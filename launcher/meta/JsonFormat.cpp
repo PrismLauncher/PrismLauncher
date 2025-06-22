@@ -35,12 +35,13 @@ MetadataVersion currentFormatVersion()
 // Index
 static std::shared_ptr<Index> parseIndexInternal(const QJsonObject& obj)
 {
-    const QVector<QJsonObject> objects = requireIsArrayOf<QJsonObject>(obj, "packages");
-    QVector<VersionList::Ptr> lists;
+    const QList<QJsonObject> objects = requireIsArrayOf<QJsonObject>(obj, "packages");
+    QList<VersionList::Ptr> lists;
     lists.reserve(objects.size());
     std::transform(objects.begin(), objects.end(), std::back_inserter(lists), [](const QJsonObject& obj) {
         VersionList::Ptr list = std::make_shared<VersionList>(requireString(obj, "uid"));
         list->setName(ensureString(obj, "name", QString()));
+        list->setSha256(ensureString(obj, "sha256", QString()));
         return list;
     });
     return std::make_shared<Index>(lists);
@@ -58,6 +59,9 @@ static Version::Ptr parseCommonVersion(const QString& uid, const QJsonObject& ob
     parseRequires(obj, &reqs, "requires");
     parseRequires(obj, &conflicts, "conflicts");
     version->setRequires(reqs, conflicts);
+    if (auto sha256 = ensureString(obj, "sha256", QString()); !sha256.isEmpty()) {
+        version->setSha256(sha256);
+    }
     return version;
 }
 
@@ -75,8 +79,8 @@ static VersionList::Ptr parseVersionListInternal(const QJsonObject& obj)
 {
     const QString uid = requireString(obj, "uid");
 
-    const QVector<QJsonObject> versionsRaw = requireIsArrayOf<QJsonObject>(obj, "versions");
-    QVector<Version::Ptr> versions;
+    const QList<QJsonObject> versionsRaw = requireIsArrayOf<QJsonObject>(obj, "versions");
+    QList<Version::Ptr> versions;
     versions.reserve(versionsRaw.size());
     std::transform(versionsRaw.begin(), versionsRaw.end(), std::back_inserter(versions), [uid](const QJsonObject& vObj) {
         auto version = parseCommonVersion(uid, vObj);

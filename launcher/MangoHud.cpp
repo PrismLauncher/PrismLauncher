@@ -40,8 +40,8 @@ namespace MangoHud {
 
 QString getLibraryString()
 {
-    /*
-     * Check for vulkan layers in this order:
+    /**
+     * Guess MangoHud install location by searching for vulkan layers in this order:
      *
      * $VK_LAYER_PATH
      * $XDG_DATA_DIRS (/usr/local/share/:/usr/share/)
@@ -49,8 +49,9 @@ QString getLibraryString()
      * /etc
      * $XDG_CONFIG_DIRS (/etc/xdg)
      * $XDG_CONFIG_HOME (~/.config)
+     *
+     * @returns Absolute path of libMangoHud.so if found and empty QString otherwise.
      */
-
     QStringList vkLayerList;
     {
         QString home = QDir::homePath();
@@ -85,7 +86,7 @@ QString getLibraryString()
         vkLayerList << FS::PathCombine(xdgConfigHome, "vulkan", "implicit_layer.d");
     }
 
-    for (QString vkLayer : vkLayerList) {
+    for (const QString& vkLayer : vkLayerList) {
         // prefer to use architecture specific vulkan layers
         QString currentArch = QSysInfo::currentCpuArchitecture();
 
@@ -95,8 +96,8 @@ QString getLibraryString()
 
         QStringList manifestNames = { QString("MangoHud.%1.json").arg(currentArch), "MangoHud.json" };
 
-        QString filePath = "";
-        for (QString manifestName : manifestNames) {
+        QString filePath{};
+        for (const QString& manifestName : manifestNames) {
             QString tryPath = FS::PathCombine(vkLayer, manifestName);
             if (QFile::exists(tryPath)) {
                 filePath = tryPath;
@@ -107,14 +108,34 @@ QString getLibraryString()
         if (filePath.isEmpty()) {
             continue;
         }
+        try {
+            auto conf = Json::requireDocument(filePath, vkLayer);
+            auto confObject = Json::requireObject(conf, vkLayer);
+            auto layer = Json::ensureObject(confObject, "layer");
+            QString libraryName = Json::ensureString(layer, "library_path");
 
-        auto conf = Json::requireDocument(filePath, vkLayer);
-        auto confObject = Json::requireObject(conf, vkLayer);
-        auto layer = Json::ensureObject(confObject, "layer");
-        return Json::ensureString(layer, "library_path");
+            if (libraryName.isEmpty()) {
+                continue;
+            }
+            if (QFileInfo(libraryName).isAbsolute()) {
+                return libraryName;
+            }
+
+#ifdef __GLIBC__
+            // Check whether mangohud is usable on a glibc based system
+            QString libraryPath = findLibrary(libraryName);
+            if (!libraryPath.isEmpty()) {
+                return libraryPath;
+            }
+#else
+            // Without glibc return recorded shared library as-is.
+            return libraryName;
+#endif
+        } catch (const Exception& e) {
+        }
     }
 
-    return QString();
+    return {};
 }
 
 QString findLibrary(QString libName)

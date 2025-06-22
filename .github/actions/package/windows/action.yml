@@ -1,0 +1,143 @@
+name: Package for Windows
+description: Create a Windows package for Prism Launcher
+
+inputs:
+  version:
+    description: Launcher version
+    required: true
+  build-type:
+    description: Type for the build
+    required: true
+    default: Debug
+  artifact-name:
+    description: Name of the uploaded artifact
+    required: true
+  msystem:
+    description: MSYS2 subsystem to use
+    required: true
+    default: false
+  windows-codesign-cert:
+    description: Certificate for signing Windows builds
+    required: false
+  windows-codesign-password:
+    description: Password for signing Windows builds
+    required: false
+
+runs:
+  using: composite
+
+  steps:
+    - name: Package (MinGW)
+      if: ${{ inputs.msystem != '' }}
+      shell: msys2 {0}
+      env:
+        BUILD_DIR: build
+        INSTALL_DIR: install
+      run: |
+        cmake --install ${{ env.BUILD_DIR }}
+        touch ${{ env.INSTALL_DIR }}/manifest.txt
+        for l in $(find ${{ env.INSTALL_DIR }} -type f); do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_DIR }}/manifest.txt
+
+    - name: Package (MSVC)
+      if: ${{ inputs.msystem == '' }}
+      shell: pwsh
+      env:
+        BUILD_DIR: build
+        INSTALL_DIR: install
+      run: |
+        cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build-type }}
+
+        cd ${{ github.workspace }}
+
+        Get-ChildItem ${{ env.INSTALL_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('.\') } | %{ $_.TrimStart('${{ env.INSTALL_DIR }}') } | %{ $_.TrimStart('\') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
+
+    - name: Fetch codesign certificate
+      shell: bash # yes, we are not using MSYS2 or PowerShell here
+      run: |
+        echo '${{ inputs.windows-codesign-cert }}' | base64 --decode > codesign.pfx
+
+    - name: Sign executable
+      shell: pwsh
+      env:
+        INSTALL_DIR: install
+      run: |
+        if (Get-Content ./codesign.pfx){
+          cd ${{ env.INSTALL_DIR }}
+          # We ship the exact same executable for portable and non-portable editions, so signing just once is fine
+          SignTool sign /fd sha256 /td sha256 /f ../codesign.pfx /p '${{ inputs.windows-codesign-password }}' /tr http://timestamp.digicert.com prismlauncher.exe prismlauncher_updater.exe prismlauncher_filelink.exe 
+        } else {
+          ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
+        }
+
+    - name: Package (MinGW, portable)
+      if: ${{ inputs.msystem != '' }}
+      shell: msys2 {0}
+      env:
+        BUILD_DIR: build
+        INSTALL_DIR: install
+        INSTALL_PORTABLE_DIR: install-portable
+      run: |
+        cp -r ${{ env.INSTALL_DIR }} ${{ env.INSTALL_PORTABLE_DIR }}  # cmake install on Windows is slow, let's just copy instead
+        cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
+        for l in $(find ${{ env.INSTALL_PORTABLE_DIR }} -type f); do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_PORTABLE_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt
+
+    - name: Package (MSVC, portable)
+      if: ${{ inputs.msystem == '' }}
+      shell: pwsh
+      env:
+        BUILD_DIR: build
+        INSTALL_DIR: install
+        INSTALL_PORTABLE_DIR: install-portable
+      run: |
+        cp -r ${{ env.INSTALL_DIR }} ${{ env.INSTALL_PORTABLE_DIR }}  # cmake install on Windows is slow, let's just copy instead
+        cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
+
+        Get-ChildItem ${{ env.INSTALL_PORTABLE_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('.\') } | %{ $_.TrimStart('${{ env.INSTALL_PORTABLE_DIR }}') } | %{ $_.TrimStart('\') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
+
+    - name: Package (installer)
+      shell: pwsh
+      env:
+        BUILD_DIR: build
+        INSTALL_DIR: install
+
+        NSCURL_VERSION: "v24.9.26.122"
+        NSCURL_SHA256: "AEE6C4BE3CB6455858E9C1EE4B3AFE0DB9960FA03FE99CCDEDC28390D57CCBB0"
+      run: |
+        New-Item -Name NSISPlugins -ItemType Directory
+        Invoke-Webrequest https://github.com/negrutiu/nsis-nscurl/releases/download/"${{ env.NSCURL_VERSION }}"/NScurl.zip -OutFile NSISPlugins\NScurl.zip
+        $nscurl_hash = Get-FileHash NSISPlugins\NScurl.zip -Algorithm Sha256 | Select-Object -ExpandProperty Hash
+        if ( $nscurl_hash -ne "${{ env.nscurl_sha256 }}") {
+          echo "::error:: NSCurl.zip sha256 mismatch"
+          exit 1
+        }
+        Expand-Archive -Path NSISPlugins\NScurl.zip -DestinationPath NSISPlugins\NScurl
+
+        cd ${{ env.INSTALL_DIR }}
+        makensis -NOCD "${{ github.workspace }}/${{ env.BUILD_DIR }}/program_info/win_install.nsi"
+
+    - name: Sign installer
+      shell: pwsh
+      run: |
+        if (Get-Content ./codesign.pfx){
+          SignTool sign /fd sha256 /td sha256 /f codesign.pfx /p '${{ inputs.windows-codesign-password }}' /tr http://timestamp.digicert.com PrismLauncher-Setup.exe
+        } else {
+          ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
+        }
+
+    - name: Upload binary zip
+      uses: actions/upload-artifact@v4
+      with:
+        name: PrismLauncher-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}
+        path: install/**
+
+    - name: Upload portable zip
+      uses: actions/upload-artifact@v4
+      with:
+        name: PrismLauncher-${{ inputs.artifact-name }}-Portable-${{ inputs.version }}-${{ inputs.build-type }}
+        path: install-portable/**
+
+    - name: Upload installer
+      uses: actions/upload-artifact@v4
+      with:
+        name: PrismLauncher-${{ inputs.artifact-name }}-Setup-${{ inputs.version }}-${{ inputs.build-type }}
+        path: PrismLauncher-Setup.exe

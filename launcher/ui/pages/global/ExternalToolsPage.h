@@ -51,7 +51,7 @@ class ExternalToolsPage : public QWidget, public BasePage {
     explicit ExternalToolsPage(QWidget* parent = 0);
     ~ExternalToolsPage();
 
-    QString displayName() const override { return tr("External Tools"); }
+    QString displayName() const override { return tr("Tools"); }
     QIcon icon() const override
     {
         auto icon = APPLICATION->getThemedIcon("externaltools");

@@ -38,6 +38,8 @@ class WideBar : public QToolBar {
     [[nodiscard]] QByteArray getVisibilityState() const;
     void setVisibilityState(QByteArray&&);
 
+    void removeAction(QAction* action);
+
    private:
     struct BarEntry {
         enum class Type { None, Action, Separator, Spacer } type = Type::None;

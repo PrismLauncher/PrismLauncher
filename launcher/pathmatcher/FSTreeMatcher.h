@@ -1,7 +1,6 @@
 #pragma once
 
 #include <SeparatorPrefixTree.h>
-#include <QRegularExpression>
 #include "IPathMatcher.h"
 
 class FSTreeMatcher : public IPathMatcher {

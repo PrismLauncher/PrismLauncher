@@ -40,7 +40,8 @@
 #include <Application.h>
 #include <modplatform/flame/FlamePackIndex.h>
 #include <QTimer>
-#include "ui/pages/BasePage.h"
+#include "ui/pages/modplatform/ModpackProviderBasePage.h"
+#include "ui/widgets/ModFilterWidget.h"
 #include "ui/widgets/ProgressWidget.h"
 
 namespace Ui {
@@ -53,7 +54,7 @@ namespace Flame {
 class ListModel;
 }
 
-class FlamePage : public QWidget, public BasePage {
+class FlamePage : public QWidget, public ModpackProviderBasePage {
     Q_OBJECT
 
    public:
@@ -72,13 +73,19 @@ class FlamePage : public QWidget, public BasePage {
 
     bool eventFilter(QObject* watched, QEvent* event) override;
 
+    /** Programatically set the term in the search bar. */
+    virtual void setSearchTerm(QString) override;
+    /** Get the current term in the search bar. */
+    [[nodiscard]] virtual QString getSerachTerm() const override;
+
    private:
     void suggestCurrent();
 
    private slots:
     void triggerSearch();
     void onSelectionChanged(QModelIndex first, QModelIndex second);
-    void onVersionSelectionChanged(QString data);
+    void onVersionSelectionChanged(int index);
+    void createFilterWidget();
 
    private:
     Ui::FlamePage* ui = nullptr;
@@ -92,4 +99,7 @@ class FlamePage : public QWidget, public BasePage {
 
     // Used to do instant searching with a delay to cache quick changes
     QTimer m_search_timer;
+
+    std::unique_ptr<ModFilterWidget> m_filterWidget;
+    Task::Ptr m_categoriesTask;
 };

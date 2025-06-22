@@ -40,7 +40,7 @@
 
 Q_LOGGING_CATEGORY(taskLogC, "launcher.task")
 
-Task::Task(QObject* parent, bool show_debug) : QObject(parent), m_show_debug(show_debug)
+Task::Task(bool show_debug) : m_show_debug(show_debug)
 {
     m_uid = QUuid::createUuid();
     setAutoDelete(false);
@@ -196,6 +196,8 @@ void Task::logWarning(const QString& line)
 {
     qWarning() << line;
     m_Warnings.append(line);
+
+    emit warningLogged(line);
 }
 
 QStringList Task::warnings() const

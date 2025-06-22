@@ -27,7 +27,7 @@ Please understand that these builds are not intended for most users. There may b
 There are development builds available through:
 
 - [GitHub Actions](https://github.com/PrismLauncher/PrismLauncher/actions) (includes builds from pull requests opened by contribuitors)
-- [nightly.link](https://nightly.link/PrismLauncher/PrismLauncher/workflows/trigger_builds/develop) (this will always point only to the latest version of develop)
+- [nightly.link](https://nightly.link/PrismLauncher/PrismLauncher/workflows/build/develop) (this will always point only to the latest version of develop)
 
 These have debug information in the binaries, so their file sizes are relatively larger.
 
@@ -61,7 +61,12 @@ The translation effort for Prism Launcher is hosted on [Weblate](https://hosted.
 
 ## Building
 
-If you want to build Prism Launcher yourself, check the [Build Instructions](https://prismlauncher.org/wiki/development/build-instructions/).
+If you want to build Prism Launcher yourself, check the build instructions:
+
+- [Windows](https://prismlauncher.org/wiki/development/build-instructions/windows/)
+- [Linux](https://prismlauncher.org/wiki/development/build-instructions/linux/)
+- [MacOS](https://prismlauncher.org/wiki/development/build-instructions/macos/)
+- [OpenBSD](https://prismlauncher.org/wiki/development/build-instructions/openbsd/)
 
 ## Sponsors & Partners
 
@@ -71,7 +76,13 @@ We thank all the wonderful backers over at Open Collective! Support Prism Launch
 
 Thanks to JetBrains for providing us a few licenses for all their products, as part of their [Open Source program](https://www.jetbrains.com/opensource/).
 
-[![JetBrains](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://www.jetbrains.com/opensource/)
+<a href="https://jb.gg/OpenSource">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://www.jetbrains.com/company/brand/img/logo_jb_dos_4.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg">
+  <img alt="JetBrains logo" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg" width="40%">
+</picture>
+</a>
 
 Thanks to Weblate for hosting our translation efforts.
 

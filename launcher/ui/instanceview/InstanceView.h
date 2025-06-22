@@ -41,6 +41,7 @@
 #include <QScrollBar>
 #include <functional>
 #include "VisualGroup.h"
+#include "ui/themes/CatPainter.h"
 
 struct InstanceViewRoles {
     enum { GroupRole = Qt::UserRole, ProgressValueRole, ProgressMaximumRole };
@@ -56,7 +57,7 @@ class InstanceView : public QAbstractItemView {
     void setModel(QAbstractItemModel* model) override;
 
     using visibilityFunction = std::function<bool(const QString&)>;
-    void setSourceOfGroupCollapseStatus(visibilityFunction f) { fVisibility = f; }
+    void setSourceOfGroupCollapseStatus(visibilityFunction f) { m_fVisibility = f; }
 
     /// return geometry rectangle occupied by the specified model item
     QRect geometryRect(const QModelIndex& index) const;
@@ -83,7 +84,7 @@ class InstanceView : public QAbstractItemView {
     virtual void updateGeometries() override;
 
    protected slots:
-    virtual void dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles) override;
+    virtual void dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QList<int>& roles) override;
     virtual void rowsInserted(const QModelIndex& parent, int start, int end) override;
     virtual void rowsAboutToBeRemoved(const QModelIndex& parent, int start, int end) override;
     void modelReset();
@@ -116,7 +117,7 @@ class InstanceView : public QAbstractItemView {
     friend struct VisualGroup;
     QList<VisualGroup*> m_groups;
 
-    visibilityFunction fVisibility;
+    visibilityFunction m_fVisibility;
 
     // geometry
     int m_leftMargin = 5;
@@ -127,9 +128,8 @@ class InstanceView : public QAbstractItemView {
     int m_itemWidth = 100;
     int m_currentItemsPerRow = -1;
     int m_currentCursorColumn = -1;
-    mutable QCache<int, QRect> geometryCache;
-    bool m_catVisible = false;
-    QPixmap m_catPixmap;
+    mutable QCache<int, QRect> m_geometryCache;
+    CatPainter* m_cat = nullptr;
 
     // point where the currently active mouse action started in geometry coordinates
     QPoint m_pressedPosition;

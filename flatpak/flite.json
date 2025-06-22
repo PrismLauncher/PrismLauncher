@@ -1,0 +1,20 @@
+{
+  "name": "flite",
+  "config-opts": [
+    "--enable-shared",
+    "--with-audio=pulseaudio"
+  ],
+  "no-parallel-make": true,
+  "sources": [
+    {
+      "type": "git",
+      "url": "https://github.com/festvox/flite.git",
+      "tag": "v2.2",
+      "commit": "e9e2e37c329dbe98bfeb27a1828ef9a71fa84f88",
+      "x-checker-data": {
+        "type": "git",
+        "tag-pattern": "^v([\\d.]+)$"
+      }
+    }
+  ]
+}

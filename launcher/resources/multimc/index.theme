@@ -1,7 +1,6 @@
 [Icon Theme]
 Name=Legacy
 Comment=Default Icons
-Inherits=default
 Directories=8x8,16x16,22x22,24x24,32x32,32x32/instances,48x48,50x50/instances,64x64,128x128/instances,256x256,scalable,scalable/instances
 
 [8x8]

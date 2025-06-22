@@ -166,8 +166,10 @@ auto HttpMetaCache::evictEntry(MetaEntryPtr entry) -> bool
     return true;
 }
 
-void HttpMetaCache::evictAll()
+// returns true on success, false otherwise
+auto HttpMetaCache::evictAll() -> bool
 {
+    bool ret = true;
     for (QString& base : m_entries.keys()) {
         EntryMap& map = m_entries[base];
         qCDebug(taskHttpMetaCacheLogC) << "Evicting base" << base;
@@ -176,8 +178,10 @@ void HttpMetaCache::evictAll()
                 qCWarning(taskHttpMetaCacheLogC) << "Unexpected missing cache entry" << entry->m_basePath;
         }
         map.entry_list.clear();
-        FS::deletePath(map.base_path);
+        // AND all return codes together so the result is true iff all runs of deletePath() are true
+        ret &= FS::deletePath(map.base_path);
     }
+    return ret;
 }
 
 auto HttpMetaCache::staleEntry(QString base, QString resource_path) -> MetaEntryPtr

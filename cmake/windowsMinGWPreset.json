@@ -1,0 +1,177 @@
+{
+	"$schema": "https://cmake.org/cmake/help/latest/_downloads/3e2d73bff478d88a7de0de736ba5e361/schema.json",
+	"version": 8,
+	"include": [
+		"commonPresets.json"
+	],
+	"configurePresets": [
+		{
+			"name": "windows_mingw_base",
+			"hidden": true,
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Windows"
+			},
+			"generator": "Ninja"
+		},
+		{
+			"name": "windows_mingw_debug",
+			"inherits": [
+				"base_debug",
+				"windows_mingw_base"
+			],
+			"displayName": "Windows MinGW (Debug)"
+		},
+		{
+			"name": "windows_mingw_release",
+			"inherits": [
+				"base_release",
+				"windows_mingw_base"
+			],
+			"displayName": "Windows MinGW (Release)"
+		},
+		{
+			"name": "windows_mingw_ci",
+			"inherits": [
+				"base_ci",
+				"windows_mingw_base"
+			],
+			"displayName": "Windows MinGW (CI)"
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "windows_mingw_base",
+			"hidden": true,
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Windows"
+			}
+		},
+		{
+			"name": "windows_mingw_debug",
+			"inherits": [
+				"windows_mingw_base"
+			],
+			"displayName": "Windows MinGW (Debug)",
+			"configurePreset": "windows_mingw_debug"
+		},
+		{
+			"name": "windows_mingw_release",
+			"inherits": [
+				"windows_mingw_base"
+			],
+			"displayName": "Windows MinGW (Release)",
+			"configurePreset": "windows_mingw_release"
+		},
+		{
+			"name": "windows_mingw_ci",
+			"inherits": [
+				"windows_mingw_base"
+			],
+			"displayName": "Windows MinGW (CI)",
+			"configurePreset": "windows_mingw_ci"
+		}
+	],
+	"testPresets": [
+		{
+			"name": "windows_mingw_base",
+			"hidden": true,
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Windows"
+			},
+			"filter": {
+				"exclude": {
+					"name": "^example64|example$"
+				}
+			}
+		},
+		{
+			"name": "windows_mingw_debug",
+			"inherits": [
+				"base_debug",
+				"windows_mingw_base"
+			],
+			"displayName": "Windows MinGW (Debug)",
+			"configurePreset": "windows_mingw_debug"
+		},
+		{
+			"name": "windows_mingw_release",
+			"inherits": [
+				"base_release",
+				"windows_mingw_base"
+			],
+			"displayName": "Windows MinGW (Release)",
+			"configurePreset": "windows_mingw_release"
+		},
+		{
+			"name": "windows_mingw_ci",
+			"inherits": [
+				"base_release",
+				"windows_mingw_base"
+			],
+			"displayName": "Windows MinGW (CI)",
+			"configurePreset": "windows_mingw_ci"
+		}
+	],
+	"workflowPresets": [
+		{
+			"name": "windows_mingw_debug",
+			"displayName": "Windows MinGW (Debug)",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "windows_mingw_debug"
+				},
+				{
+					"type": "build",
+					"name": "windows_mingw_debug"
+				},
+				{
+					"type": "test",
+					"name": "windows_mingw_debug"
+				}
+			]
+		},
+		{
+			"name": "windows_mingw",
+			"displayName": "Windows MinGW (Release)",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "windows_mingw_release"
+				},
+				{
+					"type": "build",
+					"name": "windows_mingw_release"
+				},
+				{
+					"type": "test",
+					"name": "windows_mingw_release"
+				}
+			]
+		},
+		{
+			"name": "windows_mingw_ci",
+			"displayName": "Windows MinGW (CI)",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "windows_mingw_ci"
+				},
+				{
+					"type": "build",
+					"name": "windows_mingw_ci"
+				},
+				{
+					"type": "test",
+					"name": "windows_mingw_ci"
+				}
+			]
+		}
+	]
+}

@@ -239,13 +239,12 @@ ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, InstanceWin
     : ManagedPackPage(inst, instance_window, parent)
 {
     Q_ASSERT(inst->isManagedPack());
-    connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
+    connect(ui->versionsComboBox, &QComboBox::currentIndexChanged, this, &ModrinthManagedPackPage::suggestVersion);
     connect(ui->updateButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::update);
     connect(ui->updateFromFileButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::updateFromFile);
 }
 
 // MODRINTH
-
 void ModrinthManagedPackPage::parseManagedPack()
 {
     qDebug() << "Parsing Modrinth pack";
@@ -265,7 +264,7 @@ void ModrinthManagedPackPage::parseManagedPack()
     m_fetch_job->addNetAction(
         Net::ApiDownload::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
-    QObject::connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
+    connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -293,11 +292,8 @@ void ModrinthManagedPackPage::parseManagedPack()
         ui->versionsComboBox->clear();
         ui->versionsComboBox->blockSignals(false);
 
-        for (auto version : m_pack.versions) {
-            QString name = version.version;
-
-            if (!version.name.contains(version.version))
-                name = QString("%1 — %2").arg(version.name, version.version);
+        for (const auto& version : m_pack.versions) {
+            QString name = Modrinth::getVersionDisplayString(version);
 
             // NOTE: the id from version isn't the same id in the modpack format spec...
             // e.g. HexMC's 4.4.0 has versionId 4.0.0 in the modpack index..............
@@ -311,8 +307,8 @@ void ModrinthManagedPackPage::parseManagedPack()
 
         m_loaded = true;
     });
-    QObject::connect(m_fetch_job.get(), &NetJob::failed, this, &ModrinthManagedPackPage::setFailState);
-    QObject::connect(m_fetch_job.get(), &NetJob::aborted, this, &ModrinthManagedPackPage::setFailState);
+    connect(m_fetch_job.get(), &NetJob::failed, this, &ModrinthManagedPackPage::setFailState);
+    connect(m_fetch_job.get(), &NetJob::aborted, this, &ModrinthManagedPackPage::setFailState);
 
     ui->changelogTextBrowser->setText(tr("Fetching changelogs..."));
 
@@ -336,6 +332,30 @@ void ModrinthManagedPackPage::suggestVersion()
     ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(markdownToHTML(version.changelog.toUtf8())));
 
     ManagedPackPage::suggestVersion();
+}
+
+/// @brief Called when the update task has completed.
+/// Internally handles the closing of the instance window if the update was successful and shows a message box.
+/// @param did_succeed Whether the update task was successful.
+void ManagedPackPage::onUpdateTaskCompleted(bool did_succeed) const
+{
+    // Close the window if the update was successful
+    if (did_succeed) {
+        if (m_instance_window != nullptr)
+            m_instance_window->close();
+
+        CustomMessageBox::selectable(nullptr, tr("Update Successful"),
+                                     tr("The instance updated to pack version %1 successfully.").arg(m_inst->getManagedPackVersionName()),
+                                     QMessageBox::Information)
+            ->show();
+    } else {
+        CustomMessageBox::selectable(
+            nullptr, tr("Update Failed"),
+            tr("The instance failed to update to pack version %1. Please check launcher logs for more information.")
+                .arg(m_inst->getManagedPackVersionName()),
+            QMessageBox::Critical)
+            ->show();
+    }
 }
 
 void ModrinthManagedPackPage::update()
@@ -363,10 +383,9 @@ void ModrinthManagedPackPage::update()
     extracted->setIcon(m_inst->iconKey());
     extracted->setConfirmUpdate(false);
 
+    // Run our task then handle the result
     auto did_succeed = runUpdateTask(extracted);
-
-    if (m_instance_window && did_succeed)
-        m_instance_window->close();
+    onUpdateTaskCompleted(did_succeed);
 }
 
 void ModrinthManagedPackPage::updateFromFile()
@@ -386,19 +405,17 @@ void ModrinthManagedPackPage::updateFromFile()
     extracted->setIcon(m_inst->iconKey());
     extracted->setConfirmUpdate(false);
 
+    // Run our task then handle the result
     auto did_succeed = runUpdateTask(extracted);
-
-    if (m_instance_window && did_succeed)
-        m_instance_window->close();
+    onUpdateTaskCompleted(did_succeed);
 }
 
 // FLAME
-
 FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent)
     : ManagedPackPage(inst, instance_window, parent)
 {
     Q_ASSERT(inst->isManagedPack());
-    connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
+    connect(ui->versionsComboBox, &QComboBox::currentIndexChanged, this, &FlameManagedPackPage::suggestVersion);
     connect(ui->updateButton, &QPushButton::clicked, this, &FlameManagedPackPage::update);
     connect(ui->updateFromFileButton, &QPushButton::clicked, this, &FlameManagedPackPage::updateFromFile);
 }
@@ -439,7 +456,7 @@ void FlameManagedPackPage::parseManagedPack()
 
     m_fetch_job->addNetAction(Net::ApiDownload::makeByteArray(QString("%1/mods/%2/files").arg(BuildConfig.FLAME_BASE_URL, id), response));
 
-    QObject::connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
+    connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -469,8 +486,8 @@ void FlameManagedPackPage::parseManagedPack()
         ui->versionsComboBox->clear();
         ui->versionsComboBox->blockSignals(false);
 
-        for (auto version : m_pack.versions) {
-            QString name = version.version;
+        for (const auto& version : m_pack.versions) {
+            QString name = Flame::getVersionDisplayString(version);
 
             if (version.fileId == m_inst->getManagedPackVersionID().toInt())
                 name = tr("%1 (Current)").arg(name);
@@ -482,8 +499,8 @@ void FlameManagedPackPage::parseManagedPack()
 
         m_loaded = true;
     });
-    QObject::connect(m_fetch_job.get(), &NetJob::failed, this, &FlameManagedPackPage::setFailState);
-    QObject::connect(m_fetch_job.get(), &NetJob::aborted, this, &FlameManagedPackPage::setFailState);
+    connect(m_fetch_job.get(), &NetJob::failed, this, &FlameManagedPackPage::setFailState);
+    connect(m_fetch_job.get(), &NetJob::aborted, this, &FlameManagedPackPage::setFailState);
 
     m_fetch_job->start();
 }
@@ -531,9 +548,7 @@ void FlameManagedPackPage::update()
     extracted->setConfirmUpdate(false);
 
     auto did_succeed = runUpdateTask(extracted);
-
-    if (m_instance_window && did_succeed)
-        m_instance_window->close();
+    onUpdateTaskCompleted(did_succeed);
 }
 
 void FlameManagedPackPage::updateFromFile()
@@ -555,8 +570,6 @@ void FlameManagedPackPage::updateFromFile()
     extracted->setConfirmUpdate(false);
 
     auto did_succeed = runUpdateTask(extracted);
-
-    if (m_instance_window && did_succeed)
-        m_instance_window->close();
+    onUpdateTaskCompleted(did_succeed);
 }
 #include "ManagedPackPage.moc"

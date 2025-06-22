@@ -106,8 +106,6 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
             return pack.name;
         case UserDataTypes::DESCRIPTION:
             return pack.description;
-        case UserDataTypes::SELECTED:
-            return false;
         case UserDataTypes::INSTALLED:
             return false;
         default:
@@ -123,6 +121,7 @@ bool ModpackListModel::setData(const QModelIndex& index, const QVariant& value, 
     if (pos >= modpacks.size() || pos < 0 || !index.isValid())
         return false;
 
+    Q_ASSERT(value.canConvert<Modrinth::Modpack>());
     modpacks[pos] = value.value<Modrinth::Modpack>();
 
     return true;
@@ -139,7 +138,7 @@ void ModpackListModel::performPaginatedSearch()
             ResourceAPI::ProjectInfoCallbacks callbacks;
 
             callbacks.on_fail = [this](QString reason) { searchRequestFailed(reason); };
-            callbacks.on_succeed = [this](auto& doc, auto& pack) { searchRequestForOneSucceeded(doc); };
+            callbacks.on_succeed = [this](auto& doc, auto&) { searchRequestForOneSucceeded(doc); };
             callbacks.on_abort = [this] {
                 qCritical() << "Search task aborted by an unknown reason!";
                 searchRequestFailed("Aborted");
@@ -152,35 +151,28 @@ void ModpackListModel::performPaginatedSearch()
             return;
         }
     }  // TODO: Move to standalone API
+    ResourceAPI::SortingMethod sort{};
+    sort.name = currentSort;
+    auto searchUrl = ModrinthAPI().getSearchURL({ ModPlatform::ResourceType::MODPACK, nextSearchOffset, currentSearchTerm, sort,
+                                                  m_filter->loaders, m_filter->versions, "", m_filter->categoryIds, m_filter->openSource });
+
     auto netJob = makeShared<NetJob>("Modrinth::SearchModpack", APPLICATION->network());
-    auto searchAllUrl = QString(BuildConfig.MODRINTH_PROD_URL +
-                                "/search?"
-                                "offset=%1&"
-                                "limit=%2&"
-                                "query=%3&"
-                                "index=%4&"
-                                "facets=[[\"project_type:modpack\"]]")
-                            .arg(nextSearchOffset)
-                            .arg(m_modpacks_per_page)
-                            .arg(currentSearchTerm)
-                            .arg(currentSort);
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl.value()), m_allResponse));
 
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchAllUrl), m_all_response));
+    connect(netJob.get(), &NetJob::succeeded, this, [this] {
+        QJsonParseError parseError{};
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, this, [this] {
-        QJsonParseError parse_error_all{};
-
-        QJsonDocument doc_all = QJsonDocument::fromJson(*m_all_response, &parse_error_all);
-        if (parse_error_all.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from " << debugName() << " at " << parse_error_all.offset
-                       << " reason: " << parse_error_all.errorString();
-            qWarning() << *m_all_response;
+        QJsonDocument doc = QJsonDocument::fromJson(*m_allResponse, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from " << debugName() << " at " << parseError.offset
+                       << " reason: " << parseError.errorString();
+            qWarning() << *m_allResponse;
             return;
         }
 
-        searchRequestFinished(doc_all);
+        searchRequestFinished(doc);
     });
-    QObject::connect(netJob.get(), &NetJob::failed, this, &ModpackListModel::searchRequestFailed);
+    connect(netJob.get(), &NetJob::failed, this, &ModpackListModel::searchRequestFailed);
 
     jobPtr = netJob;
     jobPtr->start();
@@ -220,19 +212,23 @@ static auto sortFromIndex(int index) -> QString
     }
 }
 
-void ModpackListModel::searchWithTerm(const QString& term, const int sort)
+void ModpackListModel::searchWithTerm(const QString& term,
+                                      const int sort,
+                                      std::shared_ptr<ModFilterWidget::Filter> filter,
+                                      bool filterChanged)
 {
     if (sort > 5 || sort < 0)
         return;
 
     auto sort_str = sortFromIndex(sort);
 
-    if (currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort_str) {
+    if (currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort_str && !filterChanged) {
         return;
     }
 
     currentSearchTerm = term;
     currentSort = sort_str;
+    m_filter = filter;
 
     refresh();
 }
@@ -258,7 +254,7 @@ void ModpackListModel::requestLogo(QString logo, QString url)
     job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
-    QObject::connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job] {
+    connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job] {
         job->deleteLater();
         emit logoLoaded(logo, QIcon(fullPath));
         if (waitingCallbacks.contains(logo)) {
@@ -266,7 +262,7 @@ void ModpackListModel::requestLogo(QString logo, QString url)
         }
     });
 
-    QObject::connect(job, &NetJob::failed, this, [this, logo, job] {
+    connect(job, &NetJob::failed, this, [this, logo, job] {
         job->deleteLater();
         emit logoFailed(logo);
     });
@@ -350,7 +346,7 @@ void ModpackListModel::searchRequestForOneSucceeded(QJsonDocument& doc)
     endInsertRows();
 }
 
-void ModpackListModel::searchRequestFailed(QString reason)
+void ModpackListModel::searchRequestFailed(QString)
 {
     auto failed_action = dynamic_cast<NetJob*>(jobPtr.get())->getFailedActions().at(0);
     if (failed_action->replyStatusCode() == -1) {

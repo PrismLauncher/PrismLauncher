@@ -36,6 +36,16 @@
 
 ThemeManager::ThemeManager()
 {
+    QIcon::setFallbackThemeName(QIcon::themeName());
+    QIcon::setThemeSearchPaths(QIcon::themeSearchPaths() << m_iconThemeFolder.path());
+
+    themeDebugLog() << "Determining System Widget Theme...";
+    const auto& style = QApplication::style();
+    m_defaultStyle = style->objectName();
+    themeDebugLog() << "System theme seems to be:" << m_defaultStyle;
+
+    m_defaultPalette = QApplication::palette();
+
     initializeThemes();
     initializeCatPacks();
 }
@@ -86,10 +96,6 @@ void ThemeManager::initializeIcons()
     // set icon theme search path!
     themeDebugLog() << "<> Initializing Icon Themes";
 
-    auto searchPaths = QIcon::themeSearchPaths();
-    searchPaths.append(m_iconThemeFolder.path());
-    QIcon::setThemeSearchPaths(searchPaths);
-
     for (const QString& id : builtinIcons) {
         IconTheme theme(id, QString(":/icons/%1").arg(id));
         if (!theme.load()) {
@@ -121,13 +127,8 @@ void ThemeManager::initializeIcons()
 
 void ThemeManager::initializeWidgets()
 {
-    themeDebugLog() << "Determining System Widget Theme...";
-    const auto& style = QApplication::style();
-    currentlySelectedSystemTheme = style->objectName();
-    themeDebugLog() << "System theme seems to be:" << currentlySelectedSystemTheme;
-
     themeDebugLog() << "<> Initializing Widget Themes";
-    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>(currentlySelectedSystemTheme, true));
+    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>(m_defaultStyle, m_defaultPalette, true));
     auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
     themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BrightTheme>());
@@ -140,7 +141,7 @@ void ThemeManager::initializeWidgets()
             continue;
         }
 #endif
-        themeDebugLog() << "Loading System Theme:" << addTheme(std::make_unique<SystemTheme>(st));
+        themeDebugLog() << "Loading System Theme:" << addTheme(std::make_unique<SystemTheme>(st, m_defaultPalette, false));
     }
 
     // TODO: need some way to differentiate same name themes in different subdirectories
@@ -196,8 +197,8 @@ QList<ITheme*> ThemeManager::getValidApplicationThemes()
 QList<CatPack*> ThemeManager::getValidCatPacks()
 {
     QList<CatPack*> ret;
-    ret.reserve(m_cat_packs.size());
-    for (auto&& [id, theme] : m_cat_packs) {
+    ret.reserve(m_catPacks.size());
+    for (auto&& [id, theme] : m_catPacks) {
         ret.append(theme.get());
     }
     return ret;
@@ -246,6 +247,8 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
         auto& theme = themeIter->second;
         themeDebugLog() << "applying theme" << theme->name();
         theme->apply(initial);
+
+        m_logColors = theme->logColorScheme();
     } else {
         themeWarningLog() << "Tried to set invalid theme:" << name;
     }
@@ -258,7 +261,7 @@ void ThemeManager::applyCurrentlySelectedTheme(bool initial)
     themeDebugLog() << "<> Icon theme set.";
     auto applicationTheme = settings->get("ApplicationTheme").toString();
     if (applicationTheme == "") {
-        applicationTheme = currentlySelectedSystemTheme;
+        applicationTheme = m_defaultStyle;
     }
     setApplicationTheme(applicationTheme, initial);
     themeDebugLog() << "<> Application theme set.";
@@ -266,8 +269,8 @@ void ThemeManager::applyCurrentlySelectedTheme(bool initial)
 
 QString ThemeManager::getCatPack(QString catName)
 {
-    auto catIter = m_cat_packs.find(!catName.isEmpty() ? catName : APPLICATION->settings()->get("BackgroundCat").toString());
-    if (catIter != m_cat_packs.end()) {
+    auto catIter = m_catPacks.find(!catName.isEmpty() ? catName : APPLICATION->settings()->get("BackgroundCat").toString());
+    if (catIter != m_catPacks.end()) {
         auto& catPack = catIter->second;
         themeDebugLog() << "applying catpack" << catPack->id();
         return catPack->path();
@@ -275,14 +278,14 @@ QString ThemeManager::getCatPack(QString catName)
         themeWarningLog() << "Tried to get invalid catPack:" << catName;
     }
 
-    return m_cat_packs.begin()->second->path();
+    return m_catPacks.begin()->second->path();
 }
 
 QString ThemeManager::addCatPack(std::unique_ptr<CatPack> catPack)
 {
     QString id = catPack->id();
-    if (m_cat_packs.find(id) == m_cat_packs.end())
-        m_cat_packs.emplace(id, std::move(catPack));
+    if (m_catPacks.find(id) == m_catPacks.end())
+        m_catPacks.emplace(id, std::move(catPack));
     else
         themeWarningLog() << "CatPack(" << id << ") not added to prevent id duplication";
     return id;
@@ -340,8 +343,8 @@ void ThemeManager::refresh()
 {
     m_themes.clear();
     m_icons.clear();
-    m_cat_packs.clear();
+    m_catPacks.clear();
 
     initializeThemes();
     initializeCatPacks();
-};
+}

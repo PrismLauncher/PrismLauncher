@@ -3,6 +3,7 @@
 #include <QUrl>
 
 #include "Json.h"
+#include "modplatform/ModIndex.h"
 
 void Flame::loadIndexedPack(Flame::IndexedPack& pack, QJsonObject& obj)
 {
@@ -76,7 +77,7 @@ void Flame::loadIndexedInfo(IndexedPack& pack, QJsonObject& obj)
 
 void Flame::loadIndexedPackVersions(Flame::IndexedPack& pack, QJsonArray& arr)
 {
-    QVector<Flame::IndexedVersion> unsortedVersions;
+    QList<Flame::IndexedVersion> unsortedVersions;
     for (auto versionIter : arr) {
         auto version = Json::requireObject(versionIter);
         Flame::IndexedVersion file;
@@ -88,8 +89,27 @@ void Flame::loadIndexedPackVersions(Flame::IndexedPack& pack, QJsonArray& arr)
             continue;
         }
 
+        for (auto mcVer : versionArray) {
+            auto str = mcVer.toString();
+
+            if (str.contains('.'))
+                file.mcVersion.append(str);
+
+            if (auto loader = str.toLower(); loader == "neoforge")
+                file.loaders |= ModPlatform::NeoForge;
+            else if (loader == "forge")
+                file.loaders |= ModPlatform::Forge;
+            else if (loader == "cauldron")
+                file.loaders |= ModPlatform::Cauldron;
+            else if (loader == "liteloader")
+                file.loaders |= ModPlatform::LiteLoader;
+            else if (loader == "fabric")
+                file.loaders |= ModPlatform::Fabric;
+            else if (loader == "quilt")
+                file.loaders |= ModPlatform::Quilt;
+        }
+
         // pick the latest version supported
-        file.mcVersion = versionArray[0].toString();
         file.version = Json::requireString(version, "displayName");
 
         ModPlatform::IndexedVersionType::VersionType ver_type;
@@ -119,4 +139,12 @@ void Flame::loadIndexedPackVersions(Flame::IndexedPack& pack, QJsonArray& arr)
     std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);
     pack.versions = unsortedVersions;
     pack.versionsLoaded = true;
+}
+
+auto Flame::getVersionDisplayString(const IndexedVersion& version) -> QString
+{
+    auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
+    auto mcVersion =
+        !version.mcVersion.isEmpty() && !version.version.contains(version.mcVersion) ? QObject::tr(" for %1").arg(version.mcVersion) : "";
+    return QString("%1%2%3").arg(version.version, mcVersion, release_type);
 }

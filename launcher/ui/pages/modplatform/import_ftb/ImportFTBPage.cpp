@@ -103,13 +103,16 @@ void ImportFTBPage::suggestCurrent()
     dialog->setSuggestedIconFromFile(FS::PathCombine(selected.path, "folder.jpg"), editedLogoName);
 }
 
-void ImportFTBPage::onPublicPackSelectionChanged(QModelIndex now, QModelIndex prev)
+void ImportFTBPage::onPublicPackSelectionChanged(QModelIndex now, QModelIndex)
 {
     if (!now.isValid()) {
         onPackSelectionChanged();
         return;
     }
-    Modpack selectedPack = currentModel->data(now, Qt::UserRole).value<Modpack>();
+
+    QVariant raw = currentModel->data(now, Qt::UserRole);
+    Q_ASSERT(raw.canConvert<Modpack>());
+    auto selectedPack = raw.value<Modpack>();
     onPackSelectionChanged(&selectedPack);
 }
 
@@ -135,4 +138,13 @@ void ImportFTBPage::triggerSearch()
     currentModel->setSearchTerm(ui->searchEdit->text());
 }
 
+void ImportFTBPage::setSearchTerm(QString term)
+{
+    ui->searchEdit->setText(term);
+}
+
+QString ImportFTBPage::getSerachTerm() const
+{
+    return ui->searchEdit->text();
+}
 }  // namespace FTBImportAPP

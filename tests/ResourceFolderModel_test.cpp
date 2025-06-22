@@ -87,7 +87,7 @@ class ResourceFolderModelTest : public QObject {
 
             QEventLoop loop;
 
-            ModFolderModel m(tempDir.path(), nullptr, true);
+            ModFolderModel m(tempDir.path(), nullptr, true, true);
 
             connect(&m, &ModFolderModel::updateFinished, &loop, &QEventLoop::quit);
 
@@ -96,7 +96,7 @@ class ResourceFolderModelTest : public QObject {
             expire_timer.setSingleShot(true);
             expire_timer.start(4000);
 
-            m.installMod(folder);
+            m.installResource(folder);
 
             loop.exec();
 
@@ -111,7 +111,7 @@ class ResourceFolderModelTest : public QObject {
             QString folder = source + '/';
             QTemporaryDir tempDir;
             QEventLoop loop;
-            ModFolderModel m(tempDir.path(), nullptr, true);
+            ModFolderModel m(tempDir.path(), nullptr, true, true);
 
             connect(&m, &ModFolderModel::updateFinished, &loop, &QEventLoop::quit);
 
@@ -120,7 +120,7 @@ class ResourceFolderModelTest : public QObject {
             expire_timer.setSingleShot(true);
             expire_timer.start(4000);
 
-            m.installMod(folder);
+            m.installResource(folder);
 
             loop.exec();
 
@@ -134,7 +134,7 @@ class ResourceFolderModelTest : public QObject {
     void test_addFromWatch()
     {
         QString source = QFINDTESTDATA("testdata/ResourceFolderModel");
-        ModFolderModel model(source, nullptr);
+        ModFolderModel model(source, nullptr, false, true);
 
         QCOMPARE(model.size(), 0);
 
@@ -154,7 +154,7 @@ class ResourceFolderModelTest : public QObject {
         QString file_mod = QFINDTESTDATA("testdata/ResourceFolderModel/supercoolmod.jar");
 
         QTemporaryDir tmp;
-        ResourceFolderModel model(QDir(tmp.path()), nullptr);
+        ResourceFolderModel model(QDir(tmp.path()), nullptr, false, false);
 
         QCOMPARE(model.size(), 0);
 
@@ -199,7 +199,7 @@ class ResourceFolderModelTest : public QObject {
         QString file_mod = QFINDTESTDATA("testdata/ResourceFolderModel/supercoolmod.jar");
 
         QTemporaryDir tmp;
-        ResourceFolderModel model(tmp.path(), nullptr);
+        ResourceFolderModel model(tmp.path(), nullptr, false, false);
 
         QCOMPARE(model.size(), 0);
 
@@ -210,7 +210,7 @@ class ResourceFolderModelTest : public QObject {
             EXEC_UPDATE_TASK(model.installResource(file_mod), QVERIFY)
         }
 
-        for (auto res : model.all())
+        for (auto res : model.allResources())
             qDebug() << res->name();
 
         QCOMPARE(model.size(), 2);

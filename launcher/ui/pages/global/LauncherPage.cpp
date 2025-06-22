@@ -4,6 +4,7 @@
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (c) 2022 dada513 <dada513@protonmail.com>
  *  Copyright (C) 2022 Tayou <git@tayou.org>
+ *  Copyright (C) 2024 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -50,6 +51,7 @@
 #include "DesktopServices.h"
 #include "settings/SettingsObject.h"
 #include "ui/themes/ITheme.h"
+#include "ui/themes/ThemeManager.h"
 #include "updater/ExternalUpdater.h"
 
 #include <QApplication>
@@ -63,33 +65,30 @@ enum InstSortMode {
     Sort_LastLaunch
 };
 
+enum InstRenamingMode {
+    // Rename metadata only.
+    Rename_Always,
+    // Ask everytime.
+    Rename_Ask,
+    // Rename physical directory too.
+    Rename_Never
+};
+
 LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::LauncherPage)
 {
     ui->setupUi(this);
-    auto origForeground = ui->fontPreview->palette().color(ui->fontPreview->foregroundRole());
-    auto origBackground = ui->fontPreview->palette().color(ui->fontPreview->backgroundRole());
-    m_colors.reset(new LogColorCache(origForeground, origBackground));
 
     ui->sortingModeGroup->setId(ui->sortByNameBtn, Sort_Name);
     ui->sortingModeGroup->setId(ui->sortLastLaunchedBtn, Sort_LastLaunch);
 
-    defaultFormat = new QTextCharFormat(ui->fontPreview->currentCharFormat());
-
-    m_languageModel = APPLICATION->translations();
     loadSettings();
 
     ui->updateSettingsBox->setHidden(!APPLICATION->updater());
-
-    connect(ui->fontSizeBox, SIGNAL(valueChanged(int)), SLOT(refreshFontPreview()));
-    connect(ui->consoleFont, SIGNAL(currentFontChanged(QFont)), SLOT(refreshFontPreview()));
-
-    connect(ui->themeCustomizationWidget, &ThemeCustomizationWidget::currentCatChanged, APPLICATION, &Application::currentCatChanged);
 }
 
 LauncherPage::~LauncherPage()
 {
     delete ui;
-    delete defaultFormat;
 }
 
 bool LauncherPage::apply()
@@ -173,6 +172,16 @@ void LauncherPage::on_downloadsDirBrowseBtn_clicked()
     }
 }
 
+void LauncherPage::on_javaDirBrowseBtn_clicked()
+{
+    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Java Folder"), ui->javaDirTextBox->text());
+
+    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
+        QString cooked_dir = FS::NormalizePath(raw_dir);
+        ui->javaDirTextBox->setText(cooked_dir);
+    }
+}
+
 void LauncherPage::on_skinsDirBrowseBtn_clicked()
 {
     QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Skins Folder"), ui->skinsDirTextBox->text());
@@ -184,9 +193,9 @@ void LauncherPage::on_skinsDirBrowseBtn_clicked()
     }
 }
 
-void LauncherPage::on_metadataDisableBtn_clicked()
+void LauncherPage::on_metadataEnableBtn_clicked()
 {
-    ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
+    ui->metadataWarningLabel->setHidden(ui->metadataEnableBtn->isChecked());
 }
 
 void LauncherPage::applySettings()
@@ -207,12 +216,6 @@ void LauncherPage::applySettings()
     s->set("RequestTimeout", ui->timeoutSecondsSpinBox->value());
 
     // Console settings
-    s->set("ShowConsole", ui->showConsoleCheck->isChecked());
-    s->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
-    s->set("ShowConsoleOnError", ui->showConsoleErrorCheck->isChecked());
-    QString consoleFontFamily = ui->consoleFont->currentFont().family();
-    s->set("ConsoleFont", consoleFontFamily);
-    s->set("ConsoleFontSize", ui->fontSizeBox->value());
     s->set("ConsoleMaxLines", ui->lineLimitSpinBox->value());
     s->set("ConsoleOverflowStop", ui->checkStopLogging->checkState() != Qt::Unchecked);
 
@@ -223,8 +226,11 @@ void LauncherPage::applySettings()
     s->set("IconsDir", ui->iconsDirTextBox->text());
     s->set("DownloadsDir", ui->downloadsDirTextBox->text());
     s->set("SkinsDir", ui->skinsDirTextBox->text());
+    s->set("JavaDir", ui->javaDirTextBox->text());
     s->set("DownloadsDirWatchRecursive", ui->downloadsDirWatchRecursiveCheckBox->isChecked());
+    s->set("MoveModsFromDownloadsDir", ui->downloadsDirMoveCheckBox->isChecked());
 
+    // Instance
     auto sortMode = (InstSortMode)ui->sortingModeGroup->checkedId();
     switch (sortMode) {
         case Sort_LastLaunch:
@@ -236,13 +242,24 @@ void LauncherPage::applySettings()
             break;
     }
 
-    // Cat
-    s->set("CatOpacity", ui->catOpacitySpinBox->value());
+    auto renamingMode = (InstRenamingMode)ui->renamingBehaviorComboBox->currentIndex();
+    switch (renamingMode) {
+        case Rename_Always:
+            s->set("InstRenamingMode", "MetadataOnly");
+            break;
+        case Rename_Never:
+            s->set("InstRenamingMode", "PhysicalDir");
+            break;
+        case Rename_Ask:
+        default:
+            s->set("InstRenamingMode", "AskEverytime");
+            break;
+    }
 
     // Mods
-    s->set("ModMetadataDisabled", ui->metadataDisableBtn->isChecked());
-    s->set("ModDependenciesDisabled", ui->dependenciesDisableBtn->isChecked());
-    s->set("SkipModpackUpdatePrompt", ui->skipModpackUpdatePromptBtn->isChecked());
+    s->set("ModMetadataDisabled", !ui->metadataEnableBtn->isChecked());
+    s->set("ModDependenciesDisabled", !ui->dependenciesEnableBtn->isChecked());
+    s->set("SkipModpackUpdatePrompt", !ui->modpackUpdatePromptBtn->isChecked());
 }
 void LauncherPage::loadSettings()
 {
@@ -253,11 +270,6 @@ void LauncherPage::loadSettings()
         ui->updateIntervalSpinBox->setValue(APPLICATION->updater()->getUpdateCheckInterval() / 3600);
     }
 
-    // Toolbar/menu bar settings (not applicable if native menu bar is present)
-    ui->toolsBox->setEnabled(!QMenuBar().isNativeMenuBar());
-#ifdef Q_OS_MACOS
-    ui->toolsBox->setVisible(!QMenuBar().isNativeMenuBar());
-#endif
     ui->preferMenuBarCheckBox->setChecked(s->get("MenuBarInsteadOfToolBar").toBool());
 
     ui->numberOfConcurrentTasksSpinBox->setValue(s->get("NumberOfConcurrentTasks").toInt());
@@ -266,20 +278,6 @@ void LauncherPage::loadSettings()
     ui->timeoutSecondsSpinBox->setValue(s->get("RequestTimeout").toInt());
 
     // Console settings
-    ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
-    ui->autoCloseConsoleCheck->setChecked(s->get("AutoCloseConsole").toBool());
-    ui->showConsoleErrorCheck->setChecked(s->get("ShowConsoleOnError").toBool());
-    QString fontFamily = APPLICATION->settings()->get("ConsoleFont").toString();
-    QFont consoleFont(fontFamily);
-    ui->consoleFont->setCurrentFont(consoleFont);
-
-    bool conversionOk = true;
-    int fontSize = APPLICATION->settings()->get("ConsoleFontSize").toInt(&conversionOk);
-    if (!conversionOk) {
-        fontSize = 11;
-    }
-    ui->fontSizeBox->setValue(fontSize);
-    refreshFontPreview();
     ui->lineLimitSpinBox->setValue(s->get("ConsoleMaxLines").toInt());
     ui->checkStopLogging->setChecked(s->get("ConsoleOverflowStop").toBool());
 
@@ -289,59 +287,34 @@ void LauncherPage::loadSettings()
     ui->iconsDirTextBox->setText(s->get("IconsDir").toString());
     ui->downloadsDirTextBox->setText(s->get("DownloadsDir").toString());
     ui->skinsDirTextBox->setText(s->get("SkinsDir").toString());
+    ui->javaDirTextBox->setText(s->get("JavaDir").toString());
     ui->downloadsDirWatchRecursiveCheckBox->setChecked(s->get("DownloadsDirWatchRecursive").toBool());
+    ui->downloadsDirMoveCheckBox->setChecked(s->get("MoveModsFromDownloadsDir").toBool());
 
+    // Instance
     QString sortMode = s->get("InstSortMode").toString();
-
     if (sortMode == "LastLaunch") {
         ui->sortLastLaunchedBtn->setChecked(true);
     } else {
         ui->sortByNameBtn->setChecked(true);
     }
 
-    // Cat
-    ui->catOpacitySpinBox->setValue(s->get("CatOpacity").toInt());
+    QString renamingMode = s->get("InstRenamingMode").toString();
+    InstRenamingMode renamingModeEnum;
+    if (renamingMode == "MetadataOnly") {
+        renamingModeEnum = Rename_Always;
+    } else if (renamingMode == "PhysicalDir") {
+        renamingModeEnum = Rename_Never;
+    } else {
+        renamingModeEnum = Rename_Ask;
+    }
+    ui->renamingBehaviorComboBox->setCurrentIndex(renamingModeEnum);
 
     // Mods
-    ui->metadataDisableBtn->setChecked(s->get("ModMetadataDisabled").toBool());
-    ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
-    ui->dependenciesDisableBtn->setChecked(s->get("ModDependenciesDisabled").toBool());
-    ui->skipModpackUpdatePromptBtn->setChecked(s->get("SkipModpackUpdatePrompt").toBool());
-}
-
-void LauncherPage::refreshFontPreview()
-{
-    int fontSize = ui->fontSizeBox->value();
-    QString fontFamily = ui->consoleFont->currentFont().family();
-    ui->fontPreview->clear();
-    defaultFormat->setFont(QFont(fontFamily, fontSize));
-    {
-        QTextCharFormat format(*defaultFormat);
-        format.setForeground(m_colors->getFront(MessageLevel::Error));
-        // append a paragraph/line
-        auto workCursor = ui->fontPreview->textCursor();
-        workCursor.movePosition(QTextCursor::End);
-        workCursor.insertText(tr("[Something/ERROR] A spooky error!"), format);
-        workCursor.insertBlock();
-    }
-    {
-        QTextCharFormat format(*defaultFormat);
-        format.setForeground(m_colors->getFront(MessageLevel::Message));
-        // append a paragraph/line
-        auto workCursor = ui->fontPreview->textCursor();
-        workCursor.movePosition(QTextCursor::End);
-        workCursor.insertText(tr("[Test/INFO] A harmless message..."), format);
-        workCursor.insertBlock();
-    }
-    {
-        QTextCharFormat format(*defaultFormat);
-        format.setForeground(m_colors->getFront(MessageLevel::Warning));
-        // append a paragraph/line
-        auto workCursor = ui->fontPreview->textCursor();
-        workCursor.movePosition(QTextCursor::End);
-        workCursor.insertText(tr("[Something/WARN] A not so spooky warning."), format);
-        workCursor.insertBlock();
-    }
+    ui->metadataEnableBtn->setChecked(!s->get("ModMetadataDisabled").toBool());
+    ui->metadataWarningLabel->setHidden(ui->metadataEnableBtn->isChecked());
+    ui->dependenciesEnableBtn->setChecked(!s->get("ModDependenciesDisabled").toBool());
+    ui->modpackUpdatePromptBtn->setChecked(!s->get("SkipModpackUpdatePrompt").toBool());
 }
 
 void LauncherPage::retranslate()

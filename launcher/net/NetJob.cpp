@@ -45,10 +45,10 @@
 #endif
 
 NetJob::NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network, int max_concurrent)
-    : ConcurrentTask(nullptr, job_name), m_network(network)
+    : ConcurrentTask(job_name), m_network(network)
 {
 #if defined(LAUNCHER_APPLICATION)
-    if (max_concurrent < 0)
+    if (APPLICATION_DYN && max_concurrent < 0)
         max_concurrent = APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt();
 #endif
     if (max_concurrent > 0)
@@ -161,7 +161,8 @@ bool NetJob::isOnline()
 void NetJob::emitFailed(QString reason)
 {
 #if defined(LAUNCHER_APPLICATION)
-    if (m_ask_retry && m_manual_try < APPLICATION->settings()->get("NumberOfManualRetries").toInt() && isOnline()) {
+
+    if (APPLICATION_DYN && m_ask_retry && m_manual_try < APPLICATION->settings()->get("NumberOfManualRetries").toInt() && isOnline()) {
         m_manual_try++;
         auto response = CustomMessageBox::selectable(nullptr, "Confirm retry",
                                                      "The tasks failed.\n"

@@ -22,7 +22,7 @@
 #include "net/NetJob.h"
 #include "tasks/SequentialTask.h"
 
-#include "minecraft/mod/tasks/LocalModUpdateTask.h"
+#include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/ModIndex.h"
 
 class ResourceFolderModel;
@@ -50,7 +50,7 @@ class ResourceDownloadTask : public SequentialTask {
     QString m_custom_target_folder;
 
     NetJob::Ptr m_filesNetJob;
-    LocalModUpdateTask::Ptr m_update_task;
+    LocalResourceUpdateTask::Ptr m_update_task;
 
     void downloadProgressChanged(qint64 current, qint64 total);
     void downloadFailed(QString reason);

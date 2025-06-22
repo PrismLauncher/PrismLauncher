@@ -3,7 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2024 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,86 +47,86 @@
 #include "launch/LaunchTask.h"
 #include "settings/Setting.h"
 
-#include "ui/ColorCache.h"
 #include "ui/GuiUtil.h"
+#include "ui/themes/ThemeManager.h"
 
 #include <BuildConfig.h>
 
-class LogFormatProxyModel : public QIdentityProxyModel {
-   public:
-    LogFormatProxyModel(QObject* parent = nullptr) : QIdentityProxyModel(parent) {}
-    QVariant data(const QModelIndex& index, int role) const override
-    {
-        switch (role) {
-            case Qt::FontRole:
-                return m_font;
-            case Qt::ForegroundRole: {
-                MessageLevel::Enum level = (MessageLevel::Enum)QIdentityProxyModel::data(index, LogModel::LevelRole).toInt();
-                return m_colors->getFront(level);
-            }
-            case Qt::BackgroundRole: {
-                MessageLevel::Enum level = (MessageLevel::Enum)QIdentityProxyModel::data(index, LogModel::LevelRole).toInt();
-                return m_colors->getBack(level);
-            }
-            default:
-                return QIdentityProxyModel::data(index, role);
+QVariant LogFormatProxyModel::data(const QModelIndex& index, int role) const
+{
+    const LogColors& colors = APPLICATION->themeManager()->getLogColors();
+
+    switch (role) {
+        case Qt::FontRole:
+            return m_font;
+        case Qt::ForegroundRole: {
+            auto level = static_cast<MessageLevel::Enum>(QIdentityProxyModel::data(index, LogModel::LevelRole).toInt());
+            QColor result = colors.foreground.value(level);
+
+            if (result.isValid())
+                return result;
+
+            break;
+        }
+        case Qt::BackgroundRole: {
+            auto level = static_cast<MessageLevel::Enum>(QIdentityProxyModel::data(index, LogModel::LevelRole).toInt());
+            QColor result = colors.background.value(level);
+
+            if (result.isValid())
+                return result;
+
+            break;
         }
     }
 
-    void setFont(QFont font) { m_font = font; }
+    return QIdentityProxyModel::data(index, role);
+}
 
-    void setColors(LogColorCache* colors) { m_colors.reset(colors); }
-
-    QModelIndex find(const QModelIndex& start, const QString& value, bool reverse) const
-    {
-        QModelIndex parentIndex = parent(start);
-        auto compare = [&](int r) -> QModelIndex {
-            QModelIndex idx = index(r, start.column(), parentIndex);
-            if (!idx.isValid() || idx == start) {
-                return QModelIndex();
-            }
-            QVariant v = data(idx, Qt::DisplayRole);
-            QString t = v.toString();
-            if (t.contains(value, Qt::CaseInsensitive))
-                return idx;
+QModelIndex LogFormatProxyModel::find(const QModelIndex& start, const QString& value, bool reverse) const
+{
+    QModelIndex parentIndex = parent(start);
+    auto compare = [this, start, parentIndex, value](int r) -> QModelIndex {
+        QModelIndex idx = index(r, start.column(), parentIndex);
+        if (!idx.isValid() || idx == start) {
             return QModelIndex();
-        };
-        if (reverse) {
-            int from = start.row();
-            int to = 0;
-
-            for (int i = 0; i < 2; ++i) {
-                for (int r = from; (r >= to); --r) {
-                    auto idx = compare(r);
-                    if (idx.isValid())
-                        return idx;
-                }
-                // prepare for the next iteration
-                from = rowCount() - 1;
-                to = start.row();
-            }
-        } else {
-            int from = start.row();
-            int to = rowCount(parentIndex);
-
-            for (int i = 0; i < 2; ++i) {
-                for (int r = from; (r < to); ++r) {
-                    auto idx = compare(r);
-                    if (idx.isValid())
-                        return idx;
-                }
-                // prepare for the next iteration
-                from = 0;
-                to = start.row();
-            }
         }
+        QVariant v = data(idx, Qt::DisplayRole);
+        QString t = v.toString();
+        if (t.contains(value, Qt::CaseInsensitive))
+            return idx;
         return QModelIndex();
-    }
+    };
+    if (reverse) {
+        int from = start.row();
+        int to = 0;
 
-   private:
-    QFont m_font;
-    std::unique_ptr<LogColorCache> m_colors;
-};
+        for (int i = 0; i < 2; ++i) {
+            for (int r = from; (r >= to); --r) {
+                auto idx = compare(r);
+                if (idx.isValid())
+                    return idx;
+            }
+            // prepare for the next iteration
+            from = rowCount() - 1;
+            to = start.row();
+        }
+    } else {
+        int from = start.row();
+        int to = rowCount(parentIndex);
+
+        for (int i = 0; i < 2; ++i) {
+            for (int r = from; (r < to); ++r) {
+                auto idx = compare(r);
+                if (idx.isValid())
+                    return idx;
+            }
+            // prepare for the next iteration
+            from = 0;
+            to = start.row();
+        }
+    }
+    return QModelIndex();
+}
 
 LogPage::LogPage(InstancePtr instance, QWidget* parent) : QWidget(parent), ui(new Ui::LogPage), m_instance(instance)
 {
@@ -134,12 +134,6 @@ LogPage::LogPage(InstancePtr instance, QWidget* parent) : QWidget(parent), ui(ne
     ui->tabWidget->tabBar()->hide();
 
     m_proxy = new LogFormatProxyModel(this);
-    // set up text colors in the log proxy and adapt them to the current theme foreground and background
-    {
-        auto origForeground = ui->text->palette().color(ui->text->foregroundRole());
-        auto origBackground = ui->text->palette().color(ui->text->backgroundRole());
-        m_proxy->setColors(new LogColorCache(origForeground, origBackground));
-    }
 
     // set up fonts in the log proxy
     {
@@ -164,12 +158,12 @@ LogPage::LogPage(InstancePtr instance, QWidget* parent) : QWidget(parent), ui(ne
     }
 
     auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
-    connect(findShortcut, SIGNAL(activated()), SLOT(findActivated()));
+    connect(findShortcut, &QShortcut::activated, this, &LogPage::findActivated);
     auto findNextShortcut = new QShortcut(QKeySequence(QKeySequence::FindNext), this);
-    connect(findNextShortcut, SIGNAL(activated()), SLOT(findNextActivated()));
-    connect(ui->searchBar, SIGNAL(returnPressed()), SLOT(on_findButton_clicked()));
+    connect(findNextShortcut, &QShortcut::activated, this, &LogPage::findNextActivated);
+    connect(ui->searchBar, &QLineEdit::returnPressed, this, &LogPage::on_findButton_clicked);
     auto findPreviousShortcut = new QShortcut(QKeySequence(QKeySequence::FindPrevious), this);
-    connect(findPreviousShortcut, SIGNAL(activated()), SLOT(findPreviousActivated()));
+    connect(findPreviousShortcut, &QShortcut::activated, this, &LogPage::findPreviousActivated);
 }
 
 LogPage::~LogPage()
@@ -186,6 +180,13 @@ void LogPage::modelStateToUI()
         ui->text->setWordWrap(false);
         ui->wrapCheckbox->setCheckState(Qt::Unchecked);
     }
+    if (m_model->colorLines()) {
+        ui->text->setColorLines(true);
+        ui->colorCheckbox->setCheckState(Qt::Checked);
+    } else {
+        ui->text->setColorLines(false);
+        ui->colorCheckbox->setCheckState(Qt::Unchecked);
+    }
     if (m_model->suspended()) {
         ui->trackLogCheckbox->setCheckState(Qt::Unchecked);
     } else {
@@ -199,6 +200,7 @@ void LogPage::UIToModelState()
         return;
     }
     m_model->setLineWrap(ui->wrapCheckbox->checkState() == Qt::Checked);
+    m_model->setColorLines(ui->colorCheckbox->checkState() == Qt::Checked);
     m_model->suspend(ui->trackLogCheckbox->checkState() != Qt::Checked);
 }
 
@@ -231,7 +233,7 @@ bool LogPage::apply()
 
 bool LogPage::shouldDisplay() const
 {
-    return m_instance->isRunning() || m_proxy->rowCount() > 0;
+    return true;
 }
 
 void LogPage::on_btnPaste_clicked()
@@ -286,6 +288,14 @@ void LogPage::on_wrapCheckbox_clicked(bool checked)
     if (!m_model)
         return;
     m_model->setLineWrap(checked);
+}
+
+void LogPage::on_colorCheckbox_clicked(bool checked)
+{
+    ui->text->setColorLines(checked);
+    if (!m_model)
+        return;
+    m_model->setColorLines(checked);
 }
 
 void LogPage::on_findButton_clicked()

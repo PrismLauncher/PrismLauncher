@@ -153,7 +153,7 @@ struct TranslationsModel::Private {
     QDir m_dir;
 
     // initial state is just english
-    QVector<Language> m_languages = { Language(defaultLangCode) };
+    QList<Language> m_languages = { Language(defaultLangCode) };
 
     QString m_selectedLanguage = defaultLangCode;
     std::unique_ptr<QTranslator> m_qt_translator;
@@ -417,9 +417,9 @@ int TranslationsModel::columnCount([[maybe_unused]] const QModelIndex& parent) c
     return 2;
 }
 
-QVector<Language>::Iterator TranslationsModel::findLanguage(const QString& key)
+QList<Language>::Iterator TranslationsModel::findLanguage(const QString& key)
 {
-    return std::find_if(d->m_languages.begin(), d->m_languages.end(), [&](Language& lang) { return lang.key == key; });
+    return std::find_if(d->m_languages.begin(), d->m_languages.end(), [key](Language& lang) { return lang.key == key; });
 }
 
 std::optional<Language> TranslationsModel::findLanguageAsOptional(const QString& key)
@@ -480,7 +480,7 @@ bool TranslationsModel::selectLanguage(QString key)
     bool successful = false;
     // FIXME: this is likely never present. FIX IT.
     d->m_qt_translator.reset(new QTranslator());
-    if (d->m_qt_translator->load("qt_" + langCode, QLibraryInfo::location(QLibraryInfo::TranslationsPath))) {
+    if (d->m_qt_translator->load("qt_" + langCode, QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
         qDebug() << "Loading Qt Language File for" << langCode.toLocal8Bit().constData() << "...";
         if (!QCoreApplication::installTranslator(d->m_qt_translator.get())) {
             qCritical() << "Loading Qt Language File failed.";
@@ -550,7 +550,7 @@ void TranslationsModel::downloadIndex()
     d->m_index_job.reset(new NetJob("Translations Index", APPLICATION->network()));
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "index_v2.json");
     entry->setStale(true);
-    auto task = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + "index_v2.json"), entry);
+    auto task = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + "index_v2.json"), entry);
     d->m_index_task = task.get();
     d->m_index_job->addNetAction(task);
     d->m_index_job->setAskRetry(false);
@@ -591,13 +591,13 @@ void TranslationsModel::downloadTranslation(QString key)
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "mmc_" + key + ".qm");
     entry->setStale(true);
 
-    auto dl = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + lang->file_name), entry);
-    auto rawHash = QByteArray::fromHex(lang->file_sha1.toLatin1());
-    dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawHash));
+    auto dl = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + lang->file_name), entry);
+    dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, lang->file_sha1));
     dl->setProgress(dl->getProgress(), lang->file_size);
 
     d->m_dl_job.reset(new NetJob("Translation for " + key, APPLICATION->network()));
     d->m_dl_job->addNetAction(dl);
+    d->m_dl_job->setAskRetry(false);
 
     connect(d->m_dl_job.get(), &NetJob::succeeded, this, &TranslationsModel::dlGood);
     connect(d->m_dl_job.get(), &NetJob::failed, this, &TranslationsModel::dlFailed);

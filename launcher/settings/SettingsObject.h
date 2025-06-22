@@ -104,6 +104,16 @@ class SettingsObject : public QObject {
     std::shared_ptr<Setting> getSetting(const QString& id) const;
 
     /*!
+     * \brief Gets the setting with the given ID.
+     * \brief if is not registered yet it does that
+     * \param id The ID of the setting to get.
+     * \return A pointer to the setting with the given ID.
+     * Returns null if there is no setting with the given ID.
+     * \sa operator []()
+     */
+    std::shared_ptr<Setting> getOrRegisterSetting(const QString& id, QVariant defVal = QVariant());
+
+    /*!
      * \brief Gets the value of the setting with the given ID.
      * \param id The ID of the setting to get.
      * \return The setting's value as a QVariant.

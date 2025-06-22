@@ -62,7 +62,7 @@ class ResourcePage : public QWidget, public BasePage {
 
     [[nodiscard]] bool setCurrentPack(ModPlatform::IndexedPack::Ptr);
     [[nodiscard]] auto getCurrentPack() const -> ModPlatform::IndexedPack::Ptr;
-    [[nodiscard]] auto getDialog() const -> const ResourceDownloadDialog* { return m_parent_dialog; }
+    [[nodiscard]] auto getDialog() const -> const ResourceDownloadDialog* { return m_parentDialog; }
     [[nodiscard]] auto getModel() const -> ResourceModel* { return m_model; }
 
    protected:
@@ -71,14 +71,16 @@ class ResourcePage : public QWidget, public BasePage {
     void addSortings();
 
    public slots:
-    virtual void updateUi();
+    virtual void updateUi(const QModelIndex& index);
     virtual void updateSelectionButton();
-    virtual void updateVersionList();
+    virtual void versionListUpdated(const QModelIndex& index);
 
     void addResourceToDialog(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&);
     void removeResourceFromDialog(const QString& pack_name);
     virtual void removeResourceFromPage(const QString& name);
     virtual void addResourceToPage(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, std::shared_ptr<ResourceFolderModel>);
+
+    virtual void modelReset();
 
     QList<DownloadTaskPtr> selectedPacks() { return m_model->selectedPacks(); }
     bool hasSelectedPacks() { return !(m_model->selectedPacks().isEmpty()); }
@@ -89,8 +91,9 @@ class ResourcePage : public QWidget, public BasePage {
     virtual void triggerSearch() = 0;
 
     void onSelectionChanged(QModelIndex first, QModelIndex second);
-    void onVersionSelectionChanged(QString data);
+    void onVersionSelectionChanged(int index);
     void onResourceSelected();
+    void onResourceToggle(const QModelIndex& index);
 
     // NOTE: Can't use [[nodiscard]] here because of https://bugreports.qt.io/browse/QTBUG-58628 on Qt 5.12
 
@@ -99,22 +102,24 @@ class ResourcePage : public QWidget, public BasePage {
     virtual void openUrl(const QUrl&);
 
    public:
-    BaseInstance& m_base_instance;
+    BaseInstance& m_baseInstance;
 
    protected:
     Ui::ResourcePage* m_ui;
 
-    ResourceDownloadDialog* m_parent_dialog = nullptr;
+    ResourceDownloadDialog* m_parentDialog = nullptr;
     ResourceModel* m_model = nullptr;
 
-    int m_selected_version_index = -1;
+    int m_selectedVersionIndex = -1;
 
-    ProgressWidget m_fetch_progress;
+    ProgressWidget m_fetchProgress;
 
     // Used to do instant searching with a delay to cache quick changes
-    QTimer m_search_timer;
+    QTimer m_searchTimer;
 
-    bool m_do_not_jump_to_mod = false;
+    bool m_doNotJumpToMod = false;
+
+    QSet<int> m_enableQueue;
 };
 
 }  // namespace ResourceDownload

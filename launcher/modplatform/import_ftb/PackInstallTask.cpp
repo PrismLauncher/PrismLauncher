@@ -89,6 +89,8 @@ void PackInstallTask::copySettings()
                 break;
             case ModPlatform::LiteLoader:
                 break;
+            case ModPlatform::DataPack:
+                break;
         }
     components->saveNow();
 

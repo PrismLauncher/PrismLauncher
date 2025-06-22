@@ -15,10 +15,9 @@
 
 #pragma once
 
+#include <QProcess>
 #include <QStringList>
-
-#include "JavaChecker.h"
-#include "JavaInstallList.h"
+#include "java/JavaInstall.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -27,6 +26,7 @@
 QString stripVariableEntries(QString name, QString target, QString remove);
 QProcessEnvironment CleanEnviroment();
 QStringList getMinecraftJavaBundle();
+QStringList getPrismJavaBundle();
 
 class JavaUtils : public QObject {
     Q_OBJECT
@@ -42,4 +42,5 @@ class JavaUtils : public QObject {
 #endif
 
     static QString getJavaCheckPath();
+    static const QString javaExecutable;
 };

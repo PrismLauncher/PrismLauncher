@@ -3,7 +3,6 @@
 #include <QList>
 #include <QMetaType>
 #include <QString>
-#include <QVector>
 #include "modplatform/ModIndex.h"
 
 namespace Flame {
@@ -18,6 +17,7 @@ struct IndexedVersion {
     int fileId;
     QString version;
     ModPlatform::IndexedVersionType version_type;
+    ModPlatform::ModLoaderTypes loaders = {};
     QString mcVersion;
     QString downloadUrl;
 };
@@ -38,7 +38,7 @@ struct IndexedPack {
     QString logoUrl;
 
     bool versionsLoaded = false;
-    QVector<IndexedVersion> versions;
+    QList<IndexedVersion> versions;
 
     bool extraInfoLoaded = false;
     ModpackExtra extra;
@@ -47,6 +47,9 @@ struct IndexedPack {
 void loadIndexedPack(IndexedPack& m, QJsonObject& obj);
 void loadIndexedInfo(IndexedPack&, QJsonObject&);
 void loadIndexedPackVersions(IndexedPack& m, QJsonArray& arr);
+
+auto getVersionDisplayString(const IndexedVersion&) -> QString;
 }  // namespace Flame
 
 Q_DECLARE_METATYPE(Flame::IndexedPack)
+Q_DECLARE_METATYPE(QList<Flame::IndexedVersion>)

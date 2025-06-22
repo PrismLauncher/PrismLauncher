@@ -6,8 +6,9 @@
 #include "Application.h"
 #include "Json.h"
 
+#include "QObjectPtr.h"
 #include "minecraft/mod/Mod.h"
-#include "minecraft/mod/tasks/LocalModUpdateTask.h"
+#include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
@@ -18,52 +19,57 @@
 static ModrinthAPI modrinth_api;
 static FlameAPI flame_api;
 
-EnsureMetadataTask::EnsureMetadataTask(Mod* mod, QDir dir, ModPlatform::ResourceProvider prov)
-    : Task(nullptr), m_index_dir(dir), m_provider(prov), m_hashing_task(nullptr), m_current_task(nullptr)
+EnsureMetadataTask::EnsureMetadataTask(Resource* resource, QDir dir, ModPlatform::ResourceProvider prov)
+    : Task(), m_indexDir(dir), m_provider(prov), m_hashingTask(nullptr), m_currentTask(nullptr)
 {
-    auto hash_task = createNewHash(mod);
-    if (!hash_task)
+    auto hashTask = createNewHash(resource);
+    if (!hashTask)
         return;
-    connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, mod](QString hash) { m_mods.insert(hash, mod); });
-    connect(hash_task.get(), &Task::failed, [this, mod] { emitFail(mod, "", RemoveFromList::No); });
-    hash_task->start();
+    connect(hashTask.get(), &Hashing::Hasher::resultsReady, [this, resource](QString hash) { m_resources.insert(hash, resource); });
+    connect(hashTask.get(), &Task::failed, [this, resource] { emitFail(resource, "", RemoveFromList::No); });
+    m_hashingTask = hashTask;
 }
 
-EnsureMetadataTask::EnsureMetadataTask(QList<Mod*>& mods, QDir dir, ModPlatform::ResourceProvider prov)
-    : Task(nullptr), m_index_dir(dir), m_provider(prov), m_current_task(nullptr)
+EnsureMetadataTask::EnsureMetadataTask(QList<Resource*>& resources, QDir dir, ModPlatform::ResourceProvider prov)
+    : Task(), m_indexDir(dir), m_provider(prov), m_currentTask(nullptr)
 {
-    m_hashing_task.reset(new ConcurrentTask(this, "MakeHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));
-    for (auto* mod : mods) {
-        auto hash_task = createNewHash(mod);
+    auto hashTask = makeShared<ConcurrentTask>("MakeHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
+    m_hashingTask = hashTask;
+    for (auto* resource : resources) {
+        auto hash_task = createNewHash(resource);
         if (!hash_task)
             continue;
-        connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, mod](QString hash) { m_mods.insert(hash, mod); });
-        connect(hash_task.get(), &Task::failed, [this, mod] { emitFail(mod, "", RemoveFromList::No); });
-        m_hashing_task->addTask(hash_task);
+        connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, resource](QString hash) { m_resources.insert(hash, resource); });
+        connect(hash_task.get(), &Task::failed, [this, resource] { emitFail(resource, "", RemoveFromList::No); });
+        hashTask->addTask(hash_task);
     }
 }
 
-Hashing::Hasher::Ptr EnsureMetadataTask::createNewHash(Mod* mod)
+EnsureMetadataTask::EnsureMetadataTask(QHash<QString, Resource*>& resources, QDir dir, ModPlatform::ResourceProvider prov)
+    : Task(), m_resources(resources), m_indexDir(dir), m_provider(prov), m_currentTask(nullptr)
+{}
+
+Hashing::Hasher::Ptr EnsureMetadataTask::createNewHash(Resource* resource)
 {
-    if (!mod || !mod->valid() || mod->type() == ResourceType::FOLDER)
+    if (!resource || !resource->valid() || resource->type() == ResourceType::FOLDER)
         return nullptr;
 
-    return Hashing::createHasher(mod->fileinfo().absoluteFilePath(), m_provider);
+    return Hashing::createHasher(resource->fileinfo().absoluteFilePath(), m_provider);
 }
 
-QString EnsureMetadataTask::getExistingHash(Mod* mod)
+QString EnsureMetadataTask::getExistingHash(Resource* resource)
 {
     // Check for already computed hashes
     // (linear on the number of mods vs. linear on the size of the mod's JAR)
-    auto it = m_mods.keyValueBegin();
-    while (it != m_mods.keyValueEnd()) {
-        if ((*it).second == mod)
+    auto it = m_resources.keyValueBegin();
+    while (it != m_resources.keyValueEnd()) {
+        if ((*it).second == resource)
             break;
         it++;
     }
 
     // We already have the hash computed
-    if (it != m_mods.keyValueEnd()) {
+    if (it != m_resources.keyValueEnd()) {
         return (*it).first;
     }
 
@@ -76,32 +82,32 @@ bool EnsureMetadataTask::abort()
     // Prevent sending signals to a dead object
     disconnect(this, 0, 0, 0);
 
-    if (m_current_task)
-        return m_current_task->abort();
+    if (m_currentTask)
+        return m_currentTask->abort();
     return true;
 }
 
 void EnsureMetadataTask::executeTask()
 {
-    setStatus(tr("Checking if mods have metadata..."));
+    setStatus(tr("Checking if resources have metadata..."));
 
-    for (auto* mod : m_mods) {
-        if (!mod->valid()) {
-            qDebug() << "Mod" << mod->name() << "is invalid!";
-            emitFail(mod);
+    for (auto* resource : m_resources) {
+        if (!resource->valid()) {
+            qDebug() << "Resource" << resource->name() << "is invalid!";
+            emitFail(resource);
             continue;
         }
 
         // They already have the right metadata :o
-        if (mod->status() != ModStatus::NoMetadata && mod->metadata() && mod->metadata()->provider == m_provider) {
-            qDebug() << "Mod" << mod->name() << "already has metadata!";
-            emitReady(mod);
+        if (resource->status() != ResourceStatus::NO_METADATA && resource->metadata() && resource->metadata()->provider == m_provider) {
+            qDebug() << "Resource" << resource->name() << "already has metadata!";
+            emitReady(resource);
             continue;
         }
 
         // Folders don't have metadata
-        if (mod->type() == ResourceType::FOLDER) {
-            emitReady(mod);
+        if (resource->type() == ResourceType::FOLDER) {
+            emitReady(resource);
         }
     }
 
@@ -117,9 +123,9 @@ void EnsureMetadataTask::executeTask()
     }
 
     auto invalidade_leftover = [this] {
-        for (auto mod = m_mods.constBegin(); mod != m_mods.constEnd(); mod++)
-            emitFail(mod.value(), mod.key(), RemoveFromList::No);
-        m_mods.clear();
+        for (auto resource = m_resources.constBegin(); resource != m_resources.constEnd(); resource++)
+            emitFail(resource.value(), resource.key(), RemoveFromList::No);
+        m_resources.clear();
 
         emitSucceeded();
     };
@@ -141,71 +147,65 @@ void EnsureMetadataTask::executeTask()
             return;
         }
 
-        connect(project_task.get(), &Task::finished, this, [=] {
+        connect(project_task.get(), &Task::finished, this, [this, invalidade_leftover, project_task] {
             invalidade_leftover();
             project_task->deleteLater();
-            if (m_current_task)
-                m_current_task.reset();
+            if (m_currentTask)
+                m_currentTask.reset();
         });
         connect(project_task.get(), &Task::failed, this, &EnsureMetadataTask::emitFailed);
 
-        m_current_task = project_task;
+        m_currentTask = project_task;
         project_task->start();
     });
 
-    connect(version_task.get(), &Task::finished, [=] {
-        version_task->deleteLater();
-        if (m_current_task)
-            m_current_task.reset();
-    });
-
-    if (m_mods.size() > 1)
+    if (m_resources.size() > 1)
         setStatus(tr("Requesting metadata information from %1...").arg(ModPlatform::ProviderCapabilities::readableName(m_provider)));
-    else if (!m_mods.empty())
+    else if (!m_resources.empty())
         setStatus(tr("Requesting metadata information from %1 for '%2'...")
-                      .arg(ModPlatform::ProviderCapabilities::readableName(m_provider), m_mods.begin().value()->name()));
+                      .arg(ModPlatform::ProviderCapabilities::readableName(m_provider), m_resources.begin().value()->name()));
 
-    m_current_task = version_task;
+    m_currentTask = version_task;
     version_task->start();
 }
 
-void EnsureMetadataTask::emitReady(Mod* m, QString key, RemoveFromList remove)
+void EnsureMetadataTask::emitReady(Resource* resource, QString key, RemoveFromList remove)
 {
-    if (!m) {
-        qCritical() << "Tried to mark a null mod as ready.";
+    if (!resource) {
+        qCritical() << "Tried to mark a null resource as ready.";
         if (!key.isEmpty())
-            m_mods.remove(key);
+            m_resources.remove(key);
 
         return;
     }
 
-    qDebug() << QString("Generated metadata for %1").arg(m->name());
-    emit metadataReady(m);
+    qDebug() << QString("Generated metadata for %1").arg(resource->name());
+    emit metadataReady(resource);
 
     if (remove == RemoveFromList::Yes) {
         if (key.isEmpty())
-            key = getExistingHash(m);
-        m_mods.remove(key);
+            key = getExistingHash(resource);
+        m_resources.remove(key);
     }
 }
 
-void EnsureMetadataTask::emitFail(Mod* m, QString key, RemoveFromList remove)
+void EnsureMetadataTask::emitFail(Resource* resource, QString key, RemoveFromList remove)
 {
-    if (!m) {
-        qCritical() << "Tried to mark a null mod as failed.";
+    if (!resource) {
+        qCritical() << "Tried to mark a null resource as failed.";
         if (!key.isEmpty())
-            m_mods.remove(key);
+            m_resources.remove(key);
 
         return;
     }
 
-    qDebug() << QString("Failed to generate metadata for %1").arg(m->name());
-    emit metadataFailed(m);
+    qDebug() << QString("Failed to generate metadata for %1").arg(resource->name());
+    emit metadataFailed(resource);
 
     if (remove == RemoveFromList::Yes) {
         if (key.isEmpty())
-            key = getExistingHash(m);
-        m_mods.remove(key);
+            key = getExistingHash(resource);
+        m_resources.remove(key);
     }
 }
 
@@ -216,7 +216,7 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
     auto hash_type = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
     auto response = std::make_shared<QByteArray>();
-    auto ver_task = modrinth_api.currentVersions(m_mods.keys(), hash_type, response);
+    auto ver_task = modrinth_api.currentVersions(m_resources.keys(), hash_type, response);
 
     // Prevents unfortunate timings when aborting the task
     if (!ver_task)
@@ -236,20 +236,20 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
 
         try {
             auto entries = Json::requireObject(doc);
-            for (auto& hash : m_mods.keys()) {
-                auto mod = m_mods.find(hash).value();
+            for (auto& hash : m_resources.keys()) {
+                auto resource = m_resources.find(hash).value();
                 try {
                     auto entry = Json::requireObject(entries, hash);
 
-                    setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(mod->name()));
-                    qDebug() << "Getting version for" << mod->name() << "from Modrinth";
+                    setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(resource->name()));
+                    qDebug() << "Getting version for" << resource->name() << "from Modrinth";
 
-                    m_temp_versions.insert(hash, Modrinth::loadIndexedPackVersion(entry));
+                    m_tempVersions.insert(hash, Modrinth::loadIndexedPackVersion(entry));
                 } catch (Json::JsonException& e) {
                     qDebug() << e.cause();
                     qDebug() << entries;
 
-                    emitFail(mod);
+                    emitFail(resource);
                 }
             }
         } catch (Json::JsonException& e) {
@@ -264,7 +264,7 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
 Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
 {
     QHash<QString, QString> addonIds;
-    for (auto const& data : m_temp_versions)
+    for (auto const& data : m_tempVersions)
         addonIds.insert(data.addonId.toString(), data.hash);
 
     auto response = std::make_shared<QByteArray>();
@@ -321,24 +321,17 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
 
             auto hash = addonIds.find(pack.addonId.toString()).value();
 
-            auto mod_iter = m_mods.find(hash);
-            if (mod_iter == m_mods.end()) {
+            auto resource_iter = m_resources.find(hash);
+            if (resource_iter == m_resources.end()) {
                 qWarning() << "Invalid project id from the API response.";
                 continue;
             }
 
-            auto* mod = mod_iter.value();
+            auto* resource = resource_iter.value();
 
-            try {
-                setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(mod->name()));
+            setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(resource->name()));
 
-                modrinthCallback(pack, m_temp_versions.find(hash).value(), mod);
-            } catch (Json::JsonException& e) {
-                qDebug() << e.cause();
-                qDebug() << entries;
-
-                emitFail(mod);
-            }
+            updateMetadata(pack, m_tempVersions.find(hash).value(), resource);
         }
     });
 
@@ -351,7 +344,7 @@ Task::Ptr EnsureMetadataTask::flameVersionsTask()
     auto response = std::make_shared<QByteArray>();
 
     QList<uint> fingerprints;
-    for (auto& murmur : m_mods.keys()) {
+    for (auto& murmur : m_resources.keys()) {
         fingerprints.push_back(murmur.toUInt());
     }
 
@@ -391,15 +384,15 @@ Task::Ptr EnsureMetadataTask::flameVersionsTask()
                 }
 
                 auto fingerprint = QString::number(Json::ensureVariant(file_obj, "fileFingerprint").toUInt());
-                auto mod = m_mods.find(fingerprint);
-                if (mod == m_mods.end()) {
+                auto resource = m_resources.find(fingerprint);
+                if (resource == m_resources.end()) {
                     qWarning() << "Invalid fingerprint from the API response.";
                     continue;
                 }
 
-                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg((*mod)->name()));
+                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg((*resource)->name()));
 
-                m_temp_versions.insert(fingerprint, FlameMod::loadIndexedPackVersion(file_obj));
+                m_tempVersions.insert(fingerprint, FlameMod::loadIndexedPackVersion(file_obj));
             }
 
         } catch (Json::JsonException& e) {
@@ -414,9 +407,9 @@ Task::Ptr EnsureMetadataTask::flameVersionsTask()
 Task::Ptr EnsureMetadataTask::flameProjectsTask()
 {
     QHash<QString, QString> addonIds;
-    for (auto const& hash : m_mods.keys()) {
-        if (m_temp_versions.contains(hash)) {
-            auto data = m_temp_versions.find(hash).value();
+    for (auto const& hash : m_resources.keys()) {
+        if (m_tempVersions.contains(hash)) {
+            auto data = m_tempVersions.find(hash).value();
 
             auto id_str = data.addonId.toString();
             if (!id_str.isEmpty())
@@ -461,21 +454,21 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
 
                 auto id = QString::number(Json::requireInteger(entry_obj, "id"));
                 auto hash = addonIds.find(id).value();
-                auto mod = m_mods.find(hash).value();
+                auto resource = m_resources.find(hash).value();
 
+                ModPlatform::IndexedPack pack;
                 try {
-                    setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name()));
+                    setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(resource->name()));
 
-                    ModPlatform::IndexedPack pack;
                     FlameMod::loadIndexedPack(pack, entry_obj);
 
-                    flameCallback(pack, m_temp_versions.find(hash).value(), mod);
                 } catch (Json::JsonException& e) {
                     qDebug() << e.cause();
                     qDebug() << entries;
 
-                    emitFail(mod);
+                    emitFail(resource);
                 }
+                updateMetadata(pack, m_tempVersions.find(hash).value(), resource);
             }
         } catch (Json::JsonException& e) {
             qDebug() << e.cause();
@@ -486,74 +479,38 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
     return proj_task;
 }
 
-void EnsureMetadataTask::modrinthCallback(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, Mod* mod)
-{
-    // Prevent file name mismatch
-    ver.fileName = mod->fileinfo().fileName();
-    if (ver.fileName.endsWith(".disabled"))
-        ver.fileName.chop(9);
-
-    QDir tmp_index_dir(m_index_dir);
-
-    {
-        LocalModUpdateTask update_metadata(m_index_dir, pack, ver);
-        QEventLoop loop;
-
-        QObject::connect(&update_metadata, &Task::finished, &loop, &QEventLoop::quit);
-
-        update_metadata.start();
-
-        if (!update_metadata.isFinished())
-            loop.exec();
-    }
-
-    auto metadata = Metadata::get(tmp_index_dir, pack.slug);
-    if (!metadata.isValid()) {
-        qCritical() << "Failed to generate metadata at last step!";
-        emitFail(mod);
-        return;
-    }
-
-    mod->setMetadata(metadata);
-
-    emitReady(mod);
-}
-
-void EnsureMetadataTask::flameCallback(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, Mod* mod)
+void EnsureMetadataTask::updateMetadata(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, Resource* resource)
 {
     try {
         // Prevent file name mismatch
-        ver.fileName = mod->fileinfo().fileName();
+        ver.fileName = resource->fileinfo().fileName();
         if (ver.fileName.endsWith(".disabled"))
             ver.fileName.chop(9);
 
-        QDir tmp_index_dir(m_index_dir);
+        auto task = makeShared<LocalResourceUpdateTask>(m_indexDir, pack, ver);
 
-        {
-            LocalModUpdateTask update_metadata(m_index_dir, pack, ver);
-            QEventLoop loop;
+        connect(task.get(), &Task::finished, this, [this, &pack, resource] { updateMetadataCallback(pack, resource); });
 
-            QObject::connect(&update_metadata, &Task::finished, &loop, &QEventLoop::quit);
-
-            update_metadata.start();
-
-            if (!update_metadata.isFinished())
-                loop.exec();
-        }
-
-        auto metadata = Metadata::get(tmp_index_dir, pack.slug);
-        if (!metadata.isValid()) {
-            qCritical() << "Failed to generate metadata at last step!";
-            emitFail(mod);
-            return;
-        }
-
-        mod->setMetadata(metadata);
-
-        emitReady(mod);
+        m_updateMetadataTasks[ModPlatform::ProviderCapabilities::name(pack.provider) + pack.addonId.toString()] = task;
+        task->start();
     } catch (Json::JsonException& e) {
         qDebug() << e.cause();
 
-        emitFail(mod);
+        emitFail(resource);
     }
+}
+
+void EnsureMetadataTask::updateMetadataCallback(ModPlatform::IndexedPack& pack, Resource* resource)
+{
+    QDir tmpIndexDir(m_indexDir);
+    auto metadata = Metadata::get(tmpIndexDir, pack.slug);
+    if (!metadata.isValid()) {
+        qCritical() << "Failed to generate metadata at last step!";
+        emitFail(resource);
+        return;
+    }
+
+    resource->setMetadata(metadata);
+
+    emitReady(resource);
 }

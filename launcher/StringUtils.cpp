@@ -53,7 +53,7 @@ static inline QChar getNextChar(const QString& s, int location)
 int StringUtils::naturalCompare(const QString& s1, const QString& s2, Qt::CaseSensitivity cs)
 {
     int l1 = 0, l2 = 0;
-    while (l1 <= s1.count() && l2 <= s2.count()) {
+    while (l1 <= s1.size() && l2 <= s2.size()) {
         // skip spaces, tabs and 0's
         QChar c1 = getNextChar(s1, l1);
         while (c1.isSpace())
@@ -213,11 +213,10 @@ QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QRegular
     return qMakePair(left, right);
 }
 
-static const QRegularExpression ulMatcher("<\\s*/\\s*ul\\s*>");
-
 QString StringUtils::htmlListPatch(QString htmlStr)
 {
-    int pos = htmlStr.indexOf(ulMatcher);
+    static const QRegularExpression s_ulMatcher("<\\s*/\\s*ul\\s*>");
+    int pos = htmlStr.indexOf(s_ulMatcher);
     int imgPos;
     while (pos != -1) {
         pos = htmlStr.indexOf(">", pos) + 1;  // Get the size of the </ul> tag. Add one for zeroeth index
@@ -230,7 +229,7 @@ QString StringUtils::htmlListPatch(QString htmlStr)
         if (textBetween.isEmpty())
             htmlStr.insert(pos, "<br>");
 
-        pos = htmlStr.indexOf(ulMatcher, pos);
+        pos = htmlStr.indexOf(s_ulMatcher, pos);
     }
     return htmlStr;
 }

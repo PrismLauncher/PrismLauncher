@@ -35,6 +35,7 @@
 
 #pragma once
 
+#include <QIdentityProxyModel>
 #include <QWidget>
 
 #include <Application.h>
@@ -46,7 +47,18 @@ namespace Ui {
 class LogPage;
 }
 class QTextCharFormat;
-class LogFormatProxyModel;
+
+class LogFormatProxyModel : public QIdentityProxyModel {
+   public:
+    LogFormatProxyModel(QObject* parent = nullptr) : QIdentityProxyModel(parent) {}
+    QVariant data(const QModelIndex& index, int role) const override;
+    QFont getFont() const { return m_font; }
+    void setFont(QFont font) { m_font = font; }
+    QModelIndex find(const QModelIndex& start, const QString& value, bool reverse) const;
+
+   private:
+    QFont m_font;
+};
 
 class LogPage : public QWidget, public BasePage {
     Q_OBJECT
@@ -70,6 +82,7 @@ class LogPage : public QWidget, public BasePage {
 
     void on_trackLogCheckbox_clicked(bool checked);
     void on_wrapCheckbox_clicked(bool checked);
+    void on_colorCheckbox_clicked(bool checked);
 
     void on_findButton_clicked();
     void findActivated();

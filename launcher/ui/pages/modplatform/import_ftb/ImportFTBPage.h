@@ -25,7 +25,7 @@
 
 #include <Application.h>
 #include "modplatform/import_ftb/PackHelpers.h"
-#include "ui/pages/BasePage.h"
+#include "ui/pages/modplatform/ModpackProviderBasePage.h"
 #include "ui/pages/modplatform/import_ftb/ListModel.h"
 
 class NewInstanceDialog;
@@ -35,7 +35,7 @@ namespace Ui {
 class ImportFTBPage;
 }
 
-class ImportFTBPage : public QWidget, public BasePage {
+class ImportFTBPage : public QWidget, public ModpackProviderBasePage {
     Q_OBJECT
 
    public:
@@ -48,6 +48,11 @@ class ImportFTBPage : public QWidget, public BasePage {
     bool shouldDisplay() const override { return true; }
     void openedImpl() override;
     void retranslate() override;
+
+    /** Programatically set the term in the search bar. */
+    virtual void setSearchTerm(QString) override;
+    /** Get the current term in the search bar. */
+    [[nodiscard]] virtual QString getSerachTerm() const override;
 
    private:
     void suggestCurrent();

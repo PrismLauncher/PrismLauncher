@@ -39,8 +39,16 @@ if [ "x$DEPS_LIST" = "x" ]; then
     # Just to be sure...
     chmod +x "${LAUNCHER_DIR}/bin/${LAUNCHER_NAME}"
 
+    ARGS=("${LAUNCHER_DIR}/${LAUNCHER_NAME}" "${LAUNCHER_DIR}/bin/${LAUNCHER_NAME}")
+
+    if [ -f portable.txt ]; then
+        ARGS+=("-d" "${LAUNCHER_DIR}")
+    fi
+
+    ARGS+=("$@")
+
     # Run the launcher
-    exec -a "${LAUNCHER_DIR}/${LAUNCHER_NAME}" "${LAUNCHER_DIR}/bin/${LAUNCHER_NAME}" -d "${LAUNCHER_DIR}" "$@"
+    exec -a "${ARGS[@]}"
 
     # Run the launcher in valgrind
     # valgrind --log-file="valgrind.log" --leak-check=full --track-origins=yes "${LAUNCHER_DIR}/bin/${LAUNCHER_NAME}" -d "${LAUNCHER_DIR}" "$@"

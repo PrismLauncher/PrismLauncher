@@ -54,11 +54,11 @@ struct GradleSpecifier {
          4 "jdk15"
          5 "jar"
         */
-        QRegularExpression matcher(
+        static const QRegularExpression s_matcher(
             QRegularExpression::anchoredPattern("([^:@]+):([^:@]+):([^:@]+)"
                                                 "(?::([^:@]+))?"
                                                 "(?:@([^:@]+))?"));
-        QRegularExpressionMatch match = matcher.match(value);
+        QRegularExpressionMatch match = s_matcher.match(value);
         m_valid = match.hasMatch();
         if (!m_valid) {
             m_invalidValue = value;

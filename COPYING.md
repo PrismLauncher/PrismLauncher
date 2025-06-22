@@ -1,7 +1,7 @@
 ## Prism Launcher
 
      Prism Launcher - Minecraft Launcher
-     Copyright (C) 2022-2024 Prism Launcher Contributors
+     Copyright (C) 2022-2025 Prism Launcher Contributors
 
      This program is free software: you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -108,7 +108,7 @@
 
     Information on third party licenses used in MinGW-w64 can be found in its COPYING.MinGW-w64-runtime.txt.
 
-## Qt 5/6
+## Qt 6
 
     Copyright (C) 2022 The Qt Company Ltd and other contributors.
     Contact: https://www.qt.io/licensing
@@ -362,28 +362,6 @@
     ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
     POSSIBILITY OF SUCH DAMAGE.
 
-## gulrak/filesystem
-
-    Copyright (c) 2018, Steffen Schümann <s.schuemann@pobox.com>
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-
-    The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    SOFTWARE.
-
 ## Breeze icons
 
     Copyright (C) 2014 Uri Herrera <uri_herrera@nitrux.in> and others
@@ -425,3 +403,12 @@
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library. If not, see <http://www.gnu.org/licenses/>.
+
+## QR-Code-generator (`libraries/qrcodegenerator`)
+
+    Copyright © 2024 Project Nayuki. (MIT License)
+    https://www.nayuki.io/page/qr-code-generator-library
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+        - The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+        - The Software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the Software or the use or other dealings in the Software.

@@ -1,8 +1,11 @@
 #pragma once
 #include <QByteArray>
+#include <QFile>
 
-class GZip {
-   public:
-    static bool unzip(const QByteArray& compressedBytes, QByteArray& uncompressedBytes);
-    static bool zip(const QByteArray& uncompressedBytes, QByteArray& compressedBytes);
-};
+namespace GZip {
+
+bool unzip(const QByteArray& compressedBytes, QByteArray& uncompressedBytes);
+bool zip(const QByteArray& uncompressedBytes, QByteArray& compressedBytes);
+QString readGzFileByBlocks(QFile* source, std::function<bool(const QByteArray&)> handleBlock);
+
+}  // namespace GZip

@@ -48,7 +48,6 @@
 
 #include "ModDetails.h"
 #include "Resource.h"
-#include "modplatform/ModIndex.h"
 
 class Mod : public Resource {
     Q_OBJECT
@@ -58,43 +57,34 @@ class Mod : public Resource {
 
     Mod() = default;
     Mod(const QFileInfo& file);
-    Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata);
     Mod(QString file_path) : Mod(QFileInfo(file_path)) {}
 
     auto details() const -> const ModDetails&;
     auto name() const -> QString override;
+    auto mod_id() const -> QString;
     auto version() const -> QString;
-    auto homeurl() const -> QString;
+    auto homepage() const -> QString override;
     auto description() const -> QString;
     auto authors() const -> QStringList;
-    auto status() const -> ModStatus;
-    auto provider() const -> std::optional<QString>;
     auto licenses() const -> const QList<ModLicense>&;
     auto issueTracker() const -> QString;
-    auto metaurl() const -> QString;
-    auto side() const -> Metadata::ModSide;
-    auto loaders() const -> ModPlatform::ModLoaderTypes;
-    auto mcVersions() const -> QStringList;
-    auto releaseType() const -> ModPlatform::IndexedVersionType;
+    auto side() const -> QString;
+    auto loaders() const -> QString;
+    auto mcVersions() const -> QString;
+    auto releaseType() const -> QString;
 
     /** Get the intneral path to the mod's icon file*/
     QString iconPath() const { return m_local_details.icon_file; }
     /** Gets the icon of the mod, converted to a QPixmap for drawing, and scaled to size. */
     [[nodiscard]] QPixmap icon(QSize size, Qt::AspectRatioMode mode = Qt::AspectRatioMode::IgnoreAspectRatio) const;
     /** Thread-safe. */
-    void setIcon(QImage new_image) const;
+    QPixmap setIcon(QImage new_image) const;
 
-    auto metadata() -> std::shared_ptr<Metadata::ModStruct>;
-    auto metadata() const -> const std::shared_ptr<Metadata::ModStruct>;
-
-    void setStatus(ModStatus status);
-    void setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata);
-    void setMetadata(const Metadata::ModStruct& metadata) { setMetadata(std::make_shared<Metadata::ModStruct>(metadata)); }
     void setDetails(const ModDetails& details);
 
     bool valid() const override;
 
-    [[nodiscard]] int compare(Resource const& other, SortType type) const override;
+    [[nodiscard]] int compare(const Resource& other, SortType type) const override;
     [[nodiscard]] bool applyFilter(QRegularExpression filter) const override;
 
     // Delete all the files of this mod
@@ -111,7 +101,7 @@ class Mod : public Resource {
 
     struct {
         QPixmapCache::Key key;
-        bool was_ever_used = false;
-        bool was_read_attempt = false;
-    } mutable m_pack_image_cache_key;
+        bool wasEverUsed = false;
+        bool wasReadAttempt = false;
+    } mutable m_packImageCacheKey;
 };

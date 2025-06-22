@@ -47,25 +47,17 @@ PostLaunchCommand::PostLaunchCommand(LaunchTask* parent) : LaunchStep(parent)
 
 void PostLaunchCommand::executeTask()
 {
-    // FIXME: where to put this?
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-    auto args = QProcess::splitCommand(m_command);
-    m_parent->substituteVariables(args);
+    auto cmd = m_parent->substituteVariables(m_command);
+    emit logLine(tr("Running Post-Launch command: %1").arg(cmd), MessageLevel::Launcher);
+    auto args = QProcess::splitCommand(cmd);
 
-    emit logLine(tr("Running Post-Launch command: %1").arg(args.join(' ')), MessageLevel::Launcher);
     const QString program = args.takeFirst();
     m_process.start(program, args);
-#else
-    m_parent->substituteVariables(m_command);
-
-    emit logLine(tr("Running Post-Launch command: %1").arg(m_command), MessageLevel::Launcher);
-    m_process.start(m_command);
-#endif
 }
 
 void PostLaunchCommand::on_state(LoggedProcess::State state)
 {
-    auto getError = [&]() { return tr("Post-Launch command failed with code %1.\n\n").arg(m_process.exitCode()); };
+    auto getError = [this]() { return tr("Post-Launch command failed with code %1.\n\n").arg(m_process.exitCode()); };
     switch (state) {
         case LoggedProcess::Aborted:
         case LoggedProcess::Crashed:

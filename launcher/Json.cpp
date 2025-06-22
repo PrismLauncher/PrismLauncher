@@ -279,4 +279,48 @@ QJsonValue requireIsType<QJsonValue>(const QJsonValue& value, const QString& wha
     return value;
 }
 
+QStringList toStringList(const QString& jsonString)
+{
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(jsonString.toUtf8(), &parseError);
+
+    if (parseError.error != QJsonParseError::NoError || !doc.isArray())
+        return {};
+    try {
+        return ensureIsArrayOf<QString>(doc.array(), "");
+    } catch (Json::JsonException& e) {
+        return {};
+    }
+}
+
+QString fromStringList(const QStringList& list)
+{
+    QJsonArray array;
+    for (const QString& str : list) {
+        array.append(str);
+    }
+
+    QJsonDocument doc(toJsonArray(list));
+    return QString::fromUtf8(doc.toJson(QJsonDocument::Compact));
+}
+
+QVariantMap toMap(const QString& jsonString)
+{
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(jsonString.toUtf8(), &parseError);
+
+    if (parseError.error != QJsonParseError::NoError || !doc.isObject())
+        return {};
+
+    QJsonObject obj = doc.object();
+    return obj.toVariantMap();
+}
+
+QString fromMap(const QVariantMap& map)
+{
+    QJsonObject obj = QJsonObject::fromVariantMap(map);
+    QJsonDocument doc(obj);
+    return QString::fromUtf8(doc.toJson(QJsonDocument::Compact));
+}
+
 }  // namespace Json

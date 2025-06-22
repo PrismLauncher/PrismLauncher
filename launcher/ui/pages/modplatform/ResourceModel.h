@@ -80,17 +80,17 @@ class ResourceModel : public QAbstractListModel {
     virtual ResourceAPI::SearchArgs createSearchArguments() = 0;
     virtual ResourceAPI::SearchCallbacks createSearchCallbacks() { return {}; }
 
-    virtual ResourceAPI::VersionSearchArgs createVersionsArguments(QModelIndex&) = 0;
-    virtual ResourceAPI::VersionSearchCallbacks createVersionsCallbacks(QModelIndex&) { return {}; }
+    virtual ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) = 0;
+    virtual ResourceAPI::VersionSearchCallbacks createVersionsCallbacks(const QModelIndex&) { return {}; }
 
-    virtual ResourceAPI::ProjectInfoArgs createInfoArguments(QModelIndex&) = 0;
-    virtual ResourceAPI::ProjectInfoCallbacks createInfoCallbacks(QModelIndex&) { return {}; }
+    virtual ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex&) = 0;
+    virtual ResourceAPI::ProjectInfoCallbacks createInfoCallbacks(const QModelIndex&) { return {}; }
 
     /** Requests the API for more entries. */
     virtual void search();
 
     /** Applies any processing / extra requests needed to fully load the specified entry's information. */
-    virtual void loadEntry(QModelIndex&);
+    virtual void loadEntry(const QModelIndex&);
 
     /** Schedule a refresh, clearing the current state. */
     void refresh();
@@ -170,8 +170,8 @@ class ResourceModel : public QAbstractListModel {
     void infoRequestSucceeded(QJsonDocument&, ModPlatform::IndexedPack&, const QModelIndex&);
 
    signals:
-    void versionListUpdated();
-    void projectInfoUpdated();
+    void versionListUpdated(const QModelIndex& index);
+    void projectInfoUpdated(const QModelIndex& index);
 };
 
 }  // namespace ResourceDownload

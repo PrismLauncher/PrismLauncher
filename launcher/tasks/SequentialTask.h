@@ -47,7 +47,7 @@
 class SequentialTask : public ConcurrentTask {
     Q_OBJECT
    public:
-    explicit SequentialTask(QObject* parent = nullptr, QString task_name = "");
+    explicit SequentialTask(QString task_name = "");
     ~SequentialTask() override = default;
 
    protected slots:

@@ -30,41 +30,58 @@
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="searchEdit">
-     <property name="placeholderText">
-      <string>Search and filter...</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QListView" name="packView">
-       <property name="horizontalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>48</width>
-         <height>48</height>
-        </size>
+      <widget class="QPushButton" name="filterButton">
+       <property name="text">
+        <string>Filter options</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="ProjectDescriptionPage" name="packDescription">
-       <property name="openExternalLinks">
-        <bool>true</bool>
-       </property>
-       <property name="openLinks">
-        <bool>true</bool>
+      <widget class="QLineEdit" name="searchEdit">
+       <property name="placeholderText">
+        <string>Search and filter...</string>
        </property>
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QSplitter" name="splitter">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="QWidget" name="widget" native="true"/>
+     <widget class="QListView" name="packView">
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>48</width>
+        <height>48</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="ProjectDescriptionPage" name="packDescription">
+      <property name="openExternalLinks">
+       <bool>true</bool>
+      </property>
+      <property name="openLinks">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout">

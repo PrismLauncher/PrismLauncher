@@ -69,7 +69,8 @@ PackInstallTask::PackInstallTask(UserInteractionSupport* support, QString packNa
 {
     m_support = support;
     m_pack_name = packName;
-    m_pack_safe_name = packName.replace(QRegularExpression("[^A-Za-z0-9]"), "");
+    static const QRegularExpression s_regex("[^A-Za-z0-9]");
+    m_pack_safe_name = packName.replace(s_regex, "");
     m_version_name = version;
     m_install_mode = installMode;
 }
@@ -90,9 +91,9 @@ void PackInstallTask::executeTask()
         QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json").arg(m_pack_safe_name).arg(m_version_name);
     netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response));
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
-    QObject::connect(netJob.get(), &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
-    QObject::connect(netJob.get(), &NetJob::aborted, this, &PackInstallTask::onDownloadAborted);
+    connect(netJob.get(), &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
+    connect(netJob.get(), &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
+    connect(netJob.get(), &NetJob::aborted, this, &PackInstallTask::onDownloadAborted);
 
     jobPtr = netJob;
     jobPtr->start();
@@ -343,9 +344,7 @@ QString PackInstallTask::getVersionForLoader(QString uid)
             return Q_NULLPTR;
         }
 
-        if (!vlist->isLoaded()) {
-            vlist->load(Net::Mode::Online);
-        }
+        vlist->waitToLoad();
 
         if (m_version.loader.recommended || m_version.loader.latest) {
             for (int i = 0; i < vlist->versions().size(); i++) {
@@ -392,7 +391,7 @@ QString PackInstallTask::getVersionForLoader(QString uid)
     return m_version.loader.version;
 }
 
-QString PackInstallTask::detectLibrary(VersionLibrary library)
+QString PackInstallTask::detectLibrary(const VersionLibrary& library)
 {
     // Try to detect what the library is
     if (!library.server.isEmpty() && library.server.split("/").length() >= 3) {
@@ -435,14 +434,15 @@ bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared
     QList<GradleSpecifier> exempt;
     for (const auto& componentUid : componentsToInstall.keys()) {
         auto componentVersion = componentsToInstall.value(componentUid);
-
-        for (const auto& library : componentVersion->data()->libraries) {
-            GradleSpecifier lib(library->rawName());
-            exempt.append(lib);
+        if (componentVersion->data()) {
+            for (const auto& library : componentVersion->data()->libraries) {
+                GradleSpecifier lib(library->rawName());
+                exempt.append(lib);
+            }
         }
     }
 
-    {
+    if (minecraftVersion->data()) {
         for (const auto& library : minecraftVersion->data()->libraries) {
             GradleSpecifier lib(library->rawName());
             exempt.append(lib);
@@ -583,10 +583,12 @@ bool PackInstallTask::createPackComponent(QString instanceRoot, std::shared_ptr<
     for (const auto& componentUid : componentsToInstall.keys()) {
         auto componentVersion = componentsToInstall.value(componentUid);
 
-        if (componentVersion->data()->mainClass != QString("")) {
-            mainClasses.append(componentVersion->data()->mainClass);
+        if (componentVersion->data()) {
+            if (componentVersion->data()->mainClass != QString("")) {
+                mainClasses.append(componentVersion->data()->mainClass);
+            }
+            tweakers.append(componentVersion->data()->addTweakers);
         }
-        tweakers.append(componentVersion->data()->addTweakers);
     }
 
     auto f = std::make_shared<VersionFile>();
@@ -638,28 +640,27 @@ void PackInstallTask::installConfigs()
 
     auto dl = Net::ApiDownload::makeCached(url, entry);
     if (!m_version.configs.sha1.isEmpty()) {
-        auto rawSha1 = QByteArray::fromHex(m_version.configs.sha1.toLatin1());
-        dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
+        dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, m_version.configs.sha1));
     }
     jobPtr->addNetAction(dl);
     archivePath = entry->getFullPath();
 
-    connect(jobPtr.get(), &NetJob::succeeded, this, [&]() {
+    connect(jobPtr.get(), &NetJob::succeeded, this, [this]() {
         abortable = false;
         jobPtr.reset();
         extractConfigs();
     });
-    connect(jobPtr.get(), &NetJob::failed, [&](QString reason) {
+    connect(jobPtr.get(), &NetJob::failed, [this](QString reason) {
         abortable = false;
         jobPtr.reset();
         emitFailed(reason);
     });
-    connect(jobPtr.get(), &NetJob::progress, [&](qint64 current, qint64 total) {
+    connect(jobPtr.get(), &NetJob::progress, [this](qint64 current, qint64 total) {
         abortable = true;
         setProgress(current, total);
     });
     connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propagateStepProgress);
-    connect(jobPtr.get(), &NetJob::aborted, [&] {
+    connect(jobPtr.get(), &NetJob::aborted, [this] {
         abortable = false;
         jobPtr.reset();
         emitAborted();
@@ -681,15 +682,10 @@ void PackInstallTask::extractConfigs()
         return;
     }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), QOverload<QString, QString>::of(MMCZip::extractDir), archivePath,
                                         extractDir.absolutePath() + "/minecraft");
-#else
-    m_extractFuture =
-        QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, archivePath, extractDir.absolutePath() + "/minecraft");
-#endif
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, [&]() { downloadMods(); });
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, [&]() { emitAborted(); });
+    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, [this]() { downloadMods(); });
+    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, [this]() { emitAborted(); });
     m_extractFutureWatcher.setFuture(m_extractFuture);
 }
 
@@ -697,7 +693,7 @@ void PackInstallTask::downloadMods()
 {
     qDebug() << "PackInstallTask::installMods: " << QThread::currentThreadId();
 
-    QVector<ATLauncher::VersionMod> optionalMods;
+    QList<ATLauncher::VersionMod> optionalMods;
     for (const auto& mod : m_version.mods) {
         if (mod.optional) {
             optionalMods.push_back(mod);
@@ -705,7 +701,7 @@ void PackInstallTask::downloadMods()
     }
 
     // Select optional mods, if pack contains any
-    QVector<QString> selectedMods;
+    QList<QString> selectedMods;
     if (!optionalMods.isEmpty()) {
         setStatus(tr("Selecting optional mods..."));
         auto mods = m_support->chooseOptionalMods(m_version, optionalMods);
@@ -758,8 +754,7 @@ void PackInstallTask::downloadMods()
 
             auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
-                auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
-                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
+                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
             }
             jobPtr->addNetAction(dl);
         } else if (mod.type == ModType::Decomp) {
@@ -769,8 +764,7 @@ void PackInstallTask::downloadMods()
 
             auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
-                auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
-                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
+                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
             }
             jobPtr->addNetAction(dl);
         } else {
@@ -783,8 +777,7 @@ void PackInstallTask::downloadMods()
 
             auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
-                auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
-                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
+                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
             }
             jobPtr->addNetAction(dl);
 
@@ -903,13 +896,8 @@ void PackInstallTask::onModsDownloaded()
     jobPtr.reset();
 
     if (!modsToExtract.empty() || !modsToDecomp.empty() || !modsToCopy.empty()) {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         m_modExtractFuture =
             QtConcurrent::run(QThreadPool::globalInstance(), &PackInstallTask::extractMods, this, modsToExtract, modsToDecomp, modsToCopy);
-#else
-        m_modExtractFuture =
-            QtConcurrent::run(QThreadPool::globalInstance(), this, &PackInstallTask::extractMods, modsToExtract, modsToDecomp, modsToCopy);
-#endif
         connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &PackInstallTask::onModsExtracted);
         connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &PackInstallTask::emitAborted);
         m_modExtractFutureWatcher.setFuture(m_modExtractFuture);
@@ -954,7 +942,8 @@ bool PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract,
         QString folderToExtract = "";
         if (mod.type == ModType::Extract) {
             folderToExtract = mod.extractFolder;
-            folderToExtract.remove(QRegularExpression("^/"));
+            static const QRegularExpression s_regex("^/");
+            folderToExtract.remove(s_regex);
         }
 
         qDebug() << "Extracting " + mod.file + " to " + extractToDir;
@@ -1075,36 +1064,7 @@ void PackInstallTask::install()
 
 static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version)
 {
-    auto vlist = APPLICATION->metadataIndex()->get(uid);
-    if (!vlist)
-        return {};
-
-    if (!vlist->isLoaded()) {
-        QEventLoop loadVersionLoop;
-        auto task = vlist->getLoadTask();
-        QObject::connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
-        if (!task->isRunning())
-            task->start();
-
-        loadVersionLoop.exec();
-    }
-
-    auto ver = vlist->getVersion(version);
-    if (!ver)
-        return {};
-
-    if (!ver->isLoaded()) {
-        QEventLoop loadVersionLoop;
-        ver->load(Net::Mode::Online);
-        auto task = ver->getCurrentTask();
-        QObject::connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
-        if (!task->isRunning())
-            task->start();
-
-        loadVersionLoop.exec();
-    }
-
-    return ver;
+    return APPLICATION->metadataIndex()->getLoadedVersion(uid, version);
 }
 
 }  // namespace ATLauncher

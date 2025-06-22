@@ -309,4 +309,15 @@ bool WideBar::checkHash(QByteArray const& old_hash) const
     return old_hash == getHash();
 }
 
+void WideBar::removeAction(QAction* action)
+{
+    auto iter = getMatching(action);
+    if (iter == m_entries.end())
+        return;
+
+    iter->bar_action->setVisible(false);
+    removeAction(iter->bar_action);
+    m_entries.erase(iter);
+}
+
 #include "WideBar.moc"

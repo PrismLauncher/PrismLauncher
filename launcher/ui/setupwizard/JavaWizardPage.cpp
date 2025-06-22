@@ -12,13 +12,9 @@
 
 #include <sys.h>
 
-#include "FileSystem.h"
 #include "JavaCommon.h"
-#include "java/JavaInstall.h"
-#include "java/JavaUtils.h"
 
-#include "ui/dialogs/CustomMessageBox.h"
-#include "ui/widgets/JavaSettingsWidget.h"
+#include "ui/widgets/JavaWizardWidget.h"
 #include "ui/widgets/VersionSelectWidget.h"
 
 JavaWizardPage::JavaWizardPage(QWidget* parent) : BaseWizardPage(parent)
@@ -31,7 +27,7 @@ void JavaWizardPage::setupUi()
     setObjectName(QStringLiteral("javaPage"));
     QVBoxLayout* layout = new QVBoxLayout(this);
 
-    m_java_widget = new JavaSettingsWidget(this);
+    m_java_widget = new JavaWizardWidget(this);
     layout->addWidget(m_java_widget);
     setLayout(layout);
 
@@ -57,15 +53,18 @@ bool JavaWizardPage::validatePage()
 {
     auto settings = APPLICATION->settings();
     auto result = m_java_widget->validate();
+    settings->set("AutomaticJavaSwitch", m_java_widget->autoDetectJava());
+    settings->set("AutomaticJavaDownload", m_java_widget->autoDownloadJava());
+    settings->set("UserAskedAboutAutomaticJavaDownload", true);
     switch (result) {
         default:
-        case JavaSettingsWidget::ValidationStatus::Bad: {
+        case JavaWizardWidget::ValidationStatus::Bad: {
             return false;
         }
-        case JavaSettingsWidget::ValidationStatus::AllOK: {
+        case JavaWizardWidget::ValidationStatus::AllOK: {
             settings->set("JavaPath", m_java_widget->javaPath());
         } /* fallthrough */
-        case JavaSettingsWidget::ValidationStatus::JavaBad: {
+        case JavaWizardWidget::ValidationStatus::JavaBad: {
             // Memory
             auto s = APPLICATION->settings();
             s->set("MinMemAlloc", m_java_widget->minHeapSize());
@@ -84,7 +83,6 @@ void JavaWizardPage::retranslate()
 {
     setTitle(tr("Java"));
     setSubTitle(
-        tr("You do not have a working Java set up yet or it went missing.\n"
-           "Please select one of the following or browse for a Java executable."));
+        tr("Please select how much memory to allocate to instances and if Prism Launcher should manage Java automatically or manually."));
     m_java_widget->retranslate();
 }

@@ -1,0 +1,176 @@
+{
+	"$schema": "https://cmake.org/cmake/help/latest/_downloads/3e2d73bff478d88a7de0de736ba5e361/schema.json",
+	"version": 8,
+	"include": [
+		"commonPresets.json"
+	],
+	"configurePresets": [
+		{
+			"name": "linux_base",
+			"hidden": true,
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Linux"
+			},
+			"generator": "Ninja",
+			"cacheVariables": {
+				"Launcher_ENABLE_JAVA_DOWNLOADER": "ON"
+			}
+		},
+		{
+			"name": "linux_debug",
+			"inherits": [
+				"base_debug",
+				"linux_base"
+			],
+			"displayName": "Linux (Debug)"
+		},
+		{
+			"name": "linux_release",
+			"inherits": [
+				"base_release",
+				"linux_base"
+			],
+			"displayName": "Linux (Release)"
+		},
+		{
+			"name": "linux_ci",
+			"inherits": [
+				"base_ci",
+				"linux_base"
+			],
+			"displayName": "Linux (CI)",
+			"installDir": "/usr"
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "linux_base",
+			"hidden": true,
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Linux"
+			}
+		},
+		{
+			"name": "linux_debug",
+			"inherits": [
+				"linux_base"
+			],
+			"displayName": "Linux (Debug)",
+			"configurePreset": "linux_debug"
+		},
+		{
+			"name": "linux_release",
+			"inherits": [
+				"linux_base"
+			],
+			"displayName": "Linux (Release)",
+			"configurePreset": "linux_release"
+		},
+		{
+			"name": "linux_ci",
+			"inherits": [
+				"linux_base"
+			],
+			"displayName": "Linux (CI)",
+			"configurePreset": "linux_ci"
+		}
+	],
+	"testPresets": [
+		{
+			"name": "linux_base",
+			"hidden": true,
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Linux"
+			}
+		},
+		{
+			"name": "linux_debug",
+			"inherits": [
+				"base_debug",
+				"linux_base"
+			],
+			"displayName": "Linux (Debug)",
+			"configurePreset": "linux_debug"
+		},
+		{
+			"name": "linux_release",
+			"inherits": [
+				"base_release",
+				"linux_base"
+			],
+			"displayName": "Linux (Release)",
+			"configurePreset": "linux_release"
+		},
+		{
+			"name": "linux_ci",
+			"inherits": [
+				"base_release",
+				"linux_base"
+			],
+			"displayName": "Linux (CI)",
+			"configurePreset": "linux_ci"
+		}
+	],
+	"workflowPresets": [
+		{
+			"name": "linux_debug",
+			"displayName": "Linux (Debug)",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "linux_debug"
+				},
+				{
+					"type": "build",
+					"name": "linux_debug"
+				},
+				{
+					"type": "test",
+					"name": "linux_debug"
+				}
+			]
+		},
+		{
+			"name": "linux",
+			"displayName": "Linux (Release)",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "linux_release"
+				},
+				{
+					"type": "build",
+					"name": "linux_release"
+				},
+				{
+					"type": "test",
+					"name": "linux_release"
+				}
+			]
+		},
+		{
+			"name": "linux_ci",
+			"displayName": "Linux (CI)",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "linux_ci"
+				},
+				{
+					"type": "build",
+					"name": "linux_ci"
+				},
+				{
+					"type": "test",
+					"name": "linux_ci"
+				}
+			]
+		}
+	]
+}

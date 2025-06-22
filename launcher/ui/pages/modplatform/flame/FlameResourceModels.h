@@ -69,7 +69,7 @@ class FlameTexturePackModel : public TexturePackResourceModel {
     void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
 
     ResourceAPI::SearchArgs createSearchArguments() override;
-    ResourceAPI::VersionSearchArgs createVersionsArguments(QModelIndex&) override;
+    ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) override;
 
     auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
 };
@@ -80,6 +80,25 @@ class FlameShaderPackModel : public ShaderPackResourceModel {
    public:
     FlameShaderPackModel(const BaseInstance&);
     ~FlameShaderPackModel() override = default;
+
+    bool optedOut(const ModPlatform::IndexedVersion& ver) const override;
+
+   private:
+    [[nodiscard]] QString debugName() const override { return Flame::debugName() + " (Model)"; }
+    [[nodiscard]] QString metaEntryBase() const override { return Flame::metaEntryBase(); }
+
+    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
+    void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
+    void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
+    auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
+};
+
+class FlameDataPackModel : public DataPackResourceModel {
+    Q_OBJECT
+
+   public:
+    FlameDataPackModel(const BaseInstance&);
+    ~FlameDataPackModel() override = default;
 
     bool optedOut(const ModPlatform::IndexedVersion& ver) const override;
 

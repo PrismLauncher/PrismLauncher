@@ -84,7 +84,7 @@ void InfoFrame::updateWithMod(Mod const& m)
 
     QString text = "";
     QString name = "";
-    QString link = m.metaurl();
+    QString link = m.homepage();
     if (m.name().isEmpty())
         name = m.internal_id();
     else
@@ -93,7 +93,7 @@ void InfoFrame::updateWithMod(Mod const& m)
     if (link.isEmpty())
         text = name;
     else {
-        text = "<a href=\"" + link + "\">" + name + "</a>";
+        text = "<a href=\"" + QUrl(link).toEncoded() + "\">" + name + "</a>";
     }
     if (!m.authors().isEmpty())
         text += " by " + m.authors().join(", ");
@@ -145,7 +145,13 @@ void InfoFrame::updateWithMod(Mod const& m)
 
 void InfoFrame::updateWithResource(const Resource& resource)
 {
-    setName(resource.name());
+    const QString homepage = resource.homepage();
+
+    if (!homepage.isEmpty())
+        setName("<a href=\"" + homepage + "\">" + resource.name() + "</a>");
+    else
+        setName(resource.name());
+
     setImage();
 }
 
@@ -209,14 +215,34 @@ QString InfoFrame::renderColorCodes(QString input)
 
 void InfoFrame::updateWithResourcePack(ResourcePack& resource_pack)
 {
-    setName(renderColorCodes(resource_pack.name()));
+    QString name = renderColorCodes(resource_pack.name());
+
+    const QString homepage = resource_pack.homepage();
+    if (!homepage.isEmpty()) {
+        name = "<a href=\"" + homepage + "\">" + name + "</a>";
+    }
+
+    setName(name);
     setDescription(renderColorCodes(resource_pack.description()));
     setImage(resource_pack.image({ 64, 64 }));
 }
 
+void InfoFrame::updateWithDataPack(DataPack& data_pack) {
+    setName(renderColorCodes(data_pack.name()));
+    setDescription(renderColorCodes(data_pack.description()));
+    setImage(data_pack.image({ 64, 64 }));
+}
+
 void InfoFrame::updateWithTexturePack(TexturePack& texture_pack)
 {
-    setName(renderColorCodes(texture_pack.name()));
+    QString name = renderColorCodes(texture_pack.name());
+
+    const QString homepage = texture_pack.homepage();
+    if (!homepage.isEmpty()) {
+        name = "<a href=\"" + homepage + "\">" + name + "</a>";
+    }
+
+    setName(name);
     setDescription(renderColorCodes(texture_pack.description()));
     setImage(texture_pack.image({ 64, 64 }));
 }
@@ -267,7 +293,7 @@ void InfoFrame::setDescription(QString text)
     QChar rem('\n');
     QString finaltext;
     finaltext.reserve(intermediatetext.size());
-    foreach (const QChar& c, intermediatetext) {
+    for (const QChar& c : intermediatetext) {
         if (c == rem && prev) {
             continue;
         }
@@ -297,7 +323,7 @@ void InfoFrame::setDescription(QString text)
         cursor.insertHtml("<a href=\"#mod_desc\">...</a>");
 
         labeltext.append(doc.toHtml());
-        QObject::connect(ui->descriptionLabel, &QLabel::linkActivated, this, &InfoFrame::descriptionEllipsisHandler);
+        connect(ui->descriptionLabel, &QLabel::linkActivated, this, &InfoFrame::descriptionEllipsisHandler);
     } else {
         ui->descriptionLabel->setTextFormat(Qt::TextFormat::AutoText);
         labeltext.append(finaltext);
@@ -321,7 +347,7 @@ void InfoFrame::setLicense(QString text)
     QChar rem('\n');
     QString finaltext;
     finaltext.reserve(intermediatetext.size());
-    foreach (const QChar& c, intermediatetext) {
+    for (const QChar& c : intermediatetext) {
         if (c == rem && prev) {
             continue;
         }
@@ -336,7 +362,7 @@ void InfoFrame::setLicense(QString text)
         m_license = text;
         // This allows injecting HTML here.
         labeltext.append("<html><body>" + finaltext.left(287) + "<a href=\"#mod_desc\">...</a></body></html>");
-        QObject::connect(ui->licenseLabel, &QLabel::linkActivated, this, &InfoFrame::licenseEllipsisHandler);
+        connect(ui->licenseLabel, &QLabel::linkActivated, this, &InfoFrame::licenseEllipsisHandler);
     } else {
         ui->licenseLabel->setTextFormat(Qt::TextFormat::AutoText);
         labeltext.append(finaltext);

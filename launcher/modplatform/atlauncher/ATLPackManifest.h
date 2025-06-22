@@ -36,9 +36,9 @@
 #pragma once
 
 #include <QJsonObject>
+#include <QList>
 #include <QMap>
 #include <QString>
-#include <QVector>
 
 namespace ATLauncher {
 
@@ -113,7 +113,7 @@ struct VersionMod {
     bool hidden;
     bool library;
     QString group;
-    QVector<QString> depends;
+    QStringList depends;
     QString colour;
     QString warning;
 
@@ -139,8 +139,8 @@ struct VersionKeep {
 };
 
 struct VersionKeeps {
-    QVector<VersionKeep> files;
-    QVector<VersionKeep> folders;
+    QList<VersionKeep> files;
+    QList<VersionKeep> folders;
 };
 
 struct VersionDelete {
@@ -149,8 +149,8 @@ struct VersionDelete {
 };
 
 struct VersionDeletes {
-    QVector<VersionDelete> files;
-    QVector<VersionDelete> folders;
+    QList<VersionDelete> files;
+    QList<VersionDelete> folders;
 };
 
 struct PackVersionMainClass {
@@ -171,8 +171,8 @@ struct PackVersion {
     PackVersionExtraArguments extraArguments;
 
     VersionLoader loader;
-    QVector<VersionLibrary> libraries;
-    QVector<VersionMod> mods;
+    QList<VersionLibrary> libraries;
+    QList<VersionMod> mods;
     VersionConfigs configs;
 
     QMap<QString, QString> colours;

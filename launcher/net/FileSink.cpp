@@ -51,18 +51,21 @@ Task::State FileSink::init(QNetworkRequest& request)
     // create a new save file and open it for writing
     if (!FS::ensureFilePathExists(m_filename)) {
         qCCritical(taskNetLogC) << "Could not create folder for " + m_filename;
+        m_fail_reason = "Could not create folder";
         return Task::State::Failed;
     }
 
-    wroteAnyData = false;
-    m_output_file.reset(new QSaveFile(m_filename));
+    m_wroteAnyData = false;
+    m_output_file.reset(new PSaveFile(m_filename));
     if (!m_output_file->open(QIODevice::WriteOnly)) {
         qCCritical(taskNetLogC) << "Could not open " + m_filename + " for writing";
+        m_fail_reason = "Could not open file";
         return Task::State::Failed;
     }
 
     if (initAllValidators(request))
         return Task::State::Running;
+    m_fail_reason = "Failed to initialize validators";
     return Task::State::Failed;
 }
 
@@ -72,17 +75,20 @@ Task::State FileSink::write(QByteArray& data)
         qCCritical(taskNetLogC) << "Failed writing into " + m_filename;
         m_output_file->cancelWriting();
         m_output_file.reset();
-        wroteAnyData = false;
+        m_wroteAnyData = false;
+        m_fail_reason = "Failed to write validators";
         return Task::State::Failed;
     }
 
-    wroteAnyData = true;
+    m_wroteAnyData = true;
     return Task::State::Running;
 }
 
 Task::State FileSink::abort()
 {
-    m_output_file->cancelWriting();
+    if (m_output_file) {
+        m_output_file->cancelWriting();
+    }
     failAllValidators();
     return Task::State::Failed;
 }
@@ -100,16 +106,19 @@ Task::State FileSink::finalize(QNetworkReply& reply)
 
     // if we wrote any data to the save file, we try to commit the data to the real file.
     // if it actually got a proper file, we write it even if it was empty
-    if (gotFile || wroteAnyData) {
+    if (gotFile || m_wroteAnyData) {
         // ask validators for data consistency
         // we only do this for actual downloads, not 'your data is still the same' cache hits
-        if (!finalizeAllValidators(reply))
+        if (!finalizeAllValidators(reply)) {
+            m_fail_reason = "Failed to finalize validators";
             return Task::State::Failed;
+        }
 
         // nothing went wrong...
         if (!m_output_file->commit()) {
             qCCritical(taskNetLogC) << "Failed to commit changes to " << m_filename;
             m_output_file->cancelWriting();
+            m_fail_reason = "Failed to commit changes";
             return Task::State::Failed;
         }
     }

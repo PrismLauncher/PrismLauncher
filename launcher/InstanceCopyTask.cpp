@@ -43,7 +43,7 @@ void InstanceCopyTask::executeTask()
     m_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), [this] {
         if (m_useClone) {
             FS::clone folderClone(m_origInstance->instanceRoot(), m_stagingPath);
-            folderClone.matcher(m_matcher.get());
+            folderClone.matcher(m_matcher);
 
             folderClone(true);
             setProgress(0, folderClone.totalCloned());
@@ -72,7 +72,7 @@ void InstanceCopyTask::executeTask()
             }
             FS::create_link folderLink(m_origInstance->instanceRoot(), m_stagingPath);
             int depth = m_linkRecursively ? -1 : 0;  // we need to at least link the top level instead of the instance folder
-            folderLink.linkRecursively(true).setMaxDepth(depth).useHardLinks(m_useHardLinks).matcher(m_matcher.get());
+            folderLink.linkRecursively(true).setMaxDepth(depth).useHardLinks(m_useHardLinks).matcher(m_matcher);
 
             folderLink(true);
             setProgress(0, m_progressTotal + folderLink.totalToLink());
@@ -91,7 +91,7 @@ void InstanceCopyTask::executeTask()
                     QEventLoop loop;
                     bool got_priv_results = false;
 
-                    connect(&folderLink, &FS::create_link::finishedPrivileged, this, [&](bool gotResults) {
+                    connect(&folderLink, &FS::create_link::finishedPrivileged, this, [&got_priv_results, &loop](bool gotResults) {
                         if (!gotResults) {
                             qDebug() << "Privileged run exited without results!";
                         }
@@ -127,7 +127,7 @@ void InstanceCopyTask::executeTask()
             return !there_were_errors;
         }
         FS::copy folderCopy(m_origInstance->instanceRoot(), m_stagingPath);
-        folderCopy.followSymlinks(false).matcher(m_matcher.get());
+        folderCopy.followSymlinks(false).matcher(m_matcher);
 
         folderCopy(true);
         setProgress(0, folderCopy.totalCopied());
@@ -173,7 +173,11 @@ void InstanceCopyTask::copyFinished()
                 allowed_symlinks_file
                     .filePath());  // we dont want to modify the original. also make sure the resulting file is not itself a link.
 
-        FS::write(allowed_symlinks_file.filePath(), allowed_symlinks);
+        try {
+            FS::write(allowed_symlinks_file.filePath(), allowed_symlinks);
+        } catch (const FS::FileSystemException& e) {
+            qCritical() << "Failed to write symlink :" << e.cause();
+        }
     }
 
     emitSucceeded();

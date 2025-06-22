@@ -18,10 +18,11 @@ class TexturePackResourceModel : public ResourcePackResourceModel {
     [[nodiscard]] inline ::Version maximumTexturePackVersion() const { return { "1.6" }; }
 
     ResourceAPI::SearchArgs createSearchArguments() override;
-    ResourceAPI::VersionSearchArgs createVersionsArguments(QModelIndex&) override;
+    ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) override;
 
    protected:
     Meta::VersionList::Ptr m_version_list;
+    Task::Ptr m_task;
 };
 
 }  // namespace ResourceDownload

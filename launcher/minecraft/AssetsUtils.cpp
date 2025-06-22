@@ -159,7 +159,7 @@ bool loadAssetsIndexJson(const QString& assetsId, const QString& path, AssetsInd
             if (key == "hash") {
                 object.hash = value.toString();
             } else if (key == "size") {
-                object.size = value.toDouble();
+                object.size = value.toLongLong();
             }
         }
 
@@ -283,8 +283,7 @@ Net::NetRequest::Ptr AssetObject::getDownloadAction()
     if ((!objectFile.isFile()) || (objectFile.size() != size)) {
         auto objectDL = Net::ApiDownload::makeFile(getUrl(), objectFile.filePath());
         if (hash.size()) {
-            auto rawHash = QByteArray::fromHex(hash.toLatin1());
-            objectDL->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawHash));
+            objectDL->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, hash));
         }
         objectDL->setProgress(objectDL->getProgress(), size);
         return objectDL;

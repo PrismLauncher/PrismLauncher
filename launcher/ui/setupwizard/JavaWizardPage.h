@@ -2,14 +2,14 @@
 
 #include "BaseWizardPage.h"
 
-class JavaSettingsWidget;
+class JavaWizardWidget;
 
 class JavaWizardPage : public BaseWizardPage {
     Q_OBJECT
    public:
     explicit JavaWizardPage(QWidget* parent = Q_NULLPTR);
 
-    virtual ~JavaWizardPage() {};
+    virtual ~JavaWizardPage() = default;
 
     bool wantsRefreshButton() override;
     void refresh() override;
@@ -21,5 +21,5 @@ class JavaWizardPage : public BaseWizardPage {
     void retranslate() override;
 
    private: /* data */
-    JavaSettingsWidget* m_java_widget = nullptr;
+    JavaWizardWidget* m_java_widget = nullptr;
 };

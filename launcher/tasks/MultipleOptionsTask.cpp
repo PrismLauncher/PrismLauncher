@@ -36,7 +36,7 @@
 
 #include <QDebug>
 
-MultipleOptionsTask::MultipleOptionsTask(QObject* parent, const QString& task_name) : ConcurrentTask(parent, task_name, 1) {}
+MultipleOptionsTask::MultipleOptionsTask(const QString& task_name) : ConcurrentTask(task_name, 1) {}
 
 void MultipleOptionsTask::executeNextSubTask()
 {

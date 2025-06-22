@@ -39,7 +39,7 @@ class World {
     QDateTime lastPlayed() const { return m_lastPlayed; }
     GameType gameType() const { return m_gameType; }
     int64_t seed() const { return m_randomSeed; }
-    bool isValid() const { return is_valid; }
+    bool isValid() const { return m_isValid; }
     bool isOnFS() const { return m_containerFile.isDir(); }
     QFileInfo container() const { return m_containerFile; }
     // delete all the files of this world
@@ -53,6 +53,8 @@ class World {
 
     bool rename(const QString& to);
     bool install(const QString& to, const QString& name = QString());
+
+    void setSize(int64_t size);
 
     // WEAK compare operator - used for replacing worlds
     bool operator==(const World& other) const;
@@ -83,10 +85,10 @@ class World {
     QString m_folderName;
     QString m_actualName;
     QString m_iconFile;
-    QDateTime levelDatTime;
+    QDateTime m_levelDatTime;
     QDateTime m_lastPlayed;
     int64_t m_size;
     int64_t m_randomSeed = 0;
     GameType m_gameType;
-    bool is_valid = false;
+    bool m_isValid = false;
 };

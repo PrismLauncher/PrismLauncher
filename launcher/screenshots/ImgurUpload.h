@@ -62,8 +62,6 @@ class ImgurUpload : public Net::NetRequest {
 
     static NetRequest::Ptr make(ScreenShot::Ptr m_shot);
 
-    void init() override;
-
    private:
     virtual QNetworkReply* getReply(QNetworkRequest&) override;
     const QFileInfo m_fileInfo;

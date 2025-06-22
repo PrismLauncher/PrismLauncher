@@ -46,11 +46,10 @@
 ProxyPage::ProxyPage(QWidget* parent) : QWidget(parent), ui(new Ui::ProxyPage)
 {
     ui->setupUi(this);
-    ui->tabWidget->tabBar()->hide();
     loadSettings();
     updateCheckboxStuff();
 
-    connect(ui->proxyGroup, QOverload<QAbstractButton*>::of(&QButtonGroup::buttonClicked), this, &ProxyPage::proxyGroupChanged);
+    connect(ui->proxyGroup, &QButtonGroup::buttonClicked, this, &ProxyPage::proxyGroupChanged);
 }
 
 ProxyPage::~ProxyPage()

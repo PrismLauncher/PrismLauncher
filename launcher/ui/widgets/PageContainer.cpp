@@ -103,7 +103,7 @@ PageContainer::PageContainer(BasePageProvider* pageProvider, QString defaultId, 
     m_pageList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     m_pageList->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     m_pageList->setModel(m_proxyModel);
-    connect(m_pageList->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), this, SLOT(currentChanged(QModelIndex)));
+    connect(m_pageList->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &PageContainer::currentChanged);
     m_pageStack->setStackingMode(QStackedLayout::StackOne);
     m_pageList->setFocus();
     selectPage(defaultId);

@@ -25,8 +25,9 @@ class ResourcePackResourcePage : public ResourcePage {
         auto page = new T(dialog, instance);
         auto model = static_cast<ResourcePackResourceModel*>(page->getModel());
 
-        connect(model, &ResourceModel::versionListUpdated, page, &ResourcePage::updateVersionList);
+        connect(model, &ResourceModel::versionListUpdated, page, &ResourcePage::versionListUpdated);
         connect(model, &ResourceModel::projectInfoUpdated, page, &ResourcePage::updateUi);
+        connect(model, &QAbstractListModel::modelReset, page, &ResourcePage::modelReset);
 
         return page;
     }

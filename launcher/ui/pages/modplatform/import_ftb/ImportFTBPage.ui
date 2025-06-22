@@ -13,6 +13,11 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="label">
+     <property name="font">
+      <font>
+       <italic>true</italic>
+      </font>
+     </property>
      <property name="text">
       <string>Note: If your FTB instances are not in the default location, select it using the button next to search.</string>
      </property>

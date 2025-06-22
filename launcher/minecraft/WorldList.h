@@ -40,9 +40,9 @@ class WorldList : public QAbstractListModel {
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
     virtual int columnCount(const QModelIndex& parent) const;
 
-    size_t size() const { return worlds.size(); };
+    size_t size() const { return m_worlds.size(); };
     bool empty() const { return size() == 0; }
-    World& operator[](size_t index) { return worlds[index]; }
+    World& operator[](size_t index) { return m_worlds[index]; }
 
     /// Reloads the mod list and returns true if the list changed.
     virtual bool update();
@@ -82,10 +82,11 @@ class WorldList : public QAbstractListModel {
 
     QString instDirPath() const;
 
-    const QList<World>& allWorlds() const { return worlds; }
+    const QList<World>& allWorlds() const { return m_worlds; }
 
    private slots:
     void directoryChanged(QString path);
+    void loadWorldsAsync();
 
    signals:
     void changed();
@@ -93,7 +94,7 @@ class WorldList : public QAbstractListModel {
    protected:
     BaseInstance* m_instance;
     QFileSystemWatcher* m_watcher;
-    bool is_watching;
+    bool m_isWatching;
     QDir m_dir;
-    QList<World> worlds;
+    QList<World> m_worlds;
 };

@@ -42,6 +42,7 @@ LogView::LogView(QWidget* parent) : QPlainTextEdit(parent)
 {
     setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
     m_defaultFormat = new QTextCharFormat(currentCharFormat());
+    setUndoRedoEnabled(false);
 }
 
 LogView::~LogView()
@@ -58,6 +59,14 @@ void LogView::setWordWrap(bool wrapping)
         setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
         setLineWrapMode(QPlainTextEdit::NoWrap);
     }
+}
+
+void LogView::setColorLines(bool colorLines)
+{
+    if (m_colorLines == colorLines)
+        return;
+    m_colorLines = colorLines;
+    repopulate();
 }
 
 void LogView::setModel(QAbstractItemModel* model)
@@ -121,6 +130,8 @@ void LogView::rowsInserted(const QModelIndex& parent, int first, int last)
     QTextDocument document;
     QTextCursor cursor(&document);
 
+    cursor.movePosition(QTextCursor::End);
+    cursor.beginEditBlock();
     for (int i = first; i <= last; i++) {
         auto idx = m_model->index(i, 0, parent);
         auto text = m_model->data(idx, Qt::DisplayRole).toString();
@@ -130,17 +141,17 @@ void LogView::rowsInserted(const QModelIndex& parent, int first, int last)
             format.setFont(font.value<QFont>());
         }
         auto fg = m_model->data(idx, Qt::ForegroundRole);
-        if (fg.isValid()) {
+        if (fg.isValid() && m_colorLines) {
             format.setForeground(fg.value<QColor>());
         }
         auto bg = m_model->data(idx, Qt::BackgroundRole);
-        if (bg.isValid()) {
+        if (bg.isValid() && m_colorLines) {
             format.setBackground(bg.value<QColor>());
         }
-        cursor.movePosition(QTextCursor::End);
         cursor.insertText(text, format);
         cursor.insertBlock();
     }
+    cursor.endEditBlock();
 
     QTextDocumentFragment fragment(&document);
     QTextCursor workCursor = textCursor();

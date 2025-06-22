@@ -20,13 +20,13 @@ ResourceAPI::SearchArgs ShaderPackResourceModel::createSearchArguments()
     return { ModPlatform::ResourceType::SHADER_PACK, m_next_search_offset, m_search_term, sort };
 }
 
-ResourceAPI::VersionSearchArgs ShaderPackResourceModel::createVersionsArguments(QModelIndex& entry)
+ResourceAPI::VersionSearchArgs ShaderPackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto& pack = m_packs[entry.row()];
     return { *pack };
 }
 
-ResourceAPI::ProjectInfoArgs ShaderPackResourceModel::createInfoArguments(QModelIndex& entry)
+ResourceAPI::ProjectInfoArgs ShaderPackResourceModel::createInfoArguments(const QModelIndex& entry)
 {
     auto& pack = m_packs[entry.row()];
     return { *pack };

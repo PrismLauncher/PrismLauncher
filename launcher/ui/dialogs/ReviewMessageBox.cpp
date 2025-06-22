@@ -20,6 +20,9 @@ ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] QString con
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &ReviewMessageBox::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &ReviewMessageBox::reject);
+
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
 }
 
 ReviewMessageBox::~ReviewMessageBox()
@@ -38,7 +41,7 @@ void ReviewMessageBox::appendResource(ResourceInformation&& info)
     itemTop->setCheckState(0, info.enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     itemTop->setText(0, info.name);
     if (!info.enabled) {
-        itemTop->setToolTip(0, tr("Mod was disabled as it may be already instaled."));
+        itemTop->setToolTip(0, tr("Mod was disabled as it may be already installed."));
     }
 
     auto filenameItem = new QTreeWidgetItem(itemTop);

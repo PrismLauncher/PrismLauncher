@@ -109,6 +109,9 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget* parent)
 
     auto HelpButton = ui->buttonBox->button(QDialogButtonBox::Help);
     connect(HelpButton, &QPushButton::clicked, this, &CopyInstanceDialog::help);
+    HelpButton->setText(tr("Help"));
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
 }
 
 CopyInstanceDialog::~CopyInstanceDialog()

@@ -45,27 +45,53 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
+#include "ui/dialogs/ResourceUpdateDialog.h"
 
 ShaderPackPage::ShaderPackPage(MinecraftInstance* instance, std::shared_ptr<ShaderPackFolderModel> model, QWidget* parent)
-    : ExternalResourcesPage(instance, model, parent)
+    : ExternalResourcesPage(instance, model, parent), m_model(model)
 {
-    ui->actionDownloadItem->setText(tr("Download shaders"));
-    ui->actionDownloadItem->setToolTip(tr("Download shaders from online platforms"));
+    ui->actionDownloadItem->setText(tr("Download Packs"));
+    ui->actionDownloadItem->setToolTip(tr("Download shader packs from online mod platforms"));
     ui->actionDownloadItem->setEnabled(true);
-    connect(ui->actionDownloadItem, &QAction::triggered, this, &ShaderPackPage::downloadShaders);
     ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionDownloadItem);
 
-    ui->actionViewConfigs->setVisible(false);
+    connect(ui->actionDownloadItem, &QAction::triggered, this, &ShaderPackPage::downloadShaderPack);
+
+    ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected shader packs (all shader packs if none are selected)"));
+    connect(ui->actionUpdateItem, &QAction::triggered, this, &ShaderPackPage::updateShaderPacks);
+    ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
+
+    auto updateMenu = new QMenu(this);
+
+    auto update = updateMenu->addAction(ui->actionUpdateItem->text());
+    connect(update, &QAction::triggered, this, &ShaderPackPage::updateShaderPacks);
+
+    updateMenu->addAction(ui->actionResetItemMetadata);
+    connect(ui->actionResetItemMetadata, &QAction::triggered, this, &ShaderPackPage::deleteShaderPackMetadata);
+
+    ui->actionUpdateItem->setMenu(updateMenu);
+
+    ui->actionChangeVersion->setToolTip(tr("Change a shader pack's version."));
+    connect(ui->actionChangeVersion, &QAction::triggered, this, &ShaderPackPage::changeShaderPackVersion);
+    ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, ui->actionChangeVersion);
 }
 
-void ShaderPackPage::downloadShaders()
+void ShaderPackPage::downloadShaderPack()
 {
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
 
-    ResourceDownload::ShaderPackDownloadDialog mdownload(this, std::static_pointer_cast<ShaderPackFolderModel>(m_model), m_instance);
-    if (mdownload.exec()) {
-        auto tasks = new ConcurrentTask(this, "Download Shaders", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+    m_downloadDialog = new ResourceDownload::ShaderPackDownloadDialog(this, m_model, m_instance);
+    connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
+    connect(m_downloadDialog, &QDialog::finished, this, &ShaderPackPage::downloadDialogFinished);
+
+    m_downloadDialog->open();
+}
+
+void ShaderPackPage::downloadDialogFinished(int result)
+{
+    if (result) {
+        auto tasks = new ConcurrentTask("Download Shader Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
@@ -82,7 +108,92 @@ void ShaderPackPage::downloadShaders()
             tasks->deleteLater();
         });
 
-        for (auto& task : mdownload.getTasks()) {
+        if (m_downloadDialog) {
+            for (auto& task : m_downloadDialog->getTasks()) {
+                tasks->addTask(task);
+            }
+        } else {
+            qWarning() << "ResourceDownloadDialog vanished before we could collect tasks!";
+        }
+
+        ProgressDialog loadDialog(this);
+        loadDialog.setSkipButton(true, tr("Abort"));
+        loadDialog.execWithTask(tasks);
+
+        m_model->update();
+    }
+    if (m_downloadDialog)
+        m_downloadDialog->deleteLater();
+}
+
+void ShaderPackPage::updateShaderPacks()
+{
+    if (m_instance->typeName() != "Minecraft")
+        return;  // this is a null instance or a legacy instance
+
+    auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
+    if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+        QMessageBox::critical(this, tr("Error"), tr("Shader pack updates are unavailable when metadata is disabled!"));
+        return;
+    }
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        auto response =
+            CustomMessageBox::selectable(this, tr("Confirm Update"),
+                                         tr("Updating shader packs while the game is running may pack duplication and game crashes.\n"
+                                            "The old files may not be deleted as they are in use.\n"
+                                            "Are you sure you want to do this?"),
+                                         QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                ->exec();
+
+        if (response != QMessageBox::Yes)
+            return;
+    }
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+
+    auto mods_list = m_model->selectedResources(selection);
+    bool use_all = mods_list.empty();
+    if (use_all)
+        mods_list = m_model->allResources();
+
+    ResourceUpdateDialog update_dialog(this, m_instance, m_model, mods_list, false);
+    update_dialog.checkCandidates();
+
+    if (update_dialog.aborted()) {
+        CustomMessageBox::selectable(this, tr("Aborted"), tr("The shader pack updater was aborted!"), QMessageBox::Warning)->show();
+        return;
+    }
+    if (update_dialog.noUpdates()) {
+        QString message{ tr("'%1' is up-to-date! :)").arg(mods_list.front()->name()) };
+        if (mods_list.size() > 1) {
+            if (use_all) {
+                message = tr("All shader packs are up-to-date! :)");
+            } else {
+                message = tr("All selected shader packs are up-to-date! :)");
+            }
+        }
+        CustomMessageBox::selectable(this, tr("Update checker"), message)->exec();
+        return;
+    }
+
+    if (update_dialog.exec()) {
+        auto tasks = new ConcurrentTask("Download Shader Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        connect(tasks, &Task::failed, [this, tasks](QString reason) {
+            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+            tasks->deleteLater();
+        });
+        connect(tasks, &Task::aborted, [this, tasks]() {
+            CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
+            tasks->deleteLater();
+        });
+        connect(tasks, &Task::succeeded, [this, tasks]() {
+            QStringList warnings = tasks->warnings();
+            if (warnings.count()) {
+                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+            }
+            tasks->deleteLater();
+        });
+
+        for (auto task : update_dialog.getTasks()) {
             tasks->addTask(task);
         }
 
@@ -92,4 +203,53 @@ void ShaderPackPage::downloadShaders()
 
         m_model->update();
     }
+}
+
+void ShaderPackPage::deleteShaderPackMetadata()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selectionCount = m_model->selectedShaderPacks(selection).length();
+    if (selectionCount == 0)
+        return;
+    if (selectionCount > 1) {
+        auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
+                                                     tr("You are about to remove the metadata for %1 shader packs.\n"
+                                                        "Are you sure?")
+                                                         .arg(selectionCount),
+                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
+
+        if (response != QMessageBox::Yes)
+            return;
+    }
+
+    m_model->deleteMetadata(selection);
+}
+
+void ShaderPackPage::changeShaderPackVersion()
+{
+    if (m_instance->typeName() != "Minecraft")
+        return;  // this is a null instance or a legacy instance
+
+    if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+        QMessageBox::critical(this, tr("Error"), tr("Shader pack updates are unavailable when metadata is disabled!"));
+        return;
+    }
+
+    const QModelIndexList rows = ui->treeView->selectionModel()->selectedRows();
+
+    if (rows.count() != 1)
+        return;
+
+    Resource& resource = m_model->at(m_filterModel->mapToSource(rows[0]).row());
+
+    if (resource.metadata() == nullptr)
+        return;
+
+    m_downloadDialog = new ResourceDownload::ShaderPackDownloadDialog(this, m_model, m_instance);
+    connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
+    connect(m_downloadDialog, &QDialog::finished, this, &ShaderPackPage::downloadDialogFinished);
+
+    m_downloadDialog->setResourceMetadata(resource.metadata());
+    m_downloadDialog->open();
 }

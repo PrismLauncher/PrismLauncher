@@ -25,7 +25,9 @@
 #include <QMap>
 #include <QRegularExpression>
 
+#include "MTPixmapCache.h"
 #include "Version.h"
+#include "minecraft/mod/tasks/LocalDataPackParseTask.h"
 
 // Values taken from:
 // https://minecraft.wiki/w/Pack_format#List_of_data_pack_formats
@@ -93,6 +95,51 @@ void DataPack::setDescription(QString new_description)
     m_description = new_description;
 }
 
+void DataPack::setImage(QImage new_image) const
+{
+    QMutexLocker locker(&m_data_lock);
+
+    Q_ASSERT(!new_image.isNull());
+
+    if (m_pack_image_cache_key.key.isValid())
+        PixmapCache::instance().remove(m_pack_image_cache_key.key);
+
+    // scale the image to avoid flooding the pixmapcache
+    auto pixmap =
+        QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
+
+    m_pack_image_cache_key.key = PixmapCache::instance().insert(pixmap);
+    m_pack_image_cache_key.was_ever_used = true;
+
+    // This can happen if the pixmap is too big to fit in the cache :c
+    if (!m_pack_image_cache_key.key.isValid()) {
+        qWarning() << "Could not insert a image cache entry! Ignoring it.";
+        m_pack_image_cache_key.was_ever_used = false;
+    }
+}
+
+QPixmap DataPack::image(QSize size, Qt::AspectRatioMode mode) const
+{
+    QPixmap cached_image;
+    if (PixmapCache::instance().find(m_pack_image_cache_key.key, &cached_image)) {
+        if (size.isNull())
+            return cached_image;
+        return cached_image.scaled(size, mode, Qt::SmoothTransformation);
+    }
+
+    // No valid image we can get
+    if (!m_pack_image_cache_key.was_ever_used) {
+        return {};
+    } else {
+        qDebug() << "Data Pack" << name() << "Had it's image evicted from the cache. reloading...";
+        PixmapCache::markCacheMissByEviciton();
+    }
+
+    // Imaged got evicted from the cache. Re-process it and retry.
+    DataPackUtils::processPackPNG(this);
+    return image(size);
+}
+
 std::pair<Version, Version> DataPack::compatibleVersions() const
 {
     if (!s_pack_format_versions.contains(m_pack_format)) {
@@ -105,19 +152,16 @@ std::pair<Version, Version> DataPack::compatibleVersions() const
 int DataPack::compare(const Resource& other, SortType type) const
 {
     auto const& cast_other = static_cast<DataPack const&>(other);
-    switch (type) {
-        default:
-            return Resource::compare(other, type);
-        case SortType::PACK_FORMAT: {
-            auto this_ver = packFormat();
-            auto other_ver = cast_other.packFormat();
+    if (type == SortType::PACK_FORMAT) {
+        auto this_ver = packFormat();
+        auto other_ver = cast_other.packFormat();
 
-            if (this_ver > other_ver)
-                return 1;
-            if (this_ver < other_ver)
-                return -1;
-            break;
-        }
+        if (this_ver > other_ver)
+            return 1;
+        if (this_ver < other_ver)
+            return -1;
+    } else {
+        return Resource::compare(other, type);
     }
     return 0;
 }

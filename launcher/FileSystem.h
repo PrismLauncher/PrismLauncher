@@ -72,7 +72,7 @@ void appendSafe(const QString& filename, const QByteArray& data);
 void append(const QString& filename, const QByteArray& data);
 
 /**
- * read data from a file safely\
+ * read data from a file safely
  */
 QByteArray read(const QString& filename);
 
@@ -129,7 +129,7 @@ class copy : public QObject {
         m_followSymlinks = follow;
         return *this;
     }
-    copy& matcher(const IPathMatcher* filter)
+    copy& matcher(IPathMatcher::Ptr filter)
     {
         m_matcher = filter;
         return *this;
@@ -161,7 +161,7 @@ class copy : public QObject {
 
    private:
     bool m_followSymlinks = true;
-    const IPathMatcher* m_matcher = nullptr;
+    IPathMatcher::Ptr m_matcher = nullptr;
     bool m_whitelist = false;
     bool m_overwrite = false;
     QDir m_src;
@@ -223,7 +223,7 @@ class create_link : public QObject {
         m_useHardLinks = useHard;
         return *this;
     }
-    create_link& matcher(const IPathMatcher* filter)
+    create_link& matcher(IPathMatcher::Ptr filter)
     {
         m_matcher = filter;
         return *this;
@@ -274,7 +274,7 @@ class create_link : public QObject {
 
    private:
     bool m_useHardLinks = false;
-    const IPathMatcher* m_matcher = nullptr;
+    IPathMatcher::Ptr m_matcher = nullptr;
     bool m_whitelist = false;
     bool m_recursive = true;
 
@@ -367,14 +367,18 @@ bool checkProblemticPathJava(QDir folder);
 // Get the Directory representing the User's Desktop
 QString getDesktopDir();
 
+// Get the Directory representing the User's Applications directory
+QString getApplicationsDir();
+
 // Overrides one folder with the contents of another, preserving items exclusive to the first folder
 // Equivalent to doing QDir::rename, but allowing for overrides
 bool overrideFolder(QString overwritten_path, QString override_path);
 
 /**
  * Creates a shortcut to the specified target file at the specified destination path.
+ * Returns null QString if creation failed; otherwise returns the path to the created shortcut.
  */
-bool createShortcut(QString destination, QString target, QStringList args, QString name, QString icon);
+QString createShortcut(QString destination, QString target, QStringList args, QString name, QString icon);
 
 enum class FilesystemType {
     FAT,
@@ -502,7 +506,7 @@ class clone : public QObject {
         m_src.setPath(src);
         m_dst.setPath(dst);
     }
-    clone& matcher(const IPathMatcher* filter)
+    clone& matcher(IPathMatcher::Ptr filter)
     {
         m_matcher = filter;
         return *this;
@@ -528,7 +532,7 @@ class clone : public QObject {
     bool operator()(const QString& offset, bool dryRun = false);
 
    private:
-    const IPathMatcher* m_matcher = nullptr;
+    IPathMatcher::Ptr m_matcher = nullptr;
     bool m_whitelist = false;
     QDir m_src;
     QDir m_dst;

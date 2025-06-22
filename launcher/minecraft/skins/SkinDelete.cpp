@@ -37,9 +37,9 @@
 #include "SkinDelete.h"
 
 #include "net/ByteArraySink.h"
-#include "net/StaticHeaderProxy.h"
+#include "net/RawHeaderProxy.h"
 
-SkinDelete::SkinDelete(QString token) : NetRequest(), m_token(token)
+SkinDelete::SkinDelete() : NetRequest()
 {
     logCat = taskMCSkinsLogC;
 }
@@ -50,17 +50,13 @@ QNetworkReply* SkinDelete::getReply(QNetworkRequest& request)
     return m_network->deleteResource(request);
 }
 
-void SkinDelete::init()
-{
-    addHeaderProxy(new Net::StaticHeaderProxy(QList<Net::HeaderPair>{
-        { "Authorization", QString("Bearer %1").arg(m_token).toLocal8Bit() },
-    }));
-}
-
 SkinDelete::Ptr SkinDelete::make(QString token)
 {
-    auto up = makeShared<SkinDelete>(token);
+    auto up = makeShared<SkinDelete>();
     up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/skins/active");
     up->m_sink.reset(new Net::ByteArraySink(std::make_shared<QByteArray>()));
+    up->addHeaderProxy(new Net::RawHeaderProxy(QList<Net::HeaderPair>{
+        { "Authorization", QString("Bearer %1").arg(token).toLocal8Bit() },
+    }));
     return up;
 }

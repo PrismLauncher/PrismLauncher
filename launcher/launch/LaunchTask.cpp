@@ -37,14 +37,13 @@
 
 #include "launch/LaunchTask.h"
 #include <assert.h>
+#include <QAnyStringView>
 #include <QCoreApplication>
 #include <QDebug>
 #include <QDir>
-#include <QEventLoop>
-#include <QRegularExpression>
 #include <QStandardPaths>
+#include <variant>
 #include "MessageLevel.h"
-#include "java/JavaChecker.h"
 #include "tasks/Task.h"
 
 void LaunchTask::init()
@@ -52,14 +51,14 @@ void LaunchTask::init()
     m_instance->setRunning(true);
 }
 
-shared_qobject_ptr<LaunchTask> LaunchTask::create(InstancePtr inst)
+shared_qobject_ptr<LaunchTask> LaunchTask::create(MinecraftInstancePtr inst)
 {
     shared_qobject_ptr<LaunchTask> proc(new LaunchTask(inst));
     proc->init();
     return proc;
 }
 
-LaunchTask::LaunchTask(InstancePtr instance) : m_instance(instance) {}
+LaunchTask::LaunchTask(MinecraftInstancePtr instance) : m_instance(instance) {}
 
 void LaunchTask::appendStep(shared_qobject_ptr<LaunchStep> step)
 {
@@ -204,8 +203,8 @@ shared_qobject_ptr<LogModel> LaunchTask::getLogModel()
 {
     if (!m_logModel) {
         m_logModel.reset(new LogModel());
-        m_logModel->setMaxLines(m_instance->getConsoleMaxLines());
-        m_logModel->setStopOnOverflow(m_instance->shouldStopOnConsoleOverflow());
+        m_logModel->setMaxLines(getConsoleMaxLines(m_instance->settings()));
+        m_logModel->setStopOnOverflow(shouldStopOnConsoleOverflow(m_instance->settings()));
         // FIXME: should this really be here?
         m_logModel->setOverflowMessage(tr("Stopped watching the game log because the log length surpassed %1 lines.\n"
                                           "You may have to fix your mods because the game is still logging to files and"
@@ -213,6 +212,52 @@ shared_qobject_ptr<LogModel> LaunchTask::getLogModel()
                                            .arg(m_logModel->getMaxLines()));
     }
     return m_logModel;
+}
+
+bool LaunchTask::parseXmlLogs(QString const& line, MessageLevel::Enum level)
+{
+    LogParser* parser;
+    switch (level) {
+        case MessageLevel::StdErr:
+            parser = &m_stderrParser;
+            break;
+        case MessageLevel::StdOut:
+            parser = &m_stdoutParser;
+            break;
+        default:
+            return false;
+    }
+
+    parser->appendLine(line);
+    auto items = parser->parseAvailable();
+    if (auto err = parser->getError(); err.has_value()) {
+        auto& model = *getLogModel();
+        model.append(MessageLevel::Error, tr("[Log4j Parse Error] Failed to parse log4j log event: %1").arg(err.value().errMessage));
+        return false;
+    } else {
+        if (!items.isEmpty()) {
+            auto& model = *getLogModel();
+            for (auto const& item : items) {
+                if (std::holds_alternative<LogParser::LogEntry>(item)) {
+                    auto entry = std::get<LogParser::LogEntry>(item);
+                    auto msg = QString("[%1] [%2/%3] [%4]: %5")
+                                   .arg(entry.timestamp.toString("HH:mm:ss"))
+                                   .arg(entry.thread)
+                                   .arg(entry.levelText)
+                                   .arg(entry.logger)
+                                   .arg(entry.message);
+                    msg = censorPrivateInfo(msg);
+                    model.append(entry.level, msg);
+                } else if (std::holds_alternative<LogParser::PlainText>(item)) {
+                    auto msg = std::get<LogParser::PlainText>(item).message;
+                    level = LogParser::guessLevel(msg, model.previousLevel());
+                    msg = censorPrivateInfo(msg);
+                    model.append(level, msg);
+                }
+            }
+        }
+    }
+    return true;
 }
 
 void LaunchTask::onLogLines(const QStringList& lines, MessageLevel::Enum defaultLevel)
@@ -224,21 +269,26 @@ void LaunchTask::onLogLines(const QStringList& lines, MessageLevel::Enum default
 
 void LaunchTask::onLogLine(QString line, MessageLevel::Enum level)
 {
+    if (parseXmlLogs(line, level)) {
+        return;
+    }
+
     // if the launcher part set a log level, use it
     auto innerLevel = MessageLevel::fromLine(line);
     if (innerLevel != MessageLevel::Unknown) {
         level = innerLevel;
     }
 
+    auto& model = *getLogModel();
+
     // If the level is still undetermined, guess level
-    if (level == MessageLevel::StdErr || level == MessageLevel::StdOut || level == MessageLevel::Unknown) {
-        level = m_instance->guessLevel(line, level);
+    if (level == MessageLevel::Unknown) {
+        level = LogParser::guessLevel(line, model.previousLevel());
     }
 
     // censor private user info
     line = censorPrivateInfo(line);
 
-    auto& model = *getLogModel();
     model.append(level, line);
 }
 
@@ -255,20 +305,60 @@ void LaunchTask::emitFailed(QString reason)
     Task::emitFailed(reason);
 }
 
-void LaunchTask::substituteVariables(QStringList& args) const
+QString expandVariables(const QString& input, QProcessEnvironment dict)
 {
-    auto env = m_instance->createEnvironment();
+    QString result = input;
 
-    for (auto key : env.keys()) {
-        args.replaceInStrings("$" + key, env.value(key));
+    enum { base, maybeBrace, variable, brace } state = base;
+    int startIdx = -1;
+    for (int i = 0; i < result.length();) {
+        QChar c = result.at(i++);
+        switch (state) {
+            case base:
+                if (c == '$')
+                    state = maybeBrace;
+                break;
+            case maybeBrace:
+                if (c == '{') {
+                    state = brace;
+                    startIdx = i;
+                } else if (c.isLetterOrNumber() || c == '_') {
+                    state = variable;
+                    startIdx = i - 1;
+                } else {
+                    state = base;
+                }
+                break;
+            case brace:
+                if (c == '}') {
+                    const auto res = dict.value(result.mid(startIdx, i - 1 - startIdx), "");
+                    if (!res.isEmpty()) {
+                        result.replace(startIdx - 2, i - startIdx + 2, res);
+                        i = startIdx - 2 + res.length();
+                    }
+                    state = base;
+                }
+                break;
+            case variable:
+                if (!c.isLetterOrNumber() && c != '_') {
+                    const auto res = dict.value(result.mid(startIdx, i - startIdx - 1), "");
+                    if (!res.isEmpty()) {
+                        result.replace(startIdx - 1, i - startIdx, res);
+                        i = startIdx - 1 + res.length();
+                    }
+                    state = base;
+                }
+                break;
+        }
     }
+    if (state == variable) {
+        if (const auto res = dict.value(result.mid(startIdx), ""); !res.isEmpty())
+            result.replace(startIdx - 1, result.length() - startIdx + 1, res);
+    }
+    return result;
 }
 
-void LaunchTask::substituteVariables(QString& cmd) const
+QString LaunchTask::substituteVariables(QString& cmd, bool isLaunch) const
 {
-    auto env = m_instance->createEnvironment();
-
-    for (auto key : env.keys()) {
-        cmd.replace("$" + key, env.value(key));
-    }
+    return expandVariables(cmd, isLaunch ? m_instance->createLaunchEnvironment() : m_instance->createEnvironment());
 }

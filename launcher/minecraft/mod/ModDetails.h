@@ -43,13 +43,6 @@
 
 #include "minecraft/mod/MetadataHandler.h"
 
-enum class ModStatus {
-    Installed,     // Both JAR and Metadata are present
-    NotInstalled,  // Only the Metadata is present
-    NoMetadata,    // Only the JAR is present
-    Unknown,       // Default status
-};
-
 struct ModLicense {
     QString name = {};
     QString id = {};
@@ -149,12 +142,6 @@ struct ModDetails {
     /* Path of mod logo */
     QString icon_file = {};
 
-    /* Installation status of the mod */
-    ModStatus status = ModStatus::Unknown;
-
-    /* Metadata information, if any */
-    std::shared_ptr<Metadata::ModStruct> metadata = nullptr;
-
     ModDetails() = default;
 
     /** Metadata should be handled manually to properly set the mod status. */
@@ -169,40 +156,9 @@ struct ModDetails {
         , issue_tracker(other.issue_tracker)
         , licenses(other.licenses)
         , icon_file(other.icon_file)
-        , status(other.status)
     {}
 
-    ModDetails& operator=(const ModDetails& other)
-    {
-        this->mod_id = other.mod_id;
-        this->name = other.name;
-        this->version = other.version;
-        this->mcversion = other.mcversion;
-        this->homeurl = other.homeurl;
-        this->description = other.description;
-        this->authors = other.authors;
-        this->issue_tracker = other.issue_tracker;
-        this->licenses = other.licenses;
-        this->icon_file = other.icon_file;
-        this->status = other.status;
+    ModDetails& operator=(const ModDetails& other) = default;
 
-        return *this;
-    }
-
-    ModDetails& operator=(const ModDetails&& other)
-    {
-        this->mod_id = other.mod_id;
-        this->name = other.name;
-        this->version = other.version;
-        this->mcversion = other.mcversion;
-        this->homeurl = other.homeurl;
-        this->description = other.description;
-        this->authors = other.authors;
-        this->issue_tracker = other.issue_tracker;
-        this->licenses = other.licenses;
-        this->icon_file = other.icon_file;
-        this->status = other.status;
-
-        return *this;
-    }
+    ModDetails& operator=(ModDetails&& other) = default;
 };

@@ -36,6 +36,7 @@
  */
 
 #include "ServersPage.h"
+#include "ServerPingTask.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ServersPage.h"
 
@@ -48,11 +49,12 @@
 #include <tag_string.h>
 #include <sstream>
 
+#include <tasks/ConcurrentTask.h>
 #include <QFileSystemWatcher>
 #include <QMenu>
 #include <QTimer>
 
-static const int COLUMN_COUNT = 2;  // 3 , TBD: latency and other nice things.
+static const int COLUMN_COUNT = 3;  // 3 , TBD: latency and other nice things.
 
 struct Server {
     // Types
@@ -111,9 +113,8 @@ struct Server {
     // Data - temporary
     bool m_checked = false;
     bool m_up = false;
-    QString m_motd;  // https://mctools.org/motd-creator
-    int m_ping = 0;
-    int m_currentPlayers = 0;
+    QString m_motd;                       // https://mctools.org/motd-creator
+    std::optional<int> m_currentPlayers;  // nullopt if not calculated/calculating
     int m_maxPlayers = 0;
 };
 
@@ -168,7 +169,7 @@ class ServersModel : public QAbstractListModel {
         m_saveTimer.setInterval(5000);
         connect(&m_saveTimer, &QTimer::timeout, this, &ServersModel::save_internal);
     }
-    virtual ~ServersModel() {};
+    virtual ~ServersModel() = default;
 
     void observe()
     {
@@ -254,11 +255,7 @@ class ServersModel : public QAbstractListModel {
             return false;
         }
         beginMoveRows(QModelIndex(), row, row, QModelIndex(), row - 1);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
         m_servers.swapItemsAt(row - 1, row);
-#else
-        m_servers.swap(row - 1, row);
-#endif
         endMoveRows();
         scheduleSave();
         return true;
@@ -274,11 +271,7 @@ class ServersModel : public QAbstractListModel {
             return false;
         }
         beginMoveRows(QModelIndex(), row, row, QModelIndex(), row + 2);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
         m_servers.swapItemsAt(row + 1, row);
-#else
-        m_servers.swap(row + 1, row);
-#endif
         endMoveRows();
         scheduleSave();
         return true;
@@ -296,7 +289,7 @@ class ServersModel : public QAbstractListModel {
                 case 1:
                     return tr("Address");
                 case 2:
-                    return tr("Latency");
+                    return tr("Online");
             }
         }
 
@@ -316,10 +309,10 @@ class ServersModel : public QAbstractListModel {
         if (row < 0 || row >= m_servers.size())
             return QVariant();
 
-        switch (column) {
-            case 0:
-                switch (role) {
-                    case Qt::DecorationRole: {
+        switch (role) {
+            case Qt::DecorationRole: {
+                switch (column) {
+                    case 0: {
                         auto& bytes = m_servers[row].m_icon;
                         if (bytes.size()) {
                             QPixmap px;
@@ -328,27 +321,32 @@ class ServersModel : public QAbstractListModel {
                         }
                         return APPLICATION->getThemedIcon("unknown_server");
                     }
-                    case Qt::DisplayRole:
-                        return m_servers[row].m_name;
-                    case ServerPtrRole:
-                        return QVariant::fromValue<void*>((void*)&m_servers[row]);
-                    default:
-                        return QVariant();
-                }
-            case 1:
-                switch (role) {
-                    case Qt::DisplayRole:
+                    case 1:
                         return m_servers[row].m_address;
                     default:
                         return QVariant();
                 }
-            case 2:
-                switch (role) {
-                    case Qt::DisplayRole:
-                        return m_servers[row].m_ping;
-                    default:
+                case 2:
+                    if (role == Qt::DisplayRole) {
+                        if (m_servers[row].m_currentPlayers) {
+                            return *m_servers[row].m_currentPlayers;
+                        } else {
+                            return "...";
+                        }
+                    } else {
                         return QVariant();
-                }
+                    }
+            }
+            case Qt::DisplayRole:
+                if (column == 0)
+                    return m_servers[row].m_name;
+                else
+                    return QVariant();
+            case ServerPtrRole:
+                if (column == 0)
+                    return QVariant::fromValue<void*>((void*)&m_servers[row]);
+                else
+                    return QVariant();
             default:
                 return QVariant();
         }
@@ -431,6 +429,40 @@ class ServersModel : public QAbstractListModel {
         if (saveIsScheduled()) {
             save_internal();
         }
+    }
+
+    void queryServersStatus()
+    {
+        // Abort the currently running task if present
+        if (m_currentQueryTask != nullptr) {
+            m_currentQueryTask->abort();
+            qDebug() << "Aborted previous server query task";
+        }
+
+        m_currentQueryTask = ConcurrentTask::Ptr(
+            new ConcurrentTask("Query servers status", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));
+        int row = 0;
+        for (Server& server : m_servers) {
+            // reset current players
+            server.m_currentPlayers = {};
+            emit dataChanged(index(row, 0), index(row, COLUMN_COUNT - 1));
+
+            // Start task to query server status
+            auto target = MinecraftTarget::parse(server.m_address, false);
+            auto* task = new ServerPingTask(target.address, target.port);
+            m_currentQueryTask->addTask(Task::Ptr(task));
+
+            // Update the model when the task is done
+            connect(task, &Task::finished, this, [this, task, row]() {
+                if (m_servers.size() < row)
+                    return;
+                m_servers[row].m_currentPlayers = task->m_outputOnlinePlayers;
+                emit dataChanged(index(row, 0), index(row, COLUMN_COUNT - 1));
+            });
+            row++;
+        }
+
+        m_currentQueryTask->start();
     }
 
    public slots:
@@ -520,6 +552,7 @@ class ServersModel : public QAbstractListModel {
     QList<Server> m_servers;
     QFileSystemWatcher* m_watcher = nullptr;
     QTimer m_saveTimer;
+    ConcurrentTask::Ptr m_currentQueryTask = nullptr;
 };
 
 ServersPage::ServersPage(InstancePtr inst, QWidget* parent) : QMainWindow(parent), ui(new Ui::ServersPage)
@@ -545,7 +578,7 @@ ServersPage::ServersPage(InstancePtr inst, QWidget* parent) : QMainWindow(parent
     connect(m_inst.get(), &MinecraftInstance::runningStatusChanged, this, &ServersPage::runningStateChanged);
     connect(ui->nameLine, &QLineEdit::textEdited, this, &ServersPage::nameEdited);
     connect(ui->addressLine, &QLineEdit::textEdited, this, &ServersPage::addressEdited);
-    connect(ui->resourceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(resourceIndexChanged(int)));
+    connect(ui->resourceComboBox, &QComboBox::currentIndexChanged, this, &ServersPage::resourceIndexChanged);
     connect(m_model, &QAbstractItemModel::rowsRemoved, this, &ServersPage::rowsRemoved);
 
     m_locked = m_inst->isRunning();
@@ -670,19 +703,19 @@ void ServersPage::openedImpl()
     m_model->observe();
 
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
-    if (!APPLICATION->settings()->contains(setting_name))
-        m_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
-    else
-        m_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
+    m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
-    ui->toolBar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
+    ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
+
+    // ping servers
+    m_model->queryServersStatus();
 }
 
 void ServersPage::closedImpl()
 {
     m_model->unobserve();
 
-    m_wide_bar_setting->set(ui->toolBar->getVisibilityState());
+    m_wide_bar_setting->set(QString::fromUtf8(ui->toolBar->getVisibilityState().toBase64()));
 }
 
 void ServersPage::on_actionAdd_triggered()
@@ -731,7 +764,12 @@ void ServersPage::on_actionMove_Down_triggered()
 void ServersPage::on_actionJoin_triggered()
 {
     const auto& address = m_model->at(currentServer)->m_address;
-    APPLICATION->launch(m_inst, true, false, std::make_shared<MinecraftServerTarget>(MinecraftServerTarget::parse(address)));
+    APPLICATION->launch(m_inst, true, false, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(address, false)));
+}
+
+void ServersPage::on_actionRefresh_triggered()
+{
+    m_model->queryServersStatus();
 }
 
 #include "ServersPage.moc"

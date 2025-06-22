@@ -94,6 +94,8 @@ class ProgressDialog : public QDialog {
 
     Task* m_task;
 
+    QList<QMetaObject::Connection> m_taskConnections;
+
     bool m_is_multi_step = false;
     QHash<QUuid, SubTaskProgressBar*> taskProgress;
 };

@@ -24,11 +24,8 @@ class LaunchTask;
 class LaunchStep : public Task {
     Q_OBJECT
    public: /* methods */
-    explicit LaunchStep(LaunchTask* parent) : Task(nullptr), m_parent(parent) { bind(parent); };
-    virtual ~LaunchStep() {};
-
-   private: /* methods */
-    void bind(LaunchTask* parent);
+    explicit LaunchStep(LaunchTask* parent);
+    virtual ~LaunchStep() = default;
 
    signals:
     void logLines(QStringList lines, MessageLevel::Enum level);

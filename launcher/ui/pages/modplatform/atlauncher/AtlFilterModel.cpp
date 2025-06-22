@@ -68,7 +68,10 @@ bool FilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParen
         return true;
     }
     QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
-    ATLauncher::IndexedPack pack = sourceModel()->data(index, Qt::UserRole).value<ATLauncher::IndexedPack>();
+    QVariant raw = sourceModel()->data(index, Qt::UserRole);
+    Q_ASSERT(raw.canConvert<ATLauncher::IndexedPack>());
+    auto pack = raw.value<ATLauncher::IndexedPack>();
+
     if (searchTerm.startsWith("#"))
         return QString::number(pack.id) == searchTerm.mid(1);
     return pack.name.contains(searchTerm, Qt::CaseInsensitive);
@@ -76,8 +79,12 @@ bool FilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParen
 
 bool FilterModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {
-    ATLauncher::IndexedPack leftPack = sourceModel()->data(left, Qt::UserRole).value<ATLauncher::IndexedPack>();
-    ATLauncher::IndexedPack rightPack = sourceModel()->data(right, Qt::UserRole).value<ATLauncher::IndexedPack>();
+    QVariant leftRaw = sourceModel()->data(left, Qt::UserRole);
+    Q_ASSERT(leftRaw.canConvert<ATLauncher::IndexedPack>());
+    auto leftPack = leftRaw.value<ATLauncher::IndexedPack>();
+    QVariant rightRaw = sourceModel()->data(right, Qt::UserRole);
+    Q_ASSERT(rightRaw.canConvert<ATLauncher::IndexedPack>());
+    auto rightPack = rightRaw.value<ATLauncher::IndexedPack>();
 
     if (currentSorting == ByPopularity) {
         return leftPack.position > rightPack.position;

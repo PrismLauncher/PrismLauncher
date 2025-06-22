@@ -36,6 +36,8 @@
 #include "GZip.h"
 #include <zlib.h>
 #include <QByteArray>
+#include <QDebug>
+#include <QFile>
 
 bool GZip::unzip(const QByteArray& compressedBytes, QByteArray& uncompressedBytes)
 {
@@ -135,4 +137,82 @@ bool GZip::zip(const QByteArray& uncompressedBytes, QByteArray& compressedBytes)
         return false;
     }
     return true;
+}
+
+int inf(QFile* source, std::function<bool(const QByteArray&)> handleBlock)
+{
+    constexpr auto CHUNK = 16384;
+    int ret;
+    unsigned have;
+    z_stream strm;
+    memset(&strm, 0, sizeof(strm));
+    char in[CHUNK];
+    unsigned char out[CHUNK];
+
+    ret = inflateInit2(&strm, (16 + MAX_WBITS));
+    if (ret != Z_OK)
+        return ret;
+
+    /* decompress until deflate stream ends or end of file */
+    do {
+        strm.avail_in = source->read(in, CHUNK);
+        if (source->error()) {
+            (void)inflateEnd(&strm);
+            return Z_ERRNO;
+        }
+        if (strm.avail_in == 0)
+            break;
+        strm.next_in = reinterpret_cast<Bytef*>(in);
+
+        /* run inflate() on input until output buffer not full */
+        do {
+            strm.avail_out = CHUNK;
+            strm.next_out = out;
+            ret = inflate(&strm, Z_NO_FLUSH);
+            assert(ret != Z_STREAM_ERROR); /* state not clobbered */
+            switch (ret) {
+                case Z_NEED_DICT:
+                    ret = Z_DATA_ERROR; /* and fall through */
+                case Z_DATA_ERROR:
+                case Z_MEM_ERROR:
+                    (void)inflateEnd(&strm);
+                    return ret;
+            }
+            have = CHUNK - strm.avail_out;
+            if (!handleBlock(QByteArray(reinterpret_cast<const char*>(out), have))) {
+                (void)inflateEnd(&strm);
+                return Z_OK;
+            }
+
+        } while (strm.avail_out == 0);
+
+        /* done when inflate() says it's done */
+    } while (ret != Z_STREAM_END);
+
+    /* clean up and return */
+    (void)inflateEnd(&strm);
+    return ret == Z_STREAM_END ? Z_OK : Z_DATA_ERROR;
+}
+
+QString zerr(int ret)
+{
+    switch (ret) {
+        case Z_ERRNO:
+            return QObject::tr("error handling file");
+        case Z_STREAM_ERROR:
+            return QObject::tr("invalid compression level");
+        case Z_DATA_ERROR:
+            return QObject::tr("invalid or incomplete deflate data");
+        case Z_MEM_ERROR:
+            return QObject::tr("out of memory");
+        case Z_VERSION_ERROR:
+            return QObject::tr("zlib version mismatch!");
+    }
+    return {};
+}
+
+QString GZip::readGzFileByBlocks(QFile* source, std::function<bool(const QByteArray&)> handleBlock)
+{
+    auto ret = inf(source, handleBlock);
+    return zerr(ret);
 }

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9.4)
+cmake_minimum_required(VERSION 3.15)
 project(gamemode
     VERSION 1.6.1)
 

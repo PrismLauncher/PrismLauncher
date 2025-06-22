@@ -34,18 +34,32 @@
  */
 
 #include "VerifyJavaInstall.h"
+#include <memory>
 
+#include "Application.h"
+#include "MessageLevel.h"
+#include "java/JavaInstall.h"
+#include "java/JavaInstallList.h"
 #include "java/JavaVersion.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
 void VerifyJavaInstall::executeTask()
 {
-    auto instance = std::dynamic_pointer_cast<MinecraftInstance>(m_parent->instance());
+    auto instance = m_parent->instance();
     auto packProfile = instance->getPackProfile();
     auto settings = instance->settings();
     auto storedVersion = settings->get("JavaVersion").toString();
     auto ignoreCompatibility = settings->get("IgnoreJavaCompatibility").toBool();
+    auto javaArchitecture = settings->get("JavaArchitecture").toString();
+    auto maxMemAlloc = settings->get("MaxMemAlloc").toInt();
+
+    if (javaArchitecture == "32" && maxMemAlloc > 2048) {
+        emit logLine(tr("Max memory allocation exceeds the supported value.\n"
+                        "The selected installation of Java is 32-bit and doesn't support more than 2048MiB of RAM.\n"
+                        "The instance may not start due to this."),
+                     MessageLevel::Error);
+    }
 
     auto compatibleMajors = packProfile->getProfile()->getCompatibleJavaMajors();
 

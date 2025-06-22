@@ -41,6 +41,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QSortFilterProxyModel>
 
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"

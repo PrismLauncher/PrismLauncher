@@ -59,10 +59,9 @@ namespace ResourceDownload {
 ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ResourcePage(dialog, instance)
 {
     connect(m_ui->resourceFilterButton, &QPushButton::clicked, this, &ModPage::filterMods);
-    connect(m_ui->packView, &QListView::doubleClicked, this, &ModPage::onResourceSelected);
 }
 
-void ModPage::setFilterWidget(unique_qobject_ptr<ModFilterWidget>& widget)
+void ModPage::setFilterWidget(std::unique_ptr<ModFilterWidget>& widget)
 {
     if (m_filter_widget)
         disconnect(m_filter_widget.get(), nullptr, nullptr, nullptr);
@@ -99,7 +98,7 @@ void ModPage::triggerSearch()
     updateSelectionButton();
 
     static_cast<ModModel*>(m_model)->searchWithTerm(getSearchTerm(), m_ui->sortByBox->currentData().toUInt(), changed);
-    m_fetch_progress.watch(m_model->activeSearchJob().get());
+    m_fetchProgress.watch(m_model->activeSearchJob().get());
 }
 
 QMap<QString, QString> ModPage::urlHandlers() const

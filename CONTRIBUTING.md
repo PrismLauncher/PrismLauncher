@@ -2,16 +2,59 @@
 
 ## Code formatting
 
-Try to follow the existing formatting.
-If there is no existing formatting, you may use `clang-format` with our included `.clang-format` configuration.
+All files are formatted with `clang-format` using the configuration in `.clang-format`. Ensure it is run on changed files before committing!
 
-In general, in order of importance:
+Please also follow the project's conventions for C++:
 
-- Make sure your IDE is not messing up line endings or whitespace and avoid using linters.
-- Prefer readability over dogma.
-- Keep to the existing formatting.
-- Indent with 4 space unless it's in a submodule.
-- Keep lists (of arguments, parameters, initializers...) as lists, not paragraphs. It should either read from top to bottom, or left to right. Not both.
+- Class and type names should be formatted as `PascalCase`: `MyClass`.
+- Private or protected class data members should be formatted as `camelCase` prefixed with `m_`: `m_myCounter`.
+- Private or protected `static` class data members should be formatted as `camelCase` prefixed with `s_`: `s_instance`.
+- Public class data members should be formatted as `camelCase` without the prefix: `dateOfBirth`.
+- Public, private or protected `static const` class data members should be formatted as `SCREAMING_SNAKE_CASE`: `MAX_VALUE`.
+- Class function members should be formatted as `camelCase` without a prefix: `incrementCounter`.
+- Global functions and non-`const` global variables should be formatted as `camelCase` without a prefix: `globalData`.
+- `const` global variables, macros, and enum constants should be formatted as `SCREAMING_SNAKE_CASE`: `LIGHT_GRAY`.
+- Avoid inventing acronyms or abbreviations especially for a name of multiple words - like `tp` for `texturePack`.
+
+Most of these rules are included in the `.clang-tidy` file, so you can run `clang-tidy` to check for any violations.
+
+Here is what these conventions with the formatting configuration look like:
+
+```c++
+#define AWESOMENESS 10
+
+constexpr double PI = 3.14159;
+
+enum class PizzaToppings { HAM_AND_PINEAPPLE, OREO_AND_KETCHUP };
+
+struct Person {
+    QString name;
+    QDateTime dateOfBirth;
+
+    long daysOld() const { return dateOfBirth.daysTo(QDateTime::currentDateTime()); }
+};
+
+class ImportantClass {
+   public:
+    void incrementCounter()
+    {
+        if (m_counter + 1 > MAX_COUNTER_VALUE)
+            throw std::runtime_error("Counter has reached limit!");
+
+        ++m_counter;
+    }
+
+    int counter() const { return m_counter; }
+
+   private:
+    static constexpr int MAX_COUNTER_VALUE = 100;
+    int m_counter;
+};
+
+ImportantClass importantClassInstance;
+```
+
+If you see any names which do not follow these conventions, it is preferred that you leave them be - renames increase the number of changes therefore make reviewing harder and make your PR more prone to conflicts. However, if you're refactoring a whole class anyway, it's fine.
 
 ## Signing your work
 

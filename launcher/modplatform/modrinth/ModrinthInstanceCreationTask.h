@@ -1,14 +1,10 @@
 #pragma once
 
+#include <optional>
+#include "BaseInstance.h"
 #include "InstanceCreationTask.h"
 
-#include <optional>
-
-#include "minecraft/MinecraftInstance.h"
-
 #include "modplatform/modrinth/ModrinthPackManifest.h"
-
-#include "net/NetJob.h"
 
 class ModrinthCreationTask final : public InstanceCreationTask {
     Q_OBJECT
@@ -43,7 +39,7 @@ class ModrinthCreationTask final : public InstanceCreationTask {
     QString m_managed_id, m_managed_version_id, m_managed_name;
 
     std::vector<Modrinth::File> m_files;
-    NetJob::Ptr m_files_job;
+    Task::Ptr m_task;
 
     std::optional<InstancePtr> m_instance;
 

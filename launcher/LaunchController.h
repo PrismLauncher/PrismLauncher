@@ -39,7 +39,7 @@
 #include <QObject>
 
 #include "minecraft/auth/MinecraftAccount.h"
-#include "minecraft/launch/MinecraftServerTarget.h"
+#include "minecraft/launch/MinecraftTarget.h"
 
 class InstanceWindow;
 class LaunchController : public Task {
@@ -47,8 +47,8 @@ class LaunchController : public Task {
    public:
     void executeTask() override;
 
-    LaunchController(QObject* parent = nullptr);
-    virtual ~LaunchController() {};
+    LaunchController();
+    virtual ~LaunchController() = default;
 
     void setInstance(InstancePtr instance) { m_instance = instance; }
 
@@ -56,13 +56,15 @@ class LaunchController : public Task {
 
     void setOnline(bool online) { m_online = online; }
 
+    void setOfflineName(const QString& offlineName) { m_offlineName = offlineName; }
+
     void setDemo(bool demo) { m_demo = demo; }
 
     void setProfiler(BaseProfilerFactory* profiler) { m_profiler = profiler; }
 
     void setParentWidget(QWidget* widget) { m_parentWidget = widget; }
 
-    void setServerToJoin(MinecraftServerTargetPtr serverToJoin) { m_serverToJoin = std::move(serverToJoin); }
+    void setTargetToJoin(MinecraftTarget::Ptr targetToJoin) { m_targetToJoin = std::move(targetToJoin); }
 
     void setAccountToUse(MinecraftAccountPtr accountToUse) { m_accountToUse = std::move(accountToUse); }
 
@@ -76,6 +78,7 @@ class LaunchController : public Task {
     void decideAccount();
     bool askPlayDemo();
     QString askOfflineName(QString playerName, bool demo, bool& ok);
+    bool reauthenticateAccount(MinecraftAccountPtr account);
 
    private slots:
     void readyForLaunch();
@@ -87,6 +90,7 @@ class LaunchController : public Task {
    private:
     BaseProfilerFactory* m_profiler = nullptr;
     bool m_online = true;
+    QString m_offlineName;
     bool m_demo = false;
     InstancePtr m_instance;
     QWidget* m_parentWidget = nullptr;
@@ -94,5 +98,5 @@ class LaunchController : public Task {
     MinecraftAccountPtr m_accountToUse = nullptr;
     AuthSessionPtr m_session;
     shared_qobject_ptr<LaunchTask> m_launcher;
-    MinecraftServerTargetPtr m_serverToJoin;
+    MinecraftTarget::Ptr m_targetToJoin;
 };

@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2024 Tayou <git@tayou.org>
+ *  Copyright (C) 2024 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,11 +47,6 @@ QString DarkTheme::name()
     return QObject::tr("Dark");
 }
 
-bool DarkTheme::hasColorScheme()
-{
-    return true;
-}
-
 QPalette DarkTheme::colorScheme()
 {
     QPalette darkPalette;
@@ -90,6 +86,7 @@ QString DarkTheme::appStyleSheet()
 {
     return "QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }";
 }
+
 QString DarkTheme::tooltip()
 {
     return "";

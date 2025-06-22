@@ -46,11 +46,6 @@ QString BrightTheme::name()
     return QObject::tr("Bright");
 }
 
-bool BrightTheme::hasColorScheme()
-{
-    return true;
-}
-
 QPalette BrightTheme::colorScheme()
 {
     QPalette brightPalette;

@@ -1,0 +1,268 @@
+{
+	"$schema": "https://cmake.org/cmake/help/latest/_downloads/3e2d73bff478d88a7de0de736ba5e361/schema.json",
+	"version": 8,
+	"include": [
+		"commonPresets.json"
+	],
+	"configurePresets": [
+		{
+			"name": "macos_base",
+			"hidden": true,
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Darwin"
+			},
+			"generator": "Ninja"
+		},
+		{
+			"name": "macos_universal_base",
+			"hidden": true,
+			"inherits": [
+				"macos_base"
+			],
+			"cacheVariables": {
+				"CMAKE_OSX_ARCHITECTURES": "x86_64;arm64"
+			}
+		},
+		{
+			"name": "macos_debug",
+			"inherits": [
+				"base_debug",
+				"macos_base"
+			],
+			"displayName": "macOS (Debug)"
+		},
+		{
+			"name": "macos_release",
+			"inherits": [
+				"base_release",
+				"macos_base"
+			],
+			"displayName": "macOS (Release)"
+		},
+		{
+			"name": "macos_universal_debug",
+			"inherits": [
+				"base_debug",
+				"macos_universal_base"
+			],
+			"displayName": "macOS (Universal Binary, Debug)"
+		},
+		{
+			"name": "macos_universal_release",
+			"inherits": [
+				"base_release",
+				"macos_universal_base"
+			],
+			"displayName": "macOS (Universal Binary, Release)"
+		},
+		{
+			"name": "macos_ci",
+			"inherits": [
+				"base_ci",
+				"macos_universal_base"
+			],
+			"displayName": "macOS (CI)"
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "macos_base",
+			"hidden": true,
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Darwin"
+			}
+		},
+		{
+			"name": "macos_debug",
+			"inherits": [
+				"macos_base"
+			],
+			"displayName": "macOS (Debug)",
+			"configurePreset": "macos_debug"
+		},
+		{
+			"name": "macos_release",
+			"inherits": [
+				"macos_base"
+			],
+			"displayName": "macOS (Release)",
+			"configurePreset": "macos_release"
+		},
+		{
+			"name": "macos_universal_debug",
+			"inherits": [
+				"macos_base"
+			],
+			"displayName": "macOS (Universal Binary, Debug)",
+			"configurePreset": "macos_universal_debug"
+		},
+		{
+			"name": "macos_universal_release",
+			"inherits": [
+				"macos_base"
+			],
+			"displayName": "macOS (Universal Binary, Release)",
+			"configurePreset": "macos_universal_release"
+		},
+		{
+			"name": "macos_ci",
+			"inherits": [
+				"macos_base"
+			],
+			"displayName": "macOS (CI)",
+			"configurePreset": "macos_ci"
+		}
+	],
+	"testPresets": [
+		{
+			"name": "macos_base",
+			"hidden": true,
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Darwin"
+			}
+		},
+		{
+			"name": "macos_debug",
+			"inherits": [
+				"base_debug",
+				"macos_base"
+			],
+			"displayName": "MacOS (Debug)",
+			"configurePreset": "macos_debug"
+		},
+		{
+			"name": "macos_release",
+			"inherits": [
+				"base_release",
+				"macos_base"
+			],
+			"displayName": "macOS (Release)",
+			"configurePreset": "macos_release"
+		},
+		{
+			"name": "macos_universal_debug",
+			"inherits": [
+				"base_debug",
+				"macos_base"
+			],
+			"displayName": "MacOS (Universal Binary, Debug)",
+			"configurePreset": "macos_universal_debug"
+		},
+		{
+			"name": "macos_universal_release",
+			"inherits": [
+				"base_release",
+				"macos_base"
+			],
+			"displayName": "macOS (Universal Binary, Release)",
+			"configurePreset": "macos_universal_release"
+		},
+		{
+			"name": "macos_ci",
+			"inherits": [
+				"base_release",
+				"macos_base"
+			],
+			"displayName": "macOS (CI)",
+			"configurePreset": "macos_ci"
+		}
+	],
+	"workflowPresets": [
+		{
+			"name": "macos_debug",
+			"displayName": "macOS (Debug)",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "macos_debug"
+				},
+				{
+					"type": "build",
+					"name": "macos_debug"
+				},
+				{
+					"type": "test",
+					"name": "macos_debug"
+				}
+			]
+		},
+		{
+			"name": "macos",
+			"displayName": "macOS (Release)",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "macos_release"
+				},
+				{
+					"type": "build",
+					"name": "macos_release"
+				},
+				{
+					"type": "test",
+					"name": "macos_release"
+				}
+			]
+		},
+		{
+			"name": "macos_universal_debug",
+			"displayName": "macOS (Universal Binary, Debug)",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "macos_universal_debug"
+				},
+				{
+					"type": "build",
+					"name": "macos_universal_debug"
+				},
+				{
+					"type": "test",
+					"name": "macos_universal_debug"
+				}
+			]
+		},
+		{
+			"name": "macos_universal",
+			"displayName": "macOS (Universal Binary, Release)",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "macos_universal_release"
+				},
+				{
+					"type": "build",
+					"name": "macos_universal_release"
+				},
+				{
+					"type": "test",
+					"name": "macos_universal_release"
+				}
+			]
+		},
+		{
+			"name": "macos_ci",
+			"displayName": "macOS (CI)",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "macos_ci"
+				},
+				{
+					"type": "build",
+					"name": "macos_ci"
+				},
+				{
+					"type": "test",
+					"name": "macos_ci"
+				}
+			]
+		}
+	]
+}

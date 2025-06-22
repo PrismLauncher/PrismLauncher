@@ -166,7 +166,7 @@ void MacSparkleUpdater::setAllowedChannels(const QSet<QString>& channels) {
     QString channelsConfig = "";
     // Convert QSet<QString> -> NSSet<NSString>
     NSMutableSet<NSString*>* nsChannels = [NSMutableSet setWithCapacity:channels.count()];
-    foreach (const QString channel, channels) {
+    for (const QString& channel : channels) {
         [nsChannels addObject:channel.toNSString()];
         channelsConfig += channel + " ";
     }

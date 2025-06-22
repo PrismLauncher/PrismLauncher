@@ -41,7 +41,6 @@
 #include <Application.h>
 #include <translations/TranslationsModel.h>
 #include "java/JavaChecker.h"
-#include "ui/ColorCache.h"
 #include "ui/pages/BasePage.h"
 
 class QTextCharFormat;
@@ -58,8 +57,8 @@ class LauncherPage : public QWidget, public BasePage {
     explicit LauncherPage(QWidget* parent = 0);
     ~LauncherPage();
 
-    QString displayName() const override { return tr("Launcher"); }
-    QIcon icon() const override { return APPLICATION->getThemedIcon("launcher"); }
+    QString displayName() const override { return tr("General"); }
+    QIcon icon() const override { return APPLICATION->getThemedIcon("settings"); }
     QString id() const override { return "launcher-settings"; }
     QString helpPage() const override { return "Launcher-settings"; }
     bool apply() override;
@@ -74,26 +73,10 @@ class LauncherPage : public QWidget, public BasePage {
     void on_modsDirBrowseBtn_clicked();
     void on_iconsDirBrowseBtn_clicked();
     void on_downloadsDirBrowseBtn_clicked();
+    void on_javaDirBrowseBtn_clicked();
     void on_skinsDirBrowseBtn_clicked();
-    void on_metadataDisableBtn_clicked();
-
-    /*!
-     * Updates the font preview
-     */
-    void refreshFontPreview();
+    void on_metadataEnableBtn_clicked();
 
    private:
     Ui::LauncherPage* ui;
-
-    /*!
-     * Stores the currently selected update channel.
-     */
-    QString m_currentUpdateChannel;
-
-    // default format for the font preview...
-    QTextCharFormat* defaultFormat;
-
-    std::unique_ptr<LogColorCache> m_colors;
-
-    std::shared_ptr<TranslationsModel> m_languageModel;
 };

@@ -82,6 +82,7 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
    private slots:
     void on_iconButton_clicked();
     void on_instNameTextBox_textChanged(const QString& arg1);
+    void selectedPageChanged(BasePage* previous, BasePage* selected);
 
    private:
     Ui::NewInstanceDialog* ui = nullptr;
@@ -97,6 +98,8 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
     QString importIconName;
 
     QString importVersion;
+
+    QString m_searchTerm;
 
     void importIconNow();
 };

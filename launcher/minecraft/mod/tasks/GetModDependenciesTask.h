@@ -19,7 +19,6 @@
 #pragma once
 
 #include <QDir>
-#include <QEventLoop>
 #include <QList>
 #include <QVariant>
 #include <functional>
@@ -61,10 +60,7 @@ class GetModDependenciesTask : public SequentialTask {
         std::shared_ptr<ResourceAPI> api;
     };
 
-    explicit GetModDependenciesTask(QObject* parent,
-                                    BaseInstance* instance,
-                                    ModFolderModel* folder,
-                                    QList<std::shared_ptr<PackDependency>> selected);
+    explicit GetModDependenciesTask(BaseInstance* instance, ModFolderModel* folder, QList<std::shared_ptr<PackDependency>> selected);
 
     auto getDependecies() const -> QList<std::shared_ptr<PackDependency>> { return m_pack_dependencies; }
     QHash<QString, PackDependencyExtraInfo> getExtraInfo();

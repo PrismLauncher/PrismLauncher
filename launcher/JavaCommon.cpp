@@ -41,7 +41,9 @@
 
 bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget* parent)
 {
-    if (jvmargs.contains("-XX:PermSize=") || jvmargs.contains(QRegularExpression("-Xm[sx]")) || jvmargs.contains("-XX-MaxHeapSize") ||
+    static const QRegularExpression s_memRegex("-Xm[sx]");
+    static const QRegularExpression s_versionRegex("-version:.*");
+    if (jvmargs.contains("-XX:PermSize=") || jvmargs.contains(s_memRegex) || jvmargs.contains("-XX-MaxHeapSize") ||
         jvmargs.contains("-XX:InitialHeapSize")) {
         auto warnStr = QObject::tr(
             "You tried to manually set a JVM memory option (using \"-XX:PermSize\", \"-XX-MaxHeapSize\", \"-XX:InitialHeapSize\", \"-Xmx\" "
@@ -52,7 +54,7 @@ bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget* parent)
         return false;
     }
     // block lunacy with passing required version to the JVM
-    if (jvmargs.contains(QRegularExpression("-version:.*"))) {
+    if (jvmargs.contains(s_versionRegex)) {
         auto warnStr = QObject::tr(
             "You tried to pass required Java version argument to the JVM (using \"-version:xxx\"). This is not safe and will not be "
             "allowed.\n"
@@ -63,7 +65,7 @@ bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget* parent)
     return true;
 }
 
-void JavaCommon::javaWasOk(QWidget* parent, const JavaCheckResult& result)
+void JavaCommon::javaWasOk(QWidget* parent, const JavaChecker::Result& result)
 {
     QString text;
     text += QObject::tr(
@@ -79,7 +81,7 @@ void JavaCommon::javaWasOk(QWidget* parent, const JavaCheckResult& result)
     CustomMessageBox::selectable(parent, QObject::tr("Java test success"), text, QMessageBox::Information)->show();
 }
 
-void JavaCommon::javaArgsWereBad(QWidget* parent, const JavaCheckResult& result)
+void JavaCommon::javaArgsWereBad(QWidget* parent, const JavaChecker::Result& result)
 {
     auto htmlError = result.errorLog;
     QString text;
@@ -89,11 +91,11 @@ void JavaCommon::javaArgsWereBad(QWidget* parent, const JavaCheckResult& result)
     CustomMessageBox::selectable(parent, QObject::tr("Java test failure"), text, QMessageBox::Warning)->show();
 }
 
-void JavaCommon::javaBinaryWasBad(QWidget* parent, const JavaCheckResult& result)
+void JavaCommon::javaBinaryWasBad(QWidget* parent, const JavaChecker::Result& result)
 {
     QString text;
     text += QObject::tr(
-        "The specified Java binary didn't work.<br />You should use the auto-detect feature, "
+        "The specified Java binary didn't work.<br />You should press 'Detect', "
         "or set the path to the Java executable.<br />");
     CustomMessageBox::selectable(parent, QObject::tr("Java test failure"), text, QMessageBox::Warning)->show();
 }
@@ -116,34 +118,26 @@ void JavaCommon::TestCheck::run()
         emit finished();
         return;
     }
-    checker.reset(new JavaChecker());
+    checker.reset(new JavaChecker(m_path, "", 0, 0, 0, 0));
     connect(checker.get(), &JavaChecker::checkFinished, this, &JavaCommon::TestCheck::checkFinished);
-    checker->m_path = m_path;
-    checker->performCheck();
+    checker->start();
 }
 
-void JavaCommon::TestCheck::checkFinished(JavaCheckResult result)
+void JavaCommon::TestCheck::checkFinished(const JavaChecker::Result& result)
 {
-    if (result.validity != JavaCheckResult::Validity::Valid) {
+    if (result.validity != JavaChecker::Result::Validity::Valid) {
         javaBinaryWasBad(m_parent, result);
         emit finished();
         return;
     }
-    checker.reset(new JavaChecker());
+    checker.reset(new JavaChecker(m_path, m_args, m_maxMem, m_maxMem, result.javaVersion.requiresPermGen() ? m_permGen : 0, 0));
     connect(checker.get(), &JavaChecker::checkFinished, this, &JavaCommon::TestCheck::checkFinishedWithArgs);
-    checker->m_path = m_path;
-    checker->m_args = m_args;
-    checker->m_minMem = m_minMem;
-    checker->m_maxMem = m_maxMem;
-    if (result.javaVersion.requiresPermGen()) {
-        checker->m_permGen = m_permGen;
-    }
-    checker->performCheck();
+    checker->start();
 }
 
-void JavaCommon::TestCheck::checkFinishedWithArgs(JavaCheckResult result)
+void JavaCommon::TestCheck::checkFinishedWithArgs(const JavaChecker::Result& result)
 {
-    if (result.validity == JavaCheckResult::Validity::Valid) {
+    if (result.validity == JavaChecker::Result::Validity::Valid) {
         javaWasOk(m_parent, result);
         emit finished();
         return;

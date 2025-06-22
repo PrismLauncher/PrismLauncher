@@ -48,18 +48,21 @@
 #include "gamemode_client.h"
 #endif
 
-LauncherPartLaunch::LauncherPartLaunch(LaunchTask* parent) : LaunchStep(parent)
+LauncherPartLaunch::LauncherPartLaunch(LaunchTask* parent)
+    : LaunchStep(parent)
+    , m_process(parent->instance()->getJavaVersion().defaultsToUtf8() ? QTextCodec::codecForName("UTF-8") : QTextCodec::codecForLocale())
 {
-    auto instance = parent->instance();
-    if (instance->settings()->get("CloseAfterLaunch").toBool()) {
+    if (parent->instance()->settings()->get("CloseAfterLaunch").toBool()) {
+        static const QRegularExpression s_settingUser(".*Setting user.+", QRegularExpression::CaseInsensitiveOption);
         std::shared_ptr<QMetaObject::Connection> connection{ new QMetaObject::Connection };
-        *connection = connect(&m_process, &LoggedProcess::log, this, [=](QStringList lines, [[maybe_unused]] MessageLevel::Enum level) {
-            qDebug() << lines;
-            if (lines.filter(QRegularExpression(".*Setting user.+", QRegularExpression::CaseInsensitiveOption)).length() != 0) {
-                APPLICATION->closeAllWindows();
-                disconnect(*connection);
-            }
-        });
+        *connection = connect(&m_process, &LoggedProcess::log, this,
+                              [connection](const QStringList& lines, [[maybe_unused]] MessageLevel::Enum level) {
+                                  qDebug() << lines;
+                                  if (lines.filter(s_settingUser).length() != 0) {
+                                      APPLICATION->closeAllWindows();
+                                      disconnect(*connection);
+                                  }
+                              });
     }
 
     connect(&m_process, &LoggedProcess::log, this, &LauncherPartLaunch::logLines);
@@ -77,10 +80,9 @@ void LauncherPartLaunch::executeTask()
     }
 
     auto instance = m_parent->instance();
-    std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
 
     QString legacyJarPath;
-    if (minecraftInstance->getLauncher() == "legacy" || minecraftInstance->shouldApplyOnlineFixes()) {
+    if (instance->getLauncher() == "legacy" || instance->shouldApplyOnlineFixes()) {
         legacyJarPath = APPLICATION->getJarPath("NewLaunchLegacy.jar");
         if (legacyJarPath.isEmpty()) {
             const char* reason = QT_TR_NOOP("Legacy launcher library could not be found. Please check your installation.");
@@ -90,8 +92,8 @@ void LauncherPartLaunch::executeTask()
         }
     }
 
-    m_launchScript = minecraftInstance->createLaunchScript(m_session, m_serverToJoin);
-    QStringList args = minecraftInstance->javaArguments();
+    m_launchScript = instance->createLaunchScript(m_session, m_targetToJoin);
+    QStringList args = instance->javaArguments();
     QString allArgs = args.join(", ");
     emit logLine("Java Arguments:\n[" + m_parent->censorPrivateInfo(allArgs) + "]\n\n", MessageLevel::Launcher);
 
@@ -102,13 +104,13 @@ void LauncherPartLaunch::executeTask()
     // make detachable - this will keep the process running even if the object is destroyed
     m_process.setDetachable(true);
 
-    auto classPath = minecraftInstance->getClassPath();
+    auto classPath = instance->getClassPath();
     classPath.prepend(jarPath);
 
     if (!legacyJarPath.isEmpty())
         classPath.prepend(legacyJarPath);
 
-    auto natPath = minecraftInstance->getNativePath();
+    auto natPath = instance->getNativePath();
 #ifdef Q_OS_WIN
     natPath = FS::getPathNameInLocal8bit(natPath);
 #endif
@@ -130,6 +132,7 @@ void LauncherPartLaunch::executeTask()
 
     QString wrapperCommandStr = instance->getWrapperCommand().trimmed();
     if (!wrapperCommandStr.isEmpty()) {
+        wrapperCommandStr = m_parent->substituteVariables(wrapperCommandStr);
         auto wrapperArgs = Commandline::splitArgs(wrapperCommandStr);
         auto wrapperCommand = wrapperArgs.takeFirst();
         auto realWrapperCommand = QStandardPaths::findExecutable(wrapperCommand);
@@ -169,6 +172,7 @@ void LauncherPartLaunch::on_state(LoggedProcess::State state)
         case LoggedProcess::Aborted:
         case LoggedProcess::Crashed: {
             m_parent->setPid(-1);
+            m_parent->instance()->setMinecraftRunning(false);
             emitFailed(tr("Game crashed."));
             return;
         }

@@ -77,7 +77,7 @@ QString getCreditsHtml()
     stream << QString("<p>d-513 %1</p>\n").arg(getGitHub("d-513"));
     stream << QString("<p>txtsd %1</p>\n").arg(getWebsite("https://ihavea.quest"));
     stream << QString("<p>timoreo %1</p>\n").arg(getGitHub("timoreo22"));
-    stream << QString("<p>Ezekiel Smith (ZekeSmith) %1</p>\n").arg(getGitHub("ZekeSmith"));
+    stream << QString("<p>ZekeZ %1</p>\n").arg(getGitHub("ZekeZDev"));
     stream << QString("<p>cozyGalvinism %1</p>\n").arg(getGitHub("cozyGalvinism"));
     stream << QString("<p>DioEgizio %1</p>\n").arg(getGitHub("DioEgizio"));
     stream << QString("<p>flowln %1</p>\n").arg(getGitHub("flowln"));
@@ -101,7 +101,7 @@ QString getCreditsHtml()
 
     stream << "<h3>" << QObject::tr("With thanks to", "About Credits") << "</h3>\n";
     stream << QString("<p>Boba %1</p>\n").arg(getWebsite("https://bobaonline.neocities.org/"));
-    stream << QString("<p>Davi Rafael %1</p>\n").arg(getWebsite("https://auti.one/"));
+    stream << QString("<p>AutiOne %1</p>\n").arg(getWebsite("https://auti.one/"));
     stream << QString("<p>Fulmine %1</p>\n").arg(getWebsite("https://fulmine.xyz/"));
     stream << QString("<p>ely %1</p>\n").arg(getGitHub("elyrodso"));
     stream << QString("<p>gon sawa %1</p>\n").arg(getGitHub("gonsawa"));
@@ -177,7 +177,7 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent), ui(new Ui::AboutDia
 
     ui->copyLabel->setText(BuildConfig.LAUNCHER_COPYRIGHT);
 
-    connect(ui->closeButton, SIGNAL(clicked()), SLOT(close()));
+    connect(ui->closeButton, &QPushButton::clicked, this, &AboutDialog::close);
 
     connect(ui->aboutQt, &QPushButton::clicked, &QApplication::aboutQt);
 }

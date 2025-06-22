@@ -1,0 +1,81 @@
+name: Setup Dependencies
+description: Install and setup dependencies for building Prism Launcher
+
+inputs:
+  build-type:
+    description: Type for the build
+    required: true
+    default: Debug
+  artifact-name:
+    description: Name of the uploaded artifact
+    required: true
+  msystem:
+    description: MSYS2 subsystem to use
+    required: false
+  vcvars-arch:
+    description: Visual Studio architecture to use
+    required: false
+  qt-architecture:
+    description: Qt architecture
+    required: false
+  qt-version:
+    description: Version of Qt to use
+    required: true
+    default: 6.8.1
+
+outputs:
+  build-type:
+    description: Type of build used
+    value: ${{ inputs.build-type }}
+  qt-version:
+    description: Version of Qt used
+    value: ${{ inputs.qt-version }}
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup Linux dependencies
+      if: ${{ runner.os == 'Linux' }}
+      uses: ./.github/actions/setup-dependencies/linux
+
+    - name: Setup macOS dependencies
+      if: ${{ runner.os == 'macOS' }}
+      uses: ./.github/actions/setup-dependencies/macos
+
+    - name: Setup Windows dependencies
+      if: ${{ runner.os == 'Windows' }}
+      uses: ./.github/actions/setup-dependencies/windows
+      with:
+        build-type: ${{ inputs.build-type }}
+        msystem: ${{ inputs.msystem }}
+        vcvars-arch: ${{ inputs.vcvars-arch }}
+
+    # TODO(@getchoo): Get this working on MSYS2!
+    - name: Setup ccache
+      if: ${{ (runner.os != 'Windows' || inputs.msystem == '') && inputs.build-type == 'Debug' }}
+      uses: hendrikmuhs/ccache-action@v1.2.18
+      with:
+        variant: sccache
+        create-symlink: ${{ runner.os != 'Windows' }}
+        key: ${{ runner.os }}-${{ runner.arch }}-${{ inputs.artifact-name }}-sccache
+
+    - name: Use ccache on debug builds
+      if: ${{ inputs.build-type == 'Debug' }}
+      shell: bash
+      env:
+        # Only use ccache on MSYS2
+        CCACHE_VARIANT: ${{ (runner.os == 'Windows' && inputs.msystem != '') && 'ccache' || 'sccache' }}
+      run: |
+        echo "CMAKE_C_COMPILER_LAUNCHER=$CCACHE_VARIANT" >> "$GITHUB_ENV"
+        echo "CMAKE_CXX_COMPILER_LAUNCHER=$CCACHE_VARIANT" >> "$GITHUB_ENV"
+
+    - name: Install Qt
+      if: ${{ inputs.msystem == '' }}
+      uses: jurplel/install-qt-action@v4
+      with:
+        aqtversion: "==3.1.*"
+        version: ${{ inputs.qt-version }}
+        arch: ${{ inputs.qt-architecture }}
+        modules: qt5compat qtimageformats qtnetworkauth
+        cache: ${{ inputs.build-type == 'Debug' }}

@@ -75,6 +75,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
     connect(ui->actionRemoveItem, &QAction::triggered, this, &ExternalResourcesPage::removeItem);
     connect(ui->actionEnableItem, &QAction::triggered, this, &ExternalResourcesPage::enableItem);
     connect(ui->actionDisableItem, &QAction::triggered, this, &ExternalResourcesPage::disableItem);
+    connect(ui->actionViewHomepage, &QAction::triggered, this, &ExternalResourcesPage::viewHomepage);
     connect(ui->actionViewConfigs, &QAction::triggered, this, &ExternalResourcesPage::viewConfigs);
     connect(ui->actionViewFolder, &QAction::triggered, this, &ExternalResourcesPage::viewFolder);
 
@@ -82,16 +83,28 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
     connect(ui->treeView, &ModListView::activated, this, &ExternalResourcesPage::itemActivated);
 
     auto selection_model = ui->treeView->selectionModel();
-    connect(selection_model, &QItemSelectionModel::currentChanged, this, &ExternalResourcesPage::current);
+
+    connect(selection_model, &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
+        if (!current.isValid()) {
+            ui->frame->clear();
+            return;
+        }
+
+        updateFrame(current, previous);
+    });
+
     auto updateExtra = [this]() {
         if (updateExtraInfo)
             updateExtraInfo(id(), extraHeaderInfoString());
     };
+
     connect(selection_model, &QItemSelectionModel::selectionChanged, this, updateExtra);
     connect(model.get(), &ResourceFolderModel::updateFinished, this, updateExtra);
     connect(model.get(), &ResourceFolderModel::parseFinished, this, updateExtra);
 
-    connect(ui->filterEdit, &QLineEdit::textChanged, this, &ExternalResourcesPage::filterTextChanged);
+    connect(selection_model, &QItemSelectionModel::selectionChanged, this, [this] { updateActions(); });
+    connect(m_model.get(), &ResourceFolderModel::rowsInserted, this, [this] { updateActions(); });
+    connect(m_model.get(), &ResourceFolderModel::rowsRemoved, this, [this] { updateActions(); });
 
     auto viewHeader = ui->treeView->header();
     viewHeader->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -100,6 +113,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
 
     m_model->loadColumns(ui->treeView);
     connect(ui->treeView->header(), &QHeaderView::sectionResized, this, [this] { m_model->saveColumns(ui->treeView); });
+    connect(ui->filterEdit, &QLineEdit::textChanged, this, &ExternalResourcesPage::filterTextChanged);
 }
 
 ExternalResourcesPage::~ExternalResourcesPage()
@@ -133,12 +147,9 @@ void ExternalResourcesPage::openedImpl()
     m_model->startWatching();
 
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
-    if (!APPLICATION->settings()->contains(setting_name))
-        m_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
-    else
-        m_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
+    m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
-    ui->actionsToolbar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
+    ui->actionsToolbar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
 
     // Enable the symbolic link warning when the folder is a symbolic link
     ui->isSymlinkWarning->setVisible(FS::isSymLink(m_model->dir().absolutePath()));
@@ -148,7 +159,7 @@ void ExternalResourcesPage::closedImpl()
 {
     m_model->stopWatching();
 
-    m_wide_bar_setting->set(ui->actionsToolbar->getVisibilityState());
+    m_wide_bar_setting->set(QString::fromUtf8(ui->actionsToolbar->getVisibilityState().toBase64()));
 }
 
 void ExternalResourcesPage::retranslate()
@@ -293,6 +304,16 @@ void ExternalResourcesPage::disableItem()
     m_model->setResourceEnabled(selection.indexes(), EnableAction::DISABLE);
 }
 
+void ExternalResourcesPage::viewHomepage()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    for (auto resource : m_model->selectedResources(selection)) {
+        auto url = resource->homepage();
+        if (!url.isEmpty())
+            DesktopServices::openUrl(url);
+    }
+}
+
 void ExternalResourcesPage::viewConfigs()
 {
     DesktopServices::openPath(m_instance->instanceConfigFolder(), true);
@@ -303,23 +324,32 @@ void ExternalResourcesPage::viewFolder()
     DesktopServices::openPath(m_model->dir().absolutePath(), true);
 }
 
-bool ExternalResourcesPage::current(const QModelIndex& current, const QModelIndex& previous)
+void ExternalResourcesPage::updateActions()
 {
-    if (!current.isValid()) {
-        ui->frame->clear();
-        return false;
-    }
+    const bool hasSelection = ui->treeView->selectionModel()->hasSelection();
+    const QModelIndexList selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    const QList<Resource*> selectedResources = m_model->selectedResources(selection);
 
-    return onSelectionChanged(current, previous);
+    ui->actionUpdateItem->setEnabled(!m_model->empty());
+    ui->actionResetItemMetadata->setEnabled(hasSelection);
+
+    ui->actionChangeVersion->setEnabled(selectedResources.size() == 1 && selectedResources[0]->metadata() != nullptr);
+
+    ui->actionRemoveItem->setEnabled(hasSelection);
+    ui->actionEnableItem->setEnabled(hasSelection);
+    ui->actionDisableItem->setEnabled(hasSelection);
+
+    ui->actionViewHomepage->setEnabled(hasSelection && std::any_of(selectedResources.begin(), selectedResources.end(),
+                                                                   [](Resource* resource) { return !resource->homepage().isEmpty(); }));
+    ui->actionExportMetadata->setEnabled(!m_model->empty());
 }
 
-bool ExternalResourcesPage::onSelectionChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
+void ExternalResourcesPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
     Resource const& resource = m_model->at(row);
     ui->frame->updateWithResource(resource);
-    return true;
 }
 
 QString ExternalResourcesPage::extraHeaderInfoString()

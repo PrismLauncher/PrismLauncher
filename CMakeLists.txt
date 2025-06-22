@@ -78,19 +78,30 @@ else()
     # ATL's pack list needs more than the default 1 Mib stack on windows
     if(WIN32)
         set(CMAKE_EXE_LINKER_FLAGS "-Wl,--stack,8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+
+        # -ffunction-sections and -fdata-sections help reduce binary size
+        # -mguard=cf enables Control Flow Guard
+        # TODO: Look into -gc-sections to further reduce binary size
+        foreach(lang C CXX)
+            set("CMAKE_${lang}_FLAGS_RELEASE" "-ffunction-sections -fdata-sections -mguard=cf")
+        endforeach()
     endif()
 endif()
 
-# Fix build with Qt 5.13
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_DISABLE_DEPRECATED_BEFORE=0x050C00")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_WARN_DEPRECATED_UP_TO=0x060200")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_DISABLE_DEPRECATED_UP_TO=0x060000")
 
 # Fix aarch64 build for toml++
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTOML_ENABLE_FLOAT16=0")
 
 # set CXXFLAGS for build targets
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -D_FORTIFY_SOURCE=2 ${CMAKE_CXX_FLAGS_RELEASE}")
+
+# Export compile commands for debug builds if we can (useful in LSPs like clangd)
+# https://cmake.org/cmake/help/v3.31/variable/CMAKE_EXPORT_COMPILE_COMMANDS.html
+if(CMAKE_GENERATOR STREQUAL "Unix Makefiles" OR CMAKE_GENERATOR STREQUAL "Ninja" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+endif()
 
 option(DEBUG_ADDRESS_SANITIZER "Enable Address Sanitizer in Debug builds" OFF)
 
@@ -99,21 +110,21 @@ if ((CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebI
     message(STATUS "Address Sanitizer enabled for Debug builds, Turn it off with -DDEBUG_ADDRESS_SANITIZER=off")
     if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
         if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
-            # using clang with clang-cl front end 
+            # using clang with clang-cl front end
             message(STATUS "Address Sanitizer available on Clang MSVC frontend")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address /Oy-")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address /Oy-")
         else()
             # AppleClang and Clang
             message(STATUS "Address Sanitizer available on Clang")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
-            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fno-sanitize-recover=null")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fno-sanitize-recover=null")
         endif()
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         # GCC
         message(STATUS "Address Sanitizer available on GCC")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fno-sanitize-recover")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fno-sanitize-recover")
         link_libraries("asan")
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
         message(STATUS "Address Sanitizer available on MSVC")
@@ -176,14 +187,17 @@ endif()
 set(Launcher_NEWS_RSS_URL "https://prismlauncher.org/feed/feed.xml" CACHE STRING "URL to fetch Prism Launcher's news RSS feed from.")
 set(Launcher_NEWS_OPEN_URL "https://prismlauncher.org/news" CACHE STRING "URL that gets opened when the user clicks 'More News'")
 set(Launcher_HELP_URL "https://prismlauncher.org/wiki/help-pages/%1" CACHE STRING "URL (with arg %1 to be substituted with page-id) that gets opened when the user requests help")
+set(Launcher_LOGIN_CALLBACK_URL "https://prismlauncher.org/successful-login" CACHE STRING "URL that gets opened when the user successfully logins.")
+set(Launcher_FMLLIBS_BASE_URL "https://files.prismlauncher.org/fmllibs/" CACHE STRING "URL for FML Libraries.")
 
 ######## Set version numbers ########
-set(Launcher_VERSION_MAJOR 9)
+set(Launcher_VERSION_MAJOR 10)
 set(Launcher_VERSION_MINOR 0)
+set(Launcher_VERSION_PATCH 0)
 
-set(Launcher_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}")
-set(Launcher_VERSION_NAME4 "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.0.0")
-set(Launcher_VERSION_NAME4_COMMA "${Launcher_VERSION_MAJOR},${Launcher_VERSION_MINOR},0,0")
+set(Launcher_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_PATCH}")
+set(Launcher_VERSION_NAME4 "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_PATCH}.0")
+set(Launcher_VERSION_NAME4_COMMA "${Launcher_VERSION_MAJOR},${Launcher_VERSION_MINOR},${Launcher_VERSION_PATCH},0")
 
 # Build platform.
 set(Launcher_BUILD_PLATFORM "unknown" CACHE STRING "A short string identifying the platform that this build was built for. Only used to display in the about dialog.")
@@ -205,6 +219,7 @@ set(Launcher_BUG_TRACKER_URL "https://github.com/PrismLauncher/PrismLauncher/iss
 
 # Translations Platform URL
 set(Launcher_TRANSLATIONS_URL "https://hosted.weblate.org/projects/prismlauncher/launcher/" CACHE STRING "URL for the translations platform.")
+set(Launcher_TRANSLATION_FILES_URL "https://i18n.prismlauncher.org/" CACHE STRING "URL for the translations files.")
 
 # Matrix Space
 set(Launcher_MATRIX_URL "https://prismlauncher.org/matrix" CACHE STRING "URL to the Matrix Space")
@@ -218,6 +233,19 @@ set(Launcher_SUBREDDIT_URL "https://prismlauncher.org/reddit" CACHE STRING "URL 
 # Builds
 set(Launcher_FORCE_BUNDLED_LIBS OFF CACHE BOOL "Prevent using system libraries, if they are available as submodules")
 set(Launcher_QT_VERSION_MAJOR "6" CACHE STRING "Major Qt version to build against")
+
+# Java downloader
+set(Launcher_ENABLE_JAVA_DOWNLOADER_DEFAULT ON)
+
+# Although we recommend enabling this, we cannot guarantee binary compatibility on
+# differing Linux/BSD/etc distributions. Downstream packagers should be explicitly opt-ing into this
+# feature if they know it will work with their distribution.
+if(UNIX AND NOT APPLE)
+    set(Launcher_ENABLE_JAVA_DOWNLOADER_DEFAULT OFF)
+endif()
+
+# Java downloader
+option(Launcher_ENABLE_JAVA_DOWNLOADER "Build the java downloader feature" ${Launcher_ENABLE_JAVA_DOWNLOADER_DEFAULT})
 
 # Native libraries
 if(UNIX AND APPLE)
@@ -280,23 +308,11 @@ endif()
 
 # Find the required Qt parts
 include(QtVersionlessBackport)
-if(Launcher_QT_VERSION_MAJOR EQUAL 5)
-    set(QT_VERSION_MAJOR 5)
-    find_package(Qt5 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml NetworkAuth)
-
-    if(NOT Launcher_FORCE_BUNDLED_LIBS)
-        find_package(QuaZip-Qt5 1.3 QUIET)
-    endif()
-    if (NOT QuaZip-Qt5_FOUND)
-        set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR} CACHE STRING "Qt version to use (4, 5 or 6), defaults to ${QT_VERSION_MAJOR}" FORCE)
-        set(FORCE_BUNDLED_QUAZIP 1)
-    endif()
-
-    # Qt 6 sets these by default. Notably causes Windows APIs to use UNICODE strings.
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE")
-elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
+if(Launcher_QT_VERSION_MAJOR EQUAL 6)
     set(QT_VERSION_MAJOR 6)
-    find_package(Qt6 REQUIRED COMPONENTS Core CoreTools Widgets Concurrent Network Test Xml Core5Compat NetworkAuth)
+    find_package(Qt6 REQUIRED COMPONENTS Core CoreTools Widgets Concurrent Network Test Xml Core5Compat NetworkAuth OpenGL)
+    find_package(Qt6 COMPONENTS DBus)
+    list(APPEND Launcher_QT_DBUS Qt6::DBus)
     list(APPEND Launcher_QT_LIBS Qt6::Core5Compat)
 
     if(NOT Launcher_FORCE_BUNDLED_LIBS)
@@ -310,31 +326,21 @@ else()
     message(FATAL_ERROR "Qt version ${Launcher_QT_VERSION_MAJOR} is not supported")
 endif()
 
-if(Launcher_QT_VERSION_MAJOR EQUAL 5)
-    include(ECMQueryQt)
-    ecm_query_qt(QT_PLUGINS_DIR  QT_INSTALL_PLUGINS)
-    ecm_query_qt(QT_LIBS_DIR     QT_INSTALL_LIBS)
-    ecm_query_qt(QT_LIBEXECS_DIR QT_INSTALL_LIBEXECS)
-else()
+if(Launcher_QT_VERSION_MAJOR EQUAL 6)
     set(QT_PLUGINS_DIR  ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_PLUGINS})
     set(QT_LIBS_DIR     ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_LIBS})
     set(QT_LIBEXECS_DIR ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_LIBEXECS})
-endif()
-
-# NOTE: Qt 6 already sets this by default
-if (Qt5_POSITION_INDEPENDENT_CODE)
-    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
 if(NOT Launcher_FORCE_BUNDLED_LIBS)
     # Find toml++
     find_package(tomlplusplus 3.2.0 QUIET)
 
-    # Find ghc_filesystem
-    find_package(ghc_filesystem QUIET)
-
     # Find cmark
     find_package(cmark QUIET)
+
+    # Find qrcodegencpp-cmake
+    find_package(qrcodegencpp QUIET)
 endif()
 
 include(ECMQtDeclareLoggingCategory)
@@ -350,7 +356,7 @@ set(Launcher_ENABLE_UPDATER NO)
 set(Launcher_BUILD_UPDATER NO)
 
 if (NOT APPLE AND (NOT Launcher_UPDATER_GITHUB_REPO STREQUAL "" AND NOT Launcher_BUILD_ARTIFACT STREQUAL ""))
-	set(Launcher_BUILD_UPDATER YES)
+    set(Launcher_BUILD_UPDATER YES)
 endif()
 
 if(NOT (UNIX AND APPLE))
@@ -381,8 +387,8 @@ if(UNIX AND APPLE)
     set(MACOSX_SPARKLE_UPDATE_PUBLIC_KEY "v55ZWWD6QlPoXGV6VLzOTZxZUggWeE51X8cRQyQh6vA=" CACHE STRING "Public key for Sparkle update feed")
     set(MACOSX_SPARKLE_UPDATE_FEED_URL "https://prismlauncher.org/feed/appcast.xml" CACHE STRING "URL for Sparkle update feed")
 
-    set(MACOSX_SPARKLE_DOWNLOAD_URL "https://github.com/sparkle-project/Sparkle/releases/download/2.5.2/Sparkle-2.5.2.tar.xz" CACHE STRING "URL to Sparkle release archive")
-    set(MACOSX_SPARKLE_SHA256 "572dd67ae398a466f19f343a449e1890bac1ef74885b4739f68f979a8a89884b" CACHE STRING "SHA256 checksum for Sparkle release archive")
+    set(MACOSX_SPARKLE_DOWNLOAD_URL "https://github.com/sparkle-project/Sparkle/releases/download/2.6.4/Sparkle-2.6.4.tar.xz" CACHE STRING "URL to Sparkle release archive")
+    set(MACOSX_SPARKLE_SHA256 "50612a06038abc931f16011d7903b8326a362c1074dabccb718404ce8e585f0b" CACHE STRING "SHA256 checksum for Sparkle release archive")
     set(MACOSX_SPARKLE_DIR "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
 
     # directories to look for dependencies
@@ -422,10 +428,10 @@ elseif(UNIX)
         set(PLUGIN_DEST_DIR "plugins")
         set(BUNDLE_DEST_DIR ".")
         set(RESOURCES_DEST_DIR ".")
-    
+
         # Apps to bundle
         set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${Launcher_APP_BINARY_NAME}")
-    
+
         # directories to look for dependencies
         set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
     endif()
@@ -479,7 +485,7 @@ if(FORCE_BUNDLED_ZLIB)
     set(SKIP_INSTALL_ALL ON)
     add_subdirectory(libraries/zlib EXCLUDE_FROM_ALL)
 
-    # On OS where unistd.h exists, zlib's generated header defines `Z_HAVE_UNISTD_H`, while the included header does not. 
+    # On OS where unistd.h exists, zlib's generated header defines `Z_HAVE_UNISTD_H`, while the included header does not.
     # We cannot safely undo the rename on those systems, and they generally have packages for zlib anyway.
     check_include_file(unistd.h NEED_GENERATED_ZCONF)
     if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib/zconf.h.included" AND NOT NEED_GENERATED_ZCONF)
@@ -516,21 +522,29 @@ else()
 endif()
 if(NOT cmark_FOUND)
     message(STATUS "Using bundled cmark")
+    set(ORIGINAL_BUILD_TESTING ${BUILD_TESTING})
     set(BUILD_TESTING 0)
-    set(BUILD_SHARED_LIBS 0) 
+    set(BUILD_SHARED_LIBS 0)
     add_subdirectory(libraries/cmark EXCLUDE_FROM_ALL) # Markdown parser
     add_library(cmark::cmark ALIAS cmark)
+    set(BUILD_TESTING ${ORIGINAL_BUILD_TESTING})
 else()
     message(STATUS "Using system cmark")
 endif()
+if(NOT qrcodegencpp_FOUND)
+    set(QRCODE_SOURCES
+        libraries/qrcodegenerator/cpp/qrcodegen.cpp
+        libraries/qrcodegenerator/cpp/qrcodegen.hpp
+    )
+    add_library(qrcodegenerator STATIC ${QRCODE_SOURCES})
+    target_include_directories(qrcodegenerator PUBLIC "libraries/qrcodegenerator/cpp/" )
+    generate_export_header(qrcodegenerator)
+else()
+    add_library(qrcodegenerator ALIAS qrcodegencpp::qrcodegencpp)
+    message(STATUS "Using system qrcodegencpp-cmake")
+endif()
 add_subdirectory(libraries/gamemode)
 add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API
-if (NOT ghc_filesystem_FOUND)
-    message(STATUS "Using bundled ghc_filesystem")
-    add_subdirectory(libraries/filesystem) # Implementation of std::filesystem for old C++, for usage in old macOS
-else()
-    message(STATUS "Using system ghc_filesystem")
-endif()
 add_subdirectory(libraries/qdcss) # css parser
 
 ############################### Built Artifacts ###############################

@@ -28,7 +28,7 @@ QString toHTML(QList<Mod*> mods, OptionalData extraData)
         auto meta = mod->metadata();
         auto modName = mod->name().toHtmlEscaped();
         if (extraData & Url) {
-            auto url = mod->metaurl().toHtmlEscaped();
+            auto url = mod->homepage().toHtmlEscaped();
             if (!url.isEmpty())
                 modName = QString("<a href=\"%1\">%2</a>").arg(url, modName);
         }
@@ -65,7 +65,7 @@ QString toMarkdown(QList<Mod*> mods, OptionalData extraData)
         auto meta = mod->metadata();
         auto modName = toMarkdownEscaped(mod->name());
         if (extraData & Url) {
-            auto url = mod->metaurl();
+            auto url = mod->homepage();
             if (!url.isEmpty())
                 modName = QString("[%1](%2)").arg(modName, url);
         }
@@ -95,7 +95,7 @@ QString toPlainTXT(QList<Mod*> mods, OptionalData extraData)
 
         auto line = modName;
         if (extraData & Url) {
-            auto url = mod->metaurl();
+            auto url = mod->homepage();
             if (!url.isEmpty())
                 line += QString(" (%1)").arg(url);
         }
@@ -124,7 +124,7 @@ QString toJSON(QList<Mod*> mods, OptionalData extraData)
         QJsonObject line;
         line["name"] = modName;
         if (extraData & Url) {
-            auto url = mod->metaurl();
+            auto url = mod->homepage();
             if (!url.isEmpty())
                 line["url"] = url;
         }
@@ -156,7 +156,7 @@ QString toCSV(QList<Mod*> mods, OptionalData extraData)
 
         data << modName;
         if (extraData & Url)
-            data << mod->metaurl();
+            data << mod->homepage();
         if (extraData & Version) {
             auto ver = mod->version();
             if (ver.isEmpty() && meta != nullptr)
@@ -203,7 +203,8 @@ QString exportToModList(QList<Mod*> mods, QString lineTemplate)
     for (auto mod : mods) {
         auto meta = mod->metadata();
         auto modName = mod->name();
-        auto url = mod->metaurl();
+        auto modID = mod->mod_id();
+        auto url = mod->homepage();
         auto ver = mod->version();
         if (ver.isEmpty() && meta != nullptr)
             ver = meta->version().toString();
@@ -211,6 +212,7 @@ QString exportToModList(QList<Mod*> mods, QString lineTemplate)
         auto filename = mod->fileinfo().fileName();
         lines << QString(lineTemplate)
                      .replace("{name}", modName)
+                     .replace("{mod_id}", modID)
                      .replace("{url}", url)
                      .replace("{version}", ver)
                      .replace("{authors}", authors)

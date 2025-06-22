@@ -40,7 +40,7 @@
 
 #include "Application.h"
 #include "Json.h"
-#include "net/StaticHeaderProxy.h"
+#include "net/RawHeaderProxy.h"
 
 // https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-device-code
 MSADeviceCodeStep::MSADeviceCodeStep(AccountData* data) : AuthStep(data)
@@ -68,18 +68,18 @@ void MSADeviceCodeStep::perform()
     };
     m_response.reset(new QByteArray());
     m_request = Net::Upload::makeByteArray(url, m_response, payload);
-    m_request->addHeaderProxy(new Net::StaticHeaderProxy(headers));
+    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
 
     m_task.reset(new NetJob("MSADeviceCodeStep", APPLICATION->network()));
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
-    connect(m_task.get(), &Task::finished, this, &MSADeviceCodeStep::deviceAutorizationFinished);
+    connect(m_task.get(), &Task::finished, this, &MSADeviceCodeStep::deviceAuthorizationFinished);
 
     m_task->start();
 }
 
-struct DeviceAutorizationResponse {
+struct DeviceAuthorizationResponse {
     QString device_code;
     QString user_code;
     QString verification_uri;
@@ -90,17 +90,17 @@ struct DeviceAutorizationResponse {
     QString error_description;
 };
 
-DeviceAutorizationResponse parseDeviceAutorizationResponse(const QByteArray& data)
+DeviceAuthorizationResponse parseDeviceAuthorizationResponse(const QByteArray& data)
 {
     QJsonParseError err;
     QJsonDocument doc = QJsonDocument::fromJson(data, &err);
     if (err.error != QJsonParseError::NoError) {
-        qWarning() << "Failed to parse device autorization response due to err:" << err.errorString();
+        qWarning() << "Failed to parse device authorization response due to err:" << err.errorString();
         return {};
     }
 
     if (!doc.isObject()) {
-        qWarning() << "Device autorization response is not an object";
+        qWarning() << "Device authorization response is not an object";
         return {};
     }
     auto obj = doc.object();
@@ -111,9 +111,9 @@ DeviceAutorizationResponse parseDeviceAutorizationResponse(const QByteArray& dat
     };
 }
 
-void MSADeviceCodeStep::deviceAutorizationFinished()
+void MSADeviceCodeStep::deviceAuthorizationFinished()
 {
-    auto rsp = parseDeviceAutorizationResponse(*m_response);
+    auto rsp = parseDeviceAuthorizationResponse(*m_response);
     if (!rsp.error.isEmpty() || !rsp.error_description.isEmpty()) {
         qWarning() << "Device authorization failed:" << rsp.error;
         emit finished(AccountTaskState::STATE_FAILED_HARD,
@@ -183,7 +183,7 @@ void MSADeviceCodeStep::authenticateUser()
     };
     m_response.reset(new QByteArray());
     m_request = Net::Upload::makeByteArray(url, m_response, payload);
-    m_request->addHeaderProxy(new Net::StaticHeaderProxy(headers));
+    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
 
     connect(m_request.get(), &Task::finished, this, &MSADeviceCodeStep::authenticationFinished);
 
@@ -208,12 +208,12 @@ AuthenticationResponse parseAuthenticationResponse(const QByteArray& data)
     QJsonParseError err;
     QJsonDocument doc = QJsonDocument::fromJson(data, &err);
     if (err.error != QJsonParseError::NoError) {
-        qWarning() << "Failed to parse device autorization response due to err:" << err.errorString();
+        qWarning() << "Failed to parse device authorization response due to err:" << err.errorString();
         return {};
     }
 
     if (!doc.isObject()) {
-        qWarning() << "Device autorization response is not an object";
+        qWarning() << "Device authorization response is not an object";
         return {};
     }
     auto obj = doc.object();

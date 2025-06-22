@@ -35,10 +35,10 @@
 
 #pragma once
 
+#include <QList>
 #include <QRect>
 #include <QString>
 #include <QStyleOption>
-#include <QVector>
 
 class InstanceView;
 class QPainter;
@@ -61,7 +61,7 @@ struct VisualGroup {
     InstanceView* view = nullptr;
     QString text;
     bool collapsed = false;
-    QVector<VisualRow> rows;
+    QList<VisualRow> rows;
     int firstItemIndex = 0;
     int m_verticalPosition = 0;
 

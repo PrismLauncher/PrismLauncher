@@ -49,7 +49,7 @@ class LoggedProcess : public QProcess {
     enum State { NotRunning, Starting, FailedToStart, Running, Finished, Crashed, Aborted };
 
    public:
-    explicit LoggedProcess(QObject* parent = 0);
+    explicit LoggedProcess(const QTextCodec* output_codec = QTextCodec::codecForLocale(), QObject* parent = 0);
     virtual ~LoggedProcess();
 
     State state() const;
@@ -80,8 +80,8 @@ class LoggedProcess : public QProcess {
     QStringList reprocess(const QByteArray& data, QTextDecoder& decoder);
 
    private:
-    QTextDecoder m_err_decoder = QTextDecoder(QTextCodec::codecForLocale());
-    QTextDecoder m_out_decoder = QTextDecoder(QTextCodec::codecForLocale());
+    QTextDecoder m_err_decoder;
+    QTextDecoder m_out_decoder;
     QString m_leftover_line;
     bool m_killed = false;
     State m_state = NotRunning;

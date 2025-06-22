@@ -1,0 +1,16 @@
+name: Setup macOS dependencies
+
+runs:
+  using: composite
+
+  steps:
+    - name: Install dependencies
+      shell: bash
+      run: |
+        brew update
+        brew install ninja extra-cmake-modules temurin@17
+
+    - name: Set JAVA_HOME
+      shell: bash
+      run: |
+        echo "JAVA_HOME=$(/usr/libexec/java_home -v 17)" >> "$GITHUB_ENV"

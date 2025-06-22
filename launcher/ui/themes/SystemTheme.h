@@ -38,7 +38,7 @@
 
 class SystemTheme : public ITheme {
    public:
-    SystemTheme(QString& themeName, bool isSystemTheme = false);
+    SystemTheme(const QString& styleName, const QPalette& defaultPalette, bool isDefaultTheme);
     virtual ~SystemTheme() {}
     void apply(bool initial) override;
 
@@ -48,13 +48,12 @@ class SystemTheme : public ITheme {
     QString qtTheme() override;
     bool hasStyleSheet() override;
     QString appStyleSheet() override;
-    bool hasColorScheme() override;
     QPalette colorScheme() override;
     double fadeAmount() override;
     QColor fadeColor() override;
 
    private:
-    QPalette colorPalette;
-    QString widgetTheme;
-    QString themeName;
+    QPalette m_colorPalette;
+    QString m_widgetTheme;
+    QString m_themeName;
 };

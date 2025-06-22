@@ -42,7 +42,7 @@
 class MultipleOptionsTask : public ConcurrentTask {
     Q_OBJECT
    public:
-    explicit MultipleOptionsTask(QObject* parent = nullptr, const QString& task_name = "");
+    explicit MultipleOptionsTask(const QString& task_name = "");
     ~MultipleOptionsTask() override = default;
 
    private slots:

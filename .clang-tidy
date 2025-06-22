@@ -1,5 +1,23 @@
 Checks:
   - modernize-use-using
   - readability-avoid-const-params-in-decls
+  - misc-unused-parameters,
+  - readability-identifier-naming
 
-SystemHeaders: false
+# ^ Without unused-parameters the readability-identifier-naming check doesn't cause any warnings.
+
+CheckOptions:
+  - { key: readability-identifier-naming.ClassCase,              value: PascalCase }
+  - { key: readability-identifier-naming.EnumCase,               value: PascalCase }
+  - { key: readability-identifier-naming.FunctionCase,           value: camelCase }
+  - { key: readability-identifier-naming.GlobalVariableCase,     value: camelCase }
+  - { key: readability-identifier-naming.GlobalFunctionCase,     value: camelCase }
+  - { key: readability-identifier-naming.GlobalConstantCase,     value: SCREAMING_SNAKE_CASE }
+  - { key: readability-identifier-naming.MacroDefinitionCase,    value: SCREAMING_SNAKE_CASE }
+  - { key: readability-identifier-naming.ClassMemberCase,        value: camelCase }
+  - { key: readability-identifier-naming.PrivateMemberPrefix,    value: m_ }
+  - { key: readability-identifier-naming.ProtectedMemberPrefix,  value: m_ }
+  - { key: readability-identifier-naming.PrivateStaticMemberPrefix, value: s_ }
+  - { key: readability-identifier-naming.ProtectedStaticMemberPrefix, value: s_ }
+  - { key: readability-identifier-naming.PublicStaticConstantCase, value: SCREAMING_SNAKE_CASE }
+  - { key: readability-identifier-naming.EnumConstantCase,       value: SCREAMING_SNAKE_CASE }

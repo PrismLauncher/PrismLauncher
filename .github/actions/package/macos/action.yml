@@ -1,0 +1,121 @@
+name: Package for macOS
+description: Create a macOS package for Prism Launcher
+
+inputs:
+  version:
+    description: Launcher version
+    required: true
+  build-type:
+    description: Type for the build
+    required: true
+    default: Debug
+  artifact-name:
+    description: Name of the uploaded artifact
+    required: true
+    default: macOS
+  apple-codesign-cert:
+    description: Certificate for signing macOS builds
+    required: false
+  apple-codesign-password:
+    description: Password for signing macOS builds
+    required: false
+  apple-codesign-id:
+    description: Certificate ID for signing macOS builds
+    required: false
+  apple-notarize-apple-id:
+    description: Apple ID used for notarizing macOS builds
+    required: false
+  apple-notarize-team-id:
+    description: Team ID used for notarizing macOS builds
+    required: false
+  apple-notarize-password:
+    description: Password used for notarizing macOS builds
+    required: false
+  sparkle-ed25519-key:
+    description: Private key for signing Sparkle updates
+    required: false
+
+runs:
+  using: composite
+
+  steps:
+    - name: Fetch codesign certificate
+      shell: bash
+      run: |
+        echo '${{ inputs.apple-codesign-cert }}' | base64 --decode > codesign.p12
+        if [ -n '${{ inputs.apple-codesign-id }}' ]; then
+          security create-keychain -p '${{ inputs.apple-codesign-password }}' build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p '${{ inputs.apple-codesign-password }}' build.keychain
+          security import codesign.p12 -k build.keychain -P '${{ inputs.apple-codesign-password }}' -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k '${{ inputs.apple-codesign-password }}' build.keychain
+        else
+          echo ":warning: Using ad-hoc code signing for macOS, as certificate was not present." >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Package
+      shell: bash
+      env:
+        BUILD_DIR: build
+        INSTALL_DIR: install
+      run: |
+        cmake --install ${{ env.BUILD_DIR }}
+
+        cd ${{ env.INSTALL_DIR }}
+        chmod +x "PrismLauncher.app/Contents/MacOS/prismlauncher"
+
+        if [ -n '${{ inputs.apple-codesign-id }}' ]; then
+          APPLE_CODESIGN_ID='${{ inputs.apple-codesign-id }}'
+          ENTITLEMENTS_FILE='../program_info/App.entitlements'
+        else
+          APPLE_CODESIGN_ID='-'
+          ENTITLEMENTS_FILE='../program_info/AdhocSignedApp.entitlements'
+        fi
+
+        sudo codesign --sign "$APPLE_CODESIGN_ID" --deep --force --entitlements "$ENTITLEMENTS_FILE" --options runtime "PrismLauncher.app/Contents/MacOS/prismlauncher"
+        mv "PrismLauncher.app" "Prism Launcher.app"
+
+    - name: Notarize
+      shell: bash
+      env:
+        INSTALL_DIR: install
+      run: |
+        cd ${{ env.INSTALL_DIR }}
+
+        if [ -n '${{ inputs.apple-notarize-password }}' ]; then
+          ditto -c -k --sequesterRsrc --keepParent "Prism Launcher.app" ../PrismLauncher.zip
+          xcrun notarytool submit ../PrismLauncher.zip \
+            --wait --progress \
+            --apple-id '${{ inputs.apple-notarize-apple-id }}' \
+            --team-id '${{ inputs.apple-notarize-team-id }}' \
+            --password '${{ inputs.apple-notarize-password }}'
+
+          xcrun stapler staple "Prism Launcher.app"
+        else
+          echo ":warning: Skipping notarization as credentials are not present." >> $GITHUB_STEP_SUMMARY
+        fi
+        ditto -c -k --sequesterRsrc --keepParent "Prism Launcher.app" ../PrismLauncher.zip
+
+    - name: Make Sparkle signature
+      shell: bash
+      run: |
+        if [ '${{ inputs.sparkle-ed25519-key }}' != '' ]; then
+          echo '${{ inputs.sparkle-ed25519-key }}' > ed25519-priv.pem
+          signature=$(/opt/homebrew/opt/openssl@3/bin/openssl pkeyutl -sign -rawin -in ${{ github.workspace }}/PrismLauncher.zip -inkey ed25519-priv.pem | openssl base64 | tr -d \\n)
+          rm ed25519-priv.pem
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+        ### Artifact Information :information_source:
+        - :memo: Sparkle Signature (ed25519): \`$signature\`
+        EOF
+        else
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+        ### Artifact Information :information_source:
+        - :warning: Sparkle Signature (ed25519): No private key available (likely a pull request or fork)
+        EOF
+        fi
+
+    - name: Upload binary tarball
+      uses: actions/upload-artifact@v4
+      with:
+        name: PrismLauncher-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}
+        path: PrismLauncher.zip

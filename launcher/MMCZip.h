@@ -2,7 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *  Copyright (c) 2023-2024 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -56,6 +56,7 @@
 
 namespace MMCZip {
 using FilterFunction = std::function<bool(const QString&)>;
+using FilterFileFunction = std::function<bool(const QFileInfo&)>;
 
 /**
  * Merge two zip files, using a filter function
@@ -149,10 +150,11 @@ bool extractFile(QString fileCompressed, QString file, QString dir);
  * \param excludeFilter function to excludeFilter which files shouldn't be included (returning true means to excude)
  * \return true for success or false for failure
  */
-bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFunction excludeFilter);
+bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFileFunction excludeFilter);
 
 #if defined(LAUNCHER_APPLICATION)
 class ExportToZipTask : public Task {
+    Q_OBJECT
    public:
     ExportToZipTask(QString outputPath,
                     QDir dir,
@@ -207,7 +209,11 @@ class ExportToZipTask : public Task {
 };
 
 class ExtractZipTask : public Task {
+    Q_OBJECT
    public:
+    ExtractZipTask(QString input, QDir outputDir, QString subdirectory = "")
+        : ExtractZipTask(std::make_shared<QuaZip>(input), outputDir, subdirectory)
+    {}
     ExtractZipTask(std::shared_ptr<QuaZip> input, QDir outputDir, QString subdirectory = "")
         : m_input(input), m_output_dir(outputDir), m_subdirectory(subdirectory)
     {}

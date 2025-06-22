@@ -19,18 +19,12 @@
 
 #pragma once
 
-#include "ApiHeaderProxy.h"
 #include "Upload.h"
 
 namespace Net {
 
-class ApiUpload : public Upload {
-   public:
-    virtual ~ApiUpload() = default;
-
-    static Upload::Ptr makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray m_post_data);
-
-    void init() override;
+namespace ApiUpload {
+Upload::Ptr makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray m_post_data);
 };
 
 }  // namespace Net

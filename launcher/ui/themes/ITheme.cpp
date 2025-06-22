@@ -44,9 +44,7 @@ void ITheme::apply(bool)
 {
     APPLICATION->setStyleSheet(QString());
     QApplication::setStyle(new HintOverrideProxyStyle(QStyleFactory::create(qtTheme())));
-    if (hasColorScheme()) {
-        QApplication::setPalette(colorScheme());
-    }
+    QApplication::setPalette(colorScheme());
     APPLICATION->setStyleSheet(appStyleSheet());
     QDir::setSearchPaths("theme", searchPaths());
 }
@@ -72,4 +70,31 @@ QPalette ITheme::fadeInactive(QPalette in, qreal bias, QColor color)
     blend(QPalette::Highlight);
     blend(QPalette::HighlightedText);
     return in;
+}
+
+LogColors ITheme::defaultLogColors(const QPalette& palette)
+{
+    LogColors result;
+
+    const QColor& bg = palette.color(QPalette::Base);
+    const QColor& fg = palette.color(QPalette::Text);
+
+    auto blend = [bg, fg](QColor color) {
+        if (Rainbow::luma(fg) > Rainbow::luma(bg)) {
+            // for dark color schemes, produce a fitting color first
+            color = Rainbow::tint(fg, color, 0.5);
+        }
+        // adapt contrast
+        return Rainbow::mix(fg, color, 1);
+    };
+
+    result.background[MessageLevel::Fatal] = Qt::black;
+
+    result.foreground[MessageLevel::Launcher] = blend(QColor("purple"));
+    result.foreground[MessageLevel::Debug] = blend(QColor("green"));
+    result.foreground[MessageLevel::Warning] = blend(QColor("orange"));
+    result.foreground[MessageLevel::Error] = blend(QColor("red"));
+    result.foreground[MessageLevel::Fatal] = blend(QColor("red"));
+
+    return result;
 }

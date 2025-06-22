@@ -27,8 +27,9 @@ class TexturePackResourcePage : public ResourcePackResourcePage {
         auto page = new T(dialog, instance);
         auto model = static_cast<TexturePackResourceModel*>(page->getModel());
 
-        connect(model, &ResourceModel::versionListUpdated, page, &ResourcePage::updateVersionList);
+        connect(model, &ResourceModel::versionListUpdated, page, &ResourcePage::versionListUpdated);
         connect(model, &ResourceModel::projectInfoUpdated, page, &ResourcePage::updateUi);
+        connect(model, &QAbstractListModel::modelReset, page, &ResourcePage::modelReset);
 
         return page;
     }
@@ -39,10 +40,7 @@ class TexturePackResourcePage : public ResourcePackResourcePage {
     [[nodiscard]] inline QString resourceString() const override { return tr("texture pack"); }
 
    protected:
-    TexturePackResourcePage(TexturePackDownloadDialog* dialog, BaseInstance& instance) : ResourcePackResourcePage(dialog, instance)
-    {
-        connect(m_ui->packView, &QListView::doubleClicked, this, &TexturePackResourcePage::onResourceSelected);
-    }
+    TexturePackResourcePage(TexturePackDownloadDialog* dialog, BaseInstance& instance) : ResourcePackResourcePage(dialog, instance) {}
 };
 
 }  // namespace ResourceDownload

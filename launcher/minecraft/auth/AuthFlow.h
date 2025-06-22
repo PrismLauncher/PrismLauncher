@@ -5,7 +5,6 @@
 #include <QNetworkReply>
 #include <QObject>
 #include <QSet>
-#include <QVector>
 
 #include "minecraft/auth/AccountData.h"
 #include "minecraft/auth/AuthStep.h"
@@ -17,7 +16,7 @@ class AuthFlow : public Task {
    public:
     enum class Action { Refresh, Login, DeviceCode };
 
-    explicit AuthFlow(AccountData* data, Action action = Action::Refresh, QObject* parent = 0);
+    explicit AuthFlow(AccountData* data, Action action = Action::Refresh);
     virtual ~AuthFlow() = default;
 
     void executeTask() override;

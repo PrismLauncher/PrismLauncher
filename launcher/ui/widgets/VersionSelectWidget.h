@@ -54,7 +54,7 @@ class VersionSelectWidget : public QWidget {
     ~VersionSelectWidget();
 
     //! loads the list if needed.
-    void initialize(BaseVersionList* vlist);
+    void initialize(BaseVersionList* vlist, bool forceLoad = false);
 
     //! Starts a task that loads the list.
     void loadList();
@@ -98,7 +98,7 @@ class VersionSelectWidget : public QWidget {
     BaseVersionList* m_vlist = nullptr;
     VersionProxyModel* m_proxyModel = nullptr;
     int resizeOnColumn = 0;
-    Task* loadTask;
+    Task::Ptr m_load_task;
     bool preselectedAlready = false;
 
     QVBoxLayout* verticalLayout = nullptr;

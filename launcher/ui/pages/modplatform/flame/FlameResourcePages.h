@@ -39,6 +39,7 @@
 
 #pragma once
 
+#include <ui/pages/modplatform/DataPackPage.h>
 #include "Application.h"
 
 #include "modplatform/ResourceAPI.h"
@@ -96,10 +97,13 @@ class FlameModPage : public ModPage {
     [[nodiscard]] inline auto helpPage() const -> QString override { return "Mod-platform"; }
 
     void openUrl(const QUrl& url) override;
-    unique_qobject_ptr<ModFilterWidget> createFilterWidget() override;
+    std::unique_ptr<ModFilterWidget> createFilterWidget() override;
 
    protected:
     virtual void prepareProviderCategories() override;
+
+   private:
+    Task::Ptr m_categoriesTask;
 };
 
 class FlameResourcePackPage : public ResourcePackResourcePage {
@@ -163,6 +167,33 @@ class FlameShaderPackPage : public ShaderPackResourcePage {
 
     FlameShaderPackPage(ShaderPackDownloadDialog* dialog, BaseInstance& instance);
     ~FlameShaderPackPage() override = default;
+
+    [[nodiscard]] bool shouldDisplay() const override;
+
+    [[nodiscard]] inline auto displayName() const -> QString override { return Flame::displayName(); }
+    [[nodiscard]] inline auto icon() const -> QIcon override { return Flame::icon(); }
+    [[nodiscard]] inline auto id() const -> QString override { return Flame::id(); }
+    [[nodiscard]] inline auto debugName() const -> QString override { return Flame::debugName(); }
+    [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
+
+    [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
+
+    void openUrl(const QUrl& url) override;
+};
+
+
+
+class FlameDataPackPage : public DataPackResourcePage {
+    Q_OBJECT
+
+   public:
+    static FlameDataPackPage* create(DataPackDownloadDialog* dialog, BaseInstance& instance)
+    {
+        return DataPackResourcePage::create<FlameDataPackPage>(dialog, instance);
+    }
+
+    FlameDataPackPage(DataPackDownloadDialog* dialog, BaseInstance& instance);
+    ~FlameDataPackPage() override = default;
 
     [[nodiscard]] bool shouldDisplay() const override;
 

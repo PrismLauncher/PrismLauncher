@@ -78,7 +78,7 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply& reply)
 {
     QFileInfo output_file_info(m_filename);
 
-    if (wroteAnyData) {
+    if (m_wroteAnyData) {
         m_entry->setMD5Sum(m_md5Node->hash().toHex().constData());
     }
 
@@ -98,8 +98,8 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply& reply)
             auto cache_control_header = reply.rawHeader("Cache-Control");
             qCDebug(taskMetaCacheLogC) << "Parsing 'Cache-Control' header with" << cache_control_header;
 
-            QRegularExpression max_age_expr("max-age=([0-9]+)");
-            qint64 max_age = max_age_expr.match(cache_control_header).captured(1).toLongLong();
+            static const QRegularExpression s_maxAgeExpr("max-age=([0-9]+)");
+            qint64 max_age = s_maxAgeExpr.match(cache_control_header).captured(1).toLongLong();
             m_entry->setMaximumAge(max_age);
 
         } else if (reply.hasRawHeader("Expires")) {

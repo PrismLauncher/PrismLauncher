@@ -1,0 +1,62 @@
+name: Merged Blocking Pull Request Automation
+
+on:
+  pull_request_target:
+    types:
+      - closed
+  workflow_dispatch:
+    inputs:
+      pr_id:
+        description: Local Pull Request number to work on
+        required: true
+        type: number
+
+jobs:
+  update-blocked-status:
+    name: Update Blocked Status
+    runs-on: ubuntu-latest
+
+    # a pr that was a `blocking:<id>` label was merged.
+    # find the open pr's it was blocked by and trigger a refresh of their state
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'blocking') }}
+
+    steps:
+      - name: Generate token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.PULL_REQUEST_APP_ID }}
+          private-key: ${{ secrets.PULL_REQUEST_APP_PRIVATE_KEY }}
+
+      - name: Gather Dependent PRs
+        id: gather_deps
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          PR_NUMBER: ${{ inputs.pr_id || github.event.pull_request.number }}
+        run: |
+          blocked_prs=$(
+          gh -R ${{ github.repository }} pr list --label 'blocked' --json 'number,body' \
+            | jq -c --argjson pr "$PR_NUMBER" '
+                reduce ( .[] | select(
+                  .body |  
+                    scan("(?:blocked (?:by|on)|stacked on):? #([0-9]+)") |
+                    map(tonumber) |
+                    any(.[]; . == $pr)
+                )) as $i ([]; . + [$i])
+              '
+          )
+          {
+            echo "deps=$blocked_prs"
+            echo "numdeps=$(jq -r '. | length' <<< "$blocked_prs")" 
+          }  >> "$GITHUB_OUTPUT"
+
+      - name: Trigger Blocked PR Workflows for Dependants
+        if: fromJSON(steps.gather_deps.outputs.numdeps) > 0
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          DEPS: ${{ steps.gather_deps.outputs.deps }}
+        run: |
+          while read -r pr ; do
+            gh -R ${{ github.repository }} workflow run 'blocked-prs.yml' -r "${{ github.ref_name }}" -f pr_id="$pr"
+          done < <(jq -c '.[].number' <<< "$DEPS")
+

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9.4)
+cmake_minimum_required(VERSION 3.15)
 project(murmur2)
 
 set(MURMUR_SOURCES

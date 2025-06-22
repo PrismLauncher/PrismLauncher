@@ -31,8 +31,8 @@ class ResourcePackResourceModel : public ResourceModel {
 
    public slots:
     ResourceAPI::SearchArgs createSearchArguments() override;
-    ResourceAPI::VersionSearchArgs createVersionsArguments(QModelIndex&) override;
-    ResourceAPI::ProjectInfoArgs createInfoArguments(QModelIndex&) override;
+    ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) override;
+    ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex&) override;
 
    protected:
     const BaseInstance& m_base_instance;

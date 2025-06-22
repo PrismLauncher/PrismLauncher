@@ -151,7 +151,7 @@ UpdateGlobalDirectoriesTask::~UpdateGlobalDirectoriesTask() {}
 
 void UpdateGlobalDirectoriesTask::executeTask()
 {
-    auto tasks = makeShared<ConcurrentTask>(this, "UpdateGlobalDirectoriesTask");
+    auto tasks = makeShared<ConcurrentTask>("UpdateGlobalDirectoriesTask");
 
     auto screenshotsTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("GlobalScreenshotsPath").toString(),
                                                             m_inst->screenshotsDir(), m_inst, "UseGlobalScreenshotsFolder", m_parent);

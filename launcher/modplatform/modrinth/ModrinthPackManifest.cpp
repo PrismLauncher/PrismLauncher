@@ -40,9 +40,6 @@
 
 #include "modplatform/modrinth/ModrinthAPI.h"
 
-#include "minecraft/MinecraftInstance.h"
-#include "minecraft/PackProfile.h"
-
 #include <QSet>
 
 static ModrinthAPI api;
@@ -102,7 +99,7 @@ void loadIndexedInfo(Modpack& pack, QJsonObject& obj)
 
 void loadIndexedVersions(Modpack& pack, QJsonDocument& doc)
 {
-    QVector<ModpackVersion> unsortedVersions;
+    QList<ModpackVersion> unsortedVersions;
 
     auto arr = Json::requireArray(doc);
 
@@ -134,6 +131,22 @@ auto loadIndexedVersion(QJsonObject& obj) -> ModpackVersion
     auto gameVersions = Json::ensureArray(obj, "game_versions");
     if (!gameVersions.isEmpty()) {
         file.gameVersion = Json::ensureString(gameVersions[0]);
+        file.gameVersion = ModrinthAPI::mapMCVersionFromModrinth(file.gameVersion);
+    }
+    auto loaders = Json::requireArray(obj, "loaders");
+    for (auto loader : loaders) {
+        if (loader == "neoforge")
+            file.loaders |= ModPlatform::NeoForge;
+        else if (loader == "forge")
+            file.loaders |= ModPlatform::Forge;
+        else if (loader == "cauldron")
+            file.loaders |= ModPlatform::Cauldron;
+        else if (loader == "liteloader")
+            file.loaders |= ModPlatform::LiteLoader;
+        else if (loader == "fabric")
+            file.loaders |= ModPlatform::Fabric;
+        else if (loader == "quilt")
+            file.loaders |= ModPlatform::Quilt;
     }
     file.version_type = ModPlatform::IndexedVersionType(Json::requireString(obj, "version_type"));
     file.changelog = Json::ensureString(obj, "changelog");
@@ -168,6 +181,16 @@ auto loadIndexedVersion(QJsonObject& obj) -> ModpackVersion
         return {};
 
     return file;
+}
+
+auto getVersionDisplayString(const ModpackVersion& version) -> QString
+{
+    auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
+    auto mcVersion = !version.gameVersion.isEmpty() && !version.name.contains(version.gameVersion)
+                         ? QObject::tr(" for %1").arg(version.gameVersion)
+                         : "";
+    auto versionStr = !version.name.contains(version.version) ? version.version : "";
+    return QString("%1%2 — %3%4").arg(version.name, mcVersion, versionStr, release_type);
 }
 
 }  // namespace Modrinth

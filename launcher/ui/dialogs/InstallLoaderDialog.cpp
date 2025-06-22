@@ -31,6 +31,7 @@
 #include "ui/widgets/VersionSelectWidget.h"
 
 class InstallLoaderPage : public VersionSelectWidget, public BasePage {
+    Q_OBJECT
    public:
     InstallLoaderPage(const QString& id,
                       const QString& iconName,
@@ -103,6 +104,8 @@ InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, c
 
     buttons->setOrientation(Qt::Horizontal);
     buttons->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+    buttons->button(QDialogButtonBox::Ok)->setText(tr("Ok"));
+    buttons->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
     connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
     buttonLayout->addWidget(buttons);
@@ -164,3 +167,4 @@ void InstallLoaderDialog::done(int result)
 
     QDialog::done(result);
 }
+#include "InstallLoaderDialog.moc"

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <QRegularExpression>
 #include "IPathMatcher.h"
 
@@ -9,6 +11,8 @@ class RegexpMatcher : public IPathMatcher {
         m_regexp.setPattern(regexp);
         m_onlyFilenamePart = !regexp.contains('/');
     }
+
+    RegexpMatcher(const QRegularExpression& regex) : m_regexp(regex) { m_onlyFilenamePart = !regex.pattern().contains('/'); }
 
     RegexpMatcher& caseSensitive(bool cs = true)
     {

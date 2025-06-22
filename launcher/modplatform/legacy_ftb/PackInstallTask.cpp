@@ -52,7 +52,7 @@
 
 namespace LegacyFTB {
 
-PackInstallTask::PackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network, Modpack pack, QString version)
+PackInstallTask::PackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network, const Modpack& pack, QString version)
 {
     m_pack = pack;
     m_version = version;
@@ -108,13 +108,8 @@ void PackInstallTask::unzip()
         return;
     }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), QOverload<QString, QString>::of(MMCZip::extractDir), archivePath,
                                         extractDir.absolutePath() + "/unzip");
-#else
-    m_extractFuture =
-        QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, archivePath, extractDir.absolutePath() + "/unzip");
-#endif
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &PackInstallTask::onUnzipFinished);
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &PackInstallTask::onUnzipCanceled);
     m_extractFutureWatcher.setFuture(m_extractFuture);
@@ -138,7 +133,7 @@ void PackInstallTask::install()
     if (unzipMcDir.exists()) {
         // ok, found minecraft dir, move contents to instance dir
         if (!FS::move(m_stagingPath + "/unzip/minecraft", m_stagingPath + "/minecraft")) {
-            emitFailed(tr("Failed to move unzipped Minecraft!"));
+            emitFailed(tr("Failed to move unpacked Minecraft!"));
             return;
         }
     }
@@ -165,7 +160,7 @@ void PackInstallTask::install()
         // we only care about the libs
         QJsonArray libs = doc.object().value("libraries").toArray();
 
-        foreach (const QJsonValue& value, libs) {
+        for (const auto& value : libs) {
             QString nameValue = value.toObject().value("name").toString();
             if (!nameValue.startsWith("net.minecraftforge")) {
                 continue;

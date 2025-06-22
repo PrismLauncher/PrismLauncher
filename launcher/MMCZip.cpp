@@ -2,7 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *  Copyright (c) 2023-2024 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -344,6 +344,17 @@ std::optional<QStringList> extractSubDir(QuaZip* zip, const QString& subdir, con
                     qWarning() << (QObject::tr("Could not fix permissions for %1").arg(target_file_path));
                 }
             }
+        } else if (fileInfo.isDir()) {
+            // Ensure the folder has the minimal required permissions
+            QFile::Permissions minimalPermissions = QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner | QFile::ReadGroup |
+                                                    QFile::ExeGroup | QFile::ReadOther | QFile::ExeOther;
+
+            QFile::Permissions currentPermissions = fileInfo.permissions();
+            if ((currentPermissions & minimalPermissions) != minimalPermissions) {
+                if (!QFile::setPermissions(target_file_path, minimalPermissions)) {
+                    qWarning() << (QObject::tr("Could not fix permissions for %1").arg(target_file_path));
+                }
+            }
         }
         qDebug() << "Extracted file" << relative_file_name << "to" << target_file_path;
     } while (zip->goToNextFile());
@@ -367,7 +378,7 @@ std::optional<QStringList> extractDir(QString fileCompressed, QString dir)
         if (fileInfo.size() == 22) {
             return QStringList();
         }
-        qWarning() << "Could not open archive for unzipping:" << fileCompressed << "Error:" << zip.getZipError();
+        qWarning() << "Could not open archive for unpacking:" << fileCompressed << "Error:" << zip.getZipError();
         ;
         return std::nullopt;
     }
@@ -384,7 +395,7 @@ std::optional<QStringList> extractDir(QString fileCompressed, QString subdir, QS
         if (fileInfo.size() == 22) {
             return QStringList();
         }
-        qWarning() << "Could not open archive for unzipping:" << fileCompressed << "Error:" << zip.getZipError();
+        qWarning() << "Could not open archive for unpacking:" << fileCompressed << "Error:" << zip.getZipError();
         ;
         return std::nullopt;
     }
@@ -401,13 +412,13 @@ bool extractFile(QString fileCompressed, QString file, QString target)
         if (fileInfo.size() == 22) {
             return true;
         }
-        qWarning() << "Could not open archive for unzipping:" << fileCompressed << "Error:" << zip.getZipError();
+        qWarning() << "Could not open archive for unpacking:" << fileCompressed << "Error:" << zip.getZipError();
         return false;
     }
     return extractRelFile(&zip, file, target);
 }
 
-bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFunction excludeFilter)
+bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFileFunction excludeFilter)
 {
     QDir rootDirectory(rootDir);
     if (!rootDirectory.exists())
@@ -432,8 +443,8 @@ bool collectFileListRecursively(const QString& rootDir, const QString& subDir, Q
     // collect files
     entries = directory.entryInfoList(QDir::Files);
     for (const auto& e : entries) {
-        QString relativeFilePath = rootDirectory.relativeFilePath(e.absoluteFilePath());
-        if (excludeFilter && excludeFilter(relativeFilePath)) {
+        if (excludeFilter && excludeFilter(e)) {
+            QString relativeFilePath = rootDirectory.relativeFilePath(e.absoluteFilePath());
             qDebug() << "Skipping file " << relativeFilePath;
             continue;
         }
@@ -525,6 +536,10 @@ bool ExportToZipTask::abort()
 
 void ExtractZipTask::executeTask()
 {
+    if (!m_input->isOpen() && !m_input->open(QuaZip::mdUnzip)) {
+        emitFailed(tr("Unable to open supplied zip file."));
+        return;
+    }
     m_zip_future = QtConcurrent::run(QThreadPool::globalInstance(), [this]() { return extractZip(); });
     connect(&m_zip_watcher, &QFutureWatcher<ZipResult>::finished, this, &ExtractZipTask::finish);
     m_zip_watcher.setFuture(m_zip_future);
@@ -560,9 +575,9 @@ auto ExtractZipTask::extractZip() -> ZipResult
         if (!file_name.startsWith(m_subdirectory))
             continue;
 
-        auto relative_file_name = QDir::fromNativeSeparators(file_name.remove(0, m_subdirectory.size()));
+        auto relative_file_name = QDir::fromNativeSeparators(file_name.mid(m_subdirectory.size()));
         auto original_name = relative_file_name;
-        setStatus("Unziping: " + relative_file_name);
+        setStatus("Unpacking: " + relative_file_name);
 
         // Fix subdirs/files ending with a / getting transformed into absolute paths
         if (relative_file_name.startsWith('/'))
@@ -607,6 +622,17 @@ auto ExtractZipTask::extractZip() -> ZipResult
             auto newPermisions = (permissions & maxPermisions) | minPermisions;
             if (newPermisions != permissions) {
                 if (!QFile::setPermissions(target_file_path, newPermisions)) {
+                    logWarning(tr("Could not fix permissions for %1").arg(target_file_path));
+                }
+            }
+        } else if (fileInfo.isDir()) {
+            // Ensure the folder has the minimal required permissions
+            QFile::Permissions minimalPermissions = QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner | QFile::ReadGroup |
+                                                    QFile::ExeGroup | QFile::ReadOther | QFile::ExeOther;
+
+            QFile::Permissions currentPermissions = fileInfo.permissions();
+            if ((currentPermissions & minimalPermissions) != minimalPermissions) {
+                if (!QFile::setPermissions(target_file_path, minimalPermissions)) {
                     logWarning(tr("Could not fix permissions for %1").arg(target_file_path));
                 }
             }

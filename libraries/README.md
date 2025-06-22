@@ -2,14 +2,6 @@
 
 This folder has third-party or otherwise external libraries needed for other parts to work.
 
-## filesystem
-
-Gulrak's implementation of C++17 std::filesystem for C++11 /C++14/C++17/C++20 on Windows, macOS, Linux and FreeBSD.
-
-See [github repo](https://github.com/gulrak/filesystem).
-
-MIT licensed.
-
 ## gamemode
 
 A performance optimization daemon.
@@ -106,6 +98,14 @@ Changes are made to make the code more generic and useful in less usual conditio
 Canonical implementation of the murmur2 hash, taken from [SMHasher](https://github.com/aappleby/smhasher).
 
 Public domain (the author disclaimed the copyright).
+
+## QR-Code-generator
+
+A simple library for generating QR codes
+
+See [github repo](https://github.com/nayuki/QR-Code-generator).
+
+MIT
 
 ## quazip
 

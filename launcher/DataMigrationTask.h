@@ -18,7 +18,7 @@
 class DataMigrationTask : public Task {
     Q_OBJECT
    public:
-    explicit DataMigrationTask(QObject* parent, const QString& sourcePath, const QString& targetPath, IPathMatcher::Ptr pathmatcher);
+    explicit DataMigrationTask(const QString& sourcePath, const QString& targetPath, IPathMatcher::Ptr pathmatcher);
     ~DataMigrationTask() override = default;
 
    protected:

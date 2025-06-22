@@ -41,7 +41,7 @@ class TranslationsModel : public QAbstractListModel {
     void setUseSystemLocale(bool useSystemLocale);
 
    private:
-    QVector<Language>::Iterator findLanguage(const QString& key);
+    QList<Language>::Iterator findLanguage(const QString& key);
     std::optional<Language> findLanguageAsOptional(const QString& key);
     void reloadLocalFiles();
     void downloadTranslation(QString key);

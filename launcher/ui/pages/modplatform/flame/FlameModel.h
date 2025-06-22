@@ -14,6 +14,7 @@
 
 #include <net/NetJob.h>
 #include <functional>
+#include "ui/widgets/ModFilterWidget.h"
 
 #include <modplatform/flame/FlamePackIndex.h>
 
@@ -38,7 +39,7 @@ class ListModel : public QAbstractListModel {
     void fetchMore(const QModelIndex& parent) override;
 
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
-    void searchWithTerm(const QString& term, int sort);
+    void searchWithTerm(const QString& term, int sort, std::shared_ptr<ModFilterWidget::Filter> filter, bool filterChanged);
 
     [[nodiscard]] bool hasActiveSearchJob() const { return jobPtr && jobPtr->isRunning(); }
     [[nodiscard]] Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? jobPtr : nullptr; }
@@ -65,6 +66,7 @@ class ListModel : public QAbstractListModel {
 
     QString currentSearchTerm;
     int currentSort = 0;
+    std::shared_ptr<ModFilterWidget::Filter> m_filter;
     int nextSearchOffset = 0;
     enum SearchState { None, CanPossiblyFetchMore, ResetRequested, Finished } searchState = None;
     Task::Ptr jobPtr;

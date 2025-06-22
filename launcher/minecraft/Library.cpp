@@ -65,7 +65,7 @@ void Library::getApplicableFiles(const RuntimeContext& runtimeContext,
 {
     bool local = isLocal();
     // Lambda function to get the absolute file path
-    auto actualPath = [&](QString relPath) {
+    auto actualPath = [this, local, overridePath](QString relPath) {
         relPath = FS::RemoveInvalidPathChars(relPath);
         QFileInfo out(FS::PathCombine(storagePrefix(), relPath));
         if (local && !overridePath.isEmpty()) {
@@ -115,7 +115,7 @@ QList<Net::NetRequest::Ptr> Library::getDownloads(const RuntimeContext& runtimeC
     bool local = isLocal();
 
     // Lambda function to check if a local file exists
-    auto check_local_file = [&](QString storage) {
+    auto check_local_file = [overridePath, &failedLocalFiles](QString storage) {
         QFileInfo fileinfo(storage);
         QString fileName = fileinfo.fileName();
         auto fullPath = FS::PathCombine(overridePath, fileName);
@@ -128,7 +128,7 @@ QList<Net::NetRequest::Ptr> Library::getDownloads(const RuntimeContext& runtimeC
     };
 
     // Lambda function to add a download request
-    auto add_download = [&](QString storage, QString url, QString sha1) {
+    auto add_download = [this, local, check_local_file, cache, stale, &out](QString storage, QString url, QString sha1) {
         if (local) {
             return check_local_file(storage);
         }
@@ -147,9 +147,8 @@ QList<Net::NetRequest::Ptr> Library::getDownloads(const RuntimeContext& runtimeC
         options |= Net::Download::Option::MakeEternal;
 
         if (sha1.size()) {
-            auto rawSha1 = QByteArray::fromHex(sha1.toLatin1());
             auto dl = Net::ApiDownload::makeCached(url, entry, options);
-            dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
+            dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, sha1));
             qDebug() << "Checksummed Download for:" << rawName().serialize() << "storage:" << storage << "url:" << url;
             out.append(dl);
         } else {
@@ -199,7 +198,7 @@ QList<Net::NetRequest::Ptr> Library::getDownloads(const RuntimeContext& runtimeC
             }
         }
     } else {
-        auto raw_dl = [&]() {
+        auto raw_dl = [this, raw_storage]() {
             if (!m_absoluteURL.isEmpty()) {
                 return m_absoluteURL;
             }

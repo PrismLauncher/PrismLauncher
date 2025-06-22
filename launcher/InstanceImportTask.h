@@ -40,16 +40,13 @@
 #include <QUrl>
 #include "InstanceTask.h"
 
-#include <memory>
-#include <optional>
-
 class QuaZip;
 
 class InstanceImportTask : public InstanceTask {
     Q_OBJECT
    public:
     explicit InstanceImportTask(const QUrl& sourceUrl, QWidget* parent = nullptr, QMap<QString, QString>&& extra_info = {});
-
+    virtual ~InstanceImportTask() = default;
     bool abort() override;
 
    protected:
@@ -70,7 +67,7 @@ class InstanceImportTask : public InstanceTask {
    private: /* data */
     QUrl m_sourceUrl;
     QString m_archivePath;
-    Task::Ptr task;
+    Task::Ptr m_task;
     enum class ModpackType {
         Unknown,
         MultiMC,

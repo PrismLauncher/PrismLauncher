@@ -37,27 +37,14 @@
 #include <sys.h>
 
 #if defined Q_OS_WIN32
-#include "WindowsConsole.h"
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include "console/WindowsConsole.h"
 #endif
 
-// Snippet from https://github.com/gulrak/filesystem#using-it-as-single-file-header
-
-#ifdef __APPLE__
-#include <Availability.h>  // for deployment target to support pre-catalina targets without std::fs
-#endif                     // __APPLE__
-
-#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || (defined(__cplusplus) && __cplusplus >= 201703L)) && defined(__has_include)
-#if __has_include(<filesystem>) && (!defined(__MAC_OS_X_VERSION_MIN_REQUIRED) || __MAC_OS_X_VERSION_MIN_REQUIRED >= 101500)
-#define GHC_USE_STD_FS
 #include <filesystem>
 namespace fs = std::filesystem;
-#endif  // MacOS min version check
-#endif  // Other OSes version check
-
-#ifndef GHC_USE_STD_FS
-#include <ghc/filesystem.hpp>
-namespace fs = ghc::filesystem;
-#endif
 
 FileLinkApp::FileLinkApp(int& argc, char** argv) : QCoreApplication(argc, argv), socket(new QLocalSocket(this))
 {
@@ -104,11 +91,11 @@ void FileLinkApp::joinServer(QString server)
 
     in.setDevice(&socket);
 
-    connect(&socket, &QLocalSocket::connected, this, [&]() { qDebug() << "connected to server"; });
+    connect(&socket, &QLocalSocket::connected, this, []() { qDebug() << "connected to server"; });
 
     connect(&socket, &QLocalSocket::readyRead, this, &FileLinkApp::readPathPairs);
 
-    connect(&socket, &QLocalSocket::errorOccurred, this, [&](QLocalSocket::LocalSocketError socketError) {
+    connect(&socket, &QLocalSocket::errorOccurred, this, [this](QLocalSocket::LocalSocketError socketError) {
         m_status = Failed;
         switch (socketError) {
             case QLocalSocket::ServerNotFoundError:
@@ -132,7 +119,7 @@ void FileLinkApp::joinServer(QString server)
         }
     });
 
-    connect(&socket, &QLocalSocket::disconnected, this, [&]() {
+    connect(&socket, &QLocalSocket::disconnected, this, [this]() {
         qDebug() << "disconnected from server, should exit";
         m_status = Succeeded;
         exit();

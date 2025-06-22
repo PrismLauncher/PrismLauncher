@@ -40,14 +40,15 @@
 #include <QMap>
 #include <QProcess>
 
-#include "Application.h"
 #include "Commandline.h"
 #include "FileSystem.h"
-#include "JavaUtils.h"
+#include "java/JavaUtils.h"
 
-JavaChecker::JavaChecker(QObject* parent) : QObject(parent) {}
+JavaChecker::JavaChecker(QString path, QString args, int minMem, int maxMem, int permGen, int id)
+    : Task(), m_path(path), m_args(args), m_minMem(minMem), m_maxMem(maxMem), m_permGen(permGen), m_id(id)
+{}
 
-void JavaChecker::performCheck()
+void JavaChecker::executeTask()
 {
     QString checkerJar = JavaUtils::getJavaCheckPath();
 
@@ -72,7 +73,7 @@ void JavaChecker::performCheck()
     if (m_maxMem != 0) {
         args << QString("-Xmx%1m").arg(m_maxMem);
     }
-    if (m_permGen != 64) {
+    if (m_permGen != 64 && m_permGen != 0) {
         args << QString("-XX:PermSize=%1m").arg(m_permGen);
     }
 
@@ -83,7 +84,7 @@ void JavaChecker::performCheck()
     process->setProcessEnvironment(CleanEnviroment());
     qDebug() << "Running java checker:" << m_path << args.join(" ");
 
-    connect(process.get(), QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &JavaChecker::finished);
+    connect(process.get(), &QProcess::finished, this, &JavaChecker::finished);
     connect(process.get(), &QProcess::errorOccurred, this, &JavaChecker::error);
     connect(process.get(), &QProcess::readyReadStandardOutput, this, &JavaChecker::stdoutReady);
     connect(process.get(), &QProcess::readyReadStandardError, this, &JavaChecker::stderrReady);
@@ -115,11 +116,10 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
     QProcessPtr _process = process;
     process.reset();
 
-    JavaCheckResult result;
-    {
-        result.path = m_path;
-        result.id = m_id;
-    }
+    Result result = {
+        m_path,
+        m_id,
+    };
     result.errorLog = m_stderr;
     result.outLog = m_stdout;
     qDebug() << "STDOUT" << m_stdout;
@@ -127,8 +127,9 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
     qDebug() << "Java checker finished with status" << status << "exit code" << exitcode;
 
     if (status == QProcess::CrashExit || exitcode == 1) {
-        result.validity = JavaCheckResult::Validity::Errored;
+        result.validity = Result::Validity::Errored;
         emit checkFinished(result);
+        emitSucceeded();
         return;
     }
 
@@ -136,11 +137,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 
     QMap<QString, QString> results;
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QStringList lines = m_stdout.split("\n", Qt::SkipEmptyParts);
-#else
-    QStringList lines = m_stdout.split("\n", QString::SkipEmptyParts);
-#endif
     for (QString line : lines) {
         line = line.trimmed();
         // NOTE: workaround for GH-4125, where garbage is getting printed into stdout on bedrock linux
@@ -148,11 +145,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
             continue;
         }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         auto parts = line.split('=', Qt::SkipEmptyParts);
-#else
-        auto parts = line.split('=', QString::SkipEmptyParts);
-#endif
         if (parts.size() != 2 || parts[0].isEmpty() || parts[1].isEmpty()) {
             continue;
         } else {
@@ -161,17 +154,18 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
     }
 
     if (!results.contains("os.arch") || !results.contains("java.version") || !results.contains("java.vendor") || !success) {
-        result.validity = JavaCheckResult::Validity::ReturnedInvalidData;
+        result.validity = Result::Validity::ReturnedInvalidData;
         emit checkFinished(result);
+        emitSucceeded();
         return;
     }
 
     auto os_arch = results["os.arch"];
     auto java_version = results["java.version"];
     auto java_vendor = results["java.vendor"];
-    bool is_64 = os_arch == "x86_64" || os_arch == "amd64" || os_arch == "aarch64" || os_arch == "arm64";
+    bool is_64 = os_arch == "x86_64" || os_arch == "amd64" || os_arch == "aarch64" || os_arch == "arm64" || os_arch == "riscv64";
 
-    result.validity = JavaCheckResult::Validity::Valid;
+    result.validity = Result::Validity::Valid;
     result.is_64bit = is_64;
     result.mojangPlatform = is_64 ? "64" : "32";
     result.realPlatform = os_arch;
@@ -179,6 +173,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
     result.javaVendor = java_vendor;
     qDebug() << "Java checker succeeded.";
     emit checkFinished(result);
+    emitSucceeded();
 }
 
 void JavaChecker::error(QProcess::ProcessError err)
@@ -190,15 +185,9 @@ void JavaChecker::error(QProcess::ProcessError err)
         qDebug() << "Native environment:";
         qDebug() << QProcessEnvironment::systemEnvironment().toStringList();
         killTimer.stop();
-        JavaCheckResult result;
-        {
-            result.path = m_path;
-            result.id = m_id;
-        }
-
-        emit checkFinished(result);
-        return;
+        emit checkFinished({ m_path, m_id });
     }
+    emitSucceeded();
 }
 
 void JavaChecker::timeout()

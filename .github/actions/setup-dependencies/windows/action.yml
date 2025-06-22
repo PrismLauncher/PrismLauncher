@@ -1,0 +1,73 @@
+name: Setup Windows Dependencies
+
+inputs:
+  build-type:
+    description: Type for the build
+    required: true
+    default: Debug
+  msystem:
+    description: MSYS2 subsystem to use
+    required: false
+  vcvars-arch:
+    description: Visual Studio architecture to use
+    required: true
+    default: amd64
+
+runs:
+  using: composite
+
+  steps:
+    # NOTE: Installed on MinGW as well for SignTool
+    - name: Enter VS Developer shell
+      if: ${{ runner.os == 'Windows' }}
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: ${{ inputs.vcvars-arch }}
+        vsversion: 2022
+
+    - name: Setup MSYS2 (MinGW)
+      if: ${{ inputs.msystem != '' }}
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{ inputs.msystem }}
+        update: true
+        install: >-
+          git
+        pacboy: >-
+          toolchain:p
+          ccache:p
+          cmake:p
+          extra-cmake-modules:p
+          ninja:p
+          qt6-base:p
+          qt6-svg:p
+          qt6-imageformats:p
+          qt6-5compat:p
+          qt6-networkauth:p
+          cmark:p
+          tomlplusplus:p
+          quazip-qt6:p
+
+    - name: List pacman packages (MinGW)
+      if: ${{ inputs.msystem != '' }}
+      shell: msys2 {0}
+      run: |
+        pacman -Qe
+
+    - name: Retrieve ccache cache (MinGW)
+      if: ${{ inputs.msystem != '' && inputs.build-type == 'Debug' }}
+      uses: actions/cache@v4.2.3
+      with:
+        path: '${{ github.workspace }}\.ccache'
+        key: ${{ runner.os }}-mingw-w64-ccache-${{ github.run_id }}
+        restore-keys: |
+          ${{ runner.os }}-mingw-w64-ccache
+
+    - name: Setup ccache (MinGW)
+      if: ${{ inputs.msystem != '' && inputs.build-type == 'Debug' }}
+      shell: msys2 {0}
+      run: |
+        ccache --set-config=cache_dir='${{ github.workspace }}\.ccache'
+        ccache --set-config=max_size='500M'
+        ccache --set-config=compression=true
+        ccache -p  # Show config

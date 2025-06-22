@@ -42,9 +42,8 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     QMenu* createPopupMenu() override;
 
    public slots:
-    bool current(const QModelIndex& current, const QModelIndex& previous);
-
-    virtual bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
+    virtual void updateActions();
+    virtual void updateFrame(const QModelIndex& current, const QModelIndex& previous);
 
    protected slots:
     void itemActivated(const QModelIndex& index);
@@ -56,6 +55,8 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
 
     virtual void enableItem();
     virtual void disableItem();
+
+    virtual void viewHomepage();
 
     virtual void viewFolder();
     virtual void viewConfigs();

@@ -25,7 +25,6 @@
 
 #include "LocalDataPackParseTask.h"
 #include "LocalModParseTask.h"
-#include "LocalResourcePackParseTask.h"
 #include "LocalShaderPackParseTask.h"
 #include "LocalTexturePackParseTask.h"
 #include "LocalWorldSaveParseTask.h"
@@ -46,7 +45,7 @@ PackedResourceType identify(QFileInfo file)
             // mods can contain resource and data packs so they must be tested first
             qDebug() << file.fileName() << "is a mod";
             return PackedResourceType::Mod;
-        } else if (ResourcePackUtils::validate(file)) {
+        } else if (DataPackUtils::validateResourcePack(file)) {
             qDebug() << file.fileName() << "is a resource pack";
             return PackedResourceType::ResourcePack;
         } else if (TexturePackUtils::validate(file)) {

@@ -39,7 +39,7 @@ void ModrinthModModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObjec
 
 void ModrinthModModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
-    ::Modrinth::loadIndexedPackVersions(m, arr, &m_base_instance);
+    ::Modrinth::loadIndexedPackVersions(m, arr);
 }
 
 auto ModrinthModModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
@@ -66,7 +66,7 @@ void ModrinthResourcePackModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, Q
 
 void ModrinthResourcePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
-    ::Modrinth::loadIndexedPackVersions(m, arr, &m_base_instance);
+    ::Modrinth::loadIndexedPackVersions(m, arr);
 }
 
 auto ModrinthResourcePackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
@@ -88,7 +88,7 @@ void ModrinthTexturePackModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJ
 
 void ModrinthTexturePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
-    ::Modrinth::loadIndexedPackVersions(m, arr, &m_base_instance);
+    ::Modrinth::loadIndexedPackVersions(m, arr);
 }
 
 auto ModrinthTexturePackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
@@ -110,12 +110,35 @@ void ModrinthShaderPackModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJs
 
 void ModrinthShaderPackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
-    ::Modrinth::loadIndexedPackVersions(m, arr, &m_base_instance);
+    ::Modrinth::loadIndexedPackVersions(m, arr);
 }
 
 auto ModrinthShaderPackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {
     return obj.object().value("hits").toArray();
 }
+
+ModrinthDataPackModel::ModrinthDataPackModel(const BaseInstance& base) : DataPackResourceModel(base, new ModrinthAPI) {}
+
+void ModrinthDataPackModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
+{
+    ::Modrinth::loadIndexedPack(m, obj);
+}
+
+void ModrinthDataPackModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
+{
+    ::Modrinth::loadExtraPackData(m, obj);
+}
+
+void ModrinthDataPackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
+{
+    ::Modrinth::loadIndexedPackVersions(m, arr);
+}
+
+auto ModrinthDataPackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
+{
+    return obj.object().value("hits").toArray();
+}
+
 
 }  // namespace ResourceDownload

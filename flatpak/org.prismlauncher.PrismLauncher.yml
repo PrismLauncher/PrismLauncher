@@ -1,11 +1,9 @@
 id: org.prismlauncher.PrismLauncher
 runtime: org.kde.Platform
-runtime-version: 6.7
+runtime-version: '6.8'
 sdk: org.kde.Sdk
 sdk-extensions:
-  - org.freedesktop.Sdk.Extension.openjdk21
   - org.freedesktop.Sdk.Extension.openjdk17
-  - org.freedesktop.Sdk.Extension.openjdk8
 
 command: prismlauncher
 finish-args:
@@ -21,9 +19,12 @@ finish-args:
   - --filesystem=xdg-download:ro
     # FTBApp import
   - --filesystem=~/.ftba:ro
-
-cleanup:
-  - /lib/libGLU*
+    # Userspace visibility for manual hugepages configuration
+    # Required for -XX:+UseLargePages
+  - --filesystem=/sys/kernel/mm/hugepages:ro
+    # Userspace visibility for transparent hugepages configuration
+    # Required for -XX:+UseTransparentHugePages
+  - --filesystem=/sys/kernel/mm/transparent_hugepage:ro
 
 modules:
   # Might be needed by some Controller mods (see https://github.com/isXander/Controlify/issues/31)
@@ -32,50 +33,39 @@ modules:
   # Needed for proper Wayland support
   - libdecor.json
 
+  # Text to Speech in the game
+  - flite.json
+
   - name: prismlauncher
     buildsystem: cmake-ninja
     builddir: true
     config-opts:
       - -DLauncher_BUILD_PLATFORM=flatpak
+      # This allows us to manage and update Java independently of this Flatpak
+      - -DLauncher_ENABLE_JAVA_DOWNLOADER=ON
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
     build-options:
       env:
         JAVA_HOME: /usr/lib/sdk/openjdk17/jvm/openjdk-17
         JAVA_COMPILER: /usr/lib/sdk/openjdk17/jvm/openjdk-17/bin/javac
+    run-tests: true
     sources:
       - type: dir
         path: ../
-
-  - name: openjdk
-    buildsystem: simple
-    build-commands:
-      - mkdir -p /app/jdk/
-      - /usr/lib/sdk/openjdk21/install.sh
-      - mv /app/jre /app/jdk/21
-      - /usr/lib/sdk/openjdk17/install.sh
-      - mv /app/jre /app/jdk/17
-      - /usr/lib/sdk/openjdk8/install.sh
-      - mv /app/jre /app/jdk/8
-    cleanup:
-      - /jre
 
   - name: glfw
     buildsystem: cmake-ninja
     config-opts:
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - -DBUILD_SHARED_LIBS:BOOL=ON
-      - -DGLFW_USE_WAYLAND:BOOL=ON
+      - -DGLFW_BUILD_WAYLAND:BOOL=ON
       - -DGLFW_BUILD_DOCS:BOOL=OFF
     sources:
       - type: git
         url: https://github.com/glfw/glfw.git
-        commit: 3fa2360720eeba1964df3c0ecf4b5df8648a8e52
+        commit: 7b6aead9fb88b3623e3b3725ebb42670cbe4c579 # 3.4
       - type: patch
-        path: patches/0003-Don-t-crash-on-calls-to-focus-or-icon.patch
-      - type: patch
-        path: patches/0005-Add-warning-about-being-an-unofficial-patch.patch
-      - type: patch
-        path: patches/0007-Platform-Prefer-Wayland-over-X11.patch
+        path: patches/0009-Defer-setting-cursor-position-until-the-cursor-is-lo.patch
     cleanup:
       - /include
       - /lib/cmake
@@ -85,8 +75,8 @@ modules:
     buildsystem: autotools
     sources:
       - type: archive
-        url: https://xorg.freedesktop.org/archive/individual/app/xrandr-1.5.2.tar.xz
-        sha256: c8bee4790d9058bacc4b6246456c58021db58a87ddda1a9d0139bf5f18f1f240
+        url: https://xorg.freedesktop.org/archive/individual/app/xrandr-1.5.3.tar.xz
+        sha256: f8dd7566adb74147fab9964680b6bbadee87cf406a7fcff51718a5e6949b841c
         x-checker-data:
           type: anitya
           project-id: 14957
@@ -108,8 +98,8 @@ modules:
     sources:
       - type: archive
         dest-filename: gamemode.tar.gz
-        url: https://api.github.com/repos/FeralInteractive/gamemode/tarball/1.8.1
-        sha256: 969cf85b5ca3944f3e315cd73a0ee9bea4f9c968cd7d485e9f4745bc1e679c4e
+        url: https://api.github.com/repos/FeralInteractive/gamemode/tarball/1.8.2
+        sha256: 2886d4ce543c78bd2a364316d5e7fd59ef06b71de63f896b37c6d3dc97658f60
         x-checker-data:
           type: json
           url: https://api.github.com/repos/FeralInteractive/gamemode/releases/latest

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "minecraft/Component.h"
 #include "net/Mode.h"
 #include "tasks/Task.h"
 
@@ -13,7 +14,7 @@ class ComponentUpdateTask : public Task {
     enum class Mode { Launch, Resolution };
 
    public:
-    explicit ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfile* list, QObject* parent = 0);
+    explicit ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfile* list);
     virtual ~ComponentUpdateTask();
 
    protected:
@@ -21,7 +22,11 @@ class ComponentUpdateTask : public Task {
 
    private:
     void loadComponents();
+    /// collects components that are dependent on or dependencies of the component
+    QList<ComponentPtr> collectTreeLinked(const QString& uid);
     void resolveDependencies(bool checkOnly);
+    void performUpdateActions();
+    void finalizeComponents();
 
     void remoteLoadSucceeded(size_t index);
     void remoteLoadFailed(size_t index, const QString& msg);

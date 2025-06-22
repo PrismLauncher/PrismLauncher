@@ -68,6 +68,9 @@ NewComponentDialog::NewComponentDialog(const QString& initialName, const QString
 
     ui->nameTextBox->setFocus();
 
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
+
     originalPlaceholderText = ui->uidTextBox->placeholderText();
     updateDialogState();
 }
@@ -80,7 +83,8 @@ NewComponentDialog::~NewComponentDialog()
 void NewComponentDialog::updateDialogState()
 {
     auto protoUid = ui->nameTextBox->text().toLower();
-    protoUid.remove(QRegularExpression("[^a-z]"));
+    static const QRegularExpression s_removeChars("[^a-z]");
+    protoUid.remove(s_removeChars);
     if (protoUid.isEmpty()) {
         ui->uidTextBox->setPlaceholderText(originalPlaceholderText);
     } else {

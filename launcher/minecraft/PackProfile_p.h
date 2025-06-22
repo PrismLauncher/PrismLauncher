@@ -3,8 +3,8 @@
 #include <QList>
 #include <QMap>
 #include <QTimer>
-#include <map>
 #include "Component.h"
+#include "tasks/Task.h"
 
 class MinecraftInstance;
 using ComponentContainer = QList<ComponentPtr>;
