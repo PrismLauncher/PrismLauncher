@@ -128,7 +128,7 @@ void WorldListPage::openedImpl()
     ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
 
     // Enable the symbolic link warning when the saves folder is a symbolic link
-    ui->globalSavesFolderWarninglabel->setVisible(FS::isSymLink(FS::PathCombine(m_inst->gameRoot(), "saves")));
+    ui->sharedSavesFolderWarninglabel->setVisible(FS::isSymLink(FS::PathCombine(m_inst->gameRoot(), "saves")));
 }
 
 void WorldListPage::closedImpl()

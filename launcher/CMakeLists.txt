@@ -315,8 +315,8 @@ set(MINECRAFT_SOURCES
     minecraft/Library.cpp
     minecraft/Library.h
     minecraft/MojangDownloadInfo.h
-    minecraft/UpdateGlobalDirectoriesTask.cpp
-    minecraft/UpdateGlobalDirectoriesTask.h
+    minecraft/UpdateSharedDirectoriesTask.cpp
+    minecraft/UpdateSharedDirectoriesTask.h
     minecraft/VanillaInstanceCreationTask.cpp
     minecraft/VanillaInstanceCreationTask.h
     minecraft/VersionFile.cpp
@@ -1126,8 +1126,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/CustomCommands.h
     ui/widgets/EnvironmentVariables.cpp
     ui/widgets/EnvironmentVariables.h
-    ui/widgets/GlobalFolderWidget.cpp
-    ui/widgets/GlobalFolderWidget.h
+    ui/widgets/SharedFolderWidget.cpp
+    ui/widgets/SharedFolderWidget.h
     ui/widgets/IconLabel.cpp
     ui/widgets/IconLabel.h
     ui/widgets/JavaWizardWidget.cpp
@@ -1235,7 +1235,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/technic/TechnicPage.ui
     ui/widgets/CustomCommands.ui
     ui/widgets/EnvironmentVariables.ui
-    ui/widgets/GlobalFolderWidget.ui
+    ui/widgets/SharedFolderWidget.ui
     ui/widgets/InfoFrame.ui
     ui/widgets/ModFilterWidget.ui
     ui/widgets/SubTaskProgressBar.ui

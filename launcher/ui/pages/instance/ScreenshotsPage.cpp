@@ -565,7 +565,7 @@ void ScreenshotsPage::openedImpl()
     ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
 
     // Enable the symbolic link warning when the screenshots folder is a symbolic link
-    ui->globalScreenshotsFolderWarninglabel->setVisible(FS::isSymLink(m_folder));
+    ui->sharedScreenshotsFolderWarninglabel->setVisible(FS::isSymLink(m_folder));
 }
 
 void ScreenshotsPage::closedImpl()

@@ -52,7 +52,7 @@ class WorldList;
 class GameOptions;
 class LaunchStep;
 class PackProfile;
-class UpdateGlobalDirectoriesTask;
+class UpdateSharedDirectoriesTask;
 
 class MinecraftInstance : public BaseInstance {
     Q_OBJECT
@@ -167,7 +167,7 @@ class MinecraftInstance : public BaseInstance {
 
    protected:  // data
     std::shared_ptr<PackProfile> m_components;
-    std::shared_ptr<UpdateGlobalDirectoriesTask> m_update_global_directories_task;
+    std::shared_ptr<UpdateSharedDirectoriesTask> m_update_shared_directories_task;
     mutable std::shared_ptr<ModFolderModel> m_loader_mod_list;
     mutable std::shared_ptr<ModFolderModel> m_core_mod_list;
     mutable std::shared_ptr<ModFolderModel> m_nil_mod_list;

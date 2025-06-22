@@ -3,15 +3,15 @@
 #include <QWidget>
 
 namespace Ui {
-class GlobalFolderWidget;
+class SharedFolderWidget;
 }
 
-class GlobalFolderWidget : public QWidget {
+class SharedFolderWidget : public QWidget {
     Q_OBJECT
 
    public:
-    explicit GlobalFolderWidget(QWidget* parent = 0);
-    virtual ~GlobalFolderWidget();
+    explicit SharedFolderWidget(QWidget* parent = 0);
+    virtual ~SharedFolderWidget();
     void initialize(bool enabled, const QString& path, const QString& label = "");
 
     bool isEnabled() const;
@@ -22,5 +22,5 @@ class GlobalFolderWidget : public QWidget {
     void on_pathBrowseBtn_clicked();
 
    private:
-    Ui::GlobalFolderWidget* ui;
+    Ui::SharedFolderWidget* ui;
 };

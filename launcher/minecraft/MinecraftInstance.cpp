@@ -85,7 +85,7 @@
 #include "AssetsUtils.h"
 #include "MinecraftLoadAndCheck.h"
 #include "PackProfile.h"
-#include "minecraft/UpdateGlobalDirectoriesTask.h"
+#include "minecraft/UpdateSharedDirectoriesTask.h"
 #include "minecraft/gameoptions/GameOptions.h"
 #include "minecraft/update/FoldersTask.h"
 
@@ -1316,9 +1316,9 @@ QList<Mod*> MinecraftInstance::getJarMods() const
 
 void MinecraftInstance::applySettings()
 {
-    // Global directories
-    m_update_global_directories_task = std::make_shared<UpdateGlobalDirectoriesTask>(this, nullptr);
-    m_update_global_directories_task->start();
+    // Shared directories
+    m_update_shared_directories_task = std::make_shared<UpdateSharedDirectoriesTask>(this, nullptr);
+    m_update_shared_directories_task->start();
 }
 
 #include "MinecraftInstance.moc"

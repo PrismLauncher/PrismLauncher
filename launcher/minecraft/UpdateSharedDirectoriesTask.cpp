@@ -1,4 +1,4 @@
-#include "UpdateGlobalDirectoriesTask.h"
+#include "UpdateSharedDirectoriesTask.h"
 
 #include <QDirIterator>
 
@@ -84,7 +84,7 @@ class TryCreateSymlinkTask : public Task {
 
         // Make sure that symbolic links are supported.
         if (!FS::canLink(m_source, m_destination)) {
-            fail(tr("Failed to create global folder.\nSymbolic links are not supported on the filesystem"));
+            fail(tr("Failed to create shared folder.\nSymbolic links are not supported on the filesystem"));
             return;
         }
 
@@ -101,7 +101,7 @@ class TryCreateSymlinkTask : public Task {
         } else if (FS::checkFolderPathExists(m_destination)) {
             if (!FS::checkFolderPathEmpty(m_destination)) {
                 if (!interactiveMove(m_destination, m_source, true, m_parent)) {
-                    fail(tr("Failed to create global folder.\nEnsure that \"%1\" is empty.").arg(m_destination));
+                    fail(tr("Failed to create shared folder.\nEnsure that \"%1\" is empty.").arg(m_destination));
                     return;
                 }
             }
@@ -111,7 +111,7 @@ class TryCreateSymlinkTask : public Task {
 
         // Make sure the source folder exists
         if (!FS::ensureFolderPathExists(m_source)) {
-            fail(tr("Failed to create global folder.\nEnsure that \"%1\" exists.").arg(m_source));
+            fail(tr("Failed to create shared folder.\nEnsure that \"%1\" exists.").arg(m_source));
             return;
         }
 
@@ -121,7 +121,7 @@ class TryCreateSymlinkTask : public Task {
         if (folderLink()) {
             emitSucceeded();
         } else {
-            fail(tr("Failed to create global folder. Error %1: %2")
+            fail(tr("Failed to create shared folder. Error %1: %2")
                      .arg(folderLink.getOSError().value())
                      .arg(folderLink.getOSError().message().c_str()));
         }
@@ -143,44 +143,44 @@ class TryCreateSymlinkTask : public Task {
     QWidget* m_parent;
 };
 
-UpdateGlobalDirectoriesTask::UpdateGlobalDirectoriesTask(MinecraftInstance* inst, QWidget* parent)
+UpdateSharedDirectoriesTask::UpdateSharedDirectoriesTask(MinecraftInstance* inst, QWidget* parent)
     : Task(parent), m_inst(inst), m_parent(parent)
 {}
 
-UpdateGlobalDirectoriesTask::~UpdateGlobalDirectoriesTask() {}
+UpdateSharedDirectoriesTask::~UpdateSharedDirectoriesTask() {}
 
-void UpdateGlobalDirectoriesTask::executeTask()
+void UpdateSharedDirectoriesTask::executeTask()
 {
-    auto tasks = makeShared<ConcurrentTask>("UpdateGlobalDirectoriesTask");
+    auto tasks = makeShared<ConcurrentTask>("UpdateSharedDirectoriesTask");
 
-    auto screenshotsTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("GlobalScreenshotsPath").toString(),
-                                                            m_inst->screenshotsDir(), m_inst, "UseGlobalScreenshotsFolder", m_parent);
-    connect(screenshotsTask.get(), &Task::failed, this, &UpdateGlobalDirectoriesTask::notifyFailed);
+    auto screenshotsTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("SharedScreenshotsPath").toString(),
+                                                            m_inst->screenshotsDir(), m_inst, "UseSharedScreenshotsFolder", m_parent);
+    connect(screenshotsTask.get(), &Task::failed, this, &UpdateSharedDirectoriesTask::notifyFailed);
     tasks->addTask(screenshotsTask);
 
-    auto savesTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("GlobalSavesPath").toString(), m_inst->worldDir(), m_inst,
-                                                      "UseGlobalSavesFolder", m_parent);
-    connect(savesTask.get(), &Task::failed, this, &UpdateGlobalDirectoriesTask::notifyFailed);
+    auto savesTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("SharedSavesPath").toString(), m_inst->worldDir(), m_inst,
+                                                      "UseSharedSavesFolder", m_parent);
+    connect(savesTask.get(), &Task::failed, this, &UpdateSharedDirectoriesTask::notifyFailed);
     tasks->addTask(savesTask);
 
-    auto resoucePacksTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("GlobalResourcePacksPath").toString(),
-                                                             m_inst->resourcePacksDir(), m_inst, "UseGlobalResourcePacksFolder", m_parent);
-    connect(resoucePacksTask.get(), &Task::failed, this, &UpdateGlobalDirectoriesTask::notifyFailed);
+    auto resoucePacksTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("SharedResourcePacksPath").toString(),
+                                                             m_inst->resourcePacksDir(), m_inst, "UseSharedResourcePacksFolder", m_parent);
+    connect(resoucePacksTask.get(), &Task::failed, this, &UpdateSharedDirectoriesTask::notifyFailed);
     tasks->addTask(resoucePacksTask);
 
-    auto texturePacksTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("GlobalResourcePacksPath").toString(),
-                                                             m_inst->texturePacksDir(), m_inst, "UseGlobalResourcePacksFolder", m_parent);
-    connect(texturePacksTask.get(), &Task::failed, this, &UpdateGlobalDirectoriesTask::notifyFailed);
+    auto texturePacksTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("SharedResourcePacksPath").toString(),
+                                                             m_inst->texturePacksDir(), m_inst, "UseSharedResourcePacksFolder", m_parent);
+    connect(texturePacksTask.get(), &Task::failed, this, &UpdateSharedDirectoriesTask::notifyFailed);
     tasks->addTask(texturePacksTask);
 
     m_tasks = tasks;
 
-    connect(m_tasks.get(), &Task::succeeded, this, &UpdateGlobalDirectoriesTask::emitSucceeded);
+    connect(m_tasks.get(), &Task::succeeded, this, &UpdateSharedDirectoriesTask::emitSucceeded);
 
     m_tasks->start();
 }
 
-void UpdateGlobalDirectoriesTask::notifyFailed(QString reason)
+void UpdateSharedDirectoriesTask::notifyFailed(QString reason)
 {
     CustomMessageBox::selectable(m_parent, tr("Failed"), reason, QMessageBox::Warning, QMessageBox::Ok)->exec();
     emit failed(reason);

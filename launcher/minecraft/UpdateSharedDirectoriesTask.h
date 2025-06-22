@@ -4,10 +4,10 @@
 
 class MinecraftInstance;
 
-class UpdateGlobalDirectoriesTask : public Task {
+class UpdateSharedDirectoriesTask : public Task {
    public:
-    explicit UpdateGlobalDirectoriesTask(MinecraftInstance* inst, QWidget* parent = 0);
-    virtual ~UpdateGlobalDirectoriesTask();
+    explicit UpdateSharedDirectoriesTask(MinecraftInstance* inst, QWidget* parent = 0);
+    virtual ~UpdateSharedDirectoriesTask();
 
    protected:
     virtual void executeTask() override;

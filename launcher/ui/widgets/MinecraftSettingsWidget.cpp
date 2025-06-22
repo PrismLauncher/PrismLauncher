@@ -53,7 +53,8 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstancePtr instance, 
     m_ui->setupUi(this);
 
     if (m_instance == nullptr) {
-        m_ui->settingsTabs->removeTab(1);
+        m_ui->settingsTabs->removeTab(m_ui->settingsTabs->indexOf(m_ui->javaPage));
+        m_ui->settingsTabs->removeTab(m_ui->settingsTabs->indexOf(m_ui->sharedFoldersTab));
 
         m_ui->openGlobalSettingsButton->setVisible(false);
         m_ui->instanceAccountGroupBox->hide();
@@ -282,11 +283,11 @@ void MinecraftSettingsWidget::loadSettings()
         m_ui->quilt->blockSignals(false);
         m_ui->liteLoader->blockSignals(false);
 
-        // Global folders
-        m_ui->globalScreenshotsFolder->initialize(settings->get("UseGlobalScreenshotsFolder").toBool(), settings->get("GlobalScreenshotsPath").toString());
-        m_ui->globalSavesFolder->initialize(settings->get("UseGlobalSavesFolder").toBool(), settings->get("GlobalSavesPath").toString());
-        m_ui->globalResourcePacksFolder->initialize(settings->get("UseGlobalResourcePacksFolder").toBool(),
-                                                    settings->get("GlobalResourcePacksPath").toString());
+        // Shared folders
+        m_ui->sharedScreenshotsFolder->initialize(settings->get("UseSharedScreenshotsFolder").toBool(), settings->get("SharedScreenshotsPath").toString());
+        m_ui->sharedSavesFolder->initialize(settings->get("UseSharedSavesFolder").toBool(), settings->get("SharedSavesPath").toString());
+        m_ui->sharedResourcePacksFolder->initialize(settings->get("UseSharedResourcePacksFolder").toBool(),
+                                                    settings->get("SharedResourcePacksPath").toString());
     }
 
     m_ui->legacySettingsGroupBox->setChecked(settings->get("OverrideLegacySettings").toBool());
@@ -477,13 +478,13 @@ void MinecraftSettingsWidget::saveSettings()
         }
 
         if (m_instance != nullptr) {
-            // Global folders
-            settings->set("UseGlobalScreenshotsFolder", m_ui->globalScreenshotsFolder->isEnabled());
-            settings->set("GlobalScreenshotsPath", m_ui->globalScreenshotsFolder->getPath());
-            settings->set("UseGlobalSavesFolder", m_ui->globalSavesFolder->isEnabled());
-            settings->set("GlobalSavesPath", m_ui->globalSavesFolder->getPath());
-            settings->set("UseGlobalResourcePacksFolder", m_ui->globalResourcePacksFolder->isEnabled());
-            settings->set("GlobalResourcePacksPath", m_ui->globalResourcePacksFolder->getPath());
+            // Shared folders
+            settings->set("UseSharedScreenshotsFolder", m_ui->sharedScreenshotsFolder->isEnabled());
+            settings->set("SharedScreenshotsPath", m_ui->sharedScreenshotsFolder->getPath());
+            settings->set("UseSharedSavesFolder", m_ui->sharedSavesFolder->isEnabled());
+            settings->set("SharedSavesPath", m_ui->sharedSavesFolder->getPath());
+            settings->set("UseSharedResourcePacksFolder", m_ui->sharedResourcePacksFolder->isEnabled());
+            settings->set("SharedResourcePacksPath", m_ui->sharedResourcePacksFolder->getPath());
         }
     }
 

@@ -801,7 +801,7 @@ It is most likely you will need to change the path - please refer to the mod's w
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="globalFoldersTab">
+     <widget class="QWidget" name="sharedFoldersTab">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -809,11 +809,11 @@ It is most likely you will need to change the path - please refer to the mod's w
         </sizepolicy>
        </property>
        <attribute name="title">
-        <string>Global Folders</string>
+        <string>Shared Folders</string>
        </attribute>
-       <layout class="QVBoxLayout" name="globalFoldersVerticalLayout">
+       <layout class="QVBoxLayout" name="sharedFoldersVerticalLayout">
         <item>
-         <widget class="QGroupBox" name="globalFoldersGroupBox">
+         <widget class="QGroupBox" name="sharedFoldersGroupBox">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -826,28 +826,28 @@ It is most likely you will need to change the path - please refer to the mod's w
           <property name="alignment">
            <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
           </property>
-          <layout class="QVBoxLayout" name="globalFoldersSettingsVerticalLayout">
+          <layout class="QVBoxLayout" name="sharedFoldersSettingsVerticalLayout">
            <item>
-            <widget class="QLabel" name="globalFoldersWarning">
+            <widget class="QLabel" name="sharedFoldersWarning">
              <property name="text">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#f5c211;&quot;&gt;Warning&lt;/span&gt;&lt;span style=&quot; color:#f5c211;&quot;&gt;: After enabling files cannot be automatically restored to their original folder.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="GlobalFolderWidget" name="globalScreenshotsFolder" native="true"/>
+            <widget class="SharedFolderWidget" name="sharedScreenshotsFolder" native="true"/>
            </item>
            <item>
-            <widget class="GlobalFolderWidget" name="globalSavesFolder" native="true"/>
+            <widget class="SharedFolderWidget" name="sharedSavesFolder" native="true"/>
            </item>
            <item>
-            <widget class="GlobalFolderWidget" name="globalResourcePacksFolder" native="true"/>
+            <widget class="SharedFolderWidget" name="sharedResourcePacksFolder" native="true"/>
            </item>
           </layout>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="globalFoldersLabel">
+         <widget class="QLabel" name="sharedFoldersLabel">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -855,7 +855,7 @@ It is most likely you will need to change the path - please refer to the mod's w
            </sizepolicy>
           </property>
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A global folder is a folder that is shared across instances.&lt;/p&gt;&lt;p&gt;For example: If two instances share the same global saves folder, they can both play on the same worlds without having to copy the world over.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A shared folder is a folder that can be shared across instances.&lt;/p&gt;&lt;p&gt;For example: If two instances share the same shared saves folder, they can both play on the same worlds without having to copy the world over.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="scaledContents">
            <bool>false</bool>
@@ -888,9 +888,9 @@ It is most likely you will need to change the path - please refer to the mod's w
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>GlobalFolderWidget</class>
+   <class>SharedFolderWidget</class>
    <extends>QWidget</extends>
-   <header>ui/widgets/GlobalFolderWidget.h</header>
+   <header>ui/widgets/SharedFolderWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

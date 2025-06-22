@@ -25,9 +25,9 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QLabel" name="globalSavesFolderWarninglabel">
+     <widget class="QLabel" name="sharedSavesFolderWarninglabel">
       <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#f5c211;&quot;&gt;Warning: This is the global saves folder&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700; color:#f5c211;&quot;&gt;Warning&lt;/span&gt;&lt;span style=&quot; color:#f5c211;&quot;&gt;: This is a shared folder and potentially shared with multiple instances&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
     </item>
