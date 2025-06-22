@@ -294,6 +294,17 @@ class create_link : public QObject {
 bool move(const QString& source, const QString& dest);
 
 /**
+ * @brief Move a file or folder, and ask the user what to do in case of a conflict.
+ * @param source      What to move.
+ * @param destination Where to move it to.
+ * @param recursive   If true, all direct children will be moved 1 by 1.
+ *                    If false, the source will be directly moved to the destination.
+ * @param parent      The parent of the dialog.
+ * @return True if everything could be moved.
+ */
+bool interactiveMove(const QString& source, const QString& destination, bool recursive = false, QWidget* parent = nullptr);
+
+/**
  * Delete a folder recursively
  */
 bool deletePath(QString path);
@@ -586,5 +597,7 @@ bool isSymLink(const QString& path);
  * @return The target of a symbolic link. Empty if path is not a symbolic link.
  */
 QString getSymLinkTarget(const QString& path);
+
+bool tryCreateSymlink(const QString& source, const QString& destination, const QString& symlinkName = "symbolic link");
 
 }  // namespace FS

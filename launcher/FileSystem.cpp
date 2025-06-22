@@ -55,6 +55,8 @@
 #include "DesktopServices.h"
 #include "PSaveFile.h"
 #include "StringUtils.h"
+#include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/FileConflictDialog.h"
 
 #if defined Q_OS_WIN32
 #define NOMINMAX
@@ -672,6 +674,44 @@ bool move(const QString& source, const QString& dest)
         return false;
     }
     return true;
+}
+
+bool interactiveMove(const QString& source, const QString& destination, bool recursive /* = false */, QWidget* parent /* = nullptr */)
+{
+    const QFileInfo sourceInfo(source);
+
+            // Make sure the source exists.
+    if (!sourceInfo.exists())
+        return false;
+
+            // Recursive doesn't make sense if the source isn't a directory.
+    if (recursive && sourceInfo.isDir()) {
+        QDirIterator sourceIt(source, QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::Hidden | QDir::Filter::NoDotAndDotDot);
+
+        while (sourceIt.hasNext()) {
+            if (!interactiveMove(sourceIt.next(), FS::PathCombine(destination, sourceIt.fileName()), false))
+                return false;
+        }
+
+        return true;
+    }
+
+    if (QFile(destination).exists()) {
+        FileConflictDialog dialog(source, destination, true, parent);
+        FileConflictDialog::Result result = dialog.execWithResult();
+
+        switch(result) {
+            case FileConflictDialog::Cancel:
+                return false;
+            case FileConflictDialog::ChooseDestination:
+                return FS::deletePath(source);
+            case FileConflictDialog::ChooseSource:
+                FS::deletePath(destination);
+                break;
+        }
+    }
+
+    return FS::move(source, destination);
 }
 
 bool deletePath(QString path)
@@ -1709,6 +1749,53 @@ bool isSymLink(const QString& path)
 QString getSymLinkTarget(const QString& path)
 {
     return QFileInfo(path).symLinkTarget();
+}
+
+bool tryCreateSymlink(const QString& source, const QString& destination, const QString& symlinkName /* = "symbolic link" */) {
+    // Make sure that symbolic links are supported.
+    if (!FS::canLink(source, destination)) {
+        CustomMessageBox::selectable(nullptr, QObject::tr("Failed"), QObject::tr("Failed to create %1.\nSymbolic links are not supported on the filesystem").arg(symlinkName), QMessageBox::Warning, QMessageBox::Ok)->exec();
+        return false;
+    }
+
+    // Check if the destination already exists.
+    // If it's already a symlink, it might already be correct.
+    if (FS::isSymLink(destination)) {
+        // If the target of the symlink is already the source, there's nothing to do.
+        if (FS::getSymLinkTarget(destination) == source) {
+            return true;
+        }
+
+        FS::deletePath(destination);
+    } else if (QFileInfo::exists(destination)) {
+        if (!FS::checkFolderPathEmpty(destination)) {
+            if (!interactiveMove(destination, source, true)) {
+                CustomMessageBox::selectable(nullptr, QObject::tr("Failed"), QObject::tr("Failed to create %1.\nEnsure that \"%2\" is empty.").arg(symlinkName).arg(destination), QMessageBox::Warning, QMessageBox::Ok)->exec();
+                return false;
+            }
+        }
+
+        FS::deletePath(destination);
+    }
+
+    // Make sure the source folder exists
+    if (!FS::ensureFolderPathExists(source)) {
+        CustomMessageBox::selectable(nullptr, QObject::tr("Failed"), QObject::tr("Failed to create %1.\nEnsure that \"%2\" exists.").arg(symlinkName).arg(source), QMessageBox::Warning, QMessageBox::Ok)->exec();
+        return false;
+    }
+
+    FS::create_link folderLink(source, destination);
+    folderLink.linkRecursively(false);
+
+    if (!folderLink()) {
+        CustomMessageBox::selectable(nullptr, QObject::tr("Failed"), QObject::tr("Failed to create %1. Error %2: %3")
+            .arg(symlinkName)
+            .arg(folderLink.getOSError().value())
+            .arg(folderLink.getOSError().message().c_str()),
+        QMessageBox::Warning, QMessageBox::Ok)->exec();
+    }
+
+    return true;
 }
 
 }  // namespace FS

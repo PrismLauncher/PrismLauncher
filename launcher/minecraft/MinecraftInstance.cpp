@@ -85,7 +85,6 @@
 #include "AssetsUtils.h"
 #include "MinecraftLoadAndCheck.h"
 #include "PackProfile.h"
-#include "minecraft/UpdateSharedDirectoriesTask.h"
 #include "minecraft/gameoptions/GameOptions.h"
 #include "minecraft/update/FoldersTask.h"
 
@@ -1317,8 +1316,38 @@ QList<Mod*> MinecraftInstance::getJarMods() const
 void MinecraftInstance::applySettings()
 {
     // Shared directories
-    m_update_shared_directories_task = std::make_shared<UpdateSharedDirectoriesTask>(this);
-    m_update_shared_directories_task->start();
+    updateSharedDirectories();
+}
+
+bool MinecraftInstance::updateSharedDirectories()
+{
+    const std::vector<std::tuple<QString, QString, QString>> sharedDirectories = {
+        { "UseSharedScreenshotsFolder", m_settings->get("SharedScreenshotsPath").toString(), screenshotsDir() },
+        { "UseSharedSavesFolder", m_settings->get("SharedSavesPath").toString(), worldDir() },
+        { "UseSharedResourcePacksFolder", m_settings->get("SharedResourcePacksPath").toString(), resourcePacksDir() },
+        { "UseSharedResourcePacksFolder", m_settings->get("SharedResourcePacksPath").toString(), texturePacksDir() }
+    };
+
+    bool success = true;
+    for (const auto& [useSetting, source, destination] : sharedDirectories) {
+        // Create symlink if useSetting is true, remove symlink if false.
+        if (m_settings->get(useSetting).toBool())
+        {
+            // Try to create symlink, set setting to false if failed.
+            if(!FS::tryCreateSymlink(source, destination, tr("shared folder"))) {
+                m_settings->set(useSetting, false);
+                success = false;
+            }
+        }
+        else {
+            // Safety check
+            if (FS::isSymLink(destination)) {
+                success = FS::deletePath(destination) && success;
+            }
+        }
+    }
+
+    return success;
 }
 
 #include "MinecraftInstance.moc"
