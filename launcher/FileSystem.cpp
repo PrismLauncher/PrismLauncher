@@ -277,11 +277,6 @@ bool ensureFolderPathExists(const QString folderPathName)
     return ensureFolderPathExists(QFileInfo(folderPathName));
 }
 
-bool checkFolderPathExists(const QString& folderPathName)
-{
-    return QDir(folderPathName).exists();
-}
-
 bool checkFolderPathEmpty(const QString& folderPathName)
 {
     return QDir(folderPathName).isEmpty(QDir::Filters(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System));

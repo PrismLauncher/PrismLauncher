@@ -100,13 +100,6 @@ bool ensureFolderPathExists(const QFileInfo folderPath);
 bool ensureFolderPathExists(const QString folderPathName);
 
 /**
- * @brief Check if the given folder exists
- * @param folderPathName The path to a folder to check
- * @return True if the given folder exists
- */
-bool checkFolderPathExists(const QString& folderPathName);
-
-/**
  * @brief Check if the given folder is empty or doesn't exist
  * @param folderPathName The path to a folder to check
  * @return True if the given folder is empty or doesn't exist

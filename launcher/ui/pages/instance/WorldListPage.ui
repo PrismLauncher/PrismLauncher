@@ -43,7 +43,7 @@
        <bool>true</bool>
       </property>
       <property name="dragDropMode">
-       <enum>QAbstractItemView::DragDropMode::DragDrop</enum>
+       <enum>QAbstractItemView::DragDrop</enum>
       </property>
       <property name="alternatingRowColors">
        <bool>true</bool>
@@ -72,10 +72,10 @@
     <string>Actions</string>
    </property>
    <property name="allowedAreas">
-    <set>Qt::ToolBarArea::LeftToolBarArea|Qt::ToolBarArea::RightToolBarArea</set>
+    <set>Qt::LeftToolBarArea|Qt::RightToolBarArea</set>
    </property>
    <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
+    <enum>Qt::ToolButtonTextOnly</enum>
    </property>
    <property name="floatable">
     <bool>false</bool>

@@ -824,7 +824,7 @@ It is most likely you will need to change the path - please refer to the mod's w
            <string>Settings</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
           </property>
           <layout class="QVBoxLayout" name="sharedFoldersSettingsVerticalLayout">
            <item>
@@ -861,7 +861,7 @@ It is most likely you will need to change the path - please refer to the mod's w
            <bool>false</bool>
           </property>
           <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
           </property>
           <property name="wordWrap">
            <bool>true</bool>

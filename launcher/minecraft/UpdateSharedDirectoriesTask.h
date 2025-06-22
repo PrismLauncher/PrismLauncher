@@ -6,8 +6,8 @@ class MinecraftInstance;
 
 class UpdateSharedDirectoriesTask : public Task {
    public:
-    explicit UpdateSharedDirectoriesTask(MinecraftInstance* inst, QWidget* parent = 0);
-    virtual ~UpdateSharedDirectoriesTask();
+    explicit UpdateSharedDirectoriesTask(MinecraftInstance* inst);
+    virtual ~UpdateSharedDirectoriesTask = default;
 
    protected:
     virtual void executeTask() override;
@@ -17,6 +17,5 @@ class UpdateSharedDirectoriesTask : public Task {
 
    private:
     MinecraftInstance* m_inst;
-    QWidget* m_parent;
     Task::Ptr m_tasks;
 };

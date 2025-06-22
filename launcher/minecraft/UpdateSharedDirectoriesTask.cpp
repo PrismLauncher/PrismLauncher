@@ -42,12 +42,15 @@ bool interactiveMove(const QString& source, const QString& destination, bool rec
         FileConflictDialog dialog(source, destination, true, parent);
         FileConflictDialog::Result result = dialog.execWithResult();
 
-        if (result == FileConflictDialog::Cancel)
+        switch(result) {
+        case FileConflictDialog::Cancel:
             return false;
-        else if (result == FileConflictDialog::ChooseDestination)
+        case FileConflictDialog::ChooseDestination:
             return FS::deletePath(source);
-        else if (result == FileConflictDialog::ChooseSource)
+        case FileConflictDialog::ChooseSource:
             FS::deletePath(destination);
+            break;
+        }
     }
 
     return FS::move(source, destination);
@@ -58,9 +61,8 @@ class TryCreateSymlinkTask : public Task {
     explicit TryCreateSymlinkTask(const QString& source,
                                   const QString& destination,
                                   MinecraftInstance* instance,
-                                  const QString& setting,
-                                  QWidget* parent)
-        : m_source(source), m_destination(destination), m_inst(instance), m_setting(setting), m_parent(parent)
+                                  const QString& setting)
+        : m_source(source), m_destination(destination), m_inst(instance), m_setting(setting)
     {
         setObjectName("TryCreateSymlinkTask");
     }
@@ -98,9 +100,9 @@ class TryCreateSymlinkTask : public Task {
             }
 
             FS::deletePath(m_destination);
-        } else if (FS::checkFolderPathExists(m_destination)) {
+        } else if (QFileInfo::exists(m_destination)) {
             if (!FS::checkFolderPathEmpty(m_destination)) {
-                if (!interactiveMove(m_destination, m_source, true, m_parent)) {
+                if (!interactiveMove(m_destination, m_source, true)) {
                     fail(tr("Failed to create shared folder.\nEnsure that \"%1\" is empty.").arg(m_destination));
                     return;
                 }
@@ -140,36 +142,33 @@ class TryCreateSymlinkTask : public Task {
     QString m_destination;
     MinecraftInstance* m_inst;
     QString m_setting;
-    QWidget* m_parent;
 };
 
-UpdateSharedDirectoriesTask::UpdateSharedDirectoriesTask(MinecraftInstance* inst, QWidget* parent)
-    : Task(parent), m_inst(inst), m_parent(parent)
+UpdateSharedDirectoriesTask::UpdateSharedDirectoriesTask(MinecraftInstance* inst)
+    : Task(), m_inst(inst)
 {}
-
-UpdateSharedDirectoriesTask::~UpdateSharedDirectoriesTask() {}
 
 void UpdateSharedDirectoriesTask::executeTask()
 {
     auto tasks = makeShared<ConcurrentTask>("UpdateSharedDirectoriesTask");
 
     auto screenshotsTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("SharedScreenshotsPath").toString(),
-                                                            m_inst->screenshotsDir(), m_inst, "UseSharedScreenshotsFolder", m_parent);
+                                                            m_inst->screenshotsDir(), m_inst, "UseSharedScreenshotsFolder");
     connect(screenshotsTask.get(), &Task::failed, this, &UpdateSharedDirectoriesTask::notifyFailed);
     tasks->addTask(screenshotsTask);
 
     auto savesTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("SharedSavesPath").toString(), m_inst->worldDir(), m_inst,
-                                                      "UseSharedSavesFolder", m_parent);
+                                                      "UseSharedSavesFolder");
     connect(savesTask.get(), &Task::failed, this, &UpdateSharedDirectoriesTask::notifyFailed);
     tasks->addTask(savesTask);
 
     auto resoucePacksTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("SharedResourcePacksPath").toString(),
-                                                             m_inst->resourcePacksDir(), m_inst, "UseSharedResourcePacksFolder", m_parent);
+                                                             m_inst->resourcePacksDir(), m_inst, "UseSharedResourcePacksFolder");
     connect(resoucePacksTask.get(), &Task::failed, this, &UpdateSharedDirectoriesTask::notifyFailed);
     tasks->addTask(resoucePacksTask);
 
     auto texturePacksTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("SharedResourcePacksPath").toString(),
-                                                             m_inst->texturePacksDir(), m_inst, "UseSharedResourcePacksFolder", m_parent);
+                                                             m_inst->texturePacksDir(), m_inst, "UseSharedResourcePacksFolder");
     connect(texturePacksTask.get(), &Task::failed, this, &UpdateSharedDirectoriesTask::notifyFailed);
     tasks->addTask(texturePacksTask);
 
@@ -182,6 +181,6 @@ void UpdateSharedDirectoriesTask::executeTask()
 
 void UpdateSharedDirectoriesTask::notifyFailed(QString reason)
 {
-    CustomMessageBox::selectable(m_parent, tr("Failed"), reason, QMessageBox::Warning, QMessageBox::Ok)->exec();
+    CustomMessageBox::selectable(nullptr, tr("Failed"), reason, QMessageBox::Warning, QMessageBox::Ok)->exec();
     emit failed(reason);
 }

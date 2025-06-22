@@ -1317,7 +1317,7 @@ QList<Mod*> MinecraftInstance::getJarMods() const
 void MinecraftInstance::applySettings()
 {
     // Shared directories
-    m_update_shared_directories_task = std::make_shared<UpdateSharedDirectoriesTask>(this, nullptr);
+    m_update_shared_directories_task = std::make_shared<UpdateSharedDirectoriesTask>(this);
     m_update_shared_directories_task->start();
 }
 
