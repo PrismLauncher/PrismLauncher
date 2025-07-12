@@ -6,12 +6,12 @@
 </picture>
 </p>
 
-Re-Prism is a <b>fork</b> of the official [PrismLauncher](https://github.com/PrismLauncher/PrismLauncher) , with some personal changes, and is <b>not</b> endorsed by the official source by any means.
+Re-Prism is a <b>fork</b> of the official [PrismLauncher](https://github.com/PrismLauncher/PrismLauncher), with some personal changes, and is <b>not</b> endorsed by the official source by any means.
 
 ## Downloading/Installation
 
-- You can dowload the latest stable build from the [releases](https://github.com/itsMeRaj69/Re-Prism/releases) section.
-- Pre-release or Canary builds can also be found on the [Github Actions](https://github.com/itsMeRaj69/Re-Prism/actions) tab (Note: Canary Builds may have bugs and are not recommended for daily use.)
+- You can dowload the latest stable builds from the [releases](https://github.com/itsMeRaj69/Re-Prism/releases) page.
+- Pre-Release or Canary builds can also be found on the [Github Actions](https://github.com/itsMeRaj69/Re-Prism/actions) tab. (Note: Canary Builds may have bugs and are not recommended for daily use.)
 
 ## Building
 
