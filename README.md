@@ -8,6 +8,12 @@
 
 Re-Prism is a <b>fork</b> of the official [PrismLauncher](https://github.com/PrismLauncher/PrismLauncher), with some personal changes, and is <b>not</b> endorsed by the official source by any means.
 
+## Roadmap
+
+- [x] Enable Offline Mode without requiring Minecraft Login
+- [ ] Test compatibility with older/newer Minecraft versions
+- [ ] Polish and prepare a stable release
+
 ## Downloading/Installation
 
 - You can dowload the latest stable builds from the [releases](https://github.com/itsMeRaj69/Re-Prism/releases) page.
