@@ -6,18 +6,16 @@
 </picture>
 </p>
 
-<p align="center">
-This is a <b>fork</b> of the official PrismLauncher, with some personal changes, and is <b>not</b> endorsed by the official source by any means.
-</p>
+Re-Prism is a <b>fork</b> of the official [PrismLauncher](https://github.com/PrismLauncher/PrismLauncher) , with some personal changes, and is <b>not</b> endorsed by the official source by any means.
 
 ## Downloading/Installation
 
-- You can dowload the latest stable build from the [release](https://github.com/itsMeRaj69/Re-PrismLauncher) section.
-- Pre-release or Canary builds can also be downloaded from the [Github Actions](https://github.com/itsMeRaj69/Re-PrismLauncher/actions) tab (Note: Canary Builds may have bugs and are not recommended for daily use.)
+- You can dowload the latest stable build from the [releases](https://github.com/itsMeRaj69/Re-Prism/releases) section.
+- Pre-release or Canary builds can also be found on the [Github Actions](https://github.com/itsMeRaj69/Re-Prism/actions) tab (Note: Canary Builds may have bugs and are not recommended for daily use.)
 
 ## Building
 
-If you want to build Prism Launcher yourself, check the build instructions:
+If you want to build Re-Prism yourself, you check PrismLauncher's official build instructions:
 
 - [Windows](https://prismlauncher.org/wiki/development/build-instructions/windows/)
 - [Linux](https://prismlauncher.org/wiki/development/build-instructions/linux/)
