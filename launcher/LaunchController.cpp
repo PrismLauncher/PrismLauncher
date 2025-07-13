@@ -136,15 +136,24 @@ bool LaunchController::askPlayDemo()
     QMessageBox box(m_parentWidget);
     box.setWindowTitle(tr("Play demo?"));
     box.setText(
-        tr("This account does not own Minecraft.\nYou need to purchase the game first to play it.\n\nDo you want to play "
-           "the demo?"));
+        tr("This account does not own Minecraft.\n"
+           "You need to purchase the game first to play it.\n\n"
+           "Do you want to play the demo?"));
     box.setIcon(QMessageBox::Warning);
+
     auto demoButton = box.addButton(tr("Play Demo"), QMessageBox::ButtonRole::YesRole);
-    auto cancelButton = box.addButton(tr("Cancel"), QMessageBox::ButtonRole::NoRole);
-    box.setDefaultButton(cancelButton);
+    auto continueButton = box.addButton(tr("Continue Anyway"), QMessageBox::ButtonRole::AcceptRole);
+    auto cancelButton = box.addButton(tr("Cancel"), QMessageBox::ButtonRole::RejectRole);
 
     box.exec();
-    return box.clickedButton() == demoButton;
+
+    if (box.clickedButton() == demoButton) {
+        return true;
+    } else if (box.clickedButton() == continueButton) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 QString LaunchController::askOfflineName(QString playerName, bool demo, bool& ok)
