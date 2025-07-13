@@ -96,7 +96,17 @@ final class LegacyLauncher extends AbstractLauncher {
 
     @Override
     public void launch() throws Throwable {
-        Class<?> main = ClassLoader.getSystemClassLoader().loadClass(mainClassName);
+        Class<?> applet = ClassLoader.getSystemClassLoader().loadClass(appletClass);
+        Class<?> main;
+        try {
+            // Try the main class given by parameters
+            main = ClassLoader.getSystemClassLoader().loadClass(mainClassName);
+        } catch (ClassNotFoundException e) {
+            // If it failed (net.minecraft.client.Minecraft was typically obfuscated when the Applet existed),
+            // detect from the Applet. Required for meta sources that strip or omit the main class, such as OmniArchive.
+            main = findClientClass(applet);
+        }
+
         Field gameDirField = findMinecraftGameDirField(main);
 
         if (gameDirField != null) {
@@ -108,7 +118,7 @@ final class LegacyLauncher extends AbstractLauncher {
             System.setProperty("minecraft.applet.TargetDirectory", gameDir);
 
             try {
-                LegacyFrame window = new LegacyFrame(title, createAppletClass(appletClass));
+                LegacyFrame window = new LegacyFrame(title, createAppletInstance(applet));
 
                 window.start(user, session, width, height, maximize, serverAddress, serverPort, gameArgs.contains("--demo"));
                 return;
@@ -123,11 +133,19 @@ final class LegacyLauncher extends AbstractLauncher {
         method.invokeExact(gameArgs.toArray(new String[0]));
     }
 
-    private static Applet createAppletClass(String clazz) throws Throwable {
-        Class<?> appletClass = ClassLoader.getSystemClassLoader().loadClass(clazz);
-
-        MethodHandle appletConstructor = MethodHandles.lookup().findConstructor(appletClass, MethodType.methodType(void.class));
+    private static Applet createAppletInstance(Class<?> clazz) throws Throwable {
+        MethodHandle appletConstructor = MethodHandles.lookup().findConstructor(clazz, MethodType.methodType(void.class));
         return (Applet) appletConstructor.invoke();
+    }
+
+    private static Class<?> findClientClass(Class<?> appletClass) {
+        for (Field field : appletClass.getDeclaredFields()) {
+            if (Runnable.class.isAssignableFrom(field.getType())) {
+                return field.getType();
+            }
+        }
+
+        throw new RuntimeException("Failed to find client class in applet class " + appletClass.getName());
     }
 
     private static Field findMinecraftGameDirField(Class<?> clazz) {
