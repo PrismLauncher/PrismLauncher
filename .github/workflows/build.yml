@@ -3,7 +3,8 @@ name: Build
 on:
   push:
     branches:
-      - "dev" 
+      - "dev"
+      - "feat/**"
     paths:
       # File types
       - "**.cpp"
