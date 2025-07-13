@@ -14,10 +14,11 @@ Re-Prism is a <b>fork</b> of the official [PrismLauncher](https://github.com/Pri
 - [ ] Test compatibility with older/newer Minecraft versions
 - [ ] Polish and prepare a stable release
 
-## Downloading/Installation
+### 📦 Downloading & Installation
 
-- You can dowload the latest stable builds from the [releases](https://github.com/itsMeRaj69/Re-Prism/releases) page.
-- Pre-Release or Canary builds can also be found on the [Github Actions](https://github.com/itsMeRaj69/Re-Prism/actions) tab. (Note: Canary Builds may have bugs and are not recommended for daily use.)
+- You can download the latest stable builds from the [Releases](https://github.com/itsMeRaj69/Re-Prism/releases) page.
+- Pre-release and development builds are available via [GitHub Actions](https://github.com/itsMeRaj69/Re-Prism/actions). *(Note: You must be logged in to your GitHub account to download artifacts.)*
+- Or grab the latest build directly from the [Nightly Link](https://nightly.link/itsMeRaj69/Re-Prism/workflows/build/dev)
 
 ## Building
 
