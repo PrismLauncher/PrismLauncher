@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env sh
 
 # Run this script from the directory containing "PrismLauncher.app"
 
