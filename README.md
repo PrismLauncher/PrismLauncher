@@ -14,7 +14,7 @@ Re-Prism is a <b>fork</b> of the official [PrismLauncher](https://github.com/Pri
 - [ ] Test compatibility with older/newer Minecraft versions
 - [ ] Polish and prepare a stable release
 
-### 📦 Downloading & Installation
+### Downloading & Installation
 
 - You can download the latest stable builds from the [Releases](https://github.com/itsMeRaj69/Re-Prism/releases) page.
 - Pre-release and development builds are available via [GitHub Actions](https://github.com/itsMeRaj69/Re-Prism/actions). *(Note: You must be logged in to your GitHub account to download artifacts.)*
