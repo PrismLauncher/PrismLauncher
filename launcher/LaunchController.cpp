@@ -150,7 +150,7 @@ bool LaunchController::askPlayDemo()
     if (box.clickedButton() == demoButton) {
         return true;
     } else if (box.clickedButton() == continueButton) {
-        return true;
+        return false;
     } else {
         return false;
     }
