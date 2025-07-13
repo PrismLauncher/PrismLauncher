@@ -29,13 +29,10 @@ if cd "../XPCServices"; then
 fi
 
 ################ PLUGINS ################
+cd "../PlugIns" || exit 1
+codesign -f -s "${CODE_SIGN_IDENTITY[@]}" */*.dylib
 cd "../MacOS" || exit 1
-codesign -f -s "${CODE_SIGN_IDENTITY[@]}" iconengines/*.dylib
-codesign -f -s "${CODE_SIGN_IDENTITY[@]}" imageformats/*.dylib
-codesign -f -s "${CODE_SIGN_IDENTITY[@]}" platforms/*.dylib
 codesign -f -s "${CODE_SIGN_IDENTITY[@]}" jars/*.jar
-codesign -f -s "${CODE_SIGN_IDENTITY[@]}" styles/*.dylib
-codesign -f -s "${CODE_SIGN_IDENTITY[@]}" tls/*.dylib
 
 ################ APP ################
 cd "../../.." || exit 1
