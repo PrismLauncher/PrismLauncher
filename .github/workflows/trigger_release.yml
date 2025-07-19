@@ -1,4 +1,4 @@
-name: Build Application and Make Release
+name: Trigger - Build Application and Make Release
 
 on:
   push:
