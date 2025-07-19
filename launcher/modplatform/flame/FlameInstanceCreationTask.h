@@ -92,4 +92,6 @@ class FlameCreationTask final : public InstanceCreationTask {
     QList<std::pair<QString, QString>> m_otherResources;
 
     std::optional<InstancePtr> m_instance;
+
+    QStringList m_selectedOptionalMods;
 };

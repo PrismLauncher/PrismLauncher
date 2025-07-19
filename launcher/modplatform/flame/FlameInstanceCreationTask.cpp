@@ -493,16 +493,35 @@ bool FlameCreationTask::createInstance()
 
 void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
 {
-    auto results = m_modIdResolver->getResults();
+    auto results = m_modIdResolver->getResults().files;
+
+    QStringList optionalFiles;
+    for (auto& result : results) {
+        if (!result.required) {
+            optionalFiles << FS::PathCombine(result.targetFolder, result.version.fileName);
+        }
+    }
+
+    if (!optionalFiles.empty()) {
+        OptionalModDialog optionalModDialog(m_parent, optionalFiles);
+        if (optionalModDialog.exec() == QDialog::Rejected) {
+            emitAborted();
+            loop.quit();
+            return;
+        }
+
+        m_selectedOptionalMods = optionalModDialog.getResult();
+    }
 
     // first check for blocked mods
     QList<BlockedMod> blocked_mods;
     auto anyBlocked = false;
-    for (const auto& result : results.files.values()) {
+    for (const auto& result : results.values()) {
         if (result.resourceType != PackedResourceType::Mod) {
             m_otherResources.append(std::make_pair(result.version.fileName, result.targetFolder));
         }
 
+        // skip optional mods that were not selected
         if (result.version.downloadUrl.isEmpty()) {
             BlockedMod blocked_mod;
             blocked_mod.name = result.version.fileName;
@@ -511,6 +530,10 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
             blocked_mod.matched = false;
             blocked_mod.localPath = "";
             blocked_mod.targetFolder = result.targetFolder;
+            auto fileName = result.version.fileName;
+            fileName = FS::RemoveInvalidPathChars(fileName);
+            auto relpath = FS::PathCombine(result.targetFolder, fileName);
+            blocked_mod.disabled = !result.required && !m_selectedOptionalMods.contains(relpath);
 
             blocked_mods.append(blocked_mod);
 
@@ -546,30 +569,12 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
     m_filesJob.reset(new NetJob(tr("Mod Download Flame"), APPLICATION->network()));
     auto results = m_modIdResolver->getResults().files;
 
-    QStringList optionalFiles;
-    for (auto& result : results) {
-        if (!result.required) {
-            optionalFiles << FS::PathCombine(result.targetFolder, result.version.fileName);
-        }
-    }
-
-    QStringList selectedOptionalMods;
-    if (!optionalFiles.empty()) {
-        OptionalModDialog optionalModDialog(m_parent, optionalFiles);
-        if (optionalModDialog.exec() == QDialog::Rejected) {
-            emitAborted();
-            loop.quit();
-            return;
-        }
-
-        selectedOptionalMods = optionalModDialog.getResult();
-    }
     for (const auto& result : results) {
         auto fileName = result.version.fileName;
         fileName = FS::RemoveInvalidPathChars(fileName);
         auto relpath = FS::PathCombine(result.targetFolder, fileName);
 
-        if (!result.required && !selectedOptionalMods.contains(relpath)) {
+        if (!result.required && !m_selectedOptionalMods.contains(relpath)) {
             relpath += ".disabled";
         }
 
@@ -617,6 +622,8 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
         }
 
         auto destPath = FS::PathCombine(m_stagingPath, "minecraft", mod.targetFolder, mod.name);
+        if (mod.disabled)
+            destPath += ".disabled";
 
         setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
 
