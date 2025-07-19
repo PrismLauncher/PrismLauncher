@@ -141,10 +141,11 @@ void AccountListPage::on_actionAddMicrosoft_triggered()
 
 void AccountListPage::on_actionAddOffline_triggered()
 {
-// Deleted the logic to allow creation of
-// Offline account
-    MinecraftAccountPtr account =
-        OfflineLoginDialog::newAccount(this, tr("Please enter your desired username to add your offline account."));
+    if (!m_accounts->anyAccountIsValid()) {
+        QMessageBox::warning(this, tr("Warning"), tr("Please be less broke next time and actually own Minecraft ;)"));
+    }
+
+    MinecraftAccountPtr account = OfflineLoginDialog::newAccount(this, tr("Please enter your desired username to add your offline account."));
 
     if (account) {
         m_accounts->addAccount(account);
@@ -153,7 +154,6 @@ void AccountListPage::on_actionAddOffline_triggered()
         }
     }
 }
-
 void AccountListPage::on_actionRemove_triggered()
 {
     auto response = CustomMessageBox::selectable(this, tr("Remove account?"), tr("Do you really want to delete this account?"),
