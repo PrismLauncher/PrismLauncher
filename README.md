@@ -17,12 +17,12 @@ Re-Prism is a <b>fork</b> of the official [PrismLauncher](https://github.com/Pri
 ### Downloading & Installation
 
 - You can download the latest stable builds from the [Releases](https://github.com/itsMeRaj69/Re-Prism/releases) page.
-- Pre-release and development builds are available via [GitHub Actions](https://github.com/itsMeRaj69/Re-Prism/actions). *(Note: You must be logged in to your GitHub account to download artifacts.)*
+- Development and Test builds are available via [GitHub Actions](https://github.com/itsMeRaj69/Re-Prism/actions). *(Note: You must be logged in to your GitHub account to download artifacts.)*
 - Or grab the latest build directly from the [Nightly Link](https://nightly.link/itsMeRaj69/Re-Prism/workflows/build/dev)
 
 ## Building
 
-If you want to build Re-Prism yourself, you check PrismLauncher's official build instructions:
+If you want to build Re-Prism yourself, you can check PrismLauncher's official build instructions:
 
 - [Windows](https://prismlauncher.org/wiki/development/build-instructions/windows/)
 - [Linux](https://prismlauncher.org/wiki/development/build-instructions/linux/)
