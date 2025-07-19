@@ -87,23 +87,23 @@ void LaunchController::decideAccount()
 
     // Find an account to use.
     auto accounts = APPLICATION->accounts();
-
-    // If no accounts exist, show prompt to add one
-    if (accounts->count() <= 0) {
+    if (accounts->count() <= 0 || !accounts->anyAccountIsValid()) {
+        // Tell the user they need to log in at least one account in order to play.
         auto reply = CustomMessageBox::selectable(m_parentWidget, tr("No Accounts"),
-                                                  tr("No accounts found. Would you like to open the account manager to add one now?"),
+                                                  tr("In order to play Minecraft, you must have at least one Microsoft "
+                                                     "account which owns Minecraft logged in. "
+                                                     "Would you like to open the account manager to add an account now?"),
                                                   QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)
                          ->exec();
 
         if (reply == QMessageBox::Yes) {
+            // Open the account manager.
             APPLICATION->ShowGlobalSettings(m_parentWidget, "accounts");
+        } else if (reply == QMessageBox::No) {
+            // Do not open "profile select" dialog.
+            return;
         }
-
-        return;
     }
-
-    // Skipping Microsoft account validity check to allow offline/local use
-    // Removed: anyAccountIsValid() check
 
     // Select the account to use. If the instance has a specific account set, that will be used. Otherwise, the default account will be used
     auto instanceAccountId = m_instance->settings()->get("InstanceAccountId").toString();
@@ -136,24 +136,15 @@ bool LaunchController::askPlayDemo()
     QMessageBox box(m_parentWidget);
     box.setWindowTitle(tr("Play demo?"));
     box.setText(
-        tr("This account does not own Minecraft.\n"
-           "You need to purchase the game first to play it.\n\n"
-           "Do you want to play the demo?"));
+        tr("This account does not own Minecraft.\nYou need to purchase the game first to play it.\n\nDo you want to play "
+           "the demo?"));
     box.setIcon(QMessageBox::Warning);
-
     auto demoButton = box.addButton(tr("Play Demo"), QMessageBox::ButtonRole::YesRole);
-    auto continueButton = box.addButton(tr("Continue Anyway"), QMessageBox::ButtonRole::AcceptRole);
-    auto cancelButton = box.addButton(tr("Cancel"), QMessageBox::ButtonRole::RejectRole);
+    auto cancelButton = box.addButton(tr("Cancel"), QMessageBox::ButtonRole::NoRole);
+    box.setDefaultButton(cancelButton);
 
     box.exec();
-
-    if (box.clickedButton() == demoButton) {
-        return true;
-    } else if (box.clickedButton() == continueButton) {
-        return false;
-    } else {
-        return false;
-    }
+    return box.clickedButton() == demoButton;
 }
 
 QString LaunchController::askOfflineName(QString playerName, bool demo, bool& ok)
