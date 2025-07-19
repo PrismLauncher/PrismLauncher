@@ -218,3 +218,4 @@ jobs:
 
           windows-codesign-cert: ${{ secrets.WINDOWS_CODESIGN_CERT }}
           windows-codesign-password: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
+
