@@ -190,7 +190,6 @@
     <addaction name="actionViewLauncherRootFolder"/>
     <addaction name="separator"/>
     <addaction name="actionViewInstanceFolder"/>
-    <addaction name="actionViewCentralModsFolder"/>
     <addaction name="actionViewSkinsFolder"/>
     <addaction name="actionViewJavaFolder"/>
     <addaction name="separator"/>
@@ -543,17 +542,6 @@
    </property>
    <property name="toolTip">
     <string>Open the launcher's root folder in a file browser.</string>
-   </property>
-  </action>
-  <action name="actionViewCentralModsFolder">
-   <property name="icon">
-    <iconset theme="centralmods"/>
-   </property>
-   <property name="text">
-    <string>&amp;Central Mods</string>
-   </property>
-   <property name="toolTip">
-    <string>Open the central mods folder in a file browser.</string>
    </property>
   </action>
   <action name="actionViewSkinsFolder">

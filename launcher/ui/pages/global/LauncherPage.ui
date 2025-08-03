@@ -271,16 +271,6 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="labelModsDir">
-            <property name="text">
-             <string>&amp;Mods:</string>
-            </property>
-            <property name="buddy">
-             <cstring>modsDirTextBox</cstring>
-            </property>
-           </widget>
-          </item>
           <item row="3" column="2">
            <widget class="QPushButton" name="javaDirBrowseBtn">
             <property name="text">
@@ -300,9 +290,6 @@
           </item>
           <item row="5" column="1">
            <widget class="QLineEdit" name="downloadsDirTextBox"/>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="modsDirTextBox"/>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="labelInstDir">
@@ -330,13 +317,6 @@
           </item>
           <item row="0" column="1">
            <widget class="QLineEdit" name="instDirTextBox"/>
-          </item>
-          <item row="1" column="2">
-           <widget class="QPushButton" name="modsDirBrowseBtn">
-            <property name="text">
-             <string>Browse</string>
-            </property>
-           </widget>
           </item>
           <item row="3" column="1">
            <widget class="QLineEdit" name="javaDirTextBox"/>
@@ -644,8 +624,6 @@
   <tabstop>updateIntervalSpinBox</tabstop>
   <tabstop>instDirTextBox</tabstop>
   <tabstop>instDirBrowseBtn</tabstop>
-  <tabstop>modsDirTextBox</tabstop>
-  <tabstop>modsDirBrowseBtn</tabstop>
   <tabstop>iconsDirTextBox</tabstop>
   <tabstop>iconsDirBrowseBtn</tabstop>
   <tabstop>javaDirTextBox</tabstop>

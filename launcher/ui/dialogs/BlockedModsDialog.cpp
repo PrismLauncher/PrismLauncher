@@ -189,14 +189,12 @@ void BlockedModsDialog::directoryChanged(QString path)
     scanPath(path, true);
 }
 
-/// @brief add the user downloads folder and the global mods folder to the filesystem watcher
+/// @brief add the user downloads folder to the filesystem watcher
 void BlockedModsDialog::setupWatch()
 {
     const QString downloadsFolder = APPLICATION->settings()->get("DownloadsDir").toString();
-    const QString modsFolder = APPLICATION->settings()->get("CentralModsDir").toString();
     const bool downloadsFolderWatchRecursive = APPLICATION->settings()->get("DownloadsDirWatchRecursive").toBool();
     watchPath(downloadsFolder, downloadsFolderWatchRecursive);
-    watchPath(modsFolder, true);
 }
 
 void BlockedModsDialog::watchPath(QString path, bool watch_recursive)

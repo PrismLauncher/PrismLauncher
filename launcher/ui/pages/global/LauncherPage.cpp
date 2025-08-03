@@ -151,17 +151,6 @@ void LauncherPage::on_iconsDirBrowseBtn_clicked()
     }
 }
 
-void LauncherPage::on_modsDirBrowseBtn_clicked()
-{
-    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Mods Folder"), ui->modsDirTextBox->text());
-
-    // do not allow current dir - it's dirty. Do not allow dirs that don't exist
-    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
-        QString cooked_dir = FS::NormalizePath(raw_dir);
-        ui->modsDirTextBox->setText(cooked_dir);
-    }
-}
-
 void LauncherPage::on_downloadsDirBrowseBtn_clicked()
 {
     QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Downloads Folder"), ui->downloadsDirTextBox->text());
@@ -222,7 +211,6 @@ void LauncherPage::applySettings()
     // Folders
     // TODO: Offer to move instances to new instance folder.
     s->set("InstanceDir", ui->instDirTextBox->text());
-    s->set("CentralModsDir", ui->modsDirTextBox->text());
     s->set("IconsDir", ui->iconsDirTextBox->text());
     s->set("DownloadsDir", ui->downloadsDirTextBox->text());
     s->set("SkinsDir", ui->skinsDirTextBox->text());
@@ -283,7 +271,6 @@ void LauncherPage::loadSettings()
 
     // Folders
     ui->instDirTextBox->setText(s->get("InstanceDir").toString());
-    ui->modsDirTextBox->setText(s->get("CentralModsDir").toString());
     ui->iconsDirTextBox->setText(s->get("IconsDir").toString());
     ui->downloadsDirTextBox->setText(s->get("DownloadsDir").toString());
     ui->skinsDirTextBox->setText(s->get("SkinsDir").toString());

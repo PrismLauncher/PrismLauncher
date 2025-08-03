@@ -111,7 +111,6 @@ class MainWindow : public QMainWindow {
     void on_actionViewLauncherRootFolder_triggered();
 
     void on_actionViewInstanceFolder_triggered();
-    void on_actionViewCentralModsFolder_triggered();
 
     void on_actionViewIconThemeFolder_triggered();
     void on_actionViewWidgetThemeFolder_triggered();

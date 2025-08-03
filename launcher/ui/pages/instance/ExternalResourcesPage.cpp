@@ -211,7 +211,7 @@ void ExternalResourcesPage::addItem()
 {
     auto list = GuiUtil::BrowseForFiles(
         helpPage(), tr("Select %1", "Select whatever type of files the page contains. Example: 'Loader Mods'").arg(displayName()),
-        m_fileSelectionFilter.arg(displayName()), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+        m_fileSelectionFilter.arg(displayName()), APPLICATION->settings()->get("DownloadsDir").toString(), this->parentWidget());
 
     if (!list.isEmpty()) {
         for (auto filename : list) {
