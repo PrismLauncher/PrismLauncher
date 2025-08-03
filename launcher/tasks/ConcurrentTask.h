@@ -88,7 +88,7 @@ class ConcurrentTask : public Task {
 
    protected:
     // NOTE: This is not thread-safe.
-    [[nodiscard]] unsigned int totalSize() const { return static_cast<unsigned int>(m_queue.size() + m_doing.size() + m_done.size()); }
+    unsigned int totalSize() const { return static_cast<unsigned int>(m_queue.size() + m_doing.size() + m_done.size()); }
 
     virtual void updateState();
 

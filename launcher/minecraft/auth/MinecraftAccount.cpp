@@ -181,8 +181,10 @@ void MinecraftAccount::authFailed(QString reason)
             data.validity_ = Validity::None;
             emit changed();
         } break;
+        case AccountTaskState::STATE_WORKING: {
+            data.accountState = AccountState::Unchecked;
+        } break;
         case AccountTaskState::STATE_CREATED:
-        case AccountTaskState::STATE_WORKING:
         case AccountTaskState::STATE_SUCCEEDED: {
             // Not reachable here, as they are not failures.
         }

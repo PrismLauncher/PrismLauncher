@@ -9,7 +9,7 @@
   jdk17,
   kdePackages,
   libnbtplusplus,
-  qt-qrcodegenerator,
+  qrcodegenerator,
   ninja,
   self,
   stripJavaArchivesHook,
@@ -64,8 +64,8 @@ stdenv.mkDerivation {
     rm -rf source/libraries/libnbtplusplus
     ln -s ${libnbtplusplus} source/libraries/libnbtplusplus
 
-    rm -rf source/libraries/qt-qrcodegenerator/QR-Code-generator
-    ln -s ${qt-qrcodegenerator} source/libraries/qt-qrcodegenerator/QR-Code-generator
+    rm -rf source/libraries/qrcodegenerator
+    ln -s ${qrcodegenerator} source/libraries/qrcodegenerator
   '';
 
   nativeBuildInputs = [

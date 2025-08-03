@@ -22,7 +22,7 @@
 
 #include <QOpenGLTexture>
 namespace opengl {
-class Scene {
+class Scene : protected QOpenGLFunctions {
    public:
     Scene(const QImage& skin, bool slim, const QImage& cape);
     virtual ~Scene();
@@ -32,15 +32,18 @@ class Scene {
     void setCape(const QImage& cape);
     void setMode(bool slim);
     void setCapeVisible(bool visible);
+    void setElytraVisible(bool elytraVisible);
 
    private:
     QList<BoxGeometry*> m_staticComponents;
     QList<BoxGeometry*> m_normalArms;
     QList<BoxGeometry*> m_slimArms;
     BoxGeometry* m_cape = nullptr;
+    QList<BoxGeometry*> m_elytra;
     QOpenGLTexture* m_skinTexture = nullptr;
     QOpenGLTexture* m_capeTexture = nullptr;
     bool m_slim = false;
     bool m_capeVisible = false;
+    bool m_elytraVisible = false;
 };
 }  // namespace opengl

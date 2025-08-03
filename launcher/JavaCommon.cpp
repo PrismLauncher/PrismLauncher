@@ -95,7 +95,7 @@ void JavaCommon::javaBinaryWasBad(QWidget* parent, const JavaChecker::Result& re
 {
     QString text;
     text += QObject::tr(
-        "The specified Java binary didn't work.<br />You should use the auto-detect feature, "
+        "The specified Java binary didn't work.<br />You should press 'Detect', "
         "or set the path to the Java executable.<br />");
     CustomMessageBox::selectable(parent, QObject::tr("Java test failure"), text, QMessageBox::Warning)->show();
 }

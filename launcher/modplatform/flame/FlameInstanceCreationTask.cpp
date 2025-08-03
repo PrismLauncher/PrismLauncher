@@ -54,6 +54,7 @@
 
 #include "settings/INISettingsObject.h"
 
+#include "sys.h"
 #include "tasks/ConcurrentTask.h"
 #include "ui/dialogs/BlockedModsDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -418,6 +419,24 @@ bool FlameCreationTask::createInstance()
         }
     }
 
+    int recommendedRAM = m_pack.minecraft.recommendedRAM;
+
+    // only set memory if this is a fresh instance
+    if (m_instance == nullptr && recommendedRAM > 0) {
+        const uint64_t sysMiB = Sys::getSystemRam() / Sys::mebibyte;
+        const uint64_t max = sysMiB * 0.9;
+
+        if (static_cast<uint64_t>(recommendedRAM) > max) {
+            logWarning(tr("The recommended memory of the modpack exceeds 90% of your system RAM—reducing it from %1 MiB to %2 MiB!")
+                           .arg(recommendedRAM)
+                           .arg(max));
+            recommendedRAM = max;
+        }
+
+        instance.settings()->set("OverrideMemory", true);
+        instance.settings()->set("MaxMemAlloc", recommendedRAM);
+    }
+
     QString jarmodsPath = FS::PathCombine(m_stagingPath, "minecraft", "jarmods");
     QFileInfo jarmodsInfo(jarmodsPath);
     if (jarmodsInfo.isDir()) {
@@ -474,16 +493,35 @@ bool FlameCreationTask::createInstance()
 
 void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
 {
-    auto results = m_modIdResolver->getResults();
+    auto results = m_modIdResolver->getResults().files;
+
+    QStringList optionalFiles;
+    for (auto& result : results) {
+        if (!result.required) {
+            optionalFiles << FS::PathCombine(result.targetFolder, result.version.fileName);
+        }
+    }
+
+    if (!optionalFiles.empty()) {
+        OptionalModDialog optionalModDialog(m_parent, optionalFiles);
+        if (optionalModDialog.exec() == QDialog::Rejected) {
+            emitAborted();
+            loop.quit();
+            return;
+        }
+
+        m_selectedOptionalMods = optionalModDialog.getResult();
+    }
 
     // first check for blocked mods
     QList<BlockedMod> blocked_mods;
     auto anyBlocked = false;
-    for (const auto& result : results.files.values()) {
-        if (result.resourceType != PackedResourceType::Mod) {
+    for (const auto& result : results.values()) {
+        if (result.resourceType != ModPlatform::ResourceType::Mod) {
             m_otherResources.append(std::make_pair(result.version.fileName, result.targetFolder));
         }
 
+        // skip optional mods that were not selected
         if (result.version.downloadUrl.isEmpty()) {
             BlockedMod blocked_mod;
             blocked_mod.name = result.version.fileName;
@@ -492,6 +530,10 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
             blocked_mod.matched = false;
             blocked_mod.localPath = "";
             blocked_mod.targetFolder = result.targetFolder;
+            auto fileName = result.version.fileName;
+            fileName = FS::RemoveInvalidPathChars(fileName);
+            auto relpath = FS::PathCombine(result.targetFolder, fileName);
+            blocked_mod.disabled = !result.required && !m_selectedOptionalMods.contains(relpath);
 
             blocked_mods.append(blocked_mod);
 
@@ -527,30 +569,12 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
     m_filesJob.reset(new NetJob(tr("Mod Download Flame"), APPLICATION->network()));
     auto results = m_modIdResolver->getResults().files;
 
-    QStringList optionalFiles;
-    for (auto& result : results) {
-        if (!result.required) {
-            optionalFiles << FS::PathCombine(result.targetFolder, result.version.fileName);
-        }
-    }
-
-    QStringList selectedOptionalMods;
-    if (!optionalFiles.empty()) {
-        OptionalModDialog optionalModDialog(m_parent, optionalFiles);
-        if (optionalModDialog.exec() == QDialog::Rejected) {
-            emitAborted();
-            loop.quit();
-            return;
-        }
-
-        selectedOptionalMods = optionalModDialog.getResult();
-    }
     for (const auto& result : results) {
         auto fileName = result.version.fileName;
         fileName = FS::RemoveInvalidPathChars(fileName);
         auto relpath = FS::PathCombine(result.targetFolder, fileName);
 
-        if (!result.required && !selectedOptionalMods.contains(relpath)) {
+        if (!result.required && !m_selectedOptionalMods.contains(relpath)) {
             relpath += ".disabled";
         }
 
@@ -598,6 +622,8 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
         }
 
         auto destPath = FS::PathCombine(m_stagingPath, "minecraft", mod.targetFolder, mod.name);
+        if (mod.disabled)
+            destPath += ".disabled";
 
         setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
 
@@ -661,29 +687,29 @@ void FlameCreationTask::validateOtherResources(QEventLoop& loop)
         QString worldPath;
 
         switch (type) {
-            case PackedResourceType::Mod:
+            case ModPlatform::ResourceType::Mod:
                 validatePath(fileName, targetFolder, "mods");
                 zipMods.push_back(fileName);
                 break;
-            case PackedResourceType::ResourcePack:
+            case ModPlatform::ResourceType::ResourcePack:
                 validatePath(fileName, targetFolder, "resourcepacks");
                 break;
-            case PackedResourceType::TexturePack:
+            case ModPlatform::ResourceType::TexturePack:
                 validatePath(fileName, targetFolder, "texturepacks");
                 break;
-            case PackedResourceType::DataPack:
+            case ModPlatform::ResourceType::DataPack:
                 validatePath(fileName, targetFolder, "datapacks");
                 break;
-            case PackedResourceType::ShaderPack:
+            case ModPlatform::ResourceType::ShaderPack:
                 // in theory flame API can't do this but who knows, that *may* change ?
                 // better to handle it if it *does* occur in the future
                 validatePath(fileName, targetFolder, "shaderpacks");
                 break;
-            case PackedResourceType::WorldSave:
+            case ModPlatform::ResourceType::World:
                 worldPath = validatePath(fileName, targetFolder, "saves");
                 installWorld(worldPath);
                 break;
-            case PackedResourceType::UNKNOWN:
+            case ModPlatform::ResourceType::Unknown:
             /* fallthrough */
             default:
                 qDebug() << "Can't Identify" << fileName << "at" << localPath << ", leaving it where it is.";

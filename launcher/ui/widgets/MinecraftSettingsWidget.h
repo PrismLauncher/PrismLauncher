@@ -56,6 +56,10 @@ class MinecraftSettingsWidget : public QWidget {
     void openGlobalSettings();
     void updateAccountsMenu(const SettingsObject& settings);
     bool isQuickPlaySupported();
+   private slots:
+    void saveSelectedLoaders();
+    void saveDataPacksPath();
+    void selectDataPacksFolder();
 
     MinecraftInstancePtr m_instance;
     Ui::MinecraftSettingsWidget* m_ui;

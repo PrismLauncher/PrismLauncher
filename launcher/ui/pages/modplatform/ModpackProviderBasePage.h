@@ -25,5 +25,5 @@ class ModpackProviderBasePage : public BasePage {
     /** Programatically set the term in the search bar. */
     virtual void setSearchTerm(QString) = 0;
     /** Get the current term in the search bar. */
-    [[nodiscard]] virtual QString getSerachTerm() const = 0;
+    virtual QString getSerachTerm() const = 0;
 };

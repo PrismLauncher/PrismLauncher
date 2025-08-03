@@ -207,6 +207,7 @@ bool parseMinecraftProfile(QByteArray& data, MinecraftProfile& output)
         if (!getString(capeObj.value("url"), capeOut.url)) {
             continue;
         }
+        capeOut.url.replace("http://textures.minecraft.net", "https://textures.minecraft.net");
         if (!getString(capeObj.value("alias"), capeOut.alias)) {
             continue;
         }
@@ -358,6 +359,7 @@ bool parseMinecraftProfileMojang(QByteArray& data, MinecraftProfile& output)
                     qWarning() << "Skin url is not a string";
                     return false;
                 }
+                skinOut.url.replace("http://textures.minecraft.net", "https://textures.minecraft.net");
 
                 auto maybeMeta = skin.find("metadata");
                 if (maybeMeta != skin.end() && maybeMeta->isObject()) {
@@ -371,6 +373,7 @@ bool parseMinecraftProfileMojang(QByteArray& data, MinecraftProfile& output)
                     qWarning() << "Cape url is not a string";
                     return false;
                 }
+                capeOut.url.replace("http://textures.minecraft.net", "https://textures.minecraft.net");
 
                 // we don't know the cape ID as it is not returned from the session server
                 // so just fake it - changing capes is probably locked anyway :(

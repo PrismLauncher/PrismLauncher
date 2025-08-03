@@ -1,6 +1,6 @@
 # Contributions Guidelines
 
-## Code formatting
+## Code style
 
 All files are formatted with `clang-format` using the configuration in `.clang-format`. Ensure it is run on changed files before committing!
 
@@ -15,6 +15,11 @@ Please also follow the project's conventions for C++:
 - Global functions and non-`const` global variables should be formatted as `camelCase` without a prefix: `globalData`.
 - `const` global variables, macros, and enum constants should be formatted as `SCREAMING_SNAKE_CASE`: `LIGHT_GRAY`.
 - Avoid inventing acronyms or abbreviations especially for a name of multiple words - like `tp` for `texturePack`.
+- Avoid using `[[nodiscard]]` unless ignoring the return value is likely to cause a bug in cases such as:
+  - A function allocates memory or another resource and the caller needs to clean it up.
+  - A function has side effects and an error status is returned.
+  - A function is likely be mistaken for having side effects.
+- A plain getter is unlikely to cause confusion and adding `[[nodiscard]]` can create clutter and inconsistency.
 
 Most of these rules are included in the `.clang-tidy` file, so you can run `clang-tidy` to check for any violations.
 

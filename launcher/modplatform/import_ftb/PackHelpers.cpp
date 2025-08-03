@@ -19,6 +19,7 @@
 #include "modplatform/import_ftb/PackHelpers.h"
 
 #include <QIcon>
+#include <QImageReader>
 #include <QString>
 #include <QVariant>
 
@@ -26,6 +27,35 @@
 #include "Json.h"
 
 namespace FTBImportAPP {
+
+QIcon loadFTBIcon(const QString& imagePath)
+{
+    // Map of type byte to image type string
+    static const QHash<char, QByteArray> imageTypeMap = { { 0x00, "png" }, { 0x01, "jpg" }, { 0x02, "gif" }, { 0x03, "webp" } };
+    QFile file(imagePath);
+    if (!file.exists() || !file.open(QIODevice::ReadOnly)) {
+        return QIcon();
+    }
+    char type;
+    if (!file.getChar(&type)) {
+        qDebug() << "Missing FTB image type header at" << imagePath;
+        return QIcon();
+    }
+    if (!imageTypeMap.contains(type)) {
+        qDebug().nospace().noquote() << "Don't recognize FTB image type 0x" << QString::number(type, 16);
+        return QIcon();
+    }
+
+    auto imageType = imageTypeMap[type];
+    // Extract actual image data beyond the first byte
+    QImageReader reader(&file, imageType);
+    auto pixmap = QPixmap::fromImageReader(&reader);
+    if (pixmap.isNull()) {
+        qDebug() << "The FTB image at" << imagePath << "is not valid";
+        return QIcon();
+    }
+    return QIcon(pixmap);
+}
 
 Modpack parseDirectory(QString path)
 {
@@ -48,9 +78,14 @@ Modpack parseDirectory(QString path)
         qDebug() << "Couldn't load ftb instance json: " << e.cause();
         return {};
     }
+
     auto versionsFile = QFileInfo(FS::PathCombine(path, "version.json"));
-    if (!versionsFile.exists() || !versionsFile.isFile())
+    if (!versionsFile.exists() || !versionsFile.isFile()) {
+        versionsFile = QFileInfo(FS::PathCombine(path, ".ftbapp", "version.json"));
+    }
+    if (!versionsFile.exists() || !versionsFile.isFile()) {
         return {};
+    }
     try {
         auto doc = Json::requireDocument(versionsFile.absoluteFilePath(), "FTB_APP version JSON file");
         const auto root = doc.object();
@@ -85,6 +120,8 @@ Modpack parseDirectory(QString path)
     auto iconFile = QFileInfo(FS::PathCombine(path, "folder.jpg"));
     if (iconFile.exists() && iconFile.isFile()) {
         modpack.icon = QIcon(iconFile.absoluteFilePath());
+    } else {  // the logo is a file that the first bit denotes the image tipe followed by the actual image data
+        modpack.icon = loadFTBIcon(FS::PathCombine(path, ".ftbapp", "logo"));
     }
     return modpack;
 }

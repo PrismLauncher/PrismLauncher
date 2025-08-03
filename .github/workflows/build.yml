@@ -2,21 +2,23 @@ name: Build
 
 on:
   push:
-    tags-ignore:
-      - "*"
-  pull_request:
+    branches:
+      - "develop"
+      - "release-*"
     paths:
       # File types
       - "**.cpp"
       - "**.h"
+      - "**.java"
+      - "**.ui"
 
       # Directories
-      - "buildconfig/"
-      - "cmake/"
-      - "launcher/"
-      - "libraries/"
-      - "program_info/"
-      - "tests/"
+      - "buildconfig/**"
+      - "cmake/**"
+      - "launcher/**"
+      - "libraries/**"
+      - "program_info/**"
+      - "tests/**"
 
       # Files
       - "CMakeLists.txt"
@@ -24,8 +26,32 @@ on:
 
       # Workflows
       - ".github/workflows/build.yml"
-      - ".github/actions/package/"
-      - ".github/actions/setup-dependencies/"
+      - ".github/actions/package/**"
+      - ".github/actions/setup-dependencies/**"
+  pull_request:
+    paths:
+      # File types
+      - "**.cpp"
+      - "**.h"
+      - "**.java"
+      - "**.ui"
+
+      # Directories
+      - "buildconfig/**"
+      - "cmake/**"
+      - "launcher/**"
+      - "libraries/**"
+      - "program_info/**"
+      - "tests/**"
+
+      # Files
+      - "CMakeLists.txt"
+      - "COPYING.md"
+
+      # Workflows
+      - ".github/workflows/build.yml"
+      - ".github/actions/package/**"
+      - ".github/actions/setup-dependencies/**"
   workflow_call:
     inputs:
       build-type:
@@ -43,6 +69,10 @@ jobs:
   build:
     name: Build (${{ matrix.artifact-name }})
 
+    permissions:
+      # Required for vcpkg binary cache
+      packages: write
+
     strategy:
       fail-fast: false
       matrix:
@@ -51,13 +81,17 @@ jobs:
             artifact-name: Linux
             base-cmake-preset: linux
 
+          - os: ubuntu-latest-arm
+            artifact-name: Linux-aarch64
+            base-cmake-preset: linux
+
           - os: windows-latest
             artifact-name: Windows-MinGW-w64
             base-cmake-preset: windows_mingw
             msystem: CLANG64
             vcvars-arch: amd64_x86
 
-          - os: windows-11-arm
+          - os: windows-latest-arm
             artifact-name: Windows-MinGW-arm64
             base-cmake-preset: windows_mingw
             msystem: CLANGARM64
@@ -104,6 +138,7 @@ jobs:
         uses: ./.github/actions/setup-dependencies
         with:
           build-type: ${{ inputs.build-type || 'Debug' }}
+          artifact-name: ${{ matrix.artifact-name }}
           msystem: ${{ matrix.msystem }}
           vcvars-arch: ${{ matrix.vcvars-arch }}
           qt-architecture: ${{ matrix.qt-architecture }}
@@ -123,6 +158,9 @@ jobs:
       - name: Run CMake workflow
         env:
           CMAKE_PRESET: ${{ steps.cmake-preset.outputs.preset }}
+
+          ARTIFACT_NAME: ${{ matrix.artifact-name }}-Qt6
+          BUILD_PLATFORM: official
         run: |
           cmake --workflow --preset "$CMAKE_PRESET"
 
@@ -142,6 +180,7 @@ jobs:
         with:
           version: ${{ steps.short-version.outputs.version }}
           build-type: ${{ steps.setup-dependencies.outputs.build-type }}
+          artifact-name: ${{ matrix.artifact-name }}
           cmake-preset: ${{ steps.cmake-preset.outputs.preset }}
           qt-version: ${{ steps.setup-dependencies.outputs.qt-version }}
 

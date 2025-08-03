@@ -66,7 +66,7 @@ class MetaEntry {
 
     /* Whether the entry expires after some time (false) or not (true). */
     void makeEternal(bool eternal) { m_is_eternal = eternal; }
-    [[nodiscard]] bool isEternal() const { return m_is_eternal; }
+    bool isEternal() const { return m_is_eternal; }
 
     auto getCurrentAge() -> qint64 { return m_current_age; }
     void setCurrentAge(qint64 age) { m_current_age = age; }

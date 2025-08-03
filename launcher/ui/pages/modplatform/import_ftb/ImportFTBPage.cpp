@@ -22,6 +22,7 @@
 
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QTemporaryFile>
 #include <QWidget>
 #include "FileSystem.h"
 #include "ListModel.h"
@@ -88,6 +89,34 @@ void ImportFTBPage::retranslate()
     ui->retranslateUi(this);
 }
 
+QString saveIconToTempFile(const QIcon& icon)
+{
+    if (icon.isNull()) {
+        return QString();
+    }
+
+    QPixmap pixmap = icon.pixmap(icon.availableSizes().last());
+    if (pixmap.isNull()) {
+        return QString();
+    }
+
+    QTemporaryFile tempFile(QDir::tempPath() + "/iconXXXXXX.png");
+    tempFile.setAutoRemove(false);
+    if (!tempFile.open()) {
+        return QString();
+    }
+
+    QString tempPath = tempFile.fileName();
+    tempFile.close();
+
+    if (!pixmap.save(tempPath, "PNG")) {
+        QFile::remove(tempPath);
+        return QString();
+    }
+
+    return tempPath;  // Success
+}
+
 void ImportFTBPage::suggestCurrent()
 {
     if (!isOpened)
@@ -100,16 +129,26 @@ void ImportFTBPage::suggestCurrent()
 
     dialog->setSuggestedPack(selected.name, new PackInstallTask(selected));
     QString editedLogoName = QString("ftb_%1_%2.jpg").arg(selected.name, QString::number(selected.id));
-    dialog->setSuggestedIconFromFile(FS::PathCombine(selected.path, "folder.jpg"), editedLogoName);
+    auto iconPath = FS::PathCombine(selected.path, "folder.jpg");
+    if (!QFileInfo::exists(iconPath)) {
+        // need to save the icon as that actual logo is not a image on the disk
+        iconPath = saveIconToTempFile(selected.icon);
+    }
+    if (!iconPath.isEmpty() && QFileInfo::exists(iconPath)) {
+        dialog->setSuggestedIconFromFile(iconPath, editedLogoName);
+    }
 }
 
-void ImportFTBPage::onPublicPackSelectionChanged(QModelIndex now, QModelIndex prev)
+void ImportFTBPage::onPublicPackSelectionChanged(QModelIndex now, QModelIndex)
 {
     if (!now.isValid()) {
         onPackSelectionChanged();
         return;
     }
-    Modpack selectedPack = currentModel->data(now, Qt::UserRole).value<Modpack>();
+
+    QVariant raw = currentModel->data(now, Qt::UserRole);
+    Q_ASSERT(raw.canConvert<Modpack>());
+    auto selectedPack = raw.value<Modpack>();
     onPackSelectionChanged(&selectedPack);
 }
 

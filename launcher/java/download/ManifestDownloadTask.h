@@ -29,7 +29,7 @@ class ManifestDownloadTask : public Task {
     ManifestDownloadTask(QUrl url, QString final_path, QString checksumType = "", QString checksumHash = "");
     virtual ~ManifestDownloadTask() = default;
 
-    [[nodiscard]] bool canAbort() const override { return true; }
+    bool canAbort() const override { return true; }
     void executeTask() override;
     virtual bool abort() override;
 

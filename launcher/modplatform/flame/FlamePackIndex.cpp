@@ -140,3 +140,11 @@ void Flame::loadIndexedPackVersions(Flame::IndexedPack& pack, QJsonArray& arr)
     pack.versions = unsortedVersions;
     pack.versionsLoaded = true;
 }
+
+auto Flame::getVersionDisplayString(const IndexedVersion& version) -> QString
+{
+    auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
+    auto mcVersion =
+        !version.mcVersion.isEmpty() && !version.version.contains(version.mcVersion) ? QObject::tr(" for %1").arg(version.mcVersion) : "";
+    return QString("%1%2%3").arg(version.version, mcVersion, release_type);
+}

@@ -145,6 +145,7 @@ class Task : public QObject, public QRunnable {
     void failed(QString reason);
     void status(QString status);
     void details(QString details);
+    void warningLogged(const QString& warning);
     void stepProgress(TaskStepProgress const& task_progress);
 
     //! Emitted when the canAbort() status has changed. */

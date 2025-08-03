@@ -13,10 +13,7 @@
 				"lhs": "${hostSystemName}",
 				"rhs": "Windows"
 			},
-			"generator": "Ninja",
-			"cacheVariables": {
-				"Launcher_BUILD_ARTIFACT": "Windows-MinGW-w64-Qt6"
-			}
+			"generator": "Ninja"
 		},
 		{
 			"name": "windows_mingw_debug",
@@ -40,10 +37,7 @@
 				"base_ci",
 				"windows_mingw_base"
 			],
-			"displayName": "Windows MinGW (CI)",
-			"cacheVariables": {
-				"Launcher_BUILD_ARTIFACT": "Windows-MinGW-w64-Qt6"
-			}
+			"displayName": "Windows MinGW (CI)"
 		}
 	],
 	"buildPresets": [

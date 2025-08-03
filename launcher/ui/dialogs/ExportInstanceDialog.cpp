@@ -79,7 +79,7 @@ ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget* parent
     m_ui->treeView->setRootIndex(m_proxyModel->mapFromSource(model->index(root)));
     m_ui->treeView->sortByColumn(0, Qt::AscendingOrder);
 
-    connect(m_proxyModel, SIGNAL(rowsInserted(QModelIndex, int, int)), SLOT(rowsInserted(QModelIndex, int, int)));
+    connect(m_proxyModel, &QAbstractItemModel::rowsInserted, this, &ExportInstanceDialog::rowsInserted);
 
     model->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Hidden);
     model->setRootPath(root);

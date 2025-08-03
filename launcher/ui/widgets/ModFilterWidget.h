@@ -61,7 +61,7 @@ class ModFilterWidget : public QTabWidget {
         std::list<Version> versions;
         std::list<ModPlatform::IndexedVersionType> releases;
         ModPlatform::ModLoaderTypes loaders;
-        QString side;
+        ModPlatform::Side side;
         bool hideInstalled;
         QStringList categoryIds;
         bool openSource;
@@ -110,6 +110,7 @@ class ModFilterWidget : public QTabWidget {
     void onShowAllVersionsChanged();
     void onOpenSourceFilterChanged();
     void onReleaseFilterChanged();
+    void onShowMoreClicked();
 
    private:
     Ui::ModFilterWidget* ui;

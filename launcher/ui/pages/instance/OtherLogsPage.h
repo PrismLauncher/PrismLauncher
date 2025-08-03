@@ -53,13 +53,13 @@ class OtherLogsPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit OtherLogsPage(InstancePtr instance, QWidget* parent = 0);
+    explicit OtherLogsPage(QString id, QString displayName, QString helpPage, InstancePtr instance = nullptr, QWidget* parent = 0);
     ~OtherLogsPage();
 
-    QString id() const override { return "logs"; }
-    QString displayName() const override { return tr("Other logs"); }
+    QString id() const override { return m_id; }
+    QString displayName() const override { return m_displayName; }
     QIcon icon() const override { return APPLICATION->getThemedIcon("log"); }
-    QString helpPage() const override { return "other-Logs"; }
+    QString helpPage() const override { return m_helpPage; }
     void retranslate() override;
 
     void openedImpl() override;
@@ -75,6 +75,7 @@ class OtherLogsPage : public QWidget, public BasePage {
     void on_btnClean_clicked();
     void on_btnBottom_clicked();
 
+    void on_trackLogCheckbox_clicked(bool checked);
     void on_wrapCheckbox_clicked(bool checked);
     void on_colorCheckbox_clicked(bool checked);
 
@@ -84,11 +85,18 @@ class OtherLogsPage : public QWidget, public BasePage {
     void findPreviousActivated();
 
    private:
+    void reload();
+    void modelStateToUI();
+    void UIToModelState();
     void setControlsEnabled(bool enabled);
 
     QStringList getPaths();
 
    private:
+    QString m_id;
+    QString m_displayName;
+    QString m_helpPage;
+
     Ui::OtherLogsPage* ui;
     InstancePtr m_instance;
     /** Path to display log paths relative to. */

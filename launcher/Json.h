@@ -99,7 +99,7 @@ template <typename T>
 QJsonArray toJsonArray(const QList<T>& container)
 {
     QJsonArray array;
-    for (const T item : container) {
+    for (const T& item : container) {
         array.append(toJson<T>(item));
     }
     return array;
@@ -277,6 +277,13 @@ JSON_HELPERFUNCTIONS(Uuid, QUuid)
 JSON_HELPERFUNCTIONS(Variant, QVariant)
 
 #undef JSON_HELPERFUNCTIONS
+
+// helper functions for settings
+QStringList toStringList(const QString& jsonString);
+QString fromStringList(const QStringList& list);
+
+QVariantMap toMap(const QString& jsonString);
+QString fromMap(const QVariantMap& map);
 
 }  // namespace Json
 using JSONValidationError = Json::JsonException;

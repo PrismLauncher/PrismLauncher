@@ -4,7 +4,7 @@
 
 class JVisualVMFactory : public BaseProfilerFactory {
    public:
-    QString name() const override { return "JVisualVM"; }
+    QString name() const override { return "VisualVM"; }
     void registerSettings(SettingsObjectPtr settings) override;
     BaseExternalTool* createTool(InstancePtr instance, QObject* parent = 0) override;
     bool check(QString* error) override;

@@ -48,6 +48,7 @@
 #include "../Version.h"
 
 #include "modplatform/ModIndex.h"
+#include "modplatform/ResourceType.h"
 #include "tasks/Task.h"
 
 /* Simple class with a common interface for interacting with APIs */
@@ -74,7 +75,7 @@ class ResourceAPI {
         std::optional<SortingMethod> sorting;
         std::optional<ModPlatform::ModLoaderTypes> loaders;
         std::optional<std::list<Version>> versions;
-        std::optional<QString> side;
+        std::optional<ModPlatform::Side> side;
         std::optional<QStringList> categoryIds;
         bool openSource;
     };
@@ -128,7 +129,7 @@ class ResourceAPI {
 
    public:
     /** Gets a list of available sorting methods for this API. */
-    [[nodiscard]] virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
+    virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
 
    public slots:
     [[nodiscard]] virtual Task::Ptr searchProjects(SearchArgs&&, SearchCallbacks&&) const
@@ -136,40 +137,40 @@ class ResourceAPI {
         qWarning() << "TODO: ResourceAPI::searchProjects";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProject([[maybe_unused]] QString addonId,
+    virtual Task::Ptr getProject([[maybe_unused]] QString addonId,
                                                [[maybe_unused]] std::shared_ptr<QByteArray> response) const
     {
         qWarning() << "TODO: ResourceAPI::getProject";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProjects([[maybe_unused]] QStringList addonIds,
+    virtual Task::Ptr getProjects([[maybe_unused]] QStringList addonIds,
                                                 [[maybe_unused]] std::shared_ptr<QByteArray> response) const
     {
         qWarning() << "TODO: ResourceAPI::getProjects";
         return nullptr;
     }
 
-    [[nodiscard]] virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const
+    virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const
     {
         qWarning() << "TODO: ResourceAPI::getProjectInfo";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const
+    virtual Task::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const
     {
         qWarning() << "TODO: ResourceAPI::getProjectVersions";
         return nullptr;
     }
 
-    [[nodiscard]] virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, DependencySearchCallbacks&&) const
+    virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, DependencySearchCallbacks&&) const
     {
         qWarning() << "TODO";
         return nullptr;
     }
 
    protected:
-    [[nodiscard]] inline QString debugName() const { return "External resource API"; }
+    inline QString debugName() const { return "External resource API"; }
 
-    [[nodiscard]] inline QString mapMCVersionToModrinth(Version v) const
+    inline QString mapMCVersionToModrinth(Version v) const
     {
         static const QString preString = " Pre-Release ";
         auto verStr = v.toString();
@@ -181,7 +182,7 @@ class ResourceAPI {
         return verStr;
     }
 
-    [[nodiscard]] inline QString getGameVersionsString(std::list<Version> mcVersions) const
+    inline QString getGameVersionsString(std::list<Version> mcVersions) const
     {
         QString s;
         for (auto& ver : mcVersions) {

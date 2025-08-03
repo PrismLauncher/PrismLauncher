@@ -462,7 +462,7 @@ void Component::waitLoadMeta()
     }
 }
 
-void Component::setUpdateAction(UpdateAction action)
+void Component::setUpdateAction(const UpdateAction& action)
 {
     m_updateAction = action;
 }

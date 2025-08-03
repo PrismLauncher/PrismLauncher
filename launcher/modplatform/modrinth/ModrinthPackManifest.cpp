@@ -183,4 +183,14 @@ auto loadIndexedVersion(QJsonObject& obj) -> ModpackVersion
     return file;
 }
 
+auto getVersionDisplayString(const ModpackVersion& version) -> QString
+{
+    auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
+    auto mcVersion = !version.gameVersion.isEmpty() && !version.name.contains(version.gameVersion)
+                         ? QObject::tr(" for %1").arg(version.gameVersion)
+                         : "";
+    auto versionStr = !version.name.contains(version.version) ? version.version : "";
+    return QString("%1%2 — %3%4").arg(version.name, mcVersion, versionStr, release_type);
+}
+
 }  // namespace Modrinth

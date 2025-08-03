@@ -28,6 +28,7 @@
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/ModFolderModel.h"
+#include "modplatform/ModIndex.h"
 #include "modplatform/helpers/HashUtils.h"
 #include "tasks/Task.h"
 
@@ -289,7 +290,7 @@ QByteArray ModrinthPackExportTask::generateIndex()
 
         // a server side mod does not imply that the mod does not work on the client
         // however, if a mrpack mod is marked as server-only it will not install on the client
-        if (iterator->side == Metadata::ModSide::ClientSide)
+        if (iterator->side == ModPlatform::Side::ClientSide)
             env["server"] = "unsupported";
 
         fileOut["env"] = env;

@@ -148,14 +148,14 @@ void ExternalResourcesPage::openedImpl()
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
-    ui->actionsToolbar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
+    ui->actionsToolbar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
 }
 
 void ExternalResourcesPage::closedImpl()
 {
     m_model->stopWatching();
 
-    m_wide_bar_setting->set(ui->actionsToolbar->getVisibilityState());
+    m_wide_bar_setting->set(QString::fromUtf8(ui->actionsToolbar->getVisibilityState().toBase64()));
 }
 
 void ExternalResourcesPage::retranslate()

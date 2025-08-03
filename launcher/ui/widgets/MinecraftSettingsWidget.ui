@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>648</width>
-    <height>400</height>
+    <height>600</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -51,9 +51,6 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
-         </property>
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
@@ -61,9 +58,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>-253</y>
-            <width>610</width>
-            <height>550</height>
+            <y>0</y>
+            <width>603</width>
+            <height>1042</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -81,15 +78,8 @@
              <property name="checked">
               <bool>false</bool>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_4">
-              <item>
-               <widget class="QCheckBox" name="maximizedCheckBox">
-                <property name="text">
-                 <string>Start Minecraft maximized</string>
-                </property>
-               </widget>
-              </item>
-              <item>
+             <layout class="QGridLayout" name="gridLayout">
+              <item row="1" column="0" colspan="6">
                <widget class="QLabel" name="maximizedWarning">
                 <property name="toolTip">
                  <string>The base game only supports resolution. In order to simulate the maximized behaviour the current implementation approximates the maximum display size.</string>
@@ -99,48 +89,225 @@
                 </property>
                </widget>
               </item>
+              <item row="5" column="0" colspan="6">
+               <widget class="QCheckBox" name="quitAfterGameStopCheck">
+                <property name="text">
+                 <string>When the game window closes, quit the launcher</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0" colspan="6">
+               <widget class="QCheckBox" name="maximizedCheckBox">
+                <property name="text">
+                 <string>Start Minecraft maximized</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0" colspan="6">
+               <widget class="QCheckBox" name="closeAfterLaunchCheck">
+                <property name="text">
+                 <string>When the game window opens, hide the launcher</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="3">
+               <widget class="QSpinBox" name="windowWidthSpinBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="suffix">
+                 <string/>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>65536</number>
+                </property>
+                <property name="singleStep">
+                 <number>1</number>
+                </property>
+                <property name="value">
+                 <number>854</number>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <spacer name="verticalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>6</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="2" column="1">
+               <widget class="QSpinBox" name="windowHeightSpinBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="suffix">
+                 <string/>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>65536</number>
+                </property>
+                <property name="value">
+                 <number>480</number>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="labelWindowWidth">
+                <property name="text">
+                 <string>&amp;Window Size:</string>
+                </property>
+                <property name="buddy">
+                 <cstring>windowWidthSpinBox</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2">
+               <widget class="QLabel" name="label">
+                <property name="text">
+                 <string>×</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="4">
+               <widget class="QLabel" name="label_2">
+                <property name="text">
+                 <string>pixels</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="5">
+               <spacer name="horizontalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="consoleSettingsBox">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="title">
+              <string>&amp;Console Window</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_2">
               <item>
-               <layout class="QGridLayout" name="gridLayoutWindowSize">
-                <item row="1" column="0">
-                 <widget class="QLabel" name="labelWindowHeight">
+               <widget class="QCheckBox" name="showConsoleCheck">
+                <property name="text">
+                 <string>When the game is launched, show the console window</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="showConsoleErrorCheck">
+                <property name="text">
+                 <string>When the game crashes, show the console window</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="autoCloseConsoleCheck">
+                <property name="text">
+                 <string>When the game quits, hide the console window</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="globalDataPacksGroupBox">
+             <property name="title">
+              <string>&amp;Global Data Packs</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_18">
+              <item>
+               <widget class="QLabel" name="label_3">
+                <property name="text">
+                 <string>Allows installing data packs across all worlds if an applicable mod is installed.
+It is most likely you will need to change the path - please refer to the mod's website.</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_4">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>6</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_4">
+                <property name="text">
+                 <string>Folder Path</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_2">
+                <item>
+                 <widget class="QLineEdit" name="dataPacksPathEdit">
+                  <property name="placeholderText">
+                   <string>datapacks</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="dataPacksPathBrowse">
                   <property name="text">
-                   <string>Window height:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="0">
-                 <widget class="QLabel" name="labelWindowWidth">
-                  <property name="text">
-                   <string>Window width:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QSpinBox" name="windowWidthSpinBox">
-                  <property name="minimum">
-                   <number>1</number>
-                  </property>
-                  <property name="maximum">
-                   <number>65536</number>
-                  </property>
-                  <property name="singleStep">
-                   <number>1</number>
-                  </property>
-                  <property name="value">
-                   <number>854</number>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QSpinBox" name="windowHeightSpinBox">
-                  <property name="minimum">
-                   <number>1</number>
-                  </property>
-                  <property name="maximum">
-                   <number>65536</number>
-                  </property>
-                  <property name="value">
-                   <number>480</number>
+                   <string>Browse</string>
                   </property>
                  </widget>
                 </item>
@@ -196,67 +363,156 @@
             </widget>
            </item>
            <item>
-            <widget class="QGroupBox" name="consoleSettingsBox">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
+            <widget class="QGroupBox" name="instanceAccountGroupBox">
              <property name="title">
-              <string>&amp;Console</string>
+              <string>Override &amp;Default Account</string>
              </property>
              <property name="checkable">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="checked">
               <bool>false</bool>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_2">
+             <layout class="QHBoxLayout" name="horizontalLayout">
               <item>
-               <widget class="QCheckBox" name="showConsoleCheck">
+               <widget class="QLabel" name="instanceAccountNameLabel">
                 <property name="text">
-                 <string>Show console while the game is running</string>
+                 <string>Account:</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="autoCloseConsoleCheck">
-                <property name="text">
-                 <string>Automatically close console when the game quits</string>
+               <widget class="QComboBox" name="instanceAccountSelector">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="showConsoleErrorCheck">
-                <property name="text">
-                 <string>Show console when the game crashes</string>
+               <spacer name="horizontalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
-               </widget>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </widget>
            </item>
            <item>
-            <widget class="QGroupBox" name="miscellaneousSettingsBox">
+            <widget class="QGroupBox" name="serverJoinGroupBox">
              <property name="title">
-              <string>&amp;Miscellaneous</string>
+              <string>Enable Auto-&amp;join</string>
              </property>
              <property name="checkable">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="checked">
               <bool>false</bool>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_12">
-              <item>
-               <widget class="QCheckBox" name="closeAfterLaunchCheck">
+             <layout class="QGridLayout" name="gridLayout_2">
+              <item row="1" column="1">
+               <widget class="QComboBox" name="worldsCb">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QRadioButton" name="worldJoinButton">
                 <property name="text">
-                 <string>Close the launcher after game window opens</string>
+                 <string>Singleplayer world:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QRadioButton" name="serverJoinAddressButton">
+                <property name="text">
+                 <string>Server address:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="serverJoinAddress">
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <spacer name="horizontalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="loaderGroup">
+             <property name="title">
+              <string>Override Mod Download &amp;Loaders</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <item>
+               <widget class="QCheckBox" name="neoForge">
+                <property name="text">
+                 <string>NeoForge</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="quitAfterGameStopCheck">
+               <widget class="QCheckBox" name="forge">
                 <property name="text">
-                 <string>Quit the launcher after game window closes</string>
+                 <string>Forge</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="fabric">
+                <property name="text">
+                 <string>Fabric</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="quilt">
+                <property name="text">
+                 <string>Quilt</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="liteLoader">
+                <property name="text">
+                 <string>LiteLoader</string>
                 </property>
                </widget>
               </item>
@@ -298,7 +554,7 @@
             <x>0</x>
             <y>0</y>
             <width>624</width>
-            <height>297</height>
+            <height>487</height>
            </rect>
           </property>
          </widget>
@@ -313,9 +569,6 @@
       <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>
         <widget class="QScrollArea" name="scrollArea_2">
-         <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
-         </property>
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
@@ -323,9 +576,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>-101</y>
-            <width>610</width>
-            <height>398</height>
+            <y>0</y>
+            <width>624</width>
+            <height>487</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -368,49 +621,68 @@
              <property name="checked">
               <bool>false</bool>
              </property>
-             <layout class="QGridLayout" name="gridLayout_3">
+             <layout class="QFormLayout" name="formLayout_2">
+              <property name="labelAlignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
               <item row="2" column="0">
-               <widget class="QCheckBox" name="useNativeOpenALCheck">
-                <property name="text">
-                 <string>Use system installation of OpenAL</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
                <widget class="QLabel" name="labelGLFWPath">
                 <property name="text">
-                 <string>&amp;GLFW library path</string>
+                 <string>&amp;GLFW library path:</string>
                 </property>
                 <property name="buddy">
                  <cstring>lineEditGLFWPath</cstring>
                 </property>
                </widget>
               </item>
-              <item row="0" column="0">
-               <widget class="QCheckBox" name="useNativeGLFWCheck">
-                <property name="text">
-                 <string>Use system installation of GLFW</string>
+              <item row="4" column="0">
+               <spacer name="verticalSpacer_6">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
                 </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QLineEdit" name="lineEditGLFWPath">
-                <property name="enabled">
-                 <bool>false</bool>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
                 </property>
-               </widget>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>6</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
-              <item row="3" column="0">
+              <item row="6" column="0">
                <widget class="QLabel" name="labelOpenALPath">
                 <property name="text">
-                 <string>&amp;OpenAL library path</string>
+                 <string>&amp;OpenAL library path:</string>
                 </property>
                 <property name="buddy">
                  <cstring>lineEditOpenALPath</cstring>
                 </property>
                </widget>
               </item>
-              <item row="3" column="1">
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="lineEditGLFWPath">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0" colspan="2">
+               <widget class="QCheckBox" name="useNativeGLFWCheck">
+                <property name="text">
+                 <string>Use system installation of GLFW</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0" colspan="2">
+               <widget class="QCheckBox" name="useNativeOpenALCheck">
+                <property name="text">
+                 <string>Use system installation of OpenAL</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="1">
                <widget class="QLineEdit" name="lineEditOpenALPath">
                 <property name="enabled">
                  <bool>false</bool>
@@ -497,115 +769,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="launchPage">
-      <attribute name="title">
-       <string>Launch</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_9">
-       <item>
-        <widget class="QScrollArea" name="scrollArea_3">
-         <property name="widgetResizable">
-          <bool>true</bool>
-         </property>
-         <widget class="QWidget" name="scrollAreaWidgetContents_5">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>624</width>
-            <height>297</height>
-           </rect>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_14">
-           <item>
-            <widget class="QGroupBox" name="instanceAccountGroupBox">
-             <property name="title">
-              <string>Override default &amp;account</string>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-             <property name="checked">
-              <bool>false</bool>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_15">
-              <item>
-               <layout class="QGridLayout" name="instanceAccountLayout">
-                <item row="0" column="0">
-                 <widget class="QLabel" name="instanceAccountNameLabel">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="text">
-                   <string>Account:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QComboBox" name="instanceAccountSelector"/>
-                </item>
-               </layout>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QGroupBox" name="serverJoinGroupBox">
-             <property name="title">
-              <string>Set a &amp;target to join on launch</string>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-             <property name="checked">
-              <bool>false</bool>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_4">
-              <item row="0" column="0">
-               <widget class="QRadioButton" name="serverJoinAddressButton">
-                <property name="text">
-                 <string>Server address:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <widget class="QLineEdit" name="serverJoinAddress"/>
-              </item>
-              <item row="1" column="0">
-               <widget class="QRadioButton" name="worldJoinButton">
-                <property name="text">
-                 <string>Singleplayer world</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="2">
-               <widget class="QComboBox" name="worldsCb"/>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <spacer name="verticalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </widget>
-        </widget>
-       </item>
-      </layout>
-     </widget>
      <widget class="QWidget" name="customCommandsPage">
       <attribute name="title">
        <string>Custom Commands</string>
@@ -621,6 +784,18 @@
        <string>Environment Variables</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_16">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="EnvironmentVariables" name="environmentVariables" native="true"/>
        </item>
@@ -649,30 +824,17 @@
   <tabstop>settingsTabs</tabstop>
   <tabstop>scrollArea</tabstop>
   <tabstop>maximizedCheckBox</tabstop>
-  <tabstop>windowWidthSpinBox</tabstop>
   <tabstop>windowHeightSpinBox</tabstop>
+  <tabstop>windowWidthSpinBox</tabstop>
+  <tabstop>closeAfterLaunchCheck</tabstop>
+  <tabstop>quitAfterGameStopCheck</tabstop>
+  <tabstop>showConsoleCheck</tabstop>
+  <tabstop>showConsoleErrorCheck</tabstop>
+  <tabstop>autoCloseConsoleCheck</tabstop>
   <tabstop>showGameTime</tabstop>
   <tabstop>recordGameTime</tabstop>
   <tabstop>showGlobalGameTime</tabstop>
   <tabstop>showGameTimeWithoutDays</tabstop>
-  <tabstop>showConsoleCheck</tabstop>
-  <tabstop>autoCloseConsoleCheck</tabstop>
-  <tabstop>showConsoleErrorCheck</tabstop>
-  <tabstop>closeAfterLaunchCheck</tabstop>
-  <tabstop>quitAfterGameStopCheck</tabstop>
-  <tabstop>javaScrollArea</tabstop>
-  <tabstop>scrollArea_2</tabstop>
-  <tabstop>onlineFixes</tabstop>
-  <tabstop>useNativeGLFWCheck</tabstop>
-  <tabstop>lineEditGLFWPath</tabstop>
-  <tabstop>useNativeOpenALCheck</tabstop>
-  <tabstop>lineEditOpenALPath</tabstop>
-  <tabstop>perfomanceGroupBox</tabstop>
-  <tabstop>enableFeralGamemodeCheck</tabstop>
-  <tabstop>enableMangoHud</tabstop>
-  <tabstop>useDiscreteGpuCheck</tabstop>
-  <tabstop>useZink</tabstop>
-  <tabstop>scrollArea_3</tabstop>
   <tabstop>instanceAccountGroupBox</tabstop>
   <tabstop>instanceAccountSelector</tabstop>
   <tabstop>serverJoinGroupBox</tabstop>
@@ -680,6 +842,17 @@
   <tabstop>serverJoinAddress</tabstop>
   <tabstop>worldJoinButton</tabstop>
   <tabstop>worldsCb</tabstop>
+  <tabstop>javaScrollArea</tabstop>
+  <tabstop>scrollArea_2</tabstop>
+  <tabstop>onlineFixes</tabstop>
+  <tabstop>useNativeGLFWCheck</tabstop>
+  <tabstop>lineEditGLFWPath</tabstop>
+  <tabstop>useNativeOpenALCheck</tabstop>
+  <tabstop>lineEditOpenALPath</tabstop>
+  <tabstop>enableFeralGamemodeCheck</tabstop>
+  <tabstop>enableMangoHud</tabstop>
+  <tabstop>useDiscreteGpuCheck</tabstop>
+  <tabstop>useZink</tabstop>
  </tabstops>
  <resources/>
  <connections/>

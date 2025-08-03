@@ -106,7 +106,7 @@ class Component : public QObject, public ProblemProvider {
 
     void waitLoadMeta();
 
-    void setUpdateAction(UpdateAction action);
+    void setUpdateAction(const UpdateAction& action);
     void clearUpdateAction();
     UpdateAction getUpdateAction();
 

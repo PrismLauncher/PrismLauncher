@@ -87,11 +87,14 @@ SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
     contentsWidget->installEventFilter(this);
     contentsWidget->setModel(&m_list);
 
-    connect(contentsWidget, SIGNAL(doubleClicked(QModelIndex)), SLOT(activated(QModelIndex)));
+    connect(contentsWidget, &QAbstractItemView::doubleClicked, this, &SkinManageDialog::activated);
 
-    connect(contentsWidget->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
-            SLOT(selectionChanged(QItemSelection, QItemSelection)));
+    connect(contentsWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SkinManageDialog::selectionChanged);
     connect(m_ui->listView, &QListView::customContextMenuRequested, this, &SkinManageDialog::show_context_menu);
+    connect(m_ui->elytraCB, &QCheckBox::stateChanged, this, [this]() {
+        m_skinPreview->setElytraVisible(m_ui->elytraCB->isChecked());
+        on_capeCombo_currentIndexChanged(0);
+    });
 
     setupCapes();
 
@@ -159,10 +162,24 @@ void SkinManageDialog::on_fileBtn_clicked()
     }
 }
 
-QPixmap previewCape(QImage capeImage)
+QPixmap previewCape(QImage capeImage, bool elytra = false)
 {
+    if (elytra) {
+        auto wing = capeImage.copy(34, 0, 12, 22);
+        QImage mirrored = wing.mirrored(true, false);
+
+        QImage combined(wing.width() * 2 - 2, wing.height(), capeImage.format());
+        combined.fill(Qt::transparent);
+
+        QPainter painter(&combined);
+        painter.drawImage(0, 0, wing);
+        painter.drawImage(wing.width() - 2, 0, mirrored);
+        painter.end();
+        return QPixmap::fromImage(combined.scaled(96, 176, Qt::IgnoreAspectRatio, Qt::FastTransformation));
+    }
     return QPixmap::fromImage(capeImage.copy(1, 1, 10, 16).scaled(80, 128, Qt::IgnoreAspectRatio, Qt::FastTransformation));
 }
+
 void SkinManageDialog::setupCapes()
 {
     // FIXME: add a model for this, download/refresh the capes on demand
@@ -208,7 +225,7 @@ void SkinManageDialog::setupCapes()
             }
         }
         if (!capeImage.isNull()) {
-            m_ui->capeCombo->addItem(previewCape(capeImage), cape.alias, cape.id);
+            m_ui->capeCombo->addItem(previewCape(capeImage, m_ui->elytraCB->isChecked()), cape.alias, cape.id);
         } else {
             m_ui->capeCombo->addItem(cape.alias, cape.id);
         }
@@ -222,7 +239,8 @@ void SkinManageDialog::on_capeCombo_currentIndexChanged(int index)
     auto id = m_ui->capeCombo->currentData();
     auto cape = m_capes.value(id.toString(), {});
     if (!cape.isNull()) {
-        m_ui->capeImage->setPixmap(previewCape(cape).scaled(size() * (1. / 3), Qt::KeepAspectRatio, Qt::FastTransformation));
+        m_ui->capeImage->setPixmap(
+            previewCape(cape, m_ui->elytraCB->isChecked()).scaled(size() * (1. / 3), Qt::KeepAspectRatio, Qt::FastTransformation));
     } else {
         m_ui->capeImage->clear();
     }
@@ -319,14 +337,14 @@ bool SkinManageDialog::eventFilter(QObject* obj, QEvent* ev)
     return QDialog::eventFilter(obj, ev);
 }
 
-void SkinManageDialog::on_action_Rename_Skin_triggered(bool checked)
+void SkinManageDialog::on_action_Rename_Skin_triggered(bool)
 {
     if (!m_selectedSkinKey.isEmpty()) {
         m_ui->listView->edit(m_ui->listView->currentIndex());
     }
 }
 
-void SkinManageDialog::on_action_Delete_Skin_triggered(bool checked)
+void SkinManageDialog::on_action_Delete_Skin_triggered(bool)
 {
     if (m_selectedSkinKey.isEmpty())
         return;
@@ -428,7 +446,7 @@ void SkinManageDialog::on_userBtn_clicked()
     auto uuidLoop = makeShared<WaitTask>();
     auto profileLoop = makeShared<WaitTask>();
 
-    auto getUUID = Net::Download::makeByteArray("https://api.mojang.com/users/profiles/minecraft/" + user, uuidOut);
+    auto getUUID = Net::Download::makeByteArray("https://api.minecraftservices.com/minecraft/profile/lookup/name/" + user, uuidOut);
     auto getProfile = Net::Download::makeByteArray(QUrl(), profileOut);
     auto downloadSkin = Net::Download::makeFile(QUrl(), path);
 
@@ -523,7 +541,7 @@ void SkinManageDialog::resizeEvent(QResizeEvent* event)
     auto id = m_ui->capeCombo->currentData();
     auto cape = m_capes.value(id.toString(), {});
     if (!cape.isNull()) {
-        m_ui->capeImage->setPixmap(previewCape(cape).scaled(s, Qt::KeepAspectRatio, Qt::FastTransformation));
+        m_ui->capeImage->setPixmap(previewCape(cape, m_ui->elytraCB->isChecked()).scaled(s, Qt::KeepAspectRatio, Qt::FastTransformation));
     } else {
         m_ui->capeImage->clear();
     }

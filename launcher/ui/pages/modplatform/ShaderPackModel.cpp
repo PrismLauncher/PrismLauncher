@@ -17,7 +17,7 @@ ShaderPackResourceModel::ShaderPackResourceModel(BaseInstance const& base_inst, 
 ResourceAPI::SearchArgs ShaderPackResourceModel::createSearchArguments()
 {
     auto sort = getCurrentSortingMethodByIndex();
-    return { ModPlatform::ResourceType::SHADER_PACK, m_next_search_offset, m_search_term, sort };
+    return { ModPlatform::ResourceType::ShaderPack, m_next_search_offset, m_search_term, sort };
 }
 
 ResourceAPI::VersionSearchArgs ShaderPackResourceModel::createVersionsArguments(const QModelIndex& entry)

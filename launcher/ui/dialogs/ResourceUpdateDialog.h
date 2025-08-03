@@ -21,7 +21,7 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
                                   std::shared_ptr<ResourceFolderModel> resource_model,
                                   QList<Resource*>& search_for,
                                   bool include_deps,
-                                  bool filter_loaders);
+                                  QList<ModPlatform::ModLoaderType> loadersList = {});
 
     void checkCandidates();
 
@@ -64,5 +64,5 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
     bool m_no_updates = false;
     bool m_aborted = false;
     bool m_include_deps = false;
-    bool m_filter_loaders = false;
+    QList<ModPlatform::ModLoaderType> m_loadersList;
 };

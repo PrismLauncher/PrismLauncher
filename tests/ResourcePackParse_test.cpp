@@ -23,7 +23,6 @@
 #include <FileSystem.h>
 
 #include <minecraft/mod/ResourcePack.h>
-#include <minecraft/mod/tasks/LocalResourcePackParseTask.h>
 
 class ResourcePackParseTest : public QObject {
     Q_OBJECT

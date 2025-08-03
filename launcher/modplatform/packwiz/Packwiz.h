@@ -27,23 +27,18 @@
 
 class QDir;
 
-// Mod from launcher/minecraft/mod/Mod.h
-class Mod;
-
 namespace Packwiz {
 
 auto getRealIndexName(const QDir& index_dir, QString normalized_index_name, bool should_match = false) -> QString;
 
 class V1 {
    public:
-    enum class Side { ClientSide = 1 << 0, ServerSide = 1 << 1, UniversalSide = ClientSide | ServerSide };
-
     // can also represent other resources beside loader mods - but this is what packwiz calls it
     struct Mod {
         QString slug{};
         QString name{};
         QString filename{};
-        Side side{ Side::UniversalSide };
+        ModPlatform::Side side{ ModPlatform::Side::UniversalSide };
         ModPlatform::ModLoaderTypes loaders;
         QStringList mcVersions;
         ModPlatform::IndexedVersionType releaseType;
@@ -74,10 +69,6 @@ class V1 {
      * its common representation in the launcher, when downloading mods.
      * */
     static auto createModFormat(const QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> Mod;
-    /* Generates the object representing the information in a mod.pw.toml file via
-     * its common representation in the launcher, plus a necessary slug.
-     * */
-    static auto createModFormat(const QDir& index_dir, ::Mod& internal_mod, QString slug) -> Mod;
 
     /* Updates the mod index for the provided mod.
      * This creates a new index if one does not exist already
@@ -88,9 +79,6 @@ class V1 {
     /* Deletes the metadata for the mod with the given slug. If the metadata doesn't exist, it does nothing. */
     static void deleteModIndex(const QDir& index_dir, QString& mod_slug);
 
-    /* Deletes the metadata for the mod with the given id. If the metadata doesn't exist, it does nothing. */
-    static void deleteModIndex(const QDir& index_dir, QVariant& mod_id);
-
     /* Gets the metadata for a mod with a particular file name.
      * If the mod doesn't have a metadata, it simply returns an empty Mod object.
      * */
@@ -100,9 +88,6 @@ class V1 {
      * If the mod doesn't have a metadata, it simply returns an empty Mod object.
      * */
     static auto getIndexForMod(const QDir& index_dir, QVariant& mod_id) -> Mod;
-
-    static auto sideToString(Side side) -> QString;
-    static auto stringToSide(QString side) -> Side;
 };
 
 }  // namespace Packwiz

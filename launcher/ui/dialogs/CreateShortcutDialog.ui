@@ -195,6 +195,20 @@
     </widget>
    </item>
    <item>
+    <widget class="QLabel" name="noteLabel">
+     <property name="text">
+      <string>Note: If a shortcut is moved after creation, it won't be deleted when deleting the instance.</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="noteLabel2">
+     <property name="text">
+      <string>You'll need to delete them manually if that is the case.</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>

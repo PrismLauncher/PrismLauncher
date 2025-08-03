@@ -163,7 +163,7 @@ void TexturePackPage::updateTexturePacks()
     if (use_all)
         mods_list = m_model->allResources();
 
-    ResourceUpdateDialog update_dialog(this, m_instance, m_model, mods_list, false, false);
+    ResourceUpdateDialog update_dialog(this, m_instance, m_model, mods_list, false);
     update_dialog.checkCandidates();
 
     if (update_dialog.aborted()) {

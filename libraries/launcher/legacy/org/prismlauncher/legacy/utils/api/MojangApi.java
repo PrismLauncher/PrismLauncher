@@ -49,7 +49,7 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public final class MojangApi {
     public static String getUuid(String username) throws IOException {
-        try (InputStream in = new URL("https://api.mojang.com/users/profiles/minecraft/" + username).openStream()) {
+        try (InputStream in = new URL("https://api.minecraftservices.com/minecraft/profile/lookup/name/" + username).openStream()) {
             Map<String, Object> map = (Map<String, Object>) JsonParser.parse(in);
             return (String) map.get("id");
         }

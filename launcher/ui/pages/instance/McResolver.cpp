@@ -37,9 +37,9 @@ void McResolver::pingWithDomainSRV(QString domain, int port)
         }
 
         const auto& firstRecord = records.at(0);
-        QString domain = firstRecord.target();
-        int port = firstRecord.port();
-        pingWithDomainA(domain, port);
+        QString newDomain = firstRecord.target();
+        int newPort = firstRecord.port();
+        pingWithDomainA(newDomain, newPort);
     });
 
     lookup->lookup();

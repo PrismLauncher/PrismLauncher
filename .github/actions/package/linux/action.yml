@@ -31,6 +31,28 @@ runs:
   using: composite
 
   steps:
+    - name: Setup build variables
+      shell: bash
+      run: |
+        # Fixup architecture naming for AppImages
+        dpkg_arch="$(dpkg-architecture -q DEB_HOST_ARCH_CPU)"
+        case "$dpkg_arch" in
+          "amd64")
+            APPIMAGE_ARCH="x86_64"
+            ;;
+          "arm64")
+            APPIMAGE_ARCH="aarch64"
+            ;;
+          *)
+            echo "# 🚨 The Debian architecture \"$deb_arch\" is not recognized!" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+            ;;
+        esac
+        echo "APPIMAGE_ARCH=$APPIMAGE_ARCH" >> "$GITHUB_ENV"
+
+        # Used for the file paths of libraries
+        echo "DEB_HOST_MULTIARCH=$(dpkg-architecture -q DEB_HOST_MULTIARCH)" >> "$GITHUB_ENV"
+
     - name: Package AppImage
       shell: bash
       env:
@@ -45,26 +67,26 @@ runs:
         mv ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/metainfo/org.prismlauncher.PrismLauncher.metainfo.xml ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/metainfo/org.prismlauncher.PrismLauncher.appdata.xml
         export "NO_APPSTREAM=1" # we have to skip appstream checking because appstream on ubuntu 20.04 is outdated
 
-        export OUTPUT="PrismLauncher-Linux-x86_64.AppImage"
+        export OUTPUT="PrismLauncher-Linux-$APPIMAGE_ARCH.AppImage"
 
         chmod +x linuxdeploy-*.AppImage
 
         mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib
         mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
 
-        cp -r ${{ runner.workspace }}/Qt/${{ inputs.qt-version }}/gcc_64/plugins/iconengines/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
+        cp -r ${{ runner.workspace }}/Qt/${{ inputs.qt-version }}/gcc_*64/plugins/iconengines/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
 
-        cp /usr/lib/x86_64-linux-gnu/libcrypto.so.* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
-        cp /usr/lib/x86_64-linux-gnu/libssl.so.* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
-        cp /usr/lib/x86_64-linux-gnu/libOpenGL.so.0* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
+        cp /usr/lib/"$DEB_HOST_MULTIARCH"/libcrypto.so.* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
+        cp /usr/lib/"$DEB_HOST_MULTIARCH"/libssl.so.* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
+        cp /usr/lib/"$DEB_HOST_MULTIARCH"/libOpenGL.so.0* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
 
         LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib"
         export LD_LIBRARY_PATH
 
-        chmod +x AppImageUpdate-x86_64.AppImage
-        cp AppImageUpdate-x86_64.AppImage ${{ env.INSTALL_APPIMAGE_DIR }}/usr/bin
+        chmod +x AppImageUpdate-"$APPIMAGE_ARCH".AppImage
+        cp AppImageUpdate-"$APPIMAGE_ARCH".AppImage ${{ env.INSTALL_APPIMAGE_DIR }}/usr/bin
 
-        export UPDATE_INFORMATION="gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|latest|PrismLauncher-Linux-x86_64.AppImage.zsync" 
+        export UPDATE_INFORMATION="gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|latest|PrismLauncher-Linux-$APPIMAGE_ARCH.AppImage.zsync"
 
         if [ '${{ inputs.gpg-private-key-id }}' != '' ]; then
           export SIGN=1
@@ -76,9 +98,9 @@ runs:
           echo ":warning: Skipped code signing for Linux AppImage, as gpg key was not present." >> $GITHUB_STEP_SUMMARY
         fi
 
-        ./linuxdeploy-x86_64.AppImage --appdir ${{ env.INSTALL_APPIMAGE_DIR }} --output appimage --plugin qt -i ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/icons/hicolor/scalable/apps/org.prismlauncher.PrismLauncher.svg
+        ./linuxdeploy-"$APPIMAGE_ARCH".AppImage --appdir ${{ env.INSTALL_APPIMAGE_DIR }} --output appimage --plugin qt -i ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/icons/hicolor/scalable/apps/org.prismlauncher.PrismLauncher.svg
 
-        mv "PrismLauncher-Linux-x86_64.AppImage" "PrismLauncher-Linux-${{ env.VERSION }}-${{ inputs.build-type }}-x86_64.AppImage"
+        mv "PrismLauncher-Linux-$APPIMAGE_ARCH.AppImage" "PrismLauncher-Linux-${{ env.VERSION }}-${{ inputs.build-type }}-$APPIMAGE_ARCH.AppImage"
 
     - name: Package portable tarball
       shell: bash
@@ -89,17 +111,8 @@ runs:
 
         INSTALL_PORTABLE_DIR: install-portable
       run: |
-        cmake --preset "$CMAKE_PRESET" -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_PORTABLE_DIR }} -DINSTALL_BUNDLE=full
-        cmake --install ${{ env.BUILD_DIR }}
-        cmake --install ${{ env.BUILD_DIR }} --component portable
-
-        mkdir  ${{ env.INSTALL_PORTABLE_DIR }}/lib
-        cp /lib/x86_64-linux-gnu/libbz2.so.1.0 ${{ env.INSTALL_PORTABLE_DIR }}/lib
-        cp /usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0 ${{ env.INSTALL_PORTABLE_DIR }}/lib
-        cp /usr/lib/x86_64-linux-gnu/libcrypto.so.* ${{ env.INSTALL_PORTABLE_DIR }}/lib
-        cp /usr/lib/x86_64-linux-gnu/libssl.so.* ${{ env.INSTALL_PORTABLE_DIR }}/lib
-        cp /usr/lib/x86_64-linux-gnu/libffi.so.*.* ${{ env.INSTALL_PORTABLE_DIR }}/lib
-        mv ${{ env.INSTALL_PORTABLE_DIR }}/bin/*.so* ${{ env.INSTALL_PORTABLE_DIR }}/lib
+        cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }}
+        cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
 
         for l in $(find ${{ env.INSTALL_PORTABLE_DIR }} -type f); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_PORTABLE_DIR }}/}; l=${l#./}; echo $l; done > ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt
         cd ${{ env.INSTALL_PORTABLE_DIR }}
@@ -114,11 +127,11 @@ runs:
     - name: Upload AppImage
       uses: actions/upload-artifact@v4
       with:
-        name: PrismLauncher-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}-x86_64.AppImage
-        path: PrismLauncher-${{ runner.os }}-${{ inputs.version }}-${{ inputs.build-type }}-x86_64.AppImage
+        name: PrismLauncher-${{ runner.os }}-${{ inputs.version }}-${{ inputs.build-type }}-${{ env.APPIMAGE_ARCH }}.AppImage
+        path: PrismLauncher-${{ runner.os }}-${{ inputs.version }}-${{ inputs.build-type }}-${{ env.APPIMAGE_ARCH }}.AppImage
 
     - name: Upload AppImage Zsync
       uses: actions/upload-artifact@v4
       with:
-        name: PrismLauncher-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}-x86_64.AppImage.zsync
-        path: PrismLauncher-Linux-x86_64.AppImage.zsync
+        name: PrismLauncher-${{ runner.os }}-${{ inputs.version }}-${{ inputs.build-type }}-${{ env.APPIMAGE_ARCH }}.AppImage.zsync
+        path: PrismLauncher-${{ runner.os }}-${{ env.APPIMAGE_ARCH }}.AppImage.zsync

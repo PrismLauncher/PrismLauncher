@@ -32,17 +32,12 @@ static std::list<Version> mcVersions(BaseInstance* inst)
     return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion() };
 }
 
-static QList<ModPlatform::ModLoaderType> mcLoadersList(BaseInstance* inst)
-{
-    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getModLoadersList();
-}
-
 ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
                                            BaseInstance* instance,
                                            const std::shared_ptr<ResourceFolderModel> resource_model,
                                            QList<Resource*>& search_for,
                                            bool include_deps,
-                                           bool filter_loaders)
+                                           QList<ModPlatform::ModLoaderType> loadersList)
     : ReviewMessageBox(parent, tr("Confirm resources to update"), "")
     , m_parent(parent)
     , m_resource_model(resource_model)
@@ -50,7 +45,7 @@ ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
     , m_second_try_metadata(new ConcurrentTask("Second Metadata Search", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()))
     , m_instance(instance)
     , m_include_deps(include_deps)
-    , m_filter_loaders(filter_loaders)
+    , m_loadersList(std::move(loadersList))
 {
     ReviewMessageBox::setGeometry(0, 0, 800, 600);
 
@@ -89,12 +84,10 @@ void ResourceUpdateDialog::checkCandidates()
     }
 
     auto versions = mcVersions(m_instance);
-    auto loadersList = m_filter_loaders ? mcLoadersList(m_instance) : QList<ModPlatform::ModLoaderType>();
-
     SequentialTask check_task(tr("Checking for updates"));
 
     if (!m_modrinth_to_update.empty()) {
-        m_modrinth_check_task.reset(new ModrinthCheckUpdate(m_modrinth_to_update, versions, loadersList, m_resource_model));
+        m_modrinth_check_task.reset(new ModrinthCheckUpdate(m_modrinth_to_update, versions, m_loadersList, m_resource_model));
         connect(m_modrinth_check_task.get(), &CheckUpdateTask::checkFailed, this,
                 [this](Resource* resource, QString reason, QUrl recover_url) {
                     m_failed_check_update.append({ resource, reason, recover_url });
@@ -103,7 +96,7 @@ void ResourceUpdateDialog::checkCandidates()
     }
 
     if (!m_flame_to_update.empty()) {
-        m_flame_check_task.reset(new FlameCheckUpdate(m_flame_to_update, versions, loadersList, m_resource_model));
+        m_flame_check_task.reset(new FlameCheckUpdate(m_flame_to_update, versions, m_loadersList, m_resource_model));
         connect(m_flame_check_task.get(), &CheckUpdateTask::checkFailed, this,
                 [this](Resource* resource, QString reason, QUrl recover_url) {
                     m_failed_check_update.append({ resource, reason, recover_url });

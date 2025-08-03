@@ -282,7 +282,7 @@ void VersionList::waitToLoad()
         return;
     QEventLoop ev;
     auto task = getLoadTask();
-    QObject::connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
+    connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
     task->start();
     ev.exec();
 }

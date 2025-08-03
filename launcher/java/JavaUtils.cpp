@@ -501,7 +501,7 @@ QString JavaUtils::getJavaCheckPath()
 QStringList getMinecraftJavaBundle()
 {
     QStringList processpaths;
-#if defined(Q_OS_OSX)
+#if defined(Q_OS_MACOS)
     processpaths << FS::PathCombine(QDir::homePath(), FS::PathCombine("Library", "Application Support", "minecraft", "runtime"));
 #elif defined(Q_OS_WIN32)
 

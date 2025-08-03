@@ -16,13 +16,17 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
     QStyleOptionViewItem opt(option);
     initStyleOption(&opt, index);
 
+    auto isInstalled = index.data(UserDataTypes::INSTALLED).toBool();
+    auto isChecked = opt.checkState == Qt::Checked;
+    auto isSelected = option.state & QStyle::State_Selected;
+
     const QStyle* style = opt.widget == nullptr ? QApplication::style() : opt.widget->style();
 
     auto rect = opt.rect;
 
     style->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter, opt.widget);
 
-    if (option.state & QStyle::State_Selected && style->objectName() != "windowsvista")
+    if (isSelected && style->objectName() != "windowsvista")
         painter->setPen(opt.palette.highlightedText().color());
 
     if (opt.features & QStyleOptionViewItem::HasCheckIndicator) {
@@ -32,6 +36,9 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
         rect.setX(checkboxOpt.rect.right());
     }
 
+    if (!isSelected && !isChecked && isInstalled) {
+        painter->setOpacity(0.4);  // Fade out the entire item
+    }
     // The default icon size will be a square (and height is usually the lower value).
     auto icon_width = rect.height(), icon_height = rect.height();
     int icon_x_margin = (rect.height() - icon_width) / 2;
@@ -68,12 +75,16 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
     {  // Title painting
         auto title = index.data(UserDataTypes::TITLE).toString();
 
-        if (index.data(UserDataTypes::INSTALLED).toBool())
-            title = tr("%1 [installed]").arg(title);
-
         painter->save();
 
         auto font = opt.font;
+        if (isChecked) {
+            font.setBold(true);
+        }
+        if (isInstalled) {
+            title = tr("%1 [installed]").arg(title);
+        }
+
         font.setPointSize(font.pointSize() + 2);
         painter->setFont(font);
 

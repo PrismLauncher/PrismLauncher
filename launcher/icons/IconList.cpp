@@ -55,7 +55,7 @@ IconList::IconList(const QStringList& builtinPaths, const QString& path, QObject
         QDir instanceIcons(builtinPath);
         auto fileInfoList = instanceIcons.entryInfoList(QDir::Files, QDir::Name);
         for (const auto& fileInfo : fileInfoList) {
-            builtinNames.insert(fileInfo.baseName());
+            builtinNames.insert(fileInfo.completeBaseName());
         }
     }
     for (const auto& builtinName : builtinNames) {
@@ -127,10 +127,11 @@ QStringList IconList::getIconFilePaths() const
 QString formatName(const QDir& iconsDir, const QFileInfo& iconFile)
 {
     if (iconFile.dir() == iconsDir)
-        return iconFile.baseName();
+        return iconFile.completeBaseName();
 
     constexpr auto delimiter = " » ";
-    QString relativePathWithoutExtension = iconsDir.relativeFilePath(iconFile.dir().path()) + QDir::separator() + iconFile.baseName();
+    QString relativePathWithoutExtension =
+        iconsDir.relativeFilePath(iconFile.dir().path()) + QDir::separator() + iconFile.completeBaseName();
     return relativePathWithoutExtension.replace(QDir::separator(), delimiter);
 }
 

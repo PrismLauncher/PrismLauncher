@@ -18,11 +18,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1746663147,
-        "narHash": "sha256-Ua0drDHawlzNqJnclTJGf87dBmaO/tn7iZ+TCkTRpRc=",
+        "lastModified": 1752687322,
+        "narHash": "sha256-RKwfXA4OZROjBTQAl9WOZQFm7L8Bo93FQwSJpAiSRvo=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "dda3dcd3fe03e991015e9a74b22d35950f264a54",
+        "rev": "6e987485eb2c77e5dcc5af4e3c70843711ef9251",
         "type": "github"
       },
       "original": {
@@ -32,7 +32,7 @@
         "type": "github"
       }
     },
-    "qt-qrcodegenerator": {
+    "qrcodegenerator": {
       "flake": false,
       "locked": {
         "lastModified": 1737616857,
@@ -52,7 +52,7 @@
       "inputs": {
         "libnbtplusplus": "libnbtplusplus",
         "nixpkgs": "nixpkgs",
-        "qt-qrcodegenerator": "qt-qrcodegenerator"
+        "qrcodegenerator": "qrcodegenerator"
       }
     }
   },

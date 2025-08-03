@@ -33,17 +33,17 @@ class ShaderPackResourcePage : public ResourcePage {
     }
 
     //: The plural version of 'shader pack'
-    [[nodiscard]] inline QString resourcesString() const override { return tr("shader packs"); }
+    inline QString resourcesString() const override { return tr("shader packs"); }
     //: The singular version of 'shader packs'
-    [[nodiscard]] inline QString resourceString() const override { return tr("shader pack"); }
+    inline QString resourceString() const override { return tr("shader pack"); }
 
-    [[nodiscard]] bool supportsFiltering() const override { return false; };
+    bool supportsFiltering() const override { return false; };
 
     void addResourceToPage(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, std::shared_ptr<ResourceFolderModel>) override;
 
-    [[nodiscard]] QMap<QString, QString> urlHandlers() const override;
+    QMap<QString, QString> urlHandlers() const override;
 
-    [[nodiscard]] inline auto helpPage() const -> QString override { return "shaderpack-platform"; }
+    inline auto helpPage() const -> QString override { return "shaderpack-platform"; }
 
    protected:
     ShaderPackResourcePage(ShaderPackDownloadDialog* dialog, BaseInstance& instance);

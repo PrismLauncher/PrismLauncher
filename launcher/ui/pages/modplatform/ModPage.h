@@ -43,17 +43,17 @@ class ModPage : public ResourcePage {
     }
 
     //: The plural version of 'mod'
-    [[nodiscard]] inline QString resourcesString() const override { return tr("mods"); }
+    inline QString resourcesString() const override { return tr("mods"); }
     //: The singular version of 'mods'
-    [[nodiscard]] inline QString resourceString() const override { return tr("mod"); }
+    inline QString resourceString() const override { return tr("mod"); }
 
-    [[nodiscard]] QMap<QString, QString> urlHandlers() const override;
+    QMap<QString, QString> urlHandlers() const override;
 
     void addResourceToPage(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, std::shared_ptr<ResourceFolderModel>) override;
 
     virtual std::unique_ptr<ModFilterWidget> createFilterWidget() = 0;
 
-    [[nodiscard]] bool supportsFiltering() const override { return true; };
+    bool supportsFiltering() const override { return true; };
     auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
     void setFilterWidget(std::unique_ptr<ModFilterWidget>&);
 

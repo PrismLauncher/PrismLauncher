@@ -22,6 +22,7 @@
 #include "BaseInstance.h"
 #include "FastFileIconProvider.h"
 #include "FileIgnoreProxy.h"
+#include "minecraft/MinecraftInstance.h"
 #include "modplatform/ModIndex.h"
 
 namespace Ui {
@@ -32,7 +33,7 @@ class ExportPackDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit ExportPackDialog(InstancePtr instance,
+    explicit ExportPackDialog(MinecraftInstancePtr instance,
                               QWidget* parent = nullptr,
                               ModPlatform::ResourceProvider provider = ModPlatform::ResourceProvider::MODRINTH);
     ~ExportPackDialog();
@@ -44,7 +45,7 @@ class ExportPackDialog : public QDialog {
     QString ignoreFileName();
 
    private:
-    const InstancePtr m_instance;
+    const MinecraftInstancePtr m_instance;
     Ui::ExportPackDialog* m_ui;
     FileIgnoreProxy* m_proxy;
     FastFileIconProvider m_icons;

@@ -13,9 +13,7 @@
 				"lhs": "${hostSystemName}",
 				"rhs": "Windows"
 			},
-			"cacheVariables": {
-				"Launcher_BUILD_ARTIFACT": "Windows-MSVC-Qt6"
-			}
+			"generator": "Ninja"
 		},
 		{
 			"name": "windows_msvc_arm64_cross_base",
@@ -23,9 +21,8 @@
 			"inherits": [
 				"windows_msvc_base"
 			],
-			"architecture": "arm64",
 			"cacheVariables": {
-				"Launcher_BUILD_ARTIFACT": "Windows-MSVC-arm64-Qt6"
+				"CMAKE_SYSTEM_NAME": "${hostSystemName}"
 			}
 		},
 		{
@@ -34,8 +31,7 @@
 				"base_debug",
 				"windows_msvc_base"
 			],
-			"displayName": "Windows MSVC (Debug)",
-			"generator": "Ninja"
+			"displayName": "Windows MSVC (Debug)"
 		},
 		{
 			"name": "windows_msvc_release",
@@ -67,10 +63,7 @@
 				"base_ci",
 				"windows_msvc_base"
 			],
-			"displayName": "Windows MSVC (CI)",
-			"cacheVariables": {
-				"Launcher_BUILD_ARTIFACT": "Windows-MSVC-Qt6"
-			}
+			"displayName": "Windows MSVC (CI)"
 		},
 		{
 			"name": "windows_msvc_arm64_cross_ci",
@@ -78,10 +71,7 @@
 				"base_ci",
 				"windows_msvc_arm64_cross_base"
 			],
-			"displayName": "Windows MSVC (ARM64 cross, CI)",
-			"cacheVariables": {
-				"Launcher_BUILD_ARTIFACT": "Windows-MSVC-arm64-Qt6"
-			}
+			"displayName": "Windows MSVC (ARM64 cross, CI)"
 		}
 	],
 	"buildPresets": [
@@ -110,11 +100,7 @@
 			],
 			"displayName": "Windows MSVC (Release)",
 			"configurePreset": "windows_msvc_release",
-			"configuration": "Release",
-			"nativeToolOptions": [
-				"/p:UseMultiToolTask=true",
-				"/p:EnforceProcessCountAcrossBuilds=true"
-			]
+			"configuration": "Release"
 		},
 		{
 			"name": "windows_msvc_arm64_cross_debug",
@@ -123,11 +109,7 @@
 			],
 			"displayName": "Windows MSVC (ARM64 cross, Debug)",
 			"configurePreset": "windows_msvc_arm64_cross_debug",
-			"configuration": "Debug",
-			"nativeToolOptions": [
-				"/p:UseMultiToolTask=true",
-				"/p:EnforceProcessCountAcrossBuilds=true"
-			]
+			"configuration": "Debug"
 		},
 		{
 			"name": "windows_msvc_arm64_cross_release",
@@ -136,11 +118,7 @@
 			],
 			"displayName": "Windows MSVC (ARM64 cross, Release)",
 			"configurePreset": "windows_msvc_arm64_cross_release",
-			"configuration": "Release",
-			"nativeToolOptions": [
-				"/p:UseMultiToolTask=true",
-				"/p:EnforceProcessCountAcrossBuilds=true"
-			]
+			"configuration": "Release"
 		},
 		{
 			"name": "windows_msvc_ci",
@@ -149,11 +127,7 @@
 			],
 			"displayName": "Windows MSVC (CI)",
 			"configurePreset": "windows_msvc_ci",
-			"configuration": "Release",
-			"nativeToolOptions": [
-				"/p:UseMultiToolTask=true",
-				"/p:EnforceProcessCountAcrossBuilds=true"
-			]
+			"configuration": "Release"
 		},
 		{
 			"name": "windows_msvc_arm64_cross_ci",
@@ -162,11 +136,7 @@
 			],
 			"displayName": "Windows MSVC (ARM64 cross, CI)",
 			"configurePreset": "windows_msvc_arm64_cross_ci",
-			"configuration": "Release",
-			"nativeToolOptions": [
-				"/p:UseMultiToolTask=true",
-				"/p:EnforceProcessCountAcrossBuilds=true"
-			]
+			"configuration": "Release"
 		}
 	],
 	"testPresets": [

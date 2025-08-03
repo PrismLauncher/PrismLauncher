@@ -6,8 +6,6 @@
 #include "MTPixmapCache.h"
 #include "Version.h"
 
-#include "minecraft/mod/tasks/LocalResourcePackParseTask.h"
-
 // Values taken from:
 // https://minecraft.wiki/w/Pack_format#List_of_resource_pack_formats
 static const QMap<int, std::pair<Version, Version>> s_pack_format_versions = {
@@ -28,62 +26,6 @@ static const QMap<int, std::pair<Version, Version>> s_pack_format_versions = {
     { 32, { Version("1.20.5-pre4"), Version("1.20.6") } }, { 33, { Version("24w18a"), Version("24w20a") } },
     { 34, { Version("24w21a"), Version("1.21") } }
 };
-
-void ResourcePack::setPackFormat(int new_format_id)
-{
-    QMutexLocker locker(&m_data_lock);
-
-    if (!s_pack_format_versions.contains(new_format_id)) {
-        qWarning() << "Pack format '" << new_format_id << "' is not a recognized resource pack id!";
-    }
-
-    m_pack_format = new_format_id;
-}
-
-void ResourcePack::setImage(QImage new_image) const
-{
-    QMutexLocker locker(&m_data_lock);
-
-    Q_ASSERT(!new_image.isNull());
-
-    if (m_pack_image_cache_key.key.isValid())
-        PixmapCache::instance().remove(m_pack_image_cache_key.key);
-
-    // scale the image to avoid flooding the pixmapcache
-    auto pixmap =
-        QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
-
-    m_pack_image_cache_key.key = PixmapCache::instance().insert(pixmap);
-    m_pack_image_cache_key.was_ever_used = true;
-
-    // This can happen if the pixmap is too big to fit in the cache :c
-    if (!m_pack_image_cache_key.key.isValid()) {
-        qWarning() << "Could not insert a image cache entry! Ignoring it.";
-        m_pack_image_cache_key.was_ever_used = false;
-    }
-}
-
-QPixmap ResourcePack::image(QSize size, Qt::AspectRatioMode mode) const
-{
-    QPixmap cached_image;
-    if (PixmapCache::instance().find(m_pack_image_cache_key.key, &cached_image)) {
-        if (size.isNull())
-            return cached_image;
-        return cached_image.scaled(size, mode, Qt::SmoothTransformation);
-    }
-
-    // No valid image we can get
-    if (!m_pack_image_cache_key.was_ever_used) {
-        return {};
-    } else {
-        qDebug() << "Resource Pack" << name() << "Had it's image evicted from the cache. reloading...";
-        PixmapCache::markCacheMissByEviciton();
-    }
-
-    // Imaged got evicted from the cache. Re-process it and retry.
-    ResourcePackUtils::processPackPNG(this);
-    return image(size);
-}
 
 std::pair<Version, Version> ResourcePack::compatibleVersions() const
 {

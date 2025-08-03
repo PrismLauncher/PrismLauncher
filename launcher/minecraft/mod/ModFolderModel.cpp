@@ -67,7 +67,6 @@ ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_
                               QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
                               QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
     m_columnsHideable = { false, true, false, true, true, true, true, true, true, true, true };
-    m_columnsHiddenByDefault = { false, false, false, false, false, false, false, true, true, true, true };
 }
 
 QVariant ModFolderModel::data(const QModelIndex& index, int role) const

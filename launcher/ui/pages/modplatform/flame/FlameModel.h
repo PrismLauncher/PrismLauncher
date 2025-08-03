@@ -41,8 +41,8 @@ class ListModel : public QAbstractListModel {
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
     void searchWithTerm(const QString& term, int sort, std::shared_ptr<ModFilterWidget::Filter> filter, bool filterChanged);
 
-    [[nodiscard]] bool hasActiveSearchJob() const { return jobPtr && jobPtr->isRunning(); }
-    [[nodiscard]] Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? jobPtr : nullptr; }
+    bool hasActiveSearchJob() const { return jobPtr && jobPtr->isRunning(); }
+    Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? jobPtr : nullptr; }
 
    private slots:
     void performPaginatedSearch();

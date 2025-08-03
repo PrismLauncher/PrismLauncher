@@ -134,7 +134,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     updateDialogState();
 
     if (APPLICATION->settings()->get("NewInstanceGeometry").isValid()) {
-        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("NewInstanceGeometry").toByteArray()));
+        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("NewInstanceGeometry").toString().toUtf8()));
     } else {
         auto screen = parent->screen();
         auto geometry = screen->availableSize();
@@ -146,7 +146,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 
 void NewInstanceDialog::reject()
 {
-    APPLICATION->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
+    APPLICATION->settings()->set("NewInstanceGeometry", QString::fromUtf8(saveGeometry().toBase64()));
 
     // This is just so that the pages get the close() call and can react to it, if needed.
     m_container->prepareToClose();
@@ -156,7 +156,7 @@ void NewInstanceDialog::reject()
 
 void NewInstanceDialog::accept()
 {
-    APPLICATION->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
+    APPLICATION->settings()->set("NewInstanceGeometry", QString::fromUtf8(saveGeometry().toBase64()));
     importIconNow();
 
     // This is just so that the pages get the close() call and can react to it, if needed.
@@ -316,7 +316,7 @@ void NewInstanceDialog::importIconNow()
         InstIconKey = importIconName.mid(0, importIconName.lastIndexOf('.'));
         importIcon = false;
     }
-    APPLICATION->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
+    APPLICATION->settings()->set("NewInstanceGeometry", QString::fromUtf8(saveGeometry().toBase64()));
 }
 
 void NewInstanceDialog::selectedPageChanged(BasePage* previous, BasePage* selected)

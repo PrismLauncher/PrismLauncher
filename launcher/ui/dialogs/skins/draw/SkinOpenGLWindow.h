@@ -43,6 +43,7 @@ class SkinOpenGLWindow : public QOpenGLWindow, protected QOpenGLFunctions {
 
     void updateScene(SkinModel* skin);
     void updateCape(const QImage& cape);
+    void setElytraVisible(bool visible);
 
    protected:
     void mousePressEvent(QMouseEvent* e) override;

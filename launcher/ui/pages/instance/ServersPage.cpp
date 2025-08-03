@@ -578,7 +578,7 @@ ServersPage::ServersPage(InstancePtr inst, QWidget* parent) : QMainWindow(parent
     connect(m_inst.get(), &MinecraftInstance::runningStatusChanged, this, &ServersPage::runningStateChanged);
     connect(ui->nameLine, &QLineEdit::textEdited, this, &ServersPage::nameEdited);
     connect(ui->addressLine, &QLineEdit::textEdited, this, &ServersPage::addressEdited);
-    connect(ui->resourceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(resourceIndexChanged(int)));
+    connect(ui->resourceComboBox, &QComboBox::currentIndexChanged, this, &ServersPage::resourceIndexChanged);
     connect(m_model, &QAbstractItemModel::rowsRemoved, this, &ServersPage::rowsRemoved);
 
     m_locked = m_inst->isRunning();
@@ -705,7 +705,7 @@ void ServersPage::openedImpl()
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
-    ui->toolBar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
+    ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
 
     // ping servers
     m_model->queryServersStatus();
@@ -715,7 +715,7 @@ void ServersPage::closedImpl()
 {
     m_model->unobserve();
 
-    m_wide_bar_setting->set(ui->toolBar->getVisibilityState());
+    m_wide_bar_setting->set(QString::fromUtf8(ui->toolBar->getVisibilityState().toBase64()));
 }
 
 void ServersPage::on_actionAdd_triggered()

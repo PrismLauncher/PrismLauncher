@@ -362,8 +362,9 @@ bool overrideFolder(QString overwritten_path, QString override_path);
 
 /**
  * Creates a shortcut to the specified target file at the specified destination path.
+ * Returns null QString if creation failed; otherwise returns the path to the created shortcut.
  */
-bool createShortcut(QString destination, QString target, QStringList args, QString name, QString icon);
+QString createShortcut(QString destination, QString target, QStringList args, QString name, QString icon);
 
 enum class FilesystemType {
     FAT,

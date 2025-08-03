@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "ui/pages/modplatform/DataPackModel.h"
 #include "ui/pages/modplatform/ModModel.h"
 #include "ui/pages/modplatform/ResourcePackModel.h"
 #include "ui/pages/modplatform/modrinth/ModrinthResourcePages.h"
@@ -34,8 +35,8 @@ class ModrinthModModel : public ModModel {
     ~ModrinthModModel() override = default;
 
    private:
-    [[nodiscard]] QString debugName() const override { return Modrinth::debugName() + " (Model)"; }
-    [[nodiscard]] QString metaEntryBase() const override { return Modrinth::metaEntryBase(); }
+    QString debugName() const override { return Modrinth::debugName() + " (Model)"; }
+    QString metaEntryBase() const override { return Modrinth::metaEntryBase(); }
 
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
@@ -53,8 +54,8 @@ class ModrinthResourcePackModel : public ResourcePackResourceModel {
     ~ModrinthResourcePackModel() override = default;
 
    private:
-    [[nodiscard]] QString debugName() const override { return Modrinth::debugName() + " (Model)"; }
-    [[nodiscard]] QString metaEntryBase() const override { return Modrinth::metaEntryBase(); }
+    QString debugName() const override { return Modrinth::debugName() + " (Model)"; }
+    QString metaEntryBase() const override { return Modrinth::metaEntryBase(); }
 
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
@@ -71,8 +72,8 @@ class ModrinthTexturePackModel : public TexturePackResourceModel {
     ~ModrinthTexturePackModel() override = default;
 
    private:
-    [[nodiscard]] QString debugName() const override { return Modrinth::debugName() + " (Model)"; }
-    [[nodiscard]] QString metaEntryBase() const override { return Modrinth::metaEntryBase(); }
+    QString debugName() const override { return Modrinth::debugName() + " (Model)"; }
+    QString metaEntryBase() const override { return Modrinth::metaEntryBase(); }
 
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
@@ -89,8 +90,26 @@ class ModrinthShaderPackModel : public ShaderPackResourceModel {
     ~ModrinthShaderPackModel() override = default;
 
    private:
-    [[nodiscard]] QString debugName() const override { return Modrinth::debugName() + " (Model)"; }
-    [[nodiscard]] QString metaEntryBase() const override { return Modrinth::metaEntryBase(); }
+    QString debugName() const override { return Modrinth::debugName() + " (Model)"; }
+    QString metaEntryBase() const override { return Modrinth::metaEntryBase(); }
+
+    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
+    void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
+    void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
+
+    auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
+};
+
+class ModrinthDataPackModel : public DataPackResourceModel {
+    Q_OBJECT
+
+   public:
+    ModrinthDataPackModel(const BaseInstance&);
+    ~ModrinthDataPackModel() override = default;
+
+   private:
+    QString debugName() const override { return Modrinth::debugName() + " (Model)"; }
+    QString metaEntryBase() const override { return Modrinth::metaEntryBase(); }
 
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;

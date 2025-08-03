@@ -180,7 +180,8 @@ QList<QVector2D> getCubeUVs(float u, float v, float width, float height, float d
 }
 
 namespace opengl {
-BoxGeometry::BoxGeometry(QVector3D size, QVector3D position) : m_indexBuf(QOpenGLBuffer::IndexBuffer), m_size(size), m_position(position)
+BoxGeometry::BoxGeometry(QVector3D size, QVector3D position)
+    : QOpenGLFunctions(), m_indexBuf(QOpenGLBuffer::IndexBuffer), m_size(size), m_position(position)
 {
     initializeOpenGLFunctions();
 
@@ -273,5 +274,10 @@ BoxGeometry* BoxGeometry::Plane()
     b->m_indecesCount = planeIndices.size();
 
     return b;
+}
+
+void BoxGeometry::scale(const QVector3D& vector)
+{
+    m_matrix.scale(vector);
 }
 }  // namespace opengl

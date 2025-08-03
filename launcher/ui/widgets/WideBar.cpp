@@ -250,7 +250,7 @@ void WideBar::addContextMenuAction(QAction* action)
     m_context_menu_actions.append(action);
 }
 
-[[nodiscard]] QByteArray WideBar::getVisibilityState() const
+QByteArray WideBar::getVisibilityState() const
 {
     QByteArray state;
 

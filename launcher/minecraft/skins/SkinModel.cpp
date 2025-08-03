@@ -122,7 +122,11 @@ QString SkinModel::name() const
 bool SkinModel::rename(QString newName)
 {
     auto info = QFileInfo(m_path);
-    m_path = FS::PathCombine(info.absolutePath(), newName + ".png");
+    auto new_path = FS::PathCombine(info.absolutePath(), newName + ".png");
+    if (QFileInfo::exists(new_path)) {
+        return false;
+    }
+    m_path = new_path;
     return FS::move(info.absoluteFilePath(), m_path);
 }
 

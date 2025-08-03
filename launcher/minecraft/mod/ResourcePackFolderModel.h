@@ -13,10 +13,10 @@ class ResourcePackFolderModel : public ResourceFolderModel {
 
     QString id() const override { return "resourcepacks"; }
 
-    [[nodiscard]] QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
-    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    [[nodiscard]] int columnCount(const QModelIndex& parent) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    int columnCount(const QModelIndex& parent) const override;
 
     [[nodiscard]] Resource* createResource(const QFileInfo& file) override { return new ResourcePack(file); }
     [[nodiscard]] Task* createParseTask(Resource&) override;

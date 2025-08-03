@@ -23,7 +23,7 @@
 			],
 			"cacheVariables": {
 				"CMAKE_OSX_ARCHITECTURES": "x86_64;arm64",
-				"Launcher_BUILD_ARTIFACT": "macOS-Qt6"
+				"VCPKG_TARGET_TRIPLET": "universal-osx"
 			}
 		},
 		{
@@ -64,10 +64,7 @@
 				"base_ci",
 				"macos_universal_base"
 			],
-			"displayName": "macOS (CI)",
-			"cacheVariables": {
-				"Launcher_BUILD_ARTIFACT": "macOS-Qt6"
-			}
+			"displayName": "macOS (CI)"
 		}
 	],
 	"buildPresets": [

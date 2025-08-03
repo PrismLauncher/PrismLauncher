@@ -36,6 +36,7 @@ class BoxGeometry : protected QOpenGLFunctions {
 
     void initGeometry(float u, float v, float width, float height, float depth, float textureWidth = 64, float textureHeight = 64);
     void rotate(float angle, const QVector3D& vector);
+    void scale(const QVector3D& vector);
 
    private:
     QOpenGLBuffer m_vertexBuf;

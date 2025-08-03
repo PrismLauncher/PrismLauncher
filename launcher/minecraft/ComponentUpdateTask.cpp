@@ -570,7 +570,7 @@ void ComponentUpdateTask::performUpdateActions()
                               component->setVersion(cv.targetVersion);
                               component->waitLoadMeta();
                           },
-                          [&component, &instance](const UpdateActionLatestRecommendedCompatible lrc) {
+                          [&component, &instance](const UpdateActionLatestRecommendedCompatible& lrc) {
                               qCDebug(instanceProfileResolveC)
                                   << instance->name() << "|"
                                   << "UpdateActionLatestRecommendedCompatible" << component->getID() << ":" << component->getVersion()
@@ -748,7 +748,6 @@ void ComponentUpdateTask::remoteLoadFailed(size_t taskIndex, const QString& msg)
     d->remoteLoadSuccessful = false;
     taskSlot.succeeded = false;
     taskSlot.finished = true;
-    taskSlot.error = msg;
     d->remoteTasksInProgress--;
     checkIfAllFinished();
 }
@@ -769,7 +768,9 @@ void ComponentUpdateTask::checkIfAllFinished()
         QStringList allErrorsList;
         for (auto& item : d->remoteLoadStatusList) {
             if (!item.succeeded) {
-                allErrorsList.append(item.error);
+                const ComponentPtr component = d->m_profile->getComponent(item.PackProfileIndex);
+                allErrorsList.append(tr("Could not download metadata for %1 %2. Please change the version or try again later.")
+                                         .arg(component->getName(), component->m_version));
             }
         }
         auto allErrors = allErrorsList.join("\n");

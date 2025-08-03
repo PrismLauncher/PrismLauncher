@@ -37,7 +37,7 @@ class VersionList : public BaseVersionList, public BaseEntity {
     enum Roles { UidRole = Qt::UserRole + 100, TimeRole, RequiresRole, VersionPtrRole };
 
     bool isLoaded() override;
-    [[nodiscard]] Task::Ptr getLoadTask() override;
+    Task::Ptr getLoadTask() override;
     const BaseVersion::Ptr at(int i) const override;
     int count() const override;
     void sortVersions() override;

@@ -76,7 +76,7 @@ class Mod : public Resource {
     /** Get the intneral path to the mod's icon file*/
     QString iconPath() const { return m_local_details.icon_file; }
     /** Gets the icon of the mod, converted to a QPixmap for drawing, and scaled to size. */
-    [[nodiscard]] QPixmap icon(QSize size, Qt::AspectRatioMode mode = Qt::AspectRatioMode::IgnoreAspectRatio) const;
+    QPixmap icon(QSize size, Qt::AspectRatioMode mode = Qt::AspectRatioMode::IgnoreAspectRatio) const;
     /** Thread-safe. */
     QPixmap setIcon(QImage new_image) const;
 

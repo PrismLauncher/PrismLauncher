@@ -225,7 +225,7 @@ void ModFolderPage::updateMods(bool includeDeps)
     if (use_all)
         mods_list = m_model->allResources();
 
-    ResourceUpdateDialog update_dialog(this, m_instance, m_model, mods_list, includeDeps, true);
+    ResourceUpdateDialog update_dialog(this, m_instance, m_model, mods_list, includeDeps, profile->getModLoadersList());
     update_dialog.checkCandidates();
 
     if (update_dialog.aborted()) {

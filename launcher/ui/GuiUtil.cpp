@@ -43,11 +43,10 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 
-#include <memory>
-
 #include "FileSystem.h"
 #include "logs/AnonymizeLog.h"
 #include "net/NetJob.h"
+#include "net/NetRequest.h"
 #include "net/PasteUpload.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -134,10 +133,10 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
         textToUpload = truncateLogForMclogs(text);
     }
 
-    auto result = std::make_shared<PasteUpload::Result>();
     auto job = NetJob::Ptr(new NetJob("Log Upload", APPLICATION->network()));
 
-    job->addNetAction(PasteUpload::make(textToUpload, pasteType, baseURL, result));
+    auto pasteJob = new PasteUpload(textToUpload, baseURL, pasteType);
+    job->addNetAction(Net::NetRequest::Ptr(pasteJob));
     QObject::connect(job.get(), &Task::failed, [parentWidget](QString reason) {
         CustomMessageBox::selectable(parentWidget, QObject::tr("Failed to upload logs!"), reason, QMessageBox::Critical)->show();
     });
@@ -148,27 +147,19 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
     });
 
     if (dialog.execWithTask(job.get()) == QDialog::Accepted) {
-        if (!result->error.isEmpty() || !result->extra_message.isEmpty()) {
-            QString message = QObject::tr("Error: %1").arg(result->error);
-            if (!result->extra_message.isEmpty()) {
-                message += QObject::tr("\nError message: %1").arg(result->extra_message);
-            }
-            CustomMessageBox::selectable(parentWidget, QObject::tr("Failed to upload logs!"), message, QMessageBox::Critical)->show();
-            return {};
-        }
-        if (result->link.isEmpty()) {
+        if (pasteJob->pasteLink().isEmpty()) {
             CustomMessageBox::selectable(parentWidget, QObject::tr("Failed to upload logs!"), "The upload link is empty",
                                          QMessageBox::Critical)
                 ->show();
             return {};
         }
-        setClipboardText(result->link);
+        setClipboardText(pasteJob->pasteLink());
         CustomMessageBox::selectable(
             parentWidget, QObject::tr("Upload finished"),
-            QObject::tr("The <a href=\"%1\">link to the uploaded log</a> has been placed in your clipboard.").arg(result->link),
+            QObject::tr("The <a href=\"%1\">link to the uploaded log</a> has been placed in your clipboard.").arg(pasteJob->pasteLink()),
             QMessageBox::Information)
             ->exec();
-        return result->link;
+        return pasteJob->pasteLink();
     }
     return {};
 }

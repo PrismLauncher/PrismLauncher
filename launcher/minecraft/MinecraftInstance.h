@@ -36,6 +36,7 @@
 
 #pragma once
 #include <java/JavaVersion.h>
+#include <minecraft/mod/DataPackFolderModel.h>
 #include <QDir>
 #include <QProcess>
 #include "BaseInstance.h"
@@ -80,6 +81,7 @@ class MinecraftInstance : public BaseInstance {
     QString modsRoot() const override;
     QString coreModsDir() const;
     QString nilModsDir() const;
+    QString dataPacksDir();
     QString modsCacheLocation() const;
     QString libDir() const;
     QString worldDir() const;
@@ -102,7 +104,7 @@ class MinecraftInstance : public BaseInstance {
     QString getLocalLibraryPath() const;
 
     /** Returns whether the instance, with its version, has support for demo mode. */
-    [[nodiscard]] bool supportsDemo() const;
+    bool supportsDemo() const;
 
     void updateRuntimeContext() override;
 
@@ -116,6 +118,7 @@ class MinecraftInstance : public BaseInstance {
     std::shared_ptr<ResourcePackFolderModel> resourcePackList();
     std::shared_ptr<TexturePackFolderModel> texturePackList();
     std::shared_ptr<ShaderPackFolderModel> shaderPackList();
+    std::shared_ptr<DataPackFolderModel> dataPackList();
     QList<std::shared_ptr<ResourceFolderModel>> resourceLists();
     std::shared_ptr<WorldList> worldList();
     std::shared_ptr<GameOptions> gameOptionsModel();
@@ -166,6 +169,7 @@ class MinecraftInstance : public BaseInstance {
     mutable std::shared_ptr<ResourcePackFolderModel> m_resource_pack_list;
     mutable std::shared_ptr<ShaderPackFolderModel> m_shader_pack_list;
     mutable std::shared_ptr<TexturePackFolderModel> m_texture_pack_list;
+    mutable std::shared_ptr<DataPackFolderModel> m_data_pack_list;
     mutable std::shared_ptr<WorldList> m_world_list;
     mutable std::shared_ptr<GameOptions> m_game_options;
 };

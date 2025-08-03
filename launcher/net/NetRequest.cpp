@@ -84,7 +84,8 @@ void NetRequest::executeTask()
             break;
         case State::Inactive:
         case State::Failed:
-            emit failed("Failed to initialize sink");
+            m_failReason = m_sink->failReason();
+            emit failed(m_sink->failReason());
             emit finished();
             return;
         case State::AbortedByUser:
@@ -259,6 +260,7 @@ void NetRequest::downloadFinished()
     } else if (m_state == State::Failed) {
         qCDebug(logCat) << getUid().toString() << "Request failed in previous step:" << m_url.toString();
         m_sink->abort();
+        m_failReason = m_reply->errorString();
         emit failed(m_reply->errorString());
         emit finished();
         return;
@@ -278,7 +280,8 @@ void NetRequest::downloadFinished()
         if (m_state != State::Succeeded) {
             qCDebug(logCat) << getUid().toString() << "Request failed to write:" << m_url.toString();
             m_sink->abort();
-            emit failed("failed to write in sink");
+            m_failReason = m_sink->failReason();
+            emit failed(m_sink->failReason());
             emit finished();
             return;
         }
@@ -289,7 +292,8 @@ void NetRequest::downloadFinished()
     if (m_state != State::Succeeded) {
         qCDebug(logCat) << getUid().toString() << "Request failed to finalize:" << m_url.toString();
         m_sink->abort();
-        emit failed("failed to finalize the request");
+        m_failReason = m_sink->failReason();
+        emit failed(m_sink->failReason());
         emit finished();
         return;
     }
@@ -305,7 +309,7 @@ void NetRequest::downloadReadyRead()
         auto data = m_reply->readAll();
         m_state = m_sink->write(data);
         if (m_state == State::Failed) {
-            qCCritical(logCat) << getUid().toString() << "Failed to process response chunk";
+            qCCritical(logCat) << getUid().toString() << "Failed to process response chunk:" << m_sink->failReason();
         }
         // qDebug() << "Request" << m_url.toString() << "gained" << data.size() << "bytes";
     } else {

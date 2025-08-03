@@ -60,7 +60,7 @@ class ResourceFolderLoadTask : public Task {
                            bool clean_orphan,
                            std::function<Resource*(const QFileInfo&)> create_function);
 
-    [[nodiscard]] bool canAbort() const override { return true; }
+    bool canAbort() const override { return true; }
     bool abort() override
     {
         m_aborted.store(true);

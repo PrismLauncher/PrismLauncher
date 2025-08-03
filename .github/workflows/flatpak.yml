@@ -2,6 +2,9 @@ name: Flatpak
 
 on:
   push:
+    branches:
+      - "develop"
+      - "release-*"
     # We don't do anything with these artifacts on releases. They go to Flathub
     tags-ignore:
       - "*"
@@ -10,17 +13,18 @@ on:
       - "**.cpp"
       - "**.h"
       - "**.java"
+      - "**.ui"
 
       # Build files
-      - "flatpak/"
+      - "flatpak/**"
 
       # Directories
-      - "buildconfig/"
-      - "cmake/"
-      - "launcher/"
-      - "libraries/"
-      - "program_info/"
-      - "tests/"
+      - "buildconfig/**"
+      - "cmake/**"
+      - "launcher/**"
+      - "libraries/**"
+      - "program_info/**"
+      - "tests/**"
 
       # Files
       - "CMakeLists.txt"
@@ -33,17 +37,19 @@ on:
       # File types
       - "**.cpp"
       - "**.h"
+      - "**.java"
+      - "**.ui"
 
       # Build files
-      - "flatpak/"
+      - "flatpak/**"
 
       # Directories
-      - "buildconfig/"
-      - "cmake/"
-      - "launcher/"
-      - "libraries/"
-      - "program_info/"
-      - "tests/"
+      - "buildconfig/**"
+      - "cmake/**"
+      - "launcher/**"
+      - "libraries/**"
+      - "program_info/**"
+      - "tests/**"
 
       # Files
       - "CMakeLists.txt"

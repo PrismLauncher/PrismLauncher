@@ -25,8 +25,13 @@ class PageDialog : public QDialog {
     explicit PageDialog(BasePageProvider* pageProvider, QString defaultId = QString(), QWidget* parent = 0);
     virtual ~PageDialog() {}
 
-   private slots:
-    virtual void closeEvent(QCloseEvent* event);
+   signals:
+    void applied();
+
+   private:
+    void accept() override;
+    void closeEvent(QCloseEvent* event) override;
+    bool handleClose();
 
    private:
     PageContainer* m_container;

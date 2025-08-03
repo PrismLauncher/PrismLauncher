@@ -177,7 +177,7 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent), ui(new Ui::AboutDia
 
     ui->copyLabel->setText(BuildConfig.LAUNCHER_COPYRIGHT);
 
-    connect(ui->closeButton, SIGNAL(clicked()), SLOT(close()));
+    connect(ui->closeButton, &QPushButton::clicked, this, &AboutDialog::close);
 
     connect(ui->aboutQt, &QPushButton::clicked, &QApplication::aboutQt);
 }

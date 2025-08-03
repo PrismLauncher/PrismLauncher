@@ -21,42 +21,63 @@
 #include <QVBoxLayout>
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 
-#include "ui/widgets/IconLabel.h"
 #include "ui/widgets/PageContainer.h"
 
 PageDialog::PageDialog(BasePageProvider* pageProvider, QString defaultId, QWidget* parent) : QDialog(parent)
 {
     setWindowTitle(pageProvider->dialogTitle());
-    m_container = new PageContainer(pageProvider, defaultId, this);
+    m_container = new PageContainer(pageProvider, std::move(defaultId), this);
 
-    QVBoxLayout* mainLayout = new QVBoxLayout;
+    auto* mainLayout = new QVBoxLayout(this);
+
+    auto* focusStealer = new QPushButton(this);
+    mainLayout->addWidget(focusStealer);
+    focusStealer->setDefault(true);
+    focusStealer->hide();
+
     mainLayout->addWidget(m_container);
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 0, 0, 0);
+
     setLayout(mainLayout);
 
-    QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Close);
-    buttons->button(QDialogButtonBox::Close)->setDefault(true);
-    buttons->button(QDialogButtonBox::Close)->setText(tr("Close"));
+    auto* buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    buttons->button(QDialogButtonBox::Ok)->setText(tr("&OK"));
+    buttons->button(QDialogButtonBox::Cancel)->setText(tr("&Cancel"));
     buttons->button(QDialogButtonBox::Help)->setText(tr("Help"));
     buttons->setContentsMargins(6, 0, 6, 0);
     m_container->addButtons(buttons);
 
-    connect(buttons->button(QDialogButtonBox::Close), SIGNAL(clicked()), this, SLOT(close()));
-    connect(buttons->button(QDialogButtonBox::Help), SIGNAL(clicked()), m_container, SLOT(help()));
+    connect(buttons->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &PageDialog::accept);
+    connect(buttons->button(QDialogButtonBox::Cancel), &QPushButton::clicked, this, &PageDialog::reject);
+    connect(buttons->button(QDialogButtonBox::Help), &QPushButton::clicked, m_container, &PageContainer::help);
 
-    restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("PagedGeometry").toByteArray()));
+    restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("PagedGeometry").toString().toUtf8()));
+}
+
+void PageDialog::accept()
+{
+    if (handleClose())
+        QDialog::accept();
 }
 
 void PageDialog::closeEvent(QCloseEvent* event)
 {
-    qDebug() << "Paged dialog close requested";
-    if (m_container->prepareToClose()) {
-        qDebug() << "Paged dialog close approved";
-        APPLICATION->settings()->set("PagedGeometry", saveGeometry().toBase64());
-        qDebug() << "Paged dialog geometry saved";
+    if (handleClose())
         QDialog::closeEvent(event);
-    }
+}
+
+bool PageDialog::handleClose()
+{
+    qDebug() << "Paged dialog close requested";
+    if (!m_container->prepareToClose())
+        return false;
+
+    qDebug() << "Paged dialog close approved";
+    APPLICATION->settings()->set("PagedGeometry", QString::fromUtf8(saveGeometry().toBase64()));
+    qDebug() << "Paged dialog geometry saved";
+
+    emit applied();
+    return true;
 }

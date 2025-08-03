@@ -101,8 +101,8 @@ JavaSettingsWidget::JavaSettingsWidget(InstancePtr instance, QWidget* parent)
     connect(m_ui->javaDetectBtn, &QPushButton::clicked, this, &JavaSettingsWidget::onJavaAutodetect);
     connect(m_ui->javaBrowseBtn, &QPushButton::clicked, this, &JavaSettingsWidget::onJavaBrowse);
 
-    connect(m_ui->maxMemSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &JavaSettingsWidget::updateThresholds);
-    connect(m_ui->minMemSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &JavaSettingsWidget::updateThresholds);
+    connect(m_ui->maxMemSpinBox, &QSpinBox::valueChanged, this, &JavaSettingsWidget::updateThresholds);
+    connect(m_ui->minMemSpinBox, &QSpinBox::valueChanged, this, &JavaSettingsWidget::updateThresholds);
 
     loadSettings();
     updateThresholds();
@@ -289,26 +289,18 @@ void JavaSettingsWidget::updateThresholds()
     unsigned int maxMem = m_ui->maxMemSpinBox->value();
     unsigned int minMem = m_ui->minMemSpinBox->value();
 
-    QString iconName;
+    const QString warningColour(QStringLiteral("<span style='color:#f5c211'>%1</span>"));
 
     if (maxMem >= sysMiB) {
-        iconName = "status-bad";
-        m_ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation exceeds your system memory capacity."));
+        m_ui->labelMaxMemNotice->setText(QString("<span style='color:red'>%1</span>").arg(tr("Your maximum memory allocation exceeds your system memory capacity.")));
+        m_ui->labelMaxMemNotice->show();
     } else if (maxMem > (sysMiB * 0.9)) {
-        iconName = "status-yellow";
-        m_ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation approaches your system memory capacity."));
+        m_ui->labelMaxMemNotice->setText(warningColour.arg(tr("Your maximum memory allocation is close to your system memory capacity.")));
+        m_ui->labelMaxMemNotice->show();
     } else if (maxMem < minMem) {
-        iconName = "status-yellow";
-        m_ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation is smaller than the minimum value"));
+        m_ui->labelMaxMemNotice->setText(warningColour.arg(tr("Your maximum memory allocation is below the minimum memory allocation.")));
+        m_ui->labelMaxMemNotice->show();
     } else {
-        iconName = "status-good";
-        m_ui->labelMaxMemIcon->setToolTip("");
-    }
-
-    {
-        auto height = m_ui->labelMaxMemIcon->fontInfo().pixelSize();
-        QIcon icon = APPLICATION->getThemedIcon(iconName);
-        QPixmap pix = icon.pixmap(height, height);
-        m_ui->labelMaxMemIcon->setPixmap(pix);
+        m_ui->labelMaxMemNotice->hide();
     }
 }

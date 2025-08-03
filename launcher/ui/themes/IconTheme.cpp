@@ -21,8 +21,6 @@
 #include <QFile>
 #include <QSettings>
 
-IconTheme::IconTheme(const QString& id, const QString& path) : m_id(id), m_path(path) {}
-
 bool IconTheme::load()
 {
     const QString path = m_path + "/index.theme";
@@ -35,19 +33,4 @@ bool IconTheme::load()
     m_name = settings.value("Name").toString();
     settings.endGroup();
     return !m_name.isNull();
-}
-
-QString IconTheme::id()
-{
-    return m_id;
-}
-
-QString IconTheme::path()
-{
-    return m_path;
-}
-
-QString IconTheme::name()
-{
-    return m_name;
 }

@@ -10,7 +10,7 @@
     <height>620</height>
    </rect>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_6">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -24,15 +24,20 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>0</number>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable">
+      <bool>true</bool>
      </property>
-     <widget class="QWidget" name="tab">
-      <attribute name="title">
-       <string>Services</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>-216</y>
+        <width>816</width>
+        <height>832</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QGroupBox" name="groupBox_paste">
          <property name="title">
@@ -50,7 +55,14 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="pasteTypeComboBox"/>
+           <widget class="QComboBox" name="pasteTypeComboBox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QLabel" name="baseURLLabel">
@@ -65,7 +77,7 @@
           <item>
            <widget class="QLineEdit" name="baseURLEntry">
             <property name="placeholderText">
-             <string/>
+             <string>Use Default</string>
             </property>
             <property name="clearButtonEnabled">
              <bool>true</bool>
@@ -92,29 +104,9 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>You can set this to a third-party metadata server to use patched libraries or other hacks.</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::RichText</enum>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="metaURL">
-            <property name="placeholderText">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QLabel" name="label_6">
             <property name="text">
-             <string>Enter a custom URL for meta here.</string>
+             <string>You can set this to a third-party metadata server to use patched libraries or other hacks.</string>
             </property>
             <property name="textFormat">
              <enum>Qt::RichText</enum>
@@ -127,35 +119,112 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QLineEdit" name="metaURL">
+            <property name="placeholderText">
+             <string>Use Default</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
+        <widget class="QGroupBox" name="groupBox_assets">
+         <property name="title">
+          <string>Assets Server</string>
          </property>
-         <property name="sizeHint" stdset="0">
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>You can set this to another server if you have problems with downloading assets.</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::RichText</enum>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+            <property name="openExternalLinks">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="resourceURL">
+            <property name="placeholderText">
+             <string>Use Default</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_ua">
+         <property name="minimumSize">
           <size>
-           <width>20</width>
-           <height>40</height>
+           <width>0</width>
+           <height>0</height>
           </size>
          </property>
-        </spacer>
+         <property name="title">
+          <string>User Agent</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QLineEdit" name="userAgentLineEdit">
+            <property name="placeholderText">
+             <string>Use Default</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="userAgentLabel">
+            <property name="text">
+             <string>Enter a custom User Agent here. The special string $LAUNCHER_VER will be replaced with the version of the launcher.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_2">
-      <attribute name="title">
-       <string>API Keys</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>
         <widget class="QGroupBox" name="groupBox_msa">
          <property name="title">
-          <string>&amp;Microsoft Authentication</string>
+          <string>&amp;API Keys</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QLabel" name="msaClientIDLabel">
+            <property name="text">
+             <string>&amp;Microsoft Authentication</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::RichText</enum>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+            <property name="openExternalLinks">
+             <bool>true</bool>
+            </property>
+            <property name="buddy">
+             <cstring>msaClientID</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="msaClientID">
+            <property name="placeholderText">
+             <string>Use Default</string>
+            </property>
+           </widget>
+          </item>
           <item>
            <widget class="QLabel" name="label_3">
             <property name="text">
@@ -170,99 +239,83 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="msaClientID">
-            <property name="placeholderText">
-             <string>(Default)</string>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>6</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="modrinthTokenLabel">
+            <property name="text">
+             <string>Mod&amp;rinth</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::RichText</enum>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+            <property name="openExternalLinks">
+             <bool>true</bool>
+            </property>
+            <property name="buddy">
+             <cstring>modrinthToken</cstring>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Enter a custom client ID for Microsoft Authentication here.</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::RichText</enum>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-            <property name="openExternalLinks">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_modrinth">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="title">
-          <string>&amp;Modrinth API</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: you only need to set this to access private data. Read the &lt;a href=&quot;https://docs.modrinth.com/api/#authentication&quot;&gt;documentation&lt;/a&gt; for more information.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="openExternalLinks">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Enter a custom API token for Modrinth here.</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::RichText</enum>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-            <property name="openExternalLinks">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
            <widget class="QLineEdit" name="modrinthToken">
             <property name="enabled">
              <bool>true</bool>
             </property>
             <property name="placeholderText">
-             <string>(None)</string>
+             <string>Use None</string>
             </property>
            </widget>
           </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_flame">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="title">
-          <string>&amp;CurseForge Core API</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_10">
+          <item>
+           <widget class="QLabel" name="label_8">
             <property name="text">
-             <string>Note: you probably don't need to set this if CurseForge already works.</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: you only need to set this to access private data. Read the &lt;a href=&quot;https://docs.modrinth.com/api/#authentication&quot;&gt;documentation&lt;/a&gt; for more information.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+            <property name="openExternalLinks">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_9">
+          <item>
+           <spacer name="verticalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>6</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="flameKeyLabel">
             <property name="text">
-             <string>Enter a custom API Key for CurseForge here.</string>
+             <string>&amp;CurseForge</string>
             </property>
             <property name="textFormat">
              <enum>Qt::RichText</enum>
@@ -273,45 +326,71 @@
             <property name="openExternalLinks">
              <bool>true</bool>
             </property>
+            <property name="buddy">
+             <cstring>flameKey</cstring>
+            </property>
            </widget>
           </item>
-          <item row="1" column="0">
+          <item>
            <widget class="QLineEdit" name="flameKey">
             <property name="enabled">
              <bool>true</bool>
             </property>
             <property name="placeholderText">
-             <string>(Default)</string>
+             <string>Use Default</string>
             </property>
            </widget>
           </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox">
-         <property name="title">
-          <string>Technic Client ID</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_9">
           <item>
-           <widget class="QLabel" name="label_11">
+           <widget class="QLabel" name="label_10">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: you only need to set this to access private data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>Note: you probably don't need to set this if CurseForge already works.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>6</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_12">
+            <property name="text">
+             <string>&amp;Technic</string>
+            </property>
+            <property name="buddy">
+             <cstring>technicClientID</cstring>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QLineEdit" name="technicClientID">
             <property name="placeholderText">
-             <string>(None)</string>
+             <string>Use Default</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_12">
+           <widget class="QLabel" name="label_11">
             <property name="text">
-             <string>Enter a custom GUID client ID for Technic here.</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: you only need to set this to access private data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -319,59 +398,14 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer">
+        <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_3">
-      <attribute name="title">
-       <string>Miscellaneous</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_6">
-       <item>
-        <widget class="QGroupBox" name="groupBox_ua">
-         <property name="minimumSize">
           <size>
            <width>0</width>
            <height>0</height>
-          </size>
-         </property>
-         <property name="title">
-          <string>User Agent</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_7">
-          <item>
-           <widget class="QLineEdit" name="userAgentLineEdit"/>
-          </item>
-          <item>
-           <widget class="QLabel" name="userAgentLabel">
-            <property name="text">
-             <string>Enter a custom User Agent here. The special string $LAUNCHER_VER will be replaced with the version of the launcher.</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
           </size>
          </property>
         </spacer>

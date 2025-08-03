@@ -39,9 +39,9 @@ JavaWizardWidget::JavaWizardWidget(QWidget* parent) : QWidget(parent)
     m_memoryTimer = new QTimer(this);
     setupUi();
 
-    connect(m_minMemSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onSpinBoxValueChanged(int)));
-    connect(m_maxMemSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onSpinBoxValueChanged(int)));
-    connect(m_permGenSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onSpinBoxValueChanged(int)));
+    connect(m_minMemSpinBox, &QSpinBox::valueChanged, this, &JavaWizardWidget::onSpinBoxValueChanged);
+    connect(m_maxMemSpinBox, &QSpinBox::valueChanged, this, &JavaWizardWidget::onSpinBoxValueChanged);
+    connect(m_permGenSpinBox, &QSpinBox::valueChanged, this, &JavaWizardWidget::onSpinBoxValueChanged);
     connect(m_memoryTimer, &QTimer::timeout, this, &JavaWizardWidget::memoryValueChanged);
     connect(m_versionWidget, &VersionSelectWidget::selectedVersionChanged, this, &JavaWizardWidget::javaVersionSelected);
     connect(m_javaBrowseBtn, &QPushButton::clicked, this, &JavaWizardWidget::on_javaBrowseBtn_clicked);

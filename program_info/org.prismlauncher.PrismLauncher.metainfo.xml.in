@@ -1,19 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
   <id>@Launcher_AppID@</id>
-  <launchable type="desktop-id">@Launcher_AppID@.desktop</launchable>
   <name>Prism Launcher</name>
-  <developer_name>Prism Launcher Contributors</developer_name>
   <summary>Custom Minecraft Launcher to easily manage multiple Minecraft installations at once</summary>
+  <developer id="org.prismlauncher">
+    <name>Prism Launcher Contributors</name>
+  </developer>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-only</project_license>
-  <url type="homepage">https://prismlauncher.org/</url>
-  <url type="help">https://prismlauncher.org/wiki/</url>
-  <url type="bugtracker">https://github.com/PrismLauncher/PrismLauncher/issues</url>
-  <url type="contact">https://prismlauncher.org/discord</url>
-  <url type="vcs-browser">https://github.com/PrismLauncher/PrismLauncher</url>
-  <url type="contribute">https://github.com/PrismLauncher/PrismLauncher/blob/develop/CONTRIBUTING.md</url>
-  <url type="translate">https://hosted.weblate.org/projects/prismlauncher/launcher</url>
   <description>
     <p>Prism Launcher is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.</p>
     <p>Features:</p>
@@ -67,8 +61,18 @@
   <releases>
     <release version="@Launcher_VERSION_NAME@" date="@Launcher_BUILD_TIMESTAMP@"></release>
   </releases>
+  <url type="homepage">https://prismlauncher.org/</url>
+  <url type="bugtracker">https://github.com/PrismLauncher/PrismLauncher/issues</url>
+  <url type="faq">https://prismlauncher.org/wiki/overview/faq/</url>
+  <url type="help">https://prismlauncher.org/wiki/</url>
+  <url type="donation">https://opencollective.com/prismlauncher</url>
+  <url type="translate">https://hosted.weblate.org/projects/prismlauncher/launcher</url>
+  <url type="contact">https://prismlauncher.org/discord</url>
+  <url type="vcs-browser">https://github.com/PrismLauncher/PrismLauncher</url>
+  <url type="contribute">https://github.com/PrismLauncher/PrismLauncher/blob/develop/CONTRIBUTING.md</url>
   <content_rating type="oars-1.1">
     <content_attribute id="violence-fantasy">moderate</content_attribute>
     <content_attribute id="social-chat">intense</content_attribute>
   </content_rating>
+  <launchable type="desktop-id">@Launcher_AppID@.desktop</launchable>
 </component>

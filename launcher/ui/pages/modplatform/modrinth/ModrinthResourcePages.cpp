@@ -56,10 +56,9 @@ ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instan
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's constructor...
-    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &ModrinthModPage::triggerSearch);
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthModPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
-            &ModrinthModPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &ModrinthModPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ModrinthModPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
@@ -75,10 +74,9 @@ ModrinthResourcePackPage::ModrinthResourcePackPage(ResourcePackDownloadDialog* d
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's constructor...
-    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &ModrinthResourcePackPage::triggerSearch);
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthResourcePackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
-            &ModrinthResourcePackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &ModrinthResourcePackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ModrinthResourcePackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
@@ -94,10 +92,9 @@ ModrinthTexturePackPage::ModrinthTexturePackPage(TexturePackDownloadDialog* dial
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's constructor...
-    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &ModrinthTexturePackPage::triggerSearch);
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthTexturePackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
-            &ModrinthTexturePackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &ModrinthTexturePackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ModrinthTexturePackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
@@ -113,11 +110,28 @@ ModrinthShaderPackPage::ModrinthShaderPackPage(ShaderPackDownloadDialog* dialog,
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's constructor...
-    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &ModrinthShaderPackPage::triggerSearch);
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthShaderPackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
-            &ModrinthShaderPackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &ModrinthShaderPackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ModrinthShaderPackPage::onResourceSelected);
+
+    m_ui->packDescription->setMetaEntry(metaEntryBase());
+}
+
+ModrinthDataPackPage::ModrinthDataPackPage(DataPackDownloadDialog* dialog, BaseInstance& instance)
+    : DataPackResourcePage(dialog, instance)
+{
+    m_model = new ModrinthDataPackModel(instance);
+    m_ui->packView->setModel(m_model);
+
+    addSortings();
+
+    // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
+    // so it's best not to connect them in the parent's constructor...
+    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &ModrinthDataPackPage::triggerSearch);
+    connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthDataPackPage::onSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &ModrinthDataPackPage::onVersionSelectionChanged);
+    connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ModrinthDataPackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
 }
@@ -141,6 +155,10 @@ auto ModrinthShaderPackPage::shouldDisplay() const -> bool
 {
     return true;
 }
+auto ModrinthDataPackPage::shouldDisplay() const -> bool
+{
+    return true;
+}
 
 std::unique_ptr<ModFilterWidget> ModrinthModPage::createFilterWidget()
 {
@@ -151,7 +169,7 @@ void ModrinthModPage::prepareProviderCategories()
 {
     auto response = std::make_shared<QByteArray>();
     m_categoriesTask = ModrinthAPI::getModCategories(response);
-    QObject::connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
+    connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
         auto categories = ModrinthAPI::loadModCategories(response);
         m_filter_widget->setCategories(categories);
     });

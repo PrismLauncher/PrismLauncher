@@ -35,6 +35,7 @@
 
 #pragma once
 
+#include "net/ByteArraySink.h"
 #include "net/NetRequest.h"
 #include "tasks/Task.h"
 
@@ -67,40 +68,29 @@ class PasteUpload : public Net::NetRequest {
     };
 
     static const std::array<PasteTypeInfo, 4> PasteTypes;
-    struct Result {
-        QString link;
-        QString error;
-        QString extra_message;
-    };
 
-    using ResultPtr = std::shared_ptr<Result>;
-
-    class Sink : public Net::Sink {
+    class Sink : public Net::ByteArraySink {
        public:
-        Sink(const PasteType pasteType, const QString base_url, ResultPtr result)
-            : m_paste_type(pasteType), m_base_url(base_url), m_result(result) {};
+        Sink(PasteUpload* p) : Net::ByteArraySink(std::make_shared<QByteArray>()), m_d(p) {};
         virtual ~Sink() = default;
 
        public:
-        auto init(QNetworkRequest& request) -> Task::State override;
-        auto write(QByteArray& data) -> Task::State override;
-        auto abort() -> Task::State override;
         auto finalize(QNetworkReply& reply) -> Task::State override;
-        auto hasLocalData() -> bool override { return false; }
 
        private:
-        const PasteType m_paste_type;
-        const QString m_base_url;
-        ResultPtr m_result;
-        QByteArray m_output;
+        PasteUpload* m_d;
     };
-    PasteUpload(const QString& log, PasteType pasteType);
+    friend Sink;
+
+    PasteUpload(const QString& log, QString url, PasteType pasteType);
     virtual ~PasteUpload() = default;
 
-    static NetRequest::Ptr make(const QString& log, PasteType pasteType, QString baseURL, ResultPtr result);
+    QString pasteLink() { return m_pasteLink; }
 
    private:
     virtual QNetworkReply* getReply(QNetworkRequest&) override;
     QString m_log;
+    QString m_pasteLink;
+    QString m_baseUrl;
     const PasteType m_paste_type;
 };

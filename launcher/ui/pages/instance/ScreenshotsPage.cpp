@@ -135,7 +135,7 @@ class FilterModel : public QIdentityProxyModel {
         m_thumbnailingPool.setMaxThreadCount(4);
         m_thumbnailCache = std::make_shared<SharedIconCache>();
         m_thumbnailCache->add("placeholder", APPLICATION->getThemedIcon("screenshot-placeholder"));
-        connect(&watcher, SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
+        connect(&watcher, &QFileSystemWatcher::fileChanged, this, &FilterModel::fileChanged);
     }
     virtual ~FilterModel()
     {
@@ -191,9 +191,9 @@ class FilterModel : public QIdentityProxyModel {
     void thumbnailImage(QString path)
     {
         auto runnable = new ThumbnailRunnable(path, m_thumbnailCache);
-        connect(&(runnable->m_resultEmitter), SIGNAL(resultsReady(QString)), SLOT(thumbnailReady(QString)));
-        connect(&(runnable->m_resultEmitter), SIGNAL(resultsFailed(QString)), SLOT(thumbnailFailed(QString)));
-        ((QThreadPool&)m_thumbnailingPool).start(runnable);
+        connect(&runnable->m_resultEmitter, &ThumbnailingResult::resultsReady, this, &FilterModel::thumbnailReady);
+        connect(&runnable->m_resultEmitter, &ThumbnailingResult::resultsFailed, this, &FilterModel::thumbnailFailed);
+        m_thumbnailingPool.start(runnable);
     }
    private slots:
     void thumbnailReady(QString path) { emit layoutChanged(); }
@@ -266,7 +266,7 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent) : QMainWindow(pa
     ui->listView->setItemDelegate(new CenteredEditingDelegate(this));
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->listView, &QListView::customContextMenuRequested, this, &ScreenshotsPage::ShowContextMenu);
-    connect(ui->listView, SIGNAL(activated(QModelIndex)), SLOT(onItemActivated(QModelIndex)));
+    connect(ui->listView, &QAbstractItemView::activated, this, &ScreenshotsPage::onItemActivated);
 }
 
 bool ScreenshotsPage::eventFilter(QObject* obj, QEvent* evt)
@@ -562,12 +562,12 @@ void ScreenshotsPage::openedImpl()
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
-    ui->toolBar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
+    ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
 }
 
 void ScreenshotsPage::closedImpl()
 {
-    m_wide_bar_setting->set(ui->toolBar->getVisibilityState());
+    m_wide_bar_setting->set(QString::fromUtf8(ui->toolBar->getVisibilityState().toBase64()));
 }
 
 #include "ScreenshotsPage.moc"

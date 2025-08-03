@@ -32,9 +32,9 @@ class DummyResourceAPI : public ResourceAPI {
     }
 
     DummyResourceAPI() : ResourceAPI() {}
-    [[nodiscard]] auto getSortingMethods() const -> QList<SortingMethod> override { return {}; }
+    auto getSortingMethods() const -> QList<SortingMethod> override { return {}; }
 
-    [[nodiscard]] Task::Ptr searchProjects(SearchArgs&&, SearchCallbacks&& callbacks) const override
+    Task::Ptr searchProjects(SearchArgs&&, SearchCallbacks&& callbacks) const override
     {
         auto task = makeShared<SearchTask>();
         QObject::connect(task.get(), &Task::succeeded, [callbacks] {

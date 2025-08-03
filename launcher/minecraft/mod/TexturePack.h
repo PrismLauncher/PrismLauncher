@@ -37,10 +37,10 @@ class TexturePack : public Resource {
     TexturePack(QFileInfo file_info) : Resource(file_info) {}
 
     /** Gets the description of the texture pack. */
-    [[nodiscard]] QString description() const { return m_description; }
+    QString description() const { return m_description; }
 
     /** Gets the image of the texture pack, converted to a QPixmap for drawing, and scaled to size. */
-    [[nodiscard]] QPixmap image(QSize size, Qt::AspectRatioMode mode = Qt::AspectRatioMode::IgnoreAspectRatio) const;
+    QPixmap image(QSize size, Qt::AspectRatioMode mode = Qt::AspectRatioMode::IgnoreAspectRatio) const;
 
     /** Thread-safe. */
     void setDescription(QString new_description);

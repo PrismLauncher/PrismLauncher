@@ -21,11 +21,11 @@ class QSortFilterProxyModel;
 
 /* A macro to define useful functions to handle Resource* -> T* more easily on derived classes */
 #define RESOURCE_HELPERS(T)                                         \
-    [[nodiscard]] T& at(int index)                                  \
+    T& at(int index)                                  \
     {                                                               \
         return *static_cast<T*>(m_resources[index].get());          \
     }                                                               \
-    [[nodiscard]] const T& at(int index) const                      \
+    const T& at(int index) const                      \
     {                                                               \
         return *static_cast<const T*>(m_resources.at(index).get()); \
     }                                                               \
@@ -115,24 +115,24 @@ class ResourceFolderModel : public QAbstractListModel {
     /** Creates a new parse task, if needed, for 'res' and start it.*/
     virtual void resolveResource(Resource::Ptr res);
 
-    [[nodiscard]] qsizetype size() const { return m_resources.size(); }
+    qsizetype size() const { return m_resources.size(); }
     [[nodiscard]] bool empty() const { return size() == 0; }
 
-    [[nodiscard]] Resource& at(int index) { return *m_resources[index].get(); }
-    [[nodiscard]] const Resource& at(int index) const { return *m_resources.at(index).get(); }
+    Resource& at(int index) { return *m_resources[index].get(); }
+    const Resource& at(int index) const { return *m_resources.at(index).get(); }
     QList<Resource*> selectedResources(const QModelIndexList& indexes);
     QList<Resource*> allResources();
 
-    [[nodiscard]] Resource::Ptr find(QString id);
+    Resource::Ptr find(QString id);
 
-    [[nodiscard]] QDir const& dir() const { return m_dir; }
+    QDir const& dir() const { return m_dir; }
 
     /** Checks whether there's any parse tasks being done.
      *
      *  Since they can be quite expensive, and are usually done in a separate thread, if we were to destroy the model while having
      *  such tasks would introduce an undefined behavior, most likely resulting in a crash.
      */
-    [[nodiscard]] bool hasPendingParseTasks() const;
+    bool hasPendingParseTasks() const;
 
     /* Qt behavior */
 
@@ -141,22 +141,22 @@ class ResourceFolderModel : public QAbstractListModel {
 
     QStringList columnNames(bool translated = true) const { return translated ? m_column_names_translated : m_column_names; }
 
-    [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : static_cast<int>(size()); }
-    [[nodiscard]] int columnCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : NUM_COLUMNS; }
+    int rowCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : static_cast<int>(size()); }
+    int columnCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : NUM_COLUMNS; }
 
-    [[nodiscard]] Qt::DropActions supportedDropActions() const override;
+    Qt::DropActions supportedDropActions() const override;
 
     /// flags, mostly to support drag&drop
-    [[nodiscard]] Qt::ItemFlags flags(const QModelIndex& index) const override;
-    [[nodiscard]] QStringList mimeTypes() const override;
-    bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
+    QStringList mimeTypes() const override;
+    [[nodiscard]] bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
 
     [[nodiscard]] bool validateIndex(const QModelIndex& index) const;
 
-    [[nodiscard]] QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
-    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     void setupHeaderAction(QAction* act, int column);
     void saveColumns(QTreeView* tree);
@@ -169,16 +169,16 @@ class ResourceFolderModel : public QAbstractListModel {
      */
     QSortFilterProxyModel* createFilterProxyModel(QObject* parent = nullptr);
 
-    [[nodiscard]] SortType columnToSortKey(size_t column) const;
-    [[nodiscard]] QList<QHeaderView::ResizeMode> columnResizeModes() const { return m_column_resize_modes; }
+    SortType columnToSortKey(size_t column) const;
+    QList<QHeaderView::ResizeMode> columnResizeModes() const { return m_column_resize_modes; }
 
     class ProxyModel : public QSortFilterProxyModel {
        public:
         explicit ProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}
 
        protected:
-        [[nodiscard]] bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;
-        [[nodiscard]] bool lessThan(const QModelIndex& source_left, const QModelIndex& source_right) const override;
+        bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;
+        bool lessThan(const QModelIndex& source_left, const QModelIndex& source_right) const override;
     };
 
     QString instDirPath() const;
@@ -243,7 +243,6 @@ class ResourceFolderModel : public QAbstractListModel {
     QList<QHeaderView::ResizeMode> m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::Interactive,
                                                              QHeaderView::Interactive, QHeaderView::Interactive };
     QList<bool> m_columnsHideable = { false, false, true, true, true };
-    QList<bool> m_columnsHiddenByDefault = { false, false, false, false, true };
 
     QDir m_dir;
     BaseInstance* m_instance;

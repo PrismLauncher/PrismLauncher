@@ -119,10 +119,10 @@ bool SettingsObject::reload()
 void SettingsObject::connectSignals(const Setting& setting)
 {
     connect(&setting, &Setting::SettingChanged, this, &SettingsObject::changeSetting);
-    connect(&setting, SIGNAL(SettingChanged(const Setting&, QVariant)), this, SIGNAL(SettingChanged(const Setting&, QVariant)));
+    connect(&setting, &Setting::SettingChanged, this, &SettingsObject::SettingChanged);
 
     connect(&setting, &Setting::settingReset, this, &SettingsObject::resetSetting);
-    connect(&setting, SIGNAL(settingReset(Setting)), this, SIGNAL(settingReset(const Setting&)));
+    connect(&setting, &Setting::settingReset, this, &SettingsObject::settingReset);
 }
 
 std::shared_ptr<Setting> SettingsObject::getOrRegisterSetting(const QString& id, QVariant defVal)

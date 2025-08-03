@@ -44,13 +44,14 @@
 #include <QTextStream>
 
 #include <QSettings>
+#include "Json.h"
 
 INIFile::INIFile() {}
 
 bool INIFile::saveFile(QString fileName)
 {
     if (!contains("ConfigVersion"))
-        insert("ConfigVersion", "1.2");
+        insert("ConfigVersion", "1.3");
     QSettings _settings_obj{ fileName, QSettings::Format::IniFormat };
     _settings_obj.setFallbacksEnabled(false);
     _settings_obj.clear();
@@ -149,6 +150,27 @@ bool parseOldFileFormat(QIODevice& device, QSettings::SettingsMap& map)
     return true;
 }
 
+QVariant migrateQByteArrayToBase64(QString key, QVariant value)
+{
+    static const QStringList otherByteArrays = { "MainWindowState",       "MainWindowGeometry", "ConsoleWindowState",
+                                                 "ConsoleWindowGeometry", "PagedGeometry",      "NewInstanceGeometry",
+                                                 "ModDownloadGeometry",   "RPDownloadGeometry", "TPDownloadGeometry",
+                                                 "ShaderDownloadGeometry" };
+    if (key.startsWith("WideBarVisibility_") || (key.startsWith("UI/") && key.endsWith("_Page/Columns"))) {
+        return QString::fromUtf8(value.toByteArray().toBase64());
+    }
+    if (otherByteArrays.contains(key)) {
+        return QString::fromUtf8(value.toByteArray());
+    }
+    if (key == "linkedInstances") {
+        return Json::fromStringList(value.toStringList());
+    }
+    if (key == "Env") {
+        return Json::fromMap(value.toMap());
+    }
+    return value;
+}
+
 bool INIFile::loadFile(QString fileName)
 {
     QSettings _settings_obj{ fileName, QSettings::Format::IniFormat };
@@ -168,22 +190,34 @@ bool INIFile::loadFile(QString fileName)
         QSettings::SettingsMap map;
         parseOldFileFormat(file, map);
         file.close();
-        for (auto&& key : map.keys())
-            insert(key, map.value(key));
-        insert("ConfigVersion", "1.2");
+        for (auto&& key : map.keys()) {
+            auto value = migrateQByteArrayToBase64(key, map.value(key));
+            insert(key, value);
+        }
+        insert("ConfigVersion", "1.3");
     } else if (_settings_obj.value("ConfigVersion").toString() == "1.1") {
         for (auto&& key : _settings_obj.allKeys()) {
-            if (auto valueStr = _settings_obj.value(key).toString();
+            auto value = migrateQByteArrayToBase64(key, _settings_obj.value(key));
+            if (auto valueStr = value.toString();
                 (valueStr.contains(QChar(';')) || valueStr.contains(QChar('=')) || valueStr.contains(QChar(','))) &&
                 valueStr.endsWith("\"") && valueStr.startsWith("\"")) {
                 insert(key, unquote(valueStr));
-            } else
-                insert(key, _settings_obj.value(key));
+            } else {
+                insert(key, value);
+            }
         }
-        insert("ConfigVersion", "1.2");
-    } else
-        for (auto&& key : _settings_obj.allKeys())
+        insert("ConfigVersion", "1.3");
+    } else if (_settings_obj.value("ConfigVersion").toString() == "1.2") {
+        for (auto&& key : _settings_obj.allKeys()) {
+            auto value = migrateQByteArrayToBase64(key, _settings_obj.value(key));
+            insert(key, value);
+        }
+        insert("ConfigVersion", "1.3");
+    } else {
+        for (auto&& key : _settings_obj.allKeys()) {
             insert(key, _settings_obj.value(key));
+        }
+    }
     return true;
 }
 

@@ -52,7 +52,7 @@ class ImportFTBPage : public QWidget, public ModpackProviderBasePage {
     /** Programatically set the term in the search bar. */
     virtual void setSearchTerm(QString) override;
     /** Get the current term in the search bar. */
-    [[nodiscard]] virtual QString getSerachTerm() const override;
+    virtual QString getSerachTerm() const override;
 
    private:
     void suggestCurrent();

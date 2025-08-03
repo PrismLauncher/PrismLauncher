@@ -103,8 +103,8 @@ void ListModel::request()
     jobPtr = netJob;
     jobPtr->start();
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::requestFinished);
-    QObject::connect(netJob.get(), &NetJob::failed, this, &ListModel::requestFailed);
+    connect(netJob.get(), &NetJob::succeeded, this, &ListModel::requestFinished);
+    connect(netJob.get(), &NetJob::failed, this, &ListModel::requestFailed);
 }
 
 void ListModel::requestFinished()
@@ -197,7 +197,7 @@ void ListModel::requestLogo(QString file, QString url)
     job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
-    QObject::connect(job, &NetJob::succeeded, this, [this, file, fullPath, job] {
+    connect(job, &NetJob::succeeded, this, [this, file, fullPath, job] {
         job->deleteLater();
         emit logoLoaded(file, QIcon(fullPath));
         if (waitingCallbacks.contains(file)) {
@@ -205,7 +205,7 @@ void ListModel::requestLogo(QString file, QString url)
         }
     });
 
-    QObject::connect(job, &NetJob::failed, this, [this, file, job] {
+    connect(job, &NetJob::failed, this, [this, file, job] {
         job->deleteLater();
         emit logoFailed(file);
     });

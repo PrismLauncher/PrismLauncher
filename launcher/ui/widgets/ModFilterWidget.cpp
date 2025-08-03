@@ -40,6 +40,7 @@
 #include <algorithm>
 #include <list>
 #include "BaseVersionList.h"
+#include "Json.h"
 #include "Version.h"
 #include "meta/Index.h"
 #include "modplatform/ModIndex.h"
@@ -140,7 +141,7 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended)
     ui->versions->setStyleSheet("combobox-popup: 0;");
     ui->version->setStyleSheet("combobox-popup: 0;");
     connect(ui->showAllVersions, &QCheckBox::stateChanged, this, &ModFilterWidget::onShowAllVersionsChanged);
-    connect(ui->versions, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ModFilterWidget::onVersionFilterChanged);
+    connect(ui->versions, &QComboBox::currentIndexChanged, this, &ModFilterWidget::onVersionFilterChanged);
     connect(ui->versions, &CheckComboBox::checkedItemsChanged, this, [this] { onVersionFilterChanged(0); });
     connect(ui->version, &QComboBox::currentTextChanged, this, &ModFilterWidget::onVersionFilterTextChanged);
 
@@ -148,10 +149,16 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended)
     connect(ui->forge, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
     connect(ui->fabric, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
     connect(ui->quilt, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
-    if (extended)
-        connect(ui->liteLoader, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
-    else
-        ui->liteLoader->setVisible(false);
+    connect(ui->liteLoader, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
+    connect(ui->babric, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
+    connect(ui->btaBabric, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
+    
+    connect(ui->showMoreButton, &QPushButton::clicked, this, &ModFilterWidget::onShowMoreClicked);
+    
+    if (!extended) {
+        ui->showMoreButton->setVisible(false);
+        ui->extendedModLoadersWidget->setVisible(false);
+    }
 
     if (extended) {
         connect(ui->clientSide, &QCheckBox::stateChanged, this, &ModFilterWidget::onSideFilterChanged);
@@ -217,8 +224,15 @@ void ModFilterWidget::prepareBasicFilter()
     m_filter->openSource = false;
     if (m_instance) {
         m_filter->hideInstalled = false;
-        m_filter->side = "";  // or "both"
-        auto loaders = m_instance->getPackProfile()->getSupportedModLoaders().value();
+        m_filter->side = ModPlatform::Side::NoSide;  // or "both"
+        ModPlatform::ModLoaderTypes loaders;
+        if (m_instance->settings()->get("OverrideModDownloadLoaders").toBool()) {
+            for (auto loader : Json::toStringList(m_instance->settings()->get("ModDownloadLoaders").toString())) {
+                loaders |= ModPlatform::getModLoaderFromString(loader);
+            }
+        } else {
+            loaders = m_instance->getPackProfile()->getSupportedModLoaders().value();
+        }
         ui->neoForge->setChecked(loaders & ModPlatform::NeoForge);
         ui->forge->setChecked(loaders & ModPlatform::Forge);
         ui->fabric->setChecked(loaders & ModPlatform::Fabric);
@@ -271,6 +285,10 @@ void ModFilterWidget::onLoadersFilterChanged()
         loaders |= ModPlatform::Quilt;
     if (ui->liteLoader->isChecked())
         loaders |= ModPlatform::LiteLoader;
+    if (ui->babric->isChecked())
+        loaders |= ModPlatform::Babric;
+    if (ui->btaBabric->isChecked())
+        loaders |= ModPlatform::BTA;
     m_filter_changed = loaders != m_filter->loaders;
     m_filter->loaders = loaders;
     if (m_filter_changed)
@@ -279,16 +297,16 @@ void ModFilterWidget::onLoadersFilterChanged()
 
 void ModFilterWidget::onSideFilterChanged()
 {
-    QString side;
+    ModPlatform::Side side;
 
     if (ui->clientSide->isChecked() && !ui->serverSide->isChecked()) {
-        side = "client";
+        side = ModPlatform::Side::ClientSide;
     } else if (!ui->clientSide->isChecked() && ui->serverSide->isChecked()) {
-        side = "server";
+        side = ModPlatform::Side::ServerSide;
     } else if (ui->clientSide->isChecked() && ui->serverSide->isChecked()) {
-        side = "both";
+        side = ModPlatform::Side::UniversalSide;
     } else {
-        side = "";
+        side = ModPlatform::Side::NoSide;
     }
 
     m_filter_changed = side != m_filter->side;
@@ -371,6 +389,12 @@ void ModFilterWidget::onReleaseFilterChanged()
     m_filter->releases = releases;
     if (m_filter_changed)
         emit filterChanged();
+}
+
+void ModFilterWidget::onShowMoreClicked()
+{
+    ui->extendedModLoadersWidget->setVisible(true);
+    ui->showMoreButton->setVisible(false);
 }
 
 #include "ModFilterWidget.moc"

@@ -38,6 +38,7 @@
 #pragma once
 #include "Application.h"
 
+#include <QList>
 #include <QMessageBox>
 
 namespace ShortcutUtils {
@@ -49,18 +50,19 @@ struct Shortcut {
     QWidget* parent = nullptr;
     QStringList extraArgs = {};
     QString iconKey = "";
+    ShortcutTarget target;
 };
 
 /// Create an instance shortcut on the specified file path
-void createInstanceShortcut(const Shortcut& shortcut, const QString& filePath);
+bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath);
 
 /// Create an instance shortcut on the desktop
-void createInstanceShortcutOnDesktop(const Shortcut& shortcut);
+bool createInstanceShortcutOnDesktop(const Shortcut& shortcut);
 
 /// Create an instance shortcut in the Applications directory
-void createInstanceShortcutInApplications(const Shortcut& shortcut);
+bool createInstanceShortcutInApplications(const Shortcut& shortcut);
 
 /// Create an instance shortcut in other directories
-void createInstanceShortcutInOther(const Shortcut& shortcut);
+bool createInstanceShortcutInOther(const Shortcut& shortcut);
 
 }  // namespace ShortcutUtils

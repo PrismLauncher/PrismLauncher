@@ -31,7 +31,7 @@ static const QMap<QString, IndexedVersionType::VersionType> s_indexed_version_ty
     { "alpha", IndexedVersionType::VersionType::Alpha }
 };
 
-static const QList<ModLoaderType> loaderList = { NeoForge, Forge, Cauldron, LiteLoader, Quilt, Fabric };
+static const QList<ModLoaderType> loaderList = { NeoForge, Forge, Cauldron, LiteLoader, Quilt, Fabric, Babric, BTA };
 
 QList<ModLoaderType> modLoaderTypesToList(ModLoaderTypes flags)
 {
@@ -122,11 +122,17 @@ auto getModLoaderAsString(ModLoaderType type) -> const QString
         case Cauldron:
             return "cauldron";
         case LiteLoader:
-            return "liteloader";
+             return "liteloader";
         case Fabric:
             return "fabric";
         case Quilt:
             return "quilt";
+        case DataPack:
+            return "datapack";
+        case Babric:
+            return "babric";
+        case BTA:
+            return "bta-babric";
         default:
             break;
     }
@@ -147,7 +153,36 @@ auto getModLoaderFromString(QString type) -> ModLoaderType
         return Fabric;
     if (type == "quilt")
         return Quilt;
+    if (type == "babric")
+        return Babric;
+    if (type == "bta-babric")
+        return BTA;
     return {};
 }
 
+QString SideUtils::toString(Side side)
+{
+    switch (side) {
+        case Side::ClientSide:
+            return "client";
+        case Side::ServerSide:
+            return "server";
+        case Side::UniversalSide:
+            return "both";
+        case Side::NoSide:
+            break;
+    }
+    return {};
+}
+
+Side SideUtils::fromString(QString side)
+{
+    if (side == "client")
+        return Side::ClientSide;
+    if (side == "server")
+        return Side::ServerSide;
+    if (side == "both")
+        return Side::UniversalSide;
+    return Side::UniversalSide;
+}
 }  // namespace ModPlatform

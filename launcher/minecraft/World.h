@@ -59,7 +59,7 @@ class World {
     // WEAK compare operator - used for replacing worlds
     bool operator==(const World& other) const;
 
-    [[nodiscard]] auto isSymLink() const -> bool { return m_containerFile.isSymLink(); }
+    auto isSymLink() const -> bool { return m_containerFile.isSymLink(); }
 
     /**
      * @brief Take a instance path, checks if the file pointed to by the resource is a symlink or under a symlink in that instance
@@ -68,9 +68,9 @@ class World {
      * @return true
      * @return false
      */
-    [[nodiscard]] bool isSymLinkUnder(const QString& instPath) const;
+    bool isSymLinkUnder(const QString& instPath) const;
 
-    [[nodiscard]] bool isMoreThanOneHardLink() const;
+    bool isMoreThanOneHardLink() const;
 
     QString canonicalFilePath() const { return m_containerFile.canonicalFilePath(); }
 

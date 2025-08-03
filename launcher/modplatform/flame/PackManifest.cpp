@@ -27,6 +27,7 @@ static void loadMinecraftV1(Flame::Minecraft& m, QJsonObject& minecraft)
         loadModloaderV1(loader, obj);
         m.modLoaders.append(loader);
     }
+    m.recommendedRAM = Json::ensureInteger(minecraft, "recommendedRam", 0);
 }
 
 static void loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)

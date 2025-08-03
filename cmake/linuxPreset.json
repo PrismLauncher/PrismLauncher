@@ -15,7 +15,6 @@
 			},
 			"generator": "Ninja",
 			"cacheVariables": {
-				"Launcher_BUILD_ARTIFACT": "Linux-Qt6",
 				"Launcher_ENABLE_JAVA_DOWNLOADER": "ON"
 			}
 		},
@@ -42,9 +41,6 @@
 				"linux_base"
 			],
 			"displayName": "Linux (CI)",
-			"cacheVariables": {
-				"Launcher_BUILD_ARTIFACT": "Linux-Qt6"
-			},
 			"installDir": "/usr"
 		}
 	],

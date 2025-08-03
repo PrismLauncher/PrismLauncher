@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2025 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2022 Tayou <git@tayou.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -15,42 +16,47 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #pragma once
 
-#include <QWidget>
-#include "translations/TranslationsModel.h"
+#include <QDialog>
+#include <memory>
 
-enum ThemeFields { NONE = 0b0000, ICONS = 0b0001, WIDGETS = 0b0010, CAT = 0b0100 };
+#include <Application.h>
+#include <translations/TranslationsModel.h>
+#include <QTextCursor>
+#include "java/JavaChecker.h"
+#include "ui/pages/BasePage.h"
+
+class QTextCharFormat;
+class SettingsObject;
 
 namespace Ui {
-class ThemeCustomizationWidget;
+class AppearanceWidget;
 }
 
-class ThemeCustomizationWidget : public QWidget {
+class AppearanceWidget : public QWidget {
     Q_OBJECT
 
    public:
-    explicit ThemeCustomizationWidget(QWidget* parent = nullptr);
-    ~ThemeCustomizationWidget() override;
+    explicit AppearanceWidget(bool simple, QWidget* parent = 0);
+    virtual ~AppearanceWidget();
 
-    void showFeatures(ThemeFields features);
-
+   public:
     void applySettings();
-
     void loadSettings();
-    void retranslate();
+    void retranslateUi();
 
-   private slots:
+   private:
     void applyIconTheme(int index);
     void applyWidgetTheme(int index);
     void applyCatTheme(int index);
-    void refresh();
+    void loadThemeSettings();
 
-   signals:
-    int currentIconThemeChanged(int index);
-    int currentWidgetThemeChanged(int index);
-    int currentCatChanged(int index);
+    void updateConsolePreview();
+    void updateCatPreview();
 
-   private:
-    Ui::ThemeCustomizationWidget* ui;
+    Ui::AppearanceWidget* m_ui;
+    QTextCharFormat m_defaultFormat;
+    bool m_themesOnly;
 };

@@ -54,9 +54,6 @@ class CreateShortcutDialog : public QDialog {
     InstancePtr m_instance;
     bool m_QuickJoinSupported = false;
 
-    // Index representations
-    enum class SaveTarget { Desktop, Applications, Other };
-
     // Functions
     void stateChanged();
 };

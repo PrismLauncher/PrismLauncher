@@ -122,10 +122,52 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="liteLoader">
+           <widget class="QPushButton" name="showMoreButton">
             <property name="text">
-             <string>LiteLoader</string>
+             <string>Show More</string>
             </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="extendedModLoadersWidget" native="true">
+            <property name="visible">
+             <bool>false</bool>
+            </property>
+            <layout class="QVBoxLayout" name="extendedModLoadersLayout">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QCheckBox" name="liteLoader">
+               <property name="text">
+                <string>LiteLoader</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="babric">
+               <property name="text">
+                <string>Babric</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="btaBabric">
+               <property name="text">
+                <string>BTA (Babric)</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>

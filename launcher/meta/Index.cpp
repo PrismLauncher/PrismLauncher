@@ -154,7 +154,7 @@ Version::Ptr Index::getLoadedVersion(const QString& uid, const QString& version)
 {
     QEventLoop ev;
     auto task = loadVersion(uid, version);
-    QObject::connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
+    connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
     task->start();
     ev.exec();
     return get(uid, version);

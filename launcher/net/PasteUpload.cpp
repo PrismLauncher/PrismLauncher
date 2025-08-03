@@ -36,6 +36,7 @@
  */
 
 #include "PasteUpload.h"
+#include <qobject.h>
 
 #include <QHttpPart>
 #include <QJsonArray>
@@ -99,86 +100,101 @@ QNetworkReply* PasteUpload::getReply(QNetworkRequest& request)
     return nullptr;
 };
 
-auto PasteUpload::Sink::init(QNetworkRequest&) -> Task::State
+auto PasteUpload::Sink::finalize(QNetworkReply& reply) -> Task::State
 {
-    m_output.clear();
-    return Task::State::Running;
-};
+    if (!finalizeAllValidators(reply)) {
+        m_fail_reason = "Failed to finalize validators";
+        return Task::State::Failed;
+    }
+    int statusCode = reply.attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
-auto PasteUpload::Sink::write(QByteArray& data) -> Task::State
-{
-    m_output.append(data);
-    return Task::State::Running;
-}
+    if (reply.error() != QNetworkReply::NetworkError::NoError) {
+        m_fail_reason = QObject::tr("Network error: %1").arg(reply.errorString());
+        return Task::State::Failed;
+    } else if (statusCode != 200 && statusCode != 201) {
+        QString reasonPhrase = reply.attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
+        m_fail_reason =
+            QObject::tr("Error: %1 returned unexpected status code %2 %3").arg(m_d->url().toString()).arg(statusCode).arg(reasonPhrase);
+        return Task::State::Failed;
+    }
 
-auto PasteUpload::Sink::abort() -> Task::State
-{
-    m_output.clear();
-    return Task::State::Failed;
-}
-
-auto PasteUpload::Sink::finalize(QNetworkReply&) -> Task::State
-{
-    switch (m_paste_type) {
+    switch (m_d->m_paste_type) {
         case PasteUpload::NullPointer:
-            m_result->link = QString::fromUtf8(m_output).trimmed();
+            m_d->m_pasteLink = QString::fromUtf8(*m_output).trimmed();
             break;
         case PasteUpload::Hastebin: {
             QJsonParseError jsonError;
-            auto doc = QJsonDocument::fromJson(m_output, &jsonError);
+            auto doc = QJsonDocument::fromJson(*m_output, &jsonError);
             if (jsonError.error != QJsonParseError::NoError) {
                 qDebug() << "hastebin server did not reply with JSON" << jsonError.errorString();
+                m_fail_reason =
+                    QObject::tr("Failed to parse response from hastebin server: expected JSON but got an invalid response. Error: %1")
+                        .arg(jsonError.errorString());
                 return Task::State::Failed;
             }
             auto obj = doc.object();
             if (obj.contains("key") && obj["key"].isString()) {
                 QString key = doc.object()["key"].toString();
-                m_result->link = m_base_url + "/" + key;
+                m_d->m_pasteLink = m_d->m_baseUrl + "/" + key;
             } else {
                 qDebug() << "Log upload failed:" << doc.toJson();
+                m_fail_reason = QObject::tr("Error: %1 returned a malformed response body").arg(m_d->url().toString());
                 return Task::State::Failed;
             }
             break;
         }
         case PasteUpload::Mclogs: {
             QJsonParseError jsonError;
-            auto doc = QJsonDocument::fromJson(m_output, &jsonError);
+            auto doc = QJsonDocument::fromJson(*m_output, &jsonError);
             if (jsonError.error != QJsonParseError::NoError) {
                 qDebug() << "mclogs server did not reply with JSON" << jsonError.errorString();
+                m_fail_reason =
+                    QObject::tr("Failed to parse response from mclogs server: expected JSON but got an invalid response. Error: %1")
+                        .arg(jsonError.errorString());
                 return Task::State::Failed;
             }
             auto obj = doc.object();
             if (obj.contains("success") && obj["success"].isBool()) {
                 bool success = obj["success"].toBool();
                 if (success) {
-                    m_result->link = obj["url"].toString();
+                    m_d->m_pasteLink = obj["url"].toString();
                 } else {
-                    m_result->error = obj["error"].toString();
+                    QString error = obj["error"].toString();
+                    m_fail_reason = QObject::tr("Error: %1 returned an error: %2").arg(m_d->url().toString(), error);
+                    return Task::State::Failed;
                 }
             } else {
                 qDebug() << "Log upload failed:" << doc.toJson();
+                m_fail_reason = QObject::tr("Error: %1 returned a malformed response body").arg(m_d->url().toString());
                 return Task::State::Failed;
             }
             break;
         }
         case PasteUpload::PasteGG:
             QJsonParseError jsonError;
-            auto doc = QJsonDocument::fromJson(m_output, &jsonError);
+            auto doc = QJsonDocument::fromJson(*m_output, &jsonError);
             if (jsonError.error != QJsonParseError::NoError) {
                 qDebug() << "pastegg server did not reply with JSON" << jsonError.errorString();
+                m_fail_reason =
+                    QObject::tr("Failed to parse response from pasteGG server: expected JSON but got an invalid response. Error: %1")
+                        .arg(jsonError.errorString());
                 return Task::State::Failed;
             }
             auto obj = doc.object();
             if (obj.contains("status") && obj["status"].isString()) {
                 QString status = obj["status"].toString();
                 if (status == "success") {
-                    m_result->link = m_base_url + "/p/anonymous/" + obj["result"].toObject()["id"].toString();
+                    m_d->m_pasteLink = m_d->m_baseUrl + "/p/anonymous/" + obj["result"].toObject()["id"].toString();
                 } else {
-                    m_result->error = obj["error"].toString();
-                    m_result->extra_message = (obj.contains("message") && obj["message"].isString()) ? obj["message"].toString() : "none";
+                    QString error = obj["error"].toString();
+                    QString message = (obj.contains("message") && obj["message"].isString()) ? obj["message"].toString() : "none";
+                    m_fail_reason =
+                        QObject::tr("Error: %1 returned an error code: %2\nError message: %3").arg(m_d->url().toString(), error, message);
+                    return Task::State::Failed;
                 }
             } else {
                 qDebug() << "Log upload failed:" << doc.toJson();
+                m_fail_reason = QObject::tr("Error: %1 returned a malformed response body").arg(m_d->url().toString());
                 return Task::State::Failed;
             }
             break;
@@ -186,23 +202,18 @@ auto PasteUpload::Sink::finalize(QNetworkReply&) -> Task::State
     return Task::State::Succeeded;
 }
 
-Net::NetRequest::Ptr PasteUpload::make(const QString& log, PasteUpload::PasteType pasteType, QString customBaseURL, ResultPtr result)
-{
-    auto base = PasteUpload::PasteTypes.at(pasteType);
-    QString baseUrl = customBaseURL.isEmpty() ? base.defaultBase : customBaseURL;
-    auto up = makeShared<PasteUpload>(log, pasteType);
-
-    // HACK: Paste's docs say the standard API path is at /api/<version> but the official instance paste.gg doesn't follow that??
-    if (pasteType == PasteUpload::PasteGG && baseUrl == base.defaultBase)
-        up->m_url = "https://api.paste.gg/v1/pastes";
-    else
-        up->m_url = baseUrl + base.endpointPath;
-
-    up->m_sink.reset(new Sink(pasteType, baseUrl, result));
-    return up;
-}
-
-PasteUpload::PasteUpload(const QString& log, PasteType pasteType) : m_log(log), m_paste_type(pasteType)
+PasteUpload::PasteUpload(const QString& log, QString url, PasteType pasteType) : m_log(log), m_baseUrl(url), m_paste_type(pasteType)
 {
     anonymizeLog(m_log);
+    auto base = PasteUpload::PasteTypes.at(pasteType);
+    if (m_baseUrl.isEmpty())
+        m_baseUrl = base.defaultBase;
+
+    // HACK: Paste's docs say the standard API path is at /api/<version> but the official instance paste.gg doesn't follow that??
+    if (pasteType == PasteUpload::PasteGG && m_baseUrl == base.defaultBase)
+        m_url = "https://api.paste.gg/v1/pastes";
+    else
+        m_url = m_baseUrl + base.endpointPath;
+
+    m_sink.reset(new Sink(this));
 }

@@ -47,6 +47,7 @@ struct LogColors {
 };
 
 // TODO: rename to Theme; this is not an interface as it contains method implementations
+// TODO: make methods const
 class ITheme {
    public:
     virtual ~ITheme() {}

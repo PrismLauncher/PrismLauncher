@@ -36,25 +36,25 @@ class ResourceModel : public QAbstractListModel {
     ResourceModel(ResourceAPI* api);
     ~ResourceModel() override;
 
-    [[nodiscard]] auto data(const QModelIndex&, int role) const -> QVariant override;
-    [[nodiscard]] auto roleNames() const -> QHash<int, QByteArray> override;
+    auto data(const QModelIndex&, int role) const -> QVariant override;
+    auto roleNames() const -> QHash<int, QByteArray> override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
-    [[nodiscard]] virtual auto debugName() const -> QString;
-    [[nodiscard]] virtual auto metaEntryBase() const -> QString = 0;
+    virtual auto debugName() const -> QString;
+    virtual auto metaEntryBase() const -> QString = 0;
 
-    [[nodiscard]] inline int rowCount(const QModelIndex& parent) const override
+    inline int rowCount(const QModelIndex& parent) const override
     {
         return parent.isValid() ? 0 : static_cast<int>(m_packs.size());
     }
-    [[nodiscard]] inline int columnCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : 1; }
-    [[nodiscard]] inline auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); }
+    inline int columnCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : 1; }
+    inline auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); }
 
-    [[nodiscard]] bool hasActiveSearchJob() const { return m_current_search_job && m_current_search_job->isRunning(); }
-    [[nodiscard]] bool hasActiveInfoJob() const { return m_current_info_job.isRunning(); }
-    [[nodiscard]] Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? m_current_search_job : nullptr; }
+    bool hasActiveSearchJob() const { return m_current_search_job && m_current_search_job->isRunning(); }
+    bool hasActiveInfoJob() const { return m_current_info_job.isRunning(); }
+    Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? m_current_search_job : nullptr; }
 
-    [[nodiscard]] auto getSortingMethods() const { return m_api->getSortingMethods(); }
+    auto getSortingMethods() const { return m_api->getSortingMethods(); }
 
     virtual QVariant getInstalledPackVersion(ModPlatform::IndexedPack::Ptr) const { return {}; }
     /** Whether the version is opted out or not. Currently only makes sense in CF. */
@@ -69,7 +69,6 @@ class ResourceModel : public QAbstractListModel {
 
    public slots:
     void fetchMore(const QModelIndex& parent) override;
-    // NOTE: Can't use [[nodiscard]] here because of https://bugreports.qt.io/browse/QTBUG-58628 on Qt 5.12
     inline bool canFetchMore(const QModelIndex& parent) const override
     {
         return parent.isValid() ? false : m_search_state == SearchState::CanFetchMore;
@@ -113,14 +112,14 @@ class ResourceModel : public QAbstractListModel {
     void runSearchJob(Task::Ptr);
     void runInfoJob(Task::Ptr);
 
-    [[nodiscard]] auto getCurrentSortingMethodByIndex() const -> std::optional<ResourceAPI::SortingMethod>;
+    auto getCurrentSortingMethodByIndex() const -> std::optional<ResourceAPI::SortingMethod>;
 
     /** Converts a JSON document to a common array format.
      *
      *  This is needed so that different providers, with different JSON structures, can be parsed
      *  uniformally. You NEED to re-implement this if you intend on using the default callbacks.
      */
-    [[nodiscard]] virtual auto documentToArray(QJsonDocument&) const -> QJsonArray;
+    virtual auto documentToArray(QJsonDocument&) const -> QJsonArray;
 
     /** Functions to load data into a pack.
      *

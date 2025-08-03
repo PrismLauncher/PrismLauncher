@@ -60,6 +60,13 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
+           <widget class="QCheckBox" name="elytraCB">
+            <property name="text">
+             <string>Preview Elytra</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QComboBox" name="capeCombo"/>
           </item>
           <item>

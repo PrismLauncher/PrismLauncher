@@ -60,6 +60,7 @@
 #include "NullInstance.h"
 #include "WatchLock.h"
 #include "minecraft/MinecraftInstance.h"
+#include "minecraft/ShortcutUtils.h"
 #include "settings/INISettingsObject.h"
 
 #ifdef Q_OS_WIN32
@@ -333,7 +334,7 @@ bool InstanceList::trashInstance(const InstanceId& id)
 {
     auto inst = getInstanceById(id);
     if (!inst) {
-        qDebug() << "Cannot trash instance" << id << ". No such instance is present (deleted externally?).";
+        qWarning() << "Cannot trash instance" << id << ". No such instance is present (deleted externally?).";
         return false;
     }
 
@@ -348,26 +349,43 @@ bool InstanceList::trashInstance(const InstanceId& id)
     }
 
     if (!FS::trash(inst->instanceRoot(), &trashedLoc)) {
-        qDebug() << "Trash of instance" << id << "has not been completely successfully...";
+        qWarning() << "Trash of instance" << id << "has not been completely successful...";
         return false;
     }
 
     qDebug() << "Instance" << id << "has been trashed by the launcher.";
     m_trashHistory.push({ id, inst->instanceRoot(), trashedLoc, cachedGroupId });
 
+    // Also trash all of its shortcuts; we remove the shortcuts if trash fails since it is invalid anyway
+    for (const auto& [name, filePath, target] : inst->shortcuts()) {
+        if (!FS::trash(filePath, &trashedLoc)) {
+            qWarning() << "Trash of shortcut" << name << "at path" << filePath << "for instance" << id
+                       << "has not been successful, trying to delete it instead...";
+            if (!FS::deletePath(filePath)) {
+                qWarning() << "Deletion of shortcut" << name << "at path" << filePath << "for instance" << id
+                           << "has not been successful, given up...";
+            } else {
+                qDebug() << "Shortcut" << name << "at path" << filePath << "for instance" << id << "has been deleted by the launcher.";
+            }
+            continue;
+        }
+        qDebug() << "Shortcut" << name << "at path" << filePath << "for instance" << id << "has been trashed by the launcher.";
+        m_trashHistory.top().shortcuts.append({ { name, filePath, target }, trashedLoc });
+    }
+
     return true;
 }
 
-bool InstanceList::trashedSomething()
+bool InstanceList::trashedSomething() const
 {
     return !m_trashHistory.empty();
 }
 
-void InstanceList::undoTrashInstance()
+bool InstanceList::undoTrashInstance()
 {
     if (m_trashHistory.empty()) {
         qWarning() << "Nothing to recover from trash.";
-        return;
+        return true;
     }
 
     auto top = m_trashHistory.pop();
@@ -377,21 +395,41 @@ void InstanceList::undoTrashInstance()
         top.path += "1";
     }
 
+    if (!QFile(top.trashPath).rename(top.path)) {
+        qWarning() << "Moving" << top.trashPath << "back to" << top.path << "failed!";
+        return false;
+    }
     qDebug() << "Moving" << top.trashPath << "back to" << top.path;
-    QFile(top.trashPath).rename(top.path);
+
+    bool ok = true;
+    for (const auto& [data, trashPath] : top.shortcuts) {
+        if (QDir(data.filePath).exists()) {
+            // Don't try to append 1 here as the shortcut may have suffixes like .app, just warn and skip it
+            qWarning() << "Shortcut" << trashPath << "original directory" << data.filePath << "already exists!";
+            ok = false;
+            continue;
+        }
+        if (!QFile(trashPath).rename(data.filePath)) {
+            qWarning() << "Moving shortcut from" << trashPath << "back to" << data.filePath << "failed!";
+            ok = false;
+            continue;
+        }
+        qDebug() << "Moving shortcut from" << trashPath << "back to" << data.filePath;
+    }
 
     m_instanceGroupIndex[top.id] = top.groupName;
     increaseGroupCount(top.groupName);
 
     saveGroupList();
     emit instancesChanged();
+    return ok;
 }
 
 void InstanceList::deleteInstance(const InstanceId& id)
 {
     auto inst = getInstanceById(id);
     if (!inst) {
-        qDebug() << "Cannot delete instance" << id << ". No such instance is present (deleted externally?).";
+        qWarning() << "Cannot delete instance" << id << ". No such instance is present (deleted externally?).";
         return;
     }
 
@@ -404,11 +442,19 @@ void InstanceList::deleteInstance(const InstanceId& id)
 
     qDebug() << "Will delete instance" << id;
     if (!FS::deletePath(inst->instanceRoot())) {
-        qWarning() << "Deletion of instance" << id << "has not been completely successful ...";
+        qWarning() << "Deletion of instance" << id << "has not been completely successful...";
         return;
     }
 
     qDebug() << "Instance" << id << "has been deleted by the launcher.";
+
+    for (const auto& [name, filePath, target] : inst->shortcuts()) {
+        if (!FS::deletePath(filePath)) {
+            qWarning() << "Deletion of shortcut" << name << "at path" << filePath << "for instance" << id << "has not been successful...";
+            continue;
+        }
+        qDebug() << "Shortcut" << name << "at path" << filePath << "for instance" << id << "has been deleted by the launcher.";
+    }
 }
 
 static QMap<InstanceId, InstanceLocator> getIdMapping(const QList<InstancePtr>& list)
@@ -638,7 +684,12 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
     } else {
         inst.reset(new NullInstance(m_globalSettings, instanceSettings, instanceRoot));
     }
-    qDebug() << "Loaded instance " << inst->name() << " from " << inst->instanceRoot();
+    qDebug() << "Loaded instance" << inst->name() << "from" << inst->instanceRoot();
+
+    auto shortcut = inst->shortcuts();
+    if (!shortcut.isEmpty())
+        qDebug() << "Loaded" << shortcut.size() << "shortcut(s) for instance" << inst->name();
+
     return inst;
 }
 

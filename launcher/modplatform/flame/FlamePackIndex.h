@@ -47,6 +47,9 @@ struct IndexedPack {
 void loadIndexedPack(IndexedPack& m, QJsonObject& obj);
 void loadIndexedInfo(IndexedPack&, QJsonObject&);
 void loadIndexedPackVersions(IndexedPack& m, QJsonArray& arr);
+
+auto getVersionDisplayString(const IndexedVersion&) -> QString;
 }  // namespace Flame
 
 Q_DECLARE_METATYPE(Flame::IndexedPack)
+Q_DECLARE_METATYPE(QList<Flame::IndexedVersion>)

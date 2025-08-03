@@ -85,7 +85,7 @@ ResourcePage::ResourcePage(ResourceDownloadDialog* parent, BaseInstance& base_in
 
     connect(m_ui->packDescription, &QTextBrowser::anchorClicked, this, &ResourcePage::openUrl);
 
-    connect(m_ui->packView, &QListView::doubleClicked, this, &ResourcePage::onResourceToggle);
+    connect(m_ui->packView, &QAbstractItemView::doubleClicked, this, &ResourcePage::onResourceToggle);
     connect(delegate, &ProjectItemDelegate::checkboxClicked, this, &ResourcePage::onResourceToggle);
 }
 
@@ -554,7 +554,7 @@ void ResourcePage::openProject(QVariant projectID)
     connect(cancelBtn, &QPushButton::clicked, m_parentDialog, &ResourceDownloadDialog::reject);
     m_ui->gridLayout_4->addWidget(buttonBox, 1, 2);
 
-    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this,
             [this, okBtn](int index) { okBtn->setEnabled(m_ui->versionSelectionBox->itemData(index).toInt() >= 0); });
 
     auto jump = [this] {

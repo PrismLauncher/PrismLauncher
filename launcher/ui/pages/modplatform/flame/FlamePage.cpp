@@ -86,9 +86,9 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
     ui->sortByBox->addItem(tr("Sort by Author"));
     ui->sortByBox->addItem(tr("Sort by Total Downloads"));
 
-    connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(ui->sortByBox, &QComboBox::currentIndexChanged, this, &FlamePage::triggerSearch);
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlamePage::onSelectionChanged);
-    connect(ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FlamePage::onVersionSelectionChanged);
+    connect(ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &FlamePage::onVersionSelectionChanged);
 
     ui->packView->setItemDelegate(new ProjectItemDelegate(this));
     ui->packDescription->setMetaEntry("FlamePacks");
@@ -166,7 +166,9 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
         return;
     }
 
-    current = listModel->data(curr, Qt::UserRole).value<Flame::IndexedPack>();
+    QVariant raw = listModel->data(curr, Qt::UserRole);
+    Q_ASSERT(raw.canConvert<Flame::IndexedPack>());
+    current = raw.value<Flame::IndexedPack>();
 
     if (!current.versionsLoaded || m_filterWidget->changed()) {
         qDebug() << "Loading flame modpack versions";
@@ -174,9 +176,9 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
         auto response = std::make_shared<QByteArray>();
         int addonId = current.addonId;
         netJob->addNetAction(
-            Net::ApiDownload::makeByteArray(QString("https://api.curseforge.com/v1/mods/%1/files").arg(addonId), response));
+            Net::ApiDownload::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files").arg(addonId), response));
 
-        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId, curr] {
+        connect(netJob, &NetJob::succeeded, this, [this, response, addonId, curr] {
             if (addonId != current.addonId) {
                 return;  // wrong request
             }
@@ -206,13 +208,8 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
         else
             ++it;
 #endif
-            for (auto version : current.versions) {
-                auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
-                auto mcVersion = !version.mcVersion.isEmpty() && !version.version.contains(version.mcVersion)
-                                     ? QString(" for %1").arg(version.mcVersion)
-                                     : "";
-                ui->versionSelectionBox->addItem(QString("%1%2%3").arg(version.version, mcVersion, release_type),
-                                                 QVariant(version.downloadUrl));
+            for (const auto& version : current.versions) {
+                ui->versionSelectionBox->addItem(Flame::getVersionDisplayString(version), QVariant(version.downloadUrl));
             }
 
             QVariant current_updated;
@@ -227,7 +224,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
             }
             suggestCurrent();
         });
-        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
+        connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
         connect(netJob, &NetJob::failed,
                 [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
         netJob->start();
@@ -353,8 +350,8 @@ void FlamePage::createFilterWidget()
 
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &FlamePage::triggerSearch);
     auto response = std::make_shared<QByteArray>();
-    m_categoriesTask = FlameAPI::getCategories(response, ModPlatform::ResourceType::MODPACK);
-    QObject::connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
+    m_categoriesTask = FlameAPI::getCategories(response, ModPlatform::ResourceType::Modpack);
+    connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
         auto categories = FlameAPI::loadModCategories(response);
         m_filterWidget->setCategories(categories);
     });

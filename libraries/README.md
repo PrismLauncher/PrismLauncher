@@ -99,7 +99,7 @@ Canonical implementation of the murmur2 hash, taken from [SMHasher](https://gith
 
 Public domain (the author disclaimed the copyright).
 
-## qt-qrcodegenerator
+## QR-Code-generator
 
 A simple library for generating QR codes
 

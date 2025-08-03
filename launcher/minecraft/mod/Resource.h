@@ -83,23 +83,23 @@ class Resource : public QObject {
     void setFile(QFileInfo file_info);
     void parseFile();
 
-    [[nodiscard]] auto fileinfo() const -> QFileInfo { return m_file_info; }
-    [[nodiscard]] auto dateTimeChanged() const -> QDateTime { return m_changed_date_time; }
-    [[nodiscard]] auto internal_id() const -> QString { return m_internal_id; }
-    [[nodiscard]] auto type() const -> ResourceType { return m_type; }
-    [[nodiscard]] bool enabled() const { return m_enabled; }
-    [[nodiscard]] auto getOriginalFileName() const -> QString;
-    [[nodiscard]] QString sizeStr() const { return m_size_str; }
-    [[nodiscard]] qint64 sizeInfo() const { return m_size_info; }
+    auto fileinfo() const -> QFileInfo { return m_file_info; }
+    auto dateTimeChanged() const -> QDateTime { return m_changed_date_time; }
+    auto internal_id() const -> QString { return m_internal_id; }
+    auto type() const -> ResourceType { return m_type; }
+    bool enabled() const { return m_enabled; }
+    auto getOriginalFileName() const -> QString;
+    QString sizeStr() const { return m_size_str; }
+    qint64 sizeInfo() const { return m_size_info; }
 
-    [[nodiscard]] virtual auto name() const -> QString;
-    [[nodiscard]] virtual bool valid() const { return m_type != ResourceType::UNKNOWN; }
+    virtual auto name() const -> QString;
+    virtual bool valid() const { return m_type != ResourceType::UNKNOWN; }
 
-    [[nodiscard]] auto status() const -> ResourceStatus { return m_status; };
-    [[nodiscard]] auto metadata() -> std::shared_ptr<Metadata::ModStruct> { return m_metadata; }
-    [[nodiscard]] auto metadata() const -> std::shared_ptr<const Metadata::ModStruct> { return m_metadata; }
-    [[nodiscard]] auto provider() const -> QString;
-    [[nodiscard]] virtual auto homepage() const -> QString;
+    auto status() const -> ResourceStatus { return m_status; };
+    auto metadata() -> std::shared_ptr<Metadata::ModStruct> { return m_metadata; }
+    auto metadata() const -> std::shared_ptr<const Metadata::ModStruct> { return m_metadata; }
+    auto provider() const -> QString;
+    virtual auto homepage() const -> QString;
 
     void setStatus(ResourceStatus status) { m_status = status; }
     void setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata);
@@ -110,12 +110,12 @@ class Resource : public QObject {
      *  = 0: 'this' is equal to 'other'
      *  < 0: 'this' comes before 'other'
      */
-    [[nodiscard]] virtual int compare(Resource const& other, SortType type = SortType::NAME) const;
+    virtual int compare(Resource const& other, SortType type = SortType::NAME) const;
 
     /** Returns whether the given filter should filter out 'this' (false),
      *  or if such filter includes the Resource (true).
      */
-    [[nodiscard]] virtual bool applyFilter(QRegularExpression filter) const;
+    virtual bool applyFilter(QRegularExpression filter) const;
 
     /** Changes the enabled property, according to 'action'.
      *
@@ -123,10 +123,10 @@ class Resource : public QObject {
      */
     bool enable(EnableAction action);
 
-    [[nodiscard]] auto shouldResolve() const -> bool { return !m_is_resolving && !m_is_resolved; }
-    [[nodiscard]] auto isResolving() const -> bool { return m_is_resolving; }
-    [[nodiscard]] auto isResolved() const -> bool { return m_is_resolved; }
-    [[nodiscard]] auto resolutionTicket() const -> int { return m_resolution_ticket; }
+    auto shouldResolve() const -> bool { return !m_is_resolving && !m_is_resolved; }
+    auto isResolving() const -> bool { return m_is_resolving; }
+    auto isResolved() const -> bool { return m_is_resolved; }
+    auto resolutionTicket() const -> int { return m_resolution_ticket; }
 
     void setResolving(bool resolving, int resolutionTicket)
     {
@@ -139,7 +139,7 @@ class Resource : public QObject {
     // Delete the metadata only.
     auto destroyMetadata(const QDir& index_dir) -> void;
 
-    [[nodiscard]] auto isSymLink() const -> bool { return m_file_info.isSymLink(); }
+    auto isSymLink() const -> bool { return m_file_info.isSymLink(); }
 
     /**
      * @brief Take a instance path, checks if the file pointed to by the resource is a symlink or under a symlink in that instance
@@ -148,11 +148,11 @@ class Resource : public QObject {
      * @return true
      * @return false
      */
-    [[nodiscard]] bool isSymLinkUnder(const QString& instPath) const;
+    bool isSymLinkUnder(const QString& instPath) const;
 
-    [[nodiscard]] bool isMoreThanOneHardLink() const;
+    bool isMoreThanOneHardLink() const;
 
-    [[nodiscard]] auto mod_id() const -> QString { return m_mod_id; }
+    auto mod_id() const -> QString { return m_mod_id; }
     void setModId(const QString& modId) { m_mod_id = modId; }
 
    protected:

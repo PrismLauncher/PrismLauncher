@@ -263,3 +263,8 @@ void SkinOpenGLWindow::wheelEvent(QWheelEvent* event)
     m_distance = qMax(16.f, m_distance);  // Clamp distance
     update();                             // Trigger a repaint
 }
+void SkinOpenGLWindow::setElytraVisible(bool visible)
+{
+    if (m_scene)
+        m_scene->setElytraVisible(visible);
+}

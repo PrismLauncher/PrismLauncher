@@ -211,6 +211,7 @@ void InstanceImportTask::processZipPack()
         progressStep->status = status;
         stepProgress(*progressStep);
     });
+    connect(zipTask.get(), &Task::warningLogged, this, [this](const QString& line) { m_Warnings.append(line); });
     m_task.reset(zipTask);
     zipTask->start();
 }
@@ -262,9 +263,9 @@ void InstanceImportTask::extractFinished()
     }
 }
 
-bool installIcon(QString root, QString instIcon)
+bool installIcon(QString root, QString instIconKey)
 {
-    auto importIconPath = IconUtils::findBestIconIn(root, instIcon);
+    auto importIconPath = IconUtils::findBestIconIn(root, instIconKey);
     if (importIconPath.isNull() || !QFile::exists(importIconPath))
         importIconPath = IconUtils::findBestIconIn(root, "icon.png");
     if (importIconPath.isNull() || !QFile::exists(importIconPath))
@@ -272,10 +273,10 @@ bool installIcon(QString root, QString instIcon)
     if (!importIconPath.isNull() && QFile::exists(importIconPath)) {
         // import icon
         auto iconList = APPLICATION->icons();
-        if (iconList->iconFileExists(instIcon)) {
-            iconList->deleteIcon(instIcon);
+        if (iconList->iconFileExists(instIconKey)) {
+            iconList->deleteIcon(instIconKey);
         }
-        iconList->installIcon(importIconPath, instIcon);
+        iconList->installIcon(importIconPath, instIconKey + ".png");
         return true;
     }
     return false;
@@ -333,6 +334,8 @@ void InstanceImportTask::processFlame()
 
     connect(inst_creation_task.get(), &Task::aborted, this, &InstanceImportTask::emitAborted);
     connect(inst_creation_task.get(), &Task::abortStatusChanged, this, &Task::setAbortable);
+
+    connect(inst_creation_task.get(), &Task::warningLogged, this, [this](const QString& line) { m_Warnings.append(line); });
 
     m_task.reset(inst_creation_task);
     setAbortable(true);
@@ -430,6 +433,8 @@ void InstanceImportTask::processModrinth()
 
     connect(inst_creation_task.get(), &Task::aborted, this, &InstanceImportTask::emitAborted);
     connect(inst_creation_task.get(), &Task::abortStatusChanged, this, &Task::setAbortable);
+
+    connect(inst_creation_task.get(), &Task::warningLogged, this, [this](const QString& line) { m_Warnings.append(line); });
 
     m_task.reset(inst_creation_task);
     setAbortable(true);

@@ -34,37 +34,6 @@ ThemeWizardPage::ThemeWizardPage(QWidget* parent) : BaseWizardPage(parent), ui(n
     updateIcons();
     updateCat();
 }
-
-ThemeWizardPage::~ThemeWizardPage()
-{
-    delete ui;
-}
-
-void ThemeWizardPage::updateIcons()
-{
-    qDebug() << "Setting Icons";
-    ui->previewIconButton0->setIcon(APPLICATION->getThemedIcon("new"));
-    ui->previewIconButton1->setIcon(APPLICATION->getThemedIcon("centralmods"));
-    ui->previewIconButton2->setIcon(APPLICATION->getThemedIcon("viewfolder"));
-    ui->previewIconButton3->setIcon(APPLICATION->getThemedIcon("launch"));
-    ui->previewIconButton4->setIcon(APPLICATION->getThemedIcon("copy"));
-    ui->previewIconButton5->setIcon(APPLICATION->getThemedIcon("export"));
-    ui->previewIconButton6->setIcon(APPLICATION->getThemedIcon("delete"));
-    ui->previewIconButton7->setIcon(APPLICATION->getThemedIcon("about"));
-    ui->previewIconButton8->setIcon(APPLICATION->getThemedIcon("settings"));
-    ui->previewIconButton9->setIcon(APPLICATION->getThemedIcon("cat"));
-    update();
-    repaint();
-    parentWidget()->update();
-}
-
-void ThemeWizardPage::updateCat()
-{
-    qDebug() << "Setting Cat";
-    ui->catImagePreviewButton->setIcon(QIcon(QString(R"(%1)").arg(APPLICATION->themeManager()->getCatPack())));
-}
-
-void ThemeWizardPage::retranslate()
 {
     ui->retranslateUi(this);
 }

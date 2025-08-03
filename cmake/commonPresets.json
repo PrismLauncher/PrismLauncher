@@ -8,7 +8,8 @@
 			"binaryDir": "build",
 			"installDir": "install",
 			"cacheVariables": {
-				"Launcher_BUILD_PLATFORM": "custom"
+				"Launcher_BUILD_ARTIFACT": "$penv{ARTIFACT_NAME}",
+				"Launcher_BUILD_PLATFORM": "$penv{BUILD_PLATFORM}"
 			}
 		},
 		{
@@ -39,7 +40,6 @@
 				"base_release"
 			],
 			"cacheVariables": {
-				"Launcher_BUILD_PLATFORM": "official",
 				"Launcher_FORCE_BUNDLED_LIBS": "ON"
 			}
 		}

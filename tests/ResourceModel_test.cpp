@@ -40,7 +40,7 @@ class DummyResourceModel : public ResourceModel {
     DummyResourceModel() : ResourceModel(new DummyResourceAPI) {}
     ~DummyResourceModel() {}
 
-    [[nodiscard]] auto metaEntryBase() const -> QString override { return ""; }
+    auto metaEntryBase() const -> QString override { return ""; }
 
     ResourceAPI::SearchArgs createSearchArguments() override { return {}; }
     ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) override { return {}; }

@@ -76,6 +76,7 @@ APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
     updateBaseURLPlaceholder(ui->pasteTypeComboBox->currentIndex());
     // NOTE: this allows http://, but we replace that with https later anyway
     ui->metaURL->setValidator(new QRegularExpressionValidator(s_validUrlRegExp, ui->metaURL));
+    ui->resourceURL->setValidator(new QRegularExpressionValidator(s_validUrlRegExp, ui->resourceURL));
     ui->baseURLEntry->setValidator(new QRegularExpressionValidator(s_validUrlRegExp, ui->baseURLEntry));
     ui->msaClientID->setValidator(new QRegularExpressionValidator(s_validMSAClientID, ui->msaClientID));
     ui->flameKey->setValidator(new QRegularExpressionValidator(s_validFlameKey, ui->flameKey));
@@ -137,6 +138,8 @@ void APIPage::loadSettings()
     ui->msaClientID->setText(msaClientID);
     QString metaURL = s->get("MetaURLOverride").toString();
     ui->metaURL->setText(metaURL);
+    QString resourceURL = s->get("ResourceURL").toString();
+    ui->resourceURL->setText(resourceURL);
     QString flameKey = s->get("FlameKeyOverride").toString();
     ui->flameKey->setText(flameKey);
     QString modrinthToken = s->get("ModrinthToken").toString();
@@ -156,18 +159,31 @@ void APIPage::applySettings()
     QString msaClientID = ui->msaClientID->text();
     s->set("MSAClientIDOverride", msaClientID);
     QUrl metaURL(ui->metaURL->text());
+    QUrl resourceURL(ui->resourceURL->text());
     // Add required trailing slash
     if (!metaURL.isEmpty() && !metaURL.path().endsWith('/')) {
         QString path = metaURL.path();
         path.append('/');
         metaURL.setPath(path);
     }
+
+    if (!resourceURL.isEmpty() && !resourceURL.path().endsWith('/')) {
+        QString path = resourceURL.path();
+        path.append('/');
+        resourceURL.setPath(path);
+    }
     // Don't allow HTTP, since meta is basically RCE with all the jar files.
     if (!metaURL.isEmpty() && metaURL.scheme() == "http") {
         metaURL.setScheme("https");
     }
 
+    // Also don't allow HTTP
+    if (!resourceURL.isEmpty() && resourceURL.scheme() == "http") {
+        resourceURL.setScheme("https");
+    }
+
     s->set("MetaURLOverride", metaURL.toString());
+    s->set("ResourceURL", resourceURL.toString());
     QString flameKey = ui->flameKey->text();
     s->set("FlameKeyOverride", flameKey);
     QString modrinthToken = ui->modrinthToken->text();

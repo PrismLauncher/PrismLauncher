@@ -33,37 +33,37 @@ class ResourcePage : public QWidget, public BasePage {
     ~ResourcePage() override;
 
     /* Affects what the user sees */
-    [[nodiscard]] auto displayName() const -> QString override = 0;
-    [[nodiscard]] auto icon() const -> QIcon override = 0;
-    [[nodiscard]] auto id() const -> QString override = 0;
-    [[nodiscard]] auto helpPage() const -> QString override = 0;
-    [[nodiscard]] bool shouldDisplay() const override = 0;
+    auto displayName() const -> QString override = 0;
+    auto icon() const -> QIcon override = 0;
+    auto id() const -> QString override = 0;
+    auto helpPage() const -> QString override = 0;
+    bool shouldDisplay() const override = 0;
 
     /* Used internally */
-    [[nodiscard]] virtual auto metaEntryBase() const -> QString = 0;
-    [[nodiscard]] virtual auto debugName() const -> QString = 0;
+    virtual auto metaEntryBase() const -> QString = 0;
+    virtual auto debugName() const -> QString = 0;
 
     //: The plural version of 'resource'
-    [[nodiscard]] virtual inline QString resourcesString() const { return tr("resources"); }
+    virtual inline QString resourcesString() const { return tr("resources"); }
     //: The singular version of 'resources'
-    [[nodiscard]] virtual inline QString resourceString() const { return tr("resource"); }
+    virtual inline QString resourceString() const { return tr("resource"); }
 
     /* Features this resource's page supports */
-    [[nodiscard]] virtual bool supportsFiltering() const = 0;
+    virtual bool supportsFiltering() const = 0;
 
     void retranslate() override;
     void openedImpl() override;
     auto eventFilter(QObject* watched, QEvent* event) -> bool override;
 
     /** Get the current term in the search bar. */
-    [[nodiscard]] auto getSearchTerm() const -> QString;
+    auto getSearchTerm() const -> QString;
     /** Programatically set the term in the search bar. */
     void setSearchTerm(QString);
 
-    [[nodiscard]] bool setCurrentPack(ModPlatform::IndexedPack::Ptr);
-    [[nodiscard]] auto getCurrentPack() const -> ModPlatform::IndexedPack::Ptr;
-    [[nodiscard]] auto getDialog() const -> const ResourceDownloadDialog* { return m_parentDialog; }
-    [[nodiscard]] auto getModel() const -> ResourceModel* { return m_model; }
+    bool setCurrentPack(ModPlatform::IndexedPack::Ptr);
+    auto getCurrentPack() const -> ModPlatform::IndexedPack::Ptr;
+    auto getDialog() const -> const ResourceDownloadDialog* { return m_parentDialog; }
+    auto getModel() const -> ResourceModel* { return m_model; }
 
    protected:
     ResourcePage(ResourceDownloadDialog* parent, BaseInstance&);
@@ -94,8 +94,6 @@ class ResourcePage : public QWidget, public BasePage {
     void onVersionSelectionChanged(int index);
     void onResourceSelected();
     void onResourceToggle(const QModelIndex& index);
-
-    // NOTE: Can't use [[nodiscard]] here because of https://bugreports.qt.io/browse/QTBUG-58628 on Qt 5.12
 
     /** Associates regex expressions to pages in the order they're given in the map. */
     virtual QMap<QString, QString> urlHandlers() const = 0;
