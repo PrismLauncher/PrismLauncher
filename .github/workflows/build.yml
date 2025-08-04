@@ -81,51 +81,13 @@ jobs:
             artifact-name: Linux
             base-cmake-preset: linux
 
-            # NOTE(@getchoo): Yes, we're intentionally using 24.04 here!!!
-            #
-            # It's not really documented anywhere AFAICT, but upstream Qt binaries
-            # *for the same version* are compiled against 24.04 on ARM, and *not* 22.04 like x64
-          - os: ubuntu-24.04-arm
-            artifact-name: Linux-aarch64
-            base-cmake-preset: linux
-
-          - os: windows-2022
-            artifact-name: Windows-MinGW-w64
-            base-cmake-preset: windows_mingw
-            msystem: CLANG64
-            vcvars-arch: amd64_x86
-
-          - os: windows-11-arm
-            artifact-name: Windows-MinGW-arm64
-            base-cmake-preset: windows_mingw
-            msystem: CLANGARM64
-            vcvars-arch: arm64
-
-          - os: windows-2022
-            artifact-name: Windows-MSVC
-            base-cmake-preset: windows_msvc
-            # TODO(@getchoo): This is the default in setup-dependencies/windows. Why isn't it working?!?!
-            vcvars-arch: amd64
-
-          - os: windows-2022
-            artifact-name: Windows-MSVC-arm64
-            base-cmake-preset: windows_msvc_arm64_cross
-            vcvars-arch: amd64_arm64
-            qt-architecture: win64_msvc2022_arm64_cross_compiled
-
-          - os: macos-14
-            artifact-name: macOS
-            base-cmake-preset: ${{ (inputs.build-type || 'Debug') == 'Debug' && 'macos_universal' || 'macos' }}
-            macosx-deployment-target: 12.0
-
     runs-on: ${{ matrix.os }}
 
     defaults:
       run:
-        shell: ${{ matrix.msystem != '' && 'msys2 {0}' || 'bash' }}
+        shell: bash
 
-    env:
-      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.macosx-deployment-target }}
+    env: {}
 
     steps:
       ##
@@ -143,9 +105,6 @@ jobs:
         with:
           build-type: ${{ inputs.build-type || 'Debug' }}
           artifact-name: ${{ matrix.artifact-name }}
-          msystem: ${{ matrix.msystem }}
-          vcvars-arch: ${{ matrix.vcvars-arch }}
-          qt-architecture: ${{ matrix.qt-architecture }}
 
       ##
       # BUILD
@@ -190,31 +149,3 @@ jobs:
 
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-private-key-id: ${{ secrets.GPG_PRIVATE_KEY_ID }}
-
-      - name: Package (macOS)
-        if: ${{ runner.os == 'macOS' }}
-        uses: ./.github/actions/package/macos
-        with:
-          version: ${{ steps.short-version.outputs.version }}
-          build-type: ${{ steps.setup-dependencies.outputs.build-type }}
-          artifact-name: ${{ matrix.artifact-name }}
-
-          apple-codesign-cert: ${{ secrets.APPLE-CODESIGN-CERT }}
-          apple-codesign-password: ${{ secrets.APPLE-CODESIGN_PASSWORD }}
-          apple-codesign-id: ${{ secrets.APPLE-CODESIGN_ID }}
-          apple-notarize-apple-id: ${{ secrets.APPLE_NOTARIZE_APPLE_ID }}
-          apple-notarize-team-id: ${{ secrets.APPLE_NOTARIZE_TEAM_ID }}
-          apple-notarize-password: ${{ secrets.APPLE-NOTARIZE_PASSWORD }}
-          sparkle-ed25519-key: ${{ secrets.SPARKLE-ED25519_KEY }}
-
-      - name: Package (Windows)
-        if: ${{ runner.os == 'Windows' }}
-        uses: ./.github/actions/package/windows
-        with:
-          version: ${{ steps.short-version.outputs.version }}
-          build-type: ${{ steps.setup-dependencies.outputs.build-type }}
-          artifact-name: ${{ matrix.artifact-name }}
-          msystem: ${{ matrix.msystem }}
-
-          windows-codesign-cert: ${{ secrets.WINDOWS_CODESIGN_CERT }}
-          windows-codesign-password: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
