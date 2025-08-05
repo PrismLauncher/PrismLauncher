@@ -65,15 +65,6 @@ enum InstSortMode {
     Sort_LastLaunch
 };
 
-enum InstRenamingMode {
-    // Rename metadata only.
-    Rename_Always,
-    // Ask everytime.
-    Rename_Ask,
-    // Rename physical directory too.
-    Rename_Never
-};
-
 LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::LauncherPage)
 {
     ui->setupUi(this);
@@ -242,18 +233,12 @@ void LauncherPage::applySettings()
             break;
     }
 
-    auto renamingMode = (InstRenamingMode)ui->renamingBehaviorComboBox->currentIndex();
-    switch (renamingMode) {
-        case Rename_Always:
-            s->set("InstRenamingMode", "MetadataOnly");
-            break;
-        case Rename_Never:
-            s->set("InstRenamingMode", "PhysicalDir");
-            break;
-        case Rename_Ask:
-        default:
-            s->set("InstRenamingMode", "AskEverytime");
-            break;
+    if (ui->askToRenameDirBtn->isChecked()) {
+        s->set("InstRenamingMode", "AskEverytime");
+    } else if (ui->alwaysRenameDirBtn->isChecked()) {
+        s->set("InstRenamingMode", "PhysicalDir");
+    } else if (ui->neverRenameDirBtn->isChecked()) {
+        s->set("InstRenamingMode", "MetadataOnly");
     }
 
     // Mods
@@ -300,15 +285,9 @@ void LauncherPage::loadSettings()
     }
 
     QString renamingMode = s->get("InstRenamingMode").toString();
-    InstRenamingMode renamingModeEnum;
-    if (renamingMode == "MetadataOnly") {
-        renamingModeEnum = Rename_Always;
-    } else if (renamingMode == "PhysicalDir") {
-        renamingModeEnum = Rename_Never;
-    } else {
-        renamingModeEnum = Rename_Ask;
-    }
-    ui->renamingBehaviorComboBox->setCurrentIndex(renamingModeEnum);
+    ui->askToRenameDirBtn->setChecked(renamingMode == "AskEverytime");
+    ui->alwaysRenameDirBtn->setChecked(renamingMode == "PhysicalDir");
+    ui->neverRenameDirBtn->setChecked(renamingMode == "MetadataOnly");
 
     // Mods
     ui->metadataEnableBtn->setChecked(!s->get("ModMetadataDisabled").toBool());

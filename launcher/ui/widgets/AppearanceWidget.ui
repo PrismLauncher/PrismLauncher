@@ -204,53 +204,6 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="catFitLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Fit</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="catFitComboBox">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>77</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <item>
-         <property name="text">
-          <string>Fit</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Fill</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Stretch</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="catOpacityLabel">
         <property name="text">
          <string>Cat Opacity</string>
@@ -369,6 +322,53 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="catFitLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Cat Scaling</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="catFitComboBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>77</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>Fit</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Fill</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Stretch</string>
+         </property>
+        </item>
+       </widget>
       </item>
      </layout>
     </widget>

@@ -32,7 +32,7 @@
    <item>
     <widget class="QScrollArea" name="scrollArea">
      <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAsNeeded</enum>
+      <enum>Qt::ScrollBarPolicy::ScrollBarAsNeeded</enum>
      </property>
      <property name="widgetResizable">
       <bool>true</bool>
@@ -41,9 +41,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-356</y>
-        <width>742</width>
-        <height>1148</height>
+        <y>0</y>
+        <width>746</width>
+        <height>1194</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -86,10 +86,10 @@
           <item>
            <spacer name="verticalSpacer">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
+             <enum>QSizePolicy::Policy::Fixed</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -107,37 +107,42 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="renamingBehaviorComboBox">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+           <widget class="QRadioButton" name="askToRenameDirBtn">
+            <property name="text">
+             <string>Ask what to do</string>
             </property>
-            <item>
-             <property name="text">
-              <string>Ask what to do with the folder</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Always rename the folder</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Never rename the folder—only the displayed name</string>
-             </property>
-            </item>
+            <attribute name="buttonGroup">
+             <string notr="true">renamingBehaviorGroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="alwaysRenameDirBtn">
+            <property name="text">
+             <string>Always rename the folder</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">renamingBehaviorGroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="neverRenameDirBtn">
+            <property name="text">
+             <string>Never rename the folder</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">renamingBehaviorGroup</string>
+            </attribute>
            </widget>
           </item>
           <item>
            <spacer name="verticalSpacer_2">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
+             <enum>QSizePolicy::Policy::Fixed</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -206,7 +211,7 @@
             <item>
              <spacer name="horizontalSpacer">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -433,7 +438,7 @@
          </property>
          <layout class="QFormLayout" name="formLayout">
           <property name="labelAlignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
           </property>
           <item row="0" column="0">
            <widget class="QLabel" name="lineLimitLabel">
@@ -602,7 +607,7 @@
           <item row="0" column="2">
            <spacer name="horizontalSpacer_2">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -618,7 +623,7 @@
        <item>
         <spacer name="verticalSpacer_FeaturesTab">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -636,9 +641,6 @@
  </widget>
  <tabstops>
   <tabstop>scrollArea</tabstop>
-  <tabstop>sortByNameBtn</tabstop>
-  <tabstop>sortLastLaunchedBtn</tabstop>
-  <tabstop>renamingBehaviorComboBox</tabstop>
   <tabstop>preferMenuBarCheckBox</tabstop>
   <tabstop>autoUpdateCheckBox</tabstop>
   <tabstop>updateIntervalSpinBox</tabstop>
@@ -670,5 +672,6 @@
  <connections/>
  <buttongroups>
   <buttongroup name="sortingModeGroup"/>
+  <buttongroup name="renamingBehaviorGroup"/>
  </buttongroups>
 </ui>
