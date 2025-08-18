@@ -22,3 +22,6 @@
 [submodule "libraries/qrcodegenerator"]
 	path = libraries/qrcodegenerator
 	url = https://github.com/nayuki/QR-Code-generator
+[submodule "libraries/qtkeychain"]
+	path = libraries/qtkeychain
+	url = https://github.com/frankosterfeld/qtkeychain

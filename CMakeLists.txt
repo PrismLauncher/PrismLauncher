@@ -356,12 +356,9 @@ if(NOT Launcher_FORCE_BUNDLED_LIBS)
         endif()
     endif()
 
-
-    # Find cmark
     find_package(cmark QUIET)
-
-    # Find qrcodegencpp-cmake
     find_package(qrcodegencpp QUIET)
+    find_package(Qt6Keychain 0.15.0 QUIET)
 endif()
 
 include(ECMQtDeclareLoggingCategory)
@@ -534,6 +531,14 @@ if(NOT qrcodegencpp_FOUND)
 else()
     add_library(qrcodegenerator ALIAS qrcodegencpp::qrcodegencpp)
     message(STATUS "Using system qrcodegencpp-cmake")
+endif()
+if(NOT Qt6Keychain_FOUND)
+    message(STATUS "Using bundled qtkeychain")
+    set(BUILD_WITH_QT6 1)
+    add_subdirectory(libraries/qtkeychain EXCLUDE_FROM_ALL)
+else()
+    add_library(qtkeychain ALIAS qt6keychain)
+    message(STATUS "Using system qtkeychain")
 endif()
 add_subdirectory(libraries/gamemode)
 add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API

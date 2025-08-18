@@ -1322,6 +1322,7 @@ target_link_libraries(Launcher_logic
     BuildConfig
     Qt${QT_VERSION_MAJOR}::Widgets
     qrcodegenerator
+    qtkeychain
 )
 if(TARGET PkgConfig::tomlplusplus)
     target_link_libraries(Launcher_logic PkgConfig::tomlplusplus)
