@@ -903,6 +903,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // Custom Technic Client ID
         m_settings->registerSetting("TechnicClientID", "");
 
+        m_settings->registerSetting("UseKeychain", false);
+
         // Init page provider
         {
             m_globalSettingsProvider = std::make_shared<GenericPageProvider>(tr("Settings"));

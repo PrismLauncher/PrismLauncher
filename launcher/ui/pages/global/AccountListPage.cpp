@@ -89,6 +89,9 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
         ui->actionAddMicrosoft->setVisible(false);
         ui->actionAddMicrosoft->setToolTip(tr("No Microsoft Authentication client ID was set."));
     }
+
+    ui->checkBoxUseKeychain->setChecked(APPLICATION->settings()->get("UseKeychain").toBool());
+    connect(ui->checkBoxUseKeychain, &QCheckBox::toggled, this, [](bool value) { APPLICATION->settings()->set("UseKeychain", value); });
 }
 
 AccountListPage::~AccountListPage()
