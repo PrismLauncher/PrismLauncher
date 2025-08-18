@@ -62,7 +62,7 @@ class AccountList : public QAbstractListModel {
         NUM_COLUMNS
     };
 
-    explicit AccountList(QObject* parent = 0);
+    explicit AccountList(QString filePath, QString keychainKey, QObject* parent = 0);
     virtual ~AccountList() noexcept;
 
     const MinecraftAccountPtr at(int i) const;
@@ -86,15 +86,6 @@ class AccountList : public QAbstractListModel {
     void requestRefresh(QString accountId);
     // queuing a refresh will let it go to the back of the queue (unless it's somewhere inside the queue already)
     void queueRefresh(QString accountId);
-
-    /*!
-     * Sets the path to load/save the list file from/to.
-     * If autosave is true, this list will automatically save to the given path whenever it changes.
-     * THIS FUNCTION DOES NOT LOAD THE LIST. If you set autosave, be sure to call loadList() immediately
-     * after calling this function to ensure an autosaved change doesn't overwrite the list you intended
-     * to load.
-     */
-    void setListFilePath(QString path, bool autosave = false);
 
     bool loadList();
     bool loadV3(QJsonObject& root);
@@ -164,11 +155,6 @@ class AccountList : public QAbstractListModel {
     MinecraftAccountPtr m_defaultAccount;
 
     //! Path to the account list file. Empty string if there isn't one.
-    QString m_listFilePath;
-
-    /*!
-     * If true, the account list will automatically save to the account list path when it changes.
-     * Ignored if m_listFilePath is blank.
-     */
-    bool m_autosave = false;
+    const QString m_filePath;
+    const QString m_keychainKey;
 };

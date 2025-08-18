@@ -54,7 +54,8 @@
 
 enum AccountListVersion { MojangMSA = 3 };
 
-AccountList::AccountList(QObject* parent) : QAbstractListModel(parent)
+AccountList::AccountList(QString filePath, QString keychainKey, QObject* parent)
+    : QAbstractListModel(parent), m_filePath(std::move(filePath)), m_keychainKey(std::move(keychainKey))
 {
     m_refreshTimer = new QTimer(this);
     m_refreshTimer->setSingleShot(true);
@@ -240,18 +241,14 @@ void AccountList::accountActivityChanged(bool active)
 
 void AccountList::onListChanged()
 {
-    if (m_autosave)
-        // TODO: Alert the user if this fails.
-        saveList();
-
+    // TODO: Alert the user if this fails.
+    saveList();
     emit listChanged();
 }
 
 void AccountList::onDefaultAccountChanged()
 {
-    if (m_autosave)
-        saveList();
-
+    saveList();
     emit defaultAccountChanged();
 }
 
@@ -410,17 +407,17 @@ bool AccountList::setData(const QModelIndex& idx, const QVariant& value, int rol
 
 bool AccountList::loadList()
 {
-    if (m_listFilePath.isEmpty()) {
+    if (m_filePath.isEmpty()) {
         qCritical() << "Can't load Mojang account list. No file path given and no default set.";
         return false;
     }
 
-    QFile file(m_listFilePath);
+    QFile file(m_filePath);
 
     // Try to open the file and fail if we can't.
     // TODO: We should probably report this error to the user.
     if (!file.open(QIODevice::ReadOnly)) {
-        qCritical() << QString("Failed to read the account list file (%1).").arg(m_listFilePath).toUtf8();
+        qCritical() << QString("Failed to read the account list file (%1).").arg(m_filePath).toUtf8();
         return false;
     }
 
@@ -452,7 +449,7 @@ bool AccountList::loadList()
     if (listVersion == AccountListVersion::MojangMSA)
         return loadV3(root);
 
-    QString newName = "accounts-old.json";
+    QString newName = m_filePath + ".bak";
     qWarning() << "Unknown format version when loading account list. Existing one will be renamed to" << newName;
     // Attempt to rename the old version.
     file.rename(newName);
@@ -489,23 +486,23 @@ bool AccountList::loadV3(QJsonObject& root)
 
 bool AccountList::saveList()
 {
-    if (m_listFilePath.isEmpty()) {
+    if (m_filePath.isEmpty()) {
         qCritical() << "Can't save Mojang account list. No file path given and no default set.";
         return false;
     }
 
     // make sure the parent folder exists
-    if (!FS::ensureFilePathExists(m_listFilePath))
+    if (!FS::ensureFilePathExists(m_filePath))
         return false;
 
     // make sure the file wasn't overwritten with a folder before (fixes a bug)
-    QFileInfo finfo(m_listFilePath);
+    QFileInfo finfo(m_filePath);
     if (finfo.isDir()) {
-        QDir badDir(m_listFilePath);
+        QDir badDir(m_filePath);
         badDir.removeRecursively();
     }
 
-    qDebug() << "Writing account list to" << m_listFilePath;
+    qDebug() << "Writing account list to" << m_filePath;
 
     qDebug() << "Building JSON data structure.";
     // Build the JSON document to write to the list file.
@@ -532,12 +529,12 @@ bool AccountList::saveList()
 
     // Now that we're done building the JSON object, we can write it to the file.
     qDebug() << "Writing account list to file.";
-    QSaveFile file(m_listFilePath);
+    QSaveFile file(m_filePath);
 
     // Try to open the file and fail if we can't.
     // TODO: We should probably report this error to the user.
     if (!file.open(QIODevice::WriteOnly)) {
-        qCritical() << QString("Failed to read the account list file (%1).").arg(m_listFilePath).toUtf8();
+        qCritical() << QString("Failed to read the account list file (%1).").arg(m_filePath).toUtf8();
         return false;
     }
 
@@ -545,18 +542,12 @@ bool AccountList::saveList()
     file.write(doc.toJson());
     file.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ReadUser | QFile::WriteUser);
     if (file.commit()) {
-        qDebug() << "Saved account list to" << m_listFilePath;
+        qDebug() << "Saved account list to" << m_filePath;
         return true;
     } else {
-        qDebug() << "Failed to save accounts to" << m_listFilePath;
+        qDebug() << "Failed to save accounts to" << m_filePath;
         return false;
     }
-}
-
-void AccountList::setListFilePath(QString path, bool autosave)
-{
-    m_listFilePath = path;
-    m_autosave = autosave;
 }
 
 bool AccountList::anyAccountIsValid()
