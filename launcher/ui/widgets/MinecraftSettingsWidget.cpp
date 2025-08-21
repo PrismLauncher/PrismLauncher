@@ -90,8 +90,6 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstancePtr instance, 
         } else {
             m_ui->worldsCb->hide();
             m_ui->worldJoinButton->hide();
-            m_ui->serverJoinAddressButton->setChecked(true);
-            m_ui->serverJoinAddress->setEnabled(true);
             m_ui->serverJoinAddressButton->setStyleSheet("QRadioButton::indicator { width: 0px; height: 0px; }");
         }
 
@@ -238,9 +236,9 @@ void MinecraftSettingsWidget::loadSettings()
             m_ui->serverJoinAddress->setEnabled(false);
             m_ui->worldsCb->setEnabled(true);
         } else {
-            m_ui->serverJoinAddressButton->setChecked(true);
+            m_ui->serverJoinAddressButton->setChecked(false);
             m_ui->worldJoinButton->setChecked(false);
-            m_ui->serverJoinAddress->setEnabled(true);
+            m_ui->serverJoinAddress->setEnabled(false);
             m_ui->worldsCb->setEnabled(false);
         }
 
