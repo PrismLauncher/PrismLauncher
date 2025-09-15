@@ -110,7 +110,7 @@ jobs:
           ref: ${{ steps.merge-commit.outputs.merge-commit-sha || github.sha }}
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v19
+        uses: DeterminateSystems/nix-installer-action@v20
         with:
           determinate: ${{ env.USE_DETERMINATE }}
 
