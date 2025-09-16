@@ -211,6 +211,8 @@ void MinecraftInstance::loadSpecificSettings()
         m_settings->registerOverride(global_settings->getSetting("CustomOpenALPath"), nativeLibraryWorkaroundsOverride);
         m_settings->registerOverride(global_settings->getSetting("UseNativeGLFW"), nativeLibraryWorkaroundsOverride);
         m_settings->registerOverride(global_settings->getSetting("CustomGLFWPath"), nativeLibraryWorkaroundsOverride);
+        m_settings->registerOverride(global_settings->getSetting("UseNativeJemalloc"), nativeLibraryWorkaroundsOverride);
+        m_settings->registerOverride(global_settings->getSetting("CustomJemallocPath"), nativeLibraryWorkaroundsOverride);
 
         // Performance related options
         auto performanceOverride = m_settings->registerSetting("OverridePerformance", false);
@@ -508,6 +510,7 @@ QStringList MinecraftInstance::extraArguments()
     {
         QString openALPath;
         QString glfwPath;
+        QString jemallocPath;
 
         if (settings()->get("UseNativeOpenAL").toBool()) {
             openALPath = APPLICATION->m_detectedOpenALPath;
@@ -521,14 +524,23 @@ QStringList MinecraftInstance::extraArguments()
             if (!customPath.isEmpty())
                 glfwPath = customPath;
         }
+        if (settings()->get("UseNativeJemalloc").toBool()) {
+            jemallocPath = APPLICATION->m_detectedJemallocPath;
+            auto customPath = settings()->get("CustomJemallocPath").toString();
+            if (!customPath.isEmpty())
+                jemallocPath = customPath;
+        }
 
         QFileInfo openALInfo(openALPath);
         QFileInfo glfwInfo(glfwPath);
+        QFileInfo jemallocInfo(jemallocPath);
 
         if (!openALPath.isEmpty() && openALInfo.exists())
             list.append("-Dorg.lwjgl.openal.libname=" + openALInfo.absoluteFilePath());
         if (!glfwPath.isEmpty() && glfwInfo.exists())
             list.append("-Dorg.lwjgl.glfw.libname=" + glfwInfo.absoluteFilePath());
+        if (!jemallocPath.isEmpty() && jemallocInfo.exists())
+            list.append("-Dorg.lwjgl.jemalloc.libname=" + jemallocInfo.absoluteFilePath());
     }
 
     return list;
@@ -904,11 +916,14 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
     auto settings = this->settings();
     bool nativeOpenAL = settings->get("UseNativeOpenAL").toBool();
     bool nativeGLFW = settings->get("UseNativeGLFW").toBool();
+    bool nativeJemalloc = settings->get("UseNativeJemalloc").toBool();
     if (nativeOpenAL || nativeGLFW) {
         if (nativeOpenAL)
             out << "Using system OpenAL.";
         if (nativeGLFW)
             out << "Using system GLFW.";
+        if (nativeJemalloc)
+            out << "Using system Jemalloc.";
         out << "";
     }
 
