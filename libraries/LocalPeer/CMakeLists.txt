@@ -2,8 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(LocalPeer)
 
 if(Launcher_QT_VERSION_MAJOR EQUAL 6)
-    find_package(Qt6 COMPONENTS Core Network Core5Compat REQUIRED)
-    list(APPEND LocalPeer_LIBS Qt${QT_VERSION_MAJOR}::Core5Compat)
+    find_package(Qt6 COMPONENTS Core Network REQUIRED)
 endif()
 
 set(SINGLE_SOURCES
