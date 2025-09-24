@@ -497,6 +497,7 @@ else()
 endif()
 if (FORCE_BUNDLED_QUAZIP)
     message(STATUS "Using bundled QuaZip")
+    set(QUAZIP_ENABLE_QTEXTCODEC OFF) # disable the qt5compat
     set(BUILD_SHARED_LIBS 0)  # link statically to avoid conflicts.
     set(QUAZIP_INSTALL 0)
     add_subdirectory(libraries/quazip) # zip manipulation library
