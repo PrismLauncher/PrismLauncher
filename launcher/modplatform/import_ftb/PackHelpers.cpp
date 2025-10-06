@@ -79,9 +79,9 @@ Modpack parseDirectory(QString path)
         return {};
     }
 
-    auto versionsFile = QFileInfo(FS::PathCombine(path, "version.json"));
+    auto versionsFile = QFileInfo(FS::PathCombine(path, ".ftbapp", "version.json"));
     if (!versionsFile.exists() || !versionsFile.isFile()) {
-        versionsFile = QFileInfo(FS::PathCombine(path, ".ftbapp", "version.json"));
+        versionsFile = QFileInfo(FS::PathCombine(path, "version.json"));
     }
     if (!versionsFile.exists() || !versionsFile.isFile()) {
         return {};
