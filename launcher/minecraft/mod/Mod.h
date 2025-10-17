@@ -71,6 +71,7 @@ class Mod : public Resource {
     auto side() const -> QString;
     auto loaders() const -> QString;
     auto mcVersions() const -> QString;
+    auto groupMcVersions() const -> QString;
     auto releaseType() const -> QString;
 
     /** Get the intneral path to the mod's icon file*/

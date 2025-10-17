@@ -49,6 +49,10 @@
 #include "minecraft/mod/ModDetails.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "modplatform/ModIndex.h"
+#include "Application.h"
+#include "meta/Index.h"
+#include "ui/widgets/VersionSelectWidget.h"
+#include "ui/widgets/VersionListView.h"
 
 Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
 {
@@ -187,9 +191,50 @@ auto Mod::side() const -> QString
 auto Mod::mcVersions() const -> QString
 {
     if (metadata())
-        return metadata()->mcVersions.join(", ");
+        return groupMcVersions();
+        //return metadata()->mcVersions.join(", ");
 
     return {};
+}
+
+auto Mod::groupMcVersions() const -> QString
+{
+
+    static QStringList s_realeasedMcVersions = []() {
+        // Gets all of minecrafts vanilla versions
+        auto vlist = APPLICATION->metadataIndex()->get("net.minecraft");
+        VersionSelectWidget* versionList = new VersionSelectWidget(nullptr);
+        versionList->initialize(vlist.get());
+        //Filters to only main released versions (like 1.19.2, 1.8.9)
+        versionList->setFilter(BaseVersionList::TypeRole, Filters::regexp(QRegularExpression("(release)")));
+        auto model = versionList->view()->model();
+        QAbstractItemModel* proxyModel = model;
+        // Versions get ordered latest to oldest
+        QStringList filteredVersions;
+        // extracts each version number from model
+        for (int row = 0; row < proxyModel->rowCount(); ++row) {
+            QModelIndex index = proxyModel->index(row, 0);
+            QVariant data = proxyModel->data(index, BaseVersionList::VersionRole);
+            filteredVersions << data.toString();
+        }
+        return filteredVersions;
+    }();
+
+    // gets existing list of minecraft versions
+    // goes through current modpacks mcVersions in sequence checking if the next in the real minecraft versions exists
+    
+    QStringList filteredVersions = s_realeasedMcVersions;
+    QStringList groupedVersions;
+
+    if (metadata()) {
+        for (int i = 0; i < metadata()->mcVersions.size(); ++i) {
+
+        }
+    }
+
+    return groupedVersions.join(", ");
+       
+
 }
 
 auto Mod::releaseType() const -> QString
