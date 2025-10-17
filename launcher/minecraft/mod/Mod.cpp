@@ -191,15 +191,18 @@ auto Mod::side() const -> QString
 auto Mod::mcVersions() const -> QString
 {
     if (metadata())
-        return groupMcVersions();
-        //return metadata()->mcVersions.join(", ");
+        // incase toggelable feature
+        if (0) {
+            return groupMcVersions();
+        } else {
+            return metadata()->mcVersions.join(", ");
+        }
 
     return {};
 }
 
 auto Mod::groupMcVersions() const -> QString
 {
-
     static QStringList s_realeasedMcVersions = []() {
         // Gets all of minecrafts vanilla versions
         auto vlist = APPLICATION->metadataIndex()->get("net.minecraft");
@@ -219,20 +222,62 @@ auto Mod::groupMcVersions() const -> QString
         }
         return filteredVersions;
     }();
-
-    // gets existing list of minecraft versions
-    // goes through current modpacks mcVersions in sequence checking if the next in the real minecraft versions exists
     
     QStringList filteredVersions = s_realeasedMcVersions;
-    QStringList groupedVersions;
+    QStringList *groupedVersions = new QStringList();
 
     if (metadata()) {
-        for (int i = 0; i < metadata()->mcVersions.size(); ++i) {
-
+        QStringList ungroupedVersions = metadata()->mcVersions;
+        QString first = ungroupedVersions[0];
+        int count = 0;
+        int ungroupedSize = ungroupedVersions.size();
+        bool grouping = false;
+        for (int i = filteredVersions.size() - 1; i >= 0; --i) {
+            if (grouping) {
+                // traversing the ungrouped versions and checking if they match the order of releases
+                if (! filteredVersions[i].compare(ungroupedVersions[count])) {
+                    count += 1;
+                    if (count >= ungroupedSize) {
+                        break;
+                    }
+                } 
+                // next version doesnt match, break grouping, append and update next grouping
+                else {
+                    grouping = false;
+                    // check if grouping occured
+                    if (! first.compare(ungroupedVersions[count - 1])) {
+                        (*groupedVersions).append(first);
+                    } else {
+                        QString groupBuff = first.append('-').append(ungroupedVersions[count - 1]);
+                        (*groupedVersions).append(groupBuff);
+                    }
+                    // set up next grouping
+                    first = ungroupedVersions[count];
+                }
+            } else {
+                // traverses all oldest to newest versions until modded version starts
+                if (! filteredVersions.at(i).compare(first)) {
+                    grouping = true;
+                    count += 1;
+                    if (count >= ungroupedSize) {
+                        break;
+                    }
+                }
+            }
         }
+        // case for last version included in mod
+        if (grouping) {
+            if (! first.compare(ungroupedVersions[count - 1])) {
+                (*groupedVersions).append(first);
+            } else {
+                QString groupBuff = first.append('-').append(ungroupedVersions[count - 1]);
+                (*groupedVersions).append(groupBuff);
+            }
+        }
+        return (*groupedVersions).join(", ");
     }
 
-    return groupedVersions.join(", ");
+    return {};
        
 
 }
