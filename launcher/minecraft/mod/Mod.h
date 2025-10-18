@@ -72,6 +72,7 @@ class Mod : public Resource {
     auto loaders() const -> QString;
     auto mcVersions() const -> QString;
     auto groupMcVersions() const -> QString;
+    static bool versionsSort(QString a, QString b);
     auto releaseType() const -> QString;
 
     /** Get the intneral path to the mod's icon file*/

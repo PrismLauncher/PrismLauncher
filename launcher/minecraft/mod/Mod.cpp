@@ -53,6 +53,7 @@
 #include "meta/Index.h"
 #include "ui/widgets/VersionSelectWidget.h"
 #include "ui/widgets/VersionListView.h"
+#include <sstream> 
 
 Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
 {
@@ -192,7 +193,7 @@ auto Mod::mcVersions() const -> QString
 {
     if (metadata())
         // incase toggelable feature
-        if (0) {
+        if (1) {
             return groupMcVersions();
         } else {
             return metadata()->mcVersions.join(", ");
@@ -204,7 +205,7 @@ auto Mod::mcVersions() const -> QString
 auto Mod::groupMcVersions() const -> QString
 {
     static QStringList s_realeasedMcVersions = []() {
-        // Gets all of minecrafts vanilla versions
+         // Gets all of minecrafts vanilla versions
         auto vlist = APPLICATION->metadataIndex()->get("net.minecraft");
         VersionSelectWidget* versionList = new VersionSelectWidget(nullptr);
         versionList->initialize(vlist.get());
@@ -224,10 +225,22 @@ auto Mod::groupMcVersions() const -> QString
     }();
     
     QStringList filteredVersions = s_realeasedMcVersions;
+
     QStringList *groupedVersions = new QStringList();
 
     if (metadata()) {
-        QStringList ungroupedVersions = metadata()->mcVersions;
+        std::vector<QString> myvector; 
+        for (QString i : metadata()->mcVersions) {
+            if (i.size() >= 10) {
+                // snapshot get filtered out, can add separte control fro them here
+            } else {
+                myvector.push_back(i);
+            }
+        }
+        std::sort(myvector.begin(), myvector.end(), versionsSort);
+        QStringList ungroupedVersions(myvector.begin(), myvector.end());
+        //QStringList ungroupedVersions = metadata()->mcVersions;
+        
         QString first = ungroupedVersions[0];
         int count = 0;
         int ungroupedSize = ungroupedVersions.size();
@@ -280,6 +293,35 @@ auto Mod::groupMcVersions() const -> QString
     return {};
        
 
+}
+
+// return false if a > b
+bool Mod::versionsSort(QString a, QString b)
+{
+    std::string stringA = a.toStdString();
+    std::string stringB = b.toStdString();
+    std::stringstream streamA(stringA);
+    std::stringstream streamB(stringB);
+    std::string bufA;
+    std::string bufB;
+
+    while (getline(streamA, bufA, '.') && getline(streamB, bufB, '.')) {
+        int intA = atoi(bufA.c_str());
+        int intB = atoi(bufB.c_str());
+        if (intA == intB) {
+            continue;
+        } else if (intA > intB) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    // one is an 1.x instead of 1.x.y so the small length string is the lower version
+    if (stringA.size() > stringB.size()) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 auto Mod::releaseType() const -> QString
