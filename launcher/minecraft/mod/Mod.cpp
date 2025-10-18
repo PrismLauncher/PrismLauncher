@@ -186,8 +186,11 @@ auto Mod::side() const -> QString
 
 auto Mod::mcVersions() const -> QString
 {
-    if (metadata())
-        return metadata()->mcVersions.join(", ");
+    if (metadata()){
+        QStringList reversed = metadata()->mcVersions;
+        std::reverse(reversed.begin(), reversed.end());
+        return reversed.join(", ");
+    }
 
     return {};
 }
