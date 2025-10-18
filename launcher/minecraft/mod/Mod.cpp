@@ -201,7 +201,7 @@ auto Mod::groupMcVersions() const -> QString
     static QStringList s_releasedMcVersions = []() {
          // Gets all of minecrafts vanilla versions
         auto vlist = APPLICATION->metadataIndex()->get("net.minecraft");
-        VersionSelectWidget versionList(nullptr);
+        VersionSelectWidget* versionList(nullptr);
         versionList->initialize(vlist.get());
         //Filters to only main released versions (like 1.19.2, 1.8.9)
         versionList->setFilter(BaseVersionList::TypeRole, Filters::regexp(QRegularExpression("(release)")));
