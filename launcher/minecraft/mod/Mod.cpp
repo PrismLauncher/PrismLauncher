@@ -192,19 +192,13 @@ auto Mod::side() const -> QString
 auto Mod::mcVersions() const -> QString
 {
     if (metadata())
-        // incase toggelable feature
-        if (1) {
             return groupMcVersions();
-        } else {
-            return metadata()->mcVersions.join(", ");
-        }
-
     return {};
 }
 
 auto Mod::groupMcVersions() const -> QString
 {
-    static QStringList s_realeasedMcVersions = []() {
+    static QStringList s_releasedMcVersions = []() {
          // Gets all of minecrafts vanilla versions
         auto vlist = APPLICATION->metadataIndex()->get("net.minecraft");
         VersionSelectWidget* versionList = new VersionSelectWidget(nullptr);
@@ -224,7 +218,7 @@ auto Mod::groupMcVersions() const -> QString
         return filteredVersions;
     }();
     
-    QStringList filteredVersions = s_realeasedMcVersions;
+    QStringList filteredVersions = s_releasedMcVersions;
 
     QStringList *groupedVersions = new QStringList();
 
@@ -239,7 +233,6 @@ auto Mod::groupMcVersions() const -> QString
         }
         std::sort(myvector.begin(), myvector.end(), versionsSort);
         QStringList ungroupedVersions(myvector.begin(), myvector.end());
-        //QStringList ungroupedVersions = metadata()->mcVersions;
         
         QString first = ungroupedVersions[0];
         int count = 0;
@@ -289,7 +282,6 @@ auto Mod::groupMcVersions() const -> QString
         }
         return (*groupedVersions).join(", ");
     }
-
     return {};
        
 
