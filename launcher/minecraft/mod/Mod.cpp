@@ -201,18 +201,18 @@ auto Mod::groupMcVersions() const -> QString
     static QStringList s_releasedMcVersions = []() {
          // Gets all of minecrafts vanilla versions
         auto vlist = APPLICATION->metadataIndex()->get("net.minecraft");
-        VersionSelectWidget* versionList = new VersionSelectWidget(nullptr);
+        VersionSelectWidget versionList(nullptr);
         versionList->initialize(vlist.get());
         //Filters to only main released versions (like 1.19.2, 1.8.9)
         versionList->setFilter(BaseVersionList::TypeRole, Filters::regexp(QRegularExpression("(release)")));
         auto model = versionList->view()->model();
-        QAbstractItemModel* proxyModel = model;
+        
         // Versions get ordered latest to oldest
         QStringList filteredVersions;
         // extracts each version number from model
-        for (int row = 0; row < proxyModel->rowCount(); ++row) {
-            QModelIndex index = proxyModel->index(row, 0);
-            QVariant data = proxyModel->data(index, BaseVersionList::VersionRole);
+        for (int row = 0; row < model->rowCount(); ++row) {
+            QModelIndex index = model->index(row, 0);
+            QVariant data = model->data(index, BaseVersionList::VersionRole);
             filteredVersions << data.toString();
         }
         return filteredVersions;
@@ -220,7 +220,7 @@ auto Mod::groupMcVersions() const -> QString
     
     QStringList filteredVersions = s_releasedMcVersions;
 
-    QStringList *groupedVersions = new QStringList();
+    QStringList groupedVersions;
 
     if (metadata()) {
         std::vector<QString> myvector; 
@@ -252,10 +252,10 @@ auto Mod::groupMcVersions() const -> QString
                     grouping = false;
                     // check if grouping occured
                     if (! first.compare(ungroupedVersions[count - 1])) {
-                        (*groupedVersions).append(first);
+                        (groupedVersions).append(first);
                     } else {
                         QString groupBuff = first.append('-').append(ungroupedVersions[count - 1]);
-                        (*groupedVersions).append(groupBuff);
+                        (groupedVersions).append(groupBuff);
                     }
                     // set up next grouping
                     first = ungroupedVersions[count];
@@ -274,13 +274,13 @@ auto Mod::groupMcVersions() const -> QString
         // case for last version included in mod
         if (grouping) {
             if (! first.compare(ungroupedVersions[count - 1])) {
-                (*groupedVersions).append(first);
+                (groupedVersions).append(first);
             } else {
                 QString groupBuff = first.append('-').append(ungroupedVersions[count - 1]);
-                (*groupedVersions).append(groupBuff);
+                (groupedVersions).append(groupBuff);
             }
         }
-        return (*groupedVersions).join(", ");
+        return (groupedVersions).join(", ");
     }
     return {};
        
