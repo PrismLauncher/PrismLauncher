@@ -21,7 +21,7 @@ inputs:
   qt-version:
     description: Version of Qt to use
     required: true
-    default: 6.9.1
+    default: 6.10.0
 
 outputs:
   build-type:
