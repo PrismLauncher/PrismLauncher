@@ -290,7 +290,8 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
                     }
                 }
             }
-            mod.mcVersions.sort();
+            std::sort(mod.mcVersions.begin(), mod.mcVersions.end(), versionsSort);
+            std::reverse(mod.mcVersions.begin(), mod.mcVersions.end());
         }
     }
     mod.version_number = table["x-prismlauncher-version-number"].value_or("");
@@ -350,16 +351,12 @@ auto V1::getIndexForMod(const QDir& index_dir, QVariant& mod_id) -> Mod
 // return false if a > b
 bool V1::versionsSort(QString a, QString b)
 {
-    std::string stringA = a.toStdString();
-    std::string stringB = b.toStdString();
-    std::stringstream streamA(stringA);
-    std::stringstream streamB(stringB);
-    std::string bufA;
-    std::string bufB;
-
-    while (getline(streamA, bufA, '.') && getline(streamB, bufB, '.')) {
-        int intA = atoi(bufA.c_str());
-        int intB = atoi(bufB.c_str());
+    QStringList splitA = a.split('.');
+    QStringList splitB = b.split('.');
+    int i = 0;
+    for (i; i < std::min(splitA.size(), splitB.size()); i++) {
+        int intA = splitA[i].toInt();
+        int intB = splitB[i].toInt();
         if (intA == intB) {
             continue;
         } else if (intA > intB) {
@@ -368,12 +365,15 @@ bool V1::versionsSort(QString a, QString b)
             return true;
         }
     }
-    // one is an 1.x instead of 1.x.y so the small length string is the lower version
-    if (stringA.size() > stringB.size()) {
+    if (splitA.size() == splitB.size()) {
+        return ((splitA[i - 1].size() > splitB[i - 1].size()));
+    }
+    if (splitA.size() > splitB.size()) {
         return false;
     } else {
         return true;
     }
+
 }
 
 }  // namespace Packwiz
