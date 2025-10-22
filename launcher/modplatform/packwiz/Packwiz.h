@@ -88,6 +88,9 @@ class V1 {
      * If the mod doesn't have a metadata, it simply returns an empty Mod object.
      * */
     static auto getIndexForMod(const QDir& index_dir, QVariant& mod_id) -> Mod;
+
+    /* Returns if version a is greater than version b, ie: 1.20.1 > 1.20; 1.20.10 > 1.20.2*/
+    static auto versionsSort(QString a, QString b) -> bool;
 };
 
 }  // namespace Packwiz

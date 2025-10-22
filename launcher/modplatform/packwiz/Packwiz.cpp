@@ -115,7 +115,8 @@ auto V1::createModFormat([[maybe_unused]] const QDir& index_dir,
     mod.side = mod_version.side == ModPlatform::Side::NoSide ? mod_pack.side : mod_version.side;
     mod.loaders = mod_version.loaders;
     mod.mcVersions = mod_version.mcVersion;
-    mod.mcVersions.sort();
+    std::sort(mod.mcVersions.begin(), mod.mcVersions.end(), versionsSort)
+    std::reverse(mod.mcVersions.begin(), mod.mcVersions.end())
     mod.releaseType = mod_version.version_type;
 
     mod.version_number = mod_version.version_number;
@@ -344,6 +345,35 @@ auto V1::getIndexForMod(const QDir& index_dir, QVariant& mod_id) -> Mod
     }
 
     return {};
+}
+
+// return false if a > b
+auto versionsSort(QString a, QString b) -> bool
+{
+    std::string stringA = a.toStdString();
+    std::string stringB = b.toStdString();
+    std::stringstream streamA(stringA);
+    std::stringstream streamB(stringB);
+    std::string bufA;
+    std::string bufB;
+
+    while (getline(streamA, bufA, '.') && getline(streamB, bufB, '.')) {
+        int intA = atoi(bufA.c_str());
+        int intB = atoi(bufB.c_str());
+        if (intA == intB) {
+            continue;
+        } else if (intA > intB) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    // one is an 1.x instead of 1.x.y so the small length string is the lower version
+    if (stringA.size() > stringB.size()) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 }  // namespace Packwiz
