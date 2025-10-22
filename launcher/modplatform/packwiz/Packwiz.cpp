@@ -115,8 +115,8 @@ auto V1::createModFormat([[maybe_unused]] const QDir& index_dir,
     mod.side = mod_version.side == ModPlatform::Side::NoSide ? mod_pack.side : mod_version.side;
     mod.loaders = mod_version.loaders;
     mod.mcVersions = mod_version.mcVersion;
-    std::sort(mod.mcVersions.begin(), mod.mcVersions.end(), versionsSort)
-    std::reverse(mod.mcVersions.begin(), mod.mcVersions.end())
+    std::sort(mod.mcVersions.begin(), mod.mcVersions.end(), versionsSort);
+    std::reverse(mod.mcVersions.begin(), mod.mcVersions.end());
     mod.releaseType = mod_version.version_type;
 
     mod.version_number = mod_version.version_number;
@@ -348,7 +348,7 @@ auto V1::getIndexForMod(const QDir& index_dir, QVariant& mod_id) -> Mod
 }
 
 // return false if a > b
-auto versionsSort(QString a, QString b) -> bool
+bool V1::versionsSort(QString a, QString b)
 {
     std::string stringA = a.toStdString();
     std::string stringB = b.toStdString();
