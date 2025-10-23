@@ -89,7 +89,7 @@ class V1 {
      * */
     static auto getIndexForMod(const QDir& index_dir, QVariant& mod_id) -> Mod;
 
-    /* Returns if version a is greater than version b, ie: 1.20.1 > 1.20; 1.20.10 > 1.20.2*/
+    /* Returns if version a is less than version b, ie: 1.20 < 1.20.1; 1.20.2 < 1.20.10*/
     static bool versionsSort(QString a, QString b);
 };
 

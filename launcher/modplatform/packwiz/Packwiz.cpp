@@ -116,7 +116,6 @@ auto V1::createModFormat([[maybe_unused]] const QDir& index_dir,
     mod.loaders = mod_version.loaders;
     mod.mcVersions = mod_version.mcVersion;
     std::sort(mod.mcVersions.begin(), mod.mcVersions.end(), versionsSort);
-    std::reverse(mod.mcVersions.begin(), mod.mcVersions.end());
     mod.releaseType = mod_version.version_type;
 
     mod.version_number = mod_version.version_number;
@@ -291,7 +290,6 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
                 }
             }
             std::sort(mod.mcVersions.begin(), mod.mcVersions.end(), versionsSort);
-            std::reverse(mod.mcVersions.begin(), mod.mcVersions.end());
         }
     }
     mod.version_number = table["x-prismlauncher-version-number"].value_or("");
@@ -359,20 +357,14 @@ bool V1::versionsSort(QString a, QString b)
         int intB = splitB[i].toInt();
         if (intA == intB) {
             continue;
-        } else if (intA > intB) {
-            return false;
         } else {
-            return true;
+            return intA > intB;
         }
     }
     if (splitA.size() == splitB.size()) {
-        return ((splitA[i - 1].size() > splitB[i - 1].size()));
+        return ((splitA[i - 1].size() <= splitB[i - 1].size()));
     }
-    if (splitA.size() > splitB.size()) {
-        return false;
-    } else {
-        return true;
-    }
+    return splitA.size() > splitB.size();
 
 }
 
