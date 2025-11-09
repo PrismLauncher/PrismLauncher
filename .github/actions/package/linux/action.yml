@@ -113,7 +113,10 @@ runs:
       run: |
         cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }}
         cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
-
+        if [ $APPIMAGE_ARCH == 'x86_64' ]; then
+          mkdir ${{ env.INSTALL_PORTABLE_DIR }}/lib
+          cp /lib/x86_64-linux-gnu/libbz2.so.1.0 ${{ env.INSTALL_PORTABLE_DIR }}/lib # fedora names the library libbz2.so.1 while ubuntu names it libbz2.so.1.0, so without this it won't work even with bzip2-libs installed 
+        fi
         for l in $(find ${{ env.INSTALL_PORTABLE_DIR }} -type f); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_PORTABLE_DIR }}/}; l=${l#./}; echo $l; done > ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt
         cd ${{ env.INSTALL_PORTABLE_DIR }}
         tar -czf ../PrismLauncher-portable.tar.gz *
