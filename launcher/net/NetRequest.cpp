@@ -48,293 +48,80 @@
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
 #endif
+#include <MMCTime.h>
+
 #include "BuildConfig.h"
 
-#include "MMCTime.h"
 #include "StringUtils.h"
 
 namespace Net {
-
-void NetRequest::addValidator(Validator* v)
+NetRequest::NetRequest(const QUrl& url, Sink* sink, const Options options) : m_url(url), m_sink(sink), m_options(options)
 {
-    m_sink->addValidator(v);
-}
-
-void NetRequest::executeTask()
-{
-    setStatus(tr("Requesting %1").arg(StringUtils::truncateUrlHumanFriendly(m_url, 80)));
-
-    if (getState() == Task::State::AbortedByUser) {
-        qCWarning(logCat) << getUid().toString() << "Attempt to start an aborted Request:" << m_url.toString();
-        emit aborted();
-        emit finished();
-        return;
+    if (!m_curl) {
+        qCritical() << "Failed to create curl easy handle";
+        throw std::bad_alloc{};
     }
 
-    QNetworkRequest request(m_url);
-    m_state = m_sink->init(request);
-    switch (m_state) {
-        case State::Succeeded:
-            qCDebug(logCat) << getUid().toString() << "Request cache hit " << m_url.toString();
-            emit succeeded();
-            emit finished();
-            return;
-        case State::Running:
-            qCDebug(logCat) << getUid().toString() << "Running " << m_url.toString();
-            break;
-        case State::Inactive:
-        case State::Failed:
-            m_failReason = m_sink->failReason();
-            emit failed(m_sink->failReason());
-            emit finished();
-            return;
-        case State::AbortedByUser:
-            emit aborted();
-            emit finished();
-            return;
-    }
+    curl_easy_setopt(m_curl.get(), CURLOPT_URL, url.toString(QUrl::FullyEncoded).toStdString().c_str());
+    curl_easy_setopt(m_curl.get(), CURLOPT_VERBOSE, 1L);
+    curl_easy_setopt(m_curl.get(), CURLOPT_FAILONERROR, 1L);
+    curl_easy_setopt(m_curl.get(), CURLOPT_NOPROGRESS, 0L);
+    curl_easy_setopt(m_curl.get(), CURLOPT_XFERINFOFUNCTION, curlProgressCallback);
+    curl_easy_setopt(m_curl.get(), CURLOPT_READFUNCTION, curlReadCallback);
+    curl_easy_setopt(m_curl.get(), CURLOPT_WRITEFUNCTION, curlWriteCallback);
+
+    const auto thisPtr = static_cast<void*>(this);
+    curl_easy_setopt(m_curl.get(), CURLOPT_XFERINFODATA, thisPtr);
+    curl_easy_setopt(m_curl.get(), CURLOPT_READDATA, thisPtr);
+    curl_easy_setopt(m_curl.get(), CURLOPT_WRITEDATA, thisPtr);
+
+    curl_easy_setopt(m_curl.get(), CURLOPT_ERRORBUFFER, m_errorBuffer);
 
 #if defined(LAUNCHER_APPLICATION)
-    auto user_agent = APPLICATION->getUserAgent();
+    const auto userAgent = APPLICATION->getUserAgent();
 #else
-    auto user_agent = BuildConfig.USER_AGENT;
+    const auto userAgent = BuildConfig.USER_AGENT;
 #endif
-
-    request.setHeader(QNetworkRequest::UserAgentHeader, user_agent.toUtf8());
-    for (auto& header_proxy : m_headerProxies) {
-        header_proxy->writeHeaders(request);
-    }
+    curl_easy_setopt(m_curl.get(), CURLOPT_USERAGENT, userAgent.toStdString().c_str());
 
 #if defined(LAUNCHER_APPLICATION)
-    request.setTransferTimeout(APPLICATION->settings()->get("RequestTimeout").toInt() * 1000);
+    const long timeout = APPLICATION->settings()->get("RequestTimeout").toInt() * 1000;
 #else
-    request.setTransferTimeout();
+    const long timeout = 30000;
 #endif
+    curl_easy_setopt(m_curl.get(), CURLOPT_TIMEOUT_MS, timeout);
 
-    m_last_progress_time = m_clock.now();
-    m_last_progress_bytes = 0;
-
-    auto rep = getReply(request);
-    if (rep == nullptr)  // it failed
-        return;
-    m_reply.reset(rep);
-    connect(rep, &QNetworkReply::uploadProgress, this, &NetRequest::onProgress);
-    connect(rep, &QNetworkReply::downloadProgress, this, &NetRequest::onProgress);
-    connect(rep, &QNetworkReply::finished, this, &NetRequest::downloadFinished);
-    connect(rep, &QNetworkReply::errorOccurred, this, &NetRequest::downloadError);
-    connect(rep, &QNetworkReply::sslErrors, this, &NetRequest::sslErrors);
-    connect(rep, &QNetworkReply::readyRead, this, &NetRequest::downloadReadyRead);
+    connect(this, &NetRequest::succeeded, this, &NetRequest::finished);
+    connect(this, &NetRequest::failed, this, &NetRequest::finished);
+    connect(this, &NetRequest::aborted, this, &NetRequest::finished);
 }
 
-void NetRequest::onProgress(qint64 bytesReceived, qint64 bytesTotal)
+NetRequest::~NetRequest() = default;
+
+void NetRequest::setLoggingCategory(logCatFunc loggingCategory)
 {
-    auto now = m_clock.now();
-    auto elapsed = now - m_last_progress_time;
-
-    // use milliseconds for speed precision
-    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
-    auto bytes_received_since = bytesReceived - m_last_progress_bytes;
-    auto dl_speed_bps = (double)bytes_received_since / elapsed_ms.count() * 1000;
-    auto remaining_time_s = (bytesTotal - bytesReceived) / dl_speed_bps;
-
-    //: Current amount of bytes downloaded, out of the total amount of bytes in the download
-    QString dl_progress =
-        tr("%1 / %2").arg(StringUtils::humanReadableFileSize(bytesReceived)).arg(StringUtils::humanReadableFileSize(bytesTotal));
-
-    QString dl_speed_str;
-    if (elapsed_ms.count() > 0) {
-        auto str_eta = bytesTotal > 0 ? Time::humanReadableDuration(remaining_time_s) : tr("unknown");
-        //: Download speed, in bytes per second (remaining download time in parenthesis)
-        dl_speed_str = tr("%1 /s (%2)").arg(StringUtils::humanReadableFileSize(dl_speed_bps)).arg(str_eta);
-    } else {
-        //: Download speed at 0 bytes per second
-        dl_speed_str = tr("0 B/s");
-    }
-
-    setDetails(dl_progress + "\n" + dl_speed_str);
-
-    setProgress(bytesReceived, bytesTotal);
+    m_logCat = loggingCategory;
 }
 
-void NetRequest::downloadError(QNetworkReply::NetworkError error)
+TaskStepProgress NetRequest::stepProgress()
 {
-    if (error == QNetworkReply::OperationCanceledError) {
-        qCCritical(logCat) << getUid().toString() << "Aborted " << m_url.toString();
-        m_state = State::Failed;
-    } else {
-        if (m_options & Option::AcceptLocalFiles) {
-            if (m_sink->hasLocalData()) {
-                m_state = State::Succeeded;
-                return;
-            }
-        }
-        // error happened during download.
-        qCCritical(logCat) << getUid().toString() << "Failed" << m_url.toString() << "with reason" << error;
-        if (m_reply)
-            qCCritical(logCat) << getUid().toString() << "HTTP Status" << replyStatusCode() << ";error" << errorString();
-        m_state = State::Failed;
-    }
+    return m_stepProgress;
 }
 
-void NetRequest::sslErrors(const QList<QSslError>& errors)
+void NetRequest::updateDetails()
 {
-    int i = 1;
-    for (auto error : errors) {
-        qCCritical(logCat) << getUid().toString() << "Request" << m_url.toString() << "SSL Error #" << i << " : " << error.errorString();
-        auto cert = error.certificate();
-        qCCritical(logCat) << getUid().toString() << "Certificate in question:\n" << cert.toText();
-        i++;
-    }
-}
+    curl_off_t downloadSpeed;
+    curl_off_t uploadSpeed;
+    curl_easy_getinfo(m_curl.get(), CURLINFO_SPEED_DOWNLOAD_T, &downloadSpeed);
+    curl_easy_getinfo(m_curl.get(), CURLINFO_SPEED_UPLOAD_T, &uploadSpeed);
 
-auto NetRequest::handleRedirect() -> bool
-{
-    QUrl redirect = m_reply->header(QNetworkRequest::LocationHeader).toUrl();
-    if (!redirect.isValid()) {
-        if (!m_reply->hasRawHeader("Location")) {
-            // no redirect -> it's fine to continue
-            return false;
-        }
-        // there is a Location header, but it's not correct. we need to apply some workarounds...
-        QByteArray redirectBA = m_reply->rawHeader("Location");
-        if (redirectBA.size() == 0) {
-            // empty, yet present redirect header? WTF?
-            return false;
-        }
-        QString redirectStr = QString::fromUtf8(redirectBA);
+    const curl_off_t speed = std::max(downloadSpeed, uploadSpeed);
+    const qint64 received = m_stepProgress.current;
+    const qint64 total = m_stepProgress.total;
 
-        if (redirectStr.startsWith("//")) {
-            /*
-             * IF the URL begins with //, we need to insert the URL scheme.
-             * See: https://bugreports.qt.io/browse/QTBUG-41061
-             * See: http://tools.ietf.org/html/rfc3986#section-4.2
-             */
-            redirectStr = m_reply->url().scheme() + ":" + redirectStr;
-        } else if (redirectStr.startsWith("/")) {
-            /*
-             * IF the URL begins with /, we need to process it as a relative URL
-             */
-            auto url = m_reply->url();
-            url.setPath(redirectStr, QUrl::TolerantMode);
-            redirectStr = url.toString();
-        }
-
-        /*
-         * Next, make sure the URL is parsed in tolerant mode. Qt doesn't parse the location header in tolerant mode, which causes issues.
-         * FIXME: report Qt bug for this
-         */
-        redirect = QUrl(redirectStr, QUrl::TolerantMode);
-        if (!redirect.isValid()) {
-            qCWarning(logCat) << getUid().toString() << "Failed to parse redirect URL:" << redirectStr;
-            downloadError(QNetworkReply::ProtocolFailure);
-            return false;
-        }
-        qCDebug(logCat) << getUid().toString() << "Fixed location header:" << redirect;
-    } else {
-        qCDebug(logCat) << getUid().toString() << "Location header:" << redirect;
-    }
-
-    m_url = QUrl(redirect.toString());
-    qCDebug(logCat) << getUid().toString() << "Following redirect to " << m_url.toString();
-    executeTask();
-
-    return true;
-}
-
-void NetRequest::downloadFinished()
-{
-    // handle HTTP redirection first
-    if (handleRedirect()) {
-        qCDebug(logCat) << getUid().toString() << "Request redirected:" << m_url.toString();
-        return;
-    }
-
-    // if the download failed before this point ...
-    if (m_state == State::Succeeded)  // pretend to succeed so we continue processing :)
-    {
-        qCDebug(logCat) << getUid().toString() << "Request failed but we are allowed to proceed:" << m_url.toString();
-        m_sink->abort();
-        emit succeeded();
-        emit finished();
-        return;
-    } else if (m_state == State::Failed) {
-        qCDebug(logCat) << getUid().toString() << "Request failed in previous step:" << m_url.toString();
-        m_sink->abort();
-        m_failReason = m_reply->errorString();
-        emit failed(m_reply->errorString());
-        emit finished();
-        return;
-    } else if (m_state == State::AbortedByUser) {
-        qCDebug(logCat) << getUid().toString() << "Request aborted in previous step:" << m_url.toString();
-        m_sink->abort();
-        emit aborted();
-        emit finished();
-        return;
-    }
-
-    // make sure we got all the remaining data, if any
-    auto data = m_reply->readAll();
-    if (data.size()) {
-        qCDebug(logCat) << getUid().toString() << "Writing extra" << data.size() << "bytes";
-        m_state = m_sink->write(data);
-        if (m_state != State::Succeeded) {
-            qCDebug(logCat) << getUid().toString() << "Request failed to write:" << m_url.toString();
-            m_sink->abort();
-            m_failReason = m_sink->failReason();
-            emit failed(m_sink->failReason());
-            emit finished();
-            return;
-        }
-    }
-
-    // otherwise, finalize the whole graph
-    m_state = m_sink->finalize(*m_reply.get());
-    if (m_state != State::Succeeded) {
-        qCDebug(logCat) << getUid().toString() << "Request failed to finalize:" << m_url.toString();
-        m_sink->abort();
-        m_failReason = m_sink->failReason();
-        emit failed(m_sink->failReason());
-        emit finished();
-        return;
-    }
-
-    qCDebug(logCat) << getUid().toString() << "Request succeeded:" << m_url.toString();
-    emit succeeded();
-    emit finished();
-}
-
-void NetRequest::downloadReadyRead()
-{
-    if (m_state == State::Running) {
-        auto data = m_reply->readAll();
-        m_state = m_sink->write(data);
-        if (m_state == State::Failed) {
-            qCCritical(logCat) << getUid().toString() << "Failed to process response chunk:" << m_sink->failReason();
-        }
-        // qDebug() << "Request" << m_url.toString() << "gained" << data.size() << "bytes";
-    } else {
-        qCCritical(logCat) << getUid().toString() << "Cannot write download data! illegal status " << m_status;
-    }
-}
-
-auto NetRequest::abort() -> bool
-{
-    m_state = State::AbortedByUser;
-    if (m_reply) {
-        disconnect(m_reply.get(), &QNetworkReply::errorOccurred, nullptr, nullptr);
-        m_reply->abort();
-    }
-    return true;
-}
-
-int NetRequest::replyStatusCode() const
-{
-    return m_reply ? m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() : -1;
-}
-
-QNetworkReply::NetworkError NetRequest::error() const
-{
-    return m_reply ? m_reply->error() : QNetworkReply::NoError;
+    const QString receivedAndTotal = total <= 0 ? "" : tr("%1 / %2").arg(StringUtils::humanReadableFileSize(received), StringUtils::humanReadableFileSize(total));
+    const QString speedAndETA = speed <= 0 ? "" : tr("%1/s (%2 left)").arg(StringUtils::humanReadableFileSize(speed), Time::humanReadableDuration((total - received) / speed));
+    m_stepProgress.details = receivedAndTotal + "\n" + speedAndETA;
 }
 
 QUrl NetRequest::url() const
@@ -342,8 +129,245 @@ QUrl NetRequest::url() const
     return m_url;
 }
 
-QString NetRequest::errorString() const
+CURL* NetRequest::curlHandle() const
 {
-    return m_reply ? m_reply->errorString() : "";
+    return m_curl.get();
+}
+
+void NetRequest::addValidator(Validator* v) const
+{
+    m_sink->addValidator(v);
+}
+
+Task::State NetRequest::prepare()
+{
+    curl_slist* headers = nullptr;
+    for (const auto& [name, value] : m_headers) {
+        const auto combined = std::string(name) + ": " + std::string(value);
+
+        const auto newHeaders = curl_slist_append(headers, combined.c_str());
+        if (!newHeaders) {
+            qCCritical(m_logCat).nospace() << "Failed to append header: " << combined;
+            continue;
+        }
+
+        headers = newHeaders;
+    }
+
+    curl_easy_setopt(m_curl.get(), CURLOPT_HTTPHEADER, headers);
+    m_curlHeaders.reset(headers);
+
+    const QString templ = m_uploadData.isEmpty() ? tr("Downloading %1") : tr("Uploading %1");
+    m_stepProgress.status = templ.arg(StringUtils::truncateUrlHumanFriendly(m_url, 80));
+
+    const auto state = m_sink->init(this);
+    switch (state) {
+        case Task::State::Succeeded:
+            qCDebug(m_logCat) << "Request" << m_url << "hit cache";
+            emit succeeded();
+            break;
+        case Task::State::Running:
+            qCDebug(m_logCat) << "Request" << m_url << "is now running";
+            break;
+        case Task::State::Inactive:
+        case Task::State::Failed:
+            qCWarning(m_logCat) << "Request" << m_url << "has failed before starting:" << m_sink->failReason();
+            emit failed(m_sink->failReason());
+            break;
+        case Task::State::AbortedByUser:
+            qCInfo(m_logCat) << "Request" << m_url << "was aborted by user before starting";
+            emit aborted();
+            break;
+        default:
+            break;
+    }
+
+    return state;
+}
+
+void NetRequest::abort()
+{
+    m_sink->abort();
+    emit aborted();
+}
+
+void NetRequest::finalize()
+{
+    switch (m_sink->finalize(this)) {
+        case Task::State::Succeeded:
+            emit succeeded();
+            break;
+        case Task::State::Failed:
+            emit failed(m_sink->failReason());
+            break;
+        case Task::State::AbortedByUser:
+            emit aborted();
+            break;
+        default:
+            break;
+    }
+}
+
+bool NetRequest::isSuccess() const
+{
+    return m_result == CURLE_OK;
+}
+
+long NetRequest::responseCode() const
+{
+    long responseCode;
+    curl_easy_getinfo(m_curl.get(), CURLINFO_RESPONSE_CODE, &responseCode);
+    return responseCode;
+}
+
+CURLcode NetRequest::result() const
+{
+    return m_result;
+}
+
+void NetRequest::setResult(const CURLcode result)
+{
+    m_result = result;
+    m_stepProgress.state = isSuccess() ? TaskStepState::Succeeded : TaskStepState::Failed;
+}
+
+QString NetRequest::error() const
+{
+    return m_errorBuffer[0] ? m_errorBuffer : curl_easy_strerror(m_result);
+}
+
+bool NetRequest::hasHeader(const char* name) const
+{
+    if (const CURLHcode result = curl_easy_header(m_curl.get(), name, 0, CURLH_HEADER, -1, nullptr); result == CURLHE_OK) {
+        return true;
+    }
+
+    return m_headers.contains(name);
+}
+
+QString NetRequest::getHeader(const char* name) const
+{
+    curl_header* header;
+    const CURLHcode result = curl_easy_header(m_curl.get(), name, 0, CURLH_HEADER, -1, &header);
+    if (result == CURLHE_OK) {
+        return header->value;
+    }
+
+    if (const auto stdName = std::string(name); m_headers.contains(stdName)) {
+        return m_headers.at(stdName).data();
+    }
+
+    qCritical() << "Failed to get header:" << result;
+    return "";
+}
+
+void NetRequest::addHeader(const char* name, const char* value)
+{
+    m_headers[name] = std::string(value);
+}
+
+void NetRequest::addHeadersFromProxy(const HeaderProxy& proxy)
+{
+    for (auto& [headerName, headerValue] : proxy.headers(m_url)) {
+        addHeader(headerName, headerValue);
+    }
+}
+
+void NetRequest::httpPut(QByteArray data)
+{
+    m_uploadData = data;
+    curl_easy_setopt(m_curl.get(), CURLOPT_UPLOAD, 1L);
+    curl_easy_setopt(m_curl.get(), CURLOPT_INFILESIZE_LARGE, data.size());
+}
+
+void NetRequest::httpPost(const char* contentType, QByteArray data)
+{
+    if (!hasHeader("Content-Type")) {
+        addHeader("Content-Type", contentType);
+    }
+
+    m_uploadData = QByteArray(data);
+    curl_easy_setopt(m_curl.get(), CURLOPT_POSTFIELDS, m_uploadData.data());
+    curl_easy_setopt(m_curl.get(), CURLOPT_POSTFIELDSIZE, m_uploadData.size());
+}
+
+void NetRequest::httpMultipart(QList<Multipart> parts)
+{
+    m_mime.reset(curl_mime_init(m_curl.get()));
+
+    for (auto& [name, data, contentType, remoteFileName] : parts) {
+        curl_mimepart* curlPart = curl_mime_addpart(m_mime.get());
+        curl_mime_name(curlPart, name.toStdString().c_str());
+        curl_mime_data(curlPart, data, data.size());
+        if (!contentType.isEmpty()) {
+            curl_mime_type(curlPart, contentType.toStdString().c_str());
+        }
+        if (!remoteFileName.isEmpty()) {
+            curl_mime_filename(curlPart, remoteFileName.toStdString().c_str());
+        }
+    }
+
+    curl_easy_setopt(m_curl.get(), CURLOPT_MIMEPOST, m_mime.get());
+}
+
+void NetRequest::httpDelete() const
+{
+    curl_easy_setopt(m_curl.get(), CURLOPT_CUSTOMREQUEST, "DELETE");
+}
+
+void NetRequest::setUrl(QUrl url)
+{
+    m_url = url;
+    curl_easy_setopt(m_curl.get(), CURLOPT_URL, url.toString(QUrl::FullyEncoded).toStdString().c_str());
+}
+
+size_t NetRequest::curlReadCallback(char* buffer, size_t, size_t bufferSize, void* thisRequest)
+{
+    const auto request = static_cast<NetRequest*>(thisRequest);
+    const size_t bytesToWrite = std::min(bufferSize, static_cast<size_t>(request->m_uploadData.size()) - request->m_uploadDataOffset);
+
+    std::memcpy(buffer, request->m_uploadData.data() + request->m_uploadDataOffset, bytesToWrite);
+    request->m_uploadDataOffset += bytesToWrite;
+
+    return bytesToWrite;
+}
+
+size_t NetRequest::curlWriteCallback(const char* data, size_t, const size_t dataSize, void* thisRequest)
+{
+    const auto request = static_cast<NetRequest*>(thisRequest);
+    QByteArray qData(data, dataSize);
+    request->m_sink->write(qData);
+
+    return dataSize;
+}
+
+size_t NetRequest::curlProgressCallback(void* thisRequest,
+                                        const curl_off_t downloadBytesExpected,
+                                        const curl_off_t downloadBytesReceived,
+                                        const curl_off_t uploadBytesExpected,
+                                        const curl_off_t uploadBytesReceived)
+{
+    const auto request = static_cast<NetRequest*>(thisRequest);
+
+    const curl_off_t bytesExpected = std::max(downloadBytesExpected, uploadBytesExpected);
+    const curl_off_t bytesReceived = std::max(downloadBytesReceived, uploadBytesReceived);
+
+    request->m_stepProgress.update(bytesReceived, bytesExpected <= 0 ? -1 : bytesExpected);
+
+    return 0;
+}
+
+void NetRequest::curlFreeSlist(curl_slist* ptr)
+{
+    if (ptr) {
+        curl_slist_free_all(ptr);
+    }
+}
+
+void NetRequest::curlFreeMime(curl_mime* ptr)
+{
+    if (ptr) {
+        curl_mime_free(ptr);
+    }
 }
 }  // namespace Net

@@ -42,7 +42,7 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
         addTask(m_update_task);
     }
 
-    m_filesNetJob.reset(new NetJob(tr("Resource download"), APPLICATION->network()));
+    m_filesNetJob.reset(new NetJob(tr("Resource download")));
     m_filesNetJob->setStatus(tr("Downloading resource:\n%1").arg(m_pack_version.downloadUrl));
 
     QDir dir{ m_pack_model->dir() };

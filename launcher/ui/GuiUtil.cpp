@@ -133,9 +133,10 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
         textToUpload = truncateLogForMclogs(text);
     }
 
-    auto job = NetJob::Ptr(new NetJob("Log Upload", APPLICATION->network()));
+    auto job = NetJob::Ptr(new NetJob("Log Upload"));
 
-    auto pasteJob = new PasteUpload(textToUpload, baseURL, pasteType);
+    auto meta = std::make_shared<PasteUpload::PasteMeta>(pasteType, baseURL);
+    auto pasteJob = PasteUpload::make(textToUpload, meta);
     job->addNetAction(Net::NetRequest::Ptr(pasteJob));
     QObject::connect(job.get(), &Task::failed, [parentWidget](QString reason) {
         CustomMessageBox::selectable(parentWidget, QObject::tr("Failed to upload logs!"), reason, QMessageBox::Critical)->show();
@@ -147,19 +148,19 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
     });
 
     if (dialog.execWithTask(job.get()) == QDialog::Accepted) {
-        if (pasteJob->pasteLink().isEmpty()) {
+        if (meta->pasteUrl.isEmpty()) {
             CustomMessageBox::selectable(parentWidget, QObject::tr("Failed to upload logs!"), "The upload link is empty",
                                          QMessageBox::Critical)
                 ->show();
             return {};
         }
-        setClipboardText(pasteJob->pasteLink());
+        setClipboardText(meta->pasteUrl);
         CustomMessageBox::selectable(
             parentWidget, QObject::tr("Upload finished"),
-            QObject::tr("The <a href=\"%1\">link to the uploaded log</a> has been placed in your clipboard.").arg(pasteJob->pasteLink()),
+            QObject::tr("The <a href=\"%1\">link to the uploaded log</a> has been placed in your clipboard.").arg(meta->pasteUrl),
             QMessageBox::Information)
             ->exec();
-        return pasteJob->pasteLink();
+        return meta->pasteUrl;
     }
     return {};
 }

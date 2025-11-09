@@ -3,6 +3,11 @@
 #include "settings/SettingsObject.h"
 #include "tasks/Task.h"
 
+#include <QFuture>
+#include <QFutureWatcher>
+#include <QTemporaryDir>
+#include <QDirIterator>
+
 /* Helpers */
 enum class InstanceNameChange { ShouldChange, ShouldKeep };
 [[nodiscard]] InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& old_name, const QString& new_name);

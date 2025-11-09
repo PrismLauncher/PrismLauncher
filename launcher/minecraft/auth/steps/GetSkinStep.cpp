@@ -19,7 +19,7 @@ void GetSkinStep::perform()
     m_response.reset(new QByteArray());
     m_request = Net::Download::makeByteArray(url, m_response);
 
-    m_task.reset(new NetJob("GetSkinStep", APPLICATION->network()));
+    m_task.reset(new NetJob("GetSkinStep"));
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
@@ -30,7 +30,7 @@ void GetSkinStep::perform()
 
 void GetSkinStep::onRequestDone()
 {
-    if (m_request->error() == QNetworkReply::NoError)
+    if (m_request->isSuccess())
         m_data->minecraftProfile.skin.data = *m_response;
     emit finished(AccountTaskState::STATE_WORKING, tr("Got skin"));
 }

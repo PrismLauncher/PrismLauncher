@@ -36,50 +36,64 @@
 
 #pragma once
 
-#include <QtNetwork>
-
-#include <QObject>
 #include "net/NetRequest.h"
 #include "tasks/ConcurrentTask.h"
 
 // Those are included so that they are also included by anyone using NetJob
+#include <queue>
+
 #include "net/Download.h"
 #include "net/HttpMetaCache.h"
 
-class NetJob : public ConcurrentTask {
+class NetJob final : public Task {
     Q_OBJECT
 
    public:
     using Ptr = shared_qobject_ptr<NetJob>;
 
-    explicit NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network, int max_concurrent = -1);
-    ~NetJob() override = default;
+    explicit NetJob(QString jobName, int maxConcurrent = -1);
+    ~NetJob() override;
 
-    auto size() const -> int;
+    bool canAbort() const override { return true; }
+    void addNetAction(Net::NetRequest::Ptr action);
+    size_t requestsSize() const;
+    std::deque<Net::NetRequest::Ptr> getFailedRequests() const;
 
-    auto canAbort() const -> bool override;
-    auto addNetAction(Net::NetRequest::Ptr action) -> bool;
-
-    auto getFailedActions() -> QList<Net::NetRequest*>;
-    auto getFailedFiles() -> QList<QString>;
     void setAskRetry(bool askRetry);
+
+    void setSuppressSucceeded(bool suppressSucceeded);
+
+    bool isMultiStep() const override;
 
    public slots:
     // Qt can't handle auto at the start for some reason?
     bool abort() override;
     void emitFailed(QString reason) override;
 
-   protected slots:
-    void executeNextSubTask() override;
-
    protected:
-    void updateState() override;
-    bool isOnline();
+    void executeTask() override;
 
    private:
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
+    bool isOnline() const;
+    void perform();
+    Net::NetRequest::Ptr& findRequestByHandle(const CURL* handle);
+    void onAllTransfersComplete();
 
-    int m_try = 1;
-    bool m_ask_retry = true;
-    int m_manual_try = 0;
+   private:
+    QString m_jobName{};
+    int m_maxConcurrent;
+
+    std::unique_ptr<CURLM, decltype(&curl_multi_cleanup)> m_curl{curl_multi_init(), curl_multi_cleanup};
+    QTimer m_performTimer{this};
+
+    std::deque<Net::NetRequest::Ptr> m_pendingRequests{};
+    std::vector<Net::NetRequest::Ptr> m_runningRequests{};
+    std::deque<Net::NetRequest::Ptr> m_failedRequests{};
+
+    bool m_suppressSucceeded = false;
+
+    int m_attempts = 1;
+    int m_attemptsBeforeAsking = 3;
+    bool m_askRetry = true;
+    int m_manualRetries = 0;
 };

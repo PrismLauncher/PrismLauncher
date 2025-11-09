@@ -315,7 +315,7 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
         return { pixmap };
 
     if (!m_current_icon_job) {
-        m_current_icon_job.reset(new NetJob("IconJob", APPLICATION->network()));
+        m_current_icon_job.reset(new NetJob("IconJob"));
         m_current_icon_job->setAskRetry(false);
     }
 
@@ -330,7 +330,7 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
     auto icon_fetch_action = Net::ApiDownload::makeCached(url, cache_entry);
 
     auto full_file_path = cache_entry->getFullPath();
-    connect(icon_fetch_action.get(), &Task::succeeded, this, [this, url, full_file_path, index] {
+    connect(icon_fetch_action.get(), &Net::NetRequest::succeeded, this, [this, url, full_file_path, index] {
         auto icon = QIcon(full_file_path);
         QPixmapCache::insert(url.toString(), icon.pixmap(icon.actualSize({ 64, 64 })));
 
@@ -338,7 +338,7 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
 
         emit dataChanged(index, index, { Qt::DecorationRole });
     });
-    connect(icon_fetch_action.get(), &Task::failed, this, [this, url] {
+    connect(icon_fetch_action.get(), &Net::NetRequest::failed, this, [this, url] {
         m_currently_running_icon_actions.remove(url);
         m_failed_icon_actions.insert(url);
     });

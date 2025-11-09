@@ -31,13 +31,13 @@ class ApiHeaderProxy : public HeaderProxy {
     virtual ~ApiHeaderProxy() = default;
 
    public:
-    virtual QList<HeaderPair> headers(const QNetworkRequest& request) const override
+    virtual QList<HeaderPair> headers(const QUrl& url) const override
     {
         QList<HeaderPair> hdrs;
-        if (APPLICATION->capabilities() & Application::SupportsFlame && request.url().host() == QUrl(BuildConfig.FLAME_BASE_URL).host()) {
+        if (APPLICATION->capabilities() & Application::SupportsFlame && url.host() == QUrl(BuildConfig.FLAME_BASE_URL).host()) {
             hdrs.append({ "x-api-key", APPLICATION->getFlameAPIKey().toUtf8() });
-        } else if (request.url().host() == QUrl(BuildConfig.MODRINTH_PROD_URL).host() ||
-                   request.url().host() == QUrl(BuildConfig.MODRINTH_STAGING_URL).host()) {
+        } else if (url.host() == QUrl(BuildConfig.MODRINTH_PROD_URL).host() ||
+                   url.host() == QUrl(BuildConfig.MODRINTH_STAGING_URL).host()) {
             QString token = APPLICATION->getModrinthAPIToken();
             if (!token.isNull())
                 hdrs.append({ "Authorization", token.toUtf8() });

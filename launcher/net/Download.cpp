@@ -39,8 +39,6 @@
 #include "Download.h"
 #include <QUrl>
 
-#include <QDateTime>
-#include <QFileInfo>
 #include <memory>
 
 #include "ByteArraySink.h"
@@ -50,41 +48,27 @@
 namespace Net {
 
 #if defined(LAUNCHER_APPLICATION)
-auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Download::Ptr
+auto Download::makeCached(QUrl url, MetaEntryPtr entry, NetRequest::Options options) -> NetRequest::Ptr
 {
-    auto dl = makeShared<Download>();
-    dl->m_url = url;
-    dl->setObjectName(QString("CACHE:") + url.toString());
-    dl->m_options = options;
     auto md5Node = new ChecksumValidator(QCryptographicHash::Md5);
-    auto cachedNode = new MetaCacheSink(entry, md5Node, options.testFlag(Option::MakeEternal));
-    dl->m_sink.reset(cachedNode);
-    return dl;
+    auto cachedNode = new MetaCacheSink(entry, md5Node, options.testFlag(NetRequest::Option::MakeEternal));
+    auto request = makeShared<NetRequest>(url, cachedNode, options);
+    request->setLoggingCategory(taskDownloadLogC);
+    return request;
 }
 #endif
 
-auto Download::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options) -> Download::Ptr
+auto Download::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, NetRequest::Options options) -> NetRequest::Ptr
 {
-    auto dl = makeShared<Download>();
-    dl->m_url = url;
-    dl->setObjectName(QString("BYTES:") + url.toString());
-    dl->m_options = options;
-    dl->m_sink.reset(new ByteArraySink(output));
-    return dl;
+    auto request = makeShared<NetRequest>(url, new ByteArraySink(output), options);
+    request->setLoggingCategory(taskDownloadLogC);
+    return request;
 }
 
-auto Download::makeFile(QUrl url, QString path, Options options) -> Download::Ptr
+auto Download::makeFile(QUrl url, QString path, NetRequest::Options options) -> NetRequest::Ptr
 {
-    auto dl = makeShared<Download>();
-    dl->m_url = url;
-    dl->setObjectName(QString("FILE:") + url.toString());
-    dl->m_options = options;
-    dl->m_sink.reset(new FileSink(path));
-    return dl;
-}
-
-QNetworkReply* Download::getReply(QNetworkRequest& request)
-{
-    return m_network->get(request);
+    auto request = makeShared<NetRequest>(url, new FileSink(path), options);
+    request->setLoggingCategory(taskDownloadLogC);
+    return request;
 }
 }  // namespace Net

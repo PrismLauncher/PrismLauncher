@@ -26,13 +26,13 @@ set(CORE_SOURCES
     NullInstance.h
     MMCZip.h
     MMCZip.cpp
-    archive/ArchiveReader.cpp  
-    archive/ArchiveReader.h  
-    archive/ArchiveWriter.cpp  
-    archive/ArchiveWriter.h  
-    archive/ExportToZipTask.cpp  
+    archive/ArchiveReader.cpp
+    archive/ArchiveReader.h
+    archive/ArchiveWriter.cpp
+    archive/ArchiveWriter.h
+    archive/ExportToZipTask.cpp
     archive/ExportToZipTask.h
-    archive/ExtractZipTask.cpp  
+    archive/ExtractZipTask.cpp
     archive/ExtractZipTask.h
     StringUtils.h
     StringUtils.cpp
@@ -621,10 +621,10 @@ set(PRISMUPDATER_SOURCES
     # Zip
     MMCZip.h
     MMCZip.cpp
-    archive/ArchiveReader.cpp  
-    archive/ArchiveReader.h  
-    archive/ArchiveWriter.cpp  
-    archive/ArchiveWriter.h  
+    archive/ArchiveReader.cpp
+    archive/ArchiveReader.h
+    archive/ArchiveWriter.cpp
+    archive/ArchiveWriter.h
 
     # Time
     MMCTime.h
@@ -1063,6 +1063,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ImportResourceDialog.h
     ui/dialogs/MSALoginDialog.cpp
     ui/dialogs/MSALoginDialog.h
+    ui/dialogs/NetworkJobFailedDialog.cpp
+    ui/dialogs/NetworkJobFailedDialog.h
     ui/dialogs/NewComponentDialog.cpp
     ui/dialogs/NewComponentDialog.h
     ui/dialogs/NewInstanceDialog.cpp
@@ -1244,6 +1246,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/ProfileSetupDialog.ui
     ui/dialogs/ProgressDialog.ui
     ui/dialogs/NewInstanceDialog.ui
+    ui/dialogs/NetworkJobFailedDialog.ui
     ui/dialogs/NewComponentDialog.ui
     ui/dialogs/NewsDialog.ui
     ui/dialogs/ProfileSelectDialog.ui
@@ -1334,6 +1337,11 @@ if(TARGET PkgConfig::libarchive)
     target_link_libraries(Launcher_logic PkgConfig::libarchive)
 else()
     target_link_libraries(Launcher_logic LibArchive::LibArchive)
+endif()
+if(TARGET PkgConfig::libcurl)
+    target_link_libraries(Launcher_logic PkgConfig::libcurl)
+else()
+    target_link_libraries(Launcher_logic CURL::libcurl)
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")

@@ -8,8 +8,9 @@
 #include "minecraft/mod/Resource.h"
 #include "tasks/ConcurrentTask.h"
 
+#include <QDir>
+
 class Mod;
-class QDir;
 
 class EnsureMetadataTask : public Task {
     Q_OBJECT

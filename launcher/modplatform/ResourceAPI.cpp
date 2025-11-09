@@ -19,7 +19,7 @@ Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatf
     auto search_url = search_url_optional.value();
 
     auto response = std::make_shared<QByteArray>();
-    auto netJob = makeShared<NetJob>(QString("%1::Search").arg(debugName()), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("%1::Search").arg(debugName()));
 
     netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(search_url), response));
 
@@ -62,8 +62,8 @@ Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatf
     QObject::connect(netJob.get(), &NetJob::failed, [weak, callbacks](const QString& reason) {
         int network_error_code = -1;
         if (auto netJob = weak.lock()) {
-            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
-                network_error_code = failed_action->replyStatusCode();
+            if (auto failed_action = netJob->getFailedRequests().at(0); failed_action)
+                network_error_code = failed_action->responseCode();
         }
         callbacks.on_fail(reason, network_error_code);
     });
@@ -83,7 +83,7 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
 
     auto versions_url = versions_url_optional.value();
 
-    auto netJob = makeShared<NetJob>(QString("%1::Versions").arg(args.pack->name), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("%1::Versions").arg(args.pack->name));
     auto response = std::make_shared<QByteArray>();
 
     netJob->addNetAction(Net::ApiDownload::makeByteArray(versions_url, response));
@@ -133,8 +133,8 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
     QObject::connect(netJob.get(), &NetJob::failed, [weak, callbacks](const QString& reason) {
         int network_error_code = -1;
         if (auto netJob = weak.lock()) {
-            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
-                network_error_code = failed_action->replyStatusCode();
+            if (auto failed_action = netJob->getFailedRequests().at(0); failed_action)
+                network_error_code = failed_action->responseCode();
         }
         callbacks.on_fail(reason, network_error_code);
     });
@@ -181,8 +181,8 @@ Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<ModPlatfo
         int network_error_code = -1;
         if (auto job = weak.lock()) {
             if (auto netJob = qSharedPointerDynamicCast<NetJob>(job)) {
-                if (auto* failed_action = netJob->getFailedActions().at(0); failed_action) {
-                    network_error_code = failed_action->replyStatusCode();
+                if (auto failed_action = netJob->getFailedRequests().at(0); failed_action) {
+                    network_error_code = failed_action->responseCode();
                 }
             }
         }
@@ -203,7 +203,7 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
 
     auto versions_url = versions_url_optional.value();
 
-    auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.addonId.toString()), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.addonId.toString()));
     auto response = std::make_shared<QByteArray>();
 
     netJob->addNetAction(Net::ApiDownload::makeByteArray(versions_url, response));
@@ -254,8 +254,8 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
     QObject::connect(netJob.get(), &NetJob::failed, [weak, callbacks](const QString& reason) {
         int network_error_code = -1;
         if (auto netJob = weak.lock()) {
-            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
-                network_error_code = failed_action->replyStatusCode();
+            if (auto failed_action = netJob->getFailedRequests().at(0); failed_action)
+                network_error_code = failed_action->responseCode();
         }
         callbacks.on_fail(reason, network_error_code);
     });
@@ -292,7 +292,7 @@ Task::Ptr ResourceAPI::getProject(QString addonId, std::shared_ptr<QByteArray> r
 
     auto project_url = project_url_optional.value();
 
-    auto netJob = makeShared<NetJob>(QString("%1::GetProject").arg(addonId), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("%1::GetProject").arg(addonId));
 
     netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(project_url), response));
 

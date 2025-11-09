@@ -35,15 +35,7 @@ class HeaderProxy {
     virtual ~HeaderProxy() {}
 
    public:
-    virtual QList<HeaderPair> headers(const QNetworkRequest& request) const = 0;
-
-   public:
-    void writeHeaders(QNetworkRequest& request)
-    {
-        for (auto header : headers(request)) {
-            request.setRawHeader(header.headerName, header.headerValue);
-        }
-    }
+    virtual QList<HeaderPair> headers(const QUrl& url) const = 0;
 };
 
 }  // namespace Net

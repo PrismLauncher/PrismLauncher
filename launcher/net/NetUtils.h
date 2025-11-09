@@ -18,26 +18,13 @@
 
 #pragma once
 
-#include <QNetworkReply>
-#include <QSet>
-
 namespace Net {
-inline bool isApplicationError(QNetworkReply::NetworkError x)
+
+constexpr int HTTP_UNAUTHORIZED = 401;
+constexpr int HTTP_NOT_FOUND = 404;
+
+inline bool isApplicationError(CURLcode result)
 {
-    // Mainly taken from https://github.com/qt/qtbase/blob/dev/src/network/access/qhttpthreaddelegate.cpp
-    static QSet<QNetworkReply::NetworkError> errors = { QNetworkReply::ProtocolInvalidOperationError,
-                                                        QNetworkReply::AuthenticationRequiredError,
-                                                        QNetworkReply::ContentAccessDenied,
-                                                        QNetworkReply::ContentNotFoundError,
-                                                        QNetworkReply::ContentOperationNotPermittedError,
-                                                        QNetworkReply::ProxyAuthenticationRequiredError,
-                                                        QNetworkReply::ContentConflictError,
-                                                        QNetworkReply::ContentGoneError,
-                                                        QNetworkReply::InternalServerError,
-                                                        QNetworkReply::OperationNotImplementedError,
-                                                        QNetworkReply::ServiceUnavailableError,
-                                                        QNetworkReply::UnknownServerError,
-                                                        QNetworkReply::UnknownContentError };
-    return errors.contains(x);
+    return result == CURLE_HTTP_RETURNED_ERROR;
 }
 }  // namespace Net

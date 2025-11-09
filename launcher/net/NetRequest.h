@@ -39,76 +39,107 @@
 
 #pragma once
 
-#include <qloggingcategory.h>
-#include <QNetworkReply>
-#include <QUrl>
+#include <curl/curl.h>
+
 #include <chrono>
 
 #include "HeaderProxy.h"
 #include "Sink.h"
 #include "Validator.h"
 
-#include "QObjectPtr.h"
 #include "net/Logging.h"
-#include "tasks/Task.h"
 
 namespace Net {
-class NetRequest : public Task {
+class NetRequest final : public QObject {
     Q_OBJECT
-   protected:
-    explicit NetRequest() : Task() {}
 
    public:
-    using Ptr = shared_qobject_ptr<class NetRequest>;
+    using Ptr = shared_qobject_ptr<NetRequest>;
+
     enum class Option { NoOptions = 0, AcceptLocalFiles = 1, MakeEternal = 2 };
     Q_DECLARE_FLAGS(Options, Option)
 
-   public:
-    ~NetRequest() override = default;
-    void addValidator(Validator* v);
-    auto abort() -> bool override;
-    auto canAbort() const -> bool override { return true; }
+    struct Multipart {
+        QString name;
+        QByteArray data;
+        QString contentType;
+        QString remoteFileName;
+    };
+   private:
+    using logCatFunc = const QLoggingCategory& (*)();
 
-    void setNetwork(shared_qobject_ptr<QNetworkAccessManager> network) { m_network = network; }
-    void addHeaderProxy(Net::HeaderProxy* proxy) { m_headerProxies.push_back(std::shared_ptr<Net::HeaderProxy>(proxy)); }
+   public:
+    explicit NetRequest(const QUrl& url, Sink* sink, Options options = Option::NoOptions);
+
+   public:
+    ~NetRequest() override;
+
+    void setLoggingCategory(logCatFunc loggingCategory);
+    TaskStepProgress stepProgress();
+    void updateDetails();
 
     QUrl url() const;
-    void setUrl(QUrl url) { m_url = url; }
-    int replyStatusCode() const;
-    QNetworkReply::NetworkError error() const;
-    QString errorString() const;
+    void setUrl(QUrl url);
+
+    CURL* curlHandle() const;
+
+    void addValidator(Validator* v) const;
+
+    Task::State prepare();
+    void abort();
+    void finalize();
+
+    bool isSuccess() const;
+    long responseCode() const;
+    CURLcode result() const;
+    void setResult(CURLcode result);
+    QString error() const;
+
+    bool hasHeader(const char* name) const;
+    QString getHeader(const char* name) const;
+    void addHeader(const char* name, const char* value);
+    void addHeadersFromProxy(const HeaderProxy& proxy);
+
+    void httpPut(QByteArray data);
+    void httpPost(const char* contentType, QByteArray data);
+    void httpMultipart(QList<Multipart> parts);
+    void httpDelete() const;
+
+   signals:
+    void finished();
+    void succeeded();
+    void failed(QString reason);
+    void aborted();
 
    private:
-    auto handleRedirect() -> bool;
-    virtual QNetworkReply* getReply(QNetworkRequest&) = 0;
+    static size_t curlReadCallback(char* buffer, size_t, size_t bufferSize, void* thisRequest);
+    static size_t curlWriteCallback(const char* data, size_t, size_t dataSize, void* thisRequest);
+    static size_t curlProgressCallback(void* thisRequest,
+                                curl_off_t downloadBytesExpected,
+                                curl_off_t downloadBytesReceived,
+                                curl_off_t uploadBytesExpected,
+                                curl_off_t uploadBytesReceived);
+    static void curlFreeSlist(curl_slist* ptr);
+    static void curlFreeMime(curl_mime* ptr);
 
-   protected slots:
-    void onProgress(qint64 bytesReceived, qint64 bytesTotal);
-    void downloadError(QNetworkReply::NetworkError error);
-    void sslErrors(const QList<QSslError>& errors);
-    void downloadFinished();
-    void downloadReadyRead();
-    void executeTask() override;
+   private:
+    logCatFunc m_logCat = taskNetLogC;
+    TaskStepProgress m_stepProgress{};
 
-   protected:
-    std::unique_ptr<Sink> m_sink;
-    Options m_options;
+    QUrl m_url{};
+    std::unique_ptr<Sink> m_sink{nullptr};
+    Options m_options{};
 
-    using logCatFunc = const QLoggingCategory& (*)();
-    logCatFunc logCat = taskUploadLogC;
+    QByteArray m_uploadData{};
+    size_t m_uploadDataOffset = 0;
 
-    std::chrono::steady_clock m_clock;
-    std::chrono::time_point<std::chrono::steady_clock> m_last_progress_time;
-    qint64 m_last_progress_bytes;
+    std::unique_ptr<curl_slist, decltype(&curl_slist_free_all)> m_curlHeaders{ nullptr, curlFreeSlist };
+    std::unique_ptr<curl_mime, decltype(&curl_mime_free)> m_mime{ nullptr, curlFreeMime };
+    std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> m_curl{ curl_easy_init(), curl_easy_cleanup };
+    CURLcode m_result = CURLE_FAILED_INIT;
+    char m_errorBuffer[CURL_ERROR_SIZE];
 
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
-
-    /// the network reply
-    unique_qobject_ptr<QNetworkReply> m_reply;
-
-    /// source URL
-    QUrl m_url;
-    std::vector<std::shared_ptr<Net::HeaderProxy>> m_headerProxies;
+    std::unordered_map<std::string, std::string> m_headers{};
 };
 }  // namespace Net
 

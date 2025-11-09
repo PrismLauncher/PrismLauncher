@@ -89,6 +89,9 @@
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
+
+#include <QUrlQuery>
+
 #include "InstanceWindow.h"
 
 #include "ui/GuiUtil.h"
@@ -1012,7 +1015,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
             const QString path = dl_url.host() + '/' + dl_url.path();
             auto entry = APPLICATION->metacache()->resolveEntry("general", path);
             entry->setStale(true);
-            auto dl_job = unique_qobject_ptr<NetJob>(new NetJob(tr("Modpack download"), APPLICATION->network()));
+            auto dl_job = unique_qobject_ptr<NetJob>(new NetJob(tr("Modpack download")));
             dl_job->addNetAction(Net::ApiDownload::makeCached(dl_url, entry));
             auto archivePath = entry->getFullPath();
 

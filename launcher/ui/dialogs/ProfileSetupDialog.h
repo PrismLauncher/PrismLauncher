@@ -25,6 +25,8 @@
 #include "net/Download.h"
 #include "net/Upload.h"
 
+#include <net/NetJob.h>
+
 namespace Ui {
 class ProfileSetupDialog;
 }
@@ -70,9 +72,11 @@ class ProfileSetupDialog : public QDialog {
 
     QTimer checkStartTimer;
 
-    std::shared_ptr<QByteArray> m_check_response;
-    Net::Download::Ptr m_check_task;
+    std::shared_ptr<QByteArray> m_checkResponse;
+    Net::NetRequest::Ptr m_checkRequest;
+    NetJob::Ptr m_checkJob;
 
-    std::shared_ptr<QByteArray> m_profile_response;
-    Net::Upload::Ptr m_profile_task;
+    std::shared_ptr<QByteArray> m_profileResponse;
+    Net::NetRequest::Ptr m_profileRequest;
+    NetJob::Ptr m_profileJob;
 };

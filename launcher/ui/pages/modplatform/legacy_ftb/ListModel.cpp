@@ -267,7 +267,7 @@ void ListModel::requestLogo(QString file)
     }
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file));
-    NetJob* job = new NetJob(QString("FTB Icon Download for %1").arg(file), APPLICATION->network());
+    NetJob* job = new NetJob(QString("FTB Icon Download for %1").arg(file));
     job->setAskRetry(false);
     job->addNetAction(Net::ApiDownload::makeCached(QUrl(QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/%1").arg(file)), entry));
 

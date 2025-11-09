@@ -22,6 +22,6 @@ class MinecraftProfileStep : public AuthStep {
 
    private:
     std::shared_ptr<QByteArray> m_response;
-    Net::Download::Ptr m_request;
+    Net::NetRequest::Ptr m_request;
     NetJob::Ptr m_task;
 };

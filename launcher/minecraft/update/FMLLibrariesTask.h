@@ -17,7 +17,6 @@ class FMLLibrariesTask : public Task {
 
    private slots:
     void fmllibsFinished();
-    void fmllibsFailed(QString reason);
 
    public slots:
     bool abort() override;

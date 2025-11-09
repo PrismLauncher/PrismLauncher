@@ -45,10 +45,10 @@ class Sink {
     virtual ~Sink() = default;
 
    public:
-    virtual auto init(QNetworkRequest& request) -> Task::State = 0;
+    virtual auto init(class NetRequest* request) -> Task::State = 0;
     virtual auto write(QByteArray& data) -> Task::State = 0;
     virtual auto abort() -> Task::State = 0;
-    virtual auto finalize(QNetworkReply& reply) -> Task::State = 0;
+    virtual auto finalize(NetRequest* request) -> Task::State = 0;
 
     virtual auto hasLocalData() -> bool = 0;
 
@@ -62,18 +62,18 @@ class Sink {
     }
 
    protected:
-    bool initAllValidators(QNetworkRequest& request)
+    bool initAllValidators()
     {
         for (auto& validator : validators) {
-            if (!validator->init(request))
+            if (!validator->init())
                 return false;
         }
         return true;
     }
-    bool finalizeAllValidators(QNetworkReply& reply)
+    bool finalizeAllValidators()
     {
         for (auto& validator : validators) {
-            if (!validator->validate(reply))
+            if (!validator->validate())
                 return false;
         }
         return true;

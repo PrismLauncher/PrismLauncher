@@ -159,22 +159,21 @@ void ProfileSetupDialog::checkName(const QString& name)
                                            { "Accept", "application/json" },
                                            { "Authorization", QString("Bearer %1").arg(m_accountToSetup->accessToken()).toUtf8() } };
 
-    m_check_response.reset(new QByteArray());
-    if (m_check_task)
-        disconnect(m_check_task.get(), nullptr, this, nullptr);
-    m_check_task = Net::Download::makeByteArray(url, m_check_response);
-    m_check_task->addHeaderProxy(new Net::RawHeaderProxy(headers));
+    m_checkResponse.reset(new QByteArray());
 
-    connect(m_check_task.get(), &Task::finished, this, &ProfileSetupDialog::checkFinished);
-
-    m_check_task->setNetwork(APPLICATION->network());
-    m_check_task->start();
+    m_checkJob.reset(new NetJob("Checking username availability"));
+    m_checkJob->setAskRetry(false);
+    m_checkRequest = Net::Download::makeByteArray(url, m_checkResponse);
+    m_checkRequest->addHeadersFromProxy(Net::RawHeaderProxy(headers));
+    m_checkJob->addNetAction(m_checkRequest);
+    connect(m_checkJob.get(), &Task::finished, this, &ProfileSetupDialog::checkFinished);
+    m_checkJob->start();
 }
 
 void ProfileSetupDialog::checkFinished()
 {
-    if (m_check_task->error() == QNetworkReply::NoError) {
-        auto doc = QJsonDocument::fromJson(*m_check_response);
+    if (m_checkRequest->isSuccess()) {
+        auto doc = QJsonDocument::fromJson(*m_checkResponse);
         auto root = doc.object();
         auto statusValue = root.value("status").toString("INVALID");
         if (statusValue == "AVAILABLE") {
@@ -205,14 +204,14 @@ void ProfileSetupDialog::setupProfile(const QString& profileName)
                                            { "Accept", "application/json" },
                                            { "Authorization", QString("Bearer %1").arg(m_accountToSetup->accessToken()).toUtf8() } };
 
-    m_profile_response.reset(new QByteArray());
-    m_profile_task = Net::Upload::makeByteArray(url, m_profile_response, payloadTemplate.arg(profileName).toUtf8());
-    m_profile_task->addHeaderProxy(new Net::RawHeaderProxy(headers));
+    m_profileResponse.reset(new QByteArray());
 
-    connect(m_profile_task.get(), &Task::finished, this, &ProfileSetupDialog::setupProfileFinished);
-
-    m_profile_task->setNetwork(APPLICATION->network());
-    m_profile_task->start();
+    m_profileJob.reset(new NetJob("Updating username"));
+    m_profileJob->setAskRetry(false);
+    m_profileRequest = Net::Upload::makeByteArray(url, m_profileResponse, payloadTemplate.arg(profileName).toUtf8());
+    m_profileRequest->addHeadersFromProxy(Net::RawHeaderProxy(headers));
+    connect(m_profileJob.get(), &Task::finished, this, &ProfileSetupDialog::setupProfileFinished);
+    m_profileJob->start();
 
     isWorking = true;
 
@@ -255,18 +254,18 @@ struct MojangError {
 void ProfileSetupDialog::setupProfileFinished()
 {
     isWorking = false;
-    if (m_profile_task->error() == QNetworkReply::NoError) {
+    if (m_profileRequest->isSuccess()) {
         /*
          * data contains the profile in the response
          * ... we could parse it and update the account, but let's just return back to the normal login flow instead...
          */
         accept();
     } else {
-        auto parsedError = MojangError::fromJSON(*m_profile_response);
+        auto parsedError = MojangError::fromJSON(*m_profileResponse);
         ui->errorLabel->setVisible(true);
 
         QString errorMessage =
-            tr("Network Error: %1\nHTTP Status: %2").arg(m_profile_task->errorString(), QString::number(m_profile_task->replyStatusCode()));
+            tr("Network Error: %1\nHTTP Status: %2").arg(m_profileRequest->error(), QString::number(m_profileRequest->responseCode()));
 
         if (parsedError.fullyParsed) {
             errorMessage += "Path: " + parsedError.path + "\n";

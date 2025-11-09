@@ -38,9 +38,9 @@ void LauncherLoginStep::perform()
 
     m_response.reset(new QByteArray());
     m_request = Net::Upload::makeByteArray(url, m_response, requestBody.toUtf8());
-    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
+    m_request->addHeadersFromProxy(Net::RawHeaderProxy(headers));
 
-    m_task.reset(new NetJob("LauncherLoginStep", APPLICATION->network()));
+    m_task.reset(new NetJob("LauncherLoginStep"));
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
@@ -53,13 +53,13 @@ void LauncherLoginStep::perform()
 void LauncherLoginStep::onRequestDone()
 {
     qCDebug(authCredentials()) << *m_response;
-    if (m_request->error() != QNetworkReply::NoError) {
+    if (!m_request->isSuccess()) {
         qWarning() << "Reply error:" << m_request->error();
-        if (Net::isApplicationError(m_request->error())) {
+        if (Net::isApplicationError(m_request->result())) {
             emit finished(AccountTaskState::STATE_FAILED_SOFT,
-                          tr("Failed to get Minecraft access token: %1").arg(m_request->errorString()));
+                          tr("Failed to get Minecraft access token: %1").arg(m_request->error()));
         } else {
-            emit finished(AccountTaskState::STATE_OFFLINE, tr("Failed to get Minecraft access token: %1").arg(m_request->errorString()));
+            emit finished(AccountTaskState::STATE_OFFLINE, tr("Failed to get Minecraft access token: %1").arg(m_request->error()));
         }
         return;
     }

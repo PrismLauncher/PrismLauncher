@@ -17,7 +17,7 @@
 
 Task::Ptr FlameAPI::matchFingerprints(const QList<uint>& fingerprints, std::shared_ptr<QByteArray> response)
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::MatchFingerprints"), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("Flame::MatchFingerprints"));
 
     QJsonObject body_obj;
     QJsonArray fingerprints_arr;
@@ -40,7 +40,7 @@ QString FlameAPI::getModFileChangelog(int modId, int fileId)
     QEventLoop lock;
     QString changelog;
 
-    auto netJob = makeShared<NetJob>(QString("Flame::FileChangelog"), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("Flame::FileChangelog"));
     auto response = std::make_shared<QByteArray>();
     netJob->addNetAction(Net::ApiDownload::makeByteArray(
         QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2/changelog")
@@ -75,7 +75,7 @@ QString FlameAPI::getModDescription(int modId)
     QEventLoop lock;
     QString description;
 
-    auto netJob = makeShared<NetJob>(QString("Flame::ModDescription"), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("Flame::ModDescription"));
     auto response = std::make_shared<QByteArray>();
     netJob->addNetAction(Net::ApiDownload::makeByteArray(
         QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/description").arg(QString::number(modId)), response));
@@ -105,7 +105,7 @@ QString FlameAPI::getModDescription(int modId)
 
 Task::Ptr FlameAPI::getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::GetProjects"), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("Flame::GetProjects"));
 
     QJsonObject body_obj;
     QJsonArray addons_arr;
@@ -127,7 +127,7 @@ Task::Ptr FlameAPI::getProjects(QStringList addonIds, std::shared_ptr<QByteArray
 
 Task::Ptr FlameAPI::getFiles(const QStringList& fileIds, std::shared_ptr<QByteArray> response) const
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::GetFiles"), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("Flame::GetFiles"));
 
     QJsonObject body_obj;
     QJsonArray files_arr;
@@ -149,7 +149,7 @@ Task::Ptr FlameAPI::getFiles(const QStringList& fileIds, std::shared_ptr<QByteAr
 
 Task::Ptr FlameAPI::getFile(const QString& addonId, const QString& fileId, std::shared_ptr<QByteArray> response) const
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::GetFile"), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("Flame::GetFile"));
     netJob->addNetAction(
         Net::ApiDownload::makeByteArray(QUrl(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2").arg(addonId, fileId)), response));
 
@@ -173,7 +173,7 @@ QList<ResourceAPI::SortingMethod> FlameAPI::getSortingMethods() const
 
 Task::Ptr FlameAPI::getCategories(std::shared_ptr<QByteArray> response, ModPlatform::ResourceType type)
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::GetCategories"), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("Flame::GetCategories"));
     netJob->addNetAction(Net::ApiDownload::makeByteArray(
         QUrl(QString(BuildConfig.FLAME_BASE_URL + "/categories?gameId=432&classId=%1").arg(getClassId(type))), response));
     QObject::connect(netJob.get(), &Task::failed, [](QString msg) { qDebug() << "Flame failed to get categories:" << msg; });

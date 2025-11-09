@@ -21,6 +21,8 @@
 #include "ui_SkinManageDialog.h"
 
 #include <FileSystem.h>
+#include <tasks/SequentialTask.h>
+
 #include <QAction>
 #include <QDialog>
 #include <QEventLoop>
@@ -192,7 +194,7 @@ void SkinManageDialog::setupCapes()
     }
 
     auto capesDir = FS::PathCombine(m_list.getDir(), "capes");
-    NetJob::Ptr job{ new NetJob(tr("Download capes"), APPLICATION->network()) };
+    NetJob::Ptr job{ new NetJob(tr("Download capes")) };
     bool needsToDownload = false;
     for (auto& cape : accountData.minecraftProfile.capes) {
         auto path = FS::PathCombine(capesDir, cape.id + ".png");
@@ -269,7 +271,8 @@ void SkinManageDialog::accept()
     auto path = skin->getPath();
 
     ProgressDialog prog(this);
-    NetJob::Ptr skinUpload{ new NetJob(tr("Change skin"), APPLICATION->network(), 1) };
+    SequentialTask::Ptr task{ new SequentialTask(tr("Changing skin")) };
+    NetJob::Ptr uploadJob{ new NetJob(tr("Changing skin")) };
 
     if (!QFile::exists(path)) {
         CustomMessageBox::selectable(this, tr("Skin Upload"), tr("Skin file does not exist!"), QMessageBox::Warning)->exec();
@@ -277,15 +280,16 @@ void SkinManageDialog::accept()
         return;
     }
 
-    skinUpload->addNetAction(SkinUpload::make(m_acct->accessToken(), skin->getPath(), skin->getModelString()));
+    uploadJob->addNetAction(SkinUpload::make(m_acct->accessToken(), skin->getPath(), skin->getModelString()));
 
     auto selectedCape = skin->getCapeId();
     if (selectedCape != m_acct->accountData()->minecraftProfile.currentCape) {
-        skinUpload->addNetAction(CapeChange::make(m_acct->accessToken(), selectedCape));
+        uploadJob->addNetAction(CapeChange::make(m_acct->accessToken(), selectedCape));
     }
 
-    skinUpload->addTask(m_acct->refresh().staticCast<Task>());
-    if (prog.execWithTask(skinUpload.get()) != QDialog::Accepted) {
+    task->addTask(uploadJob);
+    task->addTask(m_acct->refresh().staticCast<Task>());
+    if (prog.execWithTask(task.get()) != QDialog::Accepted) {
         CustomMessageBox::selectable(this, tr("Skin Upload"), tr("Failed to upload skin!"), QMessageBox::Warning)->exec();
         reject();
         return;
@@ -297,10 +301,12 @@ void SkinManageDialog::accept()
 void SkinManageDialog::on_resetBtn_clicked()
 {
     ProgressDialog prog(this);
-    NetJob::Ptr skinReset{ new NetJob(tr("Reset skin"), APPLICATION->network(), 1) };
-    skinReset->addNetAction(SkinDelete::make(m_acct->accessToken()));
-    skinReset->addTask(m_acct->refresh().staticCast<Task>());
-    if (prog.execWithTask(skinReset.get()) != QDialog::Accepted) {
+    SequentialTask::Ptr task{ new SequentialTask(tr("Resetting skin")) };
+    NetJob::Ptr resetJob{ new NetJob(tr("Reset skin")) };
+    resetJob->addNetAction(SkinDelete::make(m_acct->accessToken()));
+    task->addTask(resetJob);
+    task->addTask(m_acct->refresh().staticCast<Task>());
+    if (prog.execWithTask(task.get()) != QDialog::Accepted) {
         CustomMessageBox::selectable(this, tr("Skin Delete"), tr("Failed to delete current skin!"), QMessageBox::Warning)->exec();
         reject();
         return;
@@ -380,7 +386,7 @@ void SkinManageDialog::on_urlBtn_clicked()
         return;
     }
 
-    NetJob::Ptr job{ new NetJob(tr("Download skin"), APPLICATION->network()) };
+    NetJob::Ptr job{ new NetJob(tr("Download skin")) };
     job->setAskRetry(false);
 
     auto path = FS::PathCombine(m_list.getDir(), url.fileName());
@@ -403,31 +409,6 @@ void SkinManageDialog::on_urlBtn_clicked()
     }
 }
 
-class WaitTask : public Task {
-   public:
-    WaitTask() : m_loop(), m_done(false) {};
-    virtual ~WaitTask() = default;
-
-   public slots:
-    void quit()
-    {
-        m_done = true;
-        m_loop.quit();
-    }
-
-   protected:
-    virtual void executeTask()
-    {
-        if (!m_done)
-            m_loop.exec();
-        emitSucceeded();
-    };
-
-   private:
-    QEventLoop m_loop;
-    bool m_done;
-};
-
 void SkinManageDialog::on_userBtn_clicked()
 {
     auto user = m_ui->urlLine->text();
@@ -437,39 +418,36 @@ void SkinManageDialog::on_userBtn_clicked()
     MinecraftProfile mcProfile;
     auto path = FS::PathCombine(m_list.getDir(), user + ".png");
 
-    NetJob::Ptr job{ new NetJob(tr("Download user skin"), APPLICATION->network(), 1) };
+    NetJob::Ptr job{ new NetJob(tr("Downloading user skin")) };
     job->setAskRetry(false);
+    job->setSuppressSucceeded(true);
 
     auto uuidOut = std::make_shared<QByteArray>();
     auto profileOut = std::make_shared<QByteArray>();
-
-    auto uuidLoop = makeShared<WaitTask>();
-    auto profileLoop = makeShared<WaitTask>();
 
     auto getUUID = Net::Download::makeByteArray("https://api.minecraftservices.com/minecraft/profile/lookup/name/" + user, uuidOut);
     auto getProfile = Net::Download::makeByteArray(QUrl(), profileOut);
     auto downloadSkin = Net::Download::makeFile(QUrl(), path);
 
+    job->addNetAction(getUUID);
+
     QString failReason;
 
-    connect(getUUID.get(), &Task::aborted, uuidLoop.get(), &WaitTask::quit);
-    connect(getUUID.get(), &Task::failed, this, [&failReason](QString reason) {
+    connect(getUUID.get(), &Net::NetRequest::failed, this, [&failReason](QString reason) {
         qCritical() << "Couldn't get user UUID:" << reason;
         failReason = tr("failed to get user UUID");
     });
-    connect(getUUID.get(), &Task::failed, uuidLoop.get(), &WaitTask::quit);
-    connect(getProfile.get(), &Task::aborted, profileLoop.get(), &WaitTask::quit);
-    connect(getProfile.get(), &Task::failed, profileLoop.get(), &WaitTask::quit);
-    connect(getProfile.get(), &Task::failed, this, [&failReason](QString reason) {
+    connect(getProfile.get(), &Net::NetRequest::failed, this, [&failReason](QString reason) {
         qCritical() << "Couldn't get user profile:" << reason;
         failReason = tr("failed to get user profile");
     });
-    connect(downloadSkin.get(), &Task::failed, this, [&failReason](QString reason) {
+    connect(downloadSkin.get(), &Net::NetRequest::failed, this, [&failReason](QString reason) {
         qCritical() << "Couldn't download skin:" << reason;
         failReason = tr("failed to download skin");
     });
 
-    connect(getUUID.get(), &Task::succeeded, this, [uuidLoop, uuidOut, job, getProfile, &failReason] {
+
+    connect(getUUID.get(), &Net::NetRequest::succeeded, this, [uuidOut, job, getProfile, &failReason] {
         try {
             QJsonParseError parse_error{};
             QJsonDocument doc = QJsonDocument::fromJson(*uuidOut, &parse_error);
@@ -477,13 +455,13 @@ void SkinManageDialog::on_userBtn_clicked()
                 qWarning() << "Error while parsing JSON response from Minecraft skin service at " << parse_error.offset
                            << " reason: " << parse_error.errorString();
                 failReason = tr("failed to parse get user UUID response");
-                uuidLoop->quit();
                 return;
             }
             const auto root = doc.object();
             auto id = root["id"].toString();
             if (!id.isEmpty()) {
                 getProfile->setUrl("https://sessionserver.mojang.com/session/minecraft/profile/" + id);
+                job->addNetAction(getProfile);
             } else {
                 failReason = tr("user id is empty");
                 job->abort();
@@ -492,24 +470,19 @@ void SkinManageDialog::on_userBtn_clicked()
             qCritical() << "Couldn't load skin json:" << e.cause();
             failReason = tr("failed to parse get user UUID response");
         }
-        uuidLoop->quit();
     });
 
-    connect(getProfile.get(), &Task::succeeded, this, [profileLoop, profileOut, job, getProfile, &mcProfile, downloadSkin, &failReason] {
+    connect(getProfile.get(), &Net::NetRequest::succeeded, this, [ profileOut, job, &mcProfile, downloadSkin, &failReason] {
         if (Parsers::parseMinecraftProfileMojang(*profileOut, mcProfile)) {
             downloadSkin->setUrl(mcProfile.skin.url);
+            job->addNetAction(downloadSkin);
+            job->setSuppressSucceeded(false);
         } else {
             failReason = tr("failed to parse get user profile response");
             job->abort();
         }
-        profileLoop->quit();
     });
 
-    job->addNetAction(getUUID);
-    job->addTask(uuidLoop);
-    job->addNetAction(getProfile);
-    job->addTask(profileLoop);
-    job->addNetAction(downloadSkin);
     ProgressDialog dlg(this);
     dlg.execWithTask(job.get());
 

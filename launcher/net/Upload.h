@@ -39,19 +39,7 @@
 
 #include "net/NetRequest.h"
 
-namespace Net {
-
-class Upload : public NetRequest {
-    Q_OBJECT
-   public:
-    using Ptr = shared_qobject_ptr<Upload>;
-    explicit Upload() : NetRequest() { logCat = taskUploadLogC; };
-
-    static Upload::Ptr makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray m_post_data);
-
-   protected:
-    virtual QNetworkReply* getReply(QNetworkRequest&) override;
-    QByteArray m_post_data;
-};
-
+namespace Net::Upload {
+    NetRequest::Ptr makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray postData);
+    void configureRequest(NetRequest* request, QByteArray postData);
 }  // namespace Net

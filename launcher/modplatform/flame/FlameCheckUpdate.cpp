@@ -39,7 +39,7 @@ void FlameCheckUpdate::executeTask()
 {
     setStatus(tr("Preparing resources for CurseForge..."));
 
-    auto netJob = new NetJob("Get latest versions", APPLICATION->network());
+    auto netJob = new NetJob("Get latest versions");
     connect(netJob, &Task::finished, this, &FlameCheckUpdate::collectBlockedMods);
 
     connect(netJob, &Task::progress, this, &FlameCheckUpdate::setProgress);
@@ -55,7 +55,7 @@ void FlameCheckUpdate::executeTask()
         auto response = std::make_shared<QByteArray>();
         auto task = Net::ApiDownload::makeByteArray(versionsUrlOptional.value(), response);
 
-        connect(task.get(), &Task::succeeded, this, [this, resource, response] { getLatestVersionCallback(resource, response); });
+        connect(task.get(), &Net::NetRequest::succeeded, this, [this, resource, response] { getLatestVersionCallback(resource, response); });
         netJob->addNetAction(task);
     }
     m_task.reset(netJob);

@@ -29,6 +29,6 @@ class XboxAuthorizationStep : public AuthStep {
     QString m_authorizationKind;
 
     std::shared_ptr<QByteArray> m_response;
-    Net::Upload::Ptr m_request;
+    Net::NetRequest::Ptr m_request;
     NetJob::Ptr m_task;
 };

@@ -344,6 +344,12 @@ if(NOT tomlplusplus_FOUND)
     pkg_check_modules(tomlplusplus REQUIRED IMPORTED_TARGET tomlplusplus>=3.2.0)
 endif()
 
+find_package(CURL REQUIRED)
+if(NOT CURL_FOUND)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(libcurl REQUIRED IMPORTED_TARGET libcurl)
+endif()
+
 find_package(ZLIB REQUIRED)
 
 

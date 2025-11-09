@@ -68,9 +68,9 @@ void MSADeviceCodeStep::perform()
     };
     m_response.reset(new QByteArray());
     m_request = Net::Upload::makeByteArray(url, m_response, payload);
-    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
+    m_request->addHeadersFromProxy(Net::RawHeaderProxy(headers));
 
-    m_task.reset(new NetJob("MSADeviceCodeStep", APPLICATION->network()));
+    m_task.reset(new NetJob("Fetching device code"));
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
@@ -119,7 +119,7 @@ void MSADeviceCodeStep::deviceAuthorizationFinished()
                       tr("Device authorization failed: %1").arg(rsp.error_description.isEmpty() ? rsp.error : rsp.error_description));
         return;
     }
-    if (!m_request->wasSuccessful() || m_request->error() != QNetworkReply::NoError) {
+    if (!m_request->isSuccess()) {
         emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Failed to retrieve device authorization"));
         qDebug() << *m_response;
         return;
@@ -182,12 +182,15 @@ void MSADeviceCodeStep::authenticateUser()
     };
     m_response.reset(new QByteArray());
     m_request = Net::Upload::makeByteArray(url, m_response, payload);
-    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
+    m_request->addHeadersFromProxy(Net::RawHeaderProxy(headers));
 
-    connect(m_request.get(), &Task::finished, this, &MSADeviceCodeStep::authenticationFinished);
+    m_task.reset(new NetJob("Authenticating with device code"));
+    m_task->setAskRetry(false);
+    m_task->addNetAction(m_request);
 
-    m_request->setNetwork(APPLICATION->network());
-    m_request->start();
+    connect(m_task.get(), &Task::finished, this, &MSADeviceCodeStep::authenticationFinished);
+
+    m_task->start();
 }
 
 struct AuthenticationResponse {
@@ -227,7 +230,7 @@ AuthenticationResponse parseAuthenticationResponse(const QByteArray& data)
 
 void MSADeviceCodeStep::authenticationFinished()
 {
-    if (m_request->error() == QNetworkReply::TimeoutError) {
+    if (m_request->result() == CURLE_OPERATION_TIMEDOUT) {
         // rfc8628#section-3.5
         // "On encountering a connection timeout, clients MUST unilaterally
         // reduce their polling frequency before retrying.  The use of an
@@ -260,7 +263,7 @@ void MSADeviceCodeStep::authenticationFinished()
                       tr("Device Access failed: %1").arg(rsp.error_description.isEmpty() ? rsp.error : rsp.error_description));
         return;
     }
-    if (!m_request->wasSuccessful() || m_request->error() != QNetworkReply::NoError) {
+    if (!m_request->isSuccess()) {
         startPoolTimer();  // it failed so just try again without increasing the interval
         return;
     }

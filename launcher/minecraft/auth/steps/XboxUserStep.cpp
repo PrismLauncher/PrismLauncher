@@ -39,9 +39,9 @@ void XboxUserStep::perform()
     };
     m_response.reset(new QByteArray());
     m_request = Net::Upload::makeByteArray(url, m_response, xbox_auth_data.toUtf8());
-    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
+    m_request->addHeadersFromProxy(Net::RawHeaderProxy(headers));
 
-    m_task.reset(new NetJob("XboxUserStep", APPLICATION->network()));
+    m_task.reset(new NetJob("XboxUserStep"));
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
@@ -53,12 +53,12 @@ void XboxUserStep::perform()
 
 void XboxUserStep::onRequestDone()
 {
-    if (m_request->error() != QNetworkReply::NoError) {
+    if (!m_request->isSuccess()) {
         qWarning() << "Reply error:" << m_request->error();
-        if (Net::isApplicationError(m_request->error())) {
-            emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("XBox user authentication failed: %1").arg(m_request->errorString()));
+        if (Net::isApplicationError(m_request->result())) {
+            emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("XBox user authentication failed: %1").arg(m_request->error()));
         } else {
-            emit finished(AccountTaskState::STATE_OFFLINE, tr("XBox user authentication failed: %1").arg(m_request->errorString()));
+            emit finished(AccountTaskState::STATE_OFFLINE, tr("XBox user authentication failed: %1").arg(m_request->error()));
         }
         return;
     }

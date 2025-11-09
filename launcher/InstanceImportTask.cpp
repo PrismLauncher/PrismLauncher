@@ -59,6 +59,8 @@
 #include <QtConcurrentRun>
 #include <memory>
 
+#include <QDirIterator>
+
 InstanceImportTask::InstanceImportTask(const QUrl& sourceUrl, QWidget* parent, QMap<QString, QString>&& extra_info)
     : m_sourceUrl(sourceUrl), m_extra_info(extra_info), m_parent(parent)
 {}
@@ -96,7 +98,7 @@ void InstanceImportTask::downloadFromUrl()
     entry->setStale(true);
     m_archivePath = entry->getFullPath();
 
-    auto filesNetJob = makeShared<NetJob>(tr("Modpack download"), APPLICATION->network());
+    auto filesNetJob = makeShared<NetJob>(tr("Modpack download"));
     filesNetJob->addNetAction(Net::ApiDownload::makeCached(m_sourceUrl, entry));
 
     connect(filesNetJob.get(), &NetJob::succeeded, this, &InstanceImportTask::processZipPack);

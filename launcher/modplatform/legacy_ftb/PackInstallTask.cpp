@@ -74,7 +74,7 @@ void PackInstallTask::downloadPack()
     auto entry = APPLICATION->metacache()->resolveEntry("FTBPacks", path);
     entry->setStale(true);
     archivePath = entry->getFullPath();
-    netJobContainer.reset(new NetJob("Download FTB Pack", m_network));
+    netJobContainer.reset(new NetJob("Download FTB Pack"));
     QString url;
     if (m_pack.type == PackType::Private) {
         url = QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "privatepacks/%1").arg(path);

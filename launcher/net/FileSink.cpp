@@ -36,12 +36,13 @@
 #include "FileSink.h"
 
 #include "FileSystem.h"
+#include "NetRequest.h"
 
 #include "net/Logging.h"
 
 namespace Net {
 
-Task::State FileSink::init(QNetworkRequest& request)
+Task::State FileSink::init(NetRequest* request)
 {
     auto result = initCache(request);
     if (result != Task::State::Running) {
@@ -63,7 +64,7 @@ Task::State FileSink::init(QNetworkRequest& request)
         return Task::State::Failed;
     }
 
-    if (initAllValidators(request))
+    if (initAllValidators())
         return Task::State::Running;
     m_fail_reason = "Failed to initialize validators";
     return Task::State::Failed;
@@ -71,7 +72,7 @@ Task::State FileSink::init(QNetworkRequest& request)
 
 Task::State FileSink::write(QByteArray& data)
 {
-    if (!writeAllValidators(data) || m_output_file->write(data) != data.size()) {
+    if (!writeAllValidators(data) || !m_output_file || m_output_file->write(data) != data.size()) {
         qCCritical(taskNetLogC) << "Failed writing into " + m_filename;
         m_output_file->cancelWriting();
         m_output_file.reset();
@@ -93,23 +94,17 @@ Task::State FileSink::abort()
     return Task::State::Failed;
 }
 
-Task::State FileSink::finalize(QNetworkReply& reply)
+Task::State FileSink::finalize(NetRequest* request)
 {
-    bool gotFile = false;
-    QVariant statusCodeV = reply.attribute(QNetworkRequest::HttpStatusCodeAttribute);
-    bool validStatus = false;
-    int statusCode = statusCodeV.toInt(&validStatus);
-    if (validStatus) {
-        // this leaves out 304 Not Modified
-        gotFile = statusCode == 200 || statusCode == 203;
-    }
+    int statusCode = request->responseCode();
+    bool gotFile = statusCode == 200 || statusCode == 203; // this leaves out 304 Not Modified
 
     // if we wrote any data to the save file, we try to commit the data to the real file.
     // if it actually got a proper file, we write it even if it was empty
     if (gotFile || m_wroteAnyData) {
         // ask validators for data consistency
         // we only do this for actual downloads, not 'your data is still the same' cache hits
-        if (!finalizeAllValidators(reply)) {
+        if (!finalizeAllValidators()) {
             m_fail_reason = "Failed to finalize validators";
             return Task::State::Failed;
         }
@@ -126,15 +121,15 @@ Task::State FileSink::finalize(QNetworkReply& reply)
     // then get rid of the save file
     m_output_file.reset();
 
-    return finalizeCache(reply);
+    return finalizeCache(request);
 }
 
-Task::State FileSink::initCache(QNetworkRequest&)
+Task::State FileSink::initCache(NetRequest*)
 {
     return Task::State::Running;
 }
 
-Task::State FileSink::finalizeCache(QNetworkReply&)
+Task::State FileSink::finalizeCache(NetRequest*)
 {
     return Task::State::Succeeded;
 }

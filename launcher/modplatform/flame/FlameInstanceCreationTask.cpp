@@ -566,7 +566,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
 
 void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
 {
-    m_filesJob.reset(new NetJob(tr("Mod Download Flame"), APPLICATION->network()));
+    m_filesJob.reset(new NetJob(tr("Mod Download Flame")));
     auto results = m_modIdResolver->getResults().files;
 
     for (const auto& result : results) {
@@ -583,8 +583,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
 
         if (!result.version.downloadUrl.isEmpty()) {
             qDebug() << "Will download" << result.version.downloadUrl << "to" << path;
-            auto dl = Net::ApiDownload::makeFile(result.version.downloadUrl, path);
-            m_filesJob->addNetAction(dl);
+            m_filesJob->addNetAction(Net::ApiDownload::makeFile(result.version.downloadUrl, path));
         }
     }
 

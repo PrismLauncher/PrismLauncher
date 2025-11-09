@@ -23,9 +23,9 @@ void MinecraftProfileStep::perform()
 
     m_response.reset(new QByteArray());
     m_request = Net::Download::makeByteArray(url, m_response);
-    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
+    m_request->addHeadersFromProxy(Net::RawHeaderProxy(headers));
 
-    m_task.reset(new NetJob("MinecraftProfileStep", APPLICATION->network()));
+    m_task.reset(new NetJob("MinecraftProfileStep"));
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
@@ -36,27 +36,27 @@ void MinecraftProfileStep::perform()
 
 void MinecraftProfileStep::onRequestDone()
 {
-    if (m_request->error() == QNetworkReply::ContentNotFoundError) {
+    if (m_request->responseCode() == Net::HTTP_NOT_FOUND) {
         // NOTE: Succeed even if we do not have a profile. This is a valid account state.
         m_data->minecraftProfile = MinecraftProfile();
         emit finished(AccountTaskState::STATE_WORKING, tr("Account has no Minecraft profile."));
         return;
     }
-    if (m_request->error() != QNetworkReply::NoError) {
+    if (!m_request->isSuccess()) {
         qWarning() << "Error getting profile:";
-        qWarning() << " HTTP Status:        " << m_request->replyStatusCode();
-        qWarning() << " Internal error no.: " << m_request->error();
-        qWarning() << " Error string:       " << m_request->errorString();
+        qWarning() << " HTTP Status:        " << m_request->responseCode();
+        qWarning() << " Internal error no.: " << m_request->result();
+        qWarning() << " Error string:       " << m_request->error();
 
         qWarning() << " Response:";
         qWarning() << QString::fromUtf8(*m_response);
 
-        if (Net::isApplicationError(m_request->error())) {
+        if (Net::isApplicationError(m_request->result())) {
             emit finished(AccountTaskState::STATE_FAILED_SOFT,
-                          tr("Minecraft Java profile acquisition failed: %1").arg(m_request->errorString()));
+                          tr("Minecraft Java profile acquisition failed: %1").arg(m_request->error()));
         } else {
             emit finished(AccountTaskState::STATE_OFFLINE,
-                          tr("Minecraft Java profile acquisition failed: %1").arg(m_request->errorString()));
+                          tr("Minecraft Java profile acquisition failed: %1").arg(m_request->error()));
         }
         return;
     }

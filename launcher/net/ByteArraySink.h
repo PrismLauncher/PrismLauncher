@@ -50,13 +50,13 @@ class ByteArraySink : public Sink {
     virtual ~ByteArraySink() = default;
 
    public:
-    auto init(QNetworkRequest& request) -> Task::State override
+    auto init(NetRequest*) -> Task::State override
     {
         if (m_output)
             m_output->clear();
         else
             qWarning() << "ByteArraySink did not initialize the buffer because it's not addressable";
-        if (initAllValidators(request))
+        if (initAllValidators())
             return Task::State::Running;
         m_fail_reason = "Failed to initialize validators";
         return Task::State::Failed;
@@ -81,9 +81,9 @@ class ByteArraySink : public Sink {
         return Task::State::Failed;
     }
 
-    auto finalize(QNetworkReply& reply) -> Task::State override
+    auto finalize(NetRequest*) -> Task::State override
     {
-        if (finalizeAllValidators(reply))
+        if (finalizeAllValidators())
             return Task::State::Succeeded;
         m_fail_reason = "Failed to finalize validators";
         return Task::State::Failed;

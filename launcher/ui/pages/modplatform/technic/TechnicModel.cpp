@@ -133,7 +133,7 @@ void Technic::ListModel::performSearch()
     if (hasActiveSearchJob())
         return;
 
-    auto netJob = makeShared<NetJob>("Technic::Search", APPLICATION->network());
+    auto netJob = makeShared<NetJob>("Technic::Search");
     QString searchUrl = "";
     if (currentSearchTerm.isEmpty()) {
         searchUrl = QString("%1trending?build=%2").arg(BuildConfig.TECHNIC_API_BASE_URL, BuildConfig.TECHNIC_API_BUILD);
@@ -293,7 +293,7 @@ void Technic::ListModel::requestLogo(QString logo, QString url)
     }
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("TechnicPacks", QString("logos/%1").arg(logo));
-    auto job = new NetJob(QString("Technic Icon Download %1").arg(logo), APPLICATION->network());
+    auto job = new NetJob(QString("Technic Icon Download %1").arg(logo));
     job->setAskRetry(false);
     job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 

@@ -58,9 +58,9 @@ void FMLLibrariesTask::executeTask()
 
     // download missing libs to our place
     setStatus(tr("Downloading FML libraries..."));
-    NetJob::Ptr dljob{ new NetJob("FML libraries", APPLICATION->network()) };
+    NetJob::Ptr dljob{ new NetJob("FML libraries") };
     auto metacache = APPLICATION->metacache();
-    Net::Download::Options options = Net::Download::Option::MakeEternal;
+    Net::NetRequest::Options options = Net::NetRequest::Option::MakeEternal;
     for (auto& lib : fmlLibsToProcess) {
         auto entry = metacache->resolveEntry("fmllibs", lib.filename);
         QString urlString = BuildConfig.FMLLIBS_BASE_URL + lib.filename;
@@ -68,7 +68,6 @@ void FMLLibrariesTask::executeTask()
     }
 
     connect(dljob.get(), &NetJob::succeeded, this, &FMLLibrariesTask::fmllibsFinished);
-    connect(dljob.get(), &NetJob::failed, this, &FMLLibrariesTask::fmllibsFailed);
     connect(dljob.get(), &NetJob::aborted, this, [this] { emitFailed(tr("Aborted")); });
     connect(dljob.get(), &NetJob::progress, this, &FMLLibrariesTask::progress);
     connect(dljob.get(), &NetJob::stepProgress, this, &FMLLibrariesTask::propagateStepProgress);
@@ -106,12 +105,6 @@ void FMLLibrariesTask::fmllibsFinished()
         progress(index, fmlLibsToProcess.size());
     }
     emitSucceeded();
-}
-void FMLLibrariesTask::fmllibsFailed(QString reason)
-{
-    QStringList failed = downloadJob->getFailedFiles();
-    QString failed_all = failed.join("\n");
-    emitFailed(tr("Failed to download the following files:\n%1\n\nReason:%2\nPlease try again.").arg(failed_all, reason));
 }
 
 bool FMLLibrariesTask::abort()

@@ -51,7 +51,7 @@ class ChecksumValidator : public Validator {
     virtual ~ChecksumValidator() = default;
 
    public:
-    auto init(QNetworkRequest&) -> bool override
+    auto init() -> bool override
     {
         m_checksum.reset();
         return true;
@@ -69,7 +69,7 @@ class ChecksumValidator : public Validator {
         return true;
     }
 
-    auto validate(QNetworkReply&) -> bool override
+    auto validate() -> bool override
     {
         if (m_expected.size() && m_expected != hash()) {
             qWarning() << "Checksum mismatch, download is bad.";

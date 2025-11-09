@@ -36,27 +36,16 @@
 
 #include "SkinDelete.h"
 
-#include "net/ByteArraySink.h"
-#include "net/RawHeaderProxy.h"
+#include <net/ByteArraySink.h>
+#include <net/RawHeaderProxy.h>
 
-SkinDelete::SkinDelete() : NetRequest()
+Net::NetRequest::Ptr SkinDelete::make(QString token)
 {
-    logCat = taskMCSkinsLogC;
-}
-
-QNetworkReply* SkinDelete::getReply(QNetworkRequest& request)
-{
-    setStatus(tr("Deleting skin"));
-    return m_network->deleteResource(request);
-}
-
-SkinDelete::Ptr SkinDelete::make(QString token)
-{
-    auto up = makeShared<SkinDelete>();
-    up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/skins/active");
-    up->m_sink.reset(new Net::ByteArraySink(std::make_shared<QByteArray>()));
-    up->addHeaderProxy(new Net::RawHeaderProxy(QList<Net::HeaderPair>{
-        { "Authorization", QString("Bearer %1").arg(token).toLocal8Bit() },
-    }));
-    return up;
+    auto request = makeShared<Net::NetRequest>(QUrl("https://api.minecraftservices.com/minecraft/profile/skins/active"), new Net::ByteArraySink(std::make_shared<QByteArray>()));
+    request->addHeadersFromProxy(Net::RawHeaderProxy(QList<Net::HeaderPair>{
+         { "Authorization", QString("Bearer %1").arg(token).toLocal8Bit() },
+     }));
+    request->httpDelete();
+    request->setLoggingCategory(taskMCSkinsLogC);
+    return request;
 }

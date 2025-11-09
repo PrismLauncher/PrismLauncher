@@ -43,6 +43,7 @@
 #include <QFlag>
 #include <QIcon>
 #include <QMutex>
+#include <QFile>
 #include <QUrl>
 #include <memory>
 
@@ -58,7 +59,6 @@ class MainWindow;
 class ViewLogWindow;
 class SetupWizard;
 class GenericPageProvider;
-class QFile;
 class HttpMetaCache;
 class SettingsObject;
 class InstanceList;

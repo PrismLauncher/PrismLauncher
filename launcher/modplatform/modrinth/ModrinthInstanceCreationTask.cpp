@@ -243,7 +243,7 @@ bool ModrinthCreationTask::createInstance()
     instance.setName(name());
     instance.saveNow();
 
-    auto downloadMods = makeShared<NetJob>(tr("Mod Download Modrinth"), APPLICATION->network());
+    auto downloadMods = makeShared<NetJob>(tr("Mod Download Modrinth"));
 
     auto root_modpack_path = FS::PathCombine(m_stagingPath, m_root_path);
     auto root_modpack_url = QUrl::fromLocalFile(root_modpack_path);
@@ -278,7 +278,7 @@ bool ModrinthCreationTask::createInstance()
             // FIXME: This really needs to be put into a ConcurrentTask of
             // MultipleOptionsTask's , once those exist :)
             auto param = dl.toWeakRef();
-            connect(dl.get(), &Task::failed, [&file, file_path, param, downloadMods] {
+            connect(dl.get(), &Net::NetRequest::failed, [&file, file_path, param, downloadMods] {
                 auto ndl = Net::ApiDownload::makeFile(file.downloads.dequeue(), file_path);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 downloadMods->addNetAction(ndl);

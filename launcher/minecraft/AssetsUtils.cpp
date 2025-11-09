@@ -285,7 +285,6 @@ Net::NetRequest::Ptr AssetObject::getDownloadAction()
         if (hash.size()) {
             objectDL->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, hash));
         }
-        objectDL->setProgress(objectDL->getProgress(), size);
         return objectDL;
     }
     return nullptr;
@@ -309,14 +308,14 @@ QString AssetObject::getRelPath()
 
 NetJob::Ptr AssetsIndex::getDownloadJob()
 {
-    auto job = makeShared<NetJob>(QObject::tr("Assets for %1").arg(id), APPLICATION->network());
+    auto job = makeShared<NetJob>(QObject::tr("Assets for %1").arg(id));
     for (auto& object : objects.values()) {
         auto dl = object.getDownloadAction();
         if (dl) {
             job->addNetAction(dl);
         }
     }
-    if (job->size())
+    if (job->requestsSize() > 0)
         return job;
     return nullptr;
 }

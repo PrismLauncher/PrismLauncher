@@ -95,7 +95,10 @@
 #include <QLibraryInfo>
 #include <QList>
 #include <QNetworkAccessManager>
+#include <QNetworkProxy>
 #include <QStringList>
+#include <QSettings>
+#include <QHostInfo>
 #include <QStringLiteral>
 #include <QStyleFactory>
 #include <QTranslator>
@@ -126,6 +129,10 @@
 
 #include <stdlib.h>
 #include <sys.h>
+
+#include <QHostInfo>
+#include <QStandardPaths>
+#include <QStringLiteral>
 #include "SysInfo.h"
 
 #ifdef Q_OS_LINUX

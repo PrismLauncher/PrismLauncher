@@ -97,7 +97,7 @@ void ListModel::request()
     modpacks.clear();
     endResetModel();
 
-    auto netJob = makeShared<NetJob>("Atl::Request", APPLICATION->network());
+    auto netJob = makeShared<NetJob>("Atl::Request");
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/json/packsnew.json");
     netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), response));
     jobPtr = netJob;
@@ -192,7 +192,7 @@ void ListModel::requestLogo(QString file, QString url)
     }
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", QString("logos/%1").arg(file));
-    auto job = new NetJob(QString("ATLauncher Icon Download %1").arg(file), APPLICATION->network());
+    auto job = new NetJob(QString("ATLauncher Icon Download %1").arg(file));
     job->setAskRetry(false);
     job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 

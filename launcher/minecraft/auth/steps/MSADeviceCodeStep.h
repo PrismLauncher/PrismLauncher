@@ -73,6 +73,6 @@ class MSADeviceCodeStep : public AuthStep {
     QTimer m_expiration_timer;
 
     std::shared_ptr<QByteArray> m_response;
-    Net::Upload::Ptr m_request;
+    Net::NetRequest::Ptr m_request;
     NetJob::Ptr m_task;
 };

@@ -160,7 +160,7 @@ void TechnicPage::suggestCurrent()
         return;
     }
 
-    auto netJob = makeShared<NetJob>(QString("Technic::PackMeta(%1)").arg(current.name), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("Technic::PackMeta(%1)").arg(current.name));
     QString slug = current.slug;
     netJob->addNetAction(Net::ApiDownload::makeByteArray(
         QString("%1modpack/%2?build=%3").arg(BuildConfig.TECHNIC_API_BASE_URL, slug, BuildConfig.TECHNIC_API_BUILD), response));
@@ -258,7 +258,7 @@ void TechnicPage::metadataLoaded()
         // version so we can display something quicker
         ui->versionSelectionBox->addItem(current.currentVersion);
 
-        auto netJob = makeShared<NetJob>(QString("Technic::SolderMeta(%1)").arg(current.name), APPLICATION->network());
+        auto netJob = makeShared<NetJob>(QString("Technic::SolderMeta(%1)").arg(current.name));
         auto url = QString("%1/modpack/%2").arg(current.url, current.slug);
         netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), response));
 

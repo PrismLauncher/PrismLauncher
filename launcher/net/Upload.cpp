@@ -39,24 +39,19 @@
 #include "Upload.h"
 
 #include <memory>
-#include <utility>
 #include "ByteArraySink.h"
 
 namespace Net {
-
-QNetworkReply* Upload::getReply(QNetworkRequest& request)
+NetRequest::Ptr Upload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray postData)
 {
-    if (!request.hasRawHeader("Content-Type"))
-        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    return m_network->post(request, m_post_data);
+    auto request = makeShared<NetRequest>(url, new ByteArraySink(output));
+    configureRequest(request.get(), postData);
+    return request;
 }
 
-Upload::Ptr Upload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray m_post_data)
+void Upload::configureRequest(NetRequest* request, QByteArray postData)
 {
-    auto up = makeShared<Upload>();
-    up->m_url = std::move(url);
-    up->m_sink.reset(new ByteArraySink(output));
-    up->m_post_data = std::move(m_post_data);
-    return up;
+    request->httpPost("application/json", postData);
+    request->setLoggingCategory(taskUploadLogC);
 }
 }  // namespace Net

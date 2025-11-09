@@ -40,14 +40,12 @@
 #include "tasks/Task.h"
 
 #include <QNetworkReply>
-#include <QRegularExpression>
 #include <QString>
 
 #include <array>
 #include <memory>
 
-class PasteUpload : public Net::NetRequest {
-   public:
+namespace PasteUpload {
     enum PasteType : int {
         // 0x0.st
         NullPointer,
@@ -61,36 +59,36 @@ class PasteUpload : public Net::NetRequest {
         First = NullPointer,
         Last = Mclogs
     };
+
     struct PasteTypeInfo {
         const QString name;
         const QString defaultBase;
         const QString endpointPath;
     };
 
-    static const std::array<PasteTypeInfo, 4> PasteTypes;
+    inline static const std::array<PasteTypeInfo, 4> PasteTypes  = { { { "0x0.st", "https://0x0.st", "" },
+                                                                          { "hastebin", "https://hst.sh", "/documents" },
+                                                                          { "paste.gg", "https://paste.gg", "/api/v1/pastes" },
+                                                                          { "mclo.gs", "https://api.mclo.gs", "/1/log" } } };
+
+    struct PasteMeta {
+        PasteType pasteType;
+        QString baseUrl;
+        QString pasteUrl;
+    };
 
     class Sink : public Net::ByteArraySink {
        public:
-        Sink(PasteUpload* p) : Net::ByteArraySink(std::make_shared<QByteArray>()), m_d(p) {};
+        Sink(std::shared_ptr<PasteMeta> meta) : ByteArraySink(std::make_shared<QByteArray>()), m_meta(meta) {}
         virtual ~Sink() = default;
 
        public:
-        auto finalize(QNetworkReply& reply) -> Task::State override;
+        auto finalize(Net::NetRequest* request) -> Task::State override;
 
        private:
-        PasteUpload* m_d;
+        std::shared_ptr<PasteMeta> m_meta;
     };
-    friend Sink;
 
-    PasteUpload(const QString& log, QString url, PasteType pasteType);
-    virtual ~PasteUpload() = default;
-
-    QString pasteLink() { return m_pasteLink; }
-
-   private:
-    virtual QNetworkReply* getReply(QNetworkRequest&) override;
-    QString m_log;
-    QString m_pasteLink;
-    QString m_baseUrl;
-    const PasteType m_paste_type;
+    Net::NetRequest::Ptr make(QString log, std::shared_ptr<PasteMeta> meta);
+    void configureRequest(Net::NetRequest* request, QString log, std::shared_ptr<PasteMeta> meta);
 };

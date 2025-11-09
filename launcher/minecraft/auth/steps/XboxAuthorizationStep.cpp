@@ -43,9 +43,9 @@ void XboxAuthorizationStep::perform()
     };
     m_response.reset(new QByteArray());
     m_request = Net::Upload::makeByteArray(url, m_response, xbox_auth_data.toUtf8());
-    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
+    m_request->addHeadersFromProxy(Net::RawHeaderProxy(headers));
 
-    m_task.reset(new NetJob("XboxAuthorizationStep", APPLICATION->network()));
+    m_task.reset(new NetJob("XboxAuthorizationStep"));
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
@@ -58,19 +58,19 @@ void XboxAuthorizationStep::perform()
 void XboxAuthorizationStep::onRequestDone()
 {
     qCDebug(authCredentials()) << *m_response;
-    if (m_request->error() != QNetworkReply::NoError) {
+    if (!m_request->isSuccess()) {
         qWarning() << "Reply error:" << m_request->error();
-        if (Net::isApplicationError(m_request->error())) {
+        if (Net::isApplicationError(m_request->result())) {
             if (!processSTSError()) {
                 emit finished(AccountTaskState::STATE_FAILED_SOFT,
                               tr("Failed to get authorization for %1 services. Error %2.").arg(m_authorizationKind, m_request->error()));
             } else {
                 emit finished(AccountTaskState::STATE_FAILED_SOFT,
-                              tr("Unknown STS error for %1 services: %2").arg(m_authorizationKind, m_request->errorString()));
+                              tr("Unknown STS error for %1 services: %2").arg(m_authorizationKind, m_request->error()));
             }
         } else {
             emit finished(AccountTaskState::STATE_OFFLINE,
-                          tr("Failed to get authorization for %1 services: %2").arg(m_authorizationKind, m_request->errorString()));
+                          tr("Failed to get authorization for %1 services: %2").arg(m_authorizationKind, m_request->error()));
         }
         return;
     }
@@ -95,7 +95,7 @@ void XboxAuthorizationStep::onRequestDone()
 
 bool XboxAuthorizationStep::processSTSError()
 {
-    if (m_request->error() == QNetworkReply::AuthenticationRequiredError) {
+    if (m_request->responseCode() == Net::HTTP_UNAUTHORIZED) {
         QJsonParseError jsonError;
         QJsonDocument doc = QJsonDocument::fromJson(*m_response, &jsonError);
         if (jsonError.error) {

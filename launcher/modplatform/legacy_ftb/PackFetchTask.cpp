@@ -49,7 +49,7 @@ void PackFetchTask::fetch()
     publicPacks.clear();
     thirdPartyPacks.clear();
 
-    jobPtr.reset(new NetJob("LegacyFTB::ModpackFetch", m_network));
+    jobPtr.reset(new NetJob("LegacyFTB::ModpackFetch"));
 
     QUrl publicPacksUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/modpacks.xml");
     qDebug() << "Downloading public version info from" << publicPacksUrl.toString();
@@ -72,7 +72,7 @@ void PackFetchTask::fetchPrivate(const QStringList& toFetch)
 
     for (auto& packCode : toFetch) {
         auto data = std::make_shared<QByteArray>();
-        NetJob* job = new NetJob("Fetching private pack", m_network);
+        NetJob* job = new NetJob("Fetching private pack");
         job->addNetAction(Net::ApiDownload::makeByteArray(privatePackBaseUrl.arg(packCode), data));
         job->setAskRetry(false);
 

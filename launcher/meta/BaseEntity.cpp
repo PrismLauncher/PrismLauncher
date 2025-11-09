@@ -37,7 +37,7 @@ class ParsingValidator : public Net::Validator {
     virtual ~ParsingValidator() = default;
 
    public: /* methods */
-    bool init(QNetworkRequest&) override
+    bool init() override
     {
         m_data.clear();
         return true;
@@ -52,7 +52,7 @@ class ParsingValidator : public Net::Validator {
         m_data.clear();
         return true;
     }
-    bool validate(QNetworkReply&) override
+    bool validate() override
     {
         auto fname = m_entity->localFilename();
         try {
@@ -152,7 +152,7 @@ void BaseEntityLoadTask::executeTask()
         emitSucceeded();
         return;
     }
-    m_task.reset(new NetJob(QObject::tr("Download of meta file %1").arg(m_entity->localFilename()), APPLICATION->network()));
+    m_task.reset(new NetJob(QObject::tr("Download of meta file %1").arg(m_entity->localFilename())));
     auto url = m_entity->url();
     auto entry = APPLICATION->metacache()->resolveEntry("meta", m_entity->localFilename());
     entry->setStale(true);

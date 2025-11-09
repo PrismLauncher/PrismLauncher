@@ -43,9 +43,9 @@ class Validator {
     virtual ~Validator() {}
 
    public: /* methods */
-    virtual bool init(QNetworkRequest& request) = 0;
+    virtual bool init() = 0;
     virtual bool write(QByteArray& data) = 0;
     virtual bool abort() = 0;
-    virtual bool validate(QNetworkReply& reply) = 0;
+    virtual bool validate() = 0;
 };
 }  // namespace Net

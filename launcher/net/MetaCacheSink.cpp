@@ -38,6 +38,7 @@
 #include <QFileInfo>
 #include <QRegularExpression>
 #include "Application.h"
+#include "NetRequest.h"
 
 #include "net/Logging.h"
 
@@ -54,7 +55,7 @@ MetaCacheSink::MetaCacheSink(MetaEntryPtr entry, ChecksumValidator* md5sum, bool
     addValidator(md5sum);
 }
 
-Task::State MetaCacheSink::initCache(QNetworkRequest& request)
+Task::State MetaCacheSink::initCache(NetRequest* request)
 {
     if (!m_entry->isStale()) {
         return Task::State::Succeeded;
@@ -64,17 +65,16 @@ Task::State MetaCacheSink::initCache(QNetworkRequest& request)
     QFile current(m_filename);
     if (current.exists() && current.size() != 0) {
         if (m_entry->getRemoteChangedTimestamp().size()) {
-            request.setRawHeader(QString("If-Modified-Since").toLatin1(), m_entry->getRemoteChangedTimestamp().toLatin1());
+            request->addHeader("If-Modified-Since", m_entry->getRemoteChangedTimestamp().toLatin1());
         }
         if (m_entry->getETag().size()) {
-            request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->getETag().toLatin1());
+            request->addHeader("If-None-Match", m_entry->getETag().toLatin1());
         }
     }
 
     return Task::State::Running;
 }
-
-Task::State MetaCacheSink::finalizeCache(QNetworkReply& reply)
+Task::State MetaCacheSink::finalizeCache(NetRequest* request)
 {
     QFileInfo output_file_info(m_filename);
 
@@ -82,10 +82,10 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply& reply)
         m_entry->setMD5Sum(m_md5Node->hash().toHex().constData());
     }
 
-    m_entry->setETag(reply.rawHeader("ETag").constData());
+    m_entry->setETag(request->getHeader("ETag"));
 
-    if (reply.hasRawHeader("Last-Modified")) {
-        m_entry->setRemoteChangedTimestamp(reply.rawHeader("Last-Modified").constData());
+    if (request->hasHeader("Last-Modified")) {
+        m_entry->setRemoteChangedTimestamp(request->getHeader("Last-Modified"));
     }
 
     m_entry->setLocalChangedTimestamp(output_file_info.lastModified().toUTC().toMSecsSinceEpoch());
@@ -94,16 +94,16 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply& reply)
         if (m_is_eternal) {
             qCDebug(taskMetaCacheLogC) << "Adding eternal cache entry:" << m_entry->getFullPath();
             m_entry->makeEternal(true);
-        } else if (reply.hasRawHeader("Cache-Control")) {
-            auto cache_control_header = reply.rawHeader("Cache-Control");
+        } else if (request->hasHeader("Cache-Control")) {
+            auto cache_control_header = request->getHeader("Cache-Control");
             qCDebug(taskMetaCacheLogC) << "Parsing 'Cache-Control' header with" << cache_control_header;
 
             static const QRegularExpression s_maxAgeExpr("max-age=([0-9]+)");
             qint64 max_age = s_maxAgeExpr.match(cache_control_header).captured(1).toLongLong();
             m_entry->setMaximumAge(max_age);
 
-        } else if (reply.hasRawHeader("Expires")) {
-            auto expires_header = reply.rawHeader("Expires");
+        } else if (request->hasHeader("Expires")) {
+            auto expires_header = request->getHeader("Expires");
             qCDebug(taskMetaCacheLogC) << "Parsing 'Expires' header with" << expires_header;
 
             qint64 max_age = QDateTime::fromString(expires_header).toSecsSinceEpoch() - QDateTime::currentSecsSinceEpoch();
@@ -112,8 +112,8 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply& reply)
             m_entry->setMaximumAge(MAX_TIME_TO_EXPIRE);
         }
 
-        if (reply.hasRawHeader("Age")) {
-            auto age_header = reply.rawHeader("Age");
+        if (request->hasHeader("Age")) {
+            auto age_header = request->getHeader("Age");
             qCDebug(taskMetaCacheLogC) << "Parsing 'Age' header with" << age_header;
 
             qint64 current_age = age_header.toLongLong();

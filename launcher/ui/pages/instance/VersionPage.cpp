@@ -53,6 +53,9 @@
 
 #include "QObjectPtr.h"
 #include "VersionPage.h"
+
+#include <QIdentityProxyModel>
+
 #include "meta/JsonFormat.h"
 #include "tasks/SequentialTask.h"
 #include "ui/dialogs/InstallLoaderDialog.h"

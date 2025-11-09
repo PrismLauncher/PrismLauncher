@@ -66,6 +66,12 @@
 
 #include <DesktopServices.h>
 #include <FileSystem.h>
+
+#include <QFileSystemWatcher>
+#include <QIdentityProxyModel>
+#include <QMimeData>
+#include <QThreadPool>
+
 #include "RWStorage.h"
 
 using SharedIconCache = RWStorage<QString, QIcon>;
@@ -387,7 +393,7 @@ void ScreenshotsPage::on_actionUpload_triggered()
         return;
 
     QList<ScreenShot::Ptr> uploaded;
-    auto job = NetJob::Ptr(new NetJob("Screenshot Upload", APPLICATION->network()));
+    auto job = NetJob::Ptr(new NetJob("Screenshot Upload"));
 
     ProgressDialog dialog(this);
     dialog.setSkipButton(true, tr("Abort"));
@@ -432,10 +438,9 @@ void ScreenshotsPage::on_actionUpload_triggered()
         job->addNetAction(ImgurUpload::make(screenshot));
     }
     SequentialTask task;
-    auto albumTask = NetJob::Ptr(new NetJob("Imgur Album Creation", APPLICATION->network()));
+    auto albumTask = NetJob::Ptr(new NetJob("Imgur Album Creation"));
     auto imgurResult = std::make_shared<ImgurAlbumCreation::Result>();
-    auto imgurAlbum = ImgurAlbumCreation::make(imgurResult, uploaded);
-    albumTask->addNetAction(imgurAlbum);
+    albumTask->addNetAction(ImgurAlbumCreation::make(imgurResult, uploaded));
     task.addTask(job);
     task.addTask(albumTask);
 

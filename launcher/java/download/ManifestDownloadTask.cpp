@@ -38,7 +38,7 @@ ManifestDownloadTask::ManifestDownloadTask(QUrl url, QString final_path, QString
 void ManifestDownloadTask::executeTask()
 {
     setStatus(tr("Downloading Java"));
-    auto download = makeShared<NetJob>(QString("JRE::DownloadJava"), APPLICATION->network());
+    auto download = makeShared<NetJob>(QString("JRE::DownloadJava"));
     auto files = std::make_shared<QByteArray>();
 
     auto action = Net::Download::makeByteArray(m_url, files);
@@ -102,14 +102,14 @@ void ManifestDownloadTask::downloadJava(const QJsonDocument& doc)
             }
         }
     }
-    auto elementDownload = makeShared<NetJob>("JRE::FileDownload", APPLICATION->network());
+    auto elementDownload = makeShared<NetJob>("JRE::FileDownload");
     for (const auto& file : toDownload) {
         auto dl = Net::Download::makeFile(file.url, file.path);
         if (!file.hash.isEmpty()) {
             dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, file.hash));
         }
         if (file.isExec) {
-            connect(dl.get(), &Net::Download::succeeded,
+            connect(dl.get(), &Net::NetRequest::succeeded,
                     [file] { QFile(file.path).setPermissions(QFile(file.path).permissions() | QFileDevice::Permissions(0x1111)); });
         }
         elementDownload->addNetAction(dl);

@@ -38,10 +38,9 @@
 #include "Screenshot.h"
 #include "net/NetRequest.h"
 
-class ImgurAlbumCreation : public Net::NetRequest {
-   public:
-    virtual ~ImgurAlbumCreation() = default;
+#include <net/NetRequest.h>
 
+namespace ImgurAlbumCreation {
     struct Result {
         QString deleteHash;
         QString id;
@@ -53,10 +52,10 @@ class ImgurAlbumCreation : public Net::NetRequest {
         virtual ~Sink() = default;
 
        public:
-        auto init(QNetworkRequest& request) -> Task::State override;
+        auto init(Net::NetRequest* request) -> Task::State override;
         auto write(QByteArray& data) -> Task::State override;
         auto abort() -> Task::State override;
-        auto finalize(QNetworkReply& reply) -> Task::State override;
+        auto finalize(Net::NetRequest* request) -> Task::State override;
         auto hasLocalData() -> bool override { return false; }
 
        private:
@@ -64,9 +63,6 @@ class ImgurAlbumCreation : public Net::NetRequest {
         QByteArray m_output;
     };
 
-    static NetRequest::Ptr make(std::shared_ptr<Result> output, QList<ScreenShot::Ptr> screenshots);
-    QNetworkReply* getReply(QNetworkRequest& request) override;
-
-   private:
-    QList<ScreenShot::Ptr> m_screenshots;
+    Net::NetRequest::Ptr make(std::shared_ptr<Result> output, QList<ScreenShot::Ptr> screenshots);
+    void configureRequest(Net::NetRequest* request, QList<ScreenShot::Ptr> screenshots);
 };

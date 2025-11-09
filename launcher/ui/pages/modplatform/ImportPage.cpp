@@ -41,6 +41,7 @@
 
 #include <QFileDialog>
 #include <QMimeDatabase>
+#include <QUrlQuery>
 #include <QValidator>
 #include <utility>
 

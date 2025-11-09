@@ -36,6 +36,9 @@
  */
 
 #include "NetJob.h"
+
+#include <ui/dialogs/NetworkJobFailedDialog.h>
+
 #include <QNetworkReply>
 #include "net/NetRequest.h"
 #include "tasks/ConcurrentTask.h"
@@ -44,147 +47,228 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #endif
 
-NetJob::NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network, int max_concurrent)
-    : ConcurrentTask(job_name), m_network(network)
+NetJob::NetJob(QString jobName, int maxConcurrent)
 {
+    if (maxConcurrent < 0) {
 #if defined(LAUNCHER_APPLICATION)
-    if (APPLICATION_DYN && max_concurrent < 0)
-        max_concurrent = APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt();
+        maxConcurrent = APPLICATION_DYN ? APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt() : 6;
+#else
+        maxConcurrent = 6;
 #endif
-    if (max_concurrent > 0)
-        setMaxConcurrent(max_concurrent);
+    }
+
+    m_jobName = jobName;
+    m_maxConcurrent = maxConcurrent;
+    m_runningRequests.reserve(maxConcurrent);
+
+    connect(this, &Task::finished, this, [this]{ m_performTimer.stop(); });
 }
 
-auto NetJob::addNetAction(Net::NetRequest::Ptr action) -> bool
+NetJob::~NetJob()
 {
-    action->setNetwork(m_network);
-
-    addTask(action);
-
-    return true;
+    for (const auto& request : m_runningRequests) {
+        curl_multi_remove_handle(m_curl.get(), request->curlHandle());
+    }
 }
 
-void NetJob::executeNextSubTask()
+auto NetJob::addNetAction(Net::NetRequest::Ptr action) -> void
 {
-    // We're finished, check for failures and retry if we can (up to 3 times)
-    if (isRunning() && m_queue.isEmpty() && m_doing.isEmpty() && !m_failed.isEmpty() && m_try < 3) {
-        m_try += 1;
-        while (!m_failed.isEmpty()) {
-            auto task = m_failed.take(*m_failed.keyBegin());
-            m_done.remove(task.get());
-            m_queue.enqueue(task);
+    m_pendingRequests.push_back(action);
+}
+
+size_t NetJob::requestsSize() const
+{
+    return m_pendingRequests.size() + m_runningRequests.size() + m_failedRequests.size();
+}
+
+std::deque<Net::NetRequest::Ptr> NetJob::getFailedRequests() const
+{
+    return m_failedRequests;
+}
+
+void NetJob::executeTask()
+{
+    connect(&m_performTimer, &QTimer::timeout, this, &NetJob::perform);
+    m_performTimer.start();
+}
+
+void NetJob::perform()
+{
+    int runningTasks;
+    if (const CURLMcode result = curl_multi_perform(m_curl.get(), &runningTasks); result != CURLM_OK) {
+        qCritical() << "curl_multi_perform failed:" << curl_multi_strerror(result);
+        m_performTimer.stop();
+
+        Task::emitFailed("curl_multi_perform failed");
+        return;
+    }
+
+    while (runningTasks < m_maxConcurrent) {
+        if (m_pendingRequests.empty()) {
+            break;
+        }
+        auto request = m_pendingRequests.front();
+        m_pendingRequests.pop_front();
+
+        if (const auto state = request->prepare(); state == State::Running) {
+            curl_multi_add_handle(m_curl.get(), request->curlHandle());
+            m_runningRequests.push_back(request);
+            runningTasks++;
         }
     }
-    ConcurrentTask::executeNextSubTask();
+
+    qint64 totalExpected = 0;
+    qint64 totalReceived = 0;
+    for (const auto& request : m_runningRequests) {
+        auto taskProgress = request->stepProgress();
+
+        totalExpected += taskProgress.total;
+        totalReceived += taskProgress.current;
+
+        emit stepProgress(taskProgress);
+        request->updateDetails();
+    }
+
+    emit progress(totalReceived, totalExpected);
+
+    const CURLMsg* multiMsg = nullptr;
+    do {
+        int messagesInQueue;
+        multiMsg = curl_multi_info_read(m_curl.get(), &messagesInQueue);
+        if (multiMsg && multiMsg->msg == CURLMSG_DONE) {
+            const auto& request = findRequestByHandle(multiMsg->easy_handle);
+            const CURLcode result = multiMsg->data.result;
+            request->setResult(result);
+
+            curl_multi_remove_handle(m_curl.get(), multiMsg->easy_handle);
+            std::erase(m_runningRequests, request);
+
+            if (request->isSuccess()) {
+                request->finalize();
+                emit request->succeeded();
+            } else {
+                m_failedRequests.push_back(request);
+            }
+        }
+    } while (multiMsg);
+
+    if (runningTasks == 0) {
+        onAllTransfersComplete();
+    }
 }
 
-auto NetJob::size() const -> int
+Net::NetRequest::Ptr& NetJob::findRequestByHandle(const CURL* handle)
 {
-    return m_queue.size() + m_doing.size() + m_done.size();
+    for (auto& request : m_runningRequests) {
+        if (request->curlHandle() == handle) {
+            return request;
+        }
+    }
+
+    qCritical() << "No request found for handle";
+    throw std::invalid_argument{ "No request found for handle" };
 }
 
-auto NetJob::canAbort() const -> bool
+void NetJob::onAllTransfersComplete()
 {
-    bool canFullyAbort = true;
+    if (!isRunning()) {
+        m_performTimer.stop();
+        return;
+    }
 
-    // can abort the downloads on the queue?
-    for (auto part : m_queue)
-        canFullyAbort &= part->canAbort();
+    const bool success = m_failedRequests.empty();
+    bool shouldStop = true;
 
-    // can abort the active downloads?
-    for (auto part : m_doing)
-        canFullyAbort &= part->canAbort();
+    if (m_attempts < m_attemptsBeforeAsking && isOnline()) {
+        while (!m_failedRequests.empty()) {
+            auto request = m_failedRequests.front();
+            m_failedRequests.pop_front();
+            m_pendingRequests.push_back(request);
+            shouldStop = false;
+        }
+    }
 
-    return canFullyAbort;
+    if (!shouldStop) {
+        if (!success) {
+            m_attempts++;
+        }
+        return;
+    }
+
+    if (success) {
+        if (!m_suppressSucceeded) {
+            emitSucceeded();
+        }
+    } else {
+        emitFailed("Network requests have failed");
+    }
 }
 
 auto NetJob::abort() -> bool
 {
-    bool fullyAborted = true;
-
-    // fail all downloads on the queue
-    for (auto task : m_queue)
-        m_failed.insert(task.get(), task);
-    m_queue.clear();
-
-    // abort active downloads
-    auto toKill = m_doing.values();
-    for (auto part : toKill) {
-        fullyAborted &= part->abort();
+    for (const auto& request : m_pendingRequests) {
+        request->abort();
+    }
+    for (const auto& request : m_runningRequests) {
+        request->abort();
+        curl_multi_remove_handle(m_curl.get(), request->curlHandle());
     }
 
-    if (fullyAborted)
-        emitAborted();
-    else
-        emitFailed(tr("Failed to abort all tasks in the NetJob!"));
-
-    return fullyAborted;
+    m_performTimer.stop();
+    emitAborted();
+    return true;
 }
 
-auto NetJob::getFailedActions() -> QList<Net::NetRequest*>
-{
-    QList<Net::NetRequest*> failed;
-    for (auto index : m_failed) {
-        failed.push_back(dynamic_cast<Net::NetRequest*>(index.get()));
-    }
-    return failed;
-}
-
-auto NetJob::getFailedFiles() -> QList<QString>
-{
-    QList<QString> failed;
-    for (auto index : m_failed) {
-        failed.append(static_cast<Net::NetRequest*>(index.get())->url().toString());
-    }
-    return failed;
-}
-
-void NetJob::updateState()
-{
-    emit progress(m_done.count(), totalSize());
-    setStatus(tr("Executing %1 task(s) (%2 out of %3 are done)")
-                  .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(totalSize())));
-}
-
-bool NetJob::isOnline()
+bool NetJob::isOnline() const
 {
     // check some errors that are ussually associated with the lack of internet
-    for (auto job : getFailedActions()) {
-        auto err = job->error();
-        if (err != QNetworkReply::HostNotFoundError && err != QNetworkReply::NetworkSessionFailedError) {
+    for (const auto& request : m_failedRequests) {
+        const auto result = request->result();
+        if (result != CURLE_COULDNT_RESOLVE_HOST) {
             return true;
         }
     }
     return false;
-};
+}
 
 void NetJob::emitFailed(QString reason)
 {
 #if defined(LAUNCHER_APPLICATION)
+    if (APPLICATION_DYN && m_askRetry && m_manualRetries < APPLICATION->settings()->get("NumberOfManualRetries").toInt() && isOnline()) {
+        auto dialog = NetworkJobFailedDialog(m_jobName, m_attempts, m_failedRequests.size(), m_failedRequests.size(), nullptr);
 
-    if (APPLICATION_DYN && m_ask_retry && m_manual_try < APPLICATION->settings()->get("NumberOfManualRetries").toInt() && isOnline()) {
-        m_manual_try++;
-        auto response = CustomMessageBox::selectable(nullptr, "Confirm retry",
-                                                     "The tasks failed.\n"
-                                                     "Failed urls\n" +
-                                                         getFailedFiles().join("\n\t") +
-                                                         ".\n"
-                                                         "If this continues to happen please check the logs of the application.\n"
-                                                         "Do you want to retry?",
-                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                            ->exec();
+        int i = 0;
+        for (const auto& request : m_failedRequests) {
+            dialog.addFailedRequest(i, request->url(), request->error());
+            i++;
+        }
 
-        if (response == QMessageBox::Yes) {
-            m_try = 0;
-            executeNextSubTask();
+        if (dialog.exec() == QDialog::Accepted) {
+            m_manualRetries++;
+            m_attemptsBeforeAsking += 3;
             return;
         }
     }
 #endif
-    ConcurrentTask::emitFailed(reason);
+
+    for (const auto& request : m_failedRequests) {
+        emit request->failed(request->error());
+    }
+
+    Task::emitFailed(reason);
 }
 
 void NetJob::setAskRetry(bool askRetry)
 {
-    m_ask_retry = askRetry;
+    m_askRetry = askRetry;
+}
+
+void NetJob::setSuppressSucceeded(bool suppressSucceeded)
+{
+    m_suppressSucceeded = suppressSucceeded;
+}
+
+bool NetJob::isMultiStep() const
+{
+    return requestsSize() > 1;
 }

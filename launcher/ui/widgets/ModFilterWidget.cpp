@@ -36,6 +36,7 @@
 #include "ModFilterWidget.h"
 #include <QCheckBox>
 #include <QComboBox>
+#include <QIdentityProxyModel>
 #include <QListWidget>
 #include <algorithm>
 #include <list>

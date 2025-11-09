@@ -138,13 +138,13 @@ QList<Net::NetRequest::Ptr> Library::getDownloads(const RuntimeContext& runtimeC
         }
         if (!entry->isStale())
             return true;
-        Net::Download::Options options;
+        Net::NetRequest::Options options;
         if (stale) {
-            options |= Net::Download::Option::AcceptLocalFiles;
+            options |= Net::NetRequest::Option::AcceptLocalFiles;
         }
 
         // Don't add a time limit for the libraries cache entry validity
-        options |= Net::Download::Option::MakeEternal;
+        options |= Net::NetRequest::Option::MakeEternal;
 
         if (sha1.size()) {
             auto dl = Net::ApiDownload::makeCached(url, entry, options);

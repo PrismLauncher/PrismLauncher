@@ -84,7 +84,7 @@ bool PackInstallTask::abort()
 void PackInstallTask::executeTask()
 {
     qDebug() << "PackInstallTask::executeTask: " << QThread::currentThreadId();
-    NetJob::Ptr netJob{ new NetJob("ATLauncher::VersionFetch", APPLICATION->network()) };
+    NetJob::Ptr netJob{ new NetJob("ATLauncher::VersionFetch") };
     auto searchUrl =
         QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json").arg(m_pack_safe_name).arg(m_version_name);
     netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response));
@@ -629,7 +629,7 @@ void PackInstallTask::installConfigs()
 {
     qDebug() << "PackInstallTask::installConfigs: " << QThread::currentThreadId();
     setStatus(tr("Downloading configs..."));
-    jobPtr.reset(new NetJob(tr("Config download"), APPLICATION->network()));
+    jobPtr.reset(new NetJob(tr("Config download")));
 
     auto path = QString("Configs/%1/%2.zip").arg(m_pack_safe_name).arg(m_version_name);
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.zip").arg(m_pack_safe_name).arg(m_version_name);
@@ -706,7 +706,7 @@ void PackInstallTask::downloadMods()
     setStatus(tr("Downloading mods..."));
 
     jarmods.clear();
-    jobPtr.reset(new NetJob(tr("Mod download"), APPLICATION->network()));
+    jobPtr.reset(new NetJob(tr("Mod download")));
 
     QList<VersionMod> blocked_mods;
     for (const auto& mod : m_version.mods) {

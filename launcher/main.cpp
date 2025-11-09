@@ -33,10 +33,13 @@
  *      limitations under the License.
  */
 
+#include "curl/curl.h"
 #include "Application.h"
 
 int main(int argc, char* argv[])
 {
+    curl_global_init(CURL_GLOBAL_ALL);
+
     // try to set the utf-8 locale for the libarchive
     for (auto name : { ".UTF-8", "en_US.UTF-8", "C.UTF-8" }) {
         if (std::setlocale(LC_CTYPE, name)) {
@@ -47,6 +50,7 @@ int main(int argc, char* argv[])
     // initialize Qt
     Application app(argc, argv);
 
+    int exitCode;
     switch (app.status()) {
         case Application::StartingUp:
         case Application::Initialized: {
@@ -67,13 +71,20 @@ int main(int argc, char* argv[])
             Q_INIT_RESOURCE(flat_white);
 
             Q_INIT_RESOURCE(shaders);
-            return app.exec();
+            exitCode = Application::exec();
+            break;
         }
         case Application::Failed:
-            return 1;
+            exitCode = 1;
+            break;
         case Application::Succeeded:
-            return 0;
+            exitCode = 0;
+            break;
         default:
-            return -1;
+            exitCode = -1;
+            break;
     }
+
+    curl_global_cleanup();
+    return exitCode;
 }

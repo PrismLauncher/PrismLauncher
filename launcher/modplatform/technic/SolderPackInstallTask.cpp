@@ -70,7 +70,7 @@ void Technic::SolderPackInstallTask::executeTask()
 {
     setStatus(tr("Resolving modpack files"));
 
-    m_filesNetJob.reset(new NetJob(tr("Resolving modpack files"), m_network));
+    m_filesNetJob.reset(new NetJob(tr("Resolving modpack files")));
     auto sourceUrl = QString("%1/modpack/%2/%3").arg(m_solderUrl.toString(), m_pack, m_version);
     m_filesNetJob->addNetAction(Net::ApiDownload::makeByteArray(sourceUrl, m_response));
 
@@ -106,7 +106,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     if (!build.minecraft.isEmpty())
         m_minecraftVersion = build.minecraft;
 
-    m_filesNetJob.reset(new NetJob(tr("Downloading modpack"), m_network));
+    m_filesNetJob.reset(new NetJob(tr("Downloading modpack")));
 
     int i = 0;
     for (const auto& mod : build.mods) {

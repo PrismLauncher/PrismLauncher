@@ -35,47 +35,17 @@
  */
 
 #include "ImgurUpload.h"
+
+#include <FileSystem.h>
+
 #include "BuildConfig.h"
 #include "net/RawHeaderProxy.h"
 
 #include <QDebug>
-#include <QFile>
-#include <QHttpMultiPart>
 #include <QHttpPart>
-#include <QJsonDocument>
 #include <QJsonObject>
-#include <QNetworkRequest>
-#include <QUrl>
 
-QNetworkReply* ImgurUpload::getReply(QNetworkRequest& request)
-{
-    auto file = new QFile(m_fileInfo.absoluteFilePath(), this);
-
-    if (!file->open(QFile::ReadOnly)) {
-        emitFailed();
-        return nullptr;
-    }
-
-    QHttpMultiPart* multipart = new QHttpMultiPart(QHttpMultiPart::FormDataType, this);
-    file->setParent(multipart);
-    QHttpPart filePart;
-    filePart.setBodyDevice(file);
-    filePart.setHeader(QNetworkRequest::ContentTypeHeader, "image/png");
-    filePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"image\"; filename=\"" + file->fileName() + "\"");
-    multipart->append(filePart);
-    QHttpPart typePart;
-    typePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"type\"");
-    typePart.setBody("file");
-    multipart->append(typePart);
-    QHttpPart namePart;
-    namePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"title\"");
-    namePart.setBody(m_fileInfo.baseName().toUtf8());
-    multipart->append(namePart);
-
-    return m_network->post(request, multipart);
-}
-
-auto ImgurUpload::Sink::init(QNetworkRequest& request) -> Task::State
+auto ImgurUpload::Sink::init(Net::NetRequest*) -> Task::State
 {
     m_output.clear();
     return Task::State::Running;
@@ -94,7 +64,7 @@ auto ImgurUpload::Sink::abort() -> Task::State
     return Task::State::Failed;
 }
 
-auto ImgurUpload::Sink::finalize(QNetworkReply&) -> Task::State
+auto ImgurUpload::Sink::finalize(Net::NetRequest*) -> Task::State
 {
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(m_output, &jsonError);
@@ -115,12 +85,24 @@ auto ImgurUpload::Sink::finalize(QNetworkReply&) -> Task::State
     return Task::State::Succeeded;
 }
 
-Net::NetRequest::Ptr ImgurUpload::make(ScreenShot::Ptr m_shot)
+Net::NetRequest::Ptr ImgurUpload::make(ScreenShot::Ptr screenShot)
 {
-    auto up = makeShared<ImgurUpload>(m_shot->m_file);
-    up->m_url = std::move(BuildConfig.IMGUR_BASE_URL + "image");
-    up->m_sink.reset(new Sink(m_shot));
-    up->addHeaderProxy(new Net::RawHeaderProxy(QList<Net::HeaderPair>{
-        { "Authorization", QString("Client-ID %1").arg(BuildConfig.IMGUR_CLIENT_ID).toUtf8() }, { "Accept", "application/json" } }));
-    return up;
+    auto request = makeShared<Net::NetRequest>(BuildConfig.IMGUR_BASE_URL + "image", new Sink(screenShot));
+    configureRequest(request.get(), screenShot);
+    return request;
+}
+
+void ImgurUpload::configureRequest(Net::NetRequest* request, ScreenShot::Ptr screenShot)
+{
+    request->addHeadersFromProxy(Net::RawHeaderProxy(QList<Net::HeaderPair>{
+    { "Authorization", QString("Client-ID %1").arg(BuildConfig.IMGUR_CLIENT_ID).toUtf8() }, { "Accept", "application/json" } }));
+
+    auto path = screenShot->m_file.absoluteFilePath();
+    const QList<Net::NetRequest::Multipart> parts = {
+        { "image", FS::read(path), "image/png", screenShot->m_file.fileName() },
+        { "type", "image" },
+        { "title", screenShot->m_file.baseName().toUtf8() }
+    };
+    request->httpMultipart(parts);
+    request->setLoggingCategory(taskUploadLogC);
 }

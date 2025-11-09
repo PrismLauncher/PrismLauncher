@@ -35,9 +35,9 @@ void XboxProfileStep::perform()
 
     m_response.reset(new QByteArray());
     m_request = Net::Download::makeByteArray(url, m_response);
-    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
+    m_request->addHeadersFromProxy(Net::RawHeaderProxy(headers));
 
-    m_task.reset(new NetJob("XboxProfileStep", APPLICATION->network()));
+    m_task.reset(new NetJob("XboxProfileStep"));
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
@@ -49,13 +49,13 @@ void XboxProfileStep::perform()
 
 void XboxProfileStep::onRequestDone()
 {
-    if (m_request->error() != QNetworkReply::NoError) {
+    if (!m_request->isSuccess()) {
         qWarning() << "Reply error:" << m_request->error();
         qCDebug(authCredentials()) << *m_response;
-        if (Net::isApplicationError(m_request->error())) {
-            emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("Failed to retrieve the Xbox profile: %1").arg(m_request->errorString()));
+        if (Net::isApplicationError(m_request->result())) {
+            emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("Failed to retrieve the Xbox profile: %1").arg(m_request->error()));
         } else {
-            emit finished(AccountTaskState::STATE_OFFLINE, tr("Failed to retrieve the Xbox profile: %1").arg(m_request->errorString()));
+            emit finished(AccountTaskState::STATE_OFFLINE, tr("Failed to retrieve the Xbox profile: %1").arg(m_request->error()));
         }
         return;
     }

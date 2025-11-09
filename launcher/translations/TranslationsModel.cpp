@@ -39,6 +39,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <QDir>
+#include <QFileSystemWatcher>
 #include <QLibraryInfo>
 #include <QLocale>
 #include <QTranslator>
@@ -159,7 +160,7 @@ struct TranslationsModel::Private {
     std::unique_ptr<QTranslator> m_qt_translator;
     std::unique_ptr<QTranslator> m_app_translator;
 
-    Net::Download* m_index_task;
+    Net::NetRequest* m_index_task;
     QString m_downloadingTranslation;
     NetJob::Ptr m_dl_job;
     NetJob::Ptr m_index_job;
@@ -547,7 +548,7 @@ void TranslationsModel::downloadIndex()
         return;
     }
     qDebug() << "Downloading Translations Index...";
-    d->m_index_job.reset(new NetJob("Translations Index", APPLICATION->network()));
+    d->m_index_job.reset(new NetJob("Translations Index"));
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "index_v2.json");
     entry->setStale(true);
     auto task = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + "index_v2.json"), entry);
@@ -593,9 +594,8 @@ void TranslationsModel::downloadTranslation(QString key)
 
     auto dl = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + lang->file_name), entry);
     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, lang->file_sha1));
-    dl->setProgress(dl->getProgress(), lang->file_size);
 
-    d->m_dl_job.reset(new NetJob("Translation for " + key, APPLICATION->network()));
+    d->m_dl_job.reset(new NetJob("Translation for " + key));
     d->m_dl_job->addNetAction(dl);
     d->m_dl_job->setAskRetry(false);
 
