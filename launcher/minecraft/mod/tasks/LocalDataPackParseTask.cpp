@@ -51,7 +51,7 @@ bool processFolder(DataPack* pack, ProcessingLevel level)
     Q_ASSERT(pack->type() == ResourceType::FOLDER);
 
     auto mcmeta_invalid = [&pack]() {
-        qWarning() << "Data pack at" << pack->fileinfo().filePath() << "does not have a valid pack.mcmeta";
+        qWarning() << "Data pack at" << pack->fileinfo().filePath() << "does not have a pack.mcmeta";
         return false;  // the mcmeta is not optional
     };
 
@@ -67,7 +67,10 @@ bool processFolder(DataPack* pack, ProcessingLevel level)
 
         mcmeta_file.close();
         if (!mcmeta_result) {
-            return mcmeta_invalid();  // mcmeta invalid
+            qWarning() << "Data pack at" << pack->fileinfo().filePath() << "has a malformed pack.mcmeta";
+            pack->setValidMCMeta(false);
+            pack->setPackFormat(0);
+            pack->setDescription("\u00A7c\u00A7lInvalid pack.mcmeta!");
         }
     } else {
         return mcmeta_invalid();  // mcmeta file isn't a valid file
@@ -113,7 +116,7 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
     QuaZipFile file(&zip);
 
     auto mcmeta_invalid = [&pack]() {
-        qWarning() << "Data pack at" << pack->fileinfo().filePath() << "does not have a valid pack.mcmeta";
+        qWarning() << "Data pack at" << pack->fileinfo().filePath() << "does not have a pack.mcmeta";
         return false;  // the mcmeta is not optional
     };
 
@@ -130,7 +133,10 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
 
         file.close();
         if (!mcmeta_result) {
-            return mcmeta_invalid();  // mcmeta invalid
+            qWarning() << "Data pack at" << pack->fileinfo().filePath() << "has a malformed pack.mcmeta";
+            pack->setValidMCMeta(false);
+            pack->setPackFormat(0);
+            pack->setDescription("\u00A7c\u00A7lInvalid pack.mcmeta!");
         }
     } else {
         return mcmeta_invalid();  // could not set pack.mcmeta as current file.
@@ -176,23 +182,6 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
 // https://minecraft.wiki/w/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
 bool processMCMeta(DataPack* pack, QByteArray&& raw_data)
 {
-    // This trims the data after the top level pair of braces is closed. Some pack.mcmeta files include credits/other info after
-    // the JSON, which the parser collides with.
-    int open_braces = 0;
-    int close_braces = 0;
-    qsizetype valid_bytes = 0;
-    for (auto& byte : raw_data) {
-        if (open_braces == close_braces && open_braces != 0)
-            break;
-
-        valid_bytes++;
-        if (byte == '{')
-            open_braces++;
-        else if (byte == '}')
-            close_braces++;
-    }
-    raw_data.resize(valid_bytes);
-
     try {
         auto json_doc = QJsonDocument::fromJson(raw_data);
         auto pack_obj = Json::requireObject(json_doc.object(), "pack", {});

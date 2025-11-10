@@ -118,6 +118,13 @@ void DataPack::setImage(QImage new_image) const
     }
 }
 
+void DataPack::setValidMCMeta(bool valid)
+{
+    QMutexLocker locker(&m_data_lock);
+
+    m_has_valid_mcmeta = valid;
+}
+
 QPixmap DataPack::image(QSize size, Qt::AspectRatioMode mode) const
 {
     QPixmap cached_image;
