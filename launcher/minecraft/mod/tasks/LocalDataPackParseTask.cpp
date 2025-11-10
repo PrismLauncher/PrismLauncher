@@ -176,6 +176,23 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
 // https://minecraft.wiki/w/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
 bool processMCMeta(DataPack* pack, QByteArray&& raw_data)
 {
+    // This trims the data after the top level pair of braces is closed. Some pack.mcmeta files include credits/other info after
+    // the JSON, which the parser collides with.
+    int open_braces = 0;
+    int close_braces = 0;
+    qsizetype valid_bytes = 0;
+    for (auto& byte : raw_data) {
+        if (open_braces == close_braces && open_braces != 0)
+            break;
+
+        valid_bytes++;
+        if (byte == '{')
+            open_braces++;
+        else if (byte == '}')
+            close_braces++;
+    }
+    raw_data.resize(valid_bytes);
+
     try {
         auto json_doc = QJsonDocument::fromJson(raw_data);
         auto pack_obj = Json::requireObject(json_doc.object(), "pack", {});
