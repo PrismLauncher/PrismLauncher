@@ -178,17 +178,18 @@ bool processMCMeta(DataPack* pack, QByteArray&& raw_data)
 {
     // This trims the data after the top level pair of braces is closed. Some pack.mcmeta files include credits/other info after
     // the JSON, which the parser collides with.
-    int braces = 0;
+    int open_braces = 0;
+    int close_braces = 0;
     qsizetype valid_bytes = 0;
     for (auto& byte : raw_data) {
-        if (valid_bytes > 0 && braces == 0)
+        if (open_braces == close_braces && open_braces != 0)
             break;
 
         valid_bytes++;
         if (byte == '{')
-            braces++;
+            open_braces++;
         else if (byte == '}')
-            braces--;
+            close_braces++;
     }
     raw_data.resize(valid_bytes);
 
