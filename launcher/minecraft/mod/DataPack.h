@@ -50,7 +50,7 @@ class DataPack : public Resource {
     /** Gets the image of the data pack, converted to a QPixmap for drawing, and scaled to size. */
     QPixmap image(QSize size, Qt::AspectRatioMode mode = Qt::AspectRatioMode::IgnoreAspectRatio) const;
 
-    /** Gets the validity of the pack's pack.mcmeta file */
+    /** Gets the validity of the pack's pack.mcmeta file. */
     bool validMCMeta() const { return m_has_valid_mcmeta; }
 
     /** Thread-safe. */
