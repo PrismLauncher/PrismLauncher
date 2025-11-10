@@ -51,7 +51,7 @@ bool processFolder(DataPack* pack, ProcessingLevel level)
     Q_ASSERT(pack->type() == ResourceType::FOLDER);
 
     auto mcmeta_invalid = [&pack]() {
-        qWarning() << "Data pack at" << pack->fileinfo().filePath() << "does not have a valid pack.mcmeta";
+        qWarning() << "Data pack at" << pack->fileinfo().filePath() << "does not have a pack.mcmeta";
         return false;  // the mcmeta is not optional
     };
 
@@ -67,7 +67,10 @@ bool processFolder(DataPack* pack, ProcessingLevel level)
 
         mcmeta_file.close();
         if (!mcmeta_result) {
-            return mcmeta_invalid();  // mcmeta invalid
+            qWarning() << "Data pack at" << pack->fileinfo().filePath() << "has a malformed pack.mcmeta";
+            pack->setValidMCMeta(false);
+            pack->setPackFormat(0);
+            pack->setDescription("\u00A7c\u00A7lInvalid pack.mcmeta!");
         }
     } else {
         return mcmeta_invalid();  // mcmeta file isn't a valid file
@@ -113,7 +116,7 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
     QuaZipFile file(&zip);
 
     auto mcmeta_invalid = [&pack]() {
-        qWarning() << "Data pack at" << pack->fileinfo().filePath() << "does not have a valid pack.mcmeta";
+        qWarning() << "Data pack at" << pack->fileinfo().filePath() << "does not have a pack.mcmeta";
         return false;  // the mcmeta is not optional
     };
 
@@ -130,7 +133,10 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
 
         file.close();
         if (!mcmeta_result) {
-            return mcmeta_invalid();  // mcmeta invalid
+            qWarning() << "Data pack at" << pack->fileinfo().filePath() << "has a malformed pack.mcmeta";
+            pack->setValidMCMeta(false);
+            pack->setPackFormat(0);
+            pack->setDescription("\u00A7c\u00A7lInvalid pack.mcmeta!");
         }
     } else {
         return mcmeta_invalid();  // could not set pack.mcmeta as current file.

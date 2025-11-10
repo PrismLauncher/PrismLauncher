@@ -50,6 +50,9 @@ class DataPack : public Resource {
     /** Gets the image of the data pack, converted to a QPixmap for drawing, and scaled to size. */
     QPixmap image(QSize size, Qt::AspectRatioMode mode = Qt::AspectRatioMode::IgnoreAspectRatio) const;
 
+    /** Gets the validity of the pack's pack.mcmeta file */
+    bool validMCMeta() const { return m_has_valid_mcmeta; }
+
     /** Thread-safe. */
     void setPackFormat(int new_format_id);
 
@@ -58,6 +61,9 @@ class DataPack : public Resource {
 
     /** Thread-safe. */
     void setImage(QImage new_image) const;
+
+    /** Thread-safe. */
+    void setValidMCMeta(bool valid);
 
     bool valid() const override;
 
@@ -85,4 +91,6 @@ class DataPack : public Resource {
         QPixmapCache::Key key;
         bool was_ever_used = false;
     } mutable m_pack_image_cache_key;
+
+    bool m_has_valid_mcmeta = true;
 };

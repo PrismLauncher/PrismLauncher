@@ -94,6 +94,8 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
                     return {};
             }
         case Qt::DecorationRole: {
+            if (column == ActiveColumn && !(at(row).validMCMeta()))
+                return QIcon::fromTheme("status-yellow");
             if (column == NameColumn && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
                 return QIcon::fromTheme("status-yellow");
             if (column == ImageColumn) {
@@ -102,6 +104,9 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
             return {};
         }
         case Qt::ToolTipRole: {
+            if (column == ActiveColumn && !at(row).validMCMeta()) {
+                return m_resources[row]->internal_id() + tr("\nWarning: This pack has an invalid pack.mcmeta file.");
+            }
             if (column == PackFormatColumn) {
                 //: The string being explained by this is in the format: ID (Lower version - Upper version)
                 return tr("The resource pack format ID, as well as the Minecraft versions it was designed for.");
