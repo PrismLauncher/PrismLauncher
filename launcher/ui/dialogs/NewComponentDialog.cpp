@@ -83,7 +83,8 @@ NewComponentDialog::~NewComponentDialog()
 void NewComponentDialog::updateDialogState()
 {
     auto protoUid = ui->nameTextBox->text().toLower();
-    protoUid.remove(QRegularExpression("[^a-z]"));
+    static const QRegularExpression s_removeChars("[^a-z]");
+    protoUid.remove(s_removeChars);
     if (protoUid.isEmpty()) {
         ui->uidTextBox->setPlaceholderText(originalPlaceholderText);
     } else {

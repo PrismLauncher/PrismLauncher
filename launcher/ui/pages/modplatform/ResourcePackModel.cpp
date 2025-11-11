@@ -8,8 +8,11 @@
 
 namespace ResourceDownload {
 
-ResourcePackResourceModel::ResourcePackResourceModel(BaseInstance const& base_inst, ResourceAPI* api)
-    : ResourceModel(api), m_base_instance(base_inst)
+ResourcePackResourceModel::ResourcePackResourceModel(BaseInstance const& base_inst,
+                                                     ResourceAPI* api,
+                                                     QString debugName,
+                                                     QString metaEntryBase)
+    : ResourceModel(api), m_base_instance(base_inst), m_debugName(debugName + " (Model)"), m_metaEntryBase(metaEntryBase)
 {}
 
 /******** Make data requests ********/
@@ -17,19 +20,19 @@ ResourcePackResourceModel::ResourcePackResourceModel(BaseInstance const& base_in
 ResourceAPI::SearchArgs ResourcePackResourceModel::createSearchArguments()
 {
     auto sort = getCurrentSortingMethodByIndex();
-    return { ModPlatform::ResourceType::RESOURCE_PACK, m_next_search_offset, m_search_term, sort };
+    return { ModPlatform::ResourceType::ResourcePack, m_next_search_offset, m_search_term, sort };
 }
 
-ResourceAPI::VersionSearchArgs ResourcePackResourceModel::createVersionsArguments(QModelIndex& entry)
+ResourceAPI::VersionSearchArgs ResourcePackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
-    auto& pack = m_packs[entry.row()];
-    return { *pack };
+    auto pack = m_packs[entry.row()];
+    return { pack, {}, {}, ModPlatform::ResourceType::ResourcePack };
 }
 
-ResourceAPI::ProjectInfoArgs ResourcePackResourceModel::createInfoArguments(QModelIndex& entry)
+ResourceAPI::ProjectInfoArgs ResourcePackResourceModel::createInfoArguments(const QModelIndex& entry)
 {
-    auto& pack = m_packs[entry.row()];
-    return { *pack };
+    auto pack = m_packs[entry.row()];
+    return { pack };
 }
 
 void ResourcePackResourceModel::searchWithTerm(const QString& term, unsigned int sort)

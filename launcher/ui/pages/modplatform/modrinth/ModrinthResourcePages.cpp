@@ -37,29 +37,27 @@
  */
 
 #include "ModrinthResourcePages.h"
+#include "ui/pages/modplatform/DataPackModel.h"
 #include "ui_ResourcePage.h"
 
 #include "modplatform/modrinth/ModrinthAPI.h"
 
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
-#include "ui/pages/modplatform/modrinth/ModrinthResourceModels.h"
-
 namespace ResourceDownload {
 
 ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ModPage(dialog, instance)
 {
-    m_model = new ModrinthModModel(instance);
+    m_model = new ModModel(instance, new ModrinthAPI(), Modrinth::debugName(), Modrinth::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's constructor...
-    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &ModrinthModPage::triggerSearch);
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthModPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
-            &ModrinthModPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &ModrinthModPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ModrinthModPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
@@ -68,17 +66,16 @@ ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instan
 ModrinthResourcePackPage::ModrinthResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance)
     : ResourcePackResourcePage(dialog, instance)
 {
-    m_model = new ModrinthResourcePackModel(instance);
+    m_model = new ResourcePackResourceModel(instance, new ModrinthAPI(), Modrinth::debugName(), Modrinth::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's constructor...
-    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &ModrinthResourcePackPage::triggerSearch);
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthResourcePackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
-            &ModrinthResourcePackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &ModrinthResourcePackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ModrinthResourcePackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
@@ -87,17 +84,16 @@ ModrinthResourcePackPage::ModrinthResourcePackPage(ResourcePackDownloadDialog* d
 ModrinthTexturePackPage::ModrinthTexturePackPage(TexturePackDownloadDialog* dialog, BaseInstance& instance)
     : TexturePackResourcePage(dialog, instance)
 {
-    m_model = new ModrinthTexturePackModel(instance);
+    m_model = new TexturePackResourceModel(instance, new ModrinthAPI(), Modrinth::debugName(), Modrinth::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's constructor...
-    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &ModrinthTexturePackPage::triggerSearch);
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthTexturePackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
-            &ModrinthTexturePackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &ModrinthTexturePackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ModrinthTexturePackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
@@ -106,18 +102,34 @@ ModrinthTexturePackPage::ModrinthTexturePackPage(TexturePackDownloadDialog* dial
 ModrinthShaderPackPage::ModrinthShaderPackPage(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
     : ShaderPackResourcePage(dialog, instance)
 {
-    m_model = new ModrinthShaderPackModel(instance);
+    m_model = new ShaderPackResourceModel(instance, new ModrinthAPI(), Modrinth::debugName(), Modrinth::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's constructor...
-    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &ModrinthShaderPackPage::triggerSearch);
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthShaderPackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
-            &ModrinthShaderPackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &ModrinthShaderPackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ModrinthShaderPackPage::onResourceSelected);
+
+    m_ui->packDescription->setMetaEntry(metaEntryBase());
+}
+
+ModrinthDataPackPage::ModrinthDataPackPage(DataPackDownloadDialog* dialog, BaseInstance& instance) : DataPackResourcePage(dialog, instance)
+{
+    m_model = new DataPackResourceModel(instance, new ModrinthAPI(), Modrinth::debugName(), Modrinth::metaEntryBase());
+    m_ui->packView->setModel(m_model);
+
+    addSortings();
+
+    // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
+    // so it's best not to connect them in the parent's constructor...
+    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &ModrinthDataPackPage::triggerSearch);
+    connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthDataPackPage::onSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &ModrinthDataPackPage::onVersionSelectionChanged);
+    connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ModrinthDataPackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
 }
@@ -141,20 +153,24 @@ auto ModrinthShaderPackPage::shouldDisplay() const -> bool
 {
     return true;
 }
-
-unique_qobject_ptr<ModFilterWidget> ModrinthModPage::createFilterWidget()
+auto ModrinthDataPackPage::shouldDisplay() const -> bool
 {
-    return ModFilterWidget::create(&static_cast<MinecraftInstance&>(m_baseInstance), true, this);
+    return true;
+}
+
+std::unique_ptr<ModFilterWidget> ModrinthModPage::createFilterWidget()
+{
+    return ModFilterWidget::create(&static_cast<MinecraftInstance&>(m_baseInstance), true);
 }
 
 void ModrinthModPage::prepareProviderCategories()
 {
     auto response = std::make_shared<QByteArray>();
-    auto task = ModrinthAPI::getModCategories(response);
-    QObject::connect(task.get(), &Task::succeeded, [this, response]() {
+    m_categoriesTask = ModrinthAPI::getModCategories(response);
+    connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
         auto categories = ModrinthAPI::loadModCategories(response);
         m_filter_widget->setCategories(categories);
     });
-    task->start();
+    m_categoriesTask->start();
 };
 }  // namespace ResourceDownload

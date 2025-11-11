@@ -35,12 +35,12 @@
 
 #pragma once
 
-#include <Application.h>
 #include <QObjectPtr.h>
 #include <QDialog>
 #include <QStringListModel>
 #include "JavaCommon.h"
 #include "ui/pages/BasePage.h"
+#include "ui/widgets/JavaSettingsWidget.h"
 
 class SettingsObject;
 
@@ -56,29 +56,18 @@ class JavaPage : public QWidget, public BasePage {
     ~JavaPage();
 
     QString displayName() const override { return tr("Java"); }
-    QIcon icon() const override { return APPLICATION->getThemedIcon("java"); }
+    QIcon icon() const override { return QIcon::fromTheme("java"); }
     QString id() const override { return "java-settings"; }
     QString helpPage() const override { return "Java-settings"; }
-    bool apply() override;
     void retranslate() override;
 
-    void updateThresholds();
-
-   private:
-    void applySettings();
-    void loadSettings();
+    bool apply() override;
 
    private slots:
-    void on_javaDetectBtn_clicked();
-    void on_javaTestBtn_clicked();
-    void on_javaBrowseBtn_clicked();
     void on_downloadJavaButton_clicked();
     void on_removeJavaButton_clicked();
     void on_refreshJavaButton_clicked();
-    void on_maxMemSpinBox_valueChanged(int i);
-    void checkerFinished();
 
    private:
     Ui::JavaPage* ui;
-    unique_qobject_ptr<JavaCommon::TestCheck> checker;
 };

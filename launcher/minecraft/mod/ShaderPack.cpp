@@ -22,8 +22,6 @@
 
 #include "ShaderPack.h"
 
-#include <QRegularExpression>
-
 void ShaderPack::setPackFormat(ShaderPackFormat new_format)
 {
     QMutexLocker locker(&m_data_lock);

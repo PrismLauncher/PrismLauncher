@@ -106,7 +106,10 @@ class VersionTest : public QObject {
 
         QFile vector_file{ test_vector_dir.absoluteFilePath("test_vectors.txt") };
 
-        vector_file.open(QFile::OpenModeFlag::ReadOnly);
+        if (!vector_file.open(QFile::OpenModeFlag::ReadOnly)) {
+            qCritical() << "Failed to open file '" << vector_file.fileName() << "' for reading!";
+            return;
+        }
 
         int test_number = 0;
         const QString test_name_template{ "FlexVer test #%1 (%2)" };

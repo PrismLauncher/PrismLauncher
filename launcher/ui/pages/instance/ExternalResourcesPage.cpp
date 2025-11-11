@@ -52,7 +52,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
 {
     ui->setupUi(this);
 
-    ui->actionsToolbar->insertSpacer(ui->actionViewConfigs);
+    ui->actionsToolbar->insertSpacer(ui->actionViewFolder);
 
     m_filterModel = model->createFilterProxyModel(this);
     m_filterModel->setDynamicSortFilter(true);
@@ -146,19 +146,16 @@ void ExternalResourcesPage::openedImpl()
     m_model->startWatching();
 
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
-    if (!APPLICATION->settings()->contains(setting_name))
-        m_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
-    else
-        m_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
+    m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
-    ui->actionsToolbar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
+    ui->actionsToolbar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
 }
 
 void ExternalResourcesPage::closedImpl()
 {
     m_model->stopWatching();
 
-    m_wide_bar_setting->set(ui->actionsToolbar->getVisibilityState());
+    m_wide_bar_setting->set(QString::fromUtf8(ui->actionsToolbar->getVisibilityState().toBase64()));
 }
 
 void ExternalResourcesPage::retranslate()
@@ -289,16 +286,6 @@ void ExternalResourcesPage::enableItem()
 
 void ExternalResourcesPage::disableItem()
 {
-    if (m_instance != nullptr && m_instance->isRunning()) {
-        auto response = CustomMessageBox::selectable(this, tr("Confirm disable"),
-                                                     tr("If you disable this resource while the game is running it may crash your game.\n"
-                                                        "Are you sure you want to do this?"),
-                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                            ->exec();
-
-        if (response != QMessageBox::Yes)
-            return;
-    }
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
     m_model->setResourceEnabled(selection.indexes(), EnableAction::DISABLE);
 }

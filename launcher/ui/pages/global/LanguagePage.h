@@ -36,7 +36,6 @@
 
 #pragma once
 
-#include <Application.h>
 #include <QWidget>
 #include <memory>
 #include "ui/pages/BasePage.h"
@@ -51,7 +50,7 @@ class LanguagePage : public QWidget, public BasePage {
     virtual ~LanguagePage();
 
     QString displayName() const override { return tr("Language"); }
-    QIcon icon() const override { return APPLICATION->getThemedIcon("language"); }
+    QIcon icon() const override { return QIcon::fromTheme("language"); }
     QString id() const override { return "language-settings"; }
     QString helpPage() const override { return "Language-settings"; }
     bool apply() override;

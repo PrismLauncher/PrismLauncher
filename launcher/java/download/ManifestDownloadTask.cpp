@@ -23,10 +23,6 @@
 #include "net/ChecksumValidator.h"
 #include "net/NetJob.h"
 
-#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
-#include "xpcbridge/XPCManager.h"
-#endif
-
 struct File {
     QString path;
     QString url;
@@ -90,15 +86,10 @@ void ManifestDownloadTask::downloadJava(const QJsonDocument& doc)
         if (type == "directory") {
             FS::ensureFolderPathExists(file);
         } else if (type == "link") {
-            // this is linux only !
+            // this is *nix only !
             auto path = Json::ensureString(meta, "target");
             if (!path.isEmpty()) {
-#ifdef Q_OS_MACOS
                 QFile::link(path, file);
-#else
-                auto target = FS::PathCombine(file, "../" + path);
-                QFile(target).link(file);
-#endif
             }
         } else if (type == "file") {
             // TODO download compressed version if it exists ?
@@ -130,16 +121,7 @@ void ManifestDownloadTask::downloadJava(const QJsonDocument& doc)
     connect(elementDownload.get(), &Task::status, this, &ManifestDownloadTask::setStatus);
     connect(elementDownload.get(), &Task::details, this, &ManifestDownloadTask::setDetails);
 
-    connect(elementDownload.get(), &Task::succeeded, this, [this] {
-#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
-        auto iter = QDirIterator(m_final_path, QDir::Dirs | QDir::NoDotAndDotDot);
-        while (iter.hasNext()) {
-            QString path = QDir(iter.next()).absolutePath();
-            APPLICATION->m_xpcManager->removeQuarantineFromMojangJavaDirectory(path.toNSString(), m_url.toNSURL());
-        }
-#endif
-        this->emitSucceeded();
-    });
+    connect(elementDownload.get(), &Task::succeeded, this, &ManifestDownloadTask::emitSucceeded);
     m_task = elementDownload;
     m_task->start();
 }

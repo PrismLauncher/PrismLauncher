@@ -25,13 +25,17 @@ if cd "../XPCServices"; then
 fi
 
 ################ PLUGINS ################
-cd "../MacOS" || exit 1
+cd "../PlugIns" || exit 1
 codesign -f --timestamp -s "$CODE_SIGN_IDENTITY" iconengines/*.dylib
 codesign -f --timestamp -s "$CODE_SIGN_IDENTITY" imageformats/*.dylib
+codesign -f --timestamp -s "$CODE_SIGN_IDENTITY" networkinformation/*.dylib
+codesign -f --timestamp -s "$CODE_SIGN_IDENTITY" platforminputcontexts/*.dylib
 codesign -f --timestamp -s "$CODE_SIGN_IDENTITY" platforms/*.dylib
-codesign -f --timestamp -s "$CODE_SIGN_IDENTITY" jars/*.jar
 codesign -f --timestamp -s "$CODE_SIGN_IDENTITY" styles/*.dylib
 codesign -f --timestamp -s "$CODE_SIGN_IDENTITY" tls/*.dylib
+cd "../MacOS" || exit 1
+codesign -f --timestamp -s "$CODE_SIGN_IDENTITY" jars/*.jar
+codesign -f --timestamp -s "$CODE_SIGN_IDENTITY" *.dylib
 
 ################ APP ################
 cd "../../.." || exit 1

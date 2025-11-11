@@ -36,8 +36,8 @@
 #pragma once
 #include <QByteArray>
 #include <QJsonObject>
+#include <QList>
 #include <QString>
-#include <QVector>
 
 #include <QDateTime>
 #include <QMap>

@@ -48,6 +48,7 @@
 #include <QMessageBox>
 #include <QSortFilterProxyModel>
 #include <algorithm>
+#include <memory>
 
 #include "Application.h"
 
@@ -105,6 +106,8 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
     ui->actionExportMetadata->setToolTip(tr("Export mod's metadata to text."));
     connect(ui->actionExportMetadata, &QAction::triggered, this, &ModFolderPage::exportModMetadata);
     ui->actionsToolbar->insertActionAfter(ui->actionViewHomepage, ui->actionExportMetadata);
+
+    ui->actionsToolbar->insertActionAfter(ui->actionViewFolder, ui->actionViewConfigs);
 }
 
 bool ModFolderPage::shouldDisplay() const
@@ -146,8 +149,16 @@ void ModFolderPage::downloadMods()
         return;
     }
 
-    ResourceDownload::ModDownloadDialog mdownload(this, m_model, m_instance);
-    if (mdownload.exec()) {
+    m_downloadDialog = new ResourceDownload::ModDownloadDialog(this, m_model, m_instance);
+    connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
+    connect(m_downloadDialog, &QDialog::finished, this, &ModFolderPage::downloadDialogFinished);
+
+    m_downloadDialog->open();
+}
+
+void ModFolderPage::downloadDialogFinished(int result)
+{
+    if (result) {
         auto tasks = new ConcurrentTask(tr("Download Mods"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
@@ -165,8 +176,12 @@ void ModFolderPage::downloadMods()
             tasks->deleteLater();
         });
 
-        for (auto& task : mdownload.getTasks()) {
-            tasks->addTask(task);
+        if (m_downloadDialog) {
+            for (auto& task : m_downloadDialog->getTasks()) {
+                tasks->addTask(task);
+            }
+        } else {
+            qWarning() << "ResourceDownloadDialog vanished before we could collect tasks!";
         }
 
         ProgressDialog loadDialog(this);
@@ -175,6 +190,8 @@ void ModFolderPage::downloadMods()
 
         m_model->update();
     }
+    if (m_downloadDialog)
+        m_downloadDialog->deleteLater();
 }
 
 void ModFolderPage::updateMods(bool includeDeps)
@@ -210,7 +227,7 @@ void ModFolderPage::updateMods(bool includeDeps)
     if (use_all)
         mods_list = m_model->allResources();
 
-    ResourceUpdateDialog update_dialog(this, m_instance, m_model, mods_list, includeDeps, true);
+    ResourceUpdateDialog update_dialog(this, m_instance, m_model, mods_list, includeDeps, profile->getModLoadersList());
     update_dialog.checkCandidates();
 
     if (update_dialog.aborted()) {
@@ -300,36 +317,12 @@ void ModFolderPage::changeModVersion()
     if (mods_list.length() != 1 || mods_list[0]->metadata() == nullptr)
         return;
 
-    ResourceDownload::ModDownloadDialog mdownload(this, m_model, m_instance);
-    mdownload.setResourceMetadata((*mods_list.begin())->metadata());
-    if (mdownload.exec()) {
-        auto tasks = new ConcurrentTask("Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(tasks, &Task::failed, [this, tasks](QString reason) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-            tasks->deleteLater();
-        });
-        connect(tasks, &Task::aborted, [this, tasks]() {
-            CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
-            tasks->deleteLater();
-        });
-        connect(tasks, &Task::succeeded, [this, tasks]() {
-            QStringList warnings = tasks->warnings();
-            if (warnings.count())
-                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+    m_downloadDialog = new ResourceDownload::ModDownloadDialog(this, m_model, m_instance);
+    connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
+    connect(m_downloadDialog, &QDialog::finished, this, &ModFolderPage::downloadDialogFinished);
 
-            tasks->deleteLater();
-        });
-
-        for (auto& task : mdownload.getTasks()) {
-            tasks->addTask(task);
-        }
-
-        ProgressDialog loadDialog(this);
-        loadDialog.setSkipButton(true, tr("Abort"));
-        loadDialog.execWithTask(tasks);
-
-        m_model->update();
-    }
+    m_downloadDialog->setResourceMetadata((*mods_list.begin())->metadata());
+    m_downloadDialog->open();
 }
 
 void ModFolderPage::exportModMetadata()

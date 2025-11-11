@@ -1,0 +1,75 @@
+  <log4j:Event logger="com.mojang.datafixers.DataFixerBuilder" timestamp="1745005148589" level="INFO" thread="Datafixer Bootstrap">
+    <log4j:Message><![CDATA[263 Datafixer optimizations took 906 milliseconds]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService" timestamp="1745005150587" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="fqq" timestamp="1745005150596" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Setting user: Ryexandrite]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="fqq" timestamp="1745005150669" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Backend library: LWJGL version 3.3.3+5]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="fqq" timestamp="1745005151022" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Using optional rendering extensions: GL_KHR_debug, GL_ARB_vertex_attrib_binding, GL_ARB_direct_state_access]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="avl" timestamp="1745005151225" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Reloading ResourceManager: vanilla]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="fxf" timestamp="1745005151257" level="INFO" thread="Worker-Main-12">
+    <log4j:Message><![CDATA[Found unifont_all_no_pua-16.0.01.hex, loading]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="fxf" timestamp="1745005151369" level="INFO" thread="Worker-Main-11">
+    <log4j:Message><![CDATA[Found unifont_jp_patch-16.0.01.hex, loading]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="fjh" timestamp="1745005151878" level="WARN" thread="Render thread">
+    <log4j:Message><![CDATA[minecraft:pipeline/entity_translucent_emissive shader program does not use sampler Sampler2 defined in the pipeline. This might be a bug.]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="fik" timestamp="1745005151929" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[OpenAL initialized on device Starship/Matisse HD Audio Controller Analog Stereo]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="hpq" timestamp="1745005151930" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Sound engine started]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="hkp" timestamp="1745005152020" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="hkp" timestamp="1745005152057" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="hkp" timestamp="1745005152058" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="hkp" timestamp="1745005152059" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="hkp" timestamp="1745005152060" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Created: 2048x1024x4 minecraft:textures/atlas/armor_trims.png-atlas]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="hkp" timestamp="1745005152071" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="hkp" timestamp="1745005152072" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="hkp" timestamp="1745005152072" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="hkp" timestamp="1745005152073" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="hkp" timestamp="1745005152074" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="hkp" timestamp="1745005152139" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="hkp" timestamp="1745005152141" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="hkp" timestamp="1745005152141" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="hkp" timestamp="1745005152142" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas]]></log4j:Message>
+  </log4j:Event>

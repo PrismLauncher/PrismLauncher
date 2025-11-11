@@ -14,10 +14,10 @@ struct InstanceName {
     InstanceName() = default;
     InstanceName(QString name, QString version) : m_original_name(std::move(name)), m_original_version(std::move(version)) {}
 
-    [[nodiscard]] QString modifiedName() const;
-    [[nodiscard]] QString originalName() const;
-    [[nodiscard]] QString name() const;
-    [[nodiscard]] QString version() const;
+    QString modifiedName() const;
+    QString originalName() const;
+    QString name() const;
+    QString version() const;
 
     void setName(QString name) { m_modified_name = name; }
     void setName(InstanceName& other);
@@ -44,12 +44,12 @@ class InstanceTask : public Task, public InstanceName {
     void setGroup(const QString& group) { m_instGroup = group; }
     QString group() const { return m_instGroup; }
 
-    [[nodiscard]] bool shouldConfirmUpdate() const { return m_confirm_update; }
+    bool shouldConfirmUpdate() const { return m_confirm_update; }
     void setConfirmUpdate(bool confirm) { m_confirm_update = confirm; }
 
     bool shouldOverride() const { return m_override_existing; }
 
-    [[nodiscard]] QString originalInstanceID() const { return m_original_instance_id; };
+    QString originalInstanceID() const { return m_original_instance_id; };
 
    protected:
     void setOverride(bool override, QString instance_id_to_override = {})

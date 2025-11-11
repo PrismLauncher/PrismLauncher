@@ -1,35 +1,85 @@
 name: "CodeQL Code Scanning"
 
-on: [ push, pull_request, workflow_dispatch ]
+on:
+  push:
+    branches:
+      - "develop"
+      - "release-*"
+    paths:
+      # File types
+      - "**.cpp"
+      - "**.h"
+      - "**.java"
+      - "**.ui"
+
+      # Directories
+      - "buildconfig/**"
+      - "cmake/**"
+      - "launcher/**"
+      - "libraries/**"
+      - "program_info/**"
+      - "tests/**"
+
+      # Files
+      - "CMakeLists.txt"
+      - "COPYING.md"
+
+      # Workflows
+      - ".github/codeql/**"
+      - ".github/workflows/codeql.yml"
+      - ".github/actions/setup-dependencies/**"
+  pull_request:
+    paths:
+      # File types
+      - "**.cpp"
+      - "**.h"
+      - "**.java"
+      - "**.ui"
+
+      # Directories
+      - "buildconfig/**"
+      - "cmake/**"
+      - "launcher/**"
+      - "libraries/**"
+      - "program_info/**"
+      - "tests/**"
+
+      # Files
+      - "CMakeLists.txt"
+      - "COPYING.md"
+
+      # Workflows
+      - ".github/codeql/**"
+      - ".github/workflows/codeql.yml"
+      - ".github/actions/setup-dependencies/**"
+  workflow_dispatch:
 
 jobs:
   CodeQL:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
-          submodules: 'true'
+          submodules: "true"
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           config-file: ./.github/codeql/codeql-config.yml
           queries: security-and-quality
           languages: cpp, java
 
-      - name: Install Dependencies
-        run:  
-          sudo apt-get -y update
-
-          sudo apt-get -y install ninja-build extra-cmake-modules scdoc qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5 libqt5networkauth5 libqt5networkauth5-dev
+      - name: Setup dependencies
+        uses: ./.github/actions/setup-dependencies
+        with:
+          build-type: Debug
 
       - name: Configure and Build
         run: |
-          cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/usr -DLauncher_QT_VERSION_MAJOR=5 -G Ninja
-
-          cmake --build build
+          cmake --preset linux_debug
+          cmake --build --preset linux_debug
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4

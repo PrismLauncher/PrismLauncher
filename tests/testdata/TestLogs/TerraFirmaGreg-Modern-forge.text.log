@@ -1,0 +1,947 @@
+Checking: MC_SLIM
+Checking: MERGED_MAPPINGS
+Checking: MAPPINGS
+Checking: MC_EXTRA
+Checking: MOJMAPS
+Checking: PATCHED
+Checking: MC_SRG
+2025-04-18 12:47:23,932 main WARN Advanced terminal features are not available in this environment
+[12:47:24] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--username, Ryexandrite, --version, 1.20.1, --gameDir, /home/ryex/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/instances/TerraFirmaGreg-Modern/minecraft, --assetsDir, /home/ryex/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/assets, --assetIndex, 5, --uuid, <PROFILE ID>, --accessToken, ❄❄❄❄❄❄❄❄, --userType, msa, --versionType, release, --launchTarget, forgeclient, --fml.forgeVersion, 47.2.6, --fml.mcVersion, 1.20.1, --fml.forgeGroup, net.minecraftforge, --fml.mcpVersion, 20230612.114412, --width, 854, --height, 480]
+[12:47:24] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 10.0.9+10.0.9+main.dcd20f30 starting: java version 17.0.8 by Microsoft; OS Linux arch amd64 version 6.6.85
+[12:47:24] [main/INFO] [ne.mi.fm.lo.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
+[12:47:24] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
+[12:47:24] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
+[12:47:24] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/home/ryex/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/libraries/org/spongepowered/mixin/0.8.5/mixin-0.8.5.jar%23140!/ Service=ModLauncher Env=CLIENT
+[12:47:24] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: AMD Radeon RX 5700 XT (radeonsi, navi10, LLVM 19.1.7, DRM 3.54, 6.6.85) GL version 4.6 (Core Profile) Mesa 25.0.3 (git-c3afa2a74f), AMD
+[12:47:25] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /home/ryex/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/libraries/net/minecraftforge/fmlcore/1.20.1-47.2.6/fmlcore-1.20.1-47.2.6.jar is missing mods.toml file
+[12:47:25] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /home/ryex/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/libraries/net/minecraftforge/javafmllanguage/1.20.1-47.2.6/javafmllanguage-1.20.1-47.2.6.jar is missing mods.toml file
+[12:47:25] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /home/ryex/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/libraries/net/minecraftforge/lowcodelanguage/1.20.1-47.2.6/lowcodelanguage-1.20.1-47.2.6.jar is missing mods.toml file
+[12:47:25] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /home/ryex/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/libraries/net/minecraftforge/mclanguage/1.20.1-47.2.6/mclanguage-1.20.1-47.2.6.jar is missing mods.toml file
+[12:47:25] [main/WARN] [ne.mi.ja.se.JarSelector/]: Attempted to select two dependency jars from JarJar which have the same identification: Mod File:  and Mod File: . Using Mod File: 
+[12:47:25] [main/INFO] [ne.mi.fm.lo.mo.JarInJarDependencyLocator/]: Found 28 dependencies adding them to mods collection
+[12:47:28] [main/ERROR] [mixin/]: Mixin config dynamiclightsreforged.mixins.json does not specify "minVersion" property
+[12:47:28] [main/INFO] [mixin/]: Compatibility level set to JAVA_17
+[12:47:28] [main/ERROR] [mixin/]: Mixin config mixins.satin.client.json does not specify "minVersion" property
+[12:47:28] [main/ERROR] [mixin/]: Mixin config firstperson.mixins.json does not specify "minVersion" property
+[12:47:28] [main/ERROR] [mixin/]: Mixin config yacl.mixins.json does not specify "minVersion" property
+[12:47:28] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclient' with arguments [--version, 1.20.1, --gameDir, /home/ryex/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/instances/TerraFirmaGreg-Modern/minecraft, --assetsDir, /home/ryex/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/assets, --uuid, <PROFILE ID>, --username, Ryexandrite, --assetIndex, 5, --accessToken, ❄❄❄❄❄❄❄❄, --userType, msa, --versionType, release, --width, 854, --height, 480]
+[12:47:28] [main/INFO] [co.ab.sa.co.Saturn/]: Loaded Saturn config file with 4 configurable options
+[12:47:28] [main/INFO] [ModernFix/]: Loaded configuration file for ModernFix 5.18.1+mc1.20.1: 83 options available, 1 override(s) found
+[12:47:28] [main/WARN] [ModernFix/]: Option 'mixin.perf.thread_priorities' overriden (by mods [smoothboot]) to 'false'
+[12:47:28] [main/INFO] [ModernFix/]: Applying Nashorn fix
+[12:47:28] [main/INFO] [ModernFix/]: Applied Forge config corruption patch
+[12:47:28] [main/INFO] [fpsreducer/]: OptiFine was NOT detected.
+[12:47:28] [main/INFO] [fpsreducer/]: OptiFabric was NOT detected.
+[12:47:28] [main/WARN] [EmbeddiumConfig/]: Mod 'tfc' attempted to override option 'mixin.features.fast_biome_colors', which doesn't exist, ignoring
+[12:47:28] [main/INFO] [Embeddium/]: Loaded configuration file for Embeddium: 205 options available, 3 override(s) found
+[12:47:28] [main/INFO] [Embeddium-GraphicsAdapterProbe/]: Searching for graphics cards...
+[12:47:28] [main/INFO] [Embeddium-GraphicsAdapterProbe/]: Found graphics card: GraphicsAdapterInfo[vendor=AMD, name=Navi 10 [Radeon RX 5600 OEM/5600 XT / 5700/5700 XT], version=unknown]
+[12:47:28] [main/WARN] [Embeddium-Workarounds/]: Sodium has applied one or more workarounds to prevent crashes or other issues on your system: [NO_ERROR_CONTEXT_UNSUPPORTED]
+[12:47:28] [main/WARN] [Embeddium-Workarounds/]: This is not necessarily an issue, but it may result in certain features or optimizations being disabled. You can sometimes fix these issues by upgrading your graphics driver.
+[12:47:28] [main/INFO] [Radium Config/]: Loaded configuration file for Radium: 125 options available, 7 override(s) found
+[12:47:28] [main/WARN] [mixin/]: Reference map 'carpeted-common-refmap.json' for carpeted-common.mixins.json could not be read. If this is a development environment you can ignore this message
+[12:47:28] [main/WARN] [mixin/]: Reference map 'carpeted-forge-refmap.json' for carpeted.mixins.json could not be read. If this is a development environment you can ignore this message
+[12:47:28] [main/WARN] [mixin/]: Reference map 'emi-forge-refmap.json' for emi-forge.mixins.json could not be read. If this is a development environment you can ignore this message
+[12:47:28] [main/WARN] [mixin/]: Reference map 'ftb-filter-system-common-refmap.json' for ftbfiltersystem-common.mixins.json could not be read. If this is a development environment you can ignore this message
+[12:47:28] [main/WARN] [mixin/]: Reference map 'ftb-filter-system-forge-refmap.json' for ftbfiltersystem.mixins.json could not be read. If this is a development environment you can ignore this message
+[12:47:28] [main/INFO] [Puzzles Lib/]: Loading 160 mods:
+	- additionalplacements 1.8.0
+	- ae2 15.2.13
+	- ae2insertexportcard 1.20.1-1.3.0
+	- ae2netanalyser 1.20-1.0.6-forge
+	- ae2wtlib 15.2.3-forge
+	- aiimprovements 0.5.2
+	- ambientsounds 6.1.1
+	- architectury 9.2.14
+	- astikorcarts 1.1.8
+	- attributefix 21.0.4
+	- balm 7.3.9
+		\-- kuma_api 20.1.8
+	- barrels_2012 2.1
+	- betterf3 7.0.2
+	- betterfoliage 5.0.2
+	- betterpingdisplay 1.1
+	- betterthirdperson 1.9.0
+	- blur 3.1.1
+		\-- satin 1.20.1+1.15.0-SNAPSHOT
+	- carpeted 1.20-1.4
+	- carryon 2.1.2.7
+		\-- mixinextras 0.2.0-beta.6
+	- catalogue 1.8.0
+	- chat_heads 0.13.9
+	- cherishedworlds 6.1.7+1.20.1
+	- clienttweaks 11.1.0
+	- cloth_config 11.1.136
+	- clumps 12.0.0.4
+	- computercraft 1.113.1
+	- controlling 12.0.2
+	- coralstfc 1.0.0
+	- corpse 1.20.1-1.0.19
+	- cosmeticarmorreworked 1.20.1-v1a
+	- craftingtweaks 18.2.5
+	- craftpresence 2.5.0
+	- create 0.5.1.f
+		\-- flywheel 0.6.10-7
+	- create_connected 0.8.2-mc1.20.1
+	- createaddition 1.20.1-1.2.4c
+	- creativecore 2.12.15
+	- cucumber 7.0.12
+	- cupboard 1.20.1-2.7
+	- curios 5.10.0+1.20.1
+	- defaultoptions 18.0.1
+	- do_a_barrel_roll 3.5.6+1.20.1
+	- drippyloadingscreen 3.0.1
+	- dynamiclightsreforged 1.20.1_v1.6.0
+	- embeddium 0.3.19+mc1.20.1
+		\-- rubidium 0.7.1
+	- embeddiumplus 1.2.12
+	- emi 1.1.7+1.20.1+forge
+	- enhancedvisuals 1.8.1
+	- etched 3.0.2
+	- everycomp 1.20-2.7.12
+	- expatternprovider 1.20-1.1.14-forge
+	- exposure 1.7.7
+	- fallingtrees 0.12.7
+	- fancymenu 3.2.3
+	- ferritecore 6.0.1
+	- firmaciv 0.2.10-alpha-1.20.1
+	- firmalife 2.1.15
+	- firstperson 2.4.5
+	- flickerfix 4.0.1
+	- forge 47.2.6
+	- fpsreducer 1.20-2.5
+	- framedblocks 9.3.1
+	- ftbbackups2 1.0.23
+	- ftbessentials 2001.2.2
+	- ftbfiltersystem 1.0.2
+	- ftblibrary 2001.2.4
+	- ftbquests 2001.4.8
+	- ftbranks 2001.1.3
+	- ftbteams 2001.3.0
+	- ftbxmodcompat 2.1.1
+	- gcyr 0.1.8
+	- getittogetherdrops 1.3
+	- glodium 1.20-1.5-forge
+	- gtceu 1.2.3.a
+		|-- configuration 2.2.0
+		\-- ldlib 1.0.25.j
+	- hangglider 8.0.1
+	- immediatelyfast 1.2.18+1.20.4
+	- inventoryhud 3.4.26
+	- invtweaks 1.1.0
+	- itemphysiclite 1.6.5
+	- jade 11.9.4+forge
+	- jadeaddons 5.2.2
+	- jei 15.3.0.8
+	- konkrete 1.8.0
+	- ksyxis 1.3.2
+	- kubejs 2001.6.5-build.14
+	- kubejs_create 2001.2.5-build.2
+	- kubejs_tfc 1.20.1-1.1.3
+	- letmedespawn 1.3.2b
+	- lootjs 1.20.1-2.12.0
+	- megacells 2.4.4-1.20.1
+	- melody 1.0.2
+	- memoryleakfix 1.1.5
+	- merequester 1.20.1-1.1.5
+	- minecraft 1.20.1
+	- modelfix 1.15
+	- modernfix 5.18.1+mc1.20.1
+	- moonlight 1.20-2.13.51
+	- morered 4.0.0.4
+		|-- jumbofurnace 4.0.0.5
+		\-- useitemonblockevent 1.0.0.2
+	- mousetweaks 2.25.1
+	- myserveriscompatible 1.0
+	- nanhealthfixer 1.20.1-0.0.1
+	- nerb 0.4.1
+	- noisium 2.3.0+mc1.20-1.20.1
+	- noreportbutton 1.5.0
+	- notenoughanimations 1.7.6
+	- octolib 0.4.2
+	- oculus 1.7.0
+	- openpartiesandclaims 0.23.2
+	- packetfixer 1.4.2
+	- pandalib 0.4.2
+	- patchouli 1.20.1-84-FORGE
+	- pickupnotifier 8.0.0
+	- placebo 8.6.2
+	- playerrevive 2.0.27
+	- polylib 2000.0.3-build.143
+	- puzzleslib 8.1.23
+		\-- puzzlesaccessapi 8.0.7
+	- radium 0.12.3+git.50c5c33
+	- railways 1.6.4+forge-mc1.20.1
+	- recipeessentials 1.20.1-3.6
+	- rhino 2001.2.2-build.18
+	- saturn 0.1.3
+	- searchables 1.0.3
+	- shimmer 1.20.1-0.2.4
+	- showcaseitem 1.20.1-1.2
+	- simplylight 1.20.1-1.4.6-build.50
+	- smoothboot 0.0.4
+	- sophisticatedbackpacks 3.20.5.1044
+	- sophisticatedcore 0.6.22.611
+	- supermartijn642configlib 1.1.8
+	- supermartijn642corelib 1.1.17
+	- tfc 3.2.12
+	- tfc_tumbleweed 1.2.2
+	- tfcagedalcohol 2.1
+	- tfcambiental 1.20.1-3.3.0
+	- tfcastikorcarts 1.1.8.2
+	- tfcchannelcasting 0.2.3-beta
+	- tfcea 0.0.2
+	- tfcgroomer 1.20.1-0.1.2
+	- tfchotornot 1.0.4
+	- tfcvesseltooltip 1.1
+	- tfg 0.5.9
+	- toofast 0.4.3.5
+	- toolbelt 1.20.01
+	- treetap 1.20.1-0.4.0
+	- tumbleweed 0.5.5
+	- unilib 1.0.2
+	- uteamcore 5.1.4.312
+	- waterflasks 3.0.3
+	- xaerominimap 24.4.0
+	- xaeroworldmap 1.39.0
+	- yeetusexperimentus 2.3.1-build.6+mc1.20.1
+	- yet_another_config_lib_v3 3.5.0+1.20.1-forge
+[12:47:28] [main/WARN] [mixin/]: Reference map 'packetfixer-forge-forge-refmap.json' for packetfixer-forge.mixins.json could not be read. If this is a development environment you can ignore this message
+[12:47:28] [main/WARN] [mixin/]: Reference map 'tfchotornot.refmap.json' for tfchotornot.mixins.json could not be read. If this is a development environment you can ignore this message
+[12:47:29] [main/INFO] [ne.mi.co.Co.placebo/COREMODLOG]: Patching IForgeItemStack#getEnchantmentLevel
+[12:47:29] [main/INFO] [ne.mi.co.Co.placebo/COREMODLOG]: Patching IForgeItemStack#getEnchantmentLevel
+[12:47:29] [main/WARN] [mixin/]: Error loading class: mezz/modnametooltip/TooltipEventHandler (java.lang.ClassNotFoundException: mezz.modnametooltip.TooltipEventHandler)
+[12:47:29] [main/WARN] [mixin/]: Error loading class: me/shedaniel/rei/impl/client/ClientHelperImpl (java.lang.ClassNotFoundException: me.shedaniel.rei.impl.client.ClientHelperImpl)
+[12:47:29] [main/WARN] [mixin/]: Error loading class: me/shedaniel/rei/impl/client/gui/ScreenOverlayImpl (java.lang.ClassNotFoundException: me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl)
+[12:47:29] [main/INFO] [co.cu.Cupboard/]: Loaded config for: recipeessentials.json
+[12:47:30] [main/WARN] [mixin/]: Error loading class: loaderCommon/forge/com/seibel/distanthorizons/common/wrappers/worldGeneration/mimicObject/ChunkLoader (java.lang.ClassNotFoundException: loaderCommon.forge.com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject.ChunkLoader)
+[12:47:30] [main/INFO] [fpsreducer/]: bre2el.fpsreducer.mixin.RenderSystemMixin will be applied.
+[12:47:30] [main/INFO] [fpsreducer/]: bre2el.fpsreducer.mixin.WindowMixin will NOT be applied because OptiFine was NOT detected.
+[12:47:30] [main/WARN] [debug/]: dzwdz.chat_heads.mixin.ChatComponentMixin false false
+[12:47:30] [main/WARN] [debug/]: dzwdz.chat_heads.mixin.ChatComponentMixin2 false false
+[12:47:30] [main/WARN] [debug/]: dzwdz.chat_heads.mixin.ChatListenerMixin false false
+[12:47:30] [main/WARN] [debug/]: dzwdz.chat_heads.mixin.ClientPacketListenerMixin false false
+[12:47:30] [main/WARN] [debug/]: dzwdz.chat_heads.mixin.CommandSuggestionSuggestionsListMixin false false
+[12:47:30] [main/WARN] [debug/]: dzwdz.chat_heads.mixin.ConnectionMixin false false
+[12:47:30] [main/WARN] [debug/]: dzwdz.chat_heads.mixin.DownloadedPackSourceMixin false false
+[12:47:30] [main/WARN] [debug/]: dzwdz.chat_heads.mixin.FontStringRenderOutputMixin false false
+[12:47:30] [main/WARN] [debug/]: dzwdz.chat_heads.mixin.GuiMessageLineMixin false false
+[12:47:30] [main/WARN] [debug/]: dzwdz.chat_heads.mixin.GuiMessageMixin false false
+[12:47:30] [main/WARN] [debug/]: dzwdz.chat_heads.mixin.HttpTextureMixin false false
+[12:47:30] [main/WARN] [debug/]: dzwdz.chat_heads.mixin.PlayerChatMessageMixin false false
+[12:47:30] [main/WARN] [debug/]: dzwdz.chat_heads.mixin.SkinManagerMixin false false
+[12:47:30] [main/WARN] [debug/]: dzwdz.chat_heads.mixin.compat.EmojifulMixin true false
+[12:47:30] [main/WARN] [mixin/]: Error loading class: dan200/computercraft/shared/integration/jei/JEIComputerCraft (java.lang.ClassNotFoundException: dan200.computercraft.shared.integration.jei.JEIComputerCraft)
+[12:47:30] [main/WARN] [mixin/]: @Mixin target dan200.computercraft.shared.integration.jei.JEIComputerCraft was not found tfg.mixins.json:common.cc.JEIComputerCraftMixin
+[12:47:30] [main/WARN] [mixin/]: Error loading class: com/copycatsplus/copycats/content/copycat/slab/CopycatSlabBlock (java.lang.ClassNotFoundException: com.copycatsplus.copycats.content.copycat.slab.CopycatSlabBlock)
+[12:47:30] [main/WARN] [mixin/]: @Mixin target com.copycatsplus.copycats.content.copycat.slab.CopycatSlabBlock was not found create_connected.mixins.json:compat.CopycatBlockMixin
+[12:47:30] [main/WARN] [mixin/]: Error loading class: com/copycatsplus/copycats/content/copycat/board/CopycatBoardBlock (java.lang.ClassNotFoundException: com.copycatsplus.copycats.content.copycat.board.CopycatBoardBlock)
+[12:47:30] [main/WARN] [mixin/]: @Mixin target com.copycatsplus.copycats.content.copycat.board.CopycatBoardBlock was not found create_connected.mixins.json:compat.CopycatBlockMixin
+[12:47:30] [main/WARN] [mixin/]: Error loading class: me/jellysquid/mods/lithium/common/ai/pathing/PathNodeDefaults (java.lang.ClassNotFoundException: me.jellysquid.mods.lithium.common.ai.pathing.PathNodeDefaults)
+[12:47:30] [main/WARN] [Radium Config/]: Force-disabling mixin 'alloc.blockstate.StateMixin' as option 'mixin.alloc.blockstate' (added by mods [ferritecore]) disables it and children
+[12:47:30] [main/WARN] [Radium Config/]: Force-disabling mixin 'entity.collisions.fluid.EntityMixin' as option 'mixin.entity.collisions' (added by user configuration) disables it and children
+[12:47:30] [main/WARN] [Radium Config/]: Force-disabling mixin 'entity.collisions.intersection.WorldMixin' as option 'mixin.entity.collisions' (added by user configuration) disables it and children
+[12:47:30] [main/WARN] [Radium Config/]: Force-disabling mixin 'entity.collisions.movement.EntityMixin' as option 'mixin.entity.collisions' (added by user configuration) disables it and children
+[12:47:30] [main/WARN] [Radium Config/]: Force-disabling mixin 'entity.collisions.unpushable_cramming.AbstractMinecartEntityMixin' as option 'mixin.entity.collisions' (added by user configuration) disables it and children
+[12:47:30] [main/WARN] [Radium Config/]: Force-disabling mixin 'entity.collisions.unpushable_cramming.BoatEntityMixin' as option 'mixin.entity.collisions' (added by user configuration) disables it and children
+[12:47:30] [main/WARN] [Radium Config/]: Force-disabling mixin 'entity.collisions.unpushable_cramming.EntityMixin' as option 'mixin.entity.collisions' (added by user configuration) disables it and children
+[12:47:30] [main/WARN] [Radium Config/]: Force-disabling mixin 'entity.collisions.unpushable_cramming.EntityPredicatesMixin' as option 'mixin.entity.collisions' (added by user configuration) disables it and children
+[12:47:30] [main/WARN] [Radium Config/]: Force-disabling mixin 'entity.collisions.unpushable_cramming.EntityTrackingSectionMixin' as option 'mixin.entity.collisions' (added by user configuration) disables it and children
+[12:47:30] [main/WARN] [Radium Config/]: Force-disabling mixin 'entity.collisions.unpushable_cramming.LivingEntityMixin' as option 'mixin.entity.collisions' (added by user configuration) disables it and children
+[12:47:30] [main/WARN] [Radium Config/]: Force-disabling mixin 'world.player_chunk_tick.ThreadedAnvilChunkStorageMixin' as option 'mixin.world.player_chunk_tick' (added by user configuration) disables it and children
+[12:47:30] [main/WARN] [mixin/]: Error loading class: org/cyclops/integrateddynamics/block/BlockCable (java.lang.ClassNotFoundException: org.cyclops.integrateddynamics.block.BlockCable)
+[12:47:30] [main/WARN] [mixin/]: @Mixin target org.cyclops.integrateddynamics.block.BlockCable was not found mixins.epp.json:MixinBlockCable
+[12:47:30] [main/WARN] [mixin/]: Error loading class: blusunrize/immersiveengineering/api/wires/GlobalWireNetwork (java.lang.ClassNotFoundException: blusunrize.immersiveengineering.api.wires.GlobalWireNetwork)
+[12:47:30] [main/WARN] [mixin/]: @Mixin target blusunrize.immersiveengineering.api.wires.GlobalWireNetwork was not found mixins.epp.json:MixinGlobalWireNetwork
+[12:47:30] [main/WARN] [mixin/]: Error loading class: weather2/weathersystem/storm/TornadoHelper (java.lang.ClassNotFoundException: weather2.weathersystem.storm.TornadoHelper)
+[12:47:30] [main/WARN] [mixin/]: @Mixin target weather2.weathersystem.storm.TornadoHelper was not found tfc_tumbleweed.mixins.json:TornadoHelperMixin
+[12:47:30] [main/WARN] [mixin/]: Error loading class: weather2/weathersystem/storm/TornadoHelper (java.lang.ClassNotFoundException: weather2.weathersystem.storm.TornadoHelper)
+[12:47:30] [main/WARN] [mixin/]: @Mixin target weather2.weathersystem.storm.TornadoHelper was not found tfc_tumbleweed.mixins.json:client.TornadoHelperMixin
+[12:47:30] [main/INFO] [memoryleakfix/]: [MemoryLeakFix] Will be applying 3 memory leak fixes!
+[12:47:30] [main/INFO] [memoryleakfix/]: [MemoryLeakFix] Currently enabled memory leak fixes: [targetEntityLeak, biomeTemperatureLeak, hugeScreenshotLeak]
+[12:47:31] [main/WARN] [Embeddium/]: Force-disabling mixin 'features.render.world.sky.WorldRendererMixin' as rule 'mixin.features.render.world.sky' (added by mods [oculus, tfc]) disables it and children
+[12:47:31] [main/WARN] [Embeddium/]: Force-disabling mixin 'features.render.world.sky.ClientWorldMixin' as rule 'mixin.features.render.world.sky' (added by mods [oculus, tfc]) disables it and children
+[12:47:31] [main/WARN] [Embeddium/]: Force-disabling mixin 'features.render.world.sky.BackgroundRendererMixin' as rule 'mixin.features.render.world.sky' (added by mods [oculus, tfc]) disables it and children
+[12:47:31] [main/WARN] [Embeddium/]: Force-disabling mixin 'features.render.gui.font.GlyphRendererMixin' as rule 'mixin.features.render.gui.font' (added by mods [oculus]) disables it and children
+[12:47:31] [main/WARN] [Embeddium/]: Force-disabling mixin 'features.render.gui.font.FontSetMixin' as rule 'mixin.features.render.gui.font' (added by mods [oculus]) disables it and children
+[12:47:31] [main/WARN] [Embeddium/]: Force-disabling mixin 'features.render.entity.shadows.EntityRenderDispatcherMixin' as rule 'mixin.features.render.entity' (added by mods [oculus]) disables it and children
+[12:47:31] [main/WARN] [Embeddium/]: Force-disabling mixin 'features.render.entity.fast_render.ModelPartMixin' as rule 'mixin.features.render.entity' (added by mods [oculus]) disables it and children
+[12:47:31] [main/WARN] [Embeddium/]: Force-disabling mixin 'features.render.entity.fast_render.CuboidMixin' as rule 'mixin.features.render.entity' (added by mods [oculus]) disables it and children
+[12:47:31] [main/WARN] [Embeddium/]: Force-disabling mixin 'features.render.entity.cull.EntityRendererMixin' as rule 'mixin.features.render.entity' (added by mods [oculus]) disables it and children
+[12:47:31] [main/WARN] [mixin/]: Error loading class: org/jetbrains/annotations/ApiStatus$Internal (java.lang.ClassNotFoundException: org.jetbrains.annotations.ApiStatus$Internal)
+[12:47:31] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.4.1).
+[12:47:31] [main/INFO] [Smooth Boot (Reloaded)/]: Smooth Boot (Reloaded) config initialized
+[12:47:31] [main/WARN] [mixin/]: Static binding violation: PRIVATE @Overwrite method m_216202_ in modernfix-forge.mixins.json:perf.tag_id_caching.TagOrElementLocationMixin cannot reduce visibiliy of PUBLIC target method, visibility will be upgraded.
+[12:47:32] [pool-4-thread-1/INFO] [minecraft/Bootstrap]: ModernFix reached bootstrap stage (9.773 s after launch)
+[12:47:32] [pool-4-thread-1/WARN] [mixin/]: @Final field delegatesByName:Ljava/util/Map; in modernfix-forge.mixins.json:perf.forge_registry_alloc.ForgeRegistryMixin should be final
+[12:47:32] [pool-4-thread-1/WARN] [mixin/]: @Final field delegatesByValue:Ljava/util/Map; in modernfix-forge.mixins.json:perf.forge_registry_alloc.ForgeRegistryMixin should be final
+[12:47:32] [pool-4-thread-1/INFO] [ne.mi.co.Co.placebo/COREMODLOG]: Patching IForgeItemStack#getEnchantmentLevel
+[12:47:32] [pool-4-thread-1/INFO] [ne.mi.co.Co.placebo/COREMODLOG]: Patching IForgeItemStack#getEnchantmentLevel
+[12:47:32] [pool-4-thread-1/INFO] [ModernFix/]: Injecting BlockStateBase cache population hook into getNeighborPathNodeType from me.jellysquid.mods.lithium.mixin.ai.pathing.AbstractBlockStateMixin
+[12:47:32] [pool-4-thread-1/INFO] [ModernFix/]: Injecting BlockStateBase cache population hook into getPathNodeType from me.jellysquid.mods.lithium.mixin.ai.pathing.AbstractBlockStateMixin
+[12:47:32] [pool-4-thread-1/INFO] [ModernFix/]: Injecting BlockStateBase cache population hook into getAllFlags from me.jellysquid.mods.lithium.mixin.util.block_tracking.AbstractBlockStateMixin
+[12:47:32] [pool-4-thread-1/WARN] [mixin/]: Method overwrite conflict for m_6104_ in embeddium.mixins.json:features.options.render_layers.LeavesBlockMixin, previously written by me.srrapero720.embeddiumplus.mixins.impl.leaves_culling.LeavesBlockMixin. Skipping method.
+[12:47:32] [pool-4-thread-1/INFO] [ne.mi.co.Co.placebo/COREMODLOG]: Patching IForgeItemStack#getEnchantmentLevel
+[12:47:32] [pool-4-thread-1/INFO] [ne.mi.co.Co.placebo/COREMODLOG]: Patching IForgeItemStack#getEnchantmentLevel
+[12:47:33] [pool-4-thread-1/INFO] [minecraft/Bootstrap]: Vanilla bootstrap took 779 milliseconds
+[12:47:34] [pool-4-thread-1/WARN] [mixin/]: Method overwrite conflict for m_47505_ in lithium.mixins.json:world.temperature_cache.BiomeMixin, previously written by org.embeddedt.modernfix.common.mixin.perf.remove_biome_temperature_cache.BiomeMixin. Skipping method.
+[12:47:34] [pool-4-thread-1/INFO] [co.al.me.MERequester/]: Registering content
+[12:47:35] [Render thread/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/home/ryex/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/libraries/net/minecraft/client/1.20.1-20230612.114412/client-1.20.1-20230612.114412-srg.jar%23444!/assets/.mcassetsroot' uses unexpected schema
+[12:47:35] [Render thread/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/home/ryex/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/libraries/net/minecraft/client/1.20.1-20230612.114412/client-1.20.1-20230612.114412-srg.jar%23444!/data/.mcassetsroot' uses unexpected schema
+[12:47:35] [Render thread/INFO] [mojang/YggdrasilAuthenticationService]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[12:47:35] [Render thread/INFO] [minecraft/Minecraft]: Setting user: Ryexandrite
+[12:47:35] [Render thread/INFO] [ModernFix/]: Bypassed Mojang DFU
+[12:47:35] [Render thread/INFO] [mixin/]: BeforeConstant is searching for constants in method with descriptor (Lnet/minecraft/network/chat/Component;Lnet/minecraft/client/GuiMessageTag;)V
+[12:47:35] [Render thread/INFO] [mixin/]:   BeforeConstant found STRING constant: value = , stringValue = null
+[12:47:35] [Render thread/INFO] [mixin/]:     BeforeConstant found a matching constant TYPE at ordinal 0
+[12:47:35] [Render thread/INFO] [mixin/]:       BeforeConstant found LdcInsn 
+[12:47:35] [Render thread/INFO] [mixin/]:   BeforeConstant found STRING constant: value = \\r, stringValue = null
+[12:47:35] [Render thread/INFO] [mixin/]:     BeforeConstant found a matching constant TYPE at ordinal 1
+[12:47:35] [Render thread/INFO] [mixin/]:       BeforeConstant found LdcInsn \\r
+[12:47:35] [Render thread/INFO] [mixin/]:   BeforeConstant found STRING constant: value = 
+, stringValue = null
+[12:47:35] [Render thread/INFO] [mixin/]:     BeforeConstant found a matching constant TYPE at ordinal 2
+[12:47:35] [Render thread/INFO] [mixin/]:       BeforeConstant found LdcInsn 
+
+[12:47:35] [Render thread/INFO] [mixin/]:   BeforeConstant found STRING constant: value = \\n, stringValue = null
+[12:47:35] [Render thread/INFO] [mixin/]:     BeforeConstant found a matching constant TYPE at ordinal 3
+[12:47:35] [Render thread/INFO] [mixin/]:       BeforeConstant found LdcInsn \\n
+[12:47:35] [Render thread/INFO] [mixin/]:   BeforeConstant found CLASS constant: value = Ljava/lang/String;, typeValue = null
+[12:47:35] [Render thread/INFO] [mixin/]:   BeforeConstant found STRING constant: value = [{}] [CHAT] {}, stringValue = null
+[12:47:35] [Render thread/INFO] [mixin/]:     BeforeConstant found a matching constant TYPE at ordinal 4
+[12:47:35] [Render thread/INFO] [mixin/]:       BeforeConstant found LdcInsn [{}] [CHAT] {}
+[12:47:35] [Render thread/INFO] [mixin/]:   BeforeConstant found STRING constant: value = [CHAT] {}, stringValue = null
+[12:47:35] [Render thread/INFO] [mixin/]:     BeforeConstant found a matching constant TYPE at ordinal 5
+[12:47:35] [Render thread/INFO] [mixin/]:       BeforeConstant found LdcInsn [CHAT] {}
+[12:47:35] [Render thread/INFO] [defaultoptions/]: Loaded default options for extra-folder
+[12:47:35] [Render thread/INFO] [ModernFix/]: Instantiating Mojang DFU
+[12:47:36] [Render thread/INFO] [minecraft/Minecraft]: Backend library: LWJGL version 3.3.1 build 7
+[12:47:36] [Render thread/INFO] [KubeJS/]: Loaded client.properties
+[12:47:36] [Render thread/INFO] [Embeddium-PostlaunchChecks/]: OpenGL Vendor: AMD
+[12:47:36] [Render thread/INFO] [Embeddium-PostlaunchChecks/]: OpenGL Renderer: AMD Radeon RX 5700 XT (radeonsi, navi10, LLVM 19.1.7, DRM 3.54, 6.6.85)
+[12:47:36] [Render thread/INFO] [Embeddium-PostlaunchChecks/]: OpenGL Version: 4.6 (Core Profile) Mesa 25.0.3 (git-c3afa2a74f)
+[12:47:36] [Render thread/WARN] [Embeddium++/Config]: Loading Embeddium++Config
+[12:47:36] [Render thread/INFO] [Embeddium++/Config]: Updating config cache
+[12:47:36] [Render thread/INFO] [Embeddium++/Config]: Cache updated successfully
+[12:47:36] [Render thread/INFO] [ImmediatelyFast/]: Initializing ImmediatelyFast 1.2.18+1.20.4 on AMD Radeon RX 5700 XT (radeonsi, navi10, LLVM 19.1.7, DRM 3.54, 6.6.85) (AMD) with OpenGL 4.6 (Core Profile) Mesa 25.0.3 (git-c3afa2a74f)
+[12:47:36] [Render thread/INFO] [ImmediatelyFast/]: AMD GPU detected. Enabling coherent buffer mapping
+[12:47:36] [Datafixer Bootstrap/INFO] [mojang/DataFixerBuilder]: 188 Datafixer optimizations took 85 milliseconds
+[12:47:36] [Render thread/INFO] [ImmediatelyFast/]: Found Iris/Oculus 1.7.0. Enabling compatibility.
+[12:47:36] [Render thread/INFO] [Oculus/]: Debug functionality is disabled.
+[12:47:36] [Render thread/INFO] [Oculus/]: OpenGL 4.5 detected, enabling DSA.
+[12:47:36] [Render thread/INFO] [Oculus/]: Shaders are disabled because no valid shaderpack is selected
+[12:47:36] [Render thread/INFO] [Oculus/]: Shaders are disabled
+[12:47:36] [modloading-worker-0/INFO] [dynamiclightsreforged/]: [LambDynLights] Initializing Dynamic Lights Reforged...
+[12:47:36] [modloading-worker-0/INFO] [LowDragLib/]: LowDragLib is initializing on platform: Forge
+[12:47:36] [modloading-worker-0/INFO] [in.u_.u_.ut.ve.JarSignVerifier/]: Mod uteamcore is signed with a valid certificate.
+[12:47:36] [modloading-worker-0/INFO] [de.ke.me.Melody/]: [MELODY] Loading Melody background audio library..
+[12:47:36] [modloading-worker-0/INFO] [Puzzles Lib/]: Constructing common components for pickupnotifier:main
+[12:47:36] [modloading-worker-0/WARN] [mixin/]: Static binding violation: PRIVATE @Overwrite method m_109501_ in embeddium.mixins.json:core.render.world.WorldRendererMixin cannot reduce visibiliy of PUBLIC target method, visibility will be upgraded.
+[12:47:36] [modloading-worker-0/INFO] [de.ke.ko.Konkrete/]: [KONKRETE] Successfully initialized!
+[12:47:36] [modloading-worker-0/INFO] [de.ke.ko.Konkrete/]: [KONKRETE] Server-side libs ready to use!
+[12:47:36] [modloading-worker-0/INFO] [Puzzles Lib/]: Constructing client components for pickupnotifier:main
+[12:47:36] [modloading-worker-0/WARN] [mixin/]: Static binding violation: PRIVATE @Overwrite method m_215924_ in modernfix-forge.mixins.json:perf.tag_id_caching.TagEntryMixin cannot reduce visibiliy of PUBLIC target method, visibility will be upgraded.
+[12:47:36] [modloading-worker-0/INFO] [Additional Placements/]: Attempting to manually load Additional Placements config early.
+[12:47:36] [modloading-worker-0/INFO] [Additional Placements/]: manual config load successful.
+[12:47:36] [modloading-worker-0/WARN] [Additional Placements/]: During block registration you may recieve several reports of "Potentially Dangerous alternative prefix `additionalplacements`". Ignore these, they are intended.
+[12:47:36] [modloading-worker-0/INFO] [Puzzles Lib/]: Constructing common components for hangglider:main
+[12:47:36] [modloading-worker-0/INFO] [noisium/]: Loading Noisium.
+[12:47:36] [modloading-worker-0/INFO] [co.cu.Cupboard/]: Loaded config for: cupboard.json
+[12:47:36] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id architectury:sync_ids
+[12:47:36] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id architectury:sync_ids
+[12:47:36] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id pandalib:config_sync
+[12:47:36] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id pandalib:config_sync
+[12:47:36] [modloading-worker-0/INFO] [fallingtrees | Config/]: Successfully loaded config 'fallingtrees_client'
+[12:47:36] [modloading-worker-0/INFO] [fallingtrees | Config/]: Successfully saved config 'fallingtrees_client'
+[12:47:36] [modloading-worker-0/INFO] [Puzzles Lib/]: Constructing client components for hangglider:main
+[12:47:36] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id polylib:container_to_client
+[12:47:36] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id polylib:tile_to_client
+[12:47:36] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id polylib:container_packet_server
+[12:47:36] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id polylib:tile_data_server
+[12:47:36] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id polylib:tile_packet_server
+[12:47:36] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftblibrary:edit_nbt
+[12:47:36] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftblibrary:edit_nbt_response
+[12:47:36] [modloading-worker-0/INFO] [fallingtrees | Config/]: Successfully loaded config 'fallingtrees_common'
+[12:47:36] [modloading-worker-0/INFO] [fallingtrees | Config/]: Successfully saved config 'fallingtrees_common'
+[12:47:36] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftblibrary:sync_known_server_registries
+[12:47:36] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftblibrary:edit_config
+[12:47:37] [UniLib/INFO] [unilib/]: Starting version check for "craftpresence" (MC 1.20.1) at "https://raw.githubusercontent.com/CDAGaming/VersionLibrary/master/CraftPresence/update.json"
+[12:47:37] [UniLib/INFO] [unilib/]: Starting version check for "unilib" (MC 1.20.1) at "https://raw.githubusercontent.com/CDAGaming/VersionLibrary/master/UniLib/update.json"
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbessentials:update_tab_name
+[12:47:37] [modloading-worker-0/INFO] [invtweaks/]: Registered 2 network packets
+[12:47:37] [modloading-worker-0/INFO] [KubeJS/]: Loaded common.properties
+[12:47:37] [modloading-worker-0/INFO] [KubeJS/]: Loaded dev.properties
+[12:47:37] [modloading-worker-0/INFO] [KubeJS/]: Looking for KubeJS plugins...
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbteams:sync_teams
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbteams:sync_message_history
+[12:47:37] [modloading-worker-0/INFO] [GregTechCEu/]: GregTechCEu is initializing on platform: Forge
+[12:47:37] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source kubejs
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbteams:open_gui
+[12:47:37] [CraftPresence/INFO] [craftpresence/]: Configuration settings have been saved and reloaded successfully!
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbteams:open_my_team_gui
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbteams:update_settings
+[12:47:37] [modloading-worker-0/WARN] [KubeJS/]: Plugin dev.latvian.mods.kubejs.integration.forge.gamestages.GameStagesIntegration does not have required mod gamestages loaded, skipping
+[12:47:37] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source ldlib
+[12:47:37] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source exposure
+[12:47:37] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source tfg
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbteams:update_settings_response
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbteams:send_message
+[12:47:37] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source ftbxmodcompat
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbteams:send_message_response
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbteams:update_presence
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbteams:create_party
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbteams:player_gui_operation
+[12:47:37] [modloading-worker-0/WARN] [KubeJS/]: Plugin dev.ftb.mods.ftbxmodcompat.ftbchunks.kubejs.FTBChunksKubeJSPlugin does not have required mod ftbchunks loaded, skipping
+[12:47:37] [modloading-worker-0/INFO] [de.ke.dr.DrippyLoadingScreen/]: [DRIPPY LOADING SCREEN] Loading v3.0.1 in client-side mode on FORGE!
+[12:47:37] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source lootjs
+[12:47:37] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source cucumber
+[12:47:37] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source gtceu
+[12:47:37] [modloading-worker-0/INFO] [ne.dr.tf.TerraFirmaCraft/]: Initializing TerraFirmaCraft
+[12:47:37] [modloading-worker-0/INFO] [ne.dr.tf.TerraFirmaCraft/]: Options: Assertions Enabled = false, Boostrap = false, Test = false, Debug Logging = true
+[12:47:37] [CraftPresence/INFO] [craftpresence/]: Checking Discord for available assets with Client Id: 1182610212121743470
+[12:47:37] [CraftPresence/INFO] [craftpresence/]: Originally coded by paulhobbel - https://github.com/paulhobbel
+[12:47:37] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Forge mod loading, version 47.2.6, for MC 1.20.1 with MCP 20230612.114412
+[12:47:37] [modloading-worker-0/INFO] [ne.mi.co.MinecraftForge/FORGE]: MinecraftForge v47.2.6 Initialized
+[12:47:37] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source gcyr
+[12:47:37] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source kubejs_tfc
+[12:47:37] [modloading-worker-0/WARN] [KubeJS/]: Plugin com.notenoughmail.kubejs_tfc.addons.precpros.PrecProsPlugin does not have required mod precisionprospecting loaded, skipping
+[12:47:37] [modloading-worker-0/WARN] [KubeJS/]: Plugin com.notenoughmail.kubejs_tfc.addons.afc.AFCPlugin does not have required mod afc loaded, skipping
+[12:47:37] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source kubejs_create
+[Mouse Tweaks] Main.initialize()
+[Mouse Tweaks] Initialized.
+[12:47:37] [modloading-worker-0/INFO] [Every Compat/]: Loaded EveryCompat Create Module
+[12:47:37] [modloading-worker-0/INFO] [Configuration/FileWatching]: Registered gtceu config for auto-sync function
+[12:47:37] [modloading-worker-0/INFO] [Configuration/FileWatching]: Registered gtceu config for auto-sync function
+[12:47:37] [modloading-worker-0/INFO] [Configuration/FileWatching]: Registered gcyr config for auto-sync function
+[12:47:37] [modloading-worker-0/INFO] [GregTechCEu/]: High-Tier is Disabled.
+[12:47:37] [modloading-worker-0/INFO] [ne.cr.ft.re.or.qu.im.StdSchedulerFactory/]: Using default implementation for ThreadExecutor
+[12:47:37] [modloading-worker-0/INFO] [KubeJS/]: Done in 309.0 ms
+[12:47:37] [CraftPresence/INFO] [craftpresence/]: 3 total assets detected!
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:sync_quests
+[12:47:37] [modloading-worker-0/INFO] [Ksyxis/]: Ksyxis: Booting... (platform: Forge, manual: false)
+[12:47:37] [modloading-worker-0/INFO] [Ksyxis/]: Ksyxis: Found Mixin library. (version: 0.8.5)
+[12:47:37] [modloading-worker-0/INFO] [Ksyxis/]: Ksyxis: Ready. As always, this mod will speed up your world loading and might or might not break it.
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:sync_team_data
+[12:47:37] [modloading-worker-0/INFO] [ne.cr.ft.re.or.qu.co.SchedulerSignalerImpl/]: Initialized Scheduler Signaller of type: class net.creeperhost.ftbbackups.repack.org.quartz.core.SchedulerSignalerImpl
+[12:47:37] [modloading-worker-0/INFO] [ne.cr.ft.re.or.qu.co.QuartzScheduler/]: Quartz Scheduler v.2.0.2 created.
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:update_task_progress
+[12:47:37] [modloading-worker-0/INFO] [ne.cr.ft.re.or.qu.si.RAMJobStore/]: RAMJobStore initialized.
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:submit_task
+[12:47:37] [modloading-worker-0/INFO] [ne.cr.ft.re.or.qu.co.QuartzScheduler/]: Scheduler meta-data: Quartz Scheduler (v2.0.2) 'ftbbackups2' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'net.creeperhost.ftbbackups.repack.org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'net.creeperhost.ftbbackups.repack.org.quartz.simpl.SimpleThreadPool' - with 1 threads.
+  Using job-store 'net.creeperhost.ftbbackups.repack.org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+[12:47:37] [modloading-worker-0/INFO] [ne.cr.ft.re.or.qu.im.StdSchedulerFactory/]: Quartz scheduler 'ftbbackups2' initialized from an externally provided properties instance.
+[12:47:37] [modloading-worker-0/INFO] [ne.cr.ft.re.or.qu.im.StdSchedulerFactory/]: Quartz scheduler version: 2.0.2
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:claim_reward
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:claim_reward_response
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:sync_editing_mode
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:get_emergency_items
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:create_other_team_data
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:claim_all_rewards
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:claim_choice_reward
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:display_completion_toast
+[12:47:37] [modloading-worker-0/INFO] [ne.cr.ft.re.or.qu.co.QuartzScheduler/]: Scheduler ftbbackups2_$_NON_CLUSTERED started.
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:display_reward_toast
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:display_item_reward_toast
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:toggle_pinned
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:toggle_pinned_response
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:toggle_chapter_pinned
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:toggle_chapter_pinned_response
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:toggle_editing_mode
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:force_save
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:update_team_data
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:set_custom_image
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:object_started
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:object_completed
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:object_started_reset
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:object_completed_reset
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:sync_lock
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:reset_reward
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:team_data_changed
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:task_screen_config_req
+[12:47:37] [modloading-worker-0/INFO] [co.jo.fl.ba.Backend/]: Oculus detected.
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:task_screen_config_resp
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:change_progress
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:create_object
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:create_object_response
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:create_task_at
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:delete_object
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:delete_object_response
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:edit_object
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:edit_object_response
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:move_chapter
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:move_chapter_response
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:move_quest
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:move_quest_response
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:change_chapter_group
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:change_chapter_group_response
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:move_chapter_group
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:move_chapter_group_response
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:sync_reward_blocking
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:copy_quest
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:copy_chapter_image
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:sync_structures_request
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:sync_structures_response
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbquests:request_team_data
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:sync_editor_permission
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:open_quest_book
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ftbquests:clear_display_cache
+[12:47:37] [modloading-worker-0/INFO] [me.je.li.lo.PluginCaller/]: Sending ConfigManager...
+[12:47:37] [modloading-worker-0/INFO] [me.je.li.lo.PluginCaller/]: Sending ConfigManager took 11.32 ms
+[12:47:37] [modloading-worker-0/INFO] [MEGA Cells/]: Initialised items.
+[12:47:37] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ftbfiltersystem:sync_filter
+[12:47:37] [modloading-worker-0/INFO] [MEGA Cells/]: Initialised blocks.
+[12:47:37] [modloading-worker-0/INFO] [MEGA Cells/]: Initialised block entities.
+[12:47:37] [modloading-worker-0/INFO] [de.ke.fa.FancyMenu/]: [FANCYMENU] Loading v3.2.3 in client-side mode on FORGE!
+[12:47:37] [modloading-worker-0/INFO] [showcaseitem/]: Loading config: /home/ryex/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/instances/TerraFirmaGreg-Modern/minecraft/config/showcaseitem-common.toml
+[12:47:37] [modloading-worker-0/INFO] [showcaseitem/]: Built config: /home/ryex/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/instances/TerraFirmaGreg-Modern/minecraft/config/showcaseitem-common.toml
+[12:47:37] [modloading-worker-0/INFO] [showcaseitem/]: Loaded config: /home/ryex/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/instances/TerraFirmaGreg-Modern/minecraft/config/showcaseitem-common.toml
+[12:47:37] [modloading-worker-0/INFO] [FTB XMod Compat/]: [FTB Quests] Enabled KubeJS integration
+[12:47:37] [modloading-worker-0/INFO] [me.tr.be.BetterF3Forge/]: [BetterF3] Starting...
+[12:47:37] [modloading-worker-0/INFO] [me.tr.be.BetterF3Forge/]: [BetterF3] Loading...
+[12:47:37] [modloading-worker-0/INFO] [de.to.pa.PacketFixer/]: Packet Fixer has been initialized successfully
+[12:47:37] [modloading-worker-0/INFO] [YetAnotherConfigLib/]: Deserializing YACLConfig from '/home/ryex/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/instances/TerraFirmaGreg-Modern/minecraft/config/yacl.json5'
+[12:47:37] [modloading-worker-0/INFO] [Puzzles Lib/]: Constructing common components for puzzleslib:main
+[12:47:37] [modloading-worker-0/INFO] [me.tr.be.BetterF3Forge/]: [BetterF3] All done!
+[12:47:37] [modloading-worker-0/INFO] [Puzzles Lib/]: Constructing client components for puzzleslib:main
+[12:47:37] [modloading-worker-0/INFO] [Rhino Script Remapper/]: Loading Rhino Minecraft remapper...
+[12:47:37] [modloading-worker-0/INFO] [de.la.mo.rh.mo.ut.RhinoProperties/]: Rhino properties loaded.
+[12:47:37] [modloading-worker-0/INFO] [Rhino Script Remapper/]: Loading mappings for 1.20.1
+[12:47:37] [modloading-worker-0/WARN] [mixin/]: @Inject(@At("INVOKE")) Shift.BY=2 on create_connected.mixins.json:sequencedgearshift.SequencedGearshiftScreenMixin::handler$cfa000$updateParamsOfRow exceeds the maximum allowed value: 0. Increase the value of maxShiftBy to suppress this warning.
+[12:47:37] [modloading-worker-0/INFO] [Rhino Script Remapper/]: Done in 0.090 s
+[12:47:38] [modloading-worker-0/INFO] [Railways/]: Registered bogey styles from railways
+[12:47:38] [modloading-worker-0/INFO] [Railways/]: Registering data fixers
+[12:47:38] [modloading-worker-0/WARN] [Railways/]: Skipping Datafixer Registration due to it being disabled in the config.
+[12:47:38] [modloading-worker-0/INFO] [Railways/]: Registering tracks for Hex Casting
+[12:47:38] [modloading-worker-0/INFO] [Railways/]: Registering tracks for Oh The Biomes You'll Go
+[12:47:38] [modloading-worker-0/INFO] [Railways/]: Registering tracks for Blue Skies
+[12:47:38] [modloading-worker-0/INFO] [Railways/]: Registering tracks for Twilight Forest
+[12:47:38] [modloading-worker-0/INFO] [Railways/]: Registering tracks for Biomes O' Plenty
+[12:47:38] [modloading-worker-0/INFO] [Railways/]: Registering tracks for Nature's Spirit
+[12:47:38] [modloading-worker-0/INFO] [Railways/]: Registering tracks for Dreams and Desires
+[12:47:38] [modloading-worker-0/INFO] [Railways/]: Registering tracks for Quark
+[12:47:38] [modloading-worker-0/INFO] [Railways/]: Registering tracks for TerraFirmaCraft
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:main_startup_script.js in 0.058 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:tfc/constants.js in 0.024 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:horornot/constants.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:minecraft/constants.js in 0.004 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:railways/constants.js in 0.001 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:gtceu/machines.js in 0.008 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:gtceu/constants.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:gtceu/material_info.js in 0.002 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:gtceu/recipe_types.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:gtceu/blocks.js in 0.001 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:gtceu/items.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:framedblocks/constants.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:firmalife/constants.js in 0.001 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:sophisticated_backpacks/constants.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:more_red/constants.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:mega_cells/constants.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:create/constants.js in 0.002 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:ae2/constants.js in 0.001 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:create_additions/constants.js in 0.001 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:chisel_and_bits/constants.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:extended_ae2/constants.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:asticor_carts/constants.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:firmaciv/constants.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:firmaciv/blocks.js in 0.001 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:ftb_quests/constants.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:tfg/fluids.js in 0.001 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:tfg/materials.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:tfg/blocks.js in 0.001 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:tfg/items.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:computer_craft/constants.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded 30/30 KubeJS startup scripts in 0.721 s with 0 errors and 0 warnings
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Client/]: example.js#3: TerraFirmaGreg the best modpack in the world :)
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Client/]: Loaded script client_scripts:example.js in 0.0 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Client/]: Loaded script client_scripts:tooltips.js in 0.003 s
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Client/]: Loaded 2/2 KubeJS client scripts in 0.022 s with 0 errors and 0 warnings
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: tfg/blocks.js#48: Loaded Java class 'net.minecraft.world.level.block.AmethystClusterBlock'
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: tfg/blocks.js#49: Loaded Java class 'net.minecraft.world.level.block.Blocks'
+[12:47:38] [modloading-worker-0/INFO] [KubeJS Startup/]: tfg/blocks.js#50: Loaded Java class 'net.minecraft.world.level.block.state.BlockBehaviour$Properties'
+[12:47:38] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id kubejs:send_data_from_client
+[12:47:38] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id kubejs:send_data_from_server
+[12:47:38] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id kubejs:paint
+[12:47:38] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id kubejs:add_stage
+[12:47:38] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id kubejs:remove_stage
+[12:47:38] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id kubejs:sync_stages
+[12:47:38] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id kubejs:first_click
+[12:47:38] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id kubejs:toast
+[12:47:38] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id kubejs:reload_startup_scripts
+[12:47:38] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id kubejs:display_server_errors
+[12:47:38] [modloading-worker-0/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id kubejs:display_client_errors
+[12:47:38] [Render thread/INFO] [GregTechCEu/]: GTCEu common proxy init!
+[12:47:38] [Render thread/INFO] [GregTechCEu/]: Registering material registries
+[12:47:38] [Render thread/INFO] [GregTechCEu/]: Registering GTCEu Materials
+[12:47:38] [CraftPresence/INFO] [craftpresence/]: Attempting to connect to Discord (1/10)...
+[12:47:39] [Render thread/INFO] [GregTechCEu/]: Registering addon Materials
+[12:47:39] [Render thread/WARN] [GregTechCEu/]: FluidStorageKey{gtceu:liquid} already has an associated fluid for material gtceu:water
+[12:47:39] [Render thread/WARN] [GregTechCEu/]: FluidStorageKey{gtceu:liquid} already has an associated fluid for material gtceu:lava
+[12:47:39] [CraftPresence/INFO] [craftpresence/]: Loaded display data with Client Id: 1182610212121743470 (Logged in as RyRy)
+[12:47:39] [Render thread/INFO] [GregTechCEu/]: Registering KeyBinds
+[12:47:39] [Render thread/WARN] [ne.mi.fm.DeferredWorkQueue/LOADING]: Mod 'gtceu' took 1.043 s to run a deferred task.
+[12:47:42] [Render thread/WARN] [ne.mi.re.ForgeRegistry/REGISTRIES]: Registry minecraft:menu: The object net.minecraft.world.inventory.MenuType@67141ef8 has been registered twice for the same name ae2:export_card.
+[12:47:42] [Render thread/WARN] [ne.mi.re.ForgeRegistry/REGISTRIES]: Registry minecraft:menu: The object net.minecraft.world.inventory.MenuType@f4864e9 has been registered twice for the same name ae2:insert_card.
+[12:47:42] [Render thread/INFO] [Moonlight/]: Initialized block sets in 21ms
+[12:47:42] [Render thread/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering C2S receiver with id ae2wtlib:cycle_terminal
+[12:47:43] [Render thread/INFO] [Every Compat/]: Registering Compat WoodType Blocks
+[12:47:43] [Render thread/INFO] [Every Compat/]: EveryCompat Create Module: registered 42 WoodType blocks
+[12:47:43] [Render thread/INFO] [tf.TFCTumbleweed/]: Injecting TFC Tumbleweed override pack
+[12:47:43] [Render thread/INFO] [co.ee.fi.FirmaLife/]: Injecting firmalife override pack
+[ALSOFT] (EE) Failed to set real-time priority for thread: Operation not permitted (1)
+[12:47:43] [Render thread/INFO] [Oculus/]: Hardware information:
+[12:47:43] [Render thread/INFO] [Oculus/]: CPU: 16x AMD Ryzen 7 3700X 8-Core Processor
+[12:47:43] [Render thread/INFO] [Oculus/]: GPU: AMD Radeon RX 5700 XT (radeonsi, navi10, LLVM 19.1.7, DRM 3.54, 6.6.85) (Supports OpenGL 4.6 (Core Profile) Mesa 25.0.3 (git-c3afa2a74f))
+[12:47:43] [Render thread/INFO] [Oculus/]: OS: Linux (6.6.85)
+[12:47:44] [Render thread/WARN] [mixin/]: Method overwrite conflict for isHidden in mixins.oculus.compat.sodium.json:copyEntity.ModelPartMixin, previously written by dev.tr7zw.firstperson.mixins.ModelPartMixin. Skipping method.
+[12:47:44] [Render thread/INFO] [minecraft/Minecraft]: [FANCYMENU] Registering resource reload listener..
+[12:47:44] [Render thread/INFO] [de.ke.fa.cu.ScreenCustomization/]: [FANCYMENU] Initializing screen customization engine! Addons should NOT REGISTER TO REGISTRIES anymore now!
+[12:47:44] [Render thread/INFO] [de.ke.fa.cu.la.ScreenCustomizationLayerHandler/]: [FANCYMENU] Minecraft resource reload: STARTING
+[12:47:44] [Render thread/INFO] [ModernFix/]: Invalidating pack caches
+[12:47:44] [Render thread/INFO] [minecraft/ReloadableResourceManager]: Reloading ResourceManager: Additional Placements blockstate redirection pack, vanilla, mod_resources, gtceu:dynamic_assets, Moonlight Mods Dynamic Assets, Firmalife-1.20.1-2.1.15.jar:overload, TFCTumbleweed-1.20.1-1.2.2.jar:overload, KubeJS Resource Pack [assets], ldlib
+[12:47:44] [Finalizer/WARN] [ModernFix/]: One or more BufferBuilders have been leaked, ModernFix will attempt to correct this.
+[12:47:45] [Render thread/INFO] [Every Compat/]: Generated runtime CLIENT_RESOURCES for pack Moonlight Mods Dynamic Assets (everycomp) in: 597 ms
+[12:47:45] [Render thread/INFO] [Moonlight/]: Generated runtime CLIENT_RESOURCES for pack Moonlight Mods Dynamic Assets (moonlight) in: 0 ms
+[12:47:45] [modloading-worker-0/INFO] [Puzzles Lib/]: Loading client config for pickupnotifier
+[12:47:45] [modloading-worker-0/INFO] [Puzzles Lib/]: Loading client config for hangglider
+[12:47:45] [Worker-ResourceReload-4/INFO] [minecraft/UnihexProvider]: Found unifont_all_no_pua-15.0.06.hex, loading
+[12:47:45] [Worker-ResourceReload-3/INFO] [xa.pa.OpenPartiesAndClaims/]: Loading Open Parties and Claims!
+[12:47:45] [Worker-ResourceReload-1/INFO] [co.re.RecipeEssentials/]: recipeessentials mod initialized
+[12:47:45] [Worker-ResourceReload-10/INFO] [ne.dr.tf.TerraFirmaCraft/]: TFC Common Setup
+[12:47:45] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [saturn] Starting version check at https://github.com/AbdElAziz333/Saturn/raw/mc1.20.1/dev/updates.json
+[12:47:45] [Worker-ResourceReload-1/INFO] [FTB Library/]: Setting game stages provider implementation to: KubeJS Stages
+[12:47:45] [Worker-ResourceReload-1/INFO] [FTB XMod Compat/]: Chose [KubeJS Stages] as the active game stages implementation
+[12:47:45] [Worker-ResourceReload-1/INFO] [FTB Library/]: Setting permissions provider implementation to: FTB Ranks
+[12:47:45] [Worker-ResourceReload-1/INFO] [FTB XMod Compat/]: Chose [FTB Ranks] as the active permissions implementation
+[12:47:45] [Worker-ResourceReload-1/INFO] [FTB XMod Compat/]: [FTB Quests] recipe helper provider is [JEI]
+[12:47:45] [Worker-ResourceReload-1/INFO] [FTB XMod Compat/]: [FTB Quests] Enabled FTB Filter System integration
+[12:47:45] [Render thread/INFO] [GregTechCEu/]: GregTech Model loading took 520ms
+[12:47:46] [Render thread/INFO] [minecraft/LoadingOverlay]: [DRIPPY LOADING SCREEN] Initializing fonts for text rendering..
+[12:47:46] [Render thread/INFO] [minecraft/LoadingOverlay]: [DRIPPY LOADING SCREEN] Calculating animation sizes for FancyMenu..
+[12:47:46] [Render thread/INFO] [de.ke.fa.cu.la.ScreenCustomizationLayerHandler/]: [FANCYMENU] ScreenCustomizationLayer registered: drippy_loading_overlay
+[12:47:46] [Render thread/INFO] [de.ke.fa.cu.an.AnimationHandler/]: [FANCYMENU] Preloading animations! This could cause the loading screen to freeze for a while..
+[12:47:46] [Render thread/INFO] [de.ke.fa.cu.an.AnimationHandler/]: [FANCYMENU] Finished preloading animations!
+[12:47:46] [Render thread/INFO] [de.ke.fa.FancyMenu/]: [FANCYMENU] Starting late client initialization phase..
+[12:47:46] [Forge Version Check/WARN] [ne.mi.fm.VersionChecker/]: Failed to process update information
+com.google.gson.JsonSyntaxException: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING at line 9 column 1 path $
+	at com.google.gson.Gson.fromJson(Gson.java:1226) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1124) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1034) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:969) ~[gson-2.10.jar%2388!/:?] {}
+	at net.minecraftforge.fml.VersionChecker$1.process(VersionChecker.java:183) ~[fmlcore-1.20.1-47.2.6.jar%23445!/:?] {}
+	at java.lang.Iterable.forEach(Iterable.java:75) ~[?:?] {re:mixin}
+	at net.minecraftforge.fml.VersionChecker$1.run(VersionChecker.java:114) ~[fmlcore-1.20.1-47.2.6.jar%23445!/:?] {}
+Caused by: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING at line 9 column 1 path $
+	at com.google.gson.stream.JsonReader.beginObject(JsonReader.java:393) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.internal.bind.MapTypeAdapterFactory$Adapter.read(MapTypeAdapterFactory.java:182) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.internal.bind.MapTypeAdapterFactory$Adapter.read(MapTypeAdapterFactory.java:144) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%2388!/:?] {}
+	... 6 more
+[12:47:46] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [controlling] Starting version check at https://updates.blamejared.com/get?n=controlling&gv=1.20.1
+[12:47:46] [Worker-ResourceReload-6/ERROR] [minecraft/SimpleJsonResourceReloadListener]: Couldn't parse data file tfc:field_guide/ru_ru/entries/tfg_ores/surface_copper from tfc:patchouli_books/field_guide/ru_ru/entries/tfg_ores/surface_copper.json
+com.google.gson.JsonParseException: com.google.gson.stream.MalformedJsonException: Use JsonReader.setLenient(true) to accept malformed JSON at line 55 column 6 path $.pages[5]
+	at net.minecraft.util.GsonHelper.m_13780_(GsonHelper.java:526) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:classloading,re:mixin}
+	at net.minecraft.util.GsonHelper.m_263475_(GsonHelper.java:531) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:classloading,re:mixin}
+	at net.minecraft.util.GsonHelper.m_13776_(GsonHelper.java:581) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:classloading,re:mixin}
+	at net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener.m_278771_(SimpleJsonResourceReloadListener.java:41) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:mixin,re:classloading}
+	at net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener.m_5944_(SimpleJsonResourceReloadListener.java:29) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:mixin,re:classloading}
+	at net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener.m_5944_(SimpleJsonResourceReloadListener.java:17) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:mixin,re:classloading}
+	at net.minecraft.server.packs.resources.SimplePreparableReloadListener.m_10786_(SimplePreparableReloadListener.java:11) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:mixin,pl:accesstransformer:B,re:classloading,pl:accesstransformer:B,pl:mixin:APP:moonlight.mixins.json:ConditionHackMixin,pl:mixin:A}
+	at java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768) ~[?:?] {}
+	at java.util.concurrent.CompletableFuture$AsyncSupply.exec(CompletableFuture.java:1760) ~[?:?] {}
+	at java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:373) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1182) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1655) ~[?:?] {re:mixin,re:computing_frames}
+	at java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1622) ~[?:?] {re:mixin,re:computing_frames}
+	at java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:165) ~[?:?] {re:mixin}
+Caused by: com.google.gson.stream.MalformedJsonException: Use JsonReader.setLenient(true) to accept malformed JSON at line 55 column 6 path $.pages[5]
+	at com.google.gson.stream.JsonReader.syntaxError(JsonReader.java:1657) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.stream.JsonReader.checkLenient(JsonReader.java:1463) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.stream.JsonReader.doPeek(JsonReader.java:569) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.stream.JsonReader.hasNext(JsonReader.java:422) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.internal.bind.TypeAdapters$28.read(TypeAdapters.java:779) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.internal.bind.TypeAdapters$28.read(TypeAdapters.java:725) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.internal.bind.TypeAdapters$34$1.read(TypeAdapters.java:1007) ~[gson-2.10.jar%2388!/:?] {}
+	at net.minecraft.util.GsonHelper.m_13780_(GsonHelper.java:524) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:classloading,re:mixin}
+	... 13 more
+[12:47:46] [Render thread/INFO] [de.ke.fa.ut.wi.WindowHandler/]: [FANCYMENU] Custom window icon successfully updated!
+[12:47:46] [Render thread/INFO] [KubeJS Client/]: Client resource reload complete!
+[12:47:46] [Render thread/INFO] [defaultoptions/]: Loaded default options for keymappings
+[12:47:46] [Render thread/INFO] [de.ke.fa.ut.wi.WindowHandler/]: [FANCYMENU] Custom window icon successfully updated!
+[12:47:46] [Worker-Main-6/INFO] [minecraft/UnihexProvider]: Found unifont_all_no_pua-15.0.06.hex, loading
+[12:47:47] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [controlling] Found status: BETA Current: 12.0.2 Target: 12.0.2
+[12:47:47] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [uteamcore] Starting version check at https://api.u-team.info/update/uteamcore.json
+[12:47:47] [FTB Backups Config Watcher 0/INFO] [ne.cr.ft.FTBBackups/]: Config at /home/ryex/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/instances/TerraFirmaGreg-Modern/minecraft/config/ftbbackups2.json has changed, reloaded!
+[12:47:47] [Worker-ResourceReload-14/WARN] [minecraft/SpriteLoader]: Texture create_connected:block/fluid_container_window_debug with size 40x32 limits mip level from 4 to 3
+[12:47:47] [UniLib/INFO] [unilib/]: Received update status for "unilib" -> Outdated (Target version: "v1.0.5")
+[12:47:47] [UniLib/INFO] [unilib/]: Received update status for "craftpresence" -> Outdated (Target version: "v2.5.4")
+[12:47:47] [Render thread/INFO] [Every Compat/]: Registered 42 compat blocks making up 0.31% of total blocks registered
+[12:47:47] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [uteamcore] Found status: OUTDATED Current: 5.1.4.312 Target: 5.1.4.346
+[12:47:47] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [pickupnotifier] Starting version check at https://raw.githubusercontent.com/Fuzss/modresources/main/update/pickupnotifier.json
+[12:47:47] [Render thread/INFO] [Moonlight/]: Initialized color sets in 104ms
+[12:47:47] [Render thread/INFO] [co.no.ku.KubeJSTFC/]: KubeJS TFC configuration:
+[12:47:47] [Render thread/INFO] [co.no.ku.KubeJSTFC/]:     Debug mode enabled: false
+[12:47:47] [Render thread/INFO] [MEGA Cells/]: Initialised AE2WT integration.
+[12:47:47] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [pickupnotifier] Found status: UP_TO_DATE Current: 8.0.0 Target: null
+[12:47:47] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [corpse] Starting version check at https://update.maxhenkel.de/forge/corpse
+[12:47:47] [Worker-ResourceReload-0/INFO] [FirstPersonModel/]: Loading FirstPerson Mod
+[12:47:47] [Worker-ResourceReload-4/INFO] [xa.ma.WorldMap/]: Loading Xaero's World Map - Stage 1/2
+[12:47:47] [Placebo Patreon Trail Loader/INFO] [placebo/]: Loading patreon trails data...
+[12:47:47] [Placebo Patreon Wing Loader/INFO] [placebo/]: Loading patreon wing data...
+[12:47:47] [Worker-ResourceReload-13/INFO] [de.ke.ko.Konkrete/]: [KONKRETE] Client-side libs ready to use!
+[12:47:47] [Placebo Patreon Trail Loader/INFO] [placebo/]: Loaded 45 patreon trails.
+[12:47:47] [Placebo Patreon Wing Loader/INFO] [placebo/]: Loaded 21 patreon wings.
+[12:47:47] [Worker-ResourceReload-7/INFO] [EMI/]: [EMI] Discovered Sodium
+[12:47:47] [Worker-ResourceReload-14/INFO] [xa.mi.XaeroMinimap/]: Loading Xaero's Minimap - Stage 1/2
+[12:47:47] [Worker-ResourceReload-13/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ae2wtlib:update_wut
+[12:47:47] [Worker-ResourceReload-13/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ae2wtlib:update_restock
+[12:47:47] [Worker-ResourceReload-13/INFO] [de.ar.ne.fo.NetworkManagerImpl/]: Registering S2C receiver with id ae2wtlib:restock_amounts
+[12:47:48] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [corpse] Found status: OUTDATED Current: 1.20.1-1.0.19 Target: 1.20.1-1.0.20
+[12:47:48] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [create_connected] Starting version check at https://raw.githubusercontent.com/hlysine/create_connected/main/update.json
+[12:47:48] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [create_connected] Found status: OUTDATED Current: 0.8.2-mc1.20.1 Target: 1.0.1-mc1.20.1
+[12:47:48] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [blur] Starting version check at https://api.modrinth.com/updates/rubidium-extra/forge_updates.json
+[12:47:48] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [blur] Found status: AHEAD Current: 3.1.1 Target: null
+[12:47:48] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [hangglider] Starting version check at https://raw.githubusercontent.com/Fuzss/modresources/main/update/hangglider.json
+[12:47:48] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [hangglider] Found status: UP_TO_DATE Current: 8.0.1 Target: null
+[12:47:48] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [searchables] Starting version check at https://updates.blamejared.com/get?n=searchables&gv=1.20.1
+[12:47:48] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [searchables] Found status: BETA Current: 1.0.3 Target: 1.0.3
+[12:47:48] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [computercraft] Starting version check at https://api.modrinth.com/updates/cc-tweaked/forge_updates.json
+[12:47:49] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [computercraft] Found status: OUTDATED Current: 1.113.1 Target: 1.115.1
+[12:47:49] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [unilib] Starting version check at https://raw.githubusercontent.com/CDAGaming/VersionLibrary/master/UniLib/update.json
+[12:47:49] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [unilib] Found status: AHEAD Current: 1.0.2 Target: null
+[12:47:49] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [craftpresence] Starting version check at https://raw.githubusercontent.com/CDAGaming/VersionLibrary/master/CraftPresence/update.json
+[12:47:49] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [craftpresence] Found status: AHEAD Current: 2.5.0 Target: null
+[12:47:49] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [radium] Starting version check at https://api.modrinth.com/updates/radium/forge_updates.json
+[12:47:49] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [radium] Found status: OUTDATED Current: 0.12.3+git.50c5c33 Target: 0.12.4
+[12:47:49] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [attributefix] Starting version check at https://updates.blamejared.com/get?n=attributefix&gv=1.20.1
+[12:47:49] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [attributefix] Found status: BETA Current: 21.0.4 Target: 21.0.4
+[12:47:49] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [clumps] Starting version check at https://updates.blamejared.com/get?n=clumps&gv=1.20.1
+[12:47:49] [Worker-ResourceReload-4/WARN] [xa.hu.mi.MinimapLogs/]: io exception while checking patreon: Online mod data expired! Date: Thu Apr 17 01:03:51 MST 2025
+[12:47:49] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [clumps] Found status: BETA Current: 12.0.0.4 Target: 12.0.0.4
+[12:47:49] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [catalogue] Starting version check at https://mrcrayfish.com/modupdatejson?id=catalogue
+[12:47:50] [Forge Version Check/WARN] [ne.mi.fm.VersionChecker/]: Failed to process update information
+com.google.gson.JsonSyntaxException: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING at line 1 column 1 path $
+	at com.google.gson.Gson.fromJson(Gson.java:1226) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1124) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1034) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:969) ~[gson-2.10.jar%2388!/:?] {}
+	at net.minecraftforge.fml.VersionChecker$1.process(VersionChecker.java:183) ~[fmlcore-1.20.1-47.2.6.jar%23445!/:?] {}
+	at java.lang.Iterable.forEach(Iterable.java:75) ~[?:?] {re:mixin}
+	at net.minecraftforge.fml.VersionChecker$1.run(VersionChecker.java:114) ~[fmlcore-1.20.1-47.2.6.jar%23445!/:?] {}
+Caused by: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING at line 1 column 1 path $
+	at com.google.gson.stream.JsonReader.beginObject(JsonReader.java:393) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.internal.bind.MapTypeAdapterFactory$Adapter.read(MapTypeAdapterFactory.java:182) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.internal.bind.MapTypeAdapterFactory$Adapter.read(MapTypeAdapterFactory.java:144) ~[gson-2.10.jar%2388!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%2388!/:?] {}
+	... 6 more
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [puzzlesaccessapi] Starting version check at https://raw.githubusercontent.com/Fuzss/modresources/main/update/puzzlesaccessapi.json
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [puzzlesaccessapi] Found status: BETA Current: 8.0.7 Target: null
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Starting version check at https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json
+[12:47:50] [Worker-ResourceReload-5/WARN] [minecraft/ModelBakery]: tfcambiental:snowshoes#inventory
+java.io.FileNotFoundException: tfcambiental:models/item/snowshoes.json
+	at net.minecraft.client.resources.model.ModelBakery.m_119364_(ModelBakery.java:417) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.resources.model.ModelBakery.m_119362_(ModelBakery.java:266) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.resources.model.ModelBakery.m_119341_(ModelBakery.java:243) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.resources.model.ModelBakery.m_119306_(ModelBakery.java:384) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.resources.model.ModelBakery.<init>(ModelBakery.java:150) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.resources.model.ModelManager.m_246505_(ModelManager.java:83) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:A,pl:runtimedistcleaner:A}
+	at java.util.concurrent.CompletableFuture.biApply(CompletableFuture.java:1311) ~[?:?] {re:mixin}
+	at java.util.concurrent.CompletableFuture$BiApply.tryFire(CompletableFuture.java:1280) ~[?:?] {}
+	at java.util.concurrent.CompletableFuture$Completion.exec(CompletableFuture.java:483) ~[?:?] {}
+	at java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:373) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1182) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1655) ~[?:?] {re:mixin,re:computing_frames}
+	at java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1622) ~[?:?] {re:mixin,re:computing_frames}
+	at java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:165) ~[?:?] {re:mixin}
+[12:47:50] [Worker-ResourceReload-5/WARN] [minecraft/ModelBakery]: carpeted:block/label
+java.io.FileNotFoundException: carpeted:models/block/label.json
+	at net.minecraft.client.resources.model.ModelBakery.m_119364_(ModelBakery.java:417) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.resources.model.ModelBakery.m_119362_(ModelBakery.java:262) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.resources.model.ModelBakery.m_119341_(ModelBakery.java:243) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.resources.model.ModelBakery.<init>(ModelBakery.java:159) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.resources.model.ModelManager.m_246505_(ModelManager.java:83) ~[client-1.20.1-20230612.114412-srg.jar%23444!/:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:A,pl:runtimedistcleaner:A}
+	at java.util.concurrent.CompletableFuture.biApply(CompletableFuture.java:1311) ~[?:?] {re:mixin}
+	at java.util.concurrent.CompletableFuture$BiApply.tryFire(CompletableFuture.java:1280) ~[?:?] {}
+	at java.util.concurrent.CompletableFuture$Completion.exec(CompletableFuture.java:483) ~[?:?] {}
+	at java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:373) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1182) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1655) ~[?:?] {re:mixin,re:computing_frames}
+	at java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1622) ~[?:?] {re:mixin,re:computing_frames}
+	at java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:165) ~[?:?] {re:mixin}
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Found status: OUTDATED Current: 47.2.6 Target: 47.4.0
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [moonlight] Starting version check at https://raw.githubusercontent.com/MehVahdJukaar/Moonlight/multi-loader/forge/update.json
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [moonlight] Found status: BETA Current: 1.20-2.13.51 Target: null
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [configuration] Starting version check at https://raw.githubusercontent.com/Toma1O6/UpdateSchemas/master/configuration-forge.json
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [configuration] Found status: OUTDATED Current: 2.2.0 Target: 2.2.1
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [smoothboot] Starting version check at https://github.com/AbdElAziz333/SmoothBoot-Reloaded/raw/mc1.20.1/dev/updates.json
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [smoothboot] Found status: UP_TO_DATE Current: 0.0.4 Target: null
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [ksyxis] Starting version check at https://raw.githubusercontent.com/VidTu/Ksyxis/main/updater_ksyxis_forge.json
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [ksyxis] Found status: OUTDATED Current: 1.3.2 Target: 1.3.3
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [flywheel] Starting version check at https://api.modrinth.com/updates/flywheel/forge_updates.json
+[12:47:50] [Worker-ResourceReload-4/ERROR] [xa.ma.WorldMap/]: io exception while checking versions: Online mod data expired! Date: Thu Apr 17 01:03:51 MST 2025
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [flywheel] Found status: BETA Current: 0.6.10-7 Target: null
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [inventoryhud] Starting version check at https://raw.githubusercontent.com/DmitryLovin/pluginUpdate/master/invupdate.json
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [inventoryhud] Found status: UP_TO_DATE Current: 3.4.26 Target: null
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [puzzleslib] Starting version check at https://raw.githubusercontent.com/Fuzss/modresources/main/update/puzzleslib.json
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [puzzleslib] Found status: OUTDATED Current: 8.1.23 Target: 8.1.32
+[12:47:50] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [betterf3] Starting version check at https://api.modrinth.com/updates/betterf3/forge_updates.json
+[12:47:50] [Render thread/INFO] [xa.mi.XaeroMinimap/]: Loading Xaero's Minimap - Stage 2/2
+[12:47:51] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [betterf3] Found status: UP_TO_DATE Current: 7.0.2 Target: null
+[12:47:51] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [packetfixer] Starting version check at https://api.modrinth.com/updates/packet-fixer/forge_updates.json
+[12:47:51] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [packetfixer] Found status: OUTDATED Current: 1.4.2 Target: 2.0.0
+[12:47:51] [Render thread/WARN] [xa.hu.mi.MinimapLogs/]: io exception while checking versions: Online mod data expired! Date: Thu Apr 17 01:03:51 MST 2025
+[12:47:51] [Render thread/INFO] [xa.hu.mi.MinimapLogs/]: Registered player tracker system: minimap_synced
+[12:47:51] [Render thread/INFO] [xa.hu.mi.MinimapLogs/]: Xaero's Minimap: World Map found!
+[12:47:51] [Render thread/INFO] [xa.hu.mi.MinimapLogs/]: Registered player tracker system: openpartiesandclaims
+[12:47:51] [Render thread/INFO] [xa.hu.mi.MinimapLogs/]: Xaero's Minimap: Open Parties And Claims found!
+[12:47:51] [Render thread/INFO] [xa.hu.mi.MinimapLogs/]: No Optifine!
+[12:47:51] [Render thread/INFO] [xa.hu.mi.MinimapLogs/]: Xaero's Minimap: No Vivecraft!
+[12:47:51] [Render thread/INFO] [xa.hu.mi.MinimapLogs/]: Xaero's Minimap: Framed Blocks found!
+[12:47:51] [Render thread/INFO] [xa.hu.mi.MinimapLogs/]: Xaero's Minimap: Iris found!
+[12:47:51] [Render thread/INFO] [xa.ma.WorldMap/]: Loading Xaero's World Map - Stage 2/2
+[12:47:51] [Render thread/INFO] [xa.ma.WorldMap/]: New world map region cache hash code: -815523079
+[12:47:51] [Render thread/INFO] [xa.ma.WorldMap/]: Registered player tracker system: map_synced
+[12:47:51] [Render thread/INFO] [xa.ma.WorldMap/]: Xaero's WorldMap Mod: Xaero's minimap found!
+[12:47:51] [Render thread/INFO] [xa.ma.WorldMap/]: Registered player tracker system: minimap_synced
+[12:47:51] [Render thread/INFO] [xa.ma.WorldMap/]: Registered player tracker system: openpartiesandclaims
+[12:47:51] [Render thread/INFO] [xa.ma.WorldMap/]: Xaero's WorldMap Mod: Open Parties And Claims found!
+[12:47:51] [Render thread/INFO] [xa.ma.WorldMap/]: No Optifine!
+[12:47:51] [Render thread/INFO] [xa.ma.WorldMap/]: Xaero's World Map: No Vivecraft!
+[12:47:51] [Render thread/INFO] [xa.ma.WorldMap/]: Xaero's World Map: Framed Blocks found!
+[12:47:51] [Render thread/INFO] [xa.ma.WorldMap/]: Xaero's World Map: Iris found!
+[12:47:56] [Worker-ResourceReload-5/WARN] [minecraft/ModelManager]: Missing textures in model firmaciv:firmaciv_compass#inventory:
+    minecraft:textures/atlas/blocks.png:minecraft:item/compass
+[12:47:56] [Worker-ResourceReload-5/WARN] [minecraft/ModelManager]: Missing textures in model gtceu:tin_double_ingot#inventory:
+    minecraft:textures/atlas/blocks.png:gtceu:item/material_sets/dull/ingot_double_overlay
+[12:47:56] [Worker-ResourceReload-5/WARN] [minecraft/ModelManager]: Missing textures in model createaddition:small_light_connector#facing=west,mode=push,powered=true,rotation=x_clockwise_180,variant=default:
+    minecraft:textures/atlas/blocks.png:create:block/chute_block
+[12:47:56] [Worker-ResourceReload-5/WARN] [minecraft/ModelManager]: Missing textures in model gtceu:copper_double_ingot#inventory:
+    minecraft:textures/atlas/blocks.png:gtceu:item/material_sets/dull/ingot_double_overlay
+Reloading Dynamic Lights
+[12:47:57] [Render thread/INFO] [co.jo.fl.ba.Backend/]: Loaded all shader sources.
+Create Crafts & Additions Initialized!
+[12:47:57] [Worker-ResourceReload-2/INFO] [AttributeFix/]: Loaded values for 19 compatible attributes.
+[12:47:57] [Worker-ResourceReload-2/ERROR] [AttributeFix/]: Attribute ID 'minecolonies:mc_mob_damage' does not belong to a known attribute. This entry will be ignored.
+[12:47:57] [Worker-ResourceReload-2/INFO] [AttributeFix/]: Loaded 20 values from config.
+[12:47:57] [Worker-ResourceReload-2/INFO] [AttributeFix/]: Saving config file. 20 entries.
+[12:47:57] [Worker-ResourceReload-2/INFO] [AttributeFix/]: Applying changes for 20 attributes.
+[12:47:57] [Worker-ResourceReload-11/INFO] [de.me.as.AstikorCarts/]: Automatic pull animal configuration:
+pull_animals = [
+    "minecraft:camel",
+    "minecraft:donkey",
+    "minecraft:horse",
+    "minecraft:mule",
+    "minecraft:skeleton_horse",
+    "minecraft:zombie_horse",
+    "minecraft:player",
+    "tfc:donkey",
+    "tfc:mule",
+    "tfc:horse"
+  ]
+[12:47:57] [Worker-ResourceReload-9/INFO] [Jade/]: Start loading plugin at io.github.mortuusars.exposure.integration.jade.ExposureJadePlugin
+[12:47:57] [Worker-ResourceReload-9/INFO] [Jade/]: Start loading plugin at de.maxhenkel.corpse.integration.waila.PluginCorpse
+[12:47:57] [Worker-ResourceReload-9/INFO] [Jade/]: Start loading plugin at xfacthd.framedblocks.common.compat.jade.FramedJadePlugin
+[12:47:57] [Worker-ResourceReload-9/INFO] [Jade/]: Start loading plugin at snownee.jade.addon.general.GeneralPlugin
+[12:47:57] [Worker-ResourceReload-9/INFO] [Jade/]: Start loading plugin at snownee.jade.addon.create.CreatePlugin
+[12:47:57] [Worker-ResourceReload-9/INFO] [Jade/]: Start loading plugin at me.pandamods.fallingtrees.compat.JadePlugin
+[12:47:57] [Worker-ResourceReload-9/INFO] [Jade/]: Start loading plugin at com.gregtechceu.gtceu.integration.jade.GTJadePlugin
+[12:47:57] [Worker-ResourceReload-9/INFO] [Jade/]: Start loading plugin at net.dries007.tfc.compat.jade.JadeIntegration
+[12:47:57] [Worker-ResourceReload-9/INFO] [Jade/]: Start loading plugin at snownee.jade.addon.vanilla.VanillaPlugin
+[12:47:57] [Worker-ResourceReload-9/INFO] [Jade/]: Start loading plugin at snownee.jade.addon.universal.UniversalPlugin
+[12:47:57] [Worker-ResourceReload-9/INFO] [Jade/]: Start loading plugin at snownee.jade.addon.core.CorePlugin
+[12:47:57] [Worker-ResourceReload-9/INFO] [Jade/]: Start loading plugin at appeng.integration.modules.jade.JadeModule
+[12:47:57] [Worker-ResourceReload-9/INFO] [Jade/]: Start loading plugin at com.glodblock.github.extendedae.xmod.jade.JadePlugin
+[12:47:57] [Worker-ResourceReload-9/INFO] [Jade/]: Start loading plugin at cy.jdkdigital.treetap.compat.jade.JadePlugin
+[12:47:57] [Worker-ResourceReload-9/INFO] [Jade/]: Start loading plugin at com.eerussianguy.firmalife.compat.tooltip.JadeIntegration
+[12:47:57] [Worker-ResourceReload-9/INFO] [Jade/]: Start loading plugin at com.ljuangbminecraft.tfcchannelcasting.compat.JadeIntegration
+[12:47:59] [Render thread/WARN] [ne.mi.fm.DeferredWorkQueue/LOADING]: Mod 'create_connected' took 1.342 s to run a deferred task.
+[12:47:59] [Render thread/INFO] [defaultoptions/]: Loaded default options for keymappings
+[ALSOFT] (EE) Failed to set real-time priority for thread: Operation not permitted (1)
+[12:47:59] [Render thread/INFO] [mojang/Library]: OpenAL initialized on device Starship/Matisse HD Audio Controller Analog Stereo
+[12:47:59] [Render thread/INFO] [minecraft/SoundEngine]: Sound engine started
+[12:47:59] [Render thread/INFO] [minecraft/SoundEngine]: [FANCYMENU] Reloading AudioResourceHandler after Minecraft SoundEngine reload..
+[12:47:59] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 4096x2048x4 minecraft:textures/atlas/blocks.png-atlas
+[12:48:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x512x4 minecraft:textures/atlas/signs.png-atlas
+[12:48:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[12:48:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[12:48:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 2048x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[12:48:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x1024x4 minecraft:textures/atlas/chest.png-atlas
+[12:48:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[12:48:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[12:48:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader vsh particle.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader vsh rendertype_solid.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader fsh rendertype_solid.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader vsh rendertype_cutout_mipped.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader fsh rendertype_cutout_mipped.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader vsh rendertype_cutout.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader fsh rendertype_cutout.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader vsh rendertype_translucent.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader vsh rendertype_armor_cutout_no_cull.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader vsh rendertype_entity_solid.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader vsh rendertype_entity_cutout.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader vsh rendertype_entity_cutout_no_cull.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader vsh rendertype_entity_cutout_no_cull_z_offset.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader vsh rendertype_entity_translucent_cull.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader vsh rendertype_entity_translucent.
+[12:48:00] [Render thread/WARN] [minecraft/ShaderInstance]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader vsh rendertype_entity_smooth_cutout.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader vsh rendertype_entity_decal.
+[12:48:00] [Render thread/INFO] [Shimmer/]: inject shader vsh rendertype_entity_no_outline.
+[12:48:00] [Render thread/WARN] [minecraft/ShaderInstance]: Shader moonlight:text_alpha_color could not find sampler named Sampler2 in the specified shader program.
+[12:48:00] [Render thread/WARN] [minecraft/ShaderInstance]: Shader moonlight:text_alpha_color could not find uniform named IViewRotMat in the specified shader program.
+[12:48:00] [Render thread/WARN] [minecraft/ShaderInstance]: Shader moonlight:text_alpha_color could not find uniform named FogShape in the specified shader program.
+[12:48:00] [Render thread/WARN] [minecraft/ShaderInstance]: Shader shimmer:rendertype_armor_cutout_no_cull could not find sampler named Sampler2 in the specified shader program.
+[12:48:00] [Render thread/WARN] [minecraft/ShaderInstance]: Shader shimmer:rendertype_armor_cutout_no_cull could not find uniform named Light0_Direction in the specified shader program.
+[12:48:00] [Render thread/WARN] [minecraft/ShaderInstance]: Shader shimmer:rendertype_armor_cutout_no_cull could not find uniform named Light1_Direction in the specified shader program.
+[12:48:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 2048x1024x0 minecraft:textures/atlas/particles.png-atlas
+[12:48:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x0 minecraft:textures/atlas/paintings.png-atlas
+[12:48:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[12:48:00] [Render thread/INFO] [xa.ma.WorldMap/]: Successfully reloaded the world map shaders!
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Loading exposure filters:
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:light_blue_pane, exposure:shaders/light_blue_tint.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:orange_pane, exposure:shaders/orange_tint.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:red_pane, exposure:shaders/red_filter.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:purple_pane, exposure:shaders/purple_tint.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:blue_pane, exposure:shaders/blue_filter.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:light_gray_pane, exposure:shaders/light_gray_tint.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:magenta_pane, exposure:shaders/magenta_tint.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:gray_pane, exposure:shaders/gray_tint.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:lime_pane, exposure:shaders/lime_tint.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:green_pane, exposure:shaders/green_filter.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:pink_pane, exposure:shaders/pink_tint.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:yellow_pane, exposure:shaders/yellow_tint.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:white_pane, exposure:shaders/white_tint.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:brown_pane, exposure:shaders/brown_tint.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:glass_pane, exposure:shaders/crisp.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:interplanar_projector, exposure:shaders/invert.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:black_pane, exposure:shaders/black_tint.json] added.
+[12:48:00] [Render thread/INFO] [io.gi.mo.ex.Exposure/]: Filter [exposure:cyan_pane, exposure:shaders/cyan_tint.json] added.
+[12:48:00] [Render thread/INFO] [patchouli/]: BookContentResourceListenerLoader preloaded 1073 jsons
+[12:48:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 128x128x0 computercraft:textures/atlas/gui.png-atlas
+[12:48:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x0 polylib:textures/atlas/gui.png-atlas
+[12:48:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x128x0 jei:textures/atlas/gui.png-atlas
+[12:48:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x0 moonlight:textures/atlas/map_markers.png-atlas
+[12:48:00] [Render thread/INFO] [xa.hu.mi.MinimapLogs/]: Successfully reloaded the minimap shaders!
+[12:48:00] [Render thread/INFO] [Shimmer/]: buildIn shimmer configuration is enabled, this can be disabled by config file
+[12:48:00] [Render thread/INFO] [Shimmer/]: mod jar and resource pack discovery: file managed my minecraft located in [sourceName:KubeJS Resource Pack [assets],location:KubeJS Resource Pack [assets]]
+[12:48:00] [Render thread/ERROR] [Shimmer/]: can't find block framedblocks:framed_gate_door from file managed my minecraft located in [sourceName:KubeJS Resource Pack [assets],location:KubeJS Resource Pack [assets]]
+[12:48:00] [Render thread/ERROR] [Shimmer/]: can't find block framedblocks:framed_iron_gate_door from file managed my minecraft located in [sourceName:KubeJS Resource Pack [assets],location:KubeJS Resource Pack [assets]]
+[12:48:00] [Render thread/ERROR] [Shimmer/]: can't find block framedblocks:framed_gate_door from file managed my minecraft located in [sourceName:KubeJS Resource Pack [assets],location:KubeJS Resource Pack [assets]]
+[12:48:00] [Render thread/ERROR] [Shimmer/]: can't find block framedblocks:framed_iron_gate_door from file managed my minecraft located in [sourceName:KubeJS Resource Pack [assets],location:KubeJS Resource Pack [assets]]
+[12:48:00] [Render thread/INFO] [de.ke.fa.ut.re.ResourceHandlers/]: [FANCYMENU] Reloading resources..
+[12:48:00] [Render thread/INFO] [de.ke.fa.ut.re.pr.ResourcePreLoader/]: [FANCYMENU] Pre-loading resources..
+[12:48:00] [Render thread/INFO] [de.ke.fa.cu.la.ScreenCustomizationLayerHandler/]: [FANCYMENU] Updating animation sizes..
+[12:48:00] [Render thread/INFO] [de.ke.fa.cu.la.ScreenCustomizationLayerHandler/]: [FANCYMENU] Minecraft resource reload: FINISHED
+[12:48:00] [Render thread/INFO] [de.ke.fa.cu.la.ScreenCustomizationLayerHandler/]: [FANCYMENU] ScreenCustomizationLayer registered: title_screen
+[12:48:00] [Render thread/INFO] [Oculus/]: Creating pipeline for dimension NamespacedId{namespace='minecraft', name='overworld'}
+[12:48:01] [Render thread/INFO] [ambientsounds/]: Loaded AmbientEngine 'basic' v3.1.0. 11 dimension(s), 11 features, 11 blockgroups, 2 sound collections, 37 regions, 58 sounds, 11 sound categories, 5 solids and 2 biome types
+[12:48:01] [Render thread/INFO] [FirstPersonModel/]: PlayerAnimator not found!
+[12:48:01] [Render thread/INFO] [FirstPersonModel/]: Loaded Vanilla Hands items: []
+[12:48:01] [Render thread/INFO] [FirstPersonModel/]: Loaded Auto Disable items: [camera]
+[12:48:02] [Render thread/WARN] [ModernFix/]: Game took 40.304 seconds to start

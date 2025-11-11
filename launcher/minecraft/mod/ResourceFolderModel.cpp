@@ -164,22 +164,20 @@ bool ResourceFolderModel::installResource(QString original_path)
     return false;
 }
 
-bool ResourceFolderModel::installResourceWithFlameMetadata(QString path, ModPlatform::IndexedVersion& vers)
+void ResourceFolderModel::installResourceWithFlameMetadata(QString path, ModPlatform::IndexedVersion& vers)
 {
+    auto install = [this, path] { installResource(std::move(path)); };
     if (vers.addonId.isValid()) {
         ModPlatform::IndexedPack pack{
             vers.addonId,
             ModPlatform::ResourceProvider::FLAME,
         };
 
-        QEventLoop loop;
-
         auto response = std::make_shared<QByteArray>();
         auto job = FlameAPI().getProject(vers.addonId.toString(), response);
-
-        QObject::connect(job.get(), &Task::failed, [&loop] { loop.quit(); });
-        QObject::connect(job.get(), &Task::aborted, &loop, &QEventLoop::quit);
-        QObject::connect(job.get(), &Task::succeeded, [response, this, &vers, &loop, &pack] {
+        connect(job.get(), &Task::failed, this, install);
+        connect(job.get(), &Task::aborted, this, install);
+        connect(job.get(), &Task::succeeded, [response, this, &vers, install, &pack] {
             QJsonParseError parse_error{};
             QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
             if (parse_error.error != QJsonParseError::NoError) {
@@ -196,16 +194,14 @@ bool ResourceFolderModel::installResourceWithFlameMetadata(QString path, ModPlat
                 qWarning() << "Error while reading mod info: " << e.cause();
             }
             LocalResourceUpdateTask update_metadata(indexDir(), pack, vers);
-            QObject::connect(&update_metadata, &Task::finished, &loop, &QEventLoop::quit);
+            connect(&update_metadata, &Task::finished, this, install);
             update_metadata.start();
         });
 
         job->start();
-
-        loop.exec();
+    } else {
+        install();
     }
-
-    return installResource(std::move(path));
 }
 
 bool ResourceFolderModel::uninstallResource(QString file_name, bool preserve_metadata)
@@ -258,6 +254,18 @@ void ResourceFolderModel::deleteMetadata(const QModelIndexList& indexes)
 
 bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAction action)
 {
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        auto response =
+            CustomMessageBox::selectable(nullptr, tr("Confirm toggle"),
+                                         tr("If you enable/disable this resource while the game is running it may crash your game.\n"
+                                            "Are you sure you want to do this?"),
+                                         QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                ->exec();
+
+        if (response != QMessageBox::Yes)
+            return false;
+    }
+
     if (indexes.isEmpty())
         return true;
 
@@ -367,16 +375,11 @@ void ResourceFolderModel::onUpdateSucceeded()
 
     auto& new_resources = update_results->resources;
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     auto current_list = m_resources_index.keys();
     QSet<QString> current_set(current_list.begin(), current_list.end());
 
     auto new_list = new_resources.keys();
     QSet<QString> new_set(new_list.begin(), new_list.end());
-#else
-    QSet<QString> current_set(m_resources_index.keys().toSet());
-    QSet<QString> new_set(new_resources.keys().toSet());
-#endif
 
     applyUpdates(current_set, new_set, new_resources);
 }
@@ -512,17 +515,14 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
             return m_resources[row]->internal_id();
         case Qt::DecorationRole: {
             if (column == NameColumn && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
-                return APPLICATION->getThemedIcon("status-yellow");
+                return QIcon::fromTheme("status-yellow");
 
             return {};
         }
         case Qt::CheckStateRole:
-            switch (column) {
-                case ActiveColumn:
-                    return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
-                default:
-                    return {};
-            }
+            if (column == ActiveColumn)
+                return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
+            return {};
         default:
             return {};
     }
@@ -535,17 +535,6 @@ bool ResourceFolderModel::setData(const QModelIndex& index, [[maybe_unused]] con
         return false;
 
     if (role == Qt::CheckStateRole) {
-        if (m_instance != nullptr && m_instance->isRunning()) {
-            auto response =
-                CustomMessageBox::selectable(nullptr, tr("Confirm toggle"),
-                                             tr("If you enable/disable this resource while the game is running it may crash your game.\n"
-                                                "Are you sure you want to do this?"),
-                                             QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                    ->exec();
-
-            if (response != QMessageBox::Yes)
-                return false;
-        }
         return setResourceEnabled({ index }, EnableAction::TOGGLE);
     }
 
@@ -599,30 +588,89 @@ void ResourceFolderModel::setupHeaderAction(QAction* act, int column)
 
 void ResourceFolderModel::saveColumns(QTreeView* tree)
 {
-    auto const setting_name = QString("UI/%1_Page/Columns").arg(id());
-    auto setting = (m_instance->settings()->contains(setting_name)) ? m_instance->settings()->getSetting(setting_name)
-                                                                    : m_instance->settings()->registerSetting(setting_name);
+    auto const stateSettingName = QString("UI/%1_Page/Columns").arg(id());
+    auto const overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
+    auto const visibilitySettingName = QString("UI/%1_Page/ColumnsVisibility").arg(id());
 
-    setting->set(tree->header()->saveState());
+    auto stateSetting = m_instance->settings()->getSetting(stateSettingName);
+    stateSetting->set(QString::fromUtf8(tree->header()->saveState().toBase64()));
+
+    // neither passthrough nor override settings works for this usecase as I need to only set the global when the gate is false
+    auto settings = m_instance->settings();
+    if (!settings->get(overrideSettingName).toBool()) {
+        settings = APPLICATION->settings();
+    }
+    auto visibility = Json::toMap(settings->get(visibilitySettingName).toString());
+    for (auto i = 0; i < m_column_names.size(); ++i) {
+        if (m_columnsHideable[i]) {
+            auto name = m_column_names[i];
+            visibility[name] = !tree->isColumnHidden(i);
+        }
+    }
+    settings->set(visibilitySettingName, Json::fromMap(visibility));
 }
 
 void ResourceFolderModel::loadColumns(QTreeView* tree)
 {
-    for (auto i = 0; i < m_columnsHiddenByDefault.size(); ++i) {
-        tree->setColumnHidden(i, m_columnsHiddenByDefault[i]);
+    auto const stateSettingName = QString("UI/%1_Page/Columns").arg(id());
+    auto const overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
+    auto const visibilitySettingName = QString("UI/%1_Page/ColumnsVisibility").arg(id());
+
+    auto stateSetting = m_instance->settings()->getOrRegisterSetting(stateSettingName, "");
+    tree->header()->restoreState(QByteArray::fromBase64(stateSetting->get().toString().toUtf8()));
+
+    auto setVisible = [this, tree](QVariant value) {
+        auto visibility = Json::toMap(value.toString());
+        for (auto i = 0; i < m_column_names.size(); ++i) {
+            if (m_columnsHideable[i]) {
+                auto name = m_column_names[i];
+                tree->setColumnHidden(i, !visibility.value(name, false).toBool());
+            }
+        }
+    };
+
+    auto const defaultValue = Json::fromMap({
+        { "Image", true },
+        { "Version", true },
+        { "Last Modified", true },
+        { "Provider", true },
+        { "Pack Format", true },
+    });
+    // neither passthrough nor override settings works for this usecase as I need to only set the global when the gate is false
+    auto settings = m_instance->settings();
+    if (!settings->getOrRegisterSetting(overrideSettingName, false)->get().toBool()) {
+        settings = APPLICATION->settings();
     }
+    auto visibility = settings->getOrRegisterSetting(visibilitySettingName, defaultValue);
+    setVisible(visibility->get());
 
-    auto const setting_name = QString("UI/%1_Page/Columns").arg(id());
-    auto setting = (m_instance->settings()->contains(setting_name)) ? m_instance->settings()->getSetting(setting_name)
-                                                                    : m_instance->settings()->registerSetting(setting_name);
-
-    tree->header()->restoreState(setting->get().toByteArray());
+    // allways connect the signal in case the setting is toggled on and off
+    auto gSetting = APPLICATION->settings()->getOrRegisterSetting(visibilitySettingName, defaultValue);
+    connect(gSetting.get(), &Setting::SettingChanged, tree, [this, setVisible, overrideSettingName](const Setting&, QVariant value) {
+        if (!m_instance->settings()->get(overrideSettingName).toBool()) {
+            setVisible(value);
+        }
+    });
 }
 
 QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
 {
     auto menu = new QMenu(tree);
 
+    {  // action to decide if the visibility is per instance or not
+        auto act = new QAction(tr("Override Columns Visibility"), menu);
+        auto const overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
+
+        act->setCheckable(true);
+        act->setChecked(m_instance->settings()->getOrRegisterSetting(overrideSettingName, false)->get().toBool());
+
+        connect(act, &QAction::toggled, tree, [this, tree, overrideSettingName](bool toggled) {
+            m_instance->settings()->set(overrideSettingName, toggled);
+            saveColumns(tree);
+        });
+
+        menu->addAction(act);
+    }
     menu->addSeparator()->setText(tr("Show / Hide Columns"));
 
     for (int col = 0; col < columnCount(); ++col) {
@@ -662,8 +710,7 @@ SortType ResourceFolderModel::columnToSortKey(size_t column) const
 }
 
 /* Standard Proxy Model for createFilterProxyModel */
-[[nodiscard]] bool ResourceFolderModel::ProxyModel::filterAcceptsRow(int source_row,
-                                                                     [[maybe_unused]] const QModelIndex& source_parent) const
+bool ResourceFolderModel::ProxyModel::filterAcceptsRow(int source_row, [[maybe_unused]] const QModelIndex& source_parent) const
 {
     auto* model = qobject_cast<ResourceFolderModel*>(sourceModel());
     if (!model)
@@ -674,7 +721,7 @@ SortType ResourceFolderModel::columnToSortKey(size_t column) const
     return resource.applyFilter(filterRegularExpression());
 }
 
-[[nodiscard]] bool ResourceFolderModel::ProxyModel::lessThan(const QModelIndex& source_left, const QModelIndex& source_right) const
+bool ResourceFolderModel::ProxyModel::lessThan(const QModelIndex& source_left, const QModelIndex& source_right) const
 {
     auto* model = qobject_cast<ResourceFolderModel*>(sourceModel());
     if (!model || !source_left.isValid() || !source_right.isValid() || source_left.column() != source_right.column()) {

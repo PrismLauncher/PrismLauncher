@@ -23,7 +23,6 @@
 #include <QTreeView>
 #include <QWidget>
 
-#include <Application.h>
 #include "modplatform/import_ftb/PackHelpers.h"
 #include "ui/pages/modplatform/ModpackProviderBasePage.h"
 #include "ui/pages/modplatform/import_ftb/ListModel.h"
@@ -42,7 +41,7 @@ class ImportFTBPage : public QWidget, public ModpackProviderBasePage {
     explicit ImportFTBPage(NewInstanceDialog* dialog, QWidget* parent = 0);
     virtual ~ImportFTBPage();
     QString displayName() const override { return tr("FTB App Import"); }
-    QIcon icon() const override { return APPLICATION->getThemedIcon("ftb_logo"); }
+    QIcon icon() const override { return QIcon::fromTheme("ftb_logo"); }
     QString id() const override { return "import_ftb"; }
     QString helpPage() const override { return "FTB-import"; }
     bool shouldDisplay() const override { return true; }
@@ -52,7 +51,7 @@ class ImportFTBPage : public QWidget, public ModpackProviderBasePage {
     /** Programatically set the term in the search bar. */
     virtual void setSearchTerm(QString) override;
     /** Get the current term in the search bar. */
-    [[nodiscard]] virtual QString getSerachTerm() const override;
+    virtual QString getSerachTerm() const override;
 
    private:
     void suggestCurrent();

@@ -52,15 +52,16 @@
 #if defined(LAUNCHER_APPLICATION)
 #include "minecraft/mod/Mod.h"
 #endif
+#include "Filter.h"
 #include "tasks/Task.h"
 
 namespace MMCZip {
-using FilterFunction = std::function<bool(const QString&)>;
+using FilterFileFunction = std::function<bool(const QFileInfo&)>;
 
 /**
  * Merge two zip files, using a filter function
  */
-bool mergeZipFiles(QuaZip* into, QFileInfo from, QSet<QString>& contained, const FilterFunction& filter = nullptr);
+bool mergeZipFiles(QuaZip* into, QFileInfo from, QSet<QString>& contained, const Filter& filter = nullptr);
 
 /**
  * Compress directory, by providing a list of files to compress
@@ -149,7 +150,7 @@ bool extractFile(QString fileCompressed, QString file, QString dir);
  * \param excludeFilter function to excludeFilter which files shouldn't be included (returning true means to excude)
  * \return true for success or false for failure
  */
-bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFunction excludeFilter);
+bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFileFunction excludeFilter);
 
 #if defined(LAUNCHER_APPLICATION)
 class ExportToZipTask : public Task {

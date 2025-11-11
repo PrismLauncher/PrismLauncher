@@ -1,0 +1,255 @@
+name: Blocked/Stacked Pull Requests Automation
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+  workflow_dispatch:
+    inputs:
+      pr_id:
+        description: Local Pull Request number to work on
+        required: true
+        type: number
+
+jobs:
+  blocked_status:
+    name: Check Blocked Status
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.PULL_REQUEST_APP_ID }}
+          private-key: ${{ secrets.PULL_REQUEST_APP_PRIVATE_KEY }}
+
+      - name: Setup From Dispatch Event
+        if: github.event_name == 'workflow_dispatch'
+        id: dispatch_event_setup
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          PR_NUMBER: ${{ inputs.pr_id }}
+        run: |
+          # setup env for the rest of the workflow
+          OWNER=$(dirname "${{ github.repository }}")
+          REPO=$(basename "${{ github.repository }}")
+          PR_JSON=$(
+            gh api \
+              -H "Accept: application/vnd.github.raw+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "/repos/$OWNER/$REPO/pulls/$PR_NUMBER"
+          )
+          echo "PR_JSON=$PR_JSON" >> "$GITHUB_ENV"
+
+      - name: Setup Environment
+        id: env_setup
+        env:
+          EVENT_PR_JSON: ${{ toJSON(github.event.pull_request) }}
+        run: |
+          # setup env for the rest of the workflow
+          PR_JSON=${PR_JSON:-"$EVENT_PR_JSON"}
+          {
+            echo "REPO=$(jq -r '.base.repo.name' <<< "$PR_JSON")"
+            echo "OWNER=$(jq -r '.base.repo.owner.login' <<< "$PR_JSON")"
+            echo "PR_NUMBER=$(jq -r '.number' <<< "$PR_JSON")"
+            echo "JOB_DATA=$(jq -c '
+              {
+                "repo": .base.repo.name,
+                "owner": .base.repo.owner.login,
+                "repoUrl": .base.repo.html_url,
+                "prNumber": .number,
+                "prHeadSha": .head.sha,
+                "prHeadLabel": .head.label,
+                "prBody": (.body // ""),
+                "prLabels": (reduce .labels[].name as $l ([]; . + [$l]))
+              }
+            ' <<< "$PR_JSON")"
+          } >> "$GITHUB_ENV"
+
+
+      - name: Find Blocked/Stacked PRs in body
+        id: pr_ids
+        run: |
+          prs=$(
+            jq -c '
+              .prBody as $body 
+                | (
+                    $body | 
+                      reduce ( 
+                        . | scan("blocked (?:by|on):? #([0-9]+)") 
+                        | map({
+                          "type": "Blocked on",
+                          "number": ( . | tonumber )
+                        })
+                      ) as $i ([]; . + [$i[]])
+                  ) as $bprs
+                | (
+                    $body | 
+                      reduce ( 
+                        . | scan("stacked on:? #([0-9]+)")
+                        | map({
+                          "type": "Stacked on",
+                          "number": ( . | tonumber )
+                        })
+                      ) as $i ([]; . + [$i[]])
+                  ) as $sprs
+                | ($bprs + $sprs) as $prs 
+                | { 
+                    "blocking": $prs,
+                    "numBlocking": ( $prs | length),
+                  }
+              ' <<< "$JOB_DATA"
+          )
+          echo "prs=$prs" >> "$GITHUB_OUTPUT"
+
+      - name: Collect Blocked PR Data
+        id: blocking_data
+        if: fromJSON(steps.pr_ids.outputs.prs).numBlocking > 0
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          BLOCKING_PRS: ${{ steps.pr_ids.outputs.prs }}
+        run: |
+          blocked_pr_data=$(
+            while read -r pr_data ; do
+              gh api \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                "/repos/$OWNER/$REPO/pulls/$(jq -r '.number' <<< "$pr_data")" \
+                | jq -c --arg type "$(jq -r '.type' <<< "$pr_data")" \
+                  '
+                    . | {
+                      "type": $type,
+                      "number": .number,
+                      "merged": .merged,
+                      "state": (if .state == "open" then "Open" elif .merged then "Merged" else "Closed" end),
+                      "labels": (reduce .labels[].name as $l ([]; . + [$l])), 
+                      "basePrUrl": .html_url,
+                      "baseRepoName": .head.repo.name,
+                      "baseRepoOwner": .head.repo.owner.login,
+                      "baseRepoUrl": .head.repo.html_url,
+                      "baseSha": .head.sha,
+                      "baseRefName": .head.ref,
+                    }
+                  '
+            done < <(jq -c '.blocking[]' <<< "$BLOCKING_PRS") | jq -c -s
+          )
+          {
+            echo "data=$blocked_pr_data";
+            echo "all_merged=$(jq -r 'all(.[] | (.type == "Stacked on" and .merged) or (.type == "Blocked on" and (.state != "Open")); .)' <<< "$blocked_pr_data")";
+            echo "current_blocking=$(jq -c 'map(
+                select(
+                  (.type == "Stacked on" and (.merged | not)) or
+                  (.type == "Blocked on" and (.state == "Open")) 
+                ) | .number
+              )' <<< "$blocked_pr_data" )";
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Add 'blocked' Label if Missing
+        id: label_blocked
+        if: (fromJSON(steps.pr_ids.outputs.prs).numBlocking > 0) && !contains(fromJSON(env.JOB_DATA).prLabels, 'blocked') && !fromJSON(steps.blocking_data.outputs.all_merged)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+          gh -R ${{ github.repository }} issue edit --add-label 'blocked' "$PR_NUMBER"
+
+      - name: Remove 'blocked' Label if All Dependencies Are Merged
+        id: unlabel_blocked
+        if: fromJSON(steps.pr_ids.outputs.prs).numBlocking > 0 && fromJSON(steps.blocking_data.outputs.all_merged)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+          gh -R ${{ github.repository }} issue edit --remove-label 'blocked' "$PR_NUMBER"
+
+      - name: Apply 'blocking' Label to Unmerged Dependencies
+        id: label_blocking
+        if: fromJSON(steps.pr_ids.outputs.prs).numBlocking > 0
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          BLOCKING_ISSUES: ${{ steps.blocking_data.outputs.current_blocking }}
+        run: |
+          while read -r pr ; do
+            gh -R ${{ github.repository }} issue edit --add-label 'blocking' "$pr" || true
+          done < <(jq -c '.[]' <<< "$BLOCKING_ISSUES")
+
+      - name: Apply Blocking PR Status Check
+        id: blocked_check
+        if: fromJSON(steps.pr_ids.outputs.prs).numBlocking > 0
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          BLOCKING_DATA: ${{ steps.blocking_data.outputs.data }}
+        run: |
+          pr_head_sha=$(jq -r '.prHeadSha' <<< "$JOB_DATA")
+          # create commit Status, overwrites previous identical context
+          while read -r pr_data ; do
+            DESC=$(
+              jq -r 'if .type == "Stacked on" then
+                  "Stacked PR #" + (.number | tostring) + " is " + (if .merged then "" else "not yet " end) + "merged"
+                else
+                  "Blocking PR #" + (.number | tostring) + " is " + (if .state == "Open" then "" else "not yet " end) + "merged or closed"
+                end ' <<< "$pr_data"
+            )
+            gh api \
+              --method POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "/repos/${OWNER}/${REPO}/statuses/${pr_head_sha}" \
+              -f "state=$(jq -r 'if (.type == "Stacked on" and .merged) or (.type == "Blocked on" and (.state != "Open")) then "success" else "failure" end' <<< "$pr_data")" \
+              -f "target_url=$(jq -r '.basePrUrl' <<< "$pr_data" )" \
+              -f "description=$DESC" \
+              -f "context=ci/blocking-pr-check:$(jq '.number' <<< "$pr_data")"
+          done < <(jq -c '.[]' <<< "$BLOCKING_DATA")
+
+      - name: Context Comment
+        id: generate-comment
+        if: fromJSON(steps.pr_ids.outputs.prs).numBlocking > 0
+        continue-on-error: true
+        env:
+          BLOCKING_DATA: ${{ steps.blocking_data.outputs.data }}
+        run: |
+          COMMENT_PATH="$(pwd)/temp_comment_file.txt"
+          echo '<h3>PR Dependencies :pushpin:</h3>' > "$COMMENT_PATH"
+          echo >> "$COMMENT_PATH"
+          pr_head_label=$(jq -r '.prHeadLabel' <<< "$JOB_DATA")
+          while read -r pr_data ; do
+            base_pr=$(jq -r '.number' <<< "$pr_data")
+            base_ref_name=$(jq -r '.baseRefName' <<< "$pr_data")
+            base_repo_owner=$(jq -r '.baseRepoOwner' <<< "$pr_data")
+            base_repo_name=$(jq -r '.baseRepoName' <<< "$pr_data")
+            compare_url="https://github.com/$base_repo_owner/$base_repo_name/compare/$base_ref_name...$pr_head_label"
+            status=$(jq -r '
+                if .type == "Stacked on" then
+                  if .merged then ":heavy_check_mark: Merged" else ":x: Not Merged (" + .state + ")" end
+                else
+                  if .state != "Open" then ":white_check_mark: " + .state else ":x: Open" end
+                end
+              ' <<< "$pr_data")
+            type=$(jq -r '.type' <<< "$pr_data")
+            echo "  - $type #$base_pr $status [(compare)]($compare_url)" >> "$COMMENT_PATH"
+          done < <(jq -c '.[]'  <<< "$BLOCKING_DATA")
+
+          {
+            echo 'body<<EOF';
+            cat "${COMMENT_PATH}";
+            echo 'EOF';
+          } >> "$GITHUB_OUTPUT"
+
+      - name: 💬 PR Comment
+        if: fromJSON(steps.pr_ids.outputs.prs).numBlocking > 0
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          COMMENT_BODY: ${{ steps.generate-comment.outputs.body }}
+        run: |
+          gh -R ${{ github.repository }} issue comment "$PR_NUMBER" \
+            --body "$COMMENT_BODY" \
+            --create-if-none \
+            --edit-last
+

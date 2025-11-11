@@ -56,11 +56,17 @@ enum class InstCreateError { NoCreateError = 0, NoSuchVersion, UnknownCreateErro
 
 enum class GroupsState { NotLoaded, Steady, Dirty };
 
+struct TrashShortcutItem {
+    ShortcutData data;
+    QString trashPath;
+};
+
 struct TrashHistoryItem {
     QString id;
     QString path;
     QString trashPath;
     QString groupName;
+    QList<TrashShortcutItem> shortcuts;
 };
 
 class InstanceList : public QAbstractListModel {
@@ -111,8 +117,8 @@ class InstanceList : public QAbstractListModel {
     void deleteGroup(const GroupId& name);
     void renameGroup(const GroupId& src, const GroupId& dst);
     bool trashInstance(const InstanceId& id);
-    bool trashedSomething();
-    void undoTrashInstance();
+    bool trashedSomething() const;
+    bool undoTrashInstance();
     void deleteInstance(const InstanceId& id);
 
     // Wrap an instance creation task in some more task machinery and make it ready to be used

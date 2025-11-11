@@ -159,7 +159,7 @@ bool loadAssetsIndexJson(const QString& assetsId, const QString& path, AssetsInd
             if (key == "hash") {
                 object.hash = value.toString();
             } else if (key == "size") {
-                object.size = value.toDouble();
+                object.size = value.toLongLong();
             }
         }
 
@@ -298,7 +298,8 @@ QString AssetObject::getLocalPath()
 
 QUrl AssetObject::getUrl()
 {
-    return BuildConfig.RESOURCE_BASE + getRelPath();
+    auto resourceURL = APPLICATION->settings()->get("ResourceURL").toString();
+    return resourceURL + getRelPath();
 }
 
 QString AssetObject::getRelPath()

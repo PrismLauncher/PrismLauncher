@@ -35,26 +35,27 @@ class ModPage : public ResourcePage {
         page->setFilterWidget(filter_widget);
         model->setFilter(page->getFilter());
 
-        connect(model, &ResourceModel::versionListUpdated, page, &ResourcePage::updateVersionList);
+        connect(model, &ResourceModel::versionListUpdated, page, &ResourcePage::versionListUpdated);
         connect(model, &ResourceModel::projectInfoUpdated, page, &ResourcePage::updateUi);
+        connect(model, &QAbstractListModel::modelReset, page, &ResourcePage::modelReset);
 
         return page;
     }
 
     //: The plural version of 'mod'
-    [[nodiscard]] inline QString resourcesString() const override { return tr("mods"); }
+    inline QString resourcesString() const override { return tr("mods"); }
     //: The singular version of 'mods'
-    [[nodiscard]] inline QString resourceString() const override { return tr("mod"); }
+    inline QString resourceString() const override { return tr("mod"); }
 
-    [[nodiscard]] QMap<QString, QString> urlHandlers() const override;
+    QMap<QString, QString> urlHandlers() const override;
 
     void addResourceToPage(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, std::shared_ptr<ResourceFolderModel>) override;
 
-    virtual unique_qobject_ptr<ModFilterWidget> createFilterWidget() = 0;
+    virtual std::unique_ptr<ModFilterWidget> createFilterWidget() = 0;
 
-    [[nodiscard]] bool supportsFiltering() const override { return true; };
+    bool supportsFiltering() const override { return true; };
     auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
-    void setFilterWidget(unique_qobject_ptr<ModFilterWidget>&);
+    void setFilterWidget(std::unique_ptr<ModFilterWidget>&);
 
    protected:
     ModPage(ModDownloadDialog* dialog, BaseInstance& instance);
@@ -66,7 +67,7 @@ class ModPage : public ResourcePage {
     void triggerSearch() override;
 
    protected:
-    unique_qobject_ptr<ModFilterWidget> m_filter_widget;
+    std::unique_ptr<ModFilterWidget> m_filter_widget;
     std::shared_ptr<ModFilterWidget::Filter> m_filter;
 };
 

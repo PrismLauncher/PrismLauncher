@@ -46,31 +46,12 @@
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#include <fcntl.h>
-#include <io.h>
-#include <stdio.h>
 #include <windows.h>
-#include <iostream>
+#include "console/WindowsConsole.h"
 #endif
 
-// Snippet from https://github.com/gulrak/filesystem#using-it-as-single-file-header
-
-#ifdef __APPLE__
-#include <Availability.h>  // for deployment target to support pre-catalina targets without std::fs
-#endif                     // __APPLE__
-
-#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || (defined(__cplusplus) && __cplusplus >= 201703L)) && defined(__has_include)
-#if __has_include(<filesystem>) && (!defined(__MAC_OS_X_VERSION_MIN_REQUIRED) || __MAC_OS_X_VERSION_MIN_REQUIRED >= 101500)
-#define GHC_USE_STD_FS
 #include <filesystem>
 namespace fs = std::filesystem;
-#endif  // MacOS min version check
-#endif  // Other OSes version check
-
-#ifndef GHC_USE_STD_FS
-#include <ghc/filesystem.hpp>
-namespace fs = ghc::filesystem;
-#endif
 
 #include "DesktopServices.h"
 
@@ -103,112 +84,12 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext& context, const QSt
     }
 }
 
-#if defined Q_OS_WIN32
-
-// taken from https://stackoverflow.com/a/25927081
-// getting a proper output to console with redirection support on windows is apparently hell
-void BindCrtHandlesToStdHandles(bool bindStdIn, bool bindStdOut, bool bindStdErr)
-{
-    // Re-initialize the C runtime "FILE" handles with clean handles bound to "nul". We do this because it has been
-    // observed that the file number of our standard handle file objects can be assigned internally to a value of -2
-    // when not bound to a valid target, which represents some kind of unknown internal invalid state. In this state our
-    // call to "_dup2" fails, as it specifically tests to ensure that the target file number isn't equal to this value
-    // before allowing the operation to continue. We can resolve this issue by first "re-opening" the target files to
-    // use the "nul" device, which will place them into a valid state, after which we can redirect them to our target
-    // using the "_dup2" function.
-    if (bindStdIn) {
-        FILE* dummyFile;
-        freopen_s(&dummyFile, "nul", "r", stdin);
-    }
-    if (bindStdOut) {
-        FILE* dummyFile;
-        freopen_s(&dummyFile, "nul", "w", stdout);
-    }
-    if (bindStdErr) {
-        FILE* dummyFile;
-        freopen_s(&dummyFile, "nul", "w", stderr);
-    }
-
-    // Redirect unbuffered stdin from the current standard input handle
-    if (bindStdIn) {
-        HANDLE stdHandle = GetStdHandle(STD_INPUT_HANDLE);
-        if (stdHandle != INVALID_HANDLE_VALUE) {
-            int fileDescriptor = _open_osfhandle((intptr_t)stdHandle, _O_TEXT);
-            if (fileDescriptor != -1) {
-                FILE* file = _fdopen(fileDescriptor, "r");
-                if (file != NULL) {
-                    int dup2Result = _dup2(_fileno(file), _fileno(stdin));
-                    if (dup2Result == 0) {
-                        setvbuf(stdin, NULL, _IONBF, 0);
-                    }
-                }
-            }
-        }
-    }
-
-    // Redirect unbuffered stdout to the current standard output handle
-    if (bindStdOut) {
-        HANDLE stdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-        if (stdHandle != INVALID_HANDLE_VALUE) {
-            int fileDescriptor = _open_osfhandle((intptr_t)stdHandle, _O_TEXT);
-            if (fileDescriptor != -1) {
-                FILE* file = _fdopen(fileDescriptor, "w");
-                if (file != NULL) {
-                    int dup2Result = _dup2(_fileno(file), _fileno(stdout));
-                    if (dup2Result == 0) {
-                        setvbuf(stdout, NULL, _IONBF, 0);
-                    }
-                }
-            }
-        }
-    }
-
-    // Redirect unbuffered stderr to the current standard error handle
-    if (bindStdErr) {
-        HANDLE stdHandle = GetStdHandle(STD_ERROR_HANDLE);
-        if (stdHandle != INVALID_HANDLE_VALUE) {
-            int fileDescriptor = _open_osfhandle((intptr_t)stdHandle, _O_TEXT);
-            if (fileDescriptor != -1) {
-                FILE* file = _fdopen(fileDescriptor, "w");
-                if (file != NULL) {
-                    int dup2Result = _dup2(_fileno(file), _fileno(stderr));
-                    if (dup2Result == 0) {
-                        setvbuf(stderr, NULL, _IONBF, 0);
-                    }
-                }
-            }
-        }
-    }
-
-    // Clear the error state for each of the C++ standard stream objects. We need to do this, as attempts to access the
-    // standard streams before they refer to a valid target will cause the iostream objects to enter an error state. In
-    // versions of Visual Studio after 2005, this seems to always occur during startup regardless of whether anything
-    // has been read from or written to the targets or not.
-    if (bindStdIn) {
-        std::wcin.clear();
-        std::cin.clear();
-    }
-    if (bindStdOut) {
-        std::wcout.clear();
-        std::cout.clear();
-    }
-    if (bindStdErr) {
-        std::wcerr.clear();
-        std::cerr.clear();
-    }
-}
-#endif
-
 PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, argv)
 {
 #if defined Q_OS_WIN32
     // attach the parent console if stdout not already captured
-    auto stdout_type = GetFileType(GetStdHandle(STD_OUTPUT_HANDLE));
-    if (stdout_type == FILE_TYPE_CHAR || stdout_type == FILE_TYPE_UNKNOWN) {
-        if (AttachConsole(ATTACH_PARENT_PROCESS)) {
-            BindCrtHandlesToStdHandles(true, true, true);
-            consoleAttached = true;
-        }
+    if (AttachWindowsConsole()) {
+        consoleAttached = true;
     }
 #endif
     setOrganizationName(BuildConfig.LAUNCHER_NAME);
@@ -298,6 +179,10 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         auto version_parts = version.split('.');
         m_prismVersionMajor = version_parts.takeFirst().toInt();
         m_prismVersionMinor = version_parts.takeFirst().toInt();
+        if (!version_parts.isEmpty())
+            m_prismVersionPatch = version_parts.takeFirst().toInt();
+        else
+            m_prismVersionPatch = 0;
     }
 
     m_allowPreRelease = parser.isSet("pre-release");
@@ -556,6 +441,7 @@ void PrismUpdaterApp::run()
         m_prismVersion = BuildConfig.printableVersionString();
         m_prismVersionMajor = BuildConfig.VERSION_MAJOR;
         m_prismVersionMinor = BuildConfig.VERSION_MINOR;
+        m_prismVersionPatch = BuildConfig.VERSION_PATCH;
         m_prsimVersionChannel = BuildConfig.VERSION_CHANNEL;
         m_prismGitCommit = BuildConfig.GIT_COMMIT;
     }
@@ -564,6 +450,7 @@ void PrismUpdaterApp::run()
     qDebug() << "Executable reports as:" << m_prismBinaryName << "version:" << m_prismVersion;
     qDebug() << "Version major:" << m_prismVersionMajor;
     qDebug() << "Version minor:" << m_prismVersionMinor;
+    qDebug() << "Version minor:" << m_prismVersionPatch;
     qDebug() << "Version channel:" << m_prsimVersionChannel;
     qDebug() << "Git Commit:" << m_prismGitCommit;
 
@@ -834,8 +721,8 @@ QList<GitHubReleaseAsset> PrismUpdaterApp::validReleaseArtifacts(const GitHubRel
             for_platform = false;
         }
 
-        auto qt_pattern = QRegularExpression("-qt(\\d+)");
-        auto qt_match = qt_pattern.match(asset_name);
+        static const QRegularExpression s_qtPattern("-qt(\\d+)");
+        auto qt_match = s_qtPattern.match(asset_name);
         if (for_platform && qt_match.hasMatch()) {
             if (platform_qt_ver.isEmpty() || platform_qt_ver.toInt() != qt_match.captured(1).toInt()) {
                 qDebug() << "Rejecting" << asset.name << "because it is not for the correct qt version" << platform_qt_ver.toInt() << "vs"
@@ -1131,12 +1018,11 @@ void PrismUpdaterApp::backupAppDir()
         logUpdate("manifest.txt empty or missing. making best guess at files to back up.");
     }
     logUpdate(tr("Backing up:\n  %1").arg(file_list.join(",\n  ")));
+    static const QRegularExpression s_replaceRegex("[" + QRegularExpression::escape("\\/:*?\"<>|") + "]");
     auto app_dir = QDir(m_rootPath);
-    auto backup_dir = FS::PathCombine(
-        app_dir.absolutePath(),
-        QStringLiteral("backup_") +
-            QString(m_prismVersion).replace(QRegularExpression("[" + QRegularExpression::escape("\\/:*?\"<>|") + "]"), QString("_")) + "-" +
-            m_prismGitCommit);
+    auto backup_dir =
+        FS::PathCombine(app_dir.absolutePath(),
+                        QStringLiteral("backup_") + QString(m_prismVersion).replace(s_replaceRegex, QString("_")) + "-" + m_prismGitCommit);
     FS::ensureFolderPathExists(backup_dir);
     auto backup_marker_path = FS::PathCombine(m_dataPath, ".prism_launcher_update_backup_path.txt");
     FS::write(backup_marker_path, backup_dir.toUtf8());
@@ -1277,6 +1163,10 @@ bool PrismUpdaterApp::loadPrismVersionFromExe(const QString& exe_path)
         return false;
     m_prismVersionMajor = version_parts.takeFirst().toInt();
     m_prismVersionMinor = version_parts.takeFirst().toInt();
+    if (!version_parts.isEmpty())
+        m_prismVersionPatch = version_parts.takeFirst().toInt();
+    else
+        m_prismVersionPatch = 0;
     m_prismGitCommit = lines.takeFirst().simplified();
     return true;
 }
@@ -1400,7 +1290,7 @@ GitHubRelease PrismUpdaterApp::getLatestRelease()
 
 bool PrismUpdaterApp::needUpdate(const GitHubRelease& release)
 {
-    auto current_ver = Version(QString("%1.%2").arg(QString::number(m_prismVersionMajor)).arg(QString::number(m_prismVersionMinor)));
+    auto current_ver = Version(QString("%1.%2.%3").arg(m_prismVersionMajor).arg(m_prismVersionMinor).arg(m_prismVersionPatch));
     return current_ver < release.version;
 }
 

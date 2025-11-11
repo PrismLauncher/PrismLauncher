@@ -97,6 +97,19 @@ public final class StandardLauncher extends AbstractLauncher {
             gameArgs.add(worldName);
         }
 
+        StringBuilder joinedGameArgs = new StringBuilder();
+        for (String gameArg : gameArgs) {
+            if (joinedGameArgs.length() > 0) {
+                joinedGameArgs.append('\u001F'); // unit separator, designed for this purpose
+            }
+            joinedGameArgs.append(gameArg);
+        }
+
+        // pass the real main class and game arguments in so mods can access them
+        System.setProperty("org.prismlauncher.launch.mainclass", mainClassName);
+        // unit separator ('\u001F') delimited list of game args
+        System.setProperty("org.prismlauncher.launch.gameargs", joinedGameArgs.toString());
+
         // find and invoke the main method
         MethodHandle method = ReflectionUtils.findMainMethod(mainClassName);
         method.invokeExact(gameArgs.toArray(new String[0]));

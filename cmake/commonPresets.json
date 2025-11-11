@@ -1,0 +1,81 @@
+{
+	"$schema": "https://cmake.org/cmake/help/latest/_downloads/3e2d73bff478d88a7de0de736ba5e361/schema.json",
+	"version": 8,
+	"configurePresets": [
+		{
+			"name": "base",
+			"hidden": true,
+			"binaryDir": "build",
+			"installDir": "install",
+			"cacheVariables": {
+				"Launcher_BUILD_ARTIFACT": "$penv{ARTIFACT_NAME}",
+				"Launcher_BUILD_PLATFORM": "$penv{BUILD_PLATFORM}"
+			}
+		},
+		{
+			"name": "base_debug",
+			"hidden": true,
+			"inherits": [
+				"base"
+			],
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "base_release",
+			"hidden": true,
+			"inherits": [
+				"base"
+			],
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release",
+				"ENABLE_LTO": "ON"
+			}
+		},
+		{
+			"name": "base_ci",
+			"hidden": true,
+			"inherits": [
+				"base_release"
+			],
+			"cacheVariables": {
+				"Launcher_FORCE_BUNDLED_LIBS": "ON"
+			}
+		}
+	],
+	"testPresets": [
+		{
+			"name": "base",
+			"hidden": true,
+			"output": {
+				"outputOnFailure": true
+			},
+			"execution": {
+				"noTestsAction": "error"
+			},
+			"filter": {
+				"exclude": {
+					"name": "^example64|example$"
+				}
+			}
+		},
+		{
+			"name": "base_debug",
+			"hidden": true,
+			"inherits": [
+				"base"
+			],
+			"output": {
+				"debug": true
+			}
+		},
+		{
+			"name": "base_release",
+			"hidden": true,
+			"inherits": [
+				"base"
+			]
+		}
+	]
+}

@@ -43,6 +43,7 @@
 #include "LaunchStep.h"
 #include "LogModel.h"
 #include "MessageLevel.h"
+#include "logs/LogParser.h"
 
 class LaunchTask : public Task {
     Q_OBJECT
@@ -87,8 +88,7 @@ class LaunchTask : public Task {
     shared_qobject_ptr<LogModel> getLogModel();
 
    public:
-    void substituteVariables(QStringList& args) const;
-    void substituteVariables(QString& cmd) const;
+    QString substituteVariables(QString& cmd, bool isLaunch = false) const;
     QString censorPrivateInfo(QString in);
 
    protected: /* methods */
@@ -115,6 +115,9 @@ class LaunchTask : public Task {
    private: /*methods */
     void finalizeSteps(bool successful, const QString& error);
 
+   protected:
+    bool parseXmlLogs(QString const& line, MessageLevel::Enum level);
+
    protected: /* data */
     MinecraftInstancePtr m_instance;
     shared_qobject_ptr<LogModel> m_logModel;
@@ -123,4 +126,6 @@ class LaunchTask : public Task {
     int currentStep = -1;
     State state = NotStarted;
     qint64 m_pid = -1;
+    LogParser m_stdoutParser;
+    LogParser m_stderrParser;
 };

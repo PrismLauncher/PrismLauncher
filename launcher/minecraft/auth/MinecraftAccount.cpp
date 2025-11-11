@@ -55,7 +55,8 @@
 
 MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent)
 {
-    data.internalId = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
+    static const QRegularExpression s_removeChars("[{}-]");
+    data.internalId = QUuid::createUuid().toString().remove(s_removeChars);
 }
 
 MinecraftAccountPtr MinecraftAccount::loadFromJsonV3(const QJsonObject& json)
@@ -76,14 +77,15 @@ MinecraftAccountPtr MinecraftAccount::createBlankMSA()
 
 MinecraftAccountPtr MinecraftAccount::createOffline(const QString& username)
 {
+    static const QRegularExpression s_removeChars("[{}-]");
     auto account = makeShared<MinecraftAccount>();
     account->data.type = AccountType::Offline;
     account->data.yggdrasilToken.token = "0";
     account->data.yggdrasilToken.validity = Validity::Certain;
     account->data.yggdrasilToken.issueInstant = QDateTime::currentDateTimeUtc();
     account->data.yggdrasilToken.extra["userName"] = username;
-    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
-    account->data.minecraftProfile.id = uuidFromUsername(username).toString().remove(QRegularExpression("[{}-]"));
+    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(s_removeChars);
+    account->data.minecraftProfile.id = uuidFromUsername(username).toString().remove(s_removeChars);
     account->data.minecraftProfile.name = username;
     account->data.minecraftProfile.validity = Validity::Certain;
     return account;
@@ -106,11 +108,7 @@ QPixmap MinecraftAccount::getFace() const
         return QPixmap();
     }
     QPixmap skin = QPixmap(8, 8);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     skin.fill(QColorConstants::Transparent);
-#else
-    skin.fill(QColor(0, 0, 0, 0));
-#endif
     QPainter painter(&skin);
     painter.drawPixmap(0, 0, skinTexture.copy(8, 8, 8, 8));
     painter.drawPixmap(0, 0, skinTexture.copy(40, 8, 8, 8));
@@ -183,8 +181,10 @@ void MinecraftAccount::authFailed(QString reason)
             data.validity_ = Validity::None;
             emit changed();
         } break;
+        case AccountTaskState::STATE_WORKING: {
+            data.accountState = AccountState::Unchecked;
+        } break;
         case AccountTaskState::STATE_CREATED:
-        case AccountTaskState::STATE_WORKING:
         case AccountTaskState::STATE_SUCCEEDED: {
             // Not reachable here, as they are not failures.
         }
@@ -235,6 +235,7 @@ bool MinecraftAccount::shouldRefresh() const
 
 void MinecraftAccount::fillSession(AuthSessionPtr session)
 {
+    static const QRegularExpression s_removeChars("[{}-]");
     if (ownsMinecraft() && !hasProfile()) {
         session->status = AuthSession::RequiresProfileSetup;
     } else {
@@ -252,7 +253,7 @@ void MinecraftAccount::fillSession(AuthSessionPtr session)
     // profile ID
     session->uuid = data.profileId();
     if (session->uuid.isEmpty())
-        session->uuid = uuidFromUsername(session->player_name).toString().remove(QRegularExpression("[{}-]"));
+        session->uuid = uuidFromUsername(session->player_name).toString().remove(s_removeChars);
     // 'legacy' or 'mojang', depending on account type
     session->user_type = typeString();
     if (!session->access_token.isEmpty()) {
@@ -290,13 +291,8 @@ QUuid MinecraftAccount::uuidFromUsername(QString username)
     // basically a reimplementation of Java's UUID#nameUUIDFromBytes
     QByteArray digest = QCryptographicHash::hash(input, QCryptographicHash::Md5);
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    auto bOr = [](QByteArray& array, int index, char value) { array[index] = array.at(index) | value; };
-    auto bAnd = [](QByteArray& array, int index, char value) { array[index] = array.at(index) & value; };
-#else
     auto bOr = [](QByteArray& array, qsizetype index, char value) { array[index] |= value; };
     auto bAnd = [](QByteArray& array, qsizetype index, char value) { array[index] &= value; };
-#endif
     bAnd(digest, 6, (char)0x0f);  // clear version
     bOr(digest, 6, (char)0x30);   // set to version 3
     bAnd(digest, 8, (char)0x3f);  // clear variant

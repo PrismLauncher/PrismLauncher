@@ -80,11 +80,12 @@ void NetRequest::executeTask()
             emit finished();
             return;
         case State::Running:
-            qCDebug(logCat) << getUid().toString() << "Runninng " << m_url.toString();
+            qCDebug(logCat) << getUid().toString() << "Running " << m_url.toString();
             break;
         case State::Inactive:
         case State::Failed:
-            emit failed("Failed to initialize sink");
+            m_failReason = m_sink->failReason();
+            emit failed(m_sink->failReason());
             emit finished();
             return;
         case State::AbortedByUser:
@@ -104,12 +105,10 @@ void NetRequest::executeTask()
         header_proxy->writeHeaders(request);
     }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
 #if defined(LAUNCHER_APPLICATION)
     request.setTransferTimeout(APPLICATION->settings()->get("RequestTimeout").toInt() * 1000);
 #else
     request.setTransferTimeout();
-#endif
 #endif
 
     m_last_progress_time = m_clock.now();
@@ -122,11 +121,7 @@ void NetRequest::executeTask()
     connect(rep, &QNetworkReply::uploadProgress, this, &NetRequest::onProgress);
     connect(rep, &QNetworkReply::downloadProgress, this, &NetRequest::onProgress);
     connect(rep, &QNetworkReply::finished, this, &NetRequest::downloadFinished);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
     connect(rep, &QNetworkReply::errorOccurred, this, &NetRequest::downloadError);
-#else
-    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &NetRequest::downloadError);
-#endif
     connect(rep, &QNetworkReply::sslErrors, this, &NetRequest::sslErrors);
     connect(rep, &QNetworkReply::readyRead, this, &NetRequest::downloadReadyRead);
 }
@@ -265,6 +260,7 @@ void NetRequest::downloadFinished()
     } else if (m_state == State::Failed) {
         qCDebug(logCat) << getUid().toString() << "Request failed in previous step:" << m_url.toString();
         m_sink->abort();
+        m_failReason = m_reply->errorString();
         emit failed(m_reply->errorString());
         emit finished();
         return;
@@ -284,7 +280,8 @@ void NetRequest::downloadFinished()
         if (m_state != State::Succeeded) {
             qCDebug(logCat) << getUid().toString() << "Request failed to write:" << m_url.toString();
             m_sink->abort();
-            emit failed("failed to write in sink");
+            m_failReason = m_sink->failReason();
+            emit failed(m_sink->failReason());
             emit finished();
             return;
         }
@@ -295,7 +292,8 @@ void NetRequest::downloadFinished()
     if (m_state != State::Succeeded) {
         qCDebug(logCat) << getUid().toString() << "Request failed to finalize:" << m_url.toString();
         m_sink->abort();
-        emit failed("failed to finalize the request");
+        m_failReason = m_sink->failReason();
+        emit failed(m_sink->failReason());
         emit finished();
         return;
     }
@@ -311,7 +309,7 @@ void NetRequest::downloadReadyRead()
         auto data = m_reply->readAll();
         m_state = m_sink->write(data);
         if (m_state == State::Failed) {
-            qCCritical(logCat) << getUid().toString() << "Failed to process response chunk";
+            qCCritical(logCat) << getUid().toString() << "Failed to process response chunk:" << m_sink->failReason();
         }
         // qDebug() << "Request" << m_url.toString() << "gained" << data.size() << "bytes";
     } else {
@@ -323,11 +321,7 @@ auto NetRequest::abort() -> bool
 {
     m_state = State::AbortedByUser;
     if (m_reply) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
         disconnect(m_reply.get(), &QNetworkReply::errorOccurred, nullptr, nullptr);
-#else
-        disconnect(m_reply.get(), QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), nullptr, nullptr);
-#endif
         m_reply->abort();
     }
     return true;

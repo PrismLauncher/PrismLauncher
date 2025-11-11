@@ -6,11 +6,10 @@
 
 #include "BaseInstance.h"
 
+#include "modplatform/ModIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
-#include "modplatform/modrinth/ModrinthPackManifest.h"
 
 #include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlamePackIndex.h"
 
 #include "net/NetJob.h"
 
@@ -37,11 +36,11 @@ class ManagedPackPage : public QWidget, public BasePage {
     static ManagedPackPage* createPage(BaseInstance* inst, QString type, QWidget* parent = nullptr);
     ~ManagedPackPage() override;
 
-    [[nodiscard]] QString displayName() const override;
-    [[nodiscard]] QIcon icon() const override;
-    [[nodiscard]] QString helpPage() const override;
-    [[nodiscard]] QString id() const override { return "managed_pack"; }
-    [[nodiscard]] bool shouldDisplay() const override;
+    QString displayName() const override;
+    QIcon icon() const override;
+    QString helpPage() const override;
+    QString id() const override { return "managed_pack"; }
+    bool shouldDisplay() const override;
 
     void openedImpl() override;
 
@@ -55,7 +54,7 @@ class ManagedPackPage : public QWidget, public BasePage {
     /** URL of the managed pack.
      *  Not the version-specific one.
      */
-    [[nodiscard]] virtual QString url() const { return {}; };
+    virtual QString url() const { return {}; };
 
     void setInstanceWindow(InstanceWindow* window) { m_instance_window = window; }
 
@@ -94,6 +93,8 @@ class ManagedPackPage : public QWidget, public BasePage {
     BaseInstance* m_inst;
 
     bool m_loaded = false;
+
+    void onUpdateTaskCompleted(bool did_succeed) const;
 };
 
 /** Simple page for when we aren't a managed pack. */
@@ -107,7 +108,7 @@ class GenericManagedPackPage final : public ManagedPackPage {
     ~GenericManagedPackPage() override = default;
 
     // TODO: We may want to show this page with some useful info at some point.
-    [[nodiscard]] bool shouldDisplay() const override { return false; };
+    bool shouldDisplay() const override { return false; };
 };
 
 class ModrinthManagedPackPage final : public ManagedPackPage {
@@ -118,8 +119,8 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
     ~ModrinthManagedPackPage() override = default;
 
     void parseManagedPack() override;
-    [[nodiscard]] QString url() const override;
-    [[nodiscard]] QString helpPage() const override { return "modrinth-managed-pack"; }
+    QString url() const override;
+    QString helpPage() const override { return "modrinth-managed-pack"; }
 
    public slots:
     void suggestVersion() override;
@@ -128,9 +129,9 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
     void updateFromFile() override;
 
    private:
-    NetJob::Ptr m_fetch_job = nullptr;
+    Task::Ptr m_fetch_job = nullptr;
 
-    Modrinth::Modpack m_pack;
+    ModPlatform::IndexedPack m_pack;
     ModrinthAPI m_api;
 };
 
@@ -142,8 +143,8 @@ class FlameManagedPackPage final : public ManagedPackPage {
     ~FlameManagedPackPage() override = default;
 
     void parseManagedPack() override;
-    [[nodiscard]] QString url() const override;
-    [[nodiscard]] QString helpPage() const override { return "curseforge-managed-pack"; }
+    QString url() const override;
+    QString helpPage() const override { return "curseforge-managed-pack"; }
 
    public slots:
     void suggestVersion() override;
@@ -152,8 +153,8 @@ class FlameManagedPackPage final : public ManagedPackPage {
     void updateFromFile() override;
 
    private:
-    NetJob::Ptr m_fetch_job = nullptr;
+    Task::Ptr m_fetch_job = nullptr;
 
-    Flame::IndexedPack m_pack;
+    ModPlatform::IndexedPack m_pack;
     FlameAPI m_api;
 };

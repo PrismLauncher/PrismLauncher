@@ -35,9 +35,9 @@
 
 #pragma once
 
+#include <QIdentityProxyModel>
 #include <QWidget>
 
-#include <Application.h>
 #include "BaseInstance.h"
 #include "launch/LaunchTask.h"
 #include "ui/pages/BasePage.h"
@@ -46,7 +46,18 @@ namespace Ui {
 class LogPage;
 }
 class QTextCharFormat;
-class LogFormatProxyModel;
+
+class LogFormatProxyModel : public QIdentityProxyModel {
+   public:
+    LogFormatProxyModel(QObject* parent = nullptr) : QIdentityProxyModel(parent) {}
+    QVariant data(const QModelIndex& index, int role) const override;
+    QFont getFont() const { return m_font; }
+    void setFont(QFont font) { m_font = font; }
+    QModelIndex find(const QModelIndex& start, const QString& value, bool reverse) const;
+
+   private:
+    QFont m_font;
+};
 
 class LogPage : public QWidget, public BasePage {
     Q_OBJECT
@@ -55,7 +66,7 @@ class LogPage : public QWidget, public BasePage {
     explicit LogPage(InstancePtr instance, QWidget* parent = 0);
     virtual ~LogPage();
     virtual QString displayName() const override { return tr("Minecraft Log"); }
-    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("log"); }
+    virtual QIcon icon() const override { return QIcon::fromTheme("log"); }
     virtual QString id() const override { return "console"; }
     virtual bool apply() override;
     virtual QString helpPage() const override { return "Minecraft-Logs"; }
@@ -70,6 +81,7 @@ class LogPage : public QWidget, public BasePage {
 
     void on_trackLogCheckbox_clicked(bool checked);
     void on_wrapCheckbox_clicked(bool checked);
+    void on_colorCheckbox_clicked(bool checked);
 
     void on_findButton_clicked();
     void findActivated();

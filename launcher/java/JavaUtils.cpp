@@ -365,13 +365,13 @@ QList<QString> JavaUtils::FindJavaPaths()
     javas.append("/System/Library/Frameworks/JavaVM.framework/Versions/Current/Commands/java");
     QDir libraryJVMDir("/Library/Java/JavaVirtualMachines/");
     QStringList libraryJVMJavas = libraryJVMDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-    foreach (const QString& java, libraryJVMJavas) {
+    for (const QString& java : libraryJVMJavas) {
         javas.append(libraryJVMDir.absolutePath() + "/" + java + "/Contents/Home/bin/java");
         javas.append(libraryJVMDir.absolutePath() + "/" + java + "/Contents/Home/jre/bin/java");
     }
     QDir systemLibraryJVMDir("/System/Library/Java/JavaVirtualMachines/");
     QStringList systemLibraryJVMJavas = systemLibraryJVMDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-    foreach (const QString& java, systemLibraryJVMJavas) {
+    for (const QString& java : systemLibraryJVMJavas) {
         javas.append(systemLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Home/bin/java");
         javas.append(systemLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Commands/java");
     }
@@ -379,16 +379,25 @@ QList<QString> JavaUtils::FindJavaPaths()
     auto home = qEnvironmentVariable("HOME");
 
     // javas downloaded by sdkman
-    QDir sdkmanDir(FS::PathCombine(home, ".sdkman/candidates/java"));
-    QStringList sdkmanJavas = sdkmanDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-    foreach (const QString& java, sdkmanJavas) {
-        javas.append(sdkmanDir.absolutePath() + "/" + java + "/bin/java");
+    QString sdkmanDir = qEnvironmentVariable("SDKMAN_DIR", FS::PathCombine(home, ".sdkman"));
+    QDir sdkmanJavaDir(FS::PathCombine(sdkmanDir, "candidates/java"));
+    QStringList sdkmanJavas = sdkmanJavaDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const QString& java : sdkmanJavas) {
+        javas.append(sdkmanJavaDir.absolutePath() + "/" + java + "/bin/java");
+    }
+
+    // javas downloaded by asdf
+    QString asdfDataDir = qEnvironmentVariable("ASDF_DATA_DIR", FS::PathCombine(home, ".asdf"));
+    QDir asdfJavaDir(FS::PathCombine(asdfDataDir, "installs/java"));
+    QStringList asdfJavas = asdfJavaDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const QString& java : asdfJavas) {
+        javas.append(asdfJavaDir.absolutePath() + "/" + java + "/bin/java");
     }
 
     // java in user library folder (like from intellij downloads)
     QDir userLibraryJVMDir(FS::PathCombine(home, "Library/Java/JavaVirtualMachines/"));
     QStringList userLibraryJVMJavas = userLibraryJVMDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-    foreach (const QString& java, userLibraryJVMJavas) {
+    for (const QString& java : userLibraryJVMJavas) {
         javas.append(userLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Home/bin/java");
         javas.append(userLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Commands/java");
     }
@@ -468,7 +477,11 @@ QList<QString> JavaUtils::FindJavaPaths()
     // javas downloaded by IntelliJ
     scanJavaDirs(FS::PathCombine(home, ".jdks"));
     // javas downloaded by sdkman
-    scanJavaDirs(FS::PathCombine(home, ".sdkman/candidates/java"));
+    QString sdkmanDir = qEnvironmentVariable("SDKMAN_DIR", FS::PathCombine(home, ".sdkman"));
+    scanJavaDirs(FS::PathCombine(sdkmanDir, "candidates/java"));
+    // javas downloaded by asdf
+    QString asdfDataDir = qEnvironmentVariable("ASDF_DATA_DIR", FS::PathCombine(home, ".asdf"));
+    scanJavaDirs(FS::PathCombine(asdfDataDir, "installs/java"));
     // javas downloaded by gradle (toolchains)
     scanJavaDirs(FS::PathCombine(home, ".gradle/jdks"));
 
@@ -501,7 +514,7 @@ QString JavaUtils::getJavaCheckPath()
 QStringList getMinecraftJavaBundle()
 {
     QStringList processpaths;
-#if defined(Q_OS_OSX)
+#if defined(Q_OS_MACOS)
     processpaths << FS::PathCombine(QDir::homePath(), FS::PathCombine("Library", "Application Support", "minecraft", "runtime"));
 #elif defined(Q_OS_WIN32)
 

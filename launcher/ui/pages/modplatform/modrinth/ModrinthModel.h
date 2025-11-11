@@ -37,7 +37,7 @@
 
 #include <QAbstractListModel>
 
-#include "modplatform/modrinth/ModrinthPackManifest.h"
+#include "modplatform/ModIndex.h"
 #include "net/NetJob.h"
 #include "ui/pages/modplatform/modrinth/ModrinthPage.h"
 
@@ -56,7 +56,7 @@ class ModpackListModel : public QAbstractListModel {
     ModpackListModel(ModrinthPage* parent);
     ~ModpackListModel() override = default;
 
-    inline auto rowCount(const QModelIndex& parent) const -> int override { return parent.isValid() ? 0 : modpacks.size(); };
+    inline auto rowCount(const QModelIndex& parent) const -> int override { return parent.isValid() ? 0 : m_modpacks.size(); };
     inline auto columnCount(const QModelIndex& parent) const -> int override { return parent.isValid() ? 0 : 1; };
     inline auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); };
 
@@ -66,27 +66,27 @@ class ModpackListModel : public QAbstractListModel {
     auto data(const QModelIndex& index, int role) const -> QVariant override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
-    inline void setActiveJob(NetJob::Ptr ptr) { jobPtr = ptr; }
+    inline void setActiveJob(NetJob::Ptr ptr) { m_jobPtr = ptr; }
 
     /* Ask the API for more information */
     void fetchMore(const QModelIndex& parent) override;
     void refresh();
     void searchWithTerm(const QString& term, int sort, std::shared_ptr<ModFilterWidget::Filter> filter, bool filterChanged);
 
-    [[nodiscard]] bool hasActiveSearchJob() const { return jobPtr && jobPtr->isRunning(); }
-    [[nodiscard]] Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? jobPtr : nullptr; }
+    bool hasActiveSearchJob() const { return m_jobPtr && m_jobPtr->isRunning(); }
+    Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? m_jobPtr : nullptr; }
 
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
 
     inline auto canFetchMore(const QModelIndex& parent) const -> bool override
     {
-        return parent.isValid() ? false : searchState == CanPossiblyFetchMore;
+        return parent.isValid() ? false : m_searchState == CanPossiblyFetchMore;
     };
 
    public slots:
-    void searchRequestFinished(QJsonDocument& doc_all);
+    void searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr>& doc_all);
     void searchRequestFailed(QString reason);
-    void searchRequestForOneSucceeded(QJsonDocument&);
+    void searchRequestForOneSucceeded(ModPlatform::IndexedPack::Ptr);
 
    protected slots:
 
@@ -103,20 +103,20 @@ class ModpackListModel : public QAbstractListModel {
    protected:
     ModrinthPage* m_parent;
 
-    QList<Modrinth::Modpack> modpacks;
+    QList<ModPlatform::IndexedPack::Ptr> m_modpacks;
 
     LogoMap m_logoMap;
-    QMap<QString, LogoCallback> waitingCallbacks;
+    QMap<QString, LogoCallback> m_waitingCallbacks;
     QStringList m_failedLogos;
     QStringList m_loadingLogos;
 
-    QString currentSearchTerm;
-    QString currentSort;
+    QString m_currentSearchTerm;
+    QString m_currentSort;
     std::shared_ptr<ModFilterWidget::Filter> m_filter;
-    int nextSearchOffset = 0;
-    enum SearchState { None, CanPossiblyFetchMore, ResetRequested, Finished } searchState = None;
+    int m_nextSearchOffset = 0;
+    enum SearchState { None, CanPossiblyFetchMore, ResetRequested, Finished } m_searchState = None;
 
-    Task::Ptr jobPtr;
+    Task::Ptr m_jobPtr;
 
     std::shared_ptr<QByteArray> m_allResponse = std::make_shared<QByteArray>();
     QByteArray m_specific_response;

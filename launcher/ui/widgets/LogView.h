@@ -15,6 +15,7 @@ class LogView : public QPlainTextEdit {
 
    public slots:
     void setWordWrap(bool wrapping);
+    void setColorLines(bool colorLines);
     void findNext(const QString& what, bool reverse);
     void scrollToBottom();
 
@@ -32,4 +33,5 @@ class LogView : public QPlainTextEdit {
     QTextCharFormat* m_defaultFormat = nullptr;
     bool m_scroll = false;
     bool m_scrolling = false;
+    bool m_colorLines = true;
 };

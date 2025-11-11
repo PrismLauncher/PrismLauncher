@@ -11,7 +11,7 @@
         <file>scalable/copy.svg</file>
         <file>scalable/coremods.svg</file>
         <file>scalable/custom-commands.svg</file>
-        <file>scalable/environment-variables.svg</file>
+        <file>scalable/datapacks.svg</file>
         <file>scalable/discord.svg</file>
         <file>scalable/externaltools.svg</file>
         <file>scalable/help.svg</file>
@@ -49,5 +49,6 @@
         <file>scalable/rename.svg</file>
         <file>scalable/server.svg</file>
         <file>scalable/launch.svg</file>
+        <file>scalable/appearance.svg</file>
     </qresource>
 </RCC>

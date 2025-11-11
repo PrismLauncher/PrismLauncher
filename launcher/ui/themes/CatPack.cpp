@@ -43,7 +43,7 @@
 #include "FileSystem.h"
 #include "Json.h"
 
-QString BasicCatPack::path()
+QString BasicCatPack::path() const
 {
     const auto now = QDate::currentDate();
     const auto birthday = QDate(now.year(), 11, 1);
@@ -100,12 +100,12 @@ QDate ensureDay(int year, int month, int day)
     return QDate(year, month, day);
 }
 
-QString JsonCatPack::path()
+QString JsonCatPack::path() const
 {
     return path(QDate::currentDate());
 }
 
-QString JsonCatPack::path(QDate now)
+QString JsonCatPack::path(QDate now) const
 {
     for (auto var : m_variants) {
         QDate startDate = ensureDay(now.year(), var.startTime.month, var.startTime.day);

@@ -19,15 +19,15 @@
 #pragma once
 
 #include <QJsonObject>
+#include <QList>
 #include <QString>
-#include <QVector>
 
 namespace TechnicSolder {
 
 struct Pack {
     QString recommended;
     QString latest;
-    QVector<QString> builds;
+    QList<QString> builds;
 };
 
 void loadPack(Pack& v, QJsonObject& obj);
@@ -41,7 +41,7 @@ struct PackBuildMod {
 
 struct PackBuild {
     QString minecraft;
-    QVector<PackBuildMod> mods;
+    QList<PackBuildMod> mods;
 };
 
 void loadPackBuild(PackBuild& v, QJsonObject& obj);

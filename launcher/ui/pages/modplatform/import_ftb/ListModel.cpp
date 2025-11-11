@@ -17,7 +17,6 @@
  */
 
 #include "ListModel.h"
-#include <qfileinfo.h>
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
@@ -36,7 +35,7 @@ namespace FTBImportAPP {
 QString getFTBRoot()
 {
     QString partialPath = QDir::homePath();
-#if defined(Q_OS_OSX)
+#if defined(Q_OS_MACOS)
     partialPath = FS::PathCombine(partialPath, "Library/Application Support");
 #endif
     return FS::PathCombine(partialPath, ".ftba");
@@ -106,9 +105,6 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     }
 
     auto pack = m_modpacks.at(pos);
-    if (role == Qt::ToolTipRole) {
-    }
-
     switch (role) {
         case Qt::ToolTipRole:
             return tr("Minecraft %1").arg(pack.mcVersion);
@@ -128,8 +124,6 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
             return pack.name;
         case UserDataTypes::DESCRIPTION:
             return tr("Minecraft %1").arg(pack.mcVersion);
-        case UserDataTypes::SELECTED:
-            return false;
         case UserDataTypes::INSTALLED:
             return false;
         default:
@@ -148,8 +142,12 @@ FilterModel::FilterModel(QObject* parent) : QSortFilterProxyModel(parent)
 
 bool FilterModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {
-    Modpack leftPack = sourceModel()->data(left, Qt::UserRole).value<Modpack>();
-    Modpack rightPack = sourceModel()->data(right, Qt::UserRole).value<Modpack>();
+    QVariant leftRaw = sourceModel()->data(left, Qt::UserRole);
+    Q_ASSERT(leftRaw.canConvert<Modpack>());
+    auto leftPack = leftRaw.value<Modpack>();
+    QVariant rightRaw = sourceModel()->data(right, Qt::UserRole);
+    Q_ASSERT(rightRaw.canConvert<Modpack>());
+    auto rightPack = rightRaw.value<Modpack>();
 
     if (m_currentSorting == Sorting::ByGameVersion) {
         Version lv(leftPack.mcVersion);
@@ -171,7 +169,9 @@ bool FilterModel::filterAcceptsRow([[maybe_unused]] int sourceRow, [[maybe_unuse
         return true;
     }
     QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
-    Modpack pack = sourceModel()->data(index, Qt::UserRole).value<Modpack>();
+    QVariant raw = sourceModel()->data(index, Qt::UserRole);
+    Q_ASSERT(raw.canConvert<Modpack>());
+    auto pack = raw.value<Modpack>();
     return pack.name.contains(m_searchTerm, Qt::CaseInsensitive);
 }
 

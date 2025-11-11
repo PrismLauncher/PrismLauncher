@@ -50,12 +50,12 @@ class LocalTexturePackParseTask : public Task {
    public:
     LocalTexturePackParseTask(int token, TexturePack& rp);
 
-    [[nodiscard]] bool canAbort() const override { return true; }
+    bool canAbort() const override { return true; }
     bool abort() override;
 
     void executeTask() override;
 
-    [[nodiscard]] int token() const { return m_token; }
+    int token() const { return m_token; }
 
    private:
     int m_token;

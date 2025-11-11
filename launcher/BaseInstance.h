@@ -38,7 +38,9 @@
 #pragma once
 #include <cassert>
 
+#include <QDataStream>
 #include <QDateTime>
+#include <QList>
 #include <QMenu>
 #include <QObject>
 #include <QProcess>
@@ -50,7 +52,6 @@
 #include "BaseVersionList.h"
 #include "MessageLevel.h"
 #include "minecraft/auth/MinecraftAccount.h"
-#include "pathmatcher/IPathMatcher.h"
 #include "settings/INIFile.h"
 
 #include "net/Mode.h"
@@ -65,6 +66,20 @@ class BaseInstance;
 
 // pointer for lazy people
 using InstancePtr = std::shared_ptr<BaseInstance>;
+
+/// Shortcut saving target representations
+enum class ShortcutTarget { Desktop, Applications, Other };
+
+/// Shortcut data representation
+struct ShortcutData {
+    QString name;
+    QString filePath;
+    ShortcutTarget target = ShortcutTarget::Other;
+};
+
+/// Console settings
+int getConsoleMaxLines(SettingsObjectPtr settings);
+bool shouldStopOnConsoleOverflow(SettingsObjectPtr settings);
 
 /*!
  * \brief Base class for instances.
@@ -126,6 +141,14 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     QString name() const;
     void setName(QString val);
 
+    /// Sync name and rename instance dir accordingly; returns true if successful
+    bool syncInstanceDirName(const QString& newRoot) const;
+
+    /// Register a created shortcut
+    void registerShortcut(const ShortcutData& data);
+    QList<ShortcutData> shortcuts() const;
+    void setShortcuts(const QList<ShortcutData>& shortcuts);
+
     /// Value used for instance window titles
     QString windowTitle() const;
 
@@ -147,9 +170,6 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     QString getManagedPackVersionName() const;
     void setManagedPack(const QString& type, const QString& id, const QString& name, const QString& versionId, const QString& version);
     void copyManagedPack(BaseInstance& other);
-
-    /// guess log level from a line of game log
-    virtual MessageLevel::Enum guessLevel([[maybe_unused]] const QString& line, MessageLevel::Enum level) { return level; }
 
     virtual QStringList extraArguments();
 
@@ -196,14 +216,9 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     virtual QProcessEnvironment createLaunchEnvironment() = 0;
 
     /*!
-     * Returns a matcher that can maps relative paths within the instance to whether they are 'log files'
-     */
-    virtual IPathMatcher::Ptr getLogFileMatcher() = 0;
-
-    /*!
      * Returns the root folder to use for looking up log files
      */
-    virtual QString getLogFileRoot() = 0;
+    virtual QStringList getLogFileSearchPaths() = 0;
 
     virtual QString getStatusbarDescription() = 0;
 
@@ -259,9 +274,6 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     virtual QStringList verboseDescription(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin) = 0;
 
     Status currentStatus() const;
-
-    int getConsoleMaxLines() const;
-    bool shouldStopOnConsoleOverflow() const;
 
     QStringList getLinkedInstances() const;
     void setLinkedInstances(const QStringList& list);

@@ -20,7 +20,6 @@
 #include <algorithm>
 
 #include "Json.h"
-#include "QObjectPtr.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
@@ -33,9 +32,7 @@
 static const FlameAPI flameAPI;
 static ModrinthAPI modrinthAPI;
 
-Flame::FileResolvingTask::FileResolvingTask(const shared_qobject_ptr<QNetworkAccessManager>& network, Flame::Manifest& toProcess)
-    : m_network(network), m_manifest(toProcess)
-{}
+Flame::FileResolvingTask::FileResolvingTask(Flame::Manifest& toProcess) : m_manifest(toProcess) {}
 
 bool Flame::FileResolvingTask::abort()
 {
@@ -87,6 +84,30 @@ void Flame::FileResolvingTask::executeTask()
     m_task->start();
 }
 
+ModPlatform::ResourceType getResourceType(int classId)
+{
+    switch (classId) {
+        case 17:  // Worlds
+            return ModPlatform::ResourceType::World;
+        case 6:  // Mods
+            return ModPlatform::ResourceType::Mod;
+        case 12:  // Resource Packs
+                  // return ModPlatform::ResourceType::ResourcePack; // not really a resourcepack
+            /* fallthrough */
+        case 4546:  // Customization
+                    // return ModPlatform::ResourceType::ShaderPack; // not really a shaderPack
+            /* fallthrough */
+        case 4471:  // Modpacks
+            /* fallthrough */
+        case 5:  // Bukkit Plugins
+            /* fallthrough */
+        case 4559:  // Addons
+            /* fallthrough */
+        default:
+            return ModPlatform::ResourceType::Unknown;
+    }
+}
+
 void Flame::FileResolvingTask::netJobFinished()
 {
     setProgress(1, 3);
@@ -112,6 +133,8 @@ void Flame::FileResolvingTask::netJobFinished()
             auto obj = Json::requireObject(file);
             auto version = FlameMod::loadIndexedPackVersion(obj);
             auto fileid = version.fileId.toInt();
+            Q_ASSERT(fileid != 0);
+            Q_ASSERT(m_manifest.files.contains(fileid));
             m_manifest.files[fileid].version = version;
             auto url = QUrl(version.downloadUrl, QUrl::TolerantMode);
             if (!url.isValid() && "sha1" == version.hash_type && !version.hash.isEmpty()) {
@@ -144,7 +167,7 @@ void Flame::FileResolvingTask::netJobFinished()
                        << " reason: " << parse_error.errorString();
             qWarning() << *m_result;
 
-            failed(parse_error.errorString());
+            getFlameProjects();
             return;
         }
 
@@ -232,6 +255,10 @@ void Flame::FileResolvingTask::getFlameProjects()
 
                 setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
                 FlameMod::loadIndexedPack(file->pack, entry_obj);
+                file->resourceType = getResourceType(Json::requireInteger(entry_obj, "classId", "modClassId"));
+                if (file->resourceType == ModPlatform::ResourceType::World) {
+                    file->targetFolder = "saves";
+                }
             }
         } catch (Json::JsonException& e) {
             qDebug() << e.cause();

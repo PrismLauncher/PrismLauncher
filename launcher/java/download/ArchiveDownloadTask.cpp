@@ -59,6 +59,7 @@ void ArchiveDownloadTask::executeTask()
     connect(download.get(), &Task::stepProgress, this, &ArchiveDownloadTask::propagateStepProgress);
     connect(download.get(), &Task::status, this, &ArchiveDownloadTask::setStatus);
     connect(download.get(), &Task::details, this, &ArchiveDownloadTask::setDetails);
+    connect(download.get(), &Task::aborted, this, &ArchiveDownloadTask::emitAborted);
     connect(download.get(), &Task::succeeded, [this, fullPath] {
         // This should do all of the extracting and creating folders
         extractJava(fullPath);
@@ -150,7 +151,6 @@ bool ArchiveDownloadTask::abort()
     auto aborted = canAbort();
     if (m_task)
         aborted = m_task->abort();
-    emitAborted();
     return aborted;
 };
 }  // namespace Java

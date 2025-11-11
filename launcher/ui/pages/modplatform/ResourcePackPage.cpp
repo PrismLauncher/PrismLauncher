@@ -14,9 +14,7 @@
 namespace ResourceDownload {
 
 ResourcePackResourcePage::ResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance) : ResourcePage(dialog, instance)
-{
-    connect(m_ui->packView, &QListView::doubleClicked, this, &ResourcePackResourcePage::onResourceSelected);
-}
+{}
 
 /******** Callbacks to events in the UI (set up in the derived classes) ********/
 

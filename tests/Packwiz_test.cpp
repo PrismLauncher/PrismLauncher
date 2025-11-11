@@ -19,6 +19,7 @@
 
 #include <QTemporaryDir>
 #include <QTest>
+#include "modplatform/ModIndex.h"
 
 #include <modplatform/packwiz/Packwiz.h>
 
@@ -42,7 +43,7 @@ class PackwizTest : public QObject {
 
         QCOMPARE(metadata.name, "Borderless Mining");
         QCOMPARE(metadata.filename, "borderless-mining-1.1.1+1.18.jar");
-        QCOMPARE(metadata.side, Packwiz::V1::Side::ClientSide);
+        QCOMPARE(metadata.side, ModPlatform::Side::ClientSide);
 
         QCOMPARE(metadata.url, QUrl("https://cdn.modrinth.com/data/kYq5qkSL/versions/1.1.1+1.18/borderless-mining-1.1.1+1.18.jar"));
         QCOMPARE(metadata.hash_format, "sha512");
@@ -72,7 +73,7 @@ class PackwizTest : public QObject {
 
         QCOMPARE(metadata.name, "Screenshot to Clipboard (Fabric)");
         QCOMPARE(metadata.filename, "screenshot-to-clipboard-1.0.7-fabric.jar");
-        QCOMPARE(metadata.side, Packwiz::V1::Side::UniversalSide);
+        QCOMPARE(metadata.side, ModPlatform::Side::UniversalSide);
 
         QCOMPARE(metadata.url, QUrl("https://edge.forgecdn.net/files/3509/43/screenshot-to-clipboard-1.0.7-fabric.jar"));
         QCOMPARE(metadata.hash_format, "murmur2");

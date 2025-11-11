@@ -39,13 +39,13 @@ class LocalModParseTask : public Task {
     using ResultPtr = std::shared_ptr<Result>;
     ResultPtr result() const { return m_result; }
 
-    [[nodiscard]] bool canAbort() const override { return true; }
+    bool canAbort() const override { return true; }
     bool abort() override;
 
     LocalModParseTask(int token, ResourceType type, const QFileInfo& modFile);
     void executeTask() override;
 
-    [[nodiscard]] int token() const { return m_token; }
+    int token() const { return m_token; }
 
    private:
     int m_token;

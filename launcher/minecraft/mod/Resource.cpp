@@ -82,8 +82,8 @@ auto Resource::name() const -> QString
 
 static void removeThePrefix(QString& string)
 {
-    QRegularExpression regex(QStringLiteral("^(?:the|teh) +"), QRegularExpression::CaseInsensitiveOption);
-    string.remove(regex);
+    static const QRegularExpression s_regex(QStringLiteral("^(?:the|teh) +"), QRegularExpression::CaseInsensitiveOption);
+    string.remove(s_regex);
     string = string.trimmed();
 }
 

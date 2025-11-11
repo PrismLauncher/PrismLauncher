@@ -41,10 +41,9 @@
 #include <QIcon>
 #include <QStyle>
 
-#include "Application.h"
 #include "Version.h"
 
-#include "minecraft/mod/tasks/LocalResourcePackParseTask.h"
+#include "minecraft/mod/tasks/LocalDataPackParseTask.h"
 
 ResourcePackFolderModel::ResourcePackFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)
     : ResourceFolderModel(dir, instance, is_indexed, create_dir, parent)
@@ -96,7 +95,7 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
             }
         case Qt::DecorationRole: {
             if (column == NameColumn && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
-                return APPLICATION->getThemedIcon("status-yellow");
+                return QIcon::fromTheme("status-yellow");
             if (column == ImageColumn) {
                 return at(row).image({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
             }
@@ -128,12 +127,9 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
             }
             return {};
         case Qt::CheckStateRole:
-            switch (column) {
-                case ActiveColumn:
-                    return at(row).enabled() ? Qt::Checked : Qt::Unchecked;
-                default:
-                    return {};
-            }
+            if (column == ActiveColumn)
+                return at(row).enabled() ? Qt::Checked : Qt::Unchecked;
+            return {};
         default:
             return {};
     }
@@ -191,5 +187,5 @@ int ResourcePackFolderModel::columnCount(const QModelIndex& parent) const
 
 Task* ResourcePackFolderModel::createParseTask(Resource& resource)
 {
-    return new LocalResourcePackParseTask(m_next_resolution_ticket, static_cast<ResourcePack&>(resource));
+    return new LocalDataPackParseTask(m_next_resolution_ticket, dynamic_cast<ResourcePack*>(&resource));
 }

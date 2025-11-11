@@ -52,7 +52,7 @@
 
 namespace LegacyFTB {
 
-PackInstallTask::PackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network, Modpack pack, QString version)
+PackInstallTask::PackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network, const Modpack& pack, QString version)
 {
     m_pack = pack;
     m_version = version;
@@ -108,13 +108,8 @@ void PackInstallTask::unzip()
         return;
     }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), QOverload<QString, QString>::of(MMCZip::extractDir), archivePath,
                                         extractDir.absolutePath() + "/unzip");
-#else
-    m_extractFuture =
-        QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, archivePath, extractDir.absolutePath() + "/unzip");
-#endif
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &PackInstallTask::onUnzipFinished);
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &PackInstallTask::onUnzipCanceled);
     m_extractFutureWatcher.setFuture(m_extractFuture);
@@ -158,25 +153,29 @@ void PackInstallTask::install()
     QFile packJson(m_stagingPath + "/minecraft/pack.json");
     QDir jarmodDir = QDir(m_stagingPath + "/unzip/instMods");
     if (packJson.exists()) {
-        packJson.open(QIODevice::ReadOnly | QIODevice::Text);
-        QJsonDocument doc = QJsonDocument::fromJson(packJson.readAll());
-        packJson.close();
+        if (packJson.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QJsonDocument doc = QJsonDocument::fromJson(packJson.readAll());
+            packJson.close();
 
-        // we only care about the libs
-        QJsonArray libs = doc.object().value("libraries").toArray();
+            // we only care about the libs
+            QJsonArray libs = doc.object().value("libraries").toArray();
 
-        foreach (const QJsonValue& value, libs) {
-            QString nameValue = value.toObject().value("name").toString();
-            if (!nameValue.startsWith("net.minecraftforge")) {
-                continue;
+            for (const auto& value : libs) {
+                QString nameValue = value.toObject().value("name").toString();
+                if (!nameValue.startsWith("net.minecraftforge")) {
+                    continue;
+                }
+
+                GradleSpecifier forgeVersion(nameValue);
+
+                components->setComponentVersion("net.minecraftforge",
+                                                forgeVersion.version().replace(m_pack.mcVersion, "").replace("-", ""));
+                packJson.remove();
+                fallback = false;
+                break;
             }
-
-            GradleSpecifier forgeVersion(nameValue);
-
-            components->setComponentVersion("net.minecraftforge", forgeVersion.version().replace(m_pack.mcVersion, "").replace("-", ""));
-            packJson.remove();
-            fallback = false;
-            break;
+        } else {
+            qWarning() << "Failed to open file '" << packJson.fileName() << "' for reading!";
         }
     }
 

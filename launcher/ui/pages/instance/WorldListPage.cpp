@@ -40,12 +40,15 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui_WorldListPage.h"
 
+#include <ui/widgets/PageContainer.h>
 #include <QClipboard>
+#include <QDialogButtonBox>
 #include <QEvent>
 #include <QInputDialog>
 #include <QKeyEvent>
 #include <QMenu>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QSortFilterProxyModel>
 #include <QTreeView>
 #include <Qt>
@@ -57,6 +60,7 @@
 #include "ui/GuiUtil.h"
 
 #include "Application.h"
+#include "DataPackPage.h"
 
 class WorldListProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
@@ -73,7 +77,7 @@ class WorldListProxyModel : public QSortFilterProxyModel {
             auto iconFile = worlds->data(sourceIndex, WorldList::IconFileRole).toString();
             if (iconFile.isNull()) {
                 // NOTE: Minecraft uses the same placeholder for servers AND worlds
-                return APPLICATION->getThemedIcon("unknown_server");
+                return QIcon::fromTheme("unknown_server");
             }
             return QIcon(iconFile);
         }
@@ -82,7 +86,7 @@ class WorldListProxyModel : public QSortFilterProxyModel {
     }
 };
 
-WorldListPage::WorldListPage(InstancePtr inst, std::shared_ptr<WorldList> worlds, QWidget* parent)
+WorldListPage::WorldListPage(MinecraftInstancePtr inst, std::shared_ptr<WorldList> worlds, QWidget* parent)
     : QMainWindow(parent), m_inst(inst), ui(new Ui::WorldListPage), m_worlds(worlds)
 {
     ui->setupUi(this);
@@ -119,19 +123,16 @@ void WorldListPage::openedImpl()
     }
 
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
-    if (!APPLICATION->settings()->contains(setting_name))
-        m_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
-    else
-        m_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
+    m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
-    ui->toolBar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
+    ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
 }
 
 void WorldListPage::closedImpl()
 {
     m_worlds->stopWatching();
 
-    m_wide_bar_setting->set(ui->toolBar->getVisibilityState());
+    m_wide_bar_setting->set(QString::fromUtf8(ui->toolBar->getVisibilityState().toBase64()));
 }
 
 WorldListPage::~WorldListPage()
@@ -166,12 +167,9 @@ void WorldListPage::retranslate()
 
 bool WorldListPage::worldListFilter(QKeyEvent* keyEvent)
 {
-    switch (keyEvent->key()) {
-        case Qt::Key_Delete:
-            on_actionRemove_triggered();
-            return true;
-        default:
-            break;
+    if (keyEvent->key() == Qt::Key_Delete) {
+        on_actionRemove_triggered();
+        return true;
     }
     return QWidget::eventFilter(ui->worldTreeView, keyEvent);
 }
@@ -215,7 +213,7 @@ void WorldListPage::on_actionView_Folder_triggered()
     DesktopServices::openPath(m_worlds->dir().absolutePath(), true);
 }
 
-void WorldListPage::on_actionDatapacks_triggered()
+void WorldListPage::on_actionData_Packs_triggered()
 {
     QModelIndex index = getSelectedWorld();
 
@@ -223,12 +221,49 @@ void WorldListPage::on_actionDatapacks_triggered()
         return;
     }
 
-    if (!worldSafetyNagQuestion(tr("Open World Datapacks Folder")))
+    if (!worldSafetyNagQuestion(tr("Manage Data Packs")))
         return;
 
-    auto fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
+    const QString fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
+    const QString folder = FS::PathCombine(fullPath, "datapacks");
 
-    DesktopServices::openPath(FS::PathCombine(fullPath, "datapacks"), true);
+    auto dialog = new QDialog(this);
+    dialog->setWindowTitle(tr("Data packs for %1").arg(m_worlds->data(index, WorldList::NameRole).toString()));
+    dialog->setWindowModality(Qt::WindowModal);
+
+    dialog->resize(static_cast<int>(std::max(0.5 * window()->width(), 400.0)),
+                   static_cast<int>(std::max(0.75 * window()->height(), 400.0)));
+    dialog->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("DataPackDownloadGeometry").toByteArray()));
+
+    GenericPageProvider provider(dialog->windowTitle());
+
+    provider.addPageCreator([this, folder] {
+        bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+        auto model = std::make_shared<DataPackFolderModel>(folder, m_inst.get(), isIndexed, true);
+        return new DataPackPage(m_inst.get(), std::move(model));
+    });
+
+    auto layout = new QVBoxLayout(dialog);
+
+    auto focusStealer = new QPushButton(dialog);
+    layout->addWidget(focusStealer);
+    focusStealer->setDefault(true);
+    focusStealer->hide();
+
+    auto pageContainer = new PageContainer(&provider, {}, dialog);
+    pageContainer->hidePageList();
+    layout->addWidget(pageContainer);
+
+    auto buttonBox = new QDialogButtonBox(QDialogButtonBox::Close | QDialogButtonBox::Help);
+    connect(buttonBox, &QDialogButtonBox::rejected, dialog, &QDialog::reject);
+    connect(buttonBox, &QDialogButtonBox::helpRequested, pageContainer, &PageContainer::help);
+    layout->addWidget(buttonBox);
+
+    dialog->setLayout(layout);
+
+    dialog->exec();
+
+    APPLICATION->settings()->set("DataPackDownloadGeometry", dialog->saveGeometry().toBase64());
 }
 
 void WorldListPage::on_actionReset_Icon_triggered()
@@ -341,7 +376,7 @@ void WorldListPage::worldChanged([[maybe_unused]] const QModelIndex& current, [[
     ui->actionRemove->setEnabled(enable);
     ui->actionCopy->setEnabled(enable);
     ui->actionRename->setEnabled(enable);
-    ui->actionDatapacks->setEnabled(enable);
+    ui->actionData_Packs->setEnabled(enable);
     bool hasIcon = !index.data(WorldList::IconFileRole).isNull();
     ui->actionReset_Icon->setEnabled(enable && hasIcon);
 

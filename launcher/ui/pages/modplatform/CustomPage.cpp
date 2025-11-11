@@ -104,7 +104,7 @@ void CustomPage::filterChanged()
     if (ui->experimentsFilter->isChecked())
         out << "(experiment)";
     auto regexp = out.join('|');
-    ui->versionList->setFilter(BaseVersionList::TypeRole, new RegexpFilter(regexp, false));
+    ui->versionList->setFilter(BaseVersionList::TypeRole, Filters::regexp(QRegularExpression(regexp)));
 }
 
 void CustomPage::loaderFilterChanged()

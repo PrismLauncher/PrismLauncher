@@ -1,0 +1,20 @@
+{
+  "default-registry": {
+    "kind": "git",
+    "baseline": "0c4cf19224a049cf82f4521e29e39f7bd680440c",
+    "repository": "https://github.com/microsoft/vcpkg"
+  },
+  "registries": [
+    {
+      "kind": "artifact",
+      "location": "https://github.com/microsoft/vcpkg-ce-catalog/archive/refs/heads/main.zip",
+      "name": "microsoft"
+    }
+  ],
+  "overlay-ports": [
+    "./cmake/vcpkg-ports"
+  ],
+  "overlay-triplets": [
+    "./cmake/vcpkg-triplets"
+  ]
+}

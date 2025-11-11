@@ -15,10 +15,7 @@
 
 namespace ResourceDownload {
 
-ShaderPackResourcePage::ShaderPackResourcePage(ShaderPackDownloadDialog* dialog, BaseInstance& instance) : ResourcePage(dialog, instance)
-{
-    connect(m_ui->packView, &QListView::doubleClicked, this, &ShaderPackResourcePage::onResourceSelected);
-}
+ShaderPackResourcePage::ShaderPackResourcePage(ShaderPackDownloadDialog* dialog, BaseInstance& instance) : ResourcePage(dialog, instance) {}
 
 /******** Callbacks to events in the UI (set up in the derived classes) ********/
 

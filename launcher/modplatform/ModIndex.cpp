@@ -31,6 +31,19 @@ static const QMap<QString, IndexedVersionType::VersionType> s_indexed_version_ty
     { "alpha", IndexedVersionType::VersionType::Alpha }
 };
 
+static const QList<ModLoaderType> loaderList = { NeoForge, Forge, Cauldron, LiteLoader, Quilt, Fabric, Babric, BTA, LegacyFabric, Ornithe, Rift };
+
+QList<ModLoaderType> modLoaderTypesToList(ModLoaderTypes flags)
+{
+    QList<ModLoaderType> flagList;
+    for (auto flag : loaderList) {
+        if (flags.testFlag(flag)) {
+            flagList.append(flag);
+        }
+    }
+    return flagList;
+}
+
 IndexedVersionType::IndexedVersionType(const QString& type) : IndexedVersionType(enumFromString(type)) {}
 
 IndexedVersionType::IndexedVersionType(const IndexedVersionType::VersionType& type)
@@ -114,6 +127,18 @@ auto getModLoaderAsString(ModLoaderType type) -> const QString
             return "fabric";
         case Quilt:
             return "quilt";
+        case DataPack:
+            return "datapack";
+        case Babric:
+            return "babric";
+        case BTA:
+            return "bta-babric";
+        case LegacyFabric:
+            return "legacy-fabric";
+        case Ornithe:
+            return "ornithe";
+        case Rift:
+            return "rift";
         default:
             break;
     }
@@ -134,7 +159,42 @@ auto getModLoaderFromString(QString type) -> ModLoaderType
         return Fabric;
     if (type == "quilt")
         return Quilt;
+    if (type == "babric")
+        return Babric;
+    if (type == "bta-babric")
+        return BTA;
+    if (type == "legacy-fabric")
+        return LegacyFabric;
+    if (type == "ornithe")
+        return Ornithe;
+    if (type == "rift")
+        return Rift;
     return {};
 }
 
+QString SideUtils::toString(Side side)
+{
+    switch (side) {
+        case Side::ClientSide:
+            return "client";
+        case Side::ServerSide:
+            return "server";
+        case Side::UniversalSide:
+            return "both";
+        case Side::NoSide:
+            break;
+    }
+    return {};
+}
+
+Side SideUtils::fromString(QString side)
+{
+    if (side == "client")
+        return Side::ClientSide;
+    if (side == "server")
+        return Side::ServerSide;
+    if (side == "both")
+        return Side::UniversalSide;
+    return Side::UniversalSide;
+}
 }  // namespace ModPlatform

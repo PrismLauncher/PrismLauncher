@@ -1,7 +1,6 @@
 #include "Version.h"
 
 #include <QDebug>
-#include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <QUrl>
 

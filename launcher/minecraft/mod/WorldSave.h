@@ -38,9 +38,9 @@ class WorldSave : public Resource {
     WorldSave(QFileInfo file_info) : Resource(file_info) {}
 
     /** Gets the format of the save. */
-    [[nodiscard]] WorldSaveFormat saveFormat() const { return m_save_format; }
+    WorldSaveFormat saveFormat() const { return m_save_format; }
     /** Gets the name of the save dir (first found in multi mode). */
-    [[nodiscard]] QString saveDirName() const { return m_save_dir_name; }
+    QString saveDirName() const { return m_save_dir_name; }
 
     /** Thread-safe. */
     void setSaveFormat(WorldSaveFormat new_save_format);

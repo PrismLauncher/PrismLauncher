@@ -37,7 +37,6 @@
 #include "IconList.h"
 #include <FileSystem.h>
 #include <QDebug>
-#include <QEventLoop>
 #include <QFileSystemWatcher>
 #include <QMap>
 #include <QMimeData>
@@ -56,7 +55,7 @@ IconList::IconList(const QStringList& builtinPaths, const QString& path, QObject
         QDir instanceIcons(builtinPath);
         auto fileInfoList = instanceIcons.entryInfoList(QDir::Files, QDir::Name);
         for (const auto& fileInfo : fileInfoList) {
-            builtinNames.insert(fileInfo.baseName());
+            builtinNames.insert(fileInfo.completeBaseName());
         }
     }
     for (const auto& builtinName : builtinNames) {
@@ -128,21 +127,18 @@ QStringList IconList::getIconFilePaths() const
 QString formatName(const QDir& iconsDir, const QFileInfo& iconFile)
 {
     if (iconFile.dir() == iconsDir)
-        return iconFile.baseName();
+        return iconFile.completeBaseName();
 
     constexpr auto delimiter = " » ";
-    QString relativePathWithoutExtension = iconsDir.relativeFilePath(iconFile.dir().path()) + QDir::separator() + iconFile.baseName();
+    QString relativePathWithoutExtension =
+        iconsDir.relativeFilePath(iconFile.dir().path()) + QDir::separator() + iconFile.completeBaseName();
     return relativePathWithoutExtension.replace(QDir::separator(), delimiter);
 }
 
 /// Split into a separate function because the preprocessing impedes readability
 QSet<QString> toStringSet(const QList<QString>& list)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QSet<QString> set(list.begin(), list.end());
-#else
-    QSet<QString> set = list.toSet();
-#endif
     return set;
 }
 
@@ -166,7 +162,8 @@ void IconList::directoryChanged(const QString& path)
     for (const MMCIcon& it : m_icons) {
         if (!it.has(IconType::FileBased))
             continue;
-        currentSet.insert(it.m_images[IconType::FileBased].filename);
+        QFileInfo icon(it.getFilePath());
+        currentSet.insert(icon.absoluteFilePath());
     }
     QSet<QString> toRemove = currentSet - newSet;
     QSet<QString> toAdd = newSet - currentSet;
@@ -174,7 +171,8 @@ void IconList::directoryChanged(const QString& path)
     for (const QString& removedPath : toRemove) {
         qDebug() << "Removing icon " << removedPath;
         QFileInfo removedFile(removedPath);
-        QString key = m_dir.relativeFilePath(removedFile.absoluteFilePath());
+        QString relativePath = m_dir.relativeFilePath(removedFile.absoluteFilePath());
+        QString key = QFileInfo(relativePath).completeBaseName();
 
         int idx = getIconIndex(key);
         if (idx == -1)
@@ -196,7 +194,8 @@ void IconList::directoryChanged(const QString& path)
         qDebug() << "Adding icon " << addedPath;
 
         QFileInfo addfile(addedPath);
-        QString key = m_dir.relativeFilePath(addfile.absoluteFilePath());
+        QString relativePath = m_dir.relativeFilePath(addfile.absoluteFilePath());
+        QString key = QFileInfo(relativePath).completeBaseName();
         QString name = formatName(m_dir, addfile);
 
         if (addIcon(key, name, addfile.filePath(), IconType::FileBased)) {

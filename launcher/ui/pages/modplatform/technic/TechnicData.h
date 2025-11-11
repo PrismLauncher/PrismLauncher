@@ -36,8 +36,8 @@
 #pragma once
 
 #include <QList>
+#include <QMetaType>
 #include <QString>
-#include <QVector>
 
 namespace Technic {
 struct Modpack {
@@ -61,7 +61,7 @@ struct Modpack {
 
     bool versionsLoaded = false;
     QString recommended;
-    QVector<QString> versions;
+    QList<QString> versions;
 };
 }  // namespace Technic
 

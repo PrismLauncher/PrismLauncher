@@ -19,7 +19,6 @@
 #pragma once
 
 #include <QDir>
-#include <QEventLoop>
 #include <QList>
 #include <QVariant>
 #include <functional>
@@ -29,6 +28,8 @@
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
+#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/SequentialTask.h"
 #include "tasks/Task.h"
 #include "ui/pages/modplatform/ModModel.h"
@@ -55,16 +56,19 @@ class GetModDependenciesTask : public SequentialTask {
         QStringList required_by;
     };
 
-    struct Provider {
-        ModPlatform::ResourceProvider name;
-        std::shared_ptr<ResourceDownload::ModModel> mod;
-        std::shared_ptr<ResourceAPI> api;
-    };
-
     explicit GetModDependenciesTask(BaseInstance* instance, ModFolderModel* folder, QList<std::shared_ptr<PackDependency>> selected);
 
     auto getDependecies() const -> QList<std::shared_ptr<PackDependency>> { return m_pack_dependencies; }
     QHash<QString, PackDependencyExtraInfo> getExtraInfo();
+
+   private:
+    inline ResourceAPI* getAPI(ModPlatform::ResourceProvider provider)
+    {
+        if (provider == ModPlatform::ResourceProvider::FLAME)
+            return &m_flameAPI;
+        else
+            return &m_modrinthAPI;
+    }
 
    protected slots:
     Task::Ptr prepareDependencyTask(const ModPlatform::Dependency&, ModPlatform::ResourceProvider, int);
@@ -83,9 +87,10 @@ class GetModDependenciesTask : public SequentialTask {
     QList<std::shared_ptr<Metadata::ModStruct>> m_mods;
     QList<std::shared_ptr<PackDependency>> m_selected;
     QStringList m_mods_file_names;
-    Provider m_flame_provider;
-    Provider m_modrinth_provider;
 
     Version m_version;
     ModPlatform::ModLoaderTypes m_loaderType;
+
+    ModrinthAPI m_modrinthAPI;
+    FlameAPI m_flameAPI;
 };

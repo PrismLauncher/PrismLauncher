@@ -24,7 +24,7 @@ JVisualVM::JVisualVM(SettingsObjectPtr settings, InstancePtr instance, QObject* 
 
 void JVisualVM::profilerStarted()
 {
-    emit readyToLaunch(tr("JVisualVM started"));
+    emit readyToLaunch(tr("VisualVM started"));
 }
 
 void JVisualVM::profilerFinished([[maybe_unused]] int exit, QProcess::ExitStatus status)
@@ -48,7 +48,7 @@ void JVisualVM::beginProfilingImpl(shared_qobject_ptr<LaunchTask> process)
     profiler->setProgram(programPath);
 
     connect(profiler, &QProcess::started, this, &JVisualVM::profilerStarted);
-    connect(profiler, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &JVisualVM::profilerFinished);
+    connect(profiler, &QProcess::finished, this, &JVisualVM::profilerFinished);
 
     profiler->start();
     m_profilerProcess = profiler;
@@ -82,7 +82,7 @@ bool JVisualVMFactory::check(const QString& path, QString* error)
     }
     QFileInfo finfo(path);
     if (!finfo.isExecutable() || !finfo.fileName().contains("visualvm")) {
-        *error = QObject::tr("Invalid path to JVisualVM");
+        *error = QObject::tr("Invalid path to VisualVM");
         return false;
     }
     return true;

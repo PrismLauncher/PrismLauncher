@@ -227,6 +227,12 @@ void InfoFrame::updateWithResourcePack(ResourcePack& resource_pack)
     setImage(resource_pack.image({ 64, 64 }));
 }
 
+void InfoFrame::updateWithDataPack(DataPack& data_pack) {
+    setName(renderColorCodes(data_pack.name()));
+    setDescription(renderColorCodes(data_pack.description()));
+    setImage(data_pack.image({ 64, 64 }));
+}
+
 void InfoFrame::updateWithTexturePack(TexturePack& texture_pack)
 {
     QString name = renderColorCodes(texture_pack.name());
@@ -287,7 +293,7 @@ void InfoFrame::setDescription(QString text)
     QChar rem('\n');
     QString finaltext;
     finaltext.reserve(intermediatetext.size());
-    foreach (const QChar& c, intermediatetext) {
+    for (const QChar& c : intermediatetext) {
         if (c == rem && prev) {
             continue;
         }
@@ -317,7 +323,7 @@ void InfoFrame::setDescription(QString text)
         cursor.insertHtml("<a href=\"#mod_desc\">...</a>");
 
         labeltext.append(doc.toHtml());
-        QObject::connect(ui->descriptionLabel, &QLabel::linkActivated, this, &InfoFrame::descriptionEllipsisHandler);
+        connect(ui->descriptionLabel, &QLabel::linkActivated, this, &InfoFrame::descriptionEllipsisHandler);
     } else {
         ui->descriptionLabel->setTextFormat(Qt::TextFormat::AutoText);
         labeltext.append(finaltext);
@@ -341,7 +347,7 @@ void InfoFrame::setLicense(QString text)
     QChar rem('\n');
     QString finaltext;
     finaltext.reserve(intermediatetext.size());
-    foreach (const QChar& c, intermediatetext) {
+    for (const QChar& c : intermediatetext) {
         if (c == rem && prev) {
             continue;
         }
@@ -356,7 +362,7 @@ void InfoFrame::setLicense(QString text)
         m_license = text;
         // This allows injecting HTML here.
         labeltext.append("<html><body>" + finaltext.left(287) + "<a href=\"#mod_desc\">...</a></body></html>");
-        QObject::connect(ui->licenseLabel, &QLabel::linkActivated, this, &InfoFrame::licenseEllipsisHandler);
+        connect(ui->licenseLabel, &QLabel::linkActivated, this, &InfoFrame::licenseEllipsisHandler);
     } else {
         ui->licenseLabel->setTextFormat(Qt::TextFormat::AutoText);
         labeltext.append(finaltext);

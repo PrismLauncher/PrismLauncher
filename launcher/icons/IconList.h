@@ -106,6 +106,6 @@ class IconList : public QAbstractListModel {
     shared_qobject_ptr<QFileSystemWatcher> m_watcher;
     bool m_isWatching;
     QMap<QString, int> m_nameIndex;
-    QVector<MMCIcon> m_icons;
+    QList<MMCIcon> m_icons;
     QDir m_dir;
 };

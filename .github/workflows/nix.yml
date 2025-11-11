@@ -1,0 +1,135 @@
+name: Nix
+
+on:
+  push:
+    branches:
+      - "develop"
+      - "release-*"
+    tags:
+      - "*"
+    paths:
+      # File types
+      - "**.cpp"
+      - "**.h"
+      - "**.java"
+      - "**.ui"
+
+      # Build files
+      - "**.nix"
+      - "nix/**"
+      - "flake.lock"
+
+      # Directories
+      - "buildconfig/**"
+      - "cmake/**"
+      - "launcher/**"
+      - "libraries/**"
+      - "program_info/**"
+      - "tests/**"
+
+      # Files
+      - "CMakeLists.txt"
+      - "COPYING.md"
+
+      # Workflows
+      - ".github/workflows/nix.yml"
+  pull_request:
+    paths:
+      # File types
+      - "**.cpp"
+      - "**.h"
+      - "**.java"
+      - "**.ui"
+
+      # Build files
+      - "**.nix"
+      - "nix/**"
+      - "flake.lock"
+
+      # Directories
+      - "buildconfig/**"
+      - "cmake/**"
+      - "launcher/**"
+      - "libraries/**"
+      - "program_info/**"
+      - "tests/**"
+
+      # Files
+      - "CMakeLists.txt"
+      - "COPYING.md"
+
+      # Workflows
+      - ".github/workflows/nix.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DEBUG: ${{ github.ref_type != 'tag' }}
+
+jobs:
+  build:
+    name: Build (${{ matrix.system }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            system: x86_64-linux
+
+          - os: ubuntu-22.04-arm
+            system: aarch64-linux
+
+          - os: macos-15-intel
+            system: x86_64-darwin
+
+          - os: macos-14
+            system: aarch64-darwin
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+        # For PRs
+      - name: Setup Nix Magic Cache
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: DeterminateSystems/magic-nix-cache-action@v13
+        with:
+          diagnostic-endpoint: ""
+          use-flakehub: false
+
+        # For in-tree builds
+      - name: Setup Cachix
+        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+        uses: cachix/cachix-action@v16
+        with:
+          name: prismlauncher
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Run Flake checks
+        run: |
+          nix flake check --print-build-logs --show-trace
+
+      - name: Build debug package
+        if: ${{ env.DEBUG == 'true' }}
+        run: |
+          nix build \
+            --no-link --print-build-logs --print-out-paths \
+            .#prismlauncher-debug >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Build release package
+        if: ${{ env.DEBUG == 'false' }}
+        env:
+          TAG: ${{ github.ref_name }}
+          SYSTEM: ${{ matrix.system }}
+        run: |
+          nix build --no-link --print-out-paths .#prismlauncher \
+            | tee -a "$GITHUB_STEP_SUMMARY" \
+            | xargs cachix pin prismlauncher "$TAG"-"$SYSTEM"

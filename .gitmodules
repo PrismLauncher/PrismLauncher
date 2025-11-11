@@ -4,9 +4,6 @@
 [submodule "libraries/tomlplusplus"]
 	path = libraries/tomlplusplus
 	url = https://github.com/marzer/tomlplusplus.git
-[submodule "libraries/filesystem"]
-	path = libraries/filesystem
-	url = https://github.com/gulrak/filesystem
 [submodule "libraries/libnbtplusplus"]
 	path = libraries/libnbtplusplus
 	url = https://github.com/PrismLauncher/libnbtplusplus.git
@@ -22,3 +19,6 @@
 [submodule "flatpak/shared-modules"]
 	path = flatpak/shared-modules
 	url = https://github.com/flathub/shared-modules.git
+[submodule "libraries/qrcodegenerator"]
+	path = libraries/qrcodegenerator
+	url = https://github.com/nayuki/QR-Code-generator

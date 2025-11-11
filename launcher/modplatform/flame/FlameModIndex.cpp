@@ -4,6 +4,7 @@
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
 
 static FlameAPI api;
@@ -25,12 +26,15 @@ void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     }
 
     auto authors = Json::ensureArray(obj, "authors");
-    for (auto authorIter : authors) {
-        auto author = Json::requireObject(authorIter);
-        ModPlatform::ModpackAuthor packAuthor;
-        packAuthor.name = Json::requireString(author, "name");
-        packAuthor.url = Json::requireString(author, "url");
-        pack.authors.append(packAuthor);
+    if (!authors.isEmpty()) {
+        pack.authors.clear();
+        for (auto authorIter : authors) {
+            auto author = Json::requireObject(authorIter);
+            ModPlatform::ModpackAuthor packAuthor;
+            packAuthor.name = Json::requireString(author, "name");
+            packAuthor.url = Json::requireString(author, "url");
+            pack.authors.append(packAuthor);
+        }
     }
 
     pack.extraDataLoaded = false;
@@ -57,7 +61,7 @@ void FlameMod::loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj)
         pack.extraDataLoaded = true;
 }
 
-void FlameMod::loadBody(ModPlatform::IndexedPack& pack, [[maybe_unused]] QJsonObject& obj)
+void FlameMod::loadBody(ModPlatform::IndexedPack& pack)
 {
     pack.extraData.body = api.getModDescription(pack.addonId.toInt());
 
@@ -76,12 +80,9 @@ static QString enumToString(int hash_algorithm)
     }
 }
 
-void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
-                                       QJsonArray& arr,
-                                       [[maybe_unused]] const shared_qobject_ptr<QNetworkAccessManager>& network,
-                                       const BaseInstance* inst)
+void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArray& arr)
 {
-    QVector<ModPlatform::IndexedVersion> unsortedVersions;
+    QList<ModPlatform::IndexedVersion> unsortedVersions;
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
 
@@ -105,9 +106,6 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
 auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> ModPlatform::IndexedVersion
 {
     auto versionArray = Json::requireArray(obj, "gameVersions");
-    if (versionArray.isEmpty()) {
-        return {};
-    }
 
     ModPlatform::IndexedVersion file;
     for (auto mcVer : versionArray) {
@@ -116,6 +114,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
         if (str.contains('.'))
             file.mcVersion.append(str);
 
+        file.side = ModPlatform::Side::NoSide;
         if (auto loader = str.toLower(); loader == "neoforge")
             file.loaders |= ModPlatform::NeoForge;
         else if (loader == "forge")
@@ -129,10 +128,10 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
         else if (loader == "quilt")
             file.loaders |= ModPlatform::Quilt;
         else if (loader == "server" || loader == "client") {
-            if (file.side.isEmpty())
-                file.side = loader;
-            else if (file.side != loader)
-                file.side = "both";
+            if (file.side == ModPlatform::Side::NoSide)
+                file.side = ModPlatform::SideUtils::fromString(loader);
+            else if (file.side != ModPlatform::SideUtils::fromString(loader))
+                file.side = ModPlatform::Side::UniversalSide;
         }
     }
 
@@ -207,32 +206,4 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
         file.changelog = api.getModFileChangelog(file.addonId.toInt(), file.fileId.toInt());
 
     return file;
-}
-
-ModPlatform::IndexedVersion FlameMod::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr, const BaseInstance* inst)
-{
-    auto profile = (dynamic_cast<const MinecraftInstance*>(inst))->getPackProfile();
-    QString mcVersion = profile->getComponentVersion("net.minecraft");
-    auto loaders = profile->getSupportedModLoaders();
-    QVector<ModPlatform::IndexedVersion> versions;
-    for (auto versionIter : arr) {
-        auto obj = versionIter.toObject();
-
-        auto file = loadIndexedPackVersion(obj);
-        if (!file.addonId.isValid())
-            file.addonId = m.addonId;
-
-        if (file.fileId.isValid() &&
-            (!loaders.has_value() || !file.loaders || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
-            versions.append(file);
-    }
-
-    auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
-        // dates are in RFC 3339 format
-        return a.date > b.date;
-    };
-    std::sort(versions.begin(), versions.end(), orderSortPredicate);
-    if (versions.size() != 0)
-        return versions.front();
-    return {};
 }

@@ -25,7 +25,7 @@
 class HintOverrideProxyStyle : public QProxyStyle {
     Q_OBJECT
    public:
-    HintOverrideProxyStyle(QStyle* style) : QProxyStyle(style) {}
+    explicit HintOverrideProxyStyle(QStyle* style);
 
     int styleHint(QStyle::StyleHint hint,
                   const QStyleOption* option = nullptr,

@@ -36,11 +36,12 @@
 #pragma once
 
 #include <QJsonObject>
+#include <QList>
 #include <QMap>
 #include <QString>
 #include <QUrl>
-#include <QVector>
 #include "modplatform/ModIndex.h"
+#include "modplatform/ResourceType.h"
 
 namespace Flame {
 struct File {
@@ -54,6 +55,7 @@ struct File {
 
     // our
     QString targetFolder = QStringLiteral("mods");
+    ModPlatform::ResourceType resourceType;
 };
 
 struct Modloader {
@@ -64,7 +66,8 @@ struct Modloader {
 struct Minecraft {
     QString version;
     QString libraries;
-    QVector<Flame::Modloader> modLoaders;
+    QList<Flame::Modloader> modLoaders;
+    int recommendedRAM;
 };
 
 struct Manifest {

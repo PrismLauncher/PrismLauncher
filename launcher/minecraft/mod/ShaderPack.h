@@ -45,7 +45,7 @@ class ShaderPack : public Resource {
    public:
     using Ptr = shared_qobject_ptr<Resource>;
 
-    [[nodiscard]] ShaderPackFormat packFormat() const { return m_pack_format; }
+    ShaderPackFormat packFormat() const { return m_pack_format; }
 
     ShaderPack(QObject* parent = nullptr) : Resource(parent) {}
     ShaderPack(QFileInfo file_info) : Resource(file_info) {}

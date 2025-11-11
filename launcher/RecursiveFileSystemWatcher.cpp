@@ -1,7 +1,6 @@
 #include "RecursiveFileSystemWatcher.h"
 
 #include <QDebug>
-#include <QRegularExpression>
 
 RecursiveFileSystemWatcher::RecursiveFileSystemWatcher(QObject* parent) : QObject(parent), m_watcher(new QFileSystemWatcher(this))
 {
@@ -79,7 +78,7 @@ QStringList RecursiveFileSystemWatcher::scanRecursive(const QDir& directory)
     }
     for (const QString& file : directory.entryList(QDir::Files | QDir::Hidden)) {
         auto relPath = m_root.relativeFilePath(directory.absoluteFilePath(file));
-        if (m_matcher->matches(relPath)) {
+        if (m_matcher(relPath)) {
             ret.append(relPath);
         }
     }

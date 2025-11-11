@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>673</width>
-    <height>751</height>
+    <height>823</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -24,28 +24,43 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>0</number>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable">
+      <bool>true</bool>
      </property>
-     <widget class="QWidget" name="tab">
-      <attribute name="title">
-       <string notr="true">Tab 1</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+     <widget class="QWidget" name="scrollAreaWidgetContents_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>669</width>
+        <height>819</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QGroupBox" name="groupBox_2">
+        <widget class="QGroupBox" name="editorsBox">
          <property name="title">
-          <string notr="true">J&amp;Profiler</string>
+          <string>&amp;Editors</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_10">
+         <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>&amp;Text Editor</string>
+            </property>
+            <property name="buddy">
+             <cstring>jsonEditorTextBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
-             <widget class="QLineEdit" name="jprofilerPathEdit"/>
+             <widget class="QLineEdit" name="jsonEditorTextBox"/>
             </item>
             <item>
-             <widget class="QPushButton" name="jprofilerPathBtn">
+             <widget class="QPushButton" name="jsonEditorBrowseBtn">
               <property name="text">
                <string>Browse</string>
               </property>
@@ -54,65 +69,38 @@
            </layout>
           </item>
           <item>
-           <widget class="QPushButton" name="jprofilerCheckBtn">
+           <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>Check</string>
+             <string>Used to edit component JSON files.</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="jprofilerLink">
+           <spacer name="verticalSpacer_7">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>6</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="mceditLabel">
             <property name="text">
-             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://www.ej-technologies.com/products/jprofiler/overview.html&quot;&gt;https://www.ej-technologies.com/products/jprofiler/overview.html&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&amp;MCEdit</string>
+            </property>
+            <property name="buddy">
+             <cstring>mceditPathEdit</cstring>
             </property>
            </widget>
           </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_3">
-         <property name="title">
-          <string notr="true">J&amp;VisualVM</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_11">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
-            <item>
-             <widget class="QLineEdit" name="jvisualvmPathEdit"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="jvisualvmPathBtn">
-              <property name="text">
-               <string>Browse</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QPushButton" name="jvisualvmCheckBtn">
-            <property name="text">
-             <string>Check</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="jvisualvmLink">
-            <property name="text">
-             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://visualvm.github.io/&quot;&gt;https://visualvm.github.io/&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_4">
-         <property name="title">
-          <string notr="true">&amp;MCEdit</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_12">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
@@ -129,6 +117,12 @@
           </item>
           <item>
            <widget class="QPushButton" name="mceditCheckBtn">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>Check</string>
             </property>
@@ -137,7 +131,7 @@
           <item>
            <widget class="QLabel" name="mceditLink">
             <property name="text">
-             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://www.mcedit.net/&quot;&gt;https://www.mcedit.net/&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://www.mcedit.net/&quot;&gt;MCEdit Website&lt;/a&gt; - Used as world editor in the instance Worlds menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
@@ -145,28 +139,138 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="editorsBox">
+        <widget class="QGroupBox" name="profilersBox">
          <property name="title">
-          <string>External Editors (leave empty for system default)</string>
+          <string>&amp;Profilers</string>
          </property>
-         <layout class="QGridLayout" name="foldersBoxLayout_2">
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="jsonEditorTextBox"/>
-          </item>
-          <item row="0" column="0">
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
            <widget class="QLabel" name="labelJsonEditor">
             <property name="text">
-             <string>&amp;Text Editor:</string>
+             <string>Profilers are accessible through the Launch dropdown menu.</string>
             </property>
             <property name="buddy">
              <cstring>jsonEditorTextBox</cstring>
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QToolButton" name="jsonEditorBrowseBtn">
+          <item>
+           <spacer name="verticalSpacer_9">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>6</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label">
             <property name="text">
-             <string>Browse</string>
+             <string>J&amp;Profiler</string>
+            </property>
+            <property name="buddy">
+             <cstring>jprofilerPathEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QLineEdit" name="jprofilerPathEdit"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="jprofilerPathBtn">
+              <property name="text">
+               <string>Browse</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="jprofilerCheckBtn">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Check</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="jprofilerLink">
+            <property name="text">
+             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://www.ej-technologies.com/products/jprofiler/overview.html&quot;&gt;JProfiler Website&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_8">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>6</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>&amp;VisualVM</string>
+            </property>
+            <property name="buddy">
+             <cstring>jvisualvmPathEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QLineEdit" name="jvisualvmPathEdit"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="jvisualvmPathBtn">
+              <property name="text">
+               <string>Browse</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="jvisualvmCheckBtn">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Check</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="jvisualvmLink">
+            <property name="text">
+             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://visualvm.github.io/&quot;&gt;VisualVM Website&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
@@ -180,8 +284,8 @@
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>20</width>
-           <height>216</height>
+           <width>0</width>
+           <height>0</height>
           </size>
          </property>
         </spacer>

@@ -39,13 +39,13 @@
 #include <QSortFilterProxyModel>
 #include <QWidget>
 #include "BaseVersionList.h"
+#include "Filter.h"
 #include "VersionListView.h"
 
 class VersionProxyModel;
 class VersionListView;
 class QVBoxLayout;
 class QProgressBar;
-class Filter;
 
 class VersionSelectWidget : public QWidget {
     Q_OBJECT
@@ -70,7 +70,7 @@ class VersionSelectWidget : public QWidget {
     void setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter);
     void setExactFilter(BaseVersionList::ModelRoles role, QString filter);
     void setExactIfPresentFilter(BaseVersionList::ModelRoles role, QString filter);
-    void setFilter(BaseVersionList::ModelRoles role, Filter* filter);
+    void setFilter(BaseVersionList::ModelRoles role, Filter filter);
     void setEmptyString(QString emptyString);
     void setEmptyErrorString(QString emptyErrorString);
     void setEmptyMode(VersionListView::EmptyMode mode);

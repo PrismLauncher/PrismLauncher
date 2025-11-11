@@ -51,7 +51,7 @@
 
 namespace MMCZip {
 // ours
-bool mergeZipFiles(QuaZip* into, QFileInfo from, QSet<QString>& contained, const FilterFunction& filter)
+bool mergeZipFiles(QuaZip* into, QFileInfo from, QSet<QString>& contained, const Filter& filter)
 {
     QuaZip modZip(from.filePath());
     modZip.open(QuaZip::mdUnzip);
@@ -418,7 +418,7 @@ bool extractFile(QString fileCompressed, QString file, QString target)
     return extractRelFile(&zip, file, target);
 }
 
-bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFunction excludeFilter)
+bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFileFunction excludeFilter)
 {
     QDir rootDirectory(rootDir);
     if (!rootDirectory.exists())
@@ -443,8 +443,8 @@ bool collectFileListRecursively(const QString& rootDir, const QString& subDir, Q
     // collect files
     entries = directory.entryInfoList(QDir::Files);
     for (const auto& e : entries) {
-        QString relativeFilePath = rootDirectory.relativeFilePath(e.absoluteFilePath());
-        if (excludeFilter && excludeFilter(relativeFilePath)) {
+        if (excludeFilter && excludeFilter(e)) {
+            QString relativeFilePath = rootDirectory.relativeFilePath(e.absoluteFilePath());
             qDebug() << "Skipping file " << relativeFilePath;
             continue;
         }

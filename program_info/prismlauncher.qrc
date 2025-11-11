@@ -1,6 +1,0 @@
-<!DOCTYPE RCC>
-<RCC version="1.0">
-    <qresource prefix="/">
-        <file>org.prismlauncher.PrismLauncher.svg</file>
-    </qresource>
-</RCC>

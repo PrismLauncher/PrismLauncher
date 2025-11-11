@@ -27,12 +27,8 @@
 #include "minecraft/mod/MetadataHandler.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
-#include "modplatform/flame/FlameAPI.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/SequentialTask.h"
 #include "ui/pages/modplatform/ModModel.h"
-#include "ui/pages/modplatform/flame/FlameResourceModels.h"
-#include "ui/pages/modplatform/modrinth/ModrinthResourceModels.h"
 
 static Version mcVersion(BaseInstance* inst)
 {
@@ -55,14 +51,7 @@ static bool checkDependencies(std::shared_ptr<GetModDependenciesTask::PackDepend
 GetModDependenciesTask::GetModDependenciesTask(BaseInstance* instance,
                                                ModFolderModel* folder,
                                                QList<std::shared_ptr<PackDependency>> selected)
-    : SequentialTask(tr("Get dependencies"))
-    , m_selected(selected)
-    , m_flame_provider{ ModPlatform::ResourceProvider::FLAME, std::make_shared<ResourceDownload::FlameModModel>(*instance),
-                        std::make_shared<FlameAPI>() }
-    , m_modrinth_provider{ ModPlatform::ResourceProvider::MODRINTH, std::make_shared<ResourceDownload::ModrinthModModel>(*instance),
-                           std::make_shared<ModrinthAPI>() }
-    , m_version(mcVersion(instance))
-    , m_loaderType(mcLoaders(instance))
+    : SequentialTask(tr("Get dependencies")), m_selected(selected), m_version(mcVersion(instance)), m_loaderType(mcLoaders(instance))
 {
     for (auto mod : folder->allMods()) {
         m_mods_file_names << mod->fileinfo().fileName();
@@ -87,7 +76,7 @@ ModPlatform::Dependency GetModDependenciesTask::getOverride(const ModPlatform::D
 {
     if (auto isQuilt = m_loaderType & ModPlatform::Quilt; isQuilt || m_loaderType & ModPlatform::Fabric) {
         auto overide = ModPlatform::getOverrideDeps();
-        auto over = std::find_if(overide.cbegin(), overide.cend(), [dep, providerName, isQuilt](auto o) {
+        auto over = std::find_if(overide.cbegin(), overide.cend(), [dep, providerName, isQuilt](const auto& o) {
             return o.provider == providerName && dep.addonId == (isQuilt ? o.fabric : o.quilt);
         });
         if (over != overide.cend()) {
@@ -144,10 +133,10 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
 
 Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDependency> pDep)
 {
-    auto provider = pDep->pack->provider == m_flame_provider.name ? m_flame_provider : m_modrinth_provider;
+    auto provider = pDep->pack->provider;
     auto responseInfo = std::make_shared<QByteArray>();
-    auto info = provider.api->getProject(pDep->pack->addonId.toString(), responseInfo);
-    QObject::connect(info.get(), &NetJob::succeeded, [this, responseInfo, provider, pDep] {
+    auto info = getAPI(provider)->getProject(pDep->pack->addonId.toString(), responseInfo);
+    connect(info.get(), &NetJob::succeeded, [this, responseInfo, provider, pDep] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*responseInfo, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -158,9 +147,10 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDepende
             return;
         }
         try {
-            auto obj = provider.name == ModPlatform::ResourceProvider::FLAME ? Json::requireObject(Json::requireObject(doc), "data")
-                                                                             : Json::requireObject(doc);
-            provider.mod->loadIndexedPack(*pDep->pack, obj);
+            auto obj = provider == ModPlatform::ResourceProvider::FLAME ? Json::requireObject(Json::requireObject(doc), "data")
+                                                                        : Json::requireObject(doc);
+
+            getAPI(provider)->loadIndexedPack(*pDep->pack, obj);
         } catch (const JSONValidationError& e) {
             removePack(pDep->pack->addonId);
             qDebug() << doc;
@@ -181,7 +171,8 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     pDep->pack->provider = providerName;
 
     m_pack_dependencies.append(pDep);
-    auto provider = providerName == m_flame_provider.name ? m_flame_provider : m_modrinth_provider;
+
+    auto provider = providerName;
 
     auto tasks = makeShared<SequentialTask>(
         QString("DependencyInfo: %1").arg(dep.addonId.toString().isEmpty() ? dep.version : dep.addonId.toString()));
@@ -191,45 +182,30 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     }
 
     ResourceAPI::DependencySearchArgs args = { dep, m_version, m_loaderType };
-    ResourceAPI::DependencySearchCallbacks callbacks;
+    ResourceAPI::Callback<ModPlatform::IndexedVersion> callbacks;
     callbacks.on_fail = [](QString reason, int) {
         qCritical() << tr("A network error occurred. Could not load project dependencies:%1").arg(reason);
     };
-    callbacks.on_succeed = [dep, provider, pDep, level, this](auto& doc, [[maybe_unused]] auto& pack) {
-        try {
-            QJsonArray arr;
-            if (dep.version.length() != 0 && doc.isObject()) {
-                arr.append(doc.object());
-            } else {
-                arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
-            }
-            pDep->version = provider.mod->loadDependencyVersions(dep, arr);
-            if (!pDep->version.addonId.isValid()) {
-                if (m_loaderType & ModPlatform::Quilt) {  // falback for quilt
-                    auto overide = ModPlatform::getOverrideDeps();
-                    auto over = std::find_if(overide.cbegin(), overide.cend(),
-                                             [dep, provider](auto o) { return o.provider == provider.name && dep.addonId == o.quilt; });
-                    if (over != overide.cend()) {
-                        removePack(dep.addonId);
-                        addTask(prepareDependencyTask({ over->fabric, dep.type }, provider.name, level));
-                        return;
-                    }
+    callbacks.on_succeed = [dep, provider, pDep, level, this](auto& pack) {
+        pDep->version = pack;
+        if (!pDep->version.addonId.isValid()) {
+            if (m_loaderType & ModPlatform::Quilt) {  // falback for quilt
+                auto overide = ModPlatform::getOverrideDeps();
+                auto over = std::find_if(overide.cbegin(), overide.cend(),
+                                         [dep, provider](auto o) { return o.provider == provider && dep.addonId == o.quilt; });
+                if (over != overide.cend()) {
+                    removePack(dep.addonId);
+                    addTask(prepareDependencyTask({ over->fabric, dep.type }, provider, level));
+                    return;
                 }
-                removePack(dep.addonId);
-                qWarning() << "Error while reading mod version empty ";
-                qDebug() << doc;
-                return;
             }
-            pDep->version.is_currently_selected = true;
-            pDep->pack->versions = { pDep->version };
-            pDep->pack->versionsLoaded = true;
-
-        } catch (const JSONValidationError& e) {
             removePack(dep.addonId);
-            qDebug() << doc;
-            qWarning() << "Error while reading mod version: " << e.cause();
             return;
         }
+        pDep->version.is_currently_selected = true;
+        pDep->pack->versions = { pDep->version };
+        pDep->pack->versionsLoaded = true;
+
         if (level == 0) {
             removePack(dep.addonId);
             qWarning() << "Dependency cycle exceeded";
@@ -237,10 +213,10 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
         }
         if (dep.addonId.toString().isEmpty() && !pDep->version.addonId.toString().isEmpty()) {
             pDep->pack->addonId = pDep->version.addonId;
-            auto dep_ = getOverride({ pDep->version.addonId, pDep->dependency.type }, provider.name);
+            auto dep_ = getOverride({ pDep->version.addonId, pDep->dependency.type }, provider);
             if (dep_.addonId != pDep->version.addonId) {
                 removePack(pDep->version.addonId);
-                addTask(prepareDependencyTask(dep_, provider.name, level));
+                addTask(prepareDependencyTask(dep_, provider, level));
             } else {
                 addTask(getProjectInfoTask(pDep));
             }
@@ -249,12 +225,12 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             removePack(pDep->version.addonId);
             return;
         }
-        for (auto dep_ : getDependenciesForVersion(pDep->version, provider.name)) {
-            addTask(prepareDependencyTask(dep_, provider.name, level - 1));
+        for (auto dep_ : getDependenciesForVersion(pDep->version, provider)) {
+            addTask(prepareDependencyTask(dep_, provider, level - 1));
         }
     };
 
-    auto version = provider.api->getDependencyVersion(std::move(args), std::move(callbacks));
+    auto version = getAPI(provider)->getDependencyVersion(std::move(args), std::move(callbacks));
     tasks->addTask(version);
     return tasks;
 }

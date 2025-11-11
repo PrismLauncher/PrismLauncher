@@ -1,0 +1,6 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/">
+        <file>@Launcher_AppID@.svg</file>
+    </qresource>
+</RCC>

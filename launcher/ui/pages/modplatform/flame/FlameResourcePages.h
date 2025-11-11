@@ -39,7 +39,7 @@
 
 #pragma once
 
-#include "Application.h"
+#include <ui/pages/modplatform/DataPackPage.h>
 
 #include "modplatform/ResourceAPI.h"
 
@@ -57,7 +57,7 @@ static inline QString displayName()
 }
 static inline QIcon icon()
 {
-    return APPLICATION->getThemedIcon("flame");
+    return QIcon::fromTheme("flame");
 }
 static inline QString id()
 {
@@ -85,18 +85,18 @@ class FlameModPage : public ModPage {
     FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance);
     ~FlameModPage() override = default;
 
-    [[nodiscard]] bool shouldDisplay() const override;
+    bool shouldDisplay() const override;
 
-    [[nodiscard]] inline auto displayName() const -> QString override { return Flame::displayName(); }
-    [[nodiscard]] inline auto icon() const -> QIcon override { return Flame::icon(); }
-    [[nodiscard]] inline auto id() const -> QString override { return Flame::id(); }
-    [[nodiscard]] inline auto debugName() const -> QString override { return Flame::debugName(); }
-    [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
+    inline auto displayName() const -> QString override { return Flame::displayName(); }
+    inline auto icon() const -> QIcon override { return Flame::icon(); }
+    inline auto id() const -> QString override { return Flame::id(); }
+    inline auto debugName() const -> QString override { return Flame::debugName(); }
+    inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
 
-    [[nodiscard]] inline auto helpPage() const -> QString override { return "Mod-platform"; }
+    inline auto helpPage() const -> QString override { return "Mod-platform"; }
 
     void openUrl(const QUrl& url) override;
-    unique_qobject_ptr<ModFilterWidget> createFilterWidget() override;
+    std::unique_ptr<ModFilterWidget> createFilterWidget() override;
 
    protected:
     virtual void prepareProviderCategories() override;
@@ -117,15 +117,15 @@ class FlameResourcePackPage : public ResourcePackResourcePage {
     FlameResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance);
     ~FlameResourcePackPage() override = default;
 
-    [[nodiscard]] bool shouldDisplay() const override;
+    bool shouldDisplay() const override;
 
-    [[nodiscard]] inline auto displayName() const -> QString override { return Flame::displayName(); }
-    [[nodiscard]] inline auto icon() const -> QIcon override { return Flame::icon(); }
-    [[nodiscard]] inline auto id() const -> QString override { return Flame::id(); }
-    [[nodiscard]] inline auto debugName() const -> QString override { return Flame::debugName(); }
-    [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
+    inline auto displayName() const -> QString override { return Flame::displayName(); }
+    inline auto icon() const -> QIcon override { return Flame::icon(); }
+    inline auto id() const -> QString override { return Flame::id(); }
+    inline auto debugName() const -> QString override { return Flame::debugName(); }
+    inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
 
-    [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
+    inline auto helpPage() const -> QString override { return ""; }
 
     void openUrl(const QUrl& url) override;
 };
@@ -142,15 +142,15 @@ class FlameTexturePackPage : public TexturePackResourcePage {
     FlameTexturePackPage(TexturePackDownloadDialog* dialog, BaseInstance& instance);
     ~FlameTexturePackPage() override = default;
 
-    [[nodiscard]] bool shouldDisplay() const override;
+    bool shouldDisplay() const override;
 
-    [[nodiscard]] inline auto displayName() const -> QString override { return Flame::displayName(); }
-    [[nodiscard]] inline auto icon() const -> QIcon override { return Flame::icon(); }
-    [[nodiscard]] inline auto id() const -> QString override { return Flame::id(); }
-    [[nodiscard]] inline auto debugName() const -> QString override { return Flame::debugName(); }
-    [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
+    inline auto displayName() const -> QString override { return Flame::displayName(); }
+    inline auto icon() const -> QIcon override { return Flame::icon(); }
+    inline auto id() const -> QString override { return Flame::id(); }
+    inline auto debugName() const -> QString override { return Flame::debugName(); }
+    inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
 
-    [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
+    inline auto helpPage() const -> QString override { return ""; }
 
     void openUrl(const QUrl& url) override;
 };
@@ -167,15 +167,40 @@ class FlameShaderPackPage : public ShaderPackResourcePage {
     FlameShaderPackPage(ShaderPackDownloadDialog* dialog, BaseInstance& instance);
     ~FlameShaderPackPage() override = default;
 
-    [[nodiscard]] bool shouldDisplay() const override;
+    bool shouldDisplay() const override;
 
-    [[nodiscard]] inline auto displayName() const -> QString override { return Flame::displayName(); }
-    [[nodiscard]] inline auto icon() const -> QIcon override { return Flame::icon(); }
-    [[nodiscard]] inline auto id() const -> QString override { return Flame::id(); }
-    [[nodiscard]] inline auto debugName() const -> QString override { return Flame::debugName(); }
-    [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
+    inline auto displayName() const -> QString override { return Flame::displayName(); }
+    inline auto icon() const -> QIcon override { return Flame::icon(); }
+    inline auto id() const -> QString override { return Flame::id(); }
+    inline auto debugName() const -> QString override { return Flame::debugName(); }
+    inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
 
-    [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
+    inline auto helpPage() const -> QString override { return ""; }
+
+    void openUrl(const QUrl& url) override;
+};
+
+class FlameDataPackPage : public DataPackResourcePage {
+    Q_OBJECT
+
+   public:
+    static FlameDataPackPage* create(DataPackDownloadDialog* dialog, BaseInstance& instance)
+    {
+        return DataPackResourcePage::create<FlameDataPackPage>(dialog, instance);
+    }
+
+    FlameDataPackPage(DataPackDownloadDialog* dialog, BaseInstance& instance);
+    ~FlameDataPackPage() override = default;
+
+    bool shouldDisplay() const override;
+
+    inline auto displayName() const -> QString override { return Flame::displayName(); }
+    inline auto icon() const -> QIcon override { return Flame::icon(); }
+    inline auto id() const -> QString override { return Flame::id(); }
+    inline auto debugName() const -> QString override { return Flame::debugName(); }
+    inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
+
+    inline auto helpPage() const -> QString override { return ""; }
 
     void openUrl(const QUrl& url) override;
 };

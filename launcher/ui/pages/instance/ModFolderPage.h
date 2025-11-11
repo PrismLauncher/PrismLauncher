@@ -38,7 +38,9 @@
 
 #pragma once
 
+#include <QPointer>
 #include "ExternalResourcesPage.h"
+#include "ui/dialogs/ResourceDownloadDialog.h"
 
 class ModFolderPage : public ExternalResourcesPage {
     Q_OBJECT
@@ -50,7 +52,7 @@ class ModFolderPage : public ExternalResourcesPage {
     void setFilter(const QString& filter) { m_fileSelectionFilter = filter; }
 
     virtual QString displayName() const override { return tr("Mods"); }
-    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("loadermods"); }
+    virtual QIcon icon() const override { return QIcon::fromTheme("loadermods"); }
     virtual QString id() const override { return "mods"; }
     virtual QString helpPage() const override { return "Loader-mods"; }
 
@@ -63,6 +65,7 @@ class ModFolderPage : public ExternalResourcesPage {
     void removeItems(const QItemSelection& selection) override;
 
     void downloadMods();
+    void downloadDialogFinished(int result);
     void updateMods(bool includeDeps = false);
     void deleteModMetadata();
     void exportModMetadata();
@@ -70,6 +73,7 @@ class ModFolderPage : public ExternalResourcesPage {
 
    protected:
     std::shared_ptr<ModFolderModel> m_model;
+    QPointer<ResourceDownload::ModDownloadDialog> m_downloadDialog;
 };
 
 class CoreModFolderPage : public ModFolderPage {
@@ -78,8 +82,8 @@ class CoreModFolderPage : public ModFolderPage {
     explicit CoreModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent = 0);
     virtual ~CoreModFolderPage() = default;
 
-    virtual QString displayName() const override { return tr("Core mods"); }
-    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("coremods"); }
+    virtual QString displayName() const override { return tr("Core Mods"); }
+    virtual QIcon icon() const override { return QIcon::fromTheme("coremods"); }
     virtual QString id() const override { return "coremods"; }
     virtual QString helpPage() const override { return "Core-mods"; }
 
@@ -93,7 +97,7 @@ class NilModFolderPage : public ModFolderPage {
     virtual ~NilModFolderPage() = default;
 
     virtual QString displayName() const override { return tr("Nilmods"); }
-    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("coremods"); }
+    virtual QIcon icon() const override { return QIcon::fromTheme("coremods"); }
     virtual QString id() const override { return "nilmods"; }
     virtual QString helpPage() const override { return "Nilmods"; }
 

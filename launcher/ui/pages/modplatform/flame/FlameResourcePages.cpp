@@ -40,7 +40,6 @@
 #include "FlameResourcePages.h"
 #include <QList>
 #include <memory>
-#include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "ui_ResourcePage.h"
 
@@ -51,16 +50,16 @@ namespace ResourceDownload {
 
 FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ModPage(dialog, instance)
 {
-    m_model = new FlameModModel(instance);
+    m_model = new ModModel(instance, new FlameAPI(), Flame::debugName(), Flame::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's contructor...
-    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &FlameModPage::triggerSearch);
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameModPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FlameModPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &FlameModPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameModPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
@@ -85,17 +84,16 @@ void FlameModPage::openUrl(const QUrl& url)
 FlameResourcePackPage::FlameResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance)
     : ResourcePackResourcePage(dialog, instance)
 {
-    m_model = new FlameResourcePackModel(instance);
+    m_model = new ResourcePackResourceModel(instance, new FlameAPI(), Flame::debugName(), Flame::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's contructor...
-    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &FlameResourcePackPage::triggerSearch);
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameResourcePackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
-            &FlameResourcePackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &FlameResourcePackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameResourcePackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
@@ -127,10 +125,9 @@ FlameTexturePackPage::FlameTexturePackPage(TexturePackDownloadDialog* dialog, Ba
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's contructor...
-    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &FlameTexturePackPage::triggerSearch);
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameTexturePackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
-            &FlameTexturePackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &FlameTexturePackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameTexturePackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
@@ -152,21 +149,53 @@ void FlameTexturePackPage::openUrl(const QUrl& url)
     TexturePackResourcePage::openUrl(url);
 }
 
+void FlameDataPackPage::openUrl(const QUrl& url)
+{
+    if (url.scheme().isEmpty()) {
+        QString query = url.query(QUrl::FullyDecoded);
+
+        if (query.startsWith("remoteUrl=")) {
+            // attempt to resolve url from warning page
+            query.remove(0, 10);
+            DataPackResourcePage::openUrl({ QUrl::fromPercentEncoding(query.toUtf8()) });  // double decoding is necessary
+            return;
+        }
+    }
+
+    DataPackResourcePage::openUrl(url);
+}
+
 FlameShaderPackPage::FlameShaderPackPage(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
     : ShaderPackResourcePage(dialog, instance)
 {
-    m_model = new FlameShaderPackModel(instance);
+    m_model = new ShaderPackResourceModel(instance, new FlameAPI(), Flame::debugName(), Flame::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's constructor...
-    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &FlameShaderPackPage::triggerSearch);
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameShaderPackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
-            &FlameShaderPackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &FlameShaderPackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameShaderPackPage::onResourceSelected);
+
+    m_ui->packDescription->setMetaEntry(metaEntryBase());
+}
+
+FlameDataPackPage::FlameDataPackPage(DataPackDownloadDialog* dialog, BaseInstance& instance) : DataPackResourcePage(dialog, instance)
+{
+    m_model = new DataPackResourceModel(instance, new FlameAPI(), Flame::debugName(), Flame::metaEntryBase());
+    m_ui->packView->setModel(m_model);
+
+    addSortings();
+
+    // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
+    // so it's best not to connect them in the parent's constructor...
+    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &FlameDataPackPage::triggerSearch);
+    connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameDataPackPage::onSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &FlameDataPackPage::onVersionSelectionChanged);
+    connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameDataPackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
 }
@@ -206,17 +235,21 @@ auto FlameShaderPackPage::shouldDisplay() const -> bool
 {
     return true;
 }
-
-unique_qobject_ptr<ModFilterWidget> FlameModPage::createFilterWidget()
+auto FlameDataPackPage::shouldDisplay() const -> bool
 {
-    return ModFilterWidget::create(&static_cast<MinecraftInstance&>(m_baseInstance), false, this);
+    return true;
+}
+
+std::unique_ptr<ModFilterWidget> FlameModPage::createFilterWidget()
+{
+    return ModFilterWidget::create(&static_cast<MinecraftInstance&>(m_baseInstance), false);
 }
 
 void FlameModPage::prepareProviderCategories()
 {
     auto response = std::make_shared<QByteArray>();
     m_categoriesTask = FlameAPI::getModCategories(response);
-    QObject::connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
+    connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
         auto categories = FlameAPI::loadModCategories(response);
         m_filter_widget->setCategories(categories);
     });

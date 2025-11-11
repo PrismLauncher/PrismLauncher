@@ -1,0 +1,25 @@
+[12:50:56] [Datafixer Bootstrap/INFO]: 263 Datafixer optimizations took 908 milliseconds
+[12:50:58] [Render thread/INFO]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[12:50:58] [Render thread/INFO]: Setting user: Ryexandrite
+[12:50:58] [Render thread/INFO]: Backend library: LWJGL version 3.3.3+5
+[12:50:58] [Render thread/INFO]: Using optional rendering extensions: GL_KHR_debug, GL_ARB_vertex_attrib_binding, GL_ARB_direct_state_access
+[12:50:58] [Render thread/INFO]: Reloading ResourceManager: vanilla
+[12:50:59] [Worker-Main-6/INFO]: Found unifont_all_no_pua-16.0.01.hex, loading
+[12:50:59] [Worker-Main-7/INFO]: Found unifont_jp_patch-16.0.01.hex, loading
+[12:50:59] [Render thread/WARN]: minecraft:pipeline/entity_translucent_emissive shader program does not use sampler Sampler2 defined in the pipeline. This might be a bug.
+[12:50:59] [Render thread/INFO]: OpenAL initialized on device Starship/Matisse HD Audio Controller Analog Stereo
+[12:50:59] [Render thread/INFO]: Sound engine started
+[12:50:59] [Render thread/INFO]: Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas
+[12:50:59] [Render thread/INFO]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
+[12:50:59] [Render thread/INFO]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[12:50:59] [Render thread/INFO]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[12:50:59] [Render thread/INFO]: Created: 2048x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[12:50:59] [Render thread/INFO]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[12:50:59] [Render thread/INFO]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[12:50:59] [Render thread/INFO]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[12:50:59] [Render thread/INFO]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[12:50:59] [Render thread/INFO]: Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[12:50:59] [Render thread/INFO]: Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
+[12:51:00] [Render thread/INFO]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[12:51:00] [Render thread/INFO]: Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[12:51:00] [Render thread/INFO]: Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas

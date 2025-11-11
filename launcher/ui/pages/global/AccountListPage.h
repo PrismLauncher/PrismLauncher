@@ -41,7 +41,6 @@
 
 #include "ui/pages/BasePage.h"
 
-#include "Application.h"
 #include "minecraft/auth/AccountList.h"
 
 namespace Ui {
@@ -59,14 +58,14 @@ class AccountListPage : public QMainWindow, public BasePage {
     QString displayName() const override { return tr("Accounts"); }
     QIcon icon() const override
     {
-        auto icon = APPLICATION->getThemedIcon("accounts");
+        auto icon = QIcon::fromTheme("accounts");
         if (icon.isNull()) {
-            icon = APPLICATION->getThemedIcon("noaccount");
+            icon = QIcon::fromTheme("noaccount");
         }
         return icon;
     }
     QString id() const override { return "accounts"; }
-    QString helpPage() const override { return "/getting-started/adding-an-account"; }
+    QString helpPage() const override { return "getting-started/adding-an-account"; }
     void retranslate() override;
 
    public slots:

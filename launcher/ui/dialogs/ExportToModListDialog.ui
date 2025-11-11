@@ -79,6 +79,9 @@
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
+             <property name="toolTip">
+                <string>This text supports the following placeholders:&#10;{name}     - Mod name&#10;{mod_id}   - Mod ID&#10;{url}      - Mod URL&#10;{version}  - Mod version&#10;{authors}  - Mod authors</string>
+             </property>
             </widget>
            </item>
           </layout>

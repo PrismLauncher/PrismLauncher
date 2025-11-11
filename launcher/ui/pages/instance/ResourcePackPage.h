@@ -37,7 +37,10 @@
 
 #pragma once
 
+#include <QPointer>
+
 #include "ExternalResourcesPage.h"
+#include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui_ExternalResourcesPage.h"
 
 #include "minecraft/mod/ResourcePackFolderModel.h"
@@ -47,8 +50,8 @@ class ResourcePackPage : public ExternalResourcesPage {
    public:
     explicit ResourcePackPage(MinecraftInstance* instance, std::shared_ptr<ResourcePackFolderModel> model, QWidget* parent = 0);
 
-    QString displayName() const override { return tr("Resource packs"); }
-    QIcon icon() const override { return APPLICATION->getThemedIcon("resourcepacks"); }
+    QString displayName() const override { return tr("Resource Packs"); }
+    QIcon icon() const override { return QIcon::fromTheme("resourcepacks"); }
     QString id() const override { return "resourcepacks"; }
     QString helpPage() const override { return "Resource-packs"; }
 
@@ -62,10 +65,12 @@ class ResourcePackPage : public ExternalResourcesPage {
 
    private slots:
     void downloadResourcePacks();
+    void downloadDialogFinished(int result);
     void updateResourcePacks();
     void deleteResourcePackMetadata();
     void changeResourcePackVersion();
 
    protected:
     std::shared_ptr<ResourcePackFolderModel> m_model;
+    QPointer<ResourceDownload::ResourceDownloadDialog> m_downloadDialog;
 };

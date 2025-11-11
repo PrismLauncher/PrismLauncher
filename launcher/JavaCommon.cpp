@@ -41,7 +41,9 @@
 
 bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget* parent)
 {
-    if (jvmargs.contains("-XX:PermSize=") || jvmargs.contains(QRegularExpression("-Xm[sx]")) || jvmargs.contains("-XX-MaxHeapSize") ||
+    static const QRegularExpression s_memRegex("-Xm[sx]");
+    static const QRegularExpression s_versionRegex("-version:.*");
+    if (jvmargs.contains("-XX:PermSize=") || jvmargs.contains(s_memRegex) || jvmargs.contains("-XX-MaxHeapSize") ||
         jvmargs.contains("-XX:InitialHeapSize")) {
         auto warnStr = QObject::tr(
             "You tried to manually set a JVM memory option (using \"-XX:PermSize\", \"-XX-MaxHeapSize\", \"-XX:InitialHeapSize\", \"-Xmx\" "
@@ -52,7 +54,7 @@ bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget* parent)
         return false;
     }
     // block lunacy with passing required version to the JVM
-    if (jvmargs.contains(QRegularExpression("-version:.*"))) {
+    if (jvmargs.contains(s_versionRegex)) {
         auto warnStr = QObject::tr(
             "You tried to pass required Java version argument to the JVM (using \"-version:xxx\"). This is not safe and will not be "
             "allowed.\n"
@@ -93,7 +95,7 @@ void JavaCommon::javaBinaryWasBad(QWidget* parent, const JavaChecker::Result& re
 {
     QString text;
     text += QObject::tr(
-        "The specified Java binary didn't work.<br />You should use the auto-detect feature, "
+        "The specified Java binary didn't work.<br />You should press 'Detect', "
         "or set the path to the Java executable.<br />");
     CustomMessageBox::selectable(parent, QObject::tr("Java test failure"), text, QMessageBox::Warning)->show();
 }

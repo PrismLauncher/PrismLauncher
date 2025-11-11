@@ -131,7 +131,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>27</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
@@ -215,6 +215,7 @@
     </property>
     <addaction name="actionClearMetadata"/>
     <addaction name="actionReportBug"/>
+    <addaction name="actionViewLog"/>
     <addaction name="actionAddToPATH"/>
     <addaction name="separator"/>
     <addaction name="actionMATRIX"/>
@@ -235,11 +236,10 @@
   </widget>
   <action name="actionMoreNews">
    <property name="icon">
-    <iconset theme="news">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="news"/>
    </property>
    <property name="text">
-    <string>More news...</string>
+    <string>More News...</string>
    </property>
    <property name="toolTip">
     <string>Open the development blog to read more news about %1.</string>
@@ -250,8 +250,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset theme="cat">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="cat"/>
    </property>
    <property name="text">
     <string>&amp;Meow</string>
@@ -286,8 +285,7 @@
   </action>
   <action name="actionAddInstance">
    <property name="icon">
-    <iconset theme="new">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="new"/>
    </property>
    <property name="text">
     <string>Add Instanc&amp;e...</string>
@@ -298,8 +296,7 @@
   </action>
   <action name="actionCheckUpdate">
    <property name="icon">
-    <iconset theme="checkupdate">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="checkupdate"/>
    </property>
    <property name="text">
     <string>&amp;Update...</string>
@@ -313,8 +310,7 @@
   </action>
   <action name="actionSettings">
    <property name="icon">
-    <iconset theme="settings">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="settings"/>
    </property>
    <property name="text">
     <string>Setti&amp;ngs...</string>
@@ -328,8 +324,7 @@
   </action>
   <action name="actionManageAccounts">
    <property name="icon">
-    <iconset theme="accounts">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="accounts"/>
    </property>
    <property name="text">
     <string>&amp;Manage Accounts...</string>
@@ -337,8 +332,7 @@
   </action>
   <action name="actionLaunchInstance">
    <property name="icon">
-    <iconset theme="launch">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="launch"/>
    </property>
    <property name="text">
     <string>&amp;Launch</string>
@@ -349,8 +343,7 @@
   </action>
   <action name="actionKillInstance">
    <property name="icon">
-    <iconset theme="status-bad">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="status-bad"/>
    </property>
    <property name="text">
     <string>&amp;Kill</string>
@@ -364,8 +357,7 @@
   </action>
   <action name="actionRenameInstance">
    <property name="icon">
-    <iconset theme="rename">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="rename"/>
    </property>
    <property name="text">
     <string>Rename</string>
@@ -376,8 +368,7 @@
   </action>
   <action name="actionChangeInstGroup">
    <property name="icon">
-    <iconset theme="tag">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="tag"/>
    </property>
    <property name="text">
     <string>&amp;Change Group...</string>
@@ -399,8 +390,7 @@
   </action>
   <action name="actionEditInstance">
    <property name="icon">
-    <iconset theme="settings">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="settings"/>
    </property>
    <property name="text">
     <string>&amp;Edit...</string>
@@ -414,8 +404,7 @@
   </action>
   <action name="actionViewSelectedInstFolder">
    <property name="icon">
-    <iconset theme="viewfolder">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="viewfolder"/>
    </property>
    <property name="text">
     <string>&amp;Folder</string>
@@ -426,8 +415,7 @@
   </action>
   <action name="actionDeleteInstance">
    <property name="icon">
-    <iconset theme="delete">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="delete"/>
    </property>
    <property name="text">
     <string>Dele&amp;te</string>
@@ -441,8 +429,7 @@
   </action>
   <action name="actionCopyInstance">
    <property name="icon">
-    <iconset theme="copy">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="copy"/>
    </property>
    <property name="text">
     <string>Cop&amp;y...</string>
@@ -456,8 +443,7 @@
   </action>
   <action name="actionExportInstance">
    <property name="icon">
-    <iconset theme="export">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="export"/>
    </property>
    <property name="text">
     <string>E&amp;xport...</string>
@@ -468,8 +454,7 @@
   </action>
   <action name="actionExportInstanceZip">
    <property name="icon">
-    <iconset theme="launcher">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="launcher"/>
    </property>
    <property name="text">
     <string>Prism Launcher (zip)</string>
@@ -477,8 +462,7 @@
   </action>
   <action name="actionExportInstanceMrPack">
    <property name="icon">
-    <iconset theme="modrinth">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="modrinth"/>
    </property>
    <property name="text">
     <string>Modrinth (mrpack)</string>
@@ -486,8 +470,7 @@
   </action>
   <action name="actionExportInstanceFlamePack">
    <property name="icon">
-    <iconset theme="flame">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="flame"/>
    </property>
    <property name="text">
     <string>CurseForge (zip)</string>
@@ -495,20 +478,18 @@
   </action>
   <action name="actionCreateInstanceShortcut">
    <property name="icon">
-    <iconset theme="shortcut">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="shortcut"/>
    </property>
    <property name="text">
     <string>Create Shortcut</string>
    </property>
    <property name="toolTip">
-    <string>Creates a shortcut on your desktop to launch the selected instance.</string>
+    <string>Creates a shortcut on a selected folder to launch the selected instance.</string>
    </property>
   </action>
   <action name="actionNoAccountsAdded">
    <property name="icon">
-    <iconset theme="noaccount">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="noaccount"/>
    </property>
    <property name="text">
     <string>No accounts added!</string>
@@ -519,8 +500,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset theme="noaccount">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="noaccount"/>
    </property>
    <property name="text">
     <string>No Default Account</string>
@@ -531,8 +511,7 @@
   </action>
   <action name="actionCloseWindow">
    <property name="icon">
-    <iconset theme="status-bad">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="status-bad"/>
    </property>
    <property name="text">
     <string>Close &amp;Window</string>
@@ -546,8 +525,7 @@
   </action>
   <action name="actionViewInstanceFolder">
    <property name="icon">
-    <iconset theme="viewfolder">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="viewfolder"/>
    </property>
    <property name="text">
     <string>&amp;Instances</string>
@@ -558,8 +536,7 @@
   </action>
   <action name="actionViewLauncherRootFolder">
    <property name="icon">
-    <iconset theme="viewfolder">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="viewfolder"/>
    </property>
    <property name="text">
     <string>Launcher &amp;Root</string>
@@ -570,8 +547,7 @@
   </action>
   <action name="actionViewCentralModsFolder">
    <property name="icon">
-    <iconset theme="centralmods">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="centralmods"/>
    </property>
    <property name="text">
     <string>&amp;Central Mods</string>
@@ -582,8 +558,7 @@
   </action>
   <action name="actionViewSkinsFolder">
    <property name="icon">
-    <iconset theme="viewfolder">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="viewfolder"/>
    </property>
    <property name="text">
     <string>&amp;Skins</string>
@@ -594,8 +569,7 @@
   </action>
   <action name="actionViewIconsFolder">
    <property name="icon">
-    <iconset theme="viewfolder">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="viewfolder"/>
    </property>
    <property name="text">
     <string>Instance Icons</string>
@@ -606,8 +580,7 @@
   </action>
   <action name="actionViewLogsFolder">
    <property name="icon">
-    <iconset theme="viewfolder">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="viewfolder"/>
    </property>
    <property name="text">
     <string>Logs</string>
@@ -623,8 +596,7 @@
   </action>
   <action name="actionReportBug">
    <property name="icon">
-    <iconset theme="bug">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="bug"/>
    </property>
    <property name="text">
     <string>Report a Bug or Suggest a Feature</string>
@@ -635,8 +607,7 @@
   </action>
   <action name="actionDISCORD">
    <property name="icon">
-    <iconset theme="discord">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="discord"/>
    </property>
    <property name="text">
     <string>&amp;Discord Guild</string>
@@ -647,8 +618,7 @@
   </action>
   <action name="actionMATRIX">
    <property name="icon">
-    <iconset theme="matrix">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="matrix"/>
    </property>
    <property name="text">
     <string>&amp;Matrix Space</string>
@@ -659,8 +629,7 @@
   </action>
   <action name="actionREDDIT">
    <property name="icon">
-    <iconset theme="reddit-alien">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="reddit-alien"/>
    </property>
    <property name="text">
     <string>Sub&amp;reddit</string>
@@ -671,8 +640,7 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset theme="about">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="about"/>
    </property>
    <property name="text">
     <string>&amp;About %1</string>
@@ -686,8 +654,7 @@
   </action>
   <action name="actionClearMetadata">
    <property name="icon">
-    <iconset theme="refresh">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="refresh"/>
    </property>
    <property name="text">
     <string>&amp;Clear Metadata Cache</string>
@@ -696,10 +663,21 @@
     <string>Clear cached metadata</string>
    </property>
   </action>
+  <action name="actionViewLog">
+   <property name="icon">
+    <iconset theme="log">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>View logs</string>
+   </property>
+   <property name="toolTip">
+    <string>View current and previous launcher logs</string>
+   </property>
+  </action>
   <action name="actionAddToPATH">
    <property name="icon">
-    <iconset theme="custom-commands">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="custom-commands"/>
    </property>
    <property name="text">
     <string>Install to &amp;PATH</string>
@@ -710,8 +688,7 @@
   </action>
   <action name="actionFoldersButton">
    <property name="icon">
-    <iconset theme="viewfolder">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="viewfolder"/>
    </property>
    <property name="text">
     <string>Folders</string>
@@ -722,8 +699,7 @@
   </action>
   <action name="actionHelpButton">
    <property name="icon">
-    <iconset theme="help">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="help"/>
    </property>
    <property name="text">
     <string>Help</string>
@@ -734,8 +710,7 @@
   </action>
   <action name="actionAccountsButton">
    <property name="icon">
-    <iconset theme="noaccount">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="noaccount"/>
    </property>
    <property name="text">
     <string>Accounts</string>
@@ -743,8 +718,7 @@
   </action>
   <action name="actionOpenWiki">
    <property name="icon">
-    <iconset theme="help">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="help"/>
    </property>
    <property name="text">
     <string>%1 &amp;Help</string>
@@ -755,8 +729,7 @@
   </action>
   <action name="actionViewWidgetThemeFolder">
    <property name="icon">
-    <iconset theme="viewfolder">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="viewfolder"/>
    </property>
    <property name="text">
     <string>&amp;Widget Themes</string>
@@ -767,8 +740,7 @@
   </action>
   <action name="actionViewIconThemeFolder">
    <property name="icon">
-    <iconset theme="viewfolder">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="viewfolder"/>
    </property>
    <property name="text">
     <string>I&amp;con Theme</string>
@@ -779,8 +751,7 @@
   </action>
   <action name="actionViewCatPackFolder">
    <property name="icon">
-    <iconset theme="viewfolder">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="viewfolder"/>
    </property>
    <property name="text">
     <string>Cat Packs</string>
@@ -791,8 +762,7 @@
   </action>
   <action name="actionViewJavaFolder">
    <property name="icon">
-    <iconset theme="viewfolder">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="viewfolder"/>
    </property>
    <property name="text">
     <string>Java</string>

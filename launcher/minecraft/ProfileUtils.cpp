@@ -41,7 +41,6 @@
 
 #include <QJsonArray>
 #include <QJsonDocument>
-#include <QRegularExpression>
 #include <QSaveFile>
 
 namespace ProfileUtils {

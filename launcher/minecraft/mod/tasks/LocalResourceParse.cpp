@@ -25,54 +25,41 @@
 
 #include "LocalDataPackParseTask.h"
 #include "LocalModParseTask.h"
-#include "LocalResourcePackParseTask.h"
 #include "LocalShaderPackParseTask.h"
 #include "LocalTexturePackParseTask.h"
 #include "LocalWorldSaveParseTask.h"
-
-static const QMap<PackedResourceType, QString> s_packed_type_names = { { PackedResourceType::ResourcePack, QObject::tr("resource pack") },
-                                                                       { PackedResourceType::TexturePack, QObject::tr("texture pack") },
-                                                                       { PackedResourceType::DataPack, QObject::tr("data pack") },
-                                                                       { PackedResourceType::ShaderPack, QObject::tr("shader pack") },
-                                                                       { PackedResourceType::WorldSave, QObject::tr("world save") },
-                                                                       { PackedResourceType::Mod, QObject::tr("mod") },
-                                                                       { PackedResourceType::UNKNOWN, QObject::tr("unknown") } };
+#include "modplatform/ResourceType.h"
 
 namespace ResourceUtils {
-PackedResourceType identify(QFileInfo file)
+ModPlatform::ResourceType identify(QFileInfo file)
 {
     if (file.exists() && file.isFile()) {
         if (ModUtils::validate(file)) {
             // mods can contain resource and data packs so they must be tested first
             qDebug() << file.fileName() << "is a mod";
-            return PackedResourceType::Mod;
-        } else if (ResourcePackUtils::validate(file)) {
+            return ModPlatform::ResourceType::Mod;
+        } else if (DataPackUtils::validateResourcePack(file)) {
             qDebug() << file.fileName() << "is a resource pack";
-            return PackedResourceType::ResourcePack;
+            return ModPlatform::ResourceType::ResourcePack;
         } else if (TexturePackUtils::validate(file)) {
             qDebug() << file.fileName() << "is a pre 1.6 texture pack";
-            return PackedResourceType::TexturePack;
+            return ModPlatform::ResourceType::TexturePack;
         } else if (DataPackUtils::validate(file)) {
             qDebug() << file.fileName() << "is a data pack";
-            return PackedResourceType::DataPack;
+            return ModPlatform::ResourceType::DataPack;
         } else if (WorldSaveUtils::validate(file)) {
             qDebug() << file.fileName() << "is a world save";
-            return PackedResourceType::WorldSave;
+            return ModPlatform::ResourceType::World;
         } else if (ShaderPackUtils::validate(file)) {
             qDebug() << file.fileName() << "is a shader pack";
-            return PackedResourceType::ShaderPack;
+            return ModPlatform::ResourceType::ShaderPack;
         } else {
             qDebug() << "Can't Identify" << file.fileName();
         }
     } else {
         qDebug() << "Can't find" << file.absolutePath();
     }
-    return PackedResourceType::UNKNOWN;
-}
-
-QString getPackedTypeName(PackedResourceType type)
-{
-    return s_packed_type_names.constFind(type).value();
+    return ModPlatform::ResourceType::Unknown;
 }
 
 }  // namespace ResourceUtils

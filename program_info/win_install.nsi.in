@@ -398,6 +398,7 @@ Section "@Launcher_DisplayName@"
   WriteRegStr HKCU Software\Classes\prismlauncher\shell\open\command "" '"$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "%1"'
 
   ; Write the uninstall keys for Windows
+  ; https://learn.microsoft.com/en-us/windows/win32/msi/uninstall-registry-key
   ${GetParameters} $R0
   ${GetOptions} $R0 "/NoUninstaller" $R1
   ${If} ${Errors}

@@ -21,6 +21,8 @@ set(CORE_SOURCES
     BaseVersion.h
     BaseInstance.h
     BaseInstance.cpp
+    InstanceDirUpdate.h
+    InstanceDirUpdate.cpp
     NullInstance.h
     MMCZip.h
     MMCZip.cpp
@@ -54,7 +56,6 @@ set(CORE_SOURCES
 
     # String filters
     Filter.h
-    Filter.cpp
 
     # JSON parsing helpers
     Json.h
@@ -97,7 +98,7 @@ set(CORE_SOURCES
     MTPixmapCache.h
 )
 if (UNIX AND NOT CYGWIN AND NOT APPLE)
-set(CORE_SOURCES
+    set(CORE_SOURCES
     ${CORE_SOURCES}
 
     # MangoHud
@@ -105,15 +106,6 @@ set(CORE_SOURCES
     MangoHud.cpp
     )
 endif()
-
-set(PATHMATCHER_SOURCES
-    # Path matchers
-    pathmatcher/FSTreeMatcher.h
-    pathmatcher/IPathMatcher.h
-    pathmatcher/MultiMatcher.h
-    pathmatcher/RegexpMatcher.h
-    pathmatcher/SimplePrefixMatcher.h
-)
 
 set(NET_SOURCES
     # network stuffs
@@ -173,6 +165,8 @@ set(LAUNCH_SOURCES
     launch/LogModel.h
     launch/TaskStepWrapper.cpp
     launch/TaskStepWrapper.h
+    logs/LogParser.cpp
+    logs/LogParser.h
 )
 
 # Old update system
@@ -248,9 +242,6 @@ set(MINECRAFT_SOURCES
     minecraft/auth/steps/XboxUserStep.cpp
     minecraft/auth/steps/XboxUserStep.h
 
-    minecraft/gameoptions/GameOptions.h
-    minecraft/gameoptions/GameOptions.cpp
-
     minecraft/update/AssetUpdateTask.h
     minecraft/update/AssetUpdateTask.cpp
     minecraft/update/FMLLibrariesTask.cpp
@@ -306,6 +297,8 @@ set(MINECRAFT_SOURCES
     minecraft/ParseUtils.h
     minecraft/ProfileUtils.cpp
     minecraft/ProfileUtils.h
+    minecraft/ShortcutUtils.cpp
+    minecraft/ShortcutUtils.h
     minecraft/Library.cpp
     minecraft/Library.h
     minecraft/MojangDownloadInfo.h
@@ -332,6 +325,8 @@ set(MINECRAFT_SOURCES
     minecraft/mod/ResourceFolderModel.cpp
     minecraft/mod/DataPack.h
     minecraft/mod/DataPack.cpp
+    minecraft/mod/DataPackFolderModel.h
+    minecraft/mod/DataPackFolderModel.cpp
     minecraft/mod/ResourcePack.h
     minecraft/mod/ResourcePack.cpp
     minecraft/mod/ResourcePackFolderModel.h
@@ -353,8 +348,6 @@ set(MINECRAFT_SOURCES
     minecraft/mod/tasks/LocalResourceUpdateTask.cpp
     minecraft/mod/tasks/LocalDataPackParseTask.h
     minecraft/mod/tasks/LocalDataPackParseTask.cpp
-    minecraft/mod/tasks/LocalResourcePackParseTask.h
-    minecraft/mod/tasks/LocalResourcePackParseTask.cpp
     minecraft/mod/tasks/LocalTexturePackParseTask.h
     minecraft/mod/tasks/LocalTexturePackParseTask.cpp
     minecraft/mod/tasks/LocalShaderPackParseTask.h
@@ -488,8 +481,11 @@ set(META_SOURCES
 set(API_SOURCES
     modplatform/ModIndex.h
     modplatform/ModIndex.cpp
+    modplatform/ResourceType.h
+    modplatform/ResourceType.cpp
 
     modplatform/ResourceAPI.h
+    modplatform/ResourceAPI.cpp
 
     modplatform/EnsureMetadataTask.h
     modplatform/EnsureMetadataTask.cpp
@@ -500,8 +496,6 @@ set(API_SOURCES
     modplatform/flame/FlameAPI.cpp
     modplatform/modrinth/ModrinthAPI.h
     modplatform/modrinth/ModrinthAPI.cpp
-    modplatform/helpers/NetworkResourceAPI.h
-    modplatform/helpers/NetworkResourceAPI.cpp
     modplatform/helpers/HashUtils.h
     modplatform/helpers/HashUtils.cpp
     modplatform/helpers/OverrideUtils.h
@@ -529,8 +523,6 @@ set(FTB_SOURCES
 
 set(FLAME_SOURCES
     # Flame
-    modplatform/flame/FlamePackIndex.cpp
-    modplatform/flame/FlamePackIndex.h
     modplatform/flame/FlameModIndex.cpp
     modplatform/flame/FlameModIndex.h
     modplatform/flame/PackManifest.h
@@ -548,8 +540,6 @@ set(FLAME_SOURCES
 set(MODRINTH_SOURCES
     modplatform/modrinth/ModrinthPackIndex.cpp
     modplatform/modrinth/ModrinthPackIndex.h
-    modplatform/modrinth/ModrinthPackManifest.cpp
-    modplatform/modrinth/ModrinthPackManifest.h
     modplatform/modrinth/ModrinthCheckUpdate.cpp
     modplatform/modrinth/ModrinthCheckUpdate.h
     modplatform/modrinth/ModrinthInstanceCreationTask.cpp
@@ -587,8 +577,8 @@ set(ATLAUNCHER_SOURCES
 )
 
 set(LINKEXE_SOURCES
-    WindowsConsole.cpp
-    WindowsConsole.h
+    console/WindowsConsole.h
+    console/WindowsConsole.cpp
 
     filelink/FileLink.h
     filelink/FileLink.cpp
@@ -656,6 +646,14 @@ set(PRISMUPDATER_SOURCES
     ui/widgets/SubTaskProgressBar.cpp
 
 )
+
+if(WIN32)
+    set(PRISMUPDATER_SOURCES
+        console/WindowsConsole.h
+        console/WindowsConsole.cpp
+        ${PRISMUPDATER_SOURCES}
+    )
+endif()
 
 ######## Logging categories ########
 
@@ -744,7 +742,6 @@ endif()
 
 set(LOGIC_SOURCES
     ${CORE_SOURCES}
-    ${PATHMATCHER_SOURCES}
     ${NET_SOURCES}
     ${LAUNCH_SOURCES}
     ${UPDATE_SOURCES}
@@ -784,6 +781,9 @@ SET(LAUNCHER_SOURCES
     SysInfo.h
     SysInfo.cpp
 
+    # console utils
+    console/Console.h
+
     # GUI - general utilities
     DesktopServices.h
     DesktopServices.cpp
@@ -810,13 +810,18 @@ SET(LAUNCHER_SOURCES
     resources/flat/flat.qrc
     resources/flat_white/flat_white.qrc
     resources/documents/documents.qrc
-    ../${Launcher_Branding_LogoQRC}
+    resources/shaders/shaders.qrc
+    "${CMAKE_CURRENT_BINARY_DIR}/../${Launcher_Branding_LogoQRC}"
 
     # Icons
     icons/MMCIcon.h
     icons/MMCIcon.cpp
     icons/IconList.h
     icons/IconList.cpp
+
+    # log utils
+    logs/AnonymizeLog.cpp
+    logs/AnonymizeLog.h
 
     # GUI - windows
     ui/GuiUtil.h
@@ -825,6 +830,8 @@ SET(LAUNCHER_SOURCES
     ui/MainWindow.cpp
     ui/InstanceWindow.h
     ui/InstanceWindow.cpp
+    ui/ViewLogWindow.h
+    ui/ViewLogWindow.cpp
 
     # FIXME: maybe find a better home for this.
     FileIgnoreProxy.cpp
@@ -842,7 +849,6 @@ SET(LAUNCHER_SOURCES
     ui/setupwizard/LanguageWizardPage.h
     ui/setupwizard/PasteWizardPage.cpp
     ui/setupwizard/PasteWizardPage.h
-    ui/setupwizard/ThemeWizardPage.cpp
     ui/setupwizard/ThemeWizardPage.h
     ui/setupwizard/AutoJavaWizardPage.cpp
     ui/setupwizard/AutoJavaWizardPage.h
@@ -870,6 +876,8 @@ SET(LAUNCHER_SOURCES
     ui/themes/ThemeManager.h
     ui/themes/CatPack.cpp
     ui/themes/CatPack.h
+    ui/themes/CatPainter.cpp
+    ui/themes/CatPainter.h
 
     # Processes
     LaunchController.h
@@ -890,12 +898,12 @@ SET(LAUNCHER_SOURCES
     # GUI - instance pages
     ui/pages/instance/ExternalResourcesPage.cpp
     ui/pages/instance/ExternalResourcesPage.h
-    ui/pages/instance/GameOptionsPage.cpp
-    ui/pages/instance/GameOptionsPage.h
     ui/pages/instance/VersionPage.cpp
     ui/pages/instance/VersionPage.h
     ui/pages/instance/ManagedPackPage.cpp
     ui/pages/instance/ManagedPackPage.h
+    ui/pages/instance/DataPackPage.h
+    ui/pages/instance/DataPackPage.cpp
     ui/pages/instance/TexturePackPage.h
     ui/pages/instance/TexturePackPage.cpp
     ui/pages/instance/ResourcePackPage.h
@@ -908,7 +916,6 @@ SET(LAUNCHER_SOURCES
     ui/pages/instance/NotesPage.h
     ui/pages/instance/LogPage.cpp
     ui/pages/instance/LogPage.h
-    ui/pages/instance/InstanceSettingsPage.cpp
     ui/pages/instance/InstanceSettingsPage.h
     ui/pages/instance/ScreenshotsPage.cpp
     ui/pages/instance/ScreenshotsPage.h
@@ -918,24 +925,26 @@ SET(LAUNCHER_SOURCES
     ui/pages/instance/ServersPage.h
     ui/pages/instance/WorldListPage.cpp
     ui/pages/instance/WorldListPage.h
+    ui/pages/instance/McClient.cpp
+    ui/pages/instance/McClient.h
+    ui/pages/instance/McResolver.cpp
+    ui/pages/instance/McResolver.h
+    ui/pages/instance/ServerPingTask.cpp
+    ui/pages/instance/ServerPingTask.h
 
     # GUI - global settings pages
     ui/pages/global/AccountListPage.cpp
     ui/pages/global/AccountListPage.h
-    ui/pages/global/CustomCommandsPage.cpp
-    ui/pages/global/CustomCommandsPage.h
-    ui/pages/global/EnvironmentVariablesPage.cpp
-    ui/pages/global/EnvironmentVariablesPage.h
     ui/pages/global/ExternalToolsPage.cpp
     ui/pages/global/ExternalToolsPage.h
     ui/pages/global/JavaPage.cpp
     ui/pages/global/JavaPage.h
     ui/pages/global/LanguagePage.cpp
     ui/pages/global/LanguagePage.h
-    ui/pages/global/MinecraftPage.cpp
     ui/pages/global/MinecraftPage.h
     ui/pages/global/LauncherPage.cpp
     ui/pages/global/LauncherPage.h
+    ui/pages/global/AppearancePage.h
     ui/pages/global/ProxyPage.cpp
     ui/pages/global/ProxyPage.h
     ui/pages/global/APIPage.cpp
@@ -965,6 +974,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/ShaderPackPage.cpp
     ui/pages/modplatform/ShaderPackModel.cpp
 
+    ui/pages/modplatform/DataPackPage.cpp
+    ui/pages/modplatform/DataPackModel.cpp
 
     ui/pages/modplatform/ModpackProviderBasePage.h
 
@@ -1014,8 +1025,6 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/OptionalModDialog.cpp
     ui/pages/modplatform/OptionalModDialog.h
 
-    ui/pages/modplatform/modrinth/ModrinthResourceModels.cpp
-    ui/pages/modplatform/modrinth/ModrinthResourceModels.h
     ui/pages/modplatform/modrinth/ModrinthResourcePages.cpp
     ui/pages/modplatform/modrinth/ModrinthResourcePages.h
 
@@ -1028,10 +1037,10 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ProfileSetupDialog.h
     ui/dialogs/CopyInstanceDialog.cpp
     ui/dialogs/CopyInstanceDialog.h
+    ui/dialogs/CreateShortcutDialog.cpp
+    ui/dialogs/CreateShortcutDialog.h
     ui/dialogs/CustomMessageBox.cpp
     ui/dialogs/CustomMessageBox.h
-    ui/dialogs/EditAccountDialog.cpp
-    ui/dialogs/EditAccountDialog.h
     ui/dialogs/ExportInstanceDialog.cpp
     ui/dialogs/ExportInstanceDialog.h
     ui/dialogs/ExportPackDialog.cpp
@@ -1076,6 +1085,13 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/skins/SkinManageDialog.cpp
     ui/dialogs/skins/SkinManageDialog.h
 
+    ui/dialogs/skins/draw/SkinOpenGLWindow.h
+    ui/dialogs/skins/draw/SkinOpenGLWindow.cpp
+    ui/dialogs/skins/draw/Scene.h
+    ui/dialogs/skins/draw/Scene.cpp
+    ui/dialogs/skins/draw/BoxGeometry.h
+    ui/dialogs/skins/draw/BoxGeometry.cpp
+
     # GUI - widgets
     ui/widgets/CheckComboBox.cpp
     ui/widgets/CheckComboBox.h
@@ -1085,22 +1101,16 @@ SET(LAUNCHER_SOURCES
     ui/widgets/CustomCommands.h
     ui/widgets/EnvironmentVariables.cpp
     ui/widgets/EnvironmentVariables.h
-    ui/widgets/DropLabel.cpp
-    ui/widgets/DropLabel.h
     ui/widgets/DropList.cpp
     ui/widgets/DropList.h
-    ui/widgets/FocusLineEdit.cpp
-    ui/widgets/FocusLineEdit.h
     ui/widgets/IconLabel.cpp
     ui/widgets/IconLabel.h
-    ui/widgets/JavaSettingsWidget.cpp
-    ui/widgets/JavaSettingsWidget.h
+    ui/widgets/JavaWizardWidget.cpp
+    ui/widgets/JavaWizardWidget.h
     ui/widgets/LabeledToolButton.cpp
     ui/widgets/LabeledToolButton.h
     ui/widgets/LanguageSelectionWidget.cpp
     ui/widgets/LanguageSelectionWidget.h
-    ui/widgets/LineSeparator.cpp
-    ui/widgets/LineSeparator.h
     ui/widgets/LogView.cpp
     ui/widgets/LogView.h
     ui/widgets/InfoFrame.cpp
@@ -1128,8 +1138,12 @@ SET(LAUNCHER_SOURCES
     ui/widgets/ProgressWidget.cpp
     ui/widgets/WideBar.h
     ui/widgets/WideBar.cpp
-    ui/widgets/ThemeCustomizationWidget.h
-    ui/widgets/ThemeCustomizationWidget.cpp
+    ui/widgets/AppearanceWidget.h
+    ui/widgets/AppearanceWidget.cpp
+    ui/widgets/MinecraftSettingsWidget.h
+    ui/widgets/MinecraftSettingsWidget.cpp
+    ui/widgets/JavaSettingsWidget.h
+    ui/widgets/JavaSettingsWidget.cpp
 
     # GUI - instance group view
     ui/instanceview/InstanceProxyModel.cpp
@@ -1145,8 +1159,15 @@ SET(LAUNCHER_SOURCES
     ui/instanceview/VisualGroup.h
 )
 
+if (APPLE)
+    set(LAUNCHER_SOURCES
+        ${LAUNCHER_SOURCES}
+        ui/themes/ThemeManager.mm
+    )
+endif()
+
 if (NOT Apple)
-set(LAUNCHER_SOURCES
+    set(LAUNCHER_SOURCES
     ${LAUNCHER_SOURCES}
 
     ui/dialogs/UpdateAvailableDialog.h
@@ -1178,8 +1199,8 @@ endif()
 
 if(WIN32)
     set(LAUNCHER_SOURCES
-        WindowsConsole.cpp
-        WindowsConsole.h
+        console/WindowsConsole.h
+        console/WindowsConsole.cpp
         ${LAUNCHER_SOURCES}
     )
 endif()
@@ -1189,21 +1210,17 @@ qt_wrap_ui(LAUNCHER_UI
     ui/setupwizard/PasteWizardPage.ui
     ui/setupwizard/AutoJavaWizardPage.ui
     ui/setupwizard/LoginWizardPage.ui
-    ui/setupwizard/ThemeWizardPage.ui
     ui/pages/global/AccountListPage.ui
     ui/pages/global/JavaPage.ui
     ui/pages/global/LauncherPage.ui
     ui/pages/global/APIPage.ui
     ui/pages/global/ProxyPage.ui
-    ui/pages/global/MinecraftPage.ui
     ui/pages/global/ExternalToolsPage.ui
     ui/pages/instance/ExternalResourcesPage.ui
     ui/pages/instance/NotesPage.ui
     ui/pages/instance/LogPage.ui
     ui/pages/instance/ServersPage.ui
-    ui/pages/instance/GameOptionsPage.ui
     ui/pages/instance/OtherLogsPage.ui
-    ui/pages/instance/InstanceSettingsPage.ui
     ui/pages/instance/VersionPage.ui
     ui/pages/instance/ManagedPackPage.ui
     ui/pages/instance/WorldListPage.ui
@@ -1219,14 +1236,16 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/OptionalModDialog.ui
     ui/pages/modplatform/modrinth/ModrinthPage.ui
     ui/pages/modplatform/technic/TechnicPage.ui
-    ui/widgets/InstanceCardWidget.ui
     ui/widgets/CustomCommands.ui
     ui/widgets/EnvironmentVariables.ui
     ui/widgets/InfoFrame.ui
     ui/widgets/ModFilterWidget.ui
     ui/widgets/SubTaskProgressBar.ui
-    ui/widgets/ThemeCustomizationWidget.ui
+    ui/widgets/AppearanceWidget.ui
+    ui/widgets/MinecraftSettingsWidget.ui
+    ui/widgets/JavaSettingsWidget.ui
     ui/dialogs/CopyInstanceDialog.ui
+    ui/dialogs/CreateShortcutDialog.ui
     ui/dialogs/ProfileSetupDialog.ui
     ui/dialogs/ProgressDialog.ui
     ui/dialogs/NewInstanceDialog.ui
@@ -1241,12 +1260,10 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/MSALoginDialog.ui
     ui/dialogs/OfflineLoginDialog.ui
     ui/dialogs/AboutDialog.ui
-    ui/dialogs/EditAccountDialog.ui
     ui/dialogs/ReviewMessageBox.ui
     ui/dialogs/ScrollMessageBox.ui
     ui/dialogs/BlockedModsDialog.ui
     ui/dialogs/ChooseProviderDialog.ui
-
     ui/dialogs/skins/SkinManageDialog.ui
 )
 
@@ -1271,7 +1288,8 @@ qt_add_resources(LAUNCHER_RESOURCES
     resources/iOS/iOS.qrc
     resources/flat/flat.qrc
     resources/documents/documents.qrc
-    ../${Launcher_Branding_LogoQRC}
+    resources/shaders/shaders.qrc
+    "${CMAKE_CURRENT_BINARY_DIR}/../${Launcher_Branding_LogoQRC}"
 )
 
 qt_wrap_ui(PRISMUPDATER_UI
@@ -1300,12 +1318,16 @@ target_link_libraries(Launcher_logic
     Launcher_murmur2
     nbt++
     ${ZLIB_LIBRARIES}
-    tomlplusplus::tomlplusplus
     qdcss
     BuildConfig
     Qt${QT_VERSION_MAJOR}::Widgets
-    ghcFilesystem::ghc_filesystem
+    qrcodegenerator
 )
+if(TARGET PkgConfig::tomlplusplus)
+    target_link_libraries(Launcher_logic PkgConfig::tomlplusplus)
+else()
+    target_link_libraries(Launcher_logic tomlplusplus::tomlplusplus)
+endif()
 
 if (UNIX AND NOT CYGWIN AND NOT APPLE)
     target_link_libraries(Launcher_logic
@@ -1321,6 +1343,7 @@ target_link_libraries(Launcher_logic
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::NetworkAuth
+    Qt${QT_VERSION_MAJOR}::OpenGL
     ${Launcher_QT_DBUS}
     ${Launcher_QT_LIBS}
 )
@@ -1339,11 +1362,11 @@ if(APPLE)
     set(CMAKE_INSTALL_RPATH "@loader_path/../Frameworks/")
 
     if(Launcher_ENABLE_UPDATER)
-      file(DOWNLOAD ${MACOSX_SPARKLE_DOWNLOAD_URL} ${CMAKE_BINARY_DIR}/Sparkle.tar.xz EXPECTED_HASH SHA256=${MACOSX_SPARKLE_SHA256})
-      file(ARCHIVE_EXTRACT INPUT ${CMAKE_BINARY_DIR}/Sparkle.tar.xz DESTINATION ${CMAKE_BINARY_DIR}/frameworks/Sparkle)
+        file(DOWNLOAD ${MACOSX_SPARKLE_DOWNLOAD_URL} ${CMAKE_BINARY_DIR}/Sparkle.tar.xz EXPECTED_HASH SHA256=${MACOSX_SPARKLE_SHA256})
+        file(ARCHIVE_EXTRACT INPUT ${CMAKE_BINARY_DIR}/Sparkle.tar.xz DESTINATION ${CMAKE_BINARY_DIR}/frameworks/Sparkle)
 
-      find_library(SPARKLE_FRAMEWORK Sparkle "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
-      add_compile_definitions(SPARKLE_ENABLED)
+        find_library(SPARKLE_FRAMEWORK Sparkle "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
+        add_compile_definitions(SPARKLE_ENABLED)
     endif()
 
     target_link_libraries(Launcher_logic
@@ -1355,10 +1378,11 @@ if(APPLE)
     target_compile_options(Launcher_logic PRIVATE -fobjc-arc)
 
     if(Launcher_ENABLE_UPDATER)
-      target_link_libraries(Launcher_logic ${SPARKLE_FRAMEWORK})
-      # temporary (surely) since this file came before ARC was enabled
-      set_source_files_properties(updater/MacSparkleUpdater.mm PROPERTIES COMPILE_OPTIONS -fno-objc-arc)
+        target_link_libraries(Launcher_logic ${SPARKLE_FRAMEWORK})
+        # temporary (surely) since this file came before ARC was enabled
+        set_source_files_properties(updater/MacSparkleUpdater.mm PROPERTIES COMPILE_OPTIONS -fno-objc-arc)
     endif()
+    set_source_files_properties(ui/themes/ThemeManager.mm PROPERTIES COMPILE_OPTIONS -fno-objc-arc)
 
     if(Launcher_ENABLE_SANDBOX)
         set(ENABLE_SPARKLE_INSTALLER_LAUNCHER_SERVICE "true")
@@ -1389,11 +1413,17 @@ if(DEFINED Launcher_APP_BINARY_DEFS)
 endif()
 
 install(TARGETS ${Launcher_Name}
+    RUNTIME_DEPENDENCY_SET LAUNCHER_DEPENDENCY_SET
     BUNDLE DESTINATION "." COMPONENT Runtime
     LIBRARY DESTINATION ${LIBRARY_DEST_DIR} COMPONENT Runtime
     RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
     FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
 )
+
+# Deploy PDBs
+if(WIN32 AND (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo"))
+    install(FILES $<TARGET_PDB_FILE:${Launcher_Name}> DESTINATION ${BINARY_DEST_DIR})
+endif()
 
 if(UNIX AND APPLE AND Launcher_ENABLE_SANDBOX)
     install(TARGETS dlopen_hook
@@ -1416,7 +1446,6 @@ if(Launcher_BUILD_UPDATER)
         ${ZLIB_LIBRARIES}
         systeminfo
         BuildConfig
-        ghcFilesystem::ghc_filesystem
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Network
@@ -1441,6 +1470,11 @@ if(Launcher_BUILD_UPDATER)
         RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
         FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
     )
+
+    # Deploy PDBs
+    if(WIN32 AND (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo"))
+        install(FILES $<TARGET_PDB_FILE:${Launcher_Name}_updater> DESTINATION ${BINARY_DEST_DIR})
+    endif()
 endif()
 
 if(WIN32 OR (DEFINED Launcher_BUILD_FILELINKER AND Launcher_BUILD_FILELINKER))
@@ -1455,7 +1489,6 @@ if(WIN32 OR (DEFINED Launcher_BUILD_FILELINKER AND Launcher_BUILD_FILELINKER))
     target_link_libraries(filelink_logic
         systeminfo
         BuildConfig
-        ghcFilesystem::ghc_filesystem
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Network
@@ -1466,6 +1499,12 @@ if(WIN32 OR (DEFINED Launcher_BUILD_FILELINKER AND Launcher_BUILD_FILELINKER))
     add_executable("${Launcher_Name}_filelink" WIN32 filelink/filelink_main.cpp)
 
     target_sources("${Launcher_Name}_filelink" PRIVATE filelink/filelink.exe.manifest)
+    # HACK: Fix manifest issues with Ninja in release mode (and only release mode) and MSVC
+    # I have no idea why this works or why it's needed. UPDATE THIS IF YOU EDIT THE MANIFEST!!! -@getchoo
+    # Thank you 2018 CMake mailing list thread https://cmake.cmake.narkive.com/LnotZXus/conflicting-msvc-manifests
+    if(MSVC)
+        set_property(TARGET "${Launcher_Name}_filelink" PROPERTY LINK_FLAGS "/MANIFESTUAC:level='requireAdministrator'")
+    endif()
 
     target_link_libraries("${Launcher_Name}_filelink" filelink_logic)
 
@@ -1482,6 +1521,11 @@ if(WIN32 OR (DEFINED Launcher_BUILD_FILELINKER AND Launcher_BUILD_FILELINKER))
         RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
         FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
     )
+
+    # Deploy PDBs
+    if(WIN32 AND (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo"))
+        install(FILES $<TARGET_PDB_FILE:${Launcher_Name}_filelink> DESTINATION ${BINARY_DEST_DIR})
+    endif()
 endif()
 
 if (UNIX AND APPLE AND Launcher_ENABLE_UPDATER)
@@ -1492,186 +1536,64 @@ if (UNIX AND APPLE AND Launcher_ENABLE_UPDATER)
 endif()
 
 #### The bundle mess! ####
-# Bundle utilities are used to complete the portable packages - they add all the libraries that would otherwise be missing on the target system.
+# Bundle utilities are used to complete packages for different platforms - they add all the libraries that would otherwise be missing on the target system.
 # NOTE: it seems that this absolutely has to be here, and nowhere else.
-if(INSTALL_BUNDLE STREQUAL "full")
+if(WIN32 OR (UNIX AND APPLE))
+    if(WIN32)
+        set(QT_DEPLOY_TOOL_OPTIONS "--no-opengl-sw --no-quick-import --no-system-d3d-compiler --no-system-dxc-compiler --skip-plugin-types generic,networkinformation")
+    endif()
+
+    qt_generate_deploy_script(
+        TARGET ${Launcher_Name}
+        OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
+        CONTENT "
+        qt_deploy_runtime_dependencies(
+            EXECUTABLE ${BINARY_DEST_DIR}/$<TARGET_FILE_NAME:${Launcher_Name}>
+            BIN_DIR ${BINARY_DEST_DIR}
+            LIBEXEC_DIR ${LIBRARY_DEST_DIR}
+            LIB_DIR ${LIBRARY_DEST_DIR}
+            PLUGINS_DIR ${PLUGIN_DEST_DIR}
+            NO_OVERWRITE
+            NO_TRANSLATIONS
+            NO_COMPILER_RUNTIME
+            DEPLOY_TOOL_OPTIONS ${QT_DEPLOY_TOOL_OPTIONS}
+        )"
+    )
+
+    # Bundle our linked dependencies
+    install(
+        RUNTIME_DEPENDENCY_SET LAUNCHER_DEPENDENCY_SET
+        COMPONENT bundle
+        DIRECTORIES
+            ${CMAKE_SYSTEM_LIBRARY_PATH}
+            ${QT_LIBS_DIR}
+            ${QT_LIBEXECS_DIR}
+        PRE_EXCLUDE_REGEXES
+            "^(api-ms-win|ext-ms)-.*\\.dll$"
+            # FIXME: Why aren't these caught by the below regex???
+            "^azure.*\\.dll$"
+            "^vcruntime.*\\.dll$"
+        POST_EXCLUDE_REGEXES
+            "system32"
+        LIBRARY DESTINATION ${LIBRARY_DEST_DIR}
+        RUNTIME DESTINATION ${BINARY_DEST_DIR}
+        FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR}
+    )
+    # Deploy Qt plugins
+    install(
+        SCRIPT ${QT_DEPLOY_SCRIPT}
+        COMPONENT bundle
+    )
+
     # Add qt.conf - this makes Qt stop looking for things outside the bundle
     install(
         CODE "file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}/qt.conf\" \" \")"
-        COMPONENT Runtime
+        COMPONENT bundle
     )
-    # add qtlogging.ini as a config file
+    # Add qtlogging.ini as a config file
     install(
         FILES "qtlogging.ini"
         DESTINATION ${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}
-        COMPONENT Runtime
+        COMPONENT bundle
     )
-    # Bundle plugins
-    # Image formats
-    install(
-        DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
-        CONFIGURATIONS Debug RelWithDebInfo ""
-        DESTINATION ${PLUGIN_DEST_DIR}
-        COMPONENT Runtime
-        REGEX "tga|tiff|mng" EXCLUDE
-    )
-    install(
-        DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
-        CONFIGURATIONS Release MinSizeRel
-        DESTINATION ${PLUGIN_DEST_DIR}
-        COMPONENT Runtime
-        REGEX "tga|tiff|mng" EXCLUDE
-        REGEX "d\\." EXCLUDE
-        REGEX "_debug\\." EXCLUDE
-        REGEX "\\.dSYM" EXCLUDE
-    )
-    # Icon engines
-    install(
-        DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
-        CONFIGURATIONS Debug RelWithDebInfo ""
-        DESTINATION ${PLUGIN_DEST_DIR}
-        COMPONENT Runtime
-        REGEX "fontawesome" EXCLUDE
-    )
-    install(
-        DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
-        CONFIGURATIONS Release MinSizeRel
-        DESTINATION ${PLUGIN_DEST_DIR}
-        COMPONENT Runtime
-        REGEX "fontawesome" EXCLUDE
-        REGEX "d\\." EXCLUDE
-        REGEX "_debug\\." EXCLUDE
-        REGEX "\\.dSYM" EXCLUDE
-    )
-    # Platform plugins
-    install(
-        DIRECTORY "${QT_PLUGINS_DIR}/platforms"
-        CONFIGURATIONS Debug RelWithDebInfo ""
-        DESTINATION ${PLUGIN_DEST_DIR}
-        COMPONENT Runtime
-        REGEX "minimal|linuxfb|offscreen" EXCLUDE
-    )
-    install(
-        DIRECTORY "${QT_PLUGINS_DIR}/platforms"
-        CONFIGURATIONS Release MinSizeRel
-        DESTINATION ${PLUGIN_DEST_DIR}
-        COMPONENT Runtime
-        REGEX "minimal|linuxfb|offscreen" EXCLUDE
-        REGEX "[^2]d\\." EXCLUDE
-        REGEX "_debug\\." EXCLUDE
-        REGEX "\\.dSYM" EXCLUDE
-    )
-    # Style plugins
-    if(EXISTS "${QT_PLUGINS_DIR}/styles")
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/styles"
-            CONFIGURATIONS Debug RelWithDebInfo ""
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-        )
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/styles"
-            CONFIGURATIONS Release MinSizeRel
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-            REGEX "d\\." EXCLUDE
-            REGEX "_debug\\." EXCLUDE
-            REGEX "\\.dSYM" EXCLUDE
-        )
-    endif()
-    # TLS plugins (Qt 6 only)
-    if(EXISTS "${QT_PLUGINS_DIR}/tls")
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/tls"
-            CONFIGURATIONS Debug RelWithDebInfo ""
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-            PATTERN "*qcertonlybackend*" EXCLUDE
-        )
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/tls"
-            CONFIGURATIONS Release MinSizeRel
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-            REGEX "dd\\." EXCLUDE
-            REGEX "_debug\\." EXCLUDE
-            REGEX "\\.dSYM" EXCLUDE
-            PATTERN "*qcertonlybackend*" EXCLUDE
-        )
-    endif()
-    # Wayland support
-    if(EXISTS "${QT_PLUGINS_DIR}/wayland-graphics-integration-client")
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/wayland-graphics-integration-client"
-            CONFIGURATIONS Debug RelWithDebInfo ""
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-        )
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/wayland-graphics-integration-client"
-            CONFIGURATIONS Release MinSizeRel
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-            REGEX "dd\\." EXCLUDE
-            REGEX "_debug\\." EXCLUDE
-            REGEX "\\.dSYM" EXCLUDE
-        )
-    endif()
-    if(EXISTS "${QT_PLUGINS_DIR}/wayland-graphics-integration-server")
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/wayland-graphics-integration-server"
-            CONFIGURATIONS Debug RelWithDebInfo ""
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-        )
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/wayland-graphics-integration-server"
-            CONFIGURATIONS Release MinSizeRel
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-            REGEX "dd\\." EXCLUDE
-            REGEX "_debug\\." EXCLUDE
-            REGEX "\\.dSYM" EXCLUDE
-        )
-    endif()
-    if(EXISTS "${QT_PLUGINS_DIR}/wayland-decoration-client")
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/wayland-decoration-client"
-            CONFIGURATIONS Debug RelWithDebInfo ""
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-        )
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/wayland-decoration-client"
-            CONFIGURATIONS Release MinSizeRel
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-            REGEX "dd\\." EXCLUDE
-            REGEX "_debug\\." EXCLUDE
-            REGEX "\\.dSYM" EXCLUDE
-        )
-    endif()
-    if(EXISTS "${QT_PLUGINS_DIR}/wayland-shell-integration")
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/wayland-shell-integration"
-            CONFIGURATIONS Debug RelWithDebInfo ""
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-        )
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/wayland-shell-integration"
-            CONFIGURATIONS Release MinSizeRel
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-            REGEX "dd\\." EXCLUDE
-            REGEX "_debug\\." EXCLUDE
-            REGEX "\\.dSYM" EXCLUDE
-        )
-    endif()
-    configure_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake"
-        @ONLY
-    )
-    install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake" COMPONENT Runtime)
 endif()

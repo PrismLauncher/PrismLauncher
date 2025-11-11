@@ -203,6 +203,7 @@ QString exportToModList(QList<Mod*> mods, QString lineTemplate)
     for (auto mod : mods) {
         auto meta = mod->metadata();
         auto modName = mod->name();
+        auto modID = mod->mod_id();
         auto url = mod->homepage();
         auto ver = mod->version();
         if (ver.isEmpty() && meta != nullptr)
@@ -211,6 +212,7 @@ QString exportToModList(QList<Mod*> mods, QString lineTemplate)
         auto filename = mod->fileinfo().fileName();
         lines << QString(lineTemplate)
                      .replace("{name}", modName)
+                     .replace("{mod_id}", modID)
                      .replace("{url}", url)
                      .replace("{version}", ver)
                      .replace("{authors}", authors)

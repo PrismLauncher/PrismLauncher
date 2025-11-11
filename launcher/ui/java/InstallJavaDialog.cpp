@@ -97,7 +97,7 @@ class InstallJavaPage : public QWidget, public BasePage {
 
     QString id() const override { return uid; }
     QString displayName() const override { return name; }
-    QIcon icon() const override { return APPLICATION->getThemedIcon(iconName); }
+    QIcon icon() const override { return QIcon::fromTheme(iconName); }
 
     void openedImpl() override
     {
@@ -140,9 +140,9 @@ class InstallJavaPage : public QWidget, public BasePage {
     void recommendedFilterChanged()
     {
         if (m_recommend) {
-            majorVersionSelect->setFilter(BaseVersionList::ModelRoles::JavaMajorRole, new ExactListFilter(m_recommended_majors));
+            majorVersionSelect->setFilter(BaseVersionList::ModelRoles::JavaMajorRole, Filters::equalsAny(m_recommended_majors));
         } else {
-            majorVersionSelect->setFilter(BaseVersionList::ModelRoles::JavaMajorRole, new ExactListFilter());
+            majorVersionSelect->setFilter(BaseVersionList::ModelRoles::JavaMajorRole, Filters::equalsAny());
         }
     }
 

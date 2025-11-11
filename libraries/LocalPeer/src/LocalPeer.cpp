@@ -72,11 +72,12 @@ ApplicationId ApplicationId::fromTraditionalApp()
     protoId = protoId.toLower();
 #endif
     auto prefix = protoId.section(QLatin1Char('/'), -1);
-    prefix.remove(QRegularExpression("[^a-zA-Z]"));
+    static const QRegularExpression s_removeChars("[^a-zA-Z]");
+    prefix.remove(s_removeChars);
     prefix.truncate(6);
     QByteArray idc = protoId.toUtf8();
-    quint16 idNum = qChecksum(idc.constData(), idc.size());
-    auto socketName = QLatin1String("qtsingleapp-") + prefix + QLatin1Char('-') + QString::number(idNum, 16);
+    quint16 idNum = qChecksum(idc);
+    auto socketName = QLatin1String("pl") + prefix + QLatin1Char('-') + QString::number(idNum, 16).left(12);
 #if defined(Q_OS_WIN)
     if (!pProcessIdToSessionId) {
         QLibrary lib("kernel32");
@@ -98,12 +99,12 @@ ApplicationId ApplicationId::fromPathAndVersion(const QString& dataPath, const Q
     QCryptographicHash shasum(QCryptographicHash::Algorithm::Sha1);
     QString result = dataPath + QLatin1Char('-') + version;
     shasum.addData(result.toUtf8());
-    return ApplicationId(QLatin1String("qtsingleapp-") + QString::fromLatin1(shasum.result().toHex()));
+    return ApplicationId(QLatin1String("pl") + QString::fromLatin1(shasum.result().toHex()).left(12));
 }
 
 ApplicationId ApplicationId::fromCustomId(const QString& id)
 {
-    return ApplicationId(QLatin1String("qtsingleapp-") + id);
+    return ApplicationId(QLatin1String("pl") + id);
 }
 
 ApplicationId ApplicationId::fromRawString(const QString& id)
@@ -139,13 +140,13 @@ bool LocalPeer::isClient()
 #if defined(Q_OS_UNIX)
     // ### Workaround
     if (!res && server->serverError() == QAbstractSocket::AddressInUseError) {
-        QFile::remove(QDir::cleanPath(QDir::tempPath()) + QLatin1Char('/') + socketName);
+        QLocalServer::removeServer(socketName);
         res = server->listen(socketName);
     }
 #endif
     if (!res)
         qWarning("QtSingleCoreApplication: listen on local socket failed, %s", qPrintable(server->errorString()));
-    QObject::connect(server.get(), SIGNAL(newConnection()), SLOT(receiveConnection()));
+    connect(server.get(), &QLocalServer::newConnection, this, &LocalPeer::receiveConnection);
     return false;
 }
 

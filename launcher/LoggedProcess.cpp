@@ -45,7 +45,7 @@ LoggedProcess::LoggedProcess(const QTextCodec* output_codec, QObject* parent)
     // QProcess has a strange interface... let's map a lot of those into a few.
     connect(this, &QProcess::readyReadStandardOutput, this, &LoggedProcess::on_stdOut);
     connect(this, &QProcess::readyReadStandardError, this, &LoggedProcess::on_stdErr);
-    connect(this, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &LoggedProcess::on_exit);
+    connect(this, &QProcess::finished, this, &LoggedProcess::on_exit);
     connect(this, &QProcess::errorOccurred, this, &LoggedProcess::on_error);
     connect(this, &QProcess::stateChanged, this, &LoggedProcess::on_stateChange);
 }

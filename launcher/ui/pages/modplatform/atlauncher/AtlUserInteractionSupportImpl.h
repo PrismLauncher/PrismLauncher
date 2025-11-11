@@ -48,7 +48,7 @@ class AtlUserInteractionSupportImpl : public QObject, public ATLauncher::UserInt
 
    private:
     QString chooseVersion(Meta::VersionList::Ptr vlist, QString minecraftVersion) override;
-    std::optional<QVector<QString>> chooseOptionalMods(ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods) override;
+    std::optional<QList<QString>> chooseOptionalMods(const ATLauncher::PackVersion& version, QList<ATLauncher::VersionMod> mods) override;
     void displayMessage(QString message) override;
 
    private:

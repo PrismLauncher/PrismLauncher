@@ -1,0 +1,23 @@
+name: Publish
+
+on:
+  release:
+    types: [ released ]
+
+permissions:
+  contents: read
+
+jobs:
+  winget:
+    name: Winget
+
+    runs-on: windows-latest
+
+    steps:
+      - name: Publish on Winget
+        uses: vedantmgoyal2009/winget-releaser@v2
+        with:
+          identifier: PrismLauncher.PrismLauncher
+          version: ${{ github.event.release.tag_name }}
+          installers-regex: 'PrismLauncher-Windows-MSVC(:?-arm64|-Legacy)?-Setup-.+\.exe$'
+          token: ${{ secrets.WINGET_TOKEN }}

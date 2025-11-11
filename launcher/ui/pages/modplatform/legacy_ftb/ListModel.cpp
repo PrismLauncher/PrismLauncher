@@ -61,8 +61,12 @@ FilterModel::FilterModel(QObject* parent) : QSortFilterProxyModel(parent)
 
 bool FilterModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {
-    Modpack leftPack = sourceModel()->data(left, Qt::UserRole).value<Modpack>();
-    Modpack rightPack = sourceModel()->data(right, Qt::UserRole).value<Modpack>();
+    QVariant leftRaw = sourceModel()->data(left, Qt::UserRole);
+    Q_ASSERT(leftRaw.canConvert<Modpack>());
+    auto leftPack = leftRaw.value<Modpack>();
+    QVariant rightRaw = sourceModel()->data(right, Qt::UserRole);
+    Q_ASSERT(rightRaw.canConvert<Modpack>());
+    auto rightPack = rightRaw.value<Modpack>();
 
     if (currentSorting == Sorting::ByGameVersion) {
         Version lv(leftPack.mcVersion);
@@ -84,7 +88,9 @@ bool FilterModel::filterAcceptsRow([[maybe_unused]] int sourceRow, [[maybe_unuse
         return true;
     }
     QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
-    Modpack pack = sourceModel()->data(index, Qt::UserRole).value<Modpack>();
+    QVariant raw = sourceModel()->data(index, Qt::UserRole);
+    Q_ASSERT(raw.canConvert<Modpack>());
+    auto pack = raw.value<Modpack>();
     if (searchTerm.startsWith("#"))
         return pack.packCode == searchTerm.mid(1);
     return pack.name.contains(searchTerm, Qt::CaseInsensitive);
@@ -167,7 +173,7 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
             if (m_logoMap.contains(pack.logo)) {
                 return (m_logoMap.value(pack.logo));
             }
-            QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
+            QIcon icon = QIcon::fromTheme("screenshot-placeholder");
             ((ListModel*)this)->requestLogo(pack.logo);
             return icon;
         }
@@ -195,8 +201,6 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
             return pack.name;
         case UserDataTypes::DESCRIPTION:
             return pack.description;
-        case UserDataTypes::SELECTED:
-            return false;
         case UserDataTypes::INSTALLED:
             return false;
         default:
@@ -213,7 +217,7 @@ void ListModel::fill(ModpackList modpacks_)
     endResetModel();
 }
 
-void ListModel::addPack(Modpack modpack)
+void ListModel::addPack(const Modpack& modpack)
 {
     beginResetModel();
     this->modpacks.append(modpack);
@@ -268,7 +272,7 @@ void ListModel::requestLogo(QString file)
     job->addNetAction(Net::ApiDownload::makeCached(QUrl(QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/%1").arg(file)), entry));
 
     auto fullPath = entry->getFullPath();
-    QObject::connect(job, &NetJob::finished, this, [this, file, fullPath, job] {
+    connect(job, &NetJob::finished, this, [this, file, fullPath, job] {
         job->deleteLater();
         emit logoLoaded(file, QIcon(fullPath));
         if (waitingCallbacks.contains(file)) {
@@ -276,7 +280,7 @@ void ListModel::requestLogo(QString file)
         }
     });
 
-    QObject::connect(job, &NetJob::failed, this, [this, file, job] {
+    connect(job, &NetJob::failed, this, [this, file, job] {
         job->deleteLater();
         emit logoFailed(file);
     });

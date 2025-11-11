@@ -46,12 +46,12 @@ class LocalWorldSaveParseTask : public Task {
    public:
     LocalWorldSaveParseTask(int token, WorldSave& save);
 
-    [[nodiscard]] bool canAbort() const override { return true; }
+    bool canAbort() const override { return true; }
     bool abort() override;
 
     void executeTask() override;
 
-    [[nodiscard]] int token() const { return m_token; }
+    int token() const { return m_token; }
 
    private:
     int m_token;

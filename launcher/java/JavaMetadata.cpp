@@ -78,7 +78,7 @@ MetadataPtr parseJavaMeta(const QJsonObject& in)
     return meta;
 }
 
-bool Metadata::operator<(const Metadata& rhs)
+bool Metadata::operator<(const Metadata& rhs) const
 {
     auto id = version;
     if (id < rhs.version) {
@@ -97,17 +97,17 @@ bool Metadata::operator<(const Metadata& rhs)
     return StringUtils::naturalCompare(m_name, rhs.m_name, Qt::CaseInsensitive) < 0;
 }
 
-bool Metadata::operator==(const Metadata& rhs)
+bool Metadata::operator==(const Metadata& rhs) const
 {
     return version == rhs.version && m_name == rhs.m_name;
 }
 
-bool Metadata::operator>(const Metadata& rhs)
+bool Metadata::operator>(const Metadata& rhs) const
 {
     return (!operator<(rhs)) && (!operator==(rhs));
 }
 
-bool Metadata::operator<(BaseVersion& a)
+bool Metadata::operator<(BaseVersion& a) const
 {
     try {
         return operator<(dynamic_cast<Metadata&>(a));
@@ -116,7 +116,7 @@ bool Metadata::operator<(BaseVersion& a)
     }
 }
 
-bool Metadata::operator>(BaseVersion& a)
+bool Metadata::operator>(BaseVersion& a) const
 {
     try {
         return operator>(dynamic_cast<Metadata&>(a));

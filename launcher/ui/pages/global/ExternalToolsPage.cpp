@@ -50,7 +50,6 @@
 ExternalToolsPage::ExternalToolsPage(QWidget* parent) : QWidget(parent), ui(new Ui::ExternalToolsPage)
 {
     ui->setupUi(this);
-    ui->tabWidget->tabBar()->hide();
 
     ui->jsonEditorTextBox->setClearButtonEnabled(true);
 
@@ -128,13 +127,13 @@ void ExternalToolsPage::on_jvisualvmPathBtn_clicked()
     QString raw_dir = ui->jvisualvmPathEdit->text();
     QString error;
     do {
-        raw_dir = QFileDialog::getOpenFileName(this, tr("JVisualVM Executable"), raw_dir);
+        raw_dir = QFileDialog::getOpenFileName(this, tr("VisualVM Executable"), raw_dir);
         if (raw_dir.isEmpty()) {
             break;
         }
         QString cooked_dir = FS::NormalizePath(raw_dir);
         if (!APPLICATION->profilers()["jvisualvm"]->check(cooked_dir, &error)) {
-            QMessageBox::critical(this, tr("Error"), tr("Error while checking JVisualVM install:\n%1").arg(error));
+            QMessageBox::critical(this, tr("Error"), tr("Error while checking VisualVM install:\n%1").arg(error));
             continue;
         } else {
             ui->jvisualvmPathEdit->setText(cooked_dir);
@@ -146,9 +145,9 @@ void ExternalToolsPage::on_jvisualvmCheckBtn_clicked()
 {
     QString error;
     if (!APPLICATION->profilers()["jvisualvm"]->check(ui->jvisualvmPathEdit->text(), &error)) {
-        QMessageBox::critical(this, tr("Error"), tr("Error while checking JVisualVM install:\n%1").arg(error));
+        QMessageBox::critical(this, tr("Error"), tr("Error while checking VisualVM install:\n%1").arg(error));
     } else {
-        QMessageBox::information(this, tr("OK"), tr("JVisualVM setup seems to be OK"));
+        QMessageBox::information(this, tr("OK"), tr("VisualVM setup seems to be OK"));
     }
 }
 
@@ -157,7 +156,7 @@ void ExternalToolsPage::on_mceditPathBtn_clicked()
     QString raw_dir = ui->mceditPathEdit->text();
     QString error;
     do {
-#ifdef Q_OS_OSX
+#ifdef Q_OS_MACOS
         raw_dir = QFileDialog::getOpenFileName(this, tr("MCEdit Application"), raw_dir);
 #else
         raw_dir = QFileDialog::getExistingDirectory(this, tr("MCEdit Folder"), raw_dir);
@@ -187,7 +186,7 @@ void ExternalToolsPage::on_mceditCheckBtn_clicked()
 
 void ExternalToolsPage::on_jsonEditorBrowseBtn_clicked()
 {
-    QString raw_file = QFileDialog::getOpenFileName(this, tr("JSON Editor"),
+    QString raw_file = QFileDialog::getOpenFileName(this, tr("Text Editor"),
                                                     ui->jsonEditorTextBox->text().isEmpty()
 #if defined(Q_OS_LINUX)
                                                         ? QString("/usr/bin")

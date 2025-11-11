@@ -112,7 +112,10 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
     qint64 file_last_changed = finfo.lastModified().toUTC().toMSecsSinceEpoch();
     if (file_last_changed != entry->m_local_changed_timestamp) {
         QFile input(real_path);
-        input.open(QIODevice::ReadOnly);
+        if (!input.open(QIODevice::ReadOnly)) {
+            qWarning() << "Failed to open file '" << input.fileName() << "' for reading!";
+            return staleEntry(base, resource_path);
+        }
         QString md5sum = QCryptographicHash::hash(input.readAll(), QCryptographicHash::Md5).toHex().constData();
         if (entry->m_md5sum != md5sum) {
             selected_base.entry_list.remove(resource_path);
@@ -166,8 +169,10 @@ auto HttpMetaCache::evictEntry(MetaEntryPtr entry) -> bool
     return true;
 }
 
-void HttpMetaCache::evictAll()
+// returns true on success, false otherwise
+auto HttpMetaCache::evictAll() -> bool
 {
+    bool ret = true;
     for (QString& base : m_entries.keys()) {
         EntryMap& map = m_entries[base];
         qCDebug(taskHttpMetaCacheLogC) << "Evicting base" << base;
@@ -176,8 +181,10 @@ void HttpMetaCache::evictAll()
                 qCWarning(taskHttpMetaCacheLogC) << "Unexpected missing cache entry" << entry->m_basePath;
         }
         map.entry_list.clear();
-        FS::deletePath(map.base_path);
+        // AND all return codes together so the result is true iff all runs of deletePath() are true
+        ret &= FS::deletePath(map.base_path);
     }
+    return ret;
 }
 
 auto HttpMetaCache::staleEntry(QString base, QString resource_path) -> MetaEntryPtr

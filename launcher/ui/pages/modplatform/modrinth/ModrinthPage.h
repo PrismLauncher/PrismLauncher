@@ -36,10 +36,10 @@
 
 #pragma once
 
-#include "Application.h"
+#include "modplatform/ModIndex.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 
-#include "modplatform/modrinth/ModrinthPackManifest.h"
 #include "ui/pages/modplatform/ModpackProviderBasePage.h"
 #include "ui/widgets/ModFilterWidget.h"
 #include "ui/widgets/ProgressWidget.h"
@@ -63,14 +63,14 @@ class ModrinthPage : public QWidget, public ModpackProviderBasePage {
     ~ModrinthPage() override;
 
     QString displayName() const override { return tr("Modrinth"); }
-    QIcon icon() const override { return APPLICATION->getThemedIcon("modrinth"); }
+    QIcon icon() const override { return QIcon::fromTheme("modrinth"); }
     QString id() const override { return "modrinth"; }
     QString helpPage() const override { return "Modrinth-platform"; }
 
-    inline auto debugName() const -> QString { return "Modrinth"; }
-    inline auto metaEntryBase() const -> QString { return "ModrinthModpacks"; };
+    inline QString debugName() const { return "Modrinth"; }
+    inline QString metaEntryBase() const { return "ModrinthModpacks"; };
 
-    auto getCurrent() -> Modrinth::Modpack& { return current; }
+    ModPlatform::IndexedPack::Ptr getCurrent() { return m_current; }
     void suggestCurrent();
 
     void updateUI();
@@ -82,7 +82,7 @@ class ModrinthPage : public QWidget, public ModpackProviderBasePage {
     /** Programatically set the term in the search bar. */
     virtual void setSearchTerm(QString) override;
     /** Get the current term in the search bar. */
-    [[nodiscard]] virtual QString getSerachTerm() const override;
+    virtual QString getSerachTerm() const override;
 
    private slots:
     void onSelectionChanged(QModelIndex first, QModelIndex second);
@@ -91,18 +91,22 @@ class ModrinthPage : public QWidget, public ModpackProviderBasePage {
     void createFilterWidget();
 
    private:
-    Ui::ModrinthPage* ui;
-    NewInstanceDialog* dialog;
+    Ui::ModrinthPage* m_ui;
+    NewInstanceDialog* m_dialog;
     Modrinth::ModpackListModel* m_model;
 
-    Modrinth::Modpack current;
-    QString selectedVersion;
+    ModPlatform::IndexedPack::Ptr m_current;
+    QString m_selectedVersion;
 
     ProgressWidget m_fetch_progress;
 
     // Used to do instant searching with a delay to cache quick changes
     QTimer m_search_timer;
 
-    unique_qobject_ptr<ModFilterWidget> m_filterWidget;
+    std::unique_ptr<ModFilterWidget> m_filterWidget;
     Task::Ptr m_categoriesTask;
+
+    ModrinthAPI m_api;
+    Task::Ptr m_job;
+    Task::Ptr m_job2;
 };

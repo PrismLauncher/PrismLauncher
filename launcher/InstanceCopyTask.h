@@ -5,6 +5,7 @@
 #include <QUrl>
 #include "BaseInstance.h"
 #include "BaseVersion.h"
+#include "Filter.h"
 #include "InstanceCopyPrefs.h"
 #include "InstanceTask.h"
 #include "net/NetJob.h"
@@ -28,7 +29,7 @@ class InstanceCopyTask : public InstanceTask {
     InstancePtr m_origInstance;
     QFuture<bool> m_copyFuture;
     QFutureWatcher<bool> m_copyFutureWatcher;
-    std::unique_ptr<IPathMatcher> m_matcher;
+    Filter m_matcher;
     bool m_keepPlaytime;
     bool m_useLinks = false;
     bool m_useHardLinks = false;

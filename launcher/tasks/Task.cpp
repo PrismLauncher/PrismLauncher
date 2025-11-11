@@ -196,6 +196,8 @@ void Task::logWarning(const QString& line)
 {
     qWarning() << line;
     m_Warnings.append(line);
+
+    emit warningLogged(line);
 }
 
 QStringList Task::warnings() const

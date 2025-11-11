@@ -73,7 +73,7 @@ struct Language {
         if (key == "ja_KANJI") {
             result = locale.nativeLanguageName() + u8" (漢字)";
         } else if (key == "es_UY") {
-            result = u8"español de Latinoamérica";
+            result = u8"Español de Latinoamérica";
         } else if (key == "en_NZ") {
             result = u8"New Zealand English";  // No idea why qt translates this to just english and not to New Zealand English
         } else if (key == "en@pirate") {
@@ -153,7 +153,7 @@ struct TranslationsModel::Private {
     QDir m_dir;
 
     // initial state is just english
-    QVector<Language> m_languages = { Language(defaultLangCode) };
+    QList<Language> m_languages = { Language(defaultLangCode) };
 
     QString m_selectedLanguage = defaultLangCode;
     std::unique_ptr<QTranslator> m_qt_translator;
@@ -417,7 +417,7 @@ int TranslationsModel::columnCount([[maybe_unused]] const QModelIndex& parent) c
     return 2;
 }
 
-QVector<Language>::Iterator TranslationsModel::findLanguage(const QString& key)
+QList<Language>::Iterator TranslationsModel::findLanguage(const QString& key)
 {
     return std::find_if(d->m_languages.begin(), d->m_languages.end(), [key](Language& lang) { return lang.key == key; });
 }
@@ -480,7 +480,7 @@ bool TranslationsModel::selectLanguage(QString key)
     bool successful = false;
     // FIXME: this is likely never present. FIX IT.
     d->m_qt_translator.reset(new QTranslator());
-    if (d->m_qt_translator->load("qt_" + langCode, QLibraryInfo::location(QLibraryInfo::TranslationsPath))) {
+    if (d->m_qt_translator->load("qt_" + langCode, QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
         qDebug() << "Loading Qt Language File for" << langCode.toLocal8Bit().constData() << "...";
         if (!QCoreApplication::installTranslator(d->m_qt_translator.get())) {
             qCritical() << "Loading Qt Language File failed.";

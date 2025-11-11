@@ -59,9 +59,9 @@ void PackFetchTask::fetch()
     qDebug() << "Downloading thirdparty version info from" << thirdPartyUrl.toString();
     jobPtr->addNetAction(Net::Download::makeByteArray(thirdPartyUrl, thirdPartyModpacksXmlFileData));
 
-    QObject::connect(jobPtr.get(), &NetJob::succeeded, this, &PackFetchTask::fileDownloadFinished);
-    QObject::connect(jobPtr.get(), &NetJob::failed, this, &PackFetchTask::fileDownloadFailed);
-    QObject::connect(jobPtr.get(), &NetJob::aborted, this, &PackFetchTask::fileDownloadAborted);
+    connect(jobPtr.get(), &NetJob::succeeded, this, &PackFetchTask::fileDownloadFinished);
+    connect(jobPtr.get(), &NetJob::failed, this, &PackFetchTask::fileDownloadFailed);
+    connect(jobPtr.get(), &NetJob::aborted, this, &PackFetchTask::fileDownloadAborted);
 
     jobPtr->start();
 }
@@ -76,10 +76,10 @@ void PackFetchTask::fetchPrivate(const QStringList& toFetch)
         job->addNetAction(Net::ApiDownload::makeByteArray(privatePackBaseUrl.arg(packCode), data));
         job->setAskRetry(false);
 
-        QObject::connect(job, &NetJob::succeeded, this, [this, job, data, packCode] {
+        connect(job, &NetJob::succeeded, this, [this, job, data, packCode] {
             ModpackList packs;
             parseAndAddPacks(*data, PackType::Private, packs);
-            foreach (Modpack currentPack, packs) {
+            for (auto& currentPack : packs) {
                 currentPack.packCode = packCode;
                 emit privateFileDownloadFinished(currentPack);
             }
@@ -89,14 +89,14 @@ void PackFetchTask::fetchPrivate(const QStringList& toFetch)
             data->clear();
         });
 
-        QObject::connect(job, &NetJob::failed, this, [this, job, packCode, data](QString reason) {
+        connect(job, &NetJob::failed, this, [this, job, packCode, data](QString reason) {
             emit privateFileDownloadFailed(reason, packCode);
             job->deleteLater();
 
             data->clear();
         });
 
-        QObject::connect(job, &NetJob::aborted, this, [this, job, data] {
+        connect(job, &NetJob::aborted, this, [this, job, data] {
             emit aborted();
             job->deleteLater();
 

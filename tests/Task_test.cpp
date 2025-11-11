@@ -127,8 +127,8 @@ class TaskTest : public QObject {
     void test_basicRun()
     {
         BasicTask t;
-        QObject::connect(&t, &Task::finished,
-                         [&t] { QVERIFY2(t.wasSuccessful(), "Task finished but was not successful when it should have been."); });
+        connect(&t, &Task::finished,
+                [&t] { QVERIFY2(t.wasSuccessful(), "Task finished but was not successful when it should have been."); });
         t.start();
 
         QVERIFY2(QTest::qWaitFor([&t]() { return t.isFinished(); }, 1000), "Task didn't finish as it should.");
@@ -146,7 +146,7 @@ class TaskTest : public QObject {
         t.addTask(t2);
         t.addTask(t3);
 
-        QObject::connect(&t, &Task::finished, [&t, &t1, &t2, &t3] {
+        connect(&t, &Task::finished, [&t, &t1, &t2, &t3] {
             QVERIFY2(t.wasSuccessful(), "Task finished but was not successful when it should have been.");
             QVERIFY(t1->wasSuccessful());
             QVERIFY(t2->wasSuccessful());
@@ -182,7 +182,7 @@ class TaskTest : public QObject {
         t.addTask(t8);
         t.addTask(t9);
 
-        QObject::connect(&t, &Task::finished, [&t, &t1, &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9] {
+        connect(&t, &Task::finished, [&t, &t1, &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9] {
             QVERIFY2(t.wasSuccessful(), "Task finished but was not successful when it should have been.");
             QVERIFY(t1->wasSuccessful());
             QVERIFY(t2->wasSuccessful());
@@ -211,7 +211,7 @@ class TaskTest : public QObject {
         t.addTask(t2);
         t.addTask(t3);
 
-        QObject::connect(&t, &Task::finished, [&t, &t1, &t2, &t3] {
+        connect(&t, &Task::finished, [&t, &t1, &t2, &t3] {
             QVERIFY2(t.wasSuccessful(), "Task finished but was not successful when it should have been.");
             QVERIFY(t1->wasSuccessful());
             QVERIFY(t2->wasSuccessful());
@@ -234,7 +234,7 @@ class TaskTest : public QObject {
         t.addTask(t2);
         t.addTask(t3);
 
-        QObject::connect(&t, &Task::finished, [&t, &t1, &t2, &t3] {
+        connect(&t, &Task::finished, [&t, &t1, &t2, &t3] {
             QVERIFY2(t.wasSuccessful(), "Task finished but was not successful when it should have been.");
             QVERIFY(t1->wasSuccessful());
             QVERIFY(!t2->wasSuccessful());

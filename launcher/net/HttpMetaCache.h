@@ -66,7 +66,7 @@ class MetaEntry {
 
     /* Whether the entry expires after some time (false) or not (true). */
     void makeEternal(bool eternal) { m_is_eternal = eternal; }
-    [[nodiscard]] bool isEternal() const { return m_is_eternal; }
+    bool isEternal() const { return m_is_eternal; }
 
     auto getCurrentAge() -> qint64 { return m_current_age; }
     void setCurrentAge(qint64 age) { m_current_age = age; }
@@ -113,7 +113,7 @@ class HttpMetaCache : public QObject {
 
     // evict selected entry from cache
     auto evictEntry(MetaEntryPtr entry) -> bool;
-    void evictAll();
+    bool evictAll();
 
     void addBase(QString base, QString base_root);
 

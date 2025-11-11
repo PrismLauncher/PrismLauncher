@@ -23,7 +23,7 @@
 
 namespace Meta {
 Index::Index(QObject* parent) : QAbstractListModel(parent) {}
-Index::Index(const QVector<VersionList::Ptr>& lists, QObject* parent) : QAbstractListModel(parent), m_lists(lists)
+Index::Index(const QList<VersionList::Ptr>& lists, QObject* parent) : QAbstractListModel(parent), m_lists(lists)
 {
     for (int i = 0; i < m_lists.size(); ++i) {
         m_uids.insert(m_lists.at(i)->uid(), m_lists.at(i));
@@ -103,7 +103,7 @@ void Index::parse(const QJsonObject& obj)
 
 void Index::merge(const std::shared_ptr<Index>& other)
 {
-    const QVector<VersionList::Ptr> lists = other->m_lists;
+    const QList<VersionList::Ptr> lists = other->m_lists;
     // initial load, no need to merge
     if (m_lists.isEmpty()) {
         beginResetModel();
@@ -154,7 +154,7 @@ Version::Ptr Index::getLoadedVersion(const QString& uid, const QString& version)
 {
     QEventLoop ev;
     auto task = loadVersion(uid, version);
-    QObject::connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
+    connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
     task->start();
     ev.exec();
     return get(uid, version);

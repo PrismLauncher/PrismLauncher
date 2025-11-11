@@ -26,11 +26,17 @@
     </property>
     <item>
      <widget class="QListView" name="listView">
+      <property name="showDropIndicator" stdset="0">
+       <bool>false</bool>
+      </property>
       <property name="selectionMode">
-       <enum>QAbstractItemView::ExtendedSelection</enum>
+       <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
       </property>
       <property name="selectionBehavior">
-       <enum>QAbstractItemView::SelectRows</enum>
+       <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+      </property>
+      <property name="movement">
+       <enum>QListView::Movement::Static</enum>
       </property>
      </widget>
     </item>
@@ -41,7 +47,7 @@
     <string>Actions</string>
    </property>
    <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonTextOnly</enum>
+    <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
    </property>
    <attribute name="toolBarArea">
     <enum>RightToolBarArea</enum>

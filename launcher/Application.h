@@ -48,6 +48,7 @@
 
 #include <BaseInstance.h>
 
+#include "launch/LogModel.h"
 #include "minecraft/launch/MinecraftTarget.h"
 
 class XPCBridge;
@@ -57,6 +58,7 @@ class LaunchController;
 class LocalPeer;
 class InstanceWindow;
 class MainWindow;
+class ViewLogWindow;
 class SetupWizard;
 class GenericPageProvider;
 class QFile;
@@ -115,9 +117,9 @@ class Application : public QApplication {
 
     std::shared_ptr<SettingsObject> settings() const { return m_settings; }
 
-    qint64 timeSinceStart() const { return startTime.msecsTo(QDateTime::currentDateTime()); }
+    qint64 timeSinceStart() const { return m_startTime.msecsTo(QDateTime::currentDateTime()); }
 
-    QIcon getThemedIcon(const QString& name);
+    QIcon logo();
 
     ThemeManager* themeManager() { return m_themeManager.get(); }
 
@@ -163,7 +165,6 @@ class Application : public QApplication {
     QString getFlameAPIKey();
     QString getModrinthAPIToken();
     QString getUserAgent();
-    QString getUserAgentUncached();
 
     /// this is the root of the 'installation'. Used for automatic updates
     const QString& root() { return m_rootPath; }
@@ -186,6 +187,7 @@ class Application : public QApplication {
 
     InstanceWindow* showInstanceWindow(InstancePtr instance, QString page = QString());
     MainWindow* showMainWindow(bool minimized = false);
+    ViewLogWindow* showLogWindow();
 
     void updateIsRunning(bool running);
     bool updatesAreAllowed();
@@ -200,7 +202,7 @@ class Application : public QApplication {
    signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
-    void globalSettingsClosed();
+    void globalSettingsApplied();
     int currentCatChanged(int index);
 
     void oauthReplyRecieved(QVariantMap);
@@ -240,7 +242,7 @@ class Application : public QApplication {
     bool shouldExitNow() const;
 
    private:
-    QDateTime startTime;
+    QDateTime m_startTime;
 
     shared_qobject_ptr<QNetworkAccessManager> m_network;
 
@@ -293,6 +295,9 @@ class Application : public QApplication {
     // main window, if any
     MainWindow* m_mainWindow = nullptr;
 
+    // log window, if any
+    ViewLogWindow* m_viewLogWindow = nullptr;
+
     // peer launcher instance connector - used to implement single instance launcher and signalling
     LocalPeer* m_peerInstance = nullptr;
 
@@ -311,6 +316,7 @@ class Application : public QApplication {
     QList<QUrl> m_urlsToImport;
     QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
+    shared_qobject_ptr<LogModel> logModel;
 #if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
     std::unique_ptr<XPCManager> m_xpcManager;
     std::unique_ptr<DynamicSandboxException> m_dynamicSandboxExceptions;

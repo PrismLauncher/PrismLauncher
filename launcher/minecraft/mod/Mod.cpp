@@ -48,6 +48,7 @@
 #include "Version.h"
 #include "minecraft/mod/ModDetails.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
+#include "modplatform/ModIndex.h"
 
 Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
 {
@@ -137,6 +138,15 @@ auto Mod::name() const -> QString
     return Resource::name();
 }
 
+auto Mod::mod_id() const -> QString
+{
+    auto d_mod_id = details().mod_id;
+    if (!d_mod_id.isEmpty())
+        return d_mod_id;
+
+    return Resource::name();
+}
+
 auto Mod::version() const -> QString
 {
     return details().version;
@@ -157,11 +167,8 @@ auto Mod::loaders() const -> QString
     if (metadata()) {
         QStringList loaders;
         auto modLoaders = metadata()->loaders;
-        for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Cauldron, ModPlatform::LiteLoader, ModPlatform::Fabric,
-                             ModPlatform::Quilt }) {
-            if (modLoaders & loader) {
-                loaders << getModLoaderAsString(loader);
-            }
+        for (auto loader : ModPlatform::modLoaderTypesToList(modLoaders)) {
+            loaders << getModLoaderAsString(loader);
         }
         return loaders.join(", ");
     }
@@ -172,9 +179,9 @@ auto Mod::loaders() const -> QString
 auto Mod::side() const -> QString
 {
     if (metadata())
-        return Metadata::modSideToString(metadata()->side);
+        return ModPlatform::SideUtils::toString(metadata()->side);
 
-    return Metadata::modSideToString(Metadata::ModSide::UniversalSide);
+    return ModPlatform::SideUtils::toString(ModPlatform::Side::UniversalSide);
 }
 
 auto Mod::mcVersions() const -> QString

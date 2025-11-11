@@ -8,19 +8,19 @@
 #include <QRegularExpressionMatch>
 #include <QRegularExpressionMatchIterator>
 
-QRegularExpression ruleset_re = QRegularExpression(R"([#.]?(@?\w+?)\s*\{(.*?)\})", QRegularExpression::DotMatchesEverythingOption);
-QRegularExpression rule_re = QRegularExpression(R"((\S+?)\s*:\s*(?:\"(.*?)(?<!\\)\"|'(.*?)(?<!\\)'|(\S+?))\s*(?:;|$))");
+static const QRegularExpression s_rulesetRe(R"([#.]?(@?\w+?)\s*\{(.*?)\})", QRegularExpression::DotMatchesEverythingOption);
+static const QRegularExpression s_ruleRe(R"((\S+?)\s*:\s*(?:\"(.*?)(?<!\\)\"|'(.*?)(?<!\\)'|(\S+?))\s*(?:;|$))");
 
 QDCSS::QDCSS(QString s)
 {
     // not much error handling over here...
     // the original java code used indeces returned by the matcher for them, but QRE does not expose those
-    QRegularExpressionMatchIterator ruleset_i = ruleset_re.globalMatch(s);
+    QRegularExpressionMatchIterator ruleset_i = s_rulesetRe.globalMatch(s);
     while (ruleset_i.hasNext()) {
         QRegularExpressionMatch ruleset = ruleset_i.next();
         QString selector = ruleset.captured(1);
         QString rules = ruleset.captured(2);
-        QRegularExpressionMatchIterator rule_i = rule_re.globalMatch(rules);
+        QRegularExpressionMatchIterator rule_i = s_ruleRe.globalMatch(rules);
         while (rule_i.hasNext()) {
             QRegularExpressionMatch rule = rule_i.next();
             QString property = rule.captured(1);

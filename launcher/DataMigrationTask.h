@@ -5,7 +5,7 @@
 #pragma once
 
 #include "FileSystem.h"
-#include "pathmatcher/IPathMatcher.h"
+#include "Filter.h"
 #include "tasks/Task.h"
 
 #include <QFuture>
@@ -18,7 +18,7 @@
 class DataMigrationTask : public Task {
     Q_OBJECT
    public:
-    explicit DataMigrationTask(const QString& sourcePath, const QString& targetPath, IPathMatcher::Ptr pathmatcher);
+    explicit DataMigrationTask(const QString& sourcePath, const QString& targetPath, Filter pathmatcher);
     ~DataMigrationTask() override = default;
 
    protected:
@@ -33,7 +33,7 @@ class DataMigrationTask : public Task {
    private:
     const QString& m_sourcePath;
     const QString& m_targetPath;
-    const IPathMatcher::Ptr m_pathMatcher;
+    const Filter m_pathMatcher;
 
     FS::copy m_copy;
     int m_toCopy = 0;

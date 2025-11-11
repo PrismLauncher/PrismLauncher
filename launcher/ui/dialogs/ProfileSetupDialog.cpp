@@ -55,13 +55,13 @@ ProfileSetupDialog::ProfileSetupDialog(MinecraftAccountPtr accountToSetup, QWidg
     ui->setupUi(this);
     ui->errorLabel->setVisible(false);
 
-    goodIcon = APPLICATION->getThemedIcon("status-good");
-    yellowIcon = APPLICATION->getThemedIcon("status-yellow");
-    badIcon = APPLICATION->getThemedIcon("status-bad");
+    goodIcon = QIcon::fromTheme("status-good");
+    yellowIcon = QIcon::fromTheme("status-yellow");
+    badIcon = QIcon::fromTheme("status-bad");
 
-    QRegularExpression permittedNames("[a-zA-Z0-9_]{3,16}");
+    static const QRegularExpression s_permittedNames("[a-zA-Z0-9_]{3,16}");
     auto nameEdit = ui->nameEdit;
-    nameEdit->setValidator(new QRegularExpressionValidator(permittedNames));
+    nameEdit->setValidator(new QRegularExpressionValidator(s_permittedNames));
     nameEdit->setClearButtonEnabled(true);
     validityAction = nameEdit->addAction(yellowIcon, QLineEdit::LeadingPosition);
     connect(nameEdit, &QLineEdit::textEdited, this, &ProfileSetupDialog::nameEdited);
@@ -226,14 +226,17 @@ struct MojangError {
     static MojangError fromJSON(QByteArray data)
     {
         MojangError out;
-        out.error = QString::fromUtf8(data);
+        out.rawError = QString::fromUtf8(data);
         auto doc = QJsonDocument::fromJson(data, &out.parseError);
-        auto object = doc.object();
 
-        out.fullyParsed = true;
-        out.fullyParsed &= Parsers::getString(object.value("path"), out.path);
-        out.fullyParsed &= Parsers::getString(object.value("error"), out.error);
-        out.fullyParsed &= Parsers::getString(object.value("errorMessage"), out.errorMessage);
+        out.fullyParsed = false;
+        if (!out.parseError.error) {
+            auto object = doc.object();
+            out.fullyParsed = true;
+            out.fullyParsed &= Parsers::getString(object.value("path"), out.path);
+            out.fullyParsed &= Parsers::getString(object.value("error"), out.error);
+            out.fullyParsed &= Parsers::getString(object.value("errorMessage"), out.errorMessage);
+        }
 
         return out;
     }
@@ -261,7 +264,20 @@ void ProfileSetupDialog::setupProfileFinished()
     } else {
         auto parsedError = MojangError::fromJSON(*m_profile_response);
         ui->errorLabel->setVisible(true);
-        ui->errorLabel->setText(tr("The server returned the following error:") + "\n\n" + parsedError.errorMessage);
+
+        QString errorMessage =
+            tr("Network Error: %1\nHTTP Status: %2").arg(m_profile_task->errorString(), QString::number(m_profile_task->replyStatusCode()));
+
+        if (parsedError.fullyParsed) {
+            errorMessage += "Path: " + parsedError.path + "\n";
+            errorMessage += "Error: " + parsedError.error + "\n";
+            errorMessage += "Message: " + parsedError.errorMessage + "\n";
+        } else {
+            errorMessage += "Failed to parse error from Mojang API: " + parsedError.parseError.errorString() + "\n";
+            errorMessage += "Log:\n" + parsedError.rawError + "\n";
+        }
+
+        ui->errorLabel->setText(tr("The server responded with the following error:") + "\n\n" + errorMessage);
         qDebug() << parsedError.rawError;
         auto button = ui->buttonBox->button(QDialogButtonBox::Cancel);
         button->setEnabled(true);

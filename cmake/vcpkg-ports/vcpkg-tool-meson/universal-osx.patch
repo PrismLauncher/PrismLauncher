@@ -1,0 +1,16 @@
+diff --git a/mesonbuild/compilers/detect.py b/mesonbuild/compilers/detect.py
+index f57957f0b..a72e72a0b 100644
+--- a/mesonbuild/compilers/detect.py
++++ b/mesonbuild/compilers/detect.py
+@@ -1472,6 +1472,11 @@ def _get_clang_compiler_defines(compiler: T.List[str], lang: str) -> T.Dict[str,
+     """
+     from .mixins.clang import clang_lang_map
+ 
++    # Filter out `-arch` flags passed to the compiler for Universal Binaries
++    # https://github.com/mesonbuild/meson/issues/5290
++    # https://github.com/mesonbuild/meson/issues/8206
++    compiler = [arg for i, arg in enumerate(compiler) if not (i > 0 and compiler[i - 1] == "-arch") and not arg == "-arch"]
++
+     def _try_obtain_compiler_defines(args: T.List[str]) -> str:
+         mlog.debug(f'Running command: {join_args(args)}')
+         p, output, error = Popen_safe(compiler + args, write='', stdin=subprocess.PIPE)

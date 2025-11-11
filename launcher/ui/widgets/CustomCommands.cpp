@@ -44,13 +44,14 @@ CustomCommands::~CustomCommands()
 CustomCommands::CustomCommands(QWidget* parent) : QWidget(parent), ui(new Ui::CustomCommands)
 {
     ui->setupUi(this);
+    connect(ui->overrideCheckBox, &QCheckBox::toggled, ui->customCommandsWidget, &QWidget::setEnabled);
 }
 
 void CustomCommands::initialize(bool checkable, bool checked, const QString& prelaunch, const QString& wrapper, const QString& postexit)
 {
-    ui->customCommandsGroupBox->setCheckable(checkable);
+    ui->overrideCheckBox->setVisible(checkable);
     if (checkable) {
-        ui->customCommandsGroupBox->setChecked(checked);
+        ui->overrideCheckBox->setChecked(checked);
     }
     ui->preLaunchCmdTextBox->setText(prelaunch);
     ui->wrapperCmdTextBox->setText(wrapper);
@@ -64,9 +65,9 @@ void CustomCommands::retranslate()
 
 bool CustomCommands::checked() const
 {
-    if (!ui->customCommandsGroupBox->isCheckable())
+    if (!ui->overrideCheckBox->isVisible())
         return true;
-    return ui->customCommandsGroupBox->isChecked();
+    return ui->overrideCheckBox->isChecked();
 }
 
 QString CustomCommands::prelaunchCommand() const

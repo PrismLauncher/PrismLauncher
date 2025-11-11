@@ -35,7 +35,7 @@ class WideBar : public QToolBar {
     // Ideally we would use a QBitArray for this, but it doesn't support string conversion,
     // so using it in settings is very messy.
 
-    [[nodiscard]] QByteArray getVisibilityState() const;
+    QByteArray getVisibilityState() const;
     void setVisibilityState(QByteArray&&);
 
     void removeAction(QAction* action);
@@ -50,8 +50,8 @@ class WideBar : public QToolBar {
     auto getMatching(QAction* act) -> QList<BarEntry>::iterator;
 
     /** Used to distinguish between versions of the WideBar with different actions */
-    [[nodiscard]] QByteArray getHash() const;
-    [[nodiscard]] bool checkHash(QByteArray const&) const;
+    QByteArray getHash() const;
+    bool checkHash(QByteArray const&) const;
 
    private:
     QList<BarEntry> m_entries;

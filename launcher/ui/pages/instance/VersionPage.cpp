@@ -91,12 +91,12 @@ class IconProxy : public QIdentityProxyModel {
             if (!var.isNull()) {
                 auto string = var.toString();
                 if (string == "warning") {
-                    return APPLICATION->getThemedIcon("status-yellow");
+                    return QIcon::fromTheme("status-yellow");
                 } else if (string == "error") {
-                    return APPLICATION->getThemedIcon("status-bad");
+                    return QIcon::fromTheme("status-bad");
                 }
             }
-            return APPLICATION->getThemedIcon("status-good");
+            return QIcon::fromTheme("status-good");
         }
         return var;
     }
@@ -124,16 +124,13 @@ void VersionPage::retranslate()
 void VersionPage::openedImpl()
 {
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
-    if (!APPLICATION->settings()->contains(setting_name))
-        m_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
-    else
-        m_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
+    m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
-    ui->toolBar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
+    ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
 }
 void VersionPage::closedImpl()
 {
-    m_wide_bar_setting->set(ui->toolBar->getVisibilityState());
+    m_wide_bar_setting->set(QString::fromUtf8(ui->toolBar->getVisibilityState().toBase64()));
 }
 
 QMenu* VersionPage::createPopupMenu()
@@ -252,8 +249,11 @@ void VersionPage::updateButtons(int row)
 bool VersionPage::reloadPackProfile()
 {
     try {
-        m_profile->reload(Net::Mode::Online);
-        return true;
+        auto result = m_profile->reload(Net::Mode::Online);
+        if (!result) {
+            QMessageBox::critical(this, tr("Error"), result.error);
+        }
+        return result;
     } catch (const Exception& e) {
         QMessageBox::critical(this, tr("Error"), e.cause());
         return false;

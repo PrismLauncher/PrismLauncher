@@ -27,6 +27,7 @@ static void loadMinecraftV1(Flame::Minecraft& m, QJsonObject& minecraft)
         loadModloaderV1(loader, obj);
         m.modLoaders.append(loader);
     }
+    m.recommendedRAM = Json::ensureInteger(minecraft, "recommendedRam", 0);
 }
 
 static void loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)
@@ -45,7 +46,7 @@ static void loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)
 
         Flame::File file;
         loadFileV1(file, obj);
-
+        Q_ASSERT(file.projectId != 0);
         pack.files.insert(file.fileId, file);
     }
 

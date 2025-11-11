@@ -41,22 +41,8 @@
 const QString FlamePackExportTask::TEMPLATE = "<li><a href=\"{url}\">{name}{authors}</a></li>\n";
 const QStringList FlamePackExportTask::FILE_EXTENSIONS({ "jar", "zip" });
 
-FlamePackExportTask::FlamePackExportTask(const QString& name,
-                                         const QString& version,
-                                         const QString& author,
-                                         bool optionalFiles,
-                                         InstancePtr instance,
-                                         const QString& output,
-                                         MMCZip::FilterFunction filter)
-    : name(name)
-    , version(version)
-    , author(author)
-    , optionalFiles(optionalFiles)
-    , instance(instance)
-    , mcInstance(dynamic_cast<MinecraftInstance*>(instance.get()))
-    , gameRoot(instance->gameRoot())
-    , output(output)
-    , filter(filter)
+FlamePackExportTask::FlamePackExportTask(FlamePackExportOptions&& options)
+    : m_options(std::move(options)), m_gameRoot(m_options.instance->gameRoot())
 {}
 
 void FlamePackExportTask::executeTask()
@@ -70,7 +56,6 @@ bool FlamePackExportTask::abort()
 {
     if (task) {
         task->abort();
-        emitAborted();
         return true;
     }
     return false;
@@ -82,7 +67,7 @@ void FlamePackExportTask::collectFiles()
     QCoreApplication::processEvents();
 
     files.clear();
-    if (!MMCZip::collectFileListRecursively(instance->gameRoot(), nullptr, &files, filter)) {
+    if (!MMCZip::collectFileListRecursively(m_options.instance->gameRoot(), nullptr, &files, m_options.filter)) {
         emitFailed(tr("Could not search for files"));
         return;
     }
@@ -90,11 +75,8 @@ void FlamePackExportTask::collectFiles()
     pendingHashes.clear();
     resolvedFiles.clear();
 
-    if (mcInstance != nullptr) {
-        mcInstance->loaderModList()->update();
-        connect(mcInstance->loaderModList().get(), &ModFolderModel::updateFinished, this, &FlamePackExportTask::collectHashes);
-    } else
-        collectHashes();
+    m_options.instance->loaderModList()->update();
+    connect(m_options.instance->loaderModList().get(), &ModFolderModel::updateFinished, this, &FlamePackExportTask::collectHashes);
 }
 
 void FlamePackExportTask::collectHashes()
@@ -102,11 +84,11 @@ void FlamePackExportTask::collectHashes()
     setAbortable(true);
     setStatus(tr("Finding file hashes..."));
     setProgress(1, 5);
-    auto allMods = mcInstance->loaderModList()->allMods();
+    auto allMods = m_options.instance->loaderModList()->allMods();
     ConcurrentTask::Ptr hashingTask(new ConcurrentTask("MakeHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));
     task.reset(hashingTask);
     for (const QFileInfo& file : files) {
-        const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
+        const QString relative = m_gameRoot.relativeFilePath(file.absoluteFilePath());
         // require sensible file types
         if (!std::any_of(FILE_EXTENSIONS.begin(), FILE_EXTENSIONS.end(), [&relative](const QString& extension) {
                 return relative.endsWith('.' + extension) || relative.endsWith('.' + extension + ".disabled");
@@ -171,6 +153,7 @@ void FlamePackExportTask::collectHashes()
         progressStep->status = status;
         stepProgress(*progressStep);
     });
+    connect(hashingTask.get(), &Task::aborted, this, &FlamePackExportTask::emitAborted);
     hashingTask->start();
 }
 
@@ -246,6 +229,7 @@ void FlamePackExportTask::makeApiRequest()
         getProjectsInfo();
     });
     connect(task.get(), &Task::failed, this, &FlamePackExportTask::getProjectsInfo);
+    connect(task.get(), &Task::aborted, this, &FlamePackExportTask::emitAborted);
     task->start();
 }
 
@@ -324,6 +308,7 @@ void FlamePackExportTask::getProjectsInfo()
         buildZip();
     });
     connect(projTask.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
+    connect(projTask.get(), &Task::aborted, this, &FlamePackExportTask::emitAborted);
     task.reset(projTask);
     task->start();
 }
@@ -333,13 +318,13 @@ void FlamePackExportTask::buildZip()
     setStatus(tr("Adding files..."));
     setProgress(4, 5);
 
-    auto zipTask = makeShared<MMCZip::ExportToZipTask>(output, gameRoot, files, "overrides/", true, false);
+    auto zipTask = makeShared<MMCZip::ExportToZipTask>(m_options.output, m_gameRoot, files, "overrides/", true, false);
     zipTask->addExtraFile("manifest.json", generateIndex());
     zipTask->addExtraFile("modlist.html", generateHTML());
 
     QStringList exclude;
     std::transform(resolvedFiles.keyBegin(), resolvedFiles.keyEnd(), std::back_insert_iterator(exclude),
-                   [this](QString file) { return gameRoot.relativeFilePath(file); });
+                   [this](QString file) { return m_gameRoot.relativeFilePath(file); });
     zipTask->setExcludeFiles(exclude);
 
     auto progressStep = std::make_shared<TaskStepProgress>();
@@ -374,52 +359,56 @@ QByteArray FlamePackExportTask::generateIndex()
     QJsonObject obj;
     obj["manifestType"] = "minecraftModpack";
     obj["manifestVersion"] = 1;
-    obj["name"] = name;
-    obj["version"] = version;
-    obj["author"] = author;
+    obj["name"] = m_options.name;
+    obj["version"] = m_options.version;
+    obj["author"] = m_options.author;
     obj["overrides"] = "overrides";
-    if (mcInstance) {
-        QJsonObject version;
-        auto profile = mcInstance->getPackProfile();
-        // collect all supported components
-        const ComponentPtr minecraft = profile->getComponent("net.minecraft");
-        const ComponentPtr quilt = profile->getComponent("org.quiltmc.quilt-loader");
-        const ComponentPtr fabric = profile->getComponent("net.fabricmc.fabric-loader");
-        const ComponentPtr forge = profile->getComponent("net.minecraftforge");
-        const ComponentPtr neoforge = profile->getComponent("net.neoforged");
 
-        // convert all available components to mrpack dependencies
-        if (minecraft != nullptr)
-            version["version"] = minecraft->m_version;
-        QString id;
-        if (quilt != nullptr)
-            id = "quilt-" + quilt->m_version;
-        else if (fabric != nullptr)
-            id = "fabric-" + fabric->m_version;
-        else if (forge != nullptr)
-            id = "forge-" + forge->m_version;
-        else if (neoforge != nullptr) {
-            id = "neoforge-";
-            if (minecraft->m_version == "1.20.1")
-                id += "1.20.1-";
-            id += neoforge->m_version;
-        }
-        version["modLoaders"] = QJsonArray();
-        if (!id.isEmpty()) {
-            QJsonObject loader;
-            loader["id"] = id;
-            loader["primary"] = true;
-            version["modLoaders"] = QJsonArray({ loader });
-        }
-        obj["minecraft"] = version;
+    QJsonObject version;
+
+    auto profile = m_options.instance->getPackProfile();
+    // collect all supported components
+    const ComponentPtr minecraft = profile->getComponent("net.minecraft");
+    const ComponentPtr quilt = profile->getComponent("org.quiltmc.quilt-loader");
+    const ComponentPtr fabric = profile->getComponent("net.fabricmc.fabric-loader");
+    const ComponentPtr forge = profile->getComponent("net.minecraftforge");
+    const ComponentPtr neoforge = profile->getComponent("net.neoforged");
+
+    // convert all available components to mrpack dependencies
+    if (minecraft != nullptr)
+        version["version"] = minecraft->m_version;
+    QString id;
+    if (quilt != nullptr)
+        id = "quilt-" + quilt->m_version;
+    else if (fabric != nullptr)
+        id = "fabric-" + fabric->m_version;
+    else if (forge != nullptr)
+        id = "forge-" + forge->m_version;
+    else if (neoforge != nullptr) {
+        id = "neoforge-";
+        if (minecraft->m_version == "1.20.1")
+            id += "1.20.1-";
+        id += neoforge->m_version;
     }
+    version["modLoaders"] = QJsonArray();
+    if (!id.isEmpty()) {
+        QJsonObject loader;
+        loader["id"] = id;
+        loader["primary"] = true;
+        version["modLoaders"] = QJsonArray({ loader });
+    }
+
+    if (m_options.recommendedRAM > 0)
+        version["recommendedRam"] = m_options.recommendedRAM;
+
+    obj["minecraft"] = version;
 
     QJsonArray files;
     for (auto mod : resolvedFiles) {
         QJsonObject file;
         file["projectID"] = mod.addonId;
         file["fileID"] = mod.version;
-        file["required"] = mod.enabled || !optionalFiles;
+        file["required"] = mod.enabled || !m_options.optionalFiles;
         files << file;
     }
     obj["files"] = files;

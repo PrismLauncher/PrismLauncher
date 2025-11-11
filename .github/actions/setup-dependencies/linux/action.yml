@@ -1,0 +1,44 @@
+name: Setup Linux dependencies
+
+runs:
+  using: composite
+
+  steps:
+    - name: Install host dependencies
+      shell: bash
+      run: |
+        sudo apt-get -y update
+        sudo apt-get -y install \
+          dpkg-dev \
+          ninja-build extra-cmake-modules scdoc \
+          appstream libxcb-cursor-dev
+
+    - name: Setup AppImage tooling
+      shell: bash
+      run: |
+        declare -A appimage_deps
+
+        deb_arch="$(dpkg-architecture -q DEB_HOST_ARCH)"
+        case "$deb_arch" in
+          "amd64")
+            appimage_deps["https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20250213-2/linuxdeploy-x86_64.AppImage"]="4648f278ab3ef31f819e67c30d50f462640e5365a77637d7e6f2ad9fd0b4522a linuxdeploy-x86_64.AppImage"
+            appimage_deps["https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/1-alpha-20250213-1/linuxdeploy-plugin-qt-x86_64.AppImage"]="15106be885c1c48a021198e7e1e9a48ce9d02a86dd0a1848f00bdbf3c1c92724  linuxdeploy-plugin-qt-x86_64.AppImage"
+            appimage_deps["https://github.com/AppImageCommunity/AppImageUpdate/releases/download/2.0.0-alpha-1-20241225/AppImageUpdate-x86_64.AppImage"]="f1747cf60058e99f1bb9099ee9787d16c10241313b7acec81810ea1b1e568c11  AppImageUpdate-x86_64.AppImage"
+            ;;
+          "arm64")
+            appimage_deps["https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20250213-2/linuxdeploy-aarch64.AppImage"]="06706ac8189797dccd36bd384105892cb5e6e71f784f4df526cc958adc223cd6  linuxdeploy-aarch64.AppImage"
+            appimage_deps["https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/1-alpha-20250213-1/linuxdeploy-plugin-qt-aarch64.AppImage"]="bf1c24aff6d749b5cf423afad6f15abd4440f81dec1aab95706b25f6667cdcf1  linuxdeploy-plugin-qt-aarch64.AppImage"
+            appimage_deps["https://github.com/AppImageCommunity/AppImageUpdate/releases/download/2.0.0-alpha-1-20241225/AppImageUpdate-aarch64.AppImage"]="cf27f810dfe5eda41f130769e4a4b562b9d93665371c15ebeffb84ee06a41550  AppImageUpdate-aarch64.AppImage"
+            ;;
+          *)
+            echo "# 🚨 The Debian architecture \"$deb_arch\" is not recognized!" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+            ;;
+        esac
+
+        for url in "${!appimage_deps[@]}"; do
+          curl -LO "$url"
+          sha256sum -c - <<< "${appimage_deps[$url]}"
+        done
+
+        sudo apt -y install libopengl0

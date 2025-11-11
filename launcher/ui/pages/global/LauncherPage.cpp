@@ -78,9 +78,6 @@ LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::Launch
     ui->sortingModeGroup->setId(ui->sortByNameBtn, Sort_Name);
     ui->sortingModeGroup->setId(ui->sortLastLaunchedBtn, Sort_LastLaunch);
 
-    defaultFormat = new QTextCharFormat(ui->fontPreview->currentCharFormat());
-
-    m_languageModel = APPLICATION->translations();
     loadSettings();
 
     ui->updateSettingsBox->setHidden(!APPLICATION->updater());
@@ -93,30 +90,23 @@ LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::Launch
     ui->javaDirTextBox->setReadOnly(true);
     ui->skinsDirTextBox->setReadOnly(true);
 #else
-    ui->tabWidget->removeTab(ui->tabWidget->indexOf(ui->macSandboxTab));
+    // ui->tabWidget->removeTab(ui->tabWidget->indexOf(ui->macSandboxTab));
 #endif
 
-    connect(ui->fontSizeBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &LauncherPage::refreshFontPreview);
-    connect(ui->consoleFont, &QFontComboBox::currentFontChanged, this, &LauncherPage::refreshFontPreview);
-    connect(ui->themeCustomizationWidget, &ThemeCustomizationWidget::currentWidgetThemeChanged, this, &LauncherPage::refreshFontPreview);
-
-    connect(ui->themeCustomizationWidget, &ThemeCustomizationWidget::currentCatChanged, APPLICATION, &Application::currentCatChanged);
-
 #if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
-    connect(ui->readWriteList, &DropList::droppedURLs, APPLICATION->m_dynamicSandboxExceptions.get(), &DynamicSandboxException::addReadWriteExceptions);
-    connect(ui->readOnlyList, &DropList::droppedURLs, APPLICATION->m_dynamicSandboxExceptions.get(), &DynamicSandboxException::addReadOnlyExceptions);
-    connect(ui->readWriteList, &DropList::droppedURLs, this, &LauncherPage::loadSettings);
-    connect(ui->readOnlyList, &DropList::droppedURLs, this, &LauncherPage::loadSettings);
-
-    connect(ui->readWriteList, &DropList::deleteKeyPressed, this, &LauncherPage::on_readWriteRemoveBtn_clicked);
-    connect(ui->readOnlyList, &DropList::deleteKeyPressed, this, &LauncherPage::on_readOnlyRemoveBtn_clicked);
+    // connect(ui->readWriteList, &DropList::droppedURLs, APPLICATION->m_dynamicSandboxExceptions.get(), &DynamicSandboxException::addReadWriteExceptions);
+    // connect(ui->readOnlyList, &DropList::droppedURLs, APPLICATION->m_dynamicSandboxExceptions.get(), &DynamicSandboxException::addReadOnlyExceptions);
+    // connect(ui->readWriteList, &DropList::droppedURLs, this, &LauncherPage::loadSettings);
+    // connect(ui->readOnlyList, &DropList::droppedURLs, this, &LauncherPage::loadSettings);
+    //
+    // connect(ui->readWriteList, &DropList::deleteKeyPressed, this, &LauncherPage::on_readWriteRemoveBtn_clicked);
+    // connect(ui->readOnlyList, &DropList::deleteKeyPressed, this, &LauncherPage::on_readOnlyRemoveBtn_clicked);
 #endif
 }
 
 LauncherPage::~LauncherPage()
 {
     delete ui;
-    delete defaultFormat;
 }
 
 bool LauncherPage::apply()
@@ -257,9 +247,9 @@ void LauncherPage::on_skinsDirResetBtn_clicked()
     ui->skinsDirTextBox->setText(defValue);
 }
 
-void LauncherPage::on_metadataDisableBtn_clicked()
+void LauncherPage::on_metadataEnableBtn_clicked()
 {
-    ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
+    ui->metadataWarningLabel->setHidden(ui->metadataEnableBtn->isChecked());
 }
 
 void LauncherPage::on_readWriteAddBtn_clicked() {
@@ -274,31 +264,31 @@ void LauncherPage::on_readWriteAddBtn_clicked() {
 
 void LauncherPage::on_readWriteRemoveBtn_clicked() {
 #if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
-    int row = ui->readWriteList->currentRow();
-    if (row >= 0) {
-        APPLICATION->m_dynamicSandboxExceptions->removeReadWriteException(row);
-        loadSettings();
-    }
+    // int row = ui->readWriteList->currentRow();
+    // if (row >= 0) {
+    //     APPLICATION->m_dynamicSandboxExceptions->removeReadWriteException(row);
+    //     loadSettings();
+    // }
 #endif
 }
 
 void LauncherPage::on_readOnlyAddBtn_clicked() {
 #if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
-    QString dir = QFileDialog::getExistingDirectory(this, tr("Add Read Only Exception"), QDir::homePath());
-    if (!dir.isEmpty()) {
-        APPLICATION->m_dynamicSandboxExceptions->addReadOnlyException(dir);
-        loadSettings();
-    }
+    // QString dir = QFileDialog::getExistingDirectory(this, tr("Add Read Only Exception"), QDir::homePath());
+    // if (!dir.isEmpty()) {
+    //     APPLICATION->m_dynamicSandboxExceptions->addReadOnlyException(dir);
+    //     loadSettings();
+    // }
 #endif
 }
 
 void LauncherPage::on_readOnlyRemoveBtn_clicked() {
 #if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
-    int row = ui->readOnlyList->currentRow();
-    if (row >= 0) {
-        APPLICATION->m_dynamicSandboxExceptions->removeReadOnlyException(row);
-        loadSettings();
-    }
+    // int row = ui->readOnlyList->currentRow();
+    // if (row >= 0) {
+    //     APPLICATION->m_dynamicSandboxExceptions->removeReadOnlyException(row);
+    //     loadSettings();
+    // }
 #endif
 }
 
@@ -320,12 +310,6 @@ void LauncherPage::applySettings()
     s->set("RequestTimeout", ui->timeoutSecondsSpinBox->value());
 
     // Console settings
-    s->set("ShowConsole", ui->showConsoleCheck->isChecked());
-    s->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
-    s->set("ShowConsoleOnError", ui->showConsoleErrorCheck->isChecked());
-    QString consoleFontFamily = ui->consoleFont->currentFont().family();
-    s->set("ConsoleFont", consoleFontFamily);
-    s->set("ConsoleFontSize", ui->fontSizeBox->value());
     s->set("ConsoleMaxLines", ui->lineLimitSpinBox->value());
     s->set("ConsoleOverflowStop", ui->checkStopLogging->checkState() != Qt::Unchecked);
 
@@ -338,7 +322,9 @@ void LauncherPage::applySettings()
     s->set("SkinsDir", ui->skinsDirTextBox->text());
     s->set("JavaDir", ui->javaDirTextBox->text());
     s->set("DownloadsDirWatchRecursive", ui->downloadsDirWatchRecursiveCheckBox->isChecked());
+    s->set("MoveModsFromDownloadsDir", ui->downloadsDirMoveCheckBox->isChecked());
 
+    // Instance
     auto sortMode = (InstSortMode)ui->sortingModeGroup->checkedId();
     switch (sortMode) {
         case Sort_LastLaunch:
@@ -350,13 +336,18 @@ void LauncherPage::applySettings()
             break;
     }
 
-    // Cat
-    s->set("CatOpacity", ui->catOpacitySpinBox->value());
+    if (ui->askToRenameDirBtn->isChecked()) {
+        s->set("InstRenamingMode", "AskEverytime");
+    } else if (ui->alwaysRenameDirBtn->isChecked()) {
+        s->set("InstRenamingMode", "PhysicalDir");
+    } else if (ui->neverRenameDirBtn->isChecked()) {
+        s->set("InstRenamingMode", "MetadataOnly");
+    }
 
     // Mods
-    s->set("ModMetadataDisabled", ui->metadataDisableBtn->isChecked());
-    s->set("ModDependenciesDisabled", ui->dependenciesDisableBtn->isChecked());
-    s->set("SkipModpackUpdatePrompt", ui->skipModpackUpdatePromptBtn->isChecked());
+    s->set("ModMetadataDisabled", !ui->metadataEnableBtn->isChecked());
+    s->set("ModDependenciesDisabled", !ui->dependenciesEnableBtn->isChecked());
+    s->set("SkipModpackUpdatePrompt", !ui->modpackUpdatePromptBtn->isChecked());
 }
 void LauncherPage::loadSettings()
 {
@@ -367,11 +358,6 @@ void LauncherPage::loadSettings()
         ui->updateIntervalSpinBox->setValue(APPLICATION->updater()->getUpdateCheckInterval() / 3600);
     }
 
-    // Toolbar/menu bar settings (not applicable if native menu bar is present)
-    ui->toolsBox->setEnabled(!QMenuBar().isNativeMenuBar());
-#ifdef Q_OS_MACOS
-    ui->toolsBox->setVisible(!QMenuBar().isNativeMenuBar());
-#endif
     ui->preferMenuBarCheckBox->setChecked(s->get("MenuBarInsteadOfToolBar").toBool());
 
     ui->numberOfConcurrentTasksSpinBox->setValue(s->get("NumberOfConcurrentTasks").toInt());
@@ -380,20 +366,6 @@ void LauncherPage::loadSettings()
     ui->timeoutSecondsSpinBox->setValue(s->get("RequestTimeout").toInt());
 
     // Console settings
-    ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
-    ui->autoCloseConsoleCheck->setChecked(s->get("AutoCloseConsole").toBool());
-    ui->showConsoleErrorCheck->setChecked(s->get("ShowConsoleOnError").toBool());
-    QString fontFamily = APPLICATION->settings()->get("ConsoleFont").toString();
-    QFont consoleFont(fontFamily);
-    ui->consoleFont->setCurrentFont(consoleFont);
-
-    bool conversionOk = true;
-    int fontSize = APPLICATION->settings()->get("ConsoleFontSize").toInt(&conversionOk);
-    if (!conversionOk) {
-        fontSize = 11;
-    }
-    ui->fontSizeBox->setValue(fontSize);
-    refreshFontPreview();
     ui->lineLimitSpinBox->setValue(s->get("ConsoleMaxLines").toInt());
     ui->checkStopLogging->setChecked(s->get("ConsoleOverflowStop").toBool());
 
@@ -405,96 +377,54 @@ void LauncherPage::loadSettings()
     ui->skinsDirTextBox->setText(s->get("SkinsDir").toString());
     ui->javaDirTextBox->setText(s->get("JavaDir").toString());
     ui->downloadsDirWatchRecursiveCheckBox->setChecked(s->get("DownloadsDirWatchRecursive").toBool());
+    ui->downloadsDirMoveCheckBox->setChecked(s->get("MoveModsFromDownloadsDir").toBool());
 
+    // Instance
     QString sortMode = s->get("InstSortMode").toString();
-
     if (sortMode == "LastLaunch") {
         ui->sortLastLaunchedBtn->setChecked(true);
     } else {
         ui->sortByNameBtn->setChecked(true);
     }
 
-    // Cat
-    ui->catOpacitySpinBox->setValue(s->get("CatOpacity").toInt());
+    QString renamingMode = s->get("InstRenamingMode").toString();
+    ui->askToRenameDirBtn->setChecked(renamingMode == "AskEverytime");
+    ui->alwaysRenameDirBtn->setChecked(renamingMode == "PhysicalDir");
+    ui->neverRenameDirBtn->setChecked(renamingMode == "MetadataOnly");
 
     // Mods
-    ui->metadataDisableBtn->setChecked(s->get("ModMetadataDisabled").toBool());
-    ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
-    ui->dependenciesDisableBtn->setChecked(s->get("ModDependenciesDisabled").toBool());
-    ui->skipModpackUpdatePromptBtn->setChecked(s->get("SkipModpackUpdatePrompt").toBool());
+    ui->metadataEnableBtn->setChecked(!s->get("ModMetadataDisabled").toBool());
+    ui->metadataWarningLabel->setHidden(ui->metadataEnableBtn->isChecked());
+    ui->dependenciesEnableBtn->setChecked(!s->get("ModDependenciesDisabled").toBool());
+    ui->modpackUpdatePromptBtn->setChecked(!s->get("SkipModpackUpdatePrompt").toBool());
 
 #if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
     // macOS sandbox user-selected dynamic exceptions
-    QList<QUrl> readWriteURLs = APPLICATION->m_dynamicSandboxExceptions->readWriteExceptionURLs();
-    QList<QUrl> readOnlyURLs = APPLICATION->m_dynamicSandboxExceptions->readOnlyExceptionURLs();
-
-    QFileIconProvider iconProvider;
-    ui->readWriteList->clear();
-    for (const QUrl& url : readWriteURLs) {
-        if (url.isEmpty())
-            continue;
-        if (url.scheme() == "file") {
-            QIcon fileIcon = iconProvider.icon(QFileInfo(url.toLocalFile()));
-            auto item = new QListWidgetItem(fileIcon, url.toLocalFile());
-            ui->readWriteList->addItem(item);
-        }
-    }
-    ui->readOnlyList->clear();
-    for (const QUrl& url : readOnlyURLs) {
-        if (url.isEmpty())
-            continue;
-        if (url.scheme() == "file") {
-            QIcon fileIcon = iconProvider.icon(QFileInfo(url.toLocalFile()));
-            auto item = new QListWidgetItem(fileIcon, url.toLocalFile());
-            ui->readOnlyList->addItem(item);
-        }
-    }
+    // QList<QUrl> readWriteURLs = APPLICATION->m_dynamicSandboxExceptions->readWriteExceptionURLs();
+    // QList<QUrl> readOnlyURLs = APPLICATION->m_dynamicSandboxExceptions->readOnlyExceptionURLs();
+    //
+    // QFileIconProvider iconProvider;
+    // ui->readWriteList->clear();
+    // for (const QUrl& url : readWriteURLs) {
+    //     if (url.isEmpty())
+    //         continue;
+    //     if (url.scheme() == "file") {
+    //         QIcon fileIcon = iconProvider.icon(QFileInfo(url.toLocalFile()));
+    //         auto item = new QListWidgetItem(fileIcon, url.toLocalFile());
+    //         ui->readWriteList->addItem(item);
+    //     }
+    // }
+    // ui->readOnlyList->clear();
+    // for (const QUrl& url : readOnlyURLs) {
+    //     if (url.isEmpty())
+    //         continue;
+    //     if (url.scheme() == "file") {
+    //         QIcon fileIcon = iconProvider.icon(QFileInfo(url.toLocalFile()));
+    //         auto item = new QListWidgetItem(fileIcon, url.toLocalFile());
+    //         ui->readOnlyList->addItem(item);
+    //     }
+    // }
 #endif
-}
-
-void LauncherPage::refreshFontPreview()
-{
-    const LogColors& colors = APPLICATION->themeManager()->getLogColors();
-
-    int fontSize = ui->fontSizeBox->value();
-    QString fontFamily = ui->consoleFont->currentFont().family();
-    ui->fontPreview->clear();
-    defaultFormat->setFont(QFont(fontFamily, fontSize));
-
-    auto print = [this, colors](const QString& message, MessageLevel::Enum level) {
-        QTextCharFormat format(*defaultFormat);
-
-        QColor bg = colors.background.value(level);
-        QColor fg = colors.foreground.value(level);
-
-        if (bg.isValid())
-            format.setBackground(bg);
-
-        if (fg.isValid())
-            format.setForeground(fg);
-
-        // append a paragraph/line
-        auto workCursor = ui->fontPreview->textCursor();
-        workCursor.movePosition(QTextCursor::End);
-        workCursor.insertText(message, format);
-        workCursor.insertBlock();
-    };
-
-    print(QString("%1 version: %2 (%3)\n")
-              .arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString(), BuildConfig.BUILD_PLATFORM),
-          MessageLevel::Launcher);
-
-    QDate today = QDate::currentDate();
-
-    if (today.month() == 10 && today.day() == 31)
-        print(tr("[Test/ERROR] OOoooOOOoooo! A spooky error!"), MessageLevel::Error);
-    else
-        print(tr("[Test/ERROR] A spooky error!"), MessageLevel::Error);
-
-    print(tr("[Test/INFO] A harmless message..."), MessageLevel::Info);
-    print(tr("[Test/WARN] A not so spooky warning."), MessageLevel::Warning);
-    print(tr("[Test/DEBUG] A secret debugging message..."), MessageLevel::Debug);
-    print(tr("[Test/FATAL] A terrifying fatal error!"), MessageLevel::Fatal);
 }
 
 void LauncherPage::retranslate()

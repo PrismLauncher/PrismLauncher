@@ -22,13 +22,13 @@
 
 class IconTheme {
    public:
-    IconTheme(const QString& id, const QString& path);
+    IconTheme(const QString& id, const QString& path) : m_id(id), m_path(path) {}
     IconTheme() = default;
 
     bool load();
-    QString id();
-    QString path();
-    QString name();
+    QString id() const { return m_id; }
+    QString path() const { return m_path; }
+    QString name() const { return m_name; }
 
    private:
     QString m_id;

@@ -34,8 +34,8 @@
  */
 
 #include <qstringliteral.h>
-#include "BuildConfig.h"
 #include <QObject>
+#include "BuildConfig.h"
 
 const Config BuildConfig;
 
@@ -49,15 +49,15 @@ Config::Config()
     LAUNCHER_DOMAIN = "@Launcher_Domain@";
     LAUNCHER_CONFIGFILE = "@Launcher_ConfigFile@";
     LAUNCHER_GIT = "@Launcher_Git@";
-    LAUNCHER_DESKTOPFILENAME = "@Launcher_DesktopFileName@";
+    LAUNCHER_APPID = "@Launcher_AppID@";
     LAUNCHER_SVGFILENAME = "@Launcher_SVGFileName@";
 
     USER_AGENT = "@Launcher_UserAgent@";
-    USER_AGENT_UNCACHED = USER_AGENT + " (Uncached)";
 
     // Version information
     VERSION_MAJOR = @Launcher_VERSION_MAJOR@;
     VERSION_MINOR = @Launcher_VERSION_MINOR@;
+    VERSION_PATCH = @Launcher_VERSION_PATCH@;
 
     BUILD_PLATFORM = "@Launcher_BUILD_PLATFORM@";
     BUILD_ARTIFACT = "@Launcher_BUILD_ARTIFACT@";
@@ -74,14 +74,13 @@ Config::Config()
     MAC_SPARKLE_PUB_KEY = "@MACOSX_SPARKLE_UPDATE_PUBLIC_KEY@";
     MAC_SPARKLE_APPCAST_URL = "@MACOSX_SPARKLE_UPDATE_FEED_URL@";
 
-    if (!MAC_SPARKLE_PUB_KEY.isEmpty() && !MAC_SPARKLE_APPCAST_URL.isEmpty())
-    {
+    if (!MAC_SPARKLE_PUB_KEY.isEmpty() && !MAC_SPARKLE_APPCAST_URL.isEmpty()) {
         UPDATER_ENABLED = true;
-    } else if(!UPDATER_GITHUB_REPO.isEmpty() && !BUILD_ARTIFACT.isEmpty()) {
+    } else if (!UPDATER_GITHUB_REPO.isEmpty() && !BUILD_ARTIFACT.isEmpty()) {
         UPDATER_ENABLED = true;
     }
 
-    #cmakedefine01 Launcher_ENABLE_JAVA_DOWNLOADER
+#cmakedefine01 Launcher_ENABLE_JAVA_DOWNLOADER
     JAVA_DOWNLOADER_ENABLED = Launcher_ENABLE_JAVA_DOWNLOADER;
 
     GIT_COMMIT = "@Launcher_GIT_COMMIT@";
@@ -89,27 +88,19 @@ Config::Config()
     GIT_REFSPEC = "@Launcher_GIT_REFSPEC@";
 
     // Assume that builds outside of Git repos are "stable"
-    if (GIT_REFSPEC == QStringLiteral("GITDIR-NOTFOUND")
-        || GIT_TAG == QStringLiteral("GITDIR-NOTFOUND")
-        || GIT_REFSPEC == QStringLiteral("")
-        || GIT_TAG == QStringLiteral("GIT-NOTFOUND"))
-    {
+    if (GIT_REFSPEC == QStringLiteral("GITDIR-NOTFOUND") || GIT_TAG == QStringLiteral("GITDIR-NOTFOUND") ||
+        GIT_REFSPEC == QStringLiteral("") || GIT_TAG == QStringLiteral("GIT-NOTFOUND")) {
         GIT_REFSPEC = "refs/heads/stable";
         GIT_TAG = versionString();
         GIT_COMMIT = "";
     }
 
-    if (GIT_REFSPEC.startsWith("refs/heads/"))
-    {
+    if (GIT_REFSPEC.startsWith("refs/heads/")) {
         VERSION_CHANNEL = GIT_REFSPEC;
-        VERSION_CHANNEL.remove("refs/heads/"); 
-    }
-    else if (!GIT_COMMIT.isEmpty())
-    {
+        VERSION_CHANNEL.remove("refs/heads/");
+    } else if (!GIT_COMMIT.isEmpty()) {
         VERSION_CHANNEL = GIT_COMMIT.mid(0, 8);
-    }
-    else
-    {
+    } else {
         VERSION_CHANNEL = "unknown";
     }
 
@@ -136,7 +127,7 @@ Config::Config()
 
 QString Config::versionString() const
 {
-    return QString("%1.%2").arg(VERSION_MAJOR).arg(VERSION_MINOR);
+    return QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH);
 }
 
 QString Config::printableVersionString() const
@@ -144,8 +135,7 @@ QString Config::printableVersionString() const
     QString vstr = versionString();
 
     // If the build is not a main release, append the channel
-    if(VERSION_CHANNEL != "stable" && GIT_TAG != vstr)
-    {
+    if (VERSION_CHANNEL != "stable" && GIT_TAG != vstr) {
         vstr += "-" + VERSION_CHANNEL;
     }
     return vstr;
@@ -162,4 +152,3 @@ QString Config::systemID() const
 {
     return QStringLiteral("%1 %2 %3").arg(COMPILER_TARGET_SYSTEM, COMPILER_TARGET_SYSTEM_VERSION, COMPILER_TARGET_SYSTEM_PROCESSOR);
 }
-

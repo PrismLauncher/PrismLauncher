@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)  # minimum version required by QuaZip
+cmake_minimum_required(VERSION 3.22)  # minimum version required by Qt
 
 project(Launcher)
 
@@ -24,7 +24,7 @@ set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${PROJECT_BINARY_DIR}/jars)
 ######## Set compiler flags ########
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_C_STANDARD_REQUIRED true)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
 if(MSVC)
@@ -78,19 +78,43 @@ else()
     # ATL's pack list needs more than the default 1 Mib stack on windows
     if(WIN32)
         set(CMAKE_EXE_LINKER_FLAGS "-Wl,--stack,8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+
+        # Emit PDBs for WinDbg, etc.
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+            set(CMAKE_EXE_LINKER_FLAGS "-Wl,--pdb= ${CMAKE_EXE_LINKER_FLAGS}")
+
+            foreach(lang C CXX)
+                set("CMAKE_${lang}_FLAGS" "-gcodeview ${CMAKE_${lang}_FLAGS}")
+
+                # Force-enabling this to use generator expressions like TARGET_PDB_FILE
+                # (and because we can actually emit PDBs)
+                set("CMAKE_${lang}_LINKER_SUPPORTS_PDB" ON)
+            endforeach()
+        endif()
+
+        # -ffunction-sections and -fdata-sections help reduce binary size
+        # -mguard=cf enables Control Flow Guard
+        # TODO: Look into -gc-sections to further reduce binary size
+        foreach(lang C CXX)
+            set("CMAKE_${lang}_FLAGS_RELEASE" "-ffunction-sections -fdata-sections -mguard=cf")
+        endforeach()
     endif()
 endif()
 
-# Fix build with Qt 5.13
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_DISABLE_DEPRECATED_BEFORE=0x050C00")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_WARN_DEPRECATED_UP_TO=0x060200")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_DISABLE_DEPRECATED_UP_TO=0x060000")
 
 # Fix aarch64 build for toml++
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTOML_ENABLE_FLOAT16=0")
 
 # set CXXFLAGS for build targets
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -D_FORTIFY_SOURCE=2 ${CMAKE_CXX_FLAGS_RELEASE}")
+
+# Export compile commands for debug builds if we can (useful in LSPs like clangd)
+# https://cmake.org/cmake/help/v3.31/variable/CMAKE_EXPORT_COMPILE_COMMANDS.html
+if(CMAKE_GENERATOR STREQUAL "Unix Makefiles" OR CMAKE_GENERATOR STREQUAL "Ninja" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+endif()
 
 option(DEBUG_ADDRESS_SANITIZER "Enable Address Sanitizer in Debug builds" OFF)
 
@@ -106,14 +130,14 @@ if ((CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebI
         else()
             # AppleClang and Clang
             message(STATUS "Address Sanitizer available on Clang")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
-            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fno-sanitize-recover=null")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fno-sanitize-recover=null")
         endif()
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         # GCC
         message(STATUS "Address Sanitizer available on GCC")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fno-sanitize-recover")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fno-sanitize-recover")
         link_libraries("asan")
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
         message(STATUS "Address Sanitizer available on MSVC")
@@ -182,10 +206,11 @@ set(Launcher_FMLLIBS_BASE_URL "https://files.prismlauncher.org/fmllibs/" CACHE S
 ######## Set version numbers ########
 set(Launcher_VERSION_MAJOR 10)
 set(Launcher_VERSION_MINOR 0)
+set(Launcher_VERSION_PATCH 0)
 
-set(Launcher_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}")
-set(Launcher_VERSION_NAME4 "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.0.0")
-set(Launcher_VERSION_NAME4_COMMA "${Launcher_VERSION_MAJOR},${Launcher_VERSION_MINOR},0,0")
+set(Launcher_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_PATCH}")
+set(Launcher_VERSION_NAME4 "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_PATCH}.0")
+set(Launcher_VERSION_NAME4_COMMA "${Launcher_VERSION_MAJOR},${Launcher_VERSION_MINOR},${Launcher_VERSION_PATCH},0")
 
 # Build platform.
 set(Launcher_BUILD_PLATFORM "unknown" CACHE STRING "A short string identifying the platform that this build was built for. Only used to display in the about dialog.")
@@ -229,7 +254,7 @@ set(Launcher_ENABLE_JAVA_DOWNLOADER_DEFAULT ON)
 # differing Linux/BSD/etc distributions. Downstream packagers should be explicitly opt-ing into this
 # feature if they know it will work with their distribution.
 if(UNIX AND NOT APPLE)
-  set(Launcher_ENABLE_JAVA_DOWNLOADER_DEFAULT OFF)
+    set(Launcher_ENABLE_JAVA_DOWNLOADER_DEFAULT OFF)
 endif()
 
 # Java downloader
@@ -299,25 +324,9 @@ endif()
 
 # Find the required Qt parts
 include(QtVersionlessBackport)
-if(Launcher_QT_VERSION_MAJOR EQUAL 5)
-    set(QT_VERSION_MAJOR 5)
-    find_package(Qt5 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml NetworkAuth)
-    find_package(Qt5 COMPONENTS DBus)
-    list(APPEND Launcher_QT_DBUS Qt5::DBus)
-
-    if(NOT Launcher_FORCE_BUNDLED_LIBS)
-        find_package(QuaZip-Qt5 1.3 QUIET)
-    endif()
-    if (NOT QuaZip-Qt5_FOUND)
-        set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR} CACHE STRING "Qt version to use (4, 5 or 6), defaults to ${QT_VERSION_MAJOR}" FORCE)
-        set(FORCE_BUNDLED_QUAZIP 1)
-    endif()
-
-    # Qt 6 sets these by default. Notably causes Windows APIs to use UNICODE strings.
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE")
-elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
+if(Launcher_QT_VERSION_MAJOR EQUAL 6)
     set(QT_VERSION_MAJOR 6)
-    find_package(Qt6 REQUIRED COMPONENTS Core CoreTools Widgets Concurrent Network Test Xml Core5Compat NetworkAuth)
+    find_package(Qt6 REQUIRED COMPONENTS Core CoreTools Widgets Concurrent Network Test Xml Core5Compat NetworkAuth OpenGL)
     find_package(Qt6 COMPONENTS DBus)
     list(APPEND Launcher_QT_DBUS Qt6::DBus)
     list(APPEND Launcher_QT_LIBS Qt6::Core5Compat)
@@ -333,31 +342,29 @@ else()
     message(FATAL_ERROR "Qt version ${Launcher_QT_VERSION_MAJOR} is not supported")
 endif()
 
-if(Launcher_QT_VERSION_MAJOR EQUAL 5)
-    include(ECMQueryQt)
-    ecm_query_qt(QT_PLUGINS_DIR  QT_INSTALL_PLUGINS)
-    ecm_query_qt(QT_LIBS_DIR     QT_INSTALL_LIBS)
-    ecm_query_qt(QT_LIBEXECS_DIR QT_INSTALL_LIBEXECS)
-else()
+if(Launcher_QT_VERSION_MAJOR EQUAL 6)
     set(QT_PLUGINS_DIR  ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_PLUGINS})
     set(QT_LIBS_DIR     ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_LIBS})
     set(QT_LIBEXECS_DIR ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_LIBEXECS})
 endif()
 
-# NOTE: Qt 6 already sets this by default
-if (Qt5_POSITION_INDEPENDENT_CODE)
-    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
-endif()
-
 if(NOT Launcher_FORCE_BUNDLED_LIBS)
     # Find toml++
     find_package(tomlplusplus 3.2.0 QUIET)
+    # Fallback to pkg-config (if available) if CMake files aren't found
+    if(NOT tomlplusplus_FOUND)
+        find_package(PkgConfig)
+        if(PkgConfig_FOUND)
+            pkg_check_modules(tomlplusplus IMPORTED_TARGET tomlplusplus>=3.2.0)
+        endif()
+    endif()
 
-    # Find ghc_filesystem
-    find_package(ghc_filesystem QUIET)
 
     # Find cmark
     find_package(cmark QUIET)
+
+    # Find qrcodegencpp-cmake
+    find_package(qrcodegencpp QUIET)
 endif()
 
 include(ECMQtDeclareLoggingCategory)
@@ -373,7 +380,7 @@ set(Launcher_ENABLE_UPDATER NO)
 set(Launcher_BUILD_UPDATER NO)
 
 if (NOT APPLE AND (NOT Launcher_UPDATER_GITHUB_REPO STREQUAL "" AND NOT Launcher_BUILD_ARTIFACT STREQUAL ""))
-	set(Launcher_BUILD_UPDATER YES)
+    set(Launcher_BUILD_UPDATER YES)
 endif()
 
 if(NOT (UNIX AND APPLE))
@@ -390,9 +397,6 @@ if(UNIX AND APPLE)
     set(JARS_DEST_DIR "${Launcher_Name}.app/Contents/MacOS/jars")
     set(XPC_DEST_DIR "${Launcher_Name}.app/Contents/XPCServices")
 
-    # Apps to bundle
-    set(APPS "\${CMAKE_INSTALL_PREFIX}/${Launcher_Name}.app")
-
     # Mac bundle settings
     set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_DisplayName}")
     set(MACOSX_BUNDLE_INFO_STRING "${Launcher_DisplayName}: A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.")
@@ -405,19 +409,13 @@ if(UNIX AND APPLE)
     set(MACOSX_SPARKLE_UPDATE_PUBLIC_KEY "v55ZWWD6QlPoXGV6VLzOTZxZUggWeE51X8cRQyQh6vA=" CACHE STRING "Public key for Sparkle update feed")
     set(MACOSX_SPARKLE_UPDATE_FEED_URL "https://prismlauncher.org/feed/appcast.xml" CACHE STRING "URL for Sparkle update feed")
 
-    set(MACOSX_SPARKLE_DOWNLOAD_URL "https://github.com/sparkle-project/Sparkle/releases/download/2.6.4/Sparkle-2.6.4.tar.xz" CACHE STRING "URL to Sparkle release archive")
-    set(MACOSX_SPARKLE_SHA256 "50612a06038abc931f16011d7903b8326a362c1074dabccb718404ce8e585f0b" CACHE STRING "SHA256 checksum for Sparkle release archive")
+    set(MACOSX_SPARKLE_DOWNLOAD_URL "https://github.com/sparkle-project/Sparkle/releases/download/2.8.0/Sparkle-2.8.0.tar.xz" CACHE STRING "URL to Sparkle release archive")
+    set(MACOSX_SPARKLE_SHA256 "fd5681ee92bf238aaac2d08214ceaf0cc8976e452d7f882d80bac1e61581f3b1" CACHE STRING "SHA256 checksum for Sparkle release archive")
     set(MACOSX_SPARKLE_DIR "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
-
-    # directories to look for dependencies
-    set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} ${MACOSX_SPARKLE_DIR})
 
     if(NOT MACOSX_SPARKLE_UPDATE_PUBLIC_KEY STREQUAL "" AND NOT MACOSX_SPARKLE_UPDATE_FEED_URL STREQUAL "")
         set(Launcher_ENABLE_UPDATER YES)
     endif()
-
-    # install as bundle
-    set(INSTALL_BUNDLE "full" CACHE STRING "Use fixup_bundle to bundle dependencies")
 
     # Add the icon
     install(FILES ${Launcher_Branding_ICNS} DESTINATION ${RESOURCES_DEST_DIR} RENAME ${Launcher_Name}.icns)
@@ -429,9 +427,6 @@ elseif(UNIX)
     set(LIBRARY_DEST_DIR "lib${LIB_SUFFIX}")
     set(JARS_DEST_DIR "share/${Launcher_Name}")
 
-    # install as bundle with no dependencies included
-    set(INSTALL_BUNDLE "nodeps" CACHE STRING "Use fixup_bundle to bundle dependencies")
-
     # Set RPATH
     SET(Launcher_BINARY_RPATH "$ORIGIN/")
 
@@ -442,17 +437,9 @@ elseif(UNIX)
 
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/launcher/qtlogging.ini" DESTINATION "share/${Launcher_Name}")
 
-    if (INSTALL_BUNDLE STREQUAL full)
-        set(PLUGIN_DEST_DIR "plugins")
-        set(BUNDLE_DEST_DIR ".")
-        set(RESOURCES_DEST_DIR ".")
-
-        # Apps to bundle
-        set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${Launcher_APP_BINARY_NAME}")
-
-        # directories to look for dependencies
-        set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-    endif()
+    set(PLUGIN_DEST_DIR "plugins")
+    set(BUNDLE_DEST_DIR ".")
+    set(RESOURCES_DEST_DIR ".")
 
     if(Launcher_ManPage)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_ManPage} DESTINATION "${KDE_INSTALL_MANDIR}/man6")
@@ -468,15 +455,6 @@ elseif(WIN32)
     set(PLUGIN_DEST_DIR ".")
     set(RESOURCES_DEST_DIR ".")
     set(JARS_DEST_DIR "jars")
-
-    # Apps to bundle
-    set(APPS "\${CMAKE_INSTALL_PREFIX}/${Launcher_Name}.exe")
-
-    # directories to look for dependencies
-    set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
-    # install as bundle
-    set(INSTALL_BUNDLE "full" CACHE STRING "Use fixup_bundle to bundle dependencies")
 else()
     message(FATAL_ERROR "Platform not supported")
 endif()
@@ -549,14 +527,20 @@ if(NOT cmark_FOUND)
 else()
     message(STATUS "Using system cmark")
 endif()
+if(NOT qrcodegencpp_FOUND)
+    set(QRCODE_SOURCES
+        libraries/qrcodegenerator/cpp/qrcodegen.cpp
+        libraries/qrcodegenerator/cpp/qrcodegen.hpp
+    )
+    add_library(qrcodegenerator STATIC ${QRCODE_SOURCES})
+    target_include_directories(qrcodegenerator PUBLIC "libraries/qrcodegenerator/cpp/" )
+    generate_export_header(qrcodegenerator)
+else()
+    add_library(qrcodegenerator ALIAS qrcodegencpp::qrcodegencpp)
+    message(STATUS "Using system qrcodegencpp-cmake")
+endif()
 add_subdirectory(libraries/gamemode)
 add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API
-if (NOT ghc_filesystem_FOUND)
-    message(STATUS "Using bundled ghc_filesystem")
-    add_subdirectory(libraries/filesystem) # Implementation of std::filesystem for old C++, for usage in old macOS
-else()
-    message(STATUS "Using system ghc_filesystem")
-endif()
 add_subdirectory(libraries/qdcss) # css parser
 
 ########################### XPC Service (macOS only) ##########################

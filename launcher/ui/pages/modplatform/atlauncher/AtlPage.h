@@ -41,7 +41,6 @@
 #include <modplatform/atlauncher/ATLPackInstallTask.h>
 #include <QWidget>
 
-#include "Application.h"
 #include "ui/pages/modplatform/ModpackProviderBasePage.h"
 
 namespace Ui {
@@ -57,7 +56,7 @@ class AtlPage : public QWidget, public ModpackProviderBasePage {
     explicit AtlPage(NewInstanceDialog* dialog, QWidget* parent = 0);
     virtual ~AtlPage();
     virtual QString displayName() const override { return "ATLauncher"; }
-    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("atlauncher"); }
+    virtual QIcon icon() const override { return QIcon::fromTheme("atlauncher"); }
     virtual QString id() const override { return "atl"; }
     virtual QString helpPage() const override { return "ATL-platform"; }
     virtual bool shouldDisplay() const override;
@@ -68,7 +67,7 @@ class AtlPage : public QWidget, public ModpackProviderBasePage {
     /** Programatically set the term in the search bar. */
     virtual void setSearchTerm(QString) override;
     /** Get the current term in the search bar. */
-    [[nodiscard]] virtual QString getSerachTerm() const override;
+    virtual QString getSerachTerm() const override;
 
    private:
     void suggestCurrent();

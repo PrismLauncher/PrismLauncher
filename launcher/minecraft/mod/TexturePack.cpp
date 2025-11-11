@@ -21,8 +21,6 @@
 
 #include <QDebug>
 #include <QMap>
-#include <QRegularExpression>
-
 #include "MTPixmapCache.h"
 
 #include "minecraft/mod/tasks/LocalTexturePackParseTask.h"

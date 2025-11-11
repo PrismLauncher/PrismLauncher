@@ -23,21 +23,39 @@
 #include <QMetaType>
 #include <QString>
 #include <QVariant>
-#include <QVector>
 #include <memory>
 
 class QIODevice;
 
 namespace ModPlatform {
 
-enum ModLoaderType { NeoForge = 1 << 0, Forge = 1 << 1, Cauldron = 1 << 2, LiteLoader = 1 << 3, Fabric = 1 << 4, Quilt = 1 << 5 };
+enum ModLoaderType {
+    NeoForge = 1 << 0,
+    Forge = 1 << 1,
+    Cauldron = 1 << 2,
+    LiteLoader = 1 << 3,
+    Fabric = 1 << 4,
+    Quilt = 1 << 5,
+    DataPack = 1 << 6,
+    Babric = 1 << 7,
+    BTA = 1 << 8,
+    LegacyFabric = 1 << 9,
+    Ornithe = 1 << 10,
+    Rift = 1 << 11
+};
 Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
+QList<ModLoaderType> modLoaderTypesToList(ModLoaderTypes flags);
 
 enum class ResourceProvider { MODRINTH, FLAME };
 
-enum class ResourceType { MOD, RESOURCE_PACK, SHADER_PACK, MODPACK };
-
 enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
+
+enum class Side { NoSide = 0, ClientSide = 1 << 0, ServerSide = 1 << 1, UniversalSide = ClientSide | ServerSide };
+
+namespace SideUtils {
+QString toString(Side side);
+Side fromString(QString side);
+}  // namespace SideUtils
 
 namespace ProviderCapabilities {
 const char* name(ResourceProvider);
@@ -106,10 +124,27 @@ struct IndexedVersion {
     bool is_preferred = true;
     QString changelog;
     QList<Dependency> dependencies;
-    QString side;  // this is for flame API
+    Side side;  // this is for flame API
 
     // For internal use, not provided by APIs
     bool is_currently_selected = false;
+
+    QString getVersionDisplayString() const
+    {
+        auto release_type = version_type.isValid() ? QString(" [%1]").arg(version_type.toString()) : "";
+        auto versionStr = !version.contains(version_number) ? version_number : "";
+        QString gameVersion = "";
+        for (auto v : mcVersion) {
+            if (version.contains(v)) {
+                gameVersion = "";
+                break;
+            }
+            if (gameVersion.isEmpty()) {
+                gameVersion = QObject::tr(" for %1").arg(v);
+            }
+        }
+        return QString("%1%2 — %3%4").arg(version, gameVersion, versionStr, release_type);
+    }
 };
 
 struct ExtraPackData {
@@ -137,24 +172,24 @@ struct IndexedPack {
     QString logoName;
     QString logoUrl;
     QString websiteUrl;
-    QString side;
+    Side side;
 
     bool versionsLoaded = false;
-    QVector<IndexedVersion> versions;
+    QList<IndexedVersion> versions;
 
     // Don't load by default, since some modplatform don't have that info
     bool extraDataLoaded = true;
     ExtraPackData extraData;
 
     // For internal use, not provided by APIs
-    [[nodiscard]] bool isVersionSelected(int index) const
+    bool isVersionSelected(int index) const
     {
         if (!versionsLoaded)
             return false;
 
         return versions.at(index).is_currently_selected;
     }
-    [[nodiscard]] bool isAnyVersionSelected() const
+    bool isAnyVersionSelected() const
     {
         if (!versionsLoaded)
             return false;

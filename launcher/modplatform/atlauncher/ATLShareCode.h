@@ -19,8 +19,8 @@
 #pragma once
 
 #include <QJsonObject>
+#include <QList>
 #include <QString>
-#include <QVector>
 
 namespace ATLauncher {
 
@@ -32,7 +32,7 @@ struct ShareCodeMod {
 struct ShareCode {
     QString pack;
     QString version;
-    QVector<ShareCodeMod> mods;
+    QList<ShareCodeMod> mods;
 };
 
 struct ShareCodeResponse {

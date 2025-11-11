@@ -43,6 +43,10 @@
 
 #include "tasks/Task.h"
 
+/*!
+ * Runs a list of tasks concurrently (according to `max_concurrent` parameter).
+ * Behaviour is the same as regular Task (e.g. starts using start())
+ */
 class ConcurrentTask : public Task {
     Q_OBJECT
    public:
@@ -59,6 +63,7 @@ class ConcurrentTask : public Task {
     inline auto isMultiStep() const -> bool override { return totalSize() > 1; }
     auto getStepProgress() const -> TaskStepProgressList override;
 
+    //! Adds a task to execute in this ConcurrentTask
     void addTask(Task::Ptr task);
 
    public slots:
@@ -83,7 +88,7 @@ class ConcurrentTask : public Task {
 
    protected:
     // NOTE: This is not thread-safe.
-    [[nodiscard]] unsigned int totalSize() const { return static_cast<unsigned int>(m_queue.size() + m_doing.size() + m_done.size()); }
+    unsigned int totalSize() const { return static_cast<unsigned int>(m_queue.size() + m_doing.size() + m_done.size()); }
 
     virtual void updateState();
 

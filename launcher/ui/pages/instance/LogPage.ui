@@ -10,151 +10,153 @@
     <height>782</height>
    </rect>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
     <number>0</number>
    </property>
    <property name="topMargin">
     <number>0</number>
    </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item>
-    <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>0</number>
+   <item row="1" column="0" colspan="5">
+    <widget class="LogView" name="text">
+     <property name="undoRedoEnabled">
+      <bool>false</bool>
      </property>
-     <widget class="QWidget" name="tab">
-      <attribute name="title">
-       <string notr="true">Tab 1</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="1" column="0" colspan="5">
-        <widget class="LogView" name="text">
-         <property name="undoRedoEnabled">
-          <bool>false</bool>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-         <property name="plainText">
-          <string notr="true"/>
-         </property>
-         <property name="textInteractionFlags">
-          <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-         </property>
-         <property name="centerOnScroll">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0" colspan="5">
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <widget class="QCheckBox" name="trackLogCheckbox">
-           <property name="text">
-            <string>Keep updating</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="wrapCheckbox">
-           <property name="text">
-            <string>Wrap lines</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btnCopy">
-           <property name="toolTip">
-            <string>Copy the whole log into the clipboard</string>
-           </property>
-           <property name="text">
-            <string>&amp;Copy</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btnPaste">
-           <property name="toolTip">
-            <string>Upload the log to the paste service configured in preferences</string>
-           </property>
-           <property name="text">
-            <string>Upload</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btnClear">
-           <property name="toolTip">
-            <string>Clear the log</string>
-           </property>
-           <property name="text">
-            <string>Clear</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Search:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QPushButton" name="findButton">
-         <property name="text">
-          <string>Find</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="searchBar"/>
-       </item>
-       <item row="2" column="4">
-        <widget class="QPushButton" name="btnBottom">
-         <property name="toolTip">
-          <string>Scroll all the way to bottom</string>
-         </property>
-         <property name="text">
-          <string>Bottom</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="3">
-        <widget class="Line" name="line">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+     <property name="plainText">
+      <string notr="true"/>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+     </property>
+     <property name="centerOnScroll">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="5">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QCheckBox" name="trackLogCheckbox">
+       <property name="text">
+        <string>Keep updating</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="wrapCheckbox">
+       <property name="text">
+        <string>Wrap lines</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="colorCheckbox">
+       <property name="text">
+        <string>Color lines</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnCopy">
+       <property name="toolTip">
+        <string>Copy the whole log into the clipboard</string>
+       </property>
+       <property name="text">
+        <string>&amp;Copy</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnPaste">
+       <property name="toolTip">
+        <string>Upload the log to the paste service configured in preferences</string>
+       </property>
+       <property name="text">
+        <string>Upload</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnClear">
+       <property name="toolTip">
+        <string>Clear the log</string>
+       </property>
+       <property name="text">
+        <string>Clear</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="findButton">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Find</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="4">
+    <widget class="QPushButton" name="btnBottom">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Scroll all the way to bottom</string>
+     </property>
+     <property name="text">
+      <string>Bottom</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="QLineEdit" name="searchBar">
+     <property name="placeholderText">
+      <string>Search</string>
+     </property>
     </widget>
    </item>
   </layout>
@@ -167,14 +169,13 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
   <tabstop>trackLogCheckbox</tabstop>
   <tabstop>wrapCheckbox</tabstop>
+  <tabstop>colorCheckbox</tabstop>
   <tabstop>btnCopy</tabstop>
   <tabstop>btnPaste</tabstop>
   <tabstop>btnClear</tabstop>
   <tabstop>text</tabstop>
-  <tabstop>searchBar</tabstop>
   <tabstop>findButton</tabstop>
  </tabstops>
  <resources/>

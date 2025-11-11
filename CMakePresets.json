@@ -1,0 +1,14 @@
+{
+	"$schema": "https://cmake.org/cmake/help/latest/_downloads/3e2d73bff478d88a7de0de736ba5e361/schema.json",
+	"version": 8,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 28
+	},
+	"include": [
+		"cmake/linuxPreset.json",
+		"cmake/macosPreset.json",
+		"cmake/windowsMinGWPreset.json",
+		"cmake/windowsMSVCPreset.json"
+	]
+}

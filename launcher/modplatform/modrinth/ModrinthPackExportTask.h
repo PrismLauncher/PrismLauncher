@@ -23,6 +23,7 @@
 #include "BaseInstance.h"
 #include "MMCZip.h"
 #include "minecraft/MinecraftInstance.h"
+#include "modplatform/ModIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/Task.h"
 
@@ -35,7 +36,7 @@ class ModrinthPackExportTask : public Task {
                            bool optionalFiles,
                            InstancePtr instance,
                            const QString& output,
-                           MMCZip::FilterFunction filter);
+                           MMCZip::FilterFileFunction filter);
 
    protected:
     void executeTask() override;
@@ -45,7 +46,7 @@ class ModrinthPackExportTask : public Task {
     struct ResolvedFile {
         QString sha1, sha512, url;
         qint64 size;
-        Metadata::ModSide side;
+        ModPlatform::Side side;
     };
 
     static const QStringList PREFIXES;
@@ -58,7 +59,7 @@ class ModrinthPackExportTask : public Task {
     MinecraftInstance* mcInstance;
     const QDir gameRoot;
     const QString output;
-    const MMCZip::FilterFunction filter;
+    const MMCZip::FilterFileFunction filter;
 
     ModrinthAPI api;
     QFileInfoList files;

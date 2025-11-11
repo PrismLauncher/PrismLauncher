@@ -42,7 +42,7 @@
 
 #include <QFile>
 #ifdef Q_OS_WIN
-#include <QVector>
+#include <QList>
 #endif
 
 class LockedFile : public QFile {
@@ -64,7 +64,7 @@ class LockedFile : public QFile {
 #ifdef Q_OS_WIN
     Qt::HANDLE wmutex;
     Qt::HANDLE rmutex;
-    QVector<Qt::HANDLE> rmutexes;
+    QList<Qt::HANDLE> rmutexes;
     QString mutexname;
 
     Qt::HANDLE getMutexHandle(int idx, bool doCreate);
