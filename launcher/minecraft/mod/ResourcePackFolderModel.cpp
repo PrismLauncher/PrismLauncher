@@ -94,35 +94,35 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
                     return {};
             }
         case Qt::DecorationRole: {
-            if (column == ActiveColumn && !(at(row).validMCMeta()))
+            if (column == NameColumn &&
+                (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink() || !at(row).validMCMeta())) {
                 return QIcon::fromTheme("status-yellow");
-            if (column == NameColumn && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
-                return QIcon::fromTheme("status-yellow");
+            }
             if (column == ImageColumn) {
                 return at(row).image({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
             }
             return {};
         }
         case Qt::ToolTipRole: {
-            if (column == ActiveColumn && !at(row).validMCMeta()) {
-                return m_resources[row]->internal_id() + tr("\nWarning: This pack has an invalid pack.mcmeta file.");
-            }
             if (column == PackFormatColumn) {
                 //: The string being explained by this is in the format: ID (Lower version - Upper version)
                 return tr("The resource pack format ID, as well as the Minecraft versions it was designed for.");
             }
             if (column == NameColumn) {
+                QString toolTip = m_resources[row]->internal_id();
                 if (at(row).isSymLinkUnder(instDirPath())) {
-                    return m_resources[row]->internal_id() +
-                           tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
-                              "\nCanonical Path: %1")
-                               .arg(at(row).fileinfo().canonicalFilePath());
-                    ;
+                    toolTip.append(
+                        tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
+                           "\nCanonical Path: %1")
+                            .arg(at(row).fileinfo().canonicalFilePath()));
+                } else if (at(row).isMoreThanOneHardLink()) {
+                    toolTip.append(tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original."));
                 }
-                if (at(row).isMoreThanOneHardLink()) {
-                    return m_resources[row]->internal_id() +
-                           tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
+                if (!at(row).validMCMeta()) {
+                    toolTip.append(tr("\nWarning: This pack has an invalid pack.mcmeta file."));
                 }
+
+                return toolTip;
             }
             return m_resources[row]->internal_id();
         }
