@@ -83,11 +83,6 @@ class LauncherPage : public QWidget, public BasePage {
     void on_javaDirResetBtn_clicked();
     void on_skinsDirResetBtn_clicked();
 
-    void on_readWriteAddBtn_clicked();
-    void on_readWriteRemoveBtn_clicked();
-    void on_readOnlyAddBtn_clicked();
-    void on_readOnlyRemoveBtn_clicked();
-
    private:
     Ui::LauncherPage* ui;
 };

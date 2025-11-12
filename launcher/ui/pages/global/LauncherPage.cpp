@@ -89,18 +89,6 @@ LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::Launch
     ui->downloadsDirTextBox->setReadOnly(true);
     ui->javaDirTextBox->setReadOnly(true);
     ui->skinsDirTextBox->setReadOnly(true);
-#else
-    // ui->tabWidget->removeTab(ui->tabWidget->indexOf(ui->macSandboxTab));
-#endif
-
-#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
-    // connect(ui->readWriteList, &DropList::droppedURLs, APPLICATION->m_dynamicSandboxExceptions.get(), &DynamicSandboxException::addReadWriteExceptions);
-    // connect(ui->readOnlyList, &DropList::droppedURLs, APPLICATION->m_dynamicSandboxExceptions.get(), &DynamicSandboxException::addReadOnlyExceptions);
-    // connect(ui->readWriteList, &DropList::droppedURLs, this, &LauncherPage::loadSettings);
-    // connect(ui->readOnlyList, &DropList::droppedURLs, this, &LauncherPage::loadSettings);
-    //
-    // connect(ui->readWriteList, &DropList::deleteKeyPressed, this, &LauncherPage::on_readWriteRemoveBtn_clicked);
-    // connect(ui->readOnlyList, &DropList::deleteKeyPressed, this, &LauncherPage::on_readOnlyRemoveBtn_clicked);
 #endif
 }
 
@@ -252,46 +240,6 @@ void LauncherPage::on_metadataEnableBtn_clicked()
     ui->metadataWarningLabel->setHidden(ui->metadataEnableBtn->isChecked());
 }
 
-void LauncherPage::on_readWriteAddBtn_clicked() {
-#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
-    QString dir = QFileDialog::getExistingDirectory(this, tr("Add Read/Write Exception"), QDir::homePath());
-    if (!dir.isEmpty()) {
-        APPLICATION->m_dynamicSandboxExceptions->addReadWriteException(dir);
-        loadSettings();
-    }
-#endif
-}
-
-void LauncherPage::on_readWriteRemoveBtn_clicked() {
-#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
-    // int row = ui->readWriteList->currentRow();
-    // if (row >= 0) {
-    //     APPLICATION->m_dynamicSandboxExceptions->removeReadWriteException(row);
-    //     loadSettings();
-    // }
-#endif
-}
-
-void LauncherPage::on_readOnlyAddBtn_clicked() {
-#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
-    // QString dir = QFileDialog::getExistingDirectory(this, tr("Add Read Only Exception"), QDir::homePath());
-    // if (!dir.isEmpty()) {
-    //     APPLICATION->m_dynamicSandboxExceptions->addReadOnlyException(dir);
-    //     loadSettings();
-    // }
-#endif
-}
-
-void LauncherPage::on_readOnlyRemoveBtn_clicked() {
-#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
-    // int row = ui->readOnlyList->currentRow();
-    // if (row >= 0) {
-    //     APPLICATION->m_dynamicSandboxExceptions->removeReadOnlyException(row);
-    //     loadSettings();
-    // }
-#endif
-}
-
 void LauncherPage::applySettings()
 {
     auto s = APPLICATION->settings();
@@ -397,34 +345,6 @@ void LauncherPage::loadSettings()
     ui->metadataWarningLabel->setHidden(ui->metadataEnableBtn->isChecked());
     ui->dependenciesEnableBtn->setChecked(!s->get("ModDependenciesDisabled").toBool());
     ui->modpackUpdatePromptBtn->setChecked(!s->get("SkipModpackUpdatePrompt").toBool());
-
-#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
-    // macOS sandbox user-selected dynamic exceptions
-    // QList<QUrl> readWriteURLs = APPLICATION->m_dynamicSandboxExceptions->readWriteExceptionURLs();
-    // QList<QUrl> readOnlyURLs = APPLICATION->m_dynamicSandboxExceptions->readOnlyExceptionURLs();
-    //
-    // QFileIconProvider iconProvider;
-    // ui->readWriteList->clear();
-    // for (const QUrl& url : readWriteURLs) {
-    //     if (url.isEmpty())
-    //         continue;
-    //     if (url.scheme() == "file") {
-    //         QIcon fileIcon = iconProvider.icon(QFileInfo(url.toLocalFile()));
-    //         auto item = new QListWidgetItem(fileIcon, url.toLocalFile());
-    //         ui->readWriteList->addItem(item);
-    //     }
-    // }
-    // ui->readOnlyList->clear();
-    // for (const QUrl& url : readOnlyURLs) {
-    //     if (url.isEmpty())
-    //         continue;
-    //     if (url.scheme() == "file") {
-    //         QIcon fileIcon = iconProvider.icon(QFileInfo(url.toLocalFile()));
-    //         auto item = new QListWidgetItem(fileIcon, url.toLocalFile());
-    //         ui->readOnlyList->addItem(item);
-    //     }
-    // }
-#endif
 }
 
 void LauncherPage::retranslate()

@@ -1163,6 +1163,9 @@ if (APPLE)
     set(LAUNCHER_SOURCES
         ${LAUNCHER_SOURCES}
         ui/themes/ThemeManager.mm
+
+        ui/pages/global/MacSandboxPage.cpp
+        ui/pages/global/MacSandboxPage.h
     )
 endif()
 
@@ -1216,6 +1219,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/global/APIPage.ui
     ui/pages/global/ProxyPage.ui
     ui/pages/global/ExternalToolsPage.ui
+    ui/pages/global/MacSandboxPage.ui
     ui/pages/instance/ExternalResourcesPage.ui
     ui/pages/instance/NotesPage.ui
     ui/pages/instance/LogPage.ui

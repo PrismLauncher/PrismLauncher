@@ -65,6 +65,9 @@
 #include "ui/pages/global/LauncherPage.h"
 #include "ui/pages/global/MinecraftPage.h"
 #include "ui/pages/global/ProxyPage.h"
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+#include "ui/pages/global/MacSandboxPage.h"
+#endif
 
 #include "ui/setupwizard/AutoJavaWizardPage.h"
 #include "ui/setupwizard/JavaWizardPage.h"
@@ -953,6 +956,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             m_globalSettingsProvider->addPage<MinecraftPage>();
             m_globalSettingsProvider->addPage<JavaPage>();
             m_globalSettingsProvider->addPage<AccountListPage>();
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+            m_globalSettingsProvider->addPage<MacSandboxPage>();
+#endif
             m_globalSettingsProvider->addPage<APIPage>();
             m_globalSettingsProvider->addPage<ExternalToolsPage>();
             m_globalSettingsProvider->addPage<ProxyPage>();
