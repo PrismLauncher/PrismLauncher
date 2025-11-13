@@ -166,6 +166,9 @@ jobs:
 
           ARTIFACT_NAME: ${{ matrix.artifact-name }}-Qt6
           BUILD_PLATFORM: official
+
+          APPLE_CODESIGN_IDENTITY: ${{ secrets.APPLE_CODESIGN_ID }}
+          APPLE_BUILD_FOR_NOTARIZATION: ${{ secrets.APPLE_NOTARIZE_PASSWORD && 'YES' || 'NO' }}
         run: |
           cmake --workflow --preset "$CMAKE_PRESET"
 

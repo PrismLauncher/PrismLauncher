@@ -13,7 +13,11 @@
 				"lhs": "${hostSystemName}",
 				"rhs": "Darwin"
 			},
-			"generator": "Ninja"
+			"generator": "Ninja",
+			"cacheVariables": {
+				"MACOSX_CODESIGN_IDENTITY": "$penv{APPLE_CODESIGN_IDENTITY}",
+				"MACOSX_PREPARE_NOTARIZATION": "$penv{APPLE_BUILD_FOR_NOTARIZATION}"
+			}
 		},
 		{
 			"name": "macos_universal_base",

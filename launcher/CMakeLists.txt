@@ -1509,6 +1509,7 @@ if(WIN32 OR (UNIX AND APPLE))
             LIBEXEC_DIR ${LIBRARY_DEST_DIR}
             LIB_DIR ${LIBRARY_DEST_DIR}
             PLUGINS_DIR ${PLUGIN_DEST_DIR}
+            NO_APP_STORE_COMPLIANCE
             NO_OVERWRITE
             NO_TRANSLATIONS
             NO_COMPILER_RUNTIME
@@ -1552,4 +1553,15 @@ if(WIN32 OR (UNIX AND APPLE))
         DESTINATION ${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}
         COMPONENT bundle
     )
+endif()
+
+if(UNIX AND APPLE)
+    # Need to fix code signing for the bundle
+    set(MACOSX_ENTITLEMENTS "${CMAKE_CURRENT_BINARY_DIR}/../program_info/App.entitlements")
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/MacOSCodesign.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/MacOSCodesign.cmake"
+        @ONLY
+    )
+    install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/MacOSCodesign.cmake" COMPONENT Runtime)
 endif()

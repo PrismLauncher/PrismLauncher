@@ -3,6 +3,7 @@
   stdenv,
   cmake,
   cmark,
+  darwin,
   apple-sdk_11,
   extra-cmake-modules,
   gamemode,
@@ -71,6 +72,7 @@ stdenv.mkDerivation {
     extra-cmake-modules
     jdk17
     stripJavaArchivesHook
+    darwin.sigtool
   ];
 
   buildInputs = [

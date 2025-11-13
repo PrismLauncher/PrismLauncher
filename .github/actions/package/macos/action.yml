@@ -64,15 +64,6 @@ runs:
         cd ${{ env.INSTALL_DIR }}
         chmod +x "PrismLauncher.app/Contents/MacOS/prismlauncher"
 
-        if [ -n '${{ inputs.apple-codesign-id }}' ]; then
-          APPLE_CODESIGN_ID='${{ inputs.apple-codesign-id }}'
-          ENTITLEMENTS_FILE='../program_info/App.entitlements'
-        else
-          APPLE_CODESIGN_ID='-'
-          ENTITLEMENTS_FILE='../program_info/AdhocSignedApp.entitlements'
-        fi
-
-        sudo codesign --sign "$APPLE_CODESIGN_ID" --deep --force --entitlements "$ENTITLEMENTS_FILE" --options runtime "PrismLauncher.app/Contents/MacOS/prismlauncher"
         mv "PrismLauncher.app" "Prism Launcher.app"
 
     - name: Notarize
