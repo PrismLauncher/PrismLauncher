@@ -23,6 +23,10 @@
 #include "net/ChecksumValidator.h"
 #include "net/NetJob.h"
 
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+#include "xpcbridge/XPCManager.h"
+#endif
+
 struct File {
     QString path;
     QString url;
@@ -121,7 +125,16 @@ void ManifestDownloadTask::downloadJava(const QJsonDocument& doc)
     connect(elementDownload.get(), &Task::status, this, &ManifestDownloadTask::setStatus);
     connect(elementDownload.get(), &Task::details, this, &ManifestDownloadTask::setDetails);
 
-    connect(elementDownload.get(), &Task::succeeded, this, &ManifestDownloadTask::emitSucceeded);
+    connect(elementDownload.get(), &Task::succeeded, this, [this] {
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+        auto iter = QDirIterator(m_final_path, QDir::Dirs | QDir::NoDotAndDotDot);
+        while (iter.hasNext()) {
+            QString path = QDir(iter.next()).absolutePath();
+            APPLICATION->m_xpcManager->removeQuarantineFromMojangJavaDirectory(path.toNSString(), m_url.toNSURL());
+        }
+#endif
+        emitSucceeded();
+    });
     m_task = elementDownload;
     m_task->start();
 }
