@@ -40,8 +40,8 @@ static std::shared_ptr<Index> parseIndexInternal(const QJsonObject& obj)
     lists.reserve(objects.size());
     std::transform(objects.begin(), objects.end(), std::back_inserter(lists), [](const QJsonObject& obj) {
         VersionList::Ptr list = std::make_shared<VersionList>(requireString(obj, "uid"));
-        list->setName(ensureString(obj, "name", QString()));
-        list->setSha256(ensureString(obj, "sha256", QString()));
+        list->setName(obj["name"].toString());
+        list->setSha256(obj["sha256"].toString());
         return list;
     });
     return std::make_shared<Index>(lists);
@@ -52,14 +52,14 @@ static Version::Ptr parseCommonVersion(const QString& uid, const QJsonObject& ob
 {
     Version::Ptr version = std::make_shared<Version>(uid, requireString(obj, "version"));
     version->setTime(QDateTime::fromString(requireString(obj, "releaseTime"), Qt::ISODate).toMSecsSinceEpoch() / 1000);
-    version->setType(ensureString(obj, "type", QString()));
-    version->setRecommended(ensureBoolean(obj, QString("recommended"), false));
-    version->setVolatile(ensureBoolean(obj, QString("volatile"), false));
+    version->setType(obj["type"].toString());
+    version->setRecommended(obj["recommended"].toBool());
+    version->setVolatile(obj["volatile"].toBool());
     RequireSet reqs, conflicts;
     parseRequires(obj, &reqs, "requires");
     parseRequires(obj, &conflicts, "conflicts");
     version->setRequires(reqs, conflicts);
-    if (auto sha256 = ensureString(obj, "sha256", QString()); !sha256.isEmpty()) {
+    if (auto sha256 = obj["sha256"].toString(); !sha256.isEmpty()) {
         version->setSha256(sha256);
     }
     return version;
@@ -89,7 +89,7 @@ static VersionList::Ptr parseVersionListInternal(const QJsonObject& obj)
     });
 
     VersionList::Ptr list = std::make_shared<VersionList>(uid);
-    list->setName(ensureString(obj, "name", QString()));
+    list->setName(obj["name"].toString());
     list->setVersions(versions);
     return list;
 }
@@ -171,8 +171,8 @@ void parseRequires(const QJsonObject& obj, RequireSet* ptr, const char* keyName)
         while (iter != reqArray.end()) {
             auto reqObject = requireObject(*iter);
             auto uid = requireString(reqObject, "uid");
-            auto equals = ensureString(reqObject, "equals", QString());
-            auto suggests = ensureString(reqObject, "suggests", QString());
+            auto equals = reqObject["equals"].toString();
+            auto suggests = reqObject["suggests"].toString();
             ptr->insert({ uid, equals, suggests });
             iter++;
         }

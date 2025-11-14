@@ -160,7 +160,6 @@ void PageContainer::createUI()
     m_pageStack = new QStackedLayout;
     m_pageList = new PageView;
     m_header = new QLabel();
-    m_iconHeader = new IconLabel(this, QIcon(), QSize(24, 24));
 
     QFont headerLabelFont = m_header->font();
     headerLabelFont.setBold(true);
@@ -173,10 +172,6 @@ void PageContainer::createUI()
     const int leftMargin = APPLICATION->style()->pixelMetric(QStyle::PM_LayoutLeftMargin);
     headerHLayout->addSpacerItem(new QSpacerItem(leftMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
     headerHLayout->addWidget(m_header);
-    headerHLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Ignored));
-    headerHLayout->addWidget(m_iconHeader);
-    const int rightMargin = APPLICATION->style()->pixelMetric(QStyle::PM_LayoutRightMargin);
-    headerHLayout->addSpacerItem(new QSpacerItem(rightMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
     headerHLayout->setContentsMargins(0, 6, 0, 0);
 
     m_pageStack->setContentsMargins(0, 0, 0, 0);
@@ -223,12 +218,10 @@ void PageContainer::showPage(int row)
     if (m_currentPage) {
         m_pageStack->setCurrentIndex(m_currentPage->stackIndex);
         m_header->setText(m_currentPage->displayName());
-        m_iconHeader->setIcon(m_currentPage->icon());
         m_currentPage->opened();
     } else {
         m_pageStack->setCurrentIndex(0);
         m_header->setText(QString());
-        m_iconHeader->setIcon(QIcon::fromTheme("bug"));
     }
 }
 

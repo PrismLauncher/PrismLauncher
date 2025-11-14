@@ -140,7 +140,7 @@ class FlameAPI : public ResourceAPI {
         return url;
     }
 
-    QJsonArray documentToArray(QJsonDocument& obj) const override { return Json::ensureArray(obj.object(), "data"); }
+    QJsonArray documentToArray(QJsonDocument& obj) const override { return obj.object()["data"].toArray(); }
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) const override { FlameMod::loadIndexedPack(m, obj); }
     ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType resourceType) const override
     {

@@ -78,8 +78,8 @@ jobs:
 
       - name: Configure and Build
         run: |
-          cmake --preset linux_debug
-          cmake --build --preset linux_debug
+          cmake --preset linux
+          cmake --build --preset linux --config Debug
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4

@@ -100,7 +100,7 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
 
         QVector<ModPlatform::IndexedVersion> unsortedVersions;
         try {
-            auto arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
+            auto arr = doc.isObject() ? doc.object()["data"].toArray() : doc.array();
 
             for (auto versionIter : arr) {
                 auto obj = versionIter.toObject();
@@ -222,7 +222,7 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
         if (args.dependency.version.length() != 0 && doc.isObject()) {
             arr.append(doc.object());
         } else {
-            arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
+            arr = doc.isObject() ? doc.object()["data"].toArray() : doc.array();
         }
 
         QVector<ModPlatform::IndexedVersion> versions;

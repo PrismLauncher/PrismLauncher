@@ -251,8 +251,8 @@ void readIndex(const QString& path, QMap<QString, Language>& languages)
             Language lang(iter.key());
 
             auto langObj = Json::requireObject(iter.value());
-            lang.setTranslationStats(Json::ensureInteger(langObj, "translated", 0), Json::ensureInteger(langObj, "untranslated", 0),
-                                     Json::ensureInteger(langObj, "fuzzy", 0));
+            lang.setTranslationStats(langObj["translated"].toInt(), langObj["untranslated"].toInt(),
+                                     langObj["fuzzy"].toInt());
             lang.file_name = Json::requireString(langObj, "file");
             lang.file_sha1 = Json::requireString(langObj, "sha1");
             lang.file_size = Json::requireInteger(langObj, "size");

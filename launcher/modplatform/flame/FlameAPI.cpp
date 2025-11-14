@@ -59,7 +59,7 @@ QString FlameAPI::getModFileChangelog(int modId, int fileId)
             return;
         }
 
-        changelog = Json::ensureString(doc.object(), "data");
+        changelog = doc.object()["data"].toString();
     });
 
     QObject::connect(netJob.get(), &NetJob::finished, [&lock] { lock.quit(); });
@@ -92,7 +92,7 @@ QString FlameAPI::getModDescription(int modId)
             return;
         }
 
-        description = Json::ensureString(doc.object(), "data");
+        description = doc.object()["data"].toString();
     });
 
     QObject::connect(netJob.get(), &NetJob::finished, [&lock] { lock.quit(); });

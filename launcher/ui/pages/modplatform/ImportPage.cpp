@@ -141,13 +141,13 @@ void ImportPage::updateState()
             connect(job.get(), &NetJob::succeeded, this, [this, array, addonId, fileId] {
                 qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
                 auto doc = Json::requireDocument(*array);
-                auto data = Json::ensureObject(Json::ensureObject(doc.object()), "data");
+                auto data = doc.object()["data"].toObject();
                 // No way to find out if it's a mod or a modpack before here
                 // And also we need to check if it ends with .zip, instead of any better way
-                auto fileName = Json::ensureString(data, "fileName");
+                auto fileName = data["fileName"].toString();
                 if (fileName.endsWith(".zip")) {
                     // Have to use ensureString then use QUrl to get proper url encoding
-                    auto dl_url = QUrl(Json::ensureString(data, "downloadUrl", "", "downloadUrl"));
+                    auto dl_url = QUrl(data["downloadUrl"].toString(""));
                     if (!dl_url.isValid()) {
                         CustomMessageBox::selectable(
                             this, tr("Error"),
@@ -158,7 +158,7 @@ void ImportPage::updateState()
                     }
 
                     QFileInfo dl_file(dl_url.fileName());
-                    QString pack_name = Json::ensureString(data, "displayName", dl_file.completeBaseName(), "displayName");
+                    QString pack_name = data["displayName"].toString(dl_file.completeBaseName());
 
                     QMap<QString, QString> extra_info;
                     extra_info.insert("pack_id", addonId);

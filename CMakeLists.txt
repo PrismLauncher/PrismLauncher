@@ -112,7 +112,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2 -D_FORTIFY_SOURCE=2 ${CMAKE_CXX_FLAGS_RELEASE}"
 
 # Export compile commands for debug builds if we can (useful in LSPs like clangd)
 # https://cmake.org/cmake/help/v3.31/variable/CMAKE_EXPORT_COMPILE_COMMANDS.html
-if(CMAKE_GENERATOR STREQUAL "Unix Makefiles" OR CMAKE_GENERATOR STREQUAL "Ninja" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(CMAKE_GENERATOR STREQUAL "Unix Makefiles" OR CMAKE_GENERATOR MATCHES "^Ninja")
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
@@ -348,12 +348,24 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 6)
     set(QT_LIBEXECS_DIR ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_LIBEXECS})
 endif()
 
+# Find libqrencode
+## NOTE(@getchoo): Never use pkg-config with MSVC since the vcpkg port makes our install bundle fail to find the dll
+if(MSVC)
+    find_path(LIBQRENCODE_INCLUDE_DIR qrencode.h REQUIRED)
+    find_library(LIBQRENCODE_LIBRARY_RELEASE qrencode REQUIRED)
+    find_library(LIBQRENCODE_LIBRARY_DEBUG qrencoded)
+    set(LIBQRENCODE_LIBRARIES optimized ${LIBQRENCODE_LIBRARY_RELEASE} debug ${LIBQRENCODE_LIBRARY_DEBUG})
+else()
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(libqrencode REQUIRED IMPORTED_TARGET libqrencode)
+endif()
+
 if(NOT Launcher_FORCE_BUNDLED_LIBS)
     # Find toml++
     find_package(tomlplusplus 3.2.0 QUIET)
     # Fallback to pkg-config (if available) if CMake files aren't found
     if(NOT tomlplusplus_FOUND)
-        find_package(PkgConfig)
+        find_package(PkgConfig QUIET)
         if(PkgConfig_FOUND)
             pkg_check_modules(tomlplusplus IMPORTED_TARGET tomlplusplus>=3.2.0)
         endif()
@@ -362,9 +374,6 @@ if(NOT Launcher_FORCE_BUNDLED_LIBS)
 
     # Find cmark
     find_package(cmark QUIET)
-
-    # Find qrcodegencpp-cmake
-    find_package(qrcodegencpp QUIET)
 endif()
 
 include(ECMQtDeclareLoggingCategory)
@@ -526,18 +535,6 @@ if(NOT cmark_FOUND)
     set(BUILD_TESTING ${ORIGINAL_BUILD_TESTING})
 else()
     message(STATUS "Using system cmark")
-endif()
-if(NOT qrcodegencpp_FOUND)
-    set(QRCODE_SOURCES
-        libraries/qrcodegenerator/cpp/qrcodegen.cpp
-        libraries/qrcodegenerator/cpp/qrcodegen.hpp
-    )
-    add_library(qrcodegenerator STATIC ${QRCODE_SOURCES})
-    target_include_directories(qrcodegenerator PUBLIC "libraries/qrcodegenerator/cpp/" )
-    generate_export_header(qrcodegenerator)
-else()
-    add_library(qrcodegenerator ALIAS qrcodegencpp::qrcodegencpp)
-    message(STATUS "Using system qrcodegencpp-cmake")
 endif()
 add_subdirectory(libraries/gamemode)
 add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API

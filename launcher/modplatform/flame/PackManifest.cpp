@@ -5,13 +5,13 @@ static void loadFileV1(Flame::File& f, QJsonObject& file)
 {
     f.projectId = Json::requireInteger(file, "projectID");
     f.fileId = Json::requireInteger(file, "fileID");
-    f.required = Json::ensureBoolean(file, QString("required"), true);
+    f.required = file["required"].toBool(true);
 }
 
 static void loadModloaderV1(Flame::Modloader& m, QJsonObject& modLoader)
 {
     m.id = Json::requireString(modLoader, "id");
-    m.primary = Json::ensureBoolean(modLoader, QString("primary"), false);
+    m.primary = modLoader["primary"].toBool();
 }
 
 static void loadMinecraftV1(Flame::Minecraft& m, QJsonObject& minecraft)
@@ -19,15 +19,15 @@ static void loadMinecraftV1(Flame::Minecraft& m, QJsonObject& minecraft)
     m.version = Json::requireString(minecraft, "version");
     // extra libraries... apparently only used for a custom Minecraft launcher in the 1.2.5 FTB retro pack
     // intended use is likely hardcoded in the 'Flame' client, the manifest says nothing
-    m.libraries = Json::ensureString(minecraft, QString("libraries"), QString());
-    auto arr = Json::ensureArray(minecraft, "modLoaders", QJsonArray());
+    m.libraries = minecraft["libraries"].toString();
+    auto arr = minecraft["modLoaders"].toArray();
     for (QJsonValueRef item : arr) {
         auto obj = Json::requireObject(item);
         Flame::Modloader loader;
         loadModloaderV1(loader, obj);
         m.modLoaders.append(loader);
     }
-    m.recommendedRAM = Json::ensureInteger(minecraft, "recommendedRam", 0);
+    m.recommendedRAM = minecraft["recommendedRam"].toInt();
 }
 
 static void loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)
@@ -36,11 +36,11 @@ static void loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)
 
     loadMinecraftV1(pack.minecraft, mc);
 
-    pack.name = Json::ensureString(manifest, QString("name"), "Unnamed");
-    pack.version = Json::ensureString(manifest, QString("version"), QString());
-    pack.author = Json::ensureString(manifest, QString("author"), "Anonymous");
+    pack.name = manifest["name"].toString("Unnamed");
+    pack.version = manifest["version"].toString();
+    pack.author = manifest["author"].toString("Anonymous");
 
-    auto arr = Json::ensureArray(manifest, "files", QJsonArray());
+    auto arr = manifest["files"].toArray();
     for (auto item : arr) {
         auto obj = Json::requireObject(item);
 
@@ -50,7 +50,7 @@ static void loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)
         pack.files.insert(file.fileId, file);
     }
 
-    pack.overrides = Json::ensureString(manifest, "overrides", "overrides");
+    pack.overrides = manifest["overrides"].toString("overrides");
 
     pack.is_loaded = true;
 }

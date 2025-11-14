@@ -967,7 +967,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &version] {
                     qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
                     auto doc = Json::requireDocument(*array);
-                    auto data = Json::ensureObject(Json::ensureObject(doc.object()), "data");
+                    auto data = doc.object()["data"].toObject();
                     // No way to find out if it's a mod or a modpack before here
                     // And also we need to check if it ends with .zip, instead of any better way
                     version = FlameMod::loadIndexedPackVersion(data);

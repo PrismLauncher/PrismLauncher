@@ -105,9 +105,8 @@ DeviceAuthorizationResponse parseDeviceAuthorizationResponse(const QByteArray& d
     }
     auto obj = doc.object();
     return {
-        Json::ensureString(obj, "device_code"),       Json::ensureString(obj, "user_code"), Json::ensureString(obj, "verification_uri"),
-        Json::ensureInteger(obj, "expires_in"),       Json::ensureInteger(obj, "interval"), Json::ensureString(obj, "error"),
-        Json::ensureString(obj, "error_description"),
+        obj["device_code"].toString(), obj["user_code"].toString(), obj["verification_uri"].toString(),  obj["expires_in"].toInt(),
+        obj["interval"].toInt(),       obj["error"].toString(),     obj["error_description"].toString(),
     };
 }
 
@@ -217,12 +216,12 @@ AuthenticationResponse parseAuthenticationResponse(const QByteArray& data)
         return {};
     }
     auto obj = doc.object();
-    return { Json::ensureString(obj, "access_token"),
-             Json::ensureString(obj, "token_type"),
-             Json::ensureString(obj, "refresh_token"),
-             Json::ensureInteger(obj, "expires_in"),
-             Json::ensureString(obj, "error"),
-             Json::ensureString(obj, "error_description"),
+    return { obj["access_token"].toString(),
+             obj["token_type"].toString(),
+             obj["refresh_token"].toString(),
+             obj["expires_in"].toInt(),
+             obj["error"].toString(),
+             obj["error_description"].toString(),
              obj.toVariantMap() };
 }
 

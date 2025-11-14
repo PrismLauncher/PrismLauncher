@@ -32,27 +32,10 @@
         "type": "github"
       }
     },
-    "qrcodegenerator": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1737616857,
-        "narHash": "sha256-6SugPt0lp1Gz7nV23FLmsmpfzgFItkSw7jpGftsDPWc=",
-        "owner": "nayuki",
-        "repo": "QR-Code-generator",
-        "rev": "2c9044de6b049ca25cb3cd1649ed7e27aa055138",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nayuki",
-        "repo": "QR-Code-generator",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "libnbtplusplus": "libnbtplusplus",
-        "nixpkgs": "nixpkgs",
-        "qrcodegenerator": "qrcodegenerator"
+        "nixpkgs": "nixpkgs"
       }
     }
   },

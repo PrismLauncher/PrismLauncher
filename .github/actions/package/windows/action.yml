@@ -15,12 +15,15 @@ inputs:
   msystem:
     description: MSYS2 subsystem to use
     required: false
-  windows-codesign-cert:
-    description: Certificate for signing Windows builds
-    required: false
-  windows-codesign-password:
-    description: Password for signing Windows builds
-    required: false
+  azure-client-id:
+    description: Client ID for the Azure Signer Application
+    required: true
+  azure-tenant-id:
+    description: Tenant ID for the Azure Signer Application
+    required: true
+  azure-subscription-id:
+    description: Subscription ID for the Azure Signer Application
+    required: true
 
 runs:
   using: composite
@@ -50,23 +53,45 @@ runs:
 
         Get-ChildItem ${{ env.INSTALL_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('.\') } | %{ $_.TrimStart('${{ env.INSTALL_DIR }}') } | %{ $_.TrimStart('\') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
 
-    - name: Fetch codesign certificate
-      shell: bash # yes, we are not using MSYS2 or PowerShell here
-      run: |
-        echo '${{ inputs.windows-codesign-cert }}' | base64 --decode > codesign.pfx
-
-    - name: Sign executable
+    - name: Emit warning for unsigned builds
+      if: ${{ github.ref_name != 'develop' || inputs.azure-client-id == '' }}
       shell: pwsh
-      env:
-        INSTALL_DIR: install
       run: |
-        if (Get-Content ./codesign.pfx){
-          cd ${{ env.INSTALL_DIR }}
-          # We ship the exact same executable for portable and non-portable editions, so signing just once is fine
-          SignTool sign /fd sha256 /td sha256 /f ../codesign.pfx /p '${{ inputs.windows-codesign-password }}' /tr http://timestamp.digicert.com prismlauncher.exe prismlauncher_updater.exe prismlauncher_filelink.exe 
-        } else {
-          ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
-        }
+        ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
+
+    - name: Login to Azure
+      if: ${{ github.ref_name == 'develop' && inputs.azure-client-id != '' }}
+      uses: azure/login@v2
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+
+    - name: Sign executables
+      if: ${{ github.ref_name == 'develop' && inputs.azure-client-id != '' }}
+      uses: azure/trusted-signing-action@v0
+      with:
+        endpoint: https://eus.codesigning.azure.net/
+        trusted-signing-account-name: PrismLauncher
+        certificate-profile-name: PrismLauncher
+
+        files: |
+          ${{ github.workspace }}\install\prismlauncher.exe
+          ${{ github.workspace }}\install\prismlauncher_filelink.exe
+          ${{ github.workspace }}\install\prismlauncher_updater.exe
+
+        # TODO(@getchoo): Is this all really needed???
+        # https://github.com/Azure/trusted-signing-action/blob/fc390cf8ed0f14e248a542af1d838388a47c7a7c/docs/OIDC.md
+        exclude-environment-credential: true
+        exclude-workload-identity-credential: true
+        exclude-managed-identity-credential: true
+        exclude-shared-token-cache-credential: true
+        exclude-visual-studio-credential: true
+        exclude-visual-studio-code-credential: true
+        exclude-azure-cli-credential: false
+        exclude-azure-powershell-credential: true
+        exclude-azure-developer-cli-credential: true
+        exclude-interactive-browser-credential: true
 
     - name: Package (MinGW, portable)
       if: ${{ inputs.msystem != '' }}
@@ -115,13 +140,28 @@ runs:
         makensis -NOCD "${{ github.workspace }}/${{ env.BUILD_DIR }}/program_info/win_install.nsi"
 
     - name: Sign installer
-      shell: pwsh
-      run: |
-        if (Get-Content ./codesign.pfx){
-          SignTool sign /fd sha256 /td sha256 /f codesign.pfx /p '${{ inputs.windows-codesign-password }}' /tr http://timestamp.digicert.com PrismLauncher-Setup.exe
-        } else {
-          ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
-        }
+      if: ${{ github.ref_name == 'develop' && inputs.azure-client-id != '' }}
+      uses: azure/trusted-signing-action@v0
+      with:
+        endpoint: https://eus.codesigning.azure.net/
+        trusted-signing-account-name: PrismLauncher
+        certificate-profile-name: PrismLauncher
+
+        files: |
+          ${{ github.workspace }}\PrismLauncher-Setup.exe
+
+        # TODO(@getchoo): Is this all really needed???
+        # https://github.com/Azure/trusted-signing-action/blob/fc390cf8ed0f14e248a542af1d838388a47c7a7c/docs/OIDC.md
+        exclude-environment-credential: true
+        exclude-workload-identity-credential: true
+        exclude-managed-identity-credential: true
+        exclude-shared-token-cache-credential: true
+        exclude-visual-studio-credential: true
+        exclude-visual-studio-code-credential: true
+        exclude-azure-cli-credential: false
+        exclude-azure-powershell-credential: true
+        exclude-azure-developer-cli-credential: true
+        exclude-interactive-browser-credential: true
 
     - name: Upload binary zip
       uses: actions/upload-artifact@v5

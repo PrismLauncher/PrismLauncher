@@ -67,16 +67,16 @@ runs:
         if [ -n '${{ inputs.apple-codesign-id }}' ]; then
           APPLE_CODESIGN_ID='${{ inputs.apple-codesign-id }}'
           if [[ "${{ inputs.artifact-name }}" == *"Sandboxed"* ]]; then
-            ENTITLEMENTS_FILE='./program_info/App.entitlements'
+            ENTITLEMENTS_FILE='../${{ env.BUILD_DIR }}/program_info/App.entitlements'
           else
-            ENTITLEMENTS_FILE='./program_info/AppNoSandbox.entitlements'
+            ENTITLEMENTS_FILE='../${{ env.BUILD_DIR }}/program_info/AppNoSandbox.entitlements'
           fi
         else
           APPLE_CODESIGN_ID='-'
           if [[ "${{ inputs.artifact-name }}" == *"Sandboxed"* ]]; then
-            ENTITLEMENTS_FILE='./program_info/AdhocSignedApp.entitlements'
+            ENTITLEMENTS_FILE='../${{ env.BUILD_DIR }}/program_info/AdhocSignedApp.entitlements'
           else
-            ENTITLEMENTS_FILE='./program_info/AdhocAppNoSandbox.entitlements'
+            ENTITLEMENTS_FILE='../${{ env.BUILD_DIR }}/program_info/AdhocAppNoSandbox.entitlements'
           fi
         fi
 

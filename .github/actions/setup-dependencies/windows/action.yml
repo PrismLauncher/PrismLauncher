@@ -79,6 +79,7 @@ runs:
           qt6-5compat:p
           qt6-networkauth:p
           cmark:p
+          qrencode:p
           tomlplusplus:p
           quazip-qt6:p
 

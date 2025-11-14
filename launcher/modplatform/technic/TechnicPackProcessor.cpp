@@ -142,7 +142,7 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
     try {
         QJsonDocument doc = Json::requireDocument(data);
         QJsonObject root = Json::requireObject(doc, "version.json");
-        QString packMinecraftVersion = Json::ensureString(root, "inheritsFrom", QString(), "");
+        QString packMinecraftVersion = root["inheritsFrom"].toString();
         if (packMinecraftVersion.isEmpty()) {
             if (fmlMinecraftVersion.isEmpty()) {
                 emit failed(tr("Could not understand \"version.json\":\ninheritsFrom is missing"));
@@ -151,21 +151,21 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
             packMinecraftVersion = fmlMinecraftVersion;
         }
         components->setComponentVersion("net.minecraft", packMinecraftVersion, true);
-        for (auto library : Json::ensureArray(root, "libraries", {})) {
+        for (auto library : root["libraries"].toArray()) {
             if (!library.isObject()) {
                 continue;
             }
 
-            auto libraryObject = Json::ensureObject(library, {}, "");
-            auto libraryName = Json::ensureString(libraryObject, "name", "", "");
+            auto libraryObject = library.toObject();
+            auto libraryName = libraryObject["name"].toString();
 
             if (libraryName.startsWith("net.neoforged.fancymodloader:")) {  // it is neoforge
                 // no easy way to get the version from the libs so use the arguments
-                auto arguments = Json::ensureObject(root, "arguments", {});
+                auto arguments = root["arguments"].toObject();
                 bool isVersionArg = false;
                 QString neoforgeVersion;
-                for (auto arg : Json::ensureArray(arguments, "game", {})) {
-                    auto argument = Json::ensureString(arg, "");
+                for (auto arg : arguments["game"].toArray()) {
+                    auto argument = arg.toString("");
                     if (isVersionArg) {
                         neoforgeVersion = argument;
                         break;

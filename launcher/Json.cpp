@@ -153,7 +153,7 @@ QJsonValue toJson<QVariant>(const QVariant& variant)
 template <>
 QByteArray requireIsType<QByteArray>(const QJsonValue& value, const QString& what)
 {
-    const QString string = ensureIsType<QString>(value, what);
+    const QString string = value.toString(what);
     // ensure that the string can be safely cast to Latin1
     if (string != QString::fromLatin1(string.toLatin1())) {
         throw JsonException(what + " is not encodable as Latin1");
@@ -221,7 +221,7 @@ QDateTime requireIsType<QDateTime>(const QJsonValue& value, const QString& what)
 template <>
 QUrl requireIsType<QUrl>(const QJsonValue& value, const QString& what)
 {
-    const QString string = ensureIsType<QString>(value, what);
+    const QString string = value.toString(what);
     if (string.isEmpty()) {
         return QUrl();
     }
@@ -287,7 +287,7 @@ QStringList toStringList(const QString& jsonString)
     if (parseError.error != QJsonParseError::NoError || !doc.isArray())
         return {};
     try {
-        return ensureIsArrayOf<QString>(doc.array(), "");
+        return requireIsArrayOf<QString>(doc);
     } catch (Json::JsonException& e) {
         return {};
     }

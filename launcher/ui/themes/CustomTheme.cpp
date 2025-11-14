@@ -179,10 +179,10 @@ bool CustomTheme::read(const QString& path, bool& hasCustomLogColors)
             const QJsonObject root = doc.object();
             m_name = Json::requireString(root, "name", "Theme name");
             m_widgets = Json::requireString(root, "widgets", "Qt widget theme");
-            m_qssFilePath = Json::ensureString(root, "qssFilePath", "themeStyle.css");
+            m_qssFilePath = root["qssFilePath"].toString("themeStyle.css");
 
             auto readColor = [](const QJsonObject& colors, const QString& colorName) -> QColor {
-                auto colorValue = Json::ensureString(colors, colorName, QString());
+                auto colorValue = colors[colorName].toString();
                 if (!colorValue.isEmpty()) {
                     QColor color(colorValue);
                     if (!color.isValid()) {
@@ -222,7 +222,7 @@ bool CustomTheme::read(const QString& path, bool& hasCustomLogColors)
 
                 // fade
                 m_fadeColor = readColor(colorsRoot, "fadeColor");
-                m_fadeAmount = Json::ensureDouble(colorsRoot, "fadeAmount", 0.5, "fade amount");
+                m_fadeAmount = colorsRoot["fadeAmount"].toDouble(0.5);
             }
 
             if (root.contains("logColors")) {

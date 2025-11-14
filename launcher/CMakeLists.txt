@@ -1325,8 +1325,15 @@ target_link_libraries(Launcher_logic
     qdcss
     BuildConfig
     Qt${QT_VERSION_MAJOR}::Widgets
-    qrcodegenerator
 )
+
+if(TARGET PkgConfig::libqrencode)
+    target_link_libraries(Launcher_logic PkgConfig::libqrencode)
+else()
+    target_include_directories(Launcher_logic PRIVATE ${LIBQRENCODE_INCLUDE_DIR})
+    target_link_libraries(Launcher_logic ${LIBQRENCODE_LIBRARIES})
+endif()
+
 if(TARGET PkgConfig::tomlplusplus)
     target_link_libraries(Launcher_logic PkgConfig::tomlplusplus)
 else()

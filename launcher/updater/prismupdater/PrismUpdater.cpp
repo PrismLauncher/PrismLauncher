@@ -1239,13 +1239,13 @@ int PrismUpdaterApp::parseReleasePage(const QByteArray* response)
 
             GitHubRelease release = {};
             release.id = Json::requireInteger(release_obj, "id");
-            release.name = Json::ensureString(release_obj, "name");
+            release.name = release_obj["name"].toString();
             release.tag_name = Json::requireString(release_obj, "tag_name");
             release.created_at = QDateTime::fromString(Json::requireString(release_obj, "created_at"), Qt::ISODate);
-            release.published_at = QDateTime::fromString(Json::ensureString(release_obj, "published_at"), Qt::ISODate);
+            release.published_at = QDateTime::fromString(release_obj["published_at"].toString(), Qt::ISODate);
             release.draft = Json::requireBoolean(release_obj, "draft");
             release.prerelease = Json::requireBoolean(release_obj, "prerelease");
-            release.body = Json::ensureString(release_obj, "body");
+            release.body = release_obj["body"].toString();
             release.version = Version(release.tag_name);
 
             auto release_assets_obj = Json::requireArray(release_obj, "assets");
@@ -1254,7 +1254,7 @@ int PrismUpdaterApp::parseReleasePage(const QByteArray* response)
                 GitHubReleaseAsset asset = {};
                 asset.id = Json::requireInteger(asset_obj, "id");
                 asset.name = Json::requireString(asset_obj, "name");
-                asset.label = Json::ensureString(asset_obj, "label");
+                asset.label = asset_obj["label"].toString();
                 asset.content_type = Json::requireString(asset_obj, "content_type");
                 asset.size = Json::requireInteger(asset_obj, "size");
                 asset.created_at = QDateTime::fromString(Json::requireString(asset_obj, "created_at"), Qt::ISODate);

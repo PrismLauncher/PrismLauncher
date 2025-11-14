@@ -259,8 +259,8 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument& doc
 
     if (root.contains("runtimes")) {
         out->runtimes = {};
-        for (auto runtime : ensureArray(root, "runtimes")) {
-            out->runtimes.append(Java::parseJavaMeta(ensureObject(runtime)));
+        for (auto runtime : root["runtimes"].toArray()) {
+            out->runtimes.append(Java::parseJavaMeta(runtime.toObject()));
         }
     }
 

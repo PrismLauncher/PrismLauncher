@@ -21,7 +21,6 @@
 #include <QPainter>
 
 #include "FileSystem.h"
-#include "Json.h"
 
 static QImage improveSkin(QImage skin)
 {
@@ -108,11 +107,11 @@ SkinModel::SkinModel(QString path) : m_path(path), m_texture(getSkin(path)), m_m
 }
 
 SkinModel::SkinModel(QDir skinDir, QJsonObject obj)
-    : m_capeId(Json::ensureString(obj, "capeId")), m_model(Model::CLASSIC), m_url(Json::ensureString(obj, "url"))
+    : m_capeId(obj["capeId"].toString()), m_model(Model::CLASSIC), m_url(obj["url"].toString())
 {
-    auto name = Json::ensureString(obj, "name");
+    auto name = obj["name"].toString();
 
-    if (auto model = Json::ensureString(obj, "model"); model == "SLIM") {
+    if (auto model = obj["model"].toString(); model == "SLIM") {
         m_model = Model::SLIM;
     }
     m_path = skinDir.absoluteFilePath(name) + ".png";

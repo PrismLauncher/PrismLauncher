@@ -40,8 +40,8 @@ void ATLauncher::loadIndexedPack(ATLauncher::IndexedPack& m, QJsonObject& obj)
         loadIndexedVersion(version, versionObj);
         m.versions.append(version);
     }
-    m.system = Json::ensureBoolean(obj, QString("system"), false);
-    m.description = Json::ensureString(obj, "description", "");
+    m.system = obj["system"].toBool();
+    m.description = obj["description"].toString("");
 
     static const QRegularExpression s_regex("[^A-Za-z0-9]");
     m.safeName = Json::requireString(obj, "name").replace(s_regex, "").toLower() + ".png";

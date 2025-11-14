@@ -180,7 +180,7 @@ bool processMCMeta(DataPack* pack, QByteArray&& raw_data)
         auto json_doc = QJsonDocument::fromJson(raw_data);
         auto pack_obj = Json::requireObject(json_doc.object(), "pack", {});
 
-        pack->setPackFormat(Json::ensureInteger(pack_obj, "pack_format", 0));
+        pack->setPackFormat(pack_obj["pack_format"].toInt());
         pack->setDescription(DataPackUtils::processComponent(pack_obj.value("description")));
     } catch (Json::JsonException& e) {
         qWarning() << "JsonException: " << e.what() << e.cause();
@@ -192,19 +192,19 @@ bool processMCMeta(DataPack* pack, QByteArray&& raw_data)
 QString buildStyle(const QJsonObject& obj)
 {
     QStringList styles;
-    if (auto color = Json::ensureString(obj, "color"); !color.isEmpty()) {
+    if (auto color = obj["color"].toString(); !color.isEmpty()) {
         styles << QString("color: %1;").arg(color);
     }
     if (obj.contains("bold")) {
         QString weight = "normal";
-        if (Json::ensureBoolean(obj, "bold", false)) {
+        if (obj["bold"].toBool()) {
             weight = "bold";
         }
         styles << QString("font-weight: %1;").arg(weight);
     }
     if (obj.contains("italic")) {
         QString style = "normal";
-        if (Json::ensureBoolean(obj, "italic", false)) {
+        if (obj["italic"].toBool()) {
             style = "italic";
         }
         styles << QString("font-style: %1;").arg(style);
@@ -223,10 +223,10 @@ QString processComponent(const QJsonArray& value, bool strikethrough, bool under
 
 QString processComponent(const QJsonObject& obj, bool strikethrough, bool underline)
 {
-    underline = Json::ensureBoolean(obj, "underlined", underline);
-    strikethrough = Json::ensureBoolean(obj, "strikethrough", strikethrough);
+    underline = obj["underlined"].toBool(underline);
+    strikethrough = obj["strikethrough"].toBool(strikethrough);
 
-    QString result = Json::ensureString(obj, "text");
+    QString result = obj["text"].toString();
     if (underline) {
         result = QString("<u>%1</u>").arg(result);
     }
@@ -234,14 +234,14 @@ QString processComponent(const QJsonObject& obj, bool strikethrough, bool underl
         result = QString("<s>%1</s>").arg(result);
     }
     // the extra needs to be a array
-    result += processComponent(Json::ensureArray(obj, "extra"), strikethrough, underline);
+    result += processComponent(obj["extra"].toArray(), strikethrough, underline);
     if (auto style = buildStyle(obj); !style.isEmpty()) {
         result = QString("<span %1>%2</span>").arg(style, result);
     }
     if (obj.contains("clickEvent")) {
-        auto click_event = Json::ensureObject(obj, "clickEvent");
-        auto action = Json::ensureString(click_event, "action");
-        auto value = Json::ensureString(click_event, "value");
+        auto click_event = obj["clickEvent"].toObject();
+        auto action = click_event["action"].toString();
+        auto value = click_event["value"].toString();
         if (action == "open_url" && !value.isEmpty()) {
             result = QString("<a href=\"%1\">%2</a>").arg(value, result);
         }

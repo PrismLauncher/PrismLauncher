@@ -481,7 +481,7 @@ void SkinManageDialog::on_userBtn_clicked()
                 return;
             }
             const auto root = doc.object();
-            auto id = Json::ensureString(root, "id");
+            auto id = root["id"].toString();
             if (!id.isEmpty()) {
                 getProfile->setUrl("https://sessionserver.mojang.com/session/minecraft/profile/" + id);
             } else {

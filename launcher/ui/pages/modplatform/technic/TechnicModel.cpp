@@ -191,7 +191,7 @@ void Technic::ListModel::searchRequestFinished()
                     if (pack.slug == "vanilla")
                         continue;
 
-                    auto rawURL = Json::ensureString(technicPackObject, "iconUrl", "null");
+                    auto rawURL = technicPackObject["iconUrl"].toString("null");
                     if (rawURL == "null") {
                         pack.logoUrl = "null";
                         pack.logoName = "null";

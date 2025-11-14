@@ -11,6 +11,7 @@ runs:
         sudo apt-get -y install \
           dpkg-dev \
           ninja-build extra-cmake-modules scdoc \
+          libqrencode-dev \
           appstream libxcb-cursor-dev
 
     - name: Setup AppImage tooling

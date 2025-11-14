@@ -36,33 +36,33 @@ bool shouldDownloadOnSide(QString side)
 // https://docs.modrinth.com/api/operations/getproject/
 void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
-    pack.addonId = Json::ensureString(obj, "project_id");
+    pack.addonId = obj["project_id"].toString();
     if (pack.addonId.toString().isEmpty())
         pack.addonId = Json::requireString(obj, "id");
 
     pack.provider = ModPlatform::ResourceProvider::MODRINTH;
     pack.name = Json::requireString(obj, "title");
 
-    pack.slug = Json::ensureString(obj, "slug", "");
+    pack.slug = obj["slug"].toString("");
     if (!pack.slug.isEmpty())
         pack.websiteUrl = "https://modrinth.com/mod/" + pack.slug;
     else
         pack.websiteUrl = "";
 
-    pack.description = Json::ensureString(obj, "description", "");
+    pack.description = obj["description"].toString("");
 
-    pack.logoUrl = Json::ensureString(obj, "icon_url", "");
-    pack.logoName = QString("%1.%2").arg(Json::ensureString(obj, "slug"), QFileInfo(QUrl(pack.logoUrl).fileName()).suffix());
+    pack.logoUrl = obj["icon_url"].toString("");
+    pack.logoName = QString("%1.%2").arg(obj["slug"].toString()), QFileInfo(QUrl(pack.logoUrl).fileName()).suffix();
 
     if (obj.contains("author")) {
         ModPlatform::ModpackAuthor modAuthor;
-        modAuthor.name = Json::ensureString(obj, "author");
+        modAuthor.name = obj["author"].toString();
         modAuthor.url = api.getAuthorURL(modAuthor.name);
         pack.authors = { modAuthor };
     }
 
-    auto client = shouldDownloadOnSide(Json::ensureString(obj, "client_side"));
-    auto server = shouldDownloadOnSide(Json::ensureString(obj, "server_side"));
+    auto client = shouldDownloadOnSide(obj["client_side"].toString());
+    auto server = shouldDownloadOnSide(obj["server_side"].toString());
 
     if (server && client) {
         pack.side = ModPlatform::Side::UniversalSide;
@@ -78,38 +78,38 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 
 void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
-    pack.extraData.issuesUrl = Json::ensureString(obj, "issues_url");
+    pack.extraData.issuesUrl = obj["issues_url"].toString();
     if (pack.extraData.issuesUrl.endsWith('/'))
         pack.extraData.issuesUrl.chop(1);
 
-    pack.extraData.sourceUrl = Json::ensureString(obj, "source_url");
+    pack.extraData.sourceUrl = obj["source_url"].toString();
     if (pack.extraData.sourceUrl.endsWith('/'))
         pack.extraData.sourceUrl.chop(1);
 
-    pack.extraData.wikiUrl = Json::ensureString(obj, "wiki_url");
+    pack.extraData.wikiUrl = obj["wiki_url"].toString();
     if (pack.extraData.wikiUrl.endsWith('/'))
         pack.extraData.wikiUrl.chop(1);
 
-    pack.extraData.discordUrl = Json::ensureString(obj, "discord_url");
+    pack.extraData.discordUrl = obj["discord_url"].toString();
     if (pack.extraData.discordUrl.endsWith('/'))
         pack.extraData.discordUrl.chop(1);
 
-    auto donate_arr = Json::ensureArray(obj, "donation_urls");
+    auto donate_arr = obj["donation_urls"].toArray();
     for (auto d : donate_arr) {
         auto d_obj = Json::requireObject(d);
 
         ModPlatform::DonationData donate;
 
-        donate.id = Json::ensureString(d_obj, "id");
-        donate.platform = Json::ensureString(d_obj, "platform");
-        donate.url = Json::ensureString(d_obj, "url");
+        donate.id = d_obj["id"].toString();
+        donate.platform = d_obj["platform"].toString();
+        donate.url = d_obj["url"].toString();
 
         pack.extraData.donate.append(donate);
     }
 
-    pack.extraData.status = Json::ensureString(obj, "status");
+    pack.extraData.status = obj["status"].toString();
 
-    pack.extraData.body = Json::ensureString(obj, "body").remove("<br>");
+    pack.extraData.body = obj["body"].toString().remove("<br>");
 
     pack.extraDataLoaded = true;
 }
@@ -149,12 +149,12 @@ ModPlatform::IndexedVersion Modrinth::loadIndexedPackVersion(QJsonObject& obj, Q
 
     file.changelog = Json::requireString(obj, "changelog");
 
-    auto dependencies = Json::ensureArray(obj, "dependencies");
+    auto dependencies = obj["dependencies"].toArray();
     for (auto d : dependencies) {
-        auto dep = Json::ensureObject(d);
+        auto dep = d.toObject();
         ModPlatform::Dependency dependency;
-        dependency.addonId = Json::ensureString(dep, "project_id");
-        dependency.version = Json::ensureString(dep, "version_id");
+        dependency.addonId = dep["project_id"].toString();
+        dependency.version = dep["version_id"].toString();
         auto depType = Json::requireString(dep, "dependency_type");
 
         if (depType == "required")

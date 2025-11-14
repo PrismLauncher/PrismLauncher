@@ -202,11 +202,11 @@ void TechnicPage::suggestCurrent()
             }
         }
 
-        current.minecraftVersion = Json::ensureString(obj, "minecraft", QString(), "__placeholder__");
-        current.websiteUrl = Json::ensureString(obj, "platformUrl", QString(), "__placeholder__");
-        current.author = Json::ensureString(obj, "user", QString(), "__placeholder__");
-        current.description = Json::ensureString(obj, "description", QString(), "__placeholder__");
-        current.currentVersion = Json::ensureString(obj, "version", QString(), "__placeholder__");
+        current.minecraftVersion = obj["minecraft"].toString();
+        current.websiteUrl = obj["platformUrl"].toString();
+        current.author = obj["user"].toString();
+        current.description = obj["description"].toString();
+        current.currentVersion = obj["version"].toString();
         current.metadataLoaded = true;
 
         metadataLoaded();

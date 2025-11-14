@@ -130,18 +130,18 @@ static ComponentPtr componentFromJsonV1(PackProfile* parent, const QString& comp
     auto uid = Json::requireString(obj.value("uid"));
     auto filePath = componentJsonPattern.arg(uid);
     auto component = makeShared<Component>(parent, uid);
-    component->m_version = Json::ensureString(obj.value("version"));
-    component->m_dependencyOnly = Json::ensureBoolean(obj.value("dependencyOnly"), false);
-    component->m_important = Json::ensureBoolean(obj.value("important"), false);
+    component->m_version = obj.value("version").toString();
+    component->m_dependencyOnly = obj.value("dependencyOnly").toBool();
+    component->m_important = obj.value("important").toBool();
 
     // cached
     // TODO @RESILIENCE: ignore invalid values/structure here?
-    component->m_cachedVersion = Json::ensureString(obj.value("cachedVersion"));
-    component->m_cachedName = Json::ensureString(obj.value("cachedName"));
+    component->m_cachedVersion = obj.value("cachedVersion").toString();
+    component->m_cachedName = obj.value("cachedName").toString();
     Meta::parseRequires(obj, &component->m_cachedRequires, "cachedRequires");
     Meta::parseRequires(obj, &component->m_cachedConflicts, "cachedConflicts");
-    component->m_cachedVolatile = Json::ensureBoolean(obj.value("volatile"), false);
-    bool disabled = Json::ensureBoolean(obj.value("disabled"), false);
+    component->m_cachedVolatile = obj.value("volatile").toBool();
+    bool disabled = obj.value("disabled").toBool();
     component->setEnabled(!disabled);
     return component;
 }

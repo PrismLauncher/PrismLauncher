@@ -199,8 +199,8 @@ void FlamePackExportTask::makeApiRequest()
                 return;
             }
             for (auto match : dataArr) {
-                auto matchObj = Json::ensureObject(match, {});
-                auto fileObj = Json::ensureObject(matchObj, "file", {});
+                auto matchObj = match.toObject();
+                auto fileObj = matchObj["file"].toObject();
 
                 if (matchObj.isEmpty() || fileObj.isEmpty()) {
                     qWarning() << "Fingerprint match is empty!";
@@ -208,7 +208,7 @@ void FlamePackExportTask::makeApiRequest()
                     return;
                 }
 
-                auto fingerprint = QString::number(Json::ensureVariant(fileObj, "fileFingerprint").toUInt());
+                auto fingerprint = QString::number(fileObj["fileFingerprint"].toInteger());
                 auto mod = pendingHashes.find(fingerprint);
                 if (mod == pendingHashes.end()) {
                     qWarning() << "Invalid fingerprint from the API response.";
@@ -216,7 +216,7 @@ void FlamePackExportTask::makeApiRequest()
                 }
 
                 setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name));
-                if (Json::ensureBoolean(fileObj, "isAvailable", false, "isAvailable"))
+                if (fileObj["isAvailable"].toBool())
                     resolvedFiles.insert(mod->path, { Json::requireInteger(fileObj, "modId"), Json::requireInteger(fileObj, "id"),
                                                       mod->enabled, mod->isMod });
             }

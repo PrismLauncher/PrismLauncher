@@ -75,11 +75,11 @@ ModDetails ReadMCModInfo(QByteArray contents)
             val = jsonDoc.object().value("modListVersion");
         }
 
-        int version = Json::ensureInteger(val, -1);
+        int version = val.toInt(-1);
 
         // Some mods set the number with "", so it's a String instead
         if (version < 0)
-            version = Json::ensureString(val, "").toInt();
+            version = val.toString("").toInt();
 
         if (version != 2) {
             qWarning() << QString(R"(The value of 'modListVersion' is "%1" (expected "2")! The file may be corrupted.)").arg(version);
@@ -298,7 +298,7 @@ ModDetails ReadQuiltModInfo(QByteArray contents)
         QJsonParseError jsonError;
         QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
         auto object = Json::requireObject(jsonDoc, "quilt.mod.json");
-        auto schemaVersion = Json::ensureInteger(object.value("schema_version"), 0, "Quilt schema_version");
+        auto schemaVersion = object.value("schema_version").toInt();
 
         // https://github.com/QuiltMC/rfcs/blob/be6ba280d785395fefa90a43db48e5bfc1d15eb4/specification/0002-quilt.mod.json.md
         if (schemaVersion == 1) {
@@ -307,17 +307,17 @@ ModDetails ReadQuiltModInfo(QByteArray contents)
             details.mod_id = Json::requireString(modInfo.value("id"), "Mod ID");
             details.version = Json::requireString(modInfo.value("version"), "Mod version");
 
-            auto modMetadata = Json::ensureObject(modInfo.value("metadata"));
+            auto modMetadata = modInfo.value("metadata").toObject();
 
-            details.name = Json::ensureString(modMetadata.value("name"), details.mod_id);
-            details.description = Json::ensureString(modMetadata.value("description"));
+            details.name = modMetadata.value("name").toString(details.mod_id);
+            details.description = modMetadata.value("description").toString();
 
-            auto modContributors = Json::ensureObject(modMetadata.value("contributors"));
+            auto modContributors = modMetadata.value("contributors").toObject();
 
             // We don't really care about the role of a contributor here
             details.authors += modContributors.keys();
 
-            auto modContact = Json::ensureObject(modMetadata.value("contact"));
+            auto modContact = modMetadata.value("contact").toObject();
 
             if (modContact.contains("homepage")) {
                 details.homeurl = Json::requireString(modContact.value("homepage"));

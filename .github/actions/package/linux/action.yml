@@ -13,10 +13,6 @@ inputs:
     description: Name of the uploaded artifact
     required: true
     default: Linux
-  cmake-preset:
-    description: Base CMake preset previously used for the build
-    required: true
-    default: linux
   qt-version:
     description: Version of Qt to use
     required: true
@@ -62,7 +58,7 @@ runs:
 
         GPG_PRIVATE_KEY: ${{ inputs.gpg-private-key }}
       run: |
-        cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_APPIMAGE_DIR }}/usr
+        cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build-type }} --prefix ${{ env.INSTALL_APPIMAGE_DIR }}/usr
 
         mv ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/metainfo/org.prismlauncher.PrismLauncher.metainfo.xml ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/metainfo/org.prismlauncher.PrismLauncher.appdata.xml
         export "NO_APPSTREAM=1" # we have to skip appstream checking because appstream on ubuntu 20.04 is outdated
@@ -107,12 +103,10 @@ runs:
       env:
         BUILD_DIR: build
 
-        CMAKE_PRESET: ${{ inputs.cmake-preset }}
-
         INSTALL_PORTABLE_DIR: install-portable
       run: |
-        cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }}
-        cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
+        cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build-type }} --prefix ${{ env.INSTALL_PORTABLE_DIR }}
+        cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build-type }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
 
         for l in $(find ${{ env.INSTALL_PORTABLE_DIR }} -type f); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_PORTABLE_DIR }}/}; l=${l#./}; echo $l; done > ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt
         cd ${{ env.INSTALL_PORTABLE_DIR }}
