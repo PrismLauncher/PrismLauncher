@@ -1163,9 +1163,6 @@ if (APPLE)
     set(LAUNCHER_SOURCES
         ${LAUNCHER_SOURCES}
         ui/themes/ThemeManager.mm
-
-        ui/pages/global/MacSandboxPage.cpp
-        ui/pages/global/MacSandboxPage.h
     )
 endif()
 
@@ -1188,6 +1185,9 @@ if (APPLE)
     if (Launcher_ENABLE_SANDBOX)
         set(LAUNCHER_SOURCES
             ${LAUNCHER_SOURCES}
+
+            ui/pages/global/MacSandboxPage.cpp
+            ui/pages/global/MacSandboxPage.h
 
             xpcbridge/XPCBridge.h
             xpcbridge/XPCBridge.cpp

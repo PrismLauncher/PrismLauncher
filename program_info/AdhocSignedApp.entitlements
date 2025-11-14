@@ -38,12 +38,12 @@
     </array>
     <key>com.apple.security.temporary-exception.files.home-relative-path.read-write</key>
     <array>
-        <string>/Library/Containers/@Launcher_Identifier@/JavaInstalls/</string>
+        <string>/Library/Containers/@Launcher_AppID@/JavaInstalls/</string>
     </array>
     <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
     <array>
-        <string>@Launcher_Identifier@-spks</string>
-        <string>@Launcher_Identifier@-spki</string>
+        <string>@Launcher_AppID@-spks</string>
+        <string>@Launcher_AppID@-spki</string>
         <string>com.valvesoftware.steam.ipctool</string>
     </array>
     <key>com.apple.security.temporary-exception.sbpl</key>
