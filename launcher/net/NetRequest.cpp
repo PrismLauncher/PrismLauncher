@@ -41,6 +41,7 @@
 
 #include <QDateTime>
 #include <QFileInfo>
+#include <QNetworkProxy>
 #include <QNetworkReply>
 #include <QUrl>
 #include <memory>
@@ -62,7 +63,7 @@ NetRequest::NetRequest(const QUrl& url, Sink* sink, const Options options) : m_u
         throw std::bad_alloc{};
     }
 
-    curl_easy_setopt(m_curl.get(), CURLOPT_URL, url.toString(QUrl::FullyEncoded).toStdString().c_str());
+    curl_easy_setopt(m_curl.get(), CURLOPT_URL, url.toString(QUrl::FullyEncoded).toUtf8().constData());
     curl_easy_setopt(m_curl.get(), CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(m_curl.get(), CURLOPT_FAILONERROR, 1L);
     curl_easy_setopt(m_curl.get(), CURLOPT_NOPROGRESS, 0L);
@@ -82,7 +83,7 @@ NetRequest::NetRequest(const QUrl& url, Sink* sink, const Options options) : m_u
 #else
     const auto userAgent = BuildConfig.USER_AGENT;
 #endif
-    curl_easy_setopt(m_curl.get(), CURLOPT_USERAGENT, userAgent.toStdString().c_str());
+    curl_easy_setopt(m_curl.get(), CURLOPT_USERAGENT, userAgent.toUtf8().constData());
 
 #if defined(LAUNCHER_APPLICATION)
     const long timeout = APPLICATION->settings()->get("RequestTimeout").toInt() * 1000;
@@ -90,6 +91,34 @@ NetRequest::NetRequest(const QUrl& url, Sink* sink, const Options options) : m_u
     const long timeout = 30000;
 #endif
     curl_easy_setopt(m_curl.get(), CURLOPT_TIMEOUT_MS, timeout);
+
+    const QNetworkProxy proxy = APPLICATION->network()->proxy();
+    bool useProxy = false;
+    switch (proxy.type()) {
+        case QNetworkProxy::HttpProxy:
+        case QNetworkProxy::HttpCachingProxy:
+            curl_easy_setopt(m_curl.get(), CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+            useProxy = true;
+            break;
+        case QNetworkProxy::Socks5Proxy:
+            curl_easy_setopt(m_curl.get(), CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5_HOSTNAME);
+            useProxy = true;
+            break;
+        case QNetworkProxy::FtpCachingProxy:
+        case QNetworkProxy::DefaultProxy:
+        case QNetworkProxy::NoProxy:
+            break;
+    }
+    if (useProxy) {
+        curl_easy_setopt(m_curl.get(), CURLOPT_PROXY, proxy.hostName().toUtf8().constData());
+        curl_easy_setopt(m_curl.get(), CURLOPT_PROXYPORT, proxy.port());
+        if (!proxy.user().isEmpty()) {
+            curl_easy_setopt(m_curl.get(), CURLOPT_PROXYUSERNAME, proxy.user().toUtf8().constData());
+        }
+        if (!proxy.password().isEmpty()) {
+            curl_easy_setopt(m_curl.get(), CURLOPT_PROXYPASSWORD, proxy.password().toUtf8().constData());
+        }
+    }
 
     connect(this, &NetRequest::succeeded, this, &NetRequest::finished);
     connect(this, &NetRequest::failed, this, &NetRequest::finished);
@@ -297,13 +326,13 @@ void NetRequest::httpMultipart(QList<Multipart> parts)
 
     for (auto& [name, data, contentType, remoteFileName] : parts) {
         curl_mimepart* curlPart = curl_mime_addpart(m_mime.get());
-        curl_mime_name(curlPart, name.toStdString().c_str());
+        curl_mime_name(curlPart, name.toUtf8().constData());
         curl_mime_data(curlPart, data, data.size());
         if (!contentType.isEmpty()) {
-            curl_mime_type(curlPart, contentType.toStdString().c_str());
+            curl_mime_type(curlPart, contentType.toUtf8().constData());
         }
         if (!remoteFileName.isEmpty()) {
-            curl_mime_filename(curlPart, remoteFileName.toStdString().c_str());
+            curl_mime_filename(curlPart, remoteFileName.toUtf8().constData());
         }
     }
 
@@ -324,7 +353,7 @@ void NetRequest::setTotalBytes(const qint64 totalBytes)
 void NetRequest::setUrl(QUrl url)
 {
     m_url = url;
-    curl_easy_setopt(m_curl.get(), CURLOPT_URL, url.toString(QUrl::FullyEncoded).toStdString().c_str());
+    curl_easy_setopt(m_curl.get(), CURLOPT_URL, url.toEncoded().constData());
 }
 
 size_t NetRequest::curlReadCallback(char* buffer, size_t, size_t bufferSize, void* thisRequest)
