@@ -105,6 +105,8 @@ class NetRequest final : public QObject {
     void httpMultipart(QList<Multipart> parts);
     void httpDelete() const;
 
+    void setTotalBytes(qint64 totalBytes);
+
    signals:
     void finished();
     void succeeded();

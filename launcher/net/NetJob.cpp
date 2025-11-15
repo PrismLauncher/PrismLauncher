@@ -64,12 +64,7 @@ NetJob::NetJob(QString jobName, int maxConcurrent)
     connect(this, &Task::finished, this, [this]{ m_performTimer.stop(); });
 }
 
-NetJob::~NetJob()
-{
-    for (const auto& request : m_runningRequests) {
-        curl_multi_remove_handle(m_curl.get(), request->curlHandle());
-    }
-}
+NetJob::~NetJob() = default;
 
 auto NetJob::addNetAction(Net::NetRequest::Ptr action) -> void
 {
@@ -78,16 +73,24 @@ auto NetJob::addNetAction(Net::NetRequest::Ptr action) -> void
 
 size_t NetJob::requestsSize() const
 {
-    return m_pendingRequests.size() + m_runningRequests.size() + m_failedRequests.size();
+    return m_pendingRequests.size() + m_runningRequests.size() + m_finishedRequests.size();
 }
 
 std::deque<Net::NetRequest::Ptr> NetJob::getFailedRequests() const
 {
-    return m_failedRequests;
+    std::deque<Net::NetRequest::Ptr> failed;
+    for (auto request : m_finishedRequests) {
+        if (!request->isSuccess()) {
+            failed.push_back(request);
+        }
+    }
+
+    return failed;
 }
 
 void NetJob::executeTask()
 {
+    m_performTimer.setInterval(50);
     connect(&m_performTimer, &QTimer::timeout, this, &NetJob::perform);
     m_performTimer.start();
 }
@@ -119,35 +122,44 @@ void NetJob::perform()
 
     qint64 totalExpected = 0;
     qint64 totalReceived = 0;
+    for (const auto& request : m_pendingRequests) {
+        const auto taskProgress = request->stepProgress();
+        totalExpected += taskProgress.total;
+        totalReceived += taskProgress.current;
+    }
     for (const auto& request : m_runningRequests) {
         auto taskProgress = request->stepProgress();
-
         totalExpected += taskProgress.total;
         totalReceived += taskProgress.current;
 
-        emit stepProgress(taskProgress);
+        propagateStepProgress(taskProgress);
         request->updateDetails();
     }
+    for (const auto& request : m_finishedRequests) {
+        auto taskProgress = request->stepProgress();
+        totalExpected += taskProgress.total;
+        totalReceived += taskProgress.current;
+    }
 
-    emit progress(totalReceived, totalExpected);
+    setProgress(totalReceived, totalExpected);
 
     const CURLMsg* multiMsg = nullptr;
     do {
         int messagesInQueue;
         multiMsg = curl_multi_info_read(m_curl.get(), &messagesInQueue);
         if (multiMsg && multiMsg->msg == CURLMSG_DONE) {
-            const auto& request = findRequestByHandle(multiMsg->easy_handle);
+            auto request = findRequestByHandle(multiMsg->easy_handle);
             const CURLcode result = multiMsg->data.result;
             request->setResult(result);
+            propagateStepProgress(request->stepProgress());
 
             curl_multi_remove_handle(m_curl.get(), multiMsg->easy_handle);
             std::erase(m_runningRequests, request);
+            m_finishedRequests.push_back(request);
 
             if (request->isSuccess()) {
                 request->finalize();
                 emit request->succeeded();
-            } else {
-                m_failedRequests.push_back(request);
             }
         }
     } while (multiMsg);
@@ -157,9 +169,9 @@ void NetJob::perform()
     }
 }
 
-Net::NetRequest::Ptr& NetJob::findRequestByHandle(const CURL* handle)
+Net::NetRequest::Ptr NetJob::findRequestByHandle(const CURL* handle)
 {
-    for (auto& request : m_runningRequests) {
+    for (auto request : m_runningRequests) {
         if (request->curlHandle() == handle) {
             return request;
         }
@@ -176,15 +188,17 @@ void NetJob::onAllTransfersComplete()
         return;
     }
 
-    const bool success = m_failedRequests.empty();
+    bool success = true;
     bool shouldStop = true;
 
-    if (m_attempts < m_attemptsBeforeAsking && isOnline()) {
-        while (!m_failedRequests.empty()) {
-            auto request = m_failedRequests.front();
-            m_failedRequests.pop_front();
-            m_pendingRequests.push_back(request);
-            shouldStop = false;
+    for (auto request : m_finishedRequests) {
+        if (!request->isSuccess()) {
+            success = false;
+            if (m_attempts < m_attemptsBeforeAsking && isOnline()) {
+                std::erase(m_finishedRequests, request);
+                m_pendingRequests.push_back(request);
+                shouldStop = false;
+            }
         }
     }
 
@@ -222,9 +236,9 @@ auto NetJob::abort() -> bool
 bool NetJob::isOnline() const
 {
     // check some errors that are ussually associated with the lack of internet
-    for (const auto& request : m_failedRequests) {
+    for (const auto& request : m_finishedRequests) {
         const auto result = request->result();
-        if (result != CURLE_COULDNT_RESOLVE_HOST) {
+        if (result != CURLE_OK && result != CURLE_COULDNT_RESOLVE_HOST) {
             return true;
         }
     }
@@ -233,12 +247,14 @@ bool NetJob::isOnline() const
 
 void NetJob::emitFailed(QString reason)
 {
+    const auto failed = getFailedRequests();
+
 #if defined(LAUNCHER_APPLICATION)
     if (APPLICATION_DYN && m_askRetry && m_manualRetries < APPLICATION->settings()->get("NumberOfManualRetries").toInt() && isOnline()) {
-        auto dialog = NetworkJobFailedDialog(m_jobName, m_attempts, m_failedRequests.size(), m_failedRequests.size(), nullptr);
+        auto dialog = NetworkJobFailedDialog(m_jobName, m_attempts, m_finishedRequests.size(), failed.size(), nullptr);
 
         int i = 0;
-        for (const auto& request : m_failedRequests) {
+        for (const auto& request : failed) {
             dialog.addFailedRequest(i, request->url(), request->error());
             i++;
         }
@@ -251,7 +267,7 @@ void NetJob::emitFailed(QString reason)
     }
 #endif
 
-    for (const auto& request : m_failedRequests) {
+    for (const auto& request : failed) {
         emit request->failed(request->error());
     }
 

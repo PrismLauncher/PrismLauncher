@@ -315,6 +315,12 @@ void NetRequest::httpDelete() const
     curl_easy_setopt(m_curl.get(), CURLOPT_CUSTOMREQUEST, "DELETE");
 }
 
+void NetRequest::setTotalBytes(const qint64 totalBytes)
+{
+    m_stepProgress.old_total = m_stepProgress.total;
+    m_stepProgress.total = totalBytes;
+}
+
 void NetRequest::setUrl(QUrl url)
 {
     m_url = url;
@@ -349,7 +355,8 @@ size_t NetRequest::curlProgressCallback(void* thisRequest,
 {
     const auto request = static_cast<NetRequest*>(thisRequest);
 
-    const curl_off_t bytesExpected = std::max(downloadBytesExpected, uploadBytesExpected);
+    const curl_off_t presetTotal = request->m_stepProgress.total;
+    const curl_off_t bytesExpected = std::max(presetTotal, std::max(downloadBytesExpected, uploadBytesExpected));
     const curl_off_t bytesReceived = std::max(downloadBytesReceived, uploadBytesReceived);
 
     request->m_stepProgress.update(bytesReceived, bytesExpected <= 0 ? -1 : bytesExpected);

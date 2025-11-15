@@ -76,7 +76,7 @@ class NetJob final : public Task {
    private:
     bool isOnline() const;
     void perform();
-    Net::NetRequest::Ptr& findRequestByHandle(const CURL* handle);
+    Net::NetRequest::Ptr findRequestByHandle(const CURL* handle);
     void onAllTransfersComplete();
 
    private:
@@ -88,7 +88,7 @@ class NetJob final : public Task {
 
     std::deque<Net::NetRequest::Ptr> m_pendingRequests{};
     std::vector<Net::NetRequest::Ptr> m_runningRequests{};
-    std::deque<Net::NetRequest::Ptr> m_failedRequests{};
+    std::deque<Net::NetRequest::Ptr> m_finishedRequests{};
 
     bool m_suppressSucceeded = false;
 

@@ -285,6 +285,7 @@ Net::NetRequest::Ptr AssetObject::getDownloadAction()
         if (hash.size()) {
             objectDL->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, hash));
         }
+        objectDL->setTotalBytes(size);
         return objectDL;
     }
     return nullptr;
