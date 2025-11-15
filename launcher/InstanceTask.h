@@ -3,10 +3,10 @@
 #include "settings/SettingsObject.h"
 #include "tasks/Task.h"
 
+#include <QDirIterator>
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QTemporaryDir>
-#include <QDirIterator>
 
 /* Helpers */
 enum class InstanceNameChange { ShouldChange, ShouldKeep };

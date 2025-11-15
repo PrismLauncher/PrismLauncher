@@ -91,14 +91,14 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QFileOpenEvent>
+#include <QHostInfo>
 #include <QIcon>
 #include <QLibraryInfo>
 #include <QList>
 #include <QNetworkAccessManager>
 #include <QNetworkProxy>
-#include <QStringList>
 #include <QSettings>
-#include <QHostInfo>
+#include <QStringList>
 #include <QStringLiteral>
 #include <QStyleFactory>
 #include <QTranslator>

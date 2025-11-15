@@ -40,10 +40,10 @@
 #include <QApplication>
 #include <QDateTime>
 #include <QDebug>
+#include <QFile>
 #include <QFlag>
 #include <QIcon>
 #include <QMutex>
-#include <QFile>
 #include <QUrl>
 #include <memory>
 

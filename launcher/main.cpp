@@ -33,8 +33,8 @@
  *      limitations under the License.
  */
 
-#include "curl/curl.h"
 #include "Application.h"
+#include "curl/curl.h"
 
 int main(int argc, char* argv[])
 {
