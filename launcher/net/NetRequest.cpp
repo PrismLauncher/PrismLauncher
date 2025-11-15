@@ -92,7 +92,11 @@ NetRequest::NetRequest(const QUrl& url, Sink* sink, const Options options) : m_u
 #endif
     curl_easy_setopt(m_curl.get(), CURLOPT_TIMEOUT_MS, timeout);
 
+#if defined(LAUNCHER_APPLICATION)
     const QNetworkProxy proxy = APPLICATION->network()->proxy();
+#else
+    const QNetworkProxy proxy = QNetworkProxy::applicationProxy();
+#endif
     bool useProxy = false;
     switch (proxy.type()) {
         case QNetworkProxy::HttpProxy:
