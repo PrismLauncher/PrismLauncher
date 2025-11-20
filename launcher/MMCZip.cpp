@@ -575,7 +575,13 @@ auto ExtractZipTask::extractZip() -> ZipResult
         if (!file_name.startsWith(m_subdirectory))
             continue;
 
+#ifdef Q_OS_MACOS
+        // on macOS, ensure that the bundle is separated into its own folder, preventing accidental invalidation of the
+        // code signature
+        auto relative_file_name = file_name;
+#else
         auto relative_file_name = QDir::fromNativeSeparators(file_name.mid(m_subdirectory.size()));
+#endif
         auto original_name = relative_file_name;
         setStatus("Unpacking: " + relative_file_name);
 

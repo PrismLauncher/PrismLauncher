@@ -48,6 +48,8 @@
     <string>${MACOSX_SPARKLE_UPDATE_PUBLIC_KEY}</string>
     <key>SUFeedURL</key>
     <string>${MACOSX_SPARKLE_UPDATE_FEED_URL}</string>
+    <key>SUEnableInstallerLauncherService</key>
+    <${ENABLE_SPARKLE_INSTALLER_LAUNCHER_SERVICE}/>
     <key>CFBundleDocumentTypes</key>
     <array>
         <dict>

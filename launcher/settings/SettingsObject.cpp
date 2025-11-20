@@ -20,6 +20,13 @@
 #include "settings/Setting.h"
 
 #include <QVariant>
+#include <QDir>
+#include <utility>
+
+#ifdef Q_OS_MACOS
+#include "ui/dialogs/CustomMessageBox.h"
+#include "macsandbox/SecurityBookmarkFileAccess.h"
+#endif
 
 SettingsObject::SettingsObject(QObject* parent) : QObject(parent) {}
 
@@ -78,9 +85,17 @@ std::shared_ptr<Setting> SettingsObject::getSetting(const QString& id) const
     return m_settings[id];
 }
 
-QVariant SettingsObject::get(const QString& id) const
+QVariant SettingsObject::get(const QString& id)
 {
     auto setting = getSetting(id);
+
+#ifdef Q_OS_MACOS
+    // for macOS, use a security scoped bookmark for the paths
+    if (id.endsWith("Dir")) {
+        return { getPathFromBookmark(id) };
+    }
+#endif
+
     return (setting ? setting->get() : QVariant());
 }
 
@@ -90,11 +105,122 @@ bool SettingsObject::set(const QString& id, QVariant value)
     if (!setting) {
         qCritical() << QString("Error changing setting %1. Setting doesn't exist.").arg(id);
         return false;
-    } else {
-        setting->set(value);
+    }
+
+#ifdef Q_OS_MACOS
+    // for macOS, keep a security scoped bookmark for the paths
+    if (value.userType() == QMetaType::QString && id.endsWith("Dir")) {
+        setPathWithBookmark(id, value.toString());
+    }
+#endif
+
+    setting->set(std::move(value));
+    return true;
+}
+
+#ifdef Q_OS_MACOS
+QString SettingsObject::getPathFromBookmark(const QString& id)
+{
+    auto setting = getSetting(id);
+    if (!setting) {
+        qCritical() << QString("Error changing setting %1. Setting doesn't exist.").arg(id);
+        return "";
+    }
+
+    // there is no need to use bookmarks if the default value is used or the directory is within the data directory (already can access)
+    if (setting->get() == setting->defValue() || QDir(setting->get().toString()).absolutePath().startsWith(QDir::current().absolutePath())) {
+        return setting->get().toString();
+    }
+
+    auto bookmarkId = id + "Bookmark";
+    auto bookmarkSetting = getSetting(bookmarkId);
+    if (!bookmarkSetting) {
+        qCritical() << QString("Error changing setting %1. Bookmark setting doesn't exist.").arg(id);
+        return "";
+    }
+
+    QByteArray bookmark = bookmarkSetting->get().toByteArray();
+    if (bookmark.isEmpty()) {
+        qDebug() << "Creating bookmark for" << id << "at" << setting->get().toString();
+        setPathWithBookmark(id, setting->get().toString());
+        return setting->get().toString();
+    }
+    bool stale;
+    QUrl url = m_sandboxedFileAccess.securityScopedBookmarkToURL(bookmark, stale);
+    if (url.isValid()) {
+        if (stale) {
+            setting->set(url.path());
+            bookmarkSetting->set(bookmark);
+        }
+
+        m_sandboxedFileAccess.startUsingSecurityScopedBookmark(bookmark, stale);
+        // already did a stale check, no need to do it again
+
+        // convert to relative path to current directory if `url` is a descendant of the current directory
+        QDir currentDir = QDir::current().absolutePath();
+        return url.path().startsWith(currentDir.absolutePath()) ? currentDir.relativeFilePath(url.path()) : url.path();
+    }
+
+    return setting->get().toString();
+}
+
+bool SettingsObject::setPathWithBookmark(const QString& id, const QString& path)
+{
+    auto setting = getSetting(id);
+    if (!setting) {
+        qCritical() << QString("Error changing setting %1. Setting doesn't exist.").arg(id);
+        return false;
+    }
+    QString bookmarkId = id + "Bookmark";
+    std::shared_ptr<Setting> bookmarkSetting = getSetting(bookmarkId);
+    if (!bookmarkSetting) {
+        qCritical() << QString("Error changing setting %1. Setting doesn't exist.").arg(bookmarkId);
+        return false;
+    }
+    QDir dir(path);
+    if (!dir.exists()) {
+        qWarning() << QString("Error changing setting %1. Path doesn't exist.").arg(bookmarkId);
+        return false;
+    }
+    QString absolutePath = dir.absolutePath();
+    // there is no need to use bookmarks if the default value is used or the directory is within the data directory (already can access)
+    if (path == setting->defValue().toString() || absolutePath.startsWith(QDir::current().absolutePath())) {
+        bookmarkSetting->reset();
         return true;
     }
+    if (setting->get() == path && !bookmarkSetting->get().toByteArray().isEmpty()) {
+        // no change, no need to do anything
+        return true;
+    }
+
+    QByteArray bytes = m_sandboxedFileAccess.pathToSecurityScopedBookmark(absolutePath);
+    if (bytes.isEmpty()) {
+        qCritical() << QString("Failed to create bookmark for %1 - no access?").arg(id);
+        if (!m_showedBookmarkErrors.contains(id) && !QFileInfo(absolutePath).isReadable()) {
+            m_showedBookmarkErrors.insert(id);
+            auto dialog = CustomMessageBox::selectable(nullptr, tr("Permission Error"),
+                                                       tr("The path selected for %1 is not accessible.\n\n"
+                                                          "Please go to Prism Launcher's settings and reselect it.\n\n"
+                                                          "You should only need to do this once.")
+                                                           .arg(id),
+                                                       QMessageBox::Critical);
+            dialog->exec();
+        }
+        return false;
+    }
+    auto oldBookmark = bookmarkSetting->get().toByteArray();
+    m_sandboxedFileAccess.stopUsingSecurityScopedBookmark(oldBookmark);
+    if (!bytes.isEmpty() && bookmarkSetting) {
+        bookmarkSetting->set(bytes);
+        bool stale;
+        m_sandboxedFileAccess.startUsingSecurityScopedBookmark(bytes, stale);
+        // just created the bookmark, it shouldn't be stale
+    }
+
+    setting->set(path);
+    return true;
 }
+#endif
 
 void SettingsObject::reset(const QString& id) const
 {

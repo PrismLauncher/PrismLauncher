@@ -76,6 +76,13 @@ class LauncherPage : public QWidget, public BasePage {
     void on_skinsDirBrowseBtn_clicked();
     void on_metadataEnableBtn_clicked();
 
+    void on_instDirResetBtn_clicked();
+    void on_modsDirResetBtn_clicked();
+    void on_iconsDirResetBtn_clicked();
+    void on_downloadsDirResetBtn_clicked();
+    void on_javaDirResetBtn_clicked();
+    void on_skinsDirResetBtn_clicked();
+
    private:
     Ui::LauncherPage* ui;
 };

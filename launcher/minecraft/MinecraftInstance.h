@@ -43,6 +43,10 @@
 #include "minecraft/launch/MinecraftTarget.h"
 #include "minecraft/mod/Mod.h"
 
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+#include "xpcbridge/XPCBridge.h"
+#endif
+
 class ModFolderModel;
 class ResourceFolderModel;
 class ResourcePackFolderModel;
@@ -169,6 +173,10 @@ class MinecraftInstance : public BaseInstance {
     mutable std::shared_ptr<TexturePackFolderModel> m_texture_pack_list;
     mutable std::shared_ptr<DataPackFolderModel> m_data_pack_list;
     mutable std::shared_ptr<WorldList> m_world_list;
+
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+    std::unique_ptr<XPCBridge> m_xpcBridge;
+#endif
 };
 
 using MinecraftInstancePtr = std::shared_ptr<MinecraftInstance>;

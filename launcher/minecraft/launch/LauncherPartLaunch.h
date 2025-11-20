@@ -21,6 +21,10 @@
 
 #include "MinecraftTarget.h"
 
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+#include "xpcbridge/XPCBridge.h"
+#endif
+
 class LauncherPartLaunch : public LaunchStep {
     Q_OBJECT
    public:
@@ -47,4 +51,8 @@ class LauncherPartLaunch : public LaunchStep {
     MinecraftTarget::Ptr m_targetToJoin;
 
     bool mayProceed = false;
+
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+    XPCBridge m_xpcBridge = XPCBridge(this);
+#endif
 };

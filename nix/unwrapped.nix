@@ -57,6 +57,7 @@ stdenv.mkDerivation {
       ../libraries
       ../program_info
       ../tests
+      ../xpc
     ];
   };
 

@@ -51,6 +51,9 @@
 #include "launch/LogModel.h"
 #include "minecraft/launch/MinecraftTarget.h"
 
+class XPCBridge;
+class XPCManager;
+class DynamicSandboxException;
 class LaunchController;
 class LocalPeer;
 class InstanceWindow;
@@ -226,7 +229,7 @@ class Application : public QApplication {
     void setupWizardFinished(int status);
 
    private:
-    bool handleDataMigration(const QString& currentData, const QString& oldData, const QString& name, const QString& configFile) const;
+    bool handleDataMigration(const QString& currentData, QString oldData, const QString& name, const QString& configFile) const;
     bool createSetupWizard();
     void performMainStartupAction();
 
@@ -314,6 +317,10 @@ class Application : public QApplication {
     QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
     shared_qobject_ptr<LogModel> logModel;
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+    std::unique_ptr<XPCManager> m_xpcManager;
+    std::unique_ptr<DynamicSandboxException> m_dynamicSandboxExceptions;
+#endif
 
    public:
     void addQSavePath(QString);

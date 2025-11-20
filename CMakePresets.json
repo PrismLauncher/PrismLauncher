@@ -37,6 +37,9 @@
 			"inherits": [
 				"base"
 			],
+			"cacheVariables": {
+				"Launcher_ENABLE_SANDBOX": "$penv{SANDBOX_ENABLED}"
+			},
 			"condition": {
 				"type": "equals",
 				"lhs": "${hostSystemName}",

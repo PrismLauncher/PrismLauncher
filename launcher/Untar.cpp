@@ -140,9 +140,13 @@ bool Tar::extract(QIODevice* in, QString dst)
 
         if (name.isEmpty()) {
             name = decodeName(buffer);
+#ifndef Q_OS_MACOS
+            // not done on macOS to ensure that the bundle is separated into its own folder, preventing accidental invalidation of the
+            // code signature, namely for Adoptium Java
             if (!firstFolderName.isEmpty() && name.startsWith(firstFolderName)) {
                 name = name.mid(firstFolderName.size());
             }
+#endif
         }
         if (symlink.isEmpty())
             symlink = decodeName(buffer);

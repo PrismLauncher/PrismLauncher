@@ -66,13 +66,21 @@ runs:
 
         if [ -n '${{ inputs.apple-codesign-id }}' ]; then
           APPLE_CODESIGN_ID='${{ inputs.apple-codesign-id }}'
-          ENTITLEMENTS_FILE='../program_info/App.entitlements'
+          if [[ "${{ inputs.artifact-name }}" == *"Sandboxed"* ]]; then
+            ENTITLEMENTS_FILE='../${{ env.BUILD_DIR }}/program_info/App.entitlements'
+          else
+            ENTITLEMENTS_FILE='../${{ env.BUILD_DIR }}/program_info/AppNoSandbox.entitlements'
+          fi
         else
           APPLE_CODESIGN_ID='-'
-          ENTITLEMENTS_FILE='../program_info/AdhocSignedApp.entitlements'
+          if [[ "${{ inputs.artifact-name }}" == *"Sandboxed"* ]]; then
+            ENTITLEMENTS_FILE='../${{ env.BUILD_DIR }}/program_info/AdhocSignedApp.entitlements'
+          else
+            ENTITLEMENTS_FILE='../${{ env.BUILD_DIR }}/program_info/AdhocAppNoSandbox.entitlements'
+          fi
         fi
 
-        sudo codesign --sign "$APPLE_CODESIGN_ID" --deep --force --entitlements "$ENTITLEMENTS_FILE" --options runtime "PrismLauncher.app/Contents/MacOS/prismlauncher"
+        ../program_info/macos_signature.sh "$APPLE_CODESIGN_ID" "$ENTITLEMENTS_FILE"
         mv "PrismLauncher.app" "Prism Launcher.app"
 
     - name: Notarize

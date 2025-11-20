@@ -65,6 +65,9 @@
 #include "ui/pages/global/LauncherPage.h"
 #include "ui/pages/global/MinecraftPage.h"
 #include "ui/pages/global/ProxyPage.h"
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+#include "ui/pages/global/MacSandboxPage.h"
+#endif
 
 #include "ui/setupwizard/AutoJavaWizardPage.h"
 #include "ui/setupwizard/JavaWizardPage.h"
@@ -144,6 +147,11 @@
 #endif
 
 #if defined(Q_OS_MAC)
+#if defined(SANDBOX_ENABLED)
+#include "macsandbox/DynamicSandboxException.h"
+#include "xpcbridge/XPCBridge.h"
+#include "xpcbridge/XPCManager.h"
+#endif
 #if defined(SPARKLE_ENABLED)
 #include "updater/MacSparkleUpdater.h"
 #endif
@@ -394,12 +402,33 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     QString dataDirEnv;
     QString dirParam = parser.value("dir");
     if (!dirParam.isEmpty()) {
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+        showFatalErrorMessage(
+            QString("The --dir option is not supported on the sandboxed version of %1.").arg(BuildConfig.LAUNCHER_DISPLAYNAME),
+            QString("The --dir option is not supported on the sandboxed version of %1.\n"
+                    "\n"
+                    "You can still change the location of data such as instances in the launcher's settings without --dir. "
+                    "If you need to change the application data directory, please use the unsandboxed version. ")
+                .arg(BuildConfig.LAUNCHER_DISPLAYNAME));
+        return;
+#endif
         // the dir param. it makes multimc data path point to whatever the user specified
         // on command line
         adjustedBy = "Command line";
         dataPath = dirParam;
     } else if (dataDirEnv = QProcessEnvironment::systemEnvironment().value(QString("%1_DATA_DIR").arg(BuildConfig.LAUNCHER_NAME.toUpper()));
                !dataDirEnv.isEmpty()) {
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+        showFatalErrorMessage(
+            QString("The %1_DATA_DIR environment variable is not supported on the sandboxed version of %2.")
+                .arg(BuildConfig.LAUNCHER_NAME.toUpper(), BuildConfig.LAUNCHER_DISPLAYNAME),
+            QString("The %1_DATA_DIR environment variable is not supported on the sandboxed version of %2.\n"
+                    "\n"
+                    "You can still change the location of data such as instances in the launcher's settings without %1_DATA_DIR. "
+                    "If you need to change the application data directory, please use the unsandboxed version. ")
+                .arg(BuildConfig.LAUNCHER_NAME.toUpper(), BuildConfig.LAUNCHER_DISPLAYNAME));
+        return;
+#endif
         adjustedBy = "System environment";
         dataPath = dataDirEnv;
     } else {
@@ -700,11 +729,28 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("InstanceDir", "instances");
         m_settings->registerSetting({ "CentralModsDir", "ModsDir" }, "mods");
         m_settings->registerSetting("IconsDir", "icons");
-        m_settings->registerSetting("DownloadsDir", QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
+        m_settings->registerSetting("DownloadsDir",
+                                    QFileInfo(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)).canonicalFilePath());
         m_settings->registerSetting("DownloadsDirWatchRecursive", false);
         m_settings->registerSetting("MoveModsFromDownloadsDir", false);
         m_settings->registerSetting("SkinsDir", "skins");
         m_settings->registerSetting("JavaDir", "java");
+
+#ifdef Q_OS_MACOS
+        // Folder security-scoped bookmarks
+        m_settings->registerSetting("InstanceDirBookmark", "");
+        m_settings->registerSetting("CentralModsDirBookmark", "");
+        m_settings->registerSetting("IconsDirBookmark", "");
+        m_settings->registerSetting("DownloadsDirBookmark", "");
+        m_settings->registerSetting("SkinsDirBookmark", "");
+        m_settings->registerSetting("JavaDirBookmark", "");
+
+#ifdef SANDBOX_ENABLED
+        // Sandbox dynamic exception bookmarks
+        m_settings->registerSetting("ReadWriteDynamicSandboxExceptions", "");
+        m_settings->registerSetting("ReadOnlyDynamicSandboxExceptions", "");
+#endif
+#endif
 
         // Editors
         m_settings->registerSetting("JsonEditor", QString());
@@ -907,6 +953,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             m_globalSettingsProvider->addPage<MinecraftPage>();
             m_globalSettingsProvider->addPage<JavaPage>();
             m_globalSettingsProvider->addPage<AccountListPage>();
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+            m_globalSettingsProvider->addPage<MacSandboxPage>();
+#endif
             m_globalSettingsProvider->addPage<APIPage>();
             m_globalSettingsProvider->addPage<ExternalToolsPage>();
             m_globalSettingsProvider->addPage<ProxyPage>();
@@ -961,7 +1010,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         auto InstDirSetting = m_settings->getSetting("InstanceDir");
         // instance path: check for problems with '!' in instance path and warn the user in the log
         // and remember that we have to show him a dialog when the gui starts (if it does so)
-        QString instDir = InstDirSetting->get().toString();
+        QString instDir = m_settings->get("InstanceDir").toString();
         qInfo() << "Instance path              : " << instDir;
         if (FS::checkProblemticPathJava(QDir(instDir))) {
             qWarning() << "Your instance path contains \'!\' and this is known to cause java problems!";
@@ -1173,6 +1222,57 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             msgBox->open();
         }
     }
+
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+    m_xpcManager.reset(new XPCManager());
+    m_dynamicSandboxExceptions.reset(new DynamicSandboxException());
+
+    // symlink discord IPC socket into the sandbox so the game can access it
+    QDir tempDir(qEnvironmentVariable("TMPDIR"));
+    QString unsandboxedTempDir = APPLICATION->m_xpcManager->getUnsandboxedTemporaryDirectory();
+    if (tempDir.exists()) {
+        for (int i = 0; i <= 9; i++) {
+            QString ipcName = QString("discord-ipc-%1").arg(i);
+            QString ipcPathFull = tempDir.filePath(ipcName);
+            QFileInfo currentIPCInfo(ipcPathFull);
+            if (currentIPCInfo.isSymbolicLink()) {
+                QFile::remove(ipcPathFull);
+            }
+
+            QFile::link(unsandboxedTempDir + ipcName, ipcPathFull);
+        }
+    }
+
+    // setup storage of Java installs outside main sandbox container
+    // several issues exist with executables stored in the sandbox container as of writing
+    // e.g. crashes when using text-to-speech APIs, lack of execute permissions...
+    // storing the java executables outside of the main container works around this
+    QString defaultJavaDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/../JavaInstalls";
+    QString defaultJavaDirLink = m_dataPath + "/java";
+    if (!QDir().exists(defaultJavaDir)) {
+        bool success;
+        bool existingJavaNeedsMigration = QDir().exists(defaultJavaDirLink);
+        if (existingJavaNeedsMigration) {
+            qDebug() << "Migrating existing Java installs outside of sandbox container (migrating old non-sandboxed install to sandbox)";
+            success = QFile::rename(defaultJavaDirLink, defaultJavaDir);
+        } else {
+            success = QDir().mkdir(defaultJavaDir);
+        }
+
+        if (!success) {
+            qWarning()
+                << "Failed to create Java directory outside sandbox container. This may cause problems when using the Java downloader. "
+                << (existingJavaNeedsMigration ? "Existing Java installs may fail to launch." : "");
+        }
+
+        QFile defaultJavaDirFile(defaultJavaDir);
+        success = defaultJavaDirFile.link(m_dataPath + "/java");
+        if (!success) {
+            qWarning() << "Failed to create symbolic link to Java directory outside sandbox container. This may cause problems when using "
+                          "the Java downloader.";
+        }
+    }
+#endif
 
     if (createSetupWizard()) {
         return;
@@ -1920,11 +2020,12 @@ QString Application::getUserAgent()
     return BuildConfig.USER_AGENT;
 }
 
-bool Application::handleDataMigration(const QString& currentData,
-                                      const QString& oldData,
-                                      const QString& name,
-                                      const QString& configFile) const
+bool Application::handleDataMigration(const QString& currentData, QString oldData, const QString& name, const QString& configFile) const
 {
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+    // other programs' data are not in the sandbox container
+    oldData.remove("/Containers/org.prismlauncher.PrismLauncher/Data/Library");
+#endif
     QString nomigratePath = FS::PathCombine(currentData, name + "_nomigrate.txt");
     QStringList configPaths = { FS::PathCombine(oldData, configFile), FS::PathCombine(oldData, BuildConfig.LAUNCHER_CONFIGFILE) };
 

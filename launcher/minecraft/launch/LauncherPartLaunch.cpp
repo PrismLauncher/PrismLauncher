@@ -99,7 +99,11 @@ void LauncherPartLaunch::executeTask()
 
     auto javaPath = FS::ResolveExecutable(instance->settings()->get("JavaPath").toString());
 
-    m_process.setProcessEnvironment(instance->createLaunchEnvironment());
+    auto launchEnv = instance->createLaunchEnvironment();
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+    launchEnv.insert("PRISM_XPC_MIDDLEMAN_SOCKET", QString::number(m_xpcBridge.getGameSocketDescriptor()));
+#endif
+    m_process.setProcessEnvironment(launchEnv);
 
     // make detachable - this will keep the process running even if the object is destroyed
     m_process.setDetachable(true);

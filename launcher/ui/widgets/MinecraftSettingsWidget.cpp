@@ -488,7 +488,7 @@ void MinecraftSettingsWidget::openGlobalSettings()
         APPLICATION->ShowGlobalSettings(this, "minecraft-settings");
 }
 
-void MinecraftSettingsWidget::updateAccountsMenu(const SettingsObject& settings)
+void MinecraftSettingsWidget::updateAccountsMenu(SettingsObject& settings)
 {
     m_ui->instanceAccountSelector->clear();
     auto accounts = APPLICATION->accounts();

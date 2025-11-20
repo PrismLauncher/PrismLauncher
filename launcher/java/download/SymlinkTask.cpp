@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "java/download/SymlinkTask.h"
+#include <QDirIterator>
 #include <QFileInfo>
 
 #include "FileSystem.h"
@@ -30,12 +31,13 @@ QString findBinPath(QString root, QString pattern)
         return path;
     }
 
-    auto entries = QDir(root).entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-    for (auto& entry : entries) {
-        path = FS::PathCombine(entry.absoluteFilePath(), pattern);
+    auto entries = QDirIterator(root, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    while (entries.hasNext()) {
+        path = FS::PathCombine(entries.filePath(), pattern);
         if (QFileInfo::exists(path)) {
             return path;
         }
+        entries.next();
     }
 
     return {};

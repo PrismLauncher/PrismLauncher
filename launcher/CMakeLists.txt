@@ -1101,6 +1101,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/CustomCommands.h
     ui/widgets/EnvironmentVariables.cpp
     ui/widgets/EnvironmentVariables.h
+    ui/widgets/DropList.cpp
+    ui/widgets/DropList.h
     ui/widgets/IconLabel.cpp
     ui/widgets/IconLabel.h
     ui/widgets/JavaWizardWidget.cpp
@@ -1173,6 +1175,31 @@ if (NOT Apple)
 )
 endif()
 
+if (APPLE)
+    set(LAUNCHER_SOURCES
+        ${LAUNCHER_SOURCES}
+
+        macsandbox/SecurityBookmarkFileAccess.h
+        macsandbox/SecurityBookmarkFileAccess.mm
+    )
+    if (Launcher_ENABLE_SANDBOX)
+        set(LAUNCHER_SOURCES
+            ${LAUNCHER_SOURCES}
+
+            ui/pages/global/MacSandboxPage.cpp
+            ui/pages/global/MacSandboxPage.h
+
+            xpcbridge/XPCBridge.h
+            xpcbridge/XPCBridge.cpp
+            xpcbridge/XPCManager.h
+            xpcbridge/XPCManager.mm
+
+            macsandbox/DynamicSandboxException.cpp
+            macsandbox/DynamicSandboxException.h
+        )
+    endif()
+endif()
+
 if(WIN32)
     set(LAUNCHER_SOURCES
         console/WindowsConsole.h
@@ -1192,6 +1219,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/global/APIPage.ui
     ui/pages/global/ProxyPage.ui
     ui/pages/global/ExternalToolsPage.ui
+    ui/pages/global/MacSandboxPage.ui
     ui/pages/instance/ExternalResourcesPage.ui
     ui/pages/instance/NotesPage.ui
     ui/pages/instance/LogPage.ui
@@ -1358,9 +1386,24 @@ if(APPLE)
         "-framework Foundation"
         "-framework ApplicationServices"
     )
+    target_compile_options(Launcher_logic PRIVATE -fobjc-arc)
+
     if(Launcher_ENABLE_UPDATER)
         target_link_libraries(Launcher_logic ${SPARKLE_FRAMEWORK})
+        # temporary (surely) since this file came before ARC was enabled
+        set_source_files_properties(updater/MacSparkleUpdater.mm PROPERTIES COMPILE_OPTIONS -fno-objc-arc)
     endif()
+    set_source_files_properties(ui/themes/ThemeManager.mm PROPERTIES COMPILE_OPTIONS -fno-objc-arc)
+
+    if(Launcher_ENABLE_SANDBOX)
+        set(ENABLE_SPARKLE_INSTALLER_LAUNCHER_SERVICE "true")
+    else()
+        set(ENABLE_SPARKLE_INSTALLER_LAUNCHER_SERVICE "false")
+    endif()
+endif()
+
+if(Launcher_ENABLE_SANDBOX)
+    add_compile_definitions(SANDBOX_ENABLED)
 endif()
 
 target_link_libraries(Launcher_logic)
@@ -1391,6 +1434,18 @@ install(TARGETS ${Launcher_Name}
 # Deploy PDBs
 if(WIN32 AND (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo"))
     install(FILES $<TARGET_PDB_FILE:${Launcher_Name}> DESTINATION ${BINARY_DEST_DIR})
+endif()
+
+if(UNIX AND APPLE AND Launcher_ENABLE_SANDBOX)
+    install(TARGETS dlopen_hook
+        LIBRARY DESTINATION "${FRAMEWORK_DEST_DIR}" COMPONENT Runtime
+    )
+    install(TARGETS SandboxService
+        BUNDLE DESTINATION "${XPC_DEST_DIR}" COMPONENT Runtime
+    )
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/../program_info/container-migration.plist
+        DESTINATION "${RESOURCES_DEST_DIR}" COMPONENT Runtime
+    )
 endif()
 
 if(Launcher_BUILD_UPDATER)

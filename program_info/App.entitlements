@@ -2,9 +2,64 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
     <key>com.apple.security.device.audio-input</key>
     <true/>
     <key>com.apple.security.device.camera</key>
     <true/>
+    <key>com.apple.security.files.downloads.read-only</key>
+    <true/>
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+    <key>com.apple.security.network.client</key>
+    <true/>
+    <key>com.apple.security.network.server</key>
+    <true/>
+    <key>com.apple.security.files.bookmarks.app-scope</key>
+    <true/>
+    <key>com.apple.security.temporary-exception.files.absolute-path.read-only</key>
+    <array>
+        <string>/dev/fd/</string>
+        <string>/usr/local/</string>
+        <string>/opt/homebrew/</string>
+        <string>/opt/local/</string>
+    </array>
+    <key>com.apple.security.temporary-exception.files.home-relative-path.read-only</key>
+    <array>
+        <string>/Library/Application Support/PolyMC/</string>
+        <string>/Library/Application Support/MultiMC/</string>
+        <string>/bin/</string>
+        <string>/.bin/</string>
+        <string>/Library/Java/JavaVirtualMachines/</string>
+        <string>/Library/Application Support/Steam/Steam.AppBundle/Steam/</string>
+    </array>
+    <key>com.apple.security.temporary-exception.files.home-relative-path.read-write</key>
+    <array>
+        <string>/Library/Containers/@Launcher_AppID@/JavaInstalls/</string>
+    </array>
+    <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+    <array>
+        <string>@Launcher_AppID@-spks</string>
+        <string>@Launcher_AppID@-spki</string>
+        <string>com.valvesoftware.steam.ipctool</string>
+    </array>
+    <key>com.apple.security.temporary-exception.sbpl</key>
+    <array>
+        <string>(allow process-exec (regex #".*/Contents/Home/bin/.*$"))</string>
+        <string>(allow process-exec (regex #".*/Contents/Home/lib/.*$"))</string>
+        <string>(allow file-read* (regex #".*/[^/]*(jdk|jre|java)[^/]*/Contents/_CodeSignature/.*"))</string>
+        <string>(allow file-read* (regex #".*/[^/]*(jdk|jre|java)[^/]*/Contents/Home/.*"))</string>
+        <string>(allow file-read* (regex #".*/[^/]*(jdk|jre|java)[^/]*/Contents/MacOS/.*"))</string>
+        <string>(allow file-read* (regex #".*/[^/]*(jdk|jre|java)[^/]*/Contents/Info.plist"))</string>
+        <string>(allow network-outbound (regex #"^/private/var/folders/.*/discord-ipc-[0-9]$"))</string>
+        <!-- Allow Steam overlay -->
+        <string>(allow network-outbound (regex #"^/private/tmp/steam_chrome_overlay_uid[0-9]+_spid[0-9]+$"))</string>
+        <string>(allow ipc-posix-sem
+            (ipc-posix-name-regex #"^/MTX/[0-9a-f]+(\.2)?$")
+            (ipc-posix-name-regex #"^/Evt/[0-9a-f]+(\.2)?$")
+            (ipc-posix-name-regex #"^/BSem/[0-9a-f]+(\.2)?$"))</string>
+        <string>(allow ipc-posix-shm (ipc-posix-name-regex #"^/Shm/[0-9a-f]+(\.2)?$"))</string>
+    </array>
 </dict>
 </plist>

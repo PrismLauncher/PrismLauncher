@@ -702,6 +702,17 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
         env.insert("GALLIUM_DRIVER", "zink");
     }
 #endif
+#if defined(Q_OS_MACOS) && defined(SANDBOX_ENABLED)
+    QDir dlopenDir = QDir(Application::applicationDirPath());
+    dlopenDir.cdUp();
+    dlopenDir.cd("Frameworks");
+    QString dlopenPath = dlopenDir.filePath("libdlopen_hook.dylib");
+    QString steamLibraries = qEnvironmentVariable("STEAM_DYLD_INSERT_LIBRARIES");
+    if (!steamLibraries.isEmpty()) {
+        dlopenPath += ":" + steamLibraries;
+    }
+    env.insert("DYLD_INSERT_LIBRARIES", dlopenPath);
+#endif
     return env;
 }
 
