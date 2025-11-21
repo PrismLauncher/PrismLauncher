@@ -1394,7 +1394,7 @@ QString MinecraftInstance::updateOverrideJavaSettings()
         }
         std::sort(nextSupported.begin(), nextSupported.end(), [](const QString& a, const QString& b) { return a.toInt() < b.toInt(); });
 
-        appSettings->set("SupportedJavaMajors", nextSupported);
+        appSettings->set("SupportedJavaMajors", Json::fromStringList(nextSupported));
     }
     return {};
 }
