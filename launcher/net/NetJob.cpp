@@ -253,10 +253,8 @@ void NetJob::emitFailed(QString reason)
     if (APPLICATION_DYN && m_askRetry && m_manualRetries < APPLICATION->settings()->get("NumberOfManualRetries").toInt() && isOnline()) {
         auto dialog = NetworkJobFailedDialog(m_jobName, m_attempts, m_finishedRequests.size(), failed.size(), nullptr);
 
-        int i = 0;
         for (const auto& request : failed) {
-            dialog.addFailedRequest(i, request->url(), request->error());
-            i++;
+            dialog.addFailedRequest(request->url(), request->error());
         }
 
         if (dialog.exec() == QDialog::Accepted) {
