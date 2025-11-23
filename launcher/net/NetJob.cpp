@@ -41,8 +41,8 @@
 #include "tasks/ConcurrentTask.h"
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
-#include "ui/dialogs/CustomMessageBox.h"
 #endif
+#include "ui/dialogs/NetworkJobFailedDialog.h"
 
 NetJob::NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network, int max_concurrent)
     : ConcurrentTask(job_name), m_network(network)
@@ -164,23 +164,23 @@ void NetJob::emitFailed(QString reason)
 
     if (APPLICATION_DYN && m_ask_retry && m_manual_try < APPLICATION->settings()->get("NumberOfManualRetries").toInt() && isOnline()) {
         m_manual_try++;
-        auto response = CustomMessageBox::selectable(nullptr, "Confirm retry",
-                                                     "The tasks failed.\n"
-                                                     "Failed urls\n" +
-                                                         getFailedFiles().join("\n\t") +
-                                                         ".\n"
-                                                         "If this continues to happen please check the logs of the application.\n"
-                                                         "Do you want to retry?",
-                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                            ->exec();
+        auto failed = getFailedActions();
+        auto dialog = NetworkJobFailedDialog(objectName(), m_try, m_done.size(), failed.size(), nullptr);
 
-        if (response == QMessageBox::Yes) {
+        int i = 0;
+        for (const auto& request : failed) {
+            dialog.addFailedRequest(i, request->url(), request->errorString());
+            ++i;
+        }
+
+        if (dialog.exec() == QDialog::Accepted) {
             m_try = 0;
             executeNextSubTask();
             return;
         }
     }
 #endif
+
     ConcurrentTask::emitFailed(reason);
 }
 
