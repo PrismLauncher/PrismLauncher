@@ -33,16 +33,8 @@ class NetworkJobFailedDialog : public QDialog {
     explicit NetworkJobFailedDialog(QString jobName, int attempts, int requests, int failed, QWidget* parent = nullptr);
     ~NetworkJobFailedDialog() override;
 
-    void addFailedRequest(int row, QUrl url, QString error) const;
+    void addFailedRequest(QUrl url, QString error) const;
 
    private:
-    void setShowDetails(bool showDetails);
-
-   private slots:
-    void on_detailsButton_clicked();
-
-   private:
-    Ui::NetworkJobFailedDialog* ui;
-
-    bool m_showDetails = false;
+    Ui::NetworkJobFailedDialog* m_ui;
 };

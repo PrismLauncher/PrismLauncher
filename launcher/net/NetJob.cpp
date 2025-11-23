@@ -167,10 +167,8 @@ void NetJob::emitFailed(QString reason)
         auto failed = getFailedActions();
         auto dialog = NetworkJobFailedDialog(objectName(), m_try, m_done.size(), failed.size(), nullptr);
 
-        int i = 0;
         for (const auto& request : failed) {
-            dialog.addFailedRequest(i, request->url(), request->errorString());
-            ++i;
+            dialog.addFailedRequest(request->url(), request->errorString());
         }
 
         if (dialog.exec() == QDialog::Accepted) {

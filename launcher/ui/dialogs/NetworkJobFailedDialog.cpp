@@ -20,46 +20,37 @@
 
 #include "ui_NetworkJobFailedDialog.h"
 
-NetworkJobFailedDialog::NetworkJobFailedDialog(QString jobName, int attempts, int requests, int failed, QWidget* parent) : QDialog(parent), ui(new Ui::NetworkJobFailedDialog)
+#include <QTableWidgetItem>
+
+NetworkJobFailedDialog::NetworkJobFailedDialog(QString jobName, int attempts, int requests, int failed, QWidget* parent)
+    : QDialog(parent), m_ui(new Ui::NetworkJobFailedDialog)
 {
-    ui->setupUi(this);
-    ui->failLabel->setText(ui->failLabel->text().arg(jobName));
+    m_ui->setupUi(this);
+    m_ui->failLabel->setText(m_ui->failLabel->text().arg(jobName));
     if (failed == requests) {
-        ui->requestCountLabel->setText(tr("All %1 requests have failed after %2 attempts").arg(failed).arg(attempts));
+        m_ui->requestCountLabel->setText(tr("All %1 requests have failed after %2 attempts").arg(failed).arg(attempts));
     } else if (failed < requests / 2) {
-        ui->requestCountLabel->setText(tr("Out of %1 requests, %2 have failed after %3 attempts").arg(requests).arg(failed).arg(attempts));
+        m_ui->requestCountLabel->setText(
+            tr("Out of %1 requests, %2 have failed after %3 attempts").arg(requests).arg(failed).arg(attempts));
     } else {
-        ui->requestCountLabel->setText(tr("Out of %1 requests, only %2 succeeded after %3 attempts").arg(requests).arg(requests - failed).arg(attempts));
+        m_ui->requestCountLabel->setText(
+            tr("Out of %1 requests, only %2 succeeded after %3 attempts").arg(requests).arg(requests - failed).arg(attempts));
     }
-    ui->detailsTable->setRowCount(failed);
 
-    setShowDetails(failed < 5);
+    m_ui->detailsTable->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    m_ui->detailsTable->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
 
-    connect(ui->dialogButtonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
-    connect(ui->dialogButtonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    connect(m_ui->dialogButtonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(m_ui->dialogButtonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 }
 
 NetworkJobFailedDialog::~NetworkJobFailedDialog()
 {
-    delete ui;
+    delete m_ui;
 }
 
-void NetworkJobFailedDialog::addFailedRequest(int row, QUrl url, QString error) const
+void NetworkJobFailedDialog::addFailedRequest(QUrl url, QString error) const
 {
-    const auto urlItem = new QTableWidgetItem(url.toString());
-    const auto errorItem = new QTableWidgetItem(error);
-    ui->detailsTable->setItem(row, 0, urlItem);
-    ui->detailsTable->setItem(row, 1, errorItem);
-}
-
-void NetworkJobFailedDialog::setShowDetails(bool showDetails)
-{
-    m_showDetails = showDetails;
-    ui->detailsTable->setVisible(m_showDetails);
-    ui->detailsButton->setText(!m_showDetails ? tr("Show details") : tr("Hide details"));
-}
-
-void NetworkJobFailedDialog::on_detailsButton_clicked()
-{
-    setShowDetails(!m_showDetails);
+    auto item = new QTreeWidgetItem(m_ui->detailsTable, { url.toString(), error });
+    m_ui->detailsTable->addTopLevelItem(item);
 }

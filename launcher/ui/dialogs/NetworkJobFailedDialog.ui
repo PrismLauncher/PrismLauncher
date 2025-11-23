@@ -39,22 +39,18 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string notr="true">TextLabel</string>
+      <string notr="true">(request count)</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="detailsButton">
-     <property name="text">
-      <string notr="true">PushButton</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QTableWidget" name="detailsTable">
+    <widget class="QTreeWidget" name="detailsTable">
      <property name="editTriggers">
       <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
      </property>
+     <attribute name="headerStretchLastSection">
+      <bool>false</bool>
+     </attribute>
      <column>
       <property name="text">
        <string>URL</string>
