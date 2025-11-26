@@ -165,17 +165,25 @@ void NetJob::emitFailed(QString reason)
     if (APPLICATION_DYN && m_ask_retry && m_manual_try < APPLICATION->settings()->get("NumberOfManualRetries").toInt() && isOnline()) {
         m_manual_try++;
         auto failed = getFailedActions();
-        auto dialog = NetworkJobFailedDialog(objectName(), m_try, m_done.size(), failed.size(), nullptr);
+        auto dialog = new NetworkJobFailedDialog(objectName(), m_try, m_done.size(), failed.size(), nullptr);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
 
         for (const auto& request : failed) {
-            dialog.addFailedRequest(request->url(), request->errorString());
+            dialog->addFailedRequest(request->url(), request->errorString());
         }
 
-        if (dialog.exec() == QDialog::Accepted) {
-            m_try = 0;
-            executeNextSubTask();
-            return;
-        }
+        dialog->open();
+
+        connect(dialog, &QDialog::finished, this, [this, reason = std::move(reason)](int result) {
+            if (result == QDialog::Accepted) {
+                m_try = 0;
+                executeNextSubTask();
+            } else {
+                ConcurrentTask::emitFailed(reason);
+            }
+        });
+
+        return;
     }
 #endif
 
