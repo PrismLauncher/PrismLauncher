@@ -85,12 +85,17 @@ NetRequest::NetRequest(const QUrl& url, Sink* sink, const Options options) : m_u
 #endif
     curl_easy_setopt(m_curl.get(), CURLOPT_USERAGENT, userAgent.toUtf8().constData());
 
+    constexpr long lowSpeedThreshold = 10 * 1024;
+
 #if defined(LAUNCHER_APPLICATION)
-    const long timeout = APPLICATION->settings()->get("RequestTimeout").toInt() * 1000;
+    const long timeout = APPLICATION->settings()->get("RequestTimeout").toInt();
 #else
     const long timeout = 30000;
 #endif
-    curl_easy_setopt(m_curl.get(), CURLOPT_TIMEOUT_MS, timeout);
+    curl_easy_setopt(m_curl.get(), CURLOPT_LOW_SPEED_LIMIT, lowSpeedThreshold);
+    curl_easy_setopt(m_curl.get(), CURLOPT_LOW_SPEED_TIME, timeout / 1000);
+    // Don't wait too long in the connection phase
+    curl_easy_setopt(m_curl.get(), CURLOPT_CONNECTTIMEOUT_MS, std::max(3000L, timeout / 10));
 
 #if defined(LAUNCHER_APPLICATION)
     const QNetworkProxy proxy = APPLICATION->network()->proxy();
