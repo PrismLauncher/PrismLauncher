@@ -189,14 +189,13 @@ void NetJob::onAllTransfersComplete()
     bool success = true;
     bool shouldStop = true;
 
-    for (auto request : m_finishedRequests) {
-        if (!request->isSuccess()) {
-            success = false;
-            if (m_attempts < m_attemptsBeforeAsking && isOnline()) {
-                std::erase(m_finishedRequests, request);
-                m_pendingRequests.push_back(request);
-                shouldStop = false;
-            }
+    const auto failed = getFailedRequests();
+    for (auto& request : failed) {
+        success = false;
+        if (m_attempts < m_attemptsBeforeAsking && isOnline()) {
+            std::erase(m_finishedRequests, request);
+            m_pendingRequests.push_back(request);
+            shouldStop = false;
         }
     }
 
