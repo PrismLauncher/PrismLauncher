@@ -64,7 +64,7 @@ class GetModDependenciesTask : public SequentialTask {
    private:
     inline ResourceAPI* getAPI(ModPlatform::ResourceProvider provider)
     {
-        if (provider == ModPlatform::ResourceProvider::FLAME)
+        if (provider == ModPlatform::ResourceProvider::Flame)
             return &m_flameAPI;
         else
             return &m_modrinthAPI;

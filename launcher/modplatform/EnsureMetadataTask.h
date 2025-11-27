@@ -16,9 +16,9 @@ class EnsureMetadataTask : public Task {
     Q_OBJECT
 
    public:
-    EnsureMetadataTask(Resource*, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
-    EnsureMetadataTask(QList<Resource*>&, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
-    EnsureMetadataTask(QHash<QString, Resource*>&, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
+    EnsureMetadataTask(Resource*, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::Modrinth);
+    EnsureMetadataTask(QList<Resource*>&, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::Modrinth);
+    EnsureMetadataTask(QHash<QString, Resource*>&, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::Modrinth);
 
     ~EnsureMetadataTask() = default;
 

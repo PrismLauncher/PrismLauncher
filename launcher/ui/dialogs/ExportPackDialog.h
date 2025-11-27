@@ -35,7 +35,7 @@ class ExportPackDialog : public QDialog {
    public:
     explicit ExportPackDialog(MinecraftInstancePtr instance,
                               QWidget* parent = nullptr,
-                              ModPlatform::ResourceProvider provider = ModPlatform::ResourceProvider::MODRINTH);
+                              ModPlatform::ResourceProvider provider = ModPlatform::ResourceProvider::Modrinth);
     ~ExportPackDialog();
 
     void done(int result) override;

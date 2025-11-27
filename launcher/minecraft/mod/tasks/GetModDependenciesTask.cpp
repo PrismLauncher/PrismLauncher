@@ -91,10 +91,10 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
 {
     QList<ModPlatform::Dependency> c_dependencies;
     for (auto ver_dep : version.dependencies) {
-        if (ver_dep.type != ModPlatform::DependencyType::REQUIRED)
+        if (ver_dep.type != ModPlatform::DependencyType::Required)
             continue;
         ver_dep = getOverride(ver_dep, providerName);
-        auto isOnlyVersion = providerName == ModPlatform::ResourceProvider::MODRINTH && ver_dep.addonId.toString().isEmpty();
+        auto isOnlyVersion = providerName == ModPlatform::ResourceProvider::Modrinth && ver_dep.addonId.toString().isEmpty();
         if (auto dep = std::find_if(c_dependencies.begin(), c_dependencies.end(),
                                     [&ver_dep, isOnlyVersion](const ModPlatform::Dependency& i) {
                                         return isOnlyVersion ? i.version == ver_dep.version : i.addonId == ver_dep.addonId;
@@ -147,7 +147,7 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDepende
             return;
         }
         try {
-            auto obj = provider == ModPlatform::ResourceProvider::FLAME ? Json::requireObject(Json::requireObject(doc), "data")
+            auto obj = provider == ModPlatform::ResourceProvider::Flame ? Json::requireObject(Json::requireObject(doc), "data")
                                                                         : Json::requireObject(doc);
 
             getAPI(provider)->loadIndexedPack(*pDep->pack, obj);
@@ -264,8 +264,8 @@ auto GetModDependenciesTask::getExtraInfo() -> QHash<QString, PackDependencyExtr
             auto deps = smod->version.dependencies;
             if (auto dep = std::find_if(deps.begin(), deps.end(),
                                         [addonId, provider, version](const ModPlatform::Dependency& d) {
-                                            return d.type == ModPlatform::DependencyType::REQUIRED &&
-                                                   (provider == ModPlatform::ResourceProvider::MODRINTH && d.addonId.toString().isEmpty()
+                                            return d.type == ModPlatform::DependencyType::Required &&
+                                                   (provider == ModPlatform::ResourceProvider::Modrinth && d.addonId.toString().isEmpty()
                                                         ? version == d.version
                                                         : d.addonId == addonId);
                                         });

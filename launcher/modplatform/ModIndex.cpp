@@ -76,9 +76,9 @@ IndexedVersionType::VersionType IndexedVersionType::enumFromString(const QString
 const char* ProviderCapabilities::name(ResourceProvider p)
 {
     switch (p) {
-        case ResourceProvider::MODRINTH:
+        case ResourceProvider::Modrinth:
             return "modrinth";
-        case ResourceProvider::FLAME:
+        case ResourceProvider::Flame:
             return "curseforge";
     }
     return {};
@@ -87,9 +87,9 @@ const char* ProviderCapabilities::name(ResourceProvider p)
 QString ProviderCapabilities::readableName(ResourceProvider p)
 {
     switch (p) {
-        case ResourceProvider::MODRINTH:
+        case ResourceProvider::Modrinth:
             return "Modrinth";
-        case ResourceProvider::FLAME:
+        case ResourceProvider::Flame:
             return "CurseForge";
     }
     return {};
@@ -98,9 +98,9 @@ QString ProviderCapabilities::readableName(ResourceProvider p)
 QStringList ProviderCapabilities::hashType(ResourceProvider p)
 {
     switch (p) {
-        case ResourceProvider::MODRINTH:
+        case ResourceProvider::Modrinth:
             return { "sha512", "sha1" };
-        case ResourceProvider::FLAME:
+        case ResourceProvider::Flame:
             // Try newer formats first, fall back to old format
             return { "sha1", "md5", "murmur2" };
     }
@@ -109,7 +109,7 @@ QStringList ProviderCapabilities::hashType(ResourceProvider p)
 
 QString getMetaURL(ResourceProvider provider, QVariant projectID)
 {
-    return ((provider == ModPlatform::ResourceProvider::FLAME) ? "https://www.curseforge.com/projects/" : "https://modrinth.com/mod/") +
+    return ((provider == ModPlatform::ResourceProvider::Flame) ? "https://www.curseforge.com/projects/" : "https://modrinth.com/mod/") +
            projectID.toString();
 }
 

@@ -40,7 +40,7 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     if (pack.addonId.toString().isEmpty())
         pack.addonId = Json::requireString(obj, "id");
 
-    pack.provider = ModPlatform::ResourceProvider::MODRINTH;
+    pack.provider = ModPlatform::ResourceProvider::Modrinth;
     pack.name = Json::requireString(obj, "title");
 
     pack.slug = obj["slug"].toString("");
@@ -158,15 +158,15 @@ ModPlatform::IndexedVersion Modrinth::loadIndexedPackVersion(QJsonObject& obj, Q
         auto depType = Json::requireString(dep, "dependency_type");
 
         if (depType == "required")
-            dependency.type = ModPlatform::DependencyType::REQUIRED;
+            dependency.type = ModPlatform::DependencyType::Required;
         else if (depType == "optional")
-            dependency.type = ModPlatform::DependencyType::OPTIONAL;
+            dependency.type = ModPlatform::DependencyType::Optional;
         else if (depType == "incompatible")
-            dependency.type = ModPlatform::DependencyType::INCOMPATIBLE;
+            dependency.type = ModPlatform::DependencyType::Incompatible;
         else if (depType == "embedded")
-            dependency.type = ModPlatform::DependencyType::EMBEDDED;
+            dependency.type = ModPlatform::DependencyType::Embedded;
         else
-            dependency.type = ModPlatform::DependencyType::UNKNOWN;
+            dependency.type = ModPlatform::DependencyType::Unknown;
 
         file.dependencies.append(dependency);
     }
@@ -212,7 +212,7 @@ ModPlatform::IndexedVersion Modrinth::loadIndexedPackVersion(QJsonObject& obj, Q
             file.hash = Json::requireString(hash_list, preferred_hash_type);
             file.hash_type = preferred_hash_type;
         } else {
-            auto hash_types = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH);
+            auto hash_types = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::Modrinth);
             for (auto& hash_type : hash_types) {
                 if (hash_list.contains(hash_type)) {
                     file.hash = Json::requireString(hash_list, hash_type);

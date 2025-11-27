@@ -99,7 +99,7 @@ auto V1::createModFormat([[maybe_unused]] const QDir& index_dir,
     mod.name = mod_pack.name;
     mod.filename = mod_version.fileName;
 
-    if (mod_pack.provider == ModPlatform::ResourceProvider::FLAME) {
+    if (mod_pack.provider == ModPlatform::ResourceProvider::Flame) {
         mod.mode = "metadata:curseforge";
     } else {
         mod.mode = "url";
@@ -154,7 +154,7 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
 
     toml::table update;
     switch (mod.provider) {
-        case (ModPlatform::ResourceProvider::FLAME):
+        case (ModPlatform::ResourceProvider::Flame):
             if (mod.file_id.toInt() == 0 || mod.project_id.toInt() == 0) {
                 qCritical() << QString("Did not write file %1 because missing information!").arg(normalized_fname);
                 return;
@@ -164,7 +164,7 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
                 { "project-id", mod.project_id.toInt() },
             };
             break;
-        case (ModPlatform::ResourceProvider::MODRINTH):
+        case (ModPlatform::ResourceProvider::Modrinth):
             if (mod.mod_id().toString().isEmpty() || mod.version().toString().isEmpty()) {
                 qCritical() << QString("Did not write file %1 because missing information!").arg(normalized_fname);
                 return;
@@ -317,12 +317,12 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
         }
 
         toml::table* mod_provider_table = nullptr;
-        if ((mod_provider_table = update_table[ModPlatform::ProviderCapabilities::name(Provider::FLAME)].as_table())) {
-            mod.provider = Provider::FLAME;
+        if ((mod_provider_table = update_table[ModPlatform::ProviderCapabilities::name(Provider::Flame)].as_table())) {
+            mod.provider = Provider::Flame;
             mod.file_id = intEntry(*mod_provider_table, "file-id");
             mod.project_id = intEntry(*mod_provider_table, "project-id");
-        } else if ((mod_provider_table = update_table[ModPlatform::ProviderCapabilities::name(Provider::MODRINTH)].as_table())) {
-            mod.provider = Provider::MODRINTH;
+        } else if ((mod_provider_table = update_table[ModPlatform::ProviderCapabilities::name(Provider::Modrinth)].as_table())) {
+            mod.provider = Provider::Modrinth;
             mod.mod_id() = stringEntry(*mod_provider_table, "mod-id");
             mod.version() = stringEntry(*mod_provider_table, "version");
         } else {

@@ -224,7 +224,7 @@ void ResourceUpdateDialog::checkCandidates()
 
             for (const auto& dep : depTask->getDependecies()) {
                 auto changelog = dep->version.changelog;
-                if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME)
+                if (dep->pack->provider == ModPlatform::ResourceProvider::Flame)
                     changelog = api.getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
                 auto download_task = makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_resourceModel);
                 auto extraInfo = dependencyExtraInfo.value(dep->version.addonId.toString());
@@ -275,15 +275,15 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
     bool confirm_rest = false;
     bool try_others_rest = false;
     bool skip_rest = false;
-    ModPlatform::ResourceProvider provider_rest = ModPlatform::ResourceProvider::MODRINTH;
+    ModPlatform::ResourceProvider provider_rest = ModPlatform::ResourceProvider::Modrinth;
 
     // adds resource to list based on provider
     auto addToTmp = [&modrinth_tmp, &flame_tmp](Resource* resource, ModPlatform::ResourceProvider p) {
         switch (p) {
-            case ModPlatform::ResourceProvider::MODRINTH:
+            case ModPlatform::ResourceProvider::Modrinth:
                 modrinth_tmp.push_back(resource);
                 break;
-            case ModPlatform::ResourceProvider::FLAME:
+            case ModPlatform::ResourceProvider::Flame:
                 flame_tmp.push_back(resource);
                 break;
         }
@@ -334,10 +334,10 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
 
     // prepare task for the modrinth mods
     if (!modrinth_tmp.empty()) {
-        auto modrinth_task = makeShared<EnsureMetadataTask>(modrinth_tmp, index_dir, ModPlatform::ResourceProvider::MODRINTH);
+        auto modrinth_task = makeShared<EnsureMetadataTask>(modrinth_tmp, index_dir, ModPlatform::ResourceProvider::Modrinth);
         connect(modrinth_task.get(), &EnsureMetadataTask::metadataReady, [this](Resource* candidate) { onMetadataEnsured(candidate); });
         connect(modrinth_task.get(), &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Resource* candidate) {
-            onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::MODRINTH);
+            onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::Modrinth);
         });
         connect(modrinth_task.get(), &EnsureMetadataTask::failed,
                 [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
@@ -350,10 +350,10 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
 
     // prepare task for the flame mods
     if (!flame_tmp.empty()) {
-        auto flame_task = makeShared<EnsureMetadataTask>(flame_tmp, index_dir, ModPlatform::ResourceProvider::FLAME);
+        auto flame_task = makeShared<EnsureMetadataTask>(flame_tmp, index_dir, ModPlatform::ResourceProvider::Flame);
         connect(flame_task.get(), &EnsureMetadataTask::metadataReady, [this](Resource* candidate) { onMetadataEnsured(candidate); });
         connect(flame_task.get(), &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Resource* candidate) {
-            onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::FLAME);
+            onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::Flame);
         });
         connect(flame_task.get(), &EnsureMetadataTask::failed,
                 [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
@@ -382,10 +382,10 @@ void ResourceUpdateDialog::onMetadataEnsured(Resource* resource)
         return;
 
     switch (resource->metadata()->provider) {
-        case ModPlatform::ResourceProvider::MODRINTH:
+        case ModPlatform::ResourceProvider::Modrinth:
             m_modrinthToUpdate.push_back(resource);
             break;
-        case ModPlatform::ResourceProvider::FLAME:
+        case ModPlatform::ResourceProvider::Flame:
             m_flameToUpdate.push_back(resource);
             break;
     }
@@ -394,13 +394,13 @@ void ResourceUpdateDialog::onMetadataEnsured(Resource* resource)
 ModPlatform::ResourceProvider next(ModPlatform::ResourceProvider p)
 {
     switch (p) {
-        case ModPlatform::ResourceProvider::MODRINTH:
-            return ModPlatform::ResourceProvider::FLAME;
-        case ModPlatform::ResourceProvider::FLAME:
-            return ModPlatform::ResourceProvider::MODRINTH;
+        case ModPlatform::ResourceProvider::Modrinth:
+            return ModPlatform::ResourceProvider::Flame;
+        case ModPlatform::ResourceProvider::Flame:
+            return ModPlatform::ResourceProvider::Modrinth;
     }
 
-    return ModPlatform::ResourceProvider::FLAME;
+    return ModPlatform::ResourceProvider::Flame;
 }
 
 void ResourceUpdateDialog::onMetadataFailed(Resource* resource, bool try_others, ModPlatform::ResourceProvider first_choice)
@@ -482,7 +482,7 @@ void ResourceUpdateDialog::appendResource(CheckUpdateTask::Update const& info, Q
 
     QString text = info.changelog;
     changelog->setData(0, Qt::UserRole, text);
-    if (info.provider == ModPlatform::ResourceProvider::MODRINTH) {
+    if (info.provider == ModPlatform::ResourceProvider::Modrinth) {
         text = markdownToHTML(info.changelog.toUtf8());
     }
 

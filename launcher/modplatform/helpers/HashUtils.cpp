@@ -12,10 +12,10 @@ namespace Hashing {
 Hasher::Ptr createHasher(QString file_path, ModPlatform::ResourceProvider provider)
 {
     switch (provider) {
-        case ModPlatform::ResourceProvider::MODRINTH:
+        case ModPlatform::ResourceProvider::Modrinth:
             return makeShared<Hasher>(file_path,
-                                      ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first());
-        case ModPlatform::ResourceProvider::FLAME:
+                                      ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::Modrinth).first());
+        case ModPlatform::ResourceProvider::Flame:
             return makeShared<Hasher>(file_path, Algorithm::Murmur2);
         default:
             qCritical() << "[Hashing]" << "Unrecognized mod platform!";

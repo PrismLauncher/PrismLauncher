@@ -46,9 +46,9 @@ enum ModLoaderType {
 Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
 QList<ModLoaderType> modLoaderTypesToList(ModLoaderTypes flags);
 
-enum class ResourceProvider { MODRINTH, FLAME };
+enum class ResourceProvider { Modrinth, Flame };
 
-enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
+enum class DependencyType { Required, Optional, Incompatible, Embedded, Tool, Include, Unknown };
 
 enum class Side { NoSide = 0, ClientSide = 1 << 0, ServerSide = 1 << 1, UniversalSide = ClientSide | ServerSide };
 
@@ -207,11 +207,11 @@ struct OverrideDep {
 
 inline auto getOverrideDeps() -> QList<OverrideDep>
 {
-    return { { "634179", "306612", "API", ModPlatform::ResourceProvider::FLAME },
-             { "720410", "308769", "KotlinLibraries", ModPlatform::ResourceProvider::FLAME },
+    return { { "634179", "306612", "API", ModPlatform::ResourceProvider::Flame },
+             { "720410", "308769", "KotlinLibraries", ModPlatform::ResourceProvider::Flame },
 
-             { "qvIfYCYJ", "P7dR8mSH", "API", ModPlatform::ResourceProvider::MODRINTH },
-             { "lwVhp9o5", "Ha28R6CL", "KotlinLibraries", ModPlatform::ResourceProvider::MODRINTH } };
+             { "qvIfYCYJ", "P7dR8mSH", "API", ModPlatform::ResourceProvider::Modrinth },
+             { "lwVhp9o5", "Ha28R6CL", "KotlinLibraries", ModPlatform::ResourceProvider::Modrinth } };
 }
 
 QString getMetaURL(ResourceProvider provider, QVariant projectID);

@@ -1465,7 +1465,7 @@ void MainWindow::on_actionExportInstanceFlamePack_triggered()
                 msgBox.exec();
                 return;
             }
-            ExportPackDialog dlg(instance, this, ModPlatform::ResourceProvider::FLAME);
+            ExportPackDialog dlg(instance, this, ModPlatform::ResourceProvider::Flame);
             dlg.exec();
         }
     }

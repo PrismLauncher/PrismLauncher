@@ -114,10 +114,10 @@ void EnsureMetadataTask::executeTask()
     Task::Ptr version_task;
 
     switch (m_provider) {
-        case (ModPlatform::ResourceProvider::MODRINTH):
+        case (ModPlatform::ResourceProvider::Modrinth):
             version_task = modrinthVersionsTask();
             break;
-        case (ModPlatform::ResourceProvider::FLAME):
+        case (ModPlatform::ResourceProvider::Flame):
             version_task = flameVersionsTask();
             break;
     }
@@ -134,10 +134,10 @@ void EnsureMetadataTask::executeTask()
         Task::Ptr project_task;
 
         switch (m_provider) {
-            case (ModPlatform::ResourceProvider::MODRINTH):
+            case (ModPlatform::ResourceProvider::Modrinth):
                 project_task = modrinthProjectsTask();
                 break;
-            case (ModPlatform::ResourceProvider::FLAME):
+            case (ModPlatform::ResourceProvider::Flame):
                 project_task = flameProjectsTask();
                 break;
         }
@@ -213,7 +213,7 @@ void EnsureMetadataTask::emitFail(Resource* resource, QString key, RemoveFromLis
 
 Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
 {
-    auto hash_type = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
+    auto hash_type = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::Modrinth).first();
 
     auto response = std::make_shared<QByteArray>();
     auto ver_task = modrinth_api.currentVersions(m_resources.keys(), hash_type, response);

@@ -40,7 +40,7 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
     void onMetadataEnsured(Resource* resource);
     void onMetadataFailed(Resource* resource,
                           bool try_others = false,
-                          ModPlatform::ResourceProvider firstChoice = ModPlatform::ResourceProvider::MODRINTH);
+                          ModPlatform::ResourceProvider firstChoice = ModPlatform::ResourceProvider::Modrinth);
 
    private:
     QWidget* m_parent;

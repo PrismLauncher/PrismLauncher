@@ -383,10 +383,10 @@ QList<BasePage*> ShaderPackDownloadDialog::getPages()
 void ResourceDownloadDialog::setResourceMetadata(const std::shared_ptr<Metadata::ModStruct>& meta)
 {
     switch (meta->provider) {
-        case ModPlatform::ResourceProvider::MODRINTH:
+        case ModPlatform::ResourceProvider::Modrinth:
             selectPage(Modrinth::id());
             break;
-        case ModPlatform::ResourceProvider::FLAME:
+        case ModPlatform::ResourceProvider::Flame:
             selectPage(Flame::id());
             break;
     }

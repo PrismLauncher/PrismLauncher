@@ -98,7 +98,7 @@ void FlamePackExportTask::collectHashes()
 
         if (relative.startsWith("resourcepacks/") &&
             (relative.endsWith(".zip") || relative.endsWith(".zip.disabled"))) {  // is resourcepack
-            auto hashTask = Hashing::createHasher(file.absoluteFilePath(), ModPlatform::ResourceProvider::FLAME);
+            auto hashTask = Hashing::createHasher(file.absoluteFilePath(), ModPlatform::ResourceProvider::Flame);
             connect(hashTask.get(), &Hashing::Hasher::resultsReady, [this, relative, file](QString hash) {
                 if (m_state == Task::State::Running) {
                     pendingHashes.insert(hash, { relative, file.absoluteFilePath(), relative.endsWith(".zip") });
@@ -115,14 +115,14 @@ void FlamePackExportTask::collectHashes()
             if (!mod || mod->type() == ResourceType::FOLDER) {
                 continue;
             }
-            if (mod->metadata() && mod->metadata()->provider == ModPlatform::ResourceProvider::FLAME) {
+            if (mod->metadata() && mod->metadata()->provider == ModPlatform::ResourceProvider::Flame) {
                 resolvedFiles.insert(mod->fileinfo().absoluteFilePath(),
                                      { mod->metadata()->project_id.toInt(), mod->metadata()->file_id.toInt(), mod->enabled(), true,
                                        mod->metadata()->name, mod->metadata()->slug, mod->authors().join(", ") });
                 continue;
             }
 
-            auto hashTask = Hashing::createHasher(mod->fileinfo().absoluteFilePath(), ModPlatform::ResourceProvider::FLAME);
+            auto hashTask = Hashing::createHasher(mod->fileinfo().absoluteFilePath(), ModPlatform::ResourceProvider::Flame);
             connect(hashTask.get(), &Hashing::Hasher::resultsReady, [this, mod](QString hash) {
                 if (m_state == Task::State::Running) {
                     pendingHashes.insert(hash, { mod->name(), mod->fileinfo().absoluteFilePath(), mod->enabled(), true });
@@ -424,7 +424,7 @@ QByteArray FlamePackExportTask::generateHTML()
         if (mod.isMod) {
             content += QString(TEMPLATE)
                            .replace("{name}", mod.name.toHtmlEscaped())
-                           .replace("{url}", ModPlatform::getMetaURL(ModPlatform::ResourceProvider::FLAME, mod.addonId).toHtmlEscaped())
+                           .replace("{url}", ModPlatform::getMetaURL(ModPlatform::ResourceProvider::Flame, mod.addonId).toHtmlEscaped())
                            .replace("{authors}", !mod.authors.isEmpty() ? QString(" (by %1)").arg(mod.authors).toHtmlEscaped() : "");
         }
     }
