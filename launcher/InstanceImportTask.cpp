@@ -441,7 +441,8 @@ void InstanceImportTask::processExtraInfoPack()
     }
     auto populateExtraInfo = [this](GetModPackExtraInfoTask* task) {
         m_extra_info.insert("pack_id", task->getVersion().addonId.toString());
-        m_extra_info.insert("pack_version_id", task->getVersion().version);
+        m_extra_info.insert("pack_version_id", task->getVersion().fileId.toString());
+        m_original_version = task->getVersion().version;
         setIcon(task->getLogoName());
     };
     auto modrinthTask = makeShared<GetModPackExtraInfoTask>(m_archivePath, ModPlatform::ResourceProvider::MODRINTH);

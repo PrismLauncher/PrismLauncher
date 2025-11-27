@@ -129,7 +129,7 @@ void GetModPackExtraInfoTask::getProjectInfo()
     setStatus(tr("Get project information"));
     setProgress(3, 4);
     auto responseInfo = std::make_shared<QByteArray>();
-    auto projectTask = m_api->getProject(m_version.addonId.toString(), responseInfo);
+    auto projectTask = m_api->getProject(m_version.addonId.toString(), responseInfo.get());
     connect(projectTask.get(), &Task::succeeded, [responseInfo, this] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*responseInfo, &parse_error);
