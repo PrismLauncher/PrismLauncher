@@ -13,14 +13,13 @@ class PackFetchTask : public QObject {
     Q_OBJECT
 
    public:
-    PackFetchTask(shared_qobject_ptr<QNetworkAccessManager> network) : QObject(nullptr), m_network(network) {};
+    PackFetchTask() : QObject(nullptr) {}
     virtual ~PackFetchTask() = default;
 
     void fetch();
     void fetchPrivate(const QStringList& toFetch);
 
    private:
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
     NetJob::Ptr jobPtr;
 
     std::shared_ptr<QByteArray> publicModpacksXmlFileData = std::make_shared<QByteArray>();

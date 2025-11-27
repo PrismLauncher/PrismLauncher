@@ -45,8 +45,7 @@
 #include "net/ApiDownload.h"
 #include "net/ChecksumValidator.h"
 
-Technic::SolderPackInstallTask::SolderPackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network,
-                                                      const QUrl& solderUrl,
+Technic::SolderPackInstallTask::SolderPackInstallTask(const QUrl& solderUrl,
                                                       const QString& pack,
                                                       const QString& version,
                                                       const QString& minecraftVersion)
@@ -54,7 +53,6 @@ Technic::SolderPackInstallTask::SolderPackInstallTask(shared_qobject_ptr<QNetwor
     m_solderUrl = solderUrl;
     m_pack = pack;
     m_version = version;
-    m_network = network;
     m_minecraftVersion = minecraftVersion;
 }
 

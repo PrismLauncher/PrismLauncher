@@ -37,14 +37,12 @@
 
 #include "NetJob.h"
 
-#include <ui/dialogs/NetworkJobFailedDialog.h>
+#include "ui/dialogs/NetworkJobFailedDialog.h"
 
-#include <QNetworkReply>
 #include "net/NetRequest.h"
 #include "tasks/ConcurrentTask.h"
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
-#include "ui/dialogs/CustomMessageBox.h"
 #endif
 
 NetJob::NetJob(QString jobName, int maxConcurrent)

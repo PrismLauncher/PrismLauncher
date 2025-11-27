@@ -58,5 +58,4 @@ namespace ImgurUpload {
     };
 
     Net::NetRequest::Ptr make(ScreenShot::Ptr screenShot);
-    void configureRequest(Net::NetRequest* request, ScreenShot::Ptr screenShot);
 }

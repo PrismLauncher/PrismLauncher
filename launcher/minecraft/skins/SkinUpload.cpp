@@ -45,12 +45,7 @@
 Net::NetRequest::Ptr SkinUpload::make(QString token, QString path, QString variant)
 {
     auto request = makeShared<Net::NetRequest>(QUrl("https://api.minecraftservices.com/minecraft/profile/skins"), new Net::ByteArraySink(std::make_shared<QByteArray>()));
-    configureRequest(request.get(), token, path, variant);
-    return request;
-}
 
-void SkinUpload::configureRequest(Net::NetRequest* request, QString token, QString path, QString variant)
-{
     request->addHeadersFromProxy(Net::RawHeaderProxy(QList<Net::HeaderPair>{
         { "Authorization", QString("Bearer %1").arg(token).toLocal8Bit() },
     }));
@@ -60,4 +55,6 @@ void SkinUpload::configureRequest(Net::NetRequest* request, QString token, QStri
     };
     request->httpMultipart(parts);
     request->setLoggingCategory(taskMCSkinsLogC);
+
+    return request;
 }

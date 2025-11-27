@@ -288,7 +288,7 @@ void TechnicPage::selectVersion()
                                  new Technic::SingleZipPackInstallTask(current.url, current.minecraftVersion));
     } else {
         dialog->setSuggestedPack(current.name, selectedVersion,
-                                 new Technic::SolderPackInstallTask(APPLICATION->network(), current.url, current.slug, selectedVersion,
+                                 new Technic::SolderPackInstallTask(current.url, current.slug, selectedVersion,
                                                                     current.minecraftVersion));
     }
 }

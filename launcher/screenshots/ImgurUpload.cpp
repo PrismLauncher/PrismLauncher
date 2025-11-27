@@ -88,12 +88,7 @@ auto ImgurUpload::Sink::finalize(Net::NetRequest*) -> Task::State
 Net::NetRequest::Ptr ImgurUpload::make(ScreenShot::Ptr screenShot)
 {
     auto request = makeShared<Net::NetRequest>(BuildConfig.IMGUR_BASE_URL + "image", new Sink(screenShot));
-    configureRequest(request.get(), screenShot);
-    return request;
-}
 
-void ImgurUpload::configureRequest(Net::NetRequest* request, ScreenShot::Ptr screenShot)
-{
     request->addHeadersFromProxy(Net::RawHeaderProxy(QList<Net::HeaderPair>{
     { "Authorization", QString("Client-ID %1").arg(BuildConfig.IMGUR_CLIENT_ID).toUtf8() }, { "Accept", "application/json" } }));
 
@@ -105,4 +100,6 @@ void ImgurUpload::configureRequest(Net::NetRequest* request, ScreenShot::Ptr scr
     };
     request->httpMultipart(parts);
     request->setLoggingCategory(taskUploadLogC);
+
+    return request;
 }

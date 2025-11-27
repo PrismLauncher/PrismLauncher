@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <net/NetRequest.h>
+#include "net/NetRequest.h"
 
 namespace SkinDelete {
     Net::NetRequest::Ptr make(QString token);

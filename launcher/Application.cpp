@@ -91,7 +91,6 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QFileOpenEvent>
-#include <QHostInfo>
 #include <QIcon>
 #include <QLibraryInfo>
 #include <QList>
@@ -103,6 +102,9 @@
 #include <QStyleFactory>
 #include <QTranslator>
 #include <QWindow>
+#include <QHostInfo>
+#include <QStandardPaths>
+#include <QStringLiteral>
 
 #include "InstanceList.h"
 #include "MTPixmapCache.h"
@@ -130,9 +132,6 @@
 #include <stdlib.h>
 #include <sys.h>
 
-#include <QHostInfo>
-#include <QStandardPaths>
-#include <QStringLiteral>
 #include "SysInfo.h"
 
 #ifdef Q_OS_LINUX

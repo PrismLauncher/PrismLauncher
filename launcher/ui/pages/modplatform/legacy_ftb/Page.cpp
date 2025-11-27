@@ -55,7 +55,7 @@ namespace LegacyFTB {
 
 Page::Page(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), dialog(dialog), ui(new Ui::Page)
 {
-    ftbFetchTask.reset(new PackFetchTask(APPLICATION->network()));
+    ftbFetchTask.reset(new PackFetchTask());
     ftbPrivatePacks.reset(new PrivatePackManager());
 
     ui->setupUi(this);
@@ -179,7 +179,7 @@ void Page::suggestCurrent()
         return;
     }
 
-    dialog->setSuggestedPack(selected.name, selectedVersion, new PackInstallTask(APPLICATION->network(), selected, selectedVersion));
+    dialog->setSuggestedPack(selected.name, selectedVersion, new PackInstallTask(selected, selectedVersion));
     QString editedLogoName = selected.logo;
     if (!selected.logo.toLower().startsWith("ftb")) {
         editedLogoName = "ftb_" + editedLogoName;

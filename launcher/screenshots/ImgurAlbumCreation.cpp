@@ -90,12 +90,7 @@ auto ImgurAlbumCreation::Sink::finalize(Net::NetRequest*) -> Task::State
 Net::NetRequest::Ptr ImgurAlbumCreation::make(std::shared_ptr<Result> output, QList<ScreenShot::Ptr> screenshots)
 {
     auto request = makeShared<Net::NetRequest>(QUrl(BuildConfig.IMGUR_BASE_URL + "album"), new Sink(output));
-    configureRequest(request.get(), screenshots);
-    return request;
-}
 
-void ImgurAlbumCreation::configureRequest(Net::NetRequest* request, QList<ScreenShot::Ptr> screenshots)
-{
     request->addHeadersFromProxy(Net::RawHeaderProxy(
         QList<Net::HeaderPair>{ { "Content-Type", "application/x-www-form-urlencoded" },
                                 { "Authorization", QString("Client-ID %1").arg(BuildConfig.IMGUR_CLIENT_ID).toUtf8() },
@@ -106,5 +101,7 @@ void ImgurAlbumCreation::configureRequest(Net::NetRequest* request, QList<Screen
         hashes.append(shot->m_imgurDeleteHash);
     }
     const auto data = "deletehashes=" + hashes.join(',').toUtf8() + "&title=Minecraft%20Screenshots&privacy=hidden";
-    Net::Upload::configureRequest(request, data);
+    Net::Upload::configureRequest(request.get(), data);
+
+    return request;
 }

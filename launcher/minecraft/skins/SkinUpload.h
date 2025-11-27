@@ -22,5 +22,4 @@
 
 namespace SkinUpload {
     Net::NetRequest::Ptr make(QString token, QString path, QString variant);
-    void configureRequest(Net::NetRequest* request, QString token, QString path, QString variant);
 }

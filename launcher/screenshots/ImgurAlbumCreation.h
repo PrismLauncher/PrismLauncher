@@ -64,5 +64,4 @@ namespace ImgurAlbumCreation {
     };
 
     Net::NetRequest::Ptr make(std::shared_ptr<Result> output, QList<ScreenShot::Ptr> screenshots);
-    void configureRequest(Net::NetRequest* request, QList<ScreenShot::Ptr> screenshots);
-};
+}
