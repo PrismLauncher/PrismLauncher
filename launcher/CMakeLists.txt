@@ -1311,6 +1311,11 @@ set_project_warnings(Launcher_logic
     "${Launcher_GCC_WARNINGS}")
 target_include_directories(Launcher_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_APPLICATION)
+
+# Definitions to prevent windows.h from conflicting
+target_compile_definitions(Launcher_logic PUBLIC WIN32_LEAN_AND_MEAN)
+target_compile_definitions(Launcher_logic PUBLIC NOMINMAX)
+
 target_link_libraries(Launcher_logic
     systeminfo
     Launcher_murmur2
