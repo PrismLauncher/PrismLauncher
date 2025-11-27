@@ -131,7 +131,6 @@
 
 #include <stdlib.h>
 #include <sys.h>
-
 #include "SysInfo.h"
 
 #ifdef Q_OS_LINUX
