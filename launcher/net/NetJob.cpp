@@ -162,23 +162,31 @@ void NetJob::emitFailed(QString reason)
 {
 #if defined(LAUNCHER_APPLICATION)
 
-    if (APPLICATION_DYN && m_ask_retry && m_manual_try < APPLICATION->settings()->get("NumberOfManualRetries").toInt() && isOnline()) {
-        m_manual_try++;
-        auto response = CustomMessageBox::selectable(nullptr, "Confirm retry",
-                                                     "The tasks failed.\n"
-                                                     "Failed urls\n" +
-                                                         getFailedFiles().join("\n\t") +
-                                                         ".\n"
-                                                         "If this continues to happen please check the logs of the application.\n"
-                                                         "Do you want to retry?",
-                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                            ->exec();
-
-        if (response == QMessageBox::Yes) {
-            m_try = 0;
-            executeNextSubTask();
+    if (APPLICATION_DYN && m_askRetry && m_manualTry < APPLICATION->settings()->get("NumberOfManualRetries").toInt() && isOnline()) {
+        if (m_isDialogDisplayed)
             return;
-        }
+        m_isDialogDisplayed = true;
+        m_manualTry++;
+
+        auto dialog = CustomMessageBox::selectable(nullptr, "Confirm retry",
+                                                   "The tasks failed.\n"
+                                                   "Failed urls\n" +
+                                                       getFailedFiles().join("\n\t") +
+                                                       ".\n"
+                                                       "If this continues to happen please check the logs of the application.\n"
+                                                       "Do you want to retry?",
+                                                   QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        connect(dialog, &QDialog::finished, this, [this, reason = std::move(reason)](int result) {
+            m_isDialogDisplayed = false;
+            if (result == QMessageBox::Yes) {
+                m_try = 0;
+                executeNextSubTask();
+            } else {
+                ConcurrentTask::emitFailed(reason);
+            }
+        });
+        dialog->open();
+        return;
     }
 #endif
     ConcurrentTask::emitFailed(reason);
@@ -186,5 +194,5 @@ void NetJob::emitFailed(QString reason)
 
 void NetJob::setAskRetry(bool askRetry)
 {
-    m_ask_retry = askRetry;
+    m_askRetry = askRetry;
 }
