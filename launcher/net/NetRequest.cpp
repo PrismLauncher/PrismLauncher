@@ -79,7 +79,7 @@ NetRequest::NetRequest(const QUrl& url, Sink* sink, const Options options) : m_u
     curl_easy_setopt(m_curl.get(), CURLOPT_ERRORBUFFER, m_errorBuffer);
 
 #if defined(LAUNCHER_APPLICATION)
-    const auto userAgent = APPLICATION->getUserAgent();
+    const auto userAgent = APPLICATION_DYN ? APPLICATION->getUserAgent() : BuildConfig.USER_AGENT;
 #else
     const auto userAgent = BuildConfig.USER_AGENT;
 #endif
@@ -88,17 +88,17 @@ NetRequest::NetRequest(const QUrl& url, Sink* sink, const Options options) : m_u
     constexpr long lowSpeedThreshold = 10 * 1024;
 
 #if defined(LAUNCHER_APPLICATION)
-    const long timeout = APPLICATION->settings()->get("RequestTimeout").toInt();
+    const long timeout = APPLICATION_DYN ? APPLICATION->settings()->get("RequestTimeout").toInt() : 30;
 #else
-    const long timeout = 30000;
+    const long timeout = 30;
 #endif
     curl_easy_setopt(m_curl.get(), CURLOPT_LOW_SPEED_LIMIT, lowSpeedThreshold);
-    curl_easy_setopt(m_curl.get(), CURLOPT_LOW_SPEED_TIME, timeout / 1000);
+    curl_easy_setopt(m_curl.get(), CURLOPT_LOW_SPEED_TIME, timeout);
     // Don't wait too long in the connection phase
-    curl_easy_setopt(m_curl.get(), CURLOPT_CONNECTTIMEOUT_MS, std::max(3000L, timeout / 10));
+    curl_easy_setopt(m_curl.get(), CURLOPT_CONNECTTIMEOUT, std::max(3L, timeout / 10));
 
 #if defined(LAUNCHER_APPLICATION)
-    const QNetworkProxy proxy = APPLICATION->network()->proxy();
+    const QNetworkProxy proxy = APPLICATION_DYN ? APPLICATION->network()->proxy() : QNetworkProxy::applicationProxy();
 #else
     const QNetworkProxy proxy = QNetworkProxy::applicationProxy();
 #endif
