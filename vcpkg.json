@@ -31,14 +31,7 @@
       "name": "curl",
       "default-features": false,
       "features": [
-        {
-          "name": "ssl",
-          "platform": "!osx"
-        },
-        {
-          "name": "gnutls",
-          "platform": "osx"
-        }
+        "ssl"
       ]
     }
   ]
