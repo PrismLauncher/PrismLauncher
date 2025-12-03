@@ -118,6 +118,27 @@ void NetJob::perform()
         }
     }
 
+    const CURLMsg* multiMsg = nullptr;
+    do {
+        int messagesInQueue;
+        multiMsg = curl_multi_info_read(m_curl.get(), &messagesInQueue);
+        if (multiMsg && multiMsg->msg == CURLMSG_DONE) {
+            auto request = findRequestByHandle(multiMsg->easy_handle);
+            const CURLcode result = multiMsg->data.result;
+            request->setResult(result);
+            propagateStepProgress(request->stepProgress());
+
+            curl_multi_remove_handle(m_curl.get(), multiMsg->easy_handle);
+            std::erase(m_runningRequests, request);
+            m_finishedRequests.push_back(request);
+
+            if (request->isSuccess()) {
+                request->finalize();
+                emit request->succeeded();
+            }
+        }
+    } while (multiMsg);
+
     qint64 totalExpected = 0;
     qint64 totalReceived = 0;
     for (const auto& request : m_pendingRequests) {
@@ -140,27 +161,6 @@ void NetJob::perform()
     }
 
     setProgress(totalReceived, totalExpected);
-
-    const CURLMsg* multiMsg = nullptr;
-    do {
-        int messagesInQueue;
-        multiMsg = curl_multi_info_read(m_curl.get(), &messagesInQueue);
-        if (multiMsg && multiMsg->msg == CURLMSG_DONE) {
-            auto request = findRequestByHandle(multiMsg->easy_handle);
-            const CURLcode result = multiMsg->data.result;
-            request->setResult(result);
-            propagateStepProgress(request->stepProgress());
-
-            curl_multi_remove_handle(m_curl.get(), multiMsg->easy_handle);
-            std::erase(m_runningRequests, request);
-            m_finishedRequests.push_back(request);
-
-            if (request->isSuccess()) {
-                request->finalize();
-                emit request->succeeded();
-            }
-        }
-    } while (multiMsg);
 
     if (runningTasks == 0) {
         onAllTransfersComplete();
