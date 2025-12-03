@@ -14,7 +14,7 @@ runs:
       shell: bash
       run: |
         brew update
-        brew install ninja extra-cmake-modules temurin@17
+        brew install ninja extra-cmake-modules temurin@17 autoconf automake libtool
 
     - name: Set JAVA_HOME
       shell: bash
