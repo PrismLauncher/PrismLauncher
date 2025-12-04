@@ -468,6 +468,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDirs("/opt/ibm");  // IBM Semeru Certified Edition
     // flatpak
     scanJavaDirs("/app/jdk");
+    scanJavaDirs("/var/run/host/usr/lib/jvm");
 #elif defined(Q_OS_OPENBSD) || defined(Q_OS_FREEBSD)
     // ports install to /usr/local on OpenBSD & FreeBSD
     scanJavaDirs("/usr/local");
