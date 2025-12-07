@@ -264,12 +264,13 @@ void ResourceFolderModel::deleteMetadata(const QModelIndexList& indexes)
 bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAction action)
 {
     if (m_instance != nullptr && m_instance->isRunning()) {
-        auto response =
+        auto dialog =
             CustomMessageBox::selectable(nullptr, tr("Confirm toggle"),
                                          tr("If you enable/disable this resource while the game is running it may crash your game.\n"
                                             "Are you sure you want to do this?"),
-                                         QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                ->exec();
+                                         QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        auto response = dialog->exec();
+        dialog->deleteLater();
 
         if (response != QMessageBox::Yes)
             return false;

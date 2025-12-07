@@ -1399,6 +1399,7 @@ void Application::showFatalErrorMessage(const QString& title, const QString& con
     m_status = Application::Failed;
     auto dialog = CustomMessageBox::selectable(nullptr, title, content, QMessageBox::Critical);
     dialog->exec();
+    dialog->deleteLater();
 }
 
 Application::~Application()

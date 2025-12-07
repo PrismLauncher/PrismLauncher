@@ -25,6 +25,9 @@ QMessageBox* selectable(QWidget* parent,
                         QCheckBox* checkBox)
 {
     QMessageBox* messageBox = new QMessageBox(parent);
+    if (parent == nullptr) {
+        messageBox->setAttribute(Qt::WA_DeleteOnClose);
+    }
     messageBox->setWindowTitle(title);
     messageBox->setText(text);
     messageBox->setStandardButtons(buttons);
