@@ -1,0 +1,103 @@
+name: Clang-Tidy
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - "develop"
+      - "release-*"
+    paths:
+      # File types
+      - "**.cpp"
+      - "**.h"
+
+      # Workflows
+      - ".github/workflows/clang-tidy.yml"
+  pull_request:
+    paths:
+      # File types
+      - "**.cpp"
+      - "**.h"
+
+      # Workflows
+      - ".github/workflows/clang-tidy.yml"
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  clang-tidy:
+    name: Run clang-tidy
+
+    permissions:
+      security-events: write
+
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+        # For PRs
+      - name: Setup Nix Magic Cache
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: DeterminateSystems/magic-nix-cache-action@v13
+        with:
+          diagnostic-endpoint: ""
+          use-flakehub: false
+
+        # For in-tree builds
+      - name: Setup Cachix
+        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+        uses: cachix/cachix-action@v16
+        with:
+          name: prismlauncher
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Install clang-tidy-sarif
+        run: |
+          cargo install clang-tidy-sarif sarif-fmt
+          
+      - name: Collect files to analyze
+        id: collect-files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IS_PR: ${{ github.event_name == 'pull_request' }}
+        run: |
+          if [ "$IS_PR" == "true" ]; then
+            echo "FILES=$(gh -R ${{ github.repository }} pr diff ${{ github.event.pull_request.number }} --name-only | grep -E '\.(cpp|h)$' || true)" >> "$GITHUB_OUTPUT"
+          else
+            echo "FILES=$(find launcher/ tests/ -name \*.cpp -o -name \*.h)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run clang-tidy
+        id: clang-tidy
+        env:
+          FILES: ${{ steps.collect-files.outputs.FILES }}
+        run: |
+          if [ -n "$FILES" ]; then
+            echo "HAS_FILES=true" >> "$GITHUB_OUTPUT"
+            nix develop --command bash -c "
+              echo "$FILES" | xargs clang-tidy -p=. --fix-errors --quiet --warnings-as-errors='*' | tee clang-tidy-output.txt
+            "
+          else
+            echo "HAS_FILES=false" >> "$GITHUB_OUTPUT"
+            echo "No source files changed, skipping"
+          fi
+
+      - name: Convert output to SARIF
+        if: ${{ steps.clang-tidy.outputs.HAS_FILES == 'true' }}
+        run:
+          cat clang-tidy-output.txt | clang-tidy-sarif | tee results.sarif | sarif-fmt
+
+      - name: Upload SARIF file
+        if: ${{ steps.clang-tidy.outputs.HAS_FILES == 'true' }}
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: results.sarif
+          category: clang-tidy
