@@ -27,13 +27,13 @@ set(CORE_SOURCES
     NullInstance.h
     MMCZip.h
     MMCZip.cpp
-    archive/ArchiveReader.cpp  
-    archive/ArchiveReader.h  
-    archive/ArchiveWriter.cpp  
-    archive/ArchiveWriter.h  
-    archive/ExportToZipTask.cpp  
+    archive/ArchiveReader.cpp
+    archive/ArchiveReader.h
+    archive/ArchiveWriter.cpp
+    archive/ArchiveWriter.h
+    archive/ExportToZipTask.cpp
     archive/ExportToZipTask.h
-    archive/ExtractZipTask.cpp  
+    archive/ExtractZipTask.cpp
     archive/ExtractZipTask.h
     StringUtils.h
     StringUtils.cpp
@@ -107,11 +107,11 @@ set(CORE_SOURCES
 if (UNIX AND NOT CYGWIN AND NOT APPLE)
     #! SOURCES
     set(CORE_SOURCES
-    ${CORE_SOURCES}
+        ${CORE_SOURCES}
 
     # MangoHud
-    MangoHud.h
-    MangoHud.cpp
+        MangoHud.h
+        MangoHud.cpp
     )
 endif()
 
@@ -181,7 +181,7 @@ set(LAUNCH_SOURCES
 
 # Old update system
 #! SOURCES
-set(SOURCES
+set(UPDATE_SOURCES
     updater/ExternalUpdater.h
 )
 
@@ -391,7 +391,8 @@ set(MINECRAFT_SOURCES
     minecraft/skins/SkinList.cpp
     minecraft/skins/SkinList.h
 
-    minecraft/Agent.h)
+    minecraft/Agent.h
+)
 
 # the screenshots feature
 #! SOURCES
@@ -647,10 +648,10 @@ set(PRISMUPDATER_SOURCES
     # Zip
     MMCZip.h
     MMCZip.cpp
-    archive/ArchiveReader.cpp  
-    archive/ArchiveReader.h  
-    archive/ArchiveWriter.cpp  
-    archive/ArchiveWriter.h  
+    archive/ArchiveReader.cpp
+    archive/ArchiveReader.h
+    archive/ArchiveWriter.cpp
+    archive/ArchiveWriter.h
 
     # Time
     MMCTime.h
@@ -782,7 +783,7 @@ set(LOGIC_SOURCES
     ${CORE_SOURCES}
     ${NET_SOURCES}
     ${LAUNCH_SOURCES}
-    ${SOURCES}
+    ${UPDATE_SOURCES}
     ${NEWS_SOURCES}
     ${MINECRAFT_SOURCES}
     ${SCREENSHOTS_SOURCES}
@@ -809,7 +810,7 @@ else()
 endif()
 
 #! SOURCES
-SET(LAUNCHER_SOURCES
+set(LAUNCHER_SOURCES
     # Application base
     Application.h
     Application.cpp
@@ -1207,11 +1208,11 @@ endif()
 if (NOT Apple)
     #! SOURCES
     set(LAUNCHER_SOURCES
-    ${LAUNCHER_SOURCES}
+        ${LAUNCHER_SOURCES}
 
-    ui/dialogs/UpdateAvailableDialog.h
-    ui/dialogs/UpdateAvailableDialog.cpp
-)
+        ui/dialogs/UpdateAvailableDialog.h
+        ui/dialogs/UpdateAvailableDialog.cpp
+    )
 endif()
 
 if (APPLE)

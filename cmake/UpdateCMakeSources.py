@@ -408,36 +408,6 @@ class Context:
         return self.result
 
 
-DIFF_HDR_PAT = re.compile(r"^@@ -(\d+),?(\d+)? \+(\d+),?(\d+)? @@$")
-
-
-def apply_diff_patch(source: str, diff: list[str], reverse=False) -> str:
-    text = ""
-    i = start = 0
-    (pat_group, sign) = (1, "+") if not reverse else (3, "-")
-    while i < len(diff) and diff[i].startswith(("---", "+++")):
-        i += 1  # skip header lines
-    while i < len(diff):
-        match = DIFF_HDR_PAT.match(diff[i])
-        if not match:
-            raise Exception(f"Bad Diff: header missing or malformed (line: {i})")
-        end = int(match.group(pat_group)) - 1 + (match.group(pat_group + 1) == "0")
-        if start > end or end > len(source):
-            raise Exception(f"Bad Diff: bad line number (line: {i})")
-        text += "".join(source[start:end])
-        start = end
-        i += 1
-        while i < len(diff) and diff[i][0] != "@":
-            line = diff[i]
-            i += 1
-            if len(line) > 0:
-                if line[0] == sign or line[0] == " ":
-                    text += line[1:]
-                start += line[0] != sign
-    text += "".join(source[start:])
-    return text
-
-
 @dataclass
 class DefautState(ProcessState):
 
@@ -544,6 +514,37 @@ class ParseSourceSection(ProcessState):
         return next_state
 
 
+DIFF_HDR_PAT = re.compile(r"^@@ -(\d+),?(\d+)? \+(\d+),?(\d+)? @@$")
+
+
+def apply_diff_patch(s: str, diff: list[str], reverse=False) -> str:
+    source = s.splitlines(keepends=True)
+    text = ""
+    i = start = 0
+    (pat_group, sign) = (1, "+") if not reverse else (3, "-")
+    while i < len(diff) and diff[i].startswith(("---", "+++")):
+        i += 1  # skip header lines
+    while i < len(diff):
+        match = DIFF_HDR_PAT.match(diff[i])
+        if not match:
+            raise Exception(f"Bad Diff: header missing or malformed (line: {i})")
+        end = int(match.group(pat_group)) - 1 + (match.group(pat_group + 1) == "0")
+        if start > end or end > len(source):
+            raise Exception(f"Bad Diff: bad line number (line: {i})")
+        text += "".join(source[start:end])
+        start = end
+        i += 1
+        while i < len(diff) and diff[i][0] != "@":
+            line = diff[i]
+            i += 1
+            if len(line) > 0:
+                if line[0] == sign or line[0] == " ":
+                    text += line[1:]
+                start += line[0] != sign
+    text += "".join(source[start:])
+    return text
+
+
 ASCIIESC = re.compile("\x1b\\[[0-9;]*m")
 
 
@@ -572,13 +573,14 @@ def main():
         "-i",
         action="append",
         nargs="*",
-        type=pathlib.Path,
+        type=str,
         default=[
-            pathlib.Path("libraries"),
-            pathlib.Path("program_info"),
-            pathlib.Path("tests"),
+            "libraries",
+            "program_info",
+            "tests",
         ],
-        help="directory names not to traverse when finding/importing CMakeLists.txt",
+        help="directory names not to traverse when finding/importing CMakeLists.txt\n"
+        + " or checking for not included source files",
     )
     parser.add_argument(
         "--report-missing",
@@ -598,7 +600,7 @@ def main():
         action="append",
         nargs="*",
         type=str,
-        default=["*main.cpp"],
+        default=["*main.cpp", "BuildConfig.h"],
         help="paths or globs to ignore if detected as not included",
     )
     parser.add_argument(
@@ -703,6 +705,8 @@ def main():
         if len(not_included) > 0:
             exit_code = 1
         for path in sorted(not_included):
+            if any((parent in ignore_paths for parent in path.parents)):
+                continue
             path = path.relative_to(root)
             if any((path.match(pat) for pat in ignore_not_included)):
                 continue
@@ -713,6 +717,7 @@ def main():
     if not check:
         for result in results:
             if result.diff is not None:
+                exit_code = 1
                 if fix:
                     new_content = apply_diff_patch(
                         result.cmake_file.read_text(), list(result.diff)
@@ -724,8 +729,6 @@ def main():
         if any((result.diff is not None for result in results)):
             exit_code = 1
 
-    if not fix and not check:
-        exit_code = 0
     sys.exit(exit_code)
 
 
