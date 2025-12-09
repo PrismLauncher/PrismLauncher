@@ -117,7 +117,7 @@ if(CMAKE_GENERATOR STREQUAL "Unix Makefiles" OR CMAKE_GENERATOR MATCHES "^Ninja"
 endif()
 
 # Make sure to include implicit c/c++ lib paths in the exported compile commands.
-# Especialy usefull on Nix for getting a correct clangd environment.
+# Especially useful on Nix for getting a correct clangd environment.
 if(CMAKE_EXPORT_COMPILE_COMMANDS)
   set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES 
       ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
