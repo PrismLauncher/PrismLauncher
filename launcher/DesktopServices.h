@@ -41,4 +41,7 @@ bool isFlatpak();
  * Determine whether the launcher is running in a Snap environment
  */
 bool isSnap();
+
+
+bool recordRecentlyUsed(const QUrl& url);
 }  // namespace DesktopServices

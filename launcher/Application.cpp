@@ -1563,6 +1563,32 @@ bool Application::launch(InstancePtr instance,
                 return false;
             }
         }
+
+        {
+            QUrlQuery query;
+            if (targetToJoin != nullptr) {
+                if (!targetToJoin->world.isEmpty()) {
+                    query.setQueryItems({ { "world", targetToJoin->world } });
+                } else {
+                    query.setQueryItems({ { "server", QString("%1:%2").arg(targetToJoin->address).arg(targetToJoin->port) } });
+                }
+            }
+            if (accountToUse != nullptr) {
+                query.setQueryItems({ { "profile", accountToUse->profileName() } });
+            }
+            if (!online) {
+                query.setQueryItems({ { "offline_enabled", "true" }, { "offline_name", offlineName } });
+            }
+
+            QUrl launchUrl(QString(BuildConfig.LAUNCHER_APP_BINARY_NAME + "://launch/%1").arg(instance->id()));
+            // launchUrl.setScheme(BuildConfig.LAUNCHER_APP_BINARY_NAME);
+            // launchUrl.setHost("launch");
+            // launchUrl.setPath(instance->id());
+            launchUrl.setQuery(query.toString());
+            qDebug() << "Launch URL:" << launchUrl;
+            DesktopServices::recordRecentlyUsed(launchUrl);
+        }
+
         auto& controller = extras.controller;
         controller.reset(new LaunchController());
         controller->setInstance(instance);
