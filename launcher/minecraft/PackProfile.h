@@ -164,7 +164,7 @@ class PackProfile : public QAbstractListModel {
     /// apply the component patches. Catches all the errors and returns true/false for success/failure
     void invalidateLaunchProfile();
 
-    void updateLatestMinecraft();
+    bool updateLatestMinecraft(bool onlyRelease = true);
 
    private:
     void scheduleSave();

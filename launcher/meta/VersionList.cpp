@@ -326,11 +326,12 @@ static const Meta::Version::Ptr& getLatestVersion(const Meta::Version::Ptr& a, c
     return (a->rawTime() > b->rawTime() ? a : b);
 }
 
-Version::Ptr VersionList::getLatest()
+Version::Ptr VersionList::getLatest(bool onlyRelease)
 {
     Version::Ptr latestCompat = nullptr;
     for (auto ver : m_versions) {
-        latestCompat = getLatestVersion(latestCompat, ver);
+        if (!onlyRelease || ver->type() == "release")
+            latestCompat = getLatestVersion(latestCompat, ver);
     }
     return latestCompat;
 }

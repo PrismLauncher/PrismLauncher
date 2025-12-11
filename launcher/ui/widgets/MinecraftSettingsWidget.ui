@@ -562,10 +562,35 @@ It is most likely you will need to change the path - please refer to the mod's w
             </widget>
            </item>
            <item>
-            <widget class="QCheckBox" name="latestMCVersionCheckBox">
-             <property name="text">
+            <widget class="QGroupBox" name="latestMCVersionGroupBox">
+             <property name="title">
               <string>Always use the latest minecraft version</string>
              </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_9">
+              <item>
+               <widget class="QRadioButton" name="releaseRadioButton">
+                <property name="text">
+                 <string>Release</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">latestVersionModeGroup</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="anyRadioButton">
+                <property name="text">
+                 <string>Any</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">latestVersionModeGroup</string>
+                </attribute>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </item>
            <item>
@@ -991,4 +1016,7 @@ It is most likely you will need to change the path - please refer to the mod's w
  </tabstops>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="latestVersionModeGroup"/>
+ </buttongroups>
 </ui>
