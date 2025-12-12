@@ -42,6 +42,27 @@ bool isFlatpak();
  */
 bool isSnap();
 
+struct RecentlyUsedData {
+    /**
+     * @brief Title of bookmark
+     */
+    const QString& title;
+    /**
+     * @brief Description of bookmark
+     */
+    const QString& desc;
+    /**
+     * @brief local Url of icon file
+     */
+    const QUrl& iconUrl;
+};
 
-bool recordRecentlyUsed(const QUrl& url);
+
+/**
+ * @brief platform agnostic method of saving a resource Url as recently used
+ */
+bool recordRecentlyUsed(const QUrl& url, RecentlyUsedData data);
+
+void test() {
+}
 }  // namespace DesktopServices

@@ -42,6 +42,7 @@
 #include <QDir>
 #include <QLoggingCategory>
 #include <QProcess>
+#include <utility>
 
 #include "BuildConfig.h"
 #include "FileSystem.h"
@@ -113,7 +114,7 @@ bool isSnap()
 }
 
 #if defined(Q_OS_WIN32)
-bool recordRecentlyUsedWin32(const QUrl& url)
+bool recordRecentlyUsedWin32(const QUrl& url, RecentlyUsedData data)
 {
     return false;
 }
@@ -157,16 +158,20 @@ static const QLatin1String applicationsBookmarkTag("bookmark:applications");
 static const QLatin1String applicationBookmarkTag("bookmark:application");
 static const QLatin1String bookmarkTag("bookmark");
 static const QLatin1String infoTag("info");
+static const QLatin1String titleTag("title");
+static const QLatin1String descTag("desc");
 static const QLatin1String metadataTag("metadata");
 static const QLatin1String mimeTypeTag("mime:mime-type");
 static const QLatin1String bookmarkGroups("bookmark:groups");
 static const QLatin1String bookmarkGroup("bookmark:group");
+static const QLatin1String bookmarkIconTag("bookmark:icon");
 
 static const QLatin1String nameAttribute("name");
 static const QLatin1String countAttribute("count");
 static const QLatin1String modifiedAttribute("modified");
 static const QLatin1String visitedAttribute("visited");
 static const QLatin1String hrefAttribute("href");
+static const QLatin1String typeAttribute("type");
 static const QLatin1String addedAttribute("added");
 static const QLatin1String execAttribute("exec");
 static const QLatin1String ownerAttribute("owner");
@@ -178,6 +183,16 @@ static QString xbelPath()
     return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QLatin1String("/recently-used.xbel");
 }
 
+/**
+ * @brief removes entries from the xbel bookmarks file untill only maxEntries exist
+ *
+ * Modified form the origonal in KIO to only remove ourselves from the bookmarks
+ * so that `maxEntries` refers to the number of bookmarks that point to us.
+ * if a bookmarks has no applications bookmarking it after our removal the bookmark itself is removed
+ *
+ * @param maxEntries max number of bookmarks that point at us
+ * @return if file writing was a success
+ */
 static bool removeOldestEntries(int& maxEntries)
 {
     QFile input(xbelPath());
@@ -213,7 +228,11 @@ static bool removeOldestEntries(int& maxEntries)
         return true;
     }
 
-    const QString desktopEntryName = BuildConfig.LAUNCHER_APPID;
+    // desktopFileName is in QGuiApplication but this should be less restrictive
+    QString desktopEntryName = QCoreApplication::instance()->property("desktopFileName").toString();
+    if (desktopEntryName.isEmpty()) {
+        desktopEntryName = QCoreApplication::applicationName();
+    }
 
     QMultiMap<QDateTime, std::array<QDomNode, 3>> bookmarksByModifiedDate;
     for (int i = 0; i < bookmarkList.length(); ++i) {
@@ -259,13 +278,15 @@ static bool removeOldestEntries(int& maxEntries)
     return false;
 }
 
-static bool addToXbel(const QUrl& url, int maxEntries)
+static bool addToXbel(const QUrl& url, RecentlyUsedData data, int maxEntries)
 {
     using namespace Qt::StringLiterals;
 
-    qCDebug(DSLogCat) << "adding" << url << "to" << xbelPath();
-
-    const QString desktopEntryName = BuildConfig.LAUNCHER_APPID;
+    // desktopFileName is in QGuiApplication but this should be less restrictive
+    QString desktopEntryName = QCoreApplication::instance()->property("desktopFileName").toString();
+    if (desktopEntryName.isEmpty()) {
+        desktopEntryName = QCoreApplication::applicationName();
+    }
 
     if (!QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation))) {
         qCWarning(DSLogCat) << "Could not create GenericDataLocation";
@@ -335,10 +356,27 @@ static bool addToXbel(const QUrl& url, int maxEntries)
         output.writeAttribute(countAttribute, "1"_L1);
     };
 
+    auto addBookmarkIconTag = [&output, &data, desktopEntryName]() {
+        output.writeEmptyElement(bookmarkIconTag);
+        QString iconMime = "image/png";
+        if (!data.iconUrl.isEmpty()) {
+            QMimeDatabase mimeDb;
+            iconMime = mimeDb.mimeTypeForUrl(data.iconUrl).name();
+        }
+        output.writeAttribute(typeAttribute, iconMime);
+        if (!data.iconUrl.isEmpty()) {
+            output.writeAttribute(hrefAttribute, data.iconUrl.toString());
+        }
+        output.writeAttribute(nameAttribute, desktopEntryName);
+    };
+
     bool foundExistingApp = false;
     bool inRightBookmark = false;
     bool foundMatchingBookmark = false;
     bool firstBookmark = true;
+    bool foundTitle = false;
+    bool foundDesc = false;
+    bool foundIcon = false;
     int nbEntries = 0;
 
     QMultiMap<QDateTime, std::array<QDomNode, 3>> bookmarksByModifiedDate;
@@ -401,6 +439,28 @@ static bool addToXbel(const QUrl& url, int maxEntries)
                     attributes = newAttributes;
 
                     foundExistingApp = true;
+                } else if (inRightBookmark && tagName == titleTag) {
+                    foundTitle = true;
+                    QString _title = xml.readElementText(QXmlStreamReader::SkipChildElements);
+                    output.writeCharacters(data.title);
+                } else if (inRightBookmark && tagName == descTag) {
+                    foundDesc = true;
+                    QString _desc = xml.readElementText(QXmlStreamReader::SkipChildElements);
+                    output.writeCharacters(data.desc);
+                } else if (inRightBookmark && tagName == bookmarkIconTag) {
+                    foundIcon = true;
+                    QXmlStreamAttributes newAttributes;
+                    QString iconMime = "image/png";
+                    if (!data.iconUrl.isEmpty()) {
+                        QMimeDatabase mimeDb;
+                        iconMime = mimeDb.mimeTypeForUrl(data.iconUrl).name();
+                    }
+                    newAttributes.append(typeAttribute, iconMime);
+                    if (!data.iconUrl.isEmpty()) {
+                        newAttributes.append(hrefAttribute, data.iconUrl.toString());
+                    }
+                    newAttributes.append(nameAttribute, desktopEntryName);
+                    attributes = newAttributes;
                 }
 
                 output.writeStartElement(tagName.toString());
@@ -412,6 +472,12 @@ static bool addToXbel(const QUrl& url, int maxEntries)
                 if (tagName == applicationsBookmarkTag && inRightBookmark && !foundExistingApp) {
                     // add an application to the applications already known for the bookmark
                     addApplicationTag();
+                } else if (tagName == bookmarkTag && inRightBookmark && !foundTitle && !data.title.isEmpty()) {
+                    output.writeTextElement(titleTag, data.title);
+                } else if (tagName == bookmarkTag && inRightBookmark && !foundDesc && !data.desc.isEmpty()) {
+                    output.writeTextElement(descTag, data.desc);
+                } else if (tagName == metadataTag && inRightBookmark && !foundIcon) {
+                    addBookmarkIconTag();
                 }
                 output.writeEndElement();
                 break;
@@ -449,15 +515,26 @@ static bool addToXbel(const QUrl& url, int maxEntries)
         output.writeAttribute(visitedAttribute, currentTimestamp);
 
         {
-            QMimeDatabase mimeDb;
-            const auto fileMime = mimeDb.mimeTypeForUrl(url).name();
+            output.writeTextElement(titleTag, data.title);
+            output.writeTextElement(descTag, data.desc);
+        }
+
+        {
+            const QString urlMime = "x-scheme-handler/prismlauncher";
 
             output.writeStartElement(infoTag);
             output.writeStartElement(metadataTag);
             output.writeAttribute(ownerAttribute, ownerValue);
 
             output.writeEmptyElement(mimeTypeTag);
-            output.writeAttribute(typeAttribute, fileMime);
+            output.writeAttribute(typeAttribute, urlMime);
+
+            {
+                output.writeStartElement(bookmarkGroups);
+                output.writeTextElement(bookmarkGroup, "Multimedia");
+                // bookmarkGroups
+                output.writeEndElement();
+            }
 
             {
                 output.writeStartElement(applicationsBookmarkTag);
@@ -466,9 +543,11 @@ static bool addToXbel(const QUrl& url, int maxEntries)
                 output.writeEndElement();
             }
 
-            // end infoTag
-            output.writeEndElement();
+            addBookmarkIconTag();
+
             // end metadataTag
+            output.writeEndElement();
+            // end infoTag
             output.writeEndElement();
         }
 
@@ -492,33 +571,33 @@ static bool addToXbel(const QUrl& url, int maxEntries)
 
 /**
  * @brief record a url as recently used by this app
- * this is done by editing
- *
- * @param the the url to record
- * @return if the book wark was successfuly saved
+ * This is done by editing the recently-used.xbel file acording to the
+ * freedesktop.org desktop bookmark spec
+ * https://www.freedesktop.org/wiki/Specifications/desktop-bookmark-spec
  */
-bool recordRecentlyUsedFreeDesktop(const QUrl& url)
+bool recordRecentlyUsedFreeDesktop(const QUrl& url, RecentlyUsedData data)
 {
     int maxEntries = 6;  // FIXME: Fetch this from a setting?
-    return addToXbel(url, maxEntries);
+    return addToXbel(url, data, maxEntries);
 }
+
 #endif
 
-#if defined(OS_OS_MAXOS)
+#if defined(OS_OS_MACOS)
 bool recordRecentlyUsedMacos(const QUrl& url)
 {
     return false;
 }
 #endif
 
-bool recordRecentlyUsed(const QUrl& url)
+bool recordRecentlyUsed(const QUrl& url, RecentlyUsedData data)
 {
 #if defined Q_OS_WIN32
-    return recordRecentlyUsedWin32(url);
+    return recordRecentlyUsedWin32(url, data);
 #elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-    return recordRecentlyUsedFreeDesktop(url);
+    return recordRecentlyUsedFreeDesktop(url, data);
 #elif defined(OS_OS_MAXOS)
-    return recordRecentlyUsedMacos(url);
+    return recordRecentlyUsedMacos(url, data);
 #else
     qDebug() << "recording recently used resources is not supported on this os";
     return false;
