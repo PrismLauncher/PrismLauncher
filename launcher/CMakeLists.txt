@@ -26,13 +26,13 @@ set(CORE_SOURCES
     NullInstance.h
     MMCZip.h
     MMCZip.cpp
-    archive/ArchiveReader.cpp  
-    archive/ArchiveReader.h  
-    archive/ArchiveWriter.cpp  
-    archive/ArchiveWriter.h  
-    archive/ExportToZipTask.cpp  
+    archive/ArchiveReader.cpp
+    archive/ArchiveReader.h
+    archive/ArchiveWriter.cpp
+    archive/ArchiveWriter.h
+    archive/ExportToZipTask.cpp
     archive/ExportToZipTask.h
-    archive/ExtractZipTask.cpp  
+    archive/ExtractZipTask.cpp
     archive/ExtractZipTask.h
     StringUtils.h
     StringUtils.cpp
@@ -621,10 +621,10 @@ set(PRISMUPDATER_SOURCES
     # Zip
     MMCZip.h
     MMCZip.cpp
-    archive/ArchiveReader.cpp  
-    archive/ArchiveReader.h  
-    archive/ArchiveWriter.cpp  
-    archive/ArchiveWriter.h  
+    archive/ArchiveReader.cpp
+    archive/ArchiveReader.h
+    archive/ArchiveWriter.cpp
+    archive/ArchiveWriter.h
 
     # Time
     MMCTime.h
@@ -797,6 +797,8 @@ SET(LAUNCHER_SOURCES
     # GUI - general utilities
     DesktopServices.h
     DesktopServices.cpp
+    RecentlyUsed.h
+    RecentlyUsed.cpp
     VersionProxyModel.h
     VersionProxyModel.cpp
     Markdown.h
@@ -1340,6 +1342,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_libraries(Launcher_logic
         gamemode
     )
+endif()
+
+if(WIN32)
+    target_link_libraries(Launcher_logic cppwinrt)
 endif()
 
 target_link_libraries(Launcher_logic

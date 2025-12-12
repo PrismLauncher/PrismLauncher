@@ -121,6 +121,7 @@
 #include "translations/TranslationsModel.h"
 
 #include <DesktopServices.h>
+#include <RecentlyUsed.h>
 #include <FileSystem.h>
 #include <LocalPeer.h>
 
@@ -1586,7 +1587,7 @@ bool Application::launch(InstancePtr instance,
             // launchUrl.setPath(instance->id());
             launchUrl.setQuery(query.toString());
             qDebug() << "Launch URL:" << launchUrl;
-            DesktopServices::recordRecentlyUsed(launchUrl);
+            RecentlyUsed::recordRecentlyUsed(launchUrl);
         }
 
         auto& controller = extras.controller;
