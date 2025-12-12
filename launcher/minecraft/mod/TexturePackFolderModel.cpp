@@ -86,9 +86,11 @@ QVariant TexturePackFolderModel::data(const QModelIndex& index, int role) const
         case Qt::CheckStateRole:
             if (column == ActiveColumn) {
                 return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
-            } else if (column == LockUpdateColumn) {
-                return !m_resources[row]->lockUpdate() ? Qt::Checked : Qt::Unchecked;
             }
+            return {};
+        case Qt::UserRole:
+            if (column == LockUpdateColumn)
+                return at(row).lockUpdate();
             return {};
         default:
             break;
