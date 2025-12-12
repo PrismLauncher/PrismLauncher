@@ -597,8 +597,10 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
         case Qt::CheckStateRole:
             if (column == ActiveColumn) {
                 return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
-            } else if (column == LockUpdateColumn) {
-                return !at(row).lockUpdate() ? Qt::Checked : Qt::Unchecked;
+            }
+        case Qt::UserRole:
+            if (column == LockUpdateColumn) {
+                return at(row).lockUpdate();
             }
             return {};
         default:
@@ -613,10 +615,10 @@ bool ResourceFolderModel::setData(const QModelIndex& index, [[maybe_unused]] con
         return false;
     }
 
+    if (role == Qt::UserRole && columnNames(false).at(index.column()) == "Update") {
+        return setUpdateLock({ index }, EnableAction::TOGGLE);
+    }
     if (role == Qt::CheckStateRole) {
-        if (columnNames(false).at(index.column()) == "Update") {
-            return setUpdateLock({ index }, EnableAction::TOGGLE);
-        }
         return setResourceEnabled({ index }, EnableAction::TOGGLE);
     }
 

@@ -45,7 +45,44 @@
 #include <QHeaderView>
 #include <QKeyEvent>
 #include <QMenu>
+#include <QStyledItemDelegate>
 #include <algorithm>
+
+class LockDelegate : public QStyledItemDelegate {
+   public:
+    explicit LockDelegate(QObject* parent = nullptr) : QStyledItemDelegate(parent) {}
+
+    void paint(QPainter* painter, const QStyleOptionViewItem& opt, const QModelIndex& index) const override
+    {
+        QStyleOptionViewItem option(opt);
+        initStyleOption(&option, index);
+
+        bool locked = index.data(Qt::UserRole).toBool();
+
+        const QIcon& icon = QIcon::fromTheme(locked ? "lock" : "unlock");
+
+        // Draw default background / selection
+        option.text.clear();
+        option.icon = QIcon();
+
+        option.widget->style()->drawControl(QStyle::CE_ItemViewItem, &option, painter);
+
+        int size = qMin(option.rect.width(), option.rect.height()) * 0.75;
+        QRect iconRect(option.rect.center().x() - size / 2, option.rect.center().y() - size / 2, size, size);
+
+        icon.paint(painter, iconRect);
+    }
+
+    bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index) override
+    {
+        if (event->type() == QEvent::MouseButtonRelease) {
+            bool locked = index.data(Qt::UserRole).toBool();
+            model->setData(index, !locked, Qt::UserRole);
+            return true;
+        }
+        return event->type() == QEvent::MouseButtonDblClick;  // if double click ignore it
+    }
+};
 
 ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, ResourceFolderModel* model, QWidget* parent)
     : QMainWindow(parent), m_instance(instance), ui(new Ui::ExternalResourcesPage), m_model(model)
@@ -61,6 +98,10 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
     m_filterModel->setSourceModel(m_model);
     m_filterModel->setFilterKeyColumn(-1);
     ui->treeView->setModel(m_filterModel);
+
+    // keep the Update at the end of the list(otherwise there will be a need to iterate over the columns)
+    int lockColumn = model->columnNames(false).size() - 1;
+    ui->treeView->setItemDelegateForColumn(lockColumn, new LockDelegate(ui->treeView));
     // must come after setModel
     ui->treeView->setResizeModes(m_model->columnResizeModes());
 
