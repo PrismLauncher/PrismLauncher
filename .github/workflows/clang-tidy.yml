@@ -14,6 +14,9 @@ on:
       - "**.cpp"
       - "**.h"
 
+      # Clang-tidy configuration file
+      - ".clang-tidy"
+
       # Workflows
       - ".github/workflows/clang-tidy.yml"
   pull_request:
@@ -21,6 +24,9 @@ on:
       # File types
       - "**.cpp"
       - "**.h"
+
+      # Clang-tidy configuration file
+      - ".clang-tidy"
 
       # Workflows
       - ".github/workflows/clang-tidy.yml"
