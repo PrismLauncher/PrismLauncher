@@ -158,7 +158,6 @@
 #endif
 #include <windows.h>
 #include <QStyleHints>
-#include "console/WindowsConsole.h"
 #endif
 
 #include "console/Console.h"
@@ -292,21 +291,9 @@ std::tuple<QDateTime, QString, QString, QString, QString> read_lock_File(const Q
 
 Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 {
-#if defined Q_OS_WIN32
-    // attach the parent console if stdout not already captured
-    if (AttachWindowsConsole()) {
-        consoleAttached = true;
-        if (auto err = EnableAnsiSupport(); !err) {
-            isANSIColorConsole = true;
-        } else {
-            std::cout << "Error setting up ansi console" << err.message() << std::endl;
-        }
-    }
-#else
     if (console::isConsole()) {
         isANSIColorConsole = true;
     }
-#endif
 
     setOrganizationName(BuildConfig.LAUNCHER_NAME);
     setOrganizationDomain(BuildConfig.LAUNCHER_DOMAIN);
@@ -1418,16 +1405,6 @@ Application::~Application()
 {
     // Shut down logger by setting the logger function to nothing
     qInstallMessageHandler(nullptr);
-
-#if defined Q_OS_WIN32
-    // Detach from Windows console
-    if (consoleAttached) {
-        fclose(stdout);
-        fclose(stdin);
-        fclose(stderr);
-        FreeConsole();
-    }
-#endif
 }
 
 void Application::messageReceived(const QByteArray& message)

@@ -34,26 +34,11 @@
 
 #include <DesktopServices.h>
 
-#include <sys.h>
-
-#if defined Q_OS_WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include "console/WindowsConsole.h"
-#endif
-
 #include <filesystem>
 namespace fs = std::filesystem;
 
 FileLinkApp::FileLinkApp(int& argc, char** argv) : QCoreApplication(argc, argv), socket(new QLocalSocket(this))
 {
-#if defined Q_OS_WIN32
-    // attach the parent console
-    if (AttachWindowsConsole()) {
-        consoleAttached = true;
-    }
-#endif
     setOrganizationName(BuildConfig.LAUNCHER_NAME);
     setOrganizationDomain(BuildConfig.LAUNCHER_DOMAIN);
     setApplicationName(BuildConfig.LAUNCHER_NAME + "FileLink");
@@ -236,13 +221,4 @@ FileLinkApp::~FileLinkApp()
     qDebug() << "link program shutting down";
     // Shut down logger by setting the logger function to nothing
     qInstallMessageHandler(nullptr);
-
-#if defined Q_OS_WIN32
-    // Detach from Windows console
-    if (consoleAttached) {
-        fclose(stdout);
-        fclose(stdin);
-        fclose(stderr);
-    }
-#endif
 }
