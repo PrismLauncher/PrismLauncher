@@ -37,6 +37,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <QApplication>
 #include <QDateTime>
 #include <QDebug>
@@ -44,12 +46,12 @@
 #include <QIcon>
 #include <QMutex>
 #include <QUrl>
-#include <memory>
 
-#include <BaseInstance.h>
+#include "QObjectPtr.h"
 
 #include "launch/LogModel.h"
-#include "minecraft/launch/MinecraftTarget.h"
+#include "minecraft/auth/MinecraftAccount.h"
+#include "settings/SettingsObject.h"
 
 class LaunchController;
 class LocalPeer;
@@ -74,6 +76,13 @@ class ITheme;
 class MCEditTool;
 class ThemeManager;
 class IconTheme;
+class BaseInstance;
+
+struct MinecraftTarget;
+
+// pointers for lazy people
+using InstancePtr = std::shared_ptr<BaseInstance>;
+using MinecraftTargetPtr = std::shared_ptr<MinecraftTarget>;
 
 namespace Meta {
 class Index;
@@ -212,7 +221,7 @@ class Application : public QApplication {
     bool launch(InstancePtr instance,
                 bool online = true,
                 bool demo = false,
-                MinecraftTarget::Ptr targetToJoin = nullptr,
+                MinecraftTargetPtr targetToJoin = nullptr,
                 MinecraftAccountPtr accountToUse = nullptr,
                 const QString& offlineName = QString());
     bool kill(InstancePtr instance);
