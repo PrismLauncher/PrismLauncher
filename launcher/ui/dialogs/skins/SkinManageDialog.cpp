@@ -394,7 +394,7 @@ void SkinManageDialog::on_urlBtn_clicked()
                                                              : tr("Unable to download the skin: '%1'.").arg(m_ui->urlLine->text()),
                                      QMessageBox::Critical)
             ->show();
-        QFile::remove(path);
+        FS::deletePath(path);
         return;
     }
     m_ui->urlLine->setText("");
@@ -521,7 +521,7 @@ void SkinManageDialog::on_userBtn_clicked()
         CustomMessageBox::selectable(this, tr("Username not found"),
                                      tr("Unable to find the skin for '%1'\n because: %2.").arg(user, failReason), QMessageBox::Critical)
             ->show();
-        QFile::remove(path);
+        FS::deletePath(path);
         return;
     }
     m_ui->urlLine->setText("");

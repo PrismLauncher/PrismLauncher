@@ -110,7 +110,7 @@ QString saveIconToTempFile(const QIcon& icon)
     tempFile.close();
 
     if (!pixmap.save(tempPath, "PNG")) {
-        QFile::remove(tempPath);
+        FS::deletePath(tempPath);
         return QString();
     }
 

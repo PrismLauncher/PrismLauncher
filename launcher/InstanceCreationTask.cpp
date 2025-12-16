@@ -50,7 +50,7 @@ void InstanceCreationTask::executeTask()
 
             qDebug() << "Removing" << path;
 
-            if (!QFile::remove(path)) {
+            if (!FS::deletePath(path)) {
                 qCritical() << "Could not remove" << path;
                 deleteFailed = true;
             }
