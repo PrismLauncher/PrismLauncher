@@ -674,11 +674,23 @@ bool deletePath(QString path)
 
     fs::remove_all(StringUtils::toStdString(path), err);
 
-    if (err) {
-        qWarning() << "Failed to remove files:" << QString::fromStdString(err.message());
+    if (err.value() == 0) {
+        return true;
+    }
+    qWarning() << "Failed to remove files:" << QString::fromStdString(err.message());
+#ifdef Q_OS_WIN
+    // Schedule deletion on reboot (Windows only)
+    const std::wstring widePath = path.toStdWString();
+
+    if (MoveFileExW(widePath.c_str(), nullptr, MOVEFILE_DELAY_UNTIL_REBOOT)) {
+        qWarning() << "Marked for deletion on next reboot:" << path;
+        return true;
     }
 
-    return err.value() == 0;
+    qWarning() << "Failed to mark for deletion on reboot. Win32 error:" << GetLastError();
+#endif
+
+    return false;
 }
 
 bool trash(QString path, QString* pathInTrash)
@@ -1737,7 +1749,7 @@ bool removeFiles(QStringList listFile)
     // For each file
     for (int i = 0; i < listFile.count(); i++) {
         // Remove
-        ret = ret && QFile::remove(listFile.at(i));
+        ret = ret && deletePath(listFile.at(i));
     }
     return ret;
 }
