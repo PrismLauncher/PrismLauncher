@@ -26,10 +26,10 @@ struct UpdateActionChangeVersion {
 struct UpdateActionLatestRecommendedCompatible {
     /// Parent uid
     QString parentUid;
+    /// Parent name
     QString parentName;
     /// Parent version
     QString version;
-    ///
 };
 struct UpdateActionRemove {};
 struct UpdateActionImportantChanged {
