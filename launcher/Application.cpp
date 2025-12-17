@@ -371,25 +371,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
 
     QString origcwdPath = QDir::currentPath();
-#if defined(Q_OS_LINUX)
-    const QString binFilePath = applicationFilePath();
-    const bool isAppImage = binFilePath.startsWith("/tmp/.mount_");
-    // Yes, this can technically trigger the logic below if someone makes an AppImage with an actual launcher exe named "ld-linux"
-    // Please don't :)
-    const bool executedFromLinker = QFileInfo(binFilePath).fileName().startsWith("ld-linux");
-
-    // NOTE(@getchoo): In order for `go-appimage` to generate self-contained AppImages, it executes apps from a bundled linker at
-    // <root>/lib64
-    // This is not the path to our actual binary, which we want
-    QString binPath;
-    if (isAppImage && executedFromLinker) {
-        binPath = FS::PathCombine(applicationDirPath(), "../usr/bin");
-    } else {
-        binPath = applicationDirPath();
-    }
-#else
     QString binPath = applicationDirPath();
-#endif
 
     {
         // Root path is used for updates and portable data
