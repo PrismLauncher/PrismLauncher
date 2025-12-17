@@ -26,6 +26,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QMessageBox>
+#include <QProcess>
 #include <QProgressDialog>
 #include <QSettings>
 #include <QTimer>
@@ -34,7 +35,6 @@
 #include "StringUtils.h"
 
 #include "BuildConfig.h"
-#include "FileSystem.h"
 
 #include "ui/dialogs/UpdateAvailableDialog.h"
 
@@ -97,9 +97,14 @@ void PrismExternalUpdater::checkForUpdates(bool triggeredByUser)
     progress.show();
     QCoreApplication::processEvents();
 
+    QProcess proc;
     auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
 #if defined Q_OS_WIN32
     exe_name.append(".exe");
+
+    auto env = QProcessEnvironment::systemEnvironment();
+    env.insert("__COMPAT_LAYER", "RUNASINVOKER");
+    proc.setProcessEnvironment(env);
 #else
     exe_name = QString("bin/%1").arg(exe_name);
 #endif
@@ -108,21 +113,15 @@ void PrismExternalUpdater::checkForUpdates(bool triggeredByUser)
     if (priv->allowBeta)
         args.append("--pre-release");
 
-    auto proc = FS::createProcess(priv->appDir.absoluteFilePath(exe_name), args);
-#if defined Q_OS_WIN32
-    auto env = QProcessEnvironment::systemEnvironment();
-    env.insert("__COMPAT_LAYER", "RUNASINVOKER");
-    proc->setProcessEnvironment(env);
-#endif
-    proc->start(proc->program(), proc->arguments());
-    auto result_start = proc->waitForStarted(5000);
+    proc.start(priv->appDir.absoluteFilePath(exe_name), args);
+    auto result_start = proc.waitForStarted(5000);
     if (!result_start) {
-        auto err = proc->error();
+        auto err = proc.error();
         qDebug() << "Failed to start updater after 5 seconds."
-                 << "reason:" << err << proc->errorString();
+                 << "reason:" << err << proc.errorString();
         auto msgBox =
             QMessageBox(QMessageBox::Information, tr("Update Check Failed"),
-                        tr("Failed to start after 5 seconds\nReason: %1.").arg(proc->errorString()), QMessageBox::Ok, priv->parent);
+                        tr("Failed to start after 5 seconds\nReason: %1.").arg(proc.errorString()), QMessageBox::Ok, priv->parent);
         msgBox.setMinimumWidth(460);
         msgBox.adjustSize();
         msgBox.exec();
@@ -134,16 +133,16 @@ void PrismExternalUpdater::checkForUpdates(bool triggeredByUser)
     }
     QCoreApplication::processEvents();
 
-    auto result_finished = proc->waitForFinished(60000);
+    auto result_finished = proc.waitForFinished(60000);
     if (!result_finished) {
-        proc->kill();
-        auto err = proc->error();
-        auto output = proc->readAll();
+        proc.kill();
+        auto err = proc.error();
+        auto output = proc.readAll();
         qDebug() << "Updater failed to close after 60 seconds."
-                 << "reason:" << err << proc->errorString();
+                 << "reason:" << err << proc.errorString();
         auto msgBox =
             QMessageBox(QMessageBox::Information, tr("Update Check Failed"),
-                        tr("Updater failed to close 60 seconds\nReason: %1.").arg(proc->errorString()), QMessageBox::Ok, priv->parent);
+                        tr("Updater failed to close 60 seconds\nReason: %1.").arg(proc.errorString()), QMessageBox::Ok, priv->parent);
         msgBox.setDetailedText(output);
         msgBox.setMinimumWidth(460);
         msgBox.adjustSize();
@@ -155,10 +154,10 @@ void PrismExternalUpdater::checkForUpdates(bool triggeredByUser)
         return;
     }
 
-    auto exit_code = proc->exitCode();
+    auto exit_code = proc.exitCode();
 
-    auto std_output = proc->readAllStandardOutput();
-    auto std_error = proc->readAllStandardError();
+    auto std_output = proc.readAllStandardOutput();
+    auto std_error = proc.readAllStandardError();
 
     progress.hide();
     QCoreApplication::processEvents();
@@ -336,9 +335,14 @@ void PrismExternalUpdater::offerUpdate(const QString& version_name, const QStrin
 
 void PrismExternalUpdater::performUpdate(const QString& version_tag)
 {
+    QProcess proc;
     auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
 #if defined Q_OS_WIN32
     exe_name.append(".exe");
+
+    auto env = QProcessEnvironment::systemEnvironment();
+    env.insert("__COMPAT_LAYER", "RUNASINVOKER");
+    proc.setProcessEnvironment(env);
 #else
     exe_name = QString("bin/%1").arg(exe_name);
 #endif
@@ -347,16 +351,9 @@ void PrismExternalUpdater::performUpdate(const QString& version_tag)
     if (priv->allowBeta)
         args.append("--pre-release");
 
-    auto proc = FS::createProcess(exe_name, args);
-#if defined Q_OS_WIN32
-    auto env = QProcessEnvironment::systemEnvironment();
-    env.insert("__COMPAT_LAYER", "RUNASINVOKER");
-    proc->setProcessEnvironment(env);
-#endif
-
-    auto result = proc->startDetached(priv->appDir.absoluteFilePath(exe_name), args);
+    auto result = proc.startDetached(priv->appDir.absoluteFilePath(exe_name), args);
     if (!result) {
-        qDebug() << "Failed to start updater:" << proc->error() << proc->errorString();
+        qDebug() << "Failed to start updater:" << proc.error() << proc.errorString();
     }
     QCoreApplication::exit();
 }

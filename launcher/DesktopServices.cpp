@@ -2,7 +2,6 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 dada513 <dada513@protonmail.com>
- *  Copyright (C) 2025 Seth Flynn <getchoo@tuta.io>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -71,15 +70,6 @@ bool isFlatpak()
 {
 #ifdef Q_OS_LINUX
     return QFile::exists("/.flatpak-info");
-#else
-    return false;
-#endif
-}
-
-bool isSelfContained()
-{
-#ifdef Q_OS_LINUX
-    return QFileInfo(QCoreApplication::applicationFilePath()).fileName().startsWith("ld-linux");
 #else
     return false;
 #endif

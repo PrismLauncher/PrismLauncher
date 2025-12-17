@@ -4,7 +4,6 @@
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2022 Rachel Powers <508861+Ryex@users.noreply.github.com>
- *  Copyright (C) 2025 Seth Flynn <getchoo@tuta.io>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,13 +42,11 @@
 
 #include <system_error>
 
-#include <QCoreApplication>
 #include <QDir>
 #include <QFlags>
 #include <QLocalServer>
 #include <QObject>
 #include <QPair>
-#include <QProcess>
 #include <QThread>
 
 namespace FS {
@@ -335,14 +332,6 @@ QString pathTruncate(const QString& path, int depth);
  * @return absolute path to executable or null string
  */
 QString ResolveExecutable(QString path);
-
-/**
- * Create a QProcess instance
- *
- * This wrapper is currently only required for wrapping binaries called in
- * self-contained AppImages (like those created by `go-appimage`)
- */
-std::unique_ptr<QProcess> createProcess(const QString& program, const QStringList& arguments);
 
 /**
  * Normalize path

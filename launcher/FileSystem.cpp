@@ -4,7 +4,6 @@
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2022 Rachel Powers <508861+Ryex@users.noreply.github.com>
- *  Copyright (C) 2025 Seth Flynn <getchoo@tuta.io>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -771,34 +770,6 @@ QString ResolveExecutable(QString path)
         return QString();
     }
     return pathInfo.absoluteFilePath();
-}
-
-std::unique_ptr<QProcess> createProcess(const QString& program, const QStringList& arguments)
-{
-    qDebug() << "Creating process for" << program;
-    auto proc = std::unique_ptr<QProcess>(new QProcess());
-
-#if defined(Q_OS_LINUX)
-    if (DesktopServices::isSelfContained()) {
-        const auto linkerPath = QCoreApplication::applicationFilePath();
-        qDebug() << "Wrapping" << program << "with self-contained linker at" << linkerPath;
-
-        QStringList wrappedArguments;
-        wrappedArguments << "--inhibit-cache" << program;
-        wrappedArguments += arguments;
-
-        proc->setProgram(linkerPath);
-        proc->setArguments(wrappedArguments);
-    } else {
-        proc->setProgram(program);
-        proc->setArguments(arguments);
-    }
-#else
-    proc->setProgram(program);
-    proc->setArguments(arguments);
-#endif
-
-    return proc;
 }
 
 /**

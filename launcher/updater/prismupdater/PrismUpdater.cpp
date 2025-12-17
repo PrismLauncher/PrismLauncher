@@ -124,19 +124,7 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
     logToConsole = parser.isSet("debug");
 
     QString origCwdPath = QDir::currentPath();
-#if defined(Q_OS_LINUX)
-    // NOTE(@getchoo): In order for `go-appimage` to generate self-contained AppImages, it executes apps from a bundled linker at
-    // <root>/lib64
-    // This is not the path to our actual binary, which we want
-    QString binPath;
-    if (DesktopServices::isSelfContained()) {
-        binPath = FS::PathCombine(applicationDirPath(), "../usr/bin");
-    } else {
-        binPath = applicationDirPath();
-    }
-#else
     QString binPath = applicationDirPath();
-#endif
 
     {  // find data director
        // Root path is used for updates and portable data
@@ -819,16 +807,13 @@ QFileInfo PrismUpdaterApp::downloadAsset(const GitHubReleaseAsset& asset)
 bool PrismUpdaterApp::callAppImageUpdate()
 {
     auto appimage_path = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
+    QProcess proc = QProcess();
     qDebug() << "Calling: AppImageUpdate" << appimage_path;
-    const auto program = FS::PathCombine(m_rootPath, "bin", "AppImageUpdate.AppImage");
-    auto proc = FS::createProcess(program, { appimage_path });
-    if (!proc) {
-        qCritical() << "Unable to create process:" << program;
-        return false;
-    }
-    auto result = proc->startDetached();
+    proc.setProgram(FS::PathCombine(m_rootPath, "bin", "AppImageUpdate.AppImage"));
+    proc.setArguments({ appimage_path });
+    auto result = proc.startDetached();
     if (!result)
-        qDebug() << "Failed to start AppImageUpdate reason:" << proc->errorString();
+        qDebug() << "Failed to start AppImageUpdate reason:" << proc.errorString();
     return result;
 }
 

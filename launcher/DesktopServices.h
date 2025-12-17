@@ -38,11 +38,6 @@ bool openUrl(const QUrl& url);
 bool isFlatpak();
 
 /**
- * Determine whether the launcher is running in a self-contained Linux bundle
- */
-bool isSelfContained();
-
-/**
  * Determine whether the launcher is running in a Snap environment
  */
 bool isSnap();
