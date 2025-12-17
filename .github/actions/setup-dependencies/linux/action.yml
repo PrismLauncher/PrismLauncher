@@ -56,19 +56,19 @@ runs:
             ;;
         esac
 
-        gh release download continuous \
-          --repo probonopd/go-appimage \
-          --pattern "appimagetool-*-$APPIMAGE_ARCH.AppImage" \
-          --output ~/bin/appimagetool
+        gh release download \
+          --repo VHSgunzo/sharun \
+          --pattern "sharun-$APPIMAGE_ARCH-aio" \
+          --output ~/bin/sharun
+
         gh release download continuous \
           --repo probonopd/go-appimage \
           --pattern "mkappimage-*-$APPIMAGE_ARCH.AppImage" \
           --output ~/bin/mkappimage
-        chmod +x ~/bin/appimagetool ~/bin/mkappimage
-        echo "$HOME/bin" >> "$GITHUB_PATH"
 
         gh release download \
           --repo AppImageCommunity/AppImageUpdate \
           --pattern "AppImageUpdate-$APPIMAGE_ARCH.AppImage" \
           --output ~/bin/AppImageUpdate.AppImage
-        chmod +x ~/bin/AppImageUpdate.AppImage
+        chmod +x ~/bin/*
+        echo "$HOME/bin" >> "$GITHUB_PATH"

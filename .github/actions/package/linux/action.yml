@@ -58,9 +58,7 @@ runs:
 
         GPG_PRIVATE_KEY: ${{ inputs.gpg-private-key }}
       run: |
-        cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build-type }} --prefix ${{ env.INSTALL_APPIMAGE_DIR }}/usr
-
-        cp ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/metainfo/org.prismlauncher.PrismLauncher.{metainfo,appdata}.xml
+        cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build-type }} --prefix ${{ env.INSTALL_APPIMAGE_DIR }}
 
         if [ '${{ inputs.gpg-private-key-id }}' != '' ]; then
           echo "$GPG_PRIVATE_KEY" > privkey.asc
@@ -70,8 +68,22 @@ runs:
           echo ":warning: Skipped code signing for Linux AppImage, as gpg key was not present." >> $GITHUB_STEP_SUMMARY
         fi
 
-        appimagetool -s deploy "$INSTALL_APPIMAGE_DIR"/usr/share/applications/*.desktop
-        cp ~/bin/AppImageUpdate.AppImage "$INSTALL_APPIMAGE_DIR"/usr/bin/
+        sharun lib4bin \
+          --hard-links \
+          --with-hooks \
+          --dst-dir "$INSTALL_APPIMAGE_DIR" \
+          "$INSTALL_APPIMAGE_DIR"/bin/* "$QT_PLUGIN_PATH"/*/*.so
+
+        cp ~/bin/AppImageUpdate.AppImage "$INSTALL_APPIMAGE_DIR"/bin/
+        # FIXME(@getchoo): gamemode doesn't seem to be very portable with DBus. Find a way to make it work!
+        find "$INSTALL_APPIMAGE_DIR" -name '*gamemode*' -exec rm {} +
+
+        ln -s org.prismlauncher.PrismLauncher.metainfo.xml "$INSTALL_APPIMAGE_DIR"/share/metainfo/org.prismlauncher.PrismLauncher.appdata.xml
+        ln -s share/applications/org.prismlauncher.PrismLauncher.desktop "$INSTALL_APPIMAGE_DIR"
+        ln -s share/icons/hicolor/256x256/apps/org.prismlauncher.PrismLauncher.png "$INSTALL_APPIMAGE_DIR"
+        mv "$INSTALL_APPIMAGE_DIR"/{sharun,AppRun}
+        ls -la "$INSTALL_APPIMAGE_DIR"
+
         # FIXME(@getchoo): Validate AppStream information when https://github.com/probonopd/go-appimage/pull/379 is merged
         mkappimage \
           --no-appstream \
