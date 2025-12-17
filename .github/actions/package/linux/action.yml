@@ -84,9 +84,7 @@ runs:
         mv "$INSTALL_APPIMAGE_DIR"/{sharun,AppRun}
         ls -la "$INSTALL_APPIMAGE_DIR"
 
-        # FIXME(@getchoo): Validate AppStream information when https://github.com/probonopd/go-appimage/pull/379 is merged
         mkappimage \
-          --no-appstream \
           --updateinformation "gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|latest|PrismLauncher-Linux-$APPIMAGE_ARCH.AppImage.zsync" \
           "$INSTALL_APPIMAGE_DIR" \
           "PrismLauncher-Linux-$VERSION-${{ inputs.build-type }}-$APPIMAGE_ARCH.AppImage"
