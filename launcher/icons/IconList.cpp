@@ -340,7 +340,13 @@ void IconList::installIcon(const QString& file, const QString& name)
     if (!IconUtils::isIconSuffix(fileinfo.suffix()))
         return;
 
-    QString target = FS::PathCombine(getDirectory(), name.isEmpty() ? fileinfo.fileName() : name);
+    QString targetName = name.isEmpty() ? fileinfo.fileName() : name;
+    // Ensure the target has the correct extension from the source file
+    QFileInfo targetInfo(targetName);
+    if (!IconUtils::isIconSuffix(targetInfo.suffix())) {
+        targetName = targetInfo.completeBaseName() + "." + fileinfo.suffix();
+    }
+    QString target = FS::PathCombine(getDirectory(), targetName);
     QFile::copy(file, target);
 }
 
