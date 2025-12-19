@@ -271,9 +271,9 @@ bool installIcon(QString root, QString instIconKey)
         if (iconList->iconFileExists(instIconKey)) {
             iconList->deleteIcon(instIconKey);
         }
-        // Preserve the original file extension
+        // Let IconList::installIcon preserve the original file extension
         QFileInfo iconFileInfo(importIconPath);
-        iconList->installIcon(importIconPath, instIconKey + "." + iconFileInfo.suffix());
+        iconList->installIcon(importIconPath, instIconKey);
         return true;
     }
     return false;
