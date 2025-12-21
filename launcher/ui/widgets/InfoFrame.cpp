@@ -88,7 +88,7 @@ void InfoFrame::updateWithMod(Mod const& m)
     if (m.name().isEmpty())
         name = m.internal_id();
     else
-        name = m.name();
+        name = renderColorCodes(m.name());
 
     if (link.isEmpty())
         text = name;
@@ -103,7 +103,7 @@ void InfoFrame::updateWithMod(Mod const& m)
     if (m.description().isEmpty()) {
         setDescription(QString());
     } else {
-        setDescription(m.description());
+        setDescription(renderColorCodes(m.description()));
     }
 
     setImage(m.icon({ 64, 64 }));
@@ -146,11 +146,12 @@ void InfoFrame::updateWithMod(Mod const& m)
 void InfoFrame::updateWithResource(const Resource& resource)
 {
     const QString homepage = resource.homepage();
+    auto name = renderColorCodes(resource.name());
 
     if (!homepage.isEmpty())
-        setName("<a href=\"" + homepage + "\">" + resource.name() + "</a>");
+        setName("<a href=\"" + homepage + "\">" + name + "</a>");
     else
-        setName(resource.name());
+        setName(name);
 
     setImage();
 }
