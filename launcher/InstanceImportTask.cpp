@@ -258,44 +258,24 @@ void InstanceImportTask::extractFinished()
     }
 }
 
-bool InstanceImportTask::installIcon(const QString& root, const QString& instIconFileName)
+bool installIcon(QString root, QString instIconKey)
 {
-    QString importIconPath;
-    QString detectedExtension;
-
-    QString tryPath = FS::PathCombine(root, instIconFileName);
-    if (QFile::exists(tryPath)) {
-        // Try exact match
-        importIconPath = tryPath;
-        detectedExtension = QFileInfo(tryPath).suffix();
-    } else {
-        // Compatibility fallback: try with .png appended (legacy behavior)
-        QString pngName = instIconFileName;
-        if (!pngName.endsWith(QLatin1String(".png"), Qt::CaseInsensitive))
-            pngName += QLatin1String(".png");
-        tryPath = FS::PathCombine(root, pngName);
-        if (QFile::exists(tryPath)) {
-            importIconPath = tryPath;
-            detectedExtension = QFileInfo(tryPath).suffix();
+    auto importIconPath = IconUtils::findBestIconIn(root, instIconKey);
+    if (importIconPath.isNull() || !QFile::exists(importIconPath))
+        importIconPath = IconUtils::findBestIconIn(root, "icon.png");
+    if (importIconPath.isNull() || !QFile::exists(importIconPath))
+        importIconPath = IconUtils::findBestIconIn(FS::PathCombine(root, "overrides"), "icon.png");
+    if (!importIconPath.isNull() && QFile::exists(importIconPath)) {
+        // import icon
+        auto iconList = APPLICATION->icons();
+        if (iconList->iconFileExists(instIconKey)) {
+            iconList->deleteIcon(instIconKey);
         }
+        // Let IconList::installIcon preserve the original file extension
+        iconList->installIcon(importIconPath, instIconKey);
+        return true;
     }
-
-    if (importIconPath.isEmpty() || !QFile::exists(importIconPath))
-        return false;
-
-    auto iconList = APPLICATION->icons();
-
-    QString baseName = QFileInfo(instIconFileName).completeBaseName();
-    QString ext = detectedExtension.isEmpty() ? QFileInfo(instIconFileName).suffix() : detectedExtension;
-    QString finalIconName = baseName;
-    if (!ext.isEmpty())
-        finalIconName += QLatin1Char('.') + ext;
-
-    if (iconList->iconFileExists(finalIconName))
-        iconList->deleteIcon(finalIconName);
-
-    iconList->installIcon(importIconPath, finalIconName);
-    return true;
+    return false;
 }
 
 void InstanceImportTask::processFlame()
@@ -325,10 +305,10 @@ void InstanceImportTask::processFlame()
     inst_creation_task->setName(*this);
     // if the icon was specified by user, use that. otherwise pull icon from the pack
     if (m_instIcon == "default") {
-        auto iconFileName = QString("Flame_%1_Icon.png").arg(name());
+        auto iconKey = QString("Flame_%1_Icon").arg(name());
 
-        if (installIcon(m_stagingPath, iconFileName)) {
-            m_instIcon = QFileInfo(iconFileName).completeBaseName();
+        if (installIcon(m_stagingPath, iconKey)) {
+            m_instIcon = iconKey;
         }
     }
     inst_creation_task->setIcon(m_instIcon);
@@ -383,11 +363,9 @@ void InstanceImportTask::processMultiMC()
     if (m_instIcon != "default") {
         instance.setIconKey(m_instIcon);
     } else {
-        QString currentIconKey = instance.iconKey();
+        m_instIcon = instance.iconKey();
 
-        // Pass full filename (assume png for compatibility with existing instances)
-        installIcon(instance.instanceRoot(), currentIconKey + QLatin1String(".png"));
-        m_instIcon = currentIconKey;
+        installIcon(instance.instanceRoot(), m_instIcon);
     }
     emitSucceeded();
 }
@@ -426,10 +404,10 @@ void InstanceImportTask::processModrinth()
     inst_creation_task->setName(*this);
     // if the icon was specified by user, use that. otherwise pull icon from the pack
     if (m_instIcon == "default") {
-        auto iconFileName = QString("Modrinth_%1_Icon.png").arg(name());
+        auto iconKey = QString("Modrinth_%1_Icon").arg(name());
 
-        if (installIcon(m_stagingPath, iconFileName)) {
-            m_instIcon = QFileInfo(iconFileName).completeBaseName();
+        if (installIcon(m_stagingPath, iconKey)) {
+            m_instIcon = iconKey;
         }
     }
     inst_creation_task->setIcon(m_instIcon);

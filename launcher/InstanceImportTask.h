@@ -57,8 +57,6 @@ class InstanceImportTask : public InstanceTask {
     void processFlame();
     void processModrinth();
 
-    bool installIcon(const QString &importDir, const QString &instIconFileName);
-
    private slots:
     void processZipPack();
     void extractFinished();
