@@ -338,7 +338,7 @@ void IconList::installIcon(const QString& file, const QString& name)
         return;
 
     const auto targetInfo = name.isEmpty() ? fileinfo : QFileInfo(name);
-    if (!IconUtils::isIconSuffix(fileinfo.suffix()) || !Iconutils::isIconSuffix(targetInfo.suffix()))
+    if (!IconUtils::isIconSuffix(fileinfo.suffix()) || !IconUtils::isIconSuffix(targetInfo.suffix()))
         return;
 
     const QString targetName = targetInfo.completeBaseName() + QLatin1Char('.') + targetInfo.suffix();
