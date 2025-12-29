@@ -1,5 +1,5 @@
 Checks:
-  'bugprone-*,clang-analyzer-*,cppcoreguidelines-*,misc-*,modernize-*,performance-*,portability-*,readability-*,
+  'bugprone-*,clang-analyzer-*,cppcoreguidelines-*,hicpp-*,misc-*,modernize-*,performance-*,portability-*,readability-*,
   -cppcoreguidelines-owning-memory,
   -cppcoreguidelines-pro-type-static-cast-downcast,
   -misc-non-private-member-variables-in-classes,
