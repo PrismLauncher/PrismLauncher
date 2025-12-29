@@ -375,7 +375,7 @@ void ResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
                                      const std::shared_ptr<ResourceFolderModel> base_model)
 {
     bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-    m_model->addPack(pack, ver, base_model, is_indexed);
+    m_model->addPack(pack, ver, base_model, is_indexed, m_parentDialog->targetDirPath(), m_parentDialog->targetIndexDirPath());
 }
 
 void ResourcePage::modelReset()

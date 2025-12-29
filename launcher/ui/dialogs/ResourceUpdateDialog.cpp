@@ -27,7 +27,15 @@
 #include <QTextBrowser>
 #include <QTreeWidgetItem>
 
+#include <functional>
 #include <optional>
+
+namespace {
+QDir resolveIndexDir(ResourceFolderModel* model, Resource* resource)
+{
+    return model->indexDirForResource(*resource);
+}
+}  // namespace
 
 static std::list<Version> mcVersions(BaseInstance* inst)
 {
@@ -264,6 +272,7 @@ void ResourceUpdateDialog::checkCandidates()
 auto ResourceUpdateDialog::ensureMetadata() -> bool
 {
     auto index_dir = indexDir();
+    auto index_dir_resolver = std::bind(&resolveIndexDir, m_resourceModel.get(), std::placeholders::_1);
 
     SequentialTask seq(tr("Looking for metadata"));
 
@@ -334,7 +343,8 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
 
     // prepare task for the modrinth mods
     if (!modrinth_tmp.empty()) {
-        auto modrinth_task = makeShared<EnsureMetadataTask>(modrinth_tmp, index_dir, ModPlatform::ResourceProvider::MODRINTH);
+        auto modrinth_task =
+            makeShared<EnsureMetadataTask>(modrinth_tmp, index_dir, ModPlatform::ResourceProvider::MODRINTH, index_dir_resolver);
         connect(modrinth_task.get(), &EnsureMetadataTask::metadataReady, [this](Resource* candidate) { onMetadataEnsured(candidate); });
         connect(modrinth_task.get(), &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Resource* candidate) {
             onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::MODRINTH);
@@ -350,7 +360,7 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
 
     // prepare task for the flame mods
     if (!flame_tmp.empty()) {
-        auto flame_task = makeShared<EnsureMetadataTask>(flame_tmp, index_dir, ModPlatform::ResourceProvider::FLAME);
+        auto flame_task = makeShared<EnsureMetadataTask>(flame_tmp, index_dir, ModPlatform::ResourceProvider::FLAME, index_dir_resolver);
         connect(flame_task.get(), &EnsureMetadataTask::metadataReady, [this](Resource* candidate) { onMetadataEnsured(candidate); });
         connect(flame_task.get(), &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Resource* candidate) {
             onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::FLAME);
@@ -407,8 +417,9 @@ void ResourceUpdateDialog::onMetadataFailed(Resource* resource, bool try_others,
 {
     if (try_others) {
         auto index_dir = indexDir();
+        auto index_dir_resolver = std::bind(&resolveIndexDir, m_resourceModel.get(), std::placeholders::_1);
 
-        auto task = makeShared<EnsureMetadataTask>(resource, index_dir, next(first_choice));
+        auto task = makeShared<EnsureMetadataTask>(resource, index_dir, next(first_choice), index_dir_resolver);
         connect(task.get(), &EnsureMetadataTask::metadataReady, [this](Resource* candidate) { onMetadataEnsured(candidate); });
         connect(task.get(), &EnsureMetadataTask::metadataFailed, [this](Resource* candidate) { onMetadataFailed(candidate, false); });
         connect(task.get(), &EnsureMetadataTask::failed,

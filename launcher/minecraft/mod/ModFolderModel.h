@@ -80,8 +80,12 @@ class ModFolderModel : public ResourceFolderModel {
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     int columnCount(const QModelIndex& parent) const override;
 
+    bool startWatching() override;
+    bool stopWatching() override;
+
     [[nodiscard]] Resource* createResource(const QFileInfo& file) override { return new Mod(file); }
     [[nodiscard]] Task* createParseTask(Resource&) override;
+    [[nodiscard]] Task* createUpdateTask() override;
 
     bool isValid();
 
@@ -89,4 +93,5 @@ class ModFolderModel : public ResourceFolderModel {
 
    private slots:
     void onParseSucceeded(int ticket, QString resource_id) override;
+    void onUpdateSucceeded() override;
 };

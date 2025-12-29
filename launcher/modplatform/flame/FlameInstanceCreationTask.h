@@ -94,4 +94,7 @@ class FlameCreationTask final : public InstanceCreationTask {
     std::optional<InstancePtr> m_instance;
 
     QStringList m_selectedOptionalMods;
+
+    bool m_useModsSubdir = false;
+    QString m_modsSubdirName;
 };

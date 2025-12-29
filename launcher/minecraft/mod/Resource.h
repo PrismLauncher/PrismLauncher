@@ -86,6 +86,7 @@ class Resource : public QObject {
     auto fileinfo() const -> QFileInfo { return m_file_info; }
     auto dateTimeChanged() const -> QDateTime { return m_changed_date_time; }
     auto internal_id() const -> QString { return m_internal_id; }
+    void setInternalId(const QString& id) { m_internal_id = id; }
     auto type() const -> ResourceType { return m_type; }
     bool enabled() const { return m_enabled; }
     auto getOriginalFileName() const -> QString;

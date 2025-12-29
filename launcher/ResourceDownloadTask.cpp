@@ -24,6 +24,8 @@
 #include "FileSystem.h"
 #include "minecraft/mod/ResourceFolderModel.h"
 
+#include <QFileInfo>
+
 #include "minecraft/mod/ShaderPackFolderModel.h"
 #include "modplatform/helpers/HashUtils.h"
 #include "net/ApiDownload.h"
@@ -32,11 +34,24 @@
 ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
                                            ModPlatform::IndexedVersion version,
                                            const std::shared_ptr<ResourceFolderModel> packs,
-                                           bool is_indexed)
-    : m_pack(std::move(pack)), m_pack_version(std::move(version)), m_pack_model(packs)
+                                           bool is_indexed,
+                                           QString target_dir_path,
+                                           QString index_dir_path,
+                                           bool keep_disabled)
+    : m_pack(std::move(pack)), m_pack_version(std::move(version)), m_pack_model(packs), m_keepDisabled(keep_disabled)
 {
+    m_targetDir = target_dir_path.isEmpty() ? m_pack_model->dir() : QDir(target_dir_path);
+    m_indexDir = index_dir_path.isEmpty() ? m_pack_model->indexDir() : QDir(index_dir_path);
+    m_downloadFileName = m_pack_version.fileName;
+    if (m_keepDisabled) {
+        QFileInfo file_info(m_downloadFileName);
+        if (file_info.suffix().compare("disabled", Qt::CaseInsensitive) != 0) {
+            m_downloadFileName += ".disabled";
+        }
+    }
+
     if (is_indexed) {
-        m_update_task.reset(new LocalResourceUpdateTask(m_pack_model->indexDir(), *m_pack, m_pack_version));
+        m_update_task.reset(new LocalResourceUpdateTask(m_indexDir, *m_pack, m_pack_version));
         connect(m_update_task.get(), &LocalResourceUpdateTask::hasOldResource, this, &ResourceDownloadTask::hasOldResource);
 
         addTask(m_update_task);
@@ -45,7 +60,7 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
     m_filesNetJob.reset(new NetJob(tr("Resource download"), APPLICATION->network()));
     m_filesNetJob->setStatus(tr("Downloading resource:\n%1").arg(m_pack_version.downloadUrl));
 
-    auto action = Net::ApiDownload::makeFile(m_pack_version.downloadUrl, m_pack_model->dir().absoluteFilePath(getFilename()));
+    auto action = Net::ApiDownload::makeFile(m_pack_version.downloadUrl, m_targetDir.absoluteFilePath(getFilename()));
     if (!m_pack_version.hash_type.isEmpty() && !m_pack_version.hash.isEmpty()) {
         switch (Hashing::algorithmFromString(m_pack_version.hash_type)) {
             case Hashing::Algorithm::Md4:
@@ -79,24 +94,26 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
 void ResourceDownloadTask::downloadSucceeded()
 {
     m_filesNetJob.reset();
-    auto oldName = std::get<0>(to_delete);
-    auto oldFilename = std::get<1>(to_delete);
+    auto oldName = std::get<0>(m_toDelete);
+    auto oldFilename = std::get<1>(m_toDelete);
 
-    if (oldName.isEmpty() || oldFilename == m_pack_version.fileName)
+    if (oldName.isEmpty() || oldFilename == m_pack_version.fileName) {
         return;
+    }
 
-    m_pack_model->uninstallResource(oldFilename, true);
+    m_pack_model->uninstallResource(oldFilename, m_targetDir, true);
 
     // also rename the shader config file
     if (dynamic_cast<ShaderPackFolderModel*>(m_pack_model.get()) != nullptr) {
-        QFileInfo oldConfig(m_pack_model->dir(), oldFilename + ".txt");
-        QFileInfo newConfig(m_pack_model->dir(), getFilename() + ".txt");
+        QFileInfo oldConfig(m_targetDir, oldFilename + ".txt");
+        QFileInfo newConfig(m_targetDir, getFilename() + ".txt");
 
         if (oldConfig.exists() && !newConfig.exists()) {
             bool success = FS::move(oldConfig.filePath(), newConfig.filePath());
 
-            if (!success)
+            if (!success) {
                 emit logWarning(tr("Failed to rename shader config from '%1' to '%2'").arg(oldConfig.fileName(), newConfig.fileName()));
+            }
         }
     }
 }
@@ -116,5 +133,5 @@ void ResourceDownloadTask::downloadProgressChanged(qint64 current, qint64 total)
 // downloaded successfully!
 void ResourceDownloadTask::hasOldResource(QString name, QString filename)
 {
-    to_delete = { name, filename };
+    m_toDelete = { name, filename };
 }

@@ -85,6 +85,10 @@ class ResourceFolderModel : public QAbstractListModel {
     virtual bool stopWatching() { return stopWatching({ indexDir().absolutePath(), m_dir.absolutePath() }); }
 
     virtual QDir indexDir() const { return { QString("%1/.index").arg(dir().absolutePath()) }; }
+    QDir indexDirForResource(const Resource& resource) const;
+
+    QModelIndex indexForResource(const Resource& resource) const;
+    QModelIndexList indexesForResources(const QList<Resource*>& resources) const;
 
     /** Given a path in the system, install that resource, moving it to its place in the
      *  instance file hierarchy.
@@ -100,6 +104,7 @@ class ResourceFolderModel : public QAbstractListModel {
      *  Returns whether the removal was successful.
      */
     virtual bool uninstallResource(const QString& file_name, bool preserve_metadata = false);
+    virtual bool uninstallResource(const QString& file_name, const QDir& dir, bool preserve_metadata = false);
     virtual bool deleteResources(const QModelIndexList&);
     virtual void deleteMetadata(const QModelIndexList&);
 
@@ -196,7 +201,7 @@ class ResourceFolderModel : public QAbstractListModel {
      *  This Task is normally executed when opening a page, so it shouldn't contain much heavy work.
      *  If such work is needed, try using it in the Task create by createParseTask() instead!
      */
-    [[nodiscard]] Task* createUpdateTask();
+    [[nodiscard]] virtual Task* createUpdateTask();
 
     [[nodiscard]] virtual Resource* createResource(const QFileInfo& info) { return new Resource(info); }
 
@@ -264,4 +269,6 @@ class ResourceFolderModel : public QAbstractListModel {
     ConcurrentTask m_helper_thread_task;
     QMap<int, Task::Ptr> m_active_parse_tasks;
     std::atomic<int> m_next_resolution_ticket = 0;
+
+    QString internalIdForFile(const QFileInfo& info) const;
 };

@@ -50,6 +50,22 @@
 #include <QUuid>
 
 #include "minecraft/mod/tasks/LocalModParseTask.h"
+#include "minecraft/mod/tasks/ModFolderLoadTask.h"
+
+static void collectWatchPaths(const QDir& dir, QSet<QString>& paths)
+{
+    paths.insert(dir.absolutePath());
+
+    QDir index_dir(dir.filePath(".index"));
+    if (index_dir.exists())
+        paths.insert(index_dir.absolutePath());
+
+    for (auto entry : dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        if (entry.fileName() == ".index")
+            continue;
+        collectWatchPaths(QDir(entry.absoluteFilePath()), paths);
+    }
+}
 
 ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)
     : ResourceFolderModel(QDir(dir), instance, is_indexed, create_dir, parent)
@@ -65,6 +81,20 @@ ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_
                               QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
                               QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
     m_columnsHideable = { false, true, false, true, true, true, true, true, true, true, true };
+}
+
+bool ModFolderModel::startWatching()
+{
+    QSet<QString> paths;
+    collectWatchPaths(m_dir, paths);
+    return ResourceFolderModel::startWatching(paths.values());
+}
+
+bool ModFolderModel::stopWatching()
+{
+    QSet<QString> paths;
+    collectWatchPaths(m_dir, paths);
+    return ResourceFolderModel::stopWatching(paths.values());
 }
 
 QVariant ModFolderModel::data(const QModelIndex& index, int role) const
@@ -212,6 +242,14 @@ Task* ModFolderModel::createParseTask(Resource& resource)
     return new LocalModParseTask(m_next_resolution_ticket, resource.type(), resource.fileinfo());
 }
 
+Task* ModFolderModel::createUpdateTask()
+{
+    auto task =
+        new ModFolderLoadTask(dir(), m_is_indexed, m_first_folder_load, [this](const QFileInfo& file) { return createResource(file); });
+    m_first_folder_load = false;
+    return task;
+}
+
 bool ModFolderModel::isValid()
 {
     return m_dir.exists() && m_dir.isReadable();
@@ -237,4 +275,19 @@ void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)
         static_cast<Mod*>(resource.get())->finishResolvingWithDetails(std::move(result->details));
 
     emit dataChanged(index(row), index(row, columnCount(QModelIndex()) - 1));
+}
+
+void ModFolderModel::onUpdateSucceeded()
+{
+    auto update_results = static_cast<ModFolderLoadTask*>(m_current_update_task.get())->result();
+
+    auto& new_resources = update_results->resources;
+
+    auto current_list = m_resources_index.keys();
+    QSet<QString> current_set(current_list.begin(), current_list.end());
+
+    auto new_list = new_resources.keys();
+    QSet<QString> new_set(new_list.begin(), new_list.end());
+
+    applyUpdates(current_set, new_set, new_resources);
 }

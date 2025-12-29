@@ -3,6 +3,8 @@
 #include "ModIndex.h"
 #include "net/NetJob.h"
 
+#include <functional>
+
 #include "modplatform/helpers/HashUtils.h"
 
 #include "minecraft/mod/Resource.h"
@@ -15,9 +17,17 @@ class EnsureMetadataTask : public Task {
     Q_OBJECT
 
    public:
-    EnsureMetadataTask(Resource*, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
-    EnsureMetadataTask(QList<Resource*>&, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
-    EnsureMetadataTask(QHash<QString, Resource*>&, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
+    using IndexDirResolver = std::function<QDir(Resource*)>;
+
+    EnsureMetadataTask(Resource*, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH, IndexDirResolver = {});
+    EnsureMetadataTask(QList<Resource*>&,
+                       QDir,
+                       ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH,
+                       IndexDirResolver = {});
+    EnsureMetadataTask(QHash<QString, Resource*>&,
+                       QDir,
+                       ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH,
+                       IndexDirResolver = {});
 
     ~EnsureMetadataTask() = default;
 
@@ -54,8 +64,11 @@ class EnsureMetadataTask : public Task {
     void metadataFailed(Resource*);
 
    private:
+    QDir indexDirForResource(Resource* resource) const;
+
     QHash<QString, Resource*> m_resources;
     QDir m_indexDir;
+    IndexDirResolver m_indexDirResolver;
     ModPlatform::ResourceProvider m_provider;
 
     QHash<QString, ModPlatform::IndexedVersion> m_tempVersions;

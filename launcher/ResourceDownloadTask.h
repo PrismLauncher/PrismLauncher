@@ -22,6 +22,8 @@
 #include "net/NetJob.h"
 #include "tasks/SequentialTask.h"
 
+#include <QDir>
+
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/ModIndex.h"
 
@@ -33,8 +35,11 @@ class ResourceDownloadTask : public SequentialTask {
     explicit ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
                                   ModPlatform::IndexedVersion version,
                                   std::shared_ptr<ResourceFolderModel> packs,
-                                  bool is_indexed = true);
-    const QString& getFilename() const { return m_pack_version.fileName; }
+                                  bool is_indexed = true,
+                                  QString target_dir_path = {},
+                                  QString index_dir_path = {},
+                                  bool keep_disabled = false);
+    const QString& getFilename() const { return m_downloadFileName; }
     const QVariant& getVersionID() const { return m_pack_version.fileId; }
     const ModPlatform::IndexedVersion& getVersion() const { return m_pack_version; }
     const ModPlatform::ResourceProvider& getProvider() const { return m_pack->provider; }
@@ -45,6 +50,10 @@ class ResourceDownloadTask : public SequentialTask {
     ModPlatform::IndexedPack::Ptr m_pack;
     ModPlatform::IndexedVersion m_pack_version;
     const std::shared_ptr<ResourceFolderModel> m_pack_model;
+    QDir m_targetDir;
+    QDir m_indexDir;
+    QString m_downloadFileName;
+    bool m_keepDisabled = false;
 
     NetJob::Ptr m_filesNetJob;
     LocalResourceUpdateTask::Ptr m_update_task;
@@ -53,7 +62,7 @@ class ResourceDownloadTask : public SequentialTask {
     void downloadFailed(QString reason);
     void downloadSucceeded();
 
-    std::tuple<QString, QString> to_delete{ "", "" };
+    std::tuple<QString, QString> m_toDelete{ "", "" };
 
    private slots:
     void hasOldResource(QString name, QString filename);

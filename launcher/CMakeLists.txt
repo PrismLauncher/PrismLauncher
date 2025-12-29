@@ -325,6 +325,8 @@ set(MINECRAFT_SOURCES
     minecraft/mod/ModDetails.h
     minecraft/mod/ModFolderModel.h
     minecraft/mod/ModFolderModel.cpp
+    minecraft/mod/ModFolderTreeModel.h
+    minecraft/mod/ModFolderTreeModel.cpp
     minecraft/mod/Resource.h
     minecraft/mod/Resource.cpp
     minecraft/mod/ResourceFolderModel.h
@@ -349,6 +351,8 @@ set(MINECRAFT_SOURCES
     minecraft/mod/ShaderPackFolderModel.cpp
     minecraft/mod/tasks/ResourceFolderLoadTask.h
     minecraft/mod/tasks/ResourceFolderLoadTask.cpp
+    minecraft/mod/tasks/ModFolderLoadTask.h
+    minecraft/mod/tasks/ModFolderLoadTask.cpp
     minecraft/mod/tasks/LocalModParseTask.h
     minecraft/mod/tasks/LocalModParseTask.cpp
     minecraft/mod/tasks/LocalResourceUpdateTask.h

@@ -2,6 +2,7 @@
 
 #include <MurmurHash2.h>
 #include <QDebug>
+#include <QFileInfo>
 
 #include "Application.h"
 #include "Json.h"
@@ -16,11 +17,11 @@
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 
-static ModrinthAPI modrinth_api;
-static FlameAPI flame_api;
+static ModrinthAPI modrinthApi;
+static FlameAPI flameApi;
 
-EnsureMetadataTask::EnsureMetadataTask(Resource* resource, QDir dir, ModPlatform::ResourceProvider prov)
-    : Task(), m_indexDir(dir), m_provider(prov), m_hashingTask(nullptr), m_currentTask(nullptr)
+EnsureMetadataTask::EnsureMetadataTask(Resource* resource, QDir dir, ModPlatform::ResourceProvider prov, IndexDirResolver resolver)
+    : Task(), m_indexDir(dir), m_indexDirResolver(resolver), m_provider(prov), m_hashingTask(nullptr), m_currentTask(nullptr)
 {
     auto hashTask = createNewHash(resource);
     if (!hashTask)
@@ -30,8 +31,8 @@ EnsureMetadataTask::EnsureMetadataTask(Resource* resource, QDir dir, ModPlatform
     m_hashingTask = hashTask;
 }
 
-EnsureMetadataTask::EnsureMetadataTask(QList<Resource*>& resources, QDir dir, ModPlatform::ResourceProvider prov)
-    : Task(), m_indexDir(dir), m_provider(prov), m_currentTask(nullptr)
+EnsureMetadataTask::EnsureMetadataTask(QList<Resource*>& resources, QDir dir, ModPlatform::ResourceProvider prov, IndexDirResolver resolver)
+    : Task(), m_indexDir(dir), m_indexDirResolver(resolver), m_provider(prov), m_currentTask(nullptr)
 {
     auto hashTask = makeShared<ConcurrentTask>("MakeHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
     m_hashingTask = hashTask;
@@ -45,8 +46,11 @@ EnsureMetadataTask::EnsureMetadataTask(QList<Resource*>& resources, QDir dir, Mo
     }
 }
 
-EnsureMetadataTask::EnsureMetadataTask(QHash<QString, Resource*>& resources, QDir dir, ModPlatform::ResourceProvider prov)
-    : Task(), m_resources(resources), m_indexDir(dir), m_provider(prov), m_currentTask(nullptr)
+EnsureMetadataTask::EnsureMetadataTask(QHash<QString, Resource*>& resources,
+                                       QDir dir,
+                                       ModPlatform::ResourceProvider prov,
+                                       IndexDirResolver resolver)
+    : Task(), m_resources(resources), m_indexDir(dir), m_indexDirResolver(resolver), m_provider(prov), m_currentTask(nullptr)
 {}
 
 Hashing::Hasher::Ptr EnsureMetadataTask::createNewHash(Resource* resource)
@@ -75,6 +79,13 @@ QString EnsureMetadataTask::getExistingHash(Resource* resource)
 
     // No existing hash
     return {};
+}
+
+QDir EnsureMetadataTask::indexDirForResource(Resource* resource) const
+{
+    if (m_indexDirResolver)
+        return m_indexDirResolver(resource);
+    return m_indexDir;
 }
 
 bool EnsureMetadataTask::abort()
@@ -216,7 +227,7 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
     auto hash_type = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
     auto response = std::make_shared<QByteArray>();
-    auto ver_task = modrinth_api.currentVersions(m_resources.keys(), hash_type, response);
+    auto ver_task = modrinthApi.currentVersions(m_resources.keys(), hash_type, response);
 
     // Prevents unfortunate timings when aborting the task
     if (!ver_task)
@@ -273,9 +284,9 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
     } else if (addonIds.size() == 1) {
-        proj_task = modrinth_api.getProject(*addonIds.keyBegin(), response);
+        proj_task = modrinthApi.getProject(*addonIds.keyBegin(), response);
     } else {
-        proj_task = modrinth_api.getProjects(addonIds.keys(), response);
+        proj_task = modrinthApi.getProjects(addonIds.keys(), response);
     }
 
     // Prevents unfortunate timings when aborting the task
@@ -348,7 +359,7 @@ Task::Ptr EnsureMetadataTask::flameVersionsTask()
         fingerprints.push_back(murmur.toUInt());
     }
 
-    auto ver_task = flame_api.matchFingerprints(fingerprints, response);
+    auto ver_task = flameApi.matchFingerprints(fingerprints, response);
 
     connect(ver_task.get(), &Task::succeeded, this, [this, response] {
         QJsonParseError parse_error{};
@@ -423,9 +434,9 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
     } else if (addonIds.size() == 1) {
-        proj_task = flame_api.getProject(*addonIds.keyBegin(), response);
+        proj_task = flameApi.getProject(*addonIds.keyBegin(), response);
     } else {
-        proj_task = flame_api.getProjects(addonIds.keys(), response);
+        proj_task = flameApi.getProjects(addonIds.keys(), response);
     }
 
     // Prevents unfortunate timings when aborting the task
@@ -484,10 +495,13 @@ void EnsureMetadataTask::updateMetadata(ModPlatform::IndexedPack& pack, ModPlatf
     try {
         // Prevent file name mismatch
         ver.fileName = resource->fileinfo().fileName();
-        if (ver.fileName.endsWith(".disabled"))
-            ver.fileName.chop(9);
+        QFileInfo ver_info(ver.fileName);
+        if (ver_info.suffix().compare("disabled", Qt::CaseInsensitive) == 0) {
+            ver.fileName.chop(QString(".disabled").size());
+        }
 
-        auto task = makeShared<LocalResourceUpdateTask>(m_indexDir, pack, ver);
+        auto index_dir = indexDirForResource(resource);
+        auto task = makeShared<LocalResourceUpdateTask>(index_dir, pack, ver);
 
         connect(task.get(), &Task::finished, this, [this, &pack, resource] { updateMetadataCallback(pack, resource); });
 
@@ -502,7 +516,7 @@ void EnsureMetadataTask::updateMetadata(ModPlatform::IndexedPack& pack, ModPlatf
 
 void EnsureMetadataTask::updateMetadataCallback(ModPlatform::IndexedPack& pack, Resource* resource)
 {
-    QDir tmpIndexDir(m_indexDir);
+    QDir tmpIndexDir(indexDirForResource(resource));
     auto metadata = Metadata::get(tmpIndexDir, pack.slug);
     if (!metadata.isValid()) {
         qCritical() << "Failed to generate metadata at last step!";

@@ -83,6 +83,12 @@ ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, const std::share
     setWindowModality(Qt::WindowModal);
 }
 
+void ResourceDownloadDialog::setTargetDirectory(const QDir& dir)
+{
+    m_target_dir_path = dir.absolutePath();
+    m_target_index_dir_path = dir.filePath(".index");
+}
+
 void ResourceDownloadDialog::accept()
 {
     if (!geometrySaveKey().isEmpty())

@@ -43,15 +43,24 @@
 
 #include <QAbstractItemModel>
 #include <QAction>
+#include <QDir>
 #include <QEvent>
+#include <QFileInfo>
+#include <QHash>
+#include <QInputDialog>
 #include <QKeyEvent>
+#include <QLineEdit>
 #include <QMenu>
 #include <QMessageBox>
+#include <QSet>
 #include <QSortFilterProxyModel>
 #include <algorithm>
 #include <memory>
+#include <vector>
 
 #include "Application.h"
+#include "DesktopServices.h"
+#include "FileSystem.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
@@ -61,6 +70,7 @@
 #include "minecraft/VersionFilterData.h"
 #include "minecraft/mod/Mod.h"
 #include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/mod/ModFolderTreeModel.h"
 
 #include "tasks/ConcurrentTask.h"
 #include "tasks/Task.h"
@@ -90,8 +100,10 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
 
     auto depsDisabled = APPLICATION->settings()->getSetting("ModDependenciesDisabled");
     ui->actionVerifyItemDependencies->setVisible(!depsDisabled->get().toBool());
-    connect(depsDisabled.get(), &Setting::SettingChanged, this,
-            [this](const Setting& setting, const QVariant& value) { ui->actionVerifyItemDependencies->setVisible(!value.toBool()); });
+    connect(depsDisabled.get(), &Setting::SettingChanged, this, [this](const Setting& setting, const QVariant& value) {
+        Q_UNUSED(setting);
+        ui->actionVerifyItemDependencies->setVisible(!value.toBool());
+    });
 
     updateMenu->addAction(ui->actionResetItemMetadata);
     connect(ui->actionResetItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
@@ -109,6 +121,50 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
     ui->actionsToolbar->insertActionAfter(ui->actionViewHomepage, ui->actionExportMetadata);
 
     ui->actionsToolbar->insertActionAfter(ui->actionViewFolder, ui->actionViewConfigs);
+
+    m_newFolderAction = new QAction(tr("New Folder"), this);
+    connect(m_newFolderAction, &QAction::triggered, this, &ModFolderPage::createFolder);
+    ui->actionsToolbar->insertActionAfter(ui->actionAddItem, m_newFolderAction);
+
+    m_treeModel = new ModFolderTreeModel(m_model.get(), this);
+    m_treeFilterModel = new ModFolderTreeProxyModel(this);
+    m_treeFilterModel->setDynamicSortFilter(true);
+    m_treeFilterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_treeFilterModel->setSortCaseSensitivity(Qt::CaseInsensitive);
+    m_treeFilterModel->setSourceModel(m_treeModel);
+    m_treeFilterModel->setFilterKeyColumn(-1);
+
+    m_filterModel = m_treeFilterModel;
+    ui->treeView->setModel(m_filterModel);
+    ui->treeView->setResizeModes(m_model->columnResizeModes());
+    ui->treeView->setRootIsDecorated(true);
+    ui->treeView->setItemsExpandable(true);
+    ui->treeView->setExpandsOnDoubleClick(true);
+    ui->treeView->setSortingEnabled(false);
+    ui->treeView->setAnimated(false);
+
+    disconnect(ui->actionRemoveItem, &QAction::triggered, this, nullptr);
+    connect(ui->actionRemoveItem, &QAction::triggered, this, &ModFolderPage::removeItem);
+
+    disconnect(ui->treeView, &ModListView::activated, this, nullptr);
+    connect(ui->treeView, &ModListView::activated, this, &ModFolderPage::itemActivated);
+
+    auto selection_model = ui->treeView->selectionModel();
+    connect(selection_model, &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
+        if (!current.isValid()) {
+            ui->frame->clear();
+            return;
+        }
+        updateFrame(current, previous);
+    });
+
+    auto updateExtra = [this]() {
+        if (updateExtraInfo) {
+            updateExtraInfo(id(), extraHeaderInfoString());
+        }
+    };
+    connect(selection_model, &QItemSelectionModel::selectionChanged, this, updateExtra);
+    connect(selection_model, &QItemSelectionModel::selectionChanged, this, [this] { updateActions(); });
 }
 
 bool ModFolderPage::shouldDisplay() const
@@ -116,12 +172,125 @@ bool ModFolderPage::shouldDisplay() const
     return true;
 }
 
+void ModFolderPage::updateActions()
+{
+    const auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    const auto selected_resources = m_treeModel->resourcesFromIndexes(selection);
+
+    const bool has_mod_selection = !selected_resources.isEmpty();
+    bool has_folder_selection = false;
+    for (const auto& index : selection) {
+        if (index.column() != 0) {
+            continue;
+        }
+        if (m_treeModel->isFolderIndex(index)) {
+            has_folder_selection = true;
+            break;
+        }
+    }
+
+    ui->actionUpdateItem->setEnabled(!m_model->empty());
+    ui->actionResetItemMetadata->setEnabled(has_mod_selection);
+
+    ui->actionChangeVersion->setEnabled(selected_resources.size() == 1 && selected_resources[0]->metadata() != nullptr);
+
+    ui->actionRemoveItem->setEnabled(has_mod_selection || has_folder_selection);
+    ui->actionEnableItem->setEnabled(has_mod_selection);
+    ui->actionDisableItem->setEnabled(has_mod_selection);
+
+    ui->actionViewHomepage->setEnabled(has_mod_selection &&
+                                       std::any_of(selected_resources.begin(), selected_resources.end(),
+                                                   [](Resource* resource) { return resource && !resource->homepage().isEmpty(); }));
+    ui->actionExportMetadata->setEnabled(!m_model->empty());
+
+    if (m_newFolderAction) {
+        m_newFolderAction->setEnabled(m_instance && m_instance->typeName() == "Minecraft");
+    }
+}
+
 void ModFolderPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
-    int row = sourceCurrent.row();
-    const Mod& mod = m_model->at(row);
-    ui->frame->updateWithMod(mod);
+    auto* mod = m_treeModel->modForIndex(sourceCurrent);
+    if (!mod) {
+        ui->frame->clear();
+        return;
+    }
+    ui->frame->updateWithMod(*mod);
+}
+
+void ModFolderPage::removeItem()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    auto selection_indexes = selection.indexes();
+    auto resources = m_treeModel->resourcesFromIndexes(selection_indexes);
+    QSet<QString> folder_paths;
+    for (const auto& index : selection_indexes) {
+        if (index.column() != 0) {
+            continue;
+        }
+        if (!m_treeModel->isFolderIndex(index)) {
+            continue;
+        }
+        auto dir = m_treeModel->folderForIndex(index);
+        auto path = QDir::cleanPath(dir.absolutePath());
+        if (path == QDir::cleanPath(m_model->dir().absolutePath())) {
+            continue;
+        }
+        folder_paths.insert(path);
+    }
+
+    if (resources.isEmpty() && folder_paths.isEmpty()) {
+        return;
+    }
+
+    QStringList pruned_folders = folder_paths.values();
+    std::sort(pruned_folders.begin(), pruned_folders.end(),
+              [](const QString& left, const QString& right) { return left.size() < right.size(); });
+    QStringList folders_to_remove;
+    for (const auto& path : pruned_folders) {
+        bool is_child = false;
+        for (const auto& parent : folders_to_remove) {
+            if (path == parent || path.startsWith(parent + "/")) {
+                is_child = true;
+                break;
+            }
+        }
+        if (!is_child) {
+            folders_to_remove.append(path);
+        }
+    }
+
+    if (!folders_to_remove.isEmpty() || resources.size() > 1 || (resources.size() == 1 && !folders_to_remove.isEmpty())) {
+        QString message;
+        if (folders_to_remove.size() == 1 && resources.isEmpty()) {
+            message = tr("You are about to remove the folder '%1'.\n"
+                         "This will delete the folder and all its contents.\n\n"
+                         "Are you sure?")
+                          .arg(QFileInfo(folders_to_remove.front()).fileName());
+        } else {
+            QStringList parts;
+            if (!folders_to_remove.isEmpty()) {
+                parts << tr("%1 folder(s)").arg(folders_to_remove.size());
+            }
+            if (!resources.isEmpty()) {
+                parts << tr("%1 item(s)").arg(resources.size());
+            }
+            message = tr("You are about to remove %1.\n"
+                         "This may be permanent and the files will be gone from the folder.\n\n"
+                         "Are you sure?")
+                          .arg(parts.join(tr(" and ")));
+        }
+
+        auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"), message, QMessageBox::Warning,
+                                                     QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
+        if (response != QMessageBox::Yes) {
+            return;
+        }
+    }
+
+    removeItems(selection);
 }
 
 void ModFolderPage::removeItems(const QItemSelection& selection)
@@ -133,16 +302,119 @@ void ModFolderPage::removeItems(const QItemSelection& selection)
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
-        if (response != QMessageBox::Yes)
+        if (response != QMessageBox::Yes) {
             return;
+        }
     }
-    m_model->deleteResources(selection.indexes());
+    auto selection_indexes = selection.indexes();
+    auto resources = m_treeModel->resourcesFromIndexes(selection_indexes);
+    auto indexes = m_model->indexesForResources(resources);
+    if (!indexes.isEmpty()) {
+        m_model->deleteResources(indexes);
+    }
+
+    QSet<QString> folder_paths;
+    for (const auto& index : selection_indexes) {
+        if (index.column() != 0) {
+            continue;
+        }
+        if (!m_treeModel->isFolderIndex(index)) {
+            continue;
+        }
+        auto dir = m_treeModel->folderForIndex(index);
+        auto path = QDir::cleanPath(dir.absolutePath());
+        if (path == QDir::cleanPath(m_model->dir().absolutePath())) {
+            continue;
+        }
+        folder_paths.insert(path);
+    }
+
+    QStringList pruned_folders = folder_paths.values();
+    std::sort(pruned_folders.begin(), pruned_folders.end(),
+              [](const QString& left, const QString& right) { return left.size() < right.size(); });
+    QStringList folders_to_remove;
+    for (const auto& path : pruned_folders) {
+        bool is_child = false;
+        for (const auto& parent : folders_to_remove) {
+            if (path == parent || path.startsWith(parent + "/")) {
+                is_child = true;
+                break;
+            }
+        }
+        if (!is_child) {
+            folders_to_remove.append(path);
+        }
+    }
+
+    for (const auto& folder : folders_to_remove) {
+        if (!FS::deletePath(folder)) {
+            CustomMessageBox::selectable(this, tr("Error"), tr("Failed to remove folder '%1'.").arg(folder), QMessageBox::Warning)->show();
+        }
+    }
+
+    if (!folders_to_remove.isEmpty()) {
+        m_model->update();
+    }
+}
+
+void ModFolderPage::enableItem()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto resources = m_treeModel->resourcesFromIndexes(selection);
+    auto indexes = m_model->indexesForResources(resources);
+    m_model->setResourceEnabled(indexes, EnableAction::ENABLE);
+}
+
+void ModFolderPage::disableItem()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto resources = m_treeModel->resourcesFromIndexes(selection);
+    auto indexes = m_model->indexesForResources(resources);
+    m_model->setResourceEnabled(indexes, EnableAction::DISABLE);
+}
+
+void ModFolderPage::viewHomepage()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    for (auto resource : m_treeModel->resourcesFromIndexes(selection)) {
+        auto url = resource->homepage();
+        if (!url.isEmpty()) {
+            DesktopServices::openUrl(url);
+        }
+    }
+}
+
+void ModFolderPage::itemActivated(const QModelIndex&)
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    auto resources = m_treeModel->resourcesFromIndexes(selection.indexes());
+    auto indexes = m_model->indexesForResources(resources);
+    m_model->setResourceEnabled(indexes, EnableAction::TOGGLE);
+}
+
+bool ModFolderPage::eventFilter(QObject* obj, QEvent* ev)
+{
+    if (ev->type() == QEvent::KeyPress && obj == ui->treeView) {
+        auto* keyEvent = static_cast<QKeyEvent*>(ev);
+        switch (keyEvent->key()) {
+            case Qt::Key_Delete:
+                removeItem();
+                return true;
+            case Qt::Key_Plus:
+                addItem();
+                return true;
+            default:
+                break;
+        }
+    }
+    return ExternalResourcesPage::eventFilter(obj, ev);
 }
 
 void ModFolderPage::downloadMods()
 {
-    if (m_instance->typeName() != "Minecraft")
+    if (m_instance->typeName() != "Minecraft") {
         return;  // this is a null instance or a legacy instance
+    }
 
     auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
     if (!profile->getModLoaders().has_value()) {
@@ -154,6 +426,9 @@ void ModFolderPage::downloadMods()
     m_downloadDialog = new ResourceDownload::ModDownloadDialog(this, m_model, m_instance);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &ModFolderPage::downloadDialogFinished);
+
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_downloadDialog->setTargetDirectory(m_treeModel->targetDirForSelection(selection.indexes()));
 
     m_downloadDialog->open();
 }
@@ -172,8 +447,9 @@ void ModFolderPage::downloadDialogFinished(int result)
         });
         connect(tasks, &Task::succeeded, [this, tasks]() {
             QStringList warnings = tasks->warnings();
-            if (warnings.count())
+            if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+            }
 
             tasks->deleteLater();
         });
@@ -192,14 +468,16 @@ void ModFolderPage::downloadDialogFinished(int result)
 
         m_model->update();
     }
-    if (m_downloadDialog)
+    if (m_downloadDialog) {
         m_downloadDialog->deleteLater();
+    }
 }
 
 void ModFolderPage::updateMods(bool includeDeps)
 {
-    if (m_instance->typeName() != "Minecraft")
+    if (m_instance->typeName() != "Minecraft") {
         return;  // this is a null instance or a legacy instance
+    }
 
     auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
     if (!profile->getModLoaders().has_value()) {
@@ -220,15 +498,17 @@ void ModFolderPage::updateMods(bool includeDeps)
                                          QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                 ->exec();
 
-        if (response != QMessageBox::Yes)
+        if (response != QMessageBox::Yes) {
             return;
+        }
     }
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
 
-    auto mods_list = m_model->selectedResources(selection);
+    auto mods_list = m_treeModel->resourcesFromIndexes(selection);
     bool use_all = mods_list.empty();
-    if (use_all)
+    if (use_all) {
         mods_list = m_model->allResources();
+    }
 
     ResourceUpdateDialog update_dialog(this, m_instance, m_model, mods_list, includeDeps, profile->getModLoadersList());
     update_dialog.checkCandidates();
@@ -283,9 +563,11 @@ void ModFolderPage::updateMods(bool includeDeps)
 void ModFolderPage::deleteModMetadata()
 {
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-    auto selectionCount = m_model->selectedMods(selection).length();
-    if (selectionCount == 0)
+    auto resources = m_treeModel->resourcesFromIndexes(selection);
+    auto selectionCount = resources.length();
+    if (selectionCount == 0) {
         return;
+    }
     if (selectionCount > 1) {
         auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
                                                      tr("You are about to remove the metadata for %1 mods.\n"
@@ -294,17 +576,20 @@ void ModFolderPage::deleteModMetadata()
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
-        if (response != QMessageBox::Yes)
+        if (response != QMessageBox::Yes) {
             return;
+        }
     }
 
-    m_model->deleteMetadata(selection);
+    auto indexes = m_model->indexesForResources(resources);
+    m_model->deleteMetadata(indexes);
 }
 
 void ModFolderPage::changeModVersion()
 {
-    if (m_instance->typeName() != "Minecraft")
+    if (m_instance->typeName() != "Minecraft") {
         return;  // this is a null instance or a legacy instance
+    }
 
     auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
     if (!profile->getModLoaders().has_value()) {
@@ -317,28 +602,68 @@ void ModFolderPage::changeModVersion()
         return;
     }
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-    auto mods_list = m_model->selectedMods(selection);
-    if (mods_list.length() != 1 || mods_list[0]->metadata() == nullptr)
+    auto mods_list = m_treeModel->modsFromIndexes(selection);
+    if (mods_list.length() != 1 || mods_list[0]->metadata() == nullptr) {
         return;
+    }
 
     m_downloadDialog = new ResourceDownload::ModDownloadDialog(this, m_model, m_instance);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &ModFolderPage::downloadDialogFinished);
 
+    m_downloadDialog->setTargetDirectory(QDir(mods_list[0]->fileinfo().absolutePath()));
     m_downloadDialog->setResourceMetadata((*mods_list.begin())->metadata());
     m_downloadDialog->open();
 }
 
 void ModFolderPage::exportModMetadata()
 {
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-    auto selectedMods = m_model->selectedMods(selection);
-    if (selectedMods.length() == 0)
-        selectedMods = m_model->allMods();
-
-    std::sort(selectedMods.begin(), selectedMods.end(), [](const Mod* a, const Mod* b) { return a->name() < b->name(); });
-    ExportToModListDialog dlg(m_instance->name(), selectedMods, this);
+    auto mods = m_model->allMods();
+    std::sort(mods.begin(), mods.end(), [](const Mod* a, const Mod* b) { return a->name() < b->name(); });
+    ExportToModListDialog dlg(m_instance->name(), mods, this);
     dlg.exec();
+}
+
+void ModFolderPage::createFolder()
+{
+    if (!m_instance || m_instance->typeName() != "Minecraft") {
+        return;
+    }
+
+    bool ok = false;
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    auto target_dir = m_treeModel->targetDirForSelection(selection.indexes());
+
+    QString name =
+        QInputDialog::getText(this, tr("New Folder"), tr("Enter a new folder name."), QLineEdit::Normal, tr("New Folder"), &ok).trimmed();
+    if (!ok) {
+        return;
+    }
+
+    if (name.isEmpty()) {
+        name = tr("New Folder");
+    }
+
+    name = FS::RemoveInvalidFilenameChars(name, '-');
+    if (name.isEmpty()) {
+        name = tr("New Folder");
+    }
+
+    auto folder_name = FS::DirNameFromString(name, target_dir.absolutePath());
+    if (folder_name.isEmpty()) {
+        CustomMessageBox::selectable(this, tr("Error"), tr("Failed to create folder. Please choose a different name."),
+                                     QMessageBox::Critical)
+            ->show();
+        return;
+    }
+
+    if (!target_dir.mkpath(folder_name)) {
+        CustomMessageBox::selectable(this, tr("Error"), tr("Failed to create folder '%1'.").arg(folder_name), QMessageBox::Critical)
+            ->show();
+        return;
+    }
+
+    m_model->update();
 }
 
 CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent)
@@ -369,12 +694,14 @@ bool CoreModFolderPage::shouldDisplay() const
 {
     if (ModFolderPage::shouldDisplay()) {
         auto inst = dynamic_cast<MinecraftInstance*>(m_instance);
-        if (!inst)
+        if (!inst) {
             return true;
+        }
 
         auto version = inst->getPackProfile();
-        if (!version || !version->getComponent("net.minecraftforge") || !version->getComponent("net.minecraft"))
+        if (!version || !version->getComponent("net.minecraftforge") || !version->getComponent("net.minecraft")) {
             return false;
+        }
         auto minecraftCmp = version->getComponent("net.minecraft");
         return minecraftCmp->m_loaded && minecraftCmp->getReleaseDateTime() < g_VersionFilterData.legacyCutoffDate;
     }
@@ -393,9 +720,10 @@ bool NilModFolderPage::shouldDisplay() const
 // Helper function so this doesn't need to be duplicated 3 times
 inline bool ModFolderPage::handleNoModLoader()
 {
-    int resp = QMessageBox::question(this, this->tr("Missing Mod Loader"),
-                                     this->tr("You need to install a compatible mod loader before installing mods. Would you like to do so?"),
-                                     QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+    int resp =
+        QMessageBox::question(this, this->tr("Missing Mod Loader"),
+                              this->tr("You need to install a compatible mod loader before installing mods. Would you like to do so?"),
+                              QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
     switch (resp) {
         case QMessageBox::Yes: {
             // Should be safe
@@ -403,8 +731,8 @@ inline bool ModFolderPage::handleNoModLoader()
             InstallLoaderDialog dialog(profile, QString(), this);
             bool ret = dialog.exec();
             this->m_container->refreshContainer();
-            
-            // returning negation of dialog.exec which'll be true if the install loader dialog got canceled/closed 
+
+            // returning negation of dialog.exec which'll be true if the install loader dialog got canceled/closed
             // and false if the user went through and installed a loader
             return !ret;
         }

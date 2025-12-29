@@ -21,6 +21,7 @@
 
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QDir>
 #include <QHash>
 #include <QLayout>
 
@@ -70,6 +71,10 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     const QList<DownloadTaskPtr> getTasks();
     const std::shared_ptr<ResourceFolderModel> getBaseModel() const { return m_base_model; }
 
+    void setTargetDirectory(const QDir& dir);
+    QString targetDirPath() const { return m_target_dir_path; }
+    QString targetIndexDirPath() const { return m_target_index_dir_path; }
+
     void setResourceMetadata(const std::shared_ptr<Metadata::ModStruct>& meta);
 
    public slots:
@@ -89,6 +94,8 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
 
    protected:
     const std::shared_ptr<ResourceFolderModel> m_base_model;
+    QString m_target_dir_path;
+    QString m_target_index_dir_path;
 
     PageContainer* m_container = nullptr;
 

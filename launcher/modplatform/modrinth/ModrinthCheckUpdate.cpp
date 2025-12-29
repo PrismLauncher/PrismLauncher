@@ -13,6 +13,8 @@
 
 #include "tasks/ConcurrentTask.h"
 
+#include <QDir>
+
 static ModrinthAPI api;
 
 ModrinthCheckUpdate::ModrinthCheckUpdate(QList<Resource*>& resources,
@@ -171,7 +173,9 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
             pack->addonId = resource->metadata()->project_id;
             pack->provider = ModPlatform::ResourceProvider::MODRINTH;
             if ((project_ver.hash != hash && project_ver.is_preferred) || (resource->status() == ResourceStatus::NOT_INSTALLED)) {
-                auto download_task = makeShared<ResourceDownloadTask>(pack, project_ver, m_resourceModel);
+                QDir target_dir(resource->fileinfo().absolutePath());
+                auto download_task = makeShared<ResourceDownloadTask>(pack, project_ver, m_resourceModel, true, target_dir.absolutePath(),
+                                                                      target_dir.filePath(".index"), !resource->enabled());
 
                 QString old_version = resource->metadata()->version_number;
                 if (old_version.isEmpty()) {

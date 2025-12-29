@@ -43,6 +43,7 @@
 #include "modplatform/flame/PackManifest.h"
 
 #include "Application.h"
+#include "Commandline.h"
 #include "FileSystem.h"
 #include "InstanceList.h"
 #include "Json.h"
@@ -60,6 +61,7 @@
 #include "ui/dialogs/CustomMessageBox.h"
 
 #include <QDebug>
+#include <QDirIterator>
 #include <QFileInfo>
 
 #include "meta/Index.h"
@@ -68,7 +70,33 @@
 #include "net/ApiDownload.h"
 #include "ui/pages/modplatform/OptionalModDialog.h"
 
-static const FlameAPI api;
+namespace {
+static const QString FABRIC_ADD_MODS_ARG = QStringLiteral("-Dfabric.addMods=mods");
+
+QString sanitizeFlameSubdirName(const QString& name)
+{
+    auto sanitized = FS::RemoveInvalidFilenameChars(name.trimmed(), '-');
+    sanitized = sanitized.trimmed();
+    if (sanitized.isEmpty())
+        sanitized = QStringLiteral("modpack");
+    return sanitized;
+}
+
+QString applyModsSubdir(const QString& path, const QString& subdir_name)
+{
+    static const QString prefix = QStringLiteral("mods/");
+    if (subdir_name.isEmpty() || !path.startsWith(prefix))
+        return path;
+    return prefix + subdir_name + "/" + path.mid(prefix.size());
+}
+
+bool isModsPath(const QString& path)
+{
+    return path == QStringLiteral("mods") || path.startsWith(QStringLiteral("mods/"));
+}
+}  // namespace
+
+static const FlameAPI FLAME_API;
 
 bool FlameCreationTask::abort()
 {
@@ -106,6 +134,20 @@ bool FlameCreationTask::updateInstance()
         }
     }
 
+    auto inst_settings = inst->settings();
+    m_useModsSubdir = inst_settings->get("ManagedPackUseModsSubdir").toBool();
+    m_modsSubdirName = inst_settings->get("ManagedPackModsSubdirName").toString();
+    if (m_useModsSubdir) {
+        if (m_modsSubdirName.isEmpty()) {
+            auto fallback_name = inst->getManagedPackName();
+            if (fallback_name.isEmpty())
+                fallback_name = inst->name();
+            m_modsSubdirName = sanitizeFlameSubdirName(fallback_name);
+        } else {
+            m_modsSubdirName = sanitizeFlameSubdirName(m_modsSubdirName);
+        }
+    }
+
     QString index_path(FS::PathCombine(m_stagingPath, "manifest.json"));
 
     try {
@@ -128,6 +170,17 @@ bool FlameCreationTask::updateInstance()
         }
     }
 
+    const bool use_mods_subdir = m_useModsSubdir && !m_modsSubdirName.isEmpty();
+    if (use_mods_subdir) {
+        auto mods_subdir_path = FS::PathCombine(inst->gameRoot(), "mods", m_modsSubdirName);
+        if (QFileInfo::exists(mods_subdir_path)) {
+            qDebug() << "Removing Flame mods subfolder:" << mods_subdir_path;
+            if (!FS::deletePath(mods_subdir_path)) {
+                logWarning(tr("Failed to remove existing mods subfolder: %1").arg(mods_subdir_path));
+            }
+        }
+    }
+
     QDir old_inst_dir(inst->instanceRoot());
 
     QString old_index_folder(FS::PathCombine(old_inst_dir.absolutePath(), "flame"));
@@ -141,6 +194,15 @@ bool FlameCreationTask::updateInstance()
         auto& old_files = old_pack.files;
 
         auto& files = m_pack.files;
+
+        if (use_mods_subdir) {
+            QMutableMapIterator<int, Flame::File> old_files_it(old_files);
+            while (old_files_it.hasNext()) {
+                old_files_it.next();
+                if (old_files_it.value().targetFolder == "mods")
+                    old_files_it.remove();
+            }
+        }
 
         // Remove repeated files, we don't need to download them!
         auto files_iterator = files.begin();
@@ -173,6 +235,8 @@ bool FlameCreationTask::updateInstance()
         for (const auto& entry : old_overrides) {
             if (entry.isEmpty())
                 continue;
+            if (use_mods_subdir && isModsPath(entry))
+                continue;
             qDebug() << "Scheduling" << entry << "for removal";
             m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
         }
@@ -185,7 +249,7 @@ bool FlameCreationTask::updateInstance()
         }
 
         auto raw_response = std::make_shared<QByteArray>();
-        auto job = api.getFiles(fileIds, raw_response);
+        auto job = FLAME_API.getFiles(fileIds, raw_response);
 
         QEventLoop loop;
 
@@ -228,8 +292,10 @@ bool FlameCreationTask::updateInstance()
                 QString relative_path(FS::PathCombine(file.targetFolder, file.version.fileName));
                 qDebug() << "Scheduling" << relative_path << "for removal";
                 m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
-                if (relative_path.endsWith(".disabled")) {  // remove it if it was enabled/disabled by user
-                    m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path.chopped(9)));
+                QFileInfo relative_info(relative_path);
+                const bool isDisabled = relative_info.suffix().compare("disabled", Qt::CaseInsensitive) == 0;
+                if (isDisabled) {  // remove it if it was enabled/disabled by user
+                    m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path.chopped(QString(".disabled").size())));
                 } else {
                     m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path + ".disabled"));
                 }
@@ -357,6 +423,8 @@ bool FlameCreationTask::createInstance()
     QString loaderType;
     QString loaderUid;
     QString loaderVersion;
+    bool is_fabric_loader = false;
+    bool has_non_fabric_loader = false;
 
     for (auto& loader : m_pack.minecraft.modLoaders) {
         auto id = loader.id;
@@ -366,23 +434,78 @@ bool FlameCreationTask::createInstance()
                 id.remove("1.20.1-");  // this is a mess for curseforge
             loaderType = "neoforge";
             loaderUid = "net.neoforged";
+            has_non_fabric_loader = true;
         } else if (id.startsWith("forge-")) {
             id.remove("forge-");
             loaderType = "forge";
             loaderUid = "net.minecraftforge";
+            has_non_fabric_loader = true;
         } else if (id.startsWith("fabric-")) {
             id.remove("fabric-");
             loaderType = "fabric";
             loaderUid = "net.fabricmc.fabric-loader";
+            is_fabric_loader = true;
         } else if (id.startsWith("quilt-")) {
             id.remove("quilt-");
             loaderType = "quilt";
             loaderUid = "org.quiltmc.quilt-loader";
+            has_non_fabric_loader = true;
         } else {
             logWarning(tr("Unknown mod loader in manifest: %1").arg(id));
+            has_non_fabric_loader = true;
             continue;
         }
         loaderVersion = id;
+    }
+
+    const bool is_fabric_pack = is_fabric_loader && !has_non_fabric_loader;
+    if (!shouldOverride() && is_fabric_pack) {
+        auto proposed_name = sanitizeFlameSubdirName(m_pack.name.isEmpty() ? name() : m_pack.name);
+        auto dialog = CustomMessageBox::selectable(m_parent, tr("Mods subfolder"),
+                                                   tr("Install mods into a subfolder under ./minecraft/mods/%1?\n\nWarning: advanced "
+                                                      "option, only enable if you know what you are doing.")
+                                                       .arg(proposed_name),
+                                                   QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        m_useModsSubdir = dialog->exec() == QMessageBox::Yes;
+        m_modsSubdirName = m_useModsSubdir ? proposed_name : QString();
+    } else if (!shouldOverride()) {
+        m_useModsSubdir = false;
+        m_modsSubdirName.clear();
+    }
+
+    if (m_useModsSubdir) {
+        if (m_modsSubdirName.isEmpty()) {
+            auto fallback_name = m_pack.name.isEmpty() ? name() : m_pack.name;
+            m_modsSubdirName = sanitizeFlameSubdirName(fallback_name);
+        } else {
+            m_modsSubdirName = sanitizeFlameSubdirName(m_modsSubdirName);
+        }
+    }
+    const bool use_mods_subdir = m_useModsSubdir && !m_modsSubdirName.isEmpty();
+
+    if (use_mods_subdir) {
+        QDir mods_dir(FS::PathCombine(m_stagingPath, "minecraft", "mods"));
+        if (mods_dir.exists()) {
+            if (!mods_dir.mkpath(m_modsSubdirName)) {
+                setError(tr("Could not create mods subfolder:\n") + m_modsSubdirName);
+                return false;
+            }
+
+            auto subdir_path = FS::PathCombine(mods_dir.absolutePath(), m_modsSubdirName);
+            QDirIterator it(mods_dir.absolutePath(), QDir::NoDotAndDotDot | QDir::AllEntries);
+            while (it.hasNext()) {
+                it.next();
+                QFileInfo entry(it.fileInfo());
+                if (entry.fileName() == m_modsSubdirName)
+                    continue;
+
+                auto destination = FS::PathCombine(subdir_path, entry.fileName());
+                if (!FS::move(entry.filePath(), destination)) {
+                    setError(tr("Could not move mod override into subfolder:\n") + entry.fileName());
+                    return false;
+                }
+            }
+        }
     }
 
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
@@ -460,6 +583,30 @@ bool FlameCreationTask::createInstance()
     else
         instance.setManagedPack("flame", "", name(), "", "");
 
+    bool fabric_arg_added = false;
+    if (use_mods_subdir) {
+        auto settings = instance.settings();
+        SettingsObjectPtr source_settings = settings;
+        if (m_instance)
+            source_settings = m_instance.value()->settings();
+
+        bool override_args = source_settings->get("OverrideJavaArgs").toBool();
+        QString jvm_args = override_args ? source_settings->get("JvmArgs").toString() : m_globalSettings->get("JvmArgs").toString();
+        if (!Commandline::splitArgs(jvm_args).contains(FABRIC_ADD_MODS_ARG)) {
+            if (!jvm_args.trimmed().isEmpty())
+                jvm_args += " ";
+            jvm_args += FABRIC_ADD_MODS_ARG;
+            fabric_arg_added = true;
+        }
+        if (override_args || fabric_arg_added) {
+            settings->set("OverrideJavaArgs", true);
+            settings->set("JvmArgs", jvm_args);
+        }
+    }
+
+    instance.settings()->set("ManagedPackUseModsSubdir", m_useModsSubdir);
+    instance.settings()->set("ManagedPackModsSubdirName", use_mods_subdir ? m_modsSubdirName : QString());
+
     instance.setName(name());
 
     m_modIdResolver.reset(new Flame::FileResolvingTask(m_pack));
@@ -486,6 +633,14 @@ bool FlameCreationTask::createInstance()
         auto inst = m_instance.value();
 
         inst->copyManagedPack(instance);
+    }
+
+    if (did_succeed && use_mods_subdir) {
+        if (fabric_arg_added) {
+            logWarning(tr("Recursive mods install is enabled. Added JVM arg -Dfabric.addMods=mods to this instance."));
+        } else {
+            logWarning(tr("Recursive mods install is enabled. JVM arg -Dfabric.addMods=mods is already set for this instance."));
+        }
     }
 
     return did_succeed;
@@ -568,6 +723,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
 {
     m_filesJob.reset(new NetJob(tr("Mod Download Flame"), APPLICATION->network()));
     auto results = m_modIdResolver->getResults().files;
+    const bool use_mods_subdir = m_useModsSubdir && !m_modsSubdirName.isEmpty();
 
     for (const auto& result : results) {
         auto fileName = result.version.fileName;
@@ -578,6 +734,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
             relpath += ".disabled";
         }
 
+        relpath = applyModsSubdir(relpath, use_mods_subdir ? m_modsSubdirName : QString());
         relpath = FS::PathCombine("minecraft", relpath);
         auto path = FS::PathCombine(m_stagingPath, relpath);
 
@@ -612,6 +769,7 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
 {
     setStatus(tr("Copying Blocked Mods..."));
     setAbortable(false);
+    const bool use_mods_subdir = m_useModsSubdir && !m_modsSubdirName.isEmpty();
     int i = 0;
     int total = blocked_mods.length();
     setProgress(i, total);
@@ -621,9 +779,11 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
             continue;
         }
 
-        auto destPath = FS::PathCombine(m_stagingPath, "minecraft", mod.targetFolder, mod.name);
+        auto relpath = FS::PathCombine(mod.targetFolder, mod.name);
         if (mod.disabled)
-            destPath += ".disabled";
+            relpath += ".disabled";
+        relpath = applyModsSubdir(relpath, use_mods_subdir ? m_modsSubdirName : QString());
+        auto destPath = FS::PathCombine(m_stagingPath, "minecraft", relpath);
 
         setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
 
@@ -650,9 +810,13 @@ void FlameCreationTask::validateOtherResources(QEventLoop& loop)
 {
     qDebug() << "Validating whether other resources are in the right place";
     QStringList zipMods;
+    const bool use_mods_subdir = m_useModsSubdir && !m_modsSubdirName.isEmpty();
     for (auto [fileName, targetFolder] : m_otherResources) {
         qDebug() << "Checking" << fileName << "...";
-        auto localPath = FS::PathCombine(m_stagingPath, "minecraft", targetFolder, fileName);
+        QString effective_target_folder = targetFolder;
+        if (use_mods_subdir && targetFolder == "mods")
+            effective_target_folder = FS::PathCombine("mods", m_modsSubdirName);
+        auto localPath = FS::PathCombine(m_stagingPath, "minecraft", effective_target_folder, fileName);
 
         /// @brief check the target and move the the file
         /// @return path where file can now be found
@@ -688,25 +852,25 @@ void FlameCreationTask::validateOtherResources(QEventLoop& loop)
 
         switch (type) {
             case ModPlatform::ResourceType::Mod:
-                validatePath(fileName, targetFolder, "mods");
+                validatePath(fileName, effective_target_folder, use_mods_subdir ? FS::PathCombine("mods", m_modsSubdirName) : "mods");
                 zipMods.push_back(fileName);
                 break;
             case ModPlatform::ResourceType::ResourcePack:
-                validatePath(fileName, targetFolder, "resourcepacks");
+                validatePath(fileName, effective_target_folder, "resourcepacks");
                 break;
             case ModPlatform::ResourceType::TexturePack:
-                validatePath(fileName, targetFolder, "texturepacks");
+                validatePath(fileName, effective_target_folder, "texturepacks");
                 break;
             case ModPlatform::ResourceType::DataPack:
-                validatePath(fileName, targetFolder, "datapacks");
+                validatePath(fileName, effective_target_folder, "datapacks");
                 break;
             case ModPlatform::ResourceType::ShaderPack:
                 // in theory flame API can't do this but who knows, that *may* change ?
                 // better to handle it if it *does* occur in the future
-                validatePath(fileName, targetFolder, "shaderpacks");
+                validatePath(fileName, effective_target_folder, "shaderpacks");
                 break;
             case ModPlatform::ResourceType::World:
-                worldPath = validatePath(fileName, targetFolder, "saves");
+                worldPath = validatePath(fileName, effective_target_folder, "saves");
                 installWorld(worldPath);
                 break;
             case ModPlatform::ResourceType::Unknown:
@@ -719,12 +883,22 @@ void FlameCreationTask::validateOtherResources(QEventLoop& loop)
     // TODO make this work with other sorts of resource
     auto task = makeShared<ConcurrentTask>("CreateModMetadata", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
     auto results = m_modIdResolver->getResults().files;
-    auto folder = FS::PathCombine(m_stagingPath, "minecraft", "mods", ".index");
     for (auto file : results) {
-        if (file.targetFolder != "mods" || (file.version.fileName.endsWith(".zip") && !zipMods.contains(file.version.fileName))) {
+        QFileInfo file_info(file.version.fileName);
+        const bool isZip = file_info.suffix().compare("zip", Qt::CaseInsensitive) == 0;
+        if (!isModsPath(file.targetFolder) || (isZip && !zipMods.contains(file.version.fileName))) {
             continue;
         }
-        task->addTask(makeShared<LocalResourceUpdateTask>(folder, file.pack, file.version));
+        QString effective_target_folder = file.targetFolder;
+        if (use_mods_subdir) {
+            if (file.targetFolder == "mods")
+                effective_target_folder = FS::PathCombine("mods", m_modsSubdirName);
+            else
+                effective_target_folder = applyModsSubdir(file.targetFolder, m_modsSubdirName);
+        }
+        QDir target_dir(FS::PathCombine(m_stagingPath, "minecraft", effective_target_folder));
+        QDir index_dir(target_dir.filePath(".index"));
+        task->addTask(makeShared<LocalResourceUpdateTask>(index_dir, file.pack, file.version));
     }
     connect(task.get(), &Task::finished, &loop, &QEventLoop::quit);
     m_processUpdateFileInfoJob = task;

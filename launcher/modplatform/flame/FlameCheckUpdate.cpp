@@ -18,6 +18,8 @@
 #include "net/NetJob.h"
 #include "tasks/Task.h"
 
+#include <QDir>
+
 static FlameAPI api;
 
 bool FlameCheckUpdate::abort()
@@ -121,7 +123,9 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, std::shared_
                 old_version = tr("Unknown");
         }
 
-        auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver.value(), m_resourceModel);
+        QDir target_dir(resource->fileinfo().absolutePath());
+        auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver.value(), m_resourceModel, true, target_dir.absolutePath(),
+                                                              target_dir.filePath(".index"), !resource->enabled());
         m_updates.emplace_back(pack->name, resource->metadata()->hash, old_version, latest_ver->version, latest_ver->version_type,
                                api.getModFileChangelog(latest_ver->addonId.toInt(), latest_ver->fileId.toInt()),
                                ModPlatform::ResourceProvider::FLAME, download_task, resource->enabled());

@@ -58,4 +58,7 @@ class ModrinthCreationTask final : public InstanceCreationTask {
     std::optional<InstancePtr> m_instance;
 
     QString m_root_path = "minecraft";
+
+    bool m_useModsSubdir = false;
+    QString m_modsSubdirName;
 };

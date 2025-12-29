@@ -280,6 +280,7 @@ bool installIcon(QString root, QString instIconKey)
 void InstanceImportTask::processFlame()
 {
     shared_qobject_ptr<FlameCreationTask> inst_creation_task = nullptr;
+    QString original_instance_id;
     if (!m_extra_info.isEmpty()) {
         auto pack_id_it = m_extra_info.constFind("pack_id");
         Q_ASSERT(pack_id_it != m_extra_info.constEnd());
@@ -289,7 +290,6 @@ void InstanceImportTask::processFlame()
         Q_ASSERT(pack_version_id_it != m_extra_info.constEnd());
         auto pack_version_id = pack_version_id_it.value();
 
-        QString original_instance_id;
         auto original_instance_id_it = m_extra_info.constFind("original_instance_id");
         if (original_instance_id_it != m_extra_info.constEnd())
             original_instance_id = original_instance_id_it.value();
@@ -372,6 +372,7 @@ void InstanceImportTask::processMultiMC()
 void InstanceImportTask::processModrinth()
 {
     shared_qobject_ptr<ModrinthCreationTask> inst_creation_task = nullptr;
+    QString original_instance_id;
     if (!m_extra_info.isEmpty()) {
         auto pack_id_it = m_extra_info.constFind("pack_id");
         Q_ASSERT(pack_id_it != m_extra_info.constEnd());
@@ -382,7 +383,6 @@ void InstanceImportTask::processModrinth()
         if (pack_version_id_it != m_extra_info.constEnd())
             pack_version_id = pack_version_id_it.value();
 
-        QString original_instance_id;
         auto original_instance_id_it = m_extra_info.constFind("original_instance_id");
         if (original_instance_id_it != m_extra_info.constEnd())
             original_instance_id = original_instance_id_it.value();

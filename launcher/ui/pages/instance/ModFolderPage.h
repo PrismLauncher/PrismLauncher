@@ -42,6 +42,9 @@
 #include "ExternalResourcesPage.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
+class ModFolderTreeModel;
+class ModFolderTreeProxyModel;
+
 class ModFolderPage : public ExternalResourcesPage {
     Q_OBJECT
 
@@ -59,12 +62,14 @@ class ModFolderPage : public ExternalResourcesPage {
     virtual QString helpPage() const override { return "Loader-mods"; }
 
     virtual bool shouldDisplay() const override;
-
    public slots:
     void updateFrame(const QModelIndex& current, const QModelIndex& previous) override;
+    void updateActions() override;
 
    private slots:
+    void removeItem();
     void removeItems(const QItemSelection& selection) override;
+    void itemActivated(const QModelIndex& index);
 
     void downloadMods();
     void downloadDialogFinished(int result);
@@ -72,10 +77,20 @@ class ModFolderPage : public ExternalResourcesPage {
     void deleteModMetadata();
     void exportModMetadata();
     void changeModVersion();
+    void createFolder();
+
+   protected:
+    void enableItem() override;
+    void disableItem() override;
+    void viewHomepage() override;
+    bool eventFilter(QObject* obj, QEvent* ev) override;
 
    protected:
     std::shared_ptr<ModFolderModel> m_model;
     QPointer<ResourceDownload::ModDownloadDialog> m_downloadDialog;
+    ModFolderTreeModel* m_treeModel = nullptr;
+    ModFolderTreeProxyModel* m_treeFilterModel = nullptr;
+    QAction* m_newFolderAction = nullptr;
 };
 
 class CoreModFolderPage : public ModFolderPage {

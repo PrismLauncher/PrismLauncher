@@ -68,13 +68,13 @@ bool ResourceFolderModel::startWatching(const QStringList& paths)
 
     update();
 
-    m_is_watching = !m_is_watching;
-    return m_is_watching;
+    m_is_watching = couldnt_be_watched.isEmpty() && (!m_watcher.directories().isEmpty() || !m_watcher.files().isEmpty());
+    return couldnt_be_watched.isEmpty();
 }
 
 bool ResourceFolderModel::stopWatching(const QStringList& paths)
 {
-    if (!m_is_watching)
+    if (!m_is_watching && m_watcher.directories().isEmpty() && m_watcher.files().isEmpty())
         return false;
 
     auto couldnt_be_stopped = m_watcher.removePaths(paths);
@@ -85,8 +85,36 @@ bool ResourceFolderModel::stopWatching(const QStringList& paths)
             qDebug() << "Stopped watching " << path;
     }
 
-    m_is_watching = !m_is_watching;
-    return !m_is_watching;
+    m_is_watching = !m_watcher.directories().isEmpty() || !m_watcher.files().isEmpty();
+    return couldnt_be_stopped.isEmpty();
+}
+
+QDir ResourceFolderModel::indexDirForResource(const Resource& resource) const
+{
+    QDir resource_dir(resource.fileinfo().absolutePath());
+    return QDir(resource_dir.filePath(".index"));
+}
+
+QModelIndex ResourceFolderModel::indexForResource(const Resource& resource) const
+{
+    auto it = m_resources_index.constFind(resource.internal_id());
+    if (it == m_resources_index.constEnd())
+        return {};
+    return index(it.value(), 0);
+}
+
+QModelIndexList ResourceFolderModel::indexesForResources(const QList<Resource*>& resources) const
+{
+    QModelIndexList indexes;
+    indexes.reserve(resources.size());
+    for (auto* resource : resources) {
+        if (!resource)
+            continue;
+        auto idx = indexForResource(*resource);
+        if (idx.isValid())
+            indexes.append(idx);
+    }
+    return indexes;
 }
 
 bool ResourceFolderModel::installResource(QString original_path)
@@ -210,12 +238,42 @@ bool ResourceFolderModel::uninstallResource(const QString& file_name, bool prese
     for (auto& resource : m_resources) {
         auto resourceFileInfo = resource->fileinfo();
         auto resourceFileName = resource->fileinfo().fileName();
-        if (!resource->enabled() && resourceFileName.endsWith(".disabled")) {
-            resourceFileName.chop(9);
+        if (!resource->enabled()) {
+            QFileInfo name_info(resourceFileName);
+            if (name_info.suffix().compare("disabled", Qt::CaseInsensitive) == 0) {
+                resourceFileName.chop(QString(".disabled").size());
+            }
         }
 
         if (resourceFileName == file_name) {
-            auto res = resource->destroy(indexDir(), preserve_metadata, false);
+            auto res = resource->destroy(indexDirForResource(*resource), preserve_metadata, false);
+
+            update();
+
+            return res;
+        }
+    }
+    return false;
+}
+
+bool ResourceFolderModel::uninstallResource(const QString& file_name, const QDir& dir, bool preserve_metadata)
+{
+    auto target_dir = QDir::cleanPath(QDir::fromNativeSeparators(dir.absolutePath()));
+    for (auto& resource : m_resources) {
+        auto resource_dir = QDir::cleanPath(QDir::fromNativeSeparators(resource->fileinfo().absolutePath()));
+        if (resource_dir != target_dir)
+            continue;
+
+        auto resourceFileName = resource->fileinfo().fileName();
+        if (!resource->enabled()) {
+            QFileInfo name_info(resourceFileName);
+            if (name_info.suffix().compare("disabled", Qt::CaseInsensitive) == 0) {
+                resourceFileName.chop(QString(".disabled").size());
+            }
+        }
+
+        if (resourceFileName == file_name) {
+            auto res = resource->destroy(indexDirForResource(*resource), preserve_metadata, false);
 
             update();
 
@@ -235,7 +293,7 @@ bool ResourceFolderModel::deleteResources(const QModelIndexList& indexes)
             continue;
 
         auto& resource = m_resources.at(i.row());
-        resource->destroy(indexDir());
+        resource->destroy(indexDirForResource(*resource));
     }
 
     update();
@@ -253,7 +311,7 @@ void ResourceFolderModel::deleteMetadata(const QModelIndexList& indexes)
             continue;
 
         auto& resource = m_resources.at(i.row());
-        resource->destroyMetadata(indexDir());
+        resource->destroyMetadata(indexDirForResource(*resource));
     }
 
     update();
@@ -292,7 +350,8 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, Ena
             continue;
         }
 
-        auto new_id = resource->internal_id();
+        auto new_id = internalIdForFile(resource->fileinfo());
+        resource->setInternalId(new_id);
 
         m_resources_index.remove(old_id);
         m_resources_index[new_id] = row;
@@ -303,11 +362,11 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, Ena
     return succeeded;
 }
 
-static QMutex s_update_task_mutex;
+static QMutex sUpdateTaskMutex;
 bool ResourceFolderModel::update()
 {
     // We hold a lock here to prevent race conditions on the m_current_update_task reset.
-    QMutexLocker lock(&s_update_task_mutex);
+    QMutexLocker lock(&sUpdateTaskMutex);
 
     // Already updating, so we schedule a future update and return.
     if (m_current_update_task) {
@@ -430,6 +489,7 @@ bool ResourceFolderModel::hasPendingParseTasks() const
 
 void ResourceFolderModel::directoryChanged(QString path)
 {
+    Q_UNUSED(path);
     update();
 }
 
@@ -911,4 +971,13 @@ QList<Resource*> ResourceFolderModel::selectedResources(const QModelIndexList& i
         result.append(&at(index.row()));
     }
     return result;
+}
+
+QString ResourceFolderModel::internalIdForFile(const QFileInfo& info) const
+{
+    auto rel_path = QDir(m_dir).relativeFilePath(info.absoluteFilePath());
+    rel_path = QDir::cleanPath(QDir::fromNativeSeparators(rel_path));
+    if (rel_path.startsWith(".."))
+        return info.fileName();
+    return rel_path;
 }
