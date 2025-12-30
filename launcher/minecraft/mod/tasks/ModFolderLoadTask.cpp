@@ -175,7 +175,7 @@ void ModFolderLoadTask::getFromFiles(const QDir& dir, int depth)
             QString chopped_id = resource->internal_id();
             QFileInfo chopped_info(chopped_id);
             if (chopped_info.suffix().compare("disabled", Qt::CaseInsensitive) == 0) {
-                chopped_id.chop(QString(".disabled").size());
+                chopped_id.chop(9);
             }
 
             if (m_result->resources.contains(chopped_id)) {
