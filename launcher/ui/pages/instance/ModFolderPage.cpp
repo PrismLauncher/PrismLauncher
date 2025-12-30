@@ -164,7 +164,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         }
     };
     connect(selection_model, &QItemSelectionModel::selectionChanged, this, updateExtra);
-    connect(selection_model, &QItemSelectionModel::selectionChanged, this, [this] { updateActions(); });
+    connect(selection_model, &QItemSelectionModel::selectionChanged, this, &ModFolderPage::updateActions);
 }
 
 bool ModFolderPage::shouldDisplay() const
