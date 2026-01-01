@@ -1,6 +1,7 @@
 #include "LoginWizardPage.h"
 #include "minecraft/auth/AccountList.h"
 #include "ui/dialogs/MSALoginDialog.h"
+#include "ui/dialogs/ChooseOfflineNameDialog.h"
 #include "ui_LoginWizardPage.h"
 
 #include "Application.h"
@@ -39,6 +40,23 @@ void LoginWizardPage::on_pushButton_clicked()
             wizard()->accept();
         } else {
             wizard()->next();
+        }
+    }
+}
+
+void LoginWizardPage::on_pushButtonOffline_clicked()
+{
+    ChooseOfflineNameDialog dialog(tr("Please enter your desired username to add your offline account."), this);
+    if (dialog.exec() == QDialog::Accepted) {
+        if (const MinecraftAccountPtr account = MinecraftAccount::createOffline(dialog.getUsername())) {
+            account->login()->start();
+            APPLICATION->accounts()->addAccount(account);
+            APPLICATION->accounts()->setDefaultAccount(account);
+            if (wizard()->currentId() == wizard()->pageIds().last()) {
+                wizard()->accept();
+            } else {
+                wizard()->next();
+            }
         }
     }
 }

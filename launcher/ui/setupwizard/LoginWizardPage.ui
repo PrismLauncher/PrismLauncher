@@ -30,7 +30,7 @@
    <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>In order to play Minecraft, you must have at least one Microsoft account logged in. Do you want to log in now?</string>
+      <string>In order to play Minecraft, you must have at least one account logged in. Do you want to log in now?</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -41,6 +41,13 @@
     <widget class="Line" name="line">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pushButtonOffline">
+     <property name="text">
+      <string>Add Offline account</string>
      </property>
     </widget>
    </item>
