@@ -10,6 +10,8 @@
   <b>Prism Launcher Cracked</b> is a custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.
   <br /><br />
   This fork specifically enables <b>full support for offline/cracked accounts</b>, removing the mandatory Microsoft account requirement and ownership checks.
+  <br /><br />
+  Maintained and Personalized by <b>@Pavle012</b>
 </p>
 
 ## Features

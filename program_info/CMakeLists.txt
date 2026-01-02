@@ -9,14 +9,14 @@ if(UNIX)
 endif()
 
 set(Launcher_CommonName "PrismLauncher")
-set(Launcher_DisplayName "Prism Launcher")
+set(Launcher_DisplayName "Prism Launcher Cracked (Pavle012)")
 
 set(Launcher_Name "${Launcher_CommonName}" PARENT_SCOPE)
 set(Launcher_DisplayName "${Launcher_DisplayName}" PARENT_SCOPE)
 
 set(Launcher_AppID "org.prismlauncher.PrismLauncher")
 set(Launcher_SVGFileName "${Launcher_AppID}.svg")
-set(Launcher_Copyright "© 2022-2025 Prism Launcher Contributors\\n© 2021-2022 PolyMC Contributors\\n© 2012-2021 MultiMC Contributors")
+set(Launcher_Copyright "Copyright (c) 2025 Pavle012\n© 2022-2025 Prism Launcher Contributors\n© 2021-2022 PolyMC Contributors\n© 2012-2021 MultiMC Contributors")
 set(Launcher_Copyright_Mac "© 2022-2025 Prism Launcher Contributors, © 2021-2022 PolyMC Contributors and © 2012-2021 MultiMC Contributors" PARENT_SCOPE)
 set(Launcher_Copyright "${Launcher_Copyright}" PARENT_SCOPE)
 set(Launcher_Domain "prismlauncher.org" PARENT_SCOPE)
