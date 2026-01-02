@@ -112,6 +112,6 @@ As a bonus, you can also [cryptographically sign your commits][gh-signing-commit
 
 ## Backporting to Release Branches
 
-We use [automated backports](https://github.com/PrismLauncher/PrismLauncher/blob/develop/.github/workflows/backport.yml) to merge specific contributions from develop into `release` branches.
+We use [automated backports](https://github.com/Pavle012/PrismLauncherCracked/blob/develop/.github/workflows/backport.yml) to merge specific contributions from develop into `release` branches.
 
 This is done when pull requests are merged and have labels such as `backport release-7.x` - which should be added along with the milestone for the release.

@@ -8,7 +8,7 @@
 
 <p align="center">
   Prism Launcher is a custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.<br />
-  <br />This is a <b>fork</b> of the MultiMC Launcher and is <b>not</b> endorsed by it.
+  <br />This is the <b>Cracked</b> fork of the Prism Launcher and is <b>not</b> endorsed by it.
 </p>
 
 ## Installation
@@ -17,8 +17,7 @@
     <img src="https://repology.org/badge/vertical-allrepos/prismlauncher.svg" alt="Packaging status" align="right">
 </a>
 
-- All downloads and instructions for Prism Launcher can be found on our [Website](https://prismlauncher.org/download).
-- Last build status can be found in the [GitHub Actions](https://github.com/PrismLauncher/PrismLauncher/actions) tab (this also includes the pull requests status).
+- Last build status can be found in the [GitHub Actions](https://github.com/Pavle012/PrismLauncherCracked/actions) tab (this also includes the pull requests status).
 
 ### Development Builds
 
@@ -26,8 +25,8 @@ Please understand that these builds are not intended for most users. There may b
 
 There are development builds available through:
 
-- [GitHub Actions](https://github.com/PrismLauncher/PrismLauncher/actions) (includes builds from pull requests opened by contributors)
-- [nightly.link](https://nightly.link/PrismLauncher/PrismLauncher/workflows/build/develop) (this will always point only to the latest version of develop)
+- [GitHub Actions](https://github.com/Pavle012/PrismLauncherCracked/actions) (includes builds from pull requests opened by contributors)
+- [nightly.link](https://nightly.link/Pavle012/PrismLauncherCracked/workflows/build/develop) (this will always point only to the latest version of develop)
 
 These have debug information in the binaries, so their file sizes are relatively larger.
 
@@ -57,7 +56,7 @@ Feel free to create a GitHub issue if you find a bug or want to suggest a new fe
 
 ## Translations
 
-The translation effort for Prism Launcher is hosted on [Weblate](https://hosted.weblate.org/projects/prismlauncher/launcher/) and information about translating Prism Launcher is available at <https://github.com/PrismLauncher/Translations>.
+The translation effort for Prism Launcher is hosted on [Weblate](https://hosted.weblate.org/projects/prismlauncher/launcher/) and information about translating Prism Launcher is available at <https://github.com/Pavle012/PrismLauncherCracked>.
 
 ## Building
 
@@ -116,7 +115,7 @@ Note that if you build this software without removing the provided API keys in [
 
 If you do not agree with these terms and conditions, then remove the associated API keys from the [CMakeLists.txt](CMakeLists.txt) file by setting them to an empty string (`""`).
 
-## License [![https://github.com/PrismLauncher/PrismLauncher/blob/develop/LICENSE](https://img.shields.io/github/license/PrismLauncher/PrismLauncher?label=License&logo=gnu&color=C4282D)](LICENSE)
+## License [![https://github.com/Pavle012/PrismLauncherCracked/blob/develop/LICENSE](https://img.shields.io/github/license/Pavle012/PrismLauncherCracked?label=License&logo=gnu&color=C4282D)](LICENSE)
 
 All launcher code is available under the GPL-3.0-only license.
 
