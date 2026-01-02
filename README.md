@@ -7,56 +7,33 @@
 </p>
 
 <p align="center">
-  Prism Launcher is a custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.<br />
-  <br />This is the <b>Cracked</b> fork of the Prism Launcher and is <b>not</b> endorsed by it.
+  <b>Prism Launcher Cracked</b> is a custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.
+  <br /><br />
+  This fork specifically enables <b>full support for offline/cracked accounts</b>, removing the mandatory Microsoft account requirement and ownership checks.
 </p>
+
+## Features
+
+- **Offline Support**: Add and play with offline accounts without needing a Microsoft account.
+- **Bypass Ownership Checks**: Play Minecraft without a Microsoft account that owns the game.
+- **Streamlined Setup**: Add your offline account directly from the initial setup wizard.
+- **Multiple Instances**: Manage different versions, mods, and settings independently.
+- **Open Source**: Licensed under GPL-3.0.
 
 ## Installation
 
-<a href="https://repology.org/project/prismlauncher/versions">
-    <img src="https://repology.org/badge/vertical-allrepos/prismlauncher.svg" alt="Packaging status" align="right">
-</a>
-
-- Last build status can be found in the [GitHub Actions](https://github.com/Pavle012/PrismLauncherCracked/actions) tab (this also includes the pull requests status).
+- Last build status can be found in the [GitHub Actions](https://github.com/Pavle012/PrismLauncherCracked/actions) tab.
 
 ### Development Builds
 
-Please understand that these builds are not intended for most users. There may be bugs, and other instabilities. You have been warned.
+Prebuilt Development builds are provided for **Linux** and **Windows**.
 
-There are development builds available through:
-
-- [GitHub Actions](https://github.com/Pavle012/PrismLauncherCracked/actions) (includes builds from pull requests opened by contributors)
-- [nightly.link](https://nightly.link/Pavle012/PrismLauncherCracked/workflows/build/develop) (this will always point only to the latest version of develop)
-
-These have debug information in the binaries, so their file sizes are relatively larger.
-
-Prebuilt Development builds are provided for **Linux**, **Windows** and **macOS**.
-
-For **Arch**, **Debian**, **Fedora**, **OpenSUSE (Tumbleweed)** and **Gentoo**, respectively, you can use these packages for the latest development versions:
-
-[![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--git-1793D1?label=AUR&logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/prismlauncher-git) [![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--qt5--git-1793D1?label=AUR&logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/prismlauncher-qt5-git) [![prismlauncher-git](https://img.shields.io/badge/mpr-prismlauncher--git-A80030?label=MPR&logo=debian&logoColor=white)](https://mpr.makedeb.org/packages/prismlauncher-git)<br />[![prismlauncher-nightly](https://img.shields.io/badge/copr-prismlauncher--nightly-51A2DA?label=COPR&logo=fedora&logoColor=white)](https://copr.fedorainfracloud.org/coprs/g3tchoo/prismlauncher/) [![prismlauncher-nightly](https://img.shields.io/badge/OBS-prismlauncher--nightly-3AB6A9?logo=opensuse&logoColor=white)](https://build.opensuse.org/project/show/home:getchoo) [![prismlauncher-9999](https://img.shields.io/badge/gentoo-prismlauncher--9999-4D4270?label=Gentoo&logo=gentoo&logoColor=white)](https://packages.gentoo.org/packages/games-action/prismlauncher)
-
-These packages are also available to all the distributions based on the ones mentioned above.
+- [GitHub Actions](https://github.com/Pavle012/PrismLauncherCracked/actions)
+- [nightly.link](https://nightly.link/Pavle012/PrismLauncherCracked/workflows/build/develop)
 
 ## Community & Support
 
-Feel free to create a GitHub issue if you find a bug or want to suggest a new feature. We have multiple community spaces where other community members can help you:
-
-- **Our Discord server:**
-
-[![Prism Launcher Discord server](https://discordapp.com/api/guilds/1031648380885147709/widget.png?style=banner3)](https://prismlauncher.org/discord)
-
-- **Our Matrix space:**
-
-[![Prism Launcher Space](https://img.shields.io/matrix/prismlauncher:matrix.org?style=for-the-badge&label=Matrix%20Space&logo=matrix&color=purple)](https://prismlauncher.org/matrix)
-
-- **Our Subreddit:**
-
-[![r/PrismLauncher](https://img.shields.io/reddit/subreddit-subscribers/prismlauncher?style=for-the-badge&logo=reddit)](https://prismlauncher.org/reddit)
-
-## Translations
-
-The translation effort for Prism Launcher is hosted on [Weblate](https://hosted.weblate.org/projects/prismlauncher/launcher/) and information about translating Prism Launcher is available at <https://github.com/Pavle012/PrismLauncherCracked>.
+Feel free to create a GitHub issue if you find a bug or want to suggest a new feature.
 
 ## Building
 
@@ -64,16 +41,10 @@ If you want to build Prism Launcher yourself, check the build instructions:
 
 - [Windows](https://prismlauncher.org/wiki/development/build-instructions/windows/)
 - [Linux](https://prismlauncher.org/wiki/development/build-instructions/linux/)
-- [MacOS](https://prismlauncher.org/wiki/development/build-instructions/macos/)
-- [OpenBSD](https://prismlauncher.org/wiki/development/build-instructions/openbsd/)
 
 ## Sponsors & Partners
 
-We thank all the wonderful backers over at Open Collective! Support Prism Launcher by [becoming a backer](https://opencollective.com/prismlauncher).
-
-[![OpenCollective Backers](https://opencollective.com/prismlauncher/backers.svg?width=890&limit=1000)](https://opencollective.com/prismlauncher#backers)
-
-Thanks to JetBrains for providing us a few licenses for all their products, as part of their [Open Source program](https://www.jetbrains.com/opensource/).
+Thanks to JetBrains for providing licenses for all their products, as part of their [Open Source program](https://www.jetbrains.com/opensource/).
 
 <a href="https://jb.gg/OpenSource">
 <picture>
@@ -83,19 +54,9 @@ Thanks to JetBrains for providing us a few licenses for all their products, as p
 </picture>
 </a>
 
-Thanks to Weblate for hosting our translation efforts.
-
-<a href="https://hosted.weblate.org/engage/prismlauncher/">
-<img src="https://hosted.weblate.org/widgets/prismlauncher/-/open-graph.png" alt="Translation status" width="300" />
-</a>
-
-Thanks to Netlify for providing us their excellent web services, as part of their [Open Source program](https://www.netlify.com/open-source/).
+Thanks to Netlify for providing their excellent web services, as part of their [Open Source program](https://www.netlify.com/open-source/).
 
 <a href="https://www.netlify.com"> <img src="https://www.netlify.com/v3/img/components/netlify-color-accent.svg" alt="Deploys by Netlify" /> </a>
-
-Thanks to the awesome people over at [MacStadium](https://www.macstadium.com/), for providing M1-Macs for development purposes!
-
-<a href="https://www.macstadium.com"><img src="https://uploads-ssl.webflow.com/5ac3c046c82724970fc60918/5c019d917bba312af7553b49_MacStadium-developerlogo.png" alt="Powered by MacStadium" width="300"></a>
 
 ## Forking/Redistributing/Custom builds policy
 
