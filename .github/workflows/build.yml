@@ -93,22 +93,11 @@ jobs:
             cmake-preset: linux
             qt-version: 6.10.1
 
-          - os: ubuntu-24.04-arm
-            artifact-name: Linux-aarch64
-            cmake-preset: linux
-            qt-version: 6.10.1
-
           - os: windows-2022
             artifact-name: Windows-MinGW-w64
             cmake-preset: windows_mingw
             msystem: CLANG64
             vcvars-arch: amd64_x86
-
-          - os: windows-11-arm
-            artifact-name: Windows-MinGW-arm64
-            cmake-preset: windows_mingw
-            msystem: CLANGARM64
-            vcvars-arch: arm64
 
           - os: windows-2022
             artifact-name: Windows-MSVC
@@ -116,18 +105,6 @@ jobs:
             # TODO(@getchoo): This is the default in setup-dependencies/windows. Why isn't it working?!?!
             vcvars-arch: amd64
             qt-version: 6.10.1
-
-          - os: windows-11-arm
-            artifact-name: Windows-MSVC-arm64
-            cmake-preset: windows_msvc
-            vcvars-arch: arm64
-            qt-version: 6.10.1
-
-          - os: macos-26
-            artifact-name: macOS
-            cmake-preset: macos_universal
-            macosx-deployment-target: 12.0
-            qt-version: 6.9.3
 
     runs-on: ${{ matrix.os }}
 

@@ -94,9 +94,19 @@ jobs:
         run: |
           echo "VERSION=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
 
+      - name: Cache Flatpak builder
+        uses: actions/cache@v4
+        with:
+          path: .flatpak-builder
+          key: ${{ runner.os }}-flatpak-builder-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-flatpak-builder-
+
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-Flatpak.flatpak
           manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml
           arch: ${{ matrix.arch }}
+          cache: true
+          cache-key: ${{ runner.os }}-flatpak-builder
