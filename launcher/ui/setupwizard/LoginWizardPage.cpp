@@ -1,9 +1,10 @@
 #include "LoginWizardPage.h"
 #include "minecraft/auth/AccountList.h"
-#include "ui/dialogs/MSALoginDialog.h"
 #include "ui/dialogs/ChooseOfflineNameDialog.h"
+#include "ui/dialogs/MSALoginDialog.h"
 #include "ui_LoginWizardPage.h"
 
+#include <QWizard>
 #include "Application.h"
 
 LoginWizardPage::LoginWizardPage(QWidget* parent) : BaseWizardPage(parent), ui(new Ui::LoginWizardPage)

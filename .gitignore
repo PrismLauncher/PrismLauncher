@@ -62,3 +62,6 @@ flatbuild
 
 # Snap
 *.snap
+
+logs
+logs/*
