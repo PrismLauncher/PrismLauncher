@@ -76,6 +76,7 @@ class InfoFrame : public QFrame {
 
    private:
     void updateHiddenState();
+    void resetScrolll();
 
    private:
     Ui::InfoFrame* ui;

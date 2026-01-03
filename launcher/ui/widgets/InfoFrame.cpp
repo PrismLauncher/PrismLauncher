@@ -270,6 +270,7 @@ void InfoFrame::updateHiddenState()
 
 void InfoFrame::setName(QString text)
 {
+    resetScrolll();
     if (text.isEmpty()) {
         ui->nameLabel->setHidden(true);
     } else {
@@ -418,4 +419,10 @@ void InfoFrame::licenseEllipsisHandler([[maybe_unused]] QString link)
 void InfoFrame::boxClosed([[maybe_unused]] int result)
 {
     m_current_box = nullptr;
+}
+
+void InfoFrame::resetScrolll()
+{
+    ui->scrollArea->horizontalScrollBar()->setValue(0);
+    ui->scrollArea->verticalScrollBar()->setValue(0);
 }
