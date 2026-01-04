@@ -23,7 +23,7 @@
 - **Open Source**: Licensed under GPL-3.0.
 
 > [!TIP]
-> **Skins in Offline Mode**: Since official skins are tied to Microsoft accounts, we recommend using the [CustomSkinLoader](https://www.curseforge.com/minecraft/mc-mods/customskinloader) mod or the [SkinsRestorer](https://skinsrestorer.net/) plugin on servers to see your skins while playing offline.
+> **Skins in Offline Mode**: Since official skins are tied to Microsoft accounts, we recommend using the [CustomSkinLoader](https://modrinth.com/mod/customskinloader) mod or the [SkinsRestorer](https://skinsrestorer.net/) plugin on servers to see your skins while playing offline.
 
 ## Installation
 
