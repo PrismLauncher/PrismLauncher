@@ -32,17 +32,27 @@
  *      See the License for the specific language governing permissions and
  *      limitations under the License.
  */
+
 #include "DesktopServices.h"
+
+#include <array>
+
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
+#include <QLoggingCategory>
 #include <QProcess>
+#include <utility>
+
+#include "BuildConfig.h"
 #include "FileSystem.h"
+
+Q_LOGGING_CATEGORY(DSLogCat, "Desktop Services");
 
 namespace DesktopServices {
 bool openPath(const QFileInfo& path, bool ensureFolderPathExists)
 {
-    qDebug() << "Opening path" << path;
+    qCDebug(DSLogCat) << "Opening path" << path;
     if (ensureFolderPathExists) {
         FS::ensureFolderPathExists(path);
     }
@@ -56,13 +66,13 @@ bool openPath(const QString& path, bool ensureFolderPathExists)
 
 bool run(const QString& application, const QStringList& args, const QString& workingDirectory, qint64* pid)
 {
-    qDebug() << "Running" << application << "with args" << args.join(' ');
+    qCDebug(DSLogCat) << "Running" << application << "with args" << args.join(' ');
     return QProcess::startDetached(application, args, workingDirectory, pid);
 }
 
 bool openUrl(const QUrl& url)
 {
-    qDebug() << "Opening URL" << url.toString();
+    qCDebug(DSLogCat) << "Opening URL" << url.toString();
     return QDesktopServices::openUrl(url);
 }
 

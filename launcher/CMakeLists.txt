@@ -797,6 +797,8 @@ SET(LAUNCHER_SOURCES
     # GUI - general utilities
     DesktopServices.h
     DesktopServices.cpp
+    RecentlyUsed.h
+    RecentlyUsed.cpp
     VersionProxyModel.h
     VersionProxyModel.cpp
     Markdown.h
@@ -1351,6 +1353,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_libraries(Launcher_logic
         gamemode
     )
+endif()
+
+if(WIN32)
+    target_link_libraries(Launcher_logic cppwinrt)
 endif()
 
 target_link_libraries(Launcher_logic

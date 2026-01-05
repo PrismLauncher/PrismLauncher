@@ -994,12 +994,54 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 }
 
             } else if (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME) {
-                QVariantMap receivedData;
-                const QUrlQuery query(url.query());
-                const auto items = query.queryItems();
-                for (auto it = items.begin(), end = items.end(); it != end; ++it)
-                    receivedData.insert(it->first, it->second);
-                emit APPLICATION->oauthReplyRecieved(receivedData);
+                if (url.host() == "oauth") {
+                    QVariantMap receivedData;
+                    const QUrlQuery query(url.query());
+                    const auto items = query.queryItems();
+                    for (auto it = items.begin(), end = items.end(); it != end; ++it)
+                        receivedData.insert(it->first, it->second);
+                    emit APPLICATION->oauthReplyRecieved(receivedData);
+
+                } else if (url.host() == "launch") {
+                    const QString instanceId = url.path();
+                    const QUrlQuery query(url.query());
+                    const QString server = query.queryItemValue("server");
+                    const QString world = query.queryItemValue("world");
+                    const QString profile = query.queryItemValue("profile");
+                    const bool offline = query.queryItemValue("offline_enabled") == "true";
+                    const QString offlineName = query.queryItemValue("offline_name");
+
+                    // TODO: refactor this and the identical code in Application.cpp into a function
+                    InstancePtr instance;
+                    if (!instanceId.isEmpty()) {
+                        instance = APPLICATION->instances()->getInstanceById(instanceId);
+                        if (!instance) {
+                            qWarning() << "Launch command requires an valid instance ID. " << instanceId << "resolves to nothing.";
+                            return;
+                        }
+                    } else {
+                        qWarning() << "Launch command called without an instance ID...";
+                        return;
+                    }
+
+                    MinecraftTarget::Ptr serverObject = nullptr;
+                    if (!server.isEmpty()) {
+                        serverObject = std::make_shared<MinecraftTarget>(MinecraftTarget::parse(server, false));
+                    } else if (!world.isEmpty()) {
+                        serverObject = std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world, true));
+                    }
+                    MinecraftAccountPtr accountObject;
+                    if (!profile.isEmpty()) {
+                        accountObject = APPLICATION->accounts()->getAccountByProfileName(profile);
+                        if (!accountObject) {
+                            qWarning() << "Launch command requires the specified profile to be valid. " << profile
+                                       << "does not resolve to any account.";
+                            return;
+                        }
+                    }
+
+                    APPLICATION->launch(instance, !offline, false, serverObject, accountObject, offlineName);
+                }
                 continue;
             } else {
                 dl_url = url;

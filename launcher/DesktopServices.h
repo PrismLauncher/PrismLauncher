@@ -41,4 +41,8 @@ bool isFlatpak();
  * Determine whether the launcher is running in a Snap environment
  */
 bool isSnap();
+
+
+void test() {
+}
 }  // namespace DesktopServices
