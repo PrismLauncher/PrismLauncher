@@ -149,22 +149,16 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
     disconnect(ui->treeView, &ModListView::activated, this, nullptr);
     connect(ui->treeView, &ModListView::activated, this, &ModFolderPage::itemActivated);
 
-    auto selection_model = ui->treeView->selectionModel();
-    connect(selection_model, &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
-        if (!current.isValid()) {
-            ui->frame->clear();
-            return;
-        }
-        updateFrame(current, previous);
-    });
+    auto selectionModel = ui->treeView->selectionModel();
+    connect(selectionModel, &QItemSelectionModel::currentChanged, this, &ModFolderPage::updateFrame);
 
     auto updateExtra = [this]() {
         if (updateExtraInfo) {
             updateExtraInfo(id(), extraHeaderInfoString());
         }
     };
-    connect(selection_model, &QItemSelectionModel::selectionChanged, this, updateExtra);
-    connect(selection_model, &QItemSelectionModel::selectionChanged, this, &ModFolderPage::updateActions);
+    connect(selectionModel, &QItemSelectionModel::selectionChanged, this, updateExtra);
+    connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &ModFolderPage::updateActions);
 }
 
 bool ModFolderPage::shouldDisplay() const
@@ -172,34 +166,113 @@ bool ModFolderPage::shouldDisplay() const
     return true;
 }
 
+QModelIndexList ModFolderPage::selectedSourceIndexes() const
+{
+    return m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+}
+
+QList<Resource*> ModFolderPage::selectedResources() const
+{
+    return m_treeModel->resourcesFromIndexes(selectedSourceIndexes());
+}
+
+QList<Mod*> ModFolderPage::selectedMods() const
+{
+    return m_treeModel->modsFromIndexes(selectedSourceIndexes());
+}
+
+QStringList ModFolderPage::topLevelFolderPaths(const QModelIndexList& sourceIndexes) const
+{
+    QSet<QString> folderPaths;
+    for (const auto& index : sourceIndexes) {
+        if (index.column() != 0) {
+            continue;
+        }
+        if (!m_treeModel->isFolderIndex(index)) {
+            continue;
+        }
+        auto dir = m_treeModel->folderForIndex(index);
+        if (dir.dirName() == ".index") {
+            continue;
+        }
+        auto path = dir.absolutePath();
+        if (path == m_model->dir().absolutePath()) {
+            continue;
+        }
+        folderPaths.insert(path);
+    }
+
+    QStringList prunedFolders = folderPaths.values();
+    std::sort(prunedFolders.begin(), prunedFolders.end(), [](const QString& left, const QString& right) {
+        if (left.size() != right.size()) {
+            return left.size() < right.size();
+        }
+        return left < right;
+    });
+
+    QStringList foldersToRemove;
+    for (const auto& path : prunedFolders) {
+        bool isChild = false;
+        for (const auto& parent : foldersToRemove) {
+            if (path == parent || path.startsWith(parent + "/")) {
+                isChild = true;
+                break;
+            }
+        }
+        if (!isChild) {
+            foldersToRemove.append(path);
+        }
+    }
+
+    return foldersToRemove;
+}
+
+void ModFolderPage::showFolderRemovalErrors(const QStringList& failedFolders)
+{
+    if (failedFolders.isEmpty()) {
+        return;
+    }
+
+    QStringList entries;
+    entries.reserve(failedFolders.size());
+    for (const auto& folder : failedFolders) {
+        entries.append(QFileInfo(folder).fileName());
+    }
+
+    CustomMessageBox::selectable(this, tr("Error"),
+                                 tr("Failed to remove the following folder(s):\n%1").arg(entries.join('\n')),
+                                 QMessageBox::Warning)
+        ->show();
+}
+
 void ModFolderPage::updateActions()
 {
-    const auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-    const auto selected_resources = m_treeModel->resourcesFromIndexes(selection);
+    const auto selection = selectedSourceIndexes();
+    const auto selectedResources = m_treeModel->resourcesFromIndexes(selection);
 
-    const bool has_mod_selection = !selected_resources.isEmpty();
-    bool has_folder_selection = false;
+    const bool hasModSelection = !selectedResources.isEmpty();
+    bool hasFolderSelection = false;
     for (const auto& index : selection) {
         if (index.column() != 0) {
             continue;
         }
         if (m_treeModel->isFolderIndex(index)) {
-            has_folder_selection = true;
+            hasFolderSelection = true;
             break;
         }
     }
 
     ui->actionUpdateItem->setEnabled(!m_model->empty());
-    ui->actionResetItemMetadata->setEnabled(has_mod_selection);
+    ui->actionResetItemMetadata->setEnabled(hasModSelection);
 
-    ui->actionChangeVersion->setEnabled(selected_resources.size() == 1 && selected_resources[0]->metadata() != nullptr);
+    ui->actionChangeVersion->setEnabled(selectedResources.size() == 1 && selectedResources[0]->metadata() != nullptr);
 
-    ui->actionRemoveItem->setEnabled(has_mod_selection || has_folder_selection);
-    ui->actionEnableItem->setEnabled(has_mod_selection);
-    ui->actionDisableItem->setEnabled(has_mod_selection);
+    ui->actionRemoveItem->setEnabled(hasModSelection || hasFolderSelection);
+    ui->actionEnableItem->setEnabled(hasModSelection);
+    ui->actionDisableItem->setEnabled(hasModSelection);
 
-    ui->actionViewHomepage->setEnabled(has_mod_selection &&
-                                       std::any_of(selected_resources.begin(), selected_resources.end(),
+    ui->actionViewHomepage->setEnabled(hasModSelection &&
+                                       std::any_of(selectedResources.begin(), selectedResources.end(),
                                                    [](Resource* resource) { return resource && !resource->homepage().isEmpty(); }));
     ui->actionExportMetadata->setEnabled(!m_model->empty());
 
@@ -211,6 +284,10 @@ void ModFolderPage::updateActions()
 void ModFolderPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
+    if (!sourceCurrent.isValid()) {
+        ui->frame->clear();
+        return;
+    }
     auto* mod = m_treeModel->modForIndex(sourceCurrent);
     if (!mod) {
         ui->frame->clear();
@@ -222,56 +299,25 @@ void ModFolderPage::updateFrame(const QModelIndex& current, [[maybe_unused]] con
 void ModFolderPage::removeItem()
 {
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
-    auto selection_indexes = selection.indexes();
-    auto resources = m_treeModel->resourcesFromIndexes(selection_indexes);
-    QSet<QString> folder_paths;
-    for (const auto& index : selection_indexes) {
-        if (index.column() != 0) {
-            continue;
-        }
-        if (!m_treeModel->isFolderIndex(index)) {
-            continue;
-        }
-        auto dir = m_treeModel->folderForIndex(index);
-        auto path = QDir::cleanPath(dir.absolutePath());
-        if (path == QDir::cleanPath(m_model->dir().absolutePath())) {
-            continue;
-        }
-        folder_paths.insert(path);
-    }
+    auto selectionIndexes = selection.indexes();
+    auto resources = m_treeModel->resourcesFromIndexes(selectionIndexes);
+    auto foldersToRemove = topLevelFolderPaths(selectionIndexes);
 
-    if (resources.isEmpty() && folder_paths.isEmpty()) {
+    if (resources.isEmpty() && foldersToRemove.isEmpty()) {
         return;
     }
 
-    QStringList pruned_folders = folder_paths.values();
-    std::sort(pruned_folders.begin(), pruned_folders.end(),
-              [](const QString& left, const QString& right) { return left.size() < right.size(); });
-    QStringList folders_to_remove;
-    for (const auto& path : pruned_folders) {
-        bool is_child = false;
-        for (const auto& parent : folders_to_remove) {
-            if (path == parent || path.startsWith(parent + "/")) {
-                is_child = true;
-                break;
-            }
-        }
-        if (!is_child) {
-            folders_to_remove.append(path);
-        }
-    }
-
-    if (!folders_to_remove.isEmpty() || resources.size() > 1 || (resources.size() == 1 && !folders_to_remove.isEmpty())) {
+    if (!foldersToRemove.isEmpty() || !resources.isEmpty()) {
         QString message;
-        if (folders_to_remove.size() == 1 && resources.isEmpty()) {
+        if (foldersToRemove.size() == 1 && resources.isEmpty()) {
             message = tr("You are about to remove the folder '%1'.\n"
                          "This will delete the folder and all its contents.\n\n"
                          "Are you sure?")
-                          .arg(QFileInfo(folders_to_remove.front()).fileName());
+                          .arg(QFileInfo(foldersToRemove.front()).fileName());
         } else {
             QStringList parts;
-            if (!folders_to_remove.isEmpty()) {
-                parts << tr("%1 folder(s)").arg(folders_to_remove.size());
+            if (!foldersToRemove.isEmpty()) {
+                parts << tr("%1 folder(s)").arg(foldersToRemove.size());
             }
             if (!resources.isEmpty()) {
                 parts << tr("%1 item(s)").arg(resources.size());
@@ -306,77 +352,42 @@ void ModFolderPage::removeItems(const QItemSelection& selection)
             return;
         }
     }
-    auto selection_indexes = selection.indexes();
-    auto resources = m_treeModel->resourcesFromIndexes(selection_indexes);
+    auto selectionIndexes = selection.indexes();
+    auto resources = m_treeModel->resourcesFromIndexes(selectionIndexes);
     auto indexes = m_model->indexesForResources(resources);
     if (!indexes.isEmpty()) {
         m_model->deleteResources(indexes);
     }
 
-    QSet<QString> folder_paths;
-    for (const auto& index : selection_indexes) {
-        if (index.column() != 0) {
-            continue;
-        }
-        if (!m_treeModel->isFolderIndex(index)) {
-            continue;
-        }
-        auto dir = m_treeModel->folderForIndex(index);
-        auto path = QDir::cleanPath(dir.absolutePath());
-        if (path == QDir::cleanPath(m_model->dir().absolutePath())) {
-            continue;
-        }
-        folder_paths.insert(path);
-    }
-
-    QStringList pruned_folders = folder_paths.values();
-    std::sort(pruned_folders.begin(), pruned_folders.end(),
-              [](const QString& left, const QString& right) { return left.size() < right.size(); });
-    QStringList folders_to_remove;
-    for (const auto& path : pruned_folders) {
-        bool is_child = false;
-        for (const auto& parent : folders_to_remove) {
-            if (path == parent || path.startsWith(parent + "/")) {
-                is_child = true;
-                break;
-            }
-        }
-        if (!is_child) {
-            folders_to_remove.append(path);
-        }
-    }
-
-    for (const auto& folder : folders_to_remove) {
+    auto foldersToRemove = topLevelFolderPaths(selectionIndexes);
+    QStringList failedFolders;
+    for (const auto& folder : foldersToRemove) {
         if (!FS::deletePath(folder)) {
-            CustomMessageBox::selectable(this, tr("Error"), tr("Failed to remove folder '%1'.").arg(folder), QMessageBox::Warning)->show();
+            failedFolders.append(folder);
         }
     }
 
-    if (!folders_to_remove.isEmpty()) {
-        m_model->update();
-    }
+    showFolderRemovalErrors(failedFolders);
+    m_model->update();
 }
 
 void ModFolderPage::enableItem()
 {
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-    auto resources = m_treeModel->resourcesFromIndexes(selection);
+    auto resources = selectedResources();
     auto indexes = m_model->indexesForResources(resources);
     m_model->setResourceEnabled(indexes, EnableAction::ENABLE);
 }
 
 void ModFolderPage::disableItem()
 {
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-    auto resources = m_treeModel->resourcesFromIndexes(selection);
+    auto resources = selectedResources();
     auto indexes = m_model->indexesForResources(resources);
     m_model->setResourceEnabled(indexes, EnableAction::DISABLE);
 }
 
 void ModFolderPage::viewHomepage()
 {
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-    for (auto resource : m_treeModel->resourcesFromIndexes(selection)) {
+    for (auto resource : selectedResources()) {
         auto url = resource->homepage();
         if (!url.isEmpty()) {
             DesktopServices::openUrl(url);
@@ -386,8 +397,7 @@ void ModFolderPage::viewHomepage()
 
 void ModFolderPage::itemActivated(const QModelIndex&)
 {
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
-    auto resources = m_treeModel->resourcesFromIndexes(selection.indexes());
+    auto resources = selectedResources();
     auto indexes = m_model->indexesForResources(resources);
     m_model->setResourceEnabled(indexes, EnableAction::TOGGLE);
 }
@@ -427,8 +437,7 @@ void ModFolderPage::downloadMods()
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &ModFolderPage::downloadDialogFinished);
 
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
-    m_downloadDialog->setTargetDirectory(m_treeModel->targetDirForSelection(selection.indexes()));
+    m_downloadDialog->setTargetDirectory(m_treeModel->targetDirForSelection(selectedSourceIndexes()));
 
     m_downloadDialog->open();
 }
@@ -502,25 +511,24 @@ void ModFolderPage::updateMods(bool includeDeps)
             return;
         }
     }
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-
-    auto mods_list = m_treeModel->resourcesFromIndexes(selection);
-    bool use_all = mods_list.empty();
-    if (use_all) {
-        mods_list = m_model->allResources();
+    auto selection = selectedSourceIndexes();
+    const bool useAll = selection.isEmpty();
+    auto modsList = m_treeModel->resourcesFromIndexes(selection);
+    if (useAll) {
+        modsList = m_model->allResources();
     }
 
-    ResourceUpdateDialog update_dialog(this, m_instance, m_model, mods_list, includeDeps, profile->getModLoadersList());
-    update_dialog.checkCandidates();
+    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoadersList());
+    updateDialog.checkCandidates();
 
-    if (update_dialog.aborted()) {
+    if (updateDialog.aborted()) {
         CustomMessageBox::selectable(this, tr("Aborted"), tr("The mod updater was aborted!"), QMessageBox::Warning)->show();
         return;
     }
-    if (update_dialog.noUpdates()) {
-        QString message{ tr("'%1' is up-to-date! :)").arg(mods_list.front()->name()) };
-        if (mods_list.size() > 1) {
-            if (use_all) {
+    if (updateDialog.noUpdates()) {
+        QString message{ tr("'%1' is up-to-date! :)").arg(modsList.front()->name()) };
+        if (modsList.size() > 1) {
+            if (useAll) {
                 message = tr("All mods are up-to-date! :)");
             } else {
                 message = tr("All selected mods are up-to-date! :)");
@@ -530,7 +538,7 @@ void ModFolderPage::updateMods(bool includeDeps)
         return;
     }
 
-    if (update_dialog.exec()) {
+    if (updateDialog.exec()) {
         auto tasks = new ConcurrentTask("Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
@@ -548,7 +556,7 @@ void ModFolderPage::updateMods(bool includeDeps)
             tasks->deleteLater();
         });
 
-        for (auto task : update_dialog.getTasks()) {
+        for (auto task : updateDialog.getTasks()) {
             tasks->addTask(task);
         }
 
@@ -562,8 +570,7 @@ void ModFolderPage::updateMods(bool includeDeps)
 
 void ModFolderPage::deleteModMetadata()
 {
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-    auto resources = m_treeModel->resourcesFromIndexes(selection);
+    auto resources = selectedResources();
     auto selectionCount = resources.length();
     if (selectionCount == 0) {
         return;
@@ -601,9 +608,8 @@ void ModFolderPage::changeModVersion()
         QMessageBox::critical(this, tr("Error"), tr("Mod updates are unavailable when metadata is disabled!"));
         return;
     }
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-    auto mods_list = m_treeModel->modsFromIndexes(selection);
-    if (mods_list.length() != 1 || mods_list[0]->metadata() == nullptr) {
+    auto modsList = selectedMods();
+    if (modsList.length() != 1 || modsList[0]->metadata() == nullptr) {
         return;
     }
 
@@ -611,14 +617,17 @@ void ModFolderPage::changeModVersion()
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &ModFolderPage::downloadDialogFinished);
 
-    m_downloadDialog->setTargetDirectory(QDir(mods_list[0]->fileinfo().absolutePath()));
-    m_downloadDialog->setResourceMetadata((*mods_list.begin())->metadata());
+    m_downloadDialog->setTargetDirectory(QDir(modsList[0]->fileinfo().absolutePath()));
+    m_downloadDialog->setResourceMetadata((*modsList.begin())->metadata());
     m_downloadDialog->open();
 }
 
 void ModFolderPage::exportModMetadata()
 {
-    auto mods = m_model->allMods();
+    auto mods = selectedMods();
+    if (mods.isEmpty()) {
+        mods = m_model->allMods();
+    }
     std::sort(mods.begin(), mods.end(), [](const Mod* a, const Mod* b) { return a->name() < b->name(); });
     ExportToModListDialog dlg(m_instance->name(), mods, this);
     dlg.exec();
@@ -631,8 +640,7 @@ void ModFolderPage::createFolder()
     }
 
     bool ok = false;
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
-    auto target_dir = m_treeModel->targetDirForSelection(selection.indexes());
+    auto targetDir = m_treeModel->targetDirForSelection(selectedSourceIndexes());
 
     QString name =
         QInputDialog::getText(this, tr("New Folder"), tr("Enter a new folder name."), QLineEdit::Normal, tr("New Folder"), &ok).trimmed();
@@ -640,25 +648,21 @@ void ModFolderPage::createFolder()
         return;
     }
 
-    if (name.isEmpty()) {
-        name = tr("New Folder");
-    }
-
     name = FS::RemoveInvalidFilenameChars(name, '-');
     if (name.isEmpty()) {
-        name = tr("New Folder");
+        return;
     }
 
-    auto folder_name = FS::DirNameFromString(name, target_dir.absolutePath());
-    if (folder_name.isEmpty()) {
+    auto folderName = FS::DirNameFromString(name, targetDir.absolutePath());
+    if (folderName.isEmpty()) {
         CustomMessageBox::selectable(this, tr("Error"), tr("Failed to create folder. Please choose a different name."),
                                      QMessageBox::Critical)
             ->show();
         return;
     }
 
-    if (!target_dir.mkpath(folder_name)) {
-        CustomMessageBox::selectable(this, tr("Error"), tr("Failed to create folder '%1'.").arg(folder_name), QMessageBox::Critical)
+    if (!targetDir.mkpath(folderName)) {
+        CustomMessageBox::selectable(this, tr("Error"), tr("Failed to create folder '%1'.").arg(folderName), QMessageBox::Critical)
             ->show();
         return;
     }

@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2024
+ *  Copyright (c) 2024 abhicommands <114682464+abhicommands@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -66,7 +67,7 @@ class ModFolderTreeModel : public QAbstractItemModel {
         QString name;
         QDir dir;
         Resource* resource = nullptr;
-        int backend_row = -1;
+        int backendRow = -1;
         int row = 0;
         Node* parent = nullptr;
         std::vector<std::unique_ptr<Node>> children;
@@ -89,5 +90,5 @@ class ModFolderTreeProxyModel : public QSortFilterProxyModel {
     explicit ModFolderTreeProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}
 
    protected:
-    bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 };

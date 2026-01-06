@@ -495,13 +495,13 @@ void EnsureMetadataTask::updateMetadata(ModPlatform::IndexedPack& pack, ModPlatf
     try {
         // Prevent file name mismatch
         ver.fileName = resource->fileinfo().fileName();
-        QFileInfo ver_info(ver.fileName);
-        if (ver_info.suffix().compare("disabled", Qt::CaseInsensitive) == 0) {
-            ver.fileName.chop(QString(".disabled").size());
+        QFileInfo verInfo(ver.fileName);
+        if (verInfo.suffix().compare("disabled", Qt::CaseInsensitive) == 0) {
+            ver.fileName.chop(9);
         }
 
-        auto index_dir = indexDirForResource(resource);
-        auto task = makeShared<LocalResourceUpdateTask>(index_dir, pack, ver);
+        auto indexDir = indexDirForResource(resource);
+        auto task = makeShared<LocalResourceUpdateTask>(indexDir, pack, ver);
 
         connect(task.get(), &Task::finished, this, [this, &pack, resource] { updateMetadataCallback(pack, resource); });
 

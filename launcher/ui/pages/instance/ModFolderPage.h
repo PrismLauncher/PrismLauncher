@@ -44,6 +44,8 @@
 
 class ModFolderTreeModel;
 class ModFolderTreeProxyModel;
+class Mod;
+class Resource;
 
 class ModFolderPage : public ExternalResourcesPage {
     Q_OBJECT
@@ -78,6 +80,13 @@ class ModFolderPage : public ExternalResourcesPage {
     void exportModMetadata();
     void changeModVersion();
     void createFolder();
+
+   private:
+    QModelIndexList selectedSourceIndexes() const;
+    QList<Resource*> selectedResources() const;
+    QList<Mod*> selectedMods() const;
+    QStringList topLevelFolderPaths(const QModelIndexList& sourceIndexes) const;
+    void showFolderRemovalErrors(const QStringList& failedFolders);
 
    protected:
     void enableItem() override;

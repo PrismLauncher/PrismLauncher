@@ -37,17 +37,19 @@ QString sanitizeModrinthSubdirName(const QString& name)
 {
     auto sanitized = FS::RemoveInvalidFilenameChars(name.trimmed(), '-');
     sanitized = sanitized.trimmed();
-    if (sanitized.isEmpty())
+    if (sanitized.isEmpty()) {
         sanitized = QStringLiteral("modpack");
+    }
     return sanitized;
 }
 
-QString applyModsSubdir(const QString& path, const QString& subdir_name)
+QString applyModsSubdir(const QString& path, const QString& subdirName)
 {
     static const QString prefix = QStringLiteral("mods/");
-    if (subdir_name.isEmpty() || !path.startsWith(prefix))
+    if (subdirName.isEmpty() || !path.startsWith(prefix)) {
         return path;
-    return prefix + subdir_name + "/" + path.mid(prefix.size());
+    }
+    return prefix + subdirName + "/" + path.mid(prefix.size());
 }
 
 bool isModsPath(const QString& path)
@@ -58,12 +60,14 @@ bool isModsPath(const QString& path)
 
 bool ModrinthCreationTask::abort()
 {
-    if (!canAbort())
+    if (!canAbort()) {
         return false;
+    }
 
     m_abort = true;
-    if (m_task)
+    if (m_task) {
         m_task->abort();
+    }
     return Task::abort();
 }
 
@@ -82,8 +86,9 @@ bool ModrinthCreationTask::updateInstance()
         if (!inst) {
             inst = instance_list->getInstanceById(originalName());
 
-            if (!inst)
+            if (!inst) {
                 return false;
+            }
         }
     }
 
@@ -92,18 +97,20 @@ bool ModrinthCreationTask::updateInstance()
     m_modsSubdirName = inst_settings->get("ManagedPackModsSubdirName").toString();
     if (m_useModsSubdir) {
         if (m_modsSubdirName.isEmpty()) {
-            auto fallback_name = inst->getManagedPackName();
-            if (fallback_name.isEmpty())
-                fallback_name = inst->name();
-            m_modsSubdirName = sanitizeModrinthSubdirName(fallback_name);
+            auto fallbackName = inst->getManagedPackName();
+            if (fallbackName.isEmpty()) {
+                fallbackName = inst->name();
+            }
+            m_modsSubdirName = sanitizeModrinthSubdirName(fallbackName);
         } else {
             m_modsSubdirName = sanitizeModrinthSubdirName(m_modsSubdirName);
         }
     }
 
     QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
-    if (!parseManifest(index_path, m_files, true, false))
+    if (!parseManifest(index_path, m_files, true, false)) {
         return false;
+    }
 
     auto version_name = inst->getManagedPackVersionName();
     m_root_path = QFileInfo(inst->gameRoot()).fileName();
@@ -111,8 +118,9 @@ bool ModrinthCreationTask::updateInstance()
 
     if (shouldConfirmUpdate()) {
         auto should_update = askIfShouldUpdate(m_parent, version_str);
-        if (should_update == ShouldUpdate::SkipUpdating)
+        if (should_update == ShouldUpdate::SkipUpdating) {
             return false;
+        }
         if (should_update == ShouldUpdate::Cancel) {
             m_abort = true;
             return false;
@@ -121,11 +129,11 @@ bool ModrinthCreationTask::updateInstance()
 
     const bool useModsSubdir = m_useModsSubdir && !m_modsSubdirName.isEmpty();
     if (useModsSubdir) {
-        auto mods_subdir_path = FS::PathCombine(inst->gameRoot(), "mods", m_modsSubdirName);
-        if (QFileInfo::exists(mods_subdir_path)) {
-            qDebug() << "Removing Modrinth mods subfolder:" << mods_subdir_path;
-            if (!FS::deletePath(mods_subdir_path)) {
-                logWarning(tr("Failed to remove existing mods subfolder: %1").arg(mods_subdir_path));
+        auto modsSubdirPath = FS::PathCombine(inst->gameRoot(), "mods", m_modsSubdirName);
+        if (QFileInfo::exists(modsSubdirPath)) {
+            qDebug() << "Removing Modrinth mods subfolder:" << modsSubdirPath;
+            if (!FS::deletePath(modsSubdirPath)) {
+                logWarning(tr("Failed to remove existing mods subfolder: %1").arg(modsSubdirPath));
             }
         }
     }
@@ -175,8 +183,9 @@ bool ModrinthCreationTask::updateInstance()
         // so we're fine removing them!
         if (!old_files.empty()) {
             for (auto const& file : old_files) {
-                if (file.path.isEmpty())
+                if (file.path.isEmpty()) {
                     continue;
+                }
                 qDebug() << "Scheduling" << file.path << "for removal";
                 m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(file.path));
                 QFileInfo file_info(file.path);
@@ -194,20 +203,24 @@ bool ModrinthCreationTask::updateInstance()
         // FIXME: We may want to do something about disabled mods.
         auto old_overrides = Override::readOverrides("overrides", old_index_folder);
         for (const auto& entry : old_overrides) {
-            if (entry.isEmpty())
+            if (entry.isEmpty()) {
                 continue;
-            if (useModsSubdir && isModsPath(entry))
+            }
+            if (useModsSubdir && isModsPath(entry)) {
                 continue;
+            }
             qDebug() << "Scheduling" << entry << "for removal";
             m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
         }
 
         auto old_client_overrides = Override::readOverrides("client-overrides", old_index_folder);
         for (const auto& entry : old_client_overrides) {
-            if (entry.isEmpty())
+            if (entry.isEmpty()) {
                 continue;
-            if (useModsSubdir && isModsPath(entry))
+            }
+            if (useModsSubdir && isModsPath(entry)) {
                 continue;
+            }
             qDebug() << "Scheduling" << entry << "for removal";
             m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
         }
@@ -241,21 +254,22 @@ bool ModrinthCreationTask::createInstance()
     QString parent_folder(FS::PathCombine(m_stagingPath, "mrpack"));
 
     QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
-    if (m_files.empty() && !parseManifest(index_path, m_files, true, true))
+    if (m_files.empty() && !parseManifest(index_path, m_files, true, true)) {
         return false;
+    }
 
     const bool isFabricPack =
         !m_fabric_version.isEmpty() && m_quilt_version.isEmpty() && m_forge_version.isEmpty() && m_neoForge_version.isEmpty();
     if (!shouldOverride() && isFabricPack) {
-        auto pack_name = m_managed_name.isEmpty() ? name() : m_managed_name;
-        auto proposed_name = sanitizeModrinthSubdirName(pack_name);
+        auto packName = m_managed_name.isEmpty() ? name() : m_managed_name;
+        auto proposedName = sanitizeModrinthSubdirName(packName);
         auto dialog = CustomMessageBox::selectable(m_parent, tr("Mods subfolder"),
                                                    tr("Install mods into a subfolder under ./minecraft/mods/%1?\n\nWarning: advanced "
                                                       "option, only enable if you know what you are doing.")
-                                                       .arg(proposed_name),
+                                                       .arg(proposedName),
                                                    QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
         m_useModsSubdir = dialog->exec() == QMessageBox::Yes;
-        m_modsSubdirName = m_useModsSubdir ? proposed_name : QString();
+        m_modsSubdirName = m_useModsSubdir ? proposedName : QString();
     } else if (!shouldOverride()) {
         m_useModsSubdir = false;
         m_modsSubdirName.clear();
@@ -263,8 +277,8 @@ bool ModrinthCreationTask::createInstance()
 
     if (m_useModsSubdir) {
         if (m_modsSubdirName.isEmpty()) {
-            auto fallback_name = m_managed_name.isEmpty() ? name() : m_managed_name;
-            m_modsSubdirName = sanitizeModrinthSubdirName(fallback_name);
+            auto fallbackName = m_managed_name.isEmpty() ? name() : m_managed_name;
+            m_modsSubdirName = sanitizeModrinthSubdirName(fallbackName);
         } else {
             m_modsSubdirName = sanitizeModrinthSubdirName(m_modsSubdirName);
         }
@@ -304,22 +318,23 @@ bool ModrinthCreationTask::createInstance()
     }
 
     if (useModsSubdir) {
-        QDir mods_dir(FS::PathCombine(mcPath, "mods"));
-        if (mods_dir.exists()) {
-            if (!mods_dir.mkpath(m_modsSubdirName)) {
+        QDir modsDir(FS::PathCombine(mcPath, "mods"));
+        if (modsDir.exists()) {
+            if (!modsDir.mkpath(m_modsSubdirName)) {
                 setError(tr("Could not create mods subfolder:\n") + m_modsSubdirName);
                 return false;
             }
 
-            auto subdir_path = FS::PathCombine(mods_dir.absolutePath(), m_modsSubdirName);
-            QDirIterator it(mods_dir.absolutePath(), QDir::NoDotAndDotDot | QDir::AllEntries);
+            auto subdirPath = FS::PathCombine(modsDir.absolutePath(), m_modsSubdirName);
+            QDirIterator it(modsDir.absolutePath(), QDir::NoDotAndDotDot | QDir::AllEntries);
             while (it.hasNext()) {
                 it.next();
                 QFileInfo entry(it.fileInfo());
-                if (entry.fileName() == m_modsSubdirName)
+                if (entry.fileName() == m_modsSubdirName) {
                     continue;
+                }
 
-                auto destination = FS::PathCombine(subdir_path, entry.fileName());
+                auto destination = FS::PathCombine(subdirPath, entry.fileName());
                 if (!FS::move(entry.filePath(), destination)) {
                     setError(tr("Could not move mod override into subfolder:\n") + entry.fileName());
                     return false;
@@ -336,14 +351,18 @@ bool ModrinthCreationTask::createInstance()
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", m_minecraft_version, true);
 
-    if (!m_fabric_version.isEmpty())
+    if (!m_fabric_version.isEmpty()) {
         components->setComponentVersion("net.fabricmc.fabric-loader", m_fabric_version);
-    if (!m_quilt_version.isEmpty())
+    }
+    if (!m_quilt_version.isEmpty()) {
         components->setComponentVersion("org.quiltmc.quilt-loader", m_quilt_version);
-    if (!m_forge_version.isEmpty())
+    }
+    if (!m_forge_version.isEmpty()) {
         components->setComponentVersion("net.minecraftforge", m_forge_version);
-    if (!m_neoForge_version.isEmpty())
+    }
+    if (!m_neoForge_version.isEmpty()) {
         components->setComponentVersion("net.neoforged", m_neoForge_version);
+    }
 
     if (m_instIcon != "default") {
         instance.setIconKey(m_instIcon);
@@ -352,29 +371,32 @@ bool ModrinthCreationTask::createInstance()
     }
 
     // Don't add managed info to packs without an ID (most likely imported from ZIP)
-    if (!m_managed_id.isEmpty())
+    if (!m_managed_id.isEmpty()) {
         instance.setManagedPack("modrinth", m_managed_id, m_managed_name, m_managed_version_id, version());
-    else
+    } else {
         instance.setManagedPack("modrinth", "", name(), "", "");
+    }
 
-    bool fabric_arg_added = false;
+    bool fabricArgAdded = false;
     if (useModsSubdir) {
         auto settings = instance.settings();
-        SettingsObjectPtr source_settings = settings;
-        if (m_instance)
-            source_settings = m_instance.value()->settings();
-
-        bool override_args = source_settings->get("OverrideJavaArgs").toBool();
-        QString jvm_args = override_args ? source_settings->get("JvmArgs").toString() : m_globalSettings->get("JvmArgs").toString();
-        if (!Commandline::splitArgs(jvm_args).contains(FABRIC_ADD_MODS_ARG)) {
-            if (!jvm_args.trimmed().isEmpty())
-                jvm_args += " ";
-            jvm_args += FABRIC_ADD_MODS_ARG;
-            fabric_arg_added = true;
+        SettingsObjectPtr sourceSettings = settings;
+        if (m_instance) {
+            sourceSettings = m_instance.value()->settings();
         }
-        if (override_args || fabric_arg_added) {
+
+        bool overrideArgs = sourceSettings->get("OverrideJavaArgs").toBool();
+        QString jvmArgs = overrideArgs ? sourceSettings->get("JvmArgs").toString() : m_globalSettings->get("JvmArgs").toString();
+        if (!Commandline::splitArgs(jvmArgs).contains(FABRIC_ADD_MODS_ARG)) {
+            if (!jvmArgs.trimmed().isEmpty()) {
+                jvmArgs += " ";
+            }
+            jvmArgs += FABRIC_ADD_MODS_ARG;
+            fabricArgAdded = true;
+        }
+        if (overrideArgs || fabricArgAdded) {
             settings->set("OverrideJavaArgs", true);
-            settings->set("JvmArgs", jvm_args);
+            settings->set("JvmArgs", jvmArgs);
         }
     }
 
@@ -386,24 +408,24 @@ bool ModrinthCreationTask::createInstance()
 
     auto downloadMods = makeShared<NetJob>(tr("Mod Download Modrinth"), APPLICATION->network());
 
-    auto root_modpack_path = FS::PathCombine(m_stagingPath, m_root_path);
-    auto root_modpack_url = QUrl::fromLocalFile(root_modpack_path);
+    auto rootModpackPath = FS::PathCombine(m_stagingPath, m_root_path);
+    auto rootModpackUrl = QUrl::fromLocalFile(rootModpackPath);
     // TODO make this work with other sorts of resource
     QHash<QString, Resource*> resources;
     for (auto& file : m_files) {
         auto fileName = applyModsSubdir(file.path, useModsSubdir ? m_modsSubdirName : QString());
         fileName = FS::RemoveInvalidPathChars(fileName);
-        auto file_path = FS::PathCombine(root_modpack_path, fileName);
-        if (!root_modpack_url.isParentOf(QUrl::fromLocalFile(file_path))) {
+        auto filePath = FS::PathCombine(rootModpackPath, fileName);
+        if (!rootModpackUrl.isParentOf(QUrl::fromLocalFile(filePath))) {
             // This means we somehow got out of the root folder, so abort here to prevent exploits
             setError(tr("One of the files has a path that leads to an arbitrary location (%1). This is a security risk and isn't allowed.")
                          .arg(fileName));
             return false;
         }
         if (fileName.startsWith("mods/")) {
-            auto mod = new Mod(file_path);
+            auto mod = new Mod(filePath);
             ModDetails d;
-            d.mod_id = file_path;
+            d.mod_id = filePath;
             mod->setDetails(d);
             resources[file.hash.toHex()] = mod;
         }
@@ -411,29 +433,30 @@ bool ModrinthCreationTask::createInstance()
             setError(tr("The file '%1' is missing a download link. This is invalid in the pack format.").arg(fileName));
             return false;
         }
-        qDebug() << "Will try to download" << file.downloads.front() << "to" << file_path;
-        auto dl = Net::ApiDownload::makeFile(file.downloads.dequeue(), file_path);
+        qDebug() << "Will try to download" << file.downloads.front() << "to" << filePath;
+        auto dl = Net::ApiDownload::makeFile(file.downloads.dequeue(), filePath);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
         downloadMods->addNetAction(dl);
         if (!file.downloads.empty()) {
             // FIXME: This really needs to be put into a ConcurrentTask of
             // MultipleOptionsTask's , once those exist :)
             auto param = dl.toWeakRef();
-            connect(dl.get(), &Task::failed, [&file, file_path, param, downloadMods] {
-                auto ndl = Net::ApiDownload::makeFile(file.downloads.dequeue(), file_path);
+            connect(dl.get(), &Task::failed, [&file, filePath, param, downloadMods] {
+                auto ndl = Net::ApiDownload::makeFile(file.downloads.dequeue(), filePath);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 downloadMods->addNetAction(ndl);
-                if (auto shared = param.lock())
+                if (auto shared = param.lock()) {
                     shared->succeeded();
+                }
             });
         }
     }
 
-    bool ended_well = false;
+    bool endedWell = false;
 
-    connect(downloadMods.get(), &NetJob::succeeded, this, [&ended_well]() { ended_well = true; });
-    connect(downloadMods.get(), &NetJob::failed, [this, &ended_well](const QString& reason) {
-        ended_well = false;
+    connect(downloadMods.get(), &NetJob::succeeded, this, [&endedWell]() { endedWell = true; });
+    connect(downloadMods.get(), &NetJob::failed, [this, &endedWell](const QString& reason) {
+        endedWell = false;
         setError(reason);
     });
     connect(downloadMods.get(), &NetJob::finished, &loop, &QEventLoop::quit);
@@ -449,22 +472,22 @@ bool ModrinthCreationTask::createInstance()
 
     loop.exec();
 
-    if (!ended_well) {
+    if (!endedWell) {
         for (auto resource : resources) {
             delete resource;
         }
-        return ended_well;
+        return endedWell;
     }
 
     QEventLoop ensureMetaLoop;
     QDir folder = FS::PathCombine(instance.modsRoot(), ".index");
-    auto index_dir_resolver = [](Resource* resource) {
-        QDir mod_dir(resource->fileinfo().absolutePath());
-        return QDir(mod_dir.filePath(".index"));
+    auto indexDirResolver = [](Resource* resource) {
+        QDir modDir(resource->fileinfo().absolutePath());
+        return QDir(modDir.filePath(".index"));
     };
     auto ensureMetadataTask =
-        makeShared<EnsureMetadataTask>(resources, folder, ModPlatform::ResourceProvider::MODRINTH, index_dir_resolver);
-    connect(ensureMetadataTask.get(), &Task::succeeded, this, [&ended_well]() { ended_well = true; });
+        makeShared<EnsureMetadataTask>(resources, folder, ModPlatform::ResourceProvider::MODRINTH, indexDirResolver);
+    connect(ensureMetadataTask.get(), &Task::succeeded, this, [&endedWell]() { endedWell = true; });
     connect(ensureMetadataTask.get(), &Task::finished, &ensureMetaLoop, &QEventLoop::quit);
     connect(ensureMetadataTask.get(), &Task::progress, [this](qint64 current, qint64 total) {
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
@@ -482,7 +505,7 @@ bool ModrinthCreationTask::createInstance()
     resources.clear();
 
     // Update information of the already installed instance, if any.
-    if (m_instance && ended_well) {
+    if (m_instance && endedWell) {
         setAbortable(false);
         auto inst = m_instance.value();
 
@@ -490,22 +513,23 @@ bool ModrinthCreationTask::createInstance()
         // is preserved, but if we're using the original one, we update the version string.
         // NOTE: This needs to come before the copyManagedPack call!
         if (inst->name().contains(inst->getManagedPackVersionName()) && inst->name() != instance.name()) {
-            if (askForChangingInstanceName(m_parent, inst->name(), instance.name()) == InstanceNameChange::ShouldChange)
+            if (askForChangingInstanceName(m_parent, inst->name(), instance.name()) == InstanceNameChange::ShouldChange) {
                 inst->setName(instance.name());
+            }
         }
 
         inst->copyManagedPack(instance);
     }
 
-    if (ended_well && useModsSubdir) {
-        if (fabric_arg_added) {
+    if (endedWell && useModsSubdir) {
+        if (fabricArgAdded) {
             logWarning(tr("Recursive mods install is enabled. Added JVM arg -Dfabric.addMods=mods to this instance."));
         } else {
             logWarning(tr("Recursive mods install is enabled. JVM arg -Dfabric.addMods=mods is already set for this instance."));
         }
     }
 
-    return ended_well;
+    return endedWell;
 }
 
 bool ModrinthCreationTask::parseManifest(const QString& index_path,
@@ -524,8 +548,9 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
             }
 
             if (set_internal_data) {
-                if (m_managed_version_id.isEmpty())
+                if (m_managed_version_id.isEmpty()) {
                     m_managed_version_id = obj["versionId"].toString();
+                }
                 m_managed_name = obj["name"].toString();
             }
 
@@ -563,8 +588,9 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
                     if (!download_url.isValid()) {
                         qDebug()
                             << QString("Download URL (%1) for %2 is not a correctly formatted URL").arg(download_url.toString(), file.path);
-                        if (is_last && file.downloads.isEmpty())
+                        if (is_last && file.downloads.isEmpty()) {
                             throw JSONValidationError(tr("Download URL for %1 is not a correctly formatted URL").arg(file.path));
+                        }
                     } else {
                         file.downloads.push_back(download_url);
                     }
@@ -576,8 +602,9 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
             if (!optionalFiles.empty()) {
                 if (show_optional_dialog) {
                     QStringList oFiles;
-                    for (auto file : optionalFiles)
+                    for (auto file : optionalFiles) {
                         oFiles.push_back(file.path);
+                    }
                     OptionalModDialog optionalModDialog(m_parent, oFiles);
                     if (optionalModDialog.exec() == QDialog::Rejected) {
                         emitAborted();

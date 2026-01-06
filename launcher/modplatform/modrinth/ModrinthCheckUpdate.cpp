@@ -5,6 +5,7 @@
 
 #include "Json.h"
 
+#include "FileSystem.h"
 #include "QObjectPtr.h"
 #include "ResourceDownloadTask.h"
 
@@ -12,8 +13,6 @@
 #include "modplatform/helpers/HashUtils.h"
 
 #include "tasks/ConcurrentTask.h"
-
-#include <QDir>
 
 static ModrinthAPI api;
 
@@ -159,9 +158,9 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
             // - The version reported by the JAR is different from the version reported by the indexed version (it's usually the case)
             // Such is the pain of having arbitrary files for a given version .-.
 
-            auto project_ver = Modrinth::loadIndexedPackVersion(project_obj, m_hashType, loader_filter);
-            if (project_ver.downloadUrl.isEmpty()) {
-                qCritical() << "Modrinth mod without download url!" << project_ver.fileName;
+            auto projectVer = Modrinth::loadIndexedPackVersion(project_obj, m_hashType, loader_filter);
+            if (projectVer.downloadUrl.isEmpty()) {
+                qCritical() << "Modrinth mod without download url!" << projectVer.fileName;
                 ++iter;
                 continue;
             }
@@ -172,23 +171,25 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
             pack->slug = resource->metadata()->slug;
             pack->addonId = resource->metadata()->project_id;
             pack->provider = ModPlatform::ResourceProvider::MODRINTH;
-            if ((project_ver.hash != hash && project_ver.is_preferred) || (resource->status() == ResourceStatus::NOT_INSTALLED)) {
-                QDir target_dir(resource->fileinfo().absolutePath());
-                auto download_task = makeShared<ResourceDownloadTask>(pack, project_ver, m_resourceModel, true, target_dir.absolutePath(),
-                                                                      target_dir.filePath(".index"), !resource->enabled());
+            if ((projectVer.hash != hash && projectVer.is_preferred) || (resource->status() == ResourceStatus::NOT_INSTALLED)) {
+                const QString targetDirPath = resource->fileinfo().absolutePath();
+                const QString indexDirPath = FS::PathCombine(targetDirPath, ".index");
+                auto downloadTask =
+                    makeShared<ResourceDownloadTask>(pack, projectVer, m_resourceModel, true, targetDirPath, indexDirPath, !resource->enabled());
 
-                QString old_version = resource->metadata()->version_number;
-                if (old_version.isEmpty()) {
-                    if (resource->status() == ResourceStatus::NOT_INSTALLED)
-                        old_version = tr("Not installed");
-                    else
-                        old_version = tr("Unknown");
+                QString oldVersion = resource->metadata()->version_number;
+                if (oldVersion.isEmpty()) {
+                    if (resource->status() == ResourceStatus::NOT_INSTALLED) {
+                        oldVersion = tr("Not installed");
+                    } else {
+                        oldVersion = tr("Unknown");
+                    }
                 }
 
-                m_updates.emplace_back(pack->name, hash, old_version, project_ver.version_number, project_ver.version_type,
-                                       project_ver.changelog, ModPlatform::ResourceProvider::MODRINTH, download_task, resource->enabled());
+                m_updates.emplace_back(pack->name, hash, oldVersion, projectVer.version_number, projectVer.version_type, projectVer.changelog,
+                                       ModPlatform::ResourceProvider::MODRINTH, downloadTask, resource->enabled());
             }
-            m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, project_ver));
+            m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, projectVer));
 
             iter = m_mappings.erase(iter);
         }
@@ -216,12 +217,13 @@ void ModrinthCheckUpdate::checkNextLoader()
     for (auto resource : m_mappings) {
         QString reason;
 
-        if (dynamic_cast<Mod*>(resource) != nullptr)
+        if (dynamic_cast<Mod*>(resource) != nullptr) {
             reason =
                 tr("No valid version found for this resource. It's probably unavailable for the current game "
                    "version / mod loader.");
-        else
+        } else {
             reason = tr("No valid version found for this resource. It's probably unavailable for the current game version.");
+        }
 
         emit checkFailed(resource, reason);
     }

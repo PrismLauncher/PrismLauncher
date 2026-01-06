@@ -2,7 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2024
- *  Copyright (c) 2024 Abhinav Acharya <114682464+abhicommands@users.noreply.github.com>
+ *  Copyright (c) 2024 abhicommands <114682464+abhicommands@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ class ModFolderLoadTask : public Task {
     ResultPtr result() const { return m_result; }
 
    public:
-    ModFolderLoadTask(const QDir& root_dir, bool is_indexed, bool clean_orphan, std::function<Resource*(const QFileInfo&)> create_function);
+    ModFolderLoadTask(const QDir& rootDir, bool isIndexed, bool cleanOrphan, std::function<Resource*(const QFileInfo&)> createFunction);
 
     bool canAbort() const override { return true; }
     bool abort() override

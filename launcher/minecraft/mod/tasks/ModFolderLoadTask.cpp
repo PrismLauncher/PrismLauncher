@@ -2,7 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2024
- *  Copyright (c) 2024 Abhinav Acharya <114682464+abhicommands@users.noreply.github.com>
+ *  Copyright (c) 2024 abhicommands <114682464+abhicommands@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,27 +39,27 @@ static bool isModFile(const QFileInfo& info)
 
     auto suffix = info.suffix().toLower();
     if (suffix == "disabled") {
-        auto complete_suffix = info.completeSuffix().toLower();
-        const auto parts = complete_suffix.split('.');
+        auto completeSuffix = info.completeSuffix().toLower();
+        const auto parts = completeSuffix.split('.');
         if (parts.size() < 2) {
             return false;
         }
-        auto inner_suffix = parts.at(parts.size() - 2);
-        return isKnownModSuffix(inner_suffix);
+        auto innerSuffix = parts.at(parts.size() - 2);
+        return isKnownModSuffix(innerSuffix);
     }
 
     return isKnownModSuffix(suffix);
 }
 
-ModFolderLoadTask::ModFolderLoadTask(const QDir& root_dir,
-                                     bool is_indexed,
-                                     bool clean_orphan,
-                                     std::function<Resource*(const QFileInfo&)> create_function)
+ModFolderLoadTask::ModFolderLoadTask(const QDir& rootDir,
+                                     bool isIndexed,
+                                     bool cleanOrphan,
+                                     std::function<Resource*(const QFileInfo&)> createFunction)
     : Task(false)
-    , m_rootDir(root_dir)
-    , m_isIndexed(is_indexed)
-    , m_cleanOrphan(clean_orphan)
-    , m_createFunc(create_function)
+    , m_rootDir(rootDir)
+    , m_isIndexed(isIndexed)
+    , m_cleanOrphan(cleanOrphan)
+    , m_createFunc(createFunction)
     , m_result(new Result())
     , m_threadToSpawnInto(thread())
 {}
@@ -81,8 +81,8 @@ void ModFolderLoadTask::executeTask()
         while (iter.hasNext()) {
             auto resource = iter.next().value();
             if (resource->status() == ResourceStatus::NOT_INSTALLED) {
-                QDir index_dir(QDir(resource->fileinfo().absolutePath()).filePath(".index"));
-                resource->destroy(index_dir, false, false);
+        QDir indexDir(QDir(resource->fileinfo().absolutePath()).filePath(".index"));
+        resource->destroy(indexDir, false, false);
                 iter.remove();
             }
         }
@@ -101,18 +101,18 @@ void ModFolderLoadTask::executeTask()
 
 void ModFolderLoadTask::getFromMetadata(const QDir& dir)
 {
-    QDir index_dir(dir.filePath(".index"));
-    if (index_dir.exists()) {
-        index_dir.refresh();
-        for (auto entry : index_dir.entryList(QDir::Files)) {
-            auto metadata = Metadata::get(index_dir, entry);
+    QDir indexDir(dir.filePath(".index"));
+    if (indexDir.exists()) {
+        indexDir.refresh();
+        for (auto entry : indexDir.entryList(QDir::Files)) {
+            auto metadata = Metadata::get(indexDir, entry);
             if (!metadata.isValid()) {
                 continue;
             }
 
-            QFileInfo file_info(dir.filePath(metadata.filename));
-            auto* resource = m_createFunc(file_info);
-            resource->setInternalId(internalIdForFile(file_info));
+            QFileInfo fileInfo(dir.filePath(metadata.filename));
+            auto* resource = m_createFunc(fileInfo);
+            resource->setInternalId(internalIdForFile(fileInfo));
             resource->setMetadata(metadata);
             resource->setStatus(ResourceStatus::NOT_INSTALLED);
             m_result->resources[resource->internal_id()].reset(resource);
@@ -172,20 +172,20 @@ void ModFolderLoadTask::getFromFiles(const QDir& dir, int depth)
                 m_result->resources[resource->internal_id()]->setStatus(ResourceStatus::NO_METADATA);
             }
         } else {
-            QString chopped_id = resource->internal_id();
-            QFileInfo chopped_info(chopped_id);
-            if (chopped_info.suffix().compare("disabled", Qt::CaseInsensitive) == 0) {
-                chopped_id.chop(9);
+            QString choppedId = resource->internal_id();
+            QFileInfo choppedInfo(choppedId);
+            if (choppedInfo.suffix().compare("disabled", Qt::CaseInsensitive) == 0) {
+                choppedId.chop(9);
             }
 
-            if (m_result->resources.contains(chopped_id)) {
+            if (m_result->resources.contains(choppedId)) {
                 m_result->resources[resource->internal_id()].reset(resource);
 
-                auto metadata = m_result->resources[chopped_id]->metadata();
+                auto metadata = m_result->resources[choppedId]->metadata();
                 if (metadata) {
                     resource->setMetadata(*metadata);
                     m_result->resources[resource->internal_id()]->setStatus(ResourceStatus::INSTALLED);
-                    m_result->resources.remove(chopped_id);
+                    m_result->resources.remove(choppedId);
                 }
             } else {
                 m_result->resources[resource->internal_id()].reset(resource);
@@ -197,10 +197,11 @@ void ModFolderLoadTask::getFromFiles(const QDir& dir, int depth)
 
 QString ModFolderLoadTask::internalIdForFile(const QFileInfo& info) const
 {
-    auto rel_path = m_rootDir.relativeFilePath(info.absoluteFilePath());
-    rel_path = QDir::cleanPath(QDir::fromNativeSeparators(rel_path));
-    if (rel_path.startsWith("..")) {
+    auto relPath = m_rootDir.relativeFilePath(info.absoluteFilePath());
+    relPath = QDir::cleanPath(QDir::fromNativeSeparators(relPath));
+    if (relPath.startsWith("..")) {
+        // Defensive fallback: avoid storing IDs that escape the root folder.
         return info.fileName();
     }
-    return rel_path;
+    return relPath;
 }

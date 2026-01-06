@@ -59,8 +59,9 @@ ResourceFolderLoadTask::ResourceFolderLoadTask(const QDir& resource_dir,
 
 void ResourceFolderLoadTask::executeTask()
 {
-    if (thread() != m_thread_to_spawn_into)
+    if (thread() != m_thread_to_spawn_into) {
         connect(this, &Task::finished, this->thread(), &QThread::quit);
+    }
 
     if (m_is_indexed) {
         // Read metadata first
@@ -123,8 +124,9 @@ void ResourceFolderLoadTask::executeTask()
         }
     }
 
-    for (auto mod : m_result->resources)
+    for (auto mod : m_result->resources) {
         mod->moveToThread(m_thread_to_spawn_into);
+    }
 
     if (m_aborted) {
         emitAborted();

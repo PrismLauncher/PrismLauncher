@@ -6,6 +6,7 @@
 #include <QHash>
 #include <memory>
 
+#include "FileSystem.h"
 #include "Json.h"
 
 #include "QObjectPtr.h"
@@ -17,8 +18,6 @@
 #include "net/ApiDownload.h"
 #include "net/NetJob.h"
 #include "tasks/Task.h"
-
-#include <QDir>
 
 static FlameAPI api;
 
@@ -91,46 +90,49 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, std::shared_
         qCritical() << e.what();
         qDebug() << doc;
     }
-    auto latest_ver = api.getLatestVersion(pack->versions, m_loadersList, resource->metadata()->loaders, !m_loadersList.isEmpty());
+    auto latestVer = api.getLatestVersion(pack->versions, m_loadersList, resource->metadata()->loaders, !m_loadersList.isEmpty());
 
     setStatus(tr("Parsing the API response from CurseForge for '%1'...").arg(resource->name()));
 
-    if (!latest_ver.has_value() || !latest_ver->addonId.isValid()) {
+    if (!latestVer.has_value() || !latestVer->addonId.isValid()) {
         QString reason;
-        if (dynamic_cast<Mod*>(resource) != nullptr)
+        if (dynamic_cast<Mod*>(resource) != nullptr) {
             reason =
                 tr("No valid version found for this resource. It's probably unavailable for the current game "
                    "version / mod loader.");
-        else
+        } else {
             reason = tr("No valid version found for this resource. It's probably unavailable for the current game version.");
+        }
 
         emit checkFailed(resource, reason);
         return;
     }
 
-    if (latest_ver->downloadUrl.isEmpty() && latest_ver->fileId != resource->metadata()->file_id) {
-        m_blocked[resource] = latest_ver->fileId.toString();
+    if (latestVer->downloadUrl.isEmpty() && latestVer->fileId != resource->metadata()->file_id) {
+        m_blocked[resource] = latestVer->fileId.toString();
         return;
     }
 
-    if (!latest_ver->hash.isEmpty() &&
-        (resource->metadata()->hash != latest_ver->hash || resource->status() == ResourceStatus::NOT_INSTALLED)) {
-        auto old_version = resource->metadata()->version_number;
-        if (old_version.isEmpty()) {
-            if (resource->status() == ResourceStatus::NOT_INSTALLED)
-                old_version = tr("Not installed");
-            else
-                old_version = tr("Unknown");
+    if (!latestVer->hash.isEmpty() &&
+        (resource->metadata()->hash != latestVer->hash || resource->status() == ResourceStatus::NOT_INSTALLED)) {
+        auto oldVersion = resource->metadata()->version_number;
+        if (oldVersion.isEmpty()) {
+            if (resource->status() == ResourceStatus::NOT_INSTALLED) {
+                oldVersion = tr("Not installed");
+            } else {
+                oldVersion = tr("Unknown");
+            }
         }
 
-        QDir target_dir(resource->fileinfo().absolutePath());
-        auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver.value(), m_resourceModel, true, target_dir.absolutePath(),
-                                                              target_dir.filePath(".index"), !resource->enabled());
-        m_updates.emplace_back(pack->name, resource->metadata()->hash, old_version, latest_ver->version, latest_ver->version_type,
-                               api.getModFileChangelog(latest_ver->addonId.toInt(), latest_ver->fileId.toInt()),
-                               ModPlatform::ResourceProvider::FLAME, download_task, resource->enabled());
+        const QString targetDirPath = resource->fileinfo().absolutePath();
+        const QString indexDirPath = FS::PathCombine(targetDirPath, ".index");
+        auto downloadTask = makeShared<ResourceDownloadTask>(pack, latestVer.value(), m_resourceModel, true, targetDirPath, indexDirPath,
+                                                             !resource->enabled());
+        m_updates.emplace_back(pack->name, resource->metadata()->hash, oldVersion, latestVer->version, latestVer->version_type,
+                               api.getModFileChangelog(latestVer->addonId.toInt(), latestVer->fileId.toInt()),
+                               ModPlatform::ResourceProvider::FLAME, downloadTask, resource->enabled());
     }
-    m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, latest_ver.value()));
+    m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, latestVer.value()));
 }
 
 void FlameCheckUpdate::collectBlockedMods()
