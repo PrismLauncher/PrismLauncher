@@ -168,6 +168,24 @@ void AccountList::removeAccount(QModelIndex index)
     }
 }
 
+void AccountList::moveAccount(QModelIndex index, int delta) {
+    int row = index.row();
+    int newRow = row + delta;
+    if (index.isValid() && row < m_accounts.size() && newRow >= 0 && newRow < m_accounts.size()) {
+        auto account = m_accounts.at(row);
+
+        beginRemoveRows(QModelIndex(), row, row);
+        m_accounts.removeAt(row);
+        endRemoveRows();
+
+        beginInsertRows(QModelIndex(), newRow, newRow);
+        m_accounts.insert(newRow, account);
+        endInsertRows();
+
+        onListChanged();
+    }
+}
+
 MinecraftAccountPtr AccountList::defaultAccount() const
 {
     return m_defaultAccount;
