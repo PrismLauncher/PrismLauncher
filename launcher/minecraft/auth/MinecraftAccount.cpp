@@ -101,7 +101,7 @@ AccountState MinecraftAccount::accountState() const
     return data.accountState;
 }
 
-QPixmap MinecraftAccount::getFace() const
+QPixmap MinecraftAccount::getFace(int width, int height) const
 {
     QPixmap skinTexture;
     if (!skinTexture.loadFromData(data.minecraftProfile.skin.data, "PNG")) {
@@ -112,7 +112,7 @@ QPixmap MinecraftAccount::getFace() const
     QPainter painter(&skin);
     painter.drawPixmap(0, 0, skinTexture.copy(8, 8, 8, 8));
     painter.drawPixmap(0, 0, skinTexture.copy(40, 8, 8, 8));
-    return skin.scaled(64, 64, Qt::KeepAspectRatio);
+    return skin.scaled(width, height, Qt::KeepAspectRatio);
 }
 
 shared_qobject_ptr<AuthFlow> MinecraftAccount::login(bool useDeviceCode)
