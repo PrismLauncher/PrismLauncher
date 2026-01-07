@@ -71,7 +71,7 @@ static QImage improveSkin(QImage skin)
 
         auto copyRect = [&p, &newSkin](int startX, int startY, int offsetX, int offsetY, int sizeX, int sizeY) {
             QImage region = newSkin.copy(startX, startY, sizeX, sizeY);
-            region = region.mirrored(true, false);
+            region = region.flipped(Qt::Horizontal);
 
             p.drawImage(startX + offsetX, startY + offsetY, region);
         };

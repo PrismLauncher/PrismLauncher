@@ -60,10 +60,16 @@ class IconProxyModel : public QSortFilterProxyModel {
 
     void setCategory(IconPickerDialog::IconPickerCategory category)
     {
-        if (m_category == category)
+        if (m_category == category) {
             return;
+        }
         m_category = category;
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
         invalidateFilter();
+#else
+        beginFilterChange();
+        endFilterChange();
+#endif
     }
 
    protected:
