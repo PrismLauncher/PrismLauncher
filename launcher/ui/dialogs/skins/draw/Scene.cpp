@@ -96,11 +96,11 @@ Scene::Scene(const QImage& skin, bool slim, const QImage& cape) : QOpenGLFunctio
     m_elytra << leftWing << rightWing;
 
     // texture init
-    m_skinTexture = new QOpenGLTexture(skin.mirrored());
+    m_skinTexture = new QOpenGLTexture(skin.flipped());
     m_skinTexture->setMinificationFilter(QOpenGLTexture::Nearest);
     m_skinTexture->setMagnificationFilter(QOpenGLTexture::Nearest);
 
-    m_capeTexture = new QOpenGLTexture(cape.mirrored());
+    m_capeTexture = new QOpenGLTexture(cape.flipped());
     m_capeTexture->setMinificationFilter(QOpenGLTexture::Nearest);
     m_capeTexture->setMagnificationFilter(QOpenGLTexture::Nearest);
 }
@@ -162,7 +162,7 @@ void updateTexture(QOpenGLTexture* texture, const QImage& img)
 
 void Scene::setSkin(const QImage& skin)
 {
-    updateTexture(m_skinTexture, skin.mirrored());
+    updateTexture(m_skinTexture, skin.flipped());
 }
 
 void Scene::setMode(bool slim)
@@ -171,7 +171,7 @@ void Scene::setMode(bool slim)
 }
 void Scene::setCape(const QImage& cape)
 {
-    updateTexture(m_capeTexture, cape.mirrored());
+    updateTexture(m_capeTexture, cape.flipped());
 }
 void Scene::setCapeVisible(bool visible)
 {

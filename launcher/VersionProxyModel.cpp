@@ -70,7 +70,15 @@ class VersionFilterModel : public QSortFilterProxyModel {
         return true;
     }
 
-    void filterChanged() { invalidateFilter(); }
+    void filterChanged()
+    {
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
+        invalidateFilter();
+#else
+        beginFilterChange();
+        endFilterChange();
+#endif
+    }
 
    private:
     VersionProxyModel* m_parent;

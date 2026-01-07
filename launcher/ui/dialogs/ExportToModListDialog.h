@@ -39,7 +39,7 @@ class ExportToModListDialog : public QDialog {
    protected slots:
     void formatChanged(int index);
     void triggerImp();
-    void trigger(int /*unused*/) { triggerImp(); };
+    void trigger(Qt::CheckState /*unused*/) { triggerImp(); };
     void addExtra(ExportToModList::OptionalData option);
 
    private:
