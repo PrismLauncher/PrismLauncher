@@ -76,18 +76,18 @@ void NewsChecker::rssDownloadFinished()
     m_newsNetJob.reset();
     QDomDocument doc;
     {
-        // Stuff to store error info in.
-        QString errorMsg = "Unknown error.";
-        int errorLine = -1;
-        int errorCol = -1;
-
         QFile feed(m_entry->getFullPath());
 
         if (feed.open(QFile::ReadOnly | QFile::Text)) {
             QTextStream in(&feed);
             // Parse the XML.
-            if (!doc.setContent(in.readAll(), false, &errorMsg, &errorLine, &errorCol)) {
-                fail(QString("Error parsing RSS feed XML. %1 at %2:%3.").arg(errorMsg).arg(errorLine).arg(errorCol));
+            auto result = doc.setContent(in.readAll());
+            if (!result) {
+                QString fullErrorMsg = QString("Error parsing RSS feed XML. %1 at %2:%3.")
+                                           .arg(result.errorMessage)
+                                           .arg(result.errorLine)
+                                           .arg(result.errorColumn);
+                fail(fullErrorMsg);
                 return;
             }
         }

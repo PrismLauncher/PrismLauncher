@@ -38,7 +38,7 @@ QString Meta::Version::typeString() const
 
 QDateTime Meta::Version::time() const
 {
-    return QDateTime::fromMSecsSinceEpoch(m_time * 1000, Qt::UTC);
+    return QDateTime::fromMSecsSinceEpoch(m_time * 1000, QTimeZone::UTC);
 }
 
 void Meta::Version::parse(const QJsonObject& obj)

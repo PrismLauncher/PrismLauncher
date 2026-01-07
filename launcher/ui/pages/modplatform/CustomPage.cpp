@@ -51,11 +51,11 @@ CustomPage::CustomPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(par
     ui->setupUi(this);
     connect(ui->versionList, &VersionSelectWidget::selectedVersionChanged, this, &CustomPage::setSelectedVersion);
     filterChanged();
-    connect(ui->alphaFilter, &QCheckBox::stateChanged, this, &CustomPage::filterChanged);
-    connect(ui->betaFilter, &QCheckBox::stateChanged, this, &CustomPage::filterChanged);
-    connect(ui->snapshotFilter, &QCheckBox::stateChanged, this, &CustomPage::filterChanged);
-    connect(ui->releaseFilter, &QCheckBox::stateChanged, this, &CustomPage::filterChanged);
-    connect(ui->experimentsFilter, &QCheckBox::stateChanged, this, &CustomPage::filterChanged);
+    connect(ui->alphaFilter, &QCheckBox::checkStateChanged, this, &CustomPage::filterChanged);
+    connect(ui->betaFilter, &QCheckBox::checkStateChanged, this, &CustomPage::filterChanged);
+    connect(ui->snapshotFilter, &QCheckBox::checkStateChanged, this, &CustomPage::filterChanged);
+    connect(ui->releaseFilter, &QCheckBox::checkStateChanged, this, &CustomPage::filterChanged);
+    connect(ui->experimentsFilter, &QCheckBox::checkStateChanged, this, &CustomPage::filterChanged);
     connect(ui->refreshBtn, &QPushButton::clicked, this, &CustomPage::refresh);
 
     connect(ui->loaderVersionList, &VersionSelectWidget::selectedVersionChanged, this, &CustomPage::setSelectedLoaderVersion);

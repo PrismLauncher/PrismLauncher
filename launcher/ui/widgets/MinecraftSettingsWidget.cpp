@@ -119,7 +119,7 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
 
         for (auto c : { m_ui->neoForge, m_ui->forge, m_ui->fabric, m_ui->quilt, m_ui->liteLoader, m_ui->babric, m_ui->btaBabric,
                         m_ui->legacyFabric, m_ui->ornithe, m_ui->rift }) {
-            connect(c, &QCheckBox::stateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
+            connect(c, &QCheckBox::checkStateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
         }
     }
 

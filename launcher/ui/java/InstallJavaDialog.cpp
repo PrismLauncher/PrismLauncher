@@ -207,7 +207,7 @@ InstallDialog::InstallDialog(const QString& uid, MinecraftInstance* instance, QW
 
     auto recommendedCheckBox = new QCheckBox("Recommended", this);
     recommendedCheckBox->setCheckState(Qt::CheckState::Checked);
-    connect(recommendedCheckBox, &QCheckBox::stateChanged, this, [this](int state) {
+    connect(recommendedCheckBox, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState state) {
         for (BasePage* page : container->getPages()) {
             pageCast(page)->setRecommend(state == Qt::Checked);
         }

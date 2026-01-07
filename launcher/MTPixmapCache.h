@@ -88,7 +88,14 @@ class PixmapCache final : public QObject {
         QPixmapCache::remove(key);
         return true;
     }
-    bool _replace(const QPixmapCache::Key& key, const QPixmap& pixmap) { return QPixmapCache::replace(key, pixmap); }
+    bool _replace(const QPixmapCache::Key& key, const QPixmap& pixmap)
+    {
+        if (!key.isValid())
+            return false;
+        remove(key);
+        const_cast<QPixmapCache::Key&>(key) = insert(pixmap);
+        return key.isValid();
+    }
     bool _setCacheLimit(int n)
     {
         QPixmapCache::setCacheLimit(n);

@@ -36,8 +36,8 @@ set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
 
 add_compile_definitions($<$<NOT:$<CONFIG:Debug>>:QT_NO_DEBUG>)
-add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060400)
-add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x060400)
+add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060D00)
+add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x060903)
 add_compile_definitions(QT_NO_CONTEXTLESS_CONNECT)
 
 if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")

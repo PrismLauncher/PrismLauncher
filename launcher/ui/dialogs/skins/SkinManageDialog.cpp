@@ -98,7 +98,7 @@ SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
 
     connect(contentsWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SkinManageDialog::selectionChanged);
     connect(m_ui->listView, &QListView::customContextMenuRequested, this, &SkinManageDialog::show_context_menu);
-    connect(m_ui->elytraCB, &QCheckBox::stateChanged, this, [this]() {
+    connect(m_ui->elytraCB, &QCheckBox::checkStateChanged, this, [this]() {
         if (m_skinPreview) {
             m_skinPreview->setElytraVisible(m_ui->elytraCB->isChecked());
         }
@@ -186,7 +186,7 @@ QPixmap previewCape(QImage capeImage, bool elytra = false)
 {
     if (elytra) {
         auto wing = capeImage.copy(34, 2, 12, 20);
-        QImage mirrored = wing.mirrored(true, false);
+        QImage mirrored = wing.flipped(Qt::Horizontal);
 
         QImage combined(wing.width() * 2 + 1, wing.height() + 14, capeImage.format());
         combined.fill(Qt::transparent);
