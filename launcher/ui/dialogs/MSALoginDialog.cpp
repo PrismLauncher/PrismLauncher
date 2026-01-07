@@ -179,15 +179,20 @@ void paintQR(QPainter& painter, const QSize canvasSize, const QString& data, QCo
     }
 }
 
-void MSALoginDialog::authorizeWithBrowserWithExtra(QString url, QString code, [[maybe_unused]] int expiresIn)
+void MSALoginDialog::authorizeWithBrowserWithExtra(const QUrl& verificationUrl, const QString& code, const QUrl& completeVerificationUrl)
 {
     ui->stackedWidget->setCurrentIndex(1);
     ui->stackedWidget->adjustSize();
     ui->stackedWidget->updateGeometry();
     this->adjustSize();
 
+    auto url = verificationUrl.toString();
+    if (completeVerificationUrl.isValid()) {
+        url = completeVerificationUrl.toString();
+    }
+
     const auto linkString = QString("<a href=\"%1\">%2</a>").arg(url, url);
-    if (url == "https://www.microsoft.com/link" && !code.isEmpty()) {
+    if (!completeVerificationUrl.isValid() && url == "https://www.microsoft.com/link" && !code.isEmpty()) {
         url += QString("?otc=%1").arg(code);
     }
     ui->code->setText(code);
