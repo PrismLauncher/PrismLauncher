@@ -19,21 +19,17 @@ bool VanillaCreationTask::createInstance()
 {
     setStatus(tr("Creating instance from version %1").arg(m_version->name()));
 
-    auto instance_settings = std::make_unique<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg"));
-    instance_settings->suspendSave();
-    {
-        MinecraftInstance inst(m_globalSettings, std::move(instance_settings), m_stagingPath);
-        auto components = inst.getPackProfile();
-        components->buildingFromScratch();
-        components->setComponentVersion("net.minecraft", m_version->descriptor(), true);
-        if (m_using_loader)
-            components->setComponentVersion(m_loader, m_loader_version->descriptor());
+    MinecraftInstance inst(m_globalSettings, std::make_unique<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg")), m_stagingPath);
+    SettingsObject::Lock lock(inst.settings());
 
-        inst.setName(name());
-        inst.setIconKey(m_instIcon);
+    auto components = inst.getPackProfile();
+    components->buildingFromScratch();
+    components->setComponentVersion("net.minecraft", m_version->descriptor(), true);
+    if (m_using_loader)
+        components->setComponentVersion(m_loader, m_loader_version->descriptor());
 
-        inst.settings()->resumeSave();
-    }
+    inst.setName(name());
+    inst.setIconKey(m_instIcon);
 
     return true;
 }

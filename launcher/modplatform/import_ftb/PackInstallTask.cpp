@@ -49,10 +49,11 @@ void PackInstallTask::copySettings()
 {
     setStatus(tr("Copying settings..."));
     progress(2, 2);
+
     QString instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    auto instanceSettings = std::make_unique<INISettingsObject>(instanceConfigPath);
-    instanceSettings->suspendSave();
-    MinecraftInstance instance(m_globalSettings, std::move(instanceSettings), m_stagingPath);
+    MinecraftInstance instance(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
+    SettingsObject::Lock lock(instance.settings());
+
     instance.settings()->set("InstanceType", "OneSix");
     instance.settings()->set("totalTimePlayed", m_pack.totalPlayTime / 1000);
 
@@ -107,7 +108,6 @@ void PackInstallTask::copySettings()
     if (m_instIcon == "default")
         m_instIcon = "ftb_logo";
     instance.setIconKey(m_instIcon);
-    instance.settings()->resumeSave();
 
     emitSucceeded();
 }

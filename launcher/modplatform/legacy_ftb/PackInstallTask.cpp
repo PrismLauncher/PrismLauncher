@@ -133,10 +133,9 @@ void PackInstallTask::install()
     }
 
     QString instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    auto instanceSettings = std::make_unique<INISettingsObject>(instanceConfigPath);
-    instanceSettings->suspendSave();
+    MinecraftInstance instance(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
+    SettingsObject::Lock lock(instance.settings());
 
-    MinecraftInstance instance(m_globalSettings, std::move(instanceSettings), m_stagingPath);
     auto components = instance.getPackProfile();
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", m_pack.mcVersion, true);
@@ -204,7 +203,6 @@ void PackInstallTask::install()
         m_instIcon = "ftb_logo";
     }
     instance.setIconKey(m_instIcon);
-    instance.settings()->resumeSave();
 
     emitSucceeded();
 }

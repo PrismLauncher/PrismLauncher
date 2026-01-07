@@ -988,10 +988,9 @@ void PackInstallTask::install()
     setStatus(tr("Installing modpack"));
 
     auto instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    auto instanceSettings = std::make_unique<INISettingsObject>(instanceConfigPath);
-    instanceSettings->suspendSave();
+    MinecraftInstance instance(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
+    SettingsObject::Lock lock(instance.settings());
 
-    MinecraftInstance instance(m_globalSettings, std::move(instanceSettings), m_stagingPath);
     auto components = instance.getPackProfile();
     components->buildingFromScratch();
 
@@ -1047,7 +1046,6 @@ void PackInstallTask::install()
     instance.setName(name());
     instance.setIconKey(m_instIcon);
     instance.setManagedPack("atlauncher", m_pack_safe_name, m_pack_name, m_version_name, m_version_name);
-    instance.settings()->resumeSave();
 
     jarmods.clear();
     emitSucceeded();
