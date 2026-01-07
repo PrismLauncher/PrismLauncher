@@ -51,10 +51,10 @@ ExportToModListDialog::ExportToModListDialog(QString name, QList<Mod*> mods, QWi
     connect(m_ui->versionCheckBox, &QCheckBox::checkStateChanged, this, &ExportToModListDialog::trigger);
     connect(m_ui->urlCheckBox, &QCheckBox::checkStateChanged, this, &ExportToModListDialog::trigger);
     connect(m_ui->filenameCheckBox, &QCheckBox::checkStateChanged, this, &ExportToModListDialog::trigger);
-    connect(m_ui->authorsButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Authors); });
-    connect(m_ui->versionButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Version); });
-    connect(m_ui->urlButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Url); });
-    connect(m_ui->filenameButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::FileName); });
+    connect(m_ui->authorsButton, &QPushButton::clicked, this, [this] { addExtra(ExportToModList::Authors); });
+    connect(m_ui->versionButton, &QPushButton::clicked, this, [this] { addExtra(ExportToModList::Version); });
+    connect(m_ui->urlButton, &QPushButton::clicked, this, [this] { addExtra(ExportToModList::Url); });
+    connect(m_ui->filenameButton, &QPushButton::clicked, this, [this] { addExtra(ExportToModList::FileName); });
     connect(m_ui->templateText, &QTextEdit::textChanged, this, [this] {
         if (m_ui->templateText->toPlainText() != exampleLines[m_format]) {
             m_ui->formatComboBox->setCurrentIndex(5);

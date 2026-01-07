@@ -83,11 +83,6 @@ MSADeviceCodeStep::MSADeviceCodeStep(AccountData* data) : AuthStep(data)
 
     connect(&m_oauth2, &QOAuth2DeviceAuthorizationFlow::clientIdentifierChanged, this,
             [this](const QString& clientIdentifier) { m_data->msaClientID = clientIdentifier; });
-    connect(&m_oauth2, &QOAuth2DeviceAuthorizationFlow::userCodeExpirationAtChanged, this, [](const QDateTime& expiration) {
-        qDebug() << "=============";
-        qDebug() << expiration;
-        qDebug() << "=============";
-    });
 }
 
 QString MSADeviceCodeStep::describe()
