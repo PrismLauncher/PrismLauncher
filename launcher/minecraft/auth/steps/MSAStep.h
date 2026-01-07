@@ -38,7 +38,8 @@
 
 #include "minecraft/auth/AuthStep.h"
 
-#include <QtNetworkAuth/qoauth2authorizationcodeflow.h>
+#include <QtNetworkAuth/QOAuth2AuthorizationCodeFlow>
+
 class MSAStep : public AuthStep {
     Q_OBJECT
    public:
