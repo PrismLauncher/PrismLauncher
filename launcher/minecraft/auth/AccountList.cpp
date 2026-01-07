@@ -169,20 +169,20 @@ void AccountList::removeAccount(QModelIndex index)
 }
 
 void AccountList::moveAccount(QModelIndex index, int delta) {
-    int row = index.row();
-    int newRow = row + delta;
+    const int row = index.row();
+    const int newRow = row + delta;
     if (index.isValid() && row < m_accounts.size() && newRow >= 0 && newRow < m_accounts.size()) {
-        auto account = m_accounts.at(row);
+        // Qt is stupid, https://doc.qt.io/qt-6/qabstractitemmodel.html#beginMoveRows
+        const int modelDestinationRow = (newRow > row) ? newRow + 1 : newRow;
 
-        beginRemoveRows(QModelIndex(), row, row);
-        m_accounts.removeAt(row);
-        endRemoveRows();
+        if (beginMoveRows(QModelIndex(), row, row, QModelIndex(), modelDestinationRow)) {
+            m_accounts.move(row, newRow);
+            endMoveRows();
 
-        beginInsertRows(QModelIndex(), newRow, newRow);
-        m_accounts.insert(newRow, account);
-        endInsertRows();
-
-        onListChanged();
+            onListChanged();
+        } else {
+            qCritical().noquote() << "AccountList: failed to move account from" << row << "to" << newRow << QString("(%1 accounts in total)").arg(this->count());
+        }
     }
 }
 
