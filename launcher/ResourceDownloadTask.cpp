@@ -31,7 +31,7 @@
 
 ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
                                            ModPlatform::IndexedVersion version,
-                                           const std::shared_ptr<ResourceFolderModel> packs,
+                                           ResourceFolderModel* packs,
                                            bool is_indexed)
     : m_pack(std::move(pack)), m_pack_version(std::move(version)), m_pack_model(packs)
 {
@@ -88,7 +88,7 @@ void ResourceDownloadTask::downloadSucceeded()
     m_pack_model->uninstallResource(oldFilename, true);
 
     // also rename the shader config file
-    if (dynamic_cast<ShaderPackFolderModel*>(m_pack_model.get()) != nullptr) {
+    if (dynamic_cast<ShaderPackFolderModel*>(m_pack_model) != nullptr) {
         QFileInfo oldConfig(m_pack_model->dir(), oldFilename + ".txt");
         QFileInfo newConfig(m_pack_model->dir(), getFilename() + ".txt");
 

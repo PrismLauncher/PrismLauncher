@@ -216,7 +216,7 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
     auto hash_type = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
     auto response = std::make_shared<QByteArray>();
-    auto ver_task = modrinth_api.currentVersions(m_resources.keys(), hash_type, response);
+    auto ver_task = modrinth_api.currentVersions(m_resources.keys(), hash_type, response.get());
 
     // Prevents unfortunate timings when aborting the task
     if (!ver_task)
@@ -273,9 +273,9 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
     } else if (addonIds.size() == 1) {
-        proj_task = modrinth_api.getProject(*addonIds.keyBegin(), response);
+        proj_task = modrinth_api.getProject(*addonIds.keyBegin(), response.get());
     } else {
-        proj_task = modrinth_api.getProjects(addonIds.keys(), response);
+        proj_task = modrinth_api.getProjects(addonIds.keys(), response.get());
     }
 
     // Prevents unfortunate timings when aborting the task
@@ -348,7 +348,7 @@ Task::Ptr EnsureMetadataTask::flameVersionsTask()
         fingerprints.push_back(murmur.toUInt());
     }
 
-    auto ver_task = flame_api.matchFingerprints(fingerprints, response);
+    auto ver_task = flame_api.matchFingerprints(fingerprints, response.get());
 
     connect(ver_task.get(), &Task::succeeded, this, [this, response] {
         QJsonParseError parse_error{};
@@ -423,9 +423,9 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
     } else if (addonIds.size() == 1) {
-        proj_task = flame_api.getProject(*addonIds.keyBegin(), response);
+        proj_task = flame_api.getProject(*addonIds.keyBegin(), response.get());
     } else {
-        proj_task = flame_api.getProjects(addonIds.keys(), response);
+        proj_task = flame_api.getProjects(addonIds.keys(), response.get());
     }
 
     // Prevents unfortunate timings when aborting the task

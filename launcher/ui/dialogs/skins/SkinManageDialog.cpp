@@ -477,8 +477,8 @@ void SkinManageDialog::on_userBtn_clicked()
     auto uuidLoop = makeShared<WaitTask>();
     auto profileLoop = makeShared<WaitTask>();
 
-    auto getUUID = Net::Download::makeByteArray("https://api.minecraftservices.com/minecraft/profile/lookup/name/" + user, uuidOut);
-    auto getProfile = Net::Download::makeByteArray(QUrl(), profileOut);
+    auto getUUID = Net::Download::makeByteArray("https://api.minecraftservices.com/minecraft/profile/lookup/name/" + user, uuidOut.get());
+    auto getProfile = Net::Download::makeByteArray(QUrl(), profileOut.get());
     auto downloadSkin = Net::Download::makeFile(QUrl(), path);
 
     QString failReason;

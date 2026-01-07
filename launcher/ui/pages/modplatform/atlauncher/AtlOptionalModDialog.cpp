@@ -159,7 +159,7 @@ void AtlOptionalModListModel::useShareCode(const QString& code)
 {
     m_jobPtr.reset(new NetJob("Atl::Request", APPLICATION->network()));
     auto url = QString(BuildConfig.ATL_API_BASE_URL + "share-codes/" + code);
-    m_jobPtr->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), m_response));
+    m_jobPtr->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), m_response.get()));
 
     connect(m_jobPtr.get(), &NetJob::succeeded, this, &AtlOptionalModListModel::shareCodeSuccess);
     connect(m_jobPtr.get(), &NetJob::failed, this, &AtlOptionalModListModel::shareCodeFailure);

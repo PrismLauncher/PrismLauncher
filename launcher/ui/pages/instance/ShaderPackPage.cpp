@@ -47,7 +47,7 @@
 #include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui/dialogs/ResourceUpdateDialog.h"
 
-ShaderPackPage::ShaderPackPage(MinecraftInstance* instance, std::shared_ptr<ShaderPackFolderModel> model, QWidget* parent)
+ShaderPackPage::ShaderPackPage(MinecraftInstance* instance, ShaderPackFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(instance, model, parent), m_model(model)
 {
     ui->actionDownloadItem->setText(tr("Download Packs"));

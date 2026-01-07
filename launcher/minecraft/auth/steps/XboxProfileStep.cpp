@@ -34,8 +34,8 @@ void XboxProfileStep::perform()
     };
 
     m_response.reset(new QByteArray());
-    m_request = Net::Download::makeByteArray(url, m_response);
-    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
+    m_request = Net::Download::makeByteArray(url, m_response.get());
+    m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
 
     m_task.reset(new NetJob("XboxProfileStep", APPLICATION->network()));
     m_task->setAskRetry(false);

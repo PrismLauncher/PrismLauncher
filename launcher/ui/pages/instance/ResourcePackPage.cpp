@@ -42,7 +42,7 @@
 #include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui/dialogs/ResourceUpdateDialog.h"
 
-ResourcePackPage::ResourcePackPage(MinecraftInstance* instance, std::shared_ptr<ResourcePackFolderModel> model, QWidget* parent)
+ResourcePackPage::ResourcePackPage(MinecraftInstance* instance, ResourcePackFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(instance, model, parent), m_model(model)
 {
     ui->actionDownloadItem->setText(tr("Download Packs"));

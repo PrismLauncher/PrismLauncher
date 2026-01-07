@@ -18,7 +18,7 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
    public:
     explicit ResourceUpdateDialog(QWidget* parent,
                                   BaseInstance* instance,
-                                  std::shared_ptr<ResourceFolderModel> resourceModel,
+                                  ResourceFolderModel* resourceModel,
                                   QList<Resource*>& searchFor,
                                   bool includeDeps,
                                   QList<ModPlatform::ModLoaderType> loadersList = {});
@@ -48,7 +48,7 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
     shared_qobject_ptr<ModrinthCheckUpdate> m_modrinthCheckTask;
     shared_qobject_ptr<FlameCheckUpdate> m_flameCheckTask;
 
-    const std::shared_ptr<ResourceFolderModel> m_resourceModel;
+    ResourceFolderModel* m_resourceModel;
 
     QList<Resource*>& m_candidates;
     QList<Resource*> m_modrinthToUpdate;

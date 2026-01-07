@@ -163,7 +163,7 @@ void TechnicPage::suggestCurrent()
     auto netJob = makeShared<NetJob>(QString("Technic::PackMeta(%1)").arg(current.name), APPLICATION->network());
     QString slug = current.slug;
     netJob->addNetAction(Net::ApiDownload::makeByteArray(
-        QString("%1modpack/%2?build=%3").arg(BuildConfig.TECHNIC_API_BASE_URL, slug, BuildConfig.TECHNIC_API_BUILD), response));
+        QString("%1modpack/%2?build=%3").arg(BuildConfig.TECHNIC_API_BASE_URL, slug, BuildConfig.TECHNIC_API_BUILD), response.get()));
     connect(netJob.get(), &NetJob::succeeded, this, [this, slug] {
         jobPtr.reset();
 
@@ -260,7 +260,7 @@ void TechnicPage::metadataLoaded()
 
         auto netJob = makeShared<NetJob>(QString("Technic::SolderMeta(%1)").arg(current.name), APPLICATION->network());
         auto url = QString("%1/modpack/%2").arg(current.url, current.slug);
-        netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), response));
+        netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), response.get()));
 
         connect(netJob.get(), &NetJob::succeeded, this, &TechnicPage::onSolderLoaded);
         connect(jobPtr.get(), &NetJob::failed,

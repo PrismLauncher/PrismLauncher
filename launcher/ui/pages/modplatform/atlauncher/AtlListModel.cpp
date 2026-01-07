@@ -99,7 +99,7 @@ void ListModel::request()
 
     auto netJob = makeShared<NetJob>("Atl::Request", APPLICATION->network());
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/json/packsnew.json");
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), response.get()));
     jobPtr = netJob;
     jobPtr->start();
 

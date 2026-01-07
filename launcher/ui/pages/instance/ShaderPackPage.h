@@ -44,7 +44,7 @@
 class ShaderPackPage : public ExternalResourcesPage {
     Q_OBJECT
    public:
-    explicit ShaderPackPage(MinecraftInstance* instance, std::shared_ptr<ShaderPackFolderModel> model, QWidget* parent = nullptr);
+    explicit ShaderPackPage(MinecraftInstance* instance, ShaderPackFolderModel* model, QWidget* parent = nullptr);
     ~ShaderPackPage() override = default;
 
     QString displayName() const override { return tr("Shader Packs"); }
@@ -62,6 +62,6 @@ class ShaderPackPage : public ExternalResourcesPage {
     void changeShaderPackVersion();
 
    private:
-    std::shared_ptr<ShaderPackFolderModel> m_model;
+    ShaderPackFolderModel* m_model;
     QPointer<ResourceDownload::ShaderPackDownloadDialog> m_downloadDialog;
 };

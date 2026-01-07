@@ -107,8 +107,8 @@ class PackInstallTask : public InstanceTask {
     QString getVersionForLoader(QString uid);
     QString detectLibrary(const VersionLibrary& library);
 
-    bool createLibrariesComponent(QString instanceRoot, std::shared_ptr<PackProfile> profile);
-    bool createPackComponent(QString instanceRoot, std::shared_ptr<PackProfile> profile);
+    bool createLibrariesComponent(QString instanceRoot, PackProfile* profile);
+    bool createPackComponent(QString instanceRoot, PackProfile* profile);
 
     void deleteExistingFiles();
     void installConfigs();
@@ -125,7 +125,7 @@ class PackInstallTask : public InstanceTask {
     bool abortable = false;
 
     NetJob::Ptr jobPtr;
-    std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
+    std::unique_ptr<QByteArray> response = std::make_unique<QByteArray>();
 
     InstallMode m_install_mode;
     QString m_pack_name;

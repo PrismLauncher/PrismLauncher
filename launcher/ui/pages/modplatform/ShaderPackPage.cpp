@@ -44,7 +44,7 @@ QMap<QString, QString> ShaderPackResourcePage::urlHandlers() const
 
 void ShaderPackResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
                                                ModPlatform::IndexedVersion& version,
-                                               const std::shared_ptr<ResourceFolderModel> base_model)
+                                               ResourceFolderModel* base_model)
 {
     bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
     m_model->addPack(pack, version, base_model, is_indexed);

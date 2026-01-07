@@ -105,7 +105,7 @@ class VersionPage : public QMainWindow, public BasePage {
    private:
     Ui::VersionPage* ui;
     QSortFilterProxyModel* m_filterModel;
-    std::shared_ptr<PackProfile> m_profile;
+    PackProfile* m_profile;
     MinecraftInstance* m_inst;
     int currentIdx = 0;
 

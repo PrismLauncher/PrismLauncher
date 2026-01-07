@@ -8,7 +8,7 @@
 #include "settings/INISettingsObject.h"
 #include "tasks/Task.h"
 
-InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, const InstanceCopyPrefs& prefs)
+InstanceCopyTask::InstanceCopyTask(BaseInstance* origInstance, const InstanceCopyPrefs& prefs)
 {
     m_origInstance = origInstance;
     m_keepPlaytime = prefs.isKeepPlaytimeEnabled();
@@ -146,9 +146,9 @@ void InstanceCopyTask::copyFinished()
     }
 
     // FIXME: shouldn't this be able to report errors?
-    auto instanceSettings = std::make_shared<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg"));
+    auto instanceSettings = std::make_unique<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg"));
 
-    InstancePtr inst(new NullInstance(m_globalSettings, instanceSettings, m_stagingPath));
+    BaseInstance* inst(new NullInstance(m_globalSettings, std::move(instanceSettings), m_stagingPath));
     inst->setName(name());
     inst->setIconKey(m_instIcon);
     if (!m_keepPlaytime) {

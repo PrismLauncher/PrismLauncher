@@ -50,7 +50,7 @@
 #include <QShortcut>
 #include <QUrl>
 
-OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, InstancePtr instance, QWidget* parent)
+OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, BaseInstance* instance, QWidget* parent)
     : QWidget(parent)
     , m_id(id)
     , m_displayName(displayName)
@@ -64,10 +64,10 @@ OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, 
 
     m_proxy = new LogFormatProxyModel(this);
     if (m_instance) {
-        m_model.reset(new LogModel(this));
+        m_model = new LogModel(this);
         ui->trackLogCheckbox->hide();
     } else {
-        m_model = APPLICATION->logModel;
+        m_model = APPLICATION->logModel.get();
     }
 
     // set up fonts in the log proxy
@@ -90,7 +90,7 @@ OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, 
     } else {
         modelStateToUI();
     }
-    m_proxy->setSourceModel(m_model.get());
+    m_proxy->setSourceModel(m_model);
 
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &OtherLogsPage::populateSelectLogBox);
 
@@ -243,8 +243,8 @@ void OtherLogsPage::reload()
         if (m_instance) {
             setControlsEnabled(false);
         } else {
-            m_model = APPLICATION->logModel;
-            m_proxy->setSourceModel(m_model.get());
+            m_model = APPLICATION->logModel.get();
+            m_proxy->setSourceModel(m_model);
             ui->text->setModel(m_proxy);
             ui->text->scrollToBottom();
             UIToModelState();
@@ -299,7 +299,7 @@ void OtherLogsPage::reload()
         ui->text->clear();
         ui->text->setModel(nullptr);
         if (!m_instance) {
-            m_model.reset(new LogModel(this));
+            m_model = new LogModel(this);
             m_model->setMaxLines(getConsoleMaxLines(APPLICATION->settings()));
             m_model->setStopOnOverflow(shouldStopOnConsoleOverflow(APPLICATION->settings()));
             m_model->setOverflowMessage(tr("Cannot display this log since the log length surpassed %1 lines.").arg(m_model->getMaxLines()));
@@ -338,7 +338,7 @@ void OtherLogsPage::reload()
             ui->text->setModel(m_proxy);
             ui->text->scrollToBottom();
         } else {
-            m_proxy->setSourceModel(m_model.get());
+            m_proxy->setSourceModel(m_model);
             ui->text->setModel(m_proxy);
             ui->text->scrollToBottom();
             UIToModelState();

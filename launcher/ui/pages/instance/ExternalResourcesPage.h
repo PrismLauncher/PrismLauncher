@@ -20,7 +20,7 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     Q_OBJECT
 
    public:
-    explicit ExternalResourcesPage(BaseInstance* instance, std::shared_ptr<ResourceFolderModel> model, QWidget* parent = nullptr);
+    explicit ExternalResourcesPage(BaseInstance* instance, ResourceFolderModel* model, QWidget* parent = nullptr);
     virtual ~ExternalResourcesPage();
 
     virtual QString displayName() const override = 0;
@@ -68,7 +68,7 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     BaseInstance* m_instance = nullptr;
 
     Ui::ExternalResourcesPage* ui = nullptr;
-    std::shared_ptr<ResourceFolderModel> m_model;
+    ResourceFolderModel* m_model;
     QSortFilterProxyModel* m_filterModel = nullptr;
 
     QString m_fileSelectionFilter;

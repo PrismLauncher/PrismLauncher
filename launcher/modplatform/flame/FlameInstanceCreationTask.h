@@ -52,7 +52,7 @@ class FlameCreationTask final : public InstanceCreationTask {
 
    public:
     FlameCreationTask(const QString& staging_path,
-                      SettingsObjectPtr global_settings,
+                      SettingsObject* global_settings,
                       QWidget* parent,
                       QString id,
                       QString version_id,
@@ -91,7 +91,7 @@ class FlameCreationTask final : public InstanceCreationTask {
 
     QList<std::pair<QString, QString>> m_otherResources;
 
-    std::optional<InstancePtr> m_instance;
+    std::optional<BaseInstance*> m_instance;
 
     QStringList m_selectedOptionalMods;
 };

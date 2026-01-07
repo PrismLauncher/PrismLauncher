@@ -15,7 +15,7 @@ ClaimAccount::ClaimAccount(LaunchTask* parent, AuthSessionPtr session) : LaunchS
 void ClaimAccount::executeTask()
 {
     if (m_account) {
-        lock.reset(new UseLock(m_account));
+        lock.reset(new UseLock(m_account.get()));
         emitSucceeded();
     }
 }

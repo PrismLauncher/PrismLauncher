@@ -53,7 +53,7 @@ class InstanceWindow : public QMainWindow, public BasePageContainer {
     Q_OBJECT
 
    public:
-    explicit InstanceWindow(InstancePtr proc, QWidget* parent = 0);
+    explicit InstanceWindow(BaseInstance* proc, QWidget* parent = 0);
     virtual ~InstanceWindow() = default;
 
     bool selectPage(QString pageId) override;
@@ -72,7 +72,7 @@ class InstanceWindow : public QMainWindow, public BasePageContainer {
     void isClosing();
 
    private slots:
-    void instanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> proc);
+    void instanceLaunchTaskChanged(LaunchTask* proc);
     void runningStateChanged(bool running);
     void on_instanceStatusChanged(BaseInstance::Status, BaseInstance::Status newStatus);
 
@@ -83,8 +83,8 @@ class InstanceWindow : public QMainWindow, public BasePageContainer {
     void updateButtons();
 
    private:
-    shared_qobject_ptr<LaunchTask> m_proc;
-    InstancePtr m_instance;
+    LaunchTask* m_proc;
+    BaseInstance* m_instance;
     bool m_doNotSave = false;
     PageContainer* m_container = nullptr;
     QPushButton* m_closeButton = nullptr;

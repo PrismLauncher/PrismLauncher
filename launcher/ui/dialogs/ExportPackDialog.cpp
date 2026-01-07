@@ -33,7 +33,7 @@
 #include "MMCZip.h"
 #include "modplatform/modrinth/ModrinthPackExportTask.h"
 
-ExportPackDialog::ExportPackDialog(MinecraftInstancePtr instance, QWidget* parent, ModPlatform::ResourceProvider provider)
+ExportPackDialog::ExportPackDialog(MinecraftInstance* instance, QWidget* parent, ModPlatform::ResourceProvider provider)
     : QDialog(parent), m_instance(instance), m_ui(new Ui::ExportPackDialog), m_provider(provider)
 {
     Q_ASSERT(m_provider == ModPlatform::ResourceProvider::MODRINTH || m_provider == ModPlatform::ResourceProvider::FLAME);
@@ -101,23 +101,20 @@ ExportPackDialog::ExportPackDialog(MinecraftInstancePtr instance, QWidget* paren
 
     const QDir::Filters filter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Hidden);
 
-    MinecraftInstance* mcInstance = dynamic_cast<MinecraftInstance*>(instance.get());
-    if (mcInstance) {
-        for (auto resourceModel : mcInstance->resourceLists()) {
-            if (resourceModel == nullptr) {
-                continue;
-            }
-
-            if (!resourceModel->indexDir().exists()) {
-                continue;
-            }
-
-            if (resourceModel->dir() == resourceModel->indexDir()) {
-                continue;
-            }
-
-            m_proxy->ignoreFilesWithPath().insert(instanceRoot.relativeFilePath(resourceModel->indexDir().absolutePath()));
+    for (auto resourceModel : instance->resourceLists()) {
+        if (resourceModel == nullptr) {
+            continue;
         }
+
+        if (!resourceModel->indexDir().exists()) {
+            continue;
+        }
+
+        if (resourceModel->dir() == resourceModel->indexDir()) {
+            continue;
+        }
+
+        m_proxy->ignoreFilesWithPath().insert(instanceRoot.relativeFilePath(resourceModel->indexDir().absolutePath()));
     }
 
     m_ui->files->setModel(m_proxy);

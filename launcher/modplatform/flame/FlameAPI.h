@@ -23,14 +23,14 @@ class FlameAPI : public ResourceAPI {
                                                                 ModPlatform::ModLoaderTypes fallback,
                                                                 bool checkLoaders);
 
-    Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
-    Task::Ptr matchFingerprints(const QList<uint>& fingerprints, std::shared_ptr<QByteArray> response);
-    Task::Ptr getFiles(const QStringList& fileIds, std::shared_ptr<QByteArray> response) const;
-    Task::Ptr getFile(const QString& addonId, const QString& fileId, std::shared_ptr<QByteArray> response) const;
+    Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const override;
+    Task::Ptr matchFingerprints(const QList<uint>& fingerprints, QByteArray* response);
+    Task::Ptr getFiles(const QStringList& fileIds, QByteArray* response) const;
+    Task::Ptr getFile(const QString& addonId, const QString& fileId, QByteArray* response) const;
 
-    static Task::Ptr getCategories(std::shared_ptr<QByteArray> response, ModPlatform::ResourceType type);
-    static Task::Ptr getModCategories(std::shared_ptr<QByteArray> response);
-    static QList<ModPlatform::Category> loadModCategories(std::shared_ptr<QByteArray> response);
+    static Task::Ptr getCategories(QByteArray* response, ModPlatform::ResourceType type);
+    static Task::Ptr getModCategories(QByteArray* response);
+    static QList<ModPlatform::Category> loadModCategories(QByteArray* response);
 
     QList<ResourceAPI::SortingMethod> getSortingMethods() const override;
 

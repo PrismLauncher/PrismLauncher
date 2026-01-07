@@ -128,7 +128,7 @@ class PrismUpdaterApp : public QApplication {
     GitHubRelease m_install_release;
 
     Status m_status = Status::Starting;
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
+    std::unique_ptr<QNetworkAccessManager> m_network;
     QString m_current_url;
     Task::Ptr m_current_task;
     QList<GitHubRelease> m_releases;

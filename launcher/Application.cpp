@@ -911,7 +911,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // Init page provider
         {
-            m_globalSettingsProvider = std::make_shared<GenericPageProvider>(tr("Settings"));
+            m_globalSettingsProvider = std::make_unique<GenericPageProvider>(tr("Settings"));
             m_globalSettingsProvider->addPage<LauncherPage>();
             m_globalSettingsProvider->addPage<LanguagePage>();
             m_globalSettingsProvider->addPage<AppearancePage>();
@@ -992,7 +992,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         if (FS::checkProblemticPathJava(QDir(instDir))) {
             qWarning() << "Your instance path contains \'!\' and this is known to cause java problems!";
         }
-        m_instances.reset(new InstanceList(m_settings, instDir, this));
+        m_instances.reset(new InstanceList(m_settings.get(), instDir, this));
         connect(InstDirSetting.get(), &Setting::SettingChanged, m_instances.get(), &InstanceList::on_InstFolderChanged);
         qInfo() << "Loading Instances...";
         m_instances->loadList();
@@ -1038,12 +1038,12 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     m_profilers.insert("jvisualvm", std::shared_ptr<BaseProfilerFactory>(new JVisualVMFactory()));
     m_profilers.insert("generic", std::shared_ptr<BaseProfilerFactory>(new GenericProfilerFactory()));
     for (auto profiler : m_profilers.values()) {
-        profiler->registerSettings(m_settings);
+        profiler->registerSettings(m_settings.get());
     }
 
     // Create the MCEdit thing... why is this here?
     {
-        m_mcedit.reset(new MCEditTool(m_settings));
+        m_mcedit.reset(new MCEditTool(m_settings.get()));
     }
 
 #ifdef Q_OS_MACOS
@@ -1469,7 +1469,7 @@ void Application::messageReceived(const QByteArray& message)
         bool offline = received.args["offline_enabled"] == "true";
         QString offlineName = received.args["offline_name"];
 
-        InstancePtr instance;
+        BaseInstance* instance;
         if (!id.isEmpty()) {
             instance = instances()->getInstanceById(id);
             if (!instance) {
@@ -1503,17 +1503,17 @@ void Application::messageReceived(const QByteArray& message)
     }
 }
 
-std::shared_ptr<TranslationsModel> Application::translations()
+TranslationsModel* Application::translations()
 {
-    return m_translations;
+    return m_translations.get();
 }
 
-std::shared_ptr<JavaInstallList> Application::javalist()
+JavaInstallList* Application::javalist()
 {
     if (!m_javalist) {
         m_javalist.reset(new JavaInstallList());
     }
-    return m_javalist;
+    return m_javalist.get();
 }
 
 QIcon Application::logo()
@@ -1532,7 +1532,7 @@ bool Application::openJsonEditor(const QString& filename)
     }
 }
 
-bool Application::launch(InstancePtr instance,
+bool Application::launch(BaseInstance* instance,
                          bool online,
                          bool demo,
                          MinecraftTarget::Ptr targetToJoin,
@@ -1580,7 +1580,7 @@ bool Application::launch(InstancePtr instance,
     return false;
 }
 
-bool Application::kill(InstancePtr instance)
+bool Application::kill(BaseInstance* instance)
 {
     if (!instance->isRunning()) {
         qWarning() << "Attempted to kill instance" << instance->id() << ", which isn't running.";
@@ -1589,7 +1589,7 @@ bool Application::kill(InstancePtr instance)
     QMutexLocker locker(&m_instanceExtrasMutex);
     auto& extras = m_instanceExtras[instance->id()];
     // NOTE: copy of the shared pointer keeps it alive
-    auto controller = extras.controller;
+    auto& controller = extras.controller;
     locker.unlock();
     if (controller) {
         return controller->abort();
@@ -1738,7 +1738,7 @@ ViewLogWindow* Application::showLogWindow()
     return m_viewLogWindow;
 }
 
-InstanceWindow* Application::showInstanceWindow(InstancePtr instance, QString page)
+InstanceWindow* Application::showInstanceWindow(BaseInstance* instance, QString page)
 {
     if (!instance)
         return nullptr;
@@ -1850,22 +1850,22 @@ void Application::updateProxySettings(QString proxyTypeStr, QString addr, int po
     qDebug() << proxyDesc;
 }
 
-shared_qobject_ptr<HttpMetaCache> Application::metacache()
+HttpMetaCache* Application::metacache()
 {
-    return m_metacache;
+    return m_metacache.get();
 }
 
-shared_qobject_ptr<QNetworkAccessManager> Application::network()
+QNetworkAccessManager* Application::network()
 {
-    return m_network;
+    return m_network.get();
 }
 
-shared_qobject_ptr<Meta::Index> Application::metadataIndex()
+Meta::Index* Application::metadataIndex()
 {
     if (!m_metadataIndex) {
         m_metadataIndex.reset(new Meta::Index());
     }
-    return m_metadataIndex;
+    return m_metadataIndex.get();
 }
 
 void Application::updateCapabilities()

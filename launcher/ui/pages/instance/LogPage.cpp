@@ -128,7 +128,7 @@ QModelIndex LogFormatProxyModel::find(const QModelIndex& start, const QString& v
     return QModelIndex();
 }
 
-LogPage::LogPage(InstancePtr instance, QWidget* parent) : QWidget(parent), ui(new Ui::LogPage), m_instance(instance)
+LogPage::LogPage(BaseInstance* instance, QWidget* parent) : QWidget(parent), ui(new Ui::LogPage), m_instance(instance)
 {
     ui->setupUi(this);
 
@@ -153,7 +153,7 @@ LogPage::LogPage(InstancePtr instance, QWidget* parent) : QWidget(parent), ui(ne
         if (launchTask) {
             setInstanceLaunchTaskChanged(launchTask, true);
         }
-        connect(m_instance.get(), &BaseInstance::launchTaskChanged, this, &LogPage::onInstanceLaunchTaskChanged);
+        connect(m_instance, &BaseInstance::launchTaskChanged, this, &LogPage::onInstanceLaunchTaskChanged);
     }
 
     auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
@@ -203,7 +203,7 @@ void LogPage::UIToModelState()
     m_model->suspend(ui->trackLogCheckbox->checkState() != Qt::Checked);
 }
 
-void LogPage::setInstanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> proc, bool initial)
+void LogPage::setInstanceLaunchTaskChanged(LaunchTask* proc, bool initial)
 {
     m_process = proc;
     if (m_process) {
@@ -220,7 +220,7 @@ void LogPage::setInstanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> proc, 
     }
 }
 
-void LogPage::onInstanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> proc)
+void LogPage::onInstanceLaunchTaskChanged(LaunchTask* proc)
 {
     setInstanceLaunchTaskChanged(proc, false);
 }

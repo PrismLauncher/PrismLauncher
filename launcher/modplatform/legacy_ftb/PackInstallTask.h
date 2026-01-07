@@ -14,7 +14,7 @@ class PackInstallTask : public InstanceTask {
     Q_OBJECT
 
    public:
-    explicit PackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network, const Modpack& pack, QString version);
+    explicit PackInstallTask(QNetworkAccessManager* network, const Modpack& pack, QString version);
     virtual ~PackInstallTask() {}
 
     bool canAbort() const override { return true; }
@@ -35,7 +35,7 @@ class PackInstallTask : public InstanceTask {
     void onUnzipCanceled();
 
    private: /* data */
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
+    QNetworkAccessManager* m_network;
     bool abortable = false;
     QFuture<std::optional<QStringList>> m_extractFuture;
     QFutureWatcher<std::optional<QStringList>> m_extractFutureWatcher;

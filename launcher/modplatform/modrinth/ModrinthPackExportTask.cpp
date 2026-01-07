@@ -40,7 +40,7 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
                                                const QString& version,
                                                const QString& summary,
                                                bool optionalFiles,
-                                               InstancePtr instance,
+                                               BaseInstance* instance,
                                                const QString& output,
                                                MMCZip::FilterFileFunction filter)
     : name(name)
@@ -48,7 +48,7 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
     , summary(summary)
     , optionalFiles(optionalFiles)
     , instance(instance)
-    , mcInstance(dynamic_cast<MinecraftInstance*>(instance.get()))
+    , mcInstance(dynamic_cast<MinecraftInstance*>(instance))
     , gameRoot(instance->gameRoot())
     , output(output)
     , filter(filter)
@@ -86,7 +86,7 @@ void ModrinthPackExportTask::collectFiles()
 
     if (mcInstance) {
         mcInstance->loaderModList()->update();
-        connect(mcInstance->loaderModList().get(), &ModFolderModel::updateFinished, this, &ModrinthPackExportTask::collectHashes);
+        connect(mcInstance->loaderModList(), &ModFolderModel::updateFinished, this, &ModrinthPackExportTask::collectHashes);
     } else
         collectHashes();
 }
@@ -156,15 +156,15 @@ void ModrinthPackExportTask::makeApiRequest()
     else {
         setStatus(tr("Finding versions for hashes..."));
         auto response = std::make_shared<QByteArray>();
-        task = api.currentVersions(pendingHashes.values(), "sha512", response);
-        connect(task.get(), &Task::succeeded, [this, response]() { parseApiResponse(response); });
+        task = api.currentVersions(pendingHashes.values(), "sha512", response.get());
+        connect(task.get(), &Task::succeeded, [this, response]() { parseApiResponse(response.get()); });
         connect(task.get(), &Task::failed, this, &ModrinthPackExportTask::emitFailed);
         connect(task.get(), &Task::aborted, this, &ModrinthPackExportTask::emitAborted);
         task->start();
     }
 }
 
-void ModrinthPackExportTask::parseApiResponse(const std::shared_ptr<QByteArray> response)
+void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
 {
     task = nullptr;
 

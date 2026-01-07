@@ -33,7 +33,7 @@ class ExportPackDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit ExportPackDialog(MinecraftInstancePtr instance,
+    explicit ExportPackDialog(MinecraftInstance* instance,
                               QWidget* parent = nullptr,
                               ModPlatform::ResourceProvider provider = ModPlatform::ResourceProvider::MODRINTH);
     ~ExportPackDialog();
@@ -45,7 +45,7 @@ class ExportPackDialog : public QDialog {
     QString ignoreFileName();
 
    private:
-    const MinecraftInstancePtr m_instance;
+    MinecraftInstance* m_instance;
     Ui::ExportPackDialog* m_ui;
     FileIgnoreProxy* m_proxy;
     FastFileIconProvider m_icons;

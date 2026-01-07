@@ -24,6 +24,7 @@
  */
 class BaseVersion {
    public:
+    // TODO: delete
     using Ptr = std::shared_ptr<BaseVersion>;
     virtual ~BaseVersion() {}
     /*!

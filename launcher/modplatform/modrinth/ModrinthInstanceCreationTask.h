@@ -25,7 +25,7 @@ class ModrinthCreationTask final : public InstanceCreationTask {
 
    public:
     ModrinthCreationTask(QString staging_path,
-                         SettingsObjectPtr global_settings,
+                         SettingsObject* global_settings,
                          QWidget* parent,
                          QString id,
                          QString version_id = {},
@@ -55,7 +55,7 @@ class ModrinthCreationTask final : public InstanceCreationTask {
     std::vector<File> m_files;
     Task::Ptr m_task;
 
-    std::optional<InstancePtr> m_instance;
+    std::optional<BaseInstance*> m_instance;
 
     QString m_root_path = "minecraft";
 };

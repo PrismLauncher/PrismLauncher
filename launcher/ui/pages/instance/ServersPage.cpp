@@ -548,7 +548,7 @@ class ServersModel : public QAbstractListModel {
     ConcurrentTask::Ptr m_currentQueryTask = nullptr;
 };
 
-ServersPage::ServersPage(InstancePtr inst, QWidget* parent) : QMainWindow(parent), ui(new Ui::ServersPage)
+ServersPage::ServersPage(BaseInstance* inst, QWidget* parent) : QMainWindow(parent), ui(new Ui::ServersPage)
 {
     ui->setupUi(this);
     m_inst = inst;
@@ -568,7 +568,7 @@ ServersPage::ServersPage(InstancePtr inst, QWidget* parent) : QMainWindow(parent
 
     auto selectionModel = ui->serversView->selectionModel();
     connect(selectionModel, &QItemSelectionModel::currentChanged, this, &ServersPage::currentChanged);
-    connect(m_inst.get(), &MinecraftInstance::runningStatusChanged, this, &ServersPage::runningStateChanged);
+    connect(m_inst, &MinecraftInstance::runningStatusChanged, this, &ServersPage::runningStateChanged);
     connect(ui->nameLine, &QLineEdit::textEdited, this, &ServersPage::nameEdited);
     connect(ui->addressLine, &QLineEdit::textEdited, this, &ServersPage::addressEdited);
     connect(ui->resourceComboBox, &QComboBox::currentIndexChanged, this, &ServersPage::resourceIndexChanged);

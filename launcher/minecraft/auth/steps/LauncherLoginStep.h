@@ -21,7 +21,7 @@ class LauncherLoginStep : public AuthStep {
     void onRequestDone();
 
    private:
-    std::shared_ptr<QByteArray> m_response;
+    std::unique_ptr<QByteArray> m_response;
     Net::Upload::Ptr m_request;
     NetJob::Ptr m_task;
 };

@@ -46,7 +46,7 @@ namespace Technic {
 class SolderPackInstallTask : public InstanceTask {
     Q_OBJECT
    public:
-    explicit SolderPackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network,
+    explicit SolderPackInstallTask(QNetworkAccessManager* network,
                                    const QUrl& solderUrl,
                                    const QString& pack,
                                    const QString& version,
@@ -71,14 +71,14 @@ class SolderPackInstallTask : public InstanceTask {
    private:
     bool m_abortable = false;
 
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
+    QNetworkAccessManager* m_network;
 
     NetJob::Ptr m_filesNetJob;
     QUrl m_solderUrl;
     QString m_pack;
     QString m_version;
     QString m_minecraftVersion;
-    std::shared_ptr<QByteArray> m_response = std::make_shared<QByteArray>();
+    std::unique_ptr<QByteArray> m_response = std::make_unique<QByteArray>();
     QTemporaryDir m_outputDir;
     int m_modCount;
     QFuture<bool> m_extractFuture;

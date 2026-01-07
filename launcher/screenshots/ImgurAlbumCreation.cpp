@@ -54,7 +54,7 @@ Net::NetRequest::Ptr ImgurAlbumCreation::make(std::shared_ptr<ImgurAlbumCreation
     up->m_url = BuildConfig.IMGUR_BASE_URL + "album";
     up->m_sink.reset(new Sink(output));
     up->m_screenshots = screenshots;
-    up->addHeaderProxy(new Net::RawHeaderProxy(
+    up->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(
         QList<Net::HeaderPair>{ { "Content-Type", "application/x-www-form-urlencoded" },
                                 { "Authorization", QString("Client-ID %1").arg(BuildConfig.IMGUR_CLIENT_ID).toUtf8() },
                                 { "Accept", "application/json" } }));

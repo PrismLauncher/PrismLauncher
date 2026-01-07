@@ -39,7 +39,7 @@
 #include <QHttpMultiPart>
 
 #include "FileSystem.h"
-#include "net/ByteArraySink.h"
+#include "net/DummySink.h"
 #include "net/RawHeaderProxy.h"
 
 SkinUpload::SkinUpload(QString path, QString variant) : NetRequest(), m_path(path), m_variant(variant)
@@ -72,8 +72,8 @@ SkinUpload::Ptr SkinUpload::make(QString token, QString path, QString variant)
     auto up = makeShared<SkinUpload>(path, variant);
     up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/skins");
     up->setObjectName(QString("BYTES:") + up->m_url.toString());
-    up->m_sink.reset(new Net::ByteArraySink(std::make_shared<QByteArray>()));
-    up->addHeaderProxy(new Net::RawHeaderProxy(QList<Net::HeaderPair>{
+    up->m_sink.reset(new Net::DummySink());
+    up->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(QList<Net::HeaderPair>{
         { "Authorization", QString("Bearer %1").arg(token).toLocal8Bit() },
     }));
     return up;
