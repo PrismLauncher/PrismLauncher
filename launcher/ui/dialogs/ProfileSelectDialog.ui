@@ -22,13 +22,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTreeWidget" name="listView">
-     <column>
-      <property name="text">
-       <string notr="true">1</string>
-      </property>
-     </column>
-    </widget>
+    <widget class="QListView" name="view"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -51,7 +45,7 @@
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
      </property>
     </widget>
    </item>

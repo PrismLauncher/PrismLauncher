@@ -17,12 +17,25 @@
 #include "ui_ProfileSelectDialog.h"
 
 #include <QDebug>
+#include <QIdentityProxyModel>
 #include <QItemSelectionModel>
 #include <QPushButton>
 
 #include "Application.h"
 
-#include "ui/dialogs/ProgressDialog.h"
+// HACK: hide checkboxes from AccountList
+class HideCheckboxProxyModel : public QIdentityProxyModel {
+   public:
+    using QIdentityProxyModel::QIdentityProxyModel;
+
+    QVariant data(const QModelIndex& index, int role) const override {
+        if (role == Qt::CheckStateRole) {
+            return {};
+        }
+
+        return QIdentityProxyModel::data(index, role);
+    }
+};
 
 ProfileSelectDialog::ProfileSelectDialog(const QString& message, int flags, QWidget* parent)
     : QDialog(parent), ui(new Ui::ProfileSelectDialog)
@@ -30,33 +43,10 @@ ProfileSelectDialog::ProfileSelectDialog(const QString& message, int flags, QWid
     ui->setupUi(this);
 
     m_accounts = APPLICATION->accounts();
-    auto view = ui->listView;
-    // view->setModel(m_accounts.get());
-    // view->hideColumn(AccountList::ActiveColumn);
-    view->setColumnCount(1);
-    view->setRootIsDecorated(false);
-    // FIXME: use a real model, not this
-    if (QTreeWidgetItem* header = view->headerItem()) {
-        header->setText(0, tr("Name"));
-    } else {
-        view->setHeaderLabel(tr("Name"));
-    }
-    QList<QTreeWidgetItem*> items;
-    for (int i = 0; i < m_accounts->count(); i++) {
-        MinecraftAccountPtr account = m_accounts->at(i);
-        QString profileLabel;
-        if (account->isInUse()) {
-            profileLabel = tr("%1 (in use)").arg(account->profileName());
-        } else {
-            profileLabel = account->profileName();
-        }
-        auto item = new QTreeWidgetItem(view);
-        item->setText(0, profileLabel);
-        item->setIcon(0, account->getFace());
-        item->setData(0, AccountList::PointerRole, QVariant::fromValue(account));
-        items.append(item);
-    }
-    view->addTopLevelItems(items);
+
+    auto proxy = new HideCheckboxProxyModel(ui->view);
+    proxy->setSourceModel(m_accounts.get());
+    ui->view->setModel(proxy);
 
     // Set the message label.
     ui->msgLabel->setVisible(!message.isEmpty());
@@ -68,9 +58,9 @@ ProfileSelectDialog::ProfileSelectDialog(const QString& message, int flags, QWid
     qDebug() << flags;
 
     // Select the first entry in the list.
-    ui->listView->setCurrentIndex(ui->listView->model()->index(0, 0));
+    ui->view->setCurrentIndex(ui->view->model()->index(0, 0));
 
-    connect(ui->listView, &QAbstractItemView::doubleClicked, this, &ProfileSelectDialog::on_buttonBox_accepted);
+    connect(ui->view, &QAbstractItemView::doubleClicked, this, &ProfileSelectDialog::on_buttonBox_accepted);
 
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
     ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
@@ -98,7 +88,7 @@ bool ProfileSelectDialog::useAsInstDefaullt() const
 
 void ProfileSelectDialog::on_buttonBox_accepted()
 {
-    QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
+    QModelIndexList selection = ui->view->selectionModel()->selectedIndexes();
     if (selection.size() > 0) {
         QModelIndex selected = selection.first();
         m_selected = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
