@@ -87,10 +87,7 @@ InstanceList::InstanceList(SettingsObject* settings, const QString& instDir, QOb
     m_watcher->addPath(m_instDir);
 }
 
-InstanceList::~InstanceList()
-{
-    qDeleteAll(m_instances);
-}
+InstanceList::~InstanceList() {}
 
 Qt::DropActions InstanceList::supportedDragActions() const
 {
@@ -146,7 +143,7 @@ QMimeData* InstanceList::mimeData(const QModelIndexList& indexes) const
 QStringList InstanceList::getLinkedInstancesById(const QString& id) const
 {
     QStringList linkedInstances;
-    for (auto inst : m_instances) {
+    for (auto& inst : m_instances) {
         if (inst->isLinkedToInstanceId(id))
             linkedInstances.append(inst->id());
     }
@@ -156,7 +153,7 @@ QStringList InstanceList::getLinkedInstancesById(const QString& id) const
 int InstanceList::rowCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
-    return m_instances.count();
+    return m_instances.size();
 }
 
 QModelIndex InstanceList::index(int row, int column, const QModelIndex& parent) const
@@ -164,7 +161,7 @@ QModelIndex InstanceList::index(int row, int column, const QModelIndex& parent) 
     Q_UNUSED(parent);
     if (row < 0 || row >= m_instances.size())
         return QModelIndex();
-    return createIndex(row, column, (void*)m_instances.at(row));
+    return createIndex(row, column, m_instances.at(row).get());
 }
 
 QVariant InstanceList::data(const QModelIndex& index, int role) const
@@ -294,7 +291,7 @@ void InstanceList::deleteGroup(const GroupId& name)
             m_instanceGroupIndex.remove(instID);
             qDebug() << "Remove" << instID << "from group" << name;
             removed = true;
-            auto idx = getInstIndex(instance);
+            auto idx = getInstIndex(instance.get());
             if (idx >= 0)
                 emit dataChanged(index(idx), index(idx), { GroupRole });
         }
@@ -319,7 +316,7 @@ void InstanceList::renameGroup(const QString& src, const QString& dst)
             increaseGroupCount(dst);
             qDebug() << "Set" << instID << "group to" << dst;
             modified = true;
-            auto idx = getInstIndex(instance);
+            auto idx = getInstIndex(instance.get());
             if (idx >= 0)
                 emit dataChanged(index(idx), index(idx), { GroupRole });
         }
@@ -460,16 +457,16 @@ void InstanceList::deleteInstance(const InstanceId& id)
     }
 }
 
-static QMap<InstanceId, InstanceLocator> getIdMapping(const QList<InstanceList::BaseInstanceOwner>& list)
+static QMap<InstanceId, InstanceLocator> getIdMapping(const std::vector<std::unique_ptr<BaseInstance>>& list)
 {
     QMap<InstanceId, InstanceLocator> out;
     int i = 0;
-    for (auto item : list) {
+    for (auto& item : list) {
         auto id = item->id();
         if (out.contains(id)) {
             qWarning() << "Duplicate ID" << id << "in instance list";
         }
-        out[id] = std::make_pair(item, i);
+        out[id] = std::make_pair(item.get(), i);
         i++;
     }
     return out;
@@ -507,7 +504,7 @@ InstanceList::InstListError InstanceList::loadList()
 {
     auto existingIds = getIdMapping(m_instances);
 
-    QList<BaseInstanceOwner> newList;
+    std::vector<std::unique_ptr<BaseInstance>> newList;
 
     for (auto& id : discoverInstances()) {
         if (existingIds.contains(id)) {
@@ -515,9 +512,9 @@ InstanceList::InstListError InstanceList::loadList()
             existingIds.remove(id);
             qInfo() << "Should keep and soft-reload" << id;
         } else {
-            BaseInstanceOwner instPtr = loadInstance(id);
+            std::unique_ptr<BaseInstance> instPtr = loadInstance(id);
             if (instPtr) {
-                newList.append(instPtr);
+                newList.push_back(std::move(instPtr));
             }
         }
     }
@@ -581,12 +578,12 @@ void InstanceList::saveNow()
     }
 }
 
-void InstanceList::add(const QList<BaseInstanceOwner>& t)
+void InstanceList::add(std::vector<std::unique_ptr<BaseInstance>>& t)
 {
-    beginInsertRows(QModelIndex(), m_instances.count(), m_instances.count() + t.size() - 1);
-    m_instances.append(t);
-    for (auto ptr : t) {
-        connect(ptr, &BaseInstance::propertiesChanged, this, &InstanceList::propertiesChanged);
+    beginInsertRows(QModelIndex(), m_instances.size(), m_instances.size() + t.size() - 1);
+    for (auto& ptr : t) {
+        m_instances.push_back(std::move(ptr));
+        connect(m_instances.back().get(), &BaseInstance::propertiesChanged, this, &InstanceList::propertiesChanged);
     }
     endInsertRows();
 }
@@ -622,7 +619,7 @@ BaseInstance* InstanceList::getInstanceById(QString instId) const
         return nullptr;
     for (auto& inst : m_instances) {
         if (inst->id() == instId) {
-            return inst;
+            return inst.get();
         }
     }
     return nullptr;
@@ -633,9 +630,9 @@ BaseInstance* InstanceList::getInstanceByManagedName(const QString& managed_name
     if (managed_name.isEmpty())
         return {};
 
-    for (auto instance : m_instances) {
+    for (auto& instance : m_instances) {
         if (instance->getManagedPackName() == managed_name)
-            return instance;
+            return instance.get();
     }
 
     return {};
@@ -648,9 +645,9 @@ QModelIndex InstanceList::getInstanceIndexById(const QString& id) const
 
 int InstanceList::getInstIndex(BaseInstance* inst) const
 {
-    int count = m_instances.count();
+    int count = m_instances.size();
     for (int i = 0; i < count; i++) {
-        if (inst == m_instances[i]) {
+        if (inst == m_instances.at(i).get()) {
             return i;
         }
     }
@@ -666,7 +663,7 @@ void InstanceList::propertiesChanged(BaseInstance* inst)
     }
 }
 
-InstanceList::BaseInstanceOwner InstanceList::loadInstance(const InstanceId& id)
+std::unique_ptr<BaseInstance> InstanceList::loadInstance(const InstanceId& id)
 {
     if (!m_groupsLoaded) {
         loadGroupList();
@@ -674,7 +671,7 @@ InstanceList::BaseInstanceOwner InstanceList::loadInstance(const InstanceId& id)
 
     auto instanceRoot = FS::PathCombine(m_instDir, id);
     auto instanceSettings = std::make_unique<INISettingsObject>(FS::PathCombine(instanceRoot, "instance.cfg"));
-    BaseInstanceOwner inst;
+    std::unique_ptr<BaseInstance> inst;
 
     instanceSettings->registerSetting("InstanceType", "");
 
@@ -683,9 +680,9 @@ InstanceList::BaseInstanceOwner InstanceList::loadInstance(const InstanceId& id)
     // NOTE: Some launcher versions didn't save the InstanceType properly. We will just bank on the probability that this is probably a
     // OneSix instance
     if (inst_type == "OneSix" || inst_type.isEmpty()) {
-        inst = new MinecraftInstance(m_globalSettings, std::move(instanceSettings), instanceRoot);
+        inst.reset(new MinecraftInstance(m_globalSettings, std::move(instanceSettings), instanceRoot));
     } else {
-        inst = new NullInstance(m_globalSettings, std::move(instanceSettings), instanceRoot);
+        inst.reset(new NullInstance(m_globalSettings, std::move(instanceSettings), instanceRoot));
     }
     qDebug() << "Loaded instance" << inst->name() << "from" << inst->instanceRoot();
 

@@ -73,8 +73,6 @@ class InstanceList : public QAbstractListModel {
     Q_OBJECT
 
    public:
-    using BaseInstanceOwner = BaseInstance*;
-
     explicit InstanceList(SettingsObject* settings, const QString& instDir, QObject* parent = 0);
     virtual ~InstanceList();
 
@@ -98,9 +96,9 @@ class InstanceList : public QAbstractListModel {
      */
     enum InstListError { NoError = 0, UnknownError };
 
-    BaseInstance* at(int i) const { return m_instances.at(i); }
+    BaseInstance* at(int i) const { return m_instances.at(i).get(); }
 
-    int count() const { return m_instances.count(); }
+    int count() const { return m_instances.size(); }
 
     InstListError loadList();
     void saveNow();
@@ -181,11 +179,11 @@ class InstanceList : public QAbstractListModel {
     void updateTotalPlayTime();
     void suspendWatch();
     void resumeWatch();
-    void add(const QList<BaseInstanceOwner>& list);
+    void add(std::vector<std::unique_ptr<BaseInstance>>& list);
     void loadGroupList();
     void saveGroupList();
     QList<InstanceId> discoverInstances();
-    BaseInstanceOwner loadInstance(const InstanceId& id);
+    std::unique_ptr<BaseInstance> loadInstance(const InstanceId& id);
 
     void increaseGroupCount(const QString& group);
     void decreaseGroupCount(const QString& group);
@@ -194,7 +192,7 @@ class InstanceList : public QAbstractListModel {
     int m_watchLevel = 0;
     int totalPlayTime = 0;
     bool m_dirty = false;
-    QList<BaseInstanceOwner> m_instances;
+    std::vector<std::unique_ptr<BaseInstance>> m_instances;
     // id -> refs
     QMap<QString, int> m_groupNameCache;
 
