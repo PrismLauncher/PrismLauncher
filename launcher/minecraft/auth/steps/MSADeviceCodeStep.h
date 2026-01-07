@@ -35,17 +35,16 @@
 
 #pragma once
 #include <QObject>
-#include <QTimer>
 
 #include "minecraft/auth/AuthStep.h"
-#include "net/NetJob.h"
-#include "net/Request.h"
+
+#include <QtNetworkAuth/QOAuth2DeviceAuthorizationFlow>
 
 class MSADeviceCodeStep : public AuthStep {
     Q_OBJECT
    public:
     explicit MSADeviceCodeStep(AccountData* data);
-    virtual ~MSADeviceCodeStep() noexcept = default;
+    ~MSADeviceCodeStep() noexcept override = default;
 
     void perform() override;
 
@@ -55,23 +54,9 @@ class MSADeviceCodeStep : public AuthStep {
     void abort() override;
 
    signals:
-    void authorizeWithBrowser(QString url, QString code, int expiresIn);
-
-   private slots:
-    void deviceAuthorizationFinished(QByteArray* response);
-    void startPoolTimer();
-    void authenticateUser();
-    void authenticationFinished(QByteArray* response);
+    void authorizeWithBrowser(const QUrl& verificationUrl, const QString& code, const QUrl& completeVerificationUrl);
 
    private:
     QString m_clientId;
-    QString m_device_code;
-    bool m_is_aborted = false;
-    int interval = 5;
-
-    QTimer m_pool_timer;
-    QTimer m_expiration_timer;
-
-    Net::Request::Ptr m_request;
-    NetJob::Ptr m_task;
+    QOAuth2DeviceAuthorizationFlow m_oauth2;
 };
