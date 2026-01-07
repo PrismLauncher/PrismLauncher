@@ -30,22 +30,25 @@
 #include "icons/IconList.h"
 #include "icons/IconUtils.h"
 
-class IconProxyModel : public QSortFilterProxyModel
-{
-public:
-    explicit IconProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent)
-    {
-    }
+class IconProxyModel : public QSortFilterProxyModel {
+   public:
+    explicit IconProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}
 
     void setCategory(IconPickerDialog::IconPickerCategory category)
     {
-        if (m_category == category)
+        if (m_category == category) {
             return;
+        }
         m_category = category;
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
         invalidateFilter();
+#else
+        beginFilterChange();
+        endFilterChange();
+#endif
     }
 
-protected:
+   protected:
     bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override
     {
         if (!QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent))
@@ -68,10 +71,8 @@ protected:
 
         if (!isBuiltin) {
             const QString& name = icon->name();
-            if (name.startsWith("curseforge_", Qt::CaseInsensitive) ||
-                name.startsWith("modrinth_", Qt::CaseInsensitive) ||
-                name.startsWith("ftb_", Qt::CaseInsensitive) ||
-                name.startsWith("technic_", Qt::CaseInsensitive) ||
+            if (name.startsWith("curseforge_", Qt::CaseInsensitive) || name.startsWith("modrinth_", Qt::CaseInsensitive) ||
+                name.startsWith("ftb_", Qt::CaseInsensitive) || name.startsWith("technic_", Qt::CaseInsensitive) ||
                 name.startsWith("atl_", Qt::CaseInsensitive)) {
                 isModpack = true;
             }
@@ -91,7 +92,7 @@ protected:
         }
     }
 
-private:
+   private:
     IconPickerDialog::IconPickerCategory m_category = IconPickerDialog::Any;
 };
 
@@ -101,18 +102,10 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
     setWindowModality(Qt::WindowModal);
 
     static const QString context_text[] = {
-        tr("All"),
-        tr("Modern"),
-        tr("Legacy"),
-        tr("Modpacks"),
-        tr("Custom"),
+        tr("All"), tr("Modern"), tr("Legacy"), tr("Modpacks"), tr("Custom"),
     };
     static const IconPickerCategory context_id[] = {
-        Any,
-        Modern,
-        Legacy,
-        Modpacks,
-        Custom,
+        Any, Modern, Legacy, Modpacks, Custom,
     };
     const int cnt = sizeof(context_text) / sizeof(context_text[0]);
     for (int i = 0; i < cnt; ++i) {
