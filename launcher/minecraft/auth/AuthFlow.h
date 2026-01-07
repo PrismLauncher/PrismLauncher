@@ -27,7 +27,7 @@ class AuthFlow : public Task {
 
    signals:
     void authorizeWithBrowser(const QUrl& url);
-    void authorizeWithBrowserWithExtra(QString url, QString code, int expiresIn);
+    void authorizeWithBrowserWithExtra(const QUrl& verificationUrl, const QString& code, const QUrl& completeVerificationUrl);
 
    protected:
     void succeed();
