@@ -61,12 +61,7 @@ The translation effort for Prism Launcher is hosted on [Weblate](https://hosted.
 
 ## Building
 
-If you want to build Prism Launcher yourself, check the build instructions:
-
-- [Windows](https://prismlauncher.org/wiki/development/build-instructions/windows/)
-- [Linux](https://prismlauncher.org/wiki/development/build-instructions/linux/)
-- [MacOS](https://prismlauncher.org/wiki/development/build-instructions/macos/)
-- [OpenBSD](https://prismlauncher.org/wiki/development/build-instructions/openbsd/)
+If you want to build Prism Launcher yourself, check the [build instructions](https://prismlauncher.org/wiki/development/build-instructions).
 
 ## Sponsors & Partners
 

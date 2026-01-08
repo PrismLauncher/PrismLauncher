@@ -266,7 +266,7 @@ void LaunchController::login()
             }
             /* fallthrough */
             case AccountState::Online: {
-                if (!m_session->wants_online) {
+                if (!m_session->wants_online && m_accountToUse->accountType() != AccountType::Offline) {
                     // we ask the user for a player name
                     bool ok = false;
                     QString name;

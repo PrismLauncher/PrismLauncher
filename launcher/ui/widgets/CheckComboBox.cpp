@@ -138,7 +138,7 @@ bool CheckComboBox::eventFilter(QObject* receiver, QEvent* event)
         }
         case QEvent::MouseButtonPress: {
             auto ev = static_cast<QMouseEvent*>(event);
-            m_containerMousePress = ev && view()->indexAt(ev->pos()).isValid();
+            m_containerMousePress = ev && view()->indexAt(ev->pos()).isValid() && view()->rect().contains(ev->pos());
             break;
         }
         case QEvent::Wheel:
