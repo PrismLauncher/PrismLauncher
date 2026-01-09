@@ -129,7 +129,7 @@ class Library {
     void setHint(const QString& hint) { m_hint = hint; }
 
     /// Set the load rules
-    void setRules(QList<std::shared_ptr<Rule>> rules) { m_rules = rules; }
+    void setRules(QList<Rule> rules) { m_rules = rules; }
 
     /// Returns true if the library should be loaded (or extracted, in case of natives)
     bool isActive(const RuntimeContext& runtimeContext) const;
@@ -203,7 +203,7 @@ class Library {
     bool applyRules = false;
 
     /// rules associated with the library
-    QList<std::shared_ptr<Rule>> m_rules;
+    QList<Rule> m_rules;
 
     /// MOJANG: container with Mojang style download info
     MojangLibraryDownloadInfo::Ptr m_mojangDownloads;

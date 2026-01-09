@@ -22,10 +22,7 @@
 #include "LocalShaderPackParseTask.h"
 
 #include "FileSystem.h"
-
-#include <quazip/quazip.h>
-#include <quazip/quazipdir.h>
-#include <quazip/quazipfile.h>
+#include "archive/ArchiveReader.h"
 
 namespace ShaderPackUtils {
 
@@ -63,24 +60,18 @@ bool processZIP(ShaderPack& pack, ProcessingLevel level)
 {
     Q_ASSERT(pack.type() == ResourceType::ZIPFILE);
 
-    QuaZip zip(pack.fileinfo().filePath());
-    if (!zip.open(QuaZip::mdUnzip))
+    MMCZip::ArchiveReader zip(pack.fileinfo().filePath());
+    if (!zip.collectFiles())
         return false;  // can't open zip file
 
-    QuaZipFile file(&zip);
-
-    QuaZipDir zipDir(&zip);
-    if (!zipDir.exists("/shaders")) {
+    if (!zip.exists("/shaders")) {
         return false;  // assets dir does not exists at zip root
     }
     pack.setPackFormat(ShaderPackFormat::VALID);
 
     if (level == ProcessingLevel::BasicInfoOnly) {
-        zip.close();
         return true;  // only need basic info already checked
     }
-
-    zip.close();
 
     return true;
 }

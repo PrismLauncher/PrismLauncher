@@ -41,7 +41,6 @@
 
 #include <QDateTime>
 #include <QMap>
-#include <QString>
 #include <QVariantMap>
 
 enum class Validity { None, Assumed, Certain };

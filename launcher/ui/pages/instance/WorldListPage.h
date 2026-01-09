@@ -37,7 +37,6 @@
 
 #include <QMainWindow>
 
-#include <Application.h>
 #include <LoggedProcess.h>
 #include "minecraft/MinecraftInstance.h"
 #include "ui/pages/BasePage.h"
@@ -57,7 +56,7 @@ class WorldListPage : public QMainWindow, public BasePage {
     virtual ~WorldListPage();
 
     virtual QString displayName() const override { return tr("Worlds"); }
-    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("worlds"); }
+    virtual QIcon icon() const override { return QIcon::fromTheme("worlds"); }
     virtual QString id() const override { return "worlds"; }
     virtual QString helpPage() const override { return "Worlds"; }
     virtual bool shouldDisplay() const override;

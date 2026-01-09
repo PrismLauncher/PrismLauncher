@@ -55,9 +55,9 @@ ProfileSetupDialog::ProfileSetupDialog(MinecraftAccountPtr accountToSetup, QWidg
     ui->setupUi(this);
     ui->errorLabel->setVisible(false);
 
-    goodIcon = APPLICATION->getThemedIcon("status-good");
-    yellowIcon = APPLICATION->getThemedIcon("status-yellow");
-    badIcon = APPLICATION->getThemedIcon("status-bad");
+    goodIcon = QIcon::fromTheme("status-good");
+    yellowIcon = QIcon::fromTheme("status-yellow");
+    badIcon = QIcon::fromTheme("status-bad");
 
     static const QRegularExpression s_permittedNames("[a-zA-Z0-9_]{3,16}");
     auto nameEdit = ui->nameEdit;

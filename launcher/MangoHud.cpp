@@ -111,8 +111,8 @@ QString getLibraryString()
         try {
             auto conf = Json::requireDocument(filePath, vkLayer);
             auto confObject = Json::requireObject(conf, vkLayer);
-            auto layer = Json::ensureObject(confObject, "layer");
-            QString libraryName = Json::ensureString(layer, "library_path");
+            auto layer = confObject["layer"].toObject();
+            QString libraryName = layer["library_path"].toString();
 
             if (libraryName.isEmpty()) {
                 continue;

@@ -60,7 +60,7 @@ std::optional<LogParser::LogEntry> LogParser::parseAttributes()
             entry.timestamp = QDateTime::fromSecsSinceEpoch(value.trimmed().toLongLong());
         } else if (name == "level"_L1) {
             entry.levelText = value.trimmed().toString();
-            entry.level = MessageLevel::getLevel(entry.levelText);
+            entry.level = MessageLevel::fromName(entry.levelText);
         } else if (name == "thread"_L1) {
             entry.thread = value.trimmed().toString();
         }
@@ -320,7 +320,7 @@ std::optional<LogParser::ParsedItem> LogParser::parseLog4J()
     throw std::runtime_error("unreachable: already verified this was a complete log4j:Event");
 }
 
-MessageLevel::Enum LogParser::guessLevel(const QString& line, MessageLevel::Enum level)
+MessageLevel LogParser::guessLevel(const QString& line, MessageLevel previous)
 {
     static const QRegularExpression LINE_WITH_LEVEL("^\\[(?<timestamp>[0-9:]+)\\] \\[[^/]+/(?<level>[^\\]]+)\\]");
     auto match = LINE_WITH_LEVEL.match(line);
@@ -328,24 +328,32 @@ MessageLevel::Enum LogParser::guessLevel(const QString& line, MessageLevel::Enum
         // New style logs from log4j
         QString timestamp = match.captured("timestamp");
         QString levelStr = match.captured("level");
-        level = MessageLevel::getLevel(levelStr);
+
+        return MessageLevel::fromName(levelStr);
     } else {
         // Old style forge logs
         if (line.contains("[INFO]") || line.contains("[CONFIG]") || line.contains("[FINE]") || line.contains("[FINER]") ||
             line.contains("[FINEST]"))
-            level = MessageLevel::Info;
+            return MessageLevel::Info;
         if (line.contains("[SEVERE]") || line.contains("[STDERR]"))
-            level = MessageLevel::Error;
+            return MessageLevel::Error;
         if (line.contains("[WARNING]"))
-            level = MessageLevel::Warning;
+            return MessageLevel::Warning;
         if (line.contains("[DEBUG]"))
-            level = MessageLevel::Debug;
+            return MessageLevel::Debug;
     }
-    if (level != MessageLevel::Unknown)
-        return level;
+
+    if (line.contains("Exception: ") || line.contains("Throwable: "))
+        return MessageLevel::Error;
+
+    if (line.startsWith("Caused by: ") || line.startsWith("Exception in thread"))
+        return MessageLevel::Error;
 
     if (line.contains("overwriting existing"))
         return MessageLevel::Fatal;
 
-    return MessageLevel::Info;
+    if (line.startsWith("\t") || line.startsWith(" "))
+        return previous;
+
+    return MessageLevel::Unknown;
 }

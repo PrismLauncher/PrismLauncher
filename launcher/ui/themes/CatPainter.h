@@ -34,5 +34,6 @@ class CatPainter : public QObject {
     void updateFrame();
 
    private:
+    QMovie* m_movie = nullptr;
     QPixmap m_image;
 };

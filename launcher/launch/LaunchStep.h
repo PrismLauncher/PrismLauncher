@@ -28,8 +28,8 @@ class LaunchStep : public Task {
     virtual ~LaunchStep() = default;
 
    signals:
-    void logLines(QStringList lines, MessageLevel::Enum level);
-    void logLine(QString line, MessageLevel::Enum level);
+    void logLines(QStringList lines, MessageLevel level);
+    void logLine(QString line, MessageLevel level);
     void readyForLaunch();
     void progressReportingRequest();
 

@@ -38,6 +38,9 @@ class Scene : protected QOpenGLFunctions {
     QList<BoxGeometry*> m_staticComponents;
     QList<BoxGeometry*> m_normalArms;
     QList<BoxGeometry*> m_slimArms;
+    QList<BoxGeometry*> m_staticComponentsOverlay;
+    QList<BoxGeometry*> m_normalArmsOverlay;
+    QList<BoxGeometry*> m_slimArmsOverlay;
     BoxGeometry* m_cape = nullptr;
     QList<BoxGeometry*> m_elytra;
     QOpenGLTexture* m_skinTexture = nullptr;

@@ -21,14 +21,13 @@ class DataPackResourceModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    DataPackResourceModel(BaseInstance const&, ResourceAPI*);
+    DataPackResourceModel(BaseInstance const&, ResourceAPI*, QString, QString);
 
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, unsigned int sort);
 
-    void loadIndexedPack(ModPlatform::IndexedPack&, QJsonObject&) override = 0;
-    void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&) override = 0;
-    void loadIndexedPackVersions(ModPlatform::IndexedPack&, QJsonArray&) override = 0;
+    [[nodiscard]] QString debugName() const override { return m_debugName; }
+    [[nodiscard]] QString metaEntryBase() const override { return m_metaEntryBase; }
 
    public slots:
     ResourceAPI::SearchArgs createSearchArguments() override;
@@ -38,7 +37,9 @@ class DataPackResourceModel : public ResourceModel {
    protected:
     const BaseInstance& m_base_instance;
 
-    auto documentToArray(QJsonDocument& obj) const -> QJsonArray override = 0;
+   private:
+    QString m_debugName;
+    QString m_metaEntryBase;
 };
 
 }  // namespace ResourceDownload

@@ -16,7 +16,6 @@ class ReviewMessageBox : public QDialog {
     using ResourceInformation = struct res_info {
         QString name;
         QString filename;
-        QString custom_file_path{};
         QString provider;
         QStringList required_by;
         QString version_type;

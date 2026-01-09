@@ -111,7 +111,6 @@ class AccountList : public QAbstractListModel {
     void endActivity();
 
    private:
-    const char* m_name;
     uint32_t m_activityCount = 0;
    signals:
     void listChanged();

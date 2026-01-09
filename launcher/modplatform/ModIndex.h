@@ -23,6 +23,7 @@
 #include <QMetaType>
 #include <QString>
 #include <QVariant>
+#include <compare>
 #include <memory>
 
 class QIODevice;
@@ -75,32 +76,21 @@ struct DonationData {
 };
 
 struct IndexedVersionType {
-    enum class VersionType { Release = 1, Beta, Alpha, Unknown };
-    IndexedVersionType(const QString& type);
-    IndexedVersionType(const IndexedVersionType::VersionType& type);
-    IndexedVersionType(const IndexedVersionType& type);
-    IndexedVersionType() : IndexedVersionType(IndexedVersionType::VersionType::Unknown) {}
-    static const QString toString(const IndexedVersionType::VersionType& type);
-    static IndexedVersionType::VersionType enumFromString(const QString& type);
-    bool isValid() const { return m_type != IndexedVersionType::VersionType::Unknown; }
-    IndexedVersionType& operator=(const IndexedVersionType& other);
-    bool operator==(const IndexedVersionType& other) const { return m_type == other.m_type; }
-    bool operator==(const IndexedVersionType::VersionType& type) const { return m_type == type; }
-    bool operator!=(const IndexedVersionType& other) const { return m_type != other.m_type; }
-    bool operator!=(const IndexedVersionType::VersionType& type) const { return m_type != type; }
-    bool operator<(const IndexedVersionType& other) const { return m_type < other.m_type; }
-    bool operator<(const IndexedVersionType::VersionType& type) const { return m_type < type; }
-    bool operator<=(const IndexedVersionType& other) const { return m_type <= other.m_type; }
-    bool operator<=(const IndexedVersionType::VersionType& type) const { return m_type <= type; }
-    bool operator>(const IndexedVersionType& other) const { return m_type > other.m_type; }
-    bool operator>(const IndexedVersionType::VersionType& type) const { return m_type > type; }
-    bool operator>=(const IndexedVersionType& other) const { return m_type >= other.m_type; }
-    bool operator>=(const IndexedVersionType::VersionType& type) const { return m_type >= type; }
+    enum class Enum { Unknown, Release = 1, Beta, Alpha };
+    using enum Enum;
+    constexpr IndexedVersionType(Enum e = Unknown) : m_type(e) {}
+    static IndexedVersionType fromString(const QString& type);
+    inline bool isValid() const { return m_type != Unknown; }
+    std::strong_ordering operator<=>(const IndexedVersionType& other) const = default;
+    std::strong_ordering operator<=>(const IndexedVersionType::Enum& other) const { return m_type <=> other; }
+    QString toString() const;
+    explicit operator int() const { return static_cast<int>(m_type); }
+    explicit operator IndexedVersionType::Enum() { return m_type; }
 
-    QString toString() const { return toString(m_type); }
-
-    IndexedVersionType::VersionType m_type;
+   private:
+    Enum m_type;
 };
+
 
 struct Dependency {
     QVariant addonId;
@@ -128,6 +118,24 @@ struct IndexedVersion {
 
     // For internal use, not provided by APIs
     bool is_currently_selected = false;
+
+    QString getVersionDisplayString() const
+    {
+        auto release_type =
+            version_type.isValid() ? QString(" [%1]").arg(version_type.toString()) : "";
+        auto versionStr = !version.contains(version_number) ? version_number : "";
+        QString gameVersion = "";
+        for (auto v : mcVersion) {
+            if (version.contains(v)) {
+                gameVersion = "";
+                break;
+            }
+            if (gameVersion.isEmpty()) {
+                gameVersion = QObject::tr(" for %1").arg(v);
+            }
+        }
+        return QString("%1%2 — %3%4").arg(version, gameVersion, versionStr, release_type);
+    }
 };
 
 struct ExtraPackData {

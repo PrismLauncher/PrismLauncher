@@ -59,7 +59,7 @@ QString FlameAPI::getModFileChangelog(int modId, int fileId)
             return;
         }
 
-        changelog = Json::ensureString(doc.object(), "data");
+        changelog = doc.object()["data"].toString();
     });
 
     QObject::connect(netJob.get(), &NetJob::finished, [&lock] { lock.quit(); });
@@ -92,7 +92,7 @@ QString FlameAPI::getModDescription(int modId)
             return;
         }
 
-        description = Json::ensureString(doc.object(), "data");
+        description = doc.object()["data"].toString();
     });
 
     QObject::connect(netJob.get(), &NetJob::finished, [&lock] { lock.quit(); });
@@ -218,9 +218,19 @@ QList<ModPlatform::Category> FlameAPI::loadModCategories(std::shared_ptr<QByteAr
 
 std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
                                                                       QList<ModPlatform::ModLoaderType> instanceLoaders,
-                                                                      ModPlatform::ModLoaderTypes modLoaders)
+                                                                      ModPlatform::ModLoaderTypes modLoaders,
+                                                                      bool checkLoaders)
 {
     static const auto noLoader = ModPlatform::ModLoaderType(0);
+    if (!checkLoaders) {
+        std::optional<ModPlatform::IndexedVersion> ver;
+        for (auto file_tmp : versions) {
+            if (!ver.has_value() || file_tmp.date > ver->date) {
+                ver = file_tmp;
+            }
+        }
+        return ver;
+    }
     QHash<ModPlatform::ModLoaderType, ModPlatform::IndexedVersion> bestMatch;
     auto checkVersion = [&bestMatch](const ModPlatform::IndexedVersion& version, const ModPlatform::ModLoaderType& loader) {
         if (bestMatch.contains(loader)) {

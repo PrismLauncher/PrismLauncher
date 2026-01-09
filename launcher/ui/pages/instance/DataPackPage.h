@@ -28,8 +28,8 @@ class DataPackPage : public ExternalResourcesPage {
    public:
     explicit DataPackPage(BaseInstance* instance, std::shared_ptr<DataPackFolderModel> model, QWidget* parent = nullptr);
 
-    QString displayName() const override { return QObject::tr("Data packs"); }
-    QIcon icon() const override { return APPLICATION->getThemedIcon("datapacks"); }
+    QString displayName() const override { return QObject::tr("Data Packs"); }
+    QIcon icon() const override { return QIcon::fromTheme("datapacks"); }
     QString id() const override { return "datapacks"; }
     QString helpPage() const override { return "Data-packs"; }
     bool shouldDisplay() const override { return true; }

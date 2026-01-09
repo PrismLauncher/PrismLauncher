@@ -81,6 +81,14 @@ class ModFilterWidget : public QTabWidget {
 
             return versions.empty();
         }
+
+        bool checkModpackFilters(const ModPlatform::IndexedVersion& v)
+        {
+            return ((!loaders || !v.loaders || loaders & v.loaders) &&  // loaders
+                    (releases.empty() ||                                // releases
+                     std::find(releases.cbegin(), releases.cend(), v.version_type) != releases.cend()) &&
+                    checkMcVersions({ v.mcVersion }));  // gameVersion}
+        }
     };
 
     static std::unique_ptr<ModFilterWidget> create(MinecraftInstance* instance, bool extended);

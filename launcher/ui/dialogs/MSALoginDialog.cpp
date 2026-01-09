@@ -50,7 +50,7 @@
 #include <QUrl>
 #include <QtWidgets/QPushButton>
 
-#include "qrcodegen.hpp"
+#include "qrencode.h"
 
 MSALoginDialog::MSALoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::MSALoginDialog)
 {
@@ -146,27 +146,32 @@ void MSALoginDialog::authorizeWithBrowser(const QUrl& url)
     m_url = url;
 }
 
-// https://stackoverflow.com/questions/21400254/how-to-draw-a-qr-code-with-qt-in-native-c-c
-void paintQR(QPainter& painter, const QSize sz, const QString& data, QColor fg)
+void paintQR(QPainter& painter, const QSize canvasSize, const QString& data, QColor fg)
 {
-    // NOTE: At this point you will use the API to get the encoding and format you want, instead of my hardcoded stuff:
-    qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText(data.toUtf8().constData(), qrcodegen::QrCode::Ecc::LOW);
-    const int s = qr.getSize() > 0 ? qr.getSize() : 1;
-    const double w = sz.width();
-    const double h = sz.height();
-    const double aspect = w / h;
-    const double size = ((aspect > 1.0) ? h : w);
-    const double scale = size / (s + 2);
-    // NOTE: For performance reasons my implementation only draws the foreground parts in supplied color.
-    // It expects background to be prepared already (in white or whatever is preferred).
+    const auto* qr = QRcode_encodeString(data.toUtf8().constData(), 0, QRecLevel::QR_ECLEVEL_M, QRencodeMode::QR_MODE_8, 1);
+    if (!qr) {
+        qWarning() << "Unable to encode" << data << "as QR code";
+        return;
+    }
+
     painter.setPen(Qt::NoPen);
     painter.setBrush(fg);
-    for (int y = 0; y < s; y++) {
-        for (int x = 0; x < s; x++) {
-            const int color = qr.getModule(x, y);  // 0 for white, 1 for black
-            if (0 != color) {
-                const double rx1 = (x + 1) * scale, ry1 = (y + 1) * scale;
-                QRectF r(rx1, ry1, scale, scale);
+
+    // Make sure the QR code fits in the canvas with some padding
+    const auto qrSize = qr->width;
+    const auto canvasWidth = canvasSize.width();
+    const auto canvasHeight = canvasSize.height();
+    const auto scale = 0.8 * std::min(canvasWidth / qrSize, canvasHeight / qrSize);
+
+    // Find an offset to center it in the canvas
+    const auto offsetX = (canvasWidth - qrSize * scale) / 2;
+    const auto offsetY = (canvasHeight - qrSize * scale) / 2;
+
+    for (int y = 0; y < qrSize; y++) {
+        for (int x = 0; x < qrSize; x++) {
+            auto shouldFillIn = qr->data[y * qrSize + x] & 1;
+            if (shouldFillIn) {
+                QRectF r(offsetX + x * scale, offsetY + y * scale, scale, scale);
                 painter.drawRects(&r, 1);
             }
         }

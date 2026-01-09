@@ -123,7 +123,7 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
 
     // part of fix for weird bug involving the window icon being replaced
     // dunno why it happens, but parent 2-line fix seems to be enough, so w/e
-    auto appIcon = APPLICATION->getThemedIcon("logo");
+    auto appIcon = APPLICATION->logo();
 
     QFile iconFile(iconPath);
     if (!iconFile.open(QFile::WriteOnly)) {

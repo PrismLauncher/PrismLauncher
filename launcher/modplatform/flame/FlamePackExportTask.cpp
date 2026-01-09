@@ -30,13 +30,14 @@
 #include <memory>
 #include "Application.h"
 #include "Json.h"
-#include "MMCZip.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/helpers/HashUtils.h"
 #include "tasks/Task.h"
+
+#include "archive/ExportToZipTask.h"
 
 const QString FlamePackExportTask::TEMPLATE = "<li><a href=\"{url}\">{name}{authors}</a></li>\n";
 const QStringList FlamePackExportTask::FILE_EXTENSIONS({ "jar", "zip" });
@@ -199,8 +200,8 @@ void FlamePackExportTask::makeApiRequest()
                 return;
             }
             for (auto match : dataArr) {
-                auto matchObj = Json::ensureObject(match, {});
-                auto fileObj = Json::ensureObject(matchObj, "file", {});
+                auto matchObj = match.toObject();
+                auto fileObj = matchObj["file"].toObject();
 
                 if (matchObj.isEmpty() || fileObj.isEmpty()) {
                     qWarning() << "Fingerprint match is empty!";
@@ -208,7 +209,7 @@ void FlamePackExportTask::makeApiRequest()
                     return;
                 }
 
-                auto fingerprint = QString::number(Json::ensureVariant(fileObj, "fileFingerprint").toUInt());
+                auto fingerprint = QString::number(fileObj["fileFingerprint"].toInteger());
                 auto mod = pendingHashes.find(fingerprint);
                 if (mod == pendingHashes.end()) {
                     qWarning() << "Invalid fingerprint from the API response.";
@@ -216,7 +217,7 @@ void FlamePackExportTask::makeApiRequest()
                 }
 
                 setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name));
-                if (Json::ensureBoolean(fileObj, "isAvailable", false, "isAvailable"))
+                if (fileObj["isAvailable"].toBool())
                     resolvedFiles.insert(mod->path, { Json::requireInteger(fileObj, "modId"), Json::requireInteger(fileObj, "id"),
                                                       mod->enabled, mod->isMod });
             }
@@ -318,7 +319,7 @@ void FlamePackExportTask::buildZip()
     setStatus(tr("Adding files..."));
     setProgress(4, 5);
 
-    auto zipTask = makeShared<MMCZip::ExportToZipTask>(m_options.output, m_gameRoot, files, "overrides/", true, false);
+    auto zipTask = makeShared<MMCZip::ExportToZipTask>(m_options.output, m_gameRoot, files, "overrides/", true);
     zipTask->addExtraFile("manifest.json", generateIndex());
     zipTask->addExtraFile("modlist.html", generateHTML());
 

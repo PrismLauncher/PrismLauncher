@@ -75,9 +75,9 @@ bool SkinList::update()
         try {
             auto doc = Json::requireDocument(manifestInfo.absoluteFilePath(), "SkinList JSON file");
             const auto root = doc.object();
-            auto skins = Json::ensureArray(root, "skins");
+            auto skins = root["skins"].toArray();
             for (auto jSkin : skins) {
-                SkinModel s(m_dir, Json::ensureObject(jSkin));
+                SkinModel s(m_dir, jSkin.toObject());
                 if (s.isValid()) {
                     newSkins << s;
                 }

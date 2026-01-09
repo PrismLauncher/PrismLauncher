@@ -12,7 +12,7 @@ class LogModel : public QAbstractListModel {
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     QVariant data(const QModelIndex& index, int role) const;
 
-    void append(MessageLevel::Enum, QString line);
+    void append(MessageLevel, QString line);
     void clear();
 
     void suspend(bool suspend);
@@ -31,13 +31,13 @@ class LogModel : public QAbstractListModel {
     void setColorLines(bool state);
     bool colorLines() const;
 
-    MessageLevel::Enum previousLevel();
+    MessageLevel previousLevel();
 
     enum Roles { LevelRole = Qt::UserRole };
 
    private /* types */:
     struct entry {
-        MessageLevel::Enum level = MessageLevel::Enum::Unknown;
+        MessageLevel level = MessageLevel::Unknown;
         QString line;
     };
 

@@ -669,7 +669,7 @@ void AccountList::beginActivity()
 void AccountList::endActivity()
 {
     if (m_activityCount == 0) {
-        qWarning() << m_name << " - Activity count would become below zero";
+        qWarning() << "Activity count would become below zero";
         return;
     }
     bool deactivating = m_activityCount == 1;

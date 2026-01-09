@@ -43,10 +43,9 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
         values.append(new NotesPage(onesix.get()));
         values.append(new WorldListPage(onesix, onesix->worldList()));
         values.append(new ServersPage(onesix));
-        // values.append(new GameOptionsPage(onesix.get()));
         values.append(new ScreenshotsPage(FS::PathCombine(onesix->gameRoot(), "screenshots")));
         values.append(new InstanceSettingsPage(onesix));
-        values.append(new OtherLogsPage("logs", tr("Other logs"), "Other-Logs", inst));
+        values.append(new OtherLogsPage("logs", tr("Other Logs"), "Other-Logs", inst));
         return values;
     }
 

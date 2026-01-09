@@ -21,9 +21,10 @@
 
 #include "Application.h"
 
-#include "minecraft/mod/ModFolderModel.h"
+#include "FileSystem.h"
 #include "minecraft/mod/ResourceFolderModel.h"
 
+#include "minecraft/mod/ShaderPackFolderModel.h"
 #include "modplatform/helpers/HashUtils.h"
 #include "net/ApiDownload.h"
 #include "net/ChecksumValidator.h"
@@ -31,9 +32,8 @@
 ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
                                            ModPlatform::IndexedVersion version,
                                            const std::shared_ptr<ResourceFolderModel> packs,
-                                           bool is_indexed,
-                                           QString custom_target_folder)
-    : m_pack(std::move(pack)), m_pack_version(std::move(version)), m_pack_model(packs), m_custom_target_folder(custom_target_folder)
+                                           bool is_indexed)
+    : m_pack(std::move(pack)), m_pack_version(std::move(version)), m_pack_model(packs)
 {
     if (is_indexed) {
         m_update_task.reset(new LocalResourceUpdateTask(m_pack_model->indexDir(), *m_pack, m_pack_version));
@@ -45,17 +45,7 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
     m_filesNetJob.reset(new NetJob(tr("Resource download"), APPLICATION->network()));
     m_filesNetJob->setStatus(tr("Downloading resource:\n%1").arg(m_pack_version.downloadUrl));
 
-    QDir dir{ m_pack_model->dir() };
-    {
-        // FIXME: Make this more generic. May require adding additional info to IndexedVersion,
-        //        or adquiring a reference to the base instance.
-        if (!m_custom_target_folder.isEmpty()) {
-            dir.cdUp();
-            dir.cd(m_custom_target_folder);
-        }
-    }
-
-    auto action = Net::ApiDownload::makeFile(m_pack_version.downloadUrl, dir.absoluteFilePath(getFilename()));
+    auto action = Net::ApiDownload::makeFile(m_pack_version.downloadUrl, m_pack_model->dir().absoluteFilePath(getFilename()));
     if (!m_pack_version.hash_type.isEmpty() && !m_pack_version.hash.isEmpty()) {
         switch (Hashing::algorithmFromString(m_pack_version.hash_type)) {
             case Hashing::Algorithm::Md4:
@@ -89,10 +79,26 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
 void ResourceDownloadTask::downloadSucceeded()
 {
     m_filesNetJob.reset();
-    auto name = std::get<0>(to_delete);
-    auto filename = std::get<1>(to_delete);
-    if (!name.isEmpty() && filename != m_pack_version.fileName)
-        m_pack_model->uninstallResource(filename, true);
+    auto oldName = std::get<0>(to_delete);
+    auto oldFilename = std::get<1>(to_delete);
+
+    if (oldName.isEmpty() || oldFilename == m_pack_version.fileName)
+        return;
+
+    m_pack_model->uninstallResource(oldFilename, true);
+
+    // also rename the shader config file
+    if (dynamic_cast<ShaderPackFolderModel*>(m_pack_model.get()) != nullptr) {
+        QFileInfo oldConfig(m_pack_model->dir(), oldFilename + ".txt");
+        QFileInfo newConfig(m_pack_model->dir(), getFilename() + ".txt");
+
+        if (oldConfig.exists() && !newConfig.exists()) {
+            bool success = FS::move(oldConfig.filePath(), newConfig.filePath());
+
+            if (!success)
+                emit logWarning(tr("Failed to rename shader config from '%1' to '%2'").arg(oldConfig.fileName(), newConfig.fileName()));
+        }
+    }
 }
 
 void ResourceDownloadTask::downloadFailed(QString reason)

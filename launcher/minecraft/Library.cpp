@@ -242,13 +242,13 @@ bool Library::isActive(const RuntimeContext& runtimeContext) const
     if (m_rules.empty()) {
         result = true;
     } else {
-        RuleAction ruleResult = Disallow;
+        Rule::Action ruleResult = Rule::Disallow;
         for (auto rule : m_rules) {
-            RuleAction temp = rule->apply(this, runtimeContext);
-            if (temp != Defer)
+            Rule::Action temp = rule.apply(runtimeContext);
+            if (temp != Rule::Defer)
                 ruleResult = temp;
         }
-        result = result && (ruleResult == Allow);
+        result = result && (ruleResult == Rule::Allow);
     }
     if (isNative()) {
         result = result && !getCompatibleNative(runtimeContext).isNull();

@@ -39,7 +39,6 @@
 
 #include <QWidget>
 
-#include <Application.h>
 #include "ui/pages/BasePage.h"
 
 namespace Ui {
@@ -54,7 +53,7 @@ class APIPage : public QWidget, public BasePage {
     ~APIPage();
 
     QString displayName() const override { return tr("Services"); }
-    QIcon icon() const override { return APPLICATION->getThemedIcon("worlds"); }
+    QIcon icon() const override { return QIcon::fromTheme("worlds"); }
     QString id() const override { return "apis"; }
     QString helpPage() const override { return "APIs"; }
     virtual bool apply() override;

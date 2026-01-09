@@ -84,7 +84,6 @@
 #include "AssetsUtils.h"
 #include "MinecraftLoadAndCheck.h"
 #include "PackProfile.h"
-#include "minecraft/gameoptions/GameOptions.h"
 #include "minecraft/update/FoldersTask.h"
 
 #include "tools/BaseProfiler.h"
@@ -92,6 +91,7 @@
 #include <QActionGroup>
 #include <QMainWindow>
 #include <QScreen>
+#include <QStandardPaths>
 #include <QWindow>
 
 #ifdef Q_OS_LINUX
@@ -484,6 +484,29 @@ QStringList MinecraftInstance::getNativeJars()
     return nativeJars;
 }
 
+static QString replaceTokensIn(const QString &text, const QMap<QString, QString> &with)
+{
+    // TODO: does this still work??
+    QString result;
+    static const QRegularExpression s_token_regexp("\\$\\{(.+)\\}", QRegularExpression::InvertedGreedinessOption);
+    QStringList list;
+    QRegularExpressionMatchIterator i = s_token_regexp.globalMatch(text);
+    int lastCapturedEnd = 0;
+    while (i.hasNext()) {
+        QRegularExpressionMatch match = i.next();
+        result.append(text.mid(lastCapturedEnd, match.capturedStart()));
+        QString key = match.captured(1);
+        auto iter = with.find(key);
+        if (iter != with.end()) {
+            result.append(*iter);
+        }
+        lastCapturedEnd = match.capturedEnd();
+    }
+    result.append(text.mid(lastCapturedEnd));
+    return result;
+}
+
+
 QStringList MinecraftInstance::extraArguments()
 {
     auto list = BaseInstance::extraArguments();
@@ -496,7 +519,11 @@ QStringList MinecraftInstance::extraArguments()
     }
     auto addn = m_components->getProfile()->getAddnJvmArguments();
     if (!addn.isEmpty()) {
-        list.append(addn);
+        QMap<QString, QString> tokenMapping = makeProfileVarMapping(m_components->getProfile());
+
+        for (const QString &item : addn) {
+            list.append(replaceTokensIn(item, tokenMapping));
+        }
     }
     auto agents = m_components->getProfile()->getAgents();
     for (auto agent : agents) {
@@ -560,6 +587,16 @@ QStringList MinecraftInstance::javaArguments()
     args << QString(
         "-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_"
         "minecraft.exe.heapdump");
+#endif
+
+    // LWJGL2 reads `LWJGL_DISABLE_XRANDR` to force disable xrandr usage and fall back to xf86videomode.
+    // It *SHOULD* check for the executable to exist before trying to use it for queries but it doesnt,
+    // so WE can and force disable xrandr if it is not available.
+#ifdef Q_OS_LINUX
+    // LWJGL2 is "org.lwjgl" LWJGL3 is "org.lwjgl3"
+    if (m_components->getComponent("org.lwjgl") != nullptr && QStandardPaths::findExecutable("xrandr").isEmpty()) {
+        args << QString("-DLWJGL_DISABLE_XRANDR=true");
+    }
 #endif
 
     int min = settings()->get("MinMemAlloc").toInt();
@@ -706,28 +743,6 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
     return env;
 }
 
-static QString replaceTokensIn(QString text, QMap<QString, QString> with)
-{
-    // TODO: does this still work??
-    QString result;
-    static const QRegularExpression s_token_regexp("\\$\\{(.+)\\}", QRegularExpression::InvertedGreedinessOption);
-    QStringList list;
-    QRegularExpressionMatchIterator i = s_token_regexp.globalMatch(text);
-    int lastCapturedEnd = 0;
-    while (i.hasNext()) {
-        QRegularExpressionMatch match = i.next();
-        result.append(text.mid(lastCapturedEnd, match.capturedStart()));
-        QString key = match.captured(1);
-        auto iter = with.find(key);
-        if (iter != with.end()) {
-            result.append(*iter);
-        }
-        lastCapturedEnd = match.capturedEnd();
-    }
-    result.append(text.mid(lastCapturedEnd));
-    return result;
-}
-
 QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin) const
 {
     auto profile = m_components->getProfile();
@@ -749,38 +764,27 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, Mine
         }
     }
 
-    QMap<QString, QString> token_mapping;
+
+    QMap<QString, QString> tokenMapping = makeProfileVarMapping(profile);
+
     // yggdrasil!
     if (session) {
         // token_mapping["auth_username"] = session->username;
-        token_mapping["auth_session"] = session->session;
-        token_mapping["auth_access_token"] = session->access_token;
-        token_mapping["auth_player_name"] = session->player_name;
-        token_mapping["auth_uuid"] = session->uuid;
-        token_mapping["user_properties"] = session->serializeUserProperties();
-        token_mapping["user_type"] = session->user_type;
+        tokenMapping["auth_session"] = session->session;
+        tokenMapping["auth_access_token"] = session->access_token;
+        tokenMapping["auth_player_name"] = session->player_name;
+        tokenMapping["auth_uuid"] = session->uuid;
+        tokenMapping["user_properties"] = session->serializeUserProperties();
+        tokenMapping["user_type"] = session->user_type;
+
         if (session->demo) {
             args_pattern += " --demo";
         }
     }
 
-    token_mapping["profile_name"] = name();
-    token_mapping["version_name"] = profile->getMinecraftVersion();
-    token_mapping["version_type"] = profile->getMinecraftVersionType();
-
-    QString absRootDir = QDir(gameRoot()).absolutePath();
-    token_mapping["game_directory"] = absRootDir;
-    QString absAssetsDir = QDir("assets/").absolutePath();
-    auto assets = profile->getMinecraftAssets();
-    token_mapping["game_assets"] = AssetsUtils::getAssetsDir(assets->id, resourcesDir()).absolutePath();
-
-    // 1.7.3+ assets tokens
-    token_mapping["assets_root"] = absAssetsDir;
-    token_mapping["assets_index_name"] = assets->id;
-
     QStringList parts = args_pattern.split(' ', Qt::SkipEmptyParts);
     for (int i = 0; i < parts.length(); i++) {
-        parts[i] = replaceTokensIn(parts[i], token_mapping);
+        parts[i] = replaceTokensIn(parts[i], tokenMapping);
     }
     return parts;
 }
@@ -1023,6 +1027,29 @@ QMap<QString, QString> MinecraftInstance::createCensorFilterFromSession(AuthSess
     addToFilter(sessionRef.uuid, tr("<PROFILE ID>"));
 
     return filter;
+}
+
+QMap<QString, QString> MinecraftInstance::makeProfileVarMapping(std::shared_ptr<LaunchProfile> profile) const
+{
+    QMap<QString, QString> result;
+
+    result["profile_name"] = name();
+    result["version_name"] = profile->getMinecraftVersion();
+    result["version_type"] = profile->getMinecraftVersionType();
+
+    QString absRootDir = QDir(gameRoot()).absolutePath();
+    result["game_directory"] = absRootDir;
+    QString absAssetsDir = QDir("assets/").absolutePath();
+    auto assets = profile->getMinecraftAssets();
+    result["game_assets"] = AssetsUtils::getAssetsDir(assets->id, resourcesDir()).absolutePath();
+
+    // 1.7.3+ assets tokens
+    result["assets_root"] = absAssetsDir;
+    result["assets_index_name"] = assets->id;
+
+    result["library_directory"] = APPLICATION->metacache()->getBasePath("libraries");
+
+    return result;
 }
 
 QStringList MinecraftInstance::getLogFileSearchPaths()
@@ -1284,14 +1311,6 @@ std::shared_ptr<WorldList> MinecraftInstance::worldList()
         m_world_list.reset(new WorldList(worldDir(), this));
     }
     return m_world_list;
-}
-
-std::shared_ptr<GameOptions> MinecraftInstance::gameOptionsModel()
-{
-    if (!m_game_options) {
-        m_game_options.reset(new GameOptions(FS::PathCombine(gameRoot(), "options.txt")));
-    }
-    return m_game_options;
 }
 
 QList<Mod*> MinecraftInstance::getJarMods() const

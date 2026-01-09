@@ -36,7 +36,6 @@
  */
 
 #include "Mod.h"
-#include <qpixmap.h>
 
 #include <QDir>
 #include <QRegularExpression>
@@ -197,7 +196,7 @@ auto Mod::releaseType() const -> QString
     if (metadata())
         return metadata()->releaseType.toString();
 
-    return ModPlatform::IndexedVersionType().toString();
+    return ModPlatform::IndexedVersionType(ModPlatform::IndexedVersionType::Unknown).toString();
 }
 
 auto Mod::description() const -> QString

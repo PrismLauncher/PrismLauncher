@@ -38,10 +38,11 @@
 
 #include "Application.h"
 #include "FileSystem.h"
-#include "MMCZip.h"
 #include "NullInstance.h"
 
 #include "QObjectPtr.h"
+#include "archive/ArchiveReader.h"
+#include "archive/ExtractZipTask.h"
 #include "icons/IconList.h"
 #include "icons/IconUtils.h"
 
@@ -54,11 +55,9 @@
 
 #include "net/ApiDownload.h"
 
+#include <QFileInfo>
 #include <QtConcurrentRun>
-#include <algorithm>
 #include <memory>
-
-#include <quazip/quazipdir.h>
 
 InstanceImportTask::InstanceImportTask(const QUrl& sourceUrl, QWidget* parent, QMap<QString, QString>&& extra_info)
     : m_sourceUrl(sourceUrl), m_extra_info(extra_info), m_parent(parent)
@@ -109,39 +108,14 @@ void InstanceImportTask::downloadFromUrl()
     filesNetJob->start();
 }
 
-QString InstanceImportTask::getRootFromZip(QuaZip* zip, const QString& root)
+QString cleanPath(QString path)
 {
-    if (!isRunning()) {
-        return {};
-    }
-    QuaZipDir rootDir(zip, root);
-    for (auto&& fileName : rootDir.entryList(QDir::Files)) {
-        setDetails(fileName);
-        if (fileName == "instance.cfg") {
-            qDebug() << "MultiMC:" << true;
-            m_modpackType = ModpackType::MultiMC;
-            return root;
-        }
-        if (fileName == "manifest.json") {
-            qDebug() << "Flame:" << true;
-            m_modpackType = ModpackType::Flame;
-            return root;
-        }
-
-        QCoreApplication::processEvents();
-    }
-
-    // Recurse the search to non-ignored subfolders
-    for (auto&& fileName : rootDir.entryList(QDir::Dirs)) {
-        if ("overrides/" == fileName)
-            continue;
-
-        QString result = getRootFromZip(zip, root + fileName);
-        if (!result.isEmpty())
-            return result;
-    }
-
-    return {};
+    if (path == ".")
+        return QString();
+    QString result = path;
+    if (result.startsWith("./"))
+        result = result.mid(2);
+    return result;
 }
 
 void InstanceImportTask::processZipPack()
@@ -151,33 +125,54 @@ void InstanceImportTask::processZipPack()
     qDebug() << "Attempting to create instance from" << m_archivePath;
 
     // open the zip and find relevant files in it
-    auto packZip = std::make_shared<QuaZip>(m_archivePath);
-    if (!packZip->open(QuaZip::mdUnzip)) {
-        emitFailed(tr("Unable to open supplied modpack zip file."));
-        return;
-    }
-
-    QuaZipDir packZipDir(packZip.get());
+    MMCZip::ArchiveReader packZip(m_archivePath);
     qDebug() << "Attempting to determine instance type";
 
     QString root;
-
     // NOTE: Prioritize modpack platforms that aren't searched for recursively.
     // Especially Flame has a very common filename for its manifest, which may appear inside overrides for example
     // https://docs.modrinth.com/docs/modpacks/format_definition/#storage
-    if (packZipDir.exists("/modrinth.index.json")) {
-        // process as Modrinth pack
-        qDebug() << "Modrinth:" << true;
-        m_modpackType = ModpackType::Modrinth;
-    } else if (packZipDir.exists("/bin/modpack.jar") || packZipDir.exists("/bin/version.json")) {
-        // process as Technic pack
-        qDebug() << "Technic:" << true;
-        extractDir.mkpath("minecraft");
-        extractDir.cd("minecraft");
-        m_modpackType = ModpackType::Technic;
-    } else {
-        root = getRootFromZip(packZip.get());
-        setDetails("");
+    auto detectInstance = [this, &extractDir, &root](MMCZip::ArchiveReader::File* f, bool& stop) {
+        if (!isRunning()) {
+            stop = true;
+            return true;
+        }
+        auto fileName = f->filename();
+        if (fileName == "modrinth.index.json") {
+            // process as Modrinth pack
+            qDebug() << "Modrinth:" << true;
+            m_modpackType = ModpackType::Modrinth;
+            stop = true;
+        } else if (fileName == "bin/modpack.jar" || fileName == "bin/version.json") {
+            // process as Technic pack
+            qDebug() << "Technic:" << true;
+            extractDir.mkpath("minecraft");
+            extractDir.cd("minecraft");
+            m_modpackType = ModpackType::Technic;
+            stop = true;
+        } else {
+            QFileInfo fileInfo(fileName);
+            if (fileInfo.fileName() == "instance.cfg") {
+                qDebug() << "MultiMC:" << true;
+                m_modpackType = ModpackType::MultiMC;
+                root = cleanPath(fileInfo.path());
+                stop = true;
+                return true;
+            }
+            if (fileInfo.fileName() == "manifest.json") {
+                qDebug() << "Flame:" << true;
+                m_modpackType = ModpackType::Flame;
+                root = cleanPath(fileInfo.path());
+                stop = true;
+                return true;
+            }
+        }
+        QCoreApplication::processEvents();
+        return true;
+    };
+    if (!packZip.parse(detectInstance)) {
+        emitFailed(tr("Unable to open supplied modpack zip file."));
+        return;
     }
     if (m_modpackType == ModpackType::Unknown) {
         emitFailed(tr("Archive does not contain a recognized modpack type."));
@@ -186,7 +181,7 @@ void InstanceImportTask::processZipPack()
     setStatus(tr("Extracting modpack"));
 
     // make sure we extract just the pack
-    auto zipTask = makeShared<MMCZip::ExtractZipTask>(packZip, extractDir, root);
+    auto zipTask = makeShared<MMCZip::ExtractZipTask>(m_archivePath, extractDir, root);
 
     auto progressStep = std::make_shared<TaskStepProgress>();
     connect(zipTask.get(), &Task::finished, this, [this, progressStep] {
@@ -276,7 +271,7 @@ bool installIcon(QString root, QString instIconKey)
         if (iconList->iconFileExists(instIconKey)) {
             iconList->deleteIcon(instIconKey);
         }
-        iconList->installIcon(importIconPath, instIconKey + ".png");
+        iconList->installIcon(importIconPath, instIconKey + "." + QFileInfo(importIconPath).suffix());
         return true;
     }
     return false;

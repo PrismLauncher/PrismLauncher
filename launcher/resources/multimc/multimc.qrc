@@ -252,7 +252,6 @@
         <file>scalable/discord.svg</file>
 
         <!-- flat instance icons CC BY-SA 4.0, Santiago Cézar -->
-        <file alias="128x128/flame.png">scalable/instances/flame.svg</file>
         <file>scalable/instances/chicken.svg</file>
         <file>scalable/instances/creeper.svg</file>
         <file>scalable/instances/enderpearl.svg</file>

@@ -48,7 +48,10 @@ class LibraryTest : public QObject {
     LibraryPtr readMojangJson(const QString path)
     {
         QFile jsonFile(path);
-        jsonFile.open(QIODevice::ReadOnly);
+        if (!jsonFile.open(QIODevice::ReadOnly)) {
+            qCritical() << "Failed to open file '" << jsonFile.fileName() << "' for reading!";
+            return LibraryPtr();
+        }
         auto data = jsonFile.readAll();
         jsonFile.close();
         ProblemContainer problems;

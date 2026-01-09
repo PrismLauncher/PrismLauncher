@@ -291,6 +291,8 @@ bool move(const QString& source, const QString& dest);
  */
 bool deletePath(QString path);
 
+bool removeFiles(QStringList listFile);
+
 /**
  * Trash a folder / file
  */

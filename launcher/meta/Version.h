@@ -40,8 +40,8 @@ class Version : public QObject, public BaseVersion, public BaseEntity {
     explicit Version(const QString& uid, const QString& version);
     virtual ~Version() = default;
 
-    QString descriptor() override;
-    QString name() override;
+    QString descriptor() const override;
+    QString name() const override;
     QString typeString() const override;
 
     QString uid() const { return m_uid; }

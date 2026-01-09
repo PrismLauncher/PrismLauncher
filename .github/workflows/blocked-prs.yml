@@ -80,7 +80,7 @@ jobs:
                 | (
                     $body | 
                       reduce ( 
-                        . | scan("blocked (?:by|on):? #([0-9]+)") 
+                        . | scan("[Bb]locked (?:[Bb]y|[Oo]n):? #([0-9]+)") 
                         | map({
                           "type": "Blocked on",
                           "number": ( . | tonumber )
@@ -90,7 +90,7 @@ jobs:
                 | (
                     $body | 
                       reduce ( 
-                        . | scan("stacked on:? #([0-9]+)")
+                        . | scan("[Ss]tacked [Oo]n:? #([0-9]+)")
                         | map({
                           "type": "Stacked on",
                           "number": ( . | tonumber )

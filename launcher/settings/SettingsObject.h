@@ -23,6 +23,10 @@
 #include <QVariant>
 #include <memory>
 
+#ifdef Q_OS_MACOS
+#include "macsandbox/SecurityBookmarkFileAccess.h"
+#endif
+
 class Setting;
 class SettingsObject;
 
@@ -119,7 +123,27 @@ class SettingsObject : public QObject {
      * \return The setting's value as a QVariant.
      * If no setting with the given ID exists, returns an invalid QVariant.
      */
-    QVariant get(const QString& id) const;
+    QVariant get(const QString& id);
+
+#ifdef Q_OS_MACOS
+    /*!
+     * \brief Get the path to the file or directory represented by the bookmark stored in the associated setting.
+     * \param id The setting ID of the relevant directory - this should not include "Bookmark" at the end.
+     * \return A path to the file or directory represented by the bookmark.
+     * If a bookmark is not valid or stored, use default logic (directly return the stored path).
+     * This can attempt to create a bookmark if the path is accessible and the bookmark is not valid.
+     */
+    QString getPathFromBookmark(const QString& id);
+    /*!
+     * \brief Set a security-scoped bookmark to the provided path for the associated setting.
+     * \param id The setting ID of the relevant directory - this should not include "Bookmark" at the end.
+     * \param path The new desired path.
+     * \return A boolean indicating whether a bookmark was successfully set.
+     * The path needs to be accessible to the launcher before calling this function. For example,
+     * it could come from a user selection in an open panel.
+     */
+    bool setPathWithBookmark(const QString& id, const QString& path);
+#endif
 
     /*!
      * \brief Sets the value of the setting with the given ID.
@@ -207,6 +231,9 @@ class SettingsObject : public QObject {
 
    private:
     QMap<QString, std::shared_ptr<Setting>> m_settings;
+#ifdef Q_OS_MACOS
+    SecurityBookmarkFileAccess m_sandboxedFileAccess;
+#endif
 
    protected:
     bool m_suspendSave = false;

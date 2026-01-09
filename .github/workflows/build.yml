@@ -1,5 +1,9 @@
 name: Build
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
@@ -58,6 +62,9 @@ on:
         description: Type of build (Debug or Release)
         type: string
         default: Debug
+      environment:
+        description: Deployment environment to run under
+        type: string
   workflow_dispatch:
     inputs:
       build-type:
@@ -69,7 +76,11 @@ jobs:
   build:
     name: Build (${{ matrix.artifact-name }})
 
+    environment: ${{ inputs.environment || '' }}
+
     permissions:
+      # Required for Azure Trusted Signing
+      id-token: write
       # Required for vcpkg binary cache
       packages: write
 
@@ -77,46 +88,46 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             artifact-name: Linux
-            base-cmake-preset: linux
+            cmake-preset: linux
+            qt-version: 6.10.1
 
-            # NOTE(@getchoo): Yes, we're intentionally using 24.04 here!!!
-            #
-            # It's not really documented anywhere AFAICT, but upstream Qt binaries
-            # *for the same version* are compiled against 24.04 on ARM, and *not* 22.04 like x64
           - os: ubuntu-24.04-arm
             artifact-name: Linux-aarch64
-            base-cmake-preset: linux
+            cmake-preset: linux
+            qt-version: 6.10.1
 
           - os: windows-2022
             artifact-name: Windows-MinGW-w64
-            base-cmake-preset: windows_mingw
+            cmake-preset: windows_mingw
             msystem: CLANG64
             vcvars-arch: amd64_x86
 
           - os: windows-11-arm
             artifact-name: Windows-MinGW-arm64
-            base-cmake-preset: windows_mingw
+            cmake-preset: windows_mingw
             msystem: CLANGARM64
             vcvars-arch: arm64
 
           - os: windows-2022
             artifact-name: Windows-MSVC
-            base-cmake-preset: windows_msvc
+            cmake-preset: windows_msvc
             # TODO(@getchoo): This is the default in setup-dependencies/windows. Why isn't it working?!?!
             vcvars-arch: amd64
+            qt-version: 6.10.1
 
-          - os: windows-2022
+          - os: windows-11-arm
             artifact-name: Windows-MSVC-arm64
-            base-cmake-preset: windows_msvc_arm64_cross
-            vcvars-arch: amd64_arm64
-            qt-architecture: win64_msvc2022_arm64_cross_compiled
+            cmake-preset: windows_msvc
+            vcvars-arch: arm64
+            qt-version: 6.10.1
 
-          - os: macos-14
+          - os: macos-26
             artifact-name: macOS
-            base-cmake-preset: ${{ (inputs.build-type || 'Debug') == 'Debug' && 'macos_universal' || 'macos' }}
+            cmake-preset: macos_universal
             macosx-deployment-target: 12.0
+            qt-version: 6.9.3
 
     runs-on: ${{ matrix.os }}
 
@@ -125,6 +136,11 @@ jobs:
         shell: ${{ matrix.msystem != '' && 'msys2 {0}' || 'bash' }}
 
     env:
+      ARTIFACT_NAME: ${{ matrix.artifact-name }}-Qt6
+      BUILD_PLATFORM: official
+      BUILD_TYPE: ${{ inputs.build-type || 'Debug' }}
+      CMAKE_PRESET: ${{ matrix.cmake-preset }}
+
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.macosx-deployment-target }}
 
     steps:
@@ -133,7 +149,7 @@ jobs:
       ##
 
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: true
 
@@ -141,32 +157,27 @@ jobs:
         id: setup-dependencies
         uses: ./.github/actions/setup-dependencies
         with:
-          build-type: ${{ inputs.build-type || 'Debug' }}
+          build-type: ${{ env.BUILD_TYPE }}
           artifact-name: ${{ matrix.artifact-name }}
           msystem: ${{ matrix.msystem }}
           vcvars-arch: ${{ matrix.vcvars-arch }}
-          qt-architecture: ${{ matrix.qt-architecture }}
+          qt-version: ${{ matrix.qt-version }}
 
       ##
       # BUILD
       ##
 
-      - name: Get CMake preset
-        id: cmake-preset
-        env:
-          BASE_CMAKE_PRESET: ${{ matrix.base-cmake-preset }}
-          PRESET_TYPE: ${{ (inputs.build-type || 'Debug') == 'Debug' && 'debug' || 'ci' }}
+      - name: Configure project
         run: |
-          echo preset="$BASE_CMAKE_PRESET"_"$PRESET_TYPE" >> "$GITHUB_OUTPUT"
+          cmake --preset "$CMAKE_PRESET"
 
-      - name: Run CMake workflow
-        env:
-          CMAKE_PRESET: ${{ steps.cmake-preset.outputs.preset }}
-
-          ARTIFACT_NAME: ${{ matrix.artifact-name }}-Qt6
-          BUILD_PLATFORM: official
+      - name: Run build
         run: |
-          cmake --workflow --preset "$CMAKE_PRESET"
+          cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE"
+
+      - name: Run tests
+        run: |
+          ctest --preset "$CMAKE_PRESET" --build-config "$BUILD_TYPE"
 
       ##
       # PACKAGE
@@ -185,7 +196,6 @@ jobs:
           version: ${{ steps.short-version.outputs.version }}
           build-type: ${{ steps.setup-dependencies.outputs.build-type }}
           artifact-name: ${{ matrix.artifact-name }}
-          cmake-preset: ${{ steps.cmake-preset.outputs.preset }}
           qt-version: ${{ steps.setup-dependencies.outputs.qt-version }}
 
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -199,22 +209,25 @@ jobs:
           build-type: ${{ steps.setup-dependencies.outputs.build-type }}
           artifact-name: ${{ matrix.artifact-name }}
 
-          apple-codesign-cert: ${{ secrets.APPLE-CODESIGN-CERT }}
-          apple-codesign-password: ${{ secrets.APPLE-CODESIGN_PASSWORD }}
-          apple-codesign-id: ${{ secrets.APPLE-CODESIGN_ID }}
+          apple-codesign-cert: ${{ secrets.APPLE_CODESIGN_CERT }}
+          apple-codesign-password: ${{ secrets.APPLE_CODESIGN_PASSWORD }}
+          apple-codesign-id: ${{ secrets.APPLE_CODESIGN_ID }}
           apple-notarize-apple-id: ${{ secrets.APPLE_NOTARIZE_APPLE_ID }}
           apple-notarize-team-id: ${{ secrets.APPLE_NOTARIZE_TEAM_ID }}
-          apple-notarize-password: ${{ secrets.APPLE-NOTARIZE_PASSWORD }}
-          sparkle-ed25519-key: ${{ secrets.SPARKLE-ED25519_KEY }}
+          apple-notarize-password: ${{ secrets.APPLE_NOTARIZE_PASSWORD }}
+          sparkle-ed25519-key: ${{ secrets.SPARKLE_ED25519_KEY }}
 
       - name: Package (Windows)
         if: ${{ runner.os == 'Windows' }}
         uses: ./.github/actions/package/windows
+        env:
+          CI_HAS_ACCESS_TO_AZURE: ${{ vars.CI_HAS_ACCESS_TO_AZURE || '' }}
         with:
           version: ${{ steps.short-version.outputs.version }}
           build-type: ${{ steps.setup-dependencies.outputs.build-type }}
           artifact-name: ${{ matrix.artifact-name }}
           msystem: ${{ matrix.msystem }}
 
-          windows-codesign-cert: ${{ secrets.WINDOWS_CODESIGN_CERT }}
-          windows-codesign-password: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}

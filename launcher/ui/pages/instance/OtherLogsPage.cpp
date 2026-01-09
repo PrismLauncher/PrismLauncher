@@ -61,7 +61,6 @@ OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, 
     , m_logSearchPaths(instance ? instance->getLogFileSearchPaths() : QStringList{ "logs" })
 {
     ui->setupUi(this);
-    ui->tabWidget->tabBar()->hide();
 
     m_proxy = new LogFormatProxyModel(this);
     if (m_instance) {
@@ -275,29 +274,20 @@ void OtherLogsPage::reload()
             showTooBig();
             return;
         }
-        MessageLevel::Enum last = MessageLevel::Unknown;
+        MessageLevel last = MessageLevel::Unknown;
 
         auto handleLine = [this, &last](QString line) {
             if (line.isEmpty())
                 return false;
             if (line.back() == '\n')
                 line = line.remove(line.size() - 1, 1);
-            MessageLevel::Enum level = MessageLevel::Unknown;
+            MessageLevel level = MessageLevel::Unknown;
 
             QString lineTemp = line;  // don't edit out the time and level for clarity
             if (!m_instance) {
-                level = MessageLevel::fromLauncherLine(lineTemp);
+                level = MessageLevel::takeFromLauncherLine(lineTemp);
             } else {
-                // if the launcher part set a log level, use it
-                auto innerLevel = MessageLevel::fromLine(lineTemp);
-                if (innerLevel != MessageLevel::Unknown) {
-                    level = innerLevel;
-                }
-
-                // If the level is still undetermined, guess level
-                if (level == MessageLevel::StdErr || level == MessageLevel::StdOut || level == MessageLevel::Unknown) {
-                    level = LogParser::guessLevel(line, last);
-                }
+                level = LogParser::guessLevel(line, last);
             }
 
             last = level;

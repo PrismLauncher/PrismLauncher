@@ -48,10 +48,10 @@
 #include <QKeyEvent>
 #include <QMenu>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QSortFilterProxyModel>
 #include <QTreeView>
 #include <Qt>
-#include <QPushButton>
 
 #include "FileSystem.h"
 #include "tools/MCEditTool.h"
@@ -77,7 +77,7 @@ class WorldListProxyModel : public QSortFilterProxyModel {
             auto iconFile = worlds->data(sourceIndex, WorldList::IconFileRole).toString();
             if (iconFile.isNull()) {
                 // NOTE: Minecraft uses the same placeholder for servers AND worlds
-                return APPLICATION->getThemedIcon("unknown_server");
+                return QIcon::fromTheme("unknown_server");
             }
             return QIcon(iconFile);
         }

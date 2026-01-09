@@ -20,9 +20,7 @@
 #include "LocalTexturePackParseTask.h"
 
 #include "FileSystem.h"
-
-#include <quazip/quazip.h>
-#include <quazip/quazipfile.h>
+#include "archive/ArchiveReader.h"
 
 #include <QCryptographicHash>
 
@@ -91,55 +89,26 @@ bool processZIP(TexturePack& pack, ProcessingLevel level)
 {
     Q_ASSERT(pack.type() == ResourceType::ZIPFILE);
 
-    QuaZip zip(pack.fileinfo().filePath());
-    if (!zip.open(QuaZip::mdUnzip))
-        return false;
+    MMCZip::ArchiveReader zip(pack.fileinfo().filePath());
+    bool packProcessed = false;
+    bool iconProcessed = false;
 
-    QuaZipFile file(&zip);
-
-    if (zip.setCurrentFile("pack.txt")) {
-        if (!file.open(QIODevice::ReadOnly)) {
-            qCritical() << "Failed to open file in zip.";
-            zip.close();
-            return false;
+    return zip.parse([&packProcessed, &iconProcessed, &pack, level](MMCZip::ArchiveReader::File* file, bool& stop) {
+        if (!packProcessed && file->filename() == "pack.txt") {
+            packProcessed = true;
+            auto data = file->readAll();
+            stop = packProcessed && (iconProcessed || level == ProcessingLevel::BasicInfoOnly);
+            return TexturePackUtils::processPackTXT(pack, std::move(data));
         }
-
-        auto data = file.readAll();
-
-        bool packTXT_result = TexturePackUtils::processPackTXT(pack, std::move(data));
-
-        file.close();
-        if (!packTXT_result) {
-            return false;
+        if (!iconProcessed && file->filename() == "pack.png") {
+            iconProcessed = true;
+            auto data = file->readAll();
+            stop = packProcessed && iconProcessed;
+            return TexturePackUtils::processPackPNG(pack, std::move(data));
         }
-    }
-
-    if (level == ProcessingLevel::BasicInfoOnly) {
-        zip.close();
+        file->skip();
         return true;
-    }
-
-    if (zip.setCurrentFile("pack.png")) {
-        if (!file.open(QIODevice::ReadOnly)) {
-            qCritical() << "Failed to open file in zip.";
-            zip.close();
-            return false;
-        }
-
-        auto data = file.readAll();
-
-        bool packPNG_result = TexturePackUtils::processPackPNG(pack, std::move(data));
-
-        file.close();
-        zip.close();
-        if (!packPNG_result) {
-            return false;
-        }
-    }
-
-    zip.close();
-
-    return true;
+    });
 }
 
 bool processPackTXT(TexturePack& pack, QByteArray&& raw_data)
@@ -189,32 +158,19 @@ bool processPackPNG(const TexturePack& pack)
             return false;
         }
         case ResourceType::ZIPFILE: {
-            QuaZip zip(pack.fileinfo().filePath());
-            if (!zip.open(QuaZip::mdUnzip))
-                return false;  // can't open zip file
+            MMCZip::ArchiveReader zip(pack.fileinfo().filePath());
 
-            QuaZipFile file(&zip);
-            if (zip.setCurrentFile("pack.png")) {
-                if (!file.open(QIODevice::ReadOnly)) {
-                    qCritical() << "Failed to open file in zip.";
-                    zip.close();
-                    return png_invalid();
-                }
-
-                auto data = file.readAll();
+            auto file = zip.goToFile("pack.png");
+            if (file) {
+                auto data = file->readAll();
 
                 bool pack_png_result = TexturePackUtils::processPackPNG(pack, std::move(data));
 
-                file.close();
                 if (!pack_png_result) {
-                    zip.close();
                     return png_invalid();  // pack.png invalid
                 }
-            } else {
-                zip.close();
-                return png_invalid();  // could not set pack.mcmeta as current file.
             }
-            return false;
+            return png_invalid();  // could not set pack.mcmeta as current file.
         }
         default:
             qWarning() << "Invalid type for resource pack parse task!";

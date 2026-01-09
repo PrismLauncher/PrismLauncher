@@ -23,6 +23,7 @@
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
 #include "settings/Setting.h"
+#include "tasks/SequentialTask.h"
 #include "tasks/Task.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
@@ -204,10 +205,16 @@ void ResourceFolderModel::installResourceWithFlameMetadata(QString path, ModPlat
     }
 }
 
-bool ResourceFolderModel::uninstallResource(QString file_name, bool preserve_metadata)
+bool ResourceFolderModel::uninstallResource(const QString& file_name, bool preserve_metadata)
 {
     for (auto& resource : m_resources) {
-        if (resource->fileinfo().fileName() == file_name) {
+        auto resourceFileInfo = resource->fileinfo();
+        auto resourceFileName = resource->fileinfo().fileName();
+        if (!resource->enabled() && resourceFileName.endsWith(".disabled")) {
+            resourceFileName.chop(9);
+        }
+
+        if (resourceFileName == file_name) {
             auto res = resource->destroy(indexDir(), preserve_metadata, false);
 
             update();
@@ -254,6 +261,18 @@ void ResourceFolderModel::deleteMetadata(const QModelIndexList& indexes)
 
 bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAction action)
 {
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        auto response =
+            CustomMessageBox::selectable(nullptr, tr("Confirm toggle"),
+                                         tr("If you enable/disable this resource while the game is running it may crash your game.\n"
+                                            "Are you sure you want to do this?"),
+                                         QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                ->exec();
+
+        if (response != QMessageBox::Yes)
+            return false;
+    }
+
     if (indexes.isEmpty())
         return true;
 
@@ -316,7 +335,20 @@ bool ResourceFolderModel::update()
         },
         Qt::ConnectionType::QueuedConnection);
 
-    QThreadPool::globalInstance()->start(m_current_update_task.get());
+    Task::Ptr preUpdate{createPreUpdateTask()};
+
+    if (preUpdate != nullptr) {
+        auto task = new SequentialTask("ResourceFolderModel::update");
+
+        task->addTask(preUpdate);
+        task->addTask(m_current_update_task);
+
+        connect(task, &Task::finished, [task] { task->deleteLater(); });
+
+        QThreadPool::globalInstance()->start(task);
+    } else {
+        QThreadPool::globalInstance()->start(m_current_update_task.get());
+    }
 
     return true;
 }
@@ -503,7 +535,7 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
             return m_resources[row]->internal_id();
         case Qt::DecorationRole: {
             if (column == NameColumn && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
-                return APPLICATION->getThemedIcon("status-yellow");
+                return QIcon::fromTheme("status-yellow");
 
             return {};
         }
@@ -523,17 +555,6 @@ bool ResourceFolderModel::setData(const QModelIndex& index, [[maybe_unused]] con
         return false;
 
     if (role == Qt::CheckStateRole) {
-        if (m_instance != nullptr && m_instance->isRunning()) {
-            auto response =
-                CustomMessageBox::selectable(nullptr, tr("Confirm toggle"),
-                                             tr("If you enable/disable this resource while the game is running it may crash your game.\n"
-                                                "Are you sure you want to do this?"),
-                                             QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                    ->exec();
-
-            if (response != QMessageBox::Yes)
-                return false;
-        }
         return setResourceEnabled({ index }, EnableAction::TOGGLE);
     }
 
@@ -709,8 +730,7 @@ SortType ResourceFolderModel::columnToSortKey(size_t column) const
 }
 
 /* Standard Proxy Model for createFilterProxyModel */
-bool ResourceFolderModel::ProxyModel::filterAcceptsRow(int source_row,
-                                                                     [[maybe_unused]] const QModelIndex& source_parent) const
+bool ResourceFolderModel::ProxyModel::filterAcceptsRow(int source_row, [[maybe_unused]] const QModelIndex& source_parent) const
 {
     auto* model = qobject_cast<ResourceFolderModel*>(sourceModel());
     if (!model)

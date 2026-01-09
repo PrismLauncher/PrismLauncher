@@ -52,7 +52,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
 {
     ui->setupUi(this);
 
-    ui->actionsToolbar->insertSpacer(ui->actionViewConfigs);
+    ui->actionsToolbar->insertSpacer(ui->actionViewFolder);
 
     m_filterModel = model->createFilterProxyModel(this);
     m_filterModel->setDynamicSortFilter(true);
@@ -113,6 +113,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
     m_model->loadColumns(ui->treeView);
     connect(ui->treeView->header(), &QHeaderView::sectionResized, this, [this] { m_model->saveColumns(ui->treeView); });
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &ExternalResourcesPage::filterTextChanged);
+    updateActions();
 }
 
 ExternalResourcesPage::~ExternalResourcesPage()
@@ -286,16 +287,6 @@ void ExternalResourcesPage::enableItem()
 
 void ExternalResourcesPage::disableItem()
 {
-    if (m_instance != nullptr && m_instance->isRunning()) {
-        auto response = CustomMessageBox::selectable(this, tr("Confirm disable"),
-                                                     tr("If you disable this resource while the game is running it may crash your game.\n"
-                                                        "Are you sure you want to do this?"),
-                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                            ->exec();
-
-        if (response != QMessageBox::Yes)
-            return;
-    }
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
     m_model->setResourceEnabled(selection.indexes(), EnableAction::DISABLE);
 }

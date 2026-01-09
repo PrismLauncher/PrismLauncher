@@ -2,22 +2,6 @@
 
 This folder has third-party or otherwise external libraries needed for other parts to work.
 
-## gamemode
-
-A performance optimization daemon.
-
-See [github repo](https://github.com/FeralInteractive/gamemode).
-
-BSD-3-Clause licensed
-
-## cmark
-
-The C reference implementation of CommonMark, a standardized Markdown spec.
-
-See [github_repo](https://github.com/commonmark/cmark).
-
-BSD2 licensed.
-
 ## javacheck
 
 Simple Java tool that prints the JVM details - version and platform bitness.
@@ -99,20 +83,6 @@ Canonical implementation of the murmur2 hash, taken from [SMHasher](https://gith
 
 Public domain (the author disclaimed the copyright).
 
-## QR-Code-generator
-
-A simple library for generating QR codes
-
-See [github repo](https://github.com/nayuki/QR-Code-generator).
-
-MIT
-
-## quazip
-
-A zip manipulation library.
-
-LGPL 2.1 with linking exception.
-
 ## rainbow
 
 Color functions extracted from [KGuiAddons](https://inqlude.org/libraries/kguiaddons.html). Used for adaptive text coloring.
@@ -124,14 +94,6 @@ Available either under LGPL version 2.1 or later.
 A Prism Launcher-specific library for probing system information.
 
 Apache 2.0
-
-## tomlplusplus
-
-A TOML language parser. Used by Forge 1.14+ to store mod metadata.
-
-See [github repo](https://github.com/marzer/tomlplusplus).
-
-Licenced under the MIT licence.
 
 ## qdcss
 

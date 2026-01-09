@@ -21,5 +21,16 @@ class ShaderPackFolderModel : public ResourceFolderModel {
         return new LocalShaderPackParseTask(m_next_resolution_ticket, static_cast<ShaderPack&>(resource));
     }
 
+    QDir indexDir() const override { return m_dir; }
+
+    Task* createPreUpdateTask() override;
+
+    // avoid watching twice
+    virtual bool startWatching() override { return ResourceFolderModel::startWatching({ m_dir.absolutePath() }); }
+    virtual bool stopWatching() override { return ResourceFolderModel::stopWatching({ m_dir.absolutePath() }); }
+
     RESOURCE_HELPERS(ShaderPack);
+
+   private:
+    QMutex m_migrateLock;
 };

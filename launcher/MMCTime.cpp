@@ -16,7 +16,6 @@
  */
 
 #include <MMCTime.h>
-#include <qobject.h>
 
 #include <QDateTime>
 #include <QObject>

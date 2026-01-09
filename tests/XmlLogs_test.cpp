@@ -47,10 +47,10 @@ class XmlLogParseTest : public QObject {
         QStringList shortTextLevels_s = QString::fromUtf8(FS::read(FS::PathCombine(source, "vanilla-1.21.5-levels.txt")))
                                             .split(QRegularExpression("\n|\r\n|\r"), Qt::SkipEmptyParts);
 
-        QList<MessageLevel::Enum> shortTextLevels;
+        QList<MessageLevel> shortTextLevels;
         shortTextLevels.reserve(24);
         std::transform(shortTextLevels_s.cbegin(), shortTextLevels_s.cend(), std::back_inserter(shortTextLevels),
-                       [](const QString& line) { return MessageLevel::getLevel(line.trimmed()); });
+                       [](const QString& line) { return MessageLevel::fromName(line.trimmed()); });
 
         QString longXml = QString::fromUtf8(FS::read(FS::PathCombine(source, "TerraFirmaGreg-Modern-forge.xml.log")));
         QString longText = QString::fromUtf8(FS::read(FS::PathCombine(source, "TerraFirmaGreg-Modern-forge.text.log")));
@@ -59,18 +59,18 @@ class XmlLogParseTest : public QObject {
         QStringList longTextLevelsXml_s = QString::fromUtf8(FS::read(FS::PathCombine(source, "TerraFirmaGreg-Modern-xml-levels.txt")))
                                               .split(QRegularExpression("\n|\r\n|\r"), Qt::SkipEmptyParts);
 
-        QList<MessageLevel::Enum> longTextLevelsPlain;
+        QList<MessageLevel> longTextLevelsPlain;
         longTextLevelsPlain.reserve(974);
         std::transform(longTextLevels_s.cbegin(), longTextLevels_s.cend(), std::back_inserter(longTextLevelsPlain),
-                       [](const QString& line) { return MessageLevel::getLevel(line.trimmed()); });
-        QList<MessageLevel::Enum> longTextLevelsXml;
+                       [](const QString& line) { return MessageLevel::fromName(line.trimmed()); });
+        QList<MessageLevel> longTextLevelsXml;
         longTextLevelsXml.reserve(896);
         std::transform(longTextLevelsXml_s.cbegin(), longTextLevelsXml_s.cend(), std::back_inserter(longTextLevelsXml),
-                       [](const QString& line) { return MessageLevel::getLevel(line.trimmed()); });
+                       [](const QString& line) { return MessageLevel::fromName(line.trimmed()); });
 
         QTest::addColumn<QString>("log");
         QTest::addColumn<int>("num_entries");
-        QTest::addColumn<QList<MessageLevel::Enum>>("entry_levels");
+        QTest::addColumn<QList<MessageLevel>>("entry_levels");
 
         QTest::newRow("short-vanilla-plain") << shortText << 25 << shortTextLevels;
         QTest::newRow("short-vanilla-xml") << shortXml << 25 << shortTextLevels;
@@ -82,9 +82,9 @@ class XmlLogParseTest : public QObject {
     {
         QFETCH(QString, log);
         QFETCH(int, num_entries);
-        QFETCH(QList<MessageLevel::Enum>, entry_levels);
+        QFETCH(QList<MessageLevel>, entry_levels);
 
-        QList<std::pair<MessageLevel::Enum, QString>> entries = {};
+        QList<std::pair<MessageLevel, QString>> entries = {};
 
         QBENCHMARK
         {
@@ -93,10 +93,10 @@ class XmlLogParseTest : public QObject {
 
         QCOMPARE(entries.length(), num_entries);
 
-        QList<MessageLevel::Enum> levels = {};
+        QList<MessageLevel> levels = {};
 
         std::transform(entries.cbegin(), entries.cend(), std::back_inserter(levels),
-                       [](std::pair<MessageLevel::Enum, QString> entry) { return entry.first; });
+                       [](std::pair<MessageLevel, QString> entry) { return entry.first; });
 
         QCOMPARE(levels, entry_levels);
     }
@@ -104,10 +104,10 @@ class XmlLogParseTest : public QObject {
    private:
     LogParser m_parser;
 
-    QList<std::pair<MessageLevel::Enum, QString>> parseLines(const QStringList& lines)
+    QList<std::pair<MessageLevel, QString>> parseLines(const QStringList& lines)
     {
-        QList<std::pair<MessageLevel::Enum, QString>> out;
-        MessageLevel::Enum last = MessageLevel::Unknown;
+        QList<std::pair<MessageLevel, QString>> out;
+        MessageLevel last = MessageLevel::Unknown;
 
         for (const auto& line : lines) {
             m_parser.appendLine(line);
@@ -127,6 +127,7 @@ class XmlLogParseTest : public QObject {
                 } else if (std::holds_alternative<LogParser::PlainText>(item)) {
                     auto msg = std::get<LogParser::PlainText>(item).message;
                     auto level = LogParser::guessLevel(msg, last);
+
                     out.append(std::make_pair(level, msg));
                     last = level;
                 }

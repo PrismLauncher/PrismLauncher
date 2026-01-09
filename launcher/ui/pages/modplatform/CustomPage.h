@@ -37,7 +37,7 @@
 
 #include <QWidget>
 
-#include <Application.h>
+#include "BaseVersion.h"
 #include "tasks/Task.h"
 #include "ui/pages/BasePage.h"
 
@@ -54,7 +54,7 @@ class CustomPage : public QWidget, public BasePage {
     explicit CustomPage(NewInstanceDialog* dialog, QWidget* parent = 0);
     virtual ~CustomPage();
     virtual QString displayName() const override { return tr("Custom"); }
-    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("minecraft"); }
+    virtual QIcon icon() const override { return QIcon::fromTheme("minecraft"); }
     virtual QString id() const override { return "vanilla"; }
     virtual QString helpPage() const override { return "Vanilla-platform"; }
     virtual bool shouldDisplay() const override;

@@ -3,6 +3,20 @@
 # top-most EditorConfig file
 root = true
 
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{yml,nix}]
+indent_size = 2
+
 # C++ Code Style settings
 [*.{c++,cc,cpp,cppm,cxx,h,h++,hh,hpp,hxx,inl,ipp,ixx,tlh,tli}]
 cpp_generate_documentation_comments = doxygen_slash_star
+
+[CMakeLists.txt]
+ij_continuation_indent_size = 4

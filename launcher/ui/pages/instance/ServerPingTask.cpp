@@ -1,13 +1,19 @@
 #include <QFutureWatcher>
 
 #include <Json.h>
+#include "Exception.h"
 #include "McClient.h"
 #include "McResolver.h"
 #include "ServerPingTask.h"
 
 unsigned getOnlinePlayers(QJsonObject data)
 {
-    return Json::requireInteger(Json::requireObject(data, "players"), "online");
+    try {
+        return Json::requireInteger(Json::requireObject(data, "players"), "online");
+    } catch (Exception& e) {
+        qWarning() << "server ping failed to parse response" << e.what();
+        return 0;
+    }
 }
 
 void ServerPingTask::executeTask()

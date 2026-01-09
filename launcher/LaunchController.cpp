@@ -61,6 +61,7 @@
 #include "JavaCommon.h"
 #include "launch/steps/TextPrint.h"
 #include "tasks/Task.h"
+#include "ui/dialogs/ChooseOfflineNameDialog.h"
 
 LaunchController::LaunchController() : Task() {}
 
@@ -147,8 +148,12 @@ bool LaunchController::askPlayDemo()
     return box.clickedButton() == demoButton;
 }
 
-QString LaunchController::askOfflineName(QString playerName, bool demo, bool& ok)
+QString LaunchController::askOfflineName(QString playerName, bool demo, bool* ok)
 {
+    if (ok != nullptr) {
+        *ok = false;
+    }
+
     // we ask the user for a player name
     QString message = tr("Choose your offline mode player name.");
     if (demo) {
@@ -157,12 +162,20 @@ QString LaunchController::askOfflineName(QString playerName, bool demo, bool& ok
 
     QString lastOfflinePlayerName = APPLICATION->settings()->get("LastOfflinePlayerName").toString();
     QString usedname = lastOfflinePlayerName.isEmpty() ? playerName : lastOfflinePlayerName;
-    QString name = QInputDialog::getText(m_parentWidget, tr("Player name"), message, QLineEdit::Normal, usedname, &ok);
-    if (!ok)
+
+    ChooseOfflineNameDialog dialog(message, m_parentWidget);
+    dialog.setWindowTitle(tr("Player name"));
+    dialog.setUsername(usedname);
+    if (dialog.exec() != QDialog::Accepted) {
         return {};
-    if (name.length()) {
-        usedname = name;
-        APPLICATION->settings()->set("LastOfflinePlayerName", usedname);
+    }
+
+    const QString name = dialog.getUsername();
+    usedname = name;
+    APPLICATION->settings()->set("LastOfflinePlayerName", usedname);
+
+    if (ok != nullptr) {
+        *ok = true;
     }
     return usedname;
 }
@@ -179,7 +192,7 @@ void LaunchController::login()
         if (m_demo) {
             // we ask the user for a player name
             bool ok = false;
-            auto name = askOfflineName("Player", m_demo, ok);
+            auto name = askOfflineName("Player", m_demo, &ok);
             if (ok) {
                 m_session = std::make_shared<AuthSession>();
                 static const QRegularExpression s_removeChars("[{}-]");
@@ -253,12 +266,12 @@ void LaunchController::login()
             }
             /* fallthrough */
             case AccountState::Online: {
-                if (!m_session->wants_online) {
+                if (!m_session->wants_online && m_accountToUse->accountType() != AccountType::Offline) {
                     // we ask the user for a player name
                     bool ok = false;
                     QString name;
                     if (m_offlineName.isEmpty()) {
-                        name = askOfflineName(m_session->player_name, m_session->demo, ok);
+                        name = askOfflineName(m_session->player_name, m_session->demo, &ok);
                         if (!ok) {
                             tryagain = false;
                             break;

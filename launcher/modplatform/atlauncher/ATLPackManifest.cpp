@@ -100,20 +100,20 @@ static ATLauncher::ModType parseModType(QString rawType)
 static void loadVersionLoader(ATLauncher::VersionLoader& p, QJsonObject& obj)
 {
     p.type = Json::requireString(obj, "type");
-    p.choose = Json::ensureBoolean(obj, QString("choose"), false);
+    p.choose = obj["choose"].toBool();
 
     auto metadata = Json::requireObject(obj, "metadata");
-    p.latest = Json::ensureBoolean(metadata, QString("latest"), false);
-    p.recommended = Json::ensureBoolean(metadata, QString("recommended"), false);
+    p.latest = metadata["latest"].toBool();
+    p.recommended = metadata["recommended"].toBool();
 
     // Minecraft Forge
-    if (p.type == "forge") {
-        p.version = Json::ensureString(metadata, "version", "");
+    if (p.type == "forge" || p.type == "neoforge") {
+        p.version = metadata["version"].toString("");
     }
 
     // Fabric Loader
     if (p.type == "fabric") {
-        p.version = Json::ensureString(metadata, "loader", "");
+        p.version = metadata["loader"].toString("");
     }
 }
 
@@ -126,7 +126,7 @@ static void loadVersionLibrary(ATLauncher::VersionLibrary& p, QJsonObject& obj)
     p.download_raw = Json::requireString(obj, "download");
     p.download = parseDownloadType(p.download_raw);
 
-    p.server = Json::ensureString(obj, "server", "");
+    p.server = obj["server"].toString("");
 }
 
 static void loadVersionConfigs(ATLauncher::VersionConfigs& p, QJsonObject& obj)
@@ -141,7 +141,7 @@ static void loadVersionMod(ATLauncher::VersionMod& p, QJsonObject& obj)
     p.version = Json::requireString(obj, "version");
     p.url = Json::requireString(obj, "url");
     p.file = Json::requireString(obj, "file");
-    p.md5 = Json::ensureString(obj, "md5", "");
+    p.md5 = obj["md5"].toString("");
 
     p.download_raw = Json::requireString(obj, "download");
     p.download = parseDownloadType(p.download_raw);
@@ -161,7 +161,7 @@ static void loadVersionMod(ATLauncher::VersionMod& p, QJsonObject& obj)
     if (obj.contains("extractTo")) {
         p.extractTo_raw = Json::requireString(obj, "extractTo");
         p.extractTo = parseModType(p.extractTo_raw);
-        p.extractFolder = Json::ensureString(obj, "extractFolder", "").replace("%s%", "/");
+        p.extractFolder = obj["extractFolder"].toString("").replace("%s%", "/");
     }
 
     if (obj.contains("decompType")) {
@@ -170,23 +170,23 @@ static void loadVersionMod(ATLauncher::VersionMod& p, QJsonObject& obj)
         p.decompFile = Json::requireString(obj, "decompFile");
     }
 
-    p.description = Json::ensureString(obj, QString("description"), "");
-    p.optional = Json::ensureBoolean(obj, QString("optional"), false);
-    p.recommended = Json::ensureBoolean(obj, QString("recommended"), false);
-    p.selected = Json::ensureBoolean(obj, QString("selected"), false);
-    p.hidden = Json::ensureBoolean(obj, QString("hidden"), false);
-    p.library = Json::ensureBoolean(obj, QString("library"), false);
-    p.group = Json::ensureString(obj, QString("group"), "");
+    p.description = obj["description"].toString("");
+    p.optional = obj["optional"].toBool();
+    p.recommended = obj["recommended"].toBool();
+    p.selected = obj["selected"].toBool();
+    p.hidden = obj["hidden"].toBool();
+    p.library = obj["library"].toBool();
+    p.group = obj["group"].toString("");
     if (obj.contains("depends")) {
         auto dependsArr = Json::requireArray(obj, "depends");
         for (const auto depends : dependsArr) {
             p.depends.append(Json::requireString(depends));
         }
     }
-    p.colour = Json::ensureString(obj, QString("colour"), "");
-    p.warning = Json::ensureString(obj, QString("warning"), "");
+    p.colour = obj["colour"].toString("");
+    p.warning = obj["warning"].toString("");
 
-    p.client = Json::ensureBoolean(obj, QString("client"), false);
+    p.client = obj["client"].toBool();
 
     // computed
     p.effectively_hidden = p.hidden || p.library;
@@ -194,20 +194,20 @@ static void loadVersionMod(ATLauncher::VersionMod& p, QJsonObject& obj)
 
 static void loadVersionMessages(ATLauncher::VersionMessages& m, QJsonObject& obj)
 {
-    m.install = Json::ensureString(obj, "install", "");
-    m.update = Json::ensureString(obj, "update", "");
+    m.install = obj["install"].toString("");
+    m.update = obj["update"].toString("");
 }
 
 static void loadVersionMainClass(ATLauncher::PackVersionMainClass& m, QJsonObject& obj)
 {
-    m.mainClass = Json::ensureString(obj, "mainClass", "");
-    m.depends = Json::ensureString(obj, "depends", "");
+    m.mainClass = obj["mainClass"].toString("");
+    m.depends = obj["depends"].toString("");
 }
 
 static void loadVersionExtraArguments(ATLauncher::PackVersionExtraArguments& a, QJsonObject& obj)
 {
-    a.arguments = Json::ensureString(obj, "arguments", "");
-    a.depends = Json::ensureString(obj, "depends", "");
+    a.arguments = obj["arguments"].toString("");
+    a.depends = obj["depends"].toString("");
 }
 
 static void loadVersionKeep(ATLauncher::VersionKeep& k, QJsonObject& obj)
@@ -272,7 +272,7 @@ void ATLauncher::loadVersion(PackVersion& v, QJsonObject& obj)
 {
     v.version = Json::requireString(obj, "version");
     v.minecraft = Json::requireString(obj, "minecraft");
-    v.noConfigs = Json::ensureBoolean(obj, QString("noConfigs"), false);
+    v.noConfigs = obj["noConfigs"].toBool();
 
     if (obj.contains("mainClass")) {
         auto main = Json::requireObject(obj, "mainClass");
@@ -314,22 +314,22 @@ void ATLauncher::loadVersion(PackVersion& v, QJsonObject& obj)
         loadVersionConfigs(v.configs, configsObj);
     }
 
-    auto colourObj = Json::ensureObject(obj, "colours");
+    auto colourObj = obj["colours"].toObject();
     for (const auto& key : colourObj.keys()) {
         v.colours[key] = Json::requireString(colourObj.value(key), "colour");
     }
 
-    auto warningsObj = Json::ensureObject(obj, "warnings");
+    auto warningsObj = obj["warnings"].toObject();
     for (const auto& key : warningsObj.keys()) {
         v.warnings[key] = Json::requireString(warningsObj.value(key), "warning");
     }
 
-    auto messages = Json::ensureObject(obj, "messages");
+    auto messages = obj["messages"].toObject();
     loadVersionMessages(v.messages, messages);
 
-    auto keeps = Json::ensureObject(obj, "keeps");
+    auto keeps = obj["keeps"].toObject();
     loadVersionKeeps(v.keeps, keeps);
 
-    auto deletes = Json::ensureObject(obj, "deletes");
+    auto deletes = obj["deletes"].toObject();
     loadVersionDeletes(v.deletes, deletes);
 }

@@ -112,7 +112,10 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
     qint64 file_last_changed = finfo.lastModified().toUTC().toMSecsSinceEpoch();
     if (file_last_changed != entry->m_local_changed_timestamp) {
         QFile input(real_path);
-        input.open(QIODevice::ReadOnly);
+        if (!input.open(QIODevice::ReadOnly)) {
+            qWarning() << "Failed to open file '" << input.fileName() << "' for reading!";
+            return staleEntry(base, resource_path);
+        }
         QString md5sum = QCryptographicHash::hash(input.readAll(), QCryptographicHash::Md5).toHex().constData();
         if (entry->m_md5sum != md5sum) {
             selected_base.entry_list.remove(resource_path);
@@ -245,15 +248,15 @@ void HttpMetaCache::Load()
     auto root = json.object();
 
     // check file version first
-    auto version_val = Json::ensureString(root, "version");
+    auto version_val = root["version"].toString();
     if (version_val != "1")
         return;
 
     // read the entry array
-    auto array = Json::ensureArray(root, "entries");
+    auto array = root["entries"].toArray();
     for (auto element : array) {
-        auto element_obj = Json::ensureObject(element);
-        auto base = Json::ensureString(element_obj, "base");
+        auto element_obj = element.toObject();
+        auto base = element_obj["base"].toString();
         if (!m_entries.contains(base))
             continue;
 
@@ -261,16 +264,16 @@ void HttpMetaCache::Load()
 
         auto foo = new MetaEntry();
         foo->m_baseId = base;
-        foo->m_relativePath = Json::ensureString(element_obj, "path");
-        foo->m_md5sum = Json::ensureString(element_obj, "md5sum");
-        foo->m_etag = Json::ensureString(element_obj, "etag");
-        foo->m_local_changed_timestamp = Json::ensureDouble(element_obj, "last_changed_timestamp");
-        foo->m_remote_changed_timestamp = Json::ensureString(element_obj, "remote_changed_timestamp");
+        foo->m_relativePath = element_obj["path"].toString();
+        foo->m_md5sum = element_obj["md5sum"].toString();
+        foo->m_etag = element_obj["etag"].toString();
+        foo->m_local_changed_timestamp = element_obj["last_changed_timestamp"].toDouble();
+        foo->m_remote_changed_timestamp = element_obj["remote_changed_timestamp"].toString();
 
-        foo->makeEternal(Json::ensureBoolean(element_obj, (const QString)QStringLiteral("eternal"), false));
+        foo->makeEternal(element_obj[QStringLiteral("eternal")].toBool());
         if (!foo->isEternal()) {
-            foo->m_current_age = Json::ensureDouble(element_obj, "current_age");
-            foo->m_max_age = Json::ensureDouble(element_obj, "max_age");
+            foo->m_current_age = element_obj["current_age"].toDouble();
+            foo->m_max_age = element_obj["max_age"].toDouble();
         }
 
         // presumed innocent until closer examination

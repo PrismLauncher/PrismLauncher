@@ -43,10 +43,7 @@ class ResourceModel : public QAbstractListModel {
     virtual auto debugName() const -> QString;
     virtual auto metaEntryBase() const -> QString = 0;
 
-    inline int rowCount(const QModelIndex& parent) const override
-    {
-        return parent.isValid() ? 0 : static_cast<int>(m_packs.size());
-    }
+    inline int rowCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : static_cast<int>(m_packs.size()); }
     inline int columnCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : 1; }
     inline auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); }
 
@@ -77,13 +74,10 @@ class ResourceModel : public QAbstractListModel {
     void setSearchTerm(QString term) { m_search_term = term; }
 
     virtual ResourceAPI::SearchArgs createSearchArguments() = 0;
-    virtual ResourceAPI::SearchCallbacks createSearchCallbacks() { return {}; }
 
     virtual ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) = 0;
-    virtual ResourceAPI::VersionSearchCallbacks createVersionsCallbacks(const QModelIndex&) { return {}; }
 
     virtual ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex&) = 0;
-    virtual ResourceAPI::ProjectInfoCallbacks createInfoCallbacks(const QModelIndex&) { return {}; }
 
     /** Requests the API for more entries. */
     virtual void search();
@@ -100,8 +94,7 @@ class ResourceModel : public QAbstractListModel {
     void addPack(ModPlatform::IndexedPack::Ptr pack,
                  ModPlatform::IndexedVersion& version,
                  std::shared_ptr<ResourceFolderModel> packs,
-                 bool is_indexed = false,
-                 QString custom_target_folder = {});
+                 bool is_indexed = false);
     void removePack(const QString& rem);
     QList<DownloadTaskPtr> selectedPacks() { return m_selected; }
 
@@ -113,22 +106,6 @@ class ResourceModel : public QAbstractListModel {
     void runInfoJob(Task::Ptr);
 
     auto getCurrentSortingMethodByIndex() const -> std::optional<ResourceAPI::SortingMethod>;
-
-    /** Converts a JSON document to a common array format.
-     *
-     *  This is needed so that different providers, with different JSON structures, can be parsed
-     *  uniformally. You NEED to re-implement this if you intend on using the default callbacks.
-     */
-    virtual auto documentToArray(QJsonDocument&) const -> QJsonArray;
-
-    /** Functions to load data into a pack.
-     *
-     *  Those are needed for the same reason as documentToArray, and NEED to be re-implemented in the same way.
-     */
-
-    virtual void loadIndexedPack(ModPlatform::IndexedPack&, QJsonObject&);
-    virtual void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&);
-    virtual void loadIndexedPackVersions(ModPlatform::IndexedPack&, QJsonArray&);
 
     virtual bool isPackInstalled(ModPlatform::IndexedPack::Ptr) const { return false; }
 
@@ -159,14 +136,14 @@ class ResourceModel : public QAbstractListModel {
 
    private:
     /* Default search request callbacks */
-    void searchRequestSucceeded(QJsonDocument&);
-    void searchRequestForOneSucceeded(QJsonDocument&);
+    void searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>&);
+    void searchRequestForOneSucceeded(ModPlatform::IndexedPack::Ptr);
     void searchRequestFailed(QString reason, int network_error_code);
     void searchRequestAborted();
 
-    void versionRequestSucceeded(QJsonDocument&, ModPlatform::IndexedPack&, const QModelIndex&);
+    void versionRequestSucceeded(QVector<ModPlatform::IndexedVersion>&, QVariant, const QModelIndex&);
 
-    void infoRequestSucceeded(QJsonDocument&, ModPlatform::IndexedPack&, const QModelIndex&);
+    void infoRequestSucceeded(ModPlatform::IndexedPack::Ptr, const QModelIndex&);
 
    signals:
     void versionListUpdated(const QModelIndex& index);

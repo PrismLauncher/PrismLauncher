@@ -23,6 +23,7 @@
 #include <QVector2D>
 #include <QVector3D>
 #include <QtMath>
+#include <functional>
 
 #include "minecraft/skins/SkinModel.h"
 #include "rainbow.h"
@@ -56,12 +57,19 @@ SkinOpenGLWindow::~SkinOpenGLWindow()
         }
         delete m_backgroundTexture;
     }
-    if (m_program) {
-        if (m_program->isLinked()) {
-            m_program->release();
+    if (m_modelProgram) {
+        if (m_modelProgram->isLinked()) {
+            m_modelProgram->release();
         }
-        m_program->removeAllShaders();
-        delete m_program;
+        m_modelProgram->removeAllShaders();
+        delete m_modelProgram;
+    }
+    if (m_backgroundProgram) {
+        if (m_backgroundProgram->isLinked()) {
+            m_backgroundProgram->release();
+        }
+        m_backgroundProgram->removeAllShaders();
+        delete m_backgroundProgram;
     }
     doneCurrent();
 }
@@ -75,6 +83,12 @@ void SkinOpenGLWindow::mousePressEvent(QMouseEvent* e)
 
 void SkinOpenGLWindow::mouseMoveEvent(QMouseEvent* event)
 {
+    // Prevents mouse sticking on Wayland compositors
+    if (!(event->buttons() & Qt::MouseButton::LeftButton)) {
+        m_isMousePressed = false;
+        return;
+    }
+
     if (m_isMousePressed) {
         int dx = event->position().x() - m_mousePosition.x();
         int dy = event->position().y() - m_mousePosition.y();
@@ -125,21 +139,40 @@ void SkinOpenGLWindow::initializeGL()
 
 void SkinOpenGLWindow::initShaders()
 {
-    m_program = new QOpenGLShaderProgram(this);
+    // Skin model shaders
+    m_modelProgram = new QOpenGLShaderProgram(this);
     // Compile vertex shader
-    if (!m_program->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vshader.glsl"))
+    if (!m_modelProgram->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vshader_skin_model.glsl"))
         close();
 
     // Compile fragment shader
-    if (!m_program->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fshader.glsl"))
+    if (!m_modelProgram->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fshader.glsl"))
         close();
 
     // Link shader pipeline
-    if (!m_program->link())
+    if (!m_modelProgram->link())
         close();
 
     // Bind shader pipeline for use
-    if (!m_program->bind())
+    if (!m_modelProgram->bind())
+        close();
+
+    // Background shaders
+    m_backgroundProgram = new QOpenGLShaderProgram(this);
+    // Compile vertex shader
+    if (!m_backgroundProgram->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vshader_skin_background.glsl"))
+        close();
+
+    // Compile fragment shader
+    if (!m_backgroundProgram->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fshader.glsl"))
+        close();
+
+    // Link shader pipeline
+    if (!m_backgroundProgram->link())
+        close();
+
+    // Bind shader pipeline for use (verification)
+    if (!m_backgroundProgram->bind())
         close();
 }
 
@@ -148,17 +181,35 @@ void SkinOpenGLWindow::resizeGL(int w, int h)
     // Calculate aspect ratio
     qreal aspect = qreal(w) / qreal(h ? h : 1);
 
-    const qreal zNear = .1, zFar = 1000., fov = 45;
+    const qreal zNear = 15., fov = 45;
 
     // Reset projection
     m_projection.setToIdentity();
 
-    // Set perspective projection
-    m_projection.perspective(fov, aspect, zNear, zFar);
+    // Build the reverse z perspective projection matrix
+    double radians = qDegreesToRadians(fov / 2.);
+    double sine = std::sin(radians);
+    if (sine == 0)
+        return;
+    double cotan = std::cos(radians) / sine;
+
+    m_projection(0, 0) = cotan / aspect;
+    m_projection(1, 1) = cotan;
+    m_projection(2, 2) = 0.;
+    m_projection(3, 2) = -1.;
+    m_projection(2, 3) = zNear;
+    m_projection(3, 3) = 0.;
 }
 
 void SkinOpenGLWindow::paintGL()
 {
+    // Adjust the viewport to account for fractional scaling
+    qreal dpr = devicePixelRatio();
+    if (dpr != 1.f) {
+        QSize scaledSize = size() * dpr;
+        glViewport(0, 0, scaledSize.width(), scaledSize.height());
+    }
+
     // Clear color and depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -172,9 +223,10 @@ void SkinOpenGLWindow::paintGL()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    m_program->bind();
-
+    m_backgroundProgram->bind();
     renderBackground();
+    m_backgroundProgram->release();
+
     // Calculate model view transformation
     QMatrix4x4 matrix;
     float yawRad = qDegreesToRadians(m_yaw);
@@ -186,10 +238,18 @@ void SkinOpenGLWindow::paintGL()
                   QVector3D(0, -8, 0), QVector3D(0, 1, 0));
 
     // Set modelview-projection matrix
-    m_program->setUniformValue("mvp_matrix", m_projection * matrix);
+    m_modelProgram->bind();
+    m_modelProgram->setUniformValue("mvp_matrix", m_projection * matrix);
 
-    m_scene->draw(m_program);
-    m_program->release();
+    m_scene->draw(m_modelProgram);
+    m_modelProgram->release();
+
+    // Redraw the first frame; this is necessary because the pixel ratio for Wayland fractional scaling is not negotiated properly on the
+    // first frame
+    if (m_isFirstFrame) {
+        m_isFirstFrame = false;
+        update();
+    }
 }
 
 void SkinOpenGLWindow::updateScene(SkinModel* skin)
@@ -211,11 +271,12 @@ void SkinOpenGLWindow::updateCape(const QImage& cape)
 
 QColor calculateContrastingColor(const QColor& color)
 {
-    constexpr float contrast = 0.2;
     auto luma = Rainbow::luma(color);
     if (luma < 0.5) {
+        constexpr float contrast = 0.05;
         return Rainbow::lighten(color, contrast);
     } else {
+        constexpr float contrast = 0.2;
         return Rainbow::darken(color, contrast);
     }
 }
@@ -223,11 +284,14 @@ QColor calculateContrastingColor(const QColor& color)
 QImage generateChessboardImage(int width, int height, int tileSize, QColor baseColor)
 {
     QImage image(width, height, QImage::Format_RGB888);
-    auto white = baseColor;
-    auto black = calculateContrastingColor(baseColor);
+    bool isDarkBase = Rainbow::luma(baseColor) < 0.5;
+    float contrast = isDarkBase ? 0.05 : 0.45;
+    auto contrastFunc = std::bind(isDarkBase ? Rainbow::lighten : Rainbow::darken, std::placeholders::_1, contrast, 1.0);
+    auto white = contrastFunc(baseColor);
+    auto black = contrastFunc(calculateContrastingColor(baseColor));
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            bool isWhite = ((x / tileSize) % 2) == ((y / tileSize) % 2);
+            bool isWhite = ((x / tileSize) + (y / tileSize)) % 2 == 0;
             image.setPixelColor(x, y, isWhite ? white : black);
         }
     }
@@ -246,10 +310,8 @@ void SkinOpenGLWindow::renderBackground()
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);  // Disable depth buffer writing
     m_backgroundTexture->bind();
-    QMatrix4x4 matrix;
-    m_program->setUniformValue("mvp_matrix", matrix);
-    m_program->setUniformValue("texture", 0);
-    m_background->draw(m_program);
+    m_backgroundProgram->setUniformValue("texture", 0);
+    m_background->draw(m_backgroundProgram);
     m_backgroundTexture->release();
     glDepthMask(GL_TRUE);  // Re-enable depth buffer writing
     glEnable(GL_DEPTH_TEST);
@@ -267,4 +329,10 @@ void SkinOpenGLWindow::setElytraVisible(bool visible)
 {
     if (m_scene)
         m_scene->setElytraVisible(visible);
+}
+
+bool SkinOpenGLWindow::hasOpenGL()
+{
+    QOpenGLContext ctx;
+    return ctx.create();
 }

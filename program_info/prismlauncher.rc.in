@@ -16,9 +16,9 @@ BEGIN
                 BLOCK "000004b0"
                 BEGIN
                         VALUE "CompanyName", "MultiMC & Prism Launcher Contributors"
-                        VALUE "FileDescription", "Prism Launcher"
+                        VALUE "FileDescription", "@Launcher_DisplayName@"
                         VALUE "FileVersion", "@Launcher_VERSION_NAME4@"
-                        VALUE "ProductName", "Prism Launcher"
+                        VALUE "ProductName", "@Launcher_DisplayName@"
                         VALUE "ProductVersion", "@Launcher_VERSION_NAME4@"
                 END
         END

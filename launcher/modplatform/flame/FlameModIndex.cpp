@@ -15,23 +15,26 @@ void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     pack.provider = ModPlatform::ResourceProvider::FLAME;
     pack.name = Json::requireString(obj, "name");
     pack.slug = Json::requireString(obj, "slug");
-    pack.websiteUrl = Json::ensureString(Json::ensureObject(obj, "links"), "websiteUrl", "");
-    pack.description = Json::ensureString(obj, "summary", "");
+    pack.websiteUrl = obj["links"].toObject()["websiteUrl"].toString("");
+    pack.description = obj["summary"].toString("");
 
-    QJsonObject logo = Json::ensureObject(obj, "logo");
-    pack.logoName = Json::ensureString(logo, "title");
-    pack.logoUrl = Json::ensureString(logo, "thumbnailUrl");
+    QJsonObject logo = obj["logo"].toObject();
+    pack.logoName = logo["title"].toString();
+    pack.logoUrl = logo["thumbnailUrl"].toString();
     if (pack.logoUrl.isEmpty()) {
-        pack.logoUrl = Json::ensureString(logo, "url");
+        pack.logoUrl = logo["url"].toString();
     }
 
-    auto authors = Json::ensureArray(obj, "authors");
-    for (auto authorIter : authors) {
-        auto author = Json::requireObject(authorIter);
-        ModPlatform::ModpackAuthor packAuthor;
-        packAuthor.name = Json::requireString(author, "name");
-        packAuthor.url = Json::requireString(author, "url");
-        pack.authors.append(packAuthor);
+    auto authors = obj["authors"].toArray();
+    if (!authors.isEmpty()) {
+        pack.authors.clear();
+        for (auto authorIter : authors) {
+            auto author = Json::requireObject(authorIter);
+            ModPlatform::ModpackAuthor packAuthor;
+            packAuthor.name = Json::requireString(author, "name");
+            packAuthor.url = Json::requireString(author, "url");
+            pack.authors.append(packAuthor);
+        }
     }
 
     pack.extraDataLoaded = false;
@@ -40,17 +43,17 @@ void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 
 void FlameMod::loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
-    auto links_obj = Json::ensureObject(obj, "links");
+    auto links_obj = obj["links"].toObject();
 
-    pack.extraData.issuesUrl = Json::ensureString(links_obj, "issuesUrl");
+    pack.extraData.issuesUrl = links_obj["issuesUrl"].toString();
     if (pack.extraData.issuesUrl.endsWith('/'))
         pack.extraData.issuesUrl.chop(1);
 
-    pack.extraData.sourceUrl = Json::ensureString(links_obj, "sourceUrl");
+    pack.extraData.sourceUrl = links_obj["sourceUrl"].toString();
     if (pack.extraData.sourceUrl.endsWith('/'))
         pack.extraData.sourceUrl.chop(1);
 
-    pack.extraData.wikiUrl = Json::ensureString(links_obj, "wikiUrl");
+    pack.extraData.wikiUrl = links_obj["wikiUrl"].toString();
     if (pack.extraData.wikiUrl.endsWith('/'))
         pack.extraData.wikiUrl.chop(1);
 
@@ -58,7 +61,7 @@ void FlameMod::loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj)
         pack.extraDataLoaded = true;
 }
 
-void FlameMod::loadBody(ModPlatform::IndexedPack& pack, [[maybe_unused]] QJsonObject& obj)
+void FlameMod::loadBody(ModPlatform::IndexedPack& pack)
 {
     pack.extraData.body = api.getModDescription(pack.addonId.toInt());
 
@@ -136,31 +139,32 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     file.fileId = Json::requireInteger(obj, "id");
     file.date = Json::requireString(obj, "fileDate");
     file.version = Json::requireString(obj, "displayName");
-    file.downloadUrl = Json::ensureString(obj, "downloadUrl");
+    file.downloadUrl = obj["downloadUrl"].toString();
     file.fileName = Json::requireString(obj, "fileName");
     file.fileName = FS::RemoveInvalidPathChars(file.fileName);
 
-    ModPlatform::IndexedVersionType::VersionType ver_type;
+    ModPlatform::IndexedVersionType ver_type;
     switch (Json::requireInteger(obj, "releaseType")) {
         case 1:
-            ver_type = ModPlatform::IndexedVersionType::VersionType::Release;
+            ver_type = ModPlatform::IndexedVersionType::Release;
             break;
         case 2:
-            ver_type = ModPlatform::IndexedVersionType::VersionType::Beta;
+            ver_type = ModPlatform::IndexedVersionType::Beta;
             break;
         case 3:
-            ver_type = ModPlatform::IndexedVersionType::VersionType::Alpha;
+            ver_type = ModPlatform::IndexedVersionType::Alpha;
             break;
         default:
-            ver_type = ModPlatform::IndexedVersionType::VersionType::Unknown;
+            ver_type = ModPlatform::IndexedVersionType::Unknown;
+	    break;
     }
-    file.version_type = ModPlatform::IndexedVersionType(ver_type);
+    file.version_type = ver_type;
 
-    auto hash_list = Json::ensureArray(obj, "hashes");
+    auto hash_list = obj["hashes"].toArray();
     for (auto h : hash_list) {
-        auto hash_entry = Json::ensureObject(h);
+        auto hash_entry = h.toObject();
         auto hash_types = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::FLAME);
-        auto hash_algo = enumToString(Json::ensureInteger(hash_entry, "algo", 1, "algorithm"));
+        auto hash_algo = enumToString(hash_entry["algo"].toInt(1));
         if (hash_types.contains(hash_algo)) {
             file.hash = Json::requireString(hash_entry, "value");
             file.hash_type = hash_algo;
@@ -168,9 +172,9 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
         }
     }
 
-    auto dependencies = Json::ensureArray(obj, "dependencies");
+    auto dependencies = obj["dependencies"].toArray();
     for (auto d : dependencies) {
-        auto dep = Json::ensureObject(d);
+        auto dep = d.toObject();
         ModPlatform::Dependency dependency;
         dependency.addonId = Json::requireInteger(dep, "modId");
         switch (Json::requireInteger(dep, "relationType")) {
@@ -203,32 +207,4 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
         file.changelog = api.getModFileChangelog(file.addonId.toInt(), file.fileId.toInt());
 
     return file;
-}
-
-ModPlatform::IndexedVersion FlameMod::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr, const BaseInstance* inst)
-{
-    auto profile = (dynamic_cast<const MinecraftInstance*>(inst))->getPackProfile();
-    QString mcVersion = profile->getComponentVersion("net.minecraft");
-    auto loaders = profile->getSupportedModLoaders();
-    QList<ModPlatform::IndexedVersion> versions;
-    for (auto versionIter : arr) {
-        auto obj = versionIter.toObject();
-
-        auto file = loadIndexedPackVersion(obj);
-        if (!file.addonId.isValid())
-            file.addonId = m.addonId;
-
-        if (file.fileId.isValid() &&
-            (!loaders.has_value() || !file.loaders || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
-            versions.append(file);
-    }
-
-    auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
-        // dates are in RFC 3339 format
-        return a.date > b.date;
-    };
-    std::sort(versions.begin(), versions.end(), orderSortPredicate);
-    if (versions.size() != 0)
-        return versions.front();
-    return {};
 }

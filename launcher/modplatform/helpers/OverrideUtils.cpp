@@ -15,7 +15,10 @@ void createOverrides(const QString& name, const QString& parent_folder, const QS
     FS::ensureFilePathExists(file_path);
 
     QFile file(file_path);
-    file.open(QFile::WriteOnly);
+    if (!file.open(QFile::WriteOnly)) {
+        qWarning() << "Failed to open file '" << file.fileName() << "' for writing!";
+        return;
+    }
 
     QDirIterator override_iterator(override_path, QDirIterator::Subdirectories);
     while (override_iterator.hasNext()) {
@@ -43,7 +46,10 @@ QStringList readOverrides(const QString& name, const QString& parent_folder)
 
     QStringList previous_overrides;
 
-    file.open(QFile::ReadOnly);
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning() << "Failed to open file '" << file.fileName() << "' for reading!";
+        return previous_overrides;
+    }
 
     QString entry;
     do {

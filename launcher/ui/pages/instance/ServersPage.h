@@ -39,7 +39,7 @@
 #include <QMainWindow>
 #include <QString>
 
-#include <Application.h>
+#include "BaseInstance.h"
 #include "ui/pages/BasePage.h"
 
 #include "settings/Setting.h"
@@ -63,7 +63,7 @@ class ServersPage : public QMainWindow, public BasePage {
     void closedImpl() override;
 
     virtual QString displayName() const override { return tr("Servers"); }
-    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("server"); }
+    virtual QIcon icon() const override { return QIcon::fromTheme("server"); }
     virtual QString id() const override { return "servers"; }
     virtual QString helpPage() const override { return "Servers-management"; }
     void retranslate() override;

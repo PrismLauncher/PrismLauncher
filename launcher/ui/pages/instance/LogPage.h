@@ -38,7 +38,6 @@
 #include <QIdentityProxyModel>
 #include <QWidget>
 
-#include <Application.h>
 #include "BaseInstance.h"
 #include "launch/LaunchTask.h"
 #include "ui/pages/BasePage.h"
@@ -67,7 +66,7 @@ class LogPage : public QWidget, public BasePage {
     explicit LogPage(InstancePtr instance, QWidget* parent = 0);
     virtual ~LogPage();
     virtual QString displayName() const override { return tr("Minecraft Log"); }
-    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("log"); }
+    virtual QIcon icon() const override { return QIcon::fromTheme("log"); }
     virtual QString id() const override { return "console"; }
     virtual bool apply() override;
     virtual QString helpPage() const override { return "Minecraft-Logs"; }

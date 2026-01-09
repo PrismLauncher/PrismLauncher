@@ -37,7 +37,6 @@
 
 #include <QDialog>
 #include <QLayout>
-#include "Application.h"
 #include "java/JavaChecker.h"
 #include "translations/TranslationsModel.h"
 #include "ui/pages/BasePage.h"
@@ -53,7 +52,7 @@ class AppearancePage : public AppearanceWidget, public BasePage {
     explicit AppearancePage(QWidget* parent = nullptr) : AppearanceWidget(false, parent) { layout()->setContentsMargins(0, 0, 6, 0); }
 
     QString displayName() const override { return tr("Appearance"); }
-    QIcon icon() const override { return APPLICATION->getThemedIcon("appearance"); }
+    QIcon icon() const override { return QIcon::fromTheme("appearance"); }
     QString id() const override { return "appearance-settings"; }
     QString helpPage() const override { return "Launcher-settings"; }
 

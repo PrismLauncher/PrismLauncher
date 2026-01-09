@@ -1,9 +1,9 @@
 #include "ReviewMessageBox.h"
 #include "ui_ReviewMessageBox.h"
 
-#include "Application.h"
-
+#include <QClipboard>
 #include <QPushButton>
+#include <QShortcut>
 
 ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] QString const& title, [[maybe_unused]] QString const& icon)
     : QDialog(parent), ui(new Ui::ReviewMessageBox)
@@ -23,6 +23,26 @@ ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] QString con
 
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
     ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
+
+    // Overwrite Ctrl+C functionality to exclude the label when copying text from tree
+    auto shortcut = new QShortcut(QKeySequence::Copy, ui->modTreeWidget);
+    connect(shortcut, &QShortcut::activated, [this]() {
+        auto currentItem = this->ui->modTreeWidget->currentItem();
+        if (!currentItem)
+            return;
+        auto currentColumn = this->ui->modTreeWidget->currentColumn();
+
+        auto data = currentItem->data(currentColumn, Qt::UserRole);
+        QString txt;
+
+        if (data.isValid()) {
+            txt = data.toString();
+        } else {
+            txt = currentItem->text(currentColumn);
+        }
+
+        QApplication::clipboard()->setText(txt);
+    });
 }
 
 ReviewMessageBox::~ReviewMessageBox()
@@ -46,49 +66,32 @@ void ReviewMessageBox::appendResource(ResourceInformation&& info)
 
     auto filenameItem = new QTreeWidgetItem(itemTop);
     filenameItem->setText(0, tr("Filename: %1").arg(info.filename));
-
-    auto childIndx = 0;
-    itemTop->insertChildren(childIndx++, { filenameItem });
-
-    if (!info.custom_file_path.isEmpty()) {
-        auto customPathItem = new QTreeWidgetItem(itemTop);
-        customPathItem->setText(0, tr("This download will be placed in: %1").arg(info.custom_file_path));
-
-        itemTop->insertChildren(1, { customPathItem });
-
-        itemTop->setIcon(1, QIcon(APPLICATION->getThemedIcon("status-yellow")));
-        itemTop->setToolTip(
-            childIndx++,
-            tr("This file will be downloaded to a folder location different from the default, possibly due to its loader requiring it."));
-    }
+    filenameItem->setData(0, Qt::UserRole, info.filename);
 
     auto providerItem = new QTreeWidgetItem(itemTop);
     providerItem->setText(0, tr("Provider: %1").arg(info.provider));
-
-    itemTop->insertChildren(childIndx++, { providerItem });
+    providerItem->setData(0, Qt::UserRole, info.provider);
 
     if (!info.required_by.isEmpty()) {
         auto requiredByItem = new QTreeWidgetItem(itemTop);
         if (info.required_by.length() == 1) {
             requiredByItem->setText(0, tr("Required by: %1").arg(info.required_by.back()));
+            requiredByItem->setData(0, Qt::UserRole, info.required_by.back());
         } else {
             requiredByItem->setText(0, tr("Required by:"));
-            auto i = 0;
             for (auto req : info.required_by) {
                 auto reqItem = new QTreeWidgetItem(requiredByItem);
                 reqItem->setText(0, req);
-                reqItem->insertChildren(i++, { reqItem });
             }
         }
 
-        itemTop->insertChildren(childIndx++, { requiredByItem });
         ui->toggleDepsButton->show();
         m_deps << itemTop;
     }
 
     auto versionTypeItem = new QTreeWidgetItem(itemTop);
     versionTypeItem->setText(0, tr("Version Type: %1").arg(info.version_type));
-    itemTop->insertChildren(childIndx++, { versionTypeItem });
+    versionTypeItem->setData(0, Qt::UserRole, info.version_type);
 
     ui->modTreeWidget->addTopLevelItem(itemTop);
 }

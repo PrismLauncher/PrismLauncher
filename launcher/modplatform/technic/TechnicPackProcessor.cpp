@@ -19,12 +19,10 @@
 #include <Json.h>
 #include <minecraft/MinecraftInstance.h>
 #include <minecraft/PackProfile.h>
-#include <quazip/quazip.h>
-#include <quazip/quazipdir.h>
-#include <quazip/quazipfile.h>
 #include <settings/INISettingsObject.h>
 
 #include <memory>
+#include "archive/ArchiveReader.h"
 
 void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
                                         const QString& instName,
@@ -53,35 +51,30 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
     QString versionJson = FS::PathCombine(minecraftPath, "bin", "version.json");
     QString fmlMinecraftVersion;
     if (QFile::exists(modpackJar)) {
-        QuaZip zipFile(modpackJar);
-        if (!zipFile.open(QuaZip::mdUnzip)) {
+        MMCZip::ArchiveReader zipFile(modpackJar);
+        if (!zipFile.collectFiles()) {
             emit failed(tr("Unable to open \"bin/modpack.jar\" file!"));
             return;
         }
-        QuaZipDir zipFileRoot(&zipFile, "/");
-        if (zipFileRoot.exists("/version.json")) {
-            if (zipFileRoot.exists("/fmlversion.properties")) {
-                zipFile.setCurrentFile("fmlversion.properties");
-                QuaZipFile file(&zipFile);
-                if (!file.open(QIODevice::ReadOnly)) {
+        if (zipFile.exists("/version.json")) {
+            if (zipFile.exists("/fmlversion.properties")) {
+                auto file = zipFile.goToFile("fmlversion.properties");
+                if (!file) {
                     emit failed(tr("Unable to open \"fmlversion.properties\"!"));
                     return;
                 }
-                QByteArray fmlVersionData = file.readAll();
-                file.close();
+                QByteArray fmlVersionData = file->readAll();
                 INIFile iniFile;
                 iniFile.loadFile(fmlVersionData);
                 // If not present, this evaluates to a null string
                 fmlMinecraftVersion = iniFile["fmlbuild.mcversion"].toString();
             }
-            zipFile.setCurrentFile("version.json", QuaZip::csSensitive);
-            QuaZipFile file(&zipFile);
-            if (!file.open(QIODevice::ReadOnly)) {
+            auto file = zipFile.goToFile("version.json");
+            if (!file) {
                 emit failed(tr("Unable to open \"version.json\"!"));
                 return;
             }
-            data = file.readAll();
-            file.close();
+            data = file->readAll();
         } else {
             if (minecraftVersion.isEmpty()) {
                 emit failed(tr("Could not find \"version.json\" inside \"bin/modpack.jar\", but Minecraft version is unknown"));
@@ -93,16 +86,14 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
             // Forge for 1.4.7 and for 1.5.2 require extra libraries.
             // Figure out the forge version and add it as a component
             // (the code still comes from the jar mod installed above)
-            if (zipFileRoot.exists("/forgeversion.properties")) {
-                zipFile.setCurrentFile("forgeversion.properties", QuaZip::csSensitive);
-                QuaZipFile file(&zipFile);
-                if (!file.open(QIODevice::ReadOnly)) {
+            if (zipFile.exists("/forgeversion.properties")) {
+                auto file = zipFile.goToFile("forgeversion.properties");
+                if (!file) {
                     // Really shouldn't happen, but error handling shall not be forgotten
                     emit failed(tr("Unable to open \"forgeversion.properties\""));
                     return;
                 }
-                QByteArray forgeVersionData = file.readAll();
-                file.close();
+                auto forgeVersionData = file->readAll();
                 INIFile iniFile;
                 iniFile.loadFile(forgeVersionData);
                 QString major, minor, revision, build;
@@ -142,7 +133,7 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
     try {
         QJsonDocument doc = Json::requireDocument(data);
         QJsonObject root = Json::requireObject(doc, "version.json");
-        QString packMinecraftVersion = Json::ensureString(root, "inheritsFrom", QString(), "");
+        QString packMinecraftVersion = root["inheritsFrom"].toString();
         if (packMinecraftVersion.isEmpty()) {
             if (fmlMinecraftVersion.isEmpty()) {
                 emit failed(tr("Could not understand \"version.json\":\ninheritsFrom is missing"));
@@ -151,21 +142,21 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
             packMinecraftVersion = fmlMinecraftVersion;
         }
         components->setComponentVersion("net.minecraft", packMinecraftVersion, true);
-        for (auto library : Json::ensureArray(root, "libraries", {})) {
+        for (auto library : root["libraries"].toArray()) {
             if (!library.isObject()) {
                 continue;
             }
 
-            auto libraryObject = Json::ensureObject(library, {}, "");
-            auto libraryName = Json::ensureString(libraryObject, "name", "", "");
+            auto libraryObject = library.toObject();
+            auto libraryName = libraryObject["name"].toString();
 
             if (libraryName.startsWith("net.neoforged.fancymodloader:")) {  // it is neoforge
                 // no easy way to get the version from the libs so use the arguments
-                auto arguments = Json::ensureObject(root, "arguments", {});
+                auto arguments = root["arguments"].toObject();
                 bool isVersionArg = false;
                 QString neoforgeVersion;
-                for (auto arg : Json::ensureArray(arguments, "game", {})) {
-                    auto argument = Json::ensureString(arg, "");
+                for (auto arg : arguments["game"].toArray()) {
+                    auto argument = arg.toString("");
                     if (isVersionArg) {
                         neoforgeVersion = argument;
                         break;

@@ -39,7 +39,6 @@
 #include <QTreeView>
 #include <QWidget>
 
-#include <Application.h>
 #include "QObjectPtr.h"
 #include "modplatform/legacy_ftb/PackFetchTask.h"
 #include "modplatform/legacy_ftb/PackHelpers.h"
@@ -64,7 +63,7 @@ class Page : public QWidget, public ModpackProviderBasePage {
     explicit Page(NewInstanceDialog* dialog, QWidget* parent = 0);
     virtual ~Page();
     QString displayName() const override { return "FTB Legacy"; }
-    QIcon icon() const override { return APPLICATION->getThemedIcon("ftb_logo"); }
+    QIcon icon() const override { return QIcon::fromTheme("ftb_logo"); }
     QString id() const override { return "legacy_ftb"; }
     QString helpPage() const override { return "FTB-legacy"; }
     bool shouldDisplay() const override;

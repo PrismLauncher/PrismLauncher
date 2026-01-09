@@ -44,8 +44,6 @@
 #include <QPixmap>
 #include <QPixmapCache>
 
-#include <optional>
-
 #include "ModDetails.h"
 #include "Resource.h"
 

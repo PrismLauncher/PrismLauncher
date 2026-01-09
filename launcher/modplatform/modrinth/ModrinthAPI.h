@@ -5,12 +5,14 @@
 #pragma once
 
 #include "BuildConfig.h"
+#include "Json.h"
 #include "modplatform/ModIndex.h"
-#include "modplatform/helpers/NetworkResourceAPI.h"
+#include "modplatform/ResourceAPI.h"
+#include "modplatform/modrinth/ModrinthPackIndex.h"
 
 #include <QDebug>
 
-class ModrinthAPI : public NetworkResourceAPI {
+class ModrinthAPI : public ResourceAPI {
    public:
     Task::Ptr currentVersion(QString hash, QString hash_format, std::shared_ptr<QByteArray> response);
 
@@ -43,7 +45,8 @@ class ModrinthAPI : public NetworkResourceAPI {
     {
         QStringList l;
         for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt, ModPlatform::LiteLoader,
-                             ModPlatform::DataPack, ModPlatform::Babric, ModPlatform::BTA, ModPlatform::LegacyFabric, ModPlatform::Ornithe, ModPlatform::Rift }) {
+                             ModPlatform::DataPack, ModPlatform::Babric, ModPlatform::BTA, ModPlatform::LegacyFabric, ModPlatform::Ornithe,
+                             ModPlatform::Rift }) {
             if (types & loader) {
                 l << getModLoaderAsString(loader);
             }
@@ -186,7 +189,7 @@ class ModrinthAPI : public NetworkResourceAPI {
             get_arguments.append(QString("loaders=[\"%1\"]").arg(getModLoaderStrings(args.loaders.value()).join("\",\"")));
 
         return QString("%1/project/%2/version%3%4")
-            .arg(BuildConfig.MODRINTH_PROD_URL, args.pack.addonId.toString(), get_arguments.isEmpty() ? "" : "?", get_arguments.join('&'));
+            .arg(BuildConfig.MODRINTH_PROD_URL, args.pack->addonId.toString(), get_arguments.isEmpty() ? "" : "?", get_arguments.join('&'));
     };
 
     QString getGameVersionsArray(std::list<Version> mcVersions) const
@@ -202,7 +205,8 @@ class ModrinthAPI : public NetworkResourceAPI {
     static inline auto validateModLoaders(ModPlatform::ModLoaderTypes loaders) -> bool
     {
         return loaders & (ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt | ModPlatform::LiteLoader |
-                          ModPlatform::DataPack | ModPlatform::Babric | ModPlatform::BTA | ModPlatform::LegacyFabric | ModPlatform::Ornithe | ModPlatform::Rift);
+                          ModPlatform::DataPack | ModPlatform::Babric | ModPlatform::BTA | ModPlatform::LegacyFabric |
+                          ModPlatform::Ornithe | ModPlatform::Rift);
     }
 
     std::optional<QString> getDependencyURL(DependencySearchArgs const& args) const override
@@ -214,4 +218,12 @@ class ModrinthAPI : public NetworkResourceAPI {
                                                            .arg(mapMCVersionToModrinth(args.mcVersion))
                                                            .arg(getModLoaderStrings(args.loader).join("\",\""));
     };
+
+    QJsonArray documentToArray(QJsonDocument& obj) const override { return obj.object().value("hits").toArray(); }
+    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) const override { Modrinth::loadIndexedPack(m, obj); }
+    ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType) const override
+    {
+        return Modrinth::loadIndexedPackVersion(obj);
+    };
+    void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) const override { Modrinth::loadExtraPackData(m, obj); }
 };

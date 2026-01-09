@@ -35,34 +35,8 @@
 
 #include "Application.h"
 
-// #define BREAK_INFINITE_LOOP
-// #define BREAK_EXCEPTION
-// #define BREAK_RETURN
-
-#ifdef BREAK_INFINITE_LOOP
-#include <chrono>
-#include <thread>
-#endif
-
 int main(int argc, char* argv[])
 {
-#ifdef BREAK_INFINITE_LOOP
-    while (true) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
-    }
-#endif
-#ifdef BREAK_EXCEPTION
-    throw 42;
-#endif
-#ifdef BREAK_RETURN
-    return 42;
-#endif
-
-#if QT_VERSION <= QT_VERSION_CHECK(6, 0, 0)
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-#endif
-
     // initialize Qt
     Application app(argc, argv);
 

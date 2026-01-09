@@ -57,7 +57,7 @@ class OtherLogsPage : public QWidget, public BasePage {
 
     QString id() const override { return m_id; }
     QString displayName() const override { return m_displayName; }
-    QIcon icon() const override { return APPLICATION->getThemedIcon("log"); }
+    QIcon icon() const override { return QIcon::fromTheme("log"); }
     QString helpPage() const override { return m_helpPage; }
     void retranslate() override;
 

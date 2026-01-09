@@ -292,7 +292,8 @@ void JavaSettingsWidget::updateThresholds()
     const QString warningColour(QStringLiteral("<span style='color:#f5c211'>%1</span>"));
 
     if (maxMem >= sysMiB) {
-        m_ui->labelMaxMemNotice->setText(QString("<span style='color:red'>%1</span>").arg(tr("Your maximum memory allocation exceeds your system memory capacity.")));
+        m_ui->labelMaxMemNotice->setText(
+            QString("<span style='color:red'>%1</span>").arg(tr("Your maximum memory allocation exceeds your system memory capacity.")));
         m_ui->labelMaxMemNotice->show();
     } else if (maxMem > (sysMiB * 0.9)) {
         m_ui->labelMaxMemNotice->setText(warningColour.arg(tr("Your maximum memory allocation is close to your system memory capacity.")));

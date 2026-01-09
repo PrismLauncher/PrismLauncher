@@ -23,11 +23,8 @@
 
 #include "FileSystem.h"
 #include "Json.h"
+#include "archive/ArchiveReader.h"
 #include "minecraft/mod/ResourcePack.h"
-
-#include <quazip/quazip.h>
-#include <quazip/quazipdir.h>
-#include <quazip/quazipfile.h>
 
 #include <QCryptographicHash>
 
@@ -106,67 +103,62 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
 {
     Q_ASSERT(pack->type() == ResourceType::ZIPFILE);
 
-    QuaZip zip(pack->fileinfo().filePath());
-    if (!zip.open(QuaZip::mdUnzip))
+    MMCZip::ArchiveReader zip(pack->fileinfo().filePath());
+
+    bool metaParsed = false;
+    bool iconParsed = false;
+    bool mcmeta_result = false;
+    bool pack_png_result = false;
+    if (!zip.parse(
+            [&metaParsed, &iconParsed, &mcmeta_result, &pack_png_result, pack, level](MMCZip::ArchiveReader::File* f, bool& breakControl) {
+                bool skip = true;
+                if (!metaParsed && f->filename() == "pack.mcmeta") {
+                    metaParsed = true;
+                    skip = false;
+                    auto data = f->readAll();
+
+                    mcmeta_result = DataPackUtils::processMCMeta(pack, std::move(data));
+
+                    if (!mcmeta_result) {
+                        breakControl = true;
+                        return true;  // mcmeta invalid
+                    }
+                }
+                if (!iconParsed && level != ProcessingLevel::BasicInfoOnly && f->filename() == "pack.png") {
+                    iconParsed = true;
+                    skip = false;
+                    auto data = f->readAll();
+
+                    pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
+                    if (!pack_png_result) {
+                        breakControl = true;
+                        return true;  // pack.png invalid
+                    }
+                }
+                if (skip) {
+                    f->skip();
+                }
+                if (metaParsed && (level == ProcessingLevel::BasicInfoOnly || iconParsed)) {
+                    breakControl = true;
+                }
+
+                return true;
+            })) {
         return false;  // can't open zip file
-
-    QuaZipFile file(&zip);
-
-    auto mcmeta_invalid = [&pack]() {
+    }
+    if (!mcmeta_result) {
         qWarning() << "Data pack at" << pack->fileinfo().filePath() << "does not have a valid pack.mcmeta";
         return false;  // the mcmeta is not optional
-    };
-
-    if (zip.setCurrentFile("pack.mcmeta")) {
-        if (!file.open(QIODevice::ReadOnly)) {
-            qCritical() << "Failed to open file in zip.";
-            zip.close();
-            return mcmeta_invalid();
-        }
-
-        auto data = file.readAll();
-
-        bool mcmeta_result = DataPackUtils::processMCMeta(pack, std::move(data));
-
-        file.close();
-        if (!mcmeta_result) {
-            return mcmeta_invalid();  // mcmeta invalid
-        }
-    } else {
-        return mcmeta_invalid();  // could not set pack.mcmeta as current file.
     }
 
     if (level == ProcessingLevel::BasicInfoOnly) {
-        zip.close();
         return true;  // only need basic info already checked
     }
 
-    auto png_invalid = [&pack]() {
+    if (!pack_png_result) {
         qWarning() << "Data pack at" << pack->fileinfo().filePath() << "does not have a valid pack.png";
         return true;  // the png is optional
-    };
-
-    if (zip.setCurrentFile("pack.png")) {
-        if (!file.open(QIODevice::ReadOnly)) {
-            qCritical() << "Failed to open file in zip.";
-            zip.close();
-            return png_invalid();
-        }
-
-        auto data = file.readAll();
-
-        bool pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
-
-        file.close();
-        zip.close();
-        if (!pack_png_result) {
-            return png_invalid();  // pack.png invalid
-        }
-    } else {
-        zip.close();
-        return png_invalid();  // could not set pack.mcmeta as current file.
     }
-    zip.close();
 
     return true;
 }
@@ -176,11 +168,16 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
 // https://minecraft.wiki/w/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
 bool processMCMeta(DataPack* pack, QByteArray&& raw_data)
 {
-    try {
-        auto json_doc = QJsonDocument::fromJson(raw_data);
-        auto pack_obj = Json::requireObject(json_doc.object(), "pack", {});
+    QJsonParseError parse_error;
+    auto json_doc = Json::parseUntilGarbage(raw_data, &parse_error);
+    if (parse_error.error != QJsonParseError::NoError) {
+        qWarning() << "Failed to parse JSON:" << parse_error.errorString();
+        return false;
+    }
 
-        pack->setPackFormat(Json::ensureInteger(pack_obj, "pack_format", 0));
+    try {
+        auto pack_obj = Json::requireObject(json_doc.object(), "pack", {});
+        pack->setPackFormat(pack_obj["pack_format"].toInt());
         pack->setDescription(DataPackUtils::processComponent(pack_obj.value("description")));
     } catch (Json::JsonException& e) {
         qWarning() << "JsonException: " << e.what() << e.cause();
@@ -192,19 +189,19 @@ bool processMCMeta(DataPack* pack, QByteArray&& raw_data)
 QString buildStyle(const QJsonObject& obj)
 {
     QStringList styles;
-    if (auto color = Json::ensureString(obj, "color"); !color.isEmpty()) {
+    if (auto color = obj["color"].toString(); !color.isEmpty()) {
         styles << QString("color: %1;").arg(color);
     }
     if (obj.contains("bold")) {
         QString weight = "normal";
-        if (Json::ensureBoolean(obj, "bold", false)) {
+        if (obj["bold"].toBool()) {
             weight = "bold";
         }
         styles << QString("font-weight: %1;").arg(weight);
     }
     if (obj.contains("italic")) {
         QString style = "normal";
-        if (Json::ensureBoolean(obj, "italic", false)) {
+        if (obj["italic"].toBool()) {
             style = "italic";
         }
         styles << QString("font-style: %1;").arg(style);
@@ -223,10 +220,10 @@ QString processComponent(const QJsonArray& value, bool strikethrough, bool under
 
 QString processComponent(const QJsonObject& obj, bool strikethrough, bool underline)
 {
-    underline = Json::ensureBoolean(obj, "underlined", underline);
-    strikethrough = Json::ensureBoolean(obj, "strikethrough", strikethrough);
+    underline = obj["underlined"].toBool(underline);
+    strikethrough = obj["strikethrough"].toBool(strikethrough);
 
-    QString result = Json::ensureString(obj, "text");
+    QString result = obj["text"].toString();
     if (underline) {
         result = QString("<u>%1</u>").arg(result);
     }
@@ -234,14 +231,14 @@ QString processComponent(const QJsonObject& obj, bool strikethrough, bool underl
         result = QString("<s>%1</s>").arg(result);
     }
     // the extra needs to be a array
-    result += processComponent(Json::ensureArray(obj, "extra"), strikethrough, underline);
+    result += processComponent(obj["extra"].toArray(), strikethrough, underline);
     if (auto style = buildStyle(obj); !style.isEmpty()) {
         result = QString("<span %1>%2</span>").arg(style, result);
     }
     if (obj.contains("clickEvent")) {
-        auto click_event = Json::ensureObject(obj, "clickEvent");
-        auto action = Json::ensureString(click_event, "action");
-        auto value = Json::ensureString(click_event, "value");
+        auto click_event = obj["clickEvent"].toObject();
+        auto action = click_event["action"].toString();
+        auto value = click_event["value"].toString();
         if (action == "open_url" && !value.isEmpty()) {
             result = QString("<a href=\"%1\">%2</a>").arg(value, result);
         }
@@ -311,28 +308,17 @@ bool processPackPNG(const DataPack* pack)
             return false;  // not processed correctly; https://github.com/PrismLauncher/PrismLauncher/issues/1740
         }
         case ResourceType::ZIPFILE: {
-            QuaZip zip(pack->fileinfo().filePath());
-            if (!zip.open(QuaZip::mdUnzip))
-                return false;  // can't open zip file
+            MMCZip::ArchiveReader zip(pack->fileinfo().filePath());
+            auto f = zip.goToFile("pack.png");
+            if (!f) {
+                return png_invalid();
+            }
+            auto data = f->readAll();
 
-            QuaZipFile file(&zip);
-            if (zip.setCurrentFile("pack.png")) {
-                if (!file.open(QIODevice::ReadOnly)) {
-                    qCritical() << "Failed to open file in zip.";
-                    zip.close();
-                    return png_invalid();
-                }
+            bool pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
 
-                auto data = file.readAll();
-
-                bool pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
-
-                file.close();
-                if (!pack_png_result) {
-                    return png_invalid();  // pack.png invalid
-                }
-            } else {
-                return png_invalid();  // could not set pack.mcmeta as current file.
+            if (!pack_png_result) {
+                return png_invalid();  // pack.png invalid
             }
             return false;  // not processed correctly; https://github.com/PrismLauncher/PrismLauncher/issues/1740
         }

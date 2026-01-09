@@ -53,7 +53,7 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
 
     QString id() const override { return uid; }
     QString displayName() const override { return name; }
-    QIcon icon() const override { return APPLICATION->getThemedIcon(iconName); }
+    QIcon icon() const override { return QIcon::fromTheme(iconName); }
 
     void openedImpl() override
     {
@@ -92,11 +92,13 @@ InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, c
     : QDialog(parent), profile(std::move(profile)), container(new PageContainer(this, QString(), this)), buttons(new QDialogButtonBox(this))
 {
     auto layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     container->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     layout->addWidget(container);
 
     auto buttonLayout = new QHBoxLayout(this);
+    buttonLayout->setContentsMargins(0, 0, 6, 6);
 
     auto refreshButton = new QPushButton(tr("&Refresh"), this);
     connect(refreshButton, &QPushButton::clicked, this, [this] { pageCast(container->selectedPage())->loadList(); });
@@ -110,7 +112,7 @@ InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, c
     connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
     buttonLayout->addWidget(buttons);
 
-    layout->addLayout(buttonLayout);
+    container->addButtons(buttonLayout);
 
     setWindowTitle(dialogTitle());
     setWindowModality(Qt::WindowModal);

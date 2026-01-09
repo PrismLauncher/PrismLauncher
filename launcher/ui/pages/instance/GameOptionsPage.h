@@ -38,7 +38,6 @@
 #include <QString>
 #include <QWidget>
 
-#include <Application.h>
 #include "ui/pages/BasePage.h"
 
 namespace Ui {
@@ -59,7 +58,7 @@ class GameOptionsPage : public QWidget, public BasePage {
     void closedImpl() override;
 
     virtual QString displayName() const override { return tr("Game Options"); }
-    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("settings"); }
+    virtual QIcon icon() const override { return QIcon::fromTheme("settings"); }
     virtual QString id() const override { return "gameoptions"; }
     virtual QString helpPage() const override { return "Game-Options-management"; }
     void retranslate() override;

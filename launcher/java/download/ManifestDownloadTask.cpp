@@ -77,27 +77,27 @@ void ManifestDownloadTask::downloadJava(const QJsonDocument& doc)
     // valid json doc, begin making jre spot
     FS::ensureFolderPathExists(m_final_path);
     std::vector<File> toDownload;
-    auto list = Json::ensureObject(Json::ensureObject(doc.object()), "files");
+    auto list = doc.object()["files"].toObject();
     for (const auto& paths : list.keys()) {
         auto file = FS::PathCombine(m_final_path, paths);
 
-        const QJsonObject& meta = Json::ensureObject(list, paths);
-        auto type = Json::ensureString(meta, "type");
+        const QJsonObject& meta = list[paths].toObject();
+        auto type = meta["type"].toString();
         if (type == "directory") {
             FS::ensureFolderPathExists(file);
         } else if (type == "link") {
             // this is *nix only !
-            auto path = Json::ensureString(meta, "target");
+            auto path = meta["target"].toString();
             if (!path.isEmpty()) {
                 QFile::link(path, file);
             }
         } else if (type == "file") {
             // TODO download compressed version if it exists ?
-            auto raw = Json::ensureObject(Json::ensureObject(meta, "downloads"), "raw");
-            auto isExec = Json::ensureBoolean(meta, "executable", false);
-            auto url = Json::ensureString(raw, "url");
+            auto raw = meta["downloads"].toObject()["raw"].toObject();
+            auto isExec = meta["executable"].toBool();
+            auto url = raw["url"].toString();
             if (!url.isEmpty() && QUrl(url).isValid()) {
-                auto f = File{ file, url, QByteArray::fromHex(Json::ensureString(raw, "sha1").toLatin1()), isExec };
+                auto f = File{ file, url, QByteArray::fromHex(raw["sha1"].toString().toLatin1()), isExec };
                 toDownload.push_back(f);
             }
         }

@@ -21,11 +21,11 @@
 
 Meta::Version::Version(const QString& uid, const QString& version) : BaseVersion(), m_uid(uid), m_version(version) {}
 
-QString Meta::Version::descriptor()
+QString Meta::Version::descriptor() const
 {
     return m_version;
 }
-QString Meta::Version::name()
+QString Meta::Version::name() const
 {
     if (m_data)
         return m_data->name;
@@ -88,7 +88,7 @@ QString Meta::Version::localFilename() const
 
 ::Version Meta::Version::toComparableVersion() const
 {
-    return { const_cast<Meta::Version*>(this)->descriptor() };
+    return { descriptor() };
 }
 
 void Meta::Version::setType(const QString& type)

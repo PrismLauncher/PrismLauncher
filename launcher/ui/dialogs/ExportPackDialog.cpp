@@ -95,6 +95,7 @@ ExportPackDialog::ExportPackDialog(MinecraftInstancePtr instance, QWidget* paren
         m_proxy->ignoreFilesWithPath().insert(FS::PathCombine(prefix, path));
     }
     m_proxy->ignoreFilesWithName().append({ ".DS_Store", "thumbs.db", "Thumbs.db" });
+    m_proxy->ignoreFilesWithSuffix().append(".pw.toml");
     m_proxy->setSourceModel(model);
     m_proxy->loadBlockedPathsFromFile(ignoreFileName());
 
@@ -103,8 +104,19 @@ ExportPackDialog::ExportPackDialog(MinecraftInstancePtr instance, QWidget* paren
     MinecraftInstance* mcInstance = dynamic_cast<MinecraftInstance*>(instance.get());
     if (mcInstance) {
         for (auto resourceModel : mcInstance->resourceLists()) {
-            if (resourceModel && resourceModel->indexDir().exists())
-                m_proxy->ignoreFilesWithPath().insert(instanceRoot.relativeFilePath(resourceModel->indexDir().absolutePath()));
+            if (resourceModel == nullptr) {
+                continue;
+            }
+
+            if (!resourceModel->indexDir().exists()) {
+                continue;
+            }
+
+            if (resourceModel->dir() == resourceModel->indexDir()) {
+                continue;
+            }
+
+            m_proxy->ignoreFilesWithPath().insert(instanceRoot.relativeFilePath(resourceModel->indexDir().absolutePath()));
         }
     }
 

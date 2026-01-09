@@ -35,13 +35,9 @@
 
 #pragma once
 
-#include <memory>
-
 #include <QString>
 #include <QStringList>
 #include <QUrl>
-
-#include "minecraft/mod/MetadataHandler.h"
 
 struct ModLicense {
     QString name = {};

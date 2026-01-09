@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2025 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,72 +39,54 @@
 
 #include "Rule.h"
 
-RuleAction RuleAction_fromString(QString name)
+Rule Rule::fromJson(const QJsonObject& object)
 {
-    if (name == "allow")
-        return Allow;
-    if (name == "disallow")
-        return Disallow;
-    return Defer;
-}
+    Rule result;
 
-QList<std::shared_ptr<Rule>> rulesFromJsonV4(const QJsonObject& objectWithRules)
-{
-    QList<std::shared_ptr<Rule>> rules;
-    auto rulesVal = objectWithRules.value("rules");
-    if (!rulesVal.isArray())
-        return rules;
+    if (object["action"] == "allow")
+        result.m_action = Allow;
+    else if (object["action"] == "disallow")
+        result.m_action = Disallow;
 
-    QJsonArray ruleList = rulesVal.toArray();
-    for (auto ruleVal : ruleList) {
-        std::shared_ptr<Rule> rule;
-        if (!ruleVal.isObject())
-            continue;
-        auto ruleObj = ruleVal.toObject();
-        auto actionVal = ruleObj.value("action");
-        if (!actionVal.isString())
-            continue;
-        auto action = RuleAction_fromString(actionVal.toString());
-        if (action == Defer)
-            continue;
-
-        auto osVal = ruleObj.value("os");
-        if (!osVal.isObject()) {
-            // add a new implicit action rule
-            rules.append(ImplicitRule::create(action));
-            continue;
-        }
-
-        auto osObj = osVal.toObject();
-        auto osNameVal = osObj.value("name");
-        if (!osNameVal.isString())
-            continue;
-        QString osName = osNameVal.toString();
-        QString versionRegex = osObj.value("version").toString();
-        // add a new OS rule
-        rules.append(OsRule::create(action, osName, versionRegex));
-    }
-    return rules;
-}
-
-QJsonObject ImplicitRule::toJson()
-{
-    QJsonObject ruleObj;
-    ruleObj.insert("action", m_result == Allow ? QString("allow") : QString("disallow"));
-    return ruleObj;
-}
-
-QJsonObject OsRule::toJson()
-{
-    QJsonObject ruleObj;
-    ruleObj.insert("action", m_result == Allow ? QString("allow") : QString("disallow"));
-    QJsonObject osObj;
-    {
-        osObj.insert("name", m_system);
-        if (!m_version_regexp.isEmpty()) {
-            osObj.insert("version", m_version_regexp);
+    if (auto os = object["os"]; os.isObject()) {
+        if (auto name = os["name"].toString(); !name.isNull()) {
+            result.m_os = OS{
+                name,
+                os["version"].toString(),
+            };
         }
     }
-    ruleObj.insert("os", osObj);
-    return ruleObj;
+
+    return result;
+}
+
+QJsonObject Rule::toJson()
+{
+    QJsonObject result;
+
+    if (m_action == Allow)
+        result["action"] = "allow";
+    else if (m_action == Disallow)
+        result["action"] = "disallow";
+
+    if (m_os.has_value()) {
+        QJsonObject os;
+
+        os["name"] = m_os->name;
+
+        if (!m_os->version.isEmpty())
+            os["version"] = m_os->version;
+
+        result["os"] = os;
+    }
+
+    return result;
+}
+
+Rule::Action Rule::apply(const RuntimeContext& runtimeContext)
+{
+    if (m_os.has_value() && !runtimeContext.classifierMatches(m_os->name))
+        return Defer;
+
+    return m_action;
 }

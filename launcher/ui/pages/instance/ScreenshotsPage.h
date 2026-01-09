@@ -37,7 +37,6 @@
 
 #include <QMainWindow>
 
-#include <Application.h>
 #include "ui/pages/BasePage.h"
 
 #include "settings/Setting.h"
@@ -67,7 +66,7 @@ class ScreenshotsPage : public QMainWindow, public BasePage {
 
     virtual bool eventFilter(QObject*, QEvent*) override;
     virtual QString displayName() const override { return tr("Screenshots"); }
-    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("screenshots"); }
+    virtual QIcon icon() const override { return QIcon::fromTheme("screenshots"); }
     virtual QString id() const override { return "screenshots"; }
     virtual QString helpPage() const override { return "Screenshots-management"; }
     virtual bool apply() override { return !m_uploadActive; }

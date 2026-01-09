@@ -71,7 +71,7 @@ QVariant Technic::ListModel::data(const QModelIndex& index, int role) const
             if (m_logoMap.contains(pack.logoName)) {
                 return (m_logoMap.value(pack.logoName));
             }
-            QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
+            QIcon icon = QIcon::fromTheme("screenshot-placeholder");
             ((ListModel*)this)->requestLogo(pack.logoName, pack.logoUrl);
             return icon;
         }
@@ -191,7 +191,7 @@ void Technic::ListModel::searchRequestFinished()
                     if (pack.slug == "vanilla")
                         continue;
 
-                    auto rawURL = Json::ensureString(technicPackObject, "iconUrl", "null");
+                    auto rawURL = technicPackObject["iconUrl"].toString("null");
                     if (rawURL == "null") {
                         pack.logoUrl = "null";
                         pack.logoName = "null";

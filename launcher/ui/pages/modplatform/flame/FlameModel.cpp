@@ -11,6 +11,7 @@
 #include <Version.h>
 
 #include <QtMath>
+#include <memory>
 
 namespace Flame {
 
@@ -20,7 +21,7 @@ ListModel::~ListModel() {}
 
 int ListModel::rowCount(const QModelIndex& parent) const
 {
-    return parent.isValid() ? 0 : modpacks.size();
+    return parent.isValid() ? 0 : m_modpacks.size();
 }
 
 int ListModel::columnCount(const QModelIndex& parent) const
@@ -31,27 +32,27 @@ int ListModel::columnCount(const QModelIndex& parent) const
 QVariant ListModel::data(const QModelIndex& index, int role) const
 {
     int pos = index.row();
-    if (pos >= modpacks.size() || pos < 0 || !index.isValid()) {
+    if (pos >= m_modpacks.size() || pos < 0 || !index.isValid()) {
         return QString("INVALID INDEX %1").arg(pos);
     }
 
-    IndexedPack pack = modpacks.at(pos);
+    auto pack = m_modpacks.at(pos);
     switch (role) {
         case Qt::ToolTipRole: {
-            if (pack.description.length() > 100) {
+            if (pack->description.length() > 100) {
                 // some magic to prevent to long tooltips and replace html linebreaks
-                QString edit = pack.description.left(97);
+                QString edit = pack->description.left(97);
                 edit = edit.left(edit.lastIndexOf("<br>")).left(edit.lastIndexOf(" ")).append("...");
                 return edit;
             }
-            return pack.description;
+            return pack->description;
         }
         case Qt::DecorationRole: {
-            if (m_logoMap.contains(pack.logoName)) {
-                return (m_logoMap.value(pack.logoName));
+            if (m_logoMap.contains(pack->logoName)) {
+                return (m_logoMap.value(pack->logoName));
             }
-            QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
-            ((ListModel*)this)->requestLogo(pack.logoName, pack.logoUrl);
+            QIcon icon = QIcon::fromTheme("screenshot-placeholder");
+            ((ListModel*)this)->requestLogo(pack->logoName, pack->logoUrl);
             return icon;
         }
         case Qt::UserRole: {
@@ -62,9 +63,9 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
         case Qt::SizeHintRole:
             return QSize(0, 58);
         case UserDataTypes::TITLE:
-            return pack.name;
+            return pack->name;
         case UserDataTypes::DESCRIPTION:
-            return pack.description;
+            return pack->description;
         case UserDataTypes::INSTALLED:
             return false;
         default:
@@ -76,11 +77,10 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
 bool ListModel::setData(const QModelIndex& index, const QVariant& value, [[maybe_unused]] int role)
 {
     int pos = index.row();
-    if (pos >= modpacks.size() || pos < 0 || !index.isValid())
+    if (pos >= m_modpacks.size() || pos < 0 || !index.isValid())
         return false;
 
-    Q_ASSERT(value.canConvert<Flame::IndexedPack>());
-    modpacks[pos] = value.value<Flame::IndexedPack>();
+    m_modpacks[pos] = value.value<ModPlatform::IndexedPack::Ptr>();
 
     return true;
 }
@@ -89,8 +89,8 @@ void ListModel::logoLoaded(QString logo, QIcon out)
 {
     m_loadingLogos.removeAll(logo);
     m_logoMap.insert(logo, out);
-    for (int i = 0; i < modpacks.size(); i++) {
-        if (modpacks[i].logoName == logo) {
+    for (int i = 0; i < m_modpacks.size(); i++) {
+        if (m_modpacks[i]->logoName == logo) {
             emit dataChanged(createIndex(i, 0), createIndex(i, 0), { Qt::DecorationRole });
         }
     }
@@ -117,8 +117,8 @@ void ListModel::requestLogo(QString logo, QString url)
     connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job] {
         job->deleteLater();
         emit logoLoaded(logo, QIcon(fullPath));
-        if (waitingCallbacks.contains(logo)) {
-            waitingCallbacks.value(logo)(fullPath);
+        if (m_waitingCallbacks.contains(logo)) {
+            m_waitingCallbacks.value(logo)(fullPath);
         }
     });
 
@@ -148,14 +148,14 @@ Qt::ItemFlags ListModel::flags(const QModelIndex& index) const
 
 bool ListModel::canFetchMore([[maybe_unused]] const QModelIndex& parent) const
 {
-    return searchState == CanPossiblyFetchMore;
+    return m_searchState == CanPossiblyFetchMore;
 }
 
 void ListModel::fetchMore(const QModelIndex& parent)
 {
     if (parent.isValid())
         return;
-    if (nextSearchOffset == 0) {
+    if (m_nextSearchOffset == 0) {
         qWarning() << "fetchMore with 0 offset is wrong...";
         return;
     }
@@ -164,138 +164,112 @@ void ListModel::fetchMore(const QModelIndex& parent)
 
 void ListModel::performPaginatedSearch()
 {
-    if (currentSearchTerm.startsWith("#")) {
-        auto projectId = currentSearchTerm.mid(1);
+    static const FlameAPI api;
+    if (m_currentSearchTerm.startsWith("#")) {
+        auto projectId = m_currentSearchTerm.mid(1);
         if (!projectId.isEmpty()) {
-            ResourceAPI::ProjectInfoCallbacks callbacks;
+            ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks;
 
-            callbacks.on_fail = [this](QString reason) { searchRequestFailed(reason); };
-            callbacks.on_succeed = [this](auto& doc, auto& pack) { searchRequestForOneSucceeded(doc); };
+            callbacks.on_fail = [this](QString reason, int) { searchRequestFailed(reason); };
+            callbacks.on_succeed = [this](auto& pack) { searchRequestForOneSucceeded(pack); };
             callbacks.on_abort = [this] {
                 qCritical() << "Search task aborted by an unknown reason!";
                 searchRequestFailed("Aborted");
             };
-            static const FlameAPI api;
-            if (auto job = api.getProjectInfo({ projectId }, std::move(callbacks)); job) {
-                jobPtr = job;
-                jobPtr->start();
+            auto project = std::make_shared<ModPlatform::IndexedPack>();
+            project->addonId = projectId;
+            if (auto job = api.getProjectInfo({ project }, std::move(callbacks)); job) {
+                m_jobPtr = job;
+                m_jobPtr->start();
             }
             return;
         }
     }
     ResourceAPI::SortingMethod sort{};
-    sort.index = currentSort + 1;
+    sort.index = m_currentSort + 1;
 
-    auto netJob = makeShared<NetJob>("Flame::Search", APPLICATION->network());
-    auto searchUrl =
-        FlameAPI().getSearchURL({ ModPlatform::ResourceType::Modpack, nextSearchOffset, currentSearchTerm, sort, m_filter->loaders,
-                                  m_filter->versions, ModPlatform::Side::NoSide, m_filter->categoryIds, m_filter->openSource });
+    ResourceAPI::Callback<QList<ModPlatform::IndexedPack::Ptr>> callbacks{};
 
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl.value()), response));
-    jobPtr = netJob;
-    jobPtr->start();
-    connect(netJob.get(), &NetJob::succeeded, this, &ListModel::searchRequestFinished);
-    connect(netJob.get(), &NetJob::failed, this, &ListModel::searchRequestFailed);
+    callbacks.on_succeed = [this](auto& doc) { searchRequestFinished(doc); };
+    callbacks.on_fail = [this](QString reason, int) { searchRequestFailed(reason); };
+    callbacks.on_abort = [this] {
+	qCritical() << "Search task aborted by an unknown reason!";
+	searchRequestFailed("Aborted");
+    };
+
+    auto netJob = api.searchProjects({ ModPlatform::ResourceType::Modpack, m_nextSearchOffset, m_currentSearchTerm, sort, m_filter->loaders,
+                                       m_filter->versions, ModPlatform::Side::NoSide, m_filter->categoryIds, m_filter->openSource },
+                                     std::move(callbacks));
+
+    m_jobPtr = netJob;
+    m_jobPtr->start();
 }
 
 void ListModel::searchWithTerm(const QString& term, int sort, std::shared_ptr<ModFilterWidget::Filter> filter, bool filterChanged)
 {
-    if (currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort && !filterChanged) {
+    if (m_currentSearchTerm == term && m_currentSearchTerm.isNull() == term.isNull() && m_currentSort == sort && !filterChanged) {
         return;
     }
-    currentSearchTerm = term;
-    currentSort = sort;
+    m_currentSearchTerm = term;
+    m_currentSort = sort;
     m_filter = filter;
     if (hasActiveSearchJob()) {
-        jobPtr->abort();
-        searchState = ResetRequested;
+        m_jobPtr->abort();
+        m_searchState = ResetRequested;
         return;
     }
     beginResetModel();
-    modpacks.clear();
+    m_modpacks.clear();
     endResetModel();
-    searchState = None;
+    m_searchState = None;
 
-    nextSearchOffset = 0;
+    m_nextSearchOffset = 0;
     performPaginatedSearch();
 }
 
-void Flame::ListModel::searchRequestFinished()
+void Flame::ListModel::searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr>& newList)
 {
     if (hasActiveSearchJob())
         return;
 
-    QJsonParseError parse_error;
-    QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-    if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from CurseForge at " << parse_error.offset
-                   << " reason: " << parse_error.errorString();
-        qWarning() << *response;
-        return;
-    }
-
-    QList<Flame::IndexedPack> newList;
-    auto packs = Json::ensureArray(doc.object(), "data");
-    for (auto packRaw : packs) {
-        auto packObj = packRaw.toObject();
-
-        Flame::IndexedPack pack;
-        try {
-            Flame::loadIndexedPack(pack, packObj);
-            newList.append(pack);
-        } catch (const JSONValidationError& e) {
-            qWarning() << "Error while loading pack from CurseForge: " << e.cause();
-            continue;
-        }
-    }
-    if (packs.size() < 25) {
-        searchState = Finished;
+    if (newList.size() < 25) {
+        m_searchState = Finished;
     } else {
-        nextSearchOffset += 25;
-        searchState = CanPossiblyFetchMore;
+        m_nextSearchOffset += 25;
+        m_searchState = CanPossiblyFetchMore;
     }
 
     // When you have a Qt build with assertions turned on, proceeding here will abort the application
     if (newList.size() == 0)
         return;
 
-    beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size() + newList.size() - 1);
-    modpacks.append(newList);
+    beginInsertRows(QModelIndex(), m_modpacks.size(), m_modpacks.size() + newList.size() - 1);
+    m_modpacks.append(newList);
     endInsertRows();
 }
 
-void Flame::ListModel::searchRequestForOneSucceeded(QJsonDocument& doc)
+void Flame::ListModel::searchRequestForOneSucceeded(ModPlatform::IndexedPack::Ptr pack)
 {
-    jobPtr.reset();
+    m_jobPtr.reset();
 
-    auto packObj = Json::ensureObject(doc.object(), "data");
-
-    Flame::IndexedPack pack;
-    try {
-        Flame::loadIndexedPack(pack, packObj);
-    } catch (const JSONValidationError& e) {
-        qWarning() << "Error while loading pack from CurseForge: " << e.cause();
-        return;
-    }
-
-    beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size() + 1);
-    modpacks.append({ pack });
+    beginInsertRows(QModelIndex(), m_modpacks.size(), m_modpacks.size() + 1);
+    m_modpacks.append(pack);
     endInsertRows();
 }
 
 void Flame::ListModel::searchRequestFailed(QString reason)
 {
-    jobPtr.reset();
+    m_jobPtr.reset();
 
-    if (searchState == ResetRequested) {
+    if (m_searchState == ResetRequested) {
         beginResetModel();
-        modpacks.clear();
+        m_modpacks.clear();
         endResetModel();
 
-        nextSearchOffset = 0;
+        m_nextSearchOffset = 0;
         performPaginatedSearch();
     } else {
-        searchState = Finished;
+        m_searchState = Finished;
     }
 }
 

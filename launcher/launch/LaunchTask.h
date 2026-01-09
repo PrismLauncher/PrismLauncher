@@ -106,8 +106,8 @@ class LaunchTask : public Task {
     void requestLogging();
 
    public slots:
-    void onLogLines(const QStringList& lines, MessageLevel::Enum defaultLevel = MessageLevel::Launcher);
-    void onLogLine(QString line, MessageLevel::Enum defaultLevel = MessageLevel::Launcher);
+    void onLogLines(const QStringList& lines, MessageLevel defaultLevel = MessageLevel::Launcher);
+    void onLogLine(QString line, MessageLevel defaultLevel = MessageLevel::Launcher);
     void onReadyForLaunch();
     void onStepFinished();
     void onProgressReportingRequested();
@@ -116,7 +116,7 @@ class LaunchTask : public Task {
     void finalizeSteps(bool successful, const QString& error);
 
    protected:
-    bool parseXmlLogs(QString const& line, MessageLevel::Enum level);
+    bool parseXmlLogs(QString const& line, MessageLevel level);
 
    protected: /* data */
     MinecraftInstancePtr m_instance;

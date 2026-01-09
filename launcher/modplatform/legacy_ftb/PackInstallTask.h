@@ -1,13 +1,9 @@
 #pragma once
-#include <quazip/quazip.h>
-#include <quazip/quazipdir.h>
 #include "InstanceTask.h"
 #include "PackHelpers.h"
 #include "meta/Index.h"
 #include "meta/Version.h"
 #include "meta/VersionList.h"
-#include "net/NetJob.h"
-
 #include "net/NetJob.h"
 
 #include <optional>
@@ -41,7 +37,6 @@ class PackInstallTask : public InstanceTask {
    private: /* data */
     shared_qobject_ptr<QNetworkAccessManager> m_network;
     bool abortable = false;
-    std::unique_ptr<QuaZip> m_packZip;
     QFuture<std::optional<QStringList>> m_extractFuture;
     QFutureWatcher<std::optional<QStringList>> m_extractFutureWatcher;
     NetJob::Ptr netJobContainer;

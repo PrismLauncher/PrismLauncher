@@ -23,13 +23,11 @@
 #include "LocalWorldSaveParseTask.h"
 
 #include "FileSystem.h"
-
-#include <quazip/quazip.h>
-#include <quazip/quazipdir.h>
-#include <quazip/quazipfile.h>
+#include "archive/ArchiveReader.h"
 
 #include <QDir>
 #include <QFileInfo>
+#include <tuple>
 
 namespace WorldSaveUtils {
 
@@ -105,22 +103,40 @@ bool processFolder(WorldSave& save, ProcessingLevel level)
 ///             QString <name of folder containing level.dat>,
 ///             bool <saves folder found>
 ///         )
-static std::tuple<bool, QString, bool> contains_level_dat(QuaZip& zip)
+static std::tuple<bool, QString, bool> contains_level_dat(QString fileName)
 {
+    MMCZip::ArchiveReader zip(fileName);
+    if (!zip.collectFiles()) {
+        return std::make_tuple(false, "", false);
+    }
     bool saves = false;
-    QuaZipDir zipDir(&zip);
-    if (zipDir.exists("/saves")) {
+    if (zip.exists("/saves")) {
         saves = true;
-        zipDir.cd("/saves");
     }
 
-    for (auto const& entry : zipDir.entryList()) {
-        zipDir.cd(entry);
-        if (zipDir.exists("level.dat")) {
-            return std::make_tuple(true, entry, saves);
+    for (auto file : zip.getFiles()) {
+        QString relativePath = file;
+        if (saves) {
+            if (!relativePath.startsWith("saves/", Qt::CaseInsensitive))
+                continue;
+            relativePath = relativePath.mid(QString("saves/").length());
         }
-        zipDir.cd("..");
+        if (!relativePath.endsWith("/level.dat", Qt::CaseInsensitive))
+            continue;
+
+        int slashIndex = relativePath.indexOf('/');
+        if (slashIndex == -1)
+            continue;  // malformed: no slash between saves/ and level.dat
+
+        QString worldName = relativePath.left(slashIndex);
+        QString remaining = relativePath.mid(slashIndex + 1);
+
+        // Check that there's nothing between worldName/ and level.dat
+        if (remaining == "level.dat") {
+            return std::make_tuple(true, worldName, saves);
+        }
     }
+
     return std::make_tuple(false, "", saves);
 }
 
@@ -128,18 +144,13 @@ bool processZIP(WorldSave& save, ProcessingLevel level)
 {
     Q_ASSERT(save.type() == ResourceType::ZIPFILE);
 
-    QuaZip zip(save.fileinfo().filePath());
-    if (!zip.open(QuaZip::mdUnzip))
-        return false;  // can't open zip file
-
-    auto [found, save_dir_name, found_saves_dir] = contains_level_dat(zip);
-
-    if (save_dir_name.endsWith("/")) {
-        save_dir_name.chop(1);
-    }
+    auto [found, save_dir_name, found_saves_dir] = contains_level_dat(save.fileinfo().filePath());
 
     if (!found) {
         return false;
+    }
+    if (save_dir_name.endsWith("/")) {
+        save_dir_name.chop(1);
     }
 
     save.setSaveDirName(save_dir_name);
@@ -151,13 +162,10 @@ bool processZIP(WorldSave& save, ProcessingLevel level)
     }
 
     if (level == ProcessingLevel::BasicInfoOnly) {
-        zip.close();
         return true;  // only need basic info already checked
     }
 
     // reserved for more intensive processing
-
-    zip.close();
 
     return true;
 }

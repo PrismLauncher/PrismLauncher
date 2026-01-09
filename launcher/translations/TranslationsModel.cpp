@@ -73,7 +73,7 @@ struct Language {
         if (key == "ja_KANJI") {
             result = locale.nativeLanguageName() + u8" (漢字)";
         } else if (key == "es_UY") {
-            result = u8"español de Latinoamérica";
+            result = u8"Español de Latinoamérica";
         } else if (key == "en_NZ") {
             result = u8"New Zealand English";  // No idea why qt translates this to just english and not to New Zealand English
         } else if (key == "en@pirate") {
@@ -251,8 +251,8 @@ void readIndex(const QString& path, QMap<QString, Language>& languages)
             Language lang(iter.key());
 
             auto langObj = Json::requireObject(iter.value());
-            lang.setTranslationStats(Json::ensureInteger(langObj, "translated", 0), Json::ensureInteger(langObj, "untranslated", 0),
-                                     Json::ensureInteger(langObj, "fuzzy", 0));
+            lang.setTranslationStats(langObj["translated"].toInt(), langObj["untranslated"].toInt(),
+                                     langObj["fuzzy"].toInt());
             lang.file_name = Json::requireString(langObj, "file");
             lang.file_sha1 = Json::requireString(langObj, "sha1");
             lang.file_size = Json::requireInteger(langObj, "size");

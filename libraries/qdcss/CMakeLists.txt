@@ -2,8 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(qdcss)
 
 if(Launcher_QT_VERSION_MAJOR EQUAL 6)
-    find_package(Qt6 COMPONENTS Core Core5Compat REQUIRED)
-    list(APPEND qdcss_LIBS Qt${QT_VERSION_MAJOR}::Core5Compat)
+    find_package(Qt6 COMPONENTS Core REQUIRED)
 endif()
 
 set(QDCSS_SOURCES

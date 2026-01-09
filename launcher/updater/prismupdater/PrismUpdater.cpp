@@ -123,70 +123,6 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
 
     logToConsole = parser.isSet("debug");
 
-    auto updater_executable = QCoreApplication::applicationFilePath();
-
-#ifdef Q_OS_MACOS
-    showFatalErrorMessage(tr("MacOS Not Supported"), tr("The updater does not support installations on MacOS"));
-#endif
-
-    if (updater_executable.startsWith("/tmp/.mount_")) {
-        m_isAppimage = true;
-        m_appimagePath = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
-        if (m_appimagePath.isEmpty()) {
-            showFatalErrorMessage(tr("Unsupported Installation"),
-                                  tr("Updater is running as misconfigured AppImage? ($APPIMAGE environment variable is missing)"));
-        }
-    }
-
-    m_isFlatpak = DesktopServices::isFlatpak();
-
-    QString prism_executable = FS::PathCombine(applicationDirPath(), BuildConfig.LAUNCHER_APP_BINARY_NAME);
-#if defined Q_OS_WIN32
-    prism_executable.append(".exe");
-#endif
-
-    if (!QFileInfo(prism_executable).isFile()) {
-        showFatalErrorMessage(tr("Unsupported Installation"), tr("The updater can not find the main executable."));
-    }
-
-    m_prismExecutable = prism_executable;
-
-    auto prism_update_url = parser.value("update-url");
-    if (prism_update_url.isEmpty())
-        prism_update_url = BuildConfig.UPDATER_GITHUB_REPO;
-
-    m_prismRepoUrl = QUrl::fromUserInput(prism_update_url);
-
-    m_checkOnly = parser.isSet("check-only");
-    m_forceUpdate = parser.isSet("force");
-    m_printOnly = parser.isSet("list");
-    auto user_version = parser.value("install-version");
-    if (!user_version.isEmpty()) {
-        m_userSelectedVersion = Version(user_version);
-    }
-    m_selectUI = parser.isSet("select-ui");
-    m_allowDowngrade = parser.isSet("allow-downgrade");
-
-    auto version = parser.value("prism-version");
-    if (!version.isEmpty()) {
-        if (version.contains('-')) {
-            auto index = version.indexOf('-');
-            m_prsimVersionChannel = version.mid(index + 1);
-            version = version.left(index);
-        } else {
-            m_prsimVersionChannel = "stable";
-        }
-        auto version_parts = version.split('.');
-        m_prismVersionMajor = version_parts.takeFirst().toInt();
-        m_prismVersionMinor = version_parts.takeFirst().toInt();
-        if (!version_parts.isEmpty())
-            m_prismVersionPatch = version_parts.takeFirst().toInt();
-        else
-            m_prismVersionPatch = 0;
-    }
-
-    m_allowPreRelease = parser.isSet("pre-release");
-
     QString origCwdPath = QDir::currentPath();
     QString binPath = applicationDirPath();
 
@@ -362,6 +298,68 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         QNetworkProxy proxy = QNetworkProxy::applicationProxy();
         m_network->setProxy(proxy);
     }
+
+#ifdef Q_OS_MACOS
+    showFatalErrorMessage(tr("MacOS Not Supported"), tr("The updater does not support installations on MacOS"));
+#endif
+
+    if (binPath.startsWith("/tmp/.mount_")) {
+        m_isAppimage = true;
+        m_appimagePath = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
+        if (m_appimagePath.isEmpty()) {
+            showFatalErrorMessage(tr("Unsupported Installation"),
+                                  tr("Updater is running as misconfigured AppImage? ($APPIMAGE environment variable is missing)"));
+        }
+    }
+
+    m_isFlatpak = DesktopServices::isFlatpak();
+
+    QString prism_executable = FS::PathCombine(binPath, BuildConfig.LAUNCHER_APP_BINARY_NAME);
+#if defined Q_OS_WIN32
+    prism_executable.append(".exe");
+#endif
+
+    if (!QFileInfo(prism_executable).isFile()) {
+        showFatalErrorMessage(tr("Unsupported Installation"), tr("The updater can not find the main executable."));
+    }
+
+    m_prismExecutable = prism_executable;
+
+    auto prism_update_url = parser.value("update-url");
+    if (prism_update_url.isEmpty())
+        prism_update_url = BuildConfig.UPDATER_GITHUB_REPO;
+
+    m_prismRepoUrl = QUrl::fromUserInput(prism_update_url);
+
+    m_checkOnly = parser.isSet("check-only");
+    m_forceUpdate = parser.isSet("force");
+    m_printOnly = parser.isSet("list");
+    auto user_version = parser.value("install-version");
+    if (!user_version.isEmpty()) {
+        m_userSelectedVersion = Version(user_version);
+    }
+    m_selectUI = parser.isSet("select-ui");
+    m_allowDowngrade = parser.isSet("allow-downgrade");
+
+    auto version = parser.value("prism-version");
+    if (!version.isEmpty()) {
+        if (version.contains('-')) {
+            auto index = version.indexOf('-');
+            m_prsimVersionChannel = version.mid(index + 1);
+            version = version.left(index);
+        } else {
+            m_prsimVersionChannel = "stable";
+        }
+        auto version_parts = version.split('.');
+        m_prismVersionMajor = version_parts.takeFirst().toInt();
+        m_prismVersionMinor = version_parts.takeFirst().toInt();
+        if (!version_parts.isEmpty())
+            m_prismVersionPatch = version_parts.takeFirst().toInt();
+        else
+            m_prismVersionPatch = 0;
+    }
+
+    m_allowPreRelease = parser.isSet("pre-release");
 
     auto marker_file_path = QDir(m_rootPath).absoluteFilePath(".prism_launcher_updater_unpack.marker");
     auto marker_file = QFileInfo(marker_file_path);
@@ -811,7 +809,7 @@ bool PrismUpdaterApp::callAppImageUpdate()
     auto appimage_path = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
     QProcess proc = QProcess();
     qDebug() << "Calling: AppImageUpdate" << appimage_path;
-    proc.setProgram(FS::PathCombine(m_rootPath, "bin", "AppImageUpdate-x86_64.AppImage"));
+    proc.setProgram(FS::PathCombine(m_rootPath, "bin", "AppImageUpdate.AppImage"));
     proc.setArguments({ appimage_path });
     auto result = proc.startDetached();
     if (!result)
@@ -1078,42 +1076,13 @@ std::optional<QDir> PrismUpdaterApp::unpackArchive(QFileInfo archive)
     FS::ensureFolderPathExists(temp_extract_path);
     auto tmp_extract_dir = QDir(temp_extract_path);
 
-    if (archive.fileName().endsWith(".zip")) {
-        auto result = MMCZip::extractDir(archive.absoluteFilePath(), tmp_extract_dir.absolutePath());
-        if (result) {
-            logUpdate(tr("Extracted the following to \"%1\":\n  %2").arg(tmp_extract_dir.absolutePath()).arg(result->join("\n  ")));
-        } else {
-            logUpdate(tr("Failed to extract %1 to %2").arg(archive.absoluteFilePath()).arg(tmp_extract_dir.absolutePath()));
-            showFatalErrorMessage("Failed to extract archive",
-                                  tr("Failed to extract %1 to %2").arg(archive.absoluteFilePath()).arg(tmp_extract_dir.absolutePath()));
-            return std::nullopt;
-        }
-
-    } else if (archive.fileName().endsWith(".tar.gz")) {
-        QString cmd = "tar";
-        QStringList args = { "-xvf", archive.absoluteFilePath(), "-C", tmp_extract_dir.absolutePath() };
-        logUpdate(tr("Running: `%1 %2`").arg(cmd).arg(args.join(" ")));
-        QProcess proc = QProcess();
-        proc.start(cmd, args);
-        if (!proc.waitForStarted(5000)) {  // wait 5 seconds to start
-            auto msg = tr("Failed to launch child process \"%1 %2\".").arg(cmd).arg(args.join(" "));
-            logUpdate(msg);
-            showFatalErrorMessage(tr("Failed extract archive"), msg);
-            return std::nullopt;
-        }
-        auto result = proc.waitForFinished(5000);
-        auto out = proc.readAll();
-        logUpdate(out);
-        if (!result) {
-            auto msg = tr("Child process \"%1 %2\" failed.").arg(cmd).arg(args.join(" "));
-            logUpdate(msg);
-            showFatalErrorMessage(tr("Failed to extract archive"), msg);
-            return std::nullopt;
-        }
-
+    auto result = MMCZip::extractDir(archive.absoluteFilePath(), tmp_extract_dir.absolutePath());
+    if (result) {
+        logUpdate(tr("Extracted the following to \"%1\":\n  %2").arg(tmp_extract_dir.absolutePath()).arg(result->join("\n  ")));
     } else {
-        logUpdate(tr("Unknown archive format for %1").arg(archive.absoluteFilePath()));
-        showFatalErrorMessage("Can not extract", QStringLiteral("Unknown archive format %1").arg(archive.absoluteFilePath()));
+        logUpdate(tr("Failed to extract %1 to %2").arg(archive.absoluteFilePath()).arg(tmp_extract_dir.absolutePath()));
+        showFatalErrorMessage("Failed to extract archive",
+                              tr("Failed to extract %1 to %2").arg(archive.absoluteFilePath()).arg(tmp_extract_dir.absolutePath()));
         return std::nullopt;
     }
 
@@ -1239,13 +1208,13 @@ int PrismUpdaterApp::parseReleasePage(const QByteArray* response)
 
             GitHubRelease release = {};
             release.id = Json::requireInteger(release_obj, "id");
-            release.name = Json::ensureString(release_obj, "name");
+            release.name = release_obj["name"].toString();
             release.tag_name = Json::requireString(release_obj, "tag_name");
             release.created_at = QDateTime::fromString(Json::requireString(release_obj, "created_at"), Qt::ISODate);
-            release.published_at = QDateTime::fromString(Json::ensureString(release_obj, "published_at"), Qt::ISODate);
+            release.published_at = QDateTime::fromString(release_obj["published_at"].toString(), Qt::ISODate);
             release.draft = Json::requireBoolean(release_obj, "draft");
             release.prerelease = Json::requireBoolean(release_obj, "prerelease");
-            release.body = Json::ensureString(release_obj, "body");
+            release.body = release_obj["body"].toString();
             release.version = Version(release.tag_name);
 
             auto release_assets_obj = Json::requireArray(release_obj, "assets");
@@ -1254,7 +1223,7 @@ int PrismUpdaterApp::parseReleasePage(const QByteArray* response)
                 GitHubReleaseAsset asset = {};
                 asset.id = Json::requireInteger(asset_obj, "id");
                 asset.name = Json::requireString(asset_obj, "name");
-                asset.label = Json::ensureString(asset_obj, "label");
+                asset.label = asset_obj["label"].toString();
                 asset.content_type = Json::requireString(asset_obj, "content_type");
                 asset.size = Json::requireInteger(asset_obj, "size");
                 asset.created_at = QDateTime::fromString(Json::requireString(asset_obj, "created_at"), Qt::ISODate);

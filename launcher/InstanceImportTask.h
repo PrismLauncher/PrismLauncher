@@ -40,8 +40,6 @@
 #include <QUrl>
 #include "InstanceTask.h"
 
-class QuaZip;
-
 class InstanceImportTask : public InstanceTask {
     Q_OBJECT
    public:
@@ -58,7 +56,6 @@ class InstanceImportTask : public InstanceTask {
     void processTechnic();
     void processFlame();
     void processModrinth();
-    QString getRootFromZip(QuaZip* zip, const QString& root = "");
 
    private slots:
     void processZipPack();

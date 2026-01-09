@@ -116,7 +116,7 @@ class Application : public QApplication {
 
     qint64 timeSinceStart() const { return m_startTime.msecsTo(QDateTime::currentDateTime()); }
 
-    QIcon getThemedIcon(const QString& name);
+    QIcon logo();
 
     ThemeManager* themeManager() { return m_themeManager.get(); }
 

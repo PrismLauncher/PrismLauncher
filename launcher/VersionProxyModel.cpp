@@ -37,9 +37,9 @@
 #include "VersionProxyModel.h"
 #include <Version.h>
 #include <meta/VersionList.h>
+#include <QIcon>
 #include <QPixmapCache>
 #include <QSortFilterProxyModel>
-#include "Application.h"
 
 class VersionFilterModel : public QSortFilterProxyModel {
     Q_OBJECT
@@ -206,11 +206,11 @@ QVariant VersionProxyModel::data(const QModelIndex& index, int role) const
             if (column == Name && hasRecommended) {
                 auto recommenced = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
                 if (recommenced.toBool()) {
-                    return APPLICATION->getThemedIcon("star");
+                    return QIcon::fromTheme("star");
                 } else if (hasLatest) {
                     auto latest = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
                     if (latest.toBool()) {
-                        return APPLICATION->getThemedIcon("bug");
+                        return QIcon::fromTheme("bug");
                     }
                 }
                 QPixmap pixmap;

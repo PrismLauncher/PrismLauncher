@@ -36,8 +36,6 @@
 
 #pragma once
 
-#include <quazip.h>
-#include <quazip/JlCompress.h>
 #include <QDir>
 #include <QFileInfo>
 #include <QFuture>
@@ -46,42 +44,15 @@
 #include <QSet>
 #include <QString>
 #include <functional>
-#include <memory>
 #include <optional>
+#include "archive/ArchiveReader.h"
 
 #if defined(LAUNCHER_APPLICATION)
 #include "minecraft/mod/Mod.h"
 #endif
-#include "Filter.h"
-#include "tasks/Task.h"
 
 namespace MMCZip {
 using FilterFileFunction = std::function<bool(const QFileInfo&)>;
-
-/**
- * Merge two zip files, using a filter function
- */
-bool mergeZipFiles(QuaZip* into, QFileInfo from, QSet<QString>& contained, const Filter& filter = nullptr);
-
-/**
- * Compress directory, by providing a list of files to compress
- * \param zip target archive
- * \param dir directory that will be compressed (to compress with relative paths)
- * \param files list of files to compress
- * \param followSymlinks should follow symlinks when compressing file data
- * \return true for success or false for failure
- */
-bool compressDirFiles(QuaZip* zip, QString dir, QFileInfoList files, bool followSymlinks = false);
-
-/**
- * Compress directory, by providing a list of files to compress
- * \param fileCompressed target archive file
- * \param dir directory that will be compressed (to compress with relative paths)
- * \param files list of files to compress
- * \param followSymlinks should follow symlinks when compressing file data
- * \return true for success or false for failure
- */
-bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, bool followSymlinks = false);
 
 #if defined(LAUNCHER_APPLICATION)
 /**
@@ -89,29 +60,11 @@ bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, 
  */
 bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod*>& mods);
 #endif
-/**
- * Find a single file in archive by file name (not path)
- *
- * \param ignore_paths paths to skip when recursing the search
- *
- * \return the path prefix where the file is
- */
-QString findFolderOfFileInZip(QuaZip* zip, const QString& what, const QStringList& ignore_paths = {}, const QString& root = QString(""));
-
-/**
- * Find a multiple files of the same name in archive by file name
- * If a file is found in a path, no deeper paths are searched
- *
- * \return true if anything was found
- */
-bool findFilesInZip(QuaZip* zip, const QString& what, QStringList& result, const QString& root = QString());
 
 /**
  * Extract a subdirectory from an archive
  */
-std::optional<QStringList> extractSubDir(QuaZip* zip, const QString& subdir, const QString& target);
-
-bool extractRelFile(QuaZip* zip, const QString& file, const QString& target);
+std::optional<QStringList> extractSubDir(ArchiveReader* zip, const QString& subdir, const QString& target);
 
 /**
  * Extract a whole archive.
@@ -151,90 +104,4 @@ bool extractFile(QString fileCompressed, QString file, QString dir);
  * \return true for success or false for failure
  */
 bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFileFunction excludeFilter);
-
-#if defined(LAUNCHER_APPLICATION)
-class ExportToZipTask : public Task {
-    Q_OBJECT
-   public:
-    ExportToZipTask(QString outputPath,
-                    QDir dir,
-                    QFileInfoList files,
-                    QString destinationPrefix = "",
-                    bool followSymlinks = false,
-                    bool utf8Enabled = false)
-        : m_output_path(outputPath)
-        , m_output(outputPath)
-        , m_dir(dir)
-        , m_files(files)
-        , m_destination_prefix(destinationPrefix)
-        , m_follow_symlinks(followSymlinks)
-    {
-        setAbortable(true);
-        m_output.setUtf8Enabled(utf8Enabled);
-    };
-    ExportToZipTask(QString outputPath,
-                    QString dir,
-                    QFileInfoList files,
-                    QString destinationPrefix = "",
-                    bool followSymlinks = false,
-                    bool utf8Enabled = false)
-        : ExportToZipTask(outputPath, QDir(dir), files, destinationPrefix, followSymlinks, utf8Enabled) {};
-
-    virtual ~ExportToZipTask() = default;
-
-    void setExcludeFiles(QStringList excludeFiles) { m_exclude_files = excludeFiles; }
-    void addExtraFile(QString fileName, QByteArray data) { m_extra_files.insert(fileName, data); }
-
-    using ZipResult = std::optional<QString>;
-
-   protected:
-    virtual void executeTask() override;
-    bool abort() override;
-
-    ZipResult exportZip();
-    void finish();
-
-   private:
-    QString m_output_path;
-    QuaZip m_output;
-    QDir m_dir;
-    QFileInfoList m_files;
-    QString m_destination_prefix;
-    bool m_follow_symlinks;
-    QStringList m_exclude_files;
-    QHash<QString, QByteArray> m_extra_files;
-
-    QFuture<ZipResult> m_build_zip_future;
-    QFutureWatcher<ZipResult> m_build_zip_watcher;
-};
-
-class ExtractZipTask : public Task {
-    Q_OBJECT
-   public:
-    ExtractZipTask(QString input, QDir outputDir, QString subdirectory = "")
-        : ExtractZipTask(std::make_shared<QuaZip>(input), outputDir, subdirectory)
-    {}
-    ExtractZipTask(std::shared_ptr<QuaZip> input, QDir outputDir, QString subdirectory = "")
-        : m_input(input), m_output_dir(outputDir), m_subdirectory(subdirectory)
-    {}
-    virtual ~ExtractZipTask() = default;
-
-    using ZipResult = std::optional<QString>;
-
-   protected:
-    virtual void executeTask() override;
-    bool abort() override;
-
-    ZipResult extractZip();
-    void finish();
-
-   private:
-    std::shared_ptr<QuaZip> m_input;
-    QDir m_output_dir;
-    QString m_subdirectory;
-
-    QFuture<ZipResult> m_zip_future;
-    QFutureWatcher<ZipResult> m_zip_watcher;
-};
-#endif
 }  // namespace MMCZip

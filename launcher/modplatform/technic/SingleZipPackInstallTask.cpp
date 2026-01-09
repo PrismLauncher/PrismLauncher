@@ -66,11 +66,7 @@ void Technic::SingleZipPackInstallTask::downloadSucceeded()
     qDebug() << "Attempting to create instance from" << m_archivePath;
 
     // open the zip and find relevant files in it
-    m_packZip.reset(new QuaZip(m_archivePath));
-    if (!m_packZip->open(QuaZip::mdUnzip)) {
-        emitFailed(tr("Unable to open supplied modpack zip file."));
-        return;
-    }
+    m_packZip.reset(new MMCZip::ArchiveReader(m_archivePath));
     m_extractFuture =
         QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractSubDir, m_packZip.get(), QString(""), extractDir.absolutePath());
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &Technic::SingleZipPackInstallTask::extractFinished);

@@ -40,7 +40,6 @@
 #pragma once
 
 #include <ui/pages/modplatform/DataPackPage.h>
-#include "Application.h"
 
 #include "modplatform/ResourceAPI.h"
 
@@ -58,7 +57,7 @@ static inline QString displayName()
 }
 static inline QIcon icon()
 {
-    return APPLICATION->getThemedIcon("flame");
+    return QIcon::fromTheme("flame");
 }
 static inline QString id()
 {
@@ -180,8 +179,6 @@ class FlameShaderPackPage : public ShaderPackResourcePage {
 
     void openUrl(const QUrl& url) override;
 };
-
-
 
 class FlameDataPackPage : public DataPackResourcePage {
     Q_OBJECT

@@ -71,7 +71,7 @@ auto stringEntry(toml::table table, QString entry_name) -> QString
 {
     auto node = table[StringUtils::toStdString(entry_name)];
     if (!node) {
-        qWarning() << "Failed to read str property '" + entry_name + "' in mod metadata.";
+        qDebug() << "Failed to read str property '" + entry_name + "' in mod metadata.";
         return {};
     }
 
@@ -82,7 +82,7 @@ auto intEntry(toml::table table, QString entry_name) -> int
 {
     auto node = table[StringUtils::toStdString(entry_name)];
     if (!node) {
-        qWarning() << "Failed to read int property '" + entry_name + "' in mod metadata.";
+        qDebug() << "Failed to read int property '" + entry_name + "' in mod metadata.";
         return {};
     }
 
@@ -272,7 +272,7 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
         mod.name = stringEntry(table, "name");
         mod.filename = stringEntry(table, "filename");
         mod.side = ModPlatform::SideUtils::fromString(stringEntry(table, "side"));
-        mod.releaseType = ModPlatform::IndexedVersionType(table["x-prismlauncher-release-type"].value_or(""));
+        mod.releaseType = ModPlatform::IndexedVersionType::fromString(table["x-prismlauncher-release-type"].value_or(""));
         if (auto loaders = table["x-prismlauncher-loaders"]; loaders && loaders.is_array()) {
             for (auto&& loader : *loaders.as_array()) {
                 if (loader.is_string()) {

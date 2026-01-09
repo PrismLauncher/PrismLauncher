@@ -17,11 +17,10 @@
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftInstance.h>
 
-#include <quazip/quazip.h>
-#include <quazip/quazipdir.h>
 #include <QDir>
 #include "FileSystem.h"
-#include "MMCZip.h"
+#include "archive/ArchiveReader.h"
+#include "archive/ArchiveWriter.h"
 
 #ifdef major
 #undef major
@@ -41,30 +40,21 @@ static QString replaceSuffix(QString target, const QString& suffix, const QStrin
 
 static bool unzipNatives(QString source, QString targetFolder, bool applyJnilibHack)
 {
-    QuaZip zip(source);
-    if (!zip.open(QuaZip::mdUnzip)) {
-        return false;
-    }
+    MMCZip::ArchiveReader zip(source);
     QDir directory(targetFolder);
-    if (!zip.goToFirstFile()) {
-        return false;
-    }
-    do {
-        QString name = zip.getCurrentFileName();
+
+    auto extPtr = MMCZip::ArchiveWriter::createDiskWriter();
+    auto ext = extPtr.get();
+
+    return zip.parse([applyJnilibHack, directory, ext](MMCZip::ArchiveReader::File* f) {
+        QString name = f->filename();
         auto lowercase = name.toLower();
         if (applyJnilibHack) {
             name = replaceSuffix(name, ".jnilib", ".dylib");
         }
         QString absFilePath = directory.absoluteFilePath(name);
-        if (!JlCompress::extractFile(&zip, "", absFilePath)) {
-            return false;
-        }
-    } while (zip.goToNextFile());
-    zip.close();
-    if (zip.getZipError() != 0) {
-        return false;
-    }
-    return true;
+        return f->writeFile(ext, absFilePath);
+    });
 }
 
 void ExtractNatives::executeTask()

@@ -91,12 +91,12 @@ class IconProxy : public QIdentityProxyModel {
             if (!var.isNull()) {
                 auto string = var.toString();
                 if (string == "warning") {
-                    return APPLICATION->getThemedIcon("status-yellow");
+                    return QIcon::fromTheme("status-yellow");
                 } else if (string == "error") {
-                    return APPLICATION->getThemedIcon("status-bad");
+                    return QIcon::fromTheme("status-bad");
                 }
             }
-            return APPLICATION->getThemedIcon("status-good");
+            return QIcon::fromTheme("status-good");
         }
         return var;
     }

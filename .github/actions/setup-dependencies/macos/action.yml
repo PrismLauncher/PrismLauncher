@@ -14,7 +14,7 @@ runs:
       shell: bash
       run: |
         brew update
-        brew install ninja extra-cmake-modules temurin@17
+        brew install ninja extra-cmake-modules temurin@17 mono
 
     - name: Set JAVA_HOME
       shell: bash
@@ -42,7 +42,6 @@ runs:
         echo "VCPKG_BINARY_SOURCES=clear;nuget,$FEED_URL,readwrite" >> "$GITHUB_ENV"
 
     - name: Setup vcpkg environment
-      if: ${{ inputs.build-type == 'Debug' }}
       shell: bash
       run: |
-        echo "CMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" >> "$GITHUB_ENV"
+        echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"

@@ -43,9 +43,6 @@
 #include <FileSystem.h>
 #include <MMCZip.h>
 #include <io/stream_reader.h>
-#include <quazip/quazip.h>
-#include <quazip/quazipdir.h>
-#include <quazip/quazipfile.h>
 #include <tag_primitive.h>
 #include <tag_string.h>
 #include <sstream>
@@ -57,6 +54,7 @@
 
 #include "FileSystem.h"
 #include "PSaveFile.h"
+#include "archive/ArchiveReader.h"
 
 using std::nullopt;
 using std::optional;
@@ -244,36 +242,25 @@ void World::readFromFS(const QFileInfo& file)
 
 void World::readFromZip(const QFileInfo& file)
 {
-    QuaZip zip(file.absoluteFilePath());
-    m_isValid = zip.open(QuaZip::mdUnzip);
-    if (!m_isValid) {
-        return;
-    }
-    auto location = MMCZip::findFolderOfFileInZip(&zip, "level.dat");
-    m_isValid = !location.isEmpty();
-    if (!m_isValid) {
-        return;
-    }
-    m_containerOffsetPath = location;
-    QuaZipFile zippedFile(&zip);
-    // read the install profile
-    m_isValid = zip.setCurrentFile(location + "level.dat");
-    if (!m_isValid) {
-        return;
-    }
-    m_isValid = zippedFile.open(QIODevice::ReadOnly);
-    QuaZipFileInfo64 levelDatInfo;
-    zippedFile.getFileInfo(&levelDatInfo);
-    auto modTime = levelDatInfo.getNTFSmTime();
-    if (!modTime.isValid()) {
-        modTime = levelDatInfo.dateTime;
-    }
-    m_levelDatTime = modTime;
-    if (!m_isValid) {
-        return;
-    }
-    loadFromLevelDat(zippedFile.readAll());
-    zippedFile.close();
+    MMCZip::ArchiveReader r(file.absoluteFilePath());
+
+    m_isValid = false;
+    r.parse([this](MMCZip::ArchiveReader::File* file, bool& stop) {
+        const QString levelDat = "level.dat";
+        auto filePath = file->filename();
+        QFileInfo fi(filePath);
+        if (fi.fileName().compare(levelDat, Qt::CaseInsensitive) == 0) {
+            m_containerOffsetPath = filePath.chopped(levelDat.length());
+            if (!m_containerOffsetPath.isEmpty()) {
+                return false;
+            }
+            m_levelDatTime = file->dateTime();
+            loadFromLevelDat(file->readAll());
+            m_isValid = true;
+            stop = true;
+        }
+        return true;
+    });
 }
 
 bool World::install(const QString& to, const QString& name)
@@ -284,10 +271,7 @@ bool World::install(const QString& to, const QString& name)
     }
     bool ok = false;
     if (m_containerFile.isFile()) {
-        QuaZip zip(m_containerFile.absoluteFilePath());
-        if (!zip.open(QuaZip::mdUnzip)) {
-            return false;
-        }
+        MMCZip::ArchiveReader zip(m_containerFile.absoluteFilePath());
         ok = !MMCZip::extractSubDir(&zip, m_containerOffsetPath, finalPath);
     } else if (m_containerFile.isDir()) {
         QString from = m_containerFile.filePath();
@@ -350,7 +334,7 @@ optional<QString> read_string(nbt::value& parent, const char* name)
             return nullopt;
         }
         auto& tag_str = namedValue.as<nbt::tag_string>();
-        return QString::fromStdString(tag_str.get());
+        return QString::fromUtf8(tag_str.get());
     } catch ([[maybe_unused]] const std::out_of_range& e) {
         // fallback for old world formats
         qWarning() << "String NBT tag" << name << "could not be found.";

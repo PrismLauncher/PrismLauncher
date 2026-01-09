@@ -1,0 +1,14 @@
+name: cmark
+buildsystem: cmake-ninja
+builddir: true
+config-opts:
+  - -DCMAKE_TESTS=OFF
+sources:
+  - type: archive
+    url: https://github.com/commonmark/cmark/archive/0.31.1.tar.gz
+    sha256: 3da93db5469c30588cfeb283d9d62edfc6ded9eb0edc10a4f5bbfb7d722ea802
+    x-checker-data:
+      type: anitya
+      project-id: 9159
+      stable-only: true
+      url-template: https://github.com/commonmark/cmark/archive/$version.tar.gz

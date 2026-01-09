@@ -77,7 +77,7 @@ void AssetUpdateTask::assetIndexFinished()
         if (resourceURL != BuildConfig.DEFAULT_RESOURCE_BASE) {
             source = QUrl(resourceURL).host();
         }
-        setStatus(tr("Getting the assets files from %1...").arg(source));
+        setStatus(tr("Getting the asset files from %1...").arg(source));
         downloadJob = job;
         connect(downloadJob.get(), &NetJob::succeeded, this, &AssetUpdateTask::emitSucceeded);
         connect(downloadJob.get(), &NetJob::failed, this, &AssetUpdateTask::assetsFailed);

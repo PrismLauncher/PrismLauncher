@@ -66,6 +66,7 @@ class FileIgnoreProxy : public QSortFilterProxyModel {
 
     // list of file names that need to be removed completely from model
     inline QStringList& ignoreFilesWithName() { return m_ignoreFiles; }
+    inline QStringList& ignoreFilesWithSuffix() { return m_ignoreFilesSuffixes; }
     // list of relative paths that need to be removed completely from model
     inline SeparatorPrefixTree<'/'>& ignoreFilesWithPath() { return m_ignoreFilePaths; }
 
@@ -85,5 +86,6 @@ class FileIgnoreProxy : public QSortFilterProxyModel {
     const QString m_root;
     SeparatorPrefixTree<'/'> m_blocked;
     QStringList m_ignoreFiles;
+    QStringList m_ignoreFilesSuffixes;
     SeparatorPrefixTree<'/'> m_ignoreFilePaths;
 };

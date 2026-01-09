@@ -13,7 +13,6 @@
 #include "modplatform/EnsureMetadataTask.h"
 #include "modplatform/helpers/OverrideUtils.h"
 
-#include "modplatform/modrinth/ModrinthPackManifest.h"
 #include "net/ChecksumValidator.h"
 
 #include "net/ApiDownload.h"
@@ -85,7 +84,7 @@ bool ModrinthCreationTask::updateInstance()
     QString old_index_path(FS::PathCombine(old_index_folder, "modrinth.index.json"));
     QFileInfo old_index_file(old_index_path);
     if (old_index_file.exists()) {
-        std::vector<Modrinth::File> old_files;
+        std::vector<File> old_files;
         parseManifest(old_index_path, old_files, false, false);
 
         // Let's remove all duplicated, identical resources!
@@ -250,7 +249,7 @@ bool ModrinthCreationTask::createInstance()
     auto root_modpack_url = QUrl::fromLocalFile(root_modpack_path);
     // TODO make this work with other sorts of resource
     QHash<QString, Resource*> resources;
-    for (auto file : m_files) {
+    for (auto& file : m_files) {
         auto fileName = file.path;
         fileName = FS::RemoveInvalidPathChars(fileName);
         auto file_path = FS::PathCombine(root_modpack_path, fileName);
@@ -356,7 +355,7 @@ bool ModrinthCreationTask::createInstance()
 }
 
 bool ModrinthCreationTask::parseManifest(const QString& index_path,
-                                         std::vector<Modrinth::File>& files,
+                                         std::vector<File>& files,
                                          bool set_internal_data,
                                          bool show_optional_dialog)
 {
@@ -372,20 +371,20 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
 
             if (set_internal_data) {
                 if (m_managed_version_id.isEmpty())
-                    m_managed_version_id = Json::ensureString(obj, "versionId", {}, "Managed ID");
-                m_managed_name = Json::ensureString(obj, "name", {}, "Managed Name");
+                    m_managed_version_id = obj["versionId"].toString();
+                m_managed_name = obj["name"].toString();
             }
 
             auto jsonFiles = Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json");
-            std::vector<Modrinth::File> optionalFiles;
+            std::vector<File> optionalFiles;
             for (const auto& modInfo : jsonFiles) {
-                Modrinth::File file;
+                File file;
                 file.path = Json::requireString(modInfo, "path").replace("\\", "/");
 
-                auto env = Json::ensureObject(modInfo, "env");
+                auto env = modInfo["env"].toObject();
                 // 'env' field is optional
                 if (!env.isEmpty()) {
-                    QString support = Json::ensureString(env, "client", "unsupported");
+                    QString support = env["client"].toString("unsupported");
                     if (support == "unsupported") {
                         continue;
                     } else if (support == "optional") {
@@ -400,7 +399,7 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
                 // Do not use requireUrl, which uses StrictMode, instead use QUrl's default TolerantMode
                 // (as Modrinth seems to incorrectly handle spaces)
 
-                auto download_arr = Json::ensureArray(modInfo, "downloads");
+                auto download_arr = modInfo["downloads"].toArray();
                 for (auto download : download_arr) {
                     qWarning() << download.toString();
                     bool is_last = download.toString() == download_arr.last().toString();

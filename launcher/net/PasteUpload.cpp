@@ -36,7 +36,6 @@
  */
 
 #include "PasteUpload.h"
-#include <qobject.h>
 
 #include <QHttpPart>
 #include <QJsonArray>

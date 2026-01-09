@@ -21,11 +21,11 @@ class QSortFilterProxyModel;
 
 /* A macro to define useful functions to handle Resource* -> T* more easily on derived classes */
 #define RESOURCE_HELPERS(T)                                         \
-    T& at(int index)                                  \
+    T& at(int index)                                                \
     {                                                               \
         return *static_cast<T*>(m_resources[index].get());          \
     }                                                               \
-    const T& at(int index) const                      \
+    const T& at(int index) const                                    \
     {                                                               \
         return *static_cast<const T*>(m_resources.at(index).get()); \
     }                                                               \
@@ -84,7 +84,7 @@ class ResourceFolderModel : public QAbstractListModel {
     virtual bool startWatching() { return startWatching({ indexDir().absolutePath(), m_dir.absolutePath() }); }
     virtual bool stopWatching() { return stopWatching({ indexDir().absolutePath(), m_dir.absolutePath() }); }
 
-    QDir indexDir() { return { QString("%1/.index").arg(dir().absolutePath()) }; }
+    virtual QDir indexDir() const { return { QString("%1/.index").arg(dir().absolutePath()) }; }
 
     /** Given a path in the system, install that resource, moving it to its place in the
      *  instance file hierarchy.
@@ -99,7 +99,7 @@ class ResourceFolderModel : public QAbstractListModel {
      *
      *  Returns whether the removal was successful.
      */
-    virtual bool uninstallResource(QString file_name, bool preserve_metadata = false);
+    virtual bool uninstallResource(const QString& file_name, bool preserve_metadata = false);
     virtual bool deleteResources(const QModelIndexList&);
     virtual void deleteMetadata(const QModelIndexList&);
 
@@ -188,6 +188,7 @@ class ResourceFolderModel : public QAbstractListModel {
     void parseFinished();
 
    protected:
+    [[nodiscard]] virtual Task* createPreUpdateTask() { return nullptr; }
     /** This creates a new update task to be executed by update().
      *
      *  The task should load and parse all resources necessary, and provide a way of accessing such results.

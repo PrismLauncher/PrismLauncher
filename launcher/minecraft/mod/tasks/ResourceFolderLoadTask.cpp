@@ -136,6 +136,10 @@ void ResourceFolderLoadTask::getFromMetadata()
 {
     m_index_dir.refresh();
     for (auto entry : m_index_dir.entryList(QDir::Files)) {
+        if (!entry.endsWith(".pw.toml")) {
+            continue;
+        }
+
         auto metadata = Metadata::get(m_index_dir, entry);
 
         if (!metadata.isValid())

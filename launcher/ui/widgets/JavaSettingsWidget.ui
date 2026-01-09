@@ -191,13 +191,6 @@
       <bool>false</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="3" column="0">
-       <widget class="QLabel" name="labelMaxMemNotice">
-        <property name="text">
-         <string>Memory Notice</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="2">
        <widget class="QLabel" name="label_3">
         <property name="text">
@@ -345,6 +338,13 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item row="3" column="0" colspan="4">
+       <widget class="QLabel" name="labelMaxMemNotice">
+        <property name="text">
+         <string>Memory Notice</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

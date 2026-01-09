@@ -61,6 +61,9 @@ class PageContainer : public QWidget, public BasePageContainer {
 
     void addButtons(QWidget* buttons);
     void addButtons(QLayout* buttons);
+
+    void useSidebarStyle(bool sidebar);
+
     /*
      * Save any unsaved state and prepare to be closed.
      * @return true if everything can be saved, false if there is something that requires attention
@@ -112,6 +115,5 @@ class PageContainer : public QWidget, public BasePageContainer {
     QStackedLayout* m_pageStack;
     QListView* m_pageList;
     QLabel* m_header;
-    IconLabel* m_iconHeader;
     QGridLayout* m_layout;
 };

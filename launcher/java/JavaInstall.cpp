@@ -21,7 +21,7 @@
 #include "BaseVersion.h"
 #include "StringUtils.h"
 
-bool JavaInstall::operator<(const JavaInstall& rhs)
+bool JavaInstall::operator<(const JavaInstall& rhs) const
 {
     auto archCompare = StringUtils::naturalCompare(arch, rhs.arch, Qt::CaseInsensitive);
     if (archCompare != 0)
@@ -35,17 +35,17 @@ bool JavaInstall::operator<(const JavaInstall& rhs)
     return StringUtils::naturalCompare(path, rhs.path, Qt::CaseInsensitive) < 0;
 }
 
-bool JavaInstall::operator==(const JavaInstall& rhs)
+bool JavaInstall::operator==(const JavaInstall& rhs) const
 {
     return arch == rhs.arch && id == rhs.id && path == rhs.path;
 }
 
-bool JavaInstall::operator>(const JavaInstall& rhs)
+bool JavaInstall::operator>(const JavaInstall& rhs) const
 {
     return (!operator<(rhs)) && (!operator==(rhs));
 }
 
-bool JavaInstall::operator<(BaseVersion& a)
+bool JavaInstall::operator<(BaseVersion& a) const
 {
     try {
         return operator<(dynamic_cast<JavaInstall&>(a));
@@ -54,7 +54,7 @@ bool JavaInstall::operator<(BaseVersion& a)
     }
 }
 
-bool JavaInstall::operator>(BaseVersion& a)
+bool JavaInstall::operator>(BaseVersion& a) const
 {
     try {
         return operator>(dynamic_cast<JavaInstall&>(a));

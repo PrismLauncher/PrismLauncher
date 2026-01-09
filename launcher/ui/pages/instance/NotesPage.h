@@ -37,7 +37,6 @@
 
 #include <QWidget>
 
-#include <Application.h>
 #include "BaseInstance.h"
 #include "ui/pages/BasePage.h"
 
@@ -54,9 +53,9 @@ class NotesPage : public QWidget, public BasePage {
     virtual QString displayName() const override { return tr("Notes"); }
     virtual QIcon icon() const override
     {
-        auto icon = APPLICATION->getThemedIcon("notes");
+        auto icon = QIcon::fromTheme("notes");
         if (icon.isNull())
-            icon = APPLICATION->getThemedIcon("news");
+            icon = QIcon::fromTheme("news");
         return icon;
     }
     virtual QString id() const override { return "notes"; }

@@ -36,13 +36,10 @@
  */
 
 #include "DataPackFolderModel.h"
-#include <qnamespace.h>
-#include <qsize.h>
 
 #include <QIcon>
 #include <QStyle>
 
-#include "Application.h"
 #include "Version.h"
 
 #include "minecraft/mod/tasks/LocalDataPackParseTask.h"
@@ -92,7 +89,7 @@ QVariant DataPackFolderModel::data(const QModelIndex& index, int role) const
             }
         case Qt::DecorationRole: {
             if (column == NameColumn && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
-                return APPLICATION->getThemedIcon("status-yellow");
+                return QIcon::fromTheme("status-yellow");
             if (column == ImageColumn) {
                 return at(row).image({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
             }

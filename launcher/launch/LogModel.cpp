@@ -24,13 +24,13 @@ QVariant LogModel::data(const QModelIndex& index, int role) const
         return m_content[realRow].line;
     }
     if (role == LevelRole) {
-        return m_content[realRow].level;
+        return static_cast<int>(m_content[realRow].level);
     }
 
     return QVariant();
 }
 
-void LogModel::append(MessageLevel::Enum level, QString line)
+void LogModel::append(MessageLevel level, QString line)
 {
     if (m_suspended) {
         return;
@@ -167,10 +167,10 @@ bool LogModel::isOverFlow()
     return m_numLines >= m_maxLines && m_stopOnOverflow;
 }
 
-MessageLevel::Enum LogModel::previousLevel()
+MessageLevel LogModel::previousLevel()
 {
-    if (!m_content.isEmpty()) {
-        return m_content.last().level;
+    if (m_numLines > 0) {
+        return m_content[m_numLines - 1].level;
     }
     return MessageLevel::Unknown;
 }

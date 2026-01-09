@@ -232,7 +232,7 @@ void AppearanceWidget::updateConsolePreview()
     m_ui->consolePreview->clear();
     m_defaultFormat.setFont(QFont(fontFamily, fontSize));
 
-    auto print = [this, colors](const QString& message, MessageLevel::Enum level) {
+    auto print = [this, colors](const QString& message, MessageLevel level) {
         QTextCharFormat format(m_defaultFormat);
 
         QColor bg = colors.background.value(level);

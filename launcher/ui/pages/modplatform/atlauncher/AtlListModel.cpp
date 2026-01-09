@@ -61,7 +61,7 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
             if (m_logoMap.contains(pack.safeName)) {
                 return (m_logoMap.value(pack.safeName));
             }
-            auto icon = APPLICATION->getThemedIcon("atlauncher-placeholder");
+            auto icon = QIcon::fromTheme("atlauncher-placeholder");
 
             auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/images/%1").arg(pack.safeName);
             ((ListModel*)this)->requestLogo(pack.safeName, url);

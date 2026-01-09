@@ -239,7 +239,7 @@
     <iconset theme="news"/>
    </property>
    <property name="text">
-    <string>More news...</string>
+    <string>More News...</string>
    </property>
    <property name="toolTip">
     <string>Open the development blog to read more news about %1.</string>

@@ -72,19 +72,51 @@ Modpack parseDirectory(QString path)
         modpack.name = Json::requireString(root, "name", "name");
         modpack.version = Json::requireString(root, "version", "version");
         modpack.mcVersion = Json::requireString(root, "mcVersion", "mcVersion");
-        modpack.jvmArgs = Json::ensureVariant(root, "jvmArgs", {}, "jvmArgs");
+        modpack.jvmArgs = root["jvmArgs"].toVariant();
         modpack.totalPlayTime = Json::requireInteger(root, "totalPlayTime", "totalPlayTime");
+
+        auto modLoader = Json::requireString(root, "modLoader", "modLoader");
+        if (!modLoader.isEmpty()) {
+            const auto parts = modLoader.split('-', Qt::KeepEmptyParts);
+            if (parts.size() >= 2) {
+                const auto loader = parts.first().toLower();
+                modpack.version = parts.at(1).trimmed();
+                if (loader == "neoforge") {
+                    modpack.loaderType = ModPlatform::NeoForge;
+                } else if (loader == "forge") {
+                    modpack.loaderType = ModPlatform::Forge;
+                } else if (loader == "fabric") {
+                    modpack.loaderType = ModPlatform::Fabric;
+                } else if (loader == "quilt") {
+                    modpack.loaderType = ModPlatform::Quilt;
+                }
+            }
+        } else {            
+            legacyInstanceParsing(path, &modpack.loaderType, &modpack.loaderVersion);
+        }
     } catch (const Exception& e) {
         qDebug() << "Couldn't load ftb instance json: " << e.cause();
         return {};
     }
+    
+    auto iconFile = QFileInfo(FS::PathCombine(path, "folder.jpg"));
+    if (iconFile.exists() && iconFile.isFile()) {
+        modpack.icon = QIcon(iconFile.absoluteFilePath());
+    } else {  // the logo is a file that the first bit denotes the image tipe followed by the actual image data
+        modpack.icon = loadFTBIcon(FS::PathCombine(path, ".ftbapp", "logo"));
+    }
+    return modpack;
+}
 
-    auto versionsFile = QFileInfo(FS::PathCombine(path, "version.json"));
+void legacyInstanceParsing(QString path, std::optional<ModPlatform::ModLoaderType>* loaderType, QString* loaderVersion)
+{
+    auto versionsFile = QFileInfo(FS::PathCombine(path, ".ftbapp", "version.json"));
     if (!versionsFile.exists() || !versionsFile.isFile()) {
-        versionsFile = QFileInfo(FS::PathCombine(path, ".ftbapp", "version.json"));
+        versionsFile = QFileInfo(FS::PathCombine(path, "version.json"));
     }
     if (!versionsFile.exists() || !versionsFile.isFile()) {
-        return {};
+        qDebug() << "Couldn't find ftb version json";
+        return;
     }
     try {
         auto doc = Json::requireDocument(versionsFile.absoluteFilePath(), "FTB_APP version JSON file");
@@ -96,34 +128,29 @@ Modpack parseDirectory(QString path)
             auto name = Json::requireString(obj, "name", "name");
             auto version = Json::requireString(obj, "version", "version");
             if (name == "neoforge") {
-                modpack.loaderType = ModPlatform::NeoForge;
-                modpack.version = version;
+                *loaderType = ModPlatform::NeoForge;
+                *loaderVersion = version;
                 break;
             } else if (name == "forge") {
-                modpack.loaderType = ModPlatform::Forge;
-                modpack.version = version;
+                *loaderType = ModPlatform::Forge;
+                *loaderVersion = version;
                 break;
             } else if (name == "fabric") {
-                modpack.loaderType = ModPlatform::Fabric;
-                modpack.version = version;
+                *loaderType = ModPlatform::Fabric;
+                *loaderVersion = version;
                 break;
             } else if (name == "quilt") {
-                modpack.loaderType = ModPlatform::Quilt;
-                modpack.version = version;
+                *loaderType = ModPlatform::Quilt;
+                *loaderVersion = version;
                 break;
             }
         }
-    } catch (const Exception& e) {
+    }
+    catch (const Exception& e)
+    {
         qDebug() << "Couldn't load ftb version json: " << e.cause();
-        return {};
+        return;
     }
-    auto iconFile = QFileInfo(FS::PathCombine(path, "folder.jpg"));
-    if (iconFile.exists() && iconFile.isFile()) {
-        modpack.icon = QIcon(iconFile.absoluteFilePath());
-    } else {  // the logo is a file that the first bit denotes the image tipe followed by the actual image data
-        modpack.icon = loadFTBIcon(FS::PathCombine(path, ".ftbapp", "logo"));
-    }
-    return modpack;
 }
-
 }  // namespace FTBImportAPP
+

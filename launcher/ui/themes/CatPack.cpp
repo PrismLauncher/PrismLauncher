@@ -63,12 +63,12 @@ QString BasicCatPack::path() const
 
 JsonCatPack::PartialDate partialDate(QJsonObject date)
 {
-    auto month = Json::ensureInteger(date, "month", 1);
+    auto month = date["month"].toInt(1);
     if (month > 12)
         month = 12;
     else if (month <= 0)
         month = 1;
-    auto day = Json::ensureInteger(date, "day", 1);
+    auto day = date["day"].toInt(1);
     if (day > 31)
         day = 31;
     else if (day <= 0)
@@ -83,9 +83,9 @@ JsonCatPack::JsonCatPack(QFileInfo& manifestInfo) : BasicCatPack(manifestInfo.di
     const auto root = doc.object();
     m_name = Json::requireString(root, "name", "Catpack name");
     m_default_path = FS::PathCombine(path, Json::requireString(root, "default", "Default Cat"));
-    auto variants = Json::ensureArray(root, "variants", QJsonArray(), "Catpack Variants");
+    auto variants = root["variants"].toArray();
     for (auto v : variants) {
-        auto variant = Json::ensureObject(v, QJsonObject(), "Cat variant");
+        auto variant = v.toObject();
         m_variants << Variant{ FS::PathCombine(path, Json::requireString(variant, "path", "Variant path")),
                                partialDate(Json::requireObject(variant, "startTime", "Variant startTime")),
                                partialDate(Json::requireObject(variant, "endTime", "Variant endTime")) };

@@ -24,10 +24,17 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
 
     auto rect = opt.rect;
 
-    style->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter, opt.widget);
+    bool windows = style->objectName().startsWith("windows");
 
-    if (isSelected && style->objectName() != "windowsvista")
+    if (!windows)
+        style->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter, opt.widget);
+
+    if (isSelected) {
+        if (windows)
+            painter->fillRect(rect, opt.palette.highlight());
+
         painter->setPen(opt.palette.highlightedText().color());
+    }
 
     if (opt.features & QStyleOptionViewItem::HasCheckIndicator) {
         QStyleOptionViewItem checkboxOpt = makeCheckboxStyleOption(opt, style);

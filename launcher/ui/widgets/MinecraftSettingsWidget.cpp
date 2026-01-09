@@ -36,6 +36,7 @@
  */
 
 #include "MinecraftSettingsWidget.h"
+#include "modplatform/ModIndex.h"
 #include "ui_MinecraftSettingsWidget.h"
 
 #include <QFileDialog>
@@ -222,9 +223,9 @@ void MinecraftSettingsWidget::loadSettings()
     m_ui->useDiscreteGpuCheck->setChecked(settings->get("UseDiscreteGpu").toBool());
     m_ui->useZink->setChecked(settings->get("UseZink").toBool());
 
-    m_ui->serverJoinGroupBox->setChecked(settings->get("JoinServerOnLaunch").toBool());
-
     if (m_instance != nullptr) {
+        m_ui->serverJoinGroupBox->setChecked(settings->get("JoinServerOnLaunch").toBool());
+
         if (auto server = settings->get("JoinServerOnLaunchAddress").toString(); !server.isEmpty()) {
             m_ui->serverJoinAddress->setText(server);
             m_ui->serverJoinAddressButton->setChecked(true);
@@ -240,7 +241,7 @@ void MinecraftSettingsWidget::loadSettings()
         } else {
             m_ui->serverJoinAddressButton->setChecked(true);
             m_ui->worldJoinButton->setChecked(false);
-            m_ui->serverJoinAddress->setEnabled(true);
+            m_ui->serverJoinAddress->setEnabled(m_ui->serverJoinGroupBox->isChecked());
             m_ui->worldsCb->setEnabled(false);
         }
 
@@ -487,7 +488,7 @@ void MinecraftSettingsWidget::openGlobalSettings()
         APPLICATION->ShowGlobalSettings(this, "minecraft-settings");
 }
 
-void MinecraftSettingsWidget::updateAccountsMenu(const SettingsObject& settings)
+void MinecraftSettingsWidget::updateAccountsMenu(SettingsObject& settings)
 {
     m_ui->instanceAccountSelector->clear();
     auto accounts = APPLICATION->accounts();
@@ -499,7 +500,7 @@ void MinecraftSettingsWidget::updateAccountsMenu(const SettingsObject& settings)
         QIcon face = account->getFace();
 
         if (face.isNull())
-            face = APPLICATION->getThemedIcon("noaccount");
+            face = QIcon::fromTheme("noaccount");
 
         m_ui->instanceAccountSelector->addItem(face, account->profileName(), i);
         if (i == accountIndex)

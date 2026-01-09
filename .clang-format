@@ -5,6 +5,7 @@ AllowShortIfStatementsOnASingleLine: false
 ColumnLimit: 140
 ---
 Language: Cpp
+AccessModifierOffset: -1
 AlignConsecutiveMacros: None
 AlignConsecutiveAssignments: None
 BraceWrapping:

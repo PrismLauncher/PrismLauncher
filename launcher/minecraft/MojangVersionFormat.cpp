@@ -319,7 +319,11 @@ LibraryPtr MojangVersionFormat::libraryFromJson(ProblemContainer& problems, cons
     }
     if (libObj.contains("rules")) {
         out->applyRules = true;
-        out->m_rules = rulesFromJsonV4(libObj);
+
+        QJsonArray rulesArray = requireArray(libObj.value("rules"));
+        for (auto rule : rulesArray) {
+            out->m_rules.append(Rule::fromJson(requireObject(rule)));
+        }
     }
     if (libObj.contains("downloads")) {
         out->m_mojangDownloads = libDownloadInfoFromJson(libObj);
@@ -355,7 +359,7 @@ QJsonObject MojangVersionFormat::libraryToJson(Library* library)
     if (!library->m_rules.isEmpty()) {
         QJsonArray allRules;
         for (auto& rule : library->m_rules) {
-            QJsonObject ruleObj = rule->toJson();
+            QJsonObject ruleObj = rule.toJson();
             allRules.append(ruleObj);
         }
         libRoot.insert("rules", allRules);

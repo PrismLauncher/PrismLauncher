@@ -38,7 +38,6 @@
 #include <QDialog>
 #include <memory>
 
-#include "Application.h"
 #include "java/JavaChecker.h"
 #include "ui/pages/BasePage.h"
 #include "ui/widgets/MinecraftSettingsWidget.h"
@@ -53,7 +52,7 @@ class MinecraftPage : public MinecraftSettingsWidget, public BasePage {
     ~MinecraftPage() override {}
 
     QString displayName() const override { return tr("Minecraft"); }
-    QIcon icon() const override { return APPLICATION->getThemedIcon("minecraft"); }
+    QIcon icon() const override { return QIcon::fromTheme("minecraft"); }
     QString id() const override { return "minecraft-settings"; }
     QString helpPage() const override { return "Minecraft-settings"; }
     bool apply() override

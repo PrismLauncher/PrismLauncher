@@ -13,7 +13,8 @@ Please also follow the project's conventions for C++:
 - Public, private or protected `static const` class data members should be formatted as `SCREAMING_SNAKE_CASE`: `MAX_VALUE`.
 - Class function members should be formatted as `camelCase` without a prefix: `incrementCounter`.
 - Global functions and non-`const` global variables should be formatted as `camelCase` without a prefix: `globalData`.
-- `const` global variables, macros, and enum constants should be formatted as `SCREAMING_SNAKE_CASE`: `LIGHT_GRAY`.
+- `const` global variables and macros should be formatted as `SCREAMING_SNAKE_CASE`: `LIGHT_GRAY`.
+- enum constants should be formatted as `PascalCase`: `CamelusBactrianus`
 - Avoid inventing acronyms or abbreviations especially for a name of multiple words - like `tp` for `texturePack`.
 - Avoid using `[[nodiscard]]` unless ignoring the return value is likely to cause a bug in cases such as:
   - A function allocates memory or another resource and the caller needs to clean it up.
@@ -30,7 +31,7 @@ Here is what these conventions with the formatting configuration look like:
 
 constexpr double PI = 3.14159;
 
-enum class PizzaToppings { HAM_AND_PINEAPPLE, OREO_AND_KETCHUP };
+enum class PizzaToppings { HamAndPineapple, OreoAndKetchup };
 
 struct Person {
     QString name;

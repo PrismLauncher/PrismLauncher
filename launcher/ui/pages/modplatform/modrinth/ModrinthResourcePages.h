@@ -38,8 +38,6 @@
 
 #pragma once
 
-#include "Application.h"
-
 #include "modplatform/ResourceAPI.h"
 
 #include "ui/pages/modplatform/DataPackPage.h"
@@ -57,7 +55,7 @@ static inline QString displayName()
 }
 static inline QIcon icon()
 {
-    return APPLICATION->getThemedIcon("modrinth");
+    return QIcon::fromTheme("modrinth");
 }
 static inline QString id()
 {

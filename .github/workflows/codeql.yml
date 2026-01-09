@@ -1,5 +1,9 @@
 name: "CodeQL Code Scanning"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
@@ -60,12 +64,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: "true"
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           config-file: ./.github/codeql/codeql-config.yml
           queries: security-and-quality
@@ -75,11 +79,12 @@ jobs:
         uses: ./.github/actions/setup-dependencies
         with:
           build-type: Debug
+          qt-version: 6.10.1
 
       - name: Configure and Build
         run: |
-          cmake --preset linux_debug
-          cmake --build --preset linux_debug
+          cmake --preset linux
+          cmake --build --preset linux --config Debug
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4

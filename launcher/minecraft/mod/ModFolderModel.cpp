@@ -49,8 +49,6 @@
 #include <QUrl>
 #include <QUuid>
 
-#include "Application.h"
-
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 
 ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)
@@ -132,7 +130,7 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
             return m_resources[row]->internal_id();
         case Qt::DecorationRole: {
             if (column == NameColumn && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
-                return APPLICATION->getThemedIcon("status-yellow");
+                return QIcon::fromTheme("status-yellow");
             if (column == ImageColumn) {
                 return at(row).icon({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
             }

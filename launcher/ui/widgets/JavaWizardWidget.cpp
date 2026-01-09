@@ -33,9 +33,9 @@ JavaWizardWidget::JavaWizardWidget(QWidget* parent) : QWidget(parent)
 {
     m_availableMemory = Sys::getSystemRam() / Sys::mebibyte;
 
-    goodIcon = APPLICATION->getThemedIcon("status-good");
-    yellowIcon = APPLICATION->getThemedIcon("status-yellow");
-    badIcon = APPLICATION->getThemedIcon("status-bad");
+    goodIcon = QIcon::fromTheme("status-good");
+    yellowIcon = QIcon::fromTheme("status-yellow");
+    badIcon = QIcon::fromTheme("status-bad");
     m_memoryTimer = new QTimer(this);
     setupUi();
 
@@ -532,7 +532,7 @@ void JavaWizardWidget::updateThresholds()
 
     {
         auto height = m_labelMaxMemIcon->fontInfo().pixelSize();
-        QIcon icon = APPLICATION->getThemedIcon(iconName);
+        QIcon icon = QIcon::fromTheme(iconName);
         QPixmap pix = icon.pixmap(height, height);
         m_labelMaxMemIcon->setPixmap(pix);
     }

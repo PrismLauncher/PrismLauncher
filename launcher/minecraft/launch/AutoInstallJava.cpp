@@ -109,7 +109,8 @@ void AutoInstallJava::executeTask()
         return;
     }
     QDir javaDir(APPLICATION->javaPath());
-    auto wantedJavaPath = javaDir.absoluteFilePath(wantedJavaName);
+    auto relativeBinary = FS::PathCombine(wantedJavaName, "bin", JavaUtils::javaExecutable);
+    auto wantedJavaPath = javaDir.absoluteFilePath(relativeBinary);
     if (QFileInfo::exists(wantedJavaPath)) {
         setJavaPathFromPartial();
         return;
@@ -165,6 +166,7 @@ void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
         if (java->runtimeOS == m_supported_arch && java->name() == javaName) {
             QDir javaDir(APPLICATION->javaPath());
             auto final_path = javaDir.absoluteFilePath(java->m_name);
+            auto deletePath = [final_path] { FS::deletePath(final_path); };
             switch (java->downloadType) {
                 case Java::DownloadType::Manifest:
                     m_current_task = makeShared<Java::ManifestDownloadTask>(java->url, final_path, java->checksumType, java->checksumHash);
@@ -174,6 +176,7 @@ void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
                     break;
                 case Java::DownloadType::Unknown:
                     emitFailed(tr("Could not determine Java download type!"));
+                    deletePath();
                     return;
             }
 #if defined(Q_OS_MACOS)
@@ -182,12 +185,11 @@ void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
             seq->addTask(makeShared<Java::SymlinkTask>(final_path));
             m_current_task = seq;
 #endif
-            auto deletePath = [final_path] { FS::deletePath(final_path); };
             connect(m_current_task.get(), &Task::failed, this, [this, deletePath](QString reason) {
                 deletePath();
                 emitFailed(reason);
             });
-            connect(m_current_task.get(), &Task::aborted, this, [deletePath] { deletePath(); });
+            connect(m_current_task.get(), &Task::aborted, this, deletePath);
             connect(m_current_task.get(), &Task::succeeded, this, &AutoInstallJava::setJavaPathFromPartial);
             connect(m_current_task.get(), &Task::failed, this, &AutoInstallJava::tryNextMajorJava);
             connect(m_current_task.get(), &Task::progress, this, &AutoInstallJava::setProgress);

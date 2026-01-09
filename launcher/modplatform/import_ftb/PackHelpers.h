@@ -49,7 +49,7 @@ struct Modpack {
 using ModpackList = QList<Modpack>;
 
 Modpack parseDirectory(QString path);
-
+void legacyInstanceParsing(QString path, std::optional<ModPlatform::ModLoaderType>* loaderType, QString* loaderVersion);
 }  // namespace FTBImportAPP
 
 // We need it for the proxy model

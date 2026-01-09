@@ -77,6 +77,8 @@ class PageEntryFilterModel : public QSortFilterProxyModel {
 PageContainer::PageContainer(BasePageProvider* pageProvider, QString defaultId, QWidget* parent) : QWidget(parent)
 {
     createUI();
+    useSidebarStyle(true);
+
     m_model = new PageModel(this);
     m_proxyModel = new PageEntryFilterModel(this);
     int counter = 0;
@@ -160,7 +162,6 @@ void PageContainer::createUI()
     m_pageStack = new QStackedLayout;
     m_pageList = new PageView;
     m_header = new QLabel();
-    m_iconHeader = new IconLabel(this, QIcon(), QSize(24, 24));
 
     QFont headerLabelFont = m_header->font();
     headerLabelFont.setBold(true);
@@ -173,10 +174,6 @@ void PageContainer::createUI()
     const int leftMargin = APPLICATION->style()->pixelMetric(QStyle::PM_LayoutLeftMargin);
     headerHLayout->addSpacerItem(new QSpacerItem(leftMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
     headerHLayout->addWidget(m_header);
-    headerHLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Ignored));
-    headerHLayout->addWidget(m_iconHeader);
-    const int rightMargin = APPLICATION->style()->pixelMetric(QStyle::PM_LayoutRightMargin);
-    headerHLayout->addSpacerItem(new QSpacerItem(rightMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
     headerHLayout->setContentsMargins(0, 6, 0, 0);
 
     m_pageStack->setContentsMargins(0, 0, 0, 0);
@@ -184,10 +181,10 @@ void PageContainer::createUI()
 
     m_layout = new QGridLayout;
     m_layout->addLayout(headerHLayout, 0, 1, 1, 1);
-    m_layout->addWidget(m_pageList, 0, 0, 2, 1);
+    m_layout->addWidget(m_pageList, 0, 0, 3, 1);
     m_layout->addLayout(m_pageStack, 1, 1, 1, 1);
     m_layout->setColumnStretch(1, 4);
-    m_layout->setContentsMargins(0, 0, 0, 6);
+    m_layout->setContentsMargins(0, 0, 0, 0);
     setLayout(m_layout);
 }
 
@@ -202,12 +199,16 @@ void PageContainer::retranslate()
 
 void PageContainer::addButtons(QWidget* buttons)
 {
-    m_layout->addWidget(buttons, 2, 0, 1, 2);
+    m_layout->addWidget(buttons, 2, 1, 1, 2);
 }
 
 void PageContainer::addButtons(QLayout* buttons)
 {
-    m_layout->addLayout(buttons, 2, 0, 1, 2);
+    m_layout->addLayout(buttons, 2, 1, 1, 2);
+}
+
+void PageContainer::useSidebarStyle(bool sidebar) {
+    m_pageList->setProperty("_kde_side_panel_view", sidebar);
 }
 
 void PageContainer::showPage(int row)
@@ -223,12 +224,10 @@ void PageContainer::showPage(int row)
     if (m_currentPage) {
         m_pageStack->setCurrentIndex(m_currentPage->stackIndex);
         m_header->setText(m_currentPage->displayName());
-        m_iconHeader->setIcon(m_currentPage->icon());
         m_currentPage->opened();
     } else {
         m_pageStack->setCurrentIndex(0);
         m_header->setText(QString());
-        m_iconHeader->setIcon(APPLICATION->getThemedIcon("bug"));
     }
 }
 

@@ -172,13 +172,17 @@ void APIPage::applySettings()
         path.append('/');
         resourceURL.setPath(path);
     }
+
+    auto isLocalhost = [](const QUrl& url) { return url.host() == "localhost" || url.host() == "127.0.0.1" || url.host() == "::1"; };
+    auto isUnsafe = [isLocalhost](const QUrl& url) { return !url.isEmpty() && url.scheme() == "http" && !isLocalhost(url); };
+
     // Don't allow HTTP, since meta is basically RCE with all the jar files.
-    if (!metaURL.isEmpty() && metaURL.scheme() == "http") {
+    if (isUnsafe(metaURL)) {
         metaURL.setScheme("https");
     }
 
     // Also don't allow HTTP
-    if (!resourceURL.isEmpty() && resourceURL.scheme() == "http") {
+    if (isUnsafe(resourceURL)) {
         resourceURL.setScheme("https");
     }
 

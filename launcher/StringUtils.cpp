@@ -35,7 +35,6 @@
  */
 
 #include "StringUtils.h"
-#include <qpair.h>
 
 #include <QRegularExpression>
 #include <QUuid>

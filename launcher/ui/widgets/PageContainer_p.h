@@ -89,8 +89,6 @@ class PageView : public QListView {
         setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Expanding);
         setItemDelegate(new PageViewDelegate(this));
         setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        // Adjust margins when using Breeze theme
-        setProperty("_kde_side_panel_view", true);
     }
 
     virtual QSize sizeHint() const

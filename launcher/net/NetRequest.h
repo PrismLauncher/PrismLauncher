@@ -39,7 +39,6 @@
 
 #pragma once
 
-#include <qloggingcategory.h>
 #include <QNetworkReply>
 #include <QUrl>
 #include <chrono>

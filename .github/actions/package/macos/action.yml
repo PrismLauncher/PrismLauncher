@@ -59,7 +59,7 @@ runs:
         BUILD_DIR: build
         INSTALL_DIR: install
       run: |
-        cmake --install ${{ env.BUILD_DIR }}
+        cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build-type }}
 
         cd ${{ env.INSTALL_DIR }}
         chmod +x "PrismLauncher.app/Contents/MacOS/prismlauncher"
@@ -115,7 +115,7 @@ runs:
         fi
 
     - name: Upload binary tarball
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: PrismLauncher-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}
         path: PrismLauncher.zip

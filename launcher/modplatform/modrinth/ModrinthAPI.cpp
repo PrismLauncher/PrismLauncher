@@ -147,7 +147,7 @@ QList<ModPlatform::Category> ModrinthAPI::loadCategories(std::shared_ptr<QByteAr
         for (auto val : arr) {
             auto cat = Json::requireObject(val);
             auto name = Json::requireString(cat, "name");
-            if (Json::ensureString(cat, "project_type", "") == projectType)
+            if (cat["project_type"].toString() == projectType)
                 categories.push_back({ name, name });
         }
 

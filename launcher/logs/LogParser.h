@@ -31,7 +31,7 @@ class LogParser {
    public:
     struct LogEntry {
         QString logger;
-        MessageLevel::Enum level;
+        MessageLevel level;
         QString levelText;
         QDateTime timestamp;
         QString thread;
@@ -59,7 +59,7 @@ class LogParser {
     std::optional<Error> getError();
 
     /// guess log level from a line of game log
-    static MessageLevel::Enum guessLevel(const QString& line, MessageLevel::Enum level);
+    static MessageLevel guessLevel(const QString& line, MessageLevel previous);
 
    protected:
     std::optional<LogEntry> parseAttributes();

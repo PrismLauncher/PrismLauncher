@@ -9,15 +9,10 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "https://channels.nixos.org/nixos-25.11/nixexprs.tar.xz";
 
     libnbtplusplus = {
       url = "github:PrismLauncher/libnbtplusplus";
-      flake = false;
-    };
-
-    qrcodegenerator = {
-      url = "github:nayuki/QR-Code-generator";
       flake = false;
     };
   };
@@ -27,7 +22,6 @@
       self,
       nixpkgs,
       libnbtplusplus,
-      qrcodegenerator,
     }:
 
     let
@@ -175,7 +169,6 @@
         prismlauncher-unwrapped = prev.callPackage ./nix/unwrapped.nix {
           inherit
             libnbtplusplus
-            qrcodegenerator
             self
             ;
         };

@@ -20,6 +20,7 @@
 
 #include <QDialog>
 #include <QItemSelection>
+#include <QLabel>
 #include <QPixmap>
 
 #include "minecraft/auth/MinecraftAccount.h"
@@ -68,4 +69,5 @@ class SkinManageDialog : public QDialog, public SkinProvider {
     QHash<QString, QImage> m_capes;
     QHash<QString, int> m_capesIdx;
     SkinOpenGLWindow* m_skinPreview = nullptr;
+    QLabel* m_skinPreviewLabel = nullptr;
 };

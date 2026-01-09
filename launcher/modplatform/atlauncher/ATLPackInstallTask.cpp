@@ -39,8 +39,6 @@
 #include <QtConcurrent>
 #include <algorithm>
 
-#include <quazip/quazip.h>
-
 #include "FileSystem.h"
 #include "Json.h"
 #include "MMCZip.h"
@@ -675,13 +673,6 @@ void PackInstallTask::extractConfigs()
     setStatus(tr("Extracting configs..."));
 
     QDir extractDir(m_stagingPath);
-
-    QuaZip packZip(archivePath);
-    if (!packZip.open(QuaZip::mdUnzip)) {
-        emitFailed(tr("Failed to open pack configs %1!").arg(archivePath));
-        return;
-    }
-
     m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), QOverload<QString, QString>::of(MMCZip::extractDir), archivePath,
                                         extractDir.absolutePath() + "/minecraft");
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, [this]() { downloadMods(); });

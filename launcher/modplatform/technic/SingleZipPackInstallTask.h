@@ -16,9 +16,8 @@
 #pragma once
 
 #include "InstanceTask.h"
+#include "archive/ArchiveReader.h"
 #include "net/NetJob.h"
-
-#include <quazip/quazip.h>
 
 #include <QFutureWatcher>
 #include <QStringList>
@@ -54,7 +53,7 @@ class SingleZipPackInstallTask : public InstanceTask {
     QString m_minecraftVersion;
     QString m_archivePath;
     NetJob::Ptr m_filesNetJob;
-    std::unique_ptr<QuaZip> m_packZip;
+    std::unique_ptr<MMCZip::ArchiveReader> m_packZip;
     QFuture<std::optional<QStringList>> m_extractFuture;
     QFutureWatcher<std::optional<QStringList>> m_extractFutureWatcher;
 };

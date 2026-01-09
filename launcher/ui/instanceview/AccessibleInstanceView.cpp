@@ -2,10 +2,6 @@
 #include "AccessibleInstanceView_p.h"
 #include "InstanceView.h"
 
-#include <qaccessible.h>
-#include <qheaderview.h>
-#include <qvariant.h>
-
 #ifndef QT_NO_ACCESSIBILITY
 
 QAccessibleInterface* groupViewAccessibleFactory(const QString& classname, QObject* object)
