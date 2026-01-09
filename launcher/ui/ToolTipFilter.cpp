@@ -18,7 +18,7 @@
  * This file incorporates work covered by the following copyright and
  * permission notice:
  *
- *      Copyright 2013-2026 MultiMC Contributors
+ *      Copyright 2026 MultiMC Contributors
  *
  *      Authors: Mark Deneen <mdeneen@gmail.com>
  *
