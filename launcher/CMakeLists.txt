@@ -847,6 +847,8 @@ SET(LAUNCHER_SOURCES
     ui/InstanceWindow.cpp
     ui/ViewLogWindow.h
     ui/ViewLogWindow.cpp
+    ui/ToolTipFilter.h
+    ui/ToolTipFilter.cpp
 
     # FIXME: maybe find a better home for this.
     FileIgnoreProxy.cpp

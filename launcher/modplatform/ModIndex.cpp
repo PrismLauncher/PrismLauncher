@@ -25,11 +25,9 @@
 
 namespace ModPlatform {
 
-static const QMap<QString, IndexedVersionType> s_indexed_version_type_names = {
-    { "release", IndexedVersionType::Release },
-    { "beta", IndexedVersionType::Beta },
-    { "alpha", IndexedVersionType::Alpha }
-};
+static const QMap<QString, IndexedVersionType> s_indexed_version_type_names = { { "release", IndexedVersionType::Release },
+                                                                                { "beta", IndexedVersionType::Beta },
+                                                                                { "alpha", IndexedVersionType::Alpha } };
 
 static const QList<ModLoaderType> loaderList = { NeoForge, Forge, Cauldron,     LiteLoader, Quilt, Fabric,
                                                  Babric,   BTA,   LegacyFabric, Ornithe,    Rift };
@@ -45,11 +43,13 @@ QList<ModLoaderType> modLoaderTypesToList(ModLoaderTypes flags)
     return flagList;
 }
 
-QString IndexedVersionType::toString() const {
+QString IndexedVersionType::toString() const
+{
     return s_indexed_version_type_names.key(m_type, "unknown");
 }
 
-IndexedVersionType IndexedVersionType::fromString(const QString& type) {
+IndexedVersionType IndexedVersionType::fromString(const QString& type)
+{
     return s_indexed_version_type_names.value(type, IndexedVersionType::Unknown);
 }
 

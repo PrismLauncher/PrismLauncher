@@ -23,7 +23,8 @@
 
 #include "ui_ChooseOfflineNameDialog.h"
 
-ChooseOfflineNameDialog::ChooseOfflineNameDialog(const QString& message, QWidget* parent) : QDialog(parent), ui(new Ui::ChooseOfflineNameDialog)
+ChooseOfflineNameDialog::ChooseOfflineNameDialog(const QString& message, QWidget* parent)
+    : QDialog(parent), ui(new Ui::ChooseOfflineNameDialog)
 {
     ui->setupUi(this);
     ui->label->setText(message);

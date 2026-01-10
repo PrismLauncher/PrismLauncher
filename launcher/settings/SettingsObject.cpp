@@ -19,8 +19,8 @@
 #include "settings/OverrideSetting.h"
 #include "settings/Setting.h"
 
-#include <QVariant>
 #include <QDir>
+#include <QVariant>
 #include <utility>
 
 #ifdef Q_OS_MACOS
@@ -127,7 +127,8 @@ QString SettingsObject::getPathFromBookmark(const QString& id)
     }
 
     // there is no need to use bookmarks if the default value is used or the directory is within the data directory (already can access)
-    if (setting->get() == setting->defValue() || QDir(setting->get().toString()).absolutePath().startsWith(QDir::current().absolutePath())) {
+    if (setting->get() == setting->defValue() ||
+        QDir(setting->get().toString()).absolutePath().startsWith(QDir::current().absolutePath())) {
         return setting->get().toString();
     }
 

@@ -12,8 +12,8 @@ ViewLogWindow::ViewLogWindow(QWidget* parent)
     setWindowTitle(tr("View Launcher Logs"));
     setCentralWidget(m_page);
     setMinimumSize(m_page->size());
-    setContentsMargins(6, 6, 0, 6); // the "Other Logs" instance page has 6px padding on the right,
-                                    // to have equal padding in all directions in the dialog we add it to all other sides.
+    setContentsMargins(6, 6, 0, 6);  // the "Other Logs" instance page has 6px padding on the right,
+                                     // to have equal padding in all directions in the dialog we add it to all other sides.
     m_page->opened();
     show();
 }

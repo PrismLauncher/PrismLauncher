@@ -44,8 +44,8 @@
 
 #include <QDebug>
 
-#include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ChooseOfflineNameDialog.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/MSALoginDialog.h"
 
 #include "Application.h"

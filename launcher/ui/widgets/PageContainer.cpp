@@ -207,7 +207,8 @@ void PageContainer::addButtons(QLayout* buttons)
     m_layout->addLayout(buttons, 2, 1, 1, 2);
 }
 
-void PageContainer::useSidebarStyle(bool sidebar) {
+void PageContainer::useSidebarStyle(bool sidebar)
+{
     m_pageList->setProperty("_kde_side_panel_view", sidebar);
 }
 

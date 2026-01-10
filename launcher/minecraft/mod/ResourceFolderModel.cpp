@@ -394,7 +394,7 @@ bool ResourceFolderModel::update()
         },
         Qt::ConnectionType::QueuedConnection);
 
-    Task::Ptr preUpdate{createPreUpdateTask()};
+    Task::Ptr preUpdate{ createPreUpdateTask() };
 
     if (preUpdate != nullptr) {
         auto task = new SequentialTask("ResourceFolderModel::update");

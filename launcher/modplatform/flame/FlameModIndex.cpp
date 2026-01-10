@@ -156,7 +156,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
             break;
         default:
             ver_type = ModPlatform::IndexedVersionType::Unknown;
-	    break;
+            break;
     }
     file.version_type = ver_type;
 

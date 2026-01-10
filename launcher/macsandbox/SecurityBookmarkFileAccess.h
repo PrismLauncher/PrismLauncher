@@ -42,7 +42,8 @@ class SecurityBookmarkFileAccess {
     bool m_readOnly;
 
     NSURL* securityScopedBookmarkToNSURL(QByteArray& bookmark, bool& isStale);
-public:
+
+   public:
     /// \param readOnly A boolean indicating whether the bookmark should be read-only.
     SecurityBookmarkFileAccess(bool readOnly = false);
     ~SecurityBookmarkFileAccess();
@@ -86,4 +87,4 @@ public:
     bool isAccessingPath(const QString& path);
 };
 
-#endif //FILEACCESS_H
+#endif  // FILEACCESS_H

@@ -193,8 +193,8 @@ void ListModel::performPaginatedSearch()
     callbacks.on_succeed = [this](auto& doc) { searchRequestFinished(doc); };
     callbacks.on_fail = [this](QString reason, int) { searchRequestFailed(reason); };
     callbacks.on_abort = [this] {
-	qCritical() << "Search task aborted by an unknown reason!";
-	searchRequestFailed("Aborted");
+        qCritical() << "Search task aborted by an unknown reason!";
+        searchRequestFailed("Aborted");
     };
 
     auto netJob = api.searchProjects({ ModPlatform::ResourceType::Modpack, m_nextSearchOffset, m_currentSearchTerm, sort, m_filter->loaders,

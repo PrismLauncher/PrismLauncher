@@ -484,7 +484,7 @@ QStringList MinecraftInstance::getNativeJars()
     return nativeJars;
 }
 
-static QString replaceTokensIn(const QString &text, const QMap<QString, QString> &with)
+static QString replaceTokensIn(const QString& text, const QMap<QString, QString>& with)
 {
     // TODO: does this still work??
     QString result;
@@ -506,7 +506,6 @@ static QString replaceTokensIn(const QString &text, const QMap<QString, QString>
     return result;
 }
 
-
 QStringList MinecraftInstance::extraArguments()
 {
     auto list = BaseInstance::extraArguments();
@@ -521,7 +520,7 @@ QStringList MinecraftInstance::extraArguments()
     if (!addn.isEmpty()) {
         QMap<QString, QString> tokenMapping = makeProfileVarMapping(m_components->getProfile());
 
-        for (const QString &item : addn) {
+        for (const QString& item : addn) {
             list.append(replaceTokensIn(item, tokenMapping));
         }
     }
@@ -763,7 +762,6 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, Mine
             args_pattern += " --quickPlaySingleplayer " + targetToJoin->world;
         }
     }
-
 
     QMap<QString, QString> tokenMapping = makeProfileVarMapping(profile);
 

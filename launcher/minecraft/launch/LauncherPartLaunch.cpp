@@ -55,14 +55,14 @@ LauncherPartLaunch::LauncherPartLaunch(LaunchTask* parent)
     if (parent->instance()->settings()->get("CloseAfterLaunch").toBool()) {
         static const QRegularExpression s_settingUser(".*Setting user.+", QRegularExpression::CaseInsensitiveOption);
         std::shared_ptr<QMetaObject::Connection> connection{ new QMetaObject::Connection };
-        *connection = connect(&m_process, &LoggedProcess::log, this,
-                              [connection](const QStringList& lines, [[maybe_unused]] MessageLevel level) {
-                                  qDebug() << lines;
-                                  if (lines.filter(s_settingUser).length() != 0) {
-                                      APPLICATION->closeAllWindows();
-                                      disconnect(*connection);
-                                  }
-                              });
+        *connection =
+            connect(&m_process, &LoggedProcess::log, this, [connection](const QStringList& lines, [[maybe_unused]] MessageLevel level) {
+                qDebug() << lines;
+                if (lines.filter(s_settingUser).length() != 0) {
+                    APPLICATION->closeAllWindows();
+                    disconnect(*connection);
+                }
+            });
     }
 
     connect(&m_process, &LoggedProcess::log, this, &LauncherPartLaunch::logLines);

@@ -91,7 +91,6 @@ struct IndexedVersionType {
     Enum m_type;
 };
 
-
 struct Dependency {
     QVariant addonId;
     DependencyType type;
@@ -121,8 +120,7 @@ struct IndexedVersion {
 
     QString getVersionDisplayString() const
     {
-        auto release_type =
-            version_type.isValid() ? QString(" [%1]").arg(version_type.toString()) : "";
+        auto release_type = version_type.isValid() ? QString(" [%1]").arg(version_type.toString()) : "";
         auto versionStr = !version.contains(version_number) ? version_number : "";
         QString gameVersion = "";
         for (auto v : mcVersion) {

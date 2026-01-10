@@ -91,14 +91,14 @@ Modpack parseDirectory(QString path)
                     modpack.loaderType = ModPlatform::Quilt;
                 }
             }
-        } else {            
+        } else {
             legacyInstanceParsing(path, &modpack.loaderType, &modpack.loaderVersion);
         }
     } catch (const Exception& e) {
         qDebug() << "Couldn't load ftb instance json: " << e.cause();
         return {};
     }
-    
+
     auto iconFile = QFileInfo(FS::PathCombine(path, "folder.jpg"));
     if (iconFile.exists() && iconFile.isFile()) {
         modpack.icon = QIcon(iconFile.absoluteFilePath());
@@ -145,12 +145,9 @@ void legacyInstanceParsing(QString path, std::optional<ModPlatform::ModLoaderTyp
                 break;
             }
         }
-    }
-    catch (const Exception& e)
-    {
+    } catch (const Exception& e) {
         qDebug() << "Couldn't load ftb version json: " << e.cause();
         return;
     }
 }
 }  // namespace FTBImportAPP
-
