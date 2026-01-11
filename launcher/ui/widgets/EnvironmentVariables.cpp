@@ -96,8 +96,6 @@ void EnvironmentVariables::retranslate()
 
 bool EnvironmentVariables::override() const
 {
-    if (!ui->overrideCheckBox->isVisible())
-        return false;
     return ui->overrideCheckBox->isChecked();
 }
 

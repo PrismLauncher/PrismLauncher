@@ -106,8 +106,8 @@ QVariant ModModel::getInstalledPackVersion(ModPlatform::IndexedPack::Ptr pack) c
 
 bool checkSide(ModPlatform::Side filter, ModPlatform::Side value)
 {
-    return filter == ModPlatform::Side::NoSide || value == ModPlatform::Side::NoSide || filter == ModPlatform::Side::UniversalSide ||
-           value == ModPlatform::Side::UniversalSide || filter == value;
+    return (filter != ModPlatform::Side::ClientSide && filter != ModPlatform::Side::ServerSide) ||
+           (value != ModPlatform::Side::ClientSide && value != ModPlatform::Side::ServerSide) || filter == value;
 }
 
 bool ModModel::checkFilters(ModPlatform::IndexedPack::Ptr pack)

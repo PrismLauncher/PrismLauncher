@@ -65,8 +65,6 @@ void CustomCommands::retranslate()
 
 bool CustomCommands::checked() const
 {
-    if (!ui->overrideCheckBox->isVisible())
-        return true;
     return ui->overrideCheckBox->isChecked();
 }
 

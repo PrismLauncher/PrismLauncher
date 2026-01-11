@@ -35,7 +35,13 @@ LocalResourceUpdateTask::LocalResourceUpdateTask(QDir index_dir, ModPlatform::In
     }
 
 #ifdef Q_OS_WIN32
-    SetFileAttributesW(index_dir.path().toStdWString().c_str(), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
+    std::wstring wpath = index_dir.path().toStdWString();
+    if (index_dir.dirName().startsWith('.')) {
+        SetFileAttributesW(wpath.c_str(), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
+    } else {
+        // fix shaderpacks folder being hidden by Prism Launcher 10.0.1
+        SetFileAttributesW(wpath.c_str(), FILE_ATTRIBUTE_NORMAL);
+    }
 #endif
 }
 

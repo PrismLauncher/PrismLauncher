@@ -169,9 +169,11 @@ void NetRequest::downloadError(QNetworkReply::NetworkError error)
             }
         }
         // error happened during download.
-        qCCritical(logCat) << getUid().toString() << "Failed" << m_url.toString() << "with reason" << error;
+        qCCritical(logCat) << getUid().toString() << "Failed" << m_url.toString() << "with error" << error;
         if (m_reply)
-            qCCritical(logCat) << getUid().toString() << "HTTP Status" << replyStatusCode() << ";error" << errorString();
+            qCCritical(logCat) << getUid().toString() << "HTTP status:" << replyStatusCode() << errorString();
+        if (m_errorResponse.size() > 0)
+            qCCritical(logCat) << getUid().toString() << "Response from server:" << m_errorResponse;
         m_state = State::Failed;
     }
 }
@@ -308,6 +310,9 @@ void NetRequest::downloadReadyRead()
     if (m_state == State::Running) {
         auto data = m_reply->readAll();
         m_state = m_sink->write(data);
+        if (replyStatusCode() >= 400) {
+            m_errorResponse.append(data);
+        }
         if (m_state == State::Failed) {
             qCCritical(logCat) << getUid().toString() << "Failed to process response chunk:" << m_sink->failReason();
         }
