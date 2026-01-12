@@ -272,5 +272,5 @@ void MSADeviceCodeStep::authenticationFinished()
     m_data->msaToken.extra = rsp.extra;
     m_data->msaToken.refresh_token = rsp.refresh_token;
     m_data->msaToken.token = rsp.access_token;
-    emit finished(AccountTaskState::STATE_WORKING, tr("Got"));
+    emit finished(AccountTaskState::STATE_WORKING, tr("Got MSA token"));
 }

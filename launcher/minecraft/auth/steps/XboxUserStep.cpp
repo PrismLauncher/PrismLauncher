@@ -48,7 +48,7 @@ void XboxUserStep::perform()
     connect(m_task.get(), &Task::finished, this, &XboxUserStep::onRequestDone);
 
     m_task->start();
-    qDebug() << "First layer of XBox auth ... commencing.";
+    qDebug() << "First layer of Xbox auth ... commencing.";
 }
 
 void XboxUserStep::onRequestDone()
@@ -56,9 +56,9 @@ void XboxUserStep::onRequestDone()
     if (m_request->error() != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << m_request->error();
         if (Net::isApplicationError(m_request->error())) {
-            emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("XBox user authentication failed: %1").arg(m_request->errorString()));
+            emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("Xbox user authentication failed: %1").arg(m_request->errorString()));
         } else {
-            emit finished(AccountTaskState::STATE_OFFLINE, tr("XBox user authentication failed: %1").arg(m_request->errorString()));
+            emit finished(AccountTaskState::STATE_OFFLINE, tr("Xbox user authentication failed: %1").arg(m_request->errorString()));
         }
         return;
     }
@@ -66,7 +66,7 @@ void XboxUserStep::onRequestDone()
     Token temp;
     if (!Parsers::parseXTokenResponse(*m_response, temp, "UToken")) {
         qWarning() << "Could not parse user authentication response...";
-        emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("XBox user authentication response could not be understood."));
+        emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("Xbox user authentication response could not be understood."));
         return;
     }
     m_data->userToken = temp;

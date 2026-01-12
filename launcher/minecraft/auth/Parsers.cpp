@@ -75,7 +75,7 @@ bool getBool(QJsonValue value, bool& out)
     "Message":"",
     "Redirect":"https://start.ui.xboxlive.com/AddChildToFamily"
 }
-// 2148916233 = missing XBox account
+// 2148916233 = missing Xbox account
 // 2148916238 = child account not linked to a family
 */
 

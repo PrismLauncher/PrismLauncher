@@ -60,7 +60,7 @@ void XboxProfileStep::onRequestDone()
         return;
     }
 
-    qCDebug(authCredentials()) << "XBox profile: " << *m_response;
+    qCDebug(authCredentials()) << "Xbox profile: " << *m_response;
 
     emit finished(AccountTaskState::STATE_WORKING, tr("Got Xbox profile"));
 }

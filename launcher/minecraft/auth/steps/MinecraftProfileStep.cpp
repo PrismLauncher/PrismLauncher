@@ -66,5 +66,5 @@ void MinecraftProfileStep::onRequestDone()
         return;
     }
 
-    emit finished(AccountTaskState::STATE_WORKING, tr("Minecraft Java profile acquisition succeeded."));
+    emit finished(AccountTaskState::STATE_WORKING, tr("Got Minecraft profile"));
 }

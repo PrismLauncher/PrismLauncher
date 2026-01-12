@@ -116,7 +116,7 @@ MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(sile
         m_data->msaToken.extra = m_oauth2.extraTokens();
         m_data->msaToken.refresh_token = m_oauth2.refreshToken();
         m_data->msaToken.token = m_oauth2.token();
-        emit finished(AccountTaskState::STATE_WORKING, tr("Got "));
+        emit finished(AccountTaskState::STATE_WORKING, tr("Got MSA token"));
     });
     connect(&m_oauth2, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, this, &MSAStep::authorizeWithBrowser);
     connect(&m_oauth2, &QOAuth2AuthorizationCodeFlow::requestFailed, this, [this, silent](const QAbstractOAuth2::Error err) {
