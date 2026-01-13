@@ -1,7 +1,10 @@
+FormatStyle: file
+
 Checks:
   'bugprone-*,clang-analyzer-*,cppcoreguidelines-*,hicpp-*,misc-*,modernize-*,performance-*,portability-*,readability-*,
   -cppcoreguidelines-owning-memory,
   -cppcoreguidelines-pro-type-static-cast-downcast,
+  -cppcoreguidelines-special-member-functions,
   -misc-non-private-member-variables-in-classes,
   -modernize-use-nodiscard,
   -modernize-use-trailing-return-type,
