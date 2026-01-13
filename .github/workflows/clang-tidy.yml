@@ -68,7 +68,7 @@ jobs:
       - name: Install clang-tidy-sarif
         run: |
           cargo install clang-tidy-sarif sarif-fmt
-          
+
       - name: Collect files to analyze
         id: collect-files
         env:
@@ -89,7 +89,7 @@ jobs:
           if [ -n "$FILES" ]; then
             echo "HAS_FILES=true" >> "$GITHUB_OUTPUT"
             nix develop --command bash -c "
-              echo "$FILES" | xargs clang-tidy -p=. --fix-errors --quiet --warnings-as-errors='*' | tee clang-tidy-output.txt
+              echo "$FILES" | xargs clang-tidy -p=. --quiet --warnings-as-errors='*' | tee clang-tidy-output.txt
             "
           else
             echo "HAS_FILES=false" >> "$GITHUB_OUTPUT"
