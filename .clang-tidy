@@ -2,6 +2,7 @@ FormatStyle: file
 
 Checks:
   'bugprone-*,clang-analyzer-*,cppcoreguidelines-*,hicpp-*,misc-*,modernize-*,performance-*,portability-*,readability-*,
+  -*-magic-numbers,
   -*-non-private-member-variables-in-classes,
   -*-special-member-functions,
   -cppcoreguidelines-owning-memory,
