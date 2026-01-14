@@ -11,6 +11,7 @@
 #include <QSpinBox>
 #include <QToolButton>
 #include <QVBoxLayout>
+#include <QCheckBox>
 
 #include <sys.h>
 

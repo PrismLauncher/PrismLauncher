@@ -17,6 +17,7 @@ class QGridLayout;
 class QLabel;
 class QToolButton;
 class QSpacerItem;
+class QCheckBox;
 
 class JavaWizardWidget : public QWidget {
     Q_OBJECT
