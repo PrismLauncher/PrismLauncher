@@ -154,13 +154,11 @@ void InstanceImportTask::processZipPack()
             qDebug() << "Flame:" << true;
             m_modpackType = ModpackType::Flame;
             stop = true;
-            return true;
         } else if (QFileInfo fileInfo(fileName); fileInfo.fileName() == "instance.cfg") {
             qDebug() << "MultiMC:" << true;
             m_modpackType = ModpackType::MultiMC;
             root = cleanPath(fileInfo.path());
             stop = true;
-            return true;
         }
         QCoreApplication::processEvents();
         return true;

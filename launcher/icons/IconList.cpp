@@ -147,8 +147,7 @@ void IconList::directoryChanged(const QString& path)
 {
     QDir newDir(path);
     if (m_dir.absolutePath() != newDir.absolutePath()) {
-        if (!path.startsWith(m_dir.absolutePath()))
-            m_dir.setPath(path);
+        m_dir.setPath(path);
         m_dir.refresh();
         if (m_isWatching)
             stopWatching();

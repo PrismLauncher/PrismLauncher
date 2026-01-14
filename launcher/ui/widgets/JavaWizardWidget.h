@@ -6,6 +6,7 @@
 #include <java/JavaChecker.h>
 #include <QIcon>
 
+class QCheckBox;
 class QLineEdit;
 class VersionSelectWidget;
 class QSpinBox;

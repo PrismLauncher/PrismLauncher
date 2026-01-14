@@ -1,5 +1,6 @@
 #include "JavaWizardWidget.h"
 
+#include <QCheckBox>
 #include <QFileDialog>
 #include <QGroupBox>
 #include <QLabel>

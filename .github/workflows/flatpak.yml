@@ -82,8 +82,15 @@ jobs:
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.10
       options: --privileged
+      volumes:
+        - /opt/hostedtoolcache:/hostedtoolcache
 
     steps:
+      - name: Free up disk space
+        shell: bash
+        run: |
+          rm -rf /hostedtoolcache/*
+
       - name: Checkout repository
         uses: actions/checkout@v6
         with:

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>711</height>
+    <height>583</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -80,7 +80,7 @@
            </sizepolicy>
           </property>
           <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
+           <enum>Qt::FocusPolicy::StrongFocus</enum>
           </property>
          </widget>
         </item>
@@ -93,7 +93,7 @@
            </sizepolicy>
           </property>
           <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
+           <enum>Qt::FocusPolicy::StrongFocus</enum>
           </property>
          </widget>
         </item>
@@ -175,7 +175,7 @@
         <item>
          <spacer name="horizontalSpacer_2">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -190,10 +190,10 @@
       <item>
        <spacer name="verticalSpacer_2">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
         <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
+         <enum>QSizePolicy::Policy::Fixed</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -268,7 +268,7 @@
          <item row="3" column="2">
           <spacer name="horizontalSpacer_4">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Horizontal</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -300,7 +300,7 @@
             <number>100</number>
            </property>
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Horizontal</enum>
            </property>
           </widget>
          </item>
@@ -310,10 +310,10 @@
       <item>
        <spacer name="verticalSpacer">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
         <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
+         <enum>QSizePolicy::Policy::Fixed</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -346,8 +346,8 @@
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>77</width>
-          <height>30</height>
+          <width>81</width>
+          <height>32</height>
          </size>
         </property>
         <property name="currentIndex">
@@ -390,15 +390,15 @@
            </sizepolicy>
           </property>
           <property name="focusPolicy">
-           <enum>Qt::NoFocus</enum>
+           <enum>Qt::FocusPolicy::NoFocus</enum>
           </property>
           <property name="text">
            <string/>
           </property>
           <property name="iconSize">
            <size>
-            <width>128</width>
-            <height>256</height>
+            <width>64</width>
+            <height>128</height>
            </size>
           </property>
           <property name="flat">
@@ -413,7 +413,7 @@
             <item>
              <widget class="QPushButton" name="icon1">
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string/>
@@ -429,7 +429,7 @@
             <item>
              <widget class="QPushButton" name="icon2">
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string/>
@@ -445,7 +445,7 @@
             <item>
              <widget class="QPushButton" name="icon3">
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string/>
@@ -461,7 +461,7 @@
             <item>
              <widget class="QPushButton" name="icon4">
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string/>
@@ -477,7 +477,7 @@
             <item>
              <widget class="QPushButton" name="icon5">
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string/>
@@ -493,7 +493,7 @@
             <item>
              <widget class="QPushButton" name="icon6">
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string/>
@@ -509,7 +509,7 @@
             <item>
              <widget class="QPushButton" name="icon7">
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string/>
@@ -525,7 +525,7 @@
             <item>
              <widget class="QPushButton" name="icon8">
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string/>
@@ -541,7 +541,7 @@
             <item>
              <widget class="QPushButton" name="icon9">
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string/>
@@ -557,7 +557,7 @@
             <item>
              <widget class="QPushButton" name="icon10">
               <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
+               <enum>Qt::FocusPolicy::NoFocus</enum>
               </property>
               <property name="text">
                <string/>
@@ -573,7 +573,7 @@
             <item>
              <spacer name="horizontalSpacer">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -588,19 +588,19 @@
           <item>
            <widget class="QTextEdit" name="consolePreview">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="horizontalScrollBarPolicy">
-             <enum>Qt::ScrollBarAsNeeded</enum>
+             <enum>Qt::ScrollBarPolicy::ScrollBarAsNeeded</enum>
             </property>
             <property name="undoRedoEnabled">
              <bool>false</bool>
             </property>
             <property name="textInteractionFlags">
-             <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+             <set>Qt::TextInteractionFlag::TextSelectableByKeyboard|Qt::TextInteractionFlag::TextSelectableByMouse</set>
             </property>
            </widget>
           </item>

@@ -151,7 +151,7 @@ bool ArchiveReader::File::writeFile(archive* out, QString targetFileName, bool n
     auto r = archive_write_finish_entry(out);
     if (r < ARCHIVE_OK)
         qCritical() << "Failed to finish writing entry:" << archive_error_string(out);
-    return (r > ARCHIVE_WARN);
+    return (r >= ARCHIVE_WARN);
 }
 
 bool ArchiveReader::parse(std::function<bool(File*, bool&)> doStuff)
@@ -180,6 +180,7 @@ bool ArchiveReader::parse(std::function<bool(File*, bool&)> doStuff)
     archive_read_close(a);
     return true;
 }
+
 bool ArchiveReader::parse(std::function<bool(File*)> doStuff)
 {
     return parse([doStuff](File* f, bool&) { return doStuff(f); });

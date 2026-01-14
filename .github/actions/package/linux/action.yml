@@ -78,6 +78,8 @@ runs:
         # FIXME(@getchoo): gamemode doesn't seem to be very portable with DBus. Find a way to make it work!
         find "$INSTALL_APPIMAGE_DIR" -name '*gamemode*' -exec rm {} +
 
+        #makes the launcher use portals for file picking
+        echo "QT_QPA_PLATFORMTHEME=xdgdesktopportal" > "$INSTALL_APPIMAGE_DIR"/.env
         ln -s org.prismlauncher.PrismLauncher.metainfo.xml "$INSTALL_APPIMAGE_DIR"/share/metainfo/org.prismlauncher.PrismLauncher.appdata.xml
         ln -s share/applications/org.prismlauncher.PrismLauncher.desktop "$INSTALL_APPIMAGE_DIR"
         ln -s share/icons/hicolor/256x256/apps/org.prismlauncher.PrismLauncher.png "$INSTALL_APPIMAGE_DIR"
