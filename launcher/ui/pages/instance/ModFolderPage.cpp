@@ -86,7 +86,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
 
     connect(ui->actionDownloadItem, &QAction::triggered, this, &ModFolderPage::downloadMods);
 
-    ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
+    ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (root mods if none are selected)"));
     connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
     ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
 
@@ -159,6 +159,8 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
     };
     connect(selectionModel, &QItemSelectionModel::selectionChanged, this, updateExtra);
     connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &ModFolderPage::updateActions);
+
+    updateActions();
 }
 
 bool ModFolderPage::shouldDisplay() const
@@ -179,6 +181,64 @@ QList<Resource*> ModFolderPage::selectedResources() const
 QList<Mod*> ModFolderPage::selectedMods() const
 {
     return m_treeModel->modsFromIndexes(selectedSourceIndexes());
+}
+
+QList<Resource*> ModFolderPage::rootResourcesForUpdate() const
+{
+    QList<Resource*> resources;
+    QSet<QString> seen;
+    const auto rootPath = m_model->dir().absolutePath();
+    for (auto* resource : m_model->allResources()) {
+        if (resource->fileinfo().absolutePath() != rootPath) {
+            continue;
+        }
+        if (seen.contains(resource->internal_id())) {
+            continue;
+        }
+        seen.insert(resource->internal_id());
+        resources.append(resource);
+    }
+    return resources;
+}
+
+QList<Resource*> ModFolderPage::resourcesForUpdateSelection(const QModelIndexList& sourceIndexes) const
+{
+    if (sourceIndexes.isEmpty()) {
+        return rootResourcesForUpdate();
+    }
+
+    QList<Resource*> resources;
+    QSet<QString> seen;
+    auto addResource = [&resources, &seen](Resource* resource) {
+        if (!resource) {
+            return;
+        }
+        if (seen.contains(resource->internal_id())) {
+            return;
+        }
+        seen.insert(resource->internal_id());
+        resources.append(resource);
+    };
+
+    for (auto* resource : m_treeModel->resourcesFromIndexes(sourceIndexes)) {
+        addResource(resource);
+    }
+
+    for (const auto& index : sourceIndexes) {
+        if (index.column() != 0) {
+            continue;
+        }
+        if (!m_treeModel->isFolderIndex(index)) {
+            continue;
+        }
+        const int rowCount = m_treeModel->rowCount(index);
+        for (int row = 0; row < rowCount; ++row) {
+            auto childIndex = m_treeModel->index(row, 0, index);
+            addResource(m_treeModel->resourceForIndex(childIndex));
+        }
+    }
+
+    return resources;
 }
 
 QStringList ModFolderPage::topLevelFolderPaths(const QModelIndexList& sourceIndexes) const
@@ -275,6 +335,12 @@ void ModFolderPage::updateActions()
                                        std::any_of(selectedResources.begin(), selectedResources.end(),
                                                    [](Resource* resource) { return resource && !resource->homepage().isEmpty(); }));
     ui->actionExportMetadata->setEnabled(!m_model->empty());
+
+    if (m_treeModel->hasFolderNodes()) {
+        ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (root mods only unless folders/mods are selected)"));
+    } else {
+        ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
+    }
 
     if (m_newFolderAction) {
         m_newFolderAction->setEnabled(m_instance && m_instance->typeName() == "Minecraft");
@@ -513,9 +579,10 @@ void ModFolderPage::updateMods(bool includeDeps)
     }
     auto selection = selectedSourceIndexes();
     const bool useAll = selection.isEmpty();
-    auto modsList = m_treeModel->resourcesFromIndexes(selection);
-    if (useAll) {
-        modsList = m_model->allResources();
+    auto modsList = resourcesForUpdateSelection(selection);
+    if (modsList.isEmpty()) {
+        CustomMessageBox::selectable(this, tr("Update checker"), tr("No mods selected for update."))->exec();
+        return;
     }
 
     ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoadersList());
@@ -529,7 +596,7 @@ void ModFolderPage::updateMods(bool includeDeps)
         QString message{ tr("'%1' is up-to-date! :)").arg(modsList.front()->name()) };
         if (modsList.size() > 1) {
             if (useAll) {
-                message = tr("All mods are up-to-date! :)");
+                message = tr("All root mods are up-to-date! :)");
             } else {
                 message = tr("All selected mods are up-to-date! :)");
             }

@@ -85,6 +85,8 @@ class ModFolderPage : public ExternalResourcesPage {
     QModelIndexList selectedSourceIndexes() const;
     QList<Resource*> selectedResources() const;
     QList<Mod*> selectedMods() const;
+    QList<Resource*> rootResourcesForUpdate() const;
+    QList<Resource*> resourcesForUpdateSelection(const QModelIndexList& sourceIndexes) const;
     QStringList topLevelFolderPaths(const QModelIndexList& sourceIndexes) const;
     void showFolderRemovalErrors(const QStringList& failedFolders);
 

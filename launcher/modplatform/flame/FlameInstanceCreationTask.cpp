@@ -36,6 +36,7 @@
 #include "FlameInstanceCreationTask.h"
 
 #include "QObjectPtr.h"
+#include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/FlameAPI.h"
@@ -63,6 +64,8 @@
 #include <QDebug>
 #include <QDirIterator>
 #include <QFileInfo>
+#include <QSet>
+#include <algorithm>
 
 #include "meta/Index.h"
 #include "minecraft/World.h"
@@ -93,6 +96,24 @@ QString applyModsSubdir(const QString& path, const QString& subdir_name)
 bool isModsPath(const QString& path)
 {
     return path == QStringLiteral("mods") || path.startsWith(QStringLiteral("mods/"));
+}
+
+void removeMetadataForFiles(const QDir& indexDir, const QSet<QString>& fileNames)
+{
+    if (!indexDir.exists() || fileNames.isEmpty()) {
+        return;
+    }
+
+    const auto entries = indexDir.entryList({ "*.pw.toml" }, QDir::Files);
+    for (const auto& entry : entries) {
+        auto metadata = Metadata::get(indexDir, entry);
+        if (!metadata.isValid()) {
+            continue;
+        }
+        if (fileNames.contains(metadata.filename)) {
+            Metadata::remove(indexDir, entry);
+        }
+    }
 }
 }  // namespace
 
@@ -137,15 +158,14 @@ bool FlameCreationTask::updateInstance()
     auto inst_settings = inst->settings();
     m_useModsSubdir = inst_settings->get("ManagedPackUseModsSubdir").toBool();
     m_modsSubdirName = inst_settings->get("ManagedPackModsSubdirName").toString();
-    if (m_useModsSubdir) {
-        if (m_modsSubdirName.isEmpty()) {
-            auto fallback_name = inst->getManagedPackName();
-            if (fallback_name.isEmpty())
-                fallback_name = inst->name();
-            m_modsSubdirName = sanitizeFlameSubdirName(fallback_name);
-        } else {
-            m_modsSubdirName = sanitizeFlameSubdirName(m_modsSubdirName);
-        }
+    if (!m_modsSubdirName.isEmpty()) {
+        m_modsSubdirName = sanitizeFlameSubdirName(m_modsSubdirName);
+    }
+    if (m_useModsSubdir && m_modsSubdirName.isEmpty()) {
+        auto fallbackName = inst->getManagedPackName();
+        if (fallbackName.isEmpty())
+            fallbackName = inst->name();
+        m_modsSubdirName = sanitizeFlameSubdirName(fallbackName);
     }
 
     QString index_path(FS::PathCombine(m_stagingPath, "manifest.json"));
@@ -170,14 +190,22 @@ bool FlameCreationTask::updateInstance()
         }
     }
 
-    const bool use_mods_subdir = m_useModsSubdir && !m_modsSubdirName.isEmpty();
-    if (use_mods_subdir) {
-        auto mods_subdir_path = FS::PathCombine(inst->gameRoot(), "mods", m_modsSubdirName);
-        if (QFileInfo::exists(mods_subdir_path)) {
-            qDebug() << "Removing Flame mods subfolder:" << mods_subdir_path;
-            if (!FS::deletePath(mods_subdir_path)) {
-                logWarning(tr("Failed to remove existing mods subfolder: %1").arg(mods_subdir_path));
+    const bool useModsSubdir = m_useModsSubdir && !m_modsSubdirName.isEmpty();
+    const auto modsSubdirPath = FS::PathCombine(inst->gameRoot(), "mods", m_modsSubdirName);
+    const bool hadModsSubdir = !m_modsSubdirName.isEmpty() && QFileInfo::exists(modsSubdirPath);
+    const bool relocatingMods = hadModsSubdir != useModsSubdir;
+    const bool skipModsRemoval = useModsSubdir && hadModsSubdir;
+    if (useModsSubdir) {
+        if (QFileInfo::exists(modsSubdirPath)) {
+            qDebug() << "Removing Flame mods subfolder:" << modsSubdirPath;
+            if (!FS::deletePath(modsSubdirPath)) {
+                logWarning(tr("Failed to remove existing mods subfolder: %1").arg(modsSubdirPath));
             }
+        }
+    } else if (hadModsSubdir) {
+        qDebug() << "Removing Flame mods subfolder:" << modsSubdirPath;
+        if (!FS::deletePath(modsSubdirPath)) {
+            logWarning(tr("Failed to remove existing mods subfolder: %1").arg(modsSubdirPath));
         }
     }
 
@@ -195,7 +223,7 @@ bool FlameCreationTask::updateInstance()
 
         auto& files = m_pack.files;
 
-        if (use_mods_subdir) {
+        if (skipModsRemoval) {
             QMutableMapIterator<int, Flame::File> old_files_it(old_files);
             while (old_files_it.hasNext()) {
                 old_files_it.next();
@@ -208,6 +236,11 @@ bool FlameCreationTask::updateInstance()
         auto files_iterator = files.begin();
         while (files_iterator != files.end()) {
             auto const& file = files_iterator;
+
+            if (relocatingMods && isModsPath(file.value().targetFolder)) {
+                files_iterator++;
+                continue;
+            }
 
             auto old_file = old_files.find(file.key());
             if (old_file != old_files.end()) {
@@ -235,7 +268,7 @@ bool FlameCreationTask::updateInstance()
         for (const auto& entry : old_overrides) {
             if (entry.isEmpty())
                 continue;
-            if (use_mods_subdir && isModsPath(entry))
+            if (skipModsRemoval && isModsPath(entry))
                 continue;
             qDebug() << "Scheduling" << entry << "for removal";
             m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
@@ -253,7 +286,8 @@ bool FlameCreationTask::updateInstance()
 
         QEventLoop loop;
 
-        connect(job.get(), &Task::succeeded, this, [this, raw_response, fileIds, old_inst_dir, &old_files, old_minecraft_dir] {
+        connect(job.get(), &Task::succeeded,
+                this, [this, raw_response, fileIds, old_inst_dir, &old_files, old_minecraft_dir, relocatingMods, useModsSubdir] {
             // Parse the API response
             QJsonParseError parse_error{};
             auto doc = QJsonDocument::fromJson(*raw_response, &parse_error);
@@ -282,6 +316,24 @@ bool FlameCreationTask::updateInstance()
                 }
             } catch (Json::JsonException& e) {
                 qCritical() << e.cause() << e.what();
+            }
+
+            if (relocatingMods && useModsSubdir) {
+                QSet<QString> modFileNames;
+                for (auto& file : old_files) {
+                    if (!isModsPath(file.targetFolder)) {
+                        continue;
+                    }
+                    if (file.version.fileName.isEmpty()) {
+                        continue;
+                    }
+                    modFileNames.insert(file.version.fileName);
+                    if (file.version.fileName.endsWith(".disabled", Qt::CaseInsensitive)) {
+                        modFileNames.insert(file.version.fileName.chopped(QString(".disabled").size()));
+                    }
+                }
+                QDir oldIndexDir(old_minecraft_dir.absoluteFilePath("mods/.index"));
+                removeMetadataForFiles(oldIndexDir, modFileNames);
             }
 
             // Delete the files
@@ -583,24 +635,28 @@ bool FlameCreationTask::createInstance()
     else
         instance.setManagedPack("flame", "", name(), "", "");
 
-    bool fabric_arg_added = false;
-    if (use_mods_subdir) {
+    bool fabricArgAdded = false;
+    bool fabricArgAlreadyPresent = false;
+    if (use_mods_subdir && !m_instance) {
         auto settings = instance.settings();
-        SettingsObjectPtr source_settings = settings;
-        if (m_instance)
-            source_settings = m_instance.value()->settings();
+        const bool overrideArgs = settings->get("OverrideJavaArgs").toBool();
+        const QString jvmArgs =
+            overrideArgs ? settings->get("JvmArgs").toString() : m_globalSettings->get("JvmArgs").toString();
+        QStringList args = Commandline::splitArgs(jvmArgs);
+        const bool hasArg = std::any_of(args.begin(), args.end(), [](const QString& arg) {
+            return arg.compare(FABRIC_ADD_MODS_ARG, Qt::CaseInsensitive) == 0;
+        });
 
-        bool override_args = source_settings->get("OverrideJavaArgs").toBool();
-        QString jvm_args = override_args ? source_settings->get("JvmArgs").toString() : m_globalSettings->get("JvmArgs").toString();
-        if (!Commandline::splitArgs(jvm_args).contains(FABRIC_ADD_MODS_ARG)) {
-            if (!jvm_args.trimmed().isEmpty())
-                jvm_args += " ";
-            jvm_args += FABRIC_ADD_MODS_ARG;
-            fabric_arg_added = true;
+        if (!hasArg) {
+            args.append(FABRIC_ADD_MODS_ARG);
+            fabricArgAdded = true;
+        } else {
+            fabricArgAlreadyPresent = true;
         }
-        if (override_args || fabric_arg_added) {
+
+        if (overrideArgs || fabricArgAdded) {
             settings->set("OverrideJavaArgs", true);
-            settings->set("JvmArgs", jvm_args);
+            settings->set("JvmArgs", args.join(' '));
         }
     }
 
@@ -635,11 +691,13 @@ bool FlameCreationTask::createInstance()
         inst->copyManagedPack(instance);
     }
 
-    if (did_succeed && use_mods_subdir) {
-        if (fabric_arg_added) {
+    if (did_succeed && use_mods_subdir && !m_instance) {
+        if (fabricArgAdded) {
             logWarning(tr("Recursive mods install is enabled. Added JVM arg -Dfabric.addMods=mods to this instance."));
-        } else {
+        } else if (fabricArgAlreadyPresent) {
             logWarning(tr("Recursive mods install is enabled. JVM arg -Dfabric.addMods=mods is already set for this instance."));
+        } else {
+            logWarning(tr("Recursive mods install is enabled. Please add JVM arg -Dfabric.addMods=mods to this instance."));
         }
     }
 

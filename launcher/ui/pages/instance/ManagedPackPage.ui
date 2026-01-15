@@ -169,6 +169,37 @@
       </layout>
      </item>
      <item>
+      <layout class="QVBoxLayout" name="modsSubdirLayout">
+       <item>
+        <widget class="QCheckBox" name="modsSubdirCheckBox">
+         <property name="text">
+          <string>Install mods into subfolder (Fabric only)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="modsSubdirWarningLabel">
+         <property name="text">
+          <string>Warning: advanced option, only enable if you know what you are doing.</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="modsSubdirJvmNoteLabel">
+         <property name="text">
+          <string>Note: requires JVM arg -Dfabric.addMods=mods.</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
       <widget class="QGroupBox" name="changelogBox">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">

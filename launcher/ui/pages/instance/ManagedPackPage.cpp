@@ -24,6 +24,9 @@
 #include "Markdown.h"
 #include "StringUtils.h"
 
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
+
 #include "ui/InstanceWindow.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -94,6 +97,9 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
     Q_ASSERT(inst);
 
     ui->setupUi(this);
+    ui->modsSubdirCheckBox->setVisible(false);
+    ui->modsSubdirWarningLabel->setVisible(false);
+    ui->modsSubdirJvmNoteLabel->setVisible(false);
 
     // NOTE: GTK2 themes crash with the proxy style.
     // This seems like an upstream bug, so there's not much else that can be done.
@@ -123,6 +129,13 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
         }
         QDesktopServices::openUrl(url);
     });
+
+    connect(ui->modsSubdirCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        if (!ui->modsSubdirCheckBox->isVisible()) {
+            return;
+        }
+        ui->modsSubdirJvmNoteLabel->setVisible(checked);
+    });
 }
 
 ManagedPackPage::~ManagedPackPage()
@@ -132,6 +145,8 @@ ManagedPackPage::~ManagedPackPage()
 
 void ManagedPackPage::openedImpl()
 {
+    syncModsSubdirControls();
+
     if (m_inst->getManagedPackID().isEmpty()) {
         ui->packVersion->hide();
         ui->packVersionLabel->hide();
@@ -215,6 +230,51 @@ void ManagedPackPage::suggestVersion()
 {
     ui->updateButton->setText(tr("Update Pack"));
     ui->updateButton->setDisabled(false);
+}
+
+void ManagedPackPage::syncModsSubdirControls()
+{
+    const auto type = m_inst->getManagedPackType();
+    const bool show = (type == "modrinth" || type == "flame") && isFabricOnlyInstance();
+    ui->modsSubdirCheckBox->setVisible(show);
+    ui->modsSubdirWarningLabel->setVisible(show);
+    ui->modsSubdirJvmNoteLabel->setVisible(show && ui->modsSubdirCheckBox->isChecked());
+    if (show) {
+        const QSignalBlocker blocker(ui->modsSubdirCheckBox);
+        ui->modsSubdirCheckBox->setChecked(m_inst->settings()->get("ManagedPackUseModsSubdir").toBool());
+        ui->modsSubdirJvmNoteLabel->setVisible(ui->modsSubdirCheckBox->isChecked());
+    }
+}
+
+void ManagedPackPage::applyModsSubdirSelection()
+{
+    if (!ui->modsSubdirCheckBox->isVisible()) {
+        return;
+    }
+
+    m_inst->settings()->set("ManagedPackUseModsSubdir", ui->modsSubdirCheckBox->isChecked());
+}
+
+bool ManagedPackPage::isFabricOnlyInstance() const
+{
+    auto* mcInstance = dynamic_cast<MinecraftInstance*>(m_inst);
+    if (!mcInstance) {
+        return false;
+    }
+    auto profile = mcInstance->getPackProfile();
+    if (!profile) {
+        return false;
+    }
+    auto loaders = profile->getModLoadersList();
+    if (!loaders.contains(ModPlatform::Fabric)) {
+        return false;
+    }
+    for (const auto loader : loaders) {
+        if (loader != ModPlatform::Fabric) {
+            return false;
+        }
+    }
+    return true;
 }
 
 void ManagedPackPage::setFailState()
@@ -339,6 +399,8 @@ void ManagedPackPage::onUpdateTaskCompleted(bool did_succeed) const
 
 void ModrinthManagedPackPage::update()
 {
+    applyModsSubdirSelection();
+
     auto index = ui->versionsComboBox->currentIndex();
     if (m_pack.versions.length() == 0) {
         setFailState();
@@ -369,6 +431,8 @@ void ModrinthManagedPackPage::update()
 
 void ModrinthManagedPackPage::updateFromFile()
 {
+    applyModsSubdirSelection();
+
     auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), tr("Modrinth pack") + " (*.mrpack *.zip)");
     if (output.isEmpty())
         return;
@@ -487,6 +551,8 @@ void FlameManagedPackPage::suggestVersion()
 
 void FlameManagedPackPage::update()
 {
+    applyModsSubdirSelection();
+
     auto index = ui->versionsComboBox->currentIndex();
     if (m_pack.versions.length() == 0) {
         setFailState();
@@ -512,6 +578,8 @@ void FlameManagedPackPage::update()
 
 void FlameManagedPackPage::updateFromFile()
 {
+    applyModsSubdirSelection();
+
     auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), tr("CurseForge pack") + " (*.zip)");
     if (output.isEmpty())
         return;

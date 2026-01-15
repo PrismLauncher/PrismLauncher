@@ -79,6 +79,10 @@ class ManagedPackPage : public QWidget, public BasePage {
    protected:
     ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent = nullptr);
 
+    void syncModsSubdirControls();
+    void applyModsSubdirSelection();
+    bool isFabricOnlyInstance() const;
+
     /** Run the InstanceTask, with a progress dialog and all.
      *  Similar to MainWindow::instanceFromInstanceTask
      *

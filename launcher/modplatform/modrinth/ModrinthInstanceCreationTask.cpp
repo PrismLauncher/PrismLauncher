@@ -10,6 +10,7 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
+#include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/Mod.h"
 #include "modplatform/EnsureMetadataTask.h"
 #include "modplatform/helpers/OverrideUtils.h"
@@ -27,6 +28,7 @@
 #include <QDirIterator>
 #include <QFileInfo>
 #include <QHash>
+#include <QSet>
 #include <algorithm>
 #include <vector>
 
@@ -55,6 +57,24 @@ QString applyModsSubdir(const QString& path, const QString& subdirName)
 bool isModsPath(const QString& path)
 {
     return path.startsWith(QStringLiteral("mods/"));
+}
+
+void removeMetadataForFiles(const QDir& indexDir, const QSet<QString>& fileNames)
+{
+    if (!indexDir.exists() || fileNames.isEmpty()) {
+        return;
+    }
+
+    const auto entries = indexDir.entryList({ "*.pw.toml" }, QDir::Files);
+    for (const auto& entry : entries) {
+        auto metadata = Metadata::get(indexDir, entry);
+        if (!metadata.isValid()) {
+            continue;
+        }
+        if (fileNames.contains(metadata.filename)) {
+            Metadata::remove(indexDir, entry);
+        }
+    }
 }
 }  // namespace
 
@@ -95,16 +115,15 @@ bool ModrinthCreationTask::updateInstance()
     auto inst_settings = inst->settings();
     m_useModsSubdir = inst_settings->get("ManagedPackUseModsSubdir").toBool();
     m_modsSubdirName = inst_settings->get("ManagedPackModsSubdirName").toString();
-    if (m_useModsSubdir) {
-        if (m_modsSubdirName.isEmpty()) {
-            auto fallbackName = inst->getManagedPackName();
-            if (fallbackName.isEmpty()) {
-                fallbackName = inst->name();
-            }
-            m_modsSubdirName = sanitizeModrinthSubdirName(fallbackName);
-        } else {
-            m_modsSubdirName = sanitizeModrinthSubdirName(m_modsSubdirName);
+    if (!m_modsSubdirName.isEmpty()) {
+        m_modsSubdirName = sanitizeModrinthSubdirName(m_modsSubdirName);
+    }
+    if (m_useModsSubdir && m_modsSubdirName.isEmpty()) {
+        auto fallbackName = inst->getManagedPackName();
+        if (fallbackName.isEmpty()) {
+            fallbackName = inst->name();
         }
+        m_modsSubdirName = sanitizeModrinthSubdirName(fallbackName);
     }
 
     QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
@@ -128,13 +147,21 @@ bool ModrinthCreationTask::updateInstance()
     }
 
     const bool useModsSubdir = m_useModsSubdir && !m_modsSubdirName.isEmpty();
+    const auto modsSubdirPath = FS::PathCombine(inst->gameRoot(), "mods", m_modsSubdirName);
+    const bool hadModsSubdir = !m_modsSubdirName.isEmpty() && QFileInfo::exists(modsSubdirPath);
+    const bool relocatingMods = hadModsSubdir != useModsSubdir;
+    const bool skipModsRemoval = useModsSubdir && hadModsSubdir;
     if (useModsSubdir) {
-        auto modsSubdirPath = FS::PathCombine(inst->gameRoot(), "mods", m_modsSubdirName);
         if (QFileInfo::exists(modsSubdirPath)) {
             qDebug() << "Removing Modrinth mods subfolder:" << modsSubdirPath;
             if (!FS::deletePath(modsSubdirPath)) {
                 logWarning(tr("Failed to remove existing mods subfolder: %1").arg(modsSubdirPath));
             }
+        }
+    } else if (hadModsSubdir) {
+        qDebug() << "Removing Modrinth mods subfolder:" << modsSubdirPath;
+        if (!FS::deletePath(modsSubdirPath)) {
+            logWarning(tr("Failed to remove existing mods subfolder: %1").arg(modsSubdirPath));
         }
     }
 
@@ -149,7 +176,7 @@ bool ModrinthCreationTask::updateInstance()
         std::vector<File> old_files;
         parseManifest(old_index_path, old_files, false, false);
 
-        if (useModsSubdir) {
+        if (skipModsRemoval) {
             old_files.erase(std::remove_if(old_files.begin(), old_files.end(), [](const File& file) { return isModsPath(file.path); }),
                             old_files.end());
         }
@@ -159,6 +186,11 @@ bool ModrinthCreationTask::updateInstance()
     begin:
         while (files_iterator != m_files.end()) {
             auto const& file = *files_iterator;
+
+            if (relocatingMods && isModsPath(file.path)) {
+                files_iterator++;
+                continue;
+            }
 
             auto old_files_iterator = old_files.begin();
             while (old_files_iterator != old_files.end()) {
@@ -182,6 +214,21 @@ bool ModrinthCreationTask::updateInstance()
         // Some files were removed from the old version, and some will be downloaded in an updated version,
         // so we're fine removing them!
         if (!old_files.empty()) {
+            if (relocatingMods && useModsSubdir) {
+                QSet<QString> modFileNames;
+                for (const auto& file : old_files) {
+                    if (!isModsPath(file.path)) {
+                        continue;
+                    }
+                    auto fileName = QFileInfo(file.path).fileName();
+                    modFileNames.insert(fileName);
+                    if (fileName.endsWith(".disabled", Qt::CaseInsensitive)) {
+                        modFileNames.insert(fileName.chopped(QString(".disabled").size()));
+                    }
+                }
+                QDir oldIndexDir(old_minecraft_dir.absoluteFilePath("mods/.index"));
+                removeMetadataForFiles(oldIndexDir, modFileNames);
+            }
             for (auto const& file : old_files) {
                 if (file.path.isEmpty()) {
                     continue;
@@ -206,7 +253,7 @@ bool ModrinthCreationTask::updateInstance()
             if (entry.isEmpty()) {
                 continue;
             }
-            if (useModsSubdir && isModsPath(entry)) {
+            if (skipModsRemoval && isModsPath(entry)) {
                 continue;
             }
             qDebug() << "Scheduling" << entry << "for removal";
@@ -218,7 +265,7 @@ bool ModrinthCreationTask::updateInstance()
             if (entry.isEmpty()) {
                 continue;
             }
-            if (useModsSubdir && isModsPath(entry)) {
+            if (skipModsRemoval && isModsPath(entry)) {
                 continue;
             }
             qDebug() << "Scheduling" << entry << "for removal";
@@ -378,25 +425,27 @@ bool ModrinthCreationTask::createInstance()
     }
 
     bool fabricArgAdded = false;
-    if (useModsSubdir) {
+    bool fabricArgAlreadyPresent = false;
+    if (useModsSubdir && !m_instance) {
         auto settings = instance.settings();
-        SettingsObjectPtr sourceSettings = settings;
-        if (m_instance) {
-            sourceSettings = m_instance.value()->settings();
+        const bool overrideArgs = settings->get("OverrideJavaArgs").toBool();
+        const QString jvmArgs =
+            overrideArgs ? settings->get("JvmArgs").toString() : m_globalSettings->get("JvmArgs").toString();
+        QStringList args = Commandline::splitArgs(jvmArgs);
+        const bool hasArg = std::any_of(args.begin(), args.end(), [](const QString& arg) {
+            return arg.compare(FABRIC_ADD_MODS_ARG, Qt::CaseInsensitive) == 0;
+        });
+
+        if (!hasArg) {
+            args.append(FABRIC_ADD_MODS_ARG);
+            fabricArgAdded = true;
+        } else {
+            fabricArgAlreadyPresent = true;
         }
 
-        bool overrideArgs = sourceSettings->get("OverrideJavaArgs").toBool();
-        QString jvmArgs = overrideArgs ? sourceSettings->get("JvmArgs").toString() : m_globalSettings->get("JvmArgs").toString();
-        if (!Commandline::splitArgs(jvmArgs).contains(FABRIC_ADD_MODS_ARG)) {
-            if (!jvmArgs.trimmed().isEmpty()) {
-                jvmArgs += " ";
-            }
-            jvmArgs += FABRIC_ADD_MODS_ARG;
-            fabricArgAdded = true;
-        }
         if (overrideArgs || fabricArgAdded) {
             settings->set("OverrideJavaArgs", true);
-            settings->set("JvmArgs", jvmArgs);
+            settings->set("JvmArgs", args.join(' '));
         }
     }
 
@@ -521,11 +570,13 @@ bool ModrinthCreationTask::createInstance()
         inst->copyManagedPack(instance);
     }
 
-    if (endedWell && useModsSubdir) {
+    if (endedWell && useModsSubdir && !m_instance) {
         if (fabricArgAdded) {
             logWarning(tr("Recursive mods install is enabled. Added JVM arg -Dfabric.addMods=mods to this instance."));
-        } else {
+        } else if (fabricArgAlreadyPresent) {
             logWarning(tr("Recursive mods install is enabled. JVM arg -Dfabric.addMods=mods is already set for this instance."));
+        } else {
+            logWarning(tr("Recursive mods install is enabled. Please add JVM arg -Dfabric.addMods=mods to this instance."));
         }
     }
 

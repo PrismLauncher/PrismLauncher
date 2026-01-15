@@ -271,6 +271,15 @@ QDir ModFolderTreeModel::targetDirForSelection(const QModelIndexList& indexes) c
     return m_backend->dir();
 }
 
+bool ModFolderTreeModel::hasFolderNodes() const
+{
+    if (!m_root) {
+        return false;
+    }
+    return std::any_of(m_root->children.begin(), m_root->children.end(),
+                       [](const std::unique_ptr<Node>& child) { return child && child->kind == Node::Kind::FOLDER; });
+}
+
 void ModFolderTreeModel::rebuildTree()
 {
     beginResetModel();

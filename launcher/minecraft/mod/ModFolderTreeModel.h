@@ -51,6 +51,7 @@ class ModFolderTreeModel : public QAbstractItemModel {
     QList<Resource*> resourcesFromIndexes(const QModelIndexList& indexes) const;
     QList<Mod*> modsFromIndexes(const QModelIndexList& indexes) const;
     QDir targetDirForSelection(const QModelIndexList& indexes) const;
+    bool hasFolderNodes() const;
 
     QList<Mod*> allMods() const { return m_backend->allMods(); }
     ModFolderModel* backend() const { return m_backend; }
