@@ -174,8 +174,8 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
             if ((projectVer.hash != hash && projectVer.is_preferred) || (resource->status() == ResourceStatus::NOT_INSTALLED)) {
                 const QString targetDirPath = resource->fileinfo().absolutePath();
                 const QString indexDirPath = FS::PathCombine(targetDirPath, ".index");
-                auto downloadTask =
-                    makeShared<ResourceDownloadTask>(pack, projectVer, m_resourceModel, true, targetDirPath, indexDirPath, !resource->enabled());
+                auto downloadTask = makeShared<ResourceDownloadTask>(pack, projectVer, m_resourceModel, true, targetDirPath, indexDirPath,
+                                                                     !resource->enabled());
 
                 QString oldVersion = resource->metadata()->version_number;
                 if (oldVersion.isEmpty()) {
@@ -186,8 +186,8 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
                     }
                 }
 
-                m_updates.emplace_back(pack->name, hash, oldVersion, projectVer.version_number, projectVer.version_type, projectVer.changelog,
-                                       ModPlatform::ResourceProvider::MODRINTH, downloadTask, resource->enabled());
+                m_updates.emplace_back(pack->name, hash, oldVersion, projectVer.version_number, projectVer.version_type,
+                                       projectVer.changelog, ModPlatform::ResourceProvider::MODRINTH, downloadTask, resource->enabled());
             }
             m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, projectVer));
 

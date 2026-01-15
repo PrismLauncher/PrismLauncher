@@ -299,8 +299,7 @@ void ModFolderPage::showFolderRemovalErrors(const QStringList& failedFolders)
         entries.append(QFileInfo(folder).fileName());
     }
 
-    CustomMessageBox::selectable(this, tr("Error"),
-                                 tr("Failed to remove the following folder(s):\n%1").arg(entries.join('\n')),
+    CustomMessageBox::selectable(this, tr("Error"), tr("Failed to remove the following folder(s):\n%1").arg(entries.join('\n')),
                                  QMessageBox::Warning)
         ->show();
 }
@@ -729,8 +728,7 @@ void ModFolderPage::createFolder()
     }
 
     if (!targetDir.mkpath(folderName)) {
-        CustomMessageBox::selectable(this, tr("Error"), tr("Failed to create folder '%1'.").arg(folderName), QMessageBox::Critical)
-            ->show();
+        CustomMessageBox::selectable(this, tr("Error"), tr("Failed to create folder '%1'.").arg(folderName), QMessageBox::Critical)->show();
         return;
     }
 

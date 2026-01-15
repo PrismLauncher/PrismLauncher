@@ -429,12 +429,10 @@ bool ModrinthCreationTask::createInstance()
     if (useModsSubdir && !m_instance) {
         auto settings = instance.settings();
         const bool overrideArgs = settings->get("OverrideJavaArgs").toBool();
-        const QString jvmArgs =
-            overrideArgs ? settings->get("JvmArgs").toString() : m_globalSettings->get("JvmArgs").toString();
+        const QString jvmArgs = overrideArgs ? settings->get("JvmArgs").toString() : m_globalSettings->get("JvmArgs").toString();
         QStringList args = Commandline::splitArgs(jvmArgs);
-        const bool hasArg = std::any_of(args.begin(), args.end(), [](const QString& arg) {
-            return arg.compare(FABRIC_ADD_MODS_ARG, Qt::CaseInsensitive) == 0;
-        });
+        const bool hasArg = std::any_of(args.begin(), args.end(),
+                                        [](const QString& arg) { return arg.compare(FABRIC_ADD_MODS_ARG, Qt::CaseInsensitive) == 0; });
 
         if (!hasArg) {
             args.append(FABRIC_ADD_MODS_ARG);
@@ -534,8 +532,7 @@ bool ModrinthCreationTask::createInstance()
         QDir modDir(resource->fileinfo().absolutePath());
         return QDir(modDir.filePath(".index"));
     };
-    auto ensureMetadataTask =
-        makeShared<EnsureMetadataTask>(resources, folder, ModPlatform::ResourceProvider::MODRINTH, indexDirResolver);
+    auto ensureMetadataTask = makeShared<EnsureMetadataTask>(resources, folder, ModPlatform::ResourceProvider::MODRINTH, indexDirResolver);
     connect(ensureMetadataTask.get(), &Task::succeeded, this, [&endedWell]() { endedWell = true; });
     connect(ensureMetadataTask.get(), &Task::finished, &ensureMetaLoop, &QEventLoop::quit);
     connect(ensureMetadataTask.get(), &Task::progress, [this](qint64 current, qint64 total) {
