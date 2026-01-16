@@ -74,7 +74,7 @@
 #include "ui/pages/modplatform/OptionalModDialog.h"
 
 namespace {
-static const QString FABRIC_ADD_MODS_ARG = QStringLiteral("-Dfabric.addMods=mods");
+const QString g_fabricAddModsArg = QStringLiteral("-Dfabric.addMods=mods");
 
 QString sanitizeFlameSubdirName(const QString& name)
 {
@@ -82,17 +82,17 @@ QString sanitizeFlameSubdirName(const QString& name)
     sanitized = sanitized.trimmed();
     if (sanitized.isEmpty()) {
         sanitized = QStringLiteral("modpack");
-}
+    }
     return sanitized;
 }
 
 QString applyModsSubdir(const QString& path, const QString& subdir_name)
 {
-    static const QString prefix = QStringLiteral("mods/");
-    if (subdir_name.isEmpty() || !path.startsWith(prefix)) {
+    static const QString s_prefix = QStringLiteral("mods/");
+    if (subdir_name.isEmpty() || !path.startsWith(s_prefix)) {
         return path;
-}
-    return prefix + subdir_name + "/" + path.mid(prefix.size());
+    }
+    return s_prefix + subdir_name + "/" + path.mid(s_prefix.size());
 }
 
 bool isModsPath(const QString& path)
@@ -171,7 +171,7 @@ bool FlameCreationTask::updateInstance()
         m_modsSubdirName = sanitizeFlameSubdirName(fallbackName);
     }
 
-    QString index_path(FS::PathCombine(m_stagingPath, "manifest.json"));
+    const QString index_path(FS::PathCombine(m_stagingPath, "manifest.json"));
 
     try {
         Flame::loadManifest(m_pack, index_path);
@@ -339,7 +339,7 @@ bool FlameCreationTask::updateInstance()
                             modFileNames.insert(file.version.fileName.chopped(QString(".disabled").size()));
                         }
                     }
-                    QDir oldIndexDir(old_minecraft_dir.absoluteFilePath("mods/.index"));
+                    const QDir oldIndexDir(old_minecraft_dir.absoluteFilePath("mods/.index"));
                     removeMetadataForFiles(oldIndexDir, modFileNames);
                 }
 
@@ -349,7 +349,7 @@ bool FlameCreationTask::updateInstance()
                         continue;
 }
 
-                    QString relative_path(FS::PathCombine(file.targetFolder, file.version.fileName));
+                    const QString relative_path(FS::PathCombine(file.targetFolder, file.version.fileName));
                     qDebug() << "Scheduling" << relative_path << "for removal";
                     m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
                     QFileInfo relative_info(relative_path);
@@ -424,8 +424,9 @@ QString FlameCreationTask::getVersionForLoader(QString uid, QString loaderType, 
                 auto iter = std::find_if(reqs.begin(), reqs.end(), [mcVersion](const Meta::Require& req) {
                     return req.uid == "net.minecraft" && req.equalsVersion == mcVersion;
                 });
-                if (iter == reqs.end())
+                if (iter == reqs.end()) {
                     continue;
+                }
             }
             return version->descriptor();
         }
@@ -449,7 +450,7 @@ bool FlameCreationTask::createInstance()
     QString parent_folder(FS::PathCombine(m_stagingPath, "flame"));
 
     try {
-        QString index_path(FS::PathCombine(m_stagingPath, "manifest.json"));
+        const QString index_path(FS::PathCombine(m_stagingPath, "manifest.json"));
         if (!m_pack.is_loaded)
             Flame::loadManifest(m_pack, index_path);
 
@@ -464,12 +465,12 @@ bool FlameCreationTask::createInstance()
     }
 
     if (!m_pack.overrides.isEmpty()) {
-        QString overridePath = FS::PathCombine(m_stagingPath, m_pack.overrides);
+        const QString overridePath = FS::PathCombine(m_stagingPath, m_pack.overrides);
         if (QFile::exists(overridePath)) {
             // Create a list of overrides in "overrides.txt" inside flame/
             Override::createOverrides("overrides", parent_folder, overridePath);
 
-            QString mcPath = FS::PathCombine(m_stagingPath, "minecraft");
+            const QString mcPath = FS::PathCombine(m_stagingPath, "minecraft");
             if (!FS::move(overridePath, mcPath)) {
                 setError(tr("Could not rename the overrides folder:\n") + m_pack.overrides);
                 return false;
@@ -490,8 +491,9 @@ bool FlameCreationTask::createInstance()
         auto id = loader.id;
         if (id.startsWith("neoforge-")) {
             id.remove("neoforge-");
-            if (id.startsWith("1.20.1-"))
+            if (id.startsWith("1.20.1-")) {
                 id.remove("1.20.1-");  // this is a mess for curseforge
+            }
             loaderType = "neoforge";
             loaderUid = "net.neoforged";
             has_non_fabric_loader = true;
@@ -586,8 +588,9 @@ bool FlameCreationTask::createInstance()
     components->setComponentVersion("net.minecraft", mcVersion, true);
     if (!loaderType.isEmpty()) {
         auto version = getVersionForLoader(loaderUid, loaderType, loaderVersion, mcVersion);
-        if (version.isEmpty())
+        if (version.isEmpty()) {
             return false;
+        }
         components->setComponentVersion(loaderUid, version);
     }
 
@@ -639,10 +642,11 @@ bool FlameCreationTask::createInstance()
     }
 
     // Don't add managed info to packs without an ID (most likely imported from ZIP)
-    if (!m_managedId.isEmpty())
+    if (!m_managedId.isEmpty()) {
         instance.setManagedPack("flame", m_managedId, m_pack.name, m_managedVersionId, m_pack.version);
-    else
+    } else {
         instance.setManagedPack("flame", "", name(), "", "");
+    }
 
     bool fabricArgAdded = false;
     bool fabricArgAlreadyPresent = false;
@@ -651,11 +655,11 @@ bool FlameCreationTask::createInstance()
         const bool overrideArgs = settings->get("OverrideJavaArgs").toBool();
         const QString jvmArgs = overrideArgs ? settings->get("JvmArgs").toString() : m_globalSettings->get("JvmArgs").toString();
         QStringList args = Commandline::splitArgs(jvmArgs);
-        const bool hasArg = std::any_of(args.begin(), args.end(),
-                                        [](const QString& arg) { return arg.compare(FABRIC_ADD_MODS_ARG, Qt::CaseInsensitive) == 0; });
+        const bool hasArg =
+            std::ranges::any_of(args, [](const QString& arg) { return arg.compare(g_fabricAddModsArg, Qt::CaseInsensitive) == 0; });
 
         if (!hasArg) {
-            args.append(FABRIC_ADD_MODS_ARG);
+            args.append(g_fabricAddModsArg);
             fabricArgAdded = true;
         } else {
             fabricArgAlreadyPresent = true;

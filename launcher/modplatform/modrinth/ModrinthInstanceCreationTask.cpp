@@ -33,7 +33,7 @@
 #include <vector>
 
 namespace {
-static const QString FABRIC_ADD_MODS_ARG = QStringLiteral("-Dfabric.addMods=mods");
+const QString g_fabricAddModsArg = QStringLiteral("-Dfabric.addMods=mods");
 
 QString sanitizeModrinthSubdirName(const QString& name)
 {
@@ -47,11 +47,11 @@ QString sanitizeModrinthSubdirName(const QString& name)
 
 QString applyModsSubdir(const QString& path, const QString& subdirName)
 {
-    static const QString prefix = QStringLiteral("mods/");
-    if (subdirName.isEmpty() || !path.startsWith(prefix)) {
+    static const QString s_prefix = QStringLiteral("mods/");
+    if (subdirName.isEmpty() || !path.startsWith(s_prefix)) {
         return path;
     }
-    return prefix + subdirName + "/" + path.mid(prefix.size());
+    return s_prefix + subdirName + "/" + path.mid(s_prefix.size());
 }
 
 bool isModsPath(const QString& path)
@@ -126,7 +126,7 @@ bool ModrinthCreationTask::updateInstance()
         m_modsSubdirName = sanitizeModrinthSubdirName(fallbackName);
     }
 
-    QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
+    const QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
     if (!parseManifest(index_path, m_files, true, false)) {
         return false;
     }
@@ -177,36 +177,38 @@ bool ModrinthCreationTask::updateInstance()
         parseManifest(old_index_path, old_files, false, false);
 
         if (skipModsRemoval) {
-            old_files.erase(std::remove_if(old_files.begin(), old_files.end(), [](const File& file) { return isModsPath(file.path); }),
-                            old_files.end());
+            const auto removed = std::ranges::remove_if(old_files, [](const File& file) { return isModsPath(file.path); });
+            old_files.erase(removed.begin(), old_files.end());
         }
 
         // Let's remove all duplicated, identical resources!
         auto files_iterator = m_files.begin();
-    begin:
         while (files_iterator != m_files.end()) {
-            auto const& file = *files_iterator;
+            const auto& file = *files_iterator;
 
             if (relocatingMods && isModsPath(file.path)) {
-                files_iterator++;
+                ++files_iterator;
                 continue;
             }
 
-            auto old_files_iterator = old_files.begin();
-            while (old_files_iterator != old_files.end()) {
-                auto const& old_file = *old_files_iterator;
+            bool removed = false;
+            for (auto old_files_iterator = old_files.begin(); old_files_iterator != old_files.end();) {
+                const auto& old_file = *old_files_iterator;
 
                 if (old_file.hash == file.hash) {
                     qDebug() << "Removed file at" << file.path << "from list of downloads";
                     files_iterator = m_files.erase(files_iterator);
                     old_files_iterator = old_files.erase(old_files_iterator);
-                    goto begin;  // Sorry :c
+                    removed = true;
+                    break;
                 }
 
-                old_files_iterator++;
+                ++old_files_iterator;
             }
 
-            files_iterator++;
+            if (!removed) {
+                ++files_iterator;
+            }
         }
 
         QDir old_minecraft_dir(inst->gameRoot());
@@ -226,7 +228,7 @@ bool ModrinthCreationTask::updateInstance()
                         modFileNames.insert(fileName.chopped(QString(".disabled").size()));
                     }
                 }
-                QDir oldIndexDir(old_minecraft_dir.absoluteFilePath("mods/.index"));
+                const QDir oldIndexDir(old_minecraft_dir.absoluteFilePath("mods/.index"));
                 removeMetadataForFiles(oldIndexDir, modFileNames);
             }
             for (auto const& file : old_files) {
@@ -235,7 +237,7 @@ bool ModrinthCreationTask::updateInstance()
                 }
                 qDebug() << "Scheduling" << file.path << "for removal";
                 m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(file.path));
-                QFileInfo file_info(file.path);
+                const QFileInfo file_info(file.path);
                 const bool isDisabled = file_info.suffix().compare("disabled", Qt::CaseInsensitive) == 0;
                 if (isDisabled) {  // remove it if it was enabled/disabled by user
                     m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(file.path.chopped(QString(".disabled").size())));
@@ -273,7 +275,7 @@ bool ModrinthCreationTask::updateInstance()
         }
     } else {
         // We don't have an old index file, so we may duplicate stuff!
-        auto dialog = CustomMessageBox::selectable(m_parent, tr("No index file."),
+        auto* dialog = CustomMessageBox::selectable(m_parent, tr("No index file."),
                                                    tr("We couldn't find a suitable index file for the older version. This may cause some "
                                                       "of the files to be duplicated. Do you want to continue?"),
                                                    QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
@@ -300,7 +302,7 @@ bool ModrinthCreationTask::createInstance()
 
     QString parent_folder(FS::PathCombine(m_stagingPath, "mrpack"));
 
-    QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
+    const QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
     if (m_files.empty() && !parseManifest(index_path, m_files, true, true)) {
         return false;
     }
@@ -310,7 +312,7 @@ bool ModrinthCreationTask::createInstance()
     if (!shouldOverride() && isFabricPack) {
         auto packName = m_managed_name.isEmpty() ? name() : m_managed_name;
         auto proposedName = sanitizeModrinthSubdirName(packName);
-        auto dialog = CustomMessageBox::selectable(m_parent, tr("Mods subfolder"),
+        auto* dialog = CustomMessageBox::selectable(m_parent, tr("Mods subfolder"),
                                                    tr("Install mods into a subfolder under ./minecraft/mods/%1?\n\nWarning: advanced "
                                                       "option, only enable if you know what you are doing.")
                                                        .arg(proposedName),
@@ -365,7 +367,7 @@ bool ModrinthCreationTask::createInstance()
     }
 
     if (useModsSubdir) {
-        QDir modsDir(FS::PathCombine(mcPath, "mods"));
+        const QDir modsDir(FS::PathCombine(mcPath, "mods"));
         if (modsDir.exists()) {
             if (!modsDir.mkpath(m_modsSubdirName)) {
                 setError(tr("Could not create mods subfolder:\n") + m_modsSubdirName);
@@ -376,7 +378,7 @@ bool ModrinthCreationTask::createInstance()
             QDirIterator it(modsDir.absolutePath(), QDir::NoDotAndDotDot | QDir::AllEntries);
             while (it.hasNext()) {
                 it.next();
-                QFileInfo entry(it.fileInfo());
+                const QFileInfo entry(it.fileInfo());
                 if (entry.fileName() == m_modsSubdirName) {
                     continue;
                 }
@@ -390,7 +392,7 @@ bool ModrinthCreationTask::createInstance()
         }
     }
 
-    QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
+    const QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
     MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
 
@@ -431,11 +433,11 @@ bool ModrinthCreationTask::createInstance()
         const bool overrideArgs = settings->get("OverrideJavaArgs").toBool();
         const QString jvmArgs = overrideArgs ? settings->get("JvmArgs").toString() : m_globalSettings->get("JvmArgs").toString();
         QStringList args = Commandline::splitArgs(jvmArgs);
-        const bool hasArg = std::any_of(args.begin(), args.end(),
-                                        [](const QString& arg) { return arg.compare(FABRIC_ADD_MODS_ARG, Qt::CaseInsensitive) == 0; });
+        const bool hasArg =
+            std::ranges::any_of(args, [](const QString& arg) { return arg.compare(g_fabricAddModsArg, Qt::CaseInsensitive) == 0; });
 
         if (!hasArg) {
-            args.append(FABRIC_ADD_MODS_ARG);
+            args.append(g_fabricAddModsArg);
             fabricArgAdded = true;
         } else {
             fabricArgAlreadyPresent = true;
@@ -470,7 +472,7 @@ bool ModrinthCreationTask::createInstance()
             return false;
         }
         if (fileName.startsWith("mods/")) {
-            auto mod = new Mod(filePath);
+            auto* mod = new Mod(filePath);
             ModDetails d;
             d.mod_id = filePath;
             mod->setDetails(d);
@@ -527,9 +529,9 @@ bool ModrinthCreationTask::createInstance()
     }
 
     QEventLoop ensureMetaLoop;
-    QDir folder = FS::PathCombine(instance.modsRoot(), ".index");
-    auto indexDirResolver = [](Resource* resource) {
-        QDir modDir(resource->fileinfo().absolutePath());
+    const QDir folder = FS::PathCombine(instance.modsRoot(), ".index");
+    auto indexDirResolver = [](Resource* resource) -> QDir {
+        const QDir modDir(resource->fileinfo().absolutePath());
         return QDir(modDir.filePath(".index"));
     };
     auto ensureMetadataTask = makeShared<EnsureMetadataTask>(resources, folder, ModPlatform::ResourceProvider::MODRINTH, indexDirResolver);
@@ -588,7 +590,7 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
     try {
         auto doc = Json::requireDocument(index_path);
         auto obj = Json::requireObject(doc, "modrinth.index.json");
-        int formatVersion = Json::requireInteger(obj, "formatVersion", "modrinth.index.json");
+        const int formatVersion = Json::requireInteger(obj, "formatVersion", "modrinth.index.json");
         if (formatVersion == 1) {
             auto game = Json::requireString(obj, "game", "modrinth.index.json");
             if (game != "minecraft") {
@@ -660,18 +662,20 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
                     }
 
                     auto selectedMods = optionalModDialog.getResult();
-                    for (auto file : optionalFiles) {
-                        if (selectedMods.contains(file.path)) {
-                            file.required = true;
+                    for (const auto& file : optionalFiles) {
+                        auto selectedFile = file;
+                        if (selectedMods.contains(selectedFile.path)) {
+                            selectedFile.required = true;
                         } else {
-                            file.path += ".disabled";
+                            selectedFile.path += ".disabled";
                         }
-                        files.push_back(file);
+                        files.push_back(selectedFile);
                     }
                 } else {
-                    for (auto file : optionalFiles) {
-                        file.path += ".disabled";
-                        files.push_back(file);
+                    for (const auto& file : optionalFiles) {
+                        auto disabledFile = file;
+                        disabledFile.path += ".disabled";
+                        files.push_back(disabledFile);
                     }
                 }
             }

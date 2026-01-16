@@ -30,10 +30,12 @@
 #include <functional>
 #include <optional>
 
-static std::list<Version> mcVersions(BaseInstance* inst)
+namespace {
+std::list<Version> mcVersions(BaseInstance* inst)
 {
     return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion() };
 }
+}  // namespace
 
 ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
                                            BaseInstance* instance,
@@ -269,7 +271,7 @@ void ResourceUpdateDialog::checkCandidates()
 auto ResourceUpdateDialog::ensureMetadata() -> bool
 {
     auto indexDir = this->indexDir();
-    auto indexDirResolver = std::bind(&ResourceFolderModel::indexDirForResource, m_resourceModel.get(), std::placeholders::_1);
+    auto indexDirResolver = [model = m_resourceModel.get()](Resource* resource) { return model->indexDirForResource(*resource); };
 
     SequentialTask seq(tr("Looking for metadata"));
 
@@ -420,7 +422,7 @@ void ResourceUpdateDialog::onMetadataFailed(Resource* resource, bool try_others,
 {
     if (try_others) {
         auto indexDir = this->indexDir();
-        auto indexDirResolver = std::bind(&ResourceFolderModel::indexDirForResource, m_resourceModel.get(), std::placeholders::_1);
+        auto indexDirResolver = [model = m_resourceModel.get()](Resource* resource) { return model->indexDirForResource(*resource); };
 
         auto task = makeShared<EnsureMetadataTask>(resource, indexDir, next(first_choice), indexDirResolver);
         connect(task.get(), &EnsureMetadataTask::metadataReady, [this](Resource* candidate) { onMetadataEnsured(candidate); });

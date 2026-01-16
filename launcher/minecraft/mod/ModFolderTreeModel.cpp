@@ -23,6 +23,7 @@
 #include <QSet>
 #include <QSize>
 #include <algorithm>
+#include <utility>
 
 ModFolderTreeModel::ModFolderTreeModel(ModFolderModel* backend, QObject* parent) : QAbstractItemModel(parent), m_backend(backend)
 {
@@ -35,7 +36,8 @@ ModFolderTreeModel::ModFolderTreeModel(ModFolderModel* backend, QObject* parent)
 QModelIndex ModFolderTreeModel::index(int row, int column, const QModelIndex& parent) const
 {
     auto* parentNode = nodeForIndex(parent);
-    if (!parentNode || row < 0 || row >= static_cast<int>(parentNode->children.size()) || column < 0 || column >= columnCount({})) {
+    if (parentNode == nullptr || row < 0 || std::cmp_greater_equal(row, parentNode->children.size()) || column < 0 ||
+        column >= columnCount({})) {
         return {};
     }
 
@@ -64,7 +66,8 @@ int ModFolderTreeModel::rowCount(const QModelIndex& parent) const
 
 int ModFolderTreeModel::columnCount(const QModelIndex& parent) const
 {
-    return parent.isValid() ? m_backend->columnCount({}) : m_backend->columnCount({});
+    Q_UNUSED(parent)
+    return m_backend->columnCount({});
 }
 
 QVariant ModFolderTreeModel::data(const QModelIndex& index, int role) const
@@ -103,8 +106,6 @@ QVariant ModFolderTreeModel::data(const QModelIndex& index, int role) const
                 if (index.column() == ModFolderModel::NameColumn) {
                     return node->dir.absolutePath();
                 }
-                return {};
-            case Qt::CheckStateRole:
                 return {};
             default:
                 return {};
@@ -163,7 +164,7 @@ bool ModFolderTreeModel::dropMimeData(const QMimeData* data, Qt::DropAction acti
 bool ModFolderTreeModel::isFolderIndex(const QModelIndex& index) const
 {
     auto* node = nodeForIndex(index);
-    return node && node != m_root.get() && node->kind == Node::Kind::FOLDER;
+    return node != nullptr && node != m_root.get() && node->kind == Node::Kind::FOLDER;
 }
 
 Resource* ModFolderTreeModel::resourceForIndex(const QModelIndex& index) const
@@ -190,7 +191,7 @@ QDir ModFolderTreeModel::folderForIndex(const QModelIndex& index) const
         return node->dir;
     }
     if (node->resource) {
-        return QDir(node->resource->fileinfo().absolutePath());
+        return { node->resource->fileinfo().absolutePath() };
     }
     return m_backend->dir();
 }
@@ -263,7 +264,7 @@ QDir ModFolderTreeModel::targetDirForSelection(const QModelIndexList& indexes) c
     }
 
     if (folderPaths.size() == 1) {
-        return QDir(*folderPaths.begin());
+        return { *folderPaths.begin() };
     }
     if (folderPaths.isEmpty() && hasModDir) {
         return modDir;
@@ -323,7 +324,7 @@ void ModFolderTreeModel::rebuildTree()
         }
     };
 
-    auto collectFolders = [&](const auto& self, const QDir& dir, const QString& relPrefix) -> void {
+    auto collectFolders = [&](const auto& self, const QDir& dir, const QString& relPrefix) -> void {  // NOLINT(misc-no-recursion)
         auto entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
         for (const auto& entry : entries) {
             auto name = entry.fileName();
@@ -429,22 +430,22 @@ QModelIndex ModFolderTreeModel::indexForNode(Node* node, int column) const
     return createIndex(node->row, column, node);
 }
 
-void ModFolderTreeModel::sortChildren(Node* node)
+void ModFolderTreeModel::sortChildren(Node* node)  // NOLINT(misc-no-recursion)
 {
     if (!node) {
         return;
     }
 
-    std::sort(node->children.begin(), node->children.end(), [this](const auto& left, const auto& right) {
+    std::ranges::sort(node->children, [this](const auto& left, const auto& right) {
         if (left->kind != right->kind) {
             return left->kind == Node::Kind::FOLDER;
         }
         return QString::compare(nodeDisplayName(left.get()), nodeDisplayName(right.get()), Qt::CaseInsensitive) < 0;
     });
 
-    for (int i = 0; i < static_cast<int>(node->children.size()); ++i) {
+    for (size_t i = 0; i < node->children.size(); ++i) {
         auto* child = node->children[i].get();
-        child->row = i;
+        child->row = static_cast<int>(i);
         child->parent = node;
         if (child->kind == Node::Kind::FOLDER) {
             sortChildren(child);
@@ -452,7 +453,7 @@ void ModFolderTreeModel::sortChildren(Node* node)
     }
 }
 
-QString ModFolderTreeModel::nodeDisplayName(const Node* node) const
+QString ModFolderTreeModel::nodeDisplayName(const Node* node)
 {
     if (!node) {
         return {};
@@ -466,7 +467,7 @@ QString ModFolderTreeModel::nodeDisplayName(const Node* node) const
     return node->name;
 }
 
-bool ModFolderTreeProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+bool ModFolderTreeProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const  // NOLINT(misc-no-recursion)
 {
     auto* model = qobject_cast<ModFolderTreeModel*>(sourceModel());
     if (!model) {

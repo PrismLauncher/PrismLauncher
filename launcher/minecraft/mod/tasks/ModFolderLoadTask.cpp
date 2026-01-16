@@ -24,31 +24,34 @@
 
 #include <QFileInfo>
 #include <QThread>
+#include <utility>
 
-static bool isKnownModSuffix(const QString& suffix)
+namespace {
+bool isKnownModSuffix(const QString& suffix)
 {
     return suffix == "jar" || suffix == "zip" || suffix == "litemod" || suffix == "nilmod";
 }
 
-static bool isModFile(const QFileInfo& info)
+bool isModFile(const QFileInfo& info)
 {
     if (!info.isFile()) {
         return false;
     }
 
-    auto suffix = info.suffix().toLower();
+    const auto suffix = info.suffix().toLower();
     if (suffix == "disabled") {
-        auto completeSuffix = info.completeSuffix().toLower();
+        const auto completeSuffix = info.completeSuffix().toLower();
         const auto parts = completeSuffix.split('.');
         if (parts.size() < 2) {
             return false;
         }
-        auto innerSuffix = parts.at(parts.size() - 2);
+        const auto& innerSuffix = parts.at(parts.size() - 2);
         return isKnownModSuffix(innerSuffix);
     }
 
     return isKnownModSuffix(suffix);
 }
+}  // namespace
 
 ModFolderLoadTask::ModFolderLoadTask(const QDir& rootDir,
                                      bool isIndexed,
@@ -58,7 +61,7 @@ ModFolderLoadTask::ModFolderLoadTask(const QDir& rootDir,
     , m_rootDir(rootDir)
     , m_isIndexed(isIndexed)
     , m_cleanOrphan(cleanOrphan)
-    , m_createFunc(createFunction)
+    , m_createFunc(std::move(createFunction))
     , m_result(new Result())
     , m_threadToSpawnInto(thread())
 {}
@@ -80,14 +83,14 @@ void ModFolderLoadTask::executeTask()
         while (iter.hasNext()) {
             auto resource = iter.next().value();
             if (resource->status() == ResourceStatus::NOT_INSTALLED) {
-                QDir indexDir(QDir(resource->fileinfo().absolutePath()).filePath(".index"));
+                const QDir indexDir(QDir(resource->fileinfo().absolutePath()).filePath(".index"));
                 resource->destroy(indexDir, false, false);
                 iter.remove();
             }
         }
     }
 
-    for (auto mod : m_result->resources) {
+    for (const auto& mod : m_result->resources) {
         mod->moveToThread(m_threadToSpawnInto);
     }
 
@@ -98,18 +101,18 @@ void ModFolderLoadTask::executeTask()
     emitSucceeded();
 }
 
-void ModFolderLoadTask::getFromMetadata(const QDir& dir)
+void ModFolderLoadTask::getFromMetadata(const QDir& dir)  // NOLINT(misc-no-recursion)
 {
-    QDir indexDir(dir.filePath(".index"));
+    const QDir indexDir(dir.filePath(".index"));
     if (indexDir.exists()) {
         indexDir.refresh();
-        for (auto entry : indexDir.entryList(QDir::Files)) {
+        for (const auto& entry : indexDir.entryList(QDir::Files)) {
             auto metadata = Metadata::get(indexDir, entry);
             if (!metadata.isValid()) {
                 continue;
             }
 
-            QFileInfo fileInfo(dir.filePath(metadata.filename));
+            const QFileInfo fileInfo(dir.filePath(metadata.filename));
             auto* resource = m_createFunc(fileInfo);
             resource->setInternalId(internalIdForFile(fileInfo));
             resource->setMetadata(metadata);
@@ -118,7 +121,7 @@ void ModFolderLoadTask::getFromMetadata(const QDir& dir)
         }
     }
 
-    for (auto entry : dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+    for (const auto& entry : dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot)) {
         if (entry.fileName() == ".index") {
             continue;
         }
@@ -126,7 +129,7 @@ void ModFolderLoadTask::getFromMetadata(const QDir& dir)
     }
 }
 
-void ModFolderLoadTask::getFromFiles(const QDir& dir, int depth)
+void ModFolderLoadTask::getFromFiles(const QDir& dir, int depth)  // NOLINT(misc-no-recursion)
 {
     dir.refresh();
     for (auto entry : dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries)) {
@@ -149,7 +152,7 @@ void ModFolderLoadTask::getFromFiles(const QDir& dir, int depth)
         }
 
         auto filePath = entry.absoluteFilePath();
-        if (auto app = APPLICATION_DYN; app && app->checkQSavePath(filePath)) {
+        if (auto* app = APPLICATION_DYN; app != nullptr && app->checkQSavePath(filePath)) {
             continue;
         }
 
@@ -172,7 +175,7 @@ void ModFolderLoadTask::getFromFiles(const QDir& dir, int depth)
             }
         } else {
             QString choppedId = resource->internal_id();
-            QFileInfo choppedInfo(choppedId);
+            const QFileInfo choppedInfo(choppedId);
             if (choppedInfo.suffix().compare("disabled", Qt::CaseInsensitive) == 0) {
                 choppedId.chop(9);
             }

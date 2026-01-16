@@ -85,7 +85,7 @@ class ResourceFolderModel : public QAbstractListModel {
     virtual bool stopWatching() { return stopWatching({ indexDir().absolutePath(), m_dir.absolutePath() }); }
 
     virtual QDir indexDir() const { return { QString("%1/.index").arg(dir().absolutePath()) }; }
-    QDir indexDirForResource(const Resource& resource) const;
+    static QDir indexDirForResource(const Resource& resource);
 
     QModelIndex indexForResource(const Resource& resource) const;
     QModelIndexList indexesForResources(const QList<Resource*>& resources) const;

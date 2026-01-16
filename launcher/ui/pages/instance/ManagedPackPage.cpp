@@ -13,6 +13,7 @@
 #include <QListView>
 #include <QProxyStyle>
 #include <QStyleFactory>
+#include <algorithm>
 #include <memory>
 
 #include "Application.h"
@@ -269,12 +270,7 @@ bool ManagedPackPage::isFabricOnlyInstance() const
     if (!loaders.contains(ModPlatform::Fabric)) {
         return false;
     }
-    for (const auto loader : loaders) {
-        if (loader != ModPlatform::Fabric) {
-            return false;
-        }
-    }
-    return true;
+    return std::ranges::all_of(loaders, [](const auto loader) { return loader == ModPlatform::Fabric; });
 }
 
 void ManagedPackPage::setFailState()

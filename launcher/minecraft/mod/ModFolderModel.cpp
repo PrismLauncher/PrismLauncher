@@ -52,22 +52,24 @@
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "minecraft/mod/tasks/ModFolderLoadTask.h"
 
-static void collectWatchPaths(const QDir& dir, QSet<QString>& paths)
+namespace {
+void collectWatchPaths(const QDir& dir, QSet<QString>& paths)  // NOLINT(misc-no-recursion)
 {
     paths.insert(dir.absolutePath());
 
-    QDir index_dir(dir.filePath(".index"));
+    const QDir index_dir(dir.filePath(".index"));
     if (index_dir.exists()) {
         paths.insert(index_dir.absolutePath());
-}
+    }
 
-    for (auto entry : dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+    for (const auto& entry : dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot)) {
         if (entry.fileName() == ".index") {
             continue;
-}
+        }
         collectWatchPaths(QDir(entry.absoluteFilePath()), paths);
     }
 }
+} // namespace
 
 ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)
     : ResourceFolderModel(QDir(dir), instance, is_indexed, create_dir, parent)
@@ -246,7 +248,7 @@ Task* ModFolderModel::createParseTask(Resource& resource)
 
 Task* ModFolderModel::createUpdateTask()
 {
-    auto task =
+    auto* task =
         new ModFolderLoadTask(dir(), m_is_indexed, m_first_folder_load, [this](const QFileInfo& file) { return createResource(file); });
     m_first_folder_load = false;
     return task;

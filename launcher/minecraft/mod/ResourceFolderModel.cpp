@@ -90,10 +90,10 @@ bool ResourceFolderModel::stopWatching(const QStringList& paths)
     return couldnt_be_stopped.isEmpty();
 }
 
-QDir ResourceFolderModel::indexDirForResource(const Resource& resource) const
+QDir ResourceFolderModel::indexDirForResource(const Resource& resource)
 {
-    QDir resource_dir(resource.fileinfo().absolutePath());
-    return QDir(resource_dir.filePath(".index"));
+    const QDir resource_dir(resource.fileinfo().absolutePath());
+    return { resource_dir.filePath(".index") };
 }
 
 QModelIndex ResourceFolderModel::indexForResource(const Resource& resource) const
@@ -243,7 +243,7 @@ bool ResourceFolderModel::uninstallResource(const QString& file_name, bool prese
         auto resourceFileInfo = resource->fileinfo();
         auto resourceFileName = resource->fileinfo().fileName();
         if (!resource->enabled()) {
-            QFileInfo name_info(resourceFileName);
+            const QFileInfo name_info(resourceFileName);
             if (name_info.suffix().compare("disabled", Qt::CaseInsensitive) == 0) {
                 resourceFileName.chop(QString(".disabled").size());
             }
@@ -271,7 +271,7 @@ bool ResourceFolderModel::uninstallResource(const QString& file_name, const QDir
 
         auto resourceFileName = resource->fileinfo().fileName();
         if (!resource->enabled()) {
-            QFileInfo name_info(resourceFileName);
+            const QFileInfo name_info(resourceFileName);
             if (name_info.suffix().compare("disabled", Qt::CaseInsensitive) == 0) {
                 resourceFileName.chop(QString(".disabled").size());
             }
@@ -367,11 +367,13 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, Ena
     return succeeded;
 }
 
-static QMutex sUpdateTaskMutex;
+namespace {
+QMutex sUpdateTaskMutex;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+}  // namespace
 bool ResourceFolderModel::update()
 {
     // We hold a lock here to prevent race conditions on the m_current_update_task reset.
-    QMutexLocker lock(&sUpdateTaskMutex);
+    const QMutexLocker lock(&sUpdateTaskMutex);
 
     // Already updating, so we schedule a future update and return.
     if (m_current_update_task) {

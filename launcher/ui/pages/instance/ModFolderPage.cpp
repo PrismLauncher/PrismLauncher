@@ -50,13 +50,13 @@
 #include <QInputDialog>
 #include <QKeyEvent>
 #include <QLineEdit>
+#include <QMetaObject>
 #include <QMenu>
 #include <QMessageBox>
 #include <QSet>
 #include <QSortFilterProxyModel>
 #include <algorithm>
 #include <memory>
-#include <vector>
 
 #include "Application.h"
 #include "DesktopServices.h"
@@ -77,7 +77,12 @@
 #include "ui/dialogs/ProgressDialog.h"
 
 ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> model, QWidget* parent)
-    : ExternalResourcesPage(inst, model, parent), m_model(model)
+    : ExternalResourcesPage(inst, model, parent),
+      m_model(model),
+      m_downloadDialog(nullptr),
+      m_treeModel(new ModFolderTreeModel(m_model.get(), this)),
+      m_treeFilterModel(new ModFolderTreeProxyModel(this)),
+      m_newFolderAction(nullptr)
 {
     ui->actionDownloadItem->setText(tr("Download Mods"));
     ui->actionDownloadItem->setToolTip(tr("Download mods from online mod platforms"));
@@ -126,8 +131,6 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
     connect(m_newFolderAction, &QAction::triggered, this, &ModFolderPage::createFolder);
     ui->actionsToolbar->insertActionAfter(ui->actionAddItem, m_newFolderAction);
 
-    m_treeModel = new ModFolderTreeModel(m_model.get(), this);
-    m_treeFilterModel = new ModFolderTreeProxyModel(this);
     m_treeFilterModel->setDynamicSortFilter(true);
     m_treeFilterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     m_treeFilterModel->setSortCaseSensitivity(Qt::CaseInsensitive);
@@ -149,7 +152,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
     disconnect(ui->treeView, &ModListView::activated, this, nullptr);
     connect(ui->treeView, &ModListView::activated, this, &ModFolderPage::itemActivated);
 
-    auto selectionModel = ui->treeView->selectionModel();
+    auto* selectionModel = ui->treeView->selectionModel();
     connect(selectionModel, &QItemSelectionModel::currentChanged, this, &ModFolderPage::updateFrame);
 
     auto updateExtra = [this]() {
@@ -160,7 +163,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
     connect(selectionModel, &QItemSelectionModel::selectionChanged, this, updateExtra);
     connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &ModFolderPage::updateActions);
 
-    updateActions();
+    QMetaObject::invokeMethod(this, [this] { updateActions(); }, Qt::QueuedConnection);
 }
 
 bool ModFolderPage::shouldDisplay() const
@@ -263,7 +266,7 @@ QStringList ModFolderPage::topLevelFolderPaths(const QModelIndexList& sourceInde
     }
 
     QStringList prunedFolders = folderPaths.values();
-    std::sort(prunedFolders.begin(), prunedFolders.end(), [](const QString& left, const QString& right) {
+    std::ranges::sort(prunedFolders, [](const QString& left, const QString& right) {
         if (left.size() != right.size()) {
             return left.size() < right.size();
         }
@@ -330,9 +333,9 @@ void ModFolderPage::updateActions()
     ui->actionEnableItem->setEnabled(hasModSelection);
     ui->actionDisableItem->setEnabled(hasModSelection);
 
-    ui->actionViewHomepage->setEnabled(hasModSelection &&
-                                       std::any_of(selectedResources.begin(), selectedResources.end(),
-                                                   [](Resource* resource) { return resource && !resource->homepage().isEmpty(); }));
+    ui->actionViewHomepage->setEnabled(hasModSelection && std::ranges::any_of(selectedResources, [](Resource* resource) {
+                                           return resource && !resource->homepage().isEmpty();
+                                       }));
     ui->actionExportMetadata->setEnabled(!m_model->empty());
 
     if (m_treeModel->hasFolderNodes()) {
@@ -342,11 +345,11 @@ void ModFolderPage::updateActions()
     }
 
     if (m_newFolderAction) {
-        m_newFolderAction->setEnabled(m_instance && m_instance->typeName() == "Minecraft");
+        m_newFolderAction->setEnabled(m_instance != nullptr && m_instance->typeName() == "Minecraft");
     }
 }
 
-void ModFolderPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
+void ModFolderPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)  // NOLINT(bugprone-easily-swappable-parameters)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     if (!sourceCurrent.isValid()) {
@@ -605,7 +608,7 @@ void ModFolderPage::updateMods(bool includeDeps)
     }
 
     if (updateDialog.exec()) {
-        auto tasks = new ConcurrentTask("Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        auto* tasks = new ConcurrentTask("Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
@@ -694,14 +697,14 @@ void ModFolderPage::exportModMetadata()
     if (mods.isEmpty()) {
         mods = m_model->allMods();
     }
-    std::sort(mods.begin(), mods.end(), [](const Mod* a, const Mod* b) { return a->name() < b->name(); });
+    std::ranges::sort(mods, [](const Mod* a, const Mod* b) { return a->name() < b->name(); });
     ExportToModListDialog dlg(m_instance->name(), mods, this);
     dlg.exec();
 }
 
 void ModFolderPage::createFolder()
 {
-    if (!m_instance || m_instance->typeName() != "Minecraft") {
+    if (m_instance == nullptr || m_instance->typeName() != "Minecraft") {
         return;
     }
 

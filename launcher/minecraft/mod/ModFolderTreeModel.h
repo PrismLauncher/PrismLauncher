@@ -22,6 +22,7 @@
 #include <QDir>
 #include <QHash>
 #include <QSortFilterProxyModel>
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -62,7 +63,7 @@ class ModFolderTreeModel : public QAbstractItemModel {
 
    private:
     struct Node {
-        enum class Kind { FOLDER, MOD };
+        enum class Kind : std::uint8_t { FOLDER, MOD };
         Kind kind = Kind::FOLDER;
         QString name;
         QDir dir;
@@ -76,7 +77,7 @@ class ModFolderTreeModel : public QAbstractItemModel {
     Node* nodeForIndex(const QModelIndex& index) const;
     QModelIndex indexForNode(Node* node, int column) const;
     void sortChildren(Node* node);
-    QString nodeDisplayName(const Node* node) const;
+    static QString nodeDisplayName(const Node* node);
 
    private:
     ModFolderModel* m_backend = nullptr;

@@ -276,11 +276,11 @@ void InstanceImportTask::processFlame()
     if (!m_extra_info.isEmpty()) {
         auto pack_id_it = m_extra_info.constFind("pack_id");
         Q_ASSERT(pack_id_it != m_extra_info.constEnd());
-        auto pack_id = pack_id_it.value();
+        const auto& pack_id = pack_id_it.value();
 
         auto pack_version_id_it = m_extra_info.constFind("pack_version_id");
         Q_ASSERT(pack_version_id_it != m_extra_info.constEnd());
-        auto pack_version_id = pack_version_id_it.value();
+        const auto& pack_version_id = pack_version_id_it.value();
 
         QString original_instance_id;
         auto original_instance_id_it = m_extra_info.constFind("original_instance_id");
@@ -372,8 +372,9 @@ void InstanceImportTask::processModrinth()
 
         QString pack_version_id;
         auto pack_version_id_it = m_extra_info.constFind("pack_version_id");
-        if (pack_version_id_it != m_extra_info.constEnd())
+        if (pack_version_id_it != m_extra_info.constEnd()) {
             pack_version_id = pack_version_id_it.value();
+        }
 
         QString original_instance_id;
         auto original_instance_id_it = m_extra_info.constFind("original_instance_id");

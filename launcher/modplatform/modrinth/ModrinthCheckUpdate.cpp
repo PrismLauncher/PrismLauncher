@@ -14,7 +14,9 @@
 
 #include "tasks/ConcurrentTask.h"
 
-static ModrinthAPI api;
+namespace {
+ModrinthAPI api;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+}  // namespace
 
 ModrinthCheckUpdate::ModrinthCheckUpdate(QList<Resource*>& resources,
                                          std::list<Version>& mcVersions,

@@ -19,7 +19,9 @@
 #include "net/NetJob.h"
 #include "tasks/Task.h"
 
-static FlameAPI api;
+namespace {
+FlameAPI api;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+}  // namespace
 
 bool FlameCheckUpdate::abort()
 {

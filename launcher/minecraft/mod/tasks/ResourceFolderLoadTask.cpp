@@ -124,7 +124,7 @@ void ResourceFolderLoadTask::executeTask()
         }
     }
 
-    for (auto mod : m_result->resources) {
+    for (const auto& mod : m_result->resources) {
         mod->moveToThread(m_thread_to_spawn_into);
     }
 
