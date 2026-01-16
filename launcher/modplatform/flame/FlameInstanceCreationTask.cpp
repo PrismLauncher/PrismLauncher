@@ -80,16 +80,18 @@ QString sanitizeFlameSubdirName(const QString& name)
 {
     auto sanitized = FS::RemoveInvalidFilenameChars(name.trimmed(), '-');
     sanitized = sanitized.trimmed();
-    if (sanitized.isEmpty())
+    if (sanitized.isEmpty()) {
         sanitized = QStringLiteral("modpack");
+}
     return sanitized;
 }
 
 QString applyModsSubdir(const QString& path, const QString& subdir_name)
 {
     static const QString prefix = QStringLiteral("mods/");
-    if (subdir_name.isEmpty() || !path.startsWith(prefix))
+    if (subdir_name.isEmpty() || !path.startsWith(prefix)) {
         return path;
+}
     return prefix + subdir_name + "/" + path.mid(prefix.size());
 }
 
@@ -163,8 +165,9 @@ bool FlameCreationTask::updateInstance()
     }
     if (m_useModsSubdir && m_modsSubdirName.isEmpty()) {
         auto fallbackName = inst->getManagedPackName();
-        if (fallbackName.isEmpty())
+        if (fallbackName.isEmpty()) {
             fallbackName = inst->name();
+}
         m_modsSubdirName = sanitizeFlameSubdirName(fallbackName);
     }
 
@@ -227,8 +230,9 @@ bool FlameCreationTask::updateInstance()
             QMutableMapIterator<int, Flame::File> old_files_it(old_files);
             while (old_files_it.hasNext()) {
                 old_files_it.next();
-                if (old_files_it.value().targetFolder == "mods")
+                if (old_files_it.value().targetFolder == "mods") {
                     old_files_it.remove();
+}
             }
         }
 
@@ -268,8 +272,9 @@ bool FlameCreationTask::updateInstance()
         for (const auto& entry : old_overrides) {
             if (entry.isEmpty())
                 continue;
-            if (skipModsRemoval && isModsPath(entry))
+            if (skipModsRemoval && isModsPath(entry)) {
                 continue;
+}
             qDebug() << "Scheduling" << entry << "for removal";
             m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
         }
@@ -301,10 +306,11 @@ bool FlameCreationTask::updateInstance()
 
                 try {
                     QJsonArray entries;
-                    if (fileIds.size() == 1)
+                    if (fileIds.size() == 1) {
                         entries = { Json::requireObject(Json::requireObject(doc), "data") };
-                    else
+                    } else {
                         entries = Json::requireArray(Json::requireObject(doc), "data");
+}
 
                     for (auto entry : entries) {
                         auto entry_obj = Json::requireObject(entry);
@@ -339,8 +345,9 @@ bool FlameCreationTask::updateInstance()
 
                 // Delete the files
                 for (auto& file : old_files) {
-                    if (file.version.fileName.isEmpty() || file.targetFolder.isEmpty())
+                    if (file.version.fileName.isEmpty() || file.targetFolder.isEmpty()) {
                         continue;
+}
 
                     QString relative_path(FS::PathCombine(file.targetFolder, file.version.fileName));
                     qDebug() << "Scheduling" << relative_path << "for removal";
@@ -549,8 +556,9 @@ bool FlameCreationTask::createInstance()
             while (it.hasNext()) {
                 it.next();
                 QFileInfo entry(it.fileInfo());
-                if (entry.fileName() == m_modsSubdirName)
+                if (entry.fileName() == m_modsSubdirName) {
                     continue;
+}
 
                 auto destination = FS::PathCombine(subdir_path, entry.fileName());
                 if (!FS::move(entry.filePath(), destination)) {
@@ -837,8 +845,9 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
         }
 
         auto relpath = FS::PathCombine(mod.targetFolder, mod.name);
-        if (mod.disabled)
+        if (mod.disabled) {
             relpath += ".disabled";
+}
         relpath = applyModsSubdir(relpath, use_mods_subdir ? m_modsSubdirName : QString());
         auto destPath = FS::PathCombine(m_stagingPath, "minecraft", relpath);
 
@@ -871,8 +880,9 @@ void FlameCreationTask::validateOtherResources(QEventLoop& loop)
     for (auto [fileName, targetFolder] : m_otherResources) {
         qDebug() << "Checking" << fileName << "...";
         QString effective_target_folder = targetFolder;
-        if (use_mods_subdir && targetFolder == "mods")
+        if (use_mods_subdir && targetFolder == "mods") {
             effective_target_folder = FS::PathCombine("mods", m_modsSubdirName);
+}
         auto localPath = FS::PathCombine(m_stagingPath, "minecraft", effective_target_folder, fileName);
 
         /// @brief check the target and move the the file
@@ -948,10 +958,11 @@ void FlameCreationTask::validateOtherResources(QEventLoop& loop)
         }
         QString effective_target_folder = file.targetFolder;
         if (use_mods_subdir) {
-            if (file.targetFolder == "mods")
+            if (file.targetFolder == "mods") {
                 effective_target_folder = FS::PathCombine("mods", m_modsSubdirName);
-            else
+            } else {
                 effective_target_folder = applyModsSubdir(file.targetFolder, m_modsSubdirName);
+}
         }
         QDir target_dir(FS::PathCombine(m_stagingPath, "minecraft", effective_target_folder));
         QDir index_dir(target_dir.filePath(".index"));

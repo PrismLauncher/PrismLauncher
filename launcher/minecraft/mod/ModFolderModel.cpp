@@ -57,12 +57,14 @@ static void collectWatchPaths(const QDir& dir, QSet<QString>& paths)
     paths.insert(dir.absolutePath());
 
     QDir index_dir(dir.filePath(".index"));
-    if (index_dir.exists())
+    if (index_dir.exists()) {
         paths.insert(index_dir.absolutePath());
+}
 
     for (auto entry : dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot)) {
-        if (entry.fileName() == ".index")
+        if (entry.fileName() == ".index") {
             continue;
+}
         collectWatchPaths(QDir(entry.absoluteFilePath()), paths);
     }
 }

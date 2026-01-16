@@ -83,8 +83,9 @@ QString EnsureMetadataTask::getExistingHash(Resource* resource)
 
 QDir EnsureMetadataTask::indexDirForResource(Resource* resource) const
 {
-    if (m_indexDirResolver)
+    if (m_indexDirResolver) {
         return m_indexDirResolver(resource);
+}
     return m_indexDir;
 }
 

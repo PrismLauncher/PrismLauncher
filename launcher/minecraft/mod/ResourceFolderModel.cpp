@@ -74,8 +74,9 @@ bool ResourceFolderModel::startWatching(const QStringList& paths)
 
 bool ResourceFolderModel::stopWatching(const QStringList& paths)
 {
-    if (!m_is_watching && m_watcher.directories().isEmpty() && m_watcher.files().isEmpty())
+    if (!m_is_watching && m_watcher.directories().isEmpty() && m_watcher.files().isEmpty()) {
         return false;
+}
 
     auto couldnt_be_stopped = m_watcher.removePaths(paths);
     for (auto path : paths) {
@@ -98,8 +99,9 @@ QDir ResourceFolderModel::indexDirForResource(const Resource& resource) const
 QModelIndex ResourceFolderModel::indexForResource(const Resource& resource) const
 {
     auto it = m_resources_index.constFind(resource.internal_id());
-    if (it == m_resources_index.constEnd())
+    if (it == m_resources_index.constEnd()) {
         return {};
+}
     return index(it.value(), 0);
 }
 
@@ -108,11 +110,13 @@ QModelIndexList ResourceFolderModel::indexesForResources(const QList<Resource*>&
     QModelIndexList indexes;
     indexes.reserve(resources.size());
     for (auto* resource : resources) {
-        if (!resource)
+        if (!resource) {
             continue;
+}
         auto idx = indexForResource(*resource);
-        if (idx.isValid())
+        if (idx.isValid()) {
             indexes.append(idx);
+}
     }
     return indexes;
 }
@@ -261,8 +265,9 @@ bool ResourceFolderModel::uninstallResource(const QString& file_name, const QDir
     auto target_dir = QDir::cleanPath(QDir::fromNativeSeparators(dir.absolutePath()));
     for (auto& resource : m_resources) {
         auto resource_dir = QDir::cleanPath(QDir::fromNativeSeparators(resource->fileinfo().absolutePath()));
-        if (resource_dir != target_dir)
+        if (resource_dir != target_dir) {
             continue;
+}
 
         auto resourceFileName = resource->fileinfo().fileName();
         if (!resource->enabled()) {
@@ -977,7 +982,8 @@ QString ResourceFolderModel::internalIdForFile(const QFileInfo& info) const
 {
     auto rel_path = QDir(m_dir).relativeFilePath(info.absoluteFilePath());
     rel_path = QDir::cleanPath(QDir::fromNativeSeparators(rel_path));
-    if (rel_path.startsWith(".."))
+    if (rel_path.startsWith("..")) {
         return info.fileName();
+}
     return rel_path;
 }
