@@ -89,4 +89,8 @@ class ModFolderModel : public ResourceFolderModel {
 
    private slots:
     void onParseSucceeded(int ticket, QString resource_id) override;
+    void onIconLoaded(int row, QString key);
+
+   private:
+    mutable QSet<QString> m_loadingIcons; /**< Tracks icon keys currently being loaded to avoid duplicate loads */
 };

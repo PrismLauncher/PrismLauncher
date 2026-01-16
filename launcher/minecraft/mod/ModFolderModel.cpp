@@ -48,7 +48,9 @@
 #include <QThreadPool>
 #include <QUrl>
 #include <QUuid>
+#include <QtConcurrent/QtConcurrentRun>
 
+#include "MTPixmapCache.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 
 ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)
@@ -132,7 +134,47 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
             if (column == NameColumn && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
                 return QIcon::fromTheme("status-yellow");
             if (column == ImageColumn) {
-                return at(row).icon({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
+                // Try to fetch from pixmap cache using a deterministic string key (file path)
+                QString iconKey = at(row).fileinfo().absoluteFilePath();
+                QPixmap cached;
+                if (PixmapCache::find(iconKey, &cached)) {
+                    return cached.scaled({ 32, 32 }, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+                }
+
+                // Return a lightweight placeholder and schedule async load if not already loading
+                if (!m_loadingIcons.contains(iconKey)) {
+                    // mark as loading
+                    m_loadingIcons.insert(iconKey);
+
+                    // Capture by value what we need; run loading in background
+                    auto self = const_cast<ModFolderModel*>(this);
+                    auto resourcePtr = m_resources.at(row);
+                    (void)QtConcurrent::run([self, resourcePtr, row, iconKey]() {
+                        QPixmap pixmap;
+                        bool ok = false;
+                        try {
+                            const Mod& mod = *static_cast<const Mod*>(resourcePtr.get());
+                            ok = ModUtils::loadIconFile(mod, &pixmap);
+                        } catch (...) {
+                            ok = false;
+                        }
+                        if (ok && !pixmap.isNull()) {
+                            PixmapCache::insert(iconKey, pixmap);
+                        }
+                        // Notify model in main thread that icon load attempt finished (success or fail)
+                        QMetaObject::invokeMethod(self, "onIconLoaded", Qt::QueuedConnection, Q_ARG(int, row), Q_ARG(QString, iconKey));
+                    });
+                }
+
+                // placeholder pixmap
+                QPixmap placeholder;
+                if (!PixmapCache::find("mod_placeholder", &placeholder)) {
+                    QPixmap px(32, 32);
+                    px.fill(Qt::transparent);
+                    PixmapCache::insert("mod_placeholder", px);
+                    placeholder = px;
+                }
+                return placeholder;
             }
             return {};
         }
@@ -237,4 +279,22 @@ void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)
         static_cast<Mod*>(resource.get())->finishResolvingWithDetails(std::move(result->details));
 
     emit dataChanged(index(row), index(row, columnCount(QModelIndex()) - 1));
+}
+
+void ModFolderModel::onIconLoaded(int row, QString key)
+{
+    // Remove from loading set and notify that the image cell has changed so the view will repaint
+    m_loadingIcons.remove(key);
+
+    // Verify if the row still matches this key, otherwise find the correct row
+    if (row >= 0 && row < m_resources.count() && m_resources.at(row)->fileinfo().absoluteFilePath() == key) {
+        emit dataChanged(index(row, ImageColumn), index(row, ImageColumn));
+    } else {
+        for (int i = 0; i < m_resources.count(); ++i) {
+            if (m_resources.at(i)->fileinfo().absoluteFilePath() == key) {
+                emit dataChanged(index(i, ImageColumn), index(i, ImageColumn));
+                return;
+            }
+        }
+    }
 }
