@@ -48,9 +48,9 @@ class JavaProfileSettingsWidget : public QWidget {
     Q_OBJECT
 
    public:
-    explicit JavaProfileSettingsWidget(InstancePtr instance, QString major, QWidget* parent = nullptr);
+    explicit JavaProfileSettingsWidget(BaseInstance* instance, QString major, QWidget* parent = nullptr);
     explicit JavaProfileSettingsWidget(QString major, QWidget* parent = nullptr);
-    explicit JavaProfileSettingsWidget(InstancePtr instance, QWidget* parent = nullptr);
+    explicit JavaProfileSettingsWidget(BaseInstance* instance, QWidget* parent = nullptr);
     ~JavaProfileSettingsWidget() override;
 
     void loadSettings();
@@ -64,7 +64,7 @@ class JavaProfileSettingsWidget : public QWidget {
 
    private:
     QString m_major;
-    InstancePtr m_instance;
+    BaseInstance* m_instance;
     Ui::JavaProfileSettingsWidget* m_ui;
     unique_qobject_ptr<JavaCommon::TestCheck> m_checker;
 };

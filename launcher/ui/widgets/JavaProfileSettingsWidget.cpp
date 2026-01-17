@@ -54,11 +54,11 @@
 #include "ui_JavaProfileSettingsWidget.h"
 
 JavaProfileSettingsWidget::JavaProfileSettingsWidget(QString major, QWidget* parent) : JavaProfileSettingsWidget(nullptr, major, parent) {}
-JavaProfileSettingsWidget::JavaProfileSettingsWidget(InstancePtr instance, QWidget* parent)
+JavaProfileSettingsWidget::JavaProfileSettingsWidget(BaseInstance* instance, QWidget* parent)
     : JavaProfileSettingsWidget(instance, {}, parent)
 {}
 
-JavaProfileSettingsWidget::JavaProfileSettingsWidget(InstancePtr instance, QString major, QWidget* parent)
+JavaProfileSettingsWidget::JavaProfileSettingsWidget(BaseInstance* instance, QString major, QWidget* parent)
 
     : QWidget(parent), m_major(major), m_instance(instance), m_ui(new Ui::JavaProfileSettingsWidget)
 {
@@ -76,14 +76,14 @@ JavaProfileSettingsWidget::JavaProfileSettingsWidget(InstancePtr instance, QStri
     } else {
         m_ui->javaDownloadBtn->setVisible(BuildConfig.JAVA_DOWNLOADER_ENABLED);
 
-        SettingsObjectPtr settings = m_instance->settings();
+        auto settings = m_instance->settings();
 
         connect(settings->getSetting("OverrideJavaLocation").get(), &Setting::SettingChanged, m_ui->javaInstallationGroupBox,
                 [this, settings] { m_ui->javaInstallationGroupBox->setChecked(settings->get("OverrideJavaLocation").toBool()); });
         connect(settings->getSetting("JavaPath").get(), &Setting::SettingChanged, m_ui->javaInstallationGroupBox,
                 [this, settings] { m_ui->javaPathTextBox->setText(settings->get("JavaPath").toString()); });
         connect(m_ui->javaDownloadBtn, &QPushButton::clicked, this, [this] {
-            auto javaDialog = new Java::InstallDialog({}, m_instance.get(), this);
+            auto javaDialog = new Java::InstallDialog({}, m_instance, this);
             javaDialog->exec();
         });
         connect(m_ui->javaPathTextBox, &QLineEdit::textChanged, [this](QString newValue) {
@@ -111,7 +111,7 @@ JavaProfileSettingsWidget::~JavaProfileSettingsWidget()
 
 void JavaProfileSettingsWidget::loadSettings()
 {
-    SettingsObjectPtr settings;
+    SettingsObject* settings;
 
     if (m_instance != nullptr)
         settings = m_instance->settings();
@@ -148,7 +148,7 @@ void JavaProfileSettingsWidget::loadSettings()
 
 void JavaProfileSettingsWidget::saveSettings()
 {
-    SettingsObjectPtr settings;
+    SettingsObject* settings;
 
     if (m_instance != nullptr)
         settings = m_instance->settings();
@@ -250,7 +250,7 @@ void JavaProfileSettingsWidget::onJavaAutodetect()
         return;
     }
 
-    VersionSelectDialog versionDialog(APPLICATION->javalist().get(), tr("Select a Java version"), this, true);
+    VersionSelectDialog versionDialog(APPLICATION->javalist(), tr("Select a Java version"), this, true);
     versionDialog.setResizeOn(2);
     versionDialog.exec();
 
