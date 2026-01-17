@@ -48,6 +48,7 @@
 
 #include <BaseInstance.h>
 
+#include "QObjectPtr.h"
 #include "launch/LogModel.h"
 #include "minecraft/launch/MinecraftTarget.h"
 
@@ -283,7 +284,7 @@ class Application : public QApplication {
     // FIXME: attach to instances instead.
     struct InstanceXtras {
         InstanceWindow* window = nullptr;
-        std::unique_ptr<LaunchController> controller;
+        unique_qobject_ptr<LaunchController> controller;
     };
     std::map<QString, InstanceXtras> m_instanceExtras;
     mutable QMutex m_instanceExtrasMutex;
