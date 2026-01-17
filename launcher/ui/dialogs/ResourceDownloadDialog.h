@@ -118,9 +118,7 @@ class ResourcePackDownloadDialog final : public ResourceDownloadDialog {
     Q_OBJECT
 
    public:
-    explicit ResourcePackDownloadDialog(QWidget* parent,
-                                        ResourcePackFolderModel* resource_packs,
-                                        BaseInstance* instance);
+    explicit ResourcePackDownloadDialog(QWidget* parent, ResourcePackFolderModel* resource_packs, BaseInstance* instance);
     ~ResourcePackDownloadDialog() override = default;
 
     //: String that gets appended to the resource pack download dialog title ("Download " + resourcesString())
@@ -137,9 +135,7 @@ class TexturePackDownloadDialog final : public ResourceDownloadDialog {
     Q_OBJECT
 
    public:
-    explicit TexturePackDownloadDialog(QWidget* parent,
-                                       TexturePackFolderModel* resource_packs,
-                                       BaseInstance* instance);
+    explicit TexturePackDownloadDialog(QWidget* parent, TexturePackFolderModel* resource_packs, BaseInstance* instance);
     ~TexturePackDownloadDialog() override = default;
 
     //: String that gets appended to the texture pack download dialog title ("Download " + resourcesString())

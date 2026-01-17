@@ -67,8 +67,6 @@ void DataPackPage::downloadDataPacks()
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
 
-    auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
-
     m_downloadDialog = new ResourceDownload::DataPackDownloadDialog(this, m_model, m_instance);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &DataPackPage::downloadDialogFinished);
@@ -119,7 +117,6 @@ void DataPackPage::updateDataPacks()
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
 
-    auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Data pack updates are unavailable when metadata is disabled!"));
         return;

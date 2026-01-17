@@ -44,8 +44,7 @@ class InstanceSettingsPage : public MinecraftSettingsWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit InstanceSettingsPage(MinecraftInstance* instance, QWidget* parent = nullptr)
-        : MinecraftSettingsWidget(instance, parent)
+    explicit InstanceSettingsPage(MinecraftInstance* instance, QWidget* parent = nullptr) : MinecraftSettingsWidget(instance, parent)
     {
         connect(APPLICATION, &Application::globalSettingsAboutToOpen, this, &InstanceSettingsPage::saveSettings);
         connect(APPLICATION, &Application::globalSettingsApplied, this, &InstanceSettingsPage::loadSettings);

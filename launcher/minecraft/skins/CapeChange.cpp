@@ -36,8 +36,8 @@
 
 #include "CapeChange.h"
 
-#include <memory>
 #include <net/DummySink.h>
+#include <memory>
 #include "net/RawHeaderProxy.h"
 
 CapeChange::CapeChange(QString cape) : NetRequest(), m_capeId(cape)

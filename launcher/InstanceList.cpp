@@ -159,7 +159,7 @@ int InstanceList::rowCount(const QModelIndex& parent) const
 QModelIndex InstanceList::index(int row, int column, const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
-    if (row < 0 || row >= m_instances.size())
+    if (row < 0 || static_cast<std::size_t>(row) >= m_instances.size())
         return QModelIndex();
     return createIndex(row, column, m_instances.at(row).get());
 }
@@ -508,7 +508,6 @@ InstanceList::InstListError InstanceList::loadList()
 
     for (auto& id : discoverInstances()) {
         if (existingIds.contains(id)) {
-            auto instPair = existingIds[id];
             existingIds.remove(id);
             qInfo() << "Should keep and soft-reload" << id;
         } else {
@@ -1035,7 +1034,6 @@ bool InstanceList::commitStagedInstance(const QString& path,
         groupName = QString();
 
     QString instID;
-    BaseInstance* inst;
 
     auto should_override = commiting.shouldOverride();
 

@@ -19,7 +19,8 @@ bool VanillaCreationTask::createInstance()
 {
     setStatus(tr("Creating instance from version %1").arg(m_version->name()));
 
-    MinecraftInstance inst(m_globalSettings, std::make_unique<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg")), m_stagingPath);
+    MinecraftInstance inst(m_globalSettings, std::make_unique<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg")),
+                           m_stagingPath);
     SettingsObject::Lock lock(inst.settings());
 
     auto components = inst.getPackProfile();

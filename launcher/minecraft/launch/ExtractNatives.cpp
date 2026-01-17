@@ -65,7 +65,6 @@ void ExtractNatives::executeTask()
         emitSucceeded();
         return;
     }
-    auto settings = instance->settings();
 
     auto outputPath = instance->getNativePath();
     FS::ensureFolderPathExists(outputPath);

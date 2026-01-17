@@ -239,9 +239,7 @@ void WorldListPage::on_actionData_Packs_triggered()
     bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
     m_datapackModel.reset(new DataPackFolderModel(folder, m_inst, isIndexed, true));
 
-    provider.addPageCreator([this] {
-        return new DataPackPage(m_inst, m_datapackModel.get(), this);
-    });
+    provider.addPageCreator([this] { return new DataPackPage(m_inst, m_datapackModel.get(), this); });
 
     auto layout = new QVBoxLayout(dialog);
 
