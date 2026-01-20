@@ -143,6 +143,7 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
 
     connect(m_ui->useNativeOpenALCheck, &QAbstractButton::toggled, m_ui->lineEditOpenALPath, &QWidget::setEnabled);
     connect(m_ui->useNativeGLFWCheck, &QAbstractButton::toggled, m_ui->lineEditGLFWPath, &QWidget::setEnabled);
+    connect(m_ui->useNativeJemallocCheck, &QAbstractButton::toggled, m_ui->lineEditJemallocPath, &QWidget::setEnabled);
 
     loadSettings();
 }
@@ -214,6 +215,13 @@ void MinecraftSettingsWidget::loadSettings()
     m_ui->lineEditOpenALPath->setPlaceholderText(APPLICATION->m_detectedOpenALPath);
 #else
     m_ui->lineEditOpenALPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.OPENAL_LIBRARY_NAME));
+#endif
+    m_ui->useNativeJemallocCheck->setChecked(settings->get("UseNativeJemalloc").toBool());
+    m_ui->lineEditJemallocPath->setText(settings->get("CustomJemallocPath").toString());
+#ifdef Q_OS_LINUX
+    m_ui->lineEditJemallocPath->setPlaceholderText(APPLICATION->m_detectedJemallocPath);
+#else
+    m_ui->lineEditJemallocPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.JEMALLOC_LIBRARY_NAME));
 #endif
 
     // Performance
@@ -386,11 +394,15 @@ void MinecraftSettingsWidget::saveSettings()
             settings->set("CustomGLFWPath", m_ui->lineEditGLFWPath->text());
             settings->set("UseNativeOpenAL", m_ui->useNativeOpenALCheck->isChecked());
             settings->set("CustomOpenALPath", m_ui->lineEditOpenALPath->text());
+            settings->set("UseNativeJemalloc", m_ui->useNativeJemallocCheck->isChecked());
+            settings->set("CustomJemallocPath", m_ui->lineEditJemallocPath->text());
         } else {
             settings->reset("UseNativeGLFW");
             settings->reset("CustomGLFWPath");
             settings->reset("UseNativeOpenAL");
             settings->reset("CustomOpenALPath");
+            settings->reset("UseNativeJemalloc");
+            settings->reset("CustomJemallocPath");
         }
 
         // Performance
