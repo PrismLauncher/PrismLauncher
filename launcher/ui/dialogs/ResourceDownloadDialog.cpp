@@ -116,7 +116,12 @@ void ResourceDownloadDialog::reject()
 // won't work with subclasses if we put it in this ctor.
 void ResourceDownloadDialog::initializeContainer()
 {
+#if defined(Q_OS_MACOS)
+    // Add top and right padding on macOS to improve corner appearance
+    layout()->setContentsMargins(0, 15, 10, 0);
+#else
     layout()->setContentsMargins(0, 0, 0, 0);
+#endif
 
     m_container = new PageContainer(this, {}, this);
     m_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
