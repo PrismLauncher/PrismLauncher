@@ -1564,9 +1564,7 @@ bool Application::launch(BaseInstance* instance,
         } else if (m_mainWindow) {
             controller->setParentWidget(m_mainWindow);
         }
-        connect(controller.get(), &LaunchController::succeeded, this, &Application::controllerSucceeded);
-        connect(controller.get(), &LaunchController::failed, this, &Application::controllerFailed);
-        connect(controller.get(), &LaunchController::aborted, this, [this] { controllerFailed(tr("Aborted")); });
+        connect(controller.get(), &LaunchController::finished, this, &Application::controllerFinished);
         addRunningInstance();
         QMetaObject::invokeMethod(controller.get(), &Task::start, Qt::QueuedConnection);
         return true;
@@ -1638,7 +1636,7 @@ void Application::updateIsRunning(bool running)
     m_updateRunning = running;
 }
 
-void Application::controllerSucceeded()
+void Application::controllerFinished()
 {
     auto controller = qobject_cast<LaunchController*>(sender());
     if (!controller)
@@ -1646,10 +1644,11 @@ void Application::controllerSucceeded()
     auto id = controller->id();
 
     QMutexLocker locker(&m_instanceExtrasMutex);
-    auto& extras = m_instanceExtras[id];
+    auto& extras = m_instanceExtras.at(id);
 
+    const bool wasSuccessful = controller->wasSuccessful();
     // on success, do...
-    if (controller->instance()->settings()->get("AutoCloseConsole").toBool()) {
+    if (wasSuccessful && controller->instance()->settings()->get("AutoCloseConsole").toBool()) {
         if (extras.window) {
             QMetaObject::invokeMethod(extras.window, &QWidget::close, Qt::QueuedConnection);
         }
@@ -1659,29 +1658,8 @@ void Application::controllerSucceeded()
 
     // quit when there are no more windows.
     if (shouldExitNow()) {
-        m_status = Status::Succeeded;
-        exit(0);
-    }
-}
-
-void Application::controllerFailed(const QString& error)
-{
-    Q_UNUSED(error);
-    auto controller = qobject_cast<LaunchController*>(sender());
-    if (!controller)
-        return;
-    auto id = controller->id();
-    QMutexLocker locker(&m_instanceExtrasMutex);
-    auto& extras = m_instanceExtras[id];
-
-    // on failure, do... nothing
-    extras.controller.reset();
-    subRunningInstance();
-
-    // quit when there are no more windows.
-    if (shouldExitNow()) {
-        m_status = Status::Failed;
-        exit(1);
+        m_status = wasSuccessful ? Succeeded : Failed;
+        exit(wasSuccessful ? 0 : 1);
     }
 }
 

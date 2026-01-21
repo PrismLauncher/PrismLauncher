@@ -221,8 +221,7 @@ class Application : public QApplication {
    private slots:
     void on_windowClose();
     void messageReceived(const QByteArray& message);
-    void controllerSucceeded();
-    void controllerFailed(const QString& error);
+    void controllerFinished();
     void setupWizardFinished(int status);
 
    private:
