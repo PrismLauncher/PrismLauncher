@@ -1002,6 +1002,17 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
 
     out << "Launcher: " + getLauncher();
     out << emptyLine;
+
+    // environment variables
+    const QString env = settings->get("OverrideEnv").toBool() ? settings->get("Env").toString() : APPLICATION->settings()->get("Env").toString();
+    if (auto envMap = Json::toMap(env); !envMap.isEmpty()) {
+        out << "Custom environment variables:";
+        for (auto [key, value] : envMap.asKeyValueRange()) {
+            out << indent + key + "=" + value.toString();
+        }
+        out << emptyLine;
+    }
+
     return out;
 }
 
