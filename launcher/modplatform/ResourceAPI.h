@@ -81,7 +81,7 @@ class ResourceAPI {
         std::optional<QString> search;
         std::optional<SortingMethod> sorting;
         std::optional<ModPlatform::ModLoaderTypes> loaders;
-        std::optional<std::list<Version>> versions;
+        std::optional<std::vector<Version>> versions;
         std::optional<ModPlatform::Side> side;
         std::optional<QStringList> categoryIds;
         bool openSource;
@@ -90,7 +90,7 @@ class ResourceAPI {
     struct VersionSearchArgs {
         ModPlatform::IndexedPack::Ptr pack;
 
-        std::optional<std::list<Version>> mcVersions;
+        std::optional<std::vector<Version>> mcVersions;
         std::optional<ModPlatform::ModLoaderTypes> loaders;
         ModPlatform::ResourceType resourceType;
     };
@@ -124,7 +124,7 @@ class ResourceAPI {
 
     QString mapMCVersionToModrinth(Version v) const;
 
-    QString getGameVersionsString(std::list<Version> mcVersions) const;
+    QString getGameVersionsString(std::vector<Version> mcVersions) const;
 
    public:
     virtual auto getSearchURL(SearchArgs const& args) const -> std::optional<QString> = 0;

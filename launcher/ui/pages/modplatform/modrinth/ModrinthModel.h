@@ -98,7 +98,7 @@ class ModpackListModel : public QAbstractListModel {
    protected:
     void requestLogo(QString file, QString url);
 
-    inline auto getMineVersions() const -> std::list<Version>;
+    inline auto getMineVersions() const -> std::vector<Version>;
 
    protected:
     ModrinthPage* m_parent;

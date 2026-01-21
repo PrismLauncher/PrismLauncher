@@ -29,7 +29,7 @@
 
 #include <optional>
 
-static std::list<Version> mcVersions(BaseInstance* inst)
+static std::vector<Version> mcVersions(BaseInstance* inst)
 {
     return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion() };
 }

@@ -16,7 +16,7 @@
 static ModrinthAPI api;
 
 ModrinthCheckUpdate::ModrinthCheckUpdate(QList<Resource*>& resources,
-                                         std::list<Version>& mcVersions,
+                                         std::vector<Version>& mcVersions,
                                          QList<ModPlatform::ModLoaderType> loadersList,
                                          std::shared_ptr<ResourceFolderModel> resourceModel)
     : CheckUpdateTask(resources, mcVersions, std::move(loadersList), std::move(resourceModel))
