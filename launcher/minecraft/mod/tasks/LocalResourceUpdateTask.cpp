@@ -32,6 +32,7 @@ LocalResourceUpdateTask::LocalResourceUpdateTask(QDir index_dir, ModPlatform::In
     // Ensure a '.index' folder exists in the mods folder, and create it if it does not
     if (!FS::ensureFolderPathExists(index_dir.path())) {
         emitFailed(QString("Unable to create index directory at %1!").arg(index_dir.absolutePath()));
+        return;
     }
 
 #ifdef Q_OS_WIN32

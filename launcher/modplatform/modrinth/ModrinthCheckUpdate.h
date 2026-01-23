@@ -7,7 +7,7 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
 
    public:
     ModrinthCheckUpdate(QList<Resource*>& resources,
-                        std::list<Version>& mcVersions,
+                        std::vector<Version>& mcVersions,
                         QList<ModPlatform::ModLoaderType> loadersList,
                         ResourceFolderModel* resourceModel);
 

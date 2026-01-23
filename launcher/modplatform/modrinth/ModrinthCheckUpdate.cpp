@@ -16,7 +16,7 @@
 static ModrinthAPI api;
 
 ModrinthCheckUpdate::ModrinthCheckUpdate(QList<Resource*>& resources,
-                                         std::list<Version>& mcVersions,
+                                         std::vector<Version>& mcVersions,
                                          QList<ModPlatform::ModLoaderType> loadersList,
                                          ResourceFolderModel* resourceModel)
     : CheckUpdateTask(resources, mcVersions, std::move(loadersList), resourceModel)
@@ -90,13 +90,19 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
     QStringList hashes;
     if (forceModLoaderCheck && loader.has_value()) {
         for (auto hash : m_mappings.keys()) {
-            if (m_mappings[hash]->metadata()->loaders & loader.value()) {
+            if (m_mappings.value(hash)->metadata()->loaders & loader.value()) {
                 hashes.append(hash);
             }
         }
     } else {
         hashes = m_mappings.keys();
     }
+
+    if (hashes.isEmpty()) {
+        checkNextLoader();
+        return;
+    }
+
     auto job = api.latestVersions(hashes, m_hashType, m_gameVersions, loader, response.get());
 
     connect(job.get(), &Task::succeeded, this, [this, response, loader] { checkVersionsResponse(response.get(), loader); });

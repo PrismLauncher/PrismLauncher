@@ -97,10 +97,10 @@ void PackFetchTask::fetchPrivate(const QStringList& toFetch)
         });
 
         connect(job, &NetJob::aborted, this, [this, job, data] {
-            emit aborted();
             job->deleteLater();
-
             data->clear();
+
+            emit aborted();
         });
 
         job->start();

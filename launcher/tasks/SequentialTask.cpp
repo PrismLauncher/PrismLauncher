@@ -42,9 +42,9 @@ SequentialTask::SequentialTask(QString task_name) : ConcurrentTask(task_name, 1)
 
 void SequentialTask::subTaskFailed(Task::Ptr task, const QString& msg)
 {
-    emitFailed(msg);
     qWarning() << msg;
     ConcurrentTask::subTaskFailed(task, msg);
+    emitFailed(msg);
 }
 
 void SequentialTask::updateState()

@@ -51,11 +51,13 @@ void ModMinecraftJar::executeTask()
     // nuke obsolete stripped jar(s) if needed
     if (!FS::ensureFolderPathExists(m_inst->binRoot())) {
         emitFailed(tr("Couldn't create the bin folder for Minecraft.jar"));
+        return;
     }
 
     auto finalJarPath = QDir(m_inst->binRoot()).absoluteFilePath("minecraft.jar");
     if (!removeJar()) {
         emitFailed(tr("Couldn't remove stale jar file: %1").arg(finalJarPath));
+        return;
     }
 
     // create temporary modded jar, if needed

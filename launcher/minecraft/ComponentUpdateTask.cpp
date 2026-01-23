@@ -773,8 +773,9 @@ void ComponentUpdateTask::checkIfAllFinished()
                                          .arg(component->getName(), component->m_version));
             }
         }
+        d->remoteLoadStatusList.clear();
+
         auto allErrors = allErrorsList.join("\n");
         emitFailed(tr("Component metadata update task failed while downloading from remote server:\n%1").arg(allErrors));
-        d->remoteLoadStatusList.clear();
     }
 }

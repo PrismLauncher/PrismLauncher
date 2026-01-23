@@ -98,8 +98,8 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     try {
         TechnicSolder::loadPackBuild(build, obj);
     } catch (const JSONValidationError& e) {
-        emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
         m_filesNetJob.reset();
+        emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
         return;
     }
 
@@ -159,8 +159,8 @@ void Technic::SolderPackInstallTask::downloadSucceeded()
 void Technic::SolderPackInstallTask::downloadFailed(QString reason)
 {
     m_abortable = false;
-    emitFailed(reason);
     m_filesNetJob.reset();
+    emitFailed(reason);
 }
 
 void Technic::SolderPackInstallTask::downloadProgressChanged(qint64 current, qint64 total)
@@ -171,8 +171,8 @@ void Technic::SolderPackInstallTask::downloadProgressChanged(qint64 current, qin
 
 void Technic::SolderPackInstallTask::downloadAborted()
 {
-    emitAborted();
     m_filesNetJob.reset();
+    emitAborted();
 }
 
 void Technic::SolderPackInstallTask::extractFinished()

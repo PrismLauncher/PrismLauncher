@@ -262,7 +262,7 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
     return netJob;
 }
 
-QString ResourceAPI::getGameVersionsString(std::list<Version> mcVersions) const
+QString ResourceAPI::getGameVersionsString(std::vector<Version> mcVersions) const
 {
     QString s;
     for (auto& ver : mcVersions) {

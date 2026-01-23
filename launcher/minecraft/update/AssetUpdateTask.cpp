@@ -68,6 +68,7 @@ void AssetUpdateTask::assetIndexFinished()
         auto entry = metacache->resolveEntry("asset_indexes", assets->id + ".json");
         metacache->evictEntry(entry);
         emitFailed(tr("Failed to read the assets index!"));
+        return;
     }
 
     auto job = index.getDownloadJob();

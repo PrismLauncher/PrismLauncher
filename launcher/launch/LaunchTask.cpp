@@ -76,6 +76,7 @@ void LaunchTask::executeTask()
     if (!m_steps.size()) {
         state = LaunchTask::Finished;
         emitSucceeded();
+        return;
     }
     state = LaunchTask::Running;
     onStepFinished();
