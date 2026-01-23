@@ -88,7 +88,12 @@ InstallLoaderDialog::InstallLoaderDialog(PackProfile* profile, const QString& ui
     : QDialog(parent), profile(profile), container(new PageContainer(this, QString(), this)), buttons(new QDialogButtonBox(this))
 {
     auto layout = new QVBoxLayout(this);
+#if defined(Q_OS_MACOS)
+    // Add top and right padding on macOS to improve corner appearance
+    layout->setContentsMargins(0, 15, 10, 0);
+#else
     layout->setContentsMargins(0, 0, 0, 0);
+#endif
 
     container->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     layout->addWidget(container);
