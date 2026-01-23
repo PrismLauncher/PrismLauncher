@@ -107,3 +107,9 @@ jobs:
           bundle: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-Flatpak.flatpak
           manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml
           arch: ${{ matrix.arch }}
+
+      - name: Upload Flatpak Bundle
+        uses: actions/upload-artifact@v4
+        with:
+        name: PrismLauncher-Flatpak
+        path: PrismLauncher-*.flatpak
