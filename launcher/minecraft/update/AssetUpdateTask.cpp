@@ -114,8 +114,8 @@ bool AssetUpdateTask::abort()
 
 QString AssetUpdateTask::resourceUrl()
 {
-    if (const QString override = APPLICATION->settings()->get("ResourceURLOverride").toString(); !override.isEmpty()) {
-        return override;
+    if (const QString urlOverride = APPLICATION->settings()->get("ResourceURLOverride").toString(); !urlOverride.isEmpty()) {
+        return urlOverride;
     }
 
     return BuildConfig.DEFAULT_RESOURCE_BASE;
