@@ -52,6 +52,7 @@
 
 #include "Application.h"
 #include "net/NetRequest.h"
+#include "update/AssetUpdateTask.h"
 
 namespace {
 QSet<QString> collectPathsFromDir(QString dirPath)
@@ -298,7 +299,7 @@ QString AssetObject::getLocalPath()
 
 QUrl AssetObject::getUrl()
 {
-    auto resourceURL = APPLICATION->settings()->get("ResourceURL").toString();
+    auto resourceURL = AssetUpdateTask::resourceUrl();
     return resourceURL + getRelPath();
 }
 
