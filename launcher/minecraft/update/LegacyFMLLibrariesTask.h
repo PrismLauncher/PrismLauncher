@@ -5,11 +5,11 @@
 
 class MinecraftInstance;
 
-class FMLLibrariesTask : public Task {
+class LegacyFMLLibrariesTask : public Task {
     Q_OBJECT
    public:
-    FMLLibrariesTask(MinecraftInstance* inst);
-    virtual ~FMLLibrariesTask() = default;
+    LegacyFMLLibrariesTask(MinecraftInstance* inst);
+    virtual ~LegacyFMLLibrariesTask() = default;
 
     void executeTask() override;
 
