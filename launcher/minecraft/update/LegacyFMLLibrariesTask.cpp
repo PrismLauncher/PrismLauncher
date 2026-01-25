@@ -61,9 +61,10 @@ void LegacyFMLLibrariesTask::executeTask()
     NetJob::Ptr dljob{ new NetJob("FML libraries", APPLICATION->network()) };
     auto metacache = APPLICATION->metacache();
     Net::Download::Options options = Net::Download::Option::MakeEternal;
+    const QString base = baseUrl();
     for (auto& lib : fmlLibsToProcess) {
         auto entry = metacache->resolveEntry("fmllibs", lib.filename);
-        QString urlString = BuildConfig.LEGACY_FMLLIBS_BASE_URL + lib.filename;
+        QString urlString = base + lib.filename;
         dljob->addNetAction(Net::ApiDownload::makeCached(QUrl(urlString), entry, options));
     }
 
@@ -122,4 +123,13 @@ bool LegacyFMLLibrariesTask::abort()
         qWarning() << "Prematurely aborted LegacyFMLLibrariesTask";
     }
     return true;
+}
+
+QString LegacyFMLLibrariesTask::baseUrl()
+{
+    if (const QString urlOverride = APPLICATION->settings()->get("LegacyFMLLibsURLOverride").toString(); !urlOverride.isEmpty()) {
+        return urlOverride;
+    }
+
+    return BuildConfig.LEGACY_FMLLIBS_BASE_URL;
 }

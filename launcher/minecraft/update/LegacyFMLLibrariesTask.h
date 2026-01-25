@@ -23,6 +23,9 @@ class LegacyFMLLibrariesTask : public Task {
     bool abort() override;
 
    private:
+    static QString baseUrl();
+
+   private:
     MinecraftInstance* m_inst;
     NetJob::Ptr downloadJob;
     QList<FMLlib> fmlLibsToProcess;
