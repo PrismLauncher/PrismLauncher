@@ -56,7 +56,6 @@ Config::Config()
     // Version information
     VERSION_MAJOR = @Launcher_VERSION_MAJOR@;
     VERSION_MINOR = @Launcher_VERSION_MINOR@;
-    VERSION_PATCH = @Launcher_VERSION_PATCH@;
 
     BUILD_PLATFORM = "@Launcher_BUILD_PLATFORM@";
     BUILD_ARTIFACT = "@Launcher_BUILD_ARTIFACT@";
@@ -126,7 +125,7 @@ Config::Config()
 
 QString Config::versionString() const
 {
-    return QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH);
+    return QString("%1.%2").arg(VERSION_MAJOR).arg(VERSION_MINOR);
 }
 
 QString Config::printableVersionString() const
