@@ -574,6 +574,12 @@ set(TECHNIC_SOURCES
     modplatform/technic/SolderPackManifest.cpp
     modplatform/technic/TechnicPackProcessor.h
     modplatform/technic/TechnicPackProcessor.cpp
+    modplatform/technic/TechnicAPI.h
+    modplatform/technic/TechnicAPI.cpp
+    modplatform/technic/TechnicPackManifest.h
+    modplatform/technic/TechnicPackManifest.cpp
+    modplatform/technic/TechnicInstanceCreationTask.h
+    modplatform/technic/TechnicInstanceCreationTask.cpp
 )
 
 set(ATLAUNCHER_SOURCES

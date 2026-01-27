@@ -30,6 +30,9 @@
 
 #include "net/ApiDownload.h"
 
+#include "modplatform/technic/TechnicAPI.h"
+#include "modplatform/technic/TechnicInstanceCreationTask.h"
+
 /** This is just to override the combo box popup behavior so that the combo box doesn't take the whole screen.
  *  ... thanks Qt.
  */
@@ -84,6 +87,8 @@ ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, QString type, Q
         return new ModrinthManagedPackPage(inst, nullptr, parent);
     if (type == "flame" && (APPLICATION->capabilities() & Application::SupportsFlame))
         return new FlameManagedPackPage(inst, nullptr, parent);
+    if (type == "technic")
+        return new TechnicManagedPackPage(inst, nullptr, parent);
 
     return new GenericManagedPackPage(inst, nullptr, parent);
 }
@@ -206,9 +211,9 @@ bool ManagedPackPage::runUpdateTask(InstanceTask* task)
 
     ProgressDialog loadDialog(this);
     loadDialog.setSkipButton(true, tr("Abort"));
-    loadDialog.execWithTask(task);
+    loadDialog.execWithTask(wrapped_task.get());
 
-    return task->wasSuccessful();
+    return wrapped_task->wasSuccessful();
 }
 
 void ManagedPackPage::suggestVersion()
@@ -531,4 +536,199 @@ void FlameManagedPackPage::updateFromFile()
     auto did_succeed = runUpdateTask(extracted);
     onUpdateTaskCompleted(did_succeed);
 }
+
+// TECHNIC
+TechnicManagedPackPage::TechnicManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent)
+    : ManagedPackPage(inst, instance_window, parent)
+{
+    Q_ASSERT(inst->isManagedPack());
+    connect(ui->versionsComboBox, &QComboBox::currentTextChanged, this, &TechnicManagedPackPage::suggestVersion);
+    connect(ui->updateButton, &QPushButton::clicked, this, &TechnicManagedPackPage::update);
+    connect(ui->updateFromFileButton, &QPushButton::clicked, this, &TechnicManagedPackPage::updateFromFile);
+}
+
+void TechnicManagedPackPage::parseManagedPack()
+{
+    if (m_loaded)
+        return;
+
+    if (m_fetch_job) {
+        m_fetch_job->disconnect(this);
+        m_fetch_job.reset();
+    }
+
+    if (m_solder_fetch_job) {
+        m_solder_fetch_job->disconnect(this);
+        m_solder_fetch_job.reset();
+    }
+
+    QString packSlug = m_inst->getManagedPackID();
+
+    // First fetch platform pack info
+    m_fetch_job = Technic::API::getPackInfo(packSlug, m_response.get());
+
+    connect(m_fetch_job.get(), &Task::succeeded, this, [this, packSlug]() {
+        QJsonParseError parse_error{};
+        QJsonDocument doc = QJsonDocument::fromJson(*m_response, &parse_error);
+        if (parse_error.error != QJsonParseError::NoError) {
+            qWarning() << "Error parsing Technic pack info:" << parse_error.errorString();
+            setFailState();
+            return;
+        }
+
+        try {
+            TechnicPlatform::loadPackInfo(m_platformInfo, doc.object());
+        } catch (const JSONValidationError& e) {
+            qWarning() << "Error loading Technic pack info:" << e.cause();
+            setFailState();
+            return;
+        }
+
+        if (m_platformInfo.isSolder) {
+            // Fetch Solder pack info for version list
+            // Store in m_solder_fetch_job to avoid reassigning m_fetch_job during its callback
+            m_response->clear();
+            m_solder_fetch_job = Technic::API::getSolderPackInfo(m_platformInfo.solderUrl, packSlug, m_response.get());
+            connect(m_solder_fetch_job.get(), &Task::succeeded, this, &TechnicManagedPackPage::onSolderInfoLoaded);
+            connect(m_solder_fetch_job.get(), &Task::failed, this, [this]() { setFailState(); });
+            m_solder_fetch_job->start();
+        } else {
+            // Non-Solder pack: only has single version
+            ui->versionsComboBox->blockSignals(true);
+            ui->versionsComboBox->clear();
+            ui->versionsComboBox->blockSignals(false);
+
+            QString versionName = m_platformInfo.version;
+            if (versionName == m_inst->getManagedPackVersionName())
+                versionName = tr("%1 (Current)").arg(versionName);
+
+            ui->versionsComboBox->addItem(versionName, m_platformInfo.version);
+
+            m_loaded = true;
+            suggestVersion();
+        }
+    });
+
+    connect(m_fetch_job.get(), &Task::failed, this, [this]() { setFailState(); });
+    m_fetch_job->start();
+}
+
+void TechnicManagedPackPage::onSolderInfoLoaded()
+{
+    QJsonParseError parse_error{};
+    QJsonDocument doc = QJsonDocument::fromJson(*m_response, &parse_error);
+    if (parse_error.error != QJsonParseError::NoError) {
+        qWarning() << "Error parsing Solder pack info:" << parse_error.errorString();
+        setFailState();
+        return;
+    }
+
+    try {
+        TechnicPlatform::loadSolderPackInfo(m_solderInfo, doc.object());
+    } catch (const JSONValidationError& e) {
+        qWarning() << "Error loading Solder pack info:" << e.cause();
+        setFailState();
+        return;
+    }
+
+    ui->versionsComboBox->blockSignals(true);
+    ui->versionsComboBox->clear();
+    ui->versionsComboBox->blockSignals(false);
+
+    // Add versions in reverse order (newest first)
+    for (auto i = m_solderInfo.builds.size(); i--;) {
+        QString version = m_solderInfo.builds.at(i);
+        QString displayName = version;
+
+        if (version == m_inst->getManagedPackVersionName())
+            displayName = tr("%1 (Current)").arg(version);
+
+        ui->versionsComboBox->addItem(displayName, version);
+    }
+
+    // Select recommended version
+    if (!m_solderInfo.recommended.isEmpty()) {
+        int index = ui->versionsComboBox->findData(m_solderInfo.recommended);
+        if (index >= 0)
+            ui->versionsComboBox->setCurrentIndex(index);
+    }
+
+    m_loaded = true;
+    suggestVersion();
+}
+
+QString TechnicManagedPackPage::url() const
+{
+    if (!m_platformInfo.platformUrl.isEmpty())
+        return m_platformInfo.platformUrl;
+    return "https://www.technicpack.net/modpack/" + m_inst->getManagedPackID();
+}
+
+void TechnicManagedPackPage::suggestVersion()
+{
+    m_selectedVersion = ui->versionsComboBox->currentData().toString();
+
+    if (m_selectedVersion.isEmpty()) {
+        setFailState();
+        return;
+    }
+
+    // For Technic packs, we don't have per-version changelogs from the API
+    // Show pack description instead
+    QString description = m_platformInfo.description;
+    if (description.isEmpty())
+        description = tr("No description available.");
+
+    ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(description));
+
+    ManagedPackPage::suggestVersion();
+}
+
+void TechnicManagedPackPage::update()
+{
+    if (m_selectedVersion.isEmpty()) {
+        setFailState();
+        return;
+    }
+
+    InstanceTask* task = nullptr;
+
+    if (m_platformInfo.isSolder) {
+        task = new Technic::InstanceCreationTask(this, m_inst->getManagedPackID(), m_platformInfo.solderUrl, m_selectedVersion,
+                                                 m_platformInfo.minecraft, m_inst->id());
+    } else {
+        task = new Technic::InstanceCreationTask(this, m_inst->getManagedPackID(), QUrl(m_platformInfo.url), m_selectedVersion,
+                                                 m_platformInfo.minecraft, m_inst->id());
+    }
+
+    task->setName(m_inst->name());
+    task->setGroup(APPLICATION->instances()->getInstanceGroup(m_inst->id()));
+    task->setIcon(m_inst->iconKey());
+    task->setConfirmUpdate(false);
+
+    auto did_succeed = runUpdateTask(task);
+    onUpdateTaskCompleted(did_succeed);
+}
+
+void TechnicManagedPackPage::updateFromFile()
+{
+    auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), tr("Technic pack") + " (*.zip)");
+    if (output.isEmpty())
+        return;
+
+    // For file-based updates, we create a non-Solder task with the local file URL
+    auto task = new Technic::InstanceCreationTask(this, m_inst->getManagedPackID(), output,
+                                                  "",  // Version unknown from file
+                                                  "",  // Minecraft version will be detected from pack
+                                                  m_inst->id());
+
+    task->setName(m_inst->name());
+    task->setGroup(APPLICATION->instances()->getInstanceGroup(m_inst->id()));
+    task->setIcon(m_inst->iconKey());
+    task->setConfirmUpdate(false);
+
+    auto did_succeed = runUpdateTask(task);
+    onUpdateTaskCompleted(did_succeed);
+}
+
 #include "ManagedPackPage.moc"

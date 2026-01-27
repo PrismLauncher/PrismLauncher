@@ -284,8 +284,10 @@ void TechnicPage::selectVersion()
     }
 
     if (!current.isSolder) {
-        dialog->setSuggestedPack(current.name, selectedVersion,
-                                 new Technic::SingleZipPackInstallTask(current.url, current.minecraftVersion));
+        auto task = new Technic::SingleZipPackInstallTask(current.url, current.minecraftVersion);
+        task->setPackSlug(current.slug);
+        task->setPackVersion(selectedVersion);
+        dialog->setSuggestedPack(current.name, selectedVersion, task);
     } else {
         dialog->setSuggestedPack(current.name, selectedVersion,
                                  new Technic::SolderPackInstallTask(APPLICATION->network(), current.url, current.slug, selectedVersion,

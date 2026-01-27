@@ -357,7 +357,12 @@ CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, ModFolderModel* mods, Q
                             m_container->refreshContainer();
                         }
                     });
-                    update->start();
+                    // Don't call update->start() here - reload() already
+                    // starts the task via resolve(). Starting it again would
+                    // trigger an assertion if the task is still running.
+                    if (!update->isRunning()) {
+                        update->start();
+                    }
                 }
             }
         }

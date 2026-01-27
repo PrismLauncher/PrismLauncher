@@ -22,6 +22,8 @@
 #include "TechnicPackProcessor.h"
 
 #include "Application.h"
+#include "minecraft/MinecraftInstance.h"
+#include "settings/INISettingsObject.h"
 
 #include "net/ApiDownload.h"
 
@@ -121,7 +123,19 @@ void Technic::SingleZipPackInstallTask::extractFinished()
     }
 
     auto packProcessor = makeShared<Technic::TechnicPackProcessor>();
-    connect(packProcessor.get(), &Technic::TechnicPackProcessor::succeeded, this, &Technic::SingleZipPackInstallTask::emitSucceeded);
+    connect(packProcessor.get(), &Technic::TechnicPackProcessor::succeeded, this, [this, packProcessor]() {
+        // Set managed pack info if we have a slug
+        if (!m_packSlug.isEmpty()) {
+            QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
+            auto instanceSettings = std::make_unique<INISettingsObject>(configPath);
+            MinecraftInstance instance(m_globalSettings, std::move(instanceSettings), m_stagingPath);
+
+            instance.setManagedPack("technic", m_packSlug, name(), m_packVersion, m_packVersion);
+            instance.settings()->set("TechnicIsSolder", false);
+            instance.saveNow();
+        }
+        emitSucceeded();
+    });
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::failed, this, &Technic::SingleZipPackInstallTask::emitFailed);
     packProcessor->run(m_globalSettings, name(), m_instIcon, m_stagingPath, m_minecraftVersion);
 }

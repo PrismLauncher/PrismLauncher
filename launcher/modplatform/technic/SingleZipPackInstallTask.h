@@ -33,6 +33,9 @@ class SingleZipPackInstallTask : public InstanceTask {
    public:
     SingleZipPackInstallTask(const QUrl& sourceUrl, const QString& minecraftVersion);
 
+    void setPackSlug(const QString& slug) { m_packSlug = slug; }
+    void setPackVersion(const QString& version) { m_packVersion = version; }
+
     bool canAbort() const override { return true; }
     bool abort() override;
 
@@ -52,6 +55,8 @@ class SingleZipPackInstallTask : public InstanceTask {
     QUrl m_sourceUrl;
     QString m_minecraftVersion;
     QString m_archivePath;
+    QString m_packSlug;
+    QString m_packVersion;
     NetJob::Ptr m_filesNetJob;
     std::unique_ptr<MMCZip::ArchiveReader> m_packZip;
     QFuture<std::optional<QStringList>> m_extractFuture;

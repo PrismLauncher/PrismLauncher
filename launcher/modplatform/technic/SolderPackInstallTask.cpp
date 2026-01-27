@@ -42,8 +42,10 @@
 
 #include "SolderPackManifest.h"
 #include "TechnicPackProcessor.h"
+#include "minecraft/MinecraftInstance.h"
 #include "net/ApiDownload.h"
 #include "net/ChecksumValidator.h"
+#include "settings/INISettingsObject.h"
 
 Technic::SolderPackInstallTask::SolderPackInstallTask(QNetworkAccessManager* network,
                                                       const QUrl& solderUrl,
@@ -207,7 +209,19 @@ void Technic::SolderPackInstallTask::extractFinished()
     }
 
     auto packProcessor = makeShared<Technic::TechnicPackProcessor>();
-    connect(packProcessor.get(), &Technic::TechnicPackProcessor::succeeded, this, &Technic::SolderPackInstallTask::emitSucceeded);
+    connect(packProcessor.get(), &Technic::TechnicPackProcessor::succeeded, this, [this, packProcessor]() {
+        // Set managed pack info
+        QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
+        auto instanceSettings = std::make_unique<INISettingsObject>(configPath);
+        MinecraftInstance instance(m_globalSettings, std::move(instanceSettings), m_stagingPath);
+
+        instance.setManagedPack("technic", m_pack, name(), m_version, m_version);
+        instance.settings()->set("TechnicIsSolder", true);
+        instance.settings()->set("TechnicSolderUrl", m_solderUrl.toString());
+        instance.saveNow();
+
+        emitSucceeded();
+    });
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::failed, this, &Technic::SolderPackInstallTask::emitFailed);
     packProcessor->run(m_globalSettings, name(), m_instIcon, m_stagingPath, m_minecraftVersion, true);
 }

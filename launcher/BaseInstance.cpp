@@ -124,6 +124,10 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
     m_settings->registerSetting("ManagedPackVersionID", "");
     m_settings->registerSetting("ManagedPackVersionName", "");
 
+    // Technic-specific settings
+    m_settings->registerSetting("TechnicIsSolder", false);
+    m_settings->registerSetting("TechnicSolderUrl", "");
+
     m_settings->registerSetting("Profiler", "");
 }
 

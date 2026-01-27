@@ -10,6 +10,7 @@
 #include "modplatform/modrinth/ModrinthAPI.h"
 
 #include "modplatform/flame/FlameAPI.h"
+#include "modplatform/technic/TechnicPackManifest.h"
 
 #include "net/NetJob.h"
 
@@ -157,4 +158,35 @@ class FlameManagedPackPage final : public ManagedPackPage {
 
     ModPlatform::IndexedPack m_pack;
     FlameAPI m_api;
+};
+
+class TechnicManagedPackPage final : public ManagedPackPage {
+    Q_OBJECT
+
+   public:
+    TechnicManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent = nullptr);
+    ~TechnicManagedPackPage() override = default;
+
+    void parseManagedPack() override;
+    QString url() const override;
+    QString helpPage() const override { return "technic-managed-pack"; }
+
+   public slots:
+    void suggestVersion() override;
+
+    void update() override;
+    void updateFromFile() override;
+
+   private slots:
+    void onSolderInfoLoaded();
+
+   private:
+    Task::Ptr m_fetch_job = nullptr;
+    Task::Ptr m_solder_fetch_job = nullptr;
+
+    TechnicPlatform::PackInfo m_platformInfo;
+    TechnicPlatform::SolderPackInfo m_solderInfo;
+
+    QString m_selectedVersion;
+    std::shared_ptr<QByteArray> m_response = std::make_shared<QByteArray>();
 };
