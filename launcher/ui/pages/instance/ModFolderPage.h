@@ -56,7 +56,7 @@ class ModFolderPage : public ExternalResourcesPage {
     virtual QString displayName() const override { return tr("Mods"); }
     virtual QIcon icon() const override { return QIcon::fromTheme("loadermods"); }
     virtual QString id() const override { return "mods"; }
-    virtual QString helpPage() const override { return "Loader-mods"; }
+    virtual QString helpPage() const override { return "loader-mods"; }
 
     virtual bool shouldDisplay() const override;
 
