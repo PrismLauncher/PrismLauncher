@@ -329,12 +329,9 @@ void LaunchController::login()
                 return;
             }
             case AccountState::Disabled: {
-                auto errorString = tr("The launcher's client identification has changed. Please remove '%1' and try again.")
-                                       .arg(accountToCheck->profileName());
-
-                QMessageBox::warning(m_parentWidget, tr("Client identification changed"), errorString, QMessageBox::StandardButton::Ok,
-                                     QMessageBox::StandardButton::Ok);
-                emitFailed(errorString);
+                m_session->wants_online = false;
+                m_session->MakeOffline(m_session->player_name);
+                launchInstance();
                 return;
             }
             case AccountState::Gone: {
