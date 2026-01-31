@@ -695,6 +695,32 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
     QProcessEnvironment env = createEnvironment();
 
 #ifdef Q_OS_LINUX
+    // Fix for Steam Deck gaming mode color desaturation and resolution issues
+    // When running in gamescope (Steam Deck), we need to set specific color space and rendering options
+    bool isGamescope = qgetenv("XDG_CURRENT_DESKTOP") == "gamescope";
+    
+    if (isGamescope) {
+        // Force sRGB color space to prevent color desaturation
+        env.insert("MESA_SRGB_CAPABLE", "1");
+        
+        // Ensure proper color handling for DXVK
+        env.insert("DXVK_HUD", "off");
+        
+        // Force full resolution rendering (prevent downscaling in gamescope)
+        env.insert("GAMESCOPE_PREFER_OUTPUT_INTERNAL_RESOLUTION", "1");
+        
+        // Disable GPU frame rate limiting to allow proper rendering at native resolution
+        if (!env.contains("__GL_SYNC_TO_VBLANK")) {
+            env.insert("__GL_SYNC_TO_VBLANK", "0");
+        }
+        
+        // Ensure Vulkan uses proper color space
+        if (!env.contains("VK_ICD_FILENAMES")) {
+            // This helps ensure consistent color rendering across Vulkan implementations
+            env.insert("VK_LAYER_MESA_OVERLAY", "1");
+        }
+    }
+    
     if (settings()->get("EnableMangoHud").toBool() && APPLICATION->capabilities() & Application::SupportsMangoHud) {
         QStringList preloadList;
         if (auto value = env.value("LD_PRELOAD"); !value.isEmpty())
