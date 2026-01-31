@@ -83,6 +83,8 @@ void ModrinthCheckUpdate::executeTask()
 
 void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModLoaderTypes> loader, bool forceModLoaderCheck)
 {
+    m_loaderIdx++;
+
     setStatus(tr("Waiting for the API response from Modrinth..."));
     setProgress(m_progress + 1, m_progressTotal);
 
@@ -110,7 +112,6 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
     connect(job.get(), &Task::failed, this, &ModrinthCheckUpdate::checkNextLoader);
 
     m_job = job;
-    m_loaderIdx++;
     job->start();
 }
 
