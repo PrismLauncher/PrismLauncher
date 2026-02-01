@@ -76,6 +76,8 @@ class AccountListPage : public QMainWindow, public BasePage {
     void on_actionSetDefault_triggered();
     void on_actionNoDefault_triggered();
     void on_actionManageSkins_triggered();
+    void on_actionMoveUp_triggered();
+    void on_actionMoveDown_triggered();
 
     void listChanged();
 
@@ -88,6 +90,6 @@ class AccountListPage : public QMainWindow, public BasePage {
    private:
     void changeEvent(QEvent* event) override;
     QMenu* createPopupMenu() override;
-    shared_qobject_ptr<AccountList> m_accounts;
+    AccountList* m_accounts;
     Ui::AccountListPage* ui;
 };

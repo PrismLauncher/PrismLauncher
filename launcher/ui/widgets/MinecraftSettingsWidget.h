@@ -46,7 +46,7 @@ class MinecraftSettingsWidget;
 
 class MinecraftSettingsWidget : public QWidget {
    public:
-    MinecraftSettingsWidget(MinecraftInstancePtr instance, QWidget* parent = nullptr);
+    MinecraftSettingsWidget(MinecraftInstance* instance, QWidget* parent = nullptr);
     ~MinecraftSettingsWidget() override;
 
     void loadSettings();
@@ -61,7 +61,7 @@ class MinecraftSettingsWidget : public QWidget {
     void saveDataPacksPath();
     void selectDataPacksFolder();
 
-    MinecraftInstancePtr m_instance;
+    MinecraftInstance* m_instance;
     Ui::MinecraftSettingsWidget* m_ui;
     JavaSettingsWidget* m_javaSettings = nullptr;
     bool m_quickPlaySingleplayer = false;

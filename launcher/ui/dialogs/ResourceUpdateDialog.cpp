@@ -29,7 +29,7 @@
 
 
 namespace {
-std::list<Version> mcVersions(BaseInstance* inst)
+static std::vector<Version> mcVersions(BaseInstance* inst)
 {
     return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion() };
 }
@@ -37,7 +37,7 @@ std::list<Version> mcVersions(BaseInstance* inst)
 
 ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
                                            BaseInstance* instance,
-                                           const std::shared_ptr<ResourceFolderModel> resourceModel,
+                                           ResourceFolderModel* resourceModel,
                                            QList<Resource*>& searchFor,
                                            bool includeDeps,
                                            QList<ModPlatform::ModLoaderType> loadersList)
@@ -164,7 +164,7 @@ void ResourceUpdateDialog::checkCandidates()
             const auto& reason = std::get<1>(failed);
             const auto& recover_url = std::get<2>(failed);
 
-            qDebug() << mod->name() << " failed to check for updates!";
+            qDebug() << mod->name() << "failed to check for updates!";
 
             text += tr("Mod name: %1").arg(mod->name()) + "<br>";
             if (!reason.isEmpty()) {
@@ -181,17 +181,25 @@ void ResourceUpdateDialog::checkCandidates()
         ScrollMessageBox message_dialog(m_parent, tr("Failed to check for updates"),
                                         tr("Could not check or get the following resources for updates:<br>"
                                            "Do you wish to proceed without those resources?"),
-                                        text);
+                                        text, "Disable unavailable mods");
         message_dialog.setModal(true);
         if (message_dialog.exec() == QDialog::Rejected) {
             m_aborted = true;
             QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
             return;
         }
+
+        // Disable unavailable mods
+        if (message_dialog.isOptionChecked()) {
+            for (const auto& failed : m_failedCheckUpdate) {
+                const auto& mod = std::get<0>(failed);
+                mod->enable(EnableAction::DISABLE);
+            }
+        }
     }
 
     if (m_includeDeps && !APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
-        auto* mod_model = dynamic_cast<ModFolderModel*>(m_resourceModel.get());
+        auto* mod_model = dynamic_cast<ModFolderModel*>(m_resourceModel);
 
         if (mod_model != nullptr) {
             auto depTask = makeShared<GetModDependenciesTask>(m_instance, mod_model, selectedVers);

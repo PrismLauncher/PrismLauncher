@@ -40,7 +40,7 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent) : QWidget(pare
 
     auto translations = APPLICATION->translations();
     auto index = translations->selectedIndex();
-    languageView->setModel(translations.get());
+    languageView->setModel(translations);
     languageView->setCurrentIndex(index);
     languageView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     languageView->header()->setSectionResizeMode(0, QHeaderView::Stretch);

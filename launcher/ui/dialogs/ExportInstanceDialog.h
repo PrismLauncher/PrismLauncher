@@ -43,7 +43,6 @@
 #include "FileIgnoreProxy.h"
 
 class BaseInstance;
-using InstancePtr = std::shared_ptr<BaseInstance>;
 
 namespace Ui {
 class ExportInstanceDialog;
@@ -53,7 +52,7 @@ class ExportInstanceDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit ExportInstanceDialog(InstancePtr instance, QWidget* parent = 0);
+    explicit ExportInstanceDialog(BaseInstance* instance, QWidget* parent = 0);
     ~ExportInstanceDialog();
 
     virtual void done(int result);
@@ -64,7 +63,7 @@ class ExportInstanceDialog : public QDialog {
 
    private:
     Ui::ExportInstanceDialog* m_ui;
-    InstancePtr m_instance;
+    BaseInstance* m_instance;
     FileIgnoreProxy* m_proxyModel;
     FastFileIconProvider m_icons;
 

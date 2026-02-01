@@ -144,12 +144,12 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
 auto HttpMetaCache::updateEntry(MetaEntryPtr stale_entry) -> bool
 {
     if (!m_entries.contains(stale_entry->m_baseId)) {
-        qCCritical(taskHttpMetaCacheLogC) << "Cannot add entry with unknown base: " << stale_entry->m_baseId.toLocal8Bit();
+        qCCritical(taskHttpMetaCacheLogC) << "Cannot add entry with unknown base:" << stale_entry->m_baseId.toLocal8Bit();
         return false;
     }
 
     if (stale_entry->m_stale) {
-        qCCritical(taskHttpMetaCacheLogC) << "Cannot add stale entry: " << stale_entry->getFullPath().toLocal8Bit();
+        qCCritical(taskHttpMetaCacheLogC) << "Cannot add stale entry:" << stale_entry->getFullPath().toLocal8Bit();
         return false;
     }
 

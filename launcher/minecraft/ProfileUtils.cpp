@@ -55,7 +55,7 @@ bool readOverrideOrders(QString path, PatchOrder& order)
         return false;
     }
     if (!orderFile.open(QFile::ReadOnly)) {
-        qCritical() << "Couldn't open" << orderFile.fileName() << " for reading:" << orderFile.errorString();
+        qCritical() << "Couldn't open" << orderFile.fileName() << "for reading:" << orderFile.errorString();
         qWarning() << "Ignoring overridden order";
         return false;
     }

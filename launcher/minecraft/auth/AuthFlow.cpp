@@ -151,8 +151,8 @@ bool AuthFlow::changeState(AccountTaskState newState, QString reason)
 }
 bool AuthFlow::abort()
 {
-    emitAborted();
     if (m_currentStep)
         m_currentStep->abort();
+    emitAborted();
     return true;
 }

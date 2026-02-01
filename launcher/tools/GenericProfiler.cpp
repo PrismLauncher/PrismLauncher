@@ -24,22 +24,22 @@
 class GenericProfiler : public BaseProfiler {
     Q_OBJECT
    public:
-    GenericProfiler(SettingsObjectPtr settings, InstancePtr instance, QObject* parent = 0);
+    GenericProfiler(SettingsObject* settings, BaseInstance* instance, QObject* parent = 0);
 
    protected:
-    void beginProfilingImpl(shared_qobject_ptr<LaunchTask> process);
+    void beginProfilingImpl(LaunchTask* process);
 };
 
-GenericProfiler::GenericProfiler(SettingsObjectPtr settings, InstancePtr instance, QObject* parent)
+GenericProfiler::GenericProfiler(SettingsObject* settings, BaseInstance* instance, QObject* parent)
     : BaseProfiler(settings, instance, parent)
 {}
 
-void GenericProfiler::beginProfilingImpl(shared_qobject_ptr<LaunchTask> process)
+void GenericProfiler::beginProfilingImpl(LaunchTask* process)
 {
     emit readyToLaunch(tr("Started process: %1").arg(process->pid()));
 }
 
-BaseExternalTool* GenericProfilerFactory::createTool(InstancePtr instance, QObject* parent)
+BaseExternalTool* GenericProfilerFactory::createTool(BaseInstance* instance, QObject* parent)
 {
     return new GenericProfiler(globalSettings, instance, parent);
 }

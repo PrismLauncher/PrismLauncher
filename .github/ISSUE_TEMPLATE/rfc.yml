@@ -44,8 +44,8 @@ body:
   attributes:
     label: Unresolved Questions
     description: |
-      Are there any portions of your proposal which need to be discussed with the community before the RFC can proceed? 
-      Be careful here -- an RFC with a lot of remaining questions is likely to be stalled. 
+      Are there any portions of your proposal which need to be discussed with the community before the RFC can proceed?
+      Be careful here -- an RFC with a lot of remaining questions is likely to be stalled.
       If your RFC is mostly unresolved questions and not too much substance, it may not be ready.
     placeholder: Do a lot of users care about the cat?
   validations:

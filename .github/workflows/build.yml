@@ -91,12 +91,12 @@ jobs:
           - os: ubuntu-24.04
             artifact-name: Linux
             cmake-preset: linux
-            qt-version: 6.10.1
+            qt-version: 6.10.2
 
           - os: ubuntu-24.04-arm
             artifact-name: Linux-aarch64
             cmake-preset: linux
-            qt-version: 6.10.1
+            qt-version: 6.10.2
 
           - os: windows-2022
             artifact-name: Windows-MinGW-w64
@@ -115,13 +115,13 @@ jobs:
             cmake-preset: windows_msvc
             # TODO(@getchoo): This is the default in setup-dependencies/windows. Why isn't it working?!?!
             vcvars-arch: amd64
-            qt-version: 6.10.1
+            qt-version: 6.10.2
 
           - os: windows-11-arm
             artifact-name: Windows-MSVC-arm64
             cmake-preset: windows_msvc
             vcvars-arch: arm64
-            qt-version: 6.10.1
+            qt-version: 6.10.2
 
           - os: macos-26
             artifact-name: macOS

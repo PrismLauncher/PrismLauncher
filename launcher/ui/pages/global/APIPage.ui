@@ -162,6 +162,34 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="groupBox_fmllibs">
+         <property name="title">
+          <string>Legacy FML Libraries Server</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>You can set this to another server if you have problems with downloading legacy FML libraries (Minecraft 1.5.2 and earlier).</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::RichText</enum>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+            <property name="openExternalLinks">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="legacyFMLLibsURL"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="groupBox_ua">
          <property name="minimumSize">
           <size>

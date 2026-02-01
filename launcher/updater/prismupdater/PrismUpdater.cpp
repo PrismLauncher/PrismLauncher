@@ -40,8 +40,6 @@
 #include <QProgressDialog>
 #include <memory>
 
-#include <sys.h>
-
 #if defined Q_OS_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -272,28 +270,28 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
     {  // log debug program info
         qDebug() << qPrintable(BuildConfig.LAUNCHER_DISPLAYNAME + " Updater, " +
                                QString(BuildConfig.LAUNCHER_COPYRIGHT).replace("\n", ", "));
-        qDebug() << "Version                    : " << BuildConfig.printableVersionString();
-        qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
-        qDebug() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
-        qDebug() << "Compiled for               : " << BuildConfig.systemID();
-        qDebug() << "Compiled by                : " << BuildConfig.compilerID();
-        qDebug() << "Build Artifact             : " << BuildConfig.BUILD_ARTIFACT;
+        qDebug() << "Version                    :" << BuildConfig.printableVersionString();
+        qDebug() << "Git commit                 :" << BuildConfig.GIT_COMMIT;
+        qDebug() << "Git refspec                :" << BuildConfig.GIT_REFSPEC;
+        qDebug() << "Compiled for               :" << BuildConfig.systemID();
+        qDebug() << "Compiled by                :" << BuildConfig.compilerID();
+        qDebug() << "Build Artifact             :" << BuildConfig.BUILD_ARTIFACT;
         if (adjustedBy.size()) {
-            qDebug() << "Data dir before adjustment : " << origCwdPath;
-            qDebug() << "Data dir after adjustment  : " << m_dataPath;
-            qDebug() << "Adjusted by                : " << adjustedBy;
+            qDebug() << "Data dir before adjustment :" << origCwdPath;
+            qDebug() << "Data dir after adjustment  :" << m_dataPath;
+            qDebug() << "Adjusted by                :" << adjustedBy;
         } else {
-            qDebug() << "Data dir                   : " << QDir::currentPath();
+            qDebug() << "Data dir                   :" << QDir::currentPath();
         }
-        qDebug() << "Work dir                   : " << QDir::currentPath();
-        qDebug() << "Binary path                : " << binPath;
-        qDebug() << "Application root path      : " << m_rootPath;
-        qDebug() << "Portable install           : " << m_isPortable;
+        qDebug() << "Work dir                   :" << QDir::currentPath();
+        qDebug() << "Binary path                :" << binPath;
+        qDebug() << "Application root path      :" << m_rootPath;
+        qDebug() << "Portable install           :" << m_isPortable;
         qDebug() << "<> Paths set.";
     }
 
     {  // network
-        m_network = makeShared<QNetworkAccessManager>(new QNetworkAccessManager());
+        m_network = std::make_unique<QNetworkAccessManager>();
         qDebug() << "Detecting proxy settings...";
         QNetworkProxy proxy = QNetworkProxy::applicationProxy();
         m_network->setProxy(proxy);
@@ -427,7 +425,7 @@ void PrismUpdaterApp::showFatalErrorMessage(const QString& title, const QString&
 void PrismUpdaterApp::run()
 {
     qDebug() << "found" << m_releases.length() << "releases on github";
-    qDebug() << "loading exe at " << m_prismExecutable;
+    qDebug() << "loading exe at" << m_prismExecutable;
 
     if (m_printOnly) {
         printReleases();
@@ -792,7 +790,7 @@ QFileInfo PrismUpdaterApp::downloadAsset(const GitHubReleaseAsset& asset)
 
     qDebug() << "downloading" << file_url << "to" << out_file_path;
     auto download = Net::Download::makeFile(file_url, out_file_path);
-    download->setNetwork(m_network);
+    download->setNetwork(m_network.get());
     auto progress_dialog = ProgressDialog();
     progress_dialog.adjustSize();
 
@@ -1162,16 +1160,16 @@ void PrismUpdaterApp::downloadReleasePage(const QString& api_url, int page)
     int per_page = 30;
     auto page_url = QString("%1?per_page=%2&page=%3").arg(api_url).arg(QString::number(per_page)).arg(QString::number(page));
     auto response = std::make_shared<QByteArray>();
-    auto download = Net::Download::makeByteArray(page_url, response);
-    download->setNetwork(m_network);
+    auto download = Net::Download::makeByteArray(page_url, response.get());
+    download->setNetwork(m_network.get());
     m_current_url = page_url;
 
-    auto github_api_headers = new Net::RawHeaderProxy();
+    auto github_api_headers = std::make_unique<Net::RawHeaderProxy>();
     github_api_headers->addHeaders({
         { "Accept", "application/vnd.github+json" },
         { "X-GitHub-Api-Version", "2022-11-28" },
     });
-    download->addHeaderProxy(github_api_headers);
+    download->addHeaderProxy(std::move(github_api_headers));
 
     connect(download.get(), &Net::Download::succeeded, this, [this, response, per_page, api_url, page]() {
         int num_found = parseReleasePage(response.get());

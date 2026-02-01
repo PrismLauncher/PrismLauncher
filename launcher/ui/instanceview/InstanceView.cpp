@@ -73,6 +73,8 @@ InstanceView::InstanceView(QWidget* parent) : QAbstractItemView(parent)
     setAcceptDrops(true);
     setAutoScroll(true);
     setPaintCat(APPLICATION->settings()->get("TheCat").toBool());
+    connect(verticalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
+    connect(horizontalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
 }
 
 InstanceView::~InstanceView()
@@ -642,7 +644,7 @@ void InstanceView::dropEvent(QDropEvent* event)
                 return;
             }
             auto instanceId = QString::fromUtf8(mimedata->data("application/x-instanceid"));
-            auto instanceList = APPLICATION->instances().get();
+            auto instanceList = APPLICATION->instances();
             instanceList->setInstanceGroup(instanceId, group->text);
             event->setDropAction(Qt::MoveAction);
             event->accept();

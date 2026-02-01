@@ -70,9 +70,9 @@ class ProfileSetupDialog : public QDialog {
 
     QTimer checkStartTimer;
 
-    std::shared_ptr<QByteArray> m_check_response;
+    std::unique_ptr<QByteArray> m_check_response;
     Net::Download::Ptr m_check_task;
 
-    std::shared_ptr<QByteArray> m_profile_response;
+    std::unique_ptr<QByteArray> m_profile_response;
     Net::Upload::Ptr m_profile_task;
 };

@@ -22,7 +22,7 @@ class EntitlementsStep : public AuthStep {
 
    private:
     QString m_entitlements_request_id;
-    std::shared_ptr<QByteArray> m_response;
+    std::unique_ptr<QByteArray> m_response;
     Net::Download::Ptr m_request;
     NetJob::Ptr m_task;
 };

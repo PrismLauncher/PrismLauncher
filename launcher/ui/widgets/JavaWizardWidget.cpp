@@ -13,8 +13,6 @@
 #include <QToolButton>
 #include <QVBoxLayout>
 
-#include <sys.h>
-
 #include "DesktopServices.h"
 #include "FileSystem.h"
 #include "JavaCommon.h"
@@ -32,7 +30,7 @@
 
 JavaWizardWidget::JavaWizardWidget(QWidget* parent) : QWidget(parent)
 {
-    m_availableMemory = Sys::getSystemRam() / Sys::mebibyte;
+    m_availableMemory = SysInfo::getSystemRamMiB();
 
     goodIcon = QIcon::fromTheme("status-good");
     yellowIcon = QIcon::fromTheme("status-yellow");
@@ -186,7 +184,7 @@ void JavaWizardWidget::setupUi()
 
 void JavaWizardWidget::initialize()
 {
-    m_versionWidget->initialize(APPLICATION->javalist().get());
+    m_versionWidget->initialize(APPLICATION->javalist());
     m_versionWidget->selectSearch();
     m_versionWidget->setResizeOn(2);
     auto s = APPLICATION->settings();

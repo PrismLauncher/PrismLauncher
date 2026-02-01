@@ -521,7 +521,7 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
         // change a version of something that exists
         for (auto& change : toChange) {
             // FIXME: this should not work directly with the component list
-            qCDebug(instanceProfileResolveC) << "Setting version of " << change.uid << "to" << change.equalsVersion;
+            qCDebug(instanceProfileResolveC) << "Setting version of" << change.uid << "to" << change.equalsVersion;
             auto component = componentIndex[change.uid];
             component->setVersion(change.equalsVersion);
         }
@@ -744,7 +744,7 @@ void ComponentUpdateTask::remoteLoadFailed(size_t taskIndex, const QString& msg)
         qCWarning(instanceProfileResolveC) << "Got multiple results from remote load task" << taskIndex;
         return;
     }
-    qCDebug(instanceProfileResolveC) << "Remote task" << taskIndex << "failed: " << msg;
+    qCDebug(instanceProfileResolveC) << "Remote task" << taskIndex << "failed:" << msg;
     d->remoteLoadSuccessful = false;
     taskSlot.succeeded = false;
     taskSlot.finished = true;
@@ -773,8 +773,9 @@ void ComponentUpdateTask::checkIfAllFinished()
                                          .arg(component->getName(), component->m_version));
             }
         }
+        d->remoteLoadStatusList.clear();
+
         auto allErrors = allErrorsList.join("\n");
         emitFailed(tr("Component metadata update task failed while downloading from remote server:\n%1").arg(allErrors));
-        d->remoteLoadStatusList.clear();
     }
 }

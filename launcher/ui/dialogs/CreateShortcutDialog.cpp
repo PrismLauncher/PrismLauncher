@@ -55,7 +55,7 @@
 #include "minecraft/WorldList.h"
 #include "minecraft/auth/AccountList.h"
 
-CreateShortcutDialog::CreateShortcutDialog(InstancePtr instance, QWidget* parent)
+CreateShortcutDialog::CreateShortcutDialog(BaseInstance* instance, QWidget* parent)
     : QDialog(parent), ui(new Ui::CreateShortcutDialog), m_instance(instance)
 {
     ui->setupUi(this);
@@ -64,7 +64,7 @@ CreateShortcutDialog::CreateShortcutDialog(InstancePtr instance, QWidget* parent
     ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
     ui->instNameTextBox->setPlaceholderText(instance->name());
 
-    auto mInst = std::dynamic_pointer_cast<MinecraftInstance>(instance);
+    auto mInst = dynamic_cast<MinecraftInstance*>(instance);
     m_QuickJoinSupported = mInst && mInst->traits().contains("feature:is_quick_play_singleplayer");
     auto worldList = mInst->worldList();
     worldList->update();
@@ -212,7 +212,7 @@ void CreateShortcutDialog::createShortcut()
     if (ui->overrideAccountCheckbox->isChecked())
         extraArgs.append({ "--profile", ui->accountSelectionBox->currentData().toString() });
 
-    ShortcutUtils::Shortcut args{ m_instance.get(), name, targetString, this, extraArgs, InstIconKey, target };
+    ShortcutUtils::Shortcut args{ m_instance, name, targetString, this, extraArgs, InstIconKey, target };
     if (target == ShortcutTarget::Desktop)
         ShortcutUtils::createInstanceShortcutOnDesktop(args);
     else if (target == ShortcutTarget::Applications)

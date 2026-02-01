@@ -29,7 +29,7 @@ struct FlamePackExportOptions {
     QString version;
     QString author;
     bool optionalFiles;
-    MinecraftInstancePtr instance;
+    MinecraftInstance* instance;
     QString output;
     MMCZip::FilterFileFunction filter;
     int recommendedRAM;

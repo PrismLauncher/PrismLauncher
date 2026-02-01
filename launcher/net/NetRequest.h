@@ -68,8 +68,8 @@ class NetRequest : public Task {
     auto abort() -> bool override;
     auto canAbort() const -> bool override { return true; }
 
-    void setNetwork(shared_qobject_ptr<QNetworkAccessManager> network) { m_network = network; }
-    void addHeaderProxy(Net::HeaderProxy* proxy) { m_headerProxies.push_back(std::shared_ptr<Net::HeaderProxy>(proxy)); }
+    void setNetwork(QNetworkAccessManager* network) { m_network = network; }
+    void addHeaderProxy(std::unique_ptr<Net::HeaderProxy> proxy) { m_headerProxies.push_back(std::move(proxy)); }
 
     QUrl url() const;
     void setUrl(QUrl url) { m_url = url; }
@@ -100,15 +100,15 @@ class NetRequest : public Task {
     std::chrono::time_point<std::chrono::steady_clock> m_last_progress_time;
     qint64 m_last_progress_bytes;
 
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
+    QNetworkAccessManager* m_network;
 
     /// the network reply
-    unique_qobject_ptr<QNetworkReply> m_reply;
+    std::unique_ptr<QNetworkReply> m_reply;
     QByteArray m_errorResponse;
 
     /// source URL
     QUrl m_url;
-    std::vector<std::shared_ptr<Net::HeaderProxy>> m_headerProxies;
+    std::vector<std::unique_ptr<Net::HeaderProxy>> m_headerProxies;
 };
 }  // namespace Net
 

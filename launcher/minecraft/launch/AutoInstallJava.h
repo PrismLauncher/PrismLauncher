@@ -59,7 +59,7 @@ class AutoInstallJava : public LaunchStep {
     void tryNextMajorJava();
 
    private:
-    MinecraftInstancePtr m_instance;
+    MinecraftInstance* m_instance;
     Task::Ptr m_current_task;
 
     qsizetype m_majorJavaVersionIndex = 0;

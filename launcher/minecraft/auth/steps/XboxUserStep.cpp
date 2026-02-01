@@ -38,8 +38,8 @@ void XboxUserStep::perform()
         { "x-xbl-contract-version", "1" }
     };
     m_response.reset(new QByteArray());
-    m_request = Net::Upload::makeByteArray(url, m_response, xbox_auth_data.toUtf8());
-    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
+    m_request = Net::Upload::makeByteArray(url, m_response.get(), xbox_auth_data.toUtf8());
+    m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
 
     m_task.reset(new NetJob("XboxUserStep", APPLICATION->network()));
     m_task->setAskRetry(false);

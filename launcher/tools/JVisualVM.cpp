@@ -10,17 +10,17 @@
 class JVisualVM : public BaseProfiler {
     Q_OBJECT
    public:
-    JVisualVM(SettingsObjectPtr settings, InstancePtr instance, QObject* parent = 0);
+    JVisualVM(SettingsObject* settings, BaseInstance* instance, QObject* parent = 0);
 
    private slots:
     void profilerStarted();
     void profilerFinished(int exit, QProcess::ExitStatus status);
 
    protected:
-    void beginProfilingImpl(shared_qobject_ptr<LaunchTask> process);
+    void beginProfilingImpl(LaunchTask* process);
 };
 
-JVisualVM::JVisualVM(SettingsObjectPtr settings, InstancePtr instance, QObject* parent) : BaseProfiler(settings, instance, parent) {}
+JVisualVM::JVisualVM(SettingsObject* settings, BaseInstance* instance, QObject* parent) : BaseProfiler(settings, instance, parent) {}
 
 void JVisualVM::profilerStarted()
 {
@@ -38,7 +38,7 @@ void JVisualVM::profilerFinished([[maybe_unused]] int exit, QProcess::ExitStatus
     }
 }
 
-void JVisualVM::beginProfilingImpl(shared_qobject_ptr<LaunchTask> process)
+void JVisualVM::beginProfilingImpl(LaunchTask* process)
 {
     QProcess* profiler = new QProcess(this);
     QStringList profilerArgs = { "--openpid", QString::number(process->pid()) };
@@ -54,7 +54,7 @@ void JVisualVM::beginProfilingImpl(shared_qobject_ptr<LaunchTask> process)
     m_profilerProcess = profiler;
 }
 
-void JVisualVMFactory::registerSettings(SettingsObjectPtr settings)
+void JVisualVMFactory::registerSettings(SettingsObject* settings)
 {
     QString defaultValue = QStandardPaths::findExecutable("jvisualvm");
     if (defaultValue.isNull()) {
@@ -64,7 +64,7 @@ void JVisualVMFactory::registerSettings(SettingsObjectPtr settings)
     globalSettings = settings;
 }
 
-BaseExternalTool* JVisualVMFactory::createTool(InstancePtr instance, QObject* parent)
+BaseExternalTool* JVisualVMFactory::createTool(BaseInstance* instance, QObject* parent)
 {
     return new JVisualVM(globalSettings, instance, parent);
 }

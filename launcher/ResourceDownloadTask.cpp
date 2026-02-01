@@ -33,7 +33,7 @@
 
 ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
                                            ModPlatform::IndexedVersion version,
-                                           const std::shared_ptr<ResourceFolderModel> packs,
+                                           ResourceFolderModel* packs,
                                            bool is_indexed,
                                            QString target_dir_path,
                                            QString index_dir_path,
@@ -100,14 +100,14 @@ void ResourceDownloadTask::downloadSucceeded()
     auto oldName = std::get<0>(m_toDelete);
     auto oldFilename = std::get<1>(m_toDelete);
 
-    if (oldName.isEmpty() || oldFilename == m_pack_version.fileName) {
+    if (oldName.isEmpty() || oldFilename == getFilename()) {
         return;
     }
 
     m_pack_model->uninstallResource(oldFilename, m_targetDir, true);
 
     // also rename the shader config file
-    if (dynamic_cast<ShaderPackFolderModel*>(m_pack_model.get()) != nullptr) {
+    if (dynamic_cast<ShaderPackFolderModel*>(m_pack_model) != nullptr) {
         const QFileInfo oldConfig(m_targetDir, oldFilename + ".txt");
         const QFileInfo newConfig(m_targetDir, getFilename() + ".txt");
 
@@ -123,8 +123,8 @@ void ResourceDownloadTask::downloadSucceeded()
 
 void ResourceDownloadTask::downloadFailed(QString reason)
 {
-    emitFailed(reason);
     m_filesNetJob.reset();
+    emitFailed(reason);
 }
 
 void ResourceDownloadTask::downloadProgressChanged(qint64 current, qint64 total)

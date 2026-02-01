@@ -43,7 +43,7 @@ class FileResolvingTask : public Task {
 
    private: /* data */
     Flame::Manifest m_manifest;
-    std::shared_ptr<QByteArray> m_result;
+    std::unique_ptr<QByteArray> m_result;
     Task::Ptr m_task;
 };
 }  // namespace Flame

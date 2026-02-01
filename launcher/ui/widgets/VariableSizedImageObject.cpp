@@ -169,7 +169,7 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, std::shared_ptr<Ima
         loadImage(image);
     });
     connect(job, &NetJob::failed, this, [this, full_entry_path, source_url, loadImage](QString reason) {
-        qWarning() << "Failed resource at:" << full_entry_path << " because:" << reason;
+        qWarning() << "Failed resource at:" << full_entry_path << "because:" << reason;
         // If we flushed, don't proceed.
         if (!m_fetching_images.contains(source_url))
             return;

@@ -330,9 +330,9 @@ void FlamePage::createFilterWidget()
 
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &FlamePage::triggerSearch);
     auto response = std::make_shared<QByteArray>();
-    m_categoriesTask = FlameAPI::getCategories(response, ModPlatform::ResourceType::Modpack);
+    m_categoriesTask = FlameAPI::getCategories(response.get(), ModPlatform::ResourceType::Modpack);
     connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
-        auto categories = FlameAPI::loadModCategories(response);
+        auto categories = FlameAPI::loadModCategories(response.get());
         m_filterWidget->setCategories(categories);
     });
     m_categoriesTask->start();

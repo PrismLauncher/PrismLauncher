@@ -341,9 +341,9 @@ void InstanceImportTask::processTechnic()
 void InstanceImportTask::processMultiMC()
 {
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
+    auto instanceSettings = std::make_unique<INISettingsObject>(configPath);
 
-    NullInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
+    NullInstance instance(m_globalSettings, std::move(instanceSettings), m_stagingPath);
 
     // reset time played on import... because packs.
     instance.resetTimePlayed();

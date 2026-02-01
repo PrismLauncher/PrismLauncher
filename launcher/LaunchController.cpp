@@ -220,7 +220,10 @@ void LaunchController::login()
         if (tries > 0 && tries % 3 == 0) {
             auto result =
                 QMessageBox::question(m_parentWidget, tr("Continue launch?"),
-                                      tr("It looks like we couldn't launch after %1 tries. Do you want to continue trying?").arg(tries));
+                                      tr("It looks like we couldn't launch after %1 tries. Usually this can be fixed by logging out and "
+                                         "logging back in your Microsoft account. If that doesn't work, Minecraft authentication servers "
+                                         "may be having an outage or you may need a VPN in your region. Do you want to continue trying?")
+                                          .arg(tries));
 
             if (result == QMessageBox::No) {
                 emitAborted();
@@ -403,10 +406,10 @@ void LaunchController::launchInstance()
     if (!console && showConsole) {
         APPLICATION->showInstanceWindow(m_instance);
     }
-    connect(m_launcher.get(), &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
-    connect(m_launcher.get(), &LaunchTask::succeeded, this, &LaunchController::onSucceeded);
-    connect(m_launcher.get(), &LaunchTask::failed, this, &LaunchController::onFailed);
-    connect(m_launcher.get(), &LaunchTask::requestProgress, this, &LaunchController::onProgressRequested);
+    connect(m_launcher, &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
+    connect(m_launcher, &LaunchTask::succeeded, this, &LaunchController::onSucceeded);
+    connect(m_launcher, &LaunchTask::failed, this, &LaunchController::onFailed);
+    connect(m_launcher, &LaunchTask::requestProgress, this, &LaunchController::onProgressRequested);
 
     // Prepend Online and Auth Status
     QString online_mode;
@@ -416,19 +419,18 @@ void LaunchController::launchInstance()
         // Prepend Server Status
         QStringList servers = { "login.microsoftonline.com", "session.minecraft.net", "textures.minecraft.net", "api.mojang.com" };
 
-        m_launcher->prependStep(makeShared<PrintServers>(m_launcher.get(), servers));
+        m_launcher->prependStep(makeShared<PrintServers>(m_launcher, servers));
     } else {
         online_mode = m_demo ? "demo" : "offline";
     }
 
-    m_launcher->prependStep(
-        makeShared<TextPrint>(m_launcher.get(), "Launched instance in " + online_mode + " mode\n", MessageLevel::Launcher));
+    m_launcher->prependStep(makeShared<TextPrint>(m_launcher, "Launched instance in " + online_mode + " mode\n", MessageLevel::Launcher));
 
     // Prepend Version
     {
         auto versionString = QString("%1 version: %2 (%3)")
                                  .arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString(), BuildConfig.BUILD_PLATFORM);
-        m_launcher->prependStep(makeShared<TextPrint>(m_launcher.get(), versionString + "\n\n", MessageLevel::Launcher));
+        m_launcher->prependStep(makeShared<TextPrint>(m_launcher, versionString + "\n\n", MessageLevel::Launcher));
     }
     m_launcher->start();
 }

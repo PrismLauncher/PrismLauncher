@@ -372,9 +372,9 @@ void ModrinthPage::createFilterWidget()
 
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &ModrinthPage::triggerSearch);
     auto response = std::make_shared<QByteArray>();
-    m_categoriesTask = ModrinthAPI::getModCategories(response);
+    m_categoriesTask = ModrinthAPI::getModCategories(response.get());
     connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
-        auto categories = ModrinthAPI::loadCategories(response, "modpack");
+        auto categories = ModrinthAPI::loadCategories(response.get(), "modpack");
         m_filterWidget->setCategories(categories);
     });
     m_categoriesTask->start();

@@ -159,7 +159,7 @@ void AtlOptionalModListModel::useShareCode(const QString& code)
 {
     m_jobPtr.reset(new NetJob("Atl::Request", APPLICATION->network()));
     auto url = QString(BuildConfig.ATL_API_BASE_URL + "share-codes/" + code);
-    m_jobPtr->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), m_response));
+    m_jobPtr->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), m_response.get()));
 
     connect(m_jobPtr.get(), &NetJob::succeeded, this, &AtlOptionalModListModel::shareCodeSuccess);
     connect(m_jobPtr.get(), &NetJob::failed, this, &AtlOptionalModListModel::shareCodeFailure);
@@ -174,7 +174,7 @@ void AtlOptionalModListModel::shareCodeSuccess()
     QJsonParseError parse_error{};
     auto doc = QJsonDocument::fromJson(*m_response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from ATL at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qWarning() << "Error while parsing JSON response from ATL at" << parse_error.offset << "reason:" << parse_error.errorString();
         qWarning() << *m_response;
         return;
     }
@@ -185,7 +185,7 @@ void AtlOptionalModListModel::shareCodeSuccess()
         ATLauncher::loadShareCodeResponse(response, obj);
     } catch (const JSONValidationError& e) {
         qDebug() << QString::fromUtf8(*m_response);
-        qWarning() << "Error while reading response from ATLauncher: " << e.cause();
+        qWarning() << "Error while reading response from ATLauncher:" << e.cause();
         return;
     }
 

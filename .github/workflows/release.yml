@@ -16,7 +16,7 @@ jobs:
 
   create_release:
     needs: build_release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:

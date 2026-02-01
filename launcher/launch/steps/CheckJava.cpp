@@ -36,7 +36,6 @@
 #include "CheckJava.h"
 #include <FileSystem.h>
 #include <launch/LaunchTask.h>
-#include <sys.h>
 #include <QCryptographicHash>
 #include <QFileInfo>
 #include <QStandardPaths>

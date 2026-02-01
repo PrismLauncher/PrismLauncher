@@ -11,7 +11,7 @@ jobs:
   winget:
     name: Winget
 
-    runs-on: windows-latest
+    runs-on: ubuntu-slim
 
     steps:
       - name: Publish on Winget

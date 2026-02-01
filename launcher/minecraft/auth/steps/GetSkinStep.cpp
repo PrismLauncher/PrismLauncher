@@ -17,7 +17,7 @@ void GetSkinStep::perform()
     QUrl url(m_data->minecraftProfile.skin.url);
 
     m_response.reset(new QByteArray());
-    m_request = Net::Download::makeByteArray(url, m_response);
+    m_request = Net::Download::makeByteArray(url, m_response.get());
 
     m_task.reset(new NetJob("GetSkinStep", APPLICATION->network()));
     m_task->setAskRetry(false);

@@ -67,8 +67,8 @@ void MSADeviceCodeStep::perform()
         { "Accept", "application/json" },
     };
     m_response.reset(new QByteArray());
-    m_request = Net::Upload::makeByteArray(url, m_response, payload);
-    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
+    m_request = Net::Upload::makeByteArray(url, m_response.get(), payload);
+    m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
 
     m_task.reset(new NetJob("MSADeviceCodeStep", APPLICATION->network()));
     m_task->setAskRetry(false);
@@ -120,12 +120,13 @@ void MSADeviceCodeStep::deviceAuthorizationFinished()
         return;
     }
     if (!m_request->wasSuccessful() || m_request->error() != QNetworkReply::NoError) {
+        qWarning() << "Device authorization failed:" << *m_response;
         emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Failed to retrieve device authorization"));
-        qDebug() << *m_response;
         return;
     }
 
     if (rsp.device_code.isEmpty() || rsp.user_code.isEmpty() || rsp.verification_uri.isEmpty() || rsp.expires_in == 0) {
+        qWarning() << "Device authorization failed: required fields missing";
         emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Device authorization failed: required fields missing"));
         return;
     }
@@ -181,8 +182,8 @@ void MSADeviceCodeStep::authenticateUser()
         { "Accept", "application/json" },
     };
     m_response.reset(new QByteArray());
-    m_request = Net::Upload::makeByteArray(url, m_response, payload);
-    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
+    m_request = Net::Upload::makeByteArray(url, m_response.get(), payload);
+    m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
 
     connect(m_request.get(), &Task::finished, this, &MSADeviceCodeStep::authenticationFinished);
 

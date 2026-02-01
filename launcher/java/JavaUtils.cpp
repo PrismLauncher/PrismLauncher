@@ -483,7 +483,8 @@ QList<QString> JavaUtils::FindJavaPaths()
     QString asdfDataDir = qEnvironmentVariable("ASDF_DATA_DIR", FS::PathCombine(home, ".asdf"));
     scanJavaDirs(FS::PathCombine(asdfDataDir, "installs/java"));
     // javas downloaded by gradle (toolchains)
-    scanJavaDirs(FS::PathCombine(home, ".gradle/jdks"));
+    QString gradleUserHome = qEnvironmentVariable("GRADLE_USER_HOME", FS::PathCombine(home, ".gradle"));
+    scanJavaDirs(FS::PathCombine(gradleUserHome, "jdks"));
 
     javas.append(getMinecraftJavaBundle());
     javas.append(getPrismJavaBundle());

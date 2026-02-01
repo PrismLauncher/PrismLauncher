@@ -52,7 +52,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
    public:
     using DownloadTaskPtr = shared_qobject_ptr<ResourceDownloadTask>;
 
-    ResourceDownloadDialog(QWidget* parent, std::shared_ptr<ResourceFolderModel> base_model);
+    ResourceDownloadDialog(QWidget* parent, ResourceFolderModel* base_model);
 
     void initializeContainer();
     void connectButtons();
@@ -69,7 +69,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     void removeResource(const QString&);
 
     const QList<DownloadTaskPtr> getTasks();
-    const std::shared_ptr<ResourceFolderModel> getBaseModel() const { return m_base_model; }
+    ResourceFolderModel* getBaseModel() const { return m_base_model; }
 
     void setTargetDirectory(const QDir& dir);
     QString targetDirPath() const { return m_target_dir_path; }
@@ -93,7 +93,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     virtual GetModDependenciesTask::Ptr getModDependenciesTask() { return nullptr; }
 
    protected:
-    const std::shared_ptr<ResourceFolderModel> m_base_model;
+    ResourceFolderModel* m_base_model = nullptr;
     QString m_target_dir_path;
     QString m_target_index_dir_path;
 
@@ -107,7 +107,7 @@ class ModDownloadDialog final : public ResourceDownloadDialog {
     Q_OBJECT
 
    public:
-    explicit ModDownloadDialog(QWidget* parent, const std::shared_ptr<ModFolderModel>& mods, BaseInstance* instance);
+    explicit ModDownloadDialog(QWidget* parent, ModFolderModel* mods, BaseInstance* instance);
     ~ModDownloadDialog() override = default;
 
     //: String that gets appended to the mod download dialog title ("Download " + resourcesString())
@@ -125,9 +125,7 @@ class ResourcePackDownloadDialog final : public ResourceDownloadDialog {
     Q_OBJECT
 
    public:
-    explicit ResourcePackDownloadDialog(QWidget* parent,
-                                        const std::shared_ptr<ResourcePackFolderModel>& resource_packs,
-                                        BaseInstance* instance);
+    explicit ResourcePackDownloadDialog(QWidget* parent, ResourcePackFolderModel* resource_packs, BaseInstance* instance);
     ~ResourcePackDownloadDialog() override = default;
 
     //: String that gets appended to the resource pack download dialog title ("Download " + resourcesString())
@@ -144,9 +142,7 @@ class TexturePackDownloadDialog final : public ResourceDownloadDialog {
     Q_OBJECT
 
    public:
-    explicit TexturePackDownloadDialog(QWidget* parent,
-                                       const std::shared_ptr<TexturePackFolderModel>& resource_packs,
-                                       BaseInstance* instance);
+    explicit TexturePackDownloadDialog(QWidget* parent, TexturePackFolderModel* resource_packs, BaseInstance* instance);
     ~TexturePackDownloadDialog() override = default;
 
     //: String that gets appended to the texture pack download dialog title ("Download " + resourcesString())
@@ -163,7 +159,7 @@ class ShaderPackDownloadDialog final : public ResourceDownloadDialog {
     Q_OBJECT
 
    public:
-    explicit ShaderPackDownloadDialog(QWidget* parent, const std::shared_ptr<ShaderPackFolderModel>& shader_packs, BaseInstance* instance);
+    explicit ShaderPackDownloadDialog(QWidget* parent, ShaderPackFolderModel* shader_packs, BaseInstance* instance);
     ~ShaderPackDownloadDialog() override = default;
 
     //: String that gets appended to the shader pack download dialog title ("Download " + resourcesString())
@@ -180,7 +176,7 @@ class DataPackDownloadDialog final : public ResourceDownloadDialog {
     Q_OBJECT
 
    public:
-    explicit DataPackDownloadDialog(QWidget* parent, const std::shared_ptr<DataPackFolderModel>& data_packs, BaseInstance* instance);
+    explicit DataPackDownloadDialog(QWidget* parent, DataPackFolderModel* data_packs, BaseInstance* instance);
     ~DataPackDownloadDialog() override = default;
 
     //: String that gets appended to the data pack download dialog title ("Download " + resourcesString())

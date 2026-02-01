@@ -58,7 +58,7 @@ BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, cons
 
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &BlockedModsDialog::directoryChanged);
 
-    qDebug() << "[Blocked Mods Dialog] Mods List: " << mods;
+    qDebug() << "[Blocked Mods Dialog] Mods List:" << mods;
 
     // defer setup of file system watchers until after the dialog is shown
     // this allows OS (namely macOS) permission prompts to show after the relevant dialog appears
@@ -184,7 +184,7 @@ void BlockedModsDialog::update()
 /// @param path the path to the changed directory
 void BlockedModsDialog::directoryChanged(QString path)
 {
-    qDebug() << "[Blocked Mods Dialog] Directory changed: " << path;
+    qDebug() << "[Blocked Mods Dialog] Directory changed:" << path;
     validateMatchedMods();
     scanPath(path, true);
 }
@@ -269,10 +269,10 @@ void BlockedModsDialog::buildHashTask(QString path)
 {
     auto hash_task = Hashing::createHasher(path, m_hashType);
 
-    qDebug() << "[Blocked Mods Dialog] Creating Hash task for path: " << path;
+    qDebug() << "[Blocked Mods Dialog] Creating Hash task for path:" << path;
 
     connect(hash_task.get(), &Task::succeeded, this, [this, hash_task, path] { checkMatchHash(hash_task->getResult(), path); });
-    connect(hash_task.get(), &Task::failed, this, [path] { qDebug() << "Failed to hash path: " << path; });
+    connect(hash_task.get(), &Task::failed, this, [path] { qDebug() << "Failed to hash path:" << path; });
 
     m_hashingTask->addTask(hash_task);
 }
@@ -285,7 +285,7 @@ void BlockedModsDialog::checkMatchHash(QString hash, QString path)
 {
     bool match = false;
 
-    qDebug() << "[Blocked Mods Dialog] Checking for match on hash: " << hash << "| From path:" << path;
+    qDebug() << "[Blocked Mods Dialog] Checking for match on hash:" << hash << "| From path:" << path;
 
     auto downloadDir = QFileInfo(APPLICATION->settings()->get("DownloadsDir").toString()).absoluteFilePath();
     auto moveFiles = APPLICATION->settings()->get("MoveModsFromDownloadsDir").toBool();

@@ -145,8 +145,8 @@ void Hasher::executeTask()
         } else if (m_result = m_future.result(); m_result.isEmpty()) {
             emitFailed("Empty hash!");
         } else {
-            emitSucceeded();
             emit resultsReady(m_result);
+            emitSucceeded();
         }
     });
     m_watcher.setFuture(m_future);

@@ -56,7 +56,7 @@
 
 #include "settings/INISettingsObject.h"
 
-#include "sys.h"
+#include "SysInfo.h"
 #include "tasks/ConcurrentTask.h"
 #include "ui/dialogs/BlockedModsDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -142,7 +142,7 @@ bool FlameCreationTask::updateInstance()
     auto instance_list = APPLICATION->instances();
 
     // FIXME: How to handle situations when there's more than one install already for a given modpack?
-    InstancePtr inst;
+    BaseInstance* inst;
     if (auto original_id = originalInstanceID(); !original_id.isEmpty()) {
         inst = instance_list->getInstanceById(original_id);
         Q_ASSERT(inst);
@@ -274,7 +274,7 @@ bool FlameCreationTask::updateInstance()
                 continue;
             if (skipModsRemoval && isModsPath(entry)) {
                 continue;
-}
+            }
             qDebug() << "Scheduling" << entry << "for removal";
             m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
         }
@@ -287,81 +287,81 @@ bool FlameCreationTask::updateInstance()
         }
 
         auto raw_response = std::make_shared<QByteArray>();
-        auto job = FLAME_API.getFiles(fileIds, raw_response);
+        auto job = FLAME_API.getFiles(fileIds, raw_response.get());
 
         QEventLoop loop;
 
-        connect(
-            job.get(), &Task::succeeded, this,
-            [this, raw_response, fileIds, old_inst_dir, &old_files, old_minecraft_dir, relocatingMods, useModsSubdir] {
-                // Parse the API response
-                QJsonParseError parse_error{};
-                auto doc = QJsonDocument::fromJson(*raw_response, &parse_error);
-                if (parse_error.error != QJsonParseError::NoError) {
-                    qWarning() << "Error while parsing JSON response from Flame files task at " << parse_error.offset
-                               << " reason: " << parse_error.errorString();
-                    qWarning() << *raw_response;
-                    return;
-                }
-
-                try {
-                    QJsonArray entries;
-                    if (fileIds.size() == 1) {
-                        entries = { Json::requireObject(Json::requireObject(doc), "data") };
-                    } else {
-                        entries = Json::requireArray(Json::requireObject(doc), "data");
-}
-
-                    for (auto entry : entries) {
-                        auto entry_obj = Json::requireObject(entry);
-
-                        Flame::File file;
-                        // We don't care about blocked mods, we just need local data to delete the file
-                        file.version = FlameMod::loadIndexedPackVersion(entry_obj);
-                        auto id = Json::requireInteger(entry_obj, "id");
-                        old_files.insert(id, file);
+        connect(job.get(), &Task::succeeded, this,
+                [this, raw_response, fileIds, &old_files, old_minecraft_dir, relocatingMods, useModsSubdir] {
+                    // Parse the API response
+                    QJsonParseError parse_error{};
+                    auto doc = QJsonDocument::fromJson(*raw_response, &parse_error);
+                    if (parse_error.error != QJsonParseError::NoError) {
+                        qWarning() << "Error while parsing JSON response from Flame files task at" << parse_error.offset
+                                   << "reason:" << parse_error.errorString();
+                        qWarning() << *raw_response;
+                        return;
                     }
-                } catch (Json::JsonException& e) {
-                    qCritical() << e.cause() << e.what();
-                }
 
-                if (relocatingMods && useModsSubdir) {
-                    QSet<QString> modFileNames;
+                    try {
+                        QJsonArray entries;
+                        if (fileIds.size() == 1) {
+                            entries = { Json::requireObject(Json::requireObject(doc), "data") };
+                        } else {
+                            entries = Json::requireArray(Json::requireObject(doc), "data");
+                        }
+
+                        for (auto entry : entries) {
+                            auto entry_obj = Json::requireObject(entry);
+
+                            Flame::File file;
+                            // We don't care about blocked mods, we just need local data to delete the file
+                            file.version = FlameMod::loadIndexedPackVersion(entry_obj);
+                            auto id = Json::requireInteger(entry_obj, "id");
+                            old_files.insert(id, file);
+                        }
+                    } catch (Json::JsonException& e) {
+                        qCritical() << e.cause() << e.what();
+                        return;
+                    }
+
+                    if (relocatingMods && useModsSubdir) {
+                        QSet<QString> modFileNames;
+                        for (auto& file : old_files) {
+                            if (!isModsPath(file.targetFolder)) {
+                                continue;
+                            }
+                            if (file.version.fileName.isEmpty()) {
+                                continue;
+                            }
+                            modFileNames.insert(file.version.fileName);
+                            if (file.version.fileName.endsWith(".disabled", Qt::CaseInsensitive)) {
+                                modFileNames.insert(file.version.fileName.chopped(QString(".disabled").size()));
+                            }
+                        }
+                        const QDir oldIndexDir(old_minecraft_dir.absoluteFilePath("mods/.index"));
+                        removeMetadataForFiles(oldIndexDir, modFileNames);
+                    }
+
+                    // Delete the files
                     for (auto& file : old_files) {
-                        if (!isModsPath(file.targetFolder)) {
+                        if (file.version.fileName.isEmpty() || file.targetFolder.isEmpty()) {
                             continue;
                         }
-                        if (file.version.fileName.isEmpty()) {
-                            continue;
-                        }
-                        modFileNames.insert(file.version.fileName);
-                        if (file.version.fileName.endsWith(".disabled", Qt::CaseInsensitive)) {
-                            modFileNames.insert(file.version.fileName.chopped(QString(".disabled").size()));
+
+                        const QString relative_path(FS::PathCombine(file.targetFolder, file.version.fileName));
+                        qDebug() << "Scheduling" << relative_path << "for removal";
+                        m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
+                        QFileInfo relative_info(relative_path);
+                        const bool isDisabled = relative_info.suffix().compare("disabled", Qt::CaseInsensitive) == 0;
+                        if (isDisabled) {  // remove it if it was enabled/disabled by user
+                            m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path.chopped(QString(".disabled").size())));
+                        } else {
+                            m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path + ".disabled"));
                         }
                     }
-                    const QDir oldIndexDir(old_minecraft_dir.absoluteFilePath("mods/.index"));
-                    removeMetadataForFiles(oldIndexDir, modFileNames);
-                }
-
-                // Delete the files
-                for (auto& file : old_files) {
-                    if (file.version.fileName.isEmpty() || file.targetFolder.isEmpty()) {
-                        continue;
-}
-
-                    const QString relative_path(FS::PathCombine(file.targetFolder, file.version.fileName));
-                    qDebug() << "Scheduling" << relative_path << "for removal";
-                    m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
-                    QFileInfo relative_info(relative_path);
-                    const bool isDisabled = relative_info.suffix().compare("disabled", Qt::CaseInsensitive) == 0;
-                    if (isDisabled) {  // remove it if it was enabled/disabled by user
-                        m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path.chopped(QString(".disabled").size())));
-                    } else {
-                        m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path + ".disabled"));
-                    }
-                }
-            });
-        connect(job.get(), &Task::failed, this, [](QString reason) { qCritical() << "Failed to get files: " << reason; });
+                });
+        connect(job.get(), &Task::failed, this, [](QString reason) { qCritical() << "Failed to get files:" << reason; });
         connect(job.get(), &Task::finished, &loop, &QEventLoop::quit);
 
         m_processUpdateFileInfoJob = job;
@@ -572,8 +572,8 @@ bool FlameCreationTask::createInstance()
     }
 
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
-    MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
+    auto instanceSettings = std::make_unique<INISettingsObject>(configPath);
+    MinecraftInstance instance(m_globalSettings, std::move(instanceSettings), m_stagingPath);
     auto mcVersion = m_pack.minecraft.version;
 
     // Hack to correct some 'special sauce'...
@@ -610,7 +610,7 @@ bool FlameCreationTask::createInstance()
 
     // only set memory if this is a fresh instance
     if (m_instance == nullptr && recommendedRAM > 0) {
-        const uint64_t sysMiB = Sys::getSystemRam() / Sys::mebibyte;
+        const uint64_t sysMiB = SysInfo::getSystemRamMiB();
         const uint64_t max = sysMiB * 0.9;
 
         if (static_cast<uint64_t>(recommendedRAM) > max) {
@@ -775,7 +775,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
         message_dialog.setModal(true);
 
         if (message_dialog.exec()) {
-            qDebug() << "Post dialog blocked mods list: " << blocked_mods;
+            qDebug() << "Post dialog blocked mods list:" << blocked_mods;
             copyBlockedMods(blocked_mods);
             setupDownloadJob(loop);
         } else {

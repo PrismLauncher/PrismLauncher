@@ -169,10 +169,10 @@ class Config {
     QString DEFAULT_RESOURCE_BASE = "https://resources.download.minecraft.net/";
     QString LIBRARY_BASE = "https://libraries.minecraft.net/";
     QString IMGUR_BASE_URL = "https://api.imgur.com/3/";
-    QString FMLLIBS_BASE_URL;
+    QString LEGACY_FMLLIBS_BASE_URL;
     QString TRANSLATION_FILES_URL;
 
-    QString MODPACKSCH_API_BASE_URL = "https://api.modpacks.ch/";
+    QString FTB_API_BASE_URL = "https://api.feed-the-beast.com/v1/modpacks/public";
 
     QString LEGACY_FTB_CDN_BASE_URL = "https://dist.creeper.host/FTB2/";
 

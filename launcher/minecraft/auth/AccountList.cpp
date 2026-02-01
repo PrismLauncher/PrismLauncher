@@ -168,6 +168,26 @@ void AccountList::removeAccount(QModelIndex index)
     }
 }
 
+void AccountList::moveAccount(QModelIndex index, int delta)
+{
+    const int row = index.row();
+    const int newRow = row + delta;
+    if (index.isValid() && row < m_accounts.size() && newRow >= 0 && newRow < m_accounts.size()) {
+        // Qt is stupid, https://doc.qt.io/qt-6/qabstractitemmodel.html#beginMoveRows
+        const int modelDestinationRow = (newRow > row) ? newRow + 1 : newRow;
+
+        if (beginMoveRows(QModelIndex(), row, row, QModelIndex(), modelDestinationRow)) {
+            m_accounts.move(row, newRow);
+            endMoveRows();
+
+            onListChanged();
+        } else {
+            qCritical().noquote() << "AccountList: failed to move account from" << row << "to" << newRow
+                                  << QString("(%1 accounts in total)").arg(this->count());
+        }
+    }
+}
+
 MinecraftAccountPtr AccountList::defaultAccount() const
 {
     return m_defaultAccount;
@@ -295,6 +315,24 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
     MinecraftAccountPtr account = at(index.row());
 
     switch (role) {
+        case Qt::SizeHintRole:
+            if (index.column() == ProfileNameColumn) {
+                return QSize(0, 30);
+            }
+
+            return QVariant();
+        case Qt::DecorationRole:
+            if (index.column() == ProfileNameColumn) {
+                auto face = account->getFace(24, 24);
+
+                if (!face.isNull()) {
+                    return face;
+                } else {
+                    return QIcon::fromTheme("noaccount").pixmap(24, 24);
+                }
+            }
+
+            return QVariant();
         case Qt::DisplayRole:
             switch (index.column()) {
                 case ProfileNameColumn:
@@ -574,7 +612,7 @@ void AccountList::fillQueue()
     if (m_defaultAccount && m_defaultAccount->shouldRefresh()) {
         auto idToRefresh = m_defaultAccount->internalId();
         m_refreshQueue.push_back(idToRefresh);
-        qDebug() << "AccountList: Queued default account with internal ID " << idToRefresh << " to refresh first";
+        qDebug() << "AccountList: Queued default account with internal ID" << idToRefresh << "to refresh first";
     }
 
     for (int i = 0; i < count(); i++) {
@@ -598,7 +636,7 @@ void AccountList::requestRefresh(QString accountId)
         m_refreshQueue.removeAt(index);
     }
     m_refreshQueue.push_front(accountId);
-    qDebug() << "AccountList: Pushed account with internal ID " << accountId << " to the front of the queue";
+    qDebug() << "AccountList: Pushed account with internal ID" << accountId << "to the front of the queue";
     if (!isActive()) {
         tryNext();
     }
@@ -610,7 +648,7 @@ void AccountList::queueRefresh(QString accountId)
         return;
     }
     m_refreshQueue.push_back(accountId);
-    qDebug() << "AccountList: Queued account with internal ID " << accountId << " to refresh";
+    qDebug() << "AccountList: Queued account with internal ID" << accountId << "to refresh";
 }
 
 void AccountList::tryNext()
@@ -626,13 +664,13 @@ void AccountList::tryNext()
                     connect(m_currentTask.get(), &Task::succeeded, this, &AccountList::authSucceeded);
                     connect(m_currentTask.get(), &Task::failed, this, &AccountList::authFailed);
                     m_currentTask->start();
-                    qDebug() << "RefreshSchedule: Processing account " << account->accountDisplayString() << " with internal ID "
+                    qDebug() << "RefreshSchedule: Processing account" << account->accountDisplayString() << "with internal ID"
                              << accountId;
                     return;
                 }
             }
         }
-        qDebug() << "RefreshSchedule: Account with with internal ID " << accountId << " not found.";
+        qDebug() << "RefreshSchedule: Account with internal ID" << accountId << "not found.";
     }
     // if we get here, no account needed refreshing. Schedule refresh in an hour.
     m_refreshTimer->start(1000 * 3600);
@@ -647,7 +685,7 @@ void AccountList::authSucceeded()
 
 void AccountList::authFailed(QString reason)
 {
-    qDebug() << "RefreshSchedule: Background account refresh failed: " << reason;
+    qDebug() << "RefreshSchedule: Background account refresh failed:" << reason;
     m_currentTask.reset();
     m_nextTimer->start(1000 * 20);
 }

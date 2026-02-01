@@ -38,6 +38,8 @@
 
 #include <QDebug>
 
+#include "AssertHelpers.h"
+
 Q_LOGGING_CATEGORY(taskLogC, "launcher.task")
 
 Task::Task(bool show_debug) : m_show_debug(show_debug)
@@ -96,7 +98,7 @@ void Task::start()
             break;
         }
         case State::Running: {
-            if (m_show_debug)
+            if (ASSERT_NEVER(isRunning()) && m_show_debug)
                 qCWarning(taskLogC) << "The launcher tried to start task" << describe() << "while it was already running!";
             return;
         }
@@ -110,13 +112,13 @@ void Task::start()
 void Task::emitFailed(QString reason)
 {
     // Don't fail twice.
-    if (!isRunning()) {
-        qCCritical(taskLogC) << "Task" << describe() << "failed while not running!!!!: " << reason;
+    if (ASSERT_NEVER(!isRunning())) {
+        qCCritical(taskLogC) << "Task" << describe() << "failed while not running!!!!:" << reason;
         return;
     }
     m_state = State::Failed;
     m_failReason = reason;
-    qCCritical(taskLogC) << "Task" << describe() << "failed: " << reason;
+    qCCritical(taskLogC) << "Task" << describe() << "failed:" << reason;
     emit failed(reason);
     emit finished();
 }
@@ -124,7 +126,7 @@ void Task::emitFailed(QString reason)
 void Task::emitAborted()
 {
     // Don't abort twice.
-    if (!isRunning()) {
+    if (ASSERT_NEVER(!isRunning())) {
         qCCritical(taskLogC) << "Task" << describe() << "aborted while not running!!!!";
         return;
     }
@@ -139,7 +141,7 @@ void Task::emitAborted()
 void Task::emitSucceeded()
 {
     // Don't succeed twice.
-    if (!isRunning()) {
+    if (ASSERT_NEVER(!isRunning())) {
         qCCritical(taskLogC) << "Task" << describe() << "succeeded while not running!!!!";
         return;
     }

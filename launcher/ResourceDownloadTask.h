@@ -34,7 +34,7 @@ class ResourceDownloadTask : public SequentialTask {
    public:
     explicit ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
                                   ModPlatform::IndexedVersion version,
-                                  std::shared_ptr<ResourceFolderModel> packs,
+                                  ResourceFolderModel* packs,
                                   bool is_indexed = true,
                                   QString target_dir_path = {},
                                   QString index_dir_path = {},
@@ -49,7 +49,7 @@ class ResourceDownloadTask : public SequentialTask {
    private:
     ModPlatform::IndexedPack::Ptr m_pack;
     ModPlatform::IndexedVersion m_pack_version;
-    const std::shared_ptr<ResourceFolderModel> m_pack_model;
+    ResourceFolderModel* m_pack_model = nullptr;
     QDir m_targetDir;
     QDir m_indexDir;
     QString m_downloadFileName;

@@ -87,7 +87,7 @@ class World {
     QString m_iconFile;
     QDateTime m_levelDatTime;
     QDateTime m_lastPlayed;
-    int64_t m_size;
+    int64_t m_size = 0;
     int64_t m_randomSeed = 0;
     GameType m_gameType;
     bool m_isValid = false;

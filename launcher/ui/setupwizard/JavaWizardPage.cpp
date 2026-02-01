@@ -10,8 +10,6 @@
 #include <QToolButton>
 #include <QVBoxLayout>
 
-#include <sys.h>
-
 #include "JavaCommon.h"
 
 #include "ui/widgets/JavaWizardWidget.h"

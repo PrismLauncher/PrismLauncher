@@ -55,7 +55,7 @@ QAccessibleInterface* AccessibleInstanceView::cellAt(int row, int column) const
 
     QModelIndex index = view()->model()->index(row, column, view()->rootIndex());
     if (Q_UNLIKELY(!index.isValid())) {
-        qWarning() << "AccessibleInstanceView::cellAt: invalid index: " << index << " for " << view();
+        qWarning() << "AccessibleInstanceView::cellAt: invalid index:" << index << "for" << view();
         return 0;
     }
 
@@ -531,7 +531,7 @@ void AccessibleInstanceView::modelChange(QAccessibleTableModelChangeEvent* event
 AccessibleInstanceViewItem::AccessibleInstanceViewItem(QAbstractItemView* view_, const QModelIndex& index_) : view(view_), m_index(index_)
 {
     if (Q_UNLIKELY(!index_.isValid()))
-        qWarning() << "AccessibleInstanceViewItem::AccessibleInstanceViewItem with invalid index: " << index_;
+        qWarning() << "AccessibleInstanceViewItem::AccessibleInstanceViewItem with invalid index:" << index_;
 }
 
 void* AccessibleInstanceViewItem::interface_cast(QAccessible::InterfaceType t)

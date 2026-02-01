@@ -102,6 +102,9 @@ set(CORE_SOURCES
     MMCTime.cpp
 
     MTPixmapCache.h
+
+    # Assertion helper
+    AssertHelpers.h
 )
 if (UNIX AND NOT CYGWIN AND NOT APPLE)
     set(CORE_SOURCES
@@ -119,6 +122,7 @@ set(NET_SOURCES
     net/ChecksumValidator.h
     net/Download.cpp
     net/Download.h
+    net/DummySink.h
     net/FileSink.cpp
     net/FileSink.h
     net/HttpMetaCache.cpp
@@ -250,8 +254,8 @@ set(MINECRAFT_SOURCES
 
     minecraft/update/AssetUpdateTask.h
     minecraft/update/AssetUpdateTask.cpp
-    minecraft/update/FMLLibrariesTask.cpp
-    minecraft/update/FMLLibrariesTask.h
+    minecraft/update/LegacyFMLLibrariesTask.cpp
+    minecraft/update/LegacyFMLLibrariesTask.h
     minecraft/update/FoldersTask.cpp
     minecraft/update/FoldersTask.h
     minecraft/update/LibrariesTask.cpp
@@ -261,6 +265,8 @@ set(MINECRAFT_SOURCES
     minecraft/launch/ClaimAccount.h
     minecraft/launch/CreateGameFolders.cpp
     minecraft/launch/CreateGameFolders.h
+    minecraft/launch/EnsureOfflineLibraries.cpp
+    minecraft/launch/EnsureOfflineLibraries.h
     minecraft/launch/ModMinecraftJar.cpp
     minecraft/launch/ModMinecraftJar.h
     minecraft/launch/ExtractNatives.cpp
@@ -530,6 +536,11 @@ set(FTB_SOURCES
     modplatform/import_ftb/PackInstallTask.cpp
     modplatform/import_ftb/PackHelpers.h
     modplatform/import_ftb/PackHelpers.cpp
+
+    modplatform/ftb/FTBPackInstallTask.h
+    modplatform/ftb/FTBPackInstallTask.cpp
+    modplatform/ftb/FTBPackManifest.h
+    modplatform/ftb/FTBPackManifest.cpp
 )
 
 set(FLAME_SOURCES
@@ -1007,6 +1018,13 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/atlauncher/AtlUserInteractionSupportImpl.cpp
     ui/pages/modplatform/atlauncher/AtlUserInteractionSupportImpl.h
 
+    ui/pages/modplatform/ftb/FtbFilterModel.cpp
+    ui/pages/modplatform/ftb/FtbFilterModel.h
+    ui/pages/modplatform/ftb/FtbListModel.cpp
+    ui/pages/modplatform/ftb/FtbListModel.h
+    ui/pages/modplatform/ftb/FtbPage.cpp
+    ui/pages/modplatform/ftb/FtbPage.h
+
     ui/pages/modplatform/legacy_ftb/Page.cpp
     ui/pages/modplatform/legacy_ftb/Page.h
     ui/pages/modplatform/legacy_ftb/ListModel.h
@@ -1236,6 +1254,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/import_ftb/ImportFTBPage.ui
     ui/pages/modplatform/ImportPage.ui
     ui/pages/modplatform/OptionalModDialog.ui
+    ui/pages/modplatform/ftb/FtbPage.ui
     ui/pages/modplatform/modrinth/ModrinthPage.ui
     ui/pages/modplatform/technic/TechnicPage.ui
     ui/widgets/CustomCommands.ui
@@ -1334,7 +1353,6 @@ if(${Launcher_USE_PCH})
 endif()
 
 target_link_libraries(Launcher_logic
-    systeminfo
     Launcher_murmur2
     nbt++
     ${ZLIB_LIBRARIES}
@@ -1457,7 +1475,6 @@ if(Launcher_BUILD_UPDATER)
 
     target_link_libraries(prism_updater_logic
         ${ZLIB_LIBRARIES}
-        systeminfo
         BuildConfig
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Core
@@ -1514,7 +1531,6 @@ if(WIN32 OR (DEFINED Launcher_BUILD_FILELINKER AND Launcher_BUILD_FILELINKER))
     endif()
 
     target_link_libraries(filelink_logic
-        systeminfo
         BuildConfig
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Core
@@ -1615,6 +1631,49 @@ if(WIN32 OR (UNIX AND APPLE))
         SCRIPT ${QT_DEPLOY_SCRIPT}
         COMPONENT bundle
     )
+    # FIXME: remove this crap once we stop using msys2
+    if(MINGW)
+        # i've not found a solution better than injecting the config vars like this...
+        # with install(CODE" for everything everything just breaks
+        install(CODE "
+            set(QT_PLUGINS_DIR \"${QT_PLUGINS_DIR}\")
+            set(QT_LIBS_DIR \"${QT_LIBS_DIR}\")
+            set(QT_LIBEXECS_DIR \"${QT_LIBEXECS_DIR}\")
+            set(CMAKE_SYSTEM_LIBRARY_PATH \"${CMAKE_SYSTEM_LIBRARY_PATH}\")
+            set(CMAKE_INSTALL_PREFIX \"${CMAKE_INSTALL_PREFIX}\")
+            "
+            COMPONENT bundle)
+
+        install(CODE [[
+            file(GLOB QT_IMAGEFORMAT_DLLS "${QT_PLUGINS_DIR}/imageformats/*.dll")
+            set(CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL objdump)
+            file(GET_RUNTIME_DEPENDENCIES
+                RESOLVED_DEPENDENCIES_VAR imageformatdeps
+                LIBRARIES ${QT_IMAGEFORMAT_DLLS}
+                DIRECTORIES
+                    ${CMAKE_SYSTEM_LIBRARY_PATH}
+                    ${QT_PLUGINS_DIR}
+                    ${QT_LIBS_DIR}
+                    ${QT_LIBEXECS_DIR}
+                PRE_EXCLUDE_REGEXES
+                    "^(api-ms-win|ext-ms)-.*\\.dll$"
+                    # FIXME: Why aren't these caught by the below regex???
+                    "^azure.*\\.dll$"
+                    "^vcruntime.*\\.dll$"
+                POST_EXCLUDE_REGEXES
+                    "system32"
+            )
+            foreach(_lib ${imageformatdeps})
+                file(INSTALL
+                    DESTINATION ${CMAKE_INSTALL_PREFIX}
+                    TYPE SHARED_LIBRARY
+                    FOLLOW_SYMLINK_CHAIN
+                    FILES ${_lib}
+                )
+            endforeach()
+        ]]
+        COMPONENT bundle)
+    endif()
 
     # Add qt.conf - this makes Qt stop looking for things outside the bundle
     install(
@@ -1627,4 +1686,16 @@ if(WIN32 OR (UNIX AND APPLE))
         DESTINATION ${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}
         COMPONENT bundle
     )
+endif()
+
+find_program(CLANG_FORMAT clang-format OPTIONAL)
+if(CLANG_FORMAT)
+    message(STATUS "Creating clang-format target")
+    add_custom_target(
+        clang-format
+        COMMAND ${CLANG_FORMAT} -i --style=file:${CMAKE_SOURCE_DIR}/.clang-format ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${PRISMUPDATER_SOURCES} ${LINKEXE_SOURCES} ${PRECOMPILED_HEADERS}
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    )
+else()
+    message(WARNING "Unable to find `clang-format`. Not creating custom target")
 endif()

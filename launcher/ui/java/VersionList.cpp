@@ -118,7 +118,7 @@ void VersionList::sortVersions()
                      [versionStr](Java::MetadataPtr val) { return val->runtimeOS == versionStr; });
         std::sort(m_vlist.begin(), m_vlist.end(), sortJavas);
     } else {
-        qWarning() << "No Java versions found for your operating system." << SysInfo::currentSystem() << " " << SysInfo::useQTForArch();
+        qWarning() << "No Java versions found for your operating system:" << SysInfo::currentSystem() << SysInfo::useQTForArch();
     }
     endResetModel();
 }

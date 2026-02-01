@@ -45,7 +45,7 @@ namespace Net {
  */
 class ByteArraySink : public Sink {
    public:
-    ByteArraySink(std::shared_ptr<QByteArray> output) : m_output(output) {};
+    ByteArraySink(QByteArray* output) : m_output(output) {}
 
     virtual ~ByteArraySink() = default;
 
@@ -92,6 +92,6 @@ class ByteArraySink : public Sink {
     auto hasLocalData() -> bool override { return false; }
 
    protected:
-    std::shared_ptr<QByteArray> m_output;
+    QByteArray* m_output;
 };
 }  // namespace Net

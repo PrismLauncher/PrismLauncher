@@ -405,7 +405,7 @@ void World::loadFromLevelDat(QByteArray data)
     try {
         valPtr = &levelData->at("Data");
     } catch (const std::out_of_range& e) {
-        qWarning() << "Unable to read NBT tags from " << m_folderName << ":" << e.what();
+        qWarning().nospace() << "Unable to read NBT tags from " << m_folderName << ": " << e.what();
         m_isValid = false;
         return;
     }

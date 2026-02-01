@@ -61,7 +61,7 @@ class ListModel : public QAbstractListModel {
     QMap<QString, LogoCallback> waitingCallbacks;
 
     NetJob::Ptr jobPtr;
-    std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
+    std::unique_ptr<QByteArray> response = std::make_unique<QByteArray>();
 };
 
 }  // namespace Atl

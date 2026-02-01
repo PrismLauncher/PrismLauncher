@@ -175,8 +175,8 @@ void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
                     m_current_task = makeShared<Java::ArchiveDownloadTask>(java->url, final_path, java->checksumType, java->checksumHash);
                     break;
                 case Java::DownloadType::Unknown:
-                    emitFailed(tr("Could not determine Java download type!"));
                     deletePath();
+                    emitFailed(tr("Could not determine Java download type!"));
                     return;
             }
 #if defined(Q_OS_MACOS)

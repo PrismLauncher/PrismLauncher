@@ -5,12 +5,12 @@
 
 class MCEditTool {
    public:
-    MCEditTool(SettingsObjectPtr settings);
+    MCEditTool(SettingsObject* settings);
     void setPath(QString& path);
     QString path() const;
     bool check(const QString& toolPath, QString& error);
     QString getProgramPath();
 
    private:
-    SettingsObjectPtr m_settings;
+    SettingsObject* m_settings;
 };

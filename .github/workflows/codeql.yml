@@ -79,12 +79,16 @@ jobs:
         uses: ./.github/actions/setup-dependencies
         with:
           build-type: Debug
-          qt-version: 6.10.1
+          qt-version: 6.4.3
 
       - name: Configure and Build
         run: |
           cmake --preset linux
           cmake --build --preset linux --config Debug
+
+      - name: Run tests
+        run: |
+          ctest --preset linux --build-config Debug
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4

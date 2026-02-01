@@ -65,7 +65,6 @@ void ExtractNatives::executeTask()
         emitSucceeded();
         return;
     }
-    auto settings = instance->settings();
 
     auto outputPath = instance->getNativePath();
     FS::ensureFolderPathExists(outputPath);
@@ -76,6 +75,7 @@ void ExtractNatives::executeTask()
             const char* reason = QT_TR_NOOP("Couldn't extract native jar '%1' to destination '%2'");
             emit logLine(QString(reason).arg(source, outputPath), MessageLevel::Fatal);
             emitFailed(tr(reason).arg(source, outputPath));
+            return;
         }
     }
     emitSucceeded();

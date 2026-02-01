@@ -21,26 +21,26 @@
 class InstancePageProvider : protected QObject, public BasePageProvider {
     Q_OBJECT
    public:
-    explicit InstancePageProvider(InstancePtr parent) { inst = parent; }
+    explicit InstancePageProvider(BaseInstance* parent) { inst = parent; }
 
     virtual ~InstancePageProvider() = default;
     virtual QList<BasePage*> getPages() override
     {
         QList<BasePage*> values;
         values.append(new LogPage(inst));
-        std::shared_ptr<MinecraftInstance> onesix = std::dynamic_pointer_cast<MinecraftInstance>(inst);
-        values.append(new VersionPage(onesix.get()));
-        values.append(ManagedPackPage::createPage(onesix.get()));
-        auto modsPage = new ModFolderPage(onesix.get(), onesix->loaderModList());
+        MinecraftInstance* onesix = dynamic_cast<MinecraftInstance*>(inst);
+        values.append(new VersionPage(onesix));
+        values.append(ManagedPackPage::createPage(onesix));
+        auto modsPage = new ModFolderPage(onesix, onesix->loaderModList());
         modsPage->setFilter("%1 (*.zip *.jar *.litemod *.nilmod)");
         values.append(modsPage);
-        values.append(new CoreModFolderPage(onesix.get(), onesix->coreModList()));
-        values.append(new NilModFolderPage(onesix.get(), onesix->nilModList()));
-        values.append(new ResourcePackPage(onesix.get(), onesix->resourcePackList()));
-        values.append(new GlobalDataPackPage(onesix.get()));
-        values.append(new TexturePackPage(onesix.get(), onesix->texturePackList()));
-        values.append(new ShaderPackPage(onesix.get(), onesix->shaderPackList()));
-        values.append(new NotesPage(onesix.get()));
+        values.append(new CoreModFolderPage(onesix, onesix->coreModList()));
+        values.append(new NilModFolderPage(onesix, onesix->nilModList()));
+        values.append(new ResourcePackPage(onesix, onesix->resourcePackList()));
+        values.append(new GlobalDataPackPage(onesix));
+        values.append(new TexturePackPage(onesix, onesix->texturePackList()));
+        values.append(new ShaderPackPage(onesix, onesix->shaderPackList()));
+        values.append(new NotesPage(onesix));
         values.append(new WorldListPage(onesix, onesix->worldList()));
         values.append(new ServersPage(onesix));
         values.append(new ScreenshotsPage(FS::PathCombine(onesix->gameRoot(), "screenshots")));
@@ -52,5 +52,5 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
     virtual QString dialogTitle() override { return tr("Edit Instance (%1)").arg(inst->name()); }
 
    protected:
-    InstancePtr inst;
+    BaseInstance* inst;
 };

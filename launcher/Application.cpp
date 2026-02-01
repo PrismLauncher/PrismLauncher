@@ -126,7 +126,6 @@
 #include <LocalPeer.h>
 
 #include <stdlib.h>
-#include <sys.h>
 #include "SysInfo.h"
 
 #ifdef Q_OS_LINUX
@@ -603,25 +602,25 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     {
         qInfo() << qPrintable(BuildConfig.LAUNCHER_DISPLAYNAME + ", " + QString(BuildConfig.LAUNCHER_COPYRIGHT).replace("\n", ", "));
-        qInfo() << "Version                    : " << BuildConfig.printableVersionString();
-        qInfo() << "Platform                   : " << BuildConfig.BUILD_PLATFORM;
-        qInfo() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
-        qInfo() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
-        qInfo() << "Compiled for               : " << BuildConfig.systemID();
-        qInfo() << "Compiled by                : " << BuildConfig.compilerID();
-        qInfo() << "Build Artifact             : " << BuildConfig.BUILD_ARTIFACT;
-        qInfo() << "Updates Enabled           : " << (updaterEnabled() ? "Yes" : "No");
+        qInfo() << "Version                    :" << BuildConfig.printableVersionString();
+        qInfo() << "Platform                   :" << BuildConfig.BUILD_PLATFORM;
+        qInfo() << "Git commit                 :" << BuildConfig.GIT_COMMIT;
+        qInfo() << "Git refspec                :" << BuildConfig.GIT_REFSPEC;
+        qInfo() << "Compiled for               :" << BuildConfig.systemID();
+        qInfo() << "Compiled by                :" << BuildConfig.compilerID();
+        qInfo() << "Build Artifact             :" << BuildConfig.BUILD_ARTIFACT;
+        qInfo() << "Updates Enabled            :" << (updaterEnabled() ? "Yes" : "No");
         if (adjustedBy.size()) {
-            qInfo() << "Work dir before adjustment : " << origcwdPath;
-            qInfo() << "Work dir after adjustment  : " << QDir::currentPath();
-            qInfo() << "Adjusted by                : " << adjustedBy;
+            qInfo() << "Work dir before adjustment :" << origcwdPath;
+            qInfo() << "Work dir after adjustment  :" << QDir::currentPath();
+            qInfo() << "Adjusted by                :" << adjustedBy;
         } else {
-            qInfo() << "Work dir                   : " << QDir::currentPath();
+            qInfo() << "Work dir                   :" << QDir::currentPath();
         }
-        qInfo() << "Binary path                : " << binPath;
-        qInfo() << "Application root path      : " << m_rootPath;
+        qInfo() << "Binary path                :" << binPath;
+        qInfo() << "Application root path      :" << m_rootPath;
         if (!m_instanceIdToLaunch.isEmpty()) {
-            qInfo() << "ID of instance to launch   : " << m_instanceIdToLaunch;
+            qInfo() << "ID of instance to launch   :" << m_instanceIdToLaunch;
         }
         if (!m_serverToJoin.isEmpty()) {
             qInfo() << "Address of server to join  :" << m_serverToJoin;
@@ -685,8 +684,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         QFontInfo consoleFontInfo(consoleFont);
         QString resolvedDefaultMonospace = consoleFontInfo.family();
         QFont resolvedFont(resolvedDefaultMonospace);
-        qDebug() << "Detected default console font:" << resolvedDefaultMonospace
-                 << ", substitutions:" << resolvedFont.substitutions().join(',');
+        qDebug().nospace() << "Detected default console font: " << resolvedDefaultMonospace
+                           << ", substitutions: " << resolvedFont.substitutions().join(',');
 
         m_settings->registerSetting("ConsoleFont", resolvedDefaultMonospace);
         m_settings->registerSetting("ConsoleFontSize", defaultSize);
@@ -862,23 +861,20 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             }
         }
         {
+            auto resetIfInvalid = [this](const Setting* setting) {
+                if (const QUrl url(setting->get().toString()); !url.isValid() || (url.scheme() != "http" && url.scheme() != "https")) {
+                    m_settings->reset(setting->id());
+                }
+            };
+
             // Meta URL
-            m_settings->registerSetting("MetaURLOverride", "");
-
-            QUrl metaUrl(m_settings->get("MetaURLOverride").toString());
-
-            // get rid of invalid meta urls
-            if (!metaUrl.isValid() || (metaUrl.scheme() != "http" && metaUrl.scheme() != "https"))
-                m_settings->reset("MetaURLOverride");
+            resetIfInvalid(m_settings->registerSetting("MetaURLOverride", "").get());
 
             // Resource URL
-            m_settings->registerSetting("ResourceURL", BuildConfig.DEFAULT_RESOURCE_BASE);
+            resetIfInvalid(m_settings->registerSetting({ "ResourceURLOverride", "ResourceURL" }, "").get());
 
-            QUrl resourceUrl(m_settings->get("ResourceURL").toString());
-
-            // get rid of invalid resource urls
-            if (!resourceUrl.isValid() || (resourceUrl.scheme() != "http" && resourceUrl.scheme() != "https"))
-                m_settings->reset("ResourceURL");
+            // Legacy FML libs URL
+            resetIfInvalid(m_settings->registerSetting("LegacyFMLLibsURLOverride", "").get());
         }
 
         m_settings->registerSetting("CloseAfterLaunch", false);
@@ -911,7 +907,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // Init page provider
         {
-            m_globalSettingsProvider = std::make_shared<GenericPageProvider>(tr("Settings"));
+            m_globalSettingsProvider = std::make_unique<GenericPageProvider>(tr("Settings"));
             m_globalSettingsProvider->addPage<LauncherPage>();
             m_globalSettingsProvider->addPage<LanguagePage>();
             m_globalSettingsProvider->addPage<AppearancePage>();
@@ -988,11 +984,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // instance path: check for problems with '!' in instance path and warn the user in the log
         // and remember that we have to show him a dialog when the gui starts (if it does so)
         QString instDir = m_settings->get("InstanceDir").toString();
-        qInfo() << "Instance path              : " << instDir;
+        qInfo() << "Instance path              :" << instDir;
         if (FS::checkProblemticPathJava(QDir(instDir))) {
             qWarning() << "Your instance path contains \'!\' and this is known to cause java problems!";
         }
-        m_instances.reset(new InstanceList(m_settings, instDir, this));
+        m_instances.reset(new InstanceList(m_settings.get(), instDir, this));
         connect(InstDirSetting.get(), &Setting::SettingChanged, m_instances.get(), &InstanceList::on_InstFolderChanged);
         qInfo() << "Loading Instances...";
         m_instances->loadList();
@@ -1038,12 +1034,12 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     m_profilers.insert("jvisualvm", std::shared_ptr<BaseProfilerFactory>(new JVisualVMFactory()));
     m_profilers.insert("generic", std::shared_ptr<BaseProfilerFactory>(new GenericProfilerFactory()));
     for (auto profiler : m_profilers.values()) {
-        profiler->registerSettings(m_settings);
+        profiler->registerSettings(m_settings.get());
     }
 
     // Create the MCEdit thing... why is this here?
     {
-        m_mcedit.reset(new MCEditTool(m_settings));
+        m_mcedit.reset(new MCEditTool(m_settings.get()));
     }
 
 #ifdef Q_OS_MACOS
@@ -1469,7 +1465,7 @@ void Application::messageReceived(const QByteArray& message)
         bool offline = received.args["offline_enabled"] == "true";
         QString offlineName = received.args["offline_name"];
 
-        InstancePtr instance;
+        BaseInstance* instance;
         if (!id.isEmpty()) {
             instance = instances()->getInstanceById(id);
             if (!instance) {
@@ -1503,17 +1499,17 @@ void Application::messageReceived(const QByteArray& message)
     }
 }
 
-std::shared_ptr<TranslationsModel> Application::translations()
+TranslationsModel* Application::translations()
 {
-    return m_translations;
+    return m_translations.get();
 }
 
-std::shared_ptr<JavaInstallList> Application::javalist()
+JavaInstallList* Application::javalist()
 {
     if (!m_javalist) {
         m_javalist.reset(new JavaInstallList());
     }
-    return m_javalist;
+    return m_javalist.get();
 }
 
 QIcon Application::logo()
@@ -1532,7 +1528,7 @@ bool Application::openJsonEditor(const QString& filename)
     }
 }
 
-bool Application::launch(InstancePtr instance,
+bool Application::launch(BaseInstance* instance,
                          bool online,
                          bool demo,
                          MinecraftTarget::Ptr targetToJoin,
@@ -1564,9 +1560,7 @@ bool Application::launch(InstancePtr instance,
         } else if (m_mainWindow) {
             controller->setParentWidget(m_mainWindow);
         }
-        connect(controller.get(), &LaunchController::succeeded, this, &Application::controllerSucceeded);
-        connect(controller.get(), &LaunchController::failed, this, &Application::controllerFailed);
-        connect(controller.get(), &LaunchController::aborted, this, [this] { controllerFailed(tr("Aborted")); });
+        connect(controller.get(), &LaunchController::finished, this, &Application::controllerFinished);
         addRunningInstance();
         QMetaObject::invokeMethod(controller.get(), &Task::start, Qt::QueuedConnection);
         return true;
@@ -1580,7 +1574,7 @@ bool Application::launch(InstancePtr instance,
     return false;
 }
 
-bool Application::kill(InstancePtr instance)
+bool Application::kill(BaseInstance* instance)
 {
     if (!instance->isRunning()) {
         qWarning() << "Attempted to kill instance" << instance->id() << ", which isn't running.";
@@ -1589,7 +1583,7 @@ bool Application::kill(InstancePtr instance)
     QMutexLocker locker(&m_instanceExtrasMutex);
     auto& extras = m_instanceExtras[instance->id()];
     // NOTE: copy of the shared pointer keeps it alive
-    auto controller = extras.controller;
+    auto& controller = extras.controller;
     locker.unlock();
     if (controller) {
         return controller->abort();
@@ -1638,7 +1632,7 @@ void Application::updateIsRunning(bool running)
     m_updateRunning = running;
 }
 
-void Application::controllerSucceeded()
+void Application::controllerFinished()
 {
     auto controller = qobject_cast<LaunchController*>(sender());
     if (!controller)
@@ -1646,10 +1640,11 @@ void Application::controllerSucceeded()
     auto id = controller->id();
 
     QMutexLocker locker(&m_instanceExtrasMutex);
-    auto& extras = m_instanceExtras[id];
+    auto& extras = m_instanceExtras.at(id);
 
+    const bool wasSuccessful = controller->wasSuccessful();
     // on success, do...
-    if (controller->instance()->settings()->get("AutoCloseConsole").toBool()) {
+    if (wasSuccessful && controller->instance()->settings()->get("AutoCloseConsole").toBool()) {
         if (extras.window) {
             QMetaObject::invokeMethod(extras.window, &QWidget::close, Qt::QueuedConnection);
         }
@@ -1659,29 +1654,8 @@ void Application::controllerSucceeded()
 
     // quit when there are no more windows.
     if (shouldExitNow()) {
-        m_status = Status::Succeeded;
-        exit(0);
-    }
-}
-
-void Application::controllerFailed(const QString& error)
-{
-    Q_UNUSED(error);
-    auto controller = qobject_cast<LaunchController*>(sender());
-    if (!controller)
-        return;
-    auto id = controller->id();
-    QMutexLocker locker(&m_instanceExtrasMutex);
-    auto& extras = m_instanceExtras[id];
-
-    // on failure, do... nothing
-    extras.controller.reset();
-    subRunningInstance();
-
-    // quit when there are no more windows.
-    if (shouldExitNow()) {
-        m_status = Status::Failed;
-        exit(1);
+        m_status = wasSuccessful ? Succeeded : Failed;
+        exit(wasSuccessful ? 0 : 1);
     }
 }
 
@@ -1738,7 +1712,7 @@ ViewLogWindow* Application::showLogWindow()
     return m_viewLogWindow;
 }
 
-InstanceWindow* Application::showInstanceWindow(InstancePtr instance, QString page)
+InstanceWindow* Application::showInstanceWindow(BaseInstance* instance, QString page)
 {
     if (!instance)
         return nullptr;
@@ -1850,22 +1824,22 @@ void Application::updateProxySettings(QString proxyTypeStr, QString addr, int po
     qDebug() << proxyDesc;
 }
 
-shared_qobject_ptr<HttpMetaCache> Application::metacache()
+HttpMetaCache* Application::metacache()
 {
-    return m_metacache;
+    return m_metacache.get();
 }
 
-shared_qobject_ptr<QNetworkAccessManager> Application::network()
+QNetworkAccessManager* Application::network()
 {
-    return m_network;
+    return m_network.get();
 }
 
-shared_qobject_ptr<Meta::Index> Application::metadataIndex()
+Meta::Index* Application::metadataIndex()
 {
     if (!m_metadataIndex) {
         m_metadataIndex.reset(new Meta::Index());
     }
-    return m_metadataIndex;
+    return m_metadataIndex.get();
 }
 
 void Application::updateCapabilities()

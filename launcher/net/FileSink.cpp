@@ -116,7 +116,7 @@ Task::State FileSink::finalize(QNetworkReply& reply)
 
         // nothing went wrong...
         if (!m_output_file->commit()) {
-            qCCritical(taskNetLogC) << "Failed to commit changes to " << m_filename;
+            qCCritical(taskNetLogC) << "Failed to commit changes to" << m_filename;
             m_output_file->cancelWriting();
             m_fail_reason = "Failed to commit changes";
             return Task::State::Failed;

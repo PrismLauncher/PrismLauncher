@@ -80,7 +80,7 @@ Modpack parseDirectory(QString path)
             const auto parts = modLoader.split('-', Qt::KeepEmptyParts);
             if (parts.size() >= 2) {
                 const auto loader = parts.first().toLower();
-                modpack.version = parts.at(1).trimmed();
+                modpack.loaderVersion = parts.at(1).trimmed();
                 if (loader == "neoforge") {
                     modpack.loaderType = ModPlatform::NeoForge;
                 } else if (loader == "forge") {
@@ -91,12 +91,13 @@ Modpack parseDirectory(QString path)
                     modpack.loaderType = ModPlatform::Quilt;
                 }
             }
-        } else {
-            legacyInstanceParsing(path, &modpack.loaderType, &modpack.loaderVersion);
         }
     } catch (const Exception& e) {
-        qDebug() << "Couldn't load ftb instance json: " << e.cause();
+        qDebug() << "Couldn't load ftb instance json:" << e.cause();
         return {};
+    }
+    if (!modpack.loaderType.has_value()) {
+        legacyInstanceParsing(path, &modpack.loaderType, &modpack.loaderVersion);
     }
 
     auto iconFile = QFileInfo(FS::PathCombine(path, "folder.jpg"));
@@ -146,7 +147,7 @@ void legacyInstanceParsing(QString path, std::optional<ModPlatform::ModLoaderTyp
             }
         }
     } catch (const Exception& e) {
-        qDebug() << "Couldn't load ftb version json: " << e.cause();
+        qDebug() << "Couldn't load ftb version json:" << e.cause();
         return;
     }
 }

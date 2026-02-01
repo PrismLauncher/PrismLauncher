@@ -48,7 +48,7 @@
 #include "minecraft/auth/AccountList.h"
 #include "settings/Setting.h"
 
-MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstancePtr instance, QWidget* parent)
+MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QWidget* parent)
     : QWidget(parent), m_instance(std::move(instance)), m_ui(new Ui::MinecraftSettingsWidget)
 {
     m_ui->setupUi(this);
@@ -115,11 +115,11 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstancePtr instance, 
             else
                 m_instance->settings()->reset("ModDownloadLoaders");
         });
-        connect(m_ui->neoForge, &QCheckBox::stateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
-        connect(m_ui->forge, &QCheckBox::stateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
-        connect(m_ui->fabric, &QCheckBox::stateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
-        connect(m_ui->quilt, &QCheckBox::stateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
-        connect(m_ui->liteLoader, &QCheckBox::stateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
+
+        for (auto c : { m_ui->neoForge, m_ui->forge, m_ui->fabric, m_ui->quilt, m_ui->liteLoader, m_ui->babric, m_ui->btaBabric,
+                        m_ui->legacyFabric, m_ui->ornithe, m_ui->rift }) {
+            connect(c, &QCheckBox::stateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
+        }
     }
 
     m_ui->maximizedWarning->hide();
@@ -154,7 +154,7 @@ MinecraftSettingsWidget::~MinecraftSettingsWidget()
 
 void MinecraftSettingsWidget::loadSettings()
 {
-    SettingsObjectPtr settings;
+    SettingsObject* settings;
 
     if (m_instance != nullptr)
         settings = m_instance->settings();
@@ -202,14 +202,14 @@ void MinecraftSettingsWidget::loadSettings()
     // Native Libraries
     m_ui->nativeWorkaroundsGroupBox->setChecked(m_instance == nullptr || settings->get("OverrideNativeWorkarounds").toBool());
     m_ui->useNativeGLFWCheck->setChecked(settings->get("UseNativeGLFW").toBool());
-    m_ui->lineEditGLFWPath->setText(settings->get("CustomGLFWPath").toString());
+    m_ui->lineEditGLFWPath->setText(settings->get("CustomGLFWPath").toString().trimmed());
 #ifdef Q_OS_LINUX
     m_ui->lineEditGLFWPath->setPlaceholderText(APPLICATION->m_detectedGLFWPath);
 #else
     m_ui->lineEditGLFWPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.GLFW_LIBRARY_NAME));
 #endif
     m_ui->useNativeOpenALCheck->setChecked(settings->get("UseNativeOpenAL").toBool());
-    m_ui->lineEditOpenALPath->setText(settings->get("CustomOpenALPath").toString());
+    m_ui->lineEditOpenALPath->setText(settings->get("CustomOpenALPath").toString().trimmed());
 #ifdef Q_OS_LINUX
     m_ui->lineEditOpenALPath->setPlaceholderText(APPLICATION->m_detectedOpenALPath);
 #else
@@ -251,12 +251,12 @@ void MinecraftSettingsWidget::loadSettings()
         m_ui->instanceAccountGroupBox->setChecked(settings->get("UseAccountForInstance").toBool());
         updateAccountsMenu(*settings);
 
+        auto blockSignalsCheckBoxes = { m_ui->neoForge, m_ui->forge,     m_ui->fabric,       m_ui->quilt,   m_ui->liteLoader,
+                                        m_ui->babric,   m_ui->btaBabric, m_ui->legacyFabric, m_ui->ornithe, m_ui->rift };
         m_ui->loaderGroup->blockSignals(true);
-        m_ui->neoForge->blockSignals(true);
-        m_ui->forge->blockSignals(true);
-        m_ui->fabric->blockSignals(true);
-        m_ui->quilt->blockSignals(true);
-        m_ui->liteLoader->blockSignals(true);
+        for (auto c : blockSignalsCheckBoxes) {
+            c->blockSignals(true);
+        }
 
         const bool overrideLoaders = settings->get("OverrideModDownloadLoaders").toBool();
         const QStringList loaders = Json::toStringList(settings->get("ModDownloadLoaders").toString());
@@ -269,6 +269,11 @@ void MinecraftSettingsWidget::loadSettings()
             m_ui->fabric->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::Fabric)));
             m_ui->quilt->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::Quilt)));
             m_ui->liteLoader->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::LiteLoader)));
+            m_ui->babric->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::Babric)));
+            m_ui->btaBabric->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::BTA)));
+            m_ui->legacyFabric->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::LegacyFabric)));
+            m_ui->ornithe->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::Ornithe)));
+            m_ui->rift->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::Rift)));
         } else {
             auto instLoaders = m_instance->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
 
@@ -277,14 +282,17 @@ void MinecraftSettingsWidget::loadSettings()
             m_ui->fabric->setChecked(instLoaders & ModPlatform::Fabric);
             m_ui->quilt->setChecked(instLoaders & ModPlatform::Quilt);
             m_ui->liteLoader->setChecked(instLoaders & ModPlatform::LiteLoader);
+            m_ui->babric->setChecked(instLoaders & ModPlatform::Babric);
+            m_ui->btaBabric->setChecked(instLoaders & ModPlatform::BTA);
+            m_ui->legacyFabric->setChecked(instLoaders & ModPlatform::LegacyFabric);
+            m_ui->ornithe->setChecked(instLoaders & ModPlatform::Ornithe);
+            m_ui->rift->setChecked(instLoaders & ModPlatform::Rift);
         }
 
         m_ui->loaderGroup->blockSignals(false);
-        m_ui->neoForge->blockSignals(false);
-        m_ui->forge->blockSignals(false);
-        m_ui->fabric->blockSignals(false);
-        m_ui->quilt->blockSignals(false);
-        m_ui->liteLoader->blockSignals(false);
+        for (auto c : blockSignalsCheckBoxes) {
+            c->blockSignals(false);
+        }
     }
 
     m_ui->legacySettingsGroupBox->setChecked(settings->get("OverrideLegacySettings").toBool());
@@ -293,14 +301,14 @@ void MinecraftSettingsWidget::loadSettings()
     m_ui->globalDataPacksGroupBox->blockSignals(true);
     m_ui->dataPacksPathEdit->blockSignals(true);
     m_ui->globalDataPacksGroupBox->setChecked(settings->get("GlobalDataPacksEnabled").toBool());
-    m_ui->dataPacksPathEdit->setText(settings->get("GlobalDataPacksPath").toString());
+    m_ui->dataPacksPathEdit->setText(settings->get("GlobalDataPacksPath").toString().trimmed());
     m_ui->globalDataPacksGroupBox->blockSignals(false);
     m_ui->dataPacksPathEdit->blockSignals(false);
 }
 
 void MinecraftSettingsWidget::saveSettings()
 {
-    SettingsObjectPtr settings;
+    SettingsObject* settings;
 
     if (m_instance != nullptr)
         settings = m_instance->settings();
@@ -522,18 +530,24 @@ void MinecraftSettingsWidget::saveSelectedLoaders()
 
     if (m_ui->neoForge->isChecked())
         loaders << getModLoaderAsString(ModPlatform::NeoForge);
-
     if (m_ui->forge->isChecked())
         loaders << getModLoaderAsString(ModPlatform::Forge);
-
     if (m_ui->fabric->isChecked())
         loaders << getModLoaderAsString(ModPlatform::Fabric);
-
     if (m_ui->quilt->isChecked())
         loaders << getModLoaderAsString(ModPlatform::Quilt);
-
     if (m_ui->liteLoader->isChecked())
         loaders << getModLoaderAsString(ModPlatform::LiteLoader);
+    if (m_ui->babric->isChecked())
+        loaders << getModLoaderAsString(ModPlatform::Babric);
+    if (m_ui->btaBabric->isChecked())
+        loaders << getModLoaderAsString(ModPlatform::BTA);
+    if (m_ui->legacyFabric->isChecked())
+        loaders << getModLoaderAsString(ModPlatform::LegacyFabric);
+    if (m_ui->ornithe->isChecked())
+        loaders << getModLoaderAsString(ModPlatform::Ornithe);
+    if (m_ui->rift->isChecked())
+        loaders << getModLoaderAsString(ModPlatform::Rift);
 
     m_instance->settings()->set("ModDownloadLoaders", Json::fromStringList(loaders));
 }

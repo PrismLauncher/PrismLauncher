@@ -15,7 +15,7 @@
 class InstanceCopyTask : public InstanceTask {
     Q_OBJECT
    public:
-    explicit InstanceCopyTask(InstancePtr origInstance, const InstanceCopyPrefs& prefs);
+    explicit InstanceCopyTask(BaseInstance* origInstance, const InstanceCopyPrefs& prefs);
 
    protected:
     //! Entry point for tasks.
@@ -26,7 +26,7 @@ class InstanceCopyTask : public InstanceTask {
 
    private:
     /* data */
-    InstancePtr m_origInstance;
+    BaseInstance* m_origInstance;
     QFuture<bool> m_copyFuture;
     QFutureWatcher<bool> m_copyFutureWatcher;
     Filter m_matcher;

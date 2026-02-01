@@ -253,7 +253,7 @@ void POTranslatorPrivate::reload()
                 mode = Mode::MessageString;
             }
         } else {
-            qDebug() << "I did not understand line: " << lineNumber << ":" << QString::fromUtf8(line);
+            qDebug() << "I did not understand line:" << lineNumber << ":" << QString::fromUtf8(line);
         }
         lineNumber++;
     }

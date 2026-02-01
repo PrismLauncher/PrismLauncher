@@ -64,9 +64,9 @@ void WorldList::startWatching()
     update();
     m_isWatching = m_watcher->addPath(m_dir.absolutePath());
     if (m_isWatching) {
-        qDebug() << "Started watching " << m_dir.absolutePath();
+        qDebug() << "Started watching" << m_dir.absolutePath();
     } else {
-        qDebug() << "Failed to start watching " << m_dir.absolutePath();
+        qDebug() << "Failed to start watching" << m_dir.absolutePath();
     }
 }
 
@@ -77,9 +77,9 @@ void WorldList::stopWatching()
     }
     m_isWatching = !m_watcher->removePath(m_dir.absolutePath());
     if (!m_isWatching) {
-        qDebug() << "Stopped watching " << m_dir.absolutePath();
+        qDebug() << "Stopped watching" << m_dir.absolutePath();
     } else {
-        qDebug() << "Failed to stop watching " << m_dir.absolutePath();
+        qDebug() << "Failed to stop watching" << m_dir.absolutePath();
     }
 }
 
@@ -351,7 +351,7 @@ Qt::DropActions WorldList::supportedDropActions() const
 
 void WorldList::installWorld(QFileInfo filename)
 {
-    qDebug() << "installing: " << filename.absoluteFilePath();
+    qDebug() << "installing:" << filename.absoluteFilePath();
     World w(filename);
     if (!w.isValid()) {
         return;

@@ -71,7 +71,7 @@ class PasteUpload : public Net::NetRequest {
 
     class Sink : public Net::ByteArraySink {
        public:
-        Sink(PasteUpload* p) : Net::ByteArraySink(std::make_shared<QByteArray>()), m_d(p) {};
+        Sink(PasteUpload* p, QByteArray* output) : Net::ByteArraySink(output), m_d(p) {};
         virtual ~Sink() = default;
 
        public:
@@ -93,4 +93,5 @@ class PasteUpload : public Net::NetRequest {
     QString m_pasteLink;
     QString m_baseUrl;
     const PasteType m_paste_type;
+    std::unique_ptr<QByteArray> m_output = std::make_unique<QByteArray>();
 };

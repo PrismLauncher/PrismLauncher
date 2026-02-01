@@ -14,7 +14,7 @@ on:
 jobs:
   update-blocked-status:
     name: Update Blocked Status
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
 
     # a pr that was a `blocking:<id>` label was merged.
     # find the open pr's it was blocked by and trigger a refresh of their state
@@ -38,7 +38,7 @@ jobs:
           gh -R ${{ github.repository }} pr list --label 'blocked' --json 'number,body' \
             | jq -c --argjson pr "$PR_NUMBER" '
                 reduce ( .[] | select(
-                  .body |  
+                  .body |
                     scan("(?:blocked (?:by|on)|stacked on):? #([0-9]+)") |
                     map(tonumber) |
                     any(.[]; . == $pr)
@@ -47,7 +47,7 @@ jobs:
           )
           {
             echo "deps=$blocked_prs"
-            echo "numdeps=$(jq -r '. | length' <<< "$blocked_prs")" 
+            echo "numdeps=$(jq -r '. | length' <<< "$blocked_prs")"
           }  >> "$GITHUB_OUTPUT"
 
       - name: Trigger Blocked PR Workflows for Dependants
