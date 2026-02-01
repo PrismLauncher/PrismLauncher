@@ -81,8 +81,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
       m_model(model),
       m_downloadDialog(nullptr),
       m_treeModel(new ModFolderTreeModel(m_model.get(), this)),
-      m_treeFilterModel(new ModFolderTreeProxyModel(this)),
-      m_newFolderAction(nullptr)
+      m_treeFilterModel(new ModFolderTreeProxyModel(this))
 {
     ui->actionDownloadItem->setText(tr("Download Mods"));
     ui->actionDownloadItem->setToolTip(tr("Download mods from online mod platforms"));
@@ -512,8 +511,8 @@ void ModFolderPage::downloadMods()
 
 void ModFolderPage::downloadDialogFinished(int result)
 {
-    if (result) {
-        auto tasks = new ConcurrentTask(tr("Download Mods"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+    if (result == QDialog::Accepted) {
+        auto* tasks = new ConcurrentTask(tr("Download Mods"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
@@ -523,7 +522,7 @@ void ModFolderPage::downloadDialogFinished(int result)
             tasks->deleteLater();
         });
         connect(tasks, &Task::succeeded, [this, tasks]() {
-            QStringList warnings = tasks->warnings();
+            const QStringList warnings = tasks->warnings();
             if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
             }
@@ -618,14 +617,14 @@ void ModFolderPage::updateMods(bool includeDeps)
             tasks->deleteLater();
         });
         connect(tasks, &Task::succeeded, [this, tasks]() {
-            QStringList warnings = tasks->warnings();
+            const QStringList warnings = tasks->warnings();
             if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
             }
             tasks->deleteLater();
         });
 
-        for (auto task : updateDialog.getTasks()) {
+        for (const auto& task : updateDialog.getTasks()) {
             tasks->addTask(task);
         }
 

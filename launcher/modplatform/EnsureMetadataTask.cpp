@@ -272,7 +272,7 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
         try {
             auto entries = Json::requireObject(doc);
             for (auto& hash : m_resources.keys()) {
-                auto resource = m_resources.find(hash).value();
+                auto* resource = m_resources.find(hash).value();
                 try {
                     auto entry = Json::requireObject(entries, hash);
 

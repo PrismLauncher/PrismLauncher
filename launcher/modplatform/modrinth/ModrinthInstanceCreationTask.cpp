@@ -522,7 +522,7 @@ bool ModrinthCreationTask::createInstance()
     loop.exec();
 
     if (!endedWell) {
-        for (auto resource : resources) {
+        for (auto* resource : resources) {
             delete resource;
         }
         return endedWell;
@@ -532,7 +532,7 @@ bool ModrinthCreationTask::createInstance()
     const QDir folder = FS::PathCombine(instance.modsRoot(), ".index");
     auto indexDirResolver = [](Resource* resource) -> QDir {
         const QDir modDir(resource->fileinfo().absolutePath());
-        return QDir(modDir.filePath(".index"));
+        return { modDir.filePath(".index") };
     };
     auto ensureMetadataTask = makeShared<EnsureMetadataTask>(resources, folder, ModPlatform::ResourceProvider::MODRINTH, indexDirResolver);
     connect(ensureMetadataTask.get(), &Task::succeeded, this, [&endedWell]() { endedWell = true; });
@@ -547,7 +547,7 @@ bool ModrinthCreationTask::createInstance()
     m_task = ensureMetadataTask;
 
     ensureMetaLoop.exec();
-    for (auto resource : resources) {
+    for (auto* resource : resources) {
         delete resource;
     }
     resources.clear();

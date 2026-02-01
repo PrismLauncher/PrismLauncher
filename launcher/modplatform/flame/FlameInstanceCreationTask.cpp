@@ -692,10 +692,10 @@ bool FlameCreationTask::createInstance()
 
     loop.exec();
 
-    bool did_succeed = getError().isEmpty();
+    const bool did_succeed = getError().isEmpty();
 
     // Update information of the already installed instance, if any.
-    if (m_instance && did_succeed) {
+    if (m_instance.has_value() && did_succeed) {
         setAbortable(false);
         auto inst = m_instance.value();
 

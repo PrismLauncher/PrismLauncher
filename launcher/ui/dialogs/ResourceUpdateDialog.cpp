@@ -27,8 +27,6 @@
 #include <QTextBrowser>
 #include <QTreeWidgetItem>
 
-#include <functional>
-#include <optional>
 
 namespace {
 std::list<Version> mcVersions(BaseInstance* inst)
@@ -271,7 +269,7 @@ void ResourceUpdateDialog::checkCandidates()
 auto ResourceUpdateDialog::ensureMetadata() -> bool
 {
     auto indexDir = this->indexDir();
-    auto indexDirResolver = [model = m_resourceModel.get()](Resource* resource) { return model->indexDirForResource(*resource); };
+    auto indexDirResolver = [](Resource* resource) { return ResourceFolderModel::indexDirForResource(*resource); };
 
     SequentialTask seq(tr("Looking for metadata"));
 
@@ -422,7 +420,7 @@ void ResourceUpdateDialog::onMetadataFailed(Resource* resource, bool try_others,
 {
     if (try_others) {
         auto indexDir = this->indexDir();
-        auto indexDirResolver = [model = m_resourceModel.get()](Resource* resource) { return model->indexDirForResource(*resource); };
+        auto indexDirResolver = [](Resource* resource) { return ResourceFolderModel::indexDirForResource(*resource); };
 
         auto task = makeShared<EnsureMetadataTask>(resource, indexDir, next(first_choice), indexDirResolver);
         connect(task.get(), &EnsureMetadataTask::metadataReady, [this](Resource* candidate) { onMetadataEnsured(candidate); });

@@ -973,8 +973,9 @@ QList<Resource*> ResourceFolderModel::selectedResources(const QModelIndexList& i
 {
     QList<Resource*> result;
     for (const QModelIndex& index : indexes) {
-        if (index.column() != 0)
+        if (index.column() != 0) {
             continue;
+        }
         result.append(&at(index.row()));
     }
     return result;
