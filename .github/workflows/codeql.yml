@@ -88,7 +88,7 @@ jobs:
 
       - name: Run tests
         run: |
-          ctest --preset linux --build-config Debug
+          ctest --preset linux --build-config Debug --extra-verbose --output-on-failure
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
