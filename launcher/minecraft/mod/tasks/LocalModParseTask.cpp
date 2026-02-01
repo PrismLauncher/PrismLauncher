@@ -247,7 +247,7 @@ ModDetails ReadMCModTOML(QByteArray contents)
                 continue;
             }
             auto modId = (*dep_table)["modId"].as_string();
-            if (!modId || ignoreModIds.contains(modId->get())) {
+            if (!modId || ignoreModIds.contains(QString::fromStdString(modId->get()))) {
                 continue;
             }
             if (isNeoForgeDep(dep_table) || isForgeDep(dep_table)) {
