@@ -38,11 +38,11 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
                                            QString target_dir_path,
                                            QString index_dir_path,
                                            bool keep_disabled)
-    : m_pack(std::move(pack)),
-      m_pack_version(std::move(version)),
-      m_pack_model(packs),
-      m_keepDisabled(keep_disabled),
-      m_downloadFileName(m_pack_version.fileName)
+    : m_pack(std::move(pack))
+    , m_pack_version(std::move(version))
+    , m_pack_model(packs)
+    , m_downloadFileName(m_pack_version.fileName)
+    , m_keepDisabled(keep_disabled)
 {
     m_targetDir = target_dir_path.isEmpty() ? m_pack_model->dir() : QDir(target_dir_path);
     m_indexDir = index_dir_path.isEmpty() ? m_pack_model->indexDir() : QDir(index_dir_path);
