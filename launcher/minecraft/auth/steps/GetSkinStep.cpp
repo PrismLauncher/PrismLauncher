@@ -18,6 +18,7 @@ void GetSkinStep::perform()
 
     m_response.reset(new QByteArray());
     m_request = Net::Download::makeByteArray(url, m_response);
+    m_request->enableAutoRetry(true);
 
     m_task.reset(new NetJob("GetSkinStep", APPLICATION->network()));
     m_task->setAskRetry(false);

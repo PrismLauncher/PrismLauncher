@@ -41,6 +41,7 @@
 
 #include <QNetworkReply>
 #include <QUrl>
+#include <QTimer>
 #include <chrono>
 
 #include "HeaderProxy.h"
@@ -55,11 +56,11 @@ namespace Net {
 class NetRequest : public Task {
     Q_OBJECT
    protected:
-    explicit NetRequest() : Task() {}
+    explicit NetRequest();
 
    public:
     using Ptr = shared_qobject_ptr<class NetRequest>;
-    enum class Option { NoOptions = 0, AcceptLocalFiles = 1, MakeEternal = 2 };
+    enum class Option { NoOptions = 0, AcceptLocalFiles = 1, MakeEternal = 2, AutoRetry = 4 };
     Q_DECLARE_FLAGS(Options, Option)
 
    public:
@@ -71,6 +72,9 @@ class NetRequest : public Task {
     void setNetwork(shared_qobject_ptr<QNetworkAccessManager> network) { m_network = network; }
     void addHeaderProxy(Net::HeaderProxy* proxy) { m_headerProxies.push_back(std::shared_ptr<Net::HeaderProxy>(proxy)); }
 
+    // automatically handle HTTP 429 Too Many Requests errors and retry
+    void enableAutoRetry(bool enable);
+
     QUrl url() const;
     void setUrl(QUrl url) { m_url = url; }
     int replyStatusCode() const;
@@ -79,6 +83,7 @@ class NetRequest : public Task {
 
    private:
     auto handleRedirect() -> bool;
+    void handleAutoRetry(int64_t delay);
     virtual QNetworkReply* getReply(QNetworkRequest&) = 0;
 
    protected slots:
@@ -109,6 +114,9 @@ class NetRequest : public Task {
     /// source URL
     QUrl m_url;
     std::vector<std::shared_ptr<Net::HeaderProxy>> m_headerProxies;
+
+    int m_retryCount = 0;
+    QTimer m_retryTimer;
 };
 }  // namespace Net
 

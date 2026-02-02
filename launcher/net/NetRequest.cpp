@@ -41,8 +41,10 @@
 
 #include <QDateTime>
 #include <QFileInfo>
+#include <QLocale>
 #include <QNetworkReply>
 #include <QUrl>
+#include <cstdint>
 #include <memory>
 
 #if defined(LAUNCHER_APPLICATION)
@@ -54,6 +56,11 @@
 #include "StringUtils.h"
 
 namespace Net {
+
+NetRequest::NetRequest() : Task()
+{
+    connect(&m_retryTimer, &QTimer::timeout, this, &NetRequest::executeTask);
+}
 
 void NetRequest::addValidator(Validator* v)
 {
@@ -161,6 +168,20 @@ void NetRequest::downloadError(QNetworkReply::NetworkError error)
     if (error == QNetworkReply::OperationCanceledError) {
         qCCritical(logCat) << getUid().toString() << "Aborted" << m_url.toString();
         m_state = State::Failed;
+    } else if (replyStatusCode() == 429 /* HTTP Too Many Requests*/ && m_options & Option::AutoRetry) {
+        qCDebug(logCat) << getUid().toString() << "Rate Limited!";
+        int64_t delay = 10 * std::pow(2, m_retryCount);
+        if (m_reply->hasRawHeader("Retry-After")) {
+            auto retryAfter = m_reply->rawHeader("Retry-After");
+            if (retryAfter.trimmed().endsWith("GMT")) /* HTTP Date format */ {
+                auto afterTimestamp = QDateTime::fromString(QString::fromUtf8(retryAfter.trimmed()), "ddd, dd MMM yyyy HH:mm:ss 'GMT'");
+                auto now = QDateTime::currentDateTime();
+                delay = now.secsTo(afterTimestamp);
+            } else {
+                delay = retryAfter.toLong();
+            }
+        }
+        handleAutoRetry(delay);
     } else {
         if (m_options & Option::AcceptLocalFiles) {
             if (m_sink->hasLocalData()) {
@@ -182,7 +203,8 @@ void NetRequest::sslErrors(const QList<QSslError>& errors)
 {
     int i = 1;
     for (auto error : errors) {
-        qCCritical(logCat).nospace() << getUid().toString() << " Request " << m_url.toString() << " SSL Error #" << i << ": " << error.errorString();
+        qCCritical(logCat).nospace() << getUid().toString() << " Request " << m_url.toString() << " SSL Error #" << i << ": "
+                                     << error.errorString();
         auto cert = error.certificate();
         qCCritical(logCat) << getUid().toString() << "Certificate in question:\n" << cert.toText();
         i++;
@@ -243,8 +265,33 @@ auto NetRequest::handleRedirect() -> bool
     return true;
 }
 
+void NetRequest::handleAutoRetry(int64_t delay)
+{
+    m_retryCount++;
+    if (delay > 60 || m_retryCount > 4) {
+        /* 1 minute is too long to wait for retry, fail for now */
+        m_state = State::Failed;
+        auto retryAfter = QDateTime::currentDateTime().addSecs(delay);
+        emitFailed(tr("Request Rate Limited for %n second(s): Retry After %1", "seconds", delay)
+                       .arg(retryAfter.toLocalTime().toString(QLocale::system().dateTimeFormat(QLocale::ShortFormat))));
+        return;
+    } else {
+        qCDebug(logCat) << getUid().toString() << "Retyring Request in" << delay << "seconds";
+        setStatus(tr("Rate Limited: Waiting %n second(s)", "seconds", delay));
+        m_retryTimer.setTimerType(Qt::VeryCoarseTimer);
+        m_retryTimer.setSingleShot(true);
+        m_retryTimer.setInterval(delay * 1000);
+        m_retryTimer.start();
+    }
+}
+
 void NetRequest::downloadFinished()
 {
+    // currently waiting for retry
+    if (m_retryTimer.isActive()) {
+        return;
+    }
+
     // handle HTTP redirection first
     if (handleRedirect()) {
         qCDebug(logCat) << getUid().toString() << "Request redirected:" << m_url.toString();
@@ -351,4 +398,14 @@ QString NetRequest::errorString() const
 {
     return m_reply ? m_reply->errorString() : "";
 }
+
+void NetRequest::enableAutoRetry(bool enable)
+{
+    if (enable) {
+        m_options |= Option::AutoRetry;
+    } else {
+        m_options &= ~static_cast<int>(Option::AutoRetry);
+    }
+}
+
 }  // namespace Net
