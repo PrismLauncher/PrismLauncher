@@ -84,7 +84,8 @@ class NewsChecker : public QObject {
     //! True if news has been loaded.
     bool m_loadedNews;
 
-    std::unique_ptr<QByteArray> newsData = std::make_unique<QByteArray>();
+    //! The cache entry for the feed.
+    MetaEntryPtr m_entry;
 
     /*!
      * Gets the error message that was given last time the news was loaded.
