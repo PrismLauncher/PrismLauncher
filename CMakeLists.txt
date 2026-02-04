@@ -106,7 +106,7 @@ if(CMAKE_GENERATOR STREQUAL "Unix Makefiles" OR CMAKE_GENERATOR MATCHES "^Ninja"
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
-option(DEBUG_ADDRESS_SANITIZER "Enable Address Sanitizer in Debug builds" OFF)
+option(DEBUG_ADDRESS_SANITIZER "Enable Address Sanitizer in Debug builds" ON)
 
 # If this is a Debug build turn on address sanitiser
 if (DEBUG_ADDRESS_SANITIZER)
