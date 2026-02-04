@@ -27,8 +27,8 @@ Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatf
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from " << debugName() << " at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
+            qWarning() << "Error while parsing JSON response from" << debugName() << "at" << parse_error.offset
+                       << "reason:" << parse_error.errorString();
             qWarning() << *response;
 
             callbacks.on_fail(parse_error.errorString(), -1);
@@ -47,7 +47,7 @@ Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatf
                 loadIndexedPack(*pack, packObj);
                 newList << pack;
             } catch (const JSONValidationError& e) {
-                qWarning() << "Error while loading resource from " << debugName() << ": " << e.cause();
+                qWarning().nospace() << "Error while loading resource from " << debugName() << ": " << e.cause();
                 continue;
             }
         }
@@ -92,8 +92,8 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for getting versions at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
+            qWarning() << "Error while parsing JSON response for getting versions at" << parse_error.offset
+                       << "reason:" << parse_error.errorString();
             qWarning() << *response;
             return;
         }
@@ -120,7 +120,7 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
             std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);
         } catch (const JSONValidationError& e) {
             qDebug() << doc;
-            qWarning() << "Error while reading " << debugName() << " resource version: " << e.cause();
+            qWarning() << "Error while reading" << debugName() << "resource version:" << e.cause();
         }
 
         callbacks.on_succeed(unsortedVersions);
@@ -156,8 +156,8 @@ Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<ModPlatfo
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for mod info at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
+            qWarning() << "Error while parsing JSON response for mod info at" << parse_error.offset
+                       << "reason:" << parse_error.errorString();
             qWarning() << *response;
             return;
         }
@@ -169,7 +169,7 @@ Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<ModPlatfo
             loadExtraPackInfo(*pack, obj);
         } catch (const JSONValidationError& e) {
             qDebug() << doc;
-            qWarning() << "Error while reading " << debugName() << " resource info: " << e.cause();
+            qWarning() << "Error while reading" << debugName() << "resource info:" << e.cause();
         }
         callbacks.on_succeed(pack);
     });
@@ -212,8 +212,8 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for getting versions at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
+            qWarning() << "Error while parsing JSON response for getting dependency version at" << parse_error.offset
+                       << "reason:" << parse_error.errorString();
             qWarning() << *response;
             return;
         }

@@ -156,7 +156,7 @@ class VersionTest : public QObject {
                 continue;
             }
 
-            qCritical() << "Unexpected separator in the test vector: ";
+            qCritical() << "Unexpected separator in the test vector:";
             qCritical() << line;
 
             QVERIFY(0 != 0);

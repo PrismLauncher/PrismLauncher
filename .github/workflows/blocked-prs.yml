@@ -14,10 +14,12 @@ on:
         required: true
         type: number
 
+permissions: {}
+
 jobs:
   blocked_status:
     name: Check Blocked Status
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
 
     steps:
       - name: Generate token

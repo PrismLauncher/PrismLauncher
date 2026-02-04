@@ -175,7 +175,7 @@ class PackProfile : public QAbstractListModel {
     QString patchesPattern() const;
 
    private slots:
-    void save_internal();
+    bool save_internal();
     void updateSucceeded();
     void updateFailed(const QString& error);
     void componentDataChanged();

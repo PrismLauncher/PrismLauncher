@@ -241,6 +241,11 @@ void ModFilterWidget::prepareBasicFilter()
         ui->fabric->setChecked(loaders & ModPlatform::Fabric);
         ui->quilt->setChecked(loaders & ModPlatform::Quilt);
         ui->liteLoader->setChecked(loaders & ModPlatform::LiteLoader);
+        ui->babric->setChecked(loaders & ModPlatform::Babric);
+        ui->btaBabric->setChecked(loaders & ModPlatform::BTA);
+        ui->legacyFabric->setChecked(loaders & ModPlatform::LegacyFabric);
+        ui->ornithe->setChecked(loaders & ModPlatform::Ornithe);
+        ui->rift->setChecked(loaders & ModPlatform::Rift);
         m_filter->loaders = loaders;
         auto def = m_instance->getPackProfile()->getComponentVersion("net.minecraft");
         m_filter->versions.emplace_back(def);

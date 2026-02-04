@@ -64,9 +64,9 @@ bool ResourceFolderModel::startWatching(const QStringList& paths)
     auto couldnt_be_watched = m_watcher.addPaths(paths);
     for (auto path : paths) {
         if (couldnt_be_watched.contains(path))
-            qDebug() << "Failed to start watching " << path;
+            qDebug() << "Failed to start watching" << path;
         else
-            qDebug() << "Started watching " << path;
+            qDebug() << "Started watching" << path;
     }
 
     update();
@@ -83,9 +83,9 @@ bool ResourceFolderModel::stopWatching(const QStringList& paths)
     auto couldnt_be_stopped = m_watcher.removePaths(paths);
     for (auto path : paths) {
         if (couldnt_be_stopped.contains(path))
-            qDebug() << "Failed to stop watching " << path;
+            qDebug() << "Failed to stop watching" << path;
         else
-            qDebug() << "Stopped watching " << path;
+            qDebug() << "Stopped watching" << path;
     }
 
     m_is_watching = !m_is_watching;
@@ -102,7 +102,7 @@ bool ResourceFolderModel::installResource(QString original_path)
         qWarning() << "Caught attempt to install non-existing file or file-like object:" << original_path;
         return false;
     }
-    qDebug() << "Installing: " << file_info.absoluteFilePath();
+    qDebug() << "Installing:" << file_info.absoluteFilePath();
 
     Resource resource(file_info);
     if (!resource.valid()) {
@@ -185,8 +185,8 @@ void ResourceFolderModel::installResourceWithFlameMetadata(QString path, ModPlat
             QJsonParseError parse_error{};
             QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
             if (parse_error.error != QJsonParseError::NoError) {
-                qWarning() << "Error while parsing JSON response for mod info at " << parse_error.offset
-                           << " reason: " << parse_error.errorString();
+                qWarning() << "Error while parsing JSON response for mod info at" << parse_error.offset
+                           << "reason:" << parse_error.errorString();
                 qDebug() << *response;
                 return;
             }
@@ -195,7 +195,7 @@ void ResourceFolderModel::installResourceWithFlameMetadata(QString path, ModPlat
                 FlameMod::loadIndexedPack(pack, obj);
             } catch (const JSONValidationError& e) {
                 qDebug() << doc;
-                qWarning() << "Error while reading mod info: " << e.cause();
+                qWarning() << "Error while reading mod info:" << e.cause();
             }
             LocalResourceUpdateTask update_metadata(indexDir(), pack, vers);
             connect(&update_metadata, &Task::finished, this, install);
@@ -906,6 +906,7 @@ QList<Resource*> ResourceFolderModel::allResources()
         result.append((resource.get()));
     return result;
 }
+
 QList<Resource*> ResourceFolderModel::selectedResources(const QModelIndexList& indexes)
 {
     QList<Resource*> result;

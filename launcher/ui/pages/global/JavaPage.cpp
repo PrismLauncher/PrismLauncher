@@ -55,7 +55,6 @@
 #include "java/JavaUtils.h"
 
 #include <FileSystem.h>
-#include <sys.h>
 #include "Application.h"
 #include "settings/SettingsObject.h"
 

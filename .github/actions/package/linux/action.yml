@@ -63,7 +63,7 @@ runs:
         if [ '${{ inputs.gpg-private-key-id }}' != '' ]; then
           echo "$GPG_PRIVATE_KEY" > privkey.asc
           gpg --import privkey.asc
-          gpg --export --armor 9C7A2C9B62603299 > pubkey.asc
+          gpg --export --armor ${{ inputs.gpg-private-key-id }} > pubkey.asc
         else
           echo ":warning: Skipped code signing for Linux AppImage, as gpg key was not present." >> $GITHUB_STEP_SUMMARY
         fi

@@ -88,7 +88,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     QJsonParseError parse_error{};
     QJsonDocument doc = QJsonDocument::fromJson(*m_response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from Solder at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qWarning() << "Error while parsing JSON response from Solder at" << parse_error.offset << "reason:" << parse_error.errorString();
         qWarning() << *m_response;
         return;
     }

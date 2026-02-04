@@ -120,12 +120,13 @@ void MSADeviceCodeStep::deviceAuthorizationFinished()
         return;
     }
     if (!m_request->wasSuccessful() || m_request->error() != QNetworkReply::NoError) {
+        qWarning() << "Device authorization failed:" << *m_response;
         emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Failed to retrieve device authorization"));
-        qDebug() << *m_response;
         return;
     }
 
     if (rsp.device_code.isEmpty() || rsp.user_code.isEmpty() || rsp.verification_uri.isEmpty() || rsp.expires_in == 0) {
+        qWarning() << "Device authorization failed: required fields missing";
         emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Device authorization failed: required fields missing"));
         return;
     }

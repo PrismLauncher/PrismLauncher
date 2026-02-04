@@ -38,7 +38,6 @@ void PackInstallTask::executeTask()
 
     m_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), [this] {
         FS::copy folderCopy(m_pack.path, FS::PathCombine(m_stagingPath, "minecraft"));
-        folderCopy.followSymlinks(true);
         return folderCopy();
     });
     connect(&m_copyFutureWatcher, &QFutureWatcher<bool>::finished, this, &PackInstallTask::copySettings);

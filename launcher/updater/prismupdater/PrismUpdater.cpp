@@ -40,8 +40,6 @@
 #include <QProgressDialog>
 #include <memory>
 
-#include <sys.h>
-
 #if defined Q_OS_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -272,23 +270,23 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
     {  // log debug program info
         qDebug() << qPrintable(BuildConfig.LAUNCHER_DISPLAYNAME + " Updater, " +
                                QString(BuildConfig.LAUNCHER_COPYRIGHT).replace("\n", ", "));
-        qDebug() << "Version                    : " << BuildConfig.printableVersionString();
-        qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
-        qDebug() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
-        qDebug() << "Compiled for               : " << BuildConfig.systemID();
-        qDebug() << "Compiled by                : " << BuildConfig.compilerID();
-        qDebug() << "Build Artifact             : " << BuildConfig.BUILD_ARTIFACT;
+        qDebug() << "Version                    :" << BuildConfig.printableVersionString();
+        qDebug() << "Git commit                 :" << BuildConfig.GIT_COMMIT;
+        qDebug() << "Git refspec                :" << BuildConfig.GIT_REFSPEC;
+        qDebug() << "Compiled for               :" << BuildConfig.systemID();
+        qDebug() << "Compiled by                :" << BuildConfig.compilerID();
+        qDebug() << "Build Artifact             :" << BuildConfig.BUILD_ARTIFACT;
         if (adjustedBy.size()) {
-            qDebug() << "Data dir before adjustment : " << origCwdPath;
-            qDebug() << "Data dir after adjustment  : " << m_dataPath;
-            qDebug() << "Adjusted by                : " << adjustedBy;
+            qDebug() << "Data dir before adjustment :" << origCwdPath;
+            qDebug() << "Data dir after adjustment  :" << m_dataPath;
+            qDebug() << "Adjusted by                :" << adjustedBy;
         } else {
-            qDebug() << "Data dir                   : " << QDir::currentPath();
+            qDebug() << "Data dir                   :" << QDir::currentPath();
         }
-        qDebug() << "Work dir                   : " << QDir::currentPath();
-        qDebug() << "Binary path                : " << binPath;
-        qDebug() << "Application root path      : " << m_rootPath;
-        qDebug() << "Portable install           : " << m_isPortable;
+        qDebug() << "Work dir                   :" << QDir::currentPath();
+        qDebug() << "Binary path                :" << binPath;
+        qDebug() << "Application root path      :" << m_rootPath;
+        qDebug() << "Portable install           :" << m_isPortable;
         qDebug() << "<> Paths set.";
     }
 
@@ -427,7 +425,7 @@ void PrismUpdaterApp::showFatalErrorMessage(const QString& title, const QString&
 void PrismUpdaterApp::run()
 {
     qDebug() << "found" << m_releases.length() << "releases on github";
-    qDebug() << "loading exe at " << m_prismExecutable;
+    qDebug() << "loading exe at" << m_prismExecutable;
 
     if (m_printOnly) {
         printReleases();

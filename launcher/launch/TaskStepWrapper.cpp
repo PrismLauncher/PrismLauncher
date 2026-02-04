@@ -23,10 +23,7 @@ void TaskStepWrapper::executeTask()
         return;
     }
     connect(m_task.get(), &Task::finished, this, &TaskStepWrapper::updateFinished);
-    connect(m_task.get(), &Task::progress, this, &TaskStepWrapper::setProgress);
-    connect(m_task.get(), &Task::stepProgress, this, &TaskStepWrapper::propagateStepProgress);
-    connect(m_task.get(), &Task::status, this, &TaskStepWrapper::setStatus);
-    connect(m_task.get(), &Task::details, this, &TaskStepWrapper::setDetails);
+    propagateFromOther(m_task.get());
     emit progressReportingRequest();
 }
 
@@ -59,9 +56,7 @@ bool TaskStepWrapper::canAbort() const
 bool TaskStepWrapper::abort()
 {
     if (m_task && m_task->canAbort()) {
-        auto status = m_task->abort();
-        emitFailed("Aborted.");
-        return status;
+        return m_task->abort();
     }
     return Task::abort();
 }

@@ -40,6 +40,7 @@ void XboxAuthorizationStep::perform()
     auto headers = QList<Net::HeaderPair>{
         { "Content-Type", "application/json" },
         { "Accept", "application/json" },
+        { "x-xbl-contract-version", "1" }
     };
     m_response.reset(new QByteArray());
     m_request = Net::Upload::makeByteArray(url, m_response.get(), xbox_auth_data.toUtf8());
@@ -52,7 +53,7 @@ void XboxAuthorizationStep::perform()
     connect(m_task.get(), &Task::finished, this, &XboxAuthorizationStep::onRequestDone);
 
     m_task->start();
-    qDebug() << "Getting authorization token for " << m_relyingParty;
+    qDebug() << "Getting authorization token for" << m_relyingParty;
 }
 
 void XboxAuthorizationStep::onRequestDone()
@@ -99,7 +100,7 @@ bool XboxAuthorizationStep::processSTSError()
         QJsonParseError jsonError;
         QJsonDocument doc = QJsonDocument::fromJson(*m_response, &jsonError);
         if (jsonError.error) {
-            qWarning() << "Cannot parse error XSTS response as JSON: " << jsonError.errorString();
+            qWarning() << "Cannot parse error XSTS response as JSON:" << jsonError.errorString();
             emit finished(AccountTaskState::STATE_FAILED_SOFT,
                           tr("Cannot parse %1 authorization error response as JSON: %2").arg(m_authorizationKind, jsonError.errorString()));
             return true;

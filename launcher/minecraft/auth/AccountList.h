@@ -55,7 +55,6 @@ class AccountList : public QAbstractListModel {
     enum VListColumns {
         // TODO: Add icon column.
         ProfileNameColumn = 0,
-        NameColumn,
         TypeColumn,
         StatusColumn,
 

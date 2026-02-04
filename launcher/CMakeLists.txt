@@ -247,15 +247,13 @@ set(MINECRAFT_SOURCES
     minecraft/auth/steps/MSAStep.h
     minecraft/auth/steps/XboxAuthorizationStep.cpp
     minecraft/auth/steps/XboxAuthorizationStep.h
-    minecraft/auth/steps/XboxProfileStep.cpp
-    minecraft/auth/steps/XboxProfileStep.h
     minecraft/auth/steps/XboxUserStep.cpp
     minecraft/auth/steps/XboxUserStep.h
 
     minecraft/update/AssetUpdateTask.h
     minecraft/update/AssetUpdateTask.cpp
-    minecraft/update/FMLLibrariesTask.cpp
-    minecraft/update/FMLLibrariesTask.h
+    minecraft/update/LegacyFMLLibrariesTask.cpp
+    minecraft/update/LegacyFMLLibrariesTask.h
     minecraft/update/FoldersTask.cpp
     minecraft/update/FoldersTask.h
     minecraft/update/LibrariesTask.cpp
@@ -265,6 +263,8 @@ set(MINECRAFT_SOURCES
     minecraft/launch/ClaimAccount.h
     minecraft/launch/CreateGameFolders.cpp
     minecraft/launch/CreateGameFolders.h
+    minecraft/launch/EnsureOfflineLibraries.cpp
+    minecraft/launch/EnsureOfflineLibraries.h
     minecraft/launch/ModMinecraftJar.cpp
     minecraft/launch/ModMinecraftJar.h
     minecraft/launch/ExtractNatives.cpp
@@ -530,6 +530,11 @@ set(FTB_SOURCES
     modplatform/import_ftb/PackInstallTask.cpp
     modplatform/import_ftb/PackHelpers.h
     modplatform/import_ftb/PackHelpers.cpp
+
+    modplatform/ftb/FTBPackInstallTask.h
+    modplatform/ftb/FTBPackInstallTask.cpp
+    modplatform/ftb/FTBPackManifest.h
+    modplatform/ftb/FTBPackManifest.cpp
 )
 
 set(FLAME_SOURCES
@@ -1007,6 +1012,13 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/atlauncher/AtlUserInteractionSupportImpl.cpp
     ui/pages/modplatform/atlauncher/AtlUserInteractionSupportImpl.h
 
+    ui/pages/modplatform/ftb/FtbFilterModel.cpp
+    ui/pages/modplatform/ftb/FtbFilterModel.h
+    ui/pages/modplatform/ftb/FtbListModel.cpp
+    ui/pages/modplatform/ftb/FtbListModel.h
+    ui/pages/modplatform/ftb/FtbPage.cpp
+    ui/pages/modplatform/ftb/FtbPage.h
+
     ui/pages/modplatform/legacy_ftb/Page.cpp
     ui/pages/modplatform/legacy_ftb/Page.h
     ui/pages/modplatform/legacy_ftb/ListModel.h
@@ -1236,6 +1248,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/import_ftb/ImportFTBPage.ui
     ui/pages/modplatform/ImportPage.ui
     ui/pages/modplatform/OptionalModDialog.ui
+    ui/pages/modplatform/ftb/FtbPage.ui
     ui/pages/modplatform/modrinth/ModrinthPage.ui
     ui/pages/modplatform/technic/TechnicPage.ui
     ui/widgets/CustomCommands.ui
@@ -1334,7 +1347,6 @@ if(${Launcher_USE_PCH})
 endif()
 
 target_link_libraries(Launcher_logic
-    systeminfo
     Launcher_murmur2
     nbt++
     ${ZLIB_LIBRARIES}
@@ -1457,7 +1469,6 @@ if(Launcher_BUILD_UPDATER)
 
     target_link_libraries(prism_updater_logic
         ${ZLIB_LIBRARIES}
-        systeminfo
         BuildConfig
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Core
@@ -1514,7 +1525,6 @@ if(WIN32 OR (DEFINED Launcher_BUILD_FILELINKER AND Launcher_BUILD_FILELINKER))
     endif()
 
     target_link_libraries(filelink_logic
-        systeminfo
         BuildConfig
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Core

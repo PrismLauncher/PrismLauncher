@@ -504,8 +504,8 @@ void SkinManageDialog::on_userBtn_clicked()
             QJsonParseError parse_error{};
             QJsonDocument doc = QJsonDocument::fromJson(*uuidOut, &parse_error);
             if (parse_error.error != QJsonParseError::NoError) {
-                qWarning() << "Error while parsing JSON response from Minecraft skin service at " << parse_error.offset
-                           << " reason: " << parse_error.errorString();
+                qWarning() << "Error while parsing JSON response from Minecraft skin service at" << parse_error.offset
+                           << "reason:" << parse_error.errorString();
                 failReason = tr("failed to parse get user UUID response");
                 uuidLoop->quit();
                 return;

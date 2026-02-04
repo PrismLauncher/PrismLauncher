@@ -167,14 +167,14 @@ bool ArchiveWriter::addFile(const QString& fileName, const QString& fileDest)
     }
 
     if (archive_write_header(m_archive, entry) != ARCHIVE_OK) {
-        qCritical() << "Failed to write header for: " << fileDest << "-" << archive_error_string(m_archive);
+        qCritical() << "Failed to write header for:" << fileDest << "-" << archive_error_string(m_archive);
         return false;
     }
 
     if (fileInfo.isFile() && !fileInfo.isSymLink()) {
         QFile file(fileInfo.absoluteFilePath());
         if (!file.open(QIODevice::ReadOnly)) {
-            qCritical() << "Failed to open file: " << fileInfo.filePath();
+            qCritical() << "Failed to open file:" << fileInfo.filePath();
             return false;
         }
 
@@ -185,12 +185,12 @@ bool ArchiveWriter::addFile(const QString& fileName, const QString& fileDest)
         while (!file.atEnd()) {
             auto bytesRead = file.read(buffer.data(), chunkSize);
             if (bytesRead < 0) {
-                qCritical() << "Read error in file: " << fileInfo.filePath();
+                qCritical() << "Read error in file:" << fileInfo.filePath();
                 return false;
             }
 
             if (archive_write_data(m_archive, buffer.constData(), bytesRead) < 0) {
-                qCritical() << "Write error in archive for: " << fileDest;
+                qCritical() << "Write error in archive for:" << fileDest;
                 return false;
             }
         }
@@ -216,12 +216,12 @@ bool ArchiveWriter::addFile(const QString& fileDest, const QByteArray& data)
     archive_entry_set_size(entry, data.size());
 
     if (archive_write_header(m_archive, entry) != ARCHIVE_OK) {
-        qCritical() << "Failed to write header for: " << fileDest << "-" << archive_error_string(m_archive);
+        qCritical() << "Failed to write header for:" << fileDest << "-" << archive_error_string(m_archive);
         return false;
     }
 
     if (archive_write_data(m_archive, data.constData(), data.size()) < 0) {
-        qCritical() << "Write error in archive for: " << fileDest << "-" << archive_error_string(m_archive);
+        qCritical() << "Write error in archive for:" << fileDest << "-" << archive_error_string(m_archive);
         return false;
     }
     return true;

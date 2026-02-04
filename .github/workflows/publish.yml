@@ -4,14 +4,16 @@ on:
   release:
     types: [ released ]
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   winget:
     name: Winget
 
-    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    runs-on: ubuntu-slim
 
     steps:
       - name: Publish on Winget

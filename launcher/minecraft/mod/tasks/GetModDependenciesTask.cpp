@@ -141,8 +141,8 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDepende
         QJsonDocument doc = QJsonDocument::fromJson(*responseInfo, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
             removePack(pDep->pack->addonId);
-            qWarning() << "Error while parsing JSON response for mod info at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
+            qWarning() << "Error while parsing JSON response for mod info at" << parse_error.offset
+                       << "reason:" << parse_error.errorString();
             qDebug() << *responseInfo;
             return;
         }
@@ -154,7 +154,7 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDepende
         } catch (const JSONValidationError& e) {
             removePack(pDep->pack->addonId);
             qDebug() << doc;
-            qWarning() << "Error while reading mod info: " << e.cause();
+            qWarning() << "Error while reading mod info:" << e.cause();
         }
     });
     return info;

@@ -69,17 +69,18 @@ runs:
 
     - name: Sign executables
       if: ${{ env.CI_HAS_ACCESS_TO_AZURE != '' && inputs.azure-client-id != '' }}
-      uses: azure/trusted-signing-action@v1
+      uses: azure/artifact-signing-action@v1
       with:
         endpoint: https://eus.codesigning.azure.net/
         trusted-signing-account-name: PrismLauncher
         certificate-profile-name: PrismLauncher
-
-        files: |
-          ${{ github.workspace }}\install\prismlauncher.exe
-          ${{ github.workspace }}\install\prismlauncher_filelink.exe
-          ${{ github.workspace }}\install\prismlauncher_updater.exe
-
+        files-folder: ${{ github.workspace }}\install\
+        files-folder-filter: dll,exe
+        files-folder-recurse: true
+        files-folder-depth: 2
+        # recommended in https://github.com/Azure/artifact-signing-action#timestamping-1
+        timestamp-rfc3161: 'http://timestamp.acs.microsoft.com'
+        timestamp-digest: 'SHA256'
         # TODO(@getchoo): Is this all really needed???
         # https://github.com/Azure/trusted-signing-action/blob/fc390cf8ed0f14e248a542af1d838388a47c7a7c/docs/OIDC.md
         exclude-environment-credential: true
@@ -141,7 +142,7 @@ runs:
 
     - name: Sign installer
       if: ${{ env.CI_HAS_ACCESS_TO_AZURE != '' && inputs.azure-client-id != '' }}
-      uses: azure/trusted-signing-action@v1
+      uses: azure/artifact-signing-action@v1
       with:
         endpoint: https://eus.codesigning.azure.net/
         trusted-signing-account-name: PrismLauncher
@@ -150,6 +151,9 @@ runs:
         files: |
           ${{ github.workspace }}\PrismLauncher-Setup.exe
 
+        # recommended in https://github.com/Azure/artifact-signing-action#timestamping-1
+        timestamp-rfc3161: 'http://timestamp.acs.microsoft.com'
+        timestamp-digest: 'SHA256'
         # TODO(@getchoo): Is this all really needed???
         # https://github.com/Azure/trusted-signing-action/blob/fc390cf8ed0f14e248a542af1d838388a47c7a7c/docs/OIDC.md
         exclude-environment-credential: true

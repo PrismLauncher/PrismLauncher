@@ -180,8 +180,8 @@ void FlamePackExportTask::makeApiRequest()
         QJsonParseError parseError{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
         if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from CurseForge::CurrentVersions at " << parseError.offset
-                       << " reason: " << parseError.errorString();
+            qWarning() << "Error while parsing JSON response from CurseForge::CurrentVersions at" << parseError.offset
+                       << "reason:" << parseError.errorString();
             qWarning() << *response;
 
             emitFailed(parseError.errorString());
@@ -261,8 +261,8 @@ void FlamePackExportTask::getProjectsInfo()
         QJsonParseError parseError{};
         auto doc = QJsonDocument::fromJson(*response, &parseError);
         if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from CurseForge projects task at " << parseError.offset
-                       << " reason: " << parseError.errorString();
+            qWarning() << "Error while parsing JSON response from CurseForge projects task at" << parseError.offset
+                       << "reason:" << parseError.errorString();
             qWarning() << *response;
             emitFailed(parseError.errorString());
             return;

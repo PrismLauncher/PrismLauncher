@@ -93,7 +93,7 @@ Modpack parseDirectory(QString path)
             }
         }
     } catch (const Exception& e) {
-        qDebug() << "Couldn't load ftb instance json: " << e.cause();
+        qDebug() << "Couldn't load ftb instance json:" << e.cause();
         return {};
     }
     if (!modpack.loaderType.has_value()) {
@@ -147,7 +147,7 @@ void legacyInstanceParsing(QString path, std::optional<ModPlatform::ModLoaderTyp
             }
         }
     } catch (const Exception& e) {
-        qDebug() << "Couldn't load ftb version json: " << e.cause();
+        qDebug() << "Couldn't load ftb version json:" << e.cause();
         return;
     }
 }

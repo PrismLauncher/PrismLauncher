@@ -6,14 +6,17 @@ on:
     - cron: "0 0 * * 0"
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   update-flake:
     if: github.repository == 'PrismLauncher/PrismLauncher'
-    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    runs-on: ubuntu-slim
 
     steps:
       - uses: actions/checkout@v6

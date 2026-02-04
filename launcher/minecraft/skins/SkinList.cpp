@@ -45,9 +45,9 @@ void SkinList::startWatching()
     update();
     m_isWatching = m_watcher->addPath(m_dir.absolutePath());
     if (m_isWatching) {
-        qDebug() << "Started watching " << m_dir.absolutePath();
+        qDebug() << "Started watching" << m_dir.absolutePath();
     } else {
-        qDebug() << "Failed to start watching " << m_dir.absolutePath();
+        qDebug() << "Failed to start watching" << m_dir.absolutePath();
     }
 }
 
@@ -59,9 +59,9 @@ void SkinList::stopWatching()
     }
     m_isWatching = !m_watcher->removePath(m_dir.absolutePath());
     if (!m_isWatching) {
-        qDebug() << "Stopped watching " << m_dir.absolutePath();
+        qDebug() << "Stopped watching" << m_dir.absolutePath();
     } else {
-        qDebug() << "Failed to stop watching " << m_dir.absolutePath();
+        qDebug() << "Failed to stop watching" << m_dir.absolutePath();
     }
 }
 
@@ -167,7 +167,7 @@ void SkinList::directoryChanged(const QString& path)
 
 void SkinList::fileChanged(const QString& path)
 {
-    qDebug() << "Checking " << path;
+    qDebug() << "Checking" << path;
     QFileInfo checkfile(path);
     if (!checkfile.exists())
         return;

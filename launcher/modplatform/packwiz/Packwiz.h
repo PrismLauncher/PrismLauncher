@@ -55,6 +55,8 @@ class V1 {
         QVariant project_id{};
         QString version_number{};
 
+        QList<ModPlatform::Dependency> dependencies;
+
        public:
         // This is a totally heuristic, but should work for now.
         auto isValid() const -> bool { return !slug.isEmpty() && !project_id.isNull(); }

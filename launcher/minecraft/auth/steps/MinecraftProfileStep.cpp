@@ -44,9 +44,9 @@ void MinecraftProfileStep::onRequestDone()
     }
     if (m_request->error() != QNetworkReply::NoError) {
         qWarning() << "Error getting profile:";
-        qWarning() << " HTTP Status:        " << m_request->replyStatusCode();
-        qWarning() << " Internal error no.: " << m_request->error();
-        qWarning() << " Error string:       " << m_request->errorString();
+        qWarning() << " HTTP Status       :" << m_request->replyStatusCode();
+        qWarning() << " Internal error no.:" << m_request->error();
+        qWarning() << " Error string      :" << m_request->errorString();
 
         qWarning() << " Response:";
         qWarning() << QString::fromUtf8(*m_response);

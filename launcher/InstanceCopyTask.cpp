@@ -64,7 +64,6 @@ void InstanceCopyTask::executeTask()
 
                 savesCopy = std::make_unique<FS::copy>(FS::PathCombine(m_origInstance->gameRoot(), "saves"),
                                                        FS::PathCombine(staging_mc_dir, "saves"));
-                savesCopy->followSymlinks(true);
                 (*savesCopy)(true);
                 setProgress(0, savesCopy->totalCopied());
                 connect(savesCopy.get(), &FS::copy::fileCopied, [this](QString src) { setProgress(m_progress + 1, m_progressTotal); });
@@ -126,11 +125,11 @@ void InstanceCopyTask::executeTask()
             return !there_were_errors;
         }
         FS::copy folderCopy(m_origInstance->instanceRoot(), m_stagingPath);
-        folderCopy.followSymlinks(false).matcher(m_matcher);
+        folderCopy.matcher(m_matcher);
 
         folderCopy(true);
         setProgress(0, folderCopy.totalCopied());
-        connect(&folderCopy, &FS::copy::fileCopied, [this](QString src) { setProgress(m_progress + 1, m_progressTotal); });
+        connect(&folderCopy, &FS::copy::fileCopied, [this]() { setProgress(m_progress + 1, m_progressTotal); });
         return folderCopy();
     });
     connect(&m_copyFutureWatcher, &QFutureWatcher<bool>::finished, this, &InstanceCopyTask::copyFinished);

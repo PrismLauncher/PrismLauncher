@@ -89,11 +89,13 @@ Color functions extracted from [KGuiAddons](https://inqlude.org/libraries/kguiad
 
 Available either under LGPL version 2.1 or later.
 
-## systeminfo
+## tomlplusplus
 
-A Prism Launcher-specific library for probing system information.
+A TOML language parser. Used by Forge 1.14+ to store mod metadata.
 
-Apache 2.0
+See [github repo](https://github.com/marzer/tomlplusplus).
+
+Licenced under the MIT licence.
 
 ## qdcss
 

@@ -163,8 +163,8 @@ void Flame::FileResolvingTask::netJobFinished()
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*m_result, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
+            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions at" << parse_error.offset
+                       << "reason:" << parse_error.errorString();
             qWarning() << *m_result;
 
             getFlameProjects();
@@ -186,7 +186,7 @@ void Flame::FileResolvingTask::netJobFinished()
                         // let the user download it manually.
                         if (!file.loaders || hasSingleModLoaderSelected(file.loaders)) {
                             out.version.downloadUrl = file.downloadUrl;
-                            qDebug() << "Found alternative on modrinth " << out.version.fileName;
+                            qDebug() << "Found alternative on modrinth" << out.version.fileName;
                         }
                     } catch (Json::JsonException& e) {
                         qDebug() << e.cause();
@@ -234,8 +234,8 @@ void Flame::FileResolvingTask::getFlameProjects()
         QJsonParseError parse_error{};
         auto doc = QJsonDocument::fromJson(*m_result, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth projects task at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
+            qWarning() << "Error while parsing JSON response from Modrinth projects task at" << parse_error.offset
+                       << "reason:" << parse_error.errorString();
             qWarning() << *m_result;
             return;
         }

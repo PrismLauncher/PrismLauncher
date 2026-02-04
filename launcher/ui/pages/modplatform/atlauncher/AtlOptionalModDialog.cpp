@@ -174,7 +174,7 @@ void AtlOptionalModListModel::shareCodeSuccess()
     QJsonParseError parse_error{};
     auto doc = QJsonDocument::fromJson(*m_response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from ATL at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qWarning() << "Error while parsing JSON response from ATL at" << parse_error.offset << "reason:" << parse_error.errorString();
         qWarning() << *m_response;
         return;
     }
@@ -185,7 +185,7 @@ void AtlOptionalModListModel::shareCodeSuccess()
         ATLauncher::loadShareCodeResponse(response, obj);
     } catch (const JSONValidationError& e) {
         qDebug() << QString::fromUtf8(*m_response);
-        qWarning() << "Error while reading response from ATLauncher: " << e.cause();
+        qWarning() << "Error while reading response from ATLauncher:" << e.cause();
         return;
     }
 

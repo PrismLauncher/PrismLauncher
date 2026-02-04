@@ -86,7 +86,7 @@ bool parseXTokenResponse(QByteArray& data, Token& output, QString name)
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
     if (jsonError.error) {
-        qWarning() << "Failed to parse response from user.auth.xboxlive.com as JSON: " << jsonError.errorString();
+        qWarning() << "Failed to parse response from user.auth.xboxlive.com as JSON:" << jsonError.errorString();
         return false;
     }
 
@@ -123,7 +123,7 @@ bool parseXTokenResponse(QByteArray& data, Token& output, QString name)
         for (auto iter = obj_.begin(); iter != obj_.end(); iter++) {
             QString claim;
             if (!getString(obj_.value(iter.key()), claim)) {
-                qWarning() << "display claim " << iter.key() << " is not a string...";
+                qWarning() << "display claim" << iter.key() << "is not a string...";
                 return false;
             }
             output.extra[iter.key()] = claim;
@@ -148,7 +148,7 @@ bool parseMinecraftProfile(QByteArray& data, MinecraftProfile& output)
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
     if (jsonError.error) {
-        qWarning() << "Failed to parse response from user.auth.xboxlive.com as JSON: " << jsonError.errorString();
+        qWarning() << "Failed to parse response from user.auth.xboxlive.com as JSON:" << jsonError.errorString();
         return false;
     }
 
@@ -290,7 +290,7 @@ bool parseMinecraftProfileMojang(QByteArray& data, MinecraftProfile& output)
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
     if (jsonError.error) {
-        qWarning() << "Failed to parse response as JSON: " << jsonError.errorString();
+        qWarning() << "Failed to parse response as JSON:" << jsonError.errorString();
         return false;
     }
 
@@ -331,7 +331,7 @@ bool parseMinecraftProfileMojang(QByteArray& data, MinecraftProfile& output)
 
     doc = QJsonDocument::fromJson(texturePayload, &jsonError);
     if (jsonError.error) {
-        qWarning() << "Failed to parse response as JSON: " << jsonError.errorString();
+        qWarning() << "Failed to parse response as JSON:" << jsonError.errorString();
         return false;
     }
 
@@ -400,7 +400,7 @@ bool parseMinecraftEntitlements(QByteArray& data, MinecraftEntitlement& output)
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
     if (jsonError.error) {
-        qWarning() << "Failed to parse response from user.auth.xboxlive.com as JSON: " << jsonError.errorString();
+        qWarning() << "Failed to parse response from user.auth.xboxlive.com as JSON:" << jsonError.errorString();
         return false;
     }
 
@@ -463,7 +463,7 @@ bool parseMojangResponse(QByteArray& data, Token& output)
     qCDebug(authCredentials()) << data;
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
     if (jsonError.error) {
-        qWarning() << "Failed to parse response from api.minecraftservices.com/launcher/login as JSON: " << jsonError.errorString();
+        qWarning() << "Failed to parse response from api.minecraftservices.com/launcher/login as JSON:" << jsonError.errorString();
         return false;
     }
 

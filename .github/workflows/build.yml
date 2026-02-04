@@ -5,57 +5,9 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  push:
-    branches:
-      - "develop"
-      - "release-*"
-    paths:
-      # File types
-      - "**.cpp"
-      - "**.h"
-      - "**.java"
-      - "**.ui"
-
-      # Directories
-      - "buildconfig/**"
-      - "cmake/**"
-      - "launcher/**"
-      - "libraries/**"
-      - "program_info/**"
-      - "tests/**"
-
-      # Files
-      - "CMakeLists.txt"
-      - "COPYING.md"
-
-      # Workflows
-      - ".github/workflows/build.yml"
-      - ".github/actions/package/**"
-      - ".github/actions/setup-dependencies/**"
+  merge_group:
+    types: [checks_requested]
   pull_request:
-    paths:
-      # File types
-      - "**.cpp"
-      - "**.h"
-      - "**.java"
-      - "**.ui"
-
-      # Directories
-      - "buildconfig/**"
-      - "cmake/**"
-      - "launcher/**"
-      - "libraries/**"
-      - "program_info/**"
-      - "tests/**"
-
-      # Files
-      - "CMakeLists.txt"
-      - "COPYING.md"
-
-      # Workflows
-      - ".github/workflows/build.yml"
-      - ".github/actions/package/**"
-      - ".github/actions/setup-dependencies/**"
   workflow_call:
     inputs:
       build-type:
@@ -72,6 +24,8 @@ on:
         type: string
         default: Debug
 
+permissions: {}
+
 jobs:
   build:
     name: Build (${{ matrix.artifact-name }})
@@ -79,6 +33,7 @@ jobs:
     environment: ${{ inputs.environment || '' }}
 
     permissions:
+      contents: read
       # Required for Azure Trusted Signing
       id-token: write
       # Required for vcpkg binary cache
@@ -91,12 +46,12 @@ jobs:
           - os: ubuntu-24.04
             artifact-name: Linux
             cmake-preset: linux
-            qt-version: 6.10.1
+            qt-version: 6.10.2
 
           - os: ubuntu-24.04-arm
             artifact-name: Linux-aarch64
             cmake-preset: linux
-            qt-version: 6.10.1
+            qt-version: 6.10.2
 
           - os: windows-2022
             artifact-name: Windows-MinGW-w64
@@ -115,13 +70,13 @@ jobs:
             cmake-preset: windows_msvc
             # TODO(@getchoo): This is the default in setup-dependencies/windows. Why isn't it working?!?!
             vcvars-arch: amd64
-            qt-version: 6.10.1
+            qt-version: 6.10.2
 
           - os: windows-11-arm
             artifact-name: Windows-MSVC-arm64
             cmake-preset: windows_msvc
             vcvars-arch: arm64
-            qt-version: 6.10.1
+            qt-version: 6.10.2
 
           - os: macos-26
             artifact-name: macOS
@@ -177,7 +132,7 @@ jobs:
 
       - name: Run tests
         run: |
-          ctest --preset "$CMAKE_PRESET" --build-config "$BUILD_TYPE"
+          ctest --preset "$CMAKE_PRESET" --build-config "$BUILD_TYPE" --extra-verbose --output-on-failure
 
       ##
       # PACKAGE

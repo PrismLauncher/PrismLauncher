@@ -73,6 +73,8 @@ InstanceView::InstanceView(QWidget* parent) : QAbstractItemView(parent)
     setAcceptDrops(true);
     setAutoScroll(true);
     setPaintCat(APPLICATION->settings()->get("TheCat").toBool());
+    connect(verticalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
+    connect(horizontalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
 }
 
 InstanceView::~InstanceView()

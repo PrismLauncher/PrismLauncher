@@ -173,7 +173,7 @@ bool PackFetchTask::parseAndAddPacks(QByteArray& data, PackType packType, Modpac
                 qWarning() << "Added current version to oldVersions because oldVersions was empty! (" + modpack.name + ")";
             } else {
                 modpack.broken = true;
-                qWarning() << "Broken pack:" << modpack.name << " => No valid version!";
+                qWarning() << "Broken pack:" << modpack.name << "=> No valid version!";
             }
         }
 

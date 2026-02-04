@@ -178,4 +178,40 @@ Side SideUtils::fromString(QString side)
         return Side::UniversalSide;
     return Side::UniversalSide;
 }
+
+QString DependencyTypeUtils::toString(DependencyType type)
+{
+    switch (type) {
+        case DependencyType::REQUIRED:
+            return "REQUIRED";
+        case DependencyType::OPTIONAL:
+            return "OPTIONAL";
+        case DependencyType::INCOMPATIBLE:
+            return "INCOMPATIBLE";
+        case DependencyType::EMBEDDED:
+            return "EMBEDDED";
+        case DependencyType::TOOL:
+            return "TOOL";
+        case DependencyType::INCLUDE:
+            return "INCLUDE";
+        case DependencyType::UNKNOWN:
+            return "UNKNOWN";
+    }
+    return "UNKNOWN";
+}
+
+DependencyType DependencyTypeUtils::fromString(const QString& str)
+{
+    static const QHash<QString, DependencyType> map = {
+        { "REQUIRED", DependencyType::REQUIRED },
+        { "OPTIONAL", DependencyType::OPTIONAL },
+        { "INCOMPATIBLE", DependencyType::INCOMPATIBLE },
+        { "EMBEDDED", DependencyType::EMBEDDED },
+        { "TOOL", DependencyType::TOOL },
+        { "INCLUDE", DependencyType::INCLUDE },
+        { "UNKNOWN", DependencyType::UNKNOWN },
+    };
+
+    return map.value(str.toUpper(), DependencyType::UNKNOWN);
+}
 }  // namespace ModPlatform

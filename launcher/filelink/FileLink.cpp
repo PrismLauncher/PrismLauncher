@@ -34,8 +34,6 @@
 
 #include <DesktopServices.h>
 
-#include <sys.h>
-
 #if defined Q_OS_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -115,7 +113,7 @@ void FileLinkApp::joinServer(QString server)
                 qDebug() << ("The connection was closed by the peer. ");
                 break;
             default:
-                qDebug() << "The following error occurred: " << socket.errorString();
+                qDebug() << "The following error occurred:" << socket.errorString();
         }
     });
 

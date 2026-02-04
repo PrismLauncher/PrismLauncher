@@ -11,10 +11,12 @@ on:
         required: true
         type: number
 
+permissions: {}
+
 jobs:
   update-blocked-status:
     name: Update Blocked Status
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
 
     # a pr that was a `blocking:<id>` label was merged.
     # find the open pr's it was blocked by and trigger a refresh of their state

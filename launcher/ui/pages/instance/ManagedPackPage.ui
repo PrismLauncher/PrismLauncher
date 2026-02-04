@@ -138,6 +138,9 @@
         <widget class="QComboBox" name="versionsComboBox"/>
        </item>
        <item>
+        <widget class="QLineEdit" name="urlLine"/>
+       </item>
+       <item>
         <widget class="QPushButton" name="updateButton">
          <property name="enabled">
           <bool>false</bool>

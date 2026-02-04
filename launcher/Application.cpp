@@ -126,7 +126,6 @@
 #include <LocalPeer.h>
 
 #include <stdlib.h>
-#include <sys.h>
 #include "SysInfo.h"
 
 #ifdef Q_OS_LINUX
@@ -603,25 +602,25 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     {
         qInfo() << qPrintable(BuildConfig.LAUNCHER_DISPLAYNAME + ", " + QString(BuildConfig.LAUNCHER_COPYRIGHT).replace("\n", ", "));
-        qInfo() << "Version                    : " << BuildConfig.printableVersionString();
-        qInfo() << "Platform                   : " << BuildConfig.BUILD_PLATFORM;
-        qInfo() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
-        qInfo() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
-        qInfo() << "Compiled for               : " << BuildConfig.systemID();
-        qInfo() << "Compiled by                : " << BuildConfig.compilerID();
-        qInfo() << "Build Artifact             : " << BuildConfig.BUILD_ARTIFACT;
-        qInfo() << "Updates Enabled           : " << (updaterEnabled() ? "Yes" : "No");
+        qInfo() << "Version                    :" << BuildConfig.printableVersionString();
+        qInfo() << "Platform                   :" << BuildConfig.BUILD_PLATFORM;
+        qInfo() << "Git commit                 :" << BuildConfig.GIT_COMMIT;
+        qInfo() << "Git refspec                :" << BuildConfig.GIT_REFSPEC;
+        qInfo() << "Compiled for               :" << BuildConfig.systemID();
+        qInfo() << "Compiled by                :" << BuildConfig.compilerID();
+        qInfo() << "Build Artifact             :" << BuildConfig.BUILD_ARTIFACT;
+        qInfo() << "Updates Enabled            :" << (updaterEnabled() ? "Yes" : "No");
         if (adjustedBy.size()) {
-            qInfo() << "Work dir before adjustment : " << origcwdPath;
-            qInfo() << "Work dir after adjustment  : " << QDir::currentPath();
-            qInfo() << "Adjusted by                : " << adjustedBy;
+            qInfo() << "Work dir before adjustment :" << origcwdPath;
+            qInfo() << "Work dir after adjustment  :" << QDir::currentPath();
+            qInfo() << "Adjusted by                :" << adjustedBy;
         } else {
-            qInfo() << "Work dir                   : " << QDir::currentPath();
+            qInfo() << "Work dir                   :" << QDir::currentPath();
         }
-        qInfo() << "Binary path                : " << binPath;
-        qInfo() << "Application root path      : " << m_rootPath;
+        qInfo() << "Binary path                :" << binPath;
+        qInfo() << "Application root path      :" << m_rootPath;
         if (!m_instanceIdToLaunch.isEmpty()) {
-            qInfo() << "ID of instance to launch   : " << m_instanceIdToLaunch;
+            qInfo() << "ID of instance to launch   :" << m_instanceIdToLaunch;
         }
         if (!m_serverToJoin.isEmpty()) {
             qInfo() << "Address of server to join  :" << m_serverToJoin;
@@ -685,8 +684,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         QFontInfo consoleFontInfo(consoleFont);
         QString resolvedDefaultMonospace = consoleFontInfo.family();
         QFont resolvedFont(resolvedDefaultMonospace);
-        qDebug() << "Detected default console font:" << resolvedDefaultMonospace
-                 << ", substitutions:" << resolvedFont.substitutions().join(',');
+        qDebug().nospace() << "Detected default console font: " << resolvedDefaultMonospace
+                           << ", substitutions: " << resolvedFont.substitutions().join(',');
 
         m_settings->registerSetting("ConsoleFont", resolvedDefaultMonospace);
         m_settings->registerSetting("ConsoleFontSize", defaultSize);
@@ -862,23 +861,20 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             }
         }
         {
+            auto resetIfInvalid = [this](const Setting* setting) {
+                if (const QUrl url(setting->get().toString()); !url.isValid() || (url.scheme() != "http" && url.scheme() != "https")) {
+                    m_settings->reset(setting->id());
+                }
+            };
+
             // Meta URL
-            m_settings->registerSetting("MetaURLOverride", "");
-
-            QUrl metaUrl(m_settings->get("MetaURLOverride").toString());
-
-            // get rid of invalid meta urls
-            if (!metaUrl.isValid() || (metaUrl.scheme() != "http" && metaUrl.scheme() != "https"))
-                m_settings->reset("MetaURLOverride");
+            resetIfInvalid(m_settings->registerSetting("MetaURLOverride", "").get());
 
             // Resource URL
-            m_settings->registerSetting("ResourceURL", BuildConfig.DEFAULT_RESOURCE_BASE);
+            resetIfInvalid(m_settings->registerSetting({ "ResourceURLOverride", "ResourceURL" }, "").get());
 
-            QUrl resourceUrl(m_settings->get("ResourceURL").toString());
-
-            // get rid of invalid resource urls
-            if (!resourceUrl.isValid() || (resourceUrl.scheme() != "http" && resourceUrl.scheme() != "https"))
-                m_settings->reset("ResourceURL");
+            // Legacy FML libs URL
+            resetIfInvalid(m_settings->registerSetting("LegacyFMLLibsURLOverride", "").get());
         }
 
         m_settings->registerSetting("CloseAfterLaunch", false);
@@ -988,7 +984,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // instance path: check for problems with '!' in instance path and warn the user in the log
         // and remember that we have to show him a dialog when the gui starts (if it does so)
         QString instDir = m_settings->get("InstanceDir").toString();
-        qInfo() << "Instance path              : " << instDir;
+        qInfo() << "Instance path              :" << instDir;
         if (FS::checkProblemticPathJava(QDir(instDir))) {
             qWarning() << "Your instance path contains \'!\' and this is known to cause java problems!";
         }

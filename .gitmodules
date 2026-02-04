@@ -1,6 +1,3 @@
 [submodule "libraries/libnbtplusplus"]
 	path = libraries/libnbtplusplus
 	url = https://github.com/PrismLauncher/libnbtplusplus.git
-[submodule "flatpak/shared-modules"]
-	path = flatpak/shared-modules
-	url = https://github.com/flathub/shared-modules.git

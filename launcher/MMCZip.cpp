@@ -56,18 +56,18 @@ bool mergeZipFiles(ArchiveWriter& into, QFileInfo from, QSet<QString>& contained
     return r.parse([&into, &contained, &filter, from](ArchiveReader::File* f) {
         auto filename = f->filename();
         if (filter && !filter(filename)) {
-            qDebug() << "Skipping file " << filename << " from " << from.fileName() << " - filtered";
+            qDebug() << "Skipping file" << filename << "from" << from.fileName() << "- filtered";
             f->skip();
             return true;
         }
         if (contained.contains(filename)) {
-            qDebug() << "Skipping already contained file " << filename << " from " << from.fileName();
+            qDebug() << "Skipping already contained file" << filename << "from" << from.fileName();
             f->skip();
             return true;
         }
         contained.insert(filename);
         if (!into.addFile(f)) {
-            qCritical() << "Failed to copy data of " << filename << " into the jar";
+            qCritical() << "Failed to copy data of" << filename << "into the jar";
             return false;
         }
         return true;
@@ -149,7 +149,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
                 qCritical() << "Failed to add" << mod->fileinfo().fileName() << "to the jar.";
                 return false;
             }
-            qDebug() << "Adding folder " << filename.fileName() << " from " << filename.absoluteFilePath();
+            qDebug() << "Adding folder" << filename.fileName() << "from" << filename.absoluteFilePath();
         } else {
             // Make sure we do not continue launching when something is missing or undefined...
             zipOut.close();
@@ -321,7 +321,7 @@ bool collectFileListRecursively(const QString& rootDir, const QString& subDir, Q
     for (const auto& e : entries) {
         if (excludeFilter && excludeFilter(e)) {
             QString relativeFilePath = rootDirectory.relativeFilePath(e.absoluteFilePath());
-            qDebug() << "Skipping file " << relativeFilePath;
+            qDebug() << "Skipping file" << relativeFilePath;
             continue;
         }
 

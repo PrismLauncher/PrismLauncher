@@ -39,13 +39,15 @@
 
 #include <QAbstractListModel>
 #include <QDir>
-#include <QList>
+#include <QHash>
 #include <QMap>
 #include <QSet>
 #include <QString>
 
 #include "Mod.h"
 #include "ResourceFolderModel.h"
+#include "minecraft/Component.h"
+#include "minecraft/mod/Resource.h"
 
 class BaseInstance;
 class QFileSystemWatcher;
@@ -69,6 +71,8 @@ class ModFolderModel : public ResourceFolderModel {
         LoadersColumn,
         McVersionsColumn,
         ReleaseTypeColumn,
+        RequiresColumn,
+        RequiredByColumn,
         NUM_COLUMNS
     };
     ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent = nullptr);
@@ -85,8 +89,22 @@ class ModFolderModel : public ResourceFolderModel {
 
     bool isValid();
 
+    bool setResourceEnabled(const QModelIndexList& indexes, EnableAction action) override;
+    bool deleteResources(const QModelIndexList& indexes) override;
+
+    QModelIndexList getAffectedMods(const QModelIndexList& indexes, EnableAction action);
+
     RESOURCE_HELPERS(Mod)
+
+   public:
+    QStringList requiresList(QString id);
+    QStringList requiredByList(QString id);
 
    private slots:
     void onParseSucceeded(int ticket, QString resource_id) override;
+    void onParseFinished();
+
+   private:
+    QHash<QString, QSet<Mod*>> m_requiredBy;
+    QHash<QString, QSet<Mod*>> m_requires;
 };

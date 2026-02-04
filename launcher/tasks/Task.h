@@ -127,6 +127,9 @@ class Task : public QObject, public QRunnable {
 
     QUuid getUid() { return m_uid; }
 
+    // Copies the other task's status, details, progress, and step progress to this task; and sets up connections for future propagation
+    void propagateFromOther(Task* other);
+
    protected:
     void logWarning(const QString& line);
 

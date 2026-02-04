@@ -303,7 +303,6 @@ bool AccountData::resumeStateFromV3(QJsonObject data)
         }  // leave msaClientID empty if it doesn't exist or isn't a string
         msaToken = tokenFromJSONV3(data, "msa");
         userToken = tokenFromJSONV3(data, "utoken");
-        xboxApiToken = tokenFromJSONV3(data, "xrp-main");
         mojangservicesToken = tokenFromJSONV3(data, "xrp-mc");
     }
 
@@ -333,7 +332,6 @@ QJsonObject AccountData::saveState() const
         output["msa-client-id"] = msaClientID;
         tokenToJSONV3(output, msaToken, "msa");
         tokenToJSONV3(output, userToken, "utoken");
-        tokenToJSONV3(output, xboxApiToken, "xrp-main");
         tokenToJSONV3(output, mojangservicesToken, "xrp-mc");
     } else if (type == AccountType::Offline) {
         output["type"] = "Offline";
@@ -358,28 +356,10 @@ QString AccountData::profileId() const
 QString AccountData::profileName() const
 {
     if (minecraftProfile.name.size() == 0) {
-        return QObject::tr("No profile (%1)").arg(accountDisplayString());
-    } else {
-        return minecraftProfile.name;
+        return QObject::tr("No Minecraft profile");
     }
-}
 
-QString AccountData::accountDisplayString() const
-{
-    switch (type) {
-        case AccountType::Offline: {
-            return QObject::tr("<Offline>");
-        }
-        case AccountType::MSA: {
-            if (xboxApiToken.extra.contains("gtg")) {
-                return xboxApiToken.extra["gtg"].toString();
-            }
-            return "Xbox profile missing";
-        }
-        default: {
-            return "Invalid Account";
-        }
-    }
+    return minecraftProfile.name;
 }
 
 QString AccountData::lastError() const

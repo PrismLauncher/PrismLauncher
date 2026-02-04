@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>648</width>
+    <width>653</width>
     <height>600</height>
    </rect>
   </property>
@@ -59,8 +59,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>603</width>
-            <height>1042</height>
+            <width>623</width>
+            <height>1352</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -82,7 +82,7 @@
               <item row="1" column="0" colspan="6">
                <widget class="QLabel" name="maximizedWarning">
                 <property name="toolTip">
-                 <string>The base game only supports resolution. In order to simulate the maximized behaviour the current implementation approximates the maximum display size.</string>
+                 <string>The base game only supports resolution. In order to simulate the maximized behavior the current implementation approximates the maximum display size.</string>
                 </property>
                 <property name="text">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#f5c211;&quot;&gt;Warning&lt;/span&gt;&lt;span style=&quot; color:#f5c211;&quot;&gt;: The maximized option may not be fully supported on all Minecraft versions.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -110,7 +110,7 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="3">
+              <item row="2" column="1">
                <widget class="QSpinBox" name="windowWidthSpinBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -151,7 +151,7 @@
                 </property>
                </spacer>
               </item>
-              <item row="2" column="1">
+              <item row="2" column="3">
                <widget class="QSpinBox" name="windowHeightSpinBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -516,6 +516,41 @@ It is most likely you will need to change the path - please refer to the mod's w
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QCheckBox" name="babric">
+                <property name="text">
+                 <string>Babric</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="btaBabric">
+                <property name="text">
+                 <string>BTA (Babric)</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="legacyFabric">
+                <property name="text">
+                 <string>Legacy Fabric</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="ornithe">
+                <property name="text">
+                 <string>Ornithe</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="rift">
+                <property name="text">
+                 <string>Rift</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </widget>
            </item>
@@ -553,8 +588,8 @@ It is most likely you will need to change the path - please refer to the mod's w
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>623</width>
+            <height>484</height>
            </rect>
           </property>
          </widget>
@@ -577,8 +612,8 @@ It is most likely you will need to change the path - please refer to the mod's w
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>261</width>
-            <height>434</height>
+            <width>609</width>
+            <height>499</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">

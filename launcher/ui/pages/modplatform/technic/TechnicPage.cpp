@@ -175,8 +175,8 @@ void TechnicPage::suggestCurrent()
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         QJsonObject obj = doc.object();
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Technic at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
+            qWarning() << "Error while parsing JSON response from Technic at" << parse_error.offset
+                       << "reason:" << parse_error.errorString();
             qWarning() << *response;
             return;
         }
@@ -309,7 +309,7 @@ void TechnicPage::onSolderLoaded()
     QJsonParseError parse_error{};
     auto doc = QJsonDocument::fromJson(*response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from Solder at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qWarning() << "Error while parsing JSON response from Solder at" << parse_error.offset << "reason:" << parse_error.errorString();
         qWarning() << *response;
         fallback();
         return;

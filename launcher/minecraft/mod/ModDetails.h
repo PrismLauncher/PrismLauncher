@@ -138,6 +138,8 @@ struct ModDetails {
     /* Path of mod logo */
     QString icon_file = {};
 
+    QStringList dependencies = {};
+
     ModDetails() = default;
 
     /** Metadata should be handled manually to properly set the mod status. */
@@ -152,6 +154,7 @@ struct ModDetails {
         , issue_tracker(other.issue_tracker)
         , licenses(other.licenses)
         , icon_file(other.icon_file)
+        , dependencies(other.dependencies)
     {}
 
     ModDetails& operator=(const ModDetails& other) = default;

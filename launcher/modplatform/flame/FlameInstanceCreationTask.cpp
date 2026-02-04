@@ -54,7 +54,7 @@
 
 #include "settings/INISettingsObject.h"
 
-#include "sys.h"
+#include "SysInfo.h"
 #include "tasks/ConcurrentTask.h"
 #include "ui/dialogs/BlockedModsDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -194,8 +194,8 @@ bool FlameCreationTask::updateInstance()
             QJsonParseError parse_error{};
             auto doc = QJsonDocument::fromJson(*raw_response, &parse_error);
             if (parse_error.error != QJsonParseError::NoError) {
-                qWarning() << "Error while parsing JSON response from Flame files task at " << parse_error.offset
-                           << " reason: " << parse_error.errorString();
+                qWarning() << "Error while parsing JSON response from Flame files task at" << parse_error.offset
+                           << "reason:" << parse_error.errorString();
                 qWarning() << *raw_response;
                 return;
             }
@@ -235,7 +235,7 @@ bool FlameCreationTask::updateInstance()
                 }
             }
         });
-        connect(job.get(), &Task::failed, this, [](QString reason) { qCritical() << "Failed to get files: " << reason; });
+        connect(job.get(), &Task::failed, this, [](QString reason) { qCritical() << "Failed to get files:" << reason; });
         connect(job.get(), &Task::finished, &loop, &QEventLoop::quit);
 
         m_processUpdateFileInfoJob = job;
@@ -423,7 +423,7 @@ bool FlameCreationTask::createInstance()
 
     // only set memory if this is a fresh instance
     if (m_instance == nullptr && recommendedRAM > 0) {
-        const uint64_t sysMiB = Sys::getSystemRam() / Sys::mebibyte;
+        const uint64_t sysMiB = SysInfo::getSystemRamMiB();
         const uint64_t max = sysMiB * 0.9;
 
         if (static_cast<uint64_t>(recommendedRAM) > max) {
@@ -551,7 +551,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
         message_dialog.setModal(true);
 
         if (message_dialog.exec()) {
-            qDebug() << "Post dialog blocked mods list: " << blocked_mods;
+            qDebug() << "Post dialog blocked mods list:" << blocked_mods;
             copyBlockedMods(blocked_mods);
             setupDownloadJob(loop);
         } else {

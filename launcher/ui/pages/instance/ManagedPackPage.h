@@ -86,6 +86,8 @@ class ManagedPackPage : public QWidget, public BasePage {
      */
     bool runUpdateTask(InstanceTask*);
 
+    void updatePack(const QUrl& url, QString versionID = {}, QString versionName = {});
+
    protected:
     InstanceWindow* m_instance_window = nullptr;
 

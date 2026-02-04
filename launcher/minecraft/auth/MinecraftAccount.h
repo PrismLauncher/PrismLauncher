@@ -104,8 +104,6 @@ class MinecraftAccount : public QObject, public Usable {
    public: /* queries */
     QString internalId() const { return data.internalId; }
 
-    QString accountDisplayString() const { return data.accountDisplayString(); }
-
     QString accessToken() const { return data.accessToken(); }
 
     QString profileId() const { return data.profileId(); }

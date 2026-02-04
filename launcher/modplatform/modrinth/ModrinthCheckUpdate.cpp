@@ -83,6 +83,8 @@ void ModrinthCheckUpdate::executeTask()
 
 void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModLoaderTypes> loader, bool forceModLoaderCheck)
 {
+    m_loaderIdx++;
+
     setStatus(tr("Waiting for the API response from Modrinth..."));
     setProgress(m_progress + 1, m_progressTotal);
 
@@ -110,7 +112,6 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
     connect(job.get(), &Task::failed, this, &ModrinthCheckUpdate::checkNextLoader);
 
     m_job = job;
-    m_loaderIdx++;
     job->start();
 }
 
@@ -122,8 +123,8 @@ void ModrinthCheckUpdate::checkVersionsResponse(QByteArray* response, std::optio
     QJsonParseError parse_error{};
     QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from ModrinthCheckUpdate at " << parse_error.offset
-                   << " reason: " << parse_error.errorString();
+        qWarning() << "Error while parsing JSON response from ModrinthCheckUpdate at" << parse_error.offset
+                   << "reason:" << parse_error.errorString();
         qWarning() << *response;
 
         emitFailed(parse_error.errorString());
@@ -142,7 +143,7 @@ void ModrinthCheckUpdate::checkVersionsResponse(QByteArray* response, std::optio
             // If the returned project is empty, but we have Modrinth metadata,
             // it means this specific version is not available
             if (project_obj.isEmpty()) {
-                qDebug() << "Mod " << m_mappings.find(hash).value()->name() << " got an empty response." << "Hash: " << hash;
+                qDebug() << "Mod" << m_mappings.find(hash).value()->name() << "got an empty response. Hash:" << hash;
                 ++iter;
                 continue;
             }

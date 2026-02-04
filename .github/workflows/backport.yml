@@ -8,8 +8,7 @@ on:
 # the GitHub repository. This means that it should not evaluate user input in a
 # way that allows code injection.
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   backport:
@@ -19,7 +18,7 @@ jobs:
       actions: write # for korthout/backport-action to create PR with workflow changes
     name: Backport Pull Request
     if: github.repository_owner == 'PrismLauncher' && github.event.pull_request.merged == true && (github.event_name != 'labeled' || startsWith('backport', github.event.label.name))
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v6
         with:
