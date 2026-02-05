@@ -21,6 +21,10 @@
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QVBoxLayout>
+#if defined(Q_OS_MACOS)
+#include <QPalette>
+#include <QWidget>
+#endif
 #include "Application.h"
 #include "BuildConfig.h"
 #include "DesktopServices.h"
@@ -89,8 +93,18 @@ InstallLoaderDialog::InstallLoaderDialog(PackProfile* profile, const QString& ui
 {
     auto layout = new QVBoxLayout(this);
 #if defined(Q_OS_MACOS)
-    // Add top and right padding on macOS to improve corner appearance
-    layout->setContentsMargins(0, 15, 10, 0);
+    // Add padding and top bar with divider on macOS to improve corner appearance (Tahoe-style)
+    layout->setContentsMargins(12, 0, 12, 12);
+    auto* topBar = new QWidget(this);
+    topBar->setFixedHeight(22);
+    topBar->setAutoFillBackground(true);
+    topBar->setBackgroundRole(QPalette::Window);
+    layout->addWidget(topBar);
+    auto* topBarLine = new QWidget(this);
+    topBarLine->setFixedHeight(1);
+    topBarLine->setAutoFillBackground(true);
+    topBarLine->setBackgroundRole(QPalette::Mid);
+    layout->addWidget(topBarLine);
 #else
     layout->setContentsMargins(0, 0, 0, 0);
 #endif

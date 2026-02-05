@@ -19,8 +19,11 @@
 
 #include "ResourceDownloadDialog.h"
 #include <QList>
-
 #include <QPushButton>
+#if defined(Q_OS_MACOS)
+#include <QPalette>
+#include <QWidget>
+#endif
 #include <algorithm>
 
 #include "Application.h"
@@ -117,8 +120,18 @@ void ResourceDownloadDialog::reject()
 void ResourceDownloadDialog::initializeContainer()
 {
 #if defined(Q_OS_MACOS)
-    // Add top and right padding on macOS to improve corner appearance
-    layout()->setContentsMargins(0, 15, 10, 0);
+    // Add padding and top bar with divider on macOS to improve corner appearance (Tahoe-style)
+    layout()->setContentsMargins(12, 0, 12, 12);
+    auto* topBar = new QWidget(this);
+    topBar->setFixedHeight(22);
+    topBar->setAutoFillBackground(true);
+    topBar->setBackgroundRole(QPalette::Window);
+    m_vertical_layout.insertWidget(0, topBar);
+    auto* topBarLine = new QWidget(this);
+    topBarLine->setFixedHeight(1);
+    topBarLine->setAutoFillBackground(true);
+    topBarLine->setBackgroundRole(QPalette::Mid);
+    m_vertical_layout.insertWidget(1, topBarLine);
 #else
     layout()->setContentsMargins(0, 0, 0, 0);
 #endif
