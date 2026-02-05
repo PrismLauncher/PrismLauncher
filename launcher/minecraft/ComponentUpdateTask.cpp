@@ -38,6 +38,9 @@
  * If the component list changes, start over.
  */
 
+/*
+ * TODO: This task launches multiple other tasks. As such it should be converted to a ConcurrentTask
+ */
 ComponentUpdateTask::ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfile* list) : Task()
 {
     d.reset(new ComponentUpdateTaskData);
@@ -48,9 +51,33 @@ ComponentUpdateTask::ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfi
 
 ComponentUpdateTask::~ComponentUpdateTask() {}
 
+bool ComponentUpdateTask::canAbort() const
+{
+    for (const auto& status : d->remoteLoadStatusList) {
+        if (status.task && !status.task->canAbort()) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool ComponentUpdateTask::abort()
+{
+    bool aborted = true;
+    for (const auto& status : d->remoteLoadStatusList) {
+        if (status.task && !status.task->abort()) {
+            aborted = false;
+        }
+    }
+
+    return aborted;
+}
+
 void ComponentUpdateTask::executeTask()
 {
     qCDebug(instanceProfileResolveC) << "Loading components";
+    setStatus(tr("Loading components"));
     loadComponents();
 }
 
@@ -196,12 +223,13 @@ void ComponentUpdateTask::loadComponents()
         componentIndex++;
     }
     d->remoteTasksInProgress = taskIndex;
+    m_progressTotal = taskIndex;
     switch (result) {
         case LoadResult::LoadedLocal: {
             // Everything got loaded. Advance to dependency resolution.
             performUpdateActions();
             resolveDependencies(d->mode == Mode::Launch || d->netmode == Net::Mode::Offline);
-            break;
+            return;
         }
         case LoadResult::RequiresRemote: {
             // we wait for signals.
@@ -209,9 +237,11 @@ void ComponentUpdateTask::loadComponents()
         }
         case LoadResult::Failed: {
             emitFailed(tr("Some component metadata load tasks failed."));
-            break;
+            return;
         }
     }
+
+    setDetails(tr("Downloading metadata for %1 components").arg(taskIndex));
 }
 
 namespace {
@@ -754,6 +784,7 @@ void ComponentUpdateTask::remoteLoadFailed(size_t taskIndex, const QString& msg)
 
 void ComponentUpdateTask::checkIfAllFinished()
 {
+    setProgress(m_progress + 1, m_progressTotal);
     if (d->remoteTasksInProgress) {
         // not yet...
         return;

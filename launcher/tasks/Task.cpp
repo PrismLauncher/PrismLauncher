@@ -194,6 +194,22 @@ QString Task::failReason() const
     return m_failReason;
 }
 
+void Task::propagateFromOther(Task* other)
+{
+    Q_ASSERT(other);
+    connect(other, &Task::status, this, &Task::setStatus);
+    connect(other, &Task::details, this, &Task::setDetails);
+    connect(other, &Task::progress, this, &Task::setProgress);
+    connect(other, &Task::stepProgress, this, &Task::propagateStepProgress);
+
+    setStatus(other->getStatus());
+    setDetails(other->getDetails());
+    setProgress(other->getProgress(), other->getTotalProgress());
+    for (const auto& progress : other->getStepProgress()) {
+        propagateStepProgress(*progress);
+    }
+}
+
 void Task::logWarning(const QString& line)
 {
     qWarning() << line;

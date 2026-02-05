@@ -66,8 +66,7 @@ on:
       - ".github/workflows/nix.yml"
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 env:
   DEBUG: ${{ github.ref_type != 'tag' }}
@@ -75,6 +74,9 @@ env:
 jobs:
   build:
     name: Build (${{ matrix.system }})
+
+    permissions:
+      contents: read
 
     strategy:
       fail-fast: false

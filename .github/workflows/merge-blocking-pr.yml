@@ -11,6 +11,8 @@ on:
         required: true
         type: number
 
+permissions: {}
+
 jobs:
   update-blocked-status:
     name: Update Blocked Status

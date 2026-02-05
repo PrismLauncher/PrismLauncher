@@ -5,57 +5,9 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  push:
-    branches:
-      - "develop"
-      - "release-*"
-    paths:
-      # File types
-      - "**.cpp"
-      - "**.h"
-      - "**.java"
-      - "**.ui"
-
-      # Directories
-      - "buildconfig/**"
-      - "cmake/**"
-      - "launcher/**"
-      - "libraries/**"
-      - "program_info/**"
-      - "tests/**"
-
-      # Files
-      - "CMakeLists.txt"
-      - "COPYING.md"
-
-      # Workflows
-      - ".github/workflows/build.yml"
-      - ".github/actions/package/**"
-      - ".github/actions/setup-dependencies/**"
+  merge_group:
+    types: [checks_requested]
   pull_request:
-    paths:
-      # File types
-      - "**.cpp"
-      - "**.h"
-      - "**.java"
-      - "**.ui"
-
-      # Directories
-      - "buildconfig/**"
-      - "cmake/**"
-      - "launcher/**"
-      - "libraries/**"
-      - "program_info/**"
-      - "tests/**"
-
-      # Files
-      - "CMakeLists.txt"
-      - "COPYING.md"
-
-      # Workflows
-      - ".github/workflows/build.yml"
-      - ".github/actions/package/**"
-      - ".github/actions/setup-dependencies/**"
   workflow_call:
     inputs:
       build-type:
@@ -72,6 +24,8 @@ on:
         type: string
         default: Debug
 
+permissions: {}
+
 jobs:
   build:
     name: Build (${{ matrix.artifact-name }})
@@ -79,6 +33,7 @@ jobs:
     environment: ${{ inputs.environment || '' }}
 
     permissions:
+      contents: read
       # Required for Azure Trusted Signing
       id-token: write
       # Required for vcpkg binary cache

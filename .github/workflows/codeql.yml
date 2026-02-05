@@ -5,62 +5,20 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  push:
-    branches:
-      - "develop"
-      - "release-*"
-    paths:
-      # File types
-      - "**.cpp"
-      - "**.h"
-      - "**.java"
-      - "**.ui"
-
-      # Directories
-      - "buildconfig/**"
-      - "cmake/**"
-      - "launcher/**"
-      - "libraries/**"
-      - "program_info/**"
-      - "tests/**"
-
-      # Files
-      - "CMakeLists.txt"
-      - "COPYING.md"
-
-      # Workflows
-      - ".github/codeql/**"
-      - ".github/workflows/codeql.yml"
-      - ".github/actions/setup-dependencies/**"
+  merge_group:
+    types: [checks_requested]
   pull_request:
-    paths:
-      # File types
-      - "**.cpp"
-      - "**.h"
-      - "**.java"
-      - "**.ui"
-
-      # Directories
-      - "buildconfig/**"
-      - "cmake/**"
-      - "launcher/**"
-      - "libraries/**"
-      - "program_info/**"
-      - "tests/**"
-
-      # Files
-      - "CMakeLists.txt"
-      - "COPYING.md"
-
-      # Workflows
-      - ".github/codeql/**"
-      - ".github/workflows/codeql.yml"
-      - ".github/actions/setup-dependencies/**"
   workflow_dispatch:
+
+permissions: {}
 
 jobs:
   CodeQL:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write
 
     steps:
       - name: Checkout repository

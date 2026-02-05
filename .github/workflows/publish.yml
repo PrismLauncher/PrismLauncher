@@ -4,12 +4,14 @@ on:
   release:
     types: [ released ]
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   winget:
     name: Winget
+
+    permissions:
+      contents: read
 
     runs-on: ubuntu-slim
 
