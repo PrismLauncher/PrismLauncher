@@ -32,7 +32,7 @@ static ResourceDescriptor prepareResourcePackDescriptor()
     };
 }
 
-TexturePackResourcePage::TexturePackResourcePage(TexturePackDownloadDialog* dialog,
+TexturePackResourcePage::TexturePackResourcePage(ResourceDownloadDialog* dialog,
                                                  BaseInstance& instance,
                                                  ResourceProviderData p,
                                                  ResourceAPI* api,

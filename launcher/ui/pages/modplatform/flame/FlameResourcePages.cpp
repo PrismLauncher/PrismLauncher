@@ -57,27 +57,27 @@ static ResourceProviderData prepareFlame()
     };
 }
 
-ShaderPackResourcePage* Flame::createShaderPackResourcePage(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
+ShaderPackResourcePage* Flame::createShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
     return new ShaderPackResourcePage(dialog, instance, prepareFlame(), new FlameAPI());
 }
 
-DataPackResourcePage* Flame::createDataPackResourcePage(DataPackDownloadDialog* dialog, BaseInstance& instance)
+DataPackResourcePage* Flame::createDataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
     return new DataPackResourcePage(dialog, instance, prepareFlame(), new FlameAPI());
 }
 
-ResourcePackResourcePage* Flame::createResourcePackResourcePage(ResourcePackDownloadDialog* dialog, BaseInstance& instance)
+ResourcePackResourcePage* Flame::createResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
     return new ResourcePackResourcePage(dialog, instance, prepareFlame(), new FlameAPI());
 }
 
-TexturePackResourcePage* Flame::createTexturePackResourcePage(TexturePackDownloadDialog* dialog, BaseInstance& instance)
+TexturePackResourcePage* Flame::createTexturePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
     return new TexturePackResourcePage(dialog, instance, prepareFlame(), new FlameAPI(), new FlameTexturePackModel(instance));
 }
 
-ModPage* Flame::createModPage(ModDownloadDialog* dialog, BaseInstance& instance)
+ModPage* Flame::createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
     return new ModPage(dialog, instance, prepareFlame(), new FlameAPI(),
                        ModFilterWidget::create(&static_cast<MinecraftInstance&>(instance), false));

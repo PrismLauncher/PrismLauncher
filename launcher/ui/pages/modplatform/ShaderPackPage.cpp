@@ -32,7 +32,7 @@ static ResourceDescriptor prepareShaderPackDescriptor()
     };
 }
 
-ShaderPackResourcePage::ShaderPackResourcePage(ShaderPackDownloadDialog* dialog,
+ShaderPackResourcePage::ShaderPackResourcePage(ResourceDownloadDialog* dialog,
                                                BaseInstance& instance,
                                                ResourceProviderData p,
                                                ResourceAPI* api)

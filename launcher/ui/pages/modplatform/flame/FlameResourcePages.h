@@ -70,11 +70,11 @@ static inline QString metaEntryBase()
     return "FlameMods";
 }
 
-ShaderPackResourcePage* createShaderPackResourcePage(ShaderPackDownloadDialog* dialog, BaseInstance& instance);
-DataPackResourcePage* createDataPackResourcePage(DataPackDownloadDialog* dialog, BaseInstance& instance);
-ResourcePackResourcePage* createResourcePackResourcePage(ResourcePackDownloadDialog* dialog, BaseInstance& instance);
-TexturePackResourcePage* createTexturePackResourcePage(TexturePackDownloadDialog* dialog, BaseInstance& instance);
-ModPage* createModPage(ModDownloadDialog* dialog, BaseInstance& instance);
+ShaderPackResourcePage* createShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
+DataPackResourcePage* createDataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
+ResourcePackResourcePage* createResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
+TexturePackResourcePage* createTexturePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
+ModPage* createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance);
 }  // namespace Flame
 
 }  // namespace ResourceDownload

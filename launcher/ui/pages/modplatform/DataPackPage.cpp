@@ -33,7 +33,7 @@ static ResourceDescriptor prepareDataPackDescriptor()
     };
 }
 
-DataPackResourcePage::DataPackResourcePage(DataPackDownloadDialog* dialog, BaseInstance& instance, ResourceProviderData p, ResourceAPI* api)
+DataPackResourcePage::DataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, ResourceProviderData p, ResourceAPI* api)
     : ResourcePage(dialog, instance, prepareDataPackDescriptor(), p)
 {
     m_model = new DataPackResourceModel(instance, api, debugName(), metaEntryBase());

@@ -12,7 +12,7 @@
 
 namespace ResourceDownload {
 
-class ModDownloadDialog;
+class ResourceDownloadDialog;
 
 /* This page handles most logic related to browsing and selecting mods to download. */
 class ModPage : public ResourcePage {
@@ -21,7 +21,11 @@ class ModPage : public ResourcePage {
    public:
     auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
 
-    ModPage(ModDownloadDialog* dialog, BaseInstance& instance, ResourceProviderData p, ResourceAPI* api, ModFilterWidget* filterWidget);
+    ModPage(ResourceDownloadDialog* dialog,
+            BaseInstance& instance,
+            ResourceProviderData p,
+            ResourceAPI* api,
+            ModFilterWidget* filterWidget);
 
    protected:
     void prepareProviderCategories();

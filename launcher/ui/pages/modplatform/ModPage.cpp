@@ -68,8 +68,11 @@ ResourceDownload::ResourceDescriptor prepareModDescriptor()
 }
 }  // namespace
 
-namespace ResourceDownload {
-ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance& instance, ResourceProviderData p, ResourceAPI* api, ModFilterWidget* filterWidget)
+ModPage::ModPage(ResourceDownloadDialog* dialog,
+                 BaseInstance& instance,
+                 ResourceProviderData p,
+                 ResourceAPI* api,
+                 ModFilterWidget* filterWidget)
     : ResourcePage(dialog, instance, prepareModDescriptor(), std::move(p)), m_api(api)
 {
     auto* model = new ModModel(instance, api, debugName(), metaEntryBase());

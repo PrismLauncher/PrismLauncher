@@ -75,7 +75,7 @@ class ModFolderPage : public ExternalResourcesPage {
 
    protected:
     ModFolderModel* m_model;
-    QPointer<ResourceDownload::ModDownloadDialog> m_downloadDialog;
+    QPointer<ResourceDownload::ResourceDownloadDialog> m_downloadDialog;
 };
 
 class CoreModFolderPage : public ModFolderPage {

@@ -15,7 +15,7 @@ class TexturePackResourcePage : public ResourcePage {
     Q_OBJECT
 
    public:
-    TexturePackResourcePage(TexturePackDownloadDialog* dialog,
+    TexturePackResourcePage(ResourceDownloadDialog* dialog,
                             BaseInstance& instance,
                             ResourceProviderData p,
                             ResourceAPI* api,

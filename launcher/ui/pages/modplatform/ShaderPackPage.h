@@ -8,13 +8,13 @@
 
 namespace ResourceDownload {
 
-class ShaderPackDownloadDialog;
+class ResourceDownloadDialog;
 
 class ShaderPackResourcePage : public ResourcePage {
     Q_OBJECT
 
    public:
-    ShaderPackResourcePage(ShaderPackDownloadDialog* dialog, BaseInstance& instance, ResourceProviderData p, ResourceAPI* api);
+    ShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, ResourceProviderData p, ResourceAPI* api);
 
    protected slots:
     void triggerSearch() override;

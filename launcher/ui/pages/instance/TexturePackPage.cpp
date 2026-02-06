@@ -37,10 +37,6 @@
 
 #include "TexturePackPage.h"
 
-#include "ResourceDownloadTask.h"
-
-#include "minecraft/mod/TexturePack.h"
-
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
@@ -91,7 +87,7 @@ void TexturePackPage::downloadTexturePacks()
         return;  // this is a null instance or a legacy instance
     }
 
-    m_downloadDialog = new ResourceDownload::TexturePackDownloadDialog(this, m_model, m_instance);
+    m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createTexturePack(this, m_model, m_instance);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &TexturePackPage::downloadDialogFinished);
     m_downloadDialog->open();
@@ -264,7 +260,7 @@ void TexturePackPage::changeTexturePackVersion()
         return;
     }
 
-    m_downloadDialog = new ResourceDownload::TexturePackDownloadDialog(this, m_model, m_instance, true);
+    m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createTexturePack(this, m_model, m_instance, true);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &TexturePackPage::downloadDialogFinished);
 
