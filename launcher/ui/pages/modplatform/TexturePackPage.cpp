@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "ResourcePackPage.h"
+#include "TexturePackPage.h"
 #include "ui_ResourcePage.h"
 
-#include "ResourcePackModel.h"
+#include "TexturePackModel.h"
 
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
@@ -22,23 +22,27 @@ static ResourceDescriptor prepareResourcePackDescriptor()
     urlHandlers.insert(QRegularExpression::anchoredPattern("minecraft\\.curseforge\\.com\\/projects\\/([^\\/]+)\\/?"), "curseforge");
     return {
         .helpPage = {},
-        //: The singular version of 'resource packs'
-        .resourceString = QObject::tr("resource pack"),
-        //: The plural version of 'resource pack'
-        .resourcesString = QObject::tr("resource packs"),
+        //: The singular version of 'texture packs'
+        .resourceString = QObject::tr("texture pack"),
+        //: The plural version of 'texture pack'
+        .resourcesString = QObject::tr("texture packs"),
         .supportsFiltering = false,
         .isIndexed = true,
         .urlHandlers = urlHandlers,
     };
 }
 
-ResourcePackResourcePage::ResourcePackResourcePage(ResourceDownloadDialog* dialog,
-                                                   BaseInstance& instance,
-                                                   ResourceProviderData p,
-                                                   ResourceAPI* api)
+TexturePackResourcePage::TexturePackResourcePage(TexturePackDownloadDialog* dialog,
+                                                 BaseInstance& instance,
+                                                 ResourceProviderData p,
+                                                 ResourceAPI* api,
+                                                 TexturePackResourceModel* model)
     : ResourcePage(dialog, instance, prepareResourcePackDescriptor(), p)
 {
-    m_model = new ResourcePackResourceModel(instance, api, debugName(), metaEntryBase());
+    m_model = model;
+    if (!m_model) {
+        m_model = new TexturePackResourceModel(instance, api, debugName(), metaEntryBase());
+    }
     m_ui->packView->setModel(m_model);
 
     addSortings();
@@ -49,17 +53,17 @@ ResourcePackResourcePage::ResourcePackResourcePage(ResourceDownloadDialog* dialo
     connect(m_model, &ResourceModel::projectInfoUpdated, this, &ResourcePage::updateUi);
     connect(m_model, &QAbstractListModel::modelReset, this, &ResourcePage::modelReset);
 
-    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &ResourcePackResourcePage::triggerSearch);
-    connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ResourcePackResourcePage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &ResourcePackResourcePage::onVersionSelectionChanged);
-    connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ResourcePackResourcePage::onResourceSelected);
+    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &TexturePackResourcePage::triggerSearch);
+    connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &TexturePackResourcePage::onSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &TexturePackResourcePage::onVersionSelectionChanged);
+    connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &TexturePackResourcePage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
 }
 
 /******** Callbacks to events in the UI (set up in the derived classes) ********/
 
-void ResourcePackResourcePage::triggerSearch()
+void TexturePackResourcePage::triggerSearch()
 {
     m_ui->packView->selectionModel()->setCurrentIndex({}, QItemSelectionModel::SelectionFlag::ClearAndSelect);
     m_ui->packView->clearSelection();

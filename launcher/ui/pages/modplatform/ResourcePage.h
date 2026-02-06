@@ -25,6 +25,24 @@ namespace ResourceDownload {
 class ResourceDownloadDialog;
 class ResourceModel;
 
+struct ResourceProviderData {
+    QString displayName;
+    QIcon icon;
+    QString id;
+    QString metaEntryBase;
+    QString debugName;
+};
+
+struct ResourceDescriptor {
+    QString helpPage;
+    QString resourceString = QObject::tr("resource");
+    QString resourcesString = QObject::tr("resources");
+
+    bool supportsFiltering = false;
+    bool isIndexed = true;
+    QMap<QString, QString> urlHandlers;
+};
+
 class ResourcePage : public QWidget, public BasePage {
     Q_OBJECT
    public:
@@ -32,23 +50,23 @@ class ResourcePage : public QWidget, public BasePage {
     ~ResourcePage() override;
 
     /* Affects what the user sees */
-    auto displayName() const -> QString override = 0;
-    auto icon() const -> QIcon override = 0;
-    auto id() const -> QString override = 0;
-    auto helpPage() const -> QString override = 0;
-    bool shouldDisplay() const override = 0;
+    auto displayName() const -> QString override { return m_provider.displayName; };
+    auto icon() const -> QIcon override { return m_provider.icon; };
+    auto id() const -> QString override { return m_provider.id; };
+    auto helpPage() const -> QString override { return m_desc.helpPage; };
+    bool shouldDisplay() const override { return true; };
 
     /* Used internally */
-    virtual auto metaEntryBase() const -> QString = 0;
-    virtual auto debugName() const -> QString = 0;
+    virtual auto metaEntryBase() const -> QString { return m_provider.metaEntryBase; };
+    virtual auto debugName() const -> QString { return m_provider.debugName; };
 
     //: The plural version of 'resource'
-    virtual QString resourcesString() const { return tr("resources"); }
+    virtual QString resourcesString() const { return m_desc.resourcesString; }
     //: The singular version of 'resources'
-    virtual QString resourceString() const { return tr("resource"); }
+    virtual QString resourceString() const { return m_desc.resourceString; }
 
     /* Features this resource's page supports */
-    virtual bool supportsFiltering() const = 0;
+    virtual bool supportsFiltering() const { return m_desc.supportsFiltering; };
 
     void retranslate() override;
     void openedImpl() override;
@@ -65,7 +83,10 @@ class ResourcePage : public QWidget, public BasePage {
     auto getModel() const -> ResourceModel* { return m_model; }
 
    protected:
-    ResourcePage(ResourceDownloadDialog* parent, BaseInstance&);
+    ResourcePage(ResourceDownloadDialog* parent,
+                 BaseInstance& baseInstance,
+                 ResourceDescriptor desc = {},
+                 ResourceProviderData provider = {});
 
     void addSortings();
 
@@ -101,7 +122,7 @@ class ResourcePage : public QWidget, public BasePage {
     void onResourceToggle(const QModelIndex& index);
 
     /** Associates regex expressions to pages in the order they're given in the map. */
-    virtual QMap<QString, QString> urlHandlers() const = 0;
+    virtual QMap<QString, QString> urlHandlers() const { return m_desc.urlHandlers; };
     virtual void openUrl(const QUrl&);
 
    public:
@@ -123,6 +144,9 @@ class ResourcePage : public QWidget, public BasePage {
     bool m_doNotJumpToMod = false;
 
     QSet<int> m_enableQueue;
+
+    ResourceDescriptor m_desc;
+    ResourceProviderData m_provider;
 
    private:
     bool m_suppressInitialSearch = false;

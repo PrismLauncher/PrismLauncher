@@ -6,15 +6,9 @@
 
 #include <QWidget>
 
-#include "modplatform/ModIndex.h"
-
 #include "ui/pages/modplatform/ModModel.h"
 #include "ui/pages/modplatform/ResourcePage.h"
 #include "ui/widgets/ModFilterWidget.h"
-
-namespace Ui {
-class ResourcePage;
-}
 
 namespace ResourceDownload {
 
@@ -25,46 +19,13 @@ class ModPage : public ResourcePage {
     Q_OBJECT
 
    public:
-    template <typename T>
-    static T* create(ModDownloadDialog* dialog, BaseInstance& instance)
-    {
-        auto page = new T(dialog, instance);
-        auto* model = static_cast<ModModel*>(page->getModel());
+    auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
 
-        auto filterWidget = page->createFilterWidget();
-        page->setFilterWidget(filterWidget);
-        model->setFilter(page->getFilter());
-
-        connect(model, &ResourceModel::versionListUpdated, page, &ResourcePage::versionListUpdated);
-        connect(model, &ResourceModel::projectInfoUpdated, page, &ResourcePage::updateUi);
-        connect(model, &QAbstractListModel::modelReset, page, &ResourcePage::modelReset);
-
-        return page;
-    }
-
-    //: The plural version of 'mod'
-    QString resourcesString() const override { return tr("mods"); }
-    //: The singular version of 'mods'
-    QString resourceString() const override { return tr("mod"); }
-
-    QMap<QString, QString> urlHandlers() const override;
-
-    void addResourceToPage(ModPlatform::IndexedPack::Ptr /*unused*/,
-                           ModPlatform::IndexedVersion& /*unused*/,
-                           ResourceFolderModel* /*unused*/,
-                           QString downloadReason = "standalone",
-                           QString dependentOn = "") override;
-
-    virtual std::unique_ptr<ModFilterWidget> createFilterWidget() = 0;
-
-    bool supportsFiltering() const override { return true; };
-    auto getFilter() const -> std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
-    void setFilterWidget(std::unique_ptr<ModFilterWidget>&);
+    ModPage(ModDownloadDialog* dialog, BaseInstance& instance, ResourceProviderData p, ResourceAPI* api, ModFilterWidget* filterWidget);
 
    protected:
-    ModPage(ModDownloadDialog* dialog, BaseInstance& instance);
-
-    virtual void prepareProviderCategories() {};
+    void prepareProviderCategories();
+    void setFilterWidget(ModFilterWidget*);
 
    protected slots:
     virtual void filterMods();
@@ -73,6 +34,8 @@ class ModPage : public ResourcePage {
    protected:
     std::unique_ptr<ModFilterWidget> m_filter_widget;
     std::shared_ptr<ModFilterWidget::Filter> m_filter;
+    Task::Ptr m_categoriesTask;
+    ResourceAPI* m_api = nullptr;
 };
 
 }  // namespace ResourceDownload

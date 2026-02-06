@@ -5,11 +5,6 @@
 #pragma once
 
 #include "ui/pages/modplatform/ResourcePage.h"
-#include "ui/pages/modplatform/ShaderPackModel.h"
-
-namespace Ui {
-class ResourcePage;
-}
 
 namespace ResourceDownload {
 
@@ -19,38 +14,7 @@ class ShaderPackResourcePage : public ResourcePage {
     Q_OBJECT
 
    public:
-    template <typename T>
-    static T* create(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
-    {
-        auto page = new T(dialog, instance);
-        auto* model = static_cast<ShaderPackResourceModel*>(page->getModel());
-
-        connect(model, &ResourceModel::versionListUpdated, page, &ResourcePage::versionListUpdated);
-        connect(model, &ResourceModel::projectInfoUpdated, page, &ResourcePage::updateUi);
-        connect(model, &QAbstractListModel::modelReset, page, &ResourcePage::modelReset);
-
-        return page;
-    }
-
-    //: The plural version of 'shader pack'
-    QString resourcesString() const override { return tr("shader packs"); }
-    //: The singular version of 'shader packs'
-    QString resourceString() const override { return tr("shader pack"); }
-
-    bool supportsFiltering() const override { return false; };
-
-    void addResourceToPage(ModPlatform::IndexedPack::Ptr /*unused*/,
-                           ModPlatform::IndexedVersion& /*unused*/,
-                           ResourceFolderModel* /*unused*/,
-                           QString downloadReason = "standalone",
-                           QString dependentOn = "") override;
-
-    QMap<QString, QString> urlHandlers() const override;
-
-    auto helpPage() const -> QString override { return "shaderpack-platform"; }
-
-   protected:
-    ShaderPackResourcePage(ShaderPackDownloadDialog* dialog, BaseInstance& instance);
+    ShaderPackResourcePage(ShaderPackDownloadDialog* dialog, BaseInstance& instance, ResourceProviderData p, ResourceAPI* api);
 
    protected slots:
     void triggerSearch() override;
