@@ -24,6 +24,7 @@ void MinecraftProfileStep::perform()
     m_response.reset(new QByteArray());
     m_request = Net::Download::makeByteArray(url, m_response.get());
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
+    m_request->enableAutoRetry(true);
 
     m_task.reset(new NetJob("MinecraftProfileStep", APPLICATION->network()));
     m_task->setAskRetry(false);

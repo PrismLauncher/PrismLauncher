@@ -45,6 +45,7 @@ void XboxAuthorizationStep::perform()
     m_response.reset(new QByteArray());
     m_request = Net::Upload::makeByteArray(url, m_response.get(), xbox_auth_data.toUtf8());
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
+    m_request->enableAutoRetry(true);
 
     m_task.reset(new NetJob("XboxAuthorizationStep", APPLICATION->network()));
     m_task->setAskRetry(false);

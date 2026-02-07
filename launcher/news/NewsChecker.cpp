@@ -39,6 +39,7 @@
 #include <QDomDocument>
 
 #include <QDebug>
+#include "Application.h"
 
 NewsChecker::NewsChecker(QNetworkAccessManager* network, const QString& feedUrl)
 {
@@ -54,10 +55,12 @@ void NewsChecker::reloadNews()
         return;
     }
 
+    m_entry = APPLICATION->metacache()->resolveEntry("feed", "feed.xml");
+
     qDebug() << "Reloading news.";
 
     NetJob::Ptr job{ new NetJob("News RSS Feed", m_network) };
-    job->addNetAction(Net::Download::makeByteArray(m_feedUrl, newsData.get()));
+    job->addNetAction(Net::Download::makeCached(m_feedUrl, m_entry));
     job->setAskRetry(false);
     connect(job.get(), &NetJob::succeeded, this, &NewsChecker::rssDownloadFinished);
     connect(job.get(), &NetJob::failed, this, &NewsChecker::rssDownloadFailed);
@@ -78,14 +81,16 @@ void NewsChecker::rssDownloadFinished()
         int errorLine = -1;
         int errorCol = -1;
 
-        // Parse the XML.
-        if (!doc.setContent(*newsData, false, &errorMsg, &errorLine, &errorCol)) {
-            QString fullErrorMsg = QString("Error parsing RSS feed XML. %1 at %2:%3.").arg(errorMsg).arg(errorLine).arg(errorCol);
-            fail(fullErrorMsg);
-            newsData->clear();
-            return;
+        QFile feed(m_entry->getFullPath());
+
+        if (feed.open(QFile::ReadOnly | QFile::Text)) {
+            QTextStream in(&feed);
+            // Parse the XML.
+            if (!doc.setContent(in.readAll(), false, &errorMsg, &errorLine, &errorCol)) {
+                fail(QString("Error parsing RSS feed XML. %1 at %2:%3.").arg(errorMsg).arg(errorLine).arg(errorCol));
+                return;
+            }
         }
-        newsData->clear();
     }
 
     // If the parsing succeeded, read it.
