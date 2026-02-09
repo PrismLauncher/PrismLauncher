@@ -167,7 +167,7 @@ class ResourceFolderModel : public QAbstractListModel {
      *
      *  The actual comparisons and filtering are done directly by the Resource, so to modify behavior go there instead!
      */
-    QSortFilterProxyModel* createFilterProxyModel(QObject* parent = nullptr);
+    virtual QSortFilterProxyModel* createFilterProxyModel(QObject* parent = nullptr);
 
     SortType columnToSortKey(size_t column) const;
     QList<QHeaderView::ResizeMode> columnResizeModes() const { return m_column_resize_modes; }

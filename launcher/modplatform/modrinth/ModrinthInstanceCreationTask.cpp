@@ -10,6 +10,7 @@
 #include "minecraft/PackProfile.h"
 
 #include "minecraft/mod/Mod.h"
+#include "minecraft/mod/VirtualModGroupStore.h"
 #include "modplatform/EnsureMetadataTask.h"
 #include "modplatform/helpers/OverrideUtils.h"
 
@@ -25,6 +26,7 @@
 #include <QAbstractButton>
 #include <QFileInfo>
 #include <QHash>
+#include <algorithm>
 #include <vector>
 
 bool ModrinthCreationTask::abort()
@@ -84,8 +86,43 @@ bool ModrinthCreationTask::updateInstance()
     QString old_index_path(FS::PathCombine(old_index_folder, "modrinth.index.json"));
     QFileInfo old_index_file(old_index_path);
     if (old_index_file.exists()) {
+        VirtualModGroupStore virtualStore(QDir(FS::PathCombine(inst->gameRoot(), "mods")),
+                                          QDir(FS::PathCombine(inst->gameRoot(), "mods", ".index")));
+        auto hasVirtualStore = virtualStore.load();
+        auto managedPackId = inst->getManagedPackID();
+        if (managedPackId.isEmpty()) {
+            managedPackId = inst->getManagedPackName();
+        }
+        auto managedGroupId = hasVirtualStore ? virtualStore.findManagedPackGroup(inst->getManagedPackType(), managedPackId) : QString();
+        auto managedSubtree = managedGroupId.isEmpty() ? QList<QString>() : virtualStore.groupSubtreeIds(managedGroupId);
+
+        auto shouldTreatAsManagedOwned = [&](const QString& relativePath) {
+            if (!relativePath.startsWith("mods/")) {
+                return true;
+            }
+            if (!hasVirtualStore || managedSubtree.isEmpty()) {
+                return true;
+            }
+
+            auto fileName = QFileInfo(relativePath).fileName();
+            auto fileKey = VirtualModGroupStore::fileKeyForFileName(fileName);
+            auto entry = virtualStore.entry(fileKey);
+            if (!entry.has_value()) {
+                return true;
+            }
+            if (entry->groupId.isEmpty()) {
+                return false;
+            }
+            return managedSubtree.contains(entry->groupId);
+        };
+
         std::vector<File> old_files;
         parseManifest(old_index_path, old_files, false, false);
+
+        m_files.erase(
+            std::remove_if(m_files.begin(), m_files.end(),
+                           [&](const File& file) { return file.path.startsWith("mods/") && !shouldTreatAsManagedOwned(file.path); }),
+            m_files.end());
 
         // Let's remove all duplicated, identical resources!
         auto files_iterator = m_files.begin();
@@ -98,6 +135,10 @@ bool ModrinthCreationTask::updateInstance()
                 auto const& old_file = *old_files_iterator;
 
                 if (old_file.hash == file.hash) {
+                    if (file.path.startsWith("mods/") && shouldTreatAsManagedOwned(file.path)) {
+                        old_files_iterator++;
+                        continue;
+                    }
                     qDebug() << "Removed file at" << file.path << "from list of downloads";
                     files_iterator = m_files.erase(files_iterator);
                     old_files_iterator = old_files.erase(old_files_iterator);
@@ -118,6 +159,9 @@ bool ModrinthCreationTask::updateInstance()
             for (auto const& file : old_files) {
                 if (file.path.isEmpty())
                     continue;
+                if (file.path.startsWith("mods/") && !shouldTreatAsManagedOwned(file.path)) {
+                    continue;
+                }
                 qDebug() << "Scheduling" << file.path << "for removal";
                 m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(file.path));
                 if (file.path.endsWith(".disabled")) {  // remove it if it was enabled/disabled by user
@@ -334,6 +378,39 @@ bool ModrinthCreationTask::createInstance()
         delete resource;
     }
     resources.clear();
+
+    QStringList managedModFileNames;
+    for (auto const& file : m_files) {
+        if (file.path.startsWith("mods/")) {
+            managedModFileNames.append(QFileInfo(file.path).fileName());
+        }
+    }
+
+    if (ended_well && !managedModFileNames.isEmpty()) {
+        VirtualModGroupStore virtualStore(QDir(instance.modsRoot()), QDir(FS::PathCombine(instance.modsRoot(), ".index")));
+        if (virtualStore.loadOrCreate()) {
+            auto managedPackId = m_managed_id.isEmpty() ? m_managed_name : m_managed_id;
+            auto managedGroupId = virtualStore.ensureManagedPackGroup("modrinth", managedPackId, m_managed_name);
+            for (auto fileName : managedModFileNames) {
+                auto fileKey = VirtualModGroupStore::fileKeyForFileName(fileName);
+                auto existingEntry = virtualStore.entry(fileKey);
+
+                VirtualModGroupStore::Entry virtualEntry;
+                if (existingEntry.has_value()) {
+                    virtualEntry = existingEntry.value();
+                }
+
+                virtualEntry.fileKey = fileKey;
+                virtualEntry.fileName = fileName;
+                virtualEntry.groupId = managedGroupId;
+                virtualEntry.sourceType = VirtualModGroupStore::SourceType::MANAGED_PACK;
+                virtualStore.upsertEntry(std::move(virtualEntry));
+            }
+            if (!virtualStore.save()) {
+                qWarning() << "Could not save managed-pack virtual mod group store for Modrinth instance";
+            }
+        }
+    }
 
     // Update information of the already installed instance, if any.
     if (m_instance && ended_well) {

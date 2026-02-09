@@ -12,6 +12,7 @@ class Mod;
 class ModrinthCheckUpdate;
 class FlameCheckUpdate;
 class ConcurrentTask;
+class QTreeWidgetItem;
 
 class ResourceUpdateDialog final : public ReviewMessageBox {
     Q_OBJECT
@@ -21,7 +22,8 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
                                   ResourceFolderModel* resourceModel,
                                   QList<Resource*>& searchFor,
                                   bool includeDeps,
-                                  QList<ModPlatform::ModLoaderType> loadersList = {});
+                                  QList<ModPlatform::ModLoaderType> loadersList = {},
+                                  bool defaultUncheckManagedGroups = false);
 
     void checkCandidates();
 
@@ -43,6 +45,17 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
                           ModPlatform::ResourceProvider firstChoice = ModPlatform::ResourceProvider::MODRINTH);
 
    private:
+    QTreeWidgetItem* ensureGroupItem(const QString& groupId);
+    QString groupIdForUpdate(const CheckUpdateTask::Update& info) const;
+    bool isManagedGroup(const QString& groupId) const;
+    QString groupLabel(const QString& groupId) const;
+
+   private:
+    struct GroupState {
+        QString label;
+        bool managedPack = false;
+    };
+
     QWidget* m_parent;
 
     shared_qobject_ptr<ModrinthCheckUpdate> m_modrinthCheckTask;
@@ -59,10 +72,16 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
     QList<std::tuple<Resource*, QString, QUrl>> m_failedCheckUpdate;
 
     QHash<QString, ResourceDownloadTask::Ptr> m_tasks;
+    QHash<QTreeWidgetItem*, ResourceDownloadTask::Ptr> m_itemTasks;
+    QHash<QString, QTreeWidgetItem*> m_groupItems;
+    QHash<QString, GroupState> m_groupState;
+    ModFolderModel* m_modModel = nullptr;
     BaseInstance* m_instance;
 
     bool m_noUpdates = false;
     bool m_aborted = false;
     bool m_includeDeps = false;
+    bool m_defaultUncheckManagedGroups = false;
+    bool m_groupedViewEnabled = false;
     QList<ModPlatform::ModLoaderType> m_loadersList;
 };

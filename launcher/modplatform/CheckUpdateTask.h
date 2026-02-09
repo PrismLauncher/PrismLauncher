@@ -28,6 +28,7 @@ class CheckUpdateTask : public Task {
         ModPlatform::ResourceProvider provider;
         shared_qobject_ptr<ResourceDownloadTask> download;
         bool enabled = true;
+        QString originalFileName;
 
        public:
         Update(QString name,
@@ -38,7 +39,8 @@ class CheckUpdateTask : public Task {
                QString changelog,
                ModPlatform::ResourceProvider p,
                shared_qobject_ptr<ResourceDownloadTask> t,
-               bool enabled = true)
+               bool enabled = true,
+               QString originalFileName = {})
             : name(std::move(name))
             , old_hash(std::move(old_h))
             , old_version(std::move(old_v))
@@ -48,6 +50,7 @@ class CheckUpdateTask : public Task {
             , provider(p)
             , download(std::move(t))
             , enabled(enabled)
+            , originalFileName(std::move(originalFileName))
         {}
     };
 
