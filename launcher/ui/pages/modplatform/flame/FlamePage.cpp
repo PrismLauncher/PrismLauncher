@@ -205,8 +205,15 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
 
         auto netJob = api.getProjectVersions({ m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
 
-        m_job = netJob;
-        netJob->start();
+        if (m_job && m_job->isRunning()) { // HACK(@Octol1ttle): See PrismLauncher#4965
+            connect(m_job.get(), &Task::succeeded, this, [this, netJob] {
+                m_job = netJob;
+                m_job->start();
+            });
+        } else {
+            m_job = netJob;
+            m_job->start();
+        }
     } else {
         for (auto version : m_current->versions) {
             m_ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));

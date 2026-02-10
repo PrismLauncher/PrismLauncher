@@ -167,8 +167,15 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             updateUI();
         };
         if (auto netJob = m_api.getProjectInfo({ m_current }, std::move(callbacks)); netJob) {
-            m_job = netJob;
-            m_job->start();
+            if (m_job && m_job->isRunning()) { // HACK(@Octol1ttle): See PrismLauncher#4965
+                connect(m_job.get(), &Task::succeeded, this, [this, netJob] {
+                    m_job = netJob;
+                    m_job->start();
+                });
+            } else {
+                m_job = netJob;
+                m_job->start();
+            }
         }
 
     } else
@@ -220,8 +227,15 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
 
         auto netJob = m_api.getProjectVersions({ m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
 
-        m_job2 = netJob;
-        m_job2->start();
+        if (m_job2 && m_job2->isRunning()) { // HACK(@Octol1ttle): See PrismLauncher#4965
+            connect(m_job2.get(), &Task::succeeded, this, [this, netJob] {
+                m_job2 = netJob;
+                m_job2->start();
+            });
+        } else {
+            m_job2 = netJob;
+            m_job2->start();
+        }
 
     } else {
         for (auto version : m_current->versions) {

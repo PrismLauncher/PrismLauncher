@@ -201,8 +201,15 @@ void ListModel::performPaginatedSearch()
                                        m_filter->versions, ModPlatform::Side::NoSide, m_filter->categoryIds, m_filter->openSource },
                                      std::move(callbacks));
 
-    m_jobPtr = netJob;
-    m_jobPtr->start();
+    if (m_jobPtr && m_jobPtr->isRunning()) { // HACK(@Octol1ttle): See PrismLauncher#4965
+        connect(m_jobPtr.get(), &Task::succeeded, this, [this, netJob] {
+            m_jobPtr = netJob;
+            m_jobPtr->start();
+        });
+    } else {
+        m_jobPtr = netJob;
+        m_jobPtr->start();
+    }
 }
 
 void ListModel::searchWithTerm(const QString& term, int sort, std::shared_ptr<ModFilterWidget::Filter> filter, bool filterChanged)
