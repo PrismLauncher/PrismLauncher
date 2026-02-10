@@ -14,6 +14,7 @@
 #include <memory>
 
 #include "Application.h"
+#include "settings/SettingsObject.h"
 #include "BuildConfig.h"
 
 #include "modplatform/ResourceAPI.h"

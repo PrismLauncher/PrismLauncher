@@ -35,6 +35,7 @@
 
 #include "TechnicModel.h"
 #include "Application.h"
+#include "settings/SettingsObject.h"
 #include "BuildConfig.h"
 #include "Json.h"
 

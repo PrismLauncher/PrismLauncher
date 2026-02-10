@@ -49,9 +49,7 @@
 
 #include "QObjectPtr.h"
 
-#include "launch/LogModel.h"
 #include "minecraft/auth/MinecraftAccount.h"
-#include "settings/SettingsObject.h"
 
 class LaunchController;
 class LocalPeer;
@@ -78,11 +76,10 @@ class ThemeManager;
 class IconTheme;
 class BaseInstance;
 
-struct MinecraftTarget;
+class LogModel;
 
-// pointers for lazy people
-using InstancePtr = std::shared_ptr<BaseInstance>;
-using MinecraftTargetPtr = std::shared_ptr<MinecraftTarget>;
+struct MinecraftTarget;
+class MinecraftAccount;
 
 namespace Meta {
 class Index;
@@ -221,8 +218,8 @@ class Application : public QApplication {
     bool launch(InstancePtr instance,
                 bool online = true,
                 bool demo = false,
-                MinecraftTargetPtr targetToJoin = nullptr,
-                MinecraftAccountPtr accountToUse = nullptr,
+                std::shared_ptr<MinecraftTarget> targetToJoin = nullptr,
+                shared_qobject_ptr<MinecraftAccount> accountToUse = nullptr,
                 const QString& offlineName = QString());
     bool kill(InstancePtr instance);
     void closeCurrentWindow();

@@ -35,6 +35,7 @@
 
 #include "MSALoginDialog.h"
 #include "Application.h"
+#include "settings/SettingsObject.h"
 
 #include "ui_MSALoginDialog.h"
 

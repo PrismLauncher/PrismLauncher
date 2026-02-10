@@ -6,6 +6,7 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 #include "Application.h"
+#include "settings/SettingsObject.h"
 #include "BuildConfig.h"
 #include "settings/Setting.h"
 #include "translations/TranslationsModel.h"

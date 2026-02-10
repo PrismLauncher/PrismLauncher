@@ -43,6 +43,9 @@
 #include "ui/themes/ITheme.h"
 #include "ui/themes/ThemeManager.h"
 
+#include <Application.h>
+#include "settings/SettingsObject.h"
+
 AppearanceWidget::AppearanceWidget(bool themesOnly, QWidget* parent)
     : QWidget(parent), m_ui(new Ui::AppearanceWidget), m_themesOnly(themesOnly)
 {
