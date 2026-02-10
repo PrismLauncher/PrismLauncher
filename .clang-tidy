@@ -5,6 +5,7 @@ Checks:
   -*-magic-numbers,
   -*-non-private-member-variables-in-classes,
   -*-special-member-functions,
+  -bugprone-easily-swappable-parameters,
   -cppcoreguidelines-owning-memory,
   -cppcoreguidelines-pro-type-static-cast-downcast,
   -modernize-use-nodiscard,
