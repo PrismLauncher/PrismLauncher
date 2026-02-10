@@ -117,7 +117,7 @@ namespace {
             continue;
         }
 
-        auto fileName = QFileInfo(path).fileName();
+        auto fileName = QFileInfo(FS::RemoveInvalidPathChars(path)).fileName();
         fileKeys.insert(VirtualModGroupStore::fileKeyForFileName(fileName));
     }
 
@@ -157,40 +157,6 @@ namespace {
     }
 
     return projectIds;
-}
-
-[[nodiscard]] QString uniqueFlatTargetPath(const QDir& rootModsDir, const QString& originalFileName)
-{
-    auto baseInfo = QFileInfo(originalFileName);
-    auto completeSuffix = baseInfo.completeSuffix();
-    auto baseName = baseInfo.completeBaseName();
-    if (baseName.isEmpty()) {
-        baseName = baseInfo.fileName();
-    }
-
-    auto candidateName = baseInfo.fileName();
-    auto candidatePath = rootModsDir.absoluteFilePath(candidateName);
-    int suffix = 2;
-    while (QFile::exists(candidatePath)) {
-        if (completeSuffix.isEmpty()) {
-            candidateName = QString("%1 (%2)").arg(baseName).arg(suffix);
-        } else {
-            candidateName = QString("%1 (%2).%3").arg(baseName).arg(suffix).arg(completeSuffix);
-        }
-        candidatePath = rootModsDir.absoluteFilePath(candidateName);
-        ++suffix;
-    }
-    return candidatePath;
-}
-
-void collectFilesRecursively(const QDir& directory, QStringList& filePaths)
-{
-    for (auto const& entry : directory.entryInfoList(QDir::Files | QDir::NoDotAndDotDot | QDir::Readable)) {
-        filePaths.append(entry.absoluteFilePath());
-    }
-    for (auto const& entry : directory.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot | QDir::Readable)) {
-        collectFilesRecursively(QDir(entry.absoluteFilePath()), filePaths);
-    }
 }
 
 [[nodiscard]] bool areSameVirtualEntries(const VirtualModGroupStore::Entry& left, const VirtualModGroupStore::Entry& right)
@@ -316,13 +282,19 @@ ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_
     m_columnsHideable = { false, true, false, true, true, true, true, true, true, true, true, true, true };
 
     m_virtualGroupsEnabled = isMainModsDirectory(m_dir, instance);
+    refreshInstanceMinecraftVersion();
     if (auto* mcInstance = dynamic_cast<MinecraftInstance*>(instance)) {
         auto* packProfile = mcInstance->getPackProfile();
         if (packProfile != nullptr) {
-            auto minecraftComponent = packProfile->getComponent("net.minecraft");
-            if (minecraftComponent != nullptr) {
-                m_instanceMinecraftVersion = minecraftComponent->getVersion();
-            }
+            connect(packProfile, &PackProfile::minecraftChanged, this, [this] {
+                auto oldVersion = m_instanceMinecraftVersion;
+                refreshInstanceMinecraftVersion();
+                if (oldVersion == m_instanceMinecraftVersion || m_resources.isEmpty()) {
+                    return;
+                }
+
+                emit dataChanged(index(0, NameColumn), index(m_resources.size() - 1, McVersionsColumn));
+            });
         }
     }
 
@@ -520,7 +492,28 @@ bool ModFolderModel::isValid()
 
 void ModFolderModel::onUpdateSucceeded()
 {
+    refreshInstanceMinecraftVersion();
     ResourceFolderModel::onUpdateSucceeded();
+
+    if (m_virtualGroupsEnabled && m_groupStore != nullptr) {
+        bool reloadedGroupState = false;
+        if (m_groupStore->exists()) {
+            if (!m_groupStore->load()) {
+                qWarning() << "Could not reload virtual mod group store after update";
+            } else {
+                reloadedGroupState = true;
+            }
+        } else if (!m_groupStore->loadOrCreate()) {
+            qWarning() << "Could not initialize virtual mod group store after update";
+        } else {
+            reloadedGroupState = true;
+        }
+
+        if (reloadedGroupState) {
+            emit virtualGroupsChanged();
+        }
+    }
+
     syncVirtualGroupsFromResources();
 }
 
@@ -800,14 +793,13 @@ bool ModFolderModel::deleteResources(const QModelIndexList& indexes)
     return rsp;
 }
 
-bool ModFolderModel::createGroup(const QString& name, const QString& parentId)
+bool ModFolderModel::createGroup(const QString& name)
 {
     if (!m_virtualGroupsEnabled || m_groupStore == nullptr) {
         return false;
     }
 
-    Q_UNUSED(parentId)
-    auto groupId = m_groupStore->createGroup(name, {});
+    auto groupId = m_groupStore->createGroup(name);
     if (groupId.isEmpty()) {
         return false;
     }
@@ -838,14 +830,13 @@ bool ModFolderModel::renameGroup(const QString& groupId, const QString& newName)
     return true;
 }
 
-bool ModFolderModel::moveGroup(const QString& groupId, const QString& newParentId)
+bool ModFolderModel::moveGroup(const QString& groupId)
 {
     if (!m_virtualGroupsEnabled || m_groupStore == nullptr) {
         return false;
     }
 
-    Q_UNUSED(newParentId)
-    if (!m_groupStore->moveGroup(groupId, {})) {
+    if (!m_groupStore->moveGroup(groupId)) {
         return false;
     }
 
@@ -1054,7 +1045,7 @@ void ModFolderModel::updateManagedPackOwnership(const QStringList& fileNames,
     }
 
     auto normalizedManagedPackId = managedPackId.trimmed().isEmpty() ? managedPackName.trimmed() : managedPackId.trimmed();
-    auto groupId = m_groupStore->ensureManagedPackGroup(managedPackType, normalizedManagedPackId, managedPackName);
+    auto groupId = m_groupStore->findManagedPackGroup(managedPackType, normalizedManagedPackId);
     if (groupId.isEmpty()) {
         return;
     }
@@ -1150,7 +1141,6 @@ void ModFolderModel::initializeVirtualGroups()
             qWarning() << "Could not initialize virtual mod group store";
             return;
         }
-        migrateLegacyNestedFolders();
         bootstrapVirtualGroupsFromCurrentState();
         classifyManagedPackEntriesFromManifests();
         if (!m_groupStore->save()) {
@@ -1170,102 +1160,6 @@ void ModFolderModel::initializeVirtualGroups()
         if (!m_groupStore->save()) {
             qWarning() << "Could not save recreated virtual mod group store";
         }
-    }
-}
-
-void ModFolderModel::migrateLegacyNestedFolders()
-{
-    if (!m_virtualGroupsEnabled || m_groupStore == nullptr) {
-        return;
-    }
-
-    if (m_groupStore->legacyNestedFolderMigrationDone()) {
-        return;
-    }
-
-    bool importedAnything = false;
-
-    auto findGroupByNameAndParent = [this](const QString& name, const QString& parentId) -> QString {
-        auto groups = m_groupStore->groups();
-        for (auto const& group : groups) {
-            if (group.parentId == parentId && group.name.compare(name, Qt::CaseInsensitive) == 0) {
-                return group.id;
-            }
-        }
-        return {};
-    };
-
-    QHash<QString, QString> groupByRelativePath;
-    auto ensureGroupForRelativePath = [this, &findGroupByNameAndParent, &groupByRelativePath](const QString& relativePath) -> QString {
-        if (relativePath.isEmpty() || relativePath == ".") {
-            return {};
-        }
-        if (groupByRelativePath.contains(relativePath)) {
-            return groupByRelativePath.value(relativePath);
-        }
-
-        auto normalizedRelativePath = QDir::cleanPath(relativePath);
-        auto pathSegments = normalizedRelativePath.split('/', Qt::SkipEmptyParts);
-
-        QString currentParentId;
-        QString currentPath;
-        for (auto const& segment : pathSegments) {
-            currentPath = currentPath.isEmpty() ? segment : currentPath + "/" + segment;
-            if (groupByRelativePath.contains(currentPath)) {
-                currentParentId = groupByRelativePath.value(currentPath);
-                continue;
-            }
-
-            auto existingGroupId = findGroupByNameAndParent(segment, currentParentId);
-            if (existingGroupId.isEmpty()) {
-                existingGroupId = m_groupStore->createGroup(segment, currentParentId);
-            }
-
-            groupByRelativePath.insert(currentPath, existingGroupId);
-            currentParentId = existingGroupId;
-        }
-
-        return groupByRelativePath.value(normalizedRelativePath);
-    };
-
-    for (auto const& entry : m_dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot | QDir::Readable)) {
-        if (entry.fileName() == ".index") {
-            continue;
-        }
-
-        QStringList filePaths;
-        collectFilesRecursively(QDir(entry.absoluteFilePath()), filePaths);
-        if (filePaths.isEmpty()) {
-            continue;
-        }
-
-        for (auto const& filePath : filePaths) {
-            auto relativePath = m_dir.relativeFilePath(filePath);
-            auto relativeDirPath = QFileInfo(relativePath).path();
-            auto groupId = ensureGroupForRelativePath(relativeDirPath);
-
-            auto destinationPath = uniqueFlatTargetPath(m_dir, QFileInfo(filePath).fileName());
-            if (!FS::move(filePath, destinationPath)) {
-                qWarning() << "Could not migrate nested mod file to root mods folder:" << filePath;
-                continue;
-            }
-
-            importedAnything = true;
-            auto destinationFileName = QFileInfo(destinationPath).fileName();
-            VirtualModGroupStore::Entry virtualEntry;
-            virtualEntry.fileKey = VirtualModGroupStore::fileKeyForFileName(destinationFileName);
-            virtualEntry.fileName = destinationFileName;
-            virtualEntry.groupId = groupId;
-            virtualEntry.sourceType = VirtualModGroupStore::SourceType::LOCAL_NO_SOURCE;
-            m_groupStore->upsertEntry(std::move(virtualEntry));
-        }
-
-        QDir(entry.absoluteFilePath()).removeRecursively();
-    }
-
-    m_groupStore->setLegacyNestedFolderMigrationDone(true);
-    if (importedAnything) {
-        qInfo() << "Imported legacy nested mod folders into virtual groups";
     }
 }
 
@@ -1309,15 +1203,15 @@ void ModFolderModel::bootstrapVirtualGroupsFromCurrentState()
     m_groupStore->removeEntriesNotIn(existingFileKeys);
 }
 
-void ModFolderModel::classifyManagedPackEntriesFromManifests()
+bool ModFolderModel::classifyManagedPackEntriesFromManifests()
 {
     if (!m_virtualGroupsEnabled || m_groupStore == nullptr || m_instance == nullptr || !m_instance->isManagedPack()) {
-        return;
+        return false;
     }
 
     auto managedPackType = m_instance->getManagedPackType();
     if (managedPackType.isEmpty()) {
-        return;
+        return false;
     }
 
     auto managedPackId = m_instance->getManagedPackID();
@@ -1325,9 +1219,10 @@ void ModFolderModel::classifyManagedPackEntriesFromManifests()
         managedPackId = m_instance->getManagedPackName();
     }
 
-    auto managedGroupId = m_groupStore->ensureManagedPackGroup(managedPackType, managedPackId, m_instance->getManagedPackName());
+    bool changed = false;
+    auto managedGroupId = m_groupStore->findManagedPackGroup(managedPackType, managedPackId);
     if (managedGroupId.isEmpty()) {
-        return;
+        return false;
     }
 
     if (managedPackType == "modrinth") {
@@ -1335,13 +1230,13 @@ void ModFolderModel::classifyManagedPackEntriesFromManifests()
         auto managedFileKeys = parseModrinthManagedFileKeys(manifestPath);
         for (auto const& fileKey : managedFileKeys) {
             auto entryOpt = m_groupStore->entry(fileKey);
-            VirtualModGroupStore::Entry entry;
-            if (entryOpt.has_value()) {
-                entry = entryOpt.value();
+            if (!entryOpt.has_value()) {
+                continue;
             }
-            entry.fileKey = fileKey;
-            if (entry.fileName.isEmpty()) {
-                entry.fileName = fileKey;
+
+            auto entry = entryOpt.value();
+            if (entry.groupId != managedGroupId || entry.sourceType != VirtualModGroupStore::SourceType::MANAGED_PACK) {
+                changed = true;
             }
             entry.groupId = managedGroupId;
             entry.sourceType = VirtualModGroupStore::SourceType::MANAGED_PACK;
@@ -1361,11 +1256,39 @@ void ModFolderModel::classifyManagedPackEntriesFromManifests()
                 continue;
             }
 
+            if (entry.groupId != managedGroupId || entry.sourceType != VirtualModGroupStore::SourceType::MANAGED_PACK) {
+                changed = true;
+            }
             entry.groupId = managedGroupId;
             entry.sourceType = VirtualModGroupStore::SourceType::MANAGED_PACK;
             m_groupStore->upsertEntry(std::move(entry));
         }
     }
+
+    return changed;
+}
+
+void ModFolderModel::refreshInstanceMinecraftVersion()
+{
+    auto* mcInstance = dynamic_cast<MinecraftInstance*>(m_instance);
+    if (mcInstance == nullptr) {
+        m_instanceMinecraftVersion.clear();
+        return;
+    }
+
+    auto* packProfile = mcInstance->getPackProfile();
+    if (packProfile == nullptr) {
+        m_instanceMinecraftVersion.clear();
+        return;
+    }
+
+    auto minecraftComponent = packProfile->getComponent("net.minecraft");
+    if (minecraftComponent == nullptr) {
+        m_instanceMinecraftVersion.clear();
+        return;
+    }
+
+    m_instanceMinecraftVersion = minecraftComponent->getVersion().trimmed();
 }
 
 void ModFolderModel::syncVirtualGroupsFromResources()
@@ -1373,6 +1296,8 @@ void ModFolderModel::syncVirtualGroupsFromResources()
     if (!m_virtualGroupsEnabled || m_groupStore == nullptr) {
         return;
     }
+
+    bool storeMissingOnDisk = !m_groupStore->exists();
 
     auto beforeEntries = virtualEntryMapByKey(m_groupStore->entries());
     QHash<QString, GroupCarryHint> projectHints;
@@ -1434,6 +1359,7 @@ void ModFolderModel::syncVirtualGroupsFromResources()
     }
 
     m_groupStore->removeEntriesNotIn(fileKeys);
+    auto managedClassificationChanged = classifyManagedPackEntriesFromManifests();
 
     auto afterEntries = virtualEntryMapByKey(m_groupStore->entries());
     bool entriesChanged = !areSameVirtualEntryMaps(beforeEntries, afterEntries);
@@ -1445,7 +1371,7 @@ void ModFolderModel::syncVirtualGroupsFromResources()
         activeGroupDidChange = true;
     }
 
-    if (!entriesChanged && !activeGroupDidChange) {
+    if (!entriesChanged && !activeGroupDidChange && !storeMissingOnDisk && !managedClassificationChanged) {
         return;
     }
 
@@ -1453,7 +1379,9 @@ void ModFolderModel::syncVirtualGroupsFromResources()
         qWarning() << "Could not save virtual mod group store after sync";
     }
 
-    emit virtualGroupsChanged();
+    if (entriesChanged || activeGroupDidChange) {
+        emit virtualGroupsChanged();
+    }
 }
 
 bool ModFolderModel::ProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const

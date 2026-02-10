@@ -45,7 +45,7 @@ class VirtualModGroupStoreTest : public QObject {
 
         auto rootGroupId = store.createGroup("Pack Mods");
         QVERIFY(!rootGroupId.isEmpty());
-        auto secondGroupId = store.createGroup("Client", rootGroupId);
+        auto secondGroupId = store.createGroup("Client");
         QVERIFY(!secondGroupId.isEmpty());
 
         VirtualModGroupStore::Entry entry;
@@ -55,19 +55,13 @@ class VirtualModGroupStoreTest : public QObject {
         entry.sourceType = VirtualModGroupStore::SourceType::MANAGED_PACK;
         store.upsertEntry(entry);
 
-        store.setLegacyNestedFolderMigrationDone(true);
         QVERIFY(store.save());
 
         VirtualModGroupStore loadedStore{ QDir(modsPath), QDir(indexPath) };
         QVERIFY(loadedStore.load());
-        QVERIFY(loadedStore.legacyNestedFolderMigrationDone());
         QVERIFY(loadedStore.hasEntry("example-mod.jar"));
         QVERIFY(loadedStore.isEntryInGroupSubtree("example-mod.jar", secondGroupId));
         QVERIFY(!loadedStore.isEntryInGroupSubtree("example-mod.jar", rootGroupId));
-
-        for (auto const& group : loadedStore.groups()) {
-            QVERIFY(group.parentId.isEmpty());
-        }
     }
 
     void invalidJsonCanBeRecovered()

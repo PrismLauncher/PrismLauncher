@@ -738,15 +738,10 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget*
         connect(m_actionCreateGroup, &QAction::triggered, this, &ModFolderPage::createGroup);
         ui->actionsToolbar->insertActionAfter(ui->actionAddItem, m_actionCreateGroup);
 
-        m_actionDeleteGroup = new QAction(tr("Delete Group"), this);
-        m_actionDeleteGroup->setToolTip(tr("Delete the selected group and all mods in it."));
-        connect(m_actionDeleteGroup, &QAction::triggered, this, &ModFolderPage::deleteSelectedGroup);
-        ui->actionsToolbar->insertActionAfter(m_actionCreateGroup, m_actionDeleteGroup);
-
         m_actionMoveToGroup = new QAction(tr("Move to Group"), this);
         m_actionMoveToGroup->setToolTip(tr("Assign selected mods to a virtual group."));
         connect(m_actionMoveToGroup, &QAction::triggered, this, &ModFolderPage::moveSelectedModsToGroup);
-        ui->actionsToolbar->insertActionAfter(m_actionDeleteGroup, m_actionMoveToGroup);
+        ui->actionsToolbar->insertActionAfter(m_actionCreateGroup, m_actionMoveToGroup);
     }
 
     m_treeModel = new VirtualModTreeModel(m_model, this);
@@ -993,7 +988,7 @@ void ModFolderPage::updateActions()
 
     ui->actionChangeVersion->setEnabled(resources.size() == 1 && resources[0]->metadata() != nullptr);
 
-    ui->actionRemoveItem->setEnabled(hasModSelection);
+    ui->actionRemoveItem->setEnabled(hasModSelection || hasGroupSelection);
     ui->actionEnableItem->setEnabled(hasModSelection);
     ui->actionDisableItem->setEnabled(hasModSelection);
 
@@ -1003,11 +998,7 @@ void ModFolderPage::updateActions()
     ui->actionExportMetadata->setEnabled(!m_model->empty());
 
     if (m_actionCreateGroup != nullptr) {
-        m_actionCreateGroup->setEnabled(m_model->virtualGroupsEnabled() && !hasGroupSelection);
-    }
-
-    if (m_actionDeleteGroup != nullptr) {
-        m_actionDeleteGroup->setEnabled(m_model->virtualGroupsEnabled() && hasGroupSelection);
+        m_actionCreateGroup->setEnabled(m_model->virtualGroupsEnabled());
     }
 
     if (m_actionMoveToGroup != nullptr) {
@@ -1171,6 +1162,11 @@ void ModFolderPage::restoreTreeStateAfterReset()
 
 void ModFolderPage::removeItem()
 {
+    if (m_model->virtualGroupsEnabled() && !currentSelectedGroupId().isEmpty()) {
+        deleteSelectedGroup();
+        return;
+    }
+
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
     auto resources = m_treeModel->resourcesFromIndexes(selection.indexes());
 
@@ -1589,7 +1585,7 @@ void ModFolderPage::createGroup()
         return;
     }
 
-    if (!m_model->createGroup(groupName, {})) {
+    if (!m_model->createGroup(groupName)) {
         CustomMessageBox::selectable(this, tr("Error"), tr("Could not create group."), QMessageBox::Critical)->show();
     }
 }

@@ -34,8 +34,15 @@ class ModCompatibilityTest : public QObject {
     {
         QVERIFY(ModCompatibility::supportsMinecraftVersion({ "1.21.1" }, "1.21.1"));
         QVERIFY(ModCompatibility::supportsMinecraftVersion({ "1.21.x" }, "1.21.11"));
+        QVERIFY(ModCompatibility::supportsMinecraftVersion({ "1.21.*" }, "1.21.10"));
+        QVERIFY(ModCompatibility::supportsMinecraftVersion({ ">=1.21.0" }, "1.21.11"));
+        QVERIFY(ModCompatibility::supportsMinecraftVersion({ ">=1.21.0 <=1.21.11" }, "1.21.10"));
+        QVERIFY(ModCompatibility::supportsMinecraftVersion({ ">=1.21.0,<=1.21.11" }, "1.21.10"));
+        QVERIFY(ModCompatibility::supportsMinecraftVersion({ "1.21.9 - 1.21.11" }, "1.21.10"));
         QVERIFY(ModCompatibility::supportsMinecraftVersion({ "*" }, "1.20.4"));
         QVERIFY(!ModCompatibility::supportsMinecraftVersion({ "1.20.6" }, "1.21.1"));
+        QVERIFY(!ModCompatibility::supportsMinecraftVersion({ "1.21.11" }, "1.21.10"));
+        QVERIFY(!ModCompatibility::supportsMinecraftVersion({ "<1.21.10" }, "1.21.10"));
     }
 
     void incompatibleEnabledResourceIsReported()

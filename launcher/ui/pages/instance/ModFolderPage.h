@@ -114,7 +114,6 @@ class ModFolderPage : public ExternalResourcesPage {
     VirtualModTreeModel* m_treeModel = nullptr;
     VirtualModTreeProxyModel* m_treeFilterModel = nullptr;
     QAction* m_actionCreateGroup = nullptr;
-    QAction* m_actionDeleteGroup = nullptr;
     QAction* m_actionMoveToGroup = nullptr;
     QSet<QString> m_preDownloadFileKeys;
     QString m_pendingDownloadGroupId;

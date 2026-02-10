@@ -50,7 +50,6 @@ class VirtualModGroupStore {
     struct Group {
         QString id;
         QString name;
-        QString parentId;
         GroupKind kind = GroupKind::CUSTOM;
         QString managedPackType;
         QString managedPackId;
@@ -79,9 +78,6 @@ class VirtualModGroupStore {
     [[nodiscard]] bool loadOrCreate();
     [[nodiscard]] bool save() const;
 
-    [[nodiscard]] bool legacyNestedFolderMigrationDone() const { return m_legacyNestedFolderMigrationDone; }
-    void setLegacyNestedFolderMigrationDone(bool done) { m_legacyNestedFolderMigrationDone = done; }
-
     [[nodiscard]] QList<Group> groups() const;
     [[nodiscard]] QList<Entry> entries() const;
     [[nodiscard]] std::optional<Entry> entry(QString fileKey) const;
@@ -91,9 +87,9 @@ class VirtualModGroupStore {
     void removeEntriesNotIn(const QSet<QString>& fileKeys);
 
     [[nodiscard]] bool groupExists(const QString& groupId) const;
-    [[nodiscard]] QString createGroup(QString name, QString parentId = {});
+    [[nodiscard]] QString createGroup(QString name);
     [[nodiscard]] bool renameGroup(const QString& groupId, const QString& newName);
-    [[nodiscard]] bool moveGroup(const QString& groupId, const QString& newParentId);
+    [[nodiscard]] bool moveGroup(const QString& groupId);
     [[nodiscard]] bool deleteGroup(const QString& groupId);
 
     [[nodiscard]] bool assignEntryToGroup(const QString& fileKey, const QString& groupId);
@@ -116,16 +112,12 @@ class VirtualModGroupStore {
 
     [[nodiscard]] bool fromJson(const QJsonObject& rootObject);
     [[nodiscard]] QJsonObject toJson() const;
-    void removeOrphanedGroups();
-    [[nodiscard]] bool wouldCreateGroupCycle(const QString& groupId, const QString& newParentId) const;
     [[nodiscard]] QString generateGroupId(const QString& name) const;
-    [[nodiscard]] QString ensureUniqueGroupName(const QString& name, const QString& parentId) const;
-    void appendDisplayGroups(const QString& parentId, int depth, QList<GroupDisplay>& out) const;
+    [[nodiscard]] QString ensureUniqueGroupName(const QString& name) const;
 
    private:
     QDir m_modsDir;
     QDir m_indexDir;
-    bool m_legacyNestedFolderMigrationDone = false;
     QHash<QString, Group> m_groups;
     QHash<QString, Entry> m_entries;
 };

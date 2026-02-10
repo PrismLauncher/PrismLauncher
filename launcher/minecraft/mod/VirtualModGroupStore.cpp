@@ -90,7 +90,6 @@ bool VirtualModGroupStore::load()
 {
     m_groups.clear();
     m_entries.clear();
-    m_legacyNestedFolderMigrationDone = false;
 
     QFile storeFile(storePath());
     if (!storeFile.exists()) {
@@ -127,7 +126,6 @@ bool VirtualModGroupStore::loadOrCreate()
 
     m_groups.clear();
     m_entries.clear();
-    m_legacyNestedFolderMigrationDone = false;
     return save();
 }
 
@@ -232,12 +230,9 @@ bool VirtualModGroupStore::groupExists(const QString& groupId) const
     return m_groups.contains(groupId);
 }
 
-QString VirtualModGroupStore::createGroup(QString name, QString parentId)
+QString VirtualModGroupStore::createGroup(QString name)
 {
-    Q_UNUSED(parentId)
-    parentId.clear();
-
-    name = ensureUniqueGroupName(name.trimmed(), parentId);
+    name = ensureUniqueGroupName(name.trimmed());
     if (name.isEmpty()) {
         return {};
     }
@@ -245,7 +240,6 @@ QString VirtualModGroupStore::createGroup(QString name, QString parentId)
     Group group;
     group.id = generateGroupId(name);
     group.name = name;
-    group.parentId = parentId;
 
     m_groups.insert(group.id, group);
     return group.id;
@@ -258,7 +252,7 @@ bool VirtualModGroupStore::renameGroup(const QString& groupId, const QString& ne
         return false;
     }
 
-    auto normalizedName = ensureUniqueGroupName(newName.trimmed(), groupIter->parentId);
+    auto normalizedName = ensureUniqueGroupName(newName.trimmed());
     if (normalizedName.isEmpty()) {
         return false;
     }
@@ -267,23 +261,9 @@ bool VirtualModGroupStore::renameGroup(const QString& groupId, const QString& ne
     return true;
 }
 
-bool VirtualModGroupStore::moveGroup(const QString& groupId, const QString& newParentId)
+bool VirtualModGroupStore::moveGroup(const QString& groupId)
 {
-    auto groupIter = m_groups.find(groupId);
-    if (groupIter == m_groups.end()) {
-        return false;
-    }
-
-    Q_UNUSED(newParentId)
-    QString normalizedParent;
-
-    if (wouldCreateGroupCycle(groupId, normalizedParent)) {
-        return false;
-    }
-
-    groupIter->parentId = normalizedParent;
-    groupIter->name = ensureUniqueGroupName(groupIter->name, normalizedParent);
-    return true;
+    return m_groups.contains(groupId);
 }
 
 bool VirtualModGroupStore::deleteGroup(const QString& groupId)
@@ -292,18 +272,13 @@ bool VirtualModGroupStore::deleteGroup(const QString& groupId)
         return false;
     }
 
-    auto groupIdsToDelete = groupSubtreeIds(groupId);
-    QSet<QString> groupDeleteSet(groupIdsToDelete.begin(), groupIdsToDelete.end());
-
     for (auto entryIter = m_entries.begin(); entryIter != m_entries.end(); ++entryIter) {
-        if (groupDeleteSet.contains(entryIter->groupId)) {
+        if (entryIter->groupId == groupId) {
             entryIter->groupId.clear();
         }
     }
 
-    for (auto const& groupIdToDelete : groupIdsToDelete) {
-        m_groups.remove(groupIdToDelete);
-    }
+    m_groups.remove(groupId);
 
     return true;
 }
@@ -355,22 +330,7 @@ QList<QString> VirtualModGroupStore::groupSubtreeIds(const QString& groupId) con
     if (groupId.isEmpty() || !m_groups.contains(groupId)) {
         return {};
     }
-
-    QList<QString> subtree;
-    subtree.push_back(groupId);
-
-    int index = 0;
-    while (index < subtree.size()) {
-        auto currentId = subtree.at(index);
-        for (auto const& group : m_groups) {
-            if (group.parentId == currentId && !subtree.contains(group.id)) {
-                subtree.push_back(group.id);
-            }
-        }
-        ++index;
-    }
-
-    return subtree;
+    return { groupId };
 }
 
 QString VirtualModGroupStore::ensureManagedPackGroup(QString managedPackType, QString managedPackId, QString fallbackName)
@@ -430,7 +390,13 @@ QString VirtualModGroupStore::findManagedPackGroup(const QString& managedPackTyp
 QList<VirtualModGroupStore::GroupDisplay> VirtualModGroupStore::groupDisplayList() const
 {
     QList<GroupDisplay> groups;
-    appendDisplayGroups({}, 0, groups);
+    auto groupsList = this->groups();
+    std::sort(groupsList.begin(), groupsList.end(),
+              [](const Group& left, const Group& right) { return left.name.localeAwareCompare(right.name) < 0; });
+    groups.reserve(groupsList.size());
+    for (auto const& group : groupsList) {
+        groups.push_back({ group.id, group.name, 0 });
+    }
     return groups;
 }
 
@@ -497,13 +463,6 @@ bool VirtualModGroupStore::fromJson(const QJsonObject& rootObject)
         return false;
     }
 
-    auto legacyObject = rootObject.value("migrations");
-    if (legacyObject.isObject()) {
-        m_legacyNestedFolderMigrationDone = legacyObject.toObject().value("legacyNestedFoldersImported").toBool(false);
-    } else {
-        m_legacyNestedFolderMigrationDone = rootObject.value("legacyNestedFoldersImported").toBool(false);
-    }
-
     auto groupsArrayValue = rootObject.value("groups");
     auto entriesArrayValue = rootObject.value("entries");
     if (!groupsArrayValue.isArray() || !entriesArrayValue.isArray()) {
@@ -520,8 +479,7 @@ bool VirtualModGroupStore::fromJson(const QJsonObject& rootObject)
         Group group;
         group.id = groupObject.value("id").toString().trimmed();
         group.name = groupObject.value("name").toString().trimmed();
-        group.parentId.clear();
-        group.name = ensureUniqueGroupName(group.name, {});
+        group.name = ensureUniqueGroupName(group.name);
         group.kind = groupKindFromName(groupObject.value("kind").toString());
         group.managedPackType = groupObject.value("managedPackType").toString().trimmed();
         group.managedPackId = groupObject.value("managedPackId").toString().trimmed();
@@ -541,8 +499,11 @@ bool VirtualModGroupStore::fromJson(const QJsonObject& rootObject)
 
         auto entryObject = entryValue.toObject();
         Entry entry;
-        entry.fileKey = fileKeyForFileName(entryObject.value("fileKey").toString().trimmed());
         entry.fileName = entryObject.value("fileName").toString().trimmed();
+        if (entry.fileName.isEmpty()) {
+            entry.fileName = entryObject.value("fileKey").toString().trimmed();
+        }
+        entry.fileKey = fileKeyForFileName(entry.fileName);
         entry.groupId = entryObject.value("groupId").toString().trimmed();
         entry.sourceType = sourceTypeFromName(entryObject.value("sourceType").toString());
         entry.linkedMetadataSlug = entryObject.value("linkedMetadataSlug").toString().trimmed();
@@ -564,7 +525,6 @@ bool VirtualModGroupStore::fromJson(const QJsonObject& rootObject)
         m_entries.insert(entry.fileKey, entry);
     }
 
-    removeOrphanedGroups();
     return true;
 }
 
@@ -572,10 +532,6 @@ QJsonObject VirtualModGroupStore::toJson() const
 {
     QJsonObject rootObject;
     rootObject.insert("formatVersion", FORMAT_VERSION);
-
-    QJsonObject migrationsObject;
-    migrationsObject.insert("legacyNestedFoldersImported", m_legacyNestedFolderMigrationDone);
-    rootObject.insert("migrations", migrationsObject);
 
     QJsonArray groupsArray;
     auto groupsList = groups();
@@ -585,11 +541,6 @@ QJsonObject VirtualModGroupStore::toJson() const
         QJsonObject groupObject;
         groupObject.insert("id", group.id);
         groupObject.insert("name", group.name);
-        if (group.parentId.isEmpty()) {
-            groupObject.insert("parentId", QJsonValue(QJsonValue::Null));
-        } else {
-            groupObject.insert("parentId", group.parentId);
-        }
         groupObject.insert("kind", groupKindName(group.kind));
         if (!group.managedPackType.isEmpty()) {
             groupObject.insert("managedPackType", group.managedPackType);
@@ -603,10 +554,9 @@ QJsonObject VirtualModGroupStore::toJson() const
 
     QJsonArray entriesArray;
     auto entriesList = entries();
-    std::sort(entriesList.begin(), entriesList.end(), [](const Entry& left, const Entry& right) { return left.fileKey < right.fileKey; });
+    std::sort(entriesList.begin(), entriesList.end(), [](const Entry& left, const Entry& right) { return left.fileName < right.fileName; });
     for (auto const& entry : entriesList) {
         QJsonObject entryObject;
-        entryObject.insert("fileKey", entry.fileKey);
         entryObject.insert("fileName", entry.fileName);
         if (entry.groupId.isEmpty()) {
             entryObject.insert("groupId", QJsonValue(QJsonValue::Null));
@@ -630,44 +580,6 @@ QJsonObject VirtualModGroupStore::toJson() const
     return rootObject;
 }
 
-void VirtualModGroupStore::removeOrphanedGroups()
-{
-    bool changed = true;
-    while (changed) {
-        changed = false;
-        for (auto groupIter = m_groups.begin(); groupIter != m_groups.end(); ++groupIter) {
-            if (groupIter->parentId.isEmpty()) {
-                continue;
-            }
-            if (!m_groups.contains(groupIter->parentId) || groupIter->parentId == groupIter->id) {
-                groupIter->parentId.clear();
-                changed = true;
-            }
-        }
-    }
-}
-
-bool VirtualModGroupStore::wouldCreateGroupCycle(const QString& groupId, const QString& newParentId) const
-{
-    if (groupId == newParentId) {
-        return true;
-    }
-
-    auto currentParent = newParentId;
-    while (!currentParent.isEmpty()) {
-        if (currentParent == groupId) {
-            return true;
-        }
-        auto parentIter = m_groups.constFind(currentParent);
-        if (parentIter == m_groups.constEnd()) {
-            break;
-        }
-        currentParent = parentIter->parentId;
-    }
-
-    return false;
-}
-
 QString VirtualModGroupStore::generateGroupId(const QString& name) const
 {
     auto idFragment = sanitizedIdFragment(name);
@@ -688,16 +600,16 @@ QString VirtualModGroupStore::generateGroupId(const QString& name) const
     return candidate + "-" + QString::number(suffix);
 }
 
-QString VirtualModGroupStore::ensureUniqueGroupName(const QString& name, const QString& parentId) const
+QString VirtualModGroupStore::ensureUniqueGroupName(const QString& name) const
 {
     auto normalized = name.trimmed();
     if (normalized.isEmpty()) {
         normalized = QObject::tr("New Group");
     }
 
-    auto hasSiblingWithName = [this, &parentId](const QString& groupName) {
+    auto hasSiblingWithName = [this](const QString& groupName) {
         for (auto const& group : m_groups) {
-            if (group.parentId.compare(parentId, Qt::CaseSensitive) == 0 && group.name.compare(groupName, Qt::CaseInsensitive) == 0) {
+            if (group.name.compare(groupName, Qt::CaseInsensitive) == 0) {
                 return true;
             }
         }
@@ -716,23 +628,4 @@ QString VirtualModGroupStore::ensureUniqueGroupName(const QString& name, const Q
     } while (hasSiblingWithName(candidate));
 
     return candidate;
-}
-
-void VirtualModGroupStore::appendDisplayGroups(const QString& parentId, int depth, QList<GroupDisplay>& out) const
-{
-    QList<Group> children;
-    children.reserve(m_groups.size());
-    for (auto const& group : m_groups) {
-        if (group.parentId == parentId) {
-            children.push_back(group);
-        }
-    }
-
-    std::sort(children.begin(), children.end(),
-              [](const Group& left, const Group& right) { return left.name.localeAwareCompare(right.name) < 0; });
-
-    for (auto const& group : children) {
-        out.push_back({ group.id, group.name, depth });
-        appendDisplayGroups(group.id, depth + 1, out);
-    }
 }

@@ -61,6 +61,7 @@
 
 #include <QDebug>
 #include <QFileInfo>
+#include <QSet>
 
 #include "meta/Index.h"
 #include "minecraft/World.h"
@@ -136,15 +137,65 @@ bool FlameCreationTask::updateInstance()
 
     QFileInfo old_index_file(old_index_path);
     if (old_index_file.exists()) {
+        Flame::Manifest old_pack;
+        Flame::loadManifest(old_pack, old_index_path);
+
         VirtualModGroupStore virtualStore(QDir(FS::PathCombine(inst->gameRoot(), "mods")),
                                           QDir(FS::PathCombine(inst->gameRoot(), "mods", ".index")));
-        auto hasVirtualStore = virtualStore.load();
+        auto hasVirtualStore = virtualStore.loadOrCreate();
         auto managedPackId = inst->getManagedPackID();
         if (managedPackId.isEmpty()) {
             managedPackId = inst->getManagedPackName();
         }
         auto managedGroupId = hasVirtualStore ? virtualStore.findManagedPackGroup(inst->getManagedPackType(), managedPackId) : QString();
+
         auto managedSubtree = managedGroupId.isEmpty() ? QList<QString>() : virtualStore.groupSubtreeIds(managedGroupId);
+        QSet<QString> managedSubtreeSet;
+        for (auto const& groupId : managedSubtree) {
+            managedSubtreeSet.insert(groupId);
+        }
+        QSet<QString> managedOwnedModPaths;
+        if (hasVirtualStore && !managedGroupId.isEmpty()) {
+            auto existingEntries = virtualStore.entries();
+            for (auto const& entry : existingEntries) {
+                if (entry.groupId.isEmpty() || !managedSubtreeSet.contains(entry.groupId)) {
+                    continue;
+                }
+
+                auto fileName = QFileInfo(entry.fileName).fileName();
+                if (fileName.isEmpty()) {
+                    continue;
+                }
+
+                auto relativePath = FS::PathCombine("mods", fileName);
+                managedOwnedModPaths.insert(relativePath);
+                if (relativePath.endsWith(".disabled")) {
+                    managedOwnedModPaths.insert(relativePath.chopped(9));
+                } else {
+                    managedOwnedModPaths.insert(relativePath + ".disabled");
+                }
+            }
+
+            for (auto const& entry : existingEntries) {
+                if (entry.groupId.isEmpty() || !managedSubtreeSet.contains(entry.groupId)) {
+                    continue;
+                }
+                if (!virtualStore.removeEntry(entry.fileKey)) {
+                    qWarning() << "Could not remove managed-pack entry while deleting existing managed group:" << entry.fileKey;
+                }
+            }
+
+            if (!virtualStore.deleteGroup(managedGroupId)) {
+                qWarning() << "Could not delete existing managed-pack group before CurseForge update";
+            }
+            if (!virtualStore.save()) {
+                qWarning() << "Could not persist managed-pack group reset before CurseForge update";
+            }
+
+            managedGroupId.clear();
+            managedSubtree.clear();
+            managedSubtreeSet.clear();
+        }
 
         auto shouldTreatAsManagedOwned = [&](const QString& targetFolder, const QString& fileName) {
             if (targetFolder != "mods") {
@@ -154,7 +205,8 @@ bool FlameCreationTask::updateInstance()
                 return true;
             }
 
-            auto fileKey = VirtualModGroupStore::fileKeyForFileName(fileName);
+            auto normalizedFileName = QFileInfo(FS::RemoveInvalidPathChars(fileName)).fileName();
+            auto fileKey = VirtualModGroupStore::fileKeyForFileName(normalizedFileName);
             auto entry = virtualStore.entry(fileKey);
             if (!entry.has_value()) {
                 return true;
@@ -165,20 +217,9 @@ bool FlameCreationTask::updateInstance()
             return managedSubtree.contains(entry->groupId);
         };
 
-        Flame::Manifest old_pack;
-        Flame::loadManifest(old_pack, old_index_path);
-
         auto& old_files = old_pack.files;
 
         auto& files = m_pack.files;
-
-        for (auto fileIter = files.begin(); fileIter != files.end();) {
-            if (fileIter->targetFolder == "mods" && !shouldTreatAsManagedOwned(fileIter->targetFolder, fileIter->version.fileName)) {
-                fileIter = files.erase(fileIter);
-            } else {
-                ++fileIter;
-            }
-        }
 
         // Remove repeated files, we don't need to download them!
         auto files_iterator = files.begin();
@@ -189,7 +230,7 @@ bool FlameCreationTask::updateInstance()
             if (old_file != old_files.end()) {
                 // We found a match, but is it a different version?
                 if (old_file->fileId == file->fileId) {
-                    if (file->targetFolder == "mods" && shouldTreatAsManagedOwned(file->targetFolder, file->version.fileName)) {
+                    if (file->targetFolder == "mods") {
                         files_iterator++;
                         continue;
                     }
@@ -207,6 +248,11 @@ bool FlameCreationTask::updateInstance()
         }
 
         QDir old_minecraft_dir(inst->gameRoot());
+
+        for (auto const& managedPath : managedOwnedModPaths) {
+            qDebug() << "Scheduling managed-group path" << managedPath << "for removal";
+            m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(managedPath));
+        }
 
         // We will remove all the previous overrides, to prevent duplicate files!
         // TODO: Currently 'overrides' will always override the stuff on update. How do we preserve unchanged overrides?
@@ -769,7 +815,7 @@ void FlameCreationTask::validateOtherResources(QEventLoop& loop)
     QStringList managedModFileNames;
     for (auto file : results) {
         if (file.targetFolder == "mods") {
-            auto modFileName = file.version.fileName;
+            auto modFileName = FS::RemoveInvalidPathChars(file.version.fileName);
             auto relativePath = FS::PathCombine(file.targetFolder, modFileName);
             if (!file.required && !m_selectedOptionalMods.contains(relativePath)) {
                 modFileName += ".disabled";

@@ -97,9 +97,9 @@ class ModFolderModel : public ResourceFolderModel {
     bool setResourceEnabled(const QModelIndexList& indexes, EnableAction action) override;
     bool deleteResources(const QModelIndexList& indexes) override;
 
-    bool createGroup(const QString& name, const QString& parentId = {});
+    bool createGroup(const QString& name);
     bool renameGroup(const QString& groupId, const QString& newName);
-    bool moveGroup(const QString& groupId, const QString& newParentId);
+    bool moveGroup(const QString& groupId);
     bool deleteGroup(const QString& groupId);
     bool assignModsToGroup(const QStringList& fileKeys, const QString& groupId);
     bool setActiveGroup(const QString& groupIdOrAll);
@@ -154,10 +154,10 @@ class ModFolderModel : public ResourceFolderModel {
     };
 
     void initializeVirtualGroups();
-    void migrateLegacyNestedFolders();
     void bootstrapVirtualGroupsFromCurrentState();
-    void classifyManagedPackEntriesFromManifests();
+    bool classifyManagedPackEntriesFromManifests();
     void syncVirtualGroupsFromResources();
+    void refreshInstanceMinecraftVersion();
     bool isIncompatibleWithInstanceVersion(const Mod& mod) const;
     bool isResourceInActiveGroup(const Resource& resource) const;
     QString fileKeyForResource(const Resource& resource) const;
