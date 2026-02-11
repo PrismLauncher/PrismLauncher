@@ -58,7 +58,7 @@ static QImage improveSkin(QImage skin)
     // It seems some older skins may use this format, which can't be drawn onto
     // https://github.com/PrismLauncher/PrismLauncher/issues/4032
     // https://doc.qt.io/qt-6/qpainter.html#begin
-    if (skin.format() == QImage::Format_Indexed8) {
+    if (skin.format() <= QImage::Format_Indexed8 || !skin.hasAlphaChannel()) {
         skin = skin.convertToFormat(QImage::Format_ARGB32);
     }
 
