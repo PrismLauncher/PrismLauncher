@@ -155,14 +155,11 @@ class ModFolderModel : public ResourceFolderModel {
     void bootstrapVirtualGroupsFromCurrentState();
     bool classifyManagedPackEntriesFromManifests();
     void syncVirtualGroupsFromResources();
-    void refreshInstanceMinecraftVersion();
-    bool isIncompatibleWithInstanceVersion(const Mod& mod) const;
     bool isResourceInActiveGroup(const Resource& resource) const;
     QString fileKeyForResource(const Resource& resource) const;
 
     QHash<QString, QSet<Mod*>> m_requiredBy;
     QHash<QString, QSet<Mod*>> m_requires;
-    QString m_instanceMinecraftVersion;
     bool m_virtualGroupsEnabled = false;
     QString m_activeGroupId;
     std::unique_ptr<VirtualModGroupStore> m_groupStore;

@@ -329,8 +329,6 @@ set(MINECRAFT_SOURCES
     minecraft/mod/ModDetails.h
     minecraft/mod/ModFolderModel.h
     minecraft/mod/ModFolderModel.cpp
-    minecraft/mod/ModCompatibility.h
-    minecraft/mod/ModCompatibility.cpp
     minecraft/mod/Resource.h
     minecraft/mod/Resource.cpp
     minecraft/mod/ResourceFolderModel.h

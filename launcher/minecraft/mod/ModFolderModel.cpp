@@ -39,8 +39,6 @@
 
 #include <FileSystem.h>
 #include <QAbstractButton>
-#include <QBrush>
-#include <QColor>
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
@@ -60,8 +58,6 @@
 
 #include "minecraft/Component.h"
 #include "minecraft/MinecraftInstance.h"
-#include "minecraft/PackProfile.h"
-#include "minecraft/mod/ModCompatibility.h"
 #include "minecraft/mod/Resource.h"
 #include "minecraft/mod/ResourceFolderModel.h"
 #include "minecraft/mod/VirtualModGroupStore.h"
@@ -282,21 +278,6 @@ ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_
     m_columnsHideable = { false, true, false, true, true, true, true, true, true, true, true, true, true };
 
     m_virtualGroupsEnabled = isMainModsDirectory(m_dir, instance);
-    refreshInstanceMinecraftVersion();
-    if (auto* mcInstance = dynamic_cast<MinecraftInstance*>(instance)) {
-        auto* packProfile = mcInstance->getPackProfile();
-        if (packProfile != nullptr) {
-            connect(packProfile, &PackProfile::minecraftChanged, this, [this] {
-                auto oldVersion = m_instanceMinecraftVersion;
-                refreshInstanceMinecraftVersion();
-                if (oldVersion == m_instanceMinecraftVersion || m_resources.isEmpty()) {
-                    return;
-                }
-
-                emit dataChanged(index(0, NameColumn), index(m_resources.size() - 1, McVersionsColumn));
-            });
-        }
-    }
 
     if (m_virtualGroupsEnabled) {
         m_groupStore = std::make_unique<VirtualModGroupStore>(m_dir, indexDir());
@@ -375,15 +356,6 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
                            tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
                 }
             }
-            if ((column == NameColumn || column == McVersionsColumn) && isIncompatibleWithInstanceVersion(at(row))) {
-                auto supportedVersions = at(row).mcVersions();
-                if (supportedVersions.isEmpty()) {
-                    supportedVersions = tr("Unknown");
-                }
-                return m_resources[row]->internal_id() +
-                       tr("\nWarning: This enabled mod is incompatible with Minecraft %1. Supported versions: %2")
-                           .arg(m_instanceMinecraftVersion, supportedVersions);
-            }
             return m_resources[row]->internal_id();
         case Qt::DecorationRole: {
             if (column == NameColumn && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
@@ -393,11 +365,6 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
             }
             return {};
         }
-        case Qt::ForegroundRole:
-            if ((column == NameColumn || column == McVersionsColumn) && isIncompatibleWithInstanceVersion(at(row))) {
-                return QBrush(QColor(204, 32, 32));
-            }
-            return {};
         case Qt::SizeHintRole:
             if (column == ImageColumn) {
                 return QSize(32, 32);
@@ -492,7 +459,6 @@ bool ModFolderModel::isValid()
 
 void ModFolderModel::onUpdateSucceeded()
 {
-    refreshInstanceMinecraftVersion();
     ResourceFolderModel::onUpdateSucceeded();
 
     if (m_virtualGroupsEnabled && m_groupStore != nullptr) {
@@ -1084,14 +1050,6 @@ bool ModFolderModel::shouldTreatFileAsManagedPackOwned(const QString& fileName,
     return entryOpt->groupId == managedGroupId;
 }
 
-bool ModFolderModel::isIncompatibleWithInstanceVersion(const Mod& mod) const
-{
-    if (m_instanceMinecraftVersion.trimmed().isEmpty()) {
-        return false;
-    }
-    return ModCompatibility::isIncompatibleWithInstanceVersion(mod, m_instanceMinecraftVersion);
-}
-
 bool ModFolderModel::isResourceInActiveGroup(const Resource& resource) const
 {
     if (m_activeGroupId.isEmpty() || !m_virtualGroupsEnabled || m_groupStore == nullptr) {
@@ -1243,29 +1201,6 @@ bool ModFolderModel::classifyManagedPackEntriesFromManifests()
     }
 
     return changed;
-}
-
-void ModFolderModel::refreshInstanceMinecraftVersion()
-{
-    auto* mcInstance = dynamic_cast<MinecraftInstance*>(m_instance);
-    if (mcInstance == nullptr) {
-        m_instanceMinecraftVersion.clear();
-        return;
-    }
-
-    auto* packProfile = mcInstance->getPackProfile();
-    if (packProfile == nullptr) {
-        m_instanceMinecraftVersion.clear();
-        return;
-    }
-
-    auto minecraftComponent = packProfile->getComponent("net.minecraft");
-    if (minecraftComponent == nullptr) {
-        m_instanceMinecraftVersion.clear();
-        return;
-    }
-
-    m_instanceMinecraftVersion = minecraftComponent->getVersion().trimmed();
 }
 
 void ModFolderModel::syncVirtualGroupsFromResources()
