@@ -122,7 +122,10 @@ namespace {
 
 }  // namespace
 
-VirtualModGroupStore::VirtualModGroupStore(QDir modsDir, QDir indexDir) : m_modsDir(std::move(modsDir)), m_indexDir(std::move(indexDir)) {}
+VirtualModGroupStore::VirtualModGroupStore(QDir modsDir, QDir indexDir) : m_indexDir(std::move(indexDir))
+{
+    Q_UNUSED(modsDir);
+}
 
 bool VirtualModGroupStore::exists() const
 {
@@ -286,7 +289,7 @@ bool VirtualModGroupStore::groupExists(const QString& groupId) const
 
 QString VirtualModGroupStore::createGroup(QString name)
 {
-    name = ensureUniqueGroupName(name.trimmed());
+    name = ensureUniqueGroupName(name);
 
     Group group;
     group.id = generateGroupId(name);
@@ -303,7 +306,7 @@ bool VirtualModGroupStore::renameGroup(const QString& groupId, const QString& ne
         return false;
     }
 
-    auto normalizedName = ensureUniqueGroupName(newName.trimmed());
+    auto normalizedName = ensureUniqueGroupName(newName);
     groupIter->name = normalizedName;
     return true;
 }

@@ -103,7 +103,6 @@ class VirtualModGroupStore {
     [[nodiscard]] QString ensureUniqueGroupName(const QString& name) const;
 
    private:
-    QDir m_modsDir;
     QDir m_indexDir;
     QHash<QString, Group> m_groups;
     QHash<QString, Entry> m_entries;
