@@ -167,7 +167,7 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
                     warningMessage += tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
                 }
 
-                if (isIncompatibleWithInstanceVersion(at(row))) {
+                if (ModCompatibility::isIncompatibleWithInstanceVersion(at(row), m_instanceMinecraftVersion)) {
                     auto supportedVersions = at(row).mcVersions();
                     if (supportedVersions.isEmpty()) {
                         supportedVersions = tr("Unknown");
@@ -191,7 +191,8 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
             return {};
         }
         case Qt::ForegroundRole:
-            if ((column == NameColumn || column == McVersionsColumn) && isIncompatibleWithInstanceVersion(at(row))) {
+            if ((column == NameColumn || column == McVersionsColumn) &&
+                ModCompatibility::isIncompatibleWithInstanceVersion(at(row), m_instanceMinecraftVersion)) {
                 return QBrush(QColor(204, 32, 32));
             }
             return {};
@@ -281,12 +282,6 @@ Task* ModFolderModel::createParseTask(Resource& resource)
 bool ModFolderModel::isValid()
 {
     return m_dir.exists() && m_dir.isReadable();
-}
-
-void ModFolderModel::onUpdateSucceeded()
-{
-    refreshInstanceMinecraftVersion();
-    ResourceFolderModel::onUpdateSucceeded();
 }
 
 void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)
@@ -589,13 +584,4 @@ void ModFolderModel::refreshInstanceMinecraftVersion()
     }
 
     m_instanceMinecraftVersion = minecraftComponent->getVersion().trimmed();
-}
-
-bool ModFolderModel::isIncompatibleWithInstanceVersion(const Mod& mod) const
-{
-    if (m_instanceMinecraftVersion.isEmpty()) {
-        return false;
-    }
-
-    return ModCompatibility::isIncompatibleWithInstanceVersion(mod, m_instanceMinecraftVersion);
 }

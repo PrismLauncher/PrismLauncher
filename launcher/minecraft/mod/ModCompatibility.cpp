@@ -215,6 +215,10 @@ bool supportsMinecraftVersion(const QStringList& supportedVersions, const QStrin
 
 bool isIncompatibleWithInstanceVersion(const Resource& resource, const QString& instanceMinecraftVersion)
 {
+    if (instanceMinecraftVersion.isEmpty()) {
+        return false;
+    }
+
     if (!resource.enabled()) {
         return false;
     }
