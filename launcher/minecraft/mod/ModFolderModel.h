@@ -100,11 +100,18 @@ class ModFolderModel : public ResourceFolderModel {
     QStringList requiresList(QString id);
     QStringList requiredByList(QString id);
 
+   protected:
+    void onUpdateSucceeded() override;
+
    private slots:
     void onParseSucceeded(int ticket, QString resource_id) override;
     void onParseFinished();
 
    private:
+    void refreshInstanceMinecraftVersion();
+    bool isIncompatibleWithInstanceVersion(const Mod& mod) const;
+
     QHash<QString, QSet<Mod*>> m_requiredBy;
     QHash<QString, QSet<Mod*>> m_requires;
+    QString m_instanceMinecraftVersion;
 };
