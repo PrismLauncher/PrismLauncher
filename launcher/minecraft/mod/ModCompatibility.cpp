@@ -32,7 +32,6 @@ namespace {
 
 [[nodiscard]] QString normalizedVersionString(QString version)
 {
-    version = version.trimmed();
     if (version.startsWith("v", Qt::CaseInsensitive)) {
         version.remove(0, 1);
     }
@@ -41,17 +40,12 @@ namespace {
 
 [[nodiscard]] bool startsWithVersionComparator(const QString& value)
 {
-    auto trimmedValue = value.trimmed();
-    return trimmedValue.startsWith(">=") || trimmedValue.startsWith("<=") || trimmedValue.startsWith('>') || trimmedValue.startsWith('<') ||
-           trimmedValue.startsWith('=');
+    return value.startsWith(">=") || value.startsWith("<=") || value.startsWith('>') || value.startsWith('<') || value.startsWith('=');
 }
 
-[[nodiscard]] bool supportsWildcardPrefix(QString prefix, const QString& instanceMinecraftVersion)
+[[nodiscard]] bool supportsWildcardPrefix(const QString& prefix, const QString& normalizedInstanceVersion)
 {
-    auto normalizedInstanceVersion = normalizedVersionString(instanceMinecraftVersion);
-    prefix = normalizedVersionString(std::move(prefix));
-
-    if (prefix.isEmpty() || normalizedInstanceVersion.isEmpty()) {
+    if (prefix.isEmpty()) {
         return false;
     }
 
@@ -62,12 +56,12 @@ namespace {
     return normalizedInstanceVersion.startsWith(prefix + ".", Qt::CaseInsensitive);
 }
 
-[[nodiscard]] bool compareWithConstraint(const QString& instanceVersion, const QString& operation, const QString& versionConstraint)
+[[nodiscard]] bool compareWithConstraint(const QString& normalizedInstanceVersion,
+                                         const QString& operation,
+                                         const QString& versionConstraint)
 {
-    auto normalizedInstanceVersion = normalizedVersionString(instanceVersion);
     auto normalizedConstraint = normalizedVersionString(versionConstraint);
-
-    if (normalizedInstanceVersion.isEmpty() || normalizedConstraint.isEmpty()) {
+    if (normalizedConstraint.isEmpty()) {
         return false;
     }
 
@@ -95,44 +89,46 @@ namespace {
 
 [[nodiscard]] bool supportsSingleVersionPattern(const QString& pattern, const QString& instanceMinecraftVersion)
 {
-    auto trimmedPattern = pattern.trimmed();
-    auto normalizedInstanceVersion = normalizedVersionString(instanceMinecraftVersion);
-    if (trimmedPattern.isEmpty() || normalizedInstanceVersion.isEmpty()) {
+    if (pattern.isEmpty()) {
         return false;
     }
 
-    if (trimmedPattern == "*") {
+    auto normalizedPattern = normalizedVersionString(pattern);
+    if (normalizedPattern.isEmpty()) {
+        return false;
+    }
+
+    if (normalizedPattern == "*") {
         return true;
     }
 
-    auto normalizedPattern = normalizedVersionString(trimmedPattern);
-    if (normalizedPattern.compare(normalizedInstanceVersion, Qt::CaseInsensitive) == 0) {
+    if (normalizedPattern.compare(instanceMinecraftVersion, Qt::CaseInsensitive) == 0) {
         return true;
     }
 
-    if (trimmedPattern.endsWith(".x", Qt::CaseInsensitive)) {
-        auto prefix = trimmedPattern.left(trimmedPattern.size() - 2);
-        return supportsWildcardPrefix(prefix, normalizedInstanceVersion);
+    if (normalizedPattern.endsWith(".x", Qt::CaseInsensitive)) {
+        auto prefix = normalizedPattern.left(normalizedPattern.size() - 2);
+        return supportsWildcardPrefix(prefix, instanceMinecraftVersion);
     }
 
-    if (trimmedPattern.endsWith(".*", Qt::CaseInsensitive)) {
-        auto prefix = trimmedPattern.left(trimmedPattern.size() - 2);
-        return supportsWildcardPrefix(prefix, normalizedInstanceVersion);
+    if (normalizedPattern.endsWith(".*", Qt::CaseInsensitive)) {
+        auto prefix = normalizedPattern.left(normalizedPattern.size() - 2);
+        return supportsWildcardPrefix(prefix, instanceMinecraftVersion);
     }
 
     static const QRegularExpression s_comparatorPattern("^\\s*(<=|>=|<|>|=)\\s*(.+?)\\s*$");
-    if (auto comparatorMatch = s_comparatorPattern.match(trimmedPattern); comparatorMatch.hasMatch()) {
+    if (auto comparatorMatch = s_comparatorPattern.match(normalizedPattern); comparatorMatch.hasMatch()) {
         auto operation = comparatorMatch.captured(1);
         auto constraint = comparatorMatch.captured(2);
-        return compareWithConstraint(normalizedInstanceVersion, operation, constraint);
+        return compareWithConstraint(instanceMinecraftVersion, operation, constraint);
     }
 
     static const QRegularExpression s_rangePattern("^\\s*(.+?)\\s+-\\s+(.+?)\\s*$");
-    if (auto rangeMatch = s_rangePattern.match(trimmedPattern); rangeMatch.hasMatch()) {
+    if (auto rangeMatch = s_rangePattern.match(normalizedPattern); rangeMatch.hasMatch()) {
         auto lowerBound = rangeMatch.captured(1);
         auto upperBound = rangeMatch.captured(2);
-        return compareWithConstraint(normalizedInstanceVersion, ">=", lowerBound) &&
-               compareWithConstraint(normalizedInstanceVersion, "<=", upperBound);
+        return compareWithConstraint(instanceMinecraftVersion, ">=", lowerBound) &&
+               compareWithConstraint(instanceMinecraftVersion, "<=", upperBound);
     }
 
     return false;
@@ -140,13 +136,13 @@ namespace {
 
 [[nodiscard]] bool supportsVersionPattern(const QString& pattern, const QString& instanceMinecraftVersion)
 {
-    auto trimmedPattern = pattern.trimmed();
-    if (trimmedPattern.isEmpty()) {
+    if (pattern.isEmpty()) {
         return false;
     }
 
-    if (trimmedPattern.contains("||")) {
-        for (auto const& alternative : trimmedPattern.split("||", Qt::SkipEmptyParts)) {
+    static const QRegularExpression s_orSplitPattern("\\s*\\|\\|\\s*");
+    if (pattern.contains("||")) {
+        for (auto const& alternative : pattern.split(s_orSplitPattern, Qt::SkipEmptyParts)) {
             if (supportsVersionPattern(alternative, instanceMinecraftVersion)) {
                 return true;
             }
@@ -154,8 +150,9 @@ namespace {
         return false;
     }
 
-    if (trimmedPattern.contains(',')) {
-        auto alternatives = trimmedPattern.split(',', Qt::SkipEmptyParts);
+    static const QRegularExpression s_commaSplitPattern("\\s*,\\s*");
+    if (pattern.contains(',')) {
+        auto alternatives = pattern.split(s_commaSplitPattern, Qt::SkipEmptyParts);
         bool allConstraints = std::all_of(alternatives.cbegin(), alternatives.cend(),
                                           [](const QString& alternative) { return startsWithVersionComparator(alternative); });
 
@@ -176,7 +173,8 @@ namespace {
         return false;
     }
 
-    auto whitespaceParts = trimmedPattern.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+    static const QRegularExpression s_whitespaceSplitPattern("\\s+");
+    auto whitespaceParts = pattern.split(s_whitespaceSplitPattern, Qt::SkipEmptyParts);
     if (whitespaceParts.size() > 1) {
         bool allConstraints = std::all_of(whitespaceParts.cbegin(), whitespaceParts.cend(),
                                           [](const QString& part) { return startsWithVersionComparator(part); });
@@ -191,7 +189,7 @@ namespace {
         }
     }
 
-    return supportsSingleVersionPattern(trimmedPattern, instanceMinecraftVersion);
+    return supportsSingleVersionPattern(pattern, instanceMinecraftVersion);
 }
 
 }  // namespace
@@ -200,12 +198,13 @@ namespace ModCompatibility {
 
 bool supportsMinecraftVersion(const QStringList& supportedVersions, const QString& instanceMinecraftVersion)
 {
-    if (supportedVersions.isEmpty() || instanceMinecraftVersion.trimmed().isEmpty()) {
+    auto normalizedInstanceVersion = normalizedVersionString(instanceMinecraftVersion);
+    if (supportedVersions.isEmpty() || normalizedInstanceVersion.isEmpty()) {
         return true;
     }
 
     for (auto const& supportedVersion : supportedVersions) {
-        if (supportsVersionPattern(supportedVersion, instanceMinecraftVersion)) {
+        if (supportsVersionPattern(supportedVersion, normalizedInstanceVersion)) {
             return true;
         }
     }
