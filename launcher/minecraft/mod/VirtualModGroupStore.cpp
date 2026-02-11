@@ -32,6 +32,7 @@
 #include <QObject>
 #include <QUuid>
 
+#include "BuildConfig.h"
 #include "FileSystem.h"
 
 namespace {
@@ -66,7 +67,6 @@ namespace {
         input.replace("--", "-");
     }
 
-    input = input.trimmed();
     while (input.startsWith('-')) {
         input.remove(0, 1);
     }
@@ -75,6 +75,49 @@ namespace {
     }
 
     return input;
+}
+
+[[nodiscard]] QString groupKindName(VirtualModGroupStore::GroupKind groupKind)
+{
+    switch (groupKind) {
+        case VirtualModGroupStore::GroupKind::CUSTOM:
+            return "custom";
+        case VirtualModGroupStore::GroupKind::MANAGED_PACK:
+            return "managed-pack";
+    }
+    return "custom";
+}
+
+[[nodiscard]] VirtualModGroupStore::GroupKind groupKindFromName(const QString& groupKind)
+{
+    if (groupKind.compare("managed-pack", Qt::CaseInsensitive) == 0) {
+        return VirtualModGroupStore::GroupKind::MANAGED_PACK;
+    }
+    return VirtualModGroupStore::GroupKind::CUSTOM;
+}
+
+[[nodiscard]] QString sourceTypeName(VirtualModGroupStore::SourceType sourceType)
+{
+    switch (sourceType) {
+        case VirtualModGroupStore::SourceType::LOCAL_NO_SOURCE:
+            return "local-no-source";
+        case VirtualModGroupStore::SourceType::PROVIDER_LINKED:
+            return "provider-linked";
+        case VirtualModGroupStore::SourceType::MANAGED_PACK:
+            return "managed-pack";
+    }
+    return "local-no-source";
+}
+
+[[nodiscard]] VirtualModGroupStore::SourceType sourceTypeFromName(const QString& sourceType)
+{
+    if (sourceType.compare("provider-linked", Qt::CaseInsensitive) == 0) {
+        return VirtualModGroupStore::SourceType::PROVIDER_LINKED;
+    }
+    if (sourceType.compare("managed-pack", Qt::CaseInsensitive) == 0) {
+        return VirtualModGroupStore::SourceType::MANAGED_PACK;
+    }
+    return VirtualModGroupStore::SourceType::LOCAL_NO_SOURCE;
 }
 
 }  // namespace
@@ -96,14 +139,20 @@ bool VirtualModGroupStore::load()
         return false;
     }
 
-    if (!storeFile.open(QIODevice::ReadOnly)) {
-        qWarning() << "Could not open virtual mod group store:" << storeFile.fileName();
+    QByteArray serializedStore;
+    QString readError;
+    try {
+        serializedStore = FS::read(storeFile.fileName());
+    } catch (const FS::FileSystemException& exception) {
+        readError = exception.cause();
+    }
+    if (!readError.isEmpty()) {
+        qWarning() << "Could not open virtual mod group store:" << storeFile.fileName() << readError;
         return false;
     }
 
     QJsonParseError parseError{};
-    auto document = QJsonDocument::fromJson(storeFile.readAll(), &parseError);
-    storeFile.close();
+    auto document = QJsonDocument::fromJson(serializedStore, &parseError);
 
     if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
         qWarning() << "Could not parse virtual mod group store:" << storeFile.fileName() << parseError.errorString();
@@ -159,6 +208,11 @@ bool VirtualModGroupStore::save() const
     storeFile.flush();
     storeFile.close();
     return bytesWritten == serializedDocument.size();
+}
+
+QString VirtualModGroupStore::storeFileName()
+{
+    return QString("%1-mod-groups-v1.json").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
 }
 
 QList<VirtualModGroupStore::Group> VirtualModGroupStore::groups() const
@@ -233,9 +287,6 @@ bool VirtualModGroupStore::groupExists(const QString& groupId) const
 QString VirtualModGroupStore::createGroup(QString name)
 {
     name = ensureUniqueGroupName(name.trimmed());
-    if (name.isEmpty()) {
-        return {};
-    }
 
     Group group;
     group.id = generateGroupId(name);
@@ -253,17 +304,8 @@ bool VirtualModGroupStore::renameGroup(const QString& groupId, const QString& ne
     }
 
     auto normalizedName = ensureUniqueGroupName(newName.trimmed());
-    if (normalizedName.isEmpty()) {
-        return false;
-    }
-
     groupIter->name = normalizedName;
     return true;
-}
-
-bool VirtualModGroupStore::moveGroup(const QString& groupId)
-{
-    return m_groups.contains(groupId);
 }
 
 bool VirtualModGroupStore::deleteGroup(const QString& groupId)
@@ -310,10 +352,13 @@ bool VirtualModGroupStore::assignEntriesToGroup(const QStringList& fileKeys, con
     return updatedAny;
 }
 
-bool VirtualModGroupStore::isEntryInGroupSubtree(const QString& fileKey, const QString& groupId) const
+bool VirtualModGroupStore::isEntryInGroup(const QString& fileKey, const QString& groupId) const
 {
     if (groupId.isEmpty()) {
         return true;
+    }
+    if (!m_groups.contains(groupId)) {
+        return false;
     }
 
     auto entryOpt = entry(fileKey);
@@ -321,22 +366,14 @@ bool VirtualModGroupStore::isEntryInGroupSubtree(const QString& fileKey, const Q
         return false;
     }
 
-    auto subtreeIds = groupSubtreeIds(groupId);
-    return subtreeIds.contains(entryOpt->groupId);
-}
-
-QList<QString> VirtualModGroupStore::groupSubtreeIds(const QString& groupId) const
-{
-    if (groupId.isEmpty() || !m_groups.contains(groupId)) {
-        return {};
-    }
-    return { groupId };
+    return entryOpt->groupId == groupId;
 }
 
 QString VirtualModGroupStore::ensureManagedPackGroup(QString managedPackType, QString managedPackId, QString fallbackName)
 {
     managedPackType = managedPackType.trimmed();
     managedPackId = normalizedManagedPackId(managedPackId, fallbackName);
+    auto normalizedFallbackName = fallbackName.trimmed();
 
     auto existingId = findManagedPackGroup(managedPackType, managedPackId);
     if (!existingId.isEmpty()) {
@@ -347,7 +384,7 @@ QString VirtualModGroupStore::ensureManagedPackGroup(QString managedPackType, QS
     group.kind = GroupKind::MANAGED_PACK;
     group.managedPackType = managedPackType;
     group.managedPackId = managedPackId;
-    group.name = fallbackName.trimmed().isEmpty() ? QObject::tr("Managed Pack Mods") : fallbackName.trimmed();
+    group.name = normalizedFallbackName.isEmpty() ? QObject::tr("Managed Pack Mods") : normalizedFallbackName;
 
     auto typeFragment = sanitizedIdFragment(managedPackType);
     auto idFragment = sanitizedIdFragment(managedPackId);
@@ -373,31 +410,13 @@ QString VirtualModGroupStore::findManagedPackGroup(const QString& managedPackTyp
     auto normalizedId = managedPackId.trimmed();
 
     for (auto const& group : m_groups) {
-        if (group.kind != GroupKind::MANAGED_PACK) {
-            continue;
-        }
-        if (group.managedPackType.compare(normalizedType, Qt::CaseInsensitive) != 0) {
-            continue;
-        }
-        if (group.managedPackId.compare(normalizedId, Qt::CaseInsensitive) == 0) {
+        if (group.kind == GroupKind::MANAGED_PACK && group.managedPackType.compare(normalizedType, Qt::CaseInsensitive) == 0 &&
+            group.managedPackId.compare(normalizedId, Qt::CaseInsensitive) == 0) {
             return group.id;
         }
     }
 
     return {};
-}
-
-QList<VirtualModGroupStore::GroupDisplay> VirtualModGroupStore::groupDisplayList() const
-{
-    QList<GroupDisplay> groups;
-    auto groupsList = this->groups();
-    std::sort(groupsList.begin(), groupsList.end(),
-              [](const Group& left, const Group& right) { return left.name.localeAwareCompare(right.name) < 0; });
-    groups.reserve(groupsList.size());
-    for (auto const& group : groupsList) {
-        groups.push_back({ group.id, group.name, 0 });
-    }
-    return groups;
 }
 
 QString VirtualModGroupStore::fileKeyForFileName(QString fileName)
@@ -408,52 +427,9 @@ QString VirtualModGroupStore::fileKeyForFileName(QString fileName)
     return fileName;
 }
 
-QString VirtualModGroupStore::groupKindName(GroupKind groupKind)
-{
-    switch (groupKind) {
-        case GroupKind::CUSTOM:
-            return "custom";
-        case GroupKind::MANAGED_PACK:
-            return "managed-pack";
-    }
-    return "custom";
-}
-
-VirtualModGroupStore::GroupKind VirtualModGroupStore::groupKindFromName(const QString& groupKind)
-{
-    if (groupKind.compare("managed-pack", Qt::CaseInsensitive) == 0) {
-        return GroupKind::MANAGED_PACK;
-    }
-    return GroupKind::CUSTOM;
-}
-
-QString VirtualModGroupStore::sourceTypeName(SourceType sourceType)
-{
-    switch (sourceType) {
-        case SourceType::LOCAL_NO_SOURCE:
-            return "local-no-source";
-        case SourceType::PROVIDER_LINKED:
-            return "provider-linked";
-        case SourceType::MANAGED_PACK:
-            return "managed-pack";
-    }
-    return "local-no-source";
-}
-
-VirtualModGroupStore::SourceType VirtualModGroupStore::sourceTypeFromName(const QString& sourceType)
-{
-    if (sourceType.compare("provider-linked", Qt::CaseInsensitive) == 0) {
-        return SourceType::PROVIDER_LINKED;
-    }
-    if (sourceType.compare("managed-pack", Qt::CaseInsensitive) == 0) {
-        return SourceType::MANAGED_PACK;
-    }
-    return SourceType::LOCAL_NO_SOURCE;
-}
-
 QString VirtualModGroupStore::storePath() const
 {
-    return m_indexDir.absoluteFilePath(STORE_FILE_NAME);
+    return m_indexDir.absoluteFilePath(storeFileName());
 }
 
 bool VirtualModGroupStore::fromJson(const QJsonObject& rootObject)

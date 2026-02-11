@@ -99,16 +99,11 @@ bool ModrinthCreationTask::updateInstance()
         }
         auto managedGroupId = hasVirtualStore ? virtualStore.findManagedPackGroup(inst->getManagedPackType(), managedPackId) : QString();
 
-        auto managedSubtree = managedGroupId.isEmpty() ? QList<QString>() : virtualStore.groupSubtreeIds(managedGroupId);
-        QSet<QString> managedSubtreeSet;
-        for (auto const& groupId : managedSubtree) {
-            managedSubtreeSet.insert(groupId);
-        }
         QSet<QString> managedOwnedModPaths;
         if (hasVirtualStore && !managedGroupId.isEmpty()) {
             auto existingEntries = virtualStore.entries();
             for (auto const& entry : existingEntries) {
-                if (entry.groupId.isEmpty() || !managedSubtreeSet.contains(entry.groupId)) {
+                if (entry.groupId != managedGroupId) {
                     continue;
                 }
 
@@ -127,7 +122,7 @@ bool ModrinthCreationTask::updateInstance()
             }
 
             for (auto const& entry : existingEntries) {
-                if (entry.groupId.isEmpty() || !managedSubtreeSet.contains(entry.groupId)) {
+                if (entry.groupId != managedGroupId) {
                     continue;
                 }
                 if (!virtualStore.removeEntry(entry.fileKey)) {
@@ -143,15 +138,13 @@ bool ModrinthCreationTask::updateInstance()
             }
 
             managedGroupId.clear();
-            managedSubtree.clear();
-            managedSubtreeSet.clear();
         }
 
         auto shouldTreatAsManagedOwned = [&](const QString& relativePath) {
             if (!relativePath.startsWith("mods/")) {
                 return true;
             }
-            if (!hasVirtualStore || managedSubtree.isEmpty()) {
+            if (!hasVirtualStore || managedGroupId.isEmpty()) {
                 return true;
             }
 
@@ -164,7 +157,7 @@ bool ModrinthCreationTask::updateInstance()
             if (entry->groupId.isEmpty()) {
                 return false;
             }
-            return managedSubtree.contains(entry->groupId);
+            return entry->groupId == managedGroupId;
         };
 
         // Let's remove all duplicated, identical resources!

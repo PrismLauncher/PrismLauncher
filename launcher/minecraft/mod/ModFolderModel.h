@@ -99,7 +99,6 @@ class ModFolderModel : public ResourceFolderModel {
 
     bool createGroup(const QString& name);
     bool renameGroup(const QString& groupId, const QString& newName);
-    bool moveGroup(const QString& groupId);
     bool deleteGroup(const QString& groupId);
     bool assignModsToGroup(const QStringList& fileKeys, const QString& groupId);
     bool setActiveGroup(const QString& groupIdOrAll);
@@ -108,7 +107,6 @@ class ModFolderModel : public ResourceFolderModel {
     struct GroupOption {
         QString id;
         QString label;
-        int depth = 0;
         bool managedPack = false;
     };
     QList<GroupOption> groupOptions() const;

@@ -830,24 +830,6 @@ bool ModFolderModel::renameGroup(const QString& groupId, const QString& newName)
     return true;
 }
 
-bool ModFolderModel::moveGroup(const QString& groupId)
-{
-    if (!m_virtualGroupsEnabled || m_groupStore == nullptr) {
-        return false;
-    }
-
-    if (!m_groupStore->moveGroup(groupId)) {
-        return false;
-    }
-
-    if (!m_groupStore->save()) {
-        return false;
-    }
-
-    emit virtualGroupsChanged();
-    return true;
-}
-
 bool ModFolderModel::deleteGroup(const QString& groupId)
 {
     if (!m_virtualGroupsEnabled || m_groupStore == nullptr || groupId.isEmpty()) {
@@ -932,21 +914,16 @@ QList<ModFolderModel::GroupOption> ModFolderModel::groupOptions() const
         return options;
     }
 
-    QHash<QString, bool> managedGroupFlags;
-    auto allGroups = m_groupStore->groups();
-    managedGroupFlags.reserve(allGroups.size());
-    for (auto const& group : allGroups) {
-        managedGroupFlags.insert(group.id, group.kind == VirtualModGroupStore::GroupKind::MANAGED_PACK);
-    }
-
-    auto groups = m_groupStore->groupDisplayList();
+    auto groups = m_groupStore->groups();
+    std::sort(groups.begin(), groups.end(), [](const VirtualModGroupStore::Group& left, const VirtualModGroupStore::Group& right) {
+        return left.name.localeAwareCompare(right.name) < 0;
+    });
     options.reserve(groups.size());
     for (auto const& group : groups) {
         GroupOption option;
         option.id = group.id;
-        option.depth = group.depth;
-        option.label = QString(group.depth * 2, QChar(' ')) + group.name;
-        option.managedPack = managedGroupFlags.value(group.id, false);
+        option.label = group.name;
+        option.managedPack = group.kind == VirtualModGroupStore::GroupKind::MANAGED_PACK;
         options.push_back(option);
     }
 
@@ -1104,7 +1081,7 @@ bool ModFolderModel::shouldTreatFileAsManagedPackOwned(const QString& fileName,
         return false;
     }
 
-    return m_groupStore->groupSubtreeIds(managedGroupId).contains(entryOpt->groupId);
+    return entryOpt->groupId == managedGroupId;
 }
 
 bool ModFolderModel::isIncompatibleWithInstanceVersion(const Mod& mod) const
@@ -1122,7 +1099,7 @@ bool ModFolderModel::isResourceInActiveGroup(const Resource& resource) const
     }
 
     auto fileKey = fileKeyForResource(resource);
-    return m_groupStore->isEntryInGroupSubtree(fileKey, m_activeGroupId);
+    return m_groupStore->isEntryInGroup(fileKey, m_activeGroupId);
 }
 
 QString ModFolderModel::fileKeyForResource(const Resource& resource) const

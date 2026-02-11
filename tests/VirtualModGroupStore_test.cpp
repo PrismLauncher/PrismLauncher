@@ -60,8 +60,8 @@ class VirtualModGroupStoreTest : public QObject {
         VirtualModGroupStore loadedStore{ QDir(modsPath), QDir(indexPath) };
         QVERIFY(loadedStore.load());
         QVERIFY(loadedStore.hasEntry("example-mod.jar"));
-        QVERIFY(loadedStore.isEntryInGroupSubtree("example-mod.jar", secondGroupId));
-        QVERIFY(!loadedStore.isEntryInGroupSubtree("example-mod.jar", rootGroupId));
+        QVERIFY(loadedStore.isEntryInGroup("example-mod.jar", secondGroupId));
+        QVERIFY(!loadedStore.isEntryInGroup("example-mod.jar", rootGroupId));
     }
 
     void invalidJsonCanBeRecovered()
@@ -74,7 +74,7 @@ class VirtualModGroupStoreTest : public QObject {
         QVERIFY(FS::ensureFolderPathExists(modsPath));
         QVERIFY(FS::ensureFolderPathExists(indexPath));
 
-        auto storePath = QDir(indexPath).absoluteFilePath(VirtualModGroupStore::STORE_FILE_NAME);
+        auto storePath = QDir(indexPath).absoluteFilePath(VirtualModGroupStore::storeFileName());
         QFile file(storePath);
         QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
         file.write("{ this is not json");

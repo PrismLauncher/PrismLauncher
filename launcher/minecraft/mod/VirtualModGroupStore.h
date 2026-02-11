@@ -34,7 +34,6 @@ class QJsonObject;
 class VirtualModGroupStore {
    public:
     static inline constexpr auto FORMAT_VERSION = 1;
-    static inline constexpr auto STORE_FILE_NAME = "prismlauncher-mod-groups-v1.json";
 
     enum class GroupKind {
         CUSTOM,
@@ -65,18 +64,13 @@ class VirtualModGroupStore {
         QString projectId;
     };
 
-    struct GroupDisplay {
-        QString id;
-        QString name;
-        int depth = 0;
-    };
-
     VirtualModGroupStore(QDir modsDir, QDir indexDir);
 
     [[nodiscard]] bool exists() const;
     [[nodiscard]] bool load();
     [[nodiscard]] bool loadOrCreate();
     [[nodiscard]] bool save() const;
+    [[nodiscard]] static QString storeFileName();
 
     [[nodiscard]] QList<Group> groups() const;
     [[nodiscard]] QList<Entry> entries() const;
@@ -89,23 +83,16 @@ class VirtualModGroupStore {
     [[nodiscard]] bool groupExists(const QString& groupId) const;
     [[nodiscard]] QString createGroup(QString name);
     [[nodiscard]] bool renameGroup(const QString& groupId, const QString& newName);
-    [[nodiscard]] bool moveGroup(const QString& groupId);
     [[nodiscard]] bool deleteGroup(const QString& groupId);
 
     [[nodiscard]] bool assignEntryToGroup(const QString& fileKey, const QString& groupId);
     [[nodiscard]] bool assignEntriesToGroup(const QStringList& fileKeys, const QString& groupId);
-    [[nodiscard]] bool isEntryInGroupSubtree(const QString& fileKey, const QString& groupId) const;
-    [[nodiscard]] QList<QString> groupSubtreeIds(const QString& groupId) const;
+    [[nodiscard]] bool isEntryInGroup(const QString& fileKey, const QString& groupId) const;
 
     [[nodiscard]] QString ensureManagedPackGroup(QString managedPackType, QString managedPackId, QString fallbackName);
     [[nodiscard]] QString findManagedPackGroup(const QString& managedPackType, const QString& managedPackId) const;
-    [[nodiscard]] QList<GroupDisplay> groupDisplayList() const;
 
     [[nodiscard]] static QString fileKeyForFileName(QString fileName);
-    [[nodiscard]] static QString groupKindName(GroupKind groupKind);
-    [[nodiscard]] static GroupKind groupKindFromName(const QString& groupKind);
-    [[nodiscard]] static QString sourceTypeName(SourceType sourceType);
-    [[nodiscard]] static SourceType sourceTypeFromName(const QString& sourceType);
 
    private:
     [[nodiscard]] QString storePath() const;
