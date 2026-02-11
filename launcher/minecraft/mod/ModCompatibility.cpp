@@ -45,10 +45,6 @@ namespace {
 
 [[nodiscard]] bool supportsWildcardPrefix(const QString& prefix, const QString& normalizedInstanceVersion)
 {
-    if (prefix.isEmpty()) {
-        return false;
-    }
-
     if (normalizedInstanceVersion.compare(prefix, Qt::CaseInsensitive) == 0) {
         return true;
     }
@@ -61,10 +57,6 @@ namespace {
                                          const QString& versionConstraint)
 {
     auto normalizedConstraint = normalizedVersionString(versionConstraint);
-    if (normalizedConstraint.isEmpty()) {
-        return false;
-    }
-
     Version instance{ normalizedInstanceVersion };
     Version constraint{ normalizedConstraint };
 
@@ -89,15 +81,7 @@ namespace {
 
 [[nodiscard]] bool supportsSingleVersionPattern(const QString& pattern, const QString& instanceMinecraftVersion)
 {
-    if (pattern.isEmpty()) {
-        return false;
-    }
-
     auto normalizedPattern = normalizedVersionString(pattern);
-    if (normalizedPattern.isEmpty()) {
-        return false;
-    }
-
     if (normalizedPattern == "*") {
         return true;
     }
@@ -136,10 +120,6 @@ namespace {
 
 [[nodiscard]] bool supportsVersionPattern(const QString& pattern, const QString& instanceMinecraftVersion)
 {
-    if (pattern.isEmpty()) {
-        return false;
-    }
-
     static const QRegularExpression s_orSplitPattern("\\s*\\|\\|\\s*");
     if (pattern.contains("||")) {
         for (auto const& alternative : pattern.split(s_orSplitPattern, Qt::SkipEmptyParts)) {
@@ -199,7 +179,7 @@ namespace ModCompatibility {
 bool supportsMinecraftVersion(const QStringList& supportedVersions, const QString& instanceMinecraftVersion)
 {
     auto normalizedInstanceVersion = normalizedVersionString(instanceMinecraftVersion);
-    if (supportedVersions.isEmpty() || normalizedInstanceVersion.isEmpty()) {
+    if (supportedVersions.isEmpty()) {
         return true;
     }
 

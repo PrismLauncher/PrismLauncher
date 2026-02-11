@@ -583,5 +583,5 @@ void ModFolderModel::refreshInstanceMinecraftVersion()
         return;
     }
 
-    m_instanceMinecraftVersion = minecraftComponent->getVersion().trimmed();
+    m_instanceMinecraftVersion = minecraftComponent->getVersion();
 }
