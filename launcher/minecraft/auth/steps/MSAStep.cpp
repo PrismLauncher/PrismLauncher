@@ -37,6 +37,7 @@
 
 #include <QAbstractOAuth2>
 #include <QNetworkRequest>
+#include <QNetworkReply>
 #include <QOAuthHttpServerReplyHandler>
 #include <QOAuthOobReplyHandler>
 

@@ -1,6 +1,5 @@
 #pragma once
 #include <QList>
-#include <QNetworkReply>
 #include <QObject>
 
 #include "QObjectPtr.h"

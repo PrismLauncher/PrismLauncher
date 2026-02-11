@@ -20,13 +20,9 @@
 #pragma once
 
 #include <QDialog>
-#include <memory>
 
-#include <Application.h>
 #include <translations/TranslationsModel.h>
 #include <QTextCursor>
-#include "java/JavaChecker.h"
-#include "ui/pages/BasePage.h"
 
 class QTextCharFormat;
 class SettingsObject;
