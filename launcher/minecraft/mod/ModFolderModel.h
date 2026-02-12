@@ -100,6 +100,9 @@ class ModFolderModel : public ResourceFolderModel {
     QStringList requiresList(QString id);
     QStringList requiredByList(QString id);
 
+   private:
+    [[nodiscard]] bool isCompatible(int row) const;
+
    private slots:
     void onParseSucceeded(int ticket, QString resource_id) override;
     void onParseFinished();

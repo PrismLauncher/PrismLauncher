@@ -39,6 +39,8 @@
 
 #include <FileSystem.h>
 #include <QAbstractButton>
+#include <QBrush>
+#include <QColor>
 #include <QDebug>
 #include <QFileInfo>
 #include <QFileSystemWatcher>
@@ -52,7 +54,10 @@
 #include <QUuid>
 #include <algorithm>
 
+#include "Version.h"
 #include "minecraft/Component.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
 #include "minecraft/mod/Resource.h"
 #include "minecraft/mod/ResourceFolderModel.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
@@ -79,6 +84,29 @@ ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_
     connect(this, &ModFolderModel::parseFinished, this, &ModFolderModel::onParseFinished);
 }
 
+bool ModFolderModel::isCompatible(int row) const
+{
+    auto& mod = at(row);
+
+    auto instanceMcVersionStr = qobject_cast<MinecraftInstance*>(m_instance)
+        ->getPackProfile()
+        ->getComponentVersion("net.minecraft");
+    // in theory someone could probably mess up the components, better check this
+    if (instanceMcVersionStr.isEmpty()) {
+        return true;
+    }
+    Version instanceMcVersion(instanceMcVersionStr);
+
+    auto mcVersions = mod.metadata()->mcVersions;
+    if (mcVersions.isEmpty()) {
+        return true;
+    }
+
+    return std::ranges::any_of(mcVersions, [&](const auto& versionStr) {
+        return Version(versionStr) == instanceMcVersion;
+    });
+}
+
 QVariant ModFolderModel::data(const QModelIndex& index, int role) const
 {
     if (!validateIndex(index))
@@ -86,6 +114,8 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
 
     int row = index.row();
     int column = index.column();
+
+    const bool compatible = isCompatible(row);
 
     switch (role) {
         case Qt::DisplayRole:
@@ -132,23 +162,31 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
                 default:
                     return QVariant();
             }
-
-        case Qt::ToolTipRole:
+        case Qt::BackgroundRole: {
+            if (!compatible) {
+                return QBrush(QColor::fromRgb(255, 0, 0, 40));
+            }
+            return QVariant();
+        }
+        case Qt::ToolTipRole: {
+            QString tooltip = m_resources[row]->internal_id();
+            if (!compatible) {
+                tooltip += tr("\nThis mod is incompatible with the current Minecraft version.");
+            }
             if (column == NameColumn) {
                 if (at(row).isSymLinkUnder(instDirPath())) {
-                    return m_resources[row]->internal_id() +
-                           tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
-                              "\nCanonical Path: %1")
-                               .arg(at(row).fileinfo().canonicalFilePath());
-                }
-                if (at(row).isMoreThanOneHardLink()) {
-                    return m_resources[row]->internal_id() +
-                           tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
+                    tooltip += tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
+                                  "\nCanonical Path: %1")
+                                   .arg(at(row).fileinfo().canonicalFilePath());
+                } else if (at(row).isMoreThanOneHardLink()) {
+                    tooltip += tr("\nWarning: This resource has more than one hard link. Editing it will also change the other files "
+                                  "linked to the same inode.");
                 }
             }
-            return m_resources[row]->internal_id();
+            return tooltip;
+        }
         case Qt::DecorationRole: {
-            if (column == NameColumn && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
+            if (column == NameColumn && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink() || !compatible))
                 return QIcon::fromTheme("status-yellow");
             if (column == ImageColumn) {
                 return at(row).icon({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
