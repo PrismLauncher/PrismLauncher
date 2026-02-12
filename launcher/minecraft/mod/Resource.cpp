@@ -1,7 +1,9 @@
 #include "Resource.h"
+#include <qobject.h>
 
 #include <QDirIterator>
 #include <QFileInfo>
+#include <QObject>
 #include <QRegularExpression>
 #include <tuple>
 #include <utility>
@@ -11,9 +13,7 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
-Resource::Resource(QObject* parent) : QObject(parent), m_size_info(0) {}
-
-Resource::Resource(QFileInfo fileInfo) : m_size_info(0)
+Resource::Resource(QFileInfo file_info)
 {
     setFile(fileInfo);
 }
@@ -103,7 +103,7 @@ auto Resource::provider() const -> QString
         return ModPlatform::ProviderCapabilities::readableName(metadata()->provider);
     }
 
-    return tr("Unknown");
+    return QObject::tr("Unknown");
 }
 
 auto Resource::homepage() const -> QString
@@ -130,7 +130,7 @@ QStringList Resource::issues() const
     result.reserve(m_issues.length());
 
     for (const char* issue : m_issues) {
-        result.append(tr(issue));
+        result.append(QObject::tr(issue));
     }
 
     return result;

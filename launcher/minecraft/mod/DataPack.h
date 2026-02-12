@@ -35,9 +35,7 @@ class Version;
  * */
 
 class DataPack : public Resource {
-    Q_OBJECT
    public:
-    DataPack(QObject* parent = nullptr) : Resource(parent) {}
     DataPack(QFileInfo file_info) : Resource(file_info) {}
 
     /** Gets the numerical ID of the pack format. */

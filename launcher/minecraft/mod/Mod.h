@@ -48,12 +48,7 @@
 #include "Resource.h"
 
 class Mod : public Resource {
-    Q_OBJECT
    public:
-    using Ptr = shared_qobject_ptr<Mod>;
-    using WeakPtr = QPointer<Mod>;
-
-    Mod() = default;
     Mod(const QFileInfo& file);
     Mod(QString file_path) : Mod(QFileInfo(file_path)) {}
 

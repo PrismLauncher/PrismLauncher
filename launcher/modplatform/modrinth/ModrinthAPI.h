@@ -31,7 +31,7 @@ class ModrinthAPI : public ResourceAPI {
     std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
 
     std::pair<Task::Ptr, QByteArray*> getModCategories() override;
-    static QList<ModPlatform::Category> loadCategories(const QByteArray& response, QString projectType);
+    static QList<ModPlatform::Category> loadCategories(const QByteArray& response, const QString& projectType);
     QList<ModPlatform::Category> loadModCategories(const QByteArray& response) override;
 
    public:

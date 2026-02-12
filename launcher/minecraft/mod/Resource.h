@@ -41,9 +41,9 @@
 #include <QFileInfo>
 #include <QObject>
 #include <QPointer>
+#include <memory>
 
 #include "MetadataHandler.h"
-#include "QObjectPtr.h"
 
 class BaseInstance;
 
@@ -90,17 +90,17 @@ enum class EnableAction : std::uint8_t { ENABLE, DISABLE, TOGGLE };
  *
  *  Subclass it to add additional data / behavior, such as Mods or Resource packs.
  */
-class Resource : public QObject {
-    Q_OBJECT
-    Q_DISABLE_COPY(Resource)
+class Resource {
+    Resource(const Resource&) = delete;
+    Resource& operator=(const Resource&) = delete;
+
    public:
-    using Ptr = shared_qobject_ptr<Resource>;
+    using Ptr = std::shared_ptr<Resource>;
 
-    Resource(QObject* parent = nullptr);
-    Resource(QFileInfo fileInfo);
-    Resource(const QString& filePath) : Resource(QFileInfo(filePath)) {}
+    Resource(QFileInfo file_info);
+    Resource(QString file_path) : Resource(QFileInfo(file_path)) {}
 
-    ~Resource() override = default;
+    virtual ~Resource() = default;
 
     void setFile(QFileInfo fileInfo);
     void parseFile();
