@@ -37,7 +37,6 @@
 
 #pragma once
 #include "Application.h"
-#include "BaseInstance.h"
 
 #include <QList>
 #include <QMessageBox>

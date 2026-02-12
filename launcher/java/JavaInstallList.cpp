@@ -41,7 +41,6 @@
 #include <algorithm>
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "java/JavaChecker.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"

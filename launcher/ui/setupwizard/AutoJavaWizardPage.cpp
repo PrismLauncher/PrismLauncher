@@ -2,7 +2,6 @@
 #include "ui_AutoJavaWizardPage.h"
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 
 AutoJavaWizardPage::AutoJavaWizardPage(QWidget* parent) : BaseWizardPage(parent), ui(new Ui::AutoJavaWizardPage)
 {

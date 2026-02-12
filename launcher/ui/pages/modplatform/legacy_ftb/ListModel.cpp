@@ -35,7 +35,6 @@
 
 #include "ListModel.h"
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "net/ApiDownload.h"
 #include "net/HttpMetaCache.h"
 #include "net/NetJob.h"

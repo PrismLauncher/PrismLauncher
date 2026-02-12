@@ -2,7 +2,6 @@
 #include "ui_PasteWizardPage.h"
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "net/PasteUpload.h"
 
 PasteWizardPage::PasteWizardPage(QWidget* parent) : BaseWizardPage(parent), ui(new Ui::PasteWizardPage)

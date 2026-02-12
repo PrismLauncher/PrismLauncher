@@ -33,7 +33,6 @@
 #include "ui/themes/SystemTheme.h"
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 
 ThemeManager::ThemeManager()
 {

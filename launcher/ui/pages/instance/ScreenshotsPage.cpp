@@ -55,7 +55,6 @@
 #include <QStyledItemDelegate>
 
 #include <Application.h>
-#include "settings/SettingsObject.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"

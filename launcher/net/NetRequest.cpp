@@ -49,7 +49,6 @@
 
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #endif
 #include "BuildConfig.h"
 

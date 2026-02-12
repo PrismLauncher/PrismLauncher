@@ -53,7 +53,6 @@
 #include "POTranslator.h"
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 
 const static QLatin1String defaultLangCode("en_US");
 

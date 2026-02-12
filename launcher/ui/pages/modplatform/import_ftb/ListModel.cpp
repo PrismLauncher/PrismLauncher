@@ -23,7 +23,6 @@
 #include <QIcon>
 #include <QProcessEnvironment>
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "Exception.h"
 #include "FileSystem.h"
 #include "Json.h"

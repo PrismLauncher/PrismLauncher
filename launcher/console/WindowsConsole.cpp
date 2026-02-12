@@ -24,15 +24,11 @@
 #endif
 #include <windows.h>
 
-#include <consoleapi.h>
 #include <fcntl.h>
-#include <fileapi.h>
 #include <io.h>
 #include <stdio.h>
 #include <cstddef>
 #include <iostream>
-
-namespace console {
 
 void RedirectHandle(DWORD handle, FILE* stream, const char* mode)
 {
@@ -161,31 +157,3 @@ std::error_code EnableAnsiSupport()
 
     return {};
 }
-
-void FreeWindowsConsole()
-{
-    fclose(stdout);
-    fclose(stdin);
-    fclose(stderr);
-    FreeConsole();
-}
-
-WindowsConsoleGuard::WindowsConsoleGuard() : m_consoleAttached(false)
-{
-    if (console::AttachWindowsConsole()) {
-        m_consoleAttached = true;
-        if (auto err = console::EnableAnsiSupport(); err) {
-            std::cout << "Error setting up ansi console" << err.message() << std::endl;
-        }
-    }
-}
-
-WindowsConsoleGuard::~WindowsConsoleGuard()
-{
-    // Detach from Windows console
-    if (m_consoleAttached) {
-        console::FreeWindowsConsole();
-    }
-}
-
-}  // namespace console

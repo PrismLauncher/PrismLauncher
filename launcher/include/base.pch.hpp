@@ -3,7 +3,6 @@
 #define PRISM_PRECOMPILED_BASE_HEADERS_H
 
 #include <algorithm>
-#include <cstddef>
 #include <functional>
 #include <memory>
 #include <optional>
