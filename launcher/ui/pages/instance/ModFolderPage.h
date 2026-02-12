@@ -39,16 +39,8 @@
 #pragma once
 
 #include <QPointer>
-#include <QSet>
-#include <QStringList>
 #include "ExternalResourcesPage.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
-
-class Mod;
-class Resource;
-class QAction;
-class VirtualModTreeModel;
-class VirtualModTreeProxyModel;
 
 class ModFolderPage : public ExternalResourcesPage {
     Q_OBJECT
@@ -57,25 +49,22 @@ class ModFolderPage : public ExternalResourcesPage {
 
    public:
     explicit ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget* parent = nullptr);
-    ~ModFolderPage() override = default;
+    virtual ~ModFolderPage() = default;
 
     void setFilter(const QString& filter) { m_fileSelectionFilter = filter; }
 
-    QString displayName() const override { return tr("Mods"); }
-    QIcon icon() const override { return QIcon::fromTheme("loadermods"); }
-    QString id() const override { return "mods"; }
-    QString helpPage() const override { return "Loader-mods"; }
+    virtual QString displayName() const override { return tr("Mods"); }
+    virtual QIcon icon() const override { return QIcon::fromTheme("loadermods"); }
+    virtual QString id() const override { return "mods"; }
+    virtual QString helpPage() const override { return "Loader-mods"; }
 
-    bool shouldDisplay() const override;
+    virtual bool shouldDisplay() const override;
 
    public slots:
-    void updateActions() override;
     void updateFrame(const QModelIndex& current, const QModelIndex& previous) override;
 
    private slots:
-    void removeItem();
     void removeItems(const QItemSelection& selection) override;
-    void itemActivated(const QModelIndex& index);
 
     void downloadMods();
     void downloadDialogFinished(int result);
@@ -83,73 +72,36 @@ class ModFolderPage : public ExternalResourcesPage {
     void deleteModMetadata();
     void exportModMetadata();
     void changeModVersion();
-    void createGroup();
-    void deleteSelectedGroup();
-    void moveSelectedModsToGroup();
-    void captureTreeStateBeforeReset();
-    void restoreTreeStateAfterReset();
-
-   private:
-    QModelIndexList selectedSourceIndexes() const;
-    QList<Resource*> selectedResources() const;
-    QList<Mod*> selectedMods() const;
-    QList<Resource*> resourcesForUpdateSelection(const QModelIndexList& sourceIndexes) const;
-    QModelIndexList backendIndexesForResources(const QList<Resource*>& resources) const;
-    QModelIndexList backendIndexesForGroup(const QString& groupId) const;
-    QString selectedGroupIdForActions() const;
-    QString currentSelectedGroupId() const;
-    QString selectedTargetGroupId() const;
-    QString groupDisplayName(const QString& groupId) const;
-    bool confirmManagedGroupModification(const QString& groupId, const QString& actionDescription);
-
-   protected:
-    void enableItem() override;
-    void disableItem() override;
-    void viewHomepage() override;
-    bool eventFilter(QObject* obj, QEvent* ev) override;
 
    protected:
     ModFolderModel* m_model;
     QPointer<ResourceDownload::ModDownloadDialog> m_downloadDialog;
-    VirtualModTreeModel* m_treeModel = nullptr;
-    VirtualModTreeProxyModel* m_treeFilterModel = nullptr;
-    QAction* m_actionCreateGroup = nullptr;
-    QAction* m_actionMoveToGroup = nullptr;
-    QSet<QString> m_preDownloadFileKeys;
-    QString m_pendingDownloadGroupId;
-    QMetaObject::Connection m_downloadUpdateConnection;
-    QStringList m_pendingSelectedGroupIds;
-    QStringList m_pendingSelectedFileKeys;
-    QStringList m_pendingExpandedGroupIds;
-    bool m_pendingScrollValid = false;
-    int m_pendingVerticalScrollValue = 0;
-    int m_pendingHorizontalScrollValue = 0;
 };
 
 class CoreModFolderPage : public ModFolderPage {
     Q_OBJECT
    public:
     explicit CoreModFolderPage(BaseInstance* inst, ModFolderModel* mods, QWidget* parent = 0);
-    ~CoreModFolderPage() override = default;
+    virtual ~CoreModFolderPage() = default;
 
-    QString displayName() const override { return tr("Core Mods"); }
-    QIcon icon() const override { return QIcon::fromTheme("coremods"); }
-    QString id() const override { return "coremods"; }
-    QString helpPage() const override { return "Core-mods"; }
+    virtual QString displayName() const override { return tr("Core Mods"); }
+    virtual QIcon icon() const override { return QIcon::fromTheme("coremods"); }
+    virtual QString id() const override { return "coremods"; }
+    virtual QString helpPage() const override { return "Core-mods"; }
 
-    bool shouldDisplay() const override;
+    virtual bool shouldDisplay() const override;
 };
 
 class NilModFolderPage : public ModFolderPage {
     Q_OBJECT
    public:
     explicit NilModFolderPage(BaseInstance* inst, ModFolderModel* mods, QWidget* parent = 0);
-    ~NilModFolderPage() override = default;
+    virtual ~NilModFolderPage() = default;
 
-    QString displayName() const override { return tr("Nilmods"); }
-    QIcon icon() const override { return QIcon::fromTheme("coremods"); }
-    QString id() const override { return "nilmods"; }
-    QString helpPage() const override { return "Nilmods"; }
+    virtual QString displayName() const override { return tr("Nilmods"); }
+    virtual QIcon icon() const override { return QIcon::fromTheme("coremods"); }
+    virtual QString id() const override { return "nilmods"; }
+    virtual QString helpPage() const override { return "Nilmods"; }
 
-    bool shouldDisplay() const override;
+    virtual bool shouldDisplay() const override;
 };
