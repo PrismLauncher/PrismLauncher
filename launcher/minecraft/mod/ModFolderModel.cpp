@@ -84,19 +84,110 @@ ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_
     connect(this, &ModFolderModel::parseFinished, this, &ModFolderModel::onParseFinished);
 }
 
+enum class Op { EQ, GT, GE, LT, LE, TILDE, CARET };
+
+static Op processVersionString(QString& versionStr)
+{
+    auto consumePrefix = [&versionStr](const QString& prefix) {
+        if (versionStr.startsWith(prefix)) {
+            versionStr.remove(0, prefix.size());
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+
+    if (consumePrefix(">=")) {
+        return Op::GE;
+    } else if (consumePrefix("<=")) {
+        return Op::LE;
+    } else if (consumePrefix(">")) {
+        return Op::GT;
+    } else if (consumePrefix("<")) {
+        return Op::LT;
+    } else if (consumePrefix("=")) {
+        return Op::EQ;
+    } else if (consumePrefix("~")) {
+        return Op::TILDE;
+    } else if (consumePrefix("^")) {
+        return Op::CARET;
+    }
+
+    return Op::EQ; // default when operator omitted
+}
+
+static bool checkVersionConstraint(const QString& constraint, const Version& instanceVersion)
+{
+    if (constraint == "*" || constraint == "ANY" || constraint.isEmpty()) {
+        return true;
+    }
+
+    // // Fabric/Quilt often use || for multiple ranges
+    // if (constraint.contains("||")) {
+    //     auto parts = constraint.split("||");
+    //     for (const auto& part : parts) {
+    //         if (checkVersionConstraint(part.trimmed(), instanceVersion)) {
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // }
+    //
+    // // Handle space as AND (e.g., ">=1.16.5 <1.17")
+    // if (constraint.trimmed().contains(' ')) {
+    //     auto parts = constraint.trimmed().split(QRegularExpression("\\s+"));
+    //     for (const auto& part : parts) {
+    //         if (!checkVersionConstraint(part.trimmed(), instanceVersion)) {
+    //             return false;
+    //         }
+    //     }
+    //     return true;
+    // }
+
+    QString versionStr = constraint;
+    const Op op = processVersionString(versionStr);
+    Version constraintVersion(versionStr);
+
+    switch (op) {
+        case Op::EQ:    return instanceVersion == constraintVersion;
+        case Op::GE:    return instanceVersion >= constraintVersion;
+        case Op::LE:    return instanceVersion <= constraintVersion;
+        case Op::GT:    return instanceVersion >  constraintVersion;
+        case Op::LT:    return instanceVersion <  constraintVersion;
+        case Op::TILDE: return instanceVersion >= constraintVersion; // simplified
+        case Op::CARET: return instanceVersion >= constraintVersion; // simplified
+    }
+    return false;
+}
+
 bool ModFolderModel::isCompatible(int row) const
 {
     auto& mod = at(row);
 
-    auto instanceMcVersionStr = qobject_cast<MinecraftInstance*>(m_instance)
+    const auto instanceMcVersionStr = qobject_cast<MinecraftInstance*>(m_instance)
         ->getPackProfile()
         ->getComponentVersion("net.minecraft");
     // in theory someone could probably mess up the components, better check this
     if (instanceMcVersionStr.isEmpty()) {
         return true;
     }
-    Version instanceMcVersion(instanceMcVersionStr);
+    const Version instanceMcVersion(instanceMcVersionStr);
 
+    // 1. Check dependencies first
+    for (auto details = mod.details(); const auto& dep : details.dependencies) {
+        if (dep.startsWith("minecraft", Qt::CaseInsensitive)) {
+            // Extract constraint from "minecraft (>=1.21.11)"
+            QRegularExpression re("minecraft\\s*\\((.*)\\)", QRegularExpression::CaseInsensitiveOption);
+            auto match = re.match(dep);
+            if (match.hasMatch()) {
+                QString constraint = match.captured(1);
+                return checkVersionConstraint(constraint, Version(instanceMcVersionStr));
+            }
+        }
+    }
+
+    // 2. Fallback to mcVersions
     auto mcVersions = mod.metadata()->mcVersions;
     if (mcVersions.isEmpty()) {
         return true;

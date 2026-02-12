@@ -229,7 +229,6 @@ ModDetails ReadMCModTOML(QByteArray contents)
     details.icon_file = logoFile;
 
     auto parseDep = [&details](toml::array* dependencies) {
-        static const QStringList ignoreModIds = { "", "forge", "neoforge", "minecraft" };
         if (!dependencies) {
             return;
         }
@@ -246,13 +245,21 @@ ModDetails ReadMCModTOML(QByteArray contents)
             if (!dep_table) {
                 continue;
             }
-            auto modId = (*dep_table)["modId"].as_string();
-            if (!modId || ignoreModIds.contains(QString::fromStdString(modId->get()))) {
+            if (!isNeoForgeDep(dep_table) && !isForgeDep(dep_table)) {
                 continue;
             }
-            if (isNeoForgeDep(dep_table) || isForgeDep(dep_table)) {
-                details.dependencies.append(QString::fromStdString(modId->get()));
+            auto modId = (*dep_table)["modId"].as_string();
+            if (!modId) {
+                continue;
             }
+            QString depStr = QString::fromStdString(modId->get());
+            if (auto versionRange = (*dep_table)["versionRange"].as_string()) {
+                QString range = QString::fromStdString(versionRange->get());
+                if (!range.isEmpty() && range != "ANY") {
+                    depStr += " (" + range + ")";
+                }
+            }
+            details.dependencies.append(depStr);
         }
     };
 
@@ -367,9 +374,12 @@ ModDetails ReadFabricModInfo(QByteArray contents)
             if (depends.isObject()) {
                 auto obj = depends.toObject();
                 for (auto key : obj.keys()) {
-                    if (key != "fabricloader" && key != "minecraft" && !key.startsWith("fabric-")) {
-                        details.dependencies.append(key);
+                    QString dep = key;
+                    auto version = obj.value(key).toString();
+                    if (!version.isEmpty()) {
+                        dep += " (" + version + ")";
                     }
+                    details.dependencies.append(dep);
                 }
             }
         }
@@ -465,21 +475,32 @@ ModDetails ReadQuiltModInfo(QByteArray contents)
                 if (depends.isArray()) {
                     auto array = depends.toArray();
                     for (auto obj : array) {
-                        QString modId;
+                        QString dep;
                         if (obj.isString()) {
-                            modId = obj.toString();
+                            dep = obj.toString();
                         } else if (obj.isObject()) {
                             auto objValue = obj.toObject();
-                            modId = objValue.value("id").toString();
+                            auto modId = objValue.value("id").toString();
                             if (objValue.contains("optional") && objValue.value("optional").toBool()) {
                                 continue;
+                            }
+                            dep = modId;
+                            auto versions = objValue.value("versions");
+                            if (versions.isString()) {
+                                dep += " (" + versions.toString() + ")";
+                            } else if (versions.isArray()) {
+                                QStringList vList;
+                                for (auto v : versions.toArray()) {
+                                    vList.append(v.toString());
+                                }
+                                if (!vList.isEmpty()) {
+                                    dep += " (" + vList.join(" || ") + ")";
+                                }
                             }
                         } else {
                             continue;
                         }
-                        if (modId != "minecraft" && !modId.startsWith("quilt_")) {
-                            details.dependencies.append(modId);
-                        }
+                        details.dependencies.append(dep);
                     }
                 }
             }
