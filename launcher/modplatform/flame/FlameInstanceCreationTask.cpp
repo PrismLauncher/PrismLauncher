@@ -61,11 +61,9 @@
 
 #include <QDebug>
 #include <QFileInfo>
-#include <QSet>
 
 #include "meta/Index.h"
 #include "minecraft/World.h"
-#include "minecraft/mod/VirtualModGroupStore.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
 #include "net/ApiDownload.h"
 #include "ui/pages/modplatform/OptionalModDialog.h"
@@ -140,75 +138,6 @@ bool FlameCreationTask::updateInstance()
         Flame::Manifest old_pack;
         Flame::loadManifest(old_pack, old_index_path);
 
-        VirtualModGroupStore virtualStore(QDir(FS::PathCombine(inst->gameRoot(), "mods", ".index")));
-        auto hasVirtualStore = virtualStore.loadOrCreate();
-        auto managedPackId = inst->getManagedPackID();
-        if (managedPackId.isEmpty()) {
-            managedPackId = inst->getManagedPackName();
-        }
-        auto managedGroupId = hasVirtualStore ? virtualStore.findManagedPackGroup(inst->getManagedPackType(), managedPackId) : QString();
-
-        QSet<QString> managedOwnedModPaths;
-        if (hasVirtualStore && !managedGroupId.isEmpty()) {
-            auto existingEntries = virtualStore.entries();
-            for (auto const& entry : existingEntries) {
-                if (entry.groupId != managedGroupId) {
-                    continue;
-                }
-
-                auto fileName = QFileInfo(entry.fileName).fileName();
-                if (fileName.isEmpty()) {
-                    continue;
-                }
-
-                auto relativePath = FS::PathCombine("mods", fileName);
-                managedOwnedModPaths.insert(relativePath);
-                if (relativePath.endsWith(".disabled")) {
-                    managedOwnedModPaths.insert(relativePath.chopped(9));
-                } else {
-                    managedOwnedModPaths.insert(relativePath + ".disabled");
-                }
-            }
-
-            for (auto const& entry : existingEntries) {
-                if (entry.groupId != managedGroupId) {
-                    continue;
-                }
-                if (!virtualStore.removeEntry(entry.fileKey)) {
-                    qWarning() << "Could not remove managed-pack entry while deleting existing managed group:" << entry.fileKey;
-                }
-            }
-
-            if (!virtualStore.deleteGroup(managedGroupId)) {
-                qWarning() << "Could not delete existing managed-pack group before CurseForge update";
-            }
-            if (!virtualStore.save()) {
-                qWarning() << "Could not persist managed-pack group reset before CurseForge update";
-            }
-
-            managedGroupId.clear();
-        }
-
-        auto shouldTreatAsManagedOwned = [&](const QString& targetFolder, const QString& fileName) {
-            if (targetFolder != "mods") {
-                return true;
-            }
-            if (!hasVirtualStore || managedGroupId.isEmpty()) {
-                return true;
-            }
-
-            auto normalizedFileName = QFileInfo(FS::RemoveInvalidPathChars(fileName)).fileName();
-            auto fileKey = VirtualModGroupStore::fileKeyForFileName(normalizedFileName);
-            auto entry = virtualStore.entry(fileKey);
-            if (!entry.has_value()) {
-                return true;
-            }
-            if (entry->groupId.isEmpty()) {
-                return false;
-            }
-            return entry->groupId == managedGroupId;
-        };
-
         auto& old_files = old_pack.files;
 
         auto& files = m_pack.files;
@@ -222,10 +151,6 @@ bool FlameCreationTask::updateInstance()
             if (old_file != old_files.end()) {
                 // We found a match, but is it a different version?
                 if (old_file->fileId == file->fileId) {
-                    if (file->targetFolder == "mods") {
-                        files_iterator++;
-                        continue;
-                    }
                     qDebug() << "Removed file at" << file->targetFolder << "with id" << file->fileId << "from list of downloads";
 
                     old_files.remove(file.key());
@@ -240,11 +165,6 @@ bool FlameCreationTask::updateInstance()
         }
 
         QDir old_minecraft_dir(inst->gameRoot());
-
-        for (auto const& managedPath : managedOwnedModPaths) {
-            qDebug() << "Scheduling managed-group path" << managedPath << "for removal";
-            m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(managedPath));
-        }
 
         // We will remove all the previous overrides, to prevent duplicate files!
         // TODO: Currently 'overrides' will always override the stuff on update. How do we preserve unchanged overrides?
@@ -269,56 +189,52 @@ bool FlameCreationTask::updateInstance()
 
         QEventLoop loop;
 
-        connect(job.get(), &Task::succeeded, this,
-                [this, raw_response, fileIds, old_inst_dir, &old_files, old_minecraft_dir, shouldTreatAsManagedOwned] {
-                    // Parse the API response
-                    QJsonParseError parse_error{};
-                    auto doc = QJsonDocument::fromJson(*raw_response, &parse_error);
-                    if (parse_error.error != QJsonParseError::NoError) {
-                        qWarning() << "Error while parsing JSON response from Flame files task at" << parse_error.offset
-                                   << "reason:" << parse_error.errorString();
-                        qWarning() << *raw_response;
-                        return;
-                    }
+        connect(job.get(), &Task::succeeded, this, [this, raw_response, fileIds, old_inst_dir, &old_files, old_minecraft_dir] {
+            // Parse the API response
+            QJsonParseError parse_error{};
+            auto doc = QJsonDocument::fromJson(*raw_response, &parse_error);
+            if (parse_error.error != QJsonParseError::NoError) {
+                qWarning() << "Error while parsing JSON response from Flame files task at" << parse_error.offset
+                           << "reason:" << parse_error.errorString();
+                qWarning() << *raw_response;
+                return;
+            }
 
-                    try {
-                        QJsonArray entries;
-                        if (fileIds.size() == 1)
-                            entries = { Json::requireObject(Json::requireObject(doc), "data") };
-                        else
-                            entries = Json::requireArray(Json::requireObject(doc), "data");
+            try {
+                QJsonArray entries;
+                if (fileIds.size() == 1)
+                    entries = { Json::requireObject(Json::requireObject(doc), "data") };
+                else
+                    entries = Json::requireArray(Json::requireObject(doc), "data");
 
-                        for (auto entry : entries) {
-                            auto entry_obj = Json::requireObject(entry);
+                for (auto entry : entries) {
+                    auto entry_obj = Json::requireObject(entry);
 
-                            Flame::File file;
-                            // We don't care about blocked mods, we just need local data to delete the file
-                            file.version = FlameMod::loadIndexedPackVersion(entry_obj);
-                            auto id = Json::requireInteger(entry_obj, "id");
-                            old_files.insert(id, file);
-                        }
-                    } catch (Json::JsonException& e) {
-                        qCritical() << e.cause() << e.what();
-                    }
+                    Flame::File file;
+                    // We don't care about blocked mods, we just need local data to delete the file
+                    file.version = FlameMod::loadIndexedPackVersion(entry_obj);
+                    auto id = Json::requireInteger(entry_obj, "id");
+                    old_files.insert(id, file);
+                }
+            } catch (Json::JsonException& e) {
+                qCritical() << e.cause() << e.what();
+            }
 
-                    // Delete the files
-                    for (auto& file : old_files) {
-                        if (file.version.fileName.isEmpty() || file.targetFolder.isEmpty())
-                            continue;
-                        if (file.targetFolder == "mods" && !shouldTreatAsManagedOwned(file.targetFolder, file.version.fileName)) {
-                            continue;
-                        }
+            // Delete the files
+            for (auto& file : old_files) {
+                if (file.version.fileName.isEmpty() || file.targetFolder.isEmpty())
+                    continue;
 
-                        QString relative_path(FS::PathCombine(file.targetFolder, file.version.fileName));
-                        qDebug() << "Scheduling" << relative_path << "for removal";
-                        m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
-                        if (relative_path.endsWith(".disabled")) {  // remove it if it was enabled/disabled by user
-                            m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path.chopped(9)));
-                        } else {
-                            m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path + ".disabled"));
-                        }
-                    }
-                });
+                QString relative_path(FS::PathCombine(file.targetFolder, file.version.fileName));
+                qDebug() << "Scheduling" << relative_path << "for removal";
+                m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
+                if (relative_path.endsWith(".disabled")) {  // remove it if it was enabled/disabled by user
+                    m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path.chopped(9)));
+                } else {
+                    m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path + ".disabled"));
+                }
+            }
+        });
         connect(job.get(), &Task::failed, this, [](QString reason) { qCritical() << "Failed to get files:" << reason; });
         connect(job.get(), &Task::finished, &loop, &QEventLoop::quit);
 
@@ -804,52 +720,13 @@ void FlameCreationTask::validateOtherResources(QEventLoop& loop)
     auto task = makeShared<ConcurrentTask>("CreateModMetadata", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
     auto results = m_modIdResolver->getResults().files;
     auto folder = FS::PathCombine(m_stagingPath, "minecraft", "mods", ".index");
-    QStringList managedModFileNames;
     for (auto file : results) {
-        if (file.targetFolder == "mods") {
-            auto modFileName = FS::RemoveInvalidPathChars(file.version.fileName);
-            auto relativePath = FS::PathCombine(file.targetFolder, modFileName);
-            if (!file.required && !m_selectedOptionalMods.contains(relativePath)) {
-                modFileName += ".disabled";
-            }
-            managedModFileNames.append(modFileName);
-        }
-
         if (file.targetFolder != "mods" || (file.version.fileName.endsWith(".zip") && !zipMods.contains(file.version.fileName))) {
             continue;
         }
         task->addTask(makeShared<LocalResourceUpdateTask>(folder, file.pack, file.version));
     }
-    connect(task.get(), &Task::finished, this, [this, &loop, managedModFileNames] {
-        if (!managedModFileNames.isEmpty()) {
-            VirtualModGroupStore virtualStore(QDir(FS::PathCombine(m_stagingPath, "minecraft", "mods", ".index")));
-            if (virtualStore.loadOrCreate()) {
-                auto managedPackId = m_managedId.isEmpty() ? m_pack.name : m_managedId;
-                auto managedGroupId = virtualStore.ensureManagedPackGroup("flame", managedPackId, m_pack.name);
-
-                for (auto fileName : managedModFileNames) {
-                    auto fileKey = VirtualModGroupStore::fileKeyForFileName(fileName);
-                    auto existingEntry = virtualStore.entry(fileKey);
-
-                    VirtualModGroupStore::Entry virtualEntry;
-                    if (existingEntry.has_value()) {
-                        virtualEntry = existingEntry.value();
-                    }
-
-                    virtualEntry.fileKey = fileKey;
-                    virtualEntry.fileName = fileName;
-                    virtualEntry.groupId = managedGroupId;
-                    virtualEntry.sourceType = VirtualModGroupStore::SourceType::MANAGED_PACK;
-                    virtualStore.upsertEntry(std::move(virtualEntry));
-                }
-
-                if (!virtualStore.save()) {
-                    qWarning() << "Could not save managed-pack virtual mod group store for CurseForge instance";
-                }
-            }
-        }
-        loop.quit();
-    });
+    connect(task.get(), &Task::finished, &loop, &QEventLoop::quit);
     m_processUpdateFileInfoJob = task;
     task->start();
 }

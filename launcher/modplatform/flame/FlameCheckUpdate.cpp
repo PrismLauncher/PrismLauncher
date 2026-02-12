@@ -124,7 +124,7 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QByteArray* 
         auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver.value(), m_resourceModel);
         m_updates.emplace_back(pack->name, resource->metadata()->hash, old_version, latest_ver->version, latest_ver->version_type,
                                api.getModFileChangelog(latest_ver->addonId.toInt(), latest_ver->fileId.toInt()),
-                               ModPlatform::ResourceProvider::FLAME, download_task, resource->enabled(), resource->getOriginalFileName());
+                               ModPlatform::ResourceProvider::FLAME, download_task, resource->enabled());
     }
     m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, latest_ver.value()));
 }

@@ -1449,7 +1449,7 @@ void ModFolderPage::updateMods(bool includeDeps)
         return;
     }
 
-    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoadersList(), useAll);
+    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoadersList());
     updateDialog.checkCandidates();
 
     if (updateDialog.aborted()) {
