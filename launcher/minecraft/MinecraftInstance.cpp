@@ -566,6 +566,8 @@ QStringList MinecraftInstance::javaArguments()
 {
     QStringList args;
 
+    args << "-Duser.language=en";
+
     // custom args go first. we want to override them if we have our own here.
     args.append(extraArguments());
 
@@ -618,8 +620,6 @@ QStringList MinecraftInstance::javaArguments()
             args << QString("-XX:PermSize=%1m").arg(permgen);
         }
     }
-
-    args << "-Duser.language=en";
 
     if (javaVersion.isModular() && shouldApplyOnlineFixes())
         // allow reflective access to java.net - required by the skin fix
