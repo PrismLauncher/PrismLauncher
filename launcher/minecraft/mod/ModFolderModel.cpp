@@ -88,23 +88,11 @@ bool ModFolderModel::isCompatible(int row) const
 {
     auto& mod = at(row);
 
-    auto instanceMcVersionStr = qobject_cast<MinecraftInstance*>(m_instance)
+    const auto instanceMcVersionStr = qobject_cast<MinecraftInstance*>(m_instance)
         ->getPackProfile()
         ->getComponentVersion("net.minecraft");
     // in theory someone could probably mess up the components, better check this
-    if (instanceMcVersionStr.isEmpty()) {
-        return true;
-    }
-    Version instanceMcVersion(instanceMcVersionStr);
-
-    auto mcVersions = mod.metadata()->mcVersions;
-    if (mcVersions.isEmpty()) {
-        return true;
-    }
-
-    return std::ranges::any_of(mcVersions, [&](const auto& versionStr) {
-        return Version(versionStr) == instanceMcVersion;
-    });
+    return instanceMcVersionStr.isEmpty() || mod.metadata()->mcVersions.isEmpty() || mod.metadata()->mcVersions.contains(instanceMcVersionStr);
 }
 
 QVariant ModFolderModel::data(const QModelIndex& index, int role) const
