@@ -64,7 +64,7 @@ class VirtualModGroupStore {
         QString projectId;
     };
 
-    VirtualModGroupStore(QDir modsDir, QDir indexDir);
+    explicit VirtualModGroupStore(QDir indexDir);
 
     [[nodiscard]] bool exists() const;
     [[nodiscard]] bool load();
@@ -74,6 +74,7 @@ class VirtualModGroupStore {
 
     [[nodiscard]] QList<Group> groups() const;
     [[nodiscard]] QList<Entry> entries() const;
+    [[nodiscard]] const QHash<QString, Entry>& entriesByKey() const { return m_entries; }
     [[nodiscard]] std::optional<Entry> entry(QString fileKey) const;
     [[nodiscard]] bool hasEntry(QString fileKey) const;
     void upsertEntry(Entry entry);

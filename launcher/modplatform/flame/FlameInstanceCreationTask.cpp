@@ -140,8 +140,7 @@ bool FlameCreationTask::updateInstance()
         Flame::Manifest old_pack;
         Flame::loadManifest(old_pack, old_index_path);
 
-        VirtualModGroupStore virtualStore(QDir(FS::PathCombine(inst->gameRoot(), "mods")),
-                                          QDir(FS::PathCombine(inst->gameRoot(), "mods", ".index")));
+        VirtualModGroupStore virtualStore(QDir(FS::PathCombine(inst->gameRoot(), "mods", ".index")));
         auto hasVirtualStore = virtualStore.loadOrCreate();
         auto managedPackId = inst->getManagedPackID();
         if (managedPackId.isEmpty()) {
@@ -823,8 +822,7 @@ void FlameCreationTask::validateOtherResources(QEventLoop& loop)
     }
     connect(task.get(), &Task::finished, this, [this, &loop, managedModFileNames] {
         if (!managedModFileNames.isEmpty()) {
-            VirtualModGroupStore virtualStore(QDir(FS::PathCombine(m_stagingPath, "minecraft", "mods")),
-                                              QDir(FS::PathCombine(m_stagingPath, "minecraft", "mods", ".index")));
+            VirtualModGroupStore virtualStore(QDir(FS::PathCombine(m_stagingPath, "minecraft", "mods", ".index")));
             if (virtualStore.loadOrCreate()) {
                 auto managedPackId = m_managedId.isEmpty() ? m_pack.name : m_managedId;
                 auto managedGroupId = virtualStore.ensureManagedPackGroup("flame", managedPackId, m_pack.name);

@@ -122,10 +122,7 @@ namespace {
 
 }  // namespace
 
-VirtualModGroupStore::VirtualModGroupStore(QDir modsDir, QDir indexDir) : m_indexDir(std::move(indexDir))
-{
-    Q_UNUSED(modsDir);
-}
+VirtualModGroupStore::VirtualModGroupStore(QDir indexDir) : m_indexDir(std::move(indexDir)) {}
 
 bool VirtualModGroupStore::exists() const
 {

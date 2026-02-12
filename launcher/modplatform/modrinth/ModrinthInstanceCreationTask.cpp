@@ -90,8 +90,7 @@ bool ModrinthCreationTask::updateInstance()
         std::vector<File> old_files;
         parseManifest(old_index_path, old_files, false, false);
 
-        VirtualModGroupStore virtualStore(QDir(FS::PathCombine(inst->gameRoot(), "mods")),
-                                          QDir(FS::PathCombine(inst->gameRoot(), "mods", ".index")));
+        VirtualModGroupStore virtualStore(QDir(FS::PathCombine(inst->gameRoot(), "mods", ".index")));
         auto hasVirtualStore = virtualStore.loadOrCreate();
         auto managedPackId = inst->getManagedPackID();
         if (managedPackId.isEmpty()) {
@@ -429,7 +428,7 @@ bool ModrinthCreationTask::createInstance()
     }
 
     if (ended_well && !managedModFileNames.isEmpty()) {
-        VirtualModGroupStore virtualStore(QDir(instance.modsRoot()), QDir(FS::PathCombine(instance.modsRoot(), ".index")));
+        VirtualModGroupStore virtualStore(QDir(FS::PathCombine(instance.modsRoot(), ".index")));
         if (virtualStore.loadOrCreate()) {
             auto managedPackId = m_managed_id.isEmpty() ? m_managed_name : m_managed_id;
             auto managedGroupId = virtualStore.ensureManagedPackGroup("modrinth", managedPackId, m_managed_name);

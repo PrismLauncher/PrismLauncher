@@ -153,7 +153,6 @@ class ModFolderModel : public ResourceFolderModel {
 
     void initializeVirtualGroups();
     void bootstrapVirtualGroupsFromCurrentState();
-    bool classifyManagedPackEntriesFromManifests();
     void syncVirtualGroupsFromResources();
     bool isResourceInActiveGroup(const Resource& resource) const;
     QString fileKeyForResource(const Resource& resource) const;
