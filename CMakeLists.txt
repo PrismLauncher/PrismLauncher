@@ -31,7 +31,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
 
-add_compile_definitions($<$<CONFIG:Release>:QT_NO_DEBUG>)
+add_compile_definitions($<$<NOT:$<CONFIG:Debug>>:QT_NO_DEBUG>)
 
 if(MSVC)
     # /GS Adds buffer security checks, default on but incuded anyway to mirror gcc's fstack-protector flag
