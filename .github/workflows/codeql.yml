@@ -58,7 +58,7 @@ jobs:
 
       - name: Configure and Build
         run: |
-          cmake --preset linux
+          cmake --preset linux -DLauncher_USE_PCH=OFF
           cmake --build --preset linux --config Debug
 
       - name: Run tests
