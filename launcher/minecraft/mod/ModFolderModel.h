@@ -44,6 +44,9 @@
 #include <QSet>
 #include <QString>
 
+#include <memory>
+#include <vector>
+
 #include "Mod.h"
 #include "ResourceFolderModel.h"
 #include "minecraft/Component.h"
@@ -51,6 +54,7 @@
 
 class BaseInstance;
 class QFileSystemWatcher;
+class ModGroupStore;
 
 /**
  * A legacy mod list.
@@ -82,7 +86,11 @@ class ModFolderModel : public ResourceFolderModel {
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex& child) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     [[nodiscard]] Resource* createResource(const QFileInfo& file) override { return new Mod(file); }
     [[nodiscard]] Task* createParseTask(Resource&) override;
@@ -92,19 +100,54 @@ class ModFolderModel : public ResourceFolderModel {
     bool setResourceEnabled(const QModelIndexList& indexes, EnableAction action) override;
     bool deleteResources(const QModelIndexList& indexes) override;
 
+    Mod& at(int index) { return *static_cast<Mod*>(m_resources[index].get()); }
+    const Mod& at(int index) const { return *static_cast<const Mod*>(m_resources.at(index).get()); }
+    QList<Mod*> selectedMods(const QModelIndexList& indexes);
+    QList<Mod*> allMods();
+    QList<Resource*> selectedResources(const QModelIndexList& indexes);
+
     QModelIndexList getAffectedMods(const QModelIndexList& indexes, EnableAction action);
 
-    RESOURCE_HELPERS(Mod)
-
-   public:
     QStringList requiresList(QString id);
     QStringList requiredByList(QString id);
 
    private slots:
     void onParseSucceeded(int ticket, QString resource_id) override;
+    void onParseFailed(int ticket, QString resource_id) override;
+    void onUpdateSucceeded() override;
     void onParseFinished();
 
    private:
+    enum class ItemType { GroupNode, ModNode };
+
+    struct TreeNode {
+        ItemType type = ItemType::ModNode;
+        TreeNode* parent = nullptr;
+        int row = -1;
+        QString groupId;
+        QString label;
+        QString resourceId;
+        QList<TreeNode*> children;
+    };
+
+    static QString fileKeyFromFileName(QString fileName);
+    static QString fileKeyFromResource(const Resource& resource);
+
+    [[nodiscard]] TreeNode* nodeFromIndex(const QModelIndex& index) const;
+    [[nodiscard]] Mod* modFromIndex(const QModelIndex& index) const;
+    [[nodiscard]] QModelIndex indexForNode(TreeNode* node, int column = 0) const;
+    [[nodiscard]] QModelIndex indexForResource(const QString& resourceId, int column = 0) const;
+
+    void rebuildTree();
+    void syncGroupAssignments();
+    bool setResourcesEnabled(const QList<Mod*>& mods, EnableAction action);
+
     QHash<QString, QSet<Mod*>> m_requiredBy;
     QHash<QString, QSet<Mod*>> m_requires;
+
+    std::unique_ptr<ModGroupStore> m_groupStore;
+    QList<TreeNode*> m_rootNodes;
+    std::vector<std::unique_ptr<TreeNode>> m_treeStorage;
+    QHash<QString, TreeNode*> m_groupNodesById;
+    QHash<QString, TreeNode*> m_resourceNodes;
 };
