@@ -1,188 +1,114 @@
-name: Build
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+name: Build (Windows MSVC only)
 
 on:
-  merge_group:
-    types: [checks_requested]
-  pull_request:
-  workflow_call:
-    inputs:
-      build-type:
-        description: Type of build (Debug or Release)
-        type: string
-        default: Debug
-      environment:
-        description: Deployment environment to run under
-        type: string
   workflow_dispatch:
-    inputs:
-      build-type:
-        description: Type of build (Debug or Release)
-        type: string
-        default: Debug
+  push:
+    branches: [ develop, main ]
+  pull_request:
 
 permissions: {}
 
 jobs:
-  build:
-    name: Build (${{ matrix.artifact-name }})
-
-    environment: ${{ inputs.environment || '' }}
+  build-windows-msvc:
+    name: Build Windows MSVC (zip + installer)
+    runs-on: windows-2022
 
     permissions:
       contents: read
-      # Required for Azure Trusted Signing
       id-token: write
-      # Required for vcpkg binary cache
       packages: write
 
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-24.04
-            artifact-name: Linux
-            cmake-preset: linux
-            qt-version: 6.10.2
-
-          - os: ubuntu-24.04-arm
-            artifact-name: Linux-aarch64
-            cmake-preset: linux
-            qt-version: 6.10.2
-
-          - os: windows-2022
-            artifact-name: Windows-MinGW-w64
-            cmake-preset: windows_mingw
-            msystem: CLANG64
-            vcvars-arch: amd64_x86
-
-          - os: windows-11-arm
-            artifact-name: Windows-MinGW-arm64
-            cmake-preset: windows_mingw
-            msystem: CLANGARM64
-            vcvars-arch: arm64
-
-          - os: windows-2022
-            artifact-name: Windows-MSVC
-            cmake-preset: windows_msvc
-            # TODO(@getchoo): This is the default in setup-dependencies/windows. Why isn't it working?!?!
-            vcvars-arch: amd64
-            qt-version: 6.10.2
-
-          - os: windows-11-arm
-            artifact-name: Windows-MSVC-arm64
-            cmake-preset: windows_msvc
-            vcvars-arch: arm64
-            qt-version: 6.10.2
-
-          - os: macos-26
-            artifact-name: macOS
-            cmake-preset: macos_universal
-            macosx-deployment-target: 12.0
-            qt-version: 6.9.3
-
-    runs-on: ${{ matrix.os }}
-
-    defaults:
-      run:
-        shell: ${{ matrix.msystem != '' && 'msys2 {0}' || 'bash' }}
-
     env:
-      ARTIFACT_NAME: ${{ matrix.artifact-name }}-Qt6
-      BUILD_PLATFORM: official
-      BUILD_TYPE: ${{ inputs.build-type || 'Debug' }}
-      CMAKE_PRESET: ${{ matrix.cmake-preset }}
-
-      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.macosx-deployment-target }}
+      BUILD_TYPE: Release
+      CMAKE_PRESET: windows_msvc
+      BUILD_DIR: build
+      INSTALL_DIR: install
 
     steps:
-      ##
-      # SETUP
-      ##
-
       - name: Checkout
         uses: actions/checkout@v6
         with:
           submodules: true
 
+      # Uses your repo's existing dependency setup action
       - name: Setup dependencies
-        id: setup-dependencies
         uses: ./.github/actions/setup-dependencies
         with:
           build-type: ${{ env.BUILD_TYPE }}
-          artifact-name: ${{ matrix.artifact-name }}
-          msystem: ${{ matrix.msystem }}
-          vcvars-arch: ${{ matrix.vcvars-arch }}
-          qt-version: ${{ matrix.qt-version }}
+          artifact-name: Windows-MSVC
+          vcvars-arch: amd64
+          qt-version: 6.10.2
 
-      ##
-      # BUILD
-      ##
+      - name: Configure
+        shell: bash
+        run: cmake --preset "$CMAKE_PRESET"
 
-      - name: Configure project
+      - name: Build
+        shell: bash
+        run: cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE"
+
+      - name: Test
+        shell: bash
+        run: ctest --preset "$CMAKE_PRESET" --build-config "$BUILD_TYPE" --extra-verbose --output-on-failure
+
+      - name: Install
+        shell: pwsh
         run: |
-          cmake --preset "$CMAKE_PRESET"
+          cmake --install ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }}
 
-      - name: Run build
+      - name: Generate manifest
+        shell: pwsh
         run: |
-          cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE"
-
-      - name: Run tests
-        run: |
-          ctest --preset "$CMAKE_PRESET" --build-config "$BUILD_TYPE" --extra-verbose --output-on-failure
-
-      ##
-      # PACKAGE
-      ##
+          Get-ChildItem ${{ env.INSTALL_DIR }} -Recurse |
+            ForEach-Object FullName |
+            Resolve-Path -Relative |
+            ForEach-Object { $_.TrimStart('.\') } |
+            ForEach-Object { $_.TrimStart('${{ env.INSTALL_DIR }}') } |
+            ForEach-Object { $_.TrimStart('\') } |
+            Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
 
       - name: Get short version
         id: short-version
         shell: bash
+        run: echo "version=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Create ZIP artifact
+        shell: pwsh
         run: |
-          echo "version=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          $zipName = "PrismLauncher-Windows-MSVC-${{ steps.short-version.outputs.version }}.zip"
+          if (Test-Path $zipName) { Remove-Item $zipName -Force }
+          Compress-Archive -Path "${{ env.INSTALL_DIR }}\\*" -DestinationPath $zipName -Force
+          Write-Host "Created $zipName"
 
-      - name: Package (Linux)
-        if: ${{ runner.os == 'Linux' }}
-        uses: ./.github/actions/package/linux
-        with:
-          version: ${{ steps.short-version.outputs.version }}
-          build-type: ${{ steps.setup-dependencies.outputs.build-type }}
-          artifact-name: ${{ matrix.artifact-name }}
-          qt-version: ${{ steps.setup-dependencies.outputs.qt-version }}
-
-          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          gpg-private-key-id: ${{ secrets.GPG_PRIVATE_KEY_ID }}
-
-      - name: Package (macOS)
-        if: ${{ runner.os == 'macOS' }}
-        uses: ./.github/actions/package/macos
-        with:
-          version: ${{ steps.short-version.outputs.version }}
-          build-type: ${{ steps.setup-dependencies.outputs.build-type }}
-          artifact-name: ${{ matrix.artifact-name }}
-
-          apple-codesign-cert: ${{ secrets.APPLE_CODESIGN_CERT }}
-          apple-codesign-password: ${{ secrets.APPLE_CODESIGN_PASSWORD }}
-          apple-codesign-id: ${{ secrets.APPLE_CODESIGN_ID }}
-          apple-notarize-apple-id: ${{ secrets.APPLE_NOTARIZE_APPLE_ID }}
-          apple-notarize-team-id: ${{ secrets.APPLE_NOTARIZE_TEAM_ID }}
-          apple-notarize-password: ${{ secrets.APPLE_NOTARIZE_PASSWORD }}
-          sparkle-ed25519-key: ${{ secrets.SPARKLE_ED25519_KEY }}
-
-      - name: Package (Windows)
-        if: ${{ runner.os == 'Windows' }}
-        uses: ./.github/actions/package/windows
+      - name: Build NSIS installer (.exe)
+        shell: pwsh
         env:
-          CI_HAS_ACCESS_TO_AZURE: ${{ vars.CI_HAS_ACCESS_TO_AZURE || '' }}
-        with:
-          version: ${{ steps.short-version.outputs.version }}
-          build-type: ${{ steps.setup-dependencies.outputs.build-type }}
-          artifact-name: ${{ matrix.artifact-name }}
-          msystem: ${{ matrix.msystem }}
+          NSCURL_VERSION: "v24.9.26.122"
+          NSCURL_SHA256: "AEE6C4BE3CB6455858E9C1EE4B3AFE0DB9960FA03FE99CCDEDC28390D57CCBB0"
+        run: |
+          New-Item -Name NSISPlugins -ItemType Directory -Force
+          Invoke-WebRequest "https://github.com/negrutiu/nsis-nscurl/releases/download/${{ env.NSCURL_VERSION }}/NScurl.zip" -OutFile "NSISPlugins\\NScurl.zip"
 
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          $nscurl_hash = (Get-FileHash "NSISPlugins\\NScurl.zip" -Algorithm Sha256).Hash
+          if ($nscurl_hash -ne "${{ env.NSCURL_SHA256 }}") {
+            Write-Error "NSCurl.zip sha256 mismatch"
+            exit 1
+          }
+
+          Expand-Archive -Path "NSISPlugins\\NScurl.zip" -DestinationPath "NSISPlugins\\NScurl" -Force
+
+          Push-Location ${{ env.INSTALL_DIR }}
+          makensis -NOCD "${{ github.workspace }}/${{ env.BUILD_DIR }}/program_info/win_install.nsi"
+          Pop-Location
+
+      - name: Upload ZIP
+        uses: actions/upload-artifact@v6
+        with:
+          name: PrismLauncher-Windows-MSVC-${{ steps.short-version.outputs.version }}
+          path: PrismLauncher-Windows-MSVC-${{ steps.short-version.outputs.version }}.zip
+
+      - name: Upload installer EXE
+        uses: actions/upload-artifact@v6
+        with:
+          name: PrismLauncher-Windows-MSVC-Setup-${{ steps.short-version.outputs.version }}
+          path: PrismLauncher-Setup.exe
