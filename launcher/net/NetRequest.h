@@ -97,6 +97,10 @@ class NetRequest : public Task {
    protected:
     std::unique_ptr<Sink> m_sink;
     Options m_options;
+    bool m_firstDataChunk = true;
+    int m_416RetryCount = 0;
+    qint64 m_resumeOffset = 0;
+    static constexpr int MAX_416_RETRIES = 3;
 
     using logCatFunc = const QLoggingCategory& (*)();
     logCatFunc logCat = taskUploadLogC;

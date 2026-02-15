@@ -51,6 +51,8 @@ class Sink {
     virtual auto finalize(QNetworkReply& reply) -> Task::State = 0;
 
     virtual auto hasLocalData() -> bool = 0;
+    virtual auto currentLocalSize() -> qint64 { return 0; }
+    virtual void truncate() {}
 
     QString failReason() const { return m_fail_reason; }
 
@@ -90,6 +92,14 @@ class Sink {
     {
         for (auto& validator : validators) {
             if (!validator->write(data))
+                return false;
+        }
+        return true;
+    }
+    bool resetAllValidators()
+    {
+        for (auto& validator : validators) {
+            if (!validator->reset())
                 return false;
         }
         return true;

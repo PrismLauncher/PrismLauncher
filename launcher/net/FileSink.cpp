@@ -39,6 +39,9 @@
 
 #include "net/Logging.h"
 
+#include <QDateTime>
+#include <QFileInfo>
+
 namespace Net {
 
 Task::State FileSink::init(QNetworkRequest& request)
@@ -48,48 +51,136 @@ Task::State FileSink::init(QNetworkRequest& request)
         return result;
     }
 
-    // create a new save file and open it for writing
-    if (!FS::ensureFilePathExists(m_filename)) {
-        qCCritical(taskNetLogC) << "Could not create folder for " + m_filename;
+    m_part_path = m_filename + ".part";
+    m_wroteAnyData = false;
+    m_part_size = -1;
+
+    if (m_output_file && m_output_file->isOpen()) {
+        m_output_file->close();
+    }
+    m_output_file.reset();
+
+    // create destination path and initialize validators
+    if (!FS::ensureFilePathExists(m_part_path)) {
+        qCCritical(taskNetLogC) << "Could not create folder for " + m_part_path;
         m_fail_reason = "Could not create folder";
         return Task::State::Failed;
     }
+    if (!initAllValidators(request)) {
+        m_fail_reason = "Failed to initialize validators";
+        return Task::State::Failed;
+    }
 
-    m_wroteAnyData = false;
-    m_output_file.reset(new PSaveFile(m_filename));
-    if (!m_output_file->open(QIODevice::WriteOnly)) {
-        qCCritical(taskNetLogC) << "Could not open " + m_filename + " for writing";
+    QFileInfo partInfo(m_part_path);
+    if (partInfo.exists()) {
+        auto modified = partInfo.lastModified();
+        if (modified.isValid() && modified.daysTo(QDateTime::currentDateTimeUtc()) > 7) {
+            qCWarning(taskNetLogC) << "Removing stale partial download" << m_part_path;
+            QFile::remove(m_part_path);
+            partInfo.refresh();
+        }
+    }
+
+    // if we already have partial data, pre-seed validators and continue from there
+    if (partInfo.exists() && partInfo.size() > 0) {
+        QFile seedFile(m_part_path);
+        if (!seedFile.open(QIODevice::ReadOnly)) {
+            qCWarning(taskNetLogC) << "Failed to open partial file for resume, restarting:" << m_part_path;
+            if (!QFile::remove(m_part_path) && QFile::exists(m_part_path)) {
+                qCCritical(taskNetLogC) << "Failed to remove invalid partial file" << m_part_path;
+                m_fail_reason = "Failed to reset partial file";
+                return Task::State::Failed;
+            }
+            if (!resetAllValidators()) {
+                m_fail_reason = "Failed to reset validators";
+                return Task::State::Failed;
+            }
+        } else {
+            constexpr qint64 CHUNK_BUFFER_SIZE = 1024 * 1024;
+            bool readError = false;
+            while (!seedFile.atEnd()) {
+                auto chunk = seedFile.read(CHUNK_BUFFER_SIZE);
+                if (seedFile.error() != QFile::NoError) {
+                    readError = true;
+                    break;
+                }
+                if (chunk.isEmpty()) {
+                    if (!seedFile.atEnd()) {
+                        readError = true;
+                    }
+                    break;
+                }
+                if (!writeAllValidators(chunk)) {
+                    readError = true;
+                    break;
+                }
+            }
+
+            if (readError) {
+                qCWarning(taskNetLogC) << "Partial download is invalid, restarting:" << m_part_path;
+                seedFile.close();
+                if (!QFile::remove(m_part_path) && QFile::exists(m_part_path)) {
+                    qCCritical(taskNetLogC) << "Failed to remove invalid partial file" << m_part_path;
+                    m_fail_reason = "Failed to reset partial file";
+                    return Task::State::Failed;
+                }
+                if (!resetAllValidators()) {
+                    m_fail_reason = "Failed to reset validators";
+                    return Task::State::Failed;
+                }
+            } else {
+                m_part_size = seedFile.size();
+                qCDebug(taskNetLogC) << "Resuming from partial file" << m_part_path << "with size" << m_part_size;
+                seedFile.close();
+            }
+        }
+    }
+
+    m_output_file = std::make_unique<QFile>(m_part_path);
+    QIODevice::OpenMode mode = QIODevice::WriteOnly;
+    if (QFileInfo(m_part_path).exists()) {
+        mode |= QIODevice::Append;
+    } else {
+        mode |= QIODevice::Truncate;
+    }
+    if (!m_output_file->open(mode)) {
+        qCCritical(taskNetLogC) << "Could not open" << m_part_path << "for writing";
         m_fail_reason = "Could not open file";
         return Task::State::Failed;
     }
 
-    if (initAllValidators(request))
-        return Task::State::Running;
-    m_fail_reason = "Failed to initialize validators";
-    return Task::State::Failed;
+    if (m_part_size < 0) {
+        m_part_size = m_output_file->size();
+    }
+    return Task::State::Running;
 }
 
 Task::State FileSink::write(QByteArray& data)
 {
-    if (!writeAllValidators(data) || m_output_file->write(data) != data.size()) {
-        qCCritical(taskNetLogC) << "Failed writing into " + m_filename;
-        m_output_file->cancelWriting();
+    if (!m_output_file || !m_output_file->isOpen() || !writeAllValidators(data) || m_output_file->write(data) != data.size()) {
+        qCCritical(taskNetLogC) << "Failed writing into" << m_part_path;
+        if (m_output_file && m_output_file->isOpen()) {
+            m_output_file->close();
+        }
         m_output_file.reset();
         m_wroteAnyData = false;
-        m_fail_reason = "Failed to write validators";
+        m_fail_reason = "Failed to write output";
         return Task::State::Failed;
     }
 
     m_wroteAnyData = true;
+    m_part_size += data.size();
     return Task::State::Running;
 }
 
 Task::State FileSink::abort()
 {
-    if (m_output_file) {
-        m_output_file->cancelWriting();
+    if (m_output_file && m_output_file->isOpen()) {
+        m_output_file->close();
     }
     failAllValidators();
+    m_part_size = currentLocalSize();
+    m_wroteAnyData = false;
     return Task::State::Failed;
 }
 
@@ -101,30 +192,62 @@ Task::State FileSink::finalize(QNetworkReply& reply)
     int statusCode = statusCodeV.toInt(&validStatus);
     if (validStatus) {
         // this leaves out 304 Not Modified
-        gotFile = statusCode == 200 || statusCode == 203;
+        gotFile = statusCode == 200 || statusCode == 203 || statusCode == 206;
     }
 
-    // if we wrote any data to the save file, we try to commit the data to the real file.
+    // if we wrote any data to the temporary file, try to commit it to the destination.
     // if it actually got a proper file, we write it even if it was empty
     if (gotFile || m_wroteAnyData) {
-        // ask validators for data consistency
-        // we only do this for actual downloads, not 'your data is still the same' cache hits
+        if (m_output_file && m_output_file->isOpen()) {
+            if (!m_output_file->flush()) {
+                qCCritical(taskNetLogC) << "Failed flushing partial file" << m_part_path;
+                m_fail_reason = "Failed to flush output file";
+                return Task::State::Failed;
+            }
+            m_output_file->close();
+        }
+
         if (!finalizeAllValidators(reply)) {
+            QFile::remove(m_part_path);
             m_fail_reason = "Failed to finalize validators";
             return Task::State::Failed;
         }
 
-        // nothing went wrong...
-        if (!m_output_file->commit()) {
+        QString backup_path;
+        bool destination_backed_up = false;
+        if (QFile::exists(m_filename)) {
+            backup_path = m_filename + ".old";
+
+            if (QFile::exists(backup_path) && !QFile::remove(backup_path)) {
+                qCCritical(taskNetLogC) << "Failed to prepare backup path" << backup_path;
+                m_fail_reason = "Failed to prepare file replacement backup";
+                return Task::State::Failed;
+            }
+
+            if (!QFile::rename(m_filename, backup_path)) {
+                qCCritical(taskNetLogC) << "Failed to backup destination file" << m_filename;
+                m_fail_reason = "Failed to replace destination file";
+                return Task::State::Failed;
+            }
+            destination_backed_up = true;
+        }
+
+        if (!QFile::rename(m_part_path, m_filename)) {
             qCCritical(taskNetLogC) << "Failed to commit changes to" << m_filename;
-            m_output_file->cancelWriting();
+            if (destination_backed_up && !QFile::rename(backup_path, m_filename)) {
+                qCCritical(taskNetLogC) << "Failed to restore destination file from backup" << backup_path;
+            }
             m_fail_reason = "Failed to commit changes";
             return Task::State::Failed;
         }
+
+        if (destination_backed_up && !QFile::remove(backup_path)) {
+            qCWarning(taskNetLogC) << "Failed to remove destination backup file" << backup_path;
+        }
     }
 
-    // then get rid of the save file
     m_output_file.reset();
+    m_part_size = -1;
 
     return finalizeCache(reply);
 }
@@ -143,5 +266,52 @@ bool FileSink::hasLocalData()
 {
     QFileInfo info(m_filename);
     return info.exists() && info.size() != 0;
+}
+
+qint64 FileSink::currentLocalSize()
+{
+    QFileInfo partInfo(m_part_path);
+    if (!partInfo.exists()) {
+        m_part_size = 0;
+        return 0;
+    }
+
+    auto actualSize = partInfo.size();
+    if (m_part_size < 0 || m_part_size != actualSize) {
+        m_part_size = actualSize;
+    }
+    return m_part_size;
+}
+
+void FileSink::truncate()
+{
+    if (m_output_file && m_output_file->isOpen()) {
+        m_output_file->close();
+    }
+
+    QFile file(m_part_path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        qCCritical(taskNetLogC) << "Failed truncating partial file" << m_part_path;
+        m_fail_reason = "Failed to truncate partial file";
+        m_output_file.reset();
+        return;
+    }
+
+    file.close();
+    m_part_size = 0;
+    m_wroteAnyData = false;
+
+    if (!resetAllValidators()) {
+        m_fail_reason = "Failed to reset validators";
+        m_output_file.reset();
+        return;
+    }
+
+    m_output_file = std::make_unique<QFile>(m_part_path);
+    if (!m_output_file->open(QIODevice::WriteOnly | QIODevice::Append)) {
+        qCCritical(taskNetLogC) << "Failed to reopen partial file" << m_part_path;
+        m_fail_reason = "Failed to reopen partial file";
+        m_output_file.reset();
+    }
 }
 }  // namespace Net
