@@ -27,6 +27,18 @@ runs:
   using: composite
 
   steps:
+    - name: Cleanup Qt installation on Linux
+      shell: bash
+      run: |
+        rm -rf "$QT_PLUGIN_PATH"/printsupport
+        rm -rf "$QT_PLUGIN_PATH"/sqldrivers
+        rm -rf "$QT_PLUGIN_PATH"/help
+        rm -rf "$QT_PLUGIN_PATH"/designer
+        rm -rf "$QT_PLUGIN_PATH"/qmltooling
+        rm -rf "$QT_PLUGIN_PATH"/qmlls
+        rm -rf "$QT_PLUGIN_PATH"/qmllint
+        rm -rf "$QT_PLUGIN_PATH"/platformthemes/libqgtk3.so
+
     - name: Setup build variables
       shell: bash
       run: |

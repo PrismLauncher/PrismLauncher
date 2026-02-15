@@ -1,4 +1,5 @@
 name: Setup Linux dependencies
+description: Install and setup dependencies for building Prism Launcher
 
 runs:
   using: composite

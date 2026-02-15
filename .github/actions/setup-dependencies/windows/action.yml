@@ -1,4 +1,5 @@
 name: Setup Windows Dependencies
+description: Install and setup dependencies for building Prism Launcher
 
 inputs:
   build-type:
