@@ -157,7 +157,7 @@ void Flame::FileResolvingTask::netJobFinished()
     m_task = modrinthAPI.currentVersions(hashes, "sha1", m_result.get());
     (dynamic_cast<NetJob*>(m_task.get()))->setAskRetry(false);
     auto step_progress = std::make_shared<TaskStepProgress>();
-    connect(m_task.get(), &Task::finished, this, [this, step_progress]() {
+    connect(m_task.get(), &Task::succeeded, this, [this, step_progress]() {
         step_progress->state = TaskStepState::Succeeded;
         stepProgress(*step_progress);
         QJsonParseError parse_error{};
@@ -203,6 +203,7 @@ void Flame::FileResolvingTask::netJobFinished()
     connect(m_task.get(), &Task::failed, this, [this, step_progress](QString reason) {
         step_progress->state = TaskStepState::Failed;
         stepProgress(*step_progress);
+        getFlameProjects();
     });
     connect(m_task.get(), &Task::stepProgress, this, &FileResolvingTask::propagateStepProgress);
     connect(m_task.get(), &Task::progress, this, [this, step_progress](qint64 current, qint64 total) {
