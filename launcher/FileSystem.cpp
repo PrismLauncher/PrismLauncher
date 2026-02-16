@@ -793,7 +793,7 @@ QString NormalizePath(QString path)
     }
 }
 
-static const QString BAD_WIN_CHARS = "<>:\"|?*\r\n";
+static const QString BAD_WIN_CHARS = "<>:\"|?*\r\n™®©";
 static const QString BAD_NTFS_CHARS = "<>:\"|?*";
 static const QString BAD_HFS_CHARS = ":";
 
