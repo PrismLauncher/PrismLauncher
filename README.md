@@ -1,3 +1,24 @@
+This project does not have any affliation to PrismLauncher, nor Microsoft.\
+This is a fork of prism launcher which enables Adding offline account.\
+This is done in order to test, and experiment.\
+This application does endorse any kind of piracy, you are suggested to buy the offical game from official store.\
+
+
+
+This may come with its own flaws such as:
+  - Applications are not signed, and OS may give warning
+  - Mutliplayer functionality is limited
+
+
+
+
+> ⚠️ NOTE: The application for All 3 OS'es is not signed, and that is to be expected as this is just for experiments. They can be safely ignored, if you have downloaded the application from the RELEASES section of this repository or if you're updating from the offical prism launcher/
+
+Updates:\
+Updates will be released every 2 weeks after fetching from the source, or will be triggered manually if a ISSUE is created. 
+
+---
+
 <p align="center">
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="/program_info/org.prismlauncher.PrismLauncher.logo-darkmode.svg">
