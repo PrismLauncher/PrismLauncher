@@ -60,19 +60,6 @@
 #include "modplatform/ModIndex.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
-QString ModFolderModel::fileKeyFromFileName(QString fileName)
-{
-    if (fileName.endsWith(".disabled")) {
-        fileName.chop(9);
-    }
-    return fileName;
-}
-
-QString ModFolderModel::fileKeyFromResource(const Resource& resource)
-{
-    return fileKeyFromFileName(resource.fileinfo().fileName());
-}
-
 ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)
     : ResourceFolderModel(QDir(dir), instance, is_indexed, create_dir, parent), m_groupStore(std::make_unique<ModGroupStore>(m_dir))
 {
@@ -92,6 +79,8 @@ ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_
 
     connect(this, &ModFolderModel::parseFinished, this, &ModFolderModel::onParseFinished);
 }
+
+ModFolderModel::~ModFolderModel() = default;
 
 QVariant ModFolderModel::data(const QModelIndex& index, int role) const
 {
@@ -443,7 +432,7 @@ void ModFolderModel::syncGroupAssignments()
     QStringList fileKeys;
     fileKeys.reserve(m_resources.size());
     for (const auto& resource : m_resources) {
-        fileKeys.append(fileKeyFromResource(*resource));
+        fileKeys.append(ModGroupStore::normalizeFileKey(resource->fileinfo().fileName()));
     }
 
     m_groupStore->syncWithFilesystem(fileKeys);
@@ -481,9 +470,10 @@ void ModFolderModel::rebuildTree()
 
         TreeNode* parentNode = nullptr;
         if (m_groupStore) {
-            auto groupId = m_groupStore->groupFor(fileKeyFromResource(*resource));
-            if (groupId.has_value()) {
-                parentNode = m_groupNodesById.value(*groupId, nullptr);
+            auto fileKey = ModGroupStore::normalizeFileKey(resource->fileinfo().fileName());
+            auto groupId = m_groupStore->groupFor(fileKey);
+            if (!groupId.isEmpty()) {
+                parentNode = m_groupNodesById.value(groupId, nullptr);
             }
         }
 
@@ -980,7 +970,7 @@ bool ModFolderModel::deleteResources(const QModelIndexList& indexes)
     }
 
     for (auto* mod : mods) {
-        mod->destroy(indexDir());
+        static_cast<Resource*>(mod)->destroy(indexDir());
     }
 
     update();

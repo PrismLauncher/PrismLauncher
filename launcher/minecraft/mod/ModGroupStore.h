@@ -25,8 +25,6 @@
 #include <QString>
 #include <QStringList>
 
-#include <optional>
-
 class ModGroupStore {
    public:
     struct Group {
@@ -39,17 +37,16 @@ class ModGroupStore {
     QString createGroup(const QString& name);
     bool deleteGroup(const QString& groupId);
 
-    bool assign(const QString& fileKey, const std::optional<QString>& groupId);
-    std::optional<QString> groupFor(const QString& fileKey) const;
+    bool assign(const QString& fileKey, const QString& groupId = {});
+    QString groupFor(const QString& fileKey) const;
     QList<Group> groups() const { return m_groups; }
+    static QString normalizeFileKey(QString fileKey);
 
     bool syncWithFilesystem(const QStringList& fileKeys);
     bool save();
 
    private:
     static constexpr int s_formatVersion = 1;
-
-    static QString normalizeFileKey(QString fileKey);
 
     bool load();
     bool deserialize(const QJsonObject& root);

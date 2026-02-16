@@ -66,6 +66,7 @@ bool ModGroupStore::deleteGroup(const QString& groupId)
     if (iter == m_groups.end())
         return false;
 
+    // We mutate first, then persist. Keep previous state so a failed save can be rolled back.
     const auto previousGroups = m_groups;
     const auto previousAssignments = m_assignments;
 
@@ -84,29 +85,27 @@ bool ModGroupStore::deleteGroup(const QString& groupId)
     return false;
 }
 
-bool ModGroupStore::assign(const QString& fileKey, const std::optional<QString>& groupId)
+bool ModGroupStore::assign(const QString& fileKey, const QString& groupId)
 {
     auto normalizedFileKey = normalizeFileKey(fileKey);
     if (normalizedFileKey.isEmpty())
         return false;
 
-    QString normalizedGroupId;
-    if (groupId.has_value()) {
-        normalizedGroupId = groupId->trimmed();
-        if (!normalizedGroupId.isEmpty() && !hasGroup(normalizedGroupId))
-            return false;
-    }
-
-    if (m_assignments.contains(normalizedFileKey) && m_assignments.value(normalizedFileKey) == normalizedGroupId)
-        return true;
-
     const bool hadPreviousValue = m_assignments.contains(normalizedFileKey);
     const auto previousValue = m_assignments.value(normalizedFileKey);
+    const auto normalizedGroupId = groupId;
+
+    if (!normalizedGroupId.isEmpty() && !hasGroup(normalizedGroupId))
+        return false;
+
+    if (hadPreviousValue && previousValue == normalizedGroupId)
+        return true;
 
     m_assignments[normalizedFileKey] = normalizedGroupId;
     if (save())
         return true;
 
+    // save() failed; restore the pre-mutation state to keep memory aligned with disk.
     if (hadPreviousValue) {
         m_assignments[normalizedFileKey] = previousValue;
     } else {
@@ -115,17 +114,10 @@ bool ModGroupStore::assign(const QString& fileKey, const std::optional<QString>&
     return false;
 }
 
-std::optional<QString> ModGroupStore::groupFor(const QString& fileKey) const
+QString ModGroupStore::groupFor(const QString& fileKey) const
 {
     auto normalizedFileKey = normalizeFileKey(fileKey);
-    if (!m_assignments.contains(normalizedFileKey))
-        return std::nullopt;
-
-    const auto value = m_assignments.value(normalizedFileKey);
-    if (value.isEmpty())
-        return std::nullopt;
-
-    return value;
+    return m_assignments.value(normalizedFileKey);
 }
 
 bool ModGroupStore::syncWithFilesystem(const QStringList& fileKeys)
@@ -165,6 +157,7 @@ bool ModGroupStore::syncWithFilesystem(const QStringList& fileKeys)
     if (save())
         return true;
 
+    // save() failed; keep in-memory assignments consistent with on-disk state.
     m_assignments = previousAssignments;
     return false;
 }
@@ -210,7 +203,7 @@ bool ModGroupStore::load()
     QJsonDocument document;
 
     try {
-        document = QJsonDocument::fromJson(FS::read(m_filePath), &parseError);
+        document = Json::parseUntilGarbage(FS::read(m_filePath), &parseError);
     } catch (const FS::FileSystemException& e) {
         qWarning() << "Could not read mod group metadata file:" << e.cause();
         return false;
@@ -259,7 +252,7 @@ bool ModGroupStore::deserialize(const QJsonObject& root)
             continue;
         }
 
-        const auto parsedGroupId = groupId.toString().trimmed();
+        const auto parsedGroupId = groupId.toString();
         if (parsedGroupId.isEmpty())
             continue;
 
@@ -281,12 +274,12 @@ bool ModGroupStore::deserialize(const QJsonObject& root)
 
     auto assignmentsObject = root.value("assignments").toObject();
     for (auto assignment = assignmentsObject.begin(); assignment != assignmentsObject.end(); ++assignment) {
-        auto normalizedFileKey = normalizeFileKey(assignment.key());
-        if (normalizedFileKey.isEmpty())
+        auto fileKey = assignment.key();
+        if (fileKey.isEmpty())
             continue;
 
         if (assignment.value().isNull()) {
-            m_assignments[normalizedFileKey] = {};
+            m_assignments[fileKey] = {};
             continue;
         }
 
@@ -295,13 +288,13 @@ bool ModGroupStore::deserialize(const QJsonObject& root)
             continue;
         }
 
-        auto groupId = assignment.value().toString().trimmed();
+        auto groupId = assignment.value().toString();
         if (groupId.isEmpty() || !groupIds.contains(groupId)) {
-            m_assignments[normalizedFileKey] = {};
+            m_assignments[fileKey] = {};
             continue;
         }
 
-        m_assignments[normalizedFileKey] = groupId;
+        m_assignments[fileKey] = groupId;
     }
 
     return true;
@@ -313,7 +306,6 @@ QJsonObject ModGroupStore::serialize() const
     root.insert("formatVersion", s_formatVersion);
 
     QJsonArray groupsArray;
-    groupsArray.reserve(m_groups.size());
 
     for (const auto& group : m_groups) {
         QJsonObject groupObject;

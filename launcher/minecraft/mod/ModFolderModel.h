@@ -80,6 +80,7 @@ class ModFolderModel : public ResourceFolderModel {
         NUM_COLUMNS
     };
     ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent = nullptr);
+    ~ModFolderModel() override;
 
     virtual QString id() const override { return "mods"; }
 
@@ -129,9 +130,6 @@ class ModFolderModel : public ResourceFolderModel {
         QString resourceId;
         QList<TreeNode*> children;
     };
-
-    static QString fileKeyFromFileName(QString fileName);
-    static QString fileKeyFromResource(const Resource& resource);
 
     [[nodiscard]] TreeNode* nodeFromIndex(const QModelIndex& index) const;
     [[nodiscard]] Mod* modFromIndex(const QModelIndex& index) const;
