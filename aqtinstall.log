@@ -1,0 +1,6 @@
+2026-02-14 18:25:31,848 - aqt.main - INFO - installer 24540 aqtinstall(aqt) v3.3.0 on Python 3.13.12 [CPython MSC v.1944 64 bit (AMD64)]
+2026-02-14 18:25:31,849 - aqt.helper - DEBUG - helper 24540 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/qt6_660/Updates.xml.sha256
+2026-02-14 18:25:33,491 - aqt.main - ERROR - installer 24540 The packages ['qt_base', 'qtimageformats', 'qtnetworkauth'] were not found while parsing XML of package information!
+==============================Suggested follow-up:==============================
+* Please use 'aqt list-qt windows desktop --arch 6.6.0' to show architectures available.
+* Please use 'aqt list-qt windows desktop --modules 6.6.0 <arch>' to show modules available.
