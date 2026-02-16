@@ -60,7 +60,7 @@ void Flame::FileResolvingTask::executeTask()
     m_task = flameAPI.getFiles(fileIds, m_result.get());
 
     auto step_progress = std::make_shared<TaskStepProgress>();
-    connect(m_task.get(), &Task::finished, this, [this, step_progress]() {
+    connect(m_task.get(), &Task::succeeded, this, [this, step_progress]() {
         step_progress->state = TaskStepState::Succeeded;
         stepProgress(*step_progress);
         netJobFinished();
