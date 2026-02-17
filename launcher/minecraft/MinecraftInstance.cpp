@@ -685,12 +685,7 @@ QProcessEnvironment MinecraftInstance::createEnvironment()
             env.insert(iter.key(), iter.value().toString());
     };
 
-    bool overrideEnv = settings()->get("OverrideEnv").toBool();
-
-    if (!overrideEnv)
-        insertEnv(APPLICATION->settings()->get("Env").toString());
-    else
-        insertEnv(settings()->get("Env").toString());
+    insertEnv(settings()->get("Env").toString());
     return env;
 }
 
@@ -890,9 +885,13 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftT
 
 QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin)
 {
+    constexpr auto indent = "  ";
+    constexpr auto emptyLine = "";
+
     QStringList out;
-    out << "Main Class:" << "  " + getMainClass() << "";
-    out << "Native path:" << "  " + getNativePath() << "";
+
+    out << "Main Class:" << indent + getMainClass() << emptyLine;
+    out << "Native path:" << indent + getNativePath() << emptyLine;
 
     auto profile = m_components->getProfile();
 
@@ -901,9 +900,9 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
     if (alltraits.size()) {
         out << "Traits:";
         for (auto trait : alltraits) {
-            out << "traits " + trait;
+            out << indent + trait;
         }
-        out << "";
+        out << emptyLine;
     }
 
     // native libraries
@@ -915,7 +914,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
             out << "Using system OpenAL.";
         if (nativeGLFW)
             out << "Using system GLFW.";
-        out << "";
+        out << emptyLine;
     }
 
     // libraries and class path.
@@ -924,14 +923,14 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
         QStringList jars, nativeJars;
         profile->getLibraryFiles(runtimeContext(), jars, nativeJars, getLocalLibraryPath(), binRoot());
         for (auto file : jars) {
-            out << "  " + file;
+            out << indent + file;
         }
-        out << "";
+        out << emptyLine;
         out << "Native libraries:";
         for (auto file : nativeJars) {
-            out << "  " + file;
+            out << indent + file;
         }
-        out << "";
+        out << emptyLine;
     }
 
     // mods and core mods
@@ -956,7 +955,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
                     out << u8"  [✘] " + mod->fileinfo().completeBaseName() + " (disabled)";
                 }
             }
-            out << "";
+            out << emptyLine;
         }
     };
 
@@ -971,19 +970,19 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
             auto displayname = jarmod->displayName(runtimeContext());
             auto realname = jarmod->filename(runtimeContext());
             if (displayname != realname) {
-                out << "  " + displayname + " (" + realname + ")";
+                out << indent + displayname + " (" + realname + ")";
             } else {
-                out << "  " + realname;
+                out << indent + realname;
             }
         }
-        out << "";
+        out << emptyLine;
     }
 
     // minecraft arguments
     auto params = processMinecraftArgs(nullptr, targetToJoin);
     out << "Params:";
-    out << "  " + params.join(' ');
-    out << "";
+    out << indent + params.join(' ');
+    out << emptyLine;
 
     // window size
     QString windowParams;
@@ -994,9 +993,21 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
         auto height = settings->get("MinecraftWinHeight").toInt();
         out << "Window size: " + QString::number(width) + " x " + QString::number(height);
     }
-    out << "";
+    out << emptyLine;
+
     out << "Launcher: " + getLauncher();
-    out << "";
+    out << emptyLine;
+
+    // environment variables
+    const QString env = settings->get("Env").toString();
+    if (auto envMap = Json::toMap(env); !envMap.isEmpty()) {
+        out << "Custom environment variables:";
+        for (auto [key, value] : envMap.asKeyValueRange()) {
+            out << indent + key + "=" + value.toString();
+        }
+        out << emptyLine;
+    }
+
     return out;
 }
 
