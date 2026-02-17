@@ -9,7 +9,7 @@
 #include "meta/Index.h"
 #include "meta/Version.h"
 
-static std::list<Version> s_availableVersions = {};
+static std::vector<Version> s_availableVersions = {};
 
 namespace ResourceDownload {
 TexturePackResourceModel::TexturePackResourceModel(BaseInstance const& inst, ResourceAPI* api, QString debugName, QString metaEntryBase)

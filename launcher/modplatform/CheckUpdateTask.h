@@ -12,7 +12,7 @@ class CheckUpdateTask : public Task {
 
    public:
     CheckUpdateTask(QList<Resource*>& resources,
-                    std::list<Version>& mcVersions,
+                    std::vector<Version>& mcVersions,
                     QList<ModPlatform::ModLoaderType> loadersList,
                     ResourceFolderModel* resourceModel)
         : Task(), m_resources(resources), m_gameVersions(mcVersions), m_loadersList(std::move(loadersList)), m_resourceModel(resourceModel)
@@ -65,7 +65,7 @@ class CheckUpdateTask : public Task {
 
    protected:
     QList<Resource*>& m_resources;
-    std::list<Version>& m_gameVersions;
+    std::vector<Version>& m_gameVersions;
     QList<ModPlatform::ModLoaderType> m_loadersList;
     ResourceFolderModel* m_resourceModel;
 

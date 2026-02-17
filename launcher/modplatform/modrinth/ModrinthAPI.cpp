@@ -40,7 +40,7 @@ Task::Ptr ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_f
 
 Task::Ptr ModrinthAPI::latestVersion(QString hash,
                                      QString hash_format,
-                                     std::optional<std::list<Version>> mcVersions,
+                                     std::optional<std::vector<Version>> mcVersions,
                                      std::optional<ModPlatform::ModLoaderTypes> loaders,
                                      QByteArray* response)
 {
@@ -70,7 +70,7 @@ Task::Ptr ModrinthAPI::latestVersion(QString hash,
 
 Task::Ptr ModrinthAPI::latestVersions(const QStringList& hashes,
                                       QString hash_format,
-                                      std::optional<std::list<Version>> mcVersions,
+                                      std::optional<std::vector<Version>> mcVersions,
                                       std::optional<ModPlatform::ModLoaderTypes> loaders,
                                       QByteArray* response)
 {

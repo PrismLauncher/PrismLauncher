@@ -20,13 +20,13 @@ class ModrinthAPI : public ResourceAPI {
 
     Task::Ptr latestVersion(QString hash,
                             QString hash_format,
-                            std::optional<std::list<Version>> mcVersions,
+                            std::optional<std::vector<Version>> mcVersions,
                             std::optional<ModPlatform::ModLoaderTypes> loaders,
                             QByteArray* response);
 
     Task::Ptr latestVersions(const QStringList& hashes,
                              QString hash_format,
-                             std::optional<std::list<Version>> mcVersions,
+                             std::optional<std::vector<Version>> mcVersions,
                              std::optional<ModPlatform::ModLoaderTypes> loaders,
                              QByteArray* response);
 
@@ -192,7 +192,7 @@ class ModrinthAPI : public ResourceAPI {
             .arg(BuildConfig.MODRINTH_PROD_URL, args.pack->addonId.toString(), get_arguments.isEmpty() ? "" : "?", get_arguments.join('&'));
     };
 
-    QString getGameVersionsArray(std::list<Version> mcVersions) const
+    QString getGameVersionsArray(std::vector<Version> mcVersions) const
     {
         QString s;
         for (auto& ver : mcVersions) {

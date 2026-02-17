@@ -27,7 +27,7 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
     Q_ASSERT(profile);
     Q_ASSERT(m_filter);
 
-    std::optional<std::list<Version>> versions{};
+    std::optional<std::vector<Version>> versions{};
     std::optional<QStringList> categories{};
     auto loaders = profile->getSupportedModLoaders();
 
@@ -55,7 +55,7 @@ ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(const QModelInd
     Q_ASSERT(profile);
     Q_ASSERT(m_filter);
 
-    std::optional<std::list<Version>> versions{};
+    std::optional<std::vector<Version>> versions{};
     auto loaders = profile->getSupportedModLoaders();
     if (!m_filter->versions.empty())
         versions = m_filter->versions;

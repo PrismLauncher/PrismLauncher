@@ -248,7 +248,7 @@ void ModFilterWidget::prepareBasicFilter()
         ui->rift->setChecked(loaders & ModPlatform::Rift);
         m_filter->loaders = loaders;
         auto def = m_instance->getPackProfile()->getComponentVersion("net.minecraft");
-        m_filter->versions.emplace_front(def);
+        m_filter->versions.emplace_back(def);
         ui->versions->setCheckedItems({ def });
         ui->version->setCurrentIndex(ui->version->findText(def));
     } else {
@@ -268,7 +268,7 @@ void ModFilterWidget::onVersionFilterChanged(int)
 {
     auto versions = ui->versions->checkedItems();
     versions.sort();
-    std::list<Version> current_list;
+    std::vector<Version> current_list;
 
     for (const QString& version : versions)
         current_list.emplace_back(version);
@@ -390,7 +390,7 @@ void ModFilterWidget::onOpenSourceFilterChanged()
 
 void ModFilterWidget::onReleaseFilterChanged()
 {
-    std::list<ModPlatform::IndexedVersionType> releases;
+    std::vector<ModPlatform::IndexedVersionType> releases;
     if (ui->releaseCb->isChecked())
         releases.push_back(ModPlatform::IndexedVersionType::Release);
     if (ui->betaCb->isChecked())
