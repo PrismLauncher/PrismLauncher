@@ -58,6 +58,8 @@
    <addaction name="actionRemove"/>
    <addaction name="actionSetDefault"/>
    <addaction name="actionNoDefault"/>
+   <addaction name="actionMoveUp"/>
+   <addaction name="actionMoveDown"/>
    <addaction name="separator"/>
    <addaction name="actionManageSkins"/>
   </widget>
@@ -103,6 +105,16 @@
   <action name="actionRemove">
    <property name="text">
     <string>Remo&amp;ve</string>
+   </property>
+  </action>
+  <action name="actionMoveUp">
+   <property name="text">
+    <string>Move &amp;Up</string>
+   </property>
+  </action>
+  <action name="actionMoveDown">
+   <property name="text">
+    <string>Move &amp;Down</string>
    </property>
   </action>
  </widget>

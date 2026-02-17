@@ -168,6 +168,24 @@ void AccountList::removeAccount(QModelIndex index)
     }
 }
 
+void AccountList::moveAccount(QModelIndex index, int delta) {
+    const int row = index.row();
+    const int newRow = row + delta;
+    if (index.isValid() && row < m_accounts.size() && newRow >= 0 && newRow < m_accounts.size()) {
+        // Qt is stupid, https://doc.qt.io/qt-6/qabstractitemmodel.html#beginMoveRows
+        const int modelDestinationRow = (newRow > row) ? newRow + 1 : newRow;
+
+        if (beginMoveRows(QModelIndex(), row, row, QModelIndex(), modelDestinationRow)) {
+            m_accounts.move(row, newRow);
+            endMoveRows();
+
+            onListChanged();
+        } else {
+            qCritical().noquote() << "AccountList: failed to move account from" << row << "to" << newRow << QString("(%1 accounts in total)").arg(this->count());
+        }
+    }
+}
+
 MinecraftAccountPtr AccountList::defaultAccount() const
 {
     return m_defaultAccount;
