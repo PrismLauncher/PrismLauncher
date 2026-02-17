@@ -40,7 +40,6 @@
 #include <tasks/Task.h>
 
 #include <QUrl>
-#include <memory>
 
 namespace Technic {
 class SolderPackInstallTask : public InstanceTask {
@@ -60,7 +59,7 @@ class SolderPackInstallTask : public InstanceTask {
     virtual void executeTask() override;
 
    private slots:
-    void fileListSucceeded();
+    void fileListSucceeded(QByteArray* response);
     void downloadSucceeded();
     void downloadFailed(QString reason);
     void downloadProgressChanged(qint64 current, qint64 total);
@@ -78,7 +77,6 @@ class SolderPackInstallTask : public InstanceTask {
     QString m_pack;
     QString m_version;
     QString m_minecraftVersion;
-    std::unique_ptr<QByteArray> m_response = std::make_unique<QByteArray>();
     QTemporaryDir m_outputDir;
     int m_modCount;
     QFuture<bool> m_extractFuture;

@@ -41,11 +41,11 @@
 namespace Net {
 
 /*
- * Sink object for downloads that uses an external QByteArray it doesn't own as a target.
+ * Sink object for downloads that uses an owned QByteArray as a target.
  */
 class ByteArraySink : public Sink {
    public:
-    ByteArraySink(QByteArray* output) : m_output(output) {}
+    ByteArraySink(std::unique_ptr<QByteArray> output) : m_output(std::move(output)) {}
 
     virtual ~ByteArraySink() = default;
 
@@ -92,6 +92,6 @@ class ByteArraySink : public Sink {
     auto hasLocalData() -> bool override { return false; }
 
    protected:
-    QByteArray* m_output;
+    std::unique_ptr<QByteArray> m_output;
 };
 }  // namespace Net

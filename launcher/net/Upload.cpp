@@ -51,12 +51,15 @@ QNetworkReply* Upload::getReply(QNetworkRequest& request)
     return m_network->post(request, m_post_data);
 }
 
-Upload::Ptr Upload::makeByteArray(QUrl url, QByteArray* output, QByteArray m_post_data)
+std::pair<Upload::Ptr, QByteArray*> Upload::makeByteArray(QUrl url, QByteArray m_post_data)
 {
     auto up = makeShared<Upload>();
     up->m_url = std::move(url);
-    up->m_sink.reset(new ByteArraySink(output));
+
+    auto response = new QByteArray();
+    up->m_sink = std::make_unique<ByteArraySink>(std::unique_ptr<QByteArray>{ response });
+
     up->m_post_data = std::move(m_post_data);
-    return up;
+    return { up, response };
 }
 }  // namespace Net

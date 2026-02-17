@@ -159,23 +159,26 @@ void AtlOptionalModListModel::useShareCode(const QString& code)
 {
     m_jobPtr.reset(new NetJob("Atl::Request", APPLICATION->network()));
     auto url = QString(BuildConfig.ATL_API_BASE_URL + "share-codes/" + code);
-    m_jobPtr->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), m_response.get()));
+    auto [action, response] = Net::ApiDownload::makeByteArray(QUrl(url));
+    m_jobPtr->addNetAction(action);
 
-    connect(m_jobPtr.get(), &NetJob::succeeded, this, &AtlOptionalModListModel::shareCodeSuccess);
+    connect(m_jobPtr.get(), &NetJob::succeeded, this, [this, response] { shareCodeSuccess(response); });
     connect(m_jobPtr.get(), &NetJob::failed, this, &AtlOptionalModListModel::shareCodeFailure);
 
     m_jobPtr->start();
 }
 
-void AtlOptionalModListModel::shareCodeSuccess()
+void AtlOptionalModListModel::shareCodeSuccess(QByteArray* responsePtr)
 {
+    // NOTE(TheKodeToad): moving the response out to avoid it from being destroyed by jobPtr.reset()
+    QByteArray responseData = *std::move(responsePtr);
     m_jobPtr.reset();
 
     QJsonParseError parse_error{};
-    auto doc = QJsonDocument::fromJson(*m_response, &parse_error);
+    auto doc = QJsonDocument::fromJson(responseData, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
         qWarning() << "Error while parsing JSON response from ATL at" << parse_error.offset << "reason:" << parse_error.errorString();
-        qWarning() << *m_response;
+        qWarning() << responseData;
         return;
     }
     auto obj = doc.object();
@@ -184,7 +187,7 @@ void AtlOptionalModListModel::shareCodeSuccess()
     try {
         ATLauncher::loadShareCodeResponse(response, obj);
     } catch (const JSONValidationError& e) {
-        qDebug() << QString::fromUtf8(*m_response);
+        qDebug() << QString::fromUtf8(responseData);
         qWarning() << "Error while reading response from ATLauncher:" << e.cause();
         return;
     }

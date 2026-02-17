@@ -11,30 +11,29 @@
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 
 #include <QDebug>
+#include <utility>
 
 class ModrinthAPI : public ResourceAPI {
    public:
-    Task::Ptr currentVersion(QString hash, QString hash_format, QByteArray* response);
+    std::pair<Task::Ptr, QByteArray*> currentVersion(QString hash, QString hash_format);
 
-    Task::Ptr currentVersions(const QStringList& hashes, QString hash_format, QByteArray* response);
+    std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, QString hash_format);
 
-    Task::Ptr latestVersion(QString hash,
-                            QString hash_format,
-                            std::optional<std::vector<Version>> mcVersions,
-                            std::optional<ModPlatform::ModLoaderTypes> loaders,
-                            QByteArray* response);
+    std::pair<Task::Ptr, QByteArray*> latestVersion(QString hash,
+                                                    QString hash_format,
+                                                    std::optional<std::vector<Version>> mcVersions,
+                                                    std::optional<ModPlatform::ModLoaderTypes> loaders);
 
-    Task::Ptr latestVersions(const QStringList& hashes,
-                             QString hash_format,
-                             std::optional<std::vector<Version>> mcVersions,
-                             std::optional<ModPlatform::ModLoaderTypes> loaders,
-                             QByteArray* response);
+    std::pair<Task::Ptr, QByteArray*> latestVersions(const QStringList& hashes,
+                                                     QString hash_format,
+                                                     std::optional<std::vector<Version>> mcVersions,
+                                                     std::optional<ModPlatform::ModLoaderTypes> loaders);
 
-    Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const override;
+    std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
 
-    static Task::Ptr getModCategories(QByteArray* response);
-    static QList<ModPlatform::Category> loadCategories(QByteArray* response, QString projectType);
-    static QList<ModPlatform::Category> loadModCategories(QByteArray* response);
+    static std::pair<Task::Ptr, QByteArray*> getModCategories();
+    static QList<ModPlatform::Category> loadCategories(const QByteArray& response, QString projectType);
+    static QList<ModPlatform::Category> loadModCategories(const QByteArray& response);
 
    public:
     auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;

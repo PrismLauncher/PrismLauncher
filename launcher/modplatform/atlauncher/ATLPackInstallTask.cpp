@@ -87,9 +87,11 @@ void PackInstallTask::executeTask()
     NetJob::Ptr netJob{ new NetJob("ATLauncher::VersionFetch", APPLICATION->network()) };
     auto searchUrl =
         QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json").arg(m_pack_safe_name).arg(m_version_name);
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response.get()));
 
-    connect(netJob.get(), &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
+    auto [action, response] = Net::ApiDownload::makeByteArray(QUrl(searchUrl));
+    netJob->addNetAction(action);
+
+    connect(netJob.get(), &NetJob::succeeded, this, [this, response] { onDownloadSucceeded(response); });
     connect(netJob.get(), &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
     connect(netJob.get(), &NetJob::aborted, this, &PackInstallTask::onDownloadAborted);
 
@@ -97,17 +99,20 @@ void PackInstallTask::executeTask()
     jobPtr->start();
 }
 
-void PackInstallTask::onDownloadSucceeded()
+void PackInstallTask::onDownloadSucceeded(QByteArray* responsePtr)
 {
     qDebug() << "PackInstallTask::onDownloadSucceeded:" << QThread::currentThreadId();
+
+    // NOTE(TheKodeToad): moving the response out to avoid it from being destroyed by jobPtr.reset()
+    QByteArray response = std::move(*responsePtr);
     jobPtr.reset();
 
     QJsonParseError parse_error{};
-    QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+    QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
         qWarning() << "Error while parsing JSON response from ATLauncher at" << parse_error.offset
                    << "reason:" << parse_error.errorString();
-        qWarning() << *response.get();
+        qWarning() << response;
         return;
     }
     auto obj = doc.object();

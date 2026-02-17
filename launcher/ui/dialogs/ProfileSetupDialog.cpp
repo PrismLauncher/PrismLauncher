@@ -159,22 +159,23 @@ void ProfileSetupDialog::checkName(const QString& name)
                                            { "Accept", "application/json" },
                                            { "Authorization", QString("Bearer %1").arg(m_accountToSetup->accessToken()).toUtf8() } };
 
-    m_check_response.reset(new QByteArray());
     if (m_check_task)
         disconnect(m_check_task.get(), nullptr, this, nullptr);
-    m_check_task = Net::Download::makeByteArray(url, m_check_response.get());
+    auto [task, response] = Net::Download::makeByteArray(url);
+
+    m_check_task = task;
     m_check_task->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
 
-    connect(m_check_task.get(), &Task::finished, this, &ProfileSetupDialog::checkFinished);
+    connect(m_check_task.get(), &Task::finished, this, [this, response] { checkFinished(response); });
 
     m_check_task->setNetwork(APPLICATION->network());
     m_check_task->start();
 }
 
-void ProfileSetupDialog::checkFinished()
+void ProfileSetupDialog::checkFinished(QByteArray* response)
 {
     if (m_check_task->error() == QNetworkReply::NoError) {
-        auto doc = QJsonDocument::fromJson(*m_check_response);
+        auto doc = QJsonDocument::fromJson(*response);
         auto root = doc.object();
         auto statusValue = root.value("status").toString("INVALID");
         if (statusValue == "AVAILABLE") {
@@ -205,11 +206,11 @@ void ProfileSetupDialog::setupProfile(const QString& profileName)
                                            { "Accept", "application/json" },
                                            { "Authorization", QString("Bearer %1").arg(m_accountToSetup->accessToken()).toUtf8() } };
 
-    m_profile_response.reset(new QByteArray());
-    m_profile_task = Net::Upload::makeByteArray(url, m_profile_response.get(), payloadTemplate.arg(profileName).toUtf8());
+    auto [task, response] = Net::Upload::makeByteArray(url, payloadTemplate.arg(profileName).toUtf8());
+    m_profile_task = task;
     m_profile_task->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
 
-    connect(m_profile_task.get(), &Task::finished, this, &ProfileSetupDialog::setupProfileFinished);
+    connect(m_profile_task.get(), &Task::finished, this, [this, response] { setupProfileFinished(response); });
 
     m_profile_task->setNetwork(APPLICATION->network());
     m_profile_task->start();
@@ -252,7 +253,7 @@ struct MojangError {
 
 }  // namespace
 
-void ProfileSetupDialog::setupProfileFinished()
+void ProfileSetupDialog::setupProfileFinished(QByteArray* response)
 {
     isWorking = false;
     if (m_profile_task->error() == QNetworkReply::NoError) {
@@ -262,7 +263,7 @@ void ProfileSetupDialog::setupProfileFinished()
          */
         accept();
     } else {
-        auto parsedError = MojangError::fromJSON(*m_profile_response);
+        auto parsedError = MojangError::fromJSON(*response);
         ui->errorLabel->setVisible(true);
 
         QString errorMessage =

@@ -39,9 +39,8 @@ void ManifestDownloadTask::executeTask()
 {
     setStatus(tr("Downloading Java"));
     auto download = makeShared<NetJob>(QString("JRE::DownloadJava"), APPLICATION->network());
-    auto files = std::make_shared<QByteArray>();
 
-    auto action = Net::Download::makeByteArray(m_url, files.get());
+    auto [action, files] = Net::Download::makeByteArray(m_url);
     if (!m_checksum_hash.isEmpty() && !m_checksum_type.isEmpty()) {
         auto hashType = QCryptographicHash::Algorithm::Sha1;
         if (m_checksum_type == "sha256") {

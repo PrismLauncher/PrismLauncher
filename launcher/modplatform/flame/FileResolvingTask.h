@@ -36,14 +36,13 @@ class FileResolvingTask : public Task {
     virtual void executeTask() override;
 
    protected slots:
-    void netJobFinished();
+    void netJobFinished(QByteArray* response);
 
    private:
     void getFlameProjects();
 
    private: /* data */
     Flame::Manifest m_manifest;
-    std::unique_ptr<QByteArray> m_result;
     Task::Ptr m_task;
 };
 }  // namespace Flame

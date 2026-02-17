@@ -53,13 +53,18 @@ void PackFetchTask::fetch()
 
     QUrl publicPacksUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/modpacks.xml");
     qDebug() << "Downloading public version info from" << publicPacksUrl.toString();
-    jobPtr->addNetAction(Net::ApiDownload::makeByteArray(publicPacksUrl, publicModpacksXmlFileData.get()));
+
+    auto [publicAction, publicResponse] = Net::ApiDownload::makeByteArray(publicPacksUrl);
+    jobPtr->addNetAction(publicAction);
 
     QUrl thirdPartyUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/thirdparty.xml");
     qDebug() << "Downloading thirdparty version info from" << thirdPartyUrl.toString();
-    jobPtr->addNetAction(Net::Download::makeByteArray(thirdPartyUrl, thirdPartyModpacksXmlFileData.get()));
 
-    connect(jobPtr.get(), &NetJob::succeeded, this, &PackFetchTask::fileDownloadFinished);
+    auto [thirdPartyAction, thirdPartyResponse] = Net::Download::makeByteArray(thirdPartyUrl);
+    jobPtr->addNetAction(thirdPartyAction);
+
+    connect(jobPtr.get(), &NetJob::succeeded, this,
+            [this, publicResponse, thirdPartyResponse] { fileDownloadFinished(publicResponse, thirdPartyResponse); });
     connect(jobPtr.get(), &NetJob::failed, this, &PackFetchTask::fileDownloadFailed);
     connect(jobPtr.get(), &NetJob::aborted, this, &PackFetchTask::fileDownloadAborted);
 
@@ -71,9 +76,10 @@ void PackFetchTask::fetchPrivate(const QStringList& toFetch)
     QString privatePackBaseUrl = BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/%1.xml";
 
     for (auto& packCode : toFetch) {
-        auto data = std::make_shared<QByteArray>();
         NetJob* job = new NetJob("Fetching private pack", m_network);
-        job->addNetAction(Net::ApiDownload::makeByteArray(privatePackBaseUrl.arg(packCode), data.get()));
+
+        auto [action, data] = Net::ApiDownload::makeByteArray(privatePackBaseUrl.arg(packCode));
+        job->addNetAction(action);
         job->setAskRetry(false);
 
         connect(job, &NetJob::succeeded, this, [this, job, data, packCode] {
@@ -85,20 +91,15 @@ void PackFetchTask::fetchPrivate(const QStringList& toFetch)
             }
 
             job->deleteLater();
-
-            data->clear();
         });
 
-        connect(job, &NetJob::failed, this, [this, job, packCode, data](QString reason) {
+        connect(job, &NetJob::failed, this, [this, job, packCode](QString reason) {
             emit privateFileDownloadFailed(reason, packCode);
             job->deleteLater();
-
-            data->clear();
         });
 
-        connect(job, &NetJob::aborted, this, [this, job, data] {
+        connect(job, &NetJob::aborted, this, [this, job] {
             job->deleteLater();
-            data->clear();
 
             emit aborted();
         });
@@ -107,19 +108,20 @@ void PackFetchTask::fetchPrivate(const QStringList& toFetch)
     }
 }
 
-void PackFetchTask::fileDownloadFinished()
+void PackFetchTask::fileDownloadFinished(QByteArray* publicPtr, QByteArray* thirdPartyPtr)
 {
-    jobPtr.reset();
-
     QStringList failedLists;
 
-    if (!parseAndAddPacks(*publicModpacksXmlFileData, PackType::Public, publicPacks)) {
+    if (!parseAndAddPacks(*publicPtr, PackType::Public, publicPacks)) {
         failedLists.append(tr("Public Packs"));
     }
 
-    if (!parseAndAddPacks(*thirdPartyModpacksXmlFileData, PackType::ThirdParty, thirdPartyPacks)) {
+    if (!parseAndAddPacks(*thirdPartyPtr, PackType::ThirdParty, thirdPartyPacks)) {
         failedLists.append(tr("Third Party Packs"));
     }
+
+    // NOTE(TheKodeToad): we don't want to reset the jobPtr earlier as it may invalidate the responses!
+    jobPtr.reset();
 
     if (failedLists.size() > 0) {
         emit failed(tr("Failed to download some pack lists: %1").arg(failedLists.join("\n- ")));
@@ -139,7 +141,6 @@ bool PackFetchTask::parseAndAddPacks(QByteArray& data, PackType packType, Modpac
     if (!doc.setContent(data, false, &errorMsg, &errorLine, &errorCol)) {
         auto fullErrMsg = QString("Failed to fetch modpack data: %1 %2:%3!").arg(errorMsg).arg(errorLine).arg(errorCol);
         qWarning() << fullErrMsg;
-        data.clear();
         return false;
     }
 

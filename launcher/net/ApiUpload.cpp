@@ -22,11 +22,11 @@
 
 namespace Net {
 
-Upload::Ptr ApiUpload::makeByteArray(QUrl url, QByteArray* output, QByteArray m_post_data)
+std::pair<Upload::Ptr, QByteArray*> ApiUpload::makeByteArray(QUrl url, QByteArray m_post_data)
 {
-    auto up = Upload::makeByteArray(url, output, m_post_data);
+    auto [up, response] = Upload::makeByteArray(url, m_post_data);
     up->addHeaderProxy(std::make_unique<ApiHeaderProxy>());
-    return up;
+    return { up, response };
 }
 
 }  // namespace Net

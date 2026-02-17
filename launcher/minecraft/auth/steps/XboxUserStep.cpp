@@ -37,8 +37,8 @@ void XboxUserStep::perform()
         // https://learn.microsoft.com/en-us/gaming/gdk/_content/gc/reference/live/rest/additional/httpstandardheaders
         { "x-xbl-contract-version", "1" }
     };
-    m_response.reset(new QByteArray());
-    m_request = Net::Upload::makeByteArray(url, m_response.get(), xbox_auth_data.toUtf8());
+    auto [request, response] = Net::Upload::makeByteArray(url, xbox_auth_data.toUtf8());
+    m_request = request;
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);
 
@@ -46,13 +46,13 @@ void XboxUserStep::perform()
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
-    connect(m_task.get(), &Task::finished, this, &XboxUserStep::onRequestDone);
+    connect(m_task.get(), &Task::finished, this, [this, response] { onRequestDone(response); });
 
     m_task->start();
     qDebug() << "First layer of Xbox auth ... commencing.";
 }
 
-void XboxUserStep::onRequestDone()
+void XboxUserStep::onRequestDone(QByteArray* response)
 {
     if (m_request->error() != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << m_request->error();
@@ -65,7 +65,7 @@ void XboxUserStep::onRequestDone()
     }
 
     Token temp;
-    if (!Parsers::parseXTokenResponse(*m_response, temp, "UToken")) {
+    if (!Parsers::parseXTokenResponse(*response, temp, "UToken")) {
         qWarning() << "Could not parse user authentication response...";
         emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("Xbox user authentication response could not be understood."));
         return;
