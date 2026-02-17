@@ -19,6 +19,7 @@
 #include "ui/themes/CatPainter.h"
 #include <QPixmap>
 #include "Application.h"
+#include "settings/SettingsObject.h"
 
 CatPainter::CatPainter(const QString& path, QObject* parent) : QObject(parent)
 {

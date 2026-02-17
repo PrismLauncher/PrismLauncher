@@ -2,7 +2,6 @@
 
 #include <QImage>
 #include <QList>
-#include <QNetworkReply>
 #include <QObject>
 #include <QSet>
 

@@ -5,9 +5,15 @@
 #include <QEvent>
 #include <QMetaType>
 #include <QObject>
+
+#include <QPointer>
+#include <QSharedPointer>
+
 #include <QVariant>
+#include <QVariantMap>
 
 #include <QDebug>
+#include <QLoggingCategory>
 
 #include <QCoreApplication>
 

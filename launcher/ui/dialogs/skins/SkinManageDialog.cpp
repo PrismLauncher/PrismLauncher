@@ -34,6 +34,7 @@
 #include <QUrl>
 
 #include "Application.h"
+#include "settings/SettingsObject.h"
 #include "DesktopServices.h"
 #include "Json.h"
 #include "QObjectPtr.h"
