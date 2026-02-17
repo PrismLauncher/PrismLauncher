@@ -370,9 +370,7 @@ void ResourcePage::removeResourceFromDialog(const QString& pack_name)
     m_parentDialog->removeResource(pack_name);
 }
 
-void ResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
-                                     ModPlatform::IndexedVersion& ver,
-                                     ResourceFolderModel* base_model)
+void ResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack, ModPlatform::IndexedVersion& ver, ResourceFolderModel* base_model)
 {
     bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
     m_model->addPack(pack, ver, base_model, is_indexed);

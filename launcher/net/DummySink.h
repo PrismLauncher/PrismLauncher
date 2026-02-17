@@ -31,4 +31,4 @@ class DummySink : public Sink {
     auto hasLocalData() -> bool override { return false; }
 };
 
-} // namespace Net
+}  // namespace Net

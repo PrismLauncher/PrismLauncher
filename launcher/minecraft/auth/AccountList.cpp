@@ -40,6 +40,7 @@
 #include <QDir>
 #include <QFile>
 #include <QIODevice>
+#include <QIcon>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -168,7 +169,8 @@ void AccountList::removeAccount(QModelIndex index)
     }
 }
 
-void AccountList::moveAccount(QModelIndex index, int delta) {
+void AccountList::moveAccount(QModelIndex index, int delta)
+{
     const int row = index.row();
     const int newRow = row + delta;
     if (index.isValid() && row < m_accounts.size() && newRow >= 0 && newRow < m_accounts.size()) {
@@ -181,7 +183,8 @@ void AccountList::moveAccount(QModelIndex index, int delta) {
 
             onListChanged();
         } else {
-            qCritical().noquote() << "AccountList: failed to move account from" << row << "to" << newRow << QString("(%1 accounts in total)").arg(this->count());
+            qCritical().noquote() << "AccountList: failed to move account from" << row << "to" << newRow
+                                  << QString("(%1 accounts in total)").arg(this->count());
         }
     }
 }
@@ -662,8 +665,7 @@ void AccountList::tryNext()
                     connect(m_currentTask.get(), &Task::succeeded, this, &AccountList::authSucceeded);
                     connect(m_currentTask.get(), &Task::failed, this, &AccountList::authFailed);
                     m_currentTask->start();
-                    qDebug() << "RefreshSchedule: Processing account" << account->accountDisplayString() << "with internal ID"
-                             << accountId;
+                    qDebug() << "RefreshSchedule: Processing account" << account->accountDisplayString() << "with internal ID" << accountId;
                     return;
                 }
             }

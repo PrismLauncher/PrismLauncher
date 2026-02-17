@@ -28,7 +28,8 @@ class HideCheckboxProxyModel : public QIdentityProxyModel {
    public:
     using QIdentityProxyModel::QIdentityProxyModel;
 
-    QVariant data(const QModelIndex& index, int role) const override {
+    QVariant data(const QModelIndex& index, int role) const override
+    {
         if (role == Qt::CheckStateRole) {
             return {};
         }
@@ -45,7 +46,7 @@ ProfileSelectDialog::ProfileSelectDialog(const QString& message, int flags, QWid
     m_accounts = APPLICATION->accounts();
 
     auto proxy = new HideCheckboxProxyModel(ui->view);
-    proxy->setSourceModel(m_accounts.get());
+    proxy->setSourceModel(m_accounts);
     ui->view->setModel(proxy);
 
     // Set the message label.

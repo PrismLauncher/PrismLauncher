@@ -33,11 +33,7 @@
 class InstallLoaderPage : public VersionSelectWidget, public BasePage {
     Q_OBJECT
    public:
-    InstallLoaderPage(const QString& id,
-                      const QString& iconName,
-                      const QString& name,
-                      const Version& oldestVersion,
-                      PackProfile* profile)
+    InstallLoaderPage(const QString& id, const QString& iconName, const QString& name, const Version& oldestVersion, PackProfile* profile)
         : VersionSelectWidget(nullptr), uid(id), iconName(iconName), name(name)
     {
         const QString minecraftVersion = profile->getComponentVersion("net.minecraft");
