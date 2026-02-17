@@ -40,16 +40,6 @@
 #include <QProgressDialog>
 #include <memory>
 
-#include <sys.h>
-
-#if defined Q_OS_WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#include "console/WindowsConsole.h"
-#endif
-
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -86,12 +76,6 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext& context, const QSt
 
 PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, argv)
 {
-#if defined Q_OS_WIN32
-    // attach the parent console if stdout not already captured
-    if (AttachWindowsConsole()) {
-        consoleAttached = true;
-    }
-#endif
     setOrganizationName(BuildConfig.LAUNCHER_NAME);
     setOrganizationDomain(BuildConfig.LAUNCHER_DOMAIN);
     setApplicationName(BuildConfig.LAUNCHER_NAME + "Updater");
@@ -382,16 +366,6 @@ PrismUpdaterApp::~PrismUpdaterApp()
     qDebug() << "updater shutting down";
     // Shut down logger by setting the logger function to nothing
     qInstallMessageHandler(nullptr);
-
-#if defined Q_OS_WIN32
-    // Detach from Windows console
-    if (consoleAttached) {
-        fclose(stdout);
-        fclose(stdin);
-        fclose(stderr);
-        FreeConsole();
-    }
-#endif
 }
 
 void PrismUpdaterApp::fail(const QString& reason)
