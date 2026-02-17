@@ -77,10 +77,12 @@ APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
     ui->metaURL->setValidator(new QRegularExpressionValidator(s_validUrlRegExp, ui->metaURL));
     ui->resourceURL->setValidator(new QRegularExpressionValidator(s_validUrlRegExp, ui->resourceURL));
     ui->baseURLEntry->setValidator(new QRegularExpressionValidator(s_validUrlRegExp, ui->baseURLEntry));
+    ui->legacyFMLLibsURL->setValidator(new QRegularExpressionValidator(s_validUrlRegExp, ui->legacyFMLLibsURL));
     ui->msaClientID->setValidator(new QRegularExpressionValidator(s_validMSAClientID, ui->msaClientID));
 
     ui->metaURL->setPlaceholderText(BuildConfig.META_URL);
     ui->resourceURL->setPlaceholderText(BuildConfig.DEFAULT_RESOURCE_BASE);
+    ui->legacyFMLLibsURL->setPlaceholderText(BuildConfig.LEGACY_FMLLIBS_BASE_URL);
     ui->userAgentLineEdit->setPlaceholderText(BuildConfig.USER_AGENT);
 
     loadSettings();
@@ -139,6 +141,8 @@ void APIPage::loadSettings()
     ui->metaURL->setText(metaURL);
     QString resourceURL = s->get("ResourceURLOverride").toString();
     ui->resourceURL->setText(resourceURL);
+    QString fmlLibsURL = s->get("LegacyFMLLibsURLOverride").toString();
+    ui->legacyFMLLibsURL->setText(fmlLibsURL);
     QString flameKey = s->get("FlameKeyOverride").toString();
     ui->flameKey->setText(flameKey);
     QString modrinthToken = s->get("ModrinthToken").toString();
@@ -159,34 +163,34 @@ void APIPage::applySettings()
     s->set("MSAClientIDOverride", msaClientID);
     QUrl metaURL(ui->metaURL->text());
     QUrl resourceURL(ui->resourceURL->text());
-    // Add required trailing slash
-    if (!metaURL.isEmpty() && !metaURL.path().endsWith('/')) {
-        QString path = metaURL.path();
-        path.append('/');
-        metaURL.setPath(path);
-    }
+    QUrl fmlLibsURL(ui->legacyFMLLibsURL->text());
 
-    if (!resourceURL.isEmpty() && !resourceURL.path().endsWith('/')) {
-        QString path = resourceURL.path();
-        path.append('/');
-        resourceURL.setPath(path);
-    }
+    auto addRequiredTrailingSlash = [](QUrl& url) {
+        if (!url.isEmpty() && !url.path().endsWith('/')) {
+            QString path = url.path();
+            path.append('/');
+            url.setPath(path);
+        }
+    };
+    addRequiredTrailingSlash(metaURL);
+    addRequiredTrailingSlash(resourceURL);
+    addRequiredTrailingSlash(fmlLibsURL);
 
     auto isLocalhost = [](const QUrl& url) { return url.host() == "localhost" || url.host() == "127.0.0.1" || url.host() == "::1"; };
     auto isUnsafe = [isLocalhost](const QUrl& url) { return !url.isEmpty() && url.scheme() == "http" && !isLocalhost(url); };
+    auto upgradeToHTTPS = [isUnsafe](QUrl& url) {
+        if (isUnsafe(url)) {
+            url.setScheme("https");
+        }
+    };
 
-    // Don't allow HTTP, since meta is basically RCE with all the jar files.
-    if (isUnsafe(metaURL)) {
-        metaURL.setScheme("https");
-    }
-
-    // Also don't allow HTTP
-    if (isUnsafe(resourceURL)) {
-        resourceURL.setScheme("https");
-    }
+    upgradeToHTTPS(metaURL);
+    upgradeToHTTPS(resourceURL);
+    upgradeToHTTPS(fmlLibsURL);
 
     s->set("MetaURLOverride", metaURL.toString());
     s->set("ResourceURLOverride", resourceURL.toString());
+    s->set("LegacyFMLLibsURLOverride", fmlLibsURL.toString());
     QString flameKey = ui->flameKey->text();
     s->set("FlameKeyOverride", flameKey);
     QString modrinthToken = ui->modrinthToken->text();

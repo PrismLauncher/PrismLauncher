@@ -5,11 +5,11 @@
 
 class MinecraftInstance;
 
-class FMLLibrariesTask : public Task {
+class LegacyFMLLibrariesTask : public Task {
     Q_OBJECT
    public:
-    FMLLibrariesTask(MinecraftInstance* inst);
-    virtual ~FMLLibrariesTask() = default;
+    LegacyFMLLibrariesTask(MinecraftInstance* inst);
+    virtual ~LegacyFMLLibrariesTask() = default;
 
     void executeTask() override;
 
@@ -21,6 +21,9 @@ class FMLLibrariesTask : public Task {
 
    public slots:
     bool abort() override;
+
+   private:
+    static QString baseUrl();
 
    private:
     MinecraftInstance* m_inst;

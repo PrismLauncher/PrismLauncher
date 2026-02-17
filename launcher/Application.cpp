@@ -849,23 +849,20 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             }
         }
         {
+            auto resetIfInvalid = [this](const Setting* setting) {
+                if (const QUrl url(setting->get().toString()); !url.isValid() || (url.scheme() != "http" && url.scheme() != "https")) {
+                    m_settings->reset(setting->id());
+                }
+            };
+
             // Meta URL
-            m_settings->registerSetting("MetaURLOverride", "");
-
-            QUrl metaUrl(m_settings->get("MetaURLOverride").toString());
-
-            // get rid of invalid meta urls
-            if (!metaUrl.isValid() || (metaUrl.scheme() != "http" && metaUrl.scheme() != "https"))
-                m_settings->reset("MetaURLOverride");
+            resetIfInvalid(m_settings->registerSetting("MetaURLOverride", "").get());
 
             // Resource URL
-            m_settings->registerSetting({ "ResourceURLOverride", "ResourceURL" }, "");
+            resetIfInvalid(m_settings->registerSetting({ "ResourceURLOverride", "ResourceURL" }, "").get());
 
-            QUrl resourceUrl(m_settings->get("ResourceURLOverride").toString());
-
-            // get rid of invalid resource urls
-            if (!resourceUrl.isValid() || (resourceUrl.scheme() != "http" && resourceUrl.scheme() != "https"))
-                m_settings->reset("ResourceURLOverride");
+            // Legacy FML libs URL
+            resetIfInvalid(m_settings->registerSetting("LegacyFMLLibsURLOverride", "").get());
         }
 
         m_settings->registerSetting("CloseAfterLaunch", false);
