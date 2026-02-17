@@ -295,6 +295,24 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
     MinecraftAccountPtr account = at(index.row());
 
     switch (role) {
+        case Qt::SizeHintRole:
+            if (index.column() == ProfileNameColumn) {
+                return QSize(0, 30);
+            }
+
+            return QVariant();
+        case Qt::DecorationRole:
+            if (index.column() == ProfileNameColumn) {
+                auto face = account->getFace(24, 24);
+
+                if (!face.isNull()) {
+                    return face;
+                } else {
+                    return QIcon::fromTheme("noaccount").pixmap(24, 24);
+                }
+            }
+
+            return QVariant();
         case Qt::DisplayRole:
             switch (index.column()) {
                 case ProfileNameColumn:
