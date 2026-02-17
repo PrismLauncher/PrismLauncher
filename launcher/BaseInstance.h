@@ -64,9 +64,6 @@ class Task;
 class LaunchTask;
 class BaseInstance;
 
-// pointer for lazy people
-using InstancePtr = std::shared_ptr<BaseInstance>;
-
 /// Shortcut saving target representations
 enum class ShortcutTarget { Desktop, Applications, Other };
 
@@ -78,8 +75,8 @@ struct ShortcutData {
 };
 
 /// Console settings
-int getConsoleMaxLines(SettingsObjectPtr settings);
-bool shouldStopOnConsoleOverflow(SettingsObjectPtr settings);
+int getConsoleMaxLines(SettingsObject* settings);
+bool shouldStopOnConsoleOverflow(SettingsObject* settings);
 
 /*!
  * \brief Base class for instances.
@@ -89,11 +86,11 @@ bool shouldStopOnConsoleOverflow(SettingsObjectPtr settings);
  * To create a new instance type, create a new class inheriting from this class
  * and implement the pure virtual functions.
  */
-class BaseInstance : public QObject, public std::enable_shared_from_this<BaseInstance> {
+class BaseInstance : public QObject {
     Q_OBJECT
    protected:
     /// no-touchy!
-    BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString& rootDir);
+    BaseInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, const QString& rootDir);
 
    public: /* types */
     enum class Status {
@@ -103,7 +100,7 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
 
    public:
     /// virtual destructor to make sure the destruction is COMPLETE
-    virtual ~BaseInstance() {}
+    virtual ~BaseInstance();
 
     virtual void saveNow() = 0;
 
@@ -193,7 +190,7 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
      *
      * \return A pointer to this instance's settings object.
      */
-    virtual SettingsObjectPtr settings();
+    virtual SettingsObject* settings();
 
     /*!
      * \brief Loads settings specific to an instance type if they're not already loaded.
@@ -204,10 +201,10 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     virtual QList<Task::Ptr> createUpdateTask() = 0;
 
     /// returns a valid launcher (task container)
-    virtual shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account, MinecraftTarget::Ptr targetToJoin) = 0;
+    virtual LaunchTask* createLaunchTask(AuthSessionPtr account, MinecraftTarget::Ptr targetToJoin) = 0;
 
     /// returns the current launch task (if any)
-    shared_qobject_ptr<LaunchTask> getLaunchTask();
+    LaunchTask* getLaunchTask();
 
     /*!
      * Create envrironment variables for running the instance
@@ -286,7 +283,7 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
    protected:
     void changeStatus(Status newStatus);
 
-    SettingsObjectPtr globalSettings() const { return m_global_settings.lock(); }
+    SettingsObject* globalSettings() const { return m_global_settings; }
 
     bool isSpecificSettingsLoaded() const { return m_specific_settings_loaded; }
     void setSpecificSettingsLoaded(bool loaded) { m_specific_settings_loaded = loaded; }
@@ -297,7 +294,7 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
      */
     void propertiesChanged(BaseInstance* inst);
 
-    void launchTaskChanged(shared_qobject_ptr<LaunchTask>);
+    void launchTaskChanged(LaunchTask*);
 
     void runningStatusChanged(bool running);
 
@@ -310,10 +307,10 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
 
    protected: /* data */
     QString m_rootDir;
-    SettingsObjectPtr m_settings;
+    std::unique_ptr<SettingsObject> m_settings;
     // InstanceFlags m_flags;
     bool m_isRunning = false;
-    shared_qobject_ptr<LaunchTask> m_launchProcess;
+    std::unique_ptr<LaunchTask> m_launchProcess;
     QDateTime m_timeStarted;
     RuntimeContext m_runtimeContext;
 
@@ -323,7 +320,7 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     bool m_hasUpdate = false;
     bool m_hasBrokenVersion = false;
 
-    SettingsObjectWeakPtr m_global_settings;
+    SettingsObject* m_global_settings;
     bool m_specific_settings_loaded = false;
 };
 

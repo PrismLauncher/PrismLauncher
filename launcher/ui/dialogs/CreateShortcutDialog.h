@@ -28,7 +28,7 @@ class CreateShortcutDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit CreateShortcutDialog(InstancePtr instance, QWidget* parent = nullptr);
+    explicit CreateShortcutDialog(BaseInstance* instance, QWidget* parent = nullptr);
     ~CreateShortcutDialog();
 
     void createShortcut();
@@ -51,7 +51,7 @@ class CreateShortcutDialog : public QDialog {
     // Data
     Ui::CreateShortcutDialog* ui;
     QString InstIconKey;
-    InstancePtr m_instance;
+    BaseInstance* m_instance;
     bool m_QuickJoinSupported = false;
 
     // Functions

@@ -45,19 +45,19 @@ void ScanModFolders::executeTask()
     auto m_inst = m_parent->instance();
 
     auto loaders = m_inst->loaderModList();
-    connect(loaders.get(), &ModFolderModel::updateFinished, this, &ScanModFolders::modsDone);
+    connect(loaders, &ModFolderModel::updateFinished, this, &ScanModFolders::modsDone);
     if (!loaders->update()) {
         m_modsDone = true;
     }
 
     auto cores = m_inst->coreModList();
-    connect(cores.get(), &ModFolderModel::updateFinished, this, &ScanModFolders::coreModsDone);
+    connect(cores, &ModFolderModel::updateFinished, this, &ScanModFolders::coreModsDone);
     if (!cores->update()) {
         m_coreModsDone = true;
     }
 
     auto nils = m_inst->nilModList();
-    connect(nils.get(), &ModFolderModel::updateFinished, this, &ScanModFolders::nilModsDone);
+    connect(nils, &ModFolderModel::updateFinished, this, &ScanModFolders::nilModsDone);
     if (!nils->update()) {
         m_nilModsDone = true;
     }

@@ -66,7 +66,7 @@
 #include "tasks/Task.h"
 #include "ui/dialogs/ProgressDialog.h"
 
-ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> model, QWidget* parent)
+ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(inst, model, parent), m_model(model)
 {
     ui->actionDownloadItem->setText(tr("Download Mods"));
@@ -341,7 +341,7 @@ void ModFolderPage::exportModMetadata()
     dlg.exec();
 }
 
-CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent)
+CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, ModFolderModel* mods, QWidget* parent)
     : ModFolderPage(inst, mods, parent)
 {
     auto mcInst = dynamic_cast<MinecraftInstance*>(m_instance);
@@ -383,7 +383,7 @@ bool CoreModFolderPage::shouldDisplay() const
     return false;
 }
 
-NilModFolderPage::NilModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent)
+NilModFolderPage::NilModFolderPage(BaseInstance* inst, ModFolderModel* mods, QWidget* parent)
     : ModFolderPage(inst, mods, parent)
 {}
 

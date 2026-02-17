@@ -49,7 +49,7 @@
 
 namespace ResourceDownload {
 
-ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, const std::shared_ptr<ResourceFolderModel> base_model)
+ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, ResourceFolderModel* base_model)
     : QDialog(parent)
     , m_base_model(base_model)
     , m_buttons(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel)
@@ -274,7 +274,7 @@ void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* s
     result->setSearchTerm(prev_page->getSearchTerm());
 }
 
-ModDownloadDialog::ModDownloadDialog(QWidget* parent, const std::shared_ptr<ModFolderModel>& mods, BaseInstance* instance)
+ModDownloadDialog::ModDownloadDialog(QWidget* parent, ModFolderModel* mods, BaseInstance* instance)
     : ResourceDownloadDialog(parent, mods), m_instance(instance)
 {
     setWindowTitle(dialogTitle());
@@ -303,7 +303,7 @@ QList<BasePage*> ModDownloadDialog::getPages()
 GetModDependenciesTask::Ptr ModDownloadDialog::getModDependenciesTask()
 {
     if (!APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
-        if (auto model = dynamic_cast<ModFolderModel*>(getBaseModel().get()); model) {
+        if (auto model = dynamic_cast<ModFolderModel*>(getBaseModel()); model) {
             QList<std::shared_ptr<GetModDependenciesTask::PackDependency>> selectedVers;
             for (auto& selected : getTasks()) {
                 selectedVers.append(std::make_shared<GetModDependenciesTask::PackDependency>(selected->getPack(), selected->getVersion()));
@@ -316,7 +316,7 @@ GetModDependenciesTask::Ptr ModDownloadDialog::getModDependenciesTask()
 }
 
 ResourcePackDownloadDialog::ResourcePackDownloadDialog(QWidget* parent,
-                                                       const std::shared_ptr<ResourcePackFolderModel>& resource_packs,
+                                                       ResourcePackFolderModel* resource_packs,
                                                        BaseInstance* instance)
     : ResourceDownloadDialog(parent, resource_packs), m_instance(instance)
 {
@@ -341,7 +341,7 @@ QList<BasePage*> ResourcePackDownloadDialog::getPages()
 }
 
 TexturePackDownloadDialog::TexturePackDownloadDialog(QWidget* parent,
-                                                     const std::shared_ptr<TexturePackFolderModel>& resource_packs,
+                                                     TexturePackFolderModel* resource_packs,
                                                      BaseInstance* instance)
     : ResourceDownloadDialog(parent, resource_packs), m_instance(instance)
 {
@@ -366,7 +366,7 @@ QList<BasePage*> TexturePackDownloadDialog::getPages()
 }
 
 ShaderPackDownloadDialog::ShaderPackDownloadDialog(QWidget* parent,
-                                                   const std::shared_ptr<ShaderPackFolderModel>& shaders,
+                                                   ShaderPackFolderModel* shaders,
                                                    BaseInstance* instance)
     : ResourceDownloadDialog(parent, shaders), m_instance(instance)
 {
@@ -406,7 +406,7 @@ void ResourceDownloadDialog::setResourceMetadata(const std::shared_ptr<Metadata:
 }
 
 DataPackDownloadDialog::DataPackDownloadDialog(QWidget* parent,
-                                               const std::shared_ptr<DataPackFolderModel>& data_packs,
+                                               DataPackFolderModel* data_packs,
                                                BaseInstance* instance)
     : ResourceDownloadDialog(parent, data_packs), m_instance(instance)
 {

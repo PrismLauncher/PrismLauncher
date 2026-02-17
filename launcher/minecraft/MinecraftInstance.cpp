@@ -162,11 +162,13 @@ class OrSetting : public Setting {
     std::shared_ptr<Setting> m_b;
 };
 
-MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString& rootDir)
-    : BaseInstance(globalSettings, settings, rootDir)
+MinecraftInstance::MinecraftInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, const QString& rootDir)
+    : BaseInstance(globalSettings, std::move(settings), rootDir)
 {
     m_components.reset(new PackProfile(this));
 }
+
+MinecraftInstance::~MinecraftInstance() {}
 
 void MinecraftInstance::saveNow()
 {
@@ -271,7 +273,7 @@ void MinecraftInstance::loadSpecificSettings()
 
 void MinecraftInstance::updateRuntimeContext()
 {
-    m_runtimeContext.updateFromInstanceSettings(m_settings);
+    m_runtimeContext.updateFromInstanceSettings(m_settings.get());
     m_components->invalidateLaunchProfile();
 }
 
@@ -280,9 +282,9 @@ QString MinecraftInstance::typeName() const
     return "Minecraft";
 }
 
-std::shared_ptr<PackProfile> MinecraftInstance::getPackProfile() const
+PackProfile* MinecraftInstance::getPackProfile() const
 {
-    return m_components;
+    return m_components.get();
 }
 
 QSet<QString> MinecraftInstance::traits() const
@@ -310,9 +312,9 @@ void MinecraftInstance::populateLaunchMenu(QMenu* menu)
 
     normalLaunchDemo->setEnabled(supportsDemo());
 
-    connect(normalLaunch, &QAction::triggered, [this] { APPLICATION->launch(shared_from_this()); });
-    connect(normalLaunchOffline, &QAction::triggered, [this] { APPLICATION->launch(shared_from_this(), false, false); });
-    connect(normalLaunchDemo, &QAction::triggered, [this] { APPLICATION->launch(shared_from_this(), false, true); });
+    connect(normalLaunch, &QAction::triggered, [this] { APPLICATION->launch(this); });
+    connect(normalLaunchOffline, &QAction::triggered, [this] { APPLICATION->launch(this, false, false); });
+    connect(normalLaunchDemo, &QAction::triggered, [this] { APPLICATION->launch(this, false, true); });
 
     QString profilersTitle = tr("Profilers");
     menu->addSeparator()->setText(profilersTitle);
@@ -958,8 +960,8 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
         }
     };
 
-    printModList("Mods", *(loaderModList().get()));
-    printModList("Core Mods", *(coreModList().get()));
+    printModList("Mods", *loaderModList());
+    printModList("Core Mods", *coreModList());
 
     // jar mods
     auto& jarMods = profile->getJarMods();
@@ -1100,11 +1102,10 @@ QList<LaunchStep::Ptr> MinecraftInstance::createUpdateTask()
     };
 }
 
-shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin)
+LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin)
 {
     updateRuntimeContext();
-    // FIXME: get rid of shared_from_this ...
-    auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(shared_from_this()));
+    auto process = LaunchTask::create(this);
     auto pptr = process.get();
 
     APPLICATION->icons()->saveIcon(iconKey(), FS::PathCombine(gameRoot(), "icon.png"), "PNG");
@@ -1221,9 +1222,9 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
     if (m_settings->get("QuitAfterGameStop").toBool()) {
         process->appendStep(makeShared<QuitAfterGameStop>(pptr));
     }
-    m_launchProcess = process;
-    emit launchTaskChanged(m_launchProcess);
-    return m_launchProcess;
+    m_launchProcess = std::move(process);
+    emit launchTaskChanged(m_launchProcess.get());
+    return m_launchProcess.get();
 }
 
 JavaVersion MinecraftInstance::getJavaVersion()
@@ -1231,80 +1232,80 @@ JavaVersion MinecraftInstance::getJavaVersion()
     return JavaVersion(settings()->get("JavaVersion").toString());
 }
 
-std::shared_ptr<ModFolderModel> MinecraftInstance::loaderModList()
+ModFolderModel* MinecraftInstance::loaderModList()
 {
     if (!m_loader_mod_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
         m_loader_mod_list.reset(new ModFolderModel(modsRoot(), this, is_indexed, true));
     }
-    return m_loader_mod_list;
+    return m_loader_mod_list.get();
 }
 
-std::shared_ptr<ModFolderModel> MinecraftInstance::coreModList()
+ModFolderModel* MinecraftInstance::coreModList()
 {
     if (!m_core_mod_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
         m_core_mod_list.reset(new ModFolderModel(coreModsDir(), this, is_indexed, true));
     }
-    return m_core_mod_list;
+    return m_core_mod_list.get();
 }
 
-std::shared_ptr<ModFolderModel> MinecraftInstance::nilModList()
+ModFolderModel* MinecraftInstance::nilModList()
 {
     if (!m_nil_mod_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
         m_nil_mod_list.reset(new ModFolderModel(nilModsDir(), this, is_indexed, false));
     }
-    return m_nil_mod_list;
+    return m_nil_mod_list.get();
 }
 
-std::shared_ptr<ResourcePackFolderModel> MinecraftInstance::resourcePackList()
+ResourcePackFolderModel* MinecraftInstance::resourcePackList()
 {
     if (!m_resource_pack_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
         m_resource_pack_list.reset(new ResourcePackFolderModel(resourcePacksDir(), this, is_indexed, true));
     }
-    return m_resource_pack_list;
+    return m_resource_pack_list.get();
 }
 
-std::shared_ptr<TexturePackFolderModel> MinecraftInstance::texturePackList()
+TexturePackFolderModel* MinecraftInstance::texturePackList()
 {
     if (!m_texture_pack_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
         m_texture_pack_list.reset(new TexturePackFolderModel(texturePacksDir(), this, is_indexed, true));
     }
-    return m_texture_pack_list;
+    return m_texture_pack_list.get();
 }
 
-std::shared_ptr<ShaderPackFolderModel> MinecraftInstance::shaderPackList()
+ShaderPackFolderModel* MinecraftInstance::shaderPackList()
 {
     if (!m_shader_pack_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
         m_shader_pack_list.reset(new ShaderPackFolderModel(shaderPacksDir(), this, is_indexed, true));
     }
-    return m_shader_pack_list;
+    return m_shader_pack_list.get();
 }
 
-std::shared_ptr<DataPackFolderModel> MinecraftInstance::dataPackList()
+DataPackFolderModel* MinecraftInstance::dataPackList()
 {
     if (!m_data_pack_list && settings()->get("GlobalDataPacksEnabled").toBool()) {
         bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
         m_data_pack_list.reset(new DataPackFolderModel(dataPacksDir(), this, isIndexed, true));
     }
-    return m_data_pack_list;
+    return m_data_pack_list.get();
 }
 
-QList<std::shared_ptr<ResourceFolderModel>> MinecraftInstance::resourceLists()
+QList<ResourceFolderModel*> MinecraftInstance::resourceLists()
 {
     return { loaderModList(), coreModList(), nilModList(), resourcePackList(), texturePackList(), shaderPackList(), dataPackList() };
 }
 
-std::shared_ptr<WorldList> MinecraftInstance::worldList()
+WorldList* MinecraftInstance::worldList()
 {
     if (!m_world_list) {
         m_world_list.reset(new WorldList(worldDir(), this));
     }
-    return m_world_list;
+    return m_world_list.get();
 }
 
 QList<Mod*> MinecraftInstance::getJarMods() const

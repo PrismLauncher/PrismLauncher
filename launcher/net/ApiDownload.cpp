@@ -25,21 +25,21 @@ namespace Net {
 Download::Ptr ApiDownload::makeCached(QUrl url, MetaEntryPtr entry, Download::Options options)
 {
     auto dl = Download::makeCached(url, entry, options);
-    dl->addHeaderProxy(new ApiHeaderProxy());
+    dl->addHeaderProxy(std::make_unique<ApiHeaderProxy>());
     return dl;
 }
 
-Download::Ptr ApiDownload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Download::Options options)
+Download::Ptr ApiDownload::makeByteArray(QUrl url, QByteArray* output, Download::Options options)
 {
     auto dl = Download::makeByteArray(url, output, options);
-    dl->addHeaderProxy(new ApiHeaderProxy());
+    dl->addHeaderProxy(std::make_unique<ApiHeaderProxy>());
     return dl;
 }
 
 Download::Ptr ApiDownload::makeFile(QUrl url, QString path, Download::Options options)
 {
     auto dl = Download::makeFile(url, path, options);
-    dl->addHeaderProxy(new ApiHeaderProxy());
+    dl->addHeaderProxy(std::make_unique<ApiHeaderProxy>());
     return dl;
 }
 

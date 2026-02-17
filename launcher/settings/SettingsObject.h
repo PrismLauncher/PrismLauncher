@@ -30,9 +30,6 @@
 class Setting;
 class SettingsObject;
 
-using SettingsObjectPtr = std::shared_ptr<SettingsObject>;
-using SettingsObjectWeakPtr = std::weak_ptr<SettingsObject>;
-
 /*!
  * \brief The SettingsObject handles communicating settings between the application and a
  *settings file.
@@ -50,11 +47,11 @@ class SettingsObject : public QObject {
    public:
     class Lock {
        public:
-        Lock(SettingsObjectPtr locked) : m_locked(locked) { m_locked->suspendSave(); }
+        Lock(SettingsObject* locked) : m_locked(locked) { m_locked->suspendSave(); }
         ~Lock() { m_locked->resumeSave(); }
 
        private:
-        SettingsObjectPtr m_locked;
+        SettingsObject* m_locked;
     };
 
    public:

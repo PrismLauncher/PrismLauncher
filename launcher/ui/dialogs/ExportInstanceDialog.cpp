@@ -60,7 +60,7 @@
 #include "Application.h"
 #include "SeparatorPrefixTree.h"
 
-ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget* parent)
+ExportInstanceDialog::ExportInstanceDialog(BaseInstance* instance, QWidget* parent)
     : QDialog(parent), m_ui(new Ui::ExportInstanceDialog), m_instance(instance)
 {
     m_ui->setupUi(this);
@@ -98,7 +98,7 @@ ExportInstanceDialog::~ExportInstanceDialog()
 }
 
 /// Save icon to instance's folder is needed
-void SaveIcon(InstancePtr m_instance)
+void SaveIcon(BaseInstance* m_instance)
 {
     auto iconKey = m_instance->iconKey();
     auto iconList = APPLICATION->icons();

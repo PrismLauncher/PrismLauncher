@@ -57,7 +57,7 @@ void Flame::FileResolvingTask::executeTask()
     for (auto file : m_manifest.files) {
         fileIds.push_back(QString::number(file.fileId));
     }
-    m_task = flameAPI.getFiles(fileIds, m_result);
+    m_task = flameAPI.getFiles(fileIds, m_result.get());
 
     auto step_progress = std::make_shared<TaskStepProgress>();
     connect(m_task.get(), &Task::finished, this, [this, step_progress]() {
@@ -154,7 +154,7 @@ void Flame::FileResolvingTask::netJobFinished()
         return;
     }
     m_result.reset(new QByteArray());
-    m_task = modrinthAPI.currentVersions(hashes, "sha1", m_result);
+    m_task = modrinthAPI.currentVersions(hashes, "sha1", m_result.get());
     (dynamic_cast<NetJob*>(m_task.get()))->setAskRetry(false);
     auto step_progress = std::make_shared<TaskStepProgress>();
     connect(m_task.get(), &Task::finished, this, [this, step_progress]() {
@@ -227,7 +227,7 @@ void Flame::FileResolvingTask::getFlameProjects()
         addonIds.push_back(QString::number(file.projectId));
     }
 
-    m_task = flameAPI.getProjects(addonIds, m_result);
+    m_task = flameAPI.getProjects(addonIds, m_result.get());
 
     auto step_progress = std::make_shared<TaskStepProgress>();
     connect(m_task.get(), &Task::succeeded, this, [this, step_progress] {

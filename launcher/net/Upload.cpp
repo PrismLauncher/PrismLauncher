@@ -51,7 +51,7 @@ QNetworkReply* Upload::getReply(QNetworkRequest& request)
     return m_network->post(request, m_post_data);
 }
 
-Upload::Ptr Upload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray m_post_data)
+Upload::Ptr Upload::makeByteArray(QUrl url, QByteArray* output, QByteArray m_post_data)
 {
     auto up = makeShared<Upload>();
     up->m_url = std::move(url);

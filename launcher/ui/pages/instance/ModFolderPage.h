@@ -48,7 +48,7 @@ class ModFolderPage : public ExternalResourcesPage {
     inline bool handleNoModLoader();
 
    public:
-    explicit ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> model, QWidget* parent = nullptr);
+    explicit ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget* parent = nullptr);
     virtual ~ModFolderPage() = default;
 
     void setFilter(const QString& filter) { m_fileSelectionFilter = filter; }
@@ -74,14 +74,14 @@ class ModFolderPage : public ExternalResourcesPage {
     void changeModVersion();
 
    protected:
-    std::shared_ptr<ModFolderModel> m_model;
+    ModFolderModel* m_model;
     QPointer<ResourceDownload::ModDownloadDialog> m_downloadDialog;
 };
 
 class CoreModFolderPage : public ModFolderPage {
     Q_OBJECT
    public:
-    explicit CoreModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent = 0);
+    explicit CoreModFolderPage(BaseInstance* inst, ModFolderModel* mods, QWidget* parent = 0);
     virtual ~CoreModFolderPage() = default;
 
     virtual QString displayName() const override { return tr("Core Mods"); }
@@ -95,7 +95,7 @@ class CoreModFolderPage : public ModFolderPage {
 class NilModFolderPage : public ModFolderPage {
     Q_OBJECT
    public:
-    explicit NilModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent = 0);
+    explicit NilModFolderPage(BaseInstance* inst, ModFolderModel* mods, QWidget* parent = 0);
     virtual ~NilModFolderPage() = default;
 
     virtual QString displayName() const override { return tr("Nilmods"); }

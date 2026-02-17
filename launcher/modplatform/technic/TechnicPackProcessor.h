@@ -28,7 +28,7 @@ class TechnicPackProcessor : public QObject {
     void failed(QString reason);
 
    public:
-    void run(SettingsObjectPtr globalSettings,
+    void run(SettingsObject* globalSettings,
              const QString& instName,
              const QString& instIcon,
              const QString& stagingPath,

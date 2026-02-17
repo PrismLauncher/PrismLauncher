@@ -134,7 +134,7 @@ void ImportPage::updateState()
             auto array = std::make_shared<QByteArray>();
 
             auto api = FlameAPI();
-            auto job = api.getFile(addonId, fileId, array);
+            auto job = api.getFile(addonId, fileId, array.get());
 
             connect(job.get(), &NetJob::failed, this,
                     [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });

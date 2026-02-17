@@ -156,7 +156,7 @@ void Technic::ListModel::performSearch()
     if (!clientId.isEmpty()) {
         searchUrl += "?cid=" + clientId;
     }
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response.get()));
     jobPtr = netJob;
     jobPtr->start();
     connect(netJob.get(), &NetJob::succeeded, this, &ListModel::searchRequestFinished);

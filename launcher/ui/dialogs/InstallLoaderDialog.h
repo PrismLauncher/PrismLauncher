@@ -30,7 +30,7 @@ class InstallLoaderDialog final : public QDialog, protected BasePageProvider {
     Q_OBJECT
 
    public:
-    explicit InstallLoaderDialog(std::shared_ptr<PackProfile> instance, const QString& uid = QString(), QWidget* parent = nullptr);
+    explicit InstallLoaderDialog(PackProfile* instance, const QString& uid = QString(), QWidget* parent = nullptr);
 
     QList<BasePage*> getPages() override;
     QString dialogTitle() override;
@@ -39,7 +39,7 @@ class InstallLoaderDialog final : public QDialog, protected BasePageProvider {
     void done(int result) override;
 
    private:
-    std::shared_ptr<PackProfile> profile;
+    PackProfile* profile;
     PageContainer* container;
     QDialogButtonBox* buttons;
 };

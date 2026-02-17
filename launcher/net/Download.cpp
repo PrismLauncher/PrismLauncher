@@ -63,7 +63,7 @@ auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Down
 }
 #endif
 
-auto Download::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options) -> Download::Ptr
+auto Download::makeByteArray(QUrl url, QByteArray* output, Options options) -> Download::Ptr
 {
     auto dl = makeShared<Download>();
     dl->m_url = url;

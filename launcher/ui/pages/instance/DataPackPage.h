@@ -26,7 +26,7 @@
 class DataPackPage : public ExternalResourcesPage {
     Q_OBJECT
    public:
-    explicit DataPackPage(BaseInstance* instance, std::shared_ptr<DataPackFolderModel> model, QWidget* parent = nullptr);
+    explicit DataPackPage(BaseInstance* instance, DataPackFolderModel* model, QWidget* parent = nullptr);
 
     QString displayName() const override { return QObject::tr("Data Packs"); }
     QIcon icon() const override { return QIcon::fromTheme("datapacks"); }
@@ -43,7 +43,7 @@ class DataPackPage : public ExternalResourcesPage {
     void changeDataPackVersion();
 
    private:
-    std::shared_ptr<DataPackFolderModel> m_model;
+    DataPackFolderModel* m_model;
     QPointer<ResourceDownload::DataPackDownloadDialog> m_downloadDialog;
 };
 

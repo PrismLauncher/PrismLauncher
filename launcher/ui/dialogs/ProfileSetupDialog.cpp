@@ -162,8 +162,8 @@ void ProfileSetupDialog::checkName(const QString& name)
     m_check_response.reset(new QByteArray());
     if (m_check_task)
         disconnect(m_check_task.get(), nullptr, this, nullptr);
-    m_check_task = Net::Download::makeByteArray(url, m_check_response);
-    m_check_task->addHeaderProxy(new Net::RawHeaderProxy(headers));
+    m_check_task = Net::Download::makeByteArray(url, m_check_response.get());
+    m_check_task->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
 
     connect(m_check_task.get(), &Task::finished, this, &ProfileSetupDialog::checkFinished);
 
@@ -206,8 +206,8 @@ void ProfileSetupDialog::setupProfile(const QString& profileName)
                                            { "Authorization", QString("Bearer %1").arg(m_accountToSetup->accessToken()).toUtf8() } };
 
     m_profile_response.reset(new QByteArray());
-    m_profile_task = Net::Upload::makeByteArray(url, m_profile_response, payloadTemplate.arg(profileName).toUtf8());
-    m_profile_task->addHeaderProxy(new Net::RawHeaderProxy(headers));
+    m_profile_task = Net::Upload::makeByteArray(url, m_profile_response.get(), payloadTemplate.arg(profileName).toUtf8());
+    m_profile_task->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
 
     connect(m_profile_task.get(), &Task::finished, this, &ProfileSetupDialog::setupProfileFinished);
 

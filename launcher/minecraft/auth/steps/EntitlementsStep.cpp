@@ -32,8 +32,7 @@ void EntitlementsStep::perform()
                                            { "Authorization", QString("Bearer %1").arg(m_data->yggdrasilToken.token).toUtf8() } };
 
     m_response.reset(new QByteArray());
-    m_request = Net::Download::makeByteArray(url, m_response);
-    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
+    m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);
 
     m_task.reset(new NetJob("EntitlementsStep", APPLICATION->network()));

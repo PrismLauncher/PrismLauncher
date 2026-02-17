@@ -53,8 +53,8 @@
 
 #include "ui_JavaSettingsWidget.h"
 
-JavaSettingsWidget::JavaSettingsWidget(InstancePtr instance, QWidget* parent)
-    : QWidget(parent), m_instance(std::move(instance)), m_ui(new Ui::JavaSettingsWidget)
+JavaSettingsWidget::JavaSettingsWidget(BaseInstance* instance, QWidget* parent)
+    : QWidget(parent), m_instance(instance), m_ui(new Ui::JavaSettingsWidget)
 {
     m_ui->setupUi(this);
 
@@ -79,7 +79,7 @@ JavaSettingsWidget::JavaSettingsWidget(InstancePtr instance, QWidget* parent)
         m_ui->memoryGroupBox->setCheckable(true);
         m_ui->javaArgumentsGroupBox->setCheckable(true);
 
-        SettingsObjectPtr settings = m_instance->settings();
+        SettingsObject* settings = m_instance->settings();
 
         connect(settings->getSetting("OverrideJavaLocation").get(), &Setting::SettingChanged, m_ui->javaInstallationGroupBox,
                 [this, settings] { m_ui->javaInstallationGroupBox->setChecked(settings->get("OverrideJavaLocation").toBool()); });
@@ -87,7 +87,7 @@ JavaSettingsWidget::JavaSettingsWidget(InstancePtr instance, QWidget* parent)
                 [this, settings] { m_ui->javaPathTextBox->setText(settings->get("JavaPath").toString()); });
 
         connect(m_ui->javaDownloadBtn, &QPushButton::clicked, this, [this] {
-            auto javaDialog = new Java::InstallDialog({}, m_instance.get(), this);
+            auto javaDialog = new Java::InstallDialog({}, m_instance, this);
             javaDialog->exec();
         });
         connect(m_ui->javaPathTextBox, &QLineEdit::textChanged, [this](QString newValue) {
@@ -115,7 +115,7 @@ JavaSettingsWidget::~JavaSettingsWidget()
 
 void JavaSettingsWidget::loadSettings()
 {
-    SettingsObjectPtr settings;
+    SettingsObject* settings;
 
     if (m_instance != nullptr)
         settings = m_instance->settings();
@@ -158,7 +158,7 @@ void JavaSettingsWidget::loadSettings()
 
 void JavaSettingsWidget::saveSettings()
 {
-    SettingsObjectPtr settings;
+    SettingsObject* settings;
 
     if (m_instance != nullptr)
         settings = m_instance->settings();
@@ -265,7 +265,7 @@ void JavaSettingsWidget::onJavaAutodetect()
         return;
     }
 
-    VersionSelectDialog versionDialog(APPLICATION->javalist().get(), tr("Select a Java version"), this, true);
+    VersionSelectDialog versionDialog(APPLICATION->javalist(), tr("Select a Java version"), this, true);
     versionDialog.setResizeOn(2);
     versionDialog.exec();
 

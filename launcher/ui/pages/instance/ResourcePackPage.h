@@ -48,7 +48,7 @@
 class ResourcePackPage : public ExternalResourcesPage {
     Q_OBJECT
    public:
-    explicit ResourcePackPage(MinecraftInstance* instance, std::shared_ptr<ResourcePackFolderModel> model, QWidget* parent = 0);
+    explicit ResourcePackPage(MinecraftInstance* instance, ResourcePackFolderModel* model, QWidget* parent = 0);
 
     QString displayName() const override { return tr("Resource Packs"); }
     QIcon icon() const override { return QIcon::fromTheme("resourcepacks"); }
@@ -71,6 +71,6 @@ class ResourcePackPage : public ExternalResourcesPage {
     void changeResourcePackVersion();
 
    protected:
-    std::shared_ptr<ResourcePackFolderModel> m_model;
+    ResourcePackFolderModel* m_model;
     QPointer<ResourceDownload::ResourceDownloadDialog> m_downloadDialog;
 };

@@ -61,7 +61,7 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
 
     m_accounts = APPLICATION->accounts();
 
-    ui->listView->setModel(m_accounts.get());
+    ui->listView->setModel(m_accounts);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::ProfileNameColumn, QHeaderView::Stretch);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::NameColumn, QHeaderView::Stretch);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::TypeColumn, QHeaderView::ResizeToContents);
@@ -78,9 +78,9 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
     connect(ui->listView, &VersionListView::activated, this,
             [this](const QModelIndex& index) { m_accounts->setDefaultAccount(m_accounts->at(index.row())); });
 
-    connect(m_accounts.get(), &AccountList::listChanged, this, &AccountListPage::listChanged);
-    connect(m_accounts.get(), &AccountList::listActivityChanged, this, &AccountListPage::listChanged);
-    connect(m_accounts.get(), &AccountList::defaultAccountChanged, this, &AccountListPage::listChanged);
+    connect(m_accounts, &AccountList::listChanged, this, &AccountListPage::listChanged);
+    connect(m_accounts, &AccountList::listActivityChanged, this, &AccountListPage::listChanged);
+    connect(m_accounts, &AccountList::defaultAccountChanged, this, &AccountListPage::listChanged);
 
     updateButtonStates();
 

@@ -112,7 +112,7 @@ class Application : public QApplication {
 
     bool event(QEvent* event) override;
 
-    std::shared_ptr<SettingsObject> settings() const { return m_settings; }
+    SettingsObject* settings() const { return m_settings.get(); }
 
     qint64 timeSinceStart() const { return m_startTime.msecsTo(QDateTime::currentDateTime()); }
 
@@ -120,21 +120,21 @@ class Application : public QApplication {
 
     ThemeManager* themeManager() { return m_themeManager.get(); }
 
-    shared_qobject_ptr<ExternalUpdater> updater() { return m_updater; }
+    ExternalUpdater* updater() { return m_updater.get(); }
 
     void triggerUpdateCheck();
 
-    std::shared_ptr<TranslationsModel> translations();
+    TranslationsModel* translations();
 
-    std::shared_ptr<JavaInstallList> javalist();
+    JavaInstallList* javalist();
 
-    std::shared_ptr<InstanceList> instances() const { return m_instances; }
+    InstanceList* instances() const { return m_instances.get(); }
 
-    std::shared_ptr<IconList> icons() const { return m_icons; }
+    IconList* icons() const { return m_icons.get(); }
 
     MCEditTool* mcedit() const { return m_mcedit.get(); }
 
-    shared_qobject_ptr<AccountList> accounts() const { return m_accounts; }
+    AccountList* accounts() const { return m_accounts.get(); }
 
     Status status() const { return m_status; }
 
@@ -142,11 +142,11 @@ class Application : public QApplication {
 
     void updateProxySettings(QString proxyTypeStr, QString addr, int port, QString user, QString password);
 
-    shared_qobject_ptr<QNetworkAccessManager> network();
+    QNetworkAccessManager* network();
 
-    shared_qobject_ptr<HttpMetaCache> metacache();
+    HttpMetaCache* metacache();
 
-    shared_qobject_ptr<Meta::Index> metadataIndex();
+    Meta::Index* metadataIndex();
 
     void updateCapabilities();
 
@@ -182,7 +182,7 @@ class Application : public QApplication {
      */
     bool openJsonEditor(const QString& filename);
 
-    InstanceWindow* showInstanceWindow(InstancePtr instance, QString page = QString());
+    InstanceWindow* showInstanceWindow(BaseInstance* instance, QString page = QString());
     MainWindow* showMainWindow(bool minimized = false);
     ViewLogWindow* showLogWindow();
 
@@ -209,13 +209,13 @@ class Application : public QApplication {
 #endif
 
    public slots:
-    bool launch(InstancePtr instance,
+    bool launch(BaseInstance* instance,
                 bool online = true,
                 bool demo = false,
                 MinecraftTarget::Ptr targetToJoin = nullptr,
                 MinecraftAccountPtr accountToUse = nullptr,
                 const QString& offlineName = QString());
-    bool kill(InstancePtr instance);
+    bool kill(BaseInstance* instance);
     void closeCurrentWindow();
 
    private slots:
@@ -239,22 +239,26 @@ class Application : public QApplication {
     bool shouldExitNow() const;
 
    private:
+    QHash<QString, int> m_qsaveResources;
+    mutable QMutex m_qsaveResourcesMutex;
+
+   private:
     QDateTime m_startTime;
 
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
+    std::unique_ptr<QNetworkAccessManager> m_network;
 
-    shared_qobject_ptr<ExternalUpdater> m_updater;
-    shared_qobject_ptr<AccountList> m_accounts;
+    std::unique_ptr<ExternalUpdater> m_updater;
+    std::unique_ptr<AccountList> m_accounts;
 
-    shared_qobject_ptr<HttpMetaCache> m_metacache;
-    shared_qobject_ptr<Meta::Index> m_metadataIndex;
+    std::unique_ptr<HttpMetaCache> m_metacache;
+    std::unique_ptr<Meta::Index> m_metadataIndex;
 
-    std::shared_ptr<SettingsObject> m_settings;
-    std::shared_ptr<InstanceList> m_instances;
-    std::shared_ptr<IconList> m_icons;
-    std::shared_ptr<JavaInstallList> m_javalist;
-    std::shared_ptr<TranslationsModel> m_translations;
-    std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
+    std::unique_ptr<SettingsObject> m_settings;
+    std::unique_ptr<InstanceList> m_instances;
+    std::unique_ptr<IconList> m_icons;
+    std::unique_ptr<JavaInstallList> m_javalist;
+    std::unique_ptr<TranslationsModel> m_translations;
+    std::unique_ptr<GenericPageProvider> m_globalSettingsProvider;
     std::unique_ptr<MCEditTool> m_mcedit;
     QSet<QString> m_features;
     std::unique_ptr<ThemeManager> m_themeManager;
@@ -279,7 +283,7 @@ class Application : public QApplication {
     // FIXME: attach to instances instead.
     struct InstanceXtras {
         InstanceWindow* window = nullptr;
-        shared_qobject_ptr<LaunchController> controller;
+        std::unique_ptr<LaunchController> controller;
     };
     std::map<QString, InstanceXtras> m_instanceExtras;
     mutable QMutex m_instanceExtrasMutex;
@@ -313,14 +317,10 @@ class Application : public QApplication {
     QList<QUrl> m_urlsToImport;
     QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
-    shared_qobject_ptr<LogModel> logModel;
+    std::unique_ptr<LogModel> logModel;
 
    public:
     void addQSavePath(QString);
     void removeQSavePath(QString);
     bool checkQSavePath(QString);
-
-   private:
-    QHash<QString, int> m_qsaveResources;
-    mutable QMutex m_qsaveResourcesMutex;
 };

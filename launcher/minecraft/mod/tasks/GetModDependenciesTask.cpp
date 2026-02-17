@@ -135,7 +135,7 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDepende
 {
     auto provider = pDep->pack->provider;
     auto responseInfo = std::make_shared<QByteArray>();
-    auto info = getAPI(provider)->getProject(pDep->pack->addonId.toString(), responseInfo);
+    auto info = getAPI(provider)->getProject(pDep->pack->addonId.toString(), responseInfo.get());
     connect(info.get(), &NetJob::succeeded, [this, responseInfo, provider, pDep] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*responseInfo, &parse_error);

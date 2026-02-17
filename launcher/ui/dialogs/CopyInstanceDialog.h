@@ -30,7 +30,7 @@ class CopyInstanceDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit CopyInstanceDialog(InstancePtr original, QWidget* parent = 0);
+    explicit CopyInstanceDialog(BaseInstance* original, QWidget* parent = 0);
     ~CopyInstanceDialog();
 
     void updateDialogState();
@@ -71,7 +71,7 @@ class CopyInstanceDialog : public QDialog {
     /* data */
     Ui::CopyInstanceDialog* ui;
     QString InstIconKey;
-    InstancePtr m_original;
+    BaseInstance* m_original;
     InstanceCopyPrefs m_selectedOptions;
     bool m_cloneSupported = false;
     bool m_linkSupported = false;

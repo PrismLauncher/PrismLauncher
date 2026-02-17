@@ -45,7 +45,7 @@
 #include "net/ApiDownload.h"
 #include "net/ChecksumValidator.h"
 
-Technic::SolderPackInstallTask::SolderPackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network,
+Technic::SolderPackInstallTask::SolderPackInstallTask(QNetworkAccessManager* network,
                                                       const QUrl& solderUrl,
                                                       const QString& pack,
                                                       const QString& version,
@@ -72,7 +72,7 @@ void Technic::SolderPackInstallTask::executeTask()
 
     m_filesNetJob.reset(new NetJob(tr("Resolving modpack files"), m_network));
     auto sourceUrl = QString("%1/modpack/%2/%3").arg(m_solderUrl.toString(), m_pack, m_version);
-    m_filesNetJob->addNetAction(Net::ApiDownload::makeByteArray(sourceUrl, m_response));
+    m_filesNetJob->addNetAction(Net::ApiDownload::makeByteArray(sourceUrl, m_response.get()));
 
     auto job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SolderPackInstallTask::fileListSucceeded);

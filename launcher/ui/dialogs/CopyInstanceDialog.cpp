@@ -51,7 +51,7 @@
 #include "InstanceList.h"
 #include "icons/IconList.h"
 
-CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget* parent)
+CopyInstanceDialog::CopyInstanceDialog(BaseInstance* original, QWidget* parent)
     : QDialog(parent), ui(new Ui::CopyInstanceDialog), m_original(original)
 {
     ui->setupUi(this);

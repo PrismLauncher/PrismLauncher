@@ -47,7 +47,7 @@
 #include <QMenu>
 #include <algorithm>
 
-ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared_ptr<ResourceFolderModel> model, QWidget* parent)
+ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, ResourceFolderModel* model, QWidget* parent)
     : QMainWindow(parent), m_instance(instance), ui(new Ui::ExternalResourcesPage), m_model(model)
 {
     ui->setupUi(this);
@@ -58,7 +58,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
     m_filterModel->setDynamicSortFilter(true);
     m_filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     m_filterModel->setSortCaseSensitivity(Qt::CaseInsensitive);
-    m_filterModel->setSourceModel(m_model.get());
+    m_filterModel->setSourceModel(m_model);
     m_filterModel->setFilterKeyColumn(-1);
     ui->treeView->setModel(m_filterModel);
     // must come after setModel
@@ -98,12 +98,12 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
     };
 
     connect(selection_model, &QItemSelectionModel::selectionChanged, this, updateExtra);
-    connect(model.get(), &ResourceFolderModel::updateFinished, this, updateExtra);
-    connect(model.get(), &ResourceFolderModel::parseFinished, this, updateExtra);
+    connect(model, &ResourceFolderModel::updateFinished, this, updateExtra);
+    connect(model, &ResourceFolderModel::parseFinished, this, updateExtra);
 
     connect(selection_model, &QItemSelectionModel::selectionChanged, this, [this] { updateActions(); });
-    connect(m_model.get(), &ResourceFolderModel::rowsInserted, this, [this] { updateActions(); });
-    connect(m_model.get(), &ResourceFolderModel::rowsRemoved, this, [this] { updateActions(); });
+    connect(m_model, &ResourceFolderModel::rowsInserted, this, [this] { updateActions(); });
+    connect(m_model, &ResourceFolderModel::rowsRemoved, this, [this] { updateActions(); });
 
     auto viewHeader = ui->treeView->header();
     viewHeader->setContextMenuPolicy(Qt::CustomContextMenu);

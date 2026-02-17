@@ -220,7 +220,7 @@ class MainWindow : public QMainWindow {
     void retranslateUi();
 
     void addInstance(const QString& url = QString(), const QMap<QString, QString>& extra_info = {});
-    void activateInstance(InstancePtr instance);
+    void activateInstance(BaseInstance* instance);
     void setCatBackground(bool enabled);
     void updateInstanceToolIcon(QString new_icon);
     void setSelectedInstanceById(const QString& id);
@@ -247,7 +247,7 @@ class MainWindow : public QMainWindow {
 
     unique_qobject_ptr<NewsChecker> m_newsChecker;
 
-    InstancePtr m_selectedInstance;
+    BaseInstance* m_selectedInstance = nullptr;
     QString m_currentInstIcon;
 
     // managed by the application object

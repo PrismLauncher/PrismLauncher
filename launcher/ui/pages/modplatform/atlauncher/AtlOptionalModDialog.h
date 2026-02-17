@@ -83,7 +83,7 @@ class AtlOptionalModListModel : public QAbstractListModel {
 
    private:
     NetJob::Ptr m_jobPtr;
-    std::shared_ptr<QByteArray> m_response = std::make_shared<QByteArray>();
+    std::unique_ptr<QByteArray> m_response = std::make_unique<QByteArray>();
 
     ATLauncher::PackVersion m_version;
     QList<ATLauncher::VersionMod> m_mods;

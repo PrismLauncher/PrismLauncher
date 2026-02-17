@@ -9,20 +9,20 @@
 class JProfiler : public BaseProfiler {
     Q_OBJECT
    public:
-    JProfiler(SettingsObjectPtr settings, InstancePtr instance, QObject* parent = 0);
+    JProfiler(SettingsObject* settings, BaseInstance* instance, QObject* parent = 0);
 
    private slots:
     void profilerStarted();
     void profilerFinished(int exit, QProcess::ExitStatus status);
 
    protected:
-    void beginProfilingImpl(shared_qobject_ptr<LaunchTask> process);
+    void beginProfilingImpl(LaunchTask* process);
 
    private:
     int listeningPort = 0;
 };
 
-JProfiler::JProfiler(SettingsObjectPtr settings, InstancePtr instance, QObject* parent) : BaseProfiler(settings, instance, parent) {}
+JProfiler::JProfiler(SettingsObject* settings, BaseInstance* instance, QObject* parent) : BaseProfiler(settings, instance, parent) {}
 
 void JProfiler::profilerStarted()
 {
@@ -40,7 +40,7 @@ void JProfiler::profilerFinished([[maybe_unused]] int exit, QProcess::ExitStatus
     }
 }
 
-void JProfiler::beginProfilingImpl(shared_qobject_ptr<LaunchTask> process)
+void JProfiler::beginProfilingImpl(LaunchTask* process)
 {
     listeningPort = globalSettings->get("JProfilerPort").toInt();
     QProcess* profiler = new QProcess(this);
@@ -63,14 +63,14 @@ void JProfiler::beginProfilingImpl(shared_qobject_ptr<LaunchTask> process)
     profiler->start();
 }
 
-void JProfilerFactory::registerSettings(SettingsObjectPtr settings)
+void JProfilerFactory::registerSettings(SettingsObject* settings)
 {
     settings->registerSetting("JProfilerPath");
     settings->registerSetting("JProfilerPort", 42042);
     globalSettings = settings;
 }
 
-BaseExternalTool* JProfilerFactory::createTool(InstancePtr instance, QObject* parent)
+BaseExternalTool* JProfilerFactory::createTool(BaseInstance* instance, QObject* parent)
 {
     return new JProfiler(globalSettings, instance, parent);
 }

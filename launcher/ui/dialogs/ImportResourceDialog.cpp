@@ -35,7 +35,7 @@ ImportResourceDialog::ImportResourceDialog(QString file_path, ModPlatform::Resou
     contentsWidget->setItemDelegate(new ListViewDelegate());
 
     proxyModel = new InstanceProxyModel(this);
-    proxyModel->setSourceModel(APPLICATION->instances().get());
+    proxyModel->setSourceModel(APPLICATION->instances());
     proxyModel->sort(0);
     contentsWidget->setModel(proxyModel);
 

@@ -41,7 +41,7 @@ struct RuntimeContext {
         return javaRealArchitecture;
     }
 
-    void updateFromInstanceSettings(SettingsObjectPtr instanceSettings)
+    void updateFromInstanceSettings(SettingsObject* instanceSettings)
     {
         javaArchitecture = instanceSettings->get("JavaArchitecture").toString();
         javaRealArchitecture = instanceSettings->get("JavaRealArchitecture").toString();

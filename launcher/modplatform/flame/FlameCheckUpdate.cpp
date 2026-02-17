@@ -53,16 +53,16 @@ void FlameCheckUpdate::executeTask()
             continue;
 
         auto response = std::make_shared<QByteArray>();
-        auto task = Net::ApiDownload::makeByteArray(versionsUrlOptional.value(), response);
+        auto task = Net::ApiDownload::makeByteArray(versionsUrlOptional.value(), response.get());
 
-        connect(task.get(), &Task::succeeded, this, [this, resource, response] { getLatestVersionCallback(resource, response); });
+        connect(task.get(), &Task::succeeded, this, [this, resource, response] { getLatestVersionCallback(resource, response.get()); });
         netJob->addNetAction(task);
     }
     m_task.reset(netJob);
     m_task->start();
 }
 
-void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, std::shared_ptr<QByteArray> response)
+void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QByteArray* response)
 {
     QJsonParseError parse_error{};
     QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
@@ -146,9 +146,9 @@ void FlameCheckUpdate::collectBlockedMods()
         emitSucceeded();
         return;
     } else if (addonIds.size() == 1) {
-        projTask = api.getProject(*addonIds.begin(), response);
+        projTask = api.getProject(*addonIds.begin(), response.get());
     } else {
-        projTask = api.getProjects(addonIds, response);
+        projTask = api.getProjects(addonIds, response.get());
     }
 
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds, quickSearch] {

@@ -14,27 +14,27 @@
 
 class ModrinthAPI : public ResourceAPI {
    public:
-    Task::Ptr currentVersion(QString hash, QString hash_format, std::shared_ptr<QByteArray> response);
+    Task::Ptr currentVersion(QString hash, QString hash_format, QByteArray* response);
 
-    Task::Ptr currentVersions(const QStringList& hashes, QString hash_format, std::shared_ptr<QByteArray> response);
+    Task::Ptr currentVersions(const QStringList& hashes, QString hash_format, QByteArray* response);
 
     Task::Ptr latestVersion(QString hash,
                             QString hash_format,
                             std::optional<std::list<Version>> mcVersions,
                             std::optional<ModPlatform::ModLoaderTypes> loaders,
-                            std::shared_ptr<QByteArray> response);
+                            QByteArray* response);
 
     Task::Ptr latestVersions(const QStringList& hashes,
                              QString hash_format,
                              std::optional<std::list<Version>> mcVersions,
                              std::optional<ModPlatform::ModLoaderTypes> loaders,
-                             std::shared_ptr<QByteArray> response);
+                             QByteArray* response);
 
-    Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
+    Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const override;
 
-    static Task::Ptr getModCategories(std::shared_ptr<QByteArray> response);
-    static QList<ModPlatform::Category> loadCategories(std::shared_ptr<QByteArray> response, QString projectType);
-    static QList<ModPlatform::Category> loadModCategories(std::shared_ptr<QByteArray> response);
+    static Task::Ptr getModCategories(QByteArray* response);
+    static QList<ModPlatform::Category> loadCategories(QByteArray* response, QString projectType);
+    static QList<ModPlatform::Category> loadModCategories(QByteArray* response);
 
    public:
     auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;

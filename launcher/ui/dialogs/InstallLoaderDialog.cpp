@@ -37,7 +37,7 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
                       const QString& iconName,
                       const QString& name,
                       const Version& oldestVersion,
-                      const std::shared_ptr<PackProfile> profile)
+                      PackProfile* profile)
         : VersionSelectWidget(nullptr), uid(id), iconName(iconName), name(name)
     {
         const QString minecraftVersion = profile->getComponentVersion("net.minecraft");
@@ -88,8 +88,8 @@ static InstallLoaderPage* pageCast(BasePage* page)
     return result;
 }
 
-InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, const QString& uid, QWidget* parent)
-    : QDialog(parent), profile(std::move(profile)), container(new PageContainer(this, QString(), this)), buttons(new QDialogButtonBox(this))
+InstallLoaderDialog::InstallLoaderDialog(PackProfile* profile, const QString& uid, QWidget* parent)
+    : QDialog(parent), profile(profile), container(new PageContainer(this, QString(), this)), buttons(new QDialogButtonBox(this))
 {
     auto layout = new QVBoxLayout(this);
     // small margins look ugly on macOS on modal windows
