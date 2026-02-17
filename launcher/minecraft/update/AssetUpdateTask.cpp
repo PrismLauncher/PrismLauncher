@@ -73,7 +73,7 @@ void AssetUpdateTask::assetIndexFinished()
 
     auto job = index.getDownloadJob();
     if (job) {
-        QString resourceURL = APPLICATION->settings()->get("ResourceURL").toString();
+        QString resourceURL = resourceUrl();
         QString source = tr("Mojang");
         if (resourceURL != BuildConfig.DEFAULT_RESOURCE_BASE) {
             source = QUrl(resourceURL).host();
@@ -110,4 +110,13 @@ bool AssetUpdateTask::abort()
         qWarning() << "Prematurely aborted AssetUpdateTask";
     }
     return true;
+}
+
+QString AssetUpdateTask::resourceUrl()
+{
+    if (const QString urlOverride = APPLICATION->settings()->get("ResourceURLOverride").toString(); !urlOverride.isEmpty()) {
+        return urlOverride;
+    }
+
+    return BuildConfig.DEFAULT_RESOURCE_BASE;
 }
