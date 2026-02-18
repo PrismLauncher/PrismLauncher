@@ -252,9 +252,8 @@ void WorldListPage::on_actionData_Packs_triggered()
     pageContainer->hidePageList();
     layout->addWidget(pageContainer);
 
-    auto buttonBox = new QDialogButtonBox(QDialogButtonBox::Close | QDialogButtonBox::Help);
+    auto buttonBox = new QDialogButtonBox(QDialogButtonBox::Close);
     connect(buttonBox, &QDialogButtonBox::rejected, dialog, &QDialog::reject);
-    connect(buttonBox, &QDialogButtonBox::helpRequested, pageContainer, &PageContainer::help);
     layout->addWidget(buttonBox);
 
     dialog->setLayout(layout);

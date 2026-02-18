@@ -50,10 +50,7 @@
 namespace ResourceDownload {
 
 ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, ResourceFolderModel* base_model)
-    : QDialog(parent)
-    , m_base_model(base_model)
-    , m_buttons(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel)
-    , m_vertical_layout(this)
+    : QDialog(parent), m_base_model(base_model), m_buttons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel), m_vertical_layout(this)
 {
     setObjectName(QStringLiteral("ResourceDownloadDialog"));
 
@@ -61,10 +58,10 @@ ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, ResourceFolderMo
 
     setWindowIcon(QIcon::fromTheme("new"));
 
-    // small margins look ugly on macOS on modal windows
-    #ifndef Q_OS_MACOS
+// small margins look ugly on macOS on modal windows
+#ifndef Q_OS_MACOS
     m_buttons.setContentsMargins(0, 0, 6, 6);
-    #endif
+#endif
     // Bonk Qt over its stupid head and make sure it understands which button is the default one...
     // See: https://stackoverflow.com/questions/24556831/qbuttonbox-set-default-button
     auto OkButton = m_buttons.button(QDialogButtonBox::Ok);
@@ -77,10 +74,6 @@ ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, ResourceFolderMo
     auto CancelButton = m_buttons.button(QDialogButtonBox::Cancel);
     CancelButton->setDefault(false);
     CancelButton->setAutoDefault(false);
-
-    auto HelpButton = m_buttons.button(QDialogButtonBox::Help);
-    HelpButton->setDefault(false);
-    HelpButton->setAutoDefault(false);
 
     setWindowModality(Qt::WindowModal);
 }
@@ -118,10 +111,10 @@ void ResourceDownloadDialog::reject()
 // won't work with subclasses if we put it in this ctor.
 void ResourceDownloadDialog::initializeContainer()
 {
-    // small margins look ugly on macOS on modal windows
-    #ifndef Q_OS_MACOS
+// small margins look ugly on macOS on modal windows
+#ifndef Q_OS_MACOS
     layout()->setContentsMargins(0, 0, 0, 0);
-    #endif
+#endif
 
     m_container = new PageContainer(this, {}, this);
     m_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
@@ -142,9 +135,6 @@ void ResourceDownloadDialog::connectButtons()
 
     auto CancelButton = m_buttons.button(QDialogButtonBox::Cancel);
     connect(CancelButton, &QPushButton::clicked, this, &ResourceDownloadDialog::reject);
-
-    auto HelpButton = m_buttons.button(QDialogButtonBox::Help);
-    connect(HelpButton, &QPushButton::clicked, m_container, &PageContainer::help);
 }
 
 void ResourceDownloadDialog::confirm()

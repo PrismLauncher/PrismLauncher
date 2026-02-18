@@ -41,7 +41,6 @@ class ResourcePackResourcePage : public ResourcePage {
 
     QMap<QString, QString> urlHandlers() const override;
 
-    inline auto helpPage() const -> QString override { return "resourcepack-platform"; }
 
    protected:
     ResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);

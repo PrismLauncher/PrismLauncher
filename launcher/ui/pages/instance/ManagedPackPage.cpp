@@ -181,11 +181,6 @@ QIcon ManagedPackPage::icon() const
     return QIcon::fromTheme(m_inst->getManagedPackType());
 }
 
-QString ManagedPackPage::helpPage() const
-{
-    return {};
-}
-
 void ManagedPackPage::retranslate()
 {
     ui->retranslateUi(this);

@@ -55,7 +55,6 @@ class APIPage : public QWidget, public BasePage {
     QString displayName() const override { return tr("Services"); }
     QIcon icon() const override { return QIcon::fromTheme("worlds"); }
     QString id() const override { return "apis"; }
-    QString helpPage() const override { return "APIs"; }
     virtual bool apply() override;
     void retranslate() override;
 

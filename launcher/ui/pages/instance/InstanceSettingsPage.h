@@ -58,5 +58,4 @@ class InstanceSettingsPage : public MinecraftSettingsWidget, public BasePage {
         saveSettings();
         return true;
     }
-    QString helpPage() const override { return "Instance-settings"; }
 };

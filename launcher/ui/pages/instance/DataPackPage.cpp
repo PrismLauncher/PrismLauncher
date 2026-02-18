@@ -295,14 +295,6 @@ QIcon GlobalDataPackPage::icon() const
     return m_underlyingPage->icon();
 }
 
-QString GlobalDataPackPage::helpPage() const
-{
-    if (m_underlyingPage == nullptr)
-        return {};
-
-    return m_underlyingPage->helpPage();
-}
-
 bool GlobalDataPackPage::shouldDisplay() const
 {
     return m_instance->settings()->get("GlobalDataPacksEnabled").toBool();

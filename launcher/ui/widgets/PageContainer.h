@@ -96,9 +96,6 @@ class PageContainer : public QWidget, public BasePageContainer {
     void createUI();
     void retranslate();
 
-   public slots:
-    void help();
-
    signals:
     /** Emitted when the currently selected page is changed */
     void selectedPageChanged(BasePage* previous, BasePage* selected);

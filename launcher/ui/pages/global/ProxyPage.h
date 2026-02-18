@@ -56,7 +56,6 @@ class ProxyPage : public QWidget, public BasePage {
     QString displayName() const override { return tr("Proxy"); }
     QIcon icon() const override { return QIcon::fromTheme("proxy"); }
     QString id() const override { return "proxy-settings"; }
-    QString helpPage() const override { return "Proxy-settings"; }
     bool apply() override;
     void retranslate() override;
 

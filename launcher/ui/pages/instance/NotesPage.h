@@ -60,7 +60,6 @@ class NotesPage : public QWidget, public BasePage {
     }
     virtual QString id() const override { return "notes"; }
     virtual bool apply() override;
-    virtual QString helpPage() const override { return "Notes"; }
     void retranslate() override;
 
    private:

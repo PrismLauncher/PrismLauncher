@@ -62,7 +62,6 @@ class FlamePage : public QWidget, public ModpackProviderBasePage {
     virtual QString displayName() const override { return "CurseForge"; }
     virtual QIcon icon() const override { return QIcon::fromTheme("flame"); }
     virtual QString id() const override { return "flame"; }
-    virtual QString helpPage() const override { return "Flame-platform"; }
     virtual bool shouldDisplay() const override;
     void retranslate() override;
 

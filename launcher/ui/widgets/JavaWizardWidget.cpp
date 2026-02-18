@@ -235,7 +235,7 @@ JavaWizardWidget::ValidationStatus JavaWizardWidget::validate()
                                     "\n\n"
                                     "You can change the Java version in the settings later.\n")
                                      .arg(BuildConfig.LAUNCHER_DISPLAYNAME),
-                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Help, QMessageBox::NoButton)
+                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::NoButton)
                                  ->exec();
 
                 } else {
@@ -246,15 +246,12 @@ JavaWizardWidget::ValidationStatus JavaWizardWidget::validate()
                                                              "\n\n"
                                                              "You can change the Java version in the settings later.\n")
                                                               .arg(BuildConfig.LAUNCHER_DISPLAYNAME),
-                                                          QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Help,
-                                                          QMessageBox::NoButton)
+                                                          QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::NoButton)
                                  ->exec();
                 }
                 switch (button) {
                     case QMessageBox::Yes:
                         return ValidationStatus::JavaBad;
-                    case QMessageBox::Help:
-                        DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg("java-wizard")));
                     /* fallthrough */
                     case QMessageBox::No:
                     /* fallthrough */

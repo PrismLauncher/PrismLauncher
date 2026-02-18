@@ -93,8 +93,6 @@ class FlameModPage : public ModPage {
     inline auto debugName() const -> QString override { return Flame::debugName(); }
     inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
 
-    inline auto helpPage() const -> QString override { return "Mod-platform"; }
-
     void openUrl(const QUrl& url) override;
     std::unique_ptr<ModFilterWidget> createFilterWidget() override;
 
@@ -125,8 +123,6 @@ class FlameResourcePackPage : public ResourcePackResourcePage {
     inline auto debugName() const -> QString override { return Flame::debugName(); }
     inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
 
-    inline auto helpPage() const -> QString override { return ""; }
-
     void openUrl(const QUrl& url) override;
 };
 
@@ -149,8 +145,6 @@ class FlameTexturePackPage : public TexturePackResourcePage {
     inline auto id() const -> QString override { return Flame::id(); }
     inline auto debugName() const -> QString override { return Flame::debugName(); }
     inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
-
-    inline auto helpPage() const -> QString override { return ""; }
 
     void openUrl(const QUrl& url) override;
 };
@@ -175,8 +169,6 @@ class FlameShaderPackPage : public ShaderPackResourcePage {
     inline auto debugName() const -> QString override { return Flame::debugName(); }
     inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
 
-    inline auto helpPage() const -> QString override { return ""; }
-
     void openUrl(const QUrl& url) override;
 };
 
@@ -199,8 +191,6 @@ class FlameDataPackPage : public DataPackResourcePage {
     inline auto id() const -> QString override { return Flame::id(); }
     inline auto debugName() const -> QString override { return Flame::debugName(); }
     inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
-
-    inline auto helpPage() const -> QString override { return ""; }
 
     void openUrl(const QUrl& url) override;
 };

@@ -50,11 +50,10 @@
 #include <QShortcut>
 #include <QUrl>
 
-OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, BaseInstance* instance, QWidget* parent)
+OtherLogsPage::OtherLogsPage(QString id, QString displayName, BaseInstance* instance, QWidget* parent)
     : QWidget(parent)
     , m_id(id)
     , m_displayName(displayName)
-    , m_helpPage(helpPage)
     , ui(new Ui::OtherLogsPage)
     , m_instance(instance)
     , m_basePath(instance ? instance->gameRoot() : APPLICATION->dataRoot())

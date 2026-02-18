@@ -107,9 +107,6 @@ CopyInstanceDialog::CopyInstanceDialog(BaseInstance* original, QWidget* parent)
     updateLinkOptions();
     updateUseCloneCheckbox();
 
-    auto HelpButton = ui->buttonBox->button(QDialogButtonBox::Help);
-    connect(HelpButton, &QPushButton::clicked, this, &CopyInstanceDialog::help);
-    HelpButton->setText(tr("Help"));
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
     ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
 }
@@ -150,11 +147,6 @@ QString CopyInstanceDialog::instGroup() const
 const InstanceCopyPrefs& CopyInstanceDialog::getChosenOptions() const
 {
     return m_selectedOptions;
-}
-
-void CopyInstanceDialog::help()
-{
-    DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg("instance-copy")));
 }
 
 void CopyInstanceDialog::checkAllCheckboxes(const bool& b)

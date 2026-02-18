@@ -93,7 +93,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 
     // NOTE: m_buttons must be initialized before PageContainer, because it indirectly accesses m_buttons through setSuggestedPack! Do not
     // move this below.
-    m_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    m_buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     m_container = new PageContainer(this, {}, this);
     m_container->useSidebarStyle(false);
@@ -119,12 +119,6 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     CancelButton->setAutoDefault(false);
     CancelButton->setText(tr("Cancel"));
     connect(CancelButton, &QPushButton::clicked, this, &NewInstanceDialog::reject);
-
-    auto HelpButton = m_buttons->button(QDialogButtonBox::Help);
-    HelpButton->setDefault(false);
-    HelpButton->setAutoDefault(false);
-    HelpButton->setText(tr("Help"));
-    connect(HelpButton, &QPushButton::clicked, m_container, &PageContainer::help);
 
     if (!url.isEmpty()) {
         QUrl actualUrl(url);

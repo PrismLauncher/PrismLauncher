@@ -232,16 +232,6 @@ void PageContainer::showPage(int row)
     }
 }
 
-void PageContainer::help()
-{
-    if (m_currentPage) {
-        QString pageId = m_currentPage->helpPage();
-        if (pageId.isEmpty())
-            return;
-        DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg(pageId)));
-    }
-}
-
 void PageContainer::currentChanged(const QModelIndex& current)
 {
     int selected_index = current.isValid() ? m_proxyModel->mapToSource(current).row() : -1;

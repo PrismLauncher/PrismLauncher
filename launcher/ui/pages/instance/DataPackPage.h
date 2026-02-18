@@ -31,7 +31,6 @@ class DataPackPage : public ExternalResourcesPage {
     QString displayName() const override { return QObject::tr("Data Packs"); }
     QIcon icon() const override { return QIcon::fromTheme("datapacks"); }
     QString id() const override { return "datapacks"; }
-    QString helpPage() const override { return "Data-packs"; }
     bool shouldDisplay() const override { return true; }
 
    public slots:
@@ -57,7 +56,6 @@ class GlobalDataPackPage : public QWidget, public BasePage {
     QString displayName() const override;
     QIcon icon() const override;
     QString id() const override { return "datapacks"; }
-    QString helpPage() const override;
 
     bool shouldDisplay() const override;
 

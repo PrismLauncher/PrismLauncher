@@ -91,8 +91,6 @@ class ModrinthModPage : public ModPage {
     inline auto debugName() const -> QString override { return Modrinth::debugName(); }
     inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
 
-    inline auto helpPage() const -> QString override { return "Mod-platform"; }
-
     std::unique_ptr<ModFilterWidget> createFilterWidget() override;
 
    protected:
@@ -119,8 +117,6 @@ class ModrinthResourcePackPage : public ResourcePackResourcePage {
     inline auto id() const -> QString override { return Modrinth::id(); }
     inline auto debugName() const -> QString override { return Modrinth::debugName(); }
     inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
-
-    inline auto helpPage() const -> QString override { return ""; }
 };
 
 class ModrinthTexturePackPage : public TexturePackResourcePage {
@@ -142,8 +138,6 @@ class ModrinthTexturePackPage : public TexturePackResourcePage {
     inline auto id() const -> QString override { return Modrinth::id(); }
     inline auto debugName() const -> QString override { return Modrinth::debugName(); }
     inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
-
-    inline auto helpPage() const -> QString override { return ""; }
 };
 
 class ModrinthShaderPackPage : public ShaderPackResourcePage {
@@ -166,7 +160,6 @@ class ModrinthShaderPackPage : public ShaderPackResourcePage {
     inline auto debugName() const -> QString override { return Modrinth::debugName(); }
     inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
 
-    inline auto helpPage() const -> QString override { return ""; }
 };
 
 class ModrinthDataPackPage : public DataPackResourcePage {
@@ -189,7 +182,6 @@ class ModrinthDataPackPage : public DataPackResourcePage {
     inline auto debugName() const -> QString override { return Modrinth::debugName(); }
     inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
 
-    inline auto helpPage() const -> QString override { return ""; }
 };
 
 }  // namespace ResourceDownload

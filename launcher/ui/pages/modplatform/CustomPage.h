@@ -56,7 +56,6 @@ class CustomPage : public QWidget, public BasePage {
     virtual QString displayName() const override { return tr("Custom"); }
     virtual QIcon icon() const override { return QIcon::fromTheme("minecraft"); }
     virtual QString id() const override { return "vanilla"; }
-    virtual QString helpPage() const override { return "Vanilla-platform"; }
     virtual bool shouldDisplay() const override;
     void retranslate() override;
 

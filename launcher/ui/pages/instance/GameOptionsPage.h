@@ -60,7 +60,6 @@ class GameOptionsPage : public QWidget, public BasePage {
     virtual QString displayName() const override { return tr("Game Options"); }
     virtual QIcon icon() const override { return QIcon::fromTheme("settings"); }
     virtual QString id() const override { return "gameoptions"; }
-    virtual QString helpPage() const override { return "Game-Options-management"; }
     void retranslate() override;
 
    private:  // data

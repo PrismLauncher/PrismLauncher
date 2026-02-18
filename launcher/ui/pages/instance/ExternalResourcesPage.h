@@ -26,7 +26,6 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     virtual QString displayName() const override = 0;
     virtual QIcon icon() const override = 0;
     virtual QString id() const override = 0;
-    virtual QString helpPage() const override = 0;
 
     virtual bool shouldDisplay() const override = 0;
     QString extraHeaderInfoString();

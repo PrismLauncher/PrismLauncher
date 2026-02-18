@@ -53,7 +53,6 @@ class TexturePackPage : public ExternalResourcesPage {
     QString displayName() const override { return tr("Texture packs"); }
     QIcon icon() const override { return QIcon::fromTheme("resourcepacks"); }
     QString id() const override { return "texturepacks"; }
-    QString helpPage() const override { return "Texture-packs"; }
 
     virtual bool shouldDisplay() const override { return m_instance->traits().contains("texturepacks"); }
 

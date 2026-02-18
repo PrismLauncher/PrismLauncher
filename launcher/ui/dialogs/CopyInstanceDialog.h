@@ -40,9 +40,6 @@ class CopyInstanceDialog : public QDialog {
     QString iconKey() const;
     const InstanceCopyPrefs& getChosenOptions() const;
 
-   public slots:
-    void help();
-
    private slots:
     void on_iconButton_clicked();
     void on_instNameTextBox_textChanged(const QString& arg1);

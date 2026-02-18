@@ -36,7 +36,6 @@ class ResourcePage : public QWidget, public BasePage {
     auto displayName() const -> QString override = 0;
     auto icon() const -> QIcon override = 0;
     auto id() const -> QString override = 0;
-    auto helpPage() const -> QString override = 0;
     bool shouldDisplay() const override = 0;
 
     /* Used internally */

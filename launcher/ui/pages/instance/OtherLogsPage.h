@@ -52,13 +52,12 @@ class OtherLogsPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit OtherLogsPage(QString id, QString displayName, QString helpPage, BaseInstance* instance = nullptr, QWidget* parent = 0);
+    explicit OtherLogsPage(QString id, QString displayName, BaseInstance* instance = nullptr, QWidget* parent = 0);
     ~OtherLogsPage();
 
     QString id() const override { return m_id; }
     QString displayName() const override { return m_displayName; }
     QIcon icon() const override { return QIcon::fromTheme("log"); }
-    QString helpPage() const override { return m_helpPage; }
     void retranslate() override;
 
     void openedImpl() override;
@@ -94,7 +93,6 @@ class OtherLogsPage : public QWidget, public BasePage {
    private:
     QString m_id;
     QString m_displayName;
-    QString m_helpPage;
 
     Ui::OtherLogsPage* ui;
     BaseInstance* m_instance;
