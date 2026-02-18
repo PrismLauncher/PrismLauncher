@@ -77,12 +77,14 @@ bool ModGroupStore::deleteGroup(const QString& groupId)
             assignment.value().clear();
     }
 
-    if (save())
-        return true;
+    if (!save()) {
+        // revert because failed
+        m_groups = previousGroups;
+        m_assignments = previousAssignments;
+        return false;
+    }
 
-    m_groups = previousGroups;
-    m_assignments = previousAssignments;
-    return false;
+    return true;
 }
 
 bool ModGroupStore::assign(const QString& fileKey, const QString& groupId)
@@ -102,16 +104,17 @@ bool ModGroupStore::assign(const QString& fileKey, const QString& groupId)
         return true;
 
     m_assignments[normalizedFileKey] = normalizedGroupId;
-    if (save())
-        return true;
-
-    // save() failed; restore the pre-mutation state to keep memory aligned with disk.
-    if (hadPreviousValue) {
-        m_assignments[normalizedFileKey] = previousValue;
-    } else {
-        m_assignments.remove(normalizedFileKey);
+    if (!save()) {
+        // revert because failed
+        if (hadPreviousValue) {
+            m_assignments[normalizedFileKey] = previousValue;
+        } else {
+            m_assignments.remove(normalizedFileKey);
+        }
+        return false;
     }
-    return false;
+
+    return true;
 }
 
 QString ModGroupStore::groupFor(const QString& fileKey) const
@@ -154,12 +157,13 @@ bool ModGroupStore::syncWithFilesystem(const QStringList& fileKeys)
     if (!changed)
         return true;
 
-    if (save())
-        return true;
+    if (!save()) {
+        // revert because failed
+        m_assignments = previousAssignments;
+        return false;
+    }
 
-    // save() failed; keep in-memory assignments consistent with on-disk state.
-    m_assignments = previousAssignments;
-    return false;
+    return true;
 }
 
 bool ModGroupStore::save()
