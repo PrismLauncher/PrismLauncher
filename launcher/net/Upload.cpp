@@ -56,8 +56,9 @@ std::pair<Upload::Ptr, QByteArray*> Upload::makeByteArray(QUrl url, QByteArray m
     auto up = makeShared<Upload>();
     up->m_url = std::move(url);
 
-    auto response = new QByteArray();
-    up->m_sink = std::make_unique<ByteArraySink>(std::unique_ptr<QByteArray>{ response });
+    auto sink = std::make_unique<ByteArraySink>();
+    QByteArray* response = sink->output();
+    up->m_sink = std::move(sink);
 
     up->m_post_data = std::move(m_post_data);
     return { up, response };

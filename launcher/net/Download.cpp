@@ -70,8 +70,9 @@ auto Download::makeByteArray(QUrl url, Options options) -> std::pair<Download::P
     dl->setObjectName(QString("BYTES:") + url.toString());
     dl->m_options = options;
 
-    auto response = new QByteArray();
-    dl->m_sink = std::make_unique<ByteArraySink>(std::unique_ptr<QByteArray>{ response });
+    auto sink = std::make_unique<ByteArraySink>();
+    QByteArray* response = sink->output();
+    dl->m_sink = std::move(sink);
 
     return { dl, response };
 }
