@@ -44,6 +44,9 @@ QString ModGroupStore::createGroup(const QString& name)
     if (groupName.isEmpty())
         return {};
 
+    if (std::any_of(m_groups.begin(), m_groups.end(), [&groupName](const Group& group) { return group.name == groupName; }))
+        return {};
+
     Group group;
     do {
         group.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
