@@ -108,7 +108,7 @@ QVariant JavaInstallList::data(const QModelIndex& index, int role) const
         case VersionRole:
             return version->id.toString();
         case RecommendedRole:
-            return version->recommended;
+            return false;
         case PathRole:
             return version->path;
         case CPUArchitectureRole:
@@ -128,10 +128,6 @@ void JavaInstallList::updateListData(QList<BaseVersion::Ptr> versions)
     beginResetModel();
     m_vlist = versions;
     sortVersions();
-    if (m_vlist.size()) {
-        auto best = std::dynamic_pointer_cast<JavaInstall>(m_vlist[0]);
-        best->recommended = true;
-    }
     endResetModel();
     m_status = Status::Done;
     m_load_task.reset();
