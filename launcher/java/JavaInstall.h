@@ -39,7 +39,6 @@ struct JavaInstall : public BaseVersion {
     JavaVersion id;
     QString arch;
     QString path;
-    bool recommended = false;
     bool is_64bit = false;
 };
 
