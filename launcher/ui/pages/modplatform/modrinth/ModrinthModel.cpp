@@ -174,7 +174,7 @@ void ModpackListModel::performPaginatedSearch()
     };
 
     auto netJob = api.searchProjects({ ModPlatform::ResourceType::Modpack, m_nextSearchOffset, m_currentSearchTerm, sort, m_filter->loaders,
-                                       m_filter->versions, ModPlatform::Side::NoSide, m_filter->categoryIds, m_filter->openSource },
+                                       m_filter->versions, ModPlatform::SideType::NoSide, m_filter->categoryIds, m_filter->openSource },
                                      std::move(callbacks));
 
     m_jobPtr = netJob;

@@ -70,16 +70,16 @@ class ModrinthAPI : public ResourceAPI {
         return l.join(',');
     }
 
-    static QString getSideFilters(ModPlatform::Side side)
+    static QString getSideFilters(ModPlatform::SideType side)
     {
-        switch (side) {
-            case ModPlatform::Side::ClientSide:
+        switch (side.value()) {
+            case ModPlatform::SideType::ClientSide:
                 return { R"("client_side:required","client_side:optional"],["server_side:optional","server_side:unsupported")" };
-            case ModPlatform::Side::ServerSide:
+            case ModPlatform::SideTypeValue::ServerSide:
                 return { R"("server_side:required","server_side:optional"],["client_side:optional","client_side:unsupported")" };
-            case ModPlatform::Side::UniversalSide:
+            case ModPlatform::SideTypeValue::UniversalSide:
                 return { R"("client_side:required"],["server_side:required")" };
-            case ModPlatform::Side::NoSide:
+            case ModPlatform::SideTypeValue::NoSide:
             // fallthrough
             default:
                 return {};

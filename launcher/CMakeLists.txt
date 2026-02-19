@@ -39,6 +39,7 @@ set(CORE_SOURCES
     QVariantUtils.h
     RuntimeContext.h
     PSaveFile.h
+    EnumWrapper.h
 
     # Basic instance manipulation tasks (derived from InstanceTask)
     InstanceCreationTask.h

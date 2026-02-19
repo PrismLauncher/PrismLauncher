@@ -24,7 +24,7 @@ QVariant LogModel::data(const QModelIndex& index, int role) const
         return m_content[realRow].line;
     }
     if (role == LevelRole) {
-        return static_cast<int>(m_content[realRow].level);
+        return static_cast<int>(m_content[realRow].level.value());
     }
 
     return QVariant();

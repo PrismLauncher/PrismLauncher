@@ -114,7 +114,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
         if (str.contains('.'))
             file.mcVersion.append(str);
 
-        file.side = ModPlatform::Side::NoSide;
+        file.side = ModPlatform::SideType::NoSide;
         if (auto loader = str.toLower(); loader == "neoforge")
             file.loaders |= ModPlatform::NeoForge;
         else if (loader == "forge")
@@ -128,10 +128,10 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
         else if (loader == "quilt")
             file.loaders |= ModPlatform::Quilt;
         else if (loader == "server" || loader == "client") {
-            if (file.side == ModPlatform::Side::NoSide)
-                file.side = ModPlatform::SideUtils::fromString(loader);
-            else if (file.side != ModPlatform::SideUtils::fromString(loader))
-                file.side = ModPlatform::Side::UniversalSide;
+            if (!file.side.isValid())
+                file.side = ModPlatform::SideType::fromString(loader);
+            else if (file.side != ModPlatform::SideType::fromString(loader))
+                file.side = ModPlatform::SideType::UniversalSide;
         }
     }
 

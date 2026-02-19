@@ -192,9 +192,9 @@ auto Mod::loaders() const -> QString
 auto Mod::side() const -> QString
 {
     if (metadata())
-        return ModPlatform::SideUtils::toString(metadata()->side);
+        return metadata()->side.toString();
 
-    return ModPlatform::SideUtils::toString(ModPlatform::Side::UniversalSide);
+    return ModPlatform::SideType(ModPlatform::SideType::UniversalSide).toString();
 }
 
 auto Mod::mcVersions() const -> QString
