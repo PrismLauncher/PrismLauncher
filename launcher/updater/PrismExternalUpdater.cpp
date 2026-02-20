@@ -94,7 +94,9 @@ void PrismExternalUpdater::checkForUpdates(bool triggeredByUser)
     QProgressDialog progress(tr("Checking for updates..."), "", 0, 0, priv->parent);
     progress.setCancelButton(nullptr);
     progress.adjustSize();
-    progress.show();
+    if (triggeredByUser) {
+        progress.show();
+    }
     QCoreApplication::processEvents();
 
     QProcess proc;
