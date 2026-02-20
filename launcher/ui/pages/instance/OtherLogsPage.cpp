@@ -280,7 +280,9 @@ void OtherLogsPage::reload()
             if (line.isEmpty())
                 return false;
             if (line.back() == '\n')
-                line = line.remove(line.size() - 1, 1);
+                line.resize(line.size() - 1);
+            if (line.back() == '\r')
+                line.resize(line.size() - 1);
             MessageLevel level = MessageLevel::Unknown;
 
             QString lineTemp = line;  // don't edit out the time and level for clarity
