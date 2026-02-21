@@ -182,7 +182,7 @@ void OtherLogsPage::populateSelectLogBox()
     ui->selectLogBox->blockSignals(true);
     ui->selectLogBox->clear();
     if (!m_instance)
-        ui->selectLogBox->addItem("Current logs");
+        ui->selectLogBox->addItem(tr("Current logs"));
     ui->selectLogBox->addItems(getPaths());
     ui->selectLogBox->blockSignals(false);
 
@@ -472,14 +472,14 @@ void OtherLogsPage::setControlsEnabled(const bool enabled)
         ui->btnDelete->setEnabled(enabled);
         ui->btnClean->setEnabled(enabled);
     } else if (!m_currentFile.isEmpty()) {
-        ui->btnReload->setText("&Reload");
-        ui->btnReload->setToolTip("Reload the contents of the log from the disk");
+        ui->btnReload->setText(tr("&Reload"));
+        ui->btnReload->setToolTip(tr("Reload the contents of the log from the disk"));
         ui->btnDelete->setEnabled(enabled);
         ui->btnClean->setEnabled(enabled);
         ui->trackLogCheckbox->setEnabled(false);
     } else {
-        ui->btnReload->setText("Clear");
-        ui->btnReload->setToolTip("Clear the log");
+        ui->btnReload->setText(tr("Clear"));
+        ui->btnReload->setToolTip(tr("Clear the log"));
         ui->btnDelete->setEnabled(false);
         ui->btnClean->setEnabled(false);
         ui->trackLogCheckbox->setEnabled(enabled);
