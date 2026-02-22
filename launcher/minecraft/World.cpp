@@ -153,18 +153,23 @@ QByteArray serializeLevelDat(nbt::tag_compound* levelInfo)
     return val;
 }
 
-QString getLevelDatFromFS(const QFileInfo& file)
+QString getDatFromFS(const QFileInfo& root, QString file)
 {
-    QDir worldDir(file.filePath());
-    if (!file.isDir() || !worldDir.exists("level.dat")) {
+    QDir worldDir(root.filePath());
+    if (!root.isDir() || !worldDir.exists(file)) {
         return QString();
     }
-    return worldDir.absoluteFilePath("level.dat");
+    return worldDir.absoluteFilePath(file);
 }
 
-QByteArray getLevelDatDataFromFS(const QFileInfo& file)
+QString getLevelDatFromFS(const QFileInfo& file)
 {
-    auto fullFilePath = getLevelDatFromFS(file);
+    return getDatFromFS(file, "level.dat");
+}
+
+QByteArray getDatDataFromFS(const QFileInfo& root, QString file)
+{
+    auto fullFilePath = getDatFromFS(root, file);
     if (fullFilePath.isNull()) {
         return QByteArray();
     }
@@ -173,6 +178,16 @@ QByteArray getLevelDatDataFromFS(const QFileInfo& file)
         return QByteArray();
     }
     return f.readAll();
+}
+
+QByteArray getLevelDatDataFromFS(const QFileInfo& file)
+{
+    return getDatDataFromFS(file, "level.dat");
+}
+
+QByteArray getWorldGenDataFromFS(const QFileInfo& file)
+{
+    return getDatDataFromFS(file, "data/minecraft/world_gen_settings.dat");
 }
 
 bool putLevelDatDataToFS(const QFileInfo& file, QByteArray& data)
@@ -229,6 +244,8 @@ bool World::resetIcon()
     return false;
 }
 
+int64_t loadSeed(QByteArray data);
+
 void World::readFromFS(const QFileInfo& file)
 {
     auto bytes = getLevelDatDataFromFS(file);
@@ -238,6 +255,12 @@ void World::readFromFS(const QFileInfo& file)
     }
     loadFromLevelDat(bytes);
     m_levelDatTime = file.lastModified();
+    if (m_randomSeed == 0) {
+        auto bytes = getWorldGenDataFromFS(file);
+        if (!bytes.isEmpty()) {
+            m_randomSeed = loadSeed(bytes);
+        }
+    }
 }
 
 void World::readFromZip(const QFileInfo& file)
@@ -392,6 +415,28 @@ GameType read_gametype(nbt::value& parent, const char* name)
 }
 
 }  // namespace
+
+int64_t loadSeed(QByteArray data)
+{
+    auto levelData = parseLevelDat(data);
+    if (!levelData) {
+        return 0;
+    }
+
+    nbt::value* valPtr = nullptr;
+    try {
+        valPtr = &levelData->at("data");
+    } catch (const std::out_of_range& e) {
+        return 0;
+    }
+    nbt::value& val = *valPtr;
+
+    try {
+        return read_long(val, "seed").value_or(0);
+    } catch (const std::out_of_range&) {
+    }
+    return 0;
+}
 
 void World::loadFromLevelDat(QByteArray data)
 {
