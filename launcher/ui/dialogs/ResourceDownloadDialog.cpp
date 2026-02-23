@@ -220,7 +220,7 @@ bool ResourceDownloadDialog::selectPage(QString pageId)
 
 ResourcePage* ResourceDownloadDialog::selectedPage()
 {
-    ResourcePage* result = dynamic_cast<ResourcePage*>(m_container->selectedPage());
+    auto* result = dynamic_cast<ResourcePage*>(m_container->selectedPage());
     Q_ASSERT(result != nullptr);
     return result;
 }
@@ -269,7 +269,7 @@ void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* s
     }
 
     // Same effect as having a global search bar
-    ResourcePage* result = dynamic_cast<ResourcePage*>(selected);
+    auto* result = dynamic_cast<ResourcePage*>(selected);
     Q_ASSERT(result != nullptr);
     result->setSearchTerm(prev_page->getSearchTerm());
 }

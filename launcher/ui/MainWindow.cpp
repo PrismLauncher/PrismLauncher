@@ -383,7 +383,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     statusBar()->addPermanentWidget(m_statusCenter, 0);
 
     // Add "manage accounts" button, right align
-    QWidget* spacer = new QWidget();
+    auto* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->mainToolBar->insertWidget(ui->actionAccountsButton, spacer);
 
@@ -529,7 +529,7 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
 {
     QList<QAction*> actions;
 
-    QAction* actionSep = new QAction("", this);
+    auto* actionSep = new QAction("", this);
     actionSep->setSeparator(true);
 
     bool onInstance = view->indexAt(pos).isValid();
@@ -547,16 +547,16 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
 
         // add header
         actions.prepend(actionSep);
-        QAction* actionVoid = new QAction(m_selectedInstance->name(), this);
+        auto* actionVoid = new QAction(m_selectedInstance->name(), this);
         actionVoid->setEnabled(false);
         actions.prepend(actionVoid);
     } else {
         auto group = view->groupNameAt(pos);
 
-        QAction* actionVoid = new QAction(group.isNull() ? BuildConfig.LAUNCHER_DISPLAYNAME : group, this);
+        auto* actionVoid = new QAction(group.isNull() ? BuildConfig.LAUNCHER_DISPLAYNAME : group, this);
         actionVoid->setEnabled(false);
 
-        QAction* actionCreateInstance = new QAction(tr("&Create instance"), this);
+        auto* actionCreateInstance = new QAction(tr("&Create instance"), this);
         actionCreateInstance->setToolTip(ui->actionAddInstance->toolTip());
         if (!group.isNull()) {
             QVariantMap instance_action_data;
@@ -570,11 +570,11 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
         actions.prepend(actionVoid);
         actions.append(actionCreateInstance);
         if (!group.isNull()) {
-            QAction* actionDeleteGroup = new QAction(tr("&Delete group"), this);
+            auto* actionDeleteGroup = new QAction(tr("&Delete group"), this);
             connect(actionDeleteGroup, &QAction::triggered, this, [this, group] { deleteGroup(group); });
             actions.append(actionDeleteGroup);
 
-            QAction* actionRenameGroup = new QAction(tr("&Rename group"), this);
+            auto* actionRenameGroup = new QAction(tr("&Rename group"), this);
             connect(actionRenameGroup, &QAction::triggered, this, [this, group] { renameGroup(group); });
             actions.append(actionRenameGroup);
         }
@@ -618,7 +618,7 @@ void MainWindow::updateThemeMenu()
 
     auto themes = APPLICATION->themeManager()->getValidApplicationThemes();
 
-    QActionGroup* themesGroup = new QActionGroup(this);
+    auto* themesGroup = new QActionGroup(this);
 
     for (auto* theme : themes) {
         QAction* themeAction = themeMenu->addAction(theme->name());
@@ -663,7 +663,7 @@ void MainWindow::repopulateAccountsMenu()
         }
     }
 
-    QActionGroup* accountsGroup = new QActionGroup(this);
+    auto* accountsGroup = new QActionGroup(this);
 
     if (accounts->count() <= 0) {
         ui->actionNoAccountsAdded->setEnabled(false);
@@ -673,7 +673,7 @@ void MainWindow::repopulateAccountsMenu()
         for (int i = 0; i < accounts->count(); i++) {
             MinecraftAccountPtr account = accounts->at(i);
             auto profileLabel = profileInUseFilter(account->profileName(), account->isInUse());
-            QAction* action = new QAction(profileLabel, this);
+            auto* action = new QAction(profileLabel, this);
             action->setData(i);
             action->setCheckable(true);
             action->setActionGroup(accountsGroup);
@@ -727,7 +727,7 @@ void MainWindow::updatesAllowedChanged(bool allowed)
  */
 void MainWindow::changeActiveAccount()
 {
-    QAction* sAction = (QAction*)sender();
+    auto* sAction = (QAction*)sender();
 
     // Profile's associated Mojang username
     if (sAction->data().typeId() != QMetaType::Int)
@@ -773,7 +773,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* ev)
     if (obj == view) {
         if (ev->type() == QEvent::KeyPress) {
             secretEventFilter->input(ev);
-            QKeyEvent* keyEvent = static_cast<QKeyEvent*>(ev);
+            auto* keyEvent = static_cast<QKeyEvent*>(ev);
             switch (keyEvent->key()) {
                     /*
                 case Qt::Key_Enter:
@@ -897,7 +897,7 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
         QObject* obj = sender();
         if (!obj)
             break;
-        QAction* action = qobject_cast<QAction*>(obj);
+        auto* action = qobject_cast<QAction*>(obj);
         if (!action)
             break;
         auto map = action->data().toMap();

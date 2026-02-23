@@ -240,7 +240,7 @@ void AccountList::accountChanged()
 
 void AccountList::accountActivityChanged(bool active)
 {
-    MinecraftAccount* account = qobject_cast<MinecraftAccount*>(sender());
+    auto* account = qobject_cast<MinecraftAccount*>(sender());
     bool found = false;
     for (int i = 0; i < count(); i++) {
         if (at(i).get() == account) {

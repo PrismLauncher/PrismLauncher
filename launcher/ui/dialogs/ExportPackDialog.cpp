@@ -84,7 +84,7 @@ ExportPackDialog::ExportPackDialog(MinecraftInstance* instance, QWidget* parent,
     // the instance name can technically be empty
     validate();
 
-    QFileSystemModel* model = new QFileSystemModel(this);
+    auto* model = new QFileSystemModel(this);
     model->setIconProvider(&m_icons);
 
     // use the game root - everything outside cannot be exported

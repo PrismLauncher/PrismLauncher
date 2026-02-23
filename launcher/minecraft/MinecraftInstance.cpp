@@ -125,15 +125,15 @@
     if (!reply.isValid())
         return false;
 
-    QDBusArgument arg = qvariant_cast<QDBusArgument>(reply.value().variant());
+    auto arg = qvariant_cast<QDBusArgument>(reply.value().variant());
     QList<QVariantMap> gpus;
     arg >> gpus;
 
     for (const auto& gpu : gpus) {
-        QString name = qvariant_cast<QString>(gpu[QStringLiteral("Name")]);
+        auto name = qvariant_cast<QString>(gpu[QStringLiteral("Name")]);
         bool defaultGpu = qvariant_cast<bool>(gpu[QStringLiteral("Default")]);
         if (!defaultGpu) {
-            QStringList envList = qvariant_cast<QStringList>(gpu[QStringLiteral("Environment")]);
+            auto envList = qvariant_cast<QStringList>(gpu[QStringLiteral("Environment")]);
             for (int i = 0; i + 1 < envList.size(); i += 2) {
                 env.insert(envList[i], envList[i + 1]);
             }

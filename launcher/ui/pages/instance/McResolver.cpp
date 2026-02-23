@@ -15,12 +15,12 @@ void McResolver::ping()
 
 void McResolver::pingWithDomainSRV(QString domain, int port)
 {
-    QDnsLookup* lookup = new QDnsLookup(this);
+    auto* lookup = new QDnsLookup(this);
     lookup->setName(QString("_minecraft._tcp.%1").arg(domain));
     lookup->setType(QDnsLookup::SRV);
 
     connect(lookup, &QDnsLookup::finished, this, [this, domain, port]() {
-        QDnsLookup* lookup = qobject_cast<QDnsLookup*>(sender());
+        auto* lookup = qobject_cast<QDnsLookup*>(sender());
 
         lookup->deleteLater();
 

@@ -17,7 +17,7 @@ LegacyFMLLibrariesTask::LegacyFMLLibrariesTask(MinecraftInstance* inst)
 void LegacyFMLLibrariesTask::executeTask()
 {
     // Get the mod list
-    MinecraftInstance* inst = (MinecraftInstance*)m_inst;
+    auto* inst = (MinecraftInstance*)m_inst;
     auto components = inst->getPackProfile();
     auto profile = components->getProfile();
 
@@ -87,7 +87,7 @@ void LegacyFMLLibrariesTask::fmllibsFinished()
     downloadJob.reset();
     if (!fmlLibsToProcess.isEmpty()) {
         setStatus(tr("Copying FML libraries into the instance..."));
-        MinecraftInstance* inst = (MinecraftInstance*)m_inst;
+        auto* inst = (MinecraftInstance*)m_inst;
         auto metacache = APPLICATION->metacache();
         int index = 0;
         for (auto& lib : fmlLibsToProcess) {

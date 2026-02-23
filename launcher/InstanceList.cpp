@@ -170,7 +170,7 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
     if (!index.isValid()) {
         return QVariant();
     }
-    BaseInstance* pdata = static_cast<BaseInstance*>(index.internalPointer());
+    auto* pdata = static_cast<BaseInstance*>(index.internalPointer());
     switch (role) {
         case InstancePointerRole: {
             QVariant v = QVariant::fromValue((void*)pdata);
@@ -210,7 +210,7 @@ bool InstanceList::setData(const QModelIndex& index, const QVariant& value, int 
     if (role != Qt::EditRole) {
         return false;
     }
-    BaseInstance* pdata = static_cast<BaseInstance*>(index.internalPointer());
+    auto* pdata = static_cast<BaseInstance*>(index.internalPointer());
     auto newName = value.toString();
     if (pdata->name() == newName) {
         return true;

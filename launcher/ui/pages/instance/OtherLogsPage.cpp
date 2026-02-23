@@ -404,7 +404,7 @@ void OtherLogsPage::on_btnClean_clicked()
     if (toDelete.isEmpty()) {
         return;
     }
-    QMessageBox* messageBox = new QMessageBox(this);
+    auto* messageBox = new QMessageBox(this);
     messageBox->setWindowTitle(tr("Confirm Cleanup"));
     if (toDelete.size() > 5) {
         messageBox->setText(tr("Are you sure you want to delete all log files?"));
@@ -434,7 +434,7 @@ void OtherLogsPage::on_btnClean_clicked()
         }
     }
     if (!failed.empty()) {
-        QMessageBox* messageBoxFailure = new QMessageBox(this);
+        auto* messageBoxFailure = new QMessageBox(this);
         messageBoxFailure->setWindowTitle(tr("Error"));
         if (failed.size() > 5) {
             messageBoxFailure->setText(tr("Couldn't delete some files!"));

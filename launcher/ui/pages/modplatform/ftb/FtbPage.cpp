@@ -84,7 +84,7 @@ FtbPage::~FtbPage()
 bool FtbPage::eventFilter(QObject* watched, QEvent* event)
 {
     if (watched == m_ui->searchEdit && event->type() == QEvent::KeyPress) {
-        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+        auto* keyEvent = static_cast<QKeyEvent*>(event);
         if (keyEvent->key() == Qt::Key_Return) {
             triggerSearch();
             keyEvent->accept();

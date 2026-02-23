@@ -225,7 +225,7 @@ void ProgressDialog::changeStatus([[maybe_unused]] const QString& status)
 
 void ProgressDialog::addTaskProgress(TaskStepProgress const& progress)
 {
-    SubTaskProgressBar* task_bar = new SubTaskProgressBar(this);
+    auto* task_bar = new SubTaskProgressBar(this);
     taskProgress.insert(progress.uid, task_bar);
     ui->taskProgressLayout->addWidget(task_bar);
 }

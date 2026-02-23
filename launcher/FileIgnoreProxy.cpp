@@ -49,7 +49,7 @@ FileIgnoreProxy::FileIgnoreProxy(QString root, QObject* parent) : QSortFilterPro
 // NOTE: Sadly, we have to do sorting ourselves.
 bool FileIgnoreProxy::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {
-    QFileSystemModel* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
+    auto* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
     if (!fsm) {
         return QSortFilterProxyModel::lessThan(left, right);
     }
@@ -102,7 +102,7 @@ QVariant FileIgnoreProxy::data(const QModelIndex& index, int role) const
     QModelIndex sourceIndex = mapToSource(index);
 
     if (index.column() == 0 && role == Qt::CheckStateRole) {
-        QFileSystemModel* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
+        auto* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
         auto blockedPath = relPath(fsm->filePath(sourceIndex));
         auto cover = m_blocked.cover(blockedPath);
         if (!cover.isNull()) {
@@ -120,7 +120,7 @@ QVariant FileIgnoreProxy::data(const QModelIndex& index, int role) const
 bool FileIgnoreProxy::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     if (index.column() == 0 && role == Qt::CheckStateRole) {
-        Qt::CheckState state = static_cast<Qt::CheckState>(value.toInt());
+        auto state = static_cast<Qt::CheckState>(value.toInt());
         return setFilterState(index, state);
     }
 
@@ -135,7 +135,7 @@ QString FileIgnoreProxy::relPath(const QString& path) const
 
 bool FileIgnoreProxy::setFilterState(QModelIndex index, Qt::CheckState state)
 {
-    QFileSystemModel* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
+    auto* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
 
     if (!fsm) {
         return false;
@@ -224,7 +224,7 @@ bool FileIgnoreProxy::setFilterState(QModelIndex index, Qt::CheckState state)
 bool FileIgnoreProxy::shouldExpand(QModelIndex index)
 {
     QModelIndex sourceIndex = mapToSource(index);
-    QFileSystemModel* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
+    auto* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
     if (!fsm) {
         return false;
     }
@@ -259,7 +259,7 @@ bool FileIgnoreProxy::filterAcceptsColumn(int source_column, const QModelIndex& 
 bool FileIgnoreProxy::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
 {
     QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
-    QFileSystemModel* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
+    auto* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
 
     auto fileInfo = fsm->fileInfo(index);
     return !ignoreFile(fileInfo);

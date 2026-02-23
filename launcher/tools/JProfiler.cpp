@@ -43,7 +43,7 @@ void JProfiler::profilerFinished([[maybe_unused]] int exit, QProcess::ExitStatus
 void JProfiler::beginProfilingImpl(LaunchTask* process)
 {
     listeningPort = globalSettings->get("JProfilerPort").toInt();
-    QProcess* profiler = new QProcess(this);
+    auto* profiler = new QProcess(this);
     QStringList profilerArgs = { "-d", QString::number(process->pid()), "--gui", "-p", QString::number(listeningPort) };
     auto basePath = globalSettings->get("JProfilerPath").toString();
 

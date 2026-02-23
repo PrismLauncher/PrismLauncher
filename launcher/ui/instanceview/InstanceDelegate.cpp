@@ -351,7 +351,7 @@ class NoReturnTextEdit : public QTextEdit {
     {
         auto eventType = event->type();
         if (eventType == QEvent::KeyPress || eventType == QEvent::KeyRelease) {
-            QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+            auto* keyEvent = static_cast<QKeyEvent*>(event);
             auto key = keyEvent->key();
             if ((key == Qt::Key_Return || key == Qt::Key_Enter) && eventType == QEvent::KeyPress) {
                 emit editingDone();
@@ -413,7 +413,7 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent,
 
 void ListViewDelegate::editingDone()
 {
-    NoReturnTextEdit* editor = qobject_cast<NoReturnTextEdit*>(sender());
+    auto* editor = qobject_cast<NoReturnTextEdit*>(sender());
     emit commitData(editor);
     emit closeEditor(editor);
 }

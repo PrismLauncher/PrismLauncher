@@ -681,7 +681,7 @@ void InstanceView::startDrag(Qt::DropActions supportedActions)
     }
     QRect rect;
     QPixmap pixmap = renderToPixmap(indexes, &rect);
-    QDrag* drag = new QDrag(this);
+    auto* drag = new QDrag(this);
     drag->setPixmap(pixmap);
     drag->setMimeData(mimeData);
     drag->setHotSpot(m_pressedPosition - rect.topLeft());

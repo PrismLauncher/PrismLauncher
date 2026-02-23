@@ -24,7 +24,7 @@ JavaWizardPage::JavaWizardPage(QWidget* parent) : BaseWizardPage(parent)
 void JavaWizardPage::setupUi()
 {
     setObjectName(QStringLiteral("javaPage"));
-    QVBoxLayout* layout = new QVBoxLayout(this);
+    auto* layout = new QVBoxLayout(this);
 
     m_java_widget = new JavaWizardWidget(this);
     layout->addWidget(m_java_widget);

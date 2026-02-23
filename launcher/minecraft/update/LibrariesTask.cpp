@@ -14,7 +14,7 @@ void LibrariesTask::executeTask()
 {
     setStatus(tr("Downloading required library files..."));
     qDebug() << m_inst->name() << ": downloading libraries";
-    MinecraftInstance* inst = (MinecraftInstance*)m_inst;
+    auto* inst = (MinecraftInstance*)m_inst;
 
     // Build a list of URLs that will need to be downloaded.
     auto components = inst->getPackProfile();

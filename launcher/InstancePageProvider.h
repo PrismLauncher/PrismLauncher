@@ -28,7 +28,7 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
     {
         QList<BasePage*> values;
         values.append(new LogPage(inst));
-        MinecraftInstance* onesix = dynamic_cast<MinecraftInstance*>(inst);
+        auto* onesix = dynamic_cast<MinecraftInstance*>(inst);
         values.append(new VersionPage(onesix));
         values.append(ManagedPackPage::createPage(onesix));
         auto modsPage = new ModFolderPage(onesix, onesix->loaderModList());

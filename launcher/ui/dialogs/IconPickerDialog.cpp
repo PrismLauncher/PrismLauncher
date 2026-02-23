@@ -98,7 +98,7 @@ bool IconPickerDialog::eventFilter(QObject* obj, QEvent* evt)
     if (evt->type() != QEvent::KeyPress) {
         return QDialog::eventFilter(obj, evt);
     }
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evt);
+    auto* keyEvent = static_cast<QKeyEvent*>(evt);
     switch (keyEvent->key()) {
         case Qt::Key_Delete:
             removeSelectedIcon();

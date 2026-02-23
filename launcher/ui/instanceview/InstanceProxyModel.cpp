@@ -57,8 +57,8 @@ bool InstanceProxyModel::lessThan(const QModelIndex& left, const QModelIndex& ri
 
 bool InstanceProxyModel::subSortLessThan(const QModelIndex& left, const QModelIndex& right) const
 {
-    BaseInstance* pdataLeft = static_cast<BaseInstance*>(left.internalPointer());
-    BaseInstance* pdataRight = static_cast<BaseInstance*>(right.internalPointer());
+    auto* pdataLeft = static_cast<BaseInstance*>(left.internalPointer());
+    auto* pdataRight = static_cast<BaseInstance*>(right.internalPointer());
     QString sortMode = APPLICATION->settings()->get("InstSortMode").toString();
     if (sortMode == "LastLaunch") {
         return pdataLeft->lastLaunch() > pdataRight->lastLaunch();

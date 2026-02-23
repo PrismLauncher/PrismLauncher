@@ -57,7 +57,7 @@ QNetworkReply* ImgurUpload::getReply(QNetworkRequest& request)
         return nullptr;
     }
 
-    QHttpMultiPart* multipart = new QHttpMultiPart(QHttpMultiPart::FormDataType, this);
+    auto* multipart = new QHttpMultiPart(QHttpMultiPart::FormDataType, this);
     file->setParent(multipart);
     QHttpPart filePart;
     filePart.setBodyDevice(file);

@@ -170,7 +170,7 @@ void PageContainer::createUI()
         headerLabelFont.setPointSize(pointSize + 2);
     m_header->setFont(headerLabelFont);
 
-    QHBoxLayout* headerHLayout = new QHBoxLayout;
+    auto* headerHLayout = new QHBoxLayout;
     const int leftMargin = APPLICATION->style()->pixelMetric(QStyle::PM_LayoutLeftMargin);
     headerHLayout->addSpacerItem(new QSpacerItem(leftMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
     headerHLayout->addWidget(m_header);

@@ -56,7 +56,7 @@ QNetworkReply* PasteUpload::getReply(QNetworkRequest& request)
 {
     switch (m_paste_type) {
         case PasteUpload::NullPointer: {
-            QHttpMultiPart* multiPart = new QHttpMultiPart{ QHttpMultiPart::FormDataType, this };
+            auto* multiPart = new QHttpMultiPart{ QHttpMultiPart::FormDataType, this };
 
             QHttpPart filePart;
             filePart.setBody(m_log.toUtf8());

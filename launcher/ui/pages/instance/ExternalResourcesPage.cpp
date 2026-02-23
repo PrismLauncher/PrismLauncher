@@ -201,7 +201,7 @@ bool ExternalResourcesPage::eventFilter(QObject* obj, QEvent* ev)
     if (ev->type() != QEvent::KeyPress)
         return QWidget::eventFilter(obj, ev);
 
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(ev);
+    auto* keyEvent = static_cast<QKeyEvent*>(ev);
     if (obj == ui->treeView)
         return listFilter(keyEvent);
 

@@ -10,7 +10,7 @@ QAccessibleInterface* groupViewAccessibleFactory(const QString& classname, QObje
     if (!object || !object->isWidgetType())
         return iface;
 
-    QWidget* widget = static_cast<QWidget*>(object);
+    auto* widget = static_cast<QWidget*>(object);
 
     if (classname == QLatin1String("InstanceView")) {
         iface = new AccessibleInstanceView((InstanceView*)widget);
@@ -387,7 +387,7 @@ int AccessibleInstanceView::indexOfChild(const QAccessibleInterface* iface) cons
 
     Q_ASSERT(iface->role() != QAccessible::TreeItem);  // should be handled by tree class
     if (iface->role() == QAccessible::Cell || iface->role() == QAccessible::ListItem) {
-        const AccessibleInstanceViewItem* cell = static_cast<const AccessibleInstanceViewItem*>(iface);
+        const auto* cell = static_cast<const AccessibleInstanceViewItem*>(iface);
         return logicalIndex(cell->m_index);
     } else if (iface->role() == QAccessible::Pane) {
         return 0;  // corner button
@@ -507,7 +507,7 @@ void AccessibleInstanceView::modelChange(QAccessibleTableModelChangeEvent* event
                 Q_ASSERT(iface);
                 if (iface->role() == QAccessible::Cell || iface->role() == QAccessible::ListItem) {
                     Q_ASSERT(iface->tableCellInterface());
-                    AccessibleInstanceViewItem* cell = static_cast<AccessibleInstanceViewItem*>(iface->tableCellInterface());
+                    auto* cell = static_cast<AccessibleInstanceViewItem*>(iface->tableCellInterface());
                     // Since it is a QPersistentModelIndex, we only need to check if it is valid
                     if (cell->m_index.isValid())
                         newCache.insert(indexOfChild(cell), id);

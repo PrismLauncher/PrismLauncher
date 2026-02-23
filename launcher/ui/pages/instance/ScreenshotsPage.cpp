@@ -278,7 +278,7 @@ bool ScreenshotsPage::eventFilter(QObject* obj, QEvent* evt)
     if (evt->type() != QEvent::KeyPress) {
         return QWidget::eventFilter(obj, evt);
     }
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evt);
+    auto* keyEvent = static_cast<QKeyEvent*>(evt);
 
     if (keyEvent->matches(QKeySequence::Copy)) {
         on_actionCopy_File_s_triggered();
@@ -497,7 +497,7 @@ void ScreenshotsPage::on_actionCopy_File_s_triggered()
         auto info = m_model->fileInfo(item);
         buf += "file:///" + info.absoluteFilePath() + "\r\n";
     }
-    QMimeData* mimeData = new QMimeData();
+    auto* mimeData = new QMimeData();
     mimeData->setData("text/uri-list", buf.toLocal8Bit());
     QApplication::clipboard()->setMimeData(mimeData);
 }

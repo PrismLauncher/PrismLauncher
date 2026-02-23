@@ -353,7 +353,7 @@ bool SkinManageDialog::eventFilter(QObject* obj, QEvent* ev)
 {
     if (obj == m_ui->listView) {
         if (ev->type() == QEvent::KeyPress) {
-            QKeyEvent* keyEvent = static_cast<QKeyEvent*>(ev);
+            auto* keyEvent = static_cast<QKeyEvent*>(ev);
             switch (keyEvent->key()) {
                 case Qt::Key_Delete:
                     on_action_Delete_Skin_triggered(false);

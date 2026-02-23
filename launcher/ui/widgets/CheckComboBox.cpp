@@ -126,7 +126,7 @@ bool CheckComboBox::eventFilter(QObject* receiver, QEvent* event)
     switch (event->type()) {
         case QEvent::KeyPress:
         case QEvent::KeyRelease: {
-            QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+            auto* keyEvent = static_cast<QKeyEvent*>(event);
             if (receiver == this && (keyEvent->key() == Qt::Key_Up || keyEvent->key() == Qt::Key_Down)) {
                 showPopup();
                 return true;
@@ -153,7 +153,7 @@ void CheckComboBox::toggleCheckState(int index)
 {
     QVariant value = itemData(index, Qt::CheckStateRole);
     if (value.isValid()) {
-        Qt::CheckState state = static_cast<Qt::CheckState>(value.toInt());
+        auto state = static_cast<Qt::CheckState>(value.toInt());
         setItemData(index, (state == Qt::Unchecked ? Qt::Checked : Qt::Unchecked), Qt::CheckStateRole);
     }
     emitCheckedItemsChanged();

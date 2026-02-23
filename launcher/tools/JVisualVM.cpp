@@ -40,7 +40,7 @@ void JVisualVM::profilerFinished([[maybe_unused]] int exit, QProcess::ExitStatus
 
 void JVisualVM::beginProfilingImpl(LaunchTask* process)
 {
-    QProcess* profiler = new QProcess(this);
+    auto* profiler = new QProcess(this);
     QStringList profilerArgs = { "--openpid", QString::number(process->pid()) };
     auto programPath = globalSettings->get("JVisualVMPath").toString();
 

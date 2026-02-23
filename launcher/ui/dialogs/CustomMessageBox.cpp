@@ -24,7 +24,7 @@ QMessageBox* selectable(QWidget* parent,
                         QMessageBox::StandardButton defaultButton,
                         QCheckBox* checkBox)
 {
-    QMessageBox* messageBox = new QMessageBox(parent);
+    auto* messageBox = new QMessageBox(parent);
     messageBox->setWindowTitle(title);
     messageBox->setText(text);
     messageBox->setStandardButtons(buttons);

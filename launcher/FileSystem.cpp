@@ -594,7 +594,7 @@ void create_link::runPrivileged(const QString& offset)
         return;
     }
 
-    ExternalLinkFileProcess* linkFileProcess = new ExternalLinkFileProcess(serverName, m_useHardLinks, this);
+    auto* linkFileProcess = new ExternalLinkFileProcess(serverName, m_useHardLinks, this);
     connect(linkFileProcess, &ExternalLinkFileProcess::processExited, this, [this, &gotResults]() { emit finishedPrivileged(gotResults); });
     connect(linkFileProcess, &ExternalLinkFileProcess::finished, linkFileProcess, &QObject::deleteLater);
 

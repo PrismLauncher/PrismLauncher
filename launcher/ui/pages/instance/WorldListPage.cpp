@@ -74,7 +74,7 @@ class WorldListProxyModel : public QSortFilterProxyModel {
         QModelIndex sourceIndex = mapToSource(index);
 
         if (index.column() == 0 && role == Qt::DecorationRole) {
-            WorldList* worlds = qobject_cast<WorldList*>(sourceModel());
+            auto* worlds = qobject_cast<WorldList*>(sourceModel());
             auto iconFile = worlds->data(sourceIndex, WorldList::IconFileRole).toString();
             if (iconFile.isNull()) {
                 // NOTE: Minecraft uses the same placeholder for servers AND worlds
@@ -94,7 +94,7 @@ WorldListPage::WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget
 
     ui->toolBar->insertSpacer(ui->actionRefresh);
 
-    WorldListProxyModel* proxy = new WorldListProxyModel(this);
+    auto* proxy = new WorldListProxyModel(this);
     proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
     proxy->setSourceModel(m_worlds);
     proxy->setSortRole(Qt::UserRole);
@@ -179,7 +179,7 @@ bool WorldListPage::eventFilter(QObject* obj, QEvent* ev)
     if (ev->type() != QEvent::KeyPress) {
         return QWidget::eventFilter(obj, ev);
     }
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(ev);
+    auto* keyEvent = static_cast<QKeyEvent*>(ev);
     if (obj == ui->worldTreeView)
         return worldListFilter(keyEvent);
     return QWidget::eventFilter(obj, ev);
