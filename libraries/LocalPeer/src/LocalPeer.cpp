@@ -61,6 +61,7 @@ static PProcessIdToSessionId pProcessIdToSessionId = 0;
 
 #include <QCryptographicHash>
 #include <chrono>
+#include <memory>
 #include <thread>
 
 static const char* ack = "ack";
@@ -115,9 +116,9 @@ ApplicationId ApplicationId::fromRawString(const QString& id)
 LocalPeer::LocalPeer(QObject* parent, const ApplicationId& appId) : QObject(parent), id(appId)
 {
     socketName = id.toString();
-    server.reset(new QLocalServer());
+    server = std::make_unique<QLocalServer>();
     QString lockName = QDir(QDir::tempPath()).absolutePath() + QLatin1Char('/') + socketName + QLatin1String("-lockfile");
-    lockFile.reset(new LockedFile(lockName));
+    lockFile = std::make_unique<LockedFile>(lockName);
     lockFile->open(QIODevice::ReadWrite);
 }
 

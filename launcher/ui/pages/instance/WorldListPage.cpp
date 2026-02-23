@@ -52,6 +52,7 @@
 #include <QSortFilterProxyModel>
 #include <QTreeView>
 #include <Qt>
+#include <memory>
 
 #include "FileSystem.h"
 #include "tools/MCEditTool.h"
@@ -237,7 +238,7 @@ void WorldListPage::on_actionData_Packs_triggered()
     GenericPageProvider provider(dialog->windowTitle());
 
     bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-    m_datapackModel.reset(new DataPackFolderModel(folder, m_inst, isIndexed, true));
+    m_datapackModel = std::make_unique<DataPackFolderModel>(folder, m_inst, isIndexed, true);
 
     provider.addPageCreator([this] { return new DataPackPage(m_inst, m_datapackModel.get(), this); });
 

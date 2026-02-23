@@ -1,6 +1,8 @@
 #include "ClaimAccount.h"
 #include <launch/LaunchTask.h>
 
+#include <memory>
+
 #include "Application.h"
 #include "minecraft/auth/AccountList.h"
 
@@ -15,7 +17,7 @@ ClaimAccount::ClaimAccount(LaunchTask* parent, AuthSessionPtr session) : LaunchS
 void ClaimAccount::executeTask()
 {
     if (m_account) {
-        lock.reset(new UseLock(m_account.get()));
+        lock = std::make_unique<UseLock>(m_account.get());
     }
     emitSucceeded();
 }

@@ -2,6 +2,7 @@
 
 #include <QNetworkRequest>
 #include <QUrl>
+#include <memory>
 
 #include "Application.h"
 #include "Logging.h"

@@ -37,6 +37,8 @@
 #include "SkinDelete.h"
 
 #include <net/DummySink.h>
+
+#include <memory>
 #include "net/RawHeaderProxy.h"
 
 SkinDelete::SkinDelete() : NetRequest()
@@ -54,7 +56,7 @@ SkinDelete::Ptr SkinDelete::make(QString token)
 {
     auto up = makeShared<SkinDelete>();
     up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/skins/active");
-    up->m_sink.reset(new Net::DummySink());
+    up->m_sink = std::make_unique<Net::DummySink>();
     up->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(QList<Net::HeaderPair>{
         { "Authorization", QString("Bearer %1").arg(token).toLocal8Bit() },
     }));

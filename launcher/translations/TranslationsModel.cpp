@@ -43,6 +43,7 @@
 #include <QLocale>
 #include <QTranslator>
 #include <locale>
+#include <memory>
 
 #include "BuildConfig.h"
 #include "FileSystem.h"
@@ -177,7 +178,7 @@ struct TranslationsModel::Private {
 
 TranslationsModel::TranslationsModel(QString path, QObject* parent) : QAbstractListModel(parent)
 {
-    d.reset(new Private);
+    d = std::make_unique<Private>();
     d->m_dir.setPath(path);
     FS::ensureFolderPathExists(path);
     reloadLocalFiles();
@@ -479,7 +480,7 @@ bool TranslationsModel::selectLanguage(QString key)
     // otherwise install new translations
     bool successful = false;
     // FIXME: this is likely never present. FIX IT.
-    d->m_qt_translator.reset(new QTranslator());
+    d->m_qt_translator = std::make_unique<QTranslator>();
     if (d->m_qt_translator->load("qt_" + langCode, QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
         qDebug() << "Loading Qt Language File for" << langCode.toLocal8Bit().constData() << "...";
         if (!QCoreApplication::installTranslator(d->m_qt_translator.get())) {
@@ -508,7 +509,7 @@ bool TranslationsModel::selectLanguage(QString key)
             d->m_app_translator.reset();
         }
     } else if (langPtr->localFileType == FileType::QM) {
-        d->m_app_translator.reset(new QTranslator());
+        d->m_app_translator = std::make_unique<QTranslator>();
         if (d->m_app_translator->load("mmc_" + langCode, d->m_dir.path())) {
             qDebug() << "Loading Application Language File for" << langCode.toLocal8Bit().constData() << "...";
             if (!QCoreApplication::installTranslator(d->m_app_translator.get())) {

@@ -43,6 +43,7 @@
 #include <QJsonObject>
 #include <QRegularExpression>
 #include <QUrlQuery>
+#include <memory>
 #include "logs/AnonymizeLog.h"
 
 const std::array<PasteUpload::PasteTypeInfo, 4> PasteUpload::PasteTypes = { { { "0x0.st", "https://0x0.st", "" },
@@ -214,5 +215,5 @@ PasteUpload::PasteUpload(const QString& log, QString url, PasteType pasteType) :
     else
         m_url = m_baseUrl + base.endpointPath;
 
-    m_sink.reset(new Sink(this));
+    m_sink = std::make_unique<Sink>(this);
 }

@@ -166,7 +166,7 @@ class OrSetting : public Setting {
 MinecraftInstance::MinecraftInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, const QString& rootDir)
     : BaseInstance(globalSettings, std::move(settings), rootDir)
 {
-    m_components.reset(new PackProfile(this));
+    m_components = std::make_unique<PackProfile>(this);
 }
 
 MinecraftInstance::~MinecraftInstance() {}
@@ -1245,7 +1245,7 @@ ModFolderModel* MinecraftInstance::loaderModList()
 {
     if (!m_loader_mod_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-        m_loader_mod_list.reset(new ModFolderModel(modsRoot(), this, is_indexed, true));
+        m_loader_mod_list = std::make_unique<ModFolderModel>(modsRoot(), this, is_indexed, true);
     }
     return m_loader_mod_list.get();
 }
@@ -1254,7 +1254,7 @@ ModFolderModel* MinecraftInstance::coreModList()
 {
     if (!m_core_mod_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-        m_core_mod_list.reset(new ModFolderModel(coreModsDir(), this, is_indexed, true));
+        m_core_mod_list = std::make_unique<ModFolderModel>(coreModsDir(), this, is_indexed, true);
     }
     return m_core_mod_list.get();
 }
@@ -1263,7 +1263,7 @@ ModFolderModel* MinecraftInstance::nilModList()
 {
     if (!m_nil_mod_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-        m_nil_mod_list.reset(new ModFolderModel(nilModsDir(), this, is_indexed, false));
+        m_nil_mod_list = std::make_unique<ModFolderModel>(nilModsDir(), this, is_indexed, false);
     }
     return m_nil_mod_list.get();
 }
@@ -1272,7 +1272,7 @@ ResourcePackFolderModel* MinecraftInstance::resourcePackList()
 {
     if (!m_resource_pack_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-        m_resource_pack_list.reset(new ResourcePackFolderModel(resourcePacksDir(), this, is_indexed, true));
+        m_resource_pack_list = std::make_unique<ResourcePackFolderModel>(resourcePacksDir(), this, is_indexed, true);
     }
     return m_resource_pack_list.get();
 }
@@ -1281,7 +1281,7 @@ TexturePackFolderModel* MinecraftInstance::texturePackList()
 {
     if (!m_texture_pack_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-        m_texture_pack_list.reset(new TexturePackFolderModel(texturePacksDir(), this, is_indexed, true));
+        m_texture_pack_list = std::make_unique<TexturePackFolderModel>(texturePacksDir(), this, is_indexed, true);
     }
     return m_texture_pack_list.get();
 }
@@ -1290,7 +1290,7 @@ ShaderPackFolderModel* MinecraftInstance::shaderPackList()
 {
     if (!m_shader_pack_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-        m_shader_pack_list.reset(new ShaderPackFolderModel(shaderPacksDir(), this, is_indexed, true));
+        m_shader_pack_list = std::make_unique<ShaderPackFolderModel>(shaderPacksDir(), this, is_indexed, true);
     }
     return m_shader_pack_list.get();
 }
@@ -1299,7 +1299,7 @@ DataPackFolderModel* MinecraftInstance::dataPackList()
 {
     if (!m_data_pack_list && settings()->get("GlobalDataPacksEnabled").toBool()) {
         bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-        m_data_pack_list.reset(new DataPackFolderModel(dataPacksDir(), this, isIndexed, true));
+        m_data_pack_list = std::make_unique<DataPackFolderModel>(dataPacksDir(), this, isIndexed, true);
     }
     return m_data_pack_list.get();
 }
@@ -1312,7 +1312,7 @@ QList<ResourceFolderModel*> MinecraftInstance::resourceLists()
 WorldList* MinecraftInstance::worldList()
 {
     if (!m_world_list) {
-        m_world_list.reset(new WorldList(worldDir(), this));
+        m_world_list = std::make_unique<WorldList>(worldDir(), this);
     }
     return m_world_list.get();
 }

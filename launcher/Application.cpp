@@ -510,7 +510,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         for (auto i = 4; i > 0; i--)
             FS::move(logBase.arg(i - 1), logBase.arg(i));
 
-        logFile = std::unique_ptr<QFile>(new QFile(logBase.arg(0)));
+        logFile = std::make_unique<QFile>(logBase.arg(0));
         if (!logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
             showFatalErrorMessage("The launcher data folder is not writable!",
                                   QString("The launcher couldn't create a log file - the data folder is not writable.\n"
@@ -525,7 +525,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         qInstallMessageHandler(appDebugOutput);
         qSetMessagePattern(defaultLogFormat);
 
-        logModel.reset(new LogModel(this));
+        logModel = std::make_unique<LogModel>(this);
 
         bool foundLoggingRules = false;
 
@@ -921,7 +921,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     // initialize network access and proxy setup
     {
-        m_network.reset(new QNetworkAccessManager());
+        m_network = std::make_unique<QNetworkAccessManager>();
         QString proxyTypeStr = settings()->get("ProxyType").toString();
         QString addr = settings()->get("ProxyAddr").toString();
         int port = settings()->get("ProxyPort").value<qint16>();
@@ -933,7 +933,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     // load translations
     {
-        m_translations.reset(new TranslationsModel("translations"));
+        m_translations = std::make_unique<TranslationsModel>("translations");
         auto bcp47Name = m_settings->get("Language").toString();
         m_translations->selectLanguage(bcp47Name);
         qInfo() << "Your language is" << bcp47Name;
@@ -945,7 +945,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         auto setting = APPLICATION->settings()->getSetting("IconsDir");
         QStringList instFolders = { ":/icons/multimc/32x32/instances/", ":/icons/multimc/50x50/instances/",
                                     ":/icons/multimc/128x128/instances/", ":/icons/multimc/scalable/instances/" };
-        m_icons.reset(new IconList(instFolders, setting->get().toString()));
+        m_icons = std::make_unique<IconList>(instFolders, setting->get().toString());
         connect(setting.get(), &Setting::SettingChanged,
                 [this](const Setting&, QVariant value) { m_icons->directoryChanged(value.toString()); });
         qInfo() << "<> Instance icons initialized.";
@@ -979,7 +979,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         if (FS::checkProblemticPathJava(QDir(instDir))) {
             qWarning() << "Your instance path contains \'!\' and this is known to cause java problems!";
         }
-        m_instances.reset(new InstanceList(m_settings.get(), instDir, this));
+        m_instances = std::make_unique<InstanceList>(m_settings.get(), instDir, this);
         connect(InstDirSetting.get(), &Setting::SettingChanged, m_instances.get(), &InstanceList::on_InstFolderChanged);
         qInfo() << "Loading Instances...";
         m_instances->loadList();
@@ -988,7 +988,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     // and accounts
     {
-        m_accounts.reset(new AccountList(this));
+        m_accounts = std::make_unique<AccountList>(this);
         qInfo() << "Loading accounts...";
         m_accounts->setListFilePath("accounts.json", true);
         m_accounts->loadList();
@@ -998,7 +998,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     // init the http meta cache
     {
-        m_metacache.reset(new HttpMetaCache("metacache"));
+        m_metacache = std::make_unique<HttpMetaCache>("metacache");
         m_metacache->addBase("asset_indexes", QDir("assets/indexes").absolutePath());
         m_metacache->addBase("libraries", QDir("libraries").absolutePath());
         m_metacache->addBase("fmllibs", QDir("mods/minecraftforge/libs").absolutePath());
@@ -1031,7 +1031,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     // Create the MCEdit thing... why is this here?
     {
-        m_mcedit.reset(new MCEditTool(m_settings.get()));
+        m_mcedit = std::make_unique<MCEditTool>(m_settings.get());
     }
 
 #ifdef Q_OS_MACOS
@@ -1378,7 +1378,7 @@ void Application::performMainStartupAction()
         m_updater.reset(new MacSparkleUpdater());
 #endif
 #else
-        m_updater.reset(new PrismExternalUpdater(m_mainWindow, m_rootPath, m_dataPath));
+        m_updater = std::make_unique<PrismExternalUpdater>(m_mainWindow, m_rootPath, m_dataPath);
 #endif
         qDebug() << "<> Updater started.";
     }
@@ -1489,7 +1489,7 @@ TranslationsModel* Application::translations()
 JavaInstallList* Application::javalist()
 {
     if (!m_javalist) {
-        m_javalist.reset(new JavaInstallList());
+        m_javalist = std::make_unique<JavaInstallList>();
     }
     return m_javalist.get();
 }
@@ -1528,7 +1528,7 @@ bool Application::launch(BaseInstance* instance,
             }
         }
         auto& controller = extras.controller;
-        controller.reset(new LaunchController());
+        controller = std::make_unique<LaunchController>();
         controller->setInstance(instance);
         controller->setLaunchMode(mode);
         controller->setProfiler(profilers().value(instance->settings()->get("Profiler").toString(), nullptr).get());
@@ -1817,7 +1817,7 @@ QNetworkAccessManager* Application::network()
 Meta::Index* Application::metadataIndex()
 {
     if (!m_metadataIndex) {
-        m_metadataIndex.reset(new Meta::Index());
+        m_metadataIndex = std::make_unique<Meta::Index>();
     }
     return m_metadataIndex.get();
 }

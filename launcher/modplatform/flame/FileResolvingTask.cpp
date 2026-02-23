@@ -18,6 +18,7 @@
 
 #include "FileResolvingTask.h"
 #include <algorithm>
+#include <memory>
 
 #include "Json.h"
 #include "modplatform/ModIndex.h"

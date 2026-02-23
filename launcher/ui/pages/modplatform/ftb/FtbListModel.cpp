@@ -21,6 +21,7 @@
 #include "Json.h"
 
 #include <QPainter>
+#include <memory>
 
 namespace Ftb {
 

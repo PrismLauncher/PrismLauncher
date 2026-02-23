@@ -48,6 +48,7 @@
 #include <QTimer>
 #include <QUuid>
 #include <algorithm>
+#include <memory>
 #include <utility>
 
 #include "Application.h"
@@ -72,7 +73,7 @@
 
 PackProfile::PackProfile(MinecraftInstance* instance) : QAbstractListModel()
 {
-    d.reset(new PackProfileData);
+    d = std::make_unique<PackProfileData>();
     d->m_instance = instance;
     d->m_saveTimer.setSingleShot(true);
     d->m_saveTimer.setInterval(5000);

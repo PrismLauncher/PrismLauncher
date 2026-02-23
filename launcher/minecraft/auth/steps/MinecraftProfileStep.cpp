@@ -1,6 +1,7 @@
 #include "MinecraftProfileStep.h"
 
 #include <QNetworkRequest>
+#include <memory>
 
 #include "Application.h"
 #include "minecraft/auth/Parsers.h"

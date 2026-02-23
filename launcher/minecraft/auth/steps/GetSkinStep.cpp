@@ -2,6 +2,7 @@
 #include "GetSkinStep.h"
 
 #include <QNetworkRequest>
+#include <memory>
 
 #include "Application.h"
 

@@ -83,7 +83,7 @@ auto Download::makeFile(QUrl url, QString path, Options options) -> Download::Pt
     dl->m_url = url;
     dl->setObjectName(QString("FILE:") + url.toString());
     dl->m_options = options;
-    dl->m_sink.reset(new FileSink(path));
+    dl->m_sink = std::make_unique<FileSink>(path);
     return dl;
 }
 

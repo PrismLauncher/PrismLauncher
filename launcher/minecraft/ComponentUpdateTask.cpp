@@ -1,5 +1,6 @@
 #include "ComponentUpdateTask.h"
 #include <algorithm>
+#include <memory>
 
 #include "Component.h"
 #include "ComponentUpdateTask_p.h"
@@ -43,7 +44,7 @@
  */
 ComponentUpdateTask::ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfile* list) : Task()
 {
-    d.reset(new ComponentUpdateTaskData);
+    d = std::make_unique<ComponentUpdateTaskData>();
     d->m_profile = list;
     d->mode = mode;
     d->netmode = netmode;

@@ -37,6 +37,7 @@
 #include "SkinUpload.h"
 
 #include <QHttpMultiPart>
+#include <memory>
 
 #include "FileSystem.h"
 #include "net/DummySink.h"
@@ -72,7 +73,7 @@ SkinUpload::Ptr SkinUpload::make(QString token, QString path, QString variant)
     auto up = makeShared<SkinUpload>(path, variant);
     up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/skins");
     up->setObjectName(QString("BYTES:") + up->m_url.toString());
-    up->m_sink.reset(new Net::DummySink());
+    up->m_sink = std::make_unique<Net::DummySink>();
     up->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(QList<Net::HeaderPair>{
         { "Authorization", QString("Bearer %1").arg(token).toLocal8Bit() },
     }));

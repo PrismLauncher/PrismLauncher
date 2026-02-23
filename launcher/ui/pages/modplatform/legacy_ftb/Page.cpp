@@ -40,6 +40,7 @@
 #include "ui_Page.h"
 
 #include <QInputDialog>
+#include <memory>
 
 #include "Application.h"
 
@@ -56,7 +57,7 @@ namespace LegacyFTB {
 Page::Page(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), dialog(dialog), ui(new Ui::Page)
 {
     ftbFetchTask.reset(new PackFetchTask(APPLICATION->network()));
-    ftbPrivatePacks.reset(new PrivatePackManager());
+    ftbPrivatePacks = std::make_unique<PrivatePackManager>();
 
     ui->setupUi(this);
 

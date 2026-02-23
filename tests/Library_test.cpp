@@ -34,6 +34,7 @@
  */
 
 #include <QTest>
+#include <memory>
 
 #include <FileSystem.h>
 #include <RuntimeContext.h>
@@ -71,7 +72,7 @@ class LibraryTest : public QObject {
    private slots:
     void initTestCase()
     {
-        cache.reset(new HttpMetaCache());
+        cache = std::make_unique<HttpMetaCache>();
         cache->addBase("libraries", QDir("libraries").absolutePath());
         dataDir = QDir(QFINDTESTDATA("testdata/Libraries")).absolutePath();
     }

@@ -3,6 +3,7 @@
 #include <QJsonDocument>
 #include <QJsonParseError>
 #include <QNetworkRequest>
+#include <memory>
 
 #include "Application.h"
 #include "Logging.h"
@@ -37,11 +38,9 @@ void XboxAuthorizationStep::perform()
     auto xbox_auth_data = xbox_auth_template.arg(m_data->userToken.token, m_relyingParty);
     // http://xboxlive.com
     QUrl url("https://xsts.auth.xboxlive.com/xsts/authorize");
-    auto headers = QList<Net::HeaderPair>{
-        { "Content-Type", "application/json" },
-        { "Accept", "application/json" },
-        { "x-xbl-contract-version", "1" }
-    };
+    auto headers = QList<Net::HeaderPair>{ { "Content-Type", "application/json" },
+                                           { "Accept", "application/json" },
+                                           { "x-xbl-contract-version", "1" } };
     auto [request, response] = Net::Upload::makeByteArray(url, xbox_auth_data.toUtf8());
     m_request = request;
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));

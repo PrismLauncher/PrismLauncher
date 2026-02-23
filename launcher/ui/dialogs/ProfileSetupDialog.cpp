@@ -42,6 +42,7 @@
 #include <QJsonDocument>
 #include <QPushButton>
 #include <QRegularExpressionValidator>
+#include <memory>
 
 #include "ui/dialogs/ProgressDialog.h"
 

@@ -37,6 +37,7 @@
 
 #include <QDateTime>
 #include <QUrlQuery>
+#include <memory>
 
 #include "Application.h"
 #include "Json.h"

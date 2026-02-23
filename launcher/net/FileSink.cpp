@@ -35,6 +35,8 @@
 
 #include "FileSink.h"
 
+#include <memory>
+
 #include "FileSystem.h"
 
 #include "net/Logging.h"
@@ -56,7 +58,7 @@ Task::State FileSink::init(QNetworkRequest& request)
     }
 
     m_wroteAnyData = false;
-    m_output_file.reset(new PSaveFile(m_filename));
+    m_output_file = std::make_unique<PSaveFile>(m_filename);
     if (!m_output_file->open(QIODevice::WriteOnly)) {
         qCCritical(taskNetLogC) << "Could not open " + m_filename + " for writing";
         m_fail_reason = "Could not open file";

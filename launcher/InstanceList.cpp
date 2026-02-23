@@ -51,6 +51,7 @@
 #include <QTimer>
 #include <QUuid>
 #include <QXmlStreamReader>
+#include <memory>
 
 #include "BaseInstance.h"
 #include "ExponentialSeries.h"
@@ -679,9 +680,9 @@ std::unique_ptr<BaseInstance> InstanceList::loadInstance(const InstanceId& id)
     // NOTE: Some launcher versions didn't save the InstanceType properly. We will just bank on the probability that this is probably a
     // OneSix instance
     if (inst_type == "OneSix" || inst_type.isEmpty()) {
-        inst.reset(new MinecraftInstance(m_globalSettings, std::move(instanceSettings), instanceRoot));
+        inst = std::make_unique<MinecraftInstance>(m_globalSettings, std::move(instanceSettings), instanceRoot);
     } else {
-        inst.reset(new NullInstance(m_globalSettings, std::move(instanceSettings), instanceRoot));
+        inst = std::make_unique<NullInstance>(m_globalSettings, std::move(instanceSettings), instanceRoot);
     }
     qDebug() << "Loaded instance" << inst->name() << "from" << inst->instanceRoot();
 
