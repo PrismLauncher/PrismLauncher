@@ -145,7 +145,7 @@ void ExportInstanceDialog::doExport()
 
     auto files = QFileInfoList();
     if (!MMCZip::collectFileListRecursively(m_instance->instanceRoot(), nullptr, &files,
-                                            std::bind(&FileIgnoreProxy::filterFile, m_proxyModel, std::placeholders::_1))) {
+                                            [this](auto && PH1) { return m_proxyModel->filterFile(std::forward<decltype(PH1)>(PH1)); })) {
         QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
         QDialog::done(QDialog::Rejected);
         return;

@@ -180,7 +180,7 @@ void ExportPackDialog::done(int result)
         Task* task;
         if (m_provider == ModPlatform::ResourceProvider::MODRINTH) {
             task = new ModrinthPackExportTask(name, m_ui->version->text(), m_ui->summary->toPlainText(), m_ui->optionalFiles->isChecked(),
-                                              m_instance, output, std::bind(&FileIgnoreProxy::filterFile, m_proxy, std::placeholders::_1));
+                                              m_instance, output, [this](auto && PH1) { return m_proxy->filterFile(std::forward<decltype(PH1)>(PH1)); });
         } else {
             FlamePackExportOptions options{};
 
@@ -190,7 +190,7 @@ void ExportPackDialog::done(int result)
             options.optionalFiles = m_ui->optionalFiles->isChecked();
             options.instance = m_instance;
             options.output = output;
-            options.filter = std::bind(&FileIgnoreProxy::filterFile, m_proxy, std::placeholders::_1);
+            options.filter = [this](auto && PH1) { return m_proxy->filterFile(std::forward<decltype(PH1)>(PH1)); };
             options.recommendedRAM = m_ui->recommendedMemoryCheckBox->isChecked() ? m_ui->recommendedMemory->value() : 0;
 
             task = new FlamePackExportTask(std::move(options));
