@@ -53,6 +53,7 @@
 #include <QRegularExpression>
 #include <QSet>
 #include <QStyledItemDelegate>
+#include <memory>
 
 #include <Application.h>
 #include "settings/SettingsObject.h"
@@ -237,8 +238,8 @@ class CenteredEditingDelegate : public QStyledItemDelegate {
 
 ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent) : QMainWindow(parent), ui(new Ui::ScreenshotsPage)
 {
-    m_model.reset(new QFileSystemModel());
-    m_filterModel.reset(new FilterModel());
+    m_model = std::make_shared<QFileSystemModel>();
+    m_filterModel = std::make_shared<FilterModel>();
     m_filterModel->setSourceModel(m_model.get());
     m_model->setFilter(QDir::Files);
     m_model->setReadOnly(false);

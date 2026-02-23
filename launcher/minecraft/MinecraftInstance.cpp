@@ -102,6 +102,7 @@
 
 #ifdef WITH_QTDBUS
 #include <QtDBus/QtDBus>
+#include <memory>
 #endif
 
 #define IBUS "@im=ibus"
@@ -1133,11 +1134,11 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     if (!targetToJoin && settings()->get("JoinServerOnLaunch").toBool()) {
         QString fullAddress = settings()->get("JoinServerOnLaunchAddress").toString();
         if (!fullAddress.isEmpty()) {
-            targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(fullAddress, false)));
+            targetToJoin = std::make_shared<MinecraftTarget>(MinecraftTarget::parse(fullAddress, false));
         } else {
             QString world = settings()->get("JoinWorldOnLaunch").toString();
             if (!world.isEmpty()) {
-                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(world, true)));
+                targetToJoin = std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world, true));
             }
         }
     }

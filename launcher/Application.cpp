@@ -84,6 +84,7 @@
 #include "ApplicationMessage.h"
 
 #include <iostream>
+#include <memory>
 #include <mutex>
 
 #include <QAccessible>
@@ -1336,10 +1337,10 @@ void Application::performMainStartupAction()
             qDebug() << "<> Instance" << m_instanceIdToLaunch << "launching";
             if (!m_serverToJoin.isEmpty()) {
                 // FIXME: validate the server string
-                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(m_serverToJoin, false)));
+                targetToJoin = std::make_shared<MinecraftTarget>(MinecraftTarget::parse(m_serverToJoin, false));
                 qDebug() << "   Launching with server" << m_serverToJoin;
             } else if (!m_worldToJoin.isEmpty()) {
-                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(m_worldToJoin, true)));
+                targetToJoin = std::make_shared<MinecraftTarget>(MinecraftTarget::parse(m_worldToJoin, true));
                 qDebug() << "   Launching with world" << m_worldToJoin;
             }
 

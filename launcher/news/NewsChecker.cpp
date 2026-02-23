@@ -39,6 +39,7 @@
 #include <QDomDocument>
 
 #include <QDebug>
+#include <memory>
 #include "Application.h"
 
 NewsChecker::NewsChecker(QNetworkAccessManager* network, const QString& feedUrl)
@@ -99,7 +100,7 @@ void NewsChecker::rssDownloadFinished()
     for (int i = 0; i < items.length(); i++) {
         QDomElement element = items.at(i).toElement();
         NewsEntryPtr entry;
-        entry.reset(new NewsEntry());
+        entry = std::make_shared<NewsEntry>();
         QString errorMsg = "An unknown error occurred.";
         if (NewsEntry::fromXmlElement(element, entry.get(), &errorMsg)) {
             qDebug() << "Loaded news entry" << entry->title;
