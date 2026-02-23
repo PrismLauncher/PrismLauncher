@@ -9,7 +9,7 @@
 class JProfiler : public BaseProfiler {
     Q_OBJECT
    public:
-    JProfiler(SettingsObject* settings, BaseInstance* instance, QObject* parent = 0);
+    JProfiler(SettingsObject* settings, BaseInstance* instance, QObject* parent = nullptr);
 
    private slots:
     void profilerStarted();
@@ -36,7 +36,7 @@ void JProfiler::profilerFinished([[maybe_unused]] int exit, QProcess::ExitStatus
     }
     if (m_profilerProcess) {
         m_profilerProcess->deleteLater();
-        m_profilerProcess = 0;
+        m_profilerProcess = nullptr;
     }
 }
 

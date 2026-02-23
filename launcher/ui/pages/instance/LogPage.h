@@ -63,7 +63,7 @@ class LogPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit LogPage(BaseInstance* instance, QWidget* parent = 0);
+    explicit LogPage(BaseInstance* instance, QWidget* parent = nullptr);
     virtual ~LogPage();
     virtual QString displayName() const override { return tr("Minecraft Log"); }
     virtual QIcon icon() const override { return QIcon::fromTheme("log"); }

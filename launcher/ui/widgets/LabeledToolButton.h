@@ -27,7 +27,7 @@ class LabeledToolButton : public QToolButton {
     QIcon m_icon;
 
    public:
-    LabeledToolButton(QWidget* parent = 0);
+    LabeledToolButton(QWidget* parent = nullptr);
 
     QString text() const;
     void setText(const QString& text);

@@ -24,7 +24,7 @@ struct Language;
 class TranslationsModel : public QAbstractListModel {
     Q_OBJECT
    public:
-    explicit TranslationsModel(QString path, QObject* parent = 0);
+    explicit TranslationsModel(QString path, QObject* parent = nullptr);
     virtual ~TranslationsModel();
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;

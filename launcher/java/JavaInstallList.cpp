@@ -150,7 +150,7 @@ void JavaInstallList::sortVersions()
 JavaListLoadTask::JavaListLoadTask(JavaInstallList* vlist, bool onlyManagedVersions) : Task(), m_only_managed_versions(onlyManagedVersions)
 {
     m_list = vlist;
-    m_current_recommended = NULL;
+    m_current_recommended = nullptr;
 }
 
 void JavaListLoadTask::executeTask()

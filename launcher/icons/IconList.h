@@ -51,7 +51,7 @@ class QFileSystemWatcher;
 class IconList : public QAbstractListModel {
     Q_OBJECT
    public:
-    explicit IconList(const QStringList& builtinPaths, const QString& path, QObject* parent = 0);
+    explicit IconList(const QStringList& builtinPaths, const QString& path, QObject* parent = nullptr);
     virtual ~IconList() = default;
 
     QIcon getIcon(const QString& key) const;

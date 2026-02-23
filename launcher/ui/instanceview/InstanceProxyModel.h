@@ -22,7 +22,7 @@ class InstanceProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
 
    public:
-    InstanceProxyModel(QObject* parent = 0);
+    InstanceProxyModel(QObject* parent = nullptr);
 
    protected:
     QVariant data(const QModelIndex& index, int role) const override;

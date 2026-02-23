@@ -22,7 +22,7 @@ class ListViewDelegate : public QStyledItemDelegate {
     Q_OBJECT
 
    public:
-    explicit ListViewDelegate(QObject* parent = 0);
+    explicit ListViewDelegate(QObject* parent = nullptr);
     virtual ~ListViewDelegate() = default;
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;

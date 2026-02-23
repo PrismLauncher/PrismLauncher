@@ -46,7 +46,7 @@ class LanguagePage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit LanguagePage(QWidget* parent = 0);
+    explicit LanguagePage(QWidget* parent = nullptr);
     virtual ~LanguagePage();
 
     QString displayName() const override { return tr("Language"); }

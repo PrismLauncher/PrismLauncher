@@ -132,7 +132,7 @@ class ThumbnailRunnable : public QRunnable {
 class FilterModel : public QIdentityProxyModel {
     Q_OBJECT
    public:
-    explicit FilterModel(QObject* parent = 0) : QIdentityProxyModel(parent)
+    explicit FilterModel(QObject* parent = nullptr) : QIdentityProxyModel(parent)
     {
         m_thumbnailingPool.setMaxThreadCount(4);
         m_thumbnailCache = std::make_shared<SharedIconCache>();
@@ -221,7 +221,7 @@ class FilterModel : public QIdentityProxyModel {
 
 class CenteredEditingDelegate : public QStyledItemDelegate {
    public:
-    explicit CenteredEditingDelegate(QObject* parent = 0) : QStyledItemDelegate(parent) {}
+    explicit CenteredEditingDelegate(QObject* parent = nullptr) : QStyledItemDelegate(parent) {}
     virtual ~CenteredEditingDelegate() = default;
     virtual QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
     {

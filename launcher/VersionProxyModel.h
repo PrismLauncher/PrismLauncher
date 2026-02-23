@@ -13,7 +13,7 @@ class VersionProxyModel : public QAbstractProxyModel {
     using FilterMap = QHash<BaseVersionList::ModelRoles, Filter>;
 
    public:
-    VersionProxyModel(QObject* parent = 0);
+    VersionProxyModel(QObject* parent = nullptr);
     virtual ~VersionProxyModel() = default;
 
     virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;

@@ -28,7 +28,7 @@ class VersionList : public BaseVersionList {
     Q_OBJECT
 
    public:
-    explicit VersionList(Meta::Version::Ptr m_version, QObject* parent = 0);
+    explicit VersionList(Meta::Version::Ptr m_version, QObject* parent = nullptr);
 
     Task::Ptr getLoadTask() override;
     bool isLoaded() override;

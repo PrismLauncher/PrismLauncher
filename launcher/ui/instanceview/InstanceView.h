@@ -51,7 +51,7 @@ class InstanceView : public QAbstractItemView {
     Q_OBJECT
 
    public:
-    InstanceView(QWidget* parent = 0);
+    InstanceView(QWidget* parent = nullptr);
     ~InstanceView();
 
     void setModel(QAbstractItemModel* model) override;

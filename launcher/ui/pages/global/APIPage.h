@@ -49,7 +49,7 @@ class APIPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit APIPage(QWidget* parent = 0);
+    explicit APIPage(QWidget* parent = nullptr);
     ~APIPage();
 
     QString displayName() const override { return tr("Services"); }

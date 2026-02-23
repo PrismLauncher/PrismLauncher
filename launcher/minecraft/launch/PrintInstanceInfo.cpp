@@ -44,7 +44,7 @@ void runLspci(QStringList& log)
     if (!lspci)
         return;
 
-    while (fgets(buff, 512, lspci) != NULL) {
+    while (fgets(buff, 512, lspci) != nullptr) {
         std::string str(buff);
         if (str.length() < 9)
             continue;
@@ -101,7 +101,7 @@ void runGlxinfo(QStringList& log)
     if (!glxinfo)
         return;
 
-    while (fgets(buff, 512, glxinfo) != NULL) {
+    while (fgets(buff, 512, glxinfo) != nullptr) {
         if (strncmp(buff, "OpenGL version string:", 22) == 0) {
             log << QString::fromUtf8(buff);
             break;

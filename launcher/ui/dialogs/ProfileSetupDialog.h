@@ -31,7 +31,7 @@ class ProfileSetupDialog;
 class ProfileSetupDialog : public QDialog {
     Q_OBJECT
    public:
-    explicit ProfileSetupDialog(MinecraftAccountPtr accountToSetup, QWidget* parent = 0);
+    explicit ProfileSetupDialog(MinecraftAccountPtr accountToSetup, QWidget* parent = nullptr);
     ~ProfileSetupDialog();
 
     enum class NameStatus { NotSet, Pending, Available, Exists, Error } nameStatus = NameStatus::NotSet;

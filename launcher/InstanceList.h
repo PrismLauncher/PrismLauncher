@@ -73,7 +73,7 @@ class InstanceList : public QAbstractListModel {
     Q_OBJECT
 
    public:
-    explicit InstanceList(SettingsObject* settings, const QString& instDir, QObject* parent = 0);
+    explicit InstanceList(SettingsObject* settings, const QString& instDir, QObject* parent = nullptr);
     virtual ~InstanceList();
 
    public:

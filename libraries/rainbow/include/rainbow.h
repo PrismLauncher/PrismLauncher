@@ -46,7 +46,7 @@ qreal luma(const QColor&);
  * Calculate hue, chroma and luma of a color in one call.
  * @since 5.0
  */
-void getHcy(const QColor&, qreal* hue, qreal* chroma, qreal* luma, qreal* alpha = 0);
+void getHcy(const QColor&, qreal* hue, qreal* chroma, qreal* luma, qreal* alpha = nullptr);
 
 /**
  * Calculate the contrast ratio between two colors, according to the

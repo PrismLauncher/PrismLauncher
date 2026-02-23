@@ -80,7 +80,7 @@ QString EnsureMetadataTask::getExistingHash(Resource* resource)
 bool EnsureMetadataTask::abort()
 {
     // Prevent sending signals to a dead object
-    disconnect(this, 0, 0, 0);
+    disconnect(this, nullptr, nullptr, nullptr);
 
     if (m_currentTask)
         return m_currentTask->abort();

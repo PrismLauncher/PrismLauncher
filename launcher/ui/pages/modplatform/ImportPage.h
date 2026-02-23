@@ -50,7 +50,7 @@ class ImportPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit ImportPage(NewInstanceDialog* dialog, QWidget* parent = 0);
+    explicit ImportPage(NewInstanceDialog* dialog, QWidget* parent = nullptr);
     virtual ~ImportPage();
     virtual QString displayName() const override { return tr("Import"); }
     virtual QIcon icon() const override { return QIcon::fromTheme("viewfolder"); }

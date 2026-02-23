@@ -25,7 +25,7 @@ bool openPath(const QString& path, bool ensureFolderPathExists = false);
 /**
  * Run an application
  */
-bool run(const QString& application, const QStringList& args, const QString& workingDirectory = QString(), qint64* pid = 0);
+bool run(const QString& application, const QStringList& args, const QString& workingDirectory = QString(), qint64* pid = nullptr);
 
 /**
  * Open the URL, most likely in a browser. Maybe.

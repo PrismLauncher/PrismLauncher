@@ -56,7 +56,7 @@ class ServersPage : public QMainWindow, public BasePage {
     Q_OBJECT
 
    public:
-    explicit ServersPage(BaseInstance* inst, QWidget* parent = 0);
+    explicit ServersPage(BaseInstance* inst, QWidget* parent = nullptr);
     virtual ~ServersPage();
 
     void openedImpl() override;

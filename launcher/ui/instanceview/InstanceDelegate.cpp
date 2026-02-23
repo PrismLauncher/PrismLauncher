@@ -193,7 +193,7 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     // const int iconSize =  style->pixelMetric(QStyle::PM_IconViewIconSize);
     const int iconSize = 48;
     QRect iconbox = opt.rect;
-    const int textMargin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, 0, opt.widget) + 1;
+    const int textMargin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, nullptr, opt.widget) + 1;
     QRect textRect = opt.rect;
     QRect textHighlightRect = textRect;
     // clip the decoration on top, remove width padding

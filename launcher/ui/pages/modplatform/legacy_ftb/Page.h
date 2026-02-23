@@ -60,7 +60,7 @@ class Page : public QWidget, public ModpackProviderBasePage {
     Q_OBJECT
 
    public:
-    explicit Page(NewInstanceDialog* dialog, QWidget* parent = 0);
+    explicit Page(NewInstanceDialog* dialog, QWidget* parent = nullptr);
     virtual ~Page();
     QString displayName() const override { return "FTB Legacy"; }
     QIcon icon() const override { return QIcon::fromTheme("ftb_logo"); }

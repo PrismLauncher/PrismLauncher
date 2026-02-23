@@ -26,7 +26,7 @@ class QCheckBox;
 class LanguageSelectionWidget : public QWidget {
     Q_OBJECT
    public:
-    explicit LanguageSelectionWidget(QWidget* parent = 0);
+    explicit LanguageSelectionWidget(QWidget* parent = nullptr);
     virtual ~LanguageSelectionWidget() = default;
 
     QString getSelectedLanguageKey() const;

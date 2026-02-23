@@ -33,7 +33,7 @@ class JavaInstallList : public BaseVersionList {
     enum class Status { NotDone, InProgress, Done };
 
    public:
-    explicit JavaInstallList(QObject* parent = 0, bool onlyManagedVersions = false);
+    explicit JavaInstallList(QObject* parent = nullptr, bool onlyManagedVersions = false);
 
     Task::Ptr getLoadTask() override;
     bool isLoaded() override;

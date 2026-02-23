@@ -35,7 +35,7 @@ class MSALoginDialog : public QDialog {
     int exec() override;
 
    private:
-    explicit MSALoginDialog(QWidget* parent = 0);
+    explicit MSALoginDialog(QWidget* parent = nullptr);
 
    protected slots:
     void onTaskFailed(QString reason);

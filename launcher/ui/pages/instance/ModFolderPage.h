@@ -81,7 +81,7 @@ class ModFolderPage : public ExternalResourcesPage {
 class CoreModFolderPage : public ModFolderPage {
     Q_OBJECT
    public:
-    explicit CoreModFolderPage(BaseInstance* inst, ModFolderModel* mods, QWidget* parent = 0);
+    explicit CoreModFolderPage(BaseInstance* inst, ModFolderModel* mods, QWidget* parent = nullptr);
     virtual ~CoreModFolderPage() = default;
 
     virtual QString displayName() const override { return tr("Core Mods"); }
@@ -95,7 +95,7 @@ class CoreModFolderPage : public ModFolderPage {
 class NilModFolderPage : public ModFolderPage {
     Q_OBJECT
    public:
-    explicit NilModFolderPage(BaseInstance* inst, ModFolderModel* mods, QWidget* parent = 0);
+    explicit NilModFolderPage(BaseInstance* inst, ModFolderModel* mods, QWidget* parent = nullptr);
     virtual ~NilModFolderPage() = default;
 
     virtual QString displayName() const override { return tr("Nilmods"); }

@@ -47,7 +47,7 @@ class ExternalToolsPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit ExternalToolsPage(QWidget* parent = 0);
+    explicit ExternalToolsPage(QWidget* parent = nullptr);
     ~ExternalToolsPage();
 
     QString displayName() const override { return tr("Tools"); }

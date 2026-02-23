@@ -51,7 +51,7 @@ class CustomPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit CustomPage(NewInstanceDialog* dialog, QWidget* parent = 0);
+    explicit CustomPage(NewInstanceDialog* dialog, QWidget* parent = nullptr);
     virtual ~CustomPage();
     virtual QString displayName() const override { return tr("Custom"); }
     virtual QIcon icon() const override { return QIcon::fromTheme("minecraft"); }

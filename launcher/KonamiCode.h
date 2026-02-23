@@ -5,7 +5,7 @@
 class KonamiCode : public QObject {
     Q_OBJECT
    public:
-    KonamiCode(QObject* parent = 0);
+    KonamiCode(QObject* parent = nullptr);
     void input(QEvent* event);
 
    signals:

@@ -52,7 +52,7 @@ class WorldListPage : public QMainWindow, public BasePage {
     Q_OBJECT
 
    public:
-    explicit WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget* parent = 0);
+    explicit WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget* parent = nullptr);
     virtual ~WorldListPage();
 
     virtual QString displayName() const override { return tr("Worlds"); }

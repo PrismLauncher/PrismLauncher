@@ -35,7 +35,7 @@ class AppearanceWidget : public QWidget {
     Q_OBJECT
 
    public:
-    explicit AppearanceWidget(bool simple, QWidget* parent = 0);
+    explicit AppearanceWidget(bool simple, QWidget* parent = nullptr);
     virtual ~AppearanceWidget();
 
    public:

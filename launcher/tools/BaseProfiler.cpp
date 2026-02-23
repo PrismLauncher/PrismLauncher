@@ -23,7 +23,7 @@ void BaseProfiler::abortProfilingImpl()
     }
     m_profilerProcess->terminate();
     m_profilerProcess->deleteLater();
-    m_profilerProcess = 0;
+    m_profilerProcess = nullptr;
     emit abortLaunch(tr("Profiler aborted"));
 }
 

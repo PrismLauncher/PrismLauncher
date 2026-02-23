@@ -27,7 +27,7 @@ class IconPickerDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit IconPickerDialog(QWidget* parent = 0);
+    explicit IconPickerDialog(QWidget* parent = nullptr);
     ~IconPickerDialog();
     int execWithSelection(QString selection);
     QString selectedIconKey;

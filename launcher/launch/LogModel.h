@@ -7,7 +7,7 @@
 class LogModel : public QAbstractListModel {
     Q_OBJECT
    public:
-    explicit LogModel(QObject* parent = 0);
+    explicit LogModel(QObject* parent = nullptr);
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     QVariant data(const QModelIndex& index, int role) const;

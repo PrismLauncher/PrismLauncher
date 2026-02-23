@@ -79,7 +79,7 @@ std::shared_ptr<Setting> SettingsObject::getSetting(const QString& id) const
 {
     // Make sure there is a setting with the given ID.
     if (!m_settings.contains(id))
-        return NULL;
+        return nullptr;
 
     return m_settings[id];
 }

@@ -52,7 +52,7 @@ class OtherLogsPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit OtherLogsPage(QString id, QString displayName, QString helpPage, BaseInstance* instance = nullptr, QWidget* parent = 0);
+    explicit OtherLogsPage(QString id, QString displayName, QString helpPage, BaseInstance* instance = nullptr, QWidget* parent = nullptr);
     ~OtherLogsPage();
 
     QString id() const override { return m_id; }

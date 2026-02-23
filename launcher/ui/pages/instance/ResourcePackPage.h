@@ -48,7 +48,7 @@
 class ResourcePackPage : public ExternalResourcesPage {
     Q_OBJECT
    public:
-    explicit ResourcePackPage(MinecraftInstance* instance, ResourcePackFolderModel* model, QWidget* parent = 0);
+    explicit ResourcePackPage(MinecraftInstance* instance, ResourcePackFolderModel* model, QWidget* parent = nullptr);
 
     QString displayName() const override { return tr("Resource Packs"); }
     QIcon icon() const override { return QIcon::fromTheme("resourcepacks"); }

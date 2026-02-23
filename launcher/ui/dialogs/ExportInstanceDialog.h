@@ -52,7 +52,7 @@ class ExportInstanceDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit ExportInstanceDialog(BaseInstance* instance, QWidget* parent = 0);
+    explicit ExportInstanceDialog(BaseInstance* instance, QWidget* parent = nullptr);
     ~ExportInstanceDialog();
 
     virtual void done(int result);

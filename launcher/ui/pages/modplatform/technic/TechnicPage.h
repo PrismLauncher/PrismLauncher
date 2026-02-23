@@ -57,7 +57,7 @@ class TechnicPage : public QWidget, public ModpackProviderBasePage {
     Q_OBJECT
 
    public:
-    explicit TechnicPage(NewInstanceDialog* dialog, QWidget* parent = 0);
+    explicit TechnicPage(NewInstanceDialog* dialog, QWidget* parent = nullptr);
     virtual ~TechnicPage();
     virtual QString displayName() const override { return "Technic"; }
     virtual QIcon icon() const override { return QIcon::fromTheme("technic"); }

@@ -84,7 +84,7 @@ bool ConcurrentTask::abort()
     QMutableHashIterator<Task*, Task::Ptr> doing_iter(m_doing);
     while (doing_iter.hasNext()) {
         auto task = doing_iter.next();
-        disconnect(task->get(), &Task::aborted, this, 0);
+        disconnect(task->get(), &Task::aborted, this, nullptr);
         suceedeed &= (task.value())->abort();
     }
 
@@ -182,7 +182,7 @@ void ConcurrentTask::subTaskFinished(Task::Ptr task, TaskStepState state)
     task_progress.state = state;
     m_task_progress.remove(task->getUid());
 
-    disconnect(task.get(), 0, this, 0);
+    disconnect(task.get(), nullptr, this, nullptr);
 
     emit stepProgress(task_progress);
     updateState();

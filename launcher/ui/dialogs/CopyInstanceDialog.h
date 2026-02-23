@@ -30,7 +30,7 @@ class CopyInstanceDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit CopyInstanceDialog(BaseInstance* original, QWidget* parent = 0);
+    explicit CopyInstanceDialog(BaseInstance* original, QWidget* parent = nullptr);
     ~CopyInstanceDialog();
 
     void updateDialogState();

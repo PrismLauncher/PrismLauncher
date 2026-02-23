@@ -55,7 +55,7 @@ class VersionPage : public QMainWindow, public BasePage {
     Q_OBJECT
 
    public:
-    explicit VersionPage(MinecraftInstance* inst, QWidget* parent = 0);
+    explicit VersionPage(MinecraftInstance* inst, QWidget* parent = nullptr);
     virtual ~VersionPage();
     virtual QString displayName() const override { return tr("Version"); }
     virtual QIcon icon() const override;

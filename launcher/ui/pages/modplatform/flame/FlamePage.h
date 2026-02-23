@@ -57,7 +57,7 @@ class FlamePage : public QWidget, public ModpackProviderBasePage {
     Q_OBJECT
 
    public:
-    explicit FlamePage(NewInstanceDialog* dialog, QWidget* parent = 0);
+    explicit FlamePage(NewInstanceDialog* dialog, QWidget* parent = nullptr);
     virtual ~FlamePage();
     virtual QString displayName() const override { return "CurseForge"; }
     virtual QIcon icon() const override { return QIcon::fromTheme("flame"); }

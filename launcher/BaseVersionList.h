@@ -55,7 +55,7 @@ class BaseVersionList : public QAbstractListModel {
     };
     using RoleList = QList<int>;
 
-    explicit BaseVersionList(QObject* parent = 0);
+    explicit BaseVersionList(QObject* parent = nullptr);
 
     /*!
      * \brief Gets a task that will reload the version list.

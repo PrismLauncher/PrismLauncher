@@ -55,7 +55,7 @@ class SettingsObject : public QObject {
     };
 
    public:
-    explicit SettingsObject(QObject* parent = 0);
+    explicit SettingsObject(QObject* parent = nullptr);
     virtual ~SettingsObject();
     /*!
      * Registers an override setting for the given original setting in this settings object

@@ -156,7 +156,7 @@ class ServersModel : public QAbstractListModel {
     enum Roles {
         ServerPtrRole = Qt::UserRole,
     };
-    explicit ServersModel(const QString& path, QObject* parent = 0) : QAbstractListModel(parent)
+    explicit ServersModel(const QString& path, QObject* parent = nullptr) : QAbstractListModel(parent)
     {
         m_path = path;
         m_watcher = new QFileSystemWatcher(this);

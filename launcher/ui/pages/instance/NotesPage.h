@@ -48,7 +48,7 @@ class NotesPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit NotesPage(BaseInstance* inst, QWidget* parent = 0);
+    explicit NotesPage(BaseInstance* inst, QWidget* parent = nullptr);
     virtual ~NotesPage();
     virtual QString displayName() const override { return tr("Notes"); }
     virtual QIcon icon() const override
