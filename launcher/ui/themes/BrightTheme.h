@@ -38,7 +38,7 @@
 
 class BrightTheme : public FusionTheme {
    public:
-    virtual ~BrightTheme() {}
+    virtual ~BrightTheme() = default;
 
     QString id() override;
     QString name() override;

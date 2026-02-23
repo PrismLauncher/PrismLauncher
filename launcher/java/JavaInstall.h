@@ -24,7 +24,7 @@
 #include "JavaVersion.h"
 
 struct JavaInstall : public BaseVersion {
-    JavaInstall() {}
+    JavaInstall() = default;
     JavaInstall(QString id, QString arch, QString path) : id(id), arch(std::move(std::move(arch))), path(std::move(std::move(path))) {}
     virtual QString descriptor() const override { return id.toString(); }
 

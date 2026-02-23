@@ -26,7 +26,7 @@ class BaseVersion {
    public:
     // TODO: delete
     using Ptr = std::shared_ptr<BaseVersion>;
-    virtual ~BaseVersion() {}
+    virtual ~BaseVersion() = default;
     /*!
      * A string used to identify this version in config files.
      * This should be unique within the version list or shenanigans will occur.

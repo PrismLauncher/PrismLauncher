@@ -57,7 +57,7 @@ class PageContainer : public QWidget, public BasePageContainer {
     Q_OBJECT
    public:
     explicit PageContainer(BasePageProvider* pageProvider, QString defaultId = QString(), QWidget* parent = 0);
-    virtual ~PageContainer() {}
+    virtual ~PageContainer() = default;
 
     void addButtons(QWidget* buttons);
     void addButtons(QLayout* buttons);

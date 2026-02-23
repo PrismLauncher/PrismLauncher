@@ -477,7 +477,7 @@ void MainWindow::retranslateUi()
     }
 }
 
-MainWindow::~MainWindow() {}
+MainWindow::~MainWindow() = default;
 
 QMenu* MainWindow::createPopupMenu()
 {

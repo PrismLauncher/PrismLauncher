@@ -41,7 +41,7 @@
 class CustomTheme : public ITheme {
    public:
     CustomTheme(ITheme* baseTheme, QFileInfo& file, bool isManifest);
-    virtual ~CustomTheme() {}
+    virtual ~CustomTheme() = default;
 
     QString id() override;
     QString name() override;

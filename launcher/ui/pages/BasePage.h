@@ -45,7 +45,7 @@
 class BasePage {
    public:
     using updateExtraInfoFunc = std::function<void(QString, QString)>;
-    virtual ~BasePage() {}
+    virtual ~BasePage() = default;
     virtual QString id() const = 0;
     virtual QString displayName() const = 0;
     virtual QIcon icon() const = 0;

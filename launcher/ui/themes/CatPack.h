@@ -43,7 +43,7 @@
 
 class CatPack {
    public:
-    virtual ~CatPack() {}
+    virtual ~CatPack() = default;
     virtual QString id() const = 0;
     virtual QString name() const = 0;
     virtual QString path() const = 0;

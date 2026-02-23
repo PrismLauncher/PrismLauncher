@@ -170,7 +170,7 @@ MinecraftInstance::MinecraftInstance(SettingsObject* globalSettings, std::unique
     m_components = std::make_unique<PackProfile>(this);
 }
 
-MinecraftInstance::~MinecraftInstance() {}
+MinecraftInstance::~MinecraftInstance() = default;
 
 void MinecraftInstance::saveNow()
 {

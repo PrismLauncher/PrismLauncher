@@ -42,7 +42,7 @@ class PageModel : public QAbstractListModel {
         empty.fill(Qt::transparent);
         m_emptyIcon = QIcon(empty);
     }
-    virtual ~PageModel() {}
+    virtual ~PageModel() = default;
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const { return parent.isValid() ? 0 : m_pages.size(); }
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const

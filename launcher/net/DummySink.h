@@ -22,8 +22,8 @@ namespace Net {
 
 class DummySink : public Sink {
    public:
-    explicit DummySink() {}
-    ~DummySink() override {}
+    explicit DummySink() = default;
+    ~DummySink() override = default;
     auto init(QNetworkRequest& request) -> Task::State override { return Task::State::Running; }
     auto write(QByteArray& data) -> Task::State override { return Task::State::Succeeded; }
     auto abort() -> Task::State override { return Task::State::AbortedByUser; }

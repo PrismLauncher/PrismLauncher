@@ -49,7 +49,7 @@ class InstanceSettingsPage : public MinecraftSettingsWidget, public BasePage {
         connect(APPLICATION, &Application::globalSettingsAboutToOpen, this, &InstanceSettingsPage::saveSettings);
         connect(APPLICATION, &Application::globalSettingsApplied, this, &InstanceSettingsPage::loadSettings);
     }
-    ~InstanceSettingsPage() override {}
+    ~InstanceSettingsPage() override = default;
     QString displayName() const override { return tr("Settings"); }
     QIcon icon() const override { return QIcon::fromTheme("instance-settings"); }
     QString id() const override { return "settings"; }

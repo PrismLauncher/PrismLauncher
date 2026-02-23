@@ -4,7 +4,7 @@
 
 class FusionTheme : public ITheme {
    public:
-    virtual ~FusionTheme() {}
+    virtual ~FusionTheme() = default;
 
     QString qtTheme() override;
 };

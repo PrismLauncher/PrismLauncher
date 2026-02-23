@@ -14,7 +14,7 @@ class JavaVersion {
     friend class JavaVersionTest;
 
    public:
-    JavaVersion() {}
+    JavaVersion() = default;
     JavaVersion(const QString& rhs);
     JavaVersion(int major, int minor, int security, int build = 0, QString name = "");
 

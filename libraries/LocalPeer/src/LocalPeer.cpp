@@ -123,7 +123,7 @@ LocalPeer::LocalPeer(QObject* parent, ApplicationId  appId) : QObject(parent), i
     lockFile->open(QIODevice::ReadWrite);
 }
 
-LocalPeer::~LocalPeer() {}
+LocalPeer::~LocalPeer() = default;
 
 ApplicationId LocalPeer::applicationId() const
 {

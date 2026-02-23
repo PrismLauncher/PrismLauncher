@@ -21,7 +21,7 @@ struct MojangDownloadInfo {
 
 struct MojangLibraryDownloadInfo {
     MojangLibraryDownloadInfo(MojangDownloadInfo::Ptr artifact_) : artifact(std::move(artifact_)) {}
-    MojangLibraryDownloadInfo() {}
+    MojangLibraryDownloadInfo() = default;
 
     // types
     using Ptr = std::shared_ptr<MojangLibraryDownloadInfo>;
@@ -46,7 +46,7 @@ struct MojangAssetIndexInfo : public MojangDownloadInfo {
     using Ptr = std::shared_ptr<MojangAssetIndexInfo>;
 
     // methods
-    MojangAssetIndexInfo() {}
+    MojangAssetIndexInfo() = default;
 
     MojangAssetIndexInfo(QString id_)
     {

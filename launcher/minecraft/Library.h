@@ -60,7 +60,7 @@ class Library {
     friend class LibraryTest;
 
    public:
-    Library() {}
+    Library() = default;
     Library(const QString& name) { m_name = name; }
     /// limited copy without some data. TODO: why?
     static LibraryPtr limitedCopy(LibraryPtr base)

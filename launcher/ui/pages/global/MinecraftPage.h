@@ -49,7 +49,7 @@ class MinecraftPage : public MinecraftSettingsWidget, public BasePage {
 
    public:
     explicit MinecraftPage(QWidget* parent = nullptr) : MinecraftSettingsWidget(nullptr, parent) {}
-    ~MinecraftPage() override {}
+    ~MinecraftPage() override = default;
 
     QString displayName() const override { return tr("Minecraft"); }
     QIcon icon() const override { return QIcon::fromTheme("minecraft"); }

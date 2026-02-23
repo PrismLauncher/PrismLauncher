@@ -23,7 +23,7 @@ class ListViewDelegate : public QStyledItemDelegate {
 
    public:
     explicit ListViewDelegate(QObject* parent = 0);
-    virtual ~ListViewDelegate() {}
+    virtual ~ListViewDelegate() = default;
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;

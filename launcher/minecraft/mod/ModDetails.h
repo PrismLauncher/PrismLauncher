@@ -46,7 +46,7 @@ struct ModLicense {
     QString url = {};
     QString description = {};
 
-    ModLicense() {}
+    ModLicense() = default;
 
     ModLicense(const QString license)
     {
@@ -83,17 +83,10 @@ struct ModLicense {
         : name(std::move(name_)), id(std::move(id_)), url(std::move(url_)), description(std::move(description_))
     {}
 
-    ModLicense(const ModLicense& other) : name(other.name), id(other.id), url(other.url), description(other.description) {}
+    ModLicense(const ModLicense& other)  = default;
 
     ModLicense& operator=(const ModLicense& other)
-    {
-        this->name = other.name;
-        this->id = other.id;
-        this->url = other.url;
-        this->description = other.description;
-
-        return *this;
-    }
+    = default;
 
     ModLicense& operator=(const ModLicense&& other)
     {
@@ -145,18 +138,8 @@ struct ModDetails {
 
     /** Metadata should be handled manually to properly set the mod status. */
     ModDetails(const ModDetails& other)
-        : mod_id(other.mod_id)
-        , name(other.name)
-        , version(other.version)
-        , mcversion(other.mcversion)
-        , homeurl(other.homeurl)
-        , description(other.description)
-        , authors(other.authors)
-        , issue_tracker(other.issue_tracker)
-        , licenses(other.licenses)
-        , icon_file(other.icon_file)
-        , dependencies(other.dependencies)
-    {}
+         
+    = default;
 
     ModDetails& operator=(const ModDetails& other) = default;
 

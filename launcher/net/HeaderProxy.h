@@ -31,8 +31,8 @@ struct HeaderPair {
 
 class HeaderProxy {
    public:
-    HeaderProxy() {}
-    virtual ~HeaderProxy() {}
+    HeaderProxy() = default;
+    virtual ~HeaderProxy() = default;
 
    public:
     virtual QList<HeaderPair> headers(const QNetworkRequest& request) const = 0;

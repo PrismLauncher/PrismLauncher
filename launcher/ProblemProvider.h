@@ -12,7 +12,7 @@ struct PatchProblem {
 
 class ProblemProvider {
    public:
-    virtual ~ProblemProvider() {}
+    virtual ~ProblemProvider() = default;
     virtual const QList<PatchProblem> getProblems() const = 0;
     virtual ProblemSeverity getProblemSeverity() const = 0;
 };

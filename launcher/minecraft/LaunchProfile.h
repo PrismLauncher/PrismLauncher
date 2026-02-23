@@ -41,7 +41,7 @@
 
 class LaunchProfile : public ProblemProvider {
    public:
-    virtual ~LaunchProfile() {}
+    virtual ~LaunchProfile() = default;
 
    public: /* application of profile variables from patches */
     void applyMinecraftVersion(const QString& id);

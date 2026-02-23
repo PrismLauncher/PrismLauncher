@@ -50,7 +50,7 @@ ComponentUpdateTask::ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfi
     d->netmode = netmode;
 }
 
-ComponentUpdateTask::~ComponentUpdateTask() {}
+ComponentUpdateTask::~ComponentUpdateTask() = default;
 
 bool ComponentUpdateTask::canAbort() const
 {

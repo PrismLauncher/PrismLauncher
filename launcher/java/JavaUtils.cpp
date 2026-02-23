@@ -48,7 +48,7 @@
 
 #define IBUS "@im=ibus"
 
-JavaUtils::JavaUtils() {}
+JavaUtils::JavaUtils() = default;
 
 QString stripVariableEntries(QString name, QString target, QString remove)
 {

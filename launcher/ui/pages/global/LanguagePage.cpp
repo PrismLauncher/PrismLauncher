@@ -51,7 +51,7 @@ LanguagePage::LanguagePage(QWidget* parent) : QWidget(parent)
     retranslate();
 }
 
-LanguagePage::~LanguagePage() {}
+LanguagePage::~LanguagePage() = default;
 
 bool LanguagePage::apply()
 {

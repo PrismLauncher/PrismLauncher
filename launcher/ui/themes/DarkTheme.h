@@ -38,7 +38,7 @@
 
 class DarkTheme : public FusionTheme {
    public:
-    virtual ~DarkTheme() {}
+    virtual ~DarkTheme() = default;
 
     QString id() override;
     QString name() override;

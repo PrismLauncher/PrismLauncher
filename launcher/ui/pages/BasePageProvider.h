@@ -30,7 +30,7 @@ class GenericPageProvider : public BasePageProvider {
 
    public:
     explicit GenericPageProvider(QString  dialogTitle) : m_dialogTitle(std::move(dialogTitle)) {}
-    virtual ~GenericPageProvider() {}
+    virtual ~GenericPageProvider() = default;
 
     QList<BasePage*> getPages() override
     {

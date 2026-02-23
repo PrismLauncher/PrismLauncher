@@ -78,7 +78,7 @@ void VersionSelectWidget::setEmptyMode(VersionListView::EmptyMode mode)
     listView->setEmptyMode(mode);
 }
 
-VersionSelectWidget::~VersionSelectWidget() {}
+VersionSelectWidget::~VersionSelectWidget() = default;
 
 void VersionSelectWidget::setResizeOn(int column)
 {

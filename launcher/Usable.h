@@ -16,7 +16,7 @@ class Usable {
     friend class UseLock;
 
    public:
-    virtual ~Usable() {}
+    virtual ~Usable() = default;
 
     std::size_t useCount() const { return m_useCount; }
     bool isInUse() const { return m_useCount > 0; }

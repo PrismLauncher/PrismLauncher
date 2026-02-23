@@ -46,7 +46,7 @@
 #include <QSettings>
 #include "Json.h"
 
-INIFile::INIFile() {}
+INIFile::INIFile() = default;
 
 bool INIFile::saveFile(QString fileName)
 {

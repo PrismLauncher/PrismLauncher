@@ -22,7 +22,7 @@ class PostLaunchCommand : public LaunchStep {
     Q_OBJECT
    public:
     explicit PostLaunchCommand(LaunchTask* parent);
-    virtual ~PostLaunchCommand() {};
+    virtual ~PostLaunchCommand() = default;
 
     virtual void executeTask();
     virtual bool abort();

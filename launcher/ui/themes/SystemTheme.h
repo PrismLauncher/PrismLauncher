@@ -39,7 +39,7 @@
 class SystemTheme : public ITheme {
    public:
     SystemTheme(const QString& styleName, const QPalette& defaultPalette, bool isDefaultTheme);
-    virtual ~SystemTheme() {}
+    virtual ~SystemTheme() = default;
     void apply(bool initial) override;
 
     QString id() override;

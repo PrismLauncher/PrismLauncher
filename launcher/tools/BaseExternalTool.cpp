@@ -13,7 +13,7 @@ BaseExternalTool::BaseExternalTool(SettingsObject* settings, BaseInstance* insta
     : QObject(parent), m_instance(instance), globalSettings(settings)
 {}
 
-BaseExternalTool::~BaseExternalTool() {}
+BaseExternalTool::~BaseExternalTool() = default;
 
 BaseDetachedTool::BaseDetachedTool(SettingsObject* settings, BaseInstance* instance, QObject* parent)
     : BaseExternalTool(settings, instance, parent)
@@ -24,7 +24,7 @@ void BaseDetachedTool::run()
     runImpl();
 }
 
-BaseExternalToolFactory::~BaseExternalToolFactory() {}
+BaseExternalToolFactory::~BaseExternalToolFactory() = default;
 
 BaseDetachedTool* BaseDetachedToolFactory::createDetachedTool(BaseInstance* instance, QObject* parent)
 {

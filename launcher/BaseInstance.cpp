@@ -128,7 +128,7 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
     m_settings->registerSetting("Profiler", "");
 }
 
-BaseInstance::~BaseInstance() {}
+BaseInstance::~BaseInstance() = default;
 
 QString BaseInstance::getPreLaunchCommand()
 {

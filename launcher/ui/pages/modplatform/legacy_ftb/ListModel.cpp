@@ -126,7 +126,7 @@ FilterModel::Sorting FilterModel::getCurrentSorting()
 
 ListModel::ListModel(QObject* parent) : QAbstractListModel(parent) {}
 
-ListModel::~ListModel() {}
+ListModel::~ListModel() = default;
 
 QString ListModel::translatePackType(PackType type) const
 {

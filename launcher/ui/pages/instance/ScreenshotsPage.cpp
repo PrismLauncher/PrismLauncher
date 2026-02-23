@@ -222,7 +222,7 @@ class FilterModel : public QIdentityProxyModel {
 class CenteredEditingDelegate : public QStyledItemDelegate {
    public:
     explicit CenteredEditingDelegate(QObject* parent = 0) : QStyledItemDelegate(parent) {}
-    virtual ~CenteredEditingDelegate() {}
+    virtual ~CenteredEditingDelegate() = default;
     virtual QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
     {
         auto widget = QStyledItemDelegate::createEditor(parent, option, index);
