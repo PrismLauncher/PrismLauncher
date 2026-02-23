@@ -2,6 +2,7 @@
 #include <QJsonObject>
 #include <QObject>
 #include <QTcpSocket>
+#include <utility>
 
 #include <Exception.h>
 #include "Json.h"
@@ -12,7 +13,7 @@
 // last bit
 #define CONTINUE_BIT 0x80
 
-McClient::McClient(QObject* parent, QString domain, QString ip, short port) : QObject(parent), m_domain(domain), m_ip(ip), m_port(port) {}
+McClient::McClient(QObject* parent, QString domain, QString ip, short port) : QObject(parent), m_domain(std::move(domain)), m_ip(std::move(ip)), m_port(port) {}
 
 void McClient::getStatusData()
 {

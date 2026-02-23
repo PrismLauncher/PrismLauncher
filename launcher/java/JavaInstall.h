@@ -18,12 +18,14 @@
 
 #pragma once
 
+#include <utility>
+
 #include "BaseVersion.h"
 #include "JavaVersion.h"
 
 struct JavaInstall : public BaseVersion {
     JavaInstall() {}
-    JavaInstall(QString id, QString arch, QString path) : id(id), arch(arch), path(path) {}
+    JavaInstall(QString id, QString arch, QString path) : id(id), arch(std::move(std::move(arch))), path(std::move(std::move(path))) {}
     virtual QString descriptor() const override { return id.toString(); }
 
     virtual QString name() const override { return id.toString(); }

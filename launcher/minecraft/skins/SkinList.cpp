@@ -20,12 +20,13 @@
 
 #include <QFileInfo>
 #include <QMimeData>
+#include <utility>
 
 #include "FileSystem.h"
 #include "Json.h"
 #include "minecraft/skins/SkinModel.h"
 
-SkinList::SkinList(QObject* parent, QString path, MinecraftAccountPtr acct) : QAbstractListModel(parent), m_acct(acct)
+SkinList::SkinList(QObject* parent, QString path, MinecraftAccountPtr acct) : QAbstractListModel(parent), m_acct(std::move(acct))
 {
     FS::ensureFolderPathExists(m_dir.absolutePath());
     m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);

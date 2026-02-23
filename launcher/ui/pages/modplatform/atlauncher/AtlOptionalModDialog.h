@@ -55,7 +55,7 @@ class AtlOptionalModListModel : public QAbstractListModel {
         DescriptionColumn,
     };
 
-    AtlOptionalModListModel(QWidget* parent, const ATLauncher::PackVersion& version, QList<ATLauncher::VersionMod> mods);
+    AtlOptionalModListModel(QWidget* parent, ATLauncher::PackVersion  version, QList<ATLauncher::VersionMod> mods);
 
     QList<QString> getResult();
 

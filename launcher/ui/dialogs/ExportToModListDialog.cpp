@@ -31,6 +31,7 @@
 #include <QJsonDocument>
 #include <QMessageBox>
 #include <QPushButton>
+#include <utility>
 
 const QHash<ExportToModList::Formats, QString> ExportToModListDialog::exampleLines = {
     { ExportToModList::HTML, "<li><a href=\"{url}\">{name}</a> [{version}] by {authors}</li>" },
@@ -41,7 +42,7 @@ const QHash<ExportToModList::Formats, QString> ExportToModListDialog::exampleLin
 };
 
 ExportToModListDialog::ExportToModListDialog(QString name, QList<Mod*> mods, QWidget* parent)
-    : QDialog(parent), m_mods(mods), m_template_changed(false), m_name(name), ui(new Ui::ExportToModListDialog)
+    : QDialog(parent), m_mods(std::move(mods)), m_template_changed(false), m_name(std::move(name)), ui(new Ui::ExportToModListDialog)
 {
     ui->setupUi(this);
     enableCustom(false);

@@ -3,6 +3,7 @@
 
 #include <QFileDialog>
 #include <QPushButton>
+#include <utility>
 
 #include "Application.h"
 #include "InstanceList.h"
@@ -13,7 +14,7 @@
 #include "ui/instanceview/InstanceProxyModel.h"
 
 ImportResourceDialog::ImportResourceDialog(QString file_path, ModPlatform::ResourceType type, QWidget* parent)
-    : QDialog(parent), ui(new Ui::ImportResourceDialog), m_resource_type(type), m_file_path(file_path)
+    : QDialog(parent), ui(new Ui::ImportResourceDialog), m_resource_type(type), m_file_path(std::move(file_path))
 {
     ui->setupUi(this);
     setWindowModality(Qt::WindowModal);

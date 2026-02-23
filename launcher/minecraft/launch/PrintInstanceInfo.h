@@ -16,6 +16,9 @@
 #pragma once
 
 #include <launch/LaunchStep.h>
+
+#include <utility>
+
 #include "minecraft/auth/AuthSession.h"
 #include "minecraft/launch/MinecraftTarget.h"
 
@@ -24,7 +27,7 @@ class PrintInstanceInfo : public LaunchStep {
     Q_OBJECT
    public:
     explicit PrintInstanceInfo(LaunchTask* parent, AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin)
-        : LaunchStep(parent), m_session(session), m_targetToJoin(targetToJoin) {};
+        : LaunchStep(parent), m_session(std::move(std::move(session))), m_targetToJoin(std::move(std::move(targetToJoin))) {};
     virtual ~PrintInstanceInfo() = default;
 
     virtual void executeTask();

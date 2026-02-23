@@ -39,6 +39,7 @@
 #include <QFileInfo>
 #include <QList>
 #include <QString>
+#include <utility>
 
 class CatPack {
    public:
@@ -50,7 +51,7 @@ class CatPack {
 
 class BasicCatPack : public CatPack {
    public:
-    BasicCatPack(QString id, QString name) : m_id(id), m_name(name) {}
+    BasicCatPack(QString id, QString name) : m_id(std::move(id)), m_name(std::move(name)) {}
     BasicCatPack(QString id) : BasicCatPack(id, id) {}
     virtual QString id() const override { return m_id; }
     virtual QString name() const override { return m_name; }

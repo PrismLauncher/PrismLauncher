@@ -24,6 +24,7 @@
 #include <QFileInfo>
 
 #include <memory>
+#include <utility>
 
 #if defined Q_OS_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -37,7 +38,7 @@
 
 namespace MMCZip {
 
-ArchiveWriter::ArchiveWriter(const QString& archiveName) : m_filename(archiveName) {}
+ArchiveWriter::ArchiveWriter(QString  archiveName) : m_filename(std::move(archiveName)) {}
 
 ArchiveWriter::~ArchiveWriter()
 {

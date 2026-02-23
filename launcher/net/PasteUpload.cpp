@@ -44,6 +44,7 @@
 #include <QRegularExpression>
 #include <QUrlQuery>
 #include <memory>
+#include <utility>
 #include "logs/AnonymizeLog.h"
 
 const std::array<PasteUpload::PasteTypeInfo, 4> PasteUpload::PasteTypes = { { { "0x0.st", "https://0x0.st", "" },
@@ -202,7 +203,7 @@ auto PasteUpload::Sink::finalize(QNetworkReply& reply) -> Task::State
     return Task::State::Succeeded;
 }
 
-PasteUpload::PasteUpload(const QString& log, QString url, PasteType pasteType) : m_log(log), m_baseUrl(url), m_paste_type(pasteType)
+PasteUpload::PasteUpload(QString  log, QString url, PasteType pasteType) : m_log(std::move(log)), m_baseUrl(std::move(url)), m_paste_type(pasteType)
 {
     anonymizeLog(m_log);
     auto base = PasteUpload::PasteTypes.at(pasteType);

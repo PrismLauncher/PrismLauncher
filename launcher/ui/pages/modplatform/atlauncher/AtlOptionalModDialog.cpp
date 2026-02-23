@@ -38,6 +38,7 @@
 
 #include <QInputDialog>
 #include <QMessageBox>
+#include <utility>
 #include "Application.h"
 #include "BuildConfig.h"
 #include "Json.h"
@@ -46,9 +47,9 @@
 #include "net/ApiDownload.h"
 
 AtlOptionalModListModel::AtlOptionalModListModel(QWidget* parent,
-                                                 const ATLauncher::PackVersion& version,
+                                                 ATLauncher::PackVersion  version,
                                                  QList<ATLauncher::VersionMod> mods)
-    : QAbstractListModel(parent), m_version(version), m_mods(mods)
+    : QAbstractListModel(parent), m_version(std::move(version)), m_mods(std::move(mods))
 {
     // fill mod index
     for (int i = 0; i < m_mods.size(); i++) {

@@ -17,6 +17,7 @@
  */
 #include "java/download/ArchiveDownloadTask.h"
 #include <memory>
+#include <utility>
 
 #include "Application.h"
 #include "archive/ArchiveReader.h"
@@ -27,7 +28,7 @@
 
 namespace Java {
 ArchiveDownloadTask::ArchiveDownloadTask(QUrl url, QString final_path, QString checksumType, QString checksumHash)
-    : m_url(url), m_final_path(final_path), m_checksum_type(checksumType), m_checksum_hash(checksumHash)
+    : m_url(std::move(url)), m_final_path(std::move(final_path)), m_checksum_type(std::move(checksumType)), m_checksum_hash(std::move(checksumHash))
 {}
 
 void ArchiveDownloadTask::executeTask()

@@ -2,10 +2,11 @@
 #include <QDnsLookup>
 #include <QHostInfo>
 #include <QObject>
+#include <utility>
 
 #include "McResolver.h"
 
-McResolver::McResolver(QObject* parent, QString domain, int port) : QObject(parent), m_constrDomain(domain), m_constrPort(port) {}
+McResolver::McResolver(QObject* parent, QString domain, int port) : QObject(parent), m_constrDomain(std::move(domain)), m_constrPort(port) {}
 
 void McResolver::ping()
 {

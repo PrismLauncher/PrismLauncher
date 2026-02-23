@@ -17,11 +17,12 @@
  */
 #include "java/download/SymlinkTask.h"
 #include <QFileInfo>
+#include <utility>
 
 #include "FileSystem.h"
 
 namespace Java {
-SymlinkTask::SymlinkTask(QString final_path) : m_path(final_path) {}
+SymlinkTask::SymlinkTask(QString final_path) : m_path(std::move(final_path)) {}
 
 QString findBinPath(QString root, QString pattern)
 {

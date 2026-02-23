@@ -21,6 +21,7 @@
 #include <QDebug>
 #include <algorithm>
 #include <memory>
+#include <utility>
 #include "Json.h"
 #include "QObjectPtr.h"
 #include "minecraft/PackProfile.h"
@@ -51,7 +52,7 @@ static bool checkDependencies(std::shared_ptr<GetModDependenciesTask::PackDepend
 GetModDependenciesTask::GetModDependenciesTask(BaseInstance* instance,
                                                ModFolderModel* folder,
                                                QList<std::shared_ptr<PackDependency>> selected)
-    : SequentialTask(tr("Get dependencies")), m_selected(selected), m_version(mcVersion(instance)), m_loaderType(mcLoaders(instance))
+    : SequentialTask(tr("Get dependencies")), m_selected(std::move(selected)), m_version(mcVersion(instance)), m_loaderType(mcLoaders(instance))
 {
     for (auto mod : folder->allMods()) {
         m_mods_file_names << mod->fileinfo().fileName();

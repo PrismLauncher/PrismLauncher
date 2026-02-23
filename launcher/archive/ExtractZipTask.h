@@ -20,6 +20,7 @@
 #include <QDir>
 #include <QFuture>
 #include <QFutureWatcher>
+#include <utility>
 #include "archive/ArchiveReader.h"
 #include "tasks/Task.h"
 
@@ -29,7 +30,7 @@ class ExtractZipTask : public Task {
     Q_OBJECT
    public:
     ExtractZipTask(QString input, QDir outputDir, QString subdirectory = "")
-        : m_input(input), m_outputDir(outputDir), m_subdirectory(subdirectory)
+        : m_input(input), m_outputDir(outputDir), m_subdirectory(std::move(std::move(subdirectory)))
     {}
     virtual ~ExtractZipTask() = default;
 

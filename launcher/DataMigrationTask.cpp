@@ -11,9 +11,10 @@
 #include <QMap>
 
 #include <QtConcurrent>
+#include <utility>
 
 DataMigrationTask::DataMigrationTask(const QString& sourcePath, const QString& targetPath, Filter pathMatcher)
-    : Task(), m_sourcePath(sourcePath), m_targetPath(targetPath), m_pathMatcher(pathMatcher), m_copy(sourcePath, targetPath)
+    : Task(), m_sourcePath(sourcePath), m_targetPath(targetPath), m_pathMatcher(std::move(pathMatcher)), m_copy(sourcePath, targetPath)
 {
     m_copy.matcher(m_pathMatcher).whitelist(true);
 }

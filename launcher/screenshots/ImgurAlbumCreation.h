@@ -35,6 +35,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "Screenshot.h"
 #include "net/NetRequest.h"
 
@@ -49,7 +51,7 @@ class ImgurAlbumCreation : public Net::NetRequest {
 
     class Sink : public Net::Sink {
        public:
-        Sink(std::shared_ptr<Result> res) : m_result(res) {};
+        Sink(std::shared_ptr<Result> res) : m_result(std::move(res)) {};
         virtual ~Sink() = default;
 
        public:

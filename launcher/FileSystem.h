@@ -48,6 +48,7 @@
 #include <QObject>
 #include <QPair>
 #include <QThread>
+#include <utility>
 
 namespace FS {
 
@@ -172,7 +173,7 @@ class ExternalLinkFileProcess : public QThread {
     Q_OBJECT
    public:
     ExternalLinkFileProcess(QString server, bool useHardLinks, QObject* parent = nullptr)
-        : QThread(parent), m_useHardLinks(useHardLinks), m_server(server)
+        : QThread(parent), m_useHardLinks(useHardLinks), m_server(std::move(server))
     {}
 
     void run() override

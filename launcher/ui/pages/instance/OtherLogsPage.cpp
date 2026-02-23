@@ -49,12 +49,13 @@
 #include <QFileSystemWatcher>
 #include <QShortcut>
 #include <QUrl>
+#include <utility>
 
 OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, BaseInstance* instance, QWidget* parent)
     : QWidget(parent)
-    , m_id(id)
-    , m_displayName(displayName)
-    , m_helpPage(helpPage)
+    , m_id(std::move(id))
+    , m_displayName(std::move(displayName))
+    , m_helpPage(std::move(helpPage))
     , ui(new Ui::OtherLogsPage)
     , m_instance(instance)
     , m_basePath(instance ? instance->gameRoot() : APPLICATION->dataRoot())

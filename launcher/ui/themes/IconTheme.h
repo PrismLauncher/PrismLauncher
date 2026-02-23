@@ -19,10 +19,11 @@
 #pragma once
 
 #include <QString>
+#include <utility>
 
 class IconTheme {
    public:
-    IconTheme(const QString& id, const QString& path) : m_id(id), m_path(path) {}
+    IconTheme(QString  id, QString  path) : m_id(std::move(id)), m_path(std::move(path)) {}
     IconTheme() = default;
 
     bool load();

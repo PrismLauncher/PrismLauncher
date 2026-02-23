@@ -2,6 +2,7 @@
 #include <QMap>
 #include <QString>
 #include <memory>
+#include <utility>
 
 struct MojangDownloadInfo {
     // types
@@ -19,7 +20,7 @@ struct MojangDownloadInfo {
 };
 
 struct MojangLibraryDownloadInfo {
-    MojangLibraryDownloadInfo(MojangDownloadInfo::Ptr artifact_) : artifact(artifact_) {}
+    MojangLibraryDownloadInfo(MojangDownloadInfo::Ptr artifact_) : artifact(std::move(artifact_)) {}
     MojangLibraryDownloadInfo() {}
 
     // types

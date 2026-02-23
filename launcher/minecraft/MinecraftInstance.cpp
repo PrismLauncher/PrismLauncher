@@ -103,6 +103,7 @@
 #ifdef WITH_QTDBUS
 #include <QtDBus/QtDBus>
 #include <memory>
+#include <utility>
 #endif
 
 #define IBUS "@im=ibus"
@@ -148,7 +149,7 @@
 class OrSetting : public Setting {
     Q_OBJECT
    public:
-    OrSetting(QString id, std::shared_ptr<Setting> a, std::shared_ptr<Setting> b) : Setting({ id }, false), m_a(a), m_b(b) {}
+    OrSetting(QString id, std::shared_ptr<Setting> a, std::shared_ptr<Setting> b) : Setting({ id }, false), m_a(std::move(a)), m_b(std::move(b)) {}
     virtual QVariant get() const
     {
         bool a = m_a->get().toBool();

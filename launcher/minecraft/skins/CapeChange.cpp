@@ -38,9 +38,10 @@
 
 #include <net/DummySink.h>
 #include <memory>
+#include <utility>
 #include "net/RawHeaderProxy.h"
 
-CapeChange::CapeChange(QString cape) : NetRequest(), m_capeId(cape)
+CapeChange::CapeChange(QString cape) : NetRequest(), m_capeId(std::move(cape))
 {
     logCat = taskMCSkinsLogC;
 }

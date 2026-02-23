@@ -38,6 +38,7 @@
 #include <QString>
 #include <QStringList>
 #include <QUrl>
+#include <utility>
 
 struct ModLicense {
     QString name = {};
@@ -78,8 +79,8 @@ struct ModLicense {
         }
     }
 
-    ModLicense(const QString& name_, const QString& id_, const QString& url_, const QString& description_)
-        : name(name_), id(id_), url(url_), description(description_)
+    ModLicense(QString  name_, QString  id_, QString  url_, QString  description_)
+        : name(std::move(name_)), id(std::move(id_)), url(std::move(url_)), description(std::move(description_))
     {}
 
     ModLicense(const ModLicense& other) : name(other.name), id(other.id), url(other.url), description(other.description) {}

@@ -42,9 +42,10 @@
 #include <QPushButton>
 #include <QStandardPaths>
 #include <QTimer>
+#include <utility>
 
 BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods, QString hash_type)
-    : QDialog(parent), ui(new Ui::BlockedModsDialog), m_mods(mods), m_hashType(hash_type)
+    : QDialog(parent), ui(new Ui::BlockedModsDialog), m_mods(mods), m_hashType(std::move(hash_type))
 {
     m_hashingTask = shared_qobject_ptr<ConcurrentTask>(
         new ConcurrentTask("MakeHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));

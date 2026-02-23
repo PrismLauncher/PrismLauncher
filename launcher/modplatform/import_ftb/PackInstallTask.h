@@ -20,6 +20,7 @@
 
 #include <QFuture>
 #include <QFutureWatcher>
+#include <utility>
 
 #include "InstanceTask.h"
 #include "PackHelpers.h"
@@ -30,7 +31,7 @@ class PackInstallTask : public InstanceTask {
     Q_OBJECT
 
    public:
-    explicit PackInstallTask(const Modpack& pack) : m_pack(pack) {}
+    explicit PackInstallTask(Modpack pack) : m_pack(std::move(std::move(pack))) {}
     virtual ~PackInstallTask() = default;
 
    protected:

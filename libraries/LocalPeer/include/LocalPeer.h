@@ -70,7 +70,7 @@ class LocalPeer : public QObject {
     Q_OBJECT
 
    public:
-    LocalPeer(QObject* parent, const ApplicationId& appId);
+    LocalPeer(QObject* parent, ApplicationId  appId);
     ~LocalPeer();
     bool isClient();
     bool sendMessage(const QByteArray& message, int timeout);

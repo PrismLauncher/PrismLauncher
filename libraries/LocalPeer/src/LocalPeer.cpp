@@ -63,6 +63,7 @@ static PProcessIdToSessionId pProcessIdToSessionId = 0;
 #include <chrono>
 #include <memory>
 #include <thread>
+#include <utility>
 
 static const char* ack = "ack";
 
@@ -113,7 +114,7 @@ ApplicationId ApplicationId::fromRawString(const QString& id)
     return ApplicationId(id);
 }
 
-LocalPeer::LocalPeer(QObject* parent, const ApplicationId& appId) : QObject(parent), id(appId)
+LocalPeer::LocalPeer(QObject* parent, ApplicationId  appId) : QObject(parent), id(std::move(appId))
 {
     socketName = id.toString();
     server = std::make_unique<QLocalServer>();

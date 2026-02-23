@@ -40,11 +40,12 @@
 #include <QFileSystemModel>
 #include <QSortFilterProxyModel>
 #include <QStack>
+#include <utility>
 #include "FileSystem.h"
 #include "SeparatorPrefixTree.h"
 #include "StringUtils.h"
 
-FileIgnoreProxy::FileIgnoreProxy(QString root, QObject* parent) : QSortFilterProxyModel(parent), m_root(root) {}
+FileIgnoreProxy::FileIgnoreProxy(QString root, QObject* parent) : QSortFilterProxyModel(parent), m_root(std::move(root)) {}
 // NOTE: Sadly, we have to do sorting ourselves.
 bool FileIgnoreProxy::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {

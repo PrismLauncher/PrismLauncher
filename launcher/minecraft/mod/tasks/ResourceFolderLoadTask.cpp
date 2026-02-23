@@ -41,6 +41,7 @@
 #include "minecraft/mod/MetadataHandler.h"
 
 #include <QThread>
+#include <utility>
 
 ResourceFolderLoadTask::ResourceFolderLoadTask(const QDir& resource_dir,
                                                const QDir& index_dir,
@@ -52,7 +53,7 @@ ResourceFolderLoadTask::ResourceFolderLoadTask(const QDir& resource_dir,
     , m_index_dir(index_dir)
     , m_is_indexed(is_indexed)
     , m_clean_orphan(clean_orphan)
-    , m_create_func(create_function)
+    , m_create_func(std::move(create_function))
     , m_result(new Result())
     , m_thread_to_spawn_into(thread())
 {}

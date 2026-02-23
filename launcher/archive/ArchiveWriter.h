@@ -26,7 +26,7 @@ namespace MMCZip {
 
 class ArchiveWriter {
    public:
-    ArchiveWriter(const QString& archiveName);
+    ArchiveWriter(QString  archiveName);
     virtual ~ArchiveWriter();
 
     bool open();

@@ -24,6 +24,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <utility>
 
 #include "Application.h"
 #include "BaseVersionList.h"
@@ -47,8 +48,8 @@ class InstallJavaPage : public QWidget, public BasePage {
    public:
     Q_OBJECT
    public:
-    explicit InstallJavaPage(const QString& id, const QString& iconName, const QString& name, QWidget* parent = nullptr)
-        : QWidget(parent), uid(id), iconName(iconName), name(name)
+    explicit InstallJavaPage(QString  id, QString  iconName, QString  name, QWidget* parent = nullptr)
+        : QWidget(parent), uid(std::move(id)), iconName(std::move(iconName)), name(std::move(name))
     {
         setObjectName(QStringLiteral("VersionSelectWidget"));
         horizontalLayout = new QHBoxLayout(this);

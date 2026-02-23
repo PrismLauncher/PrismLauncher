@@ -4,6 +4,7 @@
 #include <QJsonParseError>
 #include <QNetworkRequest>
 #include <memory>
+#include <utility>
 
 #include "Application.h"
 #include "Logging.h"
@@ -13,7 +14,7 @@
 #include "net/Upload.h"
 
 XboxAuthorizationStep::XboxAuthorizationStep(AccountData* data, Token* token, QString relyingParty, QString authorizationKind)
-    : AuthStep(data), m_token(token), m_relyingParty(relyingParty), m_authorizationKind(authorizationKind)
+    : AuthStep(data), m_token(token), m_relyingParty(std::move(relyingParty)), m_authorizationKind(std::move(authorizationKind))
 {}
 
 QString XboxAuthorizationStep::describe()

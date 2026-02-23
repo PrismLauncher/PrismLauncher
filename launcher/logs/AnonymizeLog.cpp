@@ -36,9 +36,10 @@
 #include "AnonymizeLog.h"
 
 #include <QRegularExpression>
+#include <utility>
 
 struct RegReplace {
-    RegReplace(QRegularExpression r, QString w) : reg(r), with(w) { reg.optimize(); }
+    RegReplace(QRegularExpression r, QString w) : reg(std::move(r)), with(std::move(w)) { reg.optimize(); }
     QRegularExpression reg;
     QString with;
 };

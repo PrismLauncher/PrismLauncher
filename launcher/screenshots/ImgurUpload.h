@@ -36,6 +36,7 @@
 #pragma once
 
 #include <QFileInfo>
+#include <utility>
 #include "Screenshot.h"
 #include "net/NetRequest.h"
 
@@ -43,7 +44,7 @@ class ImgurUpload : public Net::NetRequest {
    public:
     class Sink : public Net::Sink {
        public:
-        Sink(ScreenShot::Ptr shot) : m_shot(shot) {};
+        Sink(ScreenShot::Ptr shot) : m_shot(std::move(shot)) {};
         virtual ~Sink() = default;
 
        public:

@@ -38,10 +38,12 @@
 #include "PSaveFile.h"
 #include "Sink.h"
 
+#include <utility>
+
 namespace Net {
 class FileSink : public Sink {
    public:
-    FileSink(QString filename) : m_filename(filename) {};
+    FileSink(QString filename) : m_filename(std::move(filename)) {};
     virtual ~FileSink() = default;
 
    public:

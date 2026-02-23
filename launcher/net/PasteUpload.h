@@ -83,7 +83,7 @@ class PasteUpload : public Net::NetRequest {
     };
     friend Sink;
 
-    PasteUpload(const QString& log, QString url, PasteType pasteType);
+    PasteUpload(QString  log, QString url, PasteType pasteType);
     virtual ~PasteUpload() = default;
 
     QString pasteLink() { return m_pasteLink; }

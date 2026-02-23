@@ -21,6 +21,7 @@
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <utility>
 #include "Application.h"
 #include "BuildConfig.h"
 #include "DesktopServices.h"
@@ -33,8 +34,8 @@
 class InstallLoaderPage : public VersionSelectWidget, public BasePage {
     Q_OBJECT
    public:
-    InstallLoaderPage(const QString& id, const QString& iconName, const QString& name, const Version& oldestVersion, PackProfile* profile)
-        : VersionSelectWidget(nullptr), uid(id), iconName(iconName), name(name)
+    InstallLoaderPage(const QString& id, QString  iconName, QString  name, const Version& oldestVersion, PackProfile* profile)
+        : VersionSelectWidget(nullptr), uid(id), iconName(std::move(iconName)), name(std::move(name))
     {
         const QString minecraftVersion = profile->getComponentVersion("net.minecraft");
         setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));

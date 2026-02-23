@@ -1,6 +1,8 @@
 #pragma once
 #include <java/JavaChecker.h>
 
+#include <utility>
+
 class QWidget;
 
 /**
@@ -22,7 +24,7 @@ class TestCheck : public QObject {
     Q_OBJECT
    public:
     TestCheck(QWidget* parent, QString path, QString args, int minMem, int maxMem, int permGen)
-        : m_parent(parent), m_path(path), m_args(args), m_minMem(minMem), m_maxMem(maxMem), m_permGen(permGen)
+        : m_parent(parent), m_path(std::move(path)), m_args(std::move(args)), m_minMem(minMem), m_maxMem(maxMem), m_permGen(permGen)
     {}
     virtual ~TestCheck() = default;
 

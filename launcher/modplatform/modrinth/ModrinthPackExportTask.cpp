@@ -23,6 +23,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QtConcurrentRun>
+#include <utility>
 #include "Json.h"
 #include "MMCZip.h"
 #include "archive/ExportToZipTask.h"
@@ -36,22 +37,22 @@
 const QStringList ModrinthPackExportTask::PREFIXES({ "mods/", "coremods/", "resourcepacks/", "texturepacks/", "shaderpacks/" });
 const QStringList ModrinthPackExportTask::FILE_EXTENSIONS({ "jar", "litemod", "zip" });
 
-ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
-                                               const QString& version,
-                                               const QString& summary,
+ModrinthPackExportTask::ModrinthPackExportTask(QString  name,
+                                               QString  version,
+                                               QString  summary,
                                                bool optionalFiles,
                                                BaseInstance* instance,
-                                               const QString& output,
+                                               QString  output,
                                                MMCZip::FilterFileFunction filter)
-    : name(name)
-    , version(version)
-    , summary(summary)
+    : name(std::move(name))
+    , version(std::move(version))
+    , summary(std::move(summary))
     , optionalFiles(optionalFiles)
     , instance(instance)
     , mcInstance(dynamic_cast<MinecraftInstance*>(instance))
     , gameRoot(instance->gameRoot())
-    , output(output)
-    , filter(filter)
+    , output(std::move(output))
+    , filter(std::move(filter))
 {}
 
 void ModrinthPackExportTask::executeTask()

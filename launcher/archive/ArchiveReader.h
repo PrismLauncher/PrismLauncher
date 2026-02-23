@@ -21,6 +21,7 @@
 #include <QDateTime>
 #include <QStringList>
 #include <memory>
+#include <utility>
 
 struct archive;
 struct archive_entry;
@@ -28,7 +29,7 @@ namespace MMCZip {
 class ArchiveReader {
    public:
     using ArchivePtr = std::unique_ptr<struct archive, int (*)(struct archive*)>;
-    ArchiveReader(QString fileName) : m_archivePath(fileName) {}
+    ArchiveReader(QString fileName) : m_archivePath(std::move(fileName)) {}
     virtual ~ArchiveReader() = default;
 
     QStringList getFiles();

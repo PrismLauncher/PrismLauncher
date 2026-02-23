@@ -21,10 +21,12 @@
 #include <launch/LaunchStep.h>
 #include <net/Mode.h>
 
+#include <utility>
+
 class TaskStepWrapper : public LaunchStep {
     Q_OBJECT
    public:
-    explicit TaskStepWrapper(LaunchTask* parent, Task::Ptr task) : LaunchStep(parent), m_task(task) {};
+    explicit TaskStepWrapper(LaunchTask* parent, Task::Ptr task) : LaunchStep(parent), m_task(std::move(std::move(task))) {};
     virtual ~TaskStepWrapper() = default;
 
     void executeTask() override;

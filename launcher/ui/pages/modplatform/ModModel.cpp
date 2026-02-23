@@ -11,11 +11,12 @@
 
 #include <QMessageBox>
 #include <algorithm>
+#include <utility>
 
 namespace ResourceDownload {
 
 ModModel::ModModel(BaseInstance& base_inst, ResourceAPI* api, QString debugName, QString metaEntryBase)
-    : ResourceModel(api), m_base_instance(base_inst), m_debugName(debugName + " (Model)"), m_metaEntryBase(metaEntryBase)
+    : ResourceModel(api), m_base_instance(base_inst), m_debugName(debugName + " (Model)"), m_metaEntryBase(std::move(metaEntryBase))
 {}
 
 /******** Make data requests ********/

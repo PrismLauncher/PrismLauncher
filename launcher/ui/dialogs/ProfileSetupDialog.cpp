@@ -43,6 +43,7 @@
 #include <QPushButton>
 #include <QRegularExpressionValidator>
 #include <memory>
+#include <utility>
 
 #include "ui/dialogs/ProgressDialog.h"
 
@@ -51,7 +52,7 @@
 #include "net/Upload.h"
 
 ProfileSetupDialog::ProfileSetupDialog(MinecraftAccountPtr accountToSetup, QWidget* parent)
-    : QDialog(parent), m_accountToSetup(accountToSetup), ui(new Ui::ProfileSetupDialog)
+    : QDialog(parent), m_accountToSetup(std::move(accountToSetup)), ui(new Ui::ProfileSetupDialog)
 {
     ui->setupUi(this);
     ui->errorLabel->setVisible(false);

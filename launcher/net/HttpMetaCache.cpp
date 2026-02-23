@@ -43,6 +43,7 @@
 #include <QFileInfo>
 
 #include <QDebug>
+#include <utility>
 
 #include "net/Logging.h"
 
@@ -52,7 +53,7 @@ auto MetaEntry::getFullPath() -> QString
     return FS::PathCombine(m_basePath, m_relativePath);
 }
 
-HttpMetaCache::HttpMetaCache(QString path) : QObject(), m_index_file(path)
+HttpMetaCache::HttpMetaCache(QString path) : QObject(), m_index_file(std::move(path))
 {
     saveBatchingTimer.setSingleShot(true);
     saveBatchingTimer.setTimerType(Qt::VeryCoarseTimer);

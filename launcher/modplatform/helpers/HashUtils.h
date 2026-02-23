@@ -4,6 +4,7 @@
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QString>
+#include <utility>
 
 #include "modplatform/ModIndex.h"
 #include "tasks/Task.h"
@@ -23,7 +24,7 @@ class Hasher : public Task {
    public:
     using Ptr = shared_qobject_ptr<Hasher>;
 
-    Hasher(QString file_path, Algorithm alg) : m_path(file_path), m_alg(alg) {}
+    Hasher(QString file_path, Algorithm alg) : m_path(std::move(file_path)), m_alg(alg) {}
     Hasher(QString file_path, QString alg) : Hasher(file_path, algorithmFromString(alg)) {}
 
     bool abort() override;

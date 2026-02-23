@@ -21,6 +21,7 @@
 #include <QFileInfoList>
 #include <QFuture>
 #include <QFutureWatcher>
+#include <utility>
 
 #include "archive/ArchiveWriter.h"
 #include "tasks/Task.h"
@@ -33,8 +34,8 @@ class ExportToZipTask : public Task {
         : m_outputPath(outputPath)
         , m_output(outputPath)
         , m_dir(dir)
-        , m_files(files)
-        , m_destinationPrefix(destinationPrefix)
+        , m_files(std::move(std::move(files)))
+        , m_destinationPrefix(std::move(std::move(destinationPrefix)))
         , m_followSymlinks(followSymlinks)
     {
         setAbortable(true);

@@ -4,6 +4,7 @@
 
 #include <QRegularExpression>
 #include <QString>
+#include <utility>
 
 JavaVersion& JavaVersion::operator=(const QString& javaVersionString)
 {
@@ -115,7 +116,7 @@ bool JavaVersion::operator>(const JavaVersion& rhs) const
 }
 
 JavaVersion::JavaVersion(int major, int minor, int security, int build, QString name)
-    : m_major(major), m_minor(minor), m_security(security), m_name(name), m_parseable(true)
+    : m_major(major), m_minor(minor), m_security(security), m_name(std::move(name)), m_parseable(true)
 {
     QStringList versions;
     if (build != 0) {
