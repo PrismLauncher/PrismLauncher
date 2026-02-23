@@ -904,7 +904,7 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
         if (!map.contains("group"))
             break;
         groupName = map["group"].toString();
-    } while (0);
+    } while (false);
 
     if (groupName.isEmpty()) {
         groupName = APPLICATION->settings()->get("LastUsedGroupForNewInstance").toString();

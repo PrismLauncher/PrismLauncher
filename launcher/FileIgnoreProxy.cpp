@@ -161,7 +161,7 @@ bool FileIgnoreProxy::setFilterState(QModelIndex index, Qt::CheckState state)
             QModelIndex doing = rootIndex;
             int row = 0;
             QStack<QModelIndex> todo;
-            while (1) {
+            while (true) {
                 auto node = fsm->index(row, 0, doing);
                 if (!node.isValid()) {
                     if (!todo.size()) {
@@ -191,7 +191,7 @@ bool FileIgnoreProxy::setFilterState(QModelIndex index, Qt::CheckState state)
         emit dataChanged(index, index, { Qt::CheckStateRole });
         // update everything above index
         QModelIndex up = index.parent();
-        while (1) {
+        while (true) {
             if (!up.isValid())
                 break;
             emit dataChanged(up, up, { Qt::CheckStateRole });
@@ -201,7 +201,7 @@ bool FileIgnoreProxy::setFilterState(QModelIndex index, Qt::CheckState state)
         QModelIndex doing = index;
         int row = 0;
         QStack<QModelIndex> todo;
-        while (1) {
+        while (true) {
             auto node = this->index(row, 0, doing);
             if (!node.isValid()) {
                 if (!todo.size()) {
