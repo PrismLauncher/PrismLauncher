@@ -92,9 +92,9 @@ bool SkinList::update()
     if (!skin.url.isEmpty() && !skin.data.isEmpty()) {
         QPixmap skinTexture;
         SkinModel* nskin = nullptr;
-        for (auto i = 0; i < newSkins.size(); i++) {
-            if (newSkins[i].getURL() == skin.url) {
-                nskin = &newSkins[i];
+        for (auto & newSkin : newSkins) {
+            if (newSkin.getURL() == skin.url) {
+                nskin = &newSkin;
                 break;
             }
         }
@@ -401,11 +401,11 @@ bool SkinList::setData(const QModelIndex& idx, const QVariant& value, int role)
 void SkinList::updateSkin(SkinModel* s)
 {
     auto done = false;
-    for (auto i = 0; i < m_skinList.size(); i++) {
-        if (m_skinList[i].getPath() == s->getPath()) {
-            m_skinList[i].setCapeId(s->getCapeId());
-            m_skinList[i].setModel(s->getModel());
-            m_skinList[i].setURL(s->getURL());
+    for (auto & i : m_skinList) {
+        if (i.getPath() == s->getPath()) {
+            i.setCapeId(s->getCapeId());
+            i.setModel(s->getModel());
+            i.setURL(s->getURL());
             done = true;
             break;
         }

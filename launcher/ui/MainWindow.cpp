@@ -822,16 +822,16 @@ QList<int> stringToIntList(const QString& string)
 {
     QStringList split = string.split(',', Qt::SkipEmptyParts);
     QList<int> out;
-    for (int i = 0; i < split.size(); ++i) {
-        out.append(split.at(i).toInt());
+    for (const auto & i : split) {
+        out.append(i.toInt());
     }
     return out;
 }
 QString intListToString(const QList<int>& list)
 {
     QStringList slist;
-    for (int i = 0; i < list.size(); ++i) {
-        slist.append(QString::number(list.at(i)));
+    for (int i : list) {
+        slist.append(QString::number(i));
     }
     return slist.join(',');
 }

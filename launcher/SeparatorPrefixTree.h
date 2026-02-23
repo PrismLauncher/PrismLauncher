@@ -159,8 +159,8 @@ class SeparatorPrefixTree {
         auto iter = children.begin();
         while (iter != children.end()) {
             QStringList list = iter.value().toStringList();
-            for (int i = 0; i < list.size(); i++) {
-                list[i] = iter.key() + Tseparator + list[i];
+            for (auto & i : list) {
+                i = iter.key() + Tseparator + i;
             }
             collected.append(list);
             if ((*iter).m_contained) {

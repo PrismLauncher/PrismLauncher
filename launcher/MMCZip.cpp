@@ -45,6 +45,7 @@
 #include <QFileInfo>
 #include <QUrl>
 #include <memory>
+#include <ranges>
 
 namespace MMCZip {
 // ours
@@ -105,8 +106,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
 
     // Modify the jar
     // This needs to be done in reverse-order to ensure we respect the loading order of components
-    for (auto i = mods.crbegin(); i != mods.crend(); i++) {
-        const auto* mod = *i;
+    for (auto mod : std::ranges::reverse_view(mods)) {
         // do not merge disabled mods.
         if (!mod->enabled())
             continue;

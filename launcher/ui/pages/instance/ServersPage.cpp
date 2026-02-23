@@ -406,8 +406,8 @@ class ServersModel : public QAbstractListModel {
         auto serversDat = parseServersDat(serversPath());
         if (serversDat) {
             auto& serversList = serversDat->at("servers").as<nbt::tag_list>();
-            for (auto iter = serversList.begin(); iter != serversList.end(); iter++) {
-                auto& serverTag = (*iter).as<nbt::tag_compound>();
+            for (auto & iter : serversList) {
+                auto& serverTag = iter.as<nbt::tag_compound>();
                 Server s(serverTag);
                 servers.append(s);
             }
