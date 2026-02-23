@@ -58,7 +58,7 @@ class PageModel : public QAbstractListModel {
                 return QIcon(icon.pixmap(QSize(48, 48)));
             }
         }
-        return QVariant();
+        return {};
     }
 
     void setPages(const QList<BasePage*>& pages)
@@ -96,7 +96,7 @@ class PageView : public QListView {
         int width = sizeHintForColumn(0) + frameWidth() * 2 + 5;
         if (verticalScrollBar()->isVisible())
             width += verticalScrollBar()->width();
-        return QSize(width, 100);
+        return {width, 100};
     }
 
     bool eventFilter(QObject* obj, QEvent* event) override

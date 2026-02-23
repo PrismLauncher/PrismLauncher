@@ -277,7 +277,7 @@ class ServersModel : public QAbstractListModel {
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override
     {
         if (section < 0 || section >= COLUMN_COUNT)
-            return QVariant();
+            return {};
 
         if (role == Qt::DisplayRole) {
             switch (section) {
@@ -296,15 +296,15 @@ class ServersModel : public QAbstractListModel {
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
     {
         if (!index.isValid())
-            return QVariant();
+            return {};
 
         int row = index.row();
         int column = index.column();
         if (column < 0 || column >= COLUMN_COUNT)
-            return QVariant();
+            return {};
 
         if (row < 0 || row >= m_servers.size())
-            return QVariant();
+            return {};
 
         switch (role) {
             case Qt::DecorationRole: {
@@ -317,7 +317,7 @@ class ServersModel : public QAbstractListModel {
                     }
                     return QIcon::fromTheme("unknown_server");
                 } else {
-                    return QVariant();
+                    return {};
                 }
             }
             case Qt::DisplayRole:
@@ -333,15 +333,15 @@ class ServersModel : public QAbstractListModel {
                             return "...";
                         }
                     default:
-                        return QVariant();
+                        return {};
                 }
             case ServerPtrRole:
                 if (column == 0)
                     return QVariant::fromValue<void*>((void*)&m_servers[row]);
                 else
-                    return QVariant();
+                    return {};
             default:
-                return QVariant();
+                return {};
         }
     }
 

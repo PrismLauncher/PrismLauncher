@@ -54,9 +54,9 @@ class NullInstance : public BaseInstance {
     QString instanceConfigFolder() const override { return instanceRoot(); };
     LaunchTask* createLaunchTask(AuthSessionPtr, MinecraftTarget::Ptr) override { return nullptr; }
     QList<Task::Ptr> createUpdateTask() override { return {}; }
-    QProcessEnvironment createEnvironment() override { return QProcessEnvironment(); }
-    QProcessEnvironment createLaunchEnvironment() override { return QProcessEnvironment(); }
-    QMap<QString, QString> getVariables() override { return QMap<QString, QString>(); }
+    QProcessEnvironment createEnvironment() override { return {}; }
+    QProcessEnvironment createLaunchEnvironment() override { return {}; }
+    QMap<QString, QString> getVariables() override { return {}; }
     QStringList getLogFileSearchPaths() override { return {}; }
     QString typeName() const override { return "Null"; }
     bool canExport() const override { return false; }
@@ -69,7 +69,7 @@ class NullInstance : public BaseInstance {
         out << "Null instance - placeholder.";
         return out;
     }
-    QString modsRoot() const override { return QString(); }
+    QString modsRoot() const override { return {}; }
     void updateRuntimeContext() override
     {
         // NOOP

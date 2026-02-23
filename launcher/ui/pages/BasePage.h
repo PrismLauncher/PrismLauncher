@@ -51,7 +51,7 @@ class BasePage {
     virtual QIcon icon() const = 0;
     virtual bool apply() { return true; }
     virtual bool shouldDisplay() const { return true; }
-    virtual QString helpPage() const { return QString(); }
+    virtual QString helpPage() const { return {}; }
     void opened()
     {
         isOpened = true;

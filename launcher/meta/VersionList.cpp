@@ -64,7 +64,7 @@ void VersionList::sortVersions()
 QVariant VersionList::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid() || index.row() < 0 || index.row() >= m_versions.size() || index.parent().isValid()) {
-        return QVariant();
+        return {};
     }
 
     Version::Ptr version = m_versions.at(index.row());
@@ -83,7 +83,7 @@ QVariant VersionList::data(const QModelIndex& index, int role) const
             if (iter != reqs.end()) {
                 return (*iter).equalsVersion;
             }
-            return QVariant();
+            return {};
         }
         case TypeRole:
             return version->type();
@@ -110,7 +110,7 @@ QVariant VersionList::data(const QModelIndex& index, int role) const
         // FIXME: this should be determined in whatever view/proxy is used...
         // case LatestRole: return version == getLatestStable();
         default:
-            return QVariant();
+            return {};
     }
 }
 

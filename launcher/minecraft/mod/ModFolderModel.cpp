@@ -184,7 +184,7 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                 case RequiresColumn:
                     return columnNames().at(section);
                 default:
-                    return QVariant();
+                    return {};
             }
 
         case Qt::ToolTipRole:
@@ -214,11 +214,12 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                 case RequiresColumn:
                     return tr("For each mod, the number of other mods it depends on.");
                 default:
-                    return QVariant();
+                    return {};
             }
         default:
-            return QVariant();
+            return {};
     }
+    return {};
 }
 
 int ModFolderModel::columnCount(const QModelIndex& parent) const
@@ -255,7 +256,6 @@ void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)
     if (result && resource) {
         auto* mod = static_cast<Mod*>(resource.get());
         mod->finishResolvingWithDetails(std::move(result->details));
-
     }
     emit dataChanged(index(row, RequiresColumn), index(row, RequiredByColumn));
 }

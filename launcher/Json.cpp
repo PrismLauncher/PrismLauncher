@@ -238,7 +238,7 @@ QUrl requireIsType<QUrl>(const QJsonValue& value, const QString& what)
 {
     const QString string = value.toString(what);
     if (string.isEmpty()) {
-        return QUrl();
+        return {};
     }
     const QUrl url = QUrl(string, QUrl::StrictMode);
     if (!url.isValid()) {

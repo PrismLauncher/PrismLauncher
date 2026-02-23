@@ -173,7 +173,7 @@ static QSize viewItemTextSize(const QStyleOptionViewItem* option)
     qreal height = 0, widthUsed = 0;
     viewItemTextLayout(textLayout, bounds.width(), height, widthUsed);
     const QSize size(qCeil(widthUsed), qCeil(height));
-    return QSize(size.width() + 2 * textMargin, size.height());
+    return {size.width() + 2 * textMargin, size.height()};
 }
 
 void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const

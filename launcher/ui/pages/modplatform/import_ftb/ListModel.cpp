@@ -102,7 +102,7 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
 {
     int pos = index.row();
     if (pos >= m_modpacks.size() || pos < 0 || !index.isValid()) {
-        return QVariant();
+        return {};
     }
 
     auto pack = m_modpacks.at(pos);

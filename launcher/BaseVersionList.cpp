@@ -58,10 +58,10 @@ BaseVersion::Ptr BaseVersionList::getRecommended() const
 QVariant BaseVersionList::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
-        return QVariant();
+        return {};
 
     if (index.row() > count())
-        return QVariant();
+        return {};
 
     BaseVersion::Ptr version = at(index.row());
 
@@ -87,7 +87,7 @@ QVariant BaseVersionList::data(const QModelIndex& index, int role) const
         }
 
         default:
-            return QVariant();
+            return {};
     }
 }
 

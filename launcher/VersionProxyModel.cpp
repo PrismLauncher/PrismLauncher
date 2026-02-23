@@ -100,9 +100,9 @@ VersionProxyModel::VersionProxyModel(QObject* parent) : QAbstractProxyModel(pare
 QVariant VersionProxyModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (section < 0 || section >= m_columns.size())
-        return QVariant();
+        return {};
     if (orientation != Qt::Horizontal)
-        return QVariant();
+        return {};
     auto column = m_columns[section];
     if (role == Qt::DisplayRole) {
         switch (column) {
@@ -147,13 +147,13 @@ QVariant VersionProxyModel::headerData(int section, Qt::Orientation orientation,
                 return tr("Release date of this version");
         }
     }
-    return QVariant();
+    return {};
 }
 
 QVariant VersionProxyModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid()) {
-        return QVariant();
+        return {};
     }
     auto column = m_columns[index.column()];
     auto parentIndex = mapToSource(index);
@@ -184,7 +184,7 @@ QVariant VersionProxyModel::data(const QModelIndex& index, int role) const
                 case Time:
                     return sourceModel()->data(parentIndex, Meta::VersionList::TimeRole).toDate();
                 default:
-                    return QVariant();
+                    return {};
             }
         }
         case Qt::ToolTipRole: {
@@ -222,20 +222,20 @@ QVariant VersionProxyModel::data(const QModelIndex& index, int role) const
                 }
                 return pixmap;
             }
-            return QVariant();
+            return {};
         }
         default: {
             if (roles.contains((BaseVersionList::ModelRoles)role)) {
                 return sourceModel()->data(parentIndex, role);
             }
-            return QVariant();
+            return {};
         }
     }
 }
 
 QModelIndex VersionProxyModel::parent([[maybe_unused]] const QModelIndex& child) const
 {
-    return QModelIndex();
+    return {};
 }
 
 QModelIndex VersionProxyModel::mapFromSource(const QModelIndex& sourceIndex) const
@@ -243,7 +243,7 @@ QModelIndex VersionProxyModel::mapFromSource(const QModelIndex& sourceIndex) con
     if (sourceIndex.isValid()) {
         return index(sourceIndex.row(), 0);
     }
-    return QModelIndex();
+    return {};
 }
 
 QModelIndex VersionProxyModel::mapToSource(const QModelIndex& proxyIndex) const
@@ -251,19 +251,19 @@ QModelIndex VersionProxyModel::mapToSource(const QModelIndex& proxyIndex) const
     if (proxyIndex.isValid()) {
         return sourceModel()->index(proxyIndex.row(), 0);
     }
-    return QModelIndex();
+    return {};
 }
 
 QModelIndex VersionProxyModel::index(int row, int column, const QModelIndex& parent) const
 {
     // no trees here... shoo
     if (parent.isValid()) {
-        return QModelIndex();
+        return {};
     }
     if (row < 0 || row >= sourceModel()->rowCount())
-        return QModelIndex();
+        return {};
     if (column < 0 || column >= columnCount())
-        return QModelIndex();
+        return {};
     return QAbstractItemModel::createIndex(row, column);
 }
 
@@ -367,7 +367,7 @@ QModelIndex VersionProxyModel::getVersion(const QString& version) const
         }
     }
     if (found == -1) {
-        return QModelIndex();
+        return {};
     }
     return index(found, 0);
 }

@@ -97,7 +97,7 @@ QDate ensureDay(int year, int month, int day)
     QDate date(year, month, 1);
     if (day > date.daysInMonth())
         day = date.daysInMonth();
-    return QDate(year, month, day);
+    return {year, month, day};
 }
 
 QString JsonCatPack::path() const

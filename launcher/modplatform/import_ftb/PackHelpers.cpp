@@ -34,16 +34,16 @@ QIcon loadFTBIcon(const QString& imagePath)
     static const QHash<char, QByteArray> imageTypeMap = { { 0x00, "png" }, { 0x01, "jpg" }, { 0x02, "gif" }, { 0x03, "webp" } };
     QFile file(imagePath);
     if (!file.exists() || !file.open(QIODevice::ReadOnly)) {
-        return QIcon();
+        return {};
     }
     char type;
     if (!file.getChar(&type)) {
         qDebug() << "Missing FTB image type header at" << imagePath;
-        return QIcon();
+        return {};
     }
     if (!imageTypeMap.contains(type)) {
         qDebug().nospace().noquote() << "Don't recognize FTB image type 0x" << QString::number(type, 16);
-        return QIcon();
+        return {};
     }
 
     auto imageType = imageTypeMap[type];
@@ -52,7 +52,7 @@ QIcon loadFTBIcon(const QString& imagePath)
     auto pixmap = QPixmap::fromImageReader(&reader);
     if (pixmap.isNull()) {
         qDebug() << "The FTB image at" << imagePath << "is not valid";
-        return QIcon();
+        return {};
     }
     return QIcon(pixmap);
 }

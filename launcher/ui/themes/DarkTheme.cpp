@@ -74,7 +74,7 @@ double DarkTheme::fadeAmount()
 
 QColor DarkTheme::fadeColor()
 {
-    return QColor(49, 49, 49);
+    return {49, 49, 49};
 }
 
 bool DarkTheme::hasStyleSheet()

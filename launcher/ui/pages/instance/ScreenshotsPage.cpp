@@ -149,7 +149,7 @@ class FilterModel : public QIdentityProxyModel {
     {
         auto model = sourceModel();
         if (!model)
-            return QVariant();
+            return {};
         if (role == Qt::DisplayRole || role == Qt::EditRole) {
             QVariant result = sourceModel()->data(mapToSource(proxyIndex), role);
             static const QRegularExpression s_removeChars("\\.png$");

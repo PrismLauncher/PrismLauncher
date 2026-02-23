@@ -88,13 +88,13 @@ QModelIndex LogFormatProxyModel::find(const QModelIndex& start, const QString& v
     auto compare = [this, start, parentIndex, value](int r) -> QModelIndex {
         QModelIndex idx = index(r, start.column(), parentIndex);
         if (!idx.isValid() || idx == start) {
-            return QModelIndex();
+            return {};
         }
         QVariant v = data(idx, Qt::DisplayRole);
         QString t = v.toString();
         if (t.contains(value, Qt::CaseInsensitive))
             return idx;
-        return QModelIndex();
+        return {};
     };
     if (reverse) {
         int from = start.row();
@@ -125,7 +125,7 @@ QModelIndex LogFormatProxyModel::find(const QModelIndex& start, const QString& v
             to = start.row();
         }
     }
-    return QModelIndex();
+    return {};
 }
 
 LogPage::LogPage(BaseInstance* instance, QWidget* parent) : QWidget(parent), ui(new Ui::LogPage), m_instance(instance)

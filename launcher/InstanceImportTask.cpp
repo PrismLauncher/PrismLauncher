@@ -112,7 +112,7 @@ void InstanceImportTask::downloadFromUrl()
 QString cleanPath(QString path)
 {
     if (path == ".")
-        return QString();
+        return {};
     QString result = path;
     if (result.startsWith("./"))
         result = result.mid(2);

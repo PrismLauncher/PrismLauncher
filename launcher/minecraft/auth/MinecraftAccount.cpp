@@ -103,7 +103,7 @@ QPixmap MinecraftAccount::getFace(int width, int height) const
 {
     QPixmap skinTexture;
     if (!skinTexture.loadFromData(data.minecraftProfile.skin.data, "PNG")) {
-        return QPixmap();
+        return {};
     }
     QPixmap skin = QPixmap(8, 8);
     skin.fill(QColorConstants::Transparent);

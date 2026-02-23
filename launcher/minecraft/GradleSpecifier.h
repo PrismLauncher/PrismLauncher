@@ -91,7 +91,7 @@ struct GradleSpecifier {
     QString getFileName() const
     {
         if (!m_valid) {
-            return QString();
+            return {};
         }
         QString filename = m_artifactId + '-' + m_version;
         if (!m_classifier.isEmpty()) {
@@ -103,7 +103,7 @@ struct GradleSpecifier {
     QString toPath(const QString& filenameOverride = QString()) const
     {
         if (!m_valid) {
-            return QString();
+            return {};
         }
         QString filename;
         if (filenameOverride.isEmpty()) {

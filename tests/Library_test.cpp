@@ -51,7 +51,7 @@ class LibraryTest : public QObject {
         QFile jsonFile(path);
         if (!jsonFile.open(QIODevice::ReadOnly)) {
             qCritical() << "Failed to open file" << jsonFile.fileName() << "for reading!";
-            return LibraryPtr();
+            return {};
         }
         auto data = jsonFile.readAll();
         jsonFile.close();

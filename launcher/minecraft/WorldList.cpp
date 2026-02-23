@@ -171,13 +171,13 @@ int WorldList::columnCount(const QModelIndex& parent) const
 QVariant WorldList::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
-        return QVariant();
+        return {};
 
     int row = index.row();
     int column = index.column();
 
     if (row < 0 || row >= m_worlds.size())
-        return QVariant();
+        return {};
 
     QLocale locale;
 
@@ -206,7 +206,7 @@ QVariant WorldList::data(const QModelIndex& index, int role) const
                     }
                     return "";
                 default:
-                    return QVariant();
+                    return {};
             }
 
         case Qt::UserRole:
@@ -249,7 +249,7 @@ QVariant WorldList::data(const QModelIndex& index, int role) const
             return world.iconFile();
         }
         default:
-            return QVariant();
+            return {};
     }
 }
 
@@ -271,7 +271,7 @@ QVariant WorldList::headerData(int section, [[maybe_unused]] Qt::Orientation ori
                     //: special warnings?
                     return tr("Info");
                 default:
-                    return QVariant();
+                    return {};
             }
 
         case Qt::ToolTipRole:
@@ -287,10 +287,10 @@ QVariant WorldList::headerData(int section, [[maybe_unused]] Qt::Orientation ori
                 case InfoColumn:
                     return tr("Information and warnings about the world.");
                 default:
-                    return QVariant();
+                    return {};
             }
         default:
-            return QVariant();
+            return {};
     }
 }
 

@@ -11,7 +11,7 @@ class MojangVersionFormatTest : public QObject {
         QFile jsonFile(path);
         if (!jsonFile.open(QIODevice::ReadOnly)) {
             qWarning() << "Failed to open file '" << jsonFile.fileName() << "' for reading!";
-            return QJsonDocument();
+            return {};
         }
         auto data = jsonFile.readAll();
         jsonFile.close();

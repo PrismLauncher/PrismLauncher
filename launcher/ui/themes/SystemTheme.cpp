@@ -119,7 +119,7 @@ QPalette SystemTheme::colorScheme()
 
 QString SystemTheme::appStyleSheet()
 {
-    return QString();
+    return {};
 }
 
 double SystemTheme::fadeAmount()
@@ -129,7 +129,7 @@ double SystemTheme::fadeAmount()
 
 QColor SystemTheme::fadeColor()
 {
-    return QColor(128, 128, 128);
+    return {128, 128, 128};
 }
 
 bool SystemTheme::hasStyleSheet()

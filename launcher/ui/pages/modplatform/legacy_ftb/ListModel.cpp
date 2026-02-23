@@ -139,7 +139,7 @@ QString ListModel::translatePackType(PackType type) const
             return tr("Private Modpack");
     }
     qWarning() << "Unknown FTB modpack type:" << int(type);
-    return QString();
+    return {};
 }
 
 int ListModel::rowCount(const QModelIndex& parent) const

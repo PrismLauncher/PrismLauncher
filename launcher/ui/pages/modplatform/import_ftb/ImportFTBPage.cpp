@@ -92,18 +92,18 @@ void ImportFTBPage::retranslate()
 QString saveIconToTempFile(const QIcon& icon)
 {
     if (icon.isNull()) {
-        return QString();
+        return {};
     }
 
     QPixmap pixmap = icon.pixmap(icon.availableSizes().last());
     if (pixmap.isNull()) {
-        return QString();
+        return {};
     }
 
     QTemporaryFile tempFile(QDir::tempPath() + "/iconXXXXXX.png");
     tempFile.setAutoRemove(false);
     if (!tempFile.open()) {
-        return QString();
+        return {};
     }
 
     QString tempPath = tempFile.fileName();
@@ -111,7 +111,7 @@ QString saveIconToTempFile(const QIcon& icon)
 
     if (!pixmap.save(tempPath, "PNG")) {
         QFile::remove(tempPath);
-        return QString();
+        return {};
     }
 
     return tempPath;  // Success

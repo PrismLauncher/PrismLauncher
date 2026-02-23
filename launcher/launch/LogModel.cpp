@@ -16,7 +16,7 @@ int LogModel::rowCount(const QModelIndex& parent) const
 QVariant LogModel::data(const QModelIndex& index, int role) const
 {
     if (index.row() < 0 || index.row() >= m_numLines)
-        return QVariant();
+        return {};
 
     auto row = index.row();
     auto realRow = (row + m_firstLine) % m_maxLines;
@@ -27,7 +27,7 @@ QVariant LogModel::data(const QModelIndex& index, int role) const
         return static_cast<int>(m_content[realRow].level);
     }
 
-    return QVariant();
+    return {};
 }
 
 void LogModel::append(MessageLevel level, QString line)

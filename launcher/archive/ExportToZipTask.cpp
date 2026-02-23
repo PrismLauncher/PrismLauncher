@@ -42,7 +42,7 @@ auto ExportToZipTask::exportZip() -> ZipResult
 
     for (auto fileName : m_extraFiles.keys()) {
         if (m_buildZipFuture.isCanceled())
-            return ZipResult();
+            return {};
         if (!m_output.addFile(fileName, m_extraFiles[fileName])) {
             return ZipResult(tr("Could not add:") + fileName);
         }
@@ -50,7 +50,7 @@ auto ExportToZipTask::exportZip() -> ZipResult
 
     for (const QFileInfo& file : m_files) {
         if (m_buildZipFuture.isCanceled())
-            return ZipResult();
+            return {};
 
         auto absolute = file.absoluteFilePath();
         auto relative = m_dir.relativeFilePath(absolute);
@@ -71,7 +71,7 @@ auto ExportToZipTask::exportZip() -> ZipResult
     if (!m_output.close()) {
         return ZipResult(tr("A zip error occurred"));
     }
-    return ZipResult();
+    return {};
 }
 
 void ExportToZipTask::finish()

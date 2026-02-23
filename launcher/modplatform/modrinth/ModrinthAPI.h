@@ -75,11 +75,11 @@ class ModrinthAPI : public ResourceAPI {
     {
         switch (side) {
             case ModPlatform::Side::ClientSide:
-                return QString(R"("client_side:required","client_side:optional"],["server_side:optional","server_side:unsupported")");
+                return {R"("client_side:required","client_side:optional"],["server_side:optional","server_side:unsupported")"};
             case ModPlatform::Side::ServerSide:
-                return QString(R"("server_side:required","server_side:optional"],["client_side:optional","client_side:unsupported")");
+                return {R"("server_side:required","server_side:optional"],["client_side:optional","client_side:unsupported")"};
             case ModPlatform::Side::UniversalSide:
-                return QString(R"("client_side:required"],["server_side:required")");
+                return {R"("client_side:required"],["server_side:required")"};
             case ModPlatform::Side::NoSide:
             // fallthrough
             default:

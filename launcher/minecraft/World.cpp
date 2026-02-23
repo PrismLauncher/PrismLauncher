@@ -157,7 +157,7 @@ QString getDatFromFS(const QFileInfo& root, QString file)
 {
     QDir worldDir(root.filePath());
     if (!root.isDir() || !worldDir.exists(file)) {
-        return QString();
+        return {};
     }
     return worldDir.absoluteFilePath(file);
 }
@@ -171,11 +171,11 @@ QByteArray getDatDataFromFS(const QFileInfo& root, QString file)
 {
     auto fullFilePath = getDatFromFS(root, file);
     if (fullFilePath.isNull()) {
-        return QByteArray();
+        return {};
     }
     QFile f(fullFilePath);
     if (!f.open(QIODevice::ReadOnly)) {
-        return QByteArray();
+        return {};
     }
     return f.readAll();
 }

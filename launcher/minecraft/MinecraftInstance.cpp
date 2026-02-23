@@ -794,10 +794,10 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftT
     QString launchScript;
 
     if (!m_components)
-        return QString();
+        return {};
     auto profile = m_components->getProfile();
     if (!profile)
-        return QString();
+        return {};
 
     auto mainClass = getMainClass();
     if (!mainClass.isEmpty()) {
@@ -1017,7 +1017,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
 QMap<QString, QString> MinecraftInstance::createCensorFilterFromSession(AuthSessionPtr session)
 {
     if (!session) {
-        return QMap<QString, QString>();
+        return {};
     }
     auto& sessionRef = *session.get();
     QMap<QString, QString> filter;

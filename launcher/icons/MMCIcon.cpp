@@ -77,7 +77,7 @@ bool MMCIcon::has(IconType _type) const
 QIcon MMCIcon::icon() const
 {
     if (m_current_type == IconType::ToBeDeleted)
-        return QIcon();
+        return {};
     auto& icon = m_images[m_current_type].icon;
     if (!icon.isNull())
         return icon;
@@ -121,7 +121,7 @@ void MMCIcon::replace(IconType new_type, const QString& key)
 QString MMCIcon::getFilePath() const
 {
     if (m_current_type == IconType::ToBeDeleted) {
-        return QString();
+        return {};
     }
     return m_images[m_current_type].filename;
 }

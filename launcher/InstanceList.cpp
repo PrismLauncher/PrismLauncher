@@ -161,14 +161,14 @@ QModelIndex InstanceList::index(int row, int column, const QModelIndex& parent) 
 {
     Q_UNUSED(parent);
     if (row < 0 || row >= count())
-        return QModelIndex();
+        return {};
     return createIndex(row, column, m_instances.at(row).get());
 }
 
 QVariant InstanceList::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid()) {
-        return QVariant();
+        return {};
     }
     auto* pdata = static_cast<BaseInstance*>(index.internalPointer());
     switch (role) {
@@ -199,7 +199,7 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
         default:
             break;
     }
-    return QVariant();
+    return {};
 }
 
 bool InstanceList::setData(const QModelIndex& index, const QVariant& value, int role)
@@ -232,13 +232,13 @@ GroupId InstanceList::getInstanceGroup(const InstanceId& id) const
 {
     auto inst = getInstanceById(id);
     if (!inst) {
-        return GroupId();
+        return {};
     }
     auto iter = m_instanceGroupIndex.find(inst->id());
     if (iter != m_instanceGroupIndex.end()) {
         return *iter;
     }
-    return GroupId();
+    return {};
 }
 
 void InstanceList::setInstanceGroup(const InstanceId& id, GroupId name)

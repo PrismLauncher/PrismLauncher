@@ -253,7 +253,7 @@ QString InstanceView::groupNameAt(const QPoint& point)
     if (group && (hitResult & (VisualGroup::HeaderHit | VisualGroup::BodyHit))) {
         return group->text;
     }
-    return QString();
+    return {};
 }
 
 int InstanceView::calculateItemsPerRow() const
@@ -705,7 +705,7 @@ QRect InstanceView::geometryRect(const QModelIndex& index) const
     const_cast<InstanceView*>(this)->executeDelayedItemsLayout();
 
     if (!index.isValid() || isIndexHidden(index) || index.column() > 0) {
-        return QRect();
+        return {};
     }
 
     int row = index.row();
@@ -739,7 +739,7 @@ QModelIndex InstanceView::indexAt(const QPoint& point) const
             return index;
         }
     }
-    return QModelIndex();
+    return {};
 }
 
 void InstanceView::setSelection(const QRect& rect, const QItemSelectionModel::SelectionFlags commands)
@@ -761,7 +761,7 @@ QPixmap InstanceView::renderToPixmap(const QModelIndexList& indices, QRect* r) c
     Q_ASSERT(r);
     auto paintPairs = draggablePaintPairs(indices, r);
     if (paintPairs.isEmpty()) {
-        return QPixmap();
+        return {};
     }
     QPixmap pixmap(r->size());
     pixmap.fill(Qt::transparent);
@@ -805,7 +805,7 @@ std::pair<VisualGroup*, VisualGroup::HitResults> InstanceView::rowDropPos(const 
 
 QPoint InstanceView::offset() const
 {
-    return QPoint(horizontalOffset(), verticalOffset());
+    return {horizontalOffset(), verticalOffset()};
 }
 
 QRegion InstanceView::visualRegionForSelection(const QItemSelection& selection) const

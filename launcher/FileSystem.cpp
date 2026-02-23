@@ -763,14 +763,14 @@ QString pathTruncate(const QString& path, int depth)
 QString ResolveExecutable(QString path)
 {
     if (path.isEmpty()) {
-        return QString();
+        return {};
     }
     if (!path.contains('/')) {
         path = QStandardPaths::findExecutable(path);
     }
     QFileInfo pathInfo(path);
     if (!pathInfo.exists() || !pathInfo.isExecutable()) {
-        return QString();
+        return {};
     }
     return pathInfo.absoluteFilePath();
 }
@@ -929,7 +929,7 @@ QString createShortcut(QString destination, QString target, QStringList args, QS
     }
     if (!ensureFilePathExists(destination)) {
         qWarning() << "Destination path can't be created!";
-        return QString();
+        return {};
     }
 #if defined(Q_OS_MACOS)
     QDir application = destination + ".app/";
@@ -1011,7 +1011,7 @@ QString createShortcut(QString destination, QString target, QStringList args, QS
     QFile f(destination);
     if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) {
         qWarning() << "Failed to open file '" << f.fileName() << "' for writing!";
-        return QString();
+        return {};
     }
     QTextStream stream(&f);
 

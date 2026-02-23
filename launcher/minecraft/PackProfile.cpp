@@ -508,13 +508,13 @@ ComponentPtr PackProfile::getComponent(size_t index)
 QVariant PackProfile::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
-        return QVariant();
+        return {};
 
     int row = index.row();
     int column = index.column();
 
     if (row < 0 || row >= d->components.size())
-        return QVariant();
+        return {};
 
     auto patch = d->components.at(row);
 
@@ -522,7 +522,7 @@ QVariant PackProfile::data(const QModelIndex& index, int role) const
         case Qt::CheckStateRole: {
             if (column == NameColumn)
                 return patch->isEnabled() ? Qt::Checked : Qt::Unchecked;
-            return QVariant();
+            return {};
         }
         case Qt::DisplayRole: {
             switch (column) {
@@ -536,7 +536,7 @@ QVariant PackProfile::data(const QModelIndex& index, int role) const
                     }
                 }
                 default:
-                    return QVariant();
+                    return {};
             }
         }
         case Qt::DecorationRole: {
@@ -548,13 +548,13 @@ QVariant PackProfile::data(const QModelIndex& index, int role) const
                     case ProblemSeverity::Error:
                         return "error";
                     default:
-                        return QVariant();
+                        return {};
                 }
             }
-            return QVariant();
+            return {};
         }
     }
-    return QVariant();
+    return {};
 }
 
 bool PackProfile::setData(const QModelIndex& index, [[maybe_unused]] const QVariant& value, int role)
@@ -582,11 +582,11 @@ QVariant PackProfile::headerData(int section, Qt::Orientation orientation, int r
                 case VersionColumn:
                     return tr("Version");
                 default:
-                    return QVariant();
+                    return {};
             }
         }
     }
-    return QVariant();
+    return {};
 }
 
 // FIXME: zero precision mess
@@ -997,7 +997,7 @@ QString PackProfile::getComponentVersion(const QString& uid) const
     if (iter != d->componentIndex.end()) {
         return (*iter)->getVersion();
     }
-    return QString();
+    return {};
 }
 
 void PackProfile::disableInteraction(bool disable)

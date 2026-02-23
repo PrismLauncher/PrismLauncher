@@ -67,7 +67,7 @@ QString getLicenseHtml()
         return output;
     } else {
         qWarning() << "Failed to open file '" << dataFile.fileName() << "' for reading!";
-        return QString();
+        return {};
     }
 }
 

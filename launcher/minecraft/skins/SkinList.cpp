@@ -232,12 +232,12 @@ Qt::ItemFlags SkinList::flags(const QModelIndex& index) const
 QVariant SkinList::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
-        return QVariant();
+        return {};
 
     int row = index.row();
 
     if (row < 0 || row >= m_skinList.size())
-        return QVariant();
+        return {};
     auto skin = m_skinList[row];
     switch (role) {
         case Qt::DecorationRole: {
@@ -254,7 +254,7 @@ QVariant SkinList::data(const QModelIndex& index, int role) const
         case Qt::EditRole:
             return skin.name();
         default:
-            return QVariant();
+            return {};
     }
 }
 

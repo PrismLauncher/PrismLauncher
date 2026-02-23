@@ -101,7 +101,7 @@ QString NewComponentDialog::name() const
     if (result.size()) {
         return result.trimmed();
     }
-    return QString();
+    return {};
 }
 
 QString NewComponentDialog::uid() const
@@ -114,7 +114,7 @@ QString NewComponentDialog::uid() const
     if (result.size() && result != originalPlaceholderText) {
         return result.trimmed();
     }
-    return QString();
+    return {};
 }
 
 void NewComponentDialog::setBlacklist(QStringList badUids)

@@ -232,7 +232,7 @@ QString GuiUtil::BrowseForFile(QString context, QString caption, QString filter,
     if (resultList.size()) {
         return resultList[0];
     }
-    return QString();
+    return {};
 }
 
 QStringList GuiUtil::BrowseForFiles(QString context, QString caption, QString filter, QString defaultPath, QWidget* parentWidget)

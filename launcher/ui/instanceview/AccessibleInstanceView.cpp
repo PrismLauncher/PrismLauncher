@@ -70,7 +70,7 @@ QAccessibleInterface* AccessibleInstanceView::caption() const
 QString AccessibleInstanceView::columnDescription(int column) const
 {
     if (!view()->model())
-        return QString();
+        return {};
 
     return view()->model()->headerData(column, Qt::Horizontal).toString();
 }
@@ -113,7 +113,7 @@ int AccessibleInstanceView::selectedRowCount() const
 QString AccessibleInstanceView::rowDescription(int row) const
 {
     if (!view()->model())
-        return QString();
+        return {};
     return view()->model()->headerData(row, Qt::Vertical).toString();
 }
 
@@ -132,7 +132,7 @@ QList<QAccessibleInterface*> AccessibleInstanceView::selectedCells() const
 QList<int> AccessibleInstanceView::selectedColumns() const
 {
     if (!view()->selectionModel()) {
-        return QList<int>();
+        return {};
     }
 
     const QModelIndexList selectedColumns = view()->selectionModel()->selectedColumns();
@@ -149,7 +149,7 @@ QList<int> AccessibleInstanceView::selectedColumns() const
 QList<int> AccessibleInstanceView::selectedRows() const
 {
     if (!view()->selectionModel()) {
-        return QList<int>();
+        return {};
     }
 
     QList<int> rows;
@@ -353,7 +353,7 @@ QAccessible::Role AccessibleInstanceView::role() const
 
 QAccessible::State AccessibleInstanceView::state() const
 {
-    return QAccessible::State();
+    return {};
 }
 
 QAccessibleInterface* AccessibleInstanceView::childAt(int x, int y) const
@@ -409,9 +409,9 @@ QString AccessibleInstanceView::text(QAccessible::Text t) const
 QRect AccessibleInstanceView::rect() const
 {
     if (!view()->isVisible())
-        return QRect();
+        return {};
     QPoint pos = view()->mapToGlobal(QPoint(0, 0));
-    return QRect(pos.x(), pos.y(), view()->width(), view()->height());
+    return {pos.x(), pos.y(), view()->width(), view()->height()};
 }
 
 QAccessibleInterface* AccessibleInstanceView::parent() const
@@ -609,7 +609,7 @@ void AccessibleInstanceViewItem::doAction(const QString& actionName)
 
 QStringList AccessibleInstanceViewItem::keyBindingsForAction(const QString&) const
 {
-    return QStringList();
+    return {};
 }
 
 void AccessibleInstanceViewItem::selectCell()

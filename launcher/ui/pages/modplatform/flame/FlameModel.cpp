@@ -71,7 +71,7 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
         default:
             break;
     }
-    return QVariant();
+    return {};
 }
 
 bool ListModel::setData(const QModelIndex& index, const QVariant& value, [[maybe_unused]] int role)

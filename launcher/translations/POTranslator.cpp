@@ -303,7 +303,7 @@ QString POTranslator::translate(const char* context, const char* sourceText, con
         }
         return entry.text;
     }
-    return QString();
+    return {};
 }
 
 bool POTranslator::isEmpty() const

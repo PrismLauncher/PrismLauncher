@@ -158,7 +158,7 @@ MinecraftProfile profileFromJSONV3(const QJsonObject& parent, const char* tokenN
         auto nameV = tokenObject.value("name");
         if (!idV.isString() || !nameV.isString()) {
             qWarning() << "mandatory profile attributes are missing or of unexpected type";
-            return MinecraftProfile();
+            return {};
         }
         out.name = nameV.toString();
         out.id = idV.toString();
@@ -168,7 +168,7 @@ MinecraftProfile profileFromJSONV3(const QJsonObject& parent, const char* tokenN
         auto skinV = tokenObject.value("skin");
         if (!skinV.isObject()) {
             qWarning() << "skin is missing";
-            return MinecraftProfile();
+            return {};
         }
         auto skinObj = skinV.toObject();
         auto idV = skinObj.value("id");
@@ -176,7 +176,7 @@ MinecraftProfile profileFromJSONV3(const QJsonObject& parent, const char* tokenN
         auto variantV = skinObj.value("variant");
         if (!idV.isString() || !urlV.isString() || !variantV.isString()) {
             qWarning() << "mandatory skin attributes are missing or of unexpected type";
-            return MinecraftProfile();
+            return {};
         }
         out.skin.id = idV.toString();
         out.skin.url = urlV.toString();
@@ -190,7 +190,7 @@ MinecraftProfile profileFromJSONV3(const QJsonObject& parent, const char* tokenN
             out.skin.data = QByteArray::fromBase64(dataV.toString().toLatin1());
         } else if (!dataV.isUndefined()) {
             qWarning() << "skin data is something unexpected";
-            return MinecraftProfile();
+            return {};
         }
     }
 
@@ -198,13 +198,13 @@ MinecraftProfile profileFromJSONV3(const QJsonObject& parent, const char* tokenN
         auto capesV = tokenObject.value("capes");
         if (!capesV.isArray()) {
             qWarning() << "capes is not an array!";
-            return MinecraftProfile();
+            return {};
         }
         auto capesArray = capesV.toArray();
         for (auto capeV : capesArray) {
             if (!capeV.isObject()) {
                 qWarning() << "cape is not an object!";
-                return MinecraftProfile();
+                return {};
             }
             auto capeObj = capeV.toObject();
             auto idV = capeObj.value("id");
@@ -212,7 +212,7 @@ MinecraftProfile profileFromJSONV3(const QJsonObject& parent, const char* tokenN
             auto aliasV = capeObj.value("alias");
             if (!idV.isString() || !urlV.isString() || !aliasV.isString()) {
                 qWarning() << "mandatory skin attributes are missing or of unexpected type";
-                return MinecraftProfile();
+                return {};
             }
             Cape cape;
             cape.id = idV.toString();
@@ -227,7 +227,7 @@ MinecraftProfile profileFromJSONV3(const QJsonObject& parent, const char* tokenN
                 cape.data = QByteArray::fromBase64(dataV.toString().toLatin1());
             } else if (!dataV.isUndefined()) {
                 qWarning() << "cape data is something unexpected";
-                return MinecraftProfile();
+                return {};
             }
             out.capes[cape.id] = cape;
         }

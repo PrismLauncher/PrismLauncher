@@ -58,10 +58,10 @@ int VersionList::count() const
 QVariant VersionList::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
-        return QVariant();
+        return {};
 
     if (index.row() > count())
-        return QVariant();
+        return {};
 
     auto version = (m_vlist[index.row()]);
     switch (role) {
@@ -89,7 +89,7 @@ QVariant VersionList::data(const QModelIndex& index, int role) const
         case Meta::VersionList::TimeRole:
             return version->releaseTime;
         default:
-            return QVariant();
+            return {};
     }
 }
 

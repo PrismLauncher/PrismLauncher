@@ -294,7 +294,7 @@ QString Library::getCompatibleNative(const RuntimeContext& runtimeContext) const
         entry = m_nativeClassifiers.constFind(runtimeContext.system);
 
     if (entry == m_nativeClassifiers.constEnd())
-        return QString();
+        return {};
 
     return entry.value();
 }

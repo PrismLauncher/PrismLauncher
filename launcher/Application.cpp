@@ -1891,7 +1891,7 @@ QString Application::getModrinthAPIToken()
     if (!tokenOverride.isEmpty())
         return tokenOverride;
 
-    return QString();
+    return {};
 }
 
 QString Application::getUserAgent()

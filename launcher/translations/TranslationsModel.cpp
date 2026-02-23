@@ -351,13 +351,13 @@ enum class Column { Language, Completeness };
 QVariant TranslationsModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
-        return QVariant();
+        return {};
 
     int row = index.row();
     auto column = static_cast<Column>(index.column());
 
     if (row < 0 || row >= d->m_languages.size())
-        return QVariant();
+        return {};
 
     auto& lang = d->m_languages[row];
     switch (role) {
@@ -379,7 +379,7 @@ QVariant TranslationsModel::data(const QModelIndex& index, int role) const
         case Qt::UserRole:
             return lang.key;
         default:
-            return QVariant();
+            return {};
     }
 }
 
@@ -534,7 +534,7 @@ QModelIndex TranslationsModel::selectedIndex()
     if (found != d->m_languages.end()) {
         return index(std::distance(d->m_languages.begin(), found), 0, QModelIndex());
     }
-    return QModelIndex();
+    return {};
 }
 
 QString TranslationsModel::selectedLanguage()

@@ -114,5 +114,5 @@ QVariant INISettingsObject::retrieveValue(const Setting& setting)
                 return m_ini[iter];
         }
     }
-    return QVariant();
+    return {};
 }

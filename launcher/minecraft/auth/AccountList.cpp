@@ -308,10 +308,10 @@ QString getAccountStatus(AccountState status)
 QVariant AccountList::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
-        return QVariant();
+        return {};
 
     if (index.row() > count())
-        return QVariant();
+        return {};
 
     MinecraftAccountPtr account = at(index.row());
 
@@ -321,7 +321,7 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
                 return QSize(0, 30);
             }
 
-            return QVariant();
+            return {};
         case Qt::DecorationRole:
             if (index.column() == ProfileNameColumn) {
                 auto face = account->getFace(24, 24);
@@ -333,7 +333,7 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
                 }
             }
 
-            return QVariant();
+            return {};
         case Qt::DisplayRole:
             switch (index.column()) {
                 case ProfileNameColumn:
@@ -352,7 +352,7 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
                 case StatusColumn:
                     return getAccountStatus(account->accountState());
                 default:
-                    return QVariant();
+                    return {};
             }
 
         case PointerRole:
@@ -361,10 +361,10 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
         case Qt::CheckStateRole:
             if (index.column() == ProfileNameColumn)
                 return account == m_defaultAccount ? Qt::Checked : Qt::Unchecked;
-            return QVariant();
+            return {};
 
         default:
-            return QVariant();
+            return {};
     }
 }
 
@@ -380,7 +380,7 @@ QVariant AccountList::headerData(int section, [[maybe_unused]] Qt::Orientation o
                 case StatusColumn:
                     return tr("Status");
                 default:
-                    return QVariant();
+                    return {};
             }
 
         case Qt::ToolTipRole:
@@ -392,11 +392,11 @@ QVariant AccountList::headerData(int section, [[maybe_unused]] Qt::Orientation o
                 case StatusColumn:
                     return tr("Current status of the account.");
                 default:
-                    return QVariant();
+                    return {};
             }
 
         default:
-            return QVariant();
+            return {};
     }
 }
 

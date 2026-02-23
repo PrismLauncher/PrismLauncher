@@ -282,7 +282,7 @@ QString NewInstanceDialog::instName() const
     if (result.size()) {
         return result;
     }
-    return QString();
+    return {};
 }
 
 QString NewInstanceDialog::instGroup() const

@@ -92,10 +92,10 @@ int JavaInstallList::count() const
 QVariant JavaInstallList::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
-        return QVariant();
+        return {};
 
     if (index.row() > count())
-        return QVariant();
+        return {};
 
     auto version = std::dynamic_pointer_cast<JavaInstall>(m_vlist[index.row()]);
     switch (role) {
@@ -114,7 +114,7 @@ QVariant JavaInstallList::data(const QModelIndex& index, int role) const
         case CPUArchitectureRole:
             return version->arch;
         default:
-            return QVariant();
+            return {};
     }
 }
 

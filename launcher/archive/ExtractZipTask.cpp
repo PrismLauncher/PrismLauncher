@@ -43,7 +43,7 @@ auto ExtractZipTask::extractZip() -> ZipResult
     }
     if (m_input.getFiles().isEmpty()) {
         logWarning(tr("Extracting empty archives seems odd..."));
-        return ZipResult();
+        return {};
     }
 
     auto extPtr = ArchiveWriter::createDiskWriter();
@@ -107,7 +107,7 @@ auto ExtractZipTask::extractZip() -> ZipResult
         FS::removeFiles(extracted);
         return result.has_value() ? result : ZipResult(tr("Failed to parse file %1").arg(fileName));
     }
-    return ZipResult();
+    return {};
 }
 
 void ExtractZipTask::finish()

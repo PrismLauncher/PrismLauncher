@@ -72,7 +72,7 @@ double BrightTheme::fadeAmount()
 
 QColor BrightTheme::fadeColor()
 {
-    return QColor(255, 255, 255);
+    return {255, 255, 255};
 }
 
 bool BrightTheme::hasStyleSheet()
@@ -82,9 +82,9 @@ bool BrightTheme::hasStyleSheet()
 
 QString BrightTheme::appStyleSheet()
 {
-    return QString();
+    return {};
 }
 QString BrightTheme::tooltip()
 {
-    return QString();
+    return {};
 }

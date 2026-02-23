@@ -134,7 +134,7 @@ QString CopyInstanceDialog::instName() const
     if (result.size()) {
         return result;
     }
-    return QString();
+    return {};
 }
 
 QString CopyInstanceDialog::iconKey() const

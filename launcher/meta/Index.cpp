@@ -34,7 +34,7 @@ Index::Index(const QList<VersionList::Ptr>& lists, QObject* parent) : QAbstractL
 QVariant Index::data(const QModelIndex& index, int role) const
 {
     if (index.parent().isValid() || index.row() < 0 || index.row() >= m_lists.size()) {
-        return QVariant();
+        return {};
     }
 
     VersionList::Ptr list = m_lists.at(index.row());
@@ -52,7 +52,7 @@ QVariant Index::data(const QModelIndex& index, int role) const
         case ListPtrRole:
             return QVariant::fromValue(list);
     }
-    return QVariant();
+    return {};
 }
 
 int Index::rowCount(const QModelIndex& parent) const
@@ -70,7 +70,7 @@ QVariant Index::headerData(int section, Qt::Orientation orientation, int role) c
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section == 0) {
         return tr("Name");
     } else {
-        return QVariant();
+        return {};
     }
 }
 

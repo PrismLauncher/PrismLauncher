@@ -106,11 +106,11 @@ QVariant FileIgnoreProxy::data(const QModelIndex& index, int role) const
         auto blockedPath = relPath(fsm->filePath(sourceIndex));
         auto cover = m_blocked.cover(blockedPath);
         if (!cover.isNull()) {
-            return QVariant(Qt::Unchecked);
+            return {Qt::Unchecked};
         } else if (m_blocked.exists(blockedPath)) {
-            return QVariant(Qt::PartiallyChecked);
+            return {Qt::PartiallyChecked};
         } else {
-            return QVariant(Qt::Checked);
+            return {Qt::Checked};
         }
     }
 

@@ -75,7 +75,7 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
         return v;
     }
 
-    return QVariant();
+    return {};
 }
 
 void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)
