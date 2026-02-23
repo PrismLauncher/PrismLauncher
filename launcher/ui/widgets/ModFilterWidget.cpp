@@ -392,13 +392,13 @@ void ModFilterWidget::onReleaseFilterChanged()
 {
     std::vector<ModPlatform::IndexedVersionType> releases;
     if (ui->releaseCb->isChecked())
-        releases.push_back(ModPlatform::IndexedVersionType::Release);
+        releases.emplace_back(ModPlatform::IndexedVersionType::Release);
     if (ui->betaCb->isChecked())
-        releases.push_back(ModPlatform::IndexedVersionType::Beta);
+        releases.emplace_back(ModPlatform::IndexedVersionType::Beta);
     if (ui->alphaCb->isChecked())
-        releases.push_back(ModPlatform::IndexedVersionType::Alpha);
+        releases.emplace_back(ModPlatform::IndexedVersionType::Alpha);
     if (ui->unknownCb->isChecked())
-        releases.push_back(ModPlatform::IndexedVersionType::Unknown);
+        releases.emplace_back(ModPlatform::IndexedVersionType::Unknown);
     m_filter_changed = releases != m_filter->releases;
     m_filter->releases = releases;
     if (m_filter_changed)
