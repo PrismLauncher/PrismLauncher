@@ -494,7 +494,7 @@ static QString replaceTokensIn(const QString& text, const QMap<QString, QString>
 {
     // TODO: does this still work??
     QString result;
-    static const QRegularExpression s_token_regexp("\\$\\{(.+)\\}", QRegularExpression::InvertedGreedinessOption);
+    static const QRegularExpression s_token_regexp(R"(\$\{(.+)\})", QRegularExpression::InvertedGreedinessOption);
     QStringList list;
     QRegularExpressionMatchIterator i = s_token_regexp.globalMatch(text);
     int lastCapturedEnd = 0;

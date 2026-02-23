@@ -45,20 +45,20 @@ struct RegReplace {
 };
 
 static const QVector<RegReplace> anonymizeRules = {
-    RegReplace(QRegularExpression("C:\\\\Users\\\\([^\\\\]+)\\\\", QRegularExpression::CaseInsensitiveOption),
-               "C:\\Users\\********\\"),  // windows
-    RegReplace(QRegularExpression("C:\\/Users\\/([^\\/]+)\\/", QRegularExpression::CaseInsensitiveOption),
+    RegReplace(QRegularExpression(R"(C:\\Users\\([^\\]+)\\)", QRegularExpression::CaseInsensitiveOption),
+               R"(C:\Users\********\)"),  // windows
+    RegReplace(QRegularExpression(R"(C:\/Users\/([^\/]+)\/)", QRegularExpression::CaseInsensitiveOption),
                "C:/Users/********/"),  // windows with forward slashes
-    RegReplace(QRegularExpression("(?<!\\\\w)\\/home\\/[^\\/]+\\/", QRegularExpression::CaseInsensitiveOption),
+    RegReplace(QRegularExpression(R"((?<!\\w)\/home\/[^\/]+\/)", QRegularExpression::CaseInsensitiveOption),
                "/home/********/"),  // linux
-    RegReplace(QRegularExpression("(?<!\\\\w)\\/Users\\/[^\\/]+\\/", QRegularExpression::CaseInsensitiveOption),
+    RegReplace(QRegularExpression(R"((?<!\\w)\/Users\/[^\/]+\/)", QRegularExpression::CaseInsensitiveOption),
                "/Users/********/"),  // macos
-    RegReplace(QRegularExpression("\\(Session ID is [^\\)]+\\)", QRegularExpression::CaseInsensitiveOption),
+    RegReplace(QRegularExpression(R"(\(Session ID is [^\)]+\))", QRegularExpression::CaseInsensitiveOption),
                "(Session ID is <SESSION_TOKEN>)"),  // SESSION_TOKEN
-    RegReplace(QRegularExpression("new refresh token: \"[^\"]+\"", QRegularExpression::CaseInsensitiveOption),
+    RegReplace(QRegularExpression(R"(new refresh token: "[^"]+")", QRegularExpression::CaseInsensitiveOption),
                "new refresh token: \"<TOKEN>\""),  // refresh token
-    RegReplace(QRegularExpression("\"device_code\" :  \"[^\"]+\"", QRegularExpression::CaseInsensitiveOption),
-               "\"device_code\" :  \"<DEVICE_CODE>\""),  // device code
+    RegReplace(QRegularExpression(R"("device_code" :  "[^"]+")", QRegularExpression::CaseInsensitiveOption),
+               R"("device_code" :  "<DEVICE_CODE>")"),  // device code
 };
 
 void anonymizeLog(QString& log)

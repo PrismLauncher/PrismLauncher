@@ -53,7 +53,7 @@ QNetworkReply* CapeChange::getReply(QNetworkRequest& request)
         return m_network->deleteResource(request);
     } else {
         setStatus(tr("Equipping cape"));
-        return m_network->put(request, QString("{\"capeId\":\"%1\"}").arg(m_capeId).toUtf8());
+        return m_network->put(request, QString(R"({"capeId":"%1"})").arg(m_capeId).toUtf8());
     }
 }
 

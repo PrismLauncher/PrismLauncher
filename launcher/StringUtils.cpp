@@ -214,7 +214,7 @@ QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QRegular
 
 QString StringUtils::htmlListPatch(QString htmlStr)
 {
-    static const QRegularExpression s_ulMatcher("<\\s*/\\s*ul\\s*>");
+    static const QRegularExpression s_ulMatcher(R"(<\s*/\s*ul\s*>)");
     int pos = htmlStr.indexOf(s_ulMatcher);
     int imgPos;
     while (pos != -1) {

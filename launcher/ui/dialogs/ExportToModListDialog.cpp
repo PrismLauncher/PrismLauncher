@@ -37,7 +37,7 @@ const QHash<ExportToModList::Formats, QString> ExportToModListDialog::exampleLin
     { ExportToModList::HTML, "<li><a href=\"{url}\">{name}</a> [{version}] by {authors}</li>" },
     { ExportToModList::MARKDOWN, "[{name}]({url}) [{version}] by {authors}" },
     { ExportToModList::PLAINTXT, "{name} ({url}) [{version}] by {authors}" },
-    { ExportToModList::JSON, "{\"name\":\"{name}\",\"url\":\"{url}\",\"version\":\"{version}\",\"authors\":\"{authors}\"}," },
+    { ExportToModList::JSON, R"({"name":"{name}","url":"{url}","version":"{version}","authors":"{authors}"},)" },
     { ExportToModList::CSV, "{name},{url},{version},\"{authors}\"" },
 };
 

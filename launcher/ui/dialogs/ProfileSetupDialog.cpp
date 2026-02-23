@@ -201,7 +201,7 @@ void ProfileSetupDialog::setupProfile(const QString& profileName)
         return;
     }
 
-    QString payloadTemplate("{\"profileName\":\"%1\"}");
+    QString payloadTemplate(R"({"profileName":"%1"})");
 
     QUrl url("https://api.minecraftservices.com/minecraft/profile");
     auto headers = QList<Net::HeaderPair>{ { "Content-Type", "application/json" },

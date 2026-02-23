@@ -77,7 +77,7 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
             data = file->readAll();
         } else {
             if (minecraftVersion.isEmpty()) {
-                emit failed(tr("Could not find \"version.json\" inside \"bin/modpack.jar\", but Minecraft version is unknown"));
+                emit failed(tr(R"(Could not find "version.json" inside "bin/modpack.jar", but Minecraft version is unknown)"));
                 return;
             }
             components->setComponentVersion("net.minecraft", minecraftVersion, true);

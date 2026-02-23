@@ -20,7 +20,7 @@ class IniFileTest : public QObject {
         QTest::addColumn<QString>("through");
 
         QTest::newRow("unix path") << "/abc/def/ghi/jkl";
-        QTest::newRow("windows path") << "C:\\Program files\\terrible\\name\\of something\\";
+        QTest::newRow("windows path") << R"(C:\Program files\terrible\name\of something\)";
         QTest::newRow("Plain text") << "Lorem ipsum dolor sit amet.";
         QTest::newRow("Escape sequences") << "Lorem\n\t\n\\n\\tAAZ\nipsum dolor\n\nsit amet.";
         QTest::newRow("Escape sequences 2") << "\"\n\n\"";
@@ -48,7 +48,7 @@ class IniFileTest : public QObject {
 
     void test_SaveLoadLists()
     {
-        QString slist_strings = "(\"a\",\"b\",\"c\")";
+        QString slist_strings = R"(("a","b","c"))";
         QStringList list_strings = { "a", "b", "c" };
 
         QString slist_numbers = "(1,2,3,10)";

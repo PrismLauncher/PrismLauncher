@@ -62,7 +62,7 @@ QNetworkReply* ImgurUpload::getReply(QNetworkRequest& request)
     QHttpPart filePart;
     filePart.setBodyDevice(file);
     filePart.setHeader(QNetworkRequest::ContentTypeHeader, "image/png");
-    filePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"image\"; filename=\"" + file->fileName() + "\"");
+    filePart.setHeader(QNetworkRequest::ContentDispositionHeader, R"(form-data; name="image"; filename=")" + file->fileName() + "\"");
     multipart->append(filePart);
     QHttpPart typePart;
     typePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"type\"");

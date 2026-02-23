@@ -75,11 +75,11 @@ class ModrinthAPI : public ResourceAPI {
     {
         switch (side) {
             case ModPlatform::Side::ClientSide:
-                return QString("\"client_side:required\",\"client_side:optional\"],[\"server_side:optional\",\"server_side:unsupported\"");
+                return QString(R"("client_side:required","client_side:optional"],["server_side:optional","server_side:unsupported")");
             case ModPlatform::Side::ServerSide:
-                return QString("\"server_side:required\",\"server_side:optional\"],[\"client_side:optional\",\"client_side:unsupported\"");
+                return QString(R"("server_side:required","server_side:optional"],["client_side:optional","client_side:unsupported")");
             case ModPlatform::Side::UniversalSide:
-                return QString("\"client_side:required\"],[\"server_side:required\"");
+                return QString(R"("client_side:required"],["server_side:required")");
             case ModPlatform::Side::NoSide:
             // fallthrough
             default:
@@ -211,7 +211,7 @@ class ModrinthAPI : public ResourceAPI {
     std::optional<QString> getDependencyURL(DependencySearchArgs const& args) const override
     {
         return args.dependency.version.length() != 0 ? QString("%1/version/%2").arg(BuildConfig.MODRINTH_PROD_URL, args.dependency.version)
-                                                     : QString("%1/project/%2/version?game_versions=[\"%3\"]&loaders=[\"%4\"]")
+                                                     : QString(R"(%1/project/%2/version?game_versions=["%3"]&loaders=["%4"])")
                                                            .arg(BuildConfig.MODRINTH_PROD_URL)
                                                            .arg(args.dependency.addonId.toString())
                                                            .arg(mapMCVersionToModrinth(args.mcVersion))

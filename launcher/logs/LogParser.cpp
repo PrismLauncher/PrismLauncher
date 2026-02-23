@@ -322,7 +322,7 @@ std::optional<LogParser::ParsedItem> LogParser::parseLog4J()
 
 MessageLevel LogParser::guessLevel(const QString& line, MessageLevel previous)
 {
-    static const QRegularExpression LINE_WITH_LEVEL("^\\[(?<timestamp>[0-9:]+)\\] \\[[^/]+/(?<level>[^\\]]+)\\]");
+    static const QRegularExpression LINE_WITH_LEVEL(R"(^\[(?<timestamp>[0-9:]+)\] \[[^/]+/(?<level>[^\]]+)\])");
     auto match = LINE_WITH_LEVEL.match(line);
     if (match.hasMatch()) {
         // New style logs from log4j
