@@ -67,7 +67,7 @@ void PackInstallTask::copySettings()
     components->setComponentVersion("net.minecraft", m_pack.mcVersion, true);
 
     auto modloader = m_pack.loaderType;
-    if (modloader.has_value())
+    if (modloader.has_value()) {
         switch (modloader.value()) {
             case ModPlatform::NeoForge: {
                 components->setComponentVersion("net.neoforged", m_pack.loaderVersion, true);
@@ -102,11 +102,13 @@ void PackInstallTask::copySettings()
             case ModPlatform::Rift:
                 break;
         }
+    }
     components->saveNow();
 
     instance.setName(name());
-    if (m_instIcon == "default")
+    if (m_instIcon == "default") {
         m_instIcon = "ftb_logo";
+    }
     instance.setIconKey(m_instIcon);
 
     emitSucceeded();

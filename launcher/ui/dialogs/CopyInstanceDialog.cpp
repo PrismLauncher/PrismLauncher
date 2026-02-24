@@ -67,8 +67,9 @@ CopyInstanceDialog::CopyInstanceDialog(BaseInstance* original, QWidget* parent)
     groups.prepend("");
     ui->groupBox->addItems(groups);
     int index = groups.indexOf(APPLICATION->instances()->getInstanceGroup(m_original->id()));
-    if (index == -1)
+    if (index == -1) {
         index = 0;
+    }
 
     ui->groupBox->setCurrentIndex(index);
     ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));

@@ -131,8 +131,9 @@ void Technic::ListModel::searchWithTerm(const QString& term)
 
 void Technic::ListModel::performSearch()
 {
-    if (hasActiveSearchJob())
+    if (hasActiveSearchJob()) {
         return;
+    }
 
     auto netJob = makeShared<NetJob>("Technic::Search", APPLICATION->network());
     QString searchUrl = "";
@@ -191,8 +192,9 @@ void Technic::ListModel::searchRequestFinished(QByteArray* responsePtr)
                     auto technicPackObject = Json::requireObject(technicPack);
                     pack.name = Json::requireString(technicPackObject, "name");
                     pack.slug = Json::requireString(technicPackObject, "slug");
-                    if (pack.slug == "vanilla")
+                    if (pack.slug == "vanilla") {
                         continue;
+                    }
 
                     auto rawURL = technicPackObject["iconUrl"].toString("null");
                     if (rawURL == "null") {
@@ -240,8 +242,9 @@ void Technic::ListModel::searchRequestFinished(QByteArray* responsePtr)
     searchState = Finished;
 
     // When you have a Qt build with assertions turned on, proceeding here will abort the application
-    if (newList.size() == 0)
+    if (newList.size() == 0) {
         return;
+    }
 
     beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size() + newList.size() - 1);
     modpacks.append(newList);

@@ -62,8 +62,9 @@ ImportFTBPage::ImportFTBPage(NewInstanceDialog* dialog, QWidget* parent) : QWidg
     connect(ui->browseButton, &QPushButton::clicked, this, [this] {
         QString dir = QFileDialog::getExistingDirectory(this, tr("Select FTBApp instances directory"), listModel->getUserPath(),
                                                         QFileDialog::ShowDirsOnly);
-        if (!dir.isEmpty())
+        if (!dir.isEmpty()) {
             listModel->setPath(dir);
+        }
     });
 
     ui->modpackList->setItemDelegate(new ProjectItemDelegate(this));
@@ -119,8 +120,9 @@ QString saveIconToTempFile(const QIcon& icon)
 
 void ImportFTBPage::suggestCurrent()
 {
-    if (!isOpened)
+    if (!isOpened) {
         return;
+    }
 
     if (selected.path.isEmpty()) {
         dialog->setSuggestedPack();
@@ -159,8 +161,9 @@ void ImportFTBPage::onPackSelectionChanged(Modpack* pack)
         suggestCurrent();
         return;
     }
-    if (isOpened)
+    if (isOpened) {
         dialog->setSuggestedPack();
+    }
 }
 
 void ImportFTBPage::onSortingSelectionChanged(const QString& sort)

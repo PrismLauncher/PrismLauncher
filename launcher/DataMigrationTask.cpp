@@ -49,8 +49,9 @@ void DataMigrationTask::dryRunFinished()
     connect(&m_copy, &FS::copy::fileCopied, [&, this](const QString& relativeName) {
         QString shortenedName = relativeName;
         // shorten the filename to hopefully fit into one line
-        if (shortenedName.length() > 50)
+        if (shortenedName.length() > 50) {
             shortenedName = relativeName.left(20) + "…" + relativeName.right(29);
+        }
         setProgress(m_copy.totalCopied(), m_toCopy);
         setStatus(tr("Copying %1…").arg(shortenedName));
     });

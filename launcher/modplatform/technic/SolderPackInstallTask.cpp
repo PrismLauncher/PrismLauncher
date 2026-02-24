@@ -105,8 +105,9 @@ void Technic::SolderPackInstallTask::fileListSucceeded(QByteArray* response)
         return;
     }
 
-    if (!build.minecraft.isEmpty())
+    if (!build.minecraft.isEmpty()) {
         m_minecraftVersion = build.minecraft;
+    }
 
     m_filesNetJob.reset(new NetJob(tr("Downloading modpack"), m_network));
 

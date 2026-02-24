@@ -62,8 +62,9 @@ std::shared_ptr<Setting> SettingsObject::registerPassthrough(const std::shared_p
 
 std::shared_ptr<Setting> SettingsObject::registerSetting(QStringList synonyms, const QVariant& defVal)
 {
-    if (synonyms.empty())
+    if (synonyms.empty()) {
         return nullptr;
+    }
     if (contains(synonyms.first())) {
         qCritical() << QString("Failed to register setting %1. ID already exists.").arg(synonyms.first());
         return nullptr;  // Fail
@@ -78,8 +79,9 @@ std::shared_ptr<Setting> SettingsObject::registerSetting(QStringList synonyms, c
 std::shared_ptr<Setting> SettingsObject::getSetting(const QString& id) const
 {
     // Make sure there is a setting with the given ID.
-    if (!m_settings.contains(id))
+    if (!m_settings.contains(id)) {
         return nullptr;
+    }
 
     return m_settings[id];
 }
@@ -208,8 +210,9 @@ bool SettingsObject::setPathWithBookmark(const QString& id, const QString& path)
 void SettingsObject::reset(const QString& id) const
 {
     auto setting = getSetting(id);
-    if (setting)
+    if (setting) {
         setting->reset();
+    }
 }
 
 bool SettingsObject::contains(const QString& id)

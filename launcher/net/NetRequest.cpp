@@ -123,8 +123,9 @@ void NetRequest::executeTask()
     m_last_progress_bytes = 0;
 
     auto rep = getReply(request);
-    if (rep == nullptr)  // it failed
+    if (rep == nullptr) {  // it failed
         return;
+    }
     m_reply.reset(rep);
     connect(rep, &QNetworkReply::uploadProgress, this, &NetRequest::onProgress);
     connect(rep, &QNetworkReply::downloadProgress, this, &NetRequest::onProgress);
@@ -192,10 +193,12 @@ void NetRequest::downloadError(QNetworkReply::NetworkError error)
         }
         // error happened during download.
         qCCritical(logCat) << getUid().toString() << "Failed" << m_url.toString() << "with error" << error;
-        if (m_reply)
+        if (m_reply) {
             qCCritical(logCat) << getUid().toString() << "HTTP status:" << replyStatusCode() << errorString();
-        if (m_errorResponse.size() > 0)
+        }
+        if (m_errorResponse.size() > 0) {
             qCCritical(logCat) << getUid().toString() << "Response from server:" << m_errorResponse;
+        }
         m_state = State::Failed;
     }
 }

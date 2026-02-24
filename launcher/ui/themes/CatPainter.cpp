@@ -54,10 +54,12 @@ void CatPainter::paint(QPainter* painter, const QRect& viewport)
         aspectMode = Qt::KeepAspectRatio;
     } else if (fit == "fit") {
         aspectMode = Qt::KeepAspectRatio;
-        if (frame.width() < widWidth)
+        if (frame.width() < widWidth) {
             widWidth = frame.width();
-        if (frame.height() < widHeight)
+        }
+        if (frame.height() < widHeight) {
             widHeight = frame.height();
+        }
     }
     auto pixmap = frame.scaled(widWidth, widHeight, aspectMode, Qt::SmoothTransformation);
     QRect rectOfPixmap = pixmap.rect();

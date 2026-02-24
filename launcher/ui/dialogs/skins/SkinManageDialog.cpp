@@ -135,16 +135,19 @@ void SkinManageDialog::activated(QModelIndex index)
 
 void SkinManageDialog::selectionChanged(QItemSelection selected, [[maybe_unused]] const QItemSelection& deselected)
 {
-    if (selected.empty())
+    if (selected.empty()) {
         return;
+    }
 
     QString key = selected.first().indexes().first().data(Qt::UserRole).toString();
-    if (key.isEmpty())
+    if (key.isEmpty()) {
         return;
+    }
     m_selectedSkinKey = key;
     auto skin = getSelectedSkin();
-    if (!skin)
+    if (!skin) {
         return;
+    }
 
     if (m_skinPreview) {
         m_skinPreview->updateScene(skin);
@@ -378,8 +381,9 @@ void SkinManageDialog::on_action_Rename_Skin_triggered(bool)
 
 void SkinManageDialog::on_action_Delete_Skin_triggered(bool)
 {
-    if (m_selectedSkinKey.isEmpty())
+    if (m_selectedSkinKey.isEmpty()) {
         return;
+    }
 
     if (m_list.getSkinIndex(m_selectedSkinKey) == m_list.getSelectedAccountSkin()) {
         CustomMessageBox::selectable(this, tr("Delete error"), tr("Can not delete skin that is in use."), QMessageBox::Warning)->exec();
@@ -387,8 +391,9 @@ void SkinManageDialog::on_action_Delete_Skin_triggered(bool)
     }
 
     auto skin = m_list.skin(m_selectedSkinKey);
-    if (!skin)
+    if (!skin) {
         return;
+    }
 
     auto response = CustomMessageBox::selectable(this, tr("Confirm Deletion"),
                                                  tr("You are about to delete \"%1\".\n"
@@ -450,8 +455,9 @@ class WaitTask : public Task {
    protected:
     void executeTask() override
     {
-        if (!m_done)
+        if (!m_done) {
             m_loop.exec();
+        }
         emitSucceeded();
     };
 

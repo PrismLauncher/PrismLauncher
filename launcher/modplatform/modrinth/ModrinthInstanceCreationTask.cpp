@@ -29,11 +29,13 @@
 
 bool ModrinthCreationTask::abort()
 {
-    if (!canAbort())
+    if (!canAbort()) {
         return false;
+    }
 
-    if (m_task)
+    if (m_task) {
         m_task->abort();
+    }
     return InstanceCreationTask::abort();
 }
 
@@ -52,14 +54,16 @@ bool ModrinthCreationTask::updateInstance()
         if (!inst) {
             inst = instance_list->getInstanceById(originalName());
 
-            if (!inst)
+            if (!inst) {
                 return false;
+            }
         }
     }
 
     QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
-    if (!parseManifest(index_path, m_files, true, false))
+    if (!parseManifest(index_path, m_files, true, false)) {
         return false;
+    }
 
     auto version_name = inst->getManagedPackVersionName();
     m_root_path = QFileInfo(inst->gameRoot()).fileName();
@@ -67,8 +71,9 @@ bool ModrinthCreationTask::updateInstance()
 
     if (shouldConfirmUpdate()) {
         auto should_update = askIfShouldUpdate(m_parent, version_str);
-        if (should_update == ShouldUpdate::SkipUpdating)
+        if (should_update == ShouldUpdate::SkipUpdating) {
             return false;
+        }
         if (should_update == ShouldUpdate::Cancel) {
             m_abort = true;
             return false;
@@ -114,9 +119,10 @@ bool ModrinthCreationTask::updateInstance()
         // Some files were removed from the old version, and some will be downloaded in an updated version,
         // so we're fine removing them!
         if (!old_files.empty()) {
-            for (auto const& file : old_files) {
-                if (file.path.isEmpty())
+            for (const auto& file : old_files) {
+                if (file.path.isEmpty()) {
                     continue;
+                }
                 qDebug() << "Scheduling" << file.path << "for removal";
                 m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(file.path));
                 if (file.path.endsWith(".disabled")) {  // remove it if it was enabled/disabled by user
@@ -132,16 +138,18 @@ bool ModrinthCreationTask::updateInstance()
         // FIXME: We may want to do something about disabled mods.
         auto old_overrides = Override::readOverrides("overrides", old_index_folder);
         for (const auto& entry : old_overrides) {
-            if (entry.isEmpty())
+            if (entry.isEmpty()) {
                 continue;
+            }
             qDebug() << "Scheduling" << entry << "for removal";
             m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
         }
 
         auto old_client_overrides = Override::readOverrides("client-overrides", old_index_folder);
         for (const auto& entry : old_client_overrides) {
-            if (entry.isEmpty())
+            if (entry.isEmpty()) {
                 continue;
+            }
             qDebug() << "Scheduling" << entry << "for removal";
             m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
         }
@@ -175,8 +183,9 @@ std::unique_ptr<MinecraftInstance> ModrinthCreationTask::createInstance()
     QString parent_folder(FS::PathCombine(m_stagingPath, "mrpack"));
 
     QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
-    if (m_files.empty() && !parseManifest(index_path, m_files, true, true))
+    if (m_files.empty() && !parseManifest(index_path, m_files, true, true)) {
         return nullptr;
+    }
 
     // Keep index file in case we need it some other time (like when changing versions)
     QString new_index_place(FS::PathCombine(parent_folder, "modrinth.index.json"));
@@ -218,14 +227,18 @@ std::unique_ptr<MinecraftInstance> ModrinthCreationTask::createInstance()
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", m_minecraft_version, true);
 
-    if (!m_fabric_version.isEmpty())
+    if (!m_fabric_version.isEmpty()) {
         components->setComponentVersion("net.fabricmc.fabric-loader", m_fabric_version);
-    if (!m_quilt_version.isEmpty())
+    }
+    if (!m_quilt_version.isEmpty()) {
         components->setComponentVersion("org.quiltmc.quilt-loader", m_quilt_version);
-    if (!m_forge_version.isEmpty())
+    }
+    if (!m_forge_version.isEmpty()) {
         components->setComponentVersion("net.minecraftforge", m_forge_version);
-    if (!m_neoForge_version.isEmpty())
+    }
+    if (!m_neoForge_version.isEmpty()) {
         components->setComponentVersion("net.neoforged", m_neoForge_version);
+    }
 
     if (m_instIcon != "default") {
         instance->setIconKey(m_instIcon);
@@ -234,10 +247,11 @@ std::unique_ptr<MinecraftInstance> ModrinthCreationTask::createInstance()
     }
 
     // Don't add managed info to packs without an ID (most likely imported from ZIP)
-    if (!m_managed_id.isEmpty())
+    if (!m_managed_id.isEmpty()) {
         instance->setManagedPack("modrinth", m_managed_id, m_managed_name, m_managed_version_id, version());
-    else
+    } else {
         instance->setManagedPack("modrinth", "", name(), "", "");
+    }
 
     instance->setName(name());
     instance->saveNow();
@@ -281,8 +295,9 @@ std::unique_ptr<MinecraftInstance> ModrinthCreationTask::createInstance()
                 auto ndl = Net::ApiDownload::makeFile(file.downloads.dequeue(), file_path);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 downloadMods->addNetAction(ndl);
-                if (auto shared = param.lock())
+                if (auto shared = param.lock()) {
                     shared->succeeded();
+                }
             });
         }
     }
@@ -343,8 +358,9 @@ std::unique_ptr<MinecraftInstance> ModrinthCreationTask::createInstance()
         // is preserved, but if we're using the original one, we update the version string.
         // NOTE: This needs to come before the copyManagedPack call!
         if (inst->name().contains(inst->getManagedPackVersionName()) && inst->name() != instance->name()) {
-            if (askForChangingInstanceName(m_parent, inst->name(), instance->name()) == InstanceNameChange::ShouldChange)
+            if (askForChangingInstanceName(m_parent, inst->name(), instance->name()) == InstanceNameChange::ShouldChange) {
                 inst->setName(instance->name());
+            }
         }
 
         inst->copyManagedPack(*instance);
@@ -372,8 +388,9 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
             }
 
             if (set_internal_data) {
-                if (m_managed_version_id.isEmpty())
+                if (m_managed_version_id.isEmpty()) {
                     m_managed_version_id = obj["versionId"].toString();
+                }
                 m_managed_name = obj["name"].toString();
             }
 
@@ -411,8 +428,9 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
                     if (!download_url.isValid()) {
                         qDebug()
                             << QString("Download URL (%1) for %2 is not a correctly formatted URL").arg(download_url.toString(), file.path);
-                        if (is_last && file.downloads.isEmpty())
+                        if (is_last && file.downloads.isEmpty()) {
                             throw JSONValidationError(tr("Download URL for %1 is not a correctly formatted URL").arg(file.path));
+                        }
                     } else {
                         file.downloads.push_back(download_url);
                     }
@@ -424,8 +442,9 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
             if (!optionalFiles.empty()) {
                 if (show_optional_dialog) {
                     QStringList oFiles;
-                    for (const auto& file : optionalFiles)
+                    for (const auto& file : optionalFiles) {
                         oFiles.push_back(file.path);
+                    }
                     OptionalModDialog optionalModDialog(m_parent, oFiles);
                     if (optionalModDialog.exec() == QDialog::Rejected) {
                         emitAborted();

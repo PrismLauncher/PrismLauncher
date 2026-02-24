@@ -26,8 +26,9 @@ std::unique_ptr<MinecraftInstance> VanillaCreationTask::createInstance()
     auto components = inst->getPackProfile();
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", m_version->descriptor(), true);
-    if (m_using_loader)
+    if (m_using_loader) {
         components->setComponentVersion(m_loader, m_loader_version->descriptor());
+    }
 
     inst->setName(name());
     inst->setIconKey(m_instIcon);

@@ -95,8 +95,9 @@ QSize LabeledToolButton::sizeHint() const
     h = sz.height();
 
     opt.rect.setSize(QSize(w, h));  // PM_MenuButtonIndicator depends on the height
-    if (popupMode() == MenuButtonPopup)
+    if (popupMode() == MenuButtonPopup) {
         w += style()->pixelMetric(QStyle::PM_MenuButtonIndicator, &opt, this);
+    }
 
     return style()->sizeFromContents(QStyle::CT_ToolButton, &opt, QSize(w, h), this);
 }
@@ -118,8 +119,9 @@ void LabeledToolButton::resetIcon()
     float ar = w / h;
     // FIXME: hardcoded max size of 160x80
     int newW = 80 * ar;
-    if (newW > 160)
+    if (newW > 160) {
         newW = 160;
+    }
     QSize newSz(newW, 80);
     auto pixmap = m_icon.pixmap(newSz);
     m_label->setPixmap(pixmap);

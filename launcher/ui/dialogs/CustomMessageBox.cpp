@@ -32,8 +32,9 @@ QMessageBox* selectable(QWidget* parent,
     messageBox->setTextInteractionFlags(Qt::TextSelectableByMouse);
     messageBox->setIcon(icon);
     messageBox->setTextInteractionFlags(Qt::TextBrowserInteraction);
-    if (checkBox)
+    if (checkBox) {
         messageBox->setCheckBox(checkBox);
+    }
 
     return messageBox;
 }

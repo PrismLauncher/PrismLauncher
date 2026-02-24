@@ -84,8 +84,9 @@ void ProgressDialog::setSkipButton(bool present, const QString& label)
 void ProgressDialog::on_skipButton_clicked(bool checked)
 {
     Q_UNUSED(checked);
-    if (ui->skipButton->isEnabled())  // prevent other triggers from aborting
+    if (ui->skipButton->isEnabled()) {  // prevent other triggers from aborting
         m_task->abort();
+    }
 }
 
 ProgressDialog::~ProgressDialog()
@@ -102,10 +103,12 @@ void ProgressDialog::updateSize(bool recenterParent)
     QPoint lastPos = this->pos();
     int minHeight = ui->globalStatusDetailsLabel->minimumSize().height() + (ui->verticalLayout->spacing() * 2);
     minHeight += ui->globalProgressBar->minimumSize().height() + ui->verticalLayout->spacing();
-    if (!ui->taskProgressScrollArea->isHidden())
+    if (!ui->taskProgressScrollArea->isHidden()) {
         minHeight += ui->taskProgressScrollArea->minimumSizeHint().height() + ui->verticalLayout->spacing();
-    if (ui->skipButton->isVisible())
+    }
+    if (ui->skipButton->isVisible()) {
         minHeight += ui->skipButton->height() + ui->verticalLayout->spacing();
+    }
     minHeight = std::max(minHeight, 60);
     QSize minSize = QSize(480, minHeight);
 
@@ -238,8 +241,9 @@ void ProgressDialog::changeStepProgress(TaskStepProgress const& task_progress)
         updateSize();
     }
 
-    if (!taskProgress.contains(task_progress.uid))
+    if (!taskProgress.contains(task_progress.uid)) {
         addTaskProgress(task_progress);
+    }
     auto task_bar = taskProgress.value(task_progress.uid);
 
     auto const [mapped_current, mapped_total] = map_int_zero_max<qint64>(task_progress.current, task_progress.total, 0);

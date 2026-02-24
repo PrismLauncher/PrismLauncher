@@ -6,7 +6,8 @@
 
 #include "McResolver.h"
 
-McResolver::McResolver(QObject* parent, QString domain, int port) : QObject(parent), m_constrDomain(std::move(domain)), m_constrPort(port) {}
+McResolver::McResolver(QObject* parent, QString domain, int port) : QObject(parent), m_constrDomain(std::move(domain)), m_constrPort(port)
+{}
 
 void McResolver::ping()
 {

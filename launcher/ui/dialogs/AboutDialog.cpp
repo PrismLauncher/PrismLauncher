@@ -94,25 +94,29 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent), ui(new Ui::AboutDia
 
     ui->versionLabel->setText(BuildConfig.printableVersionString());
 
-    if (!BuildConfig.BUILD_PLATFORM.isEmpty())
+    if (!BuildConfig.BUILD_PLATFORM.isEmpty()) {
         ui->platformLabel->setText(tr("Platform") + ": " + BuildConfig.BUILD_PLATFORM);
-    else
+    } else {
         ui->platformLabel->setVisible(false);
+    }
 
-    if (!BuildConfig.GIT_COMMIT.isEmpty())
+    if (!BuildConfig.GIT_COMMIT.isEmpty()) {
         ui->commitLabel->setText(tr("Commit: %1").arg(BuildConfig.GIT_COMMIT));
-    else
+    } else {
         ui->commitLabel->setVisible(false);
+    }
 
-    if (!BuildConfig.BUILD_DATE.isEmpty())
+    if (!BuildConfig.BUILD_DATE.isEmpty()) {
         ui->buildDateLabel->setText(tr("Build date: %1").arg(BuildConfig.BUILD_DATE));
-    else
+    } else {
         ui->buildDateLabel->setVisible(false);
+    }
 
-    if (!BuildConfig.VERSION_CHANNEL.isEmpty())
+    if (!BuildConfig.VERSION_CHANNEL.isEmpty()) {
         ui->channelLabel->setText(tr("Channel") + ": " + BuildConfig.VERSION_CHANNEL);
-    else
+    } else {
         ui->channelLabel->setVisible(false);
+    }
 
     QString urlText("<html><head/><body><p><a href=\"%1\">%1</a></p></body></html>");
     ui->urlLabel->setText(urlText.arg(BuildConfig.LAUNCHER_GIT));

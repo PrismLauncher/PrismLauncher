@@ -48,8 +48,9 @@ void loadShareCodeResponse(ShareCodeResponse& r, QJsonObject& obj)
     r.error = Json::requireBoolean(obj, "error");
     r.code = Json::requireInteger(obj, "code");
 
-    if (obj.contains("message") && !obj.value("message").isNull())
+    if (obj.contains("message") && !obj.value("message").isNull()) {
         r.message = Json::requireString(obj, "message");
+    }
 
     if (!r.error) {
         auto dataRaw = Json::requireObject(obj, "data");

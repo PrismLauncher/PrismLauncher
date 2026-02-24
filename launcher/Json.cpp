@@ -109,8 +109,9 @@ QJsonDocument parseUntilGarbage(const QByteArray& json, QJsonParseError* error, 
         QByteArray validJson = json.left(offset);
         doc = QJsonDocument::fromJson(validJson, error);
 
-        if (garbage)
+        if (garbage) {
             *garbage = json.right(json.size() - offset);
+        }
     }
 
     return doc;
@@ -299,8 +300,9 @@ QStringList toStringList(const QString& jsonString)
     QJsonParseError parseError;
     QJsonDocument doc = QJsonDocument::fromJson(jsonString.toUtf8(), &parseError);
 
-    if (parseError.error != QJsonParseError::NoError || !doc.isArray())
+    if (parseError.error != QJsonParseError::NoError || !doc.isArray()) {
         return {};
+    }
     try {
         return requireIsArrayOf<QString>(doc);
     } catch (Json::JsonException&) {
@@ -324,8 +326,9 @@ QVariantMap toMap(const QString& jsonString)
     QJsonParseError parseError;
     QJsonDocument doc = QJsonDocument::fromJson(jsonString.toUtf8(), &parseError);
 
-    if (parseError.error != QJsonParseError::NoError || !doc.isObject())
+    if (parseError.error != QJsonParseError::NoError || !doc.isObject()) {
         return {};
+    }
 
     QJsonObject obj = doc.object();
     return obj.toVariantMap();

@@ -19,8 +19,9 @@ class RWStorage {
         QReadLocker l(&lock);
         if (cache.contains(key)) {
             return cache[key];
-        } else
+        } else {
             return V();
+        }
     }
     bool get(const K& key, V& value)
     {
@@ -28,8 +29,9 @@ class RWStorage {
         if (cache.contains(key)) {
             value = cache[key];
             return true;
-        } else
+        } else {
             return false;
+        }
     }
     bool has(K key)
     {
@@ -39,8 +41,9 @@ class RWStorage {
     bool stale(const K& key)
     {
         QReadLocker l(&lock);
-        if (!cache.contains(key))
+        if (!cache.contains(key)) {
             return true;
+        }
         return stale_entries.contains(key);
     }
     void setStale(const K& key)

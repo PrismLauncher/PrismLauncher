@@ -162,8 +162,9 @@ void InstanceView::updateScrollbar()
             }
         }
         // do not divide by zero
-        if (itemScroll == 0)
+        if (itemScroll == 0) {
             itemScroll = 64;
+        }
 
         totalHeight += m_bottomMargin;
         verticalScrollBar()->setSingleStep(itemScroll);
@@ -672,8 +673,9 @@ void InstanceView::startDrag(Qt::DropActions supportedActions)
     executeDelayedItemsLayout();
 
     QModelIndexList indexes = selectionModel()->selectedIndexes();
-    if (indexes.count() == 0)
+    if (indexes.count() == 0) {
         return;
+    }
 
     QMimeData* mimeData = model()->mimeData(indexes);
     if (!mimeData) {
@@ -805,7 +807,7 @@ std::pair<VisualGroup*, VisualGroup::HitResults> InstanceView::rowDropPos(const 
 
 QPoint InstanceView::offset() const
 {
-    return {horizontalOffset(), verticalOffset()};
+    return { horizontalOffset(), verticalOffset() };
 }
 
 QRegion InstanceView::visualRegionForSelection(const QItemSelection& selection) const
@@ -834,8 +836,9 @@ QModelIndex InstanceView::moveCursor(QAbstractItemView::CursorAction cursorActio
     }
     auto cat = category(current);
     int group_index = m_groups.indexOf(cat);
-    if (group_index < 0)
+    if (group_index < 0) {
         return current;
+    }
 
     QPair<int, int> pos = cat->positionOf(current);
     int column = pos.first;
@@ -981,8 +984,9 @@ void InstanceView::scrollContentsBy(int dx, int dy)
 
 void InstanceView::scrollTo(const QModelIndex& index, ScrollHint hint)
 {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return;
+    }
 
     const QRect rect = visualRect(index);
     if (hint == EnsureVisible && viewport()->rect().contains(rect)) {
@@ -1001,11 +1005,12 @@ int InstanceView::verticalScrollToValue([[maybe_unused]] const QModelIndex& inde
 
     int verticalValue = verticalScrollBar()->value();
     QRect adjusted = rect.adjusted(-spacing(), -spacing(), spacing(), spacing());
-    if (hint == QListView::PositionAtTop || above)
+    if (hint == QListView::PositionAtTop || above) {
         verticalValue += adjusted.top();
-    else if (hint == QListView::PositionAtBottom || below)
+    } else if (hint == QListView::PositionAtBottom || below) {
         verticalValue += qMin(adjusted.top(), adjusted.bottom() - area.height() + 1);
-    else if (hint == QListView::PositionAtCenter)
+    } else if (hint == QListView::PositionAtCenter) {
         verticalValue += adjusted.top() - ((area.height() - adjusted.height()) / 2);
+    }
     return verticalValue;
 }

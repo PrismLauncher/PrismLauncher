@@ -57,8 +57,9 @@ DataPackFolderModel::DataPackFolderModel(const QString& dir, BaseInstance* insta
 
 QVariant DataPackFolderModel::data(const QModelIndex& index, int role) const
 {
-    if (!validateIndex(index))
+    if (!validateIndex(index)) {
         return {};
+    }
 
     int row = index.row();
     int column = index.column();
@@ -71,12 +72,14 @@ QVariant DataPackFolderModel::data(const QModelIndex& index, int role) const
                 case PackFormatColumn: {
                     auto& resource = at(row);
                     auto pack_format = resource.packFormat();
-                    if (pack_format == 0)
+                    if (pack_format == 0) {
                         return tr("Unrecognized");
+                    }
 
                     auto version_bounds = resource.compatibleVersions();
-                    if (version_bounds.first.toString().isEmpty())
+                    if (version_bounds.first.toString().isEmpty()) {
                         return QString::number(pack_format);
+                    }
 
                     return QString("%1 (%2 - %3)")
                         .arg(QString::number(pack_format), version_bounds.first.toString(), version_bounds.second.toString());

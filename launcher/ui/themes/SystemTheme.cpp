@@ -129,7 +129,7 @@ double SystemTheme::fadeAmount()
 
 QColor SystemTheme::fadeColor()
 {
-    return {128, 128, 128};
+    return { 128, 128, 128 };
 }
 
 bool SystemTheme::hasStyleSheet()

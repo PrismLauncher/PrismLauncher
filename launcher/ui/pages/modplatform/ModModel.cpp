@@ -33,12 +33,15 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
     auto loaders = profile->getSupportedModLoaders();
 
     // Version filter
-    if (!m_filter->versions.empty())
+    if (!m_filter->versions.empty()) {
         versions = m_filter->versions;
-    if (m_filter->loaders)
+    }
+    if (m_filter->loaders) {
         loaders = m_filter->loaders;
-    if (!m_filter->categoryIds.empty())
+    }
+    if (!m_filter->categoryIds.empty()) {
         categories = m_filter->categoryIds;
+    }
     auto side = m_filter->side;
 
     auto sort = getCurrentSortingMethodByIndex();
@@ -58,10 +61,12 @@ ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(const QModelInd
 
     std::optional<std::vector<Version>> versions{};
     auto loaders = profile->getSupportedModLoaders();
-    if (!m_filter->versions.empty())
+    if (!m_filter->versions.empty()) {
         versions = m_filter->versions;
-    if (m_filter->loaders)
+    }
+    if (m_filter->loaders) {
         loaders = m_filter->loaders;
+    }
 
     return { pack, versions, loaders, ModPlatform::ResourceType::Mod };
 }
@@ -88,8 +93,9 @@ bool ModModel::isPackInstalled(ModPlatform::IndexedPack::Ptr pack) const
 {
     auto allMods = static_cast<MinecraftInstance&>(m_base_instance).loaderModList()->allMods();
     return std::any_of(allMods.cbegin(), allMods.cend(), [pack](Mod* mod) {
-        if (auto meta = mod->metadata(); meta)
+        if (auto meta = mod->metadata(); meta) {
             return meta->provider == pack->provider && meta->project_id == pack->addonId;
+        }
         return false;
     });
 }
@@ -113,18 +119,21 @@ bool checkSide(ModPlatform::Side filter, ModPlatform::Side value)
 
 bool ModModel::checkFilters(ModPlatform::IndexedPack::Ptr pack)
 {
-    if (!m_filter)
+    if (!m_filter) {
         return true;
+    }
     return !(m_filter->hideInstalled && isPackInstalled(pack)) && checkSide(m_filter->side, pack->side);
 }
 
 bool ModModel::checkVersionFilters(const ModPlatform::IndexedVersion& v)
 {
-    if (!m_filter)
+    if (!m_filter) {
         return true;
+    }
     auto loaders = static_cast<MinecraftInstance&>(m_base_instance).getPackProfile()->getSupportedModLoaders();
-    if (m_filter->loaders)
+    if (m_filter->loaders) {
         loaders = m_filter->loaders;
+    }
     return (!optedOut(v) &&                                                         // is opted out(aka curseforge download link)
             (!loaders.has_value() || !v.loaders || loaders.value() & v.loaders) &&  // loaders
             checkSide(m_filter->side, v.side) &&                                    // side

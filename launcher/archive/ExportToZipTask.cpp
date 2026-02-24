@@ -41,26 +41,29 @@ auto ExportToZipTask::exportZip() -> ZipResult
     }
 
     for (const auto& fileName : m_extraFiles.keys()) {
-        if (m_buildZipFuture.isCanceled())
+        if (m_buildZipFuture.isCanceled()) {
             return {};
+        }
         if (!m_output.addFile(fileName, m_extraFiles[fileName])) {
             return ZipResult(tr("Could not add:") + fileName);
         }
     }
 
     for (const QFileInfo& file : m_files) {
-        if (m_buildZipFuture.isCanceled())
+        if (m_buildZipFuture.isCanceled()) {
             return {};
+        }
 
         auto absolute = file.absoluteFilePath();
         auto relative = m_dir.relativeFilePath(absolute);
         setStatus("Compressing: " + relative);
         setProgress(m_progress + 1, m_progressTotal);
         if (m_followSymlinks) {
-            if (file.isSymLink())
+            if (file.isSymLink()) {
                 absolute = file.symLinkTarget();
-            else
+            } else {
                 absolute = file.canonicalFilePath();
+            }
         }
 
         if (!m_excludeFiles.contains(relative) && !m_output.addFile(absolute, m_destinationPrefix + relative)) {

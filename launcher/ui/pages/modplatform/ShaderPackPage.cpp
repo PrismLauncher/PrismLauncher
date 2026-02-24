@@ -36,8 +36,7 @@ QMap<QString, QString> ShaderPackResourcePage::urlHandlers() const
 {
     QMap<QString, QString> map;
     map.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?modrinth\.com\/shaders\/([^\/]+)\/?)"), "modrinth");
-    map.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?curseforge\.com\/minecraft\/customization\/([^\/]+)\/?)"),
-               "curseforge");
+    map.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?curseforge\.com\/minecraft\/customization\/([^\/]+)\/?)"), "curseforge");
     map.insert(QRegularExpression::anchoredPattern(R"(minecraft\.curseforge\.com\/projects\/([^\/]+)\/?)"), "curseforge");
     return map;
 }

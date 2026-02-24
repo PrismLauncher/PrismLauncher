@@ -140,8 +140,9 @@ class ResourceFolderModelTest : public QObject {
 
         EXEC_UPDATE_TASK(model.startWatching(), )
 
-        for (auto mod : model.allMods())
+        for (auto mod : model.allMods()) {
             qDebug() << mod->name();
+        }
 
         QCOMPARE(model.size(), 4);
 
@@ -210,8 +211,9 @@ class ResourceFolderModelTest : public QObject {
             EXEC_UPDATE_TASK(model.installResource(file_mod), QVERIFY)
         }
 
-        for (auto res : model.allResources())
+        for (auto res : model.allResources()) {
             qDebug() << res->name();
+        }
 
         QCOMPARE(model.size(), 2);
 

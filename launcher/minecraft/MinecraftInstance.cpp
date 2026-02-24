@@ -111,19 +111,22 @@
 [[maybe_unused]] static bool switcherooSetupGPU(QProcessEnvironment& env)
 {
 #ifdef WITH_QTDBUS
-    if (!QDBusConnection::systemBus().isConnected())
+    if (!QDBusConnection::systemBus().isConnected()) {
         return false;
+    }
 
     QDBusInterface switcheroo("net.hadess.SwitcherooControl", "/net/hadess/SwitcherooControl", "org.freedesktop.DBus.Properties",
                               QDBusConnection::systemBus());
 
-    if (!switcheroo.isValid())
+    if (!switcheroo.isValid()) {
         return false;
+    }
 
     QDBusReply<QDBusVariant> reply =
         switcheroo.call(QStringLiteral("Get"), QStringLiteral("net.hadess.SwitcherooControl"), QStringLiteral("GPUs"));
-    if (!reply.isValid())
+    if (!reply.isValid()) {
         return false;
+    }
 
     auto arg = qvariant_cast<QDBusArgument>(reply.value().variant());
     QList<QVariantMap> gpus;
@@ -181,8 +184,9 @@ void MinecraftInstance::saveNow()
 
 void MinecraftInstance::loadSpecificSettings()
 {
-    if (isSpecificSettingsLoaded())
+    if (isSpecificSettingsLoaded()) {
         return;
+    }
 
     // Java Settings
     auto locationOverride = m_settings->registerSetting("OverrideJavaLocation", false);
@@ -353,10 +357,11 @@ QString MinecraftInstance::gameRoot() const
     QFileInfo mcDir(FS::PathCombine(instanceRoot(), "minecraft"));
     QFileInfo dotMCDir(FS::PathCombine(instanceRoot(), ".minecraft"));
 
-    if (dotMCDir.exists() && !mcDir.exists())
+    if (dotMCDir.exists() && !mcDir.exists()) {
         return dotMCDir.filePath();
-    else
+    } else {
         return mcDir.filePath();
+    }
 }
 
 QString MinecraftInstance::binRoot() const
@@ -414,8 +419,9 @@ QString MinecraftInstance::dataPacksDir()
 {
     QString relativePath = settings()->get("GlobalDataPacksPath").toString();
 
-    if (relativePath.isEmpty())
+    if (relativePath.isEmpty()) {
         relativePath = "datapacks";
+    }
 
     return QDir(gameRoot()).filePath(relativePath);
 }
@@ -518,8 +524,9 @@ QStringList MinecraftInstance::extraArguments()
 {
     auto list = BaseInstance::extraArguments();
     auto version = getPackProfile();
-    if (!version)
+    if (!version) {
         return list;
+    }
     auto jarMods = getJarMods();
     if (!jarMods.isEmpty()) {
         list.append({ "-Dfml.ignoreInvalidMinecraftCertificates=true", "-Dfml.ignorePatchDiscrepancies=true" });
@@ -546,23 +553,27 @@ QStringList MinecraftInstance::extraArguments()
         if (settings()->get("UseNativeOpenAL").toBool()) {
             openALPath = APPLICATION->m_detectedOpenALPath;
             auto customPath = settings()->get("CustomOpenALPath").toString();
-            if (!customPath.isEmpty())
+            if (!customPath.isEmpty()) {
                 openALPath = customPath;
+            }
         }
         if (settings()->get("UseNativeGLFW").toBool()) {
             glfwPath = APPLICATION->m_detectedGLFWPath;
             auto customPath = settings()->get("CustomGLFWPath").toString();
-            if (!customPath.isEmpty())
+            if (!customPath.isEmpty()) {
                 glfwPath = customPath;
+            }
         }
 
         QFileInfo openALInfo(openALPath);
         QFileInfo glfwInfo(glfwPath);
 
-        if (!openALPath.isEmpty() && openALInfo.exists())
+        if (!openALPath.isEmpty() && openALInfo.exists()) {
             list.append("-Dorg.lwjgl.openal.libname=" + openALInfo.absoluteFilePath());
-        if (!glfwPath.isEmpty() && glfwInfo.exists())
+        }
+        if (!glfwPath.isEmpty() && glfwInfo.exists()) {
             list.append("-Dorg.lwjgl.glfw.libname=" + glfwInfo.absoluteFilePath());
+        }
     }
 
     return list;
@@ -627,9 +638,10 @@ QStringList MinecraftInstance::javaArguments()
         }
     }
 
-    if (javaVersion.isModular() && shouldApplyOnlineFixes())
+    if (javaVersion.isModular() && shouldApplyOnlineFixes()) {
         // allow reflective access to java.net - required by the skin fix
         args << "--add-opens" << "java.base/java.net=ALL-UNNAMED";
+    }
 
     return args;
 }
@@ -637,8 +649,9 @@ QStringList MinecraftInstance::javaArguments()
 QString MinecraftInstance::getLauncher()
 {
     // use legacy launcher if the traits are set
-    if (isLegacy())
+    if (isLegacy()) {
         return "legacy";
+    }
 
     return "standard";
 }
@@ -682,11 +695,13 @@ QProcessEnvironment MinecraftInstance::createEnvironment()
 
     auto insertEnv = [&env](const QString& value) {
         auto envMap = Json::toMap(value);
-        if (envMap.isEmpty())
+        if (envMap.isEmpty()) {
             return;
+        }
 
-        for (auto iter = envMap.begin(); iter != envMap.end(); iter++)
+        for (auto iter = envMap.begin(); iter != envMap.end(); iter++) {
             env.insert(iter.key(), iter.value().toString());
+        }
     };
 
     insertEnv(settings()->get("Env").toString());
@@ -701,16 +716,18 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
 #ifdef Q_OS_LINUX
     if (settings()->get("EnableMangoHud").toBool() && APPLICATION->capabilities() & Application::SupportsMangoHud) {
         QStringList preloadList;
-        if (auto value = env.value("LD_PRELOAD"); !value.isEmpty())
+        if (auto value = env.value("LD_PRELOAD"); !value.isEmpty()) {
             preloadList = value.split(QLatin1String(":"));
+        }
 
         auto mangoHudLibString = MangoHud::getLibraryString();
         if (!mangoHudLibString.isEmpty()) {
             QFileInfo mangoHudLib(mangoHudLibString);
             QString libPath = mangoHudLib.absolutePath();
             auto appendLib = [libPath, &preloadList](const QString& fileName) {
-                if (QFileInfo(FS::PathCombine(libPath, fileName)).exists())
+                if (QFileInfo(FS::PathCombine(libPath, fileName)).exists()) {
                     preloadList << FS::PathCombine(libPath, fileName);
+                }
             };
 
             // dlsym variant is only needed for OpenGL and not included in the vulkan layer
@@ -793,11 +810,13 @@ QString MinecraftInstance::createLaunchScript(const AuthSessionPtr& session, con
 {
     QString launchScript;
 
-    if (!m_components)
+    if (!m_components) {
         return {};
+    }
     auto profile = m_components->getProfile();
-    if (!profile)
+    if (!profile) {
         return {};
+    }
 
     auto mainClass = getMainClass();
     if (!mainClass.isEmpty()) {
@@ -877,8 +896,9 @@ QString MinecraftInstance::createLaunchScript(const AuthSessionPtr& session, con
         launchScript += "traits " + trait + "\n";
     }
 
-    if (shouldApplyOnlineFixes())
+    if (shouldApplyOnlineFixes()) {
         launchScript += "onlineFixes true\n";
+    }
 
     launchScript += "launcher " + getLauncher() + "\n";
 
@@ -913,10 +933,12 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
     bool nativeOpenAL = settings->get("UseNativeOpenAL").toBool();
     bool nativeGLFW = settings->get("UseNativeGLFW").toBool();
     if (nativeOpenAL || nativeGLFW) {
-        if (nativeOpenAL)
+        if (nativeOpenAL) {
             out << "Using system OpenAL.";
-        if (nativeGLFW)
+        }
+        if (nativeGLFW) {
             out << "Using system GLFW.";
+        }
         out << emptyLine;
     }
 

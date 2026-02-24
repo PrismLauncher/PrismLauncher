@@ -20,7 +20,7 @@
 
 #include "JsonFormat.h"
 
-Meta::Version::Version(QString  uid, QString  version) : BaseVersion(), m_uid(std::move(uid)), m_version(std::move(version)) {}
+Meta::Version::Version(QString uid, QString version) : BaseVersion(), m_uid(std::move(uid)), m_version(std::move(version)) {}
 
 QString Meta::Version::descriptor() const
 {
@@ -28,8 +28,9 @@ QString Meta::Version::descriptor() const
 }
 QString Meta::Version::name() const
 {
-    if (m_data)
+    if (m_data) {
         return m_data->name;
+    }
     return m_uid;
 }
 QString Meta::Version::typeString() const

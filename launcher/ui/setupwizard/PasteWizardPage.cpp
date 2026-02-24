@@ -25,8 +25,9 @@ bool PasteWizardPage::validatePage()
     if (ui->previousSettingsRadioButton->isChecked()) {
         bool usingDefaultBase = prevPasteURL == PasteUpload::PasteTypes.at(PasteUpload::PasteType::NullPointer).defaultBase;
         s->set("PastebinType", PasteUpload::PasteType::NullPointer);
-        if (!usingDefaultBase)
+        if (!usingDefaultBase) {
             s->set("PastebinCustomAPIBase", prevPasteURL);
+        }
     }
 
     return true;

@@ -203,18 +203,21 @@ auto PasteUpload::Sink::finalize(QNetworkReply& reply) -> Task::State
     return Task::State::Succeeded;
 }
 
-PasteUpload::PasteUpload(QString  log, QString url, PasteType pasteType) : m_log(std::move(log)), m_baseUrl(std::move(url)), m_paste_type(pasteType)
+PasteUpload::PasteUpload(QString log, QString url, PasteType pasteType)
+    : m_log(std::move(log)), m_baseUrl(std::move(url)), m_paste_type(pasteType)
 {
     anonymizeLog(m_log);
     auto base = PasteUpload::PasteTypes.at(pasteType);
-    if (m_baseUrl.isEmpty())
+    if (m_baseUrl.isEmpty()) {
         m_baseUrl = base.defaultBase;
+    }
 
     // HACK: Paste's docs say the standard API path is at /api/<version> but the official instance paste.gg doesn't follow that??
-    if (pasteType == PasteUpload::PasteGG && m_baseUrl == base.defaultBase)
+    if (pasteType == PasteUpload::PasteGG && m_baseUrl == base.defaultBase) {
         m_url = "https://api.paste.gg/v1/pastes";
-    else
+    } else {
         m_url = m_baseUrl + base.endpointPath;
+    }
 
     m_sink = std::make_unique<Sink>(this);
 }

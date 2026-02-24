@@ -102,8 +102,9 @@ void DataPack::setImage(const QImage& new_image) const
 
     Q_ASSERT(!new_image.isNull());
 
-    if (m_pack_image_cache_key.key.isValid())
+    if (m_pack_image_cache_key.key.isValid()) {
         PixmapCache::instance().remove(m_pack_image_cache_key.key);
+    }
 
     // scale the image to avoid flooding the pixmapcache
     auto pixmap =
@@ -123,8 +124,9 @@ QPixmap DataPack::image(QSize size, Qt::AspectRatioMode mode) const
 {
     QPixmap cached_image;
     if (PixmapCache::instance().find(m_pack_image_cache_key.key, &cached_image)) {
-        if (size.isNull())
+        if (size.isNull()) {
             return cached_image;
+        }
         return cached_image.scaled(size, mode, Qt::SmoothTransformation);
     }
 
@@ -157,10 +159,12 @@ int DataPack::compare(const Resource& other, SortType type) const
         auto this_ver = packFormat();
         auto other_ver = cast_other.packFormat();
 
-        if (this_ver > other_ver)
+        if (this_ver > other_ver) {
             return 1;
-        if (this_ver < other_ver)
+        }
+        if (this_ver < other_ver) {
             return -1;
+        }
     } else {
         return Resource::compare(other, type);
     }
@@ -169,16 +173,20 @@ int DataPack::compare(const Resource& other, SortType type) const
 
 bool DataPack::applyFilter(QRegularExpression filter) const
 {
-    if (filter.match(description()).hasMatch())
+    if (filter.match(description()).hasMatch()) {
         return true;
+    }
 
-    if (filter.match(QString::number(packFormat())).hasMatch())
+    if (filter.match(QString::number(packFormat())).hasMatch()) {
         return true;
+    }
 
-    if (filter.match(compatibleVersions().first.toString()).hasMatch())
+    if (filter.match(compatibleVersions().first.toString()).hasMatch()) {
         return true;
-    if (filter.match(compatibleVersions().second.toString()).hasMatch())
+    }
+    if (filter.match(compatibleVersions().second.toString()).hasMatch()) {
         return true;
+    }
 
     return Resource::applyFilter(filter);
 }

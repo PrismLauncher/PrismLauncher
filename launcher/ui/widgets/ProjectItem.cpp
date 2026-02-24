@@ -26,12 +26,14 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
 
     bool windows = style->objectName().startsWith("windows");
 
-    if (!windows)
+    if (!windows) {
         style->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter, opt.widget);
+    }
 
     if (isSelected) {
-        if (windows)
+        if (windows) {
             painter->fillRect(rect, opt.palette.highlight());
+        }
 
         painter->setPen(opt.palette.highlightedText().color());
     }
@@ -65,12 +67,14 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
         int x = rect.x() + icon_x_margin;
         int y = rect.y() + icon_y_margin;
 
-        if (opt.features & QStyleOptionViewItem::HasCheckIndicator)
+        if (opt.features & QStyleOptionViewItem::HasCheckIndicator) {
             rect.translate(icon_x_margin / 2, 0);
+        }
 
         // Prevent 'scaling null pixmap' warnings
-        if (icon_width > 0 && icon_height > 0)
+        if (icon_width > 0 && icon_height > 0) {
             opt.icon.paint(painter, x, y, icon_width, icon_height);
+        }
     }
 
     // Change the rect so that funther painting is easier
@@ -136,10 +140,11 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
         // Have the y-value be set based on the number of lines in the description, to centralize the
         // description text with the space between the base and the title.
         int description_y = rect.y() + title_height + (rect.height() - title_height) / 2;
-        if (num_lines == 1)
+        if (num_lines == 1) {
             description_y -= opt.fontMetrics.height() / 2;
-        else
+        } else {
             description_y -= opt.fontMetrics.height();
+        }
 
         // On the bottom, aligned to the left after the icon, and featuring at most two lines of text (with some margin space to spare)
         painter->drawText(description_x, description_y, remaining_width, cut_text.size() * opt.fontMetrics.height(), Qt::TextWordWrap,
@@ -155,13 +160,15 @@ bool ProjectItemDelegate::editorEvent(QEvent* event,
                                       const QModelIndex& index)
 {
     if (!(event->type() == QEvent::MouseButtonRelease || event->type() == QEvent::MouseButtonPress ||
-          event->type() == QEvent::MouseButtonDblClick))
+          event->type() == QEvent::MouseButtonDblClick)) {
         return false;
+    }
 
     auto mouseEvent = (QMouseEvent*)event;
 
-    if (mouseEvent->button() != Qt::LeftButton)
+    if (mouseEvent->button() != Qt::LeftButton) {
         return false;
+    }
 
     QStyleOptionViewItem opt(option);
     initStyleOption(&opt, index);
@@ -170,13 +177,15 @@ bool ProjectItemDelegate::editorEvent(QEvent* event,
 
     const QStyleOptionViewItem checkboxOpt = makeCheckboxStyleOption(opt, style);
 
-    if (!checkboxOpt.rect.contains(mouseEvent->pos().x(), mouseEvent->pos().y()))
+    if (!checkboxOpt.rect.contains(mouseEvent->pos().x(), mouseEvent->pos().y())) {
         return false;
+    }
 
     // swallow other events
     // (prevents item being selected or double click action triggering)
-    if (event->type() != QEvent::MouseButtonRelease)
+    if (event->type() != QEvent::MouseButtonRelease) {
         return true;
+    }
 
     emit checkboxClicked(index);
     return true;
@@ -188,10 +197,11 @@ QStyleOptionViewItem ProjectItemDelegate::makeCheckboxStyleOption(const QStyleOp
 
     checkboxOpt.state &= ~QStyle::State_HasFocus;
 
-    if (checkboxOpt.checkState == Qt::Checked)
+    if (checkboxOpt.checkState == Qt::Checked) {
         checkboxOpt.state |= QStyle::State_On;
-    else
+    } else {
         checkboxOpt.state |= QStyle::State_Off;
+    }
 
     QRect checkboxRect = style->subElementRect(QStyle::SE_ItemViewItemCheckIndicator, &checkboxOpt, opt.widget);
     // 5px is the typical top margin for image

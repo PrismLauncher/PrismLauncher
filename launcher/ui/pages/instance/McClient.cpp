@@ -13,7 +13,9 @@
 // last bit
 #define CONTINUE_BIT 0x80
 
-McClient::McClient(QObject* parent, QString domain, QString ip, short port) : QObject(parent), m_domain(std::move(domain)), m_ip(std::move(ip)), m_port(port) {}
+McClient::McClient(QObject* parent, QString domain, QString ip, short port)
+    : QObject(parent), m_domain(std::move(domain)), m_ip(std::move(ip)), m_port(port)
+{}
 
 void McClient::getStatusData()
 {
@@ -115,14 +117,16 @@ int McClient::readVarInt(QByteArray& data)
         currentByte = readByte(data);
         value |= (currentByte & SEGMENT_BITS) << position;
 
-        if ((currentByte & CONTINUE_BIT) == 0)
+        if ((currentByte & CONTINUE_BIT) == 0) {
             break;
+        }
 
         position += 7;
     }
 
-    if (position >= 32)
+    if (position >= 32) {
         throw Exception("VarInt is too big");
+    }
 
     return value;
 }

@@ -48,8 +48,9 @@
 void setupLinkToolTip(QLabel* label)
 {
     QObject::connect(label, &QLabel::linkHovered, [label](const QString& link) {
-        if (auto url = QUrl(link); !url.isValid() || (url.scheme() != "http" && url.scheme() != "https"))
+        if (auto url = QUrl(link); !url.isValid() || (url.scheme() != "http" && url.scheme() != "https")) {
             return;
+        }
         label->setToolTip(link);
     });
 }
@@ -85,18 +86,20 @@ void InfoFrame::updateWithMod(Mod const& m)
     QString text = "";
     QString name = "";
     QString link = m.homepage();
-    if (m.name().isEmpty())
+    if (m.name().isEmpty()) {
         name = m.internal_id();
-    else
+    } else {
         name = m.name();
+    }
 
-    if (link.isEmpty())
+    if (link.isEmpty()) {
         text = name;
-    else {
+    } else {
         text = "<a href=\"" + QUrl(link).toEncoded() + "\">" + name + "</a>";
     }
-    if (!m.authors().isEmpty())
+    if (!m.authors().isEmpty()) {
         text += " by " + m.authors().join(", ");
+    }
 
     setName(text);
 
@@ -147,10 +150,11 @@ void InfoFrame::updateWithResource(const Resource& resource)
 {
     const QString homepage = resource.homepage();
 
-    if (!homepage.isEmpty())
+    if (!homepage.isEmpty()) {
         setName("<a href=\"" + homepage + "\">" + resource.name() + "</a>");
-    else
+    } else {
         setName(resource.name());
+    }
 
     setImage();
 }

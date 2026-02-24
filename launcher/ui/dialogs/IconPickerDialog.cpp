@@ -93,8 +93,9 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
 
 bool IconPickerDialog::eventFilter(QObject* obj, QEvent* evt)
 {
-    if (obj != ui->iconView)
+    if (obj != ui->iconView) {
         return QDialog::eventFilter(obj, evt);
+    }
     if (evt->type() != QEvent::KeyPress) {
         return QDialog::eventFilter(obj, evt);
     }
@@ -124,8 +125,9 @@ void IconPickerDialog::addNewIcon()
 
 void IconPickerDialog::removeSelectedIcon()
 {
-    if (APPLICATION->icons()->trashIcon(selectedIconKey))
+    if (APPLICATION->icons()->trashIcon(selectedIconKey)) {
         return;
+    }
 
     APPLICATION->icons()->deleteIcon(selectedIconKey);
 }
@@ -138,8 +140,9 @@ void IconPickerDialog::activated(QModelIndex index)
 
 void IconPickerDialog::selectionChanged(QItemSelection selected, const QItemSelection& deselected)
 {
-    if (selected.empty())
+    if (selected.empty()) {
         return;
+    }
 
     QString key = selected.first().indexes().first().data(Qt::UserRole).toString();
     if (!key.isEmpty()) {

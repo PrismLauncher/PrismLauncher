@@ -180,8 +180,9 @@ bool WorldListPage::eventFilter(QObject* obj, QEvent* ev)
         return QWidget::eventFilter(obj, ev);
     }
     auto* keyEvent = static_cast<QKeyEvent*>(ev);
-    if (obj == ui->worldTreeView)
+    if (obj == ui->worldTreeView) {
         return worldListFilter(keyEvent);
+    }
     return QWidget::eventFilter(obj, ev);
 }
 
@@ -189,8 +190,9 @@ void WorldListPage::on_actionRemove_triggered()
 {
     auto proxiedIndex = getSelectedWorld();
 
-    if (!proxiedIndex.isValid())
+    if (!proxiedIndex.isValid()) {
         return;
+    }
 
     auto result = CustomMessageBox::selectable(this, tr("Confirm Deletion"),
                                                tr("You are about to delete \"%1\".\n"
@@ -221,8 +223,9 @@ void WorldListPage::on_actionData_Packs_triggered()
         return;
     }
 
-    if (!worldSafetyNagQuestion(tr("Manage Data Packs")))
+    if (!worldSafetyNagQuestion(tr("Manage Data Packs"))) {
         return;
+    }
 
     const QString fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
     const QString folder = FS::PathCombine(fullPath, "datapacks");
@@ -269,8 +272,9 @@ void WorldListPage::on_actionReset_Icon_triggered()
 {
     auto proxiedIndex = getSelectedWorld();
 
-    if (!proxiedIndex.isValid())
+    if (!proxiedIndex.isValid()) {
         return;
+    }
 
     if (m_worlds->resetIcon(proxiedIndex.row())) {
         ui->actionReset_Icon->setEnabled(false);
@@ -298,8 +302,9 @@ void WorldListPage::on_actionCopy_Seed_triggered()
 
 void WorldListPage::on_actionMCEdit_triggered()
 {
-    if (m_mceditStarting)
+    if (m_mceditStarting) {
         return;
+    }
 
     auto mcedit = APPLICATION->mcedit();
 
@@ -311,8 +316,9 @@ void WorldListPage::on_actionMCEdit_triggered()
         return;
     }
 
-    if (!worldSafetyNagQuestion(tr("Open World in MCEdit")))
+    if (!worldSafetyNagQuestion(tr("Open World in MCEdit"))) {
         return;
+    }
 
     auto fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
 
@@ -424,8 +430,9 @@ void WorldListPage::on_actionCopy_triggered()
         return;
     }
 
-    if (!worldSafetyNagQuestion(tr("Copy World")))
+    if (!worldSafetyNagQuestion(tr("Copy World"))) {
         return;
+    }
 
     auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
     auto world = (World*)worldVariant.value<void*>();
@@ -445,8 +452,9 @@ void WorldListPage::on_actionRename_triggered()
         return;
     }
 
-    if (!worldSafetyNagQuestion(tr("Rename World")))
+    if (!worldSafetyNagQuestion(tr("Rename World"))) {
         return;
+    }
 
     auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
     auto world = (World*)worldVariant.value<void*>();

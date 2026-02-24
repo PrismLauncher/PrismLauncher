@@ -38,7 +38,7 @@
 
 namespace MMCZip {
 
-ArchiveWriter::ArchiveWriter(QString  archiveName) : m_filename(std::move(archiveName)) {}
+ArchiveWriter::ArchiveWriter(QString archiveName) : m_filename(std::move(archiveName)) {}
 
 ArchiveWriter::~ArchiveWriter()
 {

@@ -330,8 +330,9 @@ class FileSystemTest : public QObject {
             for (const auto& entry : target_dir.entryList()) {
                 qDebug() << entry;
                 QFileInfo entry_lnk_info(target_dir.filePath(entry));
-                if (!entry_lnk_info.isDir())
+                if (!entry_lnk_info.isDir()) {
                     QVERIFY(!entry_lnk_info.isSymLink());
+                }
             }
 
             QFileInfo lnk_info(target_dir.path());
@@ -426,8 +427,9 @@ class FileSystemTest : public QObject {
             for (const auto& entry : target_dir.entryList()) {
                 qDebug() << entry;
                 QFileInfo entry_lnk_info(target_dir.filePath(entry));
-                if (!entry_lnk_info.isDir())
+                if (!entry_lnk_info.isDir()) {
                     QVERIFY(entry_lnk_info.isSymLink());
+                }
             }
 
             QFileInfo lnk_info(target_dir.path());
@@ -473,8 +475,9 @@ class FileSystemTest : public QObject {
             for (const auto& entry : target_dir.entryList()) {
                 qDebug() << entry;
                 QFileInfo entry_lnk_info(target_dir.filePath(entry));
-                if (!entry_lnk_info.isDir())
+                if (!entry_lnk_info.isDir()) {
                     QVERIFY(entry_lnk_info.isSymLink());
+                }
             }
 
             QFileInfo lnk_info(target_dir.path());
@@ -519,8 +522,9 @@ class FileSystemTest : public QObject {
             for (const auto& entry : target_dir.entryList(filter)) {
                 qDebug() << entry;
                 QFileInfo entry_lnk_info(target_dir.filePath(entry));
-                if (!entry_lnk_info.isDir())
+                if (!entry_lnk_info.isDir()) {
                     QVERIFY(entry_lnk_info.isSymLink());
+                }
             }
 
             QFileInfo lnk_info(target_dir.path());
@@ -602,8 +606,9 @@ class FileSystemTest : public QObject {
             auto filter = QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::Hidden;
             for (const auto& entry : target_dir.entryList(filter)) {
                 qDebug() << entry;
-                if (entry == "." || entry == "..")
+                if (entry == "." || entry == "..") {
                     continue;
+                }
                 QFileInfo entry_lnk_info(target_dir.filePath(entry));
                 QVERIFY(entry_lnk_info.isSymLink());
             }

@@ -34,7 +34,10 @@ struct File {
 
 namespace Java {
 ManifestDownloadTask::ManifestDownloadTask(QUrl url, QString final_path, QString checksumType, QString checksumHash)
-    : m_url(std::move(url)), m_final_path(std::move(final_path)), m_checksum_type(std::move(checksumType)), m_checksum_hash(std::move(checksumHash))
+    : m_url(std::move(url))
+    , m_final_path(std::move(final_path))
+    , m_checksum_type(std::move(checksumType))
+    , m_checksum_hash(std::move(checksumHash))
 {}
 
 void ManifestDownloadTask::executeTask()
@@ -130,8 +133,9 @@ void ManifestDownloadTask::downloadJava(const QJsonDocument& doc)
 bool ManifestDownloadTask::abort()
 {
     auto aborted = canAbort();
-    if (m_task)
+    if (m_task) {
         aborted = m_task->abort();
+    }
     emitAborted();
     return aborted;
 };

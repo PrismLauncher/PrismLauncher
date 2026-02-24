@@ -234,8 +234,9 @@ void VersionPage::updateVersionControls()
 
 void VersionPage::updateButtons(int row)
 {
-    if (row == -1)
+    if (row == -1) {
         row = currentRow();
+    }
     auto patch = m_profile->getComponent(row);
     ui->actionRemove->setEnabled(patch && patch->isRemovable());
     ui->actionMove_down->setEnabled(patch && patch->isMoveable());
@@ -285,8 +286,9 @@ void VersionPage::on_actionRemove_triggered()
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
-        if (response != QMessageBox::Yes)
+        if (response != QMessageBox::Yes) {
             return;
+        }
     }
     // FIXME: use actual model, not reloading.
     if (!m_profile->remove(index)) {
@@ -337,8 +339,9 @@ void VersionPage::on_actionAdd_Agents_triggered()
     QStringList list = GuiUtil::BrowseForFiles("agent", tr("Select agents"), tr("Java agents") + " (*.jar)",
                                                APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
 
-    if (!list.isEmpty())
+    if (!list.isEmpty()) {
         m_profile->installAgents(list);
+    }
 
     updateButtons();
 }
@@ -402,8 +405,9 @@ void VersionPage::on_actionChange_version_triggered()
     if (!currentVersion.isEmpty()) {
         vselect.setCurrentVersion(currentVersion);
     }
-    if (!vselect.exec() || !vselect.selectedVersion())
+    if (!vselect.exec() || !vselect.selectedVersion()) {
         return;
+    }
 
     qDebug() << "Change" << uid << "to" << vselect.selectedVersion()->descriptor();
     bool important = false;
@@ -572,8 +576,9 @@ void VersionPage::on_actionRevert_triggered()
                                                  QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                         ->exec();
 
-    if (response != QMessageBox::Yes)
+    if (response != QMessageBox::Yes) {
         return;
+    }
 
     if (!m_profile->revertToBase(version)) {
         // TODO: some error box here

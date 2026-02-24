@@ -41,13 +41,15 @@ void runLspci(QStringList& log)
     int cline = 0;
     FILE* lspci = popen("lspci -k", "r");
 
-    if (!lspci)
+    if (!lspci) {
         return;
+    }
 
     while (fgets(buff, 512, lspci) != nullptr) {
         std::string str(buff);
-        if (str.length() < 9)
+        if (str.length() < 9) {
             continue;
+        }
         if (str.substr(8, 3) == "VGA") {
             gpuline = cline;
             log << QString::fromStdString(str.substr(35, std::string::npos));
@@ -98,8 +100,9 @@ void runGlxinfo(QStringList& log)
     // FIXME: fixed size buffers...
     char buff[512];
     FILE* glxinfo = popen("glxinfo", "r");
-    if (!glxinfo)
+    if (!glxinfo) {
         return;
+    }
 
     while (fgets(buff, 512, glxinfo) != nullptr) {
         if (strncmp(buff, "OpenGL version string:", 22) == 0) {

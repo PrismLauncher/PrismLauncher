@@ -6,7 +6,7 @@
 #include <utility>
 
 struct WatchLock {
-    WatchLock(QFileSystemWatcher* watcher, QString  directory) : m_watcher(watcher), m_directory(std::move(directory))
+    WatchLock(QFileSystemWatcher* watcher, QString directory) : m_watcher(watcher), m_directory(std::move(directory))
     {
         m_watcher->removePath(m_directory);
     }

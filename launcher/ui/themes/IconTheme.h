@@ -23,7 +23,7 @@
 
 class IconTheme {
    public:
-    IconTheme(QString  id, QString  path) : m_id(std::move(id)), m_path(std::move(path)) {}
+    IconTheme(QString id, QString path) : m_id(std::move(id)), m_path(std::move(path)) {}
     IconTheme() = default;
 
     bool load();

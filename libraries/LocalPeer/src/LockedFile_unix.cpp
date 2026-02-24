@@ -38,10 +38,10 @@
 **
 ****************************************************************************/
 
-#include <errno.h>
 #include <fcntl.h>
-#include <string.h>
 #include <unistd.h>
+#include <cerrno>
+#include <cstring>
 
 #include "LockedFile.h"
 
@@ -52,14 +52,17 @@ bool LockedFile::lock(LockMode mode, bool block)
         return false;
     }
 
-    if (mode == NoLock)
+    if (mode == NoLock) {
         return unlock();
+    }
 
-    if (mode == m_lock_mode)
+    if (mode == m_lock_mode) {
         return true;
+    }
 
-    if (m_lock_mode != NoLock)
+    if (m_lock_mode != NoLock) {
         unlock();
+    }
 
     struct flock fl;
     fl.l_whence = SEEK_SET;
@@ -70,8 +73,9 @@ bool LockedFile::lock(LockMode mode, bool block)
     int ret = fcntl(handle(), cmd, &fl);
 
     if (ret == -1) {
-        if (errno != EINTR && errno != EAGAIN)
+        if (errno != EINTR && errno != EAGAIN) {
             qWarning("QtLockedFile::lock(): fcntl: %s", strerror(errno));
+        }
         return false;
     }
 
@@ -86,8 +90,9 @@ bool LockedFile::unlock()
         return false;
     }
 
-    if (!isLocked())
+    if (!isLocked()) {
         return true;
+    }
 
     struct flock fl;
     fl.l_whence = SEEK_SET;
@@ -107,6 +112,7 @@ bool LockedFile::unlock()
 
 LockedFile::~LockedFile()
 {
-    if (isOpen())
+    if (isOpen()) {
         unlock();
+    }
 }

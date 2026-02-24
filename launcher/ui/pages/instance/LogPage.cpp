@@ -63,8 +63,9 @@ QVariant LogFormatProxyModel::data(const QModelIndex& index, int role) const
             MessageLevel level = static_cast<MessageLevel::Enum>(QIdentityProxyModel::data(index, LogModel::LevelRole).toInt());
             QColor result = colors.foreground.value(level);
 
-            if (result.isValid())
+            if (result.isValid()) {
                 return result;
+            }
 
             break;
         }
@@ -72,8 +73,9 @@ QVariant LogFormatProxyModel::data(const QModelIndex& index, int role) const
             MessageLevel level = static_cast<MessageLevel::Enum>(QIdentityProxyModel::data(index, LogModel::LevelRole).toInt());
             QColor result = colors.background.value(level);
 
-            if (result.isValid())
+            if (result.isValid()) {
                 return result;
+            }
 
             break;
         }
@@ -92,8 +94,9 @@ QModelIndex LogFormatProxyModel::find(const QModelIndex& start, const QString& v
         }
         QVariant v = data(idx, Qt::DisplayRole);
         QString t = v.toString();
-        if (t.contains(value, Qt::CaseInsensitive))
+        if (t.contains(value, Qt::CaseInsensitive)) {
             return idx;
+        }
         return {};
     };
     if (reverse) {
@@ -103,8 +106,9 @@ QModelIndex LogFormatProxyModel::find(const QModelIndex& start, const QString& v
         for (int i = 0; i < 2; ++i) {
             for (int r = from; (r >= to); --r) {
                 auto idx = compare(r);
-                if (idx.isValid())
+                if (idx.isValid()) {
                     return idx;
+                }
             }
             // prepare for the next iteration
             from = rowCount() - 1;
@@ -117,8 +121,9 @@ QModelIndex LogFormatProxyModel::find(const QModelIndex& start, const QString& v
         for (int i = 0; i < 2; ++i) {
             for (int r = from; (r < to); ++r) {
                 auto idx = compare(r);
-                if (idx.isValid())
+                if (idx.isValid()) {
                     return idx;
+                }
             }
             // prepare for the next iteration
             from = 0;
@@ -237,8 +242,9 @@ bool LogPage::shouldDisplay() const
 
 void LogPage::on_btnPaste_clicked()
 {
-    if (!m_model)
+    if (!m_model) {
         return;
+    }
 
     // FIXME: turn this into a proper task and move the upload logic out of GuiUtil!
     m_model->append(MessageLevel::Launcher,
@@ -255,16 +261,18 @@ void LogPage::on_btnPaste_clicked()
 
 void LogPage::on_btnCopy_clicked()
 {
-    if (!m_model)
+    if (!m_model) {
         return;
+    }
     m_model->append(MessageLevel::Launcher, QString("Clipboard copy at: %1").arg(QDateTime::currentDateTime().toString(Qt::RFC2822Date)));
     GuiUtil::setClipboardText(m_model->toPlainText());
 }
 
 void LogPage::on_btnClear_clicked()
 {
-    if (!m_model)
+    if (!m_model) {
         return;
+    }
     m_model->clear();
     m_container->refreshContainer();
 }
@@ -276,24 +284,27 @@ void LogPage::on_btnBottom_clicked()
 
 void LogPage::on_trackLogCheckbox_clicked(bool checked)
 {
-    if (!m_model)
+    if (!m_model) {
         return;
+    }
     m_model->suspend(!checked);
 }
 
 void LogPage::on_wrapCheckbox_clicked(bool checked)
 {
     ui->text->setWordWrap(checked);
-    if (!m_model)
+    if (!m_model) {
         return;
+    }
     m_model->setLineWrap(checked);
 }
 
 void LogPage::on_colorCheckbox_clicked(bool checked)
 {
     ui->text->setColorLines(checked);
-    if (!m_model)
+    if (!m_model) {
         return;
+    }
     m_model->setColorLines(checked);
 }
 

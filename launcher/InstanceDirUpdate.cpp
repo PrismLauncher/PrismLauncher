@@ -44,20 +44,24 @@
 
 QString askToUpdateInstanceDirName(BaseInstance* instance, const QString& oldName, const QString& newName, QWidget* parent)
 {
-    if (oldName == newName)
+    if (oldName == newName) {
         return {};
+    }
 
     QString renamingMode = APPLICATION->settings()->get("InstRenamingMode").toString();
-    if (renamingMode == "MetadataOnly")
+    if (renamingMode == "MetadataOnly") {
         return {};
+    }
 
     auto oldRoot = instance->instanceRoot();
     auto newDirName = FS::DirNameFromString(newName, QFileInfo(oldRoot).dir().absolutePath());
     auto newRoot = FS::PathCombine(QFileInfo(oldRoot).dir().absolutePath(), newDirName);
-    if (oldRoot == newRoot)
+    if (oldRoot == newRoot) {
         return {};
-    if (oldRoot == FS::PathCombine(QFileInfo(oldRoot).dir().absolutePath(), newName))
+    }
+    if (oldRoot == FS::PathCombine(QFileInfo(oldRoot).dir().absolutePath(), newName)) {
         return {};
+    }
 
     // Check for conflict
     if (QDir(newRoot).exists()) {
@@ -79,18 +83,21 @@ QString askToUpdateInstanceDirName(BaseInstance* instance, const QString& oldNam
 
         auto res = dialog->exec();
         if (checkBox->isChecked()) {
-            if (res == QMessageBox::Yes)
+            if (res == QMessageBox::Yes) {
                 APPLICATION->settings()->set("InstRenamingMode", "PhysicalDir");
-            else
+            } else {
                 APPLICATION->settings()->set("InstRenamingMode", "MetadataOnly");
+            }
         }
-        if (res == QMessageBox::No)
+        if (res == QMessageBox::No) {
             return {};
+        }
     }
 
     // Check for linked instances
-    if (!checkLinkedInstances(instance->id(), parent, QObject::tr("Renaming")))
+    if (!checkLinkedInstances(instance->id(), parent, QObject::tr("Renaming"))) {
         return {};
+    }
 
     // Now we can confirm that a renaming is happening
     if (!instance->syncInstanceDirName(newRoot)) {
@@ -119,8 +126,9 @@ bool checkLinkedInstances(const QString& id, QWidget* parent, const QString& ver
                                                          .arg(verb),
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
-        if (response != QMessageBox::Yes)
+        if (response != QMessageBox::Yes) {
             return false;
+        }
     }
     return true;
 }

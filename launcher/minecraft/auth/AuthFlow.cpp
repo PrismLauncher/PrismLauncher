@@ -76,8 +76,9 @@ void AuthFlow::nextStep()
 
 void AuthFlow::stepFinished(AccountTaskState resultingState, QString message)
 {
-    if (changeState(resultingState, std::move(message)))
+    if (changeState(resultingState, std::move(message))) {
         nextStep();
+    }
 }
 
 bool AuthFlow::changeState(AccountTaskState newState, const QString& reason)
@@ -149,8 +150,9 @@ bool AuthFlow::changeState(AccountTaskState newState, const QString& reason)
 }
 bool AuthFlow::abort()
 {
-    if (m_currentStep)
+    if (m_currentStep) {
         m_currentStep->abort();
+    }
     emitAborted();
     return true;
 }

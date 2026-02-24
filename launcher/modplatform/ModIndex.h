@@ -178,15 +178,17 @@ struct IndexedPack {
     // For internal use, not provided by APIs
     bool isVersionSelected(int index) const
     {
-        if (!versionsLoaded)
+        if (!versionsLoaded) {
             return false;
+        }
 
         return versions.at(index).is_currently_selected;
     }
     bool isAnyVersionSelected() const
     {
-        if (!versionsLoaded)
+        if (!versionsLoaded) {
             return false;
+        }
 
         return std::any_of(versions.constBegin(), versions.constEnd(), [](auto const& v) { return v.is_currently_selected; });
     }

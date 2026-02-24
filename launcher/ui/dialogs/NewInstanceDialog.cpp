@@ -176,8 +176,9 @@ QList<BasePage*> NewInstanceDialog::getPages()
     pages.append(new CustomPage(this));
     pages.append(importPage);
     pages.append(new AtlPage(this));
-    if (APPLICATION->capabilities() & Application::SupportsFlame)
+    if (APPLICATION->capabilities() & Application::SupportsFlame) {
         pages.append(new FlamePage(this));
+    }
     pages.append(new FtbPage(this));
     pages.append(new LegacyFTB::Page(this));
     pages.append(new FTBImportAPP::ImportFTBPage(this));
@@ -241,8 +242,9 @@ void NewInstanceDialog::setSuggestedIconFromFile(const QString& path, const QStr
 
 void NewInstanceDialog::setSuggestedIcon(const QString& key)
 {
-    if (key == "default")
+    if (key == "default") {
         return;
+    }
 
     auto icon = APPLICATION->icons()->getIcon(key);
     importIcon = false;

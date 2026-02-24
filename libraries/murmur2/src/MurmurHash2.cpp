@@ -28,8 +28,9 @@ uint32_t hash(Reader* file_stream, std::size_t buffer_size, const std::function<
     do {
         read = file_stream->read(buffer, buffer_size);
         for (int i = 0; i < read; i++) {
-            if (!filter_out(buffer[i]))
+            if (!filter_out(buffer[i])) {
                 size += 1;
+            }
         }
     } while (!file_stream->eof());
 
@@ -44,15 +45,17 @@ uint32_t hash(Reader* file_stream, std::size_t buffer_size, const std::function<
         for (int i = 0; i < read; i++) {
             char c = buffer[i];
 
-            if (filter_out(c))
+            if (filter_out(c)) {
                 continue;
+            }
 
             data[index] = c;
             index = (index + 1) % 4;
 
             // Mix 4 bytes at a time into the hash
-            if (index == 0)
+            if (index == 0) {
                 FourBytes_MurmurHash2(reinterpret_cast<unsigned char*>(&data), info);
+            }
         }
     } while (!file_stream->eof());
 

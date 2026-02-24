@@ -114,7 +114,7 @@ ApplicationId ApplicationId::fromRawString(const QString& id)
     return ApplicationId(id);
 }
 
-LocalPeer::LocalPeer(QObject* parent, ApplicationId  appId) : QObject(parent), id(std::move(appId))
+LocalPeer::LocalPeer(QObject* parent, ApplicationId appId) : QObject(parent), id(std::move(appId))
 {
     socketName = id.toString();
     server = std::make_unique<QLocalServer>();
@@ -132,11 +132,13 @@ ApplicationId LocalPeer::applicationId() const
 
 bool LocalPeer::isClient()
 {
-    if (lockFile->isLocked())
+    if (lockFile->isLocked()) {
         return false;
+    }
 
-    if (!lockFile->lock(LockedFile::WriteLock, false))
+    if (!lockFile->lock(LockedFile::WriteLock, false)) {
         return true;
+    }
 
     bool res = server->listen(socketName);
 #if defined(Q_OS_UNIX)
@@ -146,16 +148,18 @@ bool LocalPeer::isClient()
         res = server->listen(socketName);
     }
 #endif
-    if (!res)
+    if (!res) {
         qWarning("QtSingleCoreApplication: listen on local socket failed, %s", qPrintable(server->errorString()));
+    }
     connect(server.get(), &QLocalServer::newConnection, this, &LocalPeer::receiveConnection);
     return false;
 }
 
 bool LocalPeer::sendMessage(const QByteArray& message, int timeout)
 {
-    if (!isClient())
+    if (!isClient()) {
         return false;
+    }
 
     QLocalSocket socket;
     bool connOk = false;

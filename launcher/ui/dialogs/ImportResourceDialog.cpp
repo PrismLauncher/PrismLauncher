@@ -59,8 +59,9 @@ void ImportResourceDialog::activated(QModelIndex index)
 
 void ImportResourceDialog::selectionChanged(QItemSelection selected, const QItemSelection& deselected)
 {
-    if (selected.empty())
+    if (selected.empty()) {
         return;
+    }
 
     QString key = selected.first().indexes().first().data(InstanceList::InstanceIDRole).toString();
     if (!key.isEmpty()) {

@@ -64,8 +64,9 @@ PrismExternalUpdater::PrismExternalUpdater(QWidget* parent, const QString& appDi
     bool interval_ok;
     // default once per day
     priv->updateInterval = priv->settings->value("update_interval", 86400).toInt(&interval_ok);
-    if (!interval_ok)
+    if (!interval_ok) {
         priv->updateInterval = 86400;
+    }
     auto last_check = priv->settings->value("last_check");
     if (!last_check.isNull() && last_check.isValid()) {
         priv->lastCheck = QDateTime::fromString(last_check.toString(), Qt::ISODate);
@@ -80,8 +81,9 @@ PrismExternalUpdater::PrismExternalUpdater(QWidget* parent, const QString& appDi
 
 PrismExternalUpdater::~PrismExternalUpdater()
 {
-    if (priv->updateTimer.isActive())
+    if (priv->updateTimer.isActive()) {
         priv->updateTimer.stop();
+    }
     disconnectTimer();
     priv->settings->sync();
     delete priv;
@@ -115,8 +117,9 @@ void PrismExternalUpdater::checkForUpdates(bool triggeredByUser)
 #endif
 
     QStringList args = { "--check-only", "--dir", priv->dataDir.absolutePath(), "--debug" };
-    if (priv->allowBeta)
+    if (priv->allowBeta) {
         args.append("--pre-release");
+    }
 
     proc.start(priv->appDir.absoluteFilePath(exe_name), args);
     auto result_start = proc.waitForStarted(5000);
@@ -273,15 +276,17 @@ void PrismExternalUpdater::resetAutoCheckTimer()
         if (priv->lastCheck.isValid()) {
             auto diff = priv->lastCheck.secsTo(now);
             auto secs_left = priv->updateInterval - diff;
-            if (secs_left < 0)
+            if (secs_left < 0) {
                 secs_left = 0;
+            }
             timeoutDuration = secs_left * 1000;  // to msec
         }
         qDebug() << "Auto update timer starting," << timeoutDuration / 1000 << "seconds left";
         priv->updateTimer.start(timeoutDuration);
     } else {
-        if (priv->updateTimer.isActive())
+        if (priv->updateTimer.isActive()) {
             priv->updateTimer.stop();
+        }
     }
 }
 
@@ -353,8 +358,9 @@ void PrismExternalUpdater::performUpdate(const QString& version_tag)
 #endif
 
     QStringList args = { "--dir", priv->dataDir.absolutePath(), "--install-version", version_tag };
-    if (priv->allowBeta)
+    if (priv->allowBeta) {
         args.append("--pre-release");
+    }
 
     auto result = proc.startDetached(priv->appDir.absoluteFilePath(exe_name), args);
     if (!result) {

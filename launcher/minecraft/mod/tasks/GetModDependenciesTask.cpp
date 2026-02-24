@@ -52,12 +52,16 @@ static bool checkDependencies(const std::shared_ptr<GetModDependenciesTask::Pack
 GetModDependenciesTask::GetModDependenciesTask(BaseInstance* instance,
                                                ModFolderModel* folder,
                                                QList<std::shared_ptr<PackDependency>> selected)
-    : SequentialTask(tr("Get dependencies")), m_selected(std::move(selected)), m_version(mcVersion(instance)), m_loaderType(mcLoaders(instance))
+    : SequentialTask(tr("Get dependencies"))
+    , m_selected(std::move(selected))
+    , m_version(mcVersion(instance))
+    , m_loaderType(mcLoaders(instance))
 {
     for (auto mod : folder->allMods()) {
         m_mods_file_names << mod->fileinfo().fileName();
-        if (auto meta = mod->metadata(); meta)
+        if (auto meta = mod->metadata(); meta) {
             m_mods.append(meta);
+        }
     }
     prepare();
 }
@@ -65,10 +69,11 @@ GetModDependenciesTask::GetModDependenciesTask(BaseInstance* instance,
 void GetModDependenciesTask::prepare()
 {
     for (const auto& sel : m_selected) {
-        if (checkDependencies(sel, m_version, m_loaderType))
+        if (checkDependencies(sel, m_version, m_loaderType)) {
             for (const auto& dep : getDependenciesForVersion(sel->version, sel->pack->provider)) {
                 addTask(prepareDependencyTask(dep, sel->pack->provider, 20));
             }
+        }
     }
 }
 
@@ -92,40 +97,45 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
 {
     QList<ModPlatform::Dependency> c_dependencies;
     for (auto ver_dep : version.dependencies) {
-        if (ver_dep.type != ModPlatform::DependencyType::REQUIRED)
+        if (ver_dep.type != ModPlatform::DependencyType::REQUIRED) {
             continue;
+        }
         ver_dep = getOverride(ver_dep, providerName);
         auto isOnlyVersion = providerName == ModPlatform::ResourceProvider::MODRINTH && ver_dep.addonId.toString().isEmpty();
         if (auto dep = std::find_if(c_dependencies.begin(), c_dependencies.end(),
                                     [&ver_dep, isOnlyVersion](const ModPlatform::Dependency& i) {
                                         return isOnlyVersion ? i.version == ver_dep.version : i.addonId == ver_dep.addonId;
                                     });
-            dep != c_dependencies.end())
+            dep != c_dependencies.end()) {
             continue;  // check the current dependency list
+        }
 
         if (auto dep = std::find_if(m_selected.begin(), m_selected.end(),
                                     [&ver_dep, providerName, isOnlyVersion](const std::shared_ptr<PackDependency>& i) {
                                         return i->pack->provider == providerName && (isOnlyVersion ? i->version.version == ver_dep.version
                                                                                                    : i->pack->addonId == ver_dep.addonId);
                                     });
-            dep != m_selected.end())
+            dep != m_selected.end()) {
             continue;  // check the selected versions
+        }
 
         if (auto dep = std::find_if(m_mods.begin(), m_mods.end(),
                                     [&ver_dep, providerName, isOnlyVersion](const std::shared_ptr<Metadata::ModStruct>& i) {
                                         return i->provider == providerName &&
                                                (isOnlyVersion ? i->file_id == ver_dep.version : i->project_id == ver_dep.addonId);
                                     });
-            dep != m_mods.end())
+            dep != m_mods.end()) {
             continue;  // check the existing mods
+        }
 
         if (auto dep = std::find_if(m_pack_dependencies.begin(), m_pack_dependencies.end(),
                                     [&ver_dep, providerName, isOnlyVersion](const std::shared_ptr<PackDependency>& i) {
                                         return i->pack->provider == providerName && (isOnlyVersion ? i->version.version == ver_dep.addonId
                                                                                                    : i->pack->addonId == ver_dep.addonId);
                                     });
-            dep != m_pack_dependencies.end())  // check loaded dependencies
+            dep != m_pack_dependencies.end()) {  // check loaded dependencies
             continue;
+        }
 
         c_dependencies.append(ver_dep);
     }
@@ -259,8 +269,9 @@ auto GetModDependenciesTask::getExtraInfo() -> QHash<QString, PackDependencyExtr
         auto version = mod->version.fileId;
         auto req = QStringList();
         for (auto& smod : fullList) {
-            if (provider != smod->pack->provider)
+            if (provider != smod->pack->provider) {
                 continue;
+            }
             auto deps = smod->version.dependencies;
             if (auto dep = std::find_if(deps.begin(), deps.end(),
                                         [addonId, provider, version](const ModPlatform::Dependency& d) {
@@ -286,8 +297,9 @@ auto GetModDependenciesTask::getExtraInfo() -> QHash<QString, PackDependencyExtr
 auto laxCompare = [](const QString& fsfilename, const QString& metadataFilename, bool excludeDigits = false) {
     // allowed character seperators
     QList<QChar> allowedSeperators = { '-', '+', '.', '_' };
-    if (excludeDigits)
+    if (excludeDigits) {
         allowedSeperators.append({ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
+    }
 
     // copy in lowercase
     auto fsName = fsfilename.toLower();

@@ -49,8 +49,9 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash
 
     QJsonObject body_obj;
 
-    if (loaders.has_value())
+    if (loaders.has_value()) {
         Json::writeStringList(body_obj, "loaders", getModLoaderStrings(loaders.value()));
+    }
 
     if (mcVersions.has_value()) {
         QStringList game_versions;
@@ -82,8 +83,9 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(const QStringList&
     Json::writeStringList(body_obj, "hashes", hashes);
     Json::writeString(body_obj, "algorithm", hash_format);
 
-    if (loaders.has_value())
+    if (loaders.has_value()) {
         Json::writeStringList(body_obj, "loaders", getModLoaderStrings(loaders.value()));
+    }
 
     if (mcVersions.has_value()) {
         QStringList game_versions;

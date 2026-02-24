@@ -17,15 +17,17 @@ InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& ol
                                      QMessageBox::Question, QMessageBox::No | QMessageBox::Yes);
     auto result = dialog->exec();
 
-    if (result == QMessageBox::Yes)
+    if (result == QMessageBox::Yes) {
         return InstanceNameChange::ShouldChange;
+    }
     return InstanceNameChange::ShouldKeep;
 }
 
 ShouldUpdate askIfShouldUpdate(QWidget* parent, const QString& original_version_name)
 {
-    if (APPLICATION->settings()->get("SkipModpackUpdatePrompt").toBool())
+    if (APPLICATION->settings()->get("SkipModpackUpdatePrompt").toBool()) {
         return ShouldUpdate::SkipUpdating;
+    }
 
     auto info = CustomMessageBox::selectable(
         parent, QObject::tr("Similar modpack was found!"),
@@ -40,19 +42,23 @@ ShouldUpdate askIfShouldUpdate(QWidget* parent, const QString& original_version_
 
     info->exec();
 
-    if (info->clickedButton() == update)
+    if (info->clickedButton() == update) {
         return ShouldUpdate::Update;
-    if (info->clickedButton() == skip)
+    }
+    if (info->clickedButton() == skip) {
         return ShouldUpdate::SkipUpdating;
+    }
     return ShouldUpdate::Cancel;
 }
 
 QString InstanceName::name() const
 {
-    if (!m_modified_name.isEmpty())
+    if (!m_modified_name.isEmpty()) {
         return modifiedName();
-    if (!m_original_version.isEmpty())
+    }
+    if (!m_original_version.isEmpty()) {
         return QString("%1 %2").arg(m_original_name, m_original_version);
+    }
 
     return m_original_name;
 }
@@ -64,8 +70,9 @@ QString InstanceName::originalName() const
 
 QString InstanceName::modifiedName() const
 {
-    if (!m_modified_name.isEmpty())
+    if (!m_modified_name.isEmpty()) {
         return m_modified_name;
+    }
     return m_original_name;
 }
 

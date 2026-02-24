@@ -72,8 +72,9 @@ bool FilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParen
     Q_ASSERT(raw.canConvert<ATLauncher::IndexedPack>());
     auto pack = raw.value<ATLauncher::IndexedPack>();
 
-    if (searchTerm.startsWith("#"))
+    if (searchTerm.startsWith("#")) {
         return QString::number(pack.id) == searchTerm.mid(1);
+    }
     return pack.name.contains(searchTerm, Qt::CaseInsensitive);
 }
 

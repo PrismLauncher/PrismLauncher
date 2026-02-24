@@ -19,31 +19,38 @@ QString InstanceCopyPrefs::getSelectedFiltersAsRegex(const QStringList& addition
 {
     QStringList filters;
 
-    if (!copySaves)
+    if (!copySaves) {
         filters << "saves";
+    }
 
-    if (!copyGameOptions)
+    if (!copyGameOptions) {
         filters << "options.txt";
+    }
 
-    if (!copyResourcePacks)
+    if (!copyResourcePacks) {
         filters << "resourcepacks"
                 << "texturepacks";
+    }
 
-    if (!copyShaderPacks)
+    if (!copyShaderPacks) {
         filters << "shaderpacks";
+    }
 
-    if (!copyServers)
+    if (!copyServers) {
         filters << "servers.dat"
                 << "servers.dat_old"
                 << "server-resource-packs";
+    }
 
-    if (!copyMods)
+    if (!copyMods) {
         filters << "coremods"
                 << "mods"
                 << "config";
+    }
 
-    if (!copyScreenshots)
+    if (!copyScreenshots) {
         filters << "screenshots";
+    }
 
     for (const auto& filter : additionalFilters) {
         filters << filter;

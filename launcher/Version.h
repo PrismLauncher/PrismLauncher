@@ -101,10 +101,12 @@ class Version {
 
         inline bool operator==(const Section& other) const
         {
-            if (m_isNull && !other.m_isNull)
+            if (m_isNull && !other.m_isNull) {
                 return false;
-            if (!m_isNull && other.m_isNull)
+            }
+            if (!m_isNull && other.m_isNull) {
                 return false;
+            }
 
             if (!m_isNull && !other.m_isNull) {
                 return (m_numPart == other.m_numPart) && (m_stringPart == other.m_stringPart);
@@ -116,26 +118,33 @@ class Version {
         inline bool operator<(const Section& other) const
         {
             static auto unequal_is_less = [](const Section& non_null) -> bool {
-                if (non_null.m_stringPart.isEmpty())
+                if (non_null.m_stringPart.isEmpty()) {
                     return non_null.m_numPart == 0;
+                }
                 return (non_null.m_stringPart != QLatin1Char('.')) && non_null.isPreRelease();
             };
 
-            if (!m_isNull && other.m_isNull)
+            if (!m_isNull && other.m_isNull) {
                 return unequal_is_less(*this);
-            if (m_isNull && !other.m_isNull)
+            }
+            if (m_isNull && !other.m_isNull) {
                 return !unequal_is_less(other);
+            }
 
             if (!m_isNull && !other.m_isNull) {
-                if (m_numPart < other.m_numPart)
+                if (m_numPart < other.m_numPart) {
                     return true;
-                if (m_numPart == other.m_numPart && m_stringPart < other.m_stringPart)
+                }
+                if (m_numPart == other.m_numPart && m_stringPart < other.m_stringPart) {
                     return true;
+                }
 
-                if (!m_stringPart.isEmpty() && other.m_stringPart.isEmpty())
+                if (!m_stringPart.isEmpty() && other.m_stringPart.isEmpty()) {
                     return false;
-                if (m_stringPart.isEmpty() && !other.m_stringPart.isEmpty())
+                }
+                if (m_stringPart.isEmpty() && !other.m_stringPart.isEmpty()) {
                     return true;
+                }
 
                 return false;
             }

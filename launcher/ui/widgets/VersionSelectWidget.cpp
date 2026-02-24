@@ -43,8 +43,9 @@ VersionSelectWidget::VersionSelectWidget(QWidget* parent) : QWidget(parent)
             const QModelIndex first = listView->model()->index(0, 0);
             listView->selectionModel()->setCurrentIndex(first, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
             listView->scrollToTop();
-        } else
+        } else {
             listView->scrollTo(listView->selectionModel()->currentIndex(), QAbstractItemView::PositionAtCenter);
+        }
     });
     search->installEventFilter(this);
 
@@ -170,11 +171,13 @@ void VersionSelectWidget::currentRowChanged(const QModelIndex& current, const QM
 
 void VersionSelectWidget::preselect()
 {
-    if (preselectedAlready)
+    if (preselectedAlready) {
         return;
+    }
     selectCurrent();
-    if (preselectedAlready)
+    if (preselectedAlready) {
         return;
+    }
     selectRecommended();
 }
 

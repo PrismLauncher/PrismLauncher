@@ -59,12 +59,13 @@ QStringList splitArgs(const QString& args)
             escape = false;
             // in "quotes"
         } else if (!inquotes.isNull()) {
-            if (cchar == '\\')
+            if (cchar == '\\') {
                 escape = true;
-            else if (cchar == inquotes)
+            } else if (cchar == inquotes) {
                 inquotes = QChar::Null;
-            else
+            } else {
                 current += cchar;
+            }
             // otherwise
         } else {
             if (cchar == ' ') {
@@ -72,14 +73,16 @@ QStringList splitArgs(const QString& args)
                     argv << current;
                     current.clear();
                 }
-            } else if (cchar == '"' || cchar == '\'')
+            } else if (cchar == '"' || cchar == '\'') {
                 inquotes = cchar;
-            else
+            } else {
                 current += cchar;
+            }
         }
     }
-    if (!current.isEmpty())
+    if (!current.isEmpty()) {
         argv << current;
+    }
     return argv;
 }
 }  // namespace Commandline

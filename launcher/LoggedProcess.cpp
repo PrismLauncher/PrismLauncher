@@ -97,10 +97,11 @@ void LoggedProcess::on_exit(int exit_code, QProcess::ExitStatus status)
             changeState(LoggedProcess::Finished);
         } else {
             //: Message displayed on instance crashed
-            if (exit_code == -1)
+            if (exit_code == -1) {
                 emit log({ tr("Process crashed.") }, MessageLevel::Launcher);
-            else
+            } else {
                 emit log({ tr("Process crashed with exitcode %1.").arg(exit_code) }, MessageLevel::Launcher);
+            }
             changeState(LoggedProcess::Crashed);
         }
     } else {
@@ -141,8 +142,9 @@ int LoggedProcess::exitCode() const
 
 void LoggedProcess::changeState(LoggedProcess::State state)
 {
-    if (state == m_state)
+    if (state == m_state) {
         return;
+    }
     m_state = state;
     emit stateChanged(m_state);
 }

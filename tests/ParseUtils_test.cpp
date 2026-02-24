@@ -11,7 +11,7 @@ class ParseUtilsTest : public QObject {
         const char* timestamps[] = { "2016-02-29T13:49:54+01:00", "2016-02-26T15:21:11+00:01", "2016-02-24T15:52:36+01:13",
                                      "2016-02-18T17:41:00+00:00", "2016-02-17T15:23:19+00:00", "2016-02-16T15:22:39+09:22",
                                      "2016-02-10T15:06:41+00:00", "2016-02-04T15:28:02-05:33" };
-        for (auto & timestamp : timestamps) {
+        for (auto& timestamp : timestamps) {
             QTest::newRow(timestamp) << QString(timestamp);
         }
     }

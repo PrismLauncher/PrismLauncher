@@ -145,7 +145,7 @@ void ExportInstanceDialog::doExport()
 
     auto files = QFileInfoList();
     if (!MMCZip::collectFileListRecursively(m_instance->instanceRoot(), nullptr, &files,
-                                            [this](auto && PH1) { return m_proxyModel->filterFile(std::forward<decltype(PH1)>(PH1)); })) {
+                                            [this](auto&& PH1) { return m_proxyModel->filterFile(std::forward<decltype(PH1)>(PH1)); })) {
         QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
         QDialog::done(QDialog::Rejected);
         return;
@@ -153,8 +153,9 @@ void ExportInstanceDialog::doExport()
 
     auto task = makeShared<MMCZip::ExportToZipTask>(output, m_instance->instanceRoot(), files, "", true);
 
-    connect(task.get(), &Task::failed, this,
-            [this, output](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+    connect(task.get(), &Task::failed, this, [this, output](const QString& reason) {
+        CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+    });
     connect(task.get(), &Task::finished, this, [task] { task->deleteLater(); });
 
     ProgressDialog progress(this);

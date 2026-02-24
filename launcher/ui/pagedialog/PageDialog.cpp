@@ -59,21 +59,24 @@ PageDialog::PageDialog(BasePageProvider* pageProvider, QString defaultId, QWidge
 
 void PageDialog::accept()
 {
-    if (handleClose())
+    if (handleClose()) {
         QDialog::accept();
+    }
 }
 
 void PageDialog::closeEvent(QCloseEvent* event)
 {
-    if (handleClose())
+    if (handleClose()) {
         QDialog::closeEvent(event);
+    }
 }
 
 bool PageDialog::handleClose()
 {
     qDebug() << "Paged dialog close requested";
-    if (!m_container->prepareToClose())
+    if (!m_container->prepareToClose()) {
         return false;
+    }
 
     qDebug() << "Paged dialog close approved";
     APPLICATION->settings()->set("PagedGeometry", QString::fromUtf8(saveGeometry().toBase64()));

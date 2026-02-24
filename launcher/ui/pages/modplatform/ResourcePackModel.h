@@ -20,7 +20,7 @@ class ResourcePackResourceModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    ResourcePackResourceModel(BaseInstance const&, ResourceAPI*, const QString& debugName, QString metaEntryBase);
+    ResourcePackResourceModel(const BaseInstance&, ResourceAPI*, const QString& debugName, QString metaEntryBase);
 
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, unsigned int sort);

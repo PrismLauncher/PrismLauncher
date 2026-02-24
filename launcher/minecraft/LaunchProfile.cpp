@@ -57,8 +57,9 @@ void LaunchProfile::clear()
 
 static void applyString(const QString& from, QString& to)
 {
-    if (from.isEmpty())
+    if (from.isEmpty()) {
         return;
+    }
     to = from;
 }
 
@@ -130,8 +131,9 @@ static int findLibraryByName(QList<LibraryPtr>* haystack, const GradleSpecifier&
     for (int i = 0; i < haystack->size(); ++i) {
         if (haystack->at(i)->rawName().matchName(needle)) {
             // only one is allowed.
-            if (retval != -1)
+            if (retval != -1) {
                 return -1;
+            }
             retval = i;
         }
     }
@@ -167,8 +169,9 @@ void LaunchProfile::applyCompatibleJavaMajors(QList<int>& javaMajor)
 
 void LaunchProfile::applyCompatibleJavaName(const QString& javaName)
 {
-    if (!javaName.isEmpty())
+    if (!javaName.isEmpty()) {
         m_compatibleJavaName = javaName;
+    }
 }
 
 void LaunchProfile::applyLibrary(const LibraryPtr& library, const RuntimeContext& runtimeContext)

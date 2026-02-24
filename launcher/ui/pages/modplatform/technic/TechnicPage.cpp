@@ -91,8 +91,9 @@ bool TechnicPage::eventFilter(QObject* watched, QEvent* event)
             keyEvent->accept();
             return true;
         } else {
-            if (m_search_timer.isActive())
+            if (m_search_timer.isActive()) {
                 m_search_timer.stop();
+            }
 
             m_search_timer.start(350);
         }
@@ -230,10 +231,11 @@ void TechnicPage::metadataLoaded()
     QString text = "";
     QString name = current.name;
 
-    if (current.websiteUrl.isEmpty())
+    if (current.websiteUrl.isEmpty()) {
         text = name.toHtmlEscaped();
-    else
+    } else {
         text = "<a href=\"" + current.websiteUrl.toHtmlEscaped() + "\">" + name.toHtmlEscaped() + "</a>";
+    }
 
     if (!current.author.isEmpty()) {
         text += "<br>" + tr(" by ") + current.author.toHtmlEscaped();
@@ -245,8 +247,9 @@ void TechnicPage::metadataLoaded()
 
     // Strip trailing forward-slashes from Solder URL's
     if (current.isSolder) {
-        while (current.url.endsWith('/'))
+        while (current.url.endsWith('/')) {
             current.url.chop(1);
+        }
     }
 
     // Display versions from Solder

@@ -130,16 +130,21 @@ struct GradleSpecifier {
     }
     bool operator==(const GradleSpecifier& other) const
     {
-        if (m_groupId != other.m_groupId)
+        if (m_groupId != other.m_groupId) {
             return false;
-        if (m_artifactId != other.m_artifactId)
+        }
+        if (m_artifactId != other.m_artifactId) {
             return false;
-        if (m_version != other.m_version)
+        }
+        if (m_version != other.m_version) {
             return false;
-        if (m_classifier != other.m_classifier)
+        }
+        if (m_classifier != other.m_classifier) {
             return false;
-        if (m_extension != other.m_extension)
+        }
+        if (m_extension != other.m_extension) {
             return false;
+        }
         return true;
     }
 

@@ -507,21 +507,24 @@ ComponentPtr PackProfile::getComponent(size_t index)
 
 QVariant PackProfile::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return {};
+    }
 
     int row = index.row();
     int column = index.column();
 
-    if (row < 0 || row >= d->components.size())
+    if (row < 0 || row >= d->components.size()) {
         return {};
+    }
 
     auto patch = d->components.at(row);
 
     switch (role) {
         case Qt::CheckStateRole: {
-            if (column == NameColumn)
+            if (column == NameColumn) {
                 return patch->isEnabled() ? Qt::Checked : Qt::Unchecked;
+            }
             return {};
         }
         case Qt::DisplayRole: {
@@ -631,14 +634,18 @@ void PackProfile::move(const int index, const MoveDirection direction)
         theirIndex = index + 1;
     }
 
-    if (index < 0 || index >= d->components.size())
+    if (index < 0 || index >= d->components.size()) {
         return;
-    if (theirIndex >= rowCount())
+    }
+    if (theirIndex >= rowCount()) {
         theirIndex = rowCount() - 1;
-    if (theirIndex == -1)
+    }
+    if (theirIndex == -1) {
         theirIndex = rowCount() - 1;
-    if (index == theirIndex)
+    }
+    if (index == theirIndex) {
         return;
+    }
     int togap = theirIndex > index ? theirIndex + 1 : theirIndex;
 
     auto from = getComponent(index);
@@ -674,8 +681,9 @@ void PackProfile::installCustomJar(QString selectedFile)
 bool PackProfile::installComponents(const QStringList& selectedFiles)
 {
     const QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
-    if (!FS::ensureFolderPathExists(patchDir))
+    if (!FS::ensureFolderPathExists(patchDir)) {
         return false;
+    }
 
     bool result = true;
     for (const QString& source : selectedFiles) {
@@ -888,12 +896,14 @@ bool PackProfile::installAgents_internal(const QStringList& filepaths)
 {
     // FIXME code duplication
     const QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
-    if (!FS::ensureFolderPathExists(patchDir))
+    if (!FS::ensureFolderPathExists(patchDir)) {
         return false;
+    }
 
     const QString libDir = d->m_instance->getLocalLibraryPath();
-    if (!FS::ensureFolderPathExists(libDir))
+    if (!FS::ensureFolderPathExists(libDir)) {
         return false;
+    }
 
     for (const QString& source : filepaths) {
         const QFileInfo sourceInfo(source);
@@ -906,8 +916,9 @@ bool PackProfile::installAgents_internal(const QStringList& filepaths)
         const QFileInfo targetInfo(target);
         Q_ASSERT(!targetInfo.exists());
 
-        if (!QFile::copy(source, target))
+        if (!QFile::copy(source, target)) {
             return false;
+        }
 
         auto versionFile = std::make_shared<VersionFile>();
 
@@ -1026,22 +1037,26 @@ std::optional<ModPlatform::ModLoaderTypes> PackProfile::getModLoaders()
         }
     }
 
-    if (!has_any_loader)
+    if (!has_any_loader) {
         return {};
+    }
     return result;
 }
 
 std::optional<ModPlatform::ModLoaderTypes> PackProfile::getSupportedModLoaders()
 {
     auto loadersOpt = getModLoaders();
-    if (!loadersOpt.has_value())
+    if (!loadersOpt.has_value()) {
         return loadersOpt;
+    }
     auto loaders = loadersOpt.value();
     // TODO: remove this or add version condition once Quilt drops official Fabric support
-    if (loaders & ModPlatform::Quilt)
+    if (loaders & ModPlatform::Quilt) {
         loaders |= ModPlatform::Fabric;
-    if (getComponentVersion("net.minecraft") == "1.20.1" && (loaders & ModPlatform::NeoForge))
+    }
+    if (getComponentVersion("net.minecraft") == "1.20.1" && (loaders & ModPlatform::NeoForge)) {
         loaders |= ModPlatform::Forge;
+    }
     return loaders;
 }
 

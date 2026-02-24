@@ -56,8 +56,9 @@ struct ModLicense {
         QStringList notNameParts = {};
         for (const auto& part : parts) {
             auto _url = QUrl(part);
-            if (part.startsWith("(") && part.endsWith(")"))
+            if (part.startsWith("(") && part.endsWith(")")) {
                 _url = QUrl(part.mid(1, part.size() - 2));
+            }
 
             if (_url.isValid() && !_url.scheme().isEmpty() && !_url.host().isEmpty()) {
                 this->url = _url.toString();

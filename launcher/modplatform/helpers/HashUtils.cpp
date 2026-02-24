@@ -66,25 +66,32 @@ QString algorithmToString(Algorithm type)
 
 Algorithm algorithmFromString(const QString& type)
 {
-    if (type == "md4")
+    if (type == "md4") {
         return Algorithm::Md4;
-    if (type == "md5")
+    }
+    if (type == "md5") {
         return Algorithm::Md5;
-    if (type == "sha1")
+    }
+    if (type == "sha1") {
         return Algorithm::Sha1;
-    if (type == "sha256")
+    }
+    if (type == "sha256") {
         return Algorithm::Sha256;
-    if (type == "sha512")
+    }
+    if (type == "sha512") {
         return Algorithm::Sha512;
-    if (type == "murmur2")
+    }
+    if (type == "murmur2") {
         return Algorithm::Murmur2;
+    }
     return Algorithm::Unknown;
 }
 
 QString hash(QIODevice* device, Algorithm type)
 {
-    if (!device->isOpen() && !device->open(QFile::ReadOnly))
+    if (!device->isOpen() && !device->open(QFile::ReadOnly)) {
         return "";
+    }
     QCryptographicHash::Algorithm alg = QCryptographicHash::Sha1;
     switch (type) {
         case Algorithm::Md4:
@@ -115,8 +122,9 @@ QString hash(QIODevice* device, Algorithm type)
     }
 
     QCryptographicHash hash(alg);
-    if (!hash.addData(device))
+    if (!hash.addData(device)) {
         qCritical() << "Failed to read JAR to create hash!";
+    }
 
     Q_ASSERT(hash.result().length() == hash.hashLength(alg));
     auto result = hash.result().toHex();

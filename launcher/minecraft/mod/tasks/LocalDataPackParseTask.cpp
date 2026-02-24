@@ -55,8 +55,9 @@ bool processFolder(DataPack* pack, ProcessingLevel level)
     QFileInfo mcmeta_file_info(FS::PathCombine(pack->fileinfo().filePath(), "pack.mcmeta"));
     if (mcmeta_file_info.exists() && mcmeta_file_info.isFile()) {
         QFile mcmeta_file(mcmeta_file_info.filePath());
-        if (!mcmeta_file.open(QIODevice::ReadOnly))
+        if (!mcmeta_file.open(QIODevice::ReadOnly)) {
             return mcmeta_invalid();  // can't open mcmeta file
+        }
 
         auto data = mcmeta_file.readAll();
 
@@ -81,8 +82,9 @@ bool processFolder(DataPack* pack, ProcessingLevel level)
     QFileInfo image_file_info(FS::PathCombine(pack->fileinfo().filePath(), "pack.png"));
     if (image_file_info.exists() && image_file_info.isFile()) {
         QFile pack_png_file(image_file_info.filePath());
-        if (!pack_png_file.open(QIODevice::ReadOnly))
+        if (!pack_png_file.open(QIODevice::ReadOnly)) {
             return png_invalid();  // can't open pack.png file
+        }
 
         auto data = pack_png_file.readAll();
 
@@ -213,8 +215,9 @@ QString buildStyle(const QJsonObject& obj)
 QString processComponent(const QJsonArray& value, bool strikethrough, bool underline)
 {
     QString result;
-    for (auto current : value)
+    for (auto current : value) {
         result += processComponent(current, strikethrough, underline);
+    }
     return result;
 }
 
@@ -291,8 +294,9 @@ bool processPackPNG(const DataPack* pack)
             QFileInfo image_file_info(FS::PathCombine(pack->fileinfo().filePath(), "pack.png"));
             if (image_file_info.exists() && image_file_info.isFile()) {
                 QFile pack_png_file(image_file_info.filePath());
-                if (!pack_png_file.open(QIODevice::ReadOnly))
+                if (!pack_png_file.open(QIODevice::ReadOnly)) {
                     return png_invalid();  // can't open pack.png file
+                }
 
                 auto data = pack_png_file.readAll();
 

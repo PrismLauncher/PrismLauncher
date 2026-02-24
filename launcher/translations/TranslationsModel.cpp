@@ -350,14 +350,16 @@ enum class Column { Language, Completeness };
 
 QVariant TranslationsModel::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return {};
+    }
 
     int row = index.row();
     auto column = static_cast<Column>(index.column());
 
-    if (row < 0 || row >= d->m_languages.size())
+    if (row < 0 || row >= d->m_languages.size()) {
         return {};
+    }
 
     auto& lang = d->m_languages[row];
     switch (role) {
@@ -426,8 +428,9 @@ QList<Language>::Iterator TranslationsModel::findLanguage(const QString& key)
 std::optional<Language> TranslationsModel::findLanguageAsOptional(const QString& key)
 {
     auto found = findLanguage(key);
-    if (found != d->m_languages.end())
+    if (found != d->m_languages.end()) {
         return *found;
+    }
     return {};
 }
 

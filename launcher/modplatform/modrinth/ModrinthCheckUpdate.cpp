@@ -37,8 +37,9 @@ ModrinthCheckUpdate::ModrinthCheckUpdate(QList<Resource*>& resources,
 
 bool ModrinthCheckUpdate::abort()
 {
-    if (m_job)
+    if (m_job) {
         return m_job->abort();
+    }
     return true;
 }
 
@@ -63,7 +64,8 @@ void ModrinthCheckUpdate::executeTask()
         // (though it will rarely happen, if at all)
         if (resource->metadata()->hash_format != m_hashType) {
             auto hash_task = Hashing::createHasher(resource->fileinfo().absoluteFilePath(), ModPlatform::ResourceProvider::MODRINTH);
-            connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, resource](const QString& hash) { m_mappings.insert(hash, resource); });
+            connect(hash_task.get(), &Hashing::Hasher::resultsReady,
+                    [this, resource](const QString& hash) { m_mappings.insert(hash, resource); });
             connect(hash_task.get(), &Task::failed, [this] { failed("Failed to generate hash"); });
             hashing_task->addTask(hash_task);
             startHasing = true;
@@ -178,10 +180,11 @@ void ModrinthCheckUpdate::checkVersionsResponse(QByteArray* response, std::optio
 
                 QString old_version = resource->metadata()->version_number;
                 if (old_version.isEmpty()) {
-                    if (resource->status() == ResourceStatus::NOT_INSTALLED)
+                    if (resource->status() == ResourceStatus::NOT_INSTALLED) {
                         old_version = tr("Not installed");
-                    else
+                    } else {
                         old_version = tr("Unknown");
+                    }
                 }
 
                 m_updates.emplace_back(pack->name, hash, old_version, project_ver.version_number, project_ver.version_type,
@@ -215,12 +218,13 @@ void ModrinthCheckUpdate::checkNextLoader()
     for (auto resource : m_mappings) {
         QString reason;
 
-        if (dynamic_cast<Mod*>(resource) != nullptr)
+        if (dynamic_cast<Mod*>(resource) != nullptr) {
             reason =
                 tr("No valid version found for this resource. It's probably unavailable for the current game "
                    "version / mod loader.");
-        else
+        } else {
             reason = tr("No valid version found for this resource. It's probably unavailable for the current game version.");
+        }
 
         emit checkFailed(resource, reason);
     }

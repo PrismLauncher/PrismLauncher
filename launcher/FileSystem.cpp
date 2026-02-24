@@ -264,8 +264,9 @@ bool ensureFolderPathExists(const QFileInfo folderPath)
 {
     QDir dir;
     QString ensuredPath = folderPath.filePath();
-    if (folderPath.exists())
+    if (folderPath.exists()) {
         return true;
+    }
 
     bool success = dir.mkpath(ensuredPath);
     return success;
@@ -325,16 +326,19 @@ bool copy::operator()(const QString& offset, bool dryRun)
     fs::copy_options opt = copy_opts::none;
 
     // The default behavior is to follow symlinks
-    if (!m_followSymlinks)
+    if (!m_followSymlinks) {
         opt |= copy_opts::copy_symlinks;
+    }
 
-    if (m_overwrite)
+    if (m_overwrite) {
         opt |= copy_opts::overwrite_existing;
+    }
 
     // Function that'll do the actual copying
     auto copy_file = [this, dryRun, src, dst, opt, &err](const QString& src_path, const QString& relative_dst_path) {
-        if (m_matcher && (m_matcher(relative_dst_path) != m_whitelist))
+        if (m_matcher && (m_matcher(relative_dst_path) != m_whitelist)) {
             return;
+        }
 
         auto dst_path = PathCombine(dst, relative_dst_path);
         if (!dryRun) {
@@ -370,8 +374,9 @@ bool copy::operator()(const QString& offset, bool dryRun)
     }
 
     // If the root src is not a directory, the previous iterator won't run.
-    if (!fs::is_directory(StringUtils::toStdString(src)))
+    if (!fs::is_directory(StringUtils::toStdString(src))) {
         copy_file(src, "");
+    }
 
     return err.value() == 0;
 }
@@ -395,8 +400,9 @@ bool create_link::operator()(const QString& offset, bool dryRun)
 
     make_link_list(offset);
 
-    if (!dryRun)
+    if (!dryRun) {
         return make_links();
+    }
 
     return true;
 }
@@ -415,8 +421,9 @@ void create_link::make_link_list(const QString& offset)
         auto dst = PathCombine(QDir(dstPath).absolutePath(), offset);
 
         // you can't hard link a directory so make sure if we deal with a directory we do so recursively
-        if (m_useHardLinks)
+        if (m_useHardLinks) {
             m_recursive = true;
+        }
 
         // Function that'll do the actual linking
         auto link_file = [this, dst](const QString& src_path, const QString& relative_dst_path) {
@@ -431,12 +438,14 @@ void create_link::make_link_list(const QString& offset)
         };
 
         if ((!m_recursive) || !fs::is_directory(StringUtils::toStdString(src))) {
-            if (m_debug)
+            if (m_debug) {
                 qDebug() << "linking single file or dir:" << src << "to" << dst;
+            }
             link_file(src, "");
         } else {
-            if (m_debug)
+            if (m_debug) {
                 qDebug().nospace() << "linking recursively: " << src << " to " << dst << ", max_depth: " << m_max_depth;
+            }
             QDir src_dir(src);
             QDirIterator source_it(src, QDir::Filter::Files | QDir::Filter::Hidden, QDirIterator::Subdirectories);
 
@@ -472,16 +481,19 @@ bool create_link::make_links()
 
         ensureFilePathExists(dst_path);
         if (m_useHardLinks) {
-            if (m_debug)
+            if (m_debug) {
                 qDebug() << "making hard link:" << src_path << "to" << dst_path;
+            }
             fs::create_hard_link(src_path_std, dst_path_std, m_os_err);
         } else if (fs::is_directory(src_path_std)) {
-            if (m_debug)
+            if (m_debug) {
                 qDebug() << "making directory_symlink:" << src_path << "to" << dst_path;
+            }
             fs::create_directory_symlink(src_path_std, dst_path_std, m_os_err);
         } else {
-            if (m_debug)
+            if (m_debug) {
                 qDebug() << "making symlink:" << src_path << "to" << dst_path;
+            }
             fs::create_symlink(src_path_std, dst_path_std, m_os_err);
         }
 
@@ -496,8 +508,9 @@ bool create_link::make_links()
             m_linked++;
             emit fileLinked(src_path, dst_path);
         }
-        if (m_os_err)
+        if (m_os_err) {
             return false;
+        }
     }
     return true;
 }
@@ -547,15 +560,17 @@ void create_link::runPrivileged(const QString& offset)
 
             // Relies on the fact that QDataStream serializes a quint32 into
             // sizeof(quint32) bytes
-            if (clientConnection->bytesAvailable() < (int)sizeof(quint32))
+            if (clientConnection->bytesAvailable() < (int)sizeof(quint32)) {
                 return;
+            }
             qDebug() << "reading block size";
             in >> blockSize;
 
             qDebug() << "blocksize is" << blockSize;
             qDebug() << "bytes available" << clientConnection->bytesAvailable();
-            if (clientConnection->bytesAvailable() < blockSize || in.atEnd())
+            if (clientConnection->bytesAvailable() < blockSize || in.atEnd()) {
                 return;
+            }
 
             quint32 numResults;
             in >> numResults;
@@ -662,8 +677,9 @@ bool move(const QString& source, const QString& dest)
     fs::rename(StringUtils::toStdString(source), StringUtils::toStdString(dest), err);
 
     if (err.value() != 0) {
-        if (moveByCopy(source, dest))
+        if (moveByCopy(source, dest)) {
             return true;
+        }
         qDebug() << "Move of" << source << "to" << dest << "failed!";
         qWarning() << "Failed to move file:" << QString::fromStdString(err.message()) << QString::number(err.value());
         return false;
@@ -687,8 +703,9 @@ bool deletePath(QString path)
 bool trash(QString path, QString* pathInTrash)
 {
     // FIXME: Figure out trash in Flatpak. Qt seemingly doesn't use the Trash portal
-    if (DesktopServices::isFlatpak())
+    if (DesktopServices::isFlatpak()) {
         return false;
+    }
 #if defined Q_OS_WIN32
     if (IsWindowsServer())
         return false;
@@ -698,10 +715,12 @@ bool trash(QString path, QString* pathInTrash)
 
 QString PathCombine(const QString& path1, const QString& path2)
 {
-    if (!path1.size())
+    if (!path1.size()) {
         return path2;
-    if (!path2.size())
+    }
+    if (!path2.size()) {
         return path1;
+    }
     return QDir::cleanPath(path1 + QDir::separator() + path2);
 }
 
@@ -722,8 +741,9 @@ QString AbsolutePath(const QString& path)
 
 int pathDepth(const QString& path)
 {
-    if (path.isEmpty())
+    if (path.isEmpty()) {
         return 0;
+    }
 
     QFileInfo info(path);
 
@@ -738,8 +758,9 @@ int pathDepth(const QString& path)
 
 QString pathTruncate(const QString& path, int depth)
 {
-    if (path.isEmpty() || (depth < 0))
+    if (path.isEmpty() || (depth < 0)) {
         return "";
+    }
 
     QString trunc = QFileInfo(path).path();
 
@@ -805,9 +826,11 @@ static const QString BAD_FILENAME_CHARS = BAD_WIN_CHARS + "\\/";
 
 QString RemoveInvalidFilenameChars(QString string, QChar replaceWith)
 {
-    for (int i = 0; i < string.length(); i++)
-        if (string.at(i) < ' ' || BAD_FILENAME_CHARS.contains(string.at(i)))
+    for (int i = 0; i < string.length(); i++) {
+        if (string.at(i) < ' ' || BAD_FILENAME_CHARS.contains(string.at(i))) {
             string[i] = replaceWith;
+        }
+    }
     return string;
 }
 
@@ -874,8 +897,9 @@ QString DirNameFromString(QString string, QString inDir)
         }
 
         // If it's over 9000
-        if (num > 9000)
+        if (num > 9000) {
             return "";
+        }
         num++;
     } while (QFileInfo(PathCombine(inDir, dirName)).exists());
     return dirName;
@@ -910,13 +934,15 @@ QString quoteArgs(const QStringList& args, const QString& wrap, const QString& e
 
         bool needsWrapping = !wrapOnlyIfNeeded || arg.contains(' ') || arg.contains('\t') || arg.contains(wrap);
 
-        if (needsWrapping)
+        if (needsWrapping) {
             result += wrap + arg + wrap;
-        else
+        } else {
             result += arg;
+        }
 
-        if (i < size - 1)
+        if (i < size - 1) {
             result += ' ';
+        }
     }
 
     return result;
@@ -1007,8 +1033,9 @@ QString createShortcut(QString destination, QString target, QStringList args, QS
 
     return application.path();
 #elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-    if (!destination.endsWith(".desktop"))  // in case of isFlatpak destination is already populated
+    if (!destination.endsWith(".desktop")) {  // in case of isFlatpak destination is already populated
         destination += ".desktop";
+    }
     QFile f(destination);
     if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) {
         qWarning() << "Failed to open file '" << f.fileName() << "' for writing!";
@@ -1139,8 +1166,9 @@ bool overrideFolder(QString overwritten_path, QString override_path)
 {
     using copy_opts = fs::copy_options;
 
-    if (!FS::ensureFolderPathExists(overwritten_path))
+    if (!FS::ensureFolderPathExists(overwritten_path)) {
         return false;
+    }
 
     std::error_code err;
     fs::copy_options opt = copy_opts::recursive | copy_opts::overwrite_existing;
@@ -1170,8 +1198,9 @@ FilesystemType getFilesystemTypeFuzzy(const QString& name)
     for (auto iter = s_filesystem_type_names.constBegin(); iter != s_filesystem_type_names.constEnd(); ++iter) {
         auto fs_names = iter.value();
         for (const auto& fs_name : fs_names) {
-            if (name.toUpper().contains(fs_name.toUpper()))
+            if (name.toUpper().contains(fs_name.toUpper())) {
                 return iter.key();
+            }
         }
     }
     return FilesystemType::UNKNOWN;
@@ -1181,8 +1210,9 @@ FilesystemType getFilesystemType(const QString& name)
 {
     for (auto iter = s_filesystem_type_names.constBegin(); iter != s_filesystem_type_names.constEnd(); ++iter) {
         auto fs_names = iter.value();
-        if (fs_names.contains(name.toUpper()))
+        if (fs_names.contains(name.toUpper())) {
             return iter.key();
+        }
     }
     return FilesystemType::UNKNOWN;
 }
@@ -1193,12 +1223,14 @@ FilesystemType getFilesystemType(const QString& name)
  */
 QString nearestExistentAncestor(const QString& path)
 {
-    if (QFileInfo::exists(path))
+    if (QFileInfo::exists(path)) {
         return path;
+    }
 
     QDir dir(path);
-    if (!dir.makeAbsolute())
+    if (!dir.makeAbsolute()) {
         return {};
+    }
     do {
         dir.setPath(QDir::cleanPath(dir.filePath(QStringLiteral(".."))));
     } while (!dir.exists() && !dir.isRoot());
@@ -1288,8 +1320,9 @@ bool clone::operator()(const QString& offset, bool dryRun)
 
     // Function that'll do the actual cloneing
     auto cloneFile = [this, dryRun, dst, &err](const QString& src_path, const QString& relative_dst_path) {
-        if (m_matcher && (m_matcher(relative_dst_path) != m_whitelist))
+        if (m_matcher && (m_matcher(relative_dst_path) != m_whitelist)) {
             return;
+        }
 
         auto dst_path = PathCombine(dst, relative_dst_path);
         if (!dryRun) {
@@ -1322,8 +1355,9 @@ bool clone::operator()(const QString& offset, bool dryRun)
     }
 
     // If the root src is not a directory, the previous iterator won't run.
-    if (!fs::is_directory(StringUtils::toStdString(src)))
+    if (!fs::is_directory(StringUtils::toStdString(src))) {
         cloneFile(src, "");
+    }
 
     return err.value() == 0;
 }

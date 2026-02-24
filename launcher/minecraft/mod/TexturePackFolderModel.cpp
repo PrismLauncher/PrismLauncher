@@ -56,8 +56,9 @@ Task* TexturePackFolderModel::createParseTask(Resource& resource)
 
 QVariant TexturePackFolderModel::data(const QModelIndex& index, int role) const
 {
-    if (!validateIndex(index))
+    if (!validateIndex(index)) {
         return {};
+    }
 
     int row = index.row();
     int column = index.column();

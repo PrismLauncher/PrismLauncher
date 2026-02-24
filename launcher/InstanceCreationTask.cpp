@@ -37,8 +37,9 @@ void InstanceCreationTask::executeTask()
 
     m_instance = createInstance();
     if (!m_instance) {
-        if (m_abort)
+        if (m_abort) {
             return;
+        }
 
         qWarning() << "Instance creation failed!";
         if (!m_error_message.isEmpty()) {
@@ -62,8 +63,9 @@ void InstanceCreationTask::executeTask()
         qDebug() << "Removing old files";
 
         for (const QString& path : m_files_to_remove) {
-            if (!QFile::exists(path))
+            if (!QFile::exists(path)) {
                 continue;
+            }
 
             qDebug() << "Removing" << path;
 

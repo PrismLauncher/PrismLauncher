@@ -93,8 +93,9 @@ bool FilterModel::filterAcceptsRow([[maybe_unused]] int sourceRow, [[maybe_unuse
     QVariant raw = sourceModel()->data(index, Qt::UserRole);
     Q_ASSERT(raw.canConvert<Modpack>());
     auto pack = raw.value<Modpack>();
-    if (searchTerm.startsWith("#"))
+    if (searchTerm.startsWith("#")) {
         return pack.packCode == searchTerm.mid(1);
+    }
     return pack.name.contains(searchTerm, Qt::CaseInsensitive);
 }
 

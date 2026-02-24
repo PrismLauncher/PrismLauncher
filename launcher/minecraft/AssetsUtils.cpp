@@ -250,8 +250,9 @@ bool reconstructAssets(const QString& assetsId, QString resourcesFolder)
 
             QString original_path = FS::PathCombine(objectDir.path(), tlk, asset_object.hash);
             QFile original(original_path);
-            if (!original.exists())
+            if (!original.exists()) {
                 continue;
+            }
 
             presentFiles.remove(target_path);
 
@@ -318,7 +319,8 @@ NetJob::Ptr AssetsIndex::getDownloadJob()
             job->addNetAction(dl);
         }
     }
-    if (job->size())
+    if (job->size()) {
         return job;
+    }
     return nullptr;
 }

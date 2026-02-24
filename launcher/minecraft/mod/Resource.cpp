@@ -31,8 +31,9 @@ static std::tuple<QString, qint64> calculateFileSize(const QFileInfo& file)
         dir.setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
         auto count = dir.count();
         auto str = QObject::tr("item");
-        if (count != 1)
+        if (count != 1) {
             str = QObject::tr("items");
+        }
         return { QString("%1 %2").arg(QString::number(count), str), count };
     }
     return { StringUtils::humanReadableFileSize(file.size(), true), file.size() };
@@ -77,8 +78,9 @@ void Resource::parseFile()
 
 auto Resource::name() const -> QString
 {
-    if (metadata())
+    if (metadata()) {
         return metadata()->name;
+    }
 
     return m_name;
 }
@@ -92,24 +94,27 @@ static void removeThePrefix(QString& string)
 
 auto Resource::provider() const -> QString
 {
-    if (metadata())
+    if (metadata()) {
         return ModPlatform::ProviderCapabilities::readableName(metadata()->provider);
+    }
 
     return tr("Unknown");
 }
 
 auto Resource::homepage() const -> QString
 {
-    if (metadata())
+    if (metadata()) {
         return ModPlatform::getMetaURL(metadata()->provider, metadata()->project_id);
+    }
 
     return {};
 }
 
 void Resource::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
 {
-    if (status() == ResourceStatus::NO_METADATA)
+    if (status() == ResourceStatus::NO_METADATA) {
         setStatus(ResourceStatus::INSTALLED);
+    }
 
     m_metadata = metadata;
 }
@@ -153,10 +158,12 @@ int Resource::compare(const Resource& other, SortType type) const
     switch (type) {
         default:
         case SortType::ENABLED:
-            if (enabled() && !other.enabled())
+            if (enabled() && !other.enabled()) {
                 return 1;
-            if (!enabled() && other.enabled())
+            }
+            if (!enabled() && other.enabled()) {
                 return -1;
+            }
             break;
         case SortType::NAME: {
             QString this_name{ name() };
@@ -169,29 +176,36 @@ int Resource::compare(const Resource& other, SortType type) const
             return QString::compare(this_name, other_name, Qt::CaseInsensitive);
         }
         case SortType::DATE:
-            if (dateTimeChanged() > other.dateTimeChanged())
+            if (dateTimeChanged() > other.dateTimeChanged()) {
                 return 1;
-            if (dateTimeChanged() < other.dateTimeChanged())
+            }
+            if (dateTimeChanged() < other.dateTimeChanged()) {
                 return -1;
+            }
             break;
         case SortType::SIZE: {
             if (this->type() != other.type()) {
-                if (this->type() == ResourceType::FOLDER)
+                if (this->type() == ResourceType::FOLDER) {
                     return -1;
-                if (other.type() == ResourceType::FOLDER)
+                }
+                if (other.type() == ResourceType::FOLDER) {
                     return 1;
+                }
             }
 
-            if (sizeInfo() > other.sizeInfo())
+            if (sizeInfo() > other.sizeInfo()) {
                 return 1;
-            if (sizeInfo() < other.sizeInfo())
+            }
+            if (sizeInfo() < other.sizeInfo()) {
                 return -1;
+            }
             break;
         }
         case SortType::PROVIDER: {
             auto compare_result = QString::compare(provider(), other.provider(), Qt::CaseInsensitive);
-            if (compare_result != 0)
+            if (compare_result != 0) {
                 return compare_result;
+            }
             break;
         }
     }
@@ -206,8 +220,9 @@ bool Resource::applyFilter(QRegularExpression filter) const
 
 bool Resource::enable(EnableAction action)
 {
-    if (m_type == ResourceType::UNKNOWN || m_type == ResourceType::FOLDER)
+    if (m_type == ResourceType::UNKNOWN || m_type == ResourceType::FOLDER) {
         return false;
+    }
 
     QString path = m_file_info.absoluteFilePath();
     QFile file(path);
@@ -226,14 +241,16 @@ bool Resource::enable(EnableAction action)
             break;
     }
 
-    if (m_enabled == enable)
+    if (m_enabled == enable) {
         return false;
+    }
 
     if (enable) {
         // m_enabled is false, but there's no '.disabled' suffix.
         // TODO: Report error?
-        if (!path.endsWith(".disabled"))
+        if (!path.endsWith(".disabled")) {
             return false;
+        }
         path.chop(9);
     } else {
         path += ".disabled";
@@ -241,8 +258,9 @@ bool Resource::enable(EnableAction action)
             path = FS::getUniqueResourceName(path);
         }
     }
-    if (!file.rename(path))
+    if (!file.rename(path)) {
         return false;
+    }
 
     setFile(QFileInfo(path));
 
@@ -275,8 +293,9 @@ auto Resource::destroyMetadata(const QDir& index_dir) -> void
 
 bool Resource::isSymLinkUnder(const QString& instPath) const
 {
-    if (isSymLink())
+    if (isSymLink()) {
         return true;
+    }
 
     auto instDir = QDir(instPath);
 
@@ -294,7 +313,8 @@ bool Resource::isMoreThanOneHardLink() const
 auto Resource::getOriginalFileName() const -> QString
 {
     auto fileName = m_file_info.fileName();
-    if (!m_enabled)
+    if (!m_enabled) {
         fileName.chop(9);
+    }
     return fileName;
 }

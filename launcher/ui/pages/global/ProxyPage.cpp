@@ -81,14 +81,15 @@ void ProxyPage::applySettings()
 
     // Proxy
     QString proxyType = "None";
-    if (ui->proxyDefaultBtn->isChecked())
+    if (ui->proxyDefaultBtn->isChecked()) {
         proxyType = "Default";
-    else if (ui->proxyNoneBtn->isChecked())
+    } else if (ui->proxyNoneBtn->isChecked()) {
         proxyType = "None";
-    else if (ui->proxySOCKS5Btn->isChecked())
+    } else if (ui->proxySOCKS5Btn->isChecked()) {
         proxyType = "SOCKS5";
-    else if (ui->proxyHTTPBtn->isChecked())
+    } else if (ui->proxyHTTPBtn->isChecked()) {
         proxyType = "HTTP";
+    }
 
     s->set("ProxyType", proxyType);
     s->set("ProxyAddr", ui->proxyAddrEdit->text());
@@ -104,14 +105,15 @@ void ProxyPage::loadSettings()
     auto s = APPLICATION->settings();
     // Proxy
     QString proxyType = s->get("ProxyType").toString();
-    if (proxyType == "Default")
+    if (proxyType == "Default") {
         ui->proxyDefaultBtn->setChecked(true);
-    else if (proxyType == "None")
+    } else if (proxyType == "None") {
         ui->proxyNoneBtn->setChecked(true);
-    else if (proxyType == "SOCKS5")
+    } else if (proxyType == "SOCKS5") {
         ui->proxySOCKS5Btn->setChecked(true);
-    else if (proxyType == "HTTP")
+    } else if (proxyType == "HTTP") {
         ui->proxyHTTPBtn->setChecked(true);
+    }
 
     ui->proxyAddrEdit->setText(s->get("ProxyAddr").toString());
     ui->proxyPortEdit->setValue(s->get("ProxyPort").value<uint16_t>());

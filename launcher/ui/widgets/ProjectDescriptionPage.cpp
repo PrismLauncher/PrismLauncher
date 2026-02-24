@@ -13,12 +13,14 @@ ProjectDescriptionPage::ProjectDescriptionPage(QWidget* parent) : QTextBrowser(p
 
 void ProjectDescriptionPage::setMetaEntry(QString entry)
 {
-    if (m_image_text_object)
+    if (m_image_text_object) {
         m_image_text_object->setMetaEntry(std::move(entry));
+    }
 }
 
 void ProjectDescriptionPage::flush()
 {
-    if (m_image_text_object)
+    if (m_image_text_object) {
         m_image_text_object->flush();
+    }
 }

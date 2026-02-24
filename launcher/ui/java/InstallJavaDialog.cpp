@@ -48,7 +48,7 @@ class InstallJavaPage : public QWidget, public BasePage {
    public:
     Q_OBJECT
    public:
-    explicit InstallJavaPage(QString  id, QString  iconName, QString  name, QWidget* parent = nullptr)
+    explicit InstallJavaPage(QString id, QString iconName, QString name, QWidget* parent = nullptr)
         : QWidget(parent), uid(std::move(id)), iconName(std::move(iconName)), name(std::move(name))
     {
         setObjectName(QStringLiteral("VersionSelectWidget"));
@@ -101,12 +101,14 @@ class InstallJavaPage : public QWidget, public BasePage {
 
     void openedImpl() override
     {
-        if (loaded)
+        if (loaded) {
             return;
+        }
 
         const auto versions = APPLICATION->metadataIndex()->get(uid);
-        if (!versions)
+        if (!versions) {
             return;
+        }
 
         initialize(versions);
         loaded = true;
@@ -256,8 +258,9 @@ InstallDialog::InstallDialog(const QString& uid, BaseInstance* instance, QWidget
                             pageCast(page)->setRecommendedMajors(recommendedJavas);
                         }
                     });
-                    if (!newTask->isRunning())
+                    if (!newTask->isRunning()) {
                         newTask->start();
+                    }
                 } else {
                     recommendedJavas = getRecommendedJavaVersionsFromVersionList(versions);
                 }
@@ -265,8 +268,9 @@ InstallDialog::InstallDialog(const QString& uid, BaseInstance* instance, QWidget
         }
     }
     for (BasePage* page : container->getPages()) {
-        if (page->id() == uid)
+        if (page->id() == uid) {
             container->selectPage(page->id());
+        }
 
         auto cast = pageCast(page);
         cast->setRecommend(true);

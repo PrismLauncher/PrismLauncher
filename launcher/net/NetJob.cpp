@@ -46,14 +46,17 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #endif
 
-NetJob::NetJob(QString job_name, QNetworkAccessManager* network, int max_concurrent) : ConcurrentTask(std::move(job_name)), m_network(network)
+NetJob::NetJob(QString job_name, QNetworkAccessManager* network, int max_concurrent)
+    : ConcurrentTask(std::move(job_name)), m_network(network)
 {
 #if defined(LAUNCHER_APPLICATION)
-    if (APPLICATION_DYN && max_concurrent < 0)
+    if (APPLICATION_DYN && max_concurrent < 0) {
         max_concurrent = APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt();
+    }
 #endif
-    if (max_concurrent > 0)
+    if (max_concurrent > 0) {
         setMaxConcurrent(max_concurrent);
+    }
 }
 
 auto NetJob::addNetAction(const Net::NetRequest::Ptr& action) -> bool
@@ -89,12 +92,14 @@ auto NetJob::canAbort() const -> bool
     bool canFullyAbort = true;
 
     // can abort the downloads on the queue?
-    for (const auto& part : m_queue)
+    for (const auto& part : m_queue) {
         canFullyAbort &= part->canAbort();
+    }
 
     // can abort the active downloads?
-    for (const auto& part : m_doing)
+    for (const auto& part : m_doing) {
         canFullyAbort &= part->canAbort();
+    }
 
     return canFullyAbort;
 }
@@ -104,8 +109,9 @@ auto NetJob::abort() -> bool
     bool fullyAborted = true;
 
     // fail all downloads on the queue
-    for (const auto& task : m_queue)
+    for (const auto& task : m_queue) {
         m_failed.insert(task.get(), task);
+    }
     m_queue.clear();
 
     // abort active downloads
@@ -114,10 +120,11 @@ auto NetJob::abort() -> bool
         fullyAborted &= part->abort();
     }
 
-    if (fullyAborted)
+    if (fullyAborted) {
         emitAborted();
-    else
+    } else {
         emitFailed(tr("Failed to abort all tasks in the NetJob!"));
+    }
 
     return fullyAborted;
 }

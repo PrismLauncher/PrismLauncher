@@ -75,18 +75,22 @@ void Version::parse()
     m_sections.clear();
     QString currentSection;
 
-    if (m_string.isEmpty())
+    if (m_string.isEmpty()) {
         return;
+    }
 
     auto classChange = [&currentSection](QChar lastChar, QChar currentChar) {
-        if (lastChar.isNull())
+        if (lastChar.isNull()) {
             return false;
-        if (lastChar.isDigit() != currentChar.isDigit())
+        }
+        if (lastChar.isDigit() != currentChar.isDigit()) {
             return true;
+        }
 
         const QList<QChar> s_separators{ '.', '-', '+' };
-        if (s_separators.contains(currentChar) && currentSection.at(0) != currentChar)
+        if (s_separators.contains(currentChar) && currentSection.at(0) != currentChar) {
             return true;
+        }
 
         return false;
     };
@@ -95,16 +99,18 @@ void Version::parse()
     for (int i = 1; i < m_string.size(); ++i) {
         const auto& current_char = m_string.at(i);
         if (classChange(m_string.at(i - 1), current_char)) {
-            if (!currentSection.isEmpty())
+            if (!currentSection.isEmpty()) {
                 m_sections.append(Section(currentSection));
+            }
             currentSection = "";
         }
 
         currentSection += current_char;
     }
 
-    if (!currentSection.isEmpty())
+    if (!currentSection.isEmpty()) {
         m_sections.append(Section(currentSection));
+    }
 }
 
 /// qDebug print support for the Version class
@@ -116,8 +122,9 @@ QDebug operator<<(QDebug debug, const Version& v)
 
     bool first = true;
     for (const auto& s : v.m_sections) {
-        if (!first)
+        if (!first) {
             debug.nospace() << ", ";
+        }
         debug.nospace() << s.m_fullString;
         first = false;
     }

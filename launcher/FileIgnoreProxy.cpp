@@ -82,8 +82,9 @@ bool FileIgnoreProxy::lessThan(const QModelIndex& left, const QModelIndex& right
 
 Qt::ItemFlags FileIgnoreProxy::flags(const QModelIndex& index) const
 {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return Qt::NoItemFlags;
+    }
 
     auto sourceIndex = mapToSource(index);
     Qt::ItemFlags flags = sourceIndex.flags();
@@ -106,11 +107,11 @@ QVariant FileIgnoreProxy::data(const QModelIndex& index, int role) const
         auto blockedPath = relPath(fsm->filePath(sourceIndex));
         auto cover = m_blocked.cover(blockedPath);
         if (!cover.isNull()) {
-            return {Qt::Unchecked};
+            return { Qt::Unchecked };
         } else if (m_blocked.exists(blockedPath)) {
-            return {Qt::PartiallyChecked};
+            return { Qt::PartiallyChecked };
         } else {
-            return {Qt::Checked};
+            return { Qt::Checked };
         }
     }
 
@@ -192,8 +193,9 @@ bool FileIgnoreProxy::setFilterState(QModelIndex index, Qt::CheckState state)
         // update everything above index
         QModelIndex up = index.parent();
         while (true) {
-            if (!up.isValid())
+            if (!up.isValid()) {
                 break;
+            }
             emit dataChanged(up, up, { Qt::CheckStateRole });
             up = up.parent();
         }
@@ -250,8 +252,9 @@ bool FileIgnoreProxy::filterAcceptsColumn(int source_column, const QModelIndex& 
 
     // adjust the columns you want to filter out here
     // return false for those that will be hidden
-    if (source_column == 2 || source_column == 3)
+    if (source_column == 2 || source_column == 3) {
         return false;
+    }
 
     return true;
 }

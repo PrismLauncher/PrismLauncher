@@ -94,12 +94,15 @@ class ThumbnailRunnable : public QRunnable {
     void run() override
     {
         QFileInfo info(m_path);
-        if (info.isDir())
+        if (info.isDir()) {
             return;
-        if ((info.suffix().compare("png", Qt::CaseInsensitive) != 0))
+        }
+        if ((info.suffix().compare("png", Qt::CaseInsensitive) != 0)) {
             return;
-        if (!m_cache->stale(m_path))
+        }
+        if (!m_cache->stale(m_path)) {
             return;
+        }
         QImage image(m_path);
         if (image.isNull()) {
             m_resultEmitter.emitResultsFailed(m_path);
@@ -107,10 +110,11 @@ class ThumbnailRunnable : public QRunnable {
             return;
         }
         QImage small;
-        if (image.width() > image.height())
+        if (image.width() > image.height()) {
             small = image.scaledToWidth(512).scaledToWidth(256, Qt::SmoothTransformation);
-        else
+        } else {
             small = image.scaledToHeight(512).scaledToHeight(256, Qt::SmoothTransformation);
+        }
         QPoint offset((256 - small.width()) / 2, (256 - small.height()) / 2);
         QImage square(QSize(256, 256), QImage::Format_ARGB32);
         square.fill(Qt::transparent);
@@ -143,14 +147,16 @@ class FilterModel : public QIdentityProxyModel {
     ~FilterModel() override
     {
         m_thumbnailingPool.clear();
-        if (!m_thumbnailingPool.waitForDone(500))
+        if (!m_thumbnailingPool.waitForDone(500)) {
             qDebug() << "Thumbnail pool took longer than 500ms to finish";
+        }
     }
     QVariant data(const QModelIndex& proxyIndex, int role = Qt::DisplayRole) const override
     {
         auto model = sourceModel();
-        if (!model)
+        if (!model) {
             return {};
+        }
         if (role == Qt::DisplayRole || role == Qt::EditRole) {
             QVariant result = sourceModel()->data(mapToSource(proxyIndex), role);
             static const QRegularExpression s_removeChars("\\.png$");
@@ -177,10 +183,12 @@ class FilterModel : public QIdentityProxyModel {
     bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override
     {
         auto model = sourceModel();
-        if (!model)
+        if (!model) {
             return false;
-        if (role != Qt::EditRole)
+        }
+        if (role != Qt::EditRole) {
             return false;
+        }
         // FIXME: this is a workaround for a bug in QFileSystemModel, where it doesn't
         // sort after renames
         {
@@ -274,8 +282,9 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent) : QMainWindow(pa
 
 bool ScreenshotsPage::eventFilter(QObject* obj, QEvent* evt)
 {
-    if (obj != ui->listView)
+    if (obj != ui->listView) {
         return QWidget::eventFilter(obj, evt);
+    }
     if (evt->type() != QEvent::KeyPress) {
         return QWidget::eventFilter(obj, evt);
     }
@@ -330,8 +339,9 @@ QMenu* ScreenshotsPage::createPopupMenu()
 
 void ScreenshotsPage::onItemActivated(QModelIndex index)
 {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return;
+    }
     auto info = m_model->fileInfo(index);
     DesktopServices::openPath(info);
 }
@@ -342,13 +352,16 @@ void ScreenshotsPage::onCurrentSelectionChanged(const QItemSelection& selected)
     bool allWritable = !selected.isEmpty();
 
     for (auto index : selected.indexes()) {
-        if (!index.isValid())
+        if (!index.isValid()) {
             break;
+        }
         auto info = m_model->fileInfo(index);
-        if (!info.isReadable())
+        if (!info.isReadable()) {
             allReadable = false;
-        if (!info.isWritable())
+        }
+        if (!info.isWritable()) {
             allWritable = false;
+        }
     }
 
     ui->actionUpload->setEnabled(allReadable);
@@ -366,28 +379,31 @@ void ScreenshotsPage::on_actionView_Folder_triggered()
 void ScreenshotsPage::on_actionUpload_triggered()
 {
     auto selection = ui->listView->selectionModel()->selectedRows();
-    if (selection.isEmpty())
+    if (selection.isEmpty()) {
         return;
+    }
 
     QString text;
     QUrl baseUrl(BuildConfig.IMGUR_BASE_URL);
-    if (selection.size() > 1)
+    if (selection.size() > 1) {
         text = tr("You are about to upload %1 screenshots to %2.\n"
                   "You should double-check for personal information.\n\n"
                   "Are you sure?")
                    .arg(QString::number(selection.size()), baseUrl.host());
-    else
+    } else {
         text = tr("You are about to upload the selected screenshot to %1.\n"
                   "You should double-check for personal information.\n\n"
                   "Are you sure?")
                    .arg(baseUrl.host());
+    }
 
     auto response = CustomMessageBox::selectable(this, "Confirm Upload", text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No,
                                                  QMessageBox::No)
                         ->exec();
 
-    if (response != QMessageBox::Yes)
+    if (response != QMessageBox::Yes) {
         return;
+    }
 
     QList<ScreenShot::Ptr> uploaded;
     auto job = NetJob::Ptr(new NetJob("Screenshot Upload", APPLICATION->network()));
@@ -509,26 +525,29 @@ void ScreenshotsPage::on_actionDelete_triggered()
 
     int count = ui->listView->selectionModel()->selectedRows().size();
     QString text;
-    if (count > 1)
+    if (count > 1) {
         text = tr("You are about to delete %1 screenshots.\n"
                   "This may be permanent and they will be gone from the folder.\n\n"
                   "Are you sure?")
                    .arg(count);
-    else
+    } else {
         text = tr("You are about to delete the selected screenshot.\n"
                   "This may be permanent and it will be gone from the folder.\n\n"
                   "Are you sure?")
                    .arg(count);
+    }
 
     auto response =
         CustomMessageBox::selectable(this, tr("Confirm Deletion"), text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No)->exec();
 
-    if (response != QMessageBox::Yes)
+    if (response != QMessageBox::Yes) {
         return;
+    }
 
     for (auto item : selected) {
-        if (FS::trash(m_model->filePath(item)))
+        if (FS::trash(m_model->filePath(item))) {
             continue;
+        }
 
         m_model->remove(item);
     }
@@ -537,8 +556,9 @@ void ScreenshotsPage::on_actionDelete_triggered()
 void ScreenshotsPage::on_actionRename_triggered()
 {
     auto selection = ui->listView->selectionModel()->selectedIndexes();
-    if (selection.isEmpty())
+    if (selection.isEmpty()) {
         return;
+    }
     ui->listView->edit(selection[0]);
     // TODO: mass renaming
 }

@@ -54,8 +54,9 @@ auto ExtractZipTask::extractZip() -> ZipResult
     ZipResult result;
     auto fileName = m_input.getZipName();
     if (!m_input.parse([this, &result, &target, &target_top_dir, ext, &extracted](ArchiveReader::File* f) {
-            if (m_zipFuture.isCanceled())
+            if (m_zipFuture.isCanceled()) {
                 return false;
+            }
             setProgress(m_progress + 1, m_progressTotal);
             QString file_name = f->filename();
             if (!file_name.startsWith(m_subdirectory)) {
@@ -68,8 +69,9 @@ auto ExtractZipTask::extractZip() -> ZipResult
             setStatus("Unpacking: " + relative_file_name);
 
             // Fix subdirs/files ending with a / getting transformed into absolute paths
-            if (relative_file_name.startsWith('/'))
+            if (relative_file_name.startsWith('/')) {
                 relative_file_name = relative_file_name.mid(1);
+            }
 
             // Fix weird "folders with a single file get squashed" thing
             QString sub_path;
@@ -85,8 +87,9 @@ auto ExtractZipTask::extractZip() -> ZipResult
                 target_file_path = target + '/';
             } else {
                 target_file_path = FS::PathCombine(target_top_dir.toLocalFile(), sub_path, relative_file_name);
-                if (relative_file_name.endsWith('/') && !target_file_path.endsWith('/'))
+                if (relative_file_name.endsWith('/') && !target_file_path.endsWith('/')) {
                     target_file_path += '/';
+                }
             }
 
             if (!target_top_dir.isParentOf(QUrl::fromLocalFile(target_file_path))) {

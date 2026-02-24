@@ -36,12 +36,12 @@
  */
 
 #include "launch/LaunchTask.h"
-#include <assert.h>
 #include <QAnyStringView>
 #include <QCoreApplication>
 #include <QDebug>
 #include <QDir>
 #include <QStandardPaths>
+#include <cassert>
 #include <utility>
 #include <variant>
 #include "MessageLevel.h"
@@ -238,8 +238,9 @@ bool LaunchTask::parseXmlLogs(QString const& line, MessageLevel level)
         return false;
     }
 
-    if (items.isEmpty())
+    if (items.isEmpty()) {
         return true;
+    }
 
     auto model = getLogModel();
     for (auto const& item : items) {
@@ -258,8 +259,9 @@ bool LaunchTask::parseXmlLogs(QString const& line, MessageLevel level)
 
             MessageLevel newLevel = MessageLevel::takeFromLine(msg);
 
-            if (newLevel == MessageLevel::Unknown)
+            if (newLevel == MessageLevel::Unknown) {
                 newLevel = LogParser::guessLevel(line, model->previousLevel());
+            }
 
             msg = censorPrivateInfo(msg);
 
@@ -312,8 +314,9 @@ QString expandVariables(const QString& input, const QProcessEnvironment& dict)
         QChar c = result.at(i++);
         switch (state) {
             case base:
-                if (c == '$')
+                if (c == '$') {
                     state = maybeBrace;
+                }
                 break;
             case maybeBrace:
                 if (c == '{') {
@@ -349,8 +352,9 @@ QString expandVariables(const QString& input, const QProcessEnvironment& dict)
         }
     }
     if (state == variable) {
-        if (const auto res = dict.value(result.mid(startIdx), ""); !res.isEmpty())
+        if (const auto res = dict.value(result.mid(startIdx), ""); !res.isEmpty()) {
             result.replace(startIdx - 1, result.length() - startIdx + 1, res);
+        }
     }
     return result;
 }

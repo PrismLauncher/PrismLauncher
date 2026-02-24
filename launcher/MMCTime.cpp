@@ -75,23 +75,27 @@ QString Time::humanReadableDuration(double duration, int precision)
         os << dc << QObject::tr("days");
     }
     if (hc) {
-        if (dc)
+        if (dc) {
             os << " ";
+        }
         os << qSetFieldWidth(2) << hc << QObject::tr("h");  // hours
     }
     if (mc) {
-        if (dc || hc)
+        if (dc || hc) {
             os << " ";
+        }
         os << qSetFieldWidth(2) << mc << QObject::tr("m");  // minutes
     }
     if (dc || hc || mc || sc) {
-        if (dc || hc || mc)
+        if (dc || hc || mc) {
             os << " ";
+        }
         os << qSetFieldWidth(2) << sc << QObject::tr("s");  // seconds
     }
     if ((msc && (precision > 0)) || !(dc || hc || mc || sc)) {
-        if (dc || hc || mc || sc)
+        if (dc || hc || mc || sc) {
             os << " ";
+        }
         os << qSetFieldWidth(0) << qSetRealNumberPrecision(precision) << msc << QObject::tr("ms");  // miliseconds
     }
 

@@ -28,8 +28,9 @@ ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] QString con
     auto shortcut = new QShortcut(QKeySequence::Copy, ui->modTreeWidget);
     connect(shortcut, &QShortcut::activated, [this]() {
         auto currentItem = this->ui->modTreeWidget->currentItem();
-        if (!currentItem)
+        if (!currentItem) {
             return;
+        }
         auto currentColumn = this->ui->modTreeWidget->currentColumn();
 
         auto data = currentItem->data(currentColumn, Qt::UserRole);
@@ -124,6 +125,7 @@ void ReviewMessageBox::on_toggleDepsButton_clicked()
 {
     m_deps_checked = !m_deps_checked;
     auto state = m_deps_checked ? Qt::Checked : Qt::Unchecked;
-    for (auto dep : m_deps)
+    for (auto dep : m_deps) {
         dep->setCheckState(0, state);
+    }
 };

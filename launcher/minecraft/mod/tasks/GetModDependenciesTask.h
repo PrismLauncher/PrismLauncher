@@ -64,10 +64,11 @@ class GetModDependenciesTask : public SequentialTask {
    private:
     inline ResourceAPI* getAPI(ModPlatform::ResourceProvider provider)
     {
-        if (provider == ModPlatform::ResourceProvider::FLAME)
+        if (provider == ModPlatform::ResourceProvider::FLAME) {
             return &m_flameAPI;
-        else
+        } else {
             return &m_modrinthAPI;
+        }
     }
 
    protected slots:

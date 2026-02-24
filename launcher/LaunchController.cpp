@@ -345,8 +345,9 @@ bool LaunchController::reauthenticateAccount(const MinecraftAccountPtr& account,
             if (newAccount != nullptr) {
                 accounts->addAccount(newAccount);
 
-                if (isDefault)
+                if (isDefault) {
                     accounts->setDefaultAccount(newAccount);
+                }
 
                 if (m_accountToUse == account) {
                     m_accountToUse = nullptr;

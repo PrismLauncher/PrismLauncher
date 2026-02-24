@@ -115,8 +115,9 @@ class VersionTest : public QObject {
         const QString test_name_template{ "FlexVer test #%1 (%2)" };
         for (auto line = vector_file.readLine(); !vector_file.atEnd(); line = vector_file.readLine()) {
             line = line.simplified();
-            if (line.startsWith('#') || line.isEmpty())
+            if (line.startsWith('#') || line.isEmpty()) {
                 continue;
+            }
 
             test_number += 1;
 

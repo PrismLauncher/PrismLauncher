@@ -28,14 +28,17 @@ int HintOverrideProxyStyle::styleHint(QStyle::StyleHint hint,
                                       const QWidget* widget,
                                       QStyleHintReturn* returnData) const
 {
-    if (hint == QStyle::SH_ItemView_ActivateItemOnSingleClick)
+    if (hint == QStyle::SH_ItemView_ActivateItemOnSingleClick) {
         return 0;
+    }
 
-    if (hint == QStyle::SH_Slider_AbsoluteSetButtons)
+    if (hint == QStyle::SH_Slider_AbsoluteSetButtons) {
         return Qt::LeftButton | Qt::MiddleButton;
+    }
 
-    if (hint == QStyle::SH_Slider_PageSetButtons)
+    if (hint == QStyle::SH_Slider_PageSetButtons) {
         return Qt::RightButton;
+    }
 
     return QProxyStyle::styleHint(hint, option, widget, returnData);
 }

@@ -33,19 +33,22 @@ void ProgressWidget::reset()
 
 void ProgressWidget::progressFormat(const QString& format)
 {
-    if (format.isEmpty())
+    if (format.isEmpty()) {
         m_bar->setTextVisible(false);
-    else
+    } else {
         m_bar->setFormat(format);
+    }
 }
 
 void ProgressWidget::watch(Task* task)
 {
-    if (!task)
+    if (!task) {
         return;
+    }
 
-    if (m_task)
+    if (m_task) {
         disconnect(m_task, nullptr, this, nullptr);
+    }
 
     m_task = task;
 
@@ -55,17 +58,19 @@ void ProgressWidget::watch(Task* task)
     connect(m_task, &Task::progress, this, &ProgressWidget::handleTaskProgress);
     connect(m_task, &Task::destroyed, this, &ProgressWidget::taskDestroyed);
 
-    if (m_task->isRunning())
+    if (m_task->isRunning()) {
         show();
-    else
+    } else {
         connect(m_task, &Task::started, this, &ProgressWidget::show);
+    }
 }
 
 void ProgressWidget::start(Task* task)
 {
     watch(task);
-    if (!m_task->isRunning())
+    if (!m_task->isRunning()) {
         QMetaObject::invokeMethod(m_task, "start", Qt::QueuedConnection);
+    }
 }
 
 bool ProgressWidget::exec(const std::shared_ptr<Task>& task)
@@ -76,8 +81,9 @@ bool ProgressWidget::exec(const std::shared_ptr<Task>& task)
 
     start(task.get());
 
-    if (task->isRunning())
+    if (task->isRunning()) {
         loop.exec();
+    }
 
     return task->wasSuccessful();
 }
@@ -93,16 +99,19 @@ void ProgressWidget::hide()
 
 void ProgressWidget::handleTaskFinish()
 {
-    if (!m_task->wasSuccessful() && m_label)
+    if (!m_task->wasSuccessful() && m_label) {
         m_label->setText(m_task->failReason());
+    }
 
-    if (m_hide_if_inactive)
+    if (m_hide_if_inactive) {
         hide();
+    }
 }
 void ProgressWidget::handleTaskStatus(const QString& status)
 {
-    if (m_label)
+    if (m_label) {
         m_label->setText(status);
+    }
 }
 void ProgressWidget::handleTaskProgress(qint64 current, qint64 total)
 {

@@ -23,8 +23,9 @@ EnsureMetadataTask::EnsureMetadataTask(Resource* resource, const QDir& dir, ModP
     : Task(), m_indexDir(dir), m_provider(prov), m_hashingTask(nullptr), m_currentTask(nullptr)
 {
     auto hashTask = createNewHash(resource);
-    if (!hashTask)
+    if (!hashTask) {
         return;
+    }
     connect(hashTask.get(), &Hashing::Hasher::resultsReady, [this, resource](const QString& hash) { m_resources.insert(hash, resource); });
     connect(hashTask.get(), &Task::failed, [this, resource] { emitFail(resource, "", RemoveFromList::No); });
     m_hashingTask = hashTask;
@@ -37,9 +38,11 @@ EnsureMetadataTask::EnsureMetadataTask(QList<Resource*>& resources, const QDir& 
     m_hashingTask = hashTask;
     for (auto* resource : resources) {
         auto hash_task = createNewHash(resource);
-        if (!hash_task)
+        if (!hash_task) {
             continue;
-        connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, resource](const QString& hash) { m_resources.insert(hash, resource); });
+        }
+        connect(hash_task.get(), &Hashing::Hasher::resultsReady,
+                [this, resource](const QString& hash) { m_resources.insert(hash, resource); });
         connect(hash_task.get(), &Task::failed, [this, resource] { emitFail(resource, "", RemoveFromList::No); });
         hashTask->addTask(hash_task);
     }
@@ -51,8 +54,9 @@ EnsureMetadataTask::EnsureMetadataTask(QHash<QString, Resource*>& resources, con
 
 Hashing::Hasher::Ptr EnsureMetadataTask::createNewHash(Resource* resource)
 {
-    if (!resource || !resource->valid() || resource->type() == ResourceType::FOLDER)
+    if (!resource || !resource->valid() || resource->type() == ResourceType::FOLDER) {
         return nullptr;
+    }
 
     return Hashing::createHasher(resource->fileinfo().absoluteFilePath(), m_provider);
 }
@@ -63,8 +67,9 @@ QString EnsureMetadataTask::getExistingHash(Resource* resource)
     // (linear on the number of mods vs. linear on the size of the mod's JAR)
     auto it = m_resources.keyValueBegin();
     while (it != m_resources.keyValueEnd()) {
-        if ((*it).second == resource)
+        if ((*it).second == resource) {
             break;
+        }
         it++;
     }
 
@@ -82,8 +87,9 @@ bool EnsureMetadataTask::abort()
     // Prevent sending signals to a dead object
     disconnect(this, nullptr, nullptr, nullptr);
 
-    if (m_currentTask)
+    if (m_currentTask) {
         return m_currentTask->abort();
+    }
     return true;
 }
 
@@ -123,8 +129,9 @@ void EnsureMetadataTask::executeTask()
     }
 
     auto invalidade_leftover = [this] {
-        for (auto resource = m_resources.constBegin(); resource != m_resources.constEnd(); resource++)
+        for (auto resource = m_resources.constBegin(); resource != m_resources.constEnd(); resource++) {
             emitFail(resource.value(), resource.key(), RemoveFromList::No);
+        }
         m_resources.clear();
 
         emitSucceeded();
@@ -150,8 +157,9 @@ void EnsureMetadataTask::executeTask()
         connect(project_task.get(), &Task::finished, this, [this, invalidade_leftover, project_task] {
             invalidade_leftover();
             project_task->deleteLater();
-            if (m_currentTask)
+            if (m_currentTask) {
                 m_currentTask.reset();
+            }
         });
         connect(project_task.get(), &Task::failed, this, &EnsureMetadataTask::emitFailed);
 
@@ -159,11 +167,12 @@ void EnsureMetadataTask::executeTask()
         project_task->start();
     });
 
-    if (m_resources.size() > 1)
+    if (m_resources.size() > 1) {
         setStatus(tr("Requesting metadata information from %1...").arg(ModPlatform::ProviderCapabilities::readableName(m_provider)));
-    else if (!m_resources.empty())
+    } else if (!m_resources.empty()) {
         setStatus(tr("Requesting metadata information from %1 for '%2'...")
                       .arg(ModPlatform::ProviderCapabilities::readableName(m_provider), m_resources.begin().value()->name()));
+    }
 
     m_currentTask = version_task;
     version_task->start();
@@ -173,8 +182,9 @@ void EnsureMetadataTask::emitReady(Resource* resource, QString key, RemoveFromLi
 {
     if (!resource) {
         qCritical() << "Tried to mark a null resource as ready.";
-        if (!key.isEmpty())
+        if (!key.isEmpty()) {
             m_resources.remove(key);
+        }
 
         return;
     }
@@ -183,8 +193,9 @@ void EnsureMetadataTask::emitReady(Resource* resource, QString key, RemoveFromLi
     emit metadataReady(resource);
 
     if (remove == RemoveFromList::Yes) {
-        if (key.isEmpty())
+        if (key.isEmpty()) {
             key = getExistingHash(resource);
+        }
         m_resources.remove(key);
     }
 }
@@ -193,8 +204,9 @@ void EnsureMetadataTask::emitFail(Resource* resource, QString key, RemoveFromLis
 {
     if (!resource) {
         qCritical() << "Tried to mark a null resource as failed.";
-        if (!key.isEmpty())
+        if (!key.isEmpty()) {
             m_resources.remove(key);
+        }
 
         return;
     }
@@ -203,8 +215,9 @@ void EnsureMetadataTask::emitFail(Resource* resource, QString key, RemoveFromLis
     emit metadataFailed(resource);
 
     if (remove == RemoveFromList::Yes) {
-        if (key.isEmpty())
+        if (key.isEmpty()) {
             key = getExistingHash(resource);
+        }
         m_resources.remove(key);
     }
 }
@@ -218,8 +231,9 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
     auto [ver_task, response] = modrinth_api.currentVersions(m_resources.keys(), hash_type);
 
     // Prevents unfortunate timings when aborting the task
-    if (!ver_task)
+    if (!ver_task) {
         return Task::Ptr{ nullptr };
+    }
 
     connect(ver_task.get(), &Task::succeeded, this, [this, response] {
         QJsonParseError parse_error{};
@@ -263,8 +277,9 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
 Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
 {
     QHash<QString, QString> addonIds;
-    for (auto const& data : m_tempVersions)
+    for (const auto& data : m_tempVersions) {
         addonIds.insert(data.addonId.toString(), data.hash);
+    }
 
     Task::Ptr proj_task;
     QByteArray* response;
@@ -278,8 +293,9 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
     }
 
     // Prevents unfortunate timings when aborting the task
-    if (!proj_task)
+    if (!proj_task) {
         return Task::Ptr{ nullptr };
+    }
 
     connect(proj_task.get(), &Task::succeeded, this, [this, response, addonIds] {
         QJsonParseError parse_error{};
@@ -294,10 +310,11 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
         QJsonArray entries;
 
         try {
-            if (addonIds.size() == 1)
+            if (addonIds.size() == 1) {
                 entries = { doc.object() };
-            else
+            } else {
                 entries = Json::requireArray(doc);
+            }
         } catch (Json::JsonException& e) {
             qDebug() << e.cause();
             qDebug() << doc;
@@ -409,8 +426,9 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
             auto data = m_tempVersions.find(hash).value();
 
             auto id_str = data.addonId.toString();
-            if (!id_str.isEmpty())
+            if (!id_str.isEmpty()) {
                 addonIds.insert(data.addonId.toString(), hash);
+            }
         }
     }
 
@@ -426,8 +444,9 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
     }
 
     // Prevents unfortunate timings when aborting the task
-    if (!proj_task)
+    if (!proj_task) {
         return Task::Ptr{ nullptr };
+    }
 
     connect(proj_task.get(), &Task::succeeded, this, [this, response, addonIds] {
         QJsonParseError parse_error{};
@@ -441,10 +460,11 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
 
         try {
             QJsonArray entries;
-            if (addonIds.size() == 1)
+            if (addonIds.size() == 1) {
                 entries = { Json::requireObject(Json::requireObject(doc), "data") };
-            else
+            } else {
                 entries = Json::requireArray(Json::requireObject(doc), "data");
+            }
 
             for (auto entry : entries) {
                 auto entry_obj = Json::requireObject(entry);
@@ -481,8 +501,9 @@ void EnsureMetadataTask::updateMetadata(ModPlatform::IndexedPack& pack, ModPlatf
     try {
         // Prevent file name mismatch
         ver.fileName = resource->fileinfo().fileName();
-        if (ver.fileName.endsWith(".disabled"))
+        if (ver.fileName.endsWith(".disabled")) {
             ver.fileName.chop(9);
+        }
 
         auto task = makeShared<LocalResourceUpdateTask>(m_indexDir, pack, ver);
 

@@ -14,10 +14,12 @@ QList<std::pair<qreal, QString>> viewItemTextLayout(QTextLayout& textLayout, int
     while (true) {
         QTextLine line = textLayout.createLine();
 
-        if (!line.isValid())
+        if (!line.isValid()) {
             break;
-        if (line.textLength() == 0)
+        }
+        if (line.textLength() == 0) {
             break;
+        }
 
         line.setLineWidth(lineWidth);
         line.setPosition(QPointF(0, height));

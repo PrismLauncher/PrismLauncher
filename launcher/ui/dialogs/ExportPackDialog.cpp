@@ -145,15 +145,16 @@ void ExportPackDialog::done(int result)
     settings->set("ExportVersion", m_ui->version->text());
     settings->set("ExportOptionalFiles", m_ui->optionalFiles->isChecked());
 
-    if (m_provider == ModPlatform::ResourceProvider::MODRINTH)
+    if (m_provider == ModPlatform::ResourceProvider::MODRINTH) {
         settings->set("ExportSummary", m_ui->summary->toPlainText());
-    else {
+    } else {
         settings->set("ExportAuthor", m_ui->author->text());
 
-        if (m_ui->recommendedMemoryCheckBox->isChecked())
+        if (m_ui->recommendedMemoryCheckBox->isChecked()) {
             settings->set("ExportRecommendedRAM", m_ui->recommendedMemory->value());
-        else
+        } else {
             settings->reset("ExportRecommendedRAM");
+        }
     }
 
     if (result == Accepted) {
@@ -164,23 +165,28 @@ void ExportPackDialog::done(int result)
         if (m_provider == ModPlatform::ResourceProvider::MODRINTH) {
             output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(name), FS::PathCombine(QDir::homePath(), filename + ".mrpack"),
                                                   tr("Modrinth pack") + " (*.mrpack *.zip)", nullptr);
-            if (output.isEmpty())
+            if (output.isEmpty()) {
                 return;
-            if (!(output.endsWith(".zip") || output.endsWith(".mrpack")))
+            }
+            if (!(output.endsWith(".zip") || output.endsWith(".mrpack"))) {
                 output.append(".mrpack");
+            }
         } else {
             output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(name), FS::PathCombine(QDir::homePath(), filename + ".zip"),
                                                   tr("CurseForge pack") + " (*.zip)", nullptr);
-            if (output.isEmpty())
+            if (output.isEmpty()) {
                 return;
-            if (!output.endsWith(".zip"))
+            }
+            if (!output.endsWith(".zip")) {
                 output.append(".zip");
+            }
         }
 
         Task* task;
         if (m_provider == ModPlatform::ResourceProvider::MODRINTH) {
             task = new ModrinthPackExportTask(name, m_ui->version->text(), m_ui->summary->toPlainText(), m_ui->optionalFiles->isChecked(),
-                                              m_instance, output, [this](auto && PH1) { return m_proxy->filterFile(std::forward<decltype(PH1)>(PH1)); });
+                                              m_instance, output,
+                                              [this](auto&& PH1) { return m_proxy->filterFile(std::forward<decltype(PH1)>(PH1)); });
         } else {
             FlamePackExportOptions options{};
 
@@ -190,7 +196,7 @@ void ExportPackDialog::done(int result)
             options.optionalFiles = m_ui->optionalFiles->isChecked();
             options.instance = m_instance;
             options.output = output;
-            options.filter = [this](auto && PH1) { return m_proxy->filterFile(std::forward<decltype(PH1)>(PH1)); };
+            options.filter = [this](auto&& PH1) { return m_proxy->filterFile(std::forward<decltype(PH1)>(PH1)); };
             options.recommendedRAM = m_ui->recommendedMemoryCheckBox->isChecked() ? m_ui->recommendedMemory->value() : 0;
 
             task = new FlamePackExportTask(std::move(options));
@@ -206,8 +212,9 @@ void ExportPackDialog::done(int result)
 
         ProgressDialog progress(this);
         progress.setSkipButton(true, tr("Abort"));
-        if (progress.execWithTask(task) != QDialog::Accepted)
+        if (progress.execWithTask(task) != QDialog::Accepted) {
             return;
+        }
     }
 
     QDialog::done(result);

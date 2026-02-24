@@ -30,12 +30,12 @@
 class ModrinthPackExportTask : public Task {
     Q_OBJECT
    public:
-    ModrinthPackExportTask(QString  name,
-                           QString  version,
-                           QString  summary,
+    ModrinthPackExportTask(QString name,
+                           QString version,
+                           QString summary,
                            bool optionalFiles,
                            BaseInstance* instance,
-                           QString  output,
+                           QString output,
                            MMCZip::FilterFileFunction filter);
 
    protected:

@@ -102,18 +102,20 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
 
         connect(m_ui->globalDataPacksGroupBox, &QGroupBox::toggled, this, [this](bool value) {
             m_instance->settings()->set("GlobalDataPacksEnabled", value);
-            if (!value)
+            if (!value) {
                 m_instance->settings()->reset("GlobalDataPacksPath");
+            }
         });
         connect(m_ui->dataPacksPathEdit, &QLineEdit::editingFinished, this, &MinecraftSettingsWidget::saveDataPacksPath);
         connect(m_ui->dataPacksPathBrowse, &QPushButton::clicked, this, &MinecraftSettingsWidget::selectDataPacksFolder);
 
         connect(m_ui->loaderGroup, &QGroupBox::toggled, this, [this](bool value) {
             m_instance->settings()->set("OverrideModDownloadLoaders", value);
-            if (value)
+            if (value) {
                 saveSelectedLoaders();
-            else
+            } else {
                 m_instance->settings()->reset("ModDownloadLoaders");
+            }
         });
 
         for (auto c : { m_ui->neoForge, m_ui->forge, m_ui->fabric, m_ui->quilt, m_ui->liteLoader, m_ui->babric, m_ui->btaBabric,
@@ -156,10 +158,11 @@ void MinecraftSettingsWidget::loadSettings()
 {
     SettingsObject* settings;
 
-    if (m_instance != nullptr)
+    if (m_instance != nullptr) {
         settings = m_instance->settings();
-    else
+    } else {
         settings = APPLICATION->settings();
+    }
 
     // Game Window
     m_ui->windowSizeGroupBox->setChecked(m_instance == nullptr || settings->get("OverrideWindow").toBool() ||
@@ -183,8 +186,9 @@ void MinecraftSettingsWidget::loadSettings()
     m_ui->autoCloseConsoleCheck->setChecked(settings->get("AutoCloseConsole").toBool());
     m_ui->showConsoleErrorCheck->setChecked(settings->get("ShowConsoleOnError").toBool());
 
-    if (m_javaSettings != nullptr)
+    if (m_javaSettings != nullptr) {
         m_javaSettings->loadSettings();
+    }
 
     // Custom commands
     m_ui->customCommands->initialize(m_instance != nullptr, m_instance == nullptr || settings->get("OverrideCommands").toBool(),
@@ -310,10 +314,11 @@ void MinecraftSettingsWidget::saveSettings()
 {
     SettingsObject* settings;
 
-    if (m_instance != nullptr)
+    if (m_instance != nullptr) {
         settings = m_instance->settings();
-    else
+    } else {
         settings = APPLICATION->settings();
+    }
 
     {
         SettingsObject::Lock lock(settings);
@@ -321,8 +326,9 @@ void MinecraftSettingsWidget::saveSettings()
         // Console
         bool console = m_instance == nullptr || m_ui->consoleSettingsBox->isChecked();
 
-        if (m_instance != nullptr)
+        if (m_instance != nullptr) {
             settings->set("OverrideConsole", console);
+        }
 
         if (console) {
             settings->set("ShowConsole", m_ui->showConsoleCheck->isChecked());
@@ -359,8 +365,9 @@ void MinecraftSettingsWidget::saveSettings()
         // Custom Commands
         bool custcmd = m_instance == nullptr || m_ui->customCommands->checked();
 
-        if (m_instance != nullptr)
+        if (m_instance != nullptr) {
             settings->set("OverrideCommands", custcmd);
+        }
 
         if (custcmd) {
             settings->set("PreLaunchCommand", m_ui->customCommands->prelaunchCommand());
@@ -375,19 +382,22 @@ void MinecraftSettingsWidget::saveSettings()
         // Environment Variables
         auto env = m_instance == nullptr || m_ui->environmentVariables->override();
 
-        if (m_instance != nullptr)
+        if (m_instance != nullptr) {
             settings->set("OverrideEnv", env);
+        }
 
-        if (env)
+        if (env) {
             settings->set("Env", Json::fromMap(m_ui->environmentVariables->value()));
-        else
+        } else {
             settings->reset("Env");
+        }
 
         // Workarounds
         bool workarounds = m_instance == nullptr || m_ui->nativeWorkaroundsGroupBox->isChecked();
 
-        if (m_instance != nullptr)
+        if (m_instance != nullptr) {
             settings->set("OverrideNativeWorkarounds", workarounds);
+        }
 
         if (workarounds) {
             settings->set("UseNativeGLFW", m_ui->useNativeGLFWCheck->isChecked());
@@ -404,8 +414,9 @@ void MinecraftSettingsWidget::saveSettings()
         // Performance
         bool performance = m_instance == nullptr || m_ui->perfomanceGroupBox->isChecked();
 
-        if (m_instance != nullptr)
+        if (m_instance != nullptr) {
             settings->set("OverridePerformance", performance);
+        }
 
         if (performance) {
             settings->set("EnableFeralGamemode", m_ui->enableFeralGamemodeCheck->isChecked());
@@ -422,8 +433,9 @@ void MinecraftSettingsWidget::saveSettings()
         // Game time
         bool gameTime = m_instance == nullptr || m_ui->gameTimeGroupBox->isChecked();
 
-        if (m_instance != nullptr)
+        if (m_instance != nullptr) {
             settings->set("OverrideGameTime", gameTime);
+        }
 
         if (gameTime) {
             settings->set("ShowGameTime", m_ui->showGameTime->isChecked());
@@ -463,8 +475,9 @@ void MinecraftSettingsWidget::saveSettings()
 
                 if (accountIndex != -1) {
                     const MinecraftAccountPtr account = APPLICATION->accounts()->at(accountIndex);
-                    if (account != nullptr)
+                    if (account != nullptr) {
                         settings->set("InstanceAccountId", account->profileId());
+                    }
                 }
             } else {
                 settings->reset("InstanceAccountId");
@@ -473,8 +486,9 @@ void MinecraftSettingsWidget::saveSettings()
 
         bool overrideLegacySettings = m_instance == nullptr || m_ui->legacySettingsGroupBox->isChecked();
 
-        if (m_instance != nullptr)
+        if (m_instance != nullptr) {
             settings->set("OverrideLegacySettings", overrideLegacySettings);
+        }
 
         if (overrideLegacySettings) {
             settings->set("OnlineFixes", m_ui->onlineFixes->isChecked());
@@ -483,8 +497,9 @@ void MinecraftSettingsWidget::saveSettings()
         }
     }
 
-    if (m_javaSettings != nullptr)
+    if (m_javaSettings != nullptr) {
         m_javaSettings->saveSettings();
+    }
 }
 
 void MinecraftSettingsWidget::openGlobalSettings()
@@ -493,10 +508,11 @@ void MinecraftSettingsWidget::openGlobalSettings()
 
     qDebug() << id;
 
-    if (id == "javaPage")
+    if (id == "javaPage") {
         APPLICATION->ShowGlobalSettings(this, "java-settings");
-    else  // TODO select tab
+    } else {  // TODO select tab
         APPLICATION->ShowGlobalSettings(this, "minecraft-settings");
+    }
 }
 
 void MinecraftSettingsWidget::updateAccountsMenu(SettingsObject& settings)
@@ -510,12 +526,14 @@ void MinecraftSettingsWidget::updateAccountsMenu(SettingsObject& settings)
 
         QIcon face = account->getFace();
 
-        if (face.isNull())
+        if (face.isNull()) {
             face = QIcon::fromTheme("noaccount");
+        }
 
         m_ui->instanceAccountSelector->addItem(face, account->profileName(), i);
-        if (i == accountIndex)
+        if (i == accountIndex) {
             m_ui->instanceAccountSelector->setCurrentIndex(i);
+        }
     }
 }
 
@@ -528,34 +546,45 @@ void MinecraftSettingsWidget::saveSelectedLoaders()
 {
     QStringList loaders;
 
-    if (m_ui->neoForge->isChecked())
+    if (m_ui->neoForge->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::NeoForge);
-    if (m_ui->forge->isChecked())
+    }
+    if (m_ui->forge->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::Forge);
-    if (m_ui->fabric->isChecked())
+    }
+    if (m_ui->fabric->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::Fabric);
-    if (m_ui->quilt->isChecked())
+    }
+    if (m_ui->quilt->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::Quilt);
-    if (m_ui->liteLoader->isChecked())
+    }
+    if (m_ui->liteLoader->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::LiteLoader);
-    if (m_ui->babric->isChecked())
+    }
+    if (m_ui->babric->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::Babric);
-    if (m_ui->btaBabric->isChecked())
+    }
+    if (m_ui->btaBabric->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::BTA);
-    if (m_ui->legacyFabric->isChecked())
+    }
+    if (m_ui->legacyFabric->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::LegacyFabric);
-    if (m_ui->ornithe->isChecked())
+    }
+    if (m_ui->ornithe->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::Ornithe);
-    if (m_ui->rift->isChecked())
+    }
+    if (m_ui->rift->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::Rift);
+    }
 
     m_instance->settings()->set("ModDownloadLoaders", Json::fromStringList(loaders));
 }
 
 void MinecraftSettingsWidget::saveDataPacksPath()
 {
-    if (QDir::separator() != '/')
+    if (QDir::separator() != '/') {
         m_ui->dataPacksPathEdit->setText(m_ui->dataPacksPathEdit->text().replace(QDir::separator(), '/'));
+    }
 
     m_instance->settings()->set("GlobalDataPacksPath", m_ui->dataPacksPathEdit->text());
 }
@@ -564,8 +593,9 @@ void MinecraftSettingsWidget::selectDataPacksFolder()
 {
     QString path = QFileDialog::getExistingDirectory(this, tr("Select Global Data Packs Folder"), m_instance->gameRoot());
 
-    if (path.isEmpty())
+    if (path.isEmpty()) {
         return;
+    }
 
     // if it's inside the instance dir, set path relative to .minecraft
     // (so that if it's directly in instance dir it will still lead with .. but more than two levels up are kept absolute)
@@ -573,8 +603,9 @@ void MinecraftSettingsWidget::selectDataPacksFolder()
     const QUrl instanceRootUrl = QUrl::fromLocalFile(m_instance->instanceRoot());
     const QUrl pathUrl = QUrl::fromLocalFile(path);
 
-    if (instanceRootUrl.isParentOf(pathUrl))
+    if (instanceRootUrl.isParentOf(pathUrl)) {
         path = QDir(m_instance->gameRoot()).relativeFilePath(path);
+    }
 
     m_ui->dataPacksPathEdit->setText(path);
     m_instance->settings()->set("GlobalDataPacksPath", path);

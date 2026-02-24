@@ -63,10 +63,12 @@ class VersionBasicModel : public QIdentityProxyModel {
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
     {
-        if (role == Qt::DisplayRole)
+        if (role == Qt::DisplayRole) {
             return QIdentityProxyModel::data(index, BaseVersionList::VersionIdRole);
-        if (role == Qt::UserRole)
+        }
+        if (role == Qt::UserRole) {
             return QIdentityProxyModel::data(index, BaseVersionList::VersionIdRole);
+        }
         return {};
     }
 };
@@ -212,12 +214,14 @@ void ModFilterWidget::loadVersionList()
         });
         connect(task.get(), &Task::finished, &load_version_list_loop, &QEventLoop::quit);
 
-        if (!task->isRunning())
+        if (!task->isRunning()) {
             task->start();
+        }
 
         load_version_list_loop.exec();
-        if (time_limit_for_list_load.isActive())
+        if (time_limit_for_list_load.isActive()) {
             time_limit_for_list_load.stop();
+        }
     }
     m_versions_proxy->setSourceModel(m_version_list.get());
 }
@@ -258,10 +262,11 @@ void ModFilterWidget::prepareBasicFilter()
 
 void ModFilterWidget::onShowAllVersionsChanged()
 {
-    if (ui->showAllVersions->isChecked())
+    if (ui->showAllVersions->isChecked()) {
         m_versions_proxy->clearFilters();
-    else
+    } else {
         m_versions_proxy->setFilter(BaseVersionList::TypeRole, Filters::equals("release"));
+    }
 }
 
 void ModFilterWidget::onVersionFilterChanged(int)
@@ -270,43 +275,56 @@ void ModFilterWidget::onVersionFilterChanged(int)
     versions.sort();
     std::vector<Version> current_list;
 
-    for (const QString& version : versions)
+    for (const QString& version : versions) {
         current_list.emplace_back(version);
+    }
 
     m_filter_changed = m_filter->versions.size() != current_list.size() ||
                        !std::equal(m_filter->versions.begin(), m_filter->versions.end(), current_list.begin(), current_list.end());
     m_filter->versions = current_list;
-    if (m_filter_changed)
+    if (m_filter_changed) {
         emit filterChanged();
+    }
 }
 
 void ModFilterWidget::onLoadersFilterChanged()
 {
     ModPlatform::ModLoaderTypes loaders;
-    if (ui->neoForge->isChecked())
+    if (ui->neoForge->isChecked()) {
         loaders |= ModPlatform::NeoForge;
-    if (ui->forge->isChecked())
+    }
+    if (ui->forge->isChecked()) {
         loaders |= ModPlatform::Forge;
-    if (ui->fabric->isChecked())
+    }
+    if (ui->fabric->isChecked()) {
         loaders |= ModPlatform::Fabric;
-    if (ui->quilt->isChecked())
+    }
+    if (ui->quilt->isChecked()) {
         loaders |= ModPlatform::Quilt;
-    if (ui->liteLoader->isChecked())
+    }
+    if (ui->liteLoader->isChecked()) {
         loaders |= ModPlatform::LiteLoader;
-    if (ui->babric->isChecked())
+    }
+    if (ui->babric->isChecked()) {
         loaders |= ModPlatform::Babric;
-    if (ui->btaBabric->isChecked())
+    }
+    if (ui->btaBabric->isChecked()) {
         loaders |= ModPlatform::BTA;
-    if (ui->legacyFabric->isChecked())
+    }
+    if (ui->legacyFabric->isChecked()) {
         loaders |= ModPlatform::LegacyFabric;
-    if (ui->ornithe->isChecked())
+    }
+    if (ui->ornithe->isChecked()) {
         loaders |= ModPlatform::Ornithe;
-    if (ui->rift->isChecked())
+    }
+    if (ui->rift->isChecked()) {
         loaders |= ModPlatform::Rift;
+    }
     m_filter_changed = loaders != m_filter->loaders;
     m_filter->loaders = loaders;
-    if (m_filter_changed)
+    if (m_filter_changed) {
         emit filterChanged();
+    }
 }
 
 void ModFilterWidget::onSideFilterChanged()
@@ -325,8 +343,9 @@ void ModFilterWidget::onSideFilterChanged()
 
     m_filter_changed = side != m_filter->side;
     m_filter->side = side;
-    if (m_filter_changed)
+    if (m_filter_changed) {
         emit filterChanged();
+    }
 }
 
 void ModFilterWidget::onHideInstalledFilterChanged()
@@ -334,8 +353,9 @@ void ModFilterWidget::onHideInstalledFilterChanged()
     auto hide = ui->hideInstalled->isChecked();
     m_filter_changed = hide != m_filter->hideInstalled;
     m_filter->hideInstalled = hide;
-    if (m_filter_changed)
+    if (m_filter_changed) {
         emit filterChanged();
+    }
 }
 
 void ModFilterWidget::onVersionFilterTextChanged(const QString& version)
@@ -368,10 +388,11 @@ void ModFilterWidget::setCategories(const QList<ModPlatform::Category>& categori
 
         const QString id = category.id;
         connect(checkbox, &QCheckBox::toggled, this, [this, id](bool checked) {
-            if (checked)
+            if (checked) {
                 m_filter->categoryIds.append(id);
-            else
+            } else {
                 m_filter->categoryIds.removeOne(id);
+            }
 
             m_filter_changed = true;
             emit filterChanged();
@@ -384,25 +405,31 @@ void ModFilterWidget::onOpenSourceFilterChanged()
     auto open = ui->openSource->isChecked();
     m_filter_changed = open != m_filter->openSource;
     m_filter->openSource = open;
-    if (m_filter_changed)
+    if (m_filter_changed) {
         emit filterChanged();
+    }
 }
 
 void ModFilterWidget::onReleaseFilterChanged()
 {
     std::vector<ModPlatform::IndexedVersionType> releases;
-    if (ui->releaseCb->isChecked())
+    if (ui->releaseCb->isChecked()) {
         releases.emplace_back(ModPlatform::IndexedVersionType::Release);
-    if (ui->betaCb->isChecked())
+    }
+    if (ui->betaCb->isChecked()) {
         releases.emplace_back(ModPlatform::IndexedVersionType::Beta);
-    if (ui->alphaCb->isChecked())
+    }
+    if (ui->alphaCb->isChecked()) {
         releases.emplace_back(ModPlatform::IndexedVersionType::Alpha);
-    if (ui->unknownCb->isChecked())
+    }
+    if (ui->unknownCb->isChecked()) {
         releases.emplace_back(ModPlatform::IndexedVersionType::Unknown);
+    }
     m_filter_changed = releases != m_filter->releases;
     m_filter->releases = releases;
-    if (m_filter_changed)
+    if (m_filter_changed) {
         emit filterChanged();
+    }
 }
 
 void ModFilterWidget::onShowMoreClicked()

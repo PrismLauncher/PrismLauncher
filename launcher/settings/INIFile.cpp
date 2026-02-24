@@ -51,14 +51,16 @@ INIFile::INIFile() = default;
 
 bool INIFile::saveFile(const QString& fileName)
 {
-    if (!contains("ConfigVersion"))
+    if (!contains("ConfigVersion")) {
         insert("ConfigVersion", "1.3");
+    }
     QSettings _settings_obj{ fileName, QSettings::Format::IniFormat };
     _settings_obj.setFallbacksEnabled(false);
     _settings_obj.clear();
 
-    for (Iterator iter = begin(); iter != end(); iter++)
+    for (Iterator iter = begin(); iter != end(); iter++) {
         _settings_obj.setValue(iter.key(), iter.value());
+    }
 
     _settings_obj.sync();
 
@@ -66,8 +68,9 @@ bool INIFile::saveFile(const QString& fileName)
         // Shouldn't be possible!
         Q_ASSERT(status != QSettings::Status::FormatError);
 
-        if (status == QSettings::Status::AccessError)
+        if (status == QSettings::Status::AccessError) {
             qCritical() << "An access error occurred (e.g. trying to write to a read-only file).";
+        }
 
         return false;
     }
@@ -81,14 +84,15 @@ QString unescape(const QString& orig)
     QChar prev = QChar::Null;
     for (auto c : orig) {
         if (prev == '\\') {
-            if (c == 'n')
+            if (c == 'n') {
                 out += '\n';
-            else if (c == 't')
+            } else if (c == 't') {
                 out += '\t';
-            else if (c == '#')
+            } else if (c == '#') {
                 out += '#';
-            else
+            } else {
                 out += c;
+            }
             prev = QChar::Null;
         } else {
             if (c == '\\') {
@@ -137,8 +141,9 @@ bool parseOldFileFormat(QIODevice& device, QSettings::SettingsMap& map)
         }
 
         int eqPos = line.indexOf('=');
-        if (eqPos == -1)
+        if (eqPos == -1) {
             continue;
+        }
         QString key = line.left(eqPos).trimmed();
         QString valueStr = line.right(line.length() - eqPos - 1).trimmed();
 
@@ -178,16 +183,19 @@ bool INIFile::loadFile(const QString& fileName)
     _settings_obj.setFallbacksEnabled(false);
 
     if (auto status = _settings_obj.status(); status != QSettings::Status::NoError) {
-        if (status == QSettings::Status::AccessError)
+        if (status == QSettings::Status::AccessError) {
             qCritical() << "An access error occurred (e.g. trying to write to a read-only file).";
-        if (status == QSettings::Status::FormatError)
+        }
+        if (status == QSettings::Status::FormatError) {
             qCritical() << "A format error occurred (e.g. loading a malformed INI file).";
+        }
         return false;
     }
     if (!_settings_obj.value("ConfigVersion").isValid()) {
         QFile file(fileName);
-        if (!file.open(QIODevice::ReadOnly))
+        if (!file.open(QIODevice::ReadOnly)) {
             return false;
+        }
         QSettings::SettingsMap map;
         parseOldFileFormat(file, map);
         file.close();
@@ -225,8 +233,9 @@ bool INIFile::loadFile(const QString& fileName)
 bool INIFile::loadFile(const QByteArray& data)
 {
     QTemporaryFile file;
-    if (!file.open())
+    if (!file.open()) {
         return false;
+    }
     file.write(data);
     file.flush();
     file.close();
@@ -237,10 +246,11 @@ bool INIFile::loadFile(const QByteArray& data)
 
 QVariant INIFile::get(const QString& key, QVariant def) const
 {
-    if (!this->contains(key))
+    if (!this->contains(key)) {
         return def;
-    else
+    } else {
         return this->operator[](key);
+    }
 }
 
 void INIFile::set(const QString& key, QVariant val)

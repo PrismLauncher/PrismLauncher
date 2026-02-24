@@ -209,14 +209,16 @@ void BlockedModsDialog::watchPath(const QString& path, bool watch_recursive)
         return;
     }
     auto to_watch_path = to_watch.canonicalFilePath();
-    if (m_watcher.directories().contains(to_watch_path))
+    if (m_watcher.directories().contains(to_watch_path)) {
         return;  // don't watch the same path twice (no loops!)
+    }
 
     qDebug() << "[Blocked Mods Dialog] Adding Watch Path:" << path;
     m_watcher.addPath(to_watch_path);
 
-    if (!to_watch.isDir() || !watch_recursive)
+    if (!to_watch.isDir() || !watch_recursive) {
         return;
+    }
 
     QDirIterator it(to_watch_path, QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
     while (it.hasNext()) {

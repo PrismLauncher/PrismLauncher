@@ -128,19 +128,24 @@ class ModrinthAPI : public ResourceAPI {
     {
         QStringList facets_list;
 
-        if (args.loaders.has_value() && args.loaders.value() != 0)
+        if (args.loaders.has_value() && args.loaders.value() != 0) {
             facets_list.append(QString("[%1]").arg(getModLoaderFilters(args.loaders.value())));
-        if (args.versions.has_value() && !args.versions.value().empty())
+        }
+        if (args.versions.has_value() && !args.versions.value().empty()) {
             facets_list.append(QString("[%1]").arg(getGameVersionsArray(args.versions.value())));
+        }
         if (args.side.has_value()) {
             auto side = getSideFilters(args.side.value());
-            if (!side.isEmpty())
+            if (!side.isEmpty()) {
                 facets_list.append(QString("[%1]").arg(side));
+            }
         }
-        if (args.categoryIds.has_value() && !args.categoryIds->empty())
+        if (args.categoryIds.has_value() && !args.categoryIds->empty()) {
             facets_list.append(QString("[%1]").arg(getCategoriesFilters(args.categoryIds.value())));
-        if (args.openSource)
+        }
+        if (args.openSource) {
             facets_list.append("[\"open_source:true\"]");
+        }
 
         facets_list.append(QString("[\"project_type:%1\"]").arg(resourceTypeParameter(args.type)));
 
@@ -160,10 +165,12 @@ class ModrinthAPI : public ResourceAPI {
         QStringList get_arguments;
         get_arguments.append(QString("offset=%1").arg(args.offset));
         get_arguments.append(QString("limit=25"));
-        if (args.search.has_value())
+        if (args.search.has_value()) {
             get_arguments.append(QString("query=%1").arg(args.search.value()));
-        if (args.sorting.has_value())
+        }
+        if (args.sorting.has_value()) {
             get_arguments.append(QString("index=%1").arg(args.sorting.value().name));
+        }
         get_arguments.append(QString("facets=%1").arg(createFacets(args)));
 
         return BuildConfig.MODRINTH_PROD_URL + "/search?" + get_arguments.join('&');
@@ -182,10 +189,12 @@ class ModrinthAPI : public ResourceAPI {
     inline auto getVersionsURL(const VersionSearchArgs& args) const -> std::optional<QString> override
     {
         QStringList get_arguments;
-        if (args.mcVersions.has_value())
+        if (args.mcVersions.has_value()) {
             get_arguments.append(QString("game_versions=[%1]").arg(getGameVersionsString(args.mcVersions.value())));
-        if (args.loaders.has_value())
+        }
+        if (args.loaders.has_value()) {
             get_arguments.append(QString("loaders=[\"%1\"]").arg(getModLoaderStrings(args.loaders.value()).join("\",\"")));
+        }
 
         return QString("%1/project/%2/version%3%4")
             .arg(BuildConfig.MODRINTH_PROD_URL, args.pack->addonId.toString(), get_arguments.isEmpty() ? "" : "?", get_arguments.join('&'));

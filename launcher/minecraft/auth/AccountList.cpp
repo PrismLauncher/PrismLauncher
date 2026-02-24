@@ -262,17 +262,19 @@ void AccountList::accountActivityChanged(bool active)
 
 void AccountList::onListChanged()
 {
-    if (m_autosave)
+    if (m_autosave) {
         // TODO: Alert the user if this fails.
         saveList();
+    }
 
     emit listChanged();
 }
 
 void AccountList::onDefaultAccountChanged()
 {
-    if (m_autosave)
+    if (m_autosave) {
         saveList();
+    }
 
     emit defaultAccountChanged();
 }
@@ -308,11 +310,13 @@ QString getAccountStatus(AccountState status)
 
 QVariant AccountList::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return {};
+    }
 
-    if (index.row() > count())
+    if (index.row() > count()) {
         return {};
+    }
 
     MinecraftAccountPtr account = at(index.row());
 
@@ -360,8 +364,9 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
             return QVariant::fromValue(account);
 
         case Qt::CheckStateRole:
-            if (index.column() == ProfileNameColumn)
+            if (index.column() == ProfileNameColumn) {
                 return account == m_defaultAccount ? Qt::Checked : Qt::Unchecked;
+            }
             return {};
 
         default:
@@ -431,8 +436,9 @@ bool AccountList::setData(const QModelIndex& idx, const QVariant& value, int rol
         if (value == Qt::Checked) {
             MinecraftAccountPtr account = at(idx.row());
             setDefaultAccount(account);
-        } else if (m_defaultAccount == at(idx.row()))
+        } else if (m_defaultAccount == at(idx.row())) {
             setDefaultAccount(nullptr);
+        }
     }
 
     emit dataChanged(idx, index(idx.row(), columnCount(QModelIndex()) - 1));
@@ -480,8 +486,9 @@ bool AccountList::loadList()
 
     // Make sure the format version matches.
     auto listVersion = root.value("formatVersion").toVariant().toInt();
-    if (listVersion == AccountListVersion::MojangMSA)
+    if (listVersion == AccountListVersion::MojangMSA) {
         return loadV3(root);
+    }
 
     QString newName = "accounts-old.json";
     qWarning() << "Unknown format version when loading account list. Existing one will be renamed to" << newName;
@@ -526,8 +533,9 @@ bool AccountList::saveList()
     }
 
     // make sure the parent folder exists
-    if (!FS::ensureFilePathExists(m_listFilePath))
+    if (!FS::ensureFilePathExists(m_listFilePath)) {
         return false;
+    }
 
     // make sure the file wasn't overwritten with a folder before (fixes a bug)
     QFileInfo finfo(m_listFilePath);

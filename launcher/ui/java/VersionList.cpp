@@ -29,8 +29,9 @@ namespace Java {
 
 VersionList::VersionList(const Meta::Version::Ptr& version, QObject* parent) : BaseVersionList(parent), m_version(version)
 {
-    if (version->isLoaded())
+    if (version->isLoaded()) {
         sortVersions();
+    }
 }
 
 Task::Ptr VersionList::getLoadTask()
@@ -57,11 +58,13 @@ int VersionList::count() const
 
 QVariant VersionList::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return {};
+    }
 
-    if (index.row() > count())
+    if (index.row() > count()) {
         return {};
+    }
 
     auto version = (m_vlist[index.row()]);
     switch (role) {
@@ -107,8 +110,9 @@ bool sortJavas(const BaseVersion::Ptr& left, const BaseVersion::Ptr& right)
 
 void VersionList::sortVersions()
 {
-    if (!m_version || !m_version->data())
+    if (!m_version || !m_version->data()) {
         return;
+    }
     QString versionStr = SysInfo::getSupportedJavaArchitecture();
     beginResetModel();
     auto runtimes = m_version->data()->runtimes;

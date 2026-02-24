@@ -333,27 +333,35 @@ MessageLevel LogParser::guessLevel(const QString& line, MessageLevel previous)
     } else {
         // Old style forge logs
         if (line.contains("[INFO]") || line.contains("[CONFIG]") || line.contains("[FINE]") || line.contains("[FINER]") ||
-            line.contains("[FINEST]"))
+            line.contains("[FINEST]")) {
             return MessageLevel::Info;
-        if (line.contains("[SEVERE]") || line.contains("[STDERR]"))
+        }
+        if (line.contains("[SEVERE]") || line.contains("[STDERR]")) {
             return MessageLevel::Error;
-        if (line.contains("[WARNING]"))
+        }
+        if (line.contains("[WARNING]")) {
             return MessageLevel::Warning;
-        if (line.contains("[DEBUG]"))
+        }
+        if (line.contains("[DEBUG]")) {
             return MessageLevel::Debug;
+        }
     }
 
-    if (line.contains("Exception: ") || line.contains("Throwable: "))
+    if (line.contains("Exception: ") || line.contains("Throwable: ")) {
         return MessageLevel::Error;
+    }
 
-    if (line.startsWith("Caused by: ") || line.startsWith("Exception in thread"))
+    if (line.startsWith("Caused by: ") || line.startsWith("Exception in thread")) {
         return MessageLevel::Error;
+    }
 
-    if (line.contains("overwriting existing"))
+    if (line.contains("overwriting existing")) {
         return MessageLevel::Fatal;
+    }
 
-    if (line.startsWith("\t") || line.startsWith(" "))
+    if (line.startsWith("\t") || line.startsWith(" ")) {
         return previous;
+    }
 
     return MessageLevel::Unknown;
 }

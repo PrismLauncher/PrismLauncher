@@ -65,8 +65,9 @@ IconType MMCIcon::type() const
 
 QString MMCIcon::name() const
 {
-    if (m_name.size())
+    if (m_name.size()) {
         return m_name;
+    }
     return m_key;
 }
 
@@ -77,11 +78,13 @@ bool MMCIcon::has(IconType _type) const
 
 QIcon MMCIcon::icon() const
 {
-    if (m_current_type == IconType::ToBeDeleted)
+    if (m_current_type == IconType::ToBeDeleted) {
         return {};
+    }
     auto& icon = m_images[m_current_type].icon;
-    if (!icon.isNull())
+    if (!icon.isNull()) {
         return icon;
+    }
     // FIXME: inject this.
     return QIcon::fromTheme(m_images[m_current_type].key);
 }

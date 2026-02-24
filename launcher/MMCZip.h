@@ -103,5 +103,8 @@ bool extractFile(const QString& fileCompressed, QString file, QString dir);
  * \param excludeFilter function to excludeFilter which files shouldn't be included (returning true means to excude)
  * \return true for success or false for failure
  */
-bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, const FilterFileFunction& excludeFilter);
+bool collectFileListRecursively(const QString& rootDir,
+                                const QString& subDir,
+                                QFileInfoList* files,
+                                const FilterFileFunction& excludeFilter);
 }  // namespace MMCZip

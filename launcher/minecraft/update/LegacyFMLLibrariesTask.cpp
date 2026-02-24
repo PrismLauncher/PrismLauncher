@@ -45,8 +45,9 @@ void LegacyFMLLibrariesTask::executeTask()
     // now check the lib folder inside the instance for files.
     for (auto& lib : libList) {
         QFileInfo libInfo(FS::PathCombine(inst->libDir(), lib.filename));
-        if (libInfo.exists())
+        if (libInfo.exists()) {
             continue;
+        }
         fmlLibsToProcess.append(lib);
     }
 

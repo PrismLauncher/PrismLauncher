@@ -130,7 +130,8 @@ QList<Net::NetRequest::Ptr> Library::getDownloads(const RuntimeContext& runtimeC
     };
 
     // Lambda function to add a download request
-    auto add_download = [this, local, check_local_file, cache, stale, &out](const QString& storage, const QString& url, const QString& sha1) {
+    auto add_download = [this, local, check_local_file, cache, stale, &out](const QString& storage, const QString& url,
+                                                                            const QString& sha1) {
         if (local) {
             return check_local_file(storage);
         }
@@ -138,8 +139,9 @@ QList<Net::NetRequest::Ptr> Library::getDownloads(const RuntimeContext& runtimeC
         if (stale) {
             entry->setStale(true);
         }
-        if (!entry->isStale())
+        if (!entry->isStale()) {
             return true;
+        }
         Net::Download::Options options;
         if (stale) {
             options |= Net::Download::Option::AcceptLocalFiles;
@@ -247,8 +249,9 @@ bool Library::isActive(const RuntimeContext& runtimeContext) const
         Rule::Action ruleResult = Rule::Disallow;
         for (auto rule : m_rules) {
             Rule::Action temp = rule.apply(runtimeContext);
-            if (temp != Rule::Defer)
+            if (temp != Rule::Defer) {
                 ruleResult = temp;
+            }
         }
         result = result && (ruleResult == Rule::Allow);
     }
@@ -292,11 +295,13 @@ QString Library::getCompatibleNative(const RuntimeContext& runtimeContext) const
     // try to match precise classifier "[os]-[arch]"
     auto entry = m_nativeClassifiers.constFind(runtimeContext.getClassifier());
     // try to match imprecise classifier on legacy architectures "[os]"
-    if (entry == m_nativeClassifiers.constEnd() && runtimeContext.isLegacyArch())
+    if (entry == m_nativeClassifiers.constEnd() && runtimeContext.isLegacyArch()) {
         entry = m_nativeClassifiers.constFind(runtimeContext.system);
+    }
 
-    if (entry == m_nativeClassifiers.constEnd())
+    if (entry == m_nativeClassifiers.constEnd()) {
         return {};
+    }
 
     return entry.value();
 }
@@ -375,8 +380,9 @@ QString Library::filename(const RuntimeContext& runtimeContext) const
  */
 QString Library::displayName(const RuntimeContext& runtimeContext) const
 {
-    if (!m_displayname.isEmpty())
+    if (!m_displayname.isEmpty()) {
         return m_displayname;
+    }
     return filename(runtimeContext);
 }
 

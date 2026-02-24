@@ -160,8 +160,9 @@ void ListModel::requestPack()
 
 void ListModel::packRequestFinished(QByteArray* responsePtr)
 {
-    if (!m_jobPtr || m_aborted)
+    if (!m_jobPtr || m_aborted) {
         return;
+    }
 
     // NOTE(TheKodeToad): moving the response out to avoid it from being destroyed by jobPtr.reset()
     QByteArray response = std::move(*responsePtr);

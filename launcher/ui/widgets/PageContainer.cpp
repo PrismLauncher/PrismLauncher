@@ -68,8 +68,9 @@ class PageEntryFilterModel : public QSortFilterProxyModel {
         const QString pattern = filterRegularExpression().pattern();
         const auto model = static_cast<PageModel*>(sourceModel());
         const auto page = model->pages().at(sourceRow);
-        if (!page->shouldDisplay())
+        if (!page->shouldDisplay()) {
             return false;
+        }
         // Regular contents check, then check page-filter.
         return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent);
     }
@@ -92,8 +93,9 @@ PageContainer::PageContainer(BasePageProvider* pageProvider, QString defaultId, 
         page->setParentContainer(this);
         counter++;
         page->updateExtraInfo = [this](const QString& id, const QString& info) {
-            if (m_currentPage && id == m_currentPage->id())
+            if (m_currentPage && id == m_currentPage->id()) {
                 m_header->setText(m_currentPage->displayName() + info);
+            }
         };
     }
     m_model->setPages(pages);
@@ -167,8 +169,9 @@ void PageContainer::createUI()
     QFont headerLabelFont = m_header->font();
     headerLabelFont.setBold(true);
     const int pointSize = headerLabelFont.pointSize();
-    if (pointSize > 0)
+    if (pointSize > 0) {
         headerLabelFont.setPointSize(pointSize + 2);
+    }
     m_header->setFont(headerLabelFont);
 
     auto* headerHLayout = new QHBoxLayout;
@@ -191,11 +194,13 @@ void PageContainer::createUI()
 
 void PageContainer::retranslate()
 {
-    if (m_currentPage)
+    if (m_currentPage) {
         m_header->setText(m_currentPage->displayName());
+    }
 
-    for (auto page : m_model->pages())
+    for (auto page : m_model->pages()) {
         page->retranslate();
+    }
 }
 
 void PageContainer::addButtons(QWidget* buttons)
@@ -237,8 +242,9 @@ void PageContainer::help()
 {
     if (m_currentPage) {
         QString pageId = m_currentPage->helpPage();
-        if (pageId.isEmpty())
+        if (pageId.isEmpty()) {
             return;
+        }
         DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg(pageId)));
     }
 }
@@ -269,8 +275,9 @@ bool PageContainer::prepareToClose()
 bool PageContainer::saveAll()
 {
     for (auto page : m_model->pages()) {
-        if (!page->apply())
+        if (!page->apply()) {
             return false;
+        }
     }
     return true;
 }

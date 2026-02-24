@@ -52,8 +52,9 @@ QString findBestIconIn(const QString& folder, const QString& iconKey)
     while (it.hasNext()) {
         it.next();
         auto fileInfo = it.fileInfo();
-        if ((fileInfo.completeBaseName() == iconKey || fileInfo.fileName() == iconKey) && isIconSuffix(fileInfo.suffix()))
+        if ((fileInfo.completeBaseName() == iconKey || fileInfo.fileName() == iconKey) && isIconSuffix(fileInfo.suffix())) {
             return fileInfo.absoluteFilePath();
+        }
     }
     return {};
 }
