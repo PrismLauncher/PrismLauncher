@@ -43,7 +43,7 @@ class CheckUpdateTask : public Task {
             , old_hash(std::move(old_h))
             , old_version(std::move(old_v))
             , new_version(std::move(new_v))
-            , new_version_type(std::move(new_v_type))
+            , new_version_type(new_v_type)
             , changelog(std::move(changelog))
             , provider(p)
             , download(std::move(t))

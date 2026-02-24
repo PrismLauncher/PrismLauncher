@@ -170,7 +170,7 @@ bool ResourceFolderModel::installResource(QString original_path)
 
 void ResourceFolderModel::installResourceWithFlameMetadata(QString path, ModPlatform::IndexedVersion& vers)
 {
-    auto install = [this, path] { installResource(std::move(path)); };
+    auto install = [this, path] { installResource(path); };
     if (vers.addonId.isValid()) {
         ModPlatform::IndexedPack pack{
             vers.addonId,
