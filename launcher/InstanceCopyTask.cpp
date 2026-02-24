@@ -189,7 +189,6 @@ void InstanceCopyTask::copyFinished()
 void InstanceCopyTask::copyAborted()
 {
     emitFailed(tr("Instance folder copy has been aborted."));
-    return;
 }
 
 bool InstanceCopyTask::abort()
