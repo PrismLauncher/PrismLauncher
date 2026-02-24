@@ -80,7 +80,7 @@
 
     \sa QFile::QFile()
 */
-LockedFile::LockedFile()  
+LockedFile::LockedFile()
 {
 #ifdef Q_OS_WIN
     wmutex = 0;

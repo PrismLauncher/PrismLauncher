@@ -15,7 +15,7 @@ class CheckUpdateTask : public Task {
                     std::vector<Version>& mcVersions,
                     QList<ModPlatform::ModLoaderType> loadersList,
                     ResourceFolderModel* resourceModel)
-        :  m_resources(resources), m_gameVersions(mcVersions), m_loadersList(std::move(loadersList)), m_resourceModel(resourceModel)
+        : m_resources(resources), m_gameVersions(mcVersions), m_loadersList(std::move(loadersList)), m_resourceModel(resourceModel)
     {}
 
     struct Update {

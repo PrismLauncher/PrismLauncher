@@ -27,8 +27,8 @@
 #include "ui_BlockedModsDialog.h"
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "modplatform/helpers/HashUtils.h"
+#include "settings/SettingsObject.h"
 
 #include <QDebug>
 #include <QDesktopServices>

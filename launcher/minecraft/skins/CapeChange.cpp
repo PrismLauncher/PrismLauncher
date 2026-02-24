@@ -41,7 +41,7 @@
 #include <utility>
 #include "net/RawHeaderProxy.h"
 
-CapeChange::CapeChange(QString cape) :  m_capeId(std::move(cape))
+CapeChange::CapeChange(QString cape) : m_capeId(std::move(cape))
 {
     logCat = taskMCSkinsLogC;
 }

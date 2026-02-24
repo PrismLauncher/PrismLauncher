@@ -25,7 +25,7 @@
 #include <QOpenGLWindow>
 
 namespace opengl {
-Scene::Scene(const QImage& skin, bool slim, const QImage& cape) :  m_slim(slim), m_capeVisible(!cape.isNull())
+Scene::Scene(const QImage& skin, bool slim, const QImage& cape) : m_slim(slim), m_capeVisible(!cape.isNull())
 {
     initializeOpenGLFunctions();
     m_staticComponents = {

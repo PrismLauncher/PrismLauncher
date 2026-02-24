@@ -120,7 +120,7 @@ bool SettingsObject::set(const QString& id, QVariant value) const
 }
 
 #ifdef Q_OS_MACOS
-QString SettingsObject::getPathFromBookmark(const QString& id)
+QString SettingsObject::getPathFromBookmark(const QString& id) const
 {
     auto setting = getSetting(id);
     if (!setting) {

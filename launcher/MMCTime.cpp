@@ -92,8 +92,8 @@ QString Time::humanReadableDuration(double duration, int precision)
         }
         os << qSetFieldWidth(2) << sc << QObject::tr("s");  // seconds
     }
-    if (((msc != 0) && (precision > 0)) || ((dc == 0) && (hc == 0) && (mc == 0) && (sc == 0))) {
-        if ((dc != 0) || (hc != 0) || (mc != 0) || (sc != 0)) {
+    if ((msc && precision > 0) || (!dc && !hc && !mc && !sc)) {
+        if (dc || hc || mc || sc) {
             os << " ";
         }
         os << qSetFieldWidth(0) << qSetRealNumberPrecision(precision) << msc << QObject::tr("ms");  // miliseconds

@@ -156,7 +156,7 @@ void AutoInstallJava::setJavaPathFromPartial()
                      MessageLevel::Warning);
         emitSucceeded();
     }
-    }
+}
 
 void AutoInstallJava::downloadJava(const Meta::Version::Ptr& version, const QString& javaName)
 {

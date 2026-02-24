@@ -13,7 +13,7 @@
 
 Resource::Resource(QObject* parent) : QObject(parent) {}
 
-Resource::Resource(const QFileInfo& file_info)  
+Resource::Resource(const QFileInfo& file_info)
 {
     setFile(file_info);
 }

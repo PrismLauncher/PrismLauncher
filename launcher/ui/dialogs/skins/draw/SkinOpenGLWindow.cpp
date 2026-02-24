@@ -30,8 +30,7 @@
 #include "ui/dialogs/skins/draw/BoxGeometry.h"
 #include "ui/dialogs/skins/draw/Scene.h"
 
-SkinOpenGLWindow::SkinOpenGLWindow(SkinProvider* parent, QColor color)
-    :  m_baseColor(color), m_parent(parent)
+SkinOpenGLWindow::SkinOpenGLWindow(SkinProvider* parent, QColor color) : m_baseColor(color), m_parent(parent)
 {
     QSurfaceFormat format = QSurfaceFormat::defaultFormat();
     format.setDepthBufferSize(24);

@@ -25,7 +25,7 @@ class LogView : public QPlainTextEdit {
     void rowsInserted(const QModelIndex& parent, int first, int last);
     void rowsAboutToBeInserted(const QModelIndex& parent, int first, int last);
     // note: this supports only removing from front
-    static void rowsRemoved(const QModelIndex& parent, int first, int last);
+    void rowsRemoved(const QModelIndex& parent, int first, int last);
     void modelDestroyed(QObject* model);
 
    protected:

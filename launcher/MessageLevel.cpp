@@ -20,9 +20,9 @@ MessageLevel MessageLevel::fromName(const QString& levelName)
         return MessageLevel::Error;
     } else if (name == "FATAL") {
         return MessageLevel::Fatal;
+    } else {
         // Skip PrePost, it's not exposed to !![]!
         // Also skip StdErr and StdOut
-    } else {
         return MessageLevel::Unknown;
     }
 }

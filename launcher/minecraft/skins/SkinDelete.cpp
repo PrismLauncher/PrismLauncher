@@ -41,7 +41,7 @@
 #include <memory>
 #include "net/RawHeaderProxy.h"
 
-SkinDelete::SkinDelete()  
+SkinDelete::SkinDelete()
 {
     logCat = taskMCSkinsLogC;
 }

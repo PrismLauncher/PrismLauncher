@@ -27,7 +27,7 @@ namespace Net {
 
 class ApiHeaderProxy : public HeaderProxy {
    public:
-    ApiHeaderProxy()  {}
+    ApiHeaderProxy() {}
     ~ApiHeaderProxy() override = default;
 
    public:

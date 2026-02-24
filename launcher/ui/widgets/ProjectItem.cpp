@@ -161,7 +161,7 @@ bool ProjectItemDelegate::editorEvent(QEvent* event,
                                       const QModelIndex& index)
 {
     if (event->type() != QEvent::MouseButtonRelease && event->type() != QEvent::MouseButtonPress &&
-          event->type() != QEvent::MouseButtonDblClick) {
+        event->type() != QEvent::MouseButtonDblClick) {
         return false;
     }
 

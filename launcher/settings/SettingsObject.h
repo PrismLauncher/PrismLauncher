@@ -134,7 +134,7 @@ class SettingsObject : public QObject {
      * If a bookmark is not valid or stored, use default logic (directly return the stored path).
      * This can attempt to create a bookmark if the path is accessible and the bookmark is not valid.
      */
-    QString getPathFromBookmark(const QString& id);
+    QString getPathFromBookmark(const QString& id) const;
     /*!
      * \brief Set a security-scoped bookmark to the provided path for the associated setting.
      * \param id The setting ID of the relevant directory - this should not include "Bookmark" at the end.

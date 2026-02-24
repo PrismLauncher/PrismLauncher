@@ -34,10 +34,10 @@
 #include <QUrl>
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "DesktopServices.h"
 #include "Json.h"
 #include "QObjectPtr.h"
+#include "settings/SettingsObject.h"
 
 #include "minecraft/auth/Parsers.h"
 #include "minecraft/skins/CapeChange.h"
@@ -441,7 +441,7 @@ void SkinManageDialog::on_urlBtn_clicked()
 
 class WaitTask : public Task {
    public:
-    WaitTask() :  m_done(false) {};
+    WaitTask() : m_done(false) {};
     ~WaitTask() override = default;
 
    public slots:

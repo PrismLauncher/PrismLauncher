@@ -8,19 +8,15 @@
 #include "settings/INISettingsObject.h"
 
 VanillaCreationTask::VanillaCreationTask(BaseVersion::Ptr version, QString loader, BaseVersion::Ptr loader_version)
-    : 
-     m_version(std::move(version))
-    , m_using_loader(true)
-    , m_loader(std::move(loader))
-    , m_loader_version(std::move(loader_version))
+    : m_version(std::move(version)), m_using_loader(true), m_loader(std::move(loader)), m_loader_version(std::move(loader_version))
 {}
 
 std::unique_ptr<MinecraftInstance> VanillaCreationTask::createInstance()
 {
     setStatus(tr("Creating instance from version %1").arg(m_version->name()));
 
-    auto inst = std::make_unique<MinecraftInstance>(m_globalSettings, std::make_unique<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg")),
-                           m_stagingPath);
+    auto inst = std::make_unique<MinecraftInstance>(
+        m_globalSettings, std::make_unique<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg")), m_stagingPath);
     SettingsObject::Lock lock(inst->settings());
 
     auto components = inst->getPackProfile();

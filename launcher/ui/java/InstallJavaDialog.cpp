@@ -189,18 +189,18 @@ InstallDialog::InstallDialog(const QString& uid, BaseInstance* instance, QWidget
     : QDialog(parent), container(new PageContainer(this, QString(), this)), buttons(new QDialogButtonBox(this))
 {
     auto layout = new QVBoxLayout(this);
-    // small margins look ugly on macOS on modal windows
-    #ifndef Q_OS_MACOS
+// small margins look ugly on macOS on modal windows
+#ifndef Q_OS_MACOS
     layout->setContentsMargins(0, 0, 0, 0);
-    #endif
+#endif
     container->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     layout->addWidget(container);
 
     auto buttonLayout = new QHBoxLayout(this);
-    // small margins look ugly on macOS on modal windows
-    #ifndef Q_OS_MACOS
+// small margins look ugly on macOS on modal windows
+#ifndef Q_OS_MACOS
     buttonLayout->setContentsMargins(0, 0, 6, 6);
-    #endif
+#endif
 
     auto refreshLayout = new QHBoxLayout(this);
 

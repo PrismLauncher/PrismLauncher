@@ -30,7 +30,7 @@ namespace ResourceDownload {
 
 QHash<ResourceModel*, bool> ResourceModel::s_running_models;
 
-ResourceModel::ResourceModel(ResourceAPI* api) :  m_api(api)
+ResourceModel::ResourceModel(ResourceAPI* api) : m_api(api)
 {
     s_running_models.insert(this, true);
     if (APPLICATION_DYN) {

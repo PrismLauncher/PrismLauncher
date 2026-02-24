@@ -30,7 +30,7 @@ namespace Net {
 
 class RawHeaderProxy : public HeaderProxy {
    public:
-    RawHeaderProxy(QList<HeaderPair> headers = {}) :  m_headers(std::move(headers)) {};
+    RawHeaderProxy(QList<HeaderPair> headers = {}) : m_headers(std::move(headers)) {};
     ~RawHeaderProxy() override = default;
 
    public:

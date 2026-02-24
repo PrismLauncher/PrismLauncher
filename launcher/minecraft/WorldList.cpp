@@ -46,7 +46,7 @@
 #include <QUuid>
 #include <Qt>
 
-WorldList::WorldList(const QString& dir, BaseInstance* instance) :  m_instance(instance), m_dir(dir)
+WorldList::WorldList(const QString& dir, BaseInstance* instance) : m_instance(instance), m_dir(dir)
 {
     FS::ensureFolderPathExists(m_dir.absolutePath());
     m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);

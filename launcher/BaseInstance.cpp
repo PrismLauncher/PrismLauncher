@@ -71,7 +71,7 @@ bool shouldStopOnConsoleOverflow(SettingsObject* settings)
     return settings->get("ConsoleOverflowStop").toBool();
 }
 
-BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, const QString& rootDir)  
+BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, const QString& rootDir)
 {
     m_settings = std::move(settings);
     m_global_settings = globalSettings;

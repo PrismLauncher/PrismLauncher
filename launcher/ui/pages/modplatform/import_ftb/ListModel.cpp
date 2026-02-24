@@ -23,12 +23,12 @@
 #include <QIcon>
 #include <QProcessEnvironment>
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "Exception.h"
 #include "FileSystem.h"
 #include "Json.h"
 #include "StringUtils.h"
 #include "modplatform/import_ftb/PackHelpers.h"
+#include "settings/SettingsObject.h"
 #include "ui/widgets/ProjectItem.h"
 
 namespace FTBImportAPP {

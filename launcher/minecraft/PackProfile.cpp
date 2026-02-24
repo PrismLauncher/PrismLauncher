@@ -71,7 +71,7 @@
 
 #include "ui/dialogs/CustomMessageBox.h"
 
-PackProfile::PackProfile(MinecraftInstance* instance)  
+PackProfile::PackProfile(MinecraftInstance* instance)
 {
     d = std::make_unique<PackProfileData>();
     d->m_instance = instance;

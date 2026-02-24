@@ -56,5 +56,5 @@ bool NotesPage::apply()
 
 void NotesPage::retranslate()
 {
-    Ui::NotesPage::retranslateUi(this);
+    ui->retranslateUi(this);
 }

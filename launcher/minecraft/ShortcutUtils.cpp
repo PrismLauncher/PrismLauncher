@@ -238,7 +238,7 @@ bool createInstanceShortcutInOther(const Shortcut& shortcut)
     fileDialog.setDirectoryUrl(defaultedDir);
 
     shortcutFilePath = QFileDialog::getSaveFileName(shortcut.parent, QObject::tr("Create Shortcut"), shortcutFilePath,
-                                                  QObject::tr("Desktop Entries") + " (*" + extension + ")");
+                                                    QObject::tr("Desktop Entries") + " (*" + extension + ")");
     if (shortcutFilePath.isEmpty()) {
         return false;  // file dialog canceled by user
     }

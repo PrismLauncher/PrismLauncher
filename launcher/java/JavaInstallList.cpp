@@ -41,10 +41,10 @@
 #include <algorithm>
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "java/JavaChecker.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
+#include "settings/SettingsObject.h"
 #include "tasks/ConcurrentTask.h"
 
 JavaInstallList::JavaInstallList(QObject* parent, bool onlyManagedVersions)
@@ -149,7 +149,7 @@ void JavaInstallList::sortVersions()
     endResetModel();
 }
 
-JavaListLoadTask::JavaListLoadTask(JavaInstallList* vlist, bool onlyManagedVersions) :  m_only_managed_versions(onlyManagedVersions)
+JavaListLoadTask::JavaListLoadTask(JavaInstallList* vlist, bool onlyManagedVersions) : m_only_managed_versions(onlyManagedVersions)
 {
     m_list = vlist;
     m_current_recommended = nullptr;

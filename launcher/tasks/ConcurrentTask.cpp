@@ -39,7 +39,7 @@
 #include <utility>
 #include "tasks/Task.h"
 
-ConcurrentTask::ConcurrentTask(const QString& task_name, int max_concurrent) :  m_total_max_size(max_concurrent)
+ConcurrentTask::ConcurrentTask(const QString& task_name, int max_concurrent) : m_total_max_size(max_concurrent)
 {
     setObjectName(task_name);
 }

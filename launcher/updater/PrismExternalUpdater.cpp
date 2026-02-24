@@ -74,7 +74,7 @@ PrismExternalUpdater::PrismExternalUpdater(QWidget* parent, const QString& appDi
     priv->parent = parent;
     connectTimer();
     resetAutoCheckTimer();
-    if (priv->updateInterval == 0) { // "On Launch"
+    if (priv->updateInterval == 0) {  // "On Launch"
         checkForUpdates(false);
     }
 }

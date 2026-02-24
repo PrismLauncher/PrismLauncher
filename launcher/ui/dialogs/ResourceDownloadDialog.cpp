@@ -62,10 +62,10 @@ ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, ResourceFolderMo
 
     setWindowIcon(QIcon::fromTheme("new"));
 
-    // small margins look ugly on macOS on modal windows
-    #ifndef Q_OS_MACOS
+// small margins look ugly on macOS on modal windows
+#ifndef Q_OS_MACOS
     m_buttons.setContentsMargins(0, 0, 6, 6);
-    #endif
+#endif
     // Bonk Qt over its stupid head and make sure it understands which button is the default one...
     // See: https://stackoverflow.com/questions/24556831/qbuttonbox-set-default-button
     auto OkButton = m_buttons.button(QDialogButtonBox::Ok);
@@ -121,10 +121,10 @@ void ResourceDownloadDialog::reject()
 // won't work with subclasses if we put it in this ctor.
 void ResourceDownloadDialog::initializeContainer()
 {
-    // small margins look ugly on macOS on modal windows
-    #ifndef Q_OS_MACOS
+// small margins look ugly on macOS on modal windows
+#ifndef Q_OS_MACOS
     layout()->setContentsMargins(0, 0, 0, 0);
-    #endif
+#endif
 
     m_container = new PageContainer(this, {}, this);
     m_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);

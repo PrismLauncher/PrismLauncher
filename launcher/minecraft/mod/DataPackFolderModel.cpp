@@ -121,7 +121,7 @@ QVariant DataPackFolderModel::data(const QModelIndex& index, int role) const
         case ProviderColumn:
             mappedIndex = index.siblingAtColumn(ResourceFolderModel::ProviderColumn);
             break;
-        // FIXME: there is no size column due to an oversight
+            // FIXME: there is no size column due to an oversight
     }
 
     if (mappedIndex.isValid()) {

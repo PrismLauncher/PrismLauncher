@@ -1,7 +1,7 @@
 #include "LanguageWizardPage.h"
 #include <Application.h>
-#include "settings/SettingsObject.h"
 #include <translations/TranslationsModel.h>
+#include "settings/SettingsObject.h"
 
 #include <BuildConfig.h>
 #include <QVBoxLayout>
