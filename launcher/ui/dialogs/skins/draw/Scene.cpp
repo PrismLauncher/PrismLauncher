@@ -138,11 +138,9 @@ void Scene::draw(QOpenGLShaderProgram* program)
         if (!m_elytraVisible) {
             m_cape->draw(program);
         } else {
-            glDisable(GL_CULL_FACE);
             for (auto e : m_elytra) {
                 e->draw(program);
             }
-            glEnable(GL_CULL_FACE);
         }
         m_capeTexture->release();
     }
