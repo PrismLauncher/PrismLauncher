@@ -45,12 +45,12 @@ SkinOpenGLWindow::~SkinOpenGLWindow()
     makeCurrent();
     // double check if resources were initialized because they are not
     // initialized together with the object
-    if (m_scene) {
+    
         delete m_scene;
-    }
-    if (m_background) {
+    
+    
         delete m_background;
-    }
+    
     if (m_backgroundTexture) {
         if (m_backgroundTexture->isCreated()) {
             m_backgroundTexture->destroy();

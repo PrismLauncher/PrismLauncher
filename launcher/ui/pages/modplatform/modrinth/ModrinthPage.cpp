@@ -376,9 +376,9 @@ void ModrinthPage::createFilterWidget()
     m_filterWidget.swap(widget);
     auto old = m_ui->splitter->replaceWidget(0, m_filterWidget.get());
     // because we replaced the widget we also need to delete it
-    if (old) {
+    
         delete old;
-    }
+    
 
     connect(m_ui->filterButton, &QPushButton::clicked, this, [this] { m_filterWidget->setHidden(!m_filterWidget->isHidden()); });
 
