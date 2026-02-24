@@ -143,7 +143,8 @@ bool ArchiveReader::File::writeFile(archive* out, const QString& targetFileName,
     if (archive_write_header(out, entry) < ARCHIVE_OK) {
         qCritical() << "Failed to write header to entry:" << filename() << "-" << archive_error_string(out);
         return false;
-    } else if (archive_entry_size(m_entry) > 0) {
+    }
+    if (archive_entry_size(m_entry) > 0) {
         auto r = copy_data(m_archive.get(), out, notBlock);
         if (r < ARCHIVE_OK) {
             qCritical() << "Failed reading data block:" << archive_error_string(out);

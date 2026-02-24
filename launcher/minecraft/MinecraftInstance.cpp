@@ -359,9 +359,8 @@ QString MinecraftInstance::gameRoot() const
 
     if (dotMCDir.exists() && !mcDir.exists()) {
         return dotMCDir.filePath();
-    } else {
-        return mcDir.filePath();
     }
+    return mcDir.filePath();
 }
 
 QString MinecraftInstance::binRoot() const
@@ -461,7 +460,7 @@ QString MinecraftInstance::resourcesDir() const
     return FS::PathCombine(gameRoot(), "resources");
 }
 
-QDir MinecraftInstance::librariesPath() 
+QDir MinecraftInstance::librariesPath()
 {
     return QDir::current().absoluteFilePath("libraries");
 }
@@ -471,7 +470,7 @@ QDir MinecraftInstance::jarmodsPath() const
     return QDir(jarModsDir());
 }
 
-QDir MinecraftInstance::versionsPath() 
+QDir MinecraftInstance::versionsPath()
 {
     return QDir::current().absoluteFilePath("versions");
 }

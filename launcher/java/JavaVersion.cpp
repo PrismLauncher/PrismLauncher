@@ -95,7 +95,8 @@ bool JavaVersion::operator<(const JavaVersion& rhs) const
         if (thisPre && !rhsPre) {
             // this is a prerelease and the other one isn't -> lesser
             return true;
-        } else if (!thisPre && rhsPre) {
+        }
+        if (!thisPre && rhsPre) {
             // this isn't a prerelease and the other one is -> greater
             return false;
         } else if (thisPre && rhsPre) {
@@ -104,9 +105,8 @@ bool JavaVersion::operator<(const JavaVersion& rhs) const
         }
         // neither is prerelease, so they are the same -> this cannot be less than rhs
         return false;
-    } else {
-        return StringUtils::naturalCompare(m_string, rhs.m_string, Qt::CaseSensitive) < 0;
     }
+    return StringUtils::naturalCompare(m_string, rhs.m_string, Qt::CaseSensitive) < 0;
 }
 
 bool JavaVersion::operator==(const JavaVersion& rhs) const

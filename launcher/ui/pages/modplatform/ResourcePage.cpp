@@ -94,9 +94,8 @@ ResourcePage::ResourcePage(ResourceDownloadDialog* parent, BaseInstance& base_in
 ResourcePage::~ResourcePage()
 {
     delete m_ui;
-    
-        delete m_model;
-    
+
+    delete m_model;
 }
 
 void ResourcePage::retranslate()
@@ -129,13 +128,13 @@ auto ResourcePage::eventFilter(QObject* watched, QEvent* event) -> bool
                 triggerSearch();
                 keyEvent->accept();
                 return true;
-            } else {
-                if (m_searchTimer.isActive()) {
-                    m_searchTimer.stop();
-                }
-
-                m_searchTimer.start(350);
             }
+            if (m_searchTimer.isActive()) {
+                m_searchTimer.stop();
+            }
+
+            m_searchTimer.start(350);
+
         } else if (watched == m_ui->packView) {
             // stop the event from going to the confirm button
             if (keyEvent->key() == Qt::Key_Return) {

@@ -45,14 +45,12 @@ bool InstanceProxyModel::lessThan(const QModelIndex& left, const QModelIndex& ri
     const QString rightCategory = right.data(InstanceViewRoles::GroupRole).toString();
     if (leftCategory == rightCategory) {
         return subSortLessThan(left, right);
-    } else {
-        // FIXME: real group sorting happens in InstanceView::updateGeometries(), see LocaleString
-        auto result = leftCategory.localeAwareCompare(rightCategory);
-        if (result == 0) {
-            return subSortLessThan(left, right);
-        }
-        return result < 0;
+    }  // FIXME: real group sorting happens in InstanceView::updateGeometries(), see LocaleString
+    auto result = leftCategory.localeAwareCompare(rightCategory);
+    if (result == 0) {
+        return subSortLessThan(left, right);
     }
+    return result < 0;
 }
 
 bool InstanceProxyModel::subSortLessThan(const QModelIndex& left, const QModelIndex& right) const
@@ -62,7 +60,6 @@ bool InstanceProxyModel::subSortLessThan(const QModelIndex& left, const QModelIn
     QString sortMode = APPLICATION->settings()->get("InstSortMode").toString();
     if (sortMode == "LastLaunch") {
         return pdataLeft->lastLaunch() > pdataRight->lastLaunch();
-    } else {
-        return m_naturalSort.compare(pdataLeft->name(), pdataRight->name()) < 0;
     }
+    return m_naturalSort.compare(pdataLeft->name(), pdataRight->name()) < 0;
 }

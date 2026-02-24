@@ -160,16 +160,16 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
                     if (isVersionArg) {
                         neoforgeVersion = argument;
                         break;
-                    } else {
-                        isVersionArg = "--fml.neoForgeVersion" == argument || "--fml.forgeVersion" == argument;
                     }
+                    isVersionArg = "--fml.neoForgeVersion" == argument || "--fml.forgeVersion" == argument;
                 }
                 if (!neoforgeVersion.isEmpty()) {
                     components->setComponentVersion("net.neoforged", neoforgeVersion);
                 }
                 break;
-            } else if ((libraryName.startsWith("net.minecraftforge:forge:") || libraryName.startsWith("net.minecraftforge:fmlloader:")) &&
-                       libraryName.contains('-')) {
+            }
+            if ((libraryName.startsWith("net.minecraftforge:forge:") || libraryName.startsWith("net.minecraftforge:fmlloader:")) &&
+                libraryName.contains('-')) {
                 QString libraryVersion = libraryName.section(':', 2);
                 if (!libraryVersion.startsWith("1.7.10-")) {
                     components->setComponentVersion("net.minecraftforge", libraryName.section('-', 1));

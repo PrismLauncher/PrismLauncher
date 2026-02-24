@@ -92,7 +92,8 @@ class IconProxy : public QIdentityProxyModel {
                 auto string = var.toString();
                 if (string == "warning") {
                     return QIcon::fromTheme("status-yellow");
-                } else if (string == "error") {
+                }
+                if (string == "error") {
                     return QIcon::fromTheme("status-bad");
                 }
             }

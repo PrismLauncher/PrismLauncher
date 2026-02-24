@@ -159,8 +159,8 @@ bool FilterModel::lessThan(const QModelIndex& left, const QModelIndex& right) co
         Version lv(leftPack.mcVersion);
         Version rv(rightPack.mcVersion);
         return lv < rv;
-
-    } else if (m_currentSorting == Sorting::ByName) {
+    }
+    if (m_currentSorting == Sorting::ByName) {
         return StringUtils::naturalCompare(leftPack.name, rightPack.name, Qt::CaseSensitive) >= 0;
     }
 

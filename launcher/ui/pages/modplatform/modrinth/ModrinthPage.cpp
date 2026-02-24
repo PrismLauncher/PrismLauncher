@@ -121,13 +121,12 @@ bool ModrinthPage::eventFilter(QObject* watched, QEvent* event)
             this->triggerSearch();
             keyEvent->accept();
             return true;
-        } else {
-            if (m_search_timer.isActive()) {
-                m_search_timer.stop();
-            }
-
-            m_search_timer.start(350);
         }
+        if (m_search_timer.isActive()) {
+            m_search_timer.stop();
+        }
+
+        m_search_timer.start(350);
     }
     return QObject::eventFilter(watched, event);
 }
@@ -376,9 +375,8 @@ void ModrinthPage::createFilterWidget()
     m_filterWidget.swap(widget);
     auto old = m_ui->splitter->replaceWidget(0, m_filterWidget.get());
     // because we replaced the widget we also need to delete it
-    
-        delete old;
-    
+
+    delete old;
 
     connect(m_ui->filterButton, &QPushButton::clicked, this, [this] { m_filterWidget->setHidden(!m_filterWidget->isHidden()); });
 

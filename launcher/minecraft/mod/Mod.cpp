@@ -185,9 +185,8 @@ auto Mod::homepage() const -> QString
 
     if (metaUrl.isEmpty()) {
         return details().homeurl;
-    } else {
-        return metaUrl;
     }
+    return metaUrl;
 }
 
 auto Mod::loaders() const -> QString

@@ -534,9 +534,8 @@ QVariant PackProfile::data(const QModelIndex& index, int role) const
                 case VersionColumn: {
                     if (patch->isCustom()) {
                         return QString("%1 (Custom)").arg(patch->getVersion());
-                    } else {
-                        return patch->getVersion();
                     }
+                    return patch->getVersion();
                 }
                 default:
                     return {};
@@ -992,14 +991,12 @@ bool PackProfile::setComponentVersion(const QString& uid, const QString& version
             return true;
         }
         return false;
-    } else {
-        // add new
-        auto component = makeShared<Component>(this, uid);
-        component->m_version = version;
-        component->m_important = important;
-        appendComponent(component);
-        return true;
-    }
+    }  // add new
+    auto component = makeShared<Component>(this, uid);
+    component->m_version = version;
+    component->m_important = important;
+    appendComponent(component);
+    return true;
 }
 
 QString PackProfile::getComponentVersion(const QString& uid) const

@@ -5,7 +5,8 @@ MessageLevel MessageLevel::fromName(const QString& levelName)
     QString name = levelName.toUpper();
     if (name == "LAUNCHER") {
         return MessageLevel::Launcher;
-    } else if (name == "TRACE") {
+    }
+    if (name == "TRACE") {
         return MessageLevel::Trace;
     } else if (name == "DEBUG") {
         return MessageLevel::Debug;

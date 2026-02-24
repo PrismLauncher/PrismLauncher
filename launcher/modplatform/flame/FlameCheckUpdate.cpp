@@ -135,7 +135,7 @@ void FlameCheckUpdate::collectBlockedMods()
 {
     QStringList addonIds;
     QHash<QString, Resource*> quickSearch;
-    for (auto const& resource : m_blocked.keys()) {
+    for (const auto& resource : m_blocked.keys()) {
         auto addonId = resource->metadata()->project_id.toString();
         addonIds.append(addonId);
         quickSearch[addonId] = resource;
@@ -147,7 +147,8 @@ void FlameCheckUpdate::collectBlockedMods()
     if (addonIds.isEmpty()) {
         emitSucceeded();
         return;
-    } else if (addonIds.size() == 1) {
+    }
+    if (addonIds.size() == 1) {
         std::tie(projTask, response) = api.getProject(*addonIds.begin());
     } else {
         std::tie(projTask, response) = api.getProjects(addonIds);

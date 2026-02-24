@@ -101,9 +101,8 @@ std::shared_ptr<class VersionFile> Component::getVersionFile() const
 {
     if (m_metaVersion) {
         return m_metaVersion->data();
-    } else {
-        return m_file;
     }
+    return m_file;
 }
 
 std::shared_ptr<class Meta::VersionList> Component::getVersionList() const
@@ -248,9 +247,8 @@ QStringList Component::knownConflictingComponents()
     auto iter = KNOWN_MODLOADERS.find(m_uid);
     if (iter != KNOWN_MODLOADERS.cend()) {
         return (*iter).knownConflictingComponents;
-    } else {
-        return {};
     }
+    return {};
 }
 
 void Component::setImportant(bool state)

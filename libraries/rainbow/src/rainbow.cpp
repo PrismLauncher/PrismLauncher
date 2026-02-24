@@ -141,7 +141,8 @@ class KHCY {
         // return RGB channels in appropriate order
         if (_hs < 1.0) {
             return QColor::fromRgbF(igamma(tp), igamma(to), igamma(tn), a);
-        } else if (_hs < 2.0) {
+        }
+        if (_hs < 2.0) {
             return QColor::fromRgbF(igamma(to), igamma(tp), igamma(tn), a);
         } else if (_hs < 3.0) {
             return QColor::fromRgbF(igamma(tn), igamma(tp), igamma(to), a);
@@ -192,9 +193,8 @@ static qreal contrastRatioForLuma(qreal y1, qreal y2)
 {
     if (y1 > y2) {
         return (y1 + 0.05) / (y2 + 0.05);
-    } else {
-        return (y2 + 0.05) / (y1 + 0.05);
     }
+    return (y2 + 0.05) / (y1 + 0.05);
 }
 
 qreal Rainbow::contrastRatio(const QColor& c1, const QColor& c2)

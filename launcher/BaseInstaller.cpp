@@ -50,7 +50,7 @@ QString BaseInstaller::filename(const QString& root) const
 {
     return patchesDir(root).absoluteFilePath(id() + ".json");
 }
-QDir BaseInstaller::patchesDir(const QString& root) 
+QDir BaseInstaller::patchesDir(const QString& root)
 {
     return QDir(root + "/patches/");
 }

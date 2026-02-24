@@ -813,9 +813,8 @@ QString NormalizePath(QString path)
 
     if (newAbsolute.startsWith(currentAbsolute)) {
         return a.relativeFilePath(newAbsolute);
-    } else {
-        return newAbsolute;
     }
+    return newAbsolute;
 }
 
 static const QString BAD_WIN_CHARS = "<>:\"|?*\r\n";

@@ -25,13 +25,12 @@ QVariant Setting::get() const
     SettingsObject* sbase = m_storage;
     if (!sbase) {
         return defValue();
-    } else {
-        QVariant test = sbase->retrieveValue(*this);
-        if (!test.isValid()) {
-            return defValue();
-        }
-        return test;
     }
+    QVariant test = sbase->retrieveValue(*this);
+    if (!test.isValid()) {
+        return defValue();
+    }
+    return test;
 }
 
 QVariant Setting::defValue() const

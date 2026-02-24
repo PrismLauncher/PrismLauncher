@@ -90,13 +90,12 @@ bool TechnicPage::eventFilter(QObject* watched, QEvent* event)
             triggerSearch();
             keyEvent->accept();
             return true;
-        } else {
-            if (m_search_timer.isActive()) {
-                m_search_timer.stop();
-            }
-
-            m_search_timer.start(350);
         }
+        if (m_search_timer.isActive()) {
+            m_search_timer.stop();
+        }
+
+        m_search_timer.start(350);
     }
     return QWidget::eventFilter(watched, event);
 }

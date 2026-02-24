@@ -49,7 +49,8 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     FTB::Modpack pack = m_modpacks.at(pos);
     if (role == Qt::DisplayRole) {
         return pack.name;
-    } else if (role == Qt::ToolTipRole) {
+    }
+    if (role == Qt::ToolTipRole) {
         return pack.synopsis;
     } else if (role == Qt::DecorationRole) {
         QIcon placeholder = QIcon::fromTheme("screenshot-placeholder");

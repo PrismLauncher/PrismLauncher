@@ -343,9 +343,8 @@ Qt::ItemFlags WorldList::flags(const QModelIndex& index) const
     Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
     if (index.isValid()) {
         return Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | defaultFlags;
-    } else {
-        return Qt::ItemIsDropEnabled | defaultFlags;
     }
+    return Qt::ItemIsDropEnabled | defaultFlags;
 }
 
 Qt::DropActions WorldList::supportedDragActions() const
@@ -415,7 +414,8 @@ int64_t calculateWorldSize(const QFileInfo& file)
 {
     if (file.isFile() && file.suffix() == "zip") {
         return file.size();
-    } else if (file.isDir()) {
+    }
+    if (file.isDir()) {
         QDirIterator it(file.absoluteFilePath(), QDir::Files, QDirIterator::Subdirectories);
         int64_t total = 0;
         while (it.hasNext()) {

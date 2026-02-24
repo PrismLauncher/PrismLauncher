@@ -28,5 +28,5 @@ class ProjectItemDelegate final : public QStyledItemDelegate {
     void checkboxClicked(const QModelIndex& index);
 
    private:
-    static QStyleOptionViewItem makeCheckboxStyleOption(const QStyleOptionViewItem& opt, const QStyle* style) ;
+    static QStyleOptionViewItem makeCheckboxStyleOption(const QStyleOptionViewItem& opt, const QStyle* style);
 };

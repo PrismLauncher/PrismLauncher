@@ -100,7 +100,8 @@ ModDetails ReadMCModInfo(const QByteArray& contents)
     // this is the very old format that had just the array
     if (jsonDoc.isArray()) {
         return getInfoFromArray(jsonDoc.array());
-    } else if (jsonDoc.isObject()) {
+    }
+    if (jsonDoc.isObject()) {
         auto val = jsonDoc.object().value("modinfoversion");
         if (val.isUndefined()) {
             val = jsonDoc.object().value("modListVersion");

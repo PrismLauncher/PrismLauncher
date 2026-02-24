@@ -65,10 +65,9 @@ QString getLicenseHtml()
         QString output = markdownToHTML(dataFile.readAll());
         dataFile.close();
         return output;
-    } else {
-        qWarning() << "Failed to open file '" << dataFile.fileName() << "' for reading!";
-        return {};
     }
+    qWarning() << "Failed to open file '" << dataFile.fileName() << "' for reading!";
+    return {};
 }
 
 }  // namespace

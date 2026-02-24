@@ -279,14 +279,13 @@ void NetRequest::handleAutoRetry(int64_t delay)
         emitFailed(tr("Request Rate Limited for %n second(s): Retry After %1", "seconds", delay)
                        .arg(retryAfter.toLocalTime().toString(QLocale::system().dateTimeFormat(QLocale::ShortFormat))));
         return;
-    } else {
-        qCDebug(logCat) << getUid().toString() << "Retyring Request in" << delay << "seconds";
-        setStatus(tr("Rate Limited: Waiting %n second(s)", "seconds", delay));
-        m_retryTimer.setTimerType(Qt::VeryCoarseTimer);
-        m_retryTimer.setSingleShot(true);
-        m_retryTimer.setInterval(delay * 1000);
-        m_retryTimer.start();
     }
+    qCDebug(logCat) << getUid().toString() << "Retyring Request in" << delay << "seconds";
+    setStatus(tr("Rate Limited: Waiting %n second(s)", "seconds", delay));
+    m_retryTimer.setTimerType(Qt::VeryCoarseTimer);
+    m_retryTimer.setSingleShot(true);
+    m_retryTimer.setInterval(delay * 1000);
+    m_retryTimer.start();
 }
 
 void NetRequest::downloadFinished()
@@ -310,7 +309,8 @@ void NetRequest::downloadFinished()
         emit succeeded();
         emit finished();
         return;
-    } else if (m_state == State::Failed) {
+    }
+    if (m_state == State::Failed) {
         qCDebug(logCat) << getUid().toString() << "Request failed in previous step:" << m_url.toString();
         m_sink->abort();
         m_failReason = m_reply->errorString();

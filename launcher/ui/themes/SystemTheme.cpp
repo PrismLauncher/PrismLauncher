@@ -79,7 +79,8 @@ QString SystemTheme::name()
 {
     if (m_themeName.toLower() == "windowsvista") {
         return QObject::tr("Windows Vista");
-    } else if (m_themeName.toLower() == "windows") {
+    }
+    if (m_themeName.toLower() == "windows") {
         return QObject::tr("Windows 9x");
     } else if (m_themeName.toLower() == "windows11") {
         return QObject::tr("Windows 11");
@@ -94,7 +95,8 @@ QString SystemTheme::tooltip()
 {
     if (m_themeName.toLower() == "windowsvista") {
         return QObject::tr("Widget style trying to look like your win32 theme");
-    } else if (m_themeName.toLower() == "windows") {
+    }
+    if (m_themeName.toLower() == "windows") {
         return QObject::tr("Windows 9x inspired widget style");
     } else if (m_themeName.toLower() == "windows11") {
         return QObject::tr("WinUI 3 inspired Qt widget style");

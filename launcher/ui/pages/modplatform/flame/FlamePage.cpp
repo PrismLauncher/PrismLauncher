@@ -106,13 +106,12 @@ bool FlamePage::eventFilter(QObject* watched, QEvent* event)
             triggerSearch();
             keyEvent->accept();
             return true;
-        } else {
-            if (m_search_timer.isActive()) {
-                m_search_timer.stop();
-            }
-
-            m_search_timer.start(350);
         }
+        if (m_search_timer.isActive()) {
+            m_search_timer.stop();
+        }
+
+        m_search_timer.start(350);
     }
     return QWidget::eventFilter(watched, event);
 }
@@ -330,9 +329,8 @@ void FlamePage::createFilterWidget()
     m_filterWidget.swap(widget);
     auto old = m_ui->splitter->replaceWidget(0, m_filterWidget.get());
     // because we replaced the widget we also need to delete it
-    
-        delete old;
-    
+
+    delete old;
 
     connect(m_ui->filterButton, &QPushButton::clicked, this, [this] { m_filterWidget->setHidden(!m_filterWidget->isHidden()); });
 

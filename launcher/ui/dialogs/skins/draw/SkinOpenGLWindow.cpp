@@ -45,12 +45,11 @@ SkinOpenGLWindow::~SkinOpenGLWindow()
     makeCurrent();
     // double check if resources were initialized because they are not
     // initialized together with the object
-    
-        delete m_scene;
-    
-    
-        delete m_background;
-    
+
+    delete m_scene;
+
+    delete m_background;
+
     if (m_backgroundTexture) {
         if (m_backgroundTexture->isCreated()) {
             m_backgroundTexture->destroy();
@@ -282,10 +281,9 @@ QColor calculateContrastingColor(const QColor& color)
     if (luma < 0.5) {
         constexpr float contrast = 0.05f;
         return Rainbow::lighten(color, contrast);
-    } else {
-        constexpr float contrast = 0.2f;
-        return Rainbow::darken(color, contrast);
     }
+    constexpr float contrast = 0.2;
+    return Rainbow::darken(color, contrast);
 }
 
 QImage generateChessboardImage(int width, int height, int tileSize, QColor baseColor)

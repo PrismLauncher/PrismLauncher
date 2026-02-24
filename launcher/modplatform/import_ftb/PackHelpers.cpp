@@ -133,7 +133,8 @@ void legacyInstanceParsing(const QString& path, std::optional<ModPlatform::ModLo
                 *loaderType = ModPlatform::NeoForge;
                 *loaderVersion = version;
                 break;
-            } else if (name == "forge") {
+            }
+            if (name == "forge") {
                 *loaderType = ModPlatform::Forge;
                 *loaderVersion = version;
                 break;

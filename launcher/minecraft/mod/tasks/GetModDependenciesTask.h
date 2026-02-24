@@ -66,9 +66,8 @@ class GetModDependenciesTask : public SequentialTask {
     {
         if (provider == ModPlatform::ResourceProvider::FLAME) {
             return &m_flameAPI;
-        } else {
-            return &m_modrinthAPI;
         }
+        return &m_modrinthAPI;
     }
 
    protected slots:

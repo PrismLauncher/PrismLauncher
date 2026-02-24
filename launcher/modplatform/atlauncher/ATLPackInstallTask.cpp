@@ -222,7 +222,8 @@ void PackInstallTask::deleteExistingFiles()
 
         if (base == "root") {
             return minecraftPath;
-        } else if (base == "config") {
+        }
+        if (base == "config") {
             return FS::PathCombine(minecraftPath, "config");
         } else {
             qWarning() << "Unrecognised base path" << base;
@@ -387,7 +388,8 @@ QString PackInstallTask::getVersionForLoader(const QString& uid)
 
             emitFailed(tr("Failed to find version for %1 loader").arg(m_version.loader.type));
             return Q_NULLPTR;
-        } else if (m_version.loader.choose) {
+        }
+        if (m_version.loader.choose) {
             // Fabric Loader doesn't depend on a given Minecraft version.
             if (m_version.loader.type == "fabric") {
                 return m_support->chooseVersion(vlist, Q_NULLPTR);
@@ -431,7 +433,8 @@ QString PackInstallTask::detectLibrary(const VersionLibrary& library)
 
         if (name == QString("guava")) {
             return "com.google.guava:guava:" + version;
-        } else if (name == QString("commons-lang3")) {
+        }
+        if (name == QString("commons-lang3")) {
             return "org.apache.commons:commons-lang3:" + version;
         }
     }

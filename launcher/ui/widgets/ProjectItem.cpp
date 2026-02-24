@@ -191,7 +191,7 @@ bool ProjectItemDelegate::editorEvent(QEvent* event,
     return true;
 }
 
-QStyleOptionViewItem ProjectItemDelegate::makeCheckboxStyleOption(const QStyleOptionViewItem& opt, const QStyle* style) 
+QStyleOptionViewItem ProjectItemDelegate::makeCheckboxStyleOption(const QStyleOptionViewItem& opt, const QStyle* style)
 {
     QStyleOptionViewItem checkboxOpt = opt;
 

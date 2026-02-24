@@ -25,13 +25,12 @@ class SeparatorPrefixTree {
         if (sepIndex == -1) {
             children[path] = SeparatorPrefixTree(true);
             return children[path];
-        } else {
-            auto prefix = path.left(sepIndex);
-            if (!children.contains(prefix)) {
-                children[prefix] = SeparatorPrefixTree(false);
-            }
-            return children[prefix].insert(path.mid(sepIndex + 1));
         }
+        auto prefix = path.left(sepIndex);
+        if (!children.contains(prefix)) {
+            children[prefix] = SeparatorPrefixTree(false);
+        }
+        return children[prefix].insert(path.mid(sepIndex + 1));
     }
 
     /// is the path fully contained in the tree?
@@ -55,14 +54,13 @@ class SeparatorPrefixTree {
                 return false;
             }
             return (*found).covers(QString());
-        } else {
-            auto prefix = path.left(sepIndex);
-            auto found = children.find(prefix);
-            if (found == children.end()) {
-                return false;
-            }
-            return (*found).covers(path.mid(sepIndex + 1));
         }
+        auto prefix = path.left(sepIndex);
+        auto found = children.find(prefix);
+        if (found == children.end()) {
+            return false;
+        }
+        return (*found).covers(path.mid(sepIndex + 1));
     }
 
     /// return the contained path that covers the path specified
@@ -86,21 +84,20 @@ class SeparatorPrefixTree {
                 return path;
             }
             return path + Tseparator + nested;
-        } else {
-            auto prefix = path.left(sepIndex);
-            auto found = children.find(prefix);
-            if (found == children.end()) {
-                return {};
-            }
-            auto nested = (*found).cover(path.mid(sepIndex + 1));
-            if (nested.isNull()) {
-                return nested;
-            }
-            if (nested.isEmpty()) {
-                return prefix;
-            }
-            return prefix + Tseparator + nested;
         }
+        auto prefix = path.left(sepIndex);
+        auto found = children.find(prefix);
+        if (found == children.end()) {
+            return {};
+        }
+        auto nested = (*found).cover(path.mid(sepIndex + 1));
+        if (nested.isNull()) {
+            return nested;
+        }
+        if (nested.isEmpty()) {
+            return prefix;
+        }
+        return prefix + Tseparator + nested;
     }
 
     /// Does the path-specified node exist in the tree? It does not have to be contained.
@@ -113,14 +110,13 @@ class SeparatorPrefixTree {
                 return false;
             }
             return true;
-        } else {
-            auto prefix = path.left(sepIndex);
-            auto found = children.find(prefix);
-            if (found == children.end()) {
-                return false;
-            }
-            return (*found).exists(path.mid(sepIndex + 1));
         }
+        auto prefix = path.left(sepIndex);
+        auto found = children.find(prefix);
+        if (found == children.end()) {
+            return false;
+        }
+        return (*found).exists(path.mid(sepIndex + 1));
     }
 
     /// find a node in the tree by name
@@ -133,14 +129,13 @@ class SeparatorPrefixTree {
                 return nullptr;
             }
             return &(*found);
-        } else {
-            auto prefix = path.left(sepIndex);
-            auto found = children.find(prefix);
-            if (found == children.end()) {
-                return nullptr;
-            }
-            return (*found).find(path.mid(sepIndex + 1));
         }
+        auto prefix = path.left(sepIndex);
+        auto found = children.find(prefix);
+        if (found == children.end()) {
+            return nullptr;
+        }
+        return (*found).find(path.mid(sepIndex + 1));
     }
 
     /// is this a leaf node?

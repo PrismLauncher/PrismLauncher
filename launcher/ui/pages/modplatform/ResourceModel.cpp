@@ -69,9 +69,8 @@ auto ResourceModel::data(const QModelIndex& index, int role) const -> QVariant
                 }
 
                 return QIcon::fromTheme("screenshot-placeholder");
-            } else {
-                return {};
             }
+            return {};
         }
         case Qt::SizeHintRole:
             return QSize(0, 58);

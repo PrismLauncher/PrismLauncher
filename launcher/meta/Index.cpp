@@ -69,9 +69,8 @@ QVariant Index::headerData(int section, Qt::Orientation orientation, int role) c
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section == 0) {
         return tr("Name");
-    } else {
-        return {};
     }
+    return {};
 }
 
 bool Index::hasUid(const QString& uid) const

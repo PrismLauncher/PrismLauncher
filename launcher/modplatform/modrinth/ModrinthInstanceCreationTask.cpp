@@ -406,7 +406,8 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
                     QString support = env["client"].toString("unsupported");
                     if (support == "unsupported") {
                         continue;
-                    } else if (support == "optional") {
+                    }
+                    if (support == "optional") {
                         file.required = false;
                     }
                 }

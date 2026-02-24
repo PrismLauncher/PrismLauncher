@@ -66,9 +66,8 @@ void CheckJava::executeTask()
         }
         emitFailed(QString("Java path is not valid."));
         return;
-    } else {
-        emit logLine("Java path is:\n" + m_javaPath + "\n\n", MessageLevel::Launcher);
     }
+    emit logLine("Java path is:\n" + m_javaPath + "\n\n", MessageLevel::Launcher);
 
     if (JavaUtils::getJavaCheckPath().isEmpty()) {
         const char* reason = QT_TR_NOOP("Java checker library could not be found. Please check your installation.");

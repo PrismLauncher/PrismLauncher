@@ -112,7 +112,8 @@ auto PasteUpload::Sink::finalize(QNetworkReply& reply) -> Task::State
     if (reply.error() != QNetworkReply::NetworkError::NoError) {
         m_fail_reason = QObject::tr("Network error: %1").arg(reply.errorString());
         return Task::State::Failed;
-    } else if (statusCode != 200 && statusCode != 201) {
+    }
+    if (statusCode != 200 && statusCode != 201) {
         QString reasonPhrase = reply.attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
         m_fail_reason =
             QObject::tr("Error: %1 returned unexpected status code %2 %3").arg(m_d->url().toString()).arg(statusCode).arg(reasonPhrase);

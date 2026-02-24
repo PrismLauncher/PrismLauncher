@@ -283,7 +283,7 @@ QString ResourceAPI::getGameVersionsString(const std::vector<Version>& mcVersion
     return s;
 }
 
-QString ResourceAPI::mapMCVersionToModrinth(const Version& v) 
+QString ResourceAPI::mapMCVersionToModrinth(const Version& v)
 {
     static const QString preString = " Pre-Release ";
     auto verStr = v.toString();
