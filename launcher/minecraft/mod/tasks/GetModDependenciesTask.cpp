@@ -64,9 +64,9 @@ GetModDependenciesTask::GetModDependenciesTask(BaseInstance* instance,
 
 void GetModDependenciesTask::prepare()
 {
-    for (auto sel : m_selected) {
+    for (const auto& sel : m_selected) {
         if (checkDependencies(sel, m_version, m_loaderType))
-            for (auto dep : getDependenciesForVersion(sel->version, sel->pack->provider)) {
+            for (const auto& dep : getDependenciesForVersion(sel->version, sel->pack->provider)) {
                 addTask(prepareDependencyTask(dep, sel->pack->provider, 20));
             }
     }
@@ -225,7 +225,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             removePack(pDep->version.addonId);
             return;
         }
-        for (auto dep_ : getDependenciesForVersion(pDep->version, provider)) {
+        for (const auto& dep_ : getDependenciesForVersion(pDep->version, provider)) {
             addTask(prepareDependencyTask(dep_, provider, level - 1));
         }
     };

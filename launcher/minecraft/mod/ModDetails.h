@@ -54,7 +54,7 @@ struct ModLicense {
         // handle SPDX identifiers? https://spdx.org/licenses/
         auto parts = license.split(' ');
         QStringList notNameParts = {};
-        for (auto part : parts) {
+        for (const auto& part : parts) {
             auto _url = QUrl(part);
             if (part.startsWith("(") && part.endsWith(")"))
                 _url = QUrl(part.mid(1, part.size() - 2));
@@ -66,7 +66,7 @@ struct ModLicense {
             }
         }
 
-        for (auto part : notNameParts) {
+        for (const auto& part : notNameParts) {
             parts.removeOne(part);
         }
 

@@ -406,7 +406,7 @@ bool create_link::operator()(const QString& offset, bool dryRun)
  */
 void create_link::make_link_list(const QString& offset)
 {
-    for (auto pair : m_path_pairs) {
+    for (const auto& pair : m_path_pairs) {
         const QString& srcPath = pair.src;
         const QString& dstPath = pair.dst;
 
@@ -463,7 +463,7 @@ void create_link::make_link_list(const QString& offset)
 
 bool create_link::make_links()
 {
-    for (auto link : m_links_to_make) {
+    for (const auto& link : m_links_to_make) {
         QString src_path = link.src;
         QString dst_path = link.dst;
         auto src_path_std = StringUtils::toStdString(link.src);
@@ -520,7 +520,7 @@ void create_link::runPrivileged(const QString& offset)
         QDataStream out(&block, QIODevice::WriteOnly);
 
         qint32 blocksize = quint32(sizeof(quint32));
-        for (auto link : m_links_to_make) {
+        for (const auto& link : m_links_to_make) {
             blocksize += quint32(link.src.size());
             blocksize += quint32(link.dst.size());
         }
@@ -528,7 +528,7 @@ void create_link::runPrivileged(const QString& offset)
         out << blocksize;
 
         out << quint32(m_links_to_make.length());
-        for (auto link : m_links_to_make) {
+        for (const auto& link : m_links_to_make) {
             out << link.src;
             out << link.dst;
         }
@@ -1168,7 +1168,7 @@ FilesystemType getFilesystemTypeFuzzy(const QString& name)
 {
     for (auto iter = s_filesystem_type_names.constBegin(); iter != s_filesystem_type_names.constEnd(); ++iter) {
         auto fs_names = iter.value();
-        for (auto fs_name : fs_names) {
+        for (const auto& fs_name : fs_names) {
             if (name.toUpper().contains(fs_name.toUpper()))
                 return iter.key();
         }

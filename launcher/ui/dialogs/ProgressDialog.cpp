@@ -90,7 +90,7 @@ void ProgressDialog::on_skipButton_clicked(bool checked)
 
 ProgressDialog::~ProgressDialog()
 {
-    for (auto conn : this->m_taskConnections) {
+    for (const auto& conn : this->m_taskConnections) {
         disconnect(conn);
     }
     delete ui;

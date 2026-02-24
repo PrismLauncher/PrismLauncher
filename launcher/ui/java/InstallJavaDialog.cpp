@@ -173,7 +173,7 @@ namespace Java {
 QStringList getRecommendedJavaVersionsFromVersionList(Meta::VersionList::Ptr list)
 {
     QStringList recommendedJavas;
-    for (auto ver : list->versions()) {
+    for (const auto& ver : list->versions()) {
         auto major = ver->version();
         if (major.startsWith("java")) {
             major = "Java " + major.mid(4);

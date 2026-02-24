@@ -422,7 +422,7 @@ void OtherLogsPage::on_btnClean_clicked()
         return;
     }
     QStringList failed;
-    for (auto item : toDelete) {
+    for (const auto& item : toDelete) {
         QString absolutePath = FS::PathCombine(m_basePath, item);
         QFile file(absolutePath);
         qDebug() << "Deleting log" << absolutePath;
@@ -500,7 +500,7 @@ QStringList OtherLogsPage::getPaths()
 
     QStringList result;
 
-    for (QString searchPath : m_logSearchPaths) {
+    for (const QString& searchPath : m_logSearchPaths) {
         QDir searchDir(searchPath);
 
         QStringList filters{ "*.log", "*.log.gz" };

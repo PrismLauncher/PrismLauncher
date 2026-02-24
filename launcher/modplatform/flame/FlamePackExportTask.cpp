@@ -283,13 +283,13 @@ void FlamePackExportTask::getProjectsInfo()
 
                     ModPlatform::IndexedPack pack;
                     FlameMod::loadIndexedPack(pack, entryObj);
-                    for (auto key : resolvedFiles.keys()) {
+                    for (const auto& key : resolvedFiles.keys()) {
                         auto val = resolvedFiles.value(key);
                         if (val.addonId == pack.addonId) {
                             val.name = pack.name;
                             val.slug = pack.slug;
                             QStringList authors;
-                            for (auto author : pack.authors)
+                            for (const auto& author : pack.authors)
                                 authors << author.name;
 
                             val.authors = authors.join(", ");
@@ -405,7 +405,7 @@ QByteArray FlamePackExportTask::generateIndex()
     obj["minecraft"] = version;
 
     QJsonArray files;
-    for (auto mod : resolvedFiles) {
+    for (const auto& mod : resolvedFiles) {
         QJsonObject file;
         file["projectID"] = mod.addonId;
         file["fileID"] = mod.version;
@@ -420,7 +420,7 @@ QByteArray FlamePackExportTask::generateIndex()
 QByteArray FlamePackExportTask::generateHTML()
 {
     QString content = "";
-    for (auto mod : resolvedFiles) {
+    for (const auto& mod : resolvedFiles) {
         if (mod.isMod) {
             content += QString(TEMPLATE)
                            .replace("{name}", mod.name.toHtmlEscaped())

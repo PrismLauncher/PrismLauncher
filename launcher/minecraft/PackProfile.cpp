@@ -152,7 +152,7 @@ static bool savePackProfile(const QString& filename, const ComponentContainer& c
     QJsonObject obj;
     obj.insert("formatVersion", currentComponentsFileVersion);
     QJsonArray orderArray;
-    for (auto component : container) {
+    for (const auto& component : container) {
         orderArray.append(componentToJsonV1(component));
     }
     obj.insert("components", orderArray);
@@ -304,12 +304,12 @@ PackProfile::Result PackProfile::load()
     // FIXME: actually use fine-grained updates, not this...
     beginResetModel();
     // disconnect all the old components
-    for (auto component : d->components) {
+    for (const auto& component : d->components) {
         disconnect(component.get(), &Component::dataChanged, this, &PackProfile::componentDataChanged);
     }
     d->components.clear();
     d->componentIndex.clear();
-    for (auto component : newComponents) {
+    for (const auto& component : newComponents) {
         if (d->componentIndex.contains(component->m_uid)) {
             qWarning() << d->m_instance->name() << "|" << "Ignoring duplicate component entry" << component->m_uid;
             continue;
@@ -410,7 +410,7 @@ void PackProfile::componentDataChanged()
     }
     // figure out which one is it... in a seriously dumb way.
     int index = 0;
-    for (auto component : d->components) {
+    for (const auto& component : d->components) {
         if (component.get() == objPtr) {
             emit dataChanged(createIndex(index, 0), createIndex(index, columnCount(QModelIndex()) - 1));
             scheduleSave();
@@ -447,7 +447,7 @@ bool PackProfile::remove(const int index)
 bool PackProfile::remove(const QString& id)
 {
     int i = 0;
-    for (auto patch : d->components) {
+    for (const auto& patch : d->components) {
         if (patch->getID() == id) {
             return remove(i);
         }
@@ -787,7 +787,7 @@ bool PackProfile::installJarMods_internal(QStringList filepaths)
         return false;
     }
 
-    for (auto filepath : filepaths) {
+    for (const auto& filepath : filepaths) {
         QFileInfo sourceInfo(filepath);
         QString id = QUuid::createUuid().toString(QUuid::WithoutBraces);
         QString target_filename = id + ".jar";
@@ -948,7 +948,7 @@ std::shared_ptr<LaunchProfile> PackProfile::getProfile() const
     if (!d->m_profile) {
         try {
             auto profile = std::make_shared<LaunchProfile>();
-            for (auto file : d->components) {
+            for (const auto& file : d->components) {
                 qCDebug(instanceProfileC) << d->m_instance->name() << "|" << "Applying" << file->getID()
                                           << (file->getProblemSeverity() == ProblemSeverity::Error ? "ERROR" : "GOOD");
                 file->applyTo(profile.get());
@@ -1048,7 +1048,7 @@ std::optional<ModPlatform::ModLoaderTypes> PackProfile::getSupportedModLoaders()
 QList<ModPlatform::ModLoaderType> PackProfile::getModLoadersList()
 {
     QList<ModPlatform::ModLoaderType> result;
-    for (auto c : d->components) {
+    for (const auto& c : d->components) {
         if (c->isEnabled() && Component::KNOWN_MODLOADERS.contains(c->getID())) {
             result.append(Component::KNOWN_MODLOADERS[c->getID()].type);
         }

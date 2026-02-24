@@ -310,7 +310,7 @@ void ThemeManager::initializeCatPacks()
                                                     { "rory", QObject::tr("Rory ID 11 (drawn by Ashtaka)") },
                                                     { "rory-flat", QObject::tr("Rory ID 11 (flat edition, drawn by Ashtaka)") },
                                                     { "teawie", QObject::tr("Teawie (drawn by SympathyTea)") } };
-    for (auto [id, name] : defaultCats) {
+    for (const auto& [id, name] : defaultCats) {
         addCatPack(std::unique_ptr<CatPack>(new BasicCatPack(id, name)));
     }
     if (!m_catPacksFolder.mkpath("."))
@@ -318,7 +318,7 @@ void ThemeManager::initializeCatPacks()
     themeDebugLog() << "CatPacks Folder Path:" << m_catPacksFolder.absolutePath();
 
     QStringList supportedImageFormats;
-    for (auto format : QImageReader::supportedImageFormats()) {
+    for (const auto& format : QImageReader::supportedImageFormats()) {
         supportedImageFormats.append("*." + format);
     }
     auto loadFiles = [this, supportedImageFormats](QDir dir) {

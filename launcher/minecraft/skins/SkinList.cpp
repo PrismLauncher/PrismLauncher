@@ -121,14 +121,14 @@ bool SkinList::update()
 
     auto folderContents = m_dir.entryInfoList();
     // if there are any untracked files...
-    for (QFileInfo entry : folderContents) {
+    for (const QFileInfo& entry : folderContents) {
         if (!entry.isFile() && entry.suffix() != "png")
             continue;
 
         SkinModel w(entry.absoluteFilePath());
         if (w.isValid()) {
             auto add = true;
-            for (auto s : newSkins) {
+            for (const auto& s : newSkins) {
                 if (s.name() == w.name()) {
                     add = false;
                     break;
@@ -208,7 +208,7 @@ bool SkinList::dropMimeData(const QMimeData* data,
     if (data->hasUrls()) {
         auto urls = data->urls();
         QStringList skinFiles;
-        for (auto url : urls) {
+        for (const auto& url : urls) {
             // only local files may be dropped...
             if (!url.isLocalFile())
                 continue;
@@ -265,7 +265,7 @@ int SkinList::rowCount(const QModelIndex& parent) const
 
 void SkinList::installSkins(const QStringList& iconFiles)
 {
-    for (QString file : iconFiles)
+    for (const QString& file : iconFiles)
         installSkin(file);
 }
 
@@ -358,7 +358,7 @@ void SkinList::save()
 {
     QJsonObject doc;
     QJsonArray arr;
-    for (auto s : m_skinList) {
+    for (const auto& s : m_skinList) {
         arr << s.toJSON();
     }
     doc["skins"] = arr;

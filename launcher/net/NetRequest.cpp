@@ -203,7 +203,7 @@ void NetRequest::downloadError(QNetworkReply::NetworkError error)
 void NetRequest::sslErrors(const QList<QSslError>& errors)
 {
     int i = 1;
-    for (auto error : errors) {
+    for (const auto& error : errors) {
         qCCritical(logCat).nospace() << getUid().toString() << " Request " << m_url.toString() << " SSL Error #" << i << ": "
                                      << error.errorString();
         auto cert = error.certificate();

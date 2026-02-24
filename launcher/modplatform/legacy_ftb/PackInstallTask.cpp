@@ -176,7 +176,7 @@ void PackInstallTask::install()
         qDebug() << "Found jarmods, installing...";
 
         QStringList jarmods;
-        for (auto info : jarmodDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files)) {
+        for (const auto& info : jarmodDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files)) {
             qDebug() << "Jarmod:" << info.fileName();
             jarmods.push_back(info.absoluteFilePath());
         }

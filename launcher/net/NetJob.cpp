@@ -88,11 +88,11 @@ auto NetJob::canAbort() const -> bool
     bool canFullyAbort = true;
 
     // can abort the downloads on the queue?
-    for (auto part : m_queue)
+    for (const auto& part : m_queue)
         canFullyAbort &= part->canAbort();
 
     // can abort the active downloads?
-    for (auto part : m_doing)
+    for (const auto& part : m_doing)
         canFullyAbort &= part->canAbort();
 
     return canFullyAbort;
@@ -103,13 +103,13 @@ auto NetJob::abort() -> bool
     bool fullyAborted = true;
 
     // fail all downloads on the queue
-    for (auto task : m_queue)
+    for (const auto& task : m_queue)
         m_failed.insert(task.get(), task);
     m_queue.clear();
 
     // abort active downloads
     auto toKill = m_doing.values();
-    for (auto part : toKill) {
+    for (const auto& part : toKill) {
         fullyAborted &= part->abort();
     }
 
@@ -124,7 +124,7 @@ auto NetJob::abort() -> bool
 auto NetJob::getFailedActions() -> QList<Net::NetRequest*>
 {
     QList<Net::NetRequest*> failed;
-    for (auto index : m_failed) {
+    for (const auto& index : m_failed) {
         failed.push_back(dynamic_cast<Net::NetRequest*>(index.get()));
     }
     return failed;
@@ -133,7 +133,7 @@ auto NetJob::getFailedActions() -> QList<Net::NetRequest*>
 auto NetJob::getFailedFiles() -> QList<QString>
 {
     QList<QString> failed;
-    for (auto index : m_failed) {
+    for (const auto& index : m_failed) {
         failed.append(static_cast<Net::NetRequest*>(index.get())->url().toString());
     }
     return failed;

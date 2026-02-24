@@ -45,7 +45,7 @@ QString InstanceCopyPrefs::getSelectedFiltersAsRegex(const QStringList& addition
     if (!copyScreenshots)
         filters << "screenshots";
 
-    for (auto filter : additionalFilters) {
+    for (const auto& filter : additionalFilters) {
         filters << filter;
     }
 

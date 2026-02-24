@@ -45,7 +45,7 @@ ConcurrentTask::ConcurrentTask(QString task_name, int max_concurrent) : Task(), 
 
 ConcurrentTask::~ConcurrentTask()
 {
-    for (auto task : m_doing) {
+    for (const auto& task : m_doing) {
         if (task)
             task->disconnect(this);
     }
@@ -129,7 +129,7 @@ void ConcurrentTask::executeNextSubTask()
                 emitFailed(reason);
             } else {
                 QStringList failReason;
-                for (auto t : m_failed) {
+                for (const auto& t : m_failed) {
                     auto reason = t->failReason();
                     if (!reason.isEmpty()) {
                         failReason << reason;

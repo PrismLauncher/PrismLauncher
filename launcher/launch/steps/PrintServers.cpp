@@ -26,7 +26,7 @@ PrintServers::PrintServers(LaunchTask* parent, const QStringList& servers) : Lau
 
 void PrintServers::executeTask()
 {
-    for (QString server : m_servers) {
+    for (const QString& server : m_servers) {
         QHostInfo::lookupHost(server, this, &PrintServers::resolveServer);
     }
 }
@@ -37,7 +37,7 @@ void PrintServers::resolveServer(const QHostInfo& host_info)
     QString addresses = server + " resolves to:\n    [";
 
     if (!host_info.addresses().isEmpty()) {
-        for (QHostAddress address : host_info.addresses()) {
+        for (const QHostAddress& address : host_info.addresses()) {
             addresses += address.toString();
             if (!host_info.addresses().endsWith(address)) {
                 addresses += ", ";
@@ -52,7 +52,7 @@ void PrintServers::resolveServer(const QHostInfo& host_info)
 
     // print server info in order once all servers are resolved
     if (m_server_to_address.size() >= m_servers.size()) {
-        for (QString serv : m_servers) {
+        for (const QString& serv : m_servers) {
             emit logLine(m_server_to_address.value(serv), MessageLevel::Launcher);
         }
         emitSucceeded();

@@ -111,7 +111,7 @@ void InfoFrame::updateWithMod(Mod const& m)
     auto licenses = m.licenses();
     QString licenseText = "";
     if (!licenses.empty()) {
-        for (auto l : licenses) {
+        for (const auto& l : licenses) {
             if (!licenseText.isEmpty()) {
                 licenseText += "\n";  // add newline between licenses
             }

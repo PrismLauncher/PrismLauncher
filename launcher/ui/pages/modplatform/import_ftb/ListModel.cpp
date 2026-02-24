@@ -68,7 +68,7 @@ void ListModel::update()
     m_modpacks.clear();
 
     auto wasPathAdded = [this](QString path) {
-        for (auto pack : m_modpacks) {
+        for (const auto& pack : m_modpacks) {
             if (pack.path == path)
                 return true;
         }

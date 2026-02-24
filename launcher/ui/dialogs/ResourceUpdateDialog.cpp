@@ -472,7 +472,7 @@ void ResourceUpdateDialog::appendResource(CheckUpdateTask::Update const& info, Q
             requiredByItem->setData(0, Qt::UserRole, requiredBy.back());
         } else {
             requiredByItem->setText(0, tr("Required by:"));
-            for (auto req : requiredBy) {
+            for (const auto& req : requiredBy) {
                 auto reqItem = new QTreeWidgetItem(requiredByItem);
                 reqItem->setText(0, req);
             }

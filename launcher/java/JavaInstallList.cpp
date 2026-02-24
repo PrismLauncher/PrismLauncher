@@ -167,7 +167,7 @@ void JavaListLoadTask::executeTask()
 
     qDebug() << "Probing the following Java paths: ";
     int id = 0;
-    for (QString candidate : candidate_paths) {
+    for (const QString& candidate : candidate_paths) {
         auto checker = new JavaChecker(candidate, "", 0, 0, 0, id);
         connect(checker, &JavaChecker::checkFinished, [this](const JavaChecker::Result& result) { m_results << result; });
         job->addTask(Task::Ptr(checker));
@@ -183,7 +183,7 @@ void JavaListLoadTask::javaCheckerFinished()
     std::sort(m_results.begin(), m_results.end(), [](const JavaChecker::Result& a, const JavaChecker::Result& b) { return a.id < b.id; });
 
     qDebug() << "Found the following valid Java installations:";
-    for (auto result : m_results) {
+    for (const auto& result : m_results) {
         if (result.validity == JavaChecker::Result::Validity::Valid) {
             JavaInstallPtr javaVersion(new JavaInstall());
 
@@ -198,7 +198,7 @@ void JavaListLoadTask::javaCheckerFinished()
     }
 
     QList<BaseVersion::Ptr> javas_bvp;
-    for (auto java : candidates) {
+    for (const auto& java : candidates) {
         // qDebug() << java->id << java->arch << " at " << java->path;
         BaseVersion::Ptr bp_java = std::dynamic_pointer_cast<BaseVersion>(java);
 

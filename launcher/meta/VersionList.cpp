@@ -305,7 +305,7 @@ Version::Ptr VersionList::getRecommendedForParent(const QString& uid, const QStr
 Version::Ptr VersionList::getLatestForParent(const QString& uid, const QString& version)
 {
     Version::Ptr latestCompat = nullptr;
-    for (auto ver : m_versions) {
+    for (const auto& ver : m_versions) {
         auto& reqs = ver->requiredSet();
         auto parentReq = std::find_if(reqs.begin(), reqs.end(), [uid, version](const Require& req) -> bool {
             return req.uid == uid && req.equalsVersion == version;

@@ -127,7 +127,7 @@ void writeStringList(QJsonObject& to, const QString& key, const QStringList& val
 {
     if (!values.isEmpty()) {
         QJsonArray array;
-        for (auto value : values) {
+        for (const auto& value : values) {
             array.append(value);
         }
         to.insert(key, array);

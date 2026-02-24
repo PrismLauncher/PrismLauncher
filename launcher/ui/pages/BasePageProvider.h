@@ -35,7 +35,7 @@ class GenericPageProvider : public BasePageProvider {
     QList<BasePage*> getPages() override
     {
         QList<BasePage*> pages;
-        for (PageCreator creator : m_creators) {
+        for (const PageCreator& creator : m_creators) {
             pages.append(creator());
         }
         return pages;

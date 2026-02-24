@@ -215,7 +215,7 @@ void ExternalResourcesPage::addItem()
         m_fileSelectionFilter.arg(displayName()), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
 
     if (!list.isEmpty()) {
-        for (auto filename : list) {
+        for (const auto& filename : list) {
             m_model->installResource(filename);
         }
     }

@@ -90,7 +90,7 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
 
     QStringList hashes;
     if (forceModLoaderCheck && loader.has_value()) {
-        for (auto hash : m_mappings.keys()) {
+        for (const auto& hash : m_mappings.keys()) {
             if (m_mappings.value(hash)->metadata()->loaders & loader.value()) {
                 hashes.append(hash);
             }

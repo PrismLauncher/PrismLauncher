@@ -200,7 +200,7 @@ void AccountList::setDefaultAccount(MinecraftAccountPtr newAccount)
         int idx = 0;
         auto previousDefaultAccount = m_defaultAccount;
         m_defaultAccount = nullptr;
-        for (MinecraftAccountPtr account : m_accounts) {
+        for (const MinecraftAccountPtr& account : m_accounts) {
             if (account == previousDefaultAccount) {
                 emit dataChanged(index(idx), index(idx, columnCount(QModelIndex()) - 1));
             }
@@ -213,7 +213,7 @@ void AccountList::setDefaultAccount(MinecraftAccountPtr newAccount)
         auto newDefaultAccount = m_defaultAccount;
         int newDefaultAccountIdx = -1;
         int idx = 0;
-        for (MinecraftAccountPtr account : m_accounts) {
+        for (const MinecraftAccountPtr& account : m_accounts) {
             if (account == newAccount) {
                 newDefaultAccount = account;
                 newDefaultAccountIdx = idx;
@@ -546,7 +546,7 @@ bool AccountList::saveList()
     // Build a list of accounts.
     qDebug() << "Building account array.";
     QJsonArray accounts;
-    for (MinecraftAccountPtr account : m_accounts) {
+    for (const MinecraftAccountPtr& account : m_accounts) {
         QJsonObject accountObj = account->saveToJson();
         if (m_defaultAccount == account) {
             accountObj["active"] = true;
@@ -591,7 +591,7 @@ void AccountList::setListFilePath(QString path, bool autosave)
 
 bool AccountList::anyAccountIsValid()
 {
-    for (auto account : m_accounts) {
+    for (const auto& account : m_accounts) {
         if (account->ownsMinecraft()) {
             return true;
         }

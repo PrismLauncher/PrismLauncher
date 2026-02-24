@@ -160,7 +160,7 @@ void removeLwjglFromPatch(VersionFilePtr patch)
 {
     auto filter = [](QList<LibraryPtr>& libs) {
         QList<LibraryPtr> filteredLibs;
-        for (auto lib : libs) {
+        for (const auto& lib : libs) {
             if (!g_VersionFilterData.lwjglWhitelist.contains(lib->artifactPrefix())) {
                 filteredLibs.append(lib);
             }

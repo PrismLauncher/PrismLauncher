@@ -424,7 +424,7 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
             if (!optionalFiles.empty()) {
                 if (show_optional_dialog) {
                     QStringList oFiles;
-                    for (auto file : optionalFiles)
+                    for (const auto& file : optionalFiles)
                         oFiles.push_back(file.path);
                     OptionalModDialog optionalModDialog(m_parent, oFiles);
                     if (optionalModDialog.exec() == QDialog::Rejected) {

@@ -177,7 +177,7 @@ auto HttpMetaCache::evictAll() -> bool
     for (QString& base : m_entries.keys()) {
         EntryMap& map = m_entries[base];
         qCDebug(taskHttpMetaCacheLogC) << "Evicting base" << base;
-        for (MetaEntryPtr entry : map.entry_list) {
+        for (const MetaEntryPtr& entry : map.entry_list) {
             if (!evictEntry(entry))
                 qCWarning(taskHttpMetaCacheLogC) << "Unexpected missing cache entry" << entry->m_basePath;
         }
@@ -302,8 +302,8 @@ void HttpMetaCache::SaveNow()
     Json::writeString(toplevel, "version", "1");
 
     QJsonArray entriesArr;
-    for (auto group : m_entries) {
-        for (auto entry : group.entry_list) {
+    for (const auto& group : m_entries) {
+        for (const auto& entry : group.entry_list) {
             // do not save stale entries. they are dead.
             if (entry->m_stale) {
                 continue;

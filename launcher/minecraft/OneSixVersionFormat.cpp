@@ -305,7 +305,7 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr& patch
     writeStringList(root, "+jvmArgs", patch->addnJvmArguments);
     if (!patch->agents.isEmpty()) {
         QJsonArray array;
-        for (auto value : patch->agents) {
+        for (const auto& value : patch->agents) {
             QJsonObject agentOut = OneSixVersionFormat::libraryToJson(value->library().get());
             if (!value->argument().isEmpty())
                 agentOut.insert("argument", value->argument());
@@ -316,28 +316,28 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr& patch
     }
     if (!patch->libraries.isEmpty()) {
         QJsonArray array;
-        for (auto value : patch->libraries) {
+        for (const auto& value : patch->libraries) {
             array.append(OneSixVersionFormat::libraryToJson(value.get()));
         }
         root.insert("libraries", array);
     }
     if (!patch->mavenFiles.isEmpty()) {
         QJsonArray array;
-        for (auto value : patch->mavenFiles) {
+        for (const auto& value : patch->mavenFiles) {
             array.append(OneSixVersionFormat::libraryToJson(value.get()));
         }
         root.insert("mavenFiles", array);
     }
     if (!patch->jarMods.isEmpty()) {
         QJsonArray array;
-        for (auto value : patch->jarMods) {
+        for (const auto& value : patch->jarMods) {
             array.append(OneSixVersionFormat::jarModtoJson(value.get()));
         }
         root.insert("jarMods", array);
     }
     if (!patch->mods.isEmpty()) {
         QJsonArray array;
-        for (auto value : patch->jarMods) {
+        for (const auto& value : patch->jarMods) {
             array.append(OneSixVersionFormat::modtoJson(value.get()));
         }
         root.insert("mods", array);

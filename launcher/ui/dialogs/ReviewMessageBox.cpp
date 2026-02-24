@@ -79,7 +79,7 @@ void ReviewMessageBox::appendResource(ResourceInformation&& info)
             requiredByItem->setData(0, Qt::UserRole, info.required_by.back());
         } else {
             requiredByItem->setText(0, tr("Required by:"));
-            for (auto req : info.required_by) {
+            for (const auto& req : info.required_by) {
                 auto reqItem = new QTreeWidgetItem(requiredByItem);
                 reqItem->setText(0, req);
             }

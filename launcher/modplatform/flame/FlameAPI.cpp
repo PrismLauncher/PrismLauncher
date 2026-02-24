@@ -226,7 +226,7 @@ std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModP
     static const auto noLoader = ModPlatform::ModLoaderType(0);
     if (!checkLoaders) {
         std::optional<ModPlatform::IndexedVersion> ver;
-        for (auto file_tmp : versions) {
+        for (const auto& file_tmp : versions) {
             if (!ver.has_value() || file_tmp.date > ver->date) {
                 ver = file_tmp;
             }
@@ -244,7 +244,7 @@ std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModP
             bestMatch[loader] = version;
         }
     };
-    for (auto file_tmp : versions) {
+    for (const auto& file_tmp : versions) {
         auto loaders = ModPlatform::modLoaderTypesToList(file_tmp.loaders);
         if (loaders.isEmpty()) {
             checkVersion(file_tmp, noLoader);

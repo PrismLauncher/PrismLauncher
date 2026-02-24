@@ -63,7 +63,7 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
             return placeholder;
         }
 
-        for (auto art : pack.art) {
+        for (const auto& art : pack.art) {
             if (art.type == "square") {
                 ((ListModel*)this)->requestLogo(pack.safeName, art.url);
             }

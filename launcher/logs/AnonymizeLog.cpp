@@ -63,7 +63,7 @@ static const QVector<RegReplace> anonymizeRules = {
 
 void anonymizeLog(QString& log)
 {
-    for (auto rule : anonymizeRules) {
+    for (const auto& rule : anonymizeRules) {
         log.replace(rule.reg, rule.with);
     }
 }

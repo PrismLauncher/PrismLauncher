@@ -144,12 +144,12 @@ Wrapperommand=)";
         // load
         INIFile f1;
         f1.loadFile(fileName);
-        for (auto key : settings.allKeys())
+        for (const auto& key : settings.allKeys())
             QCOMPARE(f1.get(key, "NOT SET").toString(), settings.value(key).toString());
         f1.saveFile(fileName);
         INIFile f2;
         f2.loadFile(fileName);
-        for (auto key : settings.allKeys())
+        for (const auto& key : settings.allKeys())
             QCOMPARE(f2.get(key, "NOT SET").toString(), settings.value(key).toString());
         QCOMPARE(f2.get("ConfigVersion", "NOT SET").toString(), "1.3");
 #if defined(Q_OS_WIN)

@@ -9,7 +9,7 @@ NewsDialog::NewsDialog(QList<NewsEntryPtr> entries, QWidget* parent) : QDialog(p
 {
     ui->setupUi(this);
 
-    for (auto entry : entries) {
+    for (const auto& entry : entries) {
         ui->articleListWidget->addItem(entry->title);
         m_entries.insert(entry->title, entry);
     }

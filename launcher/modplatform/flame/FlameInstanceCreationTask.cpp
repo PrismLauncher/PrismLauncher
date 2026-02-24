@@ -283,7 +283,7 @@ QString FlameCreationTask::getVersionForLoader(QString uid, QString loaderType, 
             loadVersionLoop.exec();
         }
 
-        for (auto version : vlist->versions()) {
+        for (const auto& version : vlist->versions()) {
             // first recommended build we find, we use.
             if (!version->isRecommended())
                 continue;
@@ -651,7 +651,7 @@ void FlameCreationTask::validateOtherResources(QEventLoop& loop)
 {
     qDebug() << "Validating whether other resources are in the right place";
     QStringList zipMods;
-    for (auto [fileName, targetFolder] : m_otherResources) {
+    for (const auto& [fileName, targetFolder] : m_otherResources) {
         qDebug() << "Checking" << fileName << "...";
         auto localPath = FS::PathCombine(m_stagingPath, "minecraft", targetFolder, fileName);
 
@@ -721,7 +721,7 @@ void FlameCreationTask::validateOtherResources(QEventLoop& loop)
     auto task = makeShared<ConcurrentTask>("CreateModMetadata", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
     auto results = m_modIdResolver->getResults().files;
     auto folder = FS::PathCombine(m_stagingPath, "minecraft", "mods", ".index");
-    for (auto file : results) {
+    for (const auto& file : results) {
         if (file.targetFolder != "mods" || (file.version.fileName.endsWith(".zip") && !zipMods.contains(file.version.fileName))) {
             continue;
         }

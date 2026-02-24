@@ -81,7 +81,7 @@ bool compressDirFiles(ArchiveWriter& zip, QString dir, QFileInfoList files)
     if (!directory.exists())
         return false;
 
-    for (auto e : files) {
+    for (const auto& e : files) {
         auto filePath = directory.relativeFilePath(e.absoluteFilePath());
         auto srcPath = e.absoluteFilePath();
         if (!zip.addFile(srcPath, filePath))
@@ -138,7 +138,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
             auto files = QFileInfoList();
             collectFileListRecursively(what_to_zip, nullptr, &files, nullptr);
 
-            for (auto e : files) {
+            for (const auto& e : files) {
                 if (addedFiles.contains(e.filePath()))
                     files.removeAll(e);
             }

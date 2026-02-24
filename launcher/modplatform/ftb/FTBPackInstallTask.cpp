@@ -244,14 +244,14 @@ void PackInstallTask::createInstance()
     auto components = instance.getPackProfile();
     components->buildingFromScratch();
 
-    for (auto target : m_version.targets) {
+    for (const auto& target : m_version.targets) {
         if (target.type == "game" && target.name == "minecraft") {
             components->setComponentVersion("net.minecraft", target.version, true);
             break;
         }
     }
 
-    for (auto target : m_version.targets) {
+    for (const auto& target : m_version.targets) {
         if (target.type != "modloader")
             continue;
 

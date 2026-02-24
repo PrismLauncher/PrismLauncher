@@ -75,13 +75,13 @@ void VersionFile::applyTo(LaunchProfile* profile, const RuntimeContext& runtimeC
     profile->applyCompatibleJavaMajors(compatibleJavaMajors);
     profile->applyCompatibleJavaName(compatibleJavaName);
 
-    for (auto library : libraries) {
+    for (const auto& library : libraries) {
         profile->applyLibrary(library, runtimeContext);
     }
-    for (auto mavenFile : mavenFiles) {
+    for (const auto& mavenFile : mavenFiles) {
         profile->applyMavenFile(mavenFile, runtimeContext);
     }
-    for (auto agent : agents) {
+    for (const auto& agent : agents) {
         profile->applyAgent(agent, runtimeContext);
     }
     profile->applyProblemSeverity(getProblemSeverity());

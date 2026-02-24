@@ -219,7 +219,7 @@ bool SettingsObject::contains(const QString& id)
 
 bool SettingsObject::reload()
 {
-    for (auto setting : m_settings.values()) {
+    for (const auto& setting : m_settings.values()) {
         setting->set(setting->get());
     }
     return true;

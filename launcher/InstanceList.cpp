@@ -750,7 +750,7 @@ void InstanceList::saveGroupList()
         QJsonObject groupObj;
         QJsonArray instanceArr;
         groupObj.insert("hidden", QJsonValue(m_collapsedGroups.contains(name)));
-        for (auto item : list) {
+        for (const auto& item : list) {
             instanceArr.append(QJsonValue(item));
         }
         groupObj.insert("instances", instanceArr);

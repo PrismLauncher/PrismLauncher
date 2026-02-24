@@ -801,7 +801,7 @@ void PackInstallTask::downloadMods()
     if (!blocked_mods.isEmpty()) {
         QList<BlockedMod> mods;
 
-        for (auto mod : blocked_mods) {
+        for (const auto& mod : blocked_mods) {
             BlockedMod blocked_mod;
             blocked_mod.name = mod.file;
             blocked_mod.websiteUrl = mod.url;
@@ -823,7 +823,7 @@ void PackInstallTask::downloadMods()
 
         if (message_dialog.exec()) {
             qDebug() << "Post dialog blocked mods list:" << mods;
-            for (auto blocked : mods) {
+            for (const auto& blocked : mods) {
                 if (!blocked.matched) {
                     qDebug() << blocked.name << "was not matched to a local file, skipping copy";
                     continue;

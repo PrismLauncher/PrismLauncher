@@ -124,7 +124,7 @@ void ResourceFolderLoadTask::executeTask()
         }
     }
 
-    for (auto mod : m_result->resources)
+    for (const auto& mod : m_result->resources)
         mod->moveToThread(m_thread_to_spawn_into);
 
     if (m_aborted)
@@ -136,7 +136,7 @@ void ResourceFolderLoadTask::executeTask()
 void ResourceFolderLoadTask::getFromMetadata()
 {
     m_index_dir.refresh();
-    for (auto entry : m_index_dir.entryList(QDir::Files)) {
+    for (const auto& entry : m_index_dir.entryList(QDir::Files)) {
         if (!entry.endsWith(".pw.toml")) {
             continue;
         }

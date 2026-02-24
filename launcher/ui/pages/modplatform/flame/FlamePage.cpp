@@ -184,7 +184,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
                 else
                     ++it;
 #endif
-            for (auto version : m_current->versions) {
+            for (const auto& version : m_current->versions) {
                 m_ui->versionSelectionBox->addItem(version.getVersionDisplayString(), QVariant(version.downloadUrl));
             }
 
@@ -209,7 +209,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
         m_job = netJob;
         netJob->start();
     } else {
-        for (auto version : m_current->versions) {
+        for (const auto& version : m_current->versions) {
             m_ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
         }
 

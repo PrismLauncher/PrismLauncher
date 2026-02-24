@@ -354,7 +354,7 @@ void LaunchProfile::getLibraryFiles(const RuntimeContext& runtimeContext,
     QStringList native32, native64;
     jars.clear();
     nativeJars.clear();
-    for (auto lib : getLibraries()) {
+    for (const auto& lib : getLibraries()) {
         lib->getApplicableFiles(runtimeContext, jars, nativeJars, native32, native64, overridePath);
     }
     // NOTE: order is important here, add main jar last to the lists
@@ -367,7 +367,7 @@ void LaunchProfile::getLibraryFiles(const RuntimeContext& runtimeContext,
             m_mainJar->getApplicableFiles(runtimeContext, jars, nativeJars, native32, native64, overridePath);
         }
     }
-    for (auto lib : getNativeLibraries()) {
+    for (const auto& lib : getNativeLibraries()) {
         lib->getApplicableFiles(runtimeContext, jars, nativeJars, native32, native64, overridePath);
     }
     if (runtimeContext.javaArchitecture == "32") {

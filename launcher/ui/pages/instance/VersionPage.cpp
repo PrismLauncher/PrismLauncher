@@ -436,7 +436,7 @@ void VersionPage::on_actionDownload_All_triggered()
         return;
     }
     auto task = makeShared<SequentialTask>();
-    for (auto t : updateTasks) {
+    for (const auto& t : updateTasks) {
         task->addTask(t);
     }
     ProgressDialog tDialog(this);

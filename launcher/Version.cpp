@@ -115,7 +115,7 @@ QDebug operator<<(QDebug debug, const Version& v)
     debug.nospace() << "Version{ string: " << v.toString() << ", sections: [ ";
 
     bool first = true;
-    for (auto s : v.m_sections) {
+    for (const auto& s : v.m_sections) {
         if (!first)
             debug.nospace() << ", ";
         debug.nospace() << s.m_fullString;

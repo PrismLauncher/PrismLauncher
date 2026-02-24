@@ -40,7 +40,7 @@ auto ExportToZipTask::exportZip() -> ZipResult
         return ZipResult(tr("Could not create file"));
     }
 
-    for (auto fileName : m_extraFiles.keys()) {
+    for (const auto& fileName : m_extraFiles.keys()) {
         if (m_buildZipFuture.isCanceled())
             return {};
         if (!m_output.addFile(fileName, m_extraFiles[fileName])) {

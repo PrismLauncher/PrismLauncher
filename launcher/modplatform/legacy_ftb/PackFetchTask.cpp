@@ -160,7 +160,7 @@ bool PackFetchTask::parseAndAddPacks(QByteArray& data, PackType packType, Modpac
         modpack.bugged = false;
 
         // remove empty if the xml is bugged
-        for (QString curr : modpack.oldVersions) {
+        for (const QString& curr : modpack.oldVersions) {
             if (curr.isNull() || curr.isEmpty()) {
                 modpack.oldVersions.removeAll(curr);
                 modpack.bugged = true;

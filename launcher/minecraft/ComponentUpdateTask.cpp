@@ -177,7 +177,7 @@ void ComponentUpdateTask::loadComponents()
     d->remoteLoadSuccessful = true;
 
     // load all the components OR their lists...
-    for (auto component : d->m_profile->d->components) {
+    for (const auto& component : d->m_profile->d->components) {
         Task::Ptr loadTask;
         LoadResult singleResult;
         RemoteLoadStatus::Type loadType;
@@ -290,7 +290,7 @@ static bool gatherRequirementsFromComponents(const ComponentContainer& input, Re
 {
     bool succeeded = true;
     size_t componentNum = 0;
-    for (auto component : input) {
+    for (const auto& component : input) {
         auto& componentRequires = component->m_cachedRequires;
         for (const auto& componentRequire : componentRequires) {
             auto found = std::find_if(output.cbegin(), output.cend(),
@@ -422,7 +422,7 @@ ComponentContainer ComponentUpdateTask::collectTreeLinked(const QString& uid)
     auto& components = d->m_profile->d->components;
     auto& componentIndex = d->m_profile->d->componentIndex;
     auto& instance = d->m_profile->d->m_instance;
-    for (auto comp : components) {
+    for (const auto& comp : components) {
         qCDebug(instanceProfileResolveC) << instance->name() << "|"
                                          << "scanning" << comp->getID() << ":" << comp->getVersion() << "for tree link";
         auto dep = std::find_if(comp->m_cachedRequires.cbegin(), comp->m_cachedRequires.cend(),
@@ -439,7 +439,7 @@ ComponentContainer ComponentUpdateTask::collectTreeLinked(const QString& uid)
         comp->updateCachedData();
         qCDebug(instanceProfileResolveC) << instance->name() << "|" << comp->getID() << ":" << comp->getVersion() << "has"
                                          << comp->m_cachedRequires.size() << "dependencies";
-        for (auto dep : comp->m_cachedRequires) {
+        for (const auto& dep : comp->m_cachedRequires) {
             qCDebug(instanceProfileC) << instance->name() << "|" << uid << "depends on" << dep.uid;
             auto found = componentIndex.find(dep.uid);
             if (found != componentIndex.end()) {
@@ -640,7 +640,7 @@ void ComponentUpdateTask::performUpdateActions()
                                   << "UpdateImportantChanged" << component->getID() << ":" << component->getVersion() << "was changed from"
                                   << ic.oldVersion << "updating linked components";
                               auto oldVersion = APPLICATION->metadataIndex()->getLoadedVersion(component->getID(), ic.oldVersion);
-                              for (auto oldReq : oldVersion->requiredSet()) {
+                              for (const auto& oldReq : oldVersion->requiredSet()) {
                                   auto currentlyRequired = component->m_cachedRequires.find(oldReq);
                                   if (currentlyRequired == component->m_cachedRequires.cend()) {
                                       auto oldReqComp = componentIndex.find(oldReq.uid);
@@ -651,7 +651,7 @@ void ComponentUpdateTask::performUpdateActions()
                                   }
                               }
                               auto linked = collectTreeLinked(component->getID());
-                              for (auto comp : linked) {
+                              for (const auto& comp : linked) {
                                   if (comp->isCustom()) {
                                       continue;
                                   }
@@ -681,7 +681,7 @@ void ComponentUpdateTask::performUpdateActions()
                           } };
             std::visit(visitor, action);
             component->clearUpdateAction();
-            for (auto uid : toRemove) {
+            for (const auto& uid : toRemove) {
                 d->m_profile->remove(uid);
             }
         }
@@ -692,8 +692,8 @@ void ComponentUpdateTask::finalizeComponents()
 {
     auto& components = d->m_profile->d->components;
     auto& componentIndex = d->m_profile->d->componentIndex;
-    for (auto component : components) {
-        for (auto req : component->m_cachedRequires) {
+    for (const auto& component : components) {
+        for (const auto& req : component->m_cachedRequires) {
             auto found = componentIndex.find(req.uid);
             if (found == componentIndex.cend()) {
                 component->addComponentProblem(
@@ -718,7 +718,7 @@ void ComponentUpdateTask::finalizeComponents()
                 }
             }
         }
-        for (auto conflict : component->knownConflictingComponents()) {
+        for (const auto& conflict : component->knownConflictingComponents()) {
             auto found = componentIndex.find(conflict);
             if (found != componentIndex.cend()) {
                 auto foundComp = *found;

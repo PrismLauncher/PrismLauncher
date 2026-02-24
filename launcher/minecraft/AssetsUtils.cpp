@@ -240,7 +240,7 @@ bool reconstructAssets(QString assetsId, QString resourcesFolder)
 
     if (!targetPath.isNull()) {
         auto presentFiles = collectPathsFromDir(targetPath);
-        for (QString map : index.objects.keys()) {
+        for (const QString& map : index.objects.keys()) {
             AssetObject asset_object = index.objects.value(map);
             QString target_path = FS::PathCombine(targetPath, map);
             QFile target(target_path);

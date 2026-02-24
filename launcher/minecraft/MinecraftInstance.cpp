@@ -533,7 +533,7 @@ QStringList MinecraftInstance::extraArguments()
         }
     }
     auto agents = m_components->getProfile()->getAgents();
-    for (auto agent : agents) {
+    for (const auto& agent : agents) {
         QStringList jar, temp1, temp2, temp3;
         agent->library()->getApplicableFiles(runtimeContext(), jar, temp1, temp2, temp3, getLocalLibraryPath());
         list.append("-javaagent:" + jar[0] + (agent->argument().isEmpty() ? "" : "=" + agent->argument()));
@@ -749,7 +749,7 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, Mine
 {
     auto profile = m_components->getProfile();
     auto args = profile->getMinecraftArguments().split(' ', Qt::SkipEmptyParts);
-    for (auto tweaker : profile->getTweakers()) {
+    for (const auto& tweaker : profile->getTweakers()) {
         args << "--tweakClass" << tweaker;
     }
 
@@ -818,8 +818,8 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftT
     }
 
     // generic minecraft params
-    for (auto param : processMinecraftArgs(session, nullptr /* When using a launch script, the server parameters are handled by it*/
-                                           )) {
+    for (const auto& param : processMinecraftArgs(session, nullptr /* When using a launch script, the server parameters are handled by it*/
+                                                  )) {
         launchScript += "param " + param + "\n";
     }
 
@@ -873,7 +873,7 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftT
         launchScript += "sessionId " + session->session + "\n";
     }
 
-    for (auto trait : profile->getTraits()) {
+    for (const auto& trait : profile->getTraits()) {
         launchScript += "traits " + trait + "\n";
     }
 
@@ -902,7 +902,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
     auto alltraits = traits();
     if (alltraits.size()) {
         out << "Traits:";
-        for (auto trait : alltraits) {
+        for (const auto& trait : alltraits) {
             out << indent + trait;
         }
         out << emptyLine;
@@ -925,12 +925,12 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
         out << "Libraries:";
         QStringList jars, nativeJars;
         profile->getLibraryFiles(runtimeContext(), jars, nativeJars, getLocalLibraryPath(), binRoot());
-        for (auto file : jars) {
+        for (const auto& file : jars) {
             out << indent + file;
         }
         out << emptyLine;
         out << "Native libraries:";
-        for (auto file : nativeJars) {
+        for (const auto& file : nativeJars) {
             out << indent + file;
         }
         out << emptyLine;
@@ -1176,7 +1176,7 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     // if we aren't in offline mode
     if (session->launchMode != LaunchMode::Offline) {
         process->appendStep(makeShared<ClaimAccount>(pptr, session));
-        for (auto t : createUpdateTask()) {
+        for (const auto& t : createUpdateTask()) {
             process->appendStep(makeShared<TaskStepWrapper>(pptr, t));
         }
     } else {
@@ -1324,7 +1324,7 @@ QList<Mod*> MinecraftInstance::getJarMods() const
 {
     auto profile = m_components->getProfile();
     QList<Mod*> mods;
-    for (auto jarmod : profile->getJarMods()) {
+    for (const auto& jarmod : profile->getJarMods()) {
         QStringList jar, temp1, temp2, temp3;
         jarmod->getApplicableFiles(runtimeContext(), jar, temp1, temp2, temp3, jarmodsPath().absolutePath());
         // QString filePath = jarmodsPath().absoluteFilePath(jarmod->filename(currentSystem));

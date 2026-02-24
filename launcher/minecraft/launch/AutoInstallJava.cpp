@@ -162,7 +162,7 @@ void AutoInstallJava::setJavaPathFromPartial()
 void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
 {
     auto runtimes = version->data()->runtimes;
-    for (auto java : runtimes) {
+    for (const auto& java : runtimes) {
         if (java->runtimeOS == m_supported_arch && java->name() == javaName) {
             QDir javaDir(APPLICATION->javaPath());
             auto final_path = javaDir.absoluteFilePath(java->m_name);

@@ -106,7 +106,7 @@ Scene::Scene(const QImage& skin, bool slim, const QImage& cape) : QOpenGLFunctio
 }
 Scene::~Scene()
 {
-    for (auto array :
+    for (const auto& array :
          { m_staticComponents, m_normalArms, m_slimArms, m_elytra, m_staticComponentsOverlay, m_normalArmsOverlay, m_slimArmsOverlay }) {
         for (auto g : array) {
             delete g;
@@ -125,7 +125,7 @@ void Scene::draw(QOpenGLShaderProgram* program)
 {
     m_skinTexture->bind();
     program->setUniformValue("texture", 0);
-    for (auto toDraw : { m_staticComponents, m_slim ? m_slimArms : m_normalArms, m_staticComponentsOverlay,
+    for (const auto& toDraw : { m_staticComponents, m_slim ? m_slimArms : m_normalArms, m_staticComponentsOverlay,
                          m_slim ? m_slimArmsOverlay : m_normalArmsOverlay }) {
         for (auto g : toDraw) {
             g->draw(program);

@@ -230,7 +230,7 @@ void ModFilterWidget::prepareBasicFilter()
         m_filter->side = ModPlatform::Side::NoSide;  // or "both"
         ModPlatform::ModLoaderTypes loaders;
         if (m_instance->settings()->get("OverrideModDownloadLoaders").toBool()) {
-            for (auto loader : Json::toStringList(m_instance->settings()->get("ModDownloadLoaders").toString())) {
+            for (const auto& loader : Json::toStringList(m_instance->settings()->get("ModDownloadLoaders").toString())) {
                 loaders |= ModPlatform::getModLoaderFromString(loader);
             }
         } else {

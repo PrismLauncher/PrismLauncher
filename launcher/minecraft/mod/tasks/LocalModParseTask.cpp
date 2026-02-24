@@ -340,7 +340,7 @@ ModDetails ReadFabricModInfo(QByteArray contents)
                 auto obj = icon.toObject();
                 // take the largest icon
                 int largest = 0;
-                for (auto key : obj.keys()) {
+                for (const auto& key : obj.keys()) {
                     auto size = key.split('x').first().toInt();
                     if (size > largest) {
                         largest = size;
@@ -364,7 +364,7 @@ ModDetails ReadFabricModInfo(QByteArray contents)
             auto depends = object.value("depends");
             if (depends.isObject()) {
                 auto obj = depends.toObject();
-                for (auto key : obj.keys()) {
+                for (const auto& key : obj.keys()) {
                     if (key != "fabricloader" && key != "minecraft" && !key.startsWith("fabric-")) {
                         details.dependencies.append(key);
                     }
@@ -438,7 +438,7 @@ ModDetails ReadQuiltModInfo(QByteArray contents)
                     auto obj = icon.toObject();
                     // take the largest icon
                     int largest = 0;
-                    for (auto key : obj.keys()) {
+                    for (const auto& key : obj.keys()) {
                         auto size = key.split('x').first().toInt();
                         if (size > largest) {
                             largest = size;

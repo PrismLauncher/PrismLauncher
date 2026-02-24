@@ -128,7 +128,7 @@ struct IndexedVersion {
         auto release_type = version_type.isValid() ? QString(" [%1]").arg(version_type.toString()) : "";
         auto versionStr = !version.contains(version_number) ? version_number : "";
         QString gameVersion = "";
-        for (auto v : mcVersion) {
+        for (const auto& v : mcVersion) {
             if (version.contains(v)) {
                 gameVersion = "";
                 break;

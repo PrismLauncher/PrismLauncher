@@ -107,7 +107,7 @@ QString JsonCatPack::path() const
 
 QString JsonCatPack::path(QDate now) const
 {
-    for (auto var : m_variants) {
+    for (const auto& var : m_variants) {
         QDate startDate = ensureDay(now.year(), var.startTime.month, var.startTime.day);
         QDate endDate = ensureDay(now.year(), var.endTime.month, var.endTime.day);
         if (startDate > endDate) {  // it's spans over multiple years
@@ -125,7 +125,7 @@ QString JsonCatPack::path(QDate now) const
         return m_default_path;
 
     QStringList supportedImageFormats;
-    for (auto format : QImageReader::supportedImageFormats()) {
+    for (const auto& format : QImageReader::supportedImageFormats()) {
         supportedImageFormats.append("*." + format);
     }
 

@@ -132,7 +132,7 @@ void FtbPage::suggestCurrent()
     }
 
     m_dialog->setSuggestedPack(m_selected.name, m_selectedVersion, new FTB::PackInstallTask(m_selected, m_selectedVersion, this));
-    for (auto art : m_selected.art) {
+    for (const auto& art : m_selected.art) {
         if (art.type == "square") {
             auto editedLogoName = "ftb_" + m_selected.safeName;
             m_listModel->getLogo(m_selected.safeName, art.url,

@@ -178,7 +178,7 @@ QStringList CheckComboBox::checkedItems() const
 
 void CheckComboBox::setCheckedItems(const QStringList& items)
 {
-    for (auto text : items) {
+    for (const auto& text : items) {
         auto index = findText(text);
         setItemCheckState(index, index != -1 ? Qt::Checked : Qt::Unchecked);
     }

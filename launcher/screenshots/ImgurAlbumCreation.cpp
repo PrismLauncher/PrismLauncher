@@ -64,7 +64,7 @@ Net::NetRequest::Ptr ImgurAlbumCreation::make(std::shared_ptr<ImgurAlbumCreation
 QNetworkReply* ImgurAlbumCreation::getReply(QNetworkRequest& request)
 {
     QStringList hashes;
-    for (auto shot : m_screenshots) {
+    for (const auto& shot : m_screenshots) {
         hashes.append(shot->m_imgurDeleteHash);
     }
     const QByteArray data = "deletehashes=" + hashes.join(',').toUtf8() + "&title=Minecraft%20Screenshots&privacy=hidden";

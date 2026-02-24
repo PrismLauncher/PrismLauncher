@@ -114,7 +114,7 @@ static std::tuple<bool, QString, bool> contains_level_dat(QString fileName)
         saves = true;
     }
 
-    for (auto file : zip.getFiles()) {
+    for (const auto& file : zip.getFiles()) {
         QString relativePath = file;
         if (saves) {
             if (!relativePath.startsWith("saves/", Qt::CaseInsensitive))

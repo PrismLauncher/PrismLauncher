@@ -393,7 +393,7 @@ void WorldListPage::on_actionAdd_triggered()
                                         QString(), this->parentWidget());
     if (!list.empty()) {
         m_worlds->stopWatching();
-        for (auto filename : list) {
+        for (const auto& filename : list) {
             m_worlds->installWorld(QFileInfo(filename));
         }
         m_worlds->startWatching();

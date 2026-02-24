@@ -268,7 +268,7 @@ std::tuple<QDateTime, QString, QString, QString, QString> read_lock_File(const Q
 
     QDateTime timestamp;
     QString from, to, target, data_path;
-    for (auto line : lines) {
+    for (const auto& line : lines) {
         auto index = line.indexOf("=");
         if (index < 0)
             continue;
@@ -341,12 +341,12 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     m_instanceIdToShowWindowOf = parser.value("show");
 
-    for (auto url : parser.values("import")) {
+    for (const auto& url : parser.values("import")) {
         m_urlsToImport.append(normalizeImportUrl(url));
     }
 
     // treat unspecified positional arguments as import urls
-    for (auto url : parser.positionalArguments()) {
+    for (const auto& url : parser.positionalArguments()) {
         m_urlsToImport.append(normalizeImportUrl(url));
     }
 
@@ -459,7 +459,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                 sentMessage = m_peerInstance->sendMessage(activate.serialize(), timeout);
 
                 if (!m_urlsToImport.isEmpty()) {
-                    for (auto url : m_urlsToImport) {
+                    for (const auto& url : m_urlsToImport) {
                         ApplicationMessage import;
                         import.command = "import";
                         import.args.insert("url", url.toString());
@@ -563,7 +563,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             QStringList rule_names = loggingRules.childKeys();
             QStringList rules;
             qInfo() << "Setting log rules:";
-            for (auto rule_name : rule_names) {
+            for (const auto& rule_name : rule_names) {
                 auto rule = QString("%1=%2").arg(rule_name).arg(loggingRules.value(rule_name).toString());
                 rules.append(rule);
                 qInfo() << "    " << rule;
@@ -1025,7 +1025,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     m_profilers.insert("jprofiler", std::shared_ptr<BaseProfilerFactory>(new JProfilerFactory()));
     m_profilers.insert("jvisualvm", std::shared_ptr<BaseProfilerFactory>(new JVisualVMFactory()));
     m_profilers.insert("generic", std::shared_ptr<BaseProfilerFactory>(new GenericProfilerFactory()));
-    for (auto profiler : m_profilers.values()) {
+    for (const auto& profiler : m_profilers.values()) {
         profiler->registerSettings(m_settings.get());
     }
 
@@ -1857,7 +1857,7 @@ QString Application::getJarPath(QString jarFile)
         FS::PathCombine(m_rootPath, "jars"), FS::PathCombine(applicationDirPath(), "jars"),
         FS::PathCombine(applicationDirPath(), "..", "jars")  // from inside build dir, for debuging
     };
-    for (QString p : potentialPaths) {
+    for (const QString& p : potentialPaths) {
         QString jarPath = FS::PathCombine(p, jarFile);
         if (QFileInfo(jarPath).isFile())
             return jarPath;
@@ -1916,7 +1916,7 @@ bool Application::handleDataMigration(const QString& currentData,
 
     // Is there a valid config at the old location?
     bool configExists = false;
-    for (QString configPath : configPaths) {
+    for (const QString& configPath : configPaths) {
         configExists |= QFileInfo::exists(configPath);
     }
 
@@ -2039,7 +2039,7 @@ void Application::removeQSavePath(QString path)
 bool Application::checkQSavePath(QString path)
 {
     QMutexLocker locker(&m_qsaveResourcesMutex);
-    for (auto partialPath : m_qsaveResources.keys()) {
+    for (const auto& partialPath : m_qsaveResources.keys()) {
         if (path.startsWith(partialPath) && m_qsaveResources.value(partialPath, 0) > 0) {
             return true;
         }

@@ -40,7 +40,7 @@ class HeaderProxy {
    public:
     void writeHeaders(QNetworkRequest& request)
     {
-        for (auto header : headers(request)) {
+        for (const auto& header : headers(request)) {
             request.setRawHeader(header.headerName, header.headerValue);
         }
     }

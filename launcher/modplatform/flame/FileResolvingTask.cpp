@@ -54,7 +54,7 @@ void Flame::FileResolvingTask::executeTask()
     setProgress(0, 3);
 
     QStringList fileIds;
-    for (auto file : m_manifest.files) {
+    for (const auto& file : m_manifest.files) {
         fileIds.push_back(QString::number(file.fileId));
     }
     auto [task, response] = flameAPI.getFiles(fileIds);
@@ -224,7 +224,7 @@ void Flame::FileResolvingTask::getFlameProjects()
 {
     setProgress(2, 3);
     QStringList addonIds;
-    for (auto file : m_manifest.files) {
+    for (const auto& file : m_manifest.files) {
         addonIds.push_back(QString::number(file.projectId));
     }
 

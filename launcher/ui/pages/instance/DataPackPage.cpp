@@ -178,7 +178,7 @@ void DataPackPage::updateDataPacks()
             tasks->deleteLater();
         });
 
-        for (auto task : update_dialog.getTasks()) {
+        for (const auto& task : update_dialog.getTasks()) {
             tasks->addTask(task);
         }
 

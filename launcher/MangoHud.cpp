@@ -62,7 +62,7 @@ QString getLibraryString()
         }
 
         QStringList xdgDataDirs = qEnvironmentVariable("XDG_DATA_DIRS", "/usr/local/share/:/usr/share/").split(QLatin1String(":"));
-        for (QString dir : xdgDataDirs) {
+        for (const QString& dir : xdgDataDirs) {
             vkLayerList << FS::PathCombine(dir, "vulkan", "implicit_layer.d");
         }
 
@@ -75,7 +75,7 @@ QString getLibraryString()
         vkLayerList << "/etc";
 
         QStringList xdgConfigDirs = qEnvironmentVariable("XDG_CONFIG_DIRS", "/etc/xdg").split(QLatin1String(":"));
-        for (QString dir : xdgConfigDirs) {
+        for (const QString& dir : xdgConfigDirs) {
             vkLayerList << FS::PathCombine(dir, "vulkan", "implicit_layer.d");
         }
 

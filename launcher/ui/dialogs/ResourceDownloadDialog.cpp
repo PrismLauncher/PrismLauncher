@@ -180,7 +180,7 @@ void ResourceDownloadDialog::confirm()
             QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
             return;
         } else {
-            for (auto dep : task->getDependecies()) {
+            for (const auto& dep : task->getDependecies()) {
                 addResource(dep->pack, dep->version);
                 depNames << dep->pack->name;
             }
@@ -202,13 +202,13 @@ void ResourceDownloadDialog::confirm()
         auto deselected = confirm_dialog->deselectedResources();
         for (auto page : m_container->getPages()) {
             auto res = static_cast<ResourcePage*>(page);
-            for (auto name : deselected)
+            for (const auto& name : deselected)
                 res->removeResourceFromPage(name);
         }
 
         this->accept();
     } else {
-        for (auto name : depNames)
+        for (const auto& name : depNames)
             removeResource(name);
     }
 }

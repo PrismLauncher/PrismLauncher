@@ -182,7 +182,7 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
         loaders.push_back(getModLoaderAsString(loader).toStdString());
     }
     toml::array mcVersions;
-    for (auto version : mod.mcVersions) {
+    for (const auto& version : mod.mcVersions) {
         mcVersions.push_back(version.toStdString());
     }
 
@@ -192,7 +192,7 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
     }
 
     toml::array deps;
-    for (auto dep : mod.dependencies) {
+    for (const auto& dep : mod.dependencies) {
         auto tbl = toml::table{ { "addonId", dep.addonId.toString().toStdString() },
                                 { "type", ModPlatform::DependencyTypeUtils::toString(dep.type).toStdString() } };
         if (!dep.version.isEmpty()) {
