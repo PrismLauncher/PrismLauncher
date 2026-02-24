@@ -268,7 +268,10 @@ std::tuple<QDateTime, QString, QString, QString, QString> read_lock_File(const Q
     auto lines = contents.split('\n');
 
     QDateTime timestamp;
-    QString from, to, target, data_path;
+    QString from;
+    QString to;
+    QString target;
+    QString data_path;
     for (const auto& line : lines) {
         auto index = line.indexOf("=");
         if (index < 0) {

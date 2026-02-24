@@ -87,7 +87,8 @@ QSize LabeledToolButton::sizeHint() const
     */
     ensurePolished();
 
-    int w = 0, h = 0;
+    int w = 0;
+    int h = 0;
     QStyleOptionToolButton opt;
     initStyleOption(&opt);
     QSize sz = m_label->sizeHint();

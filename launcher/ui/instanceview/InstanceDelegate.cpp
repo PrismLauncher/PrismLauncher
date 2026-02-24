@@ -173,7 +173,8 @@ static QSize viewItemTextSize(const QStyleOptionViewItem* option)
     textLayout.setText(option->text);
     const int textMargin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, option, option->widget) + 1;
     QRect bounds(0, 0, 100 - 2 * textMargin, 600);
-    qreal height = 0, widthUsed = 0;
+    qreal height = 0;
+    qreal widthUsed = 0;
     viewItemTextLayout(textLayout, bounds.width(), height, widthUsed);
     const QSize size(qCeil(widthUsed), qCeil(height));
     return { size.width() + 2 * textMargin, size.height() };
@@ -300,7 +301,8 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     textLayout.setFont(opt.font);
     textLayout.setText(opt.text);
 
-    qreal width, height;
+    qreal width;
+    qreal height;
     viewItemTextLayout(textLayout, textRect.width(), height, width);
 
     const int lineCount = textLayout.lineCount();

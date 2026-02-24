@@ -758,7 +758,10 @@ bool PackProfile::removeComponent_internal(const ComponentPtr& patch)
         if (!jarMod->isLocal()) {
             return true;
         }
-        QStringList jar, temp1, temp2, temp3;
+        QStringList jar;
+        QStringList temp1;
+        QStringList temp2;
+        QStringList temp3;
         jarMod->getApplicableFiles(d->m_instance->runtimeContext(), jar, temp1, temp2, temp3, d->m_instance->jarmodsPath().absolutePath());
         QFileInfo finfo(jar[0]);
         if (finfo.exists()) {

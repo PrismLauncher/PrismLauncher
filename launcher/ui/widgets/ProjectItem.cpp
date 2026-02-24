@@ -49,7 +49,8 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
         painter->setOpacity(0.4);  // Fade out the entire item
     }
     // The default icon size will be a square (and height is usually the lower value).
-    auto icon_width = rect.height(), icon_height = rect.height();
+    auto icon_width = rect.height();
+    auto icon_height = rect.height();
     int icon_x_margin = (rect.height() - icon_width) / 2;
     int icon_y_margin = (rect.height() - icon_height) / 2;
 

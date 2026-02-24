@@ -105,7 +105,9 @@ class KHCY {
         qreal _y = normalize(y);
 
         // calculate some needed variables
-        qreal _hs = _h * 6.0, th, tm;
+        qreal _hs = _h * 6.0;
+        qreal th;
+        qreal tm;
         if (_hs < 1.0) {
             th = _hs;
             tm = yc[0] + yc[1] * th;
@@ -127,7 +129,9 @@ class KHCY {
         }
 
         // calculate RGB channels in sorted order
-        qreal tn, to, tp;
+        qreal tn;
+        qreal to;
+        qreal tp;
         if (tm >= _y) {
             tp = _y + _y * _c * (1.0 - tm) / tm;
             to = _y + _y * _c * (th - tm) / tm;
@@ -249,7 +253,8 @@ QColor Rainbow::tint(const QColor& base, const QColor& color, qreal amount)
     qreal baseLuma = luma(base);  // cache value because luma call is expensive
     double ri = contrastRatioForLuma(baseLuma, luma(color));
     double rg = 1.0 + ((ri + 1.0) * amount * amount * amount);
-    double u = 1.0, l = 0.0;
+    double u = 1.0;
+    double l = 0.0;
     QColor result;
     for (int i = 12; i; --i) {
         double a = 0.5 * (l + u);

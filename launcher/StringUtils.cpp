@@ -51,7 +51,8 @@ static inline QChar getNextChar(const QString& s, int location)
 /// TAKEN FROM Qt, because it doesn't expose it intelligently
 int StringUtils::naturalCompare(const QString& s1, const QString& s2, Qt::CaseSensitivity cs)
 {
-    int l1 = 0, l2 = 0;
+    int l1 = 0;
+    int l2 = 0;
     while (l1 <= s1.size() && l2 <= s2.size()) {
         // skip spaces, tabs and 0's
         QChar c1 = getNextChar(s1, l1);
@@ -200,7 +201,8 @@ QString StringUtils::getRandomAlphaNumeric()
 
 QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QString& sep, Qt::CaseSensitivity cs)
 {
-    QString left, right;
+    QString left;
+    QString right;
     auto index = s.indexOf(sep, 0, cs);
     left = s.mid(0, index);
     right = s.mid(index + sep.length());
@@ -209,7 +211,8 @@ QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QString&
 
 QPair<QString, QString> StringUtils::splitFirst(const QString& s, QChar sep, Qt::CaseSensitivity cs)
 {
-    QString left, right;
+    QString left;
+    QString right;
     auto index = s.indexOf(sep, 0, cs);
     left = s.mid(0, index);
     right = s.mid(left.length() + 1);
@@ -218,7 +221,8 @@ QPair<QString, QString> StringUtils::splitFirst(const QString& s, QChar sep, Qt:
 
 QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QRegularExpression& re)
 {
-    QString left, right;
+    QString left;
+    QString right;
     QRegularExpressionMatch match;
     auto index = s.indexOf(re, 0, &match);
     left = s.mid(0, index);

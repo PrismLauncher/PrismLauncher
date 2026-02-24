@@ -96,7 +96,10 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
                 auto forgeVersionData = file->readAll();
                 INIFile iniFile;
                 iniFile.loadFile(forgeVersionData);
-                QString major, minor, revision, build;
+                QString major;
+                QString minor;
+                QString revision;
+                QString build;
                 major = iniFile["forge.major.number"].toString();
                 minor = iniFile["forge.minor.number"].toString();
                 revision = iniFile["forge.revision.number"].toString();

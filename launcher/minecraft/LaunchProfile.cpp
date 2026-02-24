@@ -354,7 +354,8 @@ void LaunchProfile::getLibraryFiles(const RuntimeContext& runtimeContext,
                                     const QString& overridePath,
                                     const QString& tempPath) const
 {
-    QStringList native32, native64;
+    QStringList native32;
+    QStringList native64;
     jars.clear();
     nativeJars.clear();
     for (const auto& lib : getLibraries()) {

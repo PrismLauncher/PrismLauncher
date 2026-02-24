@@ -84,7 +84,10 @@ class LibraryTest : public QObject {
         QCOMPARE(test.artifactPrefix(), QString("test.package:testname"));
         QCOMPARE(test.isNative(), false);
 
-        QStringList jar, native, native32, native64;
+        QStringList jar;
+        QStringList native;
+        QStringList native32;
+        QStringList native64;
         test.getApplicableFiles(r, jar, native, native32, native64, QString());
         QCOMPARE(jar, getStorage("test/package/testname/testversion/testname-testversion.jar"));
         QCOMPARE(native, {});
@@ -141,7 +144,10 @@ class LibraryTest : public QObject {
         QCOMPARE(test.isNative(), true);
         test.setRepositoryURL("file://foo/bar");
         {
-            QStringList jar, native, native32, native64;
+            QStringList jar;
+            QStringList native;
+            QStringList native32;
+            QStringList native64;
             test.getApplicableFiles(r, jar, native, native32, native64, QString());
             QCOMPARE(jar, {});
             QCOMPARE(native, getStorage("test/package/testname/testversion/testname-testversion-linux.jar"));
@@ -165,7 +171,10 @@ class LibraryTest : public QObject {
         QCOMPARE(test.isNative(), true);
         test.setRepositoryURL("file://foo/bar");
         {
-            QStringList jar, native, native32, native64;
+            QStringList jar;
+            QStringList native;
+            QStringList native32;
+            QStringList native64;
             test.getApplicableFiles(r, jar, native, native32, native64, QString());
             QCOMPARE(jar, {});
             QCOMPARE(native, {});
@@ -180,7 +189,10 @@ class LibraryTest : public QObject {
         }
         r.system = "windows";
         {
-            QStringList jar, native, native32, native64;
+            QStringList jar;
+            QStringList native;
+            QStringList native32;
+            QStringList native64;
             test.getApplicableFiles(r, jar, native, native32, native64, QString());
             QCOMPARE(jar, {});
             QCOMPARE(native, {});
@@ -195,7 +207,10 @@ class LibraryTest : public QObject {
         }
         r.system = "osx";
         {
-            QStringList jar, native, native32, native64;
+            QStringList jar;
+            QStringList native;
+            QStringList native32;
+            QStringList native64;
             test.getApplicableFiles(r, jar, native, native32, native64, QString());
             QCOMPARE(jar, {});
             QCOMPARE(native, {});
@@ -237,7 +252,10 @@ class LibraryTest : public QObject {
         RuntimeContext r = dummyContext("osx");
         auto test = readMojangJson(QFINDTESTDATA("testdata/Libraries/lib-simple.json"));
         {
-            QStringList jar, native, native32, native64;
+            QStringList jar;
+            QStringList native;
+            QStringList native32;
+            QStringList native64;
             test->getApplicableFiles(r, jar, native, native32, native64, QString());
             QCOMPARE(jar, getStorage("com/paulscode/codecwav/20101023/codecwav-20101023.jar"));
             QCOMPARE(native, {});
