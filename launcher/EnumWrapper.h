@@ -42,7 +42,7 @@ struct EnumWrapper {
             if (e == m_value)
                 return QString(name);
         }
-        Q_UNREACHABLE();
+        Q_ASSERT_X(false, "EnumWrapper::toString()", "No string mapping found for current enum value");
         return {};
     }
 
