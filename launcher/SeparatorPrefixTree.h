@@ -106,10 +106,7 @@ class SeparatorPrefixTree {
         auto sepIndex = path.indexOf(Tseparator);
         if (sepIndex == -1) {
             auto found = children.find(path);
-            if (found == children.end()) {
-                return false;
-            }
-            return true;
+            return static_cast<bool>(found != children.end());
         }
         auto prefix = path.left(sepIndex);
         auto found = children.find(prefix);

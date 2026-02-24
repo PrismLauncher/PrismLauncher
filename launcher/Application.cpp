@@ -855,7 +855,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             bool ok;
             int pasteType = m_settings->get("PastebinType").toInt(&ok);
             // If PastebinType is invalid then reset the related settings.
-            if (!ok || !(PasteUpload::PasteType::First <= pasteType && pasteType <= PasteUpload::PasteType::Last)) {
+            if (!ok || PasteUpload::PasteType::First > pasteType || pasteType > PasteUpload::PasteType::Last) {
                 m_settings->reset("PastebinType");
                 m_settings->reset("PastebinCustomAPIBase");
             }

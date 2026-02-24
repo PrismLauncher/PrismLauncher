@@ -23,10 +23,7 @@ inline bool isConsole()
     DWORD result = GetConsoleProcessList((LPDWORD)procIDs, maxCount);
     return result > 1;
 #else
-    if (isatty(fileno(stdout))) {
-        return true;
-    }
-    return false;
+    return isatty(fileno(stdout)) != 0;
 #endif
 }
 

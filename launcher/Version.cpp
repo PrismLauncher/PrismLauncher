@@ -88,11 +88,7 @@ void Version::parse()
         }
 
         const QList<QChar> s_separators{ '.', '-', '+' };
-        if (s_separators.contains(currentChar) && currentSection.at(0) != currentChar) {
-            return true;
-        }
-
-        return false;
+        return s_separators.contains(currentChar) && currentSection.at(0) != currentChar;
     };
 
     currentSection += m_string.at(0);

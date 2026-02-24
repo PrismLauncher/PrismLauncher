@@ -160,8 +160,8 @@ bool ProjectItemDelegate::editorEvent(QEvent* event,
                                       const QStyleOptionViewItem& option,
                                       const QModelIndex& index)
 {
-    if (!(event->type() == QEvent::MouseButtonRelease || event->type() == QEvent::MouseButtonPress ||
-          event->type() == QEvent::MouseButtonDblClick)) {
+    if (event->type() != QEvent::MouseButtonRelease && event->type() != QEvent::MouseButtonPress &&
+          event->type() != QEvent::MouseButtonDblClick) {
         return false;
     }
 
