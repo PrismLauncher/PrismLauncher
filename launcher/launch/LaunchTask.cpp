@@ -42,6 +42,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QStandardPaths>
+#include <utility>
 #include <variant>
 #include "MessageLevel.h"
 #include "tasks/Task.h"
@@ -60,12 +61,12 @@ std::unique_ptr<LaunchTask> LaunchTask::create(MinecraftInstance* inst)
 
 LaunchTask::LaunchTask(MinecraftInstance* instance) : m_instance(instance) {}
 
-void LaunchTask::appendStep(shared_qobject_ptr<LaunchStep> step)
+void LaunchTask::appendStep(const shared_qobject_ptr<LaunchStep>& step)
 {
     m_steps.append(step);
 }
 
-void LaunchTask::prependStep(shared_qobject_ptr<LaunchStep> step)
+void LaunchTask::prependStep(const shared_qobject_ptr<LaunchStep>& step)
 {
     m_steps.prepend(step);
 }
@@ -132,7 +133,7 @@ void LaunchTask::onProgressReportingRequested()
 
 void LaunchTask::setCensorFilter(QMap<QString, QString> filter)
 {
-    m_censorFilter = filter;
+    m_censorFilter = std::move(filter);
 }
 
 QString LaunchTask::censorPrivateInfo(QString in)
@@ -301,7 +302,7 @@ void LaunchTask::emitFailed(QString reason)
     Task::emitFailed(reason);
 }
 
-QString expandVariables(const QString& input, QProcessEnvironment dict)
+QString expandVariables(const QString& input, const QProcessEnvironment& dict)
 {
     QString result = input;
 

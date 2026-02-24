@@ -67,7 +67,7 @@ HttpMetaCache::~HttpMetaCache()
     SaveNow();
 }
 
-auto HttpMetaCache::getEntry(QString base, QString resource_path) -> MetaEntryPtr
+auto HttpMetaCache::getEntry(const QString& base, const QString& resource_path) -> MetaEntryPtr
 {
     // no base. no base path. can't store
     if (!m_entries.contains(base)) {
@@ -83,7 +83,7 @@ auto HttpMetaCache::getEntry(QString base, QString resource_path) -> MetaEntryPt
     return {};
 }
 
-auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString expected_etag) -> MetaEntryPtr
+auto HttpMetaCache::resolveEntry(const QString& base, QString resource_path, const QString& expected_etag) -> MetaEntryPtr
 {
     resource_path = FS::RemoveInvalidPathChars(resource_path);
     auto entry = getEntry(base, resource_path);
@@ -142,7 +142,7 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
     return entry;
 }
 
-auto HttpMetaCache::updateEntry(MetaEntryPtr stale_entry) -> bool
+auto HttpMetaCache::updateEntry(const MetaEntryPtr& stale_entry) -> bool
 {
     if (!m_entries.contains(stale_entry->m_baseId)) {
         qCCritical(taskHttpMetaCacheLogC) << "Cannot add entry with unknown base:" << stale_entry->m_baseId.toLocal8Bit();
@@ -160,7 +160,7 @@ auto HttpMetaCache::updateEntry(MetaEntryPtr stale_entry) -> bool
     return true;
 }
 
-auto HttpMetaCache::evictEntry(MetaEntryPtr entry) -> bool
+auto HttpMetaCache::evictEntry(const MetaEntryPtr& entry) -> bool
 {
     if (!entry)
         return false;
@@ -188,18 +188,18 @@ auto HttpMetaCache::evictAll() -> bool
     return ret;
 }
 
-auto HttpMetaCache::staleEntry(QString base, QString resource_path) -> MetaEntryPtr
+auto HttpMetaCache::staleEntry(const QString& base, QString resource_path) -> MetaEntryPtr
 {
     auto foo = new MetaEntry();
     foo->m_baseId = base;
     foo->m_basePath = getBasePath(base);
-    foo->m_relativePath = resource_path;
+    foo->m_relativePath = std::move(resource_path);
     foo->m_stale = true;
 
     return MetaEntryPtr(foo);
 }
 
-void HttpMetaCache::addBase(QString base, QString base_root)
+void HttpMetaCache::addBase(const QString& base, QString base_root)
 {
     // TODO: report error
     if (m_entries.contains(base))
@@ -207,11 +207,11 @@ void HttpMetaCache::addBase(QString base, QString base_root)
 
     // TODO: check if the base path is valid
     EntryMap foo;
-    foo.base_path = base_root;
+    foo.base_path = std::move(base_root);
     m_entries[base] = foo;
 }
 
-auto HttpMetaCache::getBasePath(QString base) -> QString
+auto HttpMetaCache::getBasePath(const QString& base) -> QString
 {
     if (m_entries.contains(base)) {
         return m_entries[base].base_path;

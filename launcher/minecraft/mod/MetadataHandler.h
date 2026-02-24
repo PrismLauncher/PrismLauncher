@@ -39,7 +39,7 @@ inline void remove(const QDir& index_dir, QString mod_slug)
     Packwiz::V1::deleteModIndex(index_dir, mod_slug);
 }
 
-inline ModStruct get(const QDir& index_dir, QString mod_slug)
+inline ModStruct get(const QDir& index_dir, const QString& mod_slug)
 {
     return Packwiz::V1::getIndexForMod(index_dir, std::move(mod_slug));
 }

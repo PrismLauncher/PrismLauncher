@@ -108,7 +108,7 @@ void LegacyFMLLibrariesTask::fmllibsFinished()
     }
     emitSucceeded();
 }
-void LegacyFMLLibrariesTask::fmllibsFailed(QString reason)
+void LegacyFMLLibrariesTask::fmllibsFailed(const QString& reason)
 {
     QStringList failed = downloadJob->getFailedFiles();
     QString failed_all = failed.join("\n");

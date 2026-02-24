@@ -43,11 +43,11 @@ class McClient : public QObject {
 
     void writePacketToSocket(QByteArray& data);
 
-    void emitFail(QString error);
+    void emitFail(const QString& error);
     void emitSucceed(QJsonObject data);
 
    signals:
-    void succeeded(QJsonObject data);
-    void failed(QString error);
+    void succeeded(const QJsonObject& data);
+    void failed(const QString& error);
     void finished();
 };

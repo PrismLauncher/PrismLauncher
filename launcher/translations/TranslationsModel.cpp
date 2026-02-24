@@ -176,7 +176,7 @@ struct TranslationsModel::Private {
     bool no_language_set = false;
 };
 
-TranslationsModel::TranslationsModel(QString path, QObject* parent) : QAbstractListModel(parent)
+TranslationsModel::TranslationsModel(const QString& path, QObject* parent) : QAbstractListModel(parent)
 {
     d = std::make_unique<Private>();
     d->m_dir.setPath(path);
@@ -560,7 +560,7 @@ void TranslationsModel::downloadIndex()
     d->m_index_job->start();
 }
 
-void TranslationsModel::updateLanguage(QString key)
+void TranslationsModel::updateLanguage(const QString& key)
 {
     if (key == defaultLangCode) {
         qWarning() << "Cannot update builtin language" << key;
@@ -576,7 +576,7 @@ void TranslationsModel::updateLanguage(QString key)
     }
 }
 
-void TranslationsModel::downloadTranslation(QString key)
+void TranslationsModel::downloadTranslation(const QString& key)
 {
     if (d->m_dl_job) {
         d->m_nextDownload = key;
@@ -614,7 +614,7 @@ void TranslationsModel::downloadNext()
     }
 }
 
-void TranslationsModel::dlFailed(QString reason)
+void TranslationsModel::dlFailed(const QString& reason)
 {
     qCritical() << "Translations Download Failed:" << reason;
     d->m_dl_job.reset();
@@ -632,7 +632,7 @@ void TranslationsModel::dlGood()
     downloadNext();
 }
 
-void TranslationsModel::indexFailed(QString reason)
+void TranslationsModel::indexFailed(const QString& reason)
 {
     qCritical() << "Translations Index Download Failed:" << reason;
     d->m_index_job.reset();

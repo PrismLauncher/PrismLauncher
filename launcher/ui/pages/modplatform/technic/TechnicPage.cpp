@@ -156,7 +156,7 @@ void TechnicPage::suggestCurrent()
 
     QString editedLogoName = "technic_" + current.logoName;
     model->getLogo(current.logoName, current.logoUrl,
-                   [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
+                   [this, editedLogoName](const QString& logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 
     if (current.metadataLoaded) {
         metadataLoaded();
@@ -218,7 +218,7 @@ void TechnicPage::suggestCurrent()
         metadataLoaded();
     });
     connect(jobPtr.get(), &NetJob::failed,
-            [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
+            [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
     jobPtr = netJob;
     jobPtr->start();
@@ -271,7 +271,7 @@ void TechnicPage::metadataLoaded()
 
         connect(netJob.get(), &NetJob::succeeded, this, [this, response] { onSolderLoaded(response); });
         connect(jobPtr.get(), &NetJob::failed,
-                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         jobPtr = netJob;
         jobPtr->start();
@@ -343,7 +343,7 @@ void TechnicPage::onSolderLoaded(QByteArray* responsePtr)
     metadataLoaded();
 }
 
-void TechnicPage::onVersionSelectionChanged(QString version)
+void TechnicPage::onVersionSelectionChanged(const QString& version)
 {
     if (version.isNull() || version.isEmpty()) {
         selectedVersion = "";

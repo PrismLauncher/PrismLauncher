@@ -27,7 +27,7 @@ struct MojangLibraryDownloadInfo {
     using Ptr = std::shared_ptr<MojangLibraryDownloadInfo>;
 
     // methods
-    MojangDownloadInfo* getDownloadInfo(QString classifier)
+    MojangDownloadInfo* getDownloadInfo(const QString& classifier)
     {
         if (classifier.isNull()) {
             return artifact.get();
@@ -48,7 +48,7 @@ struct MojangAssetIndexInfo : public MojangDownloadInfo {
     // methods
     MojangAssetIndexInfo() = default;
 
-    MojangAssetIndexInfo(QString id_)
+    MojangAssetIndexInfo(const QString& id_)
     {
         this->id = id_;
         // HACK: ignore assets from other version files than Minecraft

@@ -44,7 +44,7 @@
 namespace Commandline {
 
 // commandline splitter
-QStringList splitArgs(QString args)
+QStringList splitArgs(const QString& args)
 {
     QStringList argv;
     QString current;

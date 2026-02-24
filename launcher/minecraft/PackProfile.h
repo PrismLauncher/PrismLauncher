@@ -95,7 +95,7 @@ class PackProfile : public QAbstractListModel {
     void installCustomJar(QString selectedFile);
 
     /// install MMC/Prism component files
-    bool installComponents(QStringList selectedFiles);
+    bool installComponents(const QStringList& selectedFiles);
 
     /// install Java agent files
     void installAgents(QStringList selectedFiles);
@@ -169,7 +169,7 @@ class PackProfile : public QAbstractListModel {
     bool saveIsScheduled() const;
 
     /// insert component so that its index is ideally the specified one (returns real index)
-    void insertComponent(size_t index, ComponentPtr component);
+    void insertComponent(size_t index, const ComponentPtr& component);
 
     QString componentsFilePath() const;
     QString patchesPattern() const;
@@ -183,10 +183,10 @@ class PackProfile : public QAbstractListModel {
 
    private:
     Result load();
-    bool installJarMods_internal(QStringList filepaths);
-    bool installCustomJar_internal(QString filepath);
-    bool installAgents_internal(QStringList filepaths);
-    bool removeComponent_internal(ComponentPtr patch);
+    bool installJarMods_internal(const QStringList& filepaths);
+    bool installCustomJar_internal(const QString& filepath);
+    bool installAgents_internal(const QStringList& filepaths);
+    bool removeComponent_internal(const ComponentPtr& patch);
 
    private: /* data */
     std::unique_ptr<PackProfileData> d;

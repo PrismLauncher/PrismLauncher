@@ -44,11 +44,12 @@
 #include <QTextStream>
 
 #include <QSettings>
+#include <utility>
 #include "Json.h"
 
 INIFile::INIFile() = default;
 
-bool INIFile::saveFile(QString fileName)
+bool INIFile::saveFile(const QString& fileName)
 {
     if (!contains("ConfigVersion"))
         insert("ConfigVersion", "1.3");
@@ -74,7 +75,7 @@ bool INIFile::saveFile(QString fileName)
     return true;
 }
 
-QString unescape(QString orig)
+QString unescape(const QString& orig)
 {
     QString out;
     QChar prev = QChar::Null;
@@ -150,7 +151,7 @@ bool parseOldFileFormat(QIODevice& device, QSettings::SettingsMap& map)
     return true;
 }
 
-QVariant migrateQByteArrayToBase64(QString key, QVariant value)
+QVariant migrateQByteArrayToBase64(const QString& key, QVariant value)
 {
     static const QStringList otherByteArrays = { "MainWindowState",       "MainWindowGeometry", "ConsoleWindowState",
                                                  "ConsoleWindowGeometry", "PagedGeometry",      "NewInstanceGeometry",
@@ -171,7 +172,7 @@ QVariant migrateQByteArrayToBase64(QString key, QVariant value)
     return value;
 }
 
-bool INIFile::loadFile(QString fileName)
+bool INIFile::loadFile(const QString& fileName)
 {
     QSettings _settings_obj{ fileName, QSettings::Format::IniFormat };
     _settings_obj.setFallbacksEnabled(false);
@@ -221,7 +222,7 @@ bool INIFile::loadFile(QString fileName)
     return true;
 }
 
-bool INIFile::loadFile(QByteArray data)
+bool INIFile::loadFile(const QByteArray& data)
 {
     QTemporaryFile file;
     if (!file.open())
@@ -234,7 +235,7 @@ bool INIFile::loadFile(QByteArray data)
     return loaded;
 }
 
-QVariant INIFile::get(QString key, QVariant def) const
+QVariant INIFile::get(const QString& key, QVariant def) const
 {
     if (!this->contains(key))
         return def;
@@ -242,7 +243,7 @@ QVariant INIFile::get(QString key, QVariant def) const
         return this->operator[](key);
 }
 
-void INIFile::set(QString key, QVariant val)
+void INIFile::set(const QString& key, QVariant val)
 {
-    this->operator[](key) = val;
+    this->operator[](key) = std::move(val);
 }

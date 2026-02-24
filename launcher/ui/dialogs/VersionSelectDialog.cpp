@@ -41,13 +41,14 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QVBoxLayout>
+#include <utility>
 
 #include "ui/widgets/VersionSelectWidget.h"
 
 #include "BaseVersion.h"
 #include "BaseVersionList.h"
 
-VersionSelectDialog::VersionSelectDialog(BaseVersionList* vlist, QString title, QWidget* parent, bool cancelable) : QDialog(parent)
+VersionSelectDialog::VersionSelectDialog(BaseVersionList* vlist, const QString& title, QWidget* parent, bool cancelable) : QDialog(parent)
 {
     setObjectName(QStringLiteral("VersionSelectDialog"));
     resize(400, 347);
@@ -108,12 +109,12 @@ void VersionSelectDialog::setCurrentVersion(const QString& version)
 
 void VersionSelectDialog::setEmptyString(QString emptyString)
 {
-    m_versionWidget->setEmptyString(emptyString);
+    m_versionWidget->setEmptyString(std::move(emptyString));
 }
 
 void VersionSelectDialog::setEmptyErrorString(QString emptyErrorString)
 {
-    m_versionWidget->setEmptyErrorString(emptyErrorString);
+    m_versionWidget->setEmptyErrorString(std::move(emptyErrorString));
 }
 
 void VersionSelectDialog::setResizeOn(int column)
@@ -149,15 +150,15 @@ void VersionSelectDialog::on_refreshButton_clicked()
 
 void VersionSelectDialog::setExactFilter(BaseVersionList::ModelRoles role, QString filter)
 {
-    m_versionWidget->setExactFilter(role, filter);
+    m_versionWidget->setExactFilter(role, std::move(filter));
 }
 
 void VersionSelectDialog::setExactIfPresentFilter(BaseVersionList::ModelRoles role, QString filter)
 {
-    m_versionWidget->setExactIfPresentFilter(role, filter);
+    m_versionWidget->setExactIfPresentFilter(role, std::move(filter));
 }
 
 void VersionSelectDialog::setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter)
 {
-    m_versionWidget->setFuzzyFilter(role, filter);
+    m_versionWidget->setFuzzyFilter(role, std::move(filter));
 }

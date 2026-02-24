@@ -3,17 +3,18 @@
 #include <QReadLocker>
 #include <QSet>
 #include <QWriteLocker>
+#include <utility>
 
 template <typename K, typename V>
 class RWStorage {
    public:
-    void add(K key, V value)
+    void add(const K& key, V value)
     {
         QWriteLocker l(&lock);
-        cache[key] = value;
+        cache[key] = std::move(value);
         stale_entries.remove(key);
     }
-    V get(K key)
+    V get(const K& key)
     {
         QReadLocker l(&lock);
         if (cache.contains(key)) {
@@ -21,7 +22,7 @@ class RWStorage {
         } else
             return V();
     }
-    bool get(K key, V& value)
+    bool get(const K& key, V& value)
     {
         QReadLocker l(&lock);
         if (cache.contains(key)) {
@@ -35,14 +36,14 @@ class RWStorage {
         QReadLocker l(&lock);
         return cache.contains(key);
     }
-    bool stale(K key)
+    bool stale(const K& key)
     {
         QReadLocker l(&lock);
         if (!cache.contains(key))
             return true;
         return stale_entries.contains(key);
     }
-    void setStale(K key)
+    void setStale(const K& key)
     {
         QWriteLocker l(&lock);
         if (cache.contains(key)) {

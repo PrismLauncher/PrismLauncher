@@ -29,8 +29,8 @@ namespace MMCZip {
 class ExtractZipTask : public Task {
     Q_OBJECT
    public:
-    ExtractZipTask(QString input, QDir outputDir, QString subdirectory = "")
-        : m_input(input), m_outputDir(outputDir), m_subdirectory(std::move(std::move(subdirectory)))
+    ExtractZipTask(QString input, const QDir& outputDir, QString subdirectory = "")
+        : m_input(std::move(input)), m_outputDir(outputDir), m_subdirectory(std::move(subdirectory))
     {}
     ~ExtractZipTask() override = default;
 

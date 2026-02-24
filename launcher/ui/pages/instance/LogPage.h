@@ -37,6 +37,7 @@
 
 #include <QIdentityProxyModel>
 #include <QWidget>
+#include <utility>
 
 #include "BaseInstance.h"
 #include "launch/LaunchTask.h"
@@ -52,7 +53,7 @@ class LogFormatProxyModel : public QIdentityProxyModel {
     LogFormatProxyModel(QObject* parent = nullptr) : QIdentityProxyModel(parent) {}
     QVariant data(const QModelIndex& index, int role) const override;
     QFont getFont() const { return m_font; }
-    void setFont(QFont font) { m_font = font; }
+    void setFont(QFont font) { m_font = std::move(font); }
     QModelIndex find(const QModelIndex& start, const QString& value, bool reverse) const;
 
    private:

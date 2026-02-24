@@ -76,7 +76,7 @@ bool LibrariesTask::canAbort() const
     return true;
 }
 
-void LibrariesTask::jarlibFailed(QString reason)
+void LibrariesTask::jarlibFailed(const QString& reason)
 {
     emitFailed(tr("Game update failed: it was impossible to fetch the required libraries.\nReason:\n%1").arg(reason));
 }

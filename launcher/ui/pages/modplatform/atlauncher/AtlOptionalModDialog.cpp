@@ -324,7 +324,7 @@ AtlOptionalModDialog::AtlOptionalModDialog(QWidget* parent, const ATLauncher::Pa
 {
     ui->setupUi(this);
 
-    listModel = new AtlOptionalModListModel(this, version, mods);
+    listModel = new AtlOptionalModListModel(this, version, std::move(mods));
     ui->treeView->setModel(listModel);
 
     ui->treeView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

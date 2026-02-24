@@ -27,7 +27,7 @@
 
 namespace Java {
 
-VersionList::VersionList(Meta::Version::Ptr version, QObject* parent) : BaseVersionList(parent), m_version(version)
+VersionList::VersionList(const Meta::Version::Ptr& version, QObject* parent) : BaseVersionList(parent), m_version(version)
 {
     if (version->isLoaded())
         sortVersions();
@@ -98,7 +98,7 @@ BaseVersionList::RoleList VersionList::providesRoles() const
     return { VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, JavaNameRole, TypeRole, Meta::VersionList::TimeRole };
 }
 
-bool sortJavas(BaseVersion::Ptr left, BaseVersion::Ptr right)
+bool sortJavas(const BaseVersion::Ptr& left, const BaseVersion::Ptr& right)
 {
     auto rleft = std::dynamic_pointer_cast<Java::Metadata>(right);
     auto rright = std::dynamic_pointer_cast<Java::Metadata>(left);
@@ -115,7 +115,7 @@ void VersionList::sortVersions()
     m_vlist = {};
     if (!versionStr.isEmpty() && !runtimes.isEmpty()) {
         std::copy_if(runtimes.begin(), runtimes.end(), std::back_inserter(m_vlist),
-                     [versionStr](Java::MetadataPtr val) { return val->runtimeOS == versionStr; });
+                     [versionStr](const Java::MetadataPtr& val) { return val->runtimeOS == versionStr; });
         std::sort(m_vlist.begin(), m_vlist.end(), sortJavas);
     } else {
         qWarning() << "No Java versions found for your operating system:" << SysInfo::currentSystem() << SysInfo::useQTForArch();

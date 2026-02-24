@@ -56,5 +56,5 @@ class ResourceDownloadTask : public SequentialTask {
     std::tuple<QString, QString> to_delete{ "", "" };
 
    private slots:
-    void hasOldResource(QString name, QString filename);
+    void hasOldResource(const QString& name, const QString& filename);
 };

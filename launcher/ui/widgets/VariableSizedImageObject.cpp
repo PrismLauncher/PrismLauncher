@@ -111,7 +111,7 @@ void VariableSizedImageObject::flush()
     m_fetching_images.clear();
 }
 
-void VariableSizedImageObject::parseImage(QTextDocument* doc, std::shared_ptr<ImageMetadata> meta)
+void VariableSizedImageObject::parseImage(QTextDocument* doc, const std::shared_ptr<ImageMetadata>& meta)
 {
     QTextCursor cursor(doc);
     cursor.setPosition(meta->posInDocument);
@@ -131,7 +131,7 @@ void VariableSizedImageObject::parseImage(QTextDocument* doc, std::shared_ptr<Im
     cursor.insertText(QString(QChar::ObjectReplacementCharacter), image_char_format);
 }
 
-void VariableSizedImageObject::loadImage(QTextDocument* doc, std::shared_ptr<ImageMetadata> meta)
+void VariableSizedImageObject::loadImage(QTextDocument* doc, const std::shared_ptr<ImageMetadata>& meta)
 {
     m_fetching_images.insert(meta->url);
 
@@ -168,7 +168,7 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, std::shared_ptr<Ima
         QImage image(full_entry_path);
         loadImage(image);
     });
-    connect(job, &NetJob::failed, this, [this, full_entry_path, source_url, loadImage](QString reason) {
+    connect(job, &NetJob::failed, this, [this, full_entry_path, source_url, loadImage](const QString& reason) {
         qWarning() << "Failed resource at:" << full_entry_path << "because:" << reason;
         // If we flushed, don't proceed.
         if (!m_fetching_images.contains(source_url))

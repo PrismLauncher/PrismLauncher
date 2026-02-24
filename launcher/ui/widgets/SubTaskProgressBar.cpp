@@ -45,12 +45,12 @@ void SubTaskProgressBar::setValue(int value)
     ui->progressBar->setValue(value);
 }
 
-void SubTaskProgressBar::setStatus(QString status)
+void SubTaskProgressBar::setStatus(const QString& status)
 {
     ui->statusLabel->setText(status);
 }
 
-void SubTaskProgressBar::setDetails(QString details)
+void SubTaskProgressBar::setDetails(const QString& details)
 {
     ui->statusDetailsLabel->setText(details);
 }

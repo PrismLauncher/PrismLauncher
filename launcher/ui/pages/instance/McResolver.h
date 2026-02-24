@@ -16,13 +16,13 @@ class McResolver : public QObject {
     void ping();
 
    private:
-    void pingWithDomainSRV(QString domain, int port);
-    void pingWithDomainA(QString domain, int port);
-    void emitFail(QString error);
+    void pingWithDomainSRV(const QString& domain, int port);
+    void pingWithDomainA(const QString& domain, int port);
+    void emitFail(const QString& error);
     void emitSucceed(QString ip, int port);
 
    signals:
-    void succeeded(QString ip, int port);
-    void failed(QString error);
+    void succeeded(const QString& ip, int port);
+    void failed(const QString& error);
     void finished();
 };

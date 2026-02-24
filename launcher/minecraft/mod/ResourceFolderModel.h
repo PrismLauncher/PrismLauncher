@@ -217,7 +217,7 @@ class ResourceFolderModel : public QAbstractListModel {
     void applyUpdates(QSet<QString>& current_set, QSet<QString>& new_set, QMap<QString, Resource::Ptr>& new_resources);
 
    protected slots:
-    void directoryChanged(QString);
+    void directoryChanged(const QString&);
 
     /** Called when the update task is successful.
      *

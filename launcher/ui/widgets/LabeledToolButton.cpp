@@ -40,6 +40,7 @@
 #include <QResizeEvent>
 #include <QStyleOption>
 #include <QVBoxLayout>
+#include <utility>
 
 /*
  *
@@ -70,7 +71,7 @@ void LabeledToolButton::setText(const QString& text)
 
 void LabeledToolButton::setIcon(QIcon icon)
 {
-    m_icon = icon;
+    m_icon = std::move(icon);
     resetIcon();
 }
 

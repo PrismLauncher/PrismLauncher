@@ -57,7 +57,7 @@ QIcon loadFTBIcon(const QString& imagePath)
     return QIcon(pixmap);
 }
 
-Modpack parseDirectory(QString path)
+Modpack parseDirectory(const QString& path)
 {
     Modpack modpack{ path };
     auto instanceFile = QFileInfo(FS::PathCombine(path, "instance.json"));
@@ -109,7 +109,7 @@ Modpack parseDirectory(QString path)
     return modpack;
 }
 
-void legacyInstanceParsing(QString path, std::optional<ModPlatform::ModLoaderType>* loaderType, QString* loaderVersion)
+void legacyInstanceParsing(const QString& path, std::optional<ModPlatform::ModLoaderType>* loaderType, QString* loaderVersion)
 {
     auto versionsFile = QFileInfo(FS::PathCombine(path, ".ftbapp", "version.json"));
     if (!versionsFile.exists() || !versionsFile.isFile()) {

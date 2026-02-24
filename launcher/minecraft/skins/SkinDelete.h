@@ -27,7 +27,7 @@ class SkinDelete : public Net::NetRequest {
     SkinDelete();
     ~SkinDelete() override = default;
 
-    static SkinDelete::Ptr make(QString token);
+    static SkinDelete::Ptr make(const QString& token);
 
    protected:
     QNetworkReply* getReply(QNetworkRequest&) override;

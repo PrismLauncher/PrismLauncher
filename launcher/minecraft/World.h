@@ -77,7 +77,7 @@ class World {
    private:
     void readFromZip(const QFileInfo& file);
     void readFromFS(const QFileInfo& file);
-    void loadFromLevelDat(QByteArray data);
+    void loadFromLevelDat(const QByteArray& data);
 
    protected:
     QFileInfo m_containerFile;

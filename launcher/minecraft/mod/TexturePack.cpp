@@ -21,6 +21,7 @@
 
 #include <QDebug>
 #include <QMap>
+#include <utility>
 #include "MTPixmapCache.h"
 
 #include "minecraft/mod/tasks/LocalTexturePackParseTask.h"
@@ -29,10 +30,10 @@ void TexturePack::setDescription(QString new_description)
 {
     QMutexLocker locker(&m_data_lock);
 
-    m_description = new_description;
+    m_description = std::move(new_description);
 }
 
-void TexturePack::setImage(QImage new_image) const
+void TexturePack::setImage(const QImage& new_image) const
 {
     QMutexLocker locker(&m_data_lock);
 

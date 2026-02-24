@@ -54,6 +54,7 @@
 #include <QSet>
 #include <QStyledItemDelegate>
 #include <memory>
+#include <utility>
 
 #include <Application.h>
 #include "settings/SettingsObject.h"
@@ -87,8 +88,8 @@ class ThumbnailRunnable : public QRunnable {
    public:
     ThumbnailRunnable(QString path, SharedIconCachePtr cache)
     {
-        m_path = path;
-        m_cache = cache;
+        m_path = std::move(path);
+        m_cache = std::move(cache);
     }
     void run() override
     {
@@ -192,15 +193,15 @@ class FilterModel : public QIdentityProxyModel {
    private:
     void thumbnailImage(QString path)
     {
-        auto runnable = new ThumbnailRunnable(path, m_thumbnailCache);
+        auto runnable = new ThumbnailRunnable(std::move(path), m_thumbnailCache);
         connect(&runnable->m_resultEmitter, &ThumbnailingResult::resultsReady, this, &FilterModel::thumbnailReady);
         connect(&runnable->m_resultEmitter, &ThumbnailingResult::resultsFailed, this, &FilterModel::thumbnailFailed);
         m_thumbnailingPool.start(runnable);
     }
    private slots:
-    void thumbnailReady(QString path) { emit layoutChanged(); }
-    void thumbnailFailed(QString path) { m_failed.insert(path); }
-    void fileChanged(QString filepath)
+    void thumbnailReady(const QString& path) { emit layoutChanged(); }
+    void thumbnailFailed(const QString& path) { m_failed.insert(path); }
+    void fileChanged(const QString& filepath)
     {
         m_thumbnailCache->setStale(filepath);
         // reinsert the path...
@@ -250,7 +251,7 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent) : QMainWindow(pa
     constexpr int file_modified_column_index = 3;
     m_model->sort(file_modified_column_index, Qt::DescendingOrder);
 
-    m_folder = path;
+    m_folder = std::move(path);
     m_valid = FS::ensureFolderPathExists(m_folder);
 
     ui->setupUi(this);
@@ -400,7 +401,7 @@ void ScreenshotsPage::on_actionUpload_triggered()
         auto screenshot = std::make_shared<ScreenShot>(info);
         job->addNetAction(ImgurUpload::make(screenshot));
 
-        connect(job.get(), &Task::failed, [this](QString reason) {
+        connect(job.get(), &Task::failed, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), reason, QMessageBox::Critical)->show();
         });
         connect(job.get(), &Task::aborted, [this] {
@@ -441,7 +442,7 @@ void ScreenshotsPage::on_actionUpload_triggered()
     task.addTask(job);
     task.addTask(albumTask);
 
-    connect(&task, &Task::failed, [this](QString reason) {
+    connect(&task, &Task::failed, [this](const QString& reason) {
         CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), reason, QMessageBox::Critical)->show();
     });
     connect(&task, &Task::aborted, [this] {

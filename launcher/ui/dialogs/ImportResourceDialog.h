@@ -25,6 +25,6 @@ class ImportResourceDialog : public QDialog {
     InstanceProxyModel* proxyModel;
 
    private slots:
-    void selectionChanged(QItemSelection, QItemSelection);
+    void selectionChanged(QItemSelection, const QItemSelection&);
     void activated(QModelIndex);
 };

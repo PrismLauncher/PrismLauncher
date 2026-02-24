@@ -150,7 +150,7 @@ class OrSetting : public Setting {
     Q_OBJECT
    public:
     OrSetting(QString id, std::shared_ptr<Setting> a, std::shared_ptr<Setting> b)
-        : Setting({ id }, false), m_a(std::move(a)), m_b(std::move(b))
+        : Setting({ std::move(id) }, false), m_a(std::move(a)), m_b(std::move(b))
     {}
     QVariant get() const override
     {
@@ -680,7 +680,7 @@ QProcessEnvironment MinecraftInstance::createEnvironment()
     }
     // custom env
 
-    auto insertEnv = [&env](QString value) {
+    auto insertEnv = [&env](const QString& value) {
         auto envMap = Json::toMap(value);
         if (envMap.isEmpty())
             return;
@@ -708,7 +708,7 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
         if (!mangoHudLibString.isEmpty()) {
             QFileInfo mangoHudLib(mangoHudLibString);
             QString libPath = mangoHudLib.absolutePath();
-            auto appendLib = [libPath, &preloadList](QString fileName) {
+            auto appendLib = [libPath, &preloadList](const QString& fileName) {
                 if (QFileInfo(FS::PathCombine(libPath, fileName)).exists())
                     preloadList << FS::PathCombine(libPath, fileName);
             };
@@ -789,7 +789,7 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, Mine
     return args;
 }
 
-QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin)
+QString MinecraftInstance::createLaunchScript(const AuthSessionPtr& session, const MinecraftTarget::Ptr& targetToJoin)
 {
     QString launchScript;
 
@@ -1014,16 +1014,16 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
     return out;
 }
 
-QMap<QString, QString> MinecraftInstance::createCensorFilterFromSession(AuthSessionPtr session)
+QMap<QString, QString> MinecraftInstance::createCensorFilterFromSession(const AuthSessionPtr& session)
 {
     if (!session) {
         return {};
     }
     auto& sessionRef = *session.get();
     QMap<QString, QString> filter;
-    auto addToFilter = [&filter](QString key, QString value) {
+    auto addToFilter = [&filter](const QString& key, QString value) {
         if (key.trimmed().size()) {
-            filter[key] = value;
+            filter[key] = std::move(value);
         }
     };
     if (sessionRef.session != "-") {
@@ -1037,7 +1037,7 @@ QMap<QString, QString> MinecraftInstance::createCensorFilterFromSession(AuthSess
     return filter;
 }
 
-QMap<QString, QString> MinecraftInstance::makeProfileVarMapping(std::shared_ptr<LaunchProfile> profile) const
+QMap<QString, QString> MinecraftInstance::makeProfileVarMapping(const std::shared_ptr<LaunchProfile>& profile) const
 {
     QMap<QString, QString> result;
 

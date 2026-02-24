@@ -37,7 +37,7 @@ class DataPack : public Resource {
     Q_OBJECT
    public:
     DataPack(QObject* parent = nullptr) : Resource(parent) {}
-    DataPack(QFileInfo file_info) : Resource(file_info) {}
+    DataPack(const QFileInfo& file_info) : Resource(file_info) {}
 
     /** Gets the numerical ID of the pack format. */
     int packFormat() const { return m_pack_format; }
@@ -57,7 +57,7 @@ class DataPack : public Resource {
     void setDescription(QString new_description);
 
     /** Thread-safe. */
-    void setImage(QImage new_image) const;
+    void setImage(const QImage& new_image) const;
 
     bool valid() const override;
 

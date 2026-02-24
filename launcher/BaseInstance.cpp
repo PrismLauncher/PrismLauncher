@@ -237,7 +237,7 @@ bool BaseInstance::isLinkedToInstanceId(const QString& id) const
     return linkedInstances.contains(id);
 }
 
-void BaseInstance::iconUpdated(QString key)
+void BaseInstance::iconUpdated(const QString& key)
 {
     if (iconKey() == key) {
         emit propertiesChanged(this);
@@ -368,7 +368,7 @@ void BaseInstance::setLastLaunch(qint64 val)
     emit propertiesChanged(this);
 }
 
-void BaseInstance::setNotes(QString val)
+void BaseInstance::setNotes(const QString& val)
 {
     // FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("notes", val);
@@ -379,7 +379,7 @@ QString BaseInstance::notes() const
     return m_settings->get("notes").toString();
 }
 
-void BaseInstance::setIconKey(QString val)
+void BaseInstance::setIconKey(const QString& val)
 {
     // FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("iconKey", val);
@@ -391,7 +391,7 @@ QString BaseInstance::iconKey() const
     return m_settings->get("iconKey").toString();
 }
 
-void BaseInstance::setName(QString val)
+void BaseInstance::setName(const QString& val)
 {
     // FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("name", val);

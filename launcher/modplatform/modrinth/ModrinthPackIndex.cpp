@@ -28,7 +28,7 @@
 
 static ModrinthAPI api;
 
-bool shouldDownloadOnSide(QString side)
+bool shouldDownloadOnSide(const QString& side)
 {
     return side == "required" || side == "optional";
 }
@@ -114,7 +114,7 @@ void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& ob
     pack.extraDataLoaded = true;
 }
 
-ModPlatform::IndexedVersion Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_type, QString preferred_file_name)
+ModPlatform::IndexedVersion Modrinth::loadIndexedPackVersion(QJsonObject& obj, const QString& preferred_hash_type, const QString& preferred_file_name)
 {
     ModPlatform::IndexedVersion file;
 

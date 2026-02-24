@@ -58,10 +58,10 @@ class ImgurUpload : public Net::NetRequest {
         ScreenShot::Ptr m_shot;
         QByteArray m_output;
     };
-    ImgurUpload(QFileInfo info) : m_fileInfo(info) {}
+    ImgurUpload(const QFileInfo& info) : m_fileInfo(info) {}
     ~ImgurUpload() override = default;
 
-    static NetRequest::Ptr make(ScreenShot::Ptr m_shot);
+    static NetRequest::Ptr make(const ScreenShot::Ptr& m_shot);
 
    private:
     QNetworkReply* getReply(QNetworkRequest&) override;

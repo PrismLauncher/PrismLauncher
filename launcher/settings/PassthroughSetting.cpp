@@ -15,12 +15,14 @@
 
 #include "PassthroughSetting.h"
 
-PassthroughSetting::PassthroughSetting(std::shared_ptr<Setting> other, std::shared_ptr<Setting> gate)
+#include <utility>
+
+PassthroughSetting::PassthroughSetting(const std::shared_ptr<Setting>& other, std::shared_ptr<Setting> gate)
     : Setting(other->configKeys(), QVariant())
 {
     Q_ASSERT(other);
     m_other = other;
-    m_gate = gate;
+    m_gate = std::move(gate);
 }
 
 bool PassthroughSetting::isOverriding() const

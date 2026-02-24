@@ -41,6 +41,7 @@
 #include <settings/Setting.h>
 
 #include <QDebug>
+#include <utility>
 #include "Application.h"
 #include "FileSystem.h"
 #include "java/JavaInstallList.h"
@@ -50,7 +51,7 @@
 
 JavaUtils::JavaUtils() = default;
 
-QString stripVariableEntries(QString name, QString target, QString remove)
+QString stripVariableEntries(const QString& name, const QString& target, const QString& remove)
 {
     char delimiter = ':';
 #ifdef Q_OS_WIN32
@@ -127,13 +128,13 @@ QProcessEnvironment CleanEnviroment()
     return env;
 }
 
-JavaInstallPtr JavaUtils::MakeJavaPtr(QString path, QString id, QString arch)
+JavaInstallPtr JavaUtils::MakeJavaPtr(QString path, const QString& id, QString arch)
 {
     JavaInstallPtr javaVersion(new JavaInstall());
 
     javaVersion->id = id;
-    javaVersion->arch = arch;
-    javaVersion->path = path;
+    javaVersion->arch = std::move(arch);
+    javaVersion->path = std::move(path);
 
     return javaVersion;
 }
@@ -566,7 +567,7 @@ QStringList getPrismJavaBundle()
 {
     QList<QString> javas;
 
-    auto scanDir = [&javas](QString prefix) {
+    auto scanDir = [&javas](const QString& prefix) {
         javas.append(FS::PathCombine(prefix, "jre", "bin", JavaUtils::javaExecutable));
         javas.append(FS::PathCombine(prefix, "bin", JavaUtils::javaExecutable));
         javas.append(FS::PathCombine(prefix, JavaUtils::javaExecutable));

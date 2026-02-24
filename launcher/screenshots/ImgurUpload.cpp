@@ -116,7 +116,7 @@ auto ImgurUpload::Sink::finalize(QNetworkReply&) -> Task::State
     return Task::State::Succeeded;
 }
 
-Net::NetRequest::Ptr ImgurUpload::make(ScreenShot::Ptr m_shot)
+Net::NetRequest::Ptr ImgurUpload::make(const ScreenShot::Ptr& m_shot)
 {
     auto up = makeShared<ImgurUpload>(m_shot->m_file);
     up->m_url = BuildConfig.IMGUR_BASE_URL + "image";

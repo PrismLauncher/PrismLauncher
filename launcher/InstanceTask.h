@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 #include "settings/SettingsObject.h"
 #include "tasks/Task.h"
 
@@ -7,7 +9,7 @@
 enum class InstanceNameChange { ShouldChange, ShouldKeep };
 [[nodiscard]] InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& old_name, const QString& new_name);
 enum class ShouldUpdate { Update, SkipUpdating, Cancel };
-[[nodiscard]] ShouldUpdate askIfShouldUpdate(QWidget* parent, QString original_version_name);
+[[nodiscard]] ShouldUpdate askIfShouldUpdate(QWidget* parent, const QString& original_version_name);
 
 struct InstanceName {
    public:
@@ -19,7 +21,7 @@ struct InstanceName {
     QString name() const;
     QString version() const;
 
-    void setName(QString name) { m_modified_name = name; }
+    void setName(QString name) { m_modified_name = std::move(name); }
     void setName(InstanceName& other);
 
    protected:
@@ -52,7 +54,7 @@ class InstanceTask : public Task, public InstanceName {
     QString originalInstanceID() const { return m_original_instance_id; };
 
    protected:
-    void setOverride(bool override, QString instance_id_to_override = {})
+    void setOverride(bool override, const QString& instance_id_to_override = {})
     {
         m_override_existing = override;
         if (!instance_id_to_override.isEmpty())

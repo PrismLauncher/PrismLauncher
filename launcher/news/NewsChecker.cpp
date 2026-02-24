@@ -113,7 +113,7 @@ void NewsChecker::rssDownloadFinished()
     succeed();
 }
 
-void NewsChecker::rssDownloadFailed(QString reason)
+void NewsChecker::rssDownloadFailed(const QString& reason)
 {
     // Set an error message and fail.
     fail(tr("Failed to load news RSS feed:\n%1").arg(reason));

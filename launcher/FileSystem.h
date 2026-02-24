@@ -199,7 +199,7 @@ class ExternalLinkFileProcess : public QThread {
 class create_link : public QObject {
     Q_OBJECT
    public:
-    create_link(const QList<LinkPair> path_pairs, QObject* parent = nullptr) : QObject(parent) { m_path_pairs.append(path_pairs); }
+    create_link(const QList<LinkPair>& path_pairs, QObject* parent = nullptr) : QObject(parent) { m_path_pairs.append(path_pairs); }
     create_link(const QString& src, const QString& dst, QObject* parent = nullptr) : QObject(parent)
     {
         LinkPair pair = { src, dst };

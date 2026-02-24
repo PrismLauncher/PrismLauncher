@@ -37,6 +37,7 @@
 #include "ui_CustomPage.h"
 
 #include <QTabBar>
+#include <utility>
 
 #include "Application.h"
 #include "Filter.h"
@@ -207,13 +208,13 @@ void CustomPage::suggestCurrent()
 
 void CustomPage::setSelectedVersion(BaseVersion::Ptr version)
 {
-    m_selectedVersion = version;
+    m_selectedVersion = std::move(version);
     suggestCurrent();
     loaderFilterChanged();
 }
 
 void CustomPage::setSelectedLoaderVersion(BaseVersion::Ptr version)
 {
-    m_selectedLoaderVersion = version;
+    m_selectedLoaderVersion = std::move(version);
     suggestCurrent();
 }

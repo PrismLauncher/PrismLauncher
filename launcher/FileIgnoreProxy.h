@@ -46,11 +46,11 @@ class FileIgnoreProxy : public QSortFilterProxyModel {
    public:
     FileIgnoreProxy(QString root, QObject* parent);
     // NOTE: Sadly, we have to do sorting ourselves.
-     bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 
-     Qt::ItemFlags flags(const QModelIndex& index) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
     QString relPath(const QString& path) const;
@@ -80,7 +80,7 @@ class FileIgnoreProxy : public QSortFilterProxyModel {
     bool filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const override;
     bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;
 
-    bool ignoreFile(QFileInfo file) const;
+    bool ignoreFile(const QFileInfo& file) const;
 
    private:
     const QString m_root;

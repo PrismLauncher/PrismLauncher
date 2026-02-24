@@ -29,7 +29,7 @@ class IconPickerDialog : public QDialog {
    public:
     explicit IconPickerDialog(QWidget* parent = nullptr);
     ~IconPickerDialog() override;
-    int execWithSelection(QString selection);
+    int execWithSelection(const QString& selection);
     QString selectedIconKey;
 
    protected:
@@ -42,7 +42,7 @@ class IconPickerDialog : public QDialog {
     QSortFilterProxyModel* proxyModel;
 
    private slots:
-    void selectionChanged(QItemSelection, QItemSelection);
+    void selectionChanged(QItemSelection, const QItemSelection&);
     void activated(QModelIndex);
     void delayed_scroll(QModelIndex);
     void addNewIcon();

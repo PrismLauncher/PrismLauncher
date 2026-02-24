@@ -178,7 +178,7 @@ bool processPackPNG(const TexturePack& pack)
     }
 }
 
-bool validate(QFileInfo file)
+bool validate(const QFileInfo& file)
 {
     TexturePack rp{ file };
     return TexturePackUtils::process(rp, ProcessingLevel::BasicInfoOnly) && rp.valid();

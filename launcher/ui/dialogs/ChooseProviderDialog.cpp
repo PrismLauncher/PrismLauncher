@@ -36,7 +36,7 @@ ChooseProviderDialog::~ChooseProviderDialog()
     delete ui;
 }
 
-void ChooseProviderDialog::setDescription(QString desc)
+void ChooseProviderDialog::setDescription(const QString& desc)
 {
     ui->explanationLabel->setText(desc);
 }

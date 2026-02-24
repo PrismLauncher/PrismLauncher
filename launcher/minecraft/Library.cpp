@@ -42,6 +42,8 @@
 #include <net/ApiDownload.h>
 #include <net/ChecksumValidator.h>
 
+#include <utility>
+
 /**
  * @brief Collect applicable files for the library.
  *
@@ -115,7 +117,7 @@ QList<Net::NetRequest::Ptr> Library::getDownloads(const RuntimeContext& runtimeC
     bool local = isLocal();
 
     // Lambda function to check if a local file exists
-    auto check_local_file = [overridePath, &failedLocalFiles](QString storage) {
+    auto check_local_file = [overridePath, &failedLocalFiles](const QString& storage) {
         QFileInfo fileinfo(storage);
         QString fileName = fileinfo.fileName();
         auto fullPath = FS::PathCombine(overridePath, fileName);
@@ -128,7 +130,7 @@ QList<Net::NetRequest::Ptr> Library::getDownloads(const RuntimeContext& runtimeC
     };
 
     // Lambda function to add a download request
-    auto add_download = [this, local, check_local_file, cache, stale, &out](QString storage, QString url, QString sha1) {
+    auto add_download = [this, local, check_local_file, cache, stale, &out](const QString& storage, const QString& url, const QString& sha1) {
         if (local) {
             return check_local_file(storage);
         }
@@ -306,7 +308,7 @@ QString Library::getCompatibleNative(const RuntimeContext& runtimeContext) const
  */
 void Library::setStoragePrefix(QString prefix)
 {
-    m_storagePrefix = prefix;
+    m_storagePrefix = std::move(prefix);
 }
 
 /**

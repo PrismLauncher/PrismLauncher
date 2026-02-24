@@ -55,7 +55,7 @@ class ListModel : public QAbstractListModel {
     int columnCount(const QModelIndex& parent) const override;
     int rowCount(const QModelIndex& parent) const override;
 
-    void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
+    void getLogo(const QString& logo, const QString& logoUrl, const LogoCallback& callback);
     void searchWithTerm(const QString& term);
 
     bool hasActiveSearchJob() const { return jobPtr && jobPtr->isRunning(); }
@@ -65,12 +65,12 @@ class ListModel : public QAbstractListModel {
     void searchRequestFinished(QByteArray* responsePtr);
     void searchRequestFailed();
 
-    void logoFailed(QString logo);
-    void logoLoaded(QString logo, QString out);
+    void logoFailed(const QString& logo);
+    void logoLoaded(const QString& logo, const QString& out);
 
    private:
     void performSearch();
-    void requestLogo(QString logo, QString url);
+    void requestLogo(const QString& logo, const QString& url);
 
    private:
     QList<Modpack> modpacks;

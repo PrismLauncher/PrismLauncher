@@ -36,7 +36,7 @@ class ListModel : public QAbstractListModel {
     bool canFetchMore(const QModelIndex& parent) const override;
     void fetchMore(const QModelIndex& parent) override;
 
-    void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
+    void getLogo(const QString& logo, const QString& logoUrl, const LogoCallback& callback);
     void searchWithTerm(const QString& term, int sort, std::shared_ptr<ModFilterWidget::Filter> filter, bool filterChanged);
 
     bool hasActiveSearchJob() const { return m_jobPtr && m_jobPtr->isRunning(); }
@@ -45,15 +45,15 @@ class ListModel : public QAbstractListModel {
    private slots:
     void performPaginatedSearch();
 
-    void logoFailed(QString logo);
-    void logoLoaded(QString logo, QIcon out);
+    void logoFailed(const QString& logo);
+    void logoLoaded(const QString& logo, const QIcon& out);
 
     void searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr>&);
-    void searchRequestFailed(QString reason);
-    void searchRequestForOneSucceeded(ModPlatform::IndexedPack::Ptr);
+    void searchRequestFailed(const QString& reason);
+    void searchRequestForOneSucceeded(const ModPlatform::IndexedPack::Ptr&);
 
    private:
-    void requestLogo(QString file, QString url);
+    void requestLogo(const QString& file, const QString& url);
 
    private:
     QList<ModPlatform::IndexedPack::Ptr> m_modpacks;

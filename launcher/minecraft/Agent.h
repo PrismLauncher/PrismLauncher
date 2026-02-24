@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QString>
+#include <utility>
 
 #include "Library.h"
 
@@ -12,7 +13,7 @@ class Agent {
    public:
     Agent(LibraryPtr library, const QString& argument)
     {
-        m_library = library;
+        m_library = std::move(library);
         m_argument = argument;
     }
 

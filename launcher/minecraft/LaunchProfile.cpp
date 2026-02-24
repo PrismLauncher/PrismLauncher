@@ -92,7 +92,7 @@ void LaunchProfile::applyMinecraftVersionType(const QString& type)
     applyString(type, this->m_minecraftVersionType);
 }
 
-void LaunchProfile::applyMinecraftAssets(MojangAssetIndexInfo::Ptr assets)
+void LaunchProfile::applyMinecraftAssets(const MojangAssetIndexInfo::Ptr& assets)
 {
     if (assets) {
         m_minecraftAssets = assets;
@@ -165,13 +165,13 @@ void LaunchProfile::applyCompatibleJavaMajors(QList<int>& javaMajor)
     m_compatibleJavaMajors.append(javaMajor);
 }
 
-void LaunchProfile::applyCompatibleJavaName(QString javaName)
+void LaunchProfile::applyCompatibleJavaName(const QString& javaName)
 {
     if (!javaName.isEmpty())
         m_compatibleJavaName = javaName;
 }
 
-void LaunchProfile::applyLibrary(LibraryPtr library, const RuntimeContext& runtimeContext)
+void LaunchProfile::applyLibrary(const LibraryPtr& library, const RuntimeContext& runtimeContext)
 {
     if (!library->isActive(runtimeContext)) {
         return;
@@ -199,7 +199,7 @@ void LaunchProfile::applyLibrary(LibraryPtr library, const RuntimeContext& runti
     }
 }
 
-void LaunchProfile::applyMavenFile(LibraryPtr mavenFile, const RuntimeContext& runtimeContext)
+void LaunchProfile::applyMavenFile(const LibraryPtr& mavenFile, const RuntimeContext& runtimeContext)
 {
     if (!mavenFile->isActive(runtimeContext)) {
         return;
@@ -213,7 +213,7 @@ void LaunchProfile::applyMavenFile(LibraryPtr mavenFile, const RuntimeContext& r
     m_mavenFiles.append(Library::limitedCopy(mavenFile));
 }
 
-void LaunchProfile::applyAgent(AgentPtr agent, const RuntimeContext& runtimeContext)
+void LaunchProfile::applyAgent(const AgentPtr& agent, const RuntimeContext& runtimeContext)
 {
     auto lib = agent->library();
     if (!lib->isActive(runtimeContext)) {
@@ -232,7 +232,7 @@ const LibraryPtr LaunchProfile::getMainJar() const
     return m_mainJar;
 }
 
-void LaunchProfile::applyMainJar(LibraryPtr jar)
+void LaunchProfile::applyMainJar(const LibraryPtr& jar)
 {
     if (jar) {
         m_mainJar = jar;

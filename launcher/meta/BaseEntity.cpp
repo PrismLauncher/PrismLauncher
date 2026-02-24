@@ -15,6 +15,8 @@
 
 #include "BaseEntity.h"
 
+#include <utility>
+
 #include "Exception.h"
 #include "FileSystem.h"
 #include "Json.h"
@@ -99,7 +101,7 @@ bool BaseEntity::isLoaded() const
 
 void BaseEntity::setSha256(QString sha256)
 {
-    m_sha256 = sha256;
+    m_sha256 = std::move(sha256);
 }
 
 BaseEntity::LoadStatus BaseEntity::status() const

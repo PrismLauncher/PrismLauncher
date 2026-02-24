@@ -19,6 +19,7 @@
 #include "FileResolvingTask.h"
 #include <algorithm>
 #include <memory>
+#include <utility>
 
 #include "Json.h"
 #include "modplatform/ModIndex.h"
@@ -69,7 +70,7 @@ void Flame::FileResolvingTask::executeTask()
     connect(m_task.get(), &Task::failed, this, [this, step_progress](QString reason) {
         step_progress->state = TaskStepState::Failed;
         stepProgress(*step_progress);
-        emitFailed(reason);
+        emitFailed(std::move(reason));
     });
     connect(m_task.get(), &Task::stepProgress, this, &FileResolvingTask::propagateStepProgress);
     connect(m_task.get(), &Task::progress, this, [this, step_progress](qint64 current, qint64 total) {
@@ -78,7 +79,7 @@ void Flame::FileResolvingTask::executeTask()
         stepProgress(*step_progress);
     });
     connect(m_task.get(), &Task::status, this, [this, step_progress](QString status) {
-        step_progress->status = status;
+        step_progress->status = std::move(status);
         stepProgress(*step_progress);
     });
 
@@ -201,7 +202,7 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
         }
         getFlameProjects();
     });
-    connect(m_task.get(), &Task::failed, this, [this, step_progress](QString reason) {
+    connect(m_task.get(), &Task::failed, this, [this, step_progress](const QString& reason) {
         step_progress->state = TaskStepState::Failed;
         stepProgress(*step_progress);
         getFlameProjects();
@@ -213,7 +214,7 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
         stepProgress(*step_progress);
     });
     connect(m_task.get(), &Task::status, this, [this, step_progress](QString status) {
-        step_progress->status = status;
+        step_progress->status = std::move(status);
         stepProgress(*step_progress);
     });
 
@@ -274,7 +275,7 @@ void Flame::FileResolvingTask::getFlameProjects()
     connect(m_task.get(), &Task::failed, this, [this, step_progress](QString reason) {
         step_progress->state = TaskStepState::Failed;
         stepProgress(*step_progress);
-        emitFailed(reason);
+        emitFailed(std::move(reason));
     });
     connect(m_task.get(), &Task::stepProgress, this, &FileResolvingTask::propagateStepProgress);
     connect(m_task.get(), &Task::progress, this, [this, step_progress](qint64 current, qint64 total) {
@@ -283,7 +284,7 @@ void Flame::FileResolvingTask::getFlameProjects()
         stepProgress(*step_progress);
     });
     connect(m_task.get(), &Task::status, this, [this, step_progress](QString status) {
-        step_progress->status = status;
+        step_progress->status = std::move(status);
         stepProgress(*step_progress);
     });
 

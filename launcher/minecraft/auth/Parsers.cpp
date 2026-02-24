@@ -8,7 +8,7 @@
 
 namespace Parsers {
 
-bool getDateTime(QJsonValue value, QDateTime& out)
+bool getDateTime(const QJsonValue& value, QDateTime& out)
 {
     if (!value.isString()) {
         return false;
@@ -17,7 +17,7 @@ bool getDateTime(QJsonValue value, QDateTime& out)
     return out.isValid();
 }
 
-bool getString(QJsonValue value, QString& out)
+bool getString(const QJsonValue& value, QString& out)
 {
     if (!value.isString()) {
         return false;
@@ -26,7 +26,7 @@ bool getString(QJsonValue value, QString& out)
     return true;
 }
 
-bool getNumber(QJsonValue value, double& out)
+bool getNumber(const QJsonValue& value, double& out)
 {
     if (!value.isDouble()) {
         return false;
@@ -35,7 +35,7 @@ bool getNumber(QJsonValue value, double& out)
     return true;
 }
 
-bool getNumber(QJsonValue value, int64_t& out)
+bool getNumber(const QJsonValue& value, int64_t& out)
 {
     if (!value.isDouble()) {
         return false;
@@ -44,7 +44,7 @@ bool getNumber(QJsonValue value, int64_t& out)
     return true;
 }
 
-bool getBool(QJsonValue value, bool& out)
+bool getBool(const QJsonValue& value, bool& out)
 {
     if (!value.isBool()) {
         return false;
@@ -79,7 +79,7 @@ bool getBool(QJsonValue value, bool& out)
 // 2148916238 = child account not linked to a family
 */
 
-bool parseXTokenResponse(QByteArray& data, Token& output, QString name)
+bool parseXTokenResponse(QByteArray& data, Token& output, const QString& name)
 {
     qDebug() << "Parsing" << name << ":";
     qCDebug(authCredentials()) << data;

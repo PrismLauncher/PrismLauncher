@@ -24,7 +24,7 @@ class ModrinthCreationTask final : public InstanceCreationTask {
     };
 
    public:
-    ModrinthCreationTask(QString staging_path,
+    ModrinthCreationTask(const QString& staging_path,
                          SettingsObject* global_settings,
                          QWidget* parent,
                          QString id,

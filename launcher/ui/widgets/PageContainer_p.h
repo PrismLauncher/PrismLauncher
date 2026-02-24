@@ -69,7 +69,7 @@ class PageModel : public QAbstractListModel {
     }
     const QList<BasePage*>& pages() const { return m_pages; }
 
-    BasePage* findPageEntryById(QString id)
+    BasePage* findPageEntryById(const QString& id)
     {
         for (auto page : m_pages) {
             if (page->id() == id)

@@ -63,7 +63,7 @@ void ModrinthCheckUpdate::executeTask()
         // (though it will rarely happen, if at all)
         if (resource->metadata()->hash_format != m_hashType) {
             auto hash_task = Hashing::createHasher(resource->fileinfo().absoluteFilePath(), ModPlatform::ResourceProvider::MODRINTH);
-            connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, resource](QString hash) { m_mappings.insert(hash, resource); });
+            connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, resource](const QString& hash) { m_mappings.insert(hash, resource); });
             connect(hash_task.get(), &Task::failed, [this] { failed("Failed to generate hash"); });
             hashing_task->addTask(hash_task);
             startHasing = true;

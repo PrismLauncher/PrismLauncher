@@ -42,6 +42,7 @@
 #include <QJsonObject>
 #include <QJsonParseError>
 #include <QVariant>
+#include <utility>
 
 #include "AssetsUtils.h"
 #include "BuildConfig.h"
@@ -55,7 +56,7 @@
 #include "update/AssetUpdateTask.h"
 
 namespace {
-QSet<QString> collectPathsFromDir(QString dirPath)
+QSet<QString> collectPathsFromDir(const QString& dirPath)
 {
     QFileInfo dirInfo(dirPath);
 
@@ -203,7 +204,7 @@ QDir getAssetsDir(const QString& assetsId, const QString& resourcesFolder)
 }
 
 // FIXME: ugly code duplication
-bool reconstructAssets(QString assetsId, QString resourcesFolder)
+bool reconstructAssets(const QString& assetsId, QString resourcesFolder)
 {
     QDir assetsDir = QDir("assets/");
     QDir indexDir = QDir(FS::PathCombine(assetsDir.path(), "indexes"));
@@ -234,7 +235,7 @@ bool reconstructAssets(QString assetsId, QString resourcesFolder)
         removeLeftovers = true;
         qDebug() << "Reconstructing virtual assets folder at" << targetPath;
     } else if (index.mapToResources) {
-        targetPath = resourcesFolder;
+        targetPath = std::move(resourcesFolder);
         qDebug() << "Reconstructing resources folder at" << targetPath;
     }
 

@@ -46,6 +46,7 @@
 
 #include <QLabel>
 #include <QtMath>
+#include <utility>
 
 #include <RWStorage.h>
 
@@ -97,7 +98,7 @@ bool FilterModel::filterAcceptsRow([[maybe_unused]] int sourceRow, [[maybe_unuse
     return pack.name.contains(searchTerm, Qt::CaseInsensitive);
 }
 
-void FilterModel::setSearchTerm(const QString term)
+void FilterModel::setSearchTerm(const QString& term)
 {
     searchTerm = term.trimmed();
     invalidate();
@@ -215,7 +216,7 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
 void ListModel::fill(ModpackList modpacks_)
 {
     beginResetModel();
-    this->modpacks = modpacks_;
+    this->modpacks = std::move(modpacks_);
     endResetModel();
 }
 
@@ -249,20 +250,20 @@ void ListModel::remove(int row)
     endRemoveRows();
 }
 
-void ListModel::logoLoaded(QString logo, QIcon out)
+void ListModel::logoLoaded(const QString& logo, const QIcon& out)
 {
     m_loadingLogos.removeAll(logo);
     m_logoMap.insert(logo, out);
     emit dataChanged(createIndex(0, 0), createIndex(1, 0));
 }
 
-void ListModel::logoFailed(QString logo)
+void ListModel::logoFailed(const QString& logo)
 {
     m_failedLogos.append(logo);
     m_loadingLogos.removeAll(logo);
 }
 
-void ListModel::requestLogo(QString file)
+void ListModel::requestLogo(const QString& file)
 {
     if (m_loadingLogos.contains(file) || m_failedLogos.contains(file)) {
         return;
@@ -292,7 +293,7 @@ void ListModel::requestLogo(QString file)
     m_loadingLogos.append(file);
 }
 
-void ListModel::getLogo(const QString& logo, LogoCallback callback)
+void ListModel::getLogo(const QString& logo, const LogoCallback& callback)
 {
     if (m_logoMap.contains(logo)) {
         callback(APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(logo))->getFullPath());

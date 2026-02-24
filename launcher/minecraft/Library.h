@@ -42,6 +42,7 @@
 #include <QStringList>
 #include <QUrl>
 #include <memory>
+#include <utility>
 
 #include "GradleSpecifier.h"
 #include "MojangDownloadInfo.h"
@@ -63,7 +64,7 @@ class Library {
     Library() = default;
     Library(const QString& name) { m_name = name; }
     /// limited copy without some data. TODO: why?
-    static LibraryPtr limitedCopy(LibraryPtr base)
+    static LibraryPtr limitedCopy(const LibraryPtr& base)
     {
         auto newlib = std::make_shared<Library>();
         newlib->m_name = base->m_name;
@@ -124,12 +125,12 @@ class Library {
     /// Get the file name of the library
     QString displayName(const RuntimeContext& runtimeContext) const;
 
-    void setMojangDownloadInfo(MojangLibraryDownloadInfo::Ptr info) { m_mojangDownloads = info; }
+    void setMojangDownloadInfo(MojangLibraryDownloadInfo::Ptr info) { m_mojangDownloads = std::move(info); }
 
     void setHint(const QString& hint) { m_hint = hint; }
 
     /// Set the load rules
-    void setRules(QList<Rule> rules) { m_rules = rules; }
+    void setRules(QList<Rule> rules) { m_rules = std::move(rules); }
 
     /// Returns true if the library should be loaded (or extracted, in case of natives)
     bool isActive(const RuntimeContext& runtimeContext) const;

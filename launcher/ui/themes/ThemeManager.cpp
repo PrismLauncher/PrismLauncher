@@ -72,7 +72,7 @@ QString ThemeManager::addTheme(std::unique_ptr<ITheme> theme)
 /// @brief Gets the Theme from the List via ID
 /// @param themeId Theme ID of theme to fetch
 /// @return Theme at themeId
-ITheme* ThemeManager::getTheme(QString themeId)
+ITheme* ThemeManager::getTheme(const QString& themeId)
 {
     return m_themes[themeId].get();
 }
@@ -280,7 +280,7 @@ void ThemeManager::applyCurrentlySelectedTheme(bool initial)
     themeDebugLog() << "<> Application theme set.";
 }
 
-QString ThemeManager::getCatPack(QString catName)
+QString ThemeManager::getCatPack(const QString& catName)
 {
     auto catIter = m_catPacks.find(!catName.isEmpty() ? catName : APPLICATION->settings()->get("BackgroundCat").toString());
     if (catIter != m_catPacks.end()) {
@@ -321,7 +321,7 @@ void ThemeManager::initializeCatPacks()
     for (const auto& format : QImageReader::supportedImageFormats()) {
         supportedImageFormats.append("*." + format);
     }
-    auto loadFiles = [this, supportedImageFormats](QDir dir) {
+    auto loadFiles = [this, supportedImageFormats](const QDir& dir) {
         // Load image files directly
         QDirIterator ImageFileIterator(dir.absoluteFilePath(""), supportedImageFormats, QDir::Files);
         while (ImageFileIterator.hasNext()) {

@@ -47,10 +47,10 @@ bool processPackPNG(const DataPack* pack, QByteArray&& raw_data);
 bool processPackPNG(const DataPack* pack);
 
 /** Checks whether a file is valid as a data pack or not. */
-bool validate(QFileInfo file);
+bool validate(const QFileInfo& file);
 
 /** Checks whether a file is valid as a resource pack or not. */
-bool validateResourcePack(QFileInfo file);
+bool validateResourcePack(const QFileInfo& file);
 
 }  // namespace DataPackUtils
 

@@ -56,7 +56,7 @@ FilterModel::Sorting FilterModel::getCurrentSorting()
     return currentSorting;
 }
 
-void FilterModel::setSearchTerm(const QString term)
+void FilterModel::setSearchTerm(const QString& term)
 {
     searchTerm = term.trimmed();
     invalidate();

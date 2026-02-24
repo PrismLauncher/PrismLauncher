@@ -39,7 +39,7 @@
 
 #include <QRegularExpression>
 
-bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget* parent)
+bool JavaCommon::checkJVMArgs(const QString& jvmargs, QWidget* parent)
 {
     static const QRegularExpression s_memRegex("-Xm[sx]");
     static const QRegularExpression s_versionRegex("-version:.*");

@@ -56,7 +56,7 @@ struct RuntimeContext {
         return mapped == "x86_64" || mapped == "x86";
     }
 
-    bool classifierMatches(QString target) const
+    bool classifierMatches(const QString& target) const
     {
         // try to match precise classifier "[os]-[arch]"
         bool x = target == getClassifier();

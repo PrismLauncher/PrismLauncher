@@ -46,5 +46,5 @@ bool loadAssetsIndexJson(const QString& id, const QString& file, AssetsIndex& in
 QDir getAssetsDir(const QString& assetsId, const QString& resourcesFolder);
 
 /// Reconstruct a virtual assets folder for the given assets ID and return the folder
-bool reconstructAssets(QString assetsId, QString resourcesFolder);
+bool reconstructAssets(const QString& assetsId, QString resourcesFolder);
 }  // namespace AssetsUtils

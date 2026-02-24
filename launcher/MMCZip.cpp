@@ -46,12 +46,13 @@
 #include <QUrl>
 #include <memory>
 #include <ranges>
+#include <utility>
 
 namespace MMCZip {
 // ours
 using FilterFunction = std::function<bool(const QString&)>;
 #if defined(LAUNCHER_APPLICATION)
-bool mergeZipFiles(ArchiveWriter& into, QFileInfo from, QSet<QString>& contained, const FilterFunction& filter = nullptr)
+bool mergeZipFiles(ArchiveWriter& into, const QFileInfo& from, QSet<QString>& contained, const FilterFunction& filter = nullptr)
 {
     ArchiveReader r(from.absoluteFilePath());
     return r.parse([&into, &contained, &filter, from](ArchiveReader::File* f) {
@@ -75,7 +76,7 @@ bool mergeZipFiles(ArchiveWriter& into, QFileInfo from, QSet<QString>& contained
     });
 }
 
-bool compressDirFiles(ArchiveWriter& zip, QString dir, QFileInfoList files)
+bool compressDirFiles(ArchiveWriter& zip, const QString& dir, const QFileInfoList& files)
 {
     QDir directory(dir);
     if (!directory.exists())
@@ -92,7 +93,7 @@ bool compressDirFiles(ArchiveWriter& zip, QString dir, QFileInfoList files)
 }
 
 // ours
-bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod*>& mods)
+bool createModdedJar(const QString& sourceJarPath, const QString& targetJarPath, const QList<Mod*>& mods)
 {
     ArchiveWriter zipOut(targetJarPath);
     if (!zipOut.open()) {
@@ -159,7 +160,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
         }
     }
 
-    if (!mergeZipFiles(zipOut, QFileInfo(sourceJarPath), addedFiles, [](const QString key) { return !key.contains("META-INF"); })) {
+    if (!mergeZipFiles(zipOut, QFileInfo(sourceJarPath), addedFiles, [](const QString& key) { return !key.contains("META-INF"); })) {
         zipOut.close();
         FS::deletePath(targetJarPath);
         qCritical() << "Failed to insert minecraft.jar contents.";
@@ -252,7 +253,7 @@ std::optional<QStringList> extractSubDir(ArchiveReader* zip, const QString& subd
 }
 
 // ours
-std::optional<QStringList> extractDir(QString fileCompressed, QString dir)
+std::optional<QStringList> extractDir(const QString& fileCompressed, const QString& dir)
 {
     // check if this is a minimum size empty zip file...
     QFileInfo fileInfo(fileCompressed);
@@ -264,7 +265,7 @@ std::optional<QStringList> extractDir(QString fileCompressed, QString dir)
 }
 
 // ours
-std::optional<QStringList> extractDir(QString fileCompressed, QString subdir, QString dir)
+std::optional<QStringList> extractDir(const QString& fileCompressed, const QString& subdir, const QString& dir)
 {
     // check if this is a minimum size empty zip file...
     QFileInfo fileInfo(fileCompressed);
@@ -276,7 +277,7 @@ std::optional<QStringList> extractDir(QString fileCompressed, QString subdir, QS
 }
 
 // ours
-bool extractFile(QString fileCompressed, QString file, QString target)
+bool extractFile(const QString& fileCompressed, QString file, QString target)
 {
     // check if this is a minimum size empty zip file...
     QFileInfo fileInfo(fileCompressed);
@@ -284,17 +285,17 @@ bool extractFile(QString fileCompressed, QString file, QString target)
         return true;
     }
     ArchiveReader zip(fileCompressed);
-    auto f = zip.goToFile(file);
+    auto f = zip.goToFile(std::move(file));
     if (!f) {
         return false;
     }
     auto extPtr = ArchiveWriter::createDiskWriter();
     auto ext = extPtr.get();
 
-    return f->writeFile(ext, target);
+    return f->writeFile(ext, std::move(target));
 }
 
-bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFileFunction excludeFilter)
+bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, const FilterFileFunction& excludeFilter)
 {
     QDir rootDirectory(rootDir);
     if (!rootDirectory.exists())

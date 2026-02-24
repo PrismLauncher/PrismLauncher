@@ -108,7 +108,7 @@ Token tokenFromJSONV3(const QJsonObject& parent, const char* tokenName)
     return out;
 }
 
-void profileToJSONV3(QJsonObject& parent, MinecraftProfile p, const char* tokenName)
+void profileToJSONV3(QJsonObject& parent, const MinecraftProfile& p, const char* tokenName)
 {
     if (p.id.isEmpty()) {
         return;
@@ -279,7 +279,7 @@ bool entitlementFromJSONV3(const QJsonObject& parent, MinecraftEntitlement& out)
 
 }  // namespace
 
-bool AccountData::resumeStateFromV3(QJsonObject data)
+bool AccountData::resumeStateFromV3(const QJsonObject& data)
 {
     auto typeV = data.value("type");
     if (!typeV.isString()) {

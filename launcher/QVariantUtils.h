@@ -42,7 +42,7 @@
 namespace QVariantUtils {
 
 template <typename T>
-inline QList<T> toList(QVariant src)
+inline QList<T> toList(const QVariant& src)
 {
     QVariantList variantList = src.toList();
 
@@ -55,7 +55,7 @@ inline QList<T> toList(QVariant src)
 }
 
 template <typename T>
-inline QVariant fromList(QList<T> val)
+inline QVariant fromList(const QList<T>& val)
 {
     QVariantList variantList;
     variantList.reserve(val.size());

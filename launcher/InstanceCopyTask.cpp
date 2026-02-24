@@ -47,7 +47,7 @@ void InstanceCopyTask::executeTask()
             folderClone(true);
             setProgress(0, folderClone.totalCloned());
             connect(&folderClone, &FS::clone::fileCloned,
-                    [this](QString src, QString dst) { setProgress(m_progress + 1, m_progressTotal); });
+                    [this](const QString& src, const QString& dst) { setProgress(m_progress + 1, m_progressTotal); });
             return folderClone();
         }
         if (m_useLinks || m_useHardLinks) {
@@ -66,7 +66,7 @@ void InstanceCopyTask::executeTask()
                                                        FS::PathCombine(staging_mc_dir, "saves"));
                 (*savesCopy)(true);
                 setProgress(0, savesCopy->totalCopied());
-                connect(savesCopy.get(), &FS::copy::fileCopied, [this](QString src) { setProgress(m_progress + 1, m_progressTotal); });
+                connect(savesCopy.get(), &FS::copy::fileCopied, [this](const QString& src) { setProgress(m_progress + 1, m_progressTotal); });
             }
             FS::create_link folderLink(m_origInstance->instanceRoot(), m_stagingPath);
             int depth = m_linkRecursively ? -1 : 0;  // we need to at least link the top level instead of the instance folder
@@ -75,7 +75,7 @@ void InstanceCopyTask::executeTask()
             folderLink(true);
             setProgress(0, m_progressTotal + folderLink.totalToLink());
             connect(&folderLink, &FS::create_link::fileLinked,
-                    [this](QString src, QString dst) { setProgress(m_progress + 1, m_progressTotal); });
+                    [this](const QString& src, const QString& dst) { setProgress(m_progress + 1, m_progressTotal); });
             bool there_were_errors = false;
 
             if (!folderLink()) {

@@ -10,7 +10,7 @@
 
 namespace ResourceDownload {
 
-DataPackResourceModel::DataPackResourceModel(const BaseInstance& base_inst, ResourceAPI* api, QString debugName, QString metaEntryBase)
+DataPackResourceModel::DataPackResourceModel(const BaseInstance& base_inst, ResourceAPI* api, const QString& debugName, QString metaEntryBase)
     : ResourceModel(api), m_base_instance(base_inst), m_debugName(debugName + " (Model)"), m_metaEntryBase(std::move(metaEntryBase))
 {}
 

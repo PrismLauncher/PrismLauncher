@@ -163,7 +163,7 @@ void ImportFTBPage::onPackSelectionChanged(Modpack* pack)
         dialog->setSuggestedPack();
 }
 
-void ImportFTBPage::onSortingSelectionChanged(QString sort)
+void ImportFTBPage::onSortingSelectionChanged(const QString& sort)
 {
     FilterModel::Sorting toSet = currentModel->getAvailableSortings().value(sort);
     currentModel->setSorting(toSet);

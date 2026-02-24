@@ -91,13 +91,13 @@ void AssetUpdateTask::assetIndexFinished()
     emitSucceeded();
 }
 
-void AssetUpdateTask::assetIndexFailed(QString reason)
+void AssetUpdateTask::assetIndexFailed(const QString& reason)
 {
     qDebug() << m_inst->name() << ": Failed asset index download";
     emitFailed(tr("Failed to download the assets index:\n%1").arg(reason));
 }
 
-void AssetUpdateTask::assetsFailed(QString reason)
+void AssetUpdateTask::assetsFailed(const QString& reason)
 {
     emitFailed(tr("Failed to download assets:\n%1").arg(reason));
 }

@@ -45,6 +45,7 @@
 #include <StringUtils.h>
 #include <QDesktopServices>
 #include <QKeyEvent>
+#include <utility>
 
 #include "Markdown.h"
 
@@ -158,7 +159,7 @@ QString ResourcePage::getSearchTerm() const
     return m_ui->searchEdit->text();
 }
 
-void ResourcePage::setSearchTerm(QString term)
+void ResourcePage::setSearchTerm(const QString& term)
 {
     m_ui->searchEdit->setText(term);
 }
@@ -174,7 +175,7 @@ void ResourcePage::addSortings()
         m_ui->sortByBox->addItem(sorting.readable_name, QVariant(sorting.index));
 }
 
-bool ResourcePage::setCurrentPack(ModPlatform::IndexedPack::Ptr pack)
+bool ResourcePage::setCurrentPack(const ModPlatform::IndexedPack::Ptr& pack)
 {
     QVariant v;
     v.setValue(pack);
@@ -363,7 +364,7 @@ void ResourcePage::onVersionSelectionChanged(int index)
 
 void ResourcePage::addResourceToDialog(ModPlatform::IndexedPack::Ptr pack, ModPlatform::IndexedVersion& version)
 {
-    m_parentDialog->addResource(pack, version);
+    m_parentDialog->addResource(std::move(pack), version);
 }
 
 void ResourcePage::removeResourceFromDialog(const QString& pack_name)
@@ -374,7 +375,7 @@ void ResourcePage::removeResourceFromDialog(const QString& pack_name)
 void ResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack, ModPlatform::IndexedVersion& ver, ResourceFolderModel* base_model)
 {
     bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-    m_model->addPack(pack, ver, base_model, is_indexed);
+    m_model->addPack(std::move(pack), ver, base_model, is_indexed);
 }
 
 void ResourcePage::modelReset()

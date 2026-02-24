@@ -12,6 +12,7 @@
 #include <QUrl>
 #include <algorithm>
 #include <memory>
+#include <utility>
 
 #include "Application.h"
 #include "settings/SettingsObject.h"
@@ -147,7 +148,7 @@ void ResourceModel::search()
             callbacks.on_fail = [this](QString reason, int) {
                 if (!s_running_models.constFind(this).value())
                     return;
-                searchRequestFailed(reason, -1);
+                searchRequestFailed(std::move(reason), -1);
             };
             callbacks.on_abort = [this] {
                 if (!s_running_models.constFind(this).value())
@@ -179,7 +180,7 @@ void ResourceModel::search()
     callbacks.on_fail = [this](QString reason, int network_error_code) {
         if (!s_running_models.constFind(this).value())
             return;
-        searchRequestFailed(reason, network_error_code);
+        searchRequestFailed(std::move(reason), network_error_code);
     };
     callbacks.on_abort = [this] {
         if (!s_running_models.constFind(this).value())
@@ -211,7 +212,7 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
                 versionRequestSucceeded(doc, addonId, entry);
             };
         if (!callbacks.on_fail)
-            callbacks.on_fail = [](QString reason, int) {
+            callbacks.on_fail = [](const QString& reason, int) {
                 QMessageBox::critical(nullptr, tr("Error"),
                                       tr("A network error occurred. Could not load project versions: %1").arg(reason));
             };
@@ -229,7 +230,7 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
                 return;
             infoRequestSucceeded(newpack, entry);
         };
-        callbacks.on_fail = [this](QString reason, int) {
+        callbacks.on_fail = [this](const QString& reason, int) {
             if (!s_running_models.constFind(this).value())
                 return;
             QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load project info: %1").arg(reason));
@@ -278,7 +279,7 @@ void ResourceModel::clearData()
     endResetModel();
 }
 
-void ResourceModel::runSearchJob(Task::Ptr ptr)
+void ResourceModel::runSearchJob(const Task::Ptr& ptr)
 {
     m_current_search_job.reset(ptr);  // clean up first
     m_current_search_job->start();
@@ -288,7 +289,7 @@ void ResourceModel::runInfoJob(Task::Ptr ptr)
     if (!m_current_info_job.isRunning())
         m_current_info_job.clear();
 
-    m_current_info_job.addTask(ptr);
+    m_current_info_job.addTask(std::move(ptr));
 
     if (!m_current_info_job.isRunning())
         m_current_info_job.run();
@@ -361,7 +362,7 @@ void ResourceModel::searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>&
     for (auto pack : newList) {
         ModPlatform::IndexedPack::Ptr p;
         if (auto sel = std::find_if(m_selected.begin(), m_selected.end(),
-                                    [&pack](const DownloadTaskPtr i) {
+                                    [&pack](const DownloadTaskPtr& i) {
                                         const auto ipack = i->getPack();
                                         return ipack->provider == pack->provider && ipack->addonId == pack->addonId;
                                     });
@@ -391,7 +392,7 @@ void ResourceModel::searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>&
     endInsertRows();
 }
 
-void ResourceModel::searchRequestForOneSucceeded(ModPlatform::IndexedPack::Ptr pack)
+void ResourceModel::searchRequestForOneSucceeded(const ModPlatform::IndexedPack::Ptr& pack)
 {
     m_search_state = SearchState::Finished;
 
@@ -400,7 +401,7 @@ void ResourceModel::searchRequestForOneSucceeded(ModPlatform::IndexedPack::Ptr p
     endInsertRows();
 }
 
-void ResourceModel::searchRequestFailed([[maybe_unused]] QString reason, int network_error_code)
+void ResourceModel::searchRequestFailed([[maybe_unused]] const QString& reason, int network_error_code)
 {
     switch (network_error_code) {
         default:
@@ -429,7 +430,7 @@ void ResourceModel::searchRequestAborted()
     search();
 }
 
-void ResourceModel::versionRequestSucceeded(QVector<ModPlatform::IndexedVersion>& doc, QVariant pack, const QModelIndex& index)
+void ResourceModel::versionRequestSucceeded(QVector<ModPlatform::IndexedVersion>& doc, const QVariant& pack, const QModelIndex& index)
 {
     auto current_pack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
 
@@ -451,7 +452,7 @@ void ResourceModel::versionRequestSucceeded(QVector<ModPlatform::IndexedVersion>
     emit versionListUpdated(index);
 }
 
-void ResourceModel::infoRequestSucceeded(ModPlatform::IndexedPack::Ptr pack, const QModelIndex& index)
+void ResourceModel::infoRequestSucceeded(const ModPlatform::IndexedPack::Ptr& pack, const QModelIndex& index)
 {
     auto current_pack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
 
@@ -476,12 +477,12 @@ void ResourceModel::addPack(ModPlatform::IndexedPack::Ptr pack,
                             bool is_indexed)
 {
     version.is_currently_selected = true;
-    m_selected.append(makeShared<ResourceDownloadTask>(pack, version, packs, is_indexed));
+    m_selected.append(makeShared<ResourceDownloadTask>(std::move(pack), version, packs, is_indexed));
 }
 
 void ResourceModel::removePack(const QString& rem)
 {
-    auto pred = [&rem](const DownloadTaskPtr i) { return rem == i->getName(); };
+    auto pred = [&rem](const DownloadTaskPtr& i) { return rem == i->getName(); };
 #if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
     m_selected.removeIf(pred);
 #else
@@ -493,7 +494,7 @@ void ResourceModel::removePack(const QString& rem)
                 ++it;
     }
 #endif
-    auto pack = std::find_if(m_packs.begin(), m_packs.end(), [&rem](const ModPlatform::IndexedPack::Ptr i) { return rem == i->name; });
+    auto pack = std::find_if(m_packs.begin(), m_packs.end(), [&rem](const ModPlatform::IndexedPack::Ptr& i) { return rem == i->name; });
     if (pack == m_packs.end()) {  // ignore it if is not in the current search
         return;
     }

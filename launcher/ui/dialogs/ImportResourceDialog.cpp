@@ -57,7 +57,7 @@ void ImportResourceDialog::activated(QModelIndex index)
     accept();
 }
 
-void ImportResourceDialog::selectionChanged(QItemSelection selected, QItemSelection deselected)
+void ImportResourceDialog::selectionChanged(QItemSelection selected, const QItemSelection& deselected)
 {
     if (selected.empty())
         return;

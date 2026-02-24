@@ -55,7 +55,7 @@ class Mod : public Resource {
 
     Mod() = default;
     Mod(const QFileInfo& file);
-    Mod(QString file_path) : Mod(QFileInfo(file_path)) {}
+    Mod(const QString& file_path) : Mod(QFileInfo(file_path)) {}
 
     auto details() const -> const ModDetails&;
     auto name() const -> QString override;
@@ -83,7 +83,7 @@ class Mod : public Resource {
     /** Gets the icon of the mod, converted to a QPixmap for drawing, and scaled to size. */
     QPixmap icon(QSize size, Qt::AspectRatioMode mode = Qt::AspectRatioMode::IgnoreAspectRatio) const;
     /** Thread-safe. */
-    QPixmap setIcon(QImage new_image) const;
+    QPixmap setIcon(const QImage& new_image) const;
 
     void setDetails(const ModDetails& details);
 

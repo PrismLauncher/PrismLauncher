@@ -50,17 +50,17 @@ class LaunchProfile : public ProblemProvider {
     void applyMinecraftArguments(const QString& minecraftArguments);
     void applyAddnJvmArguments(const QStringList& minecraftArguments);
     void applyMinecraftVersionType(const QString& type);
-    void applyMinecraftAssets(MojangAssetIndexInfo::Ptr assets);
+    void applyMinecraftAssets(const MojangAssetIndexInfo::Ptr& assets);
     void applyTraits(const QSet<QString>& traits);
     void applyTweakers(const QStringList& tweakers);
     void applyJarMods(const QList<LibraryPtr>& jarMods);
     void applyMods(const QList<LibraryPtr>& jarMods);
-    void applyLibrary(LibraryPtr library, const RuntimeContext& runtimeContext);
-    void applyMavenFile(LibraryPtr library, const RuntimeContext& runtimeContext);
-    void applyAgent(AgentPtr agent, const RuntimeContext& runtimeContext);
+    void applyLibrary(const LibraryPtr& library, const RuntimeContext& runtimeContext);
+    void applyMavenFile(const LibraryPtr& library, const RuntimeContext& runtimeContext);
+    void applyAgent(const AgentPtr& agent, const RuntimeContext& runtimeContext);
     void applyCompatibleJavaMajors(QList<int>& javaMajor);
-    void applyCompatibleJavaName(QString javaName);
-    void applyMainJar(LibraryPtr jar);
+    void applyCompatibleJavaName(const QString& javaName);
+    void applyMainJar(const LibraryPtr& jar);
     void applyProblemSeverity(ProblemSeverity severity);
     /// clear the profile
     void clear();

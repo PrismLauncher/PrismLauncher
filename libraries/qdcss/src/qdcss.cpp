@@ -11,7 +11,7 @@
 static const QRegularExpression s_rulesetRe(R"([#.]?(@?\w+?)\s*\{(.*?)\})", QRegularExpression::DotMatchesEverythingOption);
 static const QRegularExpression s_ruleRe(R"((\S+?)\s*:\s*(?:\"(.*?)(?<!\\)\"|'(.*?)(?<!\\)'|(\S+?))\s*(?:;|$))");
 
-QDCSS::QDCSS(QString s)
+QDCSS::QDCSS(const QString& s)
 {
     // not much error handling over here...
     // the original java code used indeces returned by the matcher for them, but QRE does not expose those
@@ -41,7 +41,7 @@ QDCSS::QDCSS(QString s)
     }
 }
 
-std::optional<QString>* QDCSS::get(QString key)
+std::optional<QString>* QDCSS::get(const QString& key)
 {
     auto found = m_data.find(key);
 

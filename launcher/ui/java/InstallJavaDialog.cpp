@@ -79,13 +79,13 @@ class InstallJavaPage : public QWidget, public BasePage {
     }
 
     //! loads the list if needed.
-    void initialize(Meta::VersionList::Ptr vlist)
+    void initialize(const Meta::VersionList::Ptr& vlist)
     {
         vlist->setProvidedRoles({ BaseVersionList::JavaMajorRole, BaseVersionList::RecommendedRole, BaseVersionList::VersionPointerRole });
         majorVersionSelect->initialize(vlist.get());
     }
 
-    void setSelectedVersion(BaseVersion::Ptr version)
+    void setSelectedVersion(const BaseVersion::Ptr& version)
     {
         auto dcast = std::dynamic_pointer_cast<Meta::Version>(version);
         if (!dcast) {
@@ -170,7 +170,7 @@ static InstallJavaPage* pageCast(BasePage* page)
     return result;
 }
 namespace Java {
-QStringList getRecommendedJavaVersionsFromVersionList(Meta::VersionList::Ptr list)
+QStringList getRecommendedJavaVersionsFromVersionList(const Meta::VersionList::Ptr& list)
 {
     QStringList recommendedJavas;
     for (const auto& ver : list->versions()) {
@@ -331,7 +331,7 @@ void InstallDialog::done(int result)
                 seq->addTask(makeShared<Java::SymlinkTask>(final_path));
                 task = seq;
 #endif
-                connect(task.get(), &Task::failed, this, [this, &deletePath](QString reason) {
+                connect(task.get(), &Task::failed, this, [this, &deletePath](const QString& reason) {
                     QString error = QString("Java download failed: %1").arg(reason);
                     CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)->show();
                     deletePath();

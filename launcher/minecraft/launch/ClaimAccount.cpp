@@ -6,7 +6,7 @@
 #include "Application.h"
 #include "minecraft/auth/AccountList.h"
 
-ClaimAccount::ClaimAccount(LaunchTask* parent, AuthSessionPtr session) : LaunchStep(parent)
+ClaimAccount::ClaimAccount(LaunchTask* parent, const AuthSessionPtr& session) : LaunchStep(parent)
 {
     if (session->launchMode == LaunchMode::Normal) {
         auto accounts = APPLICATION->accounts();

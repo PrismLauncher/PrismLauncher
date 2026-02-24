@@ -63,7 +63,7 @@ QString getIconFilter()
     return "(*." + validIconExtensions.join(" *.") + ")";
 }
 
-bool isIconSuffix(QString suffix)
+bool isIconSuffix(const QString& suffix)
 {
     return validIconExtensions.contains(suffix);
 }

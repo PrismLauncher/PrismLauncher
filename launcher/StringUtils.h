@@ -57,11 +57,11 @@ inline QString fromStdString(string s)
 #else
 using string = std::string;
 
-inline string toStdString(QString s)
+inline string toStdString(const QString& s)
 {
     return s.toStdString();
 }
-inline QString fromStdString(string s)
+inline QString fromStdString(const string& s)
 {
     return QString::fromStdString(s);
 }

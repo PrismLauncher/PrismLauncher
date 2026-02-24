@@ -109,7 +109,7 @@ void InstanceImportTask::downloadFromUrl()
     filesNetJob->start();
 }
 
-QString cleanPath(QString path)
+QString cleanPath(const QString& path)
 {
     if (path == ".")
         return {};
@@ -188,7 +188,7 @@ void InstanceImportTask::processZipPack()
     connect(zipTask.get(), &Task::failed, this, [this, progressStep](QString reason) {
         progressStep->state = TaskStepState::Failed;
         stepProgress(*progressStep);
-        emitFailed(reason);
+        emitFailed(std::move(reason));
     });
     connect(zipTask.get(), &Task::stepProgress, this, &InstanceImportTask::propagateStepProgress);
 
@@ -197,7 +197,7 @@ void InstanceImportTask::processZipPack()
         stepProgress(*progressStep);
     });
     connect(zipTask.get(), &Task::status, this, [this, progressStep](QString status) {
-        progressStep->status = status;
+        progressStep->status = std::move(status);
         stepProgress(*progressStep);
     });
     connect(zipTask.get(), &Task::warningLogged, this, [this](const QString& line) { m_Warnings.append(line); });
@@ -252,7 +252,7 @@ void InstanceImportTask::extractFinished()
     }
 }
 
-bool installIcon(QString root, QString instIconKey)
+bool installIcon(const QString& root, const QString& instIconKey)
 {
     auto importIconPath = IconUtils::findBestIconIn(root, instIconKey);
     if (importIconPath.isNull() || !QFile::exists(importIconPath))

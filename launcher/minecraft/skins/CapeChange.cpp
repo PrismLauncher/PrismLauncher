@@ -57,9 +57,9 @@ QNetworkReply* CapeChange::getReply(QNetworkRequest& request)
     }
 }
 
-CapeChange::Ptr CapeChange::make(QString token, QString capeId)
+CapeChange::Ptr CapeChange::make(const QString& token, QString capeId)
 {
-    auto up = makeShared<CapeChange>(capeId);
+    auto up = makeShared<CapeChange>(std::move(capeId));
     up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/capes/active");
     up->setObjectName(QString("BYTES:") + up->m_url.toString());
     up->m_sink = std::make_unique<Net::DummySink>();

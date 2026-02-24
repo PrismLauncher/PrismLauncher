@@ -38,6 +38,7 @@
 #include <QByteArray>
 #include <QDebug>
 #include <QFile>
+#include <utility>
 
 bool GZip::unzip(const QByteArray& compressedBytes, QByteArray& uncompressedBytes)
 {
@@ -139,7 +140,7 @@ bool GZip::zip(const QByteArray& uncompressedBytes, QByteArray& compressedBytes)
     return true;
 }
 
-int inf(QFile* source, std::function<bool(const QByteArray&)> handleBlock)
+int inf(QFile* source, const std::function<bool(const QByteArray&)>& handleBlock)
 {
     constexpr auto CHUNK = 16384;
     int ret;
@@ -214,6 +215,6 @@ QString zerr(int ret)
 
 QString GZip::readGzFileByBlocks(QFile* source, std::function<bool(const QByteArray&)> handleBlock)
 {
-    auto ret = inf(source, handleBlock);
+    auto ret = inf(source, std::move(handleBlock));
     return zerr(ret);
 }

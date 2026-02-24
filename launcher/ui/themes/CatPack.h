@@ -52,7 +52,7 @@ class CatPack {
 class BasicCatPack : public CatPack {
    public:
     BasicCatPack(QString id, QString name) : m_id(std::move(id)), m_name(std::move(name)) {}
-    BasicCatPack(QString id) : BasicCatPack(id, id) {}
+    BasicCatPack(const QString& id) : BasicCatPack(id, id) {}
     QString id() const override { return m_id; }
     QString name() const override { return m_name; }
     QString path() const override;
@@ -64,7 +64,7 @@ class BasicCatPack : public CatPack {
 
 class FileCatPack : public BasicCatPack {
    public:
-    FileCatPack(QString id, QFileInfo& fileInfo) : BasicCatPack(id), m_path(fileInfo.absoluteFilePath()) {}
+    FileCatPack(QString id, QFileInfo& fileInfo) : BasicCatPack(std::move(id)), m_path(fileInfo.absoluteFilePath()) {}
     FileCatPack(QFileInfo& fileInfo) : FileCatPack(fileInfo.baseName(), fileInfo) {}
     QString path() const override { return m_path; }
 

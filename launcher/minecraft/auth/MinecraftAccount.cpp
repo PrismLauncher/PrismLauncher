@@ -152,7 +152,7 @@ void MinecraftAccount::authSucceeded()
     emit activityChanged(false);
 }
 
-void MinecraftAccount::authFailed(QString reason)
+void MinecraftAccount::authFailed(const QString& reason)
 {
     switch (m_currentTask->taskState()) {
         case AccountTaskState::STATE_OFFLINE:
@@ -231,7 +231,7 @@ bool MinecraftAccount::shouldRefresh() const
     return false;
 }
 
-void MinecraftAccount::fillSession(AuthSessionPtr session)
+void MinecraftAccount::fillSession(const AuthSessionPtr& session)
 {
     // volatile auth token
     session->access_token = data.accessToken();
@@ -271,7 +271,7 @@ void MinecraftAccount::incrementUses()
     }
 }
 
-QUuid MinecraftAccount::uuidFromUsername(QString username)
+QUuid MinecraftAccount::uuidFromUsername(const QString& username)
 {
     auto input = QString("OfflinePlayer:%1").arg(username).toUtf8();
 

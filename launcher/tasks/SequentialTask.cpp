@@ -36,9 +36,10 @@
 #include "SequentialTask.h"
 
 #include <QDebug>
+#include <utility>
 #include "tasks/ConcurrentTask.h"
 
-SequentialTask::SequentialTask(QString task_name) : ConcurrentTask(task_name, 1) {}
+SequentialTask::SequentialTask(QString task_name) : ConcurrentTask(std::move(task_name), 1) {}
 
 void SequentialTask::subTaskFailed(Task::Ptr task, const QString& msg)
 {

@@ -129,7 +129,7 @@ void AutoInstallJava::executeTask()
     emit progressReportingRequest();
 }
 
-void AutoInstallJava::setJavaPath(QString path)
+void AutoInstallJava::setJavaPath(const QString& path)
 {
     auto settings = m_instance->settings();
     settings->set("OverrideJavaLocation", true);
@@ -159,7 +159,7 @@ void AutoInstallJava::setJavaPathFromPartial()
     return;
 }
 
-void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
+void AutoInstallJava::downloadJava(const Meta::Version::Ptr& version, const QString& javaName)
 {
     auto runtimes = version->data()->runtimes;
     for (const auto& java : runtimes) {
@@ -185,7 +185,7 @@ void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
             seq->addTask(makeShared<Java::SymlinkTask>(final_path));
             m_current_task = seq;
 #endif
-            connect(m_current_task.get(), &Task::failed, this, [this, deletePath](QString reason) {
+            connect(m_current_task.get(), &Task::failed, this, [this, deletePath](const QString& reason) {
                 deletePath();
                 emitFailed(reason);
             });

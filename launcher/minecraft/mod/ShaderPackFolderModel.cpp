@@ -5,7 +5,7 @@ namespace {
 class ShaderPackIndexMigrateTask : public Task {
     Q_OBJECT
    public:
-    ShaderPackIndexMigrateTask(QDir resourceDir, QDir indexDir) : m_resourceDir(resourceDir), m_indexDir(indexDir) {}
+    ShaderPackIndexMigrateTask(const QDir& resourceDir, const QDir& indexDir) : m_resourceDir(resourceDir), m_indexDir(indexDir) {}
 
     void executeTask() override
     {

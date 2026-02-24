@@ -14,7 +14,7 @@ class LibrariesTask : public Task {
     bool canAbort() const override;
 
    private slots:
-    void jarlibFailed(QString reason);
+    void jarlibFailed(const QString& reason);
 
    public slots:
     bool abort() override;

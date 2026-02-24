@@ -89,7 +89,7 @@ class MinecraftAccount : public QObject, public Usable {
 
     static MinecraftAccountPtr loadFromJsonV3(const QJsonObject& json);
 
-    static QUuid uuidFromUsername(QString username);
+    static QUuid uuidFromUsername(const QString& username);
 
     //! Saves a MinecraftAccount to a JSON object and returns it.
     QJsonObject saveToJson() const;
@@ -142,7 +142,7 @@ class MinecraftAccount : public QObject, public Usable {
 
     bool shouldRefresh() const;
 
-    void fillSession(AuthSessionPtr session);
+    void fillSession(const AuthSessionPtr& session);
 
     QString lastError() const { return data.lastError(); }
 
@@ -168,5 +168,5 @@ class MinecraftAccount : public QObject, public Usable {
 
    private slots:
     void authSucceeded();
-    void authFailed(QString reason);
+    void authFailed(const QString& reason);
 };

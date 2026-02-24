@@ -80,9 +80,9 @@ class FtbPage : public QWidget, public ModpackProviderBasePage {
    private slots:
     void triggerSearch();
 
-    void onSortingSelectionChanged(QString selected);
+    void onSortingSelectionChanged(const QString& selected);
     void onSelectionChanged(QModelIndex first, QModelIndex second);
-    void onVersionSelectionChanged(QString selected);
+    void onVersionSelectionChanged(const QString& selected);
 
    private:
     Ui::FtbPage* m_ui = nullptr;

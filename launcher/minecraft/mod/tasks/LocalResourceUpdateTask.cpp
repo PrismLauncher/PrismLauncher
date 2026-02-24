@@ -26,7 +26,7 @@
 #include <windows.h>
 #endif
 
-LocalResourceUpdateTask::LocalResourceUpdateTask(QDir index_dir, ModPlatform::IndexedPack& project, ModPlatform::IndexedVersion& version)
+LocalResourceUpdateTask::LocalResourceUpdateTask(const QDir& index_dir, ModPlatform::IndexedPack& project, ModPlatform::IndexedVersion& version)
     : m_index_dir(index_dir), m_project(project), m_version(version)
 {
     // Ensure a '.index' folder exists in the mods folder, and create it if it does not

@@ -31,7 +31,7 @@ void ProgressWidget::reset()
     m_bar->reset();
 }
 
-void ProgressWidget::progressFormat(QString format)
+void ProgressWidget::progressFormat(const QString& format)
 {
     if (format.isEmpty())
         m_bar->setTextVisible(false);
@@ -68,7 +68,7 @@ void ProgressWidget::start(Task* task)
         QMetaObject::invokeMethod(m_task, "start", Qt::QueuedConnection);
 }
 
-bool ProgressWidget::exec(std::shared_ptr<Task> task)
+bool ProgressWidget::exec(const std::shared_ptr<Task>& task)
 {
     QEventLoop loop;
 

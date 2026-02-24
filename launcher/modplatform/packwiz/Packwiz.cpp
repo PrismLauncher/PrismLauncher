@@ -34,7 +34,7 @@
 
 namespace Packwiz {
 
-auto getRealIndexName(const QDir& index_dir, QString normalized_fname, bool should_find_match) -> QString
+auto getRealIndexName(const QDir& index_dir, const QString& normalized_fname, bool should_find_match) -> QString
 {
     QFile index_file(index_dir.absoluteFilePath(normalized_fname));
 
@@ -67,7 +67,7 @@ static inline auto indexFileName(QString const& mod_slug) -> QString
 }
 
 // Helper functions for extracting data from the TOML file
-auto stringEntry(toml::table table, QString entry_name) -> QString
+auto stringEntry(toml::table table, const QString& entry_name) -> QString
 {
     auto node = table[StringUtils::toStdString(entry_name)];
     if (!node) {
@@ -78,7 +78,7 @@ auto stringEntry(toml::table table, QString entry_name) -> QString
     return node.value_or("");
 }
 
-auto intEntry(toml::table table, QString entry_name) -> int
+auto intEntry(toml::table table, const QString& entry_name) -> int
 {
     auto node = table[StringUtils::toStdString(entry_name)];
     if (!node) {
@@ -248,7 +248,7 @@ void V1::deleteModIndex(const QDir& index_dir, QString& mod_slug)
     }
 }
 
-auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
+auto V1::getIndexForMod(const QDir& index_dir, const QString& slug) -> Mod
 {
     Mod mod;
 

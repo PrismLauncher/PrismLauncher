@@ -40,7 +40,7 @@ QVariant Setting::defValue() const
 
 void Setting::set(QVariant value)
 {
-    emit SettingChanged(*this, value);
+    emit SettingChanged(*this, std::move(value));
 }
 
 void Setting::reset()

@@ -152,8 +152,8 @@ class MainWindow : public QMainWindow {
 
     void on_actionDeleteInstance_triggered();
 
-    void deleteGroup(QString group);
-    void renameGroup(QString group);
+    void deleteGroup(const QString& group);
+    void renameGroup(const QString& group);
     void undoTrashInstance();
 
     inline void on_actionExportInstance_triggered() { on_actionExportInstanceZip_triggered(); }
@@ -172,7 +172,7 @@ class MainWindow : public QMainWindow {
     /**
      * called when an icon is changed in the icon model.
      */
-    void iconUpdated(QString);
+    void iconUpdated(const QString&);
 
     void showInstanceContextMenu(const QPoint&);
 
@@ -186,7 +186,7 @@ class MainWindow : public QMainWindow {
 
     void instanceChanged(const QModelIndex& current, const QModelIndex& previous);
 
-    void instanceSelectRequest(QString id);
+    void instanceSelectRequest(const QString& id);
 
     void instanceDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 

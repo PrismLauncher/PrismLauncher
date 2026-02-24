@@ -7,6 +7,7 @@
 #include <optional>
 
 #include <QAbstractListModel>
+#include <utility>
 
 #include "QObjectPtr.h"
 
@@ -71,7 +72,7 @@ class ResourceModel : public QAbstractListModel {
         return parent.isValid() ? false : m_search_state == SearchState::CanFetchMore;
     }
 
-    void setSearchTerm(QString term) { m_search_term = term; }
+    void setSearchTerm(QString term) { m_search_term = std::move(term); }
 
     virtual ResourceAPI::SearchArgs createSearchArguments() = 0;
 
@@ -102,7 +103,7 @@ class ResourceModel : public QAbstractListModel {
     /** Resets the model's data. */
     void clearData();
 
-    void runSearchJob(Task::Ptr);
+    void runSearchJob(const Task::Ptr&);
     void runInfoJob(Task::Ptr);
 
     auto getCurrentSortingMethodByIndex() const -> std::optional<ResourceAPI::SortingMethod>;
@@ -137,13 +138,13 @@ class ResourceModel : public QAbstractListModel {
    private:
     /* Default search request callbacks */
     void searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>&);
-    void searchRequestForOneSucceeded(ModPlatform::IndexedPack::Ptr);
-    void searchRequestFailed(QString reason, int network_error_code);
+    void searchRequestForOneSucceeded(const ModPlatform::IndexedPack::Ptr&);
+    void searchRequestFailed(const QString& reason, int network_error_code);
     void searchRequestAborted();
 
-    void versionRequestSucceeded(QVector<ModPlatform::IndexedVersion>&, QVariant, const QModelIndex&);
+    void versionRequestSucceeded(QVector<ModPlatform::IndexedVersion>&, const QVariant&, const QModelIndex&);
 
-    void infoRequestSucceeded(ModPlatform::IndexedPack::Ptr, const QModelIndex&);
+    void infoRequestSucceeded(const ModPlatform::IndexedPack::Ptr&, const QModelIndex&);
 
    signals:
     void versionListUpdated(const QModelIndex& index);

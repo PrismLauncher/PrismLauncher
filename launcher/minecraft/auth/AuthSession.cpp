@@ -3,6 +3,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QStringList>
+#include <utility>
 
 QString AuthSession::serializeUserProperties()
 {
@@ -22,15 +23,15 @@ bool AuthSession::MakeOffline(QString offline_playername)
 {
     session = "-";
     access_token = "0";
-    player_name = offline_playername;
+    player_name = std::move(offline_playername);
     return true;
 }
 
 void AuthSession::MakeDemo(QString name, QString u)
 {
-    uuid = u;
+    uuid = std::move(u);
     session = "-";
     access_token = "0";
-    player_name = name;
+    player_name = std::move(name);
     launchMode = LaunchMode::Demo;
 };

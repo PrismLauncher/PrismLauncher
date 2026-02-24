@@ -5,6 +5,7 @@
 #pragma once
 
 #include <QAbstractListModel>
+#include <utility>
 
 #include "BaseInstance.h"
 
@@ -24,12 +25,12 @@ class ModModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    ModModel(BaseInstance&, ResourceAPI* api, QString debugName, QString metaEntryBase);
+    ModModel(BaseInstance&, ResourceAPI* api, const QString& debugName, QString metaEntryBase);
 
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, unsigned int sort, bool filter_changed);
 
-    void setFilter(std::shared_ptr<ModFilterWidget::Filter> filter) { m_filter = filter; }
+    void setFilter(std::shared_ptr<ModFilterWidget::Filter> filter) { m_filter = std::move(filter); }
     QVariant getInstalledPackVersion(ModPlatform::IndexedPack::Ptr) const override;
 
     [[nodiscard]] QString debugName() const override { return m_debugName; }

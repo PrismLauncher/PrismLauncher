@@ -79,19 +79,19 @@ class BlockedModsDialog : public QDialog {
     void openAll(bool missingOnly);
     void addDownloadFolder();
     void update();
-    void directoryChanged(QString path);
+    void directoryChanged(const QString& path);
     void setupWatch();
-    void watchPath(QString path, bool watch_recursive = false);
+    void watchPath(const QString& path, bool watch_recursive = false);
     void scanPaths();
-    void scanPath(QString path, bool start_task);
-    void addHashTask(QString path);
-    void buildHashTask(QString path);
-    void checkMatchHash(QString hash, QString path);
+    void scanPath(const QString& path, bool start_task);
+    void addHashTask(const QString& path);
+    void buildHashTask(const QString& path);
+    void checkMatchHash(const QString& hash, const QString& path);
     void validateMatchedMods();
     void runHashTask();
     void hashTaskFinished();
 
-    bool checkValidPath(QString path);
+    bool checkValidPath(const QString& path);
     bool allModsMatched();
 };
 

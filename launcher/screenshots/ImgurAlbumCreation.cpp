@@ -44,16 +44,17 @@
 #include <QStringList>
 #include <QUrl>
 #include <memory>
+#include <utility>
 
 #include "BuildConfig.h"
 #include "net/RawHeaderProxy.h"
 
-Net::NetRequest::Ptr ImgurAlbumCreation::make(std::shared_ptr<ImgurAlbumCreation::Result> output, QList<ScreenShot::Ptr> screenshots)
+Net::NetRequest::Ptr ImgurAlbumCreation::make(const std::shared_ptr<ImgurAlbumCreation::Result>& output, QList<ScreenShot::Ptr> screenshots)
 {
     auto up = makeShared<ImgurAlbumCreation>();
     up->m_url = BuildConfig.IMGUR_BASE_URL + "album";
     up->m_sink = std::make_unique<Sink>(output);
-    up->m_screenshots = screenshots;
+    up->m_screenshots = std::move(screenshots);
     up->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(
         QList<Net::HeaderPair>{ { "Content-Type", "application/x-www-form-urlencoded" },
                                 { "Authorization", QString("Client-ID %1").arg(BuildConfig.IMGUR_CLIENT_ID).toUtf8() },

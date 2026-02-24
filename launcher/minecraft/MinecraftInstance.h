@@ -128,7 +128,7 @@ class MinecraftInstance : public BaseInstance {
     QStringList extraArguments() override;
     QStringList verboseDescription(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin) override;
     QList<Mod*> getJarMods() const;
-    QString createLaunchScript(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin);
+    QString createLaunchScript(const AuthSessionPtr& session, const MinecraftTarget::Ptr& targetToJoin);
     /// get arguments passed to java
     QStringList javaArguments();
     QString getLauncher();
@@ -158,8 +158,8 @@ class MinecraftInstance : public BaseInstance {
     virtual JavaVersion getJavaVersion();
 
    protected:
-    QMap<QString, QString> createCensorFilterFromSession(AuthSessionPtr session);
-    QMap<QString, QString> makeProfileVarMapping(std::shared_ptr<LaunchProfile> profile) const;
+    QMap<QString, QString> createCensorFilterFromSession(const AuthSessionPtr& session);
+    QMap<QString, QString> makeProfileVarMapping(const std::shared_ptr<LaunchProfile>& profile) const;
 
    protected:  // data
     std::unique_ptr<PackProfile> m_components;

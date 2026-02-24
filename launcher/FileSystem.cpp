@@ -80,11 +80,12 @@ namespace fs = std::filesystem;
 
 // clone
 #if defined(Q_OS_LINUX)
-#include <errno.h>
 #include <fcntl.h> /* Definition of FICLONE* constants */
 #include <linux/fs.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <cerrno>
+#include <utility>
 #elif defined(Q_OS_MACOS)
 #include <sys/attr.h>
 #include <sys/clonefile.h>
@@ -275,7 +276,7 @@ bool ensureFolderPathExists(const QString folderPathName)
     return ensureFolderPathExists(QFileInfo(folderPathName));
 }
 
-bool copyFileAttributes(QString src, QString dst)
+bool copyFileAttributes(const QString& src, const QString& dst)
 {
 #ifdef Q_OS_WIN32
     auto attrs = GetFileAttributesW(src.toStdWString().c_str());
@@ -290,7 +291,7 @@ bool copyFileAttributes(QString src, QString dst)
 }
 
 // needs folders to exists
-void copyFolderAttributes(QString src, QString dst, QString relative)
+void copyFolderAttributes(const QString& src, const QString& dst, const QString& relative)
 {
     auto path = PathCombine(src, relative);
     QDir dsrc(src);
@@ -331,7 +332,7 @@ bool copy::operator()(const QString& offset, bool dryRun)
         opt |= copy_opts::overwrite_existing;
 
     // Function that'll do the actual copying
-    auto copy_file = [this, dryRun, src, dst, opt, &err](QString src_path, QString relative_dst_path) {
+    auto copy_file = [this, dryRun, src, dst, opt, &err](const QString& src_path, const QString& relative_dst_path) {
         if (m_matcher && (m_matcher(relative_dst_path) != m_whitelist))
             return;
 
@@ -418,7 +419,7 @@ void create_link::make_link_list(const QString& offset)
             m_recursive = true;
 
         // Function that'll do the actual linking
-        auto link_file = [this, dst](QString src_path, QString relative_dst_path) {
+        auto link_file = [this, dst](const QString& src_path, const QString& relative_dst_path) {
             if (m_matcher && (m_matcher(relative_dst_path) != m_whitelist)) {
                 qDebug() << "path" << relative_dst_path << "in black list or not in whitelist";
                 return;
@@ -674,7 +675,7 @@ bool deletePath(QString path)
 {
     std::error_code err;
 
-    fs::remove_all(StringUtils::toStdString(path), err);
+    fs::remove_all(StringUtils::toStdString(std::move(path)), err);
 
     if (err) {
         qWarning() << "Failed to remove files:" << QString::fromStdString(err.message());
@@ -863,7 +864,7 @@ QString RemoveInvalidPathChars(QString path, QChar replaceWith)
 QString DirNameFromString(QString string, QString inDir)
 {
     int num = 0;
-    QString baseName = RemoveInvalidFilenameChars(string, '-');
+    QString baseName = RemoveInvalidFilenameChars(std::move(string), '-');
     QString dirName;
     do {
         if (num == 0) {
@@ -1286,7 +1287,7 @@ bool clone::operator()(const QString& offset, bool dryRun)
     std::error_code err;
 
     // Function that'll do the actual cloneing
-    auto cloneFile = [this, dryRun, dst, &err](QString src_path, QString relative_dst_path) {
+    auto cloneFile = [this, dryRun, dst, &err](const QString& src_path, const QString& relative_dst_path) {
         if (m_matcher && (m_matcher(relative_dst_path) != m_whitelist))
             return;
 

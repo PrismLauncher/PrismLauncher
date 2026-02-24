@@ -52,7 +52,7 @@ class ConcurrentTask : public Task {
    public:
     using Ptr = shared_qobject_ptr<ConcurrentTask>;
 
-    explicit ConcurrentTask(QString task_name = "", int max_concurrent = 6);
+    explicit ConcurrentTask(const QString& task_name = "", int max_concurrent = 6);
     ~ConcurrentTask() override;
 
     // safe to call before starting the task
@@ -64,7 +64,7 @@ class ConcurrentTask : public Task {
     auto getStepProgress() const -> TaskStepProgressList override;
 
     //! Adds a task to execute in this ConcurrentTask
-    void addTask(Task::Ptr task);
+    void addTask(const Task::Ptr& task);
 
    public slots:
     bool abort() override;
@@ -81,10 +81,10 @@ class ConcurrentTask : public Task {
 
     void subTaskSucceeded(Task::Ptr);
     virtual void subTaskFailed(Task::Ptr, const QString& msg);
-    void subTaskFinished(Task::Ptr, TaskStepState);
-    void subTaskStatus(Task::Ptr task, const QString& msg);
-    void subTaskDetails(Task::Ptr task, const QString& msg);
-    void subTaskProgress(Task::Ptr task, qint64 current, qint64 total);
+    void subTaskFinished(const Task::Ptr&, TaskStepState);
+    void subTaskStatus(const Task::Ptr& task, const QString& msg);
+    void subTaskDetails(const Task::Ptr& task, const QString& msg);
+    void subTaskProgress(const Task::Ptr& task, qint64 current, qint64 total);
 
    protected:
     // NOTE: This is not thread-safe.
@@ -92,7 +92,7 @@ class ConcurrentTask : public Task {
 
     virtual void updateState();
 
-    void startSubTask(Task::Ptr task);
+    void startSubTask(const Task::Ptr& task);
 
    protected:
     QQueue<Task::Ptr> m_queue;

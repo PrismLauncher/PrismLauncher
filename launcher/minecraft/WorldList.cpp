@@ -108,7 +108,7 @@ bool WorldList::update()
     return true;
 }
 
-void WorldList::directoryChanged(QString)
+void WorldList::directoryChanged(const QString&)
 {
     update();
 }
@@ -349,7 +349,7 @@ Qt::DropActions WorldList::supportedDropActions() const
     return Qt::CopyAction | Qt::MoveAction;
 }
 
-void WorldList::installWorld(QFileInfo filename)
+void WorldList::installWorld(const QFileInfo& filename)
 {
     qDebug() << "installing:" << filename.absoluteFilePath();
     World w(filename);

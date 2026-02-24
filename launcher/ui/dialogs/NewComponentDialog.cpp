@@ -50,6 +50,7 @@
 #include <QLayout>
 #include <QPushButton>
 #include <QValidator>
+#include <utility>
 
 #include <meta/Index.h>
 #include <meta/VersionList.h>
@@ -119,5 +120,5 @@ QString NewComponentDialog::uid() const
 
 void NewComponentDialog::setBlacklist(QStringList badUids)
 {
-    uidBlacklist = badUids;
+    uidBlacklist = std::move(badUids);
 }

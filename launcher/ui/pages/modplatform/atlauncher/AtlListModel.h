@@ -40,17 +40,17 @@ class ListModel : public QAbstractListModel {
 
     void request();
 
-    void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
+    void getLogo(const QString& logo, const QString& logoUrl, const LogoCallback& callback);
 
    private slots:
     void requestFinished(QByteArray* responsePtr);
-    void requestFailed(QString reason);
+    void requestFailed(const QString& reason);
 
-    void logoFailed(QString logo);
-    void logoLoaded(QString logo, QIcon out);
+    void logoFailed(const QString& logo);
+    void logoLoaded(const QString& logo, const QIcon& out);
 
    private:
-    void requestLogo(QString file, QString url);
+    void requestLogo(const QString& file, const QString& url);
 
    private:
     QList<ATLauncher::IndexedPack> modpacks;

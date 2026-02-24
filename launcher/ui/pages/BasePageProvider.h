@@ -43,7 +43,7 @@ class GenericPageProvider : public BasePageProvider {
     QString dialogTitle() override { return m_dialogTitle; }
 
     void setDialogTitle(const QString& title) { m_dialogTitle = title; }
-    void addPageCreator(PageCreator page) { m_creators.append(page); }
+    void addPageCreator(const PageCreator& page) { m_creators.append(page); }
 
     template <typename PageClass>
     void addPage()

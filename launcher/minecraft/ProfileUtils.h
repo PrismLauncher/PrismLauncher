@@ -41,7 +41,7 @@ namespace ProfileUtils {
 using PatchOrder = QStringList;
 
 /// Read and parse a OneSix format order file
-bool readOverrideOrders(QString path, PatchOrder& order);
+bool readOverrideOrders(const QString& path, PatchOrder& order);
 
 /// Write a OneSix format order file
 bool writeOverrideOrders(QString path, const PatchOrder& order);
@@ -53,6 +53,6 @@ VersionFilePtr parseJsonFile(const QFileInfo& fileInfo, bool requireOrder);
 bool saveJsonFile(const QJsonDocument& doc, const QString& filename);
 
 /// Remove LWJGL from a patch file. This is applied to all Mojang-like profile files.
-void removeLwjglFromPatch(VersionFilePtr patch);
+void removeLwjglFromPatch(const VersionFilePtr& patch);
 
 }  // namespace ProfileUtils

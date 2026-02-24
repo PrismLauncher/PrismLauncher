@@ -42,12 +42,13 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QSaveFile>
+#include <utility>
 
 namespace ProfileUtils {
 
 static const int currentOrderFileVersion = 1;
 
-bool readOverrideOrders(QString path, PatchOrder& order)
+bool readOverrideOrders(const QString& path, PatchOrder& order)
 {
     QFile orderFile(path);
     if (!orderFile.exists()) {
@@ -90,10 +91,10 @@ bool readOverrideOrders(QString path, PatchOrder& order)
     return true;
 }
 
-static VersionFilePtr createErrorVersionFile(QString fileId, QString filepath, QString error)
+static VersionFilePtr createErrorVersionFile(QString fileId, const QString& filepath, const QString& error)
 {
     auto outError = std::make_shared<VersionFile>();
-    outError->uid = outError->name = fileId;
+    outError->uid = outError->name = std::move(fileId);
     // outError->filename = filepath;
     outError->addProblem(ProblemSeverity::Error, error);
     return outError;
@@ -156,7 +157,7 @@ bool saveJsonFile(const QJsonDocument& doc, const QString& filename)
     return true;
 }
 
-void removeLwjglFromPatch(VersionFilePtr patch)
+void removeLwjglFromPatch(const VersionFilePtr& patch)
 {
     auto filter = [](QList<LibraryPtr>& libs) {
         QList<LibraryPtr> filteredLibs;

@@ -126,7 +126,8 @@
 #include <FileSystem.h>
 #include <LocalPeer.h>
 
-#include <stdlib.h>
+#include <cstdlib>
+#include <utility>
 #include "SysInfo.h"
 
 #ifdef Q_OS_LINUX
@@ -947,7 +948,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                                     ":/icons/multimc/128x128/instances/", ":/icons/multimc/scalable/instances/" };
         m_icons = std::make_unique<IconList>(instFolders, setting->get().toString());
         connect(setting.get(), &Setting::SettingChanged,
-                [this](const Setting&, QVariant value) { m_icons->directoryChanged(value.toString()); });
+                [this](const Setting&, const QVariant& value) { m_icons->directoryChanged(value.toString()); });
         qInfo() << "<> Instance icons initialized.";
     }
 
@@ -1532,8 +1533,8 @@ bool Application::launch(BaseInstance* instance,
         controller->setInstance(instance);
         controller->setLaunchMode(mode);
         controller->setProfiler(profilers().value(instance->settings()->get("Profiler").toString(), nullptr).get());
-        controller->setTargetToJoin(targetToJoin);
-        controller->setAccountToUse(accountToUse);
+        controller->setTargetToJoin(std::move(targetToJoin));
+        controller->setAccountToUse(std::move(accountToUse));
         controller->setOfflineName(offlineName);
         if (window) {
             controller->setParentWidget(window);
@@ -1647,7 +1648,7 @@ void Application::ShowGlobalSettings(class QWidget* parent, QString open_page)
     emit globalSettingsAboutToOpen();
     {
         SettingsObject::Lock lock(APPLICATION->settings());
-        PageDialog dlg(m_globalSettingsProvider.get(), open_page, parent);
+        PageDialog dlg(m_globalSettingsProvider.get(), std::move(open_page), parent);
         connect(&dlg, &PageDialog::applied, this, &Application::globalSettingsApplied);
         dlg.exec();
     }
@@ -1692,7 +1693,7 @@ ViewLogWindow* Application::showLogWindow()
     return m_viewLogWindow;
 }
 
-InstanceWindow* Application::showInstanceWindow(BaseInstance* instance, QString page)
+InstanceWindow* Application::showInstanceWindow(BaseInstance* instance, const QString& page)
 {
     if (!instance)
         return nullptr;
@@ -1756,7 +1757,11 @@ void Application::on_windowClose()
     }
 }
 
-void Application::updateProxySettings(QString proxyTypeStr, QString addr, int port, QString user, QString password)
+void Application::updateProxySettings(const QString& proxyTypeStr,
+                                      const QString& addr,
+                                      int port,
+                                      const QString& user,
+                                      const QString& password)
 {
     // Set the application proxy settings.
     if (proxyTypeStr == "SOCKS5") {
@@ -1848,7 +1853,7 @@ void Application::detectLibraries()
 #endif
 }
 
-QString Application::getJarPath(QString jarFile)
+QString Application::getJarPath(const QString& jarFile)
 {
     QStringList potentialPaths = {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
@@ -2019,13 +2024,13 @@ const QString Application::javaPath()
     return m_settings->get("JavaDir").toString();
 }
 
-void Application::addQSavePath(QString path)
+void Application::addQSavePath(const QString& path)
 {
     QMutexLocker locker(&m_qsaveResourcesMutex);
     m_qsaveResources[path] = m_qsaveResources.value(path, 0) + 1;
 }
 
-void Application::removeQSavePath(QString path)
+void Application::removeQSavePath(const QString& path)
 {
     QMutexLocker locker(&m_qsaveResourcesMutex);
     auto count = m_qsaveResources.value(path, 0) - 1;
@@ -2036,7 +2041,7 @@ void Application::removeQSavePath(QString path)
     }
 }
 
-bool Application::checkQSavePath(QString path)
+bool Application::checkQSavePath(const QString& path)
 {
     QMutexLocker locker(&m_qsaveResourcesMutex);
     for (const auto& partialPath : m_qsaveResources.keys()) {

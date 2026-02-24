@@ -98,7 +98,7 @@ bool processZIP(ShaderPack& pack, ProcessingLevel level)
     return true;
 }
 
-bool validate(QFileInfo file)
+bool validate(const QFileInfo& file)
 {
     ShaderPack sp{ file };
     return ShaderPackUtils::process(sp, ProcessingLevel::BasicInfoOnly) && sp.valid();

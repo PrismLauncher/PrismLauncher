@@ -119,7 +119,7 @@ void AtlPage::suggestCurrent()
     auto editedLogoName = "atl_" + selected.safeName;
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/images/%1").arg(selected.safeName);
     listModel->getLogo(selected.safeName, url,
-                       [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
+                       [this, editedLogoName](const QString& logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 }
 
 void AtlPage::triggerSearch()
@@ -127,7 +127,7 @@ void AtlPage::triggerSearch()
     filterModel->setSearchTerm(ui->searchEdit->text());
 }
 
-void AtlPage::onSortingSelectionChanged(QString sort)
+void AtlPage::onSortingSelectionChanged(const QString& sort)
 {
     auto toSet = filterModel->getAvailableSortings().value(sort);
     filterModel->setSorting(toSet);
@@ -157,7 +157,7 @@ void AtlPage::onSelectionChanged(QModelIndex first, [[maybe_unused]] QModelIndex
     suggestCurrent();
 }
 
-void AtlPage::onVersionSelectionChanged(QString version)
+void AtlPage::onVersionSelectionChanged(const QString& version)
 {
     if (version.isNull() || version.isEmpty()) {
         selectedVersion = "";

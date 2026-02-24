@@ -328,13 +328,13 @@ bool processPackPNG(const DataPack* pack)
     }
 }
 
-bool validate(QFileInfo file)
+bool validate(const QFileInfo& file)
 {
     DataPack dp{ file };
     return DataPackUtils::process(&dp, ProcessingLevel::BasicInfoOnly) && dp.valid();
 }
 
-bool validateResourcePack(QFileInfo file)
+bool validateResourcePack(const QFileInfo& file)
 {
     ResourcePack rp{ file };
     return DataPackUtils::process(&rp, ProcessingLevel::BasicInfoOnly) && rp.valid();

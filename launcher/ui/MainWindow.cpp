@@ -73,6 +73,7 @@
 #include <QWidget>
 #include <QWidgetAction>
 #include <memory>
+#include <utility>
 
 #include <BaseInstance.h>
 #include <BuildConfig.h>
@@ -300,7 +301,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         view->setFrameShape(QFrame::NoFrame);
         // do not show ugly blue border on the mac
         view->setAttribute(Qt::WA_MacShowFocusRect, false);
-        connect(delegate, &ListViewDelegate::textChanged, this, [this](QString before, QString after) {
+        connect(delegate, &ListViewDelegate::textChanged, this, [this](const QString& before, const QString& after) {
             if (auto newRoot = askToUpdateInstanceDirName(m_selectedInstance, before, after, this); !newRoot.isEmpty()) {
                 auto oldID = m_selectedInstance->id();
                 auto newID = QFileInfo(newRoot).fileName();
@@ -851,7 +852,7 @@ void MainWindow::setCatBackground(bool enabled)
 void MainWindow::runModalTask(Task* task)
 {
     connect(task, &Task::failed,
-            [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+            [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
     connect(task, &Task::succeeded, [this, task]() {
         QStringList warnings = task->warnings();
         if (warnings.count()) {
@@ -967,7 +968,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 auto [job, array] = api.getFile(addonId, fileId);
 
                 connect(job.get(), &Task::failed, this,
-                        [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+                        [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
                 connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &version] {
                     qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
                     auto doc = Json::requireDocument(*array);
@@ -1094,7 +1095,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
 
             bool dl_success = false;
             connect(dl_job.get(), &Task::failed, this,
-                    [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+                    [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
             connect(dl_job.get(), &Task::succeeded, this, [&dl_success] { dl_success = true; });
 
             {  // drop stack
@@ -1197,7 +1198,7 @@ void MainWindow::on_actionChangeInstIcon_triggered()
     }
 }
 
-void MainWindow::iconUpdated(QString icon)
+void MainWindow::iconUpdated(const QString& icon)
 {
     if (icon == m_currentInstIcon) {
         auto new_icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
@@ -1208,7 +1209,7 @@ void MainWindow::iconUpdated(QString icon)
 
 void MainWindow::updateInstanceToolIcon(QString new_icon)
 {
-    m_currentInstIcon = new_icon;
+    m_currentInstIcon = std::move(new_icon);
     auto icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
     ui->actionChangeInstIcon->setIcon(icon);
     changeIconButton->setIcon(icon);
@@ -1246,7 +1247,7 @@ void MainWindow::on_actionChangeInstGroup_triggered()
     }
 }
 
-void MainWindow::deleteGroup(QString group)
+void MainWindow::deleteGroup(const QString& group)
 {
     Q_ASSERT(!group.isEmpty());
 
@@ -1256,7 +1257,7 @@ void MainWindow::deleteGroup(QString group)
         APPLICATION->instances()->deleteGroup(group);
 }
 
-void MainWindow::renameGroup(QString group)
+void MainWindow::renameGroup(const QString& group)
 {
     Q_ASSERT(!group.isEmpty());
 
@@ -1673,7 +1674,7 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
     }
 }
 
-void MainWindow::instanceSelectRequest(QString id)
+void MainWindow::instanceSelectRequest(const QString& id)
 {
     setSelectedInstanceById(id);
 }

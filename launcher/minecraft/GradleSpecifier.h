@@ -42,7 +42,7 @@
 
 struct GradleSpecifier {
     GradleSpecifier() { m_valid = false; }
-    GradleSpecifier(QString value) { operator=(value); }
+    GradleSpecifier(const QString& value) { operator=(value); }
     GradleSpecifier& operator=(const QString& value)
     {
         /*

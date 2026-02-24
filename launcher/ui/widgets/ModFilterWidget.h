@@ -73,7 +73,7 @@ class ModFilterWidget : public QTabWidget {
         }
         bool operator!=(const Filter& other) const { return !(*this == other); }
 
-        bool checkMcVersions(QStringList value)
+        bool checkMcVersions(const QStringList& value)
         {
             for (const auto& mcVersion : versions)
                 if (value.contains(mcVersion.toString()))

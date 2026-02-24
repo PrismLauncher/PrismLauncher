@@ -92,7 +92,7 @@ void ResourceUpdateDialog::checkCandidates()
     if (!m_modrinthToUpdate.empty()) {
         m_modrinthCheckTask.reset(new ModrinthCheckUpdate(m_modrinthToUpdate, versions, m_loadersList, m_resourceModel));
         connect(m_modrinthCheckTask.get(), &CheckUpdateTask::checkFailed, this,
-                [this](Resource* resource, QString reason, QUrl recover_url) {
+                [this](Resource* resource, const QString& reason, const QUrl& recover_url) {
                     m_failedCheckUpdate.append({ resource, reason, recover_url });
                 });
         check_task.addTask(m_modrinthCheckTask);
@@ -100,14 +100,14 @@ void ResourceUpdateDialog::checkCandidates()
 
     if (!m_flameToUpdate.empty()) {
         m_flameCheckTask.reset(new FlameCheckUpdate(m_flameToUpdate, versions, m_loadersList, m_resourceModel));
-        connect(m_flameCheckTask.get(), &CheckUpdateTask::checkFailed, this, [this](Resource* resource, QString reason, QUrl recover_url) {
+        connect(m_flameCheckTask.get(), &CheckUpdateTask::checkFailed, this, [this](Resource* resource, const QString& reason, const QUrl& recover_url) {
             m_failedCheckUpdate.append({ resource, reason, recover_url });
         });
         check_task.addTask(m_flameCheckTask);
     }
 
     connect(&check_task, &Task::failed, this,
-            [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
+            [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
     connect(&check_task, &Task::succeeded, this, [this, &check_task]() {
         QStringList warnings = check_task.warnings();
@@ -348,7 +348,7 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
             onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::MODRINTH);
         });
         connect(modrinth_task.get(), &EnsureMetadataTask::failed,
-                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         if (modrinth_task->getHashingTask())
             seq.addTask(modrinth_task->getHashingTask());
@@ -364,7 +364,7 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
             onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::FLAME);
         });
         connect(flame_task.get(), &EnsureMetadataTask::failed,
-                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         if (flame_task->getHashingTask())
             seq.addTask(flame_task->getHashingTask());

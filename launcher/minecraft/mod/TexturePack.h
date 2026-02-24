@@ -34,7 +34,7 @@ class TexturePack : public Resource {
     using Ptr = shared_qobject_ptr<Resource>;
 
     TexturePack(QObject* parent = nullptr) : Resource(parent) {}
-    TexturePack(QFileInfo file_info) : Resource(file_info) {}
+    TexturePack(const QFileInfo& file_info) : Resource(file_info) {}
 
     /** Gets the description of the texture pack. */
     QString description() const { return m_description; }
@@ -46,7 +46,7 @@ class TexturePack : public Resource {
     void setDescription(QString new_description);
 
     /** Thread-safe. */
-    void setImage(QImage new_image) const;
+    void setImage(const QImage& new_image) const;
 
     bool valid() const override;
 

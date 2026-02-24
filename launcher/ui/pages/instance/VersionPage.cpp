@@ -502,7 +502,7 @@ void VersionPage::preselect(int row)
     updateButtons(row);
 }
 
-void VersionPage::onGameUpdateError(QString error)
+void VersionPage::onGameUpdateError(const QString& error)
 {
     CustomMessageBox::selectable(this, tr("Error updating instance"), error, QMessageBox::Warning)->show();
 }

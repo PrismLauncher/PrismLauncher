@@ -78,7 +78,7 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     return {};
 }
 
-void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)
+void ListModel::getLogo(const QString& logo, const QString& logoUrl, const LogoCallback& callback)
 {
     if (m_logoMap.contains(logo)) {
         callback(APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(logo))->getFullPath());
@@ -139,7 +139,7 @@ void ListModel::requestFinished(QByteArray* responsePtr)
     }
 }
 
-void ListModel::requestFailed(QString)
+void ListModel::requestFailed(const QString&)
 {
     m_jobPtr.reset();
     m_remainingPacks.clear();
@@ -205,13 +205,13 @@ void ListModel::packRequestFinished(QByteArray* responsePtr)
     }
 }
 
-void ListModel::packRequestFailed(QString)
+void ListModel::packRequestFailed(const QString&)
 {
     m_jobPtr.reset();
     m_remainingPacks.removeOne(m_currentPack);
 }
 
-void ListModel::logoLoaded(QString logo)
+void ListModel::logoLoaded(const QString& logo)
 {
     auto& logoObj = m_logoMap[logo];
     logoObj.downloadJob.reset();
@@ -223,13 +223,13 @@ void ListModel::logoLoaded(QString logo)
     }
 }
 
-void ListModel::logoFailed(QString logo)
+void ListModel::logoFailed(const QString& logo)
 {
     m_logoMap[logo].failed = true;
     m_logoMap[logo].downloadJob.reset();
 }
 
-void ListModel::requestLogo(QString logo, QString url)
+void ListModel::requestLogo(const QString& logo, const QString& url)
 {
     if (m_logoMap.contains(logo)) {
         return;

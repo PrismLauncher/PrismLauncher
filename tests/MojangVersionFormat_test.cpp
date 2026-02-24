@@ -6,7 +6,7 @@
 class MojangVersionFormatTest : public QObject {
     Q_OBJECT
 
-    static QJsonDocument readJson(const QString path)
+    static QJsonDocument readJson(const QString& path)
     {
         QFile jsonFile(path);
         if (!jsonFile.open(QIODevice::ReadOnly)) {
@@ -17,7 +17,7 @@ class MojangVersionFormatTest : public QObject {
         jsonFile.close();
         return QJsonDocument::fromJson(data);
     }
-    static void writeJson(const char* file, QJsonDocument doc)
+    static void writeJson(const char* file, const QJsonDocument& doc)
     {
         QFile jsonFile(file);
         if (!jsonFile.open(QIODevice::WriteOnly | QIODevice::Text)) {

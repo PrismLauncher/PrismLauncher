@@ -39,6 +39,7 @@
 #include <Json.h>
 #include <MMCZip.h>
 #include <QtConcurrentRun>
+#include <utility>
 
 #include "SolderPackManifest.h"
 #include "TechnicPackProcessor.h"
@@ -161,7 +162,7 @@ void Technic::SolderPackInstallTask::downloadFailed(QString reason)
 {
     m_abortable = false;
     m_filesNetJob.reset();
-    emitFailed(reason);
+    emitFailed(std::move(reason));
 }
 
 void Technic::SolderPackInstallTask::downloadProgressChanged(qint64 current, qint64 total)

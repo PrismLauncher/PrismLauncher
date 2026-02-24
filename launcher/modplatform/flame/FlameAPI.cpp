@@ -178,7 +178,7 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getCategories(ModPlatform::ResourceT
     auto [action, response] = Net::ApiDownload::makeByteArray(
         QUrl(QString(BuildConfig.FLAME_BASE_URL + "/categories?gameId=432&classId=%1").arg(getClassId(type))));
     netJob->addNetAction(action);
-    QObject::connect(netJob.get(), &Task::failed, [](QString msg) { qDebug() << "Flame failed to get categories:" << msg; });
+    QObject::connect(netJob.get(), &Task::failed, [](const QString& msg) { qDebug() << "Flame failed to get categories:" << msg; });
     return { netJob, response };
 }
 
@@ -218,8 +218,8 @@ QList<ModPlatform::Category> FlameAPI::loadModCategories(const QByteArray& respo
     return categories;
 };
 
-std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
-                                                                      QList<ModPlatform::ModLoaderType> instanceLoaders,
+std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(const QList<ModPlatform::IndexedVersion>& versions,
+                                                                      const QList<ModPlatform::ModLoaderType>& instanceLoaders,
                                                                       ModPlatform::ModLoaderTypes modLoaders,
                                                                       bool checkLoaders)
 {

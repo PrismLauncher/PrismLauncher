@@ -84,7 +84,7 @@ class TechnicPage : public QWidget, public ModpackProviderBasePage {
     void triggerSearch();
     void onSelectionChanged(QModelIndex first, QModelIndex second);
     void onSolderLoaded(QByteArray* responsePtr);
-    void onVersionSelectionChanged(QString data);
+    void onVersionSelectionChanged(const QString& data);
 
    private:
     Ui::TechnicPage* ui = nullptr;

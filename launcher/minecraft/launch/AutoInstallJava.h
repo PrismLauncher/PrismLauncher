@@ -53,9 +53,9 @@ class AutoInstallJava : public LaunchStep {
     bool abort() override;
 
    protected:
-    void setJavaPath(QString path);
+    void setJavaPath(const QString& path);
     void setJavaPathFromPartial();
-    void downloadJava(Meta::Version::Ptr version, QString javaName);
+    void downloadJava(const Meta::Version::Ptr& version, const QString& javaName);
     void tryNextMajorJava();
 
    private:

@@ -47,7 +47,8 @@
 #include "minecraft/Component.h"
 #include "minecraft/PackProfile.h"
 
-#include <assert.h>
+#include <cassert>
+#include <utility>
 
 const QMap<QString, ModloaderMapEntry> Component::KNOWN_MODLOADERS = {
     { "net.neoforged", { ModPlatform::NeoForge, { "net.minecraftforge", "net.fabricmc.fabric-loader", "org.quiltmc.quilt-loader" } } },
@@ -70,7 +71,7 @@ Component::Component(PackProfile* parent, const QString& uid, std::shared_ptr<Ve
     assert(parent);
     m_parent = parent;
 
-    m_file = file;
+    m_file = std::move(file);
     m_uid = uid;
     m_cachedVersion = m_file->version;
     m_cachedName = m_file->name;

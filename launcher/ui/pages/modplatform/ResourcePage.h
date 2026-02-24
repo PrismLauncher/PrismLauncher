@@ -58,9 +58,9 @@ class ResourcePage : public QWidget, public BasePage {
     /** Get the current term in the search bar. */
     auto getSearchTerm() const -> QString;
     /** Programatically set the term in the search bar. */
-    void setSearchTerm(QString);
+    void setSearchTerm(const QString&);
 
-    bool setCurrentPack(ModPlatform::IndexedPack::Ptr);
+    bool setCurrentPack(const ModPlatform::IndexedPack::Ptr&);
     auto getCurrentPack() const -> ModPlatform::IndexedPack::Ptr;
     auto getDialog() const -> const ResourceDownloadDialog* { return m_parentDialog; }
     auto getModel() const -> ResourceModel* { return m_model; }

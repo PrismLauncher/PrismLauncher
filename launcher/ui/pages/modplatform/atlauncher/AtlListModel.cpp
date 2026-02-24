@@ -156,12 +156,12 @@ void ListModel::requestFinished(QByteArray* responsePtr)
     endInsertRows();
 }
 
-void ListModel::requestFailed(QString reason)
+void ListModel::requestFailed(const QString& reason)
 {
     jobPtr.reset();
 }
 
-void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)
+void ListModel::getLogo(const QString& logo, const QString& logoUrl, const LogoCallback& callback)
 {
     if (m_logoMap.contains(logo)) {
         callback(APPLICATION->metacache()->resolveEntry("ATLauncherPacks", QString("logos/%1").arg(logo))->getFullPath());
@@ -170,13 +170,13 @@ void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallbac
     }
 }
 
-void ListModel::logoFailed(QString logo)
+void ListModel::logoFailed(const QString& logo)
 {
     m_failedLogos.append(logo);
     m_loadingLogos.removeAll(logo);
 }
 
-void ListModel::logoLoaded(QString logo, QIcon out)
+void ListModel::logoLoaded(const QString& logo, const QIcon& out)
 {
     m_loadingLogos.removeAll(logo);
     m_logoMap.insert(logo, out);
@@ -188,7 +188,7 @@ void ListModel::logoLoaded(QString logo, QIcon out)
     }
 }
 
-void ListModel::requestLogo(QString file, QString url)
+void ListModel::requestLogo(const QString& file, const QString& url)
 {
     if (m_loadingLogos.contains(file) || m_failedLogos.contains(file)) {
         return;

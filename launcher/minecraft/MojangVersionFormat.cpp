@@ -47,9 +47,9 @@ static const int CURRENT_MINIMUM_LAUNCHER_VERSION = 18;
 static MojangAssetIndexInfo::Ptr assetIndexFromJson(const QJsonObject& obj);
 static MojangDownloadInfo::Ptr downloadInfoFromJson(const QJsonObject& obj);
 static MojangLibraryDownloadInfo::Ptr libDownloadInfoFromJson(const QJsonObject& libObj);
-static QJsonObject assetIndexToJson(MojangAssetIndexInfo::Ptr assetidxinfo);
-static QJsonObject libDownloadInfoToJson(MojangLibraryDownloadInfo::Ptr libinfo);
-static QJsonObject downloadInfoToJson(MojangDownloadInfo::Ptr info);
+static QJsonObject assetIndexToJson(const MojangAssetIndexInfo::Ptr& assetidxinfo);
+static QJsonObject libDownloadInfoToJson(const MojangLibraryDownloadInfo::Ptr& libinfo);
+static QJsonObject downloadInfoToJson(const MojangDownloadInfo::Ptr& info);
 
 namespace Bits {
 static void readString(const QJsonObject& root, const QString& key, QString& variable)
@@ -59,7 +59,7 @@ static void readString(const QJsonObject& root, const QString& key, QString& var
     }
 }
 
-static void readDownloadInfo(MojangDownloadInfo::Ptr out, const QJsonObject& obj)
+static void readDownloadInfo(const MojangDownloadInfo::Ptr& out, const QJsonObject& obj)
 {
     // optional, not used
     readString(obj, "path", out->path);
@@ -69,7 +69,7 @@ static void readDownloadInfo(MojangDownloadInfo::Ptr out, const QJsonObject& obj
     out->size = requireInteger(obj, "size");
 }
 
-static void readAssetIndex(MojangAssetIndexInfo::Ptr out, const QJsonObject& obj)
+static void readAssetIndex(const MojangAssetIndexInfo::Ptr& out, const QJsonObject& obj)
 {
     out->totalSize = requireInteger(obj, "totalSize");
     out->id = requireString(obj, "id");
@@ -92,7 +92,7 @@ MojangAssetIndexInfo::Ptr assetIndexFromJson(const QJsonObject& obj)
     return out;
 }
 
-QJsonObject downloadInfoToJson(MojangDownloadInfo::Ptr info)
+QJsonObject downloadInfoToJson(const MojangDownloadInfo::Ptr& info)
 {
     QJsonObject out;
     if (!info->path.isNull()) {
@@ -122,7 +122,7 @@ MojangLibraryDownloadInfo::Ptr libDownloadInfoFromJson(const QJsonObject& libObj
     return out;
 }
 
-QJsonObject libDownloadInfoToJson(MojangLibraryDownloadInfo::Ptr libinfo)
+QJsonObject libDownloadInfoToJson(const MojangLibraryDownloadInfo::Ptr& libinfo)
 {
     QJsonObject out;
     if (libinfo->artifact) {
@@ -138,7 +138,7 @@ QJsonObject libDownloadInfoToJson(MojangLibraryDownloadInfo::Ptr libinfo)
     return out;
 }
 
-QJsonObject assetIndexToJson(MojangAssetIndexInfo::Ptr info)
+QJsonObject assetIndexToJson(const MojangAssetIndexInfo::Ptr& info)
 {
     QJsonObject out;
     if (!info->path.isNull()) {

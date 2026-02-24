@@ -17,6 +17,7 @@
 
 #include <QtConcurrent>
 #include <memory>
+#include <utility>
 
 #include "FileSystem.h"
 #include "MMCZip.h"
@@ -80,7 +81,7 @@ void Technic::SingleZipPackInstallTask::downloadFailed(QString reason)
 {
     m_abortable = false;
     m_filesNetJob.reset();
-    emitFailed(reason);
+    emitFailed(std::move(reason));
 }
 
 void Technic::SingleZipPackInstallTask::downloadProgressChanged(qint64 current, qint64 total)

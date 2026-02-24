@@ -123,9 +123,9 @@ class ResourceAPI {
    protected:
     inline QString debugName() const { return "External resource API"; }
 
-    QString mapMCVersionToModrinth(Version v) const;
+    QString mapMCVersionToModrinth(const Version& v) const;
 
-    QString getGameVersionsString(std::vector<Version> mcVersions) const;
+    QString getGameVersionsString(const std::vector<Version>& mcVersions) const;
 
    public:
     virtual auto getSearchURL(SearchArgs const& args) const -> std::optional<QString> = 0;

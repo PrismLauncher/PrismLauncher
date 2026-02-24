@@ -136,7 +136,7 @@ void IconPickerDialog::activated(QModelIndex index)
     accept();
 }
 
-void IconPickerDialog::selectionChanged(QItemSelection selected, QItemSelection deselected)
+void IconPickerDialog::selectionChanged(QItemSelection selected, const QItemSelection& deselected)
 {
     if (selected.empty())
         return;
@@ -148,7 +148,7 @@ void IconPickerDialog::selectionChanged(QItemSelection selected, QItemSelection 
     buttonRemove->setEnabled(APPLICATION->icons()->iconFileExists(selectedIconKey));
 }
 
-int IconPickerDialog::execWithSelection(QString selection)
+int IconPickerDialog::execWithSelection(const QString& selection)
 {
     auto list = APPLICATION->icons();
     auto contentsWidget = ui->iconView;

@@ -83,7 +83,7 @@ class IconList : public QAbstractListModel {
     void stopWatching();
 
    signals:
-    void iconUpdated(QString key);
+    void iconUpdated(const QString& key);
 
    private:
     // hide copy constructor

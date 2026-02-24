@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <utility>
 
 #include "minecraft/auth/AccountData.h"
 #include "minecraft/auth/steps/EntitlementsStep.h"
@@ -75,11 +76,11 @@ void AuthFlow::nextStep()
 
 void AuthFlow::stepFinished(AccountTaskState resultingState, QString message)
 {
-    if (changeState(resultingState, message))
+    if (changeState(resultingState, std::move(message)))
         nextStep();
 }
 
-bool AuthFlow::changeState(AccountTaskState newState, QString reason)
+bool AuthFlow::changeState(AccountTaskState newState, const QString& reason)
 {
     m_taskState = newState;
     setDetails(reason);

@@ -19,7 +19,7 @@ QSize IconLabel::sizeHint() const
 
 void IconLabel::setIcon(QIcon icon)
 {
-    m_icon = icon;
+    m_icon = std::move(icon);
     update();
 }
 

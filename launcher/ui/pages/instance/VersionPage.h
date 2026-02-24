@@ -116,7 +116,7 @@ class VersionPage : public QMainWindow, public BasePage {
     void versionCurrent(const QModelIndex& current, const QModelIndex& previous);
 
    private slots:
-    void onGameUpdateError(QString error);
+    void onGameUpdateError(const QString& error);
     void packageCurrent(const QModelIndex& current, const QModelIndex& previous);
     void showContextMenu(const QPoint& pos);
     void onFilterTextChanged(const QString& newContents);

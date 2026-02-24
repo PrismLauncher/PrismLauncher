@@ -5,7 +5,7 @@
 
 #include "ui_NewsDialog.h"
 
-NewsDialog::NewsDialog(QList<NewsEntryPtr> entries, QWidget* parent) : QDialog(parent), ui(new Ui::NewsDialog())
+NewsDialog::NewsDialog(const QList<NewsEntryPtr>& entries, QWidget* parent) : QDialog(parent), ui(new Ui::NewsDialog())
 {
     ui->setupUi(this);
 

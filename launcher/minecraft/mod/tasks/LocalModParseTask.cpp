@@ -8,6 +8,7 @@
 #include <QJsonValue>
 #include <QRegularExpression>
 #include <QString>
+#include <utility>
 
 #include "FileSystem.h"
 #include "Json.h"
@@ -24,9 +25,9 @@ namespace ModUtils {
 
 // OLD format:
 // https://github.com/MinecraftForge/FML/wiki/FML-mod-information-file/5bf6a2d05145ec79387acc0d45c958642fb049fc
-ModDetails ReadMCModInfo(QByteArray contents)
+ModDetails ReadMCModInfo(const QByteArray& contents)
 {
-    auto getInfoFromArray = [](QJsonArray arr) -> ModDetails {
+    auto getInfoFromArray = [](const QJsonArray& arr) -> ModDetails {
         if (!arr.at(0).isObject()) {
             return {};
         }
@@ -128,7 +129,7 @@ ModDetails ReadMCModInfo(QByteArray contents)
 }
 
 // https://github.com/MinecraftForge/Documentation/blob/5ab4ba6cf9abc0ac4c0abd96ad187461aefd72af/docs/gettingstarted/structuring.md
-ModDetails ReadMCModTOML(QByteArray contents)
+ModDetails ReadMCModTOML(const QByteArray& contents)
 {
     ModDetails details;
 
@@ -277,7 +278,7 @@ ModDetails ReadMCModTOML(QByteArray contents)
 }
 
 // https://fabricmc.net/wiki/documentation:fabric_mod_json
-ModDetails ReadFabricModInfo(QByteArray contents)
+ModDetails ReadFabricModInfo(const QByteArray& contents)
 {
     QJsonParseError jsonError;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
@@ -376,7 +377,7 @@ ModDetails ReadFabricModInfo(QByteArray contents)
 }
 
 // https://github.com/QuiltMC/rfcs/blob/master/specification/0002-quilt.mod.json.md
-ModDetails ReadQuiltModInfo(QByteArray contents)
+ModDetails ReadQuiltModInfo(const QByteArray& contents)
 {
     ModDetails details;
     try {
@@ -496,7 +497,7 @@ ModDetails ReadForgeInfo(QByteArray contents)
     details.mod_id = "Forge";
     details.homeurl = "http://www.minecraftforge.net/forum/";
     INIFile ini;
-    if (!ini.loadFile(contents))
+    if (!ini.loadFile(std::move(contents)))
         return details;
 
     QString major = ini.get("forge.major.number", "0").toString();
@@ -508,7 +509,7 @@ ModDetails ReadForgeInfo(QByteArray contents)
     return details;
 }
 
-ModDetails ReadLiteModInfo(QByteArray contents)
+ModDetails ReadLiteModInfo(const QByteArray& contents)
 {
     ModDetails details;
     QJsonParseError jsonError;
@@ -533,7 +534,7 @@ ModDetails ReadLiteModInfo(QByteArray contents)
 }
 
 // https://git.sleeping.town/unascribed/NilLoader/src/commit/d7fc87b255fc31019ff90f80d45894927fac6efc/src/main/java/nilloader/api/NilMetadata.java#L64
-ModDetails ReadNilModInfo(QByteArray contents, QString fname)
+ModDetails ReadNilModInfo(const QByteArray& contents, QString fname)
 {
     ModDetails details;
 
@@ -715,7 +716,7 @@ bool processLitemod(Mod& mod, [[maybe_unused]] ProcessingLevel level)
 }
 
 /** Checks whether a file is valid as a mod or not. */
-bool validate(QFileInfo file)
+bool validate(const QFileInfo& file)
 {
     Mod mod{ file };
     return ModUtils::process(mod, ProcessingLevel::BasicInfoOnly) && mod.valid();

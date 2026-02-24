@@ -79,7 +79,7 @@ class VersionSelectWidget : public QWidget {
     bool eventFilter(QObject* watched, QEvent* event) override;
 
    signals:
-    void selectedVersionChanged(BaseVersion::Ptr version);
+    void selectedVersionChanged(const BaseVersion::Ptr& version);
 
    protected:
     void closeEvent(QCloseEvent*) override;

@@ -91,8 +91,8 @@ class Resource : public QObject {
     using WeakPtr = QPointer<Resource>;
 
     Resource(QObject* parent = nullptr);
-    Resource(QFileInfo file_info);
-    Resource(QString file_path) : Resource(QFileInfo(file_path)) {}
+    Resource(const QFileInfo& file_info);
+    Resource(const QString& file_path) : Resource(QFileInfo(file_path)) {}
 
     ~Resource() override = default;
 

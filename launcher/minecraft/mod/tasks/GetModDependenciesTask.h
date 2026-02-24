@@ -44,7 +44,7 @@ class GetModDependenciesTask : public SequentialTask {
         ModPlatform::IndexedPack::Ptr pack;
         ModPlatform::IndexedVersion version;
         PackDependency() = default;
-        PackDependency(const ModPlatform::IndexedPack::Ptr p, const ModPlatform::IndexedVersion& v)
+        PackDependency(const ModPlatform::IndexedPack::Ptr& p, const ModPlatform::IndexedVersion& v)
         {
             pack = p;
             version = v;
@@ -75,12 +75,12 @@ class GetModDependenciesTask : public SequentialTask {
     QList<ModPlatform::Dependency> getDependenciesForVersion(const ModPlatform::IndexedVersion&,
                                                              ModPlatform::ResourceProvider providerName);
     void prepare();
-    Task::Ptr getProjectInfoTask(std::shared_ptr<PackDependency> pDep);
+    Task::Ptr getProjectInfoTask(const std::shared_ptr<PackDependency>& pDep);
     ModPlatform::Dependency getOverride(const ModPlatform::Dependency&, ModPlatform::ResourceProvider providerName);
     void removePack(const QVariant& addonId);
 
-    bool isLocalyInstalled(std::shared_ptr<PackDependency> pDep);
-    bool maybeInstalled(std::shared_ptr<PackDependency> pDep);
+    bool isLocalyInstalled(const std::shared_ptr<PackDependency>& pDep);
+    bool maybeInstalled(const std::shared_ptr<PackDependency>& pDep);
 
    private:
     QList<std::shared_ptr<PackDependency>> m_pack_dependencies;

@@ -19,6 +19,8 @@
 
 #include "ResourceDownloadTask.h"
 
+#include <utility>
+
 #include "Application.h"
 
 #include "FileSystem.h"
@@ -104,7 +106,7 @@ void ResourceDownloadTask::downloadSucceeded()
 void ResourceDownloadTask::downloadFailed(QString reason)
 {
     m_filesNetJob.reset();
-    emitFailed(reason);
+    emitFailed(std::move(reason));
 }
 
 void ResourceDownloadTask::downloadProgressChanged(qint64 current, qint64 total)
@@ -114,7 +116,7 @@ void ResourceDownloadTask::downloadProgressChanged(qint64 current, qint64 total)
 
 // This indirection is done so that we don't delete a mod before being sure it was
 // downloaded successfully!
-void ResourceDownloadTask::hasOldResource(QString name, QString filename)
+void ResourceDownloadTask::hasOldResource(const QString& name, const QString& filename)
 {
     to_delete = { name, filename };
 }

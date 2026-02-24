@@ -22,6 +22,7 @@
 
 #include <QPushButton>
 #include <algorithm>
+#include <utility>
 
 #include "Application.h"
 #include "ResourceDownloadTask.h"
@@ -156,7 +157,7 @@ void ResourceDownloadDialog::confirm()
     QStringList depNames;
     if (auto task = getModDependenciesTask(); task) {
         connect(task.get(), &Task::failed, this,
-                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         auto weak = task.toWeakRef();
         connect(task.get(), &Task::succeeded, this, [this, weak]() {
@@ -215,7 +216,7 @@ void ResourceDownloadDialog::confirm()
 
 bool ResourceDownloadDialog::selectPage(QString pageId)
 {
-    return m_container->selectPage(pageId);
+    return m_container->selectPage(std::move(pageId));
 }
 
 ResourcePage* ResourceDownloadDialog::selectedPage()
@@ -225,7 +226,7 @@ ResourcePage* ResourceDownloadDialog::selectedPage()
     return result;
 }
 
-void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack::Ptr pack, ModPlatform::IndexedVersion& ver)
+void ResourceDownloadDialog::addResource(const ModPlatform::IndexedPack::Ptr& pack, ModPlatform::IndexedVersion& ver)
 {
     removeResource(pack->name);
     selectedPage()->addResourceToPage(pack, ver, getBaseModel());

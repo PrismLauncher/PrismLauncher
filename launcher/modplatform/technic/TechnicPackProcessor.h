@@ -25,7 +25,7 @@ class TechnicPackProcessor : public QObject {
 
    signals:
     void succeeded();
-    void failed(QString reason);
+    void failed(const QString& reason);
 
    public:
     void run(SettingsObject* globalSettings,

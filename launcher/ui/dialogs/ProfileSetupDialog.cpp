@@ -92,7 +92,7 @@ void ProfileSetupDialog::on_buttonBox_rejected()
     reject();
 }
 
-void ProfileSetupDialog::setNameStatus(ProfileSetupDialog::NameStatus status, QString errorString = QString())
+void ProfileSetupDialog::setNameStatus(ProfileSetupDialog::NameStatus status, const QString& errorString = QString())
 {
     nameStatus = status;
     auto okButton = ui->buttonBox->button(QDialogButtonBox::Ok);
@@ -226,7 +226,7 @@ void ProfileSetupDialog::setupProfile(const QString& profileName)
 namespace {
 
 struct MojangError {
-    static MojangError fromJSON(QByteArray data)
+    static MojangError fromJSON(const QByteArray& data)
     {
         MojangError out;
         out.rawError = QString::fromUtf8(data);

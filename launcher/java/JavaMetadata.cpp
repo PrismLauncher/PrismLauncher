@@ -27,7 +27,7 @@
 
 namespace Java {
 
-DownloadType parseDownloadType(QString javaDownload)
+DownloadType parseDownloadType(const QString& javaDownload)
 {
     if (javaDownload == "manifest")
         return DownloadType::Manifest;

@@ -25,6 +25,6 @@ namespace Modrinth {
 
 void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj);
 void loadExtraPackData(ModPlatform::IndexedPack& m, QJsonObject& obj);
-auto loadIndexedPackVersion(QJsonObject& obj, QString hash_type = "sha512", QString filename_prefer = "") -> ModPlatform::IndexedVersion;
+auto loadIndexedPackVersion(QJsonObject& obj, const QString& hash_type = "sha512", const QString& filename_prefer = "") -> ModPlatform::IndexedVersion;
 
 }  // namespace Modrinth

@@ -52,7 +52,7 @@ QNetworkReply* SkinDelete::getReply(QNetworkRequest& request)
     return m_network->deleteResource(request);
 }
 
-SkinDelete::Ptr SkinDelete::make(QString token)
+SkinDelete::Ptr SkinDelete::make(const QString& token)
 {
     auto up = makeShared<SkinDelete>();
     up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/skins/active");

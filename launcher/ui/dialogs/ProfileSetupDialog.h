@@ -49,7 +49,7 @@ class ProfileSetupDialog : public QDialog {
    protected:
     void scheduleCheck(const QString& name);
     void checkName(const QString& name);
-    void setNameStatus(NameStatus status, QString errorString);
+    void setNameStatus(NameStatus status, const QString& errorString);
 
     void setupProfile(const QString& profileName);
 

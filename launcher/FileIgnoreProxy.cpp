@@ -240,7 +240,7 @@ void FileIgnoreProxy::setBlockedPaths(QStringList paths)
 {
     beginResetModel();
     m_blocked.clear();
-    m_blocked.insert(paths);
+    m_blocked.insert(std::move(paths));
     endResetModel();
 }
 
@@ -265,7 +265,7 @@ bool FileIgnoreProxy::filterAcceptsRow(int sourceRow, const QModelIndex& sourceP
     return !ignoreFile(fileInfo);
 }
 
-bool FileIgnoreProxy::ignoreFile(QFileInfo fileInfo) const
+bool FileIgnoreProxy::ignoreFile(const QFileInfo& fileInfo) const
 {
     if (m_ignoreFiles.contains(fileInfo.fileName())) {
         return true;

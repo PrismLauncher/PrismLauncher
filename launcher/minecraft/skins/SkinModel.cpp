@@ -106,12 +106,12 @@ static QImage improveSkin(QImage skin)
     return skin;
 }
 
-static QImage getSkin(const QString path)
+static QImage getSkin(const QString& path)
 {
     return improveSkin(QImage(path));
 }
 
-static QImage generatePreviews(QImage texture, bool slim)
+static QImage generatePreviews(const QImage& texture, bool slim)
 {
     QImage preview(36, 36, QImage::Format_ARGB32);
     preview.fill(Qt::transparent);
@@ -162,12 +162,12 @@ static QImage generatePreviews(QImage texture, bool slim)
 
     return preview;
 }
-SkinModel::SkinModel(QString path) : m_path(path), m_texture(getSkin(path)), m_model(Model::CLASSIC)
+SkinModel::SkinModel(const QString& path) : m_path(path), m_texture(getSkin(path)), m_model(Model::CLASSIC)
 {
     m_preview = generatePreviews(m_texture, false);
 }
 
-SkinModel::SkinModel(QDir skinDir, QJsonObject obj)
+SkinModel::SkinModel(const QDir& skinDir, QJsonObject obj)
     : m_capeId(obj["capeId"].toString()), m_model(Model::CLASSIC), m_url(obj["url"].toString())
 {
     auto name = obj["name"].toString();
@@ -185,7 +185,7 @@ QString SkinModel::name() const
     return QFileInfo(m_path).completeBaseName();
 }
 
-bool SkinModel::rename(QString newName)
+bool SkinModel::rename(const QString& newName)
 {
     auto info = QFileInfo(m_path);
     auto new_path = FS::PathCombine(info.absolutePath(), newName + ".png");

@@ -122,7 +122,7 @@ QString GameType::toLogString() const
     return "Undefined";
 }
 
-std::unique_ptr<nbt::tag_compound> parseLevelDat(QByteArray data)
+std::unique_ptr<nbt::tag_compound> parseLevelDat(const QByteArray& data)
 {
     QByteArray output;
     if (!GZip::unzip(data, output)) {
@@ -244,7 +244,7 @@ bool World::resetIcon()
     return false;
 }
 
-int64_t loadSeed(QByteArray data);
+int64_t loadSeed(const QByteArray& data);
 
 void World::readFromFS(const QFileInfo& file)
 {
@@ -416,7 +416,7 @@ GameType read_gametype(nbt::value& parent, const char* name)
 
 }  // namespace
 
-int64_t loadSeed(QByteArray data)
+int64_t loadSeed(const QByteArray& data)
 {
     auto levelData = parseLevelDat(data);
     if (!levelData) {
@@ -438,7 +438,7 @@ int64_t loadSeed(QByteArray data)
     return 0;
 }
 
-void World::loadFromLevelDat(QByteArray data)
+void World::loadFromLevelDat(const QByteArray& data)
 {
     auto levelData = parseLevelDat(data);
     if (!levelData) {

@@ -35,7 +35,7 @@ class WorldSave : public Resource {
     using Ptr = shared_qobject_ptr<Resource>;
 
     WorldSave(QObject* parent = nullptr) : Resource(parent) {}
-    WorldSave(QFileInfo file_info) : Resource(file_info) {}
+    WorldSave(const QFileInfo& file_info) : Resource(file_info) {}
 
     /** Gets the format of the save. */
     WorldSaveFormat saveFormat() const { return m_save_format; }

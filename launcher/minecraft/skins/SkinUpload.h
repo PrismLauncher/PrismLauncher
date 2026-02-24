@@ -29,7 +29,7 @@ class SkinUpload : public Net::NetRequest {
     SkinUpload(QString path, QString variant);
     ~SkinUpload() override = default;
 
-    static SkinUpload::Ptr make(QString token, QString path, QString variant);
+    static SkinUpload::Ptr make(const QString& token, QString path, QString variant);
 
    protected:
     QNetworkReply* getReply(QNetworkRequest&) override;

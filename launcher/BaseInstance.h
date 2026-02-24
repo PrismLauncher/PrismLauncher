@@ -136,7 +136,7 @@ class BaseInstance : public QObject {
     virtual QString modsRoot() const = 0;
 
     QString name() const;
-    void setName(QString val);
+    void setName(const QString& val);
 
     /// Sync name and rename instance dir accordingly; returns true if successful
     bool syncInstanceDirName(const QString& newRoot) const;
@@ -150,10 +150,10 @@ class BaseInstance : public QObject {
     QString windowTitle() const;
 
     QString iconKey() const;
-    void setIconKey(QString val);
+    void setIconKey(const QString& val);
 
     QString notes() const;
-    void setNotes(QString val);
+    void setNotes(const QString& val);
 
     QString getPreLaunchCommand();
     QString getPostExitCommand();
@@ -303,7 +303,7 @@ class BaseInstance : public QObject {
     void statusChanged(Status from, Status to);
 
    protected slots:
-    void iconUpdated(QString key);
+    void iconUpdated(const QString& key);
 
    protected: /* data */
     QString m_rootDir;

@@ -51,6 +51,7 @@
 #include <QList>
 #include <QPushButton>
 #include <QRegularExpression>
+#include <utility>
 
 #include "BuildConfig.h"
 #include "JavaCommon.h"
@@ -229,7 +230,7 @@ bool LaunchController::askPlayDemo()
     return box.clickedButton() == demoButton;
 }
 
-QString LaunchController::askOfflineName(QString playerName, bool* ok)
+QString LaunchController::askOfflineName(const QString& playerName, bool* ok)
 {
     if (ok != nullptr) {
         *ok = false;
@@ -329,7 +330,7 @@ void LaunchController::login()
     launchInstance();
 }
 
-bool LaunchController::reauthenticateAccount(MinecraftAccountPtr account, QString reason)
+bool LaunchController::reauthenticateAccount(const MinecraftAccountPtr& account, const QString& reason)
 {
     auto button = QMessageBox::warning(
         m_parentWidget, tr("Account refresh failed"), tr("%1. Do you want to reauthenticate this account?").arg(reason),
@@ -463,7 +464,7 @@ void LaunchController::onFailed(QString reason)
     if (m_instance->settings()->get("ShowConsoleOnError").toBool()) {
         APPLICATION->showInstanceWindow(m_instance, "console");
     }
-    emitFailed(reason);
+    emitFailed(std::move(reason));
 }
 
 void LaunchController::onProgressRequested(Task* task)

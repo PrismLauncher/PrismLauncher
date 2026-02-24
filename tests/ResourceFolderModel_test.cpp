@@ -74,7 +74,7 @@ class ResourceFolderModelTest : public QObject {
         // sanity check
         QVERIFY(!source.endsWith('/'));
 
-        auto verify = [](QString path) {
+        auto verify = [](const QString& path) {
             QDir target_dir(FS::PathCombine(path, "test_folder"));
             QVERIFY(target_dir.entryList().contains("pack.mcmeta"));
             QVERIFY(target_dir.entryList().contains("assets"));

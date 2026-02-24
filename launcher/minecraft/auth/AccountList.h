@@ -76,7 +76,7 @@ class AccountList : public QAbstractListModel {
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
-    void addAccount(MinecraftAccountPtr account);
+    void addAccount(const MinecraftAccountPtr& account);
     void removeAccount(QModelIndex index);
     void moveAccount(QModelIndex index, int delta);
     int findAccountByProfileId(const QString& profileId) const;
@@ -84,9 +84,9 @@ class AccountList : public QAbstractListModel {
     QStringList profileNames() const;
 
     // requesting a refresh pushes it to the front of the queue
-    void requestRefresh(QString accountId);
+    void requestRefresh(const QString& accountId);
     // queuing a refresh will let it go to the back of the queue (unless it's somewhere inside the queue already)
-    void queueRefresh(QString accountId);
+    void queueRefresh(const QString& accountId);
 
     /*!
      * Sets the path to load/save the list file from/to.
@@ -102,7 +102,7 @@ class AccountList : public QAbstractListModel {
     bool saveList();
 
     MinecraftAccountPtr defaultAccount() const;
-    void setDefaultAccount(MinecraftAccountPtr profileId);
+    void setDefaultAccount(const MinecraftAccountPtr& profileId);
     bool anyAccountIsValid();
 
     bool isActive() const;
@@ -139,7 +139,7 @@ class AccountList : public QAbstractListModel {
     void tryNext();
 
     void authSucceeded();
-    void authFailed(QString reason);
+    void authFailed(const QString& reason);
 
    protected:
     QList<QString> m_refreshQueue;

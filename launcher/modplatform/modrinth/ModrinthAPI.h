@@ -15,24 +15,24 @@
 
 class ModrinthAPI : public ResourceAPI {
    public:
-    std::pair<Task::Ptr, QByteArray*> currentVersion(QString hash, QString hash_format);
+    std::pair<Task::Ptr, QByteArray*> currentVersion(const QString& hash, const QString& hash_format);
 
-    std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, QString hash_format);
+    std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, const QString& hash_format);
 
-    std::pair<Task::Ptr, QByteArray*> latestVersion(QString hash,
-                                                    QString hash_format,
+    std::pair<Task::Ptr, QByteArray*> latestVersion(const QString& hash,
+                                                    const QString& hash_format,
                                                     std::optional<std::vector<Version>> mcVersions,
                                                     std::optional<ModPlatform::ModLoaderTypes> loaders);
 
     std::pair<Task::Ptr, QByteArray*> latestVersions(const QStringList& hashes,
-                                                     QString hash_format,
+                                                     const QString& hash_format,
                                                      std::optional<std::vector<Version>> mcVersions,
                                                      std::optional<ModPlatform::ModLoaderTypes> loaders);
 
     std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
 
     static std::pair<Task::Ptr, QByteArray*> getModCategories();
-    static QList<ModPlatform::Category> loadCategories(const QByteArray& response, QString projectType);
+    static QList<ModPlatform::Category> loadCategories(const QByteArray& response, const QString& projectType);
     static QList<ModPlatform::Category> loadModCategories(const QByteArray& response);
 
    public:
@@ -62,7 +62,7 @@ class ModrinthAPI : public ResourceAPI {
         return l.join(',');
     }
 
-    static auto getCategoriesFilters(QStringList categories) -> const QString
+    static auto getCategoriesFilters(const QStringList& categories) -> const QString
     {
         QStringList l;
         for (const auto& cat : categories) {
@@ -75,11 +75,11 @@ class ModrinthAPI : public ResourceAPI {
     {
         switch (side) {
             case ModPlatform::Side::ClientSide:
-                return {R"("client_side:required","client_side:optional"],["server_side:optional","server_side:unsupported")"};
+                return { R"("client_side:required","client_side:optional"],["server_side:optional","server_side:unsupported")" };
             case ModPlatform::Side::ServerSide:
-                return {R"("server_side:required","server_side:optional"],["client_side:optional","client_side:unsupported")"};
+                return { R"("server_side:required","server_side:optional"],["client_side:optional","client_side:unsupported")" };
             case ModPlatform::Side::UniversalSide:
-                return {R"("client_side:required"],["server_side:required")"};
+                return { R"("client_side:required"],["server_side:required")" };
             case ModPlatform::Side::NoSide:
             // fallthrough
             default:
@@ -124,7 +124,7 @@ class ModrinthAPI : public ResourceAPI {
         return "";
     }
 
-    QString createFacets(SearchArgs const& args) const
+    QString createFacets(const SearchArgs& args) const
     {
         QStringList facets_list;
 
@@ -148,7 +148,7 @@ class ModrinthAPI : public ResourceAPI {
     }
 
    public:
-    inline auto getSearchURL(SearchArgs const& args) const -> std::optional<QString> override
+    inline auto getSearchURL(const SearchArgs& args) const -> std::optional<QString> override
     {
         if (args.loaders.has_value() && args.loaders.value() != 0) {
             if (!validateModLoaders(args.loaders.value())) {
@@ -169,17 +169,17 @@ class ModrinthAPI : public ResourceAPI {
         return BuildConfig.MODRINTH_PROD_URL + "/search?" + get_arguments.join('&');
     };
 
-    inline auto getInfoURL(QString const& id) const -> std::optional<QString> override
+    inline auto getInfoURL(const QString& id) const -> std::optional<QString> override
     {
         return BuildConfig.MODRINTH_PROD_URL + "/project/" + id;
     };
 
-    inline auto getMultipleModInfoURL(QStringList ids) const -> QString
+    inline auto getMultipleModInfoURL(const QStringList& ids) const -> QString
     {
         return BuildConfig.MODRINTH_PROD_URL + QString("/projects?ids=[\"%1\"]").arg(ids.join("\",\""));
     };
 
-    inline auto getVersionsURL(VersionSearchArgs const& args) const -> std::optional<QString> override
+    inline auto getVersionsURL(const VersionSearchArgs& args) const -> std::optional<QString> override
     {
         QStringList get_arguments;
         if (args.mcVersions.has_value())
@@ -191,7 +191,7 @@ class ModrinthAPI : public ResourceAPI {
             .arg(BuildConfig.MODRINTH_PROD_URL, args.pack->addonId.toString(), get_arguments.isEmpty() ? "" : "?", get_arguments.join('&'));
     };
 
-    QString getGameVersionsArray(std::vector<Version> mcVersions) const
+    QString getGameVersionsArray(const std::vector<Version>& mcVersions) const
     {
         QString s;
         for (auto& ver : mcVersions) {
@@ -208,7 +208,7 @@ class ModrinthAPI : public ResourceAPI {
                           ModPlatform::Ornithe | ModPlatform::Rift);
     }
 
-    std::optional<QString> getDependencyURL(DependencySearchArgs const& args) const override
+    std::optional<QString> getDependencyURL(const DependencySearchArgs& args) const override
     {
         return args.dependency.version.length() != 0 ? QString("%1/version/%2").arg(BuildConfig.MODRINTH_PROD_URL, args.dependency.version)
                                                      : QString(R"(%1/project/%2/version?game_versions=["%3"]&loaders=["%4"])")

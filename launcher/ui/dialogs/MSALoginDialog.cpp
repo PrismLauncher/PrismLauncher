@@ -109,7 +109,7 @@ MSALoginDialog::~MSALoginDialog()
     delete ui;
 }
 
-void MSALoginDialog::onTaskFailed(QString reason)
+void MSALoginDialog::onTaskFailed(const QString& reason)
 {
     // Set message
     m_authflow_task->disconnect();
@@ -179,7 +179,7 @@ void paintQR(QPainter& painter, const QSize canvasSize, const QString& data, QCo
     }
 }
 
-void MSALoginDialog::authorizeWithBrowserWithExtra(QString url, QString code, [[maybe_unused]] int expiresIn)
+void MSALoginDialog::authorizeWithBrowserWithExtra(QString url, const QString& code, [[maybe_unused]] int expiresIn)
 {
     ui->stackedWidget->setCurrentIndex(1);
     ui->stackedWidget->adjustSize();
@@ -205,7 +205,7 @@ void MSALoginDialog::authorizeWithBrowserWithExtra(QString url, QString code, [[
     ui->qrMessage->setText(tr("Open %1 or scan the QR and enter the above code if needed.").arg(linkString));
 }
 
-void MSALoginDialog::onDeviceFlowStatus(QString status)
+void MSALoginDialog::onDeviceFlowStatus(const QString& status)
 {
     ui->stackedWidget->setCurrentIndex(0);
     ui->stackedWidget->adjustSize();
@@ -214,7 +214,7 @@ void MSALoginDialog::onDeviceFlowStatus(QString status)
     ui->status->setText(status);
 }
 
-void MSALoginDialog::onAuthFlowStatus(QString status)
+void MSALoginDialog::onAuthFlowStatus(const QString& status)
 {
     ui->stackedWidget2->setCurrentIndex(0);
     ui->stackedWidget2->adjustSize();

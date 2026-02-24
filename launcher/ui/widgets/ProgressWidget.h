@@ -23,7 +23,7 @@ class ProgressWidget : public QWidget {
     /** The text that shows up in the middle of the progress bar.
      *  By default it's '%p%', with '%p' being the total progress in percentage.
      */
-    void progressFormat(QString);
+    void progressFormat(const QString&);
 
    public slots:
     /** Watch the progress of a task. */
@@ -33,7 +33,7 @@ class ProgressWidget : public QWidget {
     void start(Task* task);
 
     /** Blocking way of waiting for a task to finish. */
-    bool exec(std::shared_ptr<Task> task);
+    bool exec(const std::shared_ptr<Task>& task);
 
     /** Un-hide the widget if needed. */
     void show();

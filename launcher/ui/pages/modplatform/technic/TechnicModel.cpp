@@ -248,7 +248,7 @@ void Technic::ListModel::searchRequestFinished(QByteArray* responsePtr)
     endInsertRows();
 }
 
-void Technic::ListModel::getLogo(const QString& logo, const QString& logoUrl, Technic::LogoCallback callback)
+void Technic::ListModel::getLogo(const QString& logo, const QString& logoUrl, const Technic::LogoCallback& callback)
 {
     if (m_logoMap.contains(logo)) {
         callback(APPLICATION->metacache()->resolveEntry("TechnicPacks", QString("logos/%1").arg(logo))->getFullPath());
@@ -272,7 +272,7 @@ void Technic::ListModel::searchRequestFailed()
     }
 }
 
-void Technic::ListModel::logoLoaded(QString logo, QString out)
+void Technic::ListModel::logoLoaded(const QString& logo, const QString& out)
 {
     m_loadingLogos.removeAll(logo);
     m_logoMap.insert(logo, QIcon(out));
@@ -283,13 +283,13 @@ void Technic::ListModel::logoLoaded(QString logo, QString out)
     }
 }
 
-void Technic::ListModel::logoFailed(QString logo)
+void Technic::ListModel::logoFailed(const QString& logo)
 {
     m_failedLogos.append(logo);
     m_loadingLogos.removeAll(logo);
 }
 
-void Technic::ListModel::requestLogo(QString logo, QString url)
+void Technic::ListModel::requestLogo(const QString& logo, const QString& url)
 {
     if (m_loadingLogos.contains(logo) || m_failedLogos.contains(logo) || logo == "null") {
         return;

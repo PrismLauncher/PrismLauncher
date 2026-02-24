@@ -49,24 +49,24 @@ class ListModel : public QAbstractListModel {
     void request();
     void abortRequest();
 
-    void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
+    void getLogo(const QString& logo, const QString& logoUrl, const LogoCallback& callback);
 
     [[nodiscard]] bool isMakingRequest() const { return m_jobPtr.get(); }
     [[nodiscard]] bool wasAborted() const { return m_aborted; }
 
    private slots:
     void requestFinished(QByteArray* responsePtr);
-    void requestFailed(QString reason);
+    void requestFailed(const QString& reason);
 
     void requestPack();
     void packRequestFinished(QByteArray* responsePtr);
-    void packRequestFailed(QString reason);
+    void packRequestFailed(const QString& reason);
 
-    void logoFailed(QString logo);
-    void logoLoaded(QString logo);
+    void logoFailed(const QString& logo);
+    void logoLoaded(const QString& logo);
 
    private:
-    void requestLogo(QString file, QString url);
+    void requestLogo(const QString& file, const QString& url);
 
    private:
     bool m_aborted = false;

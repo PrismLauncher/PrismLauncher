@@ -25,8 +25,7 @@
 
 struct JavaInstall : public BaseVersion {
     JavaInstall() = default;
-    JavaInstall(QString id, QString arch, QString path) : id(id), arch(std::move(std::move(arch))), path(std::move(std::move(path))) {}
-
+    JavaInstall(const QString& id, QString arch, QString path) : id(id), arch(std::move(arch)), path(std::move(path)) {}
     QString descriptor() const override { return id.toString(); }
 
     QString name() const override { return id.toString(); }

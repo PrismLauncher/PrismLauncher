@@ -138,7 +138,7 @@ QString getLibraryString()
     return {};
 }
 
-QString findLibrary(QString libName)
+QString findLibrary(const QString& libName)
 {
 #ifdef __GLIBC__
     const char* library = libName.toLocal8Bit().constData();

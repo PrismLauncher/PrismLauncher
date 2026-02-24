@@ -23,6 +23,7 @@
 #include <QTextObjectInterface>
 #include <QUrl>
 #include <memory>
+#include <utility>
 
 /** Custom image text object to be used instead of the normal one in ProjectDescriptionPage.
  *
@@ -45,7 +46,7 @@ class VariableSizedImageObject final : public QObject, public QTextObjectInterfa
     QSizeF intrinsicSize(QTextDocument* doc, int posInDocument, const QTextFormat& format) override;
     void drawObject(QPainter* painter, const QRectF& rect, QTextDocument* doc, int posInDocument, const QTextFormat& format) override;
 
-    void setMetaEntry(QString meta_entry) { m_meta_entry = meta_entry; }
+    void setMetaEntry(QString meta_entry) { m_meta_entry = std::move(meta_entry); }
 
    public slots:
     /** Stops all currently loading images from modifying the document.
@@ -58,13 +59,13 @@ class VariableSizedImageObject final : public QObject, public QTextObjectInterfa
    private:
     /** Adds the image to the document, in the given position.
      */
-    void parseImage(QTextDocument* doc, std::shared_ptr<ImageMetadata> meta);
+    void parseImage(QTextDocument* doc, const std::shared_ptr<ImageMetadata>& meta);
 
     /** Loads an image from an external source, and adds it to the document.
      *
      *  This uses m_meta_entry to cache the image.
      */
-    void loadImage(QTextDocument* doc, std::shared_ptr<ImageMetadata> meta);
+    void loadImage(QTextDocument* doc, const std::shared_ptr<ImageMetadata>& meta);
 
    private:
     QString m_meta_entry;

@@ -15,7 +15,7 @@ namespace Murmur2 {
 const uint32_t m = 0x5bd1e995;
 const int r = 24;
 
-uint32_t hash(Reader* file_stream, std::size_t buffer_size, std::function<bool(char)> filter_out)
+uint32_t hash(Reader* file_stream, std::size_t buffer_size, const std::function<bool(char)>& filter_out)
 {
     auto* buffer = new char[buffer_size];
     char data[4];

@@ -48,7 +48,7 @@ class WorldList : public QAbstractListModel {
     virtual bool update();
 
     /// Install a world from location
-    void installWorld(QFileInfo filename);
+    void installWorld(const QFileInfo& filename);
 
     /// Deletes the mod at the given index.
     virtual bool deleteWorld(int index);
@@ -87,7 +87,7 @@ class WorldList : public QAbstractListModel {
     const QList<World>& allWorlds() const { return m_worlds; }
 
    private slots:
-    void directoryChanged(QString path);
+    void directoryChanged(const QString& path);
     void loadWorldsAsync();
 
    signals:

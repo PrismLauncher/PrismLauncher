@@ -21,14 +21,15 @@
 #include <QDir>
 #include <QImage>
 #include <QJsonObject>
+#include <utility>
 
 class SkinModel {
    public:
     enum Model { CLASSIC, SLIM };
 
     SkinModel() = default;
-    SkinModel(QString path);
-    SkinModel(QDir skinDir, QJsonObject obj);
+    SkinModel(const QString& path);
+    SkinModel(const QDir& skinDir, QJsonObject obj);
     virtual ~SkinModel() = default;
 
     QString name() const;
@@ -41,10 +42,10 @@ class SkinModel {
     Model getModel() const { return m_model; }
     QString getURL() const { return m_url; }
 
-    bool rename(QString newName);
-    void setCapeId(QString capeID) { m_capeId = capeID; }
+    bool rename(const QString& newName);
+    void setCapeId(QString capeID) { m_capeId = std::move(capeID); }
     void setModel(Model model);
-    void setURL(QString url) { m_url = url; }
+    void setURL(QString url) { m_url = std::move(url); }
     void refresh();
 
     QJsonObject toJSON() const;

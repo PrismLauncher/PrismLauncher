@@ -37,6 +37,7 @@
 #include "MMCIcon.h"
 #include <QFileInfo>
 #include <QIcon>
+#include <utility>
 
 IconType operator--(IconType& t, int)
 {
@@ -103,8 +104,8 @@ void MMCIcon::replace(IconType new_type, QIcon icon, QString path)
     if (new_type > m_current_type || m_current_type == IconType::ToBeDeleted) {
         m_current_type = new_type;
     }
-    m_images[new_type].icon = icon;
-    m_images[new_type].filename = path;
+    m_images[new_type].icon = std::move(icon);
+    m_images[new_type].filename = std::move(path);
     m_images[new_type].key = QString();
 }
 

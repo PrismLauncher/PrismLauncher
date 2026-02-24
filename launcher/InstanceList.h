@@ -104,7 +104,7 @@ class InstanceList : public QAbstractListModel {
     void saveNow();
 
     /* O(n) */
-    BaseInstance* getInstanceById(QString id) const;
+    BaseInstance* getInstanceById(const QString& id) const;
     /* O(n) */
     BaseInstance* getInstanceByManagedName(const QString& managed_name) const;
     QModelIndex getInstanceIndexById(const QString& id) const;
@@ -162,11 +162,11 @@ class InstanceList : public QAbstractListModel {
    signals:
     void dataIsInvalid();
     void instancesChanged();
-    void instanceSelectRequest(QString instanceId);
-    void groupsChanged(QSet<QString> groups);
+    void instanceSelectRequest(const QString& instanceId);
+    void groupsChanged(const QSet<QString>& groups);
 
    public slots:
-    void on_InstFolderChanged(const Setting& setting, QVariant value);
+    void on_InstFolderChanged(const Setting& setting, const QVariant& value);
     void on_GroupStateChanged(const QString& group, bool collapsed);
 
    private slots:

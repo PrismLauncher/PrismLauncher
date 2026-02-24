@@ -48,7 +48,7 @@ struct ModLicense {
 
     ModLicense() = default;
 
-    ModLicense(const QString license)
+    ModLicense(const QString& license)
     {
         // FIXME: come up with a better license parsing.
         // handle SPDX identifiers? https://spdx.org/licenses/

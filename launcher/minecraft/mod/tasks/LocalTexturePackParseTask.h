@@ -42,7 +42,7 @@ bool processPackPNG(const TexturePack& pack, QByteArray&& raw_data);
 bool processPackPNG(const TexturePack& pack);
 
 /** Checks whether a file is valid as a texture pack or not. */
-bool validate(QFileInfo file);
+bool validate(const QFileInfo& file);
 }  // namespace TexturePackUtils
 
 class LocalTexturePackParseTask : public Task {

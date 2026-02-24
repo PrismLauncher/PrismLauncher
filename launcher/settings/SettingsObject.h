@@ -22,6 +22,7 @@
 #include <QStringList>
 #include <QVariant>
 #include <memory>
+#include <utility>
 
 #ifdef Q_OS_MACOS
 #include "macsandbox/SecurityBookmarkFileAccess.h"
@@ -65,7 +66,7 @@ class SettingsObject : public QObject {
      * the one that is being registered.
      * \return A valid Setting shared pointer if successful.
      */
-    std::shared_ptr<Setting> registerOverride(std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate);
+    std::shared_ptr<Setting> registerOverride(const std::shared_ptr<Setting>& original, const std::shared_ptr<Setting>& gate);
 
     /*!
      * Registers a passthorugh setting for the given original setting in this settings object
@@ -75,7 +76,7 @@ class SettingsObject : public QObject {
      * the one that is being registered.
      * \return A valid Setting shared pointer if successful.
      */
-    std::shared_ptr<Setting> registerPassthrough(std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate);
+    std::shared_ptr<Setting> registerPassthrough(const std::shared_ptr<Setting>& original, const std::shared_ptr<Setting>& gate);
 
     /*!
      * Registers the given setting with this SettingsObject and connects the necessary  signals.
@@ -84,7 +85,7 @@ class SettingsObject : public QObject {
      * the one that is being registered.
      * \return A valid Setting shared pointer if successful.
      */
-    std::shared_ptr<Setting> registerSetting(QStringList synonyms, QVariant defVal = QVariant());
+    std::shared_ptr<Setting> registerSetting(QStringList synonyms, const QVariant& defVal = QVariant());
 
     /*!
      * Registers the given setting with this SettingsObject and connects the necessary signals.
@@ -93,7 +94,10 @@ class SettingsObject : public QObject {
      * the one that is being registered.
      * \return A valid Setting shared pointer if successful.
      */
-    std::shared_ptr<Setting> registerSetting(QString id, QVariant defVal = QVariant()) { return registerSetting(QStringList(id), defVal); }
+    std::shared_ptr<Setting> registerSetting(const QString& id, QVariant defVal = QVariant())
+    {
+        return registerSetting(QStringList(id), defVal);
+    }
 
     /*!
      * \brief Gets the setting with the given ID.
@@ -180,7 +184,7 @@ class SettingsObject : public QObject {
      * \param setting A reference to the Setting object that changed.
      * \param value The Setting object's new value.
      */
-    void SettingChanged(const Setting& setting, QVariant value);
+    void SettingChanged(const Setting& setting, const QVariant& value);
 
     /*!
      * \brief Signal emitted when one of this SettingsObject object's settings resets.

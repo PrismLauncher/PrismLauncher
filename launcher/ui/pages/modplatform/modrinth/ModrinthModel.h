@@ -66,7 +66,7 @@ class ModpackListModel : public QAbstractListModel {
     auto data(const QModelIndex& index, int role) const -> QVariant override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
-    inline void setActiveJob(NetJob::Ptr ptr) { m_jobPtr = ptr; }
+    inline void setActiveJob(const NetJob::Ptr& ptr) { m_jobPtr = ptr; }
 
     /* Ask the API for more information */
     void fetchMore(const QModelIndex& parent) override;
@@ -76,7 +76,7 @@ class ModpackListModel : public QAbstractListModel {
     bool hasActiveSearchJob() const { return m_jobPtr && m_jobPtr->isRunning(); }
     Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? m_jobPtr : nullptr; }
 
-    void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
+    void getLogo(const QString& logo, const QString& logoUrl, const LogoCallback& callback);
 
     inline auto canFetchMore(const QModelIndex& parent) const -> bool override
     {
@@ -85,18 +85,18 @@ class ModpackListModel : public QAbstractListModel {
 
    public slots:
     void searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr>& doc_all);
-    void searchRequestFailed(QString reason);
-    void searchRequestForOneSucceeded(ModPlatform::IndexedPack::Ptr);
+    void searchRequestFailed(const QString& reason);
+    void searchRequestForOneSucceeded(const ModPlatform::IndexedPack::Ptr&);
 
    protected slots:
 
-    void logoFailed(QString logo);
-    void logoLoaded(QString logo, QIcon out);
+    void logoFailed(const QString& logo);
+    void logoLoaded(const QString& logo, const QIcon& out);
 
     void performPaginatedSearch();
 
    protected:
-    void requestLogo(QString file, QString url);
+    void requestLogo(const QString& file, const QString& url);
 
     inline auto getMineVersions() const -> std::vector<Version>;
 

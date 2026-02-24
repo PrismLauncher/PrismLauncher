@@ -32,7 +32,7 @@ class ChooseProviderDialog : public QDialog {
 
     auto getResponse() const -> Response { return m_response; }
 
-    void setDescription(QString desc);
+    void setDescription(const QString& desc);
 
    private slots:
     void skipOne();

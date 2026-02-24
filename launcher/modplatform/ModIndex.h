@@ -55,7 +55,7 @@ enum class Side { NoSide = 0, ClientSide = 1 << 0, ServerSide = 1 << 1, Universa
 
 namespace SideUtils {
 QString toString(Side side);
-Side fromString(QString side);
+Side fromString(const QString& side);
 }  // namespace SideUtils
 
 namespace DependencyTypeUtils {
@@ -208,10 +208,10 @@ inline auto getOverrideDeps() -> QList<OverrideDep>
              { "lwVhp9o5", "Ha28R6CL", "KotlinLibraries", ModPlatform::ResourceProvider::MODRINTH } };
 }
 
-QString getMetaURL(ResourceProvider provider, QVariant projectID);
+QString getMetaURL(ResourceProvider provider, const QVariant& projectID);
 
 auto getModLoaderAsString(ModLoaderType type) -> const QString;
-auto getModLoaderFromString(QString type) -> ModLoaderType;
+auto getModLoaderFromString(const QString& type) -> ModLoaderType;
 
 constexpr bool hasSingleModLoaderSelected(ModLoaderTypes l) noexcept
 {

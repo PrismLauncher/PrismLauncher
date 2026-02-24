@@ -144,7 +144,7 @@ bool FlameCreationTask::updateInstance()
         // Remove repeated files, we don't need to download them!
         auto files_iterator = files.begin();
         while (files_iterator != files.end()) {
-            auto const& file = files_iterator;
+            const auto& file = files_iterator;
 
             auto old_file = old_files.find(file.key());
             if (old_file != old_files.end()) {
@@ -233,7 +233,7 @@ bool FlameCreationTask::updateInstance()
                 }
             }
         });
-        connect(job.get(), &Task::failed, this, [](QString reason) { qCritical() << "Failed to get files:" << reason; });
+        connect(job.get(), &Task::failed, this, [](const QString& reason) { qCritical() << "Failed to get files:" << reason; });
         connect(job.get(), &Task::finished, &loop, &QEventLoop::quit);
 
         m_processUpdateFileInfoJob = job;
@@ -264,7 +264,10 @@ bool FlameCreationTask::updateInstance()
     return false;
 }
 
-QString FlameCreationTask::getVersionForLoader(QString uid, QString loaderType, QString loaderVersion, QString mcVersion)
+QString FlameCreationTask::getVersionForLoader(const QString& uid,
+                                               const QString& loaderType,
+                                               QString loaderVersion,
+                                               const QString& mcVersion)
 {
     if (loaderVersion == "recommended") {
         auto vlist = APPLICATION->metadataIndex()->get(uid);
@@ -462,7 +465,7 @@ std::unique_ptr<MinecraftInstance> FlameCreationTask::createInstance()
 
     m_modIdResolver.reset(new Flame::FileResolvingTask(m_pack));
     connect(m_modIdResolver.get(), &Flame::FileResolvingTask::succeeded, this, [this, &loop] { idResolverSucceeded(loop); });
-    connect(m_modIdResolver.get(), &Flame::FileResolvingTask::failed, [this, &loop](QString reason) {
+    connect(m_modIdResolver.get(), &Flame::FileResolvingTask::failed, [this, &loop](const QString& reason) {
         m_modIdResolver.reset();
         setError(tr("Unable to resolve mod IDs:\n") + reason);
         loop.quit();
@@ -593,7 +596,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         m_filesJob.reset();
         validateOtherResources(loop);
     });
-    connect(m_filesJob.get(), &NetJob::failed, [this](QString reason) {
+    connect(m_filesJob.get(), &NetJob::failed, [this](const QString& reason) {
         m_filesJob.reset();
         setError(reason);
     });
@@ -609,14 +612,14 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
 
 /// @brief copy the matched blocked mods to the instance staging area
 /// @param blocked_mods list of the blocked mods and their matched paths
-void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
+void FlameCreationTask::copyBlockedMods(const QList<BlockedMod>& blocked_mods)
 {
     setStatus(tr("Copying Blocked Mods..."));
     setAbortable(false);
     int i = 0;
     int total = blocked_mods.length();
     setProgress(i, total);
-    for (auto const& mod : blocked_mods) {
+    for (const auto& mod : blocked_mods) {
         if (!mod.matched) {
             qDebug() << mod.name << "was not matched to a local file, skipping copy";
             continue;
@@ -657,7 +660,7 @@ void FlameCreationTask::validateOtherResources(QEventLoop& loop)
 
         /// @brief check the target and move the the file
         /// @return path where file can now be found
-        auto validatePath = [&localPath, this](QString fileName, QString targetFolder, QString realTarget) {
+        auto validatePath = [&localPath, this](const QString& fileName, const QString& targetFolder, const QString& realTarget) {
             if (targetFolder != realTarget) {
                 qDebug() << "Target folder of" << fileName << "is incorrect, it belongs in" << realTarget;
                 auto destPath = FS::PathCombine(m_stagingPath, "minecraft", realTarget, fileName);
@@ -671,7 +674,7 @@ void FlameCreationTask::validateOtherResources(QEventLoop& loop)
             return localPath;
         };
 
-        auto installWorld = [this](QString worldPath) {
+        auto installWorld = [this](const QString& worldPath) {
             qDebug() << "Installing World from" << worldPath;
             QFileInfo worldFileInfo(worldPath);
             World w(worldFileInfo);
@@ -721,7 +724,7 @@ void FlameCreationTask::validateOtherResources(QEventLoop& loop)
     auto task = makeShared<ConcurrentTask>("CreateModMetadata", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
     auto results = m_modIdResolver->getResults().files;
     auto folder = FS::PathCombine(m_stagingPath, "minecraft", "mods", ".index");
-    for (const auto& file : results) {
+    for (auto& file : results) {
         if (file.targetFolder != "mods" || (file.version.fileName.endsWith(".zip") && !zipMods.contains(file.version.fileName))) {
             continue;
         }

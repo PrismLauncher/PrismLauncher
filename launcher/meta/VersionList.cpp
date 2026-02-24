@@ -17,6 +17,7 @@
 
 #include <QDateTime>
 #include <algorithm>
+#include <utility>
 
 #include "Application.h"
 #include "Index.h"
@@ -121,7 +122,7 @@ BaseVersionList::RoleList VersionList::providesRoles() const
 
 void VersionList::setProvidedRoles(RoleList roles)
 {
-    m_provided_roles = roles;
+    m_provided_roles = std::move(roles);
 };
 
 QHash<int, QByteArray> VersionList::roleNames() const
@@ -156,7 +157,7 @@ Version::Ptr VersionList::getVersion(const QString& version)
     return out;
 }
 
-bool VersionList::hasVersion(QString version) const
+bool VersionList::hasVersion(const QString& version) const
 {
     auto ver = std::find_if(m_versions.constBegin(), m_versions.constEnd(),
                             [version](Meta::Version::Ptr const& a) { return a->version() == version; });
@@ -289,7 +290,7 @@ void VersionList::waitToLoad()
 
 Version::Ptr VersionList::getRecommendedForParent(const QString& uid, const QString& version)
 {
-    auto foundExplicit = std::find_if(m_versions.begin(), m_versions.end(), [uid, version](Version::Ptr ver) -> bool {
+    auto foundExplicit = std::find_if(m_versions.begin(), m_versions.end(), [uid, version](const Version::Ptr& ver) -> bool {
         auto& reqs = ver->requiredSet();
         auto parentReq = std::find_if(reqs.begin(), reqs.end(), [uid, version](const Require& req) -> bool {
             return req.uid == uid && req.equalsVersion == version;

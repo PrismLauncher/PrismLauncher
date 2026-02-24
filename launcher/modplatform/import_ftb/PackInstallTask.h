@@ -31,7 +31,7 @@ class PackInstallTask : public InstanceTask {
     Q_OBJECT
 
    public:
-    explicit PackInstallTask(Modpack pack) : m_pack(std::move(std::move(pack))) {}
+    explicit PackInstallTask(Modpack pack) : m_pack(std::move(pack)) {}
     ~PackInstallTask() override = default;
 
    protected:

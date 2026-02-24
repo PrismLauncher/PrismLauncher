@@ -613,7 +613,7 @@ void InstanceList::providerUpdated()
     }
 }
 
-BaseInstance* InstanceList::getInstanceById(QString instId) const
+BaseInstance* InstanceList::getInstanceById(const QString& instId) const
 {
     if (instId.isEmpty())
         return nullptr;
@@ -878,7 +878,7 @@ void InstanceList::instanceDirContentsChanged(const QString& path)
     emit instancesChanged();
 }
 
-void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting, QVariant value)
+void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting, const QVariant& value)
 {
     QString newInstDir = QDir(value.toString()).canonicalPath();
     if (newInstDir != m_instDir) {

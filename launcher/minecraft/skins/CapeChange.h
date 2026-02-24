@@ -27,7 +27,7 @@ class CapeChange : public Net::NetRequest {
     CapeChange(QString capeId);
     ~CapeChange() override = default;
 
-    static CapeChange::Ptr make(QString token, QString capeId);
+    static CapeChange::Ptr make(const QString& token, QString capeId);
 
    protected:
     QNetworkReply* getReply(QNetworkRequest&) override;

@@ -37,6 +37,7 @@
 
 #include "NetJob.h"
 #include <QNetworkReply>
+#include <utility>
 #include "net/NetRequest.h"
 #include "tasks/ConcurrentTask.h"
 #if defined(LAUNCHER_APPLICATION)
@@ -45,7 +46,7 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #endif
 
-NetJob::NetJob(QString job_name, QNetworkAccessManager* network, int max_concurrent) : ConcurrentTask(job_name), m_network(network)
+NetJob::NetJob(QString job_name, QNetworkAccessManager* network, int max_concurrent) : ConcurrentTask(std::move(job_name)), m_network(network)
 {
 #if defined(LAUNCHER_APPLICATION)
     if (APPLICATION_DYN && max_concurrent < 0)
@@ -55,7 +56,7 @@ NetJob::NetJob(QString job_name, QNetworkAccessManager* network, int max_concurr
         setMaxConcurrent(max_concurrent);
 }
 
-auto NetJob::addNetAction(Net::NetRequest::Ptr action) -> bool
+auto NetJob::addNetAction(const Net::NetRequest::Ptr& action) -> bool
 {
     action->setNetwork(m_network);
 

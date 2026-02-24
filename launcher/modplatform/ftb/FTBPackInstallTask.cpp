@@ -39,6 +39,7 @@
 #include "FTBPackInstallTask.h"
 
 #include <memory>
+#include <utility>
 
 #include "FileSystem.h"
 #include "Json.h"
@@ -340,21 +341,21 @@ void PackInstallTask::onModDownloadSucceeded()
 void PackInstallTask::onManifestDownloadFailed(QString reason)
 {
     m_net_job.reset();
-    emitFailed(reason);
+    emitFailed(std::move(reason));
 }
 void PackInstallTask::onResolveModsFailed(QString reason)
 {
     m_net_job.reset();
-    emitFailed(reason);
+    emitFailed(std::move(reason));
 }
 void PackInstallTask::onCreateInstanceFailed(QString reason)
 {
-    emitFailed(reason);
+    emitFailed(std::move(reason));
 }
 void PackInstallTask::onModDownloadFailed(QString reason)
 {
     m_net_job.reset();
-    emitFailed(reason);
+    emitFailed(std::move(reason));
 }
 
 /// @brief copy the matched blocked mods to the instance staging area

@@ -61,7 +61,7 @@ class CheckUpdateTask : public Task {
     void executeTask() override = 0;
 
    signals:
-    void checkFailed(Resource* failed, QString reason, QUrl recover_url = {});
+    void checkFailed(Resource* failed, const QString& reason, const QUrl& recover_url = {});
 
    protected:
     QList<Resource*>& m_resources;

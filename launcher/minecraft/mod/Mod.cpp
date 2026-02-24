@@ -244,7 +244,7 @@ auto Mod::issueTracker() const -> QString
     return details().issue_tracker;
 }
 
-QPixmap Mod::setIcon(QImage new_image) const
+QPixmap Mod::setIcon(const QImage& new_image) const
 {
     QMutexLocker locker(&m_data_lock);
 

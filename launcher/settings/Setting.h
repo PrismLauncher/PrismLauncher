@@ -77,7 +77,7 @@ class Setting : public QObject {
      * \param setting A reference to the Setting that changed.
      * \param value This Setting object's new value.
      */
-    void SettingChanged(const Setting& setting, QVariant value);
+    void SettingChanged(const Setting& setting, const QVariant& value);
 
     /*!
      * \brief Signal emitted when this Setting object's value resets to default.

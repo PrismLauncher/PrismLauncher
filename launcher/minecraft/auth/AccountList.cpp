@@ -52,6 +52,7 @@
 
 #include <FileSystem.h>
 #include <QSaveFile>
+#include <utility>
 
 enum AccountListVersion { MojangMSA = 3 };
 
@@ -107,7 +108,7 @@ QStringList AccountList::profileNames() const
     return out;
 }
 
-void AccountList::addAccount(const MinecraftAccountPtr account)
+void AccountList::addAccount(const MinecraftAccountPtr& account)
 {
     // NOTE: Do not allow adding something that's already there. We shouldn't let it continue
     // because of the signal / slot connections after this.
@@ -194,7 +195,7 @@ MinecraftAccountPtr AccountList::defaultAccount() const
     return m_defaultAccount;
 }
 
-void AccountList::setDefaultAccount(MinecraftAccountPtr newAccount)
+void AccountList::setDefaultAccount(const MinecraftAccountPtr& newAccount)
 {
     if (!newAccount && m_defaultAccount) {
         int idx = 0;
@@ -585,7 +586,7 @@ bool AccountList::saveList()
 
 void AccountList::setListFilePath(QString path, bool autosave)
 {
-    m_listFilePath = path;
+    m_listFilePath = std::move(path);
     m_autosave = autosave;
 }
 
@@ -621,7 +622,7 @@ void AccountList::fillQueue()
     tryNext();
 }
 
-void AccountList::requestRefresh(QString accountId)
+void AccountList::requestRefresh(const QString& accountId)
 {
     auto index = m_refreshQueue.indexOf(accountId);
     if (index != -1) {
@@ -634,7 +635,7 @@ void AccountList::requestRefresh(QString accountId)
     }
 }
 
-void AccountList::queueRefresh(QString accountId)
+void AccountList::queueRefresh(const QString& accountId)
 {
     if (m_refreshQueue.indexOf(accountId) != -1) {
         return;
@@ -675,7 +676,7 @@ void AccountList::authSucceeded()
     m_nextTimer->start(1000 * 20);
 }
 
-void AccountList::authFailed(QString reason)
+void AccountList::authFailed(const QString& reason)
 {
     qDebug() << "RefreshSchedule: Background account refresh failed:" << reason;
     m_currentTask.reset();

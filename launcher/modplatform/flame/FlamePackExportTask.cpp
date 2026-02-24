@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <utility>
 #include "Application.h"
 #include "Json.h"
 #include "minecraft/PackProfile.h"
@@ -99,7 +100,7 @@ void FlamePackExportTask::collectHashes()
         if (relative.startsWith("resourcepacks/") &&
             (relative.endsWith(".zip") || relative.endsWith(".zip.disabled"))) {  // is resourcepack
             auto hashTask = Hashing::createHasher(file.absoluteFilePath(), ModPlatform::ResourceProvider::FLAME);
-            connect(hashTask.get(), &Hashing::Hasher::resultsReady, [this, relative, file](QString hash) {
+            connect(hashTask.get(), &Hashing::Hasher::resultsReady, [this, relative, file](const QString& hash) {
                 if (m_state == Task::State::Running) {
                     pendingHashes.insert(hash, { relative, file.absoluteFilePath(), relative.endsWith(".zip") });
                 }
@@ -123,7 +124,7 @@ void FlamePackExportTask::collectHashes()
             }
 
             auto hashTask = Hashing::createHasher(mod->fileinfo().absoluteFilePath(), ModPlatform::ResourceProvider::FLAME);
-            connect(hashTask.get(), &Hashing::Hasher::resultsReady, [this, mod](QString hash) {
+            connect(hashTask.get(), &Hashing::Hasher::resultsReady, [this, mod](const QString& hash) {
                 if (m_state == Task::State::Running) {
                     pendingHashes.insert(hash, { mod->name(), mod->fileinfo().absoluteFilePath(), mod->enabled(), true });
                 }
@@ -142,7 +143,7 @@ void FlamePackExportTask::collectHashes()
     connect(hashingTask.get(), &Task::failed, this, [this, progressStep](QString reason) {
         progressStep->state = TaskStepState::Failed;
         stepProgress(*progressStep);
-        emitFailed(reason);
+        emitFailed(std::move(reason));
     });
     connect(hashingTask.get(), &Task::stepProgress, this, &FlamePackExportTask::propagateStepProgress);
 
@@ -151,7 +152,7 @@ void FlamePackExportTask::collectHashes()
         stepProgress(*progressStep);
     });
     connect(hashingTask.get(), &Task::status, this, [this, progressStep](QString status) {
-        progressStep->status = status;
+        progressStep->status = std::move(status);
         stepProgress(*progressStep);
     });
     connect(hashingTask.get(), &Task::aborted, this, &FlamePackExportTask::emitAborted);
@@ -325,7 +326,7 @@ void FlamePackExportTask::buildZip()
 
     QStringList exclude;
     std::transform(resolvedFiles.keyBegin(), resolvedFiles.keyEnd(), std::back_insert_iterator(exclude),
-                   [this](QString file) { return m_gameRoot.relativeFilePath(file); });
+                   [this](const QString& file) { return m_gameRoot.relativeFilePath(file); });
     zipTask->setExcludeFiles(exclude);
 
     auto progressStep = std::make_shared<TaskStepProgress>();
@@ -339,7 +340,7 @@ void FlamePackExportTask::buildZip()
     connect(zipTask.get(), &Task::failed, this, [this, progressStep](QString reason) {
         progressStep->state = TaskStepState::Failed;
         stepProgress(*progressStep);
-        emitFailed(reason);
+        emitFailed(std::move(reason));
     });
     connect(zipTask.get(), &Task::stepProgress, this, &FlamePackExportTask::propagateStepProgress);
 
@@ -348,7 +349,7 @@ void FlamePackExportTask::buildZip()
         stepProgress(*progressStep);
     });
     connect(zipTask.get(), &Task::status, this, [this, progressStep](QString status) {
-        progressStep->status = status;
+        progressStep->status = std::move(status);
         stepProgress(*progressStep);
     });
     task.reset(zipTask);

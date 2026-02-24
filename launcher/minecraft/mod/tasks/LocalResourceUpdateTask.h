@@ -28,7 +28,7 @@ class LocalResourceUpdateTask : public Task {
    public:
     using Ptr = shared_qobject_ptr<LocalResourceUpdateTask>;
 
-    explicit LocalResourceUpdateTask(QDir index_dir, ModPlatform::IndexedPack& project, ModPlatform::IndexedVersion& version);
+    explicit LocalResourceUpdateTask(const QDir& index_dir, ModPlatform::IndexedPack& project, ModPlatform::IndexedVersion& version);
 
     auto canAbort() const -> bool override { return true; }
     auto abort() -> bool override;
@@ -38,7 +38,7 @@ class LocalResourceUpdateTask : public Task {
     void executeTask() override;
 
    signals:
-    void hasOldResource(QString name, QString filename);
+    void hasOldResource(const QString& name, const QString& filename);
 
    private:
     QDir m_index_dir;

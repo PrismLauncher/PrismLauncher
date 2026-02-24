@@ -146,7 +146,7 @@ class Application : public QApplication {
 
     const QMap<QString, std::shared_ptr<BaseProfilerFactory>>& profilers() const { return m_profilers; }
 
-    void updateProxySettings(QString proxyTypeStr, QString addr, int port, QString user, QString password);
+    void updateProxySettings(const QString& proxyTypeStr, const QString& addr, int port, const QString& user, const QString& password);
 
     QNetworkAccessManager* network();
 
@@ -162,7 +162,7 @@ class Application : public QApplication {
      * Finds and returns the full path to a jar file.
      * Returns a null-string if it could not be found.
      */
-    QString getJarPath(QString jarFile);
+    QString getJarPath(const QString& jarFile);
 
     QString getMSAClientID();
     QString getFlameAPIKey();
@@ -188,7 +188,7 @@ class Application : public QApplication {
      */
     bool openJsonEditor(const QString& filename);
 
-    InstanceWindow* showInstanceWindow(BaseInstance* instance, QString page = QString());
+    InstanceWindow* showInstanceWindow(BaseInstance* instance, const QString& page = QString());
     MainWindow* showMainWindow(bool minimized = false);
     ViewLogWindow* showLogWindow();
 
@@ -208,7 +208,7 @@ class Application : public QApplication {
     void globalSettingsApplied();
     int currentCatChanged(int index);
 
-    void oauthReplyRecieved(QVariantMap);
+    void oauthReplyRecieved(const QVariantMap&);
 
 #ifdef Q_OS_MACOS
     void clickedOnDock();
@@ -319,7 +319,7 @@ class Application : public QApplication {
     std::unique_ptr<LogModel> logModel;
 
    public:
-    void addQSavePath(QString);
-    void removeQSavePath(QString);
-    bool checkQSavePath(QString);
+    void addQSavePath(const QString&);
+    void removeQSavePath(const QString&);
+    bool checkQSavePath(const QString&);
 };

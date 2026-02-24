@@ -29,7 +29,7 @@
 class SkinList : public QAbstractListModel {
     Q_OBJECT
    public:
-    explicit SkinList(QObject* parent, QString path, MinecraftAccountPtr acct);
+    explicit SkinList(QObject* parent, const QString& path, MinecraftAccountPtr acct);
     ~SkinList() override { save(); };
 
     int getSkinIndex(const QString& key) const;

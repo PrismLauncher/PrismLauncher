@@ -40,6 +40,7 @@
 #include <QListView>
 #include <QScrollBar>
 #include <functional>
+#include <utility>
 #include "VisualGroup.h"
 #include "ui/themes/CatPainter.h"
 
@@ -57,7 +58,7 @@ class InstanceView : public QAbstractItemView {
     void setModel(QAbstractItemModel* model) override;
 
     using visibilityFunction = std::function<bool(const QString&)>;
-    void setSourceOfGroupCollapseStatus(visibilityFunction f) { m_fVisibility = f; }
+    void setSourceOfGroupCollapseStatus(visibilityFunction f) { m_fVisibility = std::move(f); }
 
     /// return geometry rectangle occupied by the specified model item
     QRect geometryRect(const QModelIndex& index) const;
@@ -92,8 +93,8 @@ class InstanceView : public QAbstractItemView {
     void currentChanged(const QModelIndex& current, const QModelIndex& previous) override;
 
    signals:
-    void droppedURLs(QList<QUrl> urls);
-    void groupStateChanged(QString group, bool collapsed);
+    void droppedURLs(const QList<QUrl>& urls);
+    void groupStateChanged(const QString& group, bool collapsed);
 
    protected:
     bool isIndexHidden(const QModelIndex& index) const override;

@@ -33,7 +33,7 @@ class ArchiveDownloadTask : public Task {
     bool abort() override;
 
    private slots:
-    void extractJava(QString input);
+    void extractJava(const QString& input);
 
    protected:
     QUrl m_url;

@@ -25,5 +25,5 @@
 #include "modplatform/ResourceType.h"
 
 namespace ResourceUtils {
-ModPlatform::ResourceType identify(QFileInfo file);
+ModPlatform::ResourceType identify(const QFileInfo& file);
 }  // namespace ResourceUtils

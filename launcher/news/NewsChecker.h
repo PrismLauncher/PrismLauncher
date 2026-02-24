@@ -65,11 +65,11 @@ class NewsChecker : public QObject {
     /*!
      * Signal fired after the news fails to load.
      */
-    void newsLoadingFailed(QString errorMsg);
+    void newsLoadingFailed(const QString& errorMsg);
 
    protected slots:
     void rssDownloadFinished();
-    void rssDownloadFailed(QString reason);
+    void rssDownloadFailed(const QString& reason);
 
    protected: /* data */
     //! The URL for the RSS feed to fetch.

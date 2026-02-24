@@ -17,8 +17,8 @@ class FlameAPI : public ResourceAPI {
     QString getModFileChangelog(int modId, int fileId);
     QString getModDescription(int modId);
 
-    std::optional<ModPlatform::IndexedVersion> getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
-                                                                QList<ModPlatform::ModLoaderType> instanceLoaders,
+    std::optional<ModPlatform::IndexedVersion> getLatestVersion(const QList<ModPlatform::IndexedVersion>& versions,
+                                                                const QList<ModPlatform::ModLoaderType>& instanceLoaders,
                                                                 ModPlatform::ModLoaderTypes fallback,
                                                                 bool checkLoaders);
 

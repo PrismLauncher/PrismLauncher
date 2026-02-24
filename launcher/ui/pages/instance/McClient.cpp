@@ -165,7 +165,7 @@ void McClient::writePacketToSocket(QByteArray& data)
     data.clear();
 }
 
-void McClient::emitFail(QString error)
+void McClient::emitFail(const QString& error)
 {
     qDebug() << "Minecraft server ping for status error:" << error;
     emit failed(error);
@@ -174,6 +174,6 @@ void McClient::emitFail(QString error)
 
 void McClient::emitSucceed(QJsonObject data)
 {
-    emit succeeded(data);
+    emit succeeded(std::move(data));
     emit finished();
 }

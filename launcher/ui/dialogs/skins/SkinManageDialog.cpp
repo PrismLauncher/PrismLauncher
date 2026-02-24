@@ -54,7 +54,7 @@
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/instanceview/InstanceDelegate.h"
 
-SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
+SkinManageDialog::SkinManageDialog(QWidget* parent, const MinecraftAccountPtr& acct)
     : QDialog(parent), m_acct(acct), m_ui(new Ui::SkinManageDialog), m_list(this, APPLICATION->settings()->get("SkinsDir").toString(), acct)
 {
     m_ui->setupUi(this);
@@ -133,7 +133,7 @@ void SkinManageDialog::activated(QModelIndex index)
     accept();
 }
 
-void SkinManageDialog::selectionChanged(QItemSelection selected, [[maybe_unused]] QItemSelection deselected)
+void SkinManageDialog::selectionChanged(QItemSelection selected, [[maybe_unused]] const QItemSelection& deselected)
 {
     if (selected.empty())
         return;
@@ -182,7 +182,7 @@ void SkinManageDialog::on_fileBtn_clicked()
     }
 }
 
-QPixmap previewCape(QImage capeImage, bool elytra = false)
+QPixmap previewCape(const QImage& capeImage, bool elytra = false)
 {
     if (elytra) {
         auto wing = capeImage.copy(34, 2, 12, 20);
@@ -482,18 +482,18 @@ void SkinManageDialog::on_userBtn_clicked()
     QString failReason;
 
     connect(getUUID.get(), &Task::aborted, uuidLoop.get(), &WaitTask::quit);
-    connect(getUUID.get(), &Task::failed, this, [&failReason](QString reason) {
+    connect(getUUID.get(), &Task::failed, this, [&failReason](const QString& reason) {
         qCritical() << "Couldn't get user UUID:" << reason;
         failReason = tr("failed to get user UUID");
     });
     connect(getUUID.get(), &Task::failed, uuidLoop.get(), &WaitTask::quit);
     connect(getProfile.get(), &Task::aborted, profileLoop.get(), &WaitTask::quit);
     connect(getProfile.get(), &Task::failed, profileLoop.get(), &WaitTask::quit);
-    connect(getProfile.get(), &Task::failed, this, [&failReason](QString reason) {
+    connect(getProfile.get(), &Task::failed, this, [&failReason](const QString& reason) {
         qCritical() << "Couldn't get user profile:" << reason;
         failReason = tr("failed to get user profile");
     });
-    connect(downloadSkin.get(), &Task::failed, this, [&failReason](QString reason) {
+    connect(downloadSkin.get(), &Task::failed, this, [&failReason](const QString& reason) {
         qCritical() << "Couldn't download skin:" << reason;
         failReason = tr("failed to download skin");
     });

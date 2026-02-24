@@ -103,12 +103,12 @@ class PackInstallTask : public InstanceTask {
     void onModsExtracted();
 
    private:
-    QString getDirForModType(ModType type, QString raw);
-    QString getVersionForLoader(QString uid);
+    QString getDirForModType(ModType type, const QString& raw);
+    QString getVersionForLoader(const QString& uid);
     QString detectLibrary(const VersionLibrary& library);
 
-    bool createLibrariesComponent(QString instanceRoot, PackProfile* profile);
-    bool createPackComponent(QString instanceRoot, PackProfile* profile);
+    bool createLibrariesComponent(const QString& instanceRoot, PackProfile* profile);
+    bool createPackComponent(const QString& instanceRoot, PackProfile* profile);
 
     void deleteExistingFiles();
     void installConfigs();

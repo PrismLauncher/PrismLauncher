@@ -113,7 +113,7 @@ auto ReviewMessageBox::deselectedResources() -> QStringList
     return list;
 }
 
-void ReviewMessageBox::retranslateUi(QString resources_name)
+void ReviewMessageBox::retranslateUi(const QString& resources_name)
 {
     setWindowTitle(tr("Confirm %1 selection").arg(resources_name));
 

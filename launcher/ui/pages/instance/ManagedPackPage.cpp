@@ -79,7 +79,7 @@ class NoBigComboBoxStyle : public QProxyStyle {
     NoBigComboBoxStyle(QStyle* style) : QProxyStyle(style) {}
 };
 
-ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, QString type, QWidget* parent)
+ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, const QString& type, QWidget* parent)
 {
     if (type == "modrinth")
         return new ModrinthManagedPackPage(inst, nullptr, parent);
@@ -115,7 +115,7 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
         openedImpl();
     });
 
-    connect(ui->changelogTextBrowser, &QTextBrowser::anchorClicked, this, [](const QUrl url) {
+    connect(ui->changelogTextBrowser, &QTextBrowser::anchorClicked, this, [](const QUrl& url) {
         if (url.scheme().isEmpty()) {
             auto querry =
                 QUrlQuery(url.query()).queryItemValue("remoteUrl", QUrl::FullyDecoded);  // curseforge workaround for linkout?remoteUrl=
@@ -128,7 +128,7 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
         QDesktopServices::openUrl(url);
     });
 
-    connect(ui->urlLine, &QLineEdit::textChanged, this, [this](QString text) { m_inst->settings()->set("ManagedPackURL", text); });
+    connect(ui->urlLine, &QLineEdit::textChanged, this, [this](const QString& text) { m_inst->settings()->set("ManagedPackURL", text); });
 }
 
 ManagedPackPage::~ManagedPackPage()
@@ -203,7 +203,7 @@ bool ManagedPackPage::runUpdateTask(InstanceTask* task)
     unique_qobject_ptr<Task> wrapped_task(APPLICATION->instances()->wrapInstanceTask(task));
 
     connect(task, &Task::failed,
-            [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+            [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
     connect(task, &Task::succeeded, [this, task]() {
         QStringList warnings = task->warnings();
         if (warnings.count())
@@ -294,7 +294,7 @@ void ModrinthManagedPackPage::parseManagedPack()
 
         m_loaded = true;
     };
-    callbacks.on_fail = [this](QString reason, int) { setFailState(); };
+    callbacks.on_fail = [this](const QString& reason, int) { setFailState(); };
     callbacks.on_abort = [this]() { setFailState(); };
     m_fetch_job = m_api.getProjectVersions(
         { std::make_shared<ModPlatform::IndexedPack>(m_pack), {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
@@ -440,7 +440,7 @@ void FlameManagedPackPage::parseManagedPack()
 
         m_loaded = true;
     };
-    callbacks.on_fail = [this](QString reason, int) { setFailState(); };
+    callbacks.on_fail = [this](const QString& reason, int) { setFailState(); };
     callbacks.on_abort = [this]() { setFailState(); };
     m_fetch_job = m_api.getProjectVersions(
         { std::make_shared<ModPlatform::IndexedPack>(m_pack), {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
@@ -495,7 +495,7 @@ void FlameManagedPackPage::updateFromFile()
     updatePack(output);
 }
 
-void ManagedPackPage::updatePack(const QUrl& url, QString versionID, QString versionName)
+void ManagedPackPage::updatePack(const QUrl& url, const QString& versionID, const QString& versionName)
 {
     QMap<QString, QString> extra_info;
     // NOTE: Don't use 'm_pack.id' here, since we didn't completely parse all the metadata for the pack, including this field.

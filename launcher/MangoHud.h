@@ -25,5 +25,5 @@ namespace MangoHud {
 
 QString getLibraryString();
 
-QString findLibrary(QString libName);
+QString findLibrary(const QString& libName);
 }  // namespace MangoHud

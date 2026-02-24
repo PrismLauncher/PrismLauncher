@@ -24,6 +24,7 @@
 #include <QDebug>
 #include <QMap>
 #include <QRegularExpression>
+#include <utility>
 
 #include "MTPixmapCache.h"
 #include "Version.h"
@@ -92,10 +93,10 @@ void DataPack::setDescription(QString new_description)
 {
     QMutexLocker locker(&m_data_lock);
 
-    m_description = new_description;
+    m_description = std::move(new_description);
 }
 
-void DataPack::setImage(QImage new_image) const
+void DataPack::setImage(const QImage& new_image) const
 {
     QMutexLocker locker(&m_data_lock);
 

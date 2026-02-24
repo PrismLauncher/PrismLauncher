@@ -18,6 +18,7 @@
 #include <minecraft/MinecraftInstance.h>
 
 #include <QDir>
+#include <utility>
 #include "FileSystem.h"
 #include "archive/ArchiveReader.h"
 #include "archive/ArchiveWriter.h"
@@ -38,9 +39,9 @@ static QString replaceSuffix(QString target, const QString& suffix, const QStrin
     return target + replacement;
 }
 
-static bool unzipNatives(QString source, QString targetFolder, bool applyJnilibHack)
+static bool unzipNatives(QString source, const QString& targetFolder, bool applyJnilibHack)
 {
-    MMCZip::ArchiveReader zip(source);
+    MMCZip::ArchiveReader zip(std::move(source));
     QDir directory(targetFolder);
 
     auto extPtr = MMCZip::ArchiveWriter::createDiskWriter();

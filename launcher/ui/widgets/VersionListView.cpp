@@ -40,6 +40,7 @@
 #include <QHeaderView>
 #include <QMouseEvent>
 #include <QPainter>
+#include <utility>
 
 VersionListView::VersionListView(QWidget* parent) : QTreeView(parent)
 {
@@ -81,13 +82,13 @@ void VersionListView::reset()
 
 void VersionListView::setEmptyString(QString emptyString)
 {
-    m_emptyString = emptyString;
+    m_emptyString = std::move(emptyString);
     updateEmptyViewPort();
 }
 
 void VersionListView::setEmptyErrorString(QString emptyErrorString)
 {
-    m_emptyErrorString = emptyErrorString;
+    m_emptyErrorString = std::move(emptyErrorString);
     updateEmptyViewPort();
 }
 

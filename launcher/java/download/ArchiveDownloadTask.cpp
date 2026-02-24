@@ -64,7 +64,7 @@ void ArchiveDownloadTask::executeTask()
     m_task->start();
 }
 
-void ArchiveDownloadTask::extractJava(QString input)
+void ArchiveDownloadTask::extractJava(const QString& input)
 {
     setStatus(tr("Extracting Java"));
 
@@ -92,7 +92,7 @@ void ArchiveDownloadTask::extractJava(QString input)
     connect(m_task.get(), &Task::failed, this, [this, progressStep](QString reason) {
         progressStep->state = TaskStepState::Failed;
         stepProgress(*progressStep);
-        emitFailed(reason);
+        emitFailed(std::move(reason));
     });
     connect(m_task.get(), &Task::stepProgress, this, &ArchiveDownloadTask::propagateStepProgress);
 
@@ -101,7 +101,7 @@ void ArchiveDownloadTask::extractJava(QString input)
         stepProgress(*progressStep);
     });
     connect(m_task.get(), &Task::status, this, [this, progressStep](QString status) {
-        progressStep->status = status;
+        progressStep->status = std::move(status);
         stepProgress(*progressStep);
     });
     m_task->start();

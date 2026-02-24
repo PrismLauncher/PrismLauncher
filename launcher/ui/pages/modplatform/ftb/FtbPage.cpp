@@ -136,7 +136,7 @@ void FtbPage::suggestCurrent()
         if (art.type == "square") {
             auto editedLogoName = "ftb_" + m_selected.safeName;
             m_listModel->getLogo(m_selected.safeName, art.url,
-                                 [this, editedLogoName](QString logo) { m_dialog->setSuggestedIconFromFile(logo, editedLogoName); });
+                                 [this, editedLogoName](const QString& logo) { m_dialog->setSuggestedIconFromFile(logo, editedLogoName); });
         }
     }
 }
@@ -146,7 +146,7 @@ void FtbPage::triggerSearch()
     m_filterModel->setSearchTerm(m_ui->searchEdit->text());
 }
 
-void FtbPage::onSortingSelectionChanged(QString selected)
+void FtbPage::onSortingSelectionChanged(const QString& selected)
 {
     auto toSet = m_filterModel->getAvailableSortings().value(selected);
     m_filterModel->setSorting(toSet);
@@ -176,7 +176,7 @@ void FtbPage::onSelectionChanged(QModelIndex first, QModelIndex /*second*/)
     suggestCurrent();
 }
 
-void FtbPage::onVersionSelectionChanged(QString selected)
+void FtbPage::onVersionSelectionChanged(const QString& selected)
 {
     if (selected.isNull() || selected.isEmpty()) {
         m_selectedVersion = "";

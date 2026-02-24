@@ -19,7 +19,7 @@
 #include <QDebug>
 #include <QFile>
 
-INISettingsObject::INISettingsObject(QStringList paths, QObject* parent) : SettingsObject(parent)
+INISettingsObject::INISettingsObject(const QStringList& paths, QObject* parent) : SettingsObject(parent)
 {
     auto first_path = paths.constFirst();
     for (const auto& path : paths) {
@@ -38,7 +38,7 @@ INISettingsObject::INISettingsObject(QStringList paths, QObject* parent) : Setti
     m_ini.loadFile(first_path);
 }
 
-INISettingsObject::INISettingsObject(QString path, QObject* parent) : SettingsObject(parent)
+INISettingsObject::INISettingsObject(const QString& path, QObject* parent) : SettingsObject(parent)
 {
     m_filePath = path;
     m_ini.loadFile(path);

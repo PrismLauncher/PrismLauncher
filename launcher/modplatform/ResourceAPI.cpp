@@ -260,7 +260,7 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
     return netJob;
 }
 
-QString ResourceAPI::getGameVersionsString(std::vector<Version> mcVersions) const
+QString ResourceAPI::getGameVersionsString(const std::vector<Version>& mcVersions) const
 {
     QString s;
     for (auto& ver : mcVersions) {
@@ -270,7 +270,7 @@ QString ResourceAPI::getGameVersionsString(std::vector<Version> mcVersions) cons
     return s;
 }
 
-QString ResourceAPI::mapMCVersionToModrinth(Version v) const
+QString ResourceAPI::mapMCVersionToModrinth(const Version& v) const
 {
     static const QString preString = " Pre-Release ";
     auto verStr = v.toString();

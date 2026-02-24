@@ -36,7 +36,7 @@ class AuthStep : public QObject {
     virtual void abort() {}
 
    signals:
-    void finished(AccountTaskState resultingState, QString message);
+    void finished(AccountTaskState resultingState, const QString& message);
 
    protected:
     AccountData* m_data;

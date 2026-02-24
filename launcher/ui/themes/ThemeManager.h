@@ -53,7 +53,7 @@ class ThemeManager {
     /// @brief Returns the background based on selected and with events (Birthday, XMas, etc.)
     /// @param catName Optional, if you need a specific background.
     /// @return
-    QString getCatPack(QString catName = "");
+    QString getCatPack(const QString& catName = "");
     QList<CatPack*> getValidCatPacks();
 
     const LogColors& getLogColors() { return m_logColors; }
@@ -74,7 +74,7 @@ class ThemeManager {
     void initializeThemes();
     void initializeCatPacks();
     QString addTheme(std::unique_ptr<ITheme> theme);
-    ITheme* getTheme(QString themeId);
+    ITheme* getTheme(const QString& themeId);
     QString addIconTheme(IconTheme theme);
     QString addCatPack(std::unique_ptr<CatPack> catPack);
     void initializeIcons();

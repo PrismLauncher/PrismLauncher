@@ -27,7 +27,7 @@ class AuthFlow : public Task {
 
    signals:
     void authorizeWithBrowser(const QUrl& url);
-    void authorizeWithBrowserWithExtra(QString url, QString code, int expiresIn);
+    void authorizeWithBrowserWithExtra(const QString& url, const QString& code, int expiresIn);
 
    protected:
     void succeed();
@@ -35,7 +35,7 @@ class AuthFlow : public Task {
 
    private slots:
     // NOTE: true -> non-terminal state, false -> terminal state
-    bool changeState(AccountTaskState newState, QString reason = QString());
+    bool changeState(AccountTaskState newState, const QString& reason = QString());
     void stepFinished(AccountTaskState resultingState, QString message);
 
    private:

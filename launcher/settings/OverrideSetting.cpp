@@ -15,7 +15,7 @@
 
 #include "OverrideSetting.h"
 
-OverrideSetting::OverrideSetting(std::shared_ptr<Setting> other, std::shared_ptr<Setting> gate) : Setting(other->configKeys(), QVariant())
+OverrideSetting::OverrideSetting(const std::shared_ptr<Setting>& other, const std::shared_ptr<Setting>& gate) : Setting(other->configKeys(), QVariant())
 {
     Q_ASSERT(other);
     Q_ASSERT(gate);

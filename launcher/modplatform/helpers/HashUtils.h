@@ -14,9 +14,9 @@ namespace Hashing {
 enum class Algorithm { Md4, Md5, Sha1, Sha256, Sha512, Murmur2, Unknown };
 
 QString algorithmToString(Algorithm type);
-Algorithm algorithmFromString(QString type);
+Algorithm algorithmFromString(const QString& type);
 QString hash(QIODevice* device, Algorithm type);
-QString hash(QString fileName, Algorithm type);
+QString hash(const QString& fileName, Algorithm type);
 QString hash(QByteArray data, Algorithm type);
 
 class Hasher : public Task {
@@ -25,7 +25,7 @@ class Hasher : public Task {
     using Ptr = shared_qobject_ptr<Hasher>;
 
     Hasher(QString file_path, Algorithm alg) : m_path(std::move(file_path)), m_alg(alg) {}
-    Hasher(QString file_path, QString alg) : Hasher(file_path, algorithmFromString(alg)) {}
+    Hasher(QString file_path, QString alg) : Hasher(std::move(file_path), algorithmFromString(std::move(alg))) {}
 
     bool abort() override;
 
@@ -35,7 +35,7 @@ class Hasher : public Task {
     QString getPath() const { return m_path; };
 
    signals:
-    void resultsReady(QString hash);
+    void resultsReady(const QString& hash);
 
    private:
     QString m_result;
@@ -46,7 +46,7 @@ class Hasher : public Task {
     QFutureWatcher<QString> m_watcher;
 };
 
-Hasher::Ptr createHasher(QString file_path, ModPlatform::ResourceProvider provider);
+Hasher::Ptr createHasher(const QString& file_path, ModPlatform::ResourceProvider provider);
 Hasher::Ptr createHasher(QString file_path, QString type);
 
 }  // namespace Hashing

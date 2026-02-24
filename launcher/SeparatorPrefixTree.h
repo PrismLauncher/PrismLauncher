@@ -2,6 +2,7 @@
 #include <QMap>
 #include <QString>
 #include <QStringList>
+#include <utility>
 
 template <char Tseparator>
 class SeparatorPrefixTree {
@@ -10,7 +11,7 @@ class SeparatorPrefixTree {
 
     SeparatorPrefixTree(bool contained = false) { m_contained = contained; }
 
-    void insert(QStringList paths)
+    void insert(const QStringList& paths)
     {
         for (auto& path : paths) {
             insert(path);
@@ -18,7 +19,7 @@ class SeparatorPrefixTree {
     }
 
     /// insert an exact path into the tree
-    SeparatorPrefixTree& insert(QString path)
+    SeparatorPrefixTree& insert(const QString& path)
     {
         auto sepIndex = path.indexOf(Tseparator);
         if (sepIndex == -1) {
@@ -41,7 +42,7 @@ class SeparatorPrefixTree {
     }
 
     /// does the tree cover a path? That means the prefix of the path is contained in the tree
-    bool covers(QString path) const
+    bool covers(const QString& path) const
     {
         // if we found some valid node, it's good enough. the tree covers the path
         if (m_contained) {
@@ -69,7 +70,7 @@ class SeparatorPrefixTree {
     {
         // if we found some valid node, it's good enough. the tree covers the path
         if (m_contained) {
-            return {""};
+            return { "" };
         }
         auto sepIndex = path.indexOf(Tseparator);
         if (sepIndex == -1) {
@@ -101,7 +102,7 @@ class SeparatorPrefixTree {
     }
 
     /// Does the path-specified node exist in the tree? It does not have to be contained.
-    bool exists(QString path) const
+    bool exists(const QString& path) const
     {
         auto sepIndex = path.indexOf(Tseparator);
         if (sepIndex == -1) {
@@ -121,7 +122,7 @@ class SeparatorPrefixTree {
     }
 
     /// find a node in the tree by name
-    const SeparatorPrefixTree* find(QString path) const
+    const SeparatorPrefixTree* find(const QString& path) const
     {
         auto sepIndex = path.indexOf(Tseparator);
         if (sepIndex == -1) {
@@ -147,7 +148,7 @@ class SeparatorPrefixTree {
     bool contained() const { return m_contained; }
 
     /// Remove a path from the tree
-    bool remove(QString path) { return removeInternal(path) != Failed; }
+    bool remove(QString path) { return removeInternal(std::move(path)) != Failed; }
 
     /// Clear all children of this node tree node
     void clear() { children.clear(); }
@@ -159,7 +160,7 @@ class SeparatorPrefixTree {
         auto iter = children.begin();
         while (iter != children.end()) {
             QStringList list = iter.value().toStringList();
-            for (auto & i : list) {
+            for (auto& i : list) {
                 i = iter.key() + Tseparator + i;
             }
             collected.append(list);
@@ -173,7 +174,7 @@ class SeparatorPrefixTree {
 
    private:
     enum Removal { Failed, Succeeded, HasChildren };
-    Removal removeInternal(QString path = QString())
+    Removal removeInternal(const QString& path = QString())
     {
         if (path.isEmpty()) {
             if (!m_contained) {

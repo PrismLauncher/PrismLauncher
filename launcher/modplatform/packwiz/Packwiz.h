@@ -29,7 +29,7 @@ class QDir;
 
 namespace Packwiz {
 
-auto getRealIndexName(const QDir& index_dir, QString normalized_index_name, bool should_match = false) -> QString;
+auto getRealIndexName(const QDir& index_dir, const QString& normalized_index_name, bool should_match = false) -> QString;
 
 class V1 {
    public:
@@ -84,7 +84,7 @@ class V1 {
     /* Gets the metadata for a mod with a particular file name.
      * If the mod doesn't have a metadata, it simply returns an empty Mod object.
      * */
-    static auto getIndexForMod(const QDir& index_dir, QString slug) -> Mod;
+    static auto getIndexForMod(const QDir& index_dir, const QString& slug) -> Mod;
 
     /* Gets the metadata for a mod with a particular id.
      * If the mod doesn't have a metadata, it simply returns an empty Mod object.

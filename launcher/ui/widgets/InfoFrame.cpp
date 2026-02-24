@@ -155,7 +155,7 @@ void InfoFrame::updateWithResource(const Resource& resource)
     setImage();
 }
 
-QString InfoFrame::renderColorCodes(QString input)
+QString InfoFrame::renderColorCodes(const QString& input)
 {
     // We have to manually set the colors for use.
     //
@@ -267,7 +267,7 @@ void InfoFrame::updateHiddenState()
     }
 }
 
-void InfoFrame::setName(QString text)
+void InfoFrame::setName(const QString& text)
 {
     if (text.isEmpty()) {
         ui->nameLabel->setHidden(true);
@@ -278,7 +278,7 @@ void InfoFrame::setName(QString text)
     updateHiddenState();
 }
 
-void InfoFrame::setDescription(QString text)
+void InfoFrame::setDescription(const QString& text)
 {
     if (text.isEmpty()) {
         ui->descriptionLabel->setHidden(true);
@@ -332,7 +332,7 @@ void InfoFrame::setDescription(QString text)
     ui->descriptionLabel->setText(labeltext);
 }
 
-void InfoFrame::setLicense(QString text)
+void InfoFrame::setLicense(const QString& text)
 {
     if (text.isEmpty()) {
         ui->licenseLabel->setHidden(true);
@@ -371,7 +371,7 @@ void InfoFrame::setLicense(QString text)
     ui->licenseLabel->setText(labeltext);
 }
 
-void InfoFrame::setIssueTracker(QString text)
+void InfoFrame::setIssueTracker(const QString& text)
 {
     if (text.isEmpty()) {
         ui->issueTrackerLabel->setHidden(true);
@@ -382,7 +382,7 @@ void InfoFrame::setIssueTracker(QString text)
     updateHiddenState();
 }
 
-void InfoFrame::setImage(QPixmap img)
+void InfoFrame::setImage(const QPixmap& img)
 {
     if (img.isNull()) {
         ui->iconLabel->setHidden(true);
@@ -392,7 +392,7 @@ void InfoFrame::setImage(QPixmap img)
     }
 }
 
-void InfoFrame::descriptionEllipsisHandler([[maybe_unused]] QString link)
+void InfoFrame::descriptionEllipsisHandler([[maybe_unused]] const QString& link)
 {
     if (!m_current_box) {
         m_current_box = CustomMessageBox::selectable(this, "", m_description);
@@ -403,7 +403,7 @@ void InfoFrame::descriptionEllipsisHandler([[maybe_unused]] QString link)
     }
 }
 
-void InfoFrame::licenseEllipsisHandler([[maybe_unused]] QString link)
+void InfoFrame::licenseEllipsisHandler([[maybe_unused]] const QString& link)
 {
     if (!m_current_box) {
         m_current_box = CustomMessageBox::selectable(this, "", m_license);

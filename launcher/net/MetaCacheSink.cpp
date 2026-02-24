@@ -48,7 +48,7 @@ namespace Net {
  */
 #define MAX_TIME_TO_EXPIRE 1 * 7 * 24 * 60 * 60
 
-MetaCacheSink::MetaCacheSink(MetaEntryPtr entry, ChecksumValidator* md5sum, bool is_eternal)
+MetaCacheSink::MetaCacheSink(const MetaEntryPtr& entry, ChecksumValidator* md5sum, bool is_eternal)
     : Net::FileSink(entry->getFullPath()), m_entry(entry), m_md5Node(md5sum), m_is_eternal(is_eternal)
 {
     addValidator(md5sum);

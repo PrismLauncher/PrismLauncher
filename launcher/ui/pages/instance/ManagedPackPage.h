@@ -33,7 +33,7 @@ class ManagedPackPage : public QWidget, public BasePage {
         return ManagedPackPage::createPage(inst, inst->getManagedPackType(), parent);
     }
 
-    static ManagedPackPage* createPage(BaseInstance* inst, QString type, QWidget* parent = nullptr);
+    static ManagedPackPage* createPage(BaseInstance* inst, const QString& type, QWidget* parent = nullptr);
     ~ManagedPackPage() override;
 
     QString displayName() const override;
@@ -86,7 +86,7 @@ class ManagedPackPage : public QWidget, public BasePage {
      */
     bool runUpdateTask(InstanceTask*);
 
-    void updatePack(const QUrl& url, QString versionID = {}, QString versionName = {});
+    void updatePack(const QUrl& url, const QString& versionID = {}, const QString& versionName = {});
 
    protected:
     InstanceWindow* m_instance_window = nullptr;

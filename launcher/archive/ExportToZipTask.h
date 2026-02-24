@@ -30,23 +30,31 @@ namespace MMCZip {
 class ExportToZipTask : public Task {
     Q_OBJECT
    public:
-    ExportToZipTask(QString outputPath, QDir dir, QFileInfoList files, QString destinationPrefix = "", bool followSymlinks = false)
+    ExportToZipTask(const QString& outputPath,
+                    const QDir& dir,
+                    QFileInfoList files,
+                    QString destinationPrefix = "",
+                    bool followSymlinks = false)
         : m_outputPath(outputPath)
         , m_output(outputPath)
         , m_dir(dir)
-        , m_files(std::move(std::move(files)))
-        , m_destinationPrefix(std::move(std::move(destinationPrefix)))
+        , m_files(std::move(files))
+        , m_destinationPrefix(std::move(destinationPrefix))
         , m_followSymlinks(followSymlinks)
     {
         setAbortable(true);
     };
-    ExportToZipTask(QString outputPath, QString dir, QFileInfoList files, QString destinationPrefix = "", bool followSymlinks = false)
-        : ExportToZipTask(outputPath, QDir(dir), files, destinationPrefix, followSymlinks) {};
+    ExportToZipTask(QString outputPath,
+                    const QString& dir,
+                    QFileInfoList files,
+                    QString destinationPrefix = "",
+                    bool followSymlinks = false)
+        : ExportToZipTask(std::move(outputPath), QDir(dir), std::move(files), std::move(destinationPrefix), followSymlinks) {};
 
     ~ExportToZipTask() override = default;
 
-    void setExcludeFiles(QStringList excludeFiles) { m_excludeFiles = excludeFiles; }
-    void addExtraFile(QString fileName, QByteArray data) { m_extraFiles.insert(fileName, data); }
+    void setExcludeFiles(QStringList excludeFiles) { m_excludeFiles = std::move(excludeFiles); }
+    void addExtraFile(const QString& fileName, const QByteArray& data) { m_extraFiles.insert(fileName, data); }
 
     using ZipResult = std::optional<QString>;
 

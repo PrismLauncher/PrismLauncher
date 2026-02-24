@@ -70,7 +70,7 @@ ProgressDialog::ProgressDialog(QWidget* parent) : QDialog(parent), ui(new Ui::Pr
     setSkipButton(false);
 }
 
-void ProgressDialog::setSkipButton(bool present, QString label)
+void ProgressDialog::setSkipButton(bool present, const QString& label)
 {
     ui->skipButton->setAutoDefault(false);
     ui->skipButton->setDefault(false);
@@ -201,7 +201,7 @@ Task* ProgressDialog::getTask()
 
 void ProgressDialog::onTaskStarted() {}
 
-void ProgressDialog::onTaskFailed([[maybe_unused]] QString failure)
+void ProgressDialog::onTaskFailed([[maybe_unused]] const QString& failure)
 {
     reject();
     hide();

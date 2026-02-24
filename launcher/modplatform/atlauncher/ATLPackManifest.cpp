@@ -38,7 +38,7 @@
 
 #include "Json.h"
 
-static ATLauncher::DownloadType parseDownloadType(QString rawType)
+static ATLauncher::DownloadType parseDownloadType(const QString& rawType)
 {
     if (rawType == QString("server")) {
         return ATLauncher::DownloadType::Server;
@@ -51,7 +51,7 @@ static ATLauncher::DownloadType parseDownloadType(QString rawType)
     return ATLauncher::DownloadType::Unknown;
 }
 
-static ATLauncher::ModType parseModType(QString rawType)
+static ATLauncher::ModType parseModType(const QString& rawType)
 {
     // See https://wiki.atlauncher.com/mod_types
     if (rawType == QString("root")) {

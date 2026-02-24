@@ -91,7 +91,7 @@ PackProfile::~PackProfile()
 
 static const int currentComponentsFileVersion = 1;
 
-static QJsonObject componentToJsonV1(ComponentPtr component)
+static QJsonObject componentToJsonV1(const ComponentPtr& component)
 {
     QJsonObject obj;
     // critical
@@ -376,10 +376,10 @@ void PackProfile::updateFailed(const QString& error)
 
 void PackProfile::appendComponent(ComponentPtr component)
 {
-    insertComponent(d->components.size(), component);
+    insertComponent(d->components.size(), std::move(component));
 }
 
-void PackProfile::insertComponent(size_t index, ComponentPtr component)
+void PackProfile::insertComponent(size_t index, const ComponentPtr& component)
 {
     auto id = component->getID();
     if (id.isEmpty()) {
@@ -662,16 +662,16 @@ void PackProfile::invalidateLaunchProfile()
 void PackProfile::installJarMods(QStringList selectedFiles)
 {
     // FIXME: get rid of _internal
-    installJarMods_internal(selectedFiles);
+    installJarMods_internal(std::move(selectedFiles));
 }
 
 void PackProfile::installCustomJar(QString selectedFile)
 {
     // FIXME: get rid of _internal
-    installCustomJar_internal(selectedFile);
+    installCustomJar_internal(std::move(selectedFile));
 }
 
-bool PackProfile::installComponents(QStringList selectedFiles)
+bool PackProfile::installComponents(const QStringList& selectedFiles)
 {
     const QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
     if (!FS::ensureFolderPathExists(patchDir))
@@ -703,7 +703,7 @@ bool PackProfile::installComponents(QStringList selectedFiles)
 void PackProfile::installAgents(QStringList selectedFiles)
 {
     // FIXME: get rid of _internal
-    installAgents_internal(selectedFiles);
+    installAgents_internal(std::move(selectedFiles));
 }
 
 bool PackProfile::installEmpty(const QString& uid, const QString& name)
@@ -732,7 +732,7 @@ bool PackProfile::installEmpty(const QString& uid, const QString& name)
     return true;
 }
 
-bool PackProfile::removeComponent_internal(ComponentPtr patch)
+bool PackProfile::removeComponent_internal(const ComponentPtr& patch)
 {
     bool ok = true;
     // first, remove the patch file. this ensures it's not used anymore
@@ -747,7 +747,7 @@ bool PackProfile::removeComponent_internal(ComponentPtr patch)
     }
 
     // FIXME: we need a generic way of removing local resources, not just jar mods...
-    auto preRemoveJarMod = [this](LibraryPtr jarMod) -> bool {
+    auto preRemoveJarMod = [this](const LibraryPtr& jarMod) -> bool {
         if (!jarMod->isLocal()) {
             return true;
         }
@@ -776,7 +776,7 @@ bool PackProfile::removeComponent_internal(ComponentPtr patch)
     return ok;
 }
 
-bool PackProfile::installJarMods_internal(QStringList filepaths)
+bool PackProfile::installJarMods_internal(const QStringList& filepaths)
 {
     QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
     if (!FS::ensureFolderPathExists(patchDir)) {
@@ -829,7 +829,7 @@ bool PackProfile::installJarMods_internal(QStringList filepaths)
     return true;
 }
 
-bool PackProfile::installCustomJar_internal(QString filepath)
+bool PackProfile::installCustomJar_internal(const QString& filepath)
 {
     QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
     if (!FS::ensureFolderPathExists(patchDir)) {
@@ -884,7 +884,7 @@ bool PackProfile::installCustomJar_internal(QString filepath)
     return true;
 }
 
-bool PackProfile::installAgents_internal(QStringList filepaths)
+bool PackProfile::installAgents_internal(const QStringList& filepaths)
 {
     // FIXME code duplication
     const QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");

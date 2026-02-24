@@ -57,8 +57,8 @@ class LaunchTask : public Task {
     static std::unique_ptr<LaunchTask> create(MinecraftInstance* inst);
     ~LaunchTask() override = default;
 
-    void appendStep(shared_qobject_ptr<LaunchStep> step);
-    void prependStep(shared_qobject_ptr<LaunchStep> step);
+    void appendStep(const shared_qobject_ptr<LaunchStep>& step);
+    void prependStep(const shared_qobject_ptr<LaunchStep>& step);
     void setCensorFilter(QMap<QString, QString> filter);
 
     MinecraftInstance* instance() { return m_instance; }

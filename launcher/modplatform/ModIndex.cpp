@@ -87,7 +87,7 @@ QStringList ProviderCapabilities::hashType(ResourceProvider p)
     return {};
 }
 
-QString getMetaURL(ResourceProvider provider, QVariant projectID)
+QString getMetaURL(ResourceProvider provider, const QVariant& projectID)
 {
     return ((provider == ModPlatform::ResourceProvider::FLAME) ? "https://www.curseforge.com/projects/" : "https://modrinth.com/mod/") +
            projectID.toString();
@@ -126,7 +126,7 @@ auto getModLoaderAsString(ModLoaderType type) -> const QString
     return "";
 }
 
-auto getModLoaderFromString(QString type) -> ModLoaderType
+auto getModLoaderFromString(const QString& type) -> ModLoaderType
 {
     if (type == "neoforge")
         return NeoForge;
@@ -168,7 +168,7 @@ QString SideUtils::toString(Side side)
     return {};
 }
 
-Side SideUtils::fromString(QString side)
+Side SideUtils::fromString(const QString& side)
 {
     if (side == "client")
         return Side::ClientSide;

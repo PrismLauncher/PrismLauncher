@@ -78,7 +78,7 @@ int ArchiveReader::File::readNextHeader()
     return archive_read_next_header(m_archive.get(), &m_entry);
 }
 
-auto ArchiveReader::goToFile(QString filename) -> std::unique_ptr<File>
+auto ArchiveReader::goToFile(const QString& filename) -> std::unique_ptr<File>
 {
     auto f = std::make_unique<File>();
     auto a = f->m_archive.get();
@@ -128,7 +128,7 @@ static int copy_data(struct archive* ar, struct archive* aw, bool notBlock = fal
     }
 }
 
-bool ArchiveReader::File::writeFile(archive* out, QString targetFileName, bool notBlock)
+bool ArchiveReader::File::writeFile(archive* out, const QString& targetFileName, bool notBlock)
 {
     auto entry = m_entry;
     std::unique_ptr<archive_entry, decltype(&archive_entry_free)> entryClone(nullptr, &archive_entry_free);
@@ -154,7 +154,7 @@ bool ArchiveReader::File::writeFile(archive* out, QString targetFileName, bool n
     return (r >= ARCHIVE_WARN);
 }
 
-bool ArchiveReader::parse(std::function<bool(File*, bool&)> doStuff)
+bool ArchiveReader::parse(const std::function<bool(File*, bool&)>& doStuff)
 {
     auto f = std::make_unique<File>();
     auto a = f->m_archive.get();
@@ -181,7 +181,7 @@ bool ArchiveReader::parse(std::function<bool(File*, bool&)> doStuff)
     return true;
 }
 
-bool ArchiveReader::parse(std::function<bool(File*)> doStuff)
+bool ArchiveReader::parse(const std::function<bool(File*)>& doStuff)
 {
     return parse([doStuff](File* f, bool&) { return doStuff(f); });
 }

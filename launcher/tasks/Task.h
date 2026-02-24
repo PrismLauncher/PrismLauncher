@@ -39,6 +39,7 @@
 #include <QLoggingCategory>
 #include <QRunnable>
 #include <QUuid>
+#include <utility>
 
 #include "QObjectPtr.h"
 
@@ -145,16 +146,16 @@ class Task : public QObject, public QRunnable {
     void succeeded();
     //! called when a task has been aborted by calling abort()
     void aborted();
-    void failed(QString reason);
-    void status(QString status);
-    void details(QString details);
+    void failed(const QString& reason);
+    void status(const QString& status);
+    void details(const QString& details);
     void warningLogged(const QString& warning);
     void stepProgress(TaskStepProgress const& task_progress);
 
     //! Emitted when the canAbort() status has changed. */
     void abortStatusChanged(bool can_abort);
 
-    void abortButtonTextChanged(QString text);
+    void abortButtonTextChanged(const QString& text);
 
    public slots:
     // QRunnable's interface
@@ -176,10 +177,7 @@ class Task : public QObject, public QRunnable {
         emit abortStatusChanged(can_abort);
     }
 
-    void setAbortButtonText(QString text)
-    {
-        emit abortButtonTextChanged(text);
-    }
+    void setAbortButtonText(QString text) { emit abortButtonTextChanged(std::move(text)); }
 
    protected:
     //! The task subclass must implement this method. This method is called to start to run the task.

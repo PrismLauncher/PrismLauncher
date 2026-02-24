@@ -57,7 +57,7 @@ class ImportFTBPage : public QWidget, public ModpackProviderBasePage {
     void suggestCurrent();
     void onPackSelectionChanged(Modpack* pack = nullptr);
    private slots:
-    void onSortingSelectionChanged(QString data);
+    void onSortingSelectionChanged(const QString& data);
     void onPublicPackSelectionChanged(QModelIndex first, QModelIndex second);
     void triggerSearch();
 

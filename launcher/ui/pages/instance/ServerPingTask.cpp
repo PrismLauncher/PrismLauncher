@@ -1,4 +1,5 @@
 #include <QFutureWatcher>
+#include <utility>
 
 #include <Json.h>
 #include "Exception.h"
@@ -6,7 +7,7 @@
 #include "McResolver.h"
 #include "ServerPingTask.h"
 
-unsigned getOnlinePlayers(QJsonObject data)
+unsigned getOnlinePlayers(const QJsonObject& data)
 {
     try {
         return Json::requireInteger(Json::requireObject(data, "players"), "online");
@@ -22,24 +23,24 @@ void ServerPingTask::executeTask()
 
     // Resolve the actual IP and port for the server
     auto* resolver = new McResolver(nullptr, m_domain, m_port);
-    connect(resolver, &McResolver::succeeded, this, [this](QString ip, int port) {
+    connect(resolver, &McResolver::succeeded, this, [this](const QString& ip, int port) {
         qDebug().nospace().noquote() << "Resolved address for " << m_domain << ": " << ip << ":" << port;
 
         // Now that we have the IP and port, query the server
         auto* client = new McClient(nullptr, m_domain, ip, port);
 
         connect(client, &McClient::succeeded, this, [this](QJsonObject data) {
-            m_outputOnlinePlayers = getOnlinePlayers(data);
+            m_outputOnlinePlayers = getOnlinePlayers(std::move(data));
             qDebug() << "Online players:" << m_outputOnlinePlayers;
             emitSucceeded();
         });
-        connect(client, &McClient::failed, this, [this](QString error) { emitFailed(error); });
+        connect(client, &McClient::failed, this, [this](QString error) { emitFailed(std::move(error)); });
 
         // Delete McClient object when done
         connect(client, &McClient::finished, this, [client]() { client->deleteLater(); });
         client->getStatusData();
     });
-    connect(resolver, &McResolver::failed, this, [this](QString error) { emitFailed(error); });
+    connect(resolver, &McResolver::failed, this, [this](QString error) { emitFailed(std::move(error)); });
 
     // Delete McResolver object when done
     connect(resolver, &McResolver::finished, [resolver]() { resolver->deleteLater(); });

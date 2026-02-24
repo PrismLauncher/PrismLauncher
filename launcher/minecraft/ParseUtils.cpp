@@ -4,12 +4,12 @@
 #include <QString>
 #include <cstdlib>
 
-QDateTime timeFromS3Time(QString str)
+QDateTime timeFromS3Time(const QString& str)
 {
     return QDateTime::fromString(str, Qt::ISODate);
 }
 
-QString timeToS3Time(QDateTime time)
+QString timeToS3Time(const QDateTime& time)
 {
     // this all because Qt can't format timestamps right.
     int offsetRaw = time.offsetFromUtc();

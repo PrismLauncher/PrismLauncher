@@ -67,7 +67,7 @@ void ListModel::update()
     beginResetModel();
     m_modpacks.clear();
 
-    auto wasPathAdded = [this](QString path) {
+    auto wasPathAdded = [this](const QString& path) {
         for (const auto& pack : m_modpacks) {
             if (pack.path == path)
                 return true;
@@ -75,7 +75,7 @@ void ListModel::update()
         return false;
     };
 
-    auto scanPath = [this, wasPathAdded](QString path) {
+    auto scanPath = [this, wasPathAdded](const QString& path) {
         if (path.isEmpty())
             return;
         if (auto instancesInfo = QFileInfo(path); !instancesInfo.exists() || !instancesInfo.isDir())
@@ -176,7 +176,7 @@ bool FilterModel::filterAcceptsRow([[maybe_unused]] int sourceRow, [[maybe_unuse
     return pack.name.contains(m_searchTerm, Qt::CaseInsensitive);
 }
 
-void FilterModel::setSearchTerm(const QString term)
+void FilterModel::setSearchTerm(const QString& term)
 {
     m_searchTerm = term.trimmed();
     invalidate();
@@ -202,7 +202,7 @@ FilterModel::Sorting FilterModel::getCurrentSorting()
 {
     return m_currentSorting;
 }
-void ListModel::setPath(QString path)
+void ListModel::setPath(const QString& path)
 {
     APPLICATION->settings()->set("FTBAppInstancesPath", path);
     update();

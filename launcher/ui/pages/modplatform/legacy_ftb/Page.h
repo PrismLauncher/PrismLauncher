@@ -81,14 +81,14 @@ class Page : public QWidget, public ModpackProviderBasePage {
 
    private slots:
     void ftbPackDataDownloadSuccessfully(ModpackList publicPacks, ModpackList thirdPartyPacks);
-    void ftbPackDataDownloadFailed(QString reason);
+    void ftbPackDataDownloadFailed(const QString& reason);
     void ftbPackDataDownloadAborted();
 
     void ftbPrivatePackDataDownloadSuccessfully(const Modpack& pack);
-    void ftbPrivatePackDataDownloadFailed(QString reason, QString packCode);
+    void ftbPrivatePackDataDownloadFailed(const QString& reason, const QString& packCode);
 
-    void onSortingSelectionChanged(QString data);
-    void onVersionSelectionItemChanged(QString data);
+    void onSortingSelectionChanged(const QString& data);
+    void onVersionSelectionItemChanged(const QString& data);
 
     void onPublicPackSelectionChanged(QModelIndex first, QModelIndex second);
     void onThirdPartyPackSelectionChanged(QModelIndex first, QModelIndex second);

@@ -57,7 +57,7 @@ class Metadata : public BaseVersion {
 };
 using MetadataPtr = std::shared_ptr<Metadata>;
 
-DownloadType parseDownloadType(QString javaDownload);
+DownloadType parseDownloadType(const QString& javaDownload);
 QString downloadTypeToString(DownloadType javaDownload);
 MetadataPtr parseJavaMeta(const QJsonObject& libObj);
 

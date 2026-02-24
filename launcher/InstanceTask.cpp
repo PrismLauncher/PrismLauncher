@@ -22,7 +22,7 @@ InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& ol
     return InstanceNameChange::ShouldKeep;
 }
 
-ShouldUpdate askIfShouldUpdate(QWidget* parent, QString original_version_name)
+ShouldUpdate askIfShouldUpdate(QWidget* parent, const QString& original_version_name)
 {
     if (APPLICATION->settings()->get("SkipModpackUpdatePrompt").toBool())
         return ShouldUpdate::SkipUpdating;

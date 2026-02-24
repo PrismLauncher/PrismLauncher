@@ -27,7 +27,7 @@ class PrintInstanceInfo : public LaunchStep {
     Q_OBJECT
    public:
     explicit PrintInstanceInfo(LaunchTask* parent, AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin)
-        : LaunchStep(parent), m_session(std::move(std::move(session))), m_targetToJoin(std::move(std::move(targetToJoin))) {};
+        : LaunchStep(parent), m_session(std::move(session)), m_targetToJoin(std::move(targetToJoin)) {};
     ~PrintInstanceInfo() override = default;
 
     void executeTask() override;

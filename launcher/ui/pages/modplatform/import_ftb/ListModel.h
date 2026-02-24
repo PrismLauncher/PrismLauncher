@@ -35,7 +35,7 @@ class FilterModel : public QSortFilterProxyModel {
     QString translateCurrentSorting();
     void setSorting(Sorting sorting);
     Sorting getCurrentSorting();
-    void setSearchTerm(QString term);
+    void setSearchTerm(const QString& term);
 
    protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
@@ -61,7 +61,7 @@ class ListModel : public QAbstractListModel {
     void update();
 
     QString getUserPath();
-    void setPath(QString path);
+    void setPath(const QString& path);
 
    private:
     ModpackList m_modpacks;

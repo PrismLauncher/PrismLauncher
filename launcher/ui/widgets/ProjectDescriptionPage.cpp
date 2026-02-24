@@ -3,6 +3,7 @@
 #include "VariableSizedImageObject.h"
 
 #include <QDebug>
+#include <utility>
 
 ProjectDescriptionPage::ProjectDescriptionPage(QWidget* parent) : QTextBrowser(parent), m_image_text_object(new VariableSizedImageObject)
 {
@@ -13,7 +14,7 @@ ProjectDescriptionPage::ProjectDescriptionPage(QWidget* parent) : QTextBrowser(p
 void ProjectDescriptionPage::setMetaEntry(QString entry)
 {
     if (m_image_text_object)
-        m_image_text_object->setMetaEntry(entry);
+        m_image_text_object->setMetaEntry(std::move(entry));
 }
 
 void ProjectDescriptionPage::flush()

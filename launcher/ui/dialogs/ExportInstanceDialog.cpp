@@ -154,7 +154,7 @@ void ExportInstanceDialog::doExport()
     auto task = makeShared<MMCZip::ExportToZipTask>(output, m_instance->instanceRoot(), files, "", true);
 
     connect(task.get(), &Task::failed, this,
-            [this, output](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+            [this, output](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
     connect(task.get(), &Task::finished, this, [task] { task->deleteLater(); });
 
     ProgressDialog progress(this);

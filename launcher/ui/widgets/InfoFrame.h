@@ -53,11 +53,11 @@ class InfoFrame : public QFrame {
     InfoFrame(QWidget* parent = nullptr);
     ~InfoFrame() override;
 
-    void setName(QString text = {});
-    void setDescription(QString text = {});
-    void setImage(QPixmap img = {});
-    void setLicense(QString text = {});
-    void setIssueTracker(QString text = {});
+    void setName(const QString& text = {});
+    void setDescription(const QString& text = {});
+    void setImage(const QPixmap& img = {});
+    void setLicense(const QString& text = {});
+    void setIssueTracker(const QString& text = {});
 
     void clear();
 
@@ -67,11 +67,11 @@ class InfoFrame : public QFrame {
     void updateWithDataPack(DataPack& rp);
     void updateWithTexturePack(TexturePack& tp);
 
-    static QString renderColorCodes(QString input);
+    static QString renderColorCodes(const QString& input);
 
    public slots:
-    void descriptionEllipsisHandler(QString link);
-    void licenseEllipsisHandler(QString link);
+    void descriptionEllipsisHandler(const QString& link);
+    void licenseEllipsisHandler(const QString& link);
     void boxClosed(int result);
 
    private:

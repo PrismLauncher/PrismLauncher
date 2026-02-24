@@ -9,7 +9,7 @@
 class ServerPingTask : public Task {
     Q_OBJECT
    public:
-    explicit ServerPingTask(QString domain, int port) : Task(), m_domain(std::move(std::move(domain))), m_port(port) {}
+    explicit ServerPingTask(QString domain, int port) : Task(), m_domain(std::move(domain)), m_port(port) {}
     ~ServerPingTask() override = default;
     int m_outputOnlinePlayers = -1;
 

@@ -4,12 +4,13 @@
 #include <QDebug>
 #include <QFile>
 #include <QtConcurrentRun>
+#include <utility>
 
 #include <MurmurHash2.h>
 
 namespace Hashing {
 
-Hasher::Ptr createHasher(QString file_path, ModPlatform::ResourceProvider provider)
+Hasher::Ptr createHasher(const QString& file_path, ModPlatform::ResourceProvider provider)
 {
     switch (provider) {
         case ModPlatform::ResourceProvider::MODRINTH:
@@ -25,7 +26,7 @@ Hasher::Ptr createHasher(QString file_path, ModPlatform::ResourceProvider provid
 
 Hasher::Ptr createHasher(QString file_path, QString type)
 {
-    return makeShared<Hasher>(file_path, type);
+    return makeShared<Hasher>(std::move(file_path), std::move(type));
 }
 
 class QIODeviceReader : public Murmur2::Reader {
@@ -63,7 +64,7 @@ QString algorithmToString(Algorithm type)
     return "unknown";
 }
 
-Algorithm algorithmFromString(QString type)
+Algorithm algorithmFromString(const QString& type)
 {
     if (type == "md4")
         return Algorithm::Md4;
@@ -123,7 +124,7 @@ QString hash(QIODevice* device, Algorithm type)
     return result;
 }
 
-QString hash(QString fileName, Algorithm type)
+QString hash(const QString& fileName, Algorithm type)
 {
     QFile file(fileName);
     return hash(&file, type);
@@ -138,7 +139,7 @@ QString hash(QByteArray data, Algorithm type)
 void Hasher::executeTask()
 {
     m_future = QtConcurrent::run(
-        QThreadPool::globalInstance(), [](QString fileName, Algorithm type) { return hash(fileName, type); }, m_path, m_alg);
+        QThreadPool::globalInstance(), [](QString fileName, Algorithm type) { return hash(std::move(fileName), type); }, m_path, m_alg);
     connect(&m_watcher, &QFutureWatcher<QString>::finished, this, [this] {
         if (m_future.isCanceled()) {
             emitAborted();

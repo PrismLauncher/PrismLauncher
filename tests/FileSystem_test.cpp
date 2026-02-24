@@ -10,6 +10,7 @@
 #include <StringUtils.h>
 
 #include <filesystem>
+#include <utility>
 namespace fs = std::filesystem;
 
 class LinkTask : public Task {
@@ -17,7 +18,7 @@ class LinkTask : public Task {
 
     friend class FileSystemTest;
 
-    LinkTask(QString src, QString dst)
+    LinkTask(const QString& src, const QString& dst)
     {
         m_lnk = new FS::create_link(src, dst, this);
         m_lnk->debug(true);
@@ -25,7 +26,7 @@ class LinkTask : public Task {
 
     ~LinkTask() override { delete m_lnk; }
 
-    void matcher(Filter filter) { m_lnk->matcher(filter); }
+    void matcher(Filter filter) { m_lnk->matcher(std::move(filter)); }
 
     void linkRecursively(bool recursive)
     {
@@ -646,7 +647,7 @@ class FileSystemTest : public QObject {
 
             QVERIFY2(QTest::qWaitFor([&lnk_tsk]() { return lnk_tsk.isFinished(); }, 100000), "Task didn't finish as it should.");
 
-            std::function<void(QString)> verify_check = [&verify_check](QString check_path) {
+            std::function<void(QString)> verify_check = [&verify_check](const QString& check_path) {
                 QDir check_dir(check_path);
                 auto filter = QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::Hidden;
                 for (const auto& entry : check_dir.entryList(filter)) {

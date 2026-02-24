@@ -4,6 +4,7 @@
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <tuple>
+#include <utility>
 
 #include "FileSystem.h"
 #include "StringUtils.h"
@@ -12,14 +13,14 @@
 
 Resource::Resource(QObject* parent) : QObject(parent) {}
 
-Resource::Resource(QFileInfo file_info) : QObject()
+Resource::Resource(const QFileInfo& file_info) : QObject()
 {
     setFile(file_info);
 }
 
 void Resource::setFile(QFileInfo file_info)
 {
-    m_file_info = file_info;
+    m_file_info = std::move(file_info);
     parseFile();
 }
 

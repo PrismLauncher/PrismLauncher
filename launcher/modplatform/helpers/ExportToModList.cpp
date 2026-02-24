@@ -21,7 +21,7 @@
 #include <QJsonObject>
 
 namespace ExportToModList {
-QString toHTML(QList<Mod*> mods, OptionalData extraData)
+QString toHTML(const QList<Mod*>& mods, OptionalData extraData)
 {
     QStringList lines;
     for (auto mod : mods) {
@@ -57,7 +57,7 @@ QString toMarkdownEscaped(QString src)
     return src;
 }
 
-QString toMarkdown(QList<Mod*> mods, OptionalData extraData)
+QString toMarkdown(const QList<Mod*>& mods, OptionalData extraData)
 {
     QStringList lines;
 
@@ -86,7 +86,7 @@ QString toMarkdown(QList<Mod*> mods, OptionalData extraData)
     return lines.join("\n");
 }
 
-QString toPlainTXT(QList<Mod*> mods, OptionalData extraData)
+QString toPlainTXT(const QList<Mod*>& mods, OptionalData extraData)
 {
     QStringList lines;
     for (auto mod : mods) {
@@ -115,7 +115,7 @@ QString toPlainTXT(QList<Mod*> mods, OptionalData extraData)
     return lines.join("\n");
 }
 
-QString toJSON(QList<Mod*> mods, OptionalData extraData)
+QString toJSON(const QList<Mod*>& mods, OptionalData extraData)
 {
     QJsonArray lines;
     for (auto mod : mods) {
@@ -146,7 +146,7 @@ QString toJSON(QList<Mod*> mods, OptionalData extraData)
     return doc.toJson();
 }
 
-QString toCSV(QList<Mod*> mods, OptionalData extraData)
+QString toCSV(const QList<Mod*>& mods, OptionalData extraData)
 {
     QStringList lines;
     for (auto mod : mods) {
@@ -178,7 +178,7 @@ QString toCSV(QList<Mod*> mods, OptionalData extraData)
     return lines.join("\n");
 }
 
-QString exportToModList(QList<Mod*> mods, Formats format, OptionalData extraData)
+QString exportToModList(const QList<Mod*>& mods, Formats format, OptionalData extraData)
 {
     switch (format) {
         case HTML:
@@ -197,7 +197,7 @@ QString exportToModList(QList<Mod*> mods, Formats format, OptionalData extraData
     }
 }
 
-QString exportToModList(QList<Mod*> mods, QString lineTemplate)
+QString exportToModList(const QList<Mod*>& mods, const QString& lineTemplate)
 {
     QStringList lines;
     for (auto mod : mods) {

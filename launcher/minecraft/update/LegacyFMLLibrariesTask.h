@@ -17,7 +17,7 @@ class LegacyFMLLibrariesTask : public Task {
 
    private slots:
     void fmllibsFinished();
-    void fmllibsFailed(QString reason);
+    void fmllibsFailed(const QString& reason);
 
    public slots:
     bool abort() override;
