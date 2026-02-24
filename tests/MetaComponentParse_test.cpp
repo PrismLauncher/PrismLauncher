@@ -46,7 +46,7 @@
 class MetaComponentParseTest : public QObject {
     Q_OBJECT
 
-    void doTest(const QString& name)
+    static void doTest(const QString& name)
     {
         QString source = QFINDTESTDATA("testdata/MetaComponentParse");
 

@@ -5,7 +5,7 @@
 class JavaVersionTest : public QObject {
     Q_OBJECT
    private slots:
-    void test_Parse_data()
+    static void test_Parse_data()
     {
         QTest::addColumn<QString>("string");
         QTest::addColumn<int>("major");
@@ -22,7 +22,7 @@ class JavaVersionTest : public QObject {
         QTest::newRow("new format prerelease") << "9-ea" << 9 << 0 << 0 << "ea";
         QTest::newRow("new format long prerelease") << "9.0.1-ea" << 9 << 0 << 1 << "ea";
     }
-    void test_Parse()
+    static void test_Parse()
     {
         QFETCH(QString, string);
         QFETCH(int, major);
@@ -39,7 +39,7 @@ class JavaVersionTest : public QObject {
         QCOMPARE(test.m_prerelease, prerelease);
     }
 
-    void test_Sort_data()
+    static void test_Sort_data()
     {
         QTest::addColumn<QString>("lhs");
         QTest::addColumn<QString>("rhs");
@@ -97,7 +97,7 @@ class JavaVersionTest : public QObject {
         QTest::newRow("9-ea < 9-rc") << "9-ea"
                                      << "9-rc" << true << false << false;
     }
-    void test_Sort()
+    static void test_Sort()
     {
         QFETCH(QString, lhs);
         QFETCH(QString, rhs);
@@ -110,7 +110,7 @@ class JavaVersionTest : public QObject {
         QCOMPARE(lver == rver, equal);
         QCOMPARE(lver > rver, bigger);
     }
-    void test_PermGen_data()
+    static void test_PermGen_data()
     {
         QTest::addColumn<QString>("version");
         QTest::addColumn<bool>("needs_permgen");
@@ -120,7 +120,7 @@ class JavaVersionTest : public QObject {
         QTest::newRow("9-ea") << "9-ea" << false;
         QTest::newRow("9.2.4") << "9.2.4" << false;
     }
-    void test_PermGen()
+    static void test_PermGen()
     {
         QFETCH(QString, version);
         QFETCH(bool, needs_permgen);

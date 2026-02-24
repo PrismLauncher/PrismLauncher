@@ -130,7 +130,7 @@ ListModel::ListModel(QObject* parent) : QAbstractListModel(parent) {}
 
 ListModel::~ListModel() = default;
 
-QString ListModel::translatePackType(PackType type) const
+QString ListModel::translatePackType(PackType type) 
 {
     switch (type) {
         case PackType::Public:

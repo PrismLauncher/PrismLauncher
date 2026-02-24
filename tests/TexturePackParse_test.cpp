@@ -29,7 +29,7 @@ class TexturePackParseTest : public QObject {
     Q_OBJECT
 
    private slots:
-    void test_parseZIP()
+    static void test_parseZIP()
     {
         QString source = QFINDTESTDATA("testdata/TexturePackParse");
 
@@ -42,7 +42,7 @@ class TexturePackParseTest : public QObject {
         QVERIFY(valid == true);
     }
 
-    void test_parseFolder()
+    static void test_parseFolder()
     {
         QString source = QFINDTESTDATA("testdata/TexturePackParse");
 
@@ -55,7 +55,7 @@ class TexturePackParseTest : public QObject {
         QVERIFY(valid == true);
     }
 
-    void test_parseFolder2()
+    static void test_parseFolder2()
     {
         QString source = QFINDTESTDATA("testdata/TexturePackParse");
 

@@ -47,7 +47,7 @@ class ListModel : public QAbstractListModel {
     QMap<QString, LogoCallback> waitingCallbacks;
 
     void requestLogo(const QString& file);
-    QString translatePackType(PackType type) const;
+    static QString translatePackType(PackType type);
 
    private slots:
     void logoFailed(const QString& logo);

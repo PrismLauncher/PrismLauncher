@@ -105,7 +105,7 @@ class PackInstallTask : public InstanceTask {
    private:
     QString getDirForModType(ModType type, const QString& raw);
     QString getVersionForLoader(const QString& uid);
-    QString detectLibrary(const VersionLibrary& library);
+    static QString detectLibrary(const VersionLibrary& library);
 
     bool createLibrariesComponent(const QString& instanceRoot, PackProfile* profile);
     bool createPackComponent(const QString& instanceRoot, PackProfile* profile);

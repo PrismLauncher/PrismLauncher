@@ -5,7 +5,7 @@
 class ParseUtilsTest : public QObject {
     Q_OBJECT
    private slots:
-    void test_Through_data()
+    static void test_Through_data()
     {
         QTest::addColumn<QString>("timestamp");
         const char* timestamps[] = { "2016-02-29T13:49:54+01:00", "2016-02-26T15:21:11+00:01", "2016-02-24T15:52:36+01:13",
@@ -15,7 +15,7 @@ class ParseUtilsTest : public QObject {
             QTest::newRow(timestamp) << QString(timestamp);
         }
     }
-    void test_Through()
+    static void test_Through()
     {
         QFETCH(QString, timestamp);
 

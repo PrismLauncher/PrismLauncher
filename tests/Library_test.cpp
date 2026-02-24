@@ -47,7 +47,7 @@
 class LibraryTest : public QObject {
     Q_OBJECT
    private:
-    LibraryPtr readMojangJson(const QString& path)
+    static LibraryPtr readMojangJson(const QString& path)
     {
         QFile jsonFile(path);
         if (!jsonFile.open(QIODevice::ReadOnly)) {
@@ -62,7 +62,7 @@ class LibraryTest : public QObject {
     // get absolute path to expected storage, assuming default cache prefix
     QStringList getStorage(const QString& relative) { return { FS::PathCombine(cache->getBasePath("libraries"), relative) }; }
 
-    RuntimeContext dummyContext(QString system = "linux", QString arch = "64", QString realArch = "amd64")
+    static RuntimeContext dummyContext(QString system = "linux", QString arch = "64", QString realArch = "amd64")
     {
         RuntimeContext r;
         r.javaArchitecture = std::move(arch);

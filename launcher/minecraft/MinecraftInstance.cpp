@@ -461,7 +461,7 @@ QString MinecraftInstance::resourcesDir() const
     return FS::PathCombine(gameRoot(), "resources");
 }
 
-QDir MinecraftInstance::librariesPath() const
+QDir MinecraftInstance::librariesPath() 
 {
     return QDir::current().absoluteFilePath("libraries");
 }
@@ -471,7 +471,7 @@ QDir MinecraftInstance::jarmodsPath() const
     return QDir(jarModsDir());
 }
 
-QDir MinecraftInstance::versionsPath() const
+QDir MinecraftInstance::versionsPath() 
 {
     return QDir::current().absoluteFilePath("versions");
 }

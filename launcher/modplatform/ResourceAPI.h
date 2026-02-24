@@ -121,9 +121,9 @@ class ResourceAPI {
     virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, Callback<ModPlatform::IndexedVersion>&&) const;
 
    protected:
-    inline QString debugName() const { return "External resource API"; }
+    static inline QString debugName() { return "External resource API"; }
 
-    QString mapMCVersionToModrinth(const Version& v) const;
+    static QString mapMCVersionToModrinth(const Version& v);
 
     QString getGameVersionsString(const std::vector<Version>& mcVersions) const;
 

@@ -142,7 +142,7 @@ class InstanceList : public QAbstractListModel {
      * Destroy a previously created staging area given by @keyPath - used when creation fails.
      * Used by instance manipulation tasks.
      */
-    bool destroyStagingPath(const QString& keyPath);
+    static bool destroyStagingPath(const QString& keyPath);
 
     int getTotalPlayTime();
 

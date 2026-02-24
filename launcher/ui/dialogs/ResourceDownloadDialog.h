@@ -77,7 +77,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     void reject() override;
 
    protected slots:
-    void selectedPageChanged(BasePage* previous, BasePage* selected);
+    static void selectedPageChanged(BasePage* previous, BasePage* selected);
 
     virtual void confirm();
 

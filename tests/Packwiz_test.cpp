@@ -28,7 +28,7 @@ class PackwizTest : public QObject {
 
    private slots:
     // Files taken from https://github.com/packwiz/packwiz-example-pack
-    void loadFromFile_Modrinth()
+    static void loadFromFile_Modrinth()
     {
         QString source = QFINDTESTDATA("testdata/Packwiz");
 
@@ -56,7 +56,7 @@ class PackwizTest : public QObject {
         QCOMPARE(metadata.mod_id(), "kYq5qkSL");
     }
 
-    void loadFromFile_Curseforge()
+    static void loadFromFile_Curseforge()
     {
         QString source = QFINDTESTDATA("testdata/Packwiz");
 

@@ -22,7 +22,7 @@ class VersionTest : public QObject {
 
     QStringList m_flex_test_names = {};
 
-    void addDataColumns()
+    static void addDataColumns()
     {
         QTest::addColumn<QString>("first");
         QTest::addColumn<QString>("second");
@@ -81,7 +81,7 @@ class VersionTest : public QObject {
    private slots:
     void test_versionCompare_data() { setupVersions(); }
 
-    void test_versionCompare()
+    static void test_versionCompare()
     {
         QFETCH(QString, first);
         QFETCH(QString, second);
@@ -166,7 +166,7 @@ class VersionTest : public QObject {
         vector_file.close();
     }
 
-    void test_flexVerTestVector()
+    static void test_flexVerTestVector()
     {
         QFETCH(QString, first);
         QFETCH(QString, second);

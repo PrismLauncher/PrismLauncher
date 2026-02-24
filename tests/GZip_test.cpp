@@ -14,7 +14,7 @@ class GZipTest : public QObject {
     Q_OBJECT
    private slots:
 
-    void test_Through()
+    static void test_Through()
     {
         // test up to 10 MB
         static const int size = 10 * 1024 * 1024;

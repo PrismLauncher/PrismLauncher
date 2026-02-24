@@ -10,7 +10,7 @@
 class CatPackTest : public QObject {
     Q_OBJECT
    private slots:
-    void test_catPack()
+    static void test_catPack()
     {
         auto dataDir = QDir(QFINDTESTDATA("testdata/CatPacks")).absolutePath();
         auto fileName = FS::PathCombine(dataDir, "index.json");

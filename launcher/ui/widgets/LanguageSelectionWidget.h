@@ -33,7 +33,7 @@ class LanguageSelectionWidget : public QWidget {
     void retranslate();
 
    protected slots:
-    void languageRowChanged(const QModelIndex& current, const QModelIndex& previous);
+    static void languageRowChanged(const QModelIndex& current, const QModelIndex& previous);
     void languageSettingChanged(const Setting&, const QVariant&);
 
    private:

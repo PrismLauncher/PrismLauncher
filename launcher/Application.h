@@ -122,7 +122,7 @@ class Application : public QApplication {
 
     qint64 timeSinceStart() const { return m_startTime.msecsTo(QDateTime::currentDateTime()); }
 
-    QIcon logo();
+    static QIcon logo();
 
     ThemeManager* themeManager() { return m_themeManager.get(); }
 
@@ -198,9 +198,9 @@ class Application : public QApplication {
     void ShowGlobalSettings(class QWidget* parent, QString open_page = QString());
 
     bool updaterEnabled();
-    QString updaterBinaryName();
+    static QString updaterBinaryName();
 
-    QUrl normalizeImportUrl(const QString& url);
+    static QUrl normalizeImportUrl(const QString& url);
 
    signals:
     void updateAllowedChanged(bool status);
@@ -221,7 +221,7 @@ class Application : public QApplication {
                 shared_qobject_ptr<MinecraftAccount> accountToUse = nullptr,
                 const QString& offlineName = QString());
     bool kill(BaseInstance* instance);
-    void closeCurrentWindow();
+    static void closeCurrentWindow();
 
    private slots:
     void on_windowClose();
@@ -230,7 +230,7 @@ class Application : public QApplication {
     void setupWizardFinished(int status);
 
    private:
-    bool handleDataMigration(const QString& currentData, const QString& oldData, const QString& name, const QString& configFile) const;
+    static bool handleDataMigration(const QString& currentData, const QString& oldData, const QString& name, const QString& configFile);
     bool createSetupWizard();
     void performMainStartupAction();
 

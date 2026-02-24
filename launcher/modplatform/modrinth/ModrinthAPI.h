@@ -38,7 +38,7 @@ class ModrinthAPI : public ResourceAPI {
    public:
     auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 
-    inline auto getAuthorURL(const QString& name) const -> QString { return "https://modrinth.com/user/" + name; };
+    static inline auto getAuthorURL(const QString& name) -> QString { return "https://modrinth.com/user/" + name; };
 
     static auto getModLoaderStrings(const ModPlatform::ModLoaderTypes types) -> const QStringList
     {
@@ -181,7 +181,7 @@ class ModrinthAPI : public ResourceAPI {
         return BuildConfig.MODRINTH_PROD_URL + "/project/" + id;
     };
 
-    inline auto getMultipleModInfoURL(const QStringList& ids) const -> QString
+    static inline auto getMultipleModInfoURL(const QStringList& ids) -> QString
     {
         return BuildConfig.MODRINTH_PROD_URL + QString("/projects?ids=[\"%1\"]").arg(ids.join("\",\""));
     };

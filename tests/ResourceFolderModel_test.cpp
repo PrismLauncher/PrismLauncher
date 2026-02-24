@@ -66,7 +66,7 @@ class ResourceFolderModelTest : public QObject {
 
    private slots:
     // test for GH-1178 - install a folder with files to a mod list
-    void test_1178()
+    static void test_1178()
     {
         // source
         QString source = QFINDTESTDATA("testdata/Resources/test_folder");
@@ -131,7 +131,7 @@ class ResourceFolderModelTest : public QObject {
         }
     }
 
-    void test_addFromWatch()
+    static void test_addFromWatch()
     {
         QString source = QFINDTESTDATA("testdata/Resources");
         ModFolderModel model(source, nullptr, false, true);
@@ -149,7 +149,7 @@ class ResourceFolderModelTest : public QObject {
         model.stopWatching();
     }
 
-    void test_removeResource()
+    static void test_removeResource()
     {
         QString folder_resource = QFINDTESTDATA("testdata/Resources/test_folder");
         QString file_mod = QFINDTESTDATA("testdata/Resources/supercoolmod.jar");
@@ -194,7 +194,7 @@ class ResourceFolderModelTest : public QObject {
         model.stopWatching();
     }
 
-    void test_enable_disable()
+    static void test_enable_disable()
     {
         QString folder_resource = QFINDTESTDATA("testdata/Resources/test_folder");
         QString file_mod = QFINDTESTDATA("testdata/Resources/supercoolmod.jar");

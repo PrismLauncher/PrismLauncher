@@ -15,7 +15,7 @@ class IniFileTest : public QObject {
     void initTestCase() {}
     void cleanupTestCase() {}
 
-    void test_Escape_data()
+    static void test_Escape_data()
     {
         QTest::addColumn<QString>("through");
 
@@ -27,7 +27,7 @@ class IniFileTest : public QObject {
         QTest::newRow("Hashtags") << "some data#something";
     }
 
-    void test_SaveLoad()
+    static void test_SaveLoad()
     {
         QString a = "a";
         QString b = "a\nb\t\n\\\\\\C:\\Program files\\terrible\\name\\of something\\#thisIsNotAComment";
@@ -46,7 +46,7 @@ class IniFileTest : public QObject {
         QCOMPARE(f2.get("b", "NOT SET").toString(), b);
     }
 
-    void test_SaveLoadLists()
+    static void test_SaveLoadLists()
     {
         QString slist_strings = R"(("a","b","c"))";
         QStringList list_strings = { "a", "b", "c" };
@@ -75,7 +75,7 @@ class IniFileTest : public QObject {
         QCOMPARE(out_list_numbers, list_numbers);
     }
 
-    void test_SaveAlreadyExistingFile()
+    static void test_SaveAlreadyExistingFile()
     {
         QString fileContent = R"(InstanceType=OneSix
 iconKey=vanillia_icon
@@ -116,7 +116,7 @@ Wrapperommand=)";
 #endif
     }
 
-    void test_SaveAlreadyExistingFileWithSpecialChars()
+    static void test_SaveAlreadyExistingFileWithSpecialChars()
     {
 #if defined(Q_OS_WIN)
         QString fileName = "test_SaveAlreadyExistingFileWithSpecialChars.ini";
@@ -159,7 +159,7 @@ Wrapperommand=)";
 #endif
     }
 
-    void test_SaveAlreadyExistingFileWithSpecialCharsV1()
+    static void test_SaveAlreadyExistingFileWithSpecialCharsV1()
     {
         QString fileContent = R"(InstanceType=OneSix
 ConfigVersion=1.1

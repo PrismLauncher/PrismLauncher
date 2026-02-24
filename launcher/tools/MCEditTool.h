@@ -8,7 +8,7 @@ class MCEditTool {
     MCEditTool(SettingsObject* settings);
     void setPath(QString& path);
     QString path() const;
-    bool check(const QString& toolPath, QString& error);
+    static bool check(const QString& toolPath, QString& error);
     QString getProgramPath();
 
    private:

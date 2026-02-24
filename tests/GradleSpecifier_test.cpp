@@ -8,7 +8,7 @@ class GradleSpecifierTest : public QObject {
     void initTestCase() {}
     void cleanupTestCase() {}
 
-    void test_Positive_data()
+    static void test_Positive_data()
     {
         QTest::addColumn<QString>("through");
 
@@ -18,7 +18,7 @@ class GradleSpecifierTest : public QObject {
         QTest::newRow("jarboth") << "org.gradle.test.classifiers:service:1.0:jdk15@jar";
         QTest::newRow("packxz") << "org.gradle.test.classifiers:service:1.0:jdk15@jar.pack.xz";
     }
-    void test_Positive()
+    static void test_Positive()
     {
         QFETCH(QString, through);
 
@@ -27,7 +27,7 @@ class GradleSpecifierTest : public QObject {
         QCOMPARE(converted, through);
     }
 
-    void test_Path_data()
+    static void test_Path_data()
     {
         QTest::addColumn<QString>("spec");
         QTest::addColumn<QString>("expected");
@@ -37,7 +37,7 @@ class GradleSpecifierTest : public QObject {
         QTest::newRow("doom") << "id.software:doom:1.666:demons@wad"
                               << "id/software/doom/1.666/doom-1.666-demons.wad";
     }
-    void test_Path()
+    static void test_Path()
     {
         QFETCH(QString, spec);
         QFETCH(QString, expected);
@@ -46,7 +46,7 @@ class GradleSpecifierTest : public QObject {
 
         QCOMPARE(converted, expected);
     }
-    void test_Negative_data()
+    static void test_Negative_data()
     {
         QTest::addColumn<QString>("input");
 
@@ -55,7 +55,7 @@ class GradleSpecifierTest : public QObject {
         QTest::newRow("empty string") << "";
         QTest::newRow("missing version") << "herp.derp:artifact";
     }
-    void test_Negative()
+    static void test_Negative()
     {
         QFETCH(QString, input);
 
