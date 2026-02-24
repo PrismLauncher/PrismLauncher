@@ -15,14 +15,14 @@ class PackInstallTask : public InstanceTask {
 
    public:
     explicit PackInstallTask(QNetworkAccessManager* network, const Modpack& pack, QString version);
-    virtual ~PackInstallTask() = default;
+    ~PackInstallTask() override = default;
 
     bool canAbort() const override { return true; }
     bool abort() override;
 
    protected:
     //! Entry point for tasks.
-    virtual void executeTask() override;
+    void executeTask() override;
 
    private:
     void downloadPack();

@@ -32,10 +32,10 @@ class PackInstallTask : public InstanceTask {
 
    public:
     explicit PackInstallTask(Modpack pack) : m_pack(std::move(std::move(pack))) {}
-    virtual ~PackInstallTask() = default;
+    ~PackInstallTask() override = default;
 
    protected:
-    virtual void executeTask() override;
+    void executeTask() override;
 
    private slots:
     void copySettings();

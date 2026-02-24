@@ -27,7 +27,7 @@ class GenericProfiler : public BaseProfiler {
     GenericProfiler(SettingsObject* settings, BaseInstance* instance, QObject* parent = nullptr);
 
    protected:
-    void beginProfilingImpl(LaunchTask* process);
+    void beginProfilingImpl(LaunchTask* process) override;
 };
 
 GenericProfiler::GenericProfiler(SettingsObject* settings, BaseInstance* instance, QObject* parent)

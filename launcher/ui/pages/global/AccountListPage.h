@@ -53,7 +53,7 @@ class AccountListPage : public QMainWindow, public BasePage {
     Q_OBJECT
    public:
     explicit AccountListPage(QWidget* parent = nullptr);
-    ~AccountListPage();
+    ~AccountListPage() override;
 
     QString displayName() const override { return tr("Accounts"); }
     QIcon icon() const override

@@ -28,11 +28,11 @@ class TextPrint : public LaunchStep {
    public:
     explicit TextPrint(LaunchTask* parent, const QStringList& lines, MessageLevel level);
     explicit TextPrint(LaunchTask* parent, const QString& line, MessageLevel level);
-    virtual ~TextPrint() = default;
+    ~TextPrint() override = default;
 
-    virtual void executeTask();
-    virtual bool canAbort() const;
-    virtual bool abort();
+    void executeTask() override;
+    bool canAbort() const override;
+    bool abort() override;
 
    private:
     QStringList m_lines;

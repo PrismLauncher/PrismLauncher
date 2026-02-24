@@ -30,7 +30,7 @@ class ModModel : public ResourceModel {
     void searchWithTerm(const QString& term, unsigned int sort, bool filter_changed);
 
     void setFilter(std::shared_ptr<ModFilterWidget::Filter> filter) { m_filter = filter; }
-    virtual QVariant getInstalledPackVersion(ModPlatform::IndexedPack::Ptr) const override;
+    QVariant getInstalledPackVersion(ModPlatform::IndexedPack::Ptr) const override;
 
     [[nodiscard]] QString debugName() const override { return m_debugName; }
     [[nodiscard]] QString metaEntryBase() const override { return m_metaEntryBase; }
@@ -41,10 +41,10 @@ class ModModel : public ResourceModel {
     ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex&) override;
 
    protected:
-    virtual bool isPackInstalled(ModPlatform::IndexedPack::Ptr) const override;
+    bool isPackInstalled(ModPlatform::IndexedPack::Ptr) const override;
 
-    virtual bool checkFilters(ModPlatform::IndexedPack::Ptr) override;
-    virtual bool checkVersionFilters(const ModPlatform::IndexedVersion&) override;
+    bool checkFilters(ModPlatform::IndexedPack::Ptr) override;
+    bool checkVersionFilters(const ModPlatform::IndexedVersion&) override;
 
    protected:
     BaseInstance& m_base_instance;

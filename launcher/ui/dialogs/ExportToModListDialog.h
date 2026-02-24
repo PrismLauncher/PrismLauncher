@@ -32,7 +32,7 @@ class ExportToModListDialog : public QDialog {
 
    public:
     explicit ExportToModListDialog(QString name, QList<Mod*> mods, QWidget* parent = nullptr);
-    ~ExportToModListDialog();
+    ~ExportToModListDialog() override;
 
     void done(int result) override;
 

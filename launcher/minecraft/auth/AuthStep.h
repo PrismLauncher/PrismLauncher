@@ -27,7 +27,7 @@ class AuthStep : public QObject {
     using Ptr = shared_qobject_ptr<AuthStep>;
 
     explicit AuthStep(AccountData* data) : QObject(nullptr), m_data(data) {};
-    virtual ~AuthStep() noexcept = default;
+    ~AuthStep() noexcept override = default;
 
     virtual QString describe() = 0;
 

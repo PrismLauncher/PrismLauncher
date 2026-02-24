@@ -58,12 +58,12 @@ class TechnicPage : public QWidget, public ModpackProviderBasePage {
 
    public:
     explicit TechnicPage(NewInstanceDialog* dialog, QWidget* parent = nullptr);
-    virtual ~TechnicPage();
-    virtual QString displayName() const override { return "Technic"; }
-    virtual QIcon icon() const override { return QIcon::fromTheme("technic"); }
-    virtual QString id() const override { return "technic"; }
-    virtual QString helpPage() const override { return "Technic-platform"; }
-    virtual bool shouldDisplay() const override;
+    ~TechnicPage() override;
+    QString displayName() const override { return "Technic"; }
+    QIcon icon() const override { return QIcon::fromTheme("technic"); }
+    QString id() const override { return "technic"; }
+    QString helpPage() const override { return "Technic-platform"; }
+    bool shouldDisplay() const override;
     void retranslate() override;
 
     void openedImpl() override;
@@ -71,9 +71,9 @@ class TechnicPage : public QWidget, public ModpackProviderBasePage {
     bool eventFilter(QObject* watched, QEvent* event) override;
 
     /** Programatically set the term in the search bar. */
-    virtual void setSearchTerm(QString) override;
+    void setSearchTerm(QString) override;
     /** Get the current term in the search bar. */
-    virtual QString getSerachTerm() const override;
+    QString getSerachTerm() const override;
 
    private:
     void suggestCurrent();

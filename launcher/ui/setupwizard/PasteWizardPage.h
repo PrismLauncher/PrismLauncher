@@ -13,7 +13,7 @@ class PasteWizardPage : public BaseWizardPage {
 
    public:
     explicit PasteWizardPage(QWidget* parent = nullptr);
-    ~PasteWizardPage();
+    ~PasteWizardPage() override;
 
     void initializePage() override;
     bool validatePage() override;

@@ -10,7 +10,7 @@ class XboxUserStep : public AuthStep {
 
    public:
     explicit XboxUserStep(AccountData* data);
-    virtual ~XboxUserStep() noexcept = default;
+    ~XboxUserStep() noexcept override = default;
 
     void perform() override;
 

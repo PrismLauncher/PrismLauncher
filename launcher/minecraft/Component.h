@@ -57,7 +57,7 @@ class Component : public QObject, public ProblemProvider {
     // DEPRECATED: remove these constructors?
     Component(PackProfile* parent, const QString& uid, std::shared_ptr<VersionFile> file);
 
-    virtual ~Component() = default;
+    ~Component() override = default;
 
     static const QMap<QString, ModloaderMapEntry> KNOWN_MODLOADERS;
 

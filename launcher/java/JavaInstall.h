@@ -26,14 +26,15 @@
 struct JavaInstall : public BaseVersion {
     JavaInstall() = default;
     JavaInstall(QString id, QString arch, QString path) : id(id), arch(std::move(std::move(arch))), path(std::move(std::move(path))) {}
-    virtual QString descriptor() const override { return id.toString(); }
 
-    virtual QString name() const override { return id.toString(); }
+    QString descriptor() const override { return id.toString(); }
 
-    virtual QString typeString() const override { return arch; }
+    QString name() const override { return id.toString(); }
 
-    virtual bool operator<(BaseVersion& a) const override;
-    virtual bool operator>(BaseVersion& a) const override;
+    QString typeString() const override { return arch; }
+
+    bool operator<(BaseVersion& a) const override;
+    bool operator>(BaseVersion& a) const override;
     bool operator<(const JavaInstall& rhs) const;
     bool operator==(const JavaInstall& rhs) const;
     bool operator>(const JavaInstall& rhs) const;

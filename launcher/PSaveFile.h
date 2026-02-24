@@ -49,7 +49,7 @@ class PSaveFile : public QSaveFile {
    public:
     PSaveFile(const QString& name) : QSaveFile(name) { addPath(name); }
     PSaveFile(const QString& name, QObject* parent) : QSaveFile(name, parent) { addPath(name); }
-    virtual ~PSaveFile()
+    ~PSaveFile() override
     {
         if (auto app = APPLICATION_DYN) {
             app->removeQSavePath(m_absoluteFilePath);

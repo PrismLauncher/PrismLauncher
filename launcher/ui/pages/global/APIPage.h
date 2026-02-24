@@ -50,13 +50,13 @@ class APIPage : public QWidget, public BasePage {
 
    public:
     explicit APIPage(QWidget* parent = nullptr);
-    ~APIPage();
+    ~APIPage() override;
 
     QString displayName() const override { return tr("Services"); }
     QIcon icon() const override { return QIcon::fromTheme("worlds"); }
     QString id() const override { return "apis"; }
     QString helpPage() const override { return "APIs"; }
-    virtual bool apply() override;
+    bool apply() override;
     void retranslate() override;
 
    private:

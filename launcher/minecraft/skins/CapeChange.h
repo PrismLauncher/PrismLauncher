@@ -25,12 +25,12 @@ class CapeChange : public Net::NetRequest {
    public:
     using Ptr = shared_qobject_ptr<CapeChange>;
     CapeChange(QString capeId);
-    virtual ~CapeChange() = default;
+    ~CapeChange() override = default;
 
     static CapeChange::Ptr make(QString token, QString capeId);
 
    protected:
-    virtual QNetworkReply* getReply(QNetworkRequest&) override;
+    QNetworkReply* getReply(QNetworkRequest&) override;
 
    private:
     QString m_capeId;

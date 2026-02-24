@@ -94,7 +94,7 @@ class Task : public QObject, public QRunnable {
 
    public:
     explicit Task(bool show_debug_log = true);
-    virtual ~Task() = default;
+    ~Task() override = default;
 
     bool isRunning() const;
     bool isFinished() const;

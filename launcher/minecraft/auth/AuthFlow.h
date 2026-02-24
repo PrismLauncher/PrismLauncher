@@ -16,7 +16,7 @@ class AuthFlow : public Task {
     enum class Action { Refresh, Login, DeviceCode };
 
     explicit AuthFlow(AccountData* data, Action action = Action::Refresh);
-    virtual ~AuthFlow() = default;
+    ~AuthFlow() override = default;
 
     void executeTask() override;
 

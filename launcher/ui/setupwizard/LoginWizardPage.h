@@ -11,7 +11,7 @@ class LoginWizardPage : public BaseWizardPage {
 
    public:
     explicit LoginWizardPage(QWidget* parent = nullptr);
-    ~LoginWizardPage();
+    ~LoginWizardPage() override;
 
     void initializePage() override;
     bool validatePage() override;

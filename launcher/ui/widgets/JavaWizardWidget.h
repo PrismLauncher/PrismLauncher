@@ -24,7 +24,7 @@ class JavaWizardWidget : public QWidget {
 
    public:
     explicit JavaWizardWidget(QWidget* parent);
-    virtual ~JavaWizardWidget();
+    ~JavaWizardWidget() override;
 
     enum class JavaStatus { NotSet, Pending, Good, DoesNotExist, DoesNotStart, ReturnedInvalidData } javaStatus = JavaStatus::NotSet;
 

@@ -49,7 +49,7 @@ class ChecksumValidator : public Validator {
     {}
     ChecksumValidator(QCryptographicHash::Algorithm algorithm, QByteArray expected = QByteArray())
         : m_checksum(algorithm), m_expected(std::move(expected)) {};
-    virtual ~ChecksumValidator() = default;
+    ~ChecksumValidator() override = default;
 
    public:
     auto init(QNetworkRequest&) -> bool override

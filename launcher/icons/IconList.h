@@ -52,19 +52,19 @@ class IconList : public QAbstractListModel {
     Q_OBJECT
    public:
     explicit IconList(const QStringList& builtinPaths, const QString& path, QObject* parent = nullptr);
-    virtual ~IconList() = default;
+    ~IconList() override = default;
 
     QIcon getIcon(const QString& key) const;
     int getIconIndex(const QString& key) const;
     QString getDirectory() const;
 
-    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    virtual QStringList mimeTypes() const override;
-    virtual Qt::DropActions supportedDropActions() const override;
-    virtual bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
-    virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
+    QStringList mimeTypes() const override;
+    Qt::DropActions supportedDropActions() const override;
+    bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     bool addThemeIcon(const QString& key);
     bool addIcon(const QString& key, const QString& name, const QString& path, IconType type);

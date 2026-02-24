@@ -25,11 +25,11 @@ class LookupServerAddress : public LaunchStep {
     Q_OBJECT
    public:
     explicit LookupServerAddress(LaunchTask* parent);
-    virtual ~LookupServerAddress() = default;
+    ~LookupServerAddress() override = default;
 
-    virtual void executeTask();
-    virtual bool abort();
-    virtual bool canAbort() const { return true; }
+    void executeTask() override;
+    bool abort() override;
+    bool canAbort() const override { return true; }
 
     void setLookupAddress(const QString& lookupAddress);
     void setOutputAddressPtr(MinecraftTarget::Ptr output);

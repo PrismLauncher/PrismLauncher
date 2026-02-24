@@ -64,13 +64,13 @@ class LogPage : public QWidget, public BasePage {
 
    public:
     explicit LogPage(BaseInstance* instance, QWidget* parent = nullptr);
-    virtual ~LogPage();
-    virtual QString displayName() const override { return tr("Minecraft Log"); }
-    virtual QIcon icon() const override { return QIcon::fromTheme("log"); }
-    virtual QString id() const override { return "console"; }
-    virtual bool apply() override;
-    virtual QString helpPage() const override { return "Minecraft-Logs"; }
-    virtual bool shouldDisplay() const override;
+    ~LogPage() override;
+    QString displayName() const override { return tr("Minecraft Log"); }
+    QIcon icon() const override { return QIcon::fromTheme("log"); }
+    QString id() const override { return "console"; }
+    bool apply() override;
+    QString helpPage() const override { return "Minecraft-Logs"; }
+    bool shouldDisplay() const override;
     void retranslate() override;
 
    private slots:

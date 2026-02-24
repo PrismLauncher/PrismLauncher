@@ -27,7 +27,7 @@ class LanguageSelectionWidget : public QWidget {
     Q_OBJECT
    public:
     explicit LanguageSelectionWidget(QWidget* parent = nullptr);
-    virtual ~LanguageSelectionWidget() = default;
+    ~LanguageSelectionWidget() override = default;
 
     QString getSelectedLanguageKey() const;
     void retranslate();

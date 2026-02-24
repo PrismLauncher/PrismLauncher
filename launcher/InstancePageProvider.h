@@ -23,8 +23,8 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
    public:
     explicit InstancePageProvider(BaseInstance* parent) { inst = parent; }
 
-    virtual ~InstancePageProvider() = default;
-    virtual QList<BasePage*> getPages() override
+    ~InstancePageProvider() override = default;
+    QList<BasePage*> getPages() override
     {
         QList<BasePage*> values;
         values.append(new LogPage(inst));
@@ -49,7 +49,7 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
         return values;
     }
 
-    virtual QString dialogTitle() override { return tr("Edit Instance (%1)").arg(inst->name()); }
+    QString dialogTitle() override { return tr("Edit Instance (%1)").arg(inst->name()); }
 
    protected:
     BaseInstance* inst;

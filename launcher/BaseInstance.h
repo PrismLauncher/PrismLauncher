@@ -100,7 +100,7 @@ class BaseInstance : public QObject {
 
    public:
     /// virtual destructor to make sure the destruction is COMPLETE
-    virtual ~BaseInstance();
+    ~BaseInstance() override;
 
     virtual void saveNow() = 0;
 

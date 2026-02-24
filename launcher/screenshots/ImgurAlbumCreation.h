@@ -42,7 +42,7 @@
 
 class ImgurAlbumCreation : public Net::NetRequest {
    public:
-    virtual ~ImgurAlbumCreation() = default;
+    ~ImgurAlbumCreation() override = default;
 
     struct Result {
         QString deleteHash;
@@ -52,7 +52,7 @@ class ImgurAlbumCreation : public Net::NetRequest {
     class Sink : public Net::Sink {
        public:
         Sink(std::shared_ptr<Result> res) : m_result(std::move(res)) {};
-        virtual ~Sink() = default;
+        ~Sink() override = default;
 
        public:
         auto init(QNetworkRequest& request) -> Task::State override;

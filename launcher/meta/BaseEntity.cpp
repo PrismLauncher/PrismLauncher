@@ -35,7 +35,7 @@ namespace Meta {
 class ParsingValidator : public Net::Validator {
    public: /* con/des */
     ParsingValidator(BaseEntity* entity) : m_entity(entity) {};
-    virtual ~ParsingValidator() = default;
+    ~ParsingValidator() override = default;
 
    public: /* methods */
     bool init(QNetworkRequest&) override

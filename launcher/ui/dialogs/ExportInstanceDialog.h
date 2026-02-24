@@ -53,9 +53,9 @@ class ExportInstanceDialog : public QDialog {
 
    public:
     explicit ExportInstanceDialog(BaseInstance* instance, QWidget* parent = nullptr);
-    ~ExportInstanceDialog();
+    ~ExportInstanceDialog() override;
 
-    virtual void done(int result);
+    void done(int result) override;
 
    private:
     void doExport();

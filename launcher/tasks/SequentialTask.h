@@ -51,7 +51,7 @@ class SequentialTask : public ConcurrentTask {
     ~SequentialTask() override = default;
 
    protected slots:
-    virtual void subTaskFailed(Task::Ptr, const QString& msg) override;
+    void subTaskFailed(Task::Ptr, const QString& msg) override;
 
    protected:
     void updateState() override;

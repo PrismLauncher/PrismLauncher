@@ -56,12 +56,13 @@ class VersionPage : public QMainWindow, public BasePage {
 
    public:
     explicit VersionPage(MinecraftInstance* inst, QWidget* parent = nullptr);
-    virtual ~VersionPage();
-    virtual QString displayName() const override { return tr("Version"); }
-    virtual QIcon icon() const override;
-    virtual QString id() const override { return "version"; }
-    virtual QString helpPage() const override { return "Instance-Version"; }
-    virtual bool shouldDisplay() const override;
+
+    ~VersionPage() override;
+    QString displayName() const override { return tr("Version"); }
+    QIcon icon() const override;
+    QString id() const override { return "version"; }
+    QString helpPage() const override { return "Instance-Version"; }
+    bool shouldDisplay() const override;
     void retranslate() override;
 
     void openedImpl() override;

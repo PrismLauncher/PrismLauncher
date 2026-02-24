@@ -28,10 +28,10 @@ class PrintInstanceInfo : public LaunchStep {
    public:
     explicit PrintInstanceInfo(LaunchTask* parent, AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin)
         : LaunchStep(parent), m_session(std::move(std::move(session))), m_targetToJoin(std::move(std::move(targetToJoin))) {};
-    virtual ~PrintInstanceInfo() = default;
+    ~PrintInstanceInfo() override = default;
 
-    virtual void executeTask();
-    virtual bool canAbort() const { return false; }
+    void executeTask() override;
+    bool canAbort() const override { return false; }
 
    private:
     AuthSessionPtr m_session;

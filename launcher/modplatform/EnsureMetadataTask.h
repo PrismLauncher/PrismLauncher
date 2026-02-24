@@ -19,7 +19,7 @@ class EnsureMetadataTask : public Task {
     EnsureMetadataTask(QList<Resource*>&, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
     EnsureMetadataTask(QHash<QString, Resource*>&, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
 
-    ~EnsureMetadataTask() = default;
+    ~EnsureMetadataTask() override = default;
 
     Task::Ptr getHashingTask() { return m_hashingTask; }
 

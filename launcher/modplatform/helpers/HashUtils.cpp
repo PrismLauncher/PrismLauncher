@@ -31,10 +31,10 @@ Hasher::Ptr createHasher(QString file_path, QString type)
 class QIODeviceReader : public Murmur2::Reader {
    public:
     QIODeviceReader(QIODevice* device) : m_device(device) {}
-    virtual ~QIODeviceReader() = default;
-    virtual int read(char* s, int n) { return m_device->read(s, n); }
-    virtual bool eof() { return m_device->atEnd(); }
-    virtual void goToBeginning() { m_device->seek(0); }
+    ~QIODeviceReader() override = default;
+    int read(char* s, int n) override { return m_device->read(s, n); }
+    bool eof() override { return m_device->atEnd(); }
+    void goToBeginning() override { m_device->seek(0); }
     virtual void close() { m_device->close(); }
 
    private:

@@ -23,10 +23,10 @@ class CheckJava : public LaunchStep {
     Q_OBJECT
    public:
     explicit CheckJava(LaunchTask* parent) : LaunchStep(parent) {};
-    virtual ~CheckJava() = default;
+    ~CheckJava() override = default;
 
-    virtual void executeTask();
-    virtual bool canAbort() const { return false; }
+    void executeTask() override;
+    bool canAbort() const override { return false; }
    private slots:
     void checkJavaFinished(const JavaChecker::Result& result);
 

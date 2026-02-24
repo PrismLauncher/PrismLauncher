@@ -11,7 +11,7 @@ class AutoJavaWizardPage : public BaseWizardPage {
 
    public:
     explicit AutoJavaWizardPage(QWidget* parent = nullptr);
-    ~AutoJavaWizardPage();
+    ~AutoJavaWizardPage() override;
 
     void initializePage() override;
     bool validatePage() override;

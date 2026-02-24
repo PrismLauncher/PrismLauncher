@@ -32,12 +32,12 @@ class ExtractZipTask : public Task {
     ExtractZipTask(QString input, QDir outputDir, QString subdirectory = "")
         : m_input(input), m_outputDir(outputDir), m_subdirectory(std::move(std::move(subdirectory)))
     {}
-    virtual ~ExtractZipTask() = default;
+    ~ExtractZipTask() override = default;
 
     using ZipResult = std::optional<QString>;
 
    protected:
-    virtual void executeTask() override;
+    void executeTask() override;
     bool abort() override;
 
     ZipResult extractZip();

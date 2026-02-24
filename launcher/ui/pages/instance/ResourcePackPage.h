@@ -55,7 +55,7 @@ class ResourcePackPage : public ExternalResourcesPage {
     QString id() const override { return "resourcepacks"; }
     QString helpPage() const override { return "Resource-packs"; }
 
-    virtual bool shouldDisplay() const override
+    bool shouldDisplay() const override
     {
         return !m_instance->traits().contains("no-texturepacks") && !m_instance->traits().contains("texturepacks");
     }

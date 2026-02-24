@@ -66,6 +66,6 @@ class Download : public NetRequest {
     static auto makeFile(QUrl url, QString path, Options options = Option::NoOptions) -> Download::Ptr;
 
    protected:
-    virtual QNetworkReply* getReply(QNetworkRequest&) override;
+    QNetworkReply* getReply(QNetworkRequest&) override;
 };
 }  // namespace Net

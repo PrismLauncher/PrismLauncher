@@ -149,15 +149,17 @@
 class OrSetting : public Setting {
     Q_OBJECT
    public:
-    OrSetting(QString id, std::shared_ptr<Setting> a, std::shared_ptr<Setting> b) : Setting({ id }, false), m_a(std::move(a)), m_b(std::move(b)) {}
-    virtual QVariant get() const
+    OrSetting(QString id, std::shared_ptr<Setting> a, std::shared_ptr<Setting> b)
+        : Setting({ id }, false), m_a(std::move(a)), m_b(std::move(b))
+    {}
+    QVariant get() const override
     {
         bool a = m_a->get().toBool();
         bool b = m_b->get().toBool();
         return a || b;
     }
-    virtual void reset() {}
-    virtual void set(QVariant value) {}
+    void reset() override {}
+    void set(QVariant value) override {}
 
    private:
     std::shared_ptr<Setting> m_a;

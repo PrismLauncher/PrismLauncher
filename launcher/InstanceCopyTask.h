@@ -19,7 +19,7 @@ class InstanceCopyTask : public InstanceTask {
 
    protected:
     //! Entry point for tasks.
-    virtual void executeTask() override;
+    void executeTask() override;
     bool abort() override;
     void copyFinished();
     void copyAborted();

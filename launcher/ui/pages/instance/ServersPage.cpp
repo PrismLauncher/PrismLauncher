@@ -166,7 +166,7 @@ class ServersModel : public QAbstractListModel {
         m_saveTimer.setInterval(5000);
         connect(&m_saveTimer, &QTimer::timeout, this, &ServersModel::save_internal);
     }
-    virtual ~ServersModel() = default;
+    ~ServersModel() override = default;
 
     void observe()
     {
@@ -293,7 +293,7 @@ class ServersModel : public QAbstractListModel {
         return QAbstractListModel::headerData(section, orientation, role);
     }
 
-    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
     {
         if (!index.isValid())
             return QVariant();
@@ -345,7 +345,7 @@ class ServersModel : public QAbstractListModel {
         }
     }
 
-    virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override { return parent.isValid() ? 0 : m_servers.size(); }
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override { return parent.isValid() ? 0 : m_servers.size(); }
     int columnCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : COLUMN_COUNT; }
 
     Server* at(int index)
@@ -406,7 +406,7 @@ class ServersModel : public QAbstractListModel {
         auto serversDat = parseServersDat(serversPath());
         if (serversDat) {
             auto& serversList = serversDat->at("servers").as<nbt::tag_list>();
-            for (auto & iter : serversList) {
+            for (auto& iter : serversList) {
                 auto& serverTag = iter.as<nbt::tag_compound>();
                 Server s(serverTag);
                 servers.append(s);

@@ -77,7 +77,7 @@ class ModFolderModel : public ResourceFolderModel {
     };
     ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent = nullptr);
 
-    virtual QString id() const override { return "mods"; }
+    QString id() const override { return "mods"; }
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 

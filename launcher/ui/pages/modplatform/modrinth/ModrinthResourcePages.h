@@ -96,7 +96,7 @@ class ModrinthModPage : public ModPage {
     std::unique_ptr<ModFilterWidget> createFilterWidget() override;
 
    protected:
-    virtual void prepareProviderCategories() override;
+    void prepareProviderCategories() override;
     Task::Ptr m_categoriesTask;
 };
 

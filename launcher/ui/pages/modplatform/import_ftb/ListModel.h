@@ -52,11 +52,11 @@ class ListModel : public QAbstractListModel {
 
    public:
     ListModel(QObject* parent);
-    virtual ~ListModel() = default;
+    ~ListModel() override = default;
 
-    int rowCount(const QModelIndex& parent) const { return m_modpacks.size(); }
-    int columnCount(const QModelIndex& parent) const { return 1; }
-    QVariant data(const QModelIndex& index, int role) const;
+    int rowCount(const QModelIndex& parent) const override { return m_modpacks.size(); }
+    int columnCount(const QModelIndex& parent) const override { return 1; }
+    QVariant data(const QModelIndex& index, int role) const override;
 
     void update();
 

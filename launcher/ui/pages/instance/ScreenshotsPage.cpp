@@ -90,7 +90,7 @@ class ThumbnailRunnable : public QRunnable {
         m_path = path;
         m_cache = cache;
     }
-    void run()
+    void run() override
     {
         QFileInfo info(m_path);
         if (info.isDir())
@@ -139,13 +139,13 @@ class FilterModel : public QIdentityProxyModel {
         m_thumbnailCache->add("placeholder", QIcon::fromTheme("screenshot-placeholder"));
         connect(&watcher, &QFileSystemWatcher::fileChanged, this, &FilterModel::fileChanged);
     }
-    virtual ~FilterModel()
+    ~FilterModel() override
     {
         m_thumbnailingPool.clear();
         if (!m_thumbnailingPool.waitForDone(500))
             qDebug() << "Thumbnail pool took longer than 500ms to finish";
     }
-    virtual QVariant data(const QModelIndex& proxyIndex, int role = Qt::DisplayRole) const
+    QVariant data(const QModelIndex& proxyIndex, int role = Qt::DisplayRole) const override
     {
         auto model = sourceModel();
         if (!model)
@@ -173,7 +173,7 @@ class FilterModel : public QIdentityProxyModel {
         }
         return sourceModel()->data(mapToSource(proxyIndex), role);
     }
-    virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole)
+    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override
     {
         auto model = sourceModel();
         if (!model)
@@ -222,8 +222,8 @@ class FilterModel : public QIdentityProxyModel {
 class CenteredEditingDelegate : public QStyledItemDelegate {
    public:
     explicit CenteredEditingDelegate(QObject* parent = nullptr) : QStyledItemDelegate(parent) {}
-    virtual ~CenteredEditingDelegate() = default;
-    virtual QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+    ~CenteredEditingDelegate() override = default;
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override
     {
         auto widget = QStyledItemDelegate::createEditor(parent, option, index);
         auto foo = dynamic_cast<QLineEdit*>(widget);

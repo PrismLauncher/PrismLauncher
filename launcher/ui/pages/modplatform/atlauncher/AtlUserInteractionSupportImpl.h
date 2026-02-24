@@ -44,7 +44,7 @@ class AtlUserInteractionSupportImpl : public QObject, public ATLauncher::UserInt
 
    public:
     AtlUserInteractionSupportImpl(QWidget* parent);
-    virtual ~AtlUserInteractionSupportImpl() = default;
+    ~AtlUserInteractionSupportImpl() override = default;
 
    private:
     QString chooseVersion(Meta::VersionList::Ptr vlist, QString minecraftVersion) override;

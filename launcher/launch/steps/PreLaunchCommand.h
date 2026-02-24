@@ -22,11 +22,11 @@ class PreLaunchCommand : public LaunchStep {
     Q_OBJECT
    public:
     explicit PreLaunchCommand(LaunchTask* parent);
-    virtual ~PreLaunchCommand() = default;
+    ~PreLaunchCommand() override = default;
 
-    virtual void executeTask();
-    virtual bool abort();
-    virtual bool canAbort() const { return true; }
+    void executeTask() override;
+    bool abort() override;
+    bool canAbort() const override { return true; }
     void setWorkingDirectory(const QString& wd);
    private slots:
     void on_state(LoggedProcess::State state);

@@ -45,7 +45,7 @@ class ImgurUpload : public Net::NetRequest {
     class Sink : public Net::Sink {
        public:
         Sink(ScreenShot::Ptr shot) : m_shot(std::move(shot)) {};
-        virtual ~Sink() = default;
+        ~Sink() override = default;
 
        public:
         auto init(QNetworkRequest& request) -> Task::State override;
@@ -59,11 +59,11 @@ class ImgurUpload : public Net::NetRequest {
         QByteArray m_output;
     };
     ImgurUpload(QFileInfo info) : m_fileInfo(info) {}
-    virtual ~ImgurUpload() = default;
+    ~ImgurUpload() override = default;
 
     static NetRequest::Ptr make(ScreenShot::Ptr m_shot);
 
    private:
-    virtual QNetworkReply* getReply(QNetworkRequest&) override;
+    QNetworkReply* getReply(QNetworkRequest&) override;
     const QFileInfo m_fileInfo;
 };

@@ -51,7 +51,7 @@ class ProxyPage : public QWidget, public BasePage {
 
    public:
     explicit ProxyPage(QWidget* parent = nullptr);
-    ~ProxyPage();
+    ~ProxyPage() override;
 
     QString displayName() const override { return tr("Proxy"); }
     QIcon icon() const override { return QIcon::fromTheme("proxy"); }

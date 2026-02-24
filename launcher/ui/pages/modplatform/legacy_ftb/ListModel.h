@@ -55,7 +55,7 @@ class ListModel : public QAbstractListModel {
 
    public:
     ListModel(QObject* parent);
-    ~ListModel();
+    ~ListModel() override;
     int rowCount(const QModelIndex& parent) const override;
     int columnCount(const QModelIndex& parent) const override;
     QVariant data(const QModelIndex& index, int role) const override;

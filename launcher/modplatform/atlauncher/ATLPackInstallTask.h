@@ -86,13 +86,13 @@ class PackInstallTask : public InstanceTask {
                              QString packName,
                              QString version,
                              InstallMode installMode = InstallMode::Install);
-    virtual ~PackInstallTask() { delete m_support; }
+    ~PackInstallTask() override { delete m_support; }
 
     bool canAbort() const override { return true; }
     bool abort() override;
 
    protected:
-    virtual void executeTask() override;
+    void executeTask() override;
 
    private slots:
     void onDownloadSucceeded(QByteArray* responsePtr);

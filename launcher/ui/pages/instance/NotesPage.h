@@ -49,18 +49,18 @@ class NotesPage : public QWidget, public BasePage {
 
    public:
     explicit NotesPage(BaseInstance* inst, QWidget* parent = nullptr);
-    virtual ~NotesPage();
-    virtual QString displayName() const override { return tr("Notes"); }
-    virtual QIcon icon() const override
+    ~NotesPage() override;
+    QString displayName() const override { return tr("Notes"); }
+    QIcon icon() const override
     {
         auto icon = QIcon::fromTheme("notes");
         if (icon.isNull())
             icon = QIcon::fromTheme("news");
         return icon;
     }
-    virtual QString id() const override { return "notes"; }
-    virtual bool apply() override;
-    virtual QString helpPage() const override { return "Notes"; }
+    QString id() const override { return "notes"; }
+    bool apply() override;
+    QString helpPage() const override { return "Notes"; }
     void retranslate() override;
 
    private:

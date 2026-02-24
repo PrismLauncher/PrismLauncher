@@ -25,10 +25,10 @@ class SkinDelete : public Net::NetRequest {
    public:
     using Ptr = shared_qobject_ptr<SkinDelete>;
     SkinDelete();
-    virtual ~SkinDelete() = default;
+    ~SkinDelete() override = default;
 
     static SkinDelete::Ptr make(QString token);
 
    protected:
-    virtual QNetworkReply* getReply(QNetworkRequest&) override;
+    QNetworkReply* getReply(QNetworkRequest&) override;
 };

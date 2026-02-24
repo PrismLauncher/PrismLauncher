@@ -22,7 +22,7 @@ class DataMigrationTask : public Task {
     ~DataMigrationTask() override = default;
 
    protected:
-    virtual void executeTask() override;
+    void executeTask() override;
 
    protected slots:
     void dryRunFinished();

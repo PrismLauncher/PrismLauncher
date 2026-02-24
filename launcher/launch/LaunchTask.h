@@ -55,7 +55,7 @@ class LaunchTask : public Task {
 
    public: /* methods */
     static std::unique_ptr<LaunchTask> create(MinecraftInstance* inst);
-    virtual ~LaunchTask() = default;
+    ~LaunchTask() override = default;
 
     void appendStep(shared_qobject_ptr<LaunchStep> step);
     void prependStep(shared_qobject_ptr<LaunchStep> step);
@@ -70,7 +70,7 @@ class LaunchTask : public Task {
     /**
      * @brief prepare the process for launch (for multi-stage launch)
      */
-    virtual void executeTask() override;
+    void executeTask() override;
 
     /**
      * @brief launch the armed instance
@@ -91,8 +91,8 @@ class LaunchTask : public Task {
     QString censorPrivateInfo(QString in);
 
    protected: /* methods */
-    virtual void emitFailed(QString reason) override;
-    virtual void emitSucceeded() override;
+    void emitFailed(QString reason) override;
+    void emitSucceeded() override;
 
    signals:
     /**

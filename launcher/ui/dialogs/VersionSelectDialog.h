@@ -33,7 +33,7 @@ class VersionSelectDialog : public QDialog {
 
    public:
     explicit VersionSelectDialog(BaseVersionList* vlist, QString title, QWidget* parent = nullptr, bool cancelable = true);
-    virtual ~VersionSelectDialog() = default;
+    ~VersionSelectDialog() override = default;
 
     int exec() override;
 

@@ -27,7 +27,7 @@ class TaskStepWrapper : public LaunchStep {
     Q_OBJECT
    public:
     explicit TaskStepWrapper(LaunchTask* parent, Task::Ptr task) : LaunchStep(parent), m_task(std::move(std::move(task))) {};
-    virtual ~TaskStepWrapper() = default;
+    ~TaskStepWrapper() override = default;
 
     void executeTask() override;
     bool canAbort() const override;

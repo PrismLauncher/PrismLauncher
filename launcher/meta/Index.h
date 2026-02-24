@@ -30,7 +30,7 @@ class Index : public QAbstractListModel, public BaseEntity {
    public:
     explicit Index(QObject* parent = nullptr);
     explicit Index(const QList<VersionList::Ptr>& lists, QObject* parent = nullptr);
-    virtual ~Index() = default;
+    ~Index() override = default;
 
     enum { UidRole = Qt::UserRole, NameRole, ListPtrRole };
 

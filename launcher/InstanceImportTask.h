@@ -43,13 +43,13 @@
 class InstanceImportTask : public InstanceTask {
     Q_OBJECT
    public:
-    explicit InstanceImportTask(QUrl  sourceUrl, QWidget* parent = nullptr, QMap<QString, QString>&& extra_info = {});
-    virtual ~InstanceImportTask() = default;
+    explicit InstanceImportTask(QUrl sourceUrl, QWidget* parent = nullptr, QMap<QString, QString>&& extra_info = {});
+    ~InstanceImportTask() override = default;
     bool abort() override;
 
    protected:
     //! Entry point for tasks.
-    virtual void executeTask() override;
+    void executeTask() override;
 
    private:
     void processMultiMC();

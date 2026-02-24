@@ -30,18 +30,18 @@ class SkinList : public QAbstractListModel {
     Q_OBJECT
    public:
     explicit SkinList(QObject* parent, QString path, MinecraftAccountPtr acct);
-    virtual ~SkinList() { save(); };
+    ~SkinList() override { save(); };
 
     int getSkinIndex(const QString& key) const;
 
-    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& idx, const QVariant& value, int role) override;
-    virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    virtual QStringList mimeTypes() const override;
-    virtual Qt::DropActions supportedDropActions() const override;
-    virtual bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
-    virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
+    QStringList mimeTypes() const override;
+    Qt::DropActions supportedDropActions() const override;
+    bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     bool deleteSkin(const QString& key, bool trash);
 

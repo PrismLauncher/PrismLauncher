@@ -72,8 +72,8 @@ class PasteUpload : public Net::NetRequest {
 
     class Sink : public Net::ByteArraySink {
        public:
-        Sink(PasteUpload* p) : m_d(p) {};
-        virtual ~Sink() = default;
+        explicit Sink(PasteUpload* p) : m_d(p) {};
+        ~Sink() override = default;
 
        public:
         auto finalize(QNetworkReply& reply) -> Task::State override;
@@ -83,13 +83,13 @@ class PasteUpload : public Net::NetRequest {
     };
     friend Sink;
 
-    PasteUpload(QString  log, QString url, PasteType pasteType);
-    virtual ~PasteUpload() = default;
+    PasteUpload(QString log, QString url, PasteType pasteType);
+    ~PasteUpload() override = default;
 
     QString pasteLink() { return m_pasteLink; }
 
    private:
-    virtual QNetworkReply* getReply(QNetworkRequest&) override;
+    QNetworkReply* getReply(QNetworkRequest&) override;
     QString m_log;
     QString m_pasteLink;
     QString m_baseUrl;

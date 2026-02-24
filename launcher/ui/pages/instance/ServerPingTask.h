@@ -18,5 +18,5 @@ class ServerPingTask : public Task {
     int m_port;
 
    protected:
-    virtual void executeTask() override;
+    void executeTask() override;
 };

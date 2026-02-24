@@ -41,7 +41,7 @@ class UpdateAvailableDialog : public QDialog {
                                    const QString& availableVersion,
                                    const QString& releaseNotes,
                                    QWidget* parent = nullptr);
-    ~UpdateAvailableDialog() = default;
+    ~UpdateAvailableDialog() override = default;
 
    private:
     Ui::UpdateAvailableDialog* ui;

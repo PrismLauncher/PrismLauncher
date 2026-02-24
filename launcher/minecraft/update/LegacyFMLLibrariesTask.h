@@ -9,7 +9,7 @@ class LegacyFMLLibrariesTask : public Task {
     Q_OBJECT
    public:
     LegacyFMLLibrariesTask(MinecraftInstance* inst);
-    virtual ~LegacyFMLLibrariesTask() = default;
+    ~LegacyFMLLibrariesTask() override = default;
 
     void executeTask() override;
 

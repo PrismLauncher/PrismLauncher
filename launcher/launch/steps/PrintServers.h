@@ -27,8 +27,8 @@ class PrintServers : public LaunchStep {
    public:
     PrintServers(LaunchTask* parent, const QStringList& servers);
 
-    virtual void executeTask();
-    virtual bool canAbort() const;
+    void executeTask() override;
+    bool canAbort() const override;
 
    private:
     void resolveServer(const QHostInfo& host_info);

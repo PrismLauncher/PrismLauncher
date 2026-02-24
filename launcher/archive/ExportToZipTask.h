@@ -43,7 +43,7 @@ class ExportToZipTask : public Task {
     ExportToZipTask(QString outputPath, QString dir, QFileInfoList files, QString destinationPrefix = "", bool followSymlinks = false)
         : ExportToZipTask(outputPath, QDir(dir), files, destinationPrefix, followSymlinks) {};
 
-    virtual ~ExportToZipTask() = default;
+    ~ExportToZipTask() override = default;
 
     void setExcludeFiles(QStringList excludeFiles) { m_excludeFiles = excludeFiles; }
     void addExtraFile(QString fileName, QByteArray data) { m_extraFiles.insert(fileName, data); }
@@ -51,7 +51,7 @@ class ExportToZipTask : public Task {
     using ZipResult = std::optional<QString>;
 
    protected:
-    virtual void executeTask() override;
+    void executeTask() override;
     bool abort() override;
 
     ZipResult exportZip();

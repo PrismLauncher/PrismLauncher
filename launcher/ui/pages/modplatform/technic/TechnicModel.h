@@ -49,11 +49,11 @@ class ListModel : public QAbstractListModel {
 
    public:
     ListModel(QObject* parent);
-    virtual ~ListModel();
+    ~ListModel() override;
 
-    virtual QVariant data(const QModelIndex& index, int role) const;
-    virtual int columnCount(const QModelIndex& parent) const;
-    virtual int rowCount(const QModelIndex& parent) const;
+    QVariant data(const QModelIndex& index, int role) const override;
+    int columnCount(const QModelIndex& parent) const override;
+    int rowCount(const QModelIndex& parent) const override;
 
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
     void searchWithTerm(const QString& term);

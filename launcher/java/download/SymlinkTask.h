@@ -25,7 +25,7 @@ class SymlinkTask : public Task {
     Q_OBJECT
    public:
     SymlinkTask(QString final_path);
-    virtual ~SymlinkTask() = default;
+    ~SymlinkTask() override = default;
 
     void executeTask() override;
 

@@ -62,7 +62,7 @@ class PageEntryFilterModel : public QSortFilterProxyModel {
     explicit PageEntryFilterModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}
 
    protected:
-    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override
     {
         const QString pattern = filterRegularExpression().pattern();
         const auto model = static_cast<PageModel*>(sourceModel());

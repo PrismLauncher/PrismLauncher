@@ -74,7 +74,7 @@ class InstanceList : public QAbstractListModel {
 
    public:
     explicit InstanceList(SettingsObject* settings, const QString& instDir, QObject* parent = nullptr);
-    virtual ~InstanceList();
+    ~InstanceList() override;
 
    public:
     QModelIndex index(int row, int column = 0, const QModelIndex& parent = QModelIndex()) const override;

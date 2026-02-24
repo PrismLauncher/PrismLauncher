@@ -63,7 +63,7 @@ class JavaListLoadTask : public Task {
 
    public:
     explicit JavaListLoadTask(JavaInstallList* vlist, bool onlyManagedVersions = false);
-    virtual ~JavaListLoadTask() = default;
+    ~JavaListLoadTask() override = default;
 
    protected:
     void executeTask() override;

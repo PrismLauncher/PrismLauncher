@@ -14,8 +14,8 @@ class IconLabel : public QWidget {
     /// Create a line separator. orientation is the orientation of the line.
     explicit IconLabel(QWidget* parent, QIcon icon, QSize size);
 
-    virtual QSize sizeHint() const;
-    virtual void paintEvent(QPaintEvent*);
+    QSize sizeHint() const override;
+    void paintEvent(QPaintEvent*) override;
 
     void setIcon(QIcon icon);
 

@@ -36,7 +36,7 @@ class AppearanceWidget : public QWidget {
 
    public:
     explicit AppearanceWidget(bool simple, QWidget* parent = nullptr);
-    virtual ~AppearanceWidget();
+    ~AppearanceWidget() override;
 
    public:
     void applySettings();

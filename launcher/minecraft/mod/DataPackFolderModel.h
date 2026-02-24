@@ -48,7 +48,7 @@ class DataPackFolderModel : public ResourceFolderModel {
 
     explicit DataPackFolderModel(const QString& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent = nullptr);
 
-    virtual QString id() const override { return "datapacks"; }
+    QString id() const override { return "datapacks"; }
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 

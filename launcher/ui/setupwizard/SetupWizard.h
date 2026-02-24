@@ -28,7 +28,7 @@ class SetupWizard : public QWizard {
 
    public: /* con/destructors */
     explicit SetupWizard(QWidget* parent = nullptr);
-    virtual ~SetupWizard();
+    ~SetupWizard() override;
 
     void changeEvent(QEvent* event) override;
     BaseWizardPage* getBasePage(int id);

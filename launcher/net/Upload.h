@@ -56,7 +56,7 @@ class Upload : public NetRequest {
     static std::pair<Upload::Ptr, QByteArray*> makeByteArray(QUrl url, QByteArray m_post_data);
 
    protected:
-    virtual QNetworkReply* getReply(QNetworkRequest&) override;
+    QNetworkReply* getReply(QNetworkRequest&) override;
     QByteArray m_post_data;
 };
 

@@ -47,7 +47,7 @@ class LanguagePage : public QWidget, public BasePage {
 
    public:
     explicit LanguagePage(QWidget* parent = nullptr);
-    virtual ~LanguagePage();
+    ~LanguagePage() override;
 
     QString displayName() const override { return tr("Language"); }
     QIcon icon() const override { return QIcon::fromTheme("language"); }

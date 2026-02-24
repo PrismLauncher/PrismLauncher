@@ -62,7 +62,7 @@ class AccessibleInstanceView : public QAccessibleTableInterface, public QAccessi
     using ChildCache = QHash<int, QAccessible::Id>;
     mutable ChildCache childToId;
 
-    virtual ~AccessibleInstanceView();
+    ~AccessibleInstanceView() override;
 
    private:
     inline int logicalIndex(const QModelIndex& index) const;

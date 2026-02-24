@@ -27,12 +27,12 @@ class SkinUpload : public Net::NetRequest {
 
     // Note this class takes ownership of the file.
     SkinUpload(QString path, QString variant);
-    virtual ~SkinUpload() = default;
+    ~SkinUpload() override = default;
 
     static SkinUpload::Ptr make(QString token, QString path, QString variant);
 
    protected:
-    virtual QNetworkReply* getReply(QNetworkRequest&) override;
+    QNetworkReply* getReply(QNetworkRequest&) override;
 
    private:
     QString m_path;

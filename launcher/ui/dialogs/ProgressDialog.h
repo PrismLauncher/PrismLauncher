@@ -57,7 +57,7 @@ class ProgressDialog : public QDialog {
 
    public:
     explicit ProgressDialog(QWidget* parent = nullptr);
-    ~ProgressDialog();
+    ~ProgressDialog() override;
 
     void updateSize(bool recenterParent = false);
 
@@ -82,8 +82,8 @@ class ProgressDialog : public QDialog {
     void on_skipButton_clicked(bool checked);
 
    protected:
-    virtual void keyPressEvent(QKeyEvent* e);
-    virtual void closeEvent(QCloseEvent* e);
+    void keyPressEvent(QKeyEvent* e) override;
+    void closeEvent(QCloseEvent* e) override;
 
    private:
     bool handleImmediateResult(QDialog::DialogCode& result);

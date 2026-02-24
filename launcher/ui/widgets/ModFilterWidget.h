@@ -92,7 +92,7 @@ class ModFilterWidget : public QTabWidget {
     };
 
     static std::unique_ptr<ModFilterWidget> create(MinecraftInstance* instance, bool extended);
-    virtual ~ModFilterWidget();
+    ~ModFilterWidget() override;
 
     auto getFilter() -> std::shared_ptr<Filter>;
     auto changed() const -> bool { return m_filter_changed; }

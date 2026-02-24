@@ -9,8 +9,8 @@ class LogModel : public QAbstractListModel {
    public:
     explicit LogModel(QObject* parent = nullptr);
 
-    int rowCount(const QModelIndex& parent = QModelIndex()) const;
-    QVariant data(const QModelIndex& index, int role) const;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
 
     void append(MessageLevel, QString line);
     void clear();

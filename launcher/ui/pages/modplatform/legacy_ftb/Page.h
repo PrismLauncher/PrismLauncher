@@ -61,7 +61,7 @@ class Page : public QWidget, public ModpackProviderBasePage {
 
    public:
     explicit Page(NewInstanceDialog* dialog, QWidget* parent = nullptr);
-    virtual ~Page();
+    ~Page() override;
     QString displayName() const override { return "FTB Legacy"; }
     QIcon icon() const override { return QIcon::fromTheme("ftb_logo"); }
     QString id() const override { return "legacy_ftb"; }
@@ -71,9 +71,9 @@ class Page : public QWidget, public ModpackProviderBasePage {
     void retranslate() override;
 
     /** Programatically set the term in the search bar. */
-    virtual void setSearchTerm(QString) override;
+    void setSearchTerm(QString) override;
     /** Get the current term in the search bar. */
-    virtual QString getSerachTerm() const override;
+    QString getSerachTerm() const override;
 
    private:
     void suggestCurrent();

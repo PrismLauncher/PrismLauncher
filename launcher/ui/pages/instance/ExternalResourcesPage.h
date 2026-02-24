@@ -21,14 +21,14 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
 
    public:
     explicit ExternalResourcesPage(BaseInstance* instance, ResourceFolderModel* model, QWidget* parent = nullptr);
-    virtual ~ExternalResourcesPage();
+    ~ExternalResourcesPage() override;
 
-    virtual QString displayName() const override = 0;
-    virtual QIcon icon() const override = 0;
-    virtual QString id() const override = 0;
-    virtual QString helpPage() const override = 0;
+    QString displayName() const override = 0;
+    QIcon icon() const override = 0;
+    QString id() const override = 0;
+    QString helpPage() const override = 0;
 
-    virtual bool shouldDisplay() const override = 0;
+    bool shouldDisplay() const override = 0;
     QString extraHeaderInfoString();
 
     void openedImpl() override;

@@ -43,7 +43,7 @@ class MSAStep : public AuthStep {
     Q_OBJECT
    public:
     explicit MSAStep(AccountData* data, bool silent = false);
-    virtual ~MSAStep() noexcept = default;
+    ~MSAStep() noexcept override = default;
 
     void perform() override;
 

@@ -933,7 +933,7 @@ class InstanceStaging : public Task {
         m_backoffTimer.setSingleShot(true);
     }
 
-    virtual ~InstanceStaging() = default;
+    ~InstanceStaging() override = default;
 
     // FIXME/TODO: add ability to abort during instance commit retries
     bool abort() override
@@ -946,7 +946,7 @@ class InstanceStaging : public Task {
     bool canAbort() const override { return (m_child && m_child->canAbort()); }
 
    protected:
-    virtual void executeTask() override
+    void executeTask() override
     {
         if (m_stagingPath.isNull()) {
             emitFailed(tr("Could not create staging folder"));

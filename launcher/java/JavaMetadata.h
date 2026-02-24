@@ -32,14 +32,14 @@ enum class DownloadType { Manifest, Archive, Unknown };
 
 class Metadata : public BaseVersion {
    public:
-    virtual QString descriptor() const override { return version.toString(); }
+    QString descriptor() const override { return version.toString(); }
 
-    virtual QString name() const override { return m_name; }
+    QString name() const override { return m_name; }
 
-    virtual QString typeString() const override { return vendor; }
+    QString typeString() const override { return vendor; }
 
-    virtual bool operator<(BaseVersion& a) const override;
-    virtual bool operator>(BaseVersion& a) const override;
+    bool operator<(BaseVersion& a) const override;
+    bool operator>(BaseVersion& a) const override;
     bool operator<(const Metadata& rhs) const;
     bool operator==(const Metadata& rhs) const;
     bool operator>(const Metadata& rhs) const;

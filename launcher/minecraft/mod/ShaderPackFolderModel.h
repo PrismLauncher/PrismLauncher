@@ -12,7 +12,7 @@ class ShaderPackFolderModel : public ResourceFolderModel {
         : ResourceFolderModel(dir, instance, is_indexed, create_dir, parent)
     {}
 
-    virtual QString id() const override { return "shaderpacks"; }
+    QString id() const override { return "shaderpacks"; }
 
     [[nodiscard]] Resource* createResource(const QFileInfo& info) override { return new ShaderPack(info); }
 
@@ -26,8 +26,8 @@ class ShaderPackFolderModel : public ResourceFolderModel {
     Task* createPreUpdateTask() override;
 
     // avoid watching twice
-    virtual bool startWatching() override { return ResourceFolderModel::startWatching({ m_dir.absolutePath() }); }
-    virtual bool stopWatching() override { return ResourceFolderModel::stopWatching({ m_dir.absolutePath() }); }
+    bool startWatching() override { return ResourceFolderModel::startWatching({ m_dir.absolutePath() }); }
+    bool stopWatching() override { return ResourceFolderModel::stopWatching({ m_dir.absolutePath() }); }
 
     RESOURCE_HELPERS(ShaderPack);
 

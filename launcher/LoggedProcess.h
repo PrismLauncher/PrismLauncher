@@ -50,7 +50,7 @@ class LoggedProcess : public QProcess {
 
    public:
     explicit LoggedProcess(QStringConverter::Encoding outputEncoding = QStringConverter::System, QObject* parent = nullptr);
-    virtual ~LoggedProcess();
+    ~LoggedProcess() override;
 
     State state() const;
     int exitCode() const;

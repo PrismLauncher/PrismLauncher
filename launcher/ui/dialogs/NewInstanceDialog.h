@@ -57,7 +57,7 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
                                const QString& url = QString(),
                                const QMap<QString, QString>& extra_info = {},
                                QWidget* parent = nullptr);
-    ~NewInstanceDialog();
+    ~NewInstanceDialog() override;
 
     void updateDialogState();
 

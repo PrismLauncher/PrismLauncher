@@ -16,7 +16,7 @@ class JProfiler : public BaseProfiler {
     void profilerFinished(int exit, QProcess::ExitStatus status);
 
    protected:
-    void beginProfilingImpl(LaunchTask* process);
+    void beginProfilingImpl(LaunchTask* process) override;
 
    private:
     int listeningPort = 0;

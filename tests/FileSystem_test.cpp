@@ -23,7 +23,7 @@ class LinkTask : public Task {
         m_lnk->debug(true);
     }
 
-    ~LinkTask() { delete m_lnk; }
+    ~LinkTask() override { delete m_lnk; }
 
     void matcher(Filter filter) { m_lnk->matcher(filter); }
 

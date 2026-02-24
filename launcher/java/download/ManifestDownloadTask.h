@@ -27,11 +27,11 @@ class ManifestDownloadTask : public Task {
     Q_OBJECT
    public:
     ManifestDownloadTask(QUrl url, QString final_path, QString checksumType = "", QString checksumHash = "");
-    virtual ~ManifestDownloadTask() = default;
+    ~ManifestDownloadTask() override = default;
 
     bool canAbort() const override { return true; }
     void executeTask() override;
-    virtual bool abort() override;
+    bool abort() override;
 
    private slots:
     void downloadJava(const QJsonDocument& doc);

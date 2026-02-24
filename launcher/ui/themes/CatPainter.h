@@ -27,7 +27,7 @@ class CatPainter : public QObject {
     Q_OBJECT
    public:
     CatPainter(const QString& path, QObject* parent = nullptr);
-    virtual ~CatPainter() = default;
+    ~CatPainter() override = default;
     void paint(QPainter*, const QRect&);
 
    signals:

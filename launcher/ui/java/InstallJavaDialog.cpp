@@ -71,7 +71,7 @@ class InstallJavaPage : public QWidget, public BasePage {
 
         QMetaObject::connectSlotsByName(this);
     }
-    ~InstallJavaPage()
+    ~InstallJavaPage() override
     {
         delete horizontalLayout;
         delete majorVersionSelect;

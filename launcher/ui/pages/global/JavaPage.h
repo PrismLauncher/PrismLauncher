@@ -53,7 +53,7 @@ class JavaPage : public QWidget, public BasePage {
 
    public:
     explicit JavaPage(QWidget* parent = nullptr);
-    ~JavaPage();
+    ~JavaPage() override;
 
     QString displayName() const override { return tr("Java"); }
     QIcon icon() const override { return QIcon::fromTheme("java"); }

@@ -25,7 +25,7 @@ class TranslationsModel : public QAbstractListModel {
     Q_OBJECT
    public:
     explicit TranslationsModel(QString path, QObject* parent = nullptr);
-    virtual ~TranslationsModel();
+    ~TranslationsModel() override;
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;

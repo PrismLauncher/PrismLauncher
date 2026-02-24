@@ -46,12 +46,12 @@ class FileIgnoreProxy : public QSortFilterProxyModel {
    public:
     FileIgnoreProxy(QString root, QObject* parent);
     // NOTE: Sadly, we have to do sorting ourselves.
-    bool lessThan(const QModelIndex& left, const QModelIndex& right) const;
+     bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 
-    virtual Qt::ItemFlags flags(const QModelIndex& index) const;
+     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
-    virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole);
+     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
     QString relPath(const QString& path) const;
 
@@ -77,8 +77,8 @@ class FileIgnoreProxy : public QSortFilterProxyModel {
     void saveBlockedPathsToFile(const QString& fileName);
 
    protected:
-    bool filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const;
-    bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const;
+    bool filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const override;
+    bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;
 
     bool ignoreFile(QFileInfo file) const;
 

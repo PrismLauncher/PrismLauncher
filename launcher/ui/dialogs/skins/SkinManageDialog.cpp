@@ -438,7 +438,7 @@ void SkinManageDialog::on_urlBtn_clicked()
 class WaitTask : public Task {
    public:
     WaitTask() : m_loop(), m_done(false) {};
-    virtual ~WaitTask() = default;
+    ~WaitTask() override = default;
 
    public slots:
     void quit()
@@ -448,7 +448,7 @@ class WaitTask : public Task {
     }
 
    protected:
-    virtual void executeTask()
+    void executeTask() override
     {
         if (!m_done)
             m_loop.exec();

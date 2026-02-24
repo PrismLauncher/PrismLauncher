@@ -52,7 +52,7 @@ class InstanceView : public QAbstractItemView {
 
    public:
     InstanceView(QWidget* parent = nullptr);
-    ~InstanceView();
+    ~InstanceView() override;
 
     void setModel(QAbstractItemModel* model) override;
 
@@ -62,31 +62,31 @@ class InstanceView : public QAbstractItemView {
     /// return geometry rectangle occupied by the specified model item
     QRect geometryRect(const QModelIndex& index) const;
     /// return visual rectangle occupied by the specified model item
-    virtual QRect visualRect(const QModelIndex& index) const override;
+    QRect visualRect(const QModelIndex& index) const override;
     /// get the model index at the specified visual point
-    virtual QModelIndex indexAt(const QPoint& point) const override;
+    QModelIndex indexAt(const QPoint& point) const override;
     QString groupNameAt(const QPoint& point);
     void setSelection(const QRect& rect, QItemSelectionModel::SelectionFlags commands) override;
 
-    virtual int horizontalOffset() const override;
-    virtual int verticalOffset() const override;
-    virtual void scrollContentsBy(int dx, int dy) override;
-    virtual void scrollTo(const QModelIndex& index, ScrollHint hint = EnsureVisible) override;
+    int horizontalOffset() const override;
+    int verticalOffset() const override;
+    void scrollContentsBy(int dx, int dy) override;
+    void scrollTo(const QModelIndex& index, ScrollHint hint = EnsureVisible) override;
 
-    virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override;
+    QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override;
 
-    virtual QRegion visualRegionForSelection(const QItemSelection& selection) const override;
+    QRegion visualRegionForSelection(const QItemSelection& selection) const override;
 
     int spacing() const { return m_spacing; };
     void setPaintCat(bool visible);
 
    public slots:
-    virtual void updateGeometries() override;
+    void updateGeometries() override;
 
    protected slots:
-    virtual void dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QList<int>& roles) override;
-    virtual void rowsInserted(const QModelIndex& parent, int start, int end) override;
-    virtual void rowsAboutToBeRemoved(const QModelIndex& parent, int start, int end) override;
+    void dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QList<int>& roles) override;
+    void rowsInserted(const QModelIndex& parent, int start, int end) override;
+    void rowsAboutToBeRemoved(const QModelIndex& parent, int start, int end) override;
     void modelReset();
     void rowsRemoved();
     void currentChanged(const QModelIndex& current, const QModelIndex& previous) override;

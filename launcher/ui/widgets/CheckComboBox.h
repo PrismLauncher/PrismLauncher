@@ -26,7 +26,7 @@ class CheckComboBox : public QComboBox {
 
    public:
     explicit CheckComboBox(QWidget* parent = nullptr);
-    virtual ~CheckComboBox() = default;
+    ~CheckComboBox() override = default;
 
     void hidePopup() override;
 

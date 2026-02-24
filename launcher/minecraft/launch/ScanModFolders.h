@@ -22,10 +22,10 @@ class ScanModFolders : public LaunchStep {
     Q_OBJECT
    public:
     explicit ScanModFolders(LaunchTask* parent) : LaunchStep(parent) {};
-    virtual ~ScanModFolders() = default;
+    ~ScanModFolders() override = default;
 
-    virtual void executeTask() override;
-    virtual bool canAbort() const override { return false; }
+    void executeTask() override;
+    bool canAbort() const override { return false; }
    private slots:
     void coreModsDone();
     void modsDone();

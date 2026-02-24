@@ -8,12 +8,12 @@ class InstanceCreationTask : public InstanceTask {
     Q_OBJECT
    public:
     InstanceCreationTask() = default;
-    virtual ~InstanceCreationTask() = default;
+    ~InstanceCreationTask() override = default;
 
     bool abort() override;
 
    protected:
-    void executeTask() final override;
+    void executeTask() final;
 
     /**
      * Tries to update an already existing instance.

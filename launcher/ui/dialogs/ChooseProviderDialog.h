@@ -28,7 +28,7 @@ class ChooseProviderDialog : public QDialog {
 
    public:
     explicit ChooseProviderDialog(QWidget* parent, bool single_choice = false, bool allow_skipping = true);
-    ~ChooseProviderDialog();
+    ~ChooseProviderDialog() override;
 
     auto getResponse() const -> Response { return m_response; }
 

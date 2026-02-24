@@ -35,8 +35,8 @@ class CheckComboModel : public QIdentityProxyModel {
    public:
     explicit CheckComboModel(QObject* parent = nullptr) : QIdentityProxyModel(parent) {}
 
-    virtual Qt::ItemFlags flags(const QModelIndex& index) const { return QIdentityProxyModel::flags(index) | Qt::ItemIsUserCheckable; }
-    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const
+    Qt::ItemFlags flags(const QModelIndex& index) const override { return QIdentityProxyModel::flags(index) | Qt::ItemIsUserCheckable; }
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
     {
         if (role == Qt::CheckStateRole) {
             auto txt = QIdentityProxyModel::data(index, Qt::DisplayRole).toString();
@@ -46,7 +46,7 @@ class CheckComboModel : public QIdentityProxyModel {
             return QIdentityProxyModel::data(index, Qt::DisplayRole);
         return {};
     }
-    virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole)
+    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override
     {
         if (role == Qt::CheckStateRole) {
             auto txt = QIdentityProxyModel::data(index, Qt::DisplayRole).toString();

@@ -15,7 +15,7 @@ class ComponentUpdateTask : public Task {
 
    public:
     explicit ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfile* list);
-    virtual ~ComponentUpdateTask();
+    ~ComponentUpdateTask() override;
 
     bool canAbort() const override;
     bool abort() override;

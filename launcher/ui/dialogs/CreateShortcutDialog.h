@@ -29,7 +29,7 @@ class CreateShortcutDialog : public QDialog {
 
    public:
     explicit CreateShortcutDialog(BaseInstance* instance, QWidget* parent = nullptr);
-    ~CreateShortcutDialog();
+    ~CreateShortcutDialog() override;
 
     void createShortcut();
 

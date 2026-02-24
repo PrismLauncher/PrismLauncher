@@ -28,10 +28,10 @@ namespace Net {
 class ApiHeaderProxy : public HeaderProxy {
    public:
     ApiHeaderProxy() : HeaderProxy() {}
-    virtual ~ApiHeaderProxy() = default;
+    ~ApiHeaderProxy() override = default;
 
    public:
-    virtual QList<HeaderPair> headers(const QNetworkRequest& request) const override
+    QList<HeaderPair> headers(const QNetworkRequest& request) const override
     {
         QList<HeaderPair> hdrs;
         if (APPLICATION->capabilities() & Application::SupportsFlame && request.url().host() == QUrl(BuildConfig.FLAME_BASE_URL).host()) {

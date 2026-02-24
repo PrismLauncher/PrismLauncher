@@ -51,7 +51,7 @@ class VersionFilterModel : public QSortFilterProxyModel {
         sort(0, Qt::DescendingOrder);
     }
 
-    bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
+    bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override
     {
         const auto& filters = m_parent->filters();
         const QString& search = m_parent->search();

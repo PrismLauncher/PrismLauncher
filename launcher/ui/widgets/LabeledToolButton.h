@@ -32,9 +32,9 @@ class LabeledToolButton : public QToolButton {
     QString text() const;
     void setText(const QString& text);
     void setIcon(QIcon icon);
-    virtual QSize sizeHint() const;
+    QSize sizeHint() const override;
 
    protected:
-    void resizeEvent(QResizeEvent* event);
+    void resizeEvent(QResizeEvent* event) override;
     void resetIcon();
 };

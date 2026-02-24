@@ -99,7 +99,7 @@ class FlameModPage : public ModPage {
     std::unique_ptr<ModFilterWidget> createFilterWidget() override;
 
    protected:
-    virtual void prepareProviderCategories() override;
+    void prepareProviderCategories() override;
 
    private:
     Task::Ptr m_categoriesTask;

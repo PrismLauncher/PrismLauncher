@@ -48,7 +48,7 @@ class TexturePackFolderModel : public ResourceFolderModel {
 
     explicit TexturePackFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent = nullptr);
 
-    virtual QString id() const override { return "texturepacks"; }
+    QString id() const override { return "texturepacks"; }
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 

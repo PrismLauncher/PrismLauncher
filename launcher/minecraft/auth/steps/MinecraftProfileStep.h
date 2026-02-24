@@ -10,7 +10,7 @@ class MinecraftProfileStep : public AuthStep {
 
    public:
     explicit MinecraftProfileStep(AccountData* data);
-    virtual ~MinecraftProfileStep() noexcept = default;
+    ~MinecraftProfileStep() noexcept override = default;
 
     void perform() override;
 

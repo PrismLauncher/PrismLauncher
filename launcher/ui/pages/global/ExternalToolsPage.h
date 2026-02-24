@@ -48,7 +48,7 @@ class ExternalToolsPage : public QWidget, public BasePage {
 
    public:
     explicit ExternalToolsPage(QWidget* parent = nullptr);
-    ~ExternalToolsPage();
+    ~ExternalToolsPage() override;
 
     QString displayName() const override { return tr("Tools"); }
     QIcon icon() const override
@@ -61,7 +61,7 @@ class ExternalToolsPage : public QWidget, public BasePage {
     }
     QString id() const override { return "external-tools"; }
     QString helpPage() const override { return "Tools"; }
-    virtual bool apply() override;
+    bool apply() override;
     void retranslate() override;
 
    private:

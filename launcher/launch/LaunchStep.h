@@ -25,7 +25,7 @@ class LaunchStep : public Task {
     Q_OBJECT
    public: /* methods */
     explicit LaunchStep(LaunchTask* parent);
-    virtual ~LaunchStep() = default;
+    ~LaunchStep() override = default;
 
    signals:
     void logLines(QStringList lines, MessageLevel level);

@@ -61,7 +61,7 @@ class VersionBasicModel : public QIdentityProxyModel {
    public:
     explicit VersionBasicModel(QObject* parent = nullptr) : QIdentityProxyModel(parent) {}
 
-    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
     {
         if (role == Qt::DisplayRole)
             return QIdentityProxyModel::data(index, BaseVersionList::VersionIdRole);

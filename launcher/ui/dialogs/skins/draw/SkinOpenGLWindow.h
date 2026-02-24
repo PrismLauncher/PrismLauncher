@@ -39,7 +39,7 @@ class SkinOpenGLWindow : public QOpenGLWindow, protected QOpenGLFunctions {
 
    public:
     SkinOpenGLWindow(SkinProvider* parent, QColor color);
-    virtual ~SkinOpenGLWindow();
+    ~SkinOpenGLWindow() override;
 
     void updateScene(SkinModel* skin);
     void updateCape(const QImage& cape);

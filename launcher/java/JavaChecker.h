@@ -31,7 +31,7 @@ class JavaChecker : public Task {
     void checkFinished(const Result& result);
 
    protected:
-    virtual void executeTask() override;
+    void executeTask() override;
 
    private:
     QProcessPtr process;

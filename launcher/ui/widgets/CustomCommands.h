@@ -46,7 +46,7 @@ class CustomCommands : public QWidget {
 
    public:
     explicit CustomCommands(QWidget* parent = nullptr);
-    virtual ~CustomCommands();
+    ~CustomCommands() override;
     void initialize(bool checkable, bool checked, const QString& prelaunch, const QString& wrapper, const QString& postexit);
 
     void retranslate();

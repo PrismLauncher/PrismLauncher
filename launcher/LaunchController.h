@@ -50,7 +50,7 @@ class LaunchController : public Task {
     void executeTask() override;
 
     LaunchController();
-    virtual ~LaunchController() = default;
+    ~LaunchController() override = default;
 
     void setInstance(BaseInstance* instance) { m_instance = instance; }
 

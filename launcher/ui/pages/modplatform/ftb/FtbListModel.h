@@ -40,7 +40,7 @@ class ListModel : public QAbstractListModel {
 
    public:
     ListModel(QObject* parent);
-    virtual ~ListModel();
+    ~ListModel() override;
 
     int rowCount(const QModelIndex& parent) const override;
     int columnCount(const QModelIndex& parent) const override;

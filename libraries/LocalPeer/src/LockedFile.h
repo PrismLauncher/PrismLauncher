@@ -51,9 +51,9 @@ class LockedFile : public QFile {
 
     LockedFile();
     LockedFile(const QString& name);
-    ~LockedFile();
+    ~LockedFile() override;
 
-    bool open(OpenMode mode);
+    bool open(OpenMode mode) override;
 
     bool lock(LockMode mode, bool block = true);
     bool unlock();

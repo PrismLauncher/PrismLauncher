@@ -21,6 +21,6 @@ class ModListView : public QTreeView {
     Q_OBJECT
    public:
     explicit ModListView(QWidget* parent = nullptr);
-    virtual void setModel(QAbstractItemModel* model);
+    void setModel(QAbstractItemModel* model) override;
     virtual void setResizeModes(const QList<QHeaderView::ResizeMode>& modes);
 };
