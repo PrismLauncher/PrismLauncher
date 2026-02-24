@@ -79,16 +79,15 @@ struct ModLicense {
         }
     }
 
-    ModLicense(QString  name_, QString  id_, QString  url_, QString  description_)
+    ModLicense(QString name_, QString id_, QString url_, QString description_)
         : name(std::move(name_)), id(std::move(id_)), url(std::move(url_)), description(std::move(description_))
     {}
 
-    ModLicense(const ModLicense& other)  = default;
+    ModLicense(const ModLicense& other) = default;
 
-    ModLicense& operator=(const ModLicense& other)
-    = default;
+    ModLicense& operator=(const ModLicense& other) = default;
 
-    ModLicense& operator=(const ModLicense&& other)
+    ModLicense& operator=(const ModLicense&& other) noexcept
     {
         this->name = other.name;
         this->id = other.id;
@@ -138,8 +137,8 @@ struct ModDetails {
 
     /** Metadata should be handled manually to properly set the mod status. */
     ModDetails(const ModDetails& other)
-         
-    = default;
+
+        = default;
 
     ModDetails& operator=(const ModDetails& other) = default;
 
