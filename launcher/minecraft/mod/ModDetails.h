@@ -98,7 +98,7 @@ struct ModLicense {
         return *this;
     }
 
-    bool isEmpty() { return this->name.isEmpty() && this->id.isEmpty() && this->url.isEmpty() && this->description.isEmpty(); }
+    bool isEmpty() const { return this->name.isEmpty() && this->id.isEmpty() && this->url.isEmpty() && this->description.isEmpty(); }
 };
 
 struct ModDetails {

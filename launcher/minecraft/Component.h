@@ -70,23 +70,23 @@ class Component : public QObject, public ProblemProvider {
     static bool isMoveable();
     bool isCustomizable();
     bool isRevertible();
-    bool isRemovable();
-    bool isCustom();
-    bool isVersionChangeable(bool wait = true);
-    bool isKnownModloader();
-    QStringList knownConflictingComponents();
+    bool isRemovable() const;
+    bool isCustom() const;
+    bool isVersionChangeable(bool wait = true) const;
+    bool isKnownModloader() const;
+    QStringList knownConflictingComponents() const;
 
     // DEPRECATED: explicit numeric order values, used for loading old non-component config. TODO: refactor and move to migration code
     void setOrder(int order);
-    int getOrder();
+    int getOrder() const;
 
-    QString getID();
-    QString getName();
-    QString getVersion();
-    std::shared_ptr<Meta::Version> getMeta();
+    QString getID() const;
+    QString getName() const;
+    QString getVersion() const;
+    std::shared_ptr<Meta::Version> getMeta() const;
     QDateTime getReleaseDateTime();
 
-    QString getFilename();
+    QString getFilename() const;
 
     std::shared_ptr<class VersionFile> getVersionFile() const;
     std::shared_ptr<class Meta::VersionList> getVersionList() const;

@@ -50,7 +50,7 @@ class MetaEntry {
     MetaEntry() = default;
 
    public:
-    auto isStale() -> bool { return m_stale; }
+    auto isStale() const -> bool { return m_stale; }
     void setStale(bool stale) { m_stale = stale; }
 
     auto getFullPath() -> QString;
@@ -69,13 +69,13 @@ class MetaEntry {
     void makeEternal(bool eternal) { m_is_eternal = eternal; }
     bool isEternal() const { return m_is_eternal; }
 
-    auto getCurrentAge() -> qint64 { return m_current_age; }
+    auto getCurrentAge() const -> qint64 { return m_current_age; }
     void setCurrentAge(qint64 age) { m_current_age = age; }
 
-    auto getMaximumAge() -> qint64 { return m_max_age; }
+    auto getMaximumAge() const -> qint64 { return m_max_age; }
     void setMaximumAge(qint64 age) { m_max_age = age; }
 
-    bool isExpired(qint64 offset) { return !m_is_eternal && (m_current_age >= m_max_age - offset); }
+    bool isExpired(qint64 offset) const { return !m_is_eternal && (m_current_age >= m_max_age - offset); }
 
    protected:
     QString m_baseId;

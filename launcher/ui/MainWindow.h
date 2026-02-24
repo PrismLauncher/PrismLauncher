@@ -192,7 +192,7 @@ class MainWindow : public QMainWindow {
 
     void selectionBad();
 
-    void startTask(Task* task);
+    void startTask(Task* task) const;
 
     void defaultAccountChanged();
 

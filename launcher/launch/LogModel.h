@@ -16,15 +16,15 @@ class LogModel : public QAbstractListModel {
     void clear();
 
     void suspend(bool suspend);
-    bool suspended();
+    bool suspended() const;
 
     QString toPlainText();
 
-    int getMaxLines();
+    int getMaxLines() const;
     void setMaxLines(int maxLines);
     void setStopOnOverflow(bool stop);
     void setOverflowMessage(const QString& overflowMessage);
-    bool isOverFlow();
+    bool isOverFlow() const;
 
     void setLineWrap(bool state);
     bool wrapLines() const;

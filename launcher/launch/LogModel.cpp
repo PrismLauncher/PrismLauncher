@@ -64,7 +64,7 @@ void LogModel::suspend(bool suspend)
     m_suspended = suspend;
 }
 
-bool LogModel::suspended()
+bool LogModel::suspended() const
 {
     return m_suspended;
 }
@@ -125,7 +125,7 @@ void LogModel::setMaxLines(int maxLines)
     m_maxLines = maxLines;
 }
 
-int LogModel::getMaxLines()
+int LogModel::getMaxLines() const
 {
     return m_maxLines;
 }
@@ -164,7 +164,7 @@ bool LogModel::colorLines() const
     return m_colorLines;
 }
 
-bool LogModel::isOverFlow()
+bool LogModel::isOverFlow() const
 {
     return m_numLines >= m_maxLines && m_stopOnOverflow;
 }

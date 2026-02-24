@@ -306,12 +306,12 @@ QUrl AssetObject::getUrl()
     return resourceURL + getRelPath();
 }
 
-QString AssetObject::getRelPath()
+QString AssetObject::getRelPath() const
 {
     return hash.left(2) + "/" + hash;
 }
 
-NetJob::Ptr AssetsIndex::getDownloadJob()
+NetJob::Ptr AssetsIndex::getDownloadJob() const
 {
     auto job = makeShared<NetJob>(QObject::tr("Assets for %1").arg(id), APPLICATION->network());
     for (auto& object : objects.values()) {

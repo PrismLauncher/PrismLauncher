@@ -46,7 +46,7 @@ class IconPickerDialog : public QDialog {
     void activated(QModelIndex);
     void delayed_scroll(QModelIndex);
     void addNewIcon();
-    void removeSelectedIcon();
-    void openFolder();
+    void removeSelectedIcon() const;
+    void openFolder() const;
     void filterIcons(const QString& text);
 };

@@ -78,7 +78,7 @@ Component::Component(PackProfile* parent, const QString& uid, std::shared_ptr<Ve
     m_loaded = true;
 }
 
-std::shared_ptr<Meta::Version> Component::getMeta()
+std::shared_ptr<Meta::Version> Component::getMeta() const
 {
     return m_metaVersion;
 }
@@ -114,7 +114,7 @@ std::shared_ptr<class Meta::VersionList> Component::getVersionList() const
     return nullptr;
 }
 
-int Component::getOrder()
+int Component::getOrder() const
 {
     if (m_orderOverride) {
         return m_order;
@@ -133,12 +133,12 @@ void Component::setOrder(int order)
     m_order = order;
 }
 
-QString Component::getID()
+QString Component::getID() const
 {
     return m_uid;
 }
 
-QString Component::getName()
+QString Component::getName() const
 {
     if (!m_cachedName.isEmpty()) {
         return m_cachedName;
@@ -146,12 +146,12 @@ QString Component::getName()
     return m_uid;
 }
 
-QString Component::getVersion()
+QString Component::getVersion() const
 {
     return m_cachedVersion;
 }
 
-QString Component::getFilename()
+QString Component::getFilename() const
 {
     return m_parent->patchFilePathForUid(m_uid);
 }
@@ -193,7 +193,7 @@ bool Component::setEnabled(bool state)
     return false;
 }
 
-bool Component::isCustom()
+bool Component::isCustom() const
 {
     return m_file != nullptr;
 }
@@ -203,7 +203,7 @@ bool Component::isCustomizable()
     return m_metaVersion && getVersionFile();
 }
 
-bool Component::isRemovable()
+bool Component::isRemovable() const
 {
     return !m_important;
 }
@@ -224,7 +224,7 @@ bool Component::isMoveable()
     return true;
 }
 
-bool Component::isVersionChangeable(bool wait)
+bool Component::isVersionChangeable(bool wait) const
 {
     auto list = getVersionList();
     if (list) {
@@ -236,13 +236,13 @@ bool Component::isVersionChangeable(bool wait)
     return false;
 }
 
-bool Component::isKnownModloader()
+bool Component::isKnownModloader() const
 {
     auto iter = KNOWN_MODLOADERS.find(m_uid);
     return iter != KNOWN_MODLOADERS.cend();
 }
 
-QStringList Component::knownConflictingComponents()
+QStringList Component::knownConflictingComponents() const
 {
     auto iter = KNOWN_MODLOADERS.find(m_uid);
     if (iter != KNOWN_MODLOADERS.cend()) {

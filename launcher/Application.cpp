@@ -1612,7 +1612,7 @@ bool Application::shouldExitNow() const
     return m_runningInstances == 0 && m_openWindows == 0;
 }
 
-bool Application::updatesAreAllowed()
+bool Application::updatesAreAllowed() const
 {
     return m_runningInstances == 0;
 }

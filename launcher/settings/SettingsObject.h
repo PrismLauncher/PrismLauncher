@@ -124,7 +124,7 @@ class SettingsObject : public QObject {
      * \return The setting's value as a QVariant.
      * If no setting with the given ID exists, returns an invalid QVariant.
      */
-    QVariant get(const QString& id);
+    QVariant get(const QString& id) const;
 
 #ifdef Q_OS_MACOS
     /*!
@@ -153,7 +153,7 @@ class SettingsObject : public QObject {
      * \param value The new value of the setting.
      * \return True if successful, false if it failed.
      */
-    bool set(const QString& id, QVariant value);
+    bool set(const QString& id, QVariant value) const;
 
     /*!
      * \brief Reverts the setting with the given ID to default.
@@ -219,7 +219,7 @@ class SettingsObject : public QObject {
      * \brief Connects the necessary signals to the given Setting.
      * \param setting The setting to connect.
      */
-    void connectSignals(const Setting& setting);
+    void connectSignals(const Setting& setting) const;
 
     /*!
      * \brief Function used by Setting objects to get their values from the SettingsObject.

@@ -1663,7 +1663,7 @@ void MainWindow::taskEnd()
     sender->deleteLater();
 }
 
-void MainWindow::startTask(Task* task)
+void MainWindow::startTask(Task* task) const
 {
     connect(task, &Task::succeeded, this, &MainWindow::taskEnd);
     connect(task, &Task::failed, this, &MainWindow::taskEnd);
