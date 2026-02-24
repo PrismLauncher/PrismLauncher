@@ -1001,14 +1001,14 @@ class InstanceStaging : public Task {
     void childFailed(const QString& reason)
     {
         m_backoffTimer.stop();
-        m_parent->destroyStagingPath(m_stagingPath);
+        InstanceList::destroyStagingPath(m_stagingPath);
         emitFailed(reason);
     }
 
     void childAborted()
     {
         m_backoffTimer.stop();
-        m_parent->destroyStagingPath(m_stagingPath);
+        InstanceList::destroyStagingPath(m_stagingPath);
         emitAborted();
     }
 

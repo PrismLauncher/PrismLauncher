@@ -415,7 +415,7 @@ QList<QString> JavaUtils::FindJavaPaths()
 QList<QString> JavaUtils::FindJavaPaths()
 {
     QList<QString> javas;
-    javas.append(this->GetDefaultJava()->path);
+    javas.append(JavaUtils::GetDefaultJava()->path);
     auto scanJavaDir = [&javas](
                            const QString& dirPath,
                            const std::function<bool(const QFileInfo&)>& filter = [](const QFileInfo&) { return true; }) {

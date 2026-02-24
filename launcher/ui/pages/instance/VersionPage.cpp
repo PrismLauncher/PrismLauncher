@@ -240,8 +240,8 @@ void VersionPage::updateButtons(int row)
     }
     auto patch = m_profile->getComponent(row);
     ui->actionRemove->setEnabled(patch && patch->isRemovable());
-    ui->actionMove_down->setEnabled(patch && patch->isMoveable());
-    ui->actionMove_up->setEnabled(patch && patch->isMoveable());
+    ui->actionMove_down->setEnabled(patch && Component::isMoveable());
+    ui->actionMove_up->setEnabled(patch && Component::isMoveable());
     ui->actionChange_version->setEnabled(patch && patch->isVersionChangeable(false));
     ui->actionEdit->setEnabled(patch && patch->isCustom());
     ui->actionCustomize->setEnabled(patch && patch->isCustomizable());

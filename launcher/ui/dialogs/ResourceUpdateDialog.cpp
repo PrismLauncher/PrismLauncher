@@ -236,7 +236,7 @@ void ResourceUpdateDialog::checkCandidates()
             for (const auto& dep : depTask->getDependecies()) {
                 auto changelog = dep->version.changelog;
                 if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME) {
-                    changelog = api.getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
+                    changelog = FlameAPI::getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
                 }
                 auto download_task = makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_resourceModel);
                 auto extraInfo = dependencyExtraInfo.value(dep->version.addonId.toString());

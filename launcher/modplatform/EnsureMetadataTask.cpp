@@ -421,7 +421,7 @@ Task::Ptr EnsureMetadataTask::flameVersionsTask()
 Task::Ptr EnsureMetadataTask::flameProjectsTask()
 {
     QHash<QString, QString> addonIds;
-    for (auto const& hash : m_resources.keys()) {
+    for (const auto& hash : m_resources.keys()) {
         if (m_tempVersions.contains(hash)) {
             auto data = m_tempVersions.find(hash).value();
 

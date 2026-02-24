@@ -796,7 +796,7 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, Mine
         tokenMapping["auth_access_token"] = session->access_token;
         tokenMapping["auth_player_name"] = session->player_name;
         tokenMapping["auth_uuid"] = session->uuid;
-        tokenMapping["user_properties"] = session->serializeUserProperties();
+        tokenMapping["user_properties"] = AuthSession::serializeUserProperties();
         tokenMapping["user_type"] = session->user_type;
 
         if (session->launchMode == LaunchMode::Demo) {

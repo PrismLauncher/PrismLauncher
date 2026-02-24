@@ -650,7 +650,7 @@ void PackProfile::move(const int index, const MoveDirection direction)
     auto from = getComponent(index);
     auto to = getComponent(theirIndex);
 
-    if (!from || !to || !to->isMoveable() || !from->isMoveable()) {
+    if (!from || !to || !Component::isMoveable() || !Component::isMoveable()) {
         return;
     }
     beginMoveRows(QModelIndex(), index, index, QModelIndex(), togap);

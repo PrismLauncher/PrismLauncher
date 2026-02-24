@@ -56,7 +56,7 @@ ModpackListModel::ModpackListModel(ModrinthPage* parent) : QAbstractListModel(pa
 
 auto ModpackListModel::debugName() const -> QString
 {
-    return m_parent->debugName();
+    return ModrinthPage::debugName();
 }
 
 /******** Make data requests ********/
@@ -239,7 +239,7 @@ void ModpackListModel::searchWithTerm(const QString& term,
 void ModpackListModel::getLogo(const QString& logo, const QString& logoUrl, const LogoCallback& callback)
 {
     if (m_logoMap.contains(logo)) {
-        callback(APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo))->getFullPath());
+        callback(APPLICATION->metacache()->resolveEntry(ModrinthPage::metaEntryBase(), QString("logos/%1").arg(logo))->getFullPath());
     } else {
         requestLogo(logo, logoUrl);
     }
@@ -251,8 +251,8 @@ void ModpackListModel::requestLogo(const QString& logo, const QString& url)
         return;
     }
 
-    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo));
-    auto job = new NetJob(QString("%1 Icon Download %2").arg(m_parent->debugName()).arg(logo), APPLICATION->network());
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry(ModrinthPage::metaEntryBase(), QString("logos/%1").arg(logo));
+    auto job = new NetJob(QString("%1 Icon Download %2").arg(ModrinthPage::debugName()).arg(logo), APPLICATION->network());
     job->setAskRetry(false);
     job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 

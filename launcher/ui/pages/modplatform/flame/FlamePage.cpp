@@ -308,7 +308,7 @@ void FlamePage::updateUi()
     }
 
     text += "<hr>";
-    text += api.getModDescription(m_current->addonId.toInt()).toUtf8();
+    text += FlameAPI::getModDescription(m_current->addonId.toInt()).toUtf8();
 
     m_ui->packDescription->setHtml(StringUtils::htmlListPatch(text + m_current->description));
     m_ui->packDescription->flush();

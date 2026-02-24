@@ -59,7 +59,7 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     if (obj.contains("author")) {
         ModPlatform::ModpackAuthor modAuthor;
         modAuthor.name = obj["author"].toString();
-        modAuthor.url = api.getAuthorURL(modAuthor.name);
+        modAuthor.url = ModrinthAPI::getAuthorURL(modAuthor.name);
         pack.authors = { modAuthor };
     }
 

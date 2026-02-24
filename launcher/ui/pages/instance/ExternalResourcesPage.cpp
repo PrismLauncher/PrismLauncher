@@ -54,7 +54,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, ResourceFol
 
     ui->actionsToolbar->insertSpacer(ui->actionViewFolder);
 
-    m_filterModel = model->createFilterProxyModel(this);
+    m_filterModel = ResourceFolderModel::createFilterProxyModel(this);
     m_filterModel->setDynamicSortFilter(true);
     m_filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     m_filterModel->setSortCaseSensitivity(Qt::CaseInsensitive);

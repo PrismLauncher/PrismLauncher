@@ -103,14 +103,14 @@ void DataPack::setImage(const QImage& new_image) const
     Q_ASSERT(!new_image.isNull());
 
     if (m_pack_image_cache_key.key.isValid()) {
-        PixmapCache::instance().remove(m_pack_image_cache_key.key);
+        PixmapCache::remove(m_pack_image_cache_key.key);
     }
 
     // scale the image to avoid flooding the pixmapcache
     auto pixmap =
         QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
 
-    m_pack_image_cache_key.key = PixmapCache::instance().insert(pixmap);
+    m_pack_image_cache_key.key = PixmapCache::insert(pixmap);
     m_pack_image_cache_key.was_ever_used = true;
 
     // This can happen if the pixmap is too big to fit in the cache :c
@@ -123,7 +123,7 @@ void DataPack::setImage(const QImage& new_image) const
 QPixmap DataPack::image(QSize size, Qt::AspectRatioMode mode) const
 {
     QPixmap cached_image;
-    if (PixmapCache::instance().find(m_pack_image_cache_key.key, &cached_image)) {
+    if (PixmapCache::find(m_pack_image_cache_key.key, &cached_image)) {
         if (size.isNull()) {
             return cached_image;
         }

@@ -362,7 +362,7 @@ void PrismExternalUpdater::performUpdate(const QString& version_tag)
         args.append("--pre-release");
     }
 
-    auto result = proc.startDetached(priv->appDir.absoluteFilePath(exe_name), args);
+    auto result = QProcess::startDetached(priv->appDir.absoluteFilePath(exe_name), args);
     if (!result) {
         qDebug() << "Failed to start updater:" << proc.error() << proc.errorString();
     }
