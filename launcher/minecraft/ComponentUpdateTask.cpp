@@ -42,7 +42,7 @@
 /*
  * TODO: This task launches multiple other tasks. As such it should be converted to a ConcurrentTask
  */
-ComponentUpdateTask::ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfile* list) : Task()
+ComponentUpdateTask::ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfile* list)  
 {
     d = std::make_unique<ComponentUpdateTaskData>();
     d->m_profile = list;

@@ -41,10 +41,10 @@
 #include <utility>
 
 struct ModLicense {
-    QString name = {};
-    QString id = {};
-    QString url = {};
-    QString description = {};
+    QString name;
+    QString id;
+    QString url;
+    QString description;
 
     ModLicense() = default;
 
@@ -103,36 +103,36 @@ struct ModLicense {
 
 struct ModDetails {
     /* Mod ID as defined in the ModLoader-specific metadata */
-    QString mod_id = {};
+    QString mod_id;
 
     /* Human-readable name */
-    QString name = {};
+    QString name;
 
     /* Human-readable mod version */
-    QString version = {};
+    QString version;
 
     /* Human-readable minecraft version */
-    QString mcversion = {};
+    QString mcversion;
 
     /* URL for mod's home page */
-    QString homeurl = {};
+    QString homeurl;
 
     /* Human-readable description */
-    QString description = {};
+    QString description;
 
     /* List of the author's names */
-    QStringList authors = {};
+    QStringList authors;
 
     /* Issue Tracker URL */
-    QString issue_tracker = {};
+    QString issue_tracker;
 
     /* License */
-    QList<ModLicense> licenses = {};
+    QList<ModLicense> licenses;
 
     /* Path of mod logo */
-    QString icon_file = {};
+    QString icon_file;
 
-    QStringList dependencies = {};
+    QStringList dependencies;
 
     ModDetails() = default;
 

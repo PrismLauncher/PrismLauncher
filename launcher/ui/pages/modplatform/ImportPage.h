@@ -73,5 +73,5 @@ class ImportPage : public QWidget, public BasePage {
    private:
     Ui::ImportPage* ui = nullptr;
     NewInstanceDialog* dialog = nullptr;
-    QMap<QString, QString> m_extra_info = {};
+    QMap<QString, QString> m_extra_info;
 };

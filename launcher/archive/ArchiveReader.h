@@ -68,6 +68,6 @@ class ArchiveReader {
     QString m_archivePath;
     size_t m_blockSize = 10240;
 
-    QStringList m_fileNames = {};
+    QStringList m_fileNames;
 };
 }  // namespace MMCZip

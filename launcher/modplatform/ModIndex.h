@@ -106,13 +106,13 @@ struct IndexedVersion {
     QVariant addonId;
     QVariant fileId;
     QString version;
-    QString version_number = {};
+    QString version_number;
     IndexedVersionType version_type;
     QStringList mcVersion;
     QString downloadUrl;
     QString date;
     QString fileName;
-    ModLoaderTypes loaders = {};
+    ModLoaderTypes loaders;
     QString hash_type;
     QString hash;
     bool is_preferred = true;

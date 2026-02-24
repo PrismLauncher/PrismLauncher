@@ -35,25 +35,25 @@ class V1 {
    public:
     // can also represent other resources beside loader mods - but this is what packwiz calls it
     struct Mod {
-        QString slug{};
-        QString name{};
-        QString filename{};
+        QString slug;
+        QString name;
+        QString filename;
         ModPlatform::Side side{ ModPlatform::Side::UniversalSide };
         ModPlatform::ModLoaderTypes loaders;
         QStringList mcVersions;
         ModPlatform::IndexedVersionType releaseType;
 
         // [download]
-        QString mode{};
-        QUrl url{};
-        QString hash_format{};
-        QString hash{};
+        QString mode;
+        QUrl url;
+        QString hash_format;
+        QString hash;
 
         // [update]
         ModPlatform::ResourceProvider provider{};
-        QVariant file_id{};
-        QVariant project_id{};
-        QString version_number{};
+        QVariant file_id;
+        QVariant project_id;
+        QString version_number;
 
         QList<ModPlatform::Dependency> dependencies;
 

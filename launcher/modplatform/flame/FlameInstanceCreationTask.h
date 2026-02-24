@@ -57,7 +57,7 @@ class FlameCreationTask final : public InstanceCreationTask {
                       QString id,
                       QString version_id,
                       QString original_instance_id = {})
-        : InstanceCreationTask(), m_parent(parent), m_managedId(std::move(id)), m_managedVersionId(std::move(version_id))
+        :  m_parent(parent), m_managedId(std::move(id)), m_managedVersionId(std::move(version_id))
     {
         setStagingPath(staging_path);
         setParentSettings(global_settings);

@@ -49,7 +49,7 @@
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "modplatform/ModIndex.h"
 
-Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
+Mod::Mod(const QFileInfo& file) : Resource(file) 
 {
     m_enabled = (file.suffix() != "disabled");
 }

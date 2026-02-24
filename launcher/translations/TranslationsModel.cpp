@@ -139,9 +139,9 @@ struct Language {
     QLocale locale;
     bool updated;
 
-    QString file_name = QString();
+    QString file_name;
     std::size_t file_size = 0;
-    QString file_sha1 = QString();
+    QString file_sha1;
 
     unsigned translated = 0;
     unsigned untranslated = 0;
