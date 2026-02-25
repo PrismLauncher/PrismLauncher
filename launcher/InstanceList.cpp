@@ -565,7 +565,7 @@ InstanceList::InstListError InstanceList::loadList()
 void InstanceList::updateTotalPlayTime()
 {
     totalPlayTime = 0;
-    for (auto const& itr : m_instances) {
+    for (const auto& itr : m_instances) {
         totalPlayTime += itr->totalTimePlayed();
     }
 }
@@ -1033,9 +1033,9 @@ QString InstanceList::getStagedInstancePath()
 }
 
 bool InstanceList::commitStagedInstance(const QString& path,
-                                        InstanceName const& instanceName,
+                                        const InstanceName& instanceName,
                                         QString groupName,
-                                        InstanceTask const& commiting)
+                                        const InstanceTask& commiting)
 {
     if (groupName.isEmpty() && !groupName.isNull())
         groupName = QString();
