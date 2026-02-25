@@ -10,7 +10,6 @@ Checks:
   -cppcoreguidelines-pro-type-static-cast-downcast,
   -modernize-use-nodiscard,
   -modernize-use-trailing-return-type,
-  -performance-unnecessary-value-param,
   -portability-avoid-pragma-once,
   -readability-avoid-unconditional-preprocessor-if,
   -readability-function-cognitive-complexity,
