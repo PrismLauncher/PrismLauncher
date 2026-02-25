@@ -287,6 +287,8 @@ class ServersModel : public QAbstractListModel {
                     return tr("Address");
                 case 2:
                     return tr("Online");
+                default:
+                    break;
             }
         }
 
@@ -327,8 +329,8 @@ class ServersModel : public QAbstractListModel {
                     case 1:
                         return m_servers[row].m_address;
                     case 2:
-                        if (m_servers[row].m_currentPlayers) {
-                            return *m_servers[row].m_currentPlayers;
+                        if (m_servers[row].m_currentPlayers.has_value()) {
+                            return m_servers[row].m_currentPlayers.value();
                         } else {
                             return "...";
                         }
@@ -636,17 +638,13 @@ void ServersPage::currentChanged(const QModelIndex& current, [[maybe_unused]] co
 // WARNING: this is here because currentChanged is not accurate when removing rows. the current item needs to be fixed up after removal.
 void ServersPage::rowsRemoved([[maybe_unused]] const QModelIndex& parent, int first, int last)
 {
-    if (currentServer < first) {
-        // current was before the removal
-        return;
-    } else if (currentServer >= first && currentServer <= last) {
-        // current got removed...
-        return;
-    } else {
+    if ((currentServer >= first) && (currentServer < first || currentServer > last)) {
         // current was past the removal
         int count = last - first + 1;
         currentServer -= count;
     }
+    // current was before the removal or
+    // current got removed...
 }
 
 void ServersPage::nameEdited(const QString& name)
@@ -695,7 +693,7 @@ void ServersPage::openedImpl()
 {
     m_model->observe();
 
-    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
+    const auto setting_name = QString("WideBarVisibility_%1").arg(id());
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
     ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));

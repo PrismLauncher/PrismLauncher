@@ -159,7 +159,7 @@ Version::Ptr VersionList::getVersion(const QString& version)
 bool VersionList::hasVersion(QString version) const
 {
     auto ver = std::find_if(m_versions.constBegin(), m_versions.constEnd(),
-                            [version](Meta::Version::Ptr const& a) { return a->version() == version; });
+                            [version](const Meta::Version::Ptr& a) { return a->version() == version; });
     return (ver != m_versions.constEnd());
 }
 
@@ -203,12 +203,14 @@ void VersionList::clearExternalRecommends()
 }
 
 // FIXME: this is dumb, we have 'recommended' as part of the metadata already...
-static const Meta::Version::Ptr& getBetterVersion(const Meta::Version::Ptr& a, const Meta::Version::Ptr& b)
+static Meta::Version::Ptr getBetterVersion(Meta::Version::Ptr a, Meta::Version::Ptr b)
 {
-    if (!a)
+    if (!a) {
         return b;
-    if (!b)
+    }
+    if (!b) {
         return a;
+    }
     if (a->type() == b->type()) {
         // newer of same type wins
         return (a->rawTime() > b->rawTime() ? a : b);

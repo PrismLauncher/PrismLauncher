@@ -431,8 +431,8 @@ int64_t loadSeed(QByteArray data)
     try {
         return read_long(val, "seed").value_or(0);
     } catch (const std::out_of_range&) {
+        return 0;
     }
-    return 0;
 }
 
 void World::loadFromLevelDat(QByteArray data)
@@ -470,6 +470,7 @@ void World::loadFromLevelDat(QByteArray data)
         auto& WorldGen_val = val.at("WorldGenSettings");
         randomSeed = read_long(WorldGen_val, "seed");
     } catch (const std::out_of_range&) {
+        qDebug() << "seed not found";
     }
     if (!randomSeed) {
         randomSeed = read_long(val, "RandomSeed");

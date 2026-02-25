@@ -275,7 +275,7 @@ void MinecraftSettingsWidget::loadSettings()
             m_ui->ornithe->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::Ornithe)));
             m_ui->rift->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::Rift)));
         } else {
-            auto instLoaders = m_instance->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
+            auto instLoaders = m_instance->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderType::None);
 
             m_ui->neoForge->setChecked(instLoaders & ModPlatform::NeoForge);
             m_ui->forge->setChecked(instLoaders & ModPlatform::Forge);

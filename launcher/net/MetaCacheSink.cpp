@@ -46,7 +46,7 @@ namespace Net {
 /** Maximum time to hold a cache entry
  *  = 1 week in seconds
  */
-#define MAX_TIME_TO_EXPIRE 1 * 7 * 24 * 60 * 60
+#define MAX_TIME_TO_EXPIRE (1 * 7 * 24 * 60 * 60)
 
 MetaCacheSink::MetaCacheSink(MetaEntryPtr entry, ChecksumValidator* md5sum, bool is_eternal)
     : Net::FileSink(entry->getFullPath()), m_entry(entry), m_md5Node(md5sum), m_is_eternal(is_eternal)
@@ -109,7 +109,7 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply& reply)
             qint64 max_age = QDateTime::fromString(expires_header).toSecsSinceEpoch() - QDateTime::currentSecsSinceEpoch();
             m_entry->setMaximumAge(max_age);
         } else {
-            m_entry->setMaximumAge(MAX_TIME_TO_EXPIRE);
+            m_entry->setMaximumAge(static_cast<qint64>(MAX_TIME_TO_EXPIRE));
         }
 
         if (reply.hasRawHeader("Age")) {

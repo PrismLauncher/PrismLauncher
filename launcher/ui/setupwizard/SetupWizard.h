@@ -17,10 +17,6 @@
 
 #include <QWizard>
 
-namespace Ui {
-class SetupWizard;
-}
-
 class BaseWizardPage;
 
 class SetupWizard : public QWizard {

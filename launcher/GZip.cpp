@@ -46,7 +46,7 @@ bool GZip::unzip(const QByteArray& compressedBytes, QByteArray& uncompressedByte
         return true;
     }
 
-    unsigned uncompLength = compressedBytes.size();
+    auto uncompLength = compressedBytes.size();
     uncompressedBytes.clear();
     uncompressedBytes.resize(uncompLength);
 
@@ -65,8 +65,8 @@ bool GZip::unzip(const QByteArray& compressedBytes, QByteArray& uncompressedByte
 
     while (!done) {
         // If our output buffer is too small
-        if (strm.total_out >= uncompLength) {
-            uncompressedBytes.resize(uncompLength * 2);
+        if (uncompLength >= 0 && strm.total_out >= static_cast<uLong>(uncompLength)) {
+            uncompressedBytes.resize(static_cast<qsizetype>(uncompLength * 2));
             uncompLength *= 2;
         }
 
@@ -178,6 +178,8 @@ int inf(QFile* source, std::function<bool(const QByteArray&)> handleBlock)
                 case Z_MEM_ERROR:
                     (void)inflateEnd(&strm);
                     return ret;
+                default:
+                    break;
             }
             have = CHUNK - strm.avail_out;
             if (!handleBlock(QByteArray(reinterpret_cast<const char*>(out), have))) {
@@ -208,6 +210,8 @@ QString zerr(int ret)
             return QObject::tr("out of memory");
         case Z_VERSION_ERROR:
             return QObject::tr("zlib version mismatch!");
+        default:
+            break;
     }
     return {};
 }

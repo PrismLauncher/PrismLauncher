@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QtConcurrentRun>
+#include <cstddef>
 
 #include <MurmurHash2.h>
 
@@ -104,7 +105,7 @@ QString hash(QIODevice* device, Algorithm type)
         case Algorithm::Murmur2: {  // CF-specific
             auto should_filter_out = [](char c) { return (c == 9 || c == 10 || c == 13 || c == 32); };
             auto reader = std::make_unique<QIODeviceReader>(device);
-            auto result = QString::number(Murmur2::hash(reader.get(), 4 * MiB, should_filter_out));
+            auto result = QString::number(Murmur2::hash(reader.get(), static_cast<std::size_t>(4 * MiB), should_filter_out));
             device->close();
             return result;
         }

@@ -61,13 +61,10 @@ class UrlValidator : public QValidator {
     State validate(QString& in, [[maybe_unused]] int& pos) const
     {
         const QUrl url(in);
-        if (url.isValid() && !url.isRelative() && !url.isEmpty()) {
+        if ((url.isValid() && !url.isRelative() && !url.isEmpty()) || (QFile::exists(in))) {
             return Acceptable;
-        } else if (QFile::exists(in)) {
-            return Acceptable;
-        } else {
-            return Intermediate;
         }
+        return Intermediate;
     }
 };
 

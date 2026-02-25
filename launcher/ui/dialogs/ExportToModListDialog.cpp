@@ -115,6 +115,8 @@ void ExportToModListDialog::formatChanged(int index)
             m_format = ExportToModList::CUSTOM;
             break;
         }
+        default:
+            break;
     }
     triggerImp();
 }
@@ -145,11 +147,7 @@ void ExportToModListDialog::triggerImp()
         case ExportToModList::MARKDOWN:
             ui->resultText->setHtml(StringUtils::htmlListPatch(markdownToHTML(txt)));
             break;
-        case ExportToModList::PLAINTXT:
-            break;
-        case ExportToModList::JSON:
-            break;
-        case ExportToModList::CSV:
+        default:
             break;
     }
     auto exampleLine = exampleLines[m_format];
@@ -186,7 +184,7 @@ QString ExportToModListDialog::extension()
         case ExportToModList::MARKDOWN:
             return ".md";
         case ExportToModList::PLAINTXT:
-            return ".txt";
+            /*fallthrough*/
         case ExportToModList::CUSTOM:
             return ".txt";
         case ExportToModList::JSON:

@@ -52,6 +52,8 @@ QVariant Index::data(const QModelIndex& index, int role) const
             return list->name();
         case ListPtrRole:
             return QVariant::fromValue(list);
+        default:
+            break;
     }
     return QVariant();
 }

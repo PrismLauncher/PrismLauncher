@@ -63,12 +63,12 @@ void PackInstallTask::copySettings()
             instance.settings()->set("JvmArgs", m_pack.jvmArgs.toString());
         }
 
-        auto components = instance.getPackProfile();
+        auto* components = instance.getPackProfile();
         components->buildingFromScratch();
         components->setComponentVersion("net.minecraft", m_pack.mcVersion, true);
 
         auto modloader = m_pack.loaderType;
-        if (modloader.has_value())
+        if (modloader.has_value()) {
             switch (modloader.value()) {
                 case ModPlatform::NeoForge: {
                     components->setComponentVersion("net.neoforged", m_pack.loaderVersion, true);
@@ -86,28 +86,16 @@ void PackInstallTask::copySettings()
                     components->setComponentVersion("org.quiltmc.quilt-loader", m_pack.loaderVersion, true);
                     break;
                 }
-                case ModPlatform::Cauldron:
-                    break;
-                case ModPlatform::LiteLoader:
-                    break;
-                case ModPlatform::DataPack:
-                    break;
-                case ModPlatform::Babric:
-                    break;
-                case ModPlatform::BTA:
-                    break;
-                case ModPlatform::LegacyFabric:
-                    break;
-                case ModPlatform::Ornithe:
-                    break;
-                case ModPlatform::Rift:
+                default:
                     break;
             }
+        }
         components->saveNow();
 
         instance.setName(name());
-        if (m_instIcon == "default")
+        if (m_instIcon == "default") {
             m_instIcon = "ftb_logo";
+        }
         instance.setIconKey(m_instIcon);
     }
     emitSucceeded();

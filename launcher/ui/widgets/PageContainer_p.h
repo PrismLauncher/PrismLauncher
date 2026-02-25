@@ -57,6 +57,8 @@ class PageModel : public QAbstractListModel {
                 // HACK: fixes icon stretching on windows. TODO: report Qt bug for this
                 return QIcon(icon.pixmap(QSize(48, 48)));
             }
+            default:
+                break;
         }
         return QVariant();
     }

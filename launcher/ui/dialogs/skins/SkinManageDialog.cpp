@@ -564,7 +564,7 @@ void SkinManageDialog::on_userBtn_clicked()
 
 void SkinManageDialog::resizeEvent(QResizeEvent* event)
 {
-    QWidget::resizeEvent(event);
+    QDialog::resizeEvent(event);
     QSize s = size() * (1. / 3);
 
     auto id = m_ui->capeCombo->currentData();

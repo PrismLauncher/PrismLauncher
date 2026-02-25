@@ -140,6 +140,8 @@ QVariant AtlOptionalModListModel::headerData(int section, Qt::Orientation orient
                 return QString("Name");
             case DescriptionColumn:
                 return QString("Description");
+            default:
+                break;
         }
     }
 

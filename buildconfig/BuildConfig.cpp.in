@@ -74,9 +74,8 @@ Config::Config()
     MAC_SPARKLE_PUB_KEY = "@MACOSX_SPARKLE_UPDATE_PUBLIC_KEY@";
     MAC_SPARKLE_APPCAST_URL = "@MACOSX_SPARKLE_UPDATE_FEED_URL@";
 
-    if (!MAC_SPARKLE_PUB_KEY.isEmpty() && !MAC_SPARKLE_APPCAST_URL.isEmpty()) {
-        UPDATER_ENABLED = true;
-    } else if (!UPDATER_GITHUB_REPO.isEmpty() && !BUILD_ARTIFACT.isEmpty()) {
+    if ((!MAC_SPARKLE_PUB_KEY.isEmpty() && !MAC_SPARKLE_APPCAST_URL.isEmpty()) ||
+        (!UPDATER_GITHUB_REPO.isEmpty() && !BUILD_ARTIFACT.isEmpty())) {
         UPDATER_ENABLED = true;
     }
 

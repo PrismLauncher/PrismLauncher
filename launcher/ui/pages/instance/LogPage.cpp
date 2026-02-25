@@ -63,8 +63,9 @@ QVariant LogFormatProxyModel::data(const QModelIndex& index, int role) const
             MessageLevel level = static_cast<MessageLevel::Enum>(QIdentityProxyModel::data(index, LogModel::LevelRole).toInt());
             QColor result = colors.foreground.value(level);
 
-            if (result.isValid())
+            if (result.isValid()) {
                 return result;
+            }
 
             break;
         }
@@ -72,11 +73,14 @@ QVariant LogFormatProxyModel::data(const QModelIndex& index, int role) const
             MessageLevel level = static_cast<MessageLevel::Enum>(QIdentityProxyModel::data(index, LogModel::LevelRole).toInt());
             QColor result = colors.background.value(level);
 
-            if (result.isValid())
+            if (result.isValid()) {
                 return result;
+            }
 
             break;
         }
+        default:
+            break;
     }
 
     return QIdentityProxyModel::data(index, role);

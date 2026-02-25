@@ -247,9 +247,9 @@ QVariant SkinList::data(const QModelIndex& index, int role) const
             return preview;
         }
         case Qt::DisplayRole:
-            return skin.name();
+            /*fallthrough*/
         case Qt::UserRole:
-            return skin.name();
+            /*fallthrough*/
         case Qt::EditRole:
             return skin.name();
         default:

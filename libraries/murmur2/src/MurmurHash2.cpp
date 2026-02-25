@@ -92,6 +92,8 @@ void FourBytes_MurmurHash2(const unsigned char* data, IncrementalHashInfo& prev)
             case 1:
                 prev.h ^= data[0];
                 prev.h *= m;
+            default:
+                break;
         };
 
         // Do a few final mixes of the hash to ensure the last few

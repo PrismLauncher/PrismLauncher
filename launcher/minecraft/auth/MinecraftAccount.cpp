@@ -49,6 +49,7 @@
 #include <QDebug>
 
 #include <QPainter>
+#include <cstddef>
 
 #include "minecraft/auth/AccountData.h"
 #include "minecraft/auth/AuthFlow.h"
@@ -231,9 +232,9 @@ bool MinecraftAccount::shouldRefresh() const
     auto expiresTimestamp = data.yggdrasilToken.notAfter;
 
     if (!expiresTimestamp.isValid()) {
-        expiresTimestamp = issuedTimestamp.addSecs(24 * 3600);
+        expiresTimestamp = issuedTimestamp.addSecs(static_cast<qint64>(24 * 3600));
     }
-    if (now.secsTo(expiresTimestamp) < (12 * 3600)) {
+    if (now.secsTo(expiresTimestamp) < (static_cast<qint64>(12 * 3600))) {
         return true;
     }
     return false;

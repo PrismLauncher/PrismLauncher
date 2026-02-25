@@ -305,7 +305,8 @@ QList<BasePage*> ModDownloadDialog::getPages()
 {
     QList<BasePage*> pages;
 
-    auto loaders = static_cast<MinecraftInstance*>(m_instance)->getPackProfile()->getSupportedModLoaders().value();
+    auto loaders =
+        static_cast<MinecraftInstance*>(m_instance)->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderType::None);
 
     if (ModrinthAPI::validateModLoaders(loaders)) {
         auto* page = ModrinthModPage::create(this, *m_instance);

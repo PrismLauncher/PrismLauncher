@@ -132,6 +132,7 @@ QString findMangoHud()
             return libraryName;
 #endif
         } catch (const Exception& e) {
+            continue;  // this is just to not have the catch empty
         }
     }
 

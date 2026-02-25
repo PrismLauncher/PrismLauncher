@@ -1,5 +1,7 @@
 #include "LogModel.h"
 
+#include <cstddef>
+
 LogModel::LogModel(QObject* parent) : QAbstractListModel(parent)
 {
     m_content.resize(m_maxLines);
@@ -7,16 +9,18 @@ LogModel::LogModel(QObject* parent) : QAbstractListModel(parent)
 
 int LogModel::rowCount(const QModelIndex& parent) const
 {
-    if (parent.isValid())
+    if (parent.isValid()) {
         return 0;
+    }
 
     return m_numLines;
 }
 
 QVariant LogModel::data(const QModelIndex& index, int role) const
 {
-    if (index.row() < 0 || index.row() >= m_numLines)
+    if (index.row() < 0 || index.row() >= m_numLines) {
         return QVariant();
+    }
 
     auto row = index.row();
     auto realRow = (row + m_firstLine) % m_maxLines;
@@ -78,7 +82,7 @@ void LogModel::clear()
 QString LogModel::toPlainText()
 {
     QString out;
-    out.reserve(m_numLines * 80);
+    out.reserve(static_cast<qsizetype>(m_numLines) * 80);
     for (int i = 0; i < m_numLines; i++) {
         QString& line = m_content[(m_firstLine + i) % m_maxLines].line;
         out.append(line + '\n');

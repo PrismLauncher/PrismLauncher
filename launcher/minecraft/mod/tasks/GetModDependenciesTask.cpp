@@ -37,7 +37,7 @@ static Version mcVersion(BaseInstance* inst)
 
 static ModPlatform::ModLoaderTypes mcLoaders(BaseInstance* inst)
 {
-    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders().value();
+    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderType::None);
 }
 
 static bool checkDependencies(std::shared_ptr<GetModDependenciesTask::PackDependency> sel,

@@ -268,9 +268,7 @@ static RequireCompositionResult composeRequirement(const RequireEx& a, const Req
     out.indexOfFirstDependee = std::min(a.indexOfFirstDependee, b.indexOfFirstDependee);
     if (a.equalsVersion.isEmpty()) {
         out.equalsVersion = b.equalsVersion;
-    } else if (b.equalsVersion.isEmpty()) {
-        out.equalsVersion = a.equalsVersion;
-    } else if (a.equalsVersion == b.equalsVersion) {
+    } else if (b.equalsVersion.isEmpty() || a.equalsVersion == b.equalsVersion) {
         out.equalsVersion = a.equalsVersion;
     } else {
         // FIXME: mark error as explicit version conflict
