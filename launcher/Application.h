@@ -200,7 +200,7 @@ class Application : public QApplication {
     bool updaterEnabled();
     QString updaterBinaryName();
 
-    QUrl normalizeImportUrl(QString const& url);
+    QUrl normalizeImportUrl(const QString& url);
 
    signals:
     void updateAllowedChanged(bool status);
