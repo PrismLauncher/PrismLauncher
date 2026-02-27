@@ -153,6 +153,7 @@ class ResourceFolderModel : public QAbstractListModel {
 
     [[nodiscard]] bool validateIndex(const QModelIndex& index) const;
 
+    QBrush rowBackground(int row) const;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 

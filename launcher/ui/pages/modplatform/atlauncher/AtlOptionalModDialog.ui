@@ -49,7 +49,11 @@
     </widget>
    </item>
    <item row="0" column="0" colspan="4">
-    <widget class="ModListView" name="treeView"/>
+    <widget class="ModListView" name="treeView">
+     <property name="verticalScrollMode">
+      <enum>QAbstractItemView::ScrollPerPixel</enum>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

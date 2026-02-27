@@ -38,6 +38,9 @@
       <property name="movement">
        <enum>QListView::Movement::Static</enum>
       </property>
+      <property name="verticalScrollMode">
+       <enum>QAbstractItemView::ScrollPerPixel</enum>
+      </property>
      </widget>
     </item>
    </layout>

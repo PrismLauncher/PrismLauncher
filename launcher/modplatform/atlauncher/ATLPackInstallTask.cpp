@@ -447,8 +447,7 @@ bool PackInstallTask::createLibrariesComponent(QString instanceRoot, PackProfile
         }
     }
 
-    auto uuid = QUuid::createUuid();
-    auto id = uuid.toString().remove('{').remove('}');
+    auto id = QUuid::createUuid().toString(QUuid::WithoutBraces);
     auto target_id = "org.multimc.atlauncher." + id;
 
     auto patchDir = FS::PathCombine(instanceRoot, "patches");
@@ -566,8 +565,7 @@ bool PackInstallTask::createPackComponent(QString instanceRoot, PackProfile* pro
         return true;
     }
 
-    auto uuid = QUuid::createUuid();
-    auto id = uuid.toString().remove('{').remove('}');
+    auto id = QUuid::createUuid().toString(QUuid::WithoutBraces);
     auto target_id = "org.multimc.atlauncher." + id;
 
     auto patchDir = FS::PathCombine(instanceRoot, "patches");

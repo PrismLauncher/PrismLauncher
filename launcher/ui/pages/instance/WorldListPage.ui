@@ -53,6 +53,9 @@
       <property name="allColumnsShowFocus">
        <bool>true</bool>
       </property>
+      <property name="verticalScrollMode">
+       <enum>QAbstractItemView::ScrollPerPixel</enum>
+      </property>
       <attribute name="headerStretchLastSection">
        <bool>false</bool>
       </attribute>

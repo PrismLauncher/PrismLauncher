@@ -61,6 +61,9 @@
    </item>
    <item>
     <widget class="QTreeView" name="modpackList">
+     <property name="verticalScrollMode">
+      <enum>QAbstractItemView::ScrollPerPixel</enum>
+     </property>
      <property name="maximumSize">
       <size>
        <width>16777215</width>

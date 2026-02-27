@@ -61,6 +61,7 @@ AtlPage::AtlPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), 
     ui->packView->setIndentation(0);
 
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    ui->versionSelectionBox->view()->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
     for (int i = 0; i < filterModel->getAvailableSortings().size(); i++) {

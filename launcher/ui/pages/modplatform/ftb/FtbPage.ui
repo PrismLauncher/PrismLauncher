@@ -54,6 +54,9 @@
          <height>48</height>
         </size>
        </property>
+       <property name="verticalScrollMode">
+        <enum>QAbstractItemView::ScrollPerPixel</enum>
+       </property>
       </widget>
      </item>
      <item row="0" column="1">

@@ -24,6 +24,6 @@ bool TextPrint::canAbort() const
 
 bool TextPrint::abort()
 {
-    emitFailed("Aborted.");
+    emitAborted();
     return true;
 }

@@ -107,6 +107,7 @@ Page::Page(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), dialog
     }
 
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    ui->versionSelectionBox->view()->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
     connect(ui->sortByBox, &QComboBox::currentTextChanged, this, &Page::onSortingSelectionChanged);

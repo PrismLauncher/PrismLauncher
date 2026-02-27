@@ -115,7 +115,7 @@ class Version {
 
         inline bool operator<(const Section& other) const
         {
-            static auto unequal_is_less = [](Section const& non_null) -> bool {
+            static auto unequal_is_less = [](const Section& non_null) -> bool {
                 if (non_null.m_stringPart.isEmpty())
                     return non_null.m_numPart == 0;
                 return (non_null.m_stringPart != QLatin1Char('.')) && non_null.isPreRelease();

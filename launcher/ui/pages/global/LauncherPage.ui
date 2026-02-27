@@ -41,9 +41,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
+        <y>-149</y>
         <width>746</width>
-        <height>1194</height>
+        <height>1222</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -419,6 +419,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="showModIncompatCheckBox">
+            <property name="toolTip">
+             <string>Currently this just shows mods which are not marked as compatible with the current Minecraft version.</string>
+            </property>
+            <property name="text">
+             <string>Detect and show mod incompatibilities (experimental)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="modpackUpdatePromptBtn">
             <property name="toolTip">
              <string>When creating a new modpack instance, suggest updating an existing instance instead.</string>
@@ -671,7 +681,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="sortingModeGroup"/>
   <buttongroup name="renamingBehaviorGroup"/>
+  <buttongroup name="sortingModeGroup"/>
  </buttongroups>
 </ui>

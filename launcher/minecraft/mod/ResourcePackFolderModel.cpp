@@ -65,10 +65,10 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
     int column = index.column();
 
     switch (role) {
+        case Qt::BackgroundRole:
+            return rowBackground(row);
         case Qt::DisplayRole:
             switch (column) {
-                case NameColumn:
-                    return m_resources[row]->name();
                 case PackFormatColumn: {
                     auto& resource = at(row);
                     auto pack_format = resource.packFormat();
@@ -82,55 +82,52 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
                     return QString("%1 (%2 - %3)")
                         .arg(QString::number(pack_format), version_bounds.first.toString(), version_bounds.second.toString());
                 }
-                case DateColumn:
-                    return m_resources[row]->dateTimeChanged();
-                case ProviderColumn:
-                    return m_resources[row]->provider();
-                case SizeColumn:
-                    return m_resources[row]->sizeStr();
-                default:
-                    return {};
             }
         case Qt::DecorationRole: {
-            if (column == NameColumn && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
-                return QIcon::fromTheme("status-yellow");
             if (column == ImageColumn) {
                 return at(row).image({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
             }
-            return {};
+            break;
         }
         case Qt::ToolTipRole: {
             if (column == PackFormatColumn) {
                 //: The string being explained by this is in the format: ID (Lower version - Upper version)
                 return tr("The resource pack format ID, as well as the Minecraft versions it was designed for.");
             }
-            if (column == NameColumn) {
-                if (at(row).isSymLinkUnder(instDirPath())) {
-                    return m_resources[row]->internal_id() +
-                           tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
-                              "\nCanonical Path: %1")
-                               .arg(at(row).fileinfo().canonicalFilePath());
-                    ;
-                }
-                if (at(row).isMoreThanOneHardLink()) {
-                    return m_resources[row]->internal_id() +
-                           tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
-                }
-            }
-            return m_resources[row]->internal_id();
+            break;
         }
         case Qt::SizeHintRole:
             if (column == ImageColumn) {
                 return QSize(32, 32);
             }
-            return {};
-        case Qt::CheckStateRole:
-            if (column == ActiveColumn)
-                return at(row).enabled() ? Qt::Checked : Qt::Unchecked;
-            return {};
-        default:
-            return {};
+            break;
     }
+
+    // map the columns to the base equivilents
+    QModelIndex mappedIndex;
+    switch (column) {
+        case ActiveColumn:
+            mappedIndex = index.siblingAtColumn(ResourceFolderModel::ActiveColumn);
+            break;
+        case NameColumn:
+            mappedIndex = index.siblingAtColumn(ResourceFolderModel::NameColumn);
+            break;
+        case DateColumn:
+            mappedIndex = index.siblingAtColumn(ResourceFolderModel::DateColumn);
+            break;
+        case ProviderColumn:
+            mappedIndex = index.siblingAtColumn(ResourceFolderModel::ProviderColumn);
+            break;
+        case SizeColumn:
+            mappedIndex = index.siblingAtColumn(ResourceFolderModel::SizeColumn);
+            break;
+    }
+
+    if (mappedIndex.isValid()) {
+        return ResourceFolderModel::data(mappedIndex, role);
+    }
+
+    return {};
 }
 
 QVariant ResourcePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const

@@ -44,6 +44,7 @@
 VersionListView::VersionListView(QWidget* parent) : QTreeView(parent)
 {
     m_emptyString = tr("No versions are currently available.");
+    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 }
 
 void VersionListView::rowsInserted(const QModelIndex& parent, int start, int end)

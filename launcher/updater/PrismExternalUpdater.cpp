@@ -73,6 +73,9 @@ PrismExternalUpdater::PrismExternalUpdater(QWidget* parent, const QString& appDi
     priv->parent = parent;
     connectTimer();
     resetAutoCheckTimer();
+    if (priv->updateInterval == 0) { // "On Launch"
+        checkForUpdates(false);
+    }
 }
 
 PrismExternalUpdater::~PrismExternalUpdater()
@@ -94,7 +97,9 @@ void PrismExternalUpdater::checkForUpdates(bool triggeredByUser)
     QProgressDialog progress(tr("Checking for updates..."), "", 0, 0, priv->parent);
     progress.setCancelButton(nullptr);
     progress.adjustSize();
-    progress.show();
+    if (triggeredByUser) {
+        progress.show();
+    }
     QCoreApplication::processEvents();
 
     QProcess proc;

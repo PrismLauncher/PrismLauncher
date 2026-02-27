@@ -313,8 +313,8 @@ void MinecraftInstance::populateLaunchMenu(QMenu* menu)
     normalLaunchDemo->setEnabled(supportsDemo());
 
     connect(normalLaunch, &QAction::triggered, [this] { APPLICATION->launch(this); });
-    connect(normalLaunchOffline, &QAction::triggered, [this] { APPLICATION->launch(this, false, false); });
-    connect(normalLaunchDemo, &QAction::triggered, [this] { APPLICATION->launch(this, false, true); });
+    connect(normalLaunchOffline, &QAction::triggered, [this] { APPLICATION->launch(this, LaunchMode::Offline); });
+    connect(normalLaunchDemo, &QAction::triggered, [this] { APPLICATION->launch(this, LaunchMode::Demo); });
 
     QString profilersTitle = tr("Profilers");
     menu->addSeparator()->setText(profilersTitle);
@@ -744,21 +744,21 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
 QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin) const
 {
     auto profile = m_components->getProfile();
-    QString args_pattern = profile->getMinecraftArguments();
+    auto args = profile->getMinecraftArguments().split(' ', Qt::SkipEmptyParts);
     for (auto tweaker : profile->getTweakers()) {
-        args_pattern += " --tweakClass " + tweaker;
+        args << "--tweakClass" << tweaker;
     }
 
     if (targetToJoin) {
         if (!targetToJoin->address.isEmpty()) {
             if (profile->hasTrait("feature:is_quick_play_multiplayer")) {
-                args_pattern += " --quickPlayMultiplayer " + targetToJoin->address + ':' + QString::number(targetToJoin->port);
+                args << "--quickPlayMultiplayer" << targetToJoin->address + ':' + QString::number(targetToJoin->port);
             } else {
-                args_pattern += " --server " + targetToJoin->address;
-                args_pattern += " --port " + QString::number(targetToJoin->port);
+                args << "--server" << targetToJoin->address;
+                args << "--port" << QString::number(targetToJoin->port);
             }
         } else if (!targetToJoin->world.isEmpty() && profile->hasTrait("feature:is_quick_play_singleplayer")) {
-            args_pattern += " --quickPlaySingleplayer " + targetToJoin->world;
+            args << "--quickPlaySingleplayer" << targetToJoin->world;
         }
     }
 
@@ -774,16 +774,15 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, Mine
         tokenMapping["user_properties"] = session->serializeUserProperties();
         tokenMapping["user_type"] = session->user_type;
 
-        if (session->demo) {
-            args_pattern += " --demo";
+        if (session->launchMode == LaunchMode::Demo) {
+            args << "--demo";
         }
     }
 
-    QStringList parts = args_pattern.split(' ', Qt::SkipEmptyParts);
-    for (int i = 0; i < parts.length(); i++) {
-        parts[i] = replaceTokensIn(parts[i], tokenMapping);
+    for (int i = 0; i < args.length(); i++) {
+        args[i] = replaceTokensIn(args[i], tokenMapping);
     }
-    return parts;
+    return args;
 }
 
 QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin)
@@ -1153,7 +1152,7 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
 
     // load meta
     {
-        auto mode = session->status != AuthSession::PlayableOffline ? Net::Mode::Online : Net::Mode::Offline;
+        auto mode = session->launchMode != LaunchMode::Offline ? Net::Mode::Online : Net::Mode::Offline;
         process->appendStep(makeShared<TaskStepWrapper>(pptr, makeShared<MinecraftLoadAndCheck>(this, mode)));
     }
 
@@ -1170,11 +1169,9 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
         process->appendStep(step);
     }
 
-    // if we aren't in offline mode,.
-    if (session->status != AuthSession::PlayableOffline) {
-        if (!session->demo) {
-            process->appendStep(makeShared<ClaimAccount>(pptr, session));
-        }
+    // if we aren't in offline mode
+    if (session->launchMode != LaunchMode::Offline) {
+        process->appendStep(makeShared<ClaimAccount>(pptr, session));
         for (auto t : createUpdateTask()) {
             process->appendStep(makeShared<TaskStepWrapper>(pptr, t));
         }

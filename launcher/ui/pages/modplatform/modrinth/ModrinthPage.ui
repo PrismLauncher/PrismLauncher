@@ -54,6 +54,9 @@
         <height>48</height>
        </size>
       </property>
+      <property name="verticalScrollMode">
+       <enum>QAbstractItemView::ScrollPerPixel</enum>
+      </property>
      </widget>
      <widget class="ProjectDescriptionPage" name="packDescription">
       <property name="openExternalLinks">

@@ -7,6 +7,8 @@
 
 #include "FileSystem.h"
 #include "StringUtils.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
 
 Resource::Resource(QObject* parent) : QObject(parent) {}
 
@@ -109,6 +111,40 @@ void Resource::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
         setStatus(ResourceStatus::INSTALLED);
 
     m_metadata = metadata;
+}
+
+QStringList Resource::issues() const
+{
+    QStringList result;
+    result.reserve(m_issues.length());
+
+    for (const char* issue : m_issues) {
+        result.append(tr(issue));
+    }
+
+    return result;
+}
+
+void Resource::updateIssues(const BaseInstance* inst)
+{
+    m_issues.clear();
+
+    if (m_metadata == nullptr) {
+        return;
+    }
+
+    auto mcInst = dynamic_cast<const MinecraftInstance*>(inst);
+    if (mcInst == nullptr) {
+        return;
+    }
+
+    auto profile = mcInst->getPackProfile();
+    QString mcVersion = profile->getComponentVersion("net.minecraft");
+
+    if (!m_metadata->mcVersions.empty() && !m_metadata->mcVersions.contains(mcVersion)) {
+        // delay translation until issues() is called
+        m_issues.append(QT_TR_NOOP("Not marked as compatible with the instance's game version."));
+    }
 }
 
 int Resource::compare(const Resource& other, SortType type) const

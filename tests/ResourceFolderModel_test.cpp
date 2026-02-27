@@ -69,7 +69,7 @@ class ResourceFolderModelTest : public QObject {
     void test_1178()
     {
         // source
-        QString source = QFINDTESTDATA("testdata/ResourceFolderModel/test_folder");
+        QString source = QFINDTESTDATA("testdata/Resources/test_folder");
 
         // sanity check
         QVERIFY(!source.endsWith('/'));
@@ -133,7 +133,7 @@ class ResourceFolderModelTest : public QObject {
 
     void test_addFromWatch()
     {
-        QString source = QFINDTESTDATA("testdata/ResourceFolderModel");
+        QString source = QFINDTESTDATA("testdata/Resources");
         ModFolderModel model(source, nullptr, false, true);
 
         QCOMPARE(model.size(), 0);
@@ -150,8 +150,8 @@ class ResourceFolderModelTest : public QObject {
 
     void test_removeResource()
     {
-        QString folder_resource = QFINDTESTDATA("testdata/ResourceFolderModel/test_folder");
-        QString file_mod = QFINDTESTDATA("testdata/ResourceFolderModel/supercoolmod.jar");
+        QString folder_resource = QFINDTESTDATA("testdata/Resources/test_folder");
+        QString file_mod = QFINDTESTDATA("testdata/Resources/supercoolmod.jar");
 
         QTemporaryDir tmp;
         ResourceFolderModel model(QDir(tmp.path()), nullptr, false, false);
@@ -195,8 +195,8 @@ class ResourceFolderModelTest : public QObject {
 
     void test_enable_disable()
     {
-        QString folder_resource = QFINDTESTDATA("testdata/ResourceFolderModel/test_folder");
-        QString file_mod = QFINDTESTDATA("testdata/ResourceFolderModel/supercoolmod.jar");
+        QString folder_resource = QFINDTESTDATA("testdata/Resources/test_folder");
+        QString file_mod = QFINDTESTDATA("testdata/Resources/supercoolmod.jar");
 
         QTemporaryDir tmp;
         ResourceFolderModel model(tmp.path(), nullptr, false, false);

@@ -38,7 +38,7 @@ void LookupServerAddress::setOutputAddressPtr(MinecraftTarget::Ptr output)
 bool LookupServerAddress::abort()
 {
     m_dnsLookup->abort();
-    emitFailed("Aborted");
+    emitAborted();
     return true;
 }
 

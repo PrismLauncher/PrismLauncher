@@ -152,6 +152,7 @@ int ProgressDialog::execWithTask(Task* task)
     this->m_taskConnections.push_back(connect(task, &Task::progress, this, &ProgressDialog::changeProgress));
     this->m_taskConnections.push_back(connect(task, &Task::aborted, this, &ProgressDialog::hide));
     this->m_taskConnections.push_back(connect(task, &Task::abortStatusChanged, ui->skipButton, &QPushButton::setEnabled));
+    this->m_taskConnections.push_back(connect(task, &Task::abortButtonTextChanged, ui->skipButton, &QPushButton::setText));
 
     m_is_multi_step = task->isMultiStep();
     ui->taskProgressScrollArea->setHidden(!m_is_multi_step);

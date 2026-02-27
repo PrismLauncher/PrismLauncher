@@ -36,12 +36,14 @@
 #pragma once
 #include <BaseInstance.h>
 #include <tools/BaseProfiler.h>
-#include <QObject>
 
 #include "minecraft/auth/MinecraftAccount.h"
 #include "minecraft/launch/MinecraftTarget.h"
 
 class InstanceWindow;
+
+enum class LaunchDecision { Undecided, Continue, Abort };
+
 class LaunchController : public Task {
     Q_OBJECT
    public:
@@ -54,11 +56,9 @@ class LaunchController : public Task {
 
     BaseInstance* instance() { return m_instance; }
 
-    void setOnline(bool online) { m_online = online; }
+    void setLaunchMode(const LaunchMode mode) { m_wantedLaunchMode = mode; }
 
     void setOfflineName(const QString& offlineName) { m_offlineName = offlineName; }
-
-    void setDemo(bool demo) { m_demo = demo; }
 
     void setProfiler(BaseProfilerFactory* profiler) { m_profiler = profiler; }
 
@@ -76,9 +76,10 @@ class LaunchController : public Task {
     void login();
     void launchInstance();
     void decideAccount();
+    LaunchDecision decideLaunchMode();
     bool askPlayDemo();
-    QString askOfflineName(QString playerName, bool demo, bool* ok = nullptr);
-    bool reauthenticateAccount(MinecraftAccountPtr account);
+    QString askOfflineName(QString playerName, bool* ok = nullptr);
+    bool reauthenticateAccount(MinecraftAccountPtr account, QString reason);
 
    private slots:
     void readyForLaunch();
@@ -88,10 +89,10 @@ class LaunchController : public Task {
     void onProgressRequested(Task* task);
 
    private:
+    LaunchMode m_wantedLaunchMode = LaunchMode::Normal;
+    LaunchMode m_actualLaunchMode = LaunchMode::Normal;
     BaseProfilerFactory* m_profiler = nullptr;
-    bool m_online = true;
     QString m_offlineName;
-    bool m_demo = false;
     BaseInstance* m_instance;
     QWidget* m_parentWidget = nullptr;
     InstanceWindow* m_console = nullptr;

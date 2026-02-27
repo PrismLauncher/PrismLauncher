@@ -200,7 +200,7 @@ class Application : public QApplication {
     bool updaterEnabled();
     QString updaterBinaryName();
 
-    QUrl normalizeImportUrl(QString const& url);
+    QUrl normalizeImportUrl(const QString& url);
 
    signals:
     void updateAllowedChanged(bool status);
@@ -216,8 +216,7 @@ class Application : public QApplication {
 
    public slots:
     bool launch(BaseInstance* instance,
-                bool online = true,
-                bool demo = false,
+                LaunchMode mode = LaunchMode::Normal,
                 std::shared_ptr<MinecraftTarget> targetToJoin = nullptr,
                 shared_qobject_ptr<MinecraftAccount> accountToUse = nullptr,
                 const QString& offlineName = QString());
@@ -311,7 +310,7 @@ class Application : public QApplication {
     QString m_serverToJoin;
     QString m_worldToJoin;
     QString m_profileToUse;
-    bool m_offline = false;
+    bool m_launchOffline = false;
     QString m_offlineName;
     bool m_liveCheck = false;
     QList<QUrl> m_urlsToImport;

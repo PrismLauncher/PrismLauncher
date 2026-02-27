@@ -68,6 +68,7 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
     m_ui->packView->setModel(m_model);
 
     m_ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    m_ui->versionSelectionBox->view()->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     m_ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
     m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);

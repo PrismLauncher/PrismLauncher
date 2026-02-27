@@ -39,7 +39,7 @@ void AssetUpdateTask::executeTask()
 
     connect(downloadJob.get(), &NetJob::succeeded, this, &AssetUpdateTask::assetIndexFinished);
     connect(downloadJob.get(), &NetJob::failed, this, &AssetUpdateTask::assetIndexFailed);
-    connect(downloadJob.get(), &NetJob::aborted, this, [this] { emitFailed(tr("Aborted")); });
+    connect(downloadJob.get(), &NetJob::aborted, this, &AssetUpdateTask::emitAborted);
     connect(downloadJob.get(), &NetJob::progress, this, &AssetUpdateTask::progress);
     connect(downloadJob.get(), &NetJob::stepProgress, this, &AssetUpdateTask::propagateStepProgress);
 
@@ -82,7 +82,7 @@ void AssetUpdateTask::assetIndexFinished()
         downloadJob = job;
         connect(downloadJob.get(), &NetJob::succeeded, this, &AssetUpdateTask::emitSucceeded);
         connect(downloadJob.get(), &NetJob::failed, this, &AssetUpdateTask::assetsFailed);
-        connect(downloadJob.get(), &NetJob::aborted, this, [this] { emitFailed(tr("Aborted")); });
+        connect(downloadJob.get(), &NetJob::aborted, this, &AssetUpdateTask::emitAborted);
         connect(downloadJob.get(), &NetJob::progress, this, &AssetUpdateTask::progress);
         connect(downloadJob.get(), &NetJob::stepProgress, this, &AssetUpdateTask::propagateStepProgress);
         downloadJob->start();

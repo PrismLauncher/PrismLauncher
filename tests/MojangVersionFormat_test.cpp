@@ -33,7 +33,7 @@ class MojangVersionFormatTest : public QObject {
    private slots:
     void test_Through_Simple()
     {
-        QJsonDocument doc = readJson(QFINDTESTDATA("testdata/MojangVersionFormat/1.9-simple.json"));
+        QJsonDocument doc = readJson(QFINDTESTDATA("testdata/Libraries/1.9-simple.json"));
         auto vfile = MojangVersionFormat::versionFileFromJson(doc, "1.9-simple.json");
         auto doc2 = MojangVersionFormat::versionFileToJson(vfile);
         writeJson("1.9-simple-passthorugh.json", doc2);
@@ -43,7 +43,7 @@ class MojangVersionFormatTest : public QObject {
 
     void test_Through()
     {
-        QJsonDocument doc = readJson(QFINDTESTDATA("testdata/MojangVersionFormat/1.9.json"));
+        QJsonDocument doc = readJson(QFINDTESTDATA("testdata/Libraries/1.9.json"));
         auto vfile = MojangVersionFormat::versionFileFromJson(doc, "1.9.json");
         auto doc2 = MojangVersionFormat::versionFileToJson(vfile);
         writeJson("1.9-passthorugh.json", doc2);

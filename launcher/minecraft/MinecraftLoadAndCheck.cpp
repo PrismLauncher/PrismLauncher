@@ -20,7 +20,7 @@ void MinecraftLoadAndCheck::executeTask()
     }
     connect(m_task.get(), &Task::succeeded, this, &MinecraftLoadAndCheck::emitSucceeded);
     connect(m_task.get(), &Task::failed, this, &MinecraftLoadAndCheck::emitFailed);
-    connect(m_task.get(), &Task::aborted, this, [this] { emitFailed(tr("Aborted")); });
+    connect(m_task.get(), &Task::aborted, this, &MinecraftLoadAndCheck::emitAborted);
     propagateFromOther(m_task.get());
 }
 

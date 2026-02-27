@@ -15,22 +15,22 @@ VanillaCreationTask::VanillaCreationTask(BaseVersion::Ptr version, QString loade
     , m_loader_version(std::move(loader_version))
 {}
 
-bool VanillaCreationTask::createInstance()
+std::unique_ptr<MinecraftInstance> VanillaCreationTask::createInstance()
 {
     setStatus(tr("Creating instance from version %1").arg(m_version->name()));
 
-    MinecraftInstance inst(m_globalSettings, std::make_unique<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg")),
+    auto inst = std::make_unique<MinecraftInstance>(m_globalSettings, std::make_unique<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg")),
                            m_stagingPath);
-    SettingsObject::Lock lock(inst.settings());
+    SettingsObject::Lock lock(inst->settings());
 
-    auto components = inst.getPackProfile();
+    auto components = inst->getPackProfile();
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", m_version->descriptor(), true);
     if (m_using_loader)
         components->setComponentVersion(m_loader, m_loader_version->descriptor());
 
-    inst.setName(name());
-    inst.setIconKey(m_instIcon);
+    inst->setName(name());
+    inst->setIconKey(m_instIcon);
 
-    return true;
+    return inst;
 }

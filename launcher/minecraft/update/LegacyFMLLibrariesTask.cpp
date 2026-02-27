@@ -70,7 +70,7 @@ void LegacyFMLLibrariesTask::executeTask()
 
     connect(dljob.get(), &NetJob::succeeded, this, &LegacyFMLLibrariesTask::fmllibsFinished);
     connect(dljob.get(), &NetJob::failed, this, &LegacyFMLLibrariesTask::fmllibsFailed);
-    connect(dljob.get(), &NetJob::aborted, this, [this] { emitFailed(tr("Aborted")); });
+    connect(dljob.get(), &NetJob::aborted, this, &LegacyFMLLibrariesTask::emitAborted);
     connect(dljob.get(), &NetJob::progress, this, &LegacyFMLLibrariesTask::progress);
     connect(dljob.get(), &NetJob::stepProgress, this, &LegacyFMLLibrariesTask::propagateStepProgress);
     downloadJob.reset(dljob);
