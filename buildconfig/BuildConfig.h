@@ -164,6 +164,7 @@ class Config {
     QString TRANSLATIONS_URL;
     QString MATRIX_URL;
     QString DISCORD_URL;
+    QString DISCORD_CLIENT_ID;
     QString SUBREDDIT_URL;
 
     QString DEFAULT_RESOURCE_BASE = "https://resources.download.minecraft.net/";

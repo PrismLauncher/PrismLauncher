@@ -17,6 +17,10 @@ jobs:
   update-blocked-status:
     name: Update Blocked Status
     runs-on: ubuntu-slim
+    permissions:
+      pull-requests: write
+      issues: write
+      actions: write
 
     # a pr that was a `blocking:<id>` label was merged.
     # find the open pr's it was blocked by and trigger a refresh of their state
@@ -25,10 +29,7 @@ jobs:
     steps:
       - name: Generate token
         id: generate-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ vars.PULL_REQUEST_APP_ID }}
-          private-key: ${{ secrets.PULL_REQUEST_APP_PRIVATE_KEY }}
+        run: echo "token=$GITHUB_TOKEN" >> "$GITHUB_OUTPUT"
 
       - name: Gather Dependent PRs
         id: gather_deps

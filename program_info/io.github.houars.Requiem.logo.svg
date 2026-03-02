@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 <svg width="144" height="48" version="1.1" viewBox="0 0 38.1 12.7" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
- <title>Prism Launcher Logo</title>
+ <title>Requiem Logo</title>
  <g stroke-width=".26458">
   <path d="m6.35 6.35" fill="#99cd61"/>
   <path d="m6.35 0.52917-2.5208 4.3656 2.5208 1.4552 2.5203-1.4552 0.10955-3.0996c-1.1511-0.66459-2.3388-1.2661-2.6298-1.2661z" fill="#df6277"/>
@@ -21,7 +21,7 @@
   <path d="m16.746 6.9737 2.8639 4.9609c0.33073 0 2.6991-1.3672 2.8644-1.6536 0.16536-0.28642 0.16536-3.0209 0-3.3073l-2.8644 1.6536z" fill="#dfdfdf" stroke-width=".26458"/>
  </g>
  <path d="m3.8299 4.8948c-0.14551 0.25205-0.14553 2.6584 0 2.9104 0.14553 0.25204 2.2292 1.4552 2.5203 1.4552v-2.9104z" fill="#d6d2d2" stroke-width=".26458"/>
- <g fill="#14191e" stroke-width=".26458" aria-label="Prism Launcher">
+ <g fill="#14191e" stroke-width=".26458" aria-label="Requiem">
   <path d="m15.669 3.991h-0.44291v-0.8382h0.44291c0.32385 0 0.46196 0.16192 0.46196 0.4191 0 0.25718-0.13811 0.4191-0.46196 0.4191zm1.2906-0.4191c0-0.61436-0.40958-1.0763-1.2287-1.0763h-1.3192v3.3433h0.81439v-1.2001h0.50482c0.85249 0 1.2287-0.51435 1.2287-1.0668z"/>
   <path d="m18.198 4.6053c0-0.4572 0.22384-0.59055 0.6096-0.59055h0.22384v-0.86201c-0.35719 0-0.6477 0.1905-0.83344 0.47149v-0.44291h-0.81439v2.6575h0.81439z"/>
   <path d="m19.421 3.1813v2.6575h0.81439v-2.6575zm0.40958-0.27622c0.28575 0 0.48101-0.19526 0.48101-0.43815 0-0.24765-0.19526-0.44291-0.48101-0.44291-0.29051 0-0.48578 0.19526-0.48578 0.44291 0 0.24289 0.19526 0.43815 0.48578 0.43815z"/>
@@ -39,11 +39,11 @@
  <metadata>
   <rdf:RDF>
    <cc:Work rdf:about="">
-    <dc:title>Prism Launcher Logo</dc:title>
+    <dc:title>Requiem Logo</dc:title>
     <dc:date>19/10/2022</dc:date>
     <dc:creator>
      <cc:Agent>
-      <dc:title>Prism Launcher</dc:title>
+      <dc:title>Requiem</dc:title>
      </cc:Agent>
     </dc:creator>
     <dc:contributor>
@@ -51,10 +51,10 @@
       <dc:title>AutiOne, Boba, ely, Fulmine, gon sawa, Pankakes, tobimori, Zeke</dc:title>
      </cc:Agent>
     </dc:contributor>
-    <dc:source>https://github.com/PrismLauncher/PrismLauncher</dc:source>
+    <dc:source>https://github.com/Houars/Requiem</dc:source>
     <dc:publisher>
      <cc:Agent>
-      <dc:title>Prism Launcher</dc:title>
+      <dc:title>Requiem</dc:title>
      </cc:Agent>
     </dc:publisher>
     <cc:license rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/"/>

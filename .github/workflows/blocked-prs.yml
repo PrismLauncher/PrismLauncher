@@ -20,14 +20,15 @@ jobs:
   blocked_status:
     name: Check Blocked Status
     runs-on: ubuntu-slim
+    permissions:
+      pull-requests: write
+      issues: write
+      statuses: write
 
     steps:
       - name: Generate token
         id: generate-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ vars.PULL_REQUEST_APP_ID }}
-          private-key: ${{ secrets.PULL_REQUEST_APP_PRIVATE_KEY }}
+        run: echo "token=$GITHUB_TOKEN" >> "$GITHUB_OUTPUT"
 
       - name: Setup From Dispatch Event
         if: github.event_name == 'workflow_dispatch'

@@ -62,3 +62,4 @@ flatbuild
 
 # Snap
 *.snap
+_codeql_detected_source_root

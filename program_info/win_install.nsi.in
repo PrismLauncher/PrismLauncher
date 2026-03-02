@@ -393,11 +393,11 @@ Section "@Launcher_DisplayName@"
   WriteRegStr HKCU Software\Classes\curseforge "URL Protocol" ""
   WriteRegStr HKCU Software\Classes\curseforge\shell\open\command "" '"$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "%1"'
 
-  ; Write the URL Handler into registry for prismlauncher
+  ; Write the URL Handler into registry for requiem
   WriteRegStr HKCU Software\Classes\@Launcher_APP_BINARY_NAME@ "URL Protocol" ""
   WriteRegStr HKCU Software\Classes\@Launcher_APP_BINARY_NAME@\shell\open\command "" '"$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "%1"'
 
-  ; Write the URL Handler into registry for prismlauncher import
+  ; Write the URL Handler into registry for prismlauncher (backwards compatibility)
   WriteRegStr HKCU Software\Classes\prismlauncher "URL Protocol" ""
   WriteRegStr HKCU Software\Classes\prismlauncher\shell\open\command "" '"$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "%1"'
 

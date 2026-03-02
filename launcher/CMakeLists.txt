@@ -886,6 +886,8 @@ SET(LAUNCHER_SOURCES
     ui/themes/CustomTheme.h
     ui/themes/DarkTheme.cpp
     ui/themes/DarkTheme.h
+    ui/themes/RequiemTheme.cpp
+    ui/themes/RequiemTheme.h
     ui/themes/ITheme.cpp
     ui/themes/ITheme.h
     ui/themes/HintOverrideProxyStyle.cpp
@@ -900,6 +902,10 @@ SET(LAUNCHER_SOURCES
     ui/themes/CatPack.h
     ui/themes/CatPainter.cpp
     ui/themes/CatPainter.h
+
+    # Discord Rich Presence
+    discord/DiscordPresence.cpp
+    discord/DiscordPresence.h
 
     # Processes
     LaunchMode.h

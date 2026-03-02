@@ -125,6 +125,10 @@
 #include <FileSystem.h>
 #include <LocalPeer.h>
 
+#include "discord/DiscordPresence.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
+
 #include <stdlib.h>
 #include "SysInfo.h"
 
@@ -642,6 +646,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("ApplicationTheme", QString());
         m_settings->registerSetting("BackgroundCat", QString("kitteh"));
 
+        // Discord Rich Presence
+        m_settings->registerSetting("DiscordPresenceEnabled", true);
+
         // Remembered state
         m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
 
@@ -953,6 +960,16 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     // Themes
     m_themeManager = std::make_unique<ThemeManager>();
 
+    // Discord Rich Presence
+    {
+        const bool discordEnabled = m_settings->get("DiscordPresenceEnabled").toBool();
+        m_discordPresence = std::make_unique<DiscordPresence>(BuildConfig.DISCORD_CLIENT_ID, this);
+        m_discordPresence->setEnabled(discordEnabled && !BuildConfig.DISCORD_CLIENT_ID.isEmpty());
+        if (m_discordPresence->isEnabled())
+            m_discordPresence->setIdlePresence();
+        qInfo() << "<> Discord Rich Presence initialized.";
+    }
+
 #ifdef Q_OS_MACOS
     // for macOS: getting directory settings will generate URL security-scoped bookmarks if needed and not present
     // this facilitates a smooth transition from a non-sandboxed version of the launcher, that likely can access the directory,
@@ -1054,9 +1071,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     // check update locks
     {
-        auto update_log_path = FS::PathCombine(m_dataPath, "logs", "prism_launcher_update.log");
+        auto update_log_path = FS::PathCombine(m_dataPath, "logs", "requiem_update.log");
 
-        auto update_lock = QFileInfo(FS::PathCombine(m_dataPath, ".prism_launcher_update.lock"));
+        auto update_lock = QFileInfo(FS::PathCombine(m_dataPath, ".requiem_update.lock"));
         if (update_lock.exists()) {
             auto [timestamp, from, to, target, data_path] = read_lock_File(update_lock.absoluteFilePath());
             auto infoMsg = tr("This installation has a update lock file present at: %1\n"
@@ -1068,7 +1085,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                               "\n"
                               "This likely means that a update attempt failed. Please ensure your installation is in working order before "
                               "proceeding.\n"
-                              "Check the Prism Launcher updater log at: \n"
+                              "Check the Requiem updater log at: \n"
                               "%7\n"
                               "for details on the last update attempt.\n"
                               "\n"
@@ -1098,13 +1115,13 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             }
         }
 
-        auto update_fail_marker = QFileInfo(FS::PathCombine(m_dataPath, ".prism_launcher_update.fail"));
+        auto update_fail_marker = QFileInfo(FS::PathCombine(m_dataPath, ".requiem_update.fail"));
         if (update_fail_marker.exists()) {
             auto infoMsg = tr("An update attempt failed\n"
                               "\n"
                               "Please ensure your installation is in working order before "
                               "proceeding.\n"
-                              "Check the Prism Launcher updater log at: \n"
+                              "Check the Requiem updater log at: \n"
                               "%1\n"
                               "for details on the last update attempt.")
                                .arg(update_log_path);
@@ -1130,12 +1147,12 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             }
         }
 
-        auto update_success_marker = QFileInfo(FS::PathCombine(m_dataPath, ".prism_launcher_update.success"));
+        auto update_success_marker = QFileInfo(FS::PathCombine(m_dataPath, ".requiem_update.success"));
         if (update_success_marker.exists()) {
             auto infoMsg = tr("Update succeeded\n"
                               "\n"
                               "You are now running %1 .\n"
-                              "Check the Prism Launcher updater log at: \n"
+                              "Check the Requiem updater log at: \n"
                               "%2\n"
                               "for details.")
                                .arg(BuildConfig.printableVersionString())
@@ -1233,14 +1250,7 @@ bool Application::createSetupWizard()
         if (!validIcons)
             settings()->set("IconTheme", QString("pe_colored"));
         if (!validWidgets) {
-#if defined(Q_OS_WIN32) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-            const QString style =
-                QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark ? QStringLiteral("dark") : QStringLiteral("bright");
-#else
-            const QString style = QStringLiteral("system");
-#endif
-
-            settings()->set("ApplicationTheme", style);
+            settings()->set("ApplicationTheme", QStringLiteral("requiem"));
         }
 
         m_themeManager->applyCurrentlySelectedTheme(true);
@@ -1541,6 +1551,13 @@ bool Application::launch(BaseInstance* instance,
         }
         connect(controller.get(), &LaunchController::finished, this, &Application::controllerFinished);
         addRunningInstance();
+        // Update Discord Rich Presence to show the playing state
+        if (m_discordPresence && m_discordPresence->isEnabled()) {
+            QString mcVersion;
+            if (auto* mcInst = qobject_cast<MinecraftInstance*>(instance))
+                mcVersion = mcInst->getPackProfile()->getComponentVersion(QStringLiteral("net.minecraft"));
+            m_discordPresence->setPlayingPresence(instance->name(), mcVersion, QDateTime::currentSecsSinceEpoch());
+        }
         QMetaObject::invokeMethod(controller.get(), &Task::start, Qt::QueuedConnection);
         return true;
     } else if (instance->isRunning()) {
@@ -1630,6 +1647,10 @@ void Application::controllerFinished()
     }
     extras.controller.reset();
     subRunningInstance();
+
+    // Return to idle Discord presence once the instance is done
+    if (m_discordPresence && m_discordPresence->isEnabled() && m_runningInstances == 0)
+        m_discordPresence->setIdlePresence();
 
     // quit when there are no more windows.
     if (shouldExitNow()) {
