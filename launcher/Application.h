@@ -75,6 +75,7 @@ class MCEditTool;
 class ThemeManager;
 class IconTheme;
 class BaseInstance;
+class DiscordPresence;
 
 class LogModel;
 
@@ -266,6 +267,7 @@ class Application : public QApplication {
     std::unique_ptr<MCEditTool> m_mcedit;
     QSet<QString> m_features;
     std::unique_ptr<ThemeManager> m_themeManager;
+    std::unique_ptr<DiscordPresence> m_discordPresence;
 
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 

@@ -212,6 +212,9 @@ set(Launcher_MATRIX_URL "https://prismlauncher.org/matrix" CACHE STRING "URL to 
 
 # Discord URL
 set(Launcher_DISCORD_URL "https://prismlauncher.org/discord" CACHE STRING "URL for the Discord guild.")
+# Discord Rich Presence Application ID. Create an application at https://discord.com/developers/applications,
+# upload rich presence assets named "requiem" and "minecraft", then set this to the Application ID.
+set(Launcher_DISCORD_CLIENT_ID "" CACHE STRING "Discord Application ID for Rich Presence (leave empty to disable)")
 
 # Subreddit URL
 set(Launcher_SUBREDDIT_URL "https://prismlauncher.org/reddit" CACHE STRING "URL for the subreddit.")

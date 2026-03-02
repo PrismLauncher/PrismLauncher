@@ -121,6 +121,7 @@ Config::Config()
     TRANSLATION_FILES_URL = "@Launcher_TRANSLATION_FILES_URL@";
     MATRIX_URL = "@Launcher_MATRIX_URL@";
     DISCORD_URL = "@Launcher_DISCORD_URL@";
+    DISCORD_CLIENT_ID = "@Launcher_DISCORD_CLIENT_ID@";
     SUBREDDIT_URL = "@Launcher_SUBREDDIT_URL@";
 }
 
