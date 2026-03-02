@@ -1,0 +1,13 @@
+# CODEOWNERS — changes to these paths require review from the listed owners.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default: all changes require a review from the repository owner
+*                           @Houars
+
+# Workflow / CI changes require explicit sign-off
+.github/                    @Houars
+
+# Core build configuration
+CMakeLists.txt              @Houars
+vcpkg.json                  @Houars
+vcpkg-configuration.json    @Houars

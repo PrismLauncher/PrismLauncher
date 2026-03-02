@@ -98,7 +98,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ github.ref }}
           name: Requiem ${{ env.VERSION }}
-          draft: true
+          draft: false
           prerelease: false
           fail_on_unmatched_files: true
           files: |
