@@ -1,6 +1,5 @@
 #pragma once
 #include <QObject>
-#include <memory>
 
 #include "minecraft/auth/AuthStep.h"
 #include "net/Download.h"
@@ -21,7 +20,7 @@ class XboxProfileStep : public AuthStep {
     void onRequestDone();
 
    private:
-    std::unique_ptr<QByteArray> m_response;
+    QByteArray* m_response;
     Net::Download::Ptr m_request;
     NetJob::Ptr m_task;
 };
