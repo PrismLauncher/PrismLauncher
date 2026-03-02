@@ -1,5 +1,5 @@
 name: Package for Windows
-description: Create a Windows package for Prism Launcher
+description: Create a Windows package for Requiem
 
 inputs:
   version:
@@ -72,8 +72,8 @@ runs:
       uses: azure/artifact-signing-action@v1
       with:
         endpoint: https://eus.codesigning.azure.net/
-        trusted-signing-account-name: PrismLauncher
-        certificate-profile-name: PrismLauncher
+        trusted-signing-account-name: Requiem
+        certificate-profile-name: Requiem
         files-folder: ${{ github.workspace }}\install\
         files-folder-filter: dll,exe
         files-folder-recurse: true
@@ -145,11 +145,11 @@ runs:
       uses: azure/artifact-signing-action@v1
       with:
         endpoint: https://eus.codesigning.azure.net/
-        trusted-signing-account-name: PrismLauncher
-        certificate-profile-name: PrismLauncher
+        trusted-signing-account-name: Requiem
+        certificate-profile-name: Requiem
 
         files: |
-          ${{ github.workspace }}\PrismLauncher-Setup.exe
+          ${{ github.workspace }}\Requiem-Setup.exe
 
         # recommended in https://github.com/Azure/artifact-signing-action#timestamping-1
         timestamp-rfc3161: 'http://timestamp.acs.microsoft.com'
@@ -170,17 +170,17 @@ runs:
     - name: Upload binary zip
       uses: actions/upload-artifact@v6
       with:
-        name: PrismLauncher-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}
+        name: Requiem-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}
         path: install/**
 
     - name: Upload portable zip
       uses: actions/upload-artifact@v6
       with:
-        name: PrismLauncher-${{ inputs.artifact-name }}-Portable-${{ inputs.version }}-${{ inputs.build-type }}
+        name: Requiem-${{ inputs.artifact-name }}-Portable-${{ inputs.version }}-${{ inputs.build-type }}
         path: install-portable/**
 
     - name: Upload installer
       uses: actions/upload-artifact@v6
       with:
-        name: PrismLauncher-${{ inputs.artifact-name }}-Setup-${{ inputs.version }}-${{ inputs.build-type }}
-        path: PrismLauncher-Setup.exe
+        name: Requiem-${{ inputs.artifact-name }}-Setup-${{ inputs.version }}-${{ inputs.build-type }}
+        path: Requiem-Setup.exe

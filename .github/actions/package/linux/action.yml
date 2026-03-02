@@ -1,5 +1,5 @@
 name: Package for Linux
-description: Create Linux packages for Prism Launcher
+description: Create Linux packages for Requiem
 
 inputs:
   version:
@@ -92,20 +92,20 @@ runs:
 
         #makes the launcher use portals for file picking
         echo "QT_QPA_PLATFORMTHEME=xdgdesktopportal" > "$INSTALL_APPIMAGE_DIR"/.env
-        ln -s org.prismlauncher.PrismLauncher.metainfo.xml "$INSTALL_APPIMAGE_DIR"/share/metainfo/org.prismlauncher.PrismLauncher.appdata.xml
-        ln -s share/applications/org.prismlauncher.PrismLauncher.desktop "$INSTALL_APPIMAGE_DIR"
-        ln -s share/icons/hicolor/256x256/apps/org.prismlauncher.PrismLauncher.png "$INSTALL_APPIMAGE_DIR"
+        ln -s io.github.houars.Requiem.metainfo.xml "$INSTALL_APPIMAGE_DIR"/share/metainfo/io.github.houars.Requiem.appdata.xml
+        ln -s share/applications/io.github.houars.Requiem.desktop "$INSTALL_APPIMAGE_DIR"
+        ln -s share/icons/hicolor/256x256/apps/io.github.houars.Requiem.png "$INSTALL_APPIMAGE_DIR"
         mv "$INSTALL_APPIMAGE_DIR"/{sharun,AppRun}
         ls -la "$INSTALL_APPIMAGE_DIR"
 
         if [[ "${{ github.ref_type }}" == "tag" ]]; then
-          APPIMAGE_DEST="PrismLauncher-Linux-$APPIMAGE_ARCH.AppImage"
+          APPIMAGE_DEST="Requiem-Linux-$APPIMAGE_ARCH.AppImage"
         else
-          APPIMAGE_DEST="PrismLauncher-Linux-$VERSION-${{ inputs.build-type }}-$APPIMAGE_ARCH.AppImage"
+          APPIMAGE_DEST="Requiem-Linux-$VERSION-${{ inputs.build-type }}-$APPIMAGE_ARCH.AppImage"
         fi
 
         mkappimage \
-          --updateinformation "gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|latest|PrismLauncher-Linux-$APPIMAGE_ARCH.AppImage.zsync" \
+          --updateinformation "gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|latest|Requiem-Linux-$APPIMAGE_ARCH.AppImage.zsync" \
           "$INSTALL_APPIMAGE_DIR" \
           "$APPIMAGE_DEST"
 
@@ -130,22 +130,22 @@ runs:
 
         for l in $(find ${{ env.INSTALL_PORTABLE_DIR }} -type f -o -type l); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_PORTABLE_DIR }}/}; l=${l#./}; echo $l; done > ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt
         cd ${{ env.INSTALL_PORTABLE_DIR }}
-        tar -czf ../PrismLauncher-portable.tar.gz *
+        tar -czf ../Requiem-portable.tar.gz *
 
     - name: Upload binary tarball
       uses: actions/upload-artifact@v6
       with:
-        name: PrismLauncher-${{ inputs.artifact-name }}-Qt6-Portable-${{ inputs.version }}-${{ inputs.build-type }}
-        path: PrismLauncher-portable.tar.gz
+        name: Requiem-${{ inputs.artifact-name }}-Qt6-Portable-${{ inputs.version }}-${{ inputs.build-type }}
+        path: Requiem-portable.tar.gz
 
     - name: Upload AppImage
       uses: actions/upload-artifact@v6
       with:
-        name: PrismLauncher-${{ runner.os }}-${{ inputs.version }}-${{ inputs.build-type }}-${{ env.APPIMAGE_ARCH }}.AppImage
-        path: PrismLauncher-${{ runner.os }}-*${{ env.APPIMAGE_ARCH }}.AppImage
+        name: Requiem-${{ runner.os }}-${{ inputs.version }}-${{ inputs.build-type }}-${{ env.APPIMAGE_ARCH }}.AppImage
+        path: Requiem-${{ runner.os }}-*${{ env.APPIMAGE_ARCH }}.AppImage
 
     - name: Upload AppImage Zsync
       uses: actions/upload-artifact@v6
       with:
-        name: PrismLauncher-${{ runner.os }}-${{ inputs.version }}-${{ inputs.build-type }}-${{ env.APPIMAGE_ARCH }}.AppImage.zsync
-        path: PrismLauncher-${{ runner.os }}-*${{ env.APPIMAGE_ARCH }}.AppImage.zsync
+        name: Requiem-${{ runner.os }}-${{ inputs.version }}-${{ inputs.build-type }}-${{ env.APPIMAGE_ARCH }}.AppImage.zsync
+        path: Requiem-${{ runner.os }}-*${{ env.APPIMAGE_ARCH }}.AppImage.zsync
