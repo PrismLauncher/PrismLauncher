@@ -338,6 +338,175 @@ bool ModFolderModel::isValid()
     return m_dir.exists() && m_dir.isReadable();
 }
 
+QString ModFolderModel::createGroup(const QString& name)
+{
+    if (!m_groupStore) {
+        return {};
+    }
+
+    auto groupId = m_groupStore->createGroup(name);
+    if (groupId.isEmpty()) {
+        return {};
+    }
+
+    beginResetModel();
+    rebuildTree();
+    endResetModel();
+    emit virtualGroupsChanged();
+    return groupId;
+}
+
+bool ModFolderModel::deleteGroup(const QString& groupId)
+{
+    if (!m_groupStore) {
+        return false;
+    }
+
+    auto groups = m_groupStore->groups();
+    bool hasGroup =
+        std::any_of(groups.cbegin(), groups.cend(), [&groupId](const ModGroupStore::Group& group) { return group.id == groupId; });
+    if (!hasGroup) {
+        return false;
+    }
+
+    if (!m_groupStore->deleteGroup(groupId)) {
+        return false;
+    }
+
+    beginResetModel();
+    rebuildTree();
+    endResetModel();
+    emit virtualGroupsChanged();
+    return true;
+}
+
+bool ModFolderModel::assignModsToGroup(const QStringList& fileKeys, const QString& groupId)
+{
+    if (!m_groupStore) {
+        return false;
+    }
+
+    if (!groupId.isEmpty()) {
+        auto groups = m_groupStore->groups();
+        bool hasGroup =
+            std::any_of(groups.cbegin(), groups.cend(), [&groupId](const ModGroupStore::Group& group) { return group.id == groupId; });
+        if (!hasGroup) {
+            return false;
+        }
+    }
+
+    QSet<QString> uniqueFileKeys;
+    uniqueFileKeys.reserve(fileKeys.size());
+    for (const auto& fileKey : fileKeys) {
+        auto normalizedFileKey = ModGroupStore::normalizeFileKey(fileKey);
+        if (!normalizedFileKey.isEmpty()) {
+            uniqueFileKeys.insert(normalizedFileKey);
+        }
+    }
+
+    bool changed = false;
+    for (const auto& fileKey : uniqueFileKeys) {
+        if (m_groupStore->groupFor(fileKey) == groupId) {
+            continue;
+        }
+
+        if (!m_groupStore->assign(fileKey, groupId)) {
+            return false;
+        }
+
+        changed = true;
+    }
+
+    if (!changed) {
+        return true;
+    }
+
+    beginResetModel();
+    rebuildTree();
+    endResetModel();
+    emit virtualGroupsChanged();
+    return true;
+}
+
+QList<ModFolderModel::GroupOption> ModFolderModel::groupOptions() const
+{
+    QList<GroupOption> options;
+    if (!m_groupStore) {
+        return options;
+    }
+
+    auto groups = m_groupStore->groups();
+    options.reserve(groups.size());
+    for (const auto& group : groups) {
+        options.append({ group.id, group.name });
+    }
+
+    std::sort(options.begin(), options.end(), [](const GroupOption& left, const GroupOption& right) {
+        auto leftLabel = left.label.toCaseFolded();
+        auto rightLabel = right.label.toCaseFolded();
+        if (leftLabel == rightLabel) {
+            return left.id < right.id;
+        }
+        return leftLabel < rightLabel;
+    });
+
+    return options;
+}
+
+QString ModFolderModel::groupForFileKey(const QString& fileKey) const
+{
+    if (!m_groupStore) {
+        return {};
+    }
+
+    return m_groupStore->groupFor(fileKey);
+}
+
+bool ModFolderModel::isGroupIndex(const QModelIndex& index) const
+{
+    auto* node = nodeFromIndex(index);
+    return node && node->type == ItemType::GroupNode;
+}
+
+QString ModFolderModel::groupIdForIndex(const QModelIndex& index) const
+{
+    auto* node = nodeFromIndex(index);
+    if (!node || node->type != ItemType::GroupNode) {
+        return {};
+    }
+
+    return node->groupId;
+}
+
+QModelIndexList ModFolderModel::groupChildModIndexes(const QModelIndex& groupIndex) const
+{
+    QModelIndexList childIndexes;
+
+    auto* groupNode = nodeFromIndex(groupIndex);
+    if (!groupNode || groupNode->type != ItemType::GroupNode) {
+        return childIndexes;
+    }
+
+    childIndexes.reserve(groupNode->children.size());
+    for (auto* child : groupNode->children) {
+        if (!child || child->type != ItemType::ModNode) {
+            continue;
+        }
+
+        auto modIndex = indexForNode(child, 0);
+        if (modIndex.isValid()) {
+            childIndexes.append(modIndex);
+        }
+    }
+
+    return childIndexes;
+}
+
+QModelIndex ModFolderModel::indexForResourceId(const QString& resourceId, int column) const
+{
+    return indexForResource(resourceId, column);
+}
+
 QList<Mod*> ModFolderModel::selectedMods(const QModelIndexList& indexes)
 {
     QSet<QString> seen;

@@ -45,7 +45,10 @@
 #include <QAbstractItemModel>
 #include <QAction>
 #include <QEvent>
+#include <QFileInfo>
+#include <QInputDialog>
 #include <QKeyEvent>
+#include <QLineEdit>
 #include <QMenu>
 #include <QMessageBox>
 #include <QSortFilterProxyModel>
@@ -110,6 +113,23 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget*
     ui->actionsToolbar->insertActionAfter(ui->actionViewHomepage, ui->actionExportMetadata);
 
     ui->actionsToolbar->insertActionAfter(ui->actionViewFolder, ui->actionViewConfigs);
+
+    if (m_model->virtualGroupsEnabled()) {
+        m_actionCreateGroup = new QAction(tr("Add Group"), this);
+        m_actionCreateGroup->setToolTip(tr("Create a group for organizing mods."));
+        connect(m_actionCreateGroup, &QAction::triggered, this, &ModFolderPage::createGroup);
+        ui->actionsToolbar->insertActionAfter(ui->actionAddItem, m_actionCreateGroup);
+    }
+
+    disconnect(ui->actionRemoveItem, &QAction::triggered, this, nullptr);
+    connect(ui->actionRemoveItem, &QAction::triggered, this, &ModFolderPage::removeItem);
+
+    connect(m_model, &ModFolderModel::virtualGroupsChanged, this, [this] {
+        updateActions();
+        if (updateExtraInfo) {
+            updateExtraInfo(id(), extraHeaderInfoString());
+        }
+    });
 }
 
 bool ModFolderPage::shouldDisplay() const
@@ -120,9 +140,63 @@ bool ModFolderPage::shouldDisplay() const
 void ModFolderPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
-    int row = sourceCurrent.row();
-    const Mod& mod = m_model->at(row);
-    ui->frame->updateWithMod(mod);
+    if (!sourceCurrent.isValid() || m_model->isGroupIndex(sourceCurrent)) {
+        ui->frame->clear();
+        return;
+    }
+
+    auto selectedMods = m_model->selectedMods({ sourceCurrent });
+    if (selectedMods.isEmpty()) {
+        ui->frame->clear();
+        return;
+    }
+
+    ui->frame->updateWithMod(*selectedMods.first());
+}
+
+QModelIndex ModFolderPage::selectedGroupSourceIndex() const
+{
+    if (!ui->treeView || !ui->treeView->selectionModel()) {
+        return {};
+    }
+
+    QModelIndex selectedGroup;
+    auto sourceIndexes = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    for (const auto& sourceIndex : sourceIndexes) {
+        if (sourceIndex.column() != 0 || !m_model->isGroupIndex(sourceIndex)) {
+            continue;
+        }
+
+        if (!selectedGroup.isValid()) {
+            selectedGroup = sourceIndex;
+            continue;
+        }
+
+        if (m_model->groupIdForIndex(selectedGroup) != m_model->groupIdForIndex(sourceIndex)) {
+            return {};
+        }
+    }
+
+    if (selectedGroup.isValid()) {
+        return selectedGroup;
+    }
+
+    auto currentSource = m_filterModel->mapToSource(ui->treeView->currentIndex());
+    if (currentSource.isValid() && currentSource.column() == 0 && m_model->isGroupIndex(currentSource)) {
+        return currentSource;
+    }
+
+    return {};
+}
+
+void ModFolderPage::removeItem()
+{
+    if (selectedGroupSourceIndex().isValid()) {
+        deleteSelectedGroup();
+        return;
+    }
+
+    ExternalResourcesPage::removeItem();
 }
 
 void ModFolderPage::removeItems(const QItemSelection& selection)
@@ -358,6 +432,108 @@ void ModFolderPage::exportModMetadata()
     std::sort(selectedMods.begin(), selectedMods.end(), [](const Mod* a, const Mod* b) { return a->name() < b->name(); });
     ExportToModListDialog dlg(m_instance->name(), selectedMods, this);
     dlg.exec();
+}
+
+void ModFolderPage::createGroup()
+{
+    if (!m_model->virtualGroupsEnabled()) {
+        return;
+    }
+
+    bool accepted = false;
+    auto groupName = QInputDialog::getText(this, tr("Create Group"), tr("Group name:"), QLineEdit::Normal, QString(), &accepted);
+    if (!accepted) {
+        return;
+    }
+
+    if (m_model->createGroup(groupName).isEmpty()) {
+        CustomMessageBox::selectable(this, tr("Error"), tr("Could not create group."), QMessageBox::Critical)->show();
+    }
+}
+
+void ModFolderPage::deleteSelectedGroup()
+{
+    if (!m_model->virtualGroupsEnabled()) {
+        return;
+    }
+
+    auto groupIndex = selectedGroupSourceIndex();
+    if (!groupIndex.isValid()) {
+        return;
+    }
+
+    auto groupId = m_model->groupIdForIndex(groupIndex);
+    if (groupId.isEmpty()) {
+        return;
+    }
+
+    auto groupName = groupIndex.sibling(groupIndex.row(), ModFolderModel::NameColumn).data().toString().trimmed();
+    if (groupName.isEmpty()) {
+        groupName = tr("selected group");
+    }
+
+    auto groupModIndexes = m_model->groupChildModIndexes(groupIndex);
+    auto response = CustomMessageBox::selectable(this, tr("Delete Group"),
+                                                 tr("Delete group \"%1\" and permanently delete all %2 mod(s) in this group?")
+                                                     .arg(groupName, QString::number(groupModIndexes.size())),
+                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                        ->exec();
+    if (response != QMessageBox::Yes) {
+        return;
+    }
+
+    QStringList trackedPaths;
+    trackedPaths.reserve(groupModIndexes.size());
+    for (auto* resource : m_model->selectedResources(groupModIndexes)) {
+        if (resource == nullptr || resource->type() == ResourceType::FOLDER) {
+            continue;
+        }
+        trackedPaths.append(resource->fileinfo().absoluteFilePath());
+    }
+
+    if (!groupModIndexes.isEmpty()) {
+        QItemSelection selection;
+        for (const auto& index : groupModIndexes) {
+            if (!index.isValid()) {
+                continue;
+            }
+
+            auto left = index.sibling(index.row(), 0);
+            auto right = index.sibling(index.row(), m_model->columnCount({}) - 1);
+            selection.select(left, right);
+        }
+
+        removeItems(selection);
+
+        for (const auto& path : trackedPaths) {
+            if (QFileInfo::exists(path)) {
+                return;
+            }
+        }
+    }
+
+    if (!m_model->deleteGroup(groupId)) {
+        CustomMessageBox::selectable(this, tr("Error"), tr("Could not delete group."), QMessageBox::Critical)->show();
+    }
+}
+
+bool ModFolderPage::eventFilter(QObject* obj, QEvent* ev)
+{
+    if (obj == ui->treeView && ev->type() == QEvent::KeyPress) {
+        auto* keyEvent = static_cast<QKeyEvent*>(ev);
+        switch (keyEvent->key()) {
+            case Qt::Key_Delete:
+                removeItem();
+                return true;
+            case Qt::Key_Plus:
+                addItem();
+                return true;
+            default:
+                break;
+        }
+    }
+
+    return ExternalResourcesPage::eventFilter(obj, ev);
 }
 
 CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, ModFolderModel* mods, QWidget* parent) : ModFolderPage(inst, mods, parent)

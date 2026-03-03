@@ -43,6 +43,7 @@
 #include <QMap>
 #include <QSet>
 #include <QString>
+#include <QStringList>
 
 #include <memory>
 #include <vector>
@@ -98,6 +99,22 @@ class ModFolderModel : public ResourceFolderModel {
 
     bool isValid();
 
+    struct GroupOption {
+        QString id;
+        QString label;
+    };
+
+    QString createGroup(const QString& name);
+    bool deleteGroup(const QString& groupId);
+    bool assignModsToGroup(const QStringList& fileKeys, const QString& groupId = {});
+    QList<GroupOption> groupOptions() const;
+    QString groupForFileKey(const QString& fileKey) const;
+    bool isGroupIndex(const QModelIndex& index) const;
+    QString groupIdForIndex(const QModelIndex& index) const;
+    QModelIndexList groupChildModIndexes(const QModelIndex& groupIndex) const;
+    QModelIndex indexForResourceId(const QString& resourceId, int column = 0) const;
+    bool virtualGroupsEnabled() const { return m_groupStore != nullptr; }
+
     bool setResourceEnabled(const QModelIndexList& indexes, EnableAction action) override;
     bool deleteResources(const QModelIndexList& indexes) override;
 
@@ -111,6 +128,9 @@ class ModFolderModel : public ResourceFolderModel {
 
     QStringList requiresList(QString id);
     QStringList requiredByList(QString id);
+
+   signals:
+    void virtualGroupsChanged();
 
    private slots:
     void onParseSucceeded(int ticket, QString resource_id) override;

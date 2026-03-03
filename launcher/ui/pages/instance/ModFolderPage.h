@@ -42,6 +42,9 @@
 #include "ExternalResourcesPage.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
+class QAction;
+class QEvent;
+
 class ModFolderPage : public ExternalResourcesPage {
     Q_OBJECT
 
@@ -64,6 +67,7 @@ class ModFolderPage : public ExternalResourcesPage {
     void updateFrame(const QModelIndex& current, const QModelIndex& previous) override;
 
    private slots:
+    void removeItem();
     void removeItems(const QItemSelection& selection) override;
 
     void downloadMods();
@@ -72,10 +76,19 @@ class ModFolderPage : public ExternalResourcesPage {
     void deleteModMetadata();
     void exportModMetadata();
     void changeModVersion();
+    void createGroup();
+    void deleteSelectedGroup();
+
+   protected:
+    bool eventFilter(QObject* obj, QEvent* ev) override;
+
+   private:
+    QModelIndex selectedGroupSourceIndex() const;
 
    protected:
     ModFolderModel* m_model;
     QPointer<ResourceDownload::ModDownloadDialog> m_downloadDialog;
+    QAction* m_actionCreateGroup = nullptr;
 };
 
 class CoreModFolderPage : public ModFolderPage {
