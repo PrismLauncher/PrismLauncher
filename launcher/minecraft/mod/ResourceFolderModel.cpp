@@ -760,11 +760,16 @@ SortType ResourceFolderModel::columnToSortKey(size_t column) const
 }
 
 /* Standard Proxy Model for createFilterProxyModel */
-bool ResourceFolderModel::ProxyModel::filterAcceptsRow(int source_row, [[maybe_unused]] const QModelIndex& source_parent) const
+bool ResourceFolderModel::ProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
 {
     auto* model = qobject_cast<ResourceFolderModel*>(sourceModel());
     if (!model)
         return true;
+
+    // Guard against transient reset/remap states and non-flat derived models.
+    if (source_row < 0 || source_row >= model->rowCount(source_parent) || source_row >= model->size()) {
+        return false;
+    }
 
     const auto& resource = model->at(source_row);
 
@@ -775,6 +780,10 @@ bool ResourceFolderModel::ProxyModel::lessThan(const QModelIndex& source_left, c
 {
     auto* model = qobject_cast<ResourceFolderModel*>(sourceModel());
     if (!model || !source_left.isValid() || !source_right.isValid() || source_left.column() != source_right.column()) {
+        return QSortFilterProxyModel::lessThan(source_left, source_right);
+    }
+
+    if (source_left.row() < 0 || source_right.row() < 0 || source_left.row() >= model->size() || source_right.row() >= model->size()) {
         return QSortFilterProxyModel::lessThan(source_left, source_right);
     }
 
