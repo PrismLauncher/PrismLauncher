@@ -1,6 +1,5 @@
 #pragma once
 #include <QObject>
-#include <memory>
 
 #include "minecraft/auth/AuthStep.h"
 #include "net/NetJob.h"
@@ -18,10 +17,9 @@ class XboxUserStep : public AuthStep {
     QString describe() override;
 
    private slots:
-    void onRequestDone();
+    void onRequestDone(QByteArray* response);
 
    private:
-    std::unique_ptr<QByteArray> m_response;
     Net::Upload::Ptr m_request;
     NetJob::Ptr m_task;
 };

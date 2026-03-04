@@ -96,12 +96,12 @@ void ListModel::request()
 
     auto netJob = makeShared<NetJob>("Ftb::Request", APPLICATION->network());
     auto url = QString(BuildConfig.FTB_API_BASE_URL + "/modpack/all");
-    m_response.reset(new QByteArray());
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(url), m_response.get()));
+    auto [action, response] = Net::Download::makeByteArray(QUrl(url));
+    netJob->addNetAction(action);
     m_jobPtr = netJob;
     m_jobPtr->start();
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::requestFinished);
+    QObject::connect(netJob.get(), &NetJob::succeeded, this, [this, response] { requestFinished(response); });
     QObject::connect(netJob.get(), &NetJob::failed, this, &ListModel::requestFailed);
 }
 
@@ -111,16 +111,18 @@ void ListModel::abortRequest()
     m_jobPtr.reset();
 }
 
-void ListModel::requestFinished()
+void ListModel::requestFinished(QByteArray* responsePtr)
 {
+    // NOTE(TheKodeToad): moving the response out to avoid it from being destroyed by m_jobPtr.reset()
+    QByteArray response = std::move(*responsePtr);
     m_jobPtr.reset();
     m_remainingPacks.clear();
 
     QJsonParseError parse_error{};
-    QJsonDocument doc = QJsonDocument::fromJson(*m_response, &parse_error);
+    QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
         qWarning() << "Error while parsing JSON response from FTB at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << *m_response;
+        qWarning() << response;
         return;
     }
 
@@ -146,29 +148,32 @@ void ListModel::requestPack()
 {
     auto netJob = makeShared<NetJob>("Ftb::Search", APPLICATION->network());
     auto searchUrl = QString(BuildConfig.FTB_API_BASE_URL + "/modpack/%1").arg(m_currentPack);
-    m_response.reset(new QByteArray());
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), m_response.get()));
+    auto [action, response] = Net::Download::makeByteArray(QUrl(searchUrl));
+    netJob->addNetAction(action);
     m_jobPtr = netJob;
     m_jobPtr->start();
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::packRequestFinished);
+    QObject::connect(netJob.get(), &NetJob::succeeded, this, [this, response] { packRequestFinished(response); });
     QObject::connect(netJob.get(), &NetJob::failed, this, &ListModel::packRequestFailed);
 }
 
-void ListModel::packRequestFinished()
+void ListModel::packRequestFinished(QByteArray* responsePtr)
 {
     if (!m_jobPtr || m_aborted)
         return;
+
+    // NOTE(TheKodeToad): moving the response out to avoid it from being destroyed by jobPtr.reset()
+    QByteArray response = std::move(*responsePtr);
 
     m_jobPtr.reset();
     m_remainingPacks.removeOne(m_currentPack);
 
     QJsonParseError parse_error;
-    QJsonDocument doc = QJsonDocument::fromJson(*m_response, &parse_error);
+    QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
 
     if (parse_error.error != QJsonParseError::NoError) {
         qWarning() << "Error while parsing JSON response from FTB at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << *m_response;
+        qWarning() << response;
         return;
     }
 
@@ -178,7 +183,7 @@ void ListModel::packRequestFinished()
     try {
         FTB::loadModpack(pack, obj);
     } catch (const JSONValidationError& e) {
-        qDebug() << QString::fromUtf8(*m_response);
+        qDebug() << QString::fromUtf8(response);
         qWarning() << "Error while reading pack manifest from FTB: " << e.cause();
         return;
     }

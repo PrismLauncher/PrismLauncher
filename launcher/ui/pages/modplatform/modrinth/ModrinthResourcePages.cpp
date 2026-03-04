@@ -165,10 +165,10 @@ std::unique_ptr<ModFilterWidget> ModrinthModPage::createFilterWidget()
 
 void ModrinthModPage::prepareProviderCategories()
 {
-    auto response = std::make_shared<QByteArray>();
-    m_categoriesTask = ModrinthAPI::getModCategories(response.get());
+    auto [categoriesTask, response] = ModrinthAPI::getModCategories();
+    m_categoriesTask = categoriesTask;
     connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
-        auto categories = ModrinthAPI::loadModCategories(response.get());
+        auto categories = ModrinthAPI::loadModCategories(*response);
         m_filter_widget->setCategories(categories);
     });
     m_categoriesTask->start();

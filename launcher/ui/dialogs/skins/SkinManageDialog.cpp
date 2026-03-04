@@ -472,14 +472,11 @@ void SkinManageDialog::on_userBtn_clicked()
     NetJob::Ptr job{ new NetJob(tr("Download user skin"), APPLICATION->network(), 1) };
     job->setAskRetry(false);
 
-    auto uuidOut = std::make_shared<QByteArray>();
-    auto profileOut = std::make_shared<QByteArray>();
-
     auto uuidLoop = makeShared<WaitTask>();
     auto profileLoop = makeShared<WaitTask>();
 
-    auto getUUID = Net::Download::makeByteArray("https://api.minecraftservices.com/minecraft/profile/lookup/name/" + user, uuidOut.get());
-    auto getProfile = Net::Download::makeByteArray(QUrl(), profileOut.get());
+    auto [getUUID, uuidOut] = Net::Download::makeByteArray("https://api.minecraftservices.com/minecraft/profile/lookup/name/" + user);
+    auto [getProfile, profileOut] = Net::Download::makeByteArray(QUrl());
     auto downloadSkin = Net::Download::makeFile(QUrl(), path);
 
     QString failReason;

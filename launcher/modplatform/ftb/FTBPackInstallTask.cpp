@@ -91,10 +91,11 @@ void PackInstallTask::executeTask()
     auto netJob = makeShared<NetJob>("FTB::VersionFetch", APPLICATION->network());
 
     auto searchUrl = QString(BuildConfig.FTB_API_BASE_URL + "/modpack/%1/%2").arg(m_pack.id).arg(version.id);
-    m_response.reset(new QByteArray());
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), m_response.get()));
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, this, &PackInstallTask::onManifestDownloadSucceeded);
+    auto [action, response] = Net::Download::makeByteArray(QUrl(searchUrl));
+    netJob->addNetAction(action);
+
+    QObject::connect(netJob.get(), &NetJob::succeeded, this, [this, response] { onManifestDownloadSucceeded(response); });
     QObject::connect(netJob.get(), &NetJob::failed, this, &PackInstallTask::onManifestDownloadFailed);
     QObject::connect(netJob.get(), &NetJob::aborted, this, &PackInstallTask::abort);
     QObject::connect(netJob.get(), &NetJob::progress, this, &PackInstallTask::setProgress);
@@ -105,15 +106,17 @@ void PackInstallTask::executeTask()
     netJob->start();
 }
 
-void PackInstallTask::onManifestDownloadSucceeded()
+void PackInstallTask::onManifestDownloadSucceeded(QByteArray* responsePtr)
 {
+    // NOTE(TheKodeToad): moving the response out to avoid it from being destroyed by m_net_job.reset()
+    QByteArray response = std::move(*responsePtr);
     m_net_job.reset();
 
     QJsonParseError parse_error{};
-    QJsonDocument doc = QJsonDocument::fromJson(*m_response, &parse_error);
+    QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
         qWarning() << "Error while parsing JSON response from FTB at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << *m_response;
+        qWarning() << response;
         return;
     }
 

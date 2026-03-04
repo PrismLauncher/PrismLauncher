@@ -71,7 +71,7 @@ class AtlOptionalModListModel : public QAbstractListModel {
     void useShareCode(const QString& code);
 
    public slots:
-    void shareCodeSuccess();
+    void shareCodeSuccess(QByteArray* responsePtr);
     void shareCodeFailure(const QString& reason);
 
     void selectRecommended();
@@ -83,7 +83,6 @@ class AtlOptionalModListModel : public QAbstractListModel {
 
    private:
     NetJob::Ptr m_jobPtr;
-    std::unique_ptr<QByteArray> m_response = std::make_unique<QByteArray>();
 
     ATLauncher::PackVersion m_version;
     QList<ATLauncher::VersionMod> m_mods;

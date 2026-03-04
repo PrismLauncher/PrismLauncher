@@ -42,8 +42,8 @@ void XboxAuthorizationStep::perform()
         { "Accept", "application/json" },
         { "x-xbl-contract-version", "1" }
     };
-    m_response.reset(new QByteArray());
-    m_request = Net::Upload::makeByteArray(url, m_response.get(), xbox_auth_data.toUtf8());
+    auto [request, response] = Net::Upload::makeByteArray(url, xbox_auth_data.toUtf8());
+    m_request = request;
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);
 
@@ -51,19 +51,19 @@ void XboxAuthorizationStep::perform()
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
-    connect(m_task.get(), &Task::finished, this, &XboxAuthorizationStep::onRequestDone);
+    connect(m_task.get(), &Task::finished, this, [this, response] { onRequestDone(response); });
 
     m_task->start();
     qDebug() << "Getting authorization token for" << m_relyingParty;
 }
 
-void XboxAuthorizationStep::onRequestDone()
+void XboxAuthorizationStep::onRequestDone(QByteArray* response)
 {
-    qCDebug(authCredentials()) << *m_response;
+    qCDebug(authCredentials()) << *response;
     if (m_request->error() != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << m_request->error();
         if (Net::isApplicationError(m_request->error())) {
-            if (!processSTSError()) {
+            if (!processSTSError(*response)) {
                 emit finished(AccountTaskState::STATE_FAILED_SOFT,
                               tr("Failed to get authorization for %1 services. Error %2.").arg(m_authorizationKind, m_request->error()));
             } else {
@@ -78,7 +78,7 @@ void XboxAuthorizationStep::onRequestDone()
     }
 
     Token temp;
-    if (!Parsers::parseXTokenResponse(*m_response, temp, m_authorizationKind)) {
+    if (!Parsers::parseXTokenResponse(*response, temp, m_authorizationKind)) {
         emit finished(AccountTaskState::STATE_FAILED_SOFT,
                       tr("Could not parse authorization response for access to %1 services.").arg(m_authorizationKind));
         return;
@@ -95,11 +95,11 @@ void XboxAuthorizationStep::onRequestDone()
     emit finished(AccountTaskState::STATE_WORKING, tr("Got authorization to access %1").arg(m_relyingParty));
 }
 
-bool XboxAuthorizationStep::processSTSError()
+bool XboxAuthorizationStep::processSTSError(const QByteArray& response)
 {
     if (m_request->error() == QNetworkReply::AuthenticationRequiredError) {
         QJsonParseError jsonError;
-        QJsonDocument doc = QJsonDocument::fromJson(*m_response, &jsonError);
+        QJsonDocument doc = QJsonDocument::fromJson(response, &jsonError);
         if (jsonError.error) {
             qWarning() << "Cannot parse error XSTS response as JSON:" << jsonError.errorString();
             emit finished(AccountTaskState::STATE_FAILED_SOFT,

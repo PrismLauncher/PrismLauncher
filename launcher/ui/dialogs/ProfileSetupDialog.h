@@ -21,7 +21,6 @@
 #include <QTimer>
 
 #include <minecraft/auth/MinecraftAccount.h>
-#include <memory>
 #include "net/Download.h"
 #include "net/Upload.h"
 
@@ -44,8 +43,8 @@ class ProfileSetupDialog : public QDialog {
     void nameEdited(const QString& name);
     void startCheck();
 
-    void checkFinished();
-    void setupProfileFinished();
+    void checkFinished(QByteArray* response);
+    void setupProfileFinished(QByteArray* response);
 
    protected:
     void scheduleCheck(const QString& name);
@@ -70,9 +69,6 @@ class ProfileSetupDialog : public QDialog {
 
     QTimer checkStartTimer;
 
-    std::unique_ptr<QByteArray> m_check_response;
     Net::Download::Ptr m_check_task;
-
-    std::unique_ptr<QByteArray> m_profile_response;
     Net::Upload::Ptr m_profile_task;
 };

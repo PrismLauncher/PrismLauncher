@@ -372,10 +372,10 @@ void ModrinthPage::createFilterWidget()
     connect(m_ui->filterButton, &QPushButton::clicked, this, [this] { m_filterWidget->setHidden(!m_filterWidget->isHidden()); });
 
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &ModrinthPage::triggerSearch);
-    auto response = std::make_shared<QByteArray>();
-    m_categoriesTask = ModrinthAPI::getModCategories(response.get());
+    auto [categoriesTask, response] = ModrinthAPI::getModCategories();
+    m_categoriesTask = categoriesTask;
     connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
-        auto categories = ModrinthAPI::loadCategories(response.get(), "modpack");
+        auto categories = ModrinthAPI::loadCategories(*response, "modpack");
         m_filterWidget->setCategories(categories);
     });
     m_categoriesTask->start();

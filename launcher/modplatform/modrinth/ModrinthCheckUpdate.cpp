@@ -88,7 +88,6 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
     setStatus(tr("Waiting for the API response from Modrinth..."));
     setProgress(m_progress + 1, m_progressTotal);
 
-    auto response = std::make_shared<QByteArray>();
     QStringList hashes;
     if (forceModLoaderCheck && loader.has_value()) {
         for (auto hash : m_mappings.keys()) {
@@ -105,9 +104,9 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
         return;
     }
 
-    auto job = api.latestVersions(hashes, m_hashType, m_gameVersions, loader, response.get());
+    auto [job, response] = api.latestVersions(hashes, m_hashType, m_gameVersions, loader);
 
-    connect(job.get(), &Task::succeeded, this, [this, response, loader] { checkVersionsResponse(response.get(), loader); });
+    connect(job.get(), &Task::succeeded, this, [this, response, loader] { checkVersionsResponse(response, loader); });
 
     connect(job.get(), &Task::failed, this, &ModrinthCheckUpdate::checkNextLoader);
 

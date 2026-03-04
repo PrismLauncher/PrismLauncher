@@ -44,6 +44,7 @@
 
 #include <list>
 #include <optional>
+#include <utility>
 
 #include "../Version.h"
 
@@ -112,8 +113,8 @@ class ResourceAPI {
    public slots:
     virtual Task::Ptr searchProjects(SearchArgs&&, Callback<QList<ModPlatform::IndexedPack::Ptr>>&&) const;
 
-    virtual Task::Ptr getProject(QString addonId, QByteArray* response) const;
-    virtual Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const = 0;
+    virtual std::pair<Task::Ptr, QByteArray*> getProject(QString addonId) const;
+    virtual std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const = 0;
 
     virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, Callback<ModPlatform::IndexedPack::Ptr>&&) const;
     Task::Ptr getProjectVersions(VersionSearchArgs&& args, Callback<QVector<ModPlatform::IndexedVersion>>&& callbacks) const;

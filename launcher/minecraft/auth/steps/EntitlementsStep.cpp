@@ -30,8 +30,8 @@ void EntitlementsStep::perform()
                                            { "Accept", "application/json" },
                                            { "Authorization", QString("Bearer %1").arg(m_data->yggdrasilToken.token).toUtf8() } };
 
-    m_response.reset(new QByteArray());
-    m_request = Net::Download::makeByteArray(url, m_response.get());
+    auto [request, response] = Net::Download::makeByteArray(url);
+    m_request = request;
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);
 
@@ -39,19 +39,19 @@ void EntitlementsStep::perform()
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
-    connect(m_task.get(), &Task::finished, this, &EntitlementsStep::onRequestDone);
+    connect(m_task.get(), &Task::finished, this, [this, response] { onRequestDone(response); });
 
     m_task->start();
     qDebug() << "Getting entitlements...";
 }
 
-void EntitlementsStep::onRequestDone()
+void EntitlementsStep::onRequestDone(QByteArray* response)
 {
-    qCDebug(authCredentials()) << *m_response;
+    qCDebug(authCredentials()) << *response;
 
     // TODO: check presence of same entitlementsRequestId?
     // TODO: validate JWTs?
-    Parsers::parseMinecraftEntitlements(*m_response, m_data->minecraftEntitlement);
+    Parsers::parseMinecraftEntitlements(*response, m_data->minecraftEntitlement);
 
     emit finished(AccountTaskState::STATE_WORKING, tr("Got entitlements"));
 }

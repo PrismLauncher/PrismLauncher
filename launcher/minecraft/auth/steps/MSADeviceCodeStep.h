@@ -58,10 +58,10 @@ class MSADeviceCodeStep : public AuthStep {
     void authorizeWithBrowser(QString url, QString code, int expiresIn);
 
    private slots:
-    void deviceAuthorizationFinished();
+    void deviceAuthorizationFinished(QByteArray* response);
     void startPoolTimer();
     void authenticateUser();
-    void authenticationFinished();
+    void authenticationFinished(QByteArray* response);
 
    private:
     QString m_clientId;
@@ -72,7 +72,6 @@ class MSADeviceCodeStep : public AuthStep {
     QTimer m_pool_timer;
     QTimer m_expiration_timer;
 
-    std::unique_ptr<QByteArray> m_response;
     Net::Upload::Ptr m_request;
     NetJob::Ptr m_task;
 };

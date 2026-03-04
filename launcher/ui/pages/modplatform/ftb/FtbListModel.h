@@ -55,11 +55,11 @@ class ListModel : public QAbstractListModel {
     [[nodiscard]] bool wasAborted() const { return m_aborted; }
 
    private slots:
-    void requestFinished();
+    void requestFinished(QByteArray* responsePtr);
     void requestFailed(QString reason);
 
     void requestPack();
-    void packRequestFinished();
+    void packRequestFinished(QByteArray* responsePtr);
     void packRequestFailed(QString reason);
 
     void logoFailed(QString logo);
@@ -77,7 +77,6 @@ class ListModel : public QAbstractListModel {
     NetJob::Ptr m_jobPtr;
     int m_currentPack;
     QList<int> m_remainingPacks;
-    std::unique_ptr<QByteArray> m_response;
 };
 
 }  // namespace Ftb

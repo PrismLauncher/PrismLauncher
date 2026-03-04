@@ -38,12 +38,16 @@
 
 #pragma once
 
+#include <utility>
+
 #include "HttpMetaCache.h"
 
 #include "QObjectPtr.h"
 #include "net/NetRequest.h"
 
 namespace Net {
+class ByteArraySink;
+
 class Download : public NetRequest {
     Q_OBJECT
    public:
@@ -54,7 +58,11 @@ class Download : public NetRequest {
     static auto makeCached(QUrl url, MetaEntryPtr entry, Options options = Option::NoOptions) -> Download::Ptr;
 #endif
 
-    static auto makeByteArray(QUrl url, QByteArray* output, Options options = Option::NoOptions) -> Download::Ptr;
+    /**
+     * Creates a request downloading to the returned QByteArray,.
+     * The QByteArray will live as long as the Download object.
+     */
+    static auto makeByteArray(QUrl url, Options options = Option::NoOptions) -> std::pair<Download::Ptr, QByteArray*>;
     static auto makeFile(QUrl url, QString path, Options options = Option::NoOptions) -> Download::Ptr;
 
    protected:

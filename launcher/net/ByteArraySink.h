@@ -41,21 +41,16 @@
 namespace Net {
 
 /*
- * Sink object for downloads that uses an external QByteArray it doesn't own as a target.
+ * Sink object for downloads that uses an owned QByteArray as a target.
  */
 class ByteArraySink : public Sink {
    public:
-    ByteArraySink(QByteArray* output) : m_output(output) {}
-
     virtual ~ByteArraySink() = default;
 
    public:
     auto init(QNetworkRequest& request) -> Task::State override
     {
-        if (m_output)
-            m_output->clear();
-        else
-            qWarning() << "ByteArraySink did not initialize the buffer because it's not addressable";
+        m_output.clear();
         if (initAllValidators(request))
             return Task::State::Running;
         m_fail_reason = "Failed to initialize validators";
@@ -64,10 +59,7 @@ class ByteArraySink : public Sink {
 
     auto write(QByteArray& data) -> Task::State override
     {
-        if (m_output)
-            m_output->append(data);
-        else
-            qWarning() << "ByteArraySink did not write the buffer because it's not addressable";
+        m_output.append(data);
         if (writeAllValidators(data))
             return Task::State::Running;
         m_fail_reason = "Failed to write validators";
@@ -91,7 +83,9 @@ class ByteArraySink : public Sink {
 
     auto hasLocalData() -> bool override { return false; }
 
+    QByteArray* output() { return &m_output; }
+
    protected:
-    QByteArray* m_output;
+    QByteArray m_output;
 };
 }  // namespace Net

@@ -62,7 +62,7 @@ class PackInstallTask final : public InstanceTask {
     void executeTask() override;
 
    private slots:
-    void onManifestDownloadSucceeded();
+    void onManifestDownloadSucceeded(QByteArray* responsePtr);
     void onResolveModsSucceeded();
     void onCreateInstanceSucceeded();
     void onModDownloadSucceeded();
@@ -83,8 +83,6 @@ class PackInstallTask final : public InstanceTask {
     shared_qobject_ptr<Flame::FileResolvingTask> m_modIdResolverTask = nullptr;
 
     QList<int> m_fileIds;
-
-    std::unique_ptr<QByteArray> m_response;
 
     Modpack m_pack;
     QString m_versionName;
