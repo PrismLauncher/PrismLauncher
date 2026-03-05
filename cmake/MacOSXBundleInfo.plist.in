@@ -61,7 +61,7 @@
                 <string>mrpack</string>
             </array>
             <key>CFBundleTypeName</key>
-            <string>Prism Launcher instance</string>
+            <string>${Launcher_Name} instance</string>
             <key>CFBundleTypeOSTypes</key>
             <array>
                 <string>TEXT</string>
@@ -87,10 +87,10 @@
         </dict>
         <dict>
             <key>CFBundleURLName</key>
-            <string>Prismlauncher</string>
+            <string>${Launcher_Name}</string>
             <key>CFBundleURLSchemes</key>
             <array>
-            <string>prismlauncher</string>
+            <string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
             </array>
         </dict>
     </array>
