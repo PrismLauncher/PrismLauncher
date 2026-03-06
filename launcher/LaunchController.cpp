@@ -91,7 +91,7 @@ void LaunchController::decideAccount()
         m_accountToUse = accounts->at(instanceAccountIndex);
     }
 
-    if (!accounts->anyAccountIsValid()) {
+    /*if (!accounts->anyAccountIsValid()) {
         // Tell the user they need to log in at least one account in order to play.
         auto reply = CustomMessageBox::selectable(m_parentWidget, tr("No Accounts"),
                                                   tr("In order to play Minecraft, you must have at least one Microsoft "
@@ -107,7 +107,7 @@ void LaunchController::decideAccount()
             // Do not open "profile select" dialog.
             return;
         }
-    }
+    }*/
 
     if (!m_accountToUse) {
         // If no default account is set, ask the user which one to use.
