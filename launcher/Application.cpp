@@ -889,6 +889,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("ModrinthToken", "");
         m_settings->registerSetting("UserAgentOverride", "");
 
+        // Custom authlib-injector endpoint (used when launching with authlib-injector java agent)
+        m_settings->registerSetting("AuthlibInjectorUrl", "https://authlib-injector.ely.by");
+
         // FTBApp instances
         m_settings->registerSetting("FTBAppInstancesPath", "");
 
