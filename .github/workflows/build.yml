@@ -5,6 +5,7 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  push:
   merge_group:
     types: [checks_requested]
   pull_request:
@@ -53,7 +54,7 @@ jobs:
 
     defaults:
       run:
-        shell: ${{ matrix.msystem != '' && 'msys2 {0}' || 'bash' }}
+        shell: ${{ matrix.msystem && 'msys2 {0}' || 'bash' }}
 
     env:
       ARTIFACT_NAME: ${{ matrix.artifact-name }}-Qt6
@@ -69,7 +70,7 @@ jobs:
       ##
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           submodules: true
 
