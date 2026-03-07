@@ -54,7 +54,7 @@ jobs:
 
     defaults:
       run:
-        shell: ${{ matrix.msystem != '' && 'msys2 {0}' || 'bash' }}
+        shell: ${{ matrix.msystem && 'msys2 {0}' || 'bash' }}
 
     env:
       ARTIFACT_NAME: ${{ matrix.artifact-name }}-Qt6
