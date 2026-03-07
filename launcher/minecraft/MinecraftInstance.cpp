@@ -532,7 +532,16 @@ QStringList MinecraftInstance::extraArguments()
     for (auto agent : agents) {
         QStringList jar, temp1, temp2, temp3;
         agent->library()->getApplicableFiles(runtimeContext(), jar, temp1, temp2, temp3, getLocalLibraryPath());
-        list.append("-javaagent:" + jar[0] + (agent->argument().isEmpty() ? "" : "=" + agent->argument()));
+
+        QString argument = agent->argument();
+        if (argument.isEmpty()) {
+            QFileInfo agentFile(jar[0]);
+            if (agentFile.fileName().contains("authlib-injector", Qt::CaseInsensitive)) {
+                argument = APPLICATION->settings()->get("AuthlibInjectorUrl").toString();
+            }
+        }
+
+        list.append("-javaagent:" + jar[0] + (argument.isEmpty() ? "" : "=" + argument));
     }
 
     {
