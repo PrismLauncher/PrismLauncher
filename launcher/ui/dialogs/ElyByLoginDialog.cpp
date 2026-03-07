@@ -5,6 +5,10 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QMessageBox>
+
+#include "tasks/Task.h"
+#include "ui/dialogs/ProgressDialog.h"
 
 ElyByLoginDialog::ElyByLoginDialog(QWidget* parent) : QDialog(parent)
 {
@@ -53,11 +57,21 @@ MinecraftAccountPtr ElyByLoginDialog::newAccount(QWidget* parent)
     account->accountData()->yggdrasilToken.extra["elyLogin"] = dlg.m_login->text().trimmed();
     account->accountData()->yggdrasilToken.extra["elyPassword"] = dlg.m_password->text();
     account->accountData()->yggdrasilToken.extra["clientToken"] = account->internalId();
-    account->login()->start();
+
+    auto task = account->login();
+    ProgressDialog progress(parent);
+    progress.setSkipButton(true, tr("Cancel"));
+    progress.execWithTask(task.get());
+
+    if (task->getState() == Task::State::AbortedByUser) {
+        return nullptr;
+    }
 
     if (account->accountState() == AccountState::Online) {
         return account;
     }
 
+    QMessageBox::warning(parent, tr("Ely.by login failed"), account->lastError().isEmpty() ? tr("Failed to authenticate with Ely.by.")
+                                                                                             : account->lastError());
     return nullptr;
 }
