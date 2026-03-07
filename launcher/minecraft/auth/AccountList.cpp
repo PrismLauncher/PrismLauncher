@@ -391,9 +391,7 @@ QVariant AccountList::headerData(int section, [[maybe_unused]] Qt::Orientation o
                 case ProfileNameColumn:
                     return tr("Minecraft username associated with the account.");
                 case TypeColumn:
-codex/add-ely.by-provider-to-launcher-errzj5
-                    return tr("Type of the account (MSA, Ely.by or Local survivor)")
-develop
+                    return tr("Type of the account (MSA, Ely.by or Local survivor)");
                 case StatusColumn:
                     return tr("Current status of the account.");
                 default:
