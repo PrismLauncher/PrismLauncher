@@ -150,7 +150,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
 
     setWindowIcon(APPLICATION->logo());
-    setWindowTitle(APPLICATION->applicationDisplayName());
+    setWindowTitle(BuildConfig.LAUNCHER_DISPLAYNAME + QString::fromUtf8(" — Survival Edition"));
 #ifndef QT_NO_ACCESSIBILITY
     setAccessibleName(BuildConfig.LAUNCHER_DISPLAYNAME);
 #endif
@@ -379,8 +379,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     m_statusLeft = new QLabel(tr("No instance selected"), this);
     m_statusCenter = new QLabel(tr("Total playtime: 0s"), this);
+    m_statusRight = new QLabel(tr("Survival server after a long day"), this);
+    QFont statusRightFont = m_statusRight->font();
+    statusRightFont.setPointSizeF(statusRightFont.pointSizeF() - 1);
+    m_statusRight->setFont(statusRightFont);
+    m_statusRight->setStyleSheet("color: #d77a00;");
     statusBar()->addPermanentWidget(m_statusLeft, 1);
     statusBar()->addPermanentWidget(m_statusCenter, 0);
+    statusBar()->addPermanentWidget(m_statusRight, 0);
 
     // Add "manage accounts" button, right align
     QWidget* spacer = new QWidget();
