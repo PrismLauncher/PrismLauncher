@@ -42,6 +42,7 @@
 
 #include "ui/InstanceWindow.h"
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/ElyByLoginDialog.h"
 #include "ui/dialogs/MSALoginDialog.h"
 #include "ui/dialogs/ProfileSelectDialog.h"
 #include "ui/dialogs/ProfileSetupDialog.h"
@@ -145,7 +146,7 @@ LaunchDecision LaunchController::decideLaunchMode()
     MinecraftAccountPtr accountToCheck = nullptr;
 
     if (m_accountToUse->accountType() != AccountType::Offline) {
-        accountToCheck = m_accountToUse->ownsMinecraft() ? m_accountToUse : nullptr;
+        accountToCheck = m_accountToUse;
     } else if (const auto defaultAccount = accounts->defaultAccount(); defaultAccount && defaultAccount->ownsMinecraft()) {
         accountToCheck = defaultAccount;
     } else {
@@ -338,21 +339,24 @@ bool LaunchController::reauthenticateAccount(MinecraftAccountPtr account, QStrin
         auto accounts = APPLICATION->accounts();
         bool isDefault = accounts->defaultAccount() == account;
         accounts->removeAccount(accounts->index(accounts->findAccountByProfileId(account->profileId())));
+        MinecraftAccountPtr newAccount;
         if (account->accountType() == AccountType::MSA) {
-            auto newAccount = MSALoginDialog::newAccount(m_parentWidget);
+            newAccount = MSALoginDialog::newAccount(m_parentWidget);
+        } else if (account->accountType() == AccountType::ElyBy) {
+            newAccount = ElyByLoginDialog::newAccount(m_parentWidget);
+        }
 
-            if (newAccount != nullptr) {
-                accounts->addAccount(newAccount);
+        if (newAccount != nullptr) {
+            accounts->addAccount(newAccount);
 
-                if (isDefault)
-                    accounts->setDefaultAccount(newAccount);
+            if (isDefault)
+                accounts->setDefaultAccount(newAccount);
 
-                if (m_accountToUse == account) {
-                    m_accountToUse = nullptr;
-                    decideAccount();
-                }
-                return true;
+            if (m_accountToUse == account) {
+                m_accountToUse = nullptr;
+                decideAccount();
             }
+            return true;
         }
     }
 
