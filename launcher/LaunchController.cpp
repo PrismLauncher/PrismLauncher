@@ -408,8 +408,8 @@ void LaunchController::launchInstance()
 
     // Prepend Version
     {
-        auto versionString = QString("%1 version: %2 (%3)")
-                                 .arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString(), BuildConfig.BUILD_PLATFORM);
+        auto versionString = QString("Mkeiitt Launcher\nBuilt for survival with the boys\nVersion: %1 (%2)")
+                                 .arg(BuildConfig.printableVersionString(), BuildConfig.BUILD_PLATFORM);
         m_launcher->prependStep(makeShared<TextPrint>(m_launcher, versionString + "\n\n", MessageLevel::Launcher));
     }
     m_launcher->start();

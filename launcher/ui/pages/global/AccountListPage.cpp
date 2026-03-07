@@ -54,8 +54,7 @@
 AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::AccountListPage)
 {
     ui->setupUi(this);
-    ui->listView->setEmptyString(
-        tr("Welcome! Add an account to start playing."));
+    ui->listView->setEmptyString(tr("Welcome to Mkeiitt Launcher!\nRelax, grab some food, and join the survival server."));
     ui->listView->setEmptyMode(VersionListView::String);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
