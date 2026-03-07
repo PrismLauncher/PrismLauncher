@@ -5,6 +5,7 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  push:
   merge_group:
     types: [checks_requested]
   pull_request:
