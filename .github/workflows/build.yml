@@ -24,12 +24,17 @@ on:
         description: Type of build (Debug or Release)
         type: string
         default: Debug
+      platform:
+        description: Platform to run (all, macos, windows-msvc)
+        type: string
+        default: all
 
 permissions: {}
 
 jobs:
   build:
     name: Build (${{ matrix.artifact-name }})
+    if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || (github.event.inputs.platform == 'macos' && matrix.os == 'macos-14') || (github.event.inputs.platform == 'windows-msvc' && matrix.artifact-name == 'Windows-MSVC') }}
 
     environment: ${{ inputs.environment || '' }}
 
