@@ -16,9 +16,21 @@ class LoginWizardPage : public BaseWizardPage {
     void initializePage() override;
     bool validatePage() override;
     void retranslate() override;
+
    private slots:
-    void on_pushButton_clicked();
+    void on_loginButton_clicked();
+    void on_skipButton_clicked();
+    void on_accountTypeCombo_currentIndexChanged(int index);
+
+   private:
+    enum class DesiredAccountType { Offline, ElyBy, Microsoft };
+
+    DesiredAccountType selectedType() const;
+    bool addSelectedAccount();
+    void updateUiForSelection();
 
    private:
     Ui::LoginWizardPage* ui;
+    bool m_accountAdded = false;
+    bool m_skipped = false;
 };
