@@ -132,3 +132,4 @@ runs:
       with:
         name: PrismLauncher-${{ inputs.artifact-name }}-${{ runner.arch }}-${{ inputs.version }}-${{ inputs.build-type }}
         path: PrismLauncher.zip
+        overwrite: true
