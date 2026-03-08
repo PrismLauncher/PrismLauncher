@@ -82,10 +82,10 @@ else()
         set(CMAKE_EXE_LINKER_FLAGS "-Wl,--stack,8388608 ${CMAKE_EXE_LINKER_FLAGS}")
 
         # -ffunction-sections and -fdata-sections help reduce binary size
-        # -mguard=cf enables Control Flow Guard
+        # NOTE: MinGW GCC does not support -mguard=cf
         # TODO: Look into -gc-sections to further reduce binary size
         foreach(lang C CXX)
-            set("CMAKE_${lang}_FLAGS_RELEASE" "-ffunction-sections -fdata-sections -mguard=cf")
+            set("CMAKE_${lang}_FLAGS_RELEASE" "-ffunction-sections -fdata-sections")
         endforeach()
     endif()
 endif()
@@ -185,10 +185,10 @@ set(Launcher_VERSION_NAME4_COMMA "${Launcher_VERSION_MAJOR},${Launcher_VERSION_M
 set(Launcher_BUILD_PLATFORM "unknown" CACHE STRING "A short string identifying the platform that this build was built for. Only used to display in the about dialog.")
 
 # Github repo URL with releases for updater
-set(Launcher_UPDATER_GITHUB_REPO "https://github.com/PrismLauncher/PrismLauncher" CACHE STRING "Base github URL for the updater.")
+set(Launcher_UPDATER_GITHUB_REPO "https://github.com/LIDFC/MkeiittLauncher" CACHE STRING "Base github URL for the updater.")
 
 # Name to help updater identify valid artifacts
-set(Launcher_BUILD_ARTIFACT "" CACHE STRING "Artifact name to help the updater identify valid artifacts.")
+set(Launcher_BUILD_ARTIFACT "Windows-MSVC" CACHE STRING "Artifact name to help the updater identify valid artifacts.")
 
 # The metadata server
 set(Launcher_META_URL "https://meta.prismlauncher.org/v1/" CACHE STRING "URL to fetch Launcher's meta files from.")
@@ -354,12 +354,18 @@ if(NOT (UNIX AND APPLE))
 endif()
 
 if(UNIX AND APPLE)
-    set(BINARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
-    set(LIBRARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
-    set(PLUGIN_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
-    set(FRAMEWORK_DEST_DIR "${Launcher_Name}.app/Contents/Frameworks")
-    set(RESOURCES_DEST_DIR "${Launcher_Name}.app/Contents/Resources")
-    set(JARS_DEST_DIR "${Launcher_Name}.app/Contents/MacOS/jars")
+    if(DEFINED Launcher_APP_BINARY_NAME)
+        set(Launcher_MacBundleDirName "${Launcher_APP_BINARY_NAME}")
+    else()
+        set(Launcher_MacBundleDirName "${Launcher_Name}")
+    endif()
+
+    set(BINARY_DEST_DIR "${Launcher_MacBundleDirName}.app/Contents/MacOS")
+    set(LIBRARY_DEST_DIR "${Launcher_MacBundleDirName}.app/Contents/MacOS")
+    set(PLUGIN_DEST_DIR "${Launcher_MacBundleDirName}.app/Contents/MacOS")
+    set(FRAMEWORK_DEST_DIR "${Launcher_MacBundleDirName}.app/Contents/Frameworks")
+    set(RESOURCES_DEST_DIR "${Launcher_MacBundleDirName}.app/Contents/Resources")
+    set(JARS_DEST_DIR "${Launcher_MacBundleDirName}.app/Contents/MacOS/jars")
 
     # Mac bundle settings
     set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_DisplayName}")

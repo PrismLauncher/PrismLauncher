@@ -5,6 +5,7 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  push:
   merge_group:
     types: [checks_requested]
   pull_request:
@@ -23,13 +24,16 @@ on:
         description: Type of build (Debug or Release)
         type: string
         default: Debug
+      platform:
+        description: Platform to run (all, macos, windows-msvc)
+        type: string
+        default: all
 
 permissions: {}
 
 jobs:
   build:
     name: Build (${{ matrix.artifact-name }})
-
     environment: ${{ inputs.environment || '' }}
 
     permissions:
@@ -42,18 +46,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: windows-2022
-            artifact-name: Windows-MSVC
-            cmake-preset: windows_msvc
-            # TODO(@getchoo): This is the default in setup-dependencies/windows. Why isn't it working?!?!
-            vcvars-arch: amd64
-            qt-version: 6.10.2
+        include: ${{ fromJSON((github.event_name != 'workflow_dispatch' || inputs.platform == 'all') && '[{"os":"macos-14","artifact-name":"macOS","cmake-preset":"macos","qt-version":"6.10.2"},{"os":"windows-2022","artifact-name":"Windows-MSVC","cmake-preset":"windows_msvc","vcvars-arch":"amd64","qt-version":"6.10.2"}]' || (inputs.platform == 'macos' && '[{"os":"macos-14","artifact-name":"macOS","cmake-preset":"macos","qt-version":"6.10.2"}]') || (inputs.platform == 'windows-msvc' && '[{"os":"windows-2022","artifact-name":"Windows-MSVC","cmake-preset":"windows_msvc","vcvars-arch":"amd64","qt-version":"6.10.2"}]') || '[]') }}
     runs-on: ${{ matrix.os }}
 
     defaults:
       run:
-        shell: ${{ matrix.msystem != '' && 'msys2 {0}' || 'bash' }}
+        shell: ${{ matrix.msystem && 'msys2 {0}' || 'bash' }}
 
     env:
       ARTIFACT_NAME: ${{ matrix.artifact-name }}-Qt6
@@ -69,7 +67,7 @@ jobs:
       ##
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           submodules: true
 
@@ -83,6 +81,16 @@ jobs:
           vcvars-arch: ${{ matrix.vcvars-arch }}
           qt-version: ${{ matrix.qt-version }}
 
+      - name: Cache vcpkg
+        uses: actions/cache@v4
+        with:
+          path: |
+            vcpkg
+            build/vcpkg_installed
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}
+
       ##
       # BUILD
       ##
@@ -93,11 +101,19 @@ jobs:
 
       - name: Run build
         run: |
-          cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE"
+          if [ -f "build/build-${BUILD_TYPE}.ninja" ]; then
+            cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE"
+          else
+            cmake --build --preset "$CMAKE_PRESET"
+          fi
 
       - name: Run tests
         run: |
-          ctest --preset "$CMAKE_PRESET" --build-config "$BUILD_TYPE"
+          if [ -f "build/build-${BUILD_TYPE}.ninja" ]; then
+            ctest --preset "$CMAKE_PRESET" --build-config "$BUILD_TYPE"
+          else
+            ctest --preset "$CMAKE_PRESET"
+          fi
 
       ##
       # PACKAGE

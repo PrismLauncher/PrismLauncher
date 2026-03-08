@@ -62,7 +62,20 @@ runs:
         cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build-type }}
 
         cd ${{ env.INSTALL_DIR }}
-        chmod +x "PrismLauncher.app/Contents/MacOS/prismlauncher"
+        APP_BUNDLE="$(find . -maxdepth 1 -name '*.app' -type d | head -n1)"
+        if [ -z "$APP_BUNDLE" ]; then
+          echo "No .app bundle found in install directory"
+          ls -la
+          exit 1
+        fi
+
+        APP_BINARY="$(find "$APP_BUNDLE/Contents/MacOS" -maxdepth 1 -type f | head -n1)"
+        if [ -z "$APP_BINARY" ]; then
+          echo "No bundle binary found in $APP_BUNDLE/Contents/MacOS"
+          ls -la "$APP_BUNDLE/Contents/MacOS"
+          exit 1
+        fi
+        chmod +x "$APP_BINARY"
 
         if [ -n '${{ inputs.apple-codesign-id }}' ]; then
           APPLE_CODESIGN_ID='${{ inputs.apple-codesign-id }}'
@@ -72,8 +85,8 @@ runs:
           ENTITLEMENTS_FILE='../program_info/AdhocSignedApp.entitlements'
         fi
 
-        sudo codesign --sign "$APPLE_CODESIGN_ID" --deep --force --entitlements "$ENTITLEMENTS_FILE" --options runtime "PrismLauncher.app/Contents/MacOS/prismlauncher"
-        mv "PrismLauncher.app" "Prism Launcher.app"
+        sudo codesign --sign "$APPLE_CODESIGN_ID" --deep --force --entitlements "$ENTITLEMENTS_FILE" --options runtime "$APP_BUNDLE"
+        mv "$APP_BUNDLE" "Prism Launcher.app"
 
     - name: Notarize
       shell: bash
@@ -114,8 +127,19 @@ runs:
         EOF
         fi
 
-    - name: Upload binary tarball
+    - name: Upload binary tarball (attempt 1)
+      id: upload_artifact_attempt_1
+      continue-on-error: true
       uses: actions/upload-artifact@v6
       with:
-        name: PrismLauncher-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}
+        name: PrismLauncher-${{ inputs.artifact-name }}-${{ runner.arch }}-${{ inputs.version }}-${{ inputs.build-type }}
         path: PrismLauncher.zip
+        overwrite: true
+
+    - name: Upload binary tarball (retry once)
+      if: ${{ steps.upload_artifact_attempt_1.outcome == 'failure' }}
+      uses: actions/upload-artifact@v6
+      with:
+        name: PrismLauncher-${{ inputs.artifact-name }}-${{ runner.arch }}-${{ inputs.version }}-${{ inputs.build-type }}
+        path: PrismLauncher.zip
+        overwrite: true
