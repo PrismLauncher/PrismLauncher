@@ -7,13 +7,24 @@ concurrency:
 on:
   push:
   pull_request:
+
   workflow_dispatch:
+    inputs:
+      build-type:
+        description: Build type
+        required: true
+        default: Release
+        type: choice
+        options:
+          - Debug
+          - Release
 
 permissions: {}
 
 jobs:
   build:
     name: Build (${{ matrix.artifact-name }})
+
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -38,7 +49,7 @@ jobs:
     env:
       ARTIFACT_NAME: ${{ matrix.artifact-name }}-Qt6
       BUILD_PLATFORM: official
-      BUILD_TYPE: Release
+      BUILD_TYPE: ${{ inputs.build-type || 'Release' }}
       CMAKE_PRESET: ${{ matrix.cmake-preset }}
 
     steps:
@@ -48,7 +59,6 @@ jobs:
         with:
           submodules: true
 
-      # Windows dependencies
       - name: Setup dependencies (Windows)
         if: runner.os == 'Windows'
         uses: ./.github/actions/setup-dependencies
@@ -58,36 +68,45 @@ jobs:
           vcvars-arch: ${{ matrix.vcvars-arch }}
           qt-version: ${{ matrix.qt-version }}
 
-      # macOS dependencies
-      - name: Install macOS deps
+      - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
         run: |
           brew update
           brew install qt cmake ninja
 
-      - name: Configure
+      - name: Cache vcpkg
+        uses: actions/cache@v4
+        with:
+          path: |
+            vcpkg
+            build/vcpkg_installed
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}
+
+      - name: Configure project
         run: |
           cmake --preset "$CMAKE_PRESET"
 
-      - name: Build
+      - name: Run build
         run: |
           cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE"
 
-      - name: Get version
-        id: version
+      - name: Get short version
+        id: short-version
         run: |
-          echo "version=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "version=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Package Windows
+      - name: Package (Windows)
         if: runner.os == 'Windows'
         uses: ./.github/actions/package/windows
         with:
-          version: ${{ steps.version.outputs.version }}
+          version: ${{ steps.short-version.outputs.version }}
           artifact-name: ${{ matrix.artifact-name }}
 
-      - name: Package macOS
+      - name: Package (macOS)
         if: runner.os == 'macOS'
         uses: ./.github/actions/package/macos
         with:
-          version: ${{ steps.version.outputs.version }}
+          version: ${{ steps.short-version.outputs.version }}
           artifact-name: ${{ matrix.artifact-name }}
