@@ -3,7 +3,7 @@
 #endif
 #include <windows.h>
 
-IDI_ICON1               ICON    DISCARDABLE     "prismlauncher.ico"
+IDI_ICON1               ICON    DISCARDABLE     "@Launcher_Branding_ICO_FILE@"
 1 RT_MANIFEST "prismlauncher.manifest"
 
 VS_VERSION_INFO VERSIONINFO
