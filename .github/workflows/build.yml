@@ -1,7 +1,7 @@
 name: Build
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}
   cancel-in-progress: true
 
 on:
