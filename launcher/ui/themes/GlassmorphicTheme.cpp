@@ -83,13 +83,11 @@ void GlassmorphicTheme::apply(bool initial)
 {
     ITheme::apply(initial);
 
-    // Enable translucent backgrounds on all existing top-level windows
-    for (QWidget* widget : QApplication::topLevelWidgets()) {
-        widget->setAttribute(Qt::WA_TranslucentBackground, true);
-        widget->setAttribute(Qt::WA_NoSystemBackground, false);
-    }
-
-    // Request macOS vibrancy from ThemeManager
+    // Request macOS vibrancy from ThemeManager.
+    // We do NOT set WA_TranslucentBackground — that breaks Qt widget painting.
+    // Instead, the NSVisualEffectView provides the blur backdrop, and Qt renders
+    // its semi-transparent palette colors on top, letting vibrancy peek through
+    // in the gaps between widgets.
     APPLICATION->themeManager()->enableVibrancyOnAllWindows(true);
 }
 

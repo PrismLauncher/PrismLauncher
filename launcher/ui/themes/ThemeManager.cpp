@@ -267,11 +267,6 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
         // Disable vibrancy before switching themes — the new theme will re-enable if needed
         enableVibrancyOnAllWindows(false);
 
-        // Remove translucent background attribute when switching away from glassmorphic
-        for (QWidget* widget : QApplication::topLevelWidgets()) {
-            widget->setAttribute(Qt::WA_TranslucentBackground, false);
-        }
-
         theme->apply(initial);
         setTitlebarColorOfAllWindowsOnMac(qApp->palette().window().color());
 
