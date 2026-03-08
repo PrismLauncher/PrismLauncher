@@ -159,6 +159,10 @@ QString profileInUseFilter(const QString& profile, bool used)
 constexpr auto kQuickServerAddress = "144.31.48.66:4252";
 const QString kQuickServerVersion = QStringLiteral("1.21.11");
 const QString kQuickServerInstanceName = QStringLiteral("velocity-paper");
+
+constexpr auto kSurvivalServerAddress = "158.160.95.170:25565";
+const QString kSurvivalServerVersion = QStringLiteral("1.21.11");
+const QString kSurvivalServerInstanceName = QStringLiteral("Survival");
 }  // namespace
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -997,6 +1001,7 @@ void MainWindow::rebuildQuickServersTab()
     }
 
     addQuickServerButton(kQuickServerInstanceName, kQuickServerAddress, kQuickServerVersion, true);
+    addQuickServerButton(kSurvivalServerInstanceName, kSurvivalServerAddress, kSurvivalServerVersion, true);
 
     const auto customServers = loadCustomQuickServers();
     for (const auto& server : customServers) {
