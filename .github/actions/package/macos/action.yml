@@ -1,5 +1,5 @@
 name: Package for macOS
-description: Create a macOS package for Prism Launcher
+description: Create a macOS package for Mkeiitt Launcher
 
 inputs:
   version:
@@ -62,7 +62,20 @@ runs:
         cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build-type }}
 
         cd ${{ env.INSTALL_DIR }}
-        chmod +x "PrismLauncher.app/Contents/MacOS/prismlauncher"
+        APP_BUNDLE="$(find . -maxdepth 1 -name '*.app' -type d | head -n1)"
+        if [ -z "$APP_BUNDLE" ]; then
+          echo "No .app bundle found in install directory"
+          ls -la
+          exit 1
+        fi
+
+        APP_BINARY="$(find "$APP_BUNDLE/Contents/MacOS" -maxdepth 1 -type f | head -n1)"
+        if [ -z "$APP_BINARY" ]; then
+          echo "No bundle binary found in $APP_BUNDLE/Contents/MacOS"
+          ls -la "$APP_BUNDLE/Contents/MacOS"
+          exit 1
+        fi
+        chmod +x "$APP_BINARY"
 
         if [ -n '${{ inputs.apple-codesign-id }}' ]; then
           APPLE_CODESIGN_ID='${{ inputs.apple-codesign-id }}'
@@ -72,8 +85,8 @@ runs:
           ENTITLEMENTS_FILE='../program_info/AdhocSignedApp.entitlements'
         fi
 
-        sudo codesign --sign "$APPLE_CODESIGN_ID" --deep --force --entitlements "$ENTITLEMENTS_FILE" --options runtime "PrismLauncher.app/Contents/MacOS/prismlauncher"
-        mv "PrismLauncher.app" "Prism Launcher.app"
+        sudo codesign --sign "$APPLE_CODESIGN_ID" --deep --force --entitlements "$ENTITLEMENTS_FILE" --options runtime "$APP_BUNDLE"
+        mv "$APP_BUNDLE" "Mkeiitt Launcher.app"
 
     - name: Notarize
       shell: bash
@@ -83,25 +96,46 @@ runs:
         cd ${{ env.INSTALL_DIR }}
 
         if [ -n '${{ inputs.apple-notarize-password }}' ]; then
-          ditto -c -k --sequesterRsrc --keepParent "Prism Launcher.app" ../PrismLauncher.zip
-          xcrun notarytool submit ../PrismLauncher.zip \
+          ditto -c -k --sequesterRsrc --keepParent "Mkeiitt Launcher.app" ../mkeiitlauncher.zip
+          xcrun notarytool submit ../mkeiitlauncher.zip \
             --wait --progress \
             --apple-id '${{ inputs.apple-notarize-apple-id }}' \
             --team-id '${{ inputs.apple-notarize-team-id }}' \
             --password '${{ inputs.apple-notarize-password }}'
 
-          xcrun stapler staple "Prism Launcher.app"
+          xcrun stapler staple "Mkeiitt Launcher.app"
         else
           echo ":warning: Skipping notarization as credentials are not present." >> $GITHUB_STEP_SUMMARY
         fi
-        ditto -c -k --sequesterRsrc --keepParent "Prism Launcher.app" ../PrismLauncher.zip
+        ditto -c -k --sequesterRsrc --keepParent "Mkeiitt Launcher.app" ../mkeiitlauncher.zip
+
+    - name: Build DMG
+      shell: bash
+      env:
+        INSTALL_DIR: install
+      run: |
+        cd ${{ env.INSTALL_DIR }}
+        APP_NAME="Mkeiitt Launcher.app"
+        DMG_VOLUME_NAME="Mkeiitt Launcher"
+        STAGING_DIR="../dmg-staging"
+
+        rm -rf "$STAGING_DIR"
+        mkdir -p "$STAGING_DIR"
+        cp -R "$APP_NAME" "$STAGING_DIR/"
+        ln -s /Applications "$STAGING_DIR/Applications"
+
+        hdiutil create \
+          -volname "$DMG_VOLUME_NAME" \
+          -srcfolder "$STAGING_DIR" \
+          -ov -format UDZO \
+          ../mkeiitlauncher.dmg
 
     - name: Make Sparkle signature
       shell: bash
       run: |
         if [ '${{ inputs.sparkle-ed25519-key }}' != '' ]; then
           echo '${{ inputs.sparkle-ed25519-key }}' > ed25519-priv.pem
-          signature=$(/opt/homebrew/opt/openssl@3/bin/openssl pkeyutl -sign -rawin -in ${{ github.workspace }}/PrismLauncher.zip -inkey ed25519-priv.pem | openssl base64 | tr -d \\n)
+          signature=$(/opt/homebrew/opt/openssl@3/bin/openssl pkeyutl -sign -rawin -in ${{ github.workspace }}/mkeiitlauncher.zip -inkey ed25519-priv.pem | openssl base64 | tr -d \\n)
           rm ed25519-priv.pem
           cat >> $GITHUB_STEP_SUMMARY << EOF
         ### Artifact Information :information_source:
@@ -114,8 +148,36 @@ runs:
         EOF
         fi
 
-    - name: Upload binary tarball
+    - name: Upload binary tarball (attempt 1)
+      id: upload_artifact_attempt_1
+      continue-on-error: true
       uses: actions/upload-artifact@v6
       with:
-        name: PrismLauncher-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}
-        path: PrismLauncher.zip
+        name: mkeiitlauncher-${{ inputs.artifact-name }}-${{ runner.arch }}-${{ inputs.version }}-${{ inputs.build-type }}
+        path: mkeiitlauncher.zip
+        overwrite: true
+
+    - name: Upload binary tarball (retry once)
+      if: ${{ steps.upload_artifact_attempt_1.outcome == 'failure' }}
+      uses: actions/upload-artifact@v6
+      with:
+        name: mkeiitlauncher-${{ inputs.artifact-name }}-${{ runner.arch }}-${{ inputs.version }}-${{ inputs.build-type }}
+        path: mkeiitlauncher.zip
+        overwrite: true
+
+    - name: Upload DMG (attempt 1)
+      id: upload_dmg_attempt_1
+      continue-on-error: true
+      uses: actions/upload-artifact@v6
+      with:
+        name: mkeiitlauncher-${{ inputs.artifact-name }}-${{ runner.arch }}-${{ inputs.version }}-${{ inputs.build-type }}-dmg
+        path: mkeiitlauncher.dmg
+        overwrite: true
+
+    - name: Upload DMG (retry once)
+      if: ${{ steps.upload_dmg_attempt_1.outcome == 'failure' }}
+      uses: actions/upload-artifact@v6
+      with:
+        name: mkeiitlauncher-${{ inputs.artifact-name }}-${{ runner.arch }}-${{ inputs.version }}-${{ inputs.build-type }}-dmg
+        path: mkeiitlauncher.dmg
+        overwrite: true
