@@ -21,6 +21,8 @@ QString ElyByStep::describe()
 
 void ElyByStep::perform()
 {
+    static const QUrl kAuthServerBaseUrl("https://authserver.ely.by/api/authlib-injector/authserver/");
+
     const auto clientToken = m_data->yggdrasilToken.extra.value("clientToken").toString().isEmpty()
                                  ? QUuid::createUuid().toString(QUuid::Id128)
                                  : m_data->yggdrasilToken.extra.value("clientToken").toString();
@@ -31,7 +33,7 @@ void ElyByStep::perform()
 
     QUrl url;
     if (m_refresh && !m_data->yggdrasilToken.token.isEmpty()) {
-        url = QUrl("https://authserver.ely.by/refresh");
+        url = kAuthServerBaseUrl.resolved(QUrl("refresh"));
         payload.insert("accessToken", m_data->yggdrasilToken.token);
     } else {
         const auto login = m_data->yggdrasilToken.extra.value("elyLogin").toString();
@@ -41,7 +43,7 @@ void ElyByStep::perform()
             return;
         }
 
-        url = QUrl("https://authserver.ely.by/authenticate");
+        url = kAuthServerBaseUrl.resolved(QUrl("authenticate"));
         payload.insert("username", login);
         payload.insert("password", password);
         payload.insert("agent", QJsonObject{ { "name", "Minecraft" }, { "version", 1 } });
