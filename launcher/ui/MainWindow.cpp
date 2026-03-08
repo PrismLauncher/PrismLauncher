@@ -55,7 +55,10 @@
 #include <QActionGroup>
 #include <QApplication>
 #include <QButtonGroup>
+#include <QDialog>
 #include <QFileDialog>
+#include <QDialogButtonBox>
+#include <QFormLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QInputDialog>
@@ -65,13 +68,17 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QLineEdit>
 #include <QProgressDialog>
+#include <QPushButton>
 #include <QShortcut>
 #include <QStatusBar>
+#include <QTabWidget>
 #include <QToolBar>
 #include <QToolButton>
 #include <QWidget>
 #include <QWidgetAction>
+#include <QVBoxLayout>
 #include <memory>
 
 #include <BaseInstance.h>
@@ -84,10 +91,14 @@
 #include <java/JavaUtils.h>
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftInstance.h>
+#include <minecraft/VanillaInstanceCreationTask.h>
+#include <minecraft/launch/MinecraftTarget.h>
 #include <minecraft/auth/AccountList.h>
 #include <net/ApiDownload.h>
 #include <net/NetJob.h>
 #include <news/NewsChecker.h>
+#include <meta/Index.h>
+#include <meta/VersionList.h>
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
 #include "InstanceWindow.h"
@@ -143,6 +154,10 @@ QString profileInUseFilter(const QString& profile, bool used)
         return profile;
     }
 }
+
+constexpr auto kQuickServerAddress = "144.31.48.66:4252";
+const QString kQuickServerVersion = QStringLiteral("1.21.11");
+const QString kQuickServerInstanceName = QStringLiteral("velocity-paper");
 }  // namespace
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -150,7 +165,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
 
     setWindowIcon(APPLICATION->logo());
-    setWindowTitle(APPLICATION->applicationDisplayName());
+    setWindowTitle(BuildConfig.LAUNCHER_DISPLAYNAME + QString::fromUtf8(" — Survival Edition"));
 #ifndef QT_NO_ACCESSIBILITY
     setAccessibleName(BuildConfig.LAUNCHER_DISPLAYNAME);
 #endif
@@ -291,7 +306,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // Create the instance list widget
     {
-        view = new InstanceView(ui->centralWidget);
+        mainTabs = new QTabWidget(ui->centralWidget);
+        mainTabs->setObjectName(QStringLiteral("mainTabs"));
+
+        auto instancesTab = new QWidget(mainTabs);
+        auto instancesLayout = new QVBoxLayout(instancesTab);
+        instancesLayout->setContentsMargins(0, 0, 0, 0);
+        instancesLayout->setSpacing(0);
+
+        view = new InstanceView(instancesTab);
 
         view->setSelectionMode(QAbstractItemView::SingleSelection);
         // FIXME: leaks ListViewDelegate
@@ -331,7 +354,27 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         view->setSourceOfGroupCollapseStatus(
             [](const QString& groupName) -> bool { return APPLICATION->instances()->isGroupCollapsed(groupName); });
         connect(view, &InstanceView::groupStateChanged, APPLICATION->instances(), &InstanceList::on_GroupStateChanged);
-        ui->horizontalLayout->addWidget(view);
+        instancesLayout->addWidget(view);
+        mainTabs->addTab(instancesTab, tr("Instances"));
+
+        auto quickServersTab = new QWidget(mainTabs);
+        auto quickServersLayout = new QVBoxLayout(quickServersTab);
+        quickServersLayout->setContentsMargins(16, 16, 16, 16);
+        quickServersLayout->setSpacing(8);
+
+        auto addServerButton = new QPushButton(tr("Add server"), quickServersTab);
+        connect(addServerButton, &QPushButton::clicked, this, &MainWindow::promptAddQuickServer);
+        quickServersLayout->addWidget(addServerButton, 0, Qt::AlignLeft | Qt::AlignTop);
+
+        quickServersListLayout = new QVBoxLayout();
+        quickServersListLayout->setSpacing(8);
+        quickServersLayout->addLayout(quickServersListLayout);
+        quickServersLayout->addStretch();
+        mainTabs->addTab(quickServersTab, tr("Quick Servers"));
+
+        rebuildQuickServersTab();
+
+        ui->horizontalLayout->addWidget(mainTabs);
     }
     // The cat background
     {
@@ -379,8 +422,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     m_statusLeft = new QLabel(tr("No instance selected"), this);
     m_statusCenter = new QLabel(tr("Total playtime: 0s"), this);
+    m_statusRight = new QLabel(tr("Survival server after a long day"), this);
+    QFont statusRightFont = m_statusRight->font();
+    statusRightFont.setPointSizeF(statusRightFont.pointSizeF() - 1);
+    m_statusRight->setFont(statusRightFont);
+    m_statusRight->setStyleSheet("color: #d77a00;");
     statusBar()->addPermanentWidget(m_statusLeft, 1);
     statusBar()->addPermanentWidget(m_statusCenter, 0);
+    statusBar()->addPermanentWidget(m_statusRight, 0);
 
     // Add "manage accounts" button, right align
     QWidget* spacer = new QWidget();
@@ -871,6 +920,163 @@ void MainWindow::instanceFromInstanceTask(InstanceTask* rawTask)
 {
     unique_qobject_ptr<Task> task(APPLICATION->instances()->wrapInstanceTask(rawTask));
     runModalTask(task.get());
+}
+
+BaseInstance* MainWindow::findInstanceByName(const QString& name) const
+{
+    for (int i = 0; i < APPLICATION->instances()->count(); i++) {
+        auto* instance = APPLICATION->instances()->at(i);
+        if (instance && instance->name() == name) {
+            return instance;
+        }
+    }
+    return nullptr;
+}
+
+void MainWindow::launchQuickVelocityServer()
+{
+    launchQuickServer(kQuickServerInstanceName, kQuickServerAddress, kQuickServerVersion);
+}
+
+QList<QVariantMap> MainWindow::loadCustomQuickServers() const
+{
+    QList<QVariantMap> servers;
+    auto list = APPLICATION->settings()->get("QuickServers").toList();
+    for (const auto& item : list) {
+        auto map = item.toMap();
+        const auto name = map.value("name").toString().trimmed();
+        const auto address = map.value("address").toString().trimmed();
+        const auto version = map.value("version").toString().trimmed();
+        if (name.isEmpty() || address.isEmpty() || version.isEmpty()) {
+            continue;
+        }
+        servers.append({ { "name", name }, { "address", address }, { "version", version } });
+    }
+    return servers;
+}
+
+void MainWindow::saveCustomQuickServers(const QList<QVariantMap>& servers)
+{
+    QVariantList list;
+    for (const auto& server : servers) {
+        list.append(server);
+    }
+    APPLICATION->settings()->set("QuickServers", list);
+}
+
+void MainWindow::addQuickServerButton(const QString& name, const QString& address, const QString& version, bool builtIn)
+{
+    if (!quickServersListLayout) {
+        return;
+    }
+
+    auto quickServerButton = new QToolButton();
+    quickServerButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    quickServerButton->setAutoRaise(false);
+    quickServerButton->setIcon(QIcon::fromTheme("minecraft"));
+    quickServerButton->setIconSize(QSize(64, 64));
+    quickServerButton->setText(tr("%1\n%2\nMinecraft %3").arg(name, address, version));
+    quickServerButton->setToolTip(builtIn ? tr("Built-in server") : tr("Custom server"));
+    connect(quickServerButton, &QToolButton::clicked, this, [this, name, address, version] { launchQuickServer(name, address, version); });
+
+    quickServersListLayout->addWidget(quickServerButton, 0, Qt::AlignLeft | Qt::AlignTop);
+}
+
+void MainWindow::rebuildQuickServersTab()
+{
+    if (!quickServersListLayout) {
+        return;
+    }
+
+    while (auto* item = quickServersListLayout->takeAt(0)) {
+        if (item->widget()) {
+            item->widget()->deleteLater();
+        }
+        delete item;
+    }
+
+    addQuickServerButton(kQuickServerInstanceName, kQuickServerAddress, kQuickServerVersion, true);
+
+    const auto customServers = loadCustomQuickServers();
+    for (const auto& server : customServers) {
+        addQuickServerButton(server.value("name").toString(), server.value("address").toString(), server.value("version").toString(),
+                             false);
+    }
+}
+
+void MainWindow::promptAddQuickServer()
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle(tr("Add quick server"));
+
+    auto* layout = new QVBoxLayout(&dialog);
+    auto* formLayout = new QFormLayout();
+    auto* nameEdit = new QLineEdit(&dialog);
+    auto* addressEdit = new QLineEdit(&dialog);
+    auto* versionEdit = new QLineEdit(&dialog);
+    versionEdit->setText(kQuickServerVersion);
+    formLayout->addRow(tr("Server name"), nameEdit);
+    formLayout->addRow(tr("IP address"), addressEdit);
+    formLayout->addRow(tr("Game version"), versionEdit);
+    layout->addLayout(formLayout);
+
+    auto* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+    connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    layout->addWidget(buttonBox);
+
+    if (dialog.exec() != QDialog::Accepted) {
+        return;
+    }
+
+    const auto name = nameEdit->text().trimmed();
+    const auto address = addressEdit->text().trimmed();
+    const auto version = versionEdit->text().trimmed();
+    if (name.isEmpty() || address.isEmpty() || version.isEmpty()) {
+        CustomMessageBox::selectable(this, tr("Invalid server"), tr("All fields are required."), QMessageBox::Warning)->show();
+        return;
+    }
+
+    auto servers = loadCustomQuickServers();
+    servers.append({ { "name", name }, { "address", address }, { "version", version } });
+    saveCustomQuickServers(servers);
+    rebuildQuickServersTab();
+}
+
+void MainWindow::launchQuickServer(const QString& name, const QString& address, const QString& version)
+{
+    auto* instance = findInstanceByName(name);
+    if (!instance) {
+        auto versions = APPLICATION->metadataIndex()->get("net.minecraft");
+        versions->waitToLoad();
+
+        auto minecraftVersion = versions->getVersion(version);
+        if (!minecraftVersion) {
+            CustomMessageBox::selectable(this, tr("Version unavailable"),
+                                         tr("Could not find Minecraft version %1 for quick server launch.").arg(version),
+                                         QMessageBox::Critical)
+                ->show();
+            return;
+        }
+
+        auto* creationTask = new VanillaCreationTask(minecraftVersion);
+        creationTask->setName(name);
+        instanceFromInstanceTask(creationTask);
+
+        instance = findInstanceByName(name);
+        if (!instance) {
+            CustomMessageBox::selectable(this, tr("Instance creation failed"),
+                                         tr("Failed to create the quick server instance."), QMessageBox::Critical)
+                ->show();
+            return;
+        }
+
+        refreshInstances();
+        setSelectedInstanceById(instance->id());
+    }
+
+    auto target = std::make_shared<MinecraftTarget>(MinecraftTarget::parse(address, false));
+    APPLICATION->launch(instance, LaunchMode::Normal, target);
 }
 
 void MainWindow::on_actionCopyInstance_triggered()

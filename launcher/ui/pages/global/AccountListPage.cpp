@@ -46,6 +46,7 @@
 
 #include "ui/dialogs/ChooseOfflineNameDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/ElyByLoginDialog.h"
 #include "ui/dialogs/MSALoginDialog.h"
 
 #include "Application.h"
@@ -53,8 +54,7 @@
 AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::AccountListPage)
 {
     ui->setupUi(this);
-    ui->listView->setEmptyString(
-        tr("Welcome! Add an account to start playing."));
+    ui->listView->setEmptyString(tr("Welcome to Mkeiitt Launcher!\nRelax, grab some food, and join the survival server."));
     ui->listView->setEmptyMode(VersionListView::String);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -129,6 +129,17 @@ void AccountListPage::listChanged()
 void AccountListPage::on_actionAddMicrosoft_triggered()
 {
     auto account = MSALoginDialog::newAccount(this);
+    if (account) {
+        m_accounts->addAccount(account);
+        if (m_accounts->count() == 1) {
+            m_accounts->setDefaultAccount(account);
+        }
+    }
+}
+
+void AccountListPage::on_actionAddElyBy_triggered()
+{
+    auto account = ElyByLoginDialog::newAccount(this);
     if (account) {
         m_accounts->addAccount(account);
         if (m_accounts->count() == 1) {
