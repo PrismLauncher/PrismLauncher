@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>420</width>
+    <height>340</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,9 +15,9 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="titleLabel">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Add Microsoft account&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Choose nickname and account&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>
@@ -28,12 +28,22 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label_2">
+    <widget class="QLabel" name="descriptionLabel">
      <property name="text">
-      <string>In order to play Minecraft, you must have at least one Microsoft account logged in. Do you want to log in now?</string>
+      <string>Pick how you want to play: local survivor (offline), Ely.by, or Microsoft.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QComboBox" name="accountTypeCombo"/>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="offlineNameEdit">
+     <property name="placeholderText">
+      <string>Offline nickname</string>
      </property>
     </widget>
    </item>
@@ -45,9 +55,16 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="loginButton">
      <property name="text">
-      <string>Add Microsoft account</string>
+      <string>Continue</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="skipButton">
+     <property name="text">
+      <string>Skip for now</string>
      </property>
     </widget>
    </item>
@@ -59,7 +76,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>156</height>
+       <height>120</height>
       </size>
      </property>
     </spacer>
@@ -68,7 +85,4 @@
  </widget>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="buttonGroup"/>
- </buttongroups>
 </ui>

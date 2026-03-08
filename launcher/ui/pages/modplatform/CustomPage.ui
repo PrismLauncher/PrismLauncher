@@ -153,6 +153,32 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="quickModsGroupBox">
+         <property name="title">
+          <string>Quick Mod Setup</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QLabel" name="quickModsLabel">
+            <property name="text">
+             <string>Preset</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="quickModPresetComboBox"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="quickModsSummaryLabel">
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="loaderLayout">
          <item>
           <widget class="VersionSelectWidget" name="loaderVersionList" native="true">
