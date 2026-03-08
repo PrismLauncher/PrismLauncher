@@ -779,6 +779,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // Minecraft offline player name
         m_settings->registerSetting("LastOfflinePlayerName", "");
+        m_settings->registerSetting("QuickServers", QVariantList{});
 
         // Wrapper command for launch
         m_settings->registerSetting("WrapperCommand", "");
@@ -1234,7 +1235,7 @@ bool Application::createSetupWizard()
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
     bool validWidgets = m_themeManager->isValidApplicationTheme(settings()->get("ApplicationTheme").toString());
     bool validIcons = m_themeManager->isValidIconTheme(settings()->get("IconTheme").toString());
-    bool login = firstLaunchRequired || !m_accounts->anyAccountIsValid();
+    bool login = firstLaunchRequired || m_accounts->count() == 0;
     bool themeInterventionRequired = !validWidgets || !validIcons;
     bool wizardRequired = firstLaunchRequired || javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired || askjava || login;
     if (wizardRequired) {

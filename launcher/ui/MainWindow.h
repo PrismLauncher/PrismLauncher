@@ -52,6 +52,8 @@
 class LaunchController;
 class NewsChecker;
 class QToolButton;
+class QTabWidget;
+class QVBoxLayout;
 class InstanceProxyModel;
 class LabeledToolButton;
 class QLabel;
@@ -215,6 +217,8 @@ class MainWindow : public QMainWindow {
 #endif
 
     void refreshCurrentInstance();
+    void launchQuickVelocityServer();
+    void promptAddQuickServer();
 
    private:
     void retranslateUi();
@@ -229,6 +233,12 @@ class MainWindow : public QMainWindow {
 
     void runModalTask(Task* task);
     void instanceFromInstanceTask(InstanceTask* task);
+    BaseInstance* findInstanceByName(const QString& name) const;
+    void launchQuickServer(const QString& name, const QString& address, const QString& version);
+    void addQuickServerButton(const QString& name, const QString& address, const QString& version, bool builtIn);
+    void rebuildQuickServersTab();
+    QList<QVariantMap> loadCustomQuickServers() const;
+    void saveCustomQuickServers(const QList<QVariantMap>& servers);
 
    private:
     Ui::MainWindow* ui;
@@ -236,6 +246,8 @@ class MainWindow : public QMainWindow {
     InstanceView* view = nullptr;
     InstanceProxyModel* proxymodel = nullptr;
     QToolButton* newsLabel = nullptr;
+    QTabWidget* mainTabs = nullptr;
+    QVBoxLayout* quickServersListLayout = nullptr;
     QLabel* m_statusLeft = nullptr;
     QLabel* m_statusCenter = nullptr;
     QLabel* m_statusRight = nullptr;
