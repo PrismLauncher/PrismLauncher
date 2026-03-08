@@ -73,13 +73,33 @@ class CustomPage : public QWidget, public BasePage {
    private slots:
     void filterChanged();
     void loaderFilterChanged();
+    void quickModPresetChanged(int index);
 
    private:
     void refresh();
     void loaderRefresh();
     void suggestCurrent();
+    void applyQuickModPreset(int index);
+    void updateQuickModSummary(int index);
 
    private:
+    struct QuickModPreset {
+        QString name;
+        QString description;
+        QStringList mods;
+        QString loader;
+    };
+
+    const QList<QuickModPreset> m_quickModPresets = {
+        { tr("Vanilla"), tr("No mod loader or additional mods."), {}, "none" },
+        { tr("Forge"), tr("Forge loader only."), {}, "forge" },
+        { tr("Forge + OptiFine"), tr("Forge loader with OptiFine."), { "OptiFine" }, "forge" },
+        { tr("Fabric + Sodium"), tr("Fabric loader with Sodium."), { "Sodium" }, "fabric" },
+        { tr("Fabric + Sodium + Iris"), tr("Fabric loader with Sodium and Iris."), { "Sodium", "Iris" }, "fabric" },
+        { tr("Fabric + Sodium + Lithium"), tr("Fabric loader with Sodium and Lithium."), { "Sodium", "Lithium" }, "fabric" },
+        { tr("OptiFine only"), tr("No mod loader, install OptiFine only."), { "OptiFine" }, "none" },
+    };
+
     bool initialized = false;
     NewInstanceDialog* dialog = nullptr;
     Ui::CustomPage* ui = nullptr;
