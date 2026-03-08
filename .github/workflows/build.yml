@@ -6,39 +6,15 @@ concurrency:
 
 on:
   push:
-  merge_group:
-    types: [checks_requested]
   pull_request:
-  workflow_call:
-    inputs:
-      build-type:
-        description: Type of build (Debug or Release)
-        type: string
-        default: Debug
-      environment:
-        description: Deployment environment to run under
-        type: string
   workflow_dispatch:
-    inputs:
-      build-type:
-        description: Type of build (Debug or Release)
-        type: string
-        default: Debug
 
 permissions: {}
 
 jobs:
   build:
     name: Build (${{ matrix.artifact-name }})
-
     runs-on: ${{ matrix.os }}
-
-    environment: ${{ inputs.environment || '' }}
-
-    permissions:
-      contents: read
-      id-token: write
-      packages: write
 
     strategy:
       fail-fast: false
@@ -57,81 +33,61 @@ jobs:
 
     defaults:
       run:
-        shell: ${{ matrix.msystem && 'msys2 {0}' || 'bash' }}
+        shell: bash
 
     env:
       ARTIFACT_NAME: ${{ matrix.artifact-name }}-Qt6
       BUILD_PLATFORM: official
-      BUILD_TYPE: ${{ inputs.build-type || 'Debug' }}
+      BUILD_TYPE: Release
       CMAKE_PRESET: ${{ matrix.cmake-preset }}
-      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.macosx-deployment-target }}
 
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: true
 
-      - name: Setup dependencies
-        id: setup-dependencies
+      # Windows dependencies
+      - name: Setup dependencies (Windows)
+        if: runner.os == 'Windows'
         uses: ./.github/actions/setup-dependencies
         with:
           build-type: ${{ env.BUILD_TYPE }}
           artifact-name: ${{ matrix.artifact-name }}
-          msystem: ${{ matrix.msystem }}
           vcvars-arch: ${{ matrix.vcvars-arch }}
           qt-version: ${{ matrix.qt-version }}
 
-      - name: Cache vcpkg
-        uses: actions/cache@v4
-        with:
-          path: |
-            vcpkg
-            build/vcpkg_installed
-          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
-          restore-keys: |
-            vcpkg-${{ runner.os }}
+      # macOS dependencies
+      - name: Install macOS deps
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install qt cmake ninja
 
-      ##
-      # BUILD
-      ##
-
-      - name: Configure project
+      - name: Configure
         run: |
           cmake --preset "$CMAKE_PRESET"
 
-      - name: Run build
+      - name: Build
         run: |
           cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE"
 
-      ##
-      # PACKAGE
-      ##
-
-      - name: Get short version
-        id: short-version
-        shell: bash
+      - name: Get version
+        id: version
         run: |
-          echo "version=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "version=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Package (Windows)
-        if: ${{ runner.os == 'Windows' }}
+      - name: Package Windows
+        if: runner.os == 'Windows'
         uses: ./.github/actions/package/windows
-        env:
-          CI_HAS_ACCESS_TO_AZURE: ${{ vars.CI_HAS_ACCESS_TO_AZURE || '' }}
         with:
-          version: ${{ steps.short-version.outputs.version }}
-          build-type: ${{ steps.setup-dependencies.outputs.build-type }}
+          version: ${{ steps.version.outputs.version }}
           artifact-name: ${{ matrix.artifact-name }}
-          msystem: ${{ matrix.msystem }}
 
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Package (macOS)
-        if: ${{ runner.os == 'macOS' }}
+      - name: Package macOS
+        if: runner.os == 'macOS'
         uses: ./.github/actions/package/macos
         with:
-          version: ${{ steps.short-version.outputs.version }}
+          version: ${{ steps.version.outputs.version }}
           artifact-name: ${{ matrix.artifact-name }}
