@@ -31,13 +31,13 @@ jobs:
   build:
     name: Build (${{ matrix.artifact-name }})
 
+    runs-on: ${{ matrix.os }}
+
     environment: ${{ inputs.environment || '' }}
 
     permissions:
       contents: read
-      # Required for Azure Trusted Signing
       id-token: write
-      # Required for vcpkg binary cache
       packages: write
 
     strategy:
@@ -47,7 +47,6 @@ jobs:
           - os: windows-2022
             artifact-name: Windows-MSVC
             cmake-preset: windows_msvc
-            # TODO(@getchoo): This is the default in setup-dependencies/windows. Why isn't it working?!?!
             vcvars-arch: amd64
             qt-version: 6.10.2
 
@@ -55,7 +54,6 @@ jobs:
             artifact-name: macOS
             cmake-preset: macos
             qt-version: 6.10.2
-            runs-on: ${{ matrix.os }}
 
     defaults:
       run:
@@ -120,12 +118,6 @@ jobs:
       - name: Package (Windows)
         if: ${{ runner.os == 'Windows' }}
         uses: ./.github/actions/package/windows
-      - name: Package (macOS)
-        if: ${{ runner.os == 'macOS' }}
-        uses: ./.github/actions/package/macos
-    with:
-    version: ${{ steps.short-version.outputs.version }}
-    artifact-name: ${{ matrix.artifact-name }}
         env:
           CI_HAS_ACCESS_TO_AZURE: ${{ vars.CI_HAS_ACCESS_TO_AZURE || '' }}
         with:
@@ -137,3 +129,10 @@ jobs:
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Package (macOS)
+        if: ${{ runner.os == 'macOS' }}
+        uses: ./.github/actions/package/macos
+        with:
+          version: ${{ steps.short-version.outputs.version }}
+          artifact-name: ${{ matrix.artifact-name }}
