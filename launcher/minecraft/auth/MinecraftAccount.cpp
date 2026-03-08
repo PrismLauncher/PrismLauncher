@@ -74,6 +74,13 @@ MinecraftAccountPtr MinecraftAccount::createBlankMSA()
     return account;
 }
 
+MinecraftAccountPtr MinecraftAccount::createBlankEly()
+{
+    MinecraftAccountPtr account(new MinecraftAccount());
+    account->data.type = AccountType::ElyBy;
+    return account;
+}
+
 MinecraftAccountPtr MinecraftAccount::createOffline(const QString& username)
 {
     auto account = makeShared<MinecraftAccount>();

@@ -343,8 +343,11 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
                         case AccountType::MSA: {
                             return tr("MSA", "Account type");
                         }
+                        case AccountType::ElyBy: {
+                            return tr("Ely.by", "Account type");
+                        }
                         case AccountType::Offline: {
-                            return tr("Offline", "Account type");
+                            return tr("Local survivor", "Account type");
                         }
                     }
                     return tr("Unknown", "Account type");
@@ -388,7 +391,7 @@ QVariant AccountList::headerData(int section, [[maybe_unused]] Qt::Orientation o
                 case ProfileNameColumn:
                     return tr("Minecraft username associated with the account.");
                 case TypeColumn:
-                    return tr("Type of the account (MSA or Offline)");
+                    return tr("Type of the account (MSA, Ely.by or Local survivor)");
                 case StatusColumn:
                     return tr("Current status of the account.");
                 default:
