@@ -49,11 +49,6 @@ jobs:
             cmake-preset: macos
             qt-version: 6.10.2
           - os: windows-2022
-            artifact-name: Windows-MinGW-w64
-            cmake-preset: windows_mingw
-            msystem: MINGW64
-            qt-version: 6.10.2
-          - os: windows-2022
             artifact-name: Windows-MSVC
             cmake-preset: windows_msvc
             # TODO(@getchoo): This is the default in setup-dependencies/windows. Why isn't it working?!?!
