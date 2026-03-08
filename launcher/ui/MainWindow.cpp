@@ -55,6 +55,7 @@
 #include <QActionGroup>
 #include <QApplication>
 #include <QButtonGroup>
+#include <QComboBox>
 #include <QDialog>
 #include <QFileDialog>
 #include <QDialogButtonBox>
@@ -1006,6 +1007,9 @@ void MainWindow::rebuildQuickServersTab()
 
 void MainWindow::promptAddQuickServer()
 {
+    auto versions = APPLICATION->metadataIndex()->get("net.minecraft");
+    versions->waitToLoad();
+
     QDialog dialog(this);
     dialog.setWindowTitle(tr("Add quick server"));
 
@@ -1013,11 +1017,21 @@ void MainWindow::promptAddQuickServer()
     auto* formLayout = new QFormLayout();
     auto* nameEdit = new QLineEdit(&dialog);
     auto* addressEdit = new QLineEdit(&dialog);
-    auto* versionEdit = new QLineEdit(&dialog);
-    versionEdit->setText(kQuickServerVersion);
+    auto* versionCombo = new QComboBox(&dialog);
+    versionCombo->setIconSize(QSize(16, 16));
+
+    const auto mcIcon = QIcon::fromTheme("minecraft");
+    for (const auto& version : versions->versions()) {
+        versionCombo->addItem(mcIcon, version->descriptor(), version->descriptor());
+    }
+    auto defaultIndex = versionCombo->findData(kQuickServerVersion);
+    if (defaultIndex >= 0) {
+        versionCombo->setCurrentIndex(defaultIndex);
+    }
+
     formLayout->addRow(tr("Server name"), nameEdit);
     formLayout->addRow(tr("IP address"), addressEdit);
-    formLayout->addRow(tr("Game version"), versionEdit);
+    formLayout->addRow(tr("Game version"), versionCombo);
     layout->addLayout(formLayout);
 
     auto* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
@@ -1031,7 +1045,7 @@ void MainWindow::promptAddQuickServer()
 
     const auto name = nameEdit->text().trimmed();
     const auto address = addressEdit->text().trimmed();
-    const auto version = versionEdit->text().trimmed();
+    const auto version = versionCombo->currentData().toString().trimmed();
     if (name.isEmpty() || address.isEmpty() || version.isEmpty()) {
         CustomMessageBox::selectable(this, tr("Invalid server"), tr("All fields are required."), QMessageBox::Warning)->show();
         return;
@@ -1045,6 +1059,14 @@ void MainWindow::promptAddQuickServer()
 
 void MainWindow::launchQuickServer(const QString& name, const QString& address, const QString& version)
 {
+    auto confirmResult = CustomMessageBox::selectable(this, tr("Quick connect"),
+                                                      tr("Do you want to quickly connect to server \"%1\"?").arg(name),
+                                                      QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)
+                             ->exec();
+    if (confirmResult != QMessageBox::Yes) {
+        return;
+    }
+
     auto* instance = findInstanceByName(name);
     if (!instance) {
         auto versions = APPLICATION->metadataIndex()->get("net.minecraft");
