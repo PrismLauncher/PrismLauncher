@@ -1,7 +1,7 @@
 name: Build
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -64,7 +64,6 @@ jobs:
       BUILD_PLATFORM: official
       BUILD_TYPE: ${{ inputs.build-type || 'Debug' }}
       CMAKE_PRESET: ${{ matrix.cmake-preset }}
-
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.macosx-deployment-target }}
 
     steps:
