@@ -60,6 +60,10 @@ class ThemeManager {
 
     void refresh();
 
+    /// @brief Enables or disables macOS vibrancy (NSVisualEffectView) on all windows.
+    /// On non-Mac systems, this is a no-op.
+    void enableVibrancyOnAllWindows(bool enable);
+
    private:
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
     std::map<QString, IconTheme> m_icons;
@@ -89,6 +93,8 @@ class ThemeManager {
     void stopSettingNewWindowColorsOnMac();
 #ifdef Q_OS_MACOS
     NSObject* m_windowTitlebarObserver = nullptr;
+    NSObject* m_vibrancyWindowObserver = nullptr;
+    bool m_vibrancyEnabled = false;
 #endif
 
     const QStringList builtinIcons{"pe_colored", "pe_light", "pe_dark", "pe_blue",    "breeze_light", "breeze_dark",

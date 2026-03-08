@@ -71,3 +71,95 @@ void ThemeManager::stopSettingNewWindowColorsOnMac()
         m_windowTitlebarObserver = nil;
     }
 }
+
+// Identifier to find our injected vibrancy views
+static NSString* const kVibrancyViewIdentifier = @"PrismLauncherVibrancy";
+
+static void addVibrancyToWindow(NSWindow* window)
+{
+    NSView* contentView = window.contentView;
+    if (!contentView)
+        return;
+
+    // Check if we already added a vibrancy view
+    for (NSView* subview in contentView.subviews) {
+        if ([subview.identifier isEqualToString:kVibrancyViewIdentifier])
+            return;
+    }
+
+    // Create NSVisualEffectView with dark under-window material
+    NSVisualEffectView* vibrancyView = [[NSVisualEffectView alloc] initWithFrame:contentView.bounds];
+    vibrancyView.identifier = kVibrancyViewIdentifier;
+    vibrancyView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+    vibrancyView.blendingMode = NSVisualEffectBlendingModeBehindWindow;
+    vibrancyView.material = NSVisualEffectMaterialHUDWindow;
+    vibrancyView.state = NSVisualEffectStateActive;
+    vibrancyView.wantsLayer = YES;
+
+    // Insert at the very back so it doesn't cover Qt content
+    [contentView addSubview:vibrancyView positioned:NSWindowBelow relativeTo:nil];
+
+    // Make the window itself transparent so vibrancy shows
+    window.backgroundColor = [NSColor clearColor];
+    window.opaque = NO;
+    window.titlebarAppearsTransparent = YES;
+    window.appearance = [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua];
+
+    // Enable full-size content for edge-to-edge glass
+    window.styleMask |= NSWindowStyleMaskFullSizeContentView;
+}
+
+static void removeVibrancyFromWindow(NSWindow* window)
+{
+    NSView* contentView = window.contentView;
+    if (!contentView)
+        return;
+
+    NSMutableArray<NSView*>* toRemove = [NSMutableArray array];
+    for (NSView* subview in contentView.subviews) {
+        if ([subview.identifier isEqualToString:kVibrancyViewIdentifier]) {
+            [toRemove addObject:subview];
+        }
+    }
+    for (NSView* view in toRemove) {
+        [view removeFromSuperview];
+    }
+
+    // Restore window opacity
+    window.opaque = YES;
+    window.backgroundColor = nil;
+    window.styleMask &= ~NSWindowStyleMaskFullSizeContentView;
+}
+
+void ThemeManager::enableVibrancyOnAllWindows(bool enable)
+{
+    m_vibrancyEnabled = enable;
+
+    NSArray<NSWindow*>* windows = [NSApp windows];
+    for (NSWindow* window in windows) {
+        if (enable) {
+            addVibrancyToWindow(window);
+        } else {
+            removeVibrancyFromWindow(window);
+        }
+    }
+
+    // Handle newly opened windows
+    NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
+    if (m_vibrancyWindowObserver) {
+        [center removeObserver:m_vibrancyWindowObserver];
+        m_vibrancyWindowObserver = nil;
+    }
+
+    if (enable) {
+        m_vibrancyWindowObserver = [center addObserverForName:NSWindowDidChangeOcclusionStateNotification
+                                                        object:nil
+                                                         queue:[NSOperationQueue mainQueue]
+                                                    usingBlock:^(NSNotification* notification) {
+                                                        if (m_vibrancyEnabled) {
+                                                            NSWindow* window = notification.object;
+                                                            addVibrancyToWindow(window);
+                                                        }
+                                                    }];
+    }
+}

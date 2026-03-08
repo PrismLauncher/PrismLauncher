@@ -37,6 +37,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QPainter>
+#include <QPainterPath>
 #include <QTextLayout>
 #include <QTextOption>
 #include <QtMath>
@@ -46,6 +47,8 @@
 #include "BaseInstance.h"
 #include "InstanceList.h"
 #include "InstanceView.h"
+
+#include "Application.h"
 
 // Origin: Qt
 static void viewItemTextLayout(QTextLayout& textLayout, int lineWidth, qreal& height, qreal& widthUsed)
@@ -70,8 +73,66 @@ static void viewItemTextLayout(QTextLayout& textLayout, int lineWidth, qreal& he
 
 ListViewDelegate::ListViewDelegate(QObject* parent) : QStyledItemDelegate(parent) {}
 
+static bool isGlassmorphicTheme()
+{
+    auto settings = APPLICATION->settings();
+    return settings && settings->get("ApplicationTheme").toString() == "glassmorphic";
+}
+
+void drawGlassmorphicCard(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect)
+{
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing, true);
+
+    const int radius = 12;
+    QPainterPath path;
+    path.addRoundedRect(QRectF(rect), radius, radius);
+    painter->setClipPath(path);
+
+    if (option.state & QStyle::State_Selected) {
+        // Selected: luminous blue glass card
+        QColor bg(50, 140, 255, 45);
+        painter->fillPath(path, bg);
+
+        // Subtle inner glow border
+        QPen borderPen(QColor(100, 180, 255, 80), 1.0);
+        painter->setPen(borderPen);
+        painter->drawPath(path);
+
+        // Top highlight edge
+        QLinearGradient topGlow(rect.topLeft(), QPointF(rect.left(), rect.top() + 6));
+        topGlow.setColorAt(0, QColor(255, 255, 255, 25));
+        topGlow.setColorAt(1, QColor(255, 255, 255, 0));
+        painter->fillRect(QRectF(rect.left(), rect.top(), rect.width(), 6), topGlow);
+    } else if (option.state & QStyle::State_MouseOver) {
+        // Hover: subtle glass lift
+        QColor bg(255, 255, 255, 18);
+        painter->fillPath(path, bg);
+
+        QPen borderPen(QColor(255, 255, 255, 30), 0.5);
+        painter->setPen(borderPen);
+        painter->drawPath(path);
+    } else {
+        // Default: very subtle frosted card
+        QColor bg(255, 255, 255, 8);
+        painter->fillPath(path, bg);
+
+        QPen borderPen(QColor(255, 255, 255, 12), 0.5);
+        painter->setPen(borderPen);
+        painter->drawPath(path);
+    }
+
+    painter->restore();
+}
+
 void drawSelectionRect(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect)
 {
+    if (isGlassmorphicTheme()) {
+        // Use full item rect for the card, not just text area
+        drawGlassmorphicCard(painter, option, rect);
+        return;
+    }
+
     if ((option.state & QStyle::State_Selected))
         painter->fillRect(rect, option.palette.brush(QPalette::Highlight));
     else {
@@ -203,9 +264,12 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 
     // draw background
     {
-        // FIXME: unused
-        // QSize textSize = viewItemTextSize ( &opt );
-        drawSelectionRect(painter, opt, textHighlightRect);
+        if (isGlassmorphicTheme()) {
+            // Glassmorphic: draw the card around the full item, not just text area
+            drawGlassmorphicCard(painter, opt, opt.rect);
+        } else {
+            drawSelectionRect(painter, opt, textHighlightRect);
+        }
         /*
         QPalette::ColorGroup cg;
         QStyleOptionViewItem opt2(opt);

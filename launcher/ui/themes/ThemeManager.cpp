@@ -20,6 +20,7 @@
 
 #include <QApplication>
 #include <QDir>
+#include <QWidget>
 #include <QDirIterator>
 #include <QIcon>
 #include <QImageReader>
@@ -30,6 +31,7 @@
 #include "ui/themes/CatPack.h"
 #include "ui/themes/CustomTheme.h"
 #include "ui/themes/DarkTheme.h"
+#include "ui/themes/GlassmorphicTheme.h"
 #include "ui/themes/SystemTheme.h"
 
 #include "Application.h"
@@ -53,6 +55,7 @@ ThemeManager::ThemeManager()
 
 ThemeManager::~ThemeManager()
 {
+    enableVibrancyOnAllWindows(false);
     stopSettingNewWindowColorsOnMac();
 }
 
@@ -138,6 +141,7 @@ void ThemeManager::initializeWidgets()
     auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
     themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BrightTheme>());
+    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<GlassmorphicTheme>());
 
     themeDebugLog() << "<> Initializing System Widget Themes";
     QStringList styles = QStyleFactory::keys();
@@ -184,6 +188,7 @@ void ThemeManager::initializeWidgets()
 void ThemeManager::setTitlebarColorOnMac(WId windowId, QColor color) {}
 void ThemeManager::setTitlebarColorOfAllWindowsOnMac(QColor color) {}
 void ThemeManager::stopSettingNewWindowColorsOnMac() {}
+void ThemeManager::enableVibrancyOnAllWindows(bool) {}
 #endif
 
 QList<IconTheme*> ThemeManager::getValidIconThemes()
@@ -258,6 +263,15 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
     if (themeIter != m_themes.end()) {
         auto& theme = themeIter->second;
         themeDebugLog() << "applying theme" << theme->name();
+
+        // Disable vibrancy before switching themes — the new theme will re-enable if needed
+        enableVibrancyOnAllWindows(false);
+
+        // Remove translucent background attribute when switching away from glassmorphic
+        for (QWidget* widget : QApplication::topLevelWidgets()) {
+            widget->setAttribute(Qt::WA_TranslucentBackground, false);
+        }
+
         theme->apply(initial);
         setTitlebarColorOfAllWindowsOnMac(qApp->palette().window().color());
 

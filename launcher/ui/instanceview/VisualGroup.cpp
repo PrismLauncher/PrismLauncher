@@ -40,10 +40,13 @@
 #include <QDebug>
 #include <QModelIndex>
 #include <QPainter>
+#include <QPainterPath>
 #include <QtMath>
 #include <utility>
 
+#include "Application.h"
 #include "InstanceView.h"
+#include "settings/SettingsObject.h"
 
 VisualGroup::VisualGroup(QString text, InstanceView* view) : view(view), text(std::move(text)), collapsed(false) {}
 
@@ -141,73 +144,121 @@ VisualGroup::HitResults VisualGroup::hitScan(const QPoint& pos) const
 
 void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& option) const
 {
+    bool glassmorphic = APPLICATION->settings()->get("ApplicationTheme").toString() == "glassmorphic";
+
     QRect optRect = option.rect;
     optRect.setTop(optRect.top() + 7);
     QFont font(QApplication::font());
     font.setBold(true);
+
+    if (glassmorphic) {
+        // Apple SF-style: slightly larger, medium weight, more letter spacing
+        font.setPointSizeF(font.pointSizeF() * 0.92);
+        font.setLetterSpacing(QFont::AbsoluteSpacing, 0.5);
+    }
+
     const QFontMetrics fontMetrics = QFontMetrics(font);
     painter->setFont(font);
-
-    QPen pen;
-    pen.setWidth(2);
-    QColor penColor = option.palette.text().color();
-    penColor.setAlphaF(0.6f);
-    pen.setColor(penColor);
-    painter->setPen(pen);
     painter->setRenderHint(QPainter::Antialiasing);
 
-    // sizes and offsets, to keep things consistent below
     const int arrowOffsetLeft = fontMetrics.height() / 2 + 7;
     const int textOffsetLeft = arrowOffsetLeft * 2;
     const int centerHeight = optRect.top() + fontMetrics.height() / 2;
     const QString& textToDraw = text.isEmpty() ? QObject::tr("Ungrouped") : text;
 
-    // BEGIN: arrow
-    {
-        constexpr int arrowSize = 6;
-        QPolygon arrowPolygon;
-        if (collapsed) {
-            arrowPolygon << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight - arrowSize)
-                         << QPoint(arrowOffsetLeft + arrowSize / 2, centerHeight)
-                         << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight + arrowSize);
-            painter->drawPolyline(arrowPolygon);
-        } else {
-            arrowPolygon << QPoint(arrowOffsetLeft - arrowSize, centerHeight - arrowSize / 2)
-                         << QPoint(arrowOffsetLeft, centerHeight + arrowSize / 2)
-                         << QPoint(arrowOffsetLeft + arrowSize, centerHeight - arrowSize / 2);
-            painter->drawPolyline(arrowPolygon);
-        }
-    }
-    // END: arrow
+    if (glassmorphic) {
+        // Glassmorphic group header: subtle label with thin separator
+        QColor textColor(200, 200, 205, 180);
+        painter->setPen(textColor);
 
-    // BEGIN: text
-    {
+        // Draw disclosure arrow — refined SF Symbols style
+        {
+            constexpr int arrowSize = 5;
+            QPainterPath arrowPath;
+            if (collapsed) {
+                arrowPath.moveTo(arrowOffsetLeft - arrowSize / 2, centerHeight - arrowSize);
+                arrowPath.lineTo(arrowOffsetLeft + arrowSize / 2, centerHeight);
+                arrowPath.lineTo(arrowOffsetLeft - arrowSize / 2, centerHeight + arrowSize);
+            } else {
+                arrowPath.moveTo(arrowOffsetLeft - arrowSize, centerHeight - arrowSize / 2);
+                arrowPath.lineTo(arrowOffsetLeft, centerHeight + arrowSize / 2);
+                arrowPath.lineTo(arrowOffsetLeft + arrowSize, centerHeight - arrowSize / 2);
+            }
+            QPen arrowPen(QColor(200, 200, 205, 140), 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+            painter->setPen(arrowPen);
+            painter->drawPath(arrowPath);
+        }
+
+        // Group label text
+        painter->setPen(textColor);
         QRect textRect(optRect);
-        textRect.setTop(textRect.top());
         textRect.setLeft(textOffsetLeft);
         textRect.setHeight(fontMetrics.height());
         textRect.setRight(textRect.right() - 7);
+        painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, textToDraw.toUpper());
 
-        painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, textToDraw);
-    }
-    // END: text
+        // Subtle gradient separator line
+        const int startPoint =
+            optRect.left() + fontMetrics.height() + fontMetrics.size(Qt::AlignLeft | Qt::AlignVCenter, textToDraw.toUpper()).width() + 20;
+        const int lineHeight = centerHeight + 1;
 
-    // BEGIN: horizontal line
-    {
-        penColor.setAlphaF(0.05f);
+        QLinearGradient lineGrad(QPointF(startPoint, lineHeight), QPointF(optRect.right() - 3, lineHeight));
+        lineGrad.setColorAt(0, QColor(255, 255, 255, 20));
+        lineGrad.setColorAt(1, QColor(255, 255, 255, 0));
+        QPen linePen(QBrush(lineGrad), 1.0);
+        painter->setPen(linePen);
+        painter->setRenderHint(QPainter::Antialiasing, false);
+        painter->drawLine(startPoint, lineHeight, optRect.right() - 3, lineHeight);
+    } else {
+        // Original drawing code
+        QPen pen;
+        pen.setWidth(2);
+        QColor penColor = option.palette.text().color();
+        penColor.setAlphaF(0.6f);
         pen.setColor(penColor);
         painter->setPen(pen);
-        // startPoint is left + arrow + text + space
-        const int startPoint =
-            optRect.left() + fontMetrics.height() + fontMetrics.size(Qt::AlignLeft | Qt::AlignVCenter, textToDraw).width() + 20;
-        painter->setRenderHint(QPainter::Antialiasing, false);
-        QPolygon polygon;
-        // for some reason the height (yPos) doesn't look centered, so we are adding 1 to the center height
-        const int lineHeight = centerHeight + 1;
-        polygon << QPoint(startPoint, lineHeight) << QPoint(optRect.right() - 3, lineHeight);
-        painter->drawPolyline(polygon);
+
+        // Arrow
+        {
+            constexpr int arrowSize = 6;
+            QPolygon arrowPolygon;
+            if (collapsed) {
+                arrowPolygon << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight - arrowSize)
+                             << QPoint(arrowOffsetLeft + arrowSize / 2, centerHeight)
+                             << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight + arrowSize);
+                painter->drawPolyline(arrowPolygon);
+            } else {
+                arrowPolygon << QPoint(arrowOffsetLeft - arrowSize, centerHeight - arrowSize / 2)
+                             << QPoint(arrowOffsetLeft, centerHeight + arrowSize / 2)
+                             << QPoint(arrowOffsetLeft + arrowSize, centerHeight - arrowSize / 2);
+                painter->drawPolyline(arrowPolygon);
+            }
+        }
+
+        // Text
+        {
+            QRect textRect(optRect);
+            textRect.setTop(textRect.top());
+            textRect.setLeft(textOffsetLeft);
+            textRect.setHeight(fontMetrics.height());
+            textRect.setRight(textRect.right() - 7);
+            painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, textToDraw);
+        }
+
+        // Horizontal line
+        {
+            penColor.setAlphaF(0.05f);
+            pen.setColor(penColor);
+            painter->setPen(pen);
+            const int startPoint =
+                optRect.left() + fontMetrics.height() + fontMetrics.size(Qt::AlignLeft | Qt::AlignVCenter, textToDraw).width() + 20;
+            painter->setRenderHint(QPainter::Antialiasing, false);
+            QPolygon polygon;
+            const int lineHeight = centerHeight + 1;
+            polygon << QPoint(startPoint, lineHeight) << QPoint(optRect.right() - 3, lineHeight);
+            painter->drawPolyline(polygon);
+        }
     }
-    // END: horizontal line
 }
 
 int VisualGroup::totalHeight() const
