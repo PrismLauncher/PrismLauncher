@@ -84,6 +84,7 @@ class MinecraftAccount : public QObject, public Usable {
     explicit MinecraftAccount(QObject* parent = 0);
 
     static MinecraftAccountPtr createBlankMSA();
+    static MinecraftAccountPtr createBlankEly();
 
     static MinecraftAccountPtr createOffline(const QString& username);
 
@@ -123,6 +124,9 @@ class MinecraftAccount : public QObject, public Usable {
         switch (data.type) {
             case AccountType::MSA: {
                 return "msa";
+            } break;
+            case AccountType::ElyBy: {
+                return "mojang";
             } break;
             case AccountType::Offline: {
                 return "offline";

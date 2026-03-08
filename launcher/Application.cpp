@@ -748,6 +748,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("AutomaticJavaSwitch", defaultEnableAutoJava);
         m_settings->registerSetting("AutomaticJavaDownload", defaultEnableAutoJava);
         m_settings->registerSetting("UserAskedAboutAutomaticJavaDownload", false);
+        m_settings->registerSetting("FirstLaunchWizardCompleted", false);
 
         // Legacy settings
         m_settings->registerSetting("OnlineFixes", false);
@@ -778,6 +779,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // Minecraft offline player name
         m_settings->registerSetting("LastOfflinePlayerName", "");
+        m_settings->registerSetting("QuickServers", QVariantList{});
 
         // Wrapper command for launch
         m_settings->registerSetting("WrapperCommand", "");
@@ -888,6 +890,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         }
         m_settings->registerSetting("ModrinthToken", "");
         m_settings->registerSetting("UserAgentOverride", "");
+
+        // Custom authlib-injector endpoint (used when launching with authlib-injector java agent)
+        m_settings->registerSetting("AuthlibInjectorUrl", "https://authlib-injector.ely.by");
 
         // FTBApp instances
         m_settings->registerSetting("FTBAppInstancesPath", "");
@@ -1201,7 +1206,12 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
 bool Application::createSetupWizard()
 {
-    bool javaRequired = [this]() {
+    bool firstLaunchRequired = !settings()->get("FirstLaunchWizardCompleted").toBool();
+
+    bool javaRequired = [this, firstLaunchRequired]() {
+        if (firstLaunchRequired) {
+            return true;
+        }
         if (BuildConfig.JAVA_DOWNLOADER_ENABLED && settings()->get("AutomaticJavaDownload").toBool()) {
             return false;
         }
@@ -1225,9 +1235,9 @@ bool Application::createSetupWizard()
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
     bool validWidgets = m_themeManager->isValidApplicationTheme(settings()->get("ApplicationTheme").toString());
     bool validIcons = m_themeManager->isValidIconTheme(settings()->get("IconTheme").toString());
-    bool login = !m_accounts->anyAccountIsValid() && capabilities() & Application::SupportsMSA;
+    bool login = firstLaunchRequired || m_accounts->count() == 0;
     bool themeInterventionRequired = !validWidgets || !validIcons;
-    bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired || askjava || login;
+    bool wizardRequired = firstLaunchRequired || javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired || askjava || login;
     if (wizardRequired) {
         // set default theme after going into theme wizard
         if (!validIcons)
@@ -1321,6 +1331,7 @@ bool Application::event(QEvent* event)
 void Application::setupWizardFinished(int status)
 {
     qDebug() << "Wizard result =" << status;
+    settings()->set("FirstLaunchWizardCompleted", true);
     performMainStartupAction();
 }
 

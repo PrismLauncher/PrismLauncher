@@ -60,11 +60,18 @@ CustomPage::CustomPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(par
 
     connect(ui->loaderVersionList, &VersionSelectWidget::selectedVersionChanged, this, &CustomPage::setSelectedLoaderVersion);
     connect(ui->noneFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
+    connect(ui->neoForgeFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
     connect(ui->forgeFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
     connect(ui->fabricFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
     connect(ui->quiltFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
     connect(ui->liteLoaderFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
     connect(ui->loaderRefreshBtn, &QPushButton::clicked, this, &CustomPage::loaderRefresh);
+
+    for (const auto& preset : m_quickModPresets) {
+        ui->quickModPresetComboBox->addItem(preset.name);
+    }
+    connect(ui->quickModPresetComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &CustomPage::quickModPresetChanged);
+    quickModPresetChanged(ui->quickModPresetComboBox->currentIndex());
 }
 
 void CustomPage::openedImpl()
@@ -152,6 +159,46 @@ void CustomPage::loaderFilterChanged()
     ui->loaderVersionList->initialize(vlist.get());
     ui->loaderVersionList->selectRecommended();
     ui->loaderVersionList->setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
+}
+
+void CustomPage::quickModPresetChanged(int index)
+{
+    applyQuickModPreset(index);
+    updateQuickModSummary(index);
+}
+
+void CustomPage::applyQuickModPreset(int index)
+{
+    if (index < 0 || index >= m_quickModPresets.size()) {
+        return;
+    }
+
+    const auto& preset = m_quickModPresets[index];
+    if (preset.loader == "none") {
+        ui->noneFilter->setChecked(true);
+    } else if (preset.loader == "neoforge") {
+        ui->neoForgeFilter->setChecked(true);
+    } else if (preset.loader == "forge") {
+        ui->forgeFilter->setChecked(true);
+    } else if (preset.loader == "fabric") {
+        ui->fabricFilter->setChecked(true);
+    } else if (preset.loader == "quilt") {
+        ui->quiltFilter->setChecked(true);
+    } else if (preset.loader == "liteloader") {
+        ui->liteLoaderFilter->setChecked(true);
+    }
+}
+
+void CustomPage::updateQuickModSummary(int index)
+{
+    if (index < 0 || index >= m_quickModPresets.size()) {
+        ui->quickModsSummaryLabel->clear();
+        return;
+    }
+
+    const auto& preset = m_quickModPresets[index];
+    const QString mods = preset.mods.isEmpty() ? tr("None") : preset.mods.join(", ");
+    ui->quickModsSummaryLabel->setText(tr("%1\nPlanned mods: %2").arg(preset.description, mods));
 }
 
 CustomPage::~CustomPage()
