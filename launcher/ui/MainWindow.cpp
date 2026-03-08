@@ -92,7 +92,7 @@
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftInstance.h>
 #include <minecraft/VanillaInstanceCreationTask.h>
-#include <minecraft/MinecraftTarget.h>
+#include <minecraft/launch/MinecraftTarget.h>
 #include <minecraft/auth/AccountList.h>
 #include <net/ApiDownload.h>
 #include <net/NetJob.h>
