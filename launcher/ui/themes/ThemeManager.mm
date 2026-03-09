@@ -78,17 +78,19 @@ static NSString* const kVibrancyViewIdentifier = @"PrismLauncherVibrancy";
 static void addVibrancyToWindow(NSWindow* window)
 {
     NSView* contentView = window.contentView;
-    if (!contentView)
+    if (!contentView || !contentView.superview)
         return;
 
+    NSView* themeFrame = contentView.superview;
+
     // Check if we already added a vibrancy view
-    for (NSView* subview in contentView.subviews) {
+    for (NSView* subview in themeFrame.subviews) {
         if ([subview.identifier isEqualToString:kVibrancyViewIdentifier])
             return;
     }
 
     // Create NSVisualEffectView with dark under-window material
-    NSVisualEffectView* vibrancyView = [[NSVisualEffectView alloc] initWithFrame:contentView.bounds];
+    NSVisualEffectView* vibrancyView = [[NSVisualEffectView alloc] initWithFrame:themeFrame.bounds];
     vibrancyView.identifier = kVibrancyViewIdentifier;
     vibrancyView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
     vibrancyView.blendingMode = NSVisualEffectBlendingModeBehindWindow;
@@ -96,27 +98,24 @@ static void addVibrancyToWindow(NSWindow* window)
     vibrancyView.state = NSVisualEffectStateActive;
     vibrancyView.wantsLayer = YES;
 
-    // Insert at the very back so it doesn't cover Qt content
-    [contentView addSubview:vibrancyView positioned:NSWindowBelow relativeTo:nil];
+    // Insert into the themeFrame BEHIND the contentView so Qt widgets stay visible
+    [themeFrame addSubview:vibrancyView positioned:NSWindowBelow relativeTo:contentView];
 
-    // Make the window itself transparent so vibrancy shows
-    window.backgroundColor = [NSColor clearColor];
-    window.opaque = NO;
+    // Titlebar styling
     window.titlebarAppearsTransparent = YES;
     window.appearance = [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua];
-
-    // Enable full-size content for edge-to-edge glass
-    window.styleMask |= NSWindowStyleMaskFullSizeContentView;
 }
 
 static void removeVibrancyFromWindow(NSWindow* window)
 {
     NSView* contentView = window.contentView;
-    if (!contentView)
+    if (!contentView || !contentView.superview)
         return;
 
+    NSView* themeFrame = contentView.superview;
+
     NSMutableArray<NSView*>* toRemove = [NSMutableArray array];
-    for (NSView* subview in contentView.subviews) {
+    for (NSView* subview in themeFrame.subviews) {
         if ([subview.identifier isEqualToString:kVibrancyViewIdentifier]) {
             [toRemove addObject:subview];
         }
@@ -125,10 +124,9 @@ static void removeVibrancyFromWindow(NSWindow* window)
         [view removeFromSuperview];
     }
 
-    // Restore window opacity
-    window.opaque = YES;
-    window.backgroundColor = nil;
-    window.styleMask &= ~NSWindowStyleMaskFullSizeContentView;
+    // Restore window defaults
+    window.titlebarAppearsTransparent = NO;
+    window.appearance = nil;
 }
 
 void ThemeManager::enableVibrancyOnAllWindows(bool enable)
