@@ -62,3 +62,8 @@ flatbuild
 
 # Snap
 *.snap
+
+# Claude Code
+.claude/
+CLAUDE.md
+aqtinstall.log

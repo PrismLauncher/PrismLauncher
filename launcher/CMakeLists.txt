@@ -829,6 +829,8 @@ SET(LAUNCHER_SOURCES
     resources/iOS/iOS.qrc
     resources/flat/flat.qrc
     resources/flat_white/flat_white.qrc
+    resources/glassmorphic/glassmorphic.qrc
+    resources/glassmorphic_light/glassmorphic_light.qrc
     resources/documents/documents.qrc
     resources/shaders/shaders.qrc
     "${CMAKE_CURRENT_BINARY_DIR}/../${Launcher_Branding_LogoQRC}"
@@ -1305,6 +1307,8 @@ qt_add_resources(LAUNCHER_RESOURCES
     resources/OSX/OSX.qrc
     resources/iOS/iOS.qrc
     resources/flat/flat.qrc
+    resources/glassmorphic/glassmorphic.qrc
+    resources/glassmorphic_light/glassmorphic_light.qrc
     resources/documents/documents.qrc
     resources/shaders/shaders.qrc
     "${CMAKE_CURRENT_BINARY_DIR}/../${Launcher_Branding_LogoQRC}"
