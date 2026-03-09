@@ -105,6 +105,7 @@ Config::Config()
 
     NEWS_RSS_URL = "@Launcher_NEWS_RSS_URL@";
     NEWS_OPEN_URL = "@Launcher_NEWS_OPEN_URL@";
+    WIKI_URL = "@Launcher_WIKI_URL@";
     HELP_URL = "@Launcher_HELP_URL@";
     LOGIN_CALLBACK_URL = "@Launcher_LOGIN_CALLBACK_URL@";
     IMGUR_CLIENT_ID = "@Launcher_IMGUR_CLIENT_ID@";

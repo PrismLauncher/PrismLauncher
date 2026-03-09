@@ -1357,7 +1357,7 @@ void MainWindow::on_actionAddToPATH_triggered()
 
 void MainWindow::on_actionOpenWiki_triggered()
 {
-    DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg("")));
+    DesktopServices::openUrl(QUrl(BuildConfig.WIKI_URL));
 }
 
 void MainWindow::on_actionMoreNews_triggered()
