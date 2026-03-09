@@ -43,7 +43,7 @@ class ListModel : public QAbstractListModel {
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
 
    private slots:
-    void requestFinished();
+    void requestFinished(QByteArray* responsePtr);
     void requestFailed(QString reason);
 
     void logoFailed(QString logo);
@@ -61,7 +61,6 @@ class ListModel : public QAbstractListModel {
     QMap<QString, LogoCallback> waitingCallbacks;
 
     NetJob::Ptr jobPtr;
-    std::unique_ptr<QByteArray> response = std::make_unique<QByteArray>();
 };
 
 }  // namespace Atl

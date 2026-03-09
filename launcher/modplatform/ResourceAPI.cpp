@@ -18,10 +18,10 @@ Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatf
 
     auto search_url = search_url_optional.value();
 
-    auto response = std::make_shared<QByteArray>();
     auto netJob = makeShared<NetJob>(QString("%1::Search").arg(debugName()), APPLICATION->network());
 
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(search_url), response.get()));
+    auto [action, response] = Net::ApiDownload::makeByteArray(QUrl(search_url));
+    netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, [this, response, callbacks] {
         QJsonParseError parse_error{};
@@ -84,9 +84,9 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
     auto versions_url = versions_url_optional.value();
 
     auto netJob = makeShared<NetJob>(QString("%1::Versions").arg(args.pack->name), APPLICATION->network());
-    auto response = std::make_shared<QByteArray>();
 
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(versions_url, response.get()));
+    auto [action, response] = Net::ApiDownload::makeByteArray(versions_url);
+    netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, [this, response, callbacks, args] {
         QJsonParseError parse_error{};
@@ -148,8 +148,7 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
 
 Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<ModPlatform::IndexedPack::Ptr>&& callbacks) const
 {
-    auto response = std::make_shared<QByteArray>();
-    auto job = getProject(args.pack->addonId.toString(), response.get());
+    auto [job, response] = getProject(args.pack->addonId.toString());
 
     QObject::connect(job.get(), &NetJob::succeeded, [this, response, callbacks, args] {
         auto pack = args.pack;
@@ -204,9 +203,8 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
     auto versions_url = versions_url_optional.value();
 
     auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.addonId.toString()), APPLICATION->network());
-    auto response = std::make_shared<QByteArray>();
-
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(versions_url, response.get()));
+    auto [action, response] = Net::ApiDownload::makeByteArray(versions_url);
+    netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, [this, response, callbacks, args] {
         QJsonParseError parse_error{};
@@ -284,17 +282,18 @@ QString ResourceAPI::mapMCVersionToModrinth(Version v) const
     return verStr;
 }
 
-Task::Ptr ResourceAPI::getProject(QString addonId, QByteArray* response) const
+std::pair<Task::Ptr, QByteArray*> ResourceAPI::getProject(QString addonId) const
 {
     auto project_url_optional = getInfoURL(addonId);
     if (!project_url_optional.has_value())
-        return nullptr;
+        return { nullptr, nullptr };
 
     auto project_url = project_url_optional.value();
 
     auto netJob = makeShared<NetJob>(QString("%1::GetProject").arg(addonId), APPLICATION->network());
 
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(project_url), response));
+    auto [action, response] = Net::ApiDownload::makeByteArray(QUrl(project_url));
+    netJob->addNetAction(action);
 
-    return netJob;
+    return { netJob, response };
 }

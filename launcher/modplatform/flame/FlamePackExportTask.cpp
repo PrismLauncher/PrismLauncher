@@ -167,14 +167,14 @@ void FlamePackExportTask::makeApiRequest()
 
     setStatus(tr("Finding versions for hashes..."));
     setProgress(2, 5);
-    auto response = std::make_shared<QByteArray>();
 
     QList<uint> fingerprints;
     for (auto& murmur : pendingHashes.keys()) {
         fingerprints.push_back(murmur.toUInt());
     }
 
-    task.reset(api.matchFingerprints(fingerprints, response.get()));
+    auto [matchTask, response] = api.matchFingerprints(fingerprints);
+    task = matchTask;
 
     connect(task.get(), &Task::succeeded, this, [this, response] {
         QJsonParseError parseError{};
@@ -245,16 +245,16 @@ void FlamePackExportTask::getProjectsInfo()
         }
     }
 
-    auto response = std::make_shared<QByteArray>();
     Task::Ptr projTask;
+    QByteArray* response;
 
     if (addonIds.isEmpty()) {
         buildZip();
         return;
     } else if (addonIds.size() == 1) {
-        projTask = api.getProject(*addonIds.begin(), response.get());
+        std::tie(projTask, response) = api.getProject(*addonIds.begin());
     } else {
-        projTask = api.getProjects(addonIds, response.get());
+        std::tie(projTask, response) = api.getProjects(addonIds);
     }
 
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {

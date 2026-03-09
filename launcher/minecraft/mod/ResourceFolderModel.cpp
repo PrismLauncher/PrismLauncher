@@ -177,8 +177,7 @@ void ResourceFolderModel::installResourceWithFlameMetadata(QString path, ModPlat
             ModPlatform::ResourceProvider::FLAME,
         };
 
-        auto response = std::make_shared<QByteArray>();
-        auto job = FlameAPI().getProject(vers.addonId.toString(), response.get());
+        auto [job, response] = FlameAPI().getProject(vers.addonId.toString());
         connect(job.get(), &Task::failed, this, install);
         connect(job.get(), &Task::aborted, this, install);
         connect(job.get(), &Task::succeeded, [response, this, &vers, install, &pack] {

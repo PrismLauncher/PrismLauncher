@@ -3,7 +3,6 @@
 #include <QByteArray>
 #include <QObject>
 #include <QTemporaryDir>
-#include <memory>
 #include "PackHelpers.h"
 #include "net/NetJob.h"
 
@@ -23,15 +22,12 @@ class PackFetchTask : public QObject {
     QNetworkAccessManager* m_network;
     NetJob::Ptr jobPtr;
 
-    std::unique_ptr<QByteArray> publicModpacksXmlFileData = std::make_unique<QByteArray>();
-    std::unique_ptr<QByteArray> thirdPartyModpacksXmlFileData = std::make_unique<QByteArray>();
-
     bool parseAndAddPacks(QByteArray& data, PackType packType, ModpackList& list);
     ModpackList publicPacks;
     ModpackList thirdPartyPacks;
 
    protected slots:
-    void fileDownloadFinished();
+    void fileDownloadFinished(QByteArray* publicResponse, QByteArray* thirdPartyResponse);
     void fileDownloadFailed(QString reason);
     void fileDownloadAborted();
 

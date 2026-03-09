@@ -1135,8 +1135,7 @@ void PrismUpdaterApp::downloadReleasePage(const QString& api_url, int page)
 {
     int per_page = 30;
     auto page_url = QString("%1?per_page=%2&page=%3").arg(api_url).arg(QString::number(per_page)).arg(QString::number(page));
-    auto response = std::make_shared<QByteArray>();
-    auto download = Net::Download::makeByteArray(page_url, response.get());
+    auto [download, response] = Net::Download::makeByteArray(page_url);
     download->setNetwork(m_network.get());
     m_current_url = page_url;
 
@@ -1148,7 +1147,7 @@ void PrismUpdaterApp::downloadReleasePage(const QString& api_url, int page)
     download->addHeaderProxy(std::move(github_api_headers));
 
     connect(download.get(), &Net::Download::succeeded, this, [this, response, per_page, api_url, page]() {
-        int num_found = parseReleasePage(response.get());
+        int num_found = parseReleasePage(response);
         if (!(num_found < per_page)) {  // there may be more, fetch next page
             downloadReleasePage(api_url, page + 1);
         } else {

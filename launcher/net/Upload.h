@@ -37,6 +37,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "net/NetRequest.h"
 
 namespace Net {
@@ -47,7 +49,11 @@ class Upload : public NetRequest {
     using Ptr = shared_qobject_ptr<Upload>;
     explicit Upload() : NetRequest() { logCat = taskUploadLogC; };
 
-    static Upload::Ptr makeByteArray(QUrl url, QByteArray* output, QByteArray m_post_data);
+    /**
+     * Creates a request downloading to the returned QByteArray,.
+     * The QByteArray will live as long as the Upload object.
+     */
+    static std::pair<Upload::Ptr, QByteArray*> makeByteArray(QUrl url, QByteArray m_post_data);
 
    protected:
     virtual QNetworkReply* getReply(QNetworkRequest&) override;

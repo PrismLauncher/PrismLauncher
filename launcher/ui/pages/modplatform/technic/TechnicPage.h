@@ -83,7 +83,7 @@ class TechnicPage : public QWidget, public ModpackProviderBasePage {
    private slots:
     void triggerSearch();
     void onSelectionChanged(QModelIndex first, QModelIndex second);
-    void onSolderLoaded();
+    void onSolderLoaded(QByteArray* responsePtr);
     void onVersionSelectionChanged(QString data);
 
    private:
@@ -95,7 +95,6 @@ class TechnicPage : public QWidget, public ModpackProviderBasePage {
     QString selectedVersion;
 
     NetJob::Ptr jobPtr;
-    std::unique_ptr<QByteArray> response = std::make_unique<QByteArray>();
 
     ProgressWidget m_fetch_progress;
 

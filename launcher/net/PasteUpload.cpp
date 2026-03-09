@@ -119,11 +119,11 @@ auto PasteUpload::Sink::finalize(QNetworkReply& reply) -> Task::State
 
     switch (m_d->m_paste_type) {
         case PasteUpload::NullPointer:
-            m_d->m_pasteLink = QString::fromUtf8(*m_output).trimmed();
+            m_d->m_pasteLink = QString::fromUtf8(*output()).trimmed();
             break;
         case PasteUpload::Hastebin: {
             QJsonParseError jsonError;
-            auto doc = QJsonDocument::fromJson(*m_output, &jsonError);
+            auto doc = QJsonDocument::fromJson(*output(), &jsonError);
             if (jsonError.error != QJsonParseError::NoError) {
                 qDebug() << "hastebin server did not reply with JSON" << jsonError.errorString();
                 m_fail_reason =
@@ -144,7 +144,7 @@ auto PasteUpload::Sink::finalize(QNetworkReply& reply) -> Task::State
         }
         case PasteUpload::Mclogs: {
             QJsonParseError jsonError;
-            auto doc = QJsonDocument::fromJson(*m_output, &jsonError);
+            auto doc = QJsonDocument::fromJson(*output(), &jsonError);
             if (jsonError.error != QJsonParseError::NoError) {
                 qDebug() << "mclogs server did not reply with JSON" << jsonError.errorString();
                 m_fail_reason =
@@ -171,7 +171,7 @@ auto PasteUpload::Sink::finalize(QNetworkReply& reply) -> Task::State
         }
         case PasteUpload::PasteGG:
             QJsonParseError jsonError;
-            auto doc = QJsonDocument::fromJson(*m_output, &jsonError);
+            auto doc = QJsonDocument::fromJson(*output(), &jsonError);
             if (jsonError.error != QJsonParseError::NoError) {
                 qDebug() << "pastegg server did not reply with JSON" << jsonError.errorString();
                 m_fail_reason =
@@ -214,5 +214,5 @@ PasteUpload::PasteUpload(const QString& log, QString url, PasteType pasteType) :
     else
         m_url = m_baseUrl + base.endpointPath;
 
-    m_sink.reset(new Sink(this, m_output.get()));
+    m_sink.reset(new Sink(this));
 }

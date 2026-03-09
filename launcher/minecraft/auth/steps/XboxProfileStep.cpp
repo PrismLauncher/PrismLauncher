@@ -33,8 +33,9 @@ void XboxProfileStep::perform()
         { "Authorization", QString("XBL3.0 x=%1;%2").arg(m_data->userToken.extra["uhs"].toString(), m_data->xboxApiToken.token).toUtf8() }
     };
 
-    m_response.reset(new QByteArray());
-    m_request = Net::Download::makeByteArray(url, m_response.get());
+    auto [request, response] = Net::Download::makeByteArray(url);
+    m_request = request;
+    m_response = response;
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
 
     m_task.reset(new NetJob("XboxProfileStep", APPLICATION->network()));

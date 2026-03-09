@@ -247,10 +247,10 @@ std::unique_ptr<ModFilterWidget> FlameModPage::createFilterWidget()
 
 void FlameModPage::prepareProviderCategories()
 {
-    auto response = std::make_shared<QByteArray>();
-    m_categoriesTask = FlameAPI::getModCategories(response.get());
+    auto [task, response] = FlameAPI::getModCategories();
+    m_categoriesTask = task;
     connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
-        auto categories = FlameAPI::loadModCategories(response.get());
+        auto categories = FlameAPI::loadModCategories(*response);
         m_filter_widget->setCategories(categories);
     });
     m_categoriesTask->start();

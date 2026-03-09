@@ -215,8 +215,7 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
 {
     auto hash_type = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
-    auto response = std::make_shared<QByteArray>();
-    auto ver_task = modrinth_api.currentVersions(m_resources.keys(), hash_type, response.get());
+    auto [ver_task, response] = modrinth_api.currentVersions(m_resources.keys(), hash_type);
 
     // Prevents unfortunate timings when aborting the task
     if (!ver_task)
@@ -267,15 +266,15 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
     for (auto const& data : m_tempVersions)
         addonIds.insert(data.addonId.toString(), data.hash);
 
-    auto response = std::make_shared<QByteArray>();
     Task::Ptr proj_task;
+    QByteArray* response;
 
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
     } else if (addonIds.size() == 1) {
-        proj_task = modrinth_api.getProject(*addonIds.keyBegin(), response.get());
+        std::tie(proj_task, response) = modrinth_api.getProject(*addonIds.keyBegin());
     } else {
-        proj_task = modrinth_api.getProjects(addonIds.keys(), response.get());
+        std::tie(proj_task, response) = modrinth_api.getProjects(addonIds.keys());
     }
 
     // Prevents unfortunate timings when aborting the task
@@ -341,14 +340,12 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
 // Flame
 Task::Ptr EnsureMetadataTask::flameVersionsTask()
 {
-    auto response = std::make_shared<QByteArray>();
-
     QList<uint> fingerprints;
     for (auto& murmur : m_resources.keys()) {
         fingerprints.push_back(murmur.toUInt());
     }
 
-    auto ver_task = flame_api.matchFingerprints(fingerprints, response.get());
+    auto [ver_task, response] = flame_api.matchFingerprints(fingerprints);
 
     connect(ver_task.get(), &Task::succeeded, this, [this, response] {
         QJsonParseError parse_error{};
@@ -417,15 +414,15 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
         }
     }
 
-    auto response = std::make_shared<QByteArray>();
     Task::Ptr proj_task;
+    QByteArray* response;
 
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
     } else if (addonIds.size() == 1) {
-        proj_task = flame_api.getProject(*addonIds.keyBegin(), response.get());
+        std::tie(proj_task, response) = flame_api.getProject(*addonIds.keyBegin());
     } else {
-        proj_task = flame_api.getProjects(addonIds.keys(), response.get());
+        std::tie(proj_task, response) = flame_api.getProjects(addonIds.keys());
     }
 
     // Prevents unfortunate timings when aborting the task

@@ -95,7 +95,7 @@ class PackInstallTask : public InstanceTask {
     virtual void executeTask() override;
 
    private slots:
-    void onDownloadSucceeded();
+    void onDownloadSucceeded(QByteArray* responsePtr);
     void onDownloadFailed(QString reason);
     void onDownloadAborted();
 
@@ -125,7 +125,6 @@ class PackInstallTask : public InstanceTask {
     bool abortable = false;
 
     NetJob::Ptr jobPtr;
-    std::unique_ptr<QByteArray> response = std::make_unique<QByteArray>();
 
     InstallMode m_install_mode;
     QString m_pack_name;

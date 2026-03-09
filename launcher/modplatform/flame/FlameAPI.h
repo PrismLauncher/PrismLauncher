@@ -5,7 +5,6 @@
 #pragma once
 
 #include <QList>
-#include <memory>
 #include "BuildConfig.h"
 #include "Json.h"
 #include "Version.h"
@@ -23,14 +22,14 @@ class FlameAPI : public ResourceAPI {
                                                                 ModPlatform::ModLoaderTypes fallback,
                                                                 bool checkLoaders);
 
-    Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const override;
-    Task::Ptr matchFingerprints(const QList<uint>& fingerprints, QByteArray* response);
-    Task::Ptr getFiles(const QStringList& fileIds, QByteArray* response) const;
-    Task::Ptr getFile(const QString& addonId, const QString& fileId, QByteArray* response) const;
+    std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
+    std::pair<Task::Ptr, QByteArray*> matchFingerprints(const QList<uint>& fingerprints);
+    std::pair<Task::Ptr, QByteArray*> getFiles(const QStringList& fileIds) const;
+    std::pair<Task::Ptr, QByteArray*> getFile(const QString& addonId, const QString& fileId) const;
 
-    static Task::Ptr getCategories(QByteArray* response, ModPlatform::ResourceType type);
-    static Task::Ptr getModCategories(QByteArray* response);
-    static QList<ModPlatform::Category> loadModCategories(QByteArray* response);
+    static std::pair<Task::Ptr, QByteArray*> getCategories(ModPlatform::ResourceType type);
+    static std::pair<Task::Ptr, QByteArray*> getModCategories();
+    static QList<ModPlatform::Category> loadModCategories(const QByteArray& response);
 
     QList<ResourceAPI::SortingMethod> getSortingMethods() const override;
 

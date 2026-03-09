@@ -134,8 +134,7 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
 Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDependency> pDep)
 {
     auto provider = pDep->pack->provider;
-    auto responseInfo = std::make_shared<QByteArray>();
-    auto info = getAPI(provider)->getProject(pDep->pack->addonId.toString(), responseInfo.get());
+    auto [info, responseInfo] = getAPI(provider)->getProject(pDep->pack->addonId.toString());
     connect(info.get(), &NetJob::succeeded, [this, responseInfo, provider, pDep] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*responseInfo, &parse_error);

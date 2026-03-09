@@ -63,14 +63,18 @@ auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Down
 }
 #endif
 
-auto Download::makeByteArray(QUrl url, QByteArray* output, Options options) -> Download::Ptr
+auto Download::makeByteArray(QUrl url, Options options) -> std::pair<Download::Ptr, QByteArray*>
 {
     auto dl = makeShared<Download>();
     dl->m_url = url;
     dl->setObjectName(QString("BYTES:") + url.toString());
     dl->m_options = options;
-    dl->m_sink.reset(new ByteArraySink(output));
-    return dl;
+
+    auto sink = std::make_unique<ByteArraySink>();
+    QByteArray* response = sink->output();
+    dl->m_sink = std::move(sink);
+
+    return { dl, response };
 }
 
 auto Download::makeFile(QUrl url, QString path, Options options) -> Download::Ptr

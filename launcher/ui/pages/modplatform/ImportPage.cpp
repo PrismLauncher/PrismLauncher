@@ -131,10 +131,9 @@ void ImportPage::updateState()
             }
             auto addonId = query.allQueryItemValues("addonId")[0];
             auto fileId = query.allQueryItemValues("fileId")[0];
-            auto array = std::make_shared<QByteArray>();
 
             auto api = FlameAPI();
-            auto job = api.getFile(addonId, fileId, array.get());
+            auto [job, array] = api.getFile(addonId, fileId);
 
             connect(job.get(), &NetJob::failed, this,
                     [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
