@@ -86,7 +86,7 @@ runs:
         fi
 
         sudo codesign --sign "$APPLE_CODESIGN_ID" --deep --force --entitlements "$ENTITLEMENTS_FILE" --options runtime "$APP_BUNDLE"
-        mv "$APP_BUNDLE" "Mkeiitt Launcher.app"
+        mv "$APP_BUNDLE" "mkeiitlauncher.app"
 
     - name: Notarize
       shell: bash
@@ -96,18 +96,18 @@ runs:
         cd ${{ env.INSTALL_DIR }}
 
         if [ -n '${{ inputs.apple-notarize-password }}' ]; then
-          ditto -c -k --sequesterRsrc --keepParent "Mkeiitt Launcher.app" ../mkeiitlauncher.zip
+          ditto -c -k --sequesterRsrc --keepParent "mkeiitlauncher.app" ../mkeiitlauncher.zip
           xcrun notarytool submit ../mkeiitlauncher.zip \
             --wait --progress \
             --apple-id '${{ inputs.apple-notarize-apple-id }}' \
             --team-id '${{ inputs.apple-notarize-team-id }}' \
             --password '${{ inputs.apple-notarize-password }}'
 
-          xcrun stapler staple "Mkeiitt Launcher.app"
+          xcrun stapler staple "mkeiitlauncher.app"
         else
           echo ":warning: Skipping notarization as credentials are not present." >> $GITHUB_STEP_SUMMARY
         fi
-        ditto -c -k --sequesterRsrc --keepParent "Mkeiitt Launcher.app" ../mkeiitlauncher.zip
+        ditto -c -k --sequesterRsrc --keepParent "mkeiitlauncher.app" ../mkeiitlauncher.zip
 
     - name: Build DMG
       shell: bash
@@ -115,7 +115,7 @@ runs:
         INSTALL_DIR: install
       run: |
         cd ${{ env.INSTALL_DIR }}
-        APP_NAME="Mkeiitt Launcher.app"
+        APP_NAME="mkeiitlauncher.app"
         DMG_VOLUME_NAME="Mkeiitt Launcher"
         STAGING_DIR="../dmg-staging"
 
