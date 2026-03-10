@@ -19,8 +19,10 @@
 
 #include <QByteArray>
 #include <QDateTime>
+#include <QDir>
 #include <QStringList>
 #include <memory>
+#include <optional>
 
 struct archive;
 struct archive_entry;
@@ -49,6 +51,7 @@ class ArchiveReader {
         QByteArray readAll(int* outStatus = nullptr);
         bool skip();
         bool writeFile(archive* out, QString targetFileName = "", bool notBlock = false);
+        bool writeFile(archive* out, QString targetFileName, std::optional<QDir> root, bool notBlock = false);
 
        private:
         int readNextHeader();

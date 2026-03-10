@@ -233,7 +233,7 @@ std::optional<QStringList> extractSubDir(ArchiveReader* zip, const QString& subd
                            << target;
                 return false;
             }
-            if (!f->writeFile(ext, target_file_path)) {
+            if (!f->writeFile(ext, target_file_path, target)) {
                 qWarning() << "Failed to extract file" << original_name << "to" << target_file_path;
                 return false;
             }
