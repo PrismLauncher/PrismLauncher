@@ -26,7 +26,7 @@ class GetModPackExtraInfoTask : public Task {
     Q_OBJECT
    public:
     GetModPackExtraInfoTask(QString path, ModPlatform::ResourceProvider provider);
-    virtual ~GetModPackExtraInfoTask() = default;
+    ~GetModPackExtraInfoTask() override = default;
 
     bool canAbort() const override { return true; }
 

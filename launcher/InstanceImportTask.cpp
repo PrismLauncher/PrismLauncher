@@ -60,6 +60,7 @@
 #include <QFileInfo>
 #include <QtConcurrentRun>
 #include <memory>
+#include <utility>
 
 InstanceImportTask::InstanceImportTask(const QUrl& sourceUrl, QWidget* parent, QMap<QString, QString>&& extra_info)
     : m_sourceUrl(sourceUrl), m_extra_info(extra_info), m_parent(parent)
@@ -455,10 +456,6 @@ void InstanceImportTask::processExtraInfoPack()
     });
 
     connect(modrinthTask.get(), &Task::aborted, this, &InstanceImportTask::emitAborted);
-    connect(modrinthTask.get(), &Task::failed, this, [this, progressStep](QString) {
-        progressStep->state = TaskStepState::Failed;
-        stepProgress(*progressStep);
-    });
     connect(modrinthTask.get(), &Task::stepProgress, this, &InstanceImportTask::propagateStepProgress);
 
     connect(modrinthTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
@@ -466,7 +463,7 @@ void InstanceImportTask::processExtraInfoPack()
         stepProgress(*progressStep);
     });
     connect(modrinthTask.get(), &Task::status, this, [this, progressStep](QString status) {
-        progressStep->status = status;
+        progressStep->status = std::move(status);
         stepProgress(*progressStep);
     });
     m_task.reset(modrinthTask);

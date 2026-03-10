@@ -171,8 +171,7 @@ QList<ModPlatform::Category> ModrinthAPI::loadModCategories(const QByteArray& re
 Task::Ptr ModrinthAPI::getVersionFromHash(QString hash, ModPlatform::IndexedVersion& output)
 {
     auto hash_type = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
-    auto response = std::make_shared<QByteArray>();
-    auto ver_task = currentVersion(hash, hash_type, response.get());
+    auto [ver_task, response] = currentVersion(hash, hash_type);
     QObject::connect(ver_task.get(), &Task::succeeded, [response, &output] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);

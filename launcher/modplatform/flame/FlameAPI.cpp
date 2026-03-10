@@ -276,8 +276,7 @@ std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModP
 
 Task::Ptr FlameAPI::getVersionFromHash(QString hash, ModPlatform::IndexedVersion& output)
 {
-    auto response = std::make_shared<QByteArray>();
-    auto ver_task = matchFingerprints({ hash.toUInt() }, response.get());
+    auto [ver_task, response] = matchFingerprints({ hash.toUInt() });
     QObject::connect(ver_task.get(), &Task::succeeded, [response, &output, hash] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);

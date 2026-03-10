@@ -18,6 +18,7 @@
 
 #include "modplatform/helpers/GetModPackExtraInfoTask.h"
 #include <memory>
+#include <utility>
 #include "Application.h"
 #include "Json.h"
 #include "QObjectPtr.h"
@@ -33,7 +34,8 @@
 #include "net/NetJob.h"
 #include "tasks/Task.h"
 
-GetModPackExtraInfoTask::GetModPackExtraInfoTask(QString path, ModPlatform::ResourceProvider provider) : m_path(path), m_provider(provider)
+GetModPackExtraInfoTask::GetModPackExtraInfoTask(QString path, ModPlatform::ResourceProvider provider)
+    : m_path(std::move(path)), m_provider(provider)
 {
     switch (m_provider) {
         case ModPlatform::ResourceProvider::MODRINTH:
@@ -47,8 +49,9 @@ GetModPackExtraInfoTask::GetModPackExtraInfoTask(QString path, ModPlatform::Reso
 
 bool GetModPackExtraInfoTask::abort()
 {
-    if (m_current_task)
+    if (m_current_task) {
         m_current_task->abort();
+    }
 
     emitAborted();
     return true;
@@ -71,7 +74,7 @@ void GetModPackExtraInfoTask::executeTask()
     connect(hashTask.get(), &Task::failed, this, [this, progressStep](QString reason) {
         progressStep->state = TaskStepState::Failed;
         stepProgress(*progressStep);
-        emitFailed(reason);
+        emitFailed(std::move(reason));
     });
     connect(hashTask.get(), &Task::stepProgress, this, &GetModPackExtraInfoTask::propagateStepProgress);
 
@@ -80,7 +83,7 @@ void GetModPackExtraInfoTask::executeTask()
         stepProgress(*progressStep);
     });
     connect(hashTask.get(), &Task::status, this, [this, progressStep](QString status) {
-        progressStep->status = status;
+        progressStep->status = std::move(status);
         stepProgress(*progressStep);
     });
     m_current_task.reset(hashTask);
@@ -91,7 +94,7 @@ void GetModPackExtraInfoTask::hashDone(QString result)
 {
     setStatus(tr("Matching hash with version"));
     setProgress(2, 4);
-    auto verTask = m_api->getVersionFromHash(result, m_version);
+    auto verTask = m_api->getVersionFromHash(std::move(result), m_version);
     (dynamic_cast<NetJob*>(verTask.get()))->setAskRetry(false);
     auto progressStep = std::make_shared<TaskStepProgress>();
     connect(verTask.get(), &Task::succeeded, this, &GetModPackExtraInfoTask::getProjectInfo);
@@ -104,7 +107,7 @@ void GetModPackExtraInfoTask::hashDone(QString result)
     connect(verTask.get(), &Task::failed, this, [this, progressStep](QString reason) {
         progressStep->state = TaskStepState::Failed;
         stepProgress(*progressStep);
-        emitFailed(reason);
+        emitFailed(std::move(reason));
     });
     connect(verTask.get(), &Task::stepProgress, this, &GetModPackExtraInfoTask::propagateStepProgress);
 
@@ -113,7 +116,7 @@ void GetModPackExtraInfoTask::hashDone(QString result)
         stepProgress(*progressStep);
     });
     connect(verTask.get(), &Task::status, this, [this, progressStep](QString status) {
-        progressStep->status = status;
+        progressStep->status = std::move(status);
         stepProgress(*progressStep);
     });
     m_current_task.reset(verTask);
@@ -128,8 +131,7 @@ void GetModPackExtraInfoTask::getProjectInfo()
     }
     setStatus(tr("Get project information"));
     setProgress(3, 4);
-    auto responseInfo = std::make_shared<QByteArray>();
-    auto projectTask = m_api->getProject(m_version.addonId.toString(), responseInfo.get());
+    auto [projectTask, responseInfo] = m_api->getProject(m_version.addonId.toString());
     connect(projectTask.get(), &Task::succeeded, [responseInfo, this] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*responseInfo, &parse_error);
@@ -172,7 +174,7 @@ void GetModPackExtraInfoTask::getProjectInfo()
     connect(projectTask.get(), &Task::failed, this, [this, progressStep](QString reason) {
         progressStep->state = TaskStepState::Failed;
         stepProgress(*progressStep);
-        emitFailed(reason);
+        emitFailed(std::move(reason));
     });
     connect(projectTask.get(), &Task::stepProgress, this, &GetModPackExtraInfoTask::propagateStepProgress);
 
@@ -181,7 +183,7 @@ void GetModPackExtraInfoTask::getProjectInfo()
         stepProgress(*progressStep);
     });
     connect(projectTask.get(), &Task::status, this, [this, progressStep](QString status) {
-        progressStep->status = status;
+        progressStep->status = std::move(status);
         stepProgress(*progressStep);
     });
     m_current_task.reset(projectTask);
@@ -214,7 +216,7 @@ void GetModPackExtraInfoTask::getLogo()
     connect(logoTask.get(), &Task::failed, this, [this, progressStep](QString reason) {
         progressStep->state = TaskStepState::Failed;
         stepProgress(*progressStep);
-        emitFailed(reason);
+        emitFailed(std::move(reason));
     });
     connect(logoTask.get(), &Task::stepProgress, this, &GetModPackExtraInfoTask::propagateStepProgress);
 
@@ -223,7 +225,7 @@ void GetModPackExtraInfoTask::getLogo()
         stepProgress(*progressStep);
     });
     connect(logoTask.get(), &Task::status, this, [this, progressStep](QString status) {
-        progressStep->status = status;
+        progressStep->status = std::move(status);
         stepProgress(*progressStep);
     });
     m_current_task.reset(logoTask);
