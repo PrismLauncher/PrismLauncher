@@ -134,75 +134,77 @@ void PackInstallTask::install()
 
     QString instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     MinecraftInstance instance(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
-    SettingsObject::Lock lock(instance.settings());
+    {
+        SettingsObject::Lock lock(instance.settings());
 
-    auto components = instance.getPackProfile();
-    components->buildingFromScratch();
-    components->setComponentVersion("net.minecraft", m_pack.mcVersion, true);
+        auto components = instance.getPackProfile();
+        components->buildingFromScratch();
+        components->setComponentVersion("net.minecraft", m_pack.mcVersion, true);
 
-    bool fallback = true;
+        bool fallback = true;
 
-    // handle different versions
-    QFile packJson(m_stagingPath + "/minecraft/pack.json");
-    QDir jarmodDir = QDir(m_stagingPath + "/unzip/instMods");
-    if (packJson.exists()) {
-        if (packJson.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            QJsonDocument doc = QJsonDocument::fromJson(packJson.readAll());
-            packJson.close();
+        // handle different versions
+        QFile packJson(m_stagingPath + "/minecraft/pack.json");
+        QDir jarmodDir = QDir(m_stagingPath + "/unzip/instMods");
+        if (packJson.exists()) {
+            if (packJson.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QJsonDocument doc = QJsonDocument::fromJson(packJson.readAll());
+                packJson.close();
 
-            // we only care about the libs
-            QJsonArray libs = doc.object().value("libraries").toArray();
+                // we only care about the libs
+                QJsonArray libs = doc.object().value("libraries").toArray();
 
-            for (const auto& value : libs) {
-                QString nameValue = value.toObject().value("name").toString();
-                if (!nameValue.startsWith("net.minecraftforge")) {
-                    continue;
+                for (const auto& value : libs) {
+                    QString nameValue = value.toObject().value("name").toString();
+                    if (!nameValue.startsWith("net.minecraftforge")) {
+                        continue;
+                    }
+
+                    GradleSpecifier forgeVersion(nameValue);
+
+                    components->setComponentVersion("net.minecraftforge",
+                                                    forgeVersion.version().replace(m_pack.mcVersion, "").replace("-", ""));
+                    packJson.remove();
+                    fallback = false;
+                    break;
                 }
-
-                GradleSpecifier forgeVersion(nameValue);
-
-                components->setComponentVersion("net.minecraftforge",
-                                                forgeVersion.version().replace(m_pack.mcVersion, "").replace("-", ""));
-                packJson.remove();
-                fallback = false;
-                break;
+            } else {
+                qWarning() << "Failed to open file '" << packJson.fileName() << "' for reading!";
             }
-        } else {
-            qWarning() << "Failed to open file '" << packJson.fileName() << "' for reading!";
-        }
-    }
-
-    if (jarmodDir.exists()) {
-        qDebug() << "Found jarmods, installing...";
-
-        QStringList jarmods;
-        for (auto info : jarmodDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files)) {
-            qDebug() << "Jarmod:" << info.fileName();
-            jarmods.push_back(info.absoluteFilePath());
         }
 
-        components->installJarMods(jarmods);
-        fallback = false;
+        if (jarmodDir.exists()) {
+            qDebug() << "Found jarmods, installing...";
+
+            QStringList jarmods;
+            for (auto info : jarmodDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files)) {
+                qDebug() << "Jarmod:" << info.fileName();
+                jarmods.push_back(info.absoluteFilePath());
+            }
+
+            components->installJarMods(jarmods);
+            fallback = false;
+        }
+
+        // just nuke unzip directory, it s not needed anymore
+        FS::deletePath(m_stagingPath + "/unzip");
+
+        if (fallback) {
+            // TODO: Some fallback mechanism... or just keep failing!
+            emitFailed(tr("No installation method found!"));
+            return;
+        }
+
+        components->saveNow();
+
+        progress(4, 4);
+
+        instance.setName(name());
+        if (m_instIcon == "default") {
+            m_instIcon = "ftb_logo";
+        }
+        instance.setIconKey(m_instIcon);
     }
-
-    // just nuke unzip directory, it s not needed anymore
-    FS::deletePath(m_stagingPath + "/unzip");
-
-    if (fallback) {
-        // TODO: Some fallback mechanism... or just keep failing!
-        emitFailed(tr("No installation method found!"));
-        return;
-    }
-
-    components->saveNow();
-
-    progress(4, 4);
-
-    instance.setName(name());
-    if (m_instIcon == "default") {
-        m_instIcon = "ftb_logo";
-    }
-    instance.setIconKey(m_instIcon);
 
     emitSucceeded();
 }
