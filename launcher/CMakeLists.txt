@@ -4,6 +4,7 @@ project(application)
 
 ######## Sources and headers ########
 
+#! SOURCES
 set(CORE_SOURCES
     # LOGIC - Base classes and infrastructure
     BaseInstaller.h
@@ -107,15 +108,17 @@ set(CORE_SOURCES
     AssertHelpers.h
 )
 if (UNIX AND NOT CYGWIN AND NOT APPLE)
+    #! SOURCES
     set(CORE_SOURCES
-    ${CORE_SOURCES}
+        ${CORE_SOURCES}
 
     # MangoHud
-    MangoHud.h
-    MangoHud.cpp
+        MangoHud.h
+        MangoHud.cpp
     )
 endif()
 
+#! SOURCES
 set(NET_SOURCES
     # network stuffs
     net/ByteArraySink.h
@@ -152,6 +155,7 @@ set(NET_SOURCES
 )
 
 # Game launch logic
+#! SOURCES
 set(LAUNCH_SOURCES
     launch/steps/CheckJava.cpp
     launch/steps/CheckJava.h
@@ -180,21 +184,25 @@ set(LAUNCH_SOURCES
 )
 
 # Old update system
+#! SOURCES
 set(UPDATE_SOURCES
     updater/ExternalUpdater.h
 )
 
+#! SOURCES
 set(MAC_UPDATE_SOURCES
     updater/MacSparkleUpdater.h
     updater/MacSparkleUpdater.mm
 )
 
+#! SOURCES
 set(PRISM_UPDATE_SOURCES
     updater/PrismExternalUpdater.h
     updater/PrismExternalUpdater.cpp
 )
 
 # Backend for the news bar... there's usually no news.
+#! SOURCES
 set(NEWS_SOURCES
     # News System
     news/NewsChecker.h
@@ -204,6 +212,7 @@ set(NEWS_SOURCES
 )
 
 # Icon interface
+#! SOURCES
 set(ICONS_SOURCES
     # Icons System and related code
     icons/IconUtils.h
@@ -211,6 +220,7 @@ set(ICONS_SOURCES
 )
 
 # Support for Minecraft instances and launch
+#! SOURCES
 set(MINECRAFT_SOURCES
 
     # Logging
@@ -386,9 +396,11 @@ set(MINECRAFT_SOURCES
     minecraft/skins/SkinList.cpp
     minecraft/skins/SkinList.h
 
-    minecraft/Agent.h)
+    minecraft/Agent.h
+)
 
 # the screenshots feature
+#! SOURCES
 set(SCREENSHOTS_SOURCES
     screenshots/Screenshot.h
     screenshots/ImgurUpload.h
@@ -397,6 +409,7 @@ set(SCREENSHOTS_SOURCES
     screenshots/ImgurAlbumCreation.cpp
 )
 
+#! SOURCES
 set(TASKS_SOURCES
     # Tasks
     tasks/Task.h
@@ -409,6 +422,7 @@ set(TASKS_SOURCES
     tasks/MultipleOptionsTask.cpp
 )
 
+#! SOURCES
 set(SETTINGS_SOURCES
     # Settings
     settings/INIFile.cpp
@@ -425,6 +439,7 @@ set(SETTINGS_SOURCES
     settings/SettingsObject.h
 )
 
+#! SOURCES
 set(JAVA_SOURCES
     java/JavaChecker.h
     java/JavaChecker.cpp
@@ -452,6 +467,7 @@ set(JAVA_SOURCES
     ui/java/VersionList.cpp
 )
 
+#! SOURCES
 set(TRANSLATIONS_SOURCES
     translations/TranslationsModel.h
     translations/TranslationsModel.cpp
@@ -459,6 +475,7 @@ set(TRANSLATIONS_SOURCES
     translations/POTranslator.cpp
 )
 
+#! SOURCES
 set(TOOLS_SOURCES
     # Tools
     tools/BaseExternalTool.cpp
@@ -475,6 +492,7 @@ set(TOOLS_SOURCES
     tools/GenericProfiler.h
 )
 
+#! SOURCES
 set(META_SOURCES
     # Metadata sources
     meta/JsonFormat.cpp
@@ -489,6 +507,7 @@ set(META_SOURCES
     meta/Index.h
 )
 
+#! SOURCES
 set(API_SOURCES
     modplatform/ModIndex.h
     modplatform/ModIndex.cpp
@@ -516,6 +535,7 @@ set(API_SOURCES
     modplatform/helpers/ExportToModList.cpp
 )
 
+#! SOURCES
 set(FTB_SOURCES
     modplatform/legacy_ftb/PackFetchTask.h
     modplatform/legacy_ftb/PackFetchTask.cpp
@@ -537,6 +557,7 @@ set(FTB_SOURCES
     modplatform/ftb/FTBPackManifest.cpp
 )
 
+#! SOURCES
 set(FLAME_SOURCES
     # Flame
     modplatform/flame/FlameModIndex.cpp
@@ -553,6 +574,7 @@ set(FLAME_SOURCES
     modplatform/flame/FlamePackExportTask.cpp
 )
 
+#! SOURCES
 set(MODRINTH_SOURCES
     modplatform/modrinth/ModrinthPackIndex.cpp
     modplatform/modrinth/ModrinthPackIndex.h
@@ -564,12 +586,14 @@ set(MODRINTH_SOURCES
     modplatform/modrinth/ModrinthPackExportTask.h
 )
 
+#! SOURCES
 set(PACKWIZ_SOURCES
     modplatform/packwiz/Packwiz.h
     modplatform/packwiz/Packwiz.cpp
 )
 
 
+#! SOURCES
 set(TECHNIC_SOURCES
     modplatform/technic/SingleZipPackInstallTask.h
     modplatform/technic/SingleZipPackInstallTask.cpp
@@ -581,6 +605,7 @@ set(TECHNIC_SOURCES
     modplatform/technic/TechnicPackProcessor.cpp
 )
 
+#! SOURCES
 set(ATLAUNCHER_SOURCES
     modplatform/atlauncher/ATLPackIndex.cpp
     modplatform/atlauncher/ATLPackIndex.h
@@ -592,6 +617,7 @@ set(ATLAUNCHER_SOURCES
     modplatform/atlauncher/ATLShareCode.h
 )
 
+#! SOURCES
 set(LINKEXE_SOURCES
     console/WindowsConsole.h
     console/WindowsConsole.cpp
@@ -607,6 +633,7 @@ set(LINKEXE_SOURCES
     DesktopServices.cpp
 )
 
+#! SOURCES
 set(PRISMUPDATER_SOURCES
     updater/prismupdater/PrismUpdater.h
     updater/prismupdater/PrismUpdater.cpp
@@ -668,6 +695,7 @@ set(PRISMUPDATER_SOURCES
 )
 
 if(WIN32)
+    #! SOURCES
     set(PRISMUPDATER_SOURCES
         console/WindowsConsole.h
         console/WindowsConsole.cpp
@@ -760,6 +788,7 @@ endif()
 
 ################################ COMPILE ################################
 
+#! SOURCES
 set(LOGIC_SOURCES
     ${CORE_SOURCES}
     ${NET_SOURCES}
@@ -790,7 +819,8 @@ else()
     set (LOGIC_SOURCES ${LOGIC_SOURCES} ${PRISM_UPDATE_SOURCES})
 endif()
 
-SET(LAUNCHER_SOURCES
+#! SOURCES
+set(LAUNCHER_SOURCES
     # Application base
     Application.h
     Application.cpp
@@ -1190,6 +1220,7 @@ SET(LAUNCHER_SOURCES
 )
 
 if (APPLE)
+    #! SOURCES
     set(LAUNCHER_SOURCES
         ${LAUNCHER_SOURCES}
         ui/themes/ThemeManager.mm
@@ -1197,15 +1228,17 @@ if (APPLE)
 endif()
 
 if (NOT Apple)
+    #! SOURCES
     set(LAUNCHER_SOURCES
-    ${LAUNCHER_SOURCES}
+        ${LAUNCHER_SOURCES}
 
-    ui/dialogs/UpdateAvailableDialog.h
-    ui/dialogs/UpdateAvailableDialog.cpp
-)
+        ui/dialogs/UpdateAvailableDialog.h
+        ui/dialogs/UpdateAvailableDialog.cpp
+    )
 endif()
 
 if (APPLE)
+    #! SOURCES
     set(LAUNCHER_SOURCES
         ${LAUNCHER_SOURCES}
 
@@ -1215,6 +1248,7 @@ if (APPLE)
 endif()
 
 if(WIN32)
+    #! SOURCES
     set(LAUNCHER_SOURCES
         console/WindowsConsole.h
         console/WindowsConsole.cpp

@@ -135,6 +135,17 @@ jobs:
           ctest --preset "$CMAKE_PRESET" --build-config "$BUILD_TYPE"
 
       ##
+      # lint
+      ##
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Lint CMakeLists.txt source sections
+        continue-on-error: true # don't fail builds for now
+        run: |
+          python ./cmake/UpdateCMakeSources.py --report-missing --report-not-included
+
+      ##
       # PACKAGE
       ##
 
