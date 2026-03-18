@@ -1604,6 +1604,7 @@ if(WIN32 OR (UNIX AND APPLE))
         COMPONENT bundle
         DIRECTORIES
             ${CMAKE_SYSTEM_LIBRARY_PATH}
+            ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin
             ${QT_LIBS_DIR}
             ${QT_LIBEXECS_DIR}
         PRE_EXCLUDE_REGEXES

@@ -31,6 +31,12 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
 
+# NOTE: We can't statically link with the MSVC runtime due to GPL restrictions
+#
+# We also purposefully choose not to use the debug DLL, as that would require
+# users of our development builds to install the Windows SDK
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+
 add_compile_definitions($<$<NOT:$<CONFIG:Debug>>:QT_NO_DEBUG>)
 add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060400)
 add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x060400)
@@ -312,9 +318,8 @@ endif()
 ## NOTE(@getchoo): Never use pkg-config with MSVC since the vcpkg port makes our install bundle fail to find the dll
 if(MSVC)
     find_path(LIBQRENCODE_INCLUDE_DIR qrencode.h REQUIRED)
-    find_library(LIBQRENCODE_LIBRARY_RELEASE qrencode REQUIRED)
-    find_library(LIBQRENCODE_LIBRARY_DEBUG qrencoded)
-    set(LIBQRENCODE_LIBRARIES optimized ${LIBQRENCODE_LIBRARY_RELEASE} debug ${LIBQRENCODE_LIBRARY_DEBUG})
+    find_library(LIBQRENCODE_LIBRARY qrencode REQUIRED)
+    set(LIBQRENCODE_LIBRARIES ${LIBQRENCODE_LIBRARY})
 else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(libqrencode REQUIRED IMPORTED_TARGET libqrencode)
