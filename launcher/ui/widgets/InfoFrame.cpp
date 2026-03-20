@@ -82,21 +82,24 @@ void InfoFrame::updateWithMod(Mod const& m)
         return;
     }
 
-    QString text = "";
-    QString name = "";
-    QString link = m.homepage();
-    if (m.name().isEmpty())
-        name = m.internal_id();
-    else
-        name = m.name();
+    QString text;
+    QString name = m.name().isEmpty() ? m.internal_id() : m.name();
+    const QString safeName = name.toHtmlEscaped();
+    const QString link = m.homepage();
 
-    if (link.isEmpty())
-        text = name;
-    else {
-        text = "<a href=\"" + QUrl(link).toEncoded() + "\">" + name + "</a>";
+    if (link.isEmpty()) {
+        text = safeName;
+    } else {
+        QUrl url(link);
+        if (url.isValid()) {
+            text = "<a href=\"" + link + "\">" + safeName + "</a>";
+        } else {
+            text = safeName;
+        }
     }
+
     if (!m.authors().isEmpty())
-        text += " by " + m.authors().join(", ");
+        text += " by " + m.authors().join(", ").toHtmlEscaped();
 
     setName(text);
 
@@ -109,23 +112,33 @@ void InfoFrame::updateWithMod(Mod const& m)
     setImage(m.icon({ 64, 64 }));
 
     auto licenses = m.licenses();
-    QString licenseText = "";
+    QString licenseText;
     if (!licenses.empty()) {
-        for (auto l : licenses) {
-            if (!licenseText.isEmpty()) {
-                licenseText += "\n";  // add newline between licenses
-            }
+        for (auto const& l : licenses) {
+            if (!licenseText.isEmpty())
+                licenseText += "\n";
+
             if (!l.name.isEmpty()) {
                 if (l.url.isEmpty()) {
-                    licenseText += l.name;
+                    licenseText += l.name.toHtmlEscaped();
                 } else {
-                    licenseText += "<a href=\"" + l.url + "\">" + l.name + "</a>";
+                    QUrl url(l.url);
+                    if (url.isValid()) {
+                        licenseText += "<a href=\"" + l.url + "\">" + l.name.toHtmlEscaped() + "</a>";
+                    } else {
+                        licenseText += l.name.toHtmlEscaped();
+                    }
                 }
             } else if (!l.url.isEmpty()) {
-                licenseText += "<a href=\"" + l.url + "\">" + l.url + "</a>";
+                QUrl url(l.url);
+                if (url.isValid()) {
+                    licenseText += "<a href=\"" + l.url + "\">" + l.url.toHtmlEscaped() + "</a>";
+                } else {
+                    licenseText += l.url.toHtmlEscaped();
+                }
             }
             if (!l.description.isEmpty() && l.description != l.name) {
-                licenseText += " " + l.description;
+                licenseText += " " + l.description.toHtmlEscaped();
             }
         }
     }
@@ -135,10 +148,16 @@ void InfoFrame::updateWithMod(Mod const& m)
         setLicense();
     }
 
-    QString issueTracker = "";
+    QString issueTracker;
     if (!m.issueTracker().isEmpty()) {
-        issueTracker += tr("Report issues to: ");
-        issueTracker += "<a href=\"" + m.issueTracker() + "\">" + m.issueTracker() + "</a>";
+        const QString raw = m.issueTracker();
+        issueTracker = tr("Report issues to: ");
+        QUrl url(raw);
+        if (url.isValid()) {
+            issueTracker += "<a href=\"" + raw + "\">" + raw.toHtmlEscaped() + "</a>";
+        } else {
+            issueTracker += raw.toHtmlEscaped();
+        }
     }
     setIssueTracker(issueTracker);
 }
@@ -147,11 +166,14 @@ void InfoFrame::updateWithResource(const Resource& resource)
 {
     const QString homepage = resource.homepage();
 
-    if (!homepage.isEmpty())
-        setName("<a href=\"" + homepage + "\">" + resource.name() + "</a>");
-    else
-        setName(resource.name());
-
+    if (!homepage.isEmpty()) {
+        QUrl url(homepage);
+        if (url.isValid())
+            setName("<a href=\"" + homepage + "\">" + resource.name().toHtmlEscaped() + "</a>");
+        else
+            setName(resource.name().toHtmlEscaped());
+    } else
+        setName(resource.name().toHtmlEscaped());
     setImage();
 }
 
@@ -324,7 +346,7 @@ void InfoFrame::setDescription(QString text)
         cursor.insertHtml("<a href=\"#mod_desc\">...</a>");
 
         labeltext.append(doc.toHtml());
-        connect(ui->descriptionLabel, &QLabel::linkActivated, this, &InfoFrame::descriptionEllipsisHandler);
+        connect(ui->descriptionLabel, &QLabel::linkActivated, this, &InfoFrame::descriptionEllipsisHandler, Qt::UniqueConnection);
     } else {
         ui->descriptionLabel->setTextFormat(Qt::TextFormat::AutoText);
         labeltext.append(finaltext);
@@ -363,7 +385,7 @@ void InfoFrame::setLicense(QString text)
         m_license = text;
         // This allows injecting HTML here.
         labeltext.append("<html><body>" + finaltext.left(287) + "<a href=\"#mod_desc\">...</a></body></html>");
-        connect(ui->licenseLabel, &QLabel::linkActivated, this, &InfoFrame::licenseEllipsisHandler);
+        connect(ui->licenseLabel, &QLabel::linkActivated, this, &InfoFrame::licenseEllipsisHandler, Qt::UniqueConnection);
     } else {
         ui->licenseLabel->setTextFormat(Qt::TextFormat::AutoText);
         labeltext.append(finaltext);
