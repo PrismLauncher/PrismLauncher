@@ -47,5 +47,6 @@ class Validator {
     virtual bool write(QByteArray& data) = 0;
     virtual bool abort() = 0;
     virtual bool validate(QNetworkReply& reply) = 0;
+    virtual bool reset() { return true; }
 };
 }  // namespace Net

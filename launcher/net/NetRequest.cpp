@@ -42,7 +42,9 @@
 #include <QDateTime>
 #include <QFileInfo>
 #include <QLocale>
+#include <QMetaObject>
 #include <QNetworkReply>
+#include <QRegularExpression>
 #include <QUrl>
 #include <cstdint>
 #include <memory>
@@ -80,6 +82,9 @@ void NetRequest::executeTask()
     }
 
     QNetworkRequest request(m_url);
+    m_firstDataChunk = true;
+    m_errorResponse.clear();
+
     m_state = m_sink->init(request);
     switch (m_state) {
         case State::Succeeded:
@@ -111,6 +116,13 @@ void NetRequest::executeTask()
     request.setHeader(QNetworkRequest::UserAgentHeader, user_agent.toUtf8());
     for (auto& header_proxy : m_headerProxies) {
         header_proxy->writeHeaders(request);
+    }
+
+    m_resumeOffset = m_sink->currentLocalSize();
+    qCDebug(logCat) << getUid().toString() << "Local partial size before request:" << m_resumeOffset << "for" << m_url.toString();
+    if (m_resumeOffset > 0) {
+        request.setRawHeader("Range", QString("bytes=%1-").arg(m_resumeOffset).toLatin1());
+        qCDebug(logCat) << getUid().toString() << "Attempting resume with Range from offset" << m_resumeOffset << "for" << m_url.toString();
     }
 
 #if defined(LAUNCHER_APPLICATION)
@@ -293,6 +305,47 @@ void NetRequest::downloadFinished()
         return;
     }
 
+    if (m_resumeOffset > 0 && replyStatusCode() == 416) {
+        if (m_416RetryCount >= MAX_416_RETRIES) {
+            qCCritical(logCat) << getUid().toString() << "Range retry limit reached for" << m_url.toString();
+            m_sink->abort();
+            m_failReason = tr("Failed to resume download after multiple retries");
+            emit failed(m_failReason);
+            emit finished();
+            return;
+        }
+
+        ++m_416RetryCount;
+        qCWarning(logCat) << getUid().toString() << "Server rejected resume range, retrying from start:" << m_url.toString();
+        m_sink->truncate();
+        m_resumeOffset = 0;
+
+        QMetaObject::invokeMethod(
+            this, [this] { executeTask(); }, Qt::QueuedConnection
+        );
+        return;
+    }
+
+    if (m_resumeOffset > 0 && replyStatusCode() == 404) {
+        qCWarning(logCat) << getUid().toString() << "Resume request returned 404, retrying from start:" << m_url.toString();
+        m_sink->truncate();
+        m_resumeOffset = 0;
+
+        QMetaObject::invokeMethod(
+            this, [this] { executeTask(); }, Qt::QueuedConnection
+        );
+        return;
+    }
+
+    if (m_resumeOffset > 0 && m_firstDataChunk) {
+        auto statusCode = replyStatusCode();
+        if (statusCode == 200 || statusCode == 203) {
+            qCWarning(logCat) << getUid().toString() << "Server ignored Range without readyRead, downloading from start:" << m_url.toString();
+            m_sink->truncate();
+            m_resumeOffset = 0;
+        }
+    }
+
     // handle HTTP redirection first
     if (handleRedirect()) {
         qCDebug(logCat) << getUid().toString() << "Request redirected:" << m_url.toString();
@@ -356,6 +409,63 @@ void NetRequest::downloadFinished()
 void NetRequest::downloadReadyRead()
 {
     if (m_state == State::Running) {
+        if (m_firstDataChunk) {
+            m_firstDataChunk = false;
+            auto statusCode = replyStatusCode();
+            qCDebug(logCat) << getUid().toString() << "First response chunk status" << statusCode << "for" << m_url.toString();
+
+            if (m_resumeOffset > 0) {
+                if (statusCode == 200 || statusCode == 203) {
+                    qCWarning(logCat) << getUid().toString() << "Server ignored Range, downloading from start:" << m_url.toString();
+                    m_sink->truncate();
+                    m_resumeOffset = 0;
+                } else if (statusCode == 206) {
+                    auto contentRange = QString::fromLatin1(m_reply->rawHeader("Content-Range"));
+                    qCDebug(logCat) << getUid().toString() << "Received Content-Range:" << contentRange;
+                    QRegularExpression regex("^bytes\\s+(\\d+)-(\\d+)/(\\d+|\\*)$", QRegularExpression::CaseInsensitiveOption);
+                    auto match = regex.match(contentRange);
+
+                    bool shouldRestart = false;
+                    if (!match.hasMatch()) {
+                        shouldRestart = true;
+                    } else {
+                        bool startOk = false;
+                        bool totalOk = false;
+                        auto rangeStart = match.captured(1).toLongLong(&startOk);
+                        auto totalStr = match.captured(3);
+                        qint64 totalSize = -1;
+                        if (totalStr != "*") {
+                            totalSize = totalStr.toLongLong(&totalOk);
+                        } else {
+                            totalOk = true;
+                        }
+                        if (!startOk || !totalOk || rangeStart != m_resumeOffset || (totalSize >= 0 && m_resumeOffset > totalSize)) {
+                            qCWarning(logCat) << getUid().toString() << "Content-Range validation failed. startOk =" << startOk
+                                              << "totalOk =" << totalOk << "rangeStart =" << rangeStart << "resumeOffset =" << m_resumeOffset
+                                              << "totalSize =" << totalSize;
+                            shouldRestart = true;
+                        }
+                    }
+
+                    if (shouldRestart) {
+                        qCWarning(logCat) << getUid().toString() << "Invalid Content-Range, restarting from start:" << contentRange;
+                        m_sink->truncate();
+                        m_resumeOffset = 0;
+
+                        if (m_reply) {
+                            disconnect(m_reply.get(), nullptr, this, nullptr);
+                            m_reply->abort();
+                        }
+
+                        QMetaObject::invokeMethod(
+                            this, [this] { executeTask(); }, Qt::QueuedConnection
+                        );
+                        return;
+                    }
+                }
+            }
+        }
+
         auto data = m_reply->readAll();
         m_state = m_sink->write(data);
         if (replyStatusCode() >= 400) {

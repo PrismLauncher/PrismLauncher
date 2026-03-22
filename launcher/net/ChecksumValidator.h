@@ -69,6 +69,12 @@ class ChecksumValidator : public Validator {
         return true;
     }
 
+    auto reset() -> bool override
+    {
+        m_checksum.reset();
+        return true;
+    }
+
     auto validate(QNetworkReply&) -> bool override
     {
         if (m_expected.size() && m_expected != hash()) {
