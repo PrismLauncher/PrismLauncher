@@ -4,6 +4,7 @@
  *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2022 solonovamax <solonovamax@12oclockpoint.com>
+ *  Copyright (C) 2026 Mehmet Samet Duman <dumanmehmetsamet@icloud.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -70,6 +71,7 @@ import java.util.Map;
  * Changing field and method declarations without further testing is not
  * recommended.
  */
+@SuppressWarnings({ "removal", "deprecation" })
 public final class Launcher extends Applet implements AppletStub {
     private static final long serialVersionUID = 1L;
 

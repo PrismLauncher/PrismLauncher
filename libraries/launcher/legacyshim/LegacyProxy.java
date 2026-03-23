@@ -50,10 +50,11 @@
  *      limitations under the License.
  */
 
-package org.prismlauncher.legacy;
+package org.prismlauncher.legacyshim;
 
-import org.prismlauncher.launcher.Launcher;
+import org.prismlauncher.legacy.LegacyLauncher;
 import org.prismlauncher.legacy.fix.online.OnlineFixes;
+import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.utils.Parameters;
 
 // implementation of LegacyProxy

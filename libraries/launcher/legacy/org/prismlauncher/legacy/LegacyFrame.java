@@ -4,6 +4,7 @@
  *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
  *  Copyright (C) 2022 flow <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2026 Mehmet Samet Duman <dumanmehmetsamet@icloud.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -74,6 +75,7 @@ import javax.swing.JFrame;
 
 import net.minecraft.Launcher;
 
+@SuppressWarnings({ "removal", "deprecation" })
 final class LegacyFrame extends JFrame {
     private static final long serialVersionUID = 1L;
 
@@ -158,9 +160,8 @@ final class LegacyFrame extends JFrame {
     private final class ForceExitHandler extends WindowAdapter {
         @Override
         public void windowClosing(WindowEvent event) {
-            // FIXME better solution
-
-            new Thread(new Runnable() {
+            // Force exit after 30 seconds if the application hangs on stop
+            Thread forceExitThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -169,10 +170,12 @@ final class LegacyFrame extends JFrame {
                         Log.error("Thread interrupted", e);
                     }
 
-                    Log.warning("Forcing exit");
+                    Log.warning("Forcing exit due to hang");
                     System.exit(0);
                 }
-            }).start();
+            }, "ForceExitThread");
+            forceExitThread.setDaemon(true);
+            forceExitThread.start();
 
             if (launcher != null) {
                 launcher.stop();

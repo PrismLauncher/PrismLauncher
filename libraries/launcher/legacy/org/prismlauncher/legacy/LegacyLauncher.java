@@ -5,6 +5,7 @@
  *  Copyright (C) 2022 flow <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2022 solonovamax <solonovamax@12oclockpoint.com>
+ *  Copyright (C) 2026 Mehmet Samet Duman <dumanmehmetsamet@icloud.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -73,7 +74,8 @@ import java.util.List;
 /**
  * Used to launch old versions which support applets.
  */
-final class LegacyLauncher extends AbstractLauncher {
+@SuppressWarnings({ "removal", "deprecation" })
+public final class LegacyLauncher extends AbstractLauncher {
     private final String user, session;
     private final String title;
     private final String appletClass;
