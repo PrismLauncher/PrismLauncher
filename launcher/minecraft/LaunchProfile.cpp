@@ -358,7 +358,7 @@ void LaunchProfile::getLibraryFiles(const RuntimeContext& runtimeContext,
         lib->getApplicableFiles(runtimeContext, jars, nativeJars, native32, native64, overridePath);
     }
     // NOTE: order is important here, add main jar last to the lists
-    if (m_mainJar) {
+    if (m_mainJar && !m_skipMainJar) {
         // FIXME: HACK!! jar modding is weird and unsystematic!
         if (m_jarMods.size()) {
             QDir tempDir(tempPath);
@@ -375,4 +375,9 @@ void LaunchProfile::getLibraryFiles(const RuntimeContext& runtimeContext,
     } else if (runtimeContext.javaArchitecture == "64") {
         nativeJars.append(native64);
     }
+}
+
+void LaunchProfile::setSkipMainJar(bool skip)
+{
+    m_skipMainJar = Version(m_minecraftVersion) >= Version("26.1") && skip;
 }

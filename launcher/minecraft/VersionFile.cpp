@@ -62,6 +62,9 @@ void VersionFile::applyTo(LaunchProfile* profile, const RuntimeContext& runtimeC
         // https://www.theregister.co.uk/2017/02/28/aws_is_awol_as_s3_goes_haywire/
         profile->applyMinecraftAssets(mojangAssetIndex);
     }
+    if (uid == "net.minecraftforge" || uid == "net.neoforged") {
+        profile->setSkipMainJar(true);
+    }
 
     profile->applyMainJar(mainJar);
     profile->applyMainClass(mainClass);
