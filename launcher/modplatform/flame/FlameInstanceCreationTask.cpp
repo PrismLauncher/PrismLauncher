@@ -489,6 +489,18 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
 {
     auto results = m_modIdResolver->getResults().files;
 
+    for (auto& result : results) {
+        if (result.version.downloadUrl.isEmpty()) {
+            QString fileIdStr = QString::number(result.fileId);
+            if (!fileIdStr.isEmpty() && !result.version.fileName.isEmpty()) {
+                QString cdnUrl = QString("https://edge.forgecdn.net/files/%1/%2/%3")
+                    .arg(fileIdStr.left(4), fileIdStr.mid(4), QUrl::toPercentEncoding(result.version.fileName));
+
+                result.version.downloadUrl = cdnUrl;
+            }
+        }
+    }
+
     QStringList optionalFiles;
     for (auto& result : results) {
         if (!result.required) {
@@ -575,9 +587,17 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         relpath = FS::PathCombine("minecraft", relpath);
         auto path = FS::PathCombine(m_stagingPath, relpath);
 
-        if (!result.version.downloadUrl.isEmpty()) {
-            qDebug() << "Will download" << result.version.downloadUrl << "to" << path;
-            auto dl = Net::ApiDownload::makeFile(result.version.downloadUrl, path);
+        QString finalUrl = result.version.downloadUrl;
+
+        if (finalUrl.isEmpty()) {
+            QString fileIdStr = QString::number(result.fileId);
+            finalUrl = QString("https://edge.forgecdn.net/files/%1/%2/%3")
+                .arg(fileIdStr.left(4), fileIdStr.mid(4), QUrl::toPercentEncoding(result.version.fileName));
+        }
+
+        if (!finalUrl.isEmpty()) {
+            qDebug() << "Will download" << finalUrl << "to" << path;
+            auto dl = Net::ApiDownload::makeFile(finalUrl, path);
             m_filesJob->addNetAction(dl);
         }
     }
