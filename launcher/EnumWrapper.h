@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <QString>
+#include <QtGlobal>
 #include <compare>
 #include <type_traits>
 
@@ -26,6 +28,7 @@ struct EnumWrapper {
     using Enum = EnumV;
     using EnumBase = std::underlying_type_t<Enum>;
 
+    // NOLINTNEXTLINE(hicpp-explicit-conversions)
     constexpr EnumWrapper(Enum e = Derived::invalid()) : m_value(e) {}
 
     constexpr bool isValid() const { return m_value != Derived::invalid(); }
@@ -39,8 +42,9 @@ struct EnumWrapper {
     QString toString() const
     {
         for (auto&& [e, name] : Derived::mapping()) {
-            if (e == m_value)
+            if (e == m_value) {
                 return QString(name);
+            }
         }
         Q_ASSERT_X(false, "EnumWrapper::toString()", "No string mapping found for current enum value");
         return {};
@@ -49,8 +53,9 @@ struct EnumWrapper {
     static constexpr Derived fromString(const QString& str)
     {
         for (auto&& [e, name] : Derived::mapping()) {
-            if (str == name)
+            if (str == name) {
                 return Derived(e);
+            }
         }
         return Derived(Derived::invalid());
     }

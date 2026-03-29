@@ -23,8 +23,10 @@
 #include <QMetaType>
 #include <QString>
 #include <QVariant>
+#include <array>
 #include <cstdint>
 #include <memory>
+#include <utility>
 #include "EnumWrapper.h"
 
 class QIODevice;

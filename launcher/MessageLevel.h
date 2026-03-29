@@ -1,7 +1,9 @@
 #pragma once
 
 #include <QString>
+#include <array>
 #include <cstdint>
+#include <utility>
 #include "EnumWrapper.h"
 
 enum class MessageLevelValue : std::uint8_t {
