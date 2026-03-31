@@ -377,6 +377,7 @@ void LaunchProfile::getLibraryFiles(const RuntimeContext& runtimeContext,
     }
 }
 
+// Minecraft prior to 26.1 was obfuscated, after it's main class will conflict with Forge loads.
 void LaunchProfile::setSkipMainJar(bool skip)
 {
     m_skipMainJar = Version(m_minecraftVersion) >= Version("26.1") && skip;
