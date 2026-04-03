@@ -3,9 +3,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ModrinthAPI.h"
+#include <array>
 
 #include "Application.h"
 #include "Json.h"
+#include "modplatform/ResourceType.h"
 #include "net/ApiRequest.h"
 #include "net/NetJob.h"
 
@@ -120,6 +122,37 @@ QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const
              { .index = 3, .name = "follows", .readable_name = QObject::tr("Sort by Follows") },
              { .index = 4, .name = "newest", .readable_name = QObject::tr("Sort by Newest") },
              { .index = 5, .name = "updated", .readable_name = QObject::tr("Sort by Last Updated") } };
+}
+namespace {
+const auto resourceTypeMap = std::array{
+    std::pair{ ModPlatform::ResourceType::Mod, "mod" },           std::pair{ ModPlatform::ResourceType::ResourcePack, "resourcepack" },
+    std::pair{ ModPlatform::ResourceType::ShaderPack, "shader" }, std::pair{ ModPlatform::ResourceType::DataPack, "datapack" },
+    std::pair{ ModPlatform::ResourceType::Modpack, "modpack" },
+};
+}
+
+ModPlatform::ResourceType ModrinthAPI::getResourceType(const QString& param)
+{
+    for (const auto& [key, value] : resourceTypeMap) {
+        if (value == param) {
+            return key;
+        }
+    }
+
+    qWarning() << "Invalid resource type for Modrinth API!" << param;
+    return ModPlatform::ResourceType::Unknown;
+}
+
+QString ModrinthAPI::resourceTypeParameter(ModPlatform::ResourceType type)
+{
+    for (const auto& [key, value] : resourceTypeMap) {
+        if (key == type) {
+            return value;
+        }
+    }
+
+    qWarning() << "Invalid resource type for Modrinth API!" << static_cast<std::uint8_t>(type);
+    return "";
 }
 
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getModCategories() const

@@ -106,32 +106,10 @@ class ModrinthAPI final : public ResourceAPI {
         }
         return v;
     }
+    static ModPlatform::ResourceType getResourceType(const QString& param);
 
    private:
-    // NOTE: prevent creation and deletion of type - get should be used instead
-    ModrinthAPI() = default;
-    ~ModrinthAPI() = default;
-
-    static QString resourceTypeParameter(ModPlatform::ResourceType type)
-    {
-        switch (type) {
-            case ModPlatform::ResourceType::Mod:
-                return "mod";
-            case ModPlatform::ResourceType::ResourcePack:
-                return "resourcepack";
-            case ModPlatform::ResourceType::ShaderPack:
-                return "shader";
-            case ModPlatform::ResourceType::DataPack:
-                return "datapack";
-            case ModPlatform::ResourceType::Modpack:
-                return "modpack";
-            default:
-                qWarning() << "Invalid resource type for Modrinth API!";
-                break;
-        }
-
-        return "";
-    }
+    static QString resourceTypeParameter(ModPlatform::ResourceType type);
 
     QString createFacets(const SearchArgs& args) const
     {

@@ -41,6 +41,7 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 
     pack.provider = ModPlatform::ResourceProvider::MODRINTH;
     pack.name = Json::requireString(obj, "title");
+    pack.resourceType = ModrinthAPI::getResourceType(obj["project_type"].toString());
 
     pack.slug = obj["slug"].toString("");
     if (!pack.slug.isEmpty()) {

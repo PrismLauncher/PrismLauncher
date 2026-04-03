@@ -556,7 +556,7 @@ void FlameCreationTask::idResolverSucceeded()
     QList<BlockedMod> blockedMods;
     auto anyBlocked = false;
     for (const auto& result : results.values()) {
-        if (result.resourceType != ModPlatform::ResourceType::Mod) {
+        if (result.pack.resourceType != ModPlatform::ResourceType::Mod) {
             m_otherResources.append(std::make_pair(result.version.fileName, result.targetFolder));
         }
 

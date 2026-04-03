@@ -162,14 +162,41 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getFile(const QString& addonId, cons
 QList<ResourceAPI::SortingMethod> FlameAPI::getSortingMethods() const
 {
     // https://docs.curseforge.com/?python#tocS_ModsSearchSortField
-    return { { 1, "Featured", QObject::tr("Sort by Featured") },
-             { 2, "Popularity", QObject::tr("Sort by Popularity") },
-             { 3, "LastUpdated", QObject::tr("Sort by Last Updated") },
-             { 4, "Name", QObject::tr("Sort by Name") },
-             { 5, "Author", QObject::tr("Sort by Author") },
-             { 6, "TotalDownloads", QObject::tr("Sort by Downloads") },
-             { 7, "Category", QObject::tr("Sort by Category") },
-             { 8, "GameVersion", QObject::tr("Sort by Game Version") } };
+    return { { .index = 1, .name = "Featured", .readable_name = QObject::tr("Sort by Featured") },
+             { .index = 2, .name = "Popularity", .readable_name = QObject::tr("Sort by Popularity") },
+             { .index = 3, .name = "LastUpdated", .readable_name = QObject::tr("Sort by Last Updated") },
+             { .index = 4, .name = "Name", .readable_name = QObject::tr("Sort by Name") },
+             { .index = 5, .name = "Author", .readable_name = QObject::tr("Sort by Author") },
+             { .index = 6, .name = "TotalDownloads", .readable_name = QObject::tr("Sort by Downloads") },
+             { .index = 7, .name = "Category", .readable_name = QObject::tr("Sort by Category") },
+             { .index = 8, .name = "GameVersion", .readable_name = QObject::tr("Sort by Game Version") } };
+}
+
+namespace {
+const auto g_classIDMappings = std::array{
+    std::pair{ ModPlatform::ResourceType::Mod, 6 },        std::pair{ ModPlatform::ResourceType::ResourcePack, 12 },
+    std::pair{ ModPlatform::ResourceType::World, 17 },     std::pair{ ModPlatform::ResourceType::ShaderPack, 6552 },
+    std::pair{ ModPlatform::ResourceType::Modpack, 4471 }, std::pair{ ModPlatform::ResourceType::DataPack, 6945 },
+};
+}
+
+int FlameAPI::getClassId(ModPlatform::ResourceType type)
+{
+    for (auto&& [e, classId] : g_classIDMappings) {
+        if (e == type) {
+            return classId;
+        }
+    }
+    return 0;
+}
+ModPlatform::ResourceType FlameAPI::getResourceType(int classId)
+{
+    for (auto&& [type, c] : g_classIDMappings) {
+        if (c == classId) {
+            return type;
+        }
+    }
+    return ModPlatform::ResourceType::Unknown;
 }
 
 std::pair<Task::Ptr, QByteArray*> FlameAPI::getCategories(ModPlatform::ResourceType type)

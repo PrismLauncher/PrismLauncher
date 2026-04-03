@@ -83,30 +83,6 @@ void Flame::FileResolvingTask::executeTask()
     m_task->start();
 }
 
-ModPlatform::ResourceType getResourceType(int classId)
-{
-    switch (classId) {
-        case 17:  // Worlds
-            return ModPlatform::ResourceType::World;
-        case 6:  // Mods
-            return ModPlatform::ResourceType::Mod;
-        case 12:  // Resource Packs
-                  // return ModPlatform::ResourceType::ResourcePack; // not really a resourcepack
-            /* fallthrough */
-        case 4546:  // Customization
-                    // return ModPlatform::ResourceType::ShaderPack; // not really a shaderPack
-            /* fallthrough */
-        case 4471:  // Modpacks
-            /* fallthrough */
-        case 5:  // Bukkit Plugins
-            /* fallthrough */
-        case 4559:  // Addons
-            /* fallthrough */
-        default:
-            return ModPlatform::ResourceType::Unknown;
-    }
-}
-
 void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
 {
     setProgress(1, 3);
@@ -168,8 +144,8 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
 
             getFlameProjects();
             return;
-            }
-        if (APPLICATION->settings()->get("FallbackMRBlockedMods").toBool()){
+        }
+        if (APPLICATION->settings()->get("FallbackMRBlockedMods").toBool()) {
             try {
                 auto entries = Json::requireObject(doc);
                 for (auto& out : m_manifest.files) {
@@ -250,8 +226,7 @@ void Flame::FileResolvingTask::getFlameProjects()
 
                 setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
                 FlameMod::loadIndexedPack(file->pack, entry_obj);
-                file->resourceType = getResourceType(Json::requireInteger(entry_obj, "classId", "modClassId"));
-                if (file->resourceType == ModPlatform::ResourceType::World) {
+                if (file->pack.resourceType == ModPlatform::ResourceType::World) {
                     file->targetFolder = "saves";
                 }
             }
