@@ -96,7 +96,7 @@ class JavaWizardWidget : public QWidget {
     unsigned int observedMaxMemory = 0;
     unsigned int observedPermGenMemory = 0;
     QString queuedCheck;
-    uint64_t m_availableMemory = 0ull;
+    uint64_t m_availableMemory = 0ULL;
     shared_qobject_ptr<JavaChecker> m_checker;
     JavaChecker::Result m_result;
     QTimer* m_memoryTimer;

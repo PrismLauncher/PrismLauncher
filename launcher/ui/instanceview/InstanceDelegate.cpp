@@ -115,7 +115,7 @@ void drawProgressOverlay(QPainter* painter, const QStyleOptionViewItem& option, 
 
     qreal percent = (qreal)value / (qreal)maximum;
     QColor color = option.palette.color(QPalette::Dark);
-    color.setAlphaF(0.70f);
+    color.setAlphaF(0.70F);
     painter->setBrush(color);
     painter->setPen(QPen(QBrush(), 0));
     painter->drawPie(option.rect, 90 * 16, -percent * 360 * 16);

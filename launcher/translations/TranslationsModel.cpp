@@ -98,9 +98,9 @@ struct Language {
     float percentTranslated() const
     {
         if (total == 0) {
-            return 100.0f;
+            return 100.0F;
         }
-        return 100.0f * float(translated) / float(total);
+        return 100.0F * float(translated) / float(total);
     }
 
     void setTranslationStats(unsigned _translated, unsigned _untranslated, unsigned _fuzzy)

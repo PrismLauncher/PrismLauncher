@@ -150,7 +150,7 @@ void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& opti
     QPen pen;
     pen.setWidth(2);
     QColor penColor = option.palette.text().color();
-    penColor.setAlphaF(0.6f);
+    penColor.setAlphaF(0.6F);
     pen.setColor(penColor);
     painter->setPen(pen);
     painter->setRenderHint(QPainter::Antialiasing);
@@ -193,7 +193,7 @@ void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& opti
 
     // BEGIN: horizontal line
     {
-        penColor.setAlphaF(0.05f);
+        penColor.setAlphaF(0.05F);
         pen.setColor(penColor);
         painter->setPen(pen);
         // startPoint is left + arrow + text + space

@@ -95,14 +95,14 @@ void SkinOpenGLWindow::mouseMoveEvent(QMouseEvent* event)
         int dx = event->position().x() - m_mousePosition.x();
         int dy = event->position().y() - m_mousePosition.y();
 
-        m_yaw += dx * 0.5f;
-        m_pitch += dy * 0.5f;
+        m_yaw += dx * 0.5F;
+        m_pitch += dy * 0.5F;
 
         // Normalize yaw to keep it manageable
-        if (m_yaw > 360.0f)
-            m_yaw -= 360.0f;
-        else if (m_yaw < 0.0f)
-            m_yaw += 360.0f;
+        if (m_yaw > 360.0F)
+            m_yaw -= 360.0F;
+        else if (m_yaw < 0.0F)
+            m_yaw += 360.0F;
 
         m_mousePosition = QVector2D(event->pos());
         update();  // Trigger a repaint
@@ -207,7 +207,7 @@ void SkinOpenGLWindow::paintGL()
 {
     // Adjust the viewport to account for fractional scaling
     qreal dpr = devicePixelRatio();
-    if (dpr != 1.f) {
+    if (dpr != 1.F) {
         QSize scaledSize = size() * dpr;
         glViewport(0, 0, scaledSize.width(), scaledSize.height());
     }
@@ -272,10 +272,10 @@ QColor calculateContrastingColor(const QColor& color)
 {
     auto luma = Rainbow::luma(color);
     if (luma < 0.5) {
-        constexpr float contrast = 0.05f;
+        constexpr float contrast = 0.05F;
         return Rainbow::lighten(color, contrast);
     } else {
-        constexpr float contrast = 0.2f;
+        constexpr float contrast = 0.2F;
         return Rainbow::darken(color, contrast);
     }
 }
@@ -320,8 +320,8 @@ void SkinOpenGLWindow::wheelEvent(QWheelEvent* event)
 {
     // Adjust distance based on scroll
     int delta = event->angleDelta().y();  // Positive for scroll up, negative for scroll down
-    m_distance -= delta * 0.01f;          // Adjust sensitivity factor
-    m_distance = qMax(16.f, m_distance);  // Clamp distance
+    m_distance -= delta * 0.01F;          // Adjust sensitivity factor
+    m_distance = qMax(16.F, m_distance);  // Clamp distance
     update();                             // Trigger a repaint
 }
 void SkinOpenGLWindow::setElytraVisible(bool visible)

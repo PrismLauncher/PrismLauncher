@@ -270,7 +270,7 @@ void OtherLogsPage::reload()
                             "for large files.")
                              .arg(file.fileName()));
         };
-        if (file.size() > (1024ll * 1024ll * 12ll)) {
+        if (file.size() > (1024LL * 1024LL * 12LL)) {
             showTooBig();
             return;
         }
