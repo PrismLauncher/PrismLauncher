@@ -413,7 +413,7 @@ std::unique_ptr<MinecraftInstance> FlameCreationTask::createInstance()
     int recommendedRAM = m_pack.minecraft.recommendedRAM;
 
     // only set memory if this is a fresh instance
-    if (m_instance == nullptr && recommendedRAM > 0) {
+    if (!m_instance && recommendedRAM > 0) {
         const uint64_t sysMiB = HardwareInfo::totalRamMiB();
         const uint64_t max = sysMiB * 0.9;
 
