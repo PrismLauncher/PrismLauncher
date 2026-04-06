@@ -36,6 +36,8 @@
 #include "LaunchProfile.h"
 #include <Version.h>
 
+#include <algorithm>
+
 void LaunchProfile::clear()
 {
     m_minecraftVersion.clear();
@@ -241,9 +243,7 @@ void LaunchProfile::applyMainJar(LibraryPtr jar)
 
 void LaunchProfile::applyProblemSeverity(ProblemSeverity severity)
 {
-    if (m_problemSeverity < severity) {
-        m_problemSeverity = severity;
-    }
+    m_problemSeverity = std::max(m_problemSeverity, severity);
 }
 
 const QList<PatchProblem> LaunchProfile::getProblems() const

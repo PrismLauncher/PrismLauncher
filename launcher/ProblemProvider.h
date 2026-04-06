@@ -2,6 +2,7 @@
 
 #include <QList>
 #include <QString>
+#include <algorithm>
 
 enum class ProblemSeverity { None, Warning, Error };
 
@@ -23,9 +24,7 @@ class ProblemContainer : public ProblemProvider {
     ProblemSeverity getProblemSeverity() const override { return m_problemSeverity; }
     virtual void addProblem(ProblemSeverity severity, const QString& description)
     {
-        if (severity > m_problemSeverity) {
-            m_problemSeverity = severity;
-        }
+        m_problemSeverity = std::max(severity, m_problemSeverity);
         m_problems.append({ severity, description });
     }
 

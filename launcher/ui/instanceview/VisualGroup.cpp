@@ -41,6 +41,7 @@
 #include <QModelIndex>
 #include <QPainter>
 #include <QtMath>
+#include <algorithm>
 #include <utility>
 
 #include "InstanceView.h"
@@ -77,9 +78,7 @@ void VisualGroup::update()
         view->initViewItemOption(&viewItemOption);
 
         auto itemHeight = view->itemDelegate()->sizeHint(viewItemOption, item).height();
-        if (itemHeight > maxRowHeight) {
-            maxRowHeight = itemHeight;
-        }
+        maxRowHeight = std::max(itemHeight, maxRowHeight);
         rows[currentRow].items.append(item);
         positionInRow++;
     }

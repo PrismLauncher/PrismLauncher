@@ -40,6 +40,7 @@
 #include <QFileInfo>
 #include <QImageReader>
 #include <QRandomGenerator>
+#include <algorithm>
 #include "FileSystem.h"
 #include "Json.h"
 
@@ -95,8 +96,7 @@ JsonCatPack::JsonCatPack(QFileInfo& manifestInfo) : BasicCatPack(manifestInfo.di
 QDate ensureDay(int year, int month, int day)
 {
     QDate date(year, month, 1);
-    if (day > date.daysInMonth())
-        day = date.daysInMonth();
+    day = std::min(day, date.daysInMonth());
     return QDate(year, month, day);
 }
 

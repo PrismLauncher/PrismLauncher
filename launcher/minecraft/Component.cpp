@@ -38,6 +38,7 @@
 #include <meta/VersionList.h>
 
 #include <QSaveFile>
+#include <algorithm>
 
 #include "Application.h"
 #include "FileSystem.h"
@@ -280,9 +281,7 @@ const QList<PatchProblem> Component::getProblems() const
 
 void Component::addComponentProblem(ProblemSeverity severity, const QString& description)
 {
-    if (severity > m_componentProblemSeverity) {
-        m_componentProblemSeverity = severity;
-    }
+    m_componentProblemSeverity = std::max(severity, m_componentProblemSeverity);
     m_componentProblems.append({ severity, description });
 
     emit dataChanged();

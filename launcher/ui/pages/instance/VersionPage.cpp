@@ -488,9 +488,7 @@ void VersionPage::versionCurrent(const QModelIndex& current, [[maybe_unused]] co
 
 void VersionPage::preselect(int row)
 {
-    if (row < 0) {
-        row = 0;
-    }
+    row = std::max(row, 0);
     if (row >= m_profile->rowCount(QModelIndex())) {
         row = m_profile->rowCount(QModelIndex()) - 1;
     }

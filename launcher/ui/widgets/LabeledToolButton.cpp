@@ -40,6 +40,7 @@
 #include <QResizeEvent>
 #include <QStyleOption>
 #include <QVBoxLayout>
+#include <algorithm>
 
 /*
  *
@@ -117,8 +118,7 @@ void LabeledToolButton::resetIcon()
     float ar = w / h;
     // FIXME: hardcoded max size of 160x80
     int newW = 80 * ar;
-    if (newW > 160)
-        newW = 160;
+    newW = std::min(newW, 160);
     QSize newSz(newW, 80);
     auto pixmap = m_icon.pixmap(newSz);
     m_label->setPixmap(pixmap);

@@ -8,6 +8,7 @@
 #include <QJsonValue>
 #include <QRegularExpression>
 #include <QString>
+#include <algorithm>
 
 #include "FileSystem.h"
 #include "Json.h"
@@ -342,9 +343,7 @@ ModDetails ReadFabricModInfo(QByteArray contents)
                 int largest = 0;
                 for (auto key : obj.keys()) {
                     auto size = key.split('x').first().toInt();
-                    if (size > largest) {
-                        largest = size;
-                    }
+                    largest = std::max(size, largest);
                 }
                 if (largest > 0) {
                     auto key = QString::number(largest) + "x" + QString::number(largest);
@@ -440,9 +439,7 @@ ModDetails ReadQuiltModInfo(QByteArray contents)
                     int largest = 0;
                     for (auto key : obj.keys()) {
                         auto size = key.split('x').first().toInt();
-                        if (size > largest) {
-                            largest = size;
-                        }
+                        largest = std::max(size, largest);
                     }
                     if (largest > 0) {
                         auto key = QString::number(largest) + "x" + QString::number(largest);

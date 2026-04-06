@@ -12,6 +12,7 @@
 #include <QSpinBox>
 #include <QToolButton>
 #include <QVBoxLayout>
+#include <algorithm>
 
 #include "DesktopServices.h"
 #include "FileSystem.h"
@@ -283,8 +284,7 @@ int JavaWizardWidget::maxHeapSize() const
 {
     auto min = m_minMemSpinBox->value();
     auto max = m_maxMemSpinBox->value();
-    if (max < min)
-        max = min;
+    max = std::max(max, min);
     return max;
 }
 
@@ -292,8 +292,7 @@ int JavaWizardWidget::minHeapSize() const
 {
     auto min = m_minMemSpinBox->value();
     auto max = m_maxMemSpinBox->value();
-    if (min > max)
-        min = max;
+    min = std::min(min, max);
     return min;
 }
 

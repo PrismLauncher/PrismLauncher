@@ -18,6 +18,7 @@
 
 #include "ui/themes/CatPainter.h"
 #include <QPixmap>
+#include <algorithm>
 #include "Application.h"
 #include "settings/SettingsObject.h"
 
@@ -54,10 +55,8 @@ void CatPainter::paint(QPainter* painter, const QRect& viewport)
         aspectMode = Qt::KeepAspectRatio;
     } else if (fit == "fit") {
         aspectMode = Qt::KeepAspectRatio;
-        if (frame.width() < widWidth)
-            widWidth = frame.width();
-        if (frame.height() < widHeight)
-            widHeight = frame.height();
+        widWidth = std::min(frame.width(), widWidth);
+        widHeight = std::min(frame.height(), widHeight);
     }
     auto pixmap = frame.scaled(widWidth, widHeight, aspectMode, Qt::SmoothTransformation);
     QRect rectOfPixmap = pixmap.rect();
