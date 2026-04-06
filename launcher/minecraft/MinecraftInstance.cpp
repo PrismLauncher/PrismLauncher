@@ -469,7 +469,8 @@ QDir MinecraftInstance::versionsPath() const
 
 QStringList MinecraftInstance::getClassPath()
 {
-    QStringList jars, nativeJars;
+    QStringList jars;
+    QStringList nativeJars;
     auto profile = m_components->getProfile();
     profile->getLibraryFiles(runtimeContext(), jars, nativeJars, getLocalLibraryPath(), binRoot());
     return jars;
@@ -483,7 +484,8 @@ QString MinecraftInstance::getMainClass() const
 
 QStringList MinecraftInstance::getNativeJars()
 {
-    QStringList jars, nativeJars;
+    QStringList jars;
+    QStringList nativeJars;
     auto profile = m_components->getProfile();
     profile->getLibraryFiles(runtimeContext(), jars, nativeJars, getLocalLibraryPath(), binRoot());
     return nativeJars;
@@ -531,7 +533,10 @@ QStringList MinecraftInstance::extraArguments()
     }
     auto agents = m_components->getProfile()->getAgents();
     for (const auto& agent : agents) {
-        QStringList jar, temp1, temp2, temp3;
+        QStringList jar;
+        QStringList temp1;
+        QStringList temp2;
+        QStringList temp3;
         agent.library->getApplicableFiles(runtimeContext(), jar, temp1, temp2, temp3, getLocalLibraryPath());
         list.append("-javaagent:" + jar[0] + (agent.argument.isEmpty() ? "" : "=" + agent.argument));
     }
@@ -966,7 +971,8 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
     // libraries and class path.
     {
         out << "Libraries:";
-        QStringList jars, nativeJars;
+        QStringList jars;
+        QStringList nativeJars;
         profile->getLibraryFiles(runtimeContext(), jars, nativeJars, getLocalLibraryPath(), binRoot());
         for (auto file : jars) {
             out << indent + file;
@@ -1324,7 +1330,10 @@ QList<Mod*> MinecraftInstance::getJarMods() const
     auto profile = m_components->getProfile();
     QList<Mod*> mods;
     for (auto jarmod : profile->getJarMods()) {
-        QStringList jar, temp1, temp2, temp3;
+        QStringList jar;
+        QStringList temp1;
+        QStringList temp2;
+        QStringList temp3;
         jarmod->getApplicableFiles(runtimeContext(), jar, temp1, temp2, temp3, jarmodsPath().absolutePath());
         // QString filePath = jarmodsPath().absoluteFilePath(jarmod->filename(currentSystem));
         mods.push_back(new Mod(QFileInfo(jar[0])));

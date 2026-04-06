@@ -124,7 +124,8 @@ void SkinOpenGLWindow::initializeGL()
 
     generateBackgroundTexture(32, 32, 1);
 
-    QImage skin, cape;
+    QImage skin;
+    QImage cape;
     bool slim = false;
     if (m_parent) {
         if (auto* s = m_parent->getSelectedSkin()) {
@@ -183,7 +184,8 @@ void SkinOpenGLWindow::resizeGL(int w, int h)
     // Calculate aspect ratio
     qreal aspect = qreal(w) / qreal(h ? h : 1);
 
-    const qreal zNear = 15., fov = 45;
+    const qreal zNear = 15.;
+    const qreal fov = 45;
 
     // Reset projection
     m_projection.setToIdentity();

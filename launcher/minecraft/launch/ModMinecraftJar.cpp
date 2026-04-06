@@ -66,7 +66,11 @@ void ModMinecraftJar::executeTask()
     auto jarMods = m_inst->getJarMods();
     if (jarMods.size()) {
         auto mainJar = profile->getMainJar();
-        QStringList jars, temp1, temp2, temp3, temp4;
+        QStringList jars;
+        QStringList temp1;
+        QStringList temp2;
+        QStringList temp3;
+        QStringList temp4;
         mainJar->getApplicableFiles(m_inst->runtimeContext(), jars, temp1, temp2, temp3, m_inst->getLocalLibraryPath());
         auto sourceJarPath = jars[0];
         if (!MMCZip::createModdedJar(sourceJarPath, finalJarPath, jarMods)) {

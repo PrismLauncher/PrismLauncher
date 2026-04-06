@@ -55,7 +55,8 @@ static Version::Ptr parseCommonVersion(const QString& uid, const QJsonObject& ob
     version->setType(obj["type"].toString());
     version->setRecommended(obj["recommended"].toBool());
     version->setVolatile(obj["volatile"].toBool());
-    RequireSet reqs, conflicts;
+    RequireSet reqs;
+    RequireSet conflicts;
     parseRequires(obj, &reqs, "requires");
     parseRequires(obj, &conflicts, "conflicts");
     version->setRequires(reqs, conflicts);
