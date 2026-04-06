@@ -85,8 +85,8 @@ bool LibrariesTask::abort()
 {
     if (downloadJob) {
         return downloadJob->abort();
-    } else {
-        qWarning() << "Prematurely aborted LibrariesTask";
     }
+    qWarning() << "Prematurely aborted LibrariesTask";
+
     return true;
 }

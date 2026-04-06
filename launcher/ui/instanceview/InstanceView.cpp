@@ -212,9 +212,8 @@ bool InstanceView::isIndexHidden(const QModelIndex& index) const
     VisualGroup* cat = category(index);
     if (cat) {
         return cat->collapsed;
-    } else {
-        return false;
     }
+    return false;
 }
 
 VisualGroup* InstanceView::category(const QModelIndex& index) const
@@ -385,7 +384,8 @@ void InstanceView::mouseReleaseEvent(QMouseEvent* event)
             m_pressedCategory = nullptr;
             setState(NoState);
             return;
-        } else if (state() == CollapsingState) {
+        }
+        if (state() == CollapsingState) {
             m_pressedCategory->collapsed = true;
             emit groupStateChanged(m_pressedCategory->text, true);
 
@@ -905,24 +905,24 @@ QModelIndex InstanceView::moveCursor(QAbstractItemView::CursorAction cursorActio
             if (column > 0) {
                 m_currentCursorColumn = column - 1;
                 return cat->rows[row][column - 1];
-            } else if (row > 0) {
+            }
+            if (row > 0) {
                 row -= 1;
                 int newRowSize = cat->rows[row].size();
                 m_currentCursorColumn = newRowSize - 1;
                 return cat->rows[row][m_currentCursorColumn];
-            } else {
-                int prevGroupIndex = group_index - 1;
-                while (prevGroupIndex >= 0) {
-                    auto* prevGroup = m_groups[prevGroupIndex];
-                    if (prevGroup->collapsed) {
-                        prevGroupIndex--;
-                        continue;
-                    }
-                    int lastRow = prevGroup->numRows() - 1;
-                    int lastCol = prevGroup->rows[lastRow].size() - 1;
-                    m_currentCursorColumn = lastCol;
-                    return prevGroup->rows[lastRow][lastCol];
+            }
+            int prevGroupIndex = group_index - 1;
+            while (prevGroupIndex >= 0) {
+                auto* prevGroup = m_groups[prevGroupIndex];
+                if (prevGroup->collapsed) {
+                    prevGroupIndex--;
+                    continue;
                 }
+                int lastRow = prevGroup->numRows() - 1;
+                int lastCol = prevGroup->rows[lastRow].size() - 1;
+                m_currentCursorColumn = lastCol;
+                return prevGroup->rows[lastRow][lastCol];
             }
             return current;
         }
@@ -930,21 +930,21 @@ QModelIndex InstanceView::moveCursor(QAbstractItemView::CursorAction cursorActio
             if (column < cat->rows[row].size() - 1) {
                 m_currentCursorColumn = column + 1;
                 return cat->rows[row][column + 1];
-            } else if (row < cat->rows.size() - 1) {
+            }
+            if (row < cat->rows.size() - 1) {
                 row += 1;
                 m_currentCursorColumn = 0;
                 return cat->rows[row][m_currentCursorColumn];
-            } else {
-                int nextGroupIndex = group_index + 1;
-                while (nextGroupIndex < m_groups.size()) {
-                    auto* nextGroup = m_groups[nextGroupIndex];
-                    if (nextGroup->collapsed) {
-                        nextGroupIndex++;
-                        continue;
-                    }
-                    m_currentCursorColumn = 0;
-                    return nextGroup->rows[0][0];
+            }
+            int nextGroupIndex = group_index + 1;
+            while (nextGroupIndex < m_groups.size()) {
+                auto* nextGroup = m_groups[nextGroupIndex];
+                if (nextGroup->collapsed) {
+                    nextGroupIndex++;
+                    continue;
                 }
+                m_currentCursorColumn = 0;
+                return nextGroup->rows[0][0];
             }
             return current;
         }

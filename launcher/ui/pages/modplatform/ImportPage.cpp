@@ -63,11 +63,11 @@ class UrlValidator : public QValidator {
         const QUrl url(in);
         if (url.isValid() && !url.isRelative() && !url.isEmpty()) {
             return Acceptable;
-        } else if (QFile::exists(in)) {
-            return Acceptable;
-        } else {
-            return Intermediate;
         }
+        if (QFile::exists(in)) {
+            return Acceptable;
+        }
+        return Intermediate;
     }
 };
 
@@ -225,7 +225,6 @@ QUrl ImportPage::modpackUrl() const
     const QUrl url(ui->modpackEdit->text());
     if (url.isValid() && !url.isRelative() && !url.host().isEmpty()) {
         return url;
-    } else {
-        return QUrl::fromLocalFile(ui->modpackEdit->text());
     }
+    return QUrl::fromLocalFile(ui->modpackEdit->text());
 }

@@ -196,7 +196,8 @@ QDir getAssetsDir(const QString& assetsId, const QString& resourcesFolder)
     QString targetPath;
     if (index.isVirtual) {
         return virtualRoot;
-    } else if (index.mapToResources) {
+    }
+    if (index.mapToResources) {
         return QDir(resourcesFolder);
     }
     return virtualRoot;

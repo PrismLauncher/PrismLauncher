@@ -508,7 +508,8 @@ bool World::destroy()
     if (m_containerFile.isDir()) {
         QDir d(m_containerFile.filePath());
         return d.removeRecursively();
-    } else if (m_containerFile.isFile()) {
+    }
+    if (m_containerFile.isFile()) {
         QFile file(m_containerFile.absoluteFilePath());
         return file.remove();
     }

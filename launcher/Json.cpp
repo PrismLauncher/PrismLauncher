@@ -73,14 +73,13 @@ QJsonDocument requireDocument(const QByteArray& data, const QString& what)
     if (isBinaryJson(data)) {
         // FIXME: Is this needed?
         throw JsonException(what + ": Invalid JSON. Binary JSON unsupported");
-    } else {
-        QJsonParseError error;
-        QJsonDocument doc = QJsonDocument::fromJson(data, &error);
-        if (error.error != QJsonParseError::NoError) {
-            throw JsonException(what + ": Error parsing JSON: " + error.errorString());
-        }
-        return doc;
     }
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+    if (error.error != QJsonParseError::NoError) {
+        throw JsonException(what + ": Error parsing JSON: " + error.errorString());
+    }
+    return doc;
 }
 QJsonDocument requireDocument(const QString& filename, const QString& what)
 {

@@ -238,8 +238,7 @@ QVariant INIFile::get(QString key, QVariant def) const
 {
     if (!this->contains(key))
         return def;
-    else
-        return this->operator[](key);
+    return this->operator[](key);
 }
 
 void INIFile::set(QString key, QVariant val)

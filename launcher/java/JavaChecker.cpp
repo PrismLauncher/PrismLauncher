@@ -148,9 +148,8 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
         auto parts = line.split('=', Qt::SkipEmptyParts);
         if (parts.size() != 2 || parts[0].isEmpty() || parts[1].isEmpty()) {
             continue;
-        } else {
-            results.insert(parts[0], parts[1]);
         }
+        results.insert(parts[0], parts[1]);
     }
 
     if (!results.contains("os.arch") || !results.contains("java.version") || !results.contains("java.vendor") || !success) {

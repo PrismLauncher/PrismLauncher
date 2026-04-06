@@ -352,8 +352,7 @@ QString MinecraftInstance::gameRoot() const
 
     if (dotMCDir.exists() && !mcDir.exists())
         return dotMCDir.filePath();
-    else
-        return mcDir.filePath();
+    return mcDir.filePath();
 }
 
 QString MinecraftInstance::binRoot() const

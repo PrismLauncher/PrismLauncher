@@ -211,7 +211,8 @@ void ModrinthCheckUpdate::checkNextLoader()
     if (m_loaderIdx < m_loadersList.size()) {  // this are mods so check with loades
         getUpdateModsForLoader(m_loadersList.at(m_loaderIdx), m_loaderIdx > m_initialSize);
         return;
-    } else if (m_loadersList.isEmpty() && m_loaderIdx == 0) {  // this are other resources no need to check more than once with empty loader
+    }
+    if (m_loadersList.isEmpty() && m_loaderIdx == 0) {  // this are other resources no need to check more than once with empty loader
         getUpdateModsForLoader();
         return;
     }

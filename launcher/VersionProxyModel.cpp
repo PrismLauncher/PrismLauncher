@@ -192,7 +192,8 @@ QVariant VersionProxyModel::data(const QModelIndex& index, int role) const
                 auto value = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
                 if (value.toBool()) {
                     return tr("Recommended");
-                } else if (hasLatest) {
+                }
+                if (hasLatest) {
                     auto latest = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
                     if (latest.toBool()) {
                         return tr("Latest");
@@ -206,7 +207,8 @@ QVariant VersionProxyModel::data(const QModelIndex& index, int role) const
                 auto recommenced = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
                 if (recommenced.toBool()) {
                     return QIcon::fromTheme("star");
-                } else if (hasLatest) {
+                }
+                if (hasLatest) {
                     auto latest = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
                     if (latest.toBool()) {
                         return QIcon::fromTheme("bug");

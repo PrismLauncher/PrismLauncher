@@ -66,9 +66,8 @@ void CheckJava::executeTask()
         }
         emitFailed(QString("Java path is not valid."));
         return;
-    } else {
-        emit logLine("Java path is:\n  " + m_javaPath, MessageLevel::Launcher);
     }
+    emit logLine("Java path is:\n  " + m_javaPath, MessageLevel::Launcher);
 
     if (JavaUtils::getJavaCheckPath().isEmpty()) {
         const char* reason = QT_TR_NOOP("Java checker library could not be found. Please check your installation.");
@@ -98,13 +97,12 @@ void CheckJava::executeTask()
         connect(m_JavaChecker.get(), &JavaChecker::checkFinished, this, &CheckJava::checkJavaFinished);
         m_JavaChecker->start();
         return;
-    } else {
-        auto verString = instance->settings()->get("JavaVersion").toString();
-        auto archString = instance->settings()->get("JavaArchitecture").toString();
-        auto realArchString = settings->get("JavaRealArchitecture").toString();
-        auto vendorString = instance->settings()->get("JavaVendor").toString();
-        printJavaInfo(verString, archString, realArchString, vendorString);
     }
+    auto verString = instance->settings()->get("JavaVersion").toString();
+    auto archString = instance->settings()->get("JavaArchitecture").toString();
+    auto realArchString = settings->get("JavaRealArchitecture").toString();
+    auto vendorString = instance->settings()->get("JavaVendor").toString();
+    printJavaInfo(verString, archString, realArchString, vendorString);
     m_parent->instance()->updateRuntimeContext();
     emitSucceeded();
 }

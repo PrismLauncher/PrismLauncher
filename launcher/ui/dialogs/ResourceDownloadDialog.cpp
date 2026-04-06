@@ -179,13 +179,12 @@ void ResourceDownloadDialog::confirm()
         if (ret == QDialog::DialogCode::Rejected) {
             QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
             return;
-        } else {
-            for (auto dep : task->getDependecies()) {
-                addResource(dep->pack, dep->version);
-                depNames << dep->pack->name;
-            }
-            dependencyExtraInfo = task->getExtraInfo();
         }
+        for (auto dep : task->getDependecies()) {
+            addResource(dep->pack, dep->version);
+            depNames << dep->pack->name;
+        }
+        dependencyExtraInfo = task->getExtraInfo();
     }
 
     auto selected = getTasks();

@@ -191,10 +191,9 @@ QPixmap DataPack::image(QSize size, Qt::AspectRatioMode mode) const
     // No valid image we can get
     if (!m_pack_image_cache_key.was_ever_used) {
         return {};
-    } else {
-        qDebug() << "Data Pack" << name() << "Had it's image evicted from the cache. reloading...";
-        PixmapCache::markCacheMissByEviciton();
     }
+    qDebug() << "Data Pack" << name() << "Had it's image evicted from the cache. reloading...";
+    PixmapCache::markCacheMissByEviciton();
 
     // Imaged got evicted from the cache. Re-process it and retry.
     DataPackUtils::processPackPNG(this);

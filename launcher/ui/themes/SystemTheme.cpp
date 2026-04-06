@@ -79,32 +79,37 @@ QString SystemTheme::name()
 {
     if (m_themeName.toLower() == "windowsvista") {
         return QObject::tr("Windows Vista");
-    } else if (m_themeName.toLower() == "windows") {
-        return QObject::tr("Windows 9x");
-    } else if (m_themeName.toLower() == "windows11") {
-        return QObject::tr("Windows 11");
-    } else if (m_themeName.toLower() == "system") {
-        return QObject::tr("System");
-    } else {
-        return m_themeName;
     }
+    if (m_themeName.toLower() == "windows") {
+        return QObject::tr("Windows 9x");
+    }
+    if (m_themeName.toLower() == "windows11") {
+        return QObject::tr("Windows 11");
+    }
+    if (m_themeName.toLower() == "system") {
+        return QObject::tr("System");
+    }
+    return m_themeName;
 }
 
 QString SystemTheme::tooltip()
 {
     if (m_themeName.toLower() == "windowsvista") {
         return QObject::tr("Widget style trying to look like your win32 theme");
-    } else if (m_themeName.toLower() == "windows") {
-        return QObject::tr("Windows 9x inspired widget style");
-    } else if (m_themeName.toLower() == "windows11") {
-        return QObject::tr("WinUI 3 inspired Qt widget style");
-    } else if (m_themeName.toLower() == "fusion") {
-        return QObject::tr("The default Qt widget style");
-    } else if (m_themeName.toLower() == "system") {
-        return QObject::tr("Your current system theme");
-    } else {
-        return "";
     }
+    if (m_themeName.toLower() == "windows") {
+        return QObject::tr("Windows 9x inspired widget style");
+    }
+    if (m_themeName.toLower() == "windows11") {
+        return QObject::tr("WinUI 3 inspired Qt widget style");
+    }
+    if (m_themeName.toLower() == "fusion") {
+        return QObject::tr("The default Qt widget style");
+    }
+    if (m_themeName.toLower() == "system") {
+        return QObject::tr("Your current system theme");
+    }
+    return "";
 }
 
 QString SystemTheme::qtTheme()

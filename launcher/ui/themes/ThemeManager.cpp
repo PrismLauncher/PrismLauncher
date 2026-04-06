@@ -287,9 +287,8 @@ QString ThemeManager::getCatPack(QString catName)
         auto& catPack = catIter->second;
         themeDebugLog() << "applying catpack" << catPack->id();
         return catPack->path();
-    } else {
-        themeWarningLog() << "Tried to get invalid catPack:" << catName;
     }
+    themeWarningLog() << "Tried to get invalid catPack:" << catName;
 
     return m_catPacks.begin()->second->path();
 }

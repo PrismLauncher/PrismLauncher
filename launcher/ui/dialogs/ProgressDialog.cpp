@@ -270,7 +270,8 @@ void ProgressDialog::keyPressEvent(QKeyEvent* e)
         if (e->key() == Qt::Key_Escape) {
             on_skipButton_clicked(true);
             return;
-        } else if (e->key() == Qt::Key_Tab) {
+        }
+        if (e->key() == Qt::Key_Tab) {
             ui->skipButton->setFocusPolicy(Qt::StrongFocus);
             ui->skipButton->setFocus();
             ui->skipButton->setAutoDefault(true);

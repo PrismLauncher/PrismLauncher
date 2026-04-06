@@ -163,16 +163,16 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
                     if (isVersionArg) {
                         neoforgeVersion = argument;
                         break;
-                    } else {
-                        isVersionArg = "--fml.neoForgeVersion" == argument || "--fml.forgeVersion" == argument;
                     }
+                    isVersionArg = "--fml.neoForgeVersion" == argument || "--fml.forgeVersion" == argument;
                 }
                 if (!neoforgeVersion.isEmpty()) {
                     components->setComponentVersion("net.neoforged", neoforgeVersion);
                 }
                 break;
-            } else if ((libraryName.startsWith("net.minecraftforge:forge:") || libraryName.startsWith("net.minecraftforge:fmlloader:")) &&
-                       libraryName.contains('-')) {
+            }
+            if ((libraryName.startsWith("net.minecraftforge:forge:") || libraryName.startsWith("net.minecraftforge:fmlloader:")) &&
+                libraryName.contains('-')) {
                 QString libraryVersion = libraryName.section(':', 2);
                 if (!libraryVersion.startsWith("1.7.10-")) {
                     components->setComponentVersion("net.minecraftforge", libraryName.section('-', 1));
@@ -181,16 +181,14 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
                     components->setComponentVersion("net.minecraftforge", libraryName.section('-', 1, 1));
                 }
                 break;
-            } else {
-                // <Technic library name prefix> -> <our component name>
-                static QMap<QString, QString> loaderMap{ { "net.minecraftforge:minecraftforge:", "net.minecraftforge" },
-                                                         { "net.fabricmc:fabric-loader:", "net.fabricmc.fabric-loader" },
-                                                         { "org.quiltmc:quilt-loader:", "org.quiltmc.quilt-loader" } };
-                for (const auto& loader : loaderMap.keys()) {
-                    if (libraryName.startsWith(loader)) {
-                        components->setComponentVersion(loaderMap.value(loader), libraryName.section(':', 2));
-                        break;
-                    }
+            }  // <Technic library name prefix> -> <our component name>
+            static QMap<QString, QString> loaderMap{ { "net.minecraftforge:minecraftforge:", "net.minecraftforge" },
+                                                     { "net.fabricmc:fabric-loader:", "net.fabricmc.fabric-loader" },
+                                                     { "org.quiltmc:quilt-loader:", "org.quiltmc.quilt-loader" } };
+            for (const auto& loader : loaderMap.keys()) {
+                if (libraryName.startsWith(loader)) {
+                    components->setComponentVersion(loaderMap.value(loader), libraryName.section(':', 2));
+                    break;
                 }
             }
         }

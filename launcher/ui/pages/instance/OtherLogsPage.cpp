@@ -195,9 +195,9 @@ void OtherLogsPage::populateSelectLogBox()
             setControlsEnabled(true);
             // don't refresh file
             return;
-        } else {
-            setControlsEnabled(false);
         }
+        setControlsEnabled(false);
+
     } else if (!m_instance) {
         ui->selectLogBox->setCurrentIndex(0);
         setControlsEnabled(true);
@@ -328,7 +328,8 @@ void OtherLogsPage::reload()
             if (!error.isEmpty()) {
                 setPlainText(tr("The file (%1) encountered an error when reading: %2.").arg(file.fileName(), error));
                 return;
-            } else if (!line.isEmpty()) {
+            }
+            if (!line.isEmpty()) {
                 handleLine(line);
             }
         } else {

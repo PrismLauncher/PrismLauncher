@@ -90,8 +90,7 @@ int defaultMaxJvmMem()
     // If totalRAM < 6GB, use (totalRAM / 1.5), else 4GB
     if (const uint64_t totalRAM = HardwareInfo::totalRamMiB(); totalRAM < (4096 * 1.5))
         return totalRAM / 1.5;
-    else
-        return 4096;
+    return 4096;
 }
 
 QString getSupportedJavaArchitecture()
@@ -115,7 +114,8 @@ QString getSupportedJavaArchitecture()
             return "mac-os-x86";
         // Unknown, maybe something new, appending arch
         return "mac-os-" + arch;
-    } else if (sys == "linux") {
+    }
+    if (sys == "linux") {
         if (arch == "x86_64")
             return "linux-x64";
         if (arch == "i386")

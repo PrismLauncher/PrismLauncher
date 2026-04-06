@@ -50,10 +50,9 @@ QNetworkReply* CapeChange::getReply(QNetworkRequest& request)
     if (m_capeId.isEmpty()) {
         setStatus(tr("Removing cape"));
         return m_network->deleteResource(request);
-    } else {
-        setStatus(tr("Equipping cape"));
-        return m_network->put(request, QString("{\"capeId\":\"%1\"}").arg(m_capeId).toUtf8());
     }
+    setStatus(tr("Equipping cape"));
+    return m_network->put(request, QString("{\"capeId\":\"%1\"}").arg(m_capeId).toUtf8());
 }
 
 CapeChange::Ptr CapeChange::make(QString token, QString capeId)

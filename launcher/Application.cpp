@@ -492,11 +492,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             if (sentMessage) {
                 m_status = Application::Succeeded;
                 return;
-            } else {
-                std::cerr << "Unable to redirect command to already running instance\n";
-                // C function not Qt function - event loop not started yet
-                ::exit(1);
             }
+            std::cerr << "Unable to redirect command to already running instance\n";
+            // C function not Qt function - event loop not started yet
+            ::exit(1);
         }
     }
 
@@ -1513,10 +1512,8 @@ bool Application::openJsonEditor(const QString& filename)
     const QString file = QDir::current().absoluteFilePath(filename);
     if (m_settings->get("JsonEditor").toString().isEmpty()) {
         return DesktopServices::openUrl(QUrl::fromLocalFile(file));
-    } else {
-        // return DesktopServices::openFile(m_settings->get("JsonEditor").toString(), file);
-        return DesktopServices::run(m_settings->get("JsonEditor").toString(), { file });
-    }
+    }  // return DesktopServices::openFile(m_settings->get("JsonEditor").toString(), file);
+    return DesktopServices::run(m_settings->get("JsonEditor").toString(), { file });
 }
 
 bool Application::launch(BaseInstance* instance,
@@ -2018,9 +2015,8 @@ QUrl Application::normalizeImportUrl(const QString& url)
     auto local_file = QFileInfo(url);
     if (local_file.exists()) {
         return QUrl::fromLocalFile(local_file.absoluteFilePath());
-    } else {
-        return QUrl::fromUserInput(url);
     }
+    return QUrl::fromUserInput(url);
 }
 
 const QString Application::javaPath()

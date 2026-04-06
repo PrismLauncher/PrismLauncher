@@ -51,8 +51,7 @@ BaseVersion::Ptr BaseVersionList::getRecommended() const
 {
     if (count() <= 0)
         return nullptr;
-    else
-        return at(0);
+    return at(0);
 }
 
 QVariant BaseVersionList::data(const QModelIndex& index, int role) const

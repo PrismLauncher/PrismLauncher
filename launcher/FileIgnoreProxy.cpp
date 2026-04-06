@@ -106,11 +106,11 @@ QVariant FileIgnoreProxy::data(const QModelIndex& index, int role) const
         auto cover = m_blocked.cover(blockedPath);
         if (!cover.isNull()) {
             return QVariant(Qt::Unchecked);
-        } else if (m_blocked.exists(blockedPath)) {
-            return QVariant(Qt::PartiallyChecked);
-        } else {
-            return QVariant(Qt::Checked);
         }
+        if (m_blocked.exists(blockedPath)) {
+            return QVariant(Qt::PartiallyChecked);
+        }
+        return QVariant(Qt::Checked);
     }
 
     return sourceIndex.data(role);
@@ -165,11 +165,10 @@ bool FileIgnoreProxy::setFilterState(QModelIndex index, Qt::CheckState state)
                 if (!node.isValid()) {
                     if (!todo.size()) {
                         break;
-                    } else {
-                        doing = todo.pop();
-                        row = 0;
-                        continue;
                     }
+                    doing = todo.pop();
+                    row = 0;
+                    continue;
                 }
                 auto relpath = relPath(fsm->filePath(node));
                 if (blockedPath.startsWith(relpath))  // cover found?
@@ -205,11 +204,10 @@ bool FileIgnoreProxy::setFilterState(QModelIndex index, Qt::CheckState state)
             if (!node.isValid()) {
                 if (!todo.size()) {
                     break;
-                } else {
-                    doing = todo.pop();
-                    row = 0;
-                    continue;
                 }
+                doing = todo.pop();
+                row = 0;
+                continue;
             }
             emit dataChanged(node, node, { Qt::CheckStateRole });
             todo.push(node);

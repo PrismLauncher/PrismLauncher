@@ -119,9 +119,9 @@ bool LegacyFMLLibrariesTask::abort()
 {
     if (downloadJob) {
         return downloadJob->abort();
-    } else {
-        qWarning() << "Prematurely aborted LegacyFMLLibrariesTask";
     }
+    qWarning() << "Prematurely aborted LegacyFMLLibrariesTask";
+
     return true;
 }
 

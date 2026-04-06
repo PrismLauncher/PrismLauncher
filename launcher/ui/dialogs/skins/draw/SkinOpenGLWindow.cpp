@@ -276,10 +276,9 @@ QColor calculateContrastingColor(const QColor& color)
     if (luma < 0.5) {
         constexpr float contrast = 0.05F;
         return Rainbow::lighten(color, contrast);
-    } else {
-        constexpr float contrast = 0.2F;
-        return Rainbow::darken(color, contrast);
     }
+    constexpr float contrast = 0.2F;
+    return Rainbow::darken(color, contrast);
 }
 
 QImage generateChessboardImage(int width, int height, int tileSize, QColor baseColor)

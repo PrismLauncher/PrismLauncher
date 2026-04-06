@@ -328,9 +328,8 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
 
                 if (!face.isNull()) {
                     return face;
-                } else {
-                    return QIcon::fromTheme("noaccount").pixmap(24, 24);
                 }
+                return QIcon::fromTheme("noaccount").pixmap(24, 24);
             }
 
             return QVariant();
@@ -578,10 +577,9 @@ bool AccountList::saveList()
     if (file.commit()) {
         qDebug() << "Saved account list to" << m_listFilePath;
         return true;
-    } else {
-        qDebug() << "Failed to save accounts to" << m_listFilePath << "error:" << file.errorString();
-        return false;
     }
+    qDebug() << "Failed to save accounts to" << m_listFilePath << "error:" << file.errorString();
+    return false;
 }
 
 void AccountList::setListFilePath(QString path, bool autosave)

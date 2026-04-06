@@ -130,7 +130,8 @@ bool CheckComboBox::eventFilter(QObject* receiver, QEvent* event)
             if (receiver == this && (keyEvent->key() == Qt::Key_Up || keyEvent->key() == Qt::Key_Down)) {
                 showPopup();
                 return true;
-            } else if (keyEvent->key() == Qt::Key_Enter || keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Escape) {
+            }
+            if (keyEvent->key() == Qt::Key_Enter || keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Escape) {
                 QComboBox::hidePopup();
                 return (keyEvent->key() != Qt::Key_Escape);
             }

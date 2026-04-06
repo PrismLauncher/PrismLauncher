@@ -389,12 +389,13 @@ int AccessibleInstanceView::indexOfChild(const QAccessibleInterface* iface) cons
     if (iface->role() == QAccessible::Cell || iface->role() == QAccessible::ListItem) {
         const AccessibleInstanceViewItem* cell = static_cast<const AccessibleInstanceViewItem*>(iface);
         return logicalIndex(cell->m_index);
-    } else if (iface->role() == QAccessible::Pane) {
-        return 0;  // corner button
-    } else {
-        qWarning() << "AccessibleInstanceView::indexOfChild has a child with unknown role..." << iface->role()
-                   << iface->text(QAccessible::Name);
     }
+    if (iface->role() == QAccessible::Pane) {
+        return 0;  // corner button
+    }
+    qWarning() << "AccessibleInstanceView::indexOfChild has a child with unknown role..." << iface->role()
+               << iface->text(QAccessible::Name);
+
     // FIXME: we are in denial of our children. this should stop.
     return -1;
 }

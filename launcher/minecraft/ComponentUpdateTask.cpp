@@ -370,29 +370,29 @@ static bool getTrivialComponentChanges(const ComponentIndex& index, const Requir
                     decision = Decision::Missing;
                 }
                 break;
-            } else {
-                reqStr = QString("Req: %1 == %2").arg(req.uid, req.equalsVersion);
-                const auto& compIter = index.find(req.uid);
-                if (compIter == index.cend()) {
-                    toAdd.insert(req);
-                    decision = Decision::Missing;
-                    break;
-                }
-                const auto& comp = (*compIter);
-                if (comp->getVersion() != req.equalsVersion) {
-                    if (comp->isCustom()) {
-                        decision = Decision::LockedVersionNotSame;
-                    } else {
-                        if (comp->m_dependencyOnly) {
-                            decision = Decision::VersionNotSame;
-                        } else {
-                            decision = Decision::LockedVersionNotSame;
-                        }
-                    }
-                    break;
-                }
-                decision = Decision::Met;
             }
+            reqStr = QString("Req: %1 == %2").arg(req.uid, req.equalsVersion);
+            const auto& compIter = index.find(req.uid);
+            if (compIter == index.cend()) {
+                toAdd.insert(req);
+                decision = Decision::Missing;
+                break;
+            }
+            const auto& comp = (*compIter);
+            if (comp->getVersion() != req.equalsVersion) {
+                if (comp->isCustom()) {
+                    decision = Decision::LockedVersionNotSame;
+                } else {
+                    if (comp->m_dependencyOnly) {
+                        decision = Decision::VersionNotSame;
+                    } else {
+                        decision = Decision::LockedVersionNotSame;
+                    }
+                }
+                break;
+            }
+            decision = Decision::Met;
+
         } while (false);
         switch (decision) {
             case Decision::Undetermined:
@@ -621,11 +621,11 @@ void ComponentUpdateTask::performUpdateActions()
                                       component->setVersion(recommended->version());
                                       component->waitLoadMeta();
                                       return;
-                                  } else {
-                                      component->addComponentProblem(ProblemSeverity::Error,
-                                                                     QObject::tr("No compatible version of %1 found for %2 %3")
-                                                                         .arg(component->getName(), lrc.parentName, lrc.version));
                                   }
+                                  component->addComponentProblem(ProblemSeverity::Error,
+                                                                 QObject::tr("No compatible version of %1 found for %2 %3")
+                                                                     .arg(component->getName(), lrc.parentName, lrc.version));
+
                               } else {
                                   component->addComponentProblem(
                                       ProblemSeverity::Error,

@@ -74,7 +74,8 @@ bool FilterModel::lessThan(const QModelIndex& left, const QModelIndex& right) co
         Version rv(rightPack.mcVersion);
         return lv < rv;
 
-    } else if (currentSorting == Sorting::ByName) {
+    }
+    if (currentSorting == Sorting::ByName) {
         return StringUtils::naturalCompare(leftPack.name, rightPack.name, Qt::CaseSensitive) >= 0;
     }
 
@@ -187,7 +188,8 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
             if (pack.broken) {
                 // FIXME: Hardcoded color
                 return QColor(255, 0, 50);
-            } else if (pack.bugged) {
+            }
+            if (pack.bugged) {
                 // FIXME: Hardcoded color
                 // bugged pack, currently only indicates bugged xml
                 return QColor(244, 229, 66);

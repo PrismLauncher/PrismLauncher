@@ -132,15 +132,18 @@ void legacyInstanceParsing(QString path, std::optional<ModPlatform::ModLoaderTyp
                 *loaderType = ModPlatform::NeoForge;
                 *loaderVersion = version;
                 break;
-            } else if (name == "forge") {
+            }
+            if (name == "forge") {
                 *loaderType = ModPlatform::Forge;
                 *loaderVersion = version;
                 break;
-            } else if (name == "fabric") {
+            }
+            if (name == "fabric") {
                 *loaderType = ModPlatform::Fabric;
                 *loaderVersion = version;
                 break;
-            } else if (name == "quilt") {
+            }
+            if (name == "quilt") {
                 *loaderType = ModPlatform::Quilt;
                 *loaderVersion = version;
                 break;
@@ -148,7 +151,6 @@ void legacyInstanceParsing(QString path, std::optional<ModPlatform::ModLoaderTyp
         }
     } catch (const Exception& e) {
         qDebug() << "Couldn't load ftb version json:" << e.cause();
-        return;
     }
 }
 }  // namespace FTBImportAPP

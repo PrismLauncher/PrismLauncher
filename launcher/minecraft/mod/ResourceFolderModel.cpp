@@ -501,9 +501,8 @@ QBrush ResourceFolderModel::rowBackground(int row) const
 {
     if (APPLICATION->settings()->get("ShowModIncompat").toBool() && m_resources[row]->hasIssues()) {
         return { QColor(255, 0, 0, 40) };
-    } else {
-        return {};
     }
+    return {};
 }
 
 QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
@@ -559,7 +558,8 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
             if (column == NameColumn) {
                 if (APPLICATION->settings()->get("ShowModIncompat").toBool() && at(row).hasIssues()) {
                     return QIcon::fromTheme("status-bad");
-                } else if (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()) {
+                }
+                if (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()) {
                     return QIcon::fromTheme("status-yellow");
                 }
             }

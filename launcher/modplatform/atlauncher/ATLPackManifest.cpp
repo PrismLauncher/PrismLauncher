@@ -42,9 +42,11 @@ static ATLauncher::DownloadType parseDownloadType(QString rawType)
 {
     if (rawType == QString("server")) {
         return ATLauncher::DownloadType::Server;
-    } else if (rawType == QString("browser")) {
+    }
+    if (rawType == QString("browser")) {
         return ATLauncher::DownloadType::Browser;
-    } else if (rawType == QString("direct")) {
+    }
+    if (rawType == QString("direct")) {
         return ATLauncher::DownloadType::Direct;
     }
 
@@ -56,41 +58,59 @@ static ATLauncher::ModType parseModType(QString rawType)
     // See https://wiki.atlauncher.com/mod_types
     if (rawType == QString("root")) {
         return ATLauncher::ModType::Root;
-    } else if (rawType == QString("forge")) {
+    }
+    if (rawType == QString("forge")) {
         return ATLauncher::ModType::Forge;
-    } else if (rawType == QString("jar")) {
+    }
+    if (rawType == QString("jar")) {
         return ATLauncher::ModType::Jar;
-    } else if (rawType == QString("mods")) {
+    }
+    if (rawType == QString("mods")) {
         return ATLauncher::ModType::Mods;
-    } else if (rawType == QString("flan")) {
+    }
+    if (rawType == QString("flan")) {
         return ATLauncher::ModType::Flan;
-    } else if (rawType == QString("dependency") || rawType == QString("depandency")) {
+    }
+    if (rawType == QString("dependency") || rawType == QString("depandency")) {
         return ATLauncher::ModType::Dependency;
-    } else if (rawType == QString("ic2lib")) {
+    }
+    if (rawType == QString("ic2lib")) {
         return ATLauncher::ModType::Ic2Lib;
-    } else if (rawType == QString("denlib")) {
+    }
+    if (rawType == QString("denlib")) {
         return ATLauncher::ModType::DenLib;
-    } else if (rawType == QString("coremods")) {
+    }
+    if (rawType == QString("coremods")) {
         return ATLauncher::ModType::Coremods;
-    } else if (rawType == QString("mcpc")) {
+    }
+    if (rawType == QString("mcpc")) {
         return ATLauncher::ModType::MCPC;
-    } else if (rawType == QString("plugins")) {
+    }
+    if (rawType == QString("plugins")) {
         return ATLauncher::ModType::Plugins;
-    } else if (rawType == QString("extract")) {
+    }
+    if (rawType == QString("extract")) {
         return ATLauncher::ModType::Extract;
-    } else if (rawType == QString("decomp")) {
+    }
+    if (rawType == QString("decomp")) {
         return ATLauncher::ModType::Decomp;
-    } else if (rawType == QString("texturepack")) {
+    }
+    if (rawType == QString("texturepack")) {
         return ATLauncher::ModType::TexturePack;
-    } else if (rawType == QString("resourcepack")) {
+    }
+    if (rawType == QString("resourcepack")) {
         return ATLauncher::ModType::ResourcePack;
-    } else if (rawType == QString("shaderpack")) {
+    }
+    if (rawType == QString("shaderpack")) {
         return ATLauncher::ModType::ShaderPack;
-    } else if (rawType == QString("texturepackextract")) {
+    }
+    if (rawType == QString("texturepackextract")) {
         return ATLauncher::ModType::TexturePackExtract;
-    } else if (rawType == QString("resourcepackextract")) {
+    }
+    if (rawType == QString("resourcepackextract")) {
         return ATLauncher::ModType::ResourcePackExtract;
-    } else if (rawType == QString("millenaire")) {
+    }
+    if (rawType == QString("millenaire")) {
         return ATLauncher::ModType::Millenaire;
     }
 

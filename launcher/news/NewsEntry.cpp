@@ -41,9 +41,8 @@ inline QString childValue(const QDomElement& element, const QString& childName, 
     if (nodes.count() > 0) {
         QDomElement elem = nodes.at(0).toElement();
         return elem.text();
-    } else {
-        return defaultVal;
     }
+    return defaultVal;
 }
 
 bool NewsEntry::fromXmlElement(const QDomElement& element, NewsEntry* entry, [[maybe_unused]] QString* errorMsg)

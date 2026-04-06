@@ -106,9 +106,9 @@ bool AssetUpdateTask::abort()
 {
     if (downloadJob) {
         return downloadJob->abort();
-    } else {
-        qWarning() << "Prematurely aborted AssetUpdateTask";
     }
+    qWarning() << "Prematurely aborted AssetUpdateTask";
+
     return true;
 }
 

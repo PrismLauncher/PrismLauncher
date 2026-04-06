@@ -316,9 +316,8 @@ class ServersModel : public QAbstractListModel {
                             return QIcon(px);
                     }
                     return QIcon::fromTheme("unknown_server");
-                } else {
-                    return QVariant();
                 }
+                return QVariant();
             }
             case Qt::DisplayRole:
                 switch (column) {
@@ -639,14 +638,13 @@ void ServersPage::rowsRemoved([[maybe_unused]] const QModelIndex& parent, int fi
     if (currentServer < first) {
         // current was before the removal
         return;
-    } else if (currentServer >= first && currentServer <= last) {
+    }
+    if (currentServer >= first && currentServer <= last) {
         // current got removed...
         return;
-    } else {
-        // current was past the removal
-        int count = last - first + 1;
-        currentServer -= count;
-    }
+    }  // current was past the removal
+    int count = last - first + 1;
+    currentServer -= count;
 }
 
 void ServersPage::nameEdited(const QString& name)

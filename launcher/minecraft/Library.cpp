@@ -209,9 +209,9 @@ QList<Net::NetRequest::Ptr> Library::getDownloads(const RuntimeContext& runtimeC
 
             if (m_repositoryURL.endsWith('/')) {
                 return m_repositoryURL + raw_storage;
-            } else {
-                return m_repositoryURL + QChar('/') + raw_storage;
             }
+            return m_repositoryURL + QChar('/') + raw_storage;
+           
         }();
         if (raw_storage.contains("${arch}")) {
             QString cooked_storage = raw_storage;

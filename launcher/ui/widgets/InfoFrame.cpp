@@ -287,10 +287,10 @@ void InfoFrame::setDescription(QString text)
         ui->descriptionLabel->setHidden(true);
         updateHiddenState();
         return;
-    } else {
-        ui->descriptionLabel->setHidden(false);
-        updateHiddenState();
     }
+    ui->descriptionLabel->setHidden(false);
+    updateHiddenState();
+
     ui->descriptionLabel->setToolTip("");
     QString intermediatetext = text.trimmed();
     bool prev(false);
@@ -341,10 +341,10 @@ void InfoFrame::setLicense(QString text)
         ui->licenseLabel->setHidden(true);
         updateHiddenState();
         return;
-    } else {
-        ui->licenseLabel->setHidden(false);
-        updateHiddenState();
     }
+    ui->licenseLabel->setHidden(false);
+    updateHiddenState();
+
     ui->licenseLabel->setToolTip("");
     QString intermediatetext = text.trimmed();
     bool prev(false);

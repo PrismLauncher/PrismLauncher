@@ -139,9 +139,8 @@ QString profileInUseFilter(const QString& profile, bool used)
 {
     if (used) {
         return QObject::tr("%1 (in use)").arg(profile);
-    } else {
-        return profile;
     }
+    return profile;
 }
 }  // namespace
 
