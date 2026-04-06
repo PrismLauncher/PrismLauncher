@@ -68,9 +68,7 @@ void ModPage::setFilterWidget(std::unique_ptr<ModFilterWidget>& widget)
 
     auto* old = m_ui->splitter->replaceWidget(0, widget.get());
     // because we replaced the widget we also need to delete it
-    if (old) {
-        delete old;
-    }
+    delete old;
 
     m_filter_widget.swap(widget);
 

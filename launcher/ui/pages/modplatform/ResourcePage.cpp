@@ -93,8 +93,7 @@ ResourcePage::ResourcePage(ResourceDownloadDialog* parent, BaseInstance& base_in
 ResourcePage::~ResourcePage()
 {
     delete m_ui;
-    if (m_model)
-        delete m_model;
+    delete m_model;
 }
 
 void ResourcePage::retranslate()

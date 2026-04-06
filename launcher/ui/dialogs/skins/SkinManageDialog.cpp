@@ -122,9 +122,7 @@ SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
 SkinManageDialog::~SkinManageDialog()
 {
     delete m_ui;
-    if (m_skinPreview) {
-        delete m_skinPreview;
-    }
+    delete m_skinPreview;
 }
 
 void SkinManageDialog::activated(QModelIndex index)
