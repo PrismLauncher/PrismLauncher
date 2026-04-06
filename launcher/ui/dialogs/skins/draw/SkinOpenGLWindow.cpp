@@ -127,7 +127,7 @@ void SkinOpenGLWindow::initializeGL()
     QImage skin, cape;
     bool slim = false;
     if (m_parent) {
-        if (auto s = m_parent->getSelectedSkin()) {
+        if (auto* s = m_parent->getSelectedSkin()) {
             skin = s->getTexture();
             slim = s->getModel() == SkinModel::SLIM;
             cape = m_parent->capes().value(s->getCapeId(), {});

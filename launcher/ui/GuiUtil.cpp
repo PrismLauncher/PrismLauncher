@@ -135,7 +135,7 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
 
     auto job = NetJob::Ptr(new NetJob("Log Upload", APPLICATION->network()));
 
-    auto pasteJob = new PasteUpload(textToUpload, baseURL, pasteType);
+    auto* pasteJob = new PasteUpload(textToUpload, baseURL, pasteType);
     job->addNetAction(Net::NetRequest::Ptr(pasteJob));
     QObject::connect(job.get(), &Task::failed, [parentWidget](QString reason) {
         CustomMessageBox::selectable(parentWidget, QObject::tr("Failed to upload logs!"), reason, QMessageBox::Critical)->show();

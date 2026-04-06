@@ -42,7 +42,7 @@
 
 void ModMinecraftJar::executeTask()
 {
-    auto m_inst = m_parent->instance();
+    auto* m_inst = m_parent->instance();
 
     if (!m_inst->getJarMods().size()) {
         emitSucceeded();
@@ -61,7 +61,7 @@ void ModMinecraftJar::executeTask()
     }
 
     // create temporary modded jar, if needed
-    auto components = m_inst->getPackProfile();
+    auto* components = m_inst->getPackProfile();
     auto profile = components->getProfile();
     auto jarMods = m_inst->getJarMods();
     if (jarMods.size()) {
@@ -84,7 +84,7 @@ void ModMinecraftJar::finalize()
 
 bool ModMinecraftJar::removeJar()
 {
-    auto m_inst = m_parent->instance();
+    auto* m_inst = m_parent->instance();
     auto finalJarPath = QDir(m_inst->binRoot()).absoluteFilePath("minecraft.jar");
     QFile finalJar(finalJarPath);
     if (finalJar.exists()) {

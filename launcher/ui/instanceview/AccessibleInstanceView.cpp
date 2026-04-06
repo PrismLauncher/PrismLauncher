@@ -273,7 +273,7 @@ bool AccessibleInstanceView::unselectRow(int row)
     }
 
     QItemSelection selection(index, index);
-    auto selectionModel = view()->selectionModel();
+    auto* selectionModel = view()->selectionModel();
 
     switch (view()->selectionMode()) {
         case QAbstractItemView::SingleSelection:
@@ -306,7 +306,7 @@ bool AccessibleInstanceView::unselectRow(int row)
 
 bool AccessibleInstanceView::unselectColumn(int column)
 {
-    auto model = view()->model();
+    auto* model = view()->model();
     if (!model || !view()->selectionModel()) {
         return false;
     }

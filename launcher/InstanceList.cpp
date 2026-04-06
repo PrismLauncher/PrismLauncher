@@ -121,7 +121,7 @@ QStringList InstanceList::mimeTypes() const
 
 QMimeData* InstanceList::mimeData(const QModelIndexList& indexes) const
 {
-    auto mimeData = QAbstractListModel::mimeData(indexes);
+    auto* mimeData = QAbstractListModel::mimeData(indexes);
     if (indexes.size() == 1) {
         auto instanceId = data(indexes[0], InstanceIDRole).toString();
         mimeData->setData("application/x-instanceid", instanceId.toUtf8());
@@ -132,7 +132,7 @@ QMimeData* InstanceList::mimeData(const QModelIndexList& indexes) const
 QStringList InstanceList::getLinkedInstancesById(const QString& id) const
 {
     QStringList linkedInstances;
-    for (auto& inst : m_instances) {
+    for (const auto& inst : m_instances) {
         if (inst->isLinkedToInstanceId(id))
             linkedInstances.append(inst->id());
     }
@@ -218,7 +218,7 @@ Qt::ItemFlags InstanceList::flags(const QModelIndex& index) const
 
 GroupId InstanceList::getInstanceGroup(const InstanceId& id) const
 {
-    auto inst = getInstanceById(id);
+    auto* inst = getInstanceById(id);
     if (!inst) {
         return GroupId();
     }
@@ -234,7 +234,7 @@ void InstanceList::setInstanceGroup(const InstanceId& id, GroupId name)
     if (name.isEmpty() && !name.isNull())
         name = QString();
 
-    auto inst = getInstanceById(id);
+    auto* inst = getInstanceById(id);
     if (!inst) {
         qDebug() << "Attempt to set a null instance's group";
         return;
@@ -321,7 +321,7 @@ bool InstanceList::isGroupCollapsed(const QString& group)
 
 bool InstanceList::trashInstance(const InstanceId& id)
 {
-    auto inst = getInstanceById(id);
+    auto* inst = getInstanceById(id);
     if (!inst) {
         qWarning() << "Cannot trash instance" << id << ". No such instance is present (deleted externally?).";
         return false;
@@ -416,7 +416,7 @@ bool InstanceList::undoTrashInstance()
 
 void InstanceList::deleteInstance(const InstanceId& id)
 {
-    auto inst = getInstanceById(id);
+    auto* inst = getInstanceById(id);
     if (!inst) {
         qWarning() << "Cannot delete instance" << id << ". No such instance is present (deleted externally?).";
         return;
@@ -450,7 +450,7 @@ static QMap<InstanceId, InstanceLocator> getIdMapping(const std::vector<std::uni
 {
     QMap<InstanceId, InstanceLocator> out;
     int i = 0;
-    for (auto& item : list) {
+    for (const auto& item : list) {
         auto id = item->id();
         if (out.contains(id)) {
             qWarning() << "Duplicate ID" << id << "in instance list";
@@ -525,7 +525,7 @@ InstanceList::InstListError InstanceList::loadList()
             back_bookmark = currentItem;
         };
         for (auto& removedItem : deadList) {
-            auto instPtr = removedItem.first;
+            auto* instPtr = removedItem.first;
             instPtr->invalidate();
             currentItem = removedItem.second;
             if (back_bookmark == -1) {
@@ -605,7 +605,7 @@ BaseInstance* InstanceList::getInstanceById(QString instId) const
 {
     if (instId.isEmpty())
         return nullptr;
-    for (auto& inst : m_instances) {
+    for (const auto& inst : m_instances) {
         if (inst->id() == instId) {
             return inst.get();
         }
@@ -618,7 +618,7 @@ BaseInstance* InstanceList::getInstanceByManagedName(const QString& managed_name
     if (managed_name.isEmpty())
         return {};
 
-    for (auto& instance : m_instances) {
+    for (const auto& instance : m_instances) {
         if (instance->getManagedPackName() == managed_name)
             return instance.get();
     }

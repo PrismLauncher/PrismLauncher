@@ -24,7 +24,7 @@ class DataPackResourcePage : public ResourcePage {
     static T* create(DataPackDownloadDialog* dialog, BaseInstance& instance)
     {
         auto page = new T(dialog, instance);
-        auto model = static_cast<DataPackResourceModel*>(page->getModel());
+        auto* model = static_cast<DataPackResourceModel*>(page->getModel());
 
         connect(model, &ResourceModel::versionListUpdated, page, &ResourcePage::versionListUpdated);
         connect(model, &ResourceModel::projectInfoUpdated, page, &ResourcePage::updateUi);

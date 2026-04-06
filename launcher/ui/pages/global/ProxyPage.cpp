@@ -77,7 +77,7 @@ void ProxyPage::proxyGroupChanged([[maybe_unused]] QAbstractButton* button)
 
 void ProxyPage::applySettings()
 {
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
 
     // Proxy
     QString proxyType = "None";
@@ -101,7 +101,7 @@ void ProxyPage::applySettings()
 }
 void ProxyPage::loadSettings()
 {
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
     // Proxy
     QString proxyType = s->get("ProxyType").toString();
     if (proxyType == "Default")

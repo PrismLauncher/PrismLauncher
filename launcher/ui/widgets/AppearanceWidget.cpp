@@ -131,7 +131,7 @@ void AppearanceWidget::retranslateUi()
 
 void AppearanceWidget::applyIconTheme(int index)
 {
-    auto settings = APPLICATION->settings();
+    auto* settings = APPLICATION->settings();
     auto originalIconTheme = settings->get("IconTheme").toString();
     auto newIconTheme = m_ui->iconsComboBox->itemData(index).toString();
     if (originalIconTheme != newIconTheme) {
@@ -142,7 +142,7 @@ void AppearanceWidget::applyIconTheme(int index)
 
 void AppearanceWidget::applyWidgetTheme(int index)
 {
-    auto settings = APPLICATION->settings();
+    auto* settings = APPLICATION->settings();
     auto originalAppTheme = settings->get("ApplicationTheme").toString();
     auto newAppTheme = m_ui->widgetStyleComboBox->itemData(index).toString();
     if (originalAppTheme != newAppTheme) {
@@ -155,7 +155,7 @@ void AppearanceWidget::applyWidgetTheme(int index)
 
 void AppearanceWidget::applyCatTheme(int index)
 {
-    auto settings = APPLICATION->settings();
+    auto* settings = APPLICATION->settings();
     auto originalCat = settings->get("BackgroundCat").toString();
     auto newCat = m_ui->catPackComboBox->itemData(index).toString();
     if (originalCat != newCat) {
@@ -274,7 +274,7 @@ void AppearanceWidget::updateCatPreview()
     QIcon catPackIcon(APPLICATION->themeManager()->getCatPack());
     m_ui->catPreview->setIcon(catPackIcon);
 
-    auto effect = dynamic_cast<QGraphicsOpacityEffect*>(m_ui->catPreview->graphicsEffect());
+    auto* effect = dynamic_cast<QGraphicsOpacityEffect*>(m_ui->catPreview->graphicsEffect());
     if (effect)
         effect->setOpacity(m_ui->catOpacitySlider->value() / 100.0);
 }

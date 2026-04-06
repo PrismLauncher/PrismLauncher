@@ -186,7 +186,7 @@ void MinecraftInstance::loadSpecificSettings()
     auto argsOverride = m_settings->registerSetting("OverrideJavaArgs", false);
     m_settings->registerSetting("AutomaticJava", false);
 
-    if (auto global_settings = globalSettings()) {
+    if (auto* global_settings = globalSettings()) {
         m_settings->registerOverride(global_settings->getSetting("JavaPath"), locationOverride);
         m_settings->registerOverride(global_settings->getSetting("JvmArgs"), argsOverride);
         m_settings->registerOverride(global_settings->getSetting("IgnoreJavaCompatibility"), locationOverride);
@@ -290,7 +290,7 @@ PackProfile* MinecraftInstance::getPackProfile() const
 
 QSet<QString> MinecraftInstance::traits() const
 {
-    auto components = getPackProfile();
+    auto* components = getPackProfile();
     if (!components) {
         return { "version-incomplete" };
     }
@@ -320,7 +320,7 @@ void MinecraftInstance::populateLaunchMenu(QMenu* menu)
     QString profilersTitle = tr("Profilers");
     menu->addSeparator()->setText(profilersTitle);
 
-    auto profilers = new QActionGroup(menu);
+    auto* profilers = new QActionGroup(menu);
     profilers->setExclusive(true);
     connect(profilers, &QActionGroup::triggered, [this](QAction* action) {
         settings()->set("Profiler", action->data());
@@ -514,7 +514,7 @@ static QString replaceTokensIn(const QString& text, const QMap<QString, QString>
 QStringList MinecraftInstance::extraArguments()
 {
     auto list = BaseInstance::extraArguments();
-    auto version = getPackProfile();
+    auto* version = getPackProfile();
     if (!version)
         return list;
     auto jarMods = getJarMods();
@@ -827,12 +827,12 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftT
         if (settings()->get("LaunchMaximized").toBool()) {
             // FIXME doesn't support maximisation
             if (!isLegacy()) {
-                auto screen = QGuiApplication::primaryScreen();
+                auto* screen = QGuiApplication::primaryScreen();
                 auto screenGeometry = screen->availableSize();
 
                 // small hack to get the widow decorations
-                for (auto w : QApplication::topLevelWidgets()) {
-                    auto mainWindow = qobject_cast<QMainWindow*>(w);
+                for (auto* w : QApplication::topLevelWidgets()) {
+                    auto* mainWindow = qobject_cast<QMainWindow*>(w);
                     if (mainWindow) {
                         auto m = mainWindow->windowHandle()->frameMargins();
                         screenGeometry = screenGeometry.shrunkBy(m);
@@ -906,7 +906,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
                 auto bName = b->fileinfo().completeBaseName();
                 return aName.localeAwareCompare(bName) < 0;
             });
-            for (auto mod : modList) {
+            for (auto* mod : modList) {
                 if (mod->type() == ResourceType::FOLDER) {
                     out << u8"  [🖿] " + mod->fileinfo().completeBaseName() + " (folder)";
                     continue;
@@ -926,10 +926,10 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
     printModList("Core Mods", *coreModList());
 
     // jar mods
-    auto& jarMods = profile->getJarMods();
+    const auto& jarMods = profile->getJarMods();
     if (jarMods.size()) {
         out << "Jar Mods:";
-        for (auto& jarmod : jarMods) {
+        for (const auto& jarmod : jarMods) {
             auto displayname = jarmod->displayName(runtimeContext());
             auto realname = jarmod->filename(runtimeContext());
             if (displayname != realname) {
@@ -952,7 +952,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
     }
 
     // native libraries
-    auto settings = this->settings();
+    auto* settings = this->settings();
     bool nativeOpenAL = settings->get("UseNativeOpenAL").toBool();
     bool nativeGLFW = settings->get("UseNativeGLFW").toBool();
     if (nativeOpenAL || nativeGLFW) {
@@ -1117,7 +1117,7 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
 {
     updateRuntimeContext();
     auto process = LaunchTask::create(this);
-    auto pptr = process.get();
+    auto* pptr = process.get();
 
     APPLICATION->icons()->saveIcon(iconKey(), FS::PathCombine(gameRoot(), "icon.png"), "PNG");
 

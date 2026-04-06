@@ -245,7 +245,7 @@ void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)
     int row = m_resources_index[mod_id];
 
     auto parse_task = *iter;
-    auto cast_task = static_cast<LocalModParseTask*>(parse_task.get());
+    auto* cast_task = static_cast<LocalModParseTask*>(parse_task.get());
 
     Q_ASSERT(cast_task->token() == ticket);
 
@@ -283,10 +283,10 @@ void ModFolderModel::onParseFinished()
         });
         return found != mods.end() ? *found : nullptr;
     };
-    for (auto mod : mods) {
+    for (auto* mod : mods) {
         auto id = mod->mod_id();
         for (auto dep : mod->dependencies()) {
-            auto d = findById(mods, dep);
+            auto* d = findById(mods, dep);
             if (d) {
                 m_requires[id] << d;
                 m_requiredBy[d->mod_id()] << mod;
@@ -295,7 +295,7 @@ void ModFolderModel::onParseFinished()
         if (mod->metadata()) {
             for (auto dep : mod->metadata()->dependencies) {
                 if (dep.type == ModPlatform::DependencyType::REQUIRED) {
-                    auto d = findByProjectID(dep.addonId, mod->metadata()->provider);
+                    auto* d = findByProjectID(dep.addonId, mod->metadata()->provider);
                     if (d) {
                         m_requires[id] << d;
                         m_requiredBy[d->mod_id()] << mod;
@@ -304,7 +304,7 @@ void ModFolderModel::onParseFinished()
             }
         }
     }
-    for (auto mod : mods) {
+    for (auto* mod : mods) {
         auto id = mod->mod_id();
         if (mod->requiredByCount() != m_requiredBy[id].count() || mod->requiresCount() != m_requires[id].count()) {
             mod->setRequiredByCount(m_requiredBy[id].count());
@@ -319,11 +319,11 @@ QSet<Mod*> collectMods(QSet<Mod*> mods, QHash<QString, QSet<Mod*>> relation, std
 {
     QSet<Mod*> affectedList = {};
     QSet<Mod*> needToCheck = {};
-    for (auto mod : mods) {
+    for (auto* mod : mods) {
         auto id = mod->mod_id();
         if (seen.count(id) == 0) {
             seen.insert(id);
-            for (auto affected : relation[id]) {
+            for (auto* affected : relation[id]) {
                 auto affectedId = affected->mod_id();
 
                 if (findById(mods, affectedId) == nullptr && seen.count(affectedId) == 0) {
@@ -366,7 +366,7 @@ QModelIndexList ModFolderModel::getAffectedMods(const QModelIndexList& indexes, 
             return {};  // this function should not be called with TOGGLE
         }
     }
-    for (auto affected : affectedMods) {
+    for (auto* affected : affectedMods) {
         auto affectedId = affected->mod_id();
         auto row = m_resources_index[affected->internal_id()];
         affectedList << index(row, 0);
@@ -396,7 +396,7 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
             break;
         }
         case EnableAction::TOGGLE: {
-            for (auto mod : indexedMods) {
+            for (auto* mod : indexedMods) {
                 if (mod->enabled()) {
                     toDisable << mod;
                 } else {
@@ -413,7 +413,7 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
     toDisable.removeIf([toEnable](Mod* m) { return toEnable.contains(m); });
     auto toList = [this](QSet<Mod*> mods) {
         QModelIndexList list;
-        for (auto mod : mods) {
+        for (auto* mod : mods) {
             auto row = m_resources_index[mod->internal_id()];
             list << index(row, 0);
         }
@@ -447,8 +447,8 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
             yesButton = tr("Disable Required");
         }
 
-        auto box = CustomMessageBox::selectable(nullptr, title, message, QMessageBox::Warning,
-                                                QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::No);
+        auto* box = CustomMessageBox::selectable(nullptr, title, message, QMessageBox::Warning,
+                                                 QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::No);
         box->button(QMessageBox::No)->setText(noButton);
         box->button(QMessageBox::Yes)->setText(yesButton);
         auto response = box->exec();
@@ -469,7 +469,7 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
 QStringList reqToList(QSet<Mod*> l)
 {
     QStringList req;
-    for (auto m : l) {
+    for (auto* m : l) {
         req << m->name();
     }
     return req;
@@ -489,7 +489,7 @@ bool ModFolderModel::deleteResources(const QModelIndexList& indexes)
 {
     auto deleteInvalid = [](QSet<Mod*>& mods) {
         for (auto it = mods.begin(); it != mods.end();) {
-            auto mod = *it;
+            auto* mod = *it;
             // the QFileInfo::exists is used instead of mod->fileinfo().exists
             // because the later somehow caches that the file exists
             if (!mod || !QFileInfo::exists(mod->fileinfo().absoluteFilePath())) {
@@ -500,7 +500,7 @@ bool ModFolderModel::deleteResources(const QModelIndexList& indexes)
         }
     };
     auto rsp = ResourceFolderModel::deleteResources(indexes);
-    for (auto mod : allMods()) {
+    for (auto* mod : allMods()) {
         auto id = mod->mod_id();
         deleteInvalid(m_requiredBy[id]);
         deleteInvalid(m_requires[id]);

@@ -41,7 +41,7 @@ ModListView::ModListView(QWidget* parent) : QTreeView(parent)
 void ModListView::setModel(QAbstractItemModel* model)
 {
     QTreeView::setModel(model);
-    auto head = header();
+    auto* head = header();
     head->setStretchLastSection(false);
     // HACK: this is true for the checkbox column of mod lists
     auto string = model->headerData(0, head->orientation()).toString();
@@ -62,7 +62,7 @@ void ModListView::setModel(QAbstractItemModel* model)
 
 void ModListView::setResizeModes(const QList<QHeaderView::ResizeMode>& modes)
 {
-    auto head = header();
+    auto* head = header();
     for (int i = 0; i < modes.count(); i++) {
         head->setSectionResizeMode(i, modes[i]);
     }

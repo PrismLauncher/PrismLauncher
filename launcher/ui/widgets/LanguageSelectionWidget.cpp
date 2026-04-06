@@ -39,7 +39,7 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent) : QWidget(pare
             [this]() { APPLICATION->translations()->setUseSystemLocale(formatCheckbox->isChecked()); });
     verticalLayout->addWidget(formatCheckbox);
 
-    auto translations = APPLICATION->translations();
+    auto* translations = APPLICATION->translations();
     auto index = translations->selectedIndex();
     languageView->setModel(translations);
     languageView->setCurrentIndex(index);
@@ -54,7 +54,7 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent) : QWidget(pare
 
 QString LanguageSelectionWidget::getSelectedLanguageKey() const
 {
-    auto translations = APPLICATION->translations();
+    auto* translations = APPLICATION->translations();
     return translations->data(languageView->currentIndex(), Qt::UserRole).toString();
 }
 
@@ -71,7 +71,7 @@ void LanguageSelectionWidget::languageRowChanged(const QModelIndex& current, con
     if (current == previous) {
         return;
     }
-    auto translations = APPLICATION->translations();
+    auto* translations = APPLICATION->translations();
     QString key = translations->data(current, Qt::UserRole).toString();
     translations->selectLanguage(key);
     translations->updateLanguage(key);
@@ -79,7 +79,7 @@ void LanguageSelectionWidget::languageRowChanged(const QModelIndex& current, con
 
 void LanguageSelectionWidget::languageSettingChanged(const Setting&, const QVariant&)
 {
-    auto translations = APPLICATION->translations();
+    auto* translations = APPLICATION->translations();
     auto index = translations->selectedIndex();
     languageView->setCurrentIndex(index);
 }

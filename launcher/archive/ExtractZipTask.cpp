@@ -47,7 +47,7 @@ auto ExtractZipTask::extractZip() -> ZipResult
     }
 
     auto extPtr = ArchiveWriter::createDiskWriter();
-    auto ext = extPtr.get();
+    auto* ext = extPtr.get();
 
     setStatus("Extracting files...");
     setProgress(0, m_input.getFiles().count());

@@ -42,7 +42,7 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
         instance.setIconKey(instIcon);
     }
 
-    auto components = instance.getPackProfile();
+    auto* components = instance.getPackProfile();
     components->buildingFromScratch();
 
     QByteArray data;

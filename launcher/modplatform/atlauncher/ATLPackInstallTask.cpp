@@ -918,8 +918,8 @@ bool PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract,
 
     setStatus(tr("Extracting mods..."));
     for (auto iter = toExtract.begin(); iter != toExtract.end(); iter++) {
-        auto& modPath = iter.key();
-        auto& mod = iter.value();
+        const auto& modPath = iter.key();
+        const auto& mod = iter.value();
 
         QString extractToDir;
         if (mod.type == ModType::Extract) {
@@ -948,8 +948,8 @@ bool PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract,
     }
 
     for (auto iter = toDecomp.begin(); iter != toDecomp.end(); iter++) {
-        auto& modPath = iter.key();
-        auto& mod = iter.value();
+        const auto& modPath = iter.key();
+        const auto& mod = iter.value();
         auto extractToDir = getDirForModType(mod.decompType, mod.decompType_raw);
 
         QDir extractDir(m_stagingPath);
@@ -963,8 +963,8 @@ bool PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract,
     }
 
     for (auto iter = toCopy.begin(); iter != toCopy.end(); iter++) {
-        auto& from = iter.key();
-        auto& to = iter.value();
+        const auto& from = iter.key();
+        const auto& to = iter.value();
 
         // If the file already exists, assume the mod is the correct copy - and remove
         // the copy from the Configs.zip
@@ -994,7 +994,7 @@ void PackInstallTask::install()
     MinecraftInstance instance(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
     {
         SettingsObject::Lock lock(instance.settings());
-        auto components = instance.getPackProfile();
+        auto* components = instance.getPackProfile();
         components->buildingFromScratch();
 
         // Use a component to add libraries BEFORE Minecraft

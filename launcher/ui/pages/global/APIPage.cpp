@@ -121,7 +121,7 @@ void APIPage::updateBaseURLPlaceholder(int index)
 
 void APIPage::loadSettings()
 {
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
 
     int pasteType = s->get("PastebinType").toInt();
     QString pastebinURL = s->get("PastebinCustomAPIBase").toString();
@@ -158,7 +158,7 @@ void APIPage::loadSettings()
 
 void APIPage::applySettings()
 {
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
 
     s->set("PastebinType", ui->pasteTypeComboBox->currentData().toInt());
     s->set("PastebinCustomAPIBase", ui->baseURLEntry->text());

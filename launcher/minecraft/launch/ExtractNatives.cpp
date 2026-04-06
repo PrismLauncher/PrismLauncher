@@ -44,7 +44,7 @@ static bool unzipNatives(QString source, QString targetFolder, bool applyJnilibH
     QDir directory(targetFolder);
 
     auto extPtr = MMCZip::ArchiveWriter::createDiskWriter();
-    auto ext = extPtr.get();
+    auto* ext = extPtr.get();
 
     return zip.parse([applyJnilibHack, directory, ext](MMCZip::ArchiveReader::File* f) {
         QString name = f->filename();
@@ -59,7 +59,7 @@ static bool unzipNatives(QString source, QString targetFolder, bool applyJnilibH
 
 void ExtractNatives::executeTask()
 {
-    auto instance = m_parent->instance();
+    auto* instance = m_parent->instance();
     auto toExtract = instance->getNativeJars();
     if (toExtract.isEmpty()) {
         emitSucceeded();
@@ -83,7 +83,7 @@ void ExtractNatives::executeTask()
 
 void ExtractNatives::finalize()
 {
-    auto instance = m_parent->instance();
+    auto* instance = m_parent->instance();
     QString target_dir = FS::PathCombine(instance->instanceRoot(), "natives/");
     QDir dir(target_dir);
     dir.removeRecursively();

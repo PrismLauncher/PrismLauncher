@@ -7,7 +7,7 @@ CreateGameFolders::CreateGameFolders(LaunchTask* parent) : LaunchStep(parent) {}
 
 void CreateGameFolders::executeTask()
 {
-    auto instance = m_parent->instance();
+    auto* instance = m_parent->instance();
 
     if (!FS::ensureFolderPathExists(instance->gameRoot())) {
         emit logLine("Couldn't create the main game folder", MessageLevel::Error);

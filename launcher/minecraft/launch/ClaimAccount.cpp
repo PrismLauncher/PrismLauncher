@@ -7,7 +7,7 @@
 ClaimAccount::ClaimAccount(LaunchTask* parent, AuthSessionPtr session) : LaunchStep(parent)
 {
     if (session->launchMode == LaunchMode::Normal) {
-        auto accounts = APPLICATION->accounts();
+        auto* accounts = APPLICATION->accounts();
         m_account = accounts->getAccountByProfileName(session->player_name);
     }
 }

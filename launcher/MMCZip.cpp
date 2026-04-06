@@ -194,7 +194,7 @@ std::optional<QStringList> extractSubDir(ArchiveReader* zip, const QString& subd
     }
 
     auto extPtr = ArchiveWriter::createDiskWriter();
-    auto ext = extPtr.get();
+    auto* ext = extPtr.get();
 
     if (!zip->parse([&subdir, &target, &target_top_dir, ext, &extracted](ArchiveReader::File* f) {
             QString file_name = f->filename();
@@ -289,7 +289,7 @@ bool extractFile(QString fileCompressed, QString file, QString target)
         return false;
     }
     auto extPtr = ArchiveWriter::createDiskWriter();
-    auto ext = extPtr.get();
+    auto* ext = extPtr.get();
 
     return f->writeFile(ext, target);
 }

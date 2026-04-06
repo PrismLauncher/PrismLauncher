@@ -17,13 +17,13 @@ void LibrariesTask::executeTask()
     MinecraftInstance* inst = (MinecraftInstance*)m_inst;
 
     // Build a list of URLs that will need to be downloaded.
-    auto components = inst->getPackProfile();
+    auto* components = inst->getPackProfile();
     auto profile = components->getProfile();
 
     NetJob::Ptr job{ new NetJob(tr("Libraries for instance %1").arg(inst->name()), APPLICATION->network()) };
     downloadJob.reset(job);
 
-    auto metacache = APPLICATION->metacache();
+    auto* metacache = APPLICATION->metacache();
 
     auto processArtifactPool = [this, inst, metacache](const QList<LibraryPtr>& pool, QStringList& errors, const QString& localPath) {
         for (auto lib : pool) {

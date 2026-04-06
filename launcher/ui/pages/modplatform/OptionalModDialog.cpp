@@ -23,7 +23,7 @@ OptionalModDialog::OptionalModDialog(QWidget* parent, const QStringList& mods) :
 {
     ui->setupUi(this);
     for (const QString& mod : mods) {
-        auto item = new QListWidgetItem(mod, ui->list);
+        auto* item = new QListWidgetItem(mod, ui->list);
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
         item->setCheckState(Qt::Unchecked);
         item->setData(Qt::UserRole, mod);
@@ -58,7 +58,7 @@ QStringList OptionalModDialog::getResult()
     QStringList result;
     result.reserve(ui->list->count());
     for (int i = 0; i < ui->list->count(); i++) {
-        auto item = ui->list->item(i);
+        auto* item = ui->list->item(i);
         if (item->checkState() == Qt::Checked)
             result.append(item->data(Qt::UserRole).toString());
     }

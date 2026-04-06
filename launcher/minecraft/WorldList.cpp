@@ -181,7 +181,7 @@ QVariant WorldList::data(const QModelIndex& index, int role) const
 
     QLocale locale;
 
-    auto& world = m_worlds[row];
+    const auto& world = m_worlds[row];
     switch (role) {
         case Qt::DisplayRole:
             switch (column) {
@@ -323,7 +323,7 @@ QMimeData* WorldList::mimeData(const QModelIndexList& indexes) const
         urls.append(QUrl::fromLocalFile(worldPath));
     }
 
-    auto result = new QMimeData();
+    auto* result = new QMimeData();
     result->setUrls(urls);
     return result;
 }

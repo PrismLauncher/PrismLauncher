@@ -18,7 +18,7 @@ ImportResourceDialog::ImportResourceDialog(QString file_path, ModPlatform::Resou
     ui->setupUi(this);
     setWindowModality(Qt::WindowModal);
 
-    auto contentsWidget = ui->instanceView;
+    auto* contentsWidget = ui->instanceView;
     contentsWidget->setViewMode(QListView::ListMode);
     contentsWidget->setFlow(QListView::LeftToRight);
     contentsWidget->setIconSize(QSize(48, 48));

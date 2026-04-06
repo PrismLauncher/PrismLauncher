@@ -91,7 +91,7 @@ ExportPackDialog::ExportPackDialog(MinecraftInstance* instance, QWidget* parent,
     const QDir instanceRoot(instance->instanceRoot());
     m_proxy = new FileIgnoreProxy(instance->instanceRoot(), this);
     auto prefix = QDir(instance->instanceRoot()).relativeFilePath(instance->gameRoot());
-    for (auto path : { "logs", "crash-reports", ".cache", ".fabric", ".quilt" }) {
+    for (const auto* path : { "logs", "crash-reports", ".cache", ".fabric", ".quilt" }) {
         m_proxy->ignoreFilesWithPath().insert(FS::PathCombine(prefix, path));
     }
     m_proxy->ignoreFilesWithName().append({ ".DS_Store", "thumbs.db", "Thumbs.db" });
@@ -101,7 +101,7 @@ ExportPackDialog::ExportPackDialog(MinecraftInstance* instance, QWidget* parent,
 
     const QDir::Filters filter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Hidden);
 
-    for (auto resourceModel : instance->resourceLists()) {
+    for (auto* resourceModel : instance->resourceLists()) {
         if (resourceModel == nullptr) {
             continue;
         }
@@ -140,7 +140,7 @@ ExportPackDialog::~ExportPackDialog()
 void ExportPackDialog::done(int result)
 {
     m_proxy->saveBlockedPathsToFile(ignoreFileName());
-    auto settings = m_instance->settings();
+    auto* settings = m_instance->settings();
     settings->set("ExportName", m_ui->name->text());
     settings->set("ExportVersion", m_ui->version->text());
     settings->set("ExportOptionalFiles", m_ui->optionalFiles->isChecked());

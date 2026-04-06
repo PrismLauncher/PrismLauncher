@@ -18,7 +18,7 @@ void AutoJavaWizardPage::initializePage() {}
 
 bool AutoJavaWizardPage::validatePage()
 {
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
 
     if (!ui->previousSettingsRadioButton->isChecked()) {
         s->set("AutomaticJavaSwitch", true);

@@ -184,7 +184,7 @@ void serializeRequires(QJsonObject& obj, RequireSet* ptr, const char* keyName)
         return;
     }
     QJsonArray arrOut;
-    for (auto& iter : *ptr) {
+    for (const auto& iter : *ptr) {
         QJsonObject reqOut;
         reqOut.insert("uid", iter.uid);
         if (!iter.equalsVersion.isEmpty()) {

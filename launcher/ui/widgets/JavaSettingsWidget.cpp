@@ -88,7 +88,7 @@ JavaSettingsWidget::JavaSettingsWidget(BaseInstance* instance, QWidget* parent)
                 [this, settings] { m_ui->javaPathTextBox->setText(settings->get("JavaPath").toString()); });
 
         connect(m_ui->javaDownloadBtn, &QPushButton::clicked, this, [this] {
-            auto javaDialog = new Java::InstallDialog({}, m_instance, this);
+            auto* javaDialog = new Java::InstallDialog({}, m_instance, this);
             javaDialog->exec();
         });
         connect(m_ui->javaPathTextBox, &QLineEdit::textChanged, [this](QString newValue) {

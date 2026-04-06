@@ -44,7 +44,7 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
     proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     ui->iconView->setModel(proxyModel);
 
-    auto contentsWidget = ui->iconView;
+    auto* contentsWidget = ui->iconView;
     contentsWidget->setViewMode(QListView::IconMode);
     contentsWidget->setFlow(QListView::LeftToRight);
     contentsWidget->setIconSize(QSize(48, 48));
@@ -71,7 +71,7 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
     contentsWidget->setModel(proxyModel);
 
     // NOTE: ResetRole forces the button to be on the left, while the OK/Cancel ones are on the right. We win.
-    auto buttonAdd = ui->buttonBox->addButton(tr("Add Icon"), QDialogButtonBox::ResetRole);
+    auto* buttonAdd = ui->buttonBox->addButton(tr("Add Icon"), QDialogButtonBox::ResetRole);
     buttonRemove = ui->buttonBox->addButton(tr("Remove Icon"), QDialogButtonBox::ResetRole);
 
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
@@ -84,7 +84,7 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
 
     connect(contentsWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &IconPickerDialog::selectionChanged);
 
-    auto buttonFolder = ui->buttonBox->addButton(tr("Open Folder"), QDialogButtonBox::ResetRole);
+    auto* buttonFolder = ui->buttonBox->addButton(tr("Open Folder"), QDialogButtonBox::ResetRole);
     connect(buttonFolder, &QPushButton::clicked, this, &IconPickerDialog::openFolder);
     connect(searchBar, &QLineEdit::textChanged, this, &IconPickerDialog::filterIcons);
     // Prevent incorrect indices from e.g. filesystem changes
@@ -150,8 +150,8 @@ void IconPickerDialog::selectionChanged(QItemSelection selected, QItemSelection 
 
 int IconPickerDialog::execWithSelection(QString selection)
 {
-    auto list = APPLICATION->icons();
-    auto contentsWidget = ui->iconView;
+    auto* list = APPLICATION->icons();
+    auto* contentsWidget = ui->iconView;
     selectedIconKey = selection;
 
     int index_nr = list->getIconIndex(selection);
@@ -164,7 +164,7 @@ int IconPickerDialog::execWithSelection(QString selection)
 
 void IconPickerDialog::delayed_scroll(QModelIndex model_index)
 {
-    auto contentsWidget = ui->iconView;
+    auto* contentsWidget = ui->iconView;
     contentsWidget->scrollTo(model_index);
 }
 

@@ -268,7 +268,7 @@ bool reconstructAssets(QString assetsId, QString resourcesFolder)
 
         // TODO: Write last used time to virtualRoot/.lastused
         if (removeLeftovers) {
-            for (auto& file : presentFiles) {
+            for (const auto& file : presentFiles) {
                 qDebug() << "Would remove" << file;
             }
         }

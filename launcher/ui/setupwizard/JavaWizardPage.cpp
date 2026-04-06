@@ -50,7 +50,7 @@ bool JavaWizardPage::wantsRefreshButton()
 
 bool JavaWizardPage::validatePage()
 {
-    auto settings = APPLICATION->settings();
+    auto* settings = APPLICATION->settings();
     auto result = m_java_widget->validate();
     settings->set("AutomaticJavaSwitch", m_java_widget->autoDetectJava());
     settings->set("AutomaticJavaDownload", m_java_widget->autoDownloadJava());
@@ -65,7 +65,7 @@ bool JavaWizardPage::validatePage()
         } /* fallthrough */
         case JavaWizardWidget::ValidationStatus::JavaBad: {
             // Memory
-            auto s = APPLICATION->settings();
+            auto* s = APPLICATION->settings();
             s->set("MinMemAlloc", m_java_widget->minHeapSize());
             s->set("MaxMemAlloc", m_java_widget->maxHeapSize());
             if (m_java_widget->permGenEnabled()) {

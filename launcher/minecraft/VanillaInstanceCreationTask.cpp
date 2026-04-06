@@ -23,7 +23,7 @@ std::unique_ptr<MinecraftInstance> VanillaCreationTask::createInstance()
                            m_stagingPath);
     SettingsObject::Lock lock(inst->settings());
 
-    auto components = inst->getPackProfile();
+    auto* components = inst->getPackProfile();
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", m_version->descriptor(), true);
     if (m_using_loader)

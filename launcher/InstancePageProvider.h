@@ -31,7 +31,7 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
         MinecraftInstance* onesix = dynamic_cast<MinecraftInstance*>(inst);
         values.append(new VersionPage(onesix));
         values.append(ManagedPackPage::createPage(onesix));
-        auto modsPage = new ModFolderPage(onesix, onesix->loaderModList());
+        auto* modsPage = new ModFolderPage(onesix, onesix->loaderModList());
         modsPage->setFilter("%1 (*.zip *.jar *.litemod *.nilmod)");
         values.append(modsPage);
         values.append(new CoreModFolderPage(onesix, onesix->coreModList()));

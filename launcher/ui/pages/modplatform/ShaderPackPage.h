@@ -23,7 +23,7 @@ class ShaderPackResourcePage : public ResourcePage {
     static T* create(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
     {
         auto page = new T(dialog, instance);
-        auto model = static_cast<ShaderPackResourceModel*>(page->getModel());
+        auto* model = static_cast<ShaderPackResourceModel*>(page->getModel());
 
         connect(model, &ResourceModel::versionListUpdated, page, &ResourcePage::versionListUpdated);
         connect(model, &ResourceModel::projectInfoUpdated, page, &ResourcePage::updateUi);

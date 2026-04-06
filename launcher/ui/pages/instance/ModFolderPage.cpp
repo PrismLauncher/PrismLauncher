@@ -81,9 +81,9 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget*
     connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
     ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
 
-    auto updateMenu = new QMenu(this);
+    auto* updateMenu = new QMenu(this);
 
-    auto update = updateMenu->addAction(tr("Check for Updates"));
+    auto* update = updateMenu->addAction(tr("Check for Updates"));
     connect(update, &QAction::triggered, this, &ModFolderPage::updateMods);
 
     updateMenu->addAction(ui->actionVerifyItemDependencies);
@@ -164,7 +164,7 @@ void ModFolderPage::downloadMods()
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
 
-    auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
+    auto* profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
     if (!profile->getModLoaders().has_value()) {
         if (handleNoModLoader()) {
             return;
@@ -181,7 +181,7 @@ void ModFolderPage::downloadMods()
 void ModFolderPage::downloadDialogFinished(int result)
 {
     if (result) {
-        auto tasks = new ConcurrentTask(tr("Download Mods"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        auto* tasks = new ConcurrentTask(tr("Download Mods"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
@@ -199,7 +199,7 @@ void ModFolderPage::downloadDialogFinished(int result)
         });
 
         if (m_downloadDialog) {
-            for (auto& task : m_downloadDialog->getTasks()) {
+            for (const auto& task : m_downloadDialog->getTasks()) {
                 tasks->addTask(task);
             }
         } else {
@@ -221,7 +221,7 @@ void ModFolderPage::updateMods(bool includeDeps)
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
 
-    auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
+    auto* profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
     if (!profile->getModLoaders().has_value()) {
         if (handleNoModLoader()) {
             return;
@@ -271,7 +271,7 @@ void ModFolderPage::updateMods(bool includeDeps)
     }
 
     if (update_dialog.exec()) {
-        auto tasks = new ConcurrentTask("Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        auto* tasks = new ConcurrentTask("Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
@@ -326,7 +326,7 @@ void ModFolderPage::changeModVersion()
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
 
-    auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
+    auto* profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
     if (!profile->getModLoaders().has_value()) {
         if (handleNoModLoader()) {
             return;
@@ -363,9 +363,9 @@ void ModFolderPage::exportModMetadata()
 
 CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, ModFolderModel* mods, QWidget* parent) : ModFolderPage(inst, mods, parent)
 {
-    auto mcInst = dynamic_cast<MinecraftInstance*>(m_instance);
+    auto* mcInst = dynamic_cast<MinecraftInstance*>(m_instance);
     if (mcInst) {
-        auto version = mcInst->getPackProfile();
+        auto* version = mcInst->getPackProfile();
         if (version && version->getComponent("net.minecraftforge") && version->getComponent("net.minecraft")) {
             auto minecraftCmp = version->getComponent("net.minecraft");
             if (!minecraftCmp->m_loaded) {
@@ -389,11 +389,11 @@ CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, ModFolderModel* mods, Q
 bool CoreModFolderPage::shouldDisplay() const
 {
     if (ModFolderPage::shouldDisplay()) {
-        auto inst = dynamic_cast<MinecraftInstance*>(m_instance);
+        auto* inst = dynamic_cast<MinecraftInstance*>(m_instance);
         if (!inst)
             return true;
 
-        auto version = inst->getPackProfile();
+        auto* version = inst->getPackProfile();
         if (!version || !version->getComponent("net.minecraftforge") || !version->getComponent("net.minecraft"))
             return false;
         auto minecraftCmp = version->getComponent("net.minecraft");
@@ -419,7 +419,7 @@ inline bool ModFolderPage::handleNoModLoader()
     switch (resp) {
         case QMessageBox::Yes: {
             // Should be safe
-            auto profile = static_cast<MinecraftInstance*>(this->m_instance)->getPackProfile();
+            auto* profile = static_cast<MinecraftInstance*>(this->m_instance)->getPackProfile();
             InstallLoaderDialog dialog(profile, QString(), this);
             bool ret = dialog.exec();
             this->m_container->refreshContainer();

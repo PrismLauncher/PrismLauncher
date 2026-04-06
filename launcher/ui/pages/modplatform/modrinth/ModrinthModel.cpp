@@ -246,7 +246,7 @@ void ModpackListModel::requestLogo(QString logo, QString url)
     }
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo));
-    auto job = new NetJob(QString("%1 Icon Download %2").arg(m_parent->debugName()).arg(logo), APPLICATION->network());
+    auto* job = new NetJob(QString("%1 Icon Download %2").arg(m_parent->debugName()).arg(logo), APPLICATION->network());
     job->setAskRetry(false);
     job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
@@ -318,7 +318,7 @@ void ModpackListModel::searchRequestForOneSucceeded(ModPlatform::IndexedPack::Pt
 
 void ModpackListModel::searchRequestFailed(QString)
 {
-    auto failed_action = dynamic_cast<NetJob*>(m_jobPtr.get())->getFailedActions().at(0);
+    auto* failed_action = dynamic_cast<NetJob*>(m_jobPtr.get())->getFailedActions().at(0);
     if (failed_action->replyStatusCode() == -1) {
         // Network error
         QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load modpacks."));

@@ -271,7 +271,7 @@ bool LaunchTask::parseXmlLogs(QString const& line, MessageLevel level)
 
 void LaunchTask::onLogLines(const QStringList& lines, MessageLevel defaultLevel)
 {
-    for (auto& line : lines) {
+    for (const auto& line : lines) {
         onLogLine(line, defaultLevel);
     }
 }

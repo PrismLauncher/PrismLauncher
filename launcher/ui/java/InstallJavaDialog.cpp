@@ -113,7 +113,7 @@ class InstallJavaPage : public QWidget, public BasePage {
 
     void setParentContainer(BasePageContainer* container) override
     {
-        auto dialog = dynamic_cast<QDialog*>(dynamic_cast<PageContainer*>(container)->parent());
+        auto* dialog = dynamic_cast<QDialog*>(dynamic_cast<PageContainer*>(container)->parent());
         connect(javaVersionSelect->view(), &QAbstractItemView::doubleClicked, dialog, &QDialog::accept);
     }
 
@@ -164,7 +164,7 @@ class InstallJavaPage : public QWidget, public BasePage {
 
 static InstallJavaPage* pageCast(BasePage* page)
 {
-    auto result = dynamic_cast<InstallJavaPage*>(page);
+    auto* result = dynamic_cast<InstallJavaPage*>(page);
     Q_ASSERT(result != nullptr);
     return result;
 }
@@ -185,7 +185,7 @@ QStringList getRecommendedJavaVersionsFromVersionList(Meta::VersionList::Ptr lis
 InstallDialog::InstallDialog(const QString& uid, BaseInstance* instance, QWidget* parent)
     : QDialog(parent), container(new PageContainer(this, QString(), this)), buttons(new QDialogButtonBox(this))
 {
-    auto layout = new QVBoxLayout(this);
+    auto* layout = new QVBoxLayout(this);
     // small margins look ugly on macOS on modal windows
     #ifndef Q_OS_MACOS
     layout->setContentsMargins(0, 0, 0, 0);
@@ -193,19 +193,19 @@ InstallDialog::InstallDialog(const QString& uid, BaseInstance* instance, QWidget
     container->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     layout->addWidget(container);
 
-    auto buttonLayout = new QHBoxLayout(this);
+    auto* buttonLayout = new QHBoxLayout(this);
     // small margins look ugly on macOS on modal windows
     #ifndef Q_OS_MACOS
     buttonLayout->setContentsMargins(0, 0, 6, 6);
     #endif
 
-    auto refreshLayout = new QHBoxLayout(this);
+    auto* refreshLayout = new QHBoxLayout(this);
 
-    auto refreshButton = new QPushButton(tr("&Refresh"), this);
+    auto* refreshButton = new QPushButton(tr("&Refresh"), this);
     connect(refreshButton, &QPushButton::clicked, this, [this] { pageCast(container->selectedPage())->loadList(); });
     refreshLayout->addWidget(refreshButton);
 
-    auto recommendedCheckBox = new QCheckBox("Recommended", this);
+    auto* recommendedCheckBox = new QCheckBox("Recommended", this);
     recommendedCheckBox->setCheckState(Qt::CheckState::Checked);
     connect(recommendedCheckBox, &QCheckBox::stateChanged, this, [this](int state) {
         for (BasePage* page : container->getPages()) {
@@ -231,7 +231,7 @@ InstallDialog::InstallDialog(const QString& uid, BaseInstance* instance, QWidget
     resize(840, 480);
 
     QStringList recommendedJavas;
-    if (auto mcInst = dynamic_cast<MinecraftInstance*>(instance); mcInst) {
+    if (auto* mcInst = dynamic_cast<MinecraftInstance*>(instance); mcInst) {
         auto mc = mcInst->getPackProfile()->getComponent("net.minecraft");
         if (mc) {
             auto file = mc->getVersionFile();  // no need for load as it should already be loaded
@@ -267,7 +267,7 @@ InstallDialog::InstallDialog(const QString& uid, BaseInstance* instance, QWidget
         if (page->id() == uid)
             container->selectPage(page->id());
 
-        auto cast = pageCast(page);
+        auto* cast = pageCast(page);
         cast->setRecommend(true);
         connect(cast, &InstallJavaPage::selectionChanged, this, [this, cast] { validate(cast); });
         if (!recommendedJavas.isEmpty()) {

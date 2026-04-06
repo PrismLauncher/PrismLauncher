@@ -325,7 +325,7 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
     mod.version_number = table["x-prismlauncher-version-number"].value_or("");
 
     {  // [download] info
-        auto download_table = table["download"].as_table();
+        auto* download_table = table["download"].as_table();
         if (!download_table) {
             qCritical() << QString("No [download] section found on mod metadata!");
             return {};
@@ -361,10 +361,10 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
         }
     }
     {  // dependencies
-        auto deps = table["x-prismlauncher-dependencies"].as_array();
+        auto* deps = table["x-prismlauncher-dependencies"].as_array();
         if (deps) {
             for (auto&& depNode : *deps) {
-                auto dep = depNode.as_table();
+                auto* dep = depNode.as_table();
                 if (dep) {
                     ModPlatform::Dependency d;
                     d.addonId = stringEntry(*dep, "addonId");

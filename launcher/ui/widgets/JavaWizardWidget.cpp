@@ -189,7 +189,7 @@ void JavaWizardWidget::initialize()
     m_versionWidget->initialize(APPLICATION->javalist());
     m_versionWidget->selectSearch();
     m_versionWidget->setResizeOn(2);
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
     // Memory
     observedMinMemory = s->get("MinMemAlloc").toInt();
     observedMaxMemory = s->get("MaxMemAlloc").toInt();
@@ -357,7 +357,7 @@ void JavaWizardWidget::on_javaBrowseBtn_clicked()
 
 void JavaWizardWidget::javaDownloadBtn_clicked()
 {
-    auto jdialog = new Java::InstallDialog({}, nullptr, this);
+    auto* jdialog = new Java::InstallDialog({}, nullptr, this);
     jdialog->exec();
 }
 

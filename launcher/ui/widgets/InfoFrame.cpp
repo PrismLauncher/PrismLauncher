@@ -179,7 +179,7 @@ QString InfoFrame::renderColorCodes(QString input)
     QString html("<html>");
     QList<QString> tags{};
 
-    auto it = input.constBegin();
+    const auto* it = input.constBegin();
     while (it != input.constEnd()) {
         // is current char § and is there a following char
         if (*it == u'§' && (it + 1) != input.constEnd()) {

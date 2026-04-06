@@ -10,7 +10,7 @@ ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] QString con
 {
     ui->setupUi(this);
 
-    auto back_button = ui->buttonBox->button(QDialogButtonBox::Cancel);
+    auto* back_button = ui->buttonBox->button(QDialogButtonBox::Cancel);
     back_button->setText(tr("Back"));
 
     ui->toggleDepsButton->hide();
@@ -25,9 +25,9 @@ ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] QString con
     ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
 
     // Overwrite Ctrl+C functionality to exclude the label when copying text from tree
-    auto shortcut = new QShortcut(QKeySequence::Copy, ui->modTreeWidget);
+    auto* shortcut = new QShortcut(QKeySequence::Copy, ui->modTreeWidget);
     connect(shortcut, &QShortcut::activated, [this]() {
-        auto currentItem = this->ui->modTreeWidget->currentItem();
+        auto* currentItem = this->ui->modTreeWidget->currentItem();
         if (!currentItem)
             return;
         auto currentColumn = this->ui->modTreeWidget->currentColumn();
@@ -57,30 +57,30 @@ auto ReviewMessageBox::create(QWidget* parent, QString&& title, QString&& icon) 
 
 void ReviewMessageBox::appendResource(ResourceInformation&& info)
 {
-    auto itemTop = new QTreeWidgetItem(ui->modTreeWidget);
+    auto* itemTop = new QTreeWidgetItem(ui->modTreeWidget);
     itemTop->setCheckState(0, info.enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     itemTop->setText(0, info.name);
     if (!info.enabled) {
         itemTop->setToolTip(0, tr("Mod was disabled as it may be already installed."));
     }
 
-    auto filenameItem = new QTreeWidgetItem(itemTop);
+    auto* filenameItem = new QTreeWidgetItem(itemTop);
     filenameItem->setText(0, tr("Filename: %1").arg(info.filename));
     filenameItem->setData(0, Qt::UserRole, info.filename);
 
-    auto providerItem = new QTreeWidgetItem(itemTop);
+    auto* providerItem = new QTreeWidgetItem(itemTop);
     providerItem->setText(0, tr("Provider: %1").arg(info.provider));
     providerItem->setData(0, Qt::UserRole, info.provider);
 
     if (!info.required_by.isEmpty()) {
-        auto requiredByItem = new QTreeWidgetItem(itemTop);
+        auto* requiredByItem = new QTreeWidgetItem(itemTop);
         if (info.required_by.length() == 1) {
             requiredByItem->setText(0, tr("Required by: %1").arg(info.required_by.back()));
             requiredByItem->setData(0, Qt::UserRole, info.required_by.back());
         } else {
             requiredByItem->setText(0, tr("Required by:"));
             for (auto req : info.required_by) {
-                auto reqItem = new QTreeWidgetItem(requiredByItem);
+                auto* reqItem = new QTreeWidgetItem(requiredByItem);
                 reqItem->setText(0, req);
             }
         }
@@ -89,7 +89,7 @@ void ReviewMessageBox::appendResource(ResourceInformation&& info)
         m_deps << itemTop;
     }
 
-    auto versionTypeItem = new QTreeWidgetItem(itemTop);
+    auto* versionTypeItem = new QTreeWidgetItem(itemTop);
     versionTypeItem->setText(0, tr("Version Type: %1").arg(info.version_type));
     versionTypeItem->setData(0, Qt::UserRole, info.version_type);
 
@@ -124,6 +124,6 @@ void ReviewMessageBox::on_toggleDepsButton_clicked()
 {
     m_deps_checked = !m_deps_checked;
     auto state = m_deps_checked ? Qt::Checked : Qt::Unchecked;
-    for (auto dep : m_deps)
+    for (auto* dep : m_deps)
         dep->setCheckState(0, state);
 };

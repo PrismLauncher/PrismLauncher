@@ -42,21 +42,21 @@
 
 void ScanModFolders::executeTask()
 {
-    auto m_inst = m_parent->instance();
+    auto* m_inst = m_parent->instance();
 
-    auto loaders = m_inst->loaderModList();
+    auto* loaders = m_inst->loaderModList();
     connect(loaders, &ModFolderModel::updateFinished, this, &ScanModFolders::modsDone);
     if (!loaders->update()) {
         m_modsDone = true;
     }
 
-    auto cores = m_inst->coreModList();
+    auto* cores = m_inst->coreModList();
     connect(cores, &ModFolderModel::updateFinished, this, &ScanModFolders::coreModsDone);
     if (!cores->update()) {
         m_coreModsDone = true;
     }
 
-    auto nils = m_inst->nilModList();
+    auto* nils = m_inst->nilModList();
     connect(nils, &ModFolderModel::updateFinished, this, &ScanModFolders::nilModsDone);
     if (!nils->update()) {
         m_nilModsDone = true;

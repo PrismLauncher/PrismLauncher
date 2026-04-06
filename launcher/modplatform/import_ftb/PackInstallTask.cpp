@@ -63,7 +63,7 @@ void PackInstallTask::copySettings()
             instance.settings()->set("JvmArgs", m_pack.jvmArgs.toString());
         }
 
-        auto components = instance.getPackProfile();
+        auto* components = instance.getPackProfile();
         components->buildingFromScratch();
         components->setComponentVersion("net.minecraft", m_pack.mcVersion, true);
 

@@ -78,7 +78,7 @@ QIcon MMCIcon::icon() const
 {
     if (m_current_type == IconType::ToBeDeleted)
         return QIcon();
-    auto& icon = m_images[m_current_type].icon;
+    const auto& icon = m_images[m_current_type].icon;
     if (!icon.isNull())
         return icon;
     // FIXME: inject this.

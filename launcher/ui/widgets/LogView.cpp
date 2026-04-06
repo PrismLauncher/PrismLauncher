@@ -102,7 +102,7 @@ void LogView::modelDestroyed(QObject* model)
 
 void LogView::repopulate()
 {
-    auto doc = document();
+    auto* doc = document();
     doc->clear();
     if (!m_model) {
         return;

@@ -14,7 +14,7 @@ inline Filter inverse(Filter filter)
 inline Filter any(QList<Filter> filters)
 {
     return [filters = std::move(filters)](const QString& src) {
-        for (auto& filter : filters)
+        for (const auto& filter : filters)
             if (filter(src))
                 return true;
 

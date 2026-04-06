@@ -55,7 +55,7 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
 
         auto iter = m_logoMap.find(pack.safeName);
         if (iter != m_logoMap.end()) {
-            auto& logo = *iter;
+            const auto& logo = *iter;
             if (!logo.result.isNull()) {
                 return logo.result;
             }

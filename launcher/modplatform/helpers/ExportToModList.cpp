@@ -24,7 +24,7 @@ namespace ExportToModList {
 QString toHTML(QList<Mod*> mods, OptionalData extraData)
 {
     QStringList lines;
-    for (auto mod : mods) {
+    for (auto* mod : mods) {
         auto meta = mod->metadata();
         auto modName = mod->name().toHtmlEscaped();
         if (extraData & Url) {
@@ -61,7 +61,7 @@ QString toMarkdown(QList<Mod*> mods, OptionalData extraData)
 {
     QStringList lines;
 
-    for (auto mod : mods) {
+    for (auto* mod : mods) {
         auto meta = mod->metadata();
         auto modName = toMarkdownEscaped(mod->name());
         if (extraData & Url) {
@@ -89,7 +89,7 @@ QString toMarkdown(QList<Mod*> mods, OptionalData extraData)
 QString toPlainTXT(QList<Mod*> mods, OptionalData extraData)
 {
     QStringList lines;
-    for (auto mod : mods) {
+    for (auto* mod : mods) {
         auto meta = mod->metadata();
         auto modName = mod->name();
 
@@ -118,7 +118,7 @@ QString toPlainTXT(QList<Mod*> mods, OptionalData extraData)
 QString toJSON(QList<Mod*> mods, OptionalData extraData)
 {
     QJsonArray lines;
-    for (auto mod : mods) {
+    for (auto* mod : mods) {
         auto meta = mod->metadata();
         auto modName = mod->name();
         QJsonObject line;
@@ -149,7 +149,7 @@ QString toJSON(QList<Mod*> mods, OptionalData extraData)
 QString toCSV(QList<Mod*> mods, OptionalData extraData)
 {
     QStringList lines;
-    for (auto mod : mods) {
+    for (auto* mod : mods) {
         QStringList data;
         auto meta = mod->metadata();
         auto modName = mod->name();
@@ -200,7 +200,7 @@ QString exportToModList(QList<Mod*> mods, Formats format, OptionalData extraData
 QString exportToModList(QList<Mod*> mods, QString lineTemplate)
 {
     QStringList lines;
-    for (auto mod : mods) {
+    for (auto* mod : mods) {
         auto meta = mod->metadata();
         auto modName = mod->name();
         auto modID = mod->mod_id();

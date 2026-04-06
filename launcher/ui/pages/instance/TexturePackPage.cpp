@@ -60,9 +60,9 @@ TexturePackPage::TexturePackPage(MinecraftInstance* instance, TexturePackFolderM
     connect(ui->actionUpdateItem, &QAction::triggered, this, &TexturePackPage::updateTexturePacks);
     ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
 
-    auto updateMenu = new QMenu(this);
+    auto* updateMenu = new QMenu(this);
 
-    auto update = updateMenu->addAction(ui->actionUpdateItem->text());
+    auto* update = updateMenu->addAction(ui->actionUpdateItem->text());
     connect(update, &QAction::triggered, this, &TexturePackPage::updateTexturePacks);
 
     updateMenu->addAction(ui->actionResetItemMetadata);
@@ -99,7 +99,7 @@ void TexturePackPage::downloadTexturePacks()
 void TexturePackPage::downloadDialogFinished(int result)
 {
     if (result) {
-        auto tasks = new ConcurrentTask("Download Texture Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        auto* tasks = new ConcurrentTask("Download Texture Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
@@ -117,7 +117,7 @@ void TexturePackPage::downloadDialogFinished(int result)
         });
 
         if (m_downloadDialog) {
-            for (auto& task : m_downloadDialog->getTasks()) {
+            for (const auto& task : m_downloadDialog->getTasks()) {
                 tasks->addTask(task);
             }
         } else {
@@ -183,7 +183,7 @@ void TexturePackPage::updateTexturePacks()
     }
 
     if (update_dialog.exec()) {
-        auto tasks = new ConcurrentTask("Download Texture Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        auto* tasks = new ConcurrentTask("Download Texture Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();

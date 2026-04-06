@@ -44,7 +44,7 @@
 LanguagePage::LanguagePage(QWidget* parent) : QWidget(parent)
 {
     setObjectName(QStringLiteral("languagePage"));
-    auto layout = new QVBoxLayout(this);
+    auto* layout = new QVBoxLayout(this);
     mainWidget = new LanguageSelectionWidget(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(mainWidget);
@@ -61,7 +61,7 @@ bool LanguagePage::apply()
 
 void LanguagePage::applySettings()
 {
-    auto settings = APPLICATION->settings();
+    auto* settings = APPLICATION->settings();
     QString key = mainWidget->getSelectedLanguageKey();
     settings->set("Language", key);
 }

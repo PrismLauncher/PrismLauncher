@@ -228,7 +228,7 @@ bool FileIgnoreProxy::shouldExpand(QModelIndex index)
         return false;
     }
     auto blockedPath = relPath(fsm->filePath(sourceIndex));
-    auto found = m_blocked.find(blockedPath);
+    const auto* found = m_blocked.find(blockedPath);
     if (found) {
         return !found->leaf();
     }

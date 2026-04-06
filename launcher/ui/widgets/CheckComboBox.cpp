@@ -80,7 +80,7 @@ CheckComboBox::CheckComboBox(QWidget* parent) : QComboBox(parent), m_separator("
 
 void CheckComboBox::setSourceModel(QAbstractItemModel* new_model)
 {
-    auto proxy = new CheckComboModel(this);
+    auto* proxy = new CheckComboModel(this);
     proxy->setSourceModel(new_model);
     model()->disconnect(this);
     QComboBox::setModel(proxy);
@@ -137,7 +137,7 @@ bool CheckComboBox::eventFilter(QObject* receiver, QEvent* event)
             break;
         }
         case QEvent::MouseButtonPress: {
-            auto ev = static_cast<QMouseEvent*>(event);
+            auto* ev = static_cast<QMouseEvent*>(event);
             m_containerMousePress = ev && view()->indexAt(ev->pos()).isValid() && view()->rect().contains(ev->pos());
             break;
         }

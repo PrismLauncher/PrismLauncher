@@ -61,7 +61,7 @@ void Mod::setDetails(const ModDetails& details)
 
 int Mod::compare(const Resource& other, SortType type) const
 {
-    auto cast_other = dynamic_cast<Mod const*>(&other);
+    const auto* cast_other = dynamic_cast<const Mod*>(&other);
     if (!cast_other)
         return Resource::compare(other, type);
 

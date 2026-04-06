@@ -168,20 +168,20 @@ QList<Net::NetRequest::Ptr> Library::getDownloads(const RuntimeContext& runtimeC
                     nat32Classifier.replace("${arch}", "32");
                     auto nat64Classifier = nativeClassifier;
                     nat64Classifier.replace("${arch}", "64");
-                    auto nat32info = m_mojangDownloads->getDownloadInfo(nat32Classifier);
+                    auto* nat32info = m_mojangDownloads->getDownloadInfo(nat32Classifier);
                     if (nat32info) {
                         auto cooked_storage = raw_storage;
                         cooked_storage.replace("${arch}", "32");
                         add_download(cooked_storage, nat32info->url, nat32info->sha1);
                     }
-                    auto nat64info = m_mojangDownloads->getDownloadInfo(nat64Classifier);
+                    auto* nat64info = m_mojangDownloads->getDownloadInfo(nat64Classifier);
                     if (nat64info) {
                         auto cooked_storage = raw_storage;
                         cooked_storage.replace("${arch}", "64");
                         add_download(cooked_storage, nat64info->url, nat64info->sha1);
                     }
                 } else {
-                    auto info = m_mojangDownloads->getDownloadInfo(nativeClassifier);
+                    auto* info = m_mojangDownloads->getDownloadInfo(nativeClassifier);
                     if (info) {
                         add_download(raw_storage, info->url, info->sha1);
                     }

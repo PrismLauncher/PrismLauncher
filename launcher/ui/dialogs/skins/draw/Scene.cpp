@@ -82,12 +82,12 @@ Scene::Scene(const QImage& skin, bool slim, const QImage& cape) :  m_slim(slim),
     m_cape->rotate(10.8F, QVector3D(1, 0, 0));
     m_cape->rotate(180, QVector3D(0, 1, 0));
 
-    auto leftWing =
+    auto* leftWing =
         new opengl::BoxGeometry(QVector3D(12, 22, 4), QVector3D(0, -13, -2), QPoint(22, 0), QVector3D(10, 20, 2), QSize(64, 32));
     leftWing->rotate(15, QVector3D(1, 0, 0));
     leftWing->rotate(15, QVector3D(0, 0, 1));
     leftWing->rotate(1, QVector3D(1, 0, 0));
-    auto rightWing =
+    auto* rightWing =
         new opengl::BoxGeometry(QVector3D(12, 22, 4), QVector3D(0, -13, -2), QPoint(22, 0), QVector3D(10, 20, 2), QSize(64, 32));
     rightWing->scale(QVector3D(-1, 1, 1));
     rightWing->rotate(15, QVector3D(1, 0, 0));
@@ -108,7 +108,7 @@ Scene::~Scene()
 {
     for (auto array :
          { m_staticComponents, m_normalArms, m_slimArms, m_elytra, m_staticComponentsOverlay, m_normalArmsOverlay, m_slimArmsOverlay }) {
-        for (auto g : array) {
+        for (auto* g : array) {
             delete g;
         }
     }
@@ -127,7 +127,7 @@ void Scene::draw(QOpenGLShaderProgram* program)
     program->setUniformValue("texture", 0);
     for (auto toDraw : { m_staticComponents, m_slim ? m_slimArms : m_normalArms, m_staticComponentsOverlay,
                          m_slim ? m_slimArmsOverlay : m_normalArmsOverlay }) {
-        for (auto g : toDraw) {
+        for (auto* g : toDraw) {
             g->draw(program);
         }
     }
@@ -138,7 +138,7 @@ void Scene::draw(QOpenGLShaderProgram* program)
         if (!m_elytraVisible) {
             m_cape->draw(program);
         } else {
-            for (auto e : m_elytra) {
+            for (auto* e : m_elytra) {
                 e->draw(program);
             }
         }

@@ -97,7 +97,7 @@ const MinecraftAccountPtr AccountList::at(int i) const
 QStringList AccountList::profileNames() const
 {
     QStringList out;
-    for (auto& account : m_accounts) {
+    for (const auto& account : m_accounts) {
         auto profileName = account->profileName();
         if (profileName.isEmpty()) {
             continue;

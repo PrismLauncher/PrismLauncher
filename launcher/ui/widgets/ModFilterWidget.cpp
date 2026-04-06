@@ -128,7 +128,7 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended)
         ui->versions->setDefaultText(tr("All Versions"));
         ui->version->hide();
     } else {
-        auto allVersions = new AllVersionProxyModel(this);
+        auto* allVersions = new AllVersionProxyModel(this);
         allVersions->setSourceModel(proxy);
         proxy = allVersions;
         ui->version->setModel(proxy);
@@ -353,13 +353,13 @@ void ModFilterWidget::setCategories(const QList<ModPlatform::Category>& categori
     m_categories = categories;
 
     delete ui->categoryGroup->layout();
-    auto layout = new QVBoxLayout(ui->categoryGroup);
+    auto* layout = new QVBoxLayout(ui->categoryGroup);
 
     for (const auto& category : categories) {
         auto name = category.name;
         name.replace("-", " ");
         name.replace("&", "&&");
-        auto checkbox = new QCheckBox(name);
+        auto* checkbox = new QCheckBox(name);
         auto font = checkbox->font();
         font.setCapitalization(QFont::Capitalize);
         checkbox->setFont(font);

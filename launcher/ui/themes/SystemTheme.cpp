@@ -53,7 +53,7 @@ SystemTheme::SystemTheme(const QString& styleName, const QPalette& defaultPalett
     if (S_NATIVE_STYLES.contains(m_themeName)) {
         m_colorPalette = defaultPalette;
     } else {
-        auto style = QStyleFactory::create(styleName);
+        auto* style = QStyleFactory::create(styleName);
         m_colorPalette = style != nullptr ? style->standardPalette() : defaultPalette;
         delete style;
     }

@@ -21,8 +21,8 @@
 
 void ReconstructAssets::executeTask()
 {
-    auto instance = m_parent->instance();
-    auto components = instance->getPackProfile();
+    auto* instance = m_parent->instance();
+    auto* components = instance->getPackProfile();
     auto profile = components->getProfile();
     auto assets = profile->getMinecraftAssets();
 

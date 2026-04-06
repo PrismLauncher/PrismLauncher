@@ -163,7 +163,7 @@ class FilterModel : public QIdentityProxyModel {
     }
     virtual QVariant data(const QModelIndex& proxyIndex, int role = Qt::DisplayRole) const
     {
-        auto model = sourceModel();
+        auto* model = sourceModel();
         if (!model)
             return QVariant();
         if (role == Qt::DisplayRole || role == Qt::EditRole) {
@@ -191,7 +191,7 @@ class FilterModel : public QIdentityProxyModel {
     }
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole)
     {
-        auto model = sourceModel();
+        auto* model = sourceModel();
         if (!model)
             return false;
         if (role != Qt::EditRole)
@@ -208,7 +208,7 @@ class FilterModel : public QIdentityProxyModel {
    private:
     void thumbnailImage(QString path)
     {
-        auto runnable = new ThumbnailRunnable(path, m_thumbnailCache);
+        auto* runnable = new ThumbnailRunnable(path, m_thumbnailCache);
         connect(&runnable->m_resultEmitter, &ThumbnailingResult::resultsReady, this, &FilterModel::thumbnailReady);
         connect(&runnable->m_resultEmitter, &ThumbnailingResult::resultsFailed, this, &FilterModel::thumbnailFailed);
         m_thumbnailingPool.start(runnable);
@@ -241,8 +241,8 @@ class CenteredEditingDelegate : public QStyledItemDelegate {
     virtual ~CenteredEditingDelegate() {}
     virtual QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
     {
-        auto widget = QStyledItemDelegate::createEditor(parent, option, index);
-        auto foo = dynamic_cast<QLineEdit*>(widget);
+        auto* widget = QStyledItemDelegate::createEditor(parent, option, index);
+        auto* foo = dynamic_cast<QLineEdit*>(widget);
         if (foo) {
             foo->setAlignment(Qt::AlignHCenter);
             foo->setFrame(true);
@@ -326,7 +326,7 @@ ScreenshotsPage::~ScreenshotsPage()
 
 void ScreenshotsPage::ShowContextMenu(const QPoint& pos)
 {
-    auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
+    auto* menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
 
     if (ui->listView->selectionModel()->selectedRows().size() > 1) {
         menu->removeAction(ui->actionCopy_Image);

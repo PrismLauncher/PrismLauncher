@@ -269,7 +269,7 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
 
 void ThemeManager::applyCurrentlySelectedTheme(bool initial)
 {
-    auto settings = APPLICATION->settings();
+    auto* settings = APPLICATION->settings();
     setIconTheme(settings->get("IconTheme").toString());
     themeDebugLog() << "<> Icon theme set.";
     auto applicationTheme = settings->get("ApplicationTheme").toString();

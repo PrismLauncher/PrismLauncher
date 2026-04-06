@@ -352,7 +352,7 @@ void IconList::installIcon(const QString& file, const QString& name)
 
 bool IconList::iconFileExists(const QString& key) const
 {
-    auto iconEntry = icon(key);
+    const auto* iconEntry = icon(key);
     return iconEntry && iconEntry->has(IconType::FileBased);
 }
 

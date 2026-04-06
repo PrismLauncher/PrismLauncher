@@ -78,7 +78,7 @@ QVariant VersionList::data(const QModelIndex& index, int role) const
         case ParentVersionRole: {
             // FIXME: HACK: this should be generic and be replaced by something else. Anything that is a hard 'equals' dep is a 'parent
             // uid'.
-            auto& reqs = version->requiredSet();
+            const auto& reqs = version->requiredSet();
             auto iter = std::find_if(reqs.begin(), reqs.end(), [](const Require& req) { return req.uid == "net.minecraft"; });
             if (iter != reqs.end()) {
                 return (*iter).equalsVersion;
@@ -290,7 +290,7 @@ void VersionList::waitToLoad()
 Version::Ptr VersionList::getRecommendedForParent(const QString& uid, const QString& version)
 {
     auto foundExplicit = std::find_if(m_versions.begin(), m_versions.end(), [uid, version](Version::Ptr ver) -> bool {
-        auto& reqs = ver->requiredSet();
+        const auto& reqs = ver->requiredSet();
         auto parentReq = std::find_if(reqs.begin(), reqs.end(), [uid, version](const Require& req) -> bool {
             return req.uid == uid && req.equalsVersion == version;
         });
@@ -306,7 +306,7 @@ Version::Ptr VersionList::getLatestForParent(const QString& uid, const QString& 
 {
     Version::Ptr latestCompat = nullptr;
     for (auto ver : m_versions) {
-        auto& reqs = ver->requiredSet();
+        const auto& reqs = ver->requiredSet();
         auto parentReq = std::find_if(reqs.begin(), reqs.end(), [uid, version](const Require& req) -> bool {
             return req.uid == uid && req.equalsVersion == version;
         });

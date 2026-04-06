@@ -68,8 +68,8 @@ QString askToUpdateInstanceDirName(BaseInstance* instance, const QString& oldNam
 
     // Ask if we should rename
     if (renamingMode == "AskEverytime") {
-        auto checkBox = new QCheckBox(QObject::tr("&Remember my choice"), parent);
-        auto dialog =
+        auto* checkBox = new QCheckBox(QObject::tr("&Remember my choice"), parent);
+        auto* dialog =
             CustomMessageBox::selectable(parent, QObject::tr("Rename instance folder"),
                                          QObject::tr("Would you also like to rename the instance folder?\n\n"
                                                      "Old name: %1\n"

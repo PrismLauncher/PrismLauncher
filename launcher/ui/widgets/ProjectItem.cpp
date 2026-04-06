@@ -158,7 +158,7 @@ bool ProjectItemDelegate::editorEvent(QEvent* event,
           event->type() != QEvent::MouseButtonDblClick)
         return false;
 
-    auto mouseEvent = (QMouseEvent*)event;
+    auto* mouseEvent = (QMouseEvent*)event;
 
     if (mouseEvent->button() != Qt::LeftButton)
         return false;

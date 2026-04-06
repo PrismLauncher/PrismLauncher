@@ -89,7 +89,7 @@ void VisualGroup::update()
 QPair<int, int> VisualGroup::positionOf(const QModelIndex& index) const
 {
     int y = 0;
-    for (auto& row : rows) {
+    for (const auto& row : rows) {
         for (auto x = 0; x < row.items.size(); x++) {
             if (row.items[x] == index) {
                 return qMakePair(x, y);

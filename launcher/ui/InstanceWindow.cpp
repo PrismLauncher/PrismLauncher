@@ -73,16 +73,16 @@ InstanceWindow::InstanceWindow(BaseInstance* instance, QWidget* parent) : QMainW
 
     // Add custom buttons to the page container layout.
     {
-        auto horizontalLayout = new QHBoxLayout(this);
+        auto* horizontalLayout = new QHBoxLayout(this);
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
         horizontalLayout->setContentsMargins(0, 0, 6, 6);
 
-        auto btnHelp = new QPushButton(this);
+        auto* btnHelp = new QPushButton(this);
         btnHelp->setText(tr("Help"));
         horizontalLayout->addWidget(btnHelp);
         connect(btnHelp, &QPushButton::clicked, m_container, &PageContainer::help);
 
-        auto spacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+        auto* spacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
         horizontalLayout->addSpacerItem(spacer);
 
         m_launchButton = new QToolButton(this);
@@ -123,7 +123,7 @@ InstanceWindow::InstanceWindow(BaseInstance* instance, QWidget* parent) : QMainW
 
     // set up instance and launch process recognition
     {
-        auto launchTask = m_instance->getLaunchTask();
+        auto* launchTask = m_instance->getLaunchTask();
         instanceLaunchTaskChanged(launchTask);
         connect(m_instance, &BaseInstance::launchTaskChanged, this, &InstanceWindow::instanceLaunchTaskChanged);
         connect(m_instance, &BaseInstance::runningStatusChanged, this, &InstanceWindow::runningStateChanged);

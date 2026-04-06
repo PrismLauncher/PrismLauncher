@@ -113,7 +113,7 @@ void AtlPage::suggestCurrent()
         return;
     }
 
-    auto uiSupport = new AtlUserInteractionSupportImpl(this);
+    auto* uiSupport = new AtlUserInteractionSupportImpl(this);
     dialog->setSuggestedPack(selected.name, selectedVersion, new ATLauncher::PackInstallTask(uiSupport, selected.name, selectedVersion));
 
     auto editedLogoName = "atl_" + selected.safeName;

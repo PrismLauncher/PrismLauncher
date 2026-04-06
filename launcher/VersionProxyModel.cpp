@@ -293,7 +293,7 @@ void VersionProxyModel::sourceDataChanged(const QModelIndex& source_top_left, co
 
 void VersionProxyModel::setSourceModel(QAbstractItemModel* replacingRaw)
 {
-    auto replacing = dynamic_cast<BaseVersionList*>(replacingRaw);
+    auto* replacing = dynamic_cast<BaseVersionList*>(replacingRaw);
 
     m_columns.clear();
     if (!replacing) {

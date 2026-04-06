@@ -21,7 +21,7 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::matchFingerprints(const QList<uint>&
 
     QJsonObject body_obj;
     QJsonArray fingerprints_arr;
-    for (auto& fp : fingerprints) {
+    for (const auto& fp : fingerprints) {
         fingerprints_arr.append(QString("%1").arg(fp));
     }
 
@@ -130,7 +130,7 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds)
 
     QJsonObject body_obj;
     QJsonArray files_arr;
-    for (auto& fileId : fileIds) {
+    for (const auto& fileId : fileIds) {
         files_arr.append(fileId);
     }
 

@@ -1144,7 +1144,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                               "for details.")
                                .arg(BuildConfig.printableVersionString())
                                .arg(update_log_path);
-            auto msgBox = new QMessageBox(QMessageBox::Information, tr("Update Succeeded"), infoMsg, QMessageBox::Ok);
+            auto* msgBox = new QMessageBox(QMessageBox::Information, tr("Update Succeeded"), infoMsg, QMessageBox::Ok);
             msgBox->setDefaultButton(QMessageBox::Ok);
             msgBox->setDetailedText(FS::read(update_log_path));
             msgBox->setAttribute(Qt::WA_DeleteOnClose);
@@ -1182,7 +1182,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                    "You may solve this issue by remounting /tmp as 'exec' or setting "
                    "the java.io.tmpdir JVM argument to a writeable directory in a "
                    "filesystem where the 'exec' flag is set (e.g., /home/user/.local/tmp)\n");
-            auto msgBox = new QMessageBox(QMessageBox::Information, tr("Incompatible system configuration"), infoMsg, QMessageBox::Ok);
+            auto* msgBox = new QMessageBox(QMessageBox::Information, tr("Incompatible system configuration"), infoMsg, QMessageBox::Ok);
             msgBox->setDefaultButton(QMessageBox::Ok);
             msgBox->setAttribute(Qt::WA_DeleteOnClose);
             msgBox->setMinimumWidth(460);
@@ -1315,7 +1315,7 @@ bool Application::event(QEvent* event)
         if (!m_mainWindow) {
             showMainWindow(false);
         }
-        auto ev = static_cast<QFileOpenEvent*>(event);
+        auto* ev = static_cast<QFileOpenEvent*>(event);
         m_mainWindow->processURLs({ ev->url() });
     }
 
@@ -1332,7 +1332,7 @@ void Application::performMainStartupAction()
 {
     m_status = Application::Initialized;
     if (!m_instanceIdToLaunch.isEmpty()) {
-        auto inst = instances()->getInstanceById(m_instanceIdToLaunch);
+        auto* inst = instances()->getInstanceById(m_instanceIdToLaunch);
         if (inst) {
             MinecraftTarget::Ptr targetToJoin = nullptr;
             MinecraftAccountPtr accountToUse = nullptr;
@@ -1363,7 +1363,7 @@ void Application::performMainStartupAction()
         }
     }
     if (!m_instanceIdToShowWindowOf.isEmpty()) {
-        auto inst = instances()->getInstanceById(m_instanceIdToShowWindowOf);
+        auto* inst = instances()->getInstanceById(m_instanceIdToShowWindowOf);
         if (inst) {
             qDebug() << "<> Showing window of instance " << m_instanceIdToShowWindowOf;
             showInstanceWindow(inst);
@@ -1404,7 +1404,7 @@ void Application::performMainStartupAction()
 void Application::showFatalErrorMessage(const QString& title, const QString& content)
 {
     m_status = Application::Failed;
-    auto dialog = CustomMessageBox::selectable(nullptr, title, content, QMessageBox::Critical);
+    auto* dialog = CustomMessageBox::selectable(nullptr, title, content, QMessageBox::Critical);
     dialog->exec();
 }
 
@@ -1527,7 +1527,7 @@ bool Application::launch(BaseInstance* instance,
     } else if (instance->canLaunch()) {
         QMutexLocker locker(&m_instanceExtrasMutex);
         auto& extras = m_instanceExtras[instance->id()];
-        auto window = extras.window;
+        auto* window = extras.window;
         if (window) {
             if (!window->saveAll()) {
                 return false;
@@ -1620,7 +1620,7 @@ void Application::updateIsRunning(bool running)
 
 void Application::controllerFinished()
 {
-    auto controller = qobject_cast<LaunchController*>(sender());
+    auto* controller = qobject_cast<LaunchController*>(sender());
     if (!controller)
         return;
     auto id = controller->id();
@@ -1739,7 +1739,7 @@ InstanceWindow* Application::showInstanceWindow(BaseInstance* instance, QString 
 void Application::on_windowClose()
 {
     m_openWindows--;
-    auto instWindow = qobject_cast<InstanceWindow*>(sender());
+    auto* instWindow = qobject_cast<InstanceWindow*>(sender());
     if (instWindow) {
         QMutexLocker locker(&m_instanceExtrasMutex);
         auto& extras = m_instanceExtras[instWindow->instanceId()];
@@ -1748,11 +1748,11 @@ void Application::on_windowClose()
             extras.controller->setParentWidget(m_mainWindow);
         }
     }
-    auto mainWindow = qobject_cast<MainWindow*>(sender());
+    auto* mainWindow = qobject_cast<MainWindow*>(sender());
     if (mainWindow) {
         m_mainWindow = nullptr;
     }
-    auto logWindow = qobject_cast<ViewLogWindow*>(sender());
+    auto* logWindow = qobject_cast<ViewLogWindow*>(sender());
     if (logWindow) {
         m_viewLogWindow = nullptr;
     }

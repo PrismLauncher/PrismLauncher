@@ -25,7 +25,7 @@ class TexturePackResourcePage : public ResourcePackResourcePage {
     static T* create(TexturePackDownloadDialog* dialog, BaseInstance& instance)
     {
         auto page = new T(dialog, instance);
-        auto model = static_cast<TexturePackResourceModel*>(page->getModel());
+        auto* model = static_cast<TexturePackResourceModel*>(page->getModel());
 
         connect(model, &ResourceModel::versionListUpdated, page, &ResourcePage::versionListUpdated);
         connect(model, &ResourceModel::projectInfoUpdated, page, &ResourcePage::updateUi);

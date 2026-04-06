@@ -75,7 +75,7 @@ void Technic::SolderPackInstallTask::executeTask()
     auto [action, response] = Net::ApiDownload::makeByteArray(sourceUrl);
     m_filesNetJob->addNetAction(action);
 
-    auto job = m_filesNetJob.get();
+    auto* job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, [this, response] { fileListSucceeded(response); });
     connect(job, &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
     connect(job, &NetJob::aborted, this, &Technic::SolderPackInstallTask::downloadAborted);

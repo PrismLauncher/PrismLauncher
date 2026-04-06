@@ -22,7 +22,7 @@
 
 unique_qobject_ptr<SubTaskProgressBar> SubTaskProgressBar::create(QWidget* parent)
 {
-    auto progress_bar = new SubTaskProgressBar(parent);
+    auto* progress_bar = new SubTaskProgressBar(parent);
     return unique_qobject_ptr<SubTaskProgressBar>(progress_bar);
 }
 

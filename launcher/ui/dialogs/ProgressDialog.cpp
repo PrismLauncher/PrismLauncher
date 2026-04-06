@@ -114,7 +114,7 @@ void ProgressDialog::updateSize(bool recenterParent)
 
     QSize newSize = this->size();
     // if the current window is a different size
-    auto parent = this->parentWidget();
+    auto* parent = this->parentWidget();
     if (recenterParent && parent) {
         auto newX = std::max(0, parent->x() + ((parent->width() - newSize.width()) / 2));
         auto newY = std::max(0, parent->y() + ((parent->height() - newSize.height()) / 2));
@@ -240,7 +240,7 @@ void ProgressDialog::changeStepProgress(TaskStepProgress const& task_progress)
 
     if (!taskProgress.contains(task_progress.uid))
         addTaskProgress(task_progress);
-    auto task_bar = taskProgress.value(task_progress.uid);
+    auto* task_bar = taskProgress.value(task_progress.uid);
 
     auto const [mapped_current, mapped_total] = map_int_zero_max<qint64>(task_progress.current, task_progress.total, 0);
     if (task_progress.total <= 0) {

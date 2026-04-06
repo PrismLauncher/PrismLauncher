@@ -34,7 +34,7 @@ EnvironmentVariables::EnvironmentVariables(QWidget* parent) : QWidget(parent), u
     ui->list->header()->resizeSection(0, 200);
 
     connect(ui->add, &QPushButton::clicked, this, [this] {
-        auto item = new QTreeWidgetItem(ui->list);
+        auto* item = new QTreeWidgetItem(ui->list);
         item->setText(0, "ENV_VAR");
         item->setText(1, "value");
         item->setFlags(item->flags() | Qt::ItemIsEditable);
@@ -68,7 +68,7 @@ void EnvironmentVariables::initialize(bool instance, bool override, const QMap<Q
     // populate
     ui->list->clear();
     for (auto iter = value.begin(); iter != value.end(); iter++) {
-        auto item = new QTreeWidgetItem(ui->list);
+        auto* item = new QTreeWidgetItem(ui->list);
         item->setText(0, iter.key());
         item->setText(1, iter.value().toString());
         item->setFlags(item->flags() | Qt::ItemIsEditable);

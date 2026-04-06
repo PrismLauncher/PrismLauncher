@@ -79,7 +79,7 @@ ResourcePage::ResourcePage(ResourceDownloadDialog* parent, BaseInstance& base_in
 
     m_ui->verticalLayout->insertWidget(1, &m_fetchProgress);
 
-    auto delegate = new ProjectItemDelegate(this);
+    auto* delegate = new ProjectItemDelegate(this);
     m_ui->packView->setItemDelegate(delegate);
     m_ui->packView->installEventFilter(this);
     m_ui->packView->viewport()->installEventFilter(this);
@@ -427,7 +427,7 @@ void ResourcePage::onResourceToggle(const QModelIndex& index)
             });
 
             if (version == pack->versions.end()) {
-                auto errorMessage = new QMessageBox(
+                auto* errorMessage = new QMessageBox(
                     QMessageBox::Warning, tr("No versions available"),
                     tr("No versions for '%1' are available.\nThe author likely blocked third-party launchers.").arg(pack->name),
                     QMessageBox::Ok, this);
@@ -485,10 +485,10 @@ void ResourcePage::openUrl(const QUrl& url)
         if (auto current_pack = getCurrentPack(); current_pack && slug != current_pack->slug) {
             m_parentDialog->selectPage(page);
 
-            auto newPage = m_parentDialog->selectedPage();
+            auto* newPage = m_parentDialog->selectedPage();
 
             QLineEdit* searchEdit = newPage->m_ui->searchEdit;
-            auto model = newPage->m_model;
+            auto* model = newPage->m_model;
             QListView* view = newPage->m_ui->packView;
 
             auto jump = [url, slug, model, view] {
@@ -531,16 +531,16 @@ void ResourcePage::openProject(QVariant projectID)
     m_ui->resourceSelectionButton->hide();
     m_doNotJumpToMod = true;
 
-    auto buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+    auto* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 
-    auto okBtn = buttonBox->button(QDialogButtonBox::Ok);
+    auto* okBtn = buttonBox->button(QDialogButtonBox::Ok);
     okBtn->setDefault(true);
     okBtn->setAutoDefault(true);
     okBtn->setText(tr("Reinstall"));
     okBtn->setShortcut(tr("Ctrl+Return"));
     okBtn->setEnabled(false);
 
-    auto cancelBtn = buttonBox->button(QDialogButtonBox::Cancel);
+    auto* cancelBtn = buttonBox->button(QDialogButtonBox::Cancel);
     cancelBtn->setDefault(false);
     cancelBtn->setAutoDefault(false);
     cancelBtn->setText(tr("Cancel"));

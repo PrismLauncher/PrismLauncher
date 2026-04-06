@@ -74,7 +74,7 @@ class ParsingValidator : public Net::Validator {
 
 QUrl BaseEntity::url() const
 {
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
     QString metaOverride = s->get("MetaURLOverride").toString();
     if (metaOverride.isEmpty()) {
         return QUrl(BuildConfig.META_URL).resolved(localFilename());

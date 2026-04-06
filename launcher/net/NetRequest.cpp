@@ -122,7 +122,7 @@ void NetRequest::executeTask()
     m_last_progress_time = std::chrono::steady_clock::now();
     m_last_progress_bytes = 0;
 
-    auto rep = getReply(request);
+    auto* rep = getReply(request);
     if (rep == nullptr)  // it failed
         return;
     m_reply.reset(rep);

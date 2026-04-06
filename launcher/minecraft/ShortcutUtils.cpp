@@ -54,7 +54,7 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
         return false;
 
     QString appPath = QApplication::applicationFilePath();
-    auto icon = APPLICATION->icons()->icon(shortcut.iconKey.isEmpty() ? shortcut.instance->iconKey() : shortcut.iconKey);
+    const auto* icon = APPLICATION->icons()->icon(shortcut.iconKey.isEmpty() ? shortcut.instance->iconKey() : shortcut.iconKey);
     if (icon == nullptr) {
         icon = APPLICATION->icons()->icon("grass");
     }

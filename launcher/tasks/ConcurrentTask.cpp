@@ -121,7 +121,7 @@ void ConcurrentTask::executeNextSubTask()
             if (m_failed.isEmpty()) {
                 emitSucceeded();
             } else if (m_failed.count() == 1) {
-                auto task = m_failed.keys().first();
+                auto* task = m_failed.keys().first();
                 auto reason = task->failReason();
                 if (reason.isEmpty()) {  // clearly a bug somewhere
                     reason = tr("Task failed");

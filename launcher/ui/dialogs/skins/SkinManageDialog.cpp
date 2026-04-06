@@ -68,7 +68,7 @@ SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
 
     setWindowModality(Qt::WindowModal);
 
-    auto contentsWidget = m_ui->listView;
+    auto* contentsWidget = m_ui->listView;
     contentsWidget->setViewMode(QListView::IconMode);
     contentsWidget->setFlow(QListView::LeftToRight);
     contentsWidget->setIconSize(QSize(48, 48));
@@ -142,7 +142,7 @@ void SkinManageDialog::selectionChanged(QItemSelection selected, [[maybe_unused]
     if (key.isEmpty())
         return;
     m_selectedSkinKey = key;
-    auto skin = getSelectedSkin();
+    auto* skin = getSelectedSkin();
     if (!skin)
         return;
 
@@ -159,7 +159,7 @@ void SkinManageDialog::selectionChanged(QItemSelection selected, [[maybe_unused]
 
 void SkinManageDialog::delayed_scroll(QModelIndex model_index)
 {
-    auto contentsWidget = m_ui->listView;
+    auto* contentsWidget = m_ui->listView;
     contentsWidget->scrollTo(model_index);
 }
 
@@ -267,7 +267,7 @@ void SkinManageDialog::on_capeCombo_currentIndexChanged(int index)
     if (m_skinPreview) {
         m_skinPreview->updateCape(cape);
     }
-    if (auto skin = getSelectedSkin(); skin) {
+    if (auto* skin = getSelectedSkin(); skin) {
         skin->setCapeId(id.toString());
         if (m_skinPreview) {
             m_skinPreview->updateScene(skin);
@@ -280,7 +280,7 @@ void SkinManageDialog::on_capeCombo_currentIndexChanged(int index)
 
 void SkinManageDialog::on_steveBtn_toggled(bool checked)
 {
-    if (auto skin = getSelectedSkin(); skin) {
+    if (auto* skin = getSelectedSkin(); skin) {
         skin->setModel(checked ? SkinModel::CLASSIC : SkinModel::SLIM);
         if (m_skinPreview) {
             m_skinPreview->updateScene(skin);
@@ -293,7 +293,7 @@ void SkinManageDialog::on_steveBtn_toggled(bool checked)
 
 void SkinManageDialog::accept()
 {
-    auto skin = m_list.skin(m_selectedSkinKey);
+    auto* skin = m_list.skin(m_selectedSkinKey);
     if (!skin) {
         reject();
         return;
@@ -386,7 +386,7 @@ void SkinManageDialog::on_action_Delete_Skin_triggered(bool)
         return;
     }
 
-    auto skin = m_list.skin(m_selectedSkinKey);
+    auto* skin = m_list.skin(m_selectedSkinKey);
     if (!skin)
         return;
 
@@ -574,7 +574,7 @@ void SkinManageDialog::resizeEvent(QResizeEvent* event)
     } else {
         m_ui->capeImage->clear();
     }
-    if (auto skin = getSelectedSkin(); skin && !m_skinPreview) {
+    if (auto* skin = getSelectedSkin(); skin && !m_skinPreview) {
         m_skinPreviewLabel->setPixmap(
             QPixmap::fromImage(skin->getPreview()).scaled(m_skinPreviewLabel->size(), Qt::KeepAspectRatio, Qt::FastTransformation));
     }
@@ -582,7 +582,7 @@ void SkinManageDialog::resizeEvent(QResizeEvent* event)
 
 SkinModel* SkinManageDialog::getSelectedSkin()
 {
-    if (auto skin = m_list.skin(m_selectedSkinKey); skin && skin->isValid()) {
+    if (auto* skin = m_list.skin(m_selectedSkinKey); skin && skin->isValid()) {
         return skin;
     }
     return nullptr;

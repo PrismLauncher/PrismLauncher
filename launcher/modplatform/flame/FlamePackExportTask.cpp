@@ -367,7 +367,7 @@ QByteArray FlamePackExportTask::generateIndex()
 
     QJsonObject version;
 
-    auto profile = m_options.instance->getPackProfile();
+    auto* profile = m_options.instance->getPackProfile();
     // collect all supported components
     const ComponentPtr minecraft = profile->getComponent("net.minecraft");
     const ComponentPtr quilt = profile->getComponent("org.quiltmc.quilt-loader");

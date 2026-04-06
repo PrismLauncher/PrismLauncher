@@ -137,7 +137,7 @@ void PackInstallTask::install()
     {
         SettingsObject::Lock lock(instance.settings());
 
-        auto components = instance.getPackProfile();
+        auto* components = instance.getPackProfile();
         components->buildingFromScratch();
         components->setComponentVersion("net.minecraft", m_pack.mcVersion, true);
 

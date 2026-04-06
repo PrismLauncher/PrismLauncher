@@ -193,7 +193,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // set the menu for the folders help, accounts, and export tool buttons
     {
-        auto foldersMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionFoldersButton));
+        auto* foldersMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionFoldersButton));
         ui->actionFoldersButton->setMenu(ui->foldersMenu);
         foldersMenuButton->setPopupMode(QToolButton::InstantPopup);
 
@@ -203,10 +203,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->actionHelpButton->menu()->removeAction(ui->actionCheckUpdate);
         helpMenuButton->setPopupMode(QToolButton::InstantPopup);
 
-        auto accountMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionAccountsButton));
+        auto* accountMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionAccountsButton));
         accountMenuButton->setPopupMode(QToolButton::InstantPopup);
 
-        auto exportInstanceMenu = new QMenu(this);
+        auto* exportInstanceMenu = new QMenu(this);
         exportInstanceMenu->addAction(ui->actionExportInstanceZip);
         exportInstanceMenu->addAction(ui->actionExportInstanceMrPack);
         exportInstanceMenu->addAction(ui->actionExportInstanceFlamePack);
@@ -264,7 +264,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(ui->actionCloseWindow, &QAction::triggered, APPLICATION, &Application::closeCurrentWindow);
 
         // FIXME: This is kinda weird. and bad. We need some kind of managed shutdown.
-        auto q = new QShortcut(QKeySequence::Quit, this);
+        auto* q = new QShortcut(QKeySequence::Quit, this);
         connect(q, &QShortcut::activated, APPLICATION, &Application::quit);
     }
 
@@ -295,7 +295,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         view->setSelectionMode(QAbstractItemView::SingleSelection);
         // FIXME: leaks ListViewDelegate
-        auto delegate = new ListViewDelegate(this);
+        auto* delegate = new ListViewDelegate(this);
         view->setItemDelegate(delegate);
         view->setFrameShape(QFrame::NoFrame);
         // do not show ugly blue border on the mac
@@ -417,7 +417,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(ui->actionCheckUpdate, &QAction::triggered, this, &MainWindow::checkForUpdates);
 
         // set up the updater object.
-        auto updater = APPLICATION->updater();
+        auto* updater = APPLICATION->updater();
 
         if (updater) {
             connect(updater, &ExternalUpdater::canCheckForUpdatesChanged, this, &MainWindow::updatesAllowedChanged);
@@ -469,7 +469,7 @@ void MainWindow::retranslateUi()
     if (helpMenuButton->toolTip().contains("%1"))
         helpMenuButton->setToolTip(helpMenuButton->toolTip().arg(BuildConfig.LAUNCHER_DISPLAYNAME));
 
-    for (auto action : ui->helpMenu->actions()) {
+    for (auto* action : ui->helpMenu->actions()) {
         if (action->text().contains("%1"))
             action->setText(action->text().arg(BuildConfig.LAUNCHER_DISPLAYNAME));
         if (action->toolTip().contains("%1"))
@@ -651,7 +651,7 @@ void MainWindow::repopulateAccountsMenu()
         ui->actionAccountsButton->setMenu(accountsButtonMenu);
     }
 
-    auto accounts = APPLICATION->accounts();
+    auto* accounts = APPLICATION->accounts();
     MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
 
     QString active_profileId = "";
@@ -739,7 +739,7 @@ void MainWindow::changeActiveAccount()
     if (!valid) {
         index = -1;
     }
-    auto accounts = APPLICATION->accounts();
+    auto* accounts = APPLICATION->accounts();
     accounts->setDefaultAccount(index == -1 ? nullptr : accounts->at(index));
     defaultAccountChanged();
 }
@@ -882,7 +882,7 @@ void MainWindow::on_actionCopyInstance_triggered()
     if (!copyInstDlg.exec())
         return;
 
-    auto copyTask = new InstanceCopyTask(m_selectedInstance, copyInstDlg.getChosenOptions());
+    auto* copyTask = new InstanceCopyTask(m_selectedInstance, copyInstDlg.getChosenOptions());
     copyTask->setName(copyInstDlg.instName());
     copyTask->setGroup(copyInstDlg.instGroup());
     copyTask->setIcon(copyInstDlg.iconKey());
@@ -1147,8 +1147,8 @@ void MainWindow::processURLs(QList<QUrl> urls)
 
         qDebug() << "Adding resource" << localFileName << "to" << dlg.selectedInstanceKey;
 
-        auto inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
-        auto minecraftInst = dynamic_cast<MinecraftInstance*>(inst);
+        auto* inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
+        auto* minecraftInst = dynamic_cast<MinecraftInstance*>(inst);
 
         switch (type) {
             case ModPlatform::ResourceType::ResourcePack:
@@ -1528,7 +1528,7 @@ void MainWindow::on_actionExportInstanceZip_triggered()
 void MainWindow::on_actionExportInstanceMrPack_triggered()
 {
     if (m_selectedInstance) {
-        auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance);
+        auto* instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance);
         if (instance != nullptr) {
             ExportPackDialog dlg(instance, this);
             dlg.exec();
@@ -1539,7 +1539,7 @@ void MainWindow::on_actionExportInstanceMrPack_triggered()
 void MainWindow::on_actionExportInstanceFlamePack_triggered()
 {
     if (m_selectedInstance) {
-        auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance);
+        auto* instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance);
         if (instance) {
             if (auto cmp = instance->getPackProfile()->getComponent("net.minecraft");
                 cmp && cmp->getVersionFile() && cmp->getVersionFile()->type == "snapshot") {

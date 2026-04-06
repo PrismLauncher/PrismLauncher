@@ -149,19 +149,19 @@ LogPage::LogPage(BaseInstance* instance, QWidget* parent) : QWidget(parent), ui(
 
     // set up instance and launch process recognition
     {
-        auto launchTask = m_instance->getLaunchTask();
+        auto* launchTask = m_instance->getLaunchTask();
         if (launchTask) {
             setInstanceLaunchTaskChanged(launchTask, true);
         }
         connect(m_instance, &BaseInstance::launchTaskChanged, this, &LogPage::onInstanceLaunchTaskChanged);
     }
 
-    auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
+    auto* findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
     connect(findShortcut, &QShortcut::activated, this, &LogPage::findActivated);
-    auto findNextShortcut = new QShortcut(QKeySequence(QKeySequence::FindNext), this);
+    auto* findNextShortcut = new QShortcut(QKeySequence(QKeySequence::FindNext), this);
     connect(findNextShortcut, &QShortcut::activated, this, &LogPage::findNextActivated);
     connect(ui->searchBar, &QLineEdit::returnPressed, this, &LogPage::on_findButton_clicked);
-    auto findPreviousShortcut = new QShortcut(QKeySequence(QKeySequence::FindPrevious), this);
+    auto* findPreviousShortcut = new QShortcut(QKeySequence(QKeySequence::FindPrevious), this);
     connect(findPreviousShortcut, &QShortcut::activated, this, &LogPage::findPreviousActivated);
 }
 

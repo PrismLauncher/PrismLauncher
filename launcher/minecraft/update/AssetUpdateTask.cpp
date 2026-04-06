@@ -19,14 +19,14 @@ AssetUpdateTask::AssetUpdateTask(MinecraftInstance* inst)
 void AssetUpdateTask::executeTask()
 {
     setStatus(tr("Updating assets index..."));
-    auto components = m_inst->getPackProfile();
+    auto* components = m_inst->getPackProfile();
     auto profile = components->getProfile();
     auto assets = profile->getMinecraftAssets();
     QUrl indexUrl = assets->url;
     QString localPath = assets->id + ".json";
     auto job = makeShared<NetJob>(tr("Asset index for %1").arg(m_inst->name()), APPLICATION->network());
 
-    auto metacache = APPLICATION->metacache();
+    auto* metacache = APPLICATION->metacache();
     auto entry = metacache->resolveEntry("asset_indexes", localPath);
     entry->setStale(true);
     auto hexSha1 = assets->sha1.toLatin1();
@@ -57,14 +57,14 @@ void AssetUpdateTask::assetIndexFinished()
     AssetsIndex index;
     qDebug() << "Finished asset index download for" << m_inst->name();
 
-    auto components = m_inst->getPackProfile();
+    auto* components = m_inst->getPackProfile();
     auto profile = components->getProfile();
     auto assets = profile->getMinecraftAssets();
 
     QString asset_fname = "assets/indexes/" + assets->id + ".json";
     // FIXME: this looks like a job for a generic validator based on json schema?
     if (!AssetsUtils::loadAssetsIndexJson(assets->id, asset_fname, index)) {
-        auto metacache = APPLICATION->metacache();
+        auto* metacache = APPLICATION->metacache();
         auto entry = metacache->resolveEntry("asset_indexes", assets->id + ".json");
         metacache->evictEntry(entry);
         emitFailed(tr("Failed to read the assets index!"));

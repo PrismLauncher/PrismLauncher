@@ -494,7 +494,7 @@ bool TranslationsModel::selectLanguage(QString key)
 
     if (langPtr->localFileType == FileType::PO) {
         qDebug() << "Loading Application Language File for" << langCode.toLocal8Bit().constData() << "...";
-        auto poTranslator = new POTranslator(FS::PathCombine(d->m_dir.path(), langCode + ".po"));
+        auto* poTranslator = new POTranslator(FS::PathCombine(d->m_dir.path(), langCode + ".po"));
         if (!poTranslator->isEmpty()) {
             if (!QCoreApplication::installTranslator(poTranslator)) {
                 delete poTranslator;

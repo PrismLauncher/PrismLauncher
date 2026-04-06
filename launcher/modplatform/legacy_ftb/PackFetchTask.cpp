@@ -75,7 +75,7 @@ void PackFetchTask::fetchPrivate(const QStringList& toFetch)
 {
     QString privatePackBaseUrl = BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/%1.xml";
 
-    for (auto& packCode : toFetch) {
+    for (const auto& packCode : toFetch) {
         NetJob* job = new NetJob("Fetching private pack", m_network);
 
         auto [action, data] = Net::ApiDownload::makeByteArray(privatePackBaseUrl.arg(packCode));

@@ -94,13 +94,13 @@ OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, 
 
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &OtherLogsPage::populateSelectLogBox);
 
-    auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
+    auto* findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
     connect(findShortcut, &QShortcut::activated, this, &OtherLogsPage::findActivated);
 
-    auto findNextShortcut = new QShortcut(QKeySequence(QKeySequence::FindNext), this);
+    auto* findNextShortcut = new QShortcut(QKeySequence(QKeySequence::FindNext), this);
     connect(findNextShortcut, &QShortcut::activated, this, &OtherLogsPage::findNextActivated);
 
-    auto findPreviousShortcut = new QShortcut(QKeySequence(QKeySequence::FindPrevious), this);
+    auto* findPreviousShortcut = new QShortcut(QKeySequence(QKeySequence::FindPrevious), this);
     connect(findPreviousShortcut, &QShortcut::activated, this, &OtherLogsPage::findPreviousActivated);
 
     connect(ui->searchBar, &QLineEdit::returnPressed, this, &OtherLogsPage::on_findButton_clicked);

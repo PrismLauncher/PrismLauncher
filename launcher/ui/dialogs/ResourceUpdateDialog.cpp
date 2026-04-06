@@ -298,7 +298,7 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
     };
 
     // ask the user on what provider to seach for the mod first
-    for (auto candidate : m_candidates) {
+    for (auto* candidate : m_candidates) {
         if (candidate->status() != ResourceStatus::NO_METADATA) {
             onMetadataEnsured(candidate);
             continue;
@@ -438,7 +438,7 @@ void ResourceUpdateDialog::onMetadataFailed(Resource* resource, bool try_others,
 
 void ResourceUpdateDialog::appendResource(CheckUpdateTask::Update const& info, QStringList requiredBy)
 {
-    auto item_top = new QTreeWidgetItem(ui->modTreeWidget);
+    auto* item_top = new QTreeWidgetItem(ui->modTreeWidget);
     item_top->setCheckState(0, info.enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     if (!info.enabled) {
         item_top->setToolTip(0, tr("Mod was disabled as it may be already installed."));
@@ -446,34 +446,34 @@ void ResourceUpdateDialog::appendResource(CheckUpdateTask::Update const& info, Q
     item_top->setText(0, info.name);
     item_top->setExpanded(true);
 
-    auto provider_item = new QTreeWidgetItem(item_top);
+    auto* provider_item = new QTreeWidgetItem(item_top);
     QString provider_name = ModPlatform::ProviderCapabilities::readableName(info.provider);
     provider_item->setText(0, tr("Provider: %1").arg(provider_name));
     provider_item->setData(0, Qt::UserRole, provider_name);
 
-    auto old_version_item = new QTreeWidgetItem(item_top);
+    auto* old_version_item = new QTreeWidgetItem(item_top);
     old_version_item->setText(0, tr("Old version: %1").arg(info.old_version));
     old_version_item->setData(0, Qt::UserRole, info.old_version);
 
-    auto new_version_item = new QTreeWidgetItem(item_top);
+    auto* new_version_item = new QTreeWidgetItem(item_top);
     new_version_item->setText(0, tr("New version: %1").arg(info.new_version));
     new_version_item->setData(0, Qt::UserRole, info.new_version);
 
     if (info.new_version_type.has_value()) {
-        auto new_version_type_item = new QTreeWidgetItem(item_top);
+        auto* new_version_type_item = new QTreeWidgetItem(item_top);
         new_version_type_item->setText(0, tr("New Version Type: %1").arg(info.new_version_type.value().toString()));
         new_version_type_item->setData(0, Qt::UserRole, info.new_version_type.value().toString());
     }
 
     if (!requiredBy.isEmpty()) {
-        auto requiredByItem = new QTreeWidgetItem(item_top);
+        auto* requiredByItem = new QTreeWidgetItem(item_top);
         if (requiredBy.length() == 1) {
             requiredByItem->setText(0, tr("Required by: %1").arg(requiredBy.back()));
             requiredByItem->setData(0, Qt::UserRole, requiredBy.back());
         } else {
             requiredByItem->setText(0, tr("Required by:"));
             for (auto req : requiredBy) {
-                auto reqItem = new QTreeWidgetItem(requiredByItem);
+                auto* reqItem = new QTreeWidgetItem(requiredByItem);
                 reqItem->setText(0, req);
             }
         }
@@ -482,11 +482,11 @@ void ResourceUpdateDialog::appendResource(CheckUpdateTask::Update const& info, Q
         m_deps << item_top;
     }
 
-    auto changelog_item = new QTreeWidgetItem(item_top);
+    auto* changelog_item = new QTreeWidgetItem(item_top);
     changelog_item->setText(0, tr("Changelog of the latest version"));
 
-    auto changelog = new QTreeWidgetItem(changelog_item);
-    auto changelog_area = new QTextBrowser();
+    auto* changelog = new QTreeWidgetItem(changelog_item);
+    auto* changelog_area = new QTextBrowser();
 
     QString text = info.changelog;
     changelog->setData(0, Qt::UserRole, text);

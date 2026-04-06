@@ -91,7 +91,7 @@ bool JavaPage::apply()
 
 void JavaPage::on_downloadJavaButton_clicked()
 {
-    auto jdialog = new Java::InstallDialog({}, nullptr, this);
+    auto* jdialog = new Java::InstallDialog({}, nullptr, this);
     jdialog->exec();
     ui->managedJavaList->loadList();
 }

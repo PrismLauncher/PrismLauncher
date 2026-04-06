@@ -223,7 +223,7 @@ void WideBar::showVisibilityMenu(QPoint const& position)
             if (entry.type != BarEntry::Type::Action)
                 continue;
 
-            auto act = new QAction();
+            auto* act = new QAction();
             copyAction(entry.menu_action, act);
 
             act->setCheckable(true);

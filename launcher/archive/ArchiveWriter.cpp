@@ -100,7 +100,7 @@ bool ArchiveWriter::addFile(const QString& fileName, const QString& fileDest)
     }
 
     std::unique_ptr<archive_entry, void (*)(archive_entry*)> entry_ptr(archive_entry_new(), archive_entry_free);
-    auto entry = entry_ptr.get();
+    auto* entry = entry_ptr.get();
     if (!entry) {
         qCritical() << "Failed to create archive entry";
         return false;
@@ -202,7 +202,7 @@ bool ArchiveWriter::addFile(const QString& fileName, const QString& fileDest)
 bool ArchiveWriter::addFile(const QString& fileDest, const QByteArray& data)
 {
     std::unique_ptr<archive_entry, void (*)(archive_entry*)> entry_ptr(archive_entry_new(), archive_entry_free);
-    auto entry = entry_ptr.get();
+    auto* entry = entry_ptr.get();
     if (!entry) {
         qCritical() << "Failed to create archive entry";
         return false;

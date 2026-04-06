@@ -309,7 +309,7 @@ class ServersModel : public QAbstractListModel {
         switch (role) {
             case Qt::DecorationRole: {
                 if (column == 0) {
-                    auto& bytes = m_servers[row].m_icon;
+                    const auto& bytes = m_servers[row].m_icon;
                     if (bytes.size()) {
                         QPixmap px;
                         if (px.loadFromData(bytes))
@@ -361,7 +361,7 @@ class ServersModel : public QAbstractListModel {
         if (m_locked) {
             return;
         }
-        auto server = at(row);
+        auto* server = at(row);
         if (!server || server->m_name == name) {
             return;
         }
@@ -375,7 +375,7 @@ class ServersModel : public QAbstractListModel {
         if (m_locked) {
             return;
         }
-        auto server = at(row);
+        auto* server = at(row);
         if (!server || server->m_address == address) {
             return;
         }
@@ -389,7 +389,7 @@ class ServersModel : public QAbstractListModel {
         if (m_locked) {
             return;
         }
-        auto server = at(row);
+        auto* server = at(row);
         if (!server || server->m_acceptsTextures == textures) {
             return;
         }
@@ -558,7 +558,7 @@ ServersPage::ServersPage(BaseInstance* inst, QWidget* parent) : QMainWindow(pare
     ui->serversView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->serversView, &QTreeView::customContextMenuRequested, this, &ServersPage::ShowContextMenu);
 
-    auto head = ui->serversView->header();
+    auto* head = ui->serversView->header();
     if (head->count()) {
         head->setSectionResizeMode(0, QHeaderView::Stretch);
         for (int i = 1; i < head->count(); i++) {
@@ -566,7 +566,7 @@ ServersPage::ServersPage(BaseInstance* inst, QWidget* parent) : QMainWindow(pare
         }
     }
 
-    auto selectionModel = ui->serversView->selectionModel();
+    auto* selectionModel = ui->serversView->selectionModel();
     connect(selectionModel, &QItemSelectionModel::currentChanged, this, &ServersPage::currentChanged);
     connect(m_inst, &MinecraftInstance::runningStatusChanged, this, &ServersPage::runningStateChanged);
     connect(ui->nameLine, &QLineEdit::textEdited, this, &ServersPage::nameEdited);
@@ -595,7 +595,7 @@ void ServersPage::retranslate()
 
 void ServersPage::ShowContextMenu(const QPoint& pos)
 {
-    auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
+    auto* menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
     menu->exec(ui->serversView->mapToGlobal(pos));
     delete menu;
 }
@@ -667,7 +667,7 @@ void ServersPage::resourceIndexChanged(int index)
 
 void ServersPage::updateState()
 {
-    auto server = m_model->at(currentServer);
+    auto* server = m_model->at(currentServer);
 
     bool serverEditEnabled = server && !m_locked;
     ui->addressLine->setEnabled(serverEditEnabled);

@@ -19,7 +19,7 @@ void PasteWizardPage::initializePage() {}
 
 bool PasteWizardPage::validatePage()
 {
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
     QString prevPasteURL = s->get("PastebinURL").toString();
     s->reset("PastebinURL");
     if (ui->previousSettingsRadioButton->isChecked()) {

@@ -64,13 +64,13 @@ ExportInstanceDialog::ExportInstanceDialog(BaseInstance* instance, QWidget* pare
     : QDialog(parent), m_ui(new Ui::ExportInstanceDialog), m_instance(instance)
 {
     m_ui->setupUi(this);
-    auto model = new QFileSystemModel(this);
+    auto* model = new QFileSystemModel(this);
     model->setIconProvider(&m_icons);
     auto root = instance->instanceRoot();
     m_proxyModel = new FileIgnoreProxy(root, this);
     m_proxyModel->setSourceModel(model);
     auto prefix = QDir(instance->instanceRoot()).relativeFilePath(instance->gameRoot());
-    for (auto path : { "logs", "crash-reports", ".cache", ".fabric", ".quilt" }) {
+    for (const auto* path : { "logs", "crash-reports", ".cache", ".fabric", ".quilt" }) {
         m_proxyModel->ignoreFilesWithPath().insert(FS::PathCombine(prefix, path));
     }
     m_proxyModel->ignoreFilesWithName().append({ ".DS_Store", "thumbs.db", "Thumbs.db" });
@@ -84,7 +84,7 @@ ExportInstanceDialog::ExportInstanceDialog(BaseInstance* instance, QWidget* pare
 
     model->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Hidden);
     model->setRootPath(root);
-    auto headerView = m_ui->treeView->header();
+    auto* headerView = m_ui->treeView->header();
     headerView->setSectionResizeMode(QHeaderView::ResizeToContents);
     headerView->setSectionResizeMode(0, QHeaderView::Stretch);
 
@@ -101,8 +101,8 @@ ExportInstanceDialog::~ExportInstanceDialog()
 void SaveIcon(BaseInstance* m_instance)
 {
     auto iconKey = m_instance->iconKey();
-    auto iconList = APPLICATION->icons();
-    auto mmcIcon = iconList->icon(iconKey);
+    auto* iconList = APPLICATION->icons();
+    const auto* mmcIcon = iconList->icon(iconKey);
     if (!mmcIcon || mmcIcon->isBuiltIn()) {
         return;
     }
@@ -112,8 +112,8 @@ void SaveIcon(BaseInstance* m_instance)
         FS::copy(path, FS::PathCombine(m_instance->instanceRoot(), inInfo.fileName()))();
         return;
     }
-    auto& image = mmcIcon->m_images[mmcIcon->type()];
-    auto& icon = image.icon;
+    const auto& image = mmcIcon->m_images[mmcIcon->type()];
+    const auto& icon = image.icon;
     auto sizes = icon.availableSizes();
     if (sizes.size() == 0) {
         return;

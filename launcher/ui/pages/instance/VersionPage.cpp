@@ -150,7 +150,7 @@ VersionPage::VersionPage(MinecraftInstance* inst, QWidget* parent) : QMainWindow
 
     reloadPackProfile();
 
-    auto proxy = new IconProxy(ui->packageView);
+    auto* proxy = new IconProxy(ui->packageView);
     proxy->setSourceModel(m_profile);
 
     m_filterModel = new QSortFilterProxyModel(this);
@@ -165,7 +165,7 @@ VersionPage::VersionPage(MinecraftInstance* inst, QWidget* parent) : QMainWindow
     ui->packageView->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->packageView->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    auto smodel = ui->packageView->selectionModel();
+    auto* smodel = ui->packageView->selectionModel();
     connect(smodel, &QItemSelectionModel::currentChanged, this, &VersionPage::versionCurrent);
     connect(smodel, &QItemSelectionModel::currentChanged, this, &VersionPage::packageCurrent);
     connect(m_profile, &PackProfile::minecraftChanged, this, &VersionPage::updateVersionControls);
@@ -186,7 +186,7 @@ VersionPage::~VersionPage()
 
 void VersionPage::showContextMenu(const QPoint& pos)
 {
-    auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
+    auto* menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
     menu->exec(ui->packageView->mapToGlobal(pos));
     delete menu;
 }
@@ -213,9 +213,9 @@ void VersionPage::packageCurrent(const QModelIndex& current, [[maybe_unused]] co
             return;
     }
 
-    auto& problems = patch->getProblems();
+    const auto& problems = patch->getProblems();
     QString problemOut;
-    for (auto& problem : problems) {
+    for (const auto& problem : problems) {
         if (problem.m_severity == ProblemSeverity::Error) {
             problemOut += tr("Error: ");
         } else if (problem.m_severity == ProblemSeverity::Warning) {

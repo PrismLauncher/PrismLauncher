@@ -71,7 +71,7 @@ class PageModel : public QAbstractListModel {
 
     BasePage* findPageEntryById(QString id)
     {
-        for (auto page : m_pages) {
+        for (auto* page : m_pages) {
             if (page->id() == id)
                 return page;
         }

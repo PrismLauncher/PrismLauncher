@@ -143,7 +143,7 @@ static int findLibraryByName(QList<LibraryPtr>* haystack, const GradleSpecifier&
 void LaunchProfile::applyMods(const QList<LibraryPtr>& mods)
 {
     QList<LibraryPtr>* list = &m_mods;
-    for (auto& mod : mods) {
+    for (const auto& mod : mods) {
         auto modCopy = Library::limitedCopy(mod);
 
         // find the mod by name.

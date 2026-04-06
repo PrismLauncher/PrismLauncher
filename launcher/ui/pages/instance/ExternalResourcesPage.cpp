@@ -81,7 +81,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, ResourceFol
     connect(ui->treeView, &ModListView::customContextMenuRequested, this, &ExternalResourcesPage::ShowContextMenu);
     connect(ui->treeView, &ModListView::activated, this, &ExternalResourcesPage::itemActivated);
 
-    auto selection_model = ui->treeView->selectionModel();
+    auto* selection_model = ui->treeView->selectionModel();
 
     connect(selection_model, &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
         if (!current.isValid()) {
@@ -105,7 +105,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, ResourceFol
     connect(m_model, &ResourceFolderModel::rowsInserted, this, [this] { updateActions(); });
     connect(m_model, &ResourceFolderModel::rowsRemoved, this, [this] { updateActions(); });
 
-    auto viewHeader = ui->treeView->header();
+    auto* viewHeader = ui->treeView->header();
     viewHeader->setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(viewHeader, &QHeaderView::customContextMenuRequested, this, &ExternalResourcesPage::ShowHeaderContextMenu);
@@ -130,14 +130,14 @@ QMenu* ExternalResourcesPage::createPopupMenu()
 
 void ExternalResourcesPage::ShowContextMenu(const QPoint& pos)
 {
-    auto menu = ui->actionsToolbar->createContextMenu(this, tr("Context menu"));
+    auto* menu = ui->actionsToolbar->createContextMenu(this, tr("Context menu"));
     menu->exec(ui->treeView->mapToGlobal(pos));
     delete menu;
 }
 
 void ExternalResourcesPage::ShowHeaderContextMenu(const QPoint& pos)
 {
-    auto menu = m_model->createHeaderContextMenu(ui->treeView);
+    auto* menu = m_model->createHeaderContextMenu(ui->treeView);
     menu->exec(ui->treeView->mapToGlobal(pos));
     menu->deleteLater();
 }
@@ -294,7 +294,7 @@ void ExternalResourcesPage::disableItem()
 void ExternalResourcesPage::viewHomepage()
 {
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-    for (auto resource : m_model->selectedResources(selection)) {
+    for (auto* resource : m_model->selectedResources(selection)) {
         auto url = resource->homepage();
         if (!url.isEmpty())
             DesktopServices::openUrl(url);

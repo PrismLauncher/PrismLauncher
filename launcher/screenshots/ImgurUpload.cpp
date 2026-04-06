@@ -49,7 +49,7 @@
 
 QNetworkReply* ImgurUpload::getReply(QNetworkRequest& request)
 {
-    auto file = new QFile(m_fileInfo.absoluteFilePath(), this);
+    auto* file = new QFile(m_fileInfo.absoluteFilePath(), this);
 
     if (!file->open(QFile::ReadOnly)) {
         emitFailed(tr("Could not open file %1 for reading: %2").arg(m_fileInfo.absoluteFilePath()).arg(file->errorString()));

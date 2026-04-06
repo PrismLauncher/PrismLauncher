@@ -29,7 +29,7 @@ class ModPage : public ResourcePage {
     static T* create(ModDownloadDialog* dialog, BaseInstance& instance)
     {
         auto page = new T(dialog, instance);
-        auto model = static_cast<ModModel*>(page->getModel());
+        auto* model = static_cast<ModModel*>(page->getModel());
 
         auto filter_widget = page->createFilterWidget();
         page->setFilterWidget(filter_widget);

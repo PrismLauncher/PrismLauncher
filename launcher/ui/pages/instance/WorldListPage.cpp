@@ -104,7 +104,7 @@ WorldListPage::WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget
     ui->worldTreeView->setIconSize(QSize(64, 64));
     connect(ui->worldTreeView, &QTreeView::customContextMenuRequested, this, &WorldListPage::ShowContextMenu);
 
-    auto head = ui->worldTreeView->header();
+    auto* head = ui->worldTreeView->header();
     head->setSectionResizeMode(0, QHeaderView::Stretch);
     head->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     head->setSectionResizeMode(4, QHeaderView::ResizeToContents);
@@ -142,7 +142,7 @@ WorldListPage::~WorldListPage()
 
 void WorldListPage::ShowContextMenu(const QPoint& pos)
 {
-    auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
+    auto* menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
     menu->exec(ui->worldTreeView->mapToGlobal(pos));
     delete menu;
 }
@@ -226,7 +226,7 @@ void WorldListPage::on_actionData_Packs_triggered()
     const QString fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
     const QString folder = FS::PathCombine(fullPath, "datapacks");
 
-    auto dialog = new QDialog(this);
+    auto* dialog = new QDialog(this);
     dialog->setWindowTitle(tr("Data packs for %1").arg(m_worlds->data(index, WorldList::NameRole).toString()));
     dialog->setWindowModality(Qt::WindowModal);
 
@@ -241,18 +241,18 @@ void WorldListPage::on_actionData_Packs_triggered()
 
     provider.addPageCreator([this] { return new DataPackPage(m_inst, m_datapackModel.get(), this); });
 
-    auto layout = new QVBoxLayout(dialog);
+    auto* layout = new QVBoxLayout(dialog);
 
-    auto focusStealer = new QPushButton(dialog);
+    auto* focusStealer = new QPushButton(dialog);
     layout->addWidget(focusStealer);
     focusStealer->setDefault(true);
     focusStealer->hide();
 
-    auto pageContainer = new PageContainer(&provider, {}, dialog);
+    auto* pageContainer = new PageContainer(&provider, {}, dialog);
     pageContainer->hidePageList();
     layout->addWidget(pageContainer);
 
-    auto buttonBox = new QDialogButtonBox(QDialogButtonBox::Close | QDialogButtonBox::Help);
+    auto* buttonBox = new QDialogButtonBox(QDialogButtonBox::Close | QDialogButtonBox::Help);
     connect(buttonBox, &QDialogButtonBox::rejected, dialog, &QDialog::reject);
     connect(buttonBox, &QDialogButtonBox::helpRequested, pageContainer, &PageContainer::help);
     layout->addWidget(buttonBox);
@@ -280,7 +280,7 @@ QModelIndex WorldListPage::getSelectedWorld()
 {
     auto index = ui->worldTreeView->selectionModel()->currentIndex();
 
-    auto proxy = (QSortFilterProxyModel*)ui->worldTreeView->model();
+    auto* proxy = (QSortFilterProxyModel*)ui->worldTreeView->model();
     return proxy->mapToSource(index);
 }
 
@@ -300,7 +300,7 @@ void WorldListPage::on_actionMCEdit_triggered()
     if (m_mceditStarting)
         return;
 
-    auto mcedit = APPLICATION->mcedit();
+    auto* mcedit = APPLICATION->mcedit();
 
     const QString mceditPath = mcedit->path();
 
@@ -427,7 +427,7 @@ void WorldListPage::on_actionCopy_triggered()
         return;
 
     auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
-    auto world = (World*)worldVariant.value<void*>();
+    auto* world = (World*)worldVariant.value<void*>();
     bool ok = false;
     QString name =
         QInputDialog::getText(this, tr("World name"), tr("Enter a new name for the copy."), QLineEdit::Normal, world->name(), &ok);
@@ -448,7 +448,7 @@ void WorldListPage::on_actionRename_triggered()
         return;
 
     auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
-    auto world = (World*)worldVariant.value<void*>();
+    auto* world = (World*)worldVariant.value<void*>();
 
     bool ok = false;
     QString name = QInputDialog::getText(this, tr("World name"), tr("Enter a new world name."), QLineEdit::Normal, world->name(), &ok);
@@ -470,7 +470,7 @@ void WorldListPage::on_actionJoin_triggered()
         return;
     }
     auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
-    auto world = (World*)worldVariant.value<void*>();
+    auto* world = (World*)worldVariant.value<void*>();
     APPLICATION->launch(m_inst, LaunchMode::Normal, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world->folderName(), true)));
 }
 

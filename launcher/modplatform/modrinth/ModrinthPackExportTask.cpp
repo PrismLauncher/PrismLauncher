@@ -244,7 +244,7 @@ QByteArray ModrinthPackExportTask::generateIndex()
         out["summary"] = summary;
 
     if (mcInstance) {
-        auto profile = mcInstance->getPackProfile();
+        auto* profile = mcInstance->getPackProfile();
         // collect all supported components
         const ComponentPtr minecraft = profile->getComponent("net.minecraft");
         const ComponentPtr quilt = profile->getComponent("org.quiltmc.quilt-loader");

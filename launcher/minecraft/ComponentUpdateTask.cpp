@@ -359,7 +359,7 @@ static bool getTrivialComponentChanges(const ComponentIndex& index, const Requir
     QString reqStr;
     bool succeeded = true;
     // list the composed requirements and say if they are met or unmet
-    for (auto& req : input) {
+    for (const auto& req : input) {
         do {
             if (req.equalsVersion.isEmpty()) {
                 reqStr = QString("Req: %1").arg(req.uid);
@@ -378,7 +378,7 @@ static bool getTrivialComponentChanges(const ComponentIndex& index, const Requir
                     decision = Decision::Missing;
                     break;
                 }
-                auto& comp = (*compIter);
+                const auto& comp = (*compIter);
                 if (comp->getVersion() != req.equalsVersion) {
                     if (comp->isCustom()) {
                         decision = Decision::LockedVersionNotSame;
@@ -515,7 +515,7 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
     bool recursionNeeded = false;
     if (toAdd.size()) {
         // add stuff...
-        for (auto& add : toAdd) {
+        for (const auto& add : toAdd) {
             auto component = makeShared<Component>(d->m_profile, add.uid);
             if (!add.equalsVersion.isEmpty()) {
                 // exact version
@@ -554,7 +554,7 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
     }
     if (toChange.size()) {
         // change a version of something that exists
-        for (auto& change : toChange) {
+        for (const auto& change : toChange) {
             // FIXME: this should not work directly with the component list
             qCDebug(instanceProfileResolveC) << "Setting version of" << change.uid << "to" << change.equalsVersion;
             auto component = componentIndex[change.uid];

@@ -39,7 +39,7 @@ void FlameCheckUpdate::executeTask()
 {
     setStatus(tr("Preparing resources for CurseForge..."));
 
-    auto netJob = new NetJob("Get latest versions", APPLICATION->network());
+    auto* netJob = new NetJob("Get latest versions", APPLICATION->network());
     connect(netJob, &Task::finished, this, &FlameCheckUpdate::collectBlockedMods);
 
     connect(netJob, &Task::progress, this, &FlameCheckUpdate::setProgress);
@@ -172,7 +172,7 @@ void FlameCheckUpdate::collectBlockedMods()
 
                 auto id = QString::number(Json::requireInteger(entry_obj, "id"));
 
-                auto resource = quickSearch.find(id).value();
+                auto* resource = quickSearch.find(id).value();
 
                 ModPlatform::IndexedPack pack;
                 try {

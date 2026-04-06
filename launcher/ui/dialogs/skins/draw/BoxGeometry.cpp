@@ -262,7 +262,7 @@ void BoxGeometry::rotate(float angle, const QVector3D& vector)
 
 BoxGeometry* BoxGeometry::Plane()
 {
-    auto b = new BoxGeometry(QVector3D(), QVector3D());
+    auto* b = new BoxGeometry(QVector3D(), QVector3D());
 
     // Transfer vertex data to VBO 0
     b->m_vertexBuf.bind();

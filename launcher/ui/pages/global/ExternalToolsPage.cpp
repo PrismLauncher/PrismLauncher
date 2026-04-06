@@ -66,7 +66,7 @@ ExternalToolsPage::~ExternalToolsPage()
 
 void ExternalToolsPage::loadSettings()
 {
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
     ui->jprofilerPathEdit->setText(s->get("JProfilerPath").toString());
     ui->jvisualvmPathEdit->setText(s->get("JVisualVMPath").toString());
     ui->mceditPathEdit->setText(s->get("MCEditPath").toString());
@@ -76,7 +76,7 @@ void ExternalToolsPage::loadSettings()
 }
 void ExternalToolsPage::applySettings()
 {
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
 
     s->set("JProfilerPath", ui->jprofilerPathEdit->text());
     s->set("JVisualVMPath", ui->jvisualvmPathEdit->text());

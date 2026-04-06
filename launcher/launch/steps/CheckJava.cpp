@@ -43,8 +43,8 @@
 
 void CheckJava::executeTask()
 {
-    auto instance = m_parent->instance();
-    auto settings = instance->settings();
+    auto* instance = m_parent->instance();
+    auto* settings = instance->settings();
 
     QString javaPathSetting = settings->get("JavaPath").toString();
     m_javaPath = FS::ResolveExecutable(javaPathSetting);
@@ -129,7 +129,7 @@ void CheckJava::checkJavaFinished(const JavaChecker::Result& result)
             return;
         }
         case JavaChecker::Result::Validity::Valid: {
-            auto instance = m_parent->instance();
+            auto* instance = m_parent->instance();
             printJavaInfo(result.javaVersion.toString(), result.mojangPlatform, result.realPlatform, result.javaVendor);
             instance->settings()->set("JavaVersion", result.javaVersion.toString());
             instance->settings()->set("JavaArchitecture", result.mojangPlatform);

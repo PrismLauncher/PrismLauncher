@@ -53,7 +53,7 @@ GetModDependenciesTask::GetModDependenciesTask(BaseInstance* instance,
                                                QList<std::shared_ptr<PackDependency>> selected)
     : SequentialTask(tr("Get dependencies")), m_selected(selected), m_version(mcVersion(instance)), m_loaderType(mcLoaders(instance))
 {
-    for (auto mod : folder->allMods()) {
+    for (auto* mod : folder->allMods()) {
         m_mods_file_names << mod->fileinfo().fileName();
         if (auto meta = mod->metadata(); meta)
             m_mods.append(meta);

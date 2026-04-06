@@ -357,7 +357,7 @@ Task::Ptr PackProfile::getCurrentTask()
 
 void PackProfile::resolve(Net::Mode netmode)
 {
-    auto updateTask = new ComponentUpdateTask(ComponentUpdateTask::Mode::Resolution, netmode, this);
+    auto* updateTask = new ComponentUpdateTask(ComponentUpdateTask::Mode::Resolution, netmode, this);
     d->m_updateTask.reset(updateTask);
     connect(updateTask, &ComponentUpdateTask::succeeded, this, &PackProfile::updateSucceeded);
     connect(updateTask, &ComponentUpdateTask::failed, this, &PackProfile::updateFailed);
@@ -407,7 +407,7 @@ void PackProfile::insertComponent(size_t index, ComponentPtr component)
 
 void PackProfile::componentDataChanged()
 {
-    auto objPtr = qobject_cast<Component*>(sender());
+    auto* objPtr = qobject_cast<Component*>(sender());
     if (!objPtr) {
         qCWarning(instanceProfileC) << d->m_instance->name() << "|" << "PackProfile got dataChanged signal from a non-Component!";
         return;

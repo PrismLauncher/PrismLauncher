@@ -64,9 +64,9 @@ CreateShortcutDialog::CreateShortcutDialog(BaseInstance* instance, QWidget* pare
     ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
     ui->instNameTextBox->setPlaceholderText(instance->name());
 
-    auto mInst = dynamic_cast<MinecraftInstance*>(instance);
+    auto* mInst = dynamic_cast<MinecraftInstance*>(instance);
     m_QuickJoinSupported = mInst && mInst->traits().contains("feature:is_quick_play_singleplayer");
-    auto worldList = mInst->worldList();
+    auto* worldList = mInst->worldList();
     worldList->update();
     if (!m_QuickJoinSupported || worldList->empty()) {
         ui->worldTarget->hide();
@@ -100,7 +100,7 @@ CreateShortcutDialog::CreateShortcutDialog(BaseInstance* instance, QWidget* pare
     }
 
     // Populate accounts
-    auto accounts = APPLICATION->accounts();
+    auto* accounts = APPLICATION->accounts();
     MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
     if (accounts->count() <= 0) {
         ui->overrideAccountCheckbox->setEnabled(false);

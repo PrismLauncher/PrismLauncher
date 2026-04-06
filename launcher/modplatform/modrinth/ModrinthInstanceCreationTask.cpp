@@ -39,7 +39,7 @@ bool ModrinthCreationTask::abort()
 
 bool ModrinthCreationTask::updateInstance()
 {
-    auto instance_list = APPLICATION->instances();
+    auto* instance_list = APPLICATION->instances();
 
     // FIXME: How to handle situations when there's more than one install already for a given modpack?
     BaseInstance* inst;
@@ -133,10 +133,10 @@ bool ModrinthCreationTask::updateInstance()
         }
     } else {
         // We don't have an old index file, so we may duplicate stuff!
-        auto dialog = CustomMessageBox::selectable(m_parent, tr("No index file."),
-                                                   tr("We couldn't find a suitable index file for the older version. This may cause some "
-                                                      "of the files to be duplicated. Do you want to continue?"),
-                                                   QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
+        auto* dialog = CustomMessageBox::selectable(m_parent, tr("No index file."),
+                                                    tr("We couldn't find a suitable index file for the older version. This may cause some "
+                                                       "of the files to be duplicated. Do you want to continue?"),
+                                                    QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
 
         if (dialog->exec() == QDialog::DialogCode::Rejected) {
             m_abort = true;
@@ -200,7 +200,7 @@ std::unique_ptr<MinecraftInstance> ModrinthCreationTask::createInstance()
     auto instanceSettings = std::make_unique<INISettingsObject>(configPath);
     auto instance = std::make_unique<MinecraftInstance>(m_globalSettings, std::move(instanceSettings), m_stagingPath);
 
-    auto components = instance->getPackProfile();
+    auto* components = instance->getPackProfile();
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", m_minecraft_version, true);
 
@@ -245,7 +245,7 @@ std::unique_ptr<MinecraftInstance> ModrinthCreationTask::createInstance()
             return nullptr;
         }
         if (fileName.startsWith("mods/")) {
-            auto mod = new Mod(file_path);
+            auto* mod = new Mod(file_path);
             ModDetails d;
             d.mod_id = file_path;
             mod->setDetails(d);
@@ -294,7 +294,7 @@ std::unique_ptr<MinecraftInstance> ModrinthCreationTask::createInstance()
     loop.exec();
 
     if (!ended_well) {
-        for (auto resource : resources) {
+        for (auto* resource : resources) {
             delete resource;
         }
         return nullptr;
@@ -315,7 +315,7 @@ std::unique_ptr<MinecraftInstance> ModrinthCreationTask::createInstance()
     m_task = ensureMetadataTask;
 
     ensureMetaLoop.exec();
-    for (auto resource : resources) {
+    for (auto* resource : resources) {
         delete resource;
     }
     resources.clear();
@@ -323,7 +323,7 @@ std::unique_ptr<MinecraftInstance> ModrinthCreationTask::createInstance()
     // Update information of the already installed instance, if any.
     if (m_instance && ended_well) {
         setAbortable(false);
-        auto inst = m_instance.value();
+        auto* inst = m_instance.value();
 
         // Only change the name if it didn't use a custom name, so that the previous custom name
         // is preserved, but if we're using the original one, we update the version string.

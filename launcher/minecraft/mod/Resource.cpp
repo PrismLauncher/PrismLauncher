@@ -133,12 +133,12 @@ void Resource::updateIssues(const BaseInstance* inst)
         return;
     }
 
-    auto mcInst = dynamic_cast<const MinecraftInstance*>(inst);
+    const auto* mcInst = dynamic_cast<const MinecraftInstance*>(inst);
     if (mcInst == nullptr) {
         return;
     }
 
-    auto profile = mcInst->getPackProfile();
+    auto* profile = mcInst->getPackProfile();
     QString mcVersion = profile->getComponentVersion("net.minecraft");
 
     if (!m_metadata->mcVersions.empty() && !m_metadata->mcVersions.contains(mcVersion)) {

@@ -191,7 +191,7 @@ void LauncherPage::on_metadataEnableBtn_clicked()
 
 void LauncherPage::applySettings()
 {
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
 
     // Updates
     if (APPLICATION->updater()) {
@@ -249,7 +249,7 @@ void LauncherPage::applySettings()
 }
 void LauncherPage::loadSettings()
 {
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
     // Updates
     if (APPLICATION->updater()) {
         ui->autoUpdateCheckBox->setChecked(APPLICATION->updater()->getAutomaticallyChecksForUpdates());

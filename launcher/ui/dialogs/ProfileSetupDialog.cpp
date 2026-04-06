@@ -60,7 +60,7 @@ ProfileSetupDialog::ProfileSetupDialog(MinecraftAccountPtr accountToSetup, QWidg
     badIcon = QIcon::fromTheme("status-bad");
 
     static const QRegularExpression s_permittedNames("[a-zA-Z0-9_]{3,16}");
-    auto nameEdit = ui->nameEdit;
+    auto* nameEdit = ui->nameEdit;
     nameEdit->setValidator(new QRegularExpressionValidator(s_permittedNames));
     nameEdit->setClearButtonEnabled(true);
     validityAction = nameEdit->addAction(yellowIcon, QLineEdit::LeadingPosition);
@@ -93,7 +93,7 @@ void ProfileSetupDialog::on_buttonBox_rejected()
 void ProfileSetupDialog::setNameStatus(ProfileSetupDialog::NameStatus status, QString errorString = QString())
 {
     nameStatus = status;
-    auto okButton = ui->buttonBox->button(QDialogButtonBox::Ok);
+    auto* okButton = ui->buttonBox->button(QDialogButtonBox::Ok);
     switch (nameStatus) {
         case NameStatus::Available: {
             validityAction->setIcon(goodIcon);
@@ -217,7 +217,7 @@ void ProfileSetupDialog::setupProfile(const QString& profileName)
 
     isWorking = true;
 
-    auto button = ui->buttonBox->button(QDialogButtonBox::Cancel);
+    auto* button = ui->buttonBox->button(QDialogButtonBox::Cancel);
     button->setEnabled(false);
 }
 
@@ -280,7 +280,7 @@ void ProfileSetupDialog::setupProfileFinished(QByteArray* response)
 
         ui->errorLabel->setText(tr("The server responded with the following error:") + "\n\n" + errorMessage);
         qDebug() << parsedError.rawError;
-        auto button = ui->buttonBox->button(QDialogButtonBox::Cancel);
+        auto* button = ui->buttonBox->button(QDialogButtonBox::Cancel);
         button->setEnabled(true);
     }
 }

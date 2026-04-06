@@ -89,7 +89,7 @@ bool FlameCreationTask::abort()
 
 bool FlameCreationTask::updateInstance()
 {
-    auto instance_list = APPLICATION->instances();
+    auto* instance_list = APPLICATION->instances();
 
     // FIXME: How to handle situations when there's more than one install already for a given modpack?
     BaseInstance* inst;
@@ -237,10 +237,10 @@ bool FlameCreationTask::updateInstance()
         m_processUpdateFileInfoJob = nullptr;
     } else {
         // We don't have an old index file, so we may duplicate stuff!
-        auto dialog = CustomMessageBox::selectable(m_parent, tr("No index file."),
-                                                   tr("We couldn't find a suitable index file for the older version. This may cause some "
-                                                      "of the files to be duplicated. Do you want to continue?"),
-                                                   QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
+        auto* dialog = CustomMessageBox::selectable(m_parent, tr("No index file."),
+                                                    tr("We couldn't find a suitable index file for the older version. This may cause some "
+                                                       "of the files to be duplicated. Do you want to continue?"),
+                                                    QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
 
         if (dialog->exec() == QDialog::DialogCode::Rejected) {
             m_abort = true;
@@ -388,7 +388,7 @@ std::unique_ptr<MinecraftInstance> FlameCreationTask::createInstance()
         logWarning(tr("Mysterious trailing dots removed from Minecraft version while importing pack."));
     }
 
-    auto components = instance->getPackProfile();
+    auto* components = instance->getPackProfile();
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", mcVersion, true);
     if (!loaderType.isEmpty()) {
@@ -439,7 +439,7 @@ std::unique_ptr<MinecraftInstance> FlameCreationTask::createInstance()
             qDebug() << info.fileName();
             jarMods.push_back(info.absoluteFilePath());
         }
-        auto profile = instance->getPackProfile();
+        auto* profile = instance->getPackProfile();
         profile->installJarMods(jarMods);
         // nuke the original files
         FS::deletePath(jarmodsPath);
@@ -474,7 +474,7 @@ std::unique_ptr<MinecraftInstance> FlameCreationTask::createInstance()
     // Update information of the already installed instance, if any.
     if (m_instance && did_succeed) {
         setAbortable(false);
-        auto inst = m_instance.value();
+        auto* inst = m_instance.value();
 
         inst->copyManagedPack(*instance);
     }

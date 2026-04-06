@@ -19,7 +19,7 @@ NewsDialog::NewsDialog(QList<NewsEntryPtr> entries, QWidget* parent) : QDialog(p
 
     m_article_list_hidden = ui->articleListWidget->isHidden();
 
-    auto first_item = ui->articleListWidget->item(0);
+    auto* first_item = ui->articleListWidget->item(0);
     first_item->setSelected(true);
 
     auto article_entry = m_entries.constFind(first_item->text()).value();

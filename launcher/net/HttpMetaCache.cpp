@@ -189,7 +189,7 @@ auto HttpMetaCache::evictAll() -> bool
 
 auto HttpMetaCache::staleEntry(QString base, QString resource_path) -> MetaEntryPtr
 {
-    auto foo = new MetaEntry();
+    auto* foo = new MetaEntry();
     foo->m_baseId = base;
     foo->m_basePath = getBasePath(base);
     foo->m_relativePath = resource_path;
@@ -262,7 +262,7 @@ void HttpMetaCache::Load()
 
         auto& entrymap = m_entries[base];
 
-        auto foo = new MetaEntry();
+        auto* foo = new MetaEntry();
         foo->m_baseId = base;
         foo->m_relativePath = element_obj["path"].toString();
         foo->m_md5sum = element_obj["md5sum"].toString();

@@ -9,7 +9,7 @@
 
 InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& old_name, const QString& new_name)
 {
-    auto dialog =
+    auto* dialog =
         CustomMessageBox::selectable(parent, QObject::tr("Change instance name"),
                                      QObject::tr("The instance's name seems to include the old version. Would you like to update it?\n\n"
                                                  "Old name: %1\n"
@@ -28,7 +28,7 @@ ShouldUpdate askIfShouldUpdate(QWidget* parent, QString original_version_name)
     if (APPLICATION->settings()->get("SkipModpackUpdatePrompt").toBool())
         return ShouldUpdate::SkipUpdating;
 
-    auto info = CustomMessageBox::selectable(
+    auto* info = CustomMessageBox::selectable(
         parent, QObject::tr("Similar modpack was found!"),
         QObject::tr(
             "One or more of your instances are from this same modpack%1. Do you want to create a "
@@ -86,10 +86,10 @@ InstanceTask::InstanceTask()  {}
 
 ShouldDeleteSaves askIfShouldDeleteSaves(QWidget* parent)
 {
-    auto dialog = CustomMessageBox::selectable(parent, QObject::tr("Delete Existing Save Files"),
-                                               QObject::tr("An earlier version of this mod pack installed save files.\n"
-                                                           "Would you like to remove those existing saves as part of this update?"),
-                                               QMessageBox::Question, QMessageBox::No | QMessageBox::Yes);
+    auto* dialog = CustomMessageBox::selectable(parent, QObject::tr("Delete Existing Save Files"),
+                                                QObject::tr("An earlier version of this mod pack installed save files.\n"
+                                                            "Would you like to remove those existing saves as part of this update?"),
+                                                QMessageBox::Question, QMessageBox::No | QMessageBox::Yes);
     auto result = dialog->exec();
     return result == QMessageBox::Yes ? ShouldDeleteSaves::Yes : ShouldDeleteSaves::No;
 }

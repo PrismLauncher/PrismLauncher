@@ -168,7 +168,7 @@ void JavaListLoadTask::executeTask()
     qDebug() << "Probing the following Java paths: ";
     int id = 0;
     for (QString candidate : candidate_paths) {
-        auto checker = new JavaChecker(candidate, "", 0, 0, 0, id);
+        auto* checker = new JavaChecker(candidate, "", 0, 0, 0, id);
         connect(checker, &JavaChecker::checkFinished, [this](const JavaChecker::Result& result) { m_results << result; });
         job->addTask(Task::Ptr(checker));
         id++;

@@ -65,8 +65,8 @@ class PageEntryFilterModel : public QSortFilterProxyModel {
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
     {
         const QString pattern = filterRegularExpression().pattern();
-        const auto model = static_cast<PageModel*>(sourceModel());
-        const auto page = model->pages().at(sourceRow);
+        auto* const model = static_cast<PageModel*>(sourceModel());
+        auto* const page = model->pages().at(sourceRow);
         if (!page->shouldDisplay())
             return false;
         // Regular contents check, then check page-filter.
@@ -83,8 +83,8 @@ PageContainer::PageContainer(BasePageProvider* pageProvider, QString defaultId, 
     m_proxyModel = new PageEntryFilterModel(this);
     int counter = 0;
     auto pages = pageProvider->getPages();
-    for (auto page : pages) {
-        auto widget = dynamic_cast<QWidget*>(page);
+    for (auto* page : pages) {
+        auto* widget = dynamic_cast<QWidget*>(page);
         widget->setParent(this);
         page->stackIndex = m_pageStack->addWidget(widget);
         page->listIndex = counter;
@@ -114,7 +114,7 @@ PageContainer::PageContainer(BasePageProvider* pageProvider, QString defaultId, 
 bool PageContainer::selectPage(QString pageId)
 {
     // now find what we want to have selected...
-    auto page = m_model->findPageEntryById(pageId);
+    auto* page = m_model->findPageEntryById(pageId);
     QModelIndex index;
     if (page) {
         index = m_proxyModel->mapFromSource(m_model->index(page->listIndex));
@@ -193,7 +193,7 @@ void PageContainer::retranslate()
     if (m_currentPage)
         m_header->setText(m_currentPage->displayName());
 
-    for (auto page : m_model->pages())
+    for (auto* page : m_model->pages())
         page->retranslate();
 }
 
@@ -267,7 +267,7 @@ bool PageContainer::prepareToClose()
 
 bool PageContainer::saveAll()
 {
-    for (auto page : m_model->pages()) {
+    for (auto* page : m_model->pages()) {
         if (!page->apply())
             return false;
     }

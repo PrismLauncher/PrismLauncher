@@ -28,7 +28,7 @@ class ThemeWizardPage : public BaseWizardPage {
    public:
     ThemeWizardPage(QWidget* parent = nullptr) : BaseWizardPage(parent)
     {
-        auto layout = new QVBoxLayout(this);
+        auto* layout = new QVBoxLayout(this);
         layout->addWidget(&widget);
         layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding));
         layout->setContentsMargins(0, 0, 0, 0);

@@ -49,7 +49,7 @@ void Technic::SingleZipPackInstallTask::executeTask()
     m_filesNetJob.reset(new NetJob(tr("Modpack download"), APPLICATION->network()));
     m_filesNetJob->addNetAction(Net::ApiDownload::makeCached(m_sourceUrl, entry));
     m_archivePath = entry->getFullPath();
-    auto job = m_filesNetJob.get();
+    auto* job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SingleZipPackInstallTask::downloadSucceeded);
     connect(job, &NetJob::progress, this, &Technic::SingleZipPackInstallTask::downloadProgressChanged);
     connect(job, &NetJob::stepProgress, this, &Technic::SingleZipPackInstallTask::propagateStepProgress);

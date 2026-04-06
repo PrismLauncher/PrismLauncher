@@ -38,7 +38,7 @@
 
 PreLaunchCommand::PreLaunchCommand(LaunchTask* parent) : LaunchStep(parent)
 {
-    auto instance = m_parent->instance();
+    auto* instance = m_parent->instance();
     m_command = instance->getPreLaunchCommand();
     m_process.setProcessEnvironment(instance->createEnvironment());
     connect(&m_process, &LoggedProcess::log, this, &PreLaunchCommand::logLines);

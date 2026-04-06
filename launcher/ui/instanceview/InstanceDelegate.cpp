@@ -308,7 +308,7 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     }
 
     // FIXME: this really has no business of being here. Make generic.
-    auto instance = (BaseInstance*)index.data(InstanceList::InstancePointerRole).value<void*>();
+    auto* instance = (BaseInstance*)index.data(InstanceList::InstancePointerRole).value<void*>();
     if (instance) {
         drawBadges(painter, opt, instance, mode, state);
     }
@@ -406,7 +406,7 @@ QWidget* ListViewDelegate::createEditor(QWidget* parent,
                                         [[maybe_unused]] const QStyleOptionViewItem& option,
                                         [[maybe_unused]] const QModelIndex& index) const
 {
-    auto editor = new NoReturnTextEdit(parent);
+    auto* editor = new NoReturnTextEdit(parent);
     connect(editor, &NoReturnTextEdit::editingDone, this, &ListViewDelegate::editingDone);
     return editor;
 }

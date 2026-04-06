@@ -79,7 +79,7 @@ void LauncherPartLaunch::executeTask()
         return;
     }
 
-    auto instance = m_parent->instance();
+    auto* instance = m_parent->instance();
 
     QString legacyJarPath;
     if (instance->getLauncher() == "legacy" || instance->shouldApplyOnlineFixes()) {
@@ -177,7 +177,7 @@ void LauncherPartLaunch::on_state(LoggedProcess::State state)
             return;
         }
         case LoggedProcess::Finished: {
-            auto instance = m_parent->instance();
+            auto* instance = m_parent->instance();
             if (instance->settings()->get("CloseAfterLaunch").toBool())
                 APPLICATION->showMainWindow();
 

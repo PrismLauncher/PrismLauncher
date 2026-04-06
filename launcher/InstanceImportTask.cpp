@@ -260,7 +260,7 @@ bool installIcon(QString root, QString instIconKey)
         importIconPath = IconUtils::findBestIconIn(FS::PathCombine(root, "overrides"), "icon.png");
     if (!importIconPath.isNull() && QFile::exists(importIconPath)) {
         // import icon
-        auto iconList = APPLICATION->icons();
+        auto* iconList = APPLICATION->icons();
         if (iconList->iconFileExists(instIconKey)) {
             iconList->deleteIcon(instIconKey);
         }

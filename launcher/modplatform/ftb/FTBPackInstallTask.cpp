@@ -239,7 +239,7 @@ void PackInstallTask::createInstance()
     auto instanceSettings = std::make_unique<INISettingsObject>(instanceConfigPath);
 
     MinecraftInstance instance(m_globalSettings, std::move(instanceSettings), m_stagingPath);
-    auto components = instance.getPackProfile();
+    auto* components = instance.getPackProfile();
     components->buildingFromScratch();
 
     for (auto target : m_version.targets) {

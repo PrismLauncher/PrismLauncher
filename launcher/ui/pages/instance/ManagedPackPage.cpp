@@ -99,7 +99,7 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
     // NOTE: GTK2 themes crash with the proxy style.
     // This seems like an upstream bug, so there's not much else that can be done.
     if (!QStyleFactory::keys().contains("gtk2")) {
-        auto comboStyle = NoBigComboBoxStyle::getInstance(ui->versionsComboBox->style());
+        auto* comboStyle = NoBigComboBoxStyle::getInstance(ui->versionsComboBox->style());
         ui->versionsComboBox->setStyle(comboStyle);
     }
 
@@ -503,7 +503,7 @@ void ManagedPackPage::updatePack(const QUrl& url, QString versionID, QString ver
     extra_info.insert("pack_version_id", versionID);
     extra_info.insert("original_instance_id", m_inst->id());
 
-    auto extracted = new InstanceImportTask(url, this, std::move(extra_info));
+    auto* extracted = new InstanceImportTask(url, this, std::move(extra_info));
 
     if (versionName.isEmpty()) {
         extracted->setName(m_inst->name());

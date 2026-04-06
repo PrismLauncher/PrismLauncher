@@ -107,7 +107,7 @@ CopyInstanceDialog::CopyInstanceDialog(BaseInstance* original, QWidget* parent)
     updateLinkOptions();
     updateUseCloneCheckbox();
 
-    auto HelpButton = ui->buttonBox->button(QDialogButtonBox::Help);
+    auto* HelpButton = ui->buttonBox->button(QDialogButtonBox::Help);
     connect(HelpButton, &QPushButton::clicked, this, &CopyInstanceDialog::help);
     HelpButton->setText(tr("Help"));
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
@@ -122,7 +122,7 @@ CopyInstanceDialog::~CopyInstanceDialog()
 void CopyInstanceDialog::updateDialogState()
 {
     auto allowOK = !instName().isEmpty();
-    auto OkButton = ui->buttonBox->button(QDialogButtonBox::Ok);
+    auto* OkButton = ui->buttonBox->button(QDialogButtonBox::Ok);
     if (OkButton->isEnabled() != allowOK) {
         OkButton->setEnabled(allowOK);
     }

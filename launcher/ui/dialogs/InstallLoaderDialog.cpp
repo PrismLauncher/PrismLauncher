@@ -66,7 +66,7 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
 
     void setParentContainer(BasePageContainer* container) override
     {
-        auto dialog = dynamic_cast<QDialog*>(dynamic_cast<PageContainer*>(container)->parent());
+        auto* dialog = dynamic_cast<QDialog*>(dynamic_cast<PageContainer*>(container)->parent());
         connect(view(), &QAbstractItemView::doubleClicked, dialog, &QDialog::accept);
     }
 
@@ -79,7 +79,7 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
 
 static InstallLoaderPage* pageCast(BasePage* page)
 {
-    auto result = dynamic_cast<InstallLoaderPage*>(page);
+    auto* result = dynamic_cast<InstallLoaderPage*>(page);
     Q_ASSERT(result != nullptr);
     return result;
 }
@@ -87,7 +87,7 @@ static InstallLoaderPage* pageCast(BasePage* page)
 InstallLoaderDialog::InstallLoaderDialog(PackProfile* profile, const QString& uid, QWidget* parent)
     : QDialog(parent), profile(profile), container(new PageContainer(this, QString(), this)), buttons(new QDialogButtonBox(this))
 {
-    auto layout = new QVBoxLayout(this);
+    auto* layout = new QVBoxLayout(this);
     // small margins look ugly on macOS on modal windows
     #ifndef Q_OS_MACOS
     layout->setContentsMargins(0, 0, 0, 0);
@@ -95,12 +95,12 @@ InstallLoaderDialog::InstallLoaderDialog(PackProfile* profile, const QString& ui
     container->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     layout->addWidget(container);
 
-    auto buttonLayout = new QHBoxLayout(this);
+    auto* buttonLayout = new QHBoxLayout(this);
     // small margins look ugly on macOS on modal windows
     #ifndef Q_OS_MACOS
     buttonLayout->setContentsMargins(0, 0, 6, 6);
     #endif
-    auto refreshButton = new QPushButton(tr("&Refresh"), this);
+    auto* refreshButton = new QPushButton(tr("&Refresh"), this);
     connect(refreshButton, &QPushButton::clicked, this, [this] { pageCast(container->selectedPage())->loadList(); });
     buttonLayout->addWidget(refreshButton);
 

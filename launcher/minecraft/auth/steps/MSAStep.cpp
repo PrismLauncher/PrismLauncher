@@ -117,7 +117,7 @@ MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(sile
     if (QCoreApplication::applicationFilePath().startsWith("/tmp/.mount_") || APPLICATION->isPortable() || !isSchemeHandlerRegistered())
 
     {
-        auto replyHandler = new LoggingOAuthHttpServerReplyHandler(this);
+        auto* replyHandler = new LoggingOAuthHttpServerReplyHandler(this);
         replyHandler->setCallbackText(QString(R"XXX(
     <noscript>
       <meta http-equiv="Refresh" content="0; URL=%1" />

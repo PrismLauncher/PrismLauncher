@@ -102,7 +102,7 @@ void AccountListPage::retranslate()
 
 void AccountListPage::ShowContextMenu(const QPoint& pos)
 {
-    auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
+    auto* menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
     menu->exec(ui->listView->mapToGlobal(pos));
     delete menu;
 }

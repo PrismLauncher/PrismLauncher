@@ -216,7 +216,7 @@ void ModrinthCheckUpdate::checkNextLoader()
         return;
     }
 
-    for (auto resource : m_mappings) {
+    for (auto* resource : m_mappings) {
         QString reason;
 
         if (dynamic_cast<Mod*>(resource) != nullptr)

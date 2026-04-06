@@ -236,7 +236,7 @@ bool ResourceFolderModel::deleteResources(const QModelIndexList& indexes)
         if (i.column() != 0)
             continue;
 
-        auto& resource = m_resources.at(i.row());
+        const auto& resource = m_resources.at(i.row());
         resource->destroy(indexDir());
     }
 
@@ -254,7 +254,7 @@ void ResourceFolderModel::deleteMetadata(const QModelIndexList& indexes)
         if (i.column() != 0)
             continue;
 
-        auto& resource = m_resources.at(i.row());
+        const auto& resource = m_resources.at(i.row());
         resource->destroyMetadata(indexDir());
     }
 
@@ -340,7 +340,7 @@ bool ResourceFolderModel::update()
     Task::Ptr preUpdate{ createPreUpdateTask() };
 
     if (preUpdate != nullptr) {
-        auto task = new SequentialTask("ResourceFolderModel::update");
+        auto* task = new SequentialTask("ResourceFolderModel::update");
 
         task->addTask(preUpdate);
         task->addTask(m_current_update_task);
@@ -420,8 +420,8 @@ void ResourceFolderModel::onParseSucceeded(int ticket, QString resource_id)
 Task* ResourceFolderModel::createUpdateTask()
 {
     auto index_dir = indexDir();
-    auto task = new ResourceFolderLoadTask(dir(), index_dir, m_is_indexed, m_first_folder_load,
-                                           [this](const QFileInfo& file) { return createResource(file); });
+    auto* task = new ResourceFolderLoadTask(dir(), index_dir, m_is_indexed, m_first_folder_load,
+                                            [this](const QFileInfo& file) { return createResource(file); });
     m_first_folder_load = false;
     return task;
 }
@@ -643,7 +643,7 @@ void ResourceFolderModel::saveColumns(QTreeView* tree)
     stateSetting->set(QString::fromUtf8(tree->header()->saveState().toBase64()));
 
     // neither passthrough nor override settings works for this usecase as I need to only set the global when the gate is false
-    auto settings = m_instance->settings();
+    auto* settings = m_instance->settings();
     if (!settings->get(overrideSettingName).toBool()) {
         settings = APPLICATION->settings();
     }
@@ -684,7 +684,7 @@ void ResourceFolderModel::loadColumns(QTreeView* tree)
         { "Pack Format", true },
     });
     // neither passthrough nor override settings works for this usecase as I need to only set the global when the gate is false
-    auto settings = m_instance->settings();
+    auto* settings = m_instance->settings();
     if (!settings->getOrRegisterSetting(overrideSettingName, false)->get().toBool()) {
         settings = APPLICATION->settings();
     }
@@ -702,10 +702,10 @@ void ResourceFolderModel::loadColumns(QTreeView* tree)
 
 QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
 {
-    auto menu = new QMenu(tree);
+    auto* menu = new QMenu(tree);
 
     {  // action to decide if the visibility is per instance or not
-        auto act = new QAction(tr("Override Columns Visibility"), menu);
+        auto* act = new QAction(tr("Override Columns Visibility"), menu);
         auto const overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
 
         act->setCheckable(true);
@@ -724,7 +724,7 @@ QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
         // Skip creating actions for columns that should not be hidden
         if (!m_columnsHideable.at(col))
             continue;
-        auto act = new QAction(menu);
+        auto* act = new QAction(menu);
         setupHeaderAction(act, col);
 
         act->setCheckable(true);
@@ -848,7 +848,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
             if (current_resource->isResolving()) {
                 auto ticket = current_resource->resolutionTicket();
                 if (m_active_parse_tasks.contains(ticket)) {
-                    auto task = (*m_active_parse_tasks.find(ticket)).get();
+                    auto* task = (*m_active_parse_tasks.find(ticket)).get();
                     task->abort();
                 }
             }
@@ -867,7 +867,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
         removed_set.subtract(new_set);
 
         QList<int> removed_rows;
-        for (auto& removed : removed_set)
+        for (const auto& removed : removed_set)
             removed_rows.append(m_resources_index[removed]);
 
         std::sort(removed_rows.begin(), removed_rows.end(), std::greater<int>());
@@ -880,7 +880,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
             if ((*removed_it)->isResolving()) {
                 auto ticket = (*removed_it)->resolutionTicket();
                 if (m_active_parse_tasks.contains(ticket)) {
-                    auto task = (*m_active_parse_tasks.find(ticket)).get();
+                    auto* task = (*m_active_parse_tasks.find(ticket)).get();
                     task->abort();
                 }
             }
@@ -901,7 +901,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
             beginInsertRows(QModelIndex(), static_cast<int>(m_resources.size()),
                             static_cast<int>(m_resources.size() + added_set.size() - 1));
 
-            for (auto& added : added_set) {
+            for (const auto& added : added_set) {
                 auto res = new_resources[added];
                 res->updateIssues(m_instance);
                 m_resources.append(res);

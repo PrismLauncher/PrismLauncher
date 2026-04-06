@@ -83,7 +83,7 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
 
         m_quickPlaySingleplayer = m_instance->traits().contains("feature:is_quick_play_singleplayer");
         if (m_quickPlaySingleplayer) {
-            auto worlds = m_instance->worldList();
+            auto* worlds = m_instance->worldList();
             worlds->update();
             for (const auto& world : worlds->allWorlds()) {
                 m_ui->worldsCb->addItem(world.folderName());
@@ -116,8 +116,8 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
                 m_instance->settings()->reset("ModDownloadLoaders");
         });
 
-        for (auto c : { m_ui->neoForge, m_ui->forge, m_ui->fabric, m_ui->quilt, m_ui->liteLoader, m_ui->babric, m_ui->btaBabric,
-                        m_ui->legacyFabric, m_ui->ornithe, m_ui->rift }) {
+        for (auto* c : { m_ui->neoForge, m_ui->forge, m_ui->fabric, m_ui->quilt, m_ui->liteLoader, m_ui->babric, m_ui->btaBabric,
+                         m_ui->legacyFabric, m_ui->ornithe, m_ui->rift }) {
             connect(c, &QCheckBox::stateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
         }
     }
@@ -254,7 +254,7 @@ void MinecraftSettingsWidget::loadSettings()
         auto blockSignalsCheckBoxes = { m_ui->neoForge, m_ui->forge,     m_ui->fabric,       m_ui->quilt,   m_ui->liteLoader,
                                         m_ui->babric,   m_ui->btaBabric, m_ui->legacyFabric, m_ui->ornithe, m_ui->rift };
         m_ui->loaderGroup->blockSignals(true);
-        for (auto c : blockSignalsCheckBoxes) {
+        for (auto* c : blockSignalsCheckBoxes) {
             c->blockSignals(true);
         }
 
@@ -290,7 +290,7 @@ void MinecraftSettingsWidget::loadSettings()
         }
 
         m_ui->loaderGroup->blockSignals(false);
-        for (auto c : blockSignalsCheckBoxes) {
+        for (auto* c : blockSignalsCheckBoxes) {
             c->blockSignals(false);
         }
     }
@@ -502,7 +502,7 @@ void MinecraftSettingsWidget::openGlobalSettings()
 void MinecraftSettingsWidget::updateAccountsMenu(SettingsObject& settings)
 {
     m_ui->instanceAccountSelector->clear();
-    auto accounts = APPLICATION->accounts();
+    auto* accounts = APPLICATION->accounts();
     int accountIndex = accounts->findAccountByProfileId(settings.get("InstanceAccountId").toString());
 
     for (int i = 0; i < accounts->count(); i++) {
