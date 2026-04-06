@@ -32,7 +32,6 @@
 #include "Application.h"
 
 static const FlameAPI flameAPI;
-static ModrinthAPI modrinthAPI;
 
 Flame::FileResolvingTask::FileResolvingTask(Flame::Manifest& toProcess) : m_manifest(toProcess) {}
 
@@ -58,7 +57,7 @@ void Flame::FileResolvingTask::executeTask()
     for (auto file : m_manifest.files) {
         fileIds.push_back(QString::number(file.fileId));
     }
-    auto [task, response] = flameAPI.getFiles(fileIds);
+    auto [task, response] = FlameAPI::getFiles(fileIds);
     m_task = task;
 
     auto step_progress = std::make_shared<TaskStepProgress>();
@@ -155,7 +154,7 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
         getFlameProjects();
         return;
     }
-    auto [modrinthTask, modrinthResponse] = modrinthAPI.currentVersions(hashes, "sha1");
+    auto [modrinthTask, modrinthResponse] = ModrinthAPI::currentVersions(hashes, "sha1");
     m_task = modrinthTask;
     (dynamic_cast<NetJob*>(m_task.get()))->setAskRetry(false);
     auto step_progress = std::make_shared<TaskStepProgress>();

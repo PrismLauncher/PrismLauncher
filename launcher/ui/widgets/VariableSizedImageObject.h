@@ -58,7 +58,7 @@ class VariableSizedImageObject final : public QObject, public QTextObjectInterfa
    private:
     /** Adds the image to the document, in the given position.
      */
-    void parseImage(QTextDocument* doc, std::shared_ptr<ImageMetadata> meta);
+    static void parseImage(QTextDocument* doc, std::shared_ptr<ImageMetadata> meta);
 
     /** Loads an image from an external source, and adds it to the document.
      *

@@ -67,7 +67,7 @@ class Component : public QObject, public ProblemProvider {
     bool setEnabled(bool state);
     bool canBeDisabled() const;
 
-    bool isMoveable();
+    static bool isMoveable();
     bool isCustomizable();
     bool isRevertible() const;
     bool isRemovable() const;

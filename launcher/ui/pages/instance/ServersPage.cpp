@@ -463,7 +463,7 @@ class ServersModel : public QAbstractListModel {
         qDebug() << "Changed:" << path;
         load();
     }
-    void fileChanged(const QString& path) { qDebug() << "Changed:" << path; }
+    static void fileChanged(const QString& path) { qDebug() << "Changed:" << path; }
 
    private slots:
     void save_internal()

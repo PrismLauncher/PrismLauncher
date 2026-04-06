@@ -13,8 +13,6 @@
 
 #include "tasks/ConcurrentTask.h"
 
-static const ModrinthAPI g_api;
-
 ModrinthCheckUpdate::ModrinthCheckUpdate(QList<Resource*>& resources,
                                          std::vector<Version>& mcVersions,
                                          QList<ModPlatform::ModLoaderType> loadersList,
@@ -105,7 +103,7 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
         return;
     }
 
-    auto [job, response] = g_api.latestVersions(hashes, m_hashType, m_gameVersions, loader);
+    auto [job, response] = ModrinthAPI::latestVersions(hashes, m_hashType, m_gameVersions, loader);
 
     connect(job.get(), &Task::succeeded, this, [this, response, loader] { checkVersionsResponse(response, loader); });
 

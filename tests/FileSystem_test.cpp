@@ -92,7 +92,7 @@ class FileSystemTest : public QObject {
         QCOMPARE(QString("/foo/foo/foo"), FS::PathCombine(leadingSlash, leadingSlash, leadingSlash));
     }
 
-    void test_PathCombine1_data()
+    static void test_PathCombine1_data()
     {
         QTest::addColumn<QString>("result");
         QTest::addColumn<QString>("path1");
@@ -107,7 +107,7 @@ class FileSystemTest : public QObject {
 #endif
     }
 
-    void test_PathCombine1()
+    static void test_PathCombine1()
     {
         QFETCH(QString, result);
         QFETCH(QString, path1);
@@ -116,7 +116,7 @@ class FileSystemTest : public QObject {
         QCOMPARE(FS::PathCombine(path1, path2), result);
     }
 
-    void test_PathCombine2_data()
+    static void test_PathCombine2_data()
     {
         QTest::addColumn<QString>("result");
         QTest::addColumn<QString>("path1");
@@ -135,7 +135,7 @@ class FileSystemTest : public QObject {
 #endif
     }
 
-    void test_PathCombine2()
+    static void test_PathCombine2()
     {
         QFETCH(QString, result);
         QFETCH(QString, path1);
@@ -145,7 +145,7 @@ class FileSystemTest : public QObject {
         QCOMPARE(FS::PathCombine(path1, path2, path3), result);
     }
 
-    void test_copy()
+    static void test_copy()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
         auto f = [&folder]() {
@@ -176,7 +176,7 @@ class FileSystemTest : public QObject {
         f();
     }
 
-    void test_copy_with_blacklist()
+    static void test_copy_with_blacklist()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
         auto f = [&folder]() {
@@ -209,7 +209,7 @@ class FileSystemTest : public QObject {
         f();
     }
 
-    void test_copy_with_whitelist()
+    static void test_copy_with_whitelist()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
         auto f = [&folder]() {
@@ -243,7 +243,7 @@ class FileSystemTest : public QObject {
         f();
     }
 
-    void test_copy_with_dot_hidden()
+    static void test_copy_with_dot_hidden()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
         auto f = [&folder]() {
@@ -278,7 +278,7 @@ class FileSystemTest : public QObject {
         f();
     }
 
-    void test_copy_single_file()
+    static void test_copy_single_file()
     {
         QTemporaryDir tempDir;
         tempDir.setAutoRemove(true);
@@ -304,9 +304,9 @@ class FileSystemTest : public QObject {
         }
     }
 
-    void test_getDesktop() { QCOMPARE(FS::getDesktopDir(), QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)); }
+    static void test_getDesktop() { QCOMPARE(FS::getDesktopDir(), QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)); }
 
-    void test_link()
+    static void test_link()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
         auto f = [&folder]() {
@@ -351,7 +351,7 @@ class FileSystemTest : public QObject {
         f();
     }
 
-    void test_hard_link()
+    static void test_hard_link()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
         auto f = [&folder]() {
@@ -400,7 +400,7 @@ class FileSystemTest : public QObject {
         f();
     }
 
-    void test_link_with_blacklist()
+    static void test_link_with_blacklist()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
         auto f = [&folder]() {
@@ -446,7 +446,7 @@ class FileSystemTest : public QObject {
         f();
     }
 
-    void test_link_with_whitelist()
+    static void test_link_with_whitelist()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
         auto f = [&folder]() {
@@ -493,7 +493,7 @@ class FileSystemTest : public QObject {
         f();
     }
 
-    void test_link_with_dot_hidden()
+    static void test_link_with_dot_hidden()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
         auto f = [&folder]() {
@@ -540,7 +540,7 @@ class FileSystemTest : public QObject {
         f();
     }
 
-    void test_link_single_file()
+    static void test_link_single_file()
     {
         QTemporaryDir tempDir;
         tempDir.setAutoRemove(true);
@@ -575,7 +575,7 @@ class FileSystemTest : public QObject {
         }
     }
 
-    void test_link_with_max_depth()
+    static void test_link_with_max_depth()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
         auto f = [&folder]() {
@@ -625,7 +625,7 @@ class FileSystemTest : public QObject {
         f();
     }
 
-    void test_link_with_no_max_depth()
+    static void test_link_with_no_max_depth()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
         auto f = [&folder]() {
@@ -680,7 +680,7 @@ class FileSystemTest : public QObject {
         f();
     }
 
-    void test_path_depth()
+    static void test_path_depth()
     {
         QCOMPARE(FS::pathDepth(""), 0);
         QCOMPARE(FS::pathDepth("."), 0);
@@ -695,7 +695,7 @@ class FileSystemTest : public QObject {
         QCOMPARE(FS::pathDepth("/baz/../bar/foo.txt"), 1);
     }
 
-    void test_path_trunc()
+    static void test_path_trunc()
     {
         QCOMPARE(FS::pathTruncate("", 0), QDir::toNativeSeparators(""));
         QCOMPARE(FS::pathTruncate("foo.txt", 0), QDir::toNativeSeparators(""));

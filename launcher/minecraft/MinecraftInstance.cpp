@@ -451,7 +451,7 @@ QString MinecraftInstance::resourcesDir() const
     return FS::PathCombine(gameRoot(), "resources");
 }
 
-QDir MinecraftInstance::librariesPath() const
+QDir MinecraftInstance::librariesPath()
 {
     return QDir::current().absoluteFilePath("libraries");
 }
@@ -461,7 +461,7 @@ QDir MinecraftInstance::jarmodsPath() const
     return QDir(jarModsDir());
 }
 
-QDir MinecraftInstance::versionsPath() const
+QDir MinecraftInstance::versionsPath()
 {
     return QDir::current().absoluteFilePath("versions");
 }
@@ -777,7 +777,7 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, Mine
         tokenMapping["auth_access_token"] = session->access_token;
         tokenMapping["auth_player_name"] = session->player_name;
         tokenMapping["auth_uuid"] = session->uuid;
-        tokenMapping["user_properties"] = session->serializeUserProperties();
+        tokenMapping["user_properties"] = AuthSession::serializeUserProperties();
         tokenMapping["user_type"] = session->user_type;
 
         if (session->launchMode == LaunchMode::Demo) {

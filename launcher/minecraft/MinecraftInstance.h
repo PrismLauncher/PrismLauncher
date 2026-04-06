@@ -87,8 +87,8 @@ class MinecraftInstance : public BaseInstance {
     QString worldDir() const;
     QString resourcesDir() const;
     QDir jarmodsPath() const;
-    QDir librariesPath() const;
-    QDir versionsPath() const;
+    static QDir librariesPath();
+    static QDir versionsPath();
     QString instanceConfigFolder() const override;
 
     // Path to the instance's minecraft directory.
@@ -158,7 +158,7 @@ class MinecraftInstance : public BaseInstance {
     virtual JavaVersion getJavaVersion();
 
    protected:
-    QMap<QString, QString> createCensorFilterFromSession(AuthSessionPtr session);
+    static QMap<QString, QString> createCensorFilterFromSession(AuthSessionPtr session);
     QMap<QString, QString> makeProfileVarMapping(std::shared_ptr<LaunchProfile> profile) const;
 
    protected:  // data

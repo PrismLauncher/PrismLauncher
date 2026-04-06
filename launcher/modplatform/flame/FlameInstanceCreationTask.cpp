@@ -70,8 +70,6 @@
 #include "net/ApiDownload.h"
 #include "ui/pages/modplatform/OptionalModDialog.h"
 
-static const FlameAPI api;
-
 bool FlameCreationTask::abort()
 {
     if (!canAbort())
@@ -182,7 +180,7 @@ bool FlameCreationTask::updateInstance()
             fileIds.append(QString::number(file.fileId));
         }
 
-        auto [job, raw_response] = api.getFiles(fileIds);
+        auto [job, raw_response] = FlameAPI::getFiles(fileIds);
 
         QEventLoop loop;
 

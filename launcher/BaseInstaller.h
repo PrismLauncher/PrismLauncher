@@ -40,5 +40,5 @@ class BaseInstaller {
    protected:
     virtual QString id() const = 0;
     QString filename(const QString& root) const;
-    QDir patchesDir(const QString& root) const;
+    static QDir patchesDir(const QString& root);
 };

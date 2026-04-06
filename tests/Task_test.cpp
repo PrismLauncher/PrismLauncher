@@ -88,7 +88,7 @@ class TaskTest : public QObject {
     Q_OBJECT
 
    private slots:
-    void test_SetStatus_NoMultiStep()
+    static void test_SetStatus_NoMultiStep()
     {
         BasicTask t;
         QString status{ "test status" };
@@ -99,7 +99,7 @@ class TaskTest : public QObject {
         QCOMPARE(t.getStepProgress().isEmpty(), TaskStepProgressList{}.isEmpty());
     }
 
-    void test_SetStatus_MultiStep()
+    static void test_SetStatus_MultiStep()
     {
         BasicTask_MultiStep t;
         QString status{ "test status" };
@@ -112,7 +112,7 @@ class TaskTest : public QObject {
         QCOMPARE(t.getStepProgress().isEmpty(), TaskStepProgressList{}.isEmpty());
     }
 
-    void test_SetProgress()
+    static void test_SetProgress()
     {
         BasicTask t;
         int current = 42;
@@ -124,7 +124,7 @@ class TaskTest : public QObject {
         QCOMPARE(t.getTotalProgress(), total);
     }
 
-    void test_basicRun()
+    static void test_basicRun()
     {
         BasicTask t;
         connect(&t, &Task::finished,
@@ -134,7 +134,7 @@ class TaskTest : public QObject {
         QVERIFY2(QTest::qWaitFor([&t]() { return t.isFinished(); }, 1000), "Task didn't finish as it should.");
     }
 
-    void test_basicConcurrentRun()
+    static void test_basicConcurrentRun()
     {
         auto t1 = makeShared<BasicTask>();
         auto t2 = makeShared<BasicTask>();
@@ -158,7 +158,7 @@ class TaskTest : public QObject {
     }
 
     // Tests if starting new tasks after the 6 initial ones is working
-    void test_moreConcurrentRun()
+    static void test_moreConcurrentRun()
     {
         auto t1 = makeShared<BasicTask>();
         auto t2 = makeShared<BasicTask>();
@@ -199,7 +199,7 @@ class TaskTest : public QObject {
         QVERIFY2(QTest::qWaitFor([&t]() { return t.isFinished(); }, 1000), "Task didn't finish as it should.");
     }
 
-    void test_basicSequentialRun()
+    static void test_basicSequentialRun()
     {
         auto t1 = makeShared<BasicTask>();
         auto t2 = makeShared<BasicTask>();
@@ -222,7 +222,7 @@ class TaskTest : public QObject {
         QVERIFY2(QTest::qWaitFor([&t]() { return t.isFinished(); }, 1000), "Task didn't finish as it should.");
     }
 
-    void test_basicMultipleOptionsRun()
+    static void test_basicMultipleOptionsRun()
     {
         auto t1 = makeShared<BasicTask>();
         auto t2 = makeShared<BasicTask>();
@@ -245,7 +245,7 @@ class TaskTest : public QObject {
         QVERIFY2(QTest::qWaitFor([&t]() { return t.isFinished(); }, 1000), "Task didn't finish as it should.");
     }
 
-    void test_stackOverflowInConcurrentTask()
+    static void test_stackOverflowInConcurrentTask()
     {
         QEventLoop loop;
 

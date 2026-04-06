@@ -32,7 +32,7 @@ class WorldSaveParseTest : public QObject {
     Q_OBJECT
 
    private slots:
-    void test_parseZIP()
+    static void test_parseZIP()
     {
         QString source = QFINDTESTDATA("testdata/WorldSaveParse");
 
@@ -46,7 +46,7 @@ class WorldSaveParseTest : public QObject {
         QVERIFY(valid == true);
     }
 
-    void test_parse_ZIP2()
+    static void test_parse_ZIP2()
     {
         QString source = QFINDTESTDATA("testdata/WorldSaveParse");
 
@@ -60,7 +60,7 @@ class WorldSaveParseTest : public QObject {
         QVERIFY(valid == true);
     }
 
-    void test_parseFolder()
+    static void test_parseFolder()
     {
         QString source = QFINDTESTDATA("testdata/WorldSaveParse");
 
@@ -74,7 +74,7 @@ class WorldSaveParseTest : public QObject {
         QVERIFY(valid == true);
     }
 
-    void test_parseFolder2()
+    static void test_parseFolder2()
     {
         QString source = QFINDTESTDATA("testdata/WorldSaveParse");
 

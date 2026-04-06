@@ -22,7 +22,7 @@ class PackFetchTask : public QObject {
     QNetworkAccessManager* m_network;
     NetJob::Ptr jobPtr;
 
-    bool parseAndAddPacks(QByteArray& data, PackType packType, ModpackList& list);
+    static bool parseAndAddPacks(QByteArray& data, PackType packType, ModpackList& list);
     ModpackList publicPacks;
     ModpackList thirdPartyPacks;
 

@@ -46,7 +46,7 @@
 class MetaComponentParseTest : public QObject {
     Q_OBJECT
 
-    void doTest(QString name)
+    static void doTest(QString name)
     {
         QString source = QFINDTESTDATA("testdata/MetaComponentParse");
 
@@ -75,11 +75,11 @@ class MetaComponentParseTest : public QObject {
     }
 
    private slots:
-    void test_parseComponentBasic() { doTest("component_basic.json"); }
-    void test_parseComponentWithFormat() { doTest("component_with_format.json"); }
-    void test_parseComponentWithExtra() { doTest("component_with_extra.json"); }
-    void test_parseComponentWithLink() { doTest("component_with_link.json"); }
-    void test_parseComponentWithMixed() { doTest("component_with_mixed.json"); }
+    static void test_parseComponentBasic() { doTest("component_basic.json"); }
+    static void test_parseComponentWithFormat() { doTest("component_with_format.json"); }
+    static void test_parseComponentWithExtra() { doTest("component_with_extra.json"); }
+    static void test_parseComponentWithLink() { doTest("component_with_link.json"); }
+    static void test_parseComponentWithMixed() { doTest("component_with_mixed.json"); }
 };
 
 QTEST_GUILESS_MAIN(MetaComponentParseTest)

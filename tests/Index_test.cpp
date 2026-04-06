@@ -6,7 +6,7 @@
 class IndexTest : public QObject {
     Q_OBJECT
    private slots:
-    void test_hasUid_and_getList()
+    static void test_hasUid_and_getList()
     {
         Meta::Index windex({ std::make_shared<Meta::VersionList>("list1"), std::make_shared<Meta::VersionList>("list2"),
                              std::make_shared<Meta::VersionList>("list3") });
@@ -17,7 +17,7 @@ class IndexTest : public QObject {
         QVERIFY(windex.get("adsf") != nullptr);
     }
 
-    void test_merge()
+    static void test_merge()
     {
         Meta::Index windex({ std::make_shared<Meta::VersionList>("list1"), std::make_shared<Meta::VersionList>("list2"),
                              std::make_shared<Meta::VersionList>("list3") });

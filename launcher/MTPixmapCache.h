@@ -68,28 +68,28 @@ class PixmapCache final : public QObject {
 
     // NOTE: Every function returns something non-void to simplify the macros.
    private slots:
-    int _cacheLimit() { return QPixmapCache::cacheLimit(); }
-    bool _clear()
+    static int _cacheLimit() { return QPixmapCache::cacheLimit(); }
+    static bool _clear()
     {
         QPixmapCache::clear();
         return true;
     }
-    bool _find(const QString& key, QPixmap* pixmap) { return QPixmapCache::find(key, pixmap); }
-    bool _find(const QPixmapCache::Key& key, QPixmap* pixmap) { return QPixmapCache::find(key, pixmap); }
-    bool _insert(const QString& key, const QPixmap& pixmap) { return QPixmapCache::insert(key, pixmap); }
-    QPixmapCache::Key _insert(const QPixmap& pixmap) { return QPixmapCache::insert(pixmap); }
-    bool _remove(const QString& key)
+    static bool _find(const QString& key, QPixmap* pixmap) { return QPixmapCache::find(key, pixmap); }
+    static bool _find(const QPixmapCache::Key& key, QPixmap* pixmap) { return QPixmapCache::find(key, pixmap); }
+    static bool _insert(const QString& key, const QPixmap& pixmap) { return QPixmapCache::insert(key, pixmap); }
+    static QPixmapCache::Key _insert(const QPixmap& pixmap) { return QPixmapCache::insert(pixmap); }
+    static bool _remove(const QString& key)
     {
         QPixmapCache::remove(key);
         return true;
     }
-    bool _remove(const QPixmapCache::Key& key)
+    static bool _remove(const QPixmapCache::Key& key)
     {
         QPixmapCache::remove(key);
         return true;
     }
-    bool _replace(const QPixmapCache::Key& key, const QPixmap& pixmap) { return QPixmapCache::replace(key, pixmap); }
-    bool _setCacheLimit(int n)
+    static bool _replace(const QPixmapCache::Key& key, const QPixmap& pixmap) { return QPixmapCache::replace(key, pixmap); }
+    static bool _setCacheLimit(int n)
     {
         QPixmapCache::setCacheLimit(n);
         return true;

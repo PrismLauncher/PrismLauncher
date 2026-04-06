@@ -133,7 +133,7 @@ void ImportPage::updateState()
             auto fileId = query.allQueryItemValues("fileId")[0];
 
             auto api = FlameAPI();
-            auto [job, array] = api.getFile(addonId, fileId);
+            auto [job, array] = FlameAPI::getFile(addonId, fileId);
 
             connect(job.get(), &NetJob::failed, this,
                     [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });

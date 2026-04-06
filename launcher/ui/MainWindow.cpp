@@ -972,7 +972,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 extra_info.insert("pack_version_id", fileId);
 
                 auto api = FlameAPI();
-                auto [job, array] = api.getFile(addonId, fileId);
+                auto [job, array] = FlameAPI::getFile(addonId, fileId);
 
                 connect(job.get(), &Task::failed, this,
                         [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });

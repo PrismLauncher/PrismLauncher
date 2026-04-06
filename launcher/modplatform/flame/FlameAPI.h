@@ -15,18 +15,18 @@
 
 class FlameAPI : public ResourceAPI {
    public:
-    QString getModFileChangelog(int modId, int fileId);
-    QString getModDescription(int modId);
+    static QString getModFileChangelog(int modId, int fileId);
+    static QString getModDescription(int modId);
 
-    std::optional<ModPlatform::IndexedVersion> getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
-                                                                QList<ModPlatform::ModLoaderType> instanceLoaders,
-                                                                ModPlatform::ModLoaderTypes fallback,
-                                                                bool checkLoaders);
+    static std::optional<ModPlatform::IndexedVersion> getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
+                                                                       QList<ModPlatform::ModLoaderType> instanceLoaders,
+                                                                       ModPlatform::ModLoaderTypes fallback,
+                                                                       bool checkLoaders);
 
     std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
-    std::pair<Task::Ptr, QByteArray*> matchFingerprints(const QList<uint>& fingerprints);
-    std::pair<Task::Ptr, QByteArray*> getFiles(const QStringList& fileIds) const;
-    std::pair<Task::Ptr, QByteArray*> getFile(const QString& addonId, const QString& fileId) const;
+    static std::pair<Task::Ptr, QByteArray*> matchFingerprints(const QList<uint>& fingerprints);
+    static std::pair<Task::Ptr, QByteArray*> getFiles(const QStringList& fileIds);
+    static std::pair<Task::Ptr, QByteArray*> getFile(const QString& addonId, const QString& fileId);
 
     static std::pair<Task::Ptr, QByteArray*> getCategories(ModPlatform::ResourceType type);
     static std::pair<Task::Ptr, QByteArray*> getModCategories();

@@ -14,19 +14,19 @@
 
 class ModrinthAPI : public ResourceAPI {
    public:
-    std::pair<Task::Ptr, QByteArray*> currentVersion(const QString& hash, const QString& hash_format) const;
+    static std::pair<Task::Ptr, QByteArray*> currentVersion(const QString& hash, const QString& hash_format);
 
-    std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, QString hash_format) const;
+    static std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, QString hash_format);
 
-    std::pair<Task::Ptr, QByteArray*> latestVersion(const QString& hash,
-                                                    const QString& hash_format,
-                                                    std::optional<std::vector<Version>> mcVersions,
-                                                    std::optional<ModPlatform::ModLoaderTypes> loaders) const;
+    static std::pair<Task::Ptr, QByteArray*> latestVersion(const QString& hash,
+                                                           const QString& hash_format,
+                                                           std::optional<std::vector<Version>> mcVersions,
+                                                           std::optional<ModPlatform::ModLoaderTypes> loaders);
 
-    std::pair<Task::Ptr, QByteArray*> latestVersions(const QStringList& hashes,
-                                                     const QString& hash_format,
-                                                     std::optional<std::vector<Version>> mcVersions,
-                                                     std::optional<ModPlatform::ModLoaderTypes> loaders) const;
+    static std::pair<Task::Ptr, QByteArray*> latestVersions(const QStringList& hashes,
+                                                            const QString& hash_format,
+                                                            std::optional<std::vector<Version>> mcVersions,
+                                                            std::optional<ModPlatform::ModLoaderTypes> loaders);
 
     std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
 
@@ -123,7 +123,7 @@ class ModrinthAPI : public ResourceAPI {
         return "";
     }
 
-    QString createFacets(const SearchArgs& args) const
+    static QString createFacets(const SearchArgs& args)
     {
         QStringList facets_list;
 
@@ -180,7 +180,7 @@ class ModrinthAPI : public ResourceAPI {
         return BuildConfig.MODRINTH_PROD_URL + "/project/" + id;
     };
 
-    auto getMultipleModInfoURL(const QStringList& ids) const -> QString
+    static auto getMultipleModInfoURL(const QStringList& ids) -> QString
     {
         return BuildConfig.MODRINTH_PROD_URL + QString("/projects?ids=[\"%1\"]").arg(ids.join("\",\""));
     };
@@ -200,7 +200,7 @@ class ModrinthAPI : public ResourceAPI {
             .arg(BuildConfig.MODRINTH_PROD_URL, args.pack->addonId.toString(), get_arguments.isEmpty() ? "" : "?", get_arguments.join('&'));
     };
 
-    QString getGameVersionsArray(const std::vector<Version>& mcVersions) const
+    static QString getGameVersionsArray(const std::vector<Version>& mcVersions)
     {
         QString s;
         for (const auto& ver : mcVersions) {

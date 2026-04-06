@@ -67,8 +67,8 @@ class ModrinthPage : public QWidget, public ModpackProviderBasePage {
     QString id() const override { return "modrinth"; }
     QString helpPage() const override { return "Modrinth-platform"; }
 
-    QString debugName() const { return "Modrinth"; }
-    QString metaEntryBase() const { return "ModrinthModpacks"; };
+    static QString debugName() { return "Modrinth"; }
+    static QString metaEntryBase() { return "ModrinthModpacks"; };
 
     ModPlatform::IndexedPack::Ptr getCurrent() { return m_current; }
     void suggestCurrent();

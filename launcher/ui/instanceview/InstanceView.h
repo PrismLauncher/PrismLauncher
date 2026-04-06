@@ -153,7 +153,7 @@ class InstanceView : public QAbstractItemView {
     QPixmap renderToPixmap(const QModelIndexList& indices, QRect* r) const;
     QList<std::pair<QRect, QModelIndex>> draggablePaintPairs(const QModelIndexList& indices, QRect* r) const;
 
-    bool isDragEventAccepted(QDropEvent* event);
+    static bool isDragEventAccepted(QDropEvent* event);
 
     std::pair<VisualGroup*, VisualGroup::HitResults> rowDropPos(const QPoint& pos);
 

@@ -38,7 +38,7 @@ class XmlLogParseTest : public QObject {
 
    private slots:
 
-    void parseXml_data()
+    static void parseXml_data()
     {
         QString source = QFINDTESTDATA("testdata/TestLogs");
 

@@ -7,8 +7,6 @@
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
 
-static FlameAPI api;
-
 void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::requireInteger(obj, "id");
@@ -63,7 +61,7 @@ void FlameMod::loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 
 void FlameMod::loadBody(ModPlatform::IndexedPack& pack)
 {
-    pack.extraData.body = api.getModDescription(pack.addonId.toInt());
+    pack.extraData.body = FlameAPI::getModDescription(pack.addonId.toInt());
 
     if (!pack.extraData.issuesUrl.isEmpty() || !pack.extraData.sourceUrl.isEmpty() || !pack.extraData.wikiUrl.isEmpty())
         pack.extraDataLoaded = true;
@@ -204,7 +202,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     }
 
     if (load_changelog)
-        file.changelog = api.getModFileChangelog(file.addonId.toInt(), file.fileId.toInt());
+        file.changelog = FlameAPI::getModFileChangelog(file.addonId.toInt(), file.fileId.toInt());
 
     return file;
 }
