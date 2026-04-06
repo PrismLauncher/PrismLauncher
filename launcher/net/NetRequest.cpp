@@ -58,7 +58,7 @@
 
 namespace Net {
 
-NetRequest::NetRequest() : Task()
+NetRequest::NetRequest()  
 {
     connect(&m_retryTimer, &QTimer::timeout, this, &NetRequest::executeTask);
 }

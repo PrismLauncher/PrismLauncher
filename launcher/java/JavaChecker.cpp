@@ -45,7 +45,7 @@
 #include "java/JavaUtils.h"
 
 JavaChecker::JavaChecker(QString path, QString args, int minMem, int maxMem, int permGen, int id)
-    : Task(), m_path(path), m_args(args), m_minMem(minMem), m_maxMem(maxMem), m_permGen(permGen), m_id(id)
+    :  m_path(path), m_args(args), m_minMem(minMem), m_maxMem(maxMem), m_permGen(permGen), m_id(id)
 {}
 
 void JavaChecker::executeTask()

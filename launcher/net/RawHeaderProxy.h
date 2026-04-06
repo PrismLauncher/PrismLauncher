@@ -28,7 +28,7 @@ namespace Net {
 
 class RawHeaderProxy : public HeaderProxy {
    public:
-    RawHeaderProxy(QList<HeaderPair> headers = {}) : HeaderProxy(), m_headers(std::move(headers)) {};
+    RawHeaderProxy(QList<HeaderPair> headers = {}) :  m_headers(std::move(headers)) {};
     virtual ~RawHeaderProxy() = default;
 
    public:

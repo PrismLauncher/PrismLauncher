@@ -82,7 +82,7 @@ void InstanceName::setName(InstanceName& other)
     m_modified_name = other.m_modified_name;
 }
 
-InstanceTask::InstanceTask() : Task(), InstanceName() {}
+InstanceTask::InstanceTask()  {}
 
 ShouldDeleteSaves askIfShouldDeleteSaves(QWidget* parent)
 {

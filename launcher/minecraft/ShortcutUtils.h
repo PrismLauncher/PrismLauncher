@@ -49,7 +49,7 @@ struct Shortcut {
     QString name;
     QString targetString;
     QWidget* parent = nullptr;
-    QStringList extraArgs = {};
+    QStringList extraArgs;
     QString iconKey = "";
     ShortcutTarget target;
 };

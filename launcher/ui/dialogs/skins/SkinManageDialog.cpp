@@ -437,7 +437,7 @@ void SkinManageDialog::on_urlBtn_clicked()
 
 class WaitTask : public Task {
    public:
-    WaitTask() : m_loop(), m_done(false) {};
+    WaitTask() :  m_done(false) {};
     virtual ~WaitTask() = default;
 
    public slots:

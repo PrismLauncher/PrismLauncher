@@ -8,8 +8,8 @@
 #include "settings/INISettingsObject.h"
 
 VanillaCreationTask::VanillaCreationTask(BaseVersion::Ptr version, QString loader, BaseVersion::Ptr loader_version)
-    : InstanceCreationTask()
-    , m_version(std::move(version))
+    : 
+     m_version(std::move(version))
     , m_using_loader(true)
     , m_loader(std::move(loader))
     , m_loader_version(std::move(loader_version))

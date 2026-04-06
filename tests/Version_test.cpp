@@ -20,7 +20,7 @@
 class VersionTest : public QObject {
     Q_OBJECT
 
-    QStringList m_flex_test_names = {};
+    QStringList m_flex_test_names;
 
     void addDataColumns()
     {

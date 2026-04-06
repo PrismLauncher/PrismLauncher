@@ -127,18 +127,18 @@ struct ModDetails {
     QString description = {};
 
     /* List of the author's names */
-    QStringList authors = {};
+    QStringList authors;
 
     /* Issue Tracker URL */
     QString issue_tracker = {};
 
     /* License */
-    QList<ModLicense> licenses = {};
+    QList<ModLicense> licenses;
 
     /* Path of mod logo */
     QString icon_file = {};
 
-    QStringList dependencies = {};
+    QStringList dependencies;
 
     ModDetails() = default;
 
