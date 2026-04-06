@@ -75,7 +75,6 @@
 #include <memory>
 
 #include <BaseInstance.h>
-#include <BuildConfig.h>
 #include <DesktopServices.h>
 #include <InstanceList.h>
 #include <MMCZip.h>

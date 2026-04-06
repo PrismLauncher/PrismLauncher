@@ -7,7 +7,6 @@
 #include "Application.h"
 #include "InstanceList.h"
 
-#include <InstanceList.h>
 #include "modplatform/ResourceType.h"
 #include "ui/instanceview/InstanceDelegate.h"
 #include "ui/instanceview/InstanceProxyModel.h"
