@@ -100,10 +100,7 @@ bool InstanceList::canDropMimeData(const QMimeData* data,
                                    [[maybe_unused]] int column,
                                    [[maybe_unused]] const QModelIndex& parent) const
 {
-    if (data && data->hasFormat("application/x-instanceid")) {
-        return true;
-    }
-    return false;
+    return data && data->hasFormat("application/x-instanceid");
 }
 
 bool InstanceList::dropMimeData(const QMimeData* data,
@@ -112,10 +109,7 @@ bool InstanceList::dropMimeData(const QMimeData* data,
                                 [[maybe_unused]] int column,
                                 [[maybe_unused]] const QModelIndex& parent)
 {
-    if (data && data->hasFormat("application/x-instanceid")) {
-        return true;
-    }
-    return false;
+    return data && data->hasFormat("application/x-instanceid");
 }
 
 QStringList InstanceList::mimeTypes() const

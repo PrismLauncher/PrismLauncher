@@ -492,10 +492,7 @@ bool ResourceFolderModel::validateIndex(const QModelIndex& index) const
         return false;
 
     int row = index.row();
-    if (row < 0 || row >= m_resources.size())
-        return false;
-
-    return true;
+    return !(row < 0 || row >= m_resources.size());
 }
 
 // HACK: all subclasses need to call this to have the whole row painted

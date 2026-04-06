@@ -52,7 +52,7 @@ bool FileIgnoreProxy::lessThan(const QModelIndex& left, const QModelIndex& right
     if (!fsm) {
         return QSortFilterProxyModel::lessThan(left, right);
     }
-    bool asc = sortOrder() == Qt::AscendingOrder ? true : false;
+    bool asc = sortOrder() == Qt::AscendingOrder;
 
     QFileInfo leftFileInfo = fsm->fileInfo(left);
     QFileInfo rightFileInfo = fsm->fileInfo(right);
@@ -249,10 +249,7 @@ bool FileIgnoreProxy::filterAcceptsColumn(int source_column, const QModelIndex& 
 
     // adjust the columns you want to filter out here
     // return false for those that will be hidden
-    if (source_column == 2 || source_column == 3)
-        return false;
-
-    return true;
+    return !(source_column == 2 || source_column == 3);
 }
 
 bool FileIgnoreProxy::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
@@ -276,11 +273,7 @@ bool FileIgnoreProxy::ignoreFile(QFileInfo fileInfo) const
         }
     }
 
-    if (m_ignoreFilePaths.covers(relPath(fileInfo.absoluteFilePath()))) {
-        return true;
-    }
-
-    return false;
+    return m_ignoreFilePaths.covers(relPath(fileInfo.absoluteFilePath()));
 }
 
 bool FileIgnoreProxy::filterFile(const QFileInfo& file) const
