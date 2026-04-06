@@ -75,7 +75,7 @@ void ResourcePackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] 
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
-    auto& rp = static_cast<ResourcePack&>(m_model->at(row));
+    auto& rp = m_model->at(row);
     ui->frame->updateWithResourcePack(rp);
 }
 

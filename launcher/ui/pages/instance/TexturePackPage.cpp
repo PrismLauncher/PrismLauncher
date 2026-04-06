@@ -81,7 +81,7 @@ void TexturePackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] c
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
-    auto& rp = static_cast<TexturePack&>(m_model->at(row));
+    auto& rp = m_model->at(row);
     ui->frame->updateWithTexturePack(rp);
 }
 
