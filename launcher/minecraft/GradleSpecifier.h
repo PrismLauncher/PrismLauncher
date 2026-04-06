@@ -113,14 +113,14 @@ struct GradleSpecifier {
         path += '/' + m_artifactId + '/' + m_version + '/' + filename;
         return path;
     }
-    inline bool valid() const { return m_valid; }
-    inline QString version() const { return m_version; }
-    inline QString groupId() const { return m_groupId; }
-    inline QString artifactId() const { return m_artifactId; }
-    inline void setClassifier(const QString& classifier) { m_classifier = classifier; }
-    inline QString classifier() const { return m_classifier; }
-    inline std::optional<QString> extension() const { return m_extension; }
-    inline QString artifactPrefix() const { return m_groupId + ":" + m_artifactId; }
+    bool valid() const { return m_valid; }
+    QString version() const { return m_version; }
+    QString groupId() const { return m_groupId; }
+    QString artifactId() const { return m_artifactId; }
+    void setClassifier(const QString& classifier) { m_classifier = classifier; }
+    QString classifier() const { return m_classifier; }
+    std::optional<QString> extension() const { return m_extension; }
+    QString artifactPrefix() const { return m_groupId + ":" + m_artifactId; }
     bool matchName(const GradleSpecifier& other) const
     {
         return other.artifactId() == artifactId() && other.groupId() == groupId() && other.classifier() == classifier();

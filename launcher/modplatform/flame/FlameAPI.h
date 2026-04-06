@@ -34,7 +34,7 @@ class FlameAPI : public ResourceAPI {
 
     QList<ResourceAPI::SortingMethod> getSortingMethods() const override;
 
-    static inline bool validateModLoaders(ModPlatform::ModLoaderTypes loaders)
+    static bool validateModLoaders(ModPlatform::ModLoaderTypes loaders)
     {
         return loaders & (ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt);
     }

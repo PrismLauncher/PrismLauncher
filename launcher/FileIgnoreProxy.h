@@ -61,14 +61,14 @@ class FileIgnoreProxy : public QSortFilterProxyModel {
 
     void setBlockedPaths(QStringList paths);
 
-    inline const SeparatorPrefixTree<'/'>& blockedPaths() const { return m_blocked; }
-    inline SeparatorPrefixTree<'/'>& blockedPaths() { return m_blocked; }
+    const SeparatorPrefixTree<'/'>& blockedPaths() const { return m_blocked; }
+    SeparatorPrefixTree<'/'>& blockedPaths() { return m_blocked; }
 
     // list of file names that need to be removed completely from model
-    inline QStringList& ignoreFilesWithName() { return m_ignoreFiles; }
-    inline QStringList& ignoreFilesWithSuffix() { return m_ignoreFilesSuffixes; }
+    QStringList& ignoreFilesWithName() { return m_ignoreFiles; }
+    QStringList& ignoreFilesWithSuffix() { return m_ignoreFilesSuffixes; }
     // list of relative paths that need to be removed completely from model
-    inline SeparatorPrefixTree<'/'>& ignoreFilesWithPath() { return m_ignoreFilePaths; }
+    SeparatorPrefixTree<'/'>& ignoreFilesWithPath() { return m_ignoreFilePaths; }
 
     bool filterFile(const QFileInfo& fileName) const;
 

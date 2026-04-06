@@ -56,9 +56,9 @@ class ModpackListModel : public QAbstractListModel {
     ModpackListModel(ModrinthPage* parent);
     ~ModpackListModel() override = default;
 
-    inline auto rowCount(const QModelIndex& parent) const -> int override { return parent.isValid() ? 0 : m_modpacks.size(); };
-    inline auto columnCount(const QModelIndex& parent) const -> int override { return parent.isValid() ? 0 : 1; };
-    inline auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); };
+    auto rowCount(const QModelIndex& parent) const -> int override { return parent.isValid() ? 0 : m_modpacks.size(); };
+    auto columnCount(const QModelIndex& parent) const -> int override { return parent.isValid() ? 0 : 1; };
+    auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); };
 
     auto debugName() const -> QString;
 
@@ -66,7 +66,7 @@ class ModpackListModel : public QAbstractListModel {
     auto data(const QModelIndex& index, int role) const -> QVariant override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
-    inline void setActiveJob(NetJob::Ptr ptr) { m_jobPtr = ptr; }
+    void setActiveJob(NetJob::Ptr ptr) { m_jobPtr = ptr; }
 
     /* Ask the API for more information */
     void fetchMore(const QModelIndex& parent) override;
@@ -78,7 +78,7 @@ class ModpackListModel : public QAbstractListModel {
 
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
 
-    inline auto canFetchMore(const QModelIndex& parent) const -> bool override
+    auto canFetchMore(const QModelIndex& parent) const -> bool override
     {
         return parent.isValid() ? false : m_searchState == CanPossiblyFetchMore;
     };

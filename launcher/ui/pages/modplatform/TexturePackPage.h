@@ -35,9 +35,9 @@ class TexturePackResourcePage : public ResourcePackResourcePage {
     }
 
     //: The plural version of 'texture pack'
-    inline QString resourcesString() const override { return tr("texture packs"); }
+    QString resourcesString() const override { return tr("texture packs"); }
     //: The singular version of 'texture packs'
-    inline QString resourceString() const override { return tr("texture pack"); }
+    QString resourceString() const override { return tr("texture pack"); }
 
    protected:
     TexturePackResourcePage(TexturePackDownloadDialog* dialog, BaseInstance& instance) : ResourcePackResourcePage(dialog, instance) {}

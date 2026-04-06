@@ -43,9 +43,9 @@ class ModPage : public ResourcePage {
     }
 
     //: The plural version of 'mod'
-    inline QString resourcesString() const override { return tr("mods"); }
+    QString resourcesString() const override { return tr("mods"); }
     //: The singular version of 'mods'
-    inline QString resourceString() const override { return tr("mod"); }
+    QString resourceString() const override { return tr("mod"); }
 
     QMap<QString, QString> urlHandlers() const override;
 

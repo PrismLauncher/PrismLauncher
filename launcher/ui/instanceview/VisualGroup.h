@@ -48,8 +48,8 @@ struct VisualRow {
     QList<QModelIndex> items;
     int height = 0;
     int top = 0;
-    inline int size() const { return items.size(); }
-    inline QModelIndex& operator[](int i) { return items[i]; }
+    int size() const { return items.size(); }
+    QModelIndex& operator[](int i) { return items[i]; }
 };
 
 struct VisualGroup {

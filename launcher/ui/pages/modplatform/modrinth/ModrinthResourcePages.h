@@ -85,13 +85,13 @@ class ModrinthModPage : public ModPage {
 
     bool shouldDisplay() const override;
 
-    inline auto displayName() const -> QString override { return Modrinth::displayName(); }
-    inline auto icon() const -> QIcon override { return Modrinth::icon(); }
-    inline auto id() const -> QString override { return Modrinth::id(); }
-    inline auto debugName() const -> QString override { return Modrinth::debugName(); }
-    inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
+    auto displayName() const -> QString override { return Modrinth::displayName(); }
+    auto icon() const -> QIcon override { return Modrinth::icon(); }
+    auto id() const -> QString override { return Modrinth::id(); }
+    auto debugName() const -> QString override { return Modrinth::debugName(); }
+    auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
 
-    inline auto helpPage() const -> QString override { return "Mod-platform"; }
+    auto helpPage() const -> QString override { return "Mod-platform"; }
 
     std::unique_ptr<ModFilterWidget> createFilterWidget() override;
 
@@ -114,13 +114,13 @@ class ModrinthResourcePackPage : public ResourcePackResourcePage {
 
     bool shouldDisplay() const override;
 
-    inline auto displayName() const -> QString override { return Modrinth::displayName(); }
-    inline auto icon() const -> QIcon override { return Modrinth::icon(); }
-    inline auto id() const -> QString override { return Modrinth::id(); }
-    inline auto debugName() const -> QString override { return Modrinth::debugName(); }
-    inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
+    auto displayName() const -> QString override { return Modrinth::displayName(); }
+    auto icon() const -> QIcon override { return Modrinth::icon(); }
+    auto id() const -> QString override { return Modrinth::id(); }
+    auto debugName() const -> QString override { return Modrinth::debugName(); }
+    auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
 
-    inline auto helpPage() const -> QString override { return ""; }
+    auto helpPage() const -> QString override { return ""; }
 };
 
 class ModrinthTexturePackPage : public TexturePackResourcePage {
@@ -137,13 +137,13 @@ class ModrinthTexturePackPage : public TexturePackResourcePage {
 
     bool shouldDisplay() const override;
 
-    inline auto displayName() const -> QString override { return Modrinth::displayName(); }
-    inline auto icon() const -> QIcon override { return Modrinth::icon(); }
-    inline auto id() const -> QString override { return Modrinth::id(); }
-    inline auto debugName() const -> QString override { return Modrinth::debugName(); }
-    inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
+    auto displayName() const -> QString override { return Modrinth::displayName(); }
+    auto icon() const -> QIcon override { return Modrinth::icon(); }
+    auto id() const -> QString override { return Modrinth::id(); }
+    auto debugName() const -> QString override { return Modrinth::debugName(); }
+    auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
 
-    inline auto helpPage() const -> QString override { return ""; }
+    auto helpPage() const -> QString override { return ""; }
 };
 
 class ModrinthShaderPackPage : public ShaderPackResourcePage {
@@ -160,13 +160,13 @@ class ModrinthShaderPackPage : public ShaderPackResourcePage {
 
     bool shouldDisplay() const override;
 
-    inline auto displayName() const -> QString override { return Modrinth::displayName(); }
-    inline auto icon() const -> QIcon override { return Modrinth::icon(); }
-    inline auto id() const -> QString override { return Modrinth::id(); }
-    inline auto debugName() const -> QString override { return Modrinth::debugName(); }
-    inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
+    auto displayName() const -> QString override { return Modrinth::displayName(); }
+    auto icon() const -> QIcon override { return Modrinth::icon(); }
+    auto id() const -> QString override { return Modrinth::id(); }
+    auto debugName() const -> QString override { return Modrinth::debugName(); }
+    auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
 
-    inline auto helpPage() const -> QString override { return ""; }
+    auto helpPage() const -> QString override { return ""; }
 };
 
 class ModrinthDataPackPage : public DataPackResourcePage {
@@ -183,13 +183,13 @@ class ModrinthDataPackPage : public DataPackResourcePage {
 
     bool shouldDisplay() const override;
 
-    inline auto displayName() const -> QString override { return Modrinth::displayName(); }
-    inline auto icon() const -> QIcon override { return Modrinth::icon(); }
-    inline auto id() const -> QString override { return Modrinth::id(); }
-    inline auto debugName() const -> QString override { return Modrinth::debugName(); }
-    inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
+    auto displayName() const -> QString override { return Modrinth::displayName(); }
+    auto icon() const -> QIcon override { return Modrinth::icon(); }
+    auto id() const -> QString override { return Modrinth::id(); }
+    auto debugName() const -> QString override { return Modrinth::debugName(); }
+    auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
 
-    inline auto helpPage() const -> QString override { return ""; }
+    auto helpPage() const -> QString override { return ""; }
 };
 
 }  // namespace ResourceDownload

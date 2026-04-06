@@ -60,7 +60,7 @@ class ConcurrentTask : public Task {
 
     bool canAbort() const override { return true; }
 
-    inline auto isMultiStep() const -> bool override { return totalSize() > 1; }
+    auto isMultiStep() const -> bool override { return totalSize() > 1; }
     auto getStepProgress() const -> TaskStepProgressList override;
 
     //! Adds a task to execute in this ConcurrentTask

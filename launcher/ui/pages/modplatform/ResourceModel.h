@@ -43,9 +43,9 @@ class ResourceModel : public QAbstractListModel {
     virtual auto debugName() const -> QString;
     virtual auto metaEntryBase() const -> QString = 0;
 
-    inline int rowCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : static_cast<int>(m_packs.size()); }
-    inline int columnCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : 1; }
-    inline auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); }
+    int rowCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : static_cast<int>(m_packs.size()); }
+    int columnCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : 1; }
+    auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); }
 
     bool hasActiveSearchJob() const { return m_current_search_job && m_current_search_job->isRunning(); }
     bool hasActiveInfoJob() const { return m_current_info_job.isRunning(); }
@@ -66,7 +66,7 @@ class ResourceModel : public QAbstractListModel {
 
    public slots:
     void fetchMore(const QModelIndex& parent) override;
-    inline bool canFetchMore(const QModelIndex& parent) const override
+    bool canFetchMore(const QModelIndex& parent) const override
     {
         return parent.isValid() ? false : m_search_state == SearchState::CanFetchMore;
     }

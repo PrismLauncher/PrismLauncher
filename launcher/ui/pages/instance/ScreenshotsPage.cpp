@@ -92,8 +92,8 @@ using SharedIconCachePtr = std::shared_ptr<SharedIconCache>;
 class ThumbnailingResult : public QObject {
     Q_OBJECT
    public slots:
-    inline void emitResultsReady(const QString& path) { emit resultsReady(path); }
-    inline void emitResultsFailed(const QString& path) { emit resultsFailed(path); }
+    void emitResultsReady(const QString& path) { emit resultsReady(path); }
+    void emitResultsFailed(const QString& path) { emit resultsFailed(path); }
    signals:
     void resultsReady(const QString& path);
     void resultsFailed(const QString& path);

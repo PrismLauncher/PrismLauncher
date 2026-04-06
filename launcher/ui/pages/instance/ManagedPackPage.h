@@ -28,7 +28,7 @@ class ManagedPackPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    inline static ManagedPackPage* createPage(BaseInstance* inst, QWidget* parent = nullptr)
+    static ManagedPackPage* createPage(BaseInstance* inst, QWidget* parent = nullptr)
     {
         return ManagedPackPage::createPage(inst, inst->getManagedPackType(), parent);
     }

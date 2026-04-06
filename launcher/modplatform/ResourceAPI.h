@@ -123,7 +123,7 @@ class ResourceAPI {
     virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, Callback<ModPlatform::IndexedVersion>&&) const;
 
    protected:
-    inline QString debugName() const { return "External resource API"; }
+    QString debugName() const { return "External resource API"; }
 
     QString mapMCVersionToModrinth(Version v) const;
 

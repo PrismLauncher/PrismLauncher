@@ -44,9 +44,9 @@ class ResourcePage : public QWidget, public BasePage {
     virtual auto debugName() const -> QString = 0;
 
     //: The plural version of 'resource'
-    virtual inline QString resourcesString() const { return tr("resources"); }
+    virtual QString resourcesString() const { return tr("resources"); }
     //: The singular version of 'resources'
-    virtual inline QString resourceString() const { return tr("resource"); }
+    virtual QString resourceString() const { return tr("resource"); }
 
     /* Features this resource's page supports */
     virtual bool supportsFiltering() const = 0;
