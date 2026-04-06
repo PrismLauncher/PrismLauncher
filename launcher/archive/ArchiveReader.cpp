@@ -129,7 +129,7 @@ static int copy_data(struct archive* ar, struct archive* aw, bool notBlock = fal
         }
         if (r < ARCHIVE_OK) {
             qCritical() << "Failed reading data block:" << archive_error_string(ar);
-            return (r);
+            return r;
         }
         if (notBlock) {
             r = archive_write_data(aw, buff, size);
@@ -138,7 +138,7 @@ static int copy_data(struct archive* ar, struct archive* aw, bool notBlock = fal
         }
         if (r < ARCHIVE_OK) {
             qCritical() << "Failed writing data block:" << archive_error_string(aw);
-            return (r);
+            return r;
         }
     }
 }

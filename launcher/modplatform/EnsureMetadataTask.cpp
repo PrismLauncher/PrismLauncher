@@ -114,10 +114,10 @@ void EnsureMetadataTask::executeTask()
     Task::Ptr version_task;
 
     switch (m_provider) {
-        case (ModPlatform::ResourceProvider::MODRINTH):
+        case ModPlatform::ResourceProvider::MODRINTH:
             version_task = modrinthVersionsTask();
             break;
-        case (ModPlatform::ResourceProvider::FLAME):
+        case ModPlatform::ResourceProvider::FLAME:
             version_task = flameVersionsTask();
             break;
     }
@@ -134,10 +134,10 @@ void EnsureMetadataTask::executeTask()
         Task::Ptr project_task;
 
         switch (m_provider) {
-            case (ModPlatform::ResourceProvider::MODRINTH):
+            case ModPlatform::ResourceProvider::MODRINTH:
                 project_task = modrinthProjectsTask();
                 break;
-            case (ModPlatform::ResourceProvider::FLAME):
+            case ModPlatform::ResourceProvider::FLAME:
                 project_task = flameProjectsTask();
                 break;
         }

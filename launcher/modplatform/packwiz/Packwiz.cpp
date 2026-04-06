@@ -172,7 +172,7 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
 
     toml::table update;
     switch (mod.provider) {
-        case (ModPlatform::ResourceProvider::FLAME):
+        case ModPlatform::ResourceProvider::FLAME:
             if (mod.file_id.toInt() == 0 || mod.project_id.toInt() == 0) {
                 qCritical() << QString("Did not write file %1 because missing information!").arg(normalized_fname);
                 return;
@@ -182,7 +182,7 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
                 { "project-id", mod.project_id.toInt() },
             };
             break;
-        case (ModPlatform::ResourceProvider::MODRINTH):
+        case ModPlatform::ResourceProvider::MODRINTH:
             if (mod.mod_id().toString().isEmpty() || mod.version().toString().isEmpty()) {
                 qCritical() << QString("Did not write file %1 because missing information!").arg(normalized_fname);
                 return;
