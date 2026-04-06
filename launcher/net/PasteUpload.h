@@ -51,13 +51,13 @@ class PasteUpload : public Net::NetRequest {
    public:
     enum PasteType : int {
         // 0x0.st
-        NullPointer,
+        NullPointer = 0,
         // hastebin.com
-        Hastebin,
+        Hastebin = 1,
         // paste.gg
-        PasteGG,
+        PasteGG = 2,
         // mclo.gs
-        Mclogs,
+        Mclogs = 3,
         // Helpful to get the range of valid values on the enum for input sanitisation:
         First = NullPointer,
         Last = Mclogs
