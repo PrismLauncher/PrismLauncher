@@ -723,7 +723,7 @@ QRect InstanceView::geometryRect(const QModelIndex& index) const
     initViewItemOption(&option);
 
     QRect out;
-    out.setTop(cat->verticalPosition() + cat->headerHeight() + 5 + cat->rowTopOf(index));
+    out.setTop(cat->verticalPosition() + VisualGroup::headerHeight() + 5 + cat->rowTopOf(index));
     out.setLeft(m_spacing + x * (itemWidth() + m_spacing));
     out.setSize(itemDelegate()->sizeHint(option, index));
     m_geometryCache.insert(row, new QRect(out));

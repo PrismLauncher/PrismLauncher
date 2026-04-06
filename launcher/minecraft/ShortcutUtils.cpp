@@ -231,7 +231,7 @@ bool createInstanceShortcutInOther(const Shortcut& shortcut)
     // workaround to make sure the portal file dialog opens in the desktop directory
     fileDialog.setDirectoryUrl(defaultedDir);
 
-    shortcutFilePath = fileDialog.getSaveFileName(shortcut.parent, QObject::tr("Create Shortcut"), shortcutFilePath,
+    shortcutFilePath = QFileDialog::getSaveFileName(shortcut.parent, QObject::tr("Create Shortcut"), shortcutFilePath,
                                                   QObject::tr("Desktop Entries") + " (*" + extension + ")");
     if (shortcutFilePath.isEmpty())
         return false;  // file dialog canceled by user

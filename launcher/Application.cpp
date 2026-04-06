@@ -303,8 +303,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     m_startTime = QDateTime::currentDateTime();
 
     // Don't quit on hiding the last window
-    this->setQuitOnLastWindowClosed(false);
-    this->setQuitLockEnabled(false);
+    Application::setQuitOnLastWindowClosed(false);
+    Application::setQuitLockEnabled(false);
 
     // Commandline parsing
     QCommandLineParser parser;
@@ -675,7 +675,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         QString resolvedDefaultMonospace = consoleFontInfo.family();
         QFont resolvedFont(resolvedDefaultMonospace);
         qDebug().nospace() << "Detected default console font: " << resolvedDefaultMonospace
-                           << ", substitutions: " << resolvedFont.substitutions().join(',');
+                           << ", substitutions: " << QFont::substitutions().join(',');
 
         m_settings->registerSetting("ConsoleFont", resolvedDefaultMonospace);
         m_settings->registerSetting("ConsoleFontSize", defaultSize);

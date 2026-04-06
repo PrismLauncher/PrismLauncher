@@ -119,7 +119,7 @@ void NetRequest::executeTask()
     request.setTransferTimeout();
 #endif
 
-    m_last_progress_time = m_clock.now();
+    m_last_progress_time = std::chrono::steady_clock::now();
     m_last_progress_bytes = 0;
 
     auto rep = getReply(request);
@@ -136,7 +136,7 @@ void NetRequest::executeTask()
 
 void NetRequest::onProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-    auto now = m_clock.now();
+    auto now = std::chrono::steady_clock::now();
     auto elapsed = now - m_last_progress_time;
 
     // use milliseconds for speed precision
