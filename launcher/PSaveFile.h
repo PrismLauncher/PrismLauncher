@@ -21,7 +21,7 @@
 #include <QSaveFile>
 #include "Application.h"
 
-#if defined(LAUNCHER_APPLICATION)
+#ifdef LAUNCHER_APPLICATION
 
 /* PSaveFile
  * A class that mimics QSaveFile for Windows.

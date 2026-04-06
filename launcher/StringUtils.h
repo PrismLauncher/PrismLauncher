@@ -43,7 +43,7 @@
 
 namespace StringUtils {
 
-#if defined Q_OS_WIN32
+#ifdef Q_OS_WIN32
 using string = std::wstring;
 
 inline string toStdString(QString s)

@@ -134,7 +134,7 @@
 #include "gamemode_client.h"
 #endif
 
-#if defined(Q_OS_LINUX)
+#ifdef Q_OS_LINUX
 #include <sys/statvfs.h>
 #endif
 
@@ -143,7 +143,7 @@
 #include <sys/types.h>
 #endif
 
-#if defined(Q_OS_MAC)
+#ifdef Q_OS_MAC
 #if defined(SPARKLE_ENABLED)
 #include "updater/MacSparkleUpdater.h"
 #endif
@@ -151,7 +151,7 @@
 #include "updater/PrismExternalUpdater.h"
 #endif
 
-#if defined Q_OS_WIN32
+#ifdef Q_OS_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -1160,7 +1160,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     if (jvmArgs.indexOf("java.io.tmpdir") == -1) { /* java.io.tmpdir is a valid workaround, so don't annoy */
         bool is_tmp_noexec = false;
 
-#if defined(Q_OS_LINUX)
+#ifdef Q_OS_LINUX
 
         struct statvfs tmp_stat;
         statvfs("/tmp", &tmp_stat);
@@ -1280,7 +1280,7 @@ bool Application::createSetupWizard()
 
 bool Application::updaterEnabled()
 {
-#if defined(Q_OS_MAC)
+#ifdef Q_OS_MAC
     return BuildConfig.UPDATER_ENABLED;
 #else
     return BuildConfig.UPDATER_ENABLED && QFileInfo(FS::PathCombine(m_rootPath, updaterBinaryName())).isFile();
@@ -1290,7 +1290,7 @@ bool Application::updaterEnabled()
 QString Application::updaterBinaryName()
 {
     auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
-#if defined Q_OS_WIN32
+#ifdef Q_OS_WIN32
     exe_name.append(".exe");
 #else
     exe_name.prepend("bin/");

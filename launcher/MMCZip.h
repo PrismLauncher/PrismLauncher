@@ -47,14 +47,14 @@
 #include <optional>
 #include "archive/ArchiveReader.h"
 
-#if defined(LAUNCHER_APPLICATION)
+#ifdef LAUNCHER_APPLICATION
 #include "minecraft/mod/Mod.h"
 #endif
 
 namespace MMCZip {
 using FilterFileFunction = std::function<bool(const QFileInfo&)>;
 
-#if defined(LAUNCHER_APPLICATION)
+#ifdef LAUNCHER_APPLICATION
 /**
  * take a source jar, add mods to it, resulting in target jar
  */

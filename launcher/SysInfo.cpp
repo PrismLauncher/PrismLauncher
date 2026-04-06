@@ -58,7 +58,7 @@ bool rosettaDetect()
 namespace SysInfo {
 QString currentSystem()
 {
-#if defined(Q_OS_LINUX)
+#ifdef Q_OS_LINUX
     return "linux";
 #elif defined(Q_OS_MACOS)
     return "osx";

@@ -47,7 +47,7 @@
 #include <cstdint>
 #include <memory>
 
-#if defined(LAUNCHER_APPLICATION)
+#ifdef LAUNCHER_APPLICATION
 #include "Application.h"
 #include "settings/SettingsObject.h"
 #endif
@@ -102,7 +102,7 @@ void NetRequest::executeTask()
             return;
     }
 
-#if defined(LAUNCHER_APPLICATION)
+#ifdef LAUNCHER_APPLICATION
     auto user_agent = APPLICATION->getUserAgent();
 #else
     auto user_agent = BuildConfig.USER_AGENT;
@@ -113,7 +113,7 @@ void NetRequest::executeTask()
         header_proxy->writeHeaders(request);
     }
 
-#if defined(LAUNCHER_APPLICATION)
+#ifdef LAUNCHER_APPLICATION
     request.setTransferTimeout(APPLICATION->settings()->get("RequestTimeout").toInt() * 1000);
 #else
     request.setTransferTimeout();

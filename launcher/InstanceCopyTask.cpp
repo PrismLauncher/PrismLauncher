@@ -79,7 +79,7 @@ void InstanceCopyTask::executeTask()
             bool there_were_errors = false;
 
             if (!folderLink()) {
-#if defined Q_OS_WIN32
+#ifdef Q_OS_WIN32
                 if (!m_useHardLinks) {
                     setProgress(0, m_progressTotal);
                     qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";

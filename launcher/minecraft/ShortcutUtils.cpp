@@ -60,7 +60,7 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
     }
     QString iconPath;
     QStringList args;
-#if defined(Q_OS_MACOS)
+#ifdef Q_OS_MACOS
     if (appPath.startsWith("/private/var/")) {
         QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"),
                               QObject::tr("The launcher is in the folder it was extracted from, therefore it cannot create shortcuts."));
@@ -151,7 +151,7 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
 
     QString shortcutPath = FS::createShortcut(filePath, appPath, args, shortcut.name, iconPath);
     if (shortcutPath.isEmpty()) {
-#if not defined(Q_OS_MACOS)
+#ifndef Q_OS_MACOS
         iconFile.remove();
 #endif
         QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"),

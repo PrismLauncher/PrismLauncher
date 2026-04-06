@@ -86,7 +86,7 @@ Wrapperommand=)";
         fileContent += "\"";
         fileContent += +R"(\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link =)";
         fileContent += "\"\n";
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
         QString fileName = "test_SaveAlreadyExistingFile.ini";
         QFile file(fileName);
         QCOMPARE(file.open(QFile::WriteOnly | QFile::Text), true);
@@ -111,14 +111,14 @@ Wrapperommand=)";
         QCOMPARE(f2.get("PreLaunchCommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link");
         QCOMPARE(f2.get("Wrapperommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link =");
         QCOMPARE(f2.get("ConfigVersion", "NOT SET").toString(), "1.3");
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
         FS::deletePath(fileName);
 #endif
     }
 
     void test_SaveAlreadyExistingFileWithSpecialChars()
     {
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
         QString fileName = "test_SaveAlreadyExistingFileWithSpecialChars.ini";
 #else
         QTemporaryFile file;
@@ -152,7 +152,7 @@ Wrapperommand=)";
         for (auto key : settings.allKeys())
             QCOMPARE(f2.get(key, "NOT SET").toString(), settings.value(key).toString());
         QCOMPARE(f2.get("ConfigVersion", "NOT SET").toString(), "1.3");
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
         FS::deletePath(fileName);
 #endif
     }
@@ -167,7 +167,7 @@ OverrideCommands=true
 PreLaunchCommand=)";
         fileContent += "\"\\\"env mesa=true\\\"\"\n";
 
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
         QString fileName = "test_SaveAlreadyExistingFileWithSpecialCharsV1.ini";
         QFile file(fileName);
         QCOMPARE(file.open(QFile::WriteOnly | QFile::Text), true);
@@ -186,7 +186,7 @@ PreLaunchCommand=)";
         f1.loadFile(fileName);
         QCOMPARE(f1.get("PreLaunchCommand", "NOT SET").toString(), "env mesa=true");
         QCOMPARE(f1.get("ConfigVersion", "NOT SET").toString(), "1.3");
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
         FS::deletePath(fileName);
 #endif
     }

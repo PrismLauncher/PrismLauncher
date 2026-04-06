@@ -127,7 +127,7 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
     connect(m_ui->maximizedCheckBox, &QCheckBox::toggled, this,
             [this](const bool value) { m_ui->maximizedWarning->setVisible(value && (m_instance == nullptr || !m_instance->isLegacy())); });
 
-#if !defined(Q_OS_LINUX)
+#ifndef Q_OS_LINUX
     m_ui->perfomanceGroupBox->hide();
 #endif
 

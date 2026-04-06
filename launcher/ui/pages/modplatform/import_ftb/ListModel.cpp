@@ -36,7 +36,7 @@ namespace FTBImportAPP {
 QString getFTBRoot()
 {
     QString partialPath = QDir::homePath();
-#if defined(Q_OS_MACOS)
+#ifdef Q_OS_MACOS
     partialPath = FS::PathCombine(partialPath, "Library/Application Support");
 #endif
     return FS::PathCombine(partialPath, ".ftba");

@@ -56,7 +56,7 @@
 #include "PSaveFile.h"
 #include "StringUtils.h"
 
-#if defined Q_OS_WIN32
+#ifdef Q_OS_WIN32
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <objidl.h>
@@ -79,7 +79,7 @@
 namespace fs = std::filesystem;
 
 // clone
-#if defined(Q_OS_LINUX)
+#ifdef Q_OS_LINUX
 #include <errno.h>
 #include <fcntl.h> /* Definition of FICLONE* constants */
 #include <linux/fs.h>
@@ -101,7 +101,7 @@ namespace fs = std::filesystem;
 #endif
 #endif
 
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
 
 #if defined(__MINGW32__)
 
@@ -312,7 +312,7 @@ bool copy::operator()(const QString& offset, bool dryRun)
     m_failedPaths.clear();
 
 // NOTE always deep copy on windows. the alternatives are too messy.
-#if defined Q_OS_WIN32
+#ifdef Q_OS_WIN32
     m_followSymlinks = true;
 #endif
 
@@ -609,7 +609,7 @@ void ExternalLinkFileProcess::runLinkFile()
 
     params += " -H " + QVariant(m_useHardLinks).toString();
 
-#if defined Q_OS_WIN32
+#ifdef Q_OS_WIN32
     SHELLEXECUTEINFO ShExecInfo;
 
     fileLinkExe = fileLinkExe + ".exe";
@@ -688,7 +688,7 @@ bool trash(QString path, QString* pathInTrash)
     // FIXME: Figure out trash in Flatpak. Qt seemingly doesn't use the Trash portal
     if (DesktopServices::isFlatpak())
         return false;
-#if defined Q_OS_WIN32
+#ifdef Q_OS_WIN32
     if (IsWindowsServer())
         return false;
 #endif
@@ -931,7 +931,7 @@ QString createShortcut(QString destination, QString target, QStringList args, QS
         qWarning() << "Destination path can't be created!";
         return QString();
     }
-#if defined(Q_OS_MACOS)
+#ifdef Q_OS_MACOS
     QDir application = destination + ".app/";
 
     if (application.exists()) {
@@ -1345,7 +1345,7 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
         return false;
     }
 
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
 
     if (!win_ioctl_clone(src_path, dst_path, ec)) {
         qDebug() << "failed win_ioctl_clone";
@@ -1379,7 +1379,7 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
     return true;
 }
 
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
 
 static long RoundUpToPowerOf2(long originalValue, long roundingMultiplePowerOf2)
 {

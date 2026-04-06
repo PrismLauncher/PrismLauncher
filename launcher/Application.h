@@ -85,13 +85,13 @@ namespace Meta {
 class Index;
 }
 
-#if defined(APPLICATION)
+#ifdef APPLICATION
 #undef APPLICATION
 #endif
 #define APPLICATION (static_cast<Application*>(QCoreApplication::instance()))
 
 // Used for checking if is a test
-#if defined(APPLICATION_DYN)
+#ifdef APPLICATION_DYN
 #undef APPLICATION_DYN
 #endif
 #define APPLICATION_DYN (dynamic_cast<Application*>(QCoreApplication::instance()))

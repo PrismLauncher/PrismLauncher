@@ -329,7 +329,7 @@ void InstallDialog::done(int result)
                         deletePath();
                         return;
                 }
-#if defined(Q_OS_MACOS)
+#ifdef Q_OS_MACOS
                 auto seq = makeShared<SequentialTask>(tr("Install Java"));
                 seq->addTask(task);
                 seq->addTask(makeShared<Java::SymlinkTask>(final_path));

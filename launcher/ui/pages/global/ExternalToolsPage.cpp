@@ -188,7 +188,7 @@ void ExternalToolsPage::on_jsonEditorBrowseBtn_clicked()
 {
     QString raw_file = QFileDialog::getOpenFileName(this, tr("Text Editor"),
                                                     ui->jsonEditorTextBox->text().isEmpty()
-#if defined(Q_OS_LINUX)
+#ifdef Q_OS_LINUX
                                                         ? QString("/usr/bin")
 #else
                                                         ? QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first()

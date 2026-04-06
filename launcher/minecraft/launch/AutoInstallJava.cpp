@@ -179,7 +179,7 @@ void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
                     emitFailed(tr("Could not determine Java download type!"));
                     return;
             }
-#if defined(Q_OS_MACOS)
+#ifdef Q_OS_MACOS
             auto seq = makeShared<SequentialTask>(tr("Install Java"));
             seq->addTask(m_current_task);
             seq->addTask(makeShared<Java::SymlinkTask>(final_path));

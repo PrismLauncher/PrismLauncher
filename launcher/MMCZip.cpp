@@ -49,7 +49,7 @@
 namespace MMCZip {
 // ours
 using FilterFunction = std::function<bool(const QString&)>;
-#if defined(LAUNCHER_APPLICATION)
+#ifdef LAUNCHER_APPLICATION
 bool mergeZipFiles(ArchiveWriter& into, QFileInfo from, QSet<QString>& contained, const FilterFunction& filter = nullptr)
 {
     ArchiveReader r(from.absoluteFilePath());

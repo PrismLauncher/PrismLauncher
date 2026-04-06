@@ -534,7 +534,7 @@ class clone : public QObject {
  */
 bool clone_file(const QString& src, const QString& dst, std::error_code& ec);
 
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
 bool win_ioctl_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec);
 #elif defined(Q_OS_LINUX)
 bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std::error_code& ec);

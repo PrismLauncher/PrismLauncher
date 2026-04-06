@@ -21,7 +21,7 @@
 
 #include "HardwareInfo.h"
 
-#if defined(Q_OS_FREEBSD)
+#ifdef Q_OS_FREEBSD
 namespace {
 void runSysctlHwModel(QStringList& log)
 {

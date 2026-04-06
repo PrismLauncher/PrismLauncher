@@ -3,7 +3,7 @@
 #include <QString>
 
 #include <ostream>
-#if defined Q_OS_WIN32
+#ifdef Q_OS_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -17,7 +17,7 @@ namespace console {
 
 inline bool isConsole()
 {
-#if defined Q_OS_WIN32
+#ifdef Q_OS_WIN32
     DWORD procIDs[2];
     DWORD maxCount = 2;
     DWORD result = GetConsoleProcessList((LPDWORD)procIDs, maxCount);

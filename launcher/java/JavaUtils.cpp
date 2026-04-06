@@ -145,7 +145,7 @@ JavaInstallPtr JavaUtils::GetDefaultJava()
 
     javaVersion->id = "java";
     javaVersion->arch = "unknown";
-#if defined(Q_OS_WIN32)
+#ifdef Q_OS_WIN32
     javaVersion->path = "javaw";
 #else
     javaVersion->path = "java";
@@ -157,7 +157,7 @@ JavaInstallPtr JavaUtils::GetDefaultJava()
 QStringList addJavasFromEnv(QList<QString> javas)
 {
     auto env = QProcessEnvironment::systemEnvironment().value(QStringLiteral("%1_JAVA_PATHS").arg(BuildConfig.LAUNCHER_ENVNAME));
-#if defined(Q_OS_WIN32)
+#ifdef Q_OS_WIN32
     QList<QString> javaPaths = env.replace("\\", "/").split(QLatin1String(";"));
 
     auto envPath = qEnvironmentVariable("PATH");
@@ -174,7 +174,7 @@ QStringList addJavasFromEnv(QList<QString> javas)
     return javas;
 }
 
-#if defined(Q_OS_WIN32)
+#ifdef Q_OS_WIN32
 QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString keyName, QString keyJavaDir, QString subkeySuffix)
 {
     QList<JavaInstallPtr> javas;
@@ -440,7 +440,7 @@ QList<QString> JavaUtils::FindJavaPaths()
             scanJavaDir(snap + dirPath);
         }
     };
-#if defined(Q_OS_LINUX)
+#ifdef Q_OS_LINUX
     // oracle RPMs
     scanJavaDirs("/usr/java");
     // general locations used by distro packaging
@@ -516,7 +516,7 @@ QString JavaUtils::getJavaCheckPath()
 QStringList getMinecraftJavaBundle()
 {
     QStringList processpaths;
-#if defined(Q_OS_MACOS)
+#ifdef Q_OS_MACOS
     processpaths << FS::PathCombine(QDir::homePath(), FS::PathCombine("Library", "Application Support", "minecraft", "runtime"));
 #elif defined(Q_OS_WIN32)
 
@@ -557,7 +557,7 @@ QStringList getMinecraftJavaBundle()
     return javas;
 }
 
-#if defined(Q_OS_WIN32)
+#ifdef Q_OS_WIN32
 const QString JavaUtils::javaExecutable = "javaw.exe";
 #else
 const QString JavaUtils::javaExecutable = "java";

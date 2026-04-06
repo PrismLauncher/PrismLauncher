@@ -41,7 +41,7 @@ class LinkTask : public Task {
     void executeTask() override
     {
         if (!(*m_lnk)()) {
-#if defined Q_OS_WIN32
+#ifdef Q_OS_WIN32
             if (!m_useHard) {
                 qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
 
@@ -67,7 +67,7 @@ class LinkTask : public Task {
     }
 
     FS::create_link* m_lnk;
-#if defined Q_OS_WIN32
+#ifdef Q_OS_WIN32
     bool m_useHard = false;
 #endif
     bool m_linkRecursive = true;
@@ -100,7 +100,7 @@ class FileSystemTest : public QObject {
 
         QTest::newRow("qt 1") << "/abc/def/ghi/jkl" << "/abc/def" << "ghi/jkl";
         QTest::newRow("qt 2") << "/abc/def/ghi/jkl" << "/abc/def/" << "ghi/jkl";
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
         QTest::newRow("win native, from C:") << "C:/abc" << "C:" << "abc";
         QTest::newRow("win native 1") << "C:/abc/def/ghi/jkl" << "C:\\abc\\def" << "ghi\\jkl";
         QTest::newRow("win native 2") << "C:/abc/def/ghi/jkl" << "C:\\abc\\def\\" << "ghi\\jkl";
@@ -127,7 +127,7 @@ class FileSystemTest : public QObject {
         QTest::newRow("qt 2") << "/abc/def/ghi/jkl" << "/abc/" << "def" << "ghi/jkl";
         QTest::newRow("qt 3") << "/abc/def/ghi/jkl" << "/abc" << "def/" << "ghi/jkl";
         QTest::newRow("qt 4") << "/abc/def/ghi/jkl" << "/abc/" << "def/" << "ghi/jkl";
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
         QTest::newRow("win 1") << "C:/abc/def/ghi/jkl" << "C:\\abc" << "def" << "ghi\\jkl";
         QTest::newRow("win 2") << "C:/abc/def/ghi/jkl" << "C:\\abc\\" << "def" << "ghi\\jkl";
         QTest::newRow("win 3") << "C:/abc/def/ghi/jkl" << "C:\\abc" << "def\\" << "ghi\\jkl";
@@ -705,7 +705,7 @@ class FileSystemTest : public QObject {
         QCOMPARE(FS::pathTruncate("/bar/foo.txt", 1), QDir::toNativeSeparators("/bar"));
         QCOMPARE(FS::pathTruncate("bar/foo.txt", 1), QDir::toNativeSeparators("bar"));
         QCOMPARE(FS::pathTruncate("baz/bar/foo.txt", 2), QDir::toNativeSeparators("baz/bar"));
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
         QCOMPARE(FS::pathTruncate("C:\\bar\\foo.txt", 1), QDir::toNativeSeparators("C:\\bar"));
 #endif
     }

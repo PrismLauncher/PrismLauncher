@@ -107,7 +107,7 @@ void PrismExternalUpdater::checkForUpdates(bool triggeredByUser)
 
     QProcess proc;
     auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
-#if defined Q_OS_WIN32
+#ifdef Q_OS_WIN32
     exe_name.append(".exe");
 
     auto env = QProcessEnvironment::systemEnvironment();
@@ -350,7 +350,7 @@ void PrismExternalUpdater::performUpdate(const QString& version_tag)
 {
     QProcess proc;
     auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
-#if defined Q_OS_WIN32
+#ifdef Q_OS_WIN32
     exe_name.append(".exe");
 
     auto env = QProcessEnvironment::systemEnvironment();
