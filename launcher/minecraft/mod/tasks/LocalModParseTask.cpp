@@ -50,7 +50,7 @@ ModDetails ReadMCModInfo(QByteArray contents)
         details.homeurl = homeurl;
         details.description = firstObj.value("description").toString();
         QJsonArray authors = firstObj.value("authorList").toArray();
-        if (authors.size() == 0) {
+        if (authors.empty()) {
             // FIXME: what is the format of this? is there any?
             authors = firstObj.value("authors").toArray();
         }

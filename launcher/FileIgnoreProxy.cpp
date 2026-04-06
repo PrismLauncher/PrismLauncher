@@ -163,7 +163,7 @@ bool FileIgnoreProxy::setFilterState(QModelIndex index, Qt::CheckState state)
             while (1) {
                 auto node = fsm->index(row, 0, doing);
                 if (!node.isValid()) {
-                    if (!todo.size()) {
+                    if (todo.empty()) {
                         break;
                     }
                     doing = todo.pop();
@@ -202,7 +202,7 @@ bool FileIgnoreProxy::setFilterState(QModelIndex index, Qt::CheckState state)
         while (1) {
             auto node = this->index(row, 0, doing);
             if (!node.isValid()) {
-                if (!todo.size()) {
+                if (todo.empty()) {
                     break;
                 }
                 doing = todo.pop();

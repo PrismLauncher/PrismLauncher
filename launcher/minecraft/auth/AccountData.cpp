@@ -64,7 +64,7 @@ void tokenToJSONV3(QJsonObject& parent, const Token& t, const char* tokenName)
         out["refresh_token"] = QJsonValue(t.refresh_token);
         save = true;
     }
-    if (t.extra.size()) {
+    if (!t.extra.empty()) {
         out["extra"] = QJsonObject::fromVariantMap(t.extra);
         save = true;
     }

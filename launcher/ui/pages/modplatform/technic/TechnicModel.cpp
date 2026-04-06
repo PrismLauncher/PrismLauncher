@@ -240,7 +240,7 @@ void Technic::ListModel::searchRequestFinished(QByteArray* responsePtr)
     searchState = Finished;
 
     // When you have a Qt build with assertions turned on, proceeding here will abort the application
-    if (newList.size() == 0)
+    if (newList.empty())
         return;
 
     beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size() + newList.size() - 1);

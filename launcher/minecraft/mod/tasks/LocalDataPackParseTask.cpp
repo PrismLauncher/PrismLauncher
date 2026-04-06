@@ -173,7 +173,7 @@ std::pair<int, int> parseVersion(const QJsonValue& value)
     std::pair<int, int> version;
     if (value.isArray()) {
         QJsonArray arr = value.toArray();
-        if (arr.size() >= 1) {
+        if (!arr.empty()) {
             version.first = arr.at(0).toInt();
         }
         if (arr.size() >= 2) {

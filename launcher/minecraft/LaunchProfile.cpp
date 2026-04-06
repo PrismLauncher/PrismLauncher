@@ -361,7 +361,7 @@ void LaunchProfile::getLibraryFiles(const RuntimeContext& runtimeContext,
     // NOTE: order is important here, add main jar last to the lists
     if (m_mainJar) {
         // FIXME: HACK!! jar modding is weird and unsystematic!
-        if (m_jarMods.size()) {
+        if (!m_jarMods.empty()) {
             QDir tempDir(tempPath);
             jars.append(tempDir.absoluteFilePath("minecraft.jar"));
         } else {

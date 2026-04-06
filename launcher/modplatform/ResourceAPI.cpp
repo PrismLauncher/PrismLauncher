@@ -243,7 +243,7 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
             return a.date > b.date;
         };
         std::sort(versions.begin(), versions.end(), orderSortPredicate);
-        auto bestMatch = versions.size() != 0 ? versions.front() : ModPlatform::IndexedVersion();
+        auto bestMatch = !versions.empty() ? versions.front() : ModPlatform::IndexedVersion();
         callbacks.on_succeed(bestMatch);
     });
 

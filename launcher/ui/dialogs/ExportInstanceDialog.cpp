@@ -115,7 +115,7 @@ void SaveIcon(BaseInstance* m_instance)
     const auto& image = mmcIcon->m_images[mmcIcon->type()];
     const auto& icon = image.icon;
     auto sizes = icon.availableSizes();
-    if (sizes.size() == 0) {
+    if (sizes.empty()) {
         return;
     }
     auto areaOf = [](QSize size) { return size.width() * size.height(); };

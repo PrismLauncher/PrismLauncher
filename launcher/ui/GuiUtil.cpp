@@ -229,7 +229,7 @@ static QStringList BrowseForFileInternal(QString context,
 QString GuiUtil::BrowseForFile(QString context, QString caption, QString filter, QString defaultPath, QWidget* parentWidget)
 {
     auto resultList = BrowseForFileInternal(context, caption, filter, defaultPath, parentWidget, true);
-    if (resultList.size()) {
+    if (!resultList.empty()) {
         return resultList[0];
     }
     return QString();

@@ -58,7 +58,7 @@ void AuthFlow::nextStep()
     if (!Task::isRunning()) {
         return;
     }
-    if (m_steps.size() == 0) {
+    if (m_steps.empty()) {
         // we got to the end without an incident... assume this is all.
         m_currentStep.reset();
         succeed();

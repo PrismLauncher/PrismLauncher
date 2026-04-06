@@ -897,7 +897,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
         added_set.subtract(current_set);
 
         // When you have a Qt build with assertions turned on, proceeding here will abort the application
-        if (added_set.size() > 0) {
+        if (!added_set.empty()) {
             beginInsertRows(QModelIndex(), static_cast<int>(m_resources.size()),
                             static_cast<int>(m_resources.size() + added_set.size() - 1));
 

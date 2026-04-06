@@ -139,7 +139,7 @@ void ListModel::requestFinished(QByteArray* responsePtr)
         }
 
         // ignore packs without a published version
-        if (pack.versions.length() == 0)
+        if (pack.versions.empty())
             continue;
         // only display public packs (for now)
         if (pack.type != ATLauncher::PackType::Public)

@@ -504,7 +504,7 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
     }
     if (checkOnly) {
         finalizeComponents();
-        if (toAdd.size() || toChange.size()) {
+        if (!toAdd.empty() || !toChange.empty()) {
             emitFailed(tr("Instance has unresolved dependencies while loading/checking for launch."));
         } else {
             emitSucceeded();
@@ -513,7 +513,7 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
     }
 
     bool recursionNeeded = false;
-    if (toAdd.size()) {
+    if (!toAdd.empty()) {
         // add stuff...
         for (const auto& add : toAdd) {
             auto component = makeShared<Component>(d->m_profile, add.uid);
@@ -552,7 +552,7 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
         }
         recursionNeeded = true;
     }
-    if (toChange.size()) {
+    if (!toChange.empty()) {
         // change a version of something that exists
         for (const auto& change : toChange) {
             // FIXME: this should not work directly with the component list

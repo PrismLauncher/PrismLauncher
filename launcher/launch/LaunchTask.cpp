@@ -73,7 +73,7 @@ void LaunchTask::prependStep(shared_qobject_ptr<LaunchStep> step)
 void LaunchTask::executeTask()
 {
     m_instance->setCrashed(false);
-    if (!m_steps.size()) {
+    if (m_steps.empty()) {
         state = LaunchTask::Finished;
         emitSucceeded();
         return;

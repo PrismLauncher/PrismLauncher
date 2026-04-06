@@ -420,12 +420,12 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
         return list;
     };
 
-    if (requiredToEnable.size() > 0 || requiredToDisable.size() > 0) {
+    if (!requiredToEnable.empty() || !requiredToDisable.empty()) {
         QString title;
         QString message;
         QString noButton;
         QString yesButton;
-        if (requiredToEnable.size() > 0 && requiredToDisable.size() > 0) {
+        if (!requiredToEnable.empty() && !requiredToDisable.empty()) {
             title = tr("Confirm toggle");
             message = tr("Toggling these mod(s) will cause changes to other mods.\n") +
                       tr("%n mod(s) will be enabled\n", "", requiredToEnable.size()) +
@@ -433,7 +433,7 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
                       tr("Do you want to automatically apply these related changes?\nIgnoring them may break the game.");
             noButton = tr("Only Toggle Selected");
             yesButton = tr("Toggle Required Mods");
-        } else if (requiredToEnable.size() > 0) {
+        } else if (!requiredToEnable.empty()) {
             title = tr("Confirm enable");
             message = tr("The enabled mod(s) require %n mod(s).\n", "", requiredToEnable.size()) +
                       tr("Would you like to enable them as well?\nIgnoring them may break the game.");

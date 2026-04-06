@@ -90,7 +90,7 @@ bool ProfileSelectDialog::useAsInstDefaullt() const
 void ProfileSelectDialog::on_buttonBox_accepted()
 {
     QModelIndexList selection = ui->view->selectionModel()->selectedIndexes();
-    if (selection.size() > 0) {
+    if (!selection.empty()) {
         QModelIndex selected = selection.first();
         m_selected = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
     }

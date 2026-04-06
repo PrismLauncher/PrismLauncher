@@ -131,7 +131,7 @@ std::unique_ptr<nbt::tag_compound> parseLevelDat(QByteArray data)
     try {
         auto pair = nbt::io::read_compound(foo);
 
-        if (pair.first != "")
+        if (!pair.first.empty())
             return nullptr;
 
         if (pair.second == nullptr)

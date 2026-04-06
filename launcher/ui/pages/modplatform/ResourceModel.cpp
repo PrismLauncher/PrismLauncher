@@ -382,7 +382,7 @@ void ResourceModel::searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>&
     }
 
     // When you have a Qt build with assertions turned on, proceeding here will abort the application
-    if (filteredNewList.size() == 0)
+    if (filteredNewList.empty())
         return;
 
     beginInsertRows(QModelIndex(), m_packs.size(), m_packs.size() + filteredNewList.size() - 1);

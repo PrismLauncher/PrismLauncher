@@ -123,7 +123,7 @@ void PackFetchTask::fileDownloadFinished(QByteArray* publicPtr, QByteArray* thir
     // NOTE(TheKodeToad): we don't want to reset the jobPtr earlier as it may invalidate the responses!
     jobPtr.reset();
 
-    if (failedLists.size() > 0) {
+    if (!failedLists.empty()) {
         emit failed(tr("Failed to download some pack lists: %1").arg(failedLists.join("\n- ")));
     } else {
         emit finished(publicPacks, thirdPartyPacks);

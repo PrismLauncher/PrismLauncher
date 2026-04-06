@@ -122,7 +122,7 @@ static std::unique_ptr<nbt::tag_compound> parseServersDat(const QString& filenam
         std::istringstream foo(std::string(input.constData(), input.size()));
         auto pair = nbt::io::read_compound(foo);
 
-        if (pair.first != "")
+        if (!pair.first.empty())
             return nullptr;
 
         if (pair.second == nullptr)

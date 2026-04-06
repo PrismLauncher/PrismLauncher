@@ -543,7 +543,7 @@ InstanceList::InstListError InstanceList::loadList()
             removeNow();
         }
     }
-    if (newList.size()) {
+    if (!newList.empty()) {
         add(newList);
     }
     m_dirty = false;

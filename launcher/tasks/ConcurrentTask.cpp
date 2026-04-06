@@ -247,11 +247,11 @@ void ConcurrentTask::updateState()
                       .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(totalSize())));
     } else {
         QString status = tr("Please wait...");
-        if (m_queue.size() > 0) {
+        if (!m_queue.empty()) {
             status = tr("Waiting for a task to start...");
-        } else if (m_doing.size() > 0) {
+        } else if (!m_doing.empty()) {
             status = tr("Executing 1 task:");
-        } else if (m_done.size() > 0) {
+        } else if (!m_done.empty()) {
             status = tr("Task finished.");
         }
         setStatus(status);

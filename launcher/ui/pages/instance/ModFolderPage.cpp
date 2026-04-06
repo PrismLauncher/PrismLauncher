@@ -353,7 +353,7 @@ void ModFolderPage::exportModMetadata()
 {
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
     auto selectedMods = m_model->selectedMods(selection);
-    if (selectedMods.length() == 0)
+    if (selectedMods.empty())
         selectedMods = m_model->allMods();
 
     std::sort(selectedMods.begin(), selectedMods.end(), [](const Mod* a, const Mod* b) { return a->name() < b->name(); });

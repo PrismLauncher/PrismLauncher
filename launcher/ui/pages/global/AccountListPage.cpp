@@ -171,7 +171,7 @@ void AccountListPage::on_actionRemove_triggered()
         return;
     }
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
-    if (selection.size() > 0) {
+    if (!selection.empty()) {
         QModelIndex selected = selection.first();
         m_accounts->removeAccount(selected);
     }
@@ -180,7 +180,7 @@ void AccountListPage::on_actionRemove_triggered()
 void AccountListPage::on_actionRefresh_triggered()
 {
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
-    if (selection.size() > 0) {
+    if (!selection.empty()) {
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
         m_accounts->requestRefresh(account->internalId());
@@ -190,7 +190,7 @@ void AccountListPage::on_actionRefresh_triggered()
 void AccountListPage::on_actionSetDefault_triggered()
 {
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
-    if (selection.size() > 0) {
+    if (!selection.empty()) {
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
         m_accounts->setDefaultAccount(account);
@@ -241,7 +241,7 @@ void AccountListPage::updateButtonStates()
 void AccountListPage::on_actionManageSkins_triggered()
 {
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
-    if (selection.size() > 0) {
+    if (!selection.empty()) {
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
         SkinManageDialog dialog(this, account);
@@ -252,7 +252,7 @@ void AccountListPage::on_actionManageSkins_triggered()
 void AccountListPage::on_actionMoveUp_triggered()
 {
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
-    if (selection.size() > 0) {
+    if (!selection.empty()) {
         QModelIndex selected = selection.first();
         m_accounts->moveAccount(selected, -1);
     }
@@ -261,7 +261,7 @@ void AccountListPage::on_actionMoveUp_triggered()
 void AccountListPage::on_actionMoveDown_triggered()
 {
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
-    if (selection.size() > 0) {
+    if (!selection.empty()) {
         QModelIndex selected = selection.first();
         m_accounts->moveAccount(selected, 1);
     }

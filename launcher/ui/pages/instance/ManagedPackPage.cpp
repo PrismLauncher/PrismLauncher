@@ -312,7 +312,7 @@ QString ModrinthManagedPackPage::url() const
 void ModrinthManagedPackPage::suggestVersion()
 {
     auto index = ui->versionsComboBox->currentIndex();
-    if (m_pack.versions.length() == 0) {
+    if (m_pack.versions.empty()) {
         setFailState();
         return;
     }
@@ -355,7 +355,7 @@ void ModrinthManagedPackPage::update()
         return;
     }
     auto index = ui->versionsComboBox->currentIndex();
-    if (m_pack.versions.length() == 0) {
+    if (m_pack.versions.empty()) {
         setFailState();
         return;
     }
@@ -457,7 +457,7 @@ QString FlameManagedPackPage::url() const
 void FlameManagedPackPage::suggestVersion()
 {
     auto index = ui->versionsComboBox->currentIndex();
-    if (m_pack.versions.length() == 0) {
+    if (m_pack.versions.empty()) {
         setFailState();
         return;
     }
@@ -477,7 +477,7 @@ void FlameManagedPackPage::update()
         return;
     }
     auto index = ui->versionsComboBox->currentIndex();
-    if (m_pack.versions.length() == 0) {
+    if (m_pack.versions.empty()) {
         setFailState();
         return;
     }

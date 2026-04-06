@@ -902,7 +902,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
 
     // mods and core mods
     auto printModList = [&out](const QString& label, ModFolderModel& model) {
-        if (model.size()) {
+        if (!model.empty()) {
             out << QString("%1:").arg(label);
             auto modList = model.allMods();
             std::sort(modList.begin(), modList.end(), [](auto a, auto b) {
@@ -931,7 +931,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
 
     // jar mods
     const auto& jarMods = profile->getJarMods();
-    if (jarMods.size()) {
+    if (!jarMods.empty()) {
         out << "Jar Mods:";
         for (const auto& jarmod : jarMods) {
             auto displayname = jarmod->displayName(runtimeContext());
@@ -947,7 +947,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
 
     // traits
     auto alltraits = traits();
-    if (alltraits.size()) {
+    if (!alltraits.empty()) {
         out << "Traits:";
         for (auto trait : alltraits) {
             out << indent + trait;

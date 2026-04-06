@@ -44,7 +44,7 @@ void ModMinecraftJar::executeTask()
 {
     auto* m_inst = m_parent->instance();
 
-    if (!m_inst->getJarMods().size()) {
+    if (m_inst->getJarMods().empty()) {
         emitSucceeded();
         return;
     }
@@ -64,7 +64,7 @@ void ModMinecraftJar::executeTask()
     auto* components = m_inst->getPackProfile();
     auto profile = components->getProfile();
     auto jarMods = m_inst->getJarMods();
-    if (jarMods.size()) {
+    if (!jarMods.empty()) {
         auto mainJar = profile->getMainJar();
         QStringList jars;
         QStringList temp1;

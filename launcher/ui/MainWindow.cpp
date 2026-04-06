@@ -804,7 +804,7 @@ void MainWindow::updateNewsLabel()
         ui->actionMoreNews->setVisible(false);
     } else {
         QList<NewsEntryPtr> entries = m_newsChecker->getNewsEntries();
-        if (entries.length() > 0) {
+        if (!entries.empty()) {
             newsLabel->setText(entries[0]->title);
             newsLabel->setEnabled(true);
             ui->actionMoreNews->setVisible(true);

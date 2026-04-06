@@ -97,7 +97,7 @@ class Library {
     QString version() const { return m_name.version(); }
 
     /// Returns true if the library is native
-    bool isNative() const { return m_nativeClassifiers.size() != 0; }
+    bool isNative() const { return !m_nativeClassifiers.empty(); }
 
     void setStoragePrefix(QString prefix = QString());
 

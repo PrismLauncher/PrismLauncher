@@ -644,7 +644,7 @@ void AccountList::queueRefresh(QString accountId)
 
 void AccountList::tryNext()
 {
-    while (m_refreshQueue.length()) {
+    while (!m_refreshQueue.empty()) {
         auto accountId = m_refreshQueue.front();
         m_refreshQueue.pop_front();
         for (int i = 0; i < count(); i++) {
