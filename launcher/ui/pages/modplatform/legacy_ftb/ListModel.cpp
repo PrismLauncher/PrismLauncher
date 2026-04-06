@@ -192,6 +192,7 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
                 // bugged pack, currently only indicates bugged xml
                 return QColor(244, 229, 66);
             }
+            return {};
         }
         case Qt::DisplayRole:
             return pack.name;

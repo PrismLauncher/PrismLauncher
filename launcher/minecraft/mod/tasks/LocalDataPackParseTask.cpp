@@ -27,6 +27,7 @@
 #include "minecraft/mod/ResourcePack.h"
 
 #include <QCryptographicHash>
+#include <utility>
 
 namespace DataPackUtils {
 
@@ -163,6 +164,25 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
     return true;
 }
 
+std::pair<int, int> parseVersion(const QJsonValue& value)
+{
+    if (value.isDouble()) {
+        // Single integer -> [major, 0]
+        return std::make_pair(value.toInt(), 0);
+    }
+    std::pair<int, int> version;
+    if (value.isArray()) {
+        QJsonArray arr = value.toArray();
+        if (arr.size() >= 1) {
+            version.first = arr.at(0).toInt();
+        }
+        if (arr.size() >= 2) {
+            version.second = arr.at(1).toInt();
+        }
+    }
+    return version;
+}
+
 // https://minecraft.wiki/w/Data_pack#pack.mcmeta
 // https://minecraft.wiki/w/Raw_JSON_text_format
 // https://minecraft.wiki/w/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
@@ -177,7 +197,20 @@ bool processMCMeta(DataPack* pack, QByteArray&& raw_data)
 
     try {
         auto pack_obj = Json::requireObject(json_doc.object(), "pack", {});
-        pack->setPackFormat(pack_obj["pack_format"].toInt());
+
+        int pack_format = 0;
+        std::pair<int, int> min_format;
+        std::pair<int, int> max_format;
+        if (pack_obj.contains("pack_format")) {
+            pack_format = pack_obj.value("pack_format").toInt();
+        }
+        if (pack_obj.contains("min_format")) {
+            min_format = parseVersion(pack_obj.value("min_format"));
+        }
+        if (pack_obj.contains("max_format")) {
+            max_format = parseVersion(pack_obj.value("max_format"));
+        }
+        pack->setPackFormat(pack_format, min_format, max_format);
         pack->setDescription(DataPackUtils::processComponent(pack_obj.value("description")));
     } catch (Json::JsonException& e) {
         qWarning() << "JsonException:" << e.what() << e.cause();

@@ -24,34 +24,40 @@
 #include <QString>
 #include <QVariant>
 #include <compare>
+#include <cstdint>
 #include <memory>
 
 class QIODevice;
 
 namespace ModPlatform {
 
-enum ModLoaderType {
-    NeoForge = 1 << 0,
-    Forge = 1 << 1,
-    Cauldron = 1 << 2,
-    LiteLoader = 1 << 3,
-    Fabric = 1 << 4,
-    Quilt = 1 << 5,
-    DataPack = 1 << 6,
-    Babric = 1 << 7,
-    BTA = 1 << 8,
-    LegacyFabric = 1 << 9,
-    Ornithe = 1 << 10,
-    Rift = 1 << 11
+enum class ModLoaderType : std::uint16_t {
+    NeoForge = 1U << 0U,
+    Forge = 1U << 1U,
+    Cauldron = 1U << 2U,
+    LiteLoader = 1U << 3U,
+    Fabric = 1U << 4U,
+    Quilt = 1U << 5U,
+    DataPack = 1U << 6U,
+    Babric = 1U << 7U,
+    BTA = 1U << 8U,
+    LegacyFabric = 1U << 9U,
+    Ornithe = 1U << 10U,
+    Rift = 1U << 11U
 };
+
+ModLoaderType operator|(ModLoaderType lhs, ModLoaderType rhs);
+
+using enum ModLoaderType;
+
 Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
 QList<ModLoaderType> modLoaderTypesToList(ModLoaderTypes flags);
 
-enum class ResourceProvider { MODRINTH, FLAME };
+enum class ResourceProvider : std::uint8_t { MODRINTH, FLAME };
 
-enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
+enum class DependencyType : std::uint8_t { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
 
-enum class Side { NoSide = 0, ClientSide = 1 << 0, ServerSide = 1 << 1, UniversalSide = ClientSide | ServerSide };
+enum class Side : std::uint8_t { NoSide = 0, ClientSide = 1U << 0U, ServerSide = 1U << 1U, UniversalSide = ClientSide | ServerSide };
 
 namespace SideUtils {
 QString toString(Side side);
@@ -81,11 +87,11 @@ struct DonationData {
 };
 
 struct IndexedVersionType {
-    enum class Enum { Unknown, Release = 1, Beta, Alpha };
+    enum class Enum : std::uint8_t { Unknown = 0, Release = 1, Beta = 2, Alpha = 3 };
     using enum Enum;
-    constexpr IndexedVersionType(Enum e = Unknown) : m_type(e) {}
+    constexpr IndexedVersionType(Enum e = Unknown) : m_type(e) {}  // NOLINT(hicpp-explicit-conversions)
     static IndexedVersionType fromString(const QString& type);
-    inline bool isValid() const { return m_type != Unknown; }
+    bool isValid() const { return m_type != Unknown; }
     std::strong_ordering operator<=>(const IndexedVersionType& other) const = default;
     std::strong_ordering operator<=>(const IndexedVersionType::Enum& other) const { return m_type <=> other; }
     QString toString() const;
@@ -106,19 +112,19 @@ struct IndexedVersion {
     QVariant addonId;
     QVariant fileId;
     QString version;
-    QString version_number = {};
+    QString version_number;
     IndexedVersionType version_type;
     QStringList mcVersion;
     QString downloadUrl;
     QString date;
     QString fileName;
-    ModLoaderTypes loaders = {};
+    ModLoaderTypes loaders;
     QString hash_type;
     QString hash;
     bool is_preferred = true;
     QString changelog;
     QList<Dependency> dependencies;
-    Side side;  // this is for flame API
+    Side side = Side::NoSide;  // this is for flame API
 
     // For internal use, not provided by APIs
     bool is_currently_selected = false;
@@ -128,7 +134,7 @@ struct IndexedVersion {
         auto release_type = version_type.isValid() ? QString(" [%1]").arg(version_type.toString()) : "";
         auto versionStr = !version.contains(version_number) ? version_number : "";
         QString gameVersion = "";
-        for (auto v : mcVersion) {
+        for (const auto& v : mcVersion) {
             if (version.contains(v)) {
                 gameVersion = "";
                 break;
@@ -166,7 +172,7 @@ struct IndexedPack {
     QString logoName;
     QString logoUrl;
     QString websiteUrl;
-    Side side;
+    Side side = Side::NoSide;
 
     bool versionsLoaded = false;
     QList<IndexedVersion> versions;
@@ -178,17 +184,19 @@ struct IndexedPack {
     // For internal use, not provided by APIs
     bool isVersionSelected(int index) const
     {
-        if (!versionsLoaded)
+        if (!versionsLoaded) {
             return false;
+        }
 
         return versions.at(index).is_currently_selected;
     }
     bool isAnyVersionSelected() const
     {
-        if (!versionsLoaded)
+        if (!versionsLoaded) {
             return false;
+        }
 
-        return std::any_of(versions.constBegin(), versions.constEnd(), [](auto const& v) { return v.is_currently_selected; });
+        return std::any_of(versions.constBegin(), versions.constEnd(), [](const auto& v) { return v.is_currently_selected; });
     }
 };
 
@@ -201,11 +209,13 @@ struct OverrideDep {
 
 inline auto getOverrideDeps() -> QList<OverrideDep>
 {
-    return { { "634179", "306612", "API", ModPlatform::ResourceProvider::FLAME },
-             { "720410", "308769", "KotlinLibraries", ModPlatform::ResourceProvider::FLAME },
+    return {
+        { .quilt = "634179", .fabric = "306612", .slug = "API", .provider = ModPlatform::ResourceProvider::FLAME },
+        { .quilt = "720410", .fabric = "308769", .slug = "KotlinLibraries", .provider = ModPlatform::ResourceProvider::FLAME },
 
-             { "qvIfYCYJ", "P7dR8mSH", "API", ModPlatform::ResourceProvider::MODRINTH },
-             { "lwVhp9o5", "Ha28R6CL", "KotlinLibraries", ModPlatform::ResourceProvider::MODRINTH } };
+        { .quilt = "qvIfYCYJ", .fabric = "P7dR8mSH", .slug = "API", .provider = ModPlatform::ResourceProvider::MODRINTH },
+        { .quilt = "lwVhp9o5", .fabric = "Ha28R6CL", .slug = "KotlinLibraries", .provider = ModPlatform::ResourceProvider::MODRINTH }
+    };
 }
 
 QString getMetaURL(ResourceProvider provider, QVariant projectID);
@@ -215,8 +225,8 @@ auto getModLoaderFromString(QString type) -> ModLoaderType;
 
 constexpr bool hasSingleModLoaderSelected(ModLoaderTypes l) noexcept
 {
-    auto x = static_cast<int>(l);
-    return x && !(x & (x - 1));
+    auto x = static_cast<std::uint16_t>(l);
+    return (x != 0U) && ((x & (x - 1U)) == 0U);
 }
 
 struct Category {

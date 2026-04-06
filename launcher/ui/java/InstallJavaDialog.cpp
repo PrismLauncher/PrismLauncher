@@ -288,6 +288,11 @@ QList<BasePage*> InstallDialog::getPages()
         new InstallJavaPage("net.adoptium.java", "adoptium", tr("Adoptium")),
         // Azul
         new InstallJavaPage("com.azul.java", "azul", tr("Azul Zulu")),
+        // IBM
+	/* Must watch out in case the AdoptOpenJDK infrastructure is deprecated.
+        In case of happening, IBM does not seem to provide as of today (03/2026) an API like Adoptium does and rather uses GitHub directly in its website: `developer.ibm.com`.
+        GitHub is known for rate limiting requests that do not use an API key from an account. */
+        new InstallJavaPage("com.ibm.java", "openj9_hex_custom", tr("IBM Semeru Open")),
     };
 }
 

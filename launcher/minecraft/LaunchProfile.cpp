@@ -213,9 +213,9 @@ void LaunchProfile::applyMavenFile(LibraryPtr mavenFile, const RuntimeContext& r
     m_mavenFiles.append(Library::limitedCopy(mavenFile));
 }
 
-void LaunchProfile::applyAgent(AgentPtr agent, const RuntimeContext& runtimeContext)
+void LaunchProfile::applyAgent(const Agent& agent, const RuntimeContext& runtimeContext)
 {
-    auto lib = agent->library();
+    auto lib = agent.library;
     if (!lib->isActive(runtimeContext)) {
         return;
     }
@@ -330,7 +330,7 @@ const QList<LibraryPtr>& LaunchProfile::getMavenFiles() const
     return m_mavenFiles;
 }
 
-const QList<AgentPtr>& LaunchProfile::getAgents() const
+const QList<Agent>& LaunchProfile::getAgents() const
 {
     return m_agents;
 }

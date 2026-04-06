@@ -46,7 +46,6 @@
 #include "GitHubRelease.h"
 
 class PrismUpdaterApp : public QApplication {
-    // friends for the purpose of limiting access to deprecated stuff
     Q_OBJECT
    public:
     enum Status { Starting, Failed, Succeeded, Initialized, Aborted };

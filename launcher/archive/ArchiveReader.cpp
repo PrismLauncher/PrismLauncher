@@ -23,7 +23,10 @@
 #include <archive_entry.h>
 #include <QDir>
 #include <QFileInfo>
+#include <QUrl>
+#include <functional>
 #include <memory>
+#include <optional>
 
 namespace MMCZip {
 QStringList ArchiveReader::getFiles()
@@ -34,25 +37,36 @@ QStringList ArchiveReader::getFiles()
 bool ArchiveReader::collectFiles(bool onlyFiles)
 {
     return parse([this, onlyFiles](File* f) {
-        if (!onlyFiles || f->isFile())
+        if (!onlyFiles || f->isFile()) {
             m_fileNames << f->filename();
+        }
         return f->skip();
     });
 }
 
+using getPathFunc = std::function<const char*(archive_entry*)>;
+static QString decodeLibArchivePath(archive_entry* entry, const getPathFunc& getUtf8Path, const getPathFunc& getPath)
+{
+    auto fileName = QString::fromUtf8(getUtf8Path(entry));
+    if (fileName.isEmpty()) {
+        fileName = QString::fromLocal8Bit(getPath(entry));
+    }
+    return fileName;
+}
+
 QString ArchiveReader::File::filename()
 {
-    return QString::fromUtf8(archive_entry_pathname_utf8(m_entry));
+    return decodeLibArchivePath(m_entry, archive_entry_pathname_utf8, archive_entry_pathname);
 }
 
 QByteArray ArchiveReader::File::readAll(int* outStatus)
 {
     QByteArray data;
-    const void* buff;
-    size_t size;
-    la_int64_t offset;
+    const void* buff = nullptr;
+    size_t size = 0;
+    la_int64_t offset = 0;
 
-    int status;
+    int status = 0;
     while ((status = archive_read_data_block(m_archive.get(), &buff, &size, &offset)) == ARCHIVE_OK) {
         data.append(static_cast<const char*>(buff), static_cast<qsizetype>(size));
     }
@@ -78,10 +92,10 @@ int ArchiveReader::File::readNextHeader()
     return archive_read_next_header(m_archive.get(), &m_entry);
 }
 
-auto ArchiveReader::goToFile(QString filename) -> std::unique_ptr<File>
+auto ArchiveReader::goToFile(const QString& filename) -> std::unique_ptr<File>
 {
     auto f = std::make_unique<File>();
-    auto a = f->m_archive.get();
+    auto* a = f->m_archive.get();
     archive_read_support_format_all(a);
     archive_read_support_filter_all(a);
     auto fileName = m_archivePath.toStdWString();
@@ -103,15 +117,16 @@ auto ArchiveReader::goToFile(QString filename) -> std::unique_ptr<File>
 
 static int copy_data(struct archive* ar, struct archive* aw, bool notBlock = false)
 {
-    int r;
-    const void* buff;
-    size_t size;
-    la_int64_t offset;
+    int r = 0;
+    const void* buff = nullptr;
+    size_t size = 0;
+    la_int64_t offset = 0;
 
     for (;;) {
         r = archive_read_data_block(ar, &buff, &size, &offset);
-        if (r == ARCHIVE_EOF)
-            return (ARCHIVE_OK);
+        if (r == ARCHIVE_EOF) {
+            return ARCHIVE_OK;
+        }
         if (r < ARCHIVE_OK) {
             qCritical() << "Failed reading data block:" << archive_error_string(ar);
             return (r);
@@ -128,9 +143,43 @@ static int copy_data(struct archive* ar, struct archive* aw, bool notBlock = fal
     }
 }
 
-bool ArchiveReader::File::writeFile(archive* out, QString targetFileName, bool notBlock)
+static bool willEscapeRoot(const QDir& root, archive_entry* entry)
 {
-    auto entry = m_entry;
+    auto entryPath = decodeLibArchivePath(entry, archive_entry_pathname_utf8, archive_entry_pathname);
+    auto linkTarget = decodeLibArchivePath(entry, archive_entry_symlink_utf8, archive_entry_symlink);
+    auto hardLink = decodeLibArchivePath(entry, archive_entry_hardlink_utf8, archive_entry_hardlink);
+
+    if (entryPath.isEmpty() || (linkTarget.isEmpty() && hardLink.isEmpty())) {
+        return false;
+    }
+
+    bool isHardLink = false;
+    if (isHardLink = linkTarget.isEmpty(); isHardLink) {
+        linkTarget = hardLink;
+    }
+
+    QString linkFullPath = root.filePath(entryPath);
+    auto rootDir = QUrl::fromLocalFile(root.absolutePath());
+
+    if (!rootDir.isParentOf(QUrl::fromLocalFile(linkFullPath))) {
+        return true;
+    }
+
+    QDir linkDir = QFileInfo(linkFullPath).dir();
+    if (!QDir::isAbsolutePath(linkTarget)) {
+        linkTarget = (!isHardLink ? linkDir : root).filePath(linkTarget);
+    }
+    return !rootDir.isParentOf(QUrl::fromLocalFile(QDir::cleanPath(linkTarget)));
+}
+
+bool ArchiveReader::File::writeFile(archive* out, const QString& targetFileName, bool notBlock)
+{
+    return writeFile(out, targetFileName, {}, notBlock);
+};
+
+bool ArchiveReader::File::writeFile(archive* out, const QString& targetFileName, std::optional<QDir> root, bool notBlock)
+{
+    auto* entry = m_entry;
     std::unique_ptr<archive_entry, decltype(&archive_entry_free)> entryClone(nullptr, &archive_entry_free);
     if (!targetFileName.isEmpty()) {
         entryClone.reset(archive_entry_clone(m_entry));
@@ -138,26 +187,34 @@ bool ArchiveReader::File::writeFile(archive* out, QString targetFileName, bool n
         auto nameUtf8 = targetFileName.toUtf8();
         archive_entry_set_pathname_utf8(entry, nameUtf8.constData());
     }
-    if (archive_write_header(out, entry) < ARCHIVE_OK) {
-        qCritical() << "Failed to write header to entry:" << filename() << "-" << archive_error_string(out);
+    if (root.has_value() && willEscapeRoot(root.value(), entry)) {
+        qCritical() << "Failed to write header to entry:" << filename() << "-" << "file outside root";
         return false;
-    } else if (archive_entry_size(m_entry) > 0) {
+    }
+    if (archive_write_header(out, entry) < ARCHIVE_OK) {
+        qCritical() << "Failed to write header to entry:" << filename() << "-" << archive_error_string(out) << targetFileName;
+        return false;
+    }
+    if (archive_entry_size(m_entry) > 0) {
         auto r = copy_data(m_archive.get(), out, notBlock);
-        if (r < ARCHIVE_OK)
+        if (r < ARCHIVE_OK) {
             qCritical() << "Failed reading data block:" << archive_error_string(out);
-        if (r < ARCHIVE_WARN)
+        }
+        if (r < ARCHIVE_WARN) {
             return false;
+        }
     }
     auto r = archive_write_finish_entry(out);
-    if (r < ARCHIVE_OK)
+    if (r < ARCHIVE_OK) {
         qCritical() << "Failed to finish writing entry:" << archive_error_string(out);
+    }
     return (r >= ARCHIVE_WARN);
 }
 
-bool ArchiveReader::parse(std::function<bool(File*, bool&)> doStuff)
+bool ArchiveReader::parse(const std::function<bool(File*, bool&)>& doStuff)
 {
     auto f = std::make_unique<File>();
-    auto a = f->m_archive.get();
+    auto* a = f->m_archive.get();
     archive_read_support_format_all(a);
     archive_read_support_filter_all(a);
     auto fileName = m_archivePath.toStdWString();
@@ -181,7 +238,7 @@ bool ArchiveReader::parse(std::function<bool(File*, bool&)> doStuff)
     return true;
 }
 
-bool ArchiveReader::parse(std::function<bool(File*)> doStuff)
+bool ArchiveReader::parse(const std::function<bool(File*)>& doStuff)
 {
     return parse([doStuff](File* f, bool&) { return doStuff(f); });
 }
@@ -205,26 +262,32 @@ QString ArchiveReader::getZipName()
 
 bool ArchiveReader::exists(const QString& filePath) const
 {
-    if (filePath == QLatin1String("/") || filePath.isEmpty())
+    if (filePath == QLatin1String("/") || filePath.isEmpty()) {
         return true;
+    }
     // Normalize input path (remove trailing slash, if any)
     QString normalizedPath = QDir::cleanPath(filePath);
-    if (normalizedPath.startsWith('/'))
+    if (normalizedPath.startsWith('/')) {
         normalizedPath.remove(0, 1);
-    if (normalizedPath == QLatin1String("."))
+    }
+    if (normalizedPath == QLatin1String(".")) {
         return true;
-    if (normalizedPath == QLatin1String(".."))
+    }
+    if (normalizedPath == QLatin1String("..")) {
         return false;  // root only
+    }
 
     // Check for exact file match
-    if (m_fileNames.contains(normalizedPath, Qt::CaseInsensitive))
+    if (m_fileNames.contains(normalizedPath, Qt::CaseInsensitive)) {
         return true;
+    }
 
     // Check for directory existence by seeing if any file starts with that path
     QString dirPath = normalizedPath + QLatin1Char('/');
     for (const QString& f : m_fileNames) {
-        if (f.startsWith(dirPath, Qt::CaseInsensitive))
+        if (f.startsWith(dirPath, Qt::CaseInsensitive)) {
             return true;
+        }
     }
 
     return false;

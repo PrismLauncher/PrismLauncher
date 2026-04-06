@@ -29,6 +29,8 @@
 #include "net/NetJob.h"
 #include "tasks/Task.h"
 
+#include "Application.h"
+
 static const FlameAPI flameAPI;
 static ModrinthAPI modrinthAPI;
 
@@ -169,34 +171,30 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
 
             getFlameProjects();
             return;
-        }
+            }
+        if (APPLICATION->settings()->get("FallbackMRBlockedMods").toBool()){ 
+            try {
+                auto entries = Json::requireObject(doc);
+                for (auto& out : m_manifest.files) {
+                    auto url = QUrl(out.version.downloadUrl, QUrl::TolerantMode);
+                    if (!url.isValid() && "sha1" == out.version.hash_type && !out.version.hash.isEmpty()) {
+                        try {
+                            auto entry = Json::requireObject(entries, out.version.hash);
 
-        try {
-            auto entries = Json::requireObject(doc);
-            for (auto& out : m_manifest.files) {
-                auto url = QUrl(out.version.downloadUrl, QUrl::TolerantMode);
-                if (!url.isValid() && "sha1" == out.version.hash_type && !out.version.hash.isEmpty()) {
-                    try {
-                        auto entry = Json::requireObject(entries, out.version.hash);
+                            auto file = Modrinth::loadIndexedPackVersion(entry);
 
-                        auto file = Modrinth::loadIndexedPackVersion(entry);
-
-                        // If there's more than one mod loader for this version, we can't know for sure
-                        // which file is relative to each loader, so it's best to not use any one and
-                        // let the user download it manually.
-                        if (!file.loaders || hasSingleModLoaderSelected(file.loaders)) {
                             out.version.downloadUrl = file.downloadUrl;
                             qDebug() << "Found alternative on modrinth" << out.version.fileName;
+                        } catch (Json::JsonException& e) {
+                            qDebug() << e.cause();
+                            qDebug() << entries;
                         }
-                    } catch (Json::JsonException& e) {
-                        qDebug() << e.cause();
-                        qDebug() << entries;
                     }
                 }
+            } catch (Json::JsonException& e) {
+                qDebug() << e.cause();
+                qDebug() << doc;
             }
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
         }
         getFlameProjects();
     });
@@ -215,7 +213,6 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
         step_progress->status = status;
         stepProgress(*step_progress);
     });
-
     m_task->start();
 }
 

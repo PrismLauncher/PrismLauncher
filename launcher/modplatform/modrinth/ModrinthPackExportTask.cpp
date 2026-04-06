@@ -108,13 +108,13 @@ void ModrinthPackExportTask::collectHashes()
 
         QFile openFile(file.absoluteFilePath());
         if (!openFile.open(QFile::ReadOnly)) {
-            qWarning() << "Could not open" << file << "for hashing";
+            qWarning() << "Could not open" << file << "for hashing:" << openFile.errorString();
             continue;
         }
 
         const QByteArray data = openFile.readAll();
         if (openFile.error() != QFileDevice::NoError) {
-            qWarning() << "Could not read" << file;
+            qWarning() << "Could not read" << file << "error:" << openFile.errorString();
             continue;
         }
         auto sha512 = Hashing::hash(data, Hashing::Algorithm::Sha512);

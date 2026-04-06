@@ -282,6 +282,9 @@ bool copyFileAttributes(QString src, QString dst)
     if (attrs == INVALID_FILE_ATTRIBUTES)
         return false;
     return SetFileAttributesW(dst.toStdWString().c_str(), attrs);
+#else
+    Q_UNUSED(src);
+    Q_UNUSED(dst);
 #endif
     return true;
 }
@@ -950,7 +953,10 @@ QString createShortcut(QString destination, QString target, QStringList args, QS
         qWarning() << "Couldn't create directories within application";
         return QString();
     }
-    info.open(QIODevice::WriteOnly | QIODevice::Text);
+    if (!info.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qWarning() << "Failed to open file" << info.fileName() << "for writing:" << info.errorString();
+        return QString();
+    }
 
     QFile(icon).rename(resources.path() + "/Icon.icns");
 
@@ -958,7 +964,10 @@ QString createShortcut(QString destination, QString target, QStringList args, QS
     QString exec = binaryDir.path() + "/Run.command";
 
     QFile f(exec);
-    f.open(QIODevice::WriteOnly | QIODevice::Text);
+    if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qWarning() << "Failed to open file" << f.fileName() << "for writing:" << f.errorString();
+        return QString();
+    }
     QTextStream stream(&f);
 
     auto argstring = quoteArgs(args, "\"", "\\\"");
@@ -1001,7 +1010,7 @@ QString createShortcut(QString destination, QString target, QStringList args, QS
         destination += ".desktop";
     QFile f(destination);
     if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qWarning() << "Failed to open file '" << f.fileName() << "' for writing!";
+        qWarning() << "Failed to open file" << f.fileName() << "for writing:" << f.errorString();
         return QString();
     }
     QTextStream stream(&f);

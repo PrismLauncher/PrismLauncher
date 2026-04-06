@@ -618,7 +618,7 @@ bool PackInstallTask::createPackComponent(QString instanceRoot, PackProfile* pro
 
     QFile file(patchFileName);
     if (!file.open(QFile::WriteOnly)) {
-        qCritical() << "Error opening" << file.fileName() << "for reading:" << file.errorString();
+        qCritical() << "Error opening" << file.fileName() << "for writing:" << file.errorString();
         return false;
     }
     file.write(OneSixVersionFormat::versionFileToJson(f).toJson());
@@ -992,65 +992,66 @@ void PackInstallTask::install()
 
     auto instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     MinecraftInstance instance(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
-    SettingsObject::Lock lock(instance.settings());
+    {
+        SettingsObject::Lock lock(instance.settings());
+        auto components = instance.getPackProfile();
+        components->buildingFromScratch();
 
-    auto components = instance.getPackProfile();
-    components->buildingFromScratch();
-
-    // Use a component to add libraries BEFORE Minecraft
-    if (!createLibrariesComponent(instance.instanceRoot(), components)) {
-        emitFailed(tr("Failed to create libraries component"));
-        return;
-    }
-
-    // Minecraft
-    components->setComponentVersion("net.minecraft", m_version.minecraft, true);
-
-    // Loader
-    if (m_version.loader.type == QString("forge")) {
-        auto version = getVersionForLoader("net.minecraftforge");
-        if (version == Q_NULLPTR)
+        // Use a component to add libraries BEFORE Minecraft
+        if (!createLibrariesComponent(instance.instanceRoot(), components)) {
+            emitFailed(tr("Failed to create libraries component"));
             return;
+        }
 
-        components->setComponentVersion("net.minecraftforge", version);
-    } else if (m_version.loader.type == QString("neoforge")) {
-        auto version = getVersionForLoader("net.neoforged");
-        if (version == Q_NULLPTR)
+        // Minecraft
+        components->setComponentVersion("net.minecraft", m_version.minecraft, true);
+
+        // Loader
+        if (m_version.loader.type == QString("forge")) {
+            auto version = getVersionForLoader("net.minecraftforge");
+            if (version == Q_NULLPTR)
+                return;
+
+            components->setComponentVersion("net.minecraftforge", version);
+        } else if (m_version.loader.type == QString("neoforge")) {
+            auto version = getVersionForLoader("net.neoforged");
+            if (version == Q_NULLPTR)
+                return;
+
+            components->setComponentVersion("net.neoforged", version);
+        } else if (m_version.loader.type == QString("fabric")) {
+            auto version = getVersionForLoader("net.fabricmc.fabric-loader");
+            if (version == Q_NULLPTR)
+                return;
+
+            components->setComponentVersion("net.fabricmc.fabric-loader", version);
+        } else if (m_version.loader.type != QString()) {
+            emitFailed(tr("Unknown loader type: ") + m_version.loader.type);
             return;
+        }
 
-        components->setComponentVersion("net.neoforged", version);
-    } else if (m_version.loader.type == QString("fabric")) {
-        auto version = getVersionForLoader("net.fabricmc.fabric-loader");
-        if (version == Q_NULLPTR)
+        for (const auto& componentUid : componentsToInstall.keys()) {
+            auto version = componentsToInstall.value(componentUid);
+            components->setComponentVersion(componentUid, version->version());
+        }
+
+        components->installJarMods(jarmods);
+
+        // Use a component to fill in the rest of the data
+        // todo: use more detection
+        if (!createPackComponent(instance.instanceRoot(), components)) {
+            emitFailed(tr("Failed to create pack component"));
             return;
+        }
 
-        components->setComponentVersion("net.fabricmc.fabric-loader", version);
-    } else if (m_version.loader.type != QString()) {
-        emitFailed(tr("Unknown loader type: ") + m_version.loader.type);
-        return;
+        components->saveNow();
+
+        instance.setName(name());
+        instance.setIconKey(m_instIcon);
+        instance.setManagedPack("atlauncher", m_pack_safe_name, m_pack_name, m_version_name, m_version_name);
+
+        jarmods.clear();
     }
-
-    for (const auto& componentUid : componentsToInstall.keys()) {
-        auto version = componentsToInstall.value(componentUid);
-        components->setComponentVersion(componentUid, version->version());
-    }
-
-    components->installJarMods(jarmods);
-
-    // Use a component to fill in the rest of the data
-    // todo: use more detection
-    if (!createPackComponent(instance.instanceRoot(), components)) {
-        emitFailed(tr("Failed to create pack component"));
-        return;
-    }
-
-    components->saveNow();
-
-    instance.setName(name());
-    instance.setIconKey(m_instIcon);
-    instance.setManagedPack("atlauncher", m_pack_safe_name, m_pack_name, m_version_name, m_version_name);
-
-    jarmods.clear();
     emitSucceeded();
 }
 

@@ -20,12 +20,12 @@ jobs:
 
     # a pr that was a `blocking:<id>` label was merged.
     # find the open pr's it was blocked by and trigger a refresh of their state
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'blocking') }}
+    if: "${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'status: blocking') }}"
 
     steps:
       - name: Generate token
         id: generate-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ vars.PULL_REQUEST_APP_ID }}
           private-key: ${{ secrets.PULL_REQUEST_APP_PRIVATE_KEY }}
@@ -37,7 +37,7 @@ jobs:
           PR_NUMBER: ${{ inputs.pr_id || github.event.pull_request.number }}
         run: |
           blocked_prs=$(
-          gh -R ${{ github.repository }} pr list --label 'blocked' --json 'number,body' \
+          gh -R ${{ github.repository }} pr list --label 'status: blocked' --json 'number,body' \
             | jq -c --argjson pr "$PR_NUMBER" '
                 reduce ( .[] | select(
                   .body |

@@ -297,3 +297,46 @@ auto Resource::getOriginalFileName() const -> QString
         fileName.chop(9);
     return fileName;
 }
+
+QDebug operator<<(QDebug debug, ResourceType type)
+{
+    switch (type) {
+        case ResourceType::ZIPFILE:
+            debug << "ZIPFILE";
+            break;
+        case ResourceType::SINGLEFILE:
+            debug << "SINGLEFILE";
+            break;
+        case ResourceType::FOLDER:
+            debug << "FOLDER";
+            break;
+        case ResourceType::LITEMOD:
+            debug << "LITEMOD";
+            break;
+        case ResourceType::UNKNOWN:
+        default:
+            debug << "UNKNOWN";
+            break;
+    };
+    return debug;
+}
+
+QDebug operator<<(QDebug debug, ResourceStatus status)
+{
+    switch (status) {
+        case ResourceStatus::INSTALLED:
+            debug << "INSTALLED";
+            break;
+        case ResourceStatus::NOT_INSTALLED:
+            debug << "NOT_INSTALLED";
+            break;
+        case ResourceStatus::NO_METADATA:
+            debug << "NO_METADATA";
+            break;
+        case ResourceStatus::UNKNOWN:
+        default:
+            debug << "UNKNOWN";
+            break;
+    };
+    return debug;
+}

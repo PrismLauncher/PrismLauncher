@@ -106,11 +106,13 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
                 auto obj = versionIter.toObject();
 
                 auto file = loadIndexedPackVersion(obj, args.resourceType);
-                if (!file.addonId.isValid())
+                if (!file.addonId.isValid()) {
                     file.addonId = args.pack->addonId;
+                }
 
-                if (file.fileId.isValid() && !file.downloadUrl.isEmpty())  // Heuristic to check if the returned value is valid
+                if (file.fileId.isValid() && !file.downloadUrl.isEmpty()) {  // Heuristic to check if the returned value is valid
                     unsortedVersions.append(file);
+                }
             }
 
             auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {

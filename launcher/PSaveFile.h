@@ -67,5 +67,5 @@ class PSaveFile : public QSaveFile {
     QString m_absoluteFilePath;
 };
 #else
-#define PSaveFile QSaveFile
+using PSaveFile = QSaveFile;
 #endif

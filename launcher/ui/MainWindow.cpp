@@ -458,7 +458,7 @@ void MainWindow::retranslateUi()
 
     MinecraftAccountPtr defaultAccount = APPLICATION->accounts()->defaultAccount();
     if (defaultAccount) {
-        auto profileLabel = profileInUseFilter(defaultAccount->profileName(), defaultAccount->isInUse());
+        auto profileLabel = profileInUseFilter(defaultAccount->displayName(), defaultAccount->isInUse());
         ui->actionAccountsButton->setText(profileLabel);
     }
 
@@ -658,7 +658,7 @@ void MainWindow::repopulateAccountsMenu()
     if (defaultAccount) {
         // this can be called before accountMenuButton exists
         if (ui->actionAccountsButton) {
-            auto profileLabel = profileInUseFilter(defaultAccount->profileName(), defaultAccount->isInUse());
+            auto profileLabel = profileInUseFilter(defaultAccount->displayName(), defaultAccount->isInUse());
             ui->actionAccountsButton->setText(profileLabel);
         }
     }
@@ -672,7 +672,7 @@ void MainWindow::repopulateAccountsMenu()
         // TODO: Nicer way to iterate?
         for (int i = 0; i < accounts->count(); i++) {
             MinecraftAccountPtr account = accounts->at(i);
-            auto profileLabel = profileInUseFilter(account->profileName(), account->isInUse());
+            auto profileLabel = profileInUseFilter(account->displayName(), account->isInUse());
             QAction* action = new QAction(profileLabel, this);
             action->setData(i);
             action->setCheckable(true);
@@ -752,7 +752,7 @@ void MainWindow::defaultAccountChanged()
 
     // FIXME: this needs adjustment for MSA
     if (account && account->profileName() != "") {
-        auto profileLabel = profileInUseFilter(account->profileName(), account->isInUse());
+        auto profileLabel = profileInUseFilter(account->displayName(), account->isInUse());
         ui->actionAccountsButton->setText(profileLabel);
         auto face = account->getFace();
         if (face.isNull()) {
@@ -947,10 +947,20 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 (url.path().startsWith("/import", Qt::CaseInsensitive));
 
             QUrl dl_url;
-            if (url.scheme() == "curseforge") {
+            if (url.scheme() == "curseforge" || (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME && url.host() == "install")) {
                 // need to find the download link for the modpack / resource
                 // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
+                // format of url binaryname://install?platform=curseforge&addonId=IDHERE&fileId=IDHERE
                 QUrlQuery query(url);
+                
+                // check if this is a binaryname:// url
+                if (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME) {
+                    // check this is an curseforge platform request
+                    if (query.queryItemValue("platform").toLower() != "curseforge") {
+                        qDebug() << "Invalid mod distribution platform:" << query.queryItemValue("platform");
+                        continue;
+                    }
+                }
 
                 if (query.allQueryItemValues("addonId").isEmpty() || query.allQueryItemValues("fileId").isEmpty()) {
                     qDebug() << "Invalid curseforge link:" << url;
@@ -1005,13 +1015,13 @@ void MainWindow::processURLs(QList<QUrl> urls)
                     receivedData.insert(it->first, it->second);
                 emit APPLICATION->oauthReplyRecieved(receivedData);
                 continue;
-            } else if ((url.scheme() == "prismlauncher" || url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME) 
+            } else if ((url.scheme() == "prismlauncher" || url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME)
                         && isExternalURLImport) {
                 // PrismLauncher URL protocol modpack import
                 // works for any prism fork
                 // preferred import format: prismlauncher://import?url=ENCODED
                 const auto host = url.host().toLower();
-                const auto path = url.path(); 
+                const auto path = url.path();
 
                 QString encodedTarget;
 
@@ -1075,7 +1085,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 if (res != QMessageBox::Yes) {
                     continue;
                 }
-            
+
                 dl_url = target;
             } else {
                 dl_url = url;
@@ -1435,7 +1445,7 @@ void MainWindow::on_actionAddToPATH_triggered()
 
 void MainWindow::on_actionOpenWiki_triggered()
 {
-    DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg("")));
+    DesktopServices::openUrl(QUrl(BuildConfig.WIKI_URL));
 }
 
 void MainWindow::on_actionMoreNews_triggered()

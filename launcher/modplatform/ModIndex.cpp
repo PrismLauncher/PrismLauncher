@@ -25,6 +25,11 @@
 
 namespace ModPlatform {
 
+ModLoaderType operator|(ModLoaderType lhs, ModLoaderType rhs)
+{
+    return static_cast<ModLoaderType>(static_cast<std::uint16_t>(lhs) | static_cast<std::uint16_t>(rhs));
+}
+
 static const QMap<QString, IndexedVersionType> s_indexed_version_type_names = { { "release", IndexedVersionType::Release },
                                                                                 { "beta", IndexedVersionType::Beta },
                                                                                 { "alpha", IndexedVersionType::Alpha } };

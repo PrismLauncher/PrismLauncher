@@ -38,11 +38,13 @@ class InstanceCreationTask : public InstanceTask {
 
    protected:
     void setError(const QString& message) { m_error_message = message; };
+    void scheduleToDelete(QWidget* parent, QDir dir, QString path, bool checkDisabled = false);
 
    protected:
     bool m_abort = false;
 
-    QStringList m_files_to_remove;
+    QStringList m_filesToRemove;
+    ShouldDeleteSaves m_shouldDeleteSaves;
 
    private:
     QString m_error_message;

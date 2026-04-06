@@ -1,32 +1,32 @@
 FormatStyle: file
 
 Checks:
-  'bugprone-*,clang-analyzer-*,cppcoreguidelines-*,hicpp-*,misc-*,modernize-*,performance-*,portability-*,readability-*,
-  -*-magic-numbers,
-  -*-non-private-member-variables-in-classes,
-  -*-special-member-functions,
-  -bugprone-easily-swappable-parameters,
-  -cppcoreguidelines-owning-memory,
-  -cppcoreguidelines-pro-type-static-cast-downcast,
-  -modernize-use-nodiscard,
-  -modernize-use-trailing-return-type,
-  -portability-avoid-pragma-once,
-  -readability-avoid-unconditional-preprocessor-if,
-  -readability-function-cognitive-complexity,
-  -readability-identifier-length,
-  -readability-redundant-access-specifiers'
+    "bugprone-*,clang-analyzer-*,cppcoreguidelines-*,hicpp-*,misc-*,modernize-*,performance-*,portability-*,readability-*,
+    -*-magic-numbers,
+    -*-non-private-member-variables-in-classes,
+    -*-special-member-functions,
+    -bugprone-easily-swappable-parameters,
+    -cppcoreguidelines-owning-memory,
+    -cppcoreguidelines-pro-type-static-cast-downcast,
+    -modernize-use-nodiscard,
+    -modernize-use-trailing-return-type,
+    -portability-avoid-pragma-once,
+    -readability-avoid-unconditional-preprocessor-if,
+    -readability-function-cognitive-complexity,
+    -readability-identifier-length,
+    -readability-redundant-access-specifiers"
 
 CheckOptions:
-  - { key: misc-include-cleaner.MissingIncludes,                        value: false }
-  - { key: readability-identifier-naming.DefaultCase,                   value: camelBack }
-  - { key: readability-identifier-naming.NamespaceCase,                 value: CamelCase }
-  - { key: readability-identifier-naming.ClassCase,                     value: CamelCase }
-  - { key: readability-identifier-naming.ClassConstantCase,             value: CamelCase }
-  - { key: readability-identifier-naming.EnumCase,                      value: CamelCase }
-  - { key: readability-identifier-naming.EnumConstantCase,              value: CamelCase }
-  - { key: readability-identifier-naming.MacroDefinitionCase,           value: UPPER_CASE }
-  - { key: readability-identifier-naming.ClassMemberPrefix,             value: m_ }
-  - { key: readability-identifier-naming.StaticConstantPrefix,          value: s_ }
-  - { key: readability-identifier-naming.StaticVariablePrefix,          value: s_ }
-  - { key: readability-identifier-naming.GlobalConstantPrefix,          value: g_ }
-  - { key: readability-implicit-bool-conversion.AllowPointerConditions, value: true }
+    misc-include-cleaner.MissingIncludes: false
+    readability-identifier-naming.DefaultCase: "camelBack"
+    readability-identifier-naming.NamespaceCase: "CamelCase"
+    readability-identifier-naming.ClassCase: "CamelCase"
+    readability-identifier-naming.ClassConstantCase: "CamelCase"
+    readability-identifier-naming.EnumCase: "CamelCase"
+    readability-identifier-naming.EnumConstantCase: "CamelCase"
+    readability-identifier-naming.MacroDefinitionCase: "UPPER_CASE"
+    readability-identifier-naming.ClassMemberPrefix: "m_"
+    readability-identifier-naming.StaticConstantPrefix: "s_"
+    readability-identifier-naming.StaticVariablePrefix: "s_"
+    readability-identifier-naming.GlobalConstantPrefix: "g_"
+    readability-implicit-bool-conversion.AllowPointerConditions: true

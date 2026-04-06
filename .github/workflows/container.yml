@@ -1,0 +1,174 @@
+name: Development Container
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  merge_group:
+    types: [checks_requested]
+  pull_request:
+  workflow_dispatch:
+
+permissions: {}
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build:
+    name: Build (${{ matrix.arch }})
+
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      image-name: ${{ steps.image-name.outputs.image-name }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            os: ubuntu-24.04-arm
+          - arch: amd64
+            os: ubuntu-24.04-arm
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Set image name
+        id: image-name
+        run: |
+          echo "image-name=${REGISTRY}/${GITHUB_REPOSITORY_OWNER,,}/devcontainer" >> "$GITHUB_OUTPUT"
+
+      - name: Install Podman
+        uses: redhat-actions/podman-install@main
+        # TODO(@getchoo): Always use this when the action properly supports ARM
+        if: ${{ runner.arch == 'X64' || runner.arch == 'X86' }}
+        with:
+          github-token: ${{ github.token }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Determine metadata for image
+        id: image-metadata
+        uses: docker/metadata-action@v6
+        with:
+          images: |
+            ${{ steps.image-name.outputs.image-name }}
+          flavor: |
+            latest=false
+          tags: |
+            type=raw,value=latest,enable=${{ github.event.merge_group.base_ref == 'refs/heads/develop' }}
+
+            type=sha
+            type=sha,format=long
+            type=ref,event=branch
+            type=ref,event=tag
+
+      - name: Build image
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          containerfiles: |
+            ./Containerfile
+          tags: ${{ steps.image-metadata.outputs.tags }}
+          labels: ${{ steps.image-metadata.outputs.labels }}
+
+      - name: Push image
+        id: push-image
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          tags: ${{ steps.build-image.outputs.tags }}
+          username: ${{ github.repository_owner }}
+          password: ${{ github.token }}
+          tls-verify: true
+
+      - name: Export image digest
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          DIGEST: ${{ steps.push-image.outputs.digest }}
+        run: |
+          mkdir -p "$RUNNER_TEMP"/digests
+          touch "$RUNNER_TEMP"/digests/"${DIGEST#sha256:}"
+
+      - name: Upload digest artifact
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: digests-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  manifest:
+    name: Create manifest
+
+    needs: [ build ]
+    if: ${{ github.event_name != 'pull_request' }}
+
+    permissions:
+      contents: read
+      packages: write
+
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v8
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Install Podman
+        # TODO(@getchoo): Always use this when the action properly supports ARM
+        if: ${{ runner.arch == 'X64' || runner.arch == 'X86' }}
+        uses: redhat-actions/podman-install@main
+        with:
+          github-token: ${{ github.token }}
+
+      - name: Login to registry
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ github.token }}
+
+      - name: Determine metadata for manifest
+        id: manifest-metadata
+        uses: docker/metadata-action@v6
+        with:
+          images: |
+            ${{ needs.build.outputs.image-name }}
+          flavor: |
+            latest=false
+          tags: |
+            type=raw,value=latest,enable=${{ github.event.merge_group.base_ref == 'refs/heads/develop' }}
+
+            type=sha
+            type=sha,format=long
+            type=ref,event=branch
+            type=ref,event=tag
+
+      - name: Create manifest list
+        working-directory: ${{ runner.temp }}/digests
+        env:
+          IMAGE_NAME: ${{ needs.build.outputs.image-name }}
+        run: |
+          while read -r tag; do
+            podman manifest create "$tag" \
+              $(printf "$IMAGE_NAME@sha256:%s " *)
+          done <<< "$DOCKER_METADATA_OUTPUT_TAGS"
+
+      - name: Push manifest
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          tags: ${{ steps.manifest-metadata.outputs.tags }}
+          username: ${{ github.repository_owner }}
+          password: ${{ github.token }}
+          tls-verify: true

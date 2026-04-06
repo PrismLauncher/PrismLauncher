@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PrismLauncher - Minecraft Launcher
- *  Copyright (C) 2022 Jan Drögehoff <sentrycraft123@gmail.com>
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2026 Octol1ttle <l1ttleofficial@outlook.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,11 +19,11 @@
 #pragma once
 
 #include <QString>
-#include <QStringList>
+#include <cstdint>
 
-namespace MangoHud {
-
-QString getLibraryString();
-
-QString findLibrary(QString libName);
-}  // namespace MangoHud
+namespace HardwareInfo {
+QString cpuInfo();
+uint64_t totalRamMiB();
+uint64_t availableRamMiB();
+QStringList gpuInfo();
+}  // namespace HardwareInfo

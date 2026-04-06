@@ -42,7 +42,7 @@
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
 #include "settings/SettingsObject.h"
-#include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/NetworkJobFailedDialog.h"
 #endif
 
 NetJob::NetJob(QString job_name, QNetworkAccessManager* network, int max_concurrent) : ConcurrentTask(job_name), m_network(network)
@@ -164,23 +164,29 @@ void NetJob::emitFailed(QString reason)
 
     if (APPLICATION_DYN && m_ask_retry && m_manual_try < APPLICATION->settings()->get("NumberOfManualRetries").toInt() && isOnline()) {
         m_manual_try++;
-        auto response = CustomMessageBox::selectable(nullptr, "Confirm retry",
-                                                     "The tasks failed.\n"
-                                                     "Failed urls\n" +
-                                                         getFailedFiles().join("\n\t") +
-                                                         ".\n"
-                                                         "If this continues to happen please check the logs of the application.\n"
-                                                         "Do you want to retry?",
-                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                            ->exec();
+        auto failed = getFailedActions();
+        auto dialog = new NetworkJobFailedDialog(objectName(), m_try, m_done.size(), failed.size(), nullptr);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
 
-        if (response == QMessageBox::Yes) {
-            m_try = 0;
-            executeNextSubTask();
-            return;
+        for (const auto& request : failed) {
+            dialog->addFailedRequest(request->url(), request->errorString());
         }
+
+        dialog->open();
+
+        connect(dialog, &QDialog::finished, this, [this, reason = std::move(reason)](int result) {
+            if (result == QDialog::Accepted) {
+                m_try = 0;
+                executeNextSubTask();
+            } else {
+                ConcurrentTask::emitFailed(reason);
+            }
+        });
+
+        return;
     }
 #endif
+
     ConcurrentTask::emitFailed(reason);
 }
 

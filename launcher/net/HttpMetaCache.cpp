@@ -113,7 +113,7 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
     if (file_last_changed != entry->m_local_changed_timestamp) {
         QFile input(real_path);
         if (!input.open(QIODevice::ReadOnly)) {
-            qWarning() << "Failed to open file '" << input.fileName() << "' for reading!";
+            qWarning() << "Failed to open file" << input.fileName() << "for reading:" << input.errorString();
             return staleEntry(base, resource_path);
         }
         QString md5sum = QCryptographicHash::hash(input.readAll(), QCryptographicHash::Md5).toHex().constData();

@@ -95,7 +95,7 @@ GitHubRelease SelectReleaseDialog::getRelease(QTreeWidgetItem* item)
     return release;
 }
 
-void SelectReleaseDialog::selectionChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous)
+void SelectReleaseDialog::selectionChanged(QTreeWidgetItem* current, QTreeWidgetItem* /*previous*/)
 {
     GitHubRelease release = getRelease(current);
     QString body = markdownToHTML(release.body.toUtf8());
@@ -166,7 +166,7 @@ GitHubReleaseAsset SelectReleaseAssetDialog::getAsset(QTreeWidgetItem* item)
     return selected_asset;
 }
 
-void SelectReleaseAssetDialog::selectionChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous)
+void SelectReleaseAssetDialog::selectionChanged(QTreeWidgetItem* current, QTreeWidgetItem* /*previous*/)
 {
     GitHubReleaseAsset asset = getAsset(current);
     m_selectedAsset = asset;

@@ -30,6 +30,7 @@
 #include <QProgressDialog>
 #include <QSettings>
 #include <QTimer>
+#include <algorithm>
 #include <memory>
 
 #include "StringUtils.h"
@@ -43,29 +44,30 @@ class PrismExternalUpdater::Private {
     QDir appDir;
     QDir dataDir;
     QTimer updateTimer;
-    bool allowBeta;
-    bool autoCheck;
-    double updateInterval;
+    bool allowBeta{};
+    bool autoCheck{};
+    double updateInterval{};
     QDateTime lastCheck;
     std::unique_ptr<QSettings> settings;
 
-    QWidget* parent;
+    QWidget* parent{};
 };
 
 PrismExternalUpdater::PrismExternalUpdater(QWidget* parent, const QString& appDir, const QString& dataDir)
+    : priv(new PrismExternalUpdater::Private())
 {
-    priv = new PrismExternalUpdater::Private();
     priv->appDir = QDir(appDir);
     priv->dataDir = QDir(dataDir);
     auto settings_file = priv->dataDir.absoluteFilePath("prismlauncher_update.cfg");
     priv->settings = std::make_unique<QSettings>(settings_file, QSettings::Format::IniFormat);
     priv->allowBeta = priv->settings->value("allow_beta", false).toBool();
-    priv->autoCheck = priv->settings->value("auto_check", false).toBool();
-    bool interval_ok;
+    priv->autoCheck = priv->settings->value("auto_check", true).toBool();
+    bool interval_ok = false;
     // default once per day
     priv->updateInterval = priv->settings->value("update_interval", 86400).toInt(&interval_ok);
-    if (!interval_ok)
+    if (!interval_ok) {
         priv->updateInterval = 86400;
+    }
     auto last_check = priv->settings->value("last_check");
     if (!last_check.isNull() && last_check.isValid()) {
         priv->lastCheck = QDateTime::fromString(last_check.toString(), Qt::ISODate);
@@ -73,15 +75,16 @@ PrismExternalUpdater::PrismExternalUpdater(QWidget* parent, const QString& appDi
     priv->parent = parent;
     connectTimer();
     resetAutoCheckTimer();
-    if (priv->updateInterval == 0) { // "On Launch"
+    if (priv->updateInterval == 0) {  // "On Launch"
         checkForUpdates(false);
     }
 }
 
 PrismExternalUpdater::~PrismExternalUpdater()
 {
-    if (priv->updateTimer.isActive())
+    if (priv->updateTimer.isActive()) {
         priv->updateTimer.stop();
+    }
     disconnectTimer();
     priv->settings->sync();
     delete priv;
@@ -115,8 +118,9 @@ void PrismExternalUpdater::checkForUpdates(bool triggeredByUser)
 #endif
 
     QStringList args = { "--check-only", "--dir", priv->dataDir.absolutePath(), "--debug" };
-    if (priv->allowBeta)
+    if (priv->allowBeta) {
         args.append("--pre-release");
+    }
 
     proc.start(priv->appDir.absoluteFilePath(exe_name), args);
     auto result_start = proc.waitForStarted(5000);
@@ -268,20 +272,24 @@ void PrismExternalUpdater::setBetaAllowed(bool allowed)
 void PrismExternalUpdater::resetAutoCheckTimer()
 {
     if (priv->autoCheck && priv->updateInterval > 0) {
-        int timeoutDuration = 0;
         auto now = QDateTime::currentDateTime();
+
+        qint64 timeoutMs = 0;
+
         if (priv->lastCheck.isValid()) {
-            auto diff = priv->lastCheck.secsTo(now);
-            auto secs_left = priv->updateInterval - diff;
-            if (secs_left < 0)
-                secs_left = 0;
-            timeoutDuration = secs_left * 1000;  // to msec
+            qint64 diff = priv->lastCheck.secsTo(now);
+            qint64 secs_left = std::max<qint64>(priv->updateInterval - diff, 0);
+            timeoutMs = secs_left * 1000;
         }
-        qDebug() << "Auto update timer starting," << timeoutDuration / 1000 << "seconds left";
-        priv->updateTimer.start(timeoutDuration);
+
+        timeoutMs = std::min(timeoutMs, static_cast<qint64>(INT_MAX));
+
+        qDebug() << "Auto update timer starting," << timeoutMs / 1000 << "seconds left";
+        priv->updateTimer.start(static_cast<int>(timeoutMs));
     } else {
-        if (priv->updateTimer.isActive())
+        if (priv->updateTimer.isActive()) {
             priv->updateTimer.stop();
+        }
     }
 }
 
@@ -332,7 +340,7 @@ void PrismExternalUpdater::offerUpdate(const QString& version_name, const QStrin
             priv->settings->sync();
             return;
         }
-        case UpdateAvailableDialog::DontInstall: {
+        default: {
             return;
         }
     }
@@ -353,10 +361,13 @@ void PrismExternalUpdater::performUpdate(const QString& version_tag)
 #endif
 
     QStringList args = { "--dir", priv->dataDir.absolutePath(), "--install-version", version_tag };
-    if (priv->allowBeta)
+    if (priv->allowBeta) {
         args.append("--pre-release");
+    }
 
-    auto result = proc.startDetached(priv->appDir.absoluteFilePath(exe_name), args);
+    proc.setProgram(priv->appDir.absoluteFilePath(exe_name));
+    proc.setArguments(args);
+    auto result = proc.startDetached();
     if (!result) {
         qDebug() << "Failed to start updater:" << proc.error() << proc.errorString();
     }

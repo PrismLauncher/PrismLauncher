@@ -117,7 +117,7 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
     } else if (QFile::exists(versionJson)) {
         QFile file(versionJson);
         if (!file.open(QIODevice::ReadOnly)) {
-            emit failed(tr("Unable to open \"version.json\"!"));
+            emit failed(tr("Unable to open \"version.json\": %1").arg(file.errorString()));
             return;
         }
         data = file.readAll();

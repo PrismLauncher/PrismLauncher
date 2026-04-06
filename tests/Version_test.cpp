@@ -107,7 +107,7 @@ class VersionTest : public QObject {
         QFile vector_file{ test_vector_dir.absoluteFilePath("test_vectors.txt") };
 
         if (!vector_file.open(QFile::OpenModeFlag::ReadOnly)) {
-            qCritical() << "Failed to open file '" << vector_file.fileName() << "' for reading!";
+            qCritical() << "Failed to open file" << vector_file.fileName() << "for reading:" << vector_file.errorString();
             return;
         }
 
@@ -180,6 +180,31 @@ class VersionTest : public QObject {
         QCOMPARE(v1 < v2, lessThan);
         QCOMPARE(v1 > v2, !lessThan && !equal);
         QCOMPARE(v1 == v2, equal);
+    }
+
+    static void test_strict_weak_order()
+    {
+        // this tests the strict_weak_order
+        // https://en.cppreference.com/w/cpp/concepts/strict_weak_order.html
+        const Version a("1.10 Pre-Release 1");  // this is a pre-relese is before b because ' ' is lower than '-'
+        const Version b("1.10-pre1");           // this is a pre-release is before c that is an actual release
+        const Version c("1.10");
+
+        auto r = [](const Version& a, const Version& b) { return a < b; };
+        auto e = [&r](const Version& a, const Version& b) { return !r(a, b) && !r(b, a); };
+
+        qCritical() << a << b << c;
+
+        // irreflexive
+        QCOMPARE(r(a, a), false);
+        QCOMPARE(r(b, b), false);
+        QCOMPARE(r(c, c), false);
+        // transitive
+        QCOMPARE(r(a, b), true);
+        QCOMPARE(r(b, c), true);
+        QCOMPARE(r(a, c), true);
+        // transitive equivalence
+        QCOMPARE(e(a, b) && e(b, c), e(a, c));
     }
 };
 

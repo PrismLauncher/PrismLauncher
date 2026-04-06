@@ -57,7 +57,7 @@ class LaunchProfile : public ProblemProvider {
     void applyMods(const QList<LibraryPtr>& jarMods);
     void applyLibrary(LibraryPtr library, const RuntimeContext& runtimeContext);
     void applyMavenFile(LibraryPtr library, const RuntimeContext& runtimeContext);
-    void applyAgent(AgentPtr agent, const RuntimeContext& runtimeContext);
+    void applyAgent(const Agent& agent, const RuntimeContext& runtimeContext);
     void applyCompatibleJavaMajors(QList<int>& javaMajor);
     void applyCompatibleJavaName(QString javaName);
     void applyMainJar(LibraryPtr jar);
@@ -79,7 +79,7 @@ class LaunchProfile : public ProblemProvider {
     const QList<LibraryPtr>& getLibraries() const;
     const QList<LibraryPtr>& getNativeLibraries() const;
     const QList<LibraryPtr>& getMavenFiles() const;
-    const QList<AgentPtr>& getAgents() const;
+    const QList<Agent>& getAgents() const;
     const QList<int>& getCompatibleJavaMajors() const;
     const QString getCompatibleJavaName() const;
     const LibraryPtr getMainJar() const;
@@ -132,7 +132,7 @@ class LaunchProfile : public ProblemProvider {
     QList<LibraryPtr> m_mavenFiles;
 
     /// the list of java agents to add to JVM arguments
-    QList<AgentPtr> m_agents;
+    QList<Agent> m_agents;
 
     /// the main jar
     LibraryPtr m_mainJar;

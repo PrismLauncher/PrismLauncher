@@ -38,12 +38,10 @@
 #include <QRegularExpression>
 #include <QString>
 #include <QStringList>
-#include "DefaultVariable.h"
 
 struct GradleSpecifier {
     GradleSpecifier() { m_valid = false; }
-    GradleSpecifier(QString value) { operator=(value); }
-    GradleSpecifier& operator=(const QString& value)
+    GradleSpecifier(const QString& value)
     {
         /*
         org.gradle.test.classifiers : service : 1.0 : jdk15 @ jar
@@ -62,7 +60,7 @@ struct GradleSpecifier {
         m_valid = match.hasMatch();
         if (!m_valid) {
             m_invalidValue = value;
-            return *this;
+            return;
         }
         auto elements = match.captured();
         m_groupId = match.captured(1);
@@ -72,7 +70,6 @@ struct GradleSpecifier {
         if (match.lastCapturedIndex() >= 5) {
             m_extension = match.captured(5);
         }
-        return *this;
     }
     QString serialize() const
     {
@@ -83,8 +80,8 @@ struct GradleSpecifier {
         if (!m_classifier.isEmpty()) {
             retval += ":" + m_classifier;
         }
-        if (m_extension.isExplicit()) {
-            retval += "@" + m_extension;
+        if (m_extension.has_value()) {
+            retval += "@" + m_extension.value();
         }
         return retval;
     }
@@ -97,7 +94,7 @@ struct GradleSpecifier {
         if (!m_classifier.isEmpty()) {
             filename += "-" + m_classifier;
         }
-        filename += "." + m_extension;
+        filename += "." + m_extension.value_or("jar");
         return filename;
     }
     QString toPath(const QString& filenameOverride = QString()) const
@@ -122,26 +119,13 @@ struct GradleSpecifier {
     inline QString artifactId() const { return m_artifactId; }
     inline void setClassifier(const QString& classifier) { m_classifier = classifier; }
     inline QString classifier() const { return m_classifier; }
-    inline QString extension() const { return m_extension; }
+    inline std::optional<QString> extension() const { return m_extension; }
     inline QString artifactPrefix() const { return m_groupId + ":" + m_artifactId; }
     bool matchName(const GradleSpecifier& other) const
     {
         return other.artifactId() == artifactId() && other.groupId() == groupId() && other.classifier() == classifier();
     }
-    bool operator==(const GradleSpecifier& other) const
-    {
-        if (m_groupId != other.m_groupId)
-            return false;
-        if (m_artifactId != other.m_artifactId)
-            return false;
-        if (m_version != other.m_version)
-            return false;
-        if (m_classifier != other.m_classifier)
-            return false;
-        if (m_extension != other.m_extension)
-            return false;
-        return true;
-    }
+    bool operator ==(const GradleSpecifier &other) const = default;
 
    private:
     QString m_invalidValue;
@@ -149,6 +133,6 @@ struct GradleSpecifier {
     QString m_artifactId;
     QString m_version;
     QString m_classifier;
-    DefaultVariable<QString> m_extension = DefaultVariable<QString>("jar");
+    std::optional<QString> m_extension;
     bool m_valid = false;
 };

@@ -5,11 +5,15 @@
 #include "ShaderPackModel.h"
 
 #include <QMessageBox>
+#include <utility>
 
 namespace ResourceDownload {
 
-ShaderPackResourceModel::ShaderPackResourceModel(BaseInstance const& base_inst, ResourceAPI* api, QString debugName, QString metaEntryBase)
-    : ResourceModel(api), m_base_instance(base_inst), m_debugName(debugName + " (Model)"), m_metaEntryBase(metaEntryBase)
+ShaderPackResourceModel::ShaderPackResourceModel(const BaseInstance& base_inst,
+                                                 ResourceAPI* api,
+                                                 const QString& debugName,
+                                                 QString metaEntryBase)
+    : ResourceModel(api), m_base_instance(base_inst), m_debugName(debugName + " (Model)"), m_metaEntryBase(std::move(metaEntryBase))
 {}
 
 /******** Make data requests ********/
@@ -17,19 +21,29 @@ ShaderPackResourceModel::ShaderPackResourceModel(BaseInstance const& base_inst, 
 ResourceAPI::SearchArgs ShaderPackResourceModel::createSearchArguments()
 {
     auto sort = getCurrentSortingMethodByIndex();
-    return { ModPlatform::ResourceType::ShaderPack, m_next_search_offset, m_search_term, sort };
+    return {
+        .type = ModPlatform::ResourceType::ShaderPack,
+        .offset = m_next_search_offset,
+        .search = m_search_term,
+        .sorting = sort,
+        .loaders = {},
+        .versions = {},
+        .side = {},
+        .categoryIds = {},
+        .openSource = {},
+    };
 }
 
 ResourceAPI::VersionSearchArgs ShaderPackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto pack = m_packs[entry.row()];
-    return { pack, {}, {}, ModPlatform::ResourceType::ShaderPack };
+    return { .pack = pack, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::ShaderPack };
 }
 
 ResourceAPI::ProjectInfoArgs ShaderPackResourceModel::createInfoArguments(const QModelIndex& entry)
 {
     auto pack = m_packs[entry.row()];
-    return { pack };
+    return { .pack = pack };
 }
 
 void ShaderPackResourceModel::searchWithTerm(const QString& term, unsigned int sort)

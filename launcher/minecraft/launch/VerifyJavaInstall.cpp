@@ -71,7 +71,7 @@ void VerifyJavaInstall::executeTask()
     }
 
     if (ignoreCompatibility) {
-        emit logLine(tr("Java major version is incompatible. Things might break."), MessageLevel::Warning);
+        emit logLine(tr("Java major version is incompatible. Things might break.\n"), MessageLevel::Warning);
         emitSucceeded();
         return;
     }

@@ -53,12 +53,16 @@ enum class ResourceType {
     LITEMOD,     //!< The resource is a litemod
 };
 
+QDebug operator<<(QDebug debug, ResourceType type);
+
 enum class ResourceStatus {
     INSTALLED,      // Both JAR and Metadata are present
     NOT_INSTALLED,  // Only the Metadata is present
     NO_METADATA,    // Only the JAR is present
     UNKNOWN,        // Default status
 };
+
+QDebug operator<<(QDebug debug, ResourceStatus status);
 
 enum class SortType {
     NAME,
@@ -134,7 +138,7 @@ class Resource : public QObject {
      *  = 0: 'this' is equal to 'other'
      *  < 0: 'this' comes before 'other'
      */
-    virtual int compare(Resource const& other, SortType type = SortType::NAME) const;
+    virtual int compare(const Resource& other, SortType type = SortType::NAME) const;
 
     /** Returns whether the given filter should filter out 'this' (false),
      *  or if such filter includes the Resource (true).

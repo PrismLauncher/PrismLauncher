@@ -95,7 +95,7 @@ auto ExtractZipTask::extractZip() -> ZipResult
                 return false;
             }
 
-            if (!f->writeFile(ext, target_file_path)) {
+            if (!f->writeFile(ext, target_file_path, target)) {
                 result = ZipResult(tr("Failed to extract file %1 to %2").arg(original_name, target_file_path));
                 return false;
             }

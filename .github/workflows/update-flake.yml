@@ -20,14 +20,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - uses: cachix/install-nix-action@4e002c8ec80594ecd40e759629461e26c8abed15 # v31
+      - uses: cachix/install-nix-action@96951a368ba55167b55f1c916f7d416bac6505fe # v31
 
       - uses: DeterminateSystems/update-flake-lock@v28
         with:
           commit-msg: "chore(nix): update lockfile"
           pr-title: "chore(nix): update lockfile"
           pr-labels: |
-            Linux
-            packaging
-            simple change
+            platform: Linux
+            area: packaging
+            complexity: low
+            priority: low
+            type: robot
             changelog:omit

@@ -35,6 +35,7 @@
 
 #include "FlameInstanceCreationTask.h"
 
+#include "InstanceTask.h"
 #include "QObjectPtr.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/flame/FileResolvingTask.h"
@@ -62,6 +63,7 @@
 #include <QDebug>
 #include <QFileInfo>
 
+#include "HardwareInfo.h"
 #include "meta/Index.h"
 #include "minecraft/World.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
@@ -170,10 +172,7 @@ bool FlameCreationTask::updateInstance()
         // FIXME: We may want to do something about disabled mods.
         auto old_overrides = Override::readOverrides("overrides", old_index_folder);
         for (const auto& entry : old_overrides) {
-            if (entry.isEmpty())
-                continue;
-            qDebug() << "Scheduling" << entry << "for removal";
-            m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
+            scheduleToDelete(m_parent, old_minecraft_dir, entry);
         }
 
         // Remove remaining old files (we need to do an API request to know which ids are which files...)
@@ -224,13 +223,7 @@ bool FlameCreationTask::updateInstance()
                     continue;
 
                 QString relative_path(FS::PathCombine(file.targetFolder, file.version.fileName));
-                qDebug() << "Scheduling" << relative_path << "for removal";
-                m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
-                if (relative_path.endsWith(".disabled")) {  // remove it if it was enabled/disabled by user
-                    m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path.chopped(9)));
-                } else {
-                    m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path + ".disabled"));
-                }
+                scheduleToDelete(m_parent, old_minecraft_dir, relative_path, true);
             }
         });
         connect(job.get(), &Task::failed, this, [](QString reason) { qCritical() << "Failed to get files:" << reason; });
@@ -421,7 +414,7 @@ std::unique_ptr<MinecraftInstance> FlameCreationTask::createInstance()
 
     // only set memory if this is a fresh instance
     if (m_instance == nullptr && recommendedRAM > 0) {
-        const uint64_t sysMiB = SysInfo::getSystemRamMiB();
+        const uint64_t sysMiB = HardwareInfo::totalRamMiB();
         const uint64_t max = sysMiB * 0.9;
 
         if (static_cast<uint64_t>(recommendedRAM) > max) {

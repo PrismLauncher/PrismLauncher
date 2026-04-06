@@ -49,7 +49,7 @@ bool JavaInstall::operator<(BaseVersion& a) const
 {
     try {
         return operator<(dynamic_cast<JavaInstall&>(a));
-    } catch (const std::bad_cast& e) {
+    } catch (const std::bad_cast&) {
         return BaseVersion::operator<(a);
     }
 }
@@ -58,7 +58,7 @@ bool JavaInstall::operator>(BaseVersion& a) const
 {
     try {
         return operator>(dynamic_cast<JavaInstall&>(a));
-    } catch (const std::bad_cast& e) {
+    } catch (const std::bad_cast&) {
         return BaseVersion::operator>(a);
     }
 }

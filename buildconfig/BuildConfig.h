@@ -54,6 +54,7 @@ class Config {
     QString LAUNCHER_GIT;
     QString LAUNCHER_APPID;
     QString LAUNCHER_SVGFILENAME;
+    QString LAUNCHER_ENVNAME;
 
     /// The major version number.
     int VERSION_MAJOR;
@@ -128,7 +129,12 @@ class Config {
     QString NEWS_OPEN_URL;
 
     /**
-     * URL (with arg %1 to be substituted with page-id) that gets opened when the user requests help
+     * URL that gets opened when the user clicks 'Launcher Help'
+     */
+    QString WIKI_URL;
+
+    /**
+     * URL (with arg %1 to be substituted with page-id) that gets opened when the user requests help in a dialog window
      */
     QString HELP_URL;
 

@@ -111,7 +111,7 @@ bool Metadata::operator<(BaseVersion& a) const
 {
     try {
         return operator<(dynamic_cast<Metadata&>(a));
-    } catch (const std::bad_cast& e) {
+    } catch (const std::bad_cast&) {
         return BaseVersion::operator<(a);
     }
 }
@@ -120,7 +120,7 @@ bool Metadata::operator>(BaseVersion& a) const
 {
     try {
         return operator>(dynamic_cast<Metadata&>(a));
-    } catch (const std::bad_cast& e) {
+    } catch (const std::bad_cast&) {
         return BaseVersion::operator>(a);
     }
 }

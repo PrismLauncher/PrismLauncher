@@ -104,7 +104,7 @@ bool loadAssetsIndexJson(const QString& assetsId, const QString& path, AssetsInd
     // Try to open the file and fail if we can't.
     // TODO: We should probably report this error to the user.
     if (!file.open(QIODevice::ReadOnly)) {
-        qCritical() << "Failed to read assets index file" << path;
+        qCritical() << "Failed to read assets index file" << path << "error:" << file.errorString();
         return false;
     }
     index.id = assetsId;

@@ -174,7 +174,7 @@ bool ArchiveWriter::addFile(const QString& fileName, const QString& fileDest)
     if (fileInfo.isFile() && !fileInfo.isSymLink()) {
         QFile file(fileInfo.absoluteFilePath());
         if (!file.open(QIODevice::ReadOnly)) {
-            qCritical() << "Failed to open file:" << fileInfo.filePath();
+            qCritical() << "Failed to open file:" << fileInfo.filePath() << "error:" << file.errorString();
             return false;
         }
 

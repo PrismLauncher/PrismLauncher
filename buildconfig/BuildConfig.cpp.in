@@ -50,6 +50,7 @@ Config::Config()
     LAUNCHER_GIT = "@Launcher_Git@";
     LAUNCHER_APPID = "@Launcher_AppID@";
     LAUNCHER_SVGFILENAME = "@Launcher_SVGFileName@";
+    LAUNCHER_ENVNAME = "@Launcher_ENVName@";
 
     USER_AGENT = "@Launcher_UserAgent@";
 
@@ -105,6 +106,7 @@ Config::Config()
 
     NEWS_RSS_URL = "@Launcher_NEWS_RSS_URL@";
     NEWS_OPEN_URL = "@Launcher_NEWS_OPEN_URL@";
+    WIKI_URL = "@Launcher_WIKI_URL@";
     HELP_URL = "@Launcher_HELP_URL@";
     LOGIN_CALLBACK_URL = "@Launcher_LOGIN_CALLBACK_URL@";
     IMGUR_CLIENT_ID = "@Launcher_IMGUR_CLIENT_ID@";

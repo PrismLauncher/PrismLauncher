@@ -13,7 +13,7 @@ runs:
           dpkg-dev \
           ninja-build extra-cmake-modules pkg-config scdoc \
           cmark gamemode-dev libarchive-dev libcmark-dev libqrencode-dev zlib1g-dev \
-          libxcb-cursor-dev libtomlplusplus-dev
+          libxcb-cursor-dev libtomlplusplus-dev libvulkan-dev
 
     - name: Setup AppImage tooling
       shell: bash

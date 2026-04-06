@@ -28,7 +28,7 @@ RUN apt-get --assume-yes --no-install-recommends install \
   # Build system
   cmake ninja-build extra-cmake-modules pkg-config \
   # Dependencies
-  cmark gamemode-dev libarchive-dev libcmark-dev libgamemode0 libgl1-mesa-dev libqrencode-dev libtomlplusplus-dev scdoc zlib1g-dev \
+  cmark gamemode-dev libarchive-dev libcmark-dev libgamemode0 libgl1-mesa-dev libqrencode-dev libtomlplusplus-dev libvulkan-dev scdoc zlib1g-dev \
   # Tooling
   clang-format clang-tidy git
 

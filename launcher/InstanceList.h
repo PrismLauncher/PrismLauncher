@@ -98,7 +98,7 @@ class InstanceList : public QAbstractListModel {
 
     BaseInstance* at(int i) const { return m_instances.at(i).get(); }
 
-    int count() const { return m_instances.size(); }
+    int count() const { return static_cast<int>(m_instances.size()); }
 
     InstListError loadList();
     void saveNow();

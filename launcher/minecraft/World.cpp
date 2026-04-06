@@ -256,7 +256,7 @@ void World::readFromFS(const QFileInfo& file)
     loadFromLevelDat(bytes);
     m_levelDatTime = file.lastModified();
     if (m_randomSeed == 0) {
-        auto bytes = getWorldGenDataFromFS(file);
+        bytes = getWorldGenDataFromFS(file);
         if (!bytes.isEmpty()) {
             m_randomSeed = loadSeed(bytes);
         }
@@ -274,9 +274,6 @@ void World::readFromZip(const QFileInfo& file)
         QFileInfo fi(filePath);
         if (fi.fileName().compare(levelDat, Qt::CaseInsensitive) == 0) {
             m_containerOffsetPath = filePath.chopped(levelDat.length());
-            if (!m_containerOffsetPath.isEmpty()) {
-                return false;
-            }
             m_levelDatTime = file->dateTime();
             loadFromLevelDat(file->readAll());
             m_isValid = true;
@@ -426,7 +423,7 @@ int64_t loadSeed(QByteArray data)
     nbt::value* valPtr = nullptr;
     try {
         valPtr = &levelData->at("data");
-    } catch (const std::out_of_range& e) {
+    } catch (const std::out_of_range&) {
         return 0;
     }
     nbt::value& val = *valPtr;

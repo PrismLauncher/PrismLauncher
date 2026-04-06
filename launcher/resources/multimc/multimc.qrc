@@ -338,6 +338,7 @@
         <file>scalable/adoptium.svg</file>  <!-- The Adoptium Logo is a registered trademark of the Eclipse Foundation. -->
         <file>scalable/azul.svg</file>  <!-- Azul, Zulu, Azul Systems, the Azul Systems logo, Azul Zulu are either registered trademarks or trademarks of Azul Systems, registered in the U.S. and elsewhere. -->
         <file>scalable/mojang.svg</file>  <!-- The Mojang Logo is a registered trademark of Mojang AB. -->
+        <file>scalable/openj9_hex_custom.svg</file>  <!-- Adapted from the `OpenJ9-hex.svg` file by Ludgie. Source: https://github.com/eclipse-openj9/openj9/blob/master/artwork/OpenJ9-hex.svg -->
 
     </qresource>
 </RCC>

@@ -295,7 +295,6 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
         default:
             return QVariant();
     }
-    return QVariant();
 }
 
 int ModFolderModel::columnCount(const QModelIndex& parent) const

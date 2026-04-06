@@ -34,7 +34,7 @@ void PrintServers::executeTask()
 void PrintServers::resolveServer(const QHostInfo& host_info)
 {
     QString server = host_info.hostName();
-    QString addresses = server + " resolves to:\n    [";
+    QString addresses = server + " resolves to:\n  ";
 
     if (!host_info.addresses().isEmpty()) {
         for (QHostAddress address : host_info.addresses()) {
@@ -46,7 +46,7 @@ void PrintServers::resolveServer(const QHostInfo& host_info)
     } else {
         addresses += "N/A";
     }
-    addresses += "]\n\n";
+    addresses += "\n";
 
     m_server_to_address.insert(server, addresses);
 

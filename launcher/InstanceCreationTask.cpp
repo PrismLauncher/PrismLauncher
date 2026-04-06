@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QFile>
 
+#include "InstanceTask.h"
 #include "minecraft/MinecraftLoadAndCheck.h"
 #include "tasks/SequentialTask.h"
 
@@ -61,7 +62,7 @@ void InstanceCreationTask::executeTask()
         setStatus(tr("Removing old conflicting files..."));
         qDebug() << "Removing old files";
 
-        for (const QString& path : m_files_to_remove) {
+        for (const QString& path : m_filesToRemove) {
             if (!QFile::exists(path))
                 continue;
 
@@ -106,5 +107,29 @@ void InstanceCreationTask::executeTask()
 
         m_gameFilesTask = task;
         m_gameFilesTask->start();
+    }
+}
+
+void InstanceCreationTask::scheduleToDelete(QWidget* parent, QDir dir, QString path, bool checkDisabled)
+{
+    if (path.isEmpty()) {
+        return;
+    }
+    if (path.startsWith("saves/")) {
+        if (m_shouldDeleteSaves == ShouldDeleteSaves::NotAsked) {
+            m_shouldDeleteSaves = askIfShouldDeleteSaves(parent);
+        }
+        if (m_shouldDeleteSaves == ShouldDeleteSaves::No) {
+            return;
+        }
+    }
+    qDebug() << "Scheduling" << path << "for removal";
+    m_filesToRemove.append(dir.absoluteFilePath(path));
+    if (checkDisabled) {
+        if (path.endsWith(".disabled")) {  // remove it if it was enabled/disabled by user
+            m_filesToRemove.append(dir.absoluteFilePath(path.chopped(9)));
+        } else {
+            m_filesToRemove.append(dir.absoluteFilePath(path + ".disabled"));
+        }
     }
 }

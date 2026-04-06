@@ -5,6 +5,7 @@
 #pragma once
 
 #include <QList>
+#include <cstdint>
 #include "BuildConfig.h"
 #include "Json.h"
 #include "Version.h"
@@ -97,7 +98,7 @@ class FlameAPI : public ResourceAPI {
     static const QString getModLoaderFilters(ModPlatform::ModLoaderTypes types) { return "[" + getModLoaderStrings(types).join(',') + "]"; }
 
    public:
-    std::optional<QString> getSearchURL(SearchArgs const& args) const override
+    std::optional<QString> getSearchURL(const SearchArgs& args) const override
     {
         QStringList get_arguments;
         get_arguments.append(QString("classId=%1").arg(getClassId(args.type)));
@@ -110,7 +111,7 @@ class FlameAPI : public ResourceAPI {
         get_arguments.append("sortOrder=desc");
         if (args.loaders.has_value()) {
             ModPlatform::ModLoaderTypes loaders = args.loaders.value();
-            loaders &= ~ModPlatform::ModLoaderType::DataPack;
+            loaders &= ~static_cast<std::uint16_t>(ModPlatform::ModLoaderType::DataPack);
             if (loaders != 0)
                 get_arguments.append(QString("modLoaderTypes=%1").arg(getModLoaderFilters(loaders)));
         }
@@ -123,7 +124,7 @@ class FlameAPI : public ResourceAPI {
         return BuildConfig.FLAME_BASE_URL + "/mods/search?gameId=432&" + get_arguments.join('&');
     }
 
-    std::optional<QString> getVersionsURL(VersionSearchArgs const& args) const override
+    std::optional<QString> getVersionsURL(const VersionSearchArgs& args) const override
     {
         auto addonId = args.pack->addonId.toString();
         QString url = QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files?pageSize=10000").arg(addonId);
@@ -148,10 +149,10 @@ class FlameAPI : public ResourceAPI {
             return arr;
         }
         // FIXME: Client-side version filtering. This won't take into account any user-selected filtering.
-        auto const& mc_versions = arr.mcVersion;
+        const auto& mc_versions = arr.mcVersion;
 
         if (std::any_of(mc_versions.constBegin(), mc_versions.constEnd(),
-                        [](auto const& mc_version) { return Version(mc_version) <= Version("1.6"); })) {
+                        [](const auto& mc_version) { return Version(mc_version) <= Version("1.6"); })) {
             return arr;
         }
         return {};
@@ -159,8 +160,8 @@ class FlameAPI : public ResourceAPI {
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, [[maybe_unused]] QJsonObject&) const override { FlameMod::loadBody(m); }
 
    private:
-    std::optional<QString> getInfoURL(QString const& id) const override { return QString(BuildConfig.FLAME_BASE_URL + "/mods/%1").arg(id); }
-    std::optional<QString> getDependencyURL(DependencySearchArgs const& args) const override
+    std::optional<QString> getInfoURL(const QString& id) const override { return QString(BuildConfig.FLAME_BASE_URL + "/mods/%1").arg(id); }
+    std::optional<QString> getDependencyURL(const DependencySearchArgs& args) const override
     {
         auto addonId = args.dependency.addonId.toString();
         auto url =

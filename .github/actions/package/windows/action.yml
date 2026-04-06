@@ -61,7 +61,7 @@ runs:
 
     - name: Login to Azure
       if: ${{ env.CI_HAS_ACCESS_TO_AZURE != '' && inputs.azure-client-id != '' }}
-      uses: azure/login@v2
+      uses: azure/login@v3
       with:
         client-id: ${{ inputs.azure-client-id }}
         tenant-id: ${{ inputs.azure-tenant-id }}
@@ -168,19 +168,19 @@ runs:
         exclude-interactive-browser-credential: true
 
     - name: Upload binary zip
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: PrismLauncher-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}
         path: install/**
 
     - name: Upload portable zip
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: PrismLauncher-${{ inputs.artifact-name }}-Portable-${{ inputs.version }}-${{ inputs.build-type }}
         path: install-portable/**
 
     - name: Upload installer
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: PrismLauncher-${{ inputs.artifact-name }}-Setup-${{ inputs.version }}-${{ inputs.build-type }}
         path: PrismLauncher-Setup.exe

@@ -37,26 +37,13 @@
  *      limitations under the License.
  */
 
-#include <QFile>
-#include <QMap>
-#include <QProcess>
-#include <QStandardPaths>
 #include <QString>
 
-#if defined(Q_OS_WINDOWS)
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#elif defined(Q_OS_LINUX)
-#include <sys/sysinfo.h>
-#elif defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-#include <cstdio>
-#elif defined(Q_OS_APPLE)
-#include <sys/sysctl.h>
-#endif
+#include "HardwareInfo.h"
 
 #ifdef Q_OS_MACOS
+#include <sys/sysctl.h>
+
 bool rosettaDetect()
 {
     int ret = 0;
@@ -98,55 +85,10 @@ QString useQTForArch()
     return QSysInfo::currentCpuArchitecture();
 }
 
-uint64_t getSystemRamMiB()
+int defaultMaxJvmMem()
 {
-#if defined(Q_OS_WINDOWS)
-    MEMORYSTATUSEX status;
-    status.dwLength = sizeof status;
-
-    if (GlobalMemoryStatusEx(&status)) {
-        // transforming bytes -> mib
-        return (uint64_t)status.ullTotalPhys / 1024 / 1024;
-    }
-#elif defined(Q_OS_LINUX)
-    struct sysinfo info;
-
-    if (sysinfo(&info) != -1) {
-        // transforming bytes -> mib
-        return info.totalram / 1024 / 1024;
-    }
-#elif defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-    char buff[512];
-    FILE* fp = popen("sysctl hw.physmem", "r");
-    if (fp != nullptr) {
-        if (fgets(buff, 512, fp) != nullptr) {
-            std::string str(buff);
-            uint64_t mem = std::stoull(str.substr(12, std::string::npos));
-
-            // transforming kib -> mib
-            return mem / 1024;
-        }
-    }
-#elif defined(Q_OS_APPLE)
-    uint64_t memsize;
-    size_t memsizesize = sizeof memsize;
-
-    if (!sysctlbyname("hw.memsize", &memsize, &memsizesize, nullptr, 0)) {
-        // transforming bytes -> mib
-        return memsize / 1024 / 1024;
-    }
-#elif defined(__GNUC__) || defined(__clang__)
-#warning getSystemRam not implemented on this platform; detecting amount of installed RAM will not work
-#endif
-    return 0;
-}
-
-int suitableMaxMem()
-{
-    int totalRAM = getSystemRamMiB();
-
     // If totalRAM < 6GB, use (totalRAM / 1.5), else 4GB
-    if (totalRAM < (4096 * 1.5))
+    if (const uint64_t totalRAM = HardwareInfo::totalRamMiB(); totalRAM < (4096 * 1.5))
         return totalRAM / 1.5;
     else
         return 4096;

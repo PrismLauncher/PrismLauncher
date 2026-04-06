@@ -79,7 +79,7 @@ void PackInstallTask::executeTask()
 
     // Find pack version
     auto version_it = std::find_if(m_pack.versions.constBegin(), m_pack.versions.constEnd(),
-                                   [this](FTB::VersionInfo const& a) { return a.name == m_versionName; });
+                                   [this](const FTB::VersionInfo& a) { return a.name == m_versionName; });
 
     if (version_it == m_pack.versions.constEnd()) {
         emitFailed(tr("Failed to find pack version %1").arg(m_versionName));
@@ -143,7 +143,7 @@ void PackInstallTask::resolveMods()
     m_fileIds.clear();
 
     Flame::Manifest manifest;
-    for (auto const& file : m_version.files) {
+    for (const auto& file : m_version.files) {
         if (!file.serverOnly && file.url.isEmpty()) {
             if (file.curseforge.file_id <= 0) {
                 emitFailed(tr("Invalid manifest: There's no information available to download the file '%1'!").arg(file.name));
@@ -179,7 +179,7 @@ void PackInstallTask::onResolveModsSucceeded()
 
     Flame::Manifest results = m_modIdResolverTask->getResults();
     for (int index = 0; index < m_fileIds.size(); index++) {
-        auto const file_id = m_fileIds.at(index);
+        const auto file_id = m_fileIds.at(index);
         if (file_id < 0)
             continue;
 
@@ -298,7 +298,7 @@ void PackInstallTask::downloadPack()
     setAbortable(false);
 
     auto jobPtr = makeShared<NetJob>(tr("Mod download"), APPLICATION->network());
-    for (auto const& file : m_version.files) {
+    for (const auto& file : m_version.files) {
         if (file.serverOnly || file.url.isEmpty())
             continue;
 
@@ -315,6 +315,7 @@ void PackInstallTask::downloadPack()
         jobPtr->addNetAction(dl);
     }
 
+    jobPtr->setMaxConcurrent(1);  // FTB blocks multiple requests at a time
     connect(jobPtr.get(), &NetJob::succeeded, this, &PackInstallTask::onModDownloadSucceeded);
     connect(jobPtr.get(), &NetJob::failed, this, &PackInstallTask::onModDownloadFailed);
     connect(jobPtr.get(), &NetJob::aborted, this, &PackInstallTask::abort);
@@ -363,7 +364,7 @@ void PackInstallTask::copyBlockedMods()
     int i = 0;
     int total = m_blockedMods.length();
     setProgress(i, total);
-    for (auto const& mod : m_blockedMods) {
+    for (const auto& mod : m_blockedMods) {
         if (!mod.matched) {
             qDebug() << mod.name << "was not matched to a local file, skipping copy";
             continue;

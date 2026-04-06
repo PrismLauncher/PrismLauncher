@@ -59,6 +59,7 @@
 #include "minecraft/launch/AutoInstallJava.h"
 #include "minecraft/launch/ClaimAccount.h"
 #include "minecraft/launch/CreateGameFolders.h"
+#include "minecraft/launch/EnsureAvailableMemory.h"
 #include "minecraft/launch/EnsureOfflineLibraries.h"
 #include "minecraft/launch/ExtractNatives.h"
 #include "minecraft/launch/LauncherPartLaunch.h"
@@ -97,7 +98,7 @@
 #include <QWindow>
 
 #ifdef Q_OS_LINUX
-#include "MangoHud.h"
+#include "LibraryUtils.h"
 #endif
 
 #ifdef WITH_QTDBUS
@@ -529,10 +530,10 @@ QStringList MinecraftInstance::extraArguments()
         }
     }
     auto agents = m_components->getProfile()->getAgents();
-    for (auto agent : agents) {
+    for (const auto& agent : agents) {
         QStringList jar, temp1, temp2, temp3;
-        agent->library()->getApplicableFiles(runtimeContext(), jar, temp1, temp2, temp3, getLocalLibraryPath());
-        list.append("-javaagent:" + jar[0] + (agent->argument().isEmpty() ? "" : "=" + agent->argument()));
+        agent.library->getApplicableFiles(runtimeContext(), jar, temp1, temp2, temp3, getLocalLibraryPath());
+        list.append("-javaagent:" + jar[0] + (agent.argument.isEmpty() ? "" : "=" + agent.argument));
     }
 
     {
@@ -651,7 +652,7 @@ QMap<QString, QString> MinecraftInstance::getVariables()
     out.insert("INST_ID", id());
     out.insert("INST_DIR", QDir::toNativeSeparators(QDir(instanceRoot()).absolutePath()));
     out.insert("INST_MC_DIR", QDir::toNativeSeparators(QDir(gameRoot()).absolutePath()));
-    out.insert("INST_JAVA", settings()->get("JavaPath").toString());
+    out.insert("INST_JAVA", QDir::toNativeSeparators(QDir(settings()->get("JavaPath").toString()).absolutePath()));
     out.insert("INST_JAVA_ARGS", javaArguments().join(' '));
     out.insert("NO_COLOR", "1");
 #ifdef Q_OS_MACOS
@@ -700,7 +701,7 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
         if (auto value = env.value("LD_PRELOAD"); !value.isEmpty())
             preloadList = value.split(QLatin1String(":"));
 
-        auto mangoHudLibString = MangoHud::getLibraryString();
+        auto mangoHudLibString = LibraryUtils::findMangoHud();
         if (!mangoHudLibString.isEmpty()) {
             QFileInfo mangoHudLib(mangoHudLibString);
             QString libPath = mangoHudLib.absolutePath();
@@ -736,6 +737,7 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
         env.insert("__GLX_VENDOR_LIBRARY_NAME", "mesa");
         env.insert("MESA_LOADER_DRIVER_OVERRIDE", "zink");
         env.insert("GALLIUM_DRIVER", "zink");
+        env.insert("LIBGL_KOPPER_DRI2", "1");
     }
 #endif
     return env;
@@ -889,48 +891,10 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
 
     QStringList out;
 
-    out << "Main Class:" << indent + getMainClass() << emptyLine;
-    out << "Native path:" << indent + getNativePath() << emptyLine;
+    out << "Launcher: " + getLauncher();
+    out << "Main class: " + getMainClass() << emptyLine;
 
     auto profile = m_components->getProfile();
-
-    // traits
-    auto alltraits = traits();
-    if (alltraits.size()) {
-        out << "Traits:";
-        for (auto trait : alltraits) {
-            out << indent + trait;
-        }
-        out << emptyLine;
-    }
-
-    // native libraries
-    auto settings = this->settings();
-    bool nativeOpenAL = settings->get("UseNativeOpenAL").toBool();
-    bool nativeGLFW = settings->get("UseNativeGLFW").toBool();
-    if (nativeOpenAL || nativeGLFW) {
-        if (nativeOpenAL)
-            out << "Using system OpenAL.";
-        if (nativeGLFW)
-            out << "Using system GLFW.";
-        out << emptyLine;
-    }
-
-    // libraries and class path.
-    {
-        out << "Libraries:";
-        QStringList jars, nativeJars;
-        profile->getLibraryFiles(runtimeContext(), jars, nativeJars, getLocalLibraryPath(), binRoot());
-        for (auto file : jars) {
-            out << indent + file;
-        }
-        out << emptyLine;
-        out << "Native libraries:";
-        for (auto file : nativeJars) {
-            out << indent + file;
-        }
-        out << emptyLine;
-    }
 
     // mods and core mods
     auto printModList = [&out](const QString& label, ModFolderModel& model) {
@@ -977,9 +941,49 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
         out << emptyLine;
     }
 
+    // traits
+    auto alltraits = traits();
+    if (alltraits.size()) {
+        out << "Traits:";
+        for (auto trait : alltraits) {
+            out << indent + trait;
+        }
+        out << emptyLine;
+    }
+
+    // native libraries
+    auto settings = this->settings();
+    bool nativeOpenAL = settings->get("UseNativeOpenAL").toBool();
+    bool nativeGLFW = settings->get("UseNativeGLFW").toBool();
+    if (nativeOpenAL || nativeGLFW) {
+        if (nativeOpenAL)
+            out << "Using system OpenAL.";
+        if (nativeGLFW)
+            out << "Using system GLFW.";
+        out << emptyLine;
+    }
+
+    // libraries and class path.
+    {
+        out << "Libraries:";
+        QStringList jars, nativeJars;
+        profile->getLibraryFiles(runtimeContext(), jars, nativeJars, getLocalLibraryPath(), binRoot());
+        for (auto file : jars) {
+            out << indent + file;
+        }
+        out << emptyLine;
+        out << "Native libraries:";
+        for (auto file : nativeJars) {
+            out << indent + file;
+        }
+        out << emptyLine;
+    }
+
+    out << "Natives path:" << indent + getNativePath() << emptyLine;
+
     // minecraft arguments
     auto params = processMinecraftArgs(nullptr, targetToJoin);
-    out << "Params:";
+    out << "Minecraft arguments:";
     out << indent + params.join(' ');
     out << emptyLine;
 
@@ -992,9 +996,6 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
         auto height = settings->get("MinecraftWinHeight").toInt();
         out << "Window size: " + QString::number(width) + " x " + QString::number(height);
     }
-    out << emptyLine;
-
-    out << "Launcher: " + getLauncher();
     out << emptyLine;
 
     // environment variables
@@ -1122,7 +1123,7 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
 
     // print a header
     {
-        process->appendStep(makeShared<TextPrint>(pptr, "Minecraft folder is:\n" + gameRoot() + "\n\n", MessageLevel::Launcher));
+        process->appendStep(makeShared<TextPrint>(pptr, "Minecraft folder is:\n  " + gameRoot() + "\n", MessageLevel::Launcher));
     }
 
     // create the .minecraft folder and server-resource-packs (workaround for Minecraft bug MCL-3732)
@@ -1160,6 +1161,8 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     {
         process->appendStep(makeShared<AutoInstallJava>(pptr));
         process->appendStep(makeShared<CheckJava>(pptr));
+        // verify that minimum Java requirements are met
+        process->appendStep(makeShared<VerifyJavaInstall>(pptr));
     }
 
     // run pre-launch command if that's needed
@@ -1189,6 +1192,11 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
         process->appendStep(makeShared<ScanModFolders>(pptr));
     }
 
+    // make sure we have enough RAM, warn the user if we don't
+    {
+        process->appendStep(makeShared<EnsureAvailableMemory>(pptr, this));
+    }
+
     // print some instance info here...
     {
         process->appendStep(makeShared<PrintInstanceInfo>(pptr, session, targetToJoin));
@@ -1202,11 +1210,6 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     // reconstruct assets if needed
     {
         process->appendStep(makeShared<ReconstructAssets>(pptr));
-    }
-
-    // verify that minimum Java requirements are met
-    {
-        process->appendStep(makeShared<VerifyJavaInstall>(pptr));
     }
 
     {

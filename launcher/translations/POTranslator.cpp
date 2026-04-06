@@ -133,7 +133,7 @@ void POTranslatorPrivate::reload()
 {
     QFile file(filename);
     if (!file.open(QFile::OpenMode::enum_type::ReadOnly | QFile::OpenMode::enum_type::Text)) {
-        qDebug() << "Failed to open PO file:" << filename;
+        qDebug() << "Failed to open PO file:" << filename << "error:" << file.errorString();
         return;
     }
 

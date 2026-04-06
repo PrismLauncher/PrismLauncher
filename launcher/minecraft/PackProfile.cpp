@@ -326,7 +326,15 @@ PackProfile::Result PackProfile::reload(Net::Mode netmode)
 {
     // Do not reload when the update/resolve task is running. It is in control.
     if (d->m_updateTask) {
-        return Result::Success();
+        if (d->m_updateTask->netMode() == netmode) {
+            return Result::Success();
+        }
+
+        // https://github.com/PrismLauncher/PrismLauncher/issues/5209
+        // FIXME: HACK HACK HACK
+        disconnect(d->m_updateTask.get(), &ComponentUpdateTask::aborted, nullptr, nullptr);
+        d->m_updateTask->abort();
+        d->m_updateTask.reset();
     }
 
     // flush any scheduled saves to not lose state
@@ -917,7 +925,7 @@ bool PackProfile::installAgents_internal(QStringList filepaths)
         agent->setDisplayName(sourceInfo.completeBaseName());
         agent->setHint("local");
 
-        versionFile->agents.append(std::make_shared<Agent>(agent, QString()));
+        versionFile->agents.append(Agent{agent, QString()});
 
         versionFile->name = targetName;
         versionFile->uid = targetId;

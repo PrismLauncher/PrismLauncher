@@ -5,14 +5,15 @@
 #include "ResourcePackModel.h"
 
 #include <QMessageBox>
+#include <utility>
 
 namespace ResourceDownload {
 
-ResourcePackResourceModel::ResourcePackResourceModel(BaseInstance const& base_inst,
+ResourcePackResourceModel::ResourcePackResourceModel(const BaseInstance& base_inst,
                                                      ResourceAPI* api,
-                                                     QString debugName,
+                                                     const QString& debugName,
                                                      QString metaEntryBase)
-    : ResourceModel(api), m_base_instance(base_inst), m_debugName(debugName + " (Model)"), m_metaEntryBase(metaEntryBase)
+    : ResourceModel(api), m_base_instance(base_inst), m_debugName(debugName + " (Model)"), m_metaEntryBase(std::move(metaEntryBase))
 {}
 
 /******** Make data requests ********/
@@ -20,19 +21,29 @@ ResourcePackResourceModel::ResourcePackResourceModel(BaseInstance const& base_in
 ResourceAPI::SearchArgs ResourcePackResourceModel::createSearchArguments()
 {
     auto sort = getCurrentSortingMethodByIndex();
-    return { ModPlatform::ResourceType::ResourcePack, m_next_search_offset, m_search_term, sort };
+    return {
+        .type = ModPlatform::ResourceType::ResourcePack,
+        .offset = m_next_search_offset,
+        .search = m_search_term,
+        .sorting = sort,
+        .loaders = {},
+        .versions = {},
+        .side = {},
+        .categoryIds = {},
+        .openSource = {},
+    };
 }
 
 ResourceAPI::VersionSearchArgs ResourcePackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto pack = m_packs[entry.row()];
-    return { pack, {}, {}, ModPlatform::ResourceType::ResourcePack };
+    return { .pack = pack, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::ResourcePack };
 }
 
 ResourceAPI::ProjectInfoArgs ResourcePackResourceModel::createInfoArguments(const QModelIndex& entry)
 {
     auto pack = m_packs[entry.row()];
-    return { pack };
+    return { .pack = pack };
 }
 
 void ResourcePackResourceModel::searchWithTerm(const QString& term, unsigned int sort)

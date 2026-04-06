@@ -1093,10 +1093,11 @@ void ModFolderPage::removeItems(const QItemSelection& selection)
                                                      QMessageBox::Cancel)
                             ->exec();
 
-        if (response != QMessageBox::Yes) {
-            m_model->setResourceEnabled(affected, EnableAction::DISABLE);
-        } else if (response != QMessageBox::Cancel) {
+        if (response == QMessageBox::Cancel) {
             return;
+        }
+        if (response == QMessageBox::Yes) {
+            m_model->setResourceEnabled(affected, EnableAction::DISABLE);
         }
     }
 

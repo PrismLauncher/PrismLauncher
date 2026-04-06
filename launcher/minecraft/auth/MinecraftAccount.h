@@ -110,6 +110,8 @@ class MinecraftAccount : public QObject, public Usable {
 
     QString profileName() const { return data.profileName(); }
 
+    QString displayName() const;
+
     bool isActive() const;
 
     AccountType accountType() const noexcept { return data.type; }

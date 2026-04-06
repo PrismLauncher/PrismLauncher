@@ -135,6 +135,10 @@ void APIPage::loadSettings()
 
     ui->pasteTypeComboBox->setCurrentIndex(pasteTypeIndex);
 
+    if (bool fallbackMRBlockedMods = s->get("FallbackMRBlockedMods").toBool()) {
+        ui->FallbackMRBlockedMods->setChecked(fallbackMRBlockedMods);
+    }
+
     QString msaClientID = s->get("MSAClientIDOverride").toString();
     ui->msaClientID->setText(msaClientID);
     QString metaURL = s->get("MetaURLOverride").toString();
@@ -188,6 +192,7 @@ void APIPage::applySettings()
     upgradeToHTTPS(resourceURL);
     upgradeToHTTPS(fmlLibsURL);
 
+    s->set("FallbackMRBlockedMods", ui->FallbackMRBlockedMods->checkState());
     s->set("MetaURLOverride", metaURL.toString());
     s->set("ResourceURLOverride", resourceURL.toString());
     s->set("LegacyFMLLibsURLOverride", fmlLibsURL.toString());

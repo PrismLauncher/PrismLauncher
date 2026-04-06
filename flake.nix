@@ -9,7 +9,7 @@
   };
 
   inputs = {
-    nixpkgs.url = "https://channels.nixos.org/nixos-25.11/nixexprs.tar.xz";
+    nixpkgs.url = "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz";
 
     libnbtplusplus = {
       url = "github:PrismLauncher/libnbtplusplus";
@@ -42,7 +42,7 @@
 
         let
           pkgs = nixpkgsFor.${system};
-          llvm = pkgs.llvmPackages_19;
+          llvm = pkgs.llvmPackages_22;
         in
 
         {
@@ -85,7 +85,9 @@
 
         let
           pkgs = nixpkgsFor.${system};
-          llvm = pkgs.llvmPackages_19;
+          llvm = pkgs.llvmPackages_22;
+          python = pkgs.python3;
+          mkShell = pkgs.mkShell.override { inherit (llvm) stdenv; };
 
           packages' = self.packages.${system};
 
@@ -131,18 +133,36 @@
         in
 
         {
-          default = pkgs.mkShell {
+          default = mkShell {
             name = "prism-launcher";
 
             inputsFrom = [ packages'.prismlauncher-unwrapped ];
 
-            packages = with pkgs; [
-              ccache
+            packages = [
+              pkgs.ccache
               llvm.clang-tools
+              python # NOTE(@getchoo): Required for run-clang-tidy, etc.
+
+              (pkgs.stdenvNoCC.mkDerivation {
+                pname = "clang-tidy-diff";
+                inherit (llvm.clang) version;
+
+                nativeBuildInputs = [
+                  pkgs.installShellFiles
+                  python.pkgs.wrapPython
+                ];
+
+                dontUnpack = true;
+                dontConfigure = true;
+                dontBuild = true;
+
+                postInstall = "installBin ${llvm.libclang.python}/share/clang/clang-tidy-diff.py";
+                postFixup = "wrapPythonPrograms";
+              })
             ];
 
             cmakeBuildType = "Debug";
-            cmakeFlags = [ "-GNinja" ] ++ packages'.prismlauncher.cmakeFlags;
+            cmakeFlags = [ "-GNinja" ] ++ packages'.prismlauncher-unwrapped.cmakeFlags;
             dontFixCmake = true;
 
             shellHook = ''
@@ -165,16 +185,24 @@
 
       formatter = forAllSystems (system: nixpkgsFor.${system}.nixfmt-rfc-style);
 
-      overlays.default = final: prev: {
-        prismlauncher-unwrapped = prev.callPackage ./nix/unwrapped.nix {
-          inherit
-            libnbtplusplus
-            self
-            ;
-        };
+      overlays.default =
+        final: prev:
 
-        prismlauncher = final.callPackage ./nix/wrapper.nix { };
-      };
+        let
+          llvm = final.llvmPackages_22 or prev.llvmPackages_22;
+        in
+
+        {
+          prismlauncher-unwrapped = prev.callPackage ./nix/unwrapped.nix {
+            inherit (llvm) stdenv;
+            inherit
+              libnbtplusplus
+              self
+              ;
+          };
+
+          prismlauncher = final.callPackage ./nix/wrapper.nix { };
+        };
 
       packages = forAllSystems (
         system:

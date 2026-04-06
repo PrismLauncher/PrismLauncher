@@ -184,12 +184,13 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         logFile = std::unique_ptr<QFile>(new QFile(logBase.arg(0)));
         if (!logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
             showFatalErrorMessage(tr("The launcher data folder is not writable!"),
-                                  tr("The updater couldn't create a log file - the data folder is not writable.\n"
+                                  tr("The updater couldn't create a log file - %1.\n"
                                      "\n"
                                      "Make sure you have write permissions to the data folder.\n"
-                                     "(%1)\n"
+                                     "(%2)\n"
                                      "\n"
                                      "The updater cannot continue until you fix this problem.")
+                                      .arg(logFile->errorString())
                                       .arg(m_dataPath));
             return;
         }

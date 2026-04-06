@@ -1,5 +1,5 @@
 # Test vector from:
-# https://github.com/unascribed/FlexVer/blob/704e12759b6e59220ff888f8bf2ec15b8f8fd969/test/test_vectors.txt
+# https://git.sleeping.town/exa/FlexVer/src/branch/trunk/test/test_vectors.txt
 #
 # This test file is formatted as "<lefthand> <operator> <righthand>", seperated by the space character
 # Implementations should ignore lines starting with "#" and lines that have a length of 0
@@ -61,3 +61,10 @@ a1.1.2 < a1.1.2_01
 13w02a < c0.3.0_01
 0.6.0-1.18.x < 0.9.beta-1.18.x
 
+# removeLeadingZeroes (#17)
+0000.0.0 = 0.0.0
+0000.00.0 = 0.00.0
+0.0.0 = 0.00.0000
+# General leading zeroes
+1.0.01 = 1.0.1
+1.0.0001 = 1.0.01

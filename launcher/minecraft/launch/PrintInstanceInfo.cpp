@@ -19,49 +19,10 @@
 #include <launch/LaunchTask.h>
 #include "PrintInstanceInfo.h"
 
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
+#include "HardwareInfo.h"
+
+#if defined(Q_OS_FREEBSD)
 namespace {
-#if defined(Q_OS_LINUX)
-void probeProcCpuinfo(QStringList& log)
-{
-    std::ifstream cpuin("/proc/cpuinfo");
-    for (std::string line; std::getline(cpuin, line);) {
-        if (strncmp(line.c_str(), "model name", 10) == 0) {
-            log << QString::fromStdString(line.substr(13, std::string::npos));
-            break;
-        }
-    }
-}
-
-void runLspci(QStringList& log)
-{
-    // FIXME: fixed size buffers...
-    char buff[512];
-    int gpuline = -1;
-    int cline = 0;
-    FILE* lspci = popen("lspci -k", "r");
-
-    if (!lspci)
-        return;
-
-    while (fgets(buff, 512, lspci) != NULL) {
-        std::string str(buff);
-        if (str.length() < 9)
-            continue;
-        if (str.substr(8, 3) == "VGA") {
-            gpuline = cline;
-            log << QString::fromStdString(str.substr(35, std::string::npos));
-        }
-        if (gpuline > -1 && gpuline != cline) {
-            if (cline - gpuline < 3) {
-                log << QString::fromStdString(str.substr(1, std::string::npos));
-            }
-        }
-        cline++;
-    }
-    pclose(lspci);
-}
-#elif defined(Q_OS_FREEBSD)
 void runSysctlHwModel(QStringList& log)
 {
     char buff[512];
@@ -92,24 +53,6 @@ void runPciconf(QStringList& log)
     }
     pclose(pciconf);
 }
-#endif
-void runGlxinfo(QStringList& log)
-{
-    // FIXME: fixed size buffers...
-    char buff[512];
-    FILE* glxinfo = popen("glxinfo", "r");
-    if (!glxinfo)
-        return;
-
-    while (fgets(buff, 512, glxinfo) != NULL) {
-        if (strncmp(buff, "OpenGL version string:", 22) == 0) {
-            log << QString::fromUtf8(buff);
-            break;
-        }
-    }
-    pclose(glxinfo);
-}
-
 }  // namespace
 #endif
 
@@ -118,15 +61,16 @@ void PrintInstanceInfo::executeTask()
     auto instance = m_parent->instance();
     QStringList log;
 
-#if defined(Q_OS_LINUX)
-    ::probeProcCpuinfo(log);
-    ::runLspci(log);
-    ::runGlxinfo(log);
-#elif defined(Q_OS_FREEBSD)
+    log << "OS: " + QString("%1 | %2 | %3").arg(QSysInfo::prettyProductName(), QSysInfo::kernelType(), QSysInfo::kernelVersion());
+#ifdef Q_OS_FREEBSD
     ::runSysctlHwModel(log);
     ::runPciconf(log);
-    ::runGlxinfo(log);
+#else
+    log << "CPU: " + HardwareInfo::cpuInfo();
+    log << QString("RAM: %1 MiB (available: %2 MiB)").arg(HardwareInfo::totalRamMiB()).arg(HardwareInfo::availableRamMiB());
 #endif
+    log.append(HardwareInfo::gpuInfo());
+    log << "";
 
     logLines(log, MessageLevel::Launcher);
     logLines(instance->verboseDescription(m_session, m_targetToJoin), MessageLevel::Launcher);

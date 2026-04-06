@@ -44,8 +44,8 @@ void LibrariesTask::executeTask()
     libArtifactPool.append(profile->getLibraries());
     libArtifactPool.append(profile->getNativeLibraries());
     libArtifactPool.append(profile->getMavenFiles());
-    for (auto agent : profile->getAgents()) {
-        libArtifactPool.append(agent->library());
+    for (const auto& agent : profile->getAgents()) {
+        libArtifactPool.append(agent.library);
     }
     libArtifactPool.append(profile->getMainJar());
     processArtifactPool(libArtifactPool, failedLocalLibraries, inst->getLocalLibraryPath());

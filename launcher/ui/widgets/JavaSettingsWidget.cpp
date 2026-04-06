@@ -42,11 +42,12 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "FileSystem.h"
+#include "HardwareInfo.h"
 #include "JavaCommon.h"
+#include "SysInfo.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
 #include "settings/Setting.h"
-#include "SysInfo.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/VersionSelectDialog.h"
 #include "ui/java/InstallJavaDialog.h"
@@ -285,7 +286,7 @@ void JavaSettingsWidget::onJavaAutodetect()
 }
 void JavaSettingsWidget::updateThresholds()
 {
-    auto sysMiB = SysInfo::getSystemRamMiB();
+    auto sysMiB = HardwareInfo::totalRamMiB();
     unsigned int maxMem = m_ui->maxMemSpinBox->value();
     unsigned int minMem = m_ui->minMemSpinBox->value();
 

@@ -303,7 +303,7 @@ QStringList toStringList(const QString& jsonString)
         return {};
     try {
         return requireIsArrayOf<QString>(doc);
-    } catch (Json::JsonException& e) {
+    } catch (Json::JsonException&) {
         return {};
     }
 }

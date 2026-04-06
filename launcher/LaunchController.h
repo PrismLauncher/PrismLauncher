@@ -50,11 +50,11 @@ class LaunchController : public Task {
     void executeTask() override;
 
     LaunchController();
-    virtual ~LaunchController() = default;
+    ~LaunchController() override = default;
 
     void setInstance(BaseInstance* instance) { m_instance = instance; }
 
-    BaseInstance* instance() { return m_instance; }
+    BaseInstance* instance() const { return m_instance; }
 
     void setLaunchMode(const LaunchMode mode) { m_wantedLaunchMode = mode; }
 
@@ -68,7 +68,7 @@ class LaunchController : public Task {
 
     void setAccountToUse(MinecraftAccountPtr accountToUse) { m_accountToUse = std::move(accountToUse); }
 
-    QString id() { return m_instance->id(); }
+    QString id() const { return m_instance->id(); }
 
     bool abort() override;
 
@@ -77,27 +77,27 @@ class LaunchController : public Task {
     void launchInstance();
     void decideAccount();
     LaunchDecision decideLaunchMode();
-    bool askPlayDemo();
-    QString askOfflineName(QString playerName, bool* ok = nullptr);
-    bool reauthenticateAccount(MinecraftAccountPtr account, QString reason);
+    bool askPlayDemo() const;
+    QString askOfflineName(const QString& playerName, bool* ok = nullptr) const;
+    bool reauthenticateAccount(const MinecraftAccountPtr& account, const QString& reason);
 
    private slots:
     void readyForLaunch();
 
     void onSucceeded();
     void onFailed(QString reason);
-    void onProgressRequested(Task* task);
+    void onProgressRequested(Task* task) const;
 
    private:
     LaunchMode m_wantedLaunchMode = LaunchMode::Normal;
     LaunchMode m_actualLaunchMode = LaunchMode::Normal;
     BaseProfilerFactory* m_profiler = nullptr;
     QString m_offlineName;
-    BaseInstance* m_instance;
+    BaseInstance* m_instance = nullptr;
     QWidget* m_parentWidget = nullptr;
     InstanceWindow* m_console = nullptr;
     MinecraftAccountPtr m_accountToUse = nullptr;
-    AuthSessionPtr m_session;
-    LaunchTask* m_launcher;
-    MinecraftTarget::Ptr m_targetToJoin;
+    AuthSessionPtr m_session = nullptr;
+    LaunchTask* m_launcher = nullptr;
+    MinecraftTarget::Ptr m_targetToJoin = nullptr;
 };

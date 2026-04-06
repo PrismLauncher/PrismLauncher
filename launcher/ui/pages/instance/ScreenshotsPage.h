@@ -41,12 +41,13 @@
 
 #include "settings/Setting.h"
 
-class QFileSystemModel;
 class QIdentityProxyModel;
 class QItemSelection;
 namespace Ui {
 class ScreenshotsPage;
 }
+
+class ScreenshotsFSModel;
 
 struct ScreenShot;
 class ScreenshotList;
@@ -88,7 +89,7 @@ class ScreenshotsPage : public QMainWindow, public BasePage {
 
    private:
     Ui::ScreenshotsPage* ui;
-    std::shared_ptr<QFileSystemModel> m_model;
+    std::shared_ptr<ScreenshotsFSModel> m_model;
     std::shared_ptr<QIdentityProxyModel> m_filterModel;
     QString m_folder;
     bool m_valid = false;

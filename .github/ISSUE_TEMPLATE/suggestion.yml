@@ -1,6 +1,6 @@
 name: Suggestion
 description: Make a suggestion
-labels: [enhancement]
+labels: ["type: enhancement", "status: needs triage"]
 body:
 - type: markdown
   attributes:

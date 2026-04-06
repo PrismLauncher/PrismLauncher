@@ -58,8 +58,9 @@ Task::State FileSink::init(QNetworkRequest& request)
     m_wroteAnyData = false;
     m_output_file.reset(new PSaveFile(m_filename));
     if (!m_output_file->open(QIODevice::WriteOnly)) {
-        qCCritical(taskNetLogC) << "Could not open " + m_filename + " for writing";
-        m_fail_reason = "Could not open file";
+        const auto error = QString("Could not open %1 for writing: %2").arg(m_filename).arg(m_output_file->errorString());
+        qCCritical(taskNetLogC) << error;
+        m_fail_reason = error;
         return Task::State::Failed;
     }
 
@@ -72,11 +73,17 @@ Task::State FileSink::init(QNetworkRequest& request)
 Task::State FileSink::write(QByteArray& data)
 {
     if (!writeAllValidators(data) || m_output_file->write(data) != data.size()) {
-        qCCritical(taskNetLogC) << "Failed writing into " + m_filename;
+        QString error = QString("Failed writing into %1: %2").arg(m_filename);
+        if (m_output_file->error() == QFileDevice::NoError) {
+            error = error.arg("Validators failed");
+        } else {
+            error = error.arg(m_output_file->errorString());
+        }
+        qCCritical(taskNetLogC) << error;
+        m_fail_reason = error;
         m_output_file->cancelWriting();
         m_output_file.reset();
         m_wroteAnyData = false;
-        m_fail_reason = "Failed to write validators";
         return Task::State::Failed;
     }
 
@@ -116,9 +123,10 @@ Task::State FileSink::finalize(QNetworkReply& reply)
 
         // nothing went wrong...
         if (!m_output_file->commit()) {
-            qCCritical(taskNetLogC) << "Failed to commit changes to" << m_filename;
+            const auto error = QString("Failed to commit changes to %1: %2").arg(m_filename).arg(m_output_file->errorString());
+            qCCritical(taskNetLogC) << error;
+            m_fail_reason = error;
             m_output_file->cancelWriting();
-            m_fail_reason = "Failed to commit changes";
             return Task::State::Failed;
         }
     }

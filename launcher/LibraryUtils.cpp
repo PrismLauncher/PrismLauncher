@@ -25,7 +25,7 @@
 
 #include "FileSystem.h"
 #include "Json.h"
-#include "MangoHud.h"
+#include "LibraryUtils.h"
 
 #ifdef __GLIBC__
 #ifndef _GNU_SOURCE
@@ -36,9 +36,9 @@
 #include <linux/limits.h>
 #endif
 
-namespace MangoHud {
+namespace LibraryUtils {
 
-QString getLibraryString()
+QString findMangoHud()
 {
     /**
      * Guess MangoHud install location by searching for vulkan layers in this order:
@@ -123,7 +123,7 @@ QString getLibraryString()
 
 #ifdef __GLIBC__
             // Check whether mangohud is usable on a glibc based system
-            QString libraryPath = findLibrary(libraryName);
+            QString libraryPath = find(libraryName);
             if (!libraryPath.isEmpty()) {
                 return libraryPath;
             }
@@ -138,7 +138,7 @@ QString getLibraryString()
     return {};
 }
 
-QString findLibrary(QString libName)
+QString find(QString libName)
 {
 #ifdef __GLIBC__
     const char* library = libName.toLocal8Bit().constData();
@@ -161,11 +161,11 @@ QString findLibrary(QString libName)
     dlclose(handle);
     return fullPath;
 #else
-    qWarning() << "MangoHud::findLibrary is not implemented on this platform";
+    qWarning() << "LibraryUtils::find is not implemented on this platform";
     return {};
 #endif
 }
-}  // namespace MangoHud
+}  // namespace LibraryUtils
 
 #ifdef UNDEF_GNU_SOURCE
 #undef _GNU_SOURCE

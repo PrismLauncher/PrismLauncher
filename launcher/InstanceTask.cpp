@@ -1,4 +1,5 @@
 #include "InstanceTask.h"
+#include <QDir>
 
 #include "Application.h"
 #include "settings/SettingsObject.h"
@@ -82,3 +83,13 @@ void InstanceName::setName(InstanceName& other)
 }
 
 InstanceTask::InstanceTask() : Task(), InstanceName() {}
+
+ShouldDeleteSaves askIfShouldDeleteSaves(QWidget* parent)
+{
+    auto dialog = CustomMessageBox::selectable(parent, QObject::tr("Delete Existing Save Files"),
+                                               QObject::tr("An earlier version of this mod pack installed save files.\n"
+                                                           "Would you like to remove those existing saves as part of this update?"),
+                                               QMessageBox::Question, QMessageBox::No | QMessageBox::Yes);
+    auto result = dialog->exec();
+    return result == QMessageBox::Yes ? ShouldDeleteSaves::Yes : ShouldDeleteSaves::No;
+}

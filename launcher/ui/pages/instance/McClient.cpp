@@ -60,9 +60,13 @@ void McClient::readRawResponse()
     if (m_responseReadState == 1 && m_resp.size() >= m_wantedRespLength) {
         if (m_resp.size() > m_wantedRespLength) {
             qDebug().nospace() << "Warning: Packet length doesn't match actual packet size (" << m_wantedRespLength << " expected vs "
-                     << m_resp.size() << " received)";
+                               << m_resp.size() << " received)";
         }
-        parseResponse();
+        try {
+            parseResponse();
+        } catch (const Exception& e) {
+            emitFail(e.cause());
+        }
         m_responseReadState = 2;
     }
 }

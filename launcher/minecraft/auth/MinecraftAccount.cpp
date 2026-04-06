@@ -191,6 +191,14 @@ void MinecraftAccount::authFailed(QString reason)
     emit activityChanged(false);
 }
 
+QString MinecraftAccount::displayName() const
+{
+    if (const QList validStates{ AccountState::Unchecked, AccountState::Working, AccountState::Offline, AccountState::Online }; !validStates.contains(accountState())) {
+        return QString("⚠ %1").arg(profileName());
+    }
+    return profileName();
+}
+
 bool MinecraftAccount::isActive() const
 {
     return !m_currentTask.isNull();
@@ -278,12 +286,12 @@ QUuid MinecraftAccount::uuidFromUsername(QString username)
     // basically a reimplementation of Java's UUID#nameUUIDFromBytes
     QByteArray digest = QCryptographicHash::hash(input, QCryptographicHash::Md5);
 
-    auto bOr = [](QByteArray& array, qsizetype index, char value) { array[index] |= value; };
-    auto bAnd = [](QByteArray& array, qsizetype index, char value) { array[index] &= value; };
-    bAnd(digest, 6, (char)0x0f);  // clear version
-    bOr(digest, 6, (char)0x30);   // set to version 3
-    bAnd(digest, 8, (char)0x3f);  // clear variant
-    bOr(digest, 8, (char)0x80);   // set to IETF variant
+    auto bOr = [](QByteArray& array, qsizetype index, uint8_t value) { array[index] |= value; };
+    auto bAnd = [](QByteArray& array, qsizetype index, uint8_t value) { array[index] &= value; };
+    bAnd(digest, 6, 0x0f);  // clear version
+    bOr(digest, 6, 0x30);   // set to version 3
+    bAnd(digest, 8, 0x3f);  // clear variant
+    bOr(digest, 8, 0x80);   // set to IETF variant
 
     return QUuid::fromRfc4122(digest);
 }

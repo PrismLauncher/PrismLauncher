@@ -38,7 +38,6 @@
 #include "FileSystem.h"
 
 class FileLinkApp : public QCoreApplication {
-    // friends for the purpose of limiting access to deprecated stuff
     Q_OBJECT
    public:
     enum Status { Starting, Failed, Succeeded, Initialized };

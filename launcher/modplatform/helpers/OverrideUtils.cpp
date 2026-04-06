@@ -16,7 +16,7 @@ void createOverrides(const QString& name, const QString& parent_folder, const QS
 
     QFile file(file_path);
     if (!file.open(QFile::WriteOnly)) {
-        qWarning() << "Failed to open file '" << file.fileName() << "' for writing!";
+        qWarning() << "Failed to open file" << file.fileName() << "for writing:" << file.errorString();
         return;
     }
 
@@ -47,7 +47,7 @@ QStringList readOverrides(const QString& name, const QString& parent_folder)
     QStringList previous_overrides;
 
     if (!file.open(QFile::ReadOnly)) {
-        qWarning() << "Failed to open file '" << file.fileName() << "' for reading!";
+        qWarning() << "Failed to open file" << file.fileName() << "for reading:" << file.errorString();
         return previous_overrides;
     }
 

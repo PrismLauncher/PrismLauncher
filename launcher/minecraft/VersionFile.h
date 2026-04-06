@@ -126,7 +126,7 @@ class VersionFile : public ProblemContainer {
     QList<LibraryPtr> mavenFiles;
 
     /// Prism Launcher: list of agents to add to JVM arguments
-    QList<AgentPtr> agents;
+    QList<Agent> agents;
 
     /// The main jar (Minecraft version library, normally)
     LibraryPtr mainJar;

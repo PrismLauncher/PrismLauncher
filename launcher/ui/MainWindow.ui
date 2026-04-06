@@ -721,7 +721,7 @@
     <iconset theme="help"/>
    </property>
    <property name="text">
-    <string>%1 &amp;Help</string>
+    <string>%1 &amp;Wiki</string>
    </property>
    <property name="toolTip">
     <string>Open the %1 wiki</string>

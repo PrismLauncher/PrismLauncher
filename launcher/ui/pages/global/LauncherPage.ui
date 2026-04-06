@@ -252,7 +252,10 @@
           <item row="3" column="0">
            <widget class="QLabel" name="labelJavaDir">
             <property name="text">
-             <string>&amp;Java:</string>
+             <string>&amp;Auto Java Download:</string>
+            </property>
+            <property name="toolTip">
+             <string>Folder where Prism Launcher stores automatically downloaded Java versions. Do NOT set this to your system Java installation.</string>
             </property>
             <property name="buddy">
              <cstring>javaDirTextBox</cstring>

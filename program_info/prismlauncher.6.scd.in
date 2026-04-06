@@ -1,14 +1,14 @@
-prismlauncher(6)
+@Launcher_APP_BINARY_NAME@(6)
 
 
 # NAME
 
-prismlauncher - a launcher and instance manager for Minecraft.
+@Launcher_APP_BINARY_NAME@ - a launcher and instance manager for Minecraft.
 
 
 # SYNOPSIS
 
-*prismlauncher* [OPTIONS...]
+*@Launcher_APP_BINARY_NAME@* [OPTIONS...]
 
 
 # DESCRIPTION
@@ -69,14 +69,14 @@ variables, besides other common Qt variables:
 
 # BUGS
 
-https://github.com/PrismLauncher/PrismLauncher/issues
+@Launcher_BUG_TRACKER_URL@
 
 # RESOURCES
 
-GitHub: https://github.com/PrismLauncher/PrismLauncher
+GitHub: @Launcher_Git@
 
-Main website: https://prismlauncher.org
+Main website: https://@Launcher_Domain@
 
 # AUTHORS
 
-Prism Launcher Contributors
+@Launcher_Authors@

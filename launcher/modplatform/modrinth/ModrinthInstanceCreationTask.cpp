@@ -115,15 +115,7 @@ bool ModrinthCreationTask::updateInstance()
         // so we're fine removing them!
         if (!old_files.empty()) {
             for (auto const& file : old_files) {
-                if (file.path.isEmpty())
-                    continue;
-                qDebug() << "Scheduling" << file.path << "for removal";
-                m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(file.path));
-                if (file.path.endsWith(".disabled")) {  // remove it if it was enabled/disabled by user
-                    m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(file.path.chopped(9)));
-                } else {
-                    m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(file.path + ".disabled"));
-                }
+                scheduleToDelete(m_parent, old_minecraft_dir, file.path, true);
             }
         }
 
@@ -132,18 +124,12 @@ bool ModrinthCreationTask::updateInstance()
         // FIXME: We may want to do something about disabled mods.
         auto old_overrides = Override::readOverrides("overrides", old_index_folder);
         for (const auto& entry : old_overrides) {
-            if (entry.isEmpty())
-                continue;
-            qDebug() << "Scheduling" << entry << "for removal";
-            m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
+            scheduleToDelete(m_parent, old_minecraft_dir, entry);
         }
 
         auto old_client_overrides = Override::readOverrides("client-overrides", old_index_folder);
         for (const auto& entry : old_client_overrides) {
-            if (entry.isEmpty())
-                continue;
-            qDebug() << "Scheduling" << entry << "for removal";
-            m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
+            scheduleToDelete(m_parent, old_minecraft_dir, entry);
         }
     } else {
         // We don't have an old index file, so we may duplicate stuff!

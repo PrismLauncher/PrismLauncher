@@ -22,5 +22,5 @@ class ResourcePack : public DataPack {
     ResourcePack(QFileInfo file_info) : DataPack(file_info) {}
 
     /** Gets, respectively, the lower and upper versions supported by the set pack format. */
-    std::pair<Version, Version> compatibleVersions() const override;
+    QMap<std::pair<int, int>, std::pair<Version, Version>> mappings() const override;
 };

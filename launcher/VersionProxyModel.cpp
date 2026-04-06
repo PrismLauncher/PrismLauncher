@@ -198,9 +198,8 @@ QVariant VersionProxyModel::data(const QModelIndex& index, int role) const
                         return tr("Latest");
                     }
                 }
-            } else {
-                return sourceModel()->data(parentIndex, BaseVersionList::VersionIdRole);
             }
+            return sourceModel()->data(parentIndex, BaseVersionList::VersionIdRole);
         }
         case Qt::DecorationRole: {
             if (column == Name && hasRecommended) {

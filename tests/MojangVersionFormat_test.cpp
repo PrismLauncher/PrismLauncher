@@ -10,7 +10,7 @@ class MojangVersionFormatTest : public QObject {
     {
         QFile jsonFile(path);
         if (!jsonFile.open(QIODevice::ReadOnly)) {
-            qWarning() << "Failed to open file '" << jsonFile.fileName() << "' for reading!";
+            qWarning() << "Failed to open file" << jsonFile.fileName() << "for reading:" << jsonFile.errorString();
             return QJsonDocument();
         }
         auto data = jsonFile.readAll();
@@ -21,7 +21,7 @@ class MojangVersionFormatTest : public QObject {
     {
         QFile jsonFile(file);
         if (!jsonFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            qCritical() << "Failed to open file '" << jsonFile.fileName() << "' for writing!";
+            qCritical() << "Failed to open file" << jsonFile.fileName() << "for writing:" << jsonFile.errorString();
             return;
         }
         auto data = doc.toJson(QJsonDocument::Indented);

@@ -20,7 +20,7 @@ class ShaderPackResourceModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    ShaderPackResourceModel(BaseInstance const&, ResourceAPI*, QString debugName, QString metaEntryBase);
+    ShaderPackResourceModel(const BaseInstance&, ResourceAPI*, const QString& debugName, QString metaEntryBase);
 
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, unsigned int sort);

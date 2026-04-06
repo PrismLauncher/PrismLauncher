@@ -96,16 +96,36 @@ runs:
         fi
         ditto -c -k --sequesterRsrc --keepParent "Prism Launcher.app" ../PrismLauncher.zip
 
+    - name: Create DMG
+      shell: bash
+      env:
+        INSTALL_DIR: install
+      run: |
+        cd ${{ env.INSTALL_DIR }}
+
+        mkdir -p src
+        cp -R "Prism Launcher.app" src/
+
+        ln -s /Applications src/
+
+        hdiutil create \
+            -volname "Prism Launcher ${{ inputs.version }}" \
+            -srcfolder src \
+            -ov -format ULMO \
+            "../PrismLauncher.dmg"
+
     - name: Make Sparkle signature
       shell: bash
       run: |
         if [ '${{ inputs.sparkle-ed25519-key }}' != '' ]; then
           echo '${{ inputs.sparkle-ed25519-key }}' > ed25519-priv.pem
-          signature=$(/opt/homebrew/opt/openssl@3/bin/openssl pkeyutl -sign -rawin -in ${{ github.workspace }}/PrismLauncher.zip -inkey ed25519-priv.pem | openssl base64 | tr -d \\n)
+          signature_zip=$(/opt/homebrew/opt/openssl@3/bin/openssl pkeyutl -sign -rawin -in ${{ github.workspace }}/PrismLauncher.zip -inkey ed25519-priv.pem | openssl base64 | tr -d \\n)
+          signature_dmg=$(/opt/homebrew/opt/openssl@3/bin/openssl pkeyutl -sign -rawin -in ${{ github.workspace }}/PrismLauncher.dmg -inkey ed25519-priv.pem | openssl base64 | tr -d \\n) 
           rm ed25519-priv.pem
           cat >> $GITHUB_STEP_SUMMARY << EOF
         ### Artifact Information :information_source:
-        - :memo: Sparkle Signature (ed25519): \`$signature\`
+        - :memo: Sparkle Signature (ed25519): \`$signature_zip\` (ZIP)
+        - :memo: Sparkle Signature (ed25519): \`$signature_dmg\` (DMG)
         EOF
         else
           cat >> $GITHUB_STEP_SUMMARY << EOF
@@ -115,7 +135,13 @@ runs:
         fi
 
     - name: Upload binary tarball
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: PrismLauncher-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}
         path: PrismLauncher.zip
+
+    - name: Upload disk image
+      uses: actions/upload-artifact@v7
+      with:
+        name: PrismLauncher-${{ inputs.artifact-name }}-${{ inputs.version }}-${{ inputs.build-type }}.dmg
+        path: PrismLauncher.dmg

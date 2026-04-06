@@ -26,6 +26,7 @@
       ]
     },
     "tomlplusplus",
-    "zlib"
+    "zlib",
+    "vulkan-headers"
   ]
 }

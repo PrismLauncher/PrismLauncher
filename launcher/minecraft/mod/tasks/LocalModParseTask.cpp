@@ -263,12 +263,11 @@ ModDetails ReadMCModTOML(QByteArray contents)
         } else if (auto depTable = depValue.as_table()) {
             auto expectedKey = details.mod_id.toStdString();
             if (!depTable->contains(expectedKey)) {
-                for (auto [k, v] : *depTable) {
-                    expectedKey = k;
-                    break;
+                if (auto it = depTable->begin(); it != depTable->end()) {
+                    expectedKey = it->first;
                 }
             }
-            if (auto array = (*depTable)[expectedKey].as_array()) {
+            if ((array = (*depTable)[expectedKey].as_array())) {
                 parseDep(array);
             }
         }
@@ -352,9 +351,8 @@ ModDetails ReadFabricModInfo(QByteArray contents)
                     details.icon_file = obj.value(key).toString();
                 } else {  // parsing the sizes failed
                     // take the first
-                    for (auto i : obj) {
-                        details.icon_file = i.toString();
-                        break;
+                    if (auto it = obj.begin(); it != obj.end()) {
+                        details.icon_file = it->toString();
                     }
                 }
             } else if (icon.isString()) {
@@ -451,9 +449,8 @@ ModDetails ReadQuiltModInfo(QByteArray contents)
                         details.icon_file = obj.value(key).toString();
                     } else {  // parsing the sizes failed
                         // take the first
-                        for (auto i : obj) {
-                            details.icon_file = i.toString();
-                            break;
+                        if (auto it = obj.begin(); it != obj.end()) {
+                            details.icon_file = it->toString();
                         }
                     }
                 } else if (icon.isString()) {
@@ -571,7 +568,7 @@ bool process(Mod& mod, ProcessingLevel level)
         case ResourceType::LITEMOD:
             return processLitemod(mod);
         default:
-            qWarning() << "Invalid type for mod parse task!";
+            qWarning() << "Invalid type" << mod.type() << "for mod parse task!";
             return false;
     }
 }
@@ -754,7 +751,7 @@ bool loadIconFile(const Mod& mod, QPixmap* pixmap)
             if (icon_info.exists() && icon_info.isFile()) {
                 QFile icon(icon_info.filePath());
                 if (!icon.open(QIODevice::ReadOnly)) {
-                    return png_invalid("failed  to open file " + icon_info.filePath());
+                    return png_invalid("failed to open file " + icon_info.filePath() + " " + icon.errorString());
                 }
                 auto data = icon.readAll();
 

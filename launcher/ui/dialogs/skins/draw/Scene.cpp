@@ -34,9 +34,9 @@ Scene::Scene(const QImage& skin, bool slim, const QImage& cape) : QOpenGLFunctio
         // body
         new opengl::BoxGeometry(QVector3D(8, 12, 4), QVector3D(0, -6, 0), QPoint(16, 16), QVector3D(8, 12, 4)),
         // right leg
-        new opengl::BoxGeometry(QVector3D(4, 12, 4), QVector3D(-1.9, -18, -0.1), QPoint(0, 16), QVector3D(4, 12, 4)),
+        new opengl::BoxGeometry(QVector3D(4, 12, 4), QVector3D(-1.9f, -18, -0.1f), QPoint(0, 16), QVector3D(4, 12, 4)),
         // left leg
-        new opengl::BoxGeometry(QVector3D(4, 12, 4), QVector3D(1.9, -18, -0.1), QPoint(16, 48), QVector3D(4, 12, 4)),
+        new opengl::BoxGeometry(QVector3D(4, 12, 4), QVector3D(1.9f, -18, -0.1f), QPoint(16, 48), QVector3D(4, 12, 4)),
     };
 
     m_staticComponentsOverlay = {
@@ -45,9 +45,9 @@ Scene::Scene(const QImage& skin, bool slim, const QImage& cape) : QOpenGLFunctio
         // body
         new opengl::BoxGeometry(QVector3D(8.5, 12.5, 4.5), QVector3D(0, -6, 0), QPoint(16, 32), QVector3D(8, 12, 4)),
         // right leg
-        new opengl::BoxGeometry(QVector3D(4.5, 12.5, 4.5), QVector3D(-1.9, -18, -0.1), QPoint(0, 32), QVector3D(4, 12, 4)),
+        new opengl::BoxGeometry(QVector3D(4.5f, 12.5f, 4.5f), QVector3D(-1.9f, -18, -0.1f), QPoint(0, 32), QVector3D(4, 12, 4)),
         // left leg
-        new opengl::BoxGeometry(QVector3D(4.5, 12.5, 4.5), QVector3D(1.9, -18, -0.1), QPoint(0, 48), QVector3D(4, 12, 4)),
+        new opengl::BoxGeometry(QVector3D(4.5f, 12.5f, 4.5f), QVector3D(1.9f, -18, -0.1f), QPoint(0, 48), QVector3D(4, 12, 4)),
     };
 
     m_normalArms = {
@@ -79,7 +79,7 @@ Scene::Scene(const QImage& skin, bool slim, const QImage& cape) : QOpenGLFunctio
     };
 
     m_cape = new opengl::BoxGeometry(QVector3D(10, 16, 1), QVector3D(0, -8, 2.5), QPoint(0, 0), QVector3D(10, 16, 1), QSize(64, 32));
-    m_cape->rotate(10.8, QVector3D(1, 0, 0));
+    m_cape->rotate(10.8f, QVector3D(1, 0, 0));
     m_cape->rotate(180, QVector3D(0, 1, 0));
 
     auto leftWing =
