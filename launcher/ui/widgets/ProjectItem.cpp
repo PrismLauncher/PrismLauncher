@@ -74,8 +74,8 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
     }
 
     // Change the rect so that funther painting is easier
-    auto remaining_width = rect.width() - icon_width - 2 * icon_x_margin;
-    rect.setRect(rect.x() + icon_width + 2 * icon_x_margin, rect.y(), remaining_width, rect.height());
+    auto remaining_width = rect.width() - icon_width - (2 * icon_x_margin);
+    rect.setRect(rect.x() + icon_width + (2 * icon_x_margin), rect.y(), remaining_width, rect.height());
 
     int title_height = 0;
 
@@ -135,7 +135,7 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
 
         // Have the y-value be set based on the number of lines in the description, to centralize the
         // description text with the space between the base and the title.
-        int description_y = rect.y() + title_height + (rect.height() - title_height) / 2;
+        int description_y = rect.y() + title_height + ((rect.height() - title_height) / 2);
         if (num_lines == 1)
             description_y -= opt.fontMetrics.height() / 2;
         else
@@ -196,7 +196,7 @@ QStyleOptionViewItem ProjectItemDelegate::makeCheckboxStyleOption(const QStyleOp
     QRect checkboxRect = style->subElementRect(QStyle::SE_ItemViewItemCheckIndicator, &checkboxOpt, opt.widget);
     // 5px is the typical top margin for image
     // we don't want the checkboxes to be all over the place :)
-    checkboxOpt.rect = QRect(opt.rect.x() + 5, opt.rect.y() + (opt.rect.height() / 2 - checkboxRect.height() / 2), checkboxRect.width(),
+    checkboxOpt.rect = QRect(opt.rect.x() + 5, opt.rect.y() + ((opt.rect.height() / 2) - (checkboxRect.height() / 2)), checkboxRect.width(),
                              checkboxRect.height());
 
     return checkboxOpt;

@@ -165,14 +165,14 @@ void paintQR(QPainter& painter, const QSize canvasSize, const QString& data, QCo
     const auto scale = 0.8 * std::min(canvasWidth / qrSize, canvasHeight / qrSize);
 
     // Find an offset to center it in the canvas
-    const auto offsetX = (canvasWidth - qrSize * scale) / 2;
-    const auto offsetY = (canvasHeight - qrSize * scale) / 2;
+    const auto offsetX = (canvasWidth - (qrSize * scale)) / 2;
+    const auto offsetY = (canvasHeight - (qrSize * scale)) / 2;
 
     for (int y = 0; y < qrSize; y++) {
         for (int x = 0; x < qrSize; x++) {
-            auto shouldFillIn = qr->data[y * qrSize + x] & 1;
+            auto shouldFillIn = qr->data[(y * qrSize) + x] & 1;
             if (shouldFillIn) {
-                QRectF r(offsetX + x * scale, offsetY + y * scale, scale, scale);
+                QRectF r(offsetX + (x * scale), offsetY + (y * scale), scale, scale);
                 painter.drawRects(&r, 1);
             }
         }

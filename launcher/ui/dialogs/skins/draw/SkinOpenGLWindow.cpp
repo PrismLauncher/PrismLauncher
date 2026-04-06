@@ -232,7 +232,7 @@ void SkinOpenGLWindow::paintGL()
     float pitchRad = qDegreesToRadians(m_pitch);
     matrix.lookAt(QVector3D(                                       //
                       m_distance * qCos(pitchRad) * qCos(yawRad),  //
-                      m_distance * qSin(pitchRad) - 8,             //
+                      (m_distance * qSin(pitchRad)) - 8,           //
                       m_distance * qCos(pitchRad) * qSin(yawRad)),
                   QVector3D(0, -8, 0), QVector3D(0, 1, 0));
 

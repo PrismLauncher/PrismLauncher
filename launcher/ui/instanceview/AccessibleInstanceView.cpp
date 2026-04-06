@@ -27,7 +27,7 @@ int AccessibleInstanceView::logicalIndex(const QModelIndex& index) const
 {
     if (!view()->model() || !index.isValid())
         return -1;
-    return index.row() * (index.model()->columnCount()) + index.column();
+    return (index.row() * (index.model()->columnCount())) + index.column();
 }
 
 AccessibleInstanceView::AccessibleInstanceView(QWidget* w) : QAccessibleObject(w)

@@ -188,7 +188,7 @@ QPixmap previewCape(QImage capeImage, bool elytra = false)
         auto wing = capeImage.copy(34, 2, 12, 20);
         QImage mirrored = wing.mirrored(true, false);
 
-        QImage combined(wing.width() * 2 + 1, wing.height() + 14, capeImage.format());
+        QImage combined((wing.width() * 2) + 1, wing.height() + 14, capeImage.format());
         combined.fill(Qt::transparent);
 
         QPainter painter(&combined);

@@ -93,7 +93,7 @@ class PageView : public QListView {
 
     virtual QSize sizeHint() const
     {
-        int width = sizeHintForColumn(0) + frameWidth() * 2 + 5;
+        int width = sizeHintForColumn(0) + (frameWidth() * 2) + 5;
         if (verticalScrollBar()->isVisible())
             width += verticalScrollBar()->width();
         return QSize(width, 100);

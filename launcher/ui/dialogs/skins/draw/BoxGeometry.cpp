@@ -117,19 +117,19 @@ QList<QVector2D> getCubeUVs(float u, float v, float width, float height, float d
 {
     auto toFaceVertices = [textureHeight, textureWidth](float x1, float y1, float x2, float y2) -> QList<QVector2D> {
         return {
-            QVector2D(x1 / textureWidth, 1.0 - y2 / textureHeight),
-            QVector2D(x2 / textureWidth, 1.0 - y2 / textureHeight),
-            QVector2D(x2 / textureWidth, 1.0 - y1 / textureHeight),
-            QVector2D(x1 / textureWidth, 1.0 - y1 / textureHeight),
+            QVector2D(x1 / textureWidth, 1.0 - (y2 / textureHeight)),
+            QVector2D(x2 / textureWidth, 1.0 - (y2 / textureHeight)),
+            QVector2D(x2 / textureWidth, 1.0 - (y1 / textureHeight)),
+            QVector2D(x1 / textureWidth, 1.0 - (y1 / textureHeight)),
         };
     };
 
     auto top = toFaceVertices(u + depth, v, u + width + depth, v + depth);
-    auto bottom = toFaceVertices(u + width + depth, v, u + width * 2 + depth, v + depth);
+    auto bottom = toFaceVertices(u + width + depth, v, u + (width * 2) + depth, v + depth);
     auto left = toFaceVertices(u, v + depth, u + depth, v + depth + height);
     auto front = toFaceVertices(u + depth, v + depth, u + width + depth, v + depth + height);
-    auto right = toFaceVertices(u + width + depth, v + depth, u + width + depth * 2, v + height + depth);
-    auto back = toFaceVertices(u + width + depth * 2, v + depth, u + width * 2 + depth * 2, v + height + depth);
+    auto right = toFaceVertices(u + width + depth, v + depth, u + width + (depth * 2), v + height + depth);
+    auto back = toFaceVertices(u + width + (depth * 2), v + depth, u + (width * 2) + (depth * 2), v + height + depth);
 
     auto uvRight = {
         right[0],

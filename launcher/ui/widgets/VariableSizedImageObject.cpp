@@ -64,7 +64,7 @@ QSizeF VariableSizedImageObject::intrinsicSize(QTextDocument* doc, int posInDocu
 
     // Get the width of the text content to make the image similar sized.
     // doc->textWidth() includes the margin, so we need to remove it.
-    auto doc_width = doc->textWidth() - 2 * doc->documentMargin();
+    auto doc_width = doc->textWidth() - (2 * doc->documentMargin());
 
     if (size.width() > doc_width)
         size *= doc_width / (double)size.width();

@@ -156,9 +156,9 @@ void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& opti
     painter->setRenderHint(QPainter::Antialiasing);
 
     // sizes and offsets, to keep things consistent below
-    const int arrowOffsetLeft = fontMetrics.height() / 2 + 7;
+    const int arrowOffsetLeft = (fontMetrics.height() / 2) + 7;
     const int textOffsetLeft = arrowOffsetLeft * 2;
-    const int centerHeight = optRect.top() + fontMetrics.height() / 2;
+    const int centerHeight = optRect.top() + (fontMetrics.height() / 2);
     const QString& textToDraw = text.isEmpty() ? QObject::tr("Ungrouped") : text;
 
     // BEGIN: arrow
@@ -166,14 +166,14 @@ void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& opti
         constexpr int arrowSize = 6;
         QPolygon arrowPolygon;
         if (collapsed) {
-            arrowPolygon << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight - arrowSize)
-                         << QPoint(arrowOffsetLeft + arrowSize / 2, centerHeight)
-                         << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight + arrowSize);
+            arrowPolygon << QPoint(arrowOffsetLeft - (arrowSize / 2), centerHeight - arrowSize)
+                         << QPoint(arrowOffsetLeft + (arrowSize / 2), centerHeight)
+                         << QPoint(arrowOffsetLeft - (arrowSize / 2), centerHeight + arrowSize);
             painter->drawPolyline(arrowPolygon);
         } else {
-            arrowPolygon << QPoint(arrowOffsetLeft - arrowSize, centerHeight - arrowSize / 2)
-                         << QPoint(arrowOffsetLeft, centerHeight + arrowSize / 2)
-                         << QPoint(arrowOffsetLeft + arrowSize, centerHeight - arrowSize / 2);
+            arrowPolygon << QPoint(arrowOffsetLeft - arrowSize, centerHeight - (arrowSize / 2))
+                         << QPoint(arrowOffsetLeft, centerHeight + (arrowSize / 2))
+                         << QPoint(arrowOffsetLeft + arrowSize, centerHeight - (arrowSize / 2));
             painter->drawPolyline(arrowPolygon);
         }
     }
