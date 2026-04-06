@@ -75,9 +75,9 @@ bool GZip::unzip(const QByteArray& compressedBytes, QByteArray& uncompressedByte
 
         // Inflate another chunk.
         err = inflate(&strm, Z_SYNC_FLUSH);
-        if (err == Z_STREAM_END)
+        if (err == Z_STREAM_END) {
             done = true;
-        else if (err != Z_OK) {
+        } else if (err != Z_OK) {
             break;
         }
     }

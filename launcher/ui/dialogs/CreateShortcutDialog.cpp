@@ -181,9 +181,9 @@ void CreateShortcutDialog::stateChanged()
             result = tr("%1 - Server %2").arg(result, ui->serverAddressBox->text());
     }
     ui->instNameTextBox->setPlaceholderText(result);
-    if (!ui->targetCheckbox->isChecked())
+    if (!ui->targetCheckbox->isChecked()) {
         ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
-    else {
+    } else {
         ui->buttonBox->button(QDialogButtonBox::Ok)
             ->setEnabled((ui->worldTarget->isChecked() && ui->worldSelectionBox->currentIndex() != -1) ||
                          (ui->serverTarget->isChecked() && !ui->serverAddressBox->text().isEmpty()));

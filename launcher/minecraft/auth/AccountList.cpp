@@ -430,8 +430,9 @@ bool AccountList::setData(const QModelIndex& idx, const QVariant& value, int rol
         if (value == Qt::Checked) {
             MinecraftAccountPtr account = at(idx.row());
             setDefaultAccount(account);
-        } else if (m_defaultAccount == at(idx.row()))
+        } else if (m_defaultAccount == at(idx.row())) {
             setDefaultAccount(nullptr);
+        }
     }
 
     emit dataChanged(idx, index(idx.row(), columnCount(QModelIndex()) - 1));

@@ -42,8 +42,9 @@ VersionSelectWidget::VersionSelectWidget(QWidget* parent) : QWidget(parent)
             const QModelIndex first = listView->model()->index(0, 0);
             listView->selectionModel()->setCurrentIndex(first, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
             listView->scrollToTop();
-        } else
+        } else {
             listView->scrollTo(listView->selectionModel()->currentIndex(), QAbstractItemView::PositionAtCenter);
+        }
     });
     search->installEventFilter(this);
 

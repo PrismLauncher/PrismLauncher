@@ -145,9 +145,9 @@ void ExportPackDialog::done(int result)
     settings->set("ExportVersion", m_ui->version->text());
     settings->set("ExportOptionalFiles", m_ui->optionalFiles->isChecked());
 
-    if (m_provider == ModPlatform::ResourceProvider::MODRINTH)
+    if (m_provider == ModPlatform::ResourceProvider::MODRINTH) {
         settings->set("ExportSummary", m_ui->summary->toPlainText());
-    else {
+    } else {
         settings->set("ExportAuthor", m_ui->author->text());
 
         if (m_ui->recommendedMemoryCheckBox->isChecked())

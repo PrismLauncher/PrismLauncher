@@ -72,10 +72,11 @@ QStringList splitArgs(QString args)
                     argv << current;
                     current.clear();
                 }
-            } else if (cchar == '"' || cchar == '\'')
+            } else if (cchar == '"' || cchar == '\'') {
                 inquotes = cchar;
-            else
+            } else {
                 current += cchar;
+            }
         }
     }
     if (!current.isEmpty())

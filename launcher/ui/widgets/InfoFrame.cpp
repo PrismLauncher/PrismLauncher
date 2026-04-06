@@ -91,9 +91,9 @@ void InfoFrame::updateWithMod(const Mod& m)
     else
         name = renderColorCodes(m.name());
 
-    if (link.isEmpty())
+    if (link.isEmpty()) {
         text = name;
-    else {
+    } else {
         text = "<a href=\"" + QUrl(link).toEncoded() + "\">" + name + "</a>";
     }
     if (!m.authors().isEmpty())

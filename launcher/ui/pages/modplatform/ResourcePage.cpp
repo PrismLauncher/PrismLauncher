@@ -271,10 +271,11 @@ void ResourcePage::updateSelectionButton()
         if (current_pack->versionsLoaded && current_pack->versions.empty()) {
             m_ui->resourceSelectionButton->setEnabled(false);
             qWarning() << tr("No version available for the selected pack");
-        } else if (!current_pack->isVersionSelected(m_selectedVersionIndex))
+        } else if (!current_pack->isVersionSelected(m_selectedVersionIndex)) {
             m_ui->resourceSelectionButton->setText(tr("Select %1 for download").arg(resourceString()));
-        else
+        } else {
             m_ui->resourceSelectionButton->setText(tr("Deselect %1 for download").arg(resourceString()));
+        }
     } else {
         qWarning() << "Tried to update the selected button but there is not a pack selected";
     }
@@ -316,8 +317,9 @@ void ResourcePage::versionListUpdated(const QModelIndex& index)
         if (m_enableQueue.contains(index.row())) {
             m_enableQueue.remove(index.row());
             onResourceToggle(index);
-        } else
+        } else {
             updateSelectionButton();
+        }
     } else if (m_enableQueue.contains(index.row())) {
         m_enableQueue.remove(index.row());
         onResourceToggle(index);
@@ -419,9 +421,9 @@ void ResourcePage::onResourceToggle(const QModelIndex& index)
     auto pack = m_model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
 
     if (pack->versionsLoaded) {
-        if (pack->isAnyVersionSelected())
+        if (pack->isAnyVersionSelected()) {
             removeResourceFromDialog(pack->name);
-        else {
+        } else {
             auto version = std::find_if(pack->versions.begin(), pack->versions.end(), [this](const ModPlatform::IndexedVersion& version) {
                 return m_model->checkVersionFilters(version);
             });
@@ -433,8 +435,9 @@ void ResourcePage::onResourceToggle(const QModelIndex& index)
                     QMessageBox::Ok, this);
 
                 errorMessage->open();
-            } else
+            } else {
                 addResourceToDialog(pack, *version);
+            }
         }
 
         if (isSelected)

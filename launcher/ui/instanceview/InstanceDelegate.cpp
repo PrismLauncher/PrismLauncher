@@ -72,9 +72,9 @@ ListViewDelegate::ListViewDelegate(QObject* parent) : QStyledItemDelegate(parent
 
 void drawSelectionRect(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect)
 {
-    if ((option.state & QStyle::State_Selected))
+    if ((option.state & QStyle::State_Selected)) {
         painter->fillRect(rect, option.palette.brush(QPalette::Highlight));
-    else {
+    } else {
         QColor backgroundColor = option.palette.color(QPalette::Window);
         backgroundColor.setAlpha(160);
         painter->fillRect(rect, QBrush(backgroundColor));

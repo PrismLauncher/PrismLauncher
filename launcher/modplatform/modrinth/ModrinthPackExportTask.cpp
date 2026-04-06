@@ -87,8 +87,9 @@ void ModrinthPackExportTask::collectFiles()
     if (mcInstance) {
         mcInstance->loaderModList()->update();
         connect(mcInstance->loaderModList(), &ModFolderModel::updateFinished, this, &ModrinthPackExportTask::collectHashes);
-    } else
+    } else {
         collectHashes();
+    }
 }
 
 void ModrinthPackExportTask::collectHashes()
@@ -151,9 +152,9 @@ void ModrinthPackExportTask::collectHashes()
 
 void ModrinthPackExportTask::makeApiRequest()
 {
-    if (pendingHashes.isEmpty())
+    if (pendingHashes.isEmpty()) {
         buildZip();
-    else {
+    } else {
         setStatus(tr("Finding versions for hashes..."));
         auto [versionsTask, response] = api.currentVersions(pendingHashes.values(), "sha512");
         task = versionsTask;

@@ -196,9 +196,9 @@ void CustomPage::suggestCurrent()
     }
 
     // There isn't a selected version if the version list is empty
-    if (ui->loaderVersionList->selectedVersion() == nullptr)
+    if (ui->loaderVersionList->selectedVersion() == nullptr) {
         dialog->setSuggestedPack(m_selectedVersion->descriptor(), new VanillaCreationTask(m_selectedVersion));
-    else {
+    } else {
         dialog->setSuggestedPack(m_selectedVersion->descriptor(),
                                  new VanillaCreationTask(m_selectedVersion, m_selectedLoader, m_selectedLoaderVersion));
     }
