@@ -951,7 +951,7 @@ class InstanceStaging : public Task {
         if (!isRunning())
             return;
         unsigned sleepTime = backoff();
-        if (m_parent->commitStagedInstance(m_stagingPath, *m_child.get(), m_child->group(), *m_child.get())) {
+        if (m_parent->commitStagedInstance(m_stagingPath, *m_child, m_child->group(), *m_child)) {
             m_backoffTimer.stop();
             emitSucceeded();
             return;

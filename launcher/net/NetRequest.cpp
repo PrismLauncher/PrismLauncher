@@ -338,7 +338,7 @@ void NetRequest::downloadFinished()
     }
 
     // otherwise, finalize the whole graph
-    m_state = m_sink->finalize(*m_reply.get());
+    m_state = m_sink->finalize(*m_reply);
     if (m_state != State::Succeeded) {
         qCDebug(logCat) << getUid().toString() << "Request failed to finalize:" << m_url.toString();
         m_sink->abort();
