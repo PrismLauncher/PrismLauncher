@@ -97,7 +97,7 @@ LoadResult composeLoadResult(LoadResult a, LoadResult b)
     return a;
 }
 
-static LoadResult loadComponent(ComponentPtr component, Task::Ptr& loadTask, Net::Mode netmode)
+LoadResult loadComponent(ComponentPtr component, Task::Ptr& loadTask, Net::Mode netmode)
 {
     if (component->m_loaded) {
         qCDebug(instanceProfileResolveC) << component->getName() << "is already loaded";

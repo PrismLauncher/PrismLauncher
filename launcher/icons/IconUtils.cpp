@@ -39,7 +39,7 @@
 #include "FileSystem.h"
 
 namespace {
-static const QStringList validIconExtensions = { { "svg", "png", "ico", "gif", "jpg", "jpeg", "webp" } };
+const QStringList validIconExtensions = { { "svg", "png", "ico", "gif", "jpg", "jpeg", "webp" } };
 }
 
 namespace IconUtils {
