@@ -62,7 +62,7 @@ ThemeManager::~ThemeManager()
 QString ThemeManager::addTheme(std::unique_ptr<ITheme> theme)
 {
     QString id = theme->id();
-    if (m_themes.find(id) == m_themes.end())
+    if (!m_themes.contains(id))
         m_themes.emplace(id, std::move(theme));
     else
         themeWarningLog() << "Theme(" << id << ") not added to prevent id duplication";
@@ -80,7 +80,7 @@ ITheme* ThemeManager::getTheme(QString themeId)
 QString ThemeManager::addIconTheme(IconTheme theme)
 {
     QString id = theme.id();
-    if (m_icons.find(id) == m_icons.end())
+    if (!m_icons.contains(id))
         m_icons.emplace(id, std::move(theme));
     else
         themeWarningLog() << "IconTheme(" << id << ") not added to prevent id duplication";
@@ -218,12 +218,12 @@ QList<CatPack*> ThemeManager::getValidCatPacks()
 
 bool ThemeManager::isValidIconTheme(const QString& id)
 {
-    return !id.isEmpty() && m_icons.find(id) != m_icons.end();
+    return !id.isEmpty() && m_icons.contains(id);
 }
 
 bool ThemeManager::isValidApplicationTheme(const QString& id)
 {
-    return !id.isEmpty() && m_themes.find(id) != m_themes.end();
+    return !id.isEmpty() && m_themes.contains(id);
 }
 
 QDir ThemeManager::getIconThemesFolder()
@@ -243,7 +243,7 @@ QDir ThemeManager::getCatPacksFolder()
 
 void ThemeManager::setIconTheme(const QString& name)
 {
-    if (m_icons.find(name) == m_icons.end()) {
+    if (!m_icons.contains(name)) {
         themeWarningLog() << "Tried to set invalid icon theme:" << name;
         return;
     }
@@ -296,7 +296,7 @@ QString ThemeManager::getCatPack(QString catName)
 QString ThemeManager::addCatPack(std::unique_ptr<CatPack> catPack)
 {
     QString id = catPack->id();
-    if (m_catPacks.find(id) == m_catPacks.end())
+    if (!m_catPacks.contains(id))
         m_catPacks.emplace(id, std::move(catPack));
     else
         themeWarningLog() << "CatPack(" << id << ") not added to prevent id duplication";

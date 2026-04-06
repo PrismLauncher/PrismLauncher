@@ -245,7 +245,7 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument& doc
         Meta::Require mcReq;
         mcReq.uid = "net.minecraft";
         mcReq.equalsVersion = dependsOnMinecraftVersion;
-        if (out->m_requires.count(mcReq) == 0) {
+        if (!out->m_requires.contains(mcReq)) {
             out->m_requires.insert(mcReq);
         }
     }

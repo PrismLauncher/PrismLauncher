@@ -1125,7 +1125,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
 
         auto type = ResourceUtils::identify(localFileInfo);
 
-        if (ModPlatform::ResourceTypeUtils::VALID_RESOURCES.count(type) == 0) {  // probably instance/modpack
+        if (!ModPlatform::ResourceTypeUtils::VALID_RESOURCES.contains(type)) {  // probably instance/modpack
             addInstance(localFileName, extra_info);
             continue;
         }

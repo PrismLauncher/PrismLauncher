@@ -720,7 +720,7 @@ void InstanceList::saveGroupList()
             continue;
         }
 
-        if (!reverseGroupMap.count(group)) {
+        if (!reverseGroupMap.contains(group)) {
             QSet<QString> set;
             set.insert(id);
             reverseGroupMap[group] = set;

@@ -321,12 +321,12 @@ QSet<Mod*> collectMods(QSet<Mod*> mods, QHash<QString, QSet<Mod*>> relation, std
     QSet<Mod*> needToCheck = {};
     for (auto* mod : mods) {
         auto id = mod->mod_id();
-        if (seen.count(id) == 0) {
+        if (!seen.contains(id)) {
             seen.insert(id);
             for (auto* affected : relation[id]) {
                 auto affectedId = affected->mod_id();
 
-                if (findById(mods, affectedId) == nullptr && seen.count(affectedId) == 0) {
+                if (findById(mods, affectedId) == nullptr && !seen.contains(affectedId)) {
                     seen.insert(affectedId);
                     if (shouldBeEnabled != affected->enabled()) {
                         affectedList << affected;
