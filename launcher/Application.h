@@ -177,7 +177,7 @@ class Application : public QApplication {
     /// the java installed path the application is using
     const QString javaPath();
 
-    bool isPortable() { return m_portable; }
+    bool isPortable() const { return m_portable; }
 
     const Capabilities capabilities() { return m_capabilities; }
 
@@ -192,7 +192,7 @@ class Application : public QApplication {
     ViewLogWindow* showLogWindow();
 
     void updateIsRunning(bool running);
-    bool updatesAreAllowed();
+    bool updatesAreAllowed() const;
 
     void ShowGlobalSettings(class QWidget* parent, QString open_page = QString());
 

@@ -133,7 +133,7 @@ class copy : public QObject {
 
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
-    qsizetype totalCopied() { return m_copied; }
+    qsizetype totalCopied() const { return m_copied; }
     qsizetype totalFailed() { return m_failedPaths.length(); }
     QStringList failed() { return m_failedPaths; }
 
@@ -239,7 +239,7 @@ class create_link : public QObject {
 
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
-    int totalLinked() { return m_linked; }
+    int totalLinked() const { return m_linked; }
     int totalToLink() { return static_cast<int>(m_links_to_make.size()); }
 
     void runPrivileged() { runPrivileged(QString()); }
@@ -507,7 +507,7 @@ class clone : public QObject {
 
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
-    qsizetype totalCloned() { return m_cloned; }
+    qsizetype totalCloned() const { return m_cloned; }
     qsizetype totalFailed() { return m_failedClones.length(); }
 
     QList<QPair<QString, QString>> failed() { return m_failedClones; }

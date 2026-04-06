@@ -53,7 +53,7 @@ void ApplicationMessage::parse(const QByteArray& input)
     }
 }
 
-QByteArray ApplicationMessage::serialize()
+QByteArray ApplicationMessage::serialize() const
 {
     QJsonObject root;
     root.insert("command", command);

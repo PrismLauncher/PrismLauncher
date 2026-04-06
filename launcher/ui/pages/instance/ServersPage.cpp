@@ -91,7 +91,7 @@ struct Server {
         }
     }
 
-    void serialize(nbt::tag_compound& server)
+    void serialize(nbt::tag_compound& server) const
     {
         server.insert("name", m_name.trimmed().toUtf8().toStdString());
         server.insert("ip", m_address.trimmed().toUtf8().toStdString());

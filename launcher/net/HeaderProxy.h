@@ -38,7 +38,7 @@ class HeaderProxy {
     virtual QList<HeaderPair> headers(const QNetworkRequest& request) const = 0;
 
    public:
-    void writeHeaders(QNetworkRequest& request)
+    void writeHeaders(QNetworkRequest& request) const
     {
         for (auto header : headers(request)) {
             request.setRawHeader(header.headerName, header.headerValue);

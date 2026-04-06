@@ -481,7 +481,7 @@ void BaseInstance::updateRuntimeContext()
     // NOOP
 }
 
-bool BaseInstance::isLegacy()
+bool BaseInstance::isLegacy() const
 {
     return traits().contains("legacyLaunch") || traits().contains("alphaLaunch");
 }

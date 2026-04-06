@@ -69,13 +69,13 @@ class IconList : public QAbstractListModel {
     bool addThemeIcon(const QString& key);
     bool addIcon(const QString& key, const QString& name, const QString& path, IconType type);
     void saveIcon(const QString& key, const QString& path, const char* format) const;
-    bool deleteIcon(const QString& key);
-    bool trashIcon(const QString& key);
+    bool deleteIcon(const QString& key) const;
+    bool trashIcon(const QString& key) const;
     bool iconFileExists(const QString& key) const;
     QString iconDirectory(const QString& key) const;
 
-    void installIcons(const QStringList& iconFiles);
-    void installIcon(const QString& file, const QString& name);
+    void installIcons(const QStringList& iconFiles) const;
+    void installIcon(const QString& file, const QString& name) const;
 
     const MMCIcon* icon(const QString& key) const;
 

@@ -122,7 +122,7 @@ void IconPickerDialog::addNewIcon()
     APPLICATION->icons()->installIcons(fileNames);
 }
 
-void IconPickerDialog::removeSelectedIcon()
+void IconPickerDialog::removeSelectedIcon() const
 {
     if (APPLICATION->icons()->trashIcon(selectedIconKey))
         return;
@@ -173,7 +173,7 @@ IconPickerDialog::~IconPickerDialog()
     delete ui;
 }
 
-void IconPickerDialog::openFolder()
+void IconPickerDialog::openFolder() const
 {
     DesktopServices::openPath(APPLICATION->icons()->iconDirectory(selectedIconKey), true);
 }

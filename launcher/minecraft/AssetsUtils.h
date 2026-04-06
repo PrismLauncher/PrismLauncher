@@ -21,9 +21,9 @@
 #include "net/NetRequest.h"
 
 struct AssetObject {
-    QString getRelPath();
-    QUrl getUrl();
-    QString getLocalPath();
+    QString getRelPath() const;
+    QUrl getUrl() const;
+    QString getLocalPath() const;
     Net::NetRequest::Ptr getDownloadAction();
 
     QString hash;
@@ -31,7 +31,7 @@ struct AssetObject {
 };
 
 struct AssetsIndex {
-    NetJob::Ptr getDownloadJob();
+    NetJob::Ptr getDownloadJob() const;
 
     QString id;
     QMap<QString, AssetObject> objects;

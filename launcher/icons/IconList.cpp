@@ -331,13 +331,13 @@ int IconList::rowCount(const QModelIndex& parent) const
     return parent.isValid() ? 0 : m_icons.size();
 }
 
-void IconList::installIcons(const QStringList& iconFiles)
+void IconList::installIcons(const QStringList& iconFiles) const
 {
     for (const QString& file : iconFiles)
         installIcon(file, {});
 }
 
-void IconList::installIcon(const QString& file, const QString& name)
+void IconList::installIcon(const QString& file, const QString& name) const
 {
     QFileInfo fileinfo(file);
     if (!fileinfo.isReadable() || !fileinfo.isFile())
@@ -365,12 +365,12 @@ const MMCIcon* IconList::icon(const QString& key) const
     return &m_icons[iconIdx];
 }
 
-bool IconList::deleteIcon(const QString& key)
+bool IconList::deleteIcon(const QString& key) const
 {
     return iconFileExists(key) && FS::deletePath(icon(key)->getFilePath());
 }
 
-bool IconList::trashIcon(const QString& key)
+bool IconList::trashIcon(const QString& key) const
 {
     return iconFileExists(key) && FS::trash(icon(key)->getFilePath(), nullptr);
 }

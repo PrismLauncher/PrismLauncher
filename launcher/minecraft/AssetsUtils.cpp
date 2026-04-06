@@ -292,23 +292,23 @@ Net::NetRequest::Ptr AssetObject::getDownloadAction()
     return nullptr;
 }
 
-QString AssetObject::getLocalPath()
+QString AssetObject::getLocalPath() const
 {
     return "assets/objects/" + getRelPath();
 }
 
-QUrl AssetObject::getUrl()
+QUrl AssetObject::getUrl() const
 {
     auto resourceURL = AssetUpdateTask::resourceUrl();
     return resourceURL + getRelPath();
 }
 
-QString AssetObject::getRelPath()
+QString AssetObject::getRelPath() const
 {
     return hash.left(2) + "/" + hash;
 }
 
-NetJob::Ptr AssetsIndex::getDownloadJob()
+NetJob::Ptr AssetsIndex::getDownloadJob() const
 {
     auto job = makeShared<NetJob>(QObject::tr("Assets for %1").arg(id), APPLICATION->network());
     for (auto& object : objects.values()) {

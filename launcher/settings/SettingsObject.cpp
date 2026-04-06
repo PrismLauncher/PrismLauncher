@@ -84,7 +84,7 @@ std::shared_ptr<Setting> SettingsObject::getSetting(const QString& id) const
     return m_settings[id];
 }
 
-QVariant SettingsObject::get(const QString& id)
+QVariant SettingsObject::get(const QString& id) const
 {
     auto setting = getSetting(id);
 
@@ -98,7 +98,7 @@ QVariant SettingsObject::get(const QString& id)
     return (setting ? setting->get() : QVariant());
 }
 
-bool SettingsObject::set(const QString& id, QVariant value)
+bool SettingsObject::set(const QString& id, QVariant value) const
 {
     auto setting = getSetting(id);
     if (!setting) {
@@ -225,7 +225,7 @@ bool SettingsObject::reload()
     return true;
 }
 
-void SettingsObject::connectSignals(const Setting& setting)
+void SettingsObject::connectSignals(const Setting& setting) const
 {
     connect(&setting, &Setting::SettingChanged, this, &SettingsObject::changeSetting);
     connect(&setting, &Setting::SettingChanged, this, &SettingsObject::SettingChanged);

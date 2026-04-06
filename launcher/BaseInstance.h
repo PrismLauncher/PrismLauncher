@@ -278,7 +278,7 @@ class BaseInstance : public QObject {
     bool removeLinkedInstanceId(const QString& id);
     bool isLinkedToInstanceId(const QString& id) const;
 
-    bool isLegacy();
+    bool isLegacy() const;
 
    protected:
     void changeStatus(Status newStatus);

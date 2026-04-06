@@ -43,7 +43,7 @@ bool MCEditTool::check(const QString& toolPath, QString& error)
     return true;
 }
 
-QString MCEditTool::getProgramPath()
+QString MCEditTool::getProgramPath() const
 {
 #ifdef Q_OS_MACOS
     return path();

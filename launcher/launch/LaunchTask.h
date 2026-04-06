@@ -65,7 +65,7 @@ class LaunchTask : public Task {
 
     void setPid(qint64 pid) { m_pid = pid; }
 
-    qint64 pid() { return m_pid; }
+    qint64 pid() const { return m_pid; }
 
     /**
      * @brief prepare the process for launch (for multi-stage launch)

@@ -121,8 +121,8 @@ class Task : public QObject, public QRunnable {
     QString getStatus() { return m_status; }
     QString getDetails() { return m_details; }
 
-    qint64 getProgress() { return m_progress; }
-    qint64 getTotalProgress() { return m_progressTotal; }
+    qint64 getProgress() const { return m_progress; }
+    qint64 getTotalProgress() const { return m_progressTotal; }
     virtual auto getStepProgress() const -> TaskStepProgressList { return {}; }
 
     QUuid getUid() { return m_uid; }

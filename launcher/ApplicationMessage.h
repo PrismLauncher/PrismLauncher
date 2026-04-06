@@ -8,6 +8,6 @@ struct ApplicationMessage {
     QString command;
     QHash<QString, QString> args;
 
-    QByteArray serialize();
+    QByteArray serialize() const;
     void parse(const QByteArray& input);
 };
