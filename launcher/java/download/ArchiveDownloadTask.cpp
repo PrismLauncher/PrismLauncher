@@ -104,7 +104,6 @@ void ArchiveDownloadTask::extractJava(QString input)
         stepProgress(*progressStep);
     });
     m_task->start();
-    return;
 }
 
 bool ArchiveDownloadTask::abort()
