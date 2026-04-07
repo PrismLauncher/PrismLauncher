@@ -130,7 +130,7 @@ class SettingsObject : public QObject {
      * If a bookmark is not valid or stored, use default logic (directly return the stored path).
      * This can attempt to create a bookmark if the path is accessible and the bookmark is not valid.
      */
-    QString getPathFromBookmark(const QString& id);
+    QString getPathFromBookmark(const QString& id) const;
     /*!
      * \brief Set a security-scoped bookmark to the provided path for the associated setting.
      * \param id The setting ID of the relevant directory - this should not include "Bookmark" at the end.
@@ -139,7 +139,7 @@ class SettingsObject : public QObject {
      * The path needs to be accessible to the launcher before calling this function. For example,
      * it could come from a user selection in an open panel.
      */
-    bool setPathWithBookmark(const QString& id, const QString& path);
+    bool setPathWithBookmark(const QString& id, const QString& path) const;
 #endif
 
     /*!
@@ -229,7 +229,7 @@ class SettingsObject : public QObject {
    private:
     QMap<QString, std::shared_ptr<Setting>> m_settings;
 #ifdef Q_OS_MACOS
-    SecurityBookmarkFileAccess m_sandboxedFileAccess;
+    mutable SecurityBookmarkFileAccess m_sandboxedFileAccess;
 #endif
 
    protected:

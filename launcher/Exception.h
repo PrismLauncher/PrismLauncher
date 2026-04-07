@@ -33,7 +33,8 @@
  *      limitations under the License.
  */
 
-#pragma once
+#ifndef PRISMLAUNCHER_EXCEPTION_H
+#define PRISMLAUNCHER_EXCEPTION_H
 
 #include <QDebug>
 #include <QString>
@@ -50,3 +51,5 @@ class Exception : public std::exception {
    private:
     QByteArray m_message;
 };
+
+#endif
