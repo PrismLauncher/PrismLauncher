@@ -57,7 +57,6 @@
 #include "StringUtils.h"
 
 #ifdef Q_OS_WIN32
-#define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <objidl.h>
 #include <shlguid.h>
