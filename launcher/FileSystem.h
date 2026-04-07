@@ -91,13 +91,13 @@ bool ensureFilePathExists(QString filenamepath);
  * Creates all the folders in a path for the specified path
  * last segment of the path is treated as a folder name and is created!
  */
-bool ensureFolderPathExists(const QFileInfo folderPath);
+bool ensureFolderPathExists(QFileInfo folderPath);
 
 /**
  * Creates all the folders in a path for the specified path
  * last segment of the path is treated as a folder name and is created!
  */
-bool ensureFolderPathExists(const QString folderPathName);
+bool ensureFolderPathExists(QString folderPathName);
 
 /**
  * @brief Copies a directory and it's contents from src to dest
