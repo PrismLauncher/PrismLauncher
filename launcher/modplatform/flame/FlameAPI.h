@@ -84,7 +84,7 @@ class FlameAPI : public ResourceAPI {
         return 0;
     }
 
-    static const QStringList getModLoaderStrings(const ModPlatform::ModLoaderTypes types)
+    static QStringList getModLoaderStrings(const ModPlatform::ModLoaderTypes types)
     {
         QStringList l;
         for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt }) {
@@ -95,7 +95,7 @@ class FlameAPI : public ResourceAPI {
         return l;
     }
 
-    static const QString getModLoaderFilters(ModPlatform::ModLoaderTypes types) { return "[" + getModLoaderStrings(types).join(',') + "]"; }
+    static QString getModLoaderFilters(ModPlatform::ModLoaderTypes types) { return "[" + getModLoaderStrings(types).join(',') + "]"; }
 
    public:
     std::optional<QString> getSearchURL(const SearchArgs& args) const override

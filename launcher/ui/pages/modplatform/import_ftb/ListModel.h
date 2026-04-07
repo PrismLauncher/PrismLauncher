@@ -31,7 +31,7 @@ class FilterModel : public QSortFilterProxyModel {
    public:
     FilterModel(QObject* parent = Q_NULLPTR);
     enum Sorting { ByName, ByGameVersion };
-    const QMap<QString, Sorting> getAvailableSortings();
+    QMap<QString, Sorting> getAvailableSortings();
     QString translateCurrentSorting();
     void setSorting(Sorting sorting);
     Sorting getCurrentSorting();

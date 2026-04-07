@@ -2019,7 +2019,7 @@ QUrl Application::normalizeImportUrl(const QString& url)
     return QUrl::fromUserInput(url);
 }
 
-const QString Application::javaPath()
+QString Application::javaPath()
 {
     return m_settings->get("JavaDir").toString();
 }

@@ -67,7 +67,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     void addResource(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&);
     void removeResource(const QString&);
 
-    const QList<DownloadTaskPtr> getTasks();
+    QList<DownloadTaskPtr> getTasks();
     ResourceFolderModel* getBaseModel() const { return m_base_model; }
 
     void setResourceMetadata(const std::shared_ptr<Metadata::ModStruct>& meta);

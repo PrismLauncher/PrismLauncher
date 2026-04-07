@@ -175,11 +175,11 @@ class Application : public QApplication {
     const QString& dataRoot() { return m_dataPath; }
 
     /// the java installed path the application is using
-    const QString javaPath();
+    QString javaPath();
 
     bool isPortable() const { return m_portable; }
 
-    const Capabilities capabilities() { return m_capabilities; }
+    Capabilities capabilities() { return m_capabilities; }
 
     /*!
      * Opens a json file using either a system default editor, or, if not empty, the editor

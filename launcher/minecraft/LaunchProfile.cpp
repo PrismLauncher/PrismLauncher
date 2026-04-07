@@ -229,7 +229,7 @@ void LaunchProfile::applyAgent(const Agent& agent, const RuntimeContext& runtime
     m_agents.append(agent);
 }
 
-const LibraryPtr LaunchProfile::getMainJar() const
+LibraryPtr LaunchProfile::getMainJar() const
 {
     return m_mainJar;
 }
@@ -340,7 +340,7 @@ const QList<int>& LaunchProfile::getCompatibleJavaMajors() const
     return m_compatibleJavaMajors;
 }
 
-const QString LaunchProfile::getCompatibleJavaName() const
+QString LaunchProfile::getCompatibleJavaName() const
 {
     return m_compatibleJavaName;
 }

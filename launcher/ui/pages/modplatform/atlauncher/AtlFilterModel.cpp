@@ -35,7 +35,7 @@ FilterModel::FilterModel(QObject* parent) : QSortFilterProxyModel(parent)
     searchTerm = "";
 }
 
-const QMap<QString, FilterModel::Sorting> FilterModel::getAvailableSortings()
+QMap<QString, FilterModel::Sorting> FilterModel::getAvailableSortings()
 {
     return sortings;
 }

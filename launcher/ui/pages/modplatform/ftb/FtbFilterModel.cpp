@@ -32,7 +32,7 @@ FilterModel::FilterModel(QObject* parent) : QSortFilterProxyModel(parent)
     m_sortings.insert(tr("Sort by Name"), Sorting::ByName);
 }
 
-const QMap<QString, FilterModel::Sorting> FilterModel::getAvailableSortings()
+QMap<QString, FilterModel::Sorting> FilterModel::getAvailableSortings()
 {
     return m_sortings;
 }

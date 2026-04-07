@@ -29,7 +29,7 @@ class FilterModel : public QSortFilterProxyModel {
         ByGameVersion,
         ByName,
     };
-    const QMap<QString, Sorting> getAvailableSortings();
+    QMap<QString, Sorting> getAvailableSortings();
     QString translateCurrentSorting();
     void setSorting(Sorting sorting);
     Sorting getCurrentSorting();

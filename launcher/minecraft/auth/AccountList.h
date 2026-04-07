@@ -64,7 +64,7 @@ class AccountList : public QAbstractListModel {
     explicit AccountList(QObject* parent = 0);
     virtual ~AccountList() noexcept;
 
-    const MinecraftAccountPtr at(int i) const;
+    MinecraftAccountPtr at(int i) const;
     int count() const;
 
     //////// List Model Functions ////////

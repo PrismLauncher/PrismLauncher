@@ -183,7 +183,7 @@ void FilterModel::setSearchTerm(const QString term)
     invalidate();
 }
 
-const QMap<QString, FilterModel::Sorting> FilterModel::getAvailableSortings()
+QMap<QString, FilterModel::Sorting> FilterModel::getAvailableSortings()
 {
     return m_sortings;
 }

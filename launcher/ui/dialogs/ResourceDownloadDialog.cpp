@@ -249,7 +249,7 @@ void ResourceDownloadDialog::setButtonStatus()
     m_buttons.button(QDialogButtonBox::Ok)->setEnabled(selected);
 }
 
-const QList<ResourceDownloadDialog::DownloadTaskPtr> ResourceDownloadDialog::getTasks()
+QList<ResourceDownloadDialog::DownloadTaskPtr> ResourceDownloadDialog::getTasks()
 {
     QList<DownloadTaskPtr> selected;
     for (auto* page : m_container->getPages()) {

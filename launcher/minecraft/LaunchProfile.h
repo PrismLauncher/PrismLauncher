@@ -81,8 +81,8 @@ class LaunchProfile : public ProblemProvider {
     const QList<LibraryPtr>& getMavenFiles() const;
     const QList<Agent>& getAgents() const;
     const QList<int>& getCompatibleJavaMajors() const;
-    const QString getCompatibleJavaName() const;
-    const LibraryPtr getMainJar() const;
+    QString getCompatibleJavaName() const;
+    LibraryPtr getMainJar() const;
     void getLibraryFiles(const RuntimeContext& runtimeContext,
                          QStringList& jars,
                          QStringList& nativeJars,
