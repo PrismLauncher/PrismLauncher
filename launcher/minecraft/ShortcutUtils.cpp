@@ -72,7 +72,8 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
 
     QFile iconFile(iconPath);
     if (!iconFile.open(QFile::WriteOnly)) {
-        QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"), QObject::tr("Failed to create icon for application: %1").arg(iconFile.errorString()));
+        QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"),
+                              QObject::tr("Failed to create icon for application: %1").arg(iconFile.errorString()));
         return false;
     }
 
@@ -102,7 +103,8 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
 
     QFile iconFile(iconPath);
     if (!iconFile.open(QFile::WriteOnly)) {
-        QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"), QObject::tr("Failed to create icon for shortcut: %1").arg(iconFile.errorString()));
+        QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"),
+                              QObject::tr("Failed to create icon for shortcut: %1").arg(iconFile.errorString()));
         return false;
     }
     bool success = icon->icon().pixmap(64, 64).save(&iconFile, "PNG");
@@ -128,7 +130,8 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
 
     QFile iconFile(iconPath);
     if (!iconFile.open(QFile::WriteOnly)) {
-        QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"), QObject::tr("Failed to create icon for shortcut: %1").arg(iconFile.errorString()));
+        QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"),
+                              QObject::tr("Failed to create icon for shortcut: %1").arg(iconFile.errorString()));
         return false;
     }
     bool success = icon->icon().pixmap(64, 64).save(&iconFile, "ICO");
@@ -238,7 +241,7 @@ bool createInstanceShortcutInOther(const Shortcut& shortcut)
     fileDialog.setDirectoryUrl(defaultedDir);
 
     shortcutFilePath = QFileDialog::getSaveFileName(shortcut.parent, QObject::tr("Create Shortcut"), shortcutFilePath,
-                                                  QObject::tr("Desktop Entries") + " (*" + extension + ")");
+                                                    QObject::tr("Desktop Entries") + " (*" + extension + ")");
     if (shortcutFilePath.isEmpty()) {
         return false;  // file dialog canceled by user
     }

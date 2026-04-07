@@ -702,7 +702,7 @@ void ServersPage::openedImpl()
 {
     m_model->observe();
 
-    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
+    const auto setting_name = QString("WideBarVisibility_%1").arg(id());
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
     ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));

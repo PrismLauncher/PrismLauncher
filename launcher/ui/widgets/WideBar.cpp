@@ -89,7 +89,7 @@ void WideBar::addSeparator()
 
 auto WideBar::getMatching(QAction* act) -> QList<BarEntry>::iterator
 {
-    auto iter = std::find_if(m_entries.begin(), m_entries.end(), [act](BarEntry const& entry) { return entry.menu_action == act; });
+    auto iter = std::find_if(m_entries.begin(), m_entries.end(), [act](const BarEntry& entry) { return entry.menu_action == act; });
 
     return iter;
 }
@@ -207,7 +207,7 @@ static void copyAction(QAction* from, QAction* to)
     to->setToolTip(from->toolTip());
 }
 
-void WideBar::showVisibilityMenu(QPoint const& position)
+void WideBar::showVisibilityMenu(const QPoint& position)
 {
     if (!m_bar_menu) {
         m_bar_menu = std::make_unique<QMenu>(this);
@@ -261,7 +261,7 @@ QByteArray WideBar::getVisibilityState() const
 {
     QByteArray state;
 
-    for (auto const& entry : m_entries) {
+    for (const auto& entry : m_entries) {
         if (entry.type != BarEntry::Type::Action) {
             continue;
         }
@@ -306,7 +306,7 @@ void WideBar::setVisibilityState(QByteArray&& state)
 QByteArray WideBar::getHash() const
 {
     QCryptographicHash hash(QCryptographicHash::Sha1);
-    for (auto const& entry : m_entries) {
+    for (const auto& entry : m_entries) {
         if (entry.type != BarEntry::Type::Action) {
             continue;
         }
@@ -316,7 +316,7 @@ QByteArray WideBar::getHash() const
     return hash.result().toBase64();
 }
 
-bool WideBar::checkHash(QByteArray const& old_hash) const
+bool WideBar::checkHash(const QByteArray& old_hash) const
 {
     return old_hash == getHash();
 }

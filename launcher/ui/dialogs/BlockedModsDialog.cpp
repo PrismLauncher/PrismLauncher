@@ -27,8 +27,8 @@
 #include "ui_BlockedModsDialog.h"
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "modplatform/helpers/HashUtils.h"
+#include "settings/SettingsObject.h"
 
 #include <QDebug>
 #include <QDesktopServices>
@@ -381,7 +381,7 @@ bool BlockedModsDialog::checkValidPath(QString path)
 
 bool BlockedModsDialog::allModsMatched()
 {
-    return std::all_of(m_mods.begin(), m_mods.end(), [](auto const& mod) { return mod.matched; });
+    return std::all_of(m_mods.begin(), m_mods.end(), [](const auto& mod) { return mod.matched; });
 }
 
 /// @brief ensure matched file paths still exist

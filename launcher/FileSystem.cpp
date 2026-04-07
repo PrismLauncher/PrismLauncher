@@ -618,8 +618,7 @@ void create_link::runPrivileged(const QString& offset)
 
 void ExternalLinkFileProcess::runLinkFile()
 {
-    QString fileLinkExe =
-        PathCombine(QCoreApplication::applicationDirPath(), BuildConfig.LAUNCHER_APP_BINARY_NAME + "_filelink");
+    QString fileLinkExe = PathCombine(QCoreApplication::applicationDirPath(), BuildConfig.LAUNCHER_APP_BINARY_NAME + "_filelink");
     QString params = "-s " + m_server;
 
     params += " -H " + QVariant(m_useHardLinks).toString();

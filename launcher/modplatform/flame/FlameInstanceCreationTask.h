@@ -57,7 +57,7 @@ class FlameCreationTask final : public InstanceCreationTask {
                       QString id,
                       QString version_id,
                       QString original_instance_id = {})
-        :  m_parent(parent), m_managedId(std::move(id)), m_managedVersionId(std::move(version_id))
+        : m_parent(parent), m_managedId(std::move(id)), m_managedVersionId(std::move(version_id))
     {
         setStagingPath(staging_path);
         setParentSettings(global_settings);
@@ -73,7 +73,7 @@ class FlameCreationTask final : public InstanceCreationTask {
    private slots:
     void idResolverSucceeded(QEventLoop&);
     void setupDownloadJob(QEventLoop&);
-    void copyBlockedMods(QList<BlockedMod> const& blocked_mods);
+    void copyBlockedMods(const QList<BlockedMod>& blocked_mods);
     void validateOtherResources(QEventLoop& loop);
     QString getVersionForLoader(QString uid, QString loaderType, QString version, QString mcVersion);
 

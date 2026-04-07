@@ -95,11 +95,11 @@ bool ModrinthCreationTask::updateInstance()
         auto files_iterator = m_files.begin();
     begin:
         while (files_iterator != m_files.end()) {
-            auto const& file = *files_iterator;
+            const auto& file = *files_iterator;
 
             auto old_files_iterator = old_files.begin();
             while (old_files_iterator != old_files.end()) {
-                auto const& old_file = *old_files_iterator;
+                const auto& old_file = *old_files_iterator;
 
                 if (old_file.hash == file.hash) {
                     qDebug() << "Removed file at" << file.path << "from list of downloads";
@@ -119,7 +119,7 @@ bool ModrinthCreationTask::updateInstance()
         // Some files were removed from the old version, and some will be downloaded in an updated version,
         // so we're fine removing them!
         if (!old_files.empty()) {
-            for (auto const& file : old_files) {
+            for (const auto& file : old_files) {
                 scheduleToDelete(m_parent, old_minecraft_dir, file.path, true);
             }
         }

@@ -188,18 +188,18 @@ InstallDialog::InstallDialog(const QString& uid, BaseInstance* instance, QWidget
     : QDialog(parent), container(new PageContainer(this, QString(), this)), buttons(new QDialogButtonBox(this))
 {
     auto* layout = new QVBoxLayout(this);
-    // small margins look ugly on macOS on modal windows
-    #ifndef Q_OS_MACOS
+// small margins look ugly on macOS on modal windows
+#ifndef Q_OS_MACOS
     layout->setContentsMargins(0, 0, 0, 0);
-    #endif
+#endif
     container->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     layout->addWidget(container);
 
     auto* buttonLayout = new QHBoxLayout(this);
-    // small margins look ugly on macOS on modal windows
-    #ifndef Q_OS_MACOS
+// small margins look ugly on macOS on modal windows
+#ifndef Q_OS_MACOS
     buttonLayout->setContentsMargins(0, 0, 6, 6);
-    #endif
+#endif
 
     auto* refreshLayout = new QHBoxLayout(this);
 
@@ -293,9 +293,9 @@ QList<BasePage*> InstallDialog::getPages()
         // Azul
         new InstallJavaPage("com.azul.java", "azul", tr("Azul Zulu")),
         // IBM
-	/* Must watch out in case the AdoptOpenJDK infrastructure is deprecated.
-        In case of happening, IBM does not seem to provide as of today (03/2026) an API like Adoptium does and rather uses GitHub directly in its website: `developer.ibm.com`.
-        GitHub is known for rate limiting requests that do not use an API key from an account. */
+        /* Must watch out in case the AdoptOpenJDK infrastructure is deprecated.
+        In case of happening, IBM does not seem to provide as of today (03/2026) an API like Adoptium does and rather uses GitHub directly
+        in its website: `developer.ibm.com`. GitHub is known for rate limiting requests that do not use an API key from an account. */
         new InstallJavaPage("com.ibm.java", "openj9_hex_custom", tr("IBM Semeru Open")),
     };
 }

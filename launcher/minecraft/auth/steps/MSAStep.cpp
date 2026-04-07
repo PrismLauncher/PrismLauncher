@@ -36,8 +36,8 @@
 #include "MSAStep.h"
 
 #include <QAbstractOAuth2>
-#include <QNetworkRequest>
 #include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QOAuthHttpServerReplyHandler>
 #include <QOAuthOobReplyHandler>
 

@@ -125,7 +125,7 @@ struct GradleSpecifier {
     {
         return other.artifactId() == artifactId() && other.groupId() == groupId() && other.classifier() == classifier();
     }
-    bool operator ==(const GradleSpecifier &other) const = default;
+    bool operator==(const GradleSpecifier& other) const = default;
 
    private:
     QString m_invalidValue;

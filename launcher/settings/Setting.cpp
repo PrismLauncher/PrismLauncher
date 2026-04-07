@@ -16,7 +16,7 @@
 #include "Setting.h"
 #include "settings/SettingsObject.h"
 
-Setting::Setting(QStringList synonyms, QVariant defVal) :  m_synonyms(synonyms), m_defVal(defVal) {}
+Setting::Setting(QStringList synonyms, QVariant defVal) : m_synonyms(synonyms), m_defVal(defVal) {}
 
 QVariant Setting::get() const
 {

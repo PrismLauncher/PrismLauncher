@@ -135,7 +135,7 @@ void FlameCheckUpdate::collectBlockedMods()
 {
     QStringList addonIds;
     QHash<QString, Resource*> quickSearch;
-    for (auto const& resource : m_blocked.keys()) {
+    for (const auto& resource : m_blocked.keys()) {
         auto addonId = resource->metadata()->project_id.toString();
         addonIds.append(addonId);
         quickSearch[addonId] = resource;

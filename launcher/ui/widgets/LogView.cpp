@@ -165,7 +165,7 @@ void LogView::rowsInserted(const QModelIndex& parent, int first, int last)
     }
 }
 
-void LogView::rowsRemoved(const QModelIndex& parent, int first, int last) // NOLINT(*-convert-member-functions-to-static)
+void LogView::rowsRemoved(const QModelIndex& parent, int first, int last)  // NOLINT(*-convert-member-functions-to-static)
 {
     // TODO: some day... maybe
     Q_UNUSED(parent)

@@ -54,7 +54,7 @@ bool process(WorldSave& pack, ProcessingLevel level)
 ///         )
 static std::tuple<bool, QString, bool> contains_level_dat(QDir dir, bool saves = false)
 {
-    for (auto const& entry : dir.entryInfoList()) {
+    for (const auto& entry : dir.entryInfoList()) {
         if (!entry.isDir()) {
             continue;
         }

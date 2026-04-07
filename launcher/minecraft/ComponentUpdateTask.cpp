@@ -41,7 +41,7 @@
 /*
  * TODO: This task launches multiple other tasks. As such it should be converted to a ConcurrentTask
  */
-ComponentUpdateTask::ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfile* list)  
+ComponentUpdateTask::ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfile* list)
 {
     d.reset(new ComponentUpdateTaskData);
     d->m_profile = list;
@@ -597,95 +597,93 @@ void ComponentUpdateTask::performUpdateActions()
                 continue;
             }
             auto action = component->getUpdateAction();
-            auto visitor =
-                overload{ [](const UpdateActionNone&) {
-                             // noop
-                         },
-                          [&component, &instance](const UpdateActionChangeVersion& cv) {
-                              qCDebug(instanceProfileResolveC) << instance->name() << "|"
-                                                               << "UpdateActionChangeVersion" << component->getID() << ":"
-                                                               << component->getVersion() << "change to" << cv.targetVersion;
-                              component->setVersion(cv.targetVersion);
-                              component->waitLoadMeta();
-                          },
-                          [&component, &instance](const UpdateActionLatestRecommendedCompatible& lrc) {
-                              qCDebug(instanceProfileResolveC)
-                                  << instance->name() << "|"
-                                  << "UpdateActionLatestRecommendedCompatible" << component->getID() << ":" << component->getVersion()
-                                  << "updating to latest recommend or compatible with" << lrc.parentUid << lrc.version;
-                              auto versionList = APPLICATION->metadataIndex()->get(component->getID());
-                              if (versionList) {
-                                  versionList->waitToLoad();
-                                  auto recommended = versionList->getRecommendedForParent(lrc.parentUid, lrc.version);
-                                  if (!recommended) {
-                                      recommended = versionList->getLatestForParent(lrc.parentUid, lrc.version);
-                                  }
-                                  if (recommended) {
-                                      component->setVersion(recommended->version());
-                                      component->waitLoadMeta();
-                                      return;
-                                  }
-                                  component->addComponentProblem(ProblemSeverity::Error,
-                                                                 QObject::tr("No compatible version of %1 found for %2 %3")
-                                                                     .arg(component->getName(), lrc.parentName, lrc.version));
+            auto visitor = overload{
+                [](const UpdateActionNone&) {
+                    // noop
+                },
+                [&component, &instance](const UpdateActionChangeVersion& cv) {
+                    qCDebug(instanceProfileResolveC) << instance->name() << "|"
+                                                     << "UpdateActionChangeVersion" << component->getID() << ":" << component->getVersion()
+                                                     << "change to" << cv.targetVersion;
+                    component->setVersion(cv.targetVersion);
+                    component->waitLoadMeta();
+                },
+                [&component, &instance](const UpdateActionLatestRecommendedCompatible& lrc) {
+                    qCDebug(instanceProfileResolveC)
+                        << instance->name() << "|"
+                        << "UpdateActionLatestRecommendedCompatible" << component->getID() << ":" << component->getVersion()
+                        << "updating to latest recommend or compatible with" << lrc.parentUid << lrc.version;
+                    auto versionList = APPLICATION->metadataIndex()->get(component->getID());
+                    if (versionList) {
+                        versionList->waitToLoad();
+                        auto recommended = versionList->getRecommendedForParent(lrc.parentUid, lrc.version);
+                        if (!recommended) {
+                            recommended = versionList->getLatestForParent(lrc.parentUid, lrc.version);
+                        }
+                        if (recommended) {
+                            component->setVersion(recommended->version());
+                            component->waitLoadMeta();
+                            return;
+                        }
+                        component->addComponentProblem(ProblemSeverity::Error, QObject::tr("No compatible version of %1 found for %2 %3")
+                                                                                   .arg(component->getName(), lrc.parentName, lrc.version));
 
-                              } else {
-                                  component->addComponentProblem(
-                                      ProblemSeverity::Error,
-                                      QObject::tr("No version list in metadata index for %1").arg(component->getID()));
-                              }
-                          },
-                          [&component, &instance, &toRemove](const UpdateActionRemove&) {
-                              qCDebug(instanceProfileResolveC)
-                                  << instance->name() << "|"
-                                  << "UpdateActionRemove" << component->getID() << ":" << component->getVersion() << "removing";
-                              toRemove.append(component->getID());
-                          },
-                          [this, &component, &instance, &addedActions, &componentIndex](const UpdateActionImportantChanged& ic) {
-                              qCDebug(instanceProfileResolveC)
-                                  << instance->name() << "|"
-                                  << "UpdateImportantChanged" << component->getID() << ":" << component->getVersion() << "was changed from"
-                                  << ic.oldVersion << "updating linked components";
-                              auto oldVersion = APPLICATION->metadataIndex()->getLoadedVersion(component->getID(), ic.oldVersion);
-                              for (auto oldReq : oldVersion->requiredSet()) {
-                                  auto currentlyRequired = component->m_cachedRequires.find(oldReq);
-                                  if (currentlyRequired == component->m_cachedRequires.cend()) {
-                                      auto oldReqComp = componentIndex.find(oldReq.uid);
-                                      if (oldReqComp != componentIndex.cend()) {
-                                          (*oldReqComp)->setUpdateAction(UpdateAction{ UpdateActionRemove{} });
-                                          addedActions = true;
-                                      }
-                                  }
-                              }
-                              auto linked = collectTreeLinked(component->getID());
-                              for (auto comp : linked) {
-                                  if (comp->isCustom()) {
-                                      continue;
-                                  }
-                                  auto compUid = comp->getID();
-                                  auto parentReq = std::find_if(component->m_cachedRequires.begin(), component->m_cachedRequires.end(),
-                                                                [compUid](const Meta::Require& req) { return req.uid == compUid; });
-                                  if (parentReq != component->m_cachedRequires.end()) {
-                                      auto newVersion = parentReq->equalsVersion.isEmpty() ? parentReq->suggests : parentReq->equalsVersion;
-                                      if (!newVersion.isEmpty()) {
-                                          comp->setUpdateAction(UpdateAction{ UpdateActionChangeVersion{ newVersion } });
-                                      } else {
-                                          comp->setUpdateAction(UpdateAction{ UpdateActionLatestRecommendedCompatible{
-                                              component->getID(),
-                                              component->getName(),
-                                              component->getVersion(),
-                                          } });
-                                      }
-                                  } else {
-                                      comp->setUpdateAction(UpdateAction{ UpdateActionLatestRecommendedCompatible{
-                                          component->getID(),
-                                          component->getName(),
-                                          component->getVersion(),
-                                      } });
-                                  }
-                                  addedActions = true;
-                              }
-                          } };
+                    } else {
+                        component->addComponentProblem(ProblemSeverity::Error,
+                                                       QObject::tr("No version list in metadata index for %1").arg(component->getID()));
+                    }
+                },
+                [&component, &instance, &toRemove](const UpdateActionRemove&) {
+                    qCDebug(instanceProfileResolveC)
+                        << instance->name() << "|"
+                        << "UpdateActionRemove" << component->getID() << ":" << component->getVersion() << "removing";
+                    toRemove.append(component->getID());
+                },
+                [this, &component, &instance, &addedActions, &componentIndex](const UpdateActionImportantChanged& ic) {
+                    qCDebug(instanceProfileResolveC) << instance->name() << "|"
+                                                     << "UpdateImportantChanged" << component->getID() << ":" << component->getVersion()
+                                                     << "was changed from" << ic.oldVersion << "updating linked components";
+                    auto oldVersion = APPLICATION->metadataIndex()->getLoadedVersion(component->getID(), ic.oldVersion);
+                    for (auto oldReq : oldVersion->requiredSet()) {
+                        auto currentlyRequired = component->m_cachedRequires.find(oldReq);
+                        if (currentlyRequired == component->m_cachedRequires.cend()) {
+                            auto oldReqComp = componentIndex.find(oldReq.uid);
+                            if (oldReqComp != componentIndex.cend()) {
+                                (*oldReqComp)->setUpdateAction(UpdateAction{ UpdateActionRemove{} });
+                                addedActions = true;
+                            }
+                        }
+                    }
+                    auto linked = collectTreeLinked(component->getID());
+                    for (auto comp : linked) {
+                        if (comp->isCustom()) {
+                            continue;
+                        }
+                        auto compUid = comp->getID();
+                        auto parentReq = std::find_if(component->m_cachedRequires.begin(), component->m_cachedRequires.end(),
+                                                      [compUid](const Meta::Require& req) { return req.uid == compUid; });
+                        if (parentReq != component->m_cachedRequires.end()) {
+                            auto newVersion = parentReq->equalsVersion.isEmpty() ? parentReq->suggests : parentReq->equalsVersion;
+                            if (!newVersion.isEmpty()) {
+                                comp->setUpdateAction(UpdateAction{ UpdateActionChangeVersion{ newVersion } });
+                            } else {
+                                comp->setUpdateAction(UpdateAction{ UpdateActionLatestRecommendedCompatible{
+                                    component->getID(),
+                                    component->getName(),
+                                    component->getVersion(),
+                                } });
+                            }
+                        } else {
+                            comp->setUpdateAction(UpdateAction{ UpdateActionLatestRecommendedCompatible{
+                                component->getID(),
+                                component->getName(),
+                                component->getVersion(),
+                            } });
+                        }
+                        addedActions = true;
+                    }
+                }
+            };
             std::visit(visitor, action);
             component->clearUpdateAction();
             for (auto uid : toRemove) {

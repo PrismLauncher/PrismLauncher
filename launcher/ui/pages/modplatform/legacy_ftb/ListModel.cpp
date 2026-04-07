@@ -35,10 +35,10 @@
 
 #include "ListModel.h"
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "net/ApiDownload.h"
 #include "net/HttpMetaCache.h"
 #include "net/NetJob.h"
+#include "settings/SettingsObject.h"
 
 #include <Version.h>
 #include "StringUtils.h"
@@ -73,7 +73,6 @@ bool FilterModel::lessThan(const QModelIndex& left, const QModelIndex& right) co
         Version lv(leftPack.mcVersion);
         Version rv(rightPack.mcVersion);
         return lv < rv;
-
     }
     if (currentSorting == Sorting::ByName) {
         return StringUtils::naturalCompare(leftPack.name, rightPack.name, Qt::CaseSensitive) >= 0;

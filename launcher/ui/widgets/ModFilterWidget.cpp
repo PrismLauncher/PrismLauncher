@@ -111,7 +111,7 @@ class AllVersionProxyModel : public QSortFilterProxyModel {
 };
 
 ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended)
-    :  ui(new Ui::ModFilterWidget), m_instance(instance), m_filter(new Filter())
+    : ui(new Ui::ModFilterWidget), m_instance(instance), m_filter(new Filter())
 {
     ui->setupUi(this);
 

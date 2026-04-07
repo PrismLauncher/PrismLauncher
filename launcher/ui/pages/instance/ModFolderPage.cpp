@@ -426,10 +426,10 @@ bool NilModFolderPage::shouldDisplay() const
 // Helper function so this doesn't need to be duplicated 3 times
 inline bool ModFolderPage::handleNoModLoader()
 {
-    int resp =
-        QMessageBox::question(this, ModFolderPage::tr("Missing Mod Loader"),
-                              ModFolderPage::tr("You need to install a compatible mod loader before installing mods. Would you like to do so?"),
-                              QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+    int resp = QMessageBox::question(
+        this, ModFolderPage::tr("Missing Mod Loader"),
+        ModFolderPage::tr("You need to install a compatible mod loader before installing mods. Would you like to do so?"),
+        QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
     switch (resp) {
         case QMessageBox::Yes: {
             // Should be safe

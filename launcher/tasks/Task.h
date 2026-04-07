@@ -149,7 +149,7 @@ class Task : public QObject, public QRunnable {
     void status(QString status);
     void details(QString details);
     void warningLogged(const QString& warning);
-    void stepProgress(TaskStepProgress const& task_progress);
+    void stepProgress(const TaskStepProgress& task_progress);
 
     //! Emitted when the canAbort() status has changed. */
     void abortStatusChanged(bool can_abort);
@@ -177,10 +177,7 @@ class Task : public QObject, public QRunnable {
         emit abortStatusChanged(can_abort);
     }
 
-    void setAbortButtonText(QString text)
-    {
-        emit abortButtonTextChanged(text);
-    }
+    void setAbortButtonText(QString text) { emit abortButtonTextChanged(text); }
 
    protected:
     //! The task subclass must implement this method. This method is called to start to run the task.
@@ -195,7 +192,7 @@ class Task : public QObject, public QRunnable {
     //! The Task subclass must call this method when the task has failed
     virtual void emitFailed(QString reason = "");
 
-    virtual void propagateStepProgress(TaskStepProgress const& task_progress);
+    virtual void propagateStepProgress(const TaskStepProgress& task_progress);
 
    public slots:
     void setStatus(const QString& status);

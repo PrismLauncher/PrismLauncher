@@ -47,7 +47,7 @@ class Upload : public NetRequest {
     Q_OBJECT
    public:
     using Ptr = shared_qobject_ptr<Upload>;
-    explicit Upload()  { logCat = taskUploadLogC; };
+    explicit Upload() { logCat = taskUploadLogC; };
 
     /**
      * Creates a request downloading to the returned QByteArray,.

@@ -23,12 +23,12 @@
 #include <QIcon>
 #include <QProcessEnvironment>
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "Exception.h"
 #include "FileSystem.h"
 #include "Json.h"
 #include "StringUtils.h"
 #include "modplatform/import_ftb/PackHelpers.h"
+#include "settings/SettingsObject.h"
 #include "ui/widgets/ProjectItem.h"
 
 namespace FTBImportAPP {
@@ -159,7 +159,6 @@ bool FilterModel::lessThan(const QModelIndex& left, const QModelIndex& right) co
         Version lv(leftPack.mcVersion);
         Version rv(rightPack.mcVersion);
         return lv < rv;
-
     }
     if (m_currentSorting == Sorting::ByName) {
         return StringUtils::naturalCompare(leftPack.name, rightPack.name, Qt::CaseSensitive) >= 0;

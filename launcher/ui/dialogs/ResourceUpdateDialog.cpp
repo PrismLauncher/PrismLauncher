@@ -446,7 +446,7 @@ void ResourceUpdateDialog::onMetadataFailed(Resource* resource, bool try_others,
     }
 }
 
-void ResourceUpdateDialog::appendResource(CheckUpdateTask::Update const& info, QStringList requiredBy)
+void ResourceUpdateDialog::appendResource(const CheckUpdateTask::Update& info, QStringList requiredBy)
 {
     auto* item_top = new QTreeWidgetItem(ui->modTreeWidget);
     item_top->setCheckState(0, info.enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);

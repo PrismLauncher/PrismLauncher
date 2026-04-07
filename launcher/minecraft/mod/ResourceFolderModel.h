@@ -125,7 +125,7 @@ class ResourceFolderModel : public QAbstractListModel {
 
     Resource::Ptr find(QString id);
 
-    QDir const& dir() const { return m_dir; }
+    const QDir& dir() const { return m_dir; }
 
     /** Checks whether there's any parse tasks being done.
      *

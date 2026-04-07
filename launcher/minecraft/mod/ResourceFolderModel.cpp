@@ -292,7 +292,7 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, Ena
     }
 
     bool succeeded = true;
-    for (auto const& idx : indexes) {
+    for (const auto& idx : indexes) {
         if (!validateIndex(idx) || idx.column() != 0) {
             continue;
         }
@@ -657,9 +657,9 @@ void ResourceFolderModel::setupHeaderAction(QAction* act, int column) const
 
 void ResourceFolderModel::saveColumns(QTreeView* tree)
 {
-    auto const stateSettingName = QString("UI/%1_Page/Columns").arg(id());
-    auto const overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
-    auto const visibilitySettingName = QString("UI/%1_Page/ColumnsVisibility").arg(id());
+    const auto stateSettingName = QString("UI/%1_Page/Columns").arg(id());
+    const auto overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
+    const auto visibilitySettingName = QString("UI/%1_Page/ColumnsVisibility").arg(id());
 
     auto stateSetting = m_instance->settings()->getSetting(stateSettingName);
     stateSetting->set(QString::fromUtf8(tree->header()->saveState().toBase64()));
@@ -681,9 +681,9 @@ void ResourceFolderModel::saveColumns(QTreeView* tree)
 
 void ResourceFolderModel::loadColumns(QTreeView* tree)
 {
-    auto const stateSettingName = QString("UI/%1_Page/Columns").arg(id());
-    auto const overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
-    auto const visibilitySettingName = QString("UI/%1_Page/ColumnsVisibility").arg(id());
+    const auto stateSettingName = QString("UI/%1_Page/Columns").arg(id());
+    const auto overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
+    const auto visibilitySettingName = QString("UI/%1_Page/ColumnsVisibility").arg(id());
 
     auto stateSetting = m_instance->settings()->getOrRegisterSetting(stateSettingName, "");
     tree->header()->restoreState(QByteArray::fromBase64(stateSetting->get().toString().toUtf8()));
@@ -698,7 +698,7 @@ void ResourceFolderModel::loadColumns(QTreeView* tree)
         }
     };
 
-    auto const defaultValue = Json::fromMap({
+    const auto defaultValue = Json::fromMap({
         { "Image", true },
         { "Version", true },
         { "Last Modified", true },
@@ -728,7 +728,7 @@ QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
 
     {  // action to decide if the visibility is per instance or not
         auto* act = new QAction(tr("Override Columns Visibility"), menu);
-        auto const overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
+        const auto overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
 
         act->setCheckable(true);
         act->setChecked(m_instance->settings()->getOrRegisterSetting(overrideSettingName, false)->get().toBool());
@@ -804,8 +804,8 @@ bool ResourceFolderModel::ProxyModel::lessThan(const QModelIndex& source_left, c
     // proceed.
 
     auto column_sort_key = model->columnToSortKey(source_left.column());
-    auto const& resource_left = model->at(source_left.row());
-    auto const& resource_right = model->at(source_right.row());
+    const auto& resource_left = model->at(source_left.row());
+    const auto& resource_right = model->at(source_right.row());
 
     auto compare_result = resource_left.compare(resource_right, column_sort_key);
     if (compare_result == 0) {
@@ -837,7 +837,7 @@ void ResourceFolderModel::onParseFailed(int ticket, QString resource_id)
     // update index
     m_resources_index.clear();
     int idx = 0;
-    for (auto const& mod : qAsConst(m_resources)) {
+    for (const auto& mod : qAsConst(m_resources)) {
         m_resources_index[mod->internal_id()] = idx;
         idx++;
     }
@@ -851,13 +851,13 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
         QSet<QString> kept_set = current_set;
         kept_set.intersect(new_set);
 
-        for (auto const& kept : kept_set) {
+        for (const auto& kept : kept_set) {
             auto row_it = m_resources_index.constFind(kept);
             Q_ASSERT(row_it != m_resources_index.constEnd());
             auto row = row_it.value();
 
             auto& new_resource = new_resources[kept];
-            auto const& current_resource = m_resources.at(row);
+            const auto& current_resource = m_resources.at(row);
 
             if (new_resource->dateTimeChanged() == current_resource->dateTimeChanged()) {
                 // no significant change
@@ -944,7 +944,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
     {
         m_resources_index.clear();
         int idx = 0;
-        for (auto const& mod : qAsConst(m_resources)) {
+        for (const auto& mod : qAsConst(m_resources)) {
             m_resources_index[mod->internal_id()] = idx;
             idx++;
         }
@@ -953,7 +953,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
 Resource::Ptr ResourceFolderModel::find(QString id)
 {
     auto iter =
-        std::find_if(m_resources.constBegin(), m_resources.constEnd(), [&](Resource::Ptr const& r) { return r->internal_id() == id; });
+        std::find_if(m_resources.constBegin(), m_resources.constEnd(), [&](const Resource::Ptr& r) { return r->internal_id() == id; });
     if (iter == m_resources.constEnd()) {
         return nullptr;
     }

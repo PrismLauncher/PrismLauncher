@@ -28,9 +28,8 @@ NewsDialog::NewsDialog(QList<NewsEntryPtr> entries, QWidget* parent) : QDialog(p
     ui->currentArticleContentBrowser->setText(article_entry->content);
     ui->currentArticleContentBrowser->flush();
 
-    connect(this, &QDialog::finished, this, [this] {
-        APPLICATION->settings()->set("NewsGeometry", QString::fromUtf8(saveGeometry().toBase64()));
-    });
+    connect(this, &QDialog::finished, this,
+            [this] { APPLICATION->settings()->set("NewsGeometry", QString::fromUtf8(saveGeometry().toBase64())); });
     const QByteArray base64Geometry = APPLICATION->settings()->get("NewsGeometry").toString().toUtf8();
     restoreGeometry(QByteArray::fromBase64(base64Geometry));
 }

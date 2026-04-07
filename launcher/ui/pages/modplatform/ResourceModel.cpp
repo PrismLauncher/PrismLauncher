@@ -14,8 +14,8 @@
 #include <memory>
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "BuildConfig.h"
+#include "settings/SettingsObject.h"
 
 #include "modplatform/ResourceAPI.h"
 #include "net/ApiDownload.h"
@@ -29,7 +29,7 @@ namespace ResourceDownload {
 
 QHash<ResourceModel*, bool> ResourceModel::s_running_models;
 
-ResourceModel::ResourceModel(ResourceAPI* api) :  m_api(api)
+ResourceModel::ResourceModel(ResourceAPI* api) : m_api(api)
 {
     s_running_models.insert(this, true);
     if (APPLICATION_DYN) {
@@ -204,7 +204,7 @@ void ResourceModel::search()
 
 void ResourceModel::loadEntry(const QModelIndex& entry)
 {
-    auto const& pack = m_packs[entry.row()];
+    const auto& pack = m_packs[entry.row()];
 
     if (!hasActiveInfoJob()) {
         m_current_info_job.clear();
@@ -323,7 +323,7 @@ std::optional<ResourceAPI::SortingMethod> ResourceModel::getCurrentSortingMethod
     {  // Find sorting method by ID
         auto sorting_methods = getSortingMethods();
         auto method = std::find_if(sorting_methods.constBegin(), sorting_methods.constEnd(),
-                                   [this](auto const& e) { return m_current_sort_index == e.index; });
+                                   [this](const auto& e) { return m_current_sort_index == e.index; });
         if (method != sorting_methods.constEnd()) {
             sort = *method;
         }

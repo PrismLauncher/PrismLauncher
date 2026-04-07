@@ -39,7 +39,7 @@
 #include <net/DummySink.h>
 #include "net/RawHeaderProxy.h"
 
-SkinDelete::SkinDelete()  
+SkinDelete::SkinDelete()
 {
     logCat = taskMCSkinsLogC;
 }

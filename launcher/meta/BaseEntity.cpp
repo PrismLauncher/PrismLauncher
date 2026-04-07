@@ -26,8 +26,8 @@
 #include "net/NetJob.h"
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "BuildConfig.h"
+#include "settings/SettingsObject.h"
 #include "tasks/Task.h"
 
 namespace Meta {

@@ -70,7 +70,7 @@
 
 #include "ui/dialogs/CustomMessageBox.h"
 
-PackProfile::PackProfile(MinecraftInstance* instance)  
+PackProfile::PackProfile(MinecraftInstance* instance)
 {
     d.reset(new PackProfileData);
     d->m_instance = instance;
@@ -938,7 +938,7 @@ bool PackProfile::installAgents_internal(QStringList filepaths)
         agent->setDisplayName(sourceInfo.completeBaseName());
         agent->setHint("local");
 
-        versionFile->agents.append(Agent{agent, QString()});
+        versionFile->agents.append(Agent{ agent, QString() });
 
         versionFile->name = targetName;
         versionFile->uid = targetId;

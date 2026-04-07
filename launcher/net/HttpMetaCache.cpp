@@ -52,7 +52,7 @@ auto MetaEntry::getFullPath() -> QString
     return FS::PathCombine(m_basePath, m_relativePath);
 }
 
-HttpMetaCache::HttpMetaCache(QString path) :  m_index_file(path)
+HttpMetaCache::HttpMetaCache(QString path) : m_index_file(path)
 {
     saveBatchingTimer.setSingleShot(true);
     saveBatchingTimer.setTimerType(Qt::VeryCoarseTimer);

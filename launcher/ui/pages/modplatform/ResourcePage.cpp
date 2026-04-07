@@ -168,7 +168,7 @@ void ResourcePage::addSortings()
     Q_ASSERT(m_model);
 
     auto sorts = m_model->getSortingMethods();
-    std::sort(sorts.begin(), sorts.end(), [](auto const& l, auto const& r) { return l.index < r.index; });
+    std::sort(sorts.begin(), sorts.end(), [](const auto& l, const auto& r) { return l.index < r.index; });
 
     for (auto&& sorting : sorts) {
         m_ui->sortByBox->addItem(sorting.readable_name, QVariant(sorting.index));

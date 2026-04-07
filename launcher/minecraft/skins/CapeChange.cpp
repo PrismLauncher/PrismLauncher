@@ -40,7 +40,7 @@
 #include <memory>
 #include "net/RawHeaderProxy.h"
 
-CapeChange::CapeChange(QString cape) :  m_capeId(cape)
+CapeChange::CapeChange(QString cape) : m_capeId(cape)
 {
     logCat = taskMCSkinsLogC;
 }

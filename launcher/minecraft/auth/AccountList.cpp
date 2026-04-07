@@ -39,8 +39,8 @@
 
 #include <QDir>
 #include <QFile>
-#include <QIcon>
 #include <QIODevice>
+#include <QIcon>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -662,8 +662,7 @@ void AccountList::tryNext()
                     connect(m_currentTask.get(), &Task::succeeded, this, &AccountList::authSucceeded);
                     connect(m_currentTask.get(), &Task::failed, this, &AccountList::authFailed);
                     m_currentTask->start();
-                    qDebug() << "RefreshSchedule: Processing account" << account->profileName() << "with internal ID"
-                             << accountId;
+                    qDebug() << "RefreshSchedule: Processing account" << account->profileName() << "with internal ID" << accountId;
                     return;
                 }
             }

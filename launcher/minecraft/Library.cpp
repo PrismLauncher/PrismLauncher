@@ -212,7 +212,6 @@ QList<Net::NetRequest::Ptr> Library::getDownloads(const RuntimeContext& runtimeC
                 return m_repositoryURL + raw_storage;
             }
             return m_repositoryURL + QChar('/') + raw_storage;
-           
         }();
         if (raw_storage.contains("${arch}")) {
             QString cooked_storage = raw_storage;

@@ -227,7 +227,6 @@ void PackInstallTask::deleteExistingFiles()
         }
         qWarning() << "Unrecognised base path" << base;
         return minecraftPath;
-       
     };
 
     auto convertToSystemPath = [](const QString& path) {
