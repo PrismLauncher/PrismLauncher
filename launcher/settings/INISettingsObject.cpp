@@ -23,8 +23,9 @@ INISettingsObject::INISettingsObject(QStringList paths, QObject* parent) : Setti
 {
     auto first_path = paths.constFirst();
     for (auto path : paths) {
-        if (!QFile::exists(path))
+        if (!QFile::exists(path)) {
             continue;
+        }
 
         if (path != first_path && QFile::exists(path)) {
             // Copy the fallback to the preferred path.
@@ -74,13 +75,15 @@ void INISettingsObject::changeSetting(const Setting& setting, QVariant value)
         if (value.isValid()) {
             auto list = setting.configKeys();
             m_ini.set(list.takeFirst(), value);
-            for (auto iter : list)
+            for (auto iter : list) {
                 m_ini.remove(iter);
+            }
         }
         // invalid -> remove all (just like resetSetting)
         else {
-            for (auto iter : setting.configKeys())
+            for (auto iter : setting.configKeys()) {
                 m_ini.remove(iter);
+            }
         }
         doSave();
     }
@@ -99,8 +102,9 @@ void INISettingsObject::resetSetting(const Setting& setting)
 {
     // if we have the setting, remove all the synonyms. ALL OF THEM
     if (contains(setting.id())) {
-        for (auto iter : setting.configKeys())
+        for (auto iter : setting.configKeys()) {
             m_ini.remove(iter);
+        }
         doSave();
     }
 }
@@ -110,8 +114,9 @@ QVariant INISettingsObject::retrieveValue(const Setting& setting)
     // if we have the setting, return value of the first matching synonym
     if (contains(setting.id())) {
         for (auto iter : setting.configKeys()) {
-            if (m_ini.contains(iter))
+            if (m_ini.contains(iter)) {
                 return m_ini[iter];
+            }
         }
     }
     return QVariant();

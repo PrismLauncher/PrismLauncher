@@ -107,8 +107,9 @@ bool FlamePage::eventFilter(QObject* watched, QEvent* event)
             keyEvent->accept();
             return true;
         }
-        if (m_search_timer.isActive())
+        if (m_search_timer.isActive()) {
             m_search_timer.stop();
+        }
 
         m_search_timer.start(350);
     }
@@ -170,8 +171,9 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
             m_current->versions = doc;
             m_current->versionsLoaded = true;
             auto pred = [this](const ModPlatform::IndexedVersion& v) {
-                if (auto filter = m_filterWidget->getFilter())
+                if (auto filter = m_filterWidget->getFilter()) {
                     return !filter->checkModpackFilters(v);
+                }
                 return false;
             };
 #if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
@@ -190,8 +192,9 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
             QVariant current_updated;
             current_updated.setValue(m_current);
 
-            if (!m_listModel->setData(curr, current_updated, Qt::UserRole))
+            if (!m_listModel->setData(curr, current_updated, Qt::UserRole)) {
                 qWarning() << "Failed to cache versions for the current pack!";
+            }
 
             // TODO: Check whether it's a connection issue or the project disabled 3rd-party distribution.
             if (m_current->versionsLoaded && m_ui->versionSelectionBox->count() < 1) {
@@ -268,10 +271,11 @@ void FlamePage::updateUi()
     QString text = "";
     QString name = m_current->name;
 
-    if (m_current->websiteUrl.isEmpty())
+    if (m_current->websiteUrl.isEmpty()) {
         text = name;
-    else
+    } else {
         text = "<a href=\"" + m_current->websiteUrl + "\">" + name + "</a>";
+    }
     if (!m_current->authors.empty()) {
         auto authorToStr = [](ModPlatform::ModpackAuthor& author) {
             if (author.url.isEmpty()) {
@@ -292,12 +296,15 @@ void FlamePage::updateUi()
             text += "<br><br>" + tr("External links:") + "<br>";
         }
 
-        if (!m_current->extraData.issuesUrl.isEmpty())
+        if (!m_current->extraData.issuesUrl.isEmpty()) {
             text += "- " + tr("Issues: <a href=%1>%1</a>").arg(m_current->extraData.issuesUrl) + "<br>";
-        if (!m_current->extraData.wikiUrl.isEmpty())
+        }
+        if (!m_current->extraData.wikiUrl.isEmpty()) {
             text += "- " + tr("Wiki: <a href=%1>%1</a>").arg(m_current->extraData.wikiUrl) + "<br>";
-        if (!m_current->extraData.sourceUrl.isEmpty())
+        }
+        if (!m_current->extraData.sourceUrl.isEmpty()) {
             text += "- " + tr("Source code: <a href=%1>%1</a>").arg(m_current->extraData.sourceUrl) + "<br>";
+        }
     }
 
     text += "<hr>";

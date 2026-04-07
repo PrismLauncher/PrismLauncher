@@ -40,11 +40,13 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
         setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
         setExactIfPresentFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
 
-        if (oldestVersion != Version() && Version(minecraftVersion) < oldestVersion)
+        if (oldestVersion != Version() && Version(minecraftVersion) < oldestVersion) {
             setExactFilter(BaseVersionList::ParentVersionRole, "AAA");
+        }
 
-        if (const QString currentVersion = profile->getComponentVersion(id); !currentVersion.isNull())
+        if (const QString currentVersion = profile->getComponentVersion(id); !currentVersion.isNull()) {
             setCurrentVersion(currentVersion);
+        }
     }
 
     QString id() const override { return uid; }
@@ -53,12 +55,14 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
 
     void openedImpl() override
     {
-        if (loaded)
+        if (loaded) {
             return;
+        }
 
         const auto versions = APPLICATION->metadataIndex()->get(uid);
-        if (!versions)
+        if (!versions) {
             return;
+        }
 
         initialize(versions.get());
         loaded = true;
@@ -119,12 +123,14 @@ InstallLoaderDialog::InstallLoaderDialog(PackProfile* profile, const QString& ui
     resize(520, 347);
 
     for (BasePage* page : container->getPages()) {
-        if (page->id() == uid)
+        if (page->id() == uid) {
             container->selectPage(page->id());
+        }
 
         connect(pageCast(page), &VersionSelectWidget::selectedVersionChanged, this, [this, page] {
-            if (page->id() == container->selectedPage()->id())
+            if (page->id() == container->selectedPage()->id()) {
                 validate(container->selectedPage());
+            }
         });
     }
     connect(container, &PageContainer::selectedPageChanged, this, [this](BasePage* previous, BasePage* current) { validate(current); });

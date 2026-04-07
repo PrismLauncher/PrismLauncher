@@ -97,8 +97,9 @@ auto WideBar::getMatching(QAction* act) -> QList<BarEntry>::iterator
 void WideBar::insertActionBefore(QAction* before, QAction* action)
 {
     auto iter = getMatching(before);
-    if (iter == m_entries.end())
+    if (iter == m_entries.end()) {
         return;
+    }
 
     BarEntry entry;
     entry.bar_action = insertWidget(iter->bar_action, new ActionButton(action, this, m_use_default_action));
@@ -113,8 +114,9 @@ void WideBar::insertActionBefore(QAction* before, QAction* action)
 void WideBar::insertActionAfter(QAction* after, QAction* action)
 {
     auto iter = getMatching(after);
-    if (iter == m_entries.end())
+    if (iter == m_entries.end()) {
         return;
+    }
 
     iter++;
     // the action to insert after is present
@@ -138,8 +140,9 @@ void WideBar::insertActionAfter(QAction* after, QAction* action)
 void WideBar::insertWidgetBefore(QAction* before, QWidget* widget)
 {
     auto iter = getMatching(before);
-    if (iter == m_entries.end())
+    if (iter == m_entries.end()) {
         return;
+    }
 
     insertWidget(iter->bar_action, widget);
 }
@@ -147,8 +150,9 @@ void WideBar::insertWidgetBefore(QAction* before, QWidget* widget)
 void WideBar::insertSpacer(QAction* action)
 {
     auto iter = getMatching(action);
-    if (iter == m_entries.end())
+    if (iter == m_entries.end()) {
         return;
+    }
 
     auto* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -162,8 +166,9 @@ void WideBar::insertSpacer(QAction* action)
 void WideBar::insertSeparator(QAction* before)
 {
     auto iter = getMatching(before);
-    if (iter == m_entries.end())
+    if (iter == m_entries.end()) {
         return;
+    }
 
     BarEntry entry;
     entry.bar_action = QToolBar::insertSeparator(iter->bar_action);
@@ -210,8 +215,9 @@ void WideBar::showVisibilityMenu(QPoint const& position)
     }
 
     if (m_menu_state == MenuState::Dirty) {
-        for (auto* old_action : m_bar_menu->actions())
+        for (auto* old_action : m_bar_menu->actions()) {
             old_action->deleteLater();
+        }
 
         m_bar_menu->clear();
 
@@ -220,8 +226,9 @@ void WideBar::showVisibilityMenu(QPoint const& position)
         m_bar_menu->addSeparator()->setText(tr("Customize toolbar actions"));
 
         for (auto& entry : m_entries) {
-            if (entry.type != BarEntry::Type::Action)
+            if (entry.type != BarEntry::Type::Action) {
                 continue;
+            }
 
             auto* act = new QAction();
             copyAction(entry.menu_action, act);
@@ -255,8 +262,9 @@ QByteArray WideBar::getVisibilityState() const
     QByteArray state;
 
     for (auto const& entry : m_entries) {
-        if (entry.type != BarEntry::Type::Action)
+        if (entry.type != BarEntry::Type::Action) {
             continue;
+        }
 
         state.append(entry.bar_action->isVisible() ? '1' : '0');
     }
@@ -275,15 +283,18 @@ void WideBar::setVisibilityState(QByteArray&& state)
     auto hash = split.last();
 
     // If the actions changed, we better not try to load the old one to avoid unwanted hiding
-    if (!checkHash(hash))
+    if (!checkHash(hash)) {
         return;
+    }
 
     qsizetype i = 0;
     for (auto& entry : m_entries) {
-        if (entry.type != BarEntry::Type::Action)
+        if (entry.type != BarEntry::Type::Action) {
             continue;
-        if (i == bits.size())
+        }
+        if (i == bits.size()) {
             break;
+        }
 
         entry.bar_action->setVisible(bits.at(i++) == '1');
 
@@ -296,8 +307,9 @@ QByteArray WideBar::getHash() const
 {
     QCryptographicHash hash(QCryptographicHash::Sha1);
     for (auto const& entry : m_entries) {
-        if (entry.type != BarEntry::Type::Action)
+        if (entry.type != BarEntry::Type::Action) {
             continue;
+        }
         hash.addData(entry.menu_action->text().toLatin1());
     }
 
@@ -312,8 +324,9 @@ bool WideBar::checkHash(QByteArray const& old_hash) const
 void WideBar::removeAction(QAction* action)
 {
     auto iter = getMatching(action);
-    if (iter == m_entries.end())
+    if (iter == m_entries.end()) {
         return;
+    }
 
     iter->bar_action->setVisible(false);
     removeAction(iter->bar_action);

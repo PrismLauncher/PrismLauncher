@@ -93,8 +93,9 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, ResourceFol
     });
 
     auto updateExtra = [this]() {
-        if (updateExtraInfo)
+        if (updateExtraInfo) {
             updateExtraInfo(id(), extraHeaderInfoString());
+        }
     };
 
     connect(selection_model, &QItemSelectionModel::selectionChanged, this, updateExtra);
@@ -198,12 +199,14 @@ bool ExternalResourcesPage::listFilter(QKeyEvent* keyEvent)
 
 bool ExternalResourcesPage::eventFilter(QObject* obj, QEvent* ev)
 {
-    if (ev->type() != QEvent::KeyPress)
+    if (ev->type() != QEvent::KeyPress) {
         return QWidget::eventFilter(obj, ev);
+    }
 
     QKeyEvent* keyEvent = static_cast<QKeyEvent*>(ev);
-    if (obj == ui->treeView)
+    if (obj == ui->treeView) {
         return listFilter(keyEvent);
+    }
 
     return QWidget::eventFilter(obj, ev);
 }
@@ -232,8 +235,9 @@ void ExternalResourcesPage::removeItem()
             count++;
 
             // if a folder is selected, show the confirmation dialog
-            if (m_model->at(i.row()).fileinfo().isDir())
+            if (m_model->at(i.row()).fileinfo().isDir()) {
                 folder = true;
+            }
         }
     }
 
@@ -257,8 +261,9 @@ void ExternalResourcesPage::removeItem()
                                                      QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
-        if (response != QMessageBox::Yes)
+        if (response != QMessageBox::Yes) {
             return;
+        }
     }
 
     removeItems(selection);
@@ -273,8 +278,9 @@ void ExternalResourcesPage::removeItems(const QItemSelection& selection)
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
-        if (response != QMessageBox::Yes)
+        if (response != QMessageBox::Yes) {
             return;
+        }
     }
     m_model->deleteResources(selection.indexes());
 }
@@ -296,8 +302,9 @@ void ExternalResourcesPage::viewHomepage()
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
     for (auto* resource : m_model->selectedResources(selection)) {
         auto url = resource->homepage();
-        if (!url.isEmpty())
+        if (!url.isEmpty()) {
             DesktopServices::openUrl(url);
+        }
     }
 }
 
@@ -343,8 +350,9 @@ QString ExternalResourcesPage::extraHeaderInfoString()
 {
     if (ui && ui->treeView && ui->treeView->selectionModel()) {
         auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-        if (auto count = std::count_if(selection.cbegin(), selection.cend(), [](auto v) { return v.column() == 0; }); count != 0)
+        if (auto count = std::count_if(selection.cbegin(), selection.cend(), [](auto v) { return v.column() == 0; }); count != 0) {
             return tr(" (%1 installed, %2 selected)").arg(m_model->size()).arg(count);
+        }
     }
     return tr(" (%1 installed)").arg(m_model->size());
 }

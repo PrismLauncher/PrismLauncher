@@ -156,10 +156,11 @@ void InstanceWindow::updateButtons()
     m_killButton->setEnabled(m_instance->isRunning());
 
     QMenu* launchMenu = m_launchButton->menu();
-    if (launchMenu)
+    if (launchMenu) {
         launchMenu->clear();
-    else
+    } else {
         launchMenu = new QMenu(this);
+    }
     m_instance->populateLaunchMenu(launchMenu);
     m_launchButton->setMenu(launchMenu);
 }

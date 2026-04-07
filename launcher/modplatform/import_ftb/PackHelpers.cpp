@@ -61,8 +61,9 @@ Modpack parseDirectory(QString path)
 {
     Modpack modpack{ path };
     auto instanceFile = QFileInfo(FS::PathCombine(path, "instance.json"));
-    if (!instanceFile.exists() || !instanceFile.isFile())
+    if (!instanceFile.exists() || !instanceFile.isFile()) {
         return {};
+    }
     try {
         auto doc = Json::requireDocument(instanceFile.absoluteFilePath(), "FTB_APP instance JSON file");
         const auto root = doc.object();

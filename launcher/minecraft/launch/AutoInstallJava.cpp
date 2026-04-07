@@ -204,8 +204,9 @@ void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
 
 void AutoInstallJava::tryNextMajorJava()
 {
-    if (!isRunning())
+    if (!isRunning()) {
         return;
+    }
     auto versionList = APPLICATION->metadataIndex()->get("net.minecraft.java");
     auto* packProfile = m_instance->getPackProfile();
     auto wantedJavaName = packProfile->getProfile()->getCompatibleJavaName();

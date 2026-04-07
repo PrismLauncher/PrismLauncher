@@ -42,8 +42,9 @@ class CheckComboModel : public QIdentityProxyModel {
             auto txt = QIdentityProxyModel::data(index, Qt::DisplayRole).toString();
             return m_checked.contains(txt) ? Qt::Checked : Qt::Unchecked;
         }
-        if (role == Qt::DisplayRole)
+        if (role == Qt::DisplayRole) {
             return QIdentityProxyModel::data(index, Qt::DisplayRole);
+        }
         return {};
     }
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole)
@@ -92,8 +93,9 @@ void CheckComboBox::setSourceModel(QAbstractItemModel* new_model)
 
 void CheckComboBox::hidePopup()
 {
-    if (!m_containerMousePress)
+    if (!m_containerMousePress) {
         QComboBox::hidePopup();
+    }
 }
 
 void CheckComboBox::emitCheckedItemsChanged()
@@ -172,8 +174,9 @@ void CheckComboBox::setItemCheckState(int index, Qt::CheckState state)
 
 QStringList CheckComboBox::checkedItems() const
 {
-    if (model())
+    if (model()) {
         return dynamic_cast<CheckComboModel*>(model())->getChecked();
+    }
     return {};
 }
 
@@ -194,10 +197,11 @@ void CheckComboBox::paintEvent(QPaintEvent*)
     QStyleOptionComboBox opt;
     initStyleOption(&opt);
     QStringList items = checkedItems();
-    if (items.isEmpty())
+    if (items.isEmpty()) {
         opt.currentText = defaultText();
-    else
+    } else {
         opt.currentText = items.join(separator());
+    }
     painter.drawComplexControl(QStyle::CC_ComboBox, opt);
 
     // draw the icon and text

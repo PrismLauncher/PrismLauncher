@@ -109,8 +109,9 @@ void ArchiveDownloadTask::extractJava(QString input)
 bool ArchiveDownloadTask::abort()
 {
     auto aborted = canAbort();
-    if (m_task)
+    if (m_task) {
         aborted = m_task->abort();
+    }
     return aborted;
 };
 }  // namespace Java

@@ -87,8 +87,9 @@ void TexturePackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] c
 
 void TexturePackPage::downloadTexturePacks()
 {
-    if (m_instance->typeName() != "Minecraft")
+    if (m_instance->typeName() != "Minecraft") {
         return;  // this is a null instance or a legacy instance
+    }
 
     m_downloadDialog = new ResourceDownload::TexturePackDownloadDialog(this, m_model, m_instance);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
@@ -110,8 +111,9 @@ void TexturePackPage::downloadDialogFinished(int result)
         });
         connect(tasks, &Task::succeeded, [this, tasks]() {
             QStringList warnings = tasks->warnings();
-            if (warnings.count())
+            if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+            }
 
             tasks->deleteLater();
         });
@@ -130,14 +132,16 @@ void TexturePackPage::downloadDialogFinished(int result)
 
         m_model->update();
     }
-    if (m_downloadDialog)
+    if (m_downloadDialog) {
         m_downloadDialog->deleteLater();
+    }
 }
 
 void TexturePackPage::updateTexturePacks()
 {
-    if (m_instance->typeName() != "Minecraft")
+    if (m_instance->typeName() != "Minecraft") {
         return;  // this is a null instance or a legacy instance
+    }
 
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Texture pack updates are unavailable when metadata is disabled!"));
@@ -152,15 +156,17 @@ void TexturePackPage::updateTexturePacks()
                             QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
-        if (response != QMessageBox::Yes)
+        if (response != QMessageBox::Yes) {
             return;
+        }
     }
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
 
     auto mods_list = m_model->selectedResources(selection);
     bool use_all = mods_list.empty();
-    if (use_all)
+    if (use_all) {
         mods_list = m_model->allResources();
+    }
 
     ResourceUpdateDialog update_dialog(this, m_instance, m_model, mods_list, false);
     update_dialog.checkCandidates();
@@ -216,8 +222,9 @@ void TexturePackPage::deleteTexturePackMetadata()
 {
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
     auto selectionCount = m_model->selectedTexturePacks(selection).length();
-    if (selectionCount == 0)
+    if (selectionCount == 0) {
         return;
+    }
     if (selectionCount > 1) {
         auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
                                                      tr("You are about to remove the metadata for %1 texture packs.\n"
@@ -226,8 +233,9 @@ void TexturePackPage::deleteTexturePackMetadata()
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
-        if (response != QMessageBox::Yes)
+        if (response != QMessageBox::Yes) {
             return;
+        }
     }
 
     m_model->deleteMetadata(selection);
@@ -235,8 +243,9 @@ void TexturePackPage::deleteTexturePackMetadata()
 
 void TexturePackPage::changeTexturePackVersion()
 {
-    if (m_instance->typeName() != "Minecraft")
+    if (m_instance->typeName() != "Minecraft") {
         return;  // this is a null instance or a legacy instance
+    }
 
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Texture pack updates are unavailable when metadata is disabled!"));
@@ -245,13 +254,15 @@ void TexturePackPage::changeTexturePackVersion()
 
     const QModelIndexList rows = ui->treeView->selectionModel()->selectedRows();
 
-    if (rows.count() != 1)
+    if (rows.count() != 1) {
         return;
+    }
 
     Resource& resource = m_model->at(m_filterModel->mapToSource(rows[0]).row());
 
-    if (resource.metadata() == nullptr)
+    if (resource.metadata() == nullptr) {
         return;
+    }
 
     m_downloadDialog = new ResourceDownload::TexturePackDownloadDialog(this, m_model, m_instance);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);

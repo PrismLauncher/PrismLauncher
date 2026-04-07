@@ -104,22 +104,27 @@ class FlameAPI : public ResourceAPI {
         get_arguments.append(QString("classId=%1").arg(getClassId(args.type)));
         get_arguments.append(QString("index=%1").arg(args.offset));
         get_arguments.append("pageSize=25");
-        if (args.search.has_value())
+        if (args.search.has_value()) {
             get_arguments.append(QString("searchFilter=%1").arg(args.search.value()));
-        if (args.sorting.has_value())
+        }
+        if (args.sorting.has_value()) {
             get_arguments.append(QString("sortField=%1").arg(args.sorting.value().index));
+        }
         get_arguments.append("sortOrder=desc");
         if (args.loaders.has_value()) {
             ModPlatform::ModLoaderTypes loaders = args.loaders.value();
             loaders &= ~static_cast<std::uint16_t>(ModPlatform::ModLoaderType::DataPack);
-            if (loaders != 0)
+            if (loaders != 0) {
                 get_arguments.append(QString("modLoaderTypes=%1").arg(getModLoaderFilters(loaders)));
+            }
         }
-        if (args.categoryIds.has_value() && !args.categoryIds->empty())
+        if (args.categoryIds.has_value() && !args.categoryIds->empty()) {
             get_arguments.append(QString("categoryIds=[%1]").arg(args.categoryIds->join(",")));
+        }
 
-        if (args.versions.has_value() && !args.versions.value().empty())
+        if (args.versions.has_value() && !args.versions.value().empty()) {
             get_arguments.append(QString("gameVersion=%1").arg(args.versions.value().front().toString()));
+        }
 
         return BuildConfig.FLAME_BASE_URL + "/mods/search?gameId=432&" + get_arguments.join('&');
     }
@@ -129,8 +134,9 @@ class FlameAPI : public ResourceAPI {
         auto addonId = args.pack->addonId.toString();
         QString url = QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files?pageSize=10000").arg(addonId);
 
-        if (args.mcVersions.has_value())
+        if (args.mcVersions.has_value()) {
             url += QString("&gameVersion=%1").arg(args.mcVersions.value().front().toString());
+        }
 
         if (args.loaders.has_value() && args.loaders.value() != ModPlatform::ModLoaderType::DataPack &&
             ModPlatform::hasSingleModLoaderSelected(args.loaders.value())) {

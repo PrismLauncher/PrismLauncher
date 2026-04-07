@@ -32,15 +32,17 @@ QIcon FastFileIconProvider::icon(const QFileInfo& info) const
     QStyle::StandardPixmap icon;
 
     if (info.isDir()) {
-        if (link)
+        if (link) {
             icon = QStyle::SP_DirLinkIcon;
-        else
+        } else {
             icon = QStyle::SP_DirIcon;
+        }
     } else {
-        if (link)
+        if (link) {
             icon = QStyle::SP_FileLinkIcon;
-        else
+        } else {
             icon = QStyle::SP_FileIcon;
+        }
     }
 
     return QApplication::style()->standardIcon(icon);

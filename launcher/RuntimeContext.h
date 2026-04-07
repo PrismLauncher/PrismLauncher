@@ -30,14 +30,18 @@ struct RuntimeContext {
 
     QString mappedJavaRealArchitecture() const
     {
-        if (javaRealArchitecture == "amd64")
+        if (javaRealArchitecture == "amd64") {
             return "x86_64";
-        if (javaRealArchitecture == "i386" || javaRealArchitecture == "i686")
+        }
+        if (javaRealArchitecture == "i386" || javaRealArchitecture == "i686") {
             return "x86";
-        if (javaRealArchitecture == "aarch64")
+        }
+        if (javaRealArchitecture == "aarch64") {
             return "arm64";
-        if (javaRealArchitecture == "arm" || javaRealArchitecture == "armhf")
+        }
+        if (javaRealArchitecture == "arm" || javaRealArchitecture == "armhf") {
             return "arm32";
+        }
         return javaRealArchitecture;
     }
 
@@ -61,8 +65,9 @@ struct RuntimeContext {
         // try to match precise classifier "[os]-[arch]"
         bool x = target == getClassifier();
         // try to match imprecise classifier on legacy architectures "[os]"
-        if (!x && isLegacyArch())
+        if (!x && isLegacyArch()) {
             x = target == system;
+        }
 
         return x;
     }

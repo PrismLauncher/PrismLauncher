@@ -154,10 +154,11 @@ void OtherLogsPage::openedImpl()
     const QStringList failedPaths = m_watcher.addPaths(m_logSearchPaths);
 
     for (const QString& path : m_logSearchPaths) {
-        if (failedPaths.contains(path))
+        if (failedPaths.contains(path)) {
             qDebug() << "Failed to start watching" << path;
-        else
+        } else {
             qDebug() << "Started watching" << path;
+        }
     }
 
     populateSelectLogBox();
@@ -168,10 +169,11 @@ void OtherLogsPage::closedImpl()
     const QStringList failedPaths = m_watcher.removePaths(m_logSearchPaths);
 
     for (const QString& path : m_logSearchPaths) {
-        if (failedPaths.contains(path))
+        if (failedPaths.contains(path)) {
             qDebug() << "Failed to stop watching" << path;
-        else
+        } else {
             qDebug() << "Stopped watching" << path;
+        }
     }
 }
 
@@ -181,8 +183,9 @@ void OtherLogsPage::populateSelectLogBox()
 
     ui->selectLogBox->blockSignals(true);
     ui->selectLogBox->clear();
-    if (!m_instance)
+    if (!m_instance) {
         ui->selectLogBox->addItem(tr("Current logs"));
+    }
     ui->selectLogBox->addItems(getPaths());
     ui->selectLogBox->blockSignals(false);
 
@@ -227,11 +230,13 @@ void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
 void OtherLogsPage::on_btnReload_clicked()
 {
     if (!m_instance && m_currentFile.isEmpty()) {
-        if (!m_model)
+        if (!m_model) {
             return;
+        }
         m_model->clear();
-        if (m_container)
+        if (m_container) {
             m_container->refreshContainer();
+        }
     } else {
         reload();
     }
@@ -277,12 +282,15 @@ void OtherLogsPage::reload()
         MessageLevel last = MessageLevel::Unknown;
 
         auto handleLine = [this, &last](QString line) {
-            if (line.isEmpty())
+            if (line.isEmpty()) {
                 return false;
-            if (line.back() == '\n')
+            }
+            if (line.back() == '\n') {
                 line.resize(line.size() - 1);
-            if (line.back() == '\r')
+            }
+            if (line.back() == '\r') {
                 line.resize(line.size() - 1);
+            }
             MessageLevel level = MessageLevel::Unknown;
 
             QString lineTemp = line;  // don't edit out the time and level for clarity
@@ -368,8 +376,9 @@ void OtherLogsPage::on_btnBottom_clicked()
 
 void OtherLogsPage::on_trackLogCheckbox_clicked(bool checked)
 {
-    if (!m_model)
+    if (!m_model) {
         return;
+    }
     m_model->suspend(!checked);
 }
 
@@ -454,8 +463,9 @@ void OtherLogsPage::on_btnClean_clicked()
 void OtherLogsPage::on_wrapCheckbox_clicked(bool checked)
 {
     ui->text->setWordWrap(checked);
-    if (!m_model)
+    if (!m_model) {
         return;
+    }
     m_model->setLineWrap(checked);
     ui->text->scrollToBottom();
 }
@@ -463,8 +473,9 @@ void OtherLogsPage::on_wrapCheckbox_clicked(bool checked)
 void OtherLogsPage::on_colorCheckbox_clicked(bool checked)
 {
     ui->text->setColorLines(checked);
-    if (!m_model)
+    if (!m_model) {
         return;
+    }
     m_model->setColorLines(checked);
     ui->text->scrollToBottom();
 }
@@ -505,13 +516,15 @@ QStringList OtherLogsPage::getPaths()
 
         QStringList filters{ "*.log", "*.log.gz" };
 
-        if (searchPath != m_basePath)
+        if (searchPath != m_basePath) {
             filters.append("*.txt");
+        }
 
         QStringList entries = searchDir.entryList(filters, QDir::Files | QDir::Readable, QDir::SortFlag::Time);
 
-        for (const QString& name : entries)
+        for (const QString& name : entries) {
             result.append(baseDir.relativeFilePath(searchDir.filePath(name)));
+        }
     }
 
     return result;

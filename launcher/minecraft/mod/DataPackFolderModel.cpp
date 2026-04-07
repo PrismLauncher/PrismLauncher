@@ -57,8 +57,9 @@ DataPackFolderModel::DataPackFolderModel(const QString& dir, BaseInstance* insta
 
 QVariant DataPackFolderModel::data(const QModelIndex& index, int role) const
 {
-    if (!validateIndex(index))
+    if (!validateIndex(index)) {
         return {};
+    }
 
     int row = index.row();
     int column = index.column();

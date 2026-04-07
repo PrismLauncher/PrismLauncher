@@ -7,16 +7,18 @@ LogModel::LogModel(QObject* parent) : QAbstractListModel(parent)
 
 int LogModel::rowCount(const QModelIndex& parent) const
 {
-    if (parent.isValid())
+    if (parent.isValid()) {
         return 0;
+    }
 
     return m_numLines;
 }
 
 QVariant LogModel::data(const QModelIndex& index, int role) const
 {
-    if (index.row() < 0 || index.row() >= m_numLines)
+    if (index.row() < 0 || index.row() >= m_numLines) {
         return QVariant();
+    }
 
     auto row = index.row();
     auto realRow = (row + m_firstLine) % m_maxLines;

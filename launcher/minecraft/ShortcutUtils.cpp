@@ -50,8 +50,9 @@ namespace ShortcutUtils {
 
 bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
 {
-    if (!shortcut.instance)
+    if (!shortcut.instance) {
         return false;
+    }
 
     QString appPath = QApplication::applicationFilePath();
     const auto* icon = APPLICATION->icons()->icon(shortcut.iconKey.isEmpty() ? shortcut.instance->iconKey() : shortcut.iconKey);
@@ -165,8 +166,9 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
 
 bool createInstanceShortcutOnDesktop(const Shortcut& shortcut)
 {
-    if (!shortcut.instance)
+    if (!shortcut.instance) {
         return false;
+    }
 
     QString desktopDir = FS::getDesktopDir();
     if (desktopDir.isEmpty()) {
@@ -175,8 +177,9 @@ bool createInstanceShortcutOnDesktop(const Shortcut& shortcut)
     }
 
     QString shortcutFilePath = FS::PathCombine(desktopDir, FS::RemoveInvalidFilenameChars(shortcut.name));
-    if (!createInstanceShortcut(shortcut, shortcutFilePath))
+    if (!createInstanceShortcut(shortcut, shortcutFilePath)) {
         return false;
+    }
     QMessageBox::information(shortcut.parent, QObject::tr("Create Shortcut"),
                              QObject::tr("Created a shortcut to this %1 on your desktop!").arg(shortcut.targetString));
     return true;
@@ -184,8 +187,9 @@ bool createInstanceShortcutOnDesktop(const Shortcut& shortcut)
 
 bool createInstanceShortcutInApplications(const Shortcut& shortcut)
 {
-    if (!shortcut.instance)
+    if (!shortcut.instance) {
         return false;
+    }
 
     QString applicationsDir = FS::getApplicationsDir();
     if (applicationsDir.isEmpty()) {
@@ -205,8 +209,9 @@ bool createInstanceShortcutInApplications(const Shortcut& shortcut)
 #endif
 
     QString shortcutFilePath = FS::PathCombine(applicationsDir, FS::RemoveInvalidFilenameChars(shortcut.name));
-    if (!createInstanceShortcut(shortcut, shortcutFilePath))
+    if (!createInstanceShortcut(shortcut, shortcutFilePath)) {
         return false;
+    }
     QMessageBox::information(shortcut.parent, QObject::tr("Create Shortcut"),
                              QObject::tr("Created a shortcut to this %1 in your applications folder!").arg(shortcut.targetString));
     return true;
@@ -214,8 +219,9 @@ bool createInstanceShortcutInApplications(const Shortcut& shortcut)
 
 bool createInstanceShortcutInOther(const Shortcut& shortcut)
 {
-    if (!shortcut.instance)
+    if (!shortcut.instance) {
         return false;
+    }
 
     QString defaultedDir = FS::getDesktopDir();
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
@@ -233,13 +239,16 @@ bool createInstanceShortcutInOther(const Shortcut& shortcut)
 
     shortcutFilePath = QFileDialog::getSaveFileName(shortcut.parent, QObject::tr("Create Shortcut"), shortcutFilePath,
                                                   QObject::tr("Desktop Entries") + " (*" + extension + ")");
-    if (shortcutFilePath.isEmpty())
+    if (shortcutFilePath.isEmpty()) {
         return false;  // file dialog canceled by user
+    }
 
-    if (shortcutFilePath.endsWith(extension))
+    if (shortcutFilePath.endsWith(extension)) {
         shortcutFilePath = shortcutFilePath.mid(0, shortcutFilePath.length() - extension.length());
-    if (!createInstanceShortcut(shortcut, shortcutFilePath))
+    }
+    if (!createInstanceShortcut(shortcut, shortcutFilePath)) {
         return false;
+    }
     QMessageBox::information(shortcut.parent, QObject::tr("Create Shortcut"),
                              QObject::tr("Created a shortcut to this %1!").arg(shortcut.targetString));
     return true;

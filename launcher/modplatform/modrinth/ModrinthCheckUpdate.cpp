@@ -180,10 +180,11 @@ void ModrinthCheckUpdate::checkVersionsResponse(QByteArray* response, std::optio
 
                 QString old_version = resource->metadata()->version_number;
                 if (old_version.isEmpty()) {
-                    if (resource->status() == ResourceStatus::NOT_INSTALLED)
+                    if (resource->status() == ResourceStatus::NOT_INSTALLED) {
                         old_version = tr("Not installed");
-                    else
+                    } else {
                         old_version = tr("Unknown");
+                    }
                 }
 
                 m_updates.emplace_back(pack->name, hash, old_version, project_ver.version_number, project_ver.version_type,
@@ -218,12 +219,13 @@ void ModrinthCheckUpdate::checkNextLoader()
     for (auto* resource : m_mappings) {
         QString reason;
 
-        if (dynamic_cast<Mod*>(resource) != nullptr)
+        if (dynamic_cast<Mod*>(resource) != nullptr) {
             reason =
                 tr("No valid version found for this resource. It's probably unavailable for the current game "
                    "version / mod loader.");
-        else
+        } else {
             reason = tr("No valid version found for this resource. It's probably unavailable for the current game version.");
+        }
 
         emit checkFailed(resource, reason);
     }

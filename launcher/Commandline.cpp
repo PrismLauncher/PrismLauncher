@@ -59,12 +59,13 @@ QStringList splitArgs(QString args)
             escape = false;
             // in "quotes"
         } else if (!inquotes.isNull()) {
-            if (cchar == '\\')
+            if (cchar == '\\') {
                 escape = true;
-            else if (cchar == inquotes)
+            } else if (cchar == inquotes) {
                 inquotes = QChar::Null;
-            else
+            } else {
                 current += cchar;
+            }
             // otherwise
         } else {
             if (cchar == ' ') {
@@ -79,8 +80,9 @@ QStringList splitArgs(QString args)
             }
         }
     }
-    if (!current.isEmpty())
+    if (!current.isEmpty()) {
         argv << current;
+    }
     return argv;
 }
 }  // namespace Commandline

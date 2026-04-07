@@ -79,8 +79,9 @@ class SeparatorPrefixTree {
             if (nested.isNull()) {
                 return nested;
             }
-            if (nested.isEmpty())
+            if (nested.isEmpty()) {
                 return path;
+            }
             return path + Tseparator + nested;
         }
         auto prefix = path.left(sepIndex);
@@ -92,8 +93,9 @@ class SeparatorPrefixTree {
         if (nested.isNull()) {
             return nested;
         }
-        if (nested.isEmpty())
+        if (nested.isEmpty()) {
             return prefix;
+        }
         return prefix + Tseparator + nested;
     }
 

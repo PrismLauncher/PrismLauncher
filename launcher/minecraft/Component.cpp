@@ -116,8 +116,9 @@ std::shared_ptr<class Meta::VersionList> Component::getVersionList() const
 
 int Component::getOrder() const
 {
-    if (m_orderOverride)
+    if (m_orderOverride) {
         return m_order;
+    }
 
     auto vfile = getVersionFile();
     if (vfile) {
@@ -139,8 +140,9 @@ QString Component::getID() const
 
 QString Component::getName() const
 {
-    if (!m_cachedName.isEmpty())
+    if (!m_cachedName.isEmpty()) {
         return m_cachedName;
+    }
     return m_uid;
 }
 
@@ -226,8 +228,9 @@ bool Component::isVersionChangeable(bool wait) const
 {
     auto list = getVersionList();
     if (list) {
-        if (wait)
+        if (wait) {
             list->waitToLoad();
+        }
         return list->count() != 0;
     }
     return false;

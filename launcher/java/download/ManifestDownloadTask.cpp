@@ -128,8 +128,9 @@ void ManifestDownloadTask::downloadJava(const QJsonDocument& doc)
 bool ManifestDownloadTask::abort()
 {
     auto aborted = canAbort();
-    if (m_task)
+    if (m_task) {
         aborted = m_task->abort();
+    }
     emitAborted();
     return aborted;
 };

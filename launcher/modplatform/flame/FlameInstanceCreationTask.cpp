@@ -72,15 +72,19 @@
 
 bool FlameCreationTask::abort()
 {
-    if (!canAbort())
+    if (!canAbort()) {
         return false;
+    }
 
-    if (m_processUpdateFileInfoJob)
+    if (m_processUpdateFileInfoJob) {
         m_processUpdateFileInfoJob->abort();
-    if (m_filesJob)
+    }
+    if (m_filesJob) {
         m_filesJob->abort();
-    if (m_modIdResolver)
+    }
+    if (m_modIdResolver) {
         m_modIdResolver->abort();
+    }
 
     return InstanceCreationTask::abort();
 }
@@ -100,8 +104,9 @@ bool FlameCreationTask::updateInstance()
         if (!inst) {
             inst = instance_list->getInstanceById(originalName());
 
-            if (!inst)
+            if (!inst) {
                 return false;
+            }
         }
     }
 
@@ -119,8 +124,9 @@ bool FlameCreationTask::updateInstance()
 
     if (shouldConfirmUpdate()) {
         auto should_update = askIfShouldUpdate(m_parent, version_str);
-        if (should_update == ShouldUpdate::SkipUpdating)
+        if (should_update == ShouldUpdate::SkipUpdating) {
             return false;
+        }
         if (should_update == ShouldUpdate::Cancel) {
             m_abort = true;
             return false;
@@ -155,8 +161,9 @@ bool FlameCreationTask::updateInstance()
                     old_files.remove(file.key());
                     files_iterator = files.erase(files_iterator);
 
-                    if (files_iterator != files.begin())
+                    if (files_iterator != files.begin()) {
                         files_iterator--;
+                    }
                 }
             }
 
@@ -197,10 +204,11 @@ bool FlameCreationTask::updateInstance()
 
             try {
                 QJsonArray entries;
-                if (fileIds.size() == 1)
+                if (fileIds.size() == 1) {
                     entries = { Json::requireObject(Json::requireObject(doc), "data") };
-                else
+                } else {
                     entries = Json::requireArray(Json::requireObject(doc), "data");
+                }
 
                 for (auto entry : entries) {
                     auto entry_obj = Json::requireObject(entry);
@@ -217,8 +225,9 @@ bool FlameCreationTask::updateInstance()
 
             // Delete the files
             for (auto& file : old_files) {
-                if (file.version.fileName.isEmpty() || file.targetFolder.isEmpty())
+                if (file.version.fileName.isEmpty() || file.targetFolder.isEmpty()) {
                     continue;
+                }
 
                 QString relative_path(FS::PathCombine(file.targetFolder, file.version.fileName));
                 scheduleToDelete(m_parent, old_minecraft_dir, relative_path, true);
@@ -268,16 +277,18 @@ QString FlameCreationTask::getVersionForLoader(QString uid, QString loaderType, 
             QEventLoop loadVersionLoop;
             auto task = vlist->getLoadTask();
             connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
-            if (!task->isRunning())
+            if (!task->isRunning()) {
                 task->start();
+            }
 
             loadVersionLoop.exec();
         }
 
         for (auto version : vlist->versions()) {
             // first recommended build we find, we use.
-            if (!version->isRecommended())
+            if (!version->isRecommended()) {
                 continue;
+            }
             auto reqs = version->requiredSet();
 
             // filter by minecraft version, if the loader depends on a certain version.
@@ -287,8 +298,9 @@ QString FlameCreationTask::getVersionForLoader(QString uid, QString loaderType, 
                 auto iter = std::find_if(reqs.begin(), reqs.end(), [mcVersion](const Meta::Require& req) {
                     return req.uid == "net.minecraft" && req.equalsVersion == mcVersion;
                 });
-                if (iter == reqs.end())
+                if (iter == reqs.end()) {
                     continue;
+                }
             }
             return version->descriptor();
         }
@@ -313,8 +325,9 @@ std::unique_ptr<MinecraftInstance> FlameCreationTask::createInstance()
 
     try {
         QString index_path(FS::PathCombine(m_stagingPath, "manifest.json"));
-        if (!m_pack.is_loaded)
+        if (!m_pack.is_loaded) {
             Flame::loadManifest(m_pack, index_path);
+        }
 
         // Keep index file in case we need it some other time (like when changing versions)
         QString new_index_place(FS::PathCombine(parent_folder, "manifest.json"));
@@ -351,8 +364,9 @@ std::unique_ptr<MinecraftInstance> FlameCreationTask::createInstance()
         auto id = loader.id;
         if (id.startsWith("neoforge-")) {
             id.remove("neoforge-");
-            if (id.startsWith("1.20.1-"))
+            if (id.startsWith("1.20.1-")) {
                 id.remove("1.20.1-");  // this is a mess for curseforge
+            }
             loaderType = "neoforge";
             loaderUid = "net.neoforged";
         } else if (id.startsWith("forge-")) {
@@ -391,8 +405,9 @@ std::unique_ptr<MinecraftInstance> FlameCreationTask::createInstance()
     components->setComponentVersion("net.minecraft", mcVersion, true);
     if (!loaderType.isEmpty()) {
         auto version = getVersionForLoader(loaderUid, loaderType, loaderVersion, mcVersion);
-        if (version.isEmpty())
+        if (version.isEmpty()) {
             return nullptr;
+        }
         components->setComponentVersion(loaderUid, version);
     }
 
@@ -444,10 +459,11 @@ std::unique_ptr<MinecraftInstance> FlameCreationTask::createInstance()
     }
 
     // Don't add managed info to packs without an ID (most likely imported from ZIP)
-    if (!m_managedId.isEmpty())
+    if (!m_managedId.isEmpty()) {
         instance->setManagedPack("flame", m_managedId, m_pack.name, m_managedVersionId, m_pack.version);
-    else
+    } else {
         instance->setManagedPack("flame", "", name(), "", "");
+    }
 
     instance->setName(name());
 
@@ -614,8 +630,9 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
         }
 
         auto destPath = FS::PathCombine(m_stagingPath, "minecraft", mod.targetFolder, mod.name);
-        if (mod.disabled)
+        if (mod.disabled) {
             destPath += ".disabled";
+        }
 
         setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
 

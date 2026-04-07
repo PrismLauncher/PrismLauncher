@@ -64,8 +64,9 @@ void DataPackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] cons
 
 void DataPackPage::downloadDataPacks()
 {
-    if (m_instance->typeName() != "Minecraft")
+    if (m_instance->typeName() != "Minecraft") {
         return;  // this is a null instance or a legacy instance
+    }
 
     m_downloadDialog = new ResourceDownload::DataPackDownloadDialog(this, m_model, m_instance);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
@@ -88,8 +89,9 @@ void DataPackPage::downloadDialogFinished(int result)
         });
         connect(tasks, &Task::succeeded, [this, tasks]() {
             QStringList warnings = tasks->warnings();
-            if (warnings.count())
+            if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+            }
 
             tasks->deleteLater();
         });
@@ -108,14 +110,16 @@ void DataPackPage::downloadDialogFinished(int result)
 
         m_model->update();
     }
-    if (m_downloadDialog)
+    if (m_downloadDialog) {
         m_downloadDialog->deleteLater();
+    }
 }
 
 void DataPackPage::updateDataPacks()
 {
-    if (m_instance->typeName() != "Minecraft")
+    if (m_instance->typeName() != "Minecraft") {
         return;  // this is a null instance or a legacy instance
+    }
 
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Data pack updates are unavailable when metadata is disabled!"));
@@ -130,15 +134,17 @@ void DataPackPage::updateDataPacks()
                                          QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                 ->exec();
 
-        if (response != QMessageBox::Yes)
+        if (response != QMessageBox::Yes) {
             return;
+        }
     }
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
 
     auto mods_list = m_model->selectedResources(selection);
     bool use_all = mods_list.empty();
-    if (use_all)
+    if (use_all) {
         mods_list = m_model->allResources();
+    }
 
     ResourceUpdateDialog update_dialog(this, m_instance, m_model, mods_list, false, { ModPlatform::ModLoaderType::DataPack });
     update_dialog.checkCandidates();
@@ -194,8 +200,9 @@ void DataPackPage::deleteDataPackMetadata()
 {
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
     auto selectionCount = m_model->selectedDataPacks(selection).length();
-    if (selectionCount == 0)
+    if (selectionCount == 0) {
         return;
+    }
     if (selectionCount > 1) {
         auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
                                                      tr("You are about to remove the metadata for %1 data packs.\n"
@@ -204,8 +211,9 @@ void DataPackPage::deleteDataPackMetadata()
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
-        if (response != QMessageBox::Yes)
+        if (response != QMessageBox::Yes) {
             return;
+        }
     }
 
     m_model->deleteMetadata(selection);
@@ -213,8 +221,9 @@ void DataPackPage::deleteDataPackMetadata()
 
 void DataPackPage::changeDataPackVersion()
 {
-    if (m_instance->typeName() != "Minecraft")
+    if (m_instance->typeName() != "Minecraft") {
         return;  // this is a null instance or a legacy instance
+    }
 
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Data pack updates are unavailable when metadata is disabled!"));
@@ -223,13 +232,15 @@ void DataPackPage::changeDataPackVersion()
 
     const QModelIndexList rows = ui->treeView->selectionModel()->selectedRows();
 
-    if (rows.count() != 1)
+    if (rows.count() != 1) {
         return;
+    }
 
     Resource& resource = m_model->at(m_filterModel->mapToSource(rows[0]).row());
 
-    if (resource.metadata() == nullptr)
+    if (resource.metadata() == nullptr) {
         return;
+    }
 
     ResourceDownload::DataPackDownloadDialog mdownload(this, m_model, m_instance);
     mdownload.setResourceMetadata(resource.metadata());
@@ -245,8 +256,9 @@ void DataPackPage::changeDataPackVersion()
         });
         connect(tasks, &Task::succeeded, [this, tasks]() {
             QStringList warnings = tasks->warnings();
-            if (warnings.count())
+            if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+            }
 
             tasks->deleteLater();
         });
@@ -271,8 +283,9 @@ GlobalDataPackPage::GlobalDataPackPage(MinecraftInstance* instance, QWidget* par
 
     connect(instance->settings()->getSetting("GlobalDataPacksEnabled").get(), &Setting::SettingChanged, this, [this] {
         updateContent();
-        if (m_container != nullptr)
+        if (m_container != nullptr) {
             m_container->refreshContainer();
+        }
     });
 
     connect(instance->settings()->getSetting("GlobalDataPacksPath").get(), &Setting::SettingChanged, this,
@@ -281,24 +294,27 @@ GlobalDataPackPage::GlobalDataPackPage(MinecraftInstance* instance, QWidget* par
 
 QString GlobalDataPackPage::displayName() const
 {
-    if (m_underlyingPage == nullptr)
+    if (m_underlyingPage == nullptr) {
         return {};
+    }
 
     return m_underlyingPage->displayName();
 }
 
 QIcon GlobalDataPackPage::icon() const
 {
-    if (m_underlyingPage == nullptr)
+    if (m_underlyingPage == nullptr) {
         return {};
+    }
 
     return m_underlyingPage->icon();
 }
 
 QString GlobalDataPackPage::helpPage() const
 {
-    if (m_underlyingPage == nullptr)
+    if (m_underlyingPage == nullptr) {
         return {};
+    }
 
     return m_underlyingPage->helpPage();
 }
@@ -315,21 +331,24 @@ bool GlobalDataPackPage::apply()
 
 void GlobalDataPackPage::openedImpl()
 {
-    if (m_underlyingPage != nullptr)
+    if (m_underlyingPage != nullptr) {
         m_underlyingPage->openedImpl();
+    }
 }
 
 void GlobalDataPackPage::closedImpl()
 {
-    if (m_underlyingPage != nullptr)
+    if (m_underlyingPage != nullptr) {
         m_underlyingPage->closedImpl();
+    }
 }
 
 void GlobalDataPackPage::updateContent()
 {
     if (m_underlyingPage != nullptr) {
-        if (m_container->selectedPage() == this)
+        if (m_container->selectedPage() == this) {
             m_underlyingPage->closedImpl();
+        }
 
         m_underlyingPage->apply();
 
@@ -344,8 +363,9 @@ void GlobalDataPackPage::updateContent()
         m_underlyingPage->setParentContainer(m_container);
         m_underlyingPage->updateExtraInfo = [this](QString id, QString value) { updateExtraInfo(std::move(id), std::move(value)); };
 
-        if (m_container->selectedPage() == this)
+        if (m_container->selectedPage() == this) {
             m_underlyingPage->openedImpl();
+        }
 
         layout()->addWidget(m_underlyingPage);
     }

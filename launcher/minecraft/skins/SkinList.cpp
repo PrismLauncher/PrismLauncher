@@ -121,8 +121,9 @@ bool SkinList::update()
     auto folderContents = m_dir.entryInfoList();
     // if there are any untracked files...
     for (QFileInfo entry : folderContents) {
-        if (!entry.isFile() && entry.suffix() != "png")
+        if (!entry.isFile() && entry.suffix() != "png") {
             continue;
+        }
 
         SkinModel w(entry.absoluteFilePath());
         if (w.isValid()) {
@@ -144,22 +145,26 @@ bool SkinList::update()
     beginResetModel();
     m_skinList.swap(newSkins);
     endResetModel();
-    if (needsSave)
+    if (needsSave) {
         save();
+    }
     return true;
 }
 
 void SkinList::directoryChanged(const QString& path)
 {
     QDir new_dir(path);
-    if (!new_dir.exists())
-        if (!FS::ensureFolderPathExists(new_dir.absolutePath()))
+    if (!new_dir.exists()) {
+        if (!FS::ensureFolderPathExists(new_dir.absolutePath())) {
             return;
+        }
+    }
     if (m_dir.absolutePath() != new_dir.absolutePath()) {
         m_dir.setPath(path);
         m_dir.refresh();
-        if (m_isWatching)
+        if (m_isWatching) {
             stopWatching();
+        }
         startWatching();
     }
     update();
@@ -169,8 +174,9 @@ void SkinList::fileChanged(const QString& path)
 {
     qDebug() << "Checking" << path;
     QFileInfo checkfile(path);
-    if (!checkfile.exists())
+    if (!checkfile.exists()) {
         return;
+    }
 
     for (int i = 0; i < m_skinList.count(); i++) {
         if (m_skinList[i].getPath() == checkfile.absoluteFilePath()) {
@@ -197,11 +203,13 @@ bool SkinList::dropMimeData(const QMimeData* data,
                             [[maybe_unused]] int column,
                             [[maybe_unused]] const QModelIndex& parent)
 {
-    if (action == Qt::IgnoreAction)
+    if (action == Qt::IgnoreAction) {
         return true;
+    }
     // check if the action is supported
-    if (!data || !(action & supportedDropActions()))
+    if (!data || !(action & supportedDropActions())) {
         return false;
+    }
 
     // files dropped from outside?
     if (data->hasUrls()) {
@@ -209,8 +217,9 @@ bool SkinList::dropMimeData(const QMimeData* data,
         QStringList skinFiles;
         for (auto url : urls) {
             // only local files may be dropped...
-            if (!url.isLocalFile())
+            if (!url.isLocalFile()) {
                 continue;
+            }
             skinFiles << url.toLocalFile();
         }
         installSkins(skinFiles);
@@ -230,13 +239,15 @@ Qt::ItemFlags SkinList::flags(const QModelIndex& index) const
 
 QVariant SkinList::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return QVariant();
+    }
 
     int row = index.row();
 
-    if (row < 0 || row >= m_skinList.size())
+    if (row < 0 || row >= m_skinList.size()) {
         return QVariant();
+    }
     auto skin = m_skinList[row];
     switch (role) {
         case Qt::DecorationRole: {
@@ -264,8 +275,9 @@ int SkinList::rowCount(const QModelIndex& parent) const
 
 void SkinList::installSkins(const QStringList& iconFiles)
 {
-    for (QString file : iconFiles)
+    for (QString file : iconFiles) {
         installSkin(file);
+    }
 }
 
 QString getUniqueFile(const QString& root, const QString& file)
@@ -279,8 +291,9 @@ QString getUniqueFile(const QString& root, const QString& file)
     QString extension = QFileInfo(file).suffix();
     int tries = 0;
     while (QFileInfo::exists(result)) {
-        if (++tries > 256)
+        if (++tries > 256) {
             return {};
+        }
 
         QString key = QString("%1%2.%3").arg(baseName).arg(tries).arg(extension);
         result = FS::PathCombine(root, key);
@@ -290,17 +303,22 @@ QString getUniqueFile(const QString& root, const QString& file)
 }
 QString SkinList::installSkin(const QString& file, const QString& name)
 {
-    if (file.isEmpty())
+    if (file.isEmpty()) {
         return tr("Path is empty.");
+    }
     QFileInfo fileinfo(file);
-    if (!fileinfo.exists())
+    if (!fileinfo.exists()) {
         return tr("File doesn't exist.");
-    if (!fileinfo.isFile())
+    }
+    if (!fileinfo.isFile()) {
         return tr("Not a file.");
-    if (!fileinfo.isReadable())
+    }
+    if (!fileinfo.isReadable()) {
         return tr("File is not readable.");
-    if (fileinfo.suffix() != "png" && !SkinModel(fileinfo.absoluteFilePath()).isValid())
+    }
+    if (fileinfo.suffix() != "png" && !SkinModel(fileinfo.absoluteFilePath()).isValid()) {
         return tr("Skin images must be 64x64 or 64x32 pixel PNG files.");
+    }
 
     QString target = getUniqueFile(m_dir.absolutePath(), name.isEmpty() ? fileinfo.fileName() : name);
 
@@ -320,16 +338,18 @@ int SkinList::getSkinIndex(const QString& key) const
 const SkinModel* SkinList::skin(const QString& key) const
 {
     int idx = getSkinIndex(key);
-    if (idx == -1)
+    if (idx == -1) {
         return nullptr;
+    }
     return &m_skinList[idx];
 }
 
 SkinModel* SkinList::skin(const QString& key)
 {
     int idx = getSkinIndex(key);
-    if (idx == -1)
+    if (idx == -1) {
         return nullptr;
+    }
     return &m_skinList[idx];
 }
 
@@ -386,13 +406,15 @@ bool SkinList::setData(const QModelIndex& idx, const QVariant& value, int role)
     }
 
     int row = idx.row();
-    if (row < 0 || row >= m_skinList.size())
+    if (row < 0 || row >= m_skinList.size()) {
         return false;
+    }
     auto& skin = m_skinList[row];
     auto newName = value.toString();
     if (skin.name() != newName) {
-        if (!skin.rename(newName))
+        if (!skin.rename(newName)) {
             return false;
+        }
         save();
     }
     return true;

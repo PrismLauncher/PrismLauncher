@@ -79,16 +79,19 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.extraData.issuesUrl = obj["issues_url"].toString();
-    if (pack.extraData.issuesUrl.endsWith('/'))
+    if (pack.extraData.issuesUrl.endsWith('/')) {
         pack.extraData.issuesUrl.chop(1);
+    }
 
     pack.extraData.sourceUrl = obj["source_url"].toString();
-    if (pack.extraData.sourceUrl.endsWith('/'))
+    if (pack.extraData.sourceUrl.endsWith('/')) {
         pack.extraData.sourceUrl.chop(1);
+    }
 
     pack.extraData.wikiUrl = obj["wiki_url"].toString();
-    if (pack.extraData.wikiUrl.endsWith('/'))
+    if (pack.extraData.wikiUrl.endsWith('/')) {
         pack.extraData.wikiUrl.chop(1);
+    }
 
     pack.extraData.discordUrl = obj["discord_url"].toString();
     if (pack.extraData.discordUrl.endsWith('/')) {

@@ -87,8 +87,9 @@ ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, ResourceFolderMo
 
 void ResourceDownloadDialog::accept()
 {
-    if (!geometrySaveKey().isEmpty())
+    if (!geometrySaveKey().isEmpty()) {
         APPLICATION->settings()->set(geometrySaveKey(), QString::fromUtf8(saveGeometry().toBase64()));
+    }
 
     QDialog::accept();
 }
@@ -108,8 +109,9 @@ void ResourceDownloadDialog::reject()
         }
     }
 
-    if (!geometrySaveKey().isEmpty())
+    if (!geometrySaveKey().isEmpty()) {
         APPLICATION->settings()->set(geometrySaveKey(), QString::fromUtf8(saveGeometry().toBase64()));
+    }
 
     QDialog::reject();
 }
@@ -201,14 +203,16 @@ void ResourceDownloadDialog::confirm()
         auto deselected = confirm_dialog->deselectedResources();
         for (auto* page : m_container->getPages()) {
             auto* res = static_cast<ResourcePage*>(page);
-            for (auto name : deselected)
+            for (auto name : deselected) {
                 res->removeResourceFromPage(name);
+            }
         }
 
         this->accept();
     } else {
-        for (auto name : depNames)
+        for (auto name : depNames) {
             removeResource(name);
+        }
     }
 }
 
@@ -281,8 +285,9 @@ ModDownloadDialog::ModDownloadDialog(QWidget* parent, ModFolderModel* mods, Base
     initializeContainer();
     connectButtons();
 
-    if (!geometrySaveKey().isEmpty())
+    if (!geometrySaveKey().isEmpty()) {
         restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toString().toUtf8()));
+    }
 }
 
 QList<BasePage*> ModDownloadDialog::getPages()
@@ -291,10 +296,12 @@ QList<BasePage*> ModDownloadDialog::getPages()
 
     auto loaders = static_cast<MinecraftInstance*>(m_instance)->getPackProfile()->getSupportedModLoaders().value();
 
-    if (ModrinthAPI::validateModLoaders(loaders))
+    if (ModrinthAPI::validateModLoaders(loaders)) {
         pages.append(ModrinthModPage::create(this, *m_instance));
-    if (APPLICATION->capabilities() & Application::SupportsFlame && FlameAPI::validateModLoaders(loaders))
+    }
+    if (APPLICATION->capabilities() & Application::SupportsFlame && FlameAPI::validateModLoaders(loaders)) {
         pages.append(FlameModPage::create(this, *m_instance));
+    }
 
     return pages;
 }
@@ -322,8 +329,9 @@ ResourcePackDownloadDialog::ResourcePackDownloadDialog(QWidget* parent, Resource
     initializeContainer();
     connectButtons();
 
-    if (!geometrySaveKey().isEmpty())
+    if (!geometrySaveKey().isEmpty()) {
         restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toString().toUtf8()));
+    }
 }
 
 QList<BasePage*> ResourcePackDownloadDialog::getPages()
@@ -331,8 +339,9 @@ QList<BasePage*> ResourcePackDownloadDialog::getPages()
     QList<BasePage*> pages;
 
     pages.append(ModrinthResourcePackPage::create(this, *m_instance));
-    if (APPLICATION->capabilities() & Application::SupportsFlame)
+    if (APPLICATION->capabilities() & Application::SupportsFlame) {
         pages.append(FlameResourcePackPage::create(this, *m_instance));
+    }
 
     return pages;
 }
@@ -345,8 +354,9 @@ TexturePackDownloadDialog::TexturePackDownloadDialog(QWidget* parent, TexturePac
     initializeContainer();
     connectButtons();
 
-    if (!geometrySaveKey().isEmpty())
+    if (!geometrySaveKey().isEmpty()) {
         restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toString().toUtf8()));
+    }
 }
 
 QList<BasePage*> TexturePackDownloadDialog::getPages()
@@ -354,8 +364,9 @@ QList<BasePage*> TexturePackDownloadDialog::getPages()
     QList<BasePage*> pages;
 
     pages.append(ModrinthTexturePackPage::create(this, *m_instance));
-    if (APPLICATION->capabilities() & Application::SupportsFlame)
+    if (APPLICATION->capabilities() & Application::SupportsFlame) {
         pages.append(FlameTexturePackPage::create(this, *m_instance));
+    }
 
     return pages;
 }
@@ -368,16 +379,18 @@ ShaderPackDownloadDialog::ShaderPackDownloadDialog(QWidget* parent, ShaderPackFo
     initializeContainer();
     connectButtons();
 
-    if (!geometrySaveKey().isEmpty())
+    if (!geometrySaveKey().isEmpty()) {
         restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toString().toUtf8()));
+    }
 }
 
 QList<BasePage*> ShaderPackDownloadDialog::getPages()
 {
     QList<BasePage*> pages;
     pages.append(ModrinthShaderPackPage::create(this, *m_instance));
-    if (APPLICATION->capabilities() & Application::SupportsFlame)
+    if (APPLICATION->capabilities() & Application::SupportsFlame) {
         pages.append(FlameShaderPackPage::create(this, *m_instance));
+    }
     return pages;
 }
 
@@ -406,16 +419,18 @@ DataPackDownloadDialog::DataPackDownloadDialog(QWidget* parent, DataPackFolderMo
     initializeContainer();
     connectButtons();
 
-    if (!geometrySaveKey().isEmpty())
+    if (!geometrySaveKey().isEmpty()) {
         restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toByteArray()));
+    }
 }
 
 QList<BasePage*> DataPackDownloadDialog::getPages()
 {
     QList<BasePage*> pages;
     pages.append(ModrinthDataPackPage::create(this, *m_instance));
-    if (APPLICATION->capabilities() & Application::SupportsFlame)
+    if (APPLICATION->capabilities() & Application::SupportsFlame) {
         pages.append(FlameDataPackPage::create(this, *m_instance));
+    }
     return pages;
 }
 

@@ -56,10 +56,12 @@ static void viewItemTextLayout(QTextLayout& textLayout, int lineWidth, qreal& he
     QString str = textLayout.text();
     while (true) {
         QTextLine line = textLayout.createLine();
-        if (!line.isValid())
+        if (!line.isValid()) {
             break;
-        if (line.textLength() == 0)
+        }
+        if (line.textLength() == 0) {
             break;
+        }
         line.setLineWidth(lineWidth);
         line.setPosition(QPointF(0, height));
         height += line.height();
@@ -83,8 +85,9 @@ void drawSelectionRect(QPainter* painter, const QStyleOptionViewItem& option, co
 
 void drawFocusRect(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect)
 {
-    if (!(option.state & QStyle::State_HasFocus))
+    if (!(option.state & QStyle::State_HasFocus)) {
         return;
+    }
     QStyleOptionFocusRect opt;
     opt.direction = option.direction;
     opt.fontMetrics = option.fontMetrics;
@@ -265,10 +268,11 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 
     // icon mode and state, also used for badges
     QIcon::Mode mode = QIcon::Normal;
-    if (!(opt.state & QStyle::State_Enabled))
+    if (!(opt.state & QStyle::State_Enabled)) {
         mode = QIcon::Disabled;
-    else if (opt.state & QStyle::State_Selected)
+    } else if (opt.state & QStyle::State_Selected) {
         mode = QIcon::Selected;
+    }
     QIcon::State state = opt.state & QStyle::State_Open ? QIcon::On : QIcon::Off;
 
     // draw the icon
@@ -278,8 +282,9 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     }
     // set the text colors
     QPalette::ColorGroup cg = opt.state & QStyle::State_Enabled ? QPalette::Normal : QPalette::Disabled;
-    if (cg == QPalette::Normal && !(opt.state & QStyle::State_Active))
+    if (cg == QPalette::Normal && !(opt.state & QStyle::State_Active)) {
         cg = QPalette::Inactive;
+    }
     if (opt.state & QStyle::State_Selected) {
         painter->setPen(opt.palette.color(cg, QPalette::HighlightedText));
     } else {

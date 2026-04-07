@@ -122,11 +122,13 @@ static std::unique_ptr<nbt::tag_compound> parseServersDat(const QString& filenam
         std::istringstream foo(std::string(input.constData(), input.size()));
         auto pair = nbt::io::read_compound(foo);
 
-        if (!pair.first.empty())
+        if (!pair.first.empty()) {
             return nullptr;
+        }
 
-        if (pair.second == nullptr)
+        if (pair.second == nullptr) {
             return nullptr;
+        }
 
         return std::move(pair.second);
     } catch (...) {
@@ -276,8 +278,9 @@ class ServersModel : public QAbstractListModel {
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override
     {
-        if (section < 0 || section >= COLUMN_COUNT)
+        if (section < 0 || section >= COLUMN_COUNT) {
             return QVariant();
+        }
 
         if (role == Qt::DisplayRole) {
             switch (section) {
@@ -295,16 +298,19 @@ class ServersModel : public QAbstractListModel {
 
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
     {
-        if (!index.isValid())
+        if (!index.isValid()) {
             return QVariant();
+        }
 
         int row = index.row();
         int column = index.column();
-        if (column < 0 || column >= COLUMN_COUNT)
+        if (column < 0 || column >= COLUMN_COUNT) {
             return QVariant();
+        }
 
-        if (row < 0 || row >= m_servers.size())
+        if (row < 0 || row >= m_servers.size()) {
             return QVariant();
+        }
 
         switch (role) {
             case Qt::DecorationRole: {
@@ -312,8 +318,9 @@ class ServersModel : public QAbstractListModel {
                     const auto& bytes = m_servers[row].m_icon;
                     if (bytes.size()) {
                         QPixmap px;
-                        if (px.loadFromData(bytes))
+                        if (px.loadFromData(bytes)) {
                             return QIcon(px);
+                        }
                     }
                     return QIcon::fromTheme("unknown_server");
                 }
@@ -335,10 +342,11 @@ class ServersModel : public QAbstractListModel {
                         return QVariant();
                 }
             case ServerPtrRole:
-                if (column == 0)
+                if (column == 0) {
                     return QVariant::fromValue<void*>((void*)&m_servers[row]);
-                else
+                } else {
                     return QVariant();
+                }
             default:
                 return QVariant();
         }
@@ -446,8 +454,9 @@ class ServersModel : public QAbstractListModel {
 
             // Update the model when the task is done
             connect(task, &Task::finished, this, [this, task, row]() {
-                if (m_servers.size() < row)
+                if (m_servers.size() < row) {
                     return;
+                }
                 m_servers[row].m_currentPlayers = task->m_outputOnlinePlayers;
                 emit dataChanged(index(row, 0), index(row, COLUMN_COUNT - 1));
             });
@@ -732,8 +741,9 @@ void ServersPage::on_actionRemove_triggered()
                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
             ->exec();
 
-    if (response != QMessageBox::Yes)
+    if (response != QMessageBox::Yes) {
         return;
+    }
 
     m_model->removeRow(currentServer);
 }

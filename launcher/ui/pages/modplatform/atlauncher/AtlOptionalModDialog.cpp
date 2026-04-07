@@ -258,16 +258,18 @@ void AtlOptionalModListModel::toggleMod(const ATLauncher::VersionMod& mod, int i
 
 void AtlOptionalModListModel::setMod(const ATLauncher::VersionMod& mod, int index, bool enable, bool shouldEmit)
 {
-    if (m_selection[mod.name] == enable)
+    if (m_selection[mod.name] == enable) {
         return;
+    }
 
     m_selection[mod.name] = enable;
 
     // disable other mods in the group, if applicable
     if (enable && !mod.group.isEmpty()) {
         for (int i = 0; i < m_mods.size(); i++) {
-            if (index == i)
+            if (index == i) {
                 continue;
+            }
             auto other = m_mods.at(i);
 
             if (mod.group == other.group) {

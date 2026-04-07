@@ -117,16 +117,19 @@ static std::tuple<bool, QString, bool> contains_level_dat(QString fileName)
     for (auto file : zip.getFiles()) {
         QString relativePath = file;
         if (saves) {
-            if (!relativePath.startsWith("saves/", Qt::CaseInsensitive))
+            if (!relativePath.startsWith("saves/", Qt::CaseInsensitive)) {
                 continue;
+            }
             relativePath = relativePath.mid(QString("saves/").length());
         }
-        if (!relativePath.endsWith("/level.dat", Qt::CaseInsensitive))
+        if (!relativePath.endsWith("/level.dat", Qt::CaseInsensitive)) {
             continue;
+        }
 
         int slashIndex = relativePath.indexOf('/');
-        if (slashIndex == -1)
+        if (slashIndex == -1) {
             continue;  // malformed: no slash between saves/ and level.dat
+        }
 
         QString worldName = relativePath.left(slashIndex);
         QString remaining = relativePath.mid(slashIndex + 1);
@@ -193,8 +196,9 @@ void LocalWorldSaveParseTask::executeTask()
         return;
     }
 
-    if (m_aborted)
+    if (m_aborted) {
         emitAborted();
-    else
+    } else {
         emitSucceeded();
+    }
 }

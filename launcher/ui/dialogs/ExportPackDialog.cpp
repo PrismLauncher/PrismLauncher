@@ -150,10 +150,11 @@ void ExportPackDialog::done(int result)
     } else {
         settings->set("ExportAuthor", m_ui->author->text());
 
-        if (m_ui->recommendedMemoryCheckBox->isChecked())
+        if (m_ui->recommendedMemoryCheckBox->isChecked()) {
             settings->set("ExportRecommendedRAM", m_ui->recommendedMemory->value());
-        else
+        } else {
             settings->reset("ExportRecommendedRAM");
+        }
     }
 
     if (result == Accepted) {
@@ -164,17 +165,21 @@ void ExportPackDialog::done(int result)
         if (m_provider == ModPlatform::ResourceProvider::MODRINTH) {
             output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(name), FS::PathCombine(QDir::homePath(), filename + ".mrpack"),
                                                   tr("Modrinth pack") + " (*.mrpack *.zip)", nullptr);
-            if (output.isEmpty())
+            if (output.isEmpty()) {
                 return;
-            if (!(output.endsWith(".zip") || output.endsWith(".mrpack")))
+            }
+            if (!(output.endsWith(".zip") || output.endsWith(".mrpack"))) {
                 output.append(".mrpack");
+            }
         } else {
             output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(name), FS::PathCombine(QDir::homePath(), filename + ".zip"),
                                                   tr("CurseForge pack") + " (*.zip)", nullptr);
-            if (output.isEmpty())
+            if (output.isEmpty()) {
                 return;
-            if (!output.endsWith(".zip"))
+            }
+            if (!output.endsWith(".zip")) {
                 output.append(".zip");
+            }
         }
 
         Task* task;
@@ -206,8 +211,9 @@ void ExportPackDialog::done(int result)
 
         ProgressDialog progress(this);
         progress.setSkipButton(true, tr("Abort"));
-        if (progress.execWithTask(task) != QDialog::Accepted)
+        if (progress.execWithTask(task) != QDialog::Accepted) {
             return;
+        }
     }
 
     QDialog::done(result);

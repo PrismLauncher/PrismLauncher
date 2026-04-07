@@ -64,8 +64,9 @@ Task::State FileSink::init(QNetworkRequest& request)
         return Task::State::Failed;
     }
 
-    if (initAllValidators(request))
+    if (initAllValidators(request)) {
         return Task::State::Running;
+    }
     m_fail_reason = "Failed to initialize validators";
     return Task::State::Failed;
 }

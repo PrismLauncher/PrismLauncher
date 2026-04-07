@@ -165,8 +165,9 @@ class Task : public QObject, public QRunnable {
     //! used by external code to ask the task to abort
     virtual bool abort()
     {
-        if (canAbort())
+        if (canAbort()) {
             emitAborted();
+        }
         return canAbort();
     }
 

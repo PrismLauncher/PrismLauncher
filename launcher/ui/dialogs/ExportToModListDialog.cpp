@@ -56,8 +56,9 @@ ExportToModListDialog::ExportToModListDialog(QString name, QList<Mod*> mods, QWi
     connect(ui->urlButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Url); });
     connect(ui->filenameButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::FileName); });
     connect(ui->templateText, &QTextEdit::textChanged, this, [this] {
-        if (ui->templateText->toPlainText() != exampleLines[m_format])
+        if (ui->templateText->toPlainText() != exampleLines[m_format]) {
             ui->formatComboBox->setCurrentIndex(5);
+        }
         triggerImp();
     });
     connect(ui->copyButton, &QPushButton::clicked, this, [this](bool) {
@@ -126,14 +127,18 @@ void ExportToModListDialog::triggerImp()
         return;
     }
     auto opt = 0;
-    if (ui->authorsCheckBox->isChecked())
+    if (ui->authorsCheckBox->isChecked()) {
         opt |= ExportToModList::Authors;
-    if (ui->versionCheckBox->isChecked())
+    }
+    if (ui->versionCheckBox->isChecked()) {
         opt |= ExportToModList::Version;
-    if (ui->urlCheckBox->isChecked())
+    }
+    if (ui->urlCheckBox->isChecked()) {
         opt |= ExportToModList::Url;
-    if (ui->filenameCheckBox->isChecked())
+    }
+    if (ui->filenameCheckBox->isChecked()) {
         opt |= ExportToModList::FileName;
+    }
     auto txt = ExportToModList::exportToModList(m_mods, m_format, static_cast<ExportToModList::OptionalData>(opt));
     ui->finalText->setPlainText(txt);
     switch (m_format) {
@@ -153,8 +158,9 @@ void ExportToModListDialog::triggerImp()
             break;
     }
     auto exampleLine = exampleLines[m_format];
-    if (!m_template_changed && ui->templateText->toPlainText() != exampleLine)
+    if (!m_template_changed && ui->templateText->toPlainText() != exampleLine) {
         ui->templateText->setPlainText(exampleLine);
+    }
 }
 
 void ExportToModListDialog::done(int result)
@@ -165,8 +171,9 @@ void ExportToModListDialog::done(int result)
             QFileDialog::getSaveFileName(this, tr("Export %1").arg(m_name), FS::PathCombine(QDir::homePath(), filename + extension()),
                                          tr("File") + " (*.txt *.html *.md *.json *.csv)", nullptr);
 
-        if (output.isEmpty())
+        if (output.isEmpty()) {
             return;
+        }
 
         try {
             FS::write(output, ui->finalText->toPlainText().toUtf8());
@@ -199,8 +206,9 @@ QString ExportToModListDialog::extension()
 
 void ExportToModListDialog::addExtra(ExportToModList::OptionalData option)
 {
-    if (m_format != ExportToModList::CUSTOM)
+    if (m_format != ExportToModList::CUSTOM) {
         return;
+    }
     switch (option) {
         case ExportToModList::Authors:
             ui->templateText->insertPlainText("{authors}");

@@ -62,14 +62,16 @@ Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatf
     QObject::connect(netJob.get(), &NetJob::failed, [weak, callbacks](const QString& reason) {
         int network_error_code = -1;
         if (auto netJob = weak.lock()) {
-            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
+            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action) {
                 network_error_code = failed_action->replyStatusCode();
+            }
         }
         callbacks.on_fail(reason, network_error_code);
     });
     QObject::connect(netJob.get(), &NetJob::aborted, [callbacks] {
-        if (callbacks.on_abort != nullptr)
+        if (callbacks.on_abort != nullptr) {
             callbacks.on_abort();
+        }
     });
 
     return netJob;
@@ -78,8 +80,9 @@ Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatf
 Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVector<ModPlatform::IndexedVersion>>&& callbacks) const
 {
     auto versions_url_optional = getVersionsURL(args);
-    if (!versions_url_optional.has_value())
+    if (!versions_url_optional.has_value()) {
         return nullptr;
+    }
 
     auto versions_url = versions_url_optional.value();
 
@@ -135,14 +138,16 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
     QObject::connect(netJob.get(), &NetJob::failed, [weak, callbacks](const QString& reason) {
         int network_error_code = -1;
         if (auto netJob = weak.lock()) {
-            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
+            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action) {
                 network_error_code = failed_action->replyStatusCode();
+            }
         }
         callbacks.on_fail(reason, network_error_code);
     });
     QObject::connect(netJob.get(), &NetJob::aborted, [callbacks] {
-        if (callbacks.on_abort != nullptr)
+        if (callbacks.on_abort != nullptr) {
             callbacks.on_abort();
+        }
     });
 
     return netJob;
@@ -164,8 +169,9 @@ Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<ModPlatfo
         }
         try {
             auto obj = Json::requireObject(doc);
-            if (obj.contains("data"))
+            if (obj.contains("data")) {
                 obj = Json::requireObject(obj, "data");
+            }
             loadIndexedPack(*pack, obj);
             loadExtraPackInfo(*pack, obj);
         } catch (const JSONValidationError& e) {
@@ -190,8 +196,9 @@ Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<ModPlatfo
         callbacks.on_fail(reason, network_error_code);
     });
     QObject::connect(job.get(), &NetJob::aborted, [callbacks] {
-        if (callbacks.on_abort != nullptr)
+        if (callbacks.on_abort != nullptr) {
             callbacks.on_abort();
+        }
     });
     return job;
 }
@@ -199,8 +206,9 @@ Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<ModPlatfo
 Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callback<ModPlatform::IndexedVersion>&& callbacks) const
 {
     auto versions_url_optional = getDependencyURL(args);
-    if (!versions_url_optional.has_value())
+    if (!versions_url_optional.has_value()) {
         return nullptr;
+    }
 
     auto versions_url = versions_url_optional.value();
 
@@ -230,12 +238,14 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
             auto obj = versionIter.toObject();
 
             auto file = loadIndexedPackVersion(obj, ModPlatform::ResourceType::Mod);
-            if (!file.addonId.isValid())
+            if (!file.addonId.isValid()) {
                 file.addonId = args.dependency.addonId;
+            }
 
             if (file.fileId.isValid() &&
-                (!file.loaders || args.loader & file.loaders))  // Heuristic to check if the returned value is valid
+                (!file.loaders || args.loader & file.loaders)) {  // Heuristic to check if the returned value is valid
                 versions.append(file);
+            }
         }
 
         auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
@@ -254,8 +264,9 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
     QObject::connect(netJob.get(), &NetJob::failed, [weak, callbacks](const QString& reason) {
         int network_error_code = -1;
         if (auto netJob = weak.lock()) {
-            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
+            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action) {
                 network_error_code = failed_action->replyStatusCode();
+            }
         }
         callbacks.on_fail(reason, network_error_code);
     });
@@ -287,8 +298,9 @@ QString ResourceAPI::mapMCVersionToModrinth(Version v)
 std::pair<Task::Ptr, QByteArray*> ResourceAPI::getProject(QString addonId) const
 {
     auto project_url_optional = getInfoURL(addonId);
-    if (!project_url_optional.has_value())
+    if (!project_url_optional.has_value()) {
         return { nullptr, nullptr };
+    }
 
     auto project_url = project_url_optional.value();
 

@@ -54,8 +54,9 @@ class NotesPage : public QWidget, public BasePage {
     virtual QIcon icon() const override
     {
         auto icon = QIcon::fromTheme("notes");
-        if (icon.isNull())
+        if (icon.isNull()) {
             icon = QIcon::fromTheme("news");
+        }
         return icon;
     }
     virtual QString id() const override { return "notes"; }

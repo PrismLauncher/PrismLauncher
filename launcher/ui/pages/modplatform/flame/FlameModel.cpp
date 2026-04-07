@@ -77,8 +77,9 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
 bool ListModel::setData(const QModelIndex& index, const QVariant& value, [[maybe_unused]] int role)
 {
     int pos = index.row();
-    if (pos >= m_modpacks.size() || pos < 0 || !index.isValid())
+    if (pos >= m_modpacks.size() || pos < 0 || !index.isValid()) {
         return false;
+    }
 
     m_modpacks[pos] = value.value<ModPlatform::IndexedPack::Ptr>();
 
@@ -153,8 +154,9 @@ bool ListModel::canFetchMore([[maybe_unused]] const QModelIndex& parent) const
 
 void ListModel::fetchMore(const QModelIndex& parent)
 {
-    if (parent.isValid())
+    if (parent.isValid()) {
         return;
+    }
     if (m_nextSearchOffset == 0) {
         qWarning() << "fetchMore with 0 offset is wrong...";
         return;
@@ -229,8 +231,9 @@ void ListModel::searchWithTerm(const QString& term, int sort, std::shared_ptr<Mo
 
 void Flame::ListModel::searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr>& newList)
 {
-    if (hasActiveSearchJob())
+    if (hasActiveSearchJob()) {
         return;
+    }
 
     if (newList.size() < 25) {
         m_searchState = Finished;
@@ -240,8 +243,9 @@ void Flame::ListModel::searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr
     }
 
     // When you have a Qt build with assertions turned on, proceeding here will abort the application
-    if (newList.empty())
+    if (newList.empty()) {
         return;
+    }
 
     beginInsertRows(QModelIndex(), m_modpacks.size(), m_modpacks.size() + newList.size() - 1);
     m_modpacks.append(newList);

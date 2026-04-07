@@ -46,8 +46,9 @@ bool processFolder(TexturePack& pack, ProcessingLevel level)
     QFileInfo mcmeta_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.txt"));
     if (mcmeta_file_info.isFile()) {
         QFile mcmeta_file(mcmeta_file_info.filePath());
-        if (!mcmeta_file.open(QIODevice::ReadOnly))
+        if (!mcmeta_file.open(QIODevice::ReadOnly)) {
             return false;
+        }
 
         auto data = mcmeta_file.readAll();
 
@@ -61,14 +62,16 @@ bool processFolder(TexturePack& pack, ProcessingLevel level)
         return false;
     }
 
-    if (level == ProcessingLevel::BasicInfoOnly)
+    if (level == ProcessingLevel::BasicInfoOnly) {
         return true;
+    }
 
     QFileInfo image_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.png"));
     if (image_file_info.isFile()) {
         QFile mcmeta_file(image_file_info.filePath());
-        if (!mcmeta_file.open(QIODevice::ReadOnly))
+        if (!mcmeta_file.open(QIODevice::ReadOnly)) {
             return false;
+        }
 
         auto data = mcmeta_file.readAll();
 
@@ -141,8 +144,9 @@ bool processPackPNG(const TexturePack& pack)
             QFileInfo image_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.png"));
             if (image_file_info.exists() && image_file_info.isFile()) {
                 QFile pack_png_file(image_file_info.filePath());
-                if (!pack_png_file.open(QIODevice::ReadOnly))
+                if (!pack_png_file.open(QIODevice::ReadOnly)) {
                     return png_invalid();  // can't open pack.png file
+                }
 
                 auto data = pack_png_file.readAll();
 
@@ -201,8 +205,9 @@ void LocalTexturePackParseTask::executeTask()
         return;
     }
 
-    if (m_aborted)
+    if (m_aborted) {
         emitAborted();
-    else
+    } else {
         emitSucceeded();
+    }
 }

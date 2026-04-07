@@ -44,27 +44,32 @@ void FlameMod::loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     auto links_obj = obj["links"].toObject();
 
     pack.extraData.issuesUrl = links_obj["issuesUrl"].toString();
-    if (pack.extraData.issuesUrl.endsWith('/'))
+    if (pack.extraData.issuesUrl.endsWith('/')) {
         pack.extraData.issuesUrl.chop(1);
+    }
 
     pack.extraData.sourceUrl = links_obj["sourceUrl"].toString();
-    if (pack.extraData.sourceUrl.endsWith('/'))
+    if (pack.extraData.sourceUrl.endsWith('/')) {
         pack.extraData.sourceUrl.chop(1);
+    }
 
     pack.extraData.wikiUrl = links_obj["wikiUrl"].toString();
-    if (pack.extraData.wikiUrl.endsWith('/'))
+    if (pack.extraData.wikiUrl.endsWith('/')) {
         pack.extraData.wikiUrl.chop(1);
+    }
 
-    if (!pack.extraData.body.isEmpty())
+    if (!pack.extraData.body.isEmpty()) {
         pack.extraDataLoaded = true;
+    }
 }
 
 void FlameMod::loadBody(ModPlatform::IndexedPack& pack)
 {
     pack.extraData.body = FlameAPI::getModDescription(pack.addonId.toInt());
 
-    if (!pack.extraData.issuesUrl.isEmpty() || !pack.extraData.sourceUrl.isEmpty() || !pack.extraData.wikiUrl.isEmpty())
+    if (!pack.extraData.issuesUrl.isEmpty() || !pack.extraData.sourceUrl.isEmpty() || !pack.extraData.wikiUrl.isEmpty()) {
         pack.extraDataLoaded = true;
+    }
 }
 
 static QString enumToString(int hash_algorithm)
@@ -85,11 +90,13 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArra
         auto obj = versionIter.toObject();
 
         auto file = loadIndexedPackVersion(obj);
-        if (!file.addonId.isValid())
+        if (!file.addonId.isValid()) {
             file.addonId = pack.addonId;
+        }
 
-        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
+        if (file.fileId.isValid()) {  // Heuristic to check if the returned value is valid
             unsortedVersions.append(file);
+        }
     }
 
     auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
@@ -109,8 +116,9 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     for (auto mcVer : versionArray) {
         auto str = mcVer.toString();
 
-        if (str.contains('.'))
+        if (str.contains('.')) {
             file.mcVersion.append(str);
+        }
 
         file.side = ModPlatform::Side::NoSide;
         if (auto loader = str.toLower(); loader == "neoforge") {
@@ -126,10 +134,11 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
         } else if (loader == "quilt") {
             file.loaders |= ModPlatform::Quilt;
         } else if (loader == "server" || loader == "client") {
-            if (file.side == ModPlatform::Side::NoSide)
+            if (file.side == ModPlatform::Side::NoSide) {
                 file.side = ModPlatform::SideUtils::fromString(loader);
-            else if (file.side != ModPlatform::SideUtils::fromString(loader))
+            } else if (file.side != ModPlatform::SideUtils::fromString(loader)) {
                 file.side = ModPlatform::Side::UniversalSide;
+            }
         }
     }
 
@@ -201,8 +210,9 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
         file.dependencies.append(dependency);
     }
 
-    if (load_changelog)
+    if (load_changelog) {
         file.changelog = FlameAPI::getModFileChangelog(file.addonId.toInt(), file.fileId.toInt());
+    }
 
     return file;
 }

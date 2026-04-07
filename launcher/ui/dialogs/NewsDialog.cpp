@@ -56,8 +56,9 @@ void NewsDialog::toggleArticleList()
 
     ui->articleListWidget->setHidden(m_article_list_hidden);
 
-    if (m_article_list_hidden)
+    if (m_article_list_hidden) {
         ui->toggleListButton->setText(tr("Show article list"));
-    else
+    } else {
         ui->toggleListButton->setText(tr("Hide article list"));
+    }
 }

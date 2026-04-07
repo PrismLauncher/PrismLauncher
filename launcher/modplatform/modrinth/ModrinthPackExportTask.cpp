@@ -100,12 +100,14 @@ void ModrinthPackExportTask::collectHashes()
 
         const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
         // require sensible file types
-        if (!std::any_of(PREFIXES.begin(), PREFIXES.end(), [&relative](const QString& prefix) { return relative.startsWith(prefix); }))
+        if (!std::any_of(PREFIXES.begin(), PREFIXES.end(), [&relative](const QString& prefix) { return relative.startsWith(prefix); })) {
             continue;
+        }
         if (!std::any_of(FILE_EXTENSIONS.begin(), FILE_EXTENSIONS.end(), [&relative](const QString& extension) {
                 return relative.endsWith('.' + extension) || relative.endsWith('.' + extension + ".disabled");
-            }))
+            })) {
             continue;
+        }
 
         QFile openFile(file.absoluteFilePath());
         if (!openFile.open(QFile::ReadOnly)) {
@@ -177,8 +179,9 @@ void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
             iterator.next();
 
             const QJsonObject obj = doc[iterator.value()].toObject();
-            if (obj.isEmpty())
+            if (obj.isEmpty()) {
                 continue;
+            }
 
             const QJsonArray files_array = obj["files"].toArray();
             if (auto fileIter = std::find_if(files_array.begin(), files_array.end(),
@@ -241,8 +244,9 @@ QByteArray ModrinthPackExportTask::generateIndex()
     out["game"] = "minecraft";
     out["name"] = name;
     out["versionId"] = version;
-    if (!summary.isEmpty())
+    if (!summary.isEmpty()) {
         out["summary"] = summary;
+    }
 
     if (mcInstance) {
         auto* profile = mcInstance->getPackProfile();
@@ -255,16 +259,21 @@ QByteArray ModrinthPackExportTask::generateIndex()
 
         // convert all available components to mrpack dependencies
         QJsonObject dependencies;
-        if (minecraft != nullptr)
+        if (minecraft != nullptr) {
             dependencies["minecraft"] = minecraft->m_version;
-        if (quilt != nullptr)
+        }
+        if (quilt != nullptr) {
             dependencies["quilt-loader"] = quilt->m_version;
-        if (fabric != nullptr)
+        }
+        if (fabric != nullptr) {
             dependencies["fabric-loader"] = fabric->m_version;
-        if (forge != nullptr)
+        }
+        if (forge != nullptr) {
             dependencies["forge"] = forge->m_version;
-        if (neoForge != nullptr)
+        }
+        if (neoForge != nullptr) {
             dependencies["neoforge"] = neoForge->m_version;
+        }
 
         out["dependencies"] = dependencies;
     }
@@ -292,8 +301,9 @@ QByteArray ModrinthPackExportTask::generateIndex()
 
         // a server side mod does not imply that the mod does not work on the client
         // however, if a mrpack mod is marked as server-only it will not install on the client
-        if (iterator->side == ModPlatform::Side::ClientSide)
+        if (iterator->side == ModPlatform::Side::ClientSide) {
             env["server"] = "unsupported";
+        }
 
         fileOut["env"] = env;
 

@@ -25,8 +25,9 @@ bool IconTheme::load()
 {
     const QString path = m_path + "/index.theme";
 
-    if (!QFile::exists(path))
+    if (!QFile::exists(path)) {
         return false;
+    }
 
     QSettings settings(path, QSettings::IniFormat);
     settings.beginGroup("Icon Theme");

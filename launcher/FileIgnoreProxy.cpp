@@ -81,8 +81,9 @@ bool FileIgnoreProxy::lessThan(const QModelIndex& left, const QModelIndex& right
 
 Qt::ItemFlags FileIgnoreProxy::flags(const QModelIndex& index) const
 {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return Qt::NoItemFlags;
+    }
 
     auto sourceIndex = mapToSource(index);
     Qt::ItemFlags flags = sourceIndex.flags();
@@ -190,8 +191,9 @@ bool FileIgnoreProxy::setFilterState(QModelIndex index, Qt::CheckState state)
         // update everything above index
         QModelIndex up = index.parent();
         while (1) {
-            if (!up.isValid())
+            if (!up.isValid()) {
                 break;
+            }
             emit dataChanged(up, up, { Qt::CheckStateRole });
             up = up.parent();
         }

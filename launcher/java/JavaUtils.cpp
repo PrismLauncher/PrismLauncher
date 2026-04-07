@@ -63,8 +63,9 @@ QString stripVariableEntries(QString name, QString target, QString remove)
 
     for (QString item : toRemove) {
         bool removed = targetItems.removeOne(item);
-        if (!removed)
+        if (!removed) {
             qWarning() << "Entry" << item << "could not be stripped from variable" << name;
+        }
     }
     return targetItems.join(delimiter);
 }
@@ -419,12 +420,14 @@ QList<QString> JavaUtils::FindJavaPaths()
                            const QString& dirPath,
                            const std::function<bool(const QFileInfo&)>& filter = [](const QFileInfo&) { return true; }) {
         QDir dir(dirPath);
-        if (!dir.exists())
+        if (!dir.exists()) {
             return;
+        }
         auto entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
         for (auto& entry : entries) {
-            if (!filter(entry))
+            if (!filter(entry)) {
                 continue;
+            }
 
             QString prefix;
             prefix = entry.canonicalFilePath();
@@ -537,8 +540,9 @@ QStringList getMinecraftJavaBundle()
     while (!processpaths.isEmpty()) {
         auto dirPath = processpaths.takeFirst();
         QDir dir(dirPath);
-        if (!dir.exists())
+        if (!dir.exists()) {
             continue;
+        }
         auto entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
         auto binFound = false;
         for (auto& entry : entries) {
@@ -574,8 +578,9 @@ QStringList getPrismJavaBundle()
     };
     auto scanJavaDir = [scanDir](const QString& dirPath) {
         QDir dir(dirPath);
-        if (!dir.exists())
+        if (!dir.exists()) {
             return;
+        }
         auto entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
         for (auto& entry : entries) {
             scanDir(entry.canonicalFilePath());

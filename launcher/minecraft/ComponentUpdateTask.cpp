@@ -133,12 +133,13 @@ LoadResult loadComponent(ComponentPtr component, Task::Ptr& loadTask, Net::Mode 
         } else {
             loadTask = APPLICATION->metadataIndex()->loadVersion(component->m_uid, component->m_version, netmode);
             loadTask->start();
-            if (netmode == Net::Mode::Online)
+            if (netmode == Net::Mode::Online) {
                 result = LoadResult::RequiresRemote;
-            else if (metaVersion->isLoaded())
+            } else if (metaVersion->isLoaded()) {
                 result = LoadResult::LoadedLocal;
-            else
+            } else {
                 result = LoadResult::Failed;
+            }
         }
     }
     return result;
@@ -331,10 +332,12 @@ static bool gatherRequirementsFromComponents(const ComponentContainer& input, Re
 static void getTrivialRemovals(const ComponentContainer& components, const RequireExSet& reqs, QStringList& toRemove)
 {
     for (const auto& component : components) {
-        if (!component->m_dependencyOnly)
+        if (!component->m_dependencyOnly) {
             continue;
-        if (!component->m_cachedVolatile)
+        }
+        if (!component->m_cachedVolatile) {
             continue;
+        }
         RequireEx reqNeedle;
         reqNeedle.uid = component->m_uid;
         const auto iter = reqs.find(reqNeedle);

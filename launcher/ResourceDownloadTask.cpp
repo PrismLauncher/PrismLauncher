@@ -82,8 +82,9 @@ void ResourceDownloadTask::downloadSucceeded()
     auto oldName = std::get<0>(to_delete);
     auto oldFilename = std::get<1>(to_delete);
 
-    if (oldName.isEmpty() || oldFilename == m_pack_version.fileName)
+    if (oldName.isEmpty() || oldFilename == m_pack_version.fileName) {
         return;
+    }
 
     m_pack_model->uninstallResource(oldFilename, true);
 
@@ -95,8 +96,9 @@ void ResourceDownloadTask::downloadSucceeded()
         if (oldConfig.exists() && !newConfig.exists()) {
             bool success = FS::move(oldConfig.filePath(), newConfig.filePath());
 
-            if (!success)
+            if (!success) {
                 emit logWarning(tr("Failed to rename shader config from '%1' to '%2'").arg(oldConfig.fileName(), newConfig.fileName()));
+            }
         }
     }
 }

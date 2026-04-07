@@ -96,10 +96,11 @@ void SkinOpenGLWindow::mouseMoveEvent(QMouseEvent* event)
         m_pitch += dy * 0.5F;
 
         // Normalize yaw to keep it manageable
-        if (m_yaw > 360.0F)
+        if (m_yaw > 360.0F) {
             m_yaw -= 360.0F;
-        else if (m_yaw < 0.0F)
+        } else if (m_yaw < 0.0F) {
             m_yaw += 360.0F;
+        }
 
         m_mousePosition = QVector2D(event->pos());
         update();  // Trigger a repaint
@@ -142,38 +143,46 @@ void SkinOpenGLWindow::initShaders()
     // Skin model shaders
     m_modelProgram = new QOpenGLShaderProgram(this);
     // Compile vertex shader
-    if (!m_modelProgram->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vshader_skin_model.glsl"))
+    if (!m_modelProgram->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vshader_skin_model.glsl")) {
         close();
+    }
 
     // Compile fragment shader
-    if (!m_modelProgram->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fshader.glsl"))
+    if (!m_modelProgram->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fshader.glsl")) {
         close();
+    }
 
     // Link shader pipeline
-    if (!m_modelProgram->link())
+    if (!m_modelProgram->link()) {
         close();
+    }
 
     // Bind shader pipeline for use
-    if (!m_modelProgram->bind())
+    if (!m_modelProgram->bind()) {
         close();
+    }
 
     // Background shaders
     m_backgroundProgram = new QOpenGLShaderProgram(this);
     // Compile vertex shader
-    if (!m_backgroundProgram->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vshader_skin_background.glsl"))
+    if (!m_backgroundProgram->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vshader_skin_background.glsl")) {
         close();
+    }
 
     // Compile fragment shader
-    if (!m_backgroundProgram->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fshader.glsl"))
+    if (!m_backgroundProgram->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fshader.glsl")) {
         close();
+    }
 
     // Link shader pipeline
-    if (!m_backgroundProgram->link())
+    if (!m_backgroundProgram->link()) {
         close();
+    }
 
     // Bind shader pipeline for use (verification)
-    if (!m_backgroundProgram->bind())
+    if (!m_backgroundProgram->bind()) {
         close();
+    }
 }
 
 void SkinOpenGLWindow::resizeGL(int w, int h)
@@ -190,8 +199,9 @@ void SkinOpenGLWindow::resizeGL(int w, int h)
     // Build the reverse z perspective projection matrix
     double radians = qDegreesToRadians(fov / 2.);
     double sine = std::sin(radians);
-    if (sine == 0)
+    if (sine == 0) {
         return;
+    }
     double cotan = std::cos(radians) / sine;
 
     m_projection(0, 0) = cotan / aspect;
@@ -324,8 +334,9 @@ void SkinOpenGLWindow::wheelEvent(QWheelEvent* event)
 }
 void SkinOpenGLWindow::setElytraVisible(bool visible)
 {
-    if (m_scene)
+    if (m_scene) {
         m_scene->setElytraVisible(visible);
+    }
 }
 
 bool SkinOpenGLWindow::hasOpenGL()

@@ -159,8 +159,9 @@ void ProfileSetupDialog::checkName(const QString& name)
                                            { "Accept", "application/json" },
                                            { "Authorization", QString("Bearer %1").arg(m_accountToSetup->accessToken()).toUtf8() } };
 
-    if (m_check_task)
+    if (m_check_task) {
         disconnect(m_check_task.get(), nullptr, this, nullptr);
+    }
     auto [task, response] = Net::Download::makeByteArray(url);
 
     m_check_task = task;

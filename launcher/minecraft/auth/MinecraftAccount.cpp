@@ -247,8 +247,9 @@ void MinecraftAccount::fillSession(AuthSessionPtr session)
     session->player_name = data.profileName();
     // profile ID
     session->uuid = data.profileId();
-    if (session->uuid.isEmpty())
+    if (session->uuid.isEmpty()) {
         session->uuid = uuidFromUsername(session->player_name).toString(QUuid::Id128);
+    }
     // 'legacy' or 'mojang', depending on account type
     session->user_type = typeString();
     if (!session->access_token.isEmpty()) {

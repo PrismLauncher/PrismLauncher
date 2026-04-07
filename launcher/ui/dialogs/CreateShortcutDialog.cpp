@@ -81,11 +81,13 @@ CreateShortcutDialog::CreateShortcutDialog(BaseInstance* instance, QWidget* pare
         QString desktopDir = FS::getDesktopDir();
         QString applicationDir = FS::getApplicationsDir();
 
-        if (!desktopDir.isEmpty())
+        if (!desktopDir.isEmpty()) {
             ui->saveTargetSelectionBox->addItem(tr("Desktop"), QVariant::fromValue(ShortcutTarget::Desktop));
+        }
 
-        if (!applicationDir.isEmpty())
+        if (!applicationDir.isEmpty()) {
             ui->saveTargetSelectionBox->addItem(tr("Applications"), QVariant::fromValue(ShortcutTarget::Applications));
+        }
     }
     ui->saveTargetSelectionBox->addItem(tr("Other..."), QVariant::fromValue(ShortcutTarget::Other));
 
@@ -108,14 +110,16 @@ CreateShortcutDialog::CreateShortcutDialog(BaseInstance* instance, QWidget* pare
         for (int i = 0; i < accounts->count(); i++) {
             MinecraftAccountPtr account = accounts->at(i);
             auto profileLabel = account->profileName();
-            if (account->isInUse())
+            if (account->isInUse()) {
                 profileLabel = tr("%1 (in use)").arg(profileLabel);
+            }
             auto face = account->getFace();
             QIcon icon = face.isNull() ? QIcon::fromTheme("noaccount") : face;
             ui->accountSelectionBox->addItem(profileLabel, account->profileName());
             ui->accountSelectionBox->setItemIcon(i, icon);
-            if (defaultAccount == account)
+            if (defaultAccount == account) {
                 ui->accountSelectionBox->setCurrentIndex(i);
+            }
         }
     }
 }
@@ -175,10 +179,11 @@ void CreateShortcutDialog::stateChanged()
 {
     QString result = m_instance->name();
     if (ui->targetCheckbox->isChecked()) {
-        if (ui->worldTarget->isChecked())
+        if (ui->worldTarget->isChecked()) {
             result = tr("%1 - %2").arg(result, ui->worldSelectionBox->currentData().toString());
-        else if (ui->serverTarget->isChecked())
+        } else if (ui->serverTarget->isChecked()) {
             result = tr("%1 - Server %2").arg(result, ui->serverAddressBox->text());
+        }
     }
     ui->instNameTextBox->setPlaceholderText(result);
     if (!ui->targetCheckbox->isChecked()) {
@@ -207,16 +212,19 @@ void CreateShortcutDialog::createShortcut()
 
     auto target = ui->saveTargetSelectionBox->currentData().value<ShortcutTarget>();
     auto name = ui->instNameTextBox->text();
-    if (name.isEmpty())
+    if (name.isEmpty()) {
         name = ui->instNameTextBox->placeholderText();
-    if (ui->overrideAccountCheckbox->isChecked())
+    }
+    if (ui->overrideAccountCheckbox->isChecked()) {
         extraArgs.append({ "--profile", ui->accountSelectionBox->currentData().toString() });
+    }
 
     ShortcutUtils::Shortcut args{ m_instance, name, targetString, this, extraArgs, InstIconKey, target };
-    if (target == ShortcutTarget::Desktop)
+    if (target == ShortcutTarget::Desktop) {
         ShortcutUtils::createInstanceShortcutOnDesktop(args);
-    else if (target == ShortcutTarget::Applications)
+    } else if (target == ShortcutTarget::Applications) {
         ShortcutUtils::createInstanceShortcutInApplications(args);
-    else
+    } else {
         ShortcutUtils::createInstanceShortcutInOther(args);
+    }
 }

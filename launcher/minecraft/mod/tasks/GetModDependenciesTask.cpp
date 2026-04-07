@@ -55,8 +55,9 @@ GetModDependenciesTask::GetModDependenciesTask(BaseInstance* instance,
 {
     for (auto* mod : folder->allMods()) {
         m_mods_file_names << mod->fileinfo().fileName();
-        if (auto meta = mod->metadata(); meta)
+        if (auto meta = mod->metadata(); meta) {
             m_mods.append(meta);
+        }
     }
     prepare();
 }
@@ -64,10 +65,11 @@ GetModDependenciesTask::GetModDependenciesTask(BaseInstance* instance,
 void GetModDependenciesTask::prepare()
 {
     for (auto sel : m_selected) {
-        if (checkDependencies(sel, m_version, m_loaderType))
+        if (checkDependencies(sel, m_version, m_loaderType)) {
             for (auto dep : getDependenciesForVersion(sel->version, sel->pack->provider)) {
                 addTask(prepareDependencyTask(dep, sel->pack->provider, 20));
             }
+        }
     }
 }
 
@@ -265,8 +267,9 @@ auto GetModDependenciesTask::getExtraInfo() -> QHash<QString, PackDependencyExtr
         auto version = mod->version.fileId;
         auto req = QStringList();
         for (auto& smod : fullList) {
-            if (provider != smod->pack->provider)
+            if (provider != smod->pack->provider) {
                 continue;
+            }
             auto deps = smod->version.dependencies;
             if (auto dep = std::find_if(deps.begin(), deps.end(),
                                         [addonId, provider, version](const ModPlatform::Dependency& d) {
@@ -292,8 +295,9 @@ auto GetModDependenciesTask::getExtraInfo() -> QHash<QString, PackDependencyExtr
 auto laxCompare = [](QString fsfilename, QString metadataFilename, bool excludeDigits = false) {
     // allowed character seperators
     QList<QChar> allowedSeperators = { '-', '+', '.', '_' };
-    if (excludeDigits)
+    if (excludeDigits) {
         allowedSeperators.append({ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
+    }
 
     // copy in lowercase
     auto fsName = fsfilename.toLower();

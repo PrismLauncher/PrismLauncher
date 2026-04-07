@@ -170,11 +170,13 @@ void VersionSelectWidget::currentRowChanged(const QModelIndex& current, const QM
 
 void VersionSelectWidget::preselect()
 {
-    if (preselectedAlready)
+    if (preselectedAlready) {
         return;
+    }
     selectCurrent();
-    if (preselectedAlready)
+    if (preselectedAlready) {
         return;
+    }
     selectRecommended();
 }
 

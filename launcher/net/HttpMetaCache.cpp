@@ -161,8 +161,9 @@ auto HttpMetaCache::updateEntry(MetaEntryPtr stale_entry) -> bool
 
 auto HttpMetaCache::evictEntry(MetaEntryPtr entry) -> bool
 {
-    if (!entry)
+    if (!entry) {
         return false;
+    }
 
     entry->m_stale = true;
     SaveEventually();
@@ -177,8 +178,9 @@ auto HttpMetaCache::evictAll() -> bool
         EntryMap& map = m_entries[base];
         qCDebug(taskHttpMetaCacheLogC) << "Evicting base" << base;
         for (MetaEntryPtr entry : map.entry_list) {
-            if (!evictEntry(entry))
+            if (!evictEntry(entry)) {
                 qCWarning(taskHttpMetaCacheLogC) << "Unexpected missing cache entry" << entry->m_basePath;
+            }
         }
         map.entry_list.clear();
         // AND all return codes together so the result is true iff all runs of deletePath() are true
@@ -201,8 +203,9 @@ auto HttpMetaCache::staleEntry(QString base, QString resource_path) -> MetaEntry
 void HttpMetaCache::addBase(QString base, QString base_root)
 {
     // TODO: report error
-    if (m_entries.contains(base))
+    if (m_entries.contains(base)) {
         return;
+    }
 
     // TODO: check if the base path is valid
     EntryMap foo;
@@ -221,12 +224,14 @@ auto HttpMetaCache::getBasePath(QString base) -> QString
 
 void HttpMetaCache::Load()
 {
-    if (m_index_file.isNull())
+    if (m_index_file.isNull()) {
         return;
+    }
 
     QFile index(m_index_file);
-    if (!index.open(QIODevice::ReadOnly))
+    if (!index.open(QIODevice::ReadOnly)) {
         return;
+    }
 
     QJsonParseError parseError;
     QJsonDocument json = QJsonDocument::fromJson(index.readAll(), &parseError);
@@ -249,16 +254,18 @@ void HttpMetaCache::Load()
 
     // check file version first
     auto version_val = root["version"].toString();
-    if (version_val != "1")
+    if (version_val != "1") {
         return;
+    }
 
     // read the entry array
     auto array = root["entries"].toArray();
     for (auto element : array) {
         auto element_obj = element.toObject();
         auto base = element_obj["base"].toString();
-        if (!m_entries.contains(base))
+        if (!m_entries.contains(base)) {
             continue;
+        }
 
         auto& entrymap = m_entries[base];
 
@@ -292,8 +299,9 @@ void HttpMetaCache::SaveEventually()
 
 void HttpMetaCache::SaveNow()
 {
-    if (m_index_file.isNull())
+    if (m_index_file.isNull()) {
         return;
+    }
 
     qCDebug(taskHttpMetaCacheLogC) << "Saving metacache with" << m_entries.size() << "entries";
 
@@ -314,8 +322,9 @@ void HttpMetaCache::SaveNow()
             Json::writeString(entryObj, "md5sum", entry->m_md5sum);
             Json::writeString(entryObj, "etag", entry->m_etag);
             entryObj.insert("last_changed_timestamp", QJsonValue(double(entry->m_local_changed_timestamp)));
-            if (!entry->m_remote_changed_timestamp.isEmpty())
+            if (!entry->m_remote_changed_timestamp.isEmpty()) {
                 entryObj.insert("remote_changed_timestamp", QJsonValue(entry->m_remote_changed_timestamp));
+            }
             if (entry->isEternal()) {
                 entryObj.insert("eternal", true);
             } else {

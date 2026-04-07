@@ -24,8 +24,9 @@ TexturePackResourceModel::TexturePackResourceModel(const BaseInstance& inst,
     if (!m_version_list->isLoaded()) {
         qDebug() << "Loading version list...";
         m_task = m_version_list->getLoadTask();
-        if (!m_task->isRunning())
+        if (!m_task->isRunning()) {
             m_task->start();
+        }
     }
 }
 
@@ -41,17 +42,20 @@ void waitOnVersionListLoad(Meta::VersionList::Ptr version_list)
 
     auto task = version_list->getLoadTask();
     QObject::connect(task.get(), &Task::finished, &load_version_list_loop, &QEventLoop::quit);
-    if (!task->isRunning())
+    if (!task->isRunning()) {
         task->start();
+    }
     load_version_list_loop.exec();
-    if (time_limit_for_list_load.isActive())
+    if (time_limit_for_list_load.isActive()) {
         time_limit_for_list_load.stop();
+    }
 }
 
 ResourceAPI::SearchArgs TexturePackResourceModel::createSearchArguments()
 {
-    if (s_availableVersions.empty())
+    if (s_availableVersions.empty()) {
         waitOnVersionListLoad(m_version_list);
+    }
 
     auto args = ResourcePackResourceModel::createSearchArguments();
 
@@ -64,8 +68,9 @@ ResourceAPI::SearchArgs TexturePackResourceModel::createSearchArguments()
         for (auto&& version : m_version_list->versions()) {
             // FIXME: This duplicates the logic in meta for the 'texturepacks' trait. However, we don't have access to that
             //        information from the index file alone. Also, downloading every version's file isn't a very good idea.
-            if (auto ver = version->toComparableVersion(); ver <= maximumTexturePackVersion())
+            if (auto ver = version->toComparableVersion(); ver <= maximumTexturePackVersion()) {
                 s_availableVersions.push_back(ver);
+            }
         }
     }
 

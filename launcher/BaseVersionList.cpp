@@ -41,26 +41,30 @@ BaseVersionList::BaseVersionList(QObject* parent) : QAbstractListModel(parent) {
 BaseVersion::Ptr BaseVersionList::findVersion(const QString& descriptor)
 {
     for (int i = 0; i < count(); i++) {
-        if (at(i)->descriptor() == descriptor)
+        if (at(i)->descriptor() == descriptor) {
             return at(i);
+        }
     }
     return nullptr;
 }
 
 BaseVersion::Ptr BaseVersionList::getRecommended() const
 {
-    if (count() <= 0)
+    if (count() <= 0) {
         return nullptr;
+    }
     return at(0);
 }
 
 QVariant BaseVersionList::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return QVariant();
+    }
 
-    if (index.row() > count())
+    if (index.row() > count()) {
         return QVariant();
+    }
 
     BaseVersion::Ptr version = at(index.row());
 

@@ -65,16 +65,18 @@ class Sink {
     bool initAllValidators(QNetworkRequest& request)
     {
         for (auto& validator : validators) {
-            if (!validator->init(request))
+            if (!validator->init(request)) {
                 return false;
+            }
         }
         return true;
     }
     bool finalizeAllValidators(QNetworkReply& reply)
     {
         for (auto& validator : validators) {
-            if (!validator->validate(reply))
+            if (!validator->validate(reply)) {
                 return false;
+            }
         }
         return true;
     }
@@ -89,8 +91,9 @@ class Sink {
     bool writeAllValidators(QByteArray& data)
     {
         for (auto& validator : validators) {
-            if (!validator->write(data))
+            if (!validator->write(data)) {
                 return false;
+            }
         }
         return true;
     }

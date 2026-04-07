@@ -38,8 +38,9 @@ class RWStorage {
     bool stale(K key)
     {
         QReadLocker l(&lock);
-        if (!cache.contains(key))
+        if (!cache.contains(key)) {
             return true;
+        }
         return stale_entries.contains(key);
     }
     void setStale(K key)

@@ -52,8 +52,9 @@ class PageModel : public QAbstractListModel {
                 return m_pages.at(index.row())->displayName();
             case Qt::DecorationRole: {
                 QIcon icon = m_pages.at(index.row())->icon();
-                if (icon.isNull())
+                if (icon.isNull()) {
                     icon = m_emptyIcon;
+                }
                 // HACK: fixes icon stretching on windows. TODO: report Qt bug for this
                 return QIcon(icon.pixmap(QSize(48, 48)));
             }
@@ -72,8 +73,9 @@ class PageModel : public QAbstractListModel {
     BasePage* findPageEntryById(QString id)
     {
         for (auto* page : m_pages) {
-            if (page->id() == id)
+            if (page->id() == id) {
                 return page;
+            }
         }
         return nullptr;
     }
@@ -94,15 +96,17 @@ class PageView : public QListView {
     virtual QSize sizeHint() const
     {
         int width = sizeHintForColumn(0) + (frameWidth() * 2) + 5;
-        if (verticalScrollBar()->isVisible())
+        if (verticalScrollBar()->isVisible()) {
             width += verticalScrollBar()->width();
+        }
         return QSize(width, 100);
     }
 
     virtual bool eventFilter(QObject* obj, QEvent* event)
     {
-        if (obj == verticalScrollBar() && (event->type() == QEvent::Show || event->type() == QEvent::Hide))
+        if (obj == verticalScrollBar() && (event->type() == QEvent::Show || event->type() == QEvent::Hide)) {
             updateGeometry();
+        }
         return QListView::eventFilter(obj, event);
     }
 };

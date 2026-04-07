@@ -81,8 +81,9 @@ ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_
 
 QVariant ModFolderModel::data(const QModelIndex& index, int role) const
 {
-    if (!validateIndex(index))
+    if (!validateIndex(index)) {
         return {};
+    }
 
     int row = index.row();
     int column = index.column();
@@ -239,8 +240,9 @@ bool ModFolderModel::isValid()
 void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)
 {
     auto iter = m_active_parse_tasks.constFind(ticket);
-    if (iter == m_active_parse_tasks.constEnd())
+    if (iter == m_active_parse_tasks.constEnd()) {
         return;
+    }
 
     int row = m_resources_index[mod_id];
 
@@ -345,8 +347,9 @@ QSet<Mod*> collectMods(QSet<Mod*> mods, QHash<QString, QSet<Mod*>> relation, std
 
 QModelIndexList ModFolderModel::getAffectedMods(const QModelIndexList& indexes, EnableAction action)
 {
-    if (indexes.isEmpty())
+    if (indexes.isEmpty()) {
         return {};
+    }
 
     QModelIndexList affectedList = {};
     auto affectedModsList = selectedMods(indexes);
@@ -376,8 +379,9 @@ QModelIndexList ModFolderModel::getAffectedMods(const QModelIndexList& indexes, 
 
 bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAction action)
 {
-    if (indexes.isEmpty())
+    if (indexes.isEmpty()) {
         return {};
+    }
 
     auto indexedModsList = selectedMods(indexes);
     auto indexedMods = QSet(indexedModsList.begin(), indexedModsList.end());

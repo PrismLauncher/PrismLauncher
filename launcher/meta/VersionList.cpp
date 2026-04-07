@@ -205,10 +205,12 @@ void VersionList::clearExternalRecommends()
 // FIXME: this is dumb, we have 'recommended' as part of the metadata already...
 static const Meta::Version::Ptr& getBetterVersion(const Meta::Version::Ptr& a, const Meta::Version::Ptr& b)
 {
-    if (!a)
+    if (!a) {
         return b;
-    if (!b)
+    }
+    if (!b) {
         return a;
+    }
     if (a->type() == b->type()) {
         // newer of same type wins
         return (a->rawTime() > b->rawTime() ? a : b);
@@ -278,8 +280,9 @@ BaseVersion::Ptr VersionList::getRecommended() const
 
 void VersionList::waitToLoad()
 {
-    if (isLoaded())
+    if (isLoaded()) {
         return;
+    }
     QEventLoop ev;
     auto task = getLoadTask();
     connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);

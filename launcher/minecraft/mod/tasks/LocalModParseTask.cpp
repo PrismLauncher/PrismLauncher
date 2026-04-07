@@ -68,8 +68,9 @@ ModDetails ReadMCModInfo(QByteArray contents)
         }
 
         auto addDep = [&details](QString dep) {
-            if (dep == "mod_MinecraftForge" || dep == "Forge")
+            if (dep == "mod_MinecraftForge" || dep == "Forge") {
                 return;
+            }
             if (dep.contains(":")) {
                 dep = dep.section(":", 1);
             }
@@ -109,8 +110,9 @@ ModDetails ReadMCModInfo(QByteArray contents)
         int version = val.toInt(-1);
 
         // Some mods set the number with "", so it's a String instead
-        if (version < 0)
+        if (version < 0) {
             version = val.toString("").toInt();
+        }
 
         if (version != 2) {
             qWarning() << QString(R"(The value of 'modListVersion' is "%1" (expected "2")! The file may be corrupted.)").arg(version);
@@ -219,8 +221,9 @@ ModDetails ReadMCModTOML(QByteArray contents)
     } else if (auto* licenseDatumMods = (*modsTable)["license"].as_string()) {
         license = QString::fromStdString(licenseDatumMods->get());
     }
-    if (!license.isEmpty())
+    if (!license.isEmpty()) {
         details.licenses.append(ModLicense(license));
+    }
 
     QString logoFile = "";
     if (auto* logoFileDatum = tomlData["logoFile"].as_string()) {
@@ -494,8 +497,9 @@ ModDetails ReadForgeInfo(QByteArray contents)
     details.mod_id = "Forge";
     details.homeurl = "http://www.minecraftforge.net/forum/";
     INIFile ini;
-    if (!ini.loadFile(contents))
+    if (!ini.loadFile(contents)) {
         return details;
+    }
 
     QString major = ini.get("forge.major.number", "0").toString();
     QString minor = ini.get("forge.minor.number", "0").toString();
@@ -682,11 +686,13 @@ bool processFolder(Mod& mod, [[maybe_unused]] ProcessingLevel level)
     QFileInfo mcmod_info(FS::PathCombine(mod.fileinfo().filePath(), "mcmod.info"));
     if (mcmod_info.exists() && mcmod_info.isFile()) {
         QFile mcmod(mcmod_info.filePath());
-        if (!mcmod.open(QIODevice::ReadOnly))
+        if (!mcmod.open(QIODevice::ReadOnly)) {
             return false;
+        }
         auto data = mcmod.readAll();
-        if (data.isEmpty() || data.isNull())
+        if (data.isEmpty() || data.isNull()) {
             return false;
+        }
         details = ReadMCModInfo(data);
 
         mod.setDetails(details);
@@ -807,8 +813,9 @@ void LocalModParseTask::executeTask()
 
     m_result->details = mod.details();
 
-    if (m_aborted)
+    if (m_aborted) {
         emitAborted();
-    else
+    } else {
         emitSucceeded();
+    }
 }

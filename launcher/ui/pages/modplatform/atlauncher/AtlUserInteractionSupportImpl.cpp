@@ -71,10 +71,12 @@ QString AtlUserInteractionSupportImpl::chooseVersion(Meta::VersionList::Ptr vlis
         // filter by minecraft version, if the loader depends on a certain version.
         if (minecraftVersion != nullptr) {
             auto iter = std::find_if(reqs.begin(), reqs.end(), [](const Meta::Require& req) { return req.uid == "net.minecraft"; });
-            if (iter == reqs.end())
+            if (iter == reqs.end()) {
                 continue;
-            if (iter->equalsVersion != minecraftVersion)
+            }
+            if (iter->equalsVersion != minecraftVersion) {
                 continue;
+            }
         }
 
         // first recommended build we find, we use.

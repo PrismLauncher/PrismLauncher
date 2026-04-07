@@ -91,8 +91,9 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
     auto baseURL = APPLICATION->settings()->get("PastebinCustomAPIBase").toString();
     bool shouldTruncate = false;
 
-    if (baseURL.isEmpty())
+    if (baseURL.isEmpty()) {
         baseURL = PasteUpload::PasteTypes[pasteType].defaultBase;
+    }
 
     if (auto url = QUrl(baseURL); url.isValid()) {
         auto response = CustomMessageBox::selectable(parentWidget, QObject::tr("Confirm Upload"),
@@ -103,8 +104,9 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
-        if (response != QMessageBox::Yes)
+        if (response != QMessageBox::Yes) {
             return {};
+        }
 
         if (baseURL == "https://api.mclo.gs" && text.count("\n") > MaxMclogsLines) {
             auto truncateResponse = CustomMessageBox::selectable(

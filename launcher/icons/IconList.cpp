@@ -92,8 +92,9 @@ void IconList::sortIconList()
 bool IconList::addPathRecursively(const QString& path)
 {
     QDir dir(path);
-    if (!dir.exists())
+    if (!dir.exists()) {
         return false;
+    }
 
     // Add the directory itself
     bool watching = m_watcher->addPath(path);
@@ -116,10 +117,11 @@ QStringList IconList::getIconFilePaths() const
         QString first = directories.takeFirst();
         QDir dir(first);
         for (QFileInfo& fileInfo : dir.entryInfoList(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot, QDir::Name)) {
-            if (fileInfo.isDir())
+            if (fileInfo.isDir()) {
                 directories.push_back(fileInfo.absoluteFilePath());
-            else
+            } else {
                 iconFiles.push_back(fileInfo.absoluteFilePath());
+            }
         }
     }
     return iconFiles;
@@ -127,8 +129,9 @@ QStringList IconList::getIconFilePaths() const
 
 QString formatName(const QDir& iconsDir, const QFileInfo& iconFile)
 {
-    if (iconFile.dir() == iconsDir)
+    if (iconFile.dir() == iconsDir) {
         return iconFile.completeBaseName();
+    }
 
     constexpr auto delimiter = " » ";
     QString relativePathWithoutExtension =
@@ -149,19 +152,22 @@ void IconList::directoryChanged(const QString& path)
     if (m_dir.absolutePath() != newDir.absolutePath()) {
         m_dir.setPath(path);
         m_dir.refresh();
-        if (m_isWatching)
+        if (m_isWatching) {
             stopWatching();
+        }
         startWatching();
     }
-    if (!m_dir.exists() && !FS::ensureFolderPathExists(m_dir.absolutePath()))
+    if (!m_dir.exists() && !FS::ensureFolderPathExists(m_dir.absolutePath())) {
         return;
+    }
     m_dir.refresh();
     const QStringList newFileNamesList = getIconFilePaths();
     const QSet<QString> newSet = toStringSet(newFileNamesList);
     QSet<QString> currentSet;
     for (const MMCIcon& it : m_icons) {
-        if (!it.has(IconType::FileBased))
+        if (!it.has(IconType::FileBased)) {
             continue;
+        }
         QFileInfo icon(it.getFilePath());
         currentSet.insert(icon.absoluteFilePath());
     }
@@ -175,8 +181,9 @@ void IconList::directoryChanged(const QString& path)
         QString key = QFileInfo(relativePath).completeBaseName();
 
         int idx = getIconIndex(key);
-        if (idx == -1)
+        if (idx == -1) {
             continue;
+        }
         m_icons[idx].remove(FileBased);
         if (m_icons[idx].type() == ToBeDeleted) {
             beginRemoveRows(QModelIndex(), idx, idx);
@@ -211,12 +218,14 @@ void IconList::fileChanged(const QString& path)
 {
     qDebug() << "Checking icon" << path;
     QFileInfo checkfile(path);
-    if (!checkfile.exists())
+    if (!checkfile.exists()) {
         return;
+    }
     QString key = m_dir.relativeFilePath(checkfile.absoluteFilePath());
     int idx = getIconIndex(key);
-    if (idx == -1)
+    if (idx == -1) {
         return;
+    }
     QIcon icon;
     // special handling for jpg and jpeg to go through pixmap to keep the size constant
     if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
@@ -224,8 +233,9 @@ void IconList::fileChanged(const QString& path)
     } else {
         icon.addFile(path);
     }
-    if (icon.availableSizes().empty())
+    if (icon.availableSizes().empty()) {
         return;
+    }
 
     m_icons[idx].m_images[IconType::FileBased].icon = icon;
     dataChanged(index(idx), index(idx));
@@ -234,8 +244,9 @@ void IconList::fileChanged(const QString& path)
 
 void IconList::SettingChanged(const Setting& setting, const QVariant& value)
 {
-    if (setting.id() != "IconsDir")
+    if (setting.id() != "IconsDir") {
         return;
+    }
 
     directoryChanged(value.toString());
 }
@@ -276,11 +287,13 @@ bool IconList::dropMimeData(const QMimeData* data,
                             [[maybe_unused]] int column,
                             [[maybe_unused]] const QModelIndex& parent)
 {
-    if (action == Qt::IgnoreAction)
+    if (action == Qt::IgnoreAction) {
         return true;
+    }
     // check if the action is supported
-    if (!data || !(action & supportedDropActions()))
+    if (!data || !(action & supportedDropActions())) {
         return false;
+    }
 
     // files dropped from outside?
     if (data->hasUrls()) {
@@ -288,8 +301,9 @@ bool IconList::dropMimeData(const QMimeData* data,
         QStringList iconFiles;
         for (const auto& url : urls) {
             // only local files may be dropped...
-            if (!url.isLocalFile())
+            if (!url.isLocalFile()) {
                 continue;
+            }
             iconFiles += url.toLocalFile();
         }
         installIcons(iconFiles);
@@ -306,13 +320,15 @@ Qt::ItemFlags IconList::flags(const QModelIndex& index) const
 
 QVariant IconList::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return {};
+    }
 
     int row = index.row();
 
-    if (row < 0 || row >= m_icons.size())
+    if (row < 0 || row >= m_icons.size()) {
         return {};
+    }
 
     switch (role) {
         case Qt::DecorationRole:
@@ -333,18 +349,21 @@ int IconList::rowCount(const QModelIndex& parent) const
 
 void IconList::installIcons(const QStringList& iconFiles) const
 {
-    for (const QString& file : iconFiles)
+    for (const QString& file : iconFiles) {
         installIcon(file, {});
+    }
 }
 
 void IconList::installIcon(const QString& file, const QString& name) const
 {
     QFileInfo fileinfo(file);
-    if (!fileinfo.isReadable() || !fileinfo.isFile())
+    if (!fileinfo.isReadable() || !fileinfo.isFile()) {
         return;
+    }
 
-    if (!IconUtils::isIconSuffix(fileinfo.suffix()))
+    if (!IconUtils::isIconSuffix(fileinfo.suffix())) {
         return;
+    }
 
     QString target = FS::PathCombine(getDirectory(), name.isEmpty() ? fileinfo.fileName() : name);
     QFile::copy(file, target);
@@ -360,8 +379,9 @@ bool IconList::iconFileExists(const QString& key) const
 const MMCIcon* IconList::icon(const QString& key) const
 {
     int iconIdx = getIconIndex(key);
-    if (iconIdx == -1)
+    if (iconIdx == -1) {
         return nullptr;
+    }
     return &m_icons[iconIdx];
 }
 
@@ -409,8 +429,9 @@ bool IconList::addIcon(const QString& key, const QString& name, const QString& p
         icon.addFile(path);
     }
 
-    if (icon.isNull())
+    if (icon.isNull()) {
         return false;
+    }
     auto iter = m_nameIndex.find(key);
     if (iter != m_nameIndex.end()) {
         auto& oldOne = m_icons[*iter];
@@ -452,22 +473,25 @@ QIcon IconList::getIcon(const QString& key) const
 {
     int iconIndex = getIconIndex(key);
 
-    if (iconIndex != -1)
+    if (iconIndex != -1) {
         return m_icons[iconIndex].icon();
+    }
 
     // Fallback for icons that don't exist.b
     iconIndex = getIconIndex("grass");
 
-    if (iconIndex != -1)
+    if (iconIndex != -1) {
         return m_icons[iconIndex].icon();
+    }
     return {};
 }
 
 int IconList::getIconIndex(const QString& key) const
 {
     auto iter = m_nameIndex.find(key == "default" ? "grass" : key);
-    if (iter != m_nameIndex.end())
+    if (iter != m_nameIndex.end()) {
         return *iter;
+    }
 
     return -1;
 }

@@ -51,8 +51,9 @@ class ByteArraySink : public Sink {
     auto init(QNetworkRequest& request) -> Task::State override
     {
         m_output.clear();
-        if (initAllValidators(request))
+        if (initAllValidators(request)) {
             return Task::State::Running;
+        }
         m_fail_reason = "Failed to initialize validators";
         return Task::State::Failed;
     };
@@ -60,8 +61,9 @@ class ByteArraySink : public Sink {
     auto write(QByteArray& data) -> Task::State override
     {
         m_output.append(data);
-        if (writeAllValidators(data))
+        if (writeAllValidators(data)) {
             return Task::State::Running;
+        }
         m_fail_reason = "Failed to write validators";
         return Task::State::Failed;
     }
@@ -75,8 +77,9 @@ class ByteArraySink : public Sink {
 
     auto finalize(QNetworkReply& reply) -> Task::State override
     {
-        if (finalizeAllValidators(reply))
+        if (finalizeAllValidators(reply)) {
             return Task::State::Succeeded;
+        }
         m_fail_reason = "Failed to finalize validators";
         return Task::State::Failed;
     }

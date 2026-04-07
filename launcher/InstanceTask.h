@@ -57,8 +57,9 @@ class InstanceTask : public Task, public InstanceName {
     void setOverride(bool override, QString instance_id_to_override = {})
     {
         m_override_existing = override;
-        if (!instance_id_to_override.isEmpty())
+        if (!instance_id_to_override.isEmpty()) {
             m_original_instance_id = instance_id_to_override;
+        }
     }
 
    protected: /* data */

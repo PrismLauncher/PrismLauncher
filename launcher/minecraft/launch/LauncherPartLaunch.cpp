@@ -107,8 +107,9 @@ void LauncherPartLaunch::executeTask()
     auto classPath = instance->getClassPath();
     classPath.prepend(jarPath);
 
-    if (!legacyJarPath.isEmpty())
+    if (!legacyJarPath.isEmpty()) {
         classPath.prepend(legacyJarPath);
+    }
 
     auto natPath = instance->getNativePath();
 #ifdef Q_OS_WIN
@@ -178,8 +179,9 @@ void LauncherPartLaunch::on_state(LoggedProcess::State state)
         }
         case LoggedProcess::Finished: {
             auto* instance = m_parent->instance();
-            if (instance->settings()->get("CloseAfterLaunch").toBool())
+            if (instance->settings()->get("CloseAfterLaunch").toBool()) {
                 APPLICATION->showMainWindow();
+            }
 
             m_parent->setPid(-1);
             m_parent->instance()->setMinecraftRunning(false);

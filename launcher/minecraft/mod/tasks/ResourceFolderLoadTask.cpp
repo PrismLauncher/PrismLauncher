@@ -59,8 +59,9 @@ ResourceFolderLoadTask::ResourceFolderLoadTask(const QDir& resource_dir,
 
 void ResourceFolderLoadTask::executeTask()
 {
-    if (thread() != m_thread_to_spawn_into)
+    if (thread() != m_thread_to_spawn_into) {
         connect(this, &Task::finished, this->thread(), &QThread::quit);
+    }
 
     if (m_is_indexed) {
         // Read metadata first
@@ -123,13 +124,15 @@ void ResourceFolderLoadTask::executeTask()
         }
     }
 
-    for (auto mod : m_result->resources)
+    for (auto mod : m_result->resources) {
         mod->moveToThread(m_thread_to_spawn_into);
+    }
 
-    if (m_aborted)
+    if (m_aborted) {
         emit finished();
-    else
+    } else {
         emitSucceeded();
+    }
 }
 
 void ResourceFolderLoadTask::getFromMetadata()
@@ -142,8 +145,9 @@ void ResourceFolderLoadTask::getFromMetadata()
 
         auto metadata = Metadata::get(m_index_dir, entry);
 
-        if (!metadata.isValid())
+        if (!metadata.isValid()) {
             continue;
+        }
 
         auto* resource = m_create_func(QFileInfo(m_resource_dir.filePath(metadata.filename)));
         resource->setMetadata(metadata);

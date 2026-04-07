@@ -59,15 +59,18 @@ PackInstallTask::PackInstallTask(Modpack pack, QString version, QWidget* parent)
 
 bool PackInstallTask::abort()
 {
-    if (!canAbort())
+    if (!canAbort()) {
         return false;
+    }
 
     bool aborted = true;
 
-    if (m_net_job)
+    if (m_net_job) {
         aborted &= m_net_job->abort();
-    if (m_modIdResolverTask)
+    }
+    if (m_modIdResolverTask) {
         aborted &= m_modIdResolverTask->abort();
+    }
 
     return aborted ? InstanceTask::abort() : false;
 }
@@ -180,8 +183,9 @@ void PackInstallTask::onResolveModsSucceeded()
     Flame::Manifest results = m_modIdResolverTask->getResults();
     for (int index = 0; index < m_fileIds.size(); index++) {
         const auto file_id = m_fileIds.at(index);
-        if (file_id < 0)
+        if (file_id < 0) {
             continue;
+        }
 
         Flame::File resultsFile = results.files[file_id];
         VersionFile& localFile = m_version.files[index];
@@ -250,8 +254,9 @@ void PackInstallTask::createInstance()
     }
 
     for (auto target : m_version.targets) {
-        if (target.type != "modloader")
+        if (target.type != "modloader") {
             continue;
+        }
 
         if (target.name == "forge") {
             components->setComponentVersion("net.minecraftforge", target.version);
@@ -299,8 +304,9 @@ void PackInstallTask::downloadPack()
 
     auto jobPtr = makeShared<NetJob>(tr("Mod download"), APPLICATION->network());
     for (const auto& file : m_version.files) {
-        if (file.serverOnly || file.url.isEmpty())
+        if (file.serverOnly || file.url.isEmpty()) {
             continue;
+        }
 
         auto path = FS::PathCombine(m_stagingPath, ".minecraft", file.path, file.name);
         qDebug() << "Will try to download" << file.url << "to" << path;

@@ -127,8 +127,9 @@ auto ResourcePage::eventFilter(QObject* watched, QEvent* event) -> bool
                 keyEvent->accept();
                 return true;
             }
-            if (m_searchTimer.isActive())
+            if (m_searchTimer.isActive()) {
                 m_searchTimer.stop();
+            }
 
             m_searchTimer.start(350);
 
@@ -169,8 +170,9 @@ void ResourcePage::addSortings()
     auto sorts = m_model->getSortingMethods();
     std::sort(sorts.begin(), sorts.end(), [](auto const& l, auto const& r) { return l.index < r.index; });
 
-    for (auto&& sorting : sorts)
+    for (auto&& sorting : sorts) {
         m_ui->sortByBox->addItem(sorting.readable_name, QVariant(sorting.index));
+    }
 }
 
 bool ResourcePage::setCurrentPack(ModPlatform::IndexedPack::Ptr pack)
@@ -187,8 +189,9 @@ ModPlatform::IndexedPack::Ptr ResourcePage::getCurrentPack() const
 
 void ResourcePage::updateUi(const QModelIndex& index)
 {
-    if (index != m_ui->packView->currentIndex())
+    if (index != m_ui->packView->currentIndex()) {
         return;
+    }
 
     auto current_pack = getCurrentPack();
     if (!current_pack) {
@@ -199,10 +202,11 @@ void ResourcePage::updateUi(const QModelIndex& index)
     QString text = "";
     QString name = current_pack->name;
 
-    if (current_pack->websiteUrl.isEmpty())
+    if (current_pack->websiteUrl.isEmpty()) {
         text = name;
-    else
+    } else {
         text = "<a href=\"" + current_pack->websiteUrl + "\">" + name + "</a>";
+    }
 
     if (!current_pack->authors.empty()) {
         auto authorToStr = [](ModPlatform::ModpackAuthor& author) -> QString {
@@ -241,14 +245,18 @@ void ResourcePage::updateUi(const QModelIndex& index)
             text += "<br><br>" + tr("External links:") + "<br>";
         }
 
-        if (!current_pack->extraData.issuesUrl.isEmpty())
+        if (!current_pack->extraData.issuesUrl.isEmpty()) {
             text += "- " + tr("Issues: <a href=%1>%1</a>").arg(current_pack->extraData.issuesUrl) + "<br>";
-        if (!current_pack->extraData.wikiUrl.isEmpty())
+        }
+        if (!current_pack->extraData.wikiUrl.isEmpty()) {
             text += "- " + tr("Wiki: <a href=%1>%1</a>").arg(current_pack->extraData.wikiUrl) + "<br>";
-        if (!current_pack->extraData.sourceUrl.isEmpty())
+        }
+        if (!current_pack->extraData.sourceUrl.isEmpty()) {
             text += "- " + tr("Source code: <a href=%1>%1</a>").arg(current_pack->extraData.sourceUrl) + "<br>";
-        if (!current_pack->extraData.discordUrl.isEmpty())
+        }
+        if (!current_pack->extraData.discordUrl.isEmpty()) {
             text += "- " + tr("Discord: <a href=%1>%1</a>").arg(current_pack->extraData.discordUrl) + "<br>";
+        }
     }
 
     text += "<hr>";
@@ -294,8 +302,9 @@ void ResourcePage::versionListUpdated(const QModelIndex& index)
 
             for (int i = 0; i < current_pack->versions.size(); i++) {
                 auto& version = current_pack->versions[i];
-                if (!m_model->checkVersionFilters(version))
+                if (!m_model->checkVersionFilters(version)) {
                     continue;
+                }
 
                 auto versionText = version.version;
                 if (version.version_type.isValid()) {
@@ -343,15 +352,18 @@ void ResourcePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
         versionListUpdated(curr);
     }
 
-    if (current_pack && !current_pack->extraDataLoaded)
+    if (current_pack && !current_pack->extraDataLoaded) {
         request_load = true;
+    }
 
     // we are already requesting this
-    if (m_enableQueue.contains(curr.row()))
+    if (m_enableQueue.contains(curr.row())) {
         request_load = false;
+    }
 
-    if (request_load)
+    if (request_load) {
         m_model->loadEntry(curr);
+    }
 
     updateUi(curr);
 }
@@ -390,19 +402,22 @@ void ResourcePage::removeResourceFromPage(const QString& name)
 
 void ResourcePage::onResourceSelected()
 {
-    if (m_selectedVersionIndex < 0)
+    if (m_selectedVersionIndex < 0) {
         return;
+    }
 
     auto current_pack = getCurrentPack();
-    if (!current_pack || !current_pack->versionsLoaded || current_pack->versions.size() < m_selectedVersionIndex)
+    if (!current_pack || !current_pack->versionsLoaded || current_pack->versions.size() < m_selectedVersionIndex) {
         return;
+    }
 
     auto& version = current_pack->versions[m_selectedVersionIndex];
     Q_ASSERT(!version.downloadUrl.isNull());
-    if (version.is_currently_selected)
+    if (version.is_currently_selected) {
         removeResourceFromDialog(current_pack->name);
-    else
+    } else {
         addResourceToDialog(current_pack, version);
+    }
 
     // Save the modified pack (and prevent warning in release build)
     [[maybe_unused]] bool set = setCurrentPack(current_pack);
@@ -439,8 +454,9 @@ void ResourcePage::onResourceToggle(const QModelIndex& index)
             }
         }
 
-        if (isSelected)
+        if (isSelected) {
             updateSelectionButton();
+        }
 
         // force update
         QVariant variant;
@@ -452,8 +468,9 @@ void ResourcePage::onResourceToggle(const QModelIndex& index)
 
         // we can't be sure that this hasn't already been requested...
         // but this does the job well enough and there's not much point preventing edgecases
-        if (!isSelected)
+        if (!isSelected) {
             m_model->loadEntry(index);
+        }
     }
 }
 
@@ -511,10 +528,11 @@ void ResourcePage::openUrl(const QUrl& url)
             searchEdit->setText(slug);
             newPage->triggerSearch();
 
-            if (model->hasActiveSearchJob())
+            if (model->hasActiveSearchJob()) {
                 connect(model->activeSearchJob().get(), &Task::finished, jump);
-            else
+            } else {
                 jump();
+            }
 
             return;
         }
@@ -569,9 +587,10 @@ void ResourcePage::openProject(QVariant projectID)
     m_ui->searchEdit->setText("#" + projectID.toString());
     triggerSearch();
 
-    if (m_model->hasActiveSearchJob())
+    if (m_model->hasActiveSearchJob()) {
         connect(m_model->activeSearchJob().get(), &Task::finished, jump);
-    else
+    } else {
         jump();
+    }
 }
 }  // namespace ResourceDownload

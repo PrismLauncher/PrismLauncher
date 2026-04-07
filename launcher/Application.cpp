@@ -272,8 +272,9 @@ std::tuple<QDateTime, QString, QString, QString, QString> read_lock_File(const Q
     QString data_path;
     for (auto line : lines) {
         auto index = line.indexOf("=");
-        if (index < 0)
+        if (index < 0) {
             continue;
+        }
         auto left = line.left(index);
         auto right = line.mid(index + 1);
         if (left.toLower() == "timestamp") {
@@ -504,14 +505,17 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         static const QString baseLogFile = BuildConfig.LAUNCHER_NAME + "-%0.log";
         static const QString logBase = FS::PathCombine("logs", baseLogFile);
         if (FS::ensureFolderPathExists("logs")) {  // if this did not fail
-            for (auto i = 0; i <= 4; i++)
+            for (auto i = 0; i <= 4; i++) {
                 if (auto oldName = baseLogFile.arg(i);
-                    QFile::exists(oldName))  // do not pointlessly delete new files if the old ones are not there
+                    QFile::exists(oldName)) {  // do not pointlessly delete new files if the old ones are not there
                     FS::move(oldName, logBase.arg(i));
+                }
+            }
         }
 
-        for (auto i = 4; i > 0; i--)
+        for (auto i = 4; i > 0; i--) {
             FS::move(logBase.arg(i - 1), logBase.arg(i));
+        }
 
         logFile = std::unique_ptr<QFile>(new QFile(logBase.arg(0)));
         if (!logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
@@ -582,14 +586,16 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     {
         bool migrated = false;
 
-        if (!migrated)
+        if (!migrated) {
             migrated = handleDataMigration(
                 dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../PolyMC"), "PolyMC",
                 "polymc.cfg");
-        if (!migrated)
+        }
+        if (!migrated) {
             migrated = handleDataMigration(
                 dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../multimc"), "MultiMC",
                 "multimc.cfg");
+        }
     }
 
     {
@@ -887,8 +893,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
             QString flameKey = m_settings->get("CFKeyOverride").toString();
 
-            if (!flameKey.isEmpty())
+            if (!flameKey.isEmpty()) {
                 m_settings->set("FlameKeyOverride", flameKey);
+            }
             m_settings->reset("CFKeyOverride");
         }
         m_settings->registerSetting("FallbackMRBlockedMods", true);
@@ -1236,8 +1243,9 @@ bool Application::createSetupWizard()
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired || askjava || login;
     if (wizardRequired) {
         // set default theme after going into theme wizard
-        if (!validIcons)
+        if (!validIcons) {
             settings()->set("IconTheme", QString("pe_colored"));
+        }
         if (!validWidgets) {
 #if defined(Q_OS_WIN32) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
             const QString style =
@@ -1579,8 +1587,9 @@ bool Application::kill(BaseInstance* instance)
 
 void Application::closeCurrentWindow()
 {
-    if (focusWindow())
+    if (focusWindow()) {
         focusWindow()->close();
+    }
 }
 
 void Application::addRunningInstance()
@@ -1621,8 +1630,9 @@ void Application::updateIsRunning(bool running)
 void Application::controllerFinished()
 {
     auto* controller = qobject_cast<LaunchController*>(sender());
-    if (!controller)
+    if (!controller) {
         return;
+    }
     auto id = controller->id();
 
     QMutexLocker locker(&m_instanceExtrasMutex);
@@ -1700,8 +1710,9 @@ ViewLogWindow* Application::showLogWindow()
 
 InstanceWindow* Application::showInstanceWindow(BaseInstance* instance, QString page)
 {
-    if (!instance)
+    if (!instance) {
         return nullptr;
+    }
     auto id = instance->id();
     QMutexLocker locker(&m_instanceExtrasMutex);
     auto& extras = m_instanceExtras[id];
@@ -1831,17 +1842,21 @@ Meta::Index* Application::metadataIndex()
 void Application::updateCapabilities()
 {
     m_capabilities = None;
-    if (!getMSAClientID().isEmpty())
+    if (!getMSAClientID().isEmpty()) {
         m_capabilities |= SupportsMSA;
-    if (!getFlameAPIKey().isEmpty())
+    }
+    if (!getFlameAPIKey().isEmpty()) {
         m_capabilities |= SupportsFlame;
+    }
 
 #ifdef Q_OS_LINUX
-    if (gamemode_query_status() >= 0)
+    if (gamemode_query_status() >= 0) {
         m_capabilities |= SupportsGameMode;
+    }
 
-    if (!LibraryUtils::findMangoHud().isEmpty())
+    if (!LibraryUtils::findMangoHud().isEmpty()) {
         m_capabilities |= SupportsMangoHud;
+    }
 #endif
 }
 
@@ -1865,8 +1880,9 @@ QString Application::getJarPath(QString jarFile)
     };
     for (QString p : potentialPaths) {
         QString jarPath = FS::PathCombine(p, jarFile);
-        if (QFileInfo(jarPath).isFile())
+        if (QFileInfo(jarPath).isFile()) {
             return jarPath;
+        }
     }
     return {};
 }
@@ -1894,8 +1910,9 @@ QString Application::getFlameAPIKey()
 QString Application::getModrinthAPIToken()
 {
     QString tokenOverride = m_settings->get("ModrinthToken").toString();
-    if (!tokenOverride.isEmpty())
+    if (!tokenOverride.isEmpty()) {
         return tokenOverride;
+    }
 
     return QString();
 }

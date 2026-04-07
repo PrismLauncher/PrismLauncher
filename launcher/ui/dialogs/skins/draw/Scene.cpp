@@ -149,8 +149,9 @@ void Scene::draw(QOpenGLShaderProgram* program)
 void updateTexture(QOpenGLTexture* texture, const QImage& img)
 {
     if (texture) {
-        if (texture->isBound())
+        if (texture->isBound()) {
             texture->release();
+        }
         texture->destroy();
         texture->create();
         texture->setSize(img.width(), img.height());

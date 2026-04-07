@@ -139,14 +139,17 @@ void ListModel::requestFinished(QByteArray* responsePtr)
         }
 
         // ignore packs without a published version
-        if (pack.versions.empty())
+        if (pack.versions.empty()) {
             continue;
+        }
         // only display public packs (for now)
-        if (pack.type != ATLauncher::PackType::Public)
+        if (pack.type != ATLauncher::PackType::Public) {
             continue;
+        }
         // ignore "system" packs (Vanilla, Vanilla with Forge, etc)
-        if (pack.system)
+        if (pack.system) {
             continue;
+        }
 
         newList.append(pack);
     }

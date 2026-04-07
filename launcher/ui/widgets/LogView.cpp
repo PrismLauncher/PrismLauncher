@@ -63,8 +63,9 @@ void LogView::setWordWrap(bool wrapping)
 
 void LogView::setColorLines(bool colorLines)
 {
-    if (m_colorLines == colorLines)
+    if (m_colorLines == colorLines) {
         return;
+    }
     m_colorLines = colorLines;
     repopulate();
 }
@@ -180,30 +181,35 @@ void LogView::scrollToBottom()
 
 void LogView::findNext(const QString& what, bool reverse)
 {
-    if (what.isEmpty())
+    if (what.isEmpty()) {
         return;
+    }
 
     const QTextDocument::FindFlags flags(reverse ? QTextDocument::FindBackward : 0);
 
-    if (find(what, flags))
+    if (find(what, flags)) {
         return;
+    }
 
     QTextCursor cursor = textCursor();
 
     if (reverse) {
-        if (cursor.atEnd())
+        if (cursor.atEnd()) {
             return;
+        }
 
         cursor.movePosition(QTextCursor::End);
     } else {
-        if (cursor.atStart())
+        if (cursor.atStart()) {
             return;
+        }
 
         cursor.movePosition(QTextCursor::Start);
     }
 
     cursor = document()->find(what, cursor, flags);
 
-    if (!cursor.isNull())
+    if (!cursor.isNull()) {
         setTextCursor(cursor);
+    }
 }

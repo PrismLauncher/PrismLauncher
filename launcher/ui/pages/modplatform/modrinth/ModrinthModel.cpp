@@ -62,8 +62,9 @@ auto ModpackListModel::debugName() const -> QString
 
 void ModpackListModel::fetchMore(const QModelIndex& parent)
 {
-    if (parent.isValid())
+    if (parent.isValid()) {
         return;
+    }
     if (m_nextSearchOffset == 0) {
         qWarning() << "fetchMore with 0 offset is wrong...";
         return;
@@ -90,8 +91,9 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
             return pack->description;
         }
         case Qt::DecorationRole: {
-            if (m_logoMap.contains(pack->logoName))
+            if (m_logoMap.contains(pack->logoName)) {
                 return m_logoMap.value(pack->logoName);
+            }
 
             QIcon icon = QIcon::fromTheme("screenshot-placeholder");
             ((ModpackListModel*)this)->requestLogo(pack->logoName, pack->logoUrl);
@@ -121,8 +123,9 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
 bool ModpackListModel::setData(const QModelIndex& index, const QVariant& value, [[maybe_unused]] int role)
 {
     int pos = index.row();
-    if (pos >= m_modpacks.size() || pos < 0 || !index.isValid())
+    if (pos >= m_modpacks.size() || pos < 0 || !index.isValid()) {
         return false;
+    }
 
     m_modpacks[pos] = value.value<ModPlatform::IndexedPack::Ptr>();
 
@@ -131,8 +134,9 @@ bool ModpackListModel::setData(const QModelIndex& index, const QVariant& value, 
 
 void ModpackListModel::performPaginatedSearch()
 {
-    if (hasActiveSearchJob())
+    if (hasActiveSearchJob()) {
         return;
+    }
     static const ModrinthAPI api;
 
     if (m_currentSearchTerm.startsWith("#")) {
@@ -214,8 +218,9 @@ void ModpackListModel::searchWithTerm(const QString& term,
                                       std::shared_ptr<ModFilterWidget::Filter> filter,
                                       bool filterChanged)
 {
-    if (sort > 5 || sort < 0)
+    if (sort > 5 || sort < 0) {
         return;
+    }
 
     auto sort_str = sortFromIndex(sort);
 
@@ -299,8 +304,9 @@ void ModpackListModel::searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr
     }
 
     // When you have a Qt build with assertions turned on, proceeding here will abort the application
-    if (newList.empty())
+    if (newList.empty()) {
         return;
+    }
 
     beginInsertRows(QModelIndex(), m_modpacks.size(), m_modpacks.size() + newList.size() - 1);
     m_modpacks.append(newList);

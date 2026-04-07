@@ -77,14 +77,16 @@ bool mergeZipFiles(ArchiveWriter& into, QFileInfo from, QSet<QString>& contained
 bool compressDirFiles(ArchiveWriter& zip, QString dir, QFileInfoList files)
 {
     QDir directory(dir);
-    if (!directory.exists())
+    if (!directory.exists()) {
         return false;
+    }
 
     for (auto e : files) {
         auto filePath = directory.relativeFilePath(e.absoluteFilePath());
         auto srcPath = e.absoluteFilePath();
-        if (!zip.addFile(srcPath, filePath))
+        if (!zip.addFile(srcPath, filePath)) {
             return false;
+        }
     }
 
     return true;
@@ -108,8 +110,9 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
     for (auto i = mods.crbegin(); i != mods.crend(); i++) {
         const auto* mod = *i;
         // do not merge disabled mods.
-        if (!mod->enabled())
+        if (!mod->enabled()) {
             continue;
+        }
         if (mod->type() == ResourceType::ZIPFILE) {
             if (!mergeZipFiles(zipOut, mod->fileinfo(), addedFiles)) {
                 zipOut.close();
@@ -139,8 +142,9 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
             collectFileListRecursively(what_to_zip, nullptr, &files, nullptr);
 
             for (auto e : files) {
-                if (addedFiles.contains(e.filePath()))
+                if (addedFiles.contains(e.filePath())) {
                     files.removeAll(e);
+                }
             }
 
             if (!compressDirFiles(zipOut, parent_dir, files)) {
@@ -208,8 +212,9 @@ std::optional<QStringList> extractSubDir(ArchiveReader* zip, const QString& subd
             auto original_name = relative_file_name;
 
             // Fix subdirs/files ending with a / getting transformed into absolute paths
-            if (relative_file_name.startsWith('/'))
+            if (relative_file_name.startsWith('/')) {
                 relative_file_name = relative_file_name.mid(1);
+            }
 
             // Fix weird "folders with a single file get squashed" thing
             QString sub_path;
@@ -224,8 +229,9 @@ std::optional<QStringList> extractSubDir(ArchiveReader* zip, const QString& subd
                 target_file_path = target + '/';
             } else {
                 target_file_path = FS::PathCombine(target_top_dir.toLocalFile(), sub_path, relative_file_name);
-                if (relative_file_name.endsWith('/') && !target_file_path.endsWith('/'))
+                if (relative_file_name.endsWith('/') && !target_file_path.endsWith('/')) {
                     target_file_path += '/';
+                }
             }
 
             if (!target_top_dir.isParentOf(QUrl::fromLocalFile(target_file_path))) {
@@ -297,23 +303,27 @@ bool extractFile(QString fileCompressed, QString file, QString target)
 bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFileFunction excludeFilter)
 {
     QDir rootDirectory(rootDir);
-    if (!rootDirectory.exists())
+    if (!rootDirectory.exists()) {
         return false;
+    }
 
     QDir directory;
-    if (subDir == nullptr)
+    if (subDir == nullptr) {
         directory = rootDirectory;
-    else
+    } else {
         directory = QDir(subDir);
+    }
 
-    if (!directory.exists())
+    if (!directory.exists()) {
         return false;  // shouldn't ever happen
+    }
 
     // recurse directories
     QFileInfoList entries = directory.entryInfoList(QDir::AllDirs | QDir::NoDotAndDotDot | QDir::Hidden);
     for (const auto& e : entries) {
-        if (!collectFileListRecursively(rootDir, e.filePath(), files, excludeFilter))
+        if (!collectFileListRecursively(rootDir, e.filePath(), files, excludeFilter)) {
             return false;
+        }
     }
 
     // collect files

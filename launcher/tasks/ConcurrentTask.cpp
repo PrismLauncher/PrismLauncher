@@ -46,8 +46,9 @@ ConcurrentTask::ConcurrentTask(QString task_name, int max_concurrent) :  m_total
 ConcurrentTask::~ConcurrentTask()
 {
     for (auto task : m_doing) {
-        if (task)
+        if (task) {
             task->disconnect(this);
+        }
     }
 }
 
@@ -63,8 +64,9 @@ void ConcurrentTask::addTask(Task::Ptr task)
 
 void ConcurrentTask::executeTask()
 {
-    for (auto i = 0; i < m_total_max_size; i++)
+    for (auto i = 0; i < m_total_max_size; i++) {
         QMetaObject::invokeMethod(this, &ConcurrentTask::executeNextSubTask, Qt::QueuedConnection);
+    }
 }
 
 bool ConcurrentTask::abort()
@@ -88,10 +90,11 @@ bool ConcurrentTask::abort()
         suceedeed &= (task.value())->abort();
     }
 
-    if (suceedeed)
+    if (suceedeed) {
         emitAborted();
-    else
+    } else {
         emitFailed(tr("Failed to abort all running tasks."));
+    }
 
     return suceedeed;
 }

@@ -70,8 +70,9 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
             // If theme data was found, fade "Disabled" color of each role according to FadeAmount
             m_palette = fadeInactive(m_palette, m_fadeAmount, m_fadeColor);
 
-            if (!hasCustomLogColors)
+            if (!hasCustomLogColors) {
                 m_logColors = defaultLogColors(m_palette);
+            }
         } else {
             themeDebugLog() << "Did not read theme json file correctly, not changing theme, keeping previous.";
             m_logColors = defaultLogColors(m_palette);
@@ -120,8 +121,9 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
 QStringList CustomTheme::searchPaths()
 {
     QString pathResources = FS::PathCombine("themes", m_id, "resources");
-    if (QFileInfo::exists(pathResources))
+    if (QFileInfo::exists(pathResources)) {
         return { pathResources };
+    }
 
     return {};
 }
@@ -232,10 +234,11 @@ bool CustomTheme::read(const QString& path, bool& hasCustomLogColors)
                 auto readAndSetLogColor = [this, readColor, logColorsRoot](MessageLevel level, bool fg, const QString& colorName) {
                     auto color = readColor(logColorsRoot, colorName);
                     if (color.isValid()) {
-                        if (fg)
+                        if (fg) {
                             m_logColors.foreground[level] = color;
-                        else
+                        } else {
                             m_logColors.background[level] = color;
+                        }
                     } else {
                         themeDebugLog() << "Color value for" << colorName << "was not present.";
                     }

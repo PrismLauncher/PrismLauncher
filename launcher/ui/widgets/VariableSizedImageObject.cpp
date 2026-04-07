@@ -37,8 +37,9 @@ QSizeF VariableSizedImageObject::intrinsicSize(QTextDocument* doc, int posInDocu
 
     auto image = qvariant_cast<QImage>(format.property(ImageData));
     auto size = image.size();
-    if (size.isEmpty())  // can't resize an empty image
+    if (size.isEmpty()) {  // can't resize an empty image
         return { size };
+    }
 
     // calculate the new image size based on the properties
     int width = 0;
@@ -66,8 +67,9 @@ QSizeF VariableSizedImageObject::intrinsicSize(QTextDocument* doc, int posInDocu
     // doc->textWidth() includes the margin, so we need to remove it.
     auto doc_width = doc->textWidth() - (2 * doc->documentMargin());
 
-    if (size.width() > doc_width)
+    if (size.width() > doc_width) {
         size *= doc_width / (double)size.width();
+    }
 
     return { size };
 }
@@ -80,8 +82,9 @@ void VariableSizedImageObject::drawObject(QPainter* painter,
 {
     if (!format.hasProperty(ImageData)) {
         QUrl image_url{ qvariant_cast<QString>(format.property(QTextFormat::ImageName)) };
-        if (m_fetching_images.contains(image_url) || image_url.isEmpty())
+        if (m_fetching_images.contains(image_url) || image_url.isEmpty()) {
             return;
+        }
 
         auto meta = std::make_shared<ImageMetadata>();
         meta->posInDocument = posInDocument;
@@ -162,8 +165,9 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, std::shared_ptr<Ima
     connect(job, &NetJob::succeeded, this, [this, full_entry_path, source_url, loadImage] {
         qDebug() << "Loaded resource at:" << full_entry_path;
         // If we flushed, don't proceed.
-        if (!m_fetching_images.contains(source_url))
+        if (!m_fetching_images.contains(source_url)) {
             return;
+        }
 
         QImage image(full_entry_path);
         loadImage(image);
@@ -171,8 +175,9 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, std::shared_ptr<Ima
     connect(job, &NetJob::failed, this, [this, full_entry_path, source_url, loadImage](QString reason) {
         qWarning() << "Failed resource at:" << full_entry_path << "because:" << reason;
         // If we flushed, don't proceed.
-        if (!m_fetching_images.contains(source_url))
+        if (!m_fetching_images.contains(source_url)) {
             return;
+        }
 
         loadImage(QImage());
     });

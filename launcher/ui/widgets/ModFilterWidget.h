@@ -75,9 +75,11 @@ class ModFilterWidget : public QTabWidget {
 
         bool checkMcVersions(QStringList value)
         {
-            for (auto mcVersion : versions)
-                if (value.contains(mcVersion.toString()))
+            for (auto mcVersion : versions) {
+                if (value.contains(mcVersion.toString())) {
                     return true;
+                }
+            }
 
             return versions.empty();
         }

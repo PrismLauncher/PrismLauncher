@@ -20,8 +20,9 @@ InstanceCopyTask::InstanceCopyTask(BaseInstance* origInstance, const InstanceCop
 
     QString filters = prefs.getSelectedFiltersAsRegex();
     if (m_useLinks || m_useHardLinks) {
-        if (!filters.isEmpty())
+        if (!filters.isEmpty()) {
             filters += "|";
+        }
         filters += "instance.cfg";
     }
 
@@ -57,10 +58,11 @@ void InstanceCopyTask::executeTask()
                 QFileInfo dotMCDir(FS::PathCombine(m_stagingPath, ".minecraft"));
 
                 QString staging_mc_dir;
-                if (dotMCDir.exists() && !mcDir.exists())
+                if (dotMCDir.exists() && !mcDir.exists()) {
                     staging_mc_dir = dotMCDir.filePath();
-                else
+                } else {
                     staging_mc_dir = mcDir.filePath();
+                }
 
                 savesCopy = std::make_unique<FS::copy>(FS::PathCombine(m_origInstance->gameRoot(), "saves"),
                                                        FS::PathCombine(staging_mc_dir, "saves"));
@@ -161,15 +163,17 @@ void InstanceCopyTask::copyFinished()
         QByteArray allowed_symlinks;
         if (allowed_symlinks_file.exists()) {
             allowed_symlinks.append(FS::read(allowed_symlinks_file.filePath()));
-            if (allowed_symlinks.right(1) != "\n")
+            if (allowed_symlinks.right(1) != "\n") {
                 allowed_symlinks.append("\n");  // we want to be on a new line
+            }
         }
         allowed_symlinks.append(m_origInstance->gameRoot().toUtf8());
         allowed_symlinks.append("\n");
-        if (allowed_symlinks_file.isSymLink())
+        if (allowed_symlinks_file.isSymLink()) {
             FS::deletePath(
                 allowed_symlinks_file
                     .filePath());  // we dont want to modify the original. also make sure the resulting file is not itself a link.
+        }
 
         try {
             FS::write(allowed_symlinks_file.filePath(), allowed_symlinks);

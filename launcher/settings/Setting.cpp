@@ -25,8 +25,9 @@ QVariant Setting::get() const
         return defValue();
     }
     QVariant test = sbase->retrieveValue(*this);
-    if (!test.isValid())
+    if (!test.isValid()) {
         return defValue();
+    }
     return test;
 }
 

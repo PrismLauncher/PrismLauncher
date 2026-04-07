@@ -45,8 +45,9 @@ EnvironmentVariables::EnvironmentVariables(QWidget* parent) : QWidget(parent), u
     });
 
     connect(ui->remove, &QPushButton::clicked, this, [this] {
-        for (QTreeWidgetItem* item : ui->list->selectedItems())
+        for (QTreeWidgetItem* item : ui->list->selectedItems()) {
             ui->list->takeTopLevelItem(ui->list->indexOfTopLevelItem(item));
+        }
     });
 
     connect(ui->clear, &QPushButton::clicked, this, [this] { ui->list->clear(); });
@@ -103,8 +104,9 @@ QMap<QString, QVariant> EnvironmentVariables::value() const
 {
     QMap<QString, QVariant> result;
     QTreeWidgetItem* item = ui->list->topLevelItem(0);
-    for (int i = 1; item != nullptr; item = ui->list->topLevelItem(i++))
+    for (int i = 1; item != nullptr; item = ui->list->topLevelItem(i++)) {
         result[item->text(0)] = item->text(1);
+    }
 
     return result;
 }
