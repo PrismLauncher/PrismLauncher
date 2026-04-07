@@ -83,7 +83,7 @@ Task::State FileSink::write(QByteArray& data)
         qCCritical(taskNetLogC) << error;
         m_fail_reason = error;
         m_output_file->cancelWriting();
-        m_output_file.reset();
+        m_output_file = nullptr;
         m_wroteAnyData = false;
         return Task::State::Failed;
     }
@@ -133,7 +133,7 @@ Task::State FileSink::finalize(QNetworkReply& reply)
     }
 
     // then get rid of the save file
-    m_output_file.reset();
+    m_output_file = nullptr;
 
     return finalizeCache(reply);
 }

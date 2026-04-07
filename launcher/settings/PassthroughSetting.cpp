@@ -52,7 +52,7 @@ void PassthroughSetting::reset()
     if (isOverriding()) {
         Setting::reset();
     }
-    m_other->reset();
+    (*m_other).reset();
 }
 
 void PassthroughSetting::set(QVariant value)
