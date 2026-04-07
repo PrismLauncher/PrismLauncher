@@ -131,7 +131,9 @@
 #ifdef Q_OS_LINUX
 #include <dlfcn.h>
 #include "LibraryUtils.h"
+#ifdef ENABLE_GAMEMODE
 #include "gamemode_client.h"
+#endif
 #endif
 
 #if defined(Q_OS_LINUX)
@@ -1837,8 +1839,10 @@ void Application::updateCapabilities()
         m_capabilities |= SupportsFlame;
 
 #ifdef Q_OS_LINUX
+#ifdef ENABLE_GAMEMODE
     if (gamemode_query_status() >= 0)
         m_capabilities |= SupportsGameMode;
+#endif
 
     if (!LibraryUtils::findMangoHud().isEmpty())
         m_capabilities |= SupportsMangoHud;

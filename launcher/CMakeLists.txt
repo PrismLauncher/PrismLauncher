@@ -1356,10 +1356,11 @@ else()
     target_link_libraries(Launcher_logic LibArchive::LibArchive)
 endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND Launcher_ENABLE_GAMEMODE)
     target_link_libraries(Launcher_logic
         gamemode
     )
+    add_compile_definitions(ENABLE_GAMEMODE)
 endif()
 
 target_link_libraries(Launcher_logic

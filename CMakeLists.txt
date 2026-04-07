@@ -303,7 +303,9 @@ endif()
 
 find_package(cmark REQUIRED)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+option(Launcher_ENABLE_GAMEMODE "Enable Feral Gamemode support" ON)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND Launcher_ENABLE_GAMEMODE)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(gamemode REQUIRED IMPORTED_TARGET gamemode)
 endif()
