@@ -88,7 +88,7 @@ jobs:
           - os: ubuntu-22.04-arm
             system: aarch64-linux
 
-          - os: macos-14
+          - os: macos-26
             system: aarch64-darwin
 
     runs-on: ${{ matrix.os }}

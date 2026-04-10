@@ -349,7 +349,8 @@ void LaunchProfile::getLibraryFiles(const RuntimeContext& runtimeContext,
                                     QStringList& jars,
                                     QStringList& nativeJars,
                                     const QString& overridePath,
-                                    const QString& tempPath) const
+                                    const QString& tempPath,
+                                    bool addJarMods) const
 {
     QStringList native32, native64;
     jars.clear();
@@ -360,7 +361,7 @@ void LaunchProfile::getLibraryFiles(const RuntimeContext& runtimeContext,
     // NOTE: order is important here, add main jar last to the lists
     if (m_mainJar) {
         // FIXME: HACK!! jar modding is weird and unsystematic!
-        if (m_jarMods.size()) {
+        if (m_jarMods.size() && addJarMods) {
             QDir tempDir(tempPath);
             jars.append(tempDir.absoluteFilePath("minecraft.jar"));
         } else {

@@ -1,18 +1,17 @@
+#include "McClient.h"
+
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QObject>
 #include <QTcpSocket>
+#include <utility>
 
-#include <Exception.h>
+#include "Exception.h"
 #include "Json.h"
-#include "McClient.h"
 
-// 7 first bits
-#define SEGMENT_BITS 0x7F
-// last bit
-#define CONTINUE_BIT 0x80
-
-McClient::McClient(QObject* parent, QString domain, QString ip, short port) : QObject(parent), m_domain(domain), m_ip(ip), m_port(port) {}
+McClient::McClient(QObject* parent, QString domain, QString ip, const uint16_t port)
+    : QObject(parent), m_domain(std::move(domain)), m_ip(std::move(ip)), m_port(port)
+{}
 
 void McClient::getStatusData()
 {
@@ -33,13 +32,12 @@ void McClient::getStatusData()
 void McClient::sendRequest()
 {
     QByteArray data;
-    writeVarInt(data, 0x00);                    // packet ID
-    writeVarInt(data, 763);                     // hardcoded protocol version (763 = 1.20.1)
-    writeVarInt(data, m_domain.size());         // server address length
-    writeString(data, m_domain.toStdString());  // server address
-    writeFixedInt(data, m_port, 2);             // server port
-    writeVarInt(data, 0x01);                    // next state
-    writePacketToSocket(data);                  // send handshake packet
+    writeVarInt(data, 0x00);      // packet ID
+    writeVarInt(data, 763);       // hardcoded protocol version (763 = 1.20.1)
+    writeString(data, m_domain);  // server address
+    writeUInt16(data, m_port);    // server port
+    writeVarInt(data, 0x01);      // next state
+    writePacketToSocket(data);    // send handshake packet
 
     writeVarInt(data, 0x00);    // packet ID
     writePacketToSocket(data);  // send status packet
@@ -47,17 +45,17 @@ void McClient::sendRequest()
 
 void McClient::readRawResponse()
 {
-    if (m_responseReadState == 2) {
+    if (m_responseReadState == ResponseReadState::Finished) {
         return;
     }
 
     m_resp.append(m_socket.readAll());
-    if (m_responseReadState == 0 && m_resp.size() >= 5) {
+    if (m_responseReadState == ResponseReadState::Waiting && m_resp.size() >= 5) {
         m_wantedRespLength = readVarInt(m_resp);
-        m_responseReadState = 1;
+        m_responseReadState = ResponseReadState::GotLength;
     }
 
-    if (m_responseReadState == 1 && m_resp.size() >= m_wantedRespLength) {
+    if (m_responseReadState == ResponseReadState::GotLength && m_resp.size() >= m_wantedRespLength) {
         if (m_resp.size() > m_wantedRespLength) {
             qDebug().nospace() << "Warning: Packet length doesn't match actual packet size (" << m_wantedRespLength << " expected vs "
                                << m_resp.size() << " received)";
@@ -67,7 +65,7 @@ void McClient::readRawResponse()
         } catch (const Exception& e) {
             emitFail(e.cause());
         }
-        m_responseReadState = 2;
+        m_responseReadState = ResponseReadState::Finished;
     }
 }
 
@@ -75,7 +73,7 @@ void McClient::parseResponse()
 {
     qDebug() << "Received response successfully";
 
-    int packetID = readVarInt(m_resp);
+    const int packetID = readVarInt(m_resp);
     if (packetID != 0x00) {
         throw Exception(QString("Packet ID doesn't match expected value (0x00 vs 0x%1)").arg(packetID, 0, 16));
     }
@@ -84,7 +82,7 @@ void McClient::parseResponse()
 
     // 'resp' should now be the JSON string
     QJsonParseError parseError;
-    QJsonDocument doc = Json::parseUntilGarbage(m_resp, &parseError);
+    const QJsonDocument doc = Json::parseUntilGarbage(m_resp, &parseError);
     if (parseError.error != QJsonParseError::NoError) {
         qDebug() << "Failed to parse JSON:" << parseError.errorString();
         emitFail(parseError.errorString());
@@ -93,18 +91,23 @@ void McClient::parseResponse()
     emitSucceed(doc.object());
 }
 
+// NOLINTBEGIN(*-signed-bitwise)
+
 // From https://wiki.vg/Protocol#VarInt_and_VarLong
+constexpr uint8_t g_varIntValueMask = 0x7F;
+constexpr uint8_t g_varIntContinue = 0x80;
+
 void McClient::writeVarInt(QByteArray& data, int value)
 {
-    while ((value & ~SEGMENT_BITS)) {  // check if the value is too big to fit in 7 bits
+    while ((value & ~g_varIntValueMask) != 0) {  // check if the value is too big to fit in 7 bits
         // Write 7 bits
-        data.append((value & SEGMENT_BITS) | CONTINUE_BIT);
+        data.append(static_cast<uint8_t>((value & ~g_varIntValueMask) | g_varIntContinue)); // NOLINT(*-narrowing-conversions)
 
         // Erase theses 7 bits from the value to write
         // Note: >>> means that the sign bit is shifted with the rest of the number rather than being left alone
         value >>= 7;
     }
-    data.append(value);
+    data.append(static_cast<uint8_t>(value)); // NOLINT(*-narrowing-conversions)
 }
 
 // From https://wiki.vg/Protocol#VarInt_and_VarLong
@@ -112,53 +115,56 @@ int McClient::readVarInt(QByteArray& data)
 {
     int value = 0;
     int position = 0;
-    char currentByte;
 
     while (position < 32) {
-        currentByte = readByte(data);
-        value |= (currentByte & SEGMENT_BITS) << position;
+        const uint8_t currentByte = readByte(data);
+        value |= (currentByte & g_varIntValueMask) << position;
 
-        if ((currentByte & CONTINUE_BIT) == 0)
+        if ((currentByte & g_varIntContinue) == 0) {
             break;
+        }
 
         position += 7;
     }
 
-    if (position >= 32)
+    if (position >= 32) {
         throw Exception("VarInt is too big");
+    }
 
     return value;
 }
 
-char McClient::readByte(QByteArray& data)
+// NOLINTEND(*-signed-bitwise)
+
+uint8_t McClient::readByte(QByteArray& data)
 {
     if (data.isEmpty()) {
         throw Exception("No more bytes to read");
     }
 
-    char byte = data.at(0);
+    const uint8_t byte = data.at(0);
     data.remove(0, 1);
     return byte;
 }
 
-// write number with specified size in big endian format
-void McClient::writeFixedInt(QByteArray& data, int value, int size)
+void McClient::writeUInt16(QByteArray& data, const uint16_t value)
 {
-    for (int i = size - 1; i >= 0; i--) {
-        data.append((value >> (i * 8)) & 0xFF);
-    }
+    QDataStream stream(&data, QIODeviceBase::Append);
+    stream.setByteOrder(QDataStream::BigEndian);
+    stream << value;
 }
 
-void McClient::writeString(QByteArray& data, const std::string& value)
+void McClient::writeString(QByteArray& data, const QString& value)
 {
-    data.append(value.c_str());
+    writeVarInt(data, static_cast<int32_t>(value.size()));
+    data.append(value.toUtf8());
 }
 
 void McClient::writePacketToSocket(QByteArray& data)
 {
     // we prefix the packet with its length
     QByteArray dataWithSize;
-    writeVarInt(dataWithSize, data.size());
+    writeVarInt(dataWithSize, static_cast<int32_t>(data.size()));
     dataWithSize.append(data);
 
     // write it to the socket
@@ -168,7 +174,7 @@ void McClient::writePacketToSocket(QByteArray& data)
     data.clear();
 }
 
-void McClient::emitFail(QString error)
+void McClient::emitFail(const QString& error)
 {
     qDebug() << "Minecraft server ping for status error:" << error;
     emit failed(error);
@@ -177,6 +183,6 @@ void McClient::emitFail(QString error)
 
 void McClient::emitSucceed(QJsonObject data)
 {
-    emit succeeded(data);
+    emit succeeded(std::move(data));
     emit finished();
 }

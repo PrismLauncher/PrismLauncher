@@ -61,6 +61,7 @@ void PrintInstanceInfo::executeTask()
     auto instance = m_parent->instance();
     QStringList log;
 
+    log << "";
     log << "OS: " + QString("%1 | %2 | %3").arg(QSysInfo::prettyProductName(), QSysInfo::kernelType(), QSysInfo::kernelVersion());
 #ifdef Q_OS_FREEBSD
     ::runSysctlHwModel(log);
