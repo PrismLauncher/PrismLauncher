@@ -22,6 +22,7 @@ class QTreeView;
 class QLabel;
 class Setting;
 class QCheckBox;
+class QComboBox;
 
 class LanguageSelectionWidget : public QWidget {
     Q_OBJECT
@@ -41,4 +42,5 @@ class LanguageSelectionWidget : public QWidget {
     QTreeView* languageView = nullptr;
     QLabel* helpUsLabel = nullptr;
     QCheckBox* formatCheckbox = nullptr;
+    QComboBox* dateFormatCombo = nullptr;
 };
