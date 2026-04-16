@@ -1,0 +1,118 @@
+name: Build
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  merge_group:
+    types: [checks_requested]
+  pull_request:
+  workflow_call:
+    inputs:
+      build-type:
+        description: Type of build (Debug or Release)
+        type: string
+        default: Debug
+      environment:
+        description: Deployment environment to run under
+        type: string
+  workflow_dispatch:
+    inputs:
+      build-type:
+        description: Type of build (Debug or Release)
+        type: string
+        default: Debug
+
+permissions: {}
+
+jobs:
+  build:
+    name: Build (${{ matrix.artifact-name }})
+
+    environment: ${{ inputs.environment || '' }}
+
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            artifact-name: Linux
+            cmake-preset: linux
+            qt-version: 6.10.2
+
+          - os: ubuntu-24.04-arm
+            artifact-name: Linux-aarch64
+            cmake-preset: linux
+            qt-version: 6.10.2
+
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        shell: bash
+
+    env:
+      ARTIFACT_NAME: ${{ matrix.artifact-name }}-Qt6
+      BUILD_PLATFORM: official
+      BUILD_TYPE: ${{ inputs.build-type || 'Debug' }}
+      CMAKE_PRESET: ${{ matrix.cmake-preset }}
+
+    steps:
+      ##
+      # SETUP
+      ##
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Setup dependencies
+        id: setup-dependencies
+        uses: ./.github/actions/setup-dependencies
+        with:
+          build-type: ${{ env.BUILD_TYPE }}
+          artifact-name: ${{ matrix.artifact-name }}
+          qt-version: ${{ matrix.qt-version }}
+
+      ##
+      # BUILD
+      ##
+
+      - name: Configure project
+        run: |
+          cmake --preset "$CMAKE_PRESET"
+
+      - name: Run build
+        run: |
+          cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE"
+
+      - name: Run tests
+        run: |
+          ctest --preset "$CMAKE_PRESET" --build-config "$BUILD_TYPE"
+
+      ##
+      # PACKAGE
+      ##
+
+      - name: Get short version
+        id: short-version
+        run: |
+          echo "version=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Package (Linux)
+        uses: ./.github/actions/package/linux
+        with:
+          version: ${{ steps.short-version.outputs.version }}
+          build-type: ${{ steps.setup-dependencies.outputs.build-type }}
+          artifact-name: ${{ matrix.artifact-name }}
+          qt-version: ${{ steps.setup-dependencies.outputs.qt-version }}
+
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-private-key-id: ${{ secrets.GPG_PRIVATE_KEY_ID }}
