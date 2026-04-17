@@ -74,8 +74,8 @@ class IconList : public QAbstractListModel {
     bool iconFileExists(const QString& key) const;
     QString iconDirectory(const QString& key) const;
 
-    void installIcons(const QStringList& iconFiles);
-    void installIcon(const QString& file, const QString& name);
+    QString installIcon(const QString& file, const QString& name);
+    QStringList installIcons(const QStringList& iconFiles);
 
     const MMCIcon* icon(const QString& key) const;
 

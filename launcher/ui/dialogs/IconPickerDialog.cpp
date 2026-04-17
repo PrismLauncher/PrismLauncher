@@ -18,6 +18,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSortFilterProxyModel>
+#include <QTimer>
 
 #include "Application.h"
 
@@ -119,7 +120,27 @@ void IconPickerDialog::addNewIcon()
     //: The type of icon files
     auto filter = IconUtils::getIconFilter();
     QStringList fileNames = QFileDialog::getOpenFileNames(this, selectIcons, QString(), tr("Icons %1").arg(filter));
-    APPLICATION->icons()->installIcons(fileNames);
+    QStringList newKeys = APPLICATION->icons()->installIcons(fileNames);
+
+    // If we added at least one icon, select the first one automatically
+    if (!newKeys.isEmpty()) {
+        const QString& firstKey = newKeys.first();
+
+        // We have to delay this until the icon appears in the UI
+        // I tried making a connection to detect when it changes, but that introduced way too many problems
+        QTimer::singleShot(100, this, [this, firstKey]() {
+            auto iconList = APPLICATION->icons();
+            int row = iconList->getIconIndex(firstKey);
+            QModelIndex sourceIndex = iconList->index(row);
+            
+            if (sourceIndex.isValid()) {
+                QModelIndex proxyIndex = proxyModel->mapFromSource(sourceIndex);
+                
+                ui->iconView->setCurrentIndex(proxyIndex);
+                ui->iconView->scrollTo(proxyIndex);
+            }
+        });
+    }
 }
 
 void IconPickerDialog::removeSelectedIcon()

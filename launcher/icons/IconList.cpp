@@ -331,23 +331,34 @@ int IconList::rowCount(const QModelIndex& parent) const
     return parent.isValid() ? 0 : m_icons.size();
 }
 
-void IconList::installIcons(const QStringList& iconFiles)
+QStringList IconList::installIcons(const QStringList& iconFiles)
 {
-    for (const QString& file : iconFiles)
-        installIcon(file, {});
+    QStringList installedKeys;
+    for (const QString& file : iconFiles) {
+        QString key = installIcon(file, {});
+        if (!key.isEmpty()) {
+            installedKeys << key;
+        }
+    }
+    return installedKeys;
 }
 
-void IconList::installIcon(const QString& file, const QString& name)
+QString IconList::installIcon(const QString& file, const QString& name)
 {
     QFileInfo fileinfo(file);
     if (!fileinfo.isReadable() || !fileinfo.isFile())
-        return;
+        return QString();
 
     if (!IconUtils::isIconSuffix(fileinfo.suffix()))
-        return;
+        return QString();
 
-    QString target = FS::PathCombine(getDirectory(), name.isEmpty() ? fileinfo.fileName() : name);
-    QFile::copy(file, target);
+    QString iconKey = name.isEmpty() ? fileinfo.baseName() : name;
+    QString target = FS::PathCombine(getDirectory(), iconKey);
+
+    if (QFile::copy(file, target)) {
+        return iconKey;
+    }
+    return QString();
 }
 
 bool IconList::iconFileExists(const QString& key) const
