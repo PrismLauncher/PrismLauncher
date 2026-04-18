@@ -23,6 +23,7 @@
 #include <QDirIterator>
 #include <QIcon>
 #include <QImageReader>
+#include <QFileInfo>
 #include <QStyle>
 #include <QStyleFactory>
 #include "Exception.h"
@@ -282,6 +283,15 @@ void ThemeManager::applyCurrentlySelectedTheme(bool initial)
 
 QString ThemeManager::getCatPack(QString catName)
 {
+    const auto customCatPath = APPLICATION->settings()->get("BackgroundCatPath").toString().trimmed();
+    if (!customCatPath.isEmpty()) {
+        QFileInfo customCatFile(customCatPath);
+        if (customCatFile.isFile() && customCatFile.isReadable()) {
+            return customCatFile.absoluteFilePath();
+        }
+        themeWarningLog() << "Configured custom cat background is invalid:" << customCatPath;
+    }
+
     auto catIter = m_catPacks.find(!catName.isEmpty() ? catName : APPLICATION->settings()->get("BackgroundCat").toString());
     if (catIter != m_catPacks.end()) {
         auto& catPack = catIter->second;

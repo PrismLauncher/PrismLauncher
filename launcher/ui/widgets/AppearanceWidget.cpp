@@ -38,7 +38,12 @@
 #include "ui_AppearanceWidget.h"
 
 #include <DesktopServices.h>
+#include <QDir>
+#include <QFileDialog>
+#include <QFileInfo>
 #include <QGraphicsOpacityEffect>
+#include <QImageReader>
+#include <QLineEdit>
 #include "BuildConfig.h"
 #include "ui/themes/ITheme.h"
 #include "ui/themes/ThemeManager.h"
@@ -86,6 +91,32 @@ AppearanceWidget::AppearanceWidget(bool themesOnly, QWidget* parent)
     connect(m_ui->catPackFolder, &QPushButton::clicked, this,
             [] { DesktopServices::openPath(APPLICATION->themeManager()->getCatPacksFolder().path()); });
     connect(m_ui->reloadThemesButton, &QPushButton::pressed, this, &AppearanceWidget::loadThemeSettings);
+
+    connect(m_ui->catImageBrowseButton, &QPushButton::clicked, this, [this] {
+        QStringList supportedPatterns;
+        for (const auto& format : QImageReader::supportedImageFormats()) {
+            supportedPatterns.append("*." + QString::fromLatin1(format));
+        }
+        supportedPatterns.removeDuplicates();
+        supportedPatterns.sort();
+
+        const auto currentPath = m_ui->catImagePathEdit->text().trimmed();
+        const auto initialDir = currentPath.isEmpty() ? APPLICATION->themeManager()->getCatPacksFolder().absolutePath()
+                                                      : QFileInfo(currentPath).absolutePath();
+        const auto file = QFileDialog::getOpenFileName(this, tr("Select background image"), initialDir,
+                                                       tr("Image files (%1);;All files (*)").arg(supportedPatterns.join(' ')));
+        if (file.isEmpty()) {
+            return;
+        }
+
+        m_ui->catImagePathEdit->setText(QDir::toNativeSeparators(QFileInfo(file).absoluteFilePath()));
+        updateCatPreview();
+    });
+    connect(m_ui->catImageClearButton, &QPushButton::clicked, this, [this] {
+        m_ui->catImagePathEdit->clear();
+        updateCatPreview();
+    });
+    connect(m_ui->catImagePathEdit, &QLineEdit::textChanged, this, [this] { updateCatPreview(); });
 }
 
 AppearanceWidget::~AppearanceWidget()
@@ -102,6 +133,8 @@ void AppearanceWidget::applySettings()
     settings->set("CatOpacity", m_ui->catOpacitySlider->value());
     auto catFit = m_ui->catFitComboBox->currentIndex();
     settings->set("CatFit", catFit == 0 ? "fit" : catFit == 1 ? "fill" : "strech");
+    settings->set("BackgroundCatPath", m_ui->catImagePathEdit->text().trimmed());
+    APPLICATION->currentCatChanged(m_ui->catPackComboBox->currentIndex());
 }
 
 void AppearanceWidget::loadSettings()
@@ -122,6 +155,7 @@ void AppearanceWidget::loadSettings()
 
     auto catFit = settings->get("CatFit").toString();
     m_ui->catFitComboBox->setCurrentIndex(catFit == "fit" ? 0 : catFit == "fill" ? 1 : 2);
+    m_ui->catImagePathEdit->setText(settings->get("BackgroundCatPath").toString());
 }
 
 void AppearanceWidget::retranslateUi()

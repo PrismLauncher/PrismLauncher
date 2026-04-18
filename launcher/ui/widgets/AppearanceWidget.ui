@@ -370,6 +370,60 @@
         </item>
        </widget>
       </item>
+      <item>
+       <spacer name="verticalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Policy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>0</width>
+          <height>6</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="catImagePathLabel">
+        <property name="text">
+         <string>Custom Cat Image</string>
+        </property>
+        <property name="buddy">
+         <cstring>catImagePathEdit</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QLineEdit" name="catImagePathEdit">
+          <property name="placeholderText">
+           <string>Use selected cat pack image</string>
+          </property>
+          <property name="clearButtonEnabled">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="catImageBrowseButton">
+          <property name="text">
+           <string>Browse...</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="catImageClearButton">
+          <property name="text">
+           <string>Reset</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
     </widget>
    </item>
@@ -624,6 +678,9 @@
   <tabstop>consoleFont</tabstop>
   <tabstop>fontSizeBox</tabstop>
   <tabstop>catFitComboBox</tabstop>
+  <tabstop>catImagePathEdit</tabstop>
+  <tabstop>catImageBrowseButton</tabstop>
+  <tabstop>catImageClearButton</tabstop>
   <tabstop>catOpacitySlider</tabstop>
   <tabstop>consolePreview</tabstop>
  </tabstops>

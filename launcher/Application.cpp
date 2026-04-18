@@ -644,6 +644,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("IconTheme", QString());
         m_settings->registerSetting("ApplicationTheme", QString());
         m_settings->registerSetting("BackgroundCat", QString("kitteh"));
+        m_settings->registerSetting("BackgroundCatPath", QString());
 
         // Remembered state
         m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
