@@ -67,6 +67,7 @@ stdenv.mkDerivation {
     extra-cmake-modules
     jdk17
     stripJavaArchivesHook
+    wrapGAppsHook3
   ];
 
   buildInputs = [
