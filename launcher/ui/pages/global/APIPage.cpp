@@ -143,6 +143,7 @@ void APIPage::loadSettings()
     ui->msaClientID->setText(msaClientID);
     QString metaURL = s->get("MetaURLOverride").toString();
     ui->metaURL->setText(metaURL);
+    ui->metaRefreshOnLaunchCB->setCheckState(s->get("MetaRefreshOnLaunch").toBool() ? Qt::Checked : Qt::Unchecked);
     QString resourceURL = s->get("ResourceURLOverride").toString();
     ui->resourceURL->setText(resourceURL);
     QString fmlLibsURL = s->get("LegacyFMLLibsURLOverride").toString();
@@ -194,6 +195,7 @@ void APIPage::applySettings()
 
     s->set("FallbackMRBlockedMods", ui->FallbackMRBlockedMods->checkState());
     s->set("MetaURLOverride", metaURL.toString());
+    s->set("MetaRefreshOnLaunch", ui->metaRefreshOnLaunchCB->checkState() == Qt::Checked);
     s->set("ResourceURLOverride", resourceURL.toString());
     s->set("LegacyFMLLibsURLOverride", fmlLibsURL.toString());
     QString flameKey = ui->flameKey->text();

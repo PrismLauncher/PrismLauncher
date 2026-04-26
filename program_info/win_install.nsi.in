@@ -4,6 +4,7 @@
 
 !include "x64.nsh"
 
+AllowSkipFiles off
 Unicode true
 
 Name "@Launcher_DisplayName@"

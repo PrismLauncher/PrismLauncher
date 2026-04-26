@@ -27,3 +27,16 @@ uint64_t totalRamMiB();
 uint64_t availableRamMiB();
 QStringList gpuInfo();
 }  // namespace HardwareInfo
+
+#ifdef Q_OS_MACOS
+namespace MacOSHardwareInfo {
+enum class MemoryPressureLevel : uint8_t {
+    Normal = 1,
+    Warning = 2,
+    Critical = 4,
+};
+
+MemoryPressureLevel memoryPressureLevel();
+QString memoryPressureLevelName();
+}  // namespace MacOSHardwareInfo
+#endif

@@ -32,9 +32,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-262</y>
-        <width>820</width>
-        <height>908</height>
+        <y>0</y>
+        <width>825</width>
+        <height>1236</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -123,6 +123,13 @@
            <widget class="QLineEdit" name="metaURL">
             <property name="placeholderText">
              <string>Use Default</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="metaRefreshOnLaunchCB">
+            <property name="text">
+             <string>Refresh on launch</string>
             </property>
            </widget>
           </item>

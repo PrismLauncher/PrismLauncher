@@ -322,6 +322,14 @@
     <enum>QAction::PreferencesRole</enum>
    </property>
   </action>
+  <action name="actionManageSkins">
+   <property name="icon">
+    <iconset theme="settings"/>
+   </property>
+   <property name="text">
+    <string>Manage &amp;Skins...</string>
+   </property>
+  </action>
   <action name="actionManageAccounts">
    <property name="icon">
     <iconset theme="accounts"/>

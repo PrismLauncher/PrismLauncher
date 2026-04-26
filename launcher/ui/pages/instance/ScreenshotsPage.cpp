@@ -45,7 +45,6 @@
 #include <QFileSystemModel>
 #include <QKeyEvent>
 #include <QLineEdit>
-#include <QMap>
 #include <QMenu>
 #include <QModelIndex>
 #include <QMutableListIterator>
@@ -53,6 +52,8 @@
 #include <QRegularExpression>
 #include <QSet>
 #include <QStyledItemDelegate>
+#include <memory>
+#include <utility>
 
 #include <Application.h>
 #include "settings/SettingsObject.h"
@@ -70,9 +71,14 @@
 #include "RWStorage.h"
 
 class ScreenshotsFSModel : public QFileSystemModel {
-    bool canDropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) const override
+   public:
+    bool canDropMimeData(const QMimeData* data,
+                         const Qt::DropAction action,
+                         const int row,
+                         const int column,
+                         const QModelIndex& parent) const override
     {
-        QUrl root = QUrl::fromLocalFile(rootPath());
+        const QUrl root = QUrl::fromLocalFile(rootPath());
         // this disables reordering items inside the model
         // by rejecting drops if the file is already inside the folder
         if (data->hasUrls()) {
@@ -92,8 +98,8 @@ using SharedIconCachePtr = std::shared_ptr<SharedIconCache>;
 class ThumbnailingResult : public QObject {
     Q_OBJECT
    public slots:
-    inline void emitResultsReady(const QString& path) { emit resultsReady(path); }
-    inline void emitResultsFailed(const QString& path) { emit resultsFailed(path); }
+    void emitResultsReady(const QString& path) { emit resultsReady(path); }
+    void emitResultsFailed(const QString& path) { emit resultsFailed(path); }
    signals:
     void resultsReady(const QString& path);
     void resultsFailed(const QString& path);
@@ -101,32 +107,32 @@ class ThumbnailingResult : public QObject {
 
 class ThumbnailRunnable : public QRunnable {
    public:
-    ThumbnailRunnable(QString path, SharedIconCachePtr cache)
+    ThumbnailRunnable(QString path, SharedIconCachePtr cache) : m_path(std::move(path)), m_cache(std::move(cache)) {}
+    void run() override
     {
-        m_path = path;
-        m_cache = cache;
-    }
-    void run()
-    {
-        QFileInfo info(m_path);
-        if (info.isDir())
+        const QFileInfo info(m_path);
+        if (info.isDir()) {
             return;
-        if ((info.suffix().compare("png", Qt::CaseInsensitive) != 0))
+        }
+        if (info.suffix().compare("png", Qt::CaseInsensitive) != 0) {
             return;
-        if (!m_cache->stale(m_path))
+        }
+        if (!m_cache->stale(m_path)) {
             return;
-        QImage image(m_path);
+        }
+        const QImage image(m_path);
         if (image.isNull()) {
             m_resultEmitter.emitResultsFailed(m_path);
             qDebug() << "Error loading screenshot (perhaps too large?):" + m_path;
             return;
         }
         QImage small;
-        if (image.width() > image.height())
+        if (image.width() > image.height()) {
             small = image.scaledToWidth(512).scaledToWidth(256, Qt::SmoothTransformation);
-        else
+        } else {
             small = image.scaledToHeight(512).scaledToHeight(256, Qt::SmoothTransformation);
-        QPoint offset((256 - small.width()) / 2, (256 - small.height()) / 2);
+        }
+        const QPoint offset((256 - small.width()) / 2, (256 - small.height()) / 2);
         QImage square(QSize(256, 256), QImage::Format_ARGB32);
         square.fill(Qt::transparent);
 
@@ -134,7 +140,7 @@ class ThumbnailRunnable : public QRunnable {
         painter.drawImage(offset, small);
         painter.end();
 
-        QIcon icon(QPixmap::fromImage(square));
+        const QIcon icon(QPixmap::fromImage(square));
         m_cache->add(m_path, icon);
         m_resultEmitter.emitResultsReady(m_path);
     }
@@ -148,59 +154,62 @@ class ThumbnailRunnable : public QRunnable {
 class FilterModel : public QIdentityProxyModel {
     Q_OBJECT
    public:
-    explicit FilterModel(QObject* parent = 0) : QIdentityProxyModel(parent)
+    explicit FilterModel(QObject* parent = nullptr) : QIdentityProxyModel(parent)
     {
         m_thumbnailingPool.setMaxThreadCount(4);
         m_thumbnailCache = std::make_shared<SharedIconCache>();
         m_thumbnailCache->add("placeholder", QIcon::fromTheme("screenshot-placeholder"));
         connect(&watcher, &QFileSystemWatcher::fileChanged, this, &FilterModel::fileChanged);
     }
-    virtual ~FilterModel()
+    ~FilterModel() override
     {
         m_thumbnailingPool.clear();
-        if (!m_thumbnailingPool.waitForDone(500))
+        if (!m_thumbnailingPool.waitForDone(500)) {
             qDebug() << "Thumbnail pool took longer than 500ms to finish";
+        }
     }
-    virtual QVariant data(const QModelIndex& proxyIndex, int role = Qt::DisplayRole) const
+    QVariant data(const QModelIndex& proxyIndex, const int role = Qt::DisplayRole) const override  // NOLINT(*-default-arguments)
     {
-        auto model = sourceModel();
-        if (!model)
-            return QVariant();
+        const auto* model = sourceModel();
+        if (!model) {
+            return {};
+        }
         if (role == Qt::DisplayRole || role == Qt::EditRole) {
-            QVariant result = sourceModel()->data(mapToSource(proxyIndex), role);
+            const QVariant result = model->data(mapToSource(proxyIndex), role);
             static const QRegularExpression s_removeChars("\\.png$");
             return result.toString().remove(s_removeChars);
         }
         if (role == Qt::DecorationRole) {
-            QVariant result = sourceModel()->data(mapToSource(proxyIndex), QFileSystemModel::FilePathRole);
-            QString filePath = result.toString();
-            QIcon temp;
+            const QVariant result = model->data(mapToSource(proxyIndex), QFileSystemModel::FilePathRole);
+            const QString filePath = result.toString();
             if (!watched.contains(filePath)) {
-                ((QFileSystemWatcher&)watcher).addPath(filePath);
-                ((QSet<QString>&)watched).insert(filePath);
+                const_cast<QFileSystemWatcher&>(watcher).addPath(filePath);
+                const_cast<QSet<QString>&>(watched).insert(filePath);
             }
-            if (m_thumbnailCache->get(filePath, temp)) {
+            if (QIcon temp; m_thumbnailCache->get(filePath, temp)) {
                 return temp;
             }
             if (!m_failed.contains(filePath)) {
-                ((FilterModel*)this)->thumbnailImage(filePath);
+                const_cast<FilterModel*>(this)->thumbnailImage(filePath);
             }
             return (m_thumbnailCache->get("placeholder"));
         }
-        return sourceModel()->data(mapToSource(proxyIndex), role);
+        return model->data(mapToSource(proxyIndex), role);
     }
-    virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole)
+    bool setData(const QModelIndex& index, const QVariant& value, const int role = Qt::EditRole) override  // NOLINT(*-default-arguments)
     {
-        auto model = sourceModel();
-        if (!model)
+        auto* model = sourceModel();
+        if (!model) {
             return false;
-        if (role != Qt::EditRole)
+        }
+        if (role != Qt::EditRole) {
             return false;
+        }
         // FIXME: this is a workaround for a bug in QFileSystemModel, where it doesn't
         // sort after renames
         {
-            ((QFileSystemModel*)model)->setNameFilterDisables(true);
-            ((QFileSystemModel*)model)->setNameFilterDisables(false);
+            static_cast<QFileSystemModel*>(model)->setNameFilterDisables(true);
+            static_cast<QFileSystemModel*>(model)->setNameFilterDisables(false);
         }
         return model->setData(mapToSource(index), value.toString() + ".png", role);
     }
@@ -208,15 +217,15 @@ class FilterModel : public QIdentityProxyModel {
    private:
     void thumbnailImage(QString path)
     {
-        auto runnable = new ThumbnailRunnable(path, m_thumbnailCache);
+        auto* runnable = new ThumbnailRunnable(std::move(path), m_thumbnailCache);
         connect(&runnable->m_resultEmitter, &ThumbnailingResult::resultsReady, this, &FilterModel::thumbnailReady);
         connect(&runnable->m_resultEmitter, &ThumbnailingResult::resultsFailed, this, &FilterModel::thumbnailFailed);
         m_thumbnailingPool.start(runnable);
     }
    private slots:
-    void thumbnailReady(QString path) { emit layoutChanged(); }
-    void thumbnailFailed(QString path) { m_failed.insert(path); }
-    void fileChanged(QString filepath)
+    void thumbnailReady(const QString& /*path*/) { emit layoutChanged(); }
+    void thumbnailFailed(const QString& path) { m_failed.insert(path); }
+    void fileChanged(const QString& filepath)
     {
         m_thumbnailCache->setStale(filepath);
         // reinsert the path...
@@ -237,13 +246,12 @@ class FilterModel : public QIdentityProxyModel {
 
 class CenteredEditingDelegate : public QStyledItemDelegate {
    public:
-    explicit CenteredEditingDelegate(QObject* parent = 0) : QStyledItemDelegate(parent) {}
-    virtual ~CenteredEditingDelegate() {}
-    virtual QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+    explicit CenteredEditingDelegate(QObject* parent = nullptr) : QStyledItemDelegate(parent) {}
+    ~CenteredEditingDelegate() override = default;
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override
     {
-        auto widget = QStyledItemDelegate::createEditor(parent, option, index);
-        auto foo = dynamic_cast<QLineEdit*>(widget);
-        if (foo) {
+        auto* widget = QStyledItemDelegate::createEditor(parent, option, index);
+        if (auto* foo = dynamic_cast<QLineEdit*>(widget)) {
             foo->setAlignment(Qt::AlignHCenter);
             foo->setFrame(true);
             foo->setMaximumWidth(192);
@@ -252,10 +260,11 @@ class CenteredEditingDelegate : public QStyledItemDelegate {
     }
 };
 
-ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent) : QMainWindow(parent), ui(new Ui::ScreenshotsPage)
+ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent)
+    : QMainWindow(parent), ui(new Ui::ScreenshotsPage), m_folder(std::move(path))
 {
-    m_model.reset(new ScreenshotsFSModel());
-    m_filterModel.reset(new FilterModel());
+    m_model = std::make_shared<ScreenshotsFSModel>();
+    m_filterModel = std::make_shared<FilterModel>();
     m_filterModel->setSourceModel(m_model.get());
     m_model->setFilter(QDir::Files);
     m_model->setReadOnly(false);
@@ -266,7 +275,6 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent) : QMainWindow(pa
     constexpr int file_modified_column_index = 3;
     m_model->sort(file_modified_column_index, Qt::DescendingOrder);
 
-    m_folder = path;
     m_valid = FS::ensureFolderPathExists(m_folder);
 
     ui->setupUi(this);
@@ -283,18 +291,19 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent) : QMainWindow(pa
     ui->listView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->listView->setItemDelegate(new CenteredEditingDelegate(this));
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->listView, &QListView::customContextMenuRequested, this, &ScreenshotsPage::ShowContextMenu);
+    connect(ui->listView, &QListView::customContextMenuRequested, this, &ScreenshotsPage::showContextMenu);
     connect(ui->listView, &QAbstractItemView::activated, this, &ScreenshotsPage::onItemActivated);
 }
 
 bool ScreenshotsPage::eventFilter(QObject* obj, QEvent* evt)
 {
-    if (obj != ui->listView)
+    if (obj != ui->listView) {
         return QWidget::eventFilter(obj, evt);
+    }
     if (evt->type() != QEvent::KeyPress) {
         return QWidget::eventFilter(obj, evt);
     }
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evt);
+    const auto* keyEvent = static_cast<QKeyEvent*>(evt);
 
     if (keyEvent->matches(QKeySequence::Copy)) {
         on_actionCopy_File_s_triggered();
@@ -324,11 +333,11 @@ ScreenshotsPage::~ScreenshotsPage()
     delete ui;
 }
 
-void ScreenshotsPage::ShowContextMenu(const QPoint& pos)
+void ScreenshotsPage::showContextMenu(const QPoint& pos)
 {
-    auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
+    auto* menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
 
-    if (ui->listView->selectionModel()->selectedRows().size() > 1) {
+    if (ui->listView->selectionModel()->selectedIndexes().size() > 1) {
         menu->removeAction(ui->actionCopy_Image);
     }
 
@@ -343,66 +352,75 @@ QMenu* ScreenshotsPage::createPopupMenu()
     return filteredMenu;
 }
 
-void ScreenshotsPage::onItemActivated(QModelIndex index)
+void ScreenshotsPage::onItemActivated(QModelIndex index) const
 {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return;
-    auto info = m_model->fileInfo(index);
+    }
+    const auto info = m_model->fileInfo(index);
     DesktopServices::openPath(info);
 }
 
-void ScreenshotsPage::onCurrentSelectionChanged(const QItemSelection& selected)
+void ScreenshotsPage::onCurrentSelectionChanged(const QItemSelection& /*selected*/) const
 {
+    const auto selected = ui->listView->selectionModel()->selectedIndexes();
+
     bool allReadable = !selected.isEmpty();
     bool allWritable = !selected.isEmpty();
 
-    for (auto index : selected.indexes()) {
-        if (!index.isValid())
+    for (auto index : selected) {
+        if (!index.isValid()) {
             break;
+        }
         auto info = m_model->fileInfo(index);
-        if (!info.isReadable())
+        if (!info.isReadable()) {
             allReadable = false;
-        if (!info.isWritable())
+        }
+        if (!info.isWritable()) {
             allWritable = false;
+        }
     }
 
     ui->actionUpload->setEnabled(allReadable);
-    ui->actionCopy_Image->setEnabled(allReadable);
+    ui->actionCopy_Image->setEnabled(allReadable && selected.size() == 1);
     ui->actionCopy_File_s->setEnabled(allReadable);
     ui->actionDelete->setEnabled(allWritable);
     ui->actionRename->setEnabled(allWritable);
 }
 
-void ScreenshotsPage::on_actionView_Folder_triggered()
+void ScreenshotsPage::on_actionView_Folder_triggered() const
 {
     DesktopServices::openPath(m_folder, true);
 }
 
 void ScreenshotsPage::on_actionUpload_triggered()
 {
-    auto selection = ui->listView->selectionModel()->selectedRows();
-    if (selection.isEmpty())
+    auto selection = ui->listView->selectionModel()->selectedIndexes();
+    if (selection.isEmpty()) {
         return;
+    }
 
     QString text;
-    QUrl baseUrl(BuildConfig.IMGUR_BASE_URL);
-    if (selection.size() > 1)
+    const QUrl baseUrl(BuildConfig.IMGUR_BASE_URL);
+    if (selection.size() > 1) {
         text = tr("You are about to upload %1 screenshots to %2.\n"
                   "You should double-check for personal information.\n\n"
                   "Are you sure?")
                    .arg(QString::number(selection.size()), baseUrl.host());
-    else
+    } else {
         text = tr("You are about to upload the selected screenshot to %1.\n"
                   "You should double-check for personal information.\n\n"
                   "Are you sure?")
                    .arg(baseUrl.host());
+    }
 
     auto response = CustomMessageBox::selectable(this, "Confirm Upload", text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No,
                                                  QMessageBox::No)
                         ->exec();
 
-    if (response != QMessageBox::Yes)
+    if (response != QMessageBox::Yes) {
         return;
+    }
 
     QList<ScreenShot::Ptr> uploaded;
     auto job = NetJob::Ptr(new NetJob("Screenshot Upload", APPLICATION->network()));
@@ -416,7 +434,7 @@ void ScreenshotsPage::on_actionUpload_triggered()
         auto screenshot = std::make_shared<ScreenShot>(info);
         job->addNetAction(ImgurUpload::make(screenshot));
 
-        connect(job.get(), &Task::failed, [this](QString reason) {
+        connect(job.get(), &Task::failed, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), reason, QMessageBox::Critical)->show();
         });
         connect(job.get(), &Task::aborted, [this] {
@@ -457,7 +475,7 @@ void ScreenshotsPage::on_actionUpload_triggered()
     task.addTask(job);
     task.addTask(albumTask);
 
-    connect(&task, &Task::failed, [this](QString reason) {
+    connect(&task, &Task::failed, [this](const QString& reason) {
         CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), reason, QMessageBox::Critical)->show();
     });
     connect(&task, &Task::aborted, [this] {
@@ -485,24 +503,24 @@ void ScreenshotsPage::on_actionUpload_triggered()
     m_uploadActive = false;
 }
 
-void ScreenshotsPage::on_actionCopy_Image_triggered()
+void ScreenshotsPage::on_actionCopy_Image_triggered() const
 {
-    auto selection = ui->listView->selectionModel()->selectedRows();
+    auto selection = ui->listView->selectionModel()->selectedIndexes();
     if (selection.size() < 1) {
         return;
     }
 
     // You can only copy one image to the clipboard. In the case of multiple selected files, only the first one gets copied.
-    auto item = selection[0];
-    auto info = m_model->fileInfo(item);
-    QImage image(info.absoluteFilePath());
+    const auto item = selection.first();
+    const auto info = m_model->fileInfo(item);
+    const QImage image(info.absoluteFilePath());
     Q_ASSERT(!image.isNull());
     QApplication::clipboard()->setImage(image, QClipboard::Clipboard);
 }
 
-void ScreenshotsPage::on_actionCopy_File_s_triggered()
+void ScreenshotsPage::on_actionCopy_File_s_triggered() const
 {
-    auto selection = ui->listView->selectionModel()->selectedRows();
+    auto selection = ui->listView->selectionModel()->selectedIndexes();
     if (selection.size() < 1) {
         // Don't do anything so we don't empty the users clipboard
         return;
@@ -513,7 +531,7 @@ void ScreenshotsPage::on_actionCopy_File_s_triggered()
         auto info = m_model->fileInfo(item);
         buf += "file:///" + info.absoluteFilePath() + "\r\n";
     }
-    QMimeData* mimeData = new QMimeData();
+    auto* mimeData = new QMimeData();
     mimeData->setData("text/uri-list", buf.toLocal8Bit());
     QApplication::clipboard()->setMimeData(mimeData);
 }
@@ -522,39 +540,43 @@ void ScreenshotsPage::on_actionDelete_triggered()
 {
     auto selected = ui->listView->selectionModel()->selectedIndexes();
 
-    int count = ui->listView->selectionModel()->selectedRows().size();
+    const qsizetype count = selected.size();
     QString text;
-    if (count > 1)
+    if (count > 1) {
         text = tr("You are about to delete %1 screenshots.\n"
                   "This may be permanent and they will be gone from the folder.\n\n"
                   "Are you sure?")
                    .arg(count);
-    else
-        text = tr("You are about to delete the selected screenshot.\n"
-                  "This may be permanent and it will be gone from the folder.\n\n"
-                  "Are you sure?")
-                   .arg(count);
+    } else {
+        text =
+            tr("You are about to delete the selected screenshot.\n"
+               "This may be permanent and it will be gone from the folder.\n\n"
+               "Are you sure?");
+    }
 
-    auto response =
+    const auto response =
         CustomMessageBox::selectable(this, tr("Confirm Deletion"), text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No)->exec();
 
-    if (response != QMessageBox::Yes)
+    if (response != QMessageBox::Yes) {
         return;
+    }
 
     for (auto item : selected) {
-        if (FS::trash(m_model->filePath(item)))
+        if (FS::trash(m_model->filePath(item))) {
             continue;
+        }
 
         m_model->remove(item);
     }
 }
 
-void ScreenshotsPage::on_actionRename_triggered()
+void ScreenshotsPage::on_actionRename_triggered() const
 {
     auto selection = ui->listView->selectionModel()->selectedIndexes();
-    if (selection.isEmpty())
+    if (selection.isEmpty()) {
         return;
-    ui->listView->edit(selection[0]);
+    }
+    ui->listView->edit(selection.first());
     // TODO: mass renaming
 }
 
@@ -564,8 +586,8 @@ void ScreenshotsPage::openedImpl()
         m_valid = FS::ensureFolderPathExists(m_folder);
     }
     if (m_valid) {
-        QString path = QDir(m_folder).absolutePath();
-        auto idx = m_model->setRootPath(path);
+        const QString path = QDir(m_folder).absolutePath();
+        const auto idx = m_model->setRootPath(path);
         if (idx.isValid()) {
             ui->listView->setModel(m_filterModel.get());
             connect(ui->listView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
@@ -577,7 +599,7 @@ void ScreenshotsPage::openedImpl()
         }
     }
 
-    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
+    const auto setting_name = QString("WideBarVisibility_%1").arg(id());
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
     ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));

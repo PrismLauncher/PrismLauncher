@@ -48,6 +48,13 @@ Task::Task(bool show_debug) : m_show_debug(show_debug)
     setAutoDelete(false);
 }
 
+Task::~Task()
+{
+    if (isRunning()) {
+        qCWarning(taskLogC) << "Task" << describe() << "disposed while running!";
+    }
+}
+
 void Task::setStatus(const QString& new_status)
 {
     if (m_status != new_status) {

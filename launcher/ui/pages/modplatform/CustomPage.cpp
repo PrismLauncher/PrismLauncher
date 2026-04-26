@@ -80,14 +80,14 @@ void CustomPage::openedImpl()
 
 void CustomPage::refresh()
 {
-    ui->versionList->loadList();
+    ui->versionList->loadList(true);
 }
 
 void CustomPage::loaderRefresh()
 {
     if (ui->noneFilter->isChecked())
         return;
-    ui->loaderVersionList->loadList();
+    ui->loaderVersionList->loadList(true);
 }
 
 void CustomPage::filterChanged()

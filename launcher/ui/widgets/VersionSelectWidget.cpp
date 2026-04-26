@@ -127,9 +127,9 @@ void VersionSelectWidget::closeEvent(QCloseEvent* event)
     QWidget::closeEvent(event);
 }
 
-void VersionSelectWidget::loadList()
+void VersionSelectWidget::loadList(bool forceReload)
 {
-    m_load_task = m_vlist->getLoadTask();
+    m_load_task = m_vlist->getLoadTask(forceReload);
     connect(m_load_task.get(), &Task::succeeded, this, &VersionSelectWidget::onTaskSucceeded);
     connect(m_load_task.get(), &Task::failed, this, &VersionSelectWidget::onTaskFailed);
     connect(m_load_task.get(), &Task::progress, this, &VersionSelectWidget::changeProgress);

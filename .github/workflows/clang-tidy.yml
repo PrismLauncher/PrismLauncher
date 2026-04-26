@@ -29,7 +29,7 @@ jobs:
           submodules: "true"
 
       - name: Setup sccache
-        uses: hendrikmuhs/ccache-action@v1.2.22
+        uses: hendrikmuhs/ccache-action@v1.2.23
         with:
           variant: sccache
 

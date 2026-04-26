@@ -252,10 +252,7 @@ void ProgressDialog::changeStepProgress(TaskStepProgress const& task_progress)
     task_bar->setValue(mapped_current);
     task_bar->setStatus(task_progress.status);
     task_bar->setDetails(task_progress.details);
-
-    if (task_progress.isDone()) {
-        task_bar->setVisible(false);
-    }
+    task_bar->setVisible(!task_progress.isDone());
 }
 
 void ProgressDialog::changeProgress(qint64 current, qint64 total)

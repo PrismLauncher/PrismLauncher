@@ -157,7 +157,8 @@ bool WorldList::resetIcon(int row)
         return false;
     World& m = m_worlds[row];
     if (m.resetIcon()) {
-        emit dataChanged(index(row), index(row), { WorldList::IconFileRole });
+        QModelIndex modelIndex = index(row, NameColumn);
+        emit dataChanged(modelIndex, modelIndex, { WorldList::IconFileRole });
         return true;
     }
     return false;
@@ -426,7 +427,7 @@ void WorldList::loadWorldsAsync()
                         m_worlds[row].setSize(size);
 
                         // Notify views
-                        QModelIndex modelIndex = index(row);
+                        QModelIndex modelIndex = index(row, SizeColumn);
                         emit dataChanged(modelIndex, modelIndex, { SizeRole });
                     }
                 },

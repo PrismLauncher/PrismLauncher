@@ -165,12 +165,20 @@ void ListModel::fetchMore(const QModelIndex& parent)
 void ListModel::performPaginatedSearch()
 {
     static const FlameAPI api;
-    if (m_currentSearchTerm.startsWith("#")) {
+
+    // activate search by id only for numerical values because all CurseForge ids are numerical
+    static const QRegularExpression s_projectIdExpr("^\\#[0-9]+$");
+    if (m_searchState != ResetRequested && s_projectIdExpr.match(m_currentSearchTerm).hasMatch()) {
         auto projectId = m_currentSearchTerm.mid(1);
         if (!projectId.isEmpty()) {
             ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks;
 
-            callbacks.on_fail = [this](QString reason, int) { searchRequestFailed(reason); };
+            callbacks.on_fail = [this](QString reason, int network_error_code) {
+                if (network_error_code == 404) {
+                    m_searchState = ResetRequested;
+                }
+                searchRequestFailed(reason);
+            };
             callbacks.on_succeed = [this](auto& pack) { searchRequestForOneSucceeded(pack); };
             callbacks.on_abort = [this] {
                 qCritical() << "Search task aborted by an unknown reason!";
@@ -178,7 +186,7 @@ void ListModel::performPaginatedSearch()
             };
             auto project = std::make_shared<ModPlatform::IndexedPack>();
             project->addonId = projectId;
-            if (auto job = api.getProjectInfo({ project }, std::move(callbacks)); job) {
+            if (auto job = api.getProjectInfo({ project }, std::move(callbacks), false); job) {
                 m_jobPtr = job;
                 m_jobPtr->start();
             }

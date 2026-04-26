@@ -121,8 +121,8 @@ class InstallJavaPage : public QWidget, public BasePage {
     void selectSearch() { javaVersionSelect->selectSearch(); }
     void loadList()
     {
-        majorVersionSelect->loadList();
-        javaVersionSelect->loadList();
+        majorVersionSelect->loadList(true);
+        javaVersionSelect->loadList(true);
     }
 
    public slots:

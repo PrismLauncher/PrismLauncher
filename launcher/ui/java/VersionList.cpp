@@ -33,9 +33,9 @@ VersionList::VersionList(Meta::Version::Ptr version, QObject* parent) : BaseVers
         sortVersions();
 }
 
-Task::Ptr VersionList::getLoadTask()
+Task::Ptr VersionList::getLoadTask(bool forceReload)
 {
-    auto task = m_version->loadTask(Net::Mode::Online);
+    auto task = m_version->loadTask(Net::Mode::Online, forceReload);
     connect(task.get(), &Task::finished, this, &VersionList::sortVersions);
     return task;
 }

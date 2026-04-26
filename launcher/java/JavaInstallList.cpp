@@ -51,8 +51,9 @@ JavaInstallList::JavaInstallList(QObject* parent, bool onlyManagedVersions)
     : BaseVersionList(parent), m_only_managed_versions(onlyManagedVersions)
 {}
 
-Task::Ptr JavaInstallList::getLoadTask()
+Task::Ptr JavaInstallList::getLoadTask(bool forceReload)
 {
+    Q_UNUSED(forceReload)
     load();
     return getCurrentTask();
 }

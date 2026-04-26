@@ -101,7 +101,7 @@ InstallLoaderDialog::InstallLoaderDialog(PackProfile* profile, const QString& ui
     buttonLayout->setContentsMargins(0, 0, 6, 6);
     #endif
     auto refreshButton = new QPushButton(tr("&Refresh"), this);
-    connect(refreshButton, &QPushButton::clicked, this, [this] { pageCast(container->selectedPage())->loadList(); });
+    connect(refreshButton, &QPushButton::clicked, this, [this] { pageCast(container->selectedPage())->loadList(true); });
     buttonLayout->addWidget(refreshButton);
 
     buttons->setOrientation(Qt::Horizontal);

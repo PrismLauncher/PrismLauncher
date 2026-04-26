@@ -68,7 +68,12 @@ void PrintInstanceInfo::executeTask()
     ::runPciconf(log);
 #else
     log << "CPU: " + HardwareInfo::cpuInfo();
+#ifdef Q_OS_MACOS
+    log << "Memory pressure level: " + MacOSHardwareInfo::memoryPressureLevelName();
+#else
     log << QString("RAM: %1 MiB (available: %2 MiB)").arg(HardwareInfo::totalRamMiB()).arg(HardwareInfo::availableRamMiB());
+#endif
+
 #endif
     log.append(HardwareInfo::gpuInfo());
     log << "";

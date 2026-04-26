@@ -144,7 +144,7 @@ BaseVersion::Ptr VersionSelectDialog::selectedVersion() const
 
 void VersionSelectDialog::on_refreshButton_clicked()
 {
-    m_versionWidget->loadList();
+    m_versionWidget->loadList(true);
 }
 
 void VersionSelectDialog::setExactFilter(BaseVersionList::ModelRoles role, QString filter)

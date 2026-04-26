@@ -1160,8 +1160,6 @@ void PrismUpdaterApp::downloadReleasePage(const QString& api_url, int page)
     m_current_task.reset(download);
     connect(download.get(), &Net::Download::finished, this, [this]() {
         qDebug() << "Download" << m_current_task->getUid().toString() << "finished";
-        m_current_task.reset();
-        m_current_url = "";
     });
 
     QCoreApplication::processEvents();

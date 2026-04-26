@@ -141,7 +141,6 @@ uint64_t HardwareInfo::availableRamMiB()
 }
 
 #elif defined(Q_OS_MACOS)
-#include "mach/mach.h"
 #include "sys/sysctl.h"
 
 QString HardwareInfo::cpuInfo()
@@ -171,18 +170,32 @@ uint64_t HardwareInfo::totalRamMiB()
 
 uint64_t HardwareInfo::availableRamMiB()
 {
-    mach_port_t host_port = mach_host_self();
-    mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
+    return 0;
+}
 
-    vm_statistics64_data_t vm_stats;
-
-    if (host_statistics64(host_port, HOST_VM_INFO64, reinterpret_cast<host_info64_t>(&vm_stats), &count) == KERN_SUCCESS) {
-        // transforming bytes -> mib
-        return (vm_stats.free_count + vm_stats.inactive_count) * vm_page_size / 1024 / 1024;
+MacOSHardwareInfo::MemoryPressureLevel MacOSHardwareInfo::memoryPressureLevel()
+{
+    uint32_t level;
+    size_t levelSize = sizeof level;
+    if (sysctlbyname("kern.memorystatus_vm_pressure_level", &level, &levelSize, nullptr, 0) == 0) {
+        return static_cast<MemoryPressureLevel>(level);
     }
 
-    qWarning() << "Could not get available RAM: host_statistics64";
-    return 0;
+    qWarning() << "Could not get memory pressure level: sysctlbyname";
+    return MemoryPressureLevel::Normal;
+}
+
+QString MacOSHardwareInfo::memoryPressureLevelName()
+{
+    // The names are internal, users refer to levels by their graph colors in Activity Monitor
+    switch (memoryPressureLevel()) {
+        case MemoryPressureLevel::Normal:
+            return "Green";
+        case MemoryPressureLevel::Warning:
+            return "Yellow";
+        case MemoryPressureLevel::Critical:
+            return "Red";
+    }
 }
 
 #elif defined(Q_OS_LINUX)

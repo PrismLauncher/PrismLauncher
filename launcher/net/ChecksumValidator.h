@@ -38,7 +38,6 @@
 #include "Validator.h"
 
 #include <QCryptographicHash>
-#include <QFile>
 
 namespace Net {
 class ChecksumValidator : public Validator {
@@ -69,10 +68,10 @@ class ChecksumValidator : public Validator {
         return true;
     }
 
-    auto validate(QNetworkReply&) -> bool override
+    auto validate(QNetworkReply& reply) -> bool override
     {
-        if (m_expected.size() && m_expected != hash()) {
-            qWarning() << "Checksum mismatch, download is bad.";
+        if (!m_expected.isEmpty() && m_expected != hash()) {
+            qWarning() << "Checksum mismatch for URL:" << reply.url().toString() << "expected:" << m_expected << "got:" << hash();
             return false;
         }
         return true;

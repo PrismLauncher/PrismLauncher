@@ -55,7 +55,7 @@ runs:
     # TODO(@getchoo): Get this working on MSYS2!
     - name: Setup ccache
       if: ${{ (runner.os != 'Windows' || inputs.msystem == '') && inputs.build-type == 'Debug' }}
-      uses: hendrikmuhs/ccache-action@v1.2.22
+      uses: hendrikmuhs/ccache-action@v1.2.23
       with:
         variant: sccache
         create-symlink: ${{ runner.os != 'Windows' }}

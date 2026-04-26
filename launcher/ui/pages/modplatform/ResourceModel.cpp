@@ -139,15 +139,18 @@ void ResourceModel::search()
     if (hasActiveSearchJob())
         return;
 
-    if (m_search_term.startsWith("#")) {
+    if (m_search_state != SearchState::ResetRequested && m_search_term.startsWith("#")) {
         auto projectId = m_search_term.mid(1);
         if (!projectId.isEmpty()) {
             ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks;
 
-            callbacks.on_fail = [this](QString reason, int) {
+            callbacks.on_fail = [this](QString reason, int network_error_code) {
                 if (!s_running_models.constFind(this).value())
                     return;
-                searchRequestFailed(reason, -1);
+                if (network_error_code == 404) {
+                    m_search_state = SearchState::ResetRequested;
+                }
+                searchRequestFailed(reason, network_error_code);
             };
             callbacks.on_abort = [this] {
                 if (!s_running_models.constFind(this).value())
@@ -162,7 +165,7 @@ void ResourceModel::search()
             };
             auto project = std::make_shared<ModPlatform::IndexedPack>();
             project->addonId = projectId;
-            if (auto job = m_api->getProjectInfo({ project }, std::move(callbacks)); job)
+            if (auto job = m_api->getProjectInfo({ project }, std::move(callbacks), false); job)
                 runSearchJob(job);
             return;
         }
@@ -407,6 +410,9 @@ void ResourceModel::searchRequestFailed([[maybe_unused]] QString reason, int net
             // Network error
             QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load mods."));
             break;
+        case 404:
+            // 404 Not Found, some APIs return this when nothing is found, no need to bother the user
+            break;
         case 409:
             // 409 Gone, notify user to update
             QMessageBox::critical(nullptr, tr("Error"),
@@ -414,7 +420,14 @@ void ResourceModel::searchRequestFailed([[maybe_unused]] QString reason, int net
             break;
     }
 
-    m_search_state = SearchState::Finished;
+    if (m_search_state == SearchState::ResetRequested) {
+        clearData();
+
+        m_next_search_offset = 0;
+        search();
+    } else {
+        m_search_state = SearchState::Finished;
+    }
 }
 
 void ResourceModel::searchRequestAborted()

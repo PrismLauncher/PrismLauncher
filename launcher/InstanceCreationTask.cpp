@@ -18,7 +18,7 @@ bool InstanceCreationTask::abort()
         return m_gameFilesTask->abort();
     }
 
-    return true;
+    return InstanceTask::abort();
 }
 
 void InstanceCreationTask::executeTask()

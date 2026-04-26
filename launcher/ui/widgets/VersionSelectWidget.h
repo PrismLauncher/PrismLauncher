@@ -57,7 +57,7 @@ class VersionSelectWidget : public QWidget {
     void initialize(BaseVersionList* vlist, bool forceLoad = false);
 
     //! Starts a task that loads the list.
-    void loadList();
+    void loadList(bool forceReload = false);
 
     bool hasVersions() const;
     BaseVersion::Ptr selectedVersion() const;

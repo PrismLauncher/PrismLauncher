@@ -121,7 +121,7 @@ bool SkinList::update()
     auto folderContents = m_dir.entryInfoList();
     // if there are any untracked files...
     for (QFileInfo entry : folderContents) {
-        if (!entry.isFile() && entry.suffix() != "png")
+        if (!entry.isFile() || entry.suffix() != "png")
             continue;
 
         SkinModel w(entry.absoluteFilePath());
