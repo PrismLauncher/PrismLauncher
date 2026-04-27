@@ -236,6 +236,22 @@ endif()
 # Java downloader
 option(Launcher_ENABLE_JAVA_DOWNLOADER "Build the java downloader feature" ${Launcher_ENABLE_JAVA_DOWNLOADER_DEFAULT})
 
+# Gamemode support (Linux only)
+set(Launcher_ENABLE_GAMEMODE_DEFAULT OFF)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(Launcher_ENABLE_GAMEMODE_DEFAULT ON)
+endif()
+
+option(Launcher_ENABLE_GAMEMODE "Enable gamemode support" ${Launcher_ENABLE_GAMEMODE_DEFAULT})
+
+if(Launcher_ENABLE_GAMEMODE AND NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message(FATAL_ERROR "Gamemode support is only available on Linux")
+endif()
+
+if(Launcher_ENABLE_GAMEMODE)
+    add_compile_definitions(GAMEMODE_ENABLED)
+endif()
+
 # Native libraries
 if(UNIX AND APPLE)
     set(Launcher_GLFW_LIBRARY_NAME "libglfw.dylib" CACHE STRING "Name of native glfw library")
@@ -303,7 +319,7 @@ endif()
 
 find_package(cmark REQUIRED)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(Launcher_ENABLE_GAMEMODE)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(gamemode REQUIRED IMPORTED_TARGET gamemode)
 endif()

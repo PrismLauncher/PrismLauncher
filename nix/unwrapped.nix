@@ -16,6 +16,8 @@
   zlib,
   msaClientID ? null,
   libarchive,
+
+  gamemodeSupport ? stdenv.hostPlatform.isLinux,
 }:
 
 let
@@ -78,11 +80,12 @@ stdenv.mkDerivation {
     tomlplusplus
     zlib
   ]
-  ++ lib.optional stdenv.hostPlatform.isLinux gamemode;
+  ++ lib.optional gamemodeSupport gamemode;
 
   cmakeFlags = [
     # downstream branding
     (lib.cmakeFeature "Launcher_BUILD_PLATFORM" "nixpkgs")
+    (lib.cmakeBool "Launcher_ENABLE_GAMEMODE" gamemodeSupport)
   ]
   ++ lib.optionals (msaClientID != null) [
     (lib.cmakeFeature "Launcher_MSA_CLIENT_ID" (toString msaClientID))
