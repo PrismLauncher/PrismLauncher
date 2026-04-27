@@ -698,11 +698,11 @@ void ResourceFolderModel::loadColumns(QTreeView* tree)
     auto stateSetting = m_instance->settings()->getOrRegisterSetting(stateSettingName, "");
     tree->header()->restoreState(QByteArray::fromBase64(stateSetting->get().toString().toUtf8()));
 
-    auto setVisible = [this, tree](const QVariant& value) {
+    auto setVisible = [columnNames = m_column_names, columnsHideable = m_columnsHideable, tree](const QVariant& value) {
         auto visibility = Json::toMap(value.toString());
-        for (auto i = 0; i < m_columnNames.size(); ++i) {
-            if (m_columnsHideable[i]) {
-                auto name = m_columnNames[i];
+        for (auto i = 0; i < columnNames.size(); ++i) {
+            if (columnsHideable[i]) {
+                const auto& name = columnNames[i];
                 tree->setColumnHidden(i, !visibility.value(name, false).toBool());
             }
         }
@@ -725,11 +725,12 @@ void ResourceFolderModel::loadColumns(QTreeView* tree)
 
     // allways connect the signal in case the setting is toggled on and off
     auto gSetting = APPLICATION->settings()->getOrRegisterSetting(visibilitySettingName, defaultValue);
-    connect(gSetting.get(), &Setting::SettingChanged, tree, [this, setVisible, overrideSettingName](const Setting&, const QVariant& value) {
-        if (!m_instance->settings()->get(overrideSettingName).toBool()) {
-            setVisible(value);
-        }
-    });
+    connect(gSetting.get(), &Setting::SettingChanged, tree,
+            [instance = m_instance, setVisible, overrideSettingName](const Setting&, const QVariant& value) {
+                if (!instance->settings()->get(overrideSettingName).toBool()) {
+                    setVisible(value);
+                }
+            });
 }
 
 QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
