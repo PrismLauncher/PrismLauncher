@@ -90,14 +90,14 @@ bool ModGroupStore::deleteGroup(const QString& groupId)
     return true;
 }
 
-bool ModGroupStore::assign(const QString& fileKey, const QString& groupId)
+bool ModGroupStore::assign(const QString& resourceKey, const QString& groupId)
 {
-    auto normalizedFileKey = normalizeFileKey(fileKey);
-    if (normalizedFileKey.isEmpty())
+    auto normalizedResourceKey = normalizeFileKey(resourceKey);
+    if (normalizedResourceKey.isEmpty())
         return false;
 
-    const bool hadPreviousValue = m_assignments.contains(normalizedFileKey);
-    const auto previousValue = m_assignments.value(normalizedFileKey);
+    const bool hadPreviousValue = m_assignments.contains(normalizedResourceKey);
+    const auto previousValue = m_assignments.value(normalizedResourceKey);
     const auto normalizedGroupId = groupId;
 
     if (!normalizedGroupId.isEmpty() && !hasGroup(normalizedGroupId))
@@ -106,13 +106,13 @@ bool ModGroupStore::assign(const QString& fileKey, const QString& groupId)
     if (hadPreviousValue && previousValue == normalizedGroupId)
         return true;
 
-    m_assignments[normalizedFileKey] = normalizedGroupId;
+    m_assignments[normalizedResourceKey] = normalizedGroupId;
     if (!save()) {
         // revert because failed
         if (hadPreviousValue) {
-            m_assignments[normalizedFileKey] = previousValue;
+            m_assignments[normalizedResourceKey] = previousValue;
         } else {
-            m_assignments.remove(normalizedFileKey);
+            m_assignments.remove(normalizedResourceKey);
         }
         return false;
     }
@@ -120,35 +120,41 @@ bool ModGroupStore::assign(const QString& fileKey, const QString& groupId)
     return true;
 }
 
-QString ModGroupStore::groupFor(const QString& fileKey) const
+QString ModGroupStore::groupFor(const QString& resourceKey) const
 {
-    auto normalizedFileKey = normalizeFileKey(fileKey);
-    return m_assignments.value(normalizedFileKey);
+    auto normalizedResourceKey = normalizeFileKey(resourceKey);
+    return m_assignments.value(normalizedResourceKey);
 }
 
-bool ModGroupStore::syncWithFilesystem(const QStringList& fileKeys)
+bool ModGroupStore::hasAssignment(const QString& resourceKey) const
 {
-    QSet<QString> filesOnDisk;
-    filesOnDisk.reserve(fileKeys.size());
+    auto normalizedResourceKey = normalizeFileKey(resourceKey);
+    return m_assignments.contains(normalizedResourceKey);
+}
 
-    for (const auto& fileKey : fileKeys) {
-        auto normalizedFileKey = normalizeFileKey(fileKey);
-        if (!normalizedFileKey.isEmpty())
-            filesOnDisk.insert(normalizedFileKey);
+bool ModGroupStore::syncWithFilesystem(const QStringList& resourceKeys)
+{
+    QSet<QString> currentResourceKeys;
+    currentResourceKeys.reserve(resourceKeys.size());
+
+    for (const auto& resourceKey : resourceKeys) {
+        auto normalizedResourceKey = normalizeFileKey(resourceKey);
+        if (!normalizedResourceKey.isEmpty())
+            currentResourceKeys.insert(normalizedResourceKey);
     }
 
     bool changed = false;
     const auto previousAssignments = m_assignments;
 
-    for (const auto& fileKey : filesOnDisk) {
-        if (!m_assignments.contains(fileKey)) {
-            m_assignments[fileKey] = {};
+    for (const auto& resourceKey : currentResourceKeys) {
+        if (!m_assignments.contains(resourceKey)) {
+            m_assignments[resourceKey] = {};
             changed = true;
         }
     }
 
     for (auto assignment = m_assignments.begin(); assignment != m_assignments.end();) {
-        if (!filesOnDisk.contains(assignment.key())) {
+        if (!currentResourceKeys.contains(assignment.key())) {
             assignment = m_assignments.erase(assignment);
             changed = true;
             continue;
@@ -281,12 +287,12 @@ bool ModGroupStore::deserialize(const QJsonObject& root)
 
     auto assignmentsObject = root.value("assignments").toObject();
     for (auto assignment = assignmentsObject.begin(); assignment != assignmentsObject.end(); ++assignment) {
-        auto fileKey = assignment.key();
-        if (fileKey.isEmpty())
+        auto resourceKey = assignment.key();
+        if (resourceKey.isEmpty())
             continue;
 
         if (assignment.value().isNull()) {
-            m_assignments[fileKey] = {};
+            m_assignments[resourceKey] = {};
             continue;
         }
 
@@ -297,11 +303,11 @@ bool ModGroupStore::deserialize(const QJsonObject& root)
 
         auto groupId = assignment.value().toString();
         if (groupId.isEmpty() || !groupIds.contains(groupId)) {
-            m_assignments[fileKey] = {};
+            m_assignments[resourceKey] = {};
             continue;
         }
 
-        m_assignments[fileKey] = groupId;
+        m_assignments[resourceKey] = groupId;
     }
 
     return true;
@@ -327,9 +333,9 @@ QJsonObject ModGroupStore::serialize() const
     auto sortedKeys = m_assignments.keys();
     std::sort(sortedKeys.begin(), sortedKeys.end(), [](const QString& a, const QString& b) { return a < b; });
 
-    for (const auto& fileKey : sortedKeys) {
-        const auto groupId = m_assignments.value(fileKey);
-        assignmentsObject.insert(fileKey, groupId.isEmpty() ? QJsonValue(QJsonValue::Null) : QJsonValue(groupId));
+    for (const auto& resourceKey : sortedKeys) {
+        const auto groupId = m_assignments.value(resourceKey);
+        assignmentsObject.insert(resourceKey, groupId.isEmpty() ? QJsonValue(QJsonValue::Null) : QJsonValue(groupId));
     }
 
     root.insert("assignments", assignmentsObject);

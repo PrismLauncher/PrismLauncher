@@ -37,12 +37,13 @@ class ModGroupStore {
     QString createGroup(const QString& name);
     bool deleteGroup(const QString& groupId);
 
-    bool assign(const QString& fileKey, const QString& groupId = {});
-    QString groupFor(const QString& fileKey) const;
+    bool assign(const QString& resourceKey, const QString& groupId = {});
+    QString groupFor(const QString& resourceKey) const;
+    bool hasAssignment(const QString& resourceKey) const;
     QList<Group> groups() const { return m_groups; }
     static QString normalizeFileKey(QString fileKey);
 
-    bool syncWithFilesystem(const QStringList& fileKeys);
+    bool syncWithFilesystem(const QStringList& resourceKeys);
     bool save();
 
    private:

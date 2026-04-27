@@ -379,7 +379,7 @@ bool ModFolderModel::deleteGroup(const QString& groupId)
     return true;
 }
 
-bool ModFolderModel::assignModsToGroup(const QStringList& fileKeys, const QString& groupId)
+bool ModFolderModel::assignModsToGroup(const QStringList& resourceKeys, const QString& groupId)
 {
     if (!m_groupStore) {
         return false;
@@ -394,22 +394,22 @@ bool ModFolderModel::assignModsToGroup(const QStringList& fileKeys, const QStrin
         }
     }
 
-    QSet<QString> uniqueFileKeys;
-    uniqueFileKeys.reserve(fileKeys.size());
-    for (const auto& fileKey : fileKeys) {
-        auto normalizedFileKey = ModGroupStore::normalizeFileKey(fileKey);
-        if (!normalizedFileKey.isEmpty()) {
-            uniqueFileKeys.insert(normalizedFileKey);
+    QSet<QString> uniqueResourceKeys;
+    uniqueResourceKeys.reserve(resourceKeys.size());
+    for (const auto& resourceKey : resourceKeys) {
+        auto normalizedResourceKey = ModGroupStore::normalizeFileKey(resourceKey);
+        if (!normalizedResourceKey.isEmpty()) {
+            uniqueResourceKeys.insert(normalizedResourceKey);
         }
     }
 
     bool changed = false;
-    for (const auto& fileKey : uniqueFileKeys) {
-        if (m_groupStore->groupFor(fileKey) == groupId) {
+    for (const auto& resourceKey : uniqueResourceKeys) {
+        if (m_groupStore->groupFor(resourceKey) == groupId) {
             continue;
         }
 
-        if (!m_groupStore->assign(fileKey, groupId)) {
+        if (!m_groupStore->assign(resourceKey, groupId)) {
             return false;
         }
 
@@ -452,13 +452,36 @@ QList<ModFolderModel::GroupOption> ModFolderModel::groupOptions() const
     return options;
 }
 
-QString ModFolderModel::groupForFileKey(const QString& fileKey) const
+QString ModFolderModel::groupKeyForResource(const Resource& resource) const
+{
+    if (auto metadata = resource.metadata()) {
+        auto projectId = metadata->project_id.toString();
+        auto* providerName = ModPlatform::ProviderCapabilities::name(metadata->provider);
+        if (providerName != nullptr && !projectId.isEmpty()) {
+            return QStringLiteral("%1:%2").arg(QString::fromLatin1(providerName), projectId);
+        }
+    }
+
+    return legacyGroupKeyForResource(resource);
+}
+
+QString ModFolderModel::groupForResource(const Resource& resource) const
 {
     if (!m_groupStore) {
         return {};
     }
 
-    return m_groupStore->groupFor(fileKey);
+    const auto groupKey = groupKeyForResource(resource);
+    if (m_groupStore->hasAssignment(groupKey)) {
+        return m_groupStore->groupFor(groupKey);
+    }
+
+    const auto legacyGroupKey = legacyGroupKeyForResource(resource);
+    if (legacyGroupKey != groupKey) {
+        return m_groupStore->groupFor(legacyGroupKey);
+    }
+
+    return {};
 }
 
 bool ModFolderModel::isGroupIndex(const QModelIndex& index) const
@@ -588,19 +611,37 @@ QModelIndex ModFolderModel::indexForResource(const QString& resourceId, int colu
     return indexForNode(node, column);
 }
 
+QString ModFolderModel::legacyGroupKeyForResource(const Resource& resource) const
+{
+    return ModGroupStore::normalizeFileKey(resource.getOriginalFileName());
+}
+
 void ModFolderModel::syncGroupAssignments()
 {
     if (!m_groupStore) {
         return;
     }
 
-    QStringList fileKeys;
-    fileKeys.reserve(m_resources.size());
+    QStringList groupKeys;
+    groupKeys.reserve(m_resources.size());
     for (const auto& resource : m_resources) {
-        fileKeys.append(ModGroupStore::normalizeFileKey(resource->fileinfo().fileName()));
+        auto groupKey = groupKeyForResource(*resource);
+        if (groupKey.isEmpty()) {
+            continue;
+        }
+
+        const auto legacyGroupKey = legacyGroupKeyForResource(*resource);
+        if (groupKey != legacyGroupKey && !m_groupStore->hasAssignment(groupKey)) {
+            const auto legacyGroupId = m_groupStore->groupFor(legacyGroupKey);
+            if (!legacyGroupId.isEmpty() && !m_groupStore->assign(groupKey, legacyGroupId)) {
+                groupKey = legacyGroupKey;
+            }
+        }
+
+        groupKeys.append(groupKey);
     }
 
-    m_groupStore->syncWithFilesystem(fileKeys);
+    m_groupStore->syncWithFilesystem(groupKeys);
 }
 
 void ModFolderModel::rebuildTree()
@@ -635,8 +676,7 @@ void ModFolderModel::rebuildTree()
 
         TreeNode* parentNode = nullptr;
         if (m_groupStore) {
-            auto fileKey = ModGroupStore::normalizeFileKey(resource->fileinfo().fileName());
-            auto groupId = m_groupStore->groupFor(fileKey);
+            auto groupId = groupForResource(*resource);
             if (!groupId.isEmpty()) {
                 parentNode = m_groupNodesById.value(groupId, nullptr);
             }

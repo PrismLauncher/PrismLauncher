@@ -110,7 +110,7 @@ class ModFolderPage : public ExternalResourcesPage {
     VirtualModTreeProxyModel* m_treeFilterModel = nullptr;
     QAction* m_actionCreateGroup = nullptr;
     QStringList m_pendingSelectedGroupIds;
-    QStringList m_pendingSelectedFileKeys;
+    QStringList m_pendingSelectedResourceKeys;
     QStringList m_pendingExpandedGroupIds;
     bool m_pendingScrollValid = false;
     int m_pendingVerticalScrollValue = 0;

@@ -83,7 +83,7 @@
 #include "tasks/Task.h"
 #include "ui/dialogs/ProgressDialog.h"
 
-constexpr auto MOD_FILE_KEYS_MIME_TYPE = "application/x-prismlauncher-mod-filekeys";
+constexpr auto MOD_RESOURCE_KEYS_MIME_TYPE = "application/x-prismlauncher-mod-resourcekeys";
 
 class VirtualModTreeModel : public QAbstractItemModel {
    public:
@@ -236,8 +236,8 @@ class VirtualModTreeModel : public QAbstractItemModel {
     QStringList mimeTypes() const override
     {
         auto types = m_backend->mimeTypes();
-        if (!types.contains(MOD_FILE_KEYS_MIME_TYPE)) {
-            types.append(MOD_FILE_KEYS_MIME_TYPE);
+        if (!types.contains(MOD_RESOURCE_KEYS_MIME_TYPE)) {
+            types.append(MOD_RESOURCE_KEYS_MIME_TYPE);
         }
         return types;
     }
@@ -246,7 +246,7 @@ class VirtualModTreeModel : public QAbstractItemModel {
     {
         auto* mimeData = new QMimeData();
 
-        QStringList fileKeys;
+        QStringList resourceKeys;
         QSet<QString> seen;
         for (const auto& index : indexes) {
             if (index.column() != 0) {
@@ -254,16 +254,16 @@ class VirtualModTreeModel : public QAbstractItemModel {
             }
 
             auto* node = nodeForIndex(index);
-            if (node == nullptr || node->kind != Node::Kind::MOD || node->fileKey.isEmpty() || seen.contains(node->fileKey)) {
+            if (node == nullptr || node->kind != Node::Kind::MOD || node->resourceKey.isEmpty() || seen.contains(node->resourceKey)) {
                 continue;
             }
 
-            seen.insert(node->fileKey);
-            fileKeys.append(node->fileKey);
+            seen.insert(node->resourceKey);
+            resourceKeys.append(node->resourceKey);
         }
 
-        if (!fileKeys.isEmpty()) {
-            mimeData->setData(MOD_FILE_KEYS_MIME_TYPE, fileKeys.join('\n').toUtf8());
+        if (!resourceKeys.isEmpty()) {
+            mimeData->setData(MOD_RESOURCE_KEYS_MIME_TYPE, resourceKeys.join('\n').toUtf8());
         }
 
         return mimeData;
@@ -281,11 +281,11 @@ class VirtualModTreeModel : public QAbstractItemModel {
             return false;
         }
 
-        if (data->hasFormat(MOD_FILE_KEYS_MIME_TYPE)) {
-            auto payload = QString::fromUtf8(data->data(MOD_FILE_KEYS_MIME_TYPE));
-            auto fileKeys = payload.split('\n', Qt::SkipEmptyParts);
-            fileKeys.removeDuplicates();
-            if (fileKeys.isEmpty()) {
+        if (data->hasFormat(MOD_RESOURCE_KEYS_MIME_TYPE)) {
+            auto payload = QString::fromUtf8(data->data(MOD_RESOURCE_KEYS_MIME_TYPE));
+            auto resourceKeys = payload.split('\n', Qt::SkipEmptyParts);
+            resourceKeys.removeDuplicates();
+            if (resourceKeys.isEmpty()) {
                 return false;
             }
 
@@ -300,7 +300,7 @@ class VirtualModTreeModel : public QAbstractItemModel {
                 targetGroupId = targetNode->groupId;
             }
 
-            return m_backend->assignModsToGroup(fileKeys, targetGroupId);
+            return m_backend->assignModsToGroup(resourceKeys, targetGroupId);
         }
 
         if (data->hasUrls()) {
@@ -326,13 +326,13 @@ class VirtualModTreeModel : public QAbstractItemModel {
         return node->groupId;
     }
 
-    QString fileKeyForIndex(const QModelIndex& index) const
+    QString resourceKeyForIndex(const QModelIndex& index) const
     {
         auto* node = nodeForIndex(index);
         if (node == nullptr || node->kind != Node::Kind::MOD) {
             return {};
         }
-        return node->fileKey;
+        return node->resourceKey;
     }
 
     Resource* resourceForIndex(const QModelIndex& index) const
@@ -357,11 +357,11 @@ class VirtualModTreeModel : public QAbstractItemModel {
         return indexForNode(nodeIter.value(), 0);
     }
 
-    QModelIndex indexForFileKey(const QString& fileKey) const
+    QModelIndex indexForResourceKey(const QString& resourceKey) const
     {
-        auto normalizedFileKey = ModGroupStore::normalizeFileKey(fileKey);
-        auto nodeIter = m_modNodesByFileKey.constFind(normalizedFileKey);
-        if (nodeIter == m_modNodesByFileKey.constEnd()) {
+        auto normalizedResourceKey = ModGroupStore::normalizeFileKey(resourceKey);
+        auto nodeIter = m_modNodesByResourceKey.constFind(normalizedResourceKey);
+        if (nodeIter == m_modNodesByResourceKey.constEnd()) {
             return {};
         }
         return indexForNode(nodeIter.value(), 0);
@@ -419,7 +419,7 @@ class VirtualModTreeModel : public QAbstractItemModel {
         m_root->row = 0;
 
         m_groupNodes.clear();
-        m_modNodesByFileKey.clear();
+        m_modNodesByResourceKey.clear();
         m_modNodesByResourceId.clear();
 
         QHash<QString, Node*> groupNodes;
@@ -444,22 +444,22 @@ class VirtualModTreeModel : public QAbstractItemModel {
                 continue;
             }
 
-            auto fileKey = ModGroupStore::normalizeFileKey(resource->getOriginalFileName());
-            auto groupId = m_backend->groupForFileKey(fileKey);
+            auto resourceKey = m_backend->groupKeyForResource(*resource);
+            auto groupId = m_backend->groupForResource(*resource);
             auto* parentNode = groupNodes.contains(groupId) ? groupNodes.value(groupId) : m_root.get();
 
             auto modNode = std::make_unique<Node>();
             modNode->kind = Node::Kind::MOD;
             modNode->name = resource->name();
             modNode->groupId = groupId;
-            modNode->fileKey = fileKey;
+            modNode->resourceKey = resourceKey;
             modNode->resourceId = resource->internal_id();
             modNode->parent = parentNode;
 
             auto* modNodePtr = modNode.get();
             parentNode->children.push_back(std::move(modNode));
             m_modNodesByResourceId.insert(modNodePtr->resourceId, modNodePtr);
-            m_modNodesByFileKey.insert(modNodePtr->fileKey, modNodePtr);
+            m_modNodesByResourceKey.insert(modNodePtr->resourceKey, modNodePtr);
         }
 
         sortChildren(m_root.get());
@@ -478,7 +478,7 @@ class VirtualModTreeModel : public QAbstractItemModel {
         Kind kind = Kind::ROOT;
         QString name;
         QString groupId;
-        QString fileKey;
+        QString resourceKey;
         QString resourceId;
         int row = 0;
         Node* parent = nullptr;
@@ -581,7 +581,7 @@ class VirtualModTreeModel : public QAbstractItemModel {
     ModFolderModel* m_backend = nullptr;
     std::unique_ptr<Node> m_root;
     QHash<QString, Node*> m_groupNodes;
-    QHash<QString, Node*> m_modNodesByFileKey;
+    QHash<QString, Node*> m_modNodesByResourceKey;
     QHash<QString, Node*> m_modNodesByResourceId;
 };
 
@@ -893,7 +893,7 @@ void ModFolderPage::updateFrame(const QModelIndex& current, [[maybe_unused]] con
 void ModFolderPage::captureTreeStateBeforeReset()
 {
     m_pendingSelectedGroupIds.clear();
-    m_pendingSelectedFileKeys.clear();
+    m_pendingSelectedResourceKeys.clear();
     m_pendingExpandedGroupIds.clear();
     m_pendingScrollValid = false;
     m_pendingVerticalScrollValue = 0;
@@ -904,7 +904,7 @@ void ModFolderPage::captureTreeStateBeforeReset()
     }
 
     QSet<QString> selectedGroupIds;
-    QSet<QString> selectedFileKeys;
+    QSet<QString> selectedResourceKeys;
     auto sourceSelection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
     for (const auto& sourceIndex : sourceSelection) {
         if (sourceIndex.column() != 0) {
@@ -919,9 +919,9 @@ void ModFolderPage::captureTreeStateBeforeReset()
             continue;
         }
 
-        auto fileKey = m_treeModel->fileKeyForIndex(sourceIndex);
-        if (!fileKey.isEmpty()) {
-            selectedFileKeys.insert(fileKey);
+        auto resourceKey = m_treeModel->resourceKeyForIndex(sourceIndex);
+        if (!resourceKey.isEmpty()) {
+            selectedResourceKeys.insert(resourceKey);
         }
     }
 
@@ -939,7 +939,7 @@ void ModFolderPage::captureTreeStateBeforeReset()
     }
 
     m_pendingSelectedGroupIds = selectedGroupIds.values();
-    m_pendingSelectedFileKeys = selectedFileKeys.values();
+    m_pendingSelectedResourceKeys = selectedResourceKeys.values();
     m_pendingExpandedGroupIds = expandedGroupIds.values();
 
     if (ui->treeView->verticalScrollBar() != nullptr && ui->treeView->horizontalScrollBar() != nullptr) {
@@ -953,7 +953,7 @@ void ModFolderPage::restoreTreeStateAfterReset()
 {
     if (m_treeModel == nullptr || m_filterModel == nullptr || ui->treeView->selectionModel() == nullptr) {
         m_pendingSelectedGroupIds.clear();
-        m_pendingSelectedFileKeys.clear();
+        m_pendingSelectedResourceKeys.clear();
         m_pendingExpandedGroupIds.clear();
         return;
     }
@@ -993,8 +993,8 @@ void ModFolderPage::restoreTreeStateAfterReset()
     for (const auto& groupId : m_pendingSelectedGroupIds) {
         selectIndex(m_treeModel->indexForGroupId(groupId));
     }
-    for (const auto& fileKey : m_pendingSelectedFileKeys) {
-        selectIndex(m_treeModel->indexForFileKey(fileKey));
+    for (const auto& resourceKey : m_pendingSelectedResourceKeys) {
+        selectIndex(m_treeModel->indexForResourceKey(resourceKey));
     }
 
     auto* selectionModel = ui->treeView->selectionModel();
@@ -1006,7 +1006,7 @@ void ModFolderPage::restoreTreeStateAfterReset()
     }
 
     m_pendingSelectedGroupIds.clear();
-    m_pendingSelectedFileKeys.clear();
+    m_pendingSelectedResourceKeys.clear();
     m_pendingExpandedGroupIds.clear();
 
     if (m_pendingScrollValid) {

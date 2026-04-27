@@ -106,9 +106,10 @@ class ModFolderModel : public ResourceFolderModel {
 
     QString createGroup(const QString& name);
     bool deleteGroup(const QString& groupId);
-    bool assignModsToGroup(const QStringList& fileKeys, const QString& groupId = {});
+    bool assignModsToGroup(const QStringList& resourceKeys, const QString& groupId = {});
     QList<GroupOption> groupOptions() const;
-    QString groupForFileKey(const QString& fileKey) const;
+    QString groupKeyForResource(const Resource& resource) const;
+    QString groupForResource(const Resource& resource) const;
     bool isGroupIndex(const QModelIndex& index) const;
     QString groupIdForIndex(const QModelIndex& index) const;
     QModelIndexList groupChildModIndexes(const QModelIndex& groupIndex) const;
@@ -155,6 +156,7 @@ class ModFolderModel : public ResourceFolderModel {
     [[nodiscard]] Mod* modFromIndex(const QModelIndex& index) const;
     [[nodiscard]] QModelIndex indexForNode(TreeNode* node, int column = 0) const;
     [[nodiscard]] QModelIndex indexForResource(const QString& resourceId, int column = 0) const;
+    [[nodiscard]] QString legacyGroupKeyForResource(const Resource& resource) const;
 
     void rebuildTree();
     void syncGroupAssignments();
