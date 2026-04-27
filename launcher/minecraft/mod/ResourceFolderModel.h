@@ -159,7 +159,7 @@ class ResourceFolderModel : public QAbstractListModel {
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-    void setupHeaderAction(QAction* act, int column);
+    void setupHeaderAction(QAction* act, int column) const;
     void saveColumns(QTreeView* tree);
     void loadColumns(QTreeView* tree);
     QMenu* createHeaderContextMenu(QTreeView* tree);

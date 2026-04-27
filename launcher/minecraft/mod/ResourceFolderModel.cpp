@@ -320,11 +320,11 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, Ena
     return succeeded;
 }
 
-static QMutex s_update_task_mutex;
+static QMutex sUpdateTaskMutex;
 bool ResourceFolderModel::update()
 {
     // We hold a lock here to prevent race conditions on the m_current_update_task reset.
-    QMutexLocker lock(&s_update_task_mutex);
+    QMutexLocker lock(&sUpdateTaskMutex);
 
     // Already updating, so we schedule a future update and return.
     if (m_currentUpdateTask) {
@@ -658,7 +658,7 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
     return {};
 }
 
-void ResourceFolderModel::setupHeaderAction(QAction* act, int column)
+void ResourceFolderModel::setupHeaderAction(QAction* act, int column) const
 {
     Q_ASSERT(act);
 
@@ -963,7 +963,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& currentSet, QSet<QString>&
 Resource::Ptr ResourceFolderModel::find(QString id)
 {
     auto iter =
-        std::find_if(m_resources.constBegin(), m_resources.constEnd(), [&](const Resource::Ptr& r) { return r->internalId() == id; });
+        std::find_if(m_resources.constBegin(), m_resources.constEnd(), [&id](const Resource::Ptr& r) { return r->internalId() == id; });
     if (iter == m_resources.constEnd()) {
         return nullptr;
     }

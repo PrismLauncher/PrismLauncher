@@ -85,7 +85,7 @@ class WorldList : public QAbstractListModel {
     const QList<World>& allWorlds() const { return m_worlds; }
 
    private slots:
-    void directoryChanged(QString path);
+    void directoryChanged(const QString& path);
     void loadWorldsAsync();
 
    signals:
