@@ -345,7 +345,7 @@
       <item>
        <widget class="QCheckBox" name="lowMemWarningCheckBox">
         <property name="text">
-         <string>Warn when there is not enough memory available</string>
+         <string>Warn when there is not enough free memory</string>
         </property>
        </widget>
       </item>
