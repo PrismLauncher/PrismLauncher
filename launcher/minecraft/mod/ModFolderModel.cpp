@@ -49,18 +49,19 @@
 #include <QStyle>
 #include <QThreadPool>
 #include <QUrl>
-#include <QUuid>
 #include <algorithm>
 
 #include "minecraft/Component.h"
+#include "minecraft/mod/ModGroupStore.h"
 #include "minecraft/mod/Resource.h"
 #include "minecraft/mod/ResourceFolderModel.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
+#include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
 #include "modplatform/ModIndex.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
 ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)
-    : ResourceFolderModel(QDir(dir), instance, is_indexed, create_dir, parent)
+    : ResourceFolderModel(QDir(dir), instance, is_indexed, create_dir, parent), m_groupStore(std::make_unique<ModGroupStore>(m_dir))
 {
     m_column_names = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider", "Size", "Side", "Loaders",
                                    "Minecraft Versions", "Release Type", "Requires", "Required By" });
@@ -79,12 +80,36 @@ ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_
     connect(this, &ModFolderModel::parseFinished, this, &ModFolderModel::onParseFinished);
 }
 
+ModFolderModel::~ModFolderModel() = default;
+
 QVariant ModFolderModel::data(const QModelIndex& index, int role) const
 {
-    if (!validateIndex(index))
+    auto* node = nodeFromIndex(index);
+    if (!node || index.column() < 0 || index.column() >= NUM_COLUMNS)
         return {};
 
-    int row = index.row();
+    if (node->type == ItemType::GroupNode) {
+        switch (role) {
+            case Qt::DisplayRole:
+                if (index.column() == NameColumn) {
+                    return node->label;
+                }
+                return {};
+            case Qt::ToolTipRole:
+                if (index.column() == NameColumn) {
+                    return node->label;
+                }
+                return {};
+            default:
+                return {};
+        }
+    }
+
+    auto resourceIndex = m_resources_index.constFind(node->resourceId);
+    if (resourceIndex == m_resources_index.constEnd())
+        return {};
+
+    int row = resourceIndex.value();
     int column = index.column();
 
     switch (role) {
@@ -137,31 +162,82 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
             break;
     }
 
-    // map the columns to the base equivilents
-    QModelIndex mappedIndex;
+    // Delegate common column behavior to the base model, but keep the row mapped
+    // to the flat resource index because this model is tree-shaped.
+    int mappedColumn = -1;
     switch (column) {
         case ActiveColumn:
-            mappedIndex = index.siblingAtColumn(ResourceFolderModel::ActiveColumn);
+            mappedColumn = ResourceFolderModel::ActiveColumn;
             break;
         case NameColumn:
-            mappedIndex = index.siblingAtColumn(ResourceFolderModel::NameColumn);
+            mappedColumn = ResourceFolderModel::NameColumn;
             break;
         case DateColumn:
-            mappedIndex = index.siblingAtColumn(ResourceFolderModel::DateColumn);
+            mappedColumn = ResourceFolderModel::DateColumn;
             break;
         case ProviderColumn:
-            mappedIndex = index.siblingAtColumn(ResourceFolderModel::ProviderColumn);
+            mappedColumn = ResourceFolderModel::ProviderColumn;
             break;
         case SizeColumn:
-            mappedIndex = index.siblingAtColumn(ResourceFolderModel::SizeColumn);
+            mappedColumn = ResourceFolderModel::SizeColumn;
             break;
     }
 
-    if (mappedIndex.isValid()) {
+    if (mappedColumn >= 0) {
+        auto mappedIndex = createIndex(row, mappedColumn, node);
         return ResourceFolderModel::data(mappedIndex, role);
     }
 
     return {};
+}
+
+QModelIndex ModFolderModel::index(int row, int column, const QModelIndex& parent) const
+{
+    if (row < 0 || column < 0 || column >= NUM_COLUMNS) {
+        return {};
+    }
+
+    if (!parent.isValid()) {
+        if (row >= m_rootNodes.size()) {
+            return {};
+        }
+        return createIndex(row, column, m_rootNodes.at(row));
+    }
+
+    auto* parentNode = nodeFromIndex(parent);
+    if (!parentNode || parentNode->type != ItemType::GroupNode || row >= parentNode->children.size()) {
+        return {};
+    }
+
+    return createIndex(row, column, parentNode->children.at(row));
+}
+
+QModelIndex ModFolderModel::parent(const QModelIndex& child) const
+{
+    auto* node = nodeFromIndex(child);
+    if (!node || !node->parent) {
+        return {};
+    }
+
+    return createIndex(node->parent->row, 0, node->parent);
+}
+
+int ModFolderModel::rowCount(const QModelIndex& parent) const
+{
+    if (!parent.isValid()) {
+        return m_rootNodes.size();
+    }
+
+    if (parent.column() != 0) {
+        return 0;
+    }
+
+    auto* parentNode = nodeFromIndex(parent);
+    if (!parentNode || parentNode->type != ItemType::GroupNode) {
+        return 0;
+    }
+
+    return parentNode->children.size();
 }
 
 QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const
@@ -223,7 +299,32 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
 
 int ModFolderModel::columnCount(const QModelIndex& parent) const
 {
-    return parent.isValid() ? 0 : NUM_COLUMNS;
+    if (parent.isValid() && parent.column() != 0) {
+        return 0;
+    }
+    return NUM_COLUMNS;
+}
+
+Qt::ItemFlags ModFolderModel::flags(const QModelIndex& index) const
+{
+    if (!index.isValid()) {
+        return QAbstractListModel::flags(index) | Qt::ItemIsDropEnabled;
+    }
+
+    auto flags = QAbstractListModel::flags(index) | Qt::ItemIsDropEnabled;
+
+    auto* node = nodeFromIndex(index);
+    if (!node || node->type == ItemType::GroupNode) {
+        return flags & ~Qt::ItemIsUserCheckable;
+    }
+
+    if (index.column() == ActiveColumn) {
+        flags |= Qt::ItemIsUserCheckable;
+    } else {
+        flags &= ~Qt::ItemIsUserCheckable;
+    }
+
+    return flags;
 }
 
 Task* ModFolderModel::createParseTask(Resource& resource)
@@ -236,13 +337,371 @@ bool ModFolderModel::isValid()
     return m_dir.exists() && m_dir.isReadable();
 }
 
+QString ModFolderModel::createGroup(const QString& name)
+{
+    if (!m_groupStore) {
+        return {};
+    }
+
+    auto groupId = m_groupStore->createGroup(name);
+    if (groupId.isEmpty()) {
+        return {};
+    }
+
+    beginResetModel();
+    rebuildTree();
+    endResetModel();
+    emit virtualGroupsChanged();
+    return groupId;
+}
+
+bool ModFolderModel::deleteGroup(const QString& groupId)
+{
+    if (!m_groupStore) {
+        return false;
+    }
+
+    auto groups = m_groupStore->groups();
+    bool hasGroup =
+        std::any_of(groups.cbegin(), groups.cend(), [&groupId](const ModGroupStore::Group& group) { return group.id == groupId; });
+    if (!hasGroup) {
+        return false;
+    }
+
+    if (!m_groupStore->deleteGroup(groupId)) {
+        return false;
+    }
+
+    beginResetModel();
+    rebuildTree();
+    endResetModel();
+    emit virtualGroupsChanged();
+    return true;
+}
+
+bool ModFolderModel::assignModsToGroup(const QStringList& resourceKeys, const QString& groupId)
+{
+    if (!m_groupStore) {
+        return false;
+    }
+
+    if (!groupId.isEmpty()) {
+        auto groups = m_groupStore->groups();
+        bool hasGroup =
+            std::any_of(groups.cbegin(), groups.cend(), [&groupId](const ModGroupStore::Group& group) { return group.id == groupId; });
+        if (!hasGroup) {
+            return false;
+        }
+    }
+
+    QSet<QString> uniqueResourceKeys;
+    uniqueResourceKeys.reserve(resourceKeys.size());
+    for (const auto& resourceKey : resourceKeys) {
+        auto normalizedResourceKey = ModGroupStore::normalizeFileKey(resourceKey);
+        if (!normalizedResourceKey.isEmpty()) {
+            uniqueResourceKeys.insert(normalizedResourceKey);
+        }
+    }
+
+    bool changed = false;
+    for (const auto& resourceKey : uniqueResourceKeys) {
+        if (m_groupStore->groupFor(resourceKey) == groupId) {
+            continue;
+        }
+
+        if (!m_groupStore->assign(resourceKey, groupId)) {
+            return false;
+        }
+
+        changed = true;
+    }
+
+    if (!changed) {
+        return true;
+    }
+
+    beginResetModel();
+    rebuildTree();
+    endResetModel();
+    emit virtualGroupsChanged();
+    return true;
+}
+
+QList<ModFolderModel::GroupOption> ModFolderModel::groupOptions() const
+{
+    QList<GroupOption> options;
+    if (!m_groupStore) {
+        return options;
+    }
+
+    auto groups = m_groupStore->groups();
+    options.reserve(groups.size());
+    for (const auto& group : groups) {
+        options.append({ group.id, group.name });
+    }
+
+    std::sort(options.begin(), options.end(), [](const GroupOption& left, const GroupOption& right) {
+        auto leftLabel = left.label.toCaseFolded();
+        auto rightLabel = right.label.toCaseFolded();
+        if (leftLabel == rightLabel) {
+            return left.id < right.id;
+        }
+        return leftLabel < rightLabel;
+    });
+
+    return options;
+}
+
+QString ModFolderModel::groupKeyForResource(const Resource& resource) const
+{
+    if (auto metadata = resource.metadata()) {
+        auto projectId = metadata->project_id.toString();
+        auto* providerName = ModPlatform::ProviderCapabilities::name(metadata->provider);
+        if (providerName != nullptr && !projectId.isEmpty()) {
+            return QStringLiteral("%1:%2").arg(QString::fromLatin1(providerName), projectId);
+        }
+    }
+
+    return legacyGroupKeyForResource(resource);
+}
+
+QString ModFolderModel::groupForResource(const Resource& resource) const
+{
+    if (!m_groupStore) {
+        return {};
+    }
+
+    const auto groupKey = groupKeyForResource(resource);
+    if (m_groupStore->hasAssignment(groupKey)) {
+        return m_groupStore->groupFor(groupKey);
+    }
+
+    const auto legacyGroupKey = legacyGroupKeyForResource(resource);
+    if (legacyGroupKey != groupKey) {
+        return m_groupStore->groupFor(legacyGroupKey);
+    }
+
+    return {};
+}
+
+bool ModFolderModel::isGroupIndex(const QModelIndex& index) const
+{
+    auto* node = nodeFromIndex(index);
+    return node && node->type == ItemType::GroupNode;
+}
+
+QString ModFolderModel::groupIdForIndex(const QModelIndex& index) const
+{
+    auto* node = nodeFromIndex(index);
+    if (!node || node->type != ItemType::GroupNode) {
+        return {};
+    }
+
+    return node->groupId;
+}
+
+QModelIndexList ModFolderModel::groupChildModIndexes(const QModelIndex& groupIndex) const
+{
+    QModelIndexList childIndexes;
+
+    auto* groupNode = nodeFromIndex(groupIndex);
+    if (!groupNode || groupNode->type != ItemType::GroupNode) {
+        return childIndexes;
+    }
+
+    childIndexes.reserve(groupNode->children.size());
+    for (auto* child : groupNode->children) {
+        if (!child || child->type != ItemType::ModNode) {
+            continue;
+        }
+
+        auto modIndex = indexForNode(child, 0);
+        if (modIndex.isValid()) {
+            childIndexes.append(modIndex);
+        }
+    }
+
+    return childIndexes;
+}
+
+QModelIndex ModFolderModel::indexForResourceId(const QString& resourceId, int column) const
+{
+    return indexForResource(resourceId, column);
+}
+
+QList<Mod*> ModFolderModel::selectedMods(const QModelIndexList& indexes)
+{
+    QSet<QString> seen;
+    QList<Mod*> result;
+
+    for (const auto& index : indexes) {
+        if (index.column() != 0) {
+            continue;
+        }
+
+        auto* mod = modFromIndex(index);
+        if (!mod || seen.contains(mod->internal_id())) {
+            continue;
+        }
+
+        seen.insert(mod->internal_id());
+        result.append(mod);
+    }
+
+    return result;
+}
+
+QList<Mod*> ModFolderModel::allMods()
+{
+    QList<Mod*> result;
+    result.reserve(m_resources.size());
+
+    for (const auto& resource : m_resources) {
+        result.append(static_cast<Mod*>(resource.get()));
+    }
+
+    return result;
+}
+
+QList<Resource*> ModFolderModel::selectedResources(const QModelIndexList& indexes)
+{
+    QList<Resource*> result;
+    for (auto* mod : selectedMods(indexes)) {
+        result.append(mod);
+    }
+    return result;
+}
+
+ModFolderModel::TreeNode* ModFolderModel::nodeFromIndex(const QModelIndex& index) const
+{
+    if (!index.isValid()) {
+        return nullptr;
+    }
+
+    return static_cast<TreeNode*>(index.internalPointer());
+}
+
+Mod* ModFolderModel::modFromIndex(const QModelIndex& index) const
+{
+    auto* node = nodeFromIndex(index);
+    if (!node || node->type != ItemType::ModNode) {
+        return nullptr;
+    }
+
+    auto it = m_resources_index.constFind(node->resourceId);
+    if (it == m_resources_index.constEnd()) {
+        return nullptr;
+    }
+
+    return static_cast<Mod*>(m_resources.at(it.value()).get());
+}
+
+QModelIndex ModFolderModel::indexForNode(TreeNode* node, int column) const
+{
+    if (!node || column < 0 || column >= NUM_COLUMNS) {
+        return {};
+    }
+
+    return createIndex(node->row, column, node);
+}
+
+QModelIndex ModFolderModel::indexForResource(const QString& resourceId, int column) const
+{
+    auto* node = m_resourceNodes.value(resourceId, nullptr);
+    return indexForNode(node, column);
+}
+
+QString ModFolderModel::legacyGroupKeyForResource(const Resource& resource) const
+{
+    return ModGroupStore::normalizeFileKey(resource.getOriginalFileName());
+}
+
+void ModFolderModel::syncGroupAssignments()
+{
+    if (!m_groupStore) {
+        return;
+    }
+
+    QStringList groupKeys;
+    groupKeys.reserve(m_resources.size());
+    for (const auto& resource : m_resources) {
+        auto groupKey = groupKeyForResource(*resource);
+        if (groupKey.isEmpty()) {
+            continue;
+        }
+
+        const auto legacyGroupKey = legacyGroupKeyForResource(*resource);
+        if (groupKey != legacyGroupKey && !m_groupStore->hasAssignment(groupKey)) {
+            const auto legacyGroupId = m_groupStore->groupFor(legacyGroupKey);
+            if (!legacyGroupId.isEmpty() && !m_groupStore->assign(groupKey, legacyGroupId)) {
+                groupKey = legacyGroupKey;
+            }
+        }
+
+        groupKeys.append(groupKey);
+    }
+
+    m_groupStore->syncWithFilesystem(groupKeys);
+}
+
+void ModFolderModel::rebuildTree()
+{
+    m_rootNodes.clear();
+    m_treeStorage.clear();
+    m_groupNodesById.clear();
+    m_resourceNodes.clear();
+
+    auto createNode = [this](ItemType type) {
+        auto node = std::make_unique<TreeNode>();
+        node->type = type;
+        auto* ptr = node.get();
+        m_treeStorage.emplace_back(std::move(node));
+        return ptr;
+    };
+
+    if (m_groupStore) {
+        for (const auto& group : m_groupStore->groups()) {
+            auto* groupNode = createNode(ItemType::GroupNode);
+            groupNode->groupId = group.id;
+            groupNode->label = group.name;
+            groupNode->row = m_rootNodes.size();
+            m_rootNodes.append(groupNode);
+            m_groupNodesById.insert(group.id, groupNode);
+        }
+    }
+
+    for (const auto& resource : m_resources) {
+        auto* modNode = createNode(ItemType::ModNode);
+        modNode->resourceId = resource->internal_id();
+
+        TreeNode* parentNode = nullptr;
+        if (m_groupStore) {
+            auto groupId = groupForResource(*resource);
+            if (!groupId.isEmpty()) {
+                parentNode = m_groupNodesById.value(groupId, nullptr);
+            }
+        }
+
+        if (parentNode) {
+            modNode->parent = parentNode;
+            modNode->row = parentNode->children.size();
+            parentNode->children.append(modNode);
+        } else {
+            modNode->row = m_rootNodes.size();
+            m_rootNodes.append(modNode);
+        }
+
+        m_resourceNodes.insert(modNode->resourceId, modNode);
+    }
+}
+
 void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)
 {
     auto iter = m_active_parse_tasks.constFind(ticket);
     if (iter == m_active_parse_tasks.constEnd())
         return;
-
-    int row = m_resources_index[mod_id];
+    if (!m_resources_index.contains(mod_id))
+        return;
 
     auto parse_task = *iter;
     auto cast_task = static_cast<LocalModParseTask*>(parse_task.get());
@@ -255,9 +714,170 @@ void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)
     if (result && resource) {
         auto* mod = static_cast<Mod*>(resource.get());
         mod->finishResolvingWithDetails(std::move(result->details));
-
     }
-    emit dataChanged(index(row, RequiresColumn), index(row, RequiredByColumn));
+
+    auto left = indexForResource(mod_id, RequiresColumn);
+    auto right = indexForResource(mod_id, RequiredByColumn);
+    if (left.isValid() && right.isValid()) {
+        emit dataChanged(left, right);
+    }
+}
+
+void ModFolderModel::onParseFailed(int ticket, QString resource_id)
+{
+    auto iter = m_active_parse_tasks.constFind(ticket);
+    if (iter == m_active_parse_tasks.constEnd() || !m_resources_index.contains(resource_id)) {
+        return;
+    }
+
+    auto removedIndex = m_resources_index[resource_id];
+    auto removedIt = m_resources.begin() + removedIndex;
+    if (removedIt == m_resources.end()) {
+        return;
+    }
+
+    beginResetModel();
+    m_resources.erase(removedIt);
+
+    m_resources_index.clear();
+    int idx = 0;
+    for (const auto& resource : qAsConst(m_resources)) {
+        m_resources_index[resource->internal_id()] = idx;
+        idx++;
+    }
+
+    syncGroupAssignments();
+    rebuildTree();
+    endResetModel();
+}
+
+void ModFolderModel::onUpdateSucceeded()
+{
+    auto updateResults = static_cast<ResourceFolderLoadTask*>(m_current_update_task.get())->result();
+    auto& newResources = updateResults->resources;
+
+    auto currentList = m_resources_index.keys();
+    QSet<QString> currentSet(currentList.begin(), currentList.end());
+
+    auto newList = newResources.keys();
+    QSet<QString> newSet(newList.begin(), newList.end());
+    QSet<QString> keptSet = currentSet;
+    keptSet.intersect(newSet);
+
+    if (currentSet == newSet) {
+        for (const auto& kept : keptSet) {
+            auto rowIt = m_resources_index.constFind(kept);
+            Q_ASSERT(rowIt != m_resources_index.constEnd());
+            auto row = rowIt.value();
+
+            auto& newResource = newResources[kept];
+            const auto& currentResource = m_resources.at(row);
+
+            if (newResource->dateTimeChanged() == currentResource->dateTimeChanged()) {
+                continue;
+            }
+
+            if (currentResource->isResolving()) {
+                auto ticket = currentResource->resolutionTicket();
+                if (m_active_parse_tasks.contains(ticket)) {
+                    auto task = (*m_active_parse_tasks.find(ticket)).get();
+                    task->abort();
+                }
+            }
+
+            m_resources[row].reset(newResource);
+            resolveResource(m_resources.at(row));
+
+            auto left = indexForResource(kept, 0);
+            auto right = indexForResource(kept, columnCount(QModelIndex()) - 1);
+            if (left.isValid() && right.isValid()) {
+                emit dataChanged(left, right);
+            }
+        }
+
+        syncGroupAssignments();
+        return;
+    }
+
+    beginResetModel();
+
+    {
+        for (const auto& kept : keptSet) {
+            auto rowIt = m_resources_index.constFind(kept);
+            Q_ASSERT(rowIt != m_resources_index.constEnd());
+            auto row = rowIt.value();
+
+            auto& newResource = newResources[kept];
+            const auto& currentResource = m_resources.at(row);
+
+            if (newResource->dateTimeChanged() == currentResource->dateTimeChanged()) {
+                continue;
+            }
+
+            if (currentResource->isResolving()) {
+                auto ticket = currentResource->resolutionTicket();
+                if (m_active_parse_tasks.contains(ticket)) {
+                    auto task = (*m_active_parse_tasks.find(ticket)).get();
+                    task->abort();
+                }
+            }
+
+            m_resources[row].reset(newResource);
+            resolveResource(m_resources.at(row));
+        }
+    }
+
+    {
+        QSet<QString> removedSet = currentSet;
+        removedSet.subtract(newSet);
+
+        QList<int> removedRows;
+        for (const auto& removed : removedSet) {
+            removedRows.append(m_resources_index[removed]);
+        }
+
+        std::sort(removedRows.begin(), removedRows.end(), std::greater<int>());
+
+        for (auto removedIndex : removedRows) {
+            auto removedIt = m_resources.begin() + removedIndex;
+            if (removedIt == m_resources.end()) {
+                continue;
+            }
+
+            if ((*removedIt)->isResolving()) {
+                auto ticket = (*removedIt)->resolutionTicket();
+                if (m_active_parse_tasks.contains(ticket)) {
+                    auto task = (*m_active_parse_tasks.find(ticket)).get();
+                    task->abort();
+                }
+            }
+
+            m_resources.erase(removedIt);
+        }
+    }
+
+    {
+        QSet<QString> addedSet = newSet;
+        addedSet.subtract(currentSet);
+
+        for (const auto& added : addedSet) {
+            auto resource = newResources[added];
+            m_resources.append(resource);
+            resolveResource(m_resources.last());
+        }
+    }
+
+    m_resources_index.clear();
+    int idx = 0;
+    for (const auto& resource : qAsConst(m_resources)) {
+        m_resources_index[resource->internal_id()] = idx;
+        idx++;
+    }
+
+    syncGroupAssignments();
+    rebuildTree();
+
+    endResetModel();
 }
 
 Mod* findById(QSet<Mod*> mods, QString modId)
@@ -309,8 +929,11 @@ void ModFolderModel::onParseFinished()
         if (mod->requiredByCount() != m_requiredBy[id].count() || mod->requiresCount() != m_requires[id].count()) {
             mod->setRequiredByCount(m_requiredBy[id].count());
             mod->setRequiresCount(m_requires[id].count());
-            int row = m_resources_index[mod->internal_id()];
-            emit dataChanged(index(row), index(row, columnCount(QModelIndex()) - 1));
+            auto left = indexForResource(mod->internal_id(), 0);
+            auto right = indexForResource(mod->internal_id(), columnCount(QModelIndex()) - 1);
+            if (left.isValid() && right.isValid()) {
+                emit dataChanged(left, right);
+            }
         }
     }
 }
@@ -367,17 +990,74 @@ QModelIndexList ModFolderModel::getAffectedMods(const QModelIndexList& indexes, 
         }
     }
     for (auto affected : affectedMods) {
-        auto affectedId = affected->mod_id();
-        auto row = m_resources_index[affected->internal_id()];
-        affectedList << index(row, 0);
+        auto affectedIndex = indexForResource(affected->internal_id(), 0);
+        if (affectedIndex.isValid()) {
+            affectedList << affectedIndex;
+        }
     }
     return affectedList;
+}
+
+bool ModFolderModel::setResourcesEnabled(const QList<Mod*>& mods, EnableAction action)
+{
+    bool succeeded = true;
+
+    for (auto* mod : mods) {
+        if (!mod) {
+            continue;
+        }
+
+        auto oldId = mod->internal_id();
+        auto rowIt = m_resources_index.constFind(oldId);
+        if (rowIt == m_resources_index.constEnd()) {
+            continue;
+        }
+
+        auto row = rowIt.value();
+        auto& resource = m_resources[row];
+
+        if (!resource->enable(action)) {
+            succeeded = false;
+            continue;
+        }
+
+        auto newId = resource->internal_id();
+        m_resources_index.remove(oldId);
+        m_resources_index.insert(newId, row);
+
+        auto* node = m_resourceNodes.value(oldId, nullptr);
+        if (node) {
+            m_resourceNodes.remove(oldId);
+            node->resourceId = newId;
+            m_resourceNodes.insert(newId, node);
+        }
+
+        auto left = indexForResource(newId, 0);
+        auto right = indexForResource(newId, columnCount(QModelIndex()) - 1);
+        if (left.isValid() && right.isValid()) {
+            emit dataChanged(left, right);
+        }
+    }
+
+    return succeeded;
 }
 
 bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAction action)
 {
     if (indexes.isEmpty())
-        return {};
+        return true;
+
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        auto response =
+            CustomMessageBox::selectable(nullptr, tr("Confirm toggle"),
+                                         tr("If you enable/disable this resource while the game is running it may crash your game.\n"
+                                            "Are you sure you want to do this?"),
+                                         QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                ->exec();
+
+        if (response != QMessageBox::Yes)
+            return false;
+    }
 
     auto indexedModsList = selectedMods(indexes);
     auto indexedMods = QSet(indexedModsList.begin(), indexedModsList.end());
@@ -411,14 +1091,6 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
     auto requiredToDisable = collectMods(toDisable, m_requiredBy, seen, false);
 
     toDisable.removeIf([toEnable](Mod* m) { return toEnable.contains(m); });
-    auto toList = [this](QSet<Mod*> mods) {
-        QModelIndexList list;
-        for (auto mod : mods) {
-            auto row = m_resources_index[mod->internal_id()];
-            list << index(row, 0);
-        }
-        return list;
-    };
 
     if (requiredToEnable.size() > 0 || requiredToDisable.size() > 0) {
         QString title;
@@ -461,8 +1133,8 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
         }
     }
 
-    auto disableStatus = ResourceFolderModel::setResourceEnabled(toList(toDisable), EnableAction::DISABLE);
-    auto enableStatus = ResourceFolderModel::setResourceEnabled(toList(toEnable), EnableAction::ENABLE);
+    auto disableStatus = setResourcesEnabled(toDisable.values(), EnableAction::DISABLE);
+    auto enableStatus = setResourcesEnabled(toEnable.values(), EnableAction::ENABLE);
     return disableStatus && enableStatus;
 }
 
@@ -499,7 +1171,16 @@ bool ModFolderModel::deleteResources(const QModelIndexList& indexes)
             }
         }
     };
-    auto rsp = ResourceFolderModel::deleteResources(indexes);
+    auto mods = selectedMods(indexes);
+    if (mods.isEmpty()) {
+        return true;
+    }
+
+    for (auto* mod : mods) {
+        static_cast<Resource*>(mod)->destroy(indexDir());
+    }
+
+    update();
     for (auto mod : allMods()) {
         auto id = mod->mod_id();
         deleteInvalid(m_requiredBy[id]);
@@ -507,9 +1188,12 @@ bool ModFolderModel::deleteResources(const QModelIndexList& indexes)
         if (mod->requiredByCount() != m_requiredBy[id].count() || mod->requiresCount() != m_requires[id].count()) {
             mod->setRequiredByCount(m_requiredBy[id].count());
             mod->setRequiresCount(m_requires[id].count());
-            int row = m_resources_index[mod->internal_id()];
-            emit dataChanged(index(row, RequiresColumn), index(row, RequiredByColumn));
+            auto left = indexForResource(mod->internal_id(), RequiresColumn);
+            auto right = indexForResource(mod->internal_id(), RequiredByColumn);
+            if (left.isValid() && right.isValid()) {
+                emit dataChanged(left, right);
+            }
         }
     }
-    return rsp;
+    return true;
 }

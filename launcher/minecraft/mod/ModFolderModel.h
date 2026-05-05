@@ -43,6 +43,10 @@
 #include <QMap>
 #include <QSet>
 #include <QString>
+#include <QStringList>
+
+#include <memory>
+#include <vector>
 
 #include "Mod.h"
 #include "ResourceFolderModel.h"
@@ -51,6 +55,7 @@
 
 class BaseInstance;
 class QFileSystemWatcher;
+class ModGroupStore;
 
 /**
  * A legacy mod list.
@@ -76,35 +81,93 @@ class ModFolderModel : public ResourceFolderModel {
         NUM_COLUMNS
     };
     ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent = nullptr);
+    ~ModFolderModel() override;
 
     virtual QString id() const override { return "mods"; }
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex& child) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     [[nodiscard]] Resource* createResource(const QFileInfo& file) override { return new Mod(file); }
     [[nodiscard]] Task* createParseTask(Resource&) override;
 
     bool isValid();
 
+    struct GroupOption {
+        QString id;
+        QString label;
+    };
+
+    QString createGroup(const QString& name);
+    bool deleteGroup(const QString& groupId);
+    bool assignModsToGroup(const QStringList& resourceKeys, const QString& groupId = {});
+    QList<GroupOption> groupOptions() const;
+    QString groupKeyForResource(const Resource& resource) const;
+    QString groupForResource(const Resource& resource) const;
+    bool isGroupIndex(const QModelIndex& index) const;
+    QString groupIdForIndex(const QModelIndex& index) const;
+    QModelIndexList groupChildModIndexes(const QModelIndex& groupIndex) const;
+    QModelIndex indexForResourceId(const QString& resourceId, int column = 0) const;
+    bool virtualGroupsEnabled() const { return m_groupStore != nullptr; }
+
     bool setResourceEnabled(const QModelIndexList& indexes, EnableAction action) override;
     bool deleteResources(const QModelIndexList& indexes) override;
 
+    Mod& at(int index) { return *static_cast<Mod*>(m_resources[index].get()); }
+    const Mod& at(int index) const { return *static_cast<const Mod*>(m_resources.at(index).get()); }
+    QList<Mod*> selectedMods(const QModelIndexList& indexes);
+    QList<Mod*> allMods();
+    QList<Resource*> selectedResources(const QModelIndexList& indexes);
+
     QModelIndexList getAffectedMods(const QModelIndexList& indexes, EnableAction action);
 
-    RESOURCE_HELPERS(Mod)
-
-   public:
     QStringList requiresList(QString id);
     QStringList requiredByList(QString id);
 
+   signals:
+    void virtualGroupsChanged();
+
    private slots:
     void onParseSucceeded(int ticket, QString resource_id) override;
+    void onParseFailed(int ticket, QString resource_id) override;
+    void onUpdateSucceeded() override;
     void onParseFinished();
 
    private:
+    enum class ItemType { GroupNode, ModNode };
+
+    struct TreeNode {
+        ItemType type = ItemType::ModNode;
+        TreeNode* parent = nullptr;
+        int row = -1;
+        QString groupId;
+        QString label;
+        QString resourceId;
+        QList<TreeNode*> children;
+    };
+
+    [[nodiscard]] TreeNode* nodeFromIndex(const QModelIndex& index) const;
+    [[nodiscard]] Mod* modFromIndex(const QModelIndex& index) const;
+    [[nodiscard]] QModelIndex indexForNode(TreeNode* node, int column = 0) const;
+    [[nodiscard]] QModelIndex indexForResource(const QString& resourceId, int column = 0) const;
+    [[nodiscard]] QString legacyGroupKeyForResource(const Resource& resource) const;
+
+    void rebuildTree();
+    void syncGroupAssignments();
+    bool setResourcesEnabled(const QList<Mod*>& mods, EnableAction action);
+
     QHash<QString, QSet<Mod*>> m_requiredBy;
     QHash<QString, QSet<Mod*>> m_requires;
+
+    std::unique_ptr<ModGroupStore> m_groupStore;
+    QList<TreeNode*> m_rootNodes;
+    std::vector<std::unique_ptr<TreeNode>> m_treeStorage;
+    QHash<QString, TreeNode*> m_groupNodesById;
+    QHash<QString, TreeNode*> m_resourceNodes;
 };
