@@ -1,40 +1,21 @@
 #pragma once
 
+#include <cstdint>
 #include "settings/SettingsObject.h"
 #include "tasks/Task.h"
 
 /* Helpers */
-enum class InstanceNameChange { ShouldChange, ShouldKeep };
-[[nodiscard]] InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& old_name, const QString& new_name);
-enum class ShouldUpdate { Update, SkipUpdating, Cancel };
-[[nodiscard]] ShouldUpdate askIfShouldUpdate(QWidget* parent, QString original_version_name);
-enum class ShouldDeleteSaves { NotAsked, Yes, No };
+enum class InstanceNameChange : std::uint8_t { ShouldChange, ShouldKeep };
+[[nodiscard]] InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& oldName, const QString& newName);
+enum class ShouldUpdate : std::uint8_t { Update, SkipUpdating, Cancel };
+[[nodiscard]] ShouldUpdate askIfShouldUpdate(QWidget* parent, QString originalVersionName);
+enum class ShouldDeleteSaves : std::uint8_t { NotAsked, Yes, No };
 [[nodiscard]] ShouldDeleteSaves askIfShouldDeleteSaves(QWidget* parent);
 
-struct InstanceName {
-   public:
-    InstanceName() = default;
-    InstanceName(QString name, QString version) : m_original_name(std::move(name)), m_original_version(std::move(version)) {}
-
-    QString modifiedName() const;
-    QString originalName() const;
-    QString name() const;
-    QString version() const;
-
-    void setName(QString name) { m_modified_name = name; }
-    void setName(InstanceName& other);
-
-   protected:
-    QString m_original_name;
-    QString m_original_version;
-
-    QString m_modified_name;
-};
-
-class InstanceTask : public Task, public InstanceName {
+class InstanceTask : public Task {
     Q_OBJECT
    public:
-    InstanceTask();
+    InstanceTask() = default;
     ~InstanceTask() override = default;
 
     void setParentSettings(SettingsObject* settings) { m_globalSettings = settings; }
@@ -46,29 +27,37 @@ class InstanceTask : public Task, public InstanceName {
     void setGroup(const QString& group) { m_instGroup = group; }
     QString group() const { return m_instGroup; }
 
-    bool shouldConfirmUpdate() const { return m_confirm_update; }
-    void setConfirmUpdate(bool confirm) { m_confirm_update = confirm; }
+    bool shouldConfirmUpdate() const { return m_confirmUpdate; }
+    void setConfirmUpdate(bool confirm) { m_confirmUpdate = confirm; }
 
-    bool shouldOverride() const { return m_override_existing; }
+    bool shouldOverride() const { return m_overrideExisting; }
 
-    QString originalInstanceID() const { return m_original_instance_id; };
+    QString originalInstanceID() const { return m_originalInstanceId; };
+
+    QString modifiedName() const;
+    QString originalName() const;
+    QString name() const;
+    QString version() const;
+
+    void setName(const QString& name) { m_modifiedName = name; }
+    void setOriginalName(const QString& name, const QString& version);
 
    protected:
-    void setOverride(bool override, QString instance_id_to_override = {})
-    {
-        m_override_existing = override;
-        if (!instance_id_to_override.isEmpty())
-            m_original_instance_id = instance_id_to_override;
-    }
+    void setOverride(bool override, const QString& instanceIdToOverride = {});
 
    protected: /* data */
-    SettingsObject* m_globalSettings;
+    SettingsObject* m_globalSettings{};
     QString m_instIcon;
     QString m_instGroup;
     QString m_stagingPath;
 
-    bool m_override_existing = false;
-    bool m_confirm_update = true;
+    bool m_overrideExisting = false;
+    bool m_confirmUpdate = true;
 
-    QString m_original_instance_id;
+    QString m_originalInstanceId;
+
+    QString m_originalName;
+    QString m_originalVersion;
+
+    QString m_modifiedName;
 };

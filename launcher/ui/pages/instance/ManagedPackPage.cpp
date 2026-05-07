@@ -128,7 +128,8 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
         QDesktopServices::openUrl(url);
     });
 
-    connect(ui->urlLine, &QLineEdit::textChanged, this, [this](QString text) { m_inst->settings()->set("ManagedPackURL", text.trimmed()); });
+    connect(ui->urlLine, &QLineEdit::textChanged, this,
+            [this](QString text) { m_inst->settings()->set("ManagedPackURL", text.trimmed()); });
 }
 
 ManagedPackPage::~ManagedPackPage()
@@ -523,9 +524,8 @@ void ManagedPackPage::updatePack(const QUrl& url, QString versionID, QString ver
     if (versionName.isEmpty()) {
         extracted->setName(m_inst->name());
     } else {
-        InstanceName inst_name(m_inst->getManagedPackName(), versionName);
-        inst_name.setName(m_inst->name().replace(m_inst->getManagedPackVersionName(), versionName));
-        extracted->setName(inst_name);
+        extracted->setOriginalName(m_inst->getManagedPackName(), versionName);
+        extracted->setName(m_inst->name().replace(m_inst->getManagedPackVersionName(), versionName));
     }
     extracted->setGroup(APPLICATION->instances()->getInstanceGroup(m_inst->id()));
     extracted->setIcon(m_inst->iconKey());

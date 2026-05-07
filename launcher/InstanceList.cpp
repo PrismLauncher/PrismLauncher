@@ -978,7 +978,7 @@ class InstanceStaging : public Task {
     void childSucceeded()
     {
         unsigned sleepTime = backoff();
-        if (m_parent->commitStagedInstance(m_stagingPath, *m_child, m_child->group(), *m_child)) {
+        if (m_parent->commitStagedInstance(m_stagingPath, *m_child, m_child->group())) {
             m_backoffTimer.stop();
             emitSucceeded();
             return;
@@ -995,14 +995,14 @@ class InstanceStaging : public Task {
     void childFailed(const QString& reason)
     {
         m_backoffTimer.stop();
-        m_parent->destroyStagingPath(m_stagingPath);
+        FS::deletePath(m_stagingPath);
         emitFailed(reason);
     }
 
     void childAborted()
     {
         m_backoffTimer.stop();
-        m_parent->destroyStagingPath(m_stagingPath);
+        FS::deletePath(m_stagingPath);
         emitAborted();
     }
 
@@ -1047,22 +1047,20 @@ QString InstanceList::getStagedInstancePath()
     return result;
 }
 
-bool InstanceList::commitStagedInstance(const QString& path,
-                                        const InstanceName& instanceName,
-                                        QString groupName,
-                                        const InstanceTask& commiting)
+bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask& instanceTask, QString groupName)
 {
-    if (groupName.isEmpty() && !groupName.isNull())
+    if (groupName.isEmpty() && !groupName.isNull()) {
         groupName = QString();
+    }
 
     QString instID;
 
-    auto should_override = commiting.shouldOverride();
+    auto shouldOverride = instanceTask.shouldOverride();
 
-    if (should_override) {
-        instID = commiting.originalInstanceID();
+    if (shouldOverride) {
+        instID = instanceTask.originalInstanceID();
     } else {
-        instID = FS::DirNameFromString(instanceName.modifiedName(), primaryDir());
+        instID = FS::DirNameFromString(instanceTask.modifiedName(), primaryDir());
     }
 
     Q_ASSERT(!instID.isEmpty());
@@ -1071,7 +1069,7 @@ bool InstanceList::commitStagedInstance(const QString& path,
         WatchLock lock(m_watcher, primaryDir());
         QString destination = FS::PathCombine(primaryDir(), instID);
 
-        if (should_override) {
+        if (shouldOverride) {
             if (!FS::overrideFolder(destination, path)) {
                 qWarning() << "Failed to override" << path << "to" << destination;
                 return false;
@@ -1095,11 +1093,6 @@ bool InstanceList::commitStagedInstance(const QString& path,
 
     saveGroupList();
     return true;
-}
-
-bool InstanceList::destroyStagingPath(const QString& keyPath)
-{
-    return FS::deletePath(keyPath);
 }
 
 int InstanceList::getTotalPlayTime()

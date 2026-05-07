@@ -35,7 +35,7 @@ class ModrinthCreationTask final : public InstanceCreationTask {
         setStagingPath(stagingPath);
         setParentSettings(globalSettings);
 
-        m_original_instance_id = std::move(originalInstanceId);
+        m_originalInstanceId = std::move(originalInstanceId);
     }
 
     bool abort() override;

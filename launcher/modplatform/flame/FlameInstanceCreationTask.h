@@ -62,7 +62,7 @@ class FlameCreationTask final : public InstanceCreationTask {
         setStagingPath(staging_path);
         setParentSettings(global_settings);
 
-        m_original_instance_id = std::move(original_instance_id);
+        m_originalInstanceId = std::move(original_instance_id);
     }
 
     bool abort() override;
@@ -73,7 +73,7 @@ class FlameCreationTask final : public InstanceCreationTask {
    private slots:
     void idResolverSucceeded(QEventLoop&);
     void setupDownloadJob(QEventLoop&);
-    void copyBlockedMods(QList<BlockedMod> const& blocked_mods);
+    void copyBlockedMods(const QList<BlockedMod>& blocked_mods);
     void validateOtherResources(QEventLoop& loop);
     QString getVersionForLoader(QString uid, QString loaderType, QString version, QString mcVersion);
 

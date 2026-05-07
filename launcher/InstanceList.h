@@ -47,7 +47,6 @@
 
 class QFileSystemWatcher;
 class InstanceTask;
-struct InstanceName;
 
 using InstanceId = QString;
 using GroupId = QString;
@@ -137,13 +136,7 @@ class InstanceList : public QAbstractListModel {
      * should_override is used when another similar instance already exists, and we want to override it
      * - for instance, when updating it.
      */
-    bool commitStagedInstance(const QString& keyPath, const InstanceName& instanceName, QString groupName, const InstanceTask&);
-
-    /**
-     * Destroy a previously created staging area given by @keyPath - used when creation fails.
-     * Used by instance manipulation tasks.
-     */
-    bool destroyStagingPath(const QString& keyPath);
+    bool commitStagedInstance(const QString& keyPath, const InstanceTask& instanceTask, QString groupName);
 
     int getTotalPlayTime();
 

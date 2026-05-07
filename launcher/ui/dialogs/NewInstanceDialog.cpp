@@ -273,9 +273,8 @@ InstanceTask* NewInstanceDialog::extractTask()
 {
     InstanceTask* extracted = creationTask.release();
 
-    InstanceName inst_name(m_suggestedName.trimmed(), importVersion);
-    inst_name.setName(ui->instNameTextBox->text().trimmed());
-    extracted->setName(inst_name);
+    extracted->setName(ui->instNameTextBox->text().trimmed());
+    extracted->setOriginalName(m_suggestedName.trimmed(), importVersion);
 
     extracted->setGroup(instGroup());
     extracted->setIcon(iconKey());
