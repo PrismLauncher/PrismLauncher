@@ -4,11 +4,13 @@
 #include "settings/SettingsObject.h"
 #include "tasks/Task.h"
 
+class MinecraftInstance;
+
 /* Helpers */
 enum class InstanceNameChange : std::uint8_t { ShouldChange, ShouldKeep };
 [[nodiscard]] InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& oldName, const QString& newName);
 enum class ShouldUpdate : std::uint8_t { Update, SkipUpdating, Cancel };
-[[nodiscard]] ShouldUpdate askIfShouldUpdate(QWidget* parent, QString originalVersionName);
+[[nodiscard]] ShouldUpdate askIfShouldUpdate(QWidget* parent, const QString& originalVersionName);
 enum class ShouldDeleteSaves : std::uint8_t { NotAsked, Yes, No };
 [[nodiscard]] ShouldDeleteSaves askIfShouldDeleteSaves(QWidget* parent);
 
@@ -45,6 +47,12 @@ class InstanceTask : public Task {
    protected:
     void setOverride(bool override, const QString& instanceIdToOverride = {});
 
+    void scheduleToDelete(QWidget* parent, const QDir& dir, const QString& path, bool checkDisabled = false);
+    void downloadFiles(MinecraftInstance* inst);
+
+   public slots:
+    bool abort() override;
+
    protected: /* data */
     SettingsObject* m_globalSettings{};
     QString m_instIcon;
@@ -60,4 +68,9 @@ class InstanceTask : public Task {
     QString m_originalVersion;
 
     QString m_modifiedName;
+
+    QStringList m_filesToRemove;
+    ShouldDeleteSaves m_shouldDeleteSaves{};
+
+    Task::Ptr m_gameFilesTask;
 };

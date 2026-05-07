@@ -294,7 +294,8 @@ void InstanceImportTask::processFlame()
         inst_creation_task = makeShared<FlameCreationTask>(m_stagingPath, m_globalSettings, m_parent, QString(), QString());
     }
 
-    inst_creation_task->setName(*this);
+    inst_creation_task->setName(modifiedName());
+    inst_creation_task->setOriginalName(originalName(), version());
     // if the icon was specified by user, use that. otherwise pull icon from the pack
     if (m_instIcon == "default") {
         auto iconKey = QString("Flame_%1_Icon").arg(name());
@@ -394,7 +395,8 @@ void InstanceImportTask::processModrinth()
         inst_creation_task = makeShared<ModrinthCreationTask>(m_stagingPath, m_globalSettings, m_parent, pack_id);
     }
 
-    inst_creation_task->setName(*this);
+    inst_creation_task->setName(modifiedName());
+    inst_creation_task->setOriginalName(originalName(), version());
     // if the icon was specified by user, use that. otherwise pull icon from the pack
     if (m_instIcon == "default") {
         auto iconKey = QString("Modrinth_%1_Icon").arg(name());

@@ -15,9 +15,6 @@ bool InstanceCreationTask::abort()
     }
 
     m_abort = true;
-    if (m_gameFilesTask) {
-        return m_gameFilesTask->abort();
-    }
 
     return InstanceTask::abort();
 }
@@ -37,8 +34,8 @@ void InstanceCreationTask::executeTask()
         return;
     }
 
-    m_instance = createInstance();
-    if (!m_instance) {
+    auto instance = createInstance();
+    if (!instance) {
         if (m_abort) {
             return;
         }
@@ -84,59 +81,6 @@ void InstanceCreationTask::executeTask()
     }
 
     if (!m_abort) {
-        if (!APPLICATION->settings()->get("DownloadGameFilesDuringInstanceCreation").toBool()) {
-            emitSucceeded();
-            return;
-        }
-        setAbortable(true);
-        setAbortButtonText(tr("Skip"));
-        qDebug() << "Downloading game files";
-
-        auto updateTasks = m_instance->createUpdateTask();
-        if (updateTasks.isEmpty()) {
-            emitSucceeded();
-            return;
-        }
-        auto task = makeShared<SequentialTask>();
-        task->addTask(makeShared<MinecraftLoadAndCheck>(m_instance.get(), Net::Mode::Online));
-        for (const auto& t : updateTasks) {
-            task->addTask(t);
-        }
-        connect(task.get(), &Task::finished, this, [this, task] {
-            if (task->wasSuccessful() || m_abort) {
-                emitSucceeded();
-            } else {
-                emitFailed(tr("Could not download game files: %1").arg(task->failReason()));
-            }
-        });
-        propagateFromOther(task.get());
-        setDetails(tr("Downloading game files"));
-
-        m_gameFilesTask = task;
-        m_gameFilesTask->start();
-    }
-}
-
-void InstanceCreationTask::scheduleToDelete(QWidget* parent, const QDir& dir, const QString& path, bool checkDisabled)
-{
-    if (path.isEmpty()) {
-        return;
-    }
-    if (path.startsWith("saves/")) {
-        if (m_shouldDeleteSaves == ShouldDeleteSaves::NotAsked) {
-            m_shouldDeleteSaves = askIfShouldDeleteSaves(parent);
-        }
-        if (m_shouldDeleteSaves == ShouldDeleteSaves::No) {
-            return;
-        }
-    }
-    qDebug() << "Scheduling" << path << "for removal";
-    m_filesToRemove.append(dir.absoluteFilePath(path));
-    if (checkDisabled) {
-        if (path.endsWith(".disabled")) {  // remove it if it was enabled/disabled by user
-            m_filesToRemove.append(dir.absoluteFilePath(path.chopped(9)));
-        } else {
-            m_filesToRemove.append(dir.absoluteFilePath(path + ".disabled"));
-        }
+        downloadFiles(instance.get());
     }
 }

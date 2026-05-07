@@ -2,7 +2,10 @@
 #include <QDir>
 
 #include "Application.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/MinecraftLoadAndCheck.h"
 #include "settings/SettingsObject.h"
+#include "tasks/SequentialTask.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
 #include <QPushButton>
@@ -24,7 +27,7 @@ InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& ol
     return InstanceNameChange::ShouldKeep;
 }
 
-ShouldUpdate askIfShouldUpdate(QWidget* parent, QString originalVersionName)
+ShouldUpdate askIfShouldUpdate(QWidget* parent, const QString& originalVersionName)
 {
     if (APPLICATION->settings()->get("SkipModpackUpdatePrompt").toBool()) {
         return ShouldUpdate::SkipUpdating;
@@ -103,4 +106,78 @@ ShouldDeleteSaves askIfShouldDeleteSaves(QWidget* parent)
                                                 QMessageBox::Question, QMessageBox::No | QMessageBox::Yes);
     auto result = dialog->exec();
     return result == QMessageBox::Yes ? ShouldDeleteSaves::Yes : ShouldDeleteSaves::No;
+}
+
+void InstanceTask::scheduleToDelete(QWidget* parent, const QDir& dir, const QString& path, bool checkDisabled)
+{
+    if (path.isEmpty()) {
+        return;
+    }
+    if (path.startsWith("saves/")) {
+        if (m_shouldDeleteSaves == ShouldDeleteSaves::NotAsked) {
+            m_shouldDeleteSaves = askIfShouldDeleteSaves(parent);
+        }
+        if (m_shouldDeleteSaves == ShouldDeleteSaves::No) {
+            return;
+        }
+    }
+    qDebug() << "Scheduling" << path << "for removal";
+    m_filesToRemove.append(dir.absoluteFilePath(path));
+    if (checkDisabled) {
+        if (path.endsWith(".disabled")) {  // remove it if it was enabled/disabled by user
+            m_filesToRemove.append(dir.absoluteFilePath(path.chopped(9)));
+        } else {
+            m_filesToRemove.append(dir.absoluteFilePath(path + ".disabled"));
+        }
+    }
+}
+
+void InstanceTask::downloadFiles(MinecraftInstance* inst)
+{
+    if (!APPLICATION->settings()->get("DownloadGameFilesDuringInstanceCreation").toBool()) {
+        emitSucceeded();
+        return;
+    }
+    setAbortable(true);
+    setAbortButtonText(tr("Skip"));
+    qDebug() << "Downloading game files";
+
+    auto updateTasks = inst->createUpdateTask();
+    if (updateTasks.isEmpty()) {
+        emitSucceeded();
+        return;
+    }
+    auto task = makeShared<SequentialTask>();
+    task->addTask(makeShared<MinecraftLoadAndCheck>(inst, Net::Mode::Online));
+    for (const auto& t : updateTasks) {
+        task->addTask(t);
+    }
+    connect(task.get(), &Task::finished, this, [this, task] {
+        if (isRunning()) {
+            return;
+        }
+        if (task->wasSuccessful()) {
+            emitSucceeded();
+        } else {
+            emitFailed(tr("Could not download game files: %1").arg(task->failReason()));
+        }
+    });
+    propagateFromOther(task.get());
+    setDetails(tr("Downloading game files"));
+
+    m_gameFilesTask = task;
+    m_gameFilesTask->start();
+}
+
+bool InstanceTask::abort()
+{
+    if (!canAbort()) {
+        return false;
+    }
+
+    if (m_gameFilesTask) {
+        return m_gameFilesTask->abort();
+    }
+
+    return Task::abort();
 }

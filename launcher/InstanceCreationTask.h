@@ -1,6 +1,5 @@
 #pragma once
 
-#include "BaseVersion.h"
 #include "InstanceTask.h"
 #include "minecraft/MinecraftInstance.h"
 
@@ -8,12 +7,12 @@ class InstanceCreationTask : public InstanceTask {
     Q_OBJECT
    public:
     InstanceCreationTask() = default;
-    virtual ~InstanceCreationTask() = default;
+    ~InstanceCreationTask() override = default;
 
     bool abort() override;
 
    protected:
-    void executeTask() final override;
+    void executeTask() final;
 
     /**
      * Tries to update an already existing instance.
@@ -38,16 +37,10 @@ class InstanceCreationTask : public InstanceTask {
 
    protected:
     void setError(const QString& message) { m_error_message = message; };
-    void scheduleToDelete(QWidget* parent, const QDir& dir, const QString& path, bool checkDisabled = false);
 
    protected:
     bool m_abort = false;
 
-    QStringList m_filesToRemove;
-    ShouldDeleteSaves m_shouldDeleteSaves;
-
    private:
     QString m_error_message;
-    std::unique_ptr<MinecraftInstance> m_instance;
-    Task::Ptr m_gameFilesTask;
 };
