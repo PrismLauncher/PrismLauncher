@@ -52,7 +52,7 @@ static void loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)
 
     pack.overrides = manifest["overrides"].toString("overrides");
 
-    pack.is_loaded = true;
+    pack.isLoaded = true;
 }
 
 void Flame::loadManifest(Flame::Manifest& m, const QString& filepath)
