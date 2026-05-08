@@ -7,6 +7,7 @@
 #include "net/NetJob.h"
 
 #include <optional>
+#include <memory>
 
 namespace LegacyFTB {
 
@@ -41,6 +42,8 @@ class PackInstallTask : public InstanceTask {
     QFutureWatcher<std::optional<QStringList>> m_extractFutureWatcher;
     NetJob::Ptr netJobContainer;
     QString archivePath;
+
+    std::unique_ptr<MinecraftInstance> m_instance;
 
     Modpack m_pack;
     QString m_version;

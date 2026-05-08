@@ -238,8 +238,8 @@ void PackInstallTask::createInstance()
     auto instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_unique<INISettingsObject>(instanceConfigPath);
 
-    MinecraftInstance instance(m_globalSettings, std::move(instanceSettings), m_stagingPath);
-    auto components = instance.getPackProfile();
+    m_instance = std::make_unique<MinecraftInstance>(m_globalSettings, std::move(instanceSettings), m_stagingPath);
+    auto components = m_instance->getPackProfile();
     components->buildingFromScratch();
 
     for (auto target : m_version.targets) {
@@ -278,11 +278,11 @@ void PackInstallTask::createInstance()
 
     components->saveNow();
 
-    instance.setName(name());
-    instance.setIconKey(m_instIcon);
-    instance.setManagedPack("ftb", QString::number(m_pack.id), m_pack.name, QString::number(m_version.id), m_version.name);
+    m_instance->setName(name());
+    m_instance->setIconKey(m_instIcon);
+    m_instance->setManagedPack("ftb", QString::number(m_pack.id), m_pack.name, QString::number(m_version.id), m_version.name);
 
-    instance.saveNow();
+    m_instance->saveNow();
 
     onCreateInstanceSucceeded();
 }
@@ -333,7 +333,7 @@ void PackInstallTask::onModDownloadSucceeded()
     if (!m_blockedMods.isEmpty()) {
         copyBlockedMods();
     }
-    emitSucceeded();
+    downloadFiles(m_instance.get());
 }
 
 void PackInstallTask::onManifestDownloadFailed(QString reason)
