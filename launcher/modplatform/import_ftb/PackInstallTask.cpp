@@ -20,11 +20,9 @@
 
 #include <QtConcurrent>
 
-#include "BaseInstance.h"
 #include "FileSystem.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "modplatform/ResourceAPI.h"
 #include "modplatform/import_ftb/PackHelpers.h"
 #include "settings/INISettingsObject.h"
 
@@ -55,7 +53,7 @@ void PackInstallTask::copySettings()
         std::make_unique<MinecraftInstance>(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
 
     {
-        SettingsObject::Lock lock(m_instance->settings());
+        SettingsObject::Lock const lock(m_instance->settings());
         m_instance->settings()->set("InstanceType", "OneSix");
         m_instance->settings()->set("totalTimePlayed", m_pack.totalPlayTime / 1000);
 

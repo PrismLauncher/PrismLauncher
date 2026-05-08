@@ -1760,7 +1760,7 @@ void MainWindow::updateStatusCenter()
 {
     m_statusCenter->setVisible(APPLICATION->settings()->get("ShowGlobalGameTime").toBool());
 
-    int timePlayed = APPLICATION->instances()->getTotalPlayTime();
+    int64_t timePlayed = APPLICATION->instances()->getTotalPlayTime();
     if (timePlayed > 0) {
         m_statusCenter->setText(
             tr("Total playtime: %1")

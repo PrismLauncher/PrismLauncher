@@ -139,7 +139,7 @@ class InstanceList : public QAbstractListModel {
      */
     bool commitStagedInstance(const QString& keyPath, const InstanceTask& instanceTask, QString groupName);
 
-    int getTotalPlayTime();
+    int64_t getTotalPlayTime();
 
     Qt::DropActions supportedDragActions() const override;
 
@@ -163,7 +163,7 @@ class InstanceList : public QAbstractListModel {
     void groupsChanged(QSet<QString> groups);
 
    public slots:
-    void on_InstFolderChanged(const Setting& setting, QVariant value);
+    void on_InstFolderChanged(const Setting& setting, const QVariant& value);
     void on_GroupStateChanged(const QString& group, bool collapsed);
 
    private slots:
@@ -187,7 +187,7 @@ class InstanceList : public QAbstractListModel {
 
    private:
     int m_watchLevel = 0;
-    int m_totalPlayTime = 0;
+    int64_t m_totalPlayTime = 0;
     bool m_dirty = false;
     std::vector<std::unique_ptr<BaseInstance>> m_instances;
     // id -> refs

@@ -86,7 +86,7 @@ class BaseInstance : public QObject {
     Q_OBJECT
    protected:
     /// no-touchy!
-    BaseInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, const QString& rootDir);
+    BaseInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, QString rootDir);
 
    public: /* types */
     enum class Status : std::uint8_t {

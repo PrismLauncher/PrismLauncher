@@ -35,16 +35,17 @@ class NoBigComboBoxStyle : public QProxyStyle {
     Q_OBJECT
 
    public:
-    // clang-format off
-    int styleHint(QStyle::StyleHint hint, const QStyleOption* option = nullptr, const QWidget* widget = nullptr, QStyleHintReturn* returnData = nullptr) const override
+    int styleHint(QStyle::StyleHint hint,
+                  const QStyleOption* option = nullptr,
+                  const QWidget* widget = nullptr,
+                  QStyleHintReturn* returnData = nullptr) const override
     {
         if (hint == QStyle::SH_ComboBox_Popup) {
             return 0;
-}
+        }
 
         return QProxyStyle::styleHint(hint, option, widget, returnData);
     }
-    // clang-format on
 
     /**
      * Something about QProxyStyle and QStyle objects means they can't be free'd just
@@ -59,7 +60,7 @@ class NoBigComboBoxStyle : public QProxyStyle {
         static QHash<QStyle*, NoBigComboBoxStyle*> s_singleton_instances = {};
         static std::mutex s_singleton_instances_mutex;
 
-        std::lock_guard<std::mutex> lock(s_singleton_instances_mutex);
+        const std::scoped_lock lock(s_singleton_instances_mutex);
         auto instIter = s_singleton_instances.constFind(style);
         NoBigComboBoxStyle* inst = nullptr;
         if (instIter == s_singleton_instances.constEnd() || *instIter == nullptr) {
@@ -205,7 +206,7 @@ bool ManagedPackPage::runUpdateTask(InstanceTask* task)
 {
     Q_ASSERT(task);
 
-    unique_qobject_ptr<Task> wrappedTask(APPLICATION->instances()->wrapInstanceTask(task));
+    const unique_qobject_ptr<Task> wrappedTask(APPLICATION->instances()->wrapInstanceTask(task));
 
     connect(wrappedTask.get(), &Task::failed,
             [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });

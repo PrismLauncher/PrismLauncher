@@ -103,7 +103,7 @@ bool InstanceList::canDropMimeData(const QMimeData* data,
                                    [[maybe_unused]] int column,
                                    [[maybe_unused]] const QModelIndex& parent) const
 {
-    return (data != nullptr) && data->hasFormat("application/x-instanceid");
+    return data != nullptr && data->hasFormat("application/x-instanceid");
 }
 
 bool InstanceList::dropMimeData(const QMimeData* data,
@@ -112,7 +112,7 @@ bool InstanceList::dropMimeData(const QMimeData* data,
                                 [[maybe_unused]] int column,
                                 [[maybe_unused]] const QModelIndex& parent)
 {
-    return (data != nullptr) && data->hasFormat("application/x-instanceid");
+    return data != nullptr && data->hasFormat("application/x-instanceid");
 }
 
 QStringList InstanceList::mimeTypes() const
@@ -573,7 +573,7 @@ InstanceList::InstListError InstanceList::loadList()
             removeNow();
         }
     }
-    if (newList.size() != 0U) {
+    if (!newList.empty()) {
         add(newList);
     }
     m_dirty = false;
@@ -698,7 +698,7 @@ std::unique_ptr<BaseInstance> InstanceList::loadInstance(const InstanceId& id)
 
     instanceSettings->registerSetting("InstanceType", "");
 
-    QString instType = instanceSettings->get("InstanceType").toString();
+    const QString instType = instanceSettings->get("InstanceType").toString();
 
     // NOTE: Some launcher versions didn't save the InstanceType properly. We will just bank on the probability that this is probably a
     // OneSix instance
@@ -892,7 +892,7 @@ void InstanceList::instanceDirContentsChanged(const QString& path)
     emit instancesChanged();
 }
 
-void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting, [[maybe_unused]] const QVariant value)
+void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting, [[maybe_unused]] const QVariant& value)
 {
     QString instDir = m_globalSettings->get("InstanceDir").toString();
     QStringList additionalDirs = m_globalSettings->get("AdditionalInstanceDirs").toStringList();
@@ -995,7 +995,7 @@ class InstanceStaging : public Task {
    private slots:
     void childSucceeded()
     {
-        unsigned sleepTime = m_backoff();
+        const unsigned sleepTime = m_backoff();
         if (m_parent->commitStagedInstance(m_stagingPath, *m_child, m_child->group())) {
             m_backoffTimer.stop();
             emitSucceeded();
@@ -1038,7 +1038,7 @@ class InstanceStaging : public Task {
 };
 }  // namespace
 
-Task* InstanceList::wrapInstanceTask(InstanceTask * task)
+Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 {
     return new InstanceStaging(this, task, m_globalSettings);
 }
@@ -1116,7 +1116,7 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
     return true;
 }
 
-int InstanceList::getTotalPlayTime()
+int64_t InstanceList::getTotalPlayTime()
 {
     updateTotalPlayTime();
     return m_totalPlayTime;

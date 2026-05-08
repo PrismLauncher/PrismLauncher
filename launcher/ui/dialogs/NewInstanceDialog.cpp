@@ -219,7 +219,7 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task
         m_importIcon = false;
     }
 
-    auto allowOK = (task != nullptr) && !instName().isEmpty();
+    auto allowOK = task != nullptr && !instName().isEmpty();
     m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
 }
 
@@ -243,7 +243,7 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, QString version, I
         m_importIcon = false;
     }
 
-    auto allowOK = (task != nullptr) && !instName().isEmpty();
+    auto allowOK = task != nullptr && !instName().isEmpty();
     m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
 }
 
@@ -293,11 +293,11 @@ void NewInstanceDialog::updateDialogState()
 QString NewInstanceDialog::instName() const
 {
     auto result = ui->instNameTextBox->text().trimmed();
-    if (result.size() != 0) {
+    if (!result.isEmpty()) {
         return result;
     }
     result = m_suggestedName.trimmed();
-    if (result.size() != 0) {
+    if (!result.isEmpty()) {
         return result;
     }
     return QString();

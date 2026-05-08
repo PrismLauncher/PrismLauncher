@@ -262,7 +262,7 @@ void ModrinthCreationTask::createInstance()
             ModDetails d;
             d.mod_id = filePath;
             mod->setDetails(d);
-            m_resources[file.hash.toHex()] = mod;
+            m_resources.insert(file.hash.toHex(), mod);
         }
         if (file.downloads.empty()) {
             emitFailed(tr("The file '%1' is missing a download link. This is invalid in the pack format.").arg(fileName));
@@ -270,12 +270,10 @@ void ModrinthCreationTask::createInstance()
         }
         qDebug() << "Will try to download" << file.downloads.front() << "to" << filePath;
 
-        Net::ModrinthDownloadMeta meta{
-            .reason = m_oldInstance.has_value() ? "update" : "modpack",
-            .gameVersion = m_minecraftVersion,
-            .loader = loader,
-            .dependentOn = !m_managed_id.isEmpty() ? m_managed_version_id : ""
-        };
+        Net::ModrinthDownloadMeta meta{ .reason = m_oldInstance.has_value() ? "update" : "modpack",
+                                        .gameVersion = m_minecraftVersion,
+                                        .loader = loader,
+                                        .dependentOn = !m_managedId.isEmpty() ? m_managedVersionId : "" };
 
         QUrl downloadUrl = file.downloads.dequeue();
         auto dl = Net::ApiDownload::makeFile(downloadUrl, filePath, Net::Download::Option::NoOptions, meta);
@@ -325,9 +323,9 @@ bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<F
 
             if (setInternalData) {
                 if (m_managedVersionId.isEmpty()) {
-                    m_managedVersionId = obj["versionId"].toString();
+                    m_managedVersionId = obj.value("versionId").toString();
                 }
-                m_managedName = obj["name"].toString();
+                m_managedName = obj.value("name").toString();
             }
 
             auto jsonFiles = Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json");
@@ -437,7 +435,7 @@ bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<F
 
 void ModrinthCreationTask::ensureMetaLoop()
 {
-    QDir folder = FS::PathCombine(m_stagingPath, "minecraft", "jarmods");
+    const QDir folder = FS::PathCombine(m_stagingPath, "minecraft", "jarmods");
     auto ensureMetadataTask = makeShared<EnsureMetadataTask>(m_resources, folder, ModPlatform::ResourceProvider::MODRINTH);
     connect(ensureMetadataTask.get(), &Task::succeeded, this, &ModrinthCreationTask::finishInstall);
     connect(ensureMetadataTask.get(), &Task::failed, this, &ModrinthCreationTask::emitFailed);
@@ -475,7 +473,7 @@ void ModrinthCreationTask::finishInstall()
     // Update information of the already installed instance, if any.
     if (m_oldInstance) {
         setAbortable(false);
-        auto* inst = m_oldInstance.value();
+        auto* inst = *m_oldInstance;
 
         // Only change the name if it didn't use a custom name, so that the previous custom name
         // is preserved, but if we're using the original one, we update the version string.
@@ -486,7 +484,7 @@ void ModrinthCreationTask::finishInstall()
             }
         }
 
-        setManagedPack(m_oldInstance.value());
+        setManagedPack(*m_oldInstance);
     }
 
     if (shouldOverride()) {

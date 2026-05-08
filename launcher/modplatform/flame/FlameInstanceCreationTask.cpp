@@ -110,7 +110,7 @@ void FlameCreationTask::executeTask()
         }
     }
 
-    QString indexPath(FS::PathCombine(m_stagingPath, "manifest.json"));
+    const QString indexPath(FS::PathCombine(m_stagingPath, "manifest.json"));
 
     try {
         Flame::loadManifest(m_pack, indexPath);
@@ -135,12 +135,12 @@ void FlameCreationTask::executeTask()
         }
     }
 
-    QDir oldInstDir(inst->instanceRoot());
+    const QDir oldInstDir(inst->instanceRoot());
 
-    QString oldIndexFolder(FS::PathCombine(oldInstDir.absolutePath(), "flame"));
-    QString oldIndexPath(FS::PathCombine(oldIndexFolder, "manifest.json"));
+    const QString oldIndexFolder(FS::PathCombine(oldInstDir.absolutePath(), "flame"));
+    const QString oldIndexPath(FS::PathCombine(oldIndexFolder, "manifest.json"));
 
-    QFileInfo oldIndexFile(oldIndexPath);
+    const QFileInfo oldIndexFile(oldIndexPath);
     auto createInst = [this, inst] {
         setOverride(true, inst->id());
         qDebug() << "Will override instance!";
@@ -194,7 +194,7 @@ void FlameCreationTask::executeTask()
             filesIterator++;
         }
 
-        QDir oldMinecraftDir(inst->gameRoot());
+        const QDir oldMinecraftDir(inst->gameRoot());
 
         // We will remove all the previous overrides, to prevent duplicate files!
         // TODO: Currently 'overrides' will always override the stuff on update. How do we preserve unchanged overrides?
@@ -252,7 +252,7 @@ void FlameCreationTask::executeTask()
                             continue;
                         }
 
-                        QString relativePath(FS::PathCombine(file.targetFolder, file.version.fileName));
+                        const QString relativePath(FS::PathCombine(file.targetFolder, file.version.fileName));
                         scheduleToDelete(m_parent, oldMinecraftDir, relativePath, true);
                     }
 
@@ -345,16 +345,16 @@ void FlameCreationTask::setManagedPack(BaseInstance* instance)
 
 void FlameCreationTask::createInstance()
 {
-    QString parentFolder(FS::PathCombine(m_stagingPath, "flame"));
+    const QString parentFolder(FS::PathCombine(m_stagingPath, "flame"));
 
     try {
-        QString indexPath(FS::PathCombine(m_stagingPath, "manifest.json"));
+        const QString indexPath(FS::PathCombine(m_stagingPath, "manifest.json"));
         if (!m_pack.isLoaded) {
             Flame::loadManifest(m_pack, indexPath);
         }
 
         // Keep index file in case we need it some other time (like when changing versions)
-        QString newIndexPlace(FS::PathCombine(parentFolder, "manifest.json"));
+        const QString newIndexPlace(FS::PathCombine(parentFolder, "manifest.json"));
         FS::ensureFilePathExists(newIndexPlace);
         FS::move(indexPath, newIndexPlace);
 
@@ -621,8 +621,8 @@ void FlameCreationTask::copyBlockedMods(const QList<BlockedMod>& blockedMods)
     setStatus(tr("Copying Blocked Mods..."));
     setAbortable(false);
     int i = 0;
-    int total = blockedMods.length();
-    setProgress(i, total);
+    const auto total = blockedMods.length();
+    setProgress(i, static_cast<int>(total));
     for (const auto& mod : blockedMods) {
         if (!mod.matched) {
             qDebug() << mod.name << "was not matched to a local file, skipping copy";
@@ -745,7 +745,7 @@ void FlameCreationTask::finishInstall()
     // Update information of the already installed instance, if any.
     if (m_oldInstance) {
         setAbortable(false);
-        setManagedPack(m_oldInstance.value());
+        setManagedPack(m_oldInstance.value_or(nullptr));
     }
 
     if (shouldOverride()) {

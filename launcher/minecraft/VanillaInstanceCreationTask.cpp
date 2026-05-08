@@ -18,7 +18,7 @@ void VanillaCreationTask::executeTask()
     m_instance = std::make_unique<MinecraftInstance>(
         m_globalSettings, std::make_unique<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg")), m_stagingPath);
     {
-        SettingsObject::Lock lock(m_instance->settings());
+        const SettingsObject::Lock lock(m_instance->settings());
 
         auto* components = m_instance->getPackProfile();
         components->buildingFromScratch();

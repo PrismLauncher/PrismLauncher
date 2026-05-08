@@ -69,8 +69,8 @@ bool shouldStopOnConsoleOverflow(SettingsObject* settings)
     return settings->get("ConsoleOverflowStop").toBool();
 }
 
-BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, const QString& rootDir)
-    : m_rootDir(rootDir), m_settings(std::move(settings)), m_global_settings(globalSettings)
+BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, QString rootDir)
+    : m_rootDir(std::move(rootDir)), m_settings(std::move(settings)), m_global_settings(globalSettings)
 {
     m_settings->registerSetting("name", "Unnamed Instance");
     m_settings->registerSetting("iconKey", "default");
@@ -444,7 +444,7 @@ QList<ShortcutData> BaseInstance::shortcuts() const
             continue;
         }
         int value = dict["target"].toInt(-1);
-        if (!dict["name"].isString() || !dict["filePath"].isString() || value < 0 || value >= 3) {
+        if (!dict.value("name").isString() || !dict.value("filePath").isString() || value < 0 || value >= 3) {
             continue;
         }
 

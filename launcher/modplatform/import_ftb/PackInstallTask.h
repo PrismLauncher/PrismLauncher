@@ -21,9 +21,11 @@
 #include <QFuture>
 #include <QFutureWatcher>
 
+#include <memory>
+#include <utility>
 #include "InstanceTask.h"
 #include "PackHelpers.h"
-#include <memory>
+#include "minecraft/MinecraftInstance.h"
 
 namespace FTBImportAPP {
 
@@ -31,11 +33,11 @@ class PackInstallTask : public InstanceTask {
     Q_OBJECT
 
    public:
-    explicit PackInstallTask(const Modpack& pack) : m_pack(pack) {}
-    virtual ~PackInstallTask() = default;
+    explicit PackInstallTask(Modpack pack) : m_pack(std::move(pack)) {}
+    ~PackInstallTask() override = default;
 
    protected:
-    virtual void executeTask() override;
+    void executeTask() override;
 
    private slots:
     void copySettings();
