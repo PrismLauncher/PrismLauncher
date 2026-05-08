@@ -42,6 +42,7 @@
 #include <QPair>
 #include <QSet>
 #include <QStack>
+#include <cstdint>
 
 #include "BaseInstance.h"
 
@@ -52,9 +53,9 @@ using InstanceId = QString;
 using GroupId = QString;
 using InstanceLocator = std::pair<BaseInstance*, int>;
 
-enum class InstCreateError { NoCreateError = 0, NoSuchVersion, UnknownCreateError, InstExists, CantCreateDir };
+enum class InstCreateError : std::uint8_t { NoCreateError = 0, NoSuchVersion, UnknownCreateError, InstExists, CantCreateDir };
 
-enum class GroupsState { NotLoaded, Steady, Dirty };
+enum class GroupsState : std::uint8_t { NotLoaded, Steady, Dirty };
 
 struct TrashShortcutItem {
     ShortcutData data;
@@ -73,8 +74,8 @@ class InstanceList : public QAbstractListModel {
     Q_OBJECT
 
    public:
-    explicit InstanceList(SettingsObject* settings, const QStringList& instDirs, QObject* parent = 0);
-    virtual ~InstanceList();
+    explicit InstanceList(SettingsObject* settings, const QStringList& instDirs, QObject* parent = nullptr);
+    ~InstanceList() override = default;
 
    public:
     QModelIndex index(int row, int column = 0, const QModelIndex& parent = QModelIndex()) const override;
@@ -94,7 +95,7 @@ class InstanceList : public QAbstractListModel {
      * NoError Indicates that no error occurred.
      * UnknownError indicates that an unspecified error occurred.
      */
-    enum InstListError { NoError = 0, UnknownError };
+    enum InstListError : std::uint8_t { NoError = 0, UnknownError };
 
     BaseInstance* at(int i) const { return m_instances.at(i).get(); }
 
@@ -104,9 +105,9 @@ class InstanceList : public QAbstractListModel {
     void saveNow();
 
     /* O(n) */
-    BaseInstance* getInstanceById(QString id) const;
+    BaseInstance* getInstanceById(const QString& id) const;
     /* O(n) */
-    BaseInstance* getInstanceByManagedName(const QString& managed_name) const;
+    BaseInstance* getInstanceByManagedName(const QString& managedName) const;
     QModelIndex getInstanceIndexById(const QString& id) const;
     QStringList getGroups();
     bool isGroupCollapsed(const QString& groupName);
@@ -186,7 +187,7 @@ class InstanceList : public QAbstractListModel {
 
    private:
     int m_watchLevel = 0;
-    int totalPlayTime = 0;
+    int m_totalPlayTime = 0;
     bool m_dirty = false;
     std::vector<std::unique_ptr<BaseInstance>> m_instances;
     // id -> refs
@@ -200,7 +201,7 @@ class InstanceList : public QAbstractListModel {
     // FIXME: this is so inefficient that looking at it is almost painful.
     QSet<QString> m_collapsedGroups;
     QMap<InstanceId, GroupId> m_instanceGroupIndex;
-    QSet<InstanceId> instanceSet;
+    QSet<InstanceId> m_instanceSet;
     bool m_groupsLoaded = false;
     bool m_instancesProbed = false;
 

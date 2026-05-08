@@ -42,8 +42,6 @@ set(CORE_SOURCES
     EnumWrapper.h
 
     # Basic instance manipulation tasks (derived from InstanceTask)
-    InstanceCreationTask.h
-    InstanceCreationTask.cpp
     InstanceCopyPrefs.h
     InstanceCopyPrefs.cpp
     InstanceCopyTask.h
