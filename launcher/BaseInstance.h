@@ -169,7 +169,6 @@ class BaseInstance : public QObject {
     QString getManagedPackVersionID() const;
     QString getManagedPackVersionName() const;
     void setManagedPack(const QString& type, const QString& id, const QString& name, const QString& versionId, const QString& version);
-    void copyManagedPack(BaseInstance& other);
 
     virtual QStringList extraArguments();
 

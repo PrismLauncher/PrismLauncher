@@ -10,9 +10,11 @@
 #include <QVector>
 
 #include "BaseInstance.h"
-#include "InstanceCreationTask.h"
+#include "InstanceTask.h"
 
-class ModrinthCreationTask final : public InstanceCreationTask {
+class Resource;
+
+class ModrinthCreationTask final : public InstanceTask {
     Q_OBJECT
     struct File {
         QString path;
@@ -30,32 +32,42 @@ class ModrinthCreationTask final : public InstanceCreationTask {
                          QString id,
                          QString versionId = {},
                          QString originalInstanceId = {})
-        : m_parent(parent), m_managed_id(std::move(id)), m_managed_version_id(std::move(versionId))
+        : m_parent(parent), m_managedId(std::move(id)), m_managedVersionId(std::move(versionId))
     {
         setStagingPath(stagingPath);
         setParentSettings(globalSettings);
 
         m_originalInstanceId = std::move(originalInstanceId);
     }
+    ~ModrinthCreationTask() override;
 
     bool abort() override;
 
-    bool updateInstance() override;
-    std::unique_ptr<MinecraftInstance> createInstance() override;
+    void createInstance();
+    void executeTask() override;
+
+   private slots:
+    void finishInstall();
 
    private:
     bool parseManifest(const QString&, std::vector<File>&, bool setInternalData = true, bool showOptionalDialog = true);
 
+    void ensureMetaLoop();
+    void setManagedPack(BaseInstance* instance);
+
    private:
     QWidget* m_parent = nullptr;
 
-    QString m_minecraft_version, m_fabric_version, m_quilt_version, m_forge_version, m_neoForge_version;
-    QString m_managed_id, m_managed_version_id, m_managed_name;
+    QString m_minecraftVersion, m_fabricVersion, m_quiltVersion, m_forgeVersion, m_neoForgeVersion;
+    QString m_managedId, m_managedVersionId, m_managedName;
 
     std::vector<File> m_files;
     Task::Ptr m_task;
 
-    std::optional<BaseInstance*> m_instance;
+    std::optional<BaseInstance*> m_oldInstance;
+    std::unique_ptr<MinecraftInstance> m_newInstance{};
 
-    QString m_root_path = "minecraft";
+    QString m_rootPath = "minecraft";
+
+    QHash<QString, Resource*> m_resources;
 };
