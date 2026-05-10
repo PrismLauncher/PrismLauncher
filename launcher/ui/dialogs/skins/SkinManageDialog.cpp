@@ -51,7 +51,7 @@
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/instanceview/InstanceDelegate.h"
 
-SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
+SkinManageDialog::SkinManageDialog(QWidget* parent, const MinecraftAccountPtr& acct)
     : QDialog(parent), m_acct(acct), m_ui(new Ui::SkinManageDialog), m_list(this, APPLICATION->settings()->get("SkinsDir").toString(), acct)
 {
     m_ui->setupUi(this);
@@ -180,6 +180,7 @@ void SkinManageDialog::on_fileBtn_clicked()
         return;
     }
 }
+
 namespace {
 QPixmap previewCape(const QImage& capeImage, bool elytra = false)
 {

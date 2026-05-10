@@ -11,26 +11,14 @@
 #include "settings/SettingsObject.h"
 #include "translations/TranslationsModel.h"
 
-LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent) : QWidget(parent)
+LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent)
+    : QWidget(parent)
+    , m_verticalLayout(new QVBoxLayout(this))
+    , m_languageView(new QTreeView(this))
+    , m_helpUsLabel(new QLabel(this))
+    , m_formatCheckbox(new QCheckBox(this))
 {
-    verticalLayout = new QVBoxLayout(this);
-    verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
-    languageView = new QTreeView(this);
-    languageView->setObjectName(QStringLiteral("languageView"));
-    languageView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    languageView->setAlternatingRowColors(true);
-    languageView->setRootIsDecorated(false);
-    languageView->setItemsExpandable(false);
-    languageView->setWordWrap(true);
-    languageView->header()->setCascadingSectionResizes(true);
-    languageView->header()->setStretchLastSection(false);
-    verticalLayout->addWidget(languageView);
-    helpUsLabel = new QLabel(this);
-    helpUsLabel->setObjectName(QStringLiteral("helpUsLabel"));
-    helpUsLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse);
-    helpUsLabel->setOpenExternalLinks(true);
-    helpUsLabel->setWordWrap(true);
-    verticalLayout->addWidget(helpUsLabel);
+    m_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
 
     formatCheckbox = new QCheckBox(this);
     formatCheckbox->setObjectName(QStringLiteral("formatCheckbox"));
@@ -39,31 +27,43 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent) : QWidget(pare
             [this] { APPLICATION->translations()->setUseSystemLocale(formatCheckbox->isChecked()); });
     verticalLayout->addWidget(formatCheckbox);
 
-    auto translations = APPLICATION->translations();
-    auto index = translations->selectedIndex();
-    languageView->setModel(translations);
-    languageView->setCurrentIndex(index);
-    languageView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    languageView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-    connect(languageView->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &LanguageSelectionWidget::languageRowChanged);
-    verticalLayout->setContentsMargins(0, 0, 0, 0);
+    m_helpUsLabel->setObjectName(QStringLiteral("helpUsLabel"));
+    m_helpUsLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse);
+    m_helpUsLabel->setOpenExternalLinks(true);
+    m_helpUsLabel->setWordWrap(true);
+    m_verticalLayout->addWidget(m_helpUsLabel);
 
-    auto language_setting = APPLICATION->settings()->getSetting("Language");
-    connect(language_setting.get(), &Setting::SettingChanged, this, &LanguageSelectionWidget::languageSettingChanged);
+    m_formatCheckbox->setObjectName(QStringLiteral("formatCheckbox"));
+    m_formatCheckbox->setCheckState(APPLICATION->settings()->get("UseSystemLocale").toBool() ? Qt::Checked : Qt::Unchecked);
+    connect(m_formatCheckbox, &QCheckBox::checkStateChanged,
+            [this] { APPLICATION->translations()->setUseSystemLocale(m_formatCheckbox->isChecked()); });
+    m_verticalLayout->addWidget(m_formatCheckbox);
+
+    auto* translations = APPLICATION->translations();
+    auto index = translations->selectedIndex();
+    m_languageView->setModel(translations);
+    m_languageView->setCurrentIndex(index);
+    m_languageView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    m_languageView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    connect(m_languageView->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &LanguageSelectionWidget::languageRowChanged);
+    m_verticalLayout->setContentsMargins(0, 0, 0, 0);
+
+    auto languageSetting = APPLICATION->settings()->getSetting("Language");
+    connect(languageSetting.get(), &Setting::SettingChanged, this, &LanguageSelectionWidget::languageSettingChanged);
 }
 
 QString LanguageSelectionWidget::getSelectedLanguageKey() const
 {
-    auto translations = APPLICATION->translations();
-    return translations->data(languageView->currentIndex(), Qt::UserRole).toString();
+    auto* translations = APPLICATION->translations();
+    return translations->data(m_languageView->currentIndex(), Qt::UserRole).toString();
 }
 
 void LanguageSelectionWidget::retranslate()
 {
     QString text = tr("Don't see your language or the quality is poor?<br/><a href=\"%1\">Help us with translations!</a>")
                        .arg(BuildConfig.TRANSLATIONS_URL);
-    helpUsLabel->setText(text);
-    formatCheckbox->setText(tr("Use system regional standards"));
+    m_helpUsLabel->setText(text);
+    m_formatCheckbox->setText(tr("Use system regional standards"));
 }
 
 void LanguageSelectionWidget::languageRowChanged(const QModelIndex& current, const QModelIndex& previous)
@@ -71,15 +71,15 @@ void LanguageSelectionWidget::languageRowChanged(const QModelIndex& current, con
     if (current == previous) {
         return;
     }
-    auto translations = APPLICATION->translations();
+    auto* translations = APPLICATION->translations();
     QString key = translations->data(current, Qt::UserRole).toString();
     translations->selectLanguage(key);
     translations->updateLanguage(key);
 }
 
-void LanguageSelectionWidget::languageSettingChanged(const Setting&, const QVariant&)
+void LanguageSelectionWidget::languageSettingChanged(const Setting& /*unused*/, const QVariant& /*unused*/)
 {
-    auto translations = APPLICATION->translations();
+    auto* translations = APPLICATION->translations();
     auto index = translations->selectedIndex();
-    languageView->setCurrentIndex(index);
+    m_languageView->setCurrentIndex(index);
 }
