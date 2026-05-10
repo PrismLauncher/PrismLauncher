@@ -320,11 +320,11 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, Ena
     return succeeded;
 }
 
-static QMutex sUpdateTaskMutex;
 bool ResourceFolderModel::update()
 {
+    static QMutex s_sUpdateTaskMutex;
     // We hold a lock here to prevent race conditions on the m_current_update_task reset.
-    QMutexLocker lock(&sUpdateTaskMutex);
+    const QMutexLocker lock(&s_sUpdateTaskMutex);
 
     // Already updating, so we schedule a future update and return.
     if (m_currentUpdateTask) {
@@ -698,11 +698,11 @@ void ResourceFolderModel::loadColumns(QTreeView* tree)
     auto stateSetting = m_instance->settings()->getOrRegisterSetting(stateSettingName, "");
     tree->header()->restoreState(QByteArray::fromBase64(stateSetting->get().toString().toUtf8()));
 
-    auto setVisible = [columnNames = m_column_names, columnsHideable = m_columnsHideable, tree](const QVariant& value) {
+    auto setVisible = [columnNames = m_columnNames, columnsHideable = m_columnsHideable, tree](const QVariant& value) {
         auto visibility = Json::toMap(value.toString());
         for (auto i = 0; i < columnNames.size(); ++i) {
-            if (columnsHideable[i]) {
-                const auto& name = columnNames[i];
+            if (columnsHideable.at(i)) {
+                const auto& name = columnNames.at(i);
                 tree->setColumnHidden(i, !visibility.value(name, false).toBool());
             }
         }
@@ -785,7 +785,7 @@ QSortFilterProxyModel* ResourceFolderModel::createFilterProxyModel(QObject* pare
     return new ProxyModel(parent);
 }
 
-SortType ResourceFolderModel::columnToSortKey(size_t column) const
+SortType ResourceFolderModel::columnToSortKey(qsizetype column) const
 {
     Q_ASSERT(m_columnSortKeys.size() == columnCount());
     return m_columnSortKeys.at(column);

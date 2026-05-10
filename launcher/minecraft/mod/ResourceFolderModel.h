@@ -170,7 +170,7 @@ class ResourceFolderModel : public QAbstractListModel {
      */
     QSortFilterProxyModel* createFilterProxyModel(QObject* parent = nullptr);
 
-    SortType columnToSortKey(size_t column) const;
+    SortType columnToSortKey(qsizetype column) const;
     QList<QHeaderView::ResizeMode> columnResizeModes() const { return m_columnResizeModes; }
 
     class ProxyModel : public QSortFilterProxyModel {

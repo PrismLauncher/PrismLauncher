@@ -379,7 +379,7 @@ bool BlockedModsDialog::checkValidPath(QString path)
 
 bool BlockedModsDialog::allModsMatched()
 {
-    return std::all_of(m_mods.begin(), m_mods.end(), [](const auto& mod) { return mod.matched; });
+    return std::ranges::all_of(m_mods, [](const auto& mod) { return mod.matched; });
 }
 
 /// @brief ensure matched file paths still exist

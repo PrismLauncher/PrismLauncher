@@ -108,7 +108,7 @@ bool WorldList::update()
     return true;
 }
 
-void WorldList::directoryChanged(const QString&)
+void WorldList::directoryChanged(const QString& /*path*/)
 {
     update();
 }
