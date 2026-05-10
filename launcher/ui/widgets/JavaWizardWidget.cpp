@@ -45,11 +45,11 @@ JavaWizardWidget::JavaWizardWidget(QWidget* parent)
     connect(m_permGenSpinBox, &QSpinBox::valueChanged, this, &JavaWizardWidget::onSpinBoxValueChanged);
     connect(m_memoryTimer, &QTimer::timeout, this, &JavaWizardWidget::memoryValueChanged);
     connect(m_versionWidget, &VersionSelectWidget::selectedVersionChanged, this, &JavaWizardWidget::javaVersionSelected);
-    connect(m_javaBrowseBtn, &QPushButton::clicked, this, &JavaWizardWidget::on_javaBrowseBtn_clicked);
+    connect(m_javaBrowseBtn, &QPushButton::clicked, this, &JavaWizardWidget::onJavaBrowseBtnClicked);
     connect(m_javaPathTextBox, &QLineEdit::textEdited, this, &JavaWizardWidget::javaPathEdited);
-    connect(m_javaStatusBtn, &QToolButton::clicked, this, &JavaWizardWidget::on_javaStatusBtn_clicked);
+    connect(m_javaStatusBtn, &QToolButton::clicked, this, &JavaWizardWidget::onJavaStatusBtnClicked);
     if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
-        connect(m_javaDownloadBtn, &QPushButton::clicked, this, &JavaWizardWidget::javaDownloadBtn_clicked);
+        connect(m_javaDownloadBtn, &QPushButton::clicked, this, &JavaWizardWidget::javaDownloadBtnClicked);
     }
 }
 
@@ -338,7 +338,7 @@ void JavaWizardWidget::javaVersionSelected(const BaseVersion::Ptr& version)
     checkJavaPath(java->path);
 }
 
-void JavaWizardWidget::on_javaBrowseBtn_clicked()
+void JavaWizardWidget::onJavaBrowseBtnClicked()
 {
     auto filter = QString("Java (%1)").arg(JavaUtils::javaExecutable);
     auto rawPath = QFileDialog::getOpenFileName(this, tr("Find Java executable"), QString(), filter);
@@ -350,13 +350,13 @@ void JavaWizardWidget::on_javaBrowseBtn_clicked()
     checkJavaPath(cookedPath);
 }
 
-void JavaWizardWidget::javaDownloadBtn_clicked()
+void JavaWizardWidget::javaDownloadBtnClicked()
 {
     auto* jdialog = new Java::InstallDialog({}, nullptr, this);
     jdialog->exec();
 }
 
-void JavaWizardWidget::on_javaStatusBtn_clicked()
+void JavaWizardWidget::onJavaStatusBtnClicked()
 {
     QString text;
     bool failed = false;
