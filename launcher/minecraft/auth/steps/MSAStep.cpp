@@ -36,19 +36,19 @@
 #include "MSAStep.h"
 
 #include <QAbstractOAuth2>
-#include <QNetworkRequest>
 #include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QOAuthHttpServerReplyHandler>
 #include <QOAuthOobReplyHandler>
 
 #include "Application.h"
 #include "BuildConfig.h"
-#include "FileSystem.h"
 
 #include <QProcess>
 #include <QSettings>
 #include <QStandardPaths>
 
+namespace {
 bool isSchemeHandlerRegistered()
 {
 #ifdef Q_OS_LINUX
@@ -110,6 +110,7 @@ class LoggingOAuthHttpServerReplyHandler final : public QOAuthHttpServerReplyHan
         QOAuthHttpServerReplyHandler::networkReplyFinished(reply);
     }
 };
+}  // namespace
 
 MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(silent)
 {
@@ -117,7 +118,7 @@ MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(sile
     if (QCoreApplication::applicationFilePath().startsWith("/tmp/.mount_") || APPLICATION->isPortable() || !isSchemeHandlerRegistered())
 
     {
-        auto replyHandler = new LoggingOAuthHttpServerReplyHandler(this);
+        auto* replyHandler = new LoggingOAuthHttpServerReplyHandler(this);
         replyHandler->setCallbackText(QString(R"XXX(
     <noscript>
       <meta http-equiv="Refresh" content="0; URL=%1" />
@@ -165,7 +166,7 @@ MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(sile
         emit finished(state, message);
     });
     connect(&m_oauth2, &QOAuth2AuthorizationCodeFlow::serverReportedErrorOccurred, this,
-            [this](const QString& error, const QString& errorDescription, const QUrl& uri) {
+            [this](const QString& error, const QString& errorDescription, const QUrl& /*uri*/) {
                 qWarning() << "Failed to login because" << error << errorDescription;
                 emit finished(AccountTaskState::STATE_FAILED_HARD, errorDescription);
             });
@@ -198,7 +199,7 @@ void MSAStep::perform()
         m_oauth2.refreshTokens();
     } else {
         m_oauth2.setModifyParametersFunction(
-            [](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* map) { map->insert("prompt", "select_account"); });
+            [](QAbstractOAuth::Stage /*stage*/, QMultiMap<QString, QVariant>* map) { map->insert("prompt", "select_account"); });
 
         *m_data = AccountData();
         m_data->msaClientID = m_clientId;
