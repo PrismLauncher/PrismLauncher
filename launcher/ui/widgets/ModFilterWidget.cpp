@@ -51,6 +51,7 @@
 
 namespace {
 
+namespace {
 class VersionBasicModel : public QIdentityProxyModel {
     Q_OBJECT
 
@@ -105,6 +106,7 @@ class AllVersionProxyModel : public QSortFilterProxyModel {
         return QSortFilterProxyModel::flags(index);
     }
 };
+}  // namespace
 
 }  // namespace
 ModFilterWidget* ModFilterWidget::create(MinecraftInstance* instance, bool extended)
