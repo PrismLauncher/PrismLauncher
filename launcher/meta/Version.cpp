@@ -111,9 +111,9 @@ void Meta::Version::setRequires(const Meta::RequireSet& reqs, const Meta::Requir
     emit requiresChanged();
 }
 
-void Meta::Version::setVolatile(bool volatile_)
+void Meta::Version::setVolatile(bool volatileVar)
 {
-    m_volatile = volatile_;
+    m_volatile = volatileVar;
 }
 
 void Meta::Version::setData(const VersionFilePtr& data)

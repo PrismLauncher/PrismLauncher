@@ -39,7 +39,7 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent)
     m_formatCheckbox->setObjectName(QStringLiteral("formatCheckbox"));
     m_formatCheckbox->setCheckState(APPLICATION->settings()->get("UseSystemLocale").toBool() ? Qt::Checked : Qt::Unchecked);
     connect(m_formatCheckbox, &QCheckBox::checkStateChanged, this,
-            [this]() { APPLICATION->translations()->setUseSystemLocale(m_formatCheckbox->isChecked()); });
+            [this] { APPLICATION->translations()->setUseSystemLocale(m_formatCheckbox->isChecked()); });
     m_verticalLayout->addWidget(m_formatCheckbox);
 
     auto* translations = APPLICATION->translations();

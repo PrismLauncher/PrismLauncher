@@ -13,10 +13,10 @@ class AuthFlow : public Task {
     Q_OBJECT
 
    public:
-    enum class Action { Refresh, Login, DeviceCode };
+    enum class Action : std::uint8_t { Refresh, Login, DeviceCode };
 
     explicit AuthFlow(AccountData* data, Action action = Action::Refresh);
-    virtual ~AuthFlow() = default;
+    ~AuthFlow() override = default;
 
     void executeTask() override;
 
@@ -35,7 +35,7 @@ class AuthFlow : public Task {
 
    private slots:
     // NOTE: true -> non-terminal state, false -> terminal state
-    bool changeState(AccountTaskState newState, QString reason = QString());
+    bool changeState(AccountTaskState newState, const QString& reason = {});
     void stepFinished(AccountTaskState resultingState, QString message);
 
    private:
