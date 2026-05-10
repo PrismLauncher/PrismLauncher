@@ -125,6 +125,7 @@
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 
 #include "KonamiCode.h"
 
@@ -960,6 +961,21 @@ void MainWindow::processURLs(QList<QUrl> urls)
         QMap<QString, QString> extra_info;
         QUrl local_url;
         if (!url.isLocalFile()) {  // download the remote resource and identify
+            if (url.scheme().compare("modrinth", Qt::CaseInsensitive) == 0) {
+                const auto packId = ModrinthAPI::getModpackIdFromUrl(url);
+                if (!packId.isEmpty()) {
+                    extra_info.insert("pack_id", packId);
+                    addInstance(url.toString(), extra_info);
+                } else {
+                    CustomMessageBox::selectable(
+                        this, tr("Error"),
+                        tr("Unsupported Modrinth link.\n\nPrism Launcher currently only supports modpack links such as "
+                           "modrinth://modpack/fabulously-optimized."),
+                        QMessageBox::Critical)
+                        ->show();
+                }
+                continue;
+            }
 
             const bool isExternalURLImport = (url.host().toLower() == "import") || (url.path().startsWith("/import", Qt::CaseInsensitive));
 

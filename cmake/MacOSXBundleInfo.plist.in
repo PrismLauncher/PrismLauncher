@@ -87,6 +87,14 @@
         </dict>
         <dict>
             <key>CFBundleURLName</key>
+            <string>Modrinth</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+            <string>modrinth</string>
+            </array>
+        </dict>
+        <dict>
+            <key>CFBundleURLName</key>
             <string>${Launcher_Name}</string>
             <key>CFBundleURLSchemes</key>
             <array>

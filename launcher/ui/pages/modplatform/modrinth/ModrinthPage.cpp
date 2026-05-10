@@ -344,8 +344,27 @@ void ModrinthPage::triggerSearch()
     m_ui->packDescription->clear();
     m_ui->versionSelectionBox->clear();
     bool filterChanged = m_filterWidget->changed();
-    m_model->searchWithTerm(m_ui->searchEdit->text(), m_ui->sortByBox->currentIndex(), m_filterWidget->getFilter(), filterChanged);
+    const auto searchTerm = m_ui->searchEdit->text();
+    m_model->searchWithTerm(searchTerm, m_ui->sortByBox->currentIndex(), m_filterWidget->getFilter(), filterChanged);
     m_fetch_progress.watch(m_model->activeSearchJob().get());
+
+    if (searchTerm.startsWith('#') && !searchTerm.mid(1).trimmed().isEmpty()) {
+        const auto selectProject = [this, searchTerm] {
+            if (m_ui->searchEdit->text() != searchTerm || m_model->rowCount({}) != 1) {
+                return;
+            }
+
+            const auto index = m_model->index(0, 0);
+            m_ui->packView->setCurrentIndex(index);
+            m_ui->packView->scrollTo(index);
+        };
+
+        if (m_model->hasActiveSearchJob()) {
+            connect(m_model->activeSearchJob().get(), &Task::finished, this, selectProject);
+        } else {
+            selectProject();
+        }
+    }
 }
 
 void ModrinthPage::onVersionSelectionChanged(int index)
