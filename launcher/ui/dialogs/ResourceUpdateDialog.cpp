@@ -249,14 +249,14 @@ void ResourceUpdateDialog::checkCandidates()
             for (const auto& dep : depTask->getDependecies()) {
                 auto changelog = dep->version.changelog;
                 if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME) {
-                    changelog = FlameAPI::get().getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
+                    changelog = FlameAPI::getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
                 }
 
                 auto [maybeInstalled, requiredByNames, requiredByIds] = dependencyExtraInfo.value(dep->version.addonId.toString());
                 auto downloadTask =
                     makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_resourceModel, true, "dependency", requiredByIds.first());
                 CheckUpdateTask::Update updatable = {
-                    dep->pack->name, dep->version.hash,   tr("Not installed"), dep->version.version, dep->version.version_type,
+                    dep->pack->name, dep->version.hash,   tr("Not installed"), dep->version.version, dep->version.versionType,
                     changelog,       dep->pack->provider, downloadTask,        !maybeInstalled
                 };
 
@@ -366,7 +366,8 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
     // prepare task for the modrinth mods
     if (!modrinthTmp.empty()) {
         auto modrinthTask = makeShared<EnsureMetadataTask>(modrinthTmp, indexDir2, ModPlatform::ResourceProvider::MODRINTH);
-        connect(modrinthTask.get(), &EnsureMetadataTask::metadataReady, this, [this](Resource* candidate) { onMetadataEnsured(candidate); });
+        connect(modrinthTask.get(), &EnsureMetadataTask::metadataReady, this,
+                [this](Resource* candidate) { onMetadataEnsured(candidate); });
         connect(modrinthTask.get(), &EnsureMetadataTask::metadataFailed, this, [this, &shouldTryOthers](Resource* candidate) {
             onMetadataFailed(candidate, shouldTryOthers.find(candidate->internalId()).value(), ModPlatform::ResourceProvider::MODRINTH);
         });

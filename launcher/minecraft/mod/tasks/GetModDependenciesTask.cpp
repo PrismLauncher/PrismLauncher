@@ -246,10 +246,10 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
         .dependency = dep, .mcVersion = m_version, .loader = m_loaderType, .includeChangelog = true
     };
     ResourceAPI::Callback<ModPlatform::IndexedVersion> callbacks;
-    callbacks.on_fail = [](const QString& reason, int) {
+    callbacks.onFail = [](const QString& reason, int) {
         qCritical() << tr("A network error occurred. Could not load project dependencies:%1").arg(reason);
     };
-    callbacks.on_succeed = [dep, provider, pDep, level, this](auto& pack) {
+    callbacks.onSucceed = [dep, provider, pDep, level, this](auto& pack) {
         pDep->version = pack;
         if (!pDep->version.addonId.isValid()) {
             if (m_loaderType & ModPlatform::Quilt) {  // falback for quilt
@@ -265,7 +265,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             removePack(dep.addonId);
             return;
         }
-        pDep->version.is_currently_selected = true;
+        pDep->version.isCurrentlySelected = true;
         pDep->pack->versions = { pDep->version };
         pDep->pack->versionsLoaded = true;
 

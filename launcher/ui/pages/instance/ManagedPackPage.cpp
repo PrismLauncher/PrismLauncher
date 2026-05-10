@@ -213,7 +213,7 @@ void ModrinthManagedPackPage::parseManagedPack()
     m_pack = { .addonId = m_inst->getManagedPackID() };
 
     // Use default if no callbacks are set
-    callbacks.on_succeed = [this](auto& doc) {
+    callbacks.onSucceed = [this](auto& doc) {
         m_pack.versions = doc;
         m_pack.versionsLoaded = true;
 
@@ -238,14 +238,14 @@ void ModrinthManagedPackPage::parseManagedPack()
 
         m_loaded = true;
     };
-    callbacks.on_fail = [this](const QString& /*reason*/, int) { setFailState(); };
-    callbacks.on_abort = [this]() { setFailState(); };
+    callbacks.onFail = [this](const QString& /*reason*/, int) { setFailState(); };
+    callbacks.onAbort = [this]() { setFailState(); };
     m_fetchJob = ModrinthAPI::get().getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
                                                          .mcVersions = {},
                                                          .loaders = {},
                                                          .resourceType = ModPlatform::ResourceType::Modpack,
                                                          .includeChangelog = true },
-                                                       std::move(callbacks));
+                                                       callbacks);
 
     ui->changelogTextBrowser->setText(tr("Fetching changelogs..."));
 
@@ -370,7 +370,7 @@ void FlameManagedPackPage::parseManagedPack()
     ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
 
     // Use default if no callbacks are set
-    callbacks.on_succeed = [this](auto& doc) {
+    callbacks.onSucceed = [this](auto& doc) {
         m_pack.versions = doc;
         m_pack.versionsLoaded = true;
 
@@ -393,14 +393,14 @@ void FlameManagedPackPage::parseManagedPack()
 
         m_loaded = true;
     };
-    callbacks.on_fail = [this](const QString& /*reason*/, int) { setFailState(); };
-    callbacks.on_abort = [this]() { setFailState(); };
+    callbacks.onFail = [this](const QString& /*reason*/, int) { setFailState(); };
+    callbacks.onAbort = [this]() { setFailState(); };
     m_fetchJob = FlameAPI::get().getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
                                                       .mcVersions = {},
                                                       .loaders = {},
                                                       .resourceType = ModPlatform::ResourceType::Modpack,
                                                       .includeChangelog = true },
-                                                    std::move(callbacks));
+                                                    callbacks);
 
     m_fetchJob->start();
 }
@@ -421,7 +421,7 @@ void FlameManagedPackPage::suggestVersion()
     auto version = m_pack.versions.at(index);
 
     ui->changelogTextBrowser->setHtml(
-        StringUtils::htmlListPatch(FlameAPI::get().getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt())));
+        StringUtils::htmlListPatch(FlameAPI::getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt())));
 
     ManagedPackPage::suggestVersion();
 }

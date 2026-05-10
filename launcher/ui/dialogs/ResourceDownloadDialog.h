@@ -89,7 +89,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     void removeResource(const QString&);
 
     QList<DownloadTaskPtr> getTasks();
-    ResourceFolderModel* getBaseModel() const { return m_base_model; }
+    ResourceFolderModel* getBaseModel() const { return m_baseModel; }
 
     void setResourceMetadata(const std::shared_ptr<Metadata::ModStruct>& meta);
 
@@ -120,12 +120,12 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     void initPages(QList<BasePage*> pages);
 
    protected:
-    ResourceFolderModel* m_base_model;
+    ResourceFolderModel* m_baseModel;
 
     PageContainer* m_container = nullptr;
 
     QDialogButtonBox m_buttons;
-    QVBoxLayout m_vertical_layout;
+    QVBoxLayout m_verticalLayout;
 
     bool m_suppressInitialSearch = false;
     MinecraftInstance* m_instance = nullptr;

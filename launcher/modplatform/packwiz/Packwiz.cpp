@@ -122,7 +122,7 @@ auto V1::createModFormat([[maybe_unused]] const QDir& index_dir,
         mod.url = mod_version.downloadUrl;
     }
 
-    mod.hash_format = mod_version.hash_type;
+    mod.hash_format = mod_version.hashType;
     mod.hash = mod_version.hash;
 
     mod.provider = mod_pack.provider;
@@ -133,9 +133,9 @@ auto V1::createModFormat([[maybe_unused]] const QDir& index_dir,
     mod.mcVersions = mod_version.mcVersion;
     mod.mcVersions.removeDuplicates();
     std::ranges::sort(mod.mcVersions, sortMCVersions);
-    mod.releaseType = mod_version.version_type;
+    mod.releaseType = mod_version.versionType;
 
-    mod.version_number = mod_version.version_number;
+    mod.version_number = mod_version.versionNumber;
     if (mod.version_number.isNull())  // on CurseForge, there is only a version name - not a version number
         mod.version_number = mod_version.version;
 

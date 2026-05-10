@@ -89,7 +89,7 @@ class ResourceModel : public QAbstractListModel {
     void refresh();
 
     /** Gets the icon at the URL for the given index. If it's not fetched yet, fetch it and update when fisinhed. */
-    std::optional<QIcon> getIcon(QModelIndex&, const QUrl&);
+    std::optional<QIcon> getIcon(const QModelIndex&, const QUrl&);
 
     void addPack(ModPlatform::IndexedPack::Ptr pack,
                  ModPlatform::IndexedVersion& version,
@@ -104,7 +104,7 @@ class ResourceModel : public QAbstractListModel {
     /** Resets the model's data. */
     void clearData();
 
-    void runSearchJob(Task::Ptr);
+    void runSearchJob(const Task::Ptr&);
     void runInfoJob(Task::Ptr);
 
     auto getCurrentSortingMethodByIndex() const -> std::optional<ResourceAPI::SortingMethod>;
@@ -139,11 +139,11 @@ class ResourceModel : public QAbstractListModel {
    private:
     /* Default search request callbacks */
     void searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>&);
-    void searchRequestForOneSucceeded(ModPlatform::IndexedPack::Ptr);
-    void searchRequestFailed(QString reason, int network_error_code);
+    void searchRequestForOneSucceeded(const ModPlatform::IndexedPack::Ptr&);
+    void searchRequestFailed(const QString& reason, int networkErrorCode);
     void searchRequestAborted();
 
-    void versionRequestSucceeded(QVector<ModPlatform::IndexedVersion>&, QVariant, const QModelIndex&);
+    void versionRequestSucceeded(QVector<ModPlatform::IndexedVersion>&, const QVariant&, const QModelIndex&);
 
     void infoRequestSucceeded(ModPlatform::IndexedPack::Ptr, const QModelIndex&);
 

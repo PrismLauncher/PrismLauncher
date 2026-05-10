@@ -31,7 +31,7 @@ class ModModel : public ResourceModel {
     ModModel(BaseInstance&, const ResourceAPI* api, const QString& debugName, QString metaEntryBase);
 
     /* Ask the API for more information */
-    void searchWithTerm(const QString& term, unsigned int sort, bool filter_changed);
+    void searchWithTerm(const QString& term, unsigned int sort, bool filterChanged);
 
     void setFilter(std::shared_ptr<ModFilterWidget::Filter> filter) { m_filter = std::move(filter); }
     QVariant getInstalledPackVersion(ModPlatform::IndexedPack::Ptr pack) const override;
@@ -51,7 +51,7 @@ class ModModel : public ResourceModel {
     bool checkVersionFilters(const ModPlatform::IndexedVersion& version) override;
 
    protected:
-    BaseInstance& m_base_instance;
+    BaseInstance& m_baseInstance;
 
     std::shared_ptr<ModFilterWidget::Filter> m_filter = nullptr;
 

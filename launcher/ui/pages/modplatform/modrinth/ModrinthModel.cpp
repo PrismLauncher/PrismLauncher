@@ -140,14 +140,14 @@ void ModpackListModel::performPaginatedSearch()
         if (!projectId.isEmpty()) {
             ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks;
 
-            callbacks.on_fail = [this](QString reason, int network_error_code) {
-                if (network_error_code == 404) {
+            callbacks.onFail = [this](QString reason, int networkErrorCode) {
+                if (networkErrorCode == 404) {
                     m_searchState = ResetRequested;
                 }
-                searchRequestFailed(reason, network_error_code);
+                searchRequestFailed(reason, networkErrorCode);
             };
-            callbacks.on_succeed = [this](auto& pack) { searchRequestForOneSucceeded(pack); };
-            callbacks.on_abort = [this] {
+            callbacks.onSucceed = [this](auto& pack) { searchRequestForOneSucceeded(pack); };
+            callbacks.onAbort = [this] {
                 qCritical() << "Search task aborted by an unknown reason!";
                 searchRequestFailed("Aborted", 0);
             };
@@ -165,9 +165,9 @@ void ModpackListModel::performPaginatedSearch()
 
     ResourceAPI::Callback<QList<ModPlatform::IndexedPack::Ptr>> callbacks{};
 
-    callbacks.on_succeed = [this](auto& doc) { searchRequestFinished(doc); };
-    callbacks.on_fail = [this](QString reason, int network_error_code) { searchRequestFailed(reason, network_error_code); };
-    callbacks.on_abort = [this] {
+    callbacks.onSucceed = [this](auto& doc) { searchRequestFinished(doc); };
+    callbacks.onFail = [this](QString reason, int networkErrorCode) { searchRequestFailed(reason, networkErrorCode); };
+    callbacks.onAbort = [this] {
         qCritical() << "Search task aborted by an unknown reason!";
         searchRequestFailed("Aborted", 0);
     };
@@ -321,12 +321,12 @@ void ModpackListModel::searchRequestForOneSucceeded(ModPlatform::IndexedPack::Pt
     endInsertRows();
 }
 
-void ModpackListModel::searchRequestFailed(QString reason, int network_error_code)
+void ModpackListModel::searchRequestFailed(const QString& reason, int networkErrorCode)
 {
-    if (network_error_code == -1) {
+    if (networkErrorCode == -1) {
         // Unknown error in network stack
         QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load modpacks."));
-    } else if (network_error_code == 409) {
+    } else if (networkErrorCode == 409) {
         // 409 Gone, notify user to update
         QMessageBox::critical(nullptr, tr("Error"),
                               //: %1 refers to the launcher itself

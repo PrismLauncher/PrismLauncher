@@ -86,7 +86,7 @@ class ModFilterWidget : public QTabWidget {
         {
             return ((!loaders || !v.loaders || loaders & v.loaders) &&  // loaders
                     (releases.empty() ||                                // releases
-                     std::find(releases.cbegin(), releases.cend(), v.version_type) != releases.cend()) &&
+                     std::find(releases.cbegin(), releases.cend(), v.versionType) != releases.cend()) &&
                     checkMcVersions({ v.mcVersion }));  // gameVersion}
         }
     };

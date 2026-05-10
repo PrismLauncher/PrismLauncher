@@ -59,9 +59,9 @@ ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent,
                                                QString geometrySaveKey,
                                                bool suppressInitialSearch)
     : QDialog(parent)
-    , m_base_model(baseModel)
+    , m_baseModel(baseModel)
     , m_buttons(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel)
-    , m_vertical_layout(this)
+    , m_verticalLayout(this)
     , m_suppressInitialSearch(suppressInitialSearch)
     , m_instance(instance)
     , m_resourcesString(std::move(resourcesString))
@@ -142,7 +142,7 @@ void ResourceDownloadDialog::initializeContainer()
     m_container = new PageContainer(this, {}, this);
     m_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
     m_container->layout()->setContentsMargins(0, 0, 0, 0);
-    m_vertical_layout.addWidget(m_container);
+    m_verticalLayout.addWidget(m_container);
 
     m_container->addButtons(&m_buttons);
 
@@ -214,7 +214,7 @@ void ResourceDownloadDialog::confirm()
                                         .filename = task->getFilename(),
                                         .provider = ModPlatform::ProviderCapabilities::name(task->getProvider()),
                                         .required_by = extraInfo.requiredByNames,
-                                        .version_type = task->getVersion().version_type.toString(),
+                                        .version_type = task->getVersion().versionType.toString(),
                                         .enabled = !extraInfo.maybeInstalled });
     }
 

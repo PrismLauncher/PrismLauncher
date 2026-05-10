@@ -87,8 +87,7 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QByteArray* 
         qCritical() << e.what();
         qDebug() << doc;
     }
-    auto latestVer =
-        FlameAPI::get().getLatestVersion(pack->versions, m_loadersList, resource->metadata()->loaders, !m_loadersList.isEmpty());
+    auto latestVer = FlameAPI::getLatestVersion(pack->versions, m_loadersList, resource->metadata()->loaders, !m_loadersList.isEmpty());
 
     setStatus(tr("Parsing the API response from CurseForge for '%1'...").arg(resource->name()));
 
@@ -123,8 +122,8 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QByteArray* 
         }
 
         auto downloadTask = makeShared<ResourceDownloadTask>(pack, latestVer.value(), m_resourceModel, true, "update");
-        m_updates.emplace_back(pack->name, resource->metadata()->hash, oldVersion, latestVer->version, latestVer->version_type,
-                               FlameAPI::get().getModFileChangelog(latestVer->addonId.toInt(), latestVer->fileId.toInt()),
+        m_updates.emplace_back(pack->name, resource->metadata()->hash, oldVersion, latestVer->version, latestVer->versionType,
+                               FlameAPI::getModFileChangelog(latestVer->addonId.toInt(), latestVer->fileId.toInt()),
                                ModPlatform::ResourceProvider::FLAME, downloadTask, resource->enabled());
     }
     m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, latestVer.value()));

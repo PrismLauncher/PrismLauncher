@@ -10,6 +10,9 @@
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 
 #include <QDebug>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <utility>
 
 class ModrinthAPI final : public ResourceAPI {
@@ -20,17 +23,17 @@ class ModrinthAPI final : public ResourceAPI {
         return s_instance;
     }
 
-    std::pair<Task::Ptr, QByteArray*> currentVersion(const QString& hash, const QString& hash_format) const;
+    static std::pair<Task::Ptr, QByteArray*> currentVersion(const QString& hash, const QString& hashFormat);
 
-    std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, QString hash_format) const;
+    static std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, const QString& hashFormat);
 
     std::pair<Task::Ptr, QByteArray*> latestVersion(const QString& hash,
-                                                    const QString& hash_format,
+                                                    const QString& hashFormat,
                                                     std::optional<std::vector<Version>> mcVersions,
                                                     std::optional<ModPlatform::ModLoaderTypes> loaders) const;
 
     std::pair<Task::Ptr, QByteArray*> latestVersions(const QStringList& hashes,
-                                                     const QString& hash_format,
+                                                     const QString& hashFormat,
                                                      std::optional<std::vector<Version>> mcVersions,
                                                      std::optional<ModPlatform::ModLoaderTypes> loaders) const;
 
@@ -113,30 +116,30 @@ class ModrinthAPI final : public ResourceAPI {
 
     QString createFacets(const SearchArgs& args) const
     {
-        QStringList facets_list;
+        QStringList facetsList;
 
         if (args.loaders.has_value() && args.loaders.value() != 0) {
-            facets_list.append(QString("[%1]").arg(getModLoaderFilters(args.loaders.value())));
+            facetsList.append(QString("[%1]").arg(getModLoaderFilters(args.loaders.value())));
         }
         if (args.versions.has_value() && !args.versions.value().empty()) {
-            facets_list.append(QString("[%1]").arg(getGameVersionsArray(args.versions.value())));
+            facetsList.append(QString("[%1]").arg(getGameVersionsArray(args.versions.value())));
         }
         if (args.side.has_value()) {
             auto side = getSideFilters(args.side.value());
             if (!side.isEmpty()) {
-                facets_list.append(QString("[%1]").arg(side));
+                facetsList.append(QString("[%1]").arg(side));
             }
         }
         if (args.categoryIds.has_value() && !args.categoryIds->empty()) {
-            facets_list.append(QString("[%1]").arg(getCategoriesFilters(args.categoryIds.value())));
+            facetsList.append(QString("[%1]").arg(getCategoriesFilters(args.categoryIds.value())));
         }
         if (args.openSource) {
-            facets_list.append("[\"open_source:true\"]");
+            facetsList.append("[\"open_source:true\"]");
         }
 
-        facets_list.append(QString("[\"project_type:%1\"]").arg(resourceTypeParameter(args.type)));
+        facetsList.append(QString("[\"project_type:%1\"]").arg(resourceTypeParameter(args.type)));
 
-        return QString("[%1]").arg(facets_list.join(','));
+        return QString("[%1]").arg(facetsList.join(','));
     }
 
    public:
@@ -149,18 +152,18 @@ class ModrinthAPI final : public ResourceAPI {
             }
         }
 
-        QStringList get_arguments;
-        get_arguments.append(QString("offset=%1").arg(args.offset));
-        get_arguments.append(QString("limit=25"));
+        QStringList getArguments;
+        getArguments.append(QString("offset=%1").arg(args.offset));
+        getArguments.append(QString("limit=25"));
         if (args.search.has_value()) {
-            get_arguments.append(QString("query=%1").arg(args.search.value()));
+            getArguments.append(QString("query=%1").arg(args.search.value()));
         }
         if (args.sorting.has_value()) {
-            get_arguments.append(QString("index=%1").arg(args.sorting.value().name));
+            getArguments.append(QString("index=%1").arg(args.sorting.value().name));
         }
-        get_arguments.append(QString("facets=%1").arg(createFacets(args)));
+        getArguments.append(QString("facets=%1").arg(createFacets(args)));
 
-        return BuildConfig.MODRINTH_PROD_URL + "/search?" + get_arguments.join('&');
+        return BuildConfig.MODRINTH_PROD_URL + "/search?" + getArguments.join('&');
     };
 
     auto getInfoURL(const QString& id) const -> std::optional<QString> override
@@ -175,17 +178,17 @@ class ModrinthAPI final : public ResourceAPI {
 
     auto getVersionsURL(const VersionSearchArgs& args) const -> std::optional<QString> override
     {
-        QStringList get_arguments;
+        QStringList getArguments;
         if (args.mcVersions.has_value()) {
-            get_arguments.append(QString("game_versions=[%1]").arg(getGameVersionsString(args.mcVersions.value())));
+            getArguments.append(QString("game_versions=[%1]").arg(getGameVersionsString(args.mcVersions.value())));
         }
         if (args.loaders.has_value()) {
-            get_arguments.append(QString("loaders=[\"%1\"]").arg(getModLoaderStrings(args.loaders.value()).join("\",\"")));
+            getArguments.append(QString("loaders=[\"%1\"]").arg(getModLoaderStrings(args.loaders.value()).join("\",\"")));
         }
-        get_arguments.append(QString("include_changelog=%1").arg(args.includeChangelog ? "true" : "false"));
+        getArguments.append(QString("include_changelog=%1").arg(args.includeChangelog ? "true" : "false"));
 
         return QString("%1/project/%2/version%3%4")
-            .arg(BuildConfig.MODRINTH_PROD_URL, args.pack->addonId.toString(), get_arguments.isEmpty() ? "" : "?", get_arguments.join('&'));
+            .arg(BuildConfig.MODRINTH_PROD_URL, args.pack->addonId.toString(), getArguments.isEmpty() ? "" : "?", getArguments.join('&'));
     };
 
     QString getGameVersionsArray(const std::vector<Version>& mcVersions) const

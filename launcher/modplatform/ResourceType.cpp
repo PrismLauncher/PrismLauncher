@@ -22,7 +22,7 @@
 #include "ResourceType.h"
 
 namespace ModPlatform {
-static const QMap<ResourceType, QString> s_packedTypeNames = { { ResourceType::ResourcePack, QObject::tr("resource pack") },
+static const QMap<ResourceType, QString> g_packedTypeNames = { { ResourceType::ResourcePack, QObject::tr("resource pack") },
                                                                { ResourceType::TexturePack, QObject::tr("texture pack") },
                                                                { ResourceType::DataPack, QObject::tr("data pack") },
                                                                { ResourceType::ShaderPack, QObject::tr("shader pack") },
@@ -34,7 +34,7 @@ namespace ResourceTypeUtils {
 
 QString getName(ResourceType type)
 {
-    return s_packedTypeNames.constFind(type).value();
+    return g_packedTypeNames.constFind(type).value();
 }
 
 }  // namespace ResourceTypeUtils
