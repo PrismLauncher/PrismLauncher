@@ -38,7 +38,6 @@
 #include <QWidget>
 
 #include "BaseVersion.h"
-#include "tasks/Task.h"
 #include "ui/pages/BasePage.h"
 
 namespace Ui {
@@ -51,13 +50,13 @@ class CustomPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit CustomPage(NewInstanceDialog* dialog, QWidget* parent = 0);
-    virtual ~CustomPage();
-    virtual QString displayName() const override { return tr("Custom"); }
-    virtual QIcon icon() const override { return QIcon::fromTheme("minecraft"); }
-    virtual QString id() const override { return "vanilla"; }
-    virtual QString helpPage() const override { return "Vanilla-platform"; }
-    virtual bool shouldDisplay() const override;
+    explicit CustomPage(NewInstanceDialog* dialog, QWidget* parent = nullptr);
+    ~CustomPage() override;
+    QString displayName() const override { return tr("Custom"); }
+    QIcon icon() const override { return QIcon::fromTheme("minecraft"); }
+    QString id() const override { return "vanilla"; }
+    QString helpPage() const override { return "Vanilla-platform"; }
+    bool shouldDisplay() const override;
     void retranslate() override;
 
     void openedImpl() override;
@@ -81,9 +80,9 @@ class CustomPage : public QWidget, public BasePage {
     void suggestCurrent();
 
    private:
-    bool initialized = false;
-    NewInstanceDialog* dialog = nullptr;
-    Ui::CustomPage* ui = nullptr;
+    bool m_initialized = false;
+    NewInstanceDialog* m_dialog = nullptr;
+    Ui::CustomPage* m_ui = nullptr;
     bool m_versionSetByUser = false;
     BaseVersion::Ptr m_selectedVersion;
     BaseVersion::Ptr m_selectedLoaderVersion;

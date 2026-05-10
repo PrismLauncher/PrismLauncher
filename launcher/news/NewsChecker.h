@@ -69,7 +69,7 @@ class NewsChecker : public QObject {
 
    protected slots:
     void rssDownloadFinished();
-    void rssDownloadFailed(QString reason);
+    void rssDownloadFailed(const QString& reason);
 
    protected: /* data */
     //! The URL for the RSS feed to fetch.
@@ -82,7 +82,7 @@ class NewsChecker : public QObject {
     NetJob::Ptr m_newsNetJob;
 
     //! True if news has been loaded.
-    bool m_loadedNews;
+    bool m_loadedNews = false;
 
     //! The cache entry for the feed.
     MetaEntryPtr m_entry;

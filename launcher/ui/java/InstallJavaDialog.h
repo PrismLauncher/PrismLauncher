@@ -41,7 +41,7 @@ class InstallDialog final : public QDialog, private BasePageProvider {
     void done(int result) override;
 
    private:
-    PageContainer* container;
-    QDialogButtonBox* buttons;
+    PageContainer* m_container;
+    QDialogButtonBox* m_buttons;
 };
 }  // namespace Java

@@ -848,7 +848,7 @@ void ResourceFolderModel::onParseFailed(int ticket, const QString& resourceId)
     // update index
     m_resourcesIndex.clear();
     int idx = 0;
-    for (const auto& mod : qAsConst(m_resources)) {
+    for (const auto& mod : std::as_const(m_resources)) {
         m_resourcesIndex[mod->internalId()] = idx;
         idx++;
     }
@@ -955,7 +955,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& currentSet, QSet<QString>&
     {
         m_resourcesIndex.clear();
         int idx = 0;
-        for (const auto& mod : qAsConst(m_resources)) {
+        for (const auto& mod : std::as_const(m_resources)) {
             m_resourcesIndex[mod->internalId()] = idx;
             idx++;
         }
