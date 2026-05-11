@@ -346,7 +346,7 @@ void ResourceDownloadDialog::setResourceMetadata(const std::shared_ptr<Metadata:
     m_container->hidePageList();
     m_buttons.hide();
     auto* page = selectedPage();
-    page->openProject(meta->project_id);
+    page->openProject(meta->projectId);
 }
 
 GetModDependenciesTask::Ptr ResourceDownloadDialog::getModDependenciesTask()

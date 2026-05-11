@@ -48,33 +48,33 @@
 ShaderPackPage::ShaderPackPage(MinecraftInstance* instance, ShaderPackFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(instance, model, parent), m_model(model)
 {
-    ui->actionDownloadItem->setText(tr("Download Packs"));
-    ui->actionDownloadItem->setToolTip(tr("Download shader packs from online mod platforms"));
-    ui->actionDownloadItem->setEnabled(true);
-    ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionDownloadItem);
+    m_ui->actionDownloadItem->setText(tr("Download Packs"));
+    m_ui->actionDownloadItem->setToolTip(tr("Download shader packs from online mod platforms"));
+    m_ui->actionDownloadItem->setEnabled(true);
+    m_ui->actionsToolbar->insertActionBefore(m_ui->actionAddItem, m_ui->actionDownloadItem);
 
-    connect(ui->actionDownloadItem, &QAction::triggered, this, &ShaderPackPage::downloadShaderPack);
+    connect(m_ui->actionDownloadItem, &QAction::triggered, this, &ShaderPackPage::downloadShaderPack);
 
-    ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected shader packs (all shader packs if none are selected)"));
-    connect(ui->actionUpdateItem, &QAction::triggered, this, &ShaderPackPage::updateShaderPacks);
-    ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
+    m_ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected shader packs (all shader packs if none are selected)"));
+    connect(m_ui->actionUpdateItem, &QAction::triggered, this, &ShaderPackPage::updateShaderPacks);
+    m_ui->actionsToolbar->insertActionBefore(m_ui->actionAddItem, m_ui->actionUpdateItem);
 
     auto* updateMenu = new QMenu(this);
 
-    auto* update = updateMenu->addAction(ui->actionUpdateItem->text());
+    auto* update = updateMenu->addAction(m_ui->actionUpdateItem->text());
     connect(update, &QAction::triggered, this, &ShaderPackPage::updateShaderPacks);
 
-    updateMenu->addAction(ui->actionResetItemMetadata);
-    connect(ui->actionResetItemMetadata, &QAction::triggered, this, &ShaderPackPage::deleteShaderPackMetadata);
+    updateMenu->addAction(m_ui->actionResetItemMetadata);
+    connect(m_ui->actionResetItemMetadata, &QAction::triggered, this, &ShaderPackPage::deleteShaderPackMetadata);
 
-    ui->actionUpdateItem->setMenu(updateMenu);
+    m_ui->actionUpdateItem->setMenu(updateMenu);
 
-    ui->actionChangeVersion->setToolTip(tr("Change a shader pack's version."));
-    connect(ui->actionChangeVersion, &QAction::triggered, this, &ShaderPackPage::changeShaderPackVersion);
-    ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, ui->actionChangeVersion);
+    m_ui->actionChangeVersion->setToolTip(tr("Change a shader pack's version."));
+    connect(m_ui->actionChangeVersion, &QAction::triggered, this, &ShaderPackPage::changeShaderPackVersion);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionUpdateItem, m_ui->actionChangeVersion);
 
-    ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, ui->actionEnableUpdates);
-    ui->actionsToolbar->insertActionAfter(ui->actionEnableUpdates, ui->actionDisableUpdates);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionUpdateItem, m_ui->actionEnableUpdates);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionEnableUpdates, m_ui->actionDisableUpdates);
 }
 
 void ShaderPackPage::downloadShaderPack()
@@ -138,7 +138,7 @@ void ShaderPackPage::updateShaderPacks()
             return;
         }
     }
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
 
     auto modsList = m_model->selectedResources(selection);
     bool useAll = modsList.empty();
@@ -191,7 +191,7 @@ void ShaderPackPage::updateShaderPacks()
 
 void ShaderPackPage::deleteShaderPackMetadata()
 {
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
     auto selectionCount = m_model->selectedShaderPacks(selection).length();
     if (selectionCount == 0) {
         return;
@@ -219,7 +219,7 @@ void ShaderPackPage::changeShaderPackVersion()
         return;
     }
 
-    const QModelIndexList rows = ui->treeView->selectionModel()->selectedRows();
+    const QModelIndexList rows = m_ui->treeView->selectionModel()->selectedRows();
 
     if (rows.count() != 1) {
         return;
