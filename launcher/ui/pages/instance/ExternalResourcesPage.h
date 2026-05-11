@@ -20,14 +20,14 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
 
    public:
     explicit ExternalResourcesPage(MinecraftInstance* instance, ResourceFolderModel* model, QWidget* parent = nullptr);
-    virtual ~ExternalResourcesPage();
+    ~ExternalResourcesPage() override;
 
-    virtual QString displayName() const override = 0;
-    virtual QIcon icon() const override = 0;
-    virtual QString id() const override = 0;
-    virtual QString helpPage() const override = 0;
+    QString displayName() const override = 0;
+    QIcon icon() const override = 0;
+    QString id() const override = 0;
+    QString helpPage() const override = 0;
 
-    virtual bool shouldDisplay() const override = 0;
+    bool shouldDisplay() const override = 0;
     QString extraHeaderInfoString();
 
     void openedImpl() override;
@@ -37,7 +37,7 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
 
    protected:
     bool eventFilter(QObject* obj, QEvent* ev) override;
-    bool listFilter(QKeyEvent* ev);
+    bool listFilter(QKeyEvent* keyEvent);
     QMenu* createPopupMenu() override;
 
    public slots:
@@ -60,8 +60,8 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     virtual void viewFolder();
     virtual void viewConfigs();
 
-    void ShowContextMenu(const QPoint& pos);
-    void ShowHeaderContextMenu(const QPoint& pos);
+    void showContextMenu(const QPoint& pos);
+    void showHeaderContextMenu(const QPoint& pos);
 
     void enableUpdates();
     void disableUpdates();
@@ -69,7 +69,7 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
    protected:
     MinecraftInstance* m_instance = nullptr;
 
-    Ui::ExternalResourcesPage* ui = nullptr;
+    Ui::ExternalResourcesPage* m_ui = nullptr;
     ResourceFolderModel* m_model;
     QSortFilterProxyModel* m_filterModel = nullptr;
 

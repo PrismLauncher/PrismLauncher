@@ -109,7 +109,7 @@ auto Resource::provider() const -> QString
 auto Resource::version() const -> QString
 {
     if (metadata()) {
-        return metadata()->version_number;
+        return metadata()->versionNumber;
     }
 
     return QObject::tr("Unknown");
@@ -118,7 +118,7 @@ auto Resource::version() const -> QString
 auto Resource::homepage() const -> QString
 {
     if (metadata()) {
-        return ModPlatform::getMetaURL(metadata()->provider, metadata()->project_id);
+        return ModPlatform::getMetaURL(metadata()->provider, metadata()->projectId);
     }
 
     return {};
@@ -126,8 +126,9 @@ auto Resource::homepage() const -> QString
 
 bool Resource::lockUpdate() const
 {
-    if (metadata())
+    if (metadata()) {
         return metadata()->lockUpdate;
+    }
 
     return false;
 }
