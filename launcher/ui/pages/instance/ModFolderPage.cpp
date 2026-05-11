@@ -70,48 +70,48 @@
 ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(inst, model, parent), m_model(model)
 {
-    ui->actionDownloadItem->setText(tr("Download Mods"));
-    ui->actionDownloadItem->setToolTip(tr("Download mods from online mod platforms"));
-    ui->actionDownloadItem->setEnabled(true);
-    ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionDownloadItem);
+    m_ui->actionDownloadItem->setText(tr("Download Mods"));
+    m_ui->actionDownloadItem->setToolTip(tr("Download mods from online mod platforms"));
+    m_ui->actionDownloadItem->setEnabled(true);
+    m_ui->actionsToolbar->insertActionBefore(m_ui->actionAddItem, m_ui->actionDownloadItem);
 
-    connect(ui->actionDownloadItem, &QAction::triggered, this, &ModFolderPage::downloadMods);
+    connect(m_ui->actionDownloadItem, &QAction::triggered, this, &ModFolderPage::downloadMods);
 
-    ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
-    connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
-    ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
+    m_ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
+    connect(m_ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
+    m_ui->actionsToolbar->insertActionBefore(m_ui->actionAddItem, m_ui->actionUpdateItem);
 
     auto* updateMenu = new QMenu(this);
 
     auto* update = updateMenu->addAction(tr("Check for Updates"));
     connect(update, &QAction::triggered, this, &ModFolderPage::updateMods);
 
-    updateMenu->addAction(ui->actionVerifyItemDependencies);
-    connect(ui->actionVerifyItemDependencies, &QAction::triggered, this, [this] { updateMods(true); });
+    updateMenu->addAction(m_ui->actionVerifyItemDependencies);
+    connect(m_ui->actionVerifyItemDependencies, &QAction::triggered, this, [this] { updateMods(true); });
 
     auto depsDisabled = APPLICATION->settings()->getSetting("ModDependenciesDisabled");
-    ui->actionVerifyItemDependencies->setVisible(!depsDisabled->get().toBool());
+    m_ui->actionVerifyItemDependencies->setVisible(!depsDisabled->get().toBool());
     connect(depsDisabled.get(), &Setting::SettingChanged, this,
-            [this](const Setting&, const QVariant& value) { ui->actionVerifyItemDependencies->setVisible(!value.toBool()); });
+            [this](const Setting&, const QVariant& value) { m_ui->actionVerifyItemDependencies->setVisible(!value.toBool()); });
 
-    updateMenu->addAction(ui->actionResetItemMetadata);
-    connect(ui->actionResetItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
+    updateMenu->addAction(m_ui->actionResetItemMetadata);
+    connect(m_ui->actionResetItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
 
-    ui->actionUpdateItem->setMenu(updateMenu);
+    m_ui->actionUpdateItem->setMenu(updateMenu);
 
-    ui->actionChangeVersion->setToolTip(tr("Change a mod's version."));
-    connect(ui->actionChangeVersion, &QAction::triggered, this, &ModFolderPage::changeModVersion);
-    ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, ui->actionChangeVersion);
+    m_ui->actionChangeVersion->setToolTip(tr("Change a mod's version."));
+    connect(m_ui->actionChangeVersion, &QAction::triggered, this, &ModFolderPage::changeModVersion);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionUpdateItem, m_ui->actionChangeVersion);
 
-    ui->actionViewHomepage->setToolTip(tr("View the homepages of all selected mods."));
+    m_ui->actionViewHomepage->setToolTip(tr("View the homepages of all selected mods."));
 
-    ui->actionExportMetadata->setToolTip(tr("Export mod's metadata to text."));
-    connect(ui->actionExportMetadata, &QAction::triggered, this, &ModFolderPage::exportModMetadata);
-    ui->actionsToolbar->insertActionAfter(ui->actionViewHomepage, ui->actionExportMetadata);
+    m_ui->actionExportMetadata->setToolTip(tr("Export mod's metadata to text."));
+    connect(m_ui->actionExportMetadata, &QAction::triggered, this, &ModFolderPage::exportModMetadata);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionViewHomepage, m_ui->actionExportMetadata);
 
-    ui->actionsToolbar->insertActionAfter(ui->actionViewFolder, ui->actionViewConfigs);
-    ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, ui->actionEnableUpdates);
-    ui->actionsToolbar->insertActionAfter(ui->actionEnableUpdates, ui->actionDisableUpdates);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionViewFolder, m_ui->actionViewConfigs);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionUpdateItem, m_ui->actionEnableUpdates);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionEnableUpdates, m_ui->actionDisableUpdates);
 }
 
 bool ModFolderPage::shouldDisplay() const
@@ -124,7 +124,7 @@ void ModFolderPage::updateFrame(const QModelIndex& current, [[maybe_unused]] con
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
     const Mod& mod = m_model->at(row);
-    ui->frame->updateWithMod(mod);
+    m_ui->frame->updateWithMod(mod);
 }
 
 void ModFolderPage::removeItems(const QItemSelection& selection)
@@ -238,7 +238,7 @@ void ModFolderPage::updateMods(bool includeDeps)
             return;
         }
     }
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
 
     auto modsList = m_model->selectedResources(selection);
     bool useAll = modsList.empty();
@@ -291,7 +291,7 @@ void ModFolderPage::updateMods(bool includeDeps)
 
 void ModFolderPage::deleteModMetadata()
 {
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
     auto selectionCount = m_model->selectedMods(selection).length();
     if (selectionCount == 0) {
         return;
@@ -322,7 +322,7 @@ void ModFolderPage::changeModVersion()
         QMessageBox::critical(this, tr("Error"), tr("Mod updates are unavailable when metadata is disabled!"));
         return;
     }
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
     auto modsList = m_model->selectedMods(selection);
     if (modsList.length() != 1 || modsList[0]->metadata() == nullptr) {
         return;
@@ -338,7 +338,7 @@ void ModFolderPage::changeModVersion()
 
 void ModFolderPage::exportModMetadata()
 {
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
     auto selectedMods = m_model->selectedMods(selection);
     if (selectedMods.length() == 0) {
         selectedMods = m_model->allMods();

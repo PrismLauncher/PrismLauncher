@@ -322,9 +322,9 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, Ena
     return succeeded;
 }
 
-static QMutex s_updateTaskMutex;
 bool ResourceFolderModel::update()
 {
+    static QMutex s_updateTaskMutex;
     // We hold a lock here to prevent race conditions on the m_current_update_task reset.
     QMutexLocker lock(&s_updateTaskMutex);
 
@@ -373,7 +373,7 @@ bool ResourceFolderModel::update()
     return true;
 }
 
-void ResourceFolderModel::resolveResource(Resource::Ptr res)
+void ResourceFolderModel::resolveResource(const Resource::Ptr& res)
 {
     if (!res->shouldResolve()) {
         return;
@@ -602,6 +602,7 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
             if (column == ActiveColumn) {
                 return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
             }
+            [[fallthrough]];
         case Qt::UserRole:
             if (column == LockUpdateColumn) {
                 return at(row).lockUpdate();
@@ -674,7 +675,7 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
     return {};
 }
 
-void ResourceFolderModel::setupHeaderAction(QAction* act, int column)
+void ResourceFolderModel::setupHeaderAction(QAction* act, int column) const
 {
     Q_ASSERT(act);
 
@@ -803,7 +804,7 @@ QSortFilterProxyModel* ResourceFolderModel::createFilterProxyModel(QObject* pare
 SortType ResourceFolderModel::columnToSortKey(size_t column) const
 {
     Q_ASSERT(m_columnSortKeys.size() == columnCount());
-    return m_columnSortKeys.at(column);
+    return m_columnSortKeys.at(static_cast<qsizetype>(column));
 }
 
 /* Standard Proxy Model for createFilterProxyModel */
@@ -1009,14 +1010,16 @@ QList<Resource*> ResourceFolderModel::selectedResources(const QModelIndexList& i
 
 bool ResourceFolderModel::setUpdateLock(const QModelIndexList& indexes, EnableAction action)
 {
-    if (indexes.isEmpty())
+    if (indexes.isEmpty()) {
         return true;
+    }
 
     bool succeeded = true;
-    auto updateColumn = columnNames(false).indexOf("Update");
+    auto updateColumn = static_cast<int>(columnNames(false).indexOf("Update"));
     for (const auto& idx : indexes) {
-        if (!validateIndex(idx) || idx.column() != updateColumn)
+        if (!validateIndex(idx) || idx.column() != updateColumn) {
             continue;
+        }
 
         int row = idx.row();
         auto& resource = m_resources[row];

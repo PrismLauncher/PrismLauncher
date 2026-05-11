@@ -45,35 +45,35 @@
 TexturePackPage::TexturePackPage(MinecraftInstance* instance, TexturePackFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(instance, model, parent), m_model(model)
 {
-    ui->actionDownloadItem->setText(tr("Download Packs"));
-    ui->actionDownloadItem->setToolTip(tr("Download texture packs from online mod platforms"));
-    ui->actionDownloadItem->setEnabled(true);
-    ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionDownloadItem);
+    m_ui->actionDownloadItem->setText(tr("Download Packs"));
+    m_ui->actionDownloadItem->setToolTip(tr("Download texture packs from online mod platforms"));
+    m_ui->actionDownloadItem->setEnabled(true);
+    m_ui->actionsToolbar->insertActionBefore(m_ui->actionAddItem, m_ui->actionDownloadItem);
 
-    connect(ui->actionDownloadItem, &QAction::triggered, this, &TexturePackPage::downloadTexturePacks);
+    connect(m_ui->actionDownloadItem, &QAction::triggered, this, &TexturePackPage::downloadTexturePacks);
 
-    ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected texture packs (all texture packs if none are selected)"));
-    connect(ui->actionUpdateItem, &QAction::triggered, this, &TexturePackPage::updateTexturePacks);
-    ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
+    m_ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected texture packs (all texture packs if none are selected)"));
+    connect(m_ui->actionUpdateItem, &QAction::triggered, this, &TexturePackPage::updateTexturePacks);
+    m_ui->actionsToolbar->insertActionBefore(m_ui->actionAddItem, m_ui->actionUpdateItem);
 
     auto* updateMenu = new QMenu(this);
 
-    auto* update = updateMenu->addAction(ui->actionUpdateItem->text());
+    auto* update = updateMenu->addAction(m_ui->actionUpdateItem->text());
     connect(update, &QAction::triggered, this, &TexturePackPage::updateTexturePacks);
 
-    updateMenu->addAction(ui->actionResetItemMetadata);
-    connect(ui->actionResetItemMetadata, &QAction::triggered, this, &TexturePackPage::deleteTexturePackMetadata);
+    updateMenu->addAction(m_ui->actionResetItemMetadata);
+    connect(m_ui->actionResetItemMetadata, &QAction::triggered, this, &TexturePackPage::deleteTexturePackMetadata);
 
-    ui->actionUpdateItem->setMenu(updateMenu);
+    m_ui->actionUpdateItem->setMenu(updateMenu);
 
-    ui->actionChangeVersion->setToolTip(tr("Change a texture pack's version."));
-    connect(ui->actionChangeVersion, &QAction::triggered, this, &TexturePackPage::changeTexturePackVersion);
-    ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, ui->actionChangeVersion);
+    m_ui->actionChangeVersion->setToolTip(tr("Change a texture pack's version."));
+    connect(m_ui->actionChangeVersion, &QAction::triggered, this, &TexturePackPage::changeTexturePackVersion);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionUpdateItem, m_ui->actionChangeVersion);
 
-    ui->actionViewHomepage->setToolTip(tr("View the homepages of all selected texture packs."));
+    m_ui->actionViewHomepage->setToolTip(tr("View the homepages of all selected texture packs."));
 
-    ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, ui->actionEnableUpdates);
-    ui->actionsToolbar->insertActionAfter(ui->actionEnableUpdates, ui->actionDisableUpdates);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionUpdateItem, m_ui->actionEnableUpdates);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionEnableUpdates, m_ui->actionDisableUpdates);
 }
 
 void TexturePackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
@@ -81,7 +81,7 @@ void TexturePackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] c
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
     auto& rp = m_model->at(row);
-    ui->frame->updateWithTexturePack(rp);
+    m_ui->frame->updateWithTexturePack(rp);
 }
 
 void TexturePackPage::downloadTexturePacks()
@@ -144,7 +144,7 @@ void TexturePackPage::updateTexturePacks()
             return;
         }
     }
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
 
     auto modsList = m_model->selectedResources(selection);
     bool useAll = modsList.empty();
@@ -197,7 +197,7 @@ void TexturePackPage::updateTexturePacks()
 
 void TexturePackPage::deleteTexturePackMetadata()
 {
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
     auto selectionCount = m_model->selectedTexturePacks(selection).length();
     if (selectionCount == 0) {
         return;
@@ -225,7 +225,7 @@ void TexturePackPage::changeTexturePackVersion()
         return;
     }
 
-    const QModelIndexList rows = ui->treeView->selectionModel()->selectedRows();
+    const QModelIndexList rows = m_ui->treeView->selectionModel()->selectedRows();
 
     if (rows.count() != 1) {
         return;

@@ -49,12 +49,12 @@
 
 class Mod : public Resource {
    public:
-    Mod(const QFileInfo& file);
-    Mod(QString file_path) : Mod(QFileInfo(file_path)) {}
+    explicit Mod(const QFileInfo& file);
+    explicit Mod(const QString& filePath) : Mod(QFileInfo(filePath)) {}
 
     auto details() const -> const ModDetails&;
     auto name() const -> QString override;
-    auto mod_id() const -> QString;
+    auto modId() const -> QString;
     auto version() const -> QString;
     auto homepage() const -> QString override;
     auto description() const -> QString;
@@ -75,11 +75,11 @@ class Mod : public Resource {
     void setRequiresCount(int value);
 
     /** Get the intneral path to the mod's icon file*/
-    QString iconPath() const { return m_local_details.icon_file; }
+    QString iconPath() const { return m_localDetails.icon_file; }
     /** Gets the icon of the mod, converted to a QPixmap for drawing, and scaled to size. */
     QPixmap icon(QSize size, Qt::AspectRatioMode mode = Qt::AspectRatioMode::IgnoreAspectRatio) const;
     /** Thread-safe. */
-    QPixmap setIcon(QImage new_image) const;
+    QPixmap setIcon(const QImage& newImage) const;
 
     void setDetails(const ModDetails& details);
 
@@ -89,16 +89,16 @@ class Mod : public Resource {
     [[nodiscard]] bool applyFilter(const QRegularExpression& filter) const override;
 
     // Delete all the files of this mod
-    auto destroy(QDir& index_dir, bool preserve_metadata = false, bool attempt_trash = true) -> bool;
+    auto destroy(QDir& indexDir, bool preserveMetadata = false, bool attemptTrash = true) -> bool;
     // Delete the metadata only
-    void destroyMetadata(QDir& index_dir);
+    void destroyMetadata(QDir& indexDir);
 
     void finishResolvingWithDetails(ModDetails&& details);
 
    protected:
-    ModDetails m_local_details;
+    ModDetails m_localDetails;
 
-    mutable QMutex m_data_lock;
+    mutable QMutex m_dataLock;
 
     struct {
         QPixmapCache::Key key;

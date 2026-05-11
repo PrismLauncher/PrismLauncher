@@ -49,10 +49,10 @@ TexturePackFolderModel::TexturePackFolderModel(const QDir& dir,
     m_columnNamesTranslated = QStringList(
         { tr("Enable"), tr("Image"), tr("Name"), tr("Last Modified"), tr("Provider"), tr("Size"), tr("File Name"), tr("Update") });
     m_columnSortKeys = { SortType::Enabled,  SortType::Name, SortType::Name,     SortType::Date,
-                         SortType::Provider, SortType::Size, SortType::Filename, SortType::LOCK_UPDATE };
+                         SortType::Provider, SortType::Size, SortType::Filename, SortType::LockUpdate };
     m_columnResizeModes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,     QHeaderView::Interactive,
                             QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
-    m_columnsHideable = { false, true, false, true, true, true, true };
+    m_columnsHideable = { false, true, false, true, true, true, true, true };
 }
 
 Task* TexturePackFolderModel::createParseTask(Resource& resource)
@@ -89,8 +89,9 @@ QVariant TexturePackFolderModel::data(const QModelIndex& index, int role) const
             }
             return {};
         case Qt::UserRole:
-            if (column == LockUpdateColumn)
+            if (column == LockUpdateColumn) {
                 return at(row).lockUpdate();
+            }
             return {};
         default:
             break;
