@@ -51,7 +51,7 @@ bool ResourceModel::isPackInstalled(ModPlatform::IndexedPack::Ptr pack) const
 
     for (qsizetype i = 0; i < m_resourceList->size(); ++i) {
         auto& resource = m_resourceList->at(i);
-        if (auto meta = resource.metadata(); meta && meta->provider == pack->provider && meta->project_id == pack->addonId) {
+        if (auto meta = resource.metadata(); meta && meta->provider == pack->provider && meta->projectId == pack->addonId) {
             return true;
         }
     }
@@ -67,7 +67,7 @@ QVariant ResourceModel::getInstalledPackVersion(ModPlatform::IndexedPack::Ptr pa
     for (qsizetype i = 0; i < m_resourceList->size(); ++i) {
         auto& resource = m_resourceList->at(i);
         if (auto meta = resource.metadata(); meta) {
-            if (meta->provider == pack->provider && meta->project_id == pack->addonId) {
+            if (meta->provider == pack->provider && meta->projectId == pack->addonId) {
                 return meta->version();
             }
         }
@@ -449,8 +449,7 @@ void ResourceModel::searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>&
         return;
     }
 
-    beginInsertRows(QModelIndex(), static_cast<int>(m_packs.size()),
-                    static_cast<int>(m_packs.size() + filteredNewList.size() - 1));
+    beginInsertRows(QModelIndex(), static_cast<int>(m_packs.size()), static_cast<int>(m_packs.size() + filteredNewList.size() - 1));
     m_packs.append(filteredNewList);
     endInsertRows();
 }

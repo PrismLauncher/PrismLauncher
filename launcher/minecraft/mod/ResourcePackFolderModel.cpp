@@ -54,11 +54,11 @@ ResourcePackFolderModel::ResourcePackFolderModel(const QDir& dir,
     m_columnNamesTranslated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Pack Format"), tr("Last Modified"), tr("Provider"),
                                             tr("Size"), tr("File Name"), tr("Update") });
     m_columnSortKeys = { SortType::Enabled,  SortType::Name, SortType::Name,     SortType::PackFormat, SortType::Date,
-                         SortType::Provider, SortType::Size, SortType::Filename, SortType::LOCK_UPDATE };
+                         SortType::Provider, SortType::Size, SortType::Filename, SortType::LockUpdate };
     m_columnResizeModes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,
                             QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
                             QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
-    m_columnsHideable = { false, true, false, true, true, true, true, true };
+    m_columnsHideable = { false, true, false, true, true, true, true, true, true };
 }
 
 QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
@@ -102,6 +102,7 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
             if (column == ActiveColumn) {
                 return at(row).enabled() ? Qt::Checked : Qt::Unchecked;
             }
+            [[fallthrough]];
         case Qt::UserRole:
             if (column == LockUpdateColumn) {
                 return at(row).lockUpdate();

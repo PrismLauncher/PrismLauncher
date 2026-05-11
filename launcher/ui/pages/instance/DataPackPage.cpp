@@ -28,30 +28,30 @@
 DataPackPage::DataPackPage(MinecraftInstance* instance, DataPackFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(instance, model, parent), m_model(model)
 {
-    ui->actionDownloadItem->setText(tr("Download Packs"));
-    ui->actionDownloadItem->setToolTip(tr("Download data packs from online mod platforms"));
-    ui->actionDownloadItem->setEnabled(true);
-    ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionDownloadItem);
+    m_ui->actionDownloadItem->setText(tr("Download Packs"));
+    m_ui->actionDownloadItem->setToolTip(tr("Download data packs from online mod platforms"));
+    m_ui->actionDownloadItem->setEnabled(true);
+    m_ui->actionsToolbar->insertActionBefore(m_ui->actionAddItem, m_ui->actionDownloadItem);
 
-    connect(ui->actionDownloadItem, &QAction::triggered, this, &DataPackPage::downloadDataPacks);
+    connect(m_ui->actionDownloadItem, &QAction::triggered, this, &DataPackPage::downloadDataPacks);
 
-    ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected data packs (all data packs if none are selected)"));
-    connect(ui->actionUpdateItem, &QAction::triggered, this, &DataPackPage::updateDataPacks);
-    ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
+    m_ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected data packs (all data packs if none are selected)"));
+    connect(m_ui->actionUpdateItem, &QAction::triggered, this, &DataPackPage::updateDataPacks);
+    m_ui->actionsToolbar->insertActionBefore(m_ui->actionAddItem, m_ui->actionUpdateItem);
 
     auto* updateMenu = new QMenu(this);
 
-    auto* update = updateMenu->addAction(ui->actionUpdateItem->text());
+    auto* update = updateMenu->addAction(m_ui->actionUpdateItem->text());
     connect(update, &QAction::triggered, this, &DataPackPage::updateDataPacks);
 
-    updateMenu->addAction(ui->actionResetItemMetadata);
-    connect(ui->actionResetItemMetadata, &QAction::triggered, this, &DataPackPage::deleteDataPackMetadata);
+    updateMenu->addAction(m_ui->actionResetItemMetadata);
+    connect(m_ui->actionResetItemMetadata, &QAction::triggered, this, &DataPackPage::deleteDataPackMetadata);
 
-    ui->actionUpdateItem->setMenu(updateMenu);
+    m_ui->actionUpdateItem->setMenu(updateMenu);
 
-    ui->actionChangeVersion->setToolTip(tr("Change a data pack's version."));
-    connect(ui->actionChangeVersion, &QAction::triggered, this, &DataPackPage::changeDataPackVersion);
-    ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, ui->actionChangeVersion);
+    m_ui->actionChangeVersion->setToolTip(tr("Change a data pack's version."));
+    connect(m_ui->actionChangeVersion, &QAction::triggered, this, &DataPackPage::changeDataPackVersion);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionUpdateItem, m_ui->actionChangeVersion);
 }
 
 void DataPackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
@@ -59,7 +59,7 @@ void DataPackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] cons
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
     auto& dp = m_model->at(row);
-    ui->frame->updateWithDataPack(dp);
+    m_ui->frame->updateWithDataPack(dp);
 }
 
 void DataPackPage::downloadDataPacks()
@@ -123,7 +123,7 @@ void DataPackPage::updateDataPacks()
             return;
         }
     }
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
 
     auto modsList = m_model->selectedResources(selection);
     bool useAll = modsList.empty();
@@ -176,7 +176,7 @@ void DataPackPage::updateDataPacks()
 
 void DataPackPage::deleteDataPackMetadata()
 {
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
     auto selectionCount = m_model->selectedDataPacks(selection).length();
     if (selectionCount == 0) {
         return;
@@ -204,7 +204,7 @@ void DataPackPage::changeDataPackVersion()
         return;
     }
 
-    const QModelIndexList rows = ui->treeView->selectionModel()->selectedRows();
+    const QModelIndexList rows = m_ui->treeView->selectionModel()->selectedRows();
 
     if (rows.count() != 1) {
         return;
