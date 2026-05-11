@@ -38,6 +38,7 @@
 #include <QByteArray>
 #include <QDebug>
 #include <QFile>
+#include <bit>
 
 bool GZip::unzip(const QByteArray& compressedBytes, QByteArray& uncompressedBytes)
 {
@@ -46,14 +47,14 @@ bool GZip::unzip(const QByteArray& compressedBytes, QByteArray& uncompressedByte
         return true;
     }
 
-    auto uncompLength = compressedBytes.size();
+    auto uncompLength = static_cast<uLong>(compressedBytes.size());
     uncompressedBytes.clear();
-    uncompressedBytes.resize(uncompLength);
+    uncompressedBytes.resize(static_cast<qsizetype>(uncompLength));
 
     z_stream strm;
     memset(&strm, 0, sizeof(strm));
-    strm.next_in = (Bytef*)compressedBytes.data();
-    strm.avail_in = compressedBytes.size();
+    strm.next_in = std::bit_cast<Bytef*>(compressedBytes.data());
+    strm.avail_in = static_cast<uLong>(compressedBytes.size());
 
     bool done = false;
 
@@ -65,19 +66,19 @@ bool GZip::unzip(const QByteArray& compressedBytes, QByteArray& uncompressedByte
 
     while (!done) {
         // If our output buffer is too small
-        if (uncompLength >= 0 && strm.total_out >= static_cast<uLong>(uncompLength)) {
-            uncompressedBytes.resize(static_cast<qsizetype>(uncompLength * 2));
+        if (strm.total_out >= uncompLength) {
+            uncompressedBytes.resize(static_cast<qsizetype>(uncompLength) * 2);
             uncompLength *= 2;
         }
 
-        strm.next_out = reinterpret_cast<Bytef*>((uncompressedBytes.data() + strm.total_out));
+        strm.next_out = std::bit_cast<Bytef*>(&uncompressedBytes[static_cast<qsizetype>(strm.total_out)]);
         strm.avail_out = uncompLength - strm.total_out;
 
         // Inflate another chunk.
         err = inflate(&strm, Z_SYNC_FLUSH);
-        if (err == Z_STREAM_END)
+        if (err == Z_STREAM_END) {
             done = true;
-        else if (err != Z_OK) {
+        } else if (err != Z_OK) {
             break;
         }
     }
@@ -86,7 +87,7 @@ bool GZip::unzip(const QByteArray& compressedBytes, QByteArray& uncompressedByte
         return false;
     }
 
-    uncompressedBytes.resize(strm.total_out);
+    uncompressedBytes.resize(static_cast<qsizetype>(strm.total_out));
     return true;
 }
 
@@ -108,24 +109,27 @@ bool GZip::zip(const QByteArray& uncompressedBytes, QByteArray& compressedBytes)
         return false;
     }
 
-    zs.next_in = (Bytef*)uncompressedBytes.data();
-    zs.avail_in = uncompressedBytes.size();
+    zs.next_in = std::bit_cast<Bytef*>(uncompressedBytes.data());
+    zs.avail_in = static_cast<uInt>(uncompressedBytes.size());
 
-    int ret;
+    int ret = 0;
     compressedBytes.resize(uncompressedBytes.size());
 
     unsigned offset = 0;
     unsigned temp = 0;
-    do {
+    while (true) {
         auto remaining = compressedBytes.size() - offset;
         if (remaining < 1) {
             compressedBytes.resize(compressedBytes.size() * 2);
         }
-        zs.next_out = reinterpret_cast<Bytef*>((compressedBytes.data() + offset));
-        temp = zs.avail_out = compressedBytes.size() - offset;
+        zs.next_out = std::bit_cast<Bytef*>(&compressedBytes[static_cast<qsizetype>(offset)]);
+        temp = zs.avail_out = static_cast<uInt>(compressedBytes.size() - offset);
         ret = deflate(&zs, Z_FINISH);
         offset += temp - zs.avail_out;
-    } while (ret == Z_OK);
+        if (ret != Z_OK) {
+            break;
+        }
+    }
 
     compressedBytes.resize(offset);
 
@@ -139,35 +143,38 @@ bool GZip::zip(const QByteArray& uncompressedBytes, QByteArray& compressedBytes)
     return true;
 }
 
-int inf(QFile* source, std::function<bool(const QByteArray&)> handleBlock)
+namespace {
+int inf(QFile* source, const std::function<bool(const QByteArray&)>& handleBlock)
 {
-    constexpr auto CHUNK = 16384;
-    int ret;
-    unsigned have;
+    constexpr auto chunk = 16384;
+    int ret = 0;
+    unsigned have = 0;
     z_stream strm;
     memset(&strm, 0, sizeof(strm));
-    char in[CHUNK];
-    unsigned char out[CHUNK];
+    std::array<char, static_cast<std::size_t>(chunk)> in{};
+    std::array<unsigned char, static_cast<std::size_t>(chunk)> out{};
 
     ret = inflateInit2(&strm, (16 + MAX_WBITS));
-    if (ret != Z_OK)
+    if (ret != Z_OK) {
         return ret;
+    }
 
     /* decompress until deflate stream ends or end of file */
-    do {
-        strm.avail_in = source->read(in, CHUNK);
-        if (source->error()) {
+    while (true) {
+        strm.avail_in = static_cast<uInt>(source->read(in.data(), chunk));
+        if (source->error() != 0U) {
             (void)inflateEnd(&strm);
             return Z_ERRNO;
         }
-        if (strm.avail_in == 0)
+        if (strm.avail_in == 0) {
             break;
-        strm.next_in = reinterpret_cast<Bytef*>(in);
+        }
+        strm.next_in = std::bit_cast<Bytef*>(in.data());
 
         /* run inflate() on input until output buffer not full */
-        do {
-            strm.avail_out = CHUNK;
-            strm.next_out = out;
+        while (true) {
+            strm.avail_out = static_cast<uInt>(chunk);
+            strm.next_out = out.data();
             ret = inflate(&strm, Z_NO_FLUSH);
             assert(ret != Z_STREAM_ERROR); /* state not clobbered */
             switch (ret) {
@@ -181,16 +188,22 @@ int inf(QFile* source, std::function<bool(const QByteArray&)> handleBlock)
                 default:
                     break;
             }
-            have = CHUNK - strm.avail_out;
-            if (!handleBlock(QByteArray(reinterpret_cast<const char*>(out), have))) {
+            have = static_cast<unsigned>(chunk) - strm.avail_out;
+            if (!handleBlock(QByteArray(std::bit_cast<const char*>(out.data()), static_cast<qsizetype>(have)))) {
                 (void)inflateEnd(&strm);
                 return Z_OK;
             }
 
-        } while (strm.avail_out == 0);
+            if (strm.avail_out != 0) {
+                break;
+            }
+        }
 
         /* done when inflate() says it's done */
-    } while (ret != Z_STREAM_END);
+        if (ret == Z_STREAM_END) {
+            break;
+        }
+    }
 
     /* clean up and return */
     (void)inflateEnd(&strm);
@@ -215,8 +228,9 @@ QString zerr(int ret)
     }
     return {};
 }
+}  // namespace
 
-QString GZip::readGzFileByBlocks(QFile* source, std::function<bool(const QByteArray&)> handleBlock)
+QString GZip::readGzFileByBlocks(QFile* source, const std::function<bool(const QByteArray&)>& handleBlock)
 {
     auto ret = inf(source, handleBlock);
     return zerr(ret);

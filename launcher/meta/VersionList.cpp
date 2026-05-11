@@ -203,7 +203,8 @@ void VersionList::clearExternalRecommends()
 }
 
 // FIXME: this is dumb, we have 'recommended' as part of the metadata already...
-static Meta::Version::Ptr getBetterVersion(Meta::Version::Ptr a, Meta::Version::Ptr b)
+namespace {
+Meta::Version::Ptr getBetterVersion(Meta::Version::Ptr a, Meta::Version::Ptr b)
 {
     if (!a) {
         return b;
@@ -218,6 +219,7 @@ static Meta::Version::Ptr getBetterVersion(Meta::Version::Ptr a, Meta::Version::
     // 'release' type wins
     return (a->type() == "release" ? a : b);
 }
+}  // namespace
 
 void VersionList::mergeFromIndex(const VersionList::Ptr& other)
 {

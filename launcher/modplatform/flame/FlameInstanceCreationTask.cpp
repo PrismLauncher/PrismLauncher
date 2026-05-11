@@ -474,7 +474,7 @@ std::unique_ptr<MinecraftInstance> FlameCreationTask::createInstance()
     // Update information of the already installed instance, if any.
     if (m_instance.has_value() && did_succeed) {
         setAbortable(false);
-        auto* inst = m_instance.value();
+        auto* inst = *m_instance;
 
         inst->copyManagedPack(*instance);
     }
@@ -602,14 +602,14 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
 
 /// @brief copy the matched blocked mods to the instance staging area
 /// @param blocked_mods list of the blocked mods and their matched paths
-void FlameCreationTask::copyBlockedMods(const QList<BlockedMod>& blocked_mods)
+void FlameCreationTask::copyBlockedMods(const QList<BlockedMod>& blockedMods)
 {
     setStatus(tr("Copying Blocked Mods..."));
     setAbortable(false);
     int i = 0;
-    int total = blocked_mods.length();
+    int total = blockedMods.length();
     setProgress(i, total);
-    for (const auto& mod : blocked_mods) {
+    for (const auto& mod : blockedMods) {
         if (!mod.matched) {
             qDebug() << mod.name << "was not matched to a local file, skipping copy";
             continue;

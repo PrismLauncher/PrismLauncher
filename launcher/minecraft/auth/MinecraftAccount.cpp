@@ -49,7 +49,6 @@
 #include <QDebug>
 
 #include <QPainter>
-#include <cstddef>
 
 #include "minecraft/auth/AccountData.h"
 #include "minecraft/auth/AuthFlow.h"

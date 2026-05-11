@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+#include <QFlags>
 #include <QList>
 #include <QString>
 #include "minecraft/mod/Mod.h"
@@ -24,6 +25,9 @@ namespace ExportToModList {
 
 enum Formats { HTML, MARKDOWN, PLAINTXT, JSON, CSV, CUSTOM };
 enum OptionalData { Authors = 1 << 0, Url = 1 << 1, Version = 1 << 2, FileName = 1 << 3 };
-QString exportToModList(QList<Mod*> mods, Formats format, OptionalData extraData);
+Q_DECLARE_FLAGS(OptionalDatas, OptionalData)
+QString exportToModList(const QList<Mod*>& mods, Formats format, OptionalDatas extraData);
 QString exportToModList(QList<Mod*> mods, QString lineTemplate);
 }  // namespace ExportToModList
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(ExportToModList::OptionalDatas)

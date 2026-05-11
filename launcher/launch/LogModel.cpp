@@ -1,7 +1,5 @@
 #include "LogModel.h"
 
-#include <cstddef>
-
 LogModel::LogModel(QObject* parent) : QAbstractListModel(parent)
 {
     m_content.resize(m_maxLines);

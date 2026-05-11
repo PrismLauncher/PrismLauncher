@@ -84,6 +84,7 @@
 #include "ApplicationMessage.h"
 
 #include <iostream>
+#include <memory>
 #include <mutex>
 
 #include <QAccessible>
@@ -1017,7 +1018,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     // load translations
     {
-        m_translations.reset(new TranslationsModel("translations"));
+        m_translations = std::make_unique<TranslationsModel>("translations");
         m_translations->downloadIndex();
         qInfo() << "Your language is" << m_translations->selectedLanguage();
         qInfo() << "<> Translations loaded.";
@@ -1027,7 +1028,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     m_profilers.insert("jprofiler", std::shared_ptr<BaseProfilerFactory>(new JProfilerFactory()));
     m_profilers.insert("jvisualvm", std::shared_ptr<BaseProfilerFactory>(new JVisualVMFactory()));
     m_profilers.insert("generic", std::shared_ptr<BaseProfilerFactory>(new GenericProfilerFactory()));
-    for (auto profiler : m_profilers.values()) {
+    for (const auto& profiler : m_profilers.values()) {
         profiler->registerSettings(m_settings.get());
     }
 

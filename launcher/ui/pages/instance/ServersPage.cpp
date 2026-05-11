@@ -328,15 +328,18 @@ class ServersModel : public QAbstractListModel {
                         return m_servers[row].m_name;
                     case 1:
                         return m_servers[row].m_address;
-                    case 2:
-                        if (m_servers[row].m_currentPlayers.has_value()) {
-                            return m_servers[row].m_currentPlayers.value();
+                    case 2: {
+                        const auto& currentPlayers = m_servers.at(row).m_currentPlayers;
+                        if (currentPlayers.has_value()) {
+                            return *currentPlayers;
                         } else {
                             return "...";
                         }
+                    }
                     default:
                         return QVariant();
                 }
+                break;
             case ServerPtrRole:
                 if (column == 0)
                     return QVariant::fromValue<void*>((void*)&m_servers[row]);
@@ -693,8 +696,8 @@ void ServersPage::openedImpl()
 {
     m_model->observe();
 
-    const auto setting_name = QString("WideBarVisibility_%1").arg(id());
-    m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
+    const auto settingName = QString("WideBarVisibility_%1").arg(id());
+    m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(settingName);
 
     ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
 

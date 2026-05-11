@@ -346,17 +346,17 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
             return {};
         }
 
-        toml::table* mod_provider_table = update_table[ModPlatform::ProviderCapabilities::name(Provider::FLAME)].as_table();
-        if (mod_provider_table) {
+        const auto* modProviderTable = update_table[ModPlatform::ProviderCapabilities::name(Provider::FLAME)].as_table();
+        if (modProviderTable) {
             mod.provider = Provider::FLAME;
-            mod.file_id = intEntry(*mod_provider_table, "file-id");
-            mod.project_id = intEntry(*mod_provider_table, "project-id");
+            mod.file_id = intEntry(*modProviderTable, "file-id");
+            mod.project_id = intEntry(*modProviderTable, "project-id");
         } else {
-            mod_provider_table = update_table[ModPlatform::ProviderCapabilities::name(Provider::MODRINTH)].as_table();
-            if (mod_provider_table) {
+            modProviderTable = update_table[ModPlatform::ProviderCapabilities::name(Provider::MODRINTH)].as_table();
+            if (modProviderTable) {
                 mod.provider = Provider::MODRINTH;
-                mod.mod_id() = stringEntry(*mod_provider_table, "mod-id");
-                mod.version() = stringEntry(*mod_provider_table, "version");
+                mod.mod_id() = stringEntry(*modProviderTable, "mod-id");
+                mod.version() = stringEntry(*modProviderTable, "version");
             } else {
                 qCritical() << QString("No mod provider on mod metadata!");
                 return {};
