@@ -19,11 +19,11 @@ class ModPage : public ResourcePage {
     Q_OBJECT
 
    public:
-    auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
+    auto getFilter() const -> std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
 
     ModPage(ResourceDownloadDialog* dialog,
             BaseInstance& instance,
-            ResourceProviderData p,
+            ResourceProviderData provider,
             ResourceAPI* api,
             ModFilterWidget* filterWidget);
 
@@ -36,7 +36,7 @@ class ModPage : public ResourcePage {
     void triggerSearch() override;
 
    protected:
-    std::unique_ptr<ModFilterWidget> m_filter_widget;
+    std::unique_ptr<ModFilterWidget> m_filterWidget;
     std::shared_ptr<ModFilterWidget::Filter> m_filter;
     Task::Ptr m_categoriesTask;
     ResourceAPI* m_api = nullptr;

@@ -230,7 +230,7 @@ int DataPack::compare(const Resource& other, SortType type) const
     return 0;
 }
 
-bool DataPack::applyFilter(QRegularExpression filter) const
+bool DataPack::applyFilter(const QRegularExpression& filter) const
 {
     if (filter.match(description()).hasMatch()) {
         return true;

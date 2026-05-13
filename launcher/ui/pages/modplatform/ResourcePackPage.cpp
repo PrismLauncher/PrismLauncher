@@ -10,16 +10,17 @@
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
 #include <QRegularExpression>
+#include <utility>
 
-namespace ResourceDownload {
+namespace {
 
-static ResourceDescriptor prepareResourcePackDescriptor()
+ResourceDownload::ResourceDescriptor prepareResourcePackDescriptor()
 {
     QMap<QString, QString> urlHandlers;
-    urlHandlers.insert(QRegularExpression::anchoredPattern("(?:www\\.)?modrinth\\.com\\/resourcepack\\/([^\\/]+)\\/?"), "modrinth");
-    urlHandlers.insert(QRegularExpression::anchoredPattern("(?:www\\.)?curseforge\\.com\\/minecraft\\/texture-packs\\/([^\\/]+)\\/?"),
+    urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?modrinth\.com\/resourcepack\/([^\/]+)\/?)"), "modrinth");
+    urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?curseforge\.com\/minecraft\/texture-packs\/([^\/]+)\/?)"),
                        "curseforge");
-    urlHandlers.insert(QRegularExpression::anchoredPattern("minecraft\\.curseforge\\.com\\/projects\\/([^\\/]+)\\/?"), "curseforge");
+    urlHandlers.insert(QRegularExpression::anchoredPattern(R"(minecraft\.curseforge\.com\/projects\/([^\/]+)\/?)"), "curseforge");
     return {
         .helpPage = {},
         //: The singular version of 'resource packs'
@@ -31,12 +32,15 @@ static ResourceDescriptor prepareResourcePackDescriptor()
         .urlHandlers = urlHandlers,
     };
 }
+}  // namespace
+
+namespace ResourceDownload {
 
 ResourcePackResourcePage::ResourcePackResourcePage(ResourceDownloadDialog* dialog,
                                                    BaseInstance& instance,
-                                                   ResourceProviderData p,
+                                                   ResourceProviderData provider,
                                                    ResourceAPI* api)
-    : ResourcePage(dialog, instance, prepareResourcePackDescriptor(), p)
+    : ResourcePage(dialog, instance, prepareResourcePackDescriptor(), std::move(provider))
 {
     m_model = new ResourcePackResourceModel(instance, api, debugName(), metaEntryBase());
     m_ui->packView->setModel(m_model);

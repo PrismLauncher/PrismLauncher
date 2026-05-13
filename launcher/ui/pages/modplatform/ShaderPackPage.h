@@ -14,7 +14,7 @@ class ShaderPackResourcePage : public ResourcePage {
     Q_OBJECT
 
    public:
-    ShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, ResourceProviderData p, ResourceAPI* api);
+    ShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, ResourceProviderData provider, ResourceAPI* api);
 
    protected slots:
     void triggerSearch() override;

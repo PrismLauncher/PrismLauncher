@@ -68,6 +68,7 @@ ResourceDownload::ResourceDescriptor prepareModDescriptor()
 }
 }  // namespace
 
+namespace ResourceDownload {
 ModPage::ModPage(ResourceDownloadDialog* dialog,
                  BaseInstance& instance,
                  ResourceProviderData p,
@@ -101,8 +102,8 @@ ModPage::ModPage(ResourceDownloadDialog* dialog,
 
 void ModPage::setFilterWidget(ModFilterWidget* widget)
 {
-    if (m_filter_widget) {
-        disconnect(m_filter_widget.get(), nullptr, nullptr, nullptr);
+    if (m_filterWidget) {
+        disconnect(m_filterWidget.get(), nullptr, nullptr, nullptr);
     }
 
     auto* old = m_ui->splitter->replaceWidget(0, widget);
@@ -111,11 +112,11 @@ void ModPage::setFilterWidget(ModFilterWidget* widget)
         old->deleteLater();
     }
 
-    m_filter_widget.reset(widget);
+    m_filterWidget.reset(widget);
 
-    m_filter = m_filter_widget->getFilter();
+    m_filter = m_filterWidget->getFilter();
 
-    connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this, &ModPage::triggerSearch);
+    connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &ModPage::triggerSearch);
     prepareProviderCategories();
 }
 
@@ -123,13 +124,13 @@ void ModPage::setFilterWidget(ModFilterWidget* widget)
 
 void ModPage::filterMods()
 {
-    m_filter_widget->setHidden(!m_filter_widget->isHidden());
+    m_filterWidget->setHidden(!m_filterWidget->isHidden());
 }
 
 void ModPage::triggerSearch()
 {
-    auto changed = m_filter_widget->changed();
-    m_filter = m_filter_widget->getFilter();
+    auto changed = m_filterWidget->changed();
+    m_filter = m_filterWidget->getFilter();
     m_ui->packView->selectionModel()->setCurrentIndex({}, QItemSelectionModel::SelectionFlag::ClearAndSelect);
     m_ui->packView->clearSelection();
     m_ui->packDescription->clear();
@@ -146,7 +147,7 @@ void ModPage::prepareProviderCategories()
     m_categoriesTask = task;
     connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
         auto categories = m_api->loadModCategories(*response);
-        m_filter_widget->setCategories(categories);
+        m_filterWidget->setCategories(categories);
     });
     m_categoriesTask->start();
 };

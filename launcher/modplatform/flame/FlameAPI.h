@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QList>
 #include <cstdint>
 #include "BuildConfig.h"

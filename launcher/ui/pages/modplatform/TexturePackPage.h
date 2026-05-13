@@ -17,7 +17,7 @@ class TexturePackResourcePage : public ResourcePage {
    public:
     TexturePackResourcePage(ResourceDownloadDialog* dialog,
                             BaseInstance& instance,
-                            ResourceProviderData p,
+                            ResourceProviderData provider,
                             ResourceAPI* api,
                             TexturePackResourceModel* model = nullptr);
 

@@ -10,10 +10,11 @@
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
 #include <QRegularExpression>
+#include <utility>
 
-namespace ResourceDownload {
+namespace {
 
-static ResourceDescriptor prepareShaderPackDescriptor()
+ResourceDownload::ResourceDescriptor prepareShaderPackDescriptor()
 {
     QMap<QString, QString> urlHandlers;
     urlHandlers.insert(QRegularExpression::anchoredPattern("(?:www\\.)?modrinth\\.com\\/shaders\\/([^\\/]+)\\/?"), "modrinth");
@@ -31,12 +32,14 @@ static ResourceDescriptor prepareShaderPackDescriptor()
         .urlHandlers = urlHandlers,
     };
 }
+}  // namespace
+namespace ResourceDownload {
 
 ShaderPackResourcePage::ShaderPackResourcePage(ResourceDownloadDialog* dialog,
                                                BaseInstance& instance,
-                                               ResourceProviderData p,
+                                               ResourceProviderData provider,
                                                ResourceAPI* api)
-    : ResourcePage(dialog, instance, prepareShaderPackDescriptor(), p)
+    : ResourcePage(dialog, instance, prepareShaderPackDescriptor(), std::move(provider))
 {
     m_model = new ShaderPackResourceModel(instance, api, debugName(), metaEntryBase());
     m_ui->packView->setModel(m_model);

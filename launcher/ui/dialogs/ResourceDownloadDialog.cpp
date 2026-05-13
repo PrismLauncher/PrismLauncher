@@ -346,9 +346,9 @@ ResourceDownloadDialog* ResourceDownloadDialog::createMod(QWidget* parent,
         pages.append(page);
     }
     if (APPLICATION->capabilities() & Application::SupportsFlame && FlameAPI::validateModLoaders(loaders)) {
-        auto* page = Flame::createModPage(dialog, *instance);
-        page->setSuppressInitialSearch(suppressInitialSearch);
-        pages.append(page);
+        auto* flamePage = Flame::createModPage(dialog, *instance);
+        flamePage->setSuppressInitialSearch(suppressInitialSearch);
+        pages.append(flamePage);
     }
     dialog->initPages(pages);
     return dialog;
@@ -366,9 +366,9 @@ ResourceDownloadDialog* ResourceDownloadDialog::createResourcePack(QWidget* pare
     page->setSuppressInitialSearch(suppressInitialSearch);
     pages.append(page);
     if (APPLICATION->capabilities() & Application::SupportsFlame) {
-        auto* page = Flame::createResourcePackResourcePage(dialog, *instance);
-        page->setSuppressInitialSearch(suppressInitialSearch);
-        pages.append(page);
+        auto* flamePage = Flame::createResourcePackResourcePage(dialog, *instance);
+        flamePage->setSuppressInitialSearch(suppressInitialSearch);
+        pages.append(flamePage);
     }
     dialog->initPages(pages);
 
@@ -387,9 +387,9 @@ ResourceDownloadDialog* ResourceDownloadDialog::createTexturePack(QWidget* paren
     page->setSuppressInitialSearch(suppressInitialSearch);
     pages.append(page);
     if (APPLICATION->capabilities() & Application::SupportsFlame) {
-        auto* page = Flame::createTexturePackResourcePage(dialog, *instance);
-        page->setSuppressInitialSearch(suppressInitialSearch);
-        pages.append(page);
+        auto* flamePage = Flame::createTexturePackResourcePage(dialog, *instance);
+        flamePage->setSuppressInitialSearch(suppressInitialSearch);
+        pages.append(flamePage);
     }
     dialog->initPages(pages);
 
@@ -408,9 +408,9 @@ ResourceDownloadDialog* ResourceDownloadDialog::createShaderPack(QWidget* parent
     page->setSuppressInitialSearch(suppressInitialSearch);
     pages.append(page);
     if (APPLICATION->capabilities() & Application::SupportsFlame) {
-        auto* page = Flame::createShaderPackResourcePage(dialog, *instance);
-        page->setSuppressInitialSearch(suppressInitialSearch);
-        pages.append(page);
+        auto* flamePage = Flame::createShaderPackResourcePage(dialog, *instance);
+        flamePage->setSuppressInitialSearch(suppressInitialSearch);
+        pages.append(flamePage);
     }
     dialog->initPages(pages);
 
@@ -429,9 +429,9 @@ ResourceDownloadDialog* ResourceDownloadDialog::createDataPack(QWidget* parent,
     page->setSuppressInitialSearch(suppressInitialSearch);
     pages.append(page);
     if (APPLICATION->capabilities() & Application::SupportsFlame) {
-        auto* page = Flame::createDataPackResourcePage(dialog, *instance);
-        page->setSuppressInitialSearch(suppressInitialSearch);
-        pages.append(page);
+        auto* flamePage = Flame::createDataPackResourcePage(dialog, *instance);
+        flamePage->setSuppressInitialSearch(suppressInitialSearch);
+        pages.append(flamePage);
     }
     dialog->initPages(pages);
 

@@ -57,16 +57,16 @@ class ResourcePage : public QWidget, public BasePage {
     bool shouldDisplay() const override { return true; };
 
     /* Used internally */
-    virtual auto metaEntryBase() const -> QString { return m_provider.metaEntryBase; };
-    virtual auto debugName() const -> QString { return m_provider.debugName; };
+    auto metaEntryBase() const -> QString { return m_provider.metaEntryBase; };
+    auto debugName() const -> QString { return m_provider.debugName; };
 
     //: The plural version of 'resource'
-    virtual QString resourcesString() const { return m_desc.resourcesString; }
+    QString resourcesString() const { return m_desc.resourcesString; }
     //: The singular version of 'resources'
-    virtual QString resourceString() const { return m_desc.resourceString; }
+    QString resourceString() const { return m_desc.resourceString; }
 
     /* Features this resource's page supports */
-    virtual bool supportsFiltering() const { return m_desc.supportsFiltering; };
+    bool supportsFiltering() const { return m_desc.supportsFiltering; };
 
     void retranslate() override;
     void openedImpl() override;
@@ -122,8 +122,8 @@ class ResourcePage : public QWidget, public BasePage {
     void onResourceToggle(const QModelIndex& index);
 
     /** Associates regex expressions to pages in the order they're given in the map. */
-    virtual QMap<QString, QString> urlHandlers() const { return m_desc.urlHandlers; };
-    virtual void openUrl(const QUrl&);
+    QMap<QString, QString> urlHandlers() const { return m_desc.urlHandlers; };
+    void openUrl(QUrl);
 
    public:
     BaseInstance& m_baseInstance;

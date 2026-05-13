@@ -59,7 +59,7 @@ class DataPack : public Resource {
     bool valid() const override;
 
     [[nodiscard]] int compare(const Resource& other, SortType type) const override;
-    [[nodiscard]] bool applyFilter(QRegularExpression filter) const override;
+    [[nodiscard]] bool applyFilter(const QRegularExpression& filter) const override;
 
     QString packFormatStr() const;
 

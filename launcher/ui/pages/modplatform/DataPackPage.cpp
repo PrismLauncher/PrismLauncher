@@ -11,16 +11,17 @@
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
 #include <QRegularExpression>
+#include <utility>
 
-namespace ResourceDownload {
+namespace {
 
-static ResourceDescriptor prepareDataPackDescriptor()
+ResourceDownload::ResourceDescriptor prepareDataPackDescriptor()
 {
     QMap<QString, QString> urlHandlers;
-    urlHandlers.insert(QRegularExpression::anchoredPattern("(?:www\\.)?modrinth\\.com\\/resourcepack\\/([^\\/]+)\\/?"), "modrinth");
-    urlHandlers.insert(QRegularExpression::anchoredPattern("(?:www\\.)?curseforge\\.com\\/minecraft\\/texture-packs\\/([^\\/]+)\\/?"),
+    urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?modrinth\.com\/resourcepack\/([^\/]+)\/?)"), "modrinth");
+    urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?curseforge\.com\/minecraft\/texture-packs\/([^\/]+)\/?)"),
                        "curseforge");
-    urlHandlers.insert(QRegularExpression::anchoredPattern("minecraft\\.curseforge\\.com\\/projects\\/([^\\/]+)\\/?"), "curseforge");
+    urlHandlers.insert(QRegularExpression::anchoredPattern(R"(minecraft\.curseforge\.com\/projects\/([^\/]+)\/?)"), "curseforge");
     return {
         .helpPage = {},
         //: The singular version of 'data packs'
@@ -33,8 +34,14 @@ static ResourceDescriptor prepareDataPackDescriptor()
     };
 }
 
-DataPackResourcePage::DataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, ResourceProviderData p, ResourceAPI* api)
-    : ResourcePage(dialog, instance, prepareDataPackDescriptor(), p)
+}  // namespace
+namespace ResourceDownload {
+
+DataPackResourcePage::DataPackResourcePage(ResourceDownloadDialog* dialog,
+                                           BaseInstance& instance,
+                                           ResourceProviderData provider,
+                                           ResourceAPI* api)
+    : ResourcePage(dialog, instance, prepareDataPackDescriptor(), std::move(provider))
 {
     m_model = new DataPackResourceModel(instance, api, debugName(), metaEntryBase());
     m_ui->packView->setModel(m_model);

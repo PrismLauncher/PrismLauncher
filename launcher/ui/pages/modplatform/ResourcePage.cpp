@@ -498,9 +498,8 @@ void ResourcePage::onResourceToggle(const QModelIndex& index)
     }
 }
 
-void ResourcePage::openUrl(const QUrl& _url)
+void ResourcePage::openUrl(QUrl url)
 {
-    auto url = _url;
     if (url.scheme().isEmpty()) {
         QString query = url.query(QUrl::FullyDecoded);
 
