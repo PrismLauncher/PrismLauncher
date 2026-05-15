@@ -308,6 +308,9 @@ void ResourcePage::versionListUpdated(const QModelIndex& index)
         m_ui->versionSelectionBox->clear();
         m_ui->versionSelectionBox->blockSignals(false);
 
+        bool preferRelease = APPLICATION->settings()->get("PreferModRelease").toBool();
+        bool releaseChosen = false;
+
         if (currentPack) {
             auto installedVersion = m_model->getInstalledPackVersion(currentPack);
 
@@ -326,6 +329,12 @@ void ResourcePage::versionListUpdated(const QModelIndex& index)
                 }
 
                 m_ui->versionSelectionBox->addItem(versionText, QVariant(i));
+
+                bool isRelease = version.version_type == ModPlatform::IndexedVersionType::Release;
+                if (preferRelease && !releaseChosen && isRelease) {
+                    releaseChosen = true;
+                    m_ui->versionSelectionBox->setCurrentIndex(m_ui->versionSelectionBox->count() - 1);
+                }
             }
         }
         if (m_ui->versionSelectionBox->count() == 0) {
