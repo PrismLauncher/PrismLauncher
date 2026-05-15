@@ -775,6 +775,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("ShowGameTimeWithoutDays", false);
 
         // Minecraft mods
+        m_settings->registerSetting("PreferModRelease", true);
         m_settings->registerSetting("ModMetadataDisabled", false);
         m_settings->registerSetting("ModDependenciesDisabled", false);
         m_settings->registerSetting("SkipModpackUpdatePrompt", false);

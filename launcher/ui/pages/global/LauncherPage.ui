@@ -392,6 +392,13 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="preferReleaseCheckBox">
+            <property name="text">
+             <string>Prefer release versions when downloading mods</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="metadataEnableBtn">
             <property name="toolTip">
              <string>Store version information provided by mod providers (like Modrinth or CurseForge) for mods.</string>
