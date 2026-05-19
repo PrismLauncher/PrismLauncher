@@ -59,7 +59,7 @@ class LauncherPage : public QWidget, public BasePage {
     QString displayName() const override { return tr("General"); }
     QIcon icon() const override { return QIcon::fromTheme("settings"); }
     QString id() const override { return "launcher-settings"; }
-    QString helpPage() const override { return "Launcher-settings"; }
+    QString helpPage() const override { return "launcher-settings"; }
     bool apply() override;
     void retranslate() override;
 

@@ -65,6 +65,7 @@ class ServersPage : public QMainWindow, public BasePage {
     virtual QString displayName() const override { return tr("Servers"); }
     virtual QIcon icon() const override { return QIcon::fromTheme("server"); }
     virtual QString id() const override { return "servers"; }
+    /// Wiki is missing a page for servers.
     virtual QString helpPage() const override { return "Servers-management"; }
     void retranslate() override;
 

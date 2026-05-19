@@ -58,5 +58,6 @@ class InstanceSettingsPage : public MinecraftSettingsWidget, public BasePage {
         saveSettings();
         return true;
     }
-    QString helpPage() const override { return "Instance-settings"; }
+    /// Wiki is missing a page for instance settings, using instance-version instead.
+    QString helpPage() const override { return "instance-version"; }
 };

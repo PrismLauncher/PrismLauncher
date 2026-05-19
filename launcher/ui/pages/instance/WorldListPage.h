@@ -58,7 +58,7 @@ class WorldListPage : public QMainWindow, public BasePage {
     virtual QString displayName() const override { return tr("Worlds"); }
     virtual QIcon icon() const override { return QIcon::fromTheme("worlds"); }
     virtual QString id() const override { return "worlds"; }
-    virtual QString helpPage() const override { return "Worlds"; }
+    virtual QString helpPage() const override { return "worlds"; }
     virtual bool shouldDisplay() const override;
     void retranslate() override;
 

@@ -60,7 +60,7 @@ class VersionPage : public QMainWindow, public BasePage {
     virtual QString displayName() const override { return tr("Version"); }
     virtual QIcon icon() const override;
     virtual QString id() const override { return "version"; }
-    virtual QString helpPage() const override { return "Instance-Version"; }
+    virtual QString helpPage() const override { return "instance-version"; }
     virtual bool shouldDisplay() const override;
     void retranslate() override;
 
