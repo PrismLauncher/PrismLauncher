@@ -38,7 +38,7 @@
 #include "MultiWorldListPage.h"
 #include "minecraft/MultiWorldList.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui_MultiWorldListPage.h" //fix this iy
+#include "ui_MultiWorldListPage.h"
 
 #include <ui/widgets/PageContainer.h>
 #include <QClipboard>
@@ -87,7 +87,7 @@ class MultiWorldListProxyModel : public QSortFilterProxyModel {
 };
 
 MultiWorldListPage::MultiWorldListPage(MinecraftInstance* inst, MultiWorldList* worlds, QWidget* parent)
-    : QMainWindow(parent), m_inst(inst), ui(new Ui::MultiWorldListPage), m_worlds(worlds) //use MultiWorldListPage.ui to have separate ui from normal world list page iy
+    : QMainWindow(parent), m_inst(inst), ui(new Ui::MultiWorldListPage), m_worlds(worlds)
 {
     ui->setupUi(this);
 
@@ -209,7 +209,7 @@ void MultiWorldListPage::on_actionRemove_triggered()
 
 void MultiWorldListPage::on_actionView_Folder_triggered()
 {
-    DesktopServices::openPath(m_worlds->dirs()[0].absolutePath(), true); //change this iy
+    DesktopServices::openPath(m_worlds->dirs()[0].absolutePath(), true); //remove view folder option for all worlds (make it world specific) iy
 }
 
 void MultiWorldListPage::on_actionData_Packs_triggered()
@@ -433,7 +433,7 @@ void MultiWorldListPage::on_actionCopy_triggered()
         QInputDialog::getText(this, tr("World name"), tr("Enter a new name for the copy."), QLineEdit::Normal, world->name(), &ok);
 
     if (ok && name.length() > 0) {
-        world->install(m_worlds->dirs()[0].absolutePath(), name); //you know what to do iy
+        world->install(m_worlds->dirs()[0].absolutePath(), name); //ask which instance iy
     }
 }
 
@@ -474,4 +474,4 @@ void MultiWorldListPage::on_actionJoin_triggered()
     APPLICATION->launch(m_inst, LaunchMode::Normal, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world->folderName(), true)));
 }
 
-#include "MultiWorldListPage.moc" //change this iy
+#include "MultiWorldListPage.moc"

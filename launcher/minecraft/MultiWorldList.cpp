@@ -48,7 +48,7 @@
 
 MultiWorldList::MultiWorldList(const QList<QString>& dirs, QList<BaseInstance*> instances) : QAbstractListModel(), m_instances(instances)
 {
-    for (int i = 0; i < dirs.length(); i++) { // better way to do this? iy
+    for (int i = 0; i < dirs.length(); i++) {
         m_dirs[i] = dirs[i];
     }
 
@@ -63,30 +63,40 @@ MultiWorldList::MultiWorldList(const QList<QString>& dirs, QList<BaseInstance*> 
     connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &MultiWorldList::directoryChanged);
 }
 
-void MultiWorldList::startWatching() //figure out what watchers do / if necessary and do all paths iy
+void MultiWorldList::startWatching()
 {
     if (m_isWatching) {
         return;
     }
     update();
-    m_isWatching = m_watcher->addPath(m_dirs[0].absolutePath());
-    if (m_isWatching) {
-        qDebug() << "Started watching" << m_dirs[0].absolutePath();
-    } else {
-        qDebug() << "Failed to start watching" << m_dirs[0].absolutePath();
+
+    m_isWatching = true;
+
+    for (QDir dir : m_dirs) {
+        if (m_watcher->addPath(dir.absolutePath())) {
+            qDebug() << "Started watching" << dir.absolutePath();
+        } else {
+            m_isWatching = false;
+            qDebug() << "Failed to start watching" << dir.absolutePath();
+        }
     }
 }
 
-void MultiWorldList::stopWatching() //same as above function iy
+void MultiWorldList::stopWatching()
 {
     if (!m_isWatching) {
         return;
     }
-    m_isWatching = !m_watcher->removePath(m_dirs[0].absolutePath());
-    if (!m_isWatching) {
-        qDebug() << "Stopped watching" << m_dirs[0].absolutePath();
-    } else {
-        qDebug() << "Failed to stop watching" << m_dirs[0].absolutePath();
+
+    m_isWatching = false;
+
+    for (QDir dir : m_dirs) {
+        if (m_watcher->removePath(dir.absolutePath())) {
+            qDebug() << "Stopped watching" << dir.absolutePath();
+        } else {
+            m_isWatching = true;
+            qDebug() << "Failed to stop watching" << dir.absolutePath();
+        }
     }
 }
 
@@ -216,8 +226,10 @@ QVariant MultiWorldList::data(const QModelIndex& index, int role) const
                     return locale.formattedDataSize(world.bytes());
 
                 case InfoColumn:
-                    if (world.isSymLinkUnder(instDirPaths()[0])) { //FIX THIS--NO INDEX 0 iy
-                        return tr("This world is symbolically linked from elsewhere.");
+                    for (QString path : instDirPaths()) { //use canonical paths instead of for loops? iy
+                        if (world.isSymLinkUnder(path)) {
+                            return tr("This world is symbolically linked from elsewhere.");
+                        }
                     }
                     if (world.isMoreThanOneHardLink()) {
                         return tr("\nThis world is hard linked elsewhere.");
@@ -234,10 +246,12 @@ QVariant MultiWorldList::data(const QModelIndex& index, int role) const
 
         case Qt::ToolTipRole: {
             if (column == InfoColumn) {
-                if (world.isSymLinkUnder(instDirPaths()[0])) { //SAME HERE iy
-                    return tr("Warning: This world is symbolically linked from elsewhere. Editing it will also change the original."
+                for (QString path : instDirPaths()) { //use canonical paths instead of for loops? iy
+                    if (world.isSymLinkUnder(path)) {
+                        return tr("Warning: This world is symbolically linked from elsewhere. Editing it will also change the original."
                               "\nCanonical Path: %1")
-                        .arg(world.canonicalFilePath());
+                            .arg(world.canonicalFilePath());
+                    }
                 }
                 if (world.isMoreThanOneHardLink()) {
                     return tr("Warning: This world is hard linked elsewhere. Editing it will also change the original.");
@@ -249,7 +263,7 @@ QVariant MultiWorldList::data(const QModelIndex& index, int role) const
             return QVariant::fromValue<void*>((void*)&world);
         }
         case FolderRole: {
-            return QDir::toNativeSeparators(dirs()[0].absoluteFilePath(world.folderName())); //SAME HERE iy
+            return QDir::toNativeSeparators(QDir(world.canonicalFilePath()).absoluteFilePath(world.folderName())); //test if canonical file path works iy
         }
         case SeedRole: {
             return QVariant::fromValue<qlonglong>(world.seed());
@@ -374,7 +388,7 @@ void MultiWorldList::installWorld(QFileInfo filename)
     if (!w.isValid()) {
         return;
     }
-    w.install(m_dirs[0].absolutePath()); //more directory stuff iy
+    w.install(m_dirs[0].absolutePath()); //add option for which instance to install to iy
 }
 
 bool MultiWorldList::dropMimeData(const QMimeData* data,
@@ -402,7 +416,7 @@ bool MultiWorldList::dropMimeData(const QMimeData* data,
 
             QFileInfo worldInfo(filename);
 
-            if (!m_dirs[0].entryInfoList().contains(worldInfo)) { //more stuff to fix iy
+            if (!m_dirs[0].entryInfoList().contains(worldInfo)) { //same as above, add option for which instance to install to iy
                 installWorld(worldInfo);
             }
         }
