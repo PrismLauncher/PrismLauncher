@@ -3,12 +3,12 @@
   stdenv,
   cmake,
   cmark,
-  extra-cmake-modules,
   gamemode,
   jdk17,
   kdePackages,
   libnbtplusplus,
   ninja,
+  pkg-config,
   qrencode,
   self,
   stripJavaArchivesHook,
@@ -35,6 +35,13 @@ let
       ]
     else
       "unknown";
+
+  # Remove once https://github.com/NixOS/nixpkgs/pull/518987 lands
+  extra-cmake-modules = kdePackages.extra-cmake-modules.overrideAttrs (prevAttrs: {
+    meta = prevAttrs.meta // {
+      platforms = lib.platforms.all;
+    };
+  });
 in
 
 stdenv.mkDerivation {
@@ -65,6 +72,7 @@ stdenv.mkDerivation {
     cmake
     ninja
     extra-cmake-modules
+    pkg-config
     jdk17
     stripJavaArchivesHook
   ];

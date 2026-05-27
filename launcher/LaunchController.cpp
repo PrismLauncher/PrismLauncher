@@ -133,14 +133,6 @@ LaunchDecision LaunchController::decideLaunchMode()
         return LaunchDecision::Continue;
     }
 
-    if (m_wantedLaunchMode == LaunchMode::Normal) {
-        if (m_accountToUse->shouldRefresh() || m_accountToUse->accountState() == AccountState::Offline) {
-            // Force account refresh on the account used to launch the instance updating the AccountState
-            // only on first try and if it is not meant to be offline
-            m_accountToUse->refresh();
-        }
-    }
-
     const auto* accounts = APPLICATION->accounts();
     MinecraftAccountPtr accountToCheck = nullptr;
 
@@ -163,7 +155,9 @@ LaunchDecision LaunchController::decideLaunchMode()
     }
 
     auto state = accountToCheck->accountState();
-    if (state == AccountState::Unchecked || state == AccountState::Errored) {
+    const bool needsRefresh =
+        m_wantedLaunchMode == LaunchMode::Normal && (state == AccountState::Offline || accountToCheck->shouldRefresh());
+    if (state == AccountState::Unchecked || state == AccountState::Errored || needsRefresh) {
         accountToCheck->refresh();
         state = AccountState::Working;
     }

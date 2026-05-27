@@ -893,6 +893,14 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
 
     QStringList out;
 
+    out << "Components:";
+    for (int i = 0; i < m_components->rowCount(); ++i) {
+        const auto& component = m_components->getComponent(i);
+        out << indent +
+                   QString("%1) %2 (%3) %4").arg(QString::number(i + 1), component->getName(), component->getID(), component->getVersion());
+    }
+    out << emptyLine;
+
     out << "Launcher: " + getLauncher();
     out << "Main class: " + getMainClass() << emptyLine;
 

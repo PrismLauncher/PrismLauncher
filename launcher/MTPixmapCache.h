@@ -14,26 +14,26 @@
     else                                                                    \
         type = Qt::DirectConnection;
 
-#define DEFINE_FUNC_NO_PARAM(NAME, RET_TYPE)                                                 \
+#define DEFINE_FUNC_NO_PARAM(NAME, RET_TYPE, RET_DEF)                                        \
     static RET_TYPE NAME()                                                                   \
     {                                                                                        \
-        RET_TYPE ret;                                                                        \
+        RET_TYPE ret = RET_DEF;                                                              \
         GET_TYPE()                                                                           \
         QMetaObject::invokeMethod(s_instance, "_" #NAME, type, Q_RETURN_ARG(RET_TYPE, ret)); \
         return ret;                                                                          \
     }
-#define DEFINE_FUNC_ONE_PARAM(NAME, RET_TYPE, PARAM_1_TYPE)                                                           \
+#define DEFINE_FUNC_ONE_PARAM(NAME, RET_TYPE, RET_DEF, PARAM_1_TYPE)                                                  \
     static RET_TYPE NAME(PARAM_1_TYPE p1)                                                                             \
     {                                                                                                                 \
-        RET_TYPE ret;                                                                                                 \
+        RET_TYPE ret = RET_DEF;                                                                                       \
         GET_TYPE()                                                                                                    \
         QMetaObject::invokeMethod(s_instance, "_" #NAME, type, Q_RETURN_ARG(RET_TYPE, ret), Q_ARG(PARAM_1_TYPE, p1)); \
         return ret;                                                                                                   \
     }
-#define DEFINE_FUNC_TWO_PARAM(NAME, RET_TYPE, PARAM_1_TYPE, PARAM_2_TYPE)                                            \
+#define DEFINE_FUNC_TWO_PARAM(NAME, RET_TYPE, RET_DEF, PARAM_1_TYPE, PARAM_2_TYPE)                                   \
     static RET_TYPE NAME(PARAM_1_TYPE p1, PARAM_2_TYPE p2)                                                           \
     {                                                                                                                \
-        RET_TYPE ret;                                                                                                \
+        RET_TYPE ret = RET_DEF;                                                                                      \
         GET_TYPE()                                                                                                   \
         QMetaObject::invokeMethod(s_instance, "_" #NAME, type, Q_RETURN_ARG(RET_TYPE, ret), Q_ARG(PARAM_1_TYPE, p1), \
                                   Q_ARG(PARAM_2_TYPE, p2));                                                          \
@@ -53,18 +53,18 @@ class PixmapCache final : public QObject {
     static void setInstance(PixmapCache* i) { s_instance = i; }
 
    public:
-    DEFINE_FUNC_NO_PARAM(cacheLimit, int)
-    DEFINE_FUNC_NO_PARAM(clear, bool)
-    DEFINE_FUNC_TWO_PARAM(find, bool, const QString&, QPixmap*)
-    DEFINE_FUNC_TWO_PARAM(find, bool, const QPixmapCache::Key&, QPixmap*)
-    DEFINE_FUNC_TWO_PARAM(insert, bool, const QString&, const QPixmap&)
-    DEFINE_FUNC_ONE_PARAM(insert, QPixmapCache::Key, const QPixmap&)
-    DEFINE_FUNC_ONE_PARAM(remove, bool, const QString&)
-    DEFINE_FUNC_ONE_PARAM(remove, bool, const QPixmapCache::Key&)
-    DEFINE_FUNC_TWO_PARAM(replace, bool, const QPixmapCache::Key&, const QPixmap&)
-    DEFINE_FUNC_ONE_PARAM(setCacheLimit, bool, int)
-    DEFINE_FUNC_NO_PARAM(markCacheMissByEviciton, bool)
-    DEFINE_FUNC_ONE_PARAM(setFastEvictionThreshold, bool, int)
+    DEFINE_FUNC_NO_PARAM(cacheLimit, int, -1)
+    DEFINE_FUNC_NO_PARAM(clear, bool, false)
+    DEFINE_FUNC_TWO_PARAM(find, bool, false, const QString&, QPixmap*)
+    DEFINE_FUNC_TWO_PARAM(find, bool, false, const QPixmapCache::Key&, QPixmap*)
+    DEFINE_FUNC_TWO_PARAM(insert, bool, false, const QString&, const QPixmap&)
+    DEFINE_FUNC_ONE_PARAM(insert, QPixmapCache::Key, {}, const QPixmap&)
+    DEFINE_FUNC_ONE_PARAM(remove, bool, false, const QString&)
+    DEFINE_FUNC_ONE_PARAM(remove, bool, false, const QPixmapCache::Key&)
+    DEFINE_FUNC_TWO_PARAM(replace, bool, false, const QPixmapCache::Key&, const QPixmap&)
+    DEFINE_FUNC_ONE_PARAM(setCacheLimit, bool, false, int)
+    DEFINE_FUNC_NO_PARAM(markCacheMissByEviciton, bool, false)
+    DEFINE_FUNC_ONE_PARAM(setFastEvictionThreshold, bool, false, int)
 
     // NOTE: Every function returns something non-void to simplify the macros.
    private slots:
