@@ -298,6 +298,8 @@ set(MINECRAFT_SOURCES
     minecraft/MinecraftLoadAndCheck.cpp
     minecraft/MojangVersionFormat.cpp
     minecraft/MojangVersionFormat.h
+    minecraft/MultiWorldList.cpp
+    minecraft/MultiWorldList.h
     minecraft/Rule.cpp
     minecraft/Rule.h
     minecraft/OneSixVersionFormat.cpp
@@ -832,6 +834,8 @@ SET(LAUNCHER_SOURCES
     ui/GuiUtil.cpp
     ui/MainWindow.h
     ui/MainWindow.cpp
+    ui/MultiWorldListPage.cpp
+    ui/MultiWorldListPage.h
     ui/InstanceWindow.h
     ui/InstanceWindow.cpp
     ui/ViewLogWindow.h
