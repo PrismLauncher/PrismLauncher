@@ -38,7 +38,7 @@
 #include "MultiWorldListPage.h"
 #include "minecraft/MultiWorldList.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui_WorldListPage.h" //fix this iy
+#include "ui_MultiWorldListPage.h" //fix this iy
 
 #include <ui/widgets/PageContainer.h>
 #include <QClipboard>
@@ -62,11 +62,11 @@
 #include "Application.h"
 #include "pages/instance/DataPackPage.h"
 
-class WorldListProxyModel : public QSortFilterProxyModel {
+class MultiWorldListProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
 
    public:
-    WorldListProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {}
+    MultiWorldListProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {}
 
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const
     {
@@ -87,13 +87,13 @@ class WorldListProxyModel : public QSortFilterProxyModel {
 };
 
 MultiWorldListPage::MultiWorldListPage(MinecraftInstance* inst, MultiWorldList* worlds, QWidget* parent)
-    : QMainWindow(parent), m_inst(inst), ui(new Ui::WorldListPage), m_worlds(worlds) //use MultiWorldListPage.ui to have separate ui from normal world list page iy
+    : QMainWindow(parent), m_inst(inst), ui(new Ui::MultiWorldListPage), m_worlds(worlds) //use MultiWorldListPage.ui to have separate ui from normal world list page iy
 {
     ui->setupUi(this);
 
     ui->toolBar->insertSpacer(ui->actionRefresh);
 
-    WorldListProxyModel* proxy = new WorldListProxyModel(this);
+    MultiWorldListProxyModel* proxy = new MultiWorldListProxyModel(this);
     proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
     proxy->setSourceModel(m_worlds);
     proxy->setSortRole(Qt::UserRole);
@@ -474,4 +474,4 @@ void MultiWorldListPage::on_actionJoin_triggered()
     APPLICATION->launch(m_inst, LaunchMode::Normal, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world->folderName(), true)));
 }
 
-#include "WorldListPage.moc" //change this iy
+#include "MultiWorldListPage.moc" //change this iy

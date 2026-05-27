@@ -80,7 +80,7 @@ class MultiWorldListPage : public QMainWindow, public BasePage {
     void mceditError();
 
    private:
-    Ui::WorldListPage* ui;
+    Ui::MultiWorldListPage* ui;
     MultiWorldList* m_worlds;
     unique_qobject_ptr<LoggedProcess> m_mceditProcess;
     bool m_mceditStarting = false;

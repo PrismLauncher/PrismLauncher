@@ -32,7 +32,7 @@ class MultiWorldList : public QAbstractListModel {
 
     enum Roles { ObjectRole = Qt::UserRole + 1, FolderRole, SeedRole, NameRole, GameModeRole, LastPlayedRole, SizeRole, IconFileRole };
 
-    MultiWorldList(const QList<QString&> dirs, QList<BaseInstance*> instances);
+    MultiWorldList(const QList<QString>& dirs, QList<BaseInstance*> instances);
 
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
 
@@ -68,6 +68,7 @@ class MultiWorldList : public QAbstractListModel {
     /// process data from drop action
     virtual bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent);
     /// what drag actions do we support?
+    int64_t calculateWorldSize(const QFileInfo& file);
     virtual Qt::DropActions supportedDragActions() const;
 
     /// what drop actions do we support?

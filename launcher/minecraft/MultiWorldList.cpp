@@ -46,7 +46,7 @@
 #include <QUuid>
 #include <Qt>
 
-MultiWorldList::MultiWorldList(const QList<QString&> dirs, QList<BaseInstance*> instances) : QAbstractListModel(), m_instances(instances)
+MultiWorldList::MultiWorldList(const QList<QString>& dirs, QList<BaseInstance*> instances) : QAbstractListModel(), m_instances(instances)
 {
     for (int i = 0; i < dirs.length(); i++) { // better way to do this? iy
         m_dirs[i] = dirs[i];
@@ -413,7 +413,7 @@ bool MultiWorldList::dropMimeData(const QMimeData* data,
     return false;
 }
 
-int64_t calculateWorldSize(const QFileInfo& file)
+int64_t MultiWorldList::calculateWorldSize(const QFileInfo& file)
 {
     if (file.isFile() && file.suffix() == "zip") {
         return file.size();
