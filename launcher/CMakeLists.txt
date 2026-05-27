@@ -666,11 +666,29 @@ set(PRISMUPDATER_SOURCES
 
 )
 
+set(GPUDETECT_SOURCES
+    gpudetect/Print.h
+    gpudetect/OpenGL.cpp
+    gpudetect/OpenGL.h
+    gpudetect/Vulkan.cpp
+    gpudetect/Vulkan.h
+    gpudetect/lspci.cpp
+    gpudetect/lspci.h
+)
+
 if(WIN32)
     set(PRISMUPDATER_SOURCES
         console/WindowsConsole.h
         console/WindowsConsole.cpp
         ${PRISMUPDATER_SOURCES}
+    )
+endif()
+
+if(WIN32)
+    set(GPUDETECT_SOURCES
+        console/WindowsConsole.h
+        console/WindowsConsole.cpp
+        ${GPUDETECT_SOURCES}
     )
 endif()
 
@@ -1475,6 +1493,51 @@ if (UNIX AND APPLE AND Launcher_ENABLE_UPDATER)
     install(DIRECTORY ${MACOSX_SPARKLE_DIR}/Sparkle.framework DESTINATION ${FRAMEWORK_DEST_DIR} USE_SOURCE_PERMISSIONS)
 endif()
 
+if(Launcher_BUILD_GPUDETECT)
+    # GPU detection executable
+    add_library(gpudetect_logic STATIC ${GPUDETECT_SOURCES})
+    target_include_directories(gpudetect_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+    if(${Launcher_USE_PCH})
+        target_precompile_headers(gpudetect_logic PRIVATE ${PRECOMPILED_HEADERS})
+    endif()
+
+    target_link_libraries(gpudetect_logic
+        BuildConfig
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Network
+        ${Launcher_QT_LIBS}
+    )
+
+    add_executable("${Launcher_Name}_gpudetect" WIN32 gpudetect/gpudetect_main.cpp)
+    target_sources("${Launcher_Name}_gpudetect" PRIVATE gpudetect/gpudetect.exe.manifest)
+    target_link_libraries("${Launcher_Name}_gpudetect" gpudetect_logic)
+
+    if(${Launcher_USE_PCH})
+        target_precompile_headers("${Launcher_Name}_gpudetect" REUSE_FROM gpudetect_logic)
+    endif()
+
+    if(DEFINED Launcher_APP_BINARY_NAME)
+        set_target_properties("${Launcher_Name}_gpudetect" PROPERTIES OUTPUT_NAME "${Launcher_APP_BINARY_NAME}_gpudetect")
+    endif()
+    if(DEFINED Launcher_BINARY_RPATH)
+        set_target_properties("${Launcher_Name}_gpudetect" PROPERTIES INSTALL_RPATH "${Launcher_BINARY_RPATH}")
+    endif()
+
+    install(TARGETS "${Launcher_Name}_gpudetect"
+            BUNDLE DESTINATION "." COMPONENT Runtime
+            LIBRARY DESTINATION ${LIBRARY_DEST_DIR} COMPONENT Runtime
+            RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
+            FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
+    )
+
+    # Deploy PDBs
+    if(CMAKE_CXX_LINKER_SUPPORTS_PDB)
+        install(FILES $<TARGET_PDB_FILE:${Launcher_Name}_gpudetect> DESTINATION ${BINARY_DEST_DIR} OPTIONAL)
+    endif()
+endif()
+
 # Set basic compiler warning/error flags for all targets
 get_property(Launcher_TARGETS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
 foreach(target ${Launcher_TARGETS})
@@ -1608,7 +1671,7 @@ if(CLANG_FORMAT)
     message(STATUS "Creating clang-format target")
     add_custom_target(
         clang-format
-        COMMAND ${CLANG_FORMAT} -i --style=file:${CMAKE_SOURCE_DIR}/.clang-format ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${PRISMUPDATER_SOURCES} ${LINKEXE_SOURCES} ${PRECOMPILED_HEADERS}
+        COMMAND ${CLANG_FORMAT} -i --style=file:${CMAKE_SOURCE_DIR}/.clang-format ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${PRISMUPDATER_SOURCES} ${LINKEXE_SOURCES} ${GPUDETECT_SOURCES} ${PRECOMPILED_HEADERS}
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     )
 else()

@@ -18,85 +18,69 @@
 
 #include "HardwareInfo.h"
 
-#include <QCoreApplication>
-#include <QOffscreenSurface>
-#include <QOpenGLFunctions>
+#include <QDir>
 #include <QProcessEnvironment>
+
+#include "Application.h"
 #include "BuildConfig.h"
 
-#ifndef Q_OS_MACOS
-#include <QVulkanInstance>
-#include <QVulkanWindow>
-#endif
-
-namespace {
-bool vulkanInfo(QStringList& out)
-{
-    if (!QProcessEnvironment::systemEnvironment()
-             .value(QStringLiteral("%1_DISABLE_GLVULKAN").arg(BuildConfig.LAUNCHER_ENVNAME))
-             .isEmpty()) {
-        return false;
-    }
-#ifndef Q_OS_MACOS
-    QVulkanInstance inst;
-    if (!inst.create()) {
-        qWarning() << "Vulkan instance creation failed, VkResult:" << inst.errorCode();
-        out << "Couldn't get Vulkan device information";
-        return false;
-    }
-
-    QVulkanWindow window;
-    window.setVulkanInstance(&inst);
-
-    for (auto device : window.availablePhysicalDevices()) {
-        const auto supportedVulkanVersion = QVersionNumber(VK_API_VERSION_MAJOR(device.apiVersion), VK_API_VERSION_MINOR(device.apiVersion),
-                                                           VK_API_VERSION_PATCH(device.apiVersion));
-        out << QString("Found Vulkan device: %1 (API version %2)").arg(device.deviceName).arg(supportedVulkanVersion.toString());
-    }
-#endif
-
-    return true;
-}
-
-bool openGlInfo(QStringList& out)
-{
-    if (!QProcessEnvironment::systemEnvironment()
-             .value(QStringLiteral("%1_DISABLE_GLVULKAN").arg(BuildConfig.LAUNCHER_ENVNAME))
-             .isEmpty()) {
-        return false;
-    }
-    QOpenGLContext ctx;
-    if (!ctx.create()) {
-        qWarning() << "OpenGL context creation failed";
-        out << "Couldn't get OpenGL device information";
-        return false;
-    }
-
-    QOffscreenSurface surface;
-    surface.create();
-    ctx.makeCurrent(&surface);
-
-    auto* f = ctx.functions();
-    f->initializeOpenGLFunctions();
-
-    auto toQString = [](const GLubyte* str) { return QString(reinterpret_cast<const char*>(str)); };
-    out << "OpenGL driver vendor: " + toQString(f->glGetString(GL_VENDOR));
-    out << "OpenGL renderer: " + toQString(f->glGetString(GL_RENDERER));
-    out << "OpenGL driver version: " + toQString(f->glGetString(GL_VERSION));
-
-    return true;
-}
-}  // namespace
-
-#ifndef Q_OS_LINUX
 QStringList HardwareInfo::gpuInfo()
 {
-    QStringList info;
-    vulkanInfo(info);
-    openGlInfo(info);
-    return info;
-}
+    QProcess process;
+
+    auto exeName = QStringLiteral("%1_gpudetect").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
+#ifdef Q_OS_WIN32
+    exeName.append(".exe");
+
+    auto env = QProcessEnvironment::systemEnvironment();
+    env.insert("__COMPAT_LAYER", "RUNASINVOKER");
+    process.setProcessEnvironment(env);
 #endif
+
+    const QDir appExePath(APPLICATION->applicationDirPath());
+    const QString pathToExe = appExePath.absoluteFilePath(exeName);
+
+    process.setProgram(pathToExe);
+
+    QStringList methods;
+    if (QProcessEnvironment::systemEnvironment().value(QStringLiteral("%1_DISABLE_GLVULKAN").arg(BuildConfig.LAUNCHER_ENVNAME)).isEmpty()) {
+        methods << "opengl";
+#ifndef Q_OS_MACOS
+        methods << "vulkan";
+#endif
+    }
+
+#ifdef Q_OS_LINUX
+    methods << "lspci";
+#endif
+
+    QStringList out;
+
+    for (const auto& method : methods) {
+        qInfo() << "Attempting GPU detection using" << method;
+
+        process.setArguments({ method });
+        process.start();
+        if (!process.waitForFinished(1000)) {
+            process.kill();
+            qWarning() << "GPU detection process exited with code:" << process.exitCode() << process.errorString();
+            continue;
+        }
+
+        for (const auto& str : process.readAllStandardOutput().split('\n')) {
+            if (const auto line = str.trimmed(); !line.isEmpty()) {
+                out << line;
+            }
+        }
+        for (const auto& str : process.readAllStandardError().split('\n')) {
+            if (const auto line = str.trimmed(); !line.isEmpty()) {
+                qWarning() << line;
+            }
+        }
+    }
+
+    return out;
+}
 
 #ifdef Q_OS_WINDOWS
 #ifndef WIN32_LEAN_AND_MEAN
@@ -252,56 +236,6 @@ uint64_t HardwareInfo::totalRamMiB()
 uint64_t HardwareInfo::availableRamMiB()
 {
     return readMemInfo("MemAvailable");
-}
-
-QStringList HardwareInfo::gpuInfo()
-{
-    QStringList list;
-    const bool vulkanSuccess = vulkanInfo(list);
-    const bool openGlSuccess = openGlInfo(list);
-    if (vulkanSuccess || openGlSuccess) {
-        return list;
-    }
-
-    std::array<char, 512> buffer;
-    FILE* lspci = popen("lspci -k", "r");
-
-    if (!lspci) {
-        return { "Could not detect GPUs: lspci is not present" };
-    }
-
-    bool readingGpuInfo = false;
-    QString currentModel = "";
-    while (fgets(buffer.data(), 512, lspci) != nullptr) {
-        QString str(buffer.data());
-        // clang-format off
-        // 04:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Ellesmere [Radeon RX 470/480/570/570X/580/580X/590] (rev e7)
-        // Subsystem: Sapphire Technology Limited Radeon RX 580 Pulse 4GB
-        // Kernel driver in use: amdgpu
-        // Kernel modules: amdgpu
-        // clang-format on
-        if (str.contains("VGA compatible controller")) {
-            readingGpuInfo = true;
-        } else if (!str.startsWith('\t')) {
-            readingGpuInfo = false;
-        }
-        if (!readingGpuInfo) {
-            continue;
-        }
-
-        if (str.contains("Subsystem")) {
-            currentModel = "Found GPU: " + afterColon(str);
-        }
-        if (str.contains("Kernel driver in use")) {
-            currentModel += " (using driver " + afterColon(str);
-        }
-        if (str.contains("Kernel modules")) {
-            currentModel += ", available drivers: " + afterColon(str) + ")";
-            list.append(currentModel);
-        }
-    }
-    pclose(lspci);
-    return list;
 }
 
 #else

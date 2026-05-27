@@ -978,6 +978,7 @@ void PrismUpdaterApp::backupAppDir()
                 "prismlauncher.exe",
                 "prismlauncher_filelink.exe",
                 "prismlauncher_updater.exe",
+                "prismlauncher_gpudetect.exe",
                 "qtlogging.ini",
                 "imageformats",
                 "iconengines",

@@ -353,6 +353,7 @@ add_subdirectory(program_info)
 
 set(Launcher_ENABLE_UPDATER NO)
 set(Launcher_BUILD_UPDATER NO)
+set(Launcher_BUILD_GPUDETECT YES)
 
 if (NOT APPLE AND (NOT Launcher_UPDATER_GITHUB_REPO STREQUAL "" AND NOT Launcher_BUILD_ARTIFACT STREQUAL ""))
     set(Launcher_BUILD_UPDATER YES)
