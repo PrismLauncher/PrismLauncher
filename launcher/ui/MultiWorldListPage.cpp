@@ -86,7 +86,7 @@ class MultiWorldListProxyModel : public QSortFilterProxyModel {
     }
 };
 
-MultiWorldListPage::MultiWorldListPage(MinecraftInstance* inst, MultiWorldList* worlds, QWidget* parent)
+MultiWorldListPage::MultiWorldListPage(MinecraftInstance* inst, MultiWorldList* worlds, QWidget* parent) //require all instances instead of just one iy
     : QMainWindow(parent), m_inst(inst), ui(new Ui::MultiWorldListPage), m_worlds(worlds)
 {
     ui->setupUi(this);
@@ -117,9 +117,9 @@ void MultiWorldListPage::openedImpl()
 {
     m_worlds->startWatching();
 
-    if (!m_inst || !m_inst->traits().contains("feature:is_quick_play_singleplayer")) {
-        ui->toolBar->removeAction(ui->actionJoin);
-    }
+    // if (!m_inst || !m_inst->traits().contains("feature:is_quick_play_singleplayer")) { //get rid of this??? iy
+    //     ui->toolBar->removeAction(ui->actionJoin);
+    // }
 
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
@@ -378,12 +378,13 @@ void MultiWorldListPage::worldChanged([[maybe_unused]] const QModelIndex& curren
     bool hasIcon = !index.data(MultiWorldList::IconFileRole).isNull();
     ui->actionReset_Icon->setEnabled(enable && hasIcon);
 
-    auto supportsJoin = m_inst && m_inst->traits().contains("feature:is_quick_play_singleplayer");
-    ui->actionJoin->setEnabled(enable && supportsJoin);
+    // auto supportsJoin = m_inst && m_inst->traits().contains("feature:is_quick_play_singleplayer"); //change this to be on instance by instance basis iy
+    // ui->actionJoin->setEnabled(enable && supportsJoin);
+    ui->actionJoin->setEnabled(true);
 
-    if (!supportsJoin) {
-        ui->toolBar->removeAction(ui->actionJoin);
-    }
+    // if (!supportsJoin) {
+    //     ui->toolBar->removeAction(ui->actionJoin);
+    // }
 }
 
 void MultiWorldListPage::on_actionAdd_triggered()

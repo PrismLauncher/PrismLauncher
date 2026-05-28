@@ -138,7 +138,7 @@ QMimeData* InstanceList::mimeData(const QModelIndexList& indexes) const
 QStringList InstanceList::getLinkedInstancesById(const QString& id) const
 {
     QStringList linkedInstances;
-    for (auto& inst : m_instances) {
+    for (auto& inst : instances) {
         if (inst->isLinkedToInstanceId(id))
             linkedInstances.append(inst->id());
     }
@@ -156,7 +156,7 @@ QModelIndex InstanceList::index(int row, int column, const QModelIndex& parent) 
     Q_UNUSED(parent);
     if (row < 0 || row >= count())
         return QModelIndex();
-    return createIndex(row, column, m_instances.at(row).get());
+    return createIndex(row, column, instances.at(row).get());
 }
 
 QVariant InstanceList::data(const QModelIndex& index, int role) const
@@ -279,7 +279,7 @@ void InstanceList::deleteGroup(const GroupId& name)
 
     bool removed = false;
     qDebug() << "Delete group" << name;
-    for (auto& instance : m_instances) {
+    for (auto& instance : instances) {
         const QString& instID = instance->id();
         const QString instGroupName = getInstanceGroup(instID);
         if (instGroupName == name) {
@@ -303,7 +303,7 @@ void InstanceList::renameGroup(const QString& src, const QString& dst)
 
     bool modified = false;
     qDebug() << "Rename group" << src << "to" << dst;
-    for (auto& instance : m_instances) {
+    for (auto& instance : instances) {
         const QString& instID = instance->id();
         const QString instGroupName = getInstanceGroup(instID);
         if (instGroupName == src) {
@@ -497,7 +497,7 @@ QList<InstanceId> InstanceList::discoverInstances()
 
 InstanceList::InstListError InstanceList::loadList()
 {
-    auto existingIds = getIdMapping(m_instances);
+    auto existingIds = getIdMapping(instances);
 
     std::vector<std::unique_ptr<BaseInstance>> newList;
 
@@ -525,7 +525,7 @@ InstanceList::InstListError InstanceList::loadList()
         int currentItem = -1;
         auto removeNow = [this, &front_bookmark, &back_bookmark, &currentItem]() {
             beginRemoveRows(QModelIndex(), front_bookmark, back_bookmark);
-            m_instances.erase(m_instances.begin() + front_bookmark, m_instances.begin() + back_bookmark + 1);
+            instances.erase(instances.begin() + front_bookmark, instances.begin() + back_bookmark + 1);
             endRemoveRows();
             front_bookmark = -1;
             back_bookmark = currentItem;
@@ -560,14 +560,14 @@ InstanceList::InstListError InstanceList::loadList()
 void InstanceList::updateTotalPlayTime()
 {
     totalPlayTime = 0;
-    for (const auto& itr : m_instances) {
+    for (const auto& itr : instances) {
         totalPlayTime += itr->totalTimePlayed();
     }
 }
 
 void InstanceList::saveNow()
 {
-    for (auto& item : m_instances) {
+    for (auto& item : instances) {
         item->saveNow();
     }
 }
@@ -576,8 +576,8 @@ void InstanceList::add(std::vector<std::unique_ptr<BaseInstance>>& t)
 {
     beginInsertRows(QModelIndex(), count(), static_cast<int>(count() + t.size() - 1));
     for (auto& ptr : t) {
-        m_instances.push_back(std::move(ptr));
-        connect(m_instances.back().get(), &BaseInstance::propertiesChanged, this, &InstanceList::propertiesChanged);
+        instances.push_back(std::move(ptr));
+        connect(instances.back().get(), &BaseInstance::propertiesChanged, this, &InstanceList::propertiesChanged);
     }
     endInsertRows();
 }
@@ -607,11 +607,22 @@ void InstanceList::providerUpdated()
     }
 }
 
+QList<BaseInstance*> InstanceList::getAllInstances() 
+{
+    QList<BaseInstance*> instanceList;
+
+    for (auto& inst : instances) {
+        instanceList.append(inst.get());
+    }
+
+    return instanceList;
+}
+
 BaseInstance* InstanceList::getInstanceById(QString instId) const
 {
     if (instId.isEmpty())
         return nullptr;
-    for (auto& inst : m_instances) {
+    for (auto& inst : instances) {
         if (inst->id() == instId) {
             return inst.get();
         }
@@ -624,7 +635,7 @@ BaseInstance* InstanceList::getInstanceByManagedName(const QString& managed_name
     if (managed_name.isEmpty())
         return {};
 
-    for (auto& instance : m_instances) {
+    for (auto& instance : instances) {
         if (instance->getManagedPackName() == managed_name)
             return instance.get();
     }
@@ -641,7 +652,7 @@ int InstanceList::getInstIndex(BaseInstance* inst) const
 {
     int count = this->count();
     for (int i = 0; i < count; i++) {
-        if (inst == m_instances.at(i).get()) {
+        if (inst == instances.at(i).get()) {
             return i;
         }
     }
@@ -882,7 +893,7 @@ void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting,
         m_instDir = newInstDir;
         m_groupsLoaded = false;
         beginRemoveRows(QModelIndex(), 0, count());
-        m_instances.erase(m_instances.begin(), m_instances.end());
+        instances.erase(instances.begin(), instances.end());
         endRemoveRows();
         emit instancesChanged();
     }

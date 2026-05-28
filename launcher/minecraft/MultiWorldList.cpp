@@ -48,8 +48,8 @@
 
 MultiWorldList::MultiWorldList(const QList<QString>& dirs, QList<BaseInstance*> instances) : QAbstractListModel(), m_instances(instances)
 {
-    for (int i = 0; i < dirs.length(); i++) {
-        m_dirs[i] = dirs[i];
+    for (QString dir : dirs) {
+        m_dirs.append(dir);
     }
 
     for (QDir dir : m_dirs) {

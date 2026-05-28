@@ -93,6 +93,7 @@
 #include "InstanceWindow.h"
 
 #include "ui/GuiUtil.h"
+#include "ui/MultiWorldListPage.h"
 #include "ui/ViewLogWindow.h"
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
@@ -113,6 +114,7 @@
 #include "ui/themes/ThemeManager.h"
 #include "ui/widgets/LabeledToolButton.h"
 
+#include "minecraft/MultiWorldList.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/VersionFile.h"
 #include "minecraft/WorldList.h"
@@ -334,6 +336,22 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(view, &InstanceView::groupStateChanged, APPLICATION->instances(), &InstanceList::on_GroupStateChanged);
         ui->horizontalLayout->addWidget(view);
     }
+    // Create the all worlds widget
+    {
+        QList<BaseInstance*> allInstances = APPLICATION->instances()->getAllInstances();
+        qDebug() << "iy initially" << allInstances.length();
+        QList<QString> dirs;
+        for (BaseInstance* inst : allInstances) {
+            dirs.append(dynamic_cast<MinecraftInstance*>(inst)->worldDir());
+        }
+
+        allWorlds = new MultiWorldList(dirs, allInstances);
+        allWorlds->update();
+        allWorldsPage = new MultiWorldListPage(dynamic_cast<MinecraftInstance*>(allInstances[0]), allWorlds); //shouldnt be only one instance iy
+
+        ui->horizontalLayout->addWidget(allWorldsPage);
+    }
+
     // The cat background
     {
         // set the cat action priority here so you can still see the action in qt designer
@@ -926,6 +944,21 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
     if (creationTask) {
         instanceFromInstanceTask(creationTask);
     }
+
+    //clean this up iy - fix ghosting issue and only joining one world despite which one you click
+
+    QList<BaseInstance*> allInstances = APPLICATION->instances()->getAllInstances();
+    qDebug() << "iy finally " << allInstances.length();
+    QList<QString> dirs;
+    for (BaseInstance* inst : allInstances) {
+        dirs.append(dynamic_cast<MinecraftInstance*>(inst)->worldDir());
+    }
+
+    allWorlds = new MultiWorldList(dirs, allInstances);
+    allWorlds->update();
+    auto newAllWorldsPage = new MultiWorldListPage(dynamic_cast<MinecraftInstance*>(allInstances[0]), allWorlds); //shouldnt be only one instance iy
+    ui->horizontalLayout->replaceWidget(allWorldsPage, newAllWorldsPage);
+    allWorldsPage = newAllWorldsPage;
 }
 
 void MainWindow::on_actionAddInstance_triggered()
