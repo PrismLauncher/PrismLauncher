@@ -263,9 +263,15 @@ void MinecraftInstance::loadSpecificSettings()
     connect(dataPacksEnabled.get(), &Setting::SettingChanged, this, [this] { m_data_pack_list.reset(); });
     connect(dataPacksPath.get(), &Setting::SettingChanged, this, [this] { m_data_pack_list.reset(); });
 
-    // Join server on launch, this does not have a global override
+    // Set mod downloaders, this does not have a global override
     m_settings->registerSetting("OverrideModDownloadLoaders", false);
     m_settings->registerSetting("ModDownloadLoaders", "[]");
+
+    // Enable automatic mod updates, this does not have a global override
+    m_settings->registerSetting("AutomaticallyUpdateMods", false);
+    m_settings->registerSetting("AutomaticallyUpdateModsAll", false);
+    m_settings->registerSetting("AutomaticallyUpdateModsEnabled", true);
+    // m_settings->registerSetting("AutomaticallyUpdateModsSpecified", "[]");
 
     qDebug() << "Instance-type specific settings were loaded!";
 

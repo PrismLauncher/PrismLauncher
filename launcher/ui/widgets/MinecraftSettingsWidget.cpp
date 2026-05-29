@@ -61,6 +61,7 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
         m_ui->serverJoinGroupBox->hide();
         m_ui->globalDataPacksGroupBox->hide();
         m_ui->loaderGroup->hide();
+        m_ui->autoModUpdateGroup->hide();
     } else {
         m_javaSettings = new JavaSettingsWidget(m_instance, this);
         m_ui->javaScrollArea->setWidget(m_javaSettings);
@@ -120,6 +121,18 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
                         m_ui->legacyFabric, m_ui->ornithe, m_ui->rift }) {
             connect(c, &QCheckBox::stateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
         }
+
+        connect(m_ui->autoModUpdateGroup, &QGroupBox::toggled, this, [this](bool value) {
+            m_instance->settings()->set("AutomaticallyUpdateMods", value);
+            // if (!value) {
+            //     m_instance->settings()->reset("AutomaticallyUpdateModsAll");
+            //     m_instance->settings()->reset("AutomaticallyUpdateModsEnabled");
+            // }
+        });
+        connect(m_ui->allMods, &QAbstractButton::toggled, this,
+                [this](bool value) { m_instance->settings()->set("AutomaticallyUpdateModsAll", value); });
+        connect(m_ui->enabledMods, &QAbstractButton::toggled, this,
+                [this](bool value) { m_instance->settings()->set("AutomaticallyUpdateModsEnabled", value); });
     }
 
     m_ui->maximizedWarning->hide();
@@ -247,6 +260,10 @@ void MinecraftSettingsWidget::loadSettings()
         }
 
         m_ui->serverJoinGroupBox->setChecked(settings->get("JoinServerOnLaunch").toBool());
+
+        m_ui->autoModUpdateGroup->setChecked(settings->get("AutomaticallyUpdateMods").toBool());
+        m_ui->allMods->setChecked(settings->get("AutomaticallyUpdateModsAll").toBool());
+        m_ui->enabledMods->setChecked(settings->get("AutomaticallyUpdateModsEnabled").toBool());
 
         m_ui->instanceAccountGroupBox->setChecked(settings->get("UseAccountForInstance").toBool());
         updateAccountsMenu(*settings);
@@ -454,6 +471,21 @@ void MinecraftSettingsWidget::saveSettings()
                 settings->reset("JoinServerOnLaunchAddress");
                 settings->reset("JoinWorldOnLaunch");
             }
+
+            bool automaticallyUpdateMods = m_ui->autoModUpdateGroup->isChecked();
+            settings->set("AutomaticallyUpdateMods", automaticallyUpdateMods);
+            // if (automaticallyUpdateMods) {
+            if (m_ui->allMods->isChecked()) {
+                settings->set("AutomaticallyUpdateModsAll", true);
+                settings->set("AutomaticallyUpdateModsEnabled", false);
+            } else {
+                settings->set("AutomaticallyUpdateModsAll", false);
+                settings->set("AutomaticallyUpdateModsEnabled", true);
+            }
+            // } else {
+            //     settings->reset("AutomaticallyUpdateModsAll");
+            //     settings->reset("AutomaticallyUpdateModsEnabled");
+            // }
 
             // Use an account for this instance
             bool useAccountForInstance = m_ui->instanceAccountGroupBox->isChecked();
