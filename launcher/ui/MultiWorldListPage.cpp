@@ -86,14 +86,14 @@ class MultiWorldListProxyModel : public QSortFilterProxyModel {
     }
 };
 
-MultiWorldListPage::MultiWorldListPage(MinecraftInstance* inst, MultiWorldList* worlds, QWidget* parent) //require all instances instead of just one iy
-    : QMainWindow(parent), m_inst(inst), ui(new Ui::MultiWorldListPage), m_worlds(worlds)
+MultiWorldListPage::MultiWorldListPage(MultiWorldList* worlds, QWidget* parent)
+    : QMainWindow(parent), ui(new Ui::MultiWorldListPage), m_worlds(worlds)
 {
     ui->setupUi(this);
 
     ui->toolBar->insertSpacer(ui->actionRefresh);
 
-    MultiWorldListProxyModel* proxy = new MultiWorldListProxyModel(this);
+    auto* proxy = new MultiWorldListProxyModel(this);
     proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
     proxy->setSourceModel(m_worlds);
     proxy->setSortRole(Qt::UserRole);
@@ -195,7 +195,7 @@ void MultiWorldListPage::on_actionRemove_triggered()
                                                tr("You are about to delete \"%1\".\n"
                                                   "The world may be gone forever (A LONG TIME).\n\n"
                                                   "Are you sure?")
-                                                   .arg(m_worlds->allWorlds().at(proxiedIndex.row()).name()),
+                                                   .arg(m_worlds->allWorlds().at(proxiedIndex.row()).world.name()),
                                                QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                       ->exec();
 
@@ -237,9 +237,9 @@ void MultiWorldListPage::on_actionData_Packs_triggered()
     GenericPageProvider provider(dialog->windowTitle());
 
     bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-    m_datapackModel.reset(new DataPackFolderModel(folder, m_inst, isIndexed, true));
+    m_datapackModel.reset(new DataPackFolderModel(folder, m_worlds->allWorlds()[0].instance, isIndexed, true)); //don't use instance 0 iy
 
-    provider.addPageCreator([this] { return new DataPackPage(m_inst, m_datapackModel.get(), this); });
+    provider.addPageCreator([this] { return new DataPackPage(m_worlds->allWorlds()[0].instance, m_datapackModel.get(), this); }); //no instance 0 iy
 
     auto layout = new QVBoxLayout(dialog);
 
@@ -402,7 +402,7 @@ void MultiWorldListPage::on_actionAdd_triggered()
 
 bool MultiWorldListPage::isWorldSafe(QModelIndex)
 {
-    return !m_inst->isRunning();
+    return !m_worlds->allWorlds()[0].instance->isRunning(); //don't use instance 0 iy
 }
 
 bool MultiWorldListPage::worldSafetyNagQuestion(const QString& actionType)
@@ -471,8 +471,8 @@ void MultiWorldListPage::on_actionJoin_triggered()
         return;
     }
     auto worldVariant = m_worlds->data(index, MultiWorldList::ObjectRole);
-    auto world = (World*)worldVariant.value<void*>();
-    APPLICATION->launch(m_inst, LaunchMode::Normal, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world->folderName(), true)));
+    auto world = (InstanceWorld*)worldVariant.value<void*>();
+    APPLICATION->launch(world->instance, LaunchMode::Normal, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world->world.folderName(), true)));
 }
 
 #include "MultiWorldListPage.moc"

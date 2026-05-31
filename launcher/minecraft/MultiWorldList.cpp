@@ -46,7 +46,9 @@
 #include <QUuid>
 #include <Qt>
 
-MultiWorldList::MultiWorldList(const QList<QString>& dirs, QList<BaseInstance*> instances) : QAbstractListModel(), m_instances(instances)
+#include "MinecraftInstance.h"
+
+MultiWorldList::MultiWorldList(const QList<QString>& dirs, const QList<BaseInstance*>& instances) : QAbstractListModel(), m_instances(instances)
 {
     for (QString dir : dirs) {
         m_dirs.append(dir);
@@ -105,9 +107,10 @@ bool MultiWorldList::update()
     if (!isValid())
         return false;
 
-    QList<World> newWorlds;
+    QList<InstanceWorld> newWorlds;
 
-    for (QDir dir : m_dirs) {
+    for (BaseInstance* inst : m_instances) {
+        QDir dir = dynamic_cast<MinecraftInstance*>(inst)->worldDir();
         dir.refresh();
         auto folderContents = dir.entryInfoList();
         // if there are any untracked files...
@@ -117,7 +120,7 @@ bool MultiWorldList::update()
 
             World w(entry);
             if (w.isValid()) {
-                newWorlds.append(w);
+                newWorlds.append(InstanceWorld(w, inst));
             }
         }
     }
@@ -134,16 +137,24 @@ void MultiWorldList::directoryChanged(QString)
     update();
 }
 
-bool MultiWorldList::isValid() //account for all directories
+bool MultiWorldList::isValid()
 {
-    return m_dirs[0].exists() && m_dirs[0].isReadable();
+    bool valid = true;
+
+    for (const QDir& dir : m_dirs) {
+        if (!(dir.exists() && dir.isReadable())) {
+            valid = false;
+        }
+    }
+
+    return valid;
 }
 
 QList<QString> MultiWorldList::instDirPaths() const
 {
     QList<QString> dirList;
 
-    for (BaseInstance* instance : m_instances) {
+    for (BaseInstance* instance : m_instances) { //use m_dirs??? iy
         dirList.append(QFileInfo(instance->instanceRoot()).absoluteFilePath());
     }
 
@@ -154,7 +165,7 @@ bool MultiWorldList::deleteWorld(int index)
 {
     if (index >= m_worlds.size() || index < 0)
         return false;
-    World& m = m_worlds[index];
+    World& m = m_worlds[index].world;
     if (m.destroy()) {
         beginRemoveRows(QModelIndex(), index, index);
         m_worlds.removeAt(index);
@@ -168,7 +179,7 @@ bool MultiWorldList::deleteWorld(int index)
 bool MultiWorldList::deleteWorlds(int first, int last)
 {
     for (int i = first; i <= last; i++) {
-        World& m = m_worlds[i];
+        World& m = m_worlds[i].world;
         m.destroy();
     }
     beginRemoveRows(QModelIndex(), first, last);
@@ -182,7 +193,7 @@ bool MultiWorldList::resetIcon(int row)
 {
     if (row >= m_worlds.size() || row < 0)
         return false;
-    World& m = m_worlds[row];
+    World& m = m_worlds[row].world;
     if (m.resetIcon()) {
         QModelIndex modelIndex = index(row, NameColumn);
         emit dataChanged(modelIndex, modelIndex, { MultiWorldList::IconFileRole });
@@ -209,29 +220,29 @@ QVariant MultiWorldList::data(const QModelIndex& index, int role) const
 
     QLocale locale;
 
-    auto& world = m_worlds[row];
+    auto& instanceWorld = m_worlds[row];
     switch (role) {
         case Qt::DisplayRole:
             switch (column) {
                 case NameColumn:
-                    return world.name();
+                    return instanceWorld.world.name();
 
                 case GameModeColumn:
-                    return world.gameType().toTranslatedString();
+                    return instanceWorld.world.gameType().toTranslatedString();
 
                 case LastPlayedColumn:
-                    return world.lastPlayed();
+                    return instanceWorld.world.lastPlayed();
 
                 case SizeColumn:
-                    return locale.formattedDataSize(world.bytes());
+                    return locale.formattedDataSize(instanceWorld.world.bytes());
 
                 case InfoColumn:
                     for (QString path : instDirPaths()) { //use canonical paths instead of for loops? iy
-                        if (world.isSymLinkUnder(path)) {
+                        if (instanceWorld.world.isSymLinkUnder(path)) {
                             return tr("This world is symbolically linked from elsewhere.");
                         }
                     }
-                    if (world.isMoreThanOneHardLink()) {
+                    if (instanceWorld.world.isMoreThanOneHardLink()) {
                         return tr("\nThis world is hard linked elsewhere.");
                     }
                     return "";
@@ -241,44 +252,44 @@ QVariant MultiWorldList::data(const QModelIndex& index, int role) const
 
         case Qt::UserRole:
             if (column == SizeColumn)
-                return QVariant::fromValue<qlonglong>(world.bytes());
+                return QVariant::fromValue<qlonglong>(instanceWorld.world.bytes());
             return data(index, Qt::DisplayRole);
 
         case Qt::ToolTipRole: {
             if (column == InfoColumn) {
                 for (QString path : instDirPaths()) { //use canonical paths instead of for loops? iy
-                    if (world.isSymLinkUnder(path)) {
+                    if (instanceWorld.world.isSymLinkUnder(path)) {
                         return tr("Warning: This world is symbolically linked from elsewhere. Editing it will also change the original."
                               "\nCanonical Path: %1")
-                            .arg(world.canonicalFilePath());
+                            .arg(instanceWorld.world.canonicalFilePath());
                     }
                 }
-                if (world.isMoreThanOneHardLink()) {
+                if (instanceWorld.world.isMoreThanOneHardLink()) {
                     return tr("Warning: This world is hard linked elsewhere. Editing it will also change the original.");
                 }
             }
-            return world.folderName();
+            return instanceWorld.world.folderName();
         }
         case ObjectRole: {
-            return QVariant::fromValue<void*>((void*)&world);
+            return QVariant::fromValue<void*>((void*)&instanceWorld);
         }
         case FolderRole: {
-            return QDir::toNativeSeparators(QDir(world.canonicalFilePath()).absoluteFilePath(world.folderName())); //test if canonical file path works iy
+            return QDir::toNativeSeparators(QDir(instanceWorld.world.canonicalFilePath()).absoluteFilePath(instanceWorld.world.folderName())); //test if canonical file path works iy
         }
         case SeedRole: {
-            return QVariant::fromValue<qlonglong>(world.seed());
+            return QVariant::fromValue<qlonglong>(instanceWorld.world.seed());
         }
         case NameRole: {
-            return world.name();
+            return instanceWorld.world.name();
         }
         case LastPlayedRole: {
-            return world.lastPlayed();
+            return instanceWorld.world.lastPlayed();
         }
         case SizeRole: {
-            return QVariant::fromValue<qlonglong>(world.bytes());
+            return QVariant::fromValue<qlonglong>(instanceWorld.world.bytes());
         }
         case IconFileRole: {
-            return world.iconFile();
+            return instanceWorld.world.iconFile();
         }
         default:
             return QVariant();
@@ -345,7 +356,7 @@ QMimeData* MultiWorldList::mimeData(const QModelIndexList& indexes) const
         if (row < 0 || row >= this->m_worlds.size())
             continue;
 
-        const World& world = m_worlds[row];
+        const World& world = m_worlds[row].world;
 
         if (!world.isValid() || !world.isOnFS())
             continue;
@@ -446,7 +457,7 @@ int64_t MultiWorldList::calculateWorldSize(const QFileInfo& file)
 void MultiWorldList::loadWorldsAsync()
 {
     for (int i = 0; i < m_worlds.size(); ++i) {
-        auto file = m_worlds.at(i).container();
+        auto file = m_worlds.at(i).world.container();
         int row = i;
         QThreadPool::globalInstance()->start([this, file, row]() mutable {
             auto size = calculateWorldSize(file);
@@ -454,8 +465,8 @@ void MultiWorldList::loadWorldsAsync()
             QMetaObject::invokeMethod(
                 this,
                 [this, size, row, file]() {
-                    if (row < m_worlds.size() && m_worlds[row].container() == file) {
-                        m_worlds[row].setSize(size);
+                    if (row < m_worlds.size() && m_worlds[row].world.container() == file) {
+                        m_worlds[row].world.setSize(size);
 
                         // Notify views
                         QModelIndex modelIndex = index(row, SizeColumn);

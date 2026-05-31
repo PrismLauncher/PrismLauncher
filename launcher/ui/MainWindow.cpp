@@ -339,7 +339,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Create the all worlds widget
     {
         QList<BaseInstance*> allInstances = APPLICATION->instances()->getAllInstances();
-        qDebug() << "iy initially" << allInstances.length();
         QList<QString> dirs;
         for (BaseInstance* inst : allInstances) {
             dirs.append(dynamic_cast<MinecraftInstance*>(inst)->worldDir());
@@ -347,7 +346,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         allWorlds = new MultiWorldList(dirs, allInstances);
         allWorlds->update();
-        allWorldsPage = new MultiWorldListPage(dynamic_cast<MinecraftInstance*>(allInstances[0]), allWorlds); //shouldnt be only one instance iy
+        allWorldsPage = new MultiWorldListPage(allWorlds);
 
         ui->horizontalLayout->addWidget(allWorldsPage);
     }
@@ -945,10 +944,7 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
         instanceFromInstanceTask(creationTask);
     }
 
-    //clean this up iy - fix ghosting issue and only joining one world despite which one you click
-
     QList<BaseInstance*> allInstances = APPLICATION->instances()->getAllInstances();
-    qDebug() << "iy finally " << allInstances.length();
     QList<QString> dirs;
     for (BaseInstance* inst : allInstances) {
         dirs.append(dynamic_cast<MinecraftInstance*>(inst)->worldDir());
@@ -956,8 +952,9 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
 
     allWorlds = new MultiWorldList(dirs, allInstances);
     allWorlds->update();
-    auto newAllWorldsPage = new MultiWorldListPage(dynamic_cast<MinecraftInstance*>(allInstances[0]), allWorlds); //shouldnt be only one instance iy
+    auto newAllWorldsPage = new MultiWorldListPage(allWorlds);
     ui->horizontalLayout->replaceWidget(allWorldsPage, newAllWorldsPage);
+    delete allWorldsPage;
     allWorldsPage = newAllWorldsPage;
 }
 

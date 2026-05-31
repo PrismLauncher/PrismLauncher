@@ -25,6 +25,11 @@
 
 class QFileSystemWatcher;
 
+struct InstanceWorld {
+    World world;
+    BaseInstance* instance;
+};
+
 class MultiWorldList : public QAbstractListModel {
     Q_OBJECT
    public:
@@ -32,7 +37,7 @@ class MultiWorldList : public QAbstractListModel {
 
     enum Roles { ObjectRole = Qt::UserRole + 1, FolderRole, SeedRole, NameRole, GameModeRole, LastPlayedRole, SizeRole, IconFileRole };
 
-    MultiWorldList(const QList<QString>& dirs, QList<BaseInstance*> instances);
+    MultiWorldList(const QList<QString>& dirs, const QList<BaseInstance*>& instances);
 
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
 
@@ -42,7 +47,7 @@ class MultiWorldList : public QAbstractListModel {
 
     size_t size() const { return m_worlds.size(); };
     bool empty() const { return size() == 0; }
-    World& operator[](size_t index) { return m_worlds[index]; }
+    World& operator[](size_t index) { return m_worlds[index].world; }
 
     /// Reloads the mod list and returns true if the list changed.
     virtual bool update();
@@ -83,7 +88,7 @@ class MultiWorldList : public QAbstractListModel {
 
     QList<QString> instDirPaths() const;
 
-    const QList<World>& allWorlds() const { return m_worlds; }
+    const QList<InstanceWorld>& allWorlds() const { return m_worlds; }
 
    private slots:
     void directoryChanged(QString path);
@@ -97,5 +102,5 @@ class MultiWorldList : public QAbstractListModel {
     QFileSystemWatcher* m_watcher;
     bool m_isWatching;
     QList<QDir> m_dirs;
-    QList<World> m_worlds;
+    QList<InstanceWorld> m_worlds;
 };

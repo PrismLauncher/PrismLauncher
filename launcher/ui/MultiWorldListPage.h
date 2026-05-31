@@ -52,7 +52,7 @@ class MultiWorldListPage : public QMainWindow, public BasePage {
     Q_OBJECT
 
    public:
-    explicit MultiWorldListPage(MinecraftInstance* inst, MultiWorldList* worlds, QWidget* parent = 0);
+    explicit MultiWorldListPage(MultiWorldList* worlds, QWidget* parent = 0);
     virtual ~MultiWorldListPage();
 
     virtual QString displayName() const override { return tr("Worlds"); }
@@ -69,9 +69,6 @@ class MultiWorldListPage : public QMainWindow, public BasePage {
     bool eventFilter(QObject* obj, QEvent* ev) override;
     bool worldListFilter(QKeyEvent* ev);
     QMenu* createPopupMenu() override;
-
-   protected:
-    MinecraftInstance* m_inst;
 
    private:
     QModelIndex getSelectedWorld();
