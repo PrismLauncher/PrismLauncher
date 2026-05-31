@@ -255,6 +255,8 @@ set(MINECRAFT_SOURCES
     minecraft/update/FoldersTask.h
     minecraft/update/LibrariesTask.cpp
     minecraft/update/LibrariesTask.h
+    minecraft/update/ModUpdateTask.cpp
+    minecraft/update/ModUpdateTask.h
 
     minecraft/launch/ClaimAccount.cpp
     minecraft/launch/ClaimAccount.h
