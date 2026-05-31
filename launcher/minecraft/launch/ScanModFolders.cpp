@@ -45,19 +45,19 @@ void ScanModFolders::executeTask()
     auto m_inst = m_parent->instance();
 
     auto loaders = m_inst->loaderModList();
-    connect(loaders, &ModFolderModel::updateFinished, this, &ScanModFolders::modsDone);
+    connect(loaders, &ModFolderModel::updateFinished, this, &ScanModFolders::modsDone, Qt::UniqueConnection);
     if (!loaders->update()) {
         m_modsDone = true;
     }
 
     auto cores = m_inst->coreModList();
-    connect(cores, &ModFolderModel::updateFinished, this, &ScanModFolders::coreModsDone);
+    connect(cores, &ModFolderModel::updateFinished, this, &ScanModFolders::coreModsDone, Qt::UniqueConnection);
     if (!cores->update()) {
         m_coreModsDone = true;
     }
 
     auto nils = m_inst->nilModList();
-    connect(nils, &ModFolderModel::updateFinished, this, &ScanModFolders::nilModsDone);
+    connect(nils, &ModFolderModel::updateFinished, this, &ScanModFolders::nilModsDone, Qt::UniqueConnection);
     if (!nils->update()) {
         m_nilModsDone = true;
     }
@@ -66,25 +66,63 @@ void ScanModFolders::executeTask()
 
 void ScanModFolders::modsDone()
 {
+    qDebug() << "Check done in ScanModFolders modsDone...";
+    if (!isRunning()) {
+        qDebug() << "ScanModFolders::modsDone called but step not running; ignoring.";
+        return;
+    }
     m_modsDone = true;
     checkDone();
 }
 
 void ScanModFolders::coreModsDone()
 {
+    qDebug() << "Check done in ScanModFolders coreModsDone...";
+    if (!isRunning()) {
+        qDebug() << "ScanModFolders::coreModsDone called but step not running; "
+                    "ignoring.";
+        return;
+    }
     m_coreModsDone = true;
     checkDone();
 }
 
 void ScanModFolders::nilModsDone()
 {
+    qDebug() << "Check done in ScanModFolders nilModsDone...";
+    if (!isRunning()) {
+        qDebug() << "ScanModFolders::nilModsDone called but step not running; ignoring.";
+        return;
+    }
     m_nilModsDone = true;
     checkDone();
 }
 
 void ScanModFolders::checkDone()
 {
+    qDebug() << "Check done in ScanModFolders...";
     if (m_modsDone && m_coreModsDone && m_nilModsDone) {
+        // Disconnect model signals before finishing so the finished step doesn't
+        // receive later updateFinished() notifications and try to finish again.
+        auto m_inst = m_parent->instance();
+        if (m_inst) {
+            disconnect(m_inst->loaderModList(), &ModFolderModel::updateFinished, this, &ScanModFolders::modsDone);
+            disconnect(m_inst->coreModList(), &ModFolderModel::updateFinished, this, &ScanModFolders::coreModsDone);
+            disconnect(m_inst->nilModList(), &ModFolderModel::updateFinished, this, &ScanModFolders::nilModsDone);
+        }
+
         emitSucceeded();
     }
+}
+
+void ScanModFolders::finalize()
+{
+    auto m_inst = m_parent->instance();
+    if (!m_inst) {
+        return;
+    }
+
+    disconnect(m_inst->loaderModList(), &ModFolderModel::updateFinished, this, &ScanModFolders::modsDone);
+    disconnect(m_inst->coreModList(), &ModFolderModel::updateFinished, this, &ScanModFolders::coreModsDone);
+    disconnect(m_inst->nilModList(), &ModFolderModel::updateFinished, this, &ScanModFolders::nilModsDone);
 }
