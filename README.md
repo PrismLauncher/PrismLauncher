@@ -16,9 +16,11 @@
 - All downloads and instructions for Prism Launcher can be found on our [Website](https://prismlauncher.org/download).
 - Last build status can be found in the [GitHub Actions](https://github.com/PrismLauncher/PrismLauncher/actions) tab (this also includes the pull requests status).
 
+<p align="center">
 <a href="https://repology.org/project/prismlauncher/versions">
     <img src="https://repology.org/badge/vertical-allrepos/prismlauncher.svg?columns=3" alt="Packaging status">
 </a>
+</p>
 
 ### Development Builds
 
