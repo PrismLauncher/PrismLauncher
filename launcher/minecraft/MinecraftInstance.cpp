@@ -72,6 +72,7 @@
 #include "minecraft/update/FoldersTask.h"
 #include "minecraft/update/LegacyFMLLibrariesTask.h"
 #include "minecraft/update/LibrariesTask.h"
+#include "minecraft/update/ModUpdateTask.h"
 
 #include "java/JavaUtils.h"
 
@@ -1226,6 +1227,13 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     // Scan mods folders for mods
     {
         process->appendStep(makeShared<ScanModFolders>(pptr));
+    }
+
+    // Update mods if "AutomaticallyUpdateMods" is true.
+    // Must come after ScanModFolders to ensure mods are loaded.
+    if (settings()->get("AutomaticallyUpdateMods").toBool()) {
+        process->appendStep(
+            makeShared<TaskStepWrapper>(pptr, makeShared<ModUpdateTask>(this, settings()->get("AutomaticallyUpdateModsEnabled").toBool())));
     }
 
     // make sure we have enough RAM, warn the user if we don't
