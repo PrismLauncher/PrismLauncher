@@ -13,12 +13,12 @@
 
 ## Installation
 
-<a href="https://repology.org/project/prismlauncher/versions">
-    <img src="https://repology.org/badge/vertical-allrepos/prismlauncher.svg" alt="Packaging status" align="right">
-</a>
-
 - All downloads and instructions for Prism Launcher can be found on our [Website](https://prismlauncher.org/download).
 - Last build status can be found in the [GitHub Actions](https://github.com/PrismLauncher/PrismLauncher/actions) tab (this also includes the pull requests status).
+
+<a href="https://repology.org/project/prismlauncher/versions">
+    <img src="https://repology.org/badge/vertical-allrepos/prismlauncher.svg?columns=3" alt="Packaging status">
+</a>
 
 ### Development Builds
 
