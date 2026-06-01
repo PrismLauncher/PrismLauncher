@@ -153,7 +153,6 @@ void MSADeviceCodeStep::abort()
         m_request->abort();
     }
     m_is_aborted = true;
-    emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Task aborted"));
 }
 
 void MSADeviceCodeStep::startPoolTimer()
