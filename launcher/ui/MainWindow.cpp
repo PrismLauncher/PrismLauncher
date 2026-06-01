@@ -349,6 +349,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         allWorldsPage = new MultiWorldListPage(allWorlds);
 
         ui->horizontalLayout->addWidget(allWorldsPage);
+
+        allWorldsPage->setVisible(false);
+        ui->instanceToolBar->setVisibilityState(QByteArray::fromBase64(instanceToolbarSetting->get().toString().toUtf8())); //fix instance toolbar checkbox independent of all worlds screen showing iy
+
+        connect(ui->actionAllWorlds, &QAction::toggled, this, &MainWindow::onAllWorldsToggled);
     }
 
     // The cat background
@@ -859,6 +864,32 @@ QString intListToString(const QList<int>& list)
     return slist.join(',');
 }
 
+void MainWindow::onAllWorldsToggled(bool toggled)
+{
+    if (toggled) {
+        QList<BaseInstance*> allInstances = APPLICATION->instances()->getAllInstances();
+        QList<QString> dirs;
+        for (BaseInstance* inst : allInstances) {
+            dirs.append(dynamic_cast<MinecraftInstance*>(inst)->worldDir());
+        }
+
+        allWorlds = new MultiWorldList(dirs, allInstances);
+        allWorlds->update();
+        auto newAllWorldsPage = new MultiWorldListPage(allWorlds);
+        ui->horizontalLayout->replaceWidget(allWorldsPage, newAllWorldsPage);
+        delete allWorldsPage;
+        allWorldsPage = newAllWorldsPage;
+
+        view->setVisible(false);
+        ui->instanceToolBar->setVisible(false);
+        allWorldsPage->setVisible(true);
+    } else {
+        allWorldsPage->setVisible(false);
+        view->setVisible(true);
+        ui->instanceToolBar->setVisibilityState(QByteArray::fromBase64(instanceToolbarSetting->get().toString().toUtf8()));
+    }
+}
+
 void MainWindow::onCatToggled(bool state)
 {
     setCatBackground(state);
@@ -943,19 +974,6 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
     if (creationTask) {
         instanceFromInstanceTask(creationTask);
     }
-
-    QList<BaseInstance*> allInstances = APPLICATION->instances()->getAllInstances();
-    QList<QString> dirs;
-    for (BaseInstance* inst : allInstances) {
-        dirs.append(dynamic_cast<MinecraftInstance*>(inst)->worldDir());
-    }
-
-    allWorlds = new MultiWorldList(dirs, allInstances);
-    allWorlds->update();
-    auto newAllWorldsPage = new MultiWorldListPage(allWorlds);
-    ui->horizontalLayout->replaceWidget(allWorldsPage, newAllWorldsPage);
-    delete allWorldsPage;
-    allWorldsPage = newAllWorldsPage;
 }
 
 void MainWindow::on_actionAddInstance_triggered()

@@ -454,7 +454,7 @@ int64_t MultiWorldList::calculateWorldSize(const QFileInfo& file)
     return -1;
 }
 
-void MultiWorldList::loadWorldsAsync()
+void MultiWorldList::loadWorldsAsync() //this causes problems when deleting instances iy - only load this screen when switch to all worlds page?
 {
     for (int i = 0; i < m_worlds.size(); ++i) {
         auto file = m_worlds.at(i).world.container();

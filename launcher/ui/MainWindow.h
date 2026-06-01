@@ -90,6 +90,8 @@ class MainWindow : public QMainWindow {
     QMenu* createPopupMenu() override;
 
    private slots:
+    void onAllWorldsToggled(bool);
+
     void onCatToggled(bool);
 
     void onCatChanged(int);
