@@ -81,6 +81,9 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
     m_settings->registerSetting("iconKey", "default");
     m_settings->registerSetting("notes", "");
 
+    m_settings->registerSetting("exportTemplate", "");
+    m_settings->registerSetting("exportSettings", 0);
+
     m_settings->registerSetting("lastLaunchTime", 0);
     m_settings->registerSetting("totalTimePlayed", 0);
     if (m_settings->get("totalTimePlayed").toLongLong() < 0)
@@ -396,6 +399,30 @@ void BaseInstance::setName(QString val)
     // FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("name", val);
     emit propertiesChanged(this);
+}
+
+void BaseInstance::setExportTemplate(QString val)
+{
+    // FIXME: if no change, do not set. setting involves saving a file.
+    m_settings->set("exportTemplate", val);
+    emit propertiesChanged(this);
+}
+
+QString BaseInstance::exportTemplate() const
+{
+    return m_settings->get("exportTemplate").toString();
+}
+
+void BaseInstance::setExportSettings(int val)
+{
+    // FIXME: if no change, do not set. setting involves saving a file.
+    m_settings->set("exportSettings", val);
+    emit propertiesChanged(this);
+}
+
+int BaseInstance::exportSettings() const
+{
+    return m_settings->get("exportSettings").toInt();
 }
 
 bool BaseInstance::syncInstanceDirName(const QString& newRoot) const
