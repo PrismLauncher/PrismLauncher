@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Publish on Winget
-        uses: vedantmgoyal2009/winget-releaser@v2
+        uses: vedantmgoyal2009/winget-releaser@4ffc7888bffd451b357355dc214d43bb9f23917e # v2
         with:
           identifier: PrismLauncher.PrismLauncher
           version: ${{ github.event.release.tag_name }}

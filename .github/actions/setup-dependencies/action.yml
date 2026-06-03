@@ -55,7 +55,7 @@ runs:
     # TODO(@getchoo): Get this working on MSYS2!
     - name: Setup ccache
       if: ${{ (runner.os != 'Windows' || inputs.msystem == '') && inputs.build-type == 'Debug' }}
-      uses: hendrikmuhs/ccache-action@v1.2.23
+      uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
       with:
         variant: sccache
         create-symlink: ${{ runner.os != 'Windows' }}
@@ -73,7 +73,7 @@ runs:
 
     - name: Install Qt
       if: ${{ inputs.msystem == '' }}
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@48d3ad6db93f3627c8ee7a0454bc6f3744f7e730 # v4.3.1
       with:
         aqtversion: "==3.1.*"
         version: ${{ inputs.qt-version }}
