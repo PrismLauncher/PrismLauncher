@@ -192,6 +192,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->instanceToolBar->addContextMenuAction(ui->instanceToolBar->toggleViewAction());
         ui->instanceToolBar->addContextMenuAction(ui->actionToggleStatusBar);
         ui->instanceToolBar->addContextMenuAction(ui->actionLockToolbars);
+
+        m_oldInstanceToolbarSetting = ui->instanceToolBar->isVisible();
     }
 
     // set the menu for the folders help, accounts, and export tool buttons
@@ -881,12 +883,13 @@ void MainWindow::onAllWorldsToggled(bool toggled)
         allWorldsPage = newAllWorldsPage;
 
         view->setVisible(false);
+        m_oldInstanceToolbarSetting = ui->instanceToolBar->isVisible(); //won't work if starts on all worlds screen iy
         ui->instanceToolBar->setVisible(false);
         allWorldsPage->setVisible(true);
     } else {
         allWorldsPage->setVisible(false);
         view->setVisible(true);
-        ui->instanceToolBar->setVisibilityState(QByteArray::fromBase64(instanceToolbarSetting->get().toString().toUtf8()));
+        ui->instanceToolBar->setVisible(m_oldInstanceToolbarSetting);
     }
 }
 

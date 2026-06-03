@@ -252,6 +252,7 @@ class MainWindow : public QMainWindow {
     MultiWorldList* allWorlds = nullptr;
 
     std::shared_ptr<Setting> instanceToolbarSetting = nullptr;
+    bool m_oldInstanceToolbarSetting;
 
     unique_qobject_ptr<NewsChecker> m_newsChecker;
 
