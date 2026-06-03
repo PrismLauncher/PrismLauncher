@@ -241,6 +241,8 @@ void LauncherPage::applySettings()
         s->set("InstRenamingMode", "MetadataOnly");
     }
 
+    s->set("OpenEditWindowOnInstanceDoubleClick", ui->openEditWindowOnInstanceDoubleClickCheckBox->isChecked());
+
     // Mods
     s->set("ModMetadataDisabled", !ui->metadataEnableBtn->isChecked());
     s->set("ModDependenciesDisabled", !ui->dependenciesEnableBtn->isChecked());
@@ -285,6 +287,8 @@ void LauncherPage::loadSettings()
     } else {
         ui->sortByNameBtn->setChecked(true);
     }
+
+    ui->openEditWindowOnInstanceDoubleClickCheckBox->setChecked(s->get("OpenEditWindowOnInstanceDoubleClick").toBool());
 
     QString renamingMode = s->get("InstRenamingMode").toString();
     ui->askToRenameDirBtn->setChecked(renamingMode == "AskEverytime");

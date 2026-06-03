@@ -162,6 +162,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="openEditWindowOnInstanceDoubleClickCheckBox">
+            <property name="toolTip">
+             <string>Opens the edit instance window on double-clicking an instance instead of running the instance.</string>
+            </property>
+            <property name="text">
+             <string>&amp;Open edit window on Instance double-click</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>

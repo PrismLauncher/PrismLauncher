@@ -1617,6 +1617,17 @@ void MainWindow::on_actionLaunchInstance_triggered()
 
 void MainWindow::activateInstance(BaseInstance* instance)
 {
+    if (APPLICATION->settings()->get("OpenEditWindowOnInstanceDoubleClick").toBool()) {
+        if (instance->canEdit()) {
+            APPLICATION->showInstanceWindow(instance);
+        } else {
+            CustomMessageBox::selectable(
+                this, tr("Instance not editable"),
+                tr("This instance is not editable. It may be broken, invalid, or too old. Check logs for details."), QMessageBox::Critical)
+                ->show();
+        }
+        return;
+    }
     APPLICATION->launch(instance);
 }
 
