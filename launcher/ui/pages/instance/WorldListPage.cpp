@@ -121,7 +121,7 @@ void WorldListPage::openedImpl()
         ui->toolBar->removeAction(ui->actionJoin);
     }
 
-    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
+    const auto setting_name = QString("WideBarVisibility_%1").arg(id());
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
     ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
@@ -259,9 +259,12 @@ void WorldListPage::on_actionData_Packs_triggered()
 
     dialog->setLayout(layout);
 
-    dialog->exec();
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
 
-    APPLICATION->settings()->set("DataPackDownloadGeometry", dialog->saveGeometry().toBase64());
+    connect(dialog, &QDialog::finished, this,
+            [dialog]() { APPLICATION->settings()->set("DataPackDownloadGeometry", dialog->saveGeometry().toBase64()); });
+
+    dialog->open();
 }
 
 void WorldListPage::on_actionReset_Icon_triggered()
