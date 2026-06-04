@@ -92,6 +92,7 @@ MultiWorldListPage::MultiWorldListPage(MultiWorldList* worlds, QWidget* parent)
     ui->setupUi(this);
 
     ui->toolBar->insertSpacer(ui->actionRefresh);
+    ui->actionJoin->setEnabled(true);
 
     auto* proxy = new MultiWorldListProxyModel(this);
     proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
@@ -116,10 +117,6 @@ MultiWorldListPage::MultiWorldListPage(MultiWorldList* worlds, QWidget* parent)
 void MultiWorldListPage::openedImpl()
 {
     m_worlds->startWatching();
-
-    // if (!m_inst || !m_inst->traits().contains("feature:is_quick_play_singleplayer")) { //get rid of this??? iy
-    //     ui->toolBar->removeAction(ui->actionJoin);
-    // }
 
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
@@ -209,7 +206,15 @@ void MultiWorldListPage::on_actionRemove_triggered()
 
 void MultiWorldListPage::on_actionView_Folder_triggered()
 {
-    DesktopServices::openPath(m_worlds->dirs()[0].absolutePath(), true); //remove view folder option for all worlds (make it world specific) iy
+    QModelIndex index = getSelectedWorld();
+    if (!index.isValid()) {
+        return;
+    }
+
+    auto worldVariant = m_worlds->data(index, MultiWorldList::ObjectRole);
+    auto world = (World*)worldVariant.value<void*>();
+
+    DesktopServices::openPath(world->canonicalFilePath(), true);
 }
 
 void MultiWorldListPage::on_actionData_Packs_triggered()
@@ -237,9 +242,9 @@ void MultiWorldListPage::on_actionData_Packs_triggered()
     GenericPageProvider provider(dialog->windowTitle());
 
     bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-    m_datapackModel.reset(new DataPackFolderModel(folder, m_worlds->allWorlds()[0].instance, isIndexed, true)); //don't use instance 0 iy
+    m_datapackModel.reset(new DataPackFolderModel(folder, static_cast<InstanceWorld*>(m_worlds->data(index, MultiWorldList::ObjectRole).value<void*>())->instance, isIndexed, true)); //these cause crashes sometimes iy with null error SIGSEGV (probably due to watchers) after every first time launched -> using index 0 for instances doesnt fix it
 
-    provider.addPageCreator([this] { return new DataPackPage(m_worlds->allWorlds()[0].instance, m_datapackModel.get(), this); }); //no instance 0 iy
+    provider.addPageCreator([this, index] { return new DataPackPage(static_cast<InstanceWorld*>(m_worlds->data(index, MultiWorldList::ObjectRole).value<void*>())->instance, m_datapackModel.get(), this); }); //iy
 
     auto layout = new QVBoxLayout(dialog);
 
@@ -375,16 +380,10 @@ void MultiWorldListPage::worldChanged([[maybe_unused]] const QModelIndex& curren
     ui->actionCopy->setEnabled(enable);
     ui->actionRename->setEnabled(enable);
     ui->actionData_Packs->setEnabled(enable);
+    ui->actionView_Folder->setEnabled(enable);
+    ui->actionJoin->setEnabled(enable);
     bool hasIcon = !index.data(MultiWorldList::IconFileRole).isNull();
     ui->actionReset_Icon->setEnabled(enable && hasIcon);
-
-    // auto supportsJoin = m_inst && m_inst->traits().contains("feature:is_quick_play_singleplayer"); //change this to be on instance by instance basis iy
-    // ui->actionJoin->setEnabled(enable && supportsJoin);
-    ui->actionJoin->setEnabled(true);
-
-    // if (!supportsJoin) {
-    //     ui->toolBar->removeAction(ui->actionJoin);
-    // }
 }
 
 void MultiWorldListPage::on_actionAdd_triggered()
@@ -400,9 +399,9 @@ void MultiWorldListPage::on_actionAdd_triggered()
     }
 }
 
-bool MultiWorldListPage::isWorldSafe(QModelIndex)
+bool MultiWorldListPage::isWorldSafe(QModelIndex index)
 {
-    return !m_worlds->allWorlds()[0].instance->isRunning(); //don't use instance 0 iy
+    return !static_cast<InstanceWorld*>(m_worlds->data(index, MultiWorldList::ObjectRole).value<void*>())->instance->isRunning();
 }
 
 bool MultiWorldListPage::worldSafetyNagQuestion(const QString& actionType)
@@ -471,7 +470,7 @@ void MultiWorldListPage::on_actionJoin_triggered()
         return;
     }
     auto worldVariant = m_worlds->data(index, MultiWorldList::ObjectRole);
-    auto world = (InstanceWorld*)worldVariant.value<void*>();
+    auto *world = static_cast<InstanceWorld*>(worldVariant.value<void*>());
     APPLICATION->launch(world->instance, LaunchMode::Normal, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world->world.folderName(), true)));
 }
 

@@ -227,6 +227,9 @@ QVariant MultiWorldList::data(const QModelIndex& index, int role) const
                 case NameColumn:
                     return instanceWorld.world.name();
 
+                case InstanceColumn:
+                    return instanceWorld.instance->name();
+
                 case GameModeColumn:
                     return instanceWorld.world.gameType().toTranslatedString();
 
@@ -303,6 +306,8 @@ QVariant MultiWorldList::headerData(int section, [[maybe_unused]] Qt::Orientatio
             switch (section) {
                 case NameColumn:
                     return tr("Name");
+                case InstanceColumn:
+                    return tr("Instance");
                 case GameModeColumn:
                     return tr("Game Mode");
                 case LastPlayedColumn:
@@ -321,6 +326,8 @@ QVariant MultiWorldList::headerData(int section, [[maybe_unused]] Qt::Orientatio
             switch (section) {
                 case NameColumn:
                     return tr("The name of the world.");
+                case InstanceColumn:
+                    return tr("The instance the world belongs to.");
                 case GameModeColumn:
                     return tr("Game mode of the world.");
                 case LastPlayedColumn:
@@ -454,7 +461,7 @@ int64_t MultiWorldList::calculateWorldSize(const QFileInfo& file)
     return -1;
 }
 
-void MultiWorldList::loadWorldsAsync() //this causes problems when deleting instances iy - only load this screen when switch to all worlds page?
+void MultiWorldList::loadWorldsAsync()
 {
     for (int i = 0; i < m_worlds.size(); ++i) {
         auto file = m_worlds.at(i).world.container();

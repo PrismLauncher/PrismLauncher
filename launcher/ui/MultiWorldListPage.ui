@@ -91,10 +91,10 @@
    <addaction name="actionMCEdit"/>
    <addaction name="actionData_Packs"/>
    <addaction name="actionReset_Icon"/>
+   <addaction name="actionView_Folder"/>
    <addaction name="separator"/>
    <addaction name="actionCopy_Seed"/>
    <addaction name="actionRefresh"/>
-   <addaction name="actionView_Folder"/>
   </widget>
   <action name="actionAdd">
    <property name="text">
