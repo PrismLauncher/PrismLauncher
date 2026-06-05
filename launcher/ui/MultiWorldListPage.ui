@@ -88,6 +88,7 @@
    <addaction name="actionRename"/>
    <addaction name="actionCopy"/>
    <addaction name="actionRemove"/>
+   <addaction name="actionInstance_Settings"/>
    <addaction name="actionMCEdit"/>
    <addaction name="actionData_Packs"/>
    <addaction name="actionReset_Icon"/>
@@ -155,6 +156,14 @@
    </property>
    <property name="toolTip">
     <string>Manage data packs inside the world.</string>
+   </property>
+  </action>
+  <action name="actionInstance_Settings">
+   <property name="text">
+    <string>View Instance</string>
+   </property>
+   <property name="toolTip">
+    <string>View the instance this world belongs to.</string>
    </property>
   </action>
  </widget>

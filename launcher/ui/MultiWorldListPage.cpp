@@ -111,6 +111,7 @@ MultiWorldListPage::MultiWorldListPage(MultiWorldList* worlds, QWidget* parent)
     head->setSectionResizeMode(4, QHeaderView::ResizeToContents);
 
     connect(ui->worldTreeView->selectionModel(), &QItemSelectionModel::currentChanged, this, &MultiWorldListPage::worldChanged);
+    connect(ui->worldTreeView, &QAbstractItemView::doubleClicked, this, &MultiWorldListPage::worldDoubleClicked);
     worldChanged(QModelIndex(), QModelIndex());
 }
 
@@ -382,6 +383,7 @@ void MultiWorldListPage::worldChanged([[maybe_unused]] const QModelIndex& curren
     ui->actionData_Packs->setEnabled(enable);
     ui->actionView_Folder->setEnabled(enable);
     ui->actionJoin->setEnabled(enable);
+    ui->actionInstance_Settings->setEnabled(enable);
     bool hasIcon = !index.data(MultiWorldList::IconFileRole).isNull();
     ui->actionReset_Icon->setEnabled(enable && hasIcon);
 }
@@ -458,14 +460,44 @@ void MultiWorldListPage::on_actionRename_triggered()
     }
 }
 
+void MultiWorldListPage::on_actionInstance_Settings_triggered()
+{
+    QModelIndex index = getSelectedWorld();
+    if (!index.isValid()) {
+        return;
+    }
+    auto worldVariant = m_worlds->data(index, MultiWorldList::ObjectRole);
+    auto *world = static_cast<InstanceWorld*>(worldVariant.value<void*>());
+
+    if (world->instance->canEdit()) {
+        APPLICATION->showInstanceWindow(world->instance);
+    } else {
+        CustomMessageBox::selectable(this, tr("Instance not editable"),
+                                     tr("This instance is not editable. It may be broken, invalid, or too old. Check logs for details."),
+                                     QMessageBox::Critical)
+            ->show();
+    }
+}
+
 void MultiWorldListPage::on_actionRefresh_triggered()
 {
     m_worlds->update();
 }
 
+void MultiWorldListPage::worldDoubleClicked(const QModelIndex& index)
+{
+    auto proxy = (QSortFilterProxyModel*)ui->worldTreeView->model();
+    join(proxy->mapToSource(index));
+}
+
 void MultiWorldListPage::on_actionJoin_triggered()
 {
     QModelIndex index = getSelectedWorld();
+    join(index);
+}
+
+void MultiWorldListPage::join(QModelIndex index)
+{
     if (!index.isValid()) {
         return;
     }

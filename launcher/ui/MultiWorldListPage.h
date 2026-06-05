@@ -75,6 +75,7 @@ class MultiWorldListPage : public QMainWindow, public BasePage {
     bool isWorldSafe(QModelIndex index);
     bool worldSafetyNagQuestion(const QString& actionType);
     void mceditError();
+    void join(QModelIndex index);
 
    private:
     Ui::MultiWorldListPage* ui;
@@ -92,6 +93,7 @@ class MultiWorldListPage : public QMainWindow, public BasePage {
     void on_actionAdd_triggered();
     void on_actionCopy_triggered();
     void on_actionRename_triggered();
+    void on_actionInstance_Settings_triggered();
     void on_actionRefresh_triggered();
     void on_actionView_Folder_triggered();
     void on_actionData_Packs_triggered();
@@ -99,6 +101,7 @@ class MultiWorldListPage : public QMainWindow, public BasePage {
     void worldChanged(const QModelIndex& current, const QModelIndex& previous);
     void mceditState(LoggedProcess::State state);
     void on_actionJoin_triggered();
+    void worldDoubleClicked(const QModelIndex& index);
 
     void ShowContextMenu(const QPoint& pos);
 };
