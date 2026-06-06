@@ -48,10 +48,10 @@
 
 #include "MinecraftInstance.h"
 
-MultiWorldList::MultiWorldList(const QList<QString>& dirs, const QList<BaseInstance*>& instances) : QAbstractListModel(), m_instances(instances)
+MultiWorldList::MultiWorldList(const QList<BaseInstance*>& instances) : QAbstractListModel(), m_instances(instances)
 {
-    for (QString dir : dirs) {
-        m_dirs.append(dir);
+    for (BaseInstance* inst : m_instances) {
+        m_dirs.append(dynamic_cast<MinecraftInstance*>(inst)->worldDir());
     }
 
     for (QDir dir : m_dirs) {
@@ -277,7 +277,7 @@ QVariant MultiWorldList::data(const QModelIndex& index, int role) const
             return QVariant::fromValue<void*>((void*)&instanceWorld);
         }
         case FolderRole: {
-            return QDir::toNativeSeparators(QDir(instanceWorld.world.canonicalFilePath()).absoluteFilePath(instanceWorld.world.folderName())); //test if canonical file path works iy
+            return QDir::toNativeSeparators(QDir(dynamic_cast<MinecraftInstance*>(instanceWorld.instance)->worldDir()).absoluteFilePath(instanceWorld.world.folderName())); //test if canonical file path works iy
         }
         case SeedRole: {
             return QVariant::fromValue<qlonglong>(instanceWorld.world.seed());

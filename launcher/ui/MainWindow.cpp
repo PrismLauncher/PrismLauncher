@@ -339,19 +339,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Create the all worlds widget
     {
         QList<BaseInstance*> allInstances = APPLICATION->instances()->getAllInstances();
-        QList<QString> dirs;
-        for (BaseInstance* inst : allInstances) {
-            dirs.append(dynamic_cast<MinecraftInstance*>(inst)->worldDir());
-        }
 
-        allWorlds = new MultiWorldList(dirs, allInstances);
+        allWorlds = new MultiWorldList(allInstances);
         allWorlds->update();
         allWorldsPage = new MultiWorldListPage(allWorlds);
 
         ui->horizontalLayout->addWidget(allWorldsPage);
 
         allWorldsPage->setVisible(false);
-        ui->instanceToolBar->setVisibilityState(QByteArray::fromBase64(instanceToolbarSetting->get().toString().toUtf8())); //fix instance toolbar checkbox independent of all worlds screen showing iy
+        ui->instanceToolBar->setVisibilityState(QByteArray::fromBase64(instanceToolbarSetting->get().toString().toUtf8()));
 
         connect(ui->actionAllWorlds, &QAction::toggled, this, &MainWindow::onAllWorldsToggled);
         connect(allWorldsPage, &MultiWorldListPage::worldJoined, this, &MainWindow::worldJoined);
@@ -880,12 +876,8 @@ void MainWindow::toggleAllWorldsScreen(bool toggled)
 {
     if (toggled) {
         QList<BaseInstance*> allInstances = APPLICATION->instances()->getAllInstances();
-        QList<QString> dirs;
-        for (BaseInstance* inst : allInstances) {
-            dirs.append(dynamic_cast<MinecraftInstance*>(inst)->worldDir());
-        }
 
-        allWorlds = new MultiWorldList(dirs, allInstances);
+        allWorlds = new MultiWorldList(allInstances);
         allWorlds->update();
         auto newAllWorldsPage = new MultiWorldListPage(allWorlds);
         ui->horizontalLayout->replaceWidget(allWorldsPage, newAllWorldsPage);

@@ -37,7 +37,7 @@ class MultiWorldList : public QAbstractListModel {
 
     enum Roles { ObjectRole = Qt::UserRole + 1, FolderRole, SeedRole, NameRole, InstanceRole, GameModeRole, LastPlayedRole, SizeRole, IconFileRole };
 
-    MultiWorldList(const QList<QString>& dirs, const QList<BaseInstance*>& instances);
+    MultiWorldList(const QList<BaseInstance*>& instances);
 
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
 
