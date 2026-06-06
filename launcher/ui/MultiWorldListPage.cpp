@@ -504,6 +504,7 @@ void MultiWorldListPage::join(QModelIndex index)
     auto worldVariant = m_worlds->data(index, MultiWorldList::ObjectRole);
     auto *world = static_cast<InstanceWorld*>(worldVariant.value<void*>());
     APPLICATION->launch(world->instance, LaunchMode::Normal, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world->world.folderName(), true)));
+    emit worldJoined();
 }
 
 #include "MultiWorldListPage.moc"

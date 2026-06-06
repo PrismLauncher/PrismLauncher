@@ -175,6 +175,8 @@ class MainWindow : public QMainWindow {
 
     void taskEnd();
 
+    void worldJoined();
+
     /**
      * called when an icon is changed in the icon model.
      */
@@ -235,6 +237,8 @@ class MainWindow : public QMainWindow {
 
     void runModalTask(Task* task);
     void instanceFromInstanceTask(InstanceTask* task);
+
+    void toggleAllWorldsScreen(bool toggled);
 
    private:
     Ui::MainWindow* ui;

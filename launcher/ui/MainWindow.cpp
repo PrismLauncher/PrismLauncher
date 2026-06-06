@@ -192,8 +192,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->instanceToolBar->addContextMenuAction(ui->instanceToolBar->toggleViewAction());
         ui->instanceToolBar->addContextMenuAction(ui->actionToggleStatusBar);
         ui->instanceToolBar->addContextMenuAction(ui->actionLockToolbars);
-
-        m_oldInstanceToolbarSetting = ui->instanceToolBar->isVisible();
     }
 
     // set the menu for the folders help, accounts, and export tool buttons
@@ -356,6 +354,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->instanceToolBar->setVisibilityState(QByteArray::fromBase64(instanceToolbarSetting->get().toString().toUtf8())); //fix instance toolbar checkbox independent of all worlds screen showing iy
 
         connect(ui->actionAllWorlds, &QAction::toggled, this, &MainWindow::onAllWorldsToggled);
+        connect(allWorldsPage, &MultiWorldListPage::worldJoined, this, &MainWindow::worldJoined);
     }
 
     // The cat background
@@ -868,6 +867,17 @@ QString intListToString(const QList<int>& list)
 
 void MainWindow::onAllWorldsToggled(bool toggled)
 {
+    toggleAllWorldsScreen(toggled);
+}
+
+void MainWindow::worldJoined()
+{
+    ui->actionAllWorlds->setChecked(false);
+    toggleAllWorldsScreen(false);
+}
+
+void MainWindow::toggleAllWorldsScreen(bool toggled)
+{
     if (toggled) {
         QList<BaseInstance*> allInstances = APPLICATION->instances()->getAllInstances();
         QList<QString> dirs;
@@ -883,9 +893,11 @@ void MainWindow::onAllWorldsToggled(bool toggled)
         allWorldsPage = newAllWorldsPage;
 
         view->setVisible(false);
-        m_oldInstanceToolbarSetting = ui->instanceToolBar->isVisible(); //won't work if starts on all worlds screen iy
+        m_oldInstanceToolbarSetting = ui->instanceToolBar->isVisible();
         ui->instanceToolBar->setVisible(false);
         allWorldsPage->setVisible(true);
+
+        connect(allWorldsPage, &MultiWorldListPage::worldJoined, this, &MainWindow::worldJoined);
     } else {
         allWorldsPage->setVisible(false);
         view->setVisible(true);
@@ -1631,6 +1643,10 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+    if (view->isVisible()) {
+        m_oldInstanceToolbarSetting = ui->instanceToolBar->isVisible();
+    }
+    toggleAllWorldsScreen(false);
     // Save the window state and geometry.
     APPLICATION->settings()->set("MainWindowState", QString::fromUtf8(saveState().toBase64()));
     APPLICATION->settings()->set("MainWindowGeometry", QString::fromUtf8(saveGeometry().toBase64()));
