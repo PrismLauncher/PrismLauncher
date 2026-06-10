@@ -240,7 +240,7 @@ QVariant MultiWorldList::data(const QModelIndex& index, int role) const
                     return locale.formattedDataSize(instanceWorld.world.bytes());
 
                 case InfoColumn:
-                    for (QString path : instDirPaths()) { //use canonical paths instead of for loops? iy
+                    for (QString path : instDirPaths()) {
                         if (instanceWorld.world.isSymLinkUnder(path)) {
                             return tr("This world is symbolically linked from elsewhere.");
                         }
@@ -260,7 +260,7 @@ QVariant MultiWorldList::data(const QModelIndex& index, int role) const
 
         case Qt::ToolTipRole: {
             if (column == InfoColumn) {
-                for (QString path : instDirPaths()) { //use canonical paths instead of for loops? iy
+                for (QString path : instDirPaths()) {
                     if (instanceWorld.world.isSymLinkUnder(path)) {
                         return tr("Warning: This world is symbolically linked from elsewhere. Editing it will also change the original."
                               "\nCanonical Path: %1")
@@ -277,7 +277,7 @@ QVariant MultiWorldList::data(const QModelIndex& index, int role) const
             return QVariant::fromValue<void*>((void*)&instanceWorld);
         }
         case FolderRole: {
-            return QDir::toNativeSeparators(QDir(dynamic_cast<MinecraftInstance*>(instanceWorld.instance)->worldDir()).absoluteFilePath(instanceWorld.world.folderName())); //test if canonical file path works iy
+            return QDir::toNativeSeparators(QDir(dynamic_cast<MinecraftInstance*>(instanceWorld.instance)->worldDir()).absoluteFilePath(instanceWorld.world.folderName()));
         }
         case SeedRole: {
             return QVariant::fromValue<qlonglong>(instanceWorld.world.seed());

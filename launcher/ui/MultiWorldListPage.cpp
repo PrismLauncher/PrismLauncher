@@ -242,10 +242,12 @@ void MultiWorldListPage::on_actionData_Packs_triggered()
 
     GenericPageProvider provider(dialog->windowTitle());
 
-    bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-    m_datapackModel.reset(new DataPackFolderModel(folder, static_cast<InstanceWorld*>(m_worlds->data(index, MultiWorldList::ObjectRole).value<void*>())->instance, isIndexed, true)); //these cause crashes sometimes iy with null error SIGSEGV (probably due to watchers) after every first time launched -> using index 0 for instances doesnt fix it
+    auto instance = (static_cast<InstanceWorld*>(m_worlds->data(index, MultiWorldList::ObjectRole).value<void*>()))->instance;
 
-    provider.addPageCreator([this, index] { return new DataPackPage(static_cast<InstanceWorld*>(m_worlds->data(index, MultiWorldList::ObjectRole).value<void*>())->instance, m_datapackModel.get(), this); }); //iy
+    bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+    m_datapackModel.reset(new DataPackFolderModel(folder, instance, isIndexed, true));
+
+    provider.addPageCreator([this, instance] { return new DataPackPage(instance, m_datapackModel.get(), this); });
 
     auto layout = new QVBoxLayout(dialog);
 
@@ -265,9 +267,12 @@ void MultiWorldListPage::on_actionData_Packs_triggered()
 
     dialog->setLayout(layout);
 
-    dialog->exec();
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
 
-    APPLICATION->settings()->set("DataPackDownloadGeometry", dialog->saveGeometry().toBase64());
+    connect(dialog, &QDialog::finished, this,
+            [dialog]() { APPLICATION->settings()->set("DataPackDownloadGeometry", dialog->saveGeometry().toBase64()); });
+
+    dialog->open();
 }
 
 void MultiWorldListPage::on_actionReset_Icon_triggered()
