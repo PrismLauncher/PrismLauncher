@@ -113,6 +113,12 @@ DeviceAuthorizationResponse parseDeviceAuthorizationResponse(const QByteArray& d
 
 void MSADeviceCodeStep::deviceAuthorizationFinished(QByteArray* response)
 {
+    if (!m_request->wasSuccessful() || m_request->error() != QNetworkReply::NoError) {
+        qWarning() << "Device authorization failed:" << m_request->error() << m_request->errorString();
+        emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Device authorization failed: %1").arg(m_request->errorString()));
+        return;
+    }
+
     auto rsp = parseDeviceAuthorizationResponse(*response);
     if (!rsp.error.isEmpty() || !rsp.error_description.isEmpty()) {
         qWarning() << "Device authorization failed:" << rsp.error;
@@ -120,12 +126,6 @@ void MSADeviceCodeStep::deviceAuthorizationFinished(QByteArray* response)
                       tr("Device authorization failed: %1").arg(rsp.error_description.isEmpty() ? rsp.error : rsp.error_description));
         return;
     }
-    if (!m_request->wasSuccessful() || m_request->error() != QNetworkReply::NoError) {
-        qWarning() << "Device authorization failed:" << *response;
-        emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Failed to retrieve device authorization"));
-        return;
-    }
-
     if (rsp.device_code.isEmpty() || rsp.user_code.isEmpty() || rsp.verification_uri.isEmpty() || rsp.expires_in == 0) {
         qWarning() << "Device authorization failed: required fields missing";
         emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Device authorization failed: required fields missing"));
