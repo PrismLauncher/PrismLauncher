@@ -59,14 +59,18 @@ QString askToUpdateInstanceDirName(BaseInstance* instance, const QString& oldNam
     if (oldRoot == FS::PathCombine(QFileInfo(oldRoot).dir().absolutePath(), newName))
         return QString();
 
-    // Check for conflict
+    if (instance->isRunning()) {
+        QMessageBox::warning(parent, QObject::tr("Cannot rename instance"),
+                             QObject::tr("The instance is currently running. Please close the game before renaming the instance folder."));
+        return QString();
+    }
+
     if (QDir(newRoot).exists()) {
         QMessageBox::warning(parent, QObject::tr("Cannot rename instance"),
                              QObject::tr("New instance root (%1) already exists. <br />Only the metadata will be renamed.").arg(newRoot));
         return QString();
     }
 
-    // Ask if we should rename
     if (renamingMode == "AskEverytime") {
         auto checkBox = new QCheckBox(QObject::tr("&Remember my choice"), parent);
         auto dialog =
@@ -88,11 +92,9 @@ QString askToUpdateInstanceDirName(BaseInstance* instance, const QString& oldNam
             return QString();
     }
 
-    // Check for linked instances
     if (!checkLinkedInstances(instance->id(), parent, QObject::tr("Renaming")))
         return QString();
 
-    // Now we can confirm that a renaming is happening
     if (!instance->syncInstanceDirName(newRoot)) {
         QMessageBox::warning(parent, QObject::tr("Cannot rename instance"),
                              QObject::tr("An error occurred when performing the following renaming operation: <br/>"
