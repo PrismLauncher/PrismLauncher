@@ -207,6 +207,24 @@ void InstanceView::updateGeometries()
     viewport()->update();
 }
 
+void InstanceView::selectInstance(BaseInstance* instance)
+{
+    QModelIndex index;
+
+    for (int row = 0; row < model()->rowCount(); row++) {
+        for (int j = 0; j < model()->columnCount(); j++) {
+            auto testIndex = model()->index(row, j);
+            if (testIndex.data(InstanceList::InstanceIDRole).toString() == instance->id()) {
+                index = testIndex;
+            }
+        }
+    }
+
+    if (index.isValid()) {
+        selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+    }
+}
+
 bool InstanceView::isIndexHidden(const QModelIndex& index) const
 {
     VisualGroup* cat = category(index);

@@ -66,7 +66,7 @@ class MultiWorldListPage : public QMainWindow, public BasePage {
     virtual void closedImpl() override;
 
    signals:
-    void worldJoined();
+    void worldJoined(BaseInstance* instance);
 
    protected:
     bool eventFilter(QObject* obj, QEvent* ev) override;

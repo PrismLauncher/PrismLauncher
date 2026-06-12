@@ -40,6 +40,8 @@
 #include <QListView>
 #include <QScrollBar>
 #include <functional>
+
+#include "BaseInstance.h"
 #include "VisualGroup.h"
 #include "ui/themes/CatPainter.h"
 
@@ -82,6 +84,7 @@ class InstanceView : public QAbstractItemView {
 
    public slots:
     virtual void updateGeometries() override;
+    void selectInstance(BaseInstance* instance);
 
    protected slots:
     virtual void dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QList<int>& roles) override;

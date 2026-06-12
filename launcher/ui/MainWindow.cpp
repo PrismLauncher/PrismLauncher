@@ -335,6 +335,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
             [](const QString& groupName) -> bool { return APPLICATION->instances()->isGroupCollapsed(groupName); });
         connect(view, &InstanceView::groupStateChanged, APPLICATION->instances(), &InstanceList::on_GroupStateChanged);
         ui->horizontalLayout->addWidget(view);
+
+        connect(this, &MainWindow::selectInstance, view, &InstanceView::selectInstance);
     }
     // Create the all worlds widget
     {
@@ -866,10 +868,11 @@ void MainWindow::onAllWorldsToggled(bool toggled)
     toggleAllWorldsScreen(toggled);
 }
 
-void MainWindow::worldJoined()
+void MainWindow::worldJoined(BaseInstance* instance)
 {
     ui->actionAllWorlds->setChecked(false);
     toggleAllWorldsScreen(false);
+    emit selectInstance(instance);
 }
 
 void MainWindow::toggleAllWorldsScreen(bool toggled)
@@ -877,7 +880,7 @@ void MainWindow::toggleAllWorldsScreen(bool toggled)
     if (toggled) {
         QList<BaseInstance*> allInstances = APPLICATION->instances()->getAllInstances();
 
-        allWorlds = new MultiWorldList(allInstances);
+        allWorlds = new MultiWorldList(allInstances); //make this be unique pointer or whatever instead of awkward replace and delete iy
         allWorlds->update();
         auto newAllWorldsPage = new MultiWorldListPage(allWorlds);
         ui->horizontalLayout->replaceWidget(allWorldsPage, newAllWorldsPage);
@@ -888,6 +891,7 @@ void MainWindow::toggleAllWorldsScreen(bool toggled)
         m_oldInstanceToolbarSetting = ui->instanceToolBar->isVisible();
         ui->instanceToolBar->setVisible(false);
         allWorldsPage->setVisible(true);
+        statusBar()->setVisible(false);
 
         allWorlds->startWatching();
 
@@ -896,6 +900,7 @@ void MainWindow::toggleAllWorldsScreen(bool toggled)
         allWorldsPage->setVisible(false);
         view->setVisible(true);
         ui->instanceToolBar->setVisible(m_oldInstanceToolbarSetting);
+        statusBar()->setVisible(APPLICATION->settings()->get("StatusBarVisible").toBool());
 
         allWorlds->stopWatching();
     }

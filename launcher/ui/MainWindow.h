@@ -86,6 +86,8 @@ class MainWindow : public QMainWindow {
    signals:
     void isClosing();
 
+    void selectInstance(BaseInstance* instance);
+
    protected:
     QMenu* createPopupMenu() override;
 
@@ -175,7 +177,7 @@ class MainWindow : public QMainWindow {
 
     void taskEnd();
 
-    void worldJoined();
+    void worldJoined(BaseInstance* instance);
 
     /**
      * called when an icon is changed in the icon model.
