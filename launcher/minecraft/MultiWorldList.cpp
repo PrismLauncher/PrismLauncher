@@ -46,7 +46,10 @@
 #include <QUuid>
 #include <Qt>
 
+#include "Application.h"
 #include "MinecraftInstance.h"
+#include "PackProfile.h"
+#include "icons/IconList.h"
 
 MultiWorldList::MultiWorldList(const QList<BaseInstance*>& instances) : QAbstractListModel(), allInstances(instances)
 {
@@ -230,6 +233,10 @@ QVariant MultiWorldList::data(const QModelIndex& index, int role) const
                 case InstanceColumn:
                     return instanceWorld.instance->name();
 
+                case VersionColumn:
+                    static_cast<MinecraftInstance*>(instanceWorld.instance)->getPackProfile()->reload(Net::Mode::Online);
+                    return static_cast<MinecraftInstance*>(instanceWorld.instance)->getPackProfile()->getComponentVersion("net.minecraft");
+
                 case GameModeColumn:
                     return instanceWorld.world.gameType().toTranslatedString();
 
@@ -240,10 +247,8 @@ QVariant MultiWorldList::data(const QModelIndex& index, int role) const
                     return locale.formattedDataSize(instanceWorld.world.bytes());
 
                 case InfoColumn:
-                    for (QString path : instDirPaths()) {
-                        if (instanceWorld.world.isSymLinkUnder(path)) {
-                            return tr("This world is symbolically linked from elsewhere.");
-                        }
+                    if (instanceWorld.world.isSymLinkUnder(QFileInfo(instanceWorld.instance->instanceRoot()).absoluteFilePath())) {
+                        return tr("This world is symbolically linked from elsewhere.");
                     }
                     if (instanceWorld.world.isMoreThanOneHardLink()) {
                         return tr("\nThis world is hard linked elsewhere.");
@@ -260,12 +265,10 @@ QVariant MultiWorldList::data(const QModelIndex& index, int role) const
 
         case Qt::ToolTipRole: {
             if (column == InfoColumn) {
-                for (QString path : instDirPaths()) {
-                    if (instanceWorld.world.isSymLinkUnder(path)) {
-                        return tr("Warning: This world is symbolically linked from elsewhere. Editing it will also change the original."
-                              "\nCanonical Path: %1")
-                            .arg(instanceWorld.world.canonicalFilePath());
-                    }
+                if (instanceWorld.world.isSymLinkUnder(QFileInfo(instanceWorld.instance->instanceRoot()).absoluteFilePath())) {
+                    return tr("Warning: This world is symbolically linked from elsewhere. Editing it will also change the original."
+                        "\nCanonical Path: %1")
+                        .arg(instanceWorld.world.canonicalFilePath());
                 }
                 if (instanceWorld.world.isMoreThanOneHardLink()) {
                     return tr("Warning: This world is hard linked elsewhere. Editing it will also change the original.");
@@ -294,6 +297,9 @@ QVariant MultiWorldList::data(const QModelIndex& index, int role) const
         case IconFileRole: {
             return instanceWorld.world.iconFile();
         }
+        case InstanceIconFileRole: {
+            return APPLICATION->icons()->getIcon(instanceWorld.instance->iconKey());
+        }
         default:
             return QVariant();
     }
@@ -308,6 +314,8 @@ QVariant MultiWorldList::headerData(int section, [[maybe_unused]] Qt::Orientatio
                     return tr("Name");
                 case InstanceColumn:
                     return tr("Instance");
+                case VersionColumn:
+                    return tr("Version");
                 case GameModeColumn:
                     return tr("Game Mode");
                 case LastPlayedColumn:
@@ -328,6 +336,8 @@ QVariant MultiWorldList::headerData(int section, [[maybe_unused]] Qt::Orientatio
                     return tr("The name of the world.");
                 case InstanceColumn:
                     return tr("The instance the world belongs to.");
+                case VersionColumn:
+                    return tr("The Minecraft version of the world.");
                 case GameModeColumn:
                     return tr("Game mode of the world.");
                 case LastPlayedColumn:

@@ -889,11 +889,15 @@ void MainWindow::toggleAllWorldsScreen(bool toggled)
         ui->instanceToolBar->setVisible(false);
         allWorldsPage->setVisible(true);
 
+        allWorlds->startWatching();
+
         connect(allWorldsPage, &MultiWorldListPage::worldJoined, this, &MainWindow::worldJoined);
     } else {
         allWorldsPage->setVisible(false);
         view->setVisible(true);
         ui->instanceToolBar->setVisible(m_oldInstanceToolbarSetting);
+
+        allWorlds->stopWatching();
     }
 }
 

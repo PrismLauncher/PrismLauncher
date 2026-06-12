@@ -33,9 +33,9 @@ struct InstanceWorld {
 class MultiWorldList : public QAbstractListModel {
     Q_OBJECT
    public:
-    enum Columns { NameColumn, InstanceColumn, GameModeColumn, LastPlayedColumn, SizeColumn, InfoColumn };
+    enum Columns { NameColumn, InstanceColumn, VersionColumn, GameModeColumn, LastPlayedColumn, SizeColumn, InfoColumn };
 
-    enum Roles { ObjectRole = Qt::UserRole + 1, FolderRole, SeedRole, NameRole, InstanceRole, GameModeRole, LastPlayedRole, SizeRole, IconFileRole };
+    enum Roles { ObjectRole = Qt::UserRole + 1, FolderRole, SeedRole, NameRole, InstanceRole, VersionRole, GameModeRole, LastPlayedRole, SizeRole, IconFileRole, InstanceIconFileRole };
 
     MultiWorldList(const QList<BaseInstance*>& instances);
 

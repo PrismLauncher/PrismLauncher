@@ -83,6 +83,12 @@ class MultiWorldListProxyModel : public QSortFilterProxyModel {
             return QIcon(iconFile);
         }
 
+        if (index.column() == 1 && role == Qt::DecorationRole) {
+            MultiWorldList* worlds = qobject_cast<MultiWorldList*>(sourceModel());
+            auto icon = worlds->data(sourceIndex, MultiWorldList::InstanceIconFileRole).value<QIcon>();
+            return icon.pixmap(24, 24);
+        }
+
         return sourceIndex.data(role);
     }
 };
@@ -483,6 +489,8 @@ MinecraftInstance* MultiWorldListPage::selectInstance(const QString& message, Ba
             instanceList->setCurrentItem(item);
         }
     }
+
+    instanceList->sortItems(Qt::AscendingOrder);
 
     layout->addWidget(instanceList);
 
