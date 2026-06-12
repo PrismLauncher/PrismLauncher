@@ -60,6 +60,7 @@
 #include "ui/GuiUtil.h"
 
 #include "Application.h"
+#include "icons/IconList.h"
 #include "pages/instance/DataPackPage.h"
 
 class MultiWorldListProxyModel : public QSortFilterProxyModel {
@@ -113,6 +114,8 @@ MultiWorldListPage::MultiWorldListPage(MultiWorldList* worlds, QWidget* parent)
     connect(ui->worldTreeView->selectionModel(), &QItemSelectionModel::currentChanged, this, &MultiWorldListPage::worldChanged);
     connect(ui->worldTreeView, &QAbstractItemView::doubleClicked, this, &MultiWorldListPage::worldDoubleClicked);
     worldChanged(QModelIndex(), QModelIndex());
+
+    connect(m_worlds, &MultiWorldList::fileDropped, this, &MultiWorldListPage::fileDropped);
 }
 
 void MultiWorldListPage::openedImpl()
@@ -400,7 +403,11 @@ void MultiWorldListPage::on_actionAdd_triggered()
     if (!list.empty()) {
         m_worlds->stopWatching();
         for (auto filename : list) {
-            m_worlds->installWorld(QFileInfo(filename));
+            auto *instance = selectInstance(tr("Select instance to add world '%1' to.").arg(QFileInfo(filename).fileName()));
+
+            if (instance != nullptr) {
+                m_worlds->installWorld(instance, QFileInfo(filename));
+            }
         }
         m_worlds->startWatching();
     }
@@ -434,14 +441,66 @@ void MultiWorldListPage::on_actionCopy_triggered()
         return;
 
     auto worldVariant = m_worlds->data(index, MultiWorldList::ObjectRole);
-    auto world = (World*)worldVariant.value<void*>();
+    auto *world = static_cast<InstanceWorld*>(worldVariant.value<void*>());
+
     bool ok = false;
     QString name =
-        QInputDialog::getText(this, tr("World name"), tr("Enter a new name for the copy."), QLineEdit::Normal, world->name(), &ok);
+        QInputDialog::getText(this, tr("World name"), tr("Enter a new name for the copy."), QLineEdit::Normal, world->world.name(), &ok);
 
     if (ok && name.length() > 0) {
-        world->install(m_worlds->dirs()[0].absolutePath(), name); //ask which instance iy
+        auto *instance = selectInstance(tr("Select instance to copy world to."), world->instance);
+
+        if (instance != nullptr) {
+            world->world.install((QDir(instance->worldDir())).absolutePath(), name);
+            m_worlds->update();
+        }
     }
+}
+
+Q_DECLARE_METATYPE(BaseInstance*);
+
+MinecraftInstance* MultiWorldListPage::selectInstance(const QString& message, BaseInstance* preselectedInstance)
+{
+    auto *dialog = new QDialog(this);
+    dialog->setWindowTitle(tr("Select Instance"));
+
+    dialog->resize(static_cast<int>(std::max(0.5 * window()->width(), 400.0)),
+                   static_cast<int>(std::max(0.75 * window()->height(), 400.0)));
+    dialog->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("SelectInstanceGeometry").toByteArray()));
+
+    auto layout = new QVBoxLayout(dialog);
+
+    layout->addWidget(new QLabel(message));
+
+    auto instanceList = new QListWidget(dialog);
+
+    for (auto instance : m_worlds->getInstances()) {
+        auto *item = new QListWidgetItem(instanceList);
+        item->setText(instance->name());
+        item->setIcon(APPLICATION->icons()->getIcon(instance->iconKey()));
+        item->setData(Qt::UserRole, QVariant::fromValue(instance));
+        if (instance == preselectedInstance) {
+            instanceList->setCurrentItem(item);
+        }
+    }
+
+    layout->addWidget(instanceList);
+
+    auto buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    connect(buttonBox, &QDialogButtonBox::rejected, dialog, &QDialog::reject);
+    connect(buttonBox, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
+    layout->addWidget(buttonBox);
+
+    dialog->setLayout(layout);
+
+    connect(dialog, &QDialog::finished, this,
+            [dialog]() { APPLICATION->settings()->set("SelectInstanceGeometry", dialog->saveGeometry().toBase64()); });
+
+    if (dialog->exec() == QDialog::Accepted) {
+        return static_cast<MinecraftInstance*>(instanceList->currentItem()->data(Qt::UserRole).value<BaseInstance*>());
+    }
+
+    return nullptr;
 }
 
 void MultiWorldListPage::on_actionRename_triggered()
@@ -493,6 +552,17 @@ void MultiWorldListPage::worldDoubleClicked(const QModelIndex& index)
 {
     auto proxy = (QSortFilterProxyModel*)ui->worldTreeView->model();
     join(proxy->mapToSource(index));
+}
+
+void MultiWorldListPage::fileDropped(const QFileInfo& worldInfo)
+{
+    auto *instance = selectInstance(tr("Select instance to add world '%1' to.").arg(worldInfo.fileName()));
+
+    if (instance != nullptr) {
+        if (!QDir(instance->worldDir()).entryInfoList().contains(worldInfo)) {
+            m_worlds->installWorld(instance, worldInfo);
+        }
+    }
 }
 
 void MultiWorldListPage::on_actionJoin_triggered()

@@ -53,7 +53,7 @@ class MultiWorldList : public QAbstractListModel {
     virtual bool update();
 
     /// Install a world from location
-    void installWorld(QFileInfo filename);
+    void installWorld(BaseInstance* instance, QFileInfo filename);
 
     /// Deletes the mod at the given index.
     virtual bool deleteWorld(int index);
@@ -90,17 +90,22 @@ class MultiWorldList : public QAbstractListModel {
 
     const QList<InstanceWorld>& allWorlds() const { return m_worlds; }
 
+    QList<BaseInstance*> getInstances() const { return allInstances; }
+
    private slots:
     void directoryChanged(QString path);
     void loadWorldsAsync();
 
    signals:
     void changed();
+    void fileDropped(QFileInfo worldInfo);
 
    protected:
-    QList<BaseInstance*> m_instances;
     QFileSystemWatcher* m_watcher;
     bool m_isWatching;
     QList<QDir> m_dirs;
     QList<InstanceWorld> m_worlds;
+
+   private:
+    QList<BaseInstance*> allInstances;
 };

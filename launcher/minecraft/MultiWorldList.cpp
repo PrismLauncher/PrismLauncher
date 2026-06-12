@@ -48,9 +48,9 @@
 
 #include "MinecraftInstance.h"
 
-MultiWorldList::MultiWorldList(const QList<BaseInstance*>& instances) : QAbstractListModel(), m_instances(instances)
+MultiWorldList::MultiWorldList(const QList<BaseInstance*>& instances) : QAbstractListModel(), allInstances(instances)
 {
-    for (BaseInstance* inst : m_instances) {
+    for (BaseInstance* inst : allInstances) {
         m_dirs.append(dynamic_cast<MinecraftInstance*>(inst)->worldDir());
     }
 
@@ -109,7 +109,7 @@ bool MultiWorldList::update()
 
     QList<InstanceWorld> newWorlds;
 
-    for (BaseInstance* inst : m_instances) {
+    for (BaseInstance* inst : allInstances) {
         QDir dir = dynamic_cast<MinecraftInstance*>(inst)->worldDir();
         dir.refresh();
         auto folderContents = dir.entryInfoList();
@@ -154,7 +154,7 @@ QList<QString> MultiWorldList::instDirPaths() const
 {
     QList<QString> dirList;
 
-    for (BaseInstance* instance : m_instances) { //use m_dirs??? iy
+    for (BaseInstance* instance : allInstances) {
         dirList.append(QFileInfo(instance->instanceRoot()).absoluteFilePath());
     }
 
@@ -399,14 +399,15 @@ Qt::DropActions MultiWorldList::supportedDropActions() const
     return Qt::CopyAction | Qt::MoveAction;
 }
 
-void MultiWorldList::installWorld(QFileInfo filename)
+void MultiWorldList::installWorld(BaseInstance* instance, QFileInfo filename)
 {
     qDebug() << "installing:" << filename.absoluteFilePath();
     World w(filename);
     if (!w.isValid()) {
         return;
     }
-    w.install(m_dirs[0].absolutePath()); //add option for which instance to install to iy
+    w.install(QDir(dynamic_cast<MinecraftInstance*>(instance)->worldDir()).absolutePath());
+    update();
 }
 
 bool MultiWorldList::dropMimeData(const QMimeData* data,
@@ -434,9 +435,7 @@ bool MultiWorldList::dropMimeData(const QMimeData* data,
 
             QFileInfo worldInfo(filename);
 
-            if (!m_dirs[0].entryInfoList().contains(worldInfo)) { //same as above, add option for which instance to install to iy
-                installWorld(worldInfo);
-            }
+            emit fileDropped(worldInfo);
         }
         if (was_watching)
             startWatching();
