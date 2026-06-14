@@ -84,7 +84,7 @@ class InstanceView : public QAbstractItemView {
 
    public slots:
     virtual void updateGeometries() override;
-    void selectInstance(BaseInstance* instance);
+    void selectInstance(const BaseInstance* instance) const;
 
    protected slots:
     virtual void dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QList<int>& roles) override;

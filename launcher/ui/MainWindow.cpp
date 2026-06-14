@@ -338,19 +338,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         connect(this, &MainWindow::selectInstance, view, &InstanceView::selectInstance);
     }
-    // Create the all worlds widget
+
+    // All worlds toggle
     {
-        QList<BaseInstance*> allInstances = APPLICATION->instances()->getAllInstances();
-
-        allWorlds = new MultiWorldList(allInstances);
-        allWorlds->update();
-        allWorldsPage = new MultiWorldListPage(allWorlds);
-
-        ui->horizontalLayout->addWidget(allWorldsPage);
-
-        allWorldsPage->setVisible(false);
-        ui->instanceToolBar->setVisibilityState(QByteArray::fromBase64(instanceToolbarSetting->get().toString().toUtf8()));
-
         connect(ui->actionAllWorlds, &QAction::toggled, this, &MainWindow::onAllWorldsToggled);
         connect(allWorldsPage, &MultiWorldListPage::worldJoined, this, &MainWindow::worldJoined);
     }
@@ -878,14 +868,13 @@ void MainWindow::worldJoined(BaseInstance* instance)
 void MainWindow::toggleAllWorldsScreen(bool toggled)
 {
     if (toggled) {
-        QList<BaseInstance*> allInstances = APPLICATION->instances()->getAllInstances();
+        QList<BaseInstance*> const allInstances = APPLICATION->instances()->getAllInstances();
 
-        allWorlds = new MultiWorldList(allInstances); //make this be unique pointer or whatever instead of awkward replace and delete iy
-        allWorlds->update();
-        auto newAllWorldsPage = new MultiWorldListPage(allWorlds);
-        ui->horizontalLayout->replaceWidget(allWorldsPage, newAllWorldsPage);
-        delete allWorldsPage;
-        allWorldsPage = newAllWorldsPage;
+        allWorldsList = new MultiWorldList(allInstances);
+        allWorldsList->update();
+
+        allWorldsPage = new MultiWorldListPage(allWorldsList);
+        ui->horizontalLayout->addWidget(allWorldsPage);
 
         view->setVisible(false);
         m_oldInstanceToolbarSetting = ui->instanceToolBar->isVisible();
@@ -893,16 +882,27 @@ void MainWindow::toggleAllWorldsScreen(bool toggled)
         allWorldsPage->setVisible(true);
         statusBar()->setVisible(false);
 
-        allWorlds->startWatching();
+        allWorldsList->startWatching();
 
         connect(allWorldsPage, &MultiWorldListPage::worldJoined, this, &MainWindow::worldJoined);
     } else {
-        allWorldsPage->setVisible(false);
-        view->setVisible(true);
-        ui->instanceToolBar->setVisible(m_oldInstanceToolbarSetting);
-        statusBar()->setVisible(APPLICATION->settings()->get("StatusBarVisible").toBool());
+        if (allWorldsList == nullptr || allWorldsPage == nullptr) {
+            view->setVisible(true);
+            ui->instanceToolBar->setVisible(m_oldInstanceToolbarSetting);
+            statusBar()->setVisible(APPLICATION->settings()->get("StatusBarVisible").toBool());
+        } else {
+            allWorldsPage->setVisible(false);
+            view->setVisible(true);
+            ui->instanceToolBar->setVisible(m_oldInstanceToolbarSetting);
+            statusBar()->setVisible(APPLICATION->settings()->get("StatusBarVisible").toBool());
 
-        allWorlds->stopWatching();
+            allWorldsList->stopWatching();
+
+            delete allWorldsList;
+            allWorldsList = nullptr;
+            delete allWorldsPage;
+            allWorldsPage = nullptr;
+        }
     }
 }
 

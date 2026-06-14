@@ -607,11 +607,11 @@ void InstanceList::providerUpdated()
     }
 }
 
-QList<BaseInstance*> InstanceList::getAllInstances() 
+QList<BaseInstance*> InstanceList::getAllInstances() const
 {
     QList<BaseInstance*> instanceList;
 
-    for (auto& inst : instances) {
+    for (const auto& inst : instances) {
         instanceList.append(inst.get());
     }
 

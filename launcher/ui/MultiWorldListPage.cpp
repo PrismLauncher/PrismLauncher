@@ -466,7 +466,7 @@ void MultiWorldListPage::on_actionCopy_triggered()
 
 // TODO: Make this a separate dialog class
 Q_DECLARE_METATYPE(BaseInstance*);
-MinecraftInstance* MultiWorldListPage::selectInstance(const QString& message, BaseInstance* preselectedInstance)
+MinecraftInstance* MultiWorldListPage::selectInstance(const QString& message, const BaseInstance* preselectedInstance)
 {
     auto *dialog = new QDialog(this);
     dialog->setWindowTitle(tr("Select Instance"));
@@ -475,13 +475,13 @@ MinecraftInstance* MultiWorldListPage::selectInstance(const QString& message, Ba
                    static_cast<int>(std::max(0.75 * window()->height(), 400.0)));
     dialog->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("SelectInstanceGeometry").toByteArray()));
 
-    auto layout = new QVBoxLayout(dialog);
+    auto *layout = new QVBoxLayout(dialog);
 
     layout->addWidget(new QLabel(message));
 
-    auto instanceList = new QListWidget(dialog);
+    auto *instanceList = new QListWidget(dialog);
 
-    for (auto instance : m_worlds->getInstances()) {
+    for (auto *instance : m_worlds->getInstances()) {
         auto *item = new QListWidgetItem(instanceList);
         item->setText(instance->name());
         item->setIcon(APPLICATION->icons()->getIcon(instance->iconKey()));
@@ -495,7 +495,7 @@ MinecraftInstance* MultiWorldListPage::selectInstance(const QString& message, Ba
 
     layout->addWidget(instanceList);
 
-    auto buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     connect(buttonBox, &QDialogButtonBox::rejected, dialog, &QDialog::reject);
     connect(buttonBox, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
     layout->addWidget(buttonBox);
@@ -559,7 +559,7 @@ void MultiWorldListPage::on_actionRefresh_triggered()
 
 void MultiWorldListPage::worldDoubleClicked(const QModelIndex& index)
 {
-    auto proxy = (QSortFilterProxyModel*)ui->worldTreeView->model();
+    auto *proxy = static_cast<QSortFilterProxyModel*>(ui->worldTreeView->model());
     join(proxy->mapToSource(index), LaunchMode::Normal);
 }
 

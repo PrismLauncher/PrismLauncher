@@ -73,7 +73,7 @@ class MultiWorldList : public QAbstractListModel {
     /// process data from drop action
     virtual bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent);
     /// what drag actions do we support?
-    int64_t calculateWorldSize(const QFileInfo& file);
+    static int64_t calculateWorldSize(const QFileInfo& file);
     virtual Qt::DropActions supportedDragActions() const;
 
     /// what drop actions do we support?

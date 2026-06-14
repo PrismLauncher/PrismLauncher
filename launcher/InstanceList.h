@@ -103,7 +103,7 @@ class InstanceList : public QAbstractListModel {
     InstListError loadList();
     void saveNow();
 
-    QList<BaseInstance*> getAllInstances();
+    QList<BaseInstance*> getAllInstances() const;
     /* O(n) */
     BaseInstance* getInstanceById(QString id) const;
     /* O(n) */

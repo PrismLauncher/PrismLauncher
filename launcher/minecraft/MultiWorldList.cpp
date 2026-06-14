@@ -77,7 +77,7 @@ void MultiWorldList::startWatching()
 
     m_isWatching = true;
 
-    for (QDir dir : m_dirs) {
+    for (const QDir& dir : m_dirs) {
         if (m_watcher->addPath(dir.absolutePath())) {
             qDebug() << "Started watching" << dir.absolutePath();
         } else {
@@ -157,7 +157,7 @@ QList<QString> MultiWorldList::instDirPaths() const
 {
     QList<QString> dirList;
 
-    for (BaseInstance* instance : allInstances) {
+    for (BaseInstance const* instance : allInstances) {
         dirList.append(QFileInfo(instance->instanceRoot()).absoluteFilePath());
     }
 
@@ -223,7 +223,7 @@ QVariant MultiWorldList::data(const QModelIndex& index, int role) const
 
     QLocale locale;
 
-    auto& instanceWorld = m_worlds[row];
+    const auto& instanceWorld = m_worlds[row];
     switch (role) {
         case Qt::DisplayRole:
             switch (column) {

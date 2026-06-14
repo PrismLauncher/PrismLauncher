@@ -207,13 +207,13 @@ void InstanceView::updateGeometries()
     viewport()->update();
 }
 
-void InstanceView::selectInstance(BaseInstance* instance)
+void InstanceView::selectInstance(const BaseInstance* instance) const
 {
     QModelIndex index;
 
     for (int row = 0; row < model()->rowCount(); row++) {
-        for (int j = 0; j < model()->columnCount(); j++) {
-            auto testIndex = model()->index(row, j);
+        for (int col = 0; col < model()->columnCount(); col++) {
+            auto testIndex = model()->index(row, col);
             if (testIndex.data(InstanceList::InstanceIDRole).toString() == instance->id()) {
                 index = testIndex;
             }

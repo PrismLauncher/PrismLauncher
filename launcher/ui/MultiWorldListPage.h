@@ -79,7 +79,7 @@ class MultiWorldListPage : public QMainWindow, public BasePage {
     bool worldSafetyNagQuestion(const QString& actionType);
     void mceditError();
     void join(const QModelIndex& index, LaunchMode launchMode);
-    MinecraftInstance* selectInstance(const QString& message, BaseInstance* instance = nullptr);
+    MinecraftInstance* selectInstance(const QString& message, const BaseInstance* preselectedInstance = nullptr);
 
    private:
     Ui::MultiWorldListPage* ui;

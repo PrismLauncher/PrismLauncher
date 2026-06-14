@@ -255,7 +255,7 @@ class MainWindow : public QMainWindow {
     LabeledToolButton* renameButton = nullptr;
     QToolButton* helpMenuButton = nullptr;
     KonamiCode* secretEventFilter = nullptr;
-    MultiWorldList* allWorlds = nullptr;
+    MultiWorldList* allWorldsList = nullptr;
 
     std::shared_ptr<Setting> instanceToolbarSetting = nullptr;
     bool m_oldInstanceToolbarSetting;
