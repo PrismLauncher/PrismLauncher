@@ -397,6 +397,7 @@ void MultiWorldListPage::worldChanged([[maybe_unused]] const QModelIndex& curren
     ui->actionData_Packs->setEnabled(enable);
     ui->actionView_Folder->setEnabled(enable);
     ui->actionJoin->setEnabled(enable);
+    ui->actionJoin_Offline->setEnabled(enable);
     ui->actionInstance_Settings->setEnabled(enable);
     bool hasIcon = !index.data(MultiWorldList::IconFileRole).isNull();
     ui->actionReset_Icon->setEnabled(enable && hasIcon);
@@ -463,8 +464,8 @@ void MultiWorldListPage::on_actionCopy_triggered()
     }
 }
 
+// TODO: Make this a separate dialog class
 Q_DECLARE_METATYPE(BaseInstance*);
-
 MinecraftInstance* MultiWorldListPage::selectInstance(const QString& message, BaseInstance* preselectedInstance)
 {
     auto *dialog = new QDialog(this);
@@ -559,7 +560,7 @@ void MultiWorldListPage::on_actionRefresh_triggered()
 void MultiWorldListPage::worldDoubleClicked(const QModelIndex& index)
 {
     auto proxy = (QSortFilterProxyModel*)ui->worldTreeView->model();
-    join(proxy->mapToSource(index));
+    join(proxy->mapToSource(index), LaunchMode::Normal);
 }
 
 void MultiWorldListPage::fileDropped(const QFileInfo& worldInfo)
@@ -576,17 +577,23 @@ void MultiWorldListPage::fileDropped(const QFileInfo& worldInfo)
 void MultiWorldListPage::on_actionJoin_triggered()
 {
     QModelIndex index = getSelectedWorld();
-    join(index);
+    join(index, LaunchMode::Normal);
 }
 
-void MultiWorldListPage::join(QModelIndex index)
+void MultiWorldListPage::on_actionJoin_Offline_triggered()
+{
+    QModelIndex index = getSelectedWorld();
+    join(index, LaunchMode::Offline);
+}
+
+void MultiWorldListPage::join(const QModelIndex& index, const LaunchMode launchMode)
 {
     if (!index.isValid()) {
         return;
     }
     auto worldVariant = m_worlds->data(index, MultiWorldList::ObjectRole);
     auto *world = static_cast<InstanceWorld*>(worldVariant.value<void*>());
-    APPLICATION->launch(world->instance, LaunchMode::Normal, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world->world.folderName(), true)));
+    APPLICATION->launch(world->instance, launchMode, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world->world.folderName(), true)));
     emit worldJoined(world->instance);
 }
 

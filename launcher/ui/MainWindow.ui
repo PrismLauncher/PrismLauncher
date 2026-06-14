@@ -786,7 +786,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset theme="allworlds"/>
+    <iconset theme="worlds"/>
    </property>
    <property name="text">
     <string>&amp;All Worlds</string>

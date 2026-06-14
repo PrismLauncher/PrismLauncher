@@ -85,6 +85,7 @@
    <addaction name="actionAdd"/>
    <addaction name="separator"/>
    <addaction name="actionJoin"/>
+   <addaction name="actionJoin_Offline"/>
    <addaction name="actionRename"/>
    <addaction name="actionCopy"/>
    <addaction name="actionRemove"/>
@@ -105,6 +106,11 @@
   <action name="actionJoin">
    <property name="text">
     <string>Join</string>
+   </property>
+  </action>
+  <action name="actionJoin_Offline">
+   <property name="text">
+    <string>Join Offline</string>
    </property>
   </action>
   <action name="actionRename">

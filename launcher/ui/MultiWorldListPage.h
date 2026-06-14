@@ -78,7 +78,7 @@ class MultiWorldListPage : public QMainWindow, public BasePage {
     bool isWorldSafe(QModelIndex index);
     bool worldSafetyNagQuestion(const QString& actionType);
     void mceditError();
-    void join(QModelIndex index);
+    void join(const QModelIndex& index, LaunchMode launchMode);
     MinecraftInstance* selectInstance(const QString& message, BaseInstance* instance = nullptr);
 
    private:
@@ -105,6 +105,7 @@ class MultiWorldListPage : public QMainWindow, public BasePage {
     void worldChanged(const QModelIndex& current, const QModelIndex& previous);
     void mceditState(LoggedProcess::State state);
     void on_actionJoin_triggered();
+    void on_actionJoin_Offline_triggered();
     void worldDoubleClicked(const QModelIndex& index);
     void fileDropped(const QFileInfo& worldInfo);
 
