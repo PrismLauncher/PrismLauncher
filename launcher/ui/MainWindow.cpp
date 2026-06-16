@@ -898,10 +898,10 @@ void MainWindow::toggleAllWorldsScreen(bool toggled)
 
             allWorldsList->stopWatching();
 
-            delete allWorldsList;
-            allWorldsList = nullptr;
-            delete allWorldsPage;
+            allWorldsPage->deleteLater();
             allWorldsPage = nullptr;
+            allWorldsList->deleteLater();
+            allWorldsList = nullptr;
         }
     }
 }
