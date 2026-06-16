@@ -464,7 +464,7 @@ void MultiWorldListPage::on_actionCopy_triggered()
     }
 }
 
-// TODO: Make this a separate dialog class
+// TODO: Make this a separate dialog class in launcher/ui/dialogs
 Q_DECLARE_METATYPE(BaseInstance*);
 MinecraftInstance* MultiWorldListPage::selectInstance(const QString& message, const BaseInstance* preselectedInstance)
 {
