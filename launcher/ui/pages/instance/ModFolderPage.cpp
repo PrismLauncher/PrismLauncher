@@ -49,6 +49,9 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QSortFilterProxyModel>
+#include <QInputDialog>
+#include <QBoxLayout>
+#include <QGridLayout>
 #include <algorithm>
 #include <memory>
 
@@ -70,6 +73,30 @@
 ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(inst, model, parent), m_model(model)
 {
+    m_profileTabBar = new QTabBar(this);
+    if (ui->treeView->parentWidget() && ui->treeView->parentWidget()->layout()) {
+        QLayout* layout = ui->treeView->parentWidget()->layout();
+        int index = layout->indexOf(ui->treeView);
+
+        if (index != -1) {
+            if (auto box = qobject_cast<QBoxLayout*>(layout)) {
+                box->insertWidget(index, m_profileTabBar);
+            }
+            else if (auto grid = qobject_cast<QGridLayout*>(layout)) {
+                grid->addWidget(m_profileTabBar, index, 0);
+            }
+        }
+    }
+    connect(m_profileTabBar, &QTabBar::currentChanged, this, &ModFolderPage::onProfileTabChanged);
+
+    auto* addProfileAction = new QAction(tr("Add Profile"), this);
+    connect(addProfileAction, &QAction::triggered, this, &ModFolderPage::onAddProfileClicked);
+    ui->actionsToolbar->addAction(addProfileAction);
+
+    auto* removeProfileAction = new QAction(tr("Remove Profile"), this);
+    connect(removeProfileAction, &QAction::triggered, this, &ModFolderPage::onRemoveProfileClicked);
+    ui->actionsToolbar->addAction(removeProfileAction);
+
     ui->actionDownloadItem->setText(tr("Download Mods"));
     ui->actionDownloadItem->setToolTip(tr("Download mods from online mod platforms"));
     ui->actionDownloadItem->setEnabled(true);
@@ -110,6 +137,27 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget*
     ui->actionsToolbar->insertActionAfter(ui->actionViewHomepage, ui->actionExportMetadata);
 
     ui->actionsToolbar->insertActionAfter(ui->actionViewFolder, ui->actionViewConfigs);
+
+    m_instance->settings()->getOrRegisterSetting("ModProfileList", QStringList() << "All Mods");
+    QStringList profileList = m_instance->settings()->get("ModProfileList").toStringList();
+    m_profileTabBar->blockSignals(true);
+    for (const QString& name : profileList) {
+        m_profileTabBar->addTab(name);
+        
+        QString key = "ModProfile_" + name;
+        m_instance->settings()->getOrRegisterSetting(key, QStringList());
+        QStringList saved = m_instance->settings()->get(key).toStringList();
+        m_profileStates[name] = QSet<QString>(saved.begin(), saved.end());
+    }
+    m_profileTabBar->blockSignals(false);
+
+    m_instance->settings()->getOrRegisterSetting("ModProfileLastActiveIndex", 0);
+    int savedIndex = m_instance->settings()->get("ModProfileLastActiveIndex").toInt();
+    if (savedIndex < 0 || savedIndex >= m_profileTabBar->count()) {
+        savedIndex = 0;
+    }
+    m_profileTabBar->setCurrentIndex(savedIndex);
+    onProfileTabChanged(m_profileTabBar->currentIndex());
 }
 
 bool ModFolderPage::shouldDisplay() const
@@ -447,4 +495,132 @@ inline bool ModFolderPage::handleNoModLoader()
     // Nothing happens the dialog is already closing
     // returning true so the caller doesn't go and continue with opening it's dialog without a mod loader
     return true;
+}
+
+void ModFolderPage::onProfileTabChanged(int index) {
+    if (m_currentProfile.isEmpty()) {
+        QVariant val = m_profileTabBar->property("currentProfileName");
+        m_currentProfile = val.isValid() ? val.toString() : QString();
+    }
+
+    if (!m_currentProfile.isEmpty()) {
+        bool stillExists = false;
+        for (int i = 0; i < m_profileTabBar->count(); ++i) {
+            if (m_profileTabBar->tabText(i) == m_currentProfile) {
+                stillExists = true;
+                break;
+            }
+        }
+        if (stillExists) {
+            QSet<QString> enabledMods;
+            for (int i = 0; i < m_model->rowCount(); ++i) {
+                const Resource& res = m_model->at(i);
+                if (res.enabled()) {
+                    enabledMods.insert(res.getOriginalFileName());
+                }
+            }
+            m_profileStates[m_currentProfile] = enabledMods;
+            QString key = "ModProfile_" + m_currentProfile;
+            m_instance->settings()->getOrRegisterSetting(key, QStringList());
+            m_instance->settings()->set(key, QStringList(enabledMods.begin(), enabledMods.end()));
+        }
+    }
+
+    if (index >= 0 && index < m_profileTabBar->count()) {
+        QString tabName = m_profileTabBar->tabText(index);
+        m_currentProfile = tabName;
+        m_profileTabBar->setProperty("currentProfileName", tabName);
+        m_instance->settings()->set("ModProfileLastActiveIndex", index);
+
+        QSet<QString> enabledMods;
+        if (m_profileStates.contains(tabName)) {
+            enabledMods = m_profileStates[tabName];
+        } else {
+            QString key = "ModProfile_" + tabName;
+            m_instance->settings()->getOrRegisterSetting(key, QStringList());
+            QStringList saved = m_instance->settings()->get(key).toStringList();
+            enabledMods = QSet<QString>(saved.begin(), saved.end());
+            m_profileStates[tabName] = enabledMods;
+        }
+
+        QModelIndexList toEnable;
+        QModelIndexList toDisable;
+        for (int i = 0; i < m_model->rowCount(); ++i) {
+            const Resource& res = m_model->at(i);
+            QModelIndex idx = m_model->index(i, 0);
+            if (enabledMods.contains(res.getOriginalFileName())) {
+                if (!res.enabled()) {
+                    toEnable.append(idx);
+                }
+            } else {
+                if (res.enabled()) {
+                    toDisable.append(idx);
+                }
+            }
+        }
+        if (!toEnable.isEmpty()) {
+            m_model->setResourceEnabled(toEnable, EnableAction::ENABLE);
+        }
+        if (!toDisable.isEmpty()) {
+            m_model->setResourceEnabled(toDisable, EnableAction::DISABLE);
+        }
+
+        m_model->update();
+        emit m_model->dataChanged(m_model->index(0, 0), m_model->index(m_model->rowCount() - 1, m_model->columnCount(QModelIndex()) - 1));
+    } else {
+        m_currentProfile = QString();
+        m_profileTabBar->setProperty("currentProfileName", QString());
+    }
+}
+
+void ModFolderPage::onAddProfileClicked() {
+    bool ok;
+    QString name = QInputDialog::getText(this, tr("Add Profile"), tr("Profile Name:"), QLineEdit::Normal, QString(), &ok);
+    if (ok && !name.isEmpty()) {
+        for (int i = 0; i < m_profileTabBar->count(); ++i) {
+            if (m_profileTabBar->tabText(i) == name) {
+                QMessageBox::warning(this, tr("Warning"), tr("A profile with this name already exists."));
+                return;
+            }
+        }
+
+        QSet<QString> enabledMods;
+        if (!m_currentProfile.isEmpty() && m_profileStates.contains(m_currentProfile)) {
+            enabledMods = m_profileStates[m_currentProfile];
+        } else {
+            for (int i = 0; i < m_model->rowCount(); ++i) {
+                const Resource& res = m_model->at(i);
+                if (res.enabled()) {
+                    enabledMods.insert(res.getOriginalFileName());
+                }
+            }
+        }
+
+        m_profileStates[name] = enabledMods;
+
+        QString newKey = "ModProfile_" + name;
+        m_instance->settings()->getOrRegisterSetting(newKey, QStringList());
+        m_instance->settings()->set(newKey, QStringList(enabledMods.begin(), enabledMods.end()));
+
+        m_profileTabBar->addTab(name);
+        QStringList profileList = m_instance->settings()->get("ModProfileList").toStringList();
+        profileList.append(name);
+        m_instance->settings()->set("ModProfileList", profileList);
+    }
+}
+
+void ModFolderPage::onRemoveProfileClicked() {
+    int index = m_profileTabBar->currentIndex();
+    if (index != -1) {
+        QString name = m_profileTabBar->tabText(index);
+
+        m_profileStates.remove(name);
+        QString key = "ModProfile_" + name;
+        m_instance->settings()->reset(key);
+
+        m_profileTabBar->removeTab(index);
+        QStringList profileList = m_instance->settings()->get("ModProfileList").toStringList();
+        profileList.removeAll(name);
+        m_instance->settings()->set("ModProfileList", profileList);
+    }
 }

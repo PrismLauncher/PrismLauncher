@@ -39,43 +39,52 @@
 #pragma once
 
 #include <QPointer>
+#include <QMap>
+#include <QSet>
+#include <QTabBar>
 #include "ExternalResourcesPage.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
 class ModFolderPage : public ExternalResourcesPage {
     Q_OBJECT
-
-    inline bool handleNoModLoader();
-
-   public:
-    explicit ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget* parent = nullptr);
-    virtual ~ModFolderPage() = default;
-
-    void setFilter(const QString& filter) { m_fileSelectionFilter = filter; }
-
-    virtual QString displayName() const override { return tr("Mods"); }
-    virtual QIcon icon() const override { return QIcon::fromTheme("loadermods"); }
-    virtual QString id() const override { return "mods"; }
-    virtual QString helpPage() const override { return "Loader-mods"; }
-
-    virtual bool shouldDisplay() const override;
-
-   public slots:
-    void updateFrame(const QModelIndex& current, const QModelIndex& previous) override;
-
-   private slots:
-    void removeItems(const QItemSelection& selection) override;
-
-    void downloadMods();
-    void downloadDialogFinished(int result);
-    void updateMods(bool includeDeps = false);
-    void deleteModMetadata();
-    void exportModMetadata();
-    void changeModVersion();
-
-   protected:
-    ModFolderModel* m_model;
-    QPointer<ResourceDownload::ModDownloadDialog> m_downloadDialog;
+ 
+     inline bool handleNoModLoader();
+ 
+    public:
+     explicit ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget* parent = nullptr);
+     virtual ~ModFolderPage() = default;
+ 
+     void setFilter(const QString& filter) { m_fileSelectionFilter = filter; }
+ 
+     virtual QString displayName() const override { return tr("Mods"); }
+     virtual QIcon icon() const override { return QIcon::fromTheme("loadermods"); }
+     virtual QString id() const override { return "mods"; }
+     virtual QString helpPage() const override { return "Loader-mods"; }
+ 
+     virtual bool shouldDisplay() const override;
+ 
+    public slots:
+     void updateFrame(const QModelIndex& current, const QModelIndex& previous) override;
+ 
+    private slots:
+     void removeItems(const QItemSelection& selection) override;
+ 
+     void downloadMods();
+     void downloadDialogFinished(int result);
+     void updateMods(bool includeDeps = false);
+     void deleteModMetadata();
+     void exportModMetadata();
+     void changeModVersion();
+     void onProfileTabChanged(int index);
+     void onAddProfileClicked();
+     void onRemoveProfileClicked();
+ 
+    protected:
+     ModFolderModel* m_model;
+     QPointer<ResourceDownload::ModDownloadDialog> m_downloadDialog;
+     QTabBar* m_profileTabBar = nullptr;
+     QMap<QString, QSet<QString>> m_profileStates;
+     QString m_currentProfile;
 };
 
 class CoreModFolderPage : public ModFolderPage {
