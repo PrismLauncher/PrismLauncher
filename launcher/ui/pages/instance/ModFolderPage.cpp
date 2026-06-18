@@ -286,6 +286,10 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget*
             << "[SAVE_TRIGGER]\n"
             << "source = updateFinished\n"
             << "currentProfile = " << m_currentProfile;
+        if (m_profileLoading) {
+            m_profileLoading = false;
+            return;
+        }
         saveCurrentProfileState();
     });
     connect(m_model, &QAbstractItemModel::dataChanged, this, [this]() {
@@ -840,9 +844,8 @@ void ModFolderPage::onProfileTabChanged(int index) {
         m_currentProfile = QString();
         setActiveProfileForModel(m_model, QStringLiteral("None"));
         m_profileTabBar->setProperty("currentProfileName", QString());
+        m_profileLoading = false;
     }
-
-    m_profileLoading = false;
 
     qDebug() << "[INSTRUMENTATION]" << ++g_logSequence << "onProfileTabChanged() END"
              << "index:" << index
