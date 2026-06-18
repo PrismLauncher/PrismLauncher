@@ -42,6 +42,7 @@
 #include <QMap>
 #include <QSet>
 #include <QTabBar>
+#include <QToolButton>
 #include "ExternalResourcesPage.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
@@ -52,7 +53,7 @@ class ModFolderPage : public ExternalResourcesPage {
  
     public:
      explicit ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget* parent = nullptr);
-     virtual ~ModFolderPage() = default;
+     virtual ~ModFolderPage();
  
      void setFilter(const QString& filter) { m_fileSelectionFilter = filter; }
  
@@ -68,7 +69,7 @@ class ModFolderPage : public ExternalResourcesPage {
  
     private slots:
      void removeItems(const QItemSelection& selection) override;
- 
+
      void downloadMods();
      void downloadDialogFinished(int result);
      void updateMods(bool includeDeps = false);
@@ -78,13 +79,47 @@ class ModFolderPage : public ExternalResourcesPage {
      void onProfileTabChanged(int index);
      void onAddProfileClicked();
      void onRemoveProfileClicked();
- 
+     void saveCurrentProfileState();
+
+     // Tab context-menu slots
+     void onTabContextMenuRequested(const QPoint& pos);
+     void onTabNewToRight(int sourceIndex);
+     void onTabDuplicate(int sourceIndex);
+     void onTabRename(int tabIndex);
+     void onTabRemove(int tabIndex);
+     void onTabEnableAll(int tabIndex);
+     void onTabDisableAll(int tabIndex);
+
+    private:
+     // Creates a new profile tab with the given initial mod-enable state.
+     // Pass an empty QSet for a blank slate; pass a copied QSet for duplication.
+     void createProfile(const QString& name, const QSet<QString>& initialState, int insertAfterIndex = -1);
+     // Re-serialises the current tab order into the "ModProfileList" setting.
+     void saveProfileList();
+
+     // Settings-key helpers — namespaced by model directory to prevent
+     // Mods / CoreMods / NilMods pages from overwriting each other's state.
+     QString profileListKey() const { return QStringLiteral("ModProfileList_") + m_settingsPrefix; }
+     QString profileKey(const QString& name) const { return m_settingsPrefix + QStringLiteral("/ModProfile_") + name; }
+     QString lastActiveIndexKey() const { return QStringLiteral("ModProfileLastActiveIndex_") + m_settingsPrefix; }
+
     protected:
+     bool eventFilter(QObject* obj, QEvent* ev) override;
+     void mousePressEvent(QMouseEvent* event) override;
+     void showEvent(QShowEvent* event) override;
+     void hideEvent(QHideEvent* event) override;
+
      ModFolderModel* m_model;
      QPointer<ResourceDownload::ModDownloadDialog> m_downloadDialog;
-     QTabBar* m_profileTabBar = nullptr;
+     QPointer<QWidget> m_filterWindow;
+     bool m_downloadFlowActive = false;
+     QTabBar*       m_profileTabBar  = nullptr;
+     QToolButton*   m_newTabButton   = nullptr;  ///< Chrome-style "+" button appended after last tab
      QMap<QString, QSet<QString>> m_profileStates;
      QString m_currentProfile;
+     QString m_settingsPrefix;
+     bool m_destructorStarted = false;
+     bool m_profileLoading = false;
 };
 
 class CoreModFolderPage : public ModFolderPage {
