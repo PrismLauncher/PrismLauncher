@@ -66,18 +66,21 @@ void ScanModFolders::executeTask()
 
 void ScanModFolders::modsDone()
 {
+    disconnect(sender(), nullptr, this, nullptr);
     m_modsDone = true;
     checkDone();
 }
 
 void ScanModFolders::coreModsDone()
 {
+    disconnect(sender(), nullptr, this, nullptr);
     m_coreModsDone = true;
     checkDone();
 }
 
 void ScanModFolders::nilModsDone()
 {
+    disconnect(sender(), nullptr, this, nullptr);
     m_nilModsDone = true;
     checkDone();
 }
