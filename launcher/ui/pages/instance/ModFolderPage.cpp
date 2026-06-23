@@ -198,7 +198,10 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget*
     // Install viewport filter so clicking blank space in the list clears selection.
     ui->treeView->viewport()->installEventFilter(this);
 
-    connect(m_profileTabBar, &QTabBar::currentChanged, this, &ModFolderPage::onProfileTabChanged);
+    connect(m_profileTabBar, &QTabBar::currentChanged, this, [this](int index) {
+        ++m_profileSwitchGeneration;
+        applyProfileSwitch(index, m_profileSwitchGeneration);
+    });
     connect(m_profileTabBar, &QTabBar::customContextMenuRequested,
             this, &ModFolderPage::onTabContextMenuRequested);
     connect(m_newTabButton, &QToolButton::clicked, this, [this] {
@@ -279,30 +282,15 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget*
         savedIndex = 0;
     }
     m_profileTabBar->setCurrentIndex(savedIndex);
-    onProfileTabChanged(m_profileTabBar->currentIndex());
+    applyProfileSwitch(m_profileTabBar->currentIndex(), m_profileSwitchGeneration);
 
-    connect(m_model, &ResourceFolderModel::updateFinished, this, [this]() {
-        qDebug().noquote().nospace()
-            << "[SAVE_TRIGGER]\n"
-            << "source = updateFinished\n"
-            << "currentProfile = " << m_currentProfile;
-        if (m_profileLoading) {
-            m_profileLoading = false;
-            return;
-        }
-        saveCurrentProfileState();
-    });
     connect(m_model, &QAbstractItemModel::dataChanged, this, [this]() {
-        qDebug().noquote().nospace()
-            << "[SAVE_TRIGGER]\n"
-            << "source = dataChanged\n"
-            << "currentProfile = " << m_currentProfile;
-        saveCurrentProfileState();
-    });
-    connect(m_model, &ResourceFolderModel::updateFinished, this, [this] {
-        if (!m_currentProfile.isEmpty()) {
-            QSet<QString> expectedMods = m_profileStates.value(m_currentProfile);
-            compareModelToProfileState("updateFinished() FIRED", m_model, expectedMods, ++g_logSequence);
+        if (!m_applyingProfile) {
+            qDebug().noquote().nospace()
+                << "[SAVE_TRIGGER]\n"
+                << "source = dataChanged\n"
+                << "currentProfile = " << m_currentProfile;
+            saveCurrentProfileState();
         }
     });
 }
@@ -752,7 +740,7 @@ void ModFolderPage::saveCurrentProfileState()
              << "savedModsCount:" << enabledMods.size();
 }
 
-void ModFolderPage::onProfileTabChanged(int index) {
+void ModFolderPage::applyProfileSwitch(int index, int generation) {
     qDebug() << "[INSTRUMENTATION]" << ++g_logSequence << "onProfileTabChanged() START"
              << "index:" << index
              << "thread:" << QThread::currentThreadId()
@@ -826,7 +814,23 @@ void ModFolderPage::onProfileTabChanged(int index) {
         }
 
         compareModelToProfileState("BEFORE update()", m_model, enabledMods, ++g_logSequence);
-        bool started = m_model->update();
+        
+        // Capture generation token. If tab changes again before this update
+        // completes, the token will be stale and we discard the result.
+        int capturedGeneration = generation;
+        m_applyingProfile = true;
+        connect(m_model, &ResourceFolderModel::updateFinished, this,
+            [this, capturedGeneration] {
+                if (capturedGeneration == m_profileSwitchGeneration) {
+                    saveCurrentProfileState();
+                }
+                m_applyingProfile = false;
+            },
+            Qt::SingleShotConnection);
+
+        m_model->update();
+
+
         qDebug().noquote().nospace()
             << "[ProfileSwitch]\n"
             << "Profile: " << tabName << "\n"
@@ -845,6 +849,7 @@ void ModFolderPage::onProfileTabChanged(int index) {
         setActiveProfileForModel(m_model, QStringLiteral("None"));
         m_profileTabBar->setProperty("currentProfileName", QString());
         m_profileLoading = false;
+        m_applyingProfile = false;
     }
 
     qDebug() << "[INSTRUMENTATION]" << ++g_logSequence << "onProfileTabChanged() END"
@@ -1122,6 +1127,8 @@ void ModFolderPage::onTabEnableAll(int tabIndex)
 {
     if (m_profileTabBar->currentIndex() != tabIndex) {
         m_profileTabBar->setCurrentIndex(tabIndex);
+    } else {
+        applyProfileSwitch(tabIndex, m_profileSwitchGeneration);
     }
     // Build the full index list and enable every mod in the active profile.
     QModelIndexList allIndices;
@@ -1139,6 +1146,8 @@ void ModFolderPage::onTabDisableAll(int tabIndex)
 {
     if (m_profileTabBar->currentIndex() != tabIndex) {
         m_profileTabBar->setCurrentIndex(tabIndex);
+    } else {
+        applyProfileSwitch(tabIndex, m_profileSwitchGeneration);
     }
     // Build the full index list and disable every mod in the active profile.
     QModelIndexList allIndices;

@@ -48,25 +48,25 @@
 
 class ModFolderPage : public ExternalResourcesPage {
     Q_OBJECT
- 
+
      inline bool handleNoModLoader();
- 
+
     public:
      explicit ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget* parent = nullptr);
      virtual ~ModFolderPage();
- 
+
      void setFilter(const QString& filter) { m_fileSelectionFilter = filter; }
- 
+
      virtual QString displayName() const override { return tr("Mods"); }
      virtual QIcon icon() const override { return QIcon::fromTheme("loadermods"); }
      virtual QString id() const override { return "mods"; }
      virtual QString helpPage() const override { return "Loader-mods"; }
- 
+
      virtual bool shouldDisplay() const override;
- 
+
     public slots:
      void updateFrame(const QModelIndex& current, const QModelIndex& previous) override;
- 
+
     private slots:
      void removeItems(const QItemSelection& selection) override;
 
@@ -76,7 +76,6 @@ class ModFolderPage : public ExternalResourcesPage {
      void deleteModMetadata();
      void exportModMetadata();
      void changeModVersion();
-     void onProfileTabChanged(int index);
      void onAddProfileClicked();
      void onRemoveProfileClicked();
      void saveCurrentProfileState();
@@ -91,6 +90,8 @@ class ModFolderPage : public ExternalResourcesPage {
      void onTabDisableAll(int tabIndex);
 
     private:
+     void applyProfileSwitch(int index, int generation);
+
      // Creates a new profile tab with the given initial mod-enable state.
      // Pass an empty QSet for a blank slate; pass a copied QSet for duplication.
      void createProfile(const QString& name, const QSet<QString>& initialState, int insertAfterIndex = -1);
@@ -120,6 +121,8 @@ class ModFolderPage : public ExternalResourcesPage {
      QString m_settingsPrefix;
      bool m_destructorStarted = false;
      bool m_profileLoading = false;
+     int            m_profileSwitchGeneration = 0;
+     bool           m_applyingProfile = false;
 };
 
 class CoreModFolderPage : public ModFolderPage {
