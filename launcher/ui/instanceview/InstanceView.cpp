@@ -38,6 +38,7 @@
 #include <QAccessible>
 #include <QApplication>
 #include <QCache>
+#include <QDebug>
 #include <QDrag>
 #include <QFont>
 #include <QListView>
@@ -46,6 +47,7 @@
 #include <QPainter>
 #include <QPersistentModelIndex>
 #include <QScrollBar>
+#include <QSet>
 #include <QtMath>
 
 #include "VisualGroup.h"
@@ -202,7 +204,23 @@ void InstanceView::updateGeometries()
     }
 
     qDeleteAll(m_groups);
-    m_groups = cats.values();
+    m_groups.clear();
+
+    // Build ordered group list from custom group order
+    auto instanceList = APPLICATION->instances();
+    auto groupOrder = instanceList->groupOrder();
+    QSet<QString> placed;
+    for (const auto& groupName : groupOrder) {
+        if (cats.contains(groupName)) {
+            m_groups.append(cats.take(groupName));
+            placed.insert(groupName);
+        }
+    }
+    // Append remaining groups (not in order) alphabetically
+    auto remaining = cats.values();
+    std::sort(remaining.begin(), remaining.end(), [](VisualGroup* a, VisualGroup* b) { return a->text.localeAwareCompare(b->text) < 0; });
+    m_groups.append(remaining);
+
     updateScrollbar();
     viewport()->update();
 }
@@ -283,12 +301,22 @@ void InstanceView::mousePressEvent(QMouseEvent* event)
     m_pressedIndex = index;
     m_pressedAlreadySelected = selectionModel()->isSelected(m_pressedIndex);
     m_pressedPosition = geometryPos;
+    m_draggingGroup = false;
+    m_draggedGroupName.clear();
+    m_groupDragTargetIndex = -1;
 
     if (event->button() == Qt::LeftButton) {
         VisualGroup::HitResults hitResult;
         m_pressedCategory = categoryAt(geometryPos, hitResult);
-        if (m_pressedCategory && hitResult & VisualGroup::CheckboxHit) {
-            setState(m_pressedCategory->collapsed ? ExpandingState : CollapsingState);
+        if (m_pressedCategory && hitResult & VisualGroup::HeaderHit) {
+            // Always allow drag from header, collapse also possible on click
+            m_draggingGroup = true;
+            m_draggedGroupName = m_pressedCategory->text;
+            qDebug() << "drag group: press on header" << m_draggedGroupName << "hitResult" << hitResult << "geometryPos" << geometryPos
+                     << "visualPos" << visualPos;
+            if (hitResult & VisualGroup::CheckboxHit) {
+                setState(m_pressedCategory->collapsed ? ExpandingState : CollapsingState);
+            }
             event->accept();
             return;
         }
@@ -324,6 +352,43 @@ void InstanceView::mouseMoveEvent(QMouseEvent* event)
     QPoint topLeft;
     QPoint visualPos = event->pos();
     QPoint geometryPos = event->pos() + offset();
+
+    if (m_draggingGroup) {
+        topLeft = m_pressedPosition - offset();
+        qreal dist = (topLeft - event->pos()).manhattanLength();
+        qreal threshold = QApplication::startDragDistance();
+        qDebug() << "drag group: mouseMove m_draggingGroup" << m_draggedGroupName << "dist" << dist << "threshold" << threshold
+                 << "m_pressedPosition" << m_pressedPosition << "offset" << offset() << "event->pos()" << event->pos() << "topLeft"
+                 << topLeft;
+        if (dist > threshold) {
+            // Drag preview: compute visual target index and show indicator
+            setState(NoState);
+            QPoint cursorPos = geometryPos;
+            m_groupDragTargetIndex = -1;
+            for (int i = 0; i < m_groups.size(); i++) {
+                if (m_groups[i]->text == m_draggedGroupName)
+                    continue;
+                int gTop = m_groups[i]->verticalPosition();
+                int gBot = gTop + m_groups[i]->totalHeight();
+                int hMid = gTop + VisualGroup::headerHeight() / 2;
+                if (cursorPos.y() < hMid) {
+                    m_groupDragTargetIndex = i;
+                    break;
+                } else if (cursorPos.y() < gBot) {
+                    m_groupDragTargetIndex = i + 1;
+                    break;
+                }
+            }
+            if (m_groupDragTargetIndex < 0)
+                m_groupDragTargetIndex = m_groups.size();
+            if (m_groupDragTargetIndex > m_groups.size())
+                m_groupDragTargetIndex = m_groups.size();
+            qDebug() << "drag group: targetIndex" << m_groupDragTargetIndex;
+            viewport()->update();
+            return;
+        }
+        return;
+    }
 
     if (state() == ExpandingState || state() == CollapsingState) {
         return;
@@ -367,6 +432,39 @@ void InstanceView::mouseMoveEvent(QMouseEvent* event)
 void InstanceView::mouseReleaseEvent(QMouseEvent* event)
 {
     executeDelayedItemsLayout();
+
+    qDebug() << "drag group: mouseRelease draggingGroup was" << m_draggingGroup << "state" << state() << "pressedCategory"
+             << (m_pressedCategory ? m_pressedCategory->text : "(null)");
+
+    // Commit group drag reorder on release
+    if (m_draggingGroup && m_groupDragTargetIndex >= 0) {
+        auto groupOrder = APPLICATION->instances()->groupOrder();
+        int currentOrderIdx = groupOrder.indexOf(m_draggedGroupName);
+        if (currentOrderIdx >= 0) {
+            // Convert visual target index to groupOrder index
+            int orderTarget = 0;
+            for (int i = 0; i < m_groupDragTargetIndex && i < m_groups.size(); i++) {
+                if (m_groups[i]->text == m_draggedGroupName)
+                    continue;
+                int orderPos = groupOrder.indexOf(m_groups[i]->text);
+                if (orderPos >= 0 && orderPos >= orderTarget)
+                    orderTarget = orderPos + 1;
+            }
+            // Clamp to valid range
+            if (orderTarget > groupOrder.size())
+                orderTarget = groupOrder.size();
+            if (orderTarget != currentOrderIdx) {
+                qDebug() << "drag group: commit" << m_draggedGroupName << "from" << currentOrderIdx << "to" << orderTarget;
+                APPLICATION->instances()->moveGroup(m_draggedGroupName, orderTarget);
+                updateGeometries();
+            }
+        }
+        viewport()->update();
+    }
+
+    m_draggingGroup = false;
+    m_draggedGroupName.clear();
+    m_groupDragTargetIndex = -1;
 
     QPoint visualPos = event->pos();
     QPoint geometryPos = event->pos() + offset();
@@ -522,6 +620,21 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
         option.rect.setRight(wpWidth - m_rightMargin);
         category->drawHeader(&painter, option);
         option.rect = backup;
+    }
+
+    // Draw group drag drop indicator
+    if (m_groupDragTargetIndex >= 0) {
+        int indicatorY = 0;
+        if (m_groupDragTargetIndex < m_groups.size()) {
+            indicatorY = m_groups[m_groupDragTargetIndex]->verticalPosition() - verticalOffset();
+        } else if (!m_groups.isEmpty()) {
+            auto* last = m_groups.last();
+            indicatorY = last->verticalPosition() + last->totalHeight() - verticalOffset();
+        }
+        painter.save();
+        painter.setPen(QPen(Qt::white, 1));
+        painter.drawLine(m_leftMargin, indicatorY, wpWidth - m_rightMargin, indicatorY);
+        painter.restore();
     }
 
     for (int i = 0; i < model()->rowCount(); ++i) {

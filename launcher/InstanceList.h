@@ -158,8 +158,11 @@ class InstanceList : public QAbstractListModel {
     QMimeData* mimeData(const QModelIndexList& indexes) const override;
 
     QStringList getLinkedInstancesById(const QString& id) const;
+    QStringList groupOrder() const;
+    void moveGroup(const QString& group, int toIndex);
 
    signals:
+    void groupOrderChanged();
     void dataIsInvalid();
     void instancesChanged();
     void instanceSelectRequest(QString instanceId);
@@ -195,6 +198,7 @@ class InstanceList : public QAbstractListModel {
     std::vector<std::unique_ptr<BaseInstance>> m_instances;
     // id -> refs
     QMap<QString, int> m_groupNameCache;
+    QStringList m_groupOrder;
 
     SettingsObject* m_globalSettings;
     QString m_instDir;
