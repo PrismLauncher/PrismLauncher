@@ -73,66 +73,9 @@
 #include "tasks/Task.h"
 #include "ui/dialogs/ProgressDialog.h"
 
-#include <QMutex>
-#include <QMap>
-#include <QThread>
-#include <QAtomicInt>
-
-QMutex g_activeProfilesMutex;
-QMap<void*, QString> g_activeProfiles;
-QAtomicInt g_logSequence(0);
-
-QString getActiveProfileForModel(void* modelPtr) {
-    QMutexLocker locker(&g_activeProfilesMutex);
-    return g_activeProfiles.value(modelPtr, QStringLiteral("Unknown/None"));
-}
-
-void setActiveProfileForModel(void* modelPtr, const QString& profile) {
-    QMutexLocker locker(&g_activeProfilesMutex);
-    g_activeProfiles[modelPtr] = profile;
-}
-
-void compareModelToProfileState(const QString& stage, ModFolderModel* model, const QSet<QString>& expectedMods, int seq) {
-    QSet<QString> actualMods;
-    for (int i = 0; i < model->rowCount(); ++i) {
-        const Resource& res = model->at(i);
-        if (res.enabled()) {
-            actualMods.insert(res.getOriginalFileName());
-        }
-    }
-    
-    bool match = (expectedMods == actualMods);
-    qDebug() << "[INSTRUMENTATION-DIVERGE]" << seq << stage
-             << "expectedCount:" << expectedMods.size()
-             << "actualCount:" << actualMods.size()
-             << "match:" << match;
-             
-    if (!match) {
-        QSet<QString> missing = expectedMods;
-        missing.subtract(actualMods);
-        QSet<QString> unexpected = actualMods;
-        unexpected.subtract(expectedMods);
-        
-        qDebug() << "  -> Expected Set:" << expectedMods;
-        qDebug() << "  -> Actual Set:" << actualMods;
-        qDebug() << "  -> Missing mods:" << missing;
-        qDebug() << "  -> Unexpected enabled mods:" << unexpected;
-    }
-}
-
 ModFolderPage::~ModFolderPage()
 {
     m_destructorStarted = true;
-    qDebug() << "[INSTRUMENTATION]" << ++g_logSequence << "ModFolderPage::~ModFolderPage() entered"
-             << "thread:" << QThread::currentThreadId()
-             << "model:" << m_model
-             << "currentProfile:" << m_currentProfile
-             << "destructorStarted:" << m_destructorStarted;
-
-    {
-        QMutexLocker locker(&g_activeProfilesMutex);
-        g_activeProfiles.remove(m_model);
-    }
 
     if (m_filterWindow) {
         m_filterWindow->removeEventFilter(this);
@@ -142,7 +85,6 @@ ModFolderPage::~ModFolderPage()
     }
 }
 
-
 ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(inst, model, parent), m_model(model)
 {
@@ -150,8 +92,8 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget*
     m_profileTabBar->setExpanding(false);
     m_profileTabBar->setDrawBase(false);         // no underline bar — matches Settings tab style
     m_profileTabBar->setDocumentMode(false);
-    m_profileTabBar->setUsesScrollButtons(true);
-    m_profileTabBar->setElideMode(Qt::ElideRight);
+    m_profileTabBar->setUsesScrollButtons(m_profileTabBar->count() > 1);
+    m_profileTabBar->setElideMode(Qt::ElideNone);
     m_profileTabBar->setContextMenuPolicy(Qt::CustomContextMenu);
     // Palette-based stylesheet: selected tab uses palette(base) to match the
     // treeView background; unselected tabs use the standard button tone.
@@ -197,6 +139,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget*
 
     // Install viewport filter so clicking blank space in the list clears selection.
     ui->treeView->viewport()->installEventFilter(this);
+    m_profileTabBar->installEventFilter(this);
 
     connect(m_profileTabBar, &QTabBar::currentChanged, this, [this](int index) {
         ++m_profileSwitchGeneration;
@@ -258,23 +201,14 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget*
     m_profileTabBar->blockSignals(true);
     for (const QString& name : profileList) {
         m_profileTabBar->addTab(name);
-        
+
         QString key = profileKey(name);
         m_instance->settings()->getOrRegisterSetting(key, QStringList());
         QStringList saved = m_instance->settings()->get(key).toStringList();
         m_profileStates[name] = QSet<QString>(saved.begin(), saved.end());
-        qDebug().noquote().nospace()
-            << "[PROFILE_STATE_WRITE]\n"
-            << "reason = constructor\n"
-            << "profile = " << name << "\n"
-            << "count = " << m_profileStates[name].size();
-        qDebug() << "[INSTRUMENTATION]" << ++g_logSequence
-                 << "m_profileStates write (constructor)"
-                 << "profile:" << name
-                 << "key:" << key
-                 << "modsCount:" << m_profileStates[name].size();
     }
     m_profileTabBar->blockSignals(false);
+    m_profileTabBar->setUsesScrollButtons(m_profileTabBar->count() > 1);
 
     m_instance->settings()->getOrRegisterSetting(lastActiveIndexKey(), 0);
     int savedIndex = m_instance->settings()->get(lastActiveIndexKey()).toInt();
@@ -286,10 +220,6 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget*
 
     connect(m_model, &QAbstractItemModel::dataChanged, this, [this]() {
         if (!m_applyingProfile) {
-            qDebug().noquote().nospace()
-                << "[SAVE_TRIGGER]\n"
-                << "source = dataChanged\n"
-                << "currentProfile = " << m_currentProfile;
             saveCurrentProfileState();
         }
     });
@@ -675,20 +605,7 @@ inline bool ModFolderPage::handleNoModLoader()
 
 void ModFolderPage::saveCurrentProfileState()
 {
-    if (m_profileLoading) {
-        return;
-    }
-
-    qDebug() << "[INSTRUMENTATION]" << ++g_logSequence << "saveCurrentProfileState() START"
-             << "thread:" << QThread::currentThreadId()
-             << "model:" << m_model
-             << "profile:" << m_currentProfile
-             << "destructorStarted:" << m_destructorStarted;
-
     if (m_currentProfile.isEmpty()) {
-        qDebug() << "[INSTRUMENTATION]" << ++g_logSequence << "saveCurrentProfileState() END (empty profile)"
-                 << "thread:" << QThread::currentThreadId()
-                 << "model:" << m_model;
         return;
     }
     bool stillExists = false;
@@ -699,10 +616,6 @@ void ModFolderPage::saveCurrentProfileState()
         }
     }
     if (!stillExists) {
-        qDebug() << "[INSTRUMENTATION]" << ++g_logSequence << "saveCurrentProfileState() END (profile no longer exists)"
-                 << "thread:" << QThread::currentThreadId()
-                 << "model:" << m_model
-                 << "profile:" << m_currentProfile;
         return;
     }
     QSet<QString> enabledMods;
@@ -713,41 +626,13 @@ void ModFolderPage::saveCurrentProfileState()
         }
     }
     m_profileStates[m_currentProfile] = enabledMods;
-    qDebug().noquote().nospace()
-        << "[PROFILE_STATE_WRITE]\n"
-        << "reason = saveCurrentProfileState\n"
-        << "profile = " << m_currentProfile << "\n"
-        << "count = " << m_profileStates[m_currentProfile].size();
     QString key = profileKey(m_currentProfile);
-    qDebug() << "[INSTRUMENTATION]" << ++g_logSequence
-             << "m_profileStates write (saveCurrentProfileState)"
-             << "profile:" << m_currentProfile
-             << "key:" << key
-             << "modsCount:" << enabledMods.size();
 
     m_instance->settings()->getOrRegisterSetting(key, QStringList());
     m_instance->settings()->set(key, QStringList(enabledMods.begin(), enabledMods.end()));
-    qDebug() << "[INSTRUMENTATION]" << ++g_logSequence
-             << "settings()->set write (saveCurrentProfileState)"
-             << "profile:" << m_currentProfile
-             << "key:" << key
-             << "modsCount:" << enabledMods.size();
-
-    qDebug() << "[INSTRUMENTATION]" << ++g_logSequence << "saveCurrentProfileState() END (saved)"
-             << "thread:" << QThread::currentThreadId()
-             << "model:" << m_model
-             << "profile:" << m_currentProfile
-             << "savedModsCount:" << enabledMods.size();
 }
 
 void ModFolderPage::applyProfileSwitch(int index, int generation) {
-    qDebug() << "[INSTRUMENTATION]" << ++g_logSequence << "onProfileTabChanged() START"
-             << "index:" << index
-             << "thread:" << QThread::currentThreadId()
-             << "model:" << m_model
-             << "profileBefore:" << m_currentProfile
-             << "destructorStarted:" << m_destructorStarted;
-
     if (m_currentProfile.isEmpty()) {
         QVariant val = m_profileTabBar->property("currentProfileName");
         m_currentProfile = val.isValid() ? val.toString() : QString();
@@ -755,40 +640,21 @@ void ModFolderPage::applyProfileSwitch(int index, int generation) {
 
     saveCurrentProfileState();
 
-    m_profileLoading = true;
-
     if (index >= 0 && index < m_profileTabBar->count()) {
         QString tabName = m_profileTabBar->tabText(index);
         m_currentProfile = tabName;
-        setActiveProfileForModel(m_model, m_currentProfile);
         m_profileTabBar->setProperty("currentProfileName", tabName);
         m_instance->settings()->set(lastActiveIndexKey(), index);
 
         QSet<QString> enabledMods;
         if (m_profileStates.contains(tabName)) {
             enabledMods = m_profileStates[tabName];
-            qDebug() << "[INSTRUMENTATION]" << ++g_logSequence
-                     << "profile load (onProfileTabChanged): cached state read"
-                     << "thread:" << QThread::currentThreadId()
-                     << "model:" << m_model
-                     << "profile:" << tabName
-                     << "modsCount:" << enabledMods.size();
         } else {
             QString key = profileKey(tabName);
             m_instance->settings()->getOrRegisterSetting(key, QStringList());
             QStringList saved = m_instance->settings()->get(key).toStringList();
             enabledMods = QSet<QString>(saved.begin(), saved.end());
             m_profileStates[tabName] = enabledMods;
-            qDebug().noquote().nospace()
-                << "[PROFILE_STATE_WRITE]\n"
-                << "reason = onProfileTabChanged\n"
-                << "profile = " << tabName << "\n"
-                << "count = " << m_profileStates[tabName].size();
-            qDebug() << "[INSTRUMENTATION]" << ++g_logSequence
-                     << "m_profileStates write (onProfileTabChanged - settings read)"
-                     << "profile:" << tabName
-                     << "key:" << key
-                     << "modsCount:" << enabledMods.size();
         }
 
         QModelIndexList toEnable;
@@ -806,6 +672,7 @@ void ModFolderPage::applyProfileSwitch(int index, int generation) {
                 }
             }
         }
+        m_applyingProfile = true;
         if (!toEnable.isEmpty()) {
             m_model->setResourceEnabled(toEnable, EnableAction::ENABLE);
         }
@@ -813,12 +680,9 @@ void ModFolderPage::applyProfileSwitch(int index, int generation) {
             m_model->setResourceEnabled(toDisable, EnableAction::DISABLE);
         }
 
-        compareModelToProfileState("BEFORE update()", m_model, enabledMods, ++g_logSequence);
-        
         // Capture generation token. If tab changes again before this update
         // completes, the token will be stale and we discard the result.
         int capturedGeneration = generation;
-        m_applyingProfile = true;
         connect(m_model, &ResourceFolderModel::updateFinished, this,
             [this, capturedGeneration] {
                 if (capturedGeneration == m_profileSwitchGeneration) {
@@ -830,33 +694,11 @@ void ModFolderPage::applyProfileSwitch(int index, int generation) {
 
         m_model->update();
 
-
-        qDebug().noquote().nospace()
-            << "[ProfileSwitch]\n"
-            << "Profile: " << tabName << "\n"
-            << "Enable: " << toEnable.size() << "\n"
-            << "Disable: " << toDisable.size() << "\n"
-            << "updateStarted: " << (started ? "true" : "false");
-        compareModelToProfileState("AFTER update()", m_model, enabledMods, ++g_logSequence);
-        qDebug() << "[INSTRUMENTATION]" << ++g_logSequence
-                 << "EMIT m_model->dataChanged() (onProfileTabChanged layout update)"
-                 << "thread:" << QThread::currentThreadId()
-                 << "model:" << m_model
-                 << "profile:" << m_currentProfile;
-        emit m_model->dataChanged(m_model->index(0, 0), m_model->index(m_model->rowCount() - 1, m_model->columnCount(QModelIndex()) - 1));
     } else {
         m_currentProfile = QString();
-        setActiveProfileForModel(m_model, QStringLiteral("None"));
         m_profileTabBar->setProperty("currentProfileName", QString());
-        m_profileLoading = false;
         m_applyingProfile = false;
     }
-
-    qDebug() << "[INSTRUMENTATION]" << ++g_logSequence << "onProfileTabChanged() END"
-             << "index:" << index
-             << "thread:" << QThread::currentThreadId()
-             << "model:" << m_model
-             << "profileAfter:" << m_currentProfile;
 }
 
 
@@ -896,25 +738,10 @@ void ModFolderPage::createProfile(const QString& name, const QSet<QString>& init
 
     // Persist state to memory and settings
     m_profileStates[name] = initialState;
-    qDebug().noquote().nospace()
-        << "[PROFILE_STATE_WRITE]\n"
-        << "reason = createProfile\n"
-        << "profile = " << name << "\n"
-        << "count = " << m_profileStates[name].size();
     QString key = profileKey(name);
-    qDebug() << "[INSTRUMENTATION]" << ++g_logSequence
-             << "m_profileStates write (createProfile)"
-             << "profile:" << name
-             << "key:" << key
-             << "modsCount:" << initialState.size();
 
     m_instance->settings()->getOrRegisterSetting(key, QStringList());
     m_instance->settings()->set(key, QStringList(initialState.begin(), initialState.end()));
-    qDebug() << "[INSTRUMENTATION]" << ++g_logSequence
-             << "settings()->set write (createProfile)"
-             << "profile:" << name
-             << "key:" << key
-             << "modsCount:" << initialState.size();
 
     // Insert tab at the correct position
     if (insertAfterIndex >= 0 && insertAfterIndex < m_profileTabBar->count()) {
@@ -922,6 +749,7 @@ void ModFolderPage::createProfile(const QString& name, const QSet<QString>& init
     } else {
         m_profileTabBar->addTab(name);
     }
+    m_profileTabBar->setUsesScrollButtons(m_profileTabBar->count() > 1);
 
     saveProfileList();
 }
@@ -1010,16 +838,6 @@ void ModFolderPage::onTabDuplicate(int sourceIndex)
             }
         }
         m_profileStates[m_currentProfile] = enabledMods;
-        qDebug().noquote().nospace()
-            << "[PROFILE_STATE_WRITE]\n"
-            << "reason = onTabDuplicate\n"
-            << "profile = " << m_currentProfile << "\n"
-            << "count = " << m_profileStates[m_currentProfile].size();
-        qDebug() << "[INSTRUMENTATION]" << ++g_logSequence
-                 << "m_profileStates write (onTabDuplicate)"
-                 << "profile:" << m_currentProfile
-                 << "key:" << profileKey(m_currentProfile)
-                 << "modsCount:" << enabledMods.size();
     }
 
     QString sourceName = m_profileTabBar->tabText(sourceIndex);
@@ -1059,16 +877,6 @@ void ModFolderPage::onTabRename(int tabIndex)
     // Migrate in-memory state to the new key
     if (m_profileStates.contains(oldName)) {
         m_profileStates[newName] = m_profileStates.take(oldName);
-        qDebug().noquote().nospace()
-            << "[PROFILE_STATE_WRITE]\n"
-            << "reason = onTabRename\n"
-            << "profile = " << newName << "\n"
-            << "count = " << m_profileStates[newName].size();
-        qDebug() << "[INSTRUMENTATION]" << ++g_logSequence
-                 << "m_profileStates write (onTabRename)"
-                 << "profile:" << newName
-                 << "key:" << profileKey(newName)
-                 << "modsCount:" << m_profileStates[newName].size();
     }
 
     // Migrate settings: read → reset old key → write under new key
@@ -1078,11 +886,6 @@ void ModFolderPage::onTabRename(int tabIndex)
     m_instance->settings()->reset(oldKey);
     m_instance->settings()->getOrRegisterSetting(newKey, QStringList());
     m_instance->settings()->set(newKey, stateData);
-    qDebug() << "[INSTRUMENTATION]" << ++g_logSequence
-             << "settings()->set write (onTabRename)"
-             << "profile:" << newName
-             << "key:" << newKey
-             << "modsCount:" << stateData.size();
 
     // Update the visible tab label
     m_profileTabBar->setTabText(tabIndex, newName);
@@ -1112,14 +915,11 @@ void ModFolderPage::onTabRemove(int tabIndex)
     if (response != QMessageBox::Yes) return;
 
     m_profileStates.remove(name);
-    qDebug().noquote().nospace()
-        << "[PROFILE_STATE_WRITE]\n"
-        << "reason = onTabRemove\n"
-        << "profile = " << name << "\n"
-        << "count = 0";
+
     m_instance->settings()->reset(profileKey(name));
 
     m_profileTabBar->removeTab(tabIndex);
+    m_profileTabBar->setUsesScrollButtons(m_profileTabBar->count() > 1);
     saveProfileList();
 }
 
@@ -1127,9 +927,9 @@ void ModFolderPage::onTabEnableAll(int tabIndex)
 {
     if (m_profileTabBar->currentIndex() != tabIndex) {
         m_profileTabBar->setCurrentIndex(tabIndex);
-    } else {
-        applyProfileSwitch(tabIndex, m_profileSwitchGeneration);
     }
+    applyProfileSwitch(tabIndex, m_profileSwitchGeneration);
+
     // Build the full index list and enable every mod in the active profile.
     QModelIndexList allIndices;
     allIndices.reserve(m_model->rowCount());
@@ -1146,9 +946,9 @@ void ModFolderPage::onTabDisableAll(int tabIndex)
 {
     if (m_profileTabBar->currentIndex() != tabIndex) {
         m_profileTabBar->setCurrentIndex(tabIndex);
-    } else {
-        applyProfileSwitch(tabIndex, m_profileSwitchGeneration);
     }
+    applyProfileSwitch(tabIndex, m_profileSwitchGeneration);
+
     // Build the full index list and disable every mod in the active profile.
     QModelIndexList allIndices;
     allIndices.reserve(m_model->rowCount());
@@ -1166,6 +966,10 @@ bool ModFolderPage::eventFilter(QObject* obj, QEvent* ev)
     // Safety guard: ensure the page, its UI, and tree view are fully valid
     if (!ui || !ui->treeView || !m_model) {
         return ExternalResourcesPage::eventFilter(obj, ev);
+    }
+
+    if (obj == m_profileTabBar && ev->type() == QEvent::Wheel) {
+        return true;  // swallow wheel events so they can't change the active profile tab
     }
 
     // When focus or clicks land outside this page (e.g. the instance sidebar), clear selection.

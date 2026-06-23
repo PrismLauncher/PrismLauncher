@@ -120,7 +120,6 @@ class ModFolderPage : public ExternalResourcesPage {
      QString m_currentProfile;
      QString m_settingsPrefix;
      bool m_destructorStarted = false;
-     bool m_profileLoading = false;
      int            m_profileSwitchGeneration = 0;
      bool           m_applyingProfile = false;
 };
