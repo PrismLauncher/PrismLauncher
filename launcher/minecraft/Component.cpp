@@ -54,7 +54,8 @@ const QMap<QString, ModloaderMapEntry> Component::KNOWN_MODLOADERS = {
     { "net.minecraftforge", { ModPlatform::Forge, { "net.neoforged", "net.fabricmc.fabric-loader", "org.quiltmc.quilt-loader" } } },
     { "net.fabricmc.fabric-loader", { ModPlatform::Fabric, { "net.minecraftforge", "net.neoforged", "org.quiltmc.quilt-loader" } } },
     { "org.quiltmc.quilt-loader", { ModPlatform::Quilt, { "net.minecraftforge", "net.neoforged", "net.fabricmc.fabric-loader" } } },
-    { "com.mumfrey.liteloader", { ModPlatform::LiteLoader, {} } }
+    { "babric", { ModPlatform::Babric, { "net.minecraftforge", "net.neoforged", "org.quiltmc.quilt-loader" } } },
+	{ "com.mumfrey.liteloader", { ModPlatform::LiteLoader, {} } }
 };
 
 Component::Component(PackProfile* parent, const QString& uid)

@@ -35,6 +35,7 @@
 
 #pragma once
 
+#include <QLabel>
 #include <QWidget>
 
 #include "BaseVersion.h"
@@ -78,6 +79,8 @@ class CustomPage : public QWidget, public BasePage {
     void refresh();
     void loaderRefresh();
     void suggestCurrent();
+
+    void setLoaderWidgetMode(bool isBabric);
 
    private:
     bool initialized = false;

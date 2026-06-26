@@ -55,6 +55,7 @@
 #include "VersionPage.h"
 #include "meta/JsonFormat.h"
 #include "tasks/SequentialTask.h"
+#include "minecraft/BabricCreationTask.h"
 #include "ui/dialogs/InstallLoaderDialog.h"
 #include "ui_VersionPage.h"
 
@@ -288,6 +289,31 @@ void VersionPage::on_actionRemove_triggered()
         if (response != QMessageBox::Yes)
             return;
     }
+    // Removing any component from the Babric stack removes all of them to prevent a partially-installed, broken state.
+    static const QSet<QString> babricStack = {
+        "babric", "net.fabricmc.intermediary",
+        "org.lwjgl", "net.fabricmc.fabric-loader",
+    };
+    const bool isBabricInstance = m_profile->getComponent("babric") != nullptr;
+    if (isBabricInstance && babricStack.contains(component->getID())) {
+        auto response =
+            CustomMessageBox::selectable(
+                this, tr("Remove Babric"),
+                tr("Removing \"%1\" will remove all Babric components from this instance:\n"
+                   "Babric, Intermediary Mappings, LWJGL 2, Fabric Loader.\n\n"
+                   "Minecraft b1.7.3 will be kept. Are you sure?")
+                    .arg(component->getName()),
+                QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                ->exec();
+        if (response != QMessageBox::Yes)
+            return;
+        BabricCreationTask::removePatches(m_profile);
+        updateButtons();
+        reloadPackProfile();
+        m_container->refreshContainer();
+        return;
+    }
+
     // FIXME: use actual model, not reloading.
     if (!m_profile->remove(index)) {
         QMessageBox::critical(this, tr("Error"), tr("Couldn't remove file"));

@@ -155,13 +155,80 @@
        <item>
         <layout class="QHBoxLayout" name="loaderLayout">
          <item>
-          <widget class="VersionSelectWidget" name="loaderVersionList" native="true">
+          <widget class="QStackedWidget" name="loaderStack">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <widget class="QWidget" name="loaderPage0">
+            <layout class="QVBoxLayout" name="loaderPage0Layout">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="VersionSelectWidget" name="loaderVersionList" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="loaderPage1">
+            <layout class="QVBoxLayout" name="loaderPage1Layout">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="babricInfoLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+               </property>
+               <property name="wordWrap">
+                <bool>true</bool>
+               </property>
+               <property name="openExternalLinks">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </widget>
          </item>
          <item>
@@ -230,6 +297,16 @@
             </widget>
            </item>
            <item>
+            <widget class="QRadioButton" name="babricFilter">
+             <property name="text">
+              <string>Babric</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">loaderBtnGroup</string>
+             </attribute>
+            </widget>
+           </item>
+                      <item>
             <widget class="QRadioButton" name="liteLoaderFilter">
              <property name="text">
               <string>LiteLoader</string>

@@ -43,28 +43,45 @@
 #include "Version.h"
 #include "meta/Index.h"
 #include "meta/VersionList.h"
+#include "minecraft/BabricCreationTask.h"
 #include "minecraft/VanillaInstanceCreationTask.h"
 #include "ui/dialogs/NewInstanceDialog.h"
+#include <QTimer>
 
 CustomPage::CustomPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), dialog(dialog), ui(new Ui::CustomPage)
 {
     ui->setupUi(this);
+
+    // babricInfoLabel and loaderStack come from CustomPage.ui —
+    // no runtime widget creation or layout manipulation needed here.
+    ui->babricInfoLabel->setText(
+        tr("<b>Babric</b> is a Fabric-based mod loader "
+           "for <b>Minecraft Beta 1.7.3</b>.<br><br>"
+           "Clicking <b>OK</b> will create an instance with:<ul>"
+           "<li>Minecraft b1.7.3</li>"
+           "<li>Fabric Loader 0.18.4 + Babric mapping layer</li>"
+           "</ul>"));
+
+	ui->loaderPage1->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+
     connect(ui->versionList, &VersionSelectWidget::selectedVersionChanged, this, &CustomPage::setSelectedVersion);
     filterChanged();
-    connect(ui->alphaFilter, &QCheckBox::stateChanged, this, &CustomPage::filterChanged);
-    connect(ui->betaFilter, &QCheckBox::stateChanged, this, &CustomPage::filterChanged);
-    connect(ui->snapshotFilter, &QCheckBox::stateChanged, this, &CustomPage::filterChanged);
-    connect(ui->releaseFilter, &QCheckBox::stateChanged, this, &CustomPage::filterChanged);
+    connect(ui->alphaFilter,       &QCheckBox::stateChanged, this, &CustomPage::filterChanged);
+    connect(ui->betaFilter,        &QCheckBox::stateChanged, this, &CustomPage::filterChanged);
+    connect(ui->snapshotFilter,    &QCheckBox::stateChanged, this, &CustomPage::filterChanged);
+    connect(ui->releaseFilter,     &QCheckBox::stateChanged, this, &CustomPage::filterChanged);
     connect(ui->experimentsFilter, &QCheckBox::stateChanged, this, &CustomPage::filterChanged);
-    connect(ui->refreshBtn, &QPushButton::clicked, this, &CustomPage::refresh);
+    connect(ui->refreshBtn,        &QPushButton::clicked,    this, &CustomPage::refresh);
 
     connect(ui->loaderVersionList, &VersionSelectWidget::selectedVersionChanged, this, &CustomPage::setSelectedLoaderVersion);
-    connect(ui->noneFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
-    connect(ui->forgeFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
-    connect(ui->fabricFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
-    connect(ui->quiltFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
-    connect(ui->liteLoaderFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
-    connect(ui->loaderRefreshBtn, &QPushButton::clicked, this, &CustomPage::loaderRefresh);
+    connect(ui->noneFilter,        &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
+    connect(ui->neoForgeFilter,    &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
+    connect(ui->forgeFilter,       &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
+    connect(ui->fabricFilter,      &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
+    connect(ui->quiltFilter,       &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
+    connect(ui->babricFilter,      &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
+    connect(ui->liteLoaderFilter,  &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
+    connect(ui->loaderRefreshBtn,  &QPushButton::clicked,  this, &CustomPage::loaderRefresh);
 }
 
 void CustomPage::openedImpl()
@@ -85,7 +102,7 @@ void CustomPage::refresh()
 
 void CustomPage::loaderRefresh()
 {
-    if (ui->noneFilter->isChecked())
+    if (ui->noneFilter->isChecked() || ui->babricFilter->isChecked())
         return;
     ui->loaderVersionList->loadList(true);
 }
@@ -107,23 +124,52 @@ void CustomPage::filterChanged()
     ui->versionList->setFilter(BaseVersionList::TypeRole, Filters::regexp(QRegularExpression(regexp)));
 }
 
+void CustomPage::setLoaderWidgetMode(bool isBabric)
+{
+    ui->loaderStack->setCurrentIndex(isBabric ? 1 : 0);
+    ui->loaderRefreshBtn->setEnabled(!isBabric);
+
+    for (int i = 0; i < ui->verticalLayout_2->count(); i++) {
+        if (QSpacerItem* spacer = ui->verticalLayout_2->itemAt(i)->spacerItem()) {
+            spacer->changeSize(20, 0, QSizePolicy::Minimum,
+                               isBabric ? QSizePolicy::Fixed : QSizePolicy::Expanding);
+            ui->verticalLayout_2->invalidate();
+            break;
+        }
+    }
+}
+
 void CustomPage::loaderFilterChanged()
 {
-    QString minecraftVersion;
-    if (m_selectedVersion) {
-        minecraftVersion = m_selectedVersion->descriptor();
-    } else {
-        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA");  // empty list
+    // Always sync the widget visibility first.
+    setLoaderWidgetMode(ui->babricFilter->isChecked());
+
+    const QString minecraftVersion = m_selectedVersion ? m_selectedVersion->descriptor() : QString();
+
+    if (ui->noneFilter->isChecked()) {
+        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA");
+        ui->loaderVersionList->setEmptyString(tr("No mod loader is selected."));
+        ui->loaderVersionList->setEmptyMode(VersionListView::String);
+        m_selectedLoader.clear();
+        suggestCurrent();
+        return;
+    }
+
+    if (ui->babricFilter->isChecked()) {
+        // No meta-server lookup needed — everything is embedded.
+        m_selectedLoader = "babric";
+        suggestCurrent();
+        return;
+    }
+
+    if (minecraftVersion.isEmpty()) {
+        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA");
         ui->loaderVersionList->setEmptyString(tr("No Minecraft version is selected."));
         ui->loaderVersionList->setEmptyMode(VersionListView::String);
         return;
     }
-    if (ui->noneFilter->isChecked()) {
-        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA");  // empty list
-        ui->loaderVersionList->setEmptyString(tr("No mod loader is selected."));
-        ui->loaderVersionList->setEmptyMode(VersionListView::String);
-        return;
-    } else if (ui->neoForgeFilter->isChecked()) {
+
+    if (ui->neoForgeFilter->isChecked()) {
         ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
         m_selectedLoader = "net.neoforged";
     } else if (ui->forgeFilter->isChecked()) {
@@ -186,7 +232,12 @@ QString CustomPage::selectedLoader() const
 
 void CustomPage::suggestCurrent()
 {
-    if (!isOpened) {
+    if (!isOpened)
+        return;
+
+    if (ui->babricFilter->isChecked()) {
+        dialog->setSuggestedPack("b1.7.3", new BabricCreationTask());
+        dialog->setSuggestedIcon("fabric");
         return;
     }
 

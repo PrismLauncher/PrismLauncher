@@ -19,13 +19,15 @@
 #include "InstallLoaderDialog.h"
 
 #include <QDialogButtonBox>
+#include <QLabel>
 #include <QPushButton>
+#include <QMessageBox>
 #include <QVBoxLayout>
 #include "Application.h"
 #include "BuildConfig.h"
 #include "DesktopServices.h"
 #include "meta/Index.h"
-#include "minecraft/MinecraftInstance.h"
+#include "minecraft/BabricCreationTask.h"
 #include "minecraft/PackProfile.h"
 #include "ui/widgets/PageContainer.h"
 #include "ui/widgets/VersionSelectWidget.h"
@@ -33,7 +35,11 @@
 class InstallLoaderPage : public VersionSelectWidget, public BasePage {
     Q_OBJECT
    public:
-    InstallLoaderPage(const QString& id, const QString& iconName, const QString& name, const Version& oldestVersion, PackProfile* profile)
+    InstallLoaderPage(const QString& id,
+                      const QString& iconName,
+                      const QString& name,
+                      const Version& oldestVersion,
+                      PackProfile* profile)
         : VersionSelectWidget(nullptr), uid(id), iconName(iconName), name(name)
     {
         const QString minecraftVersion = profile->getComponentVersion("net.minecraft");
@@ -77,17 +83,89 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
     bool loaded = false;
 };
 
-static InstallLoaderPage* pageCast(BasePage* page)
+class InstallBabricPage : public QWidget, public BasePage {
+    Q_OBJECT
+   public:
+    explicit InstallBabricPage(PackProfile* profile, QWidget* parent = nullptr)
+        : QWidget(parent), m_profile(profile)
+    {
+        auto* layout = new QVBoxLayout(this);
+        layout->setContentsMargins(16, 16, 16, 16);
+        layout->setSpacing(12);
+
+        m_label = new QLabel(this);
+        m_label->setWordWrap(true);
+        m_label->setOpenExternalLinks(true);
+        m_label->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+        layout->addWidget(m_label);
+        layout->addStretch();
+
+        updateLabel();
+    }
+
+    QString id() const override { return "babric"; }
+    QString displayName() const override { return tr("Babric"); }
+    QIcon icon() const override { return QIcon::fromTheme("fabricmc"); }
+
+    bool isCompatible() const
+    {
+        const QString mc = m_profile->getComponentVersion("net.minecraft");
+        return mc.isEmpty() || mc == "b1.7.3";
+    }
+
+    bool install()
+    {
+        if (!BabricCreationTask::installPatches(m_profile))
+            return false;
+        m_profile->resolve(Net::Mode::Online);
+        return true;
+    }
+
+   private:
+    void updateLabel()
+    {
+        if (isCompatible()) {
+            m_label->setText(
+                tr("<b>Babric</b> is a Fabric-based mod loader "
+                   "for <b>Minecraft Beta 1.7.3</b>."
+                   "<br><br>"
+                   "Clicking <b>OK</b> will:"
+                   "<ul>"
+                   "<li>Replace this instance's Minecraft version with <b>b1.7.3</b></li>"
+                   "<li>Install <b>Fabric Loader 0.18.4</b> and the Babric mapping layer</li>"
+                   "<li>Configure the mod browser to show Babric-compatible mods</li>"
+                   "</ul>"));
+        } else {
+            const QString mc = m_profile->getComponentVersion("net.minecraft");
+            m_label->setText(
+                tr("No versions are currently available for Minecraft %1."
+                   "<br><br>"
+                   "Babric only supports <b>Minecraft Beta 1.7.3</b>.").arg(mc));
+        }
+    }
+
+    PackProfile* m_profile = nullptr;
+    QLabel* m_label = nullptr;
+};
+
+
+static InstallLoaderPage* asLoaderPage(BasePage* page)
 {
-    auto result = dynamic_cast<InstallLoaderPage*>(page);
-    Q_ASSERT(result != nullptr);
-    return result;
+    return dynamic_cast<InstallLoaderPage*>(page);
+}
+
+static InstallBabricPage* asBabricPage(BasePage* page)
+{
+    return dynamic_cast<InstallBabricPage*>(page);
 }
 
 InstallLoaderDialog::InstallLoaderDialog(PackProfile* profile, const QString& uid, QWidget* parent)
-    : QDialog(parent), profile(profile), container(new PageContainer(this, QString(), this)), buttons(new QDialogButtonBox(this))
+    : QDialog(parent)
+    , profile(profile)
+    , container(new PageContainer(this, QString(), this))
+    , buttons(new QDialogButtonBox(this))
 {
-    auto layout = new QVBoxLayout(this);
+    auto* layout = new QVBoxLayout(this);
     // small margins look ugly on macOS on modal windows
     #ifndef Q_OS_MACOS
     layout->setContentsMargins(0, 0, 0, 0);
@@ -95,13 +173,19 @@ InstallLoaderDialog::InstallLoaderDialog(PackProfile* profile, const QString& ui
     container->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     layout->addWidget(container);
 
-    auto buttonLayout = new QHBoxLayout(this);
+    auto* buttonLayout = new QHBoxLayout();
     // small margins look ugly on macOS on modal windows
     #ifndef Q_OS_MACOS
     buttonLayout->setContentsMargins(0, 0, 6, 6);
     #endif
-    auto refreshButton = new QPushButton(tr("&Refresh"), this);
-    connect(refreshButton, &QPushButton::clicked, this, [this] { pageCast(container->selectedPage())->loadList(true); });
+
+    auto* refreshButton = new QPushButton(tr("&Refresh"), this);
+    connect(refreshButton, &QPushButton::clicked, this, [this] {
+        auto* page = container->selectedPage();
+        if (auto* lp = asLoaderPage(page))
+            lp->loadList(true);
+        // Babric has no remote list to refresh.
+    });
     buttonLayout->addWidget(refreshButton);
 
     buttons->setOrientation(Qt::Horizontal);
@@ -118,17 +202,29 @@ InstallLoaderDialog::InstallLoaderDialog(PackProfile* profile, const QString& ui
     setWindowModality(Qt::WindowModal);
     resize(520, 347);
 
+    // Pre-select requested uid (if any) and wire version-selection → OK state.
     for (BasePage* page : container->getPages()) {
-        if (page->id() == uid)
+        if (!uid.isEmpty() && page->id() == uid)
             container->selectPage(page->id());
 
-        connect(pageCast(page), &VersionSelectWidget::selectedVersionChanged, this, [this, page] {
-            if (page->id() == container->selectedPage()->id())
-                validate(container->selectedPage());
-        });
+        if (auto* lp = dynamic_cast<InstallLoaderPage*>(page)) {
+            connect(lp, &VersionSelectWidget::selectedVersionChanged, this, [this, page] {
+                if (page == container->selectedPage())
+                    validate(container->selectedPage());
+            });
+        }
     }
-    connect(container, &PageContainer::selectedPageChanged, this, [this](BasePage* previous, BasePage* current) { validate(current); });
-    pageCast(container->selectedPage())->selectSearch();
+
+    connect(container, &PageContainer::selectedPageChanged, this,
+            [this, refreshButton](BasePage* /*prev*/, BasePage* current) {
+                refreshButton->setVisible(!asBabricPage(current));
+                validate(current);
+            });
+
+    if (auto* lp = asLoaderPage(container->selectedPage()))
+        lp->selectSearch();
+
+    refreshButton->setVisible(!asBabricPage(container->selectedPage()));
     validate(container->selectedPage());
 }
 
@@ -142,6 +238,8 @@ QList<BasePage*> InstallLoaderDialog::getPages()
              new InstallLoaderPage("net.fabricmc.fabric-loader", "fabricmc", tr("Fabric"), Version("1.14"), profile),
              // Quilt
              new InstallLoaderPage("org.quiltmc.quilt-loader", "quiltmc", tr("Quilt"), Version("1.14"), profile),
+			 // Babric
+			 new InstallBabricPage(profile),
              // LiteLoader
              new InstallLoaderPage("com.mumfrey.liteloader", "liteloader", tr("LiteLoader"), {}, profile)
     };
@@ -154,16 +252,34 @@ QString InstallLoaderDialog::dialogTitle()
 
 void InstallLoaderDialog::validate(BasePage* page)
 {
-    buttons->button(QDialogButtonBox::Ok)->setEnabled(pageCast(page)->selectedVersion() != nullptr);
+    bool ok = false;
+    if (auto* bp = asBabricPage(page)) {
+        ok = bp->isCompatible();
+    } else if (auto* lp = asLoaderPage(page)) {
+        ok = lp->selectedVersion() != nullptr;
+    }
+    buttons->button(QDialogButtonBox::Ok)->setEnabled(ok);
 }
 
 void InstallLoaderDialog::done(int result)
 {
     if (result == Accepted) {
-        auto* page = pageCast(container->selectedPage());
-        if (page->selectedVersion()) {
-            profile->setComponentVersion(page->id(), page->selectedVersion()->descriptor());
-            profile->resolve(Net::Mode::Online);
+        BasePage* page = container->selectedPage();
+
+        if (auto* bp = asBabricPage(page)) {
+            if (!bp->install()) {
+                QMessageBox::critical(
+                    this, tr("Install Error"),
+                    tr("Failed to install Babric.\n\n"
+                       "Run the launcher from a terminal to see details:\n"
+                       "  cd install && .\\prismlauncher.exe 2>&1"));
+                return;  // keep dialog open so user can try again or cancel
+            }
+        } else if (auto* lp = asLoaderPage(page)) {
+            if (lp->selectedVersion()) {
+                profile->setComponentVersion(lp->id(), lp->selectedVersion()->descriptor());
+                profile->resolve(Net::Mode::Online);
+            }
         }
     }
 
