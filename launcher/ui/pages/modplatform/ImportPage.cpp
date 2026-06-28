@@ -180,6 +180,11 @@ void ImportPage::updateState()
                 input.append("/file");
                 url = QUrl::fromUserInput(input);
             }
+            if (input.startsWith("https://www.curseforge.com/minecraft/share/")) {
+                input.remove(0, 43);
+                input.prepend("http://api.curseforge.com/v1/shared-profile/");
+                url = QUrl::fromUserInput(input);
+            }
             // hook, line and sinker.
             QFileInfo fi(url.fileName());
             auto extra_info = QMap(m_extra_info);
