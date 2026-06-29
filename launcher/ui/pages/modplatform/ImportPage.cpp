@@ -182,7 +182,7 @@ void ImportPage::updateState()
             }
             if (input.startsWith("https://www.curseforge.com/minecraft/share/")) {
                 input.remove(0, 43);
-                input.prepend("http://api.curseforge.com/v1/shared-profile/");
+                input.prepend("https://api.curseforge.com/v1/shared-profile/");
                 url = QUrl::fromUserInput(input);
             }
             // hook, line and sinker.
