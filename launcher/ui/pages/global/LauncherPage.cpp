@@ -62,7 +62,9 @@ enum InstSortMode {
     // Sort alphabetically by name.
     Sort_Name,
     // Sort by which instance was launched most recently.
-    Sort_LastLaunch
+    Sort_LastLaunch,
+    // Sort by which instance has the most playtime.
+    Sort_Playtime,
 };
 
 LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::LauncherPage)
@@ -71,6 +73,7 @@ LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::Launch
 
     ui->sortingModeGroup->setId(ui->sortByNameBtn, Sort_Name);
     ui->sortingModeGroup->setId(ui->sortLastLaunchedBtn, Sort_LastLaunch);
+    ui->sortingModeGroup->setId(ui->sortByPlaytimeBtn, Sort_Playtime);
 
     loadSettings();
 
@@ -227,6 +230,9 @@ void LauncherPage::applySettings()
         case Sort_LastLaunch:
             s->set("InstSortMode", "LastLaunch");
             break;
+        case Sort_Playtime:
+            s->set("InstSortMode", "Playtime");
+            break;
         case Sort_Name:
         default:
             s->set("InstSortMode", "Name");
@@ -282,6 +288,8 @@ void LauncherPage::loadSettings()
     QString sortMode = s->get("InstSortMode").toString();
     if (sortMode == "LastLaunch") {
         ui->sortLastLaunchedBtn->setChecked(true);
+    } else if (sortMode == "Playtime"){
+        ui->sortByPlaytimeBtn->setChecked(true);
     } else {
         ui->sortByNameBtn->setChecked(true);
     }

@@ -179,13 +179,20 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 void JavaChecker::error(QProcess::ProcessError err)
 {
     if (err == QProcess::FailedToStart) {
-        qDebug() << "Java checker has failed to start.";
+        qDebug() << "Java checker has failed to start:" << process->errorString();
         qDebug() << "Process environment:";
         qDebug() << process->environment();
         qDebug() << "Native environment:";
         qDebug() << QProcessEnvironment::systemEnvironment().toStringList();
         killTimer.stop();
-        emit checkFinished({ m_path, m_id });
+
+        Result result = {
+            m_path,
+            m_id,
+        };
+        result.errorLog = process->errorString();
+        result.validity = Result::Validity::Errored;
+        emit checkFinished(result);
     }
     emitSucceeded();
 }

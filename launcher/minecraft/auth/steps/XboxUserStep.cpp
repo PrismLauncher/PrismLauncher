@@ -56,9 +56,10 @@ void XboxUserStep::onRequestDone(QByteArray* response)
 {
     if (m_request->error() != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << m_request->error();
-        if (Net::isApplicationError(m_request->error())) {
+        if (Net::isApplicationError(m_request->error()) && !Net::isServerError(m_request->error())) {
             emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("Xbox user authentication failed: %1").arg(m_request->errorString()));
         } else {
+            m_data->networkError = m_request->error();
             emit finished(AccountTaskState::STATE_OFFLINE, tr("Xbox user authentication failed: %1").arg(m_request->errorString()));
         }
         return;

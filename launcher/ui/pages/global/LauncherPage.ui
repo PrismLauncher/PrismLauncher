@@ -84,6 +84,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QRadioButton" name="sortByPlaytimeBtn">
+            <property name="text">
+             <string>By total time &amp;played</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">sortingModeGroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item>
            <spacer name="verticalSpacer">
             <property name="orientation">
              <enum>Qt::Orientation::Vertical</enum>
@@ -673,6 +683,12 @@
  </widget>
  <tabstops>
   <tabstop>scrollArea</tabstop>
+  <tabstop>sortByNameBtn</tabstop>
+  <tabstop>sortLastLaunchedBtn</tabstop>
+  <tabstop>sortByPlaytimeBtn</tabstop>
+  <tabstop>askToRenameDirBtn</tabstop>
+  <tabstop>alwaysRenameDirBtn</tabstop>
+  <tabstop>neverRenameDirBtn</tabstop>
   <tabstop>preferMenuBarCheckBox</tabstop>
   <tabstop>autoUpdateCheckBox</tabstop>
   <tabstop>updateIntervalSpinBox</tabstop>
@@ -692,7 +708,9 @@
   <tabstop>downloadsDirMoveCheckBox</tabstop>
   <tabstop>metadataEnableBtn</tabstop>
   <tabstop>dependenciesEnableBtn</tabstop>
+  <tabstop>showModIncompatCheckBox</tabstop>
   <tabstop>modpackUpdatePromptBtn</tabstop>
+  <tabstop>downloadGameFilesBtn</tabstop>
   <tabstop>lineLimitSpinBox</tabstop>
   <tabstop>checkStopLogging</tabstop>
   <tabstop>numberOfConcurrentTasksSpinBox</tabstop>

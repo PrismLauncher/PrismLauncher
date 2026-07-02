@@ -18,84 +18,45 @@
 
 #include "HardwareInfo.h"
 
-#include <QCoreApplication>
-#include <QOffscreenSurface>
-#include <QOpenGLFunctions>
-#include <QProcessEnvironment>
-#include "BuildConfig.h"
+#include <QDebug>
+#include <QStringList>
 
-#ifndef Q_OS_MACOS
-#include <QVulkanInstance>
-#include <QVulkanWindow>
-#endif
-
+#if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
 namespace {
-bool vulkanInfo(QStringList& out)
+QString afterColon(QString str)
 {
-    if (!QProcessEnvironment::systemEnvironment()
-             .value(QStringLiteral("%1_DISABLE_GLVULKAN").arg(BuildConfig.LAUNCHER_ENVNAME))
-             .isEmpty()) {
-        return false;
-    }
-#ifndef Q_OS_MACOS
-    QVulkanInstance inst;
-    if (!inst.create()) {
-        qWarning() << "Vulkan instance creation failed, VkResult:" << inst.errorCode();
-        out << "Couldn't get Vulkan device information";
-        return false;
-    }
-
-    QVulkanWindow window;
-    window.setVulkanInstance(&inst);
-
-    for (auto device : window.availablePhysicalDevices()) {
-        const auto supportedVulkanVersion = QVersionNumber(VK_API_VERSION_MAJOR(device.apiVersion), VK_API_VERSION_MINOR(device.apiVersion),
-                                                           VK_API_VERSION_PATCH(device.apiVersion));
-        out << QString("Found Vulkan device: %1 (API version %2)").arg(device.deviceName).arg(supportedVulkanVersion.toString());
-    }
-#endif
-
-    return true;
+    return str.remove(0, str.indexOf(':') + 2).trimmed();
 }
 
-bool openGlInfo(QStringList& out)
+template <typename F>
+bool readFromOutput(const char* command, F function)
 {
-    if (!QProcessEnvironment::systemEnvironment()
-             .value(QStringLiteral("%1_DISABLE_GLVULKAN").arg(BuildConfig.LAUNCHER_ENVNAME))
-             .isEmpty()) {
-        return false;
-    }
-    QOpenGLContext ctx;
-    if (!ctx.create()) {
-        qWarning() << "OpenGL context creation failed";
-        out << "Couldn't get OpenGL device information";
+    FILE* file = popen(command, "r");  // NOLINT(*-command-processor)
+    if (!file) {
+        qWarning().nospace() << "Could not execute command '" << command << "': " << strerror(errno);
         return false;
     }
 
-    QOffscreenSurface surface;
-    surface.create();
-    ctx.makeCurrent(&surface);
+    constexpr size_t bufferSize = 512;
+    std::array<char, bufferSize> buffer{};
+    while (fgets(buffer.data(), bufferSize, file) != nullptr) {
+        function(buffer.data());
+    }
 
-    auto* f = ctx.functions();
-    f->initializeOpenGLFunctions();
+    const int exitCode = pclose(file);
+    if (exitCode != 0) {
+        if (exitCode == -1) {
+            qWarning().nospace() << "Could not close stream for command '" << command << "': " << strerror(errno);
+        } else {
+            qWarning().nospace() << "Command '" << command << "' exited with code " << exitCode;
+        }
 
-    auto toQString = [](const GLubyte* str) { return QString(reinterpret_cast<const char*>(str)); };
-    out << "OpenGL driver vendor: " + toQString(f->glGetString(GL_VENDOR));
-    out << "OpenGL renderer: " + toQString(f->glGetString(GL_RENDERER));
-    out << "OpenGL driver version: " + toQString(f->glGetString(GL_VERSION));
+        return false;
+    }
 
     return true;
 }
 }  // namespace
-
-#ifndef Q_OS_LINUX
-QStringList HardwareInfo::gpuInfo()
-{
-    QStringList info;
-    vulkanInfo(info);
-    openGlInfo(info);
-    return info;
-}
 #endif
 
 #ifdef Q_OS_WINDOWS
@@ -104,7 +65,11 @@ QStringList HardwareInfo::gpuInfo()
 #endif
 #include <QSettings>
 
-#include "windows.h"
+#include <dxgi1_6.h>
+#include <windows.h>
+
+#include <wrl/client.h>
+using Microsoft::WRL::ComPtr;
 
 QString HardwareInfo::cpuInfo()
 {
@@ -140,15 +105,42 @@ uint64_t HardwareInfo::availableRamMiB()
     return 0;
 }
 
+QStringList HardwareInfo::gpuInfo()
+{
+    ComPtr<IDXGIFactory6> factory;
+    HRESULT hr = CreateDXGIFactory1(IID_PPV_ARGS(&factory));
+    if (FAILED(hr)) {
+        qWarning() << "Could not create DXGI factory:" << Qt::hex << hr;
+        return { "GPU discovery failed: could not create DXGI factory" };
+    }
+
+    UINT i = 0;
+    ComPtr<IDXGIAdapter> adapter;
+    QStringList out;
+    while (factory->EnumAdapterByGpuPreference(i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter)) != DXGI_ERROR_NOT_FOUND) {
+        DXGI_ADAPTER_DESC desc;
+        hr = adapter->GetDesc(&desc);
+        if (SUCCEEDED(hr)) {
+            out << "GPU: " + QString::fromWCharArray(desc.Description);  // NOLINT(*-pro-bounds-array-to-pointer-decay, *-no-array-decay)
+        } else {
+            qWarning() << "Could not get DXGI adapter description:" << Qt::hex << hr;
+        }
+
+        ++i;
+    }
+
+    return out;
+}
+
 #elif defined(Q_OS_MACOS)
 #include "sys/sysctl.h"
 
 QString HardwareInfo::cpuInfo()
 {
-    std::array<char, 512> buffer;
+    std::array<char, 512> buffer{};
     size_t bufferSize = buffer.size();
     if (sysctlbyname("machdep.cpu.brand_string", &buffer, &bufferSize, nullptr, 0) == 0) {
-        return QString(buffer.data());
+        return { buffer.data() };
     }
 
     qWarning() << "Could not get CPU model: sysctlbyname";
@@ -157,7 +149,7 @@ QString HardwareInfo::cpuInfo()
 
 uint64_t HardwareInfo::totalRamMiB()
 {
-    uint64_t memsize;
+    uint64_t memsize = 0;
     size_t memsizeSize = sizeof memsize;
     if (sysctlbyname("hw.memsize", &memsize, &memsizeSize, nullptr, 0) == 0) {
         // transforming bytes -> mib
@@ -175,7 +167,7 @@ uint64_t HardwareInfo::availableRamMiB()
 
 MacOSHardwareInfo::MemoryPressureLevel MacOSHardwareInfo::memoryPressureLevel()
 {
-    uint32_t level;
+    uint32_t level = 0;
     size_t levelSize = sizeof level;
     if (sysctlbyname("kern.memorystatus_vm_pressure_level", &level, &levelSize, nullptr, 0) == 0) {
         return static_cast<MemoryPressureLevel>(level);
@@ -195,25 +187,37 @@ QString MacOSHardwareInfo::memoryPressureLevelName()
             return "Yellow";
         case MemoryPressureLevel::Critical:
             return "Red";
+        default:
+            Q_ASSERT(false);
+            return "";
     }
+}
+
+QStringList HardwareInfo::gpuInfo()
+{
+    QStringList out;
+    const bool success = readFromOutput("system_profiler SPDisplaysDataType", [&](const QString& str) {
+        // Chipset Model: Intel HD Graphics 620
+        if (str.contains("Chipset Model")) {
+            out << "GPU: " + afterColon(str);
+        }
+    });
+    if (!success) {
+        return { "GPU discovery failed: could not read from system_profiler" };
+    }
+
+    return out;
 }
 
 #elif defined(Q_OS_LINUX)
 #include <fstream>
-
-namespace {
-QString afterColon(QString& str)
-{
-    return str.remove(0, str.indexOf(':') + 2).trimmed();
-}
-}  // namespace
 
 QString HardwareInfo::cpuInfo()
 {
     std::ifstream cpuin("/proc/cpuinfo");
     for (std::string line; std::getline(cpuin, line);) {
         // model name      : AMD Ryzen 7 5800X 8-Core Processor
-        if (QString str = QString::fromStdString(line); str.startsWith("model name")) {
+        if (const QString str = QString::fromStdString(line); str.startsWith("model name")) {
             return afterColon(str);
         }
     }
@@ -222,12 +226,13 @@ QString HardwareInfo::cpuInfo()
     return "unknown";
 }
 
-uint64_t readMemInfo(QString searchTarget)
+namespace {
+uint64_t readMemInfo(const QString& searchTarget)
 {
     std::ifstream memin("/proc/meminfo");
     for (std::string line; std::getline(memin, line);) {
         // MemTotal:       16287480 kB
-        if (QString str = QString::fromStdString(line); str.startsWith(searchTarget)) {
+        if (const QString str = QString::fromStdString(line); str.startsWith(searchTarget)) {
             bool ok = false;
             const uint total = str.simplified().section(' ', 1, 1).toUInt(&ok);
             if (!ok) {
@@ -243,6 +248,7 @@ uint64_t readMemInfo(QString searchTarget)
     qWarning() << "Could not read /proc/meminfo: search target not found:" << searchTarget;
     return 0;
 }
+}  // namespace
 
 uint64_t HardwareInfo::totalRamMiB()
 {
@@ -256,52 +262,50 @@ uint64_t HardwareInfo::availableRamMiB()
 
 QStringList HardwareInfo::gpuInfo()
 {
-    QStringList list;
-    const bool vulkanSuccess = vulkanInfo(list);
-    const bool openGlSuccess = openGlInfo(list);
-    if (vulkanSuccess || openGlSuccess) {
-        return list;
-    }
-
-    std::array<char, 512> buffer;
-    FILE* lspci = popen("lspci -k", "r");
-
-    if (!lspci) {
-        return { "Could not detect GPUs: lspci is not present" };
-    }
-
     bool readingGpuInfo = false;
-    QString currentModel = "";
-    while (fgets(buffer.data(), 512, lspci) != nullptr) {
-        QString str(buffer.data());
+    QString gpu;
+    QString driverInUse = "NONE";
+    QString driversAvailable = "NONE";
+    QStringList out;
+
+    const bool success = readFromOutput("lspci -k", [&](const QString& str) {
         // clang-format off
         // 04:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Ellesmere [Radeon RX 470/480/570/570X/580/580X/590] (rev e7)
         // Subsystem: Sapphire Technology Limited Radeon RX 580 Pulse 4GB
         // Kernel driver in use: amdgpu
         // Kernel modules: amdgpu
         // clang-format on
-        if (str.contains("VGA compatible controller")) {
+        if (str.contains("VGA compatible controller") || str.contains("3D controller")) {
             readingGpuInfo = true;
         } else if (!str.startsWith('\t')) {
+            if (readingGpuInfo) {
+                out << QString("GPU: %1 (driver in use: %2; drivers available: %3)").arg(gpu, driverInUse, driversAvailable);
+                driverInUse = "NONE";
+                driversAvailable = "NONE";
+            }
             readingGpuInfo = false;
         }
+
         if (!readingGpuInfo) {
-            continue;
+            return;
         }
 
+        const QString value = afterColon(str);
         if (str.contains("Subsystem")) {
-            currentModel = "Found GPU: " + afterColon(str);
+            gpu = value;
         }
         if (str.contains("Kernel driver in use")) {
-            currentModel += " (using driver " + afterColon(str);
+            driverInUse = value;
         }
         if (str.contains("Kernel modules")) {
-            currentModel += ", available drivers: " + afterColon(str) + ")";
-            list.append(currentModel);
+            driversAvailable = value;
         }
+    });
+    if (!success) {
+        return { "GPU discovery failed: could not read from lspci" };
     }
-    pclose(lspci);
-    return list;
+
+    return out;
 }
 
 #else
@@ -316,19 +320,20 @@ QString HardwareInfo::cpuInfo()
 
 uint64_t HardwareInfo::totalRamMiB()
 {
-    char buff[512];
-    FILE* fp = popen("sysctl hw.physmem", "r");
-    if (fp != nullptr) {
-        if (fgets(buff, 512, fp) != nullptr) {
-            std::string str(buff);
-            uint64_t mem = std::stoull(str.substr(12, std::string::npos));
+    uint64_t out = 0;
 
-            // transforming kib -> mib
-            return mem / 1024;
-        }
+    const bool success = readFromOutput("sysctl hw.physmem", [&](const QString& str) {
+        const uint64_t mem = str.mid(12).toULong();
+
+        // transforming kib -> mib
+        out = mem / 1024;
+    });
+    if (!success) {
+        qWarning() << "Could not get total RAM: could not read from sysctl";
+        return 0;
     }
 
-    return 0;
+    return out;
 }
 
 #else
@@ -343,4 +348,8 @@ uint64_t HardwareInfo::availableRamMiB()
     return 0;
 }
 
+QStringList HardwareInfo::gpuInfo()
+{
+    return { "GPU discovery failed: not implemented for this OS" };
+}
 #endif

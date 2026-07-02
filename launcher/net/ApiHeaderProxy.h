@@ -61,17 +61,19 @@ class ApiHeaderProxy : public HeaderProxy {
     QList<HeaderPair> headers(const QNetworkRequest& request) const override
     {
         QList<HeaderPair> hdrs;
-        if (APPLICATION->capabilities() & Application::SupportsFlame && request.url().host() == QUrl(BuildConfig.FLAME_BASE_URL).host()) {
+        const auto host = request.url().host();
+
+        if (APPLICATION->capabilities() & Application::SupportsFlame &&
+            (host == QUrl(BuildConfig.FLAME_BASE_URL).host() || host == BuildConfig.FLAME_DOWNLOAD_HOST)) {
             hdrs.append({ .headerName = "x-api-key", .headerValue = APPLICATION->getFlameAPIKey().toUtf8() });
-        } else if (request.url().host() == QUrl(BuildConfig.MODRINTH_PROD_URL).host() ||
-                   request.url().host() == QUrl(BuildConfig.MODRINTH_STAGING_URL).host()) {
+        } else if (host == QUrl(BuildConfig.MODRINTH_PROD_URL).host() || host == QUrl(BuildConfig.MODRINTH_STAGING_URL).host()) {
             QString token = APPLICATION->getModrinthAPIToken();
             if (!token.isNull()) {
                 hdrs.append({ .headerName = "Authorization", .headerValue = token.toUtf8() });
             }
         }
 
-        if (request.url().host() == "cdn.modrinth.com" && !m_meta.isEmpty()) {
+        if (host == BuildConfig.MODRINTH_DOWNLOAD_HOST && !m_meta.isEmpty()) {
             hdrs.append({ .headerName = "modrinth-download-meta", .headerValue = m_meta.toJson() });
         }
         return hdrs;
