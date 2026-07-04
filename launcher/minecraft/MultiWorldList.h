@@ -53,7 +53,8 @@ class MultiWorldList : public QAbstractListModel {
     virtual bool update();
 
     /// Install a world from location
-    void installWorld(BaseInstance* instance, QFileInfo filename);
+    void installWorld(BaseInstance* instance, const QFileInfo& filename);
+    void installWorld(const QFileInfo& filename);
 
     /// Deletes the mod at the given index.
     virtual bool deleteWorld(int index);

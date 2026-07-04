@@ -207,7 +207,7 @@ bool MultiWorldList::resetIcon(int row)
 
 int MultiWorldList::columnCount(const QModelIndex& parent) const
 {
-    return parent.isValid() ? 0 : 5;
+    return parent.isValid() ? 0 : 7;
 }
 
 QVariant MultiWorldList::data(const QModelIndex& index, int role) const
@@ -409,7 +409,7 @@ Qt::DropActions MultiWorldList::supportedDropActions() const
     return Qt::CopyAction | Qt::MoveAction;
 }
 
-void MultiWorldList::installWorld(BaseInstance* instance, QFileInfo filename)
+void MultiWorldList::installWorld(BaseInstance* instance, const QFileInfo& filename)
 {
     qDebug() << "installing:" << filename.absoluteFilePath();
     World w(filename);
@@ -418,6 +418,15 @@ void MultiWorldList::installWorld(BaseInstance* instance, QFileInfo filename)
     }
     w.install(QDir(dynamic_cast<MinecraftInstance*>(instance)->worldDir()).absolutePath());
     update();
+}
+
+void MultiWorldList::installWorld(const QFileInfo& filename)
+{
+    if (allInstances.size() == 1) {
+        installWorld(allInstances[0], filename);
+    } else {
+        qDebug() << "world could not be installed, instance was not specified";
+    }
 }
 
 bool MultiWorldList::dropMimeData(const QMimeData* data,

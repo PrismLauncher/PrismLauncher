@@ -2,6 +2,7 @@
 #include <FileSystem.h>
 #include <ui/pages/instance/DataPackPage.h>
 #include "minecraft/MinecraftInstance.h"
+#include "ui/MultiWorldListPage.h"
 #include "ui/pages/BasePage.h"
 #include "ui/pages/BasePageProvider.h"
 #include "ui/pages/instance/InstanceSettingsPage.h"
@@ -16,7 +17,6 @@
 #include "ui/pages/instance/ShaderPackPage.h"
 #include "ui/pages/instance/TexturePackPage.h"
 #include "ui/pages/instance/VersionPage.h"
-#include "ui/pages/instance/WorldListPage.h"
 
 class InstancePageProvider : protected QObject, public BasePageProvider {
     Q_OBJECT
@@ -41,7 +41,7 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
         values.append(new TexturePackPage(onesix, onesix->texturePackList()));
         values.append(new ShaderPackPage(onesix, onesix->shaderPackList()));
         values.append(new NotesPage(onesix));
-        values.append(new WorldListPage(onesix, onesix->worldList()));
+        values.append(new MultiWorldListPage(onesix->worldList()));
         values.append(new ServersPage(onesix));
         values.append(new ScreenshotsPage(FS::PathCombine(onesix->gameRoot(), "screenshots")));
         values.append(new InstanceSettingsPage(onesix));

@@ -110,6 +110,14 @@ MultiWorldListPage::MultiWorldListPage(MultiWorldList* worlds, QWidget* parent)
     ui->worldTreeView->installEventFilter(this);
     ui->worldTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->worldTreeView->setIconSize(QSize(64, 64));
+
+    //remove useless info when only one instance
+    if (m_worlds->getInstances().size() == 1) {
+        ui->worldTreeView->setColumnHidden(1, true);
+        ui->worldTreeView->setColumnHidden(2, true);
+        ui->toolBar->removeAction(ui->actionInstance_Settings);
+    }
+
     connect(ui->worldTreeView, &QTreeView::customContextMenuRequested, this, &MultiWorldListPage::ShowContextMenu);
 
     auto head = ui->worldTreeView->header();
@@ -127,6 +135,13 @@ MultiWorldListPage::MultiWorldListPage(MultiWorldList* worlds, QWidget* parent)
 void MultiWorldListPage::openedImpl()
 {
     m_worlds->startWatching();
+
+    if (m_worlds->getInstances().size() == 1) {
+        if ((m_worlds->getInstances()[0] == nullptr) || !m_worlds->getInstances()[0]->traits().contains("feature:is_quick_play_singleplayer")) {
+            ui->toolBar->removeAction(ui->actionJoin);
+            ui->toolBar->removeAction(ui->actionJoin_Offline);
+        }
+    }
 
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
@@ -216,15 +231,19 @@ void MultiWorldListPage::on_actionRemove_triggered()
 
 void MultiWorldListPage::on_actionView_Folder_triggered()
 {
-    QModelIndex index = getSelectedWorld();
-    if (!index.isValid()) {
-        return;
+    if (m_worlds->getInstances().size() == 1) {
+        DesktopServices::openPath(QDir(dynamic_cast<MinecraftInstance*>(m_worlds->getInstances()[0])->worldDir()).absolutePath(), true);
+    } else {
+        QModelIndex index = getSelectedWorld();
+        if (!index.isValid()) {
+            return;
+        }
+
+        auto worldVariant = m_worlds->data(index, MultiWorldList::ObjectRole);
+        auto world = (World*)worldVariant.value<void*>();
+
+        DesktopServices::openPath(world->canonicalFilePath(), true);
     }
-
-    auto worldVariant = m_worlds->data(index, MultiWorldList::ObjectRole);
-    auto world = (World*)worldVariant.value<void*>();
-
-    DesktopServices::openPath(world->canonicalFilePath(), true);
 }
 
 void MultiWorldListPage::on_actionData_Packs_triggered()
@@ -395,7 +414,9 @@ void MultiWorldListPage::worldChanged([[maybe_unused]] const QModelIndex& curren
     ui->actionCopy->setEnabled(enable);
     ui->actionRename->setEnabled(enable);
     ui->actionData_Packs->setEnabled(enable);
-    ui->actionView_Folder->setEnabled(enable);
+    if (m_worlds->getInstances().size() != 1) {
+        ui->actionView_Folder->setEnabled(enable);
+    }
     ui->actionJoin->setEnabled(enable);
     ui->actionJoin_Offline->setEnabled(enable);
     ui->actionInstance_Settings->setEnabled(enable);
@@ -409,11 +430,15 @@ void MultiWorldListPage::on_actionAdd_triggered()
                                         QString(), this->parentWidget());
     if (!list.empty()) {
         m_worlds->stopWatching();
-        for (auto filename : list) {
-            auto *instance = selectInstance(tr("Select instance to add world '%1' to.").arg(QFileInfo(filename).fileName()));
+        for (const auto& filename : list) {
+            if (m_worlds->getInstances().size() == 1) {
+                m_worlds->installWorld(m_worlds->getInstances()[0], QFileInfo(filename));
+            } else {
+                auto *instance = selectInstance(tr("Select instance to add world '%1' to.").arg(QFileInfo(filename).fileName()));
 
-            if (instance != nullptr) {
-                m_worlds->installWorld(instance, QFileInfo(filename));
+                if (instance != nullptr) {
+                    m_worlds->installWorld(instance, QFileInfo(filename));
+                }
             }
         }
         m_worlds->startWatching();
@@ -455,11 +480,16 @@ void MultiWorldListPage::on_actionCopy_triggered()
         QInputDialog::getText(this, tr("World name"), tr("Enter a new name for the copy."), QLineEdit::Normal, world->world.name(), &ok);
 
     if (ok && name.length() > 0) {
-        auto *instance = selectInstance(tr("Select instance to copy world to."), world->instance);
-
-        if (instance != nullptr) {
-            world->world.install((QDir(instance->worldDir())).absolutePath(), name);
+        if (m_worlds->getInstances().size() == 1) {
+            world->world.install((QDir(dynamic_cast<MinecraftInstance*>(world->instance)->worldDir())).absolutePath(), name);
             m_worlds->update();
+        } else {
+            auto *instance = selectInstance(tr("Select instance to copy world to."), world->instance);
+
+            if (instance != nullptr) {
+                world->world.install((QDir(instance->worldDir())).absolutePath(), name);
+                m_worlds->update();
+            }
         }
     }
 }
