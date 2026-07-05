@@ -94,19 +94,19 @@ class MultiWorldListProxyModel : public QSortFilterProxyModel {
 };
 
 MultiWorldListPage::MultiWorldListPage(MultiWorldList* worlds, QWidget* parent)
-    : QMainWindow(parent), ui(new Ui::MultiWorldListPage), m_worlds(worlds)
+    : QMainWindow(parent), ui(new Ui::MultiWorldListPage), m_worlds(worlds), m_proxy(new MultiWorldListProxyModel(this))
 {
     ui->setupUi(this);
 
     ui->toolBar->insertSpacer(ui->actionRefresh);
     ui->actionJoin->setEnabled(true);
 
-    auto* proxy = new MultiWorldListProxyModel(this);
-    proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
-    proxy->setSourceModel(m_worlds);
-    proxy->setSortRole(Qt::UserRole);
+    m_proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
+    m_proxy->setSourceModel(m_worlds);
+    m_proxy->setSortRole(Qt::UserRole);
     ui->worldTreeView->setSortingEnabled(true);
-    ui->worldTreeView->setModel(proxy);
+    ui->worldTreeView->setModel(m_proxy);
     ui->worldTreeView->installEventFilter(this);
     ui->worldTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->worldTreeView->setIconSize(QSize(64, 64));
@@ -118,6 +118,7 @@ MultiWorldListPage::MultiWorldListPage(MultiWorldList* worlds, QWidget* parent)
         ui->toolBar->removeAction(ui->actionInstance_Settings);
     }
 
+    connect(ui->filterEdit, &QLineEdit::textChanged, this, &MultiWorldListPage::onFilterTextChanged);
     connect(ui->worldTreeView, &QTreeView::customContextMenuRequested, this, &MultiWorldListPage::ShowContextMenu);
 
     auto head = ui->worldTreeView->header();
@@ -126,7 +127,7 @@ MultiWorldListPage::MultiWorldListPage(MultiWorldList* worlds, QWidget* parent)
     head->setSectionResizeMode(4, QHeaderView::ResizeToContents);
 
     connect(ui->worldTreeView->selectionModel(), &QItemSelectionModel::currentChanged, this, &MultiWorldListPage::worldChanged);
-    connect(ui->worldTreeView, &QAbstractItemView::doubleClicked, this, &MultiWorldListPage::worldDoubleClicked);
+    connect(ui->worldTreeView, &QAbstractItemView::activated, this, &MultiWorldListPage::worldActivated);
     worldChanged(QModelIndex(), QModelIndex());
 
     connect(m_worlds, &MultiWorldList::fileDropped, this, &MultiWorldListPage::fileDropped);
@@ -587,10 +588,15 @@ void MultiWorldListPage::on_actionRefresh_triggered()
     m_worlds->update();
 }
 
-void MultiWorldListPage::worldDoubleClicked(const QModelIndex& index)
+void MultiWorldListPage::worldActivated(const QModelIndex& index)
 {
     auto *proxy = static_cast<QSortFilterProxyModel*>(ui->worldTreeView->model());
     join(proxy->mapToSource(index), LaunchMode::Normal);
+}
+
+void MultiWorldListPage::onFilterTextChanged(const QString& newContents)
+{
+    m_proxy->setFilterFixedString(newContents);
 }
 
 void MultiWorldListPage::fileDropped(const QFileInfo& worldInfo)

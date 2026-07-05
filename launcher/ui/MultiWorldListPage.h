@@ -43,6 +43,7 @@
 
 #include "settings/Setting.h"
 
+class MultiWorldListProxyModel;
 class MultiWorldList;
 namespace Ui {
 class MultiWorldListPage;
@@ -84,6 +85,7 @@ class MultiWorldListPage : public QMainWindow, public BasePage {
    private:
     Ui::MultiWorldListPage* ui;
     MultiWorldList* m_worlds;
+    MultiWorldListProxyModel* m_proxy;
     unique_qobject_ptr<LoggedProcess> m_mceditProcess;
     bool m_mceditStarting = false;
 
@@ -106,8 +108,9 @@ class MultiWorldListPage : public QMainWindow, public BasePage {
     void mceditState(LoggedProcess::State state);
     void on_actionJoin_triggered();
     void on_actionJoin_Offline_triggered();
-    void worldDoubleClicked(const QModelIndex& index);
+    void worldActivated(const QModelIndex& index);
     void fileDropped(const QFileInfo& worldInfo);
+    void onFilterTextChanged(const QString& newContents);
 
     void ShowContextMenu(const QPoint& pos);
 };
