@@ -94,6 +94,7 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
     auto gameTimeOverride = m_settings->registerSetting("OverrideGameTime", false);
     m_settings->registerOverride(globalSettings->getSetting("ShowGameTime"), gameTimeOverride);
     m_settings->registerOverride(globalSettings->getSetting("RecordGameTime"), gameTimeOverride);
+    m_settings->registerSetting("CountGameTime", true);
 
     // NOTE: Sometimees InstanceType is already registered, as it was used to identify the type of
     // a locally stored instance
@@ -321,6 +322,11 @@ int64_t BaseInstance::lastTimePlayed() const
         return m_timeStarted.secsTo(timeNow);
     }
     return m_settings->get("lastTimePlayed").toLongLong();
+}
+
+bool BaseInstance::countTimePlayed() const
+{
+    return m_settings->get("CountGameTime").toBool();
 }
 
 void BaseInstance::resetTimePlayed()

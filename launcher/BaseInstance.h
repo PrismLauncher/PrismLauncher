@@ -121,6 +121,7 @@ class BaseInstance : public QObject {
     bool isRunning() const;
     int64_t totalTimePlayed() const;
     int64_t lastTimePlayed() const;
+    bool countTimePlayed() const;
     void resetTimePlayed();
 
     /// get the type of this instance
