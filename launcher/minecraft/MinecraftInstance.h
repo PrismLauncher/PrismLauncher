@@ -40,7 +40,7 @@
 #include <QDir>
 #include <QProcess>
 #include "BaseInstance.h"
-#include "MultiWorldList.h"
+#include "WorldList.h"
 #include "minecraft/launch/MinecraftTarget.h"
 #include "minecraft/mod/Mod.h"
 
@@ -121,7 +121,7 @@ class MinecraftInstance : public BaseInstance {
     ShaderPackFolderModel* shaderPackList();
     DataPackFolderModel* dataPackList();
     QList<ResourceFolderModel*> resourceLists();
-    MultiWorldList* worldList();
+    WorldList* worldList();
 
     //////  Launch stuff //////
     QList<Task::Ptr> createUpdateTask() override;
@@ -171,5 +171,5 @@ class MinecraftInstance : public BaseInstance {
     std::unique_ptr<ShaderPackFolderModel> m_shader_pack_list;
     std::unique_ptr<TexturePackFolderModel> m_texture_pack_list;
     std::unique_ptr<DataPackFolderModel> m_data_pack_list;
-    std::unique_ptr<MultiWorldList> m_world_list;
+    std::unique_ptr<WorldList> m_world_list;
 };

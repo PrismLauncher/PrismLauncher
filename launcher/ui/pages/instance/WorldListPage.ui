@@ -25,41 +25,52 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QTreeView" name="worldTreeView">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="acceptDrops">
-       <bool>true</bool>
-      </property>
-      <property name="dragDropMode">
-       <enum>QAbstractItemView::DragDrop</enum>
-      </property>
-      <property name="alternatingRowColors">
-       <bool>true</bool>
-      </property>
-      <property name="rootIsDecorated">
-       <bool>false</bool>
-      </property>
-      <property name="itemsExpandable">
-       <bool>false</bool>
-      </property>
-      <property name="sortingEnabled">
-       <bool>true</bool>
-      </property>
-      <property name="allColumnsShowFocus">
-       <bool>true</bool>
-      </property>
-      <property name="verticalScrollMode">
-       <enum>QAbstractItemView::ScrollPerPixel</enum>
-      </property>
-      <attribute name="headerStretchLastSection">
-       <bool>false</bool>
-      </attribute>
-     </widget>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QTreeView" name="worldTreeView">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="acceptDrops">
+         <bool>true</bool>
+        </property>
+        <property name="dragDropMode">
+         <enum>QAbstractItemView::DragDrop</enum>
+        </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <property name="rootIsDecorated">
+         <bool>false</bool>
+        </property>
+        <property name="itemsExpandable">
+         <bool>false</bool>
+        </property>
+        <property name="sortingEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="allColumnsShowFocus">
+         <bool>true</bool>
+        </property>
+        <property name="verticalScrollMode">
+         <enum>QAbstractItemView::ScrollPerPixel</enum>
+        </property>
+        <attribute name="headerStretchLastSection">
+         <bool>false</bool>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="filterEdit">
+        <property name="placeholderText">
+         <string>Search</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -85,9 +96,11 @@
    <addaction name="actionAdd"/>
    <addaction name="separator"/>
    <addaction name="actionJoin"/>
+   <addaction name="actionJoin_Offline"/>
    <addaction name="actionRename"/>
    <addaction name="actionCopy"/>
    <addaction name="actionRemove"/>
+   <addaction name="actionInstance_Settings"/>
    <addaction name="actionMCEdit"/>
    <addaction name="actionData_Packs"/>
    <addaction name="actionReset_Icon"/>
@@ -104,6 +117,11 @@
   <action name="actionJoin">
    <property name="text">
     <string>Join</string>
+   </property>
+  </action>
+  <action name="actionJoin_Offline">
+   <property name="text">
+    <string>Join Offline</string>
    </property>
   </action>
   <action name="actionRename">
@@ -155,6 +173,14 @@
    </property>
    <property name="toolTip">
     <string>Manage data packs inside the world.</string>
+   </property>
+  </action>
+  <action name="actionInstance_Settings">
+   <property name="text">
+    <string>View Instance</string>
+   </property>
+   <property name="toolTip">
+    <string>View the instance this world belongs to.</string>
    </property>
   </action>
  </widget>

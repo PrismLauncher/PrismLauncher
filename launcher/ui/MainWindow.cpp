@@ -93,7 +93,6 @@
 #include "InstanceWindow.h"
 
 #include "ui/GuiUtil.h"
-#include "ui/MultiWorldListPage.h"
 #include "ui/ViewLogWindow.h"
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
@@ -114,7 +113,7 @@
 #include "ui/themes/ThemeManager.h"
 #include "ui/widgets/LabeledToolButton.h"
 
-#include "minecraft/MultiWorldList.h"
+#include "minecraft/WorldList.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/VersionFile.h"
 #include "minecraft/WorldList.h"
@@ -136,6 +135,7 @@
 #include "Json.h"
 
 #include "MMCTime.h"
+#include "pages/instance/WorldListPage.h"
 
 namespace {
 QString profileInUseFilter(const QString& profile, bool used)
@@ -342,7 +342,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     // All worlds toggle
     {
         connect(ui->actionAllWorlds, &QAction::toggled, this, &MainWindow::onAllWorldsToggled);
-        connect(allWorldsPage, &MultiWorldListPage::worldJoined, this, &MainWindow::worldJoined);
+        connect(allWorldsPage, &WorldListPage::worldJoined, this, &MainWindow::worldJoined);
     }
 
     // The cat background
@@ -870,10 +870,10 @@ void MainWindow::toggleAllWorldsScreen(bool toggled)
     if (toggled) {
         QList<BaseInstance*> const allInstances = APPLICATION->instances()->getAllInstances();
 
-        allWorldsList = new MultiWorldList(allInstances);
+        allWorldsList = new WorldList(allInstances);
         allWorldsList->update();
 
-        allWorldsPage = new MultiWorldListPage(allWorldsList);
+        allWorldsPage = new WorldListPage(allWorldsList);
         ui->horizontalLayout->addWidget(allWorldsPage);
 
         view->setVisible(false);
@@ -884,7 +884,7 @@ void MainWindow::toggleAllWorldsScreen(bool toggled)
 
         allWorldsList->startWatching();
 
-        connect(allWorldsPage, &MultiWorldListPage::worldJoined, this, &MainWindow::worldJoined);
+        connect(allWorldsPage, &WorldListPage::worldJoined, this, &MainWindow::worldJoined);
     } else {
         if (allWorldsList == nullptr || allWorldsPage == nullptr) {
             view->setVisible(true);

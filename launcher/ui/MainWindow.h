@@ -58,8 +58,8 @@ class QLabel;
 class MinecraftLauncher;
 class BaseProfilerFactory;
 class InstanceView;
-class MultiWorldList;
-class MultiWorldListPage;
+class WorldList;
+class WorldListPage;
 class KonamiCode;
 class InstanceTask;
 class LabeledToolButton;
@@ -246,7 +246,7 @@ class MainWindow : public QMainWindow {
     Ui::MainWindow* ui;
     // these are managed by Qt's memory management model!
     InstanceView* view = nullptr;
-    MultiWorldListPage* allWorldsPage = nullptr;
+    WorldListPage* allWorldsPage = nullptr;
     InstanceProxyModel* proxymodel = nullptr;
     QToolButton* newsLabel = nullptr;
     QLabel* m_statusLeft = nullptr;
@@ -255,7 +255,7 @@ class MainWindow : public QMainWindow {
     LabeledToolButton* renameButton = nullptr;
     QToolButton* helpMenuButton = nullptr;
     KonamiCode* secretEventFilter = nullptr;
-    MultiWorldList* allWorldsList = nullptr;
+    WorldList* allWorldsList = nullptr;
 
     std::shared_ptr<Setting> instanceToolbarSetting = nullptr;
     bool m_oldInstanceToolbarSetting;
