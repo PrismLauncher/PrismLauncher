@@ -1528,6 +1528,7 @@ if(WIN32 OR (UNIX AND APPLE))
         COMPONENT bundle
         DIRECTORIES
             ${CMAKE_SYSTEM_LIBRARY_PATH}
+            $ENV{PATH}
             ${QT_LIBS_DIR}
             ${QT_LIBEXECS_DIR}
         PRE_EXCLUDE_REGEXES
@@ -1547,7 +1548,7 @@ if(WIN32 OR (UNIX AND APPLE))
         COMPONENT bundle
     )
     # FIXME: remove this crap once we stop using msys2
-    if(MINGW)
+    if(MINGW AND NOT VCPKG_MANIFEST_INSTALL)
         # i've not found a solution better than injecting the config vars like this...
         # with install(CODE" for everything everything just breaks
         install(CODE "

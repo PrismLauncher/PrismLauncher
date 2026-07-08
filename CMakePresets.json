@@ -68,6 +68,11 @@
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Windows"
+            },
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "$penv{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "VCPKG_HOST_TRIPLET": "x64-mingw-static-release",
+                "VCPKG_TARGET_TRIPLET": "x64-mingw-static-release"
             }
         },
         {
