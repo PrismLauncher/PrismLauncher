@@ -107,6 +107,7 @@ WorldListPage::WorldListPage(WorldList* worlds, QWidget* parent)
     m_proxy->setSortRole(Qt::UserRole);
     ui->worldTreeView->setSortingEnabled(true);
     ui->worldTreeView->setModel(m_proxy);
+    ui->worldTreeView->sortByColumn(0, Qt::AscendingOrder);
     ui->worldTreeView->installEventFilter(this);
     ui->worldTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->worldTreeView->setIconSize(QSize(64, 64));
@@ -138,7 +139,7 @@ void WorldListPage::openedImpl()
     m_worlds->startWatching();
 
     if (m_worlds->getInstances().size() == 1) {
-        if ((m_worlds->getInstances()[0] == nullptr) || !m_worlds->getInstances()[0]->traits().contains("feature:is_quick_play_singleplayer")) {
+        if (m_worlds->getInstances()[0] == nullptr || !m_worlds->getInstances()[0]->traits().contains("feature:is_quick_play_singleplayer")) {
             ui->toolBar->removeAction(ui->actionJoin);
             ui->toolBar->removeAction(ui->actionJoin_Offline);
         }
@@ -590,6 +591,12 @@ void WorldListPage::on_actionRefresh_triggered()
 
 void WorldListPage::worldActivated(const QModelIndex& index)
 {
+    if (m_worlds->getInstances().size() == 1) {
+        if (m_worlds->getInstances()[0] == nullptr || !m_worlds->getInstances()[0]->traits().contains("feature:is_quick_play_singleplayer")) {
+            return;
+        }
+    }
+
     auto *proxy = static_cast<QSortFilterProxyModel*>(ui->worldTreeView->model());
     join(proxy->mapToSource(index), LaunchMode::Normal);
 }
