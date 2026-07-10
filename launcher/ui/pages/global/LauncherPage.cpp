@@ -300,7 +300,7 @@ void LauncherPage::loadSettings()
     QString sortMode = s->get("InstSortMode").toString();
     if (sortMode == "LastLaunch") {
         ui->sortLastLaunchedBtn->setChecked(true);
-    } else if (sortMode == "Playtime"){
+    } else if (sortMode == "Playtime") {
         ui->sortByPlaytimeBtn->setChecked(true);
     } else {
         ui->sortByNameBtn->setChecked(true);

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2025 PineconeMC Contributors
+ *  Copyright (C) 2025 Avenger Anubis (Ilya) <avenger.anubis@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -54,6 +54,7 @@ class DownloadCache {
     bool promoteCache(const QUrl& url, const QString& finalPath);
     void removePart(const QUrl& url);
     void removeCache(const QUrl& url);
+    bool serveFromCache(const QUrl& url, const QString& finalPath);
 
     void cleanup(qint64 maxSizeBytes, int maxAgeHours);
     qint64 totalCacheSize() const;

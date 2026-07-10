@@ -40,8 +40,8 @@
 #pragma once
 
 #include <QNetworkReply>
-#include <QUrl>
 #include <QTimer>
+#include <QUrl>
 #include <chrono>
 
 #include "HeaderProxy.h"

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2025 PineconeMC Contributors
+ *  Copyright (C) 2025 Avenger Anubis (Ilya) <avenger.anubis@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -119,8 +119,12 @@ bool DownloadCache::promotePart(const QUrl& url, const QString& finalPath)
         return false;
     }
 
-    // Also store in cache
+    // Store in cache directory for future re-use
     QString key = generateCacheKey(url);
+    QString cachePath = m_cacheDir + "/" + key;
+    if (!QFile::copy(finalPath, cachePath))
+        qCWarning(taskNetLogC) << "Failed to copy to cache:" << cachePath;
+
     DownloadCacheEntry entry;
     entry.url = url.toString();
     entry.cacheFileName = key;
@@ -163,6 +167,35 @@ bool DownloadCache::promoteCache(const QUrl& url, const QString& finalPath)
     saveMetadata();
 
     qCDebug(taskNetLogC) << "Promoted cached download:" << url.toString() << "->" << finalPath;
+    return true;
+}
+
+bool DownloadCache::serveFromCache(const QUrl& url, const QString& finalPath)
+{
+    QMutexLocker lock(&m_mutex);
+    QString key = generateCacheKey(url);
+    if (!m_entries.contains(key))
+        return false;
+
+    QString cachePath = m_cacheDir + "/" + key;
+    if (!QFileInfo::exists(cachePath))
+        return false;
+
+    QFileInfo finalInfo(finalPath);
+    QDir().mkpath(finalInfo.absolutePath());
+
+    if (QFileInfo::exists(finalPath))
+        QFile::remove(finalPath);
+
+    if (!QFile::copy(cachePath, finalPath)) {
+        qCCritical(taskNetLogC) << "Failed to serve from cache:" << cachePath << "->" << finalPath;
+        return false;
+    }
+
+    m_entries[key].lastAccessed = QDateTime::currentSecsSinceEpoch();
+    saveMetadata();
+
+    qCDebug(taskNetLogC) << "Served from cache:" << url.toString();
     return true;
 }
 
@@ -227,9 +260,8 @@ void DownloadCache::cleanup(qint64 maxSizeBytes, int maxAgeHours)
     // If still over size limit, evict oldest
     if (maxSizeBytes > 0 && totalCacheSize() > maxSizeBytes) {
         QList<DownloadCacheEntry> sorted = m_entries.values();
-        std::sort(sorted.begin(), sorted.end(), [](const DownloadCacheEntry& a, const DownloadCacheEntry& b) {
-            return a.lastAccessed < b.lastAccessed;
-        });
+        std::sort(sorted.begin(), sorted.end(),
+                  [](const DownloadCacheEntry& a, const DownloadCacheEntry& b) { return a.lastAccessed < b.lastAccessed; });
 
         while (totalCacheSize() > maxSizeBytes && !sorted.isEmpty()) {
             auto oldest = sorted.takeFirst();

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2025 PineconeMC Contributors
+ *  Copyright (C) 2025 Avenger Anubis (Ilya) <avenger.anubis@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,18 +20,31 @@
 
 #include <QDir>
 #include <QFileInfo>
+#include <QNetworkReply>
 #include <QUrl>
 
+#include "ChecksumValidator.h"
 #include "DownloadCache.h"
 #include "FileSystem.h"
 #include "net/Logging.h"
 
 namespace Net {
 
+// Minimal QNetworkReply that only provides a URL for validator finalization
+class CacheHitReply : public QNetworkReply {
+   public:
+    CacheHitReply(const QUrl& url)
+    {
+        setUrl(url);
+        setOpenMode(QIODevice::ReadOnly);
+    }
+    void abort() override {}
+    qint64 readData(char*, qint64) override { return -1; }
+};
+
 ResumingFileSink::ResumingFileSink(QString finalPath, QUrl url, ::DownloadCache* cache)
     : m_finalPath(std::move(finalPath)), m_url(std::move(url)), m_cache(cache)
-{
-}
+{}
 
 Task::State ResumingFileSink::init(QNetworkRequest& request)
 {
@@ -39,6 +52,29 @@ Task::State ResumingFileSink::init(QNetworkRequest& request)
         qCCritical(taskNetLogC) << "Could not create folder for " + m_finalPath;
         m_fail_reason = "Could not create folder";
         return Task::State::Failed;
+    }
+
+    if (m_cache && m_cache->hasCache(m_url)) {
+        if (initAllValidators(request) && m_cache->serveFromCache(m_url, m_finalPath)) {
+            QFile cachedFile(m_finalPath);
+            if (cachedFile.open(QIODevice::ReadOnly)) {
+                QByteArray all = cachedFile.readAll();
+                if (writeAllValidators(all)) {
+                    CacheHitReply fakeReply(m_url);
+                    if (finalizeAllValidators(fakeReply)) {
+                        qCDebug(taskNetLogC) << "Cache hit, skipping download:" << m_url.toString();
+                        return Task::State::Succeeded;
+                    }
+                    m_fail_reason = "Cached file failed checksum validation";
+                } else {
+                    m_fail_reason = "Cached file failed validation";
+                }
+            } else {
+                m_fail_reason = "Could not read cached file for validation";
+            }
+        }
+        qCWarning(taskNetLogC) << "Cache entry invalid, re-downloading:" << m_url.toString();
+        // Don't return — fall through to normal download
     }
 
     QString partPath;

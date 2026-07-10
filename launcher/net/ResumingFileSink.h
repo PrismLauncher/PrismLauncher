@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2025 PineconeMC Contributors
+ *  Copyright (C) 2025 Avenger Anubis (Ilya) <avenger.anubis@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ class ResumingFileSink : public Sink {
     virtual ~ResumingFileSink() = default;
 
     void deleteCache();
+    bool hasUsedRange() const { return m_usedRange; }
 
     auto init(QNetworkRequest& request) -> Task::State override;
     auto write(QByteArray& data) -> Task::State override;

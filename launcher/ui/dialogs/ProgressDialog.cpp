@@ -89,14 +89,11 @@ void ProgressDialog::on_skipButton_clicked(bool checked)
     if (!ui->skipButton->isEnabled())  // prevent other triggers from aborting
         return;
 
-    auto result = QMessageBox::question(
-        this,
-        tr("Abort Download"),
-        tr("Do you also want to delete the cached partial download?\n\n"
-           "If you keep it, the download can be resumed later.\n"
-           "If you delete it, the download will start from scratch."),
-        QMessageBox::Yes | QMessageBox::No,
-        QMessageBox::No);
+    auto result = QMessageBox::question(this, tr("Abort Download"),
+                                        tr("Do you also want to delete the cached partial download?\n\n"
+                                           "If you keep it, the download can be resumed later.\n"
+                                           "If you delete it, the download will start from scratch."),
+                                        QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
     if (result == QMessageBox::Yes) {
         if (auto* netJob = qobject_cast<NetJob*>(m_task)) {
@@ -242,14 +239,14 @@ void ProgressDialog::changeStatus([[maybe_unused]] const QString& status)
     updateSize();
 }
 
-void ProgressDialog::addTaskProgress(TaskStepProgress const& progress)
+void ProgressDialog::addTaskProgress(const TaskStepProgress& progress)
 {
     SubTaskProgressBar* task_bar = new SubTaskProgressBar(this);
     taskProgress.insert(progress.uid, task_bar);
     ui->taskProgressLayout->addWidget(task_bar);
 }
 
-void ProgressDialog::changeStepProgress(TaskStepProgress const& task_progress)
+void ProgressDialog::changeStepProgress(const TaskStepProgress& task_progress)
 {
     m_is_multi_step = true;
     if (ui->taskProgressScrollArea->isHidden()) {
@@ -261,7 +258,7 @@ void ProgressDialog::changeStepProgress(TaskStepProgress const& task_progress)
         addTaskProgress(task_progress);
     auto task_bar = taskProgress.value(task_progress.uid);
 
-    auto const [mapped_current, mapped_total] = map_int_zero_max<qint64>(task_progress.current, task_progress.total, 0);
+    const auto [mapped_current, mapped_total] = map_int_zero_max<qint64>(task_progress.current, task_progress.total, 0);
     if (task_progress.total <= 0) {
         task_bar->setRange(0, 0);
     } else {

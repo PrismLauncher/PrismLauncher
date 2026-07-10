@@ -656,8 +656,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // Download cache settings
         m_settings->registerSetting("DownloadCacheEnabled", true);
-        m_settings->registerSetting("DownloadCacheMaxSize", 1024);       // MB
-        m_settings->registerSetting("DownloadCacheDuration", 24);        // hours
+        m_settings->registerSetting("DownloadCacheMaxSize", 1024);  // MB
+        m_settings->registerSetting("DownloadCacheDuration", 24);   // hours
         m_settings->registerSetting("DownloadCacheCleanupOnLaunch", true);
 
         QString defaultMonospace;
