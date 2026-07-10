@@ -209,6 +209,12 @@ void LauncherPage::applySettings()
     s->set("NumberOfManualRetries", ui->numberOfManualRetriesSpinBox->value());
     s->set("RequestTimeout", ui->timeoutSecondsSpinBox->value());
 
+    // Download cache settings
+    s->set("DownloadCacheEnabled", ui->downloadCacheEnabledCheckBox->isChecked());
+    s->set("DownloadCacheMaxSize", ui->downloadCacheMaxSizeSpinBox->value());
+    s->set("DownloadCacheDuration", ui->downloadCacheDurationSpinBox->value());
+    s->set("DownloadCacheCleanupOnLaunch", ui->downloadCacheCleanupOnLaunchCheckBox->isChecked());
+
     // Console settings
     s->set("ConsoleMaxLines", ui->lineLimitSpinBox->value());
     s->set("ConsoleOverflowStop", ui->checkStopLogging->checkState() != Qt::Unchecked);
@@ -269,6 +275,12 @@ void LauncherPage::loadSettings()
     ui->numberOfConcurrentDownloadsSpinBox->setValue(s->get("NumberOfConcurrentDownloads").toInt());
     ui->numberOfManualRetriesSpinBox->setValue(s->get("NumberOfManualRetries").toInt());
     ui->timeoutSecondsSpinBox->setValue(s->get("RequestTimeout").toInt());
+
+    // Download cache settings
+    ui->downloadCacheEnabledCheckBox->setChecked(s->get("DownloadCacheEnabled").toBool());
+    ui->downloadCacheMaxSizeSpinBox->setValue(s->get("DownloadCacheMaxSize").toInt());
+    ui->downloadCacheDurationSpinBox->setValue(s->get("DownloadCacheDuration").toInt());
+    ui->downloadCacheCleanupOnLaunchCheckBox->setChecked(s->get("DownloadCacheCleanupOnLaunch").toBool());
 
     // Console settings
     ui->lineLimitSpinBox->setValue(s->get("ConsoleMaxLines").toInt());

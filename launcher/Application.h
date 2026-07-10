@@ -59,6 +59,7 @@ class ViewLogWindow;
 class SetupWizard;
 class GenericPageProvider;
 class QFile;
+class DownloadCache;
 class HttpMetaCache;
 class SettingsObject;
 class InstanceList;
@@ -150,6 +151,7 @@ class Application : public QApplication {
     QNetworkAccessManager* network();
 
     HttpMetaCache* metacache();
+    DownloadCache* downloadCache();
 
     Meta::Index* metadataIndex();
 
@@ -254,6 +256,7 @@ class Application : public QApplication {
     std::unique_ptr<AccountList> m_accounts;
 
     std::unique_ptr<HttpMetaCache> m_metacache;
+    std::unique_ptr<DownloadCache> m_downloadCache;
     std::unique_ptr<Meta::Index> m_metadataIndex;
 
     std::unique_ptr<SettingsObject> m_settings;
