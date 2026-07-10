@@ -33,6 +33,8 @@ class ResumingFileSink : public Sink {
     ResumingFileSink(QString finalPath, QUrl url, ::DownloadCache* cache = nullptr);
     virtual ~ResumingFileSink() = default;
 
+    void deleteCache();
+
     auto init(QNetworkRequest& request) -> Task::State override;
     auto write(QByteArray& data) -> Task::State override;
     auto abort() -> Task::State override;

@@ -54,6 +54,7 @@
 #include "BuildConfig.h"
 
 #include "MMCTime.h"
+#include "ResumingFileSink.h"
 #include "StringUtils.h"
 
 namespace Net {
@@ -367,6 +368,14 @@ void NetRequest::downloadReadyRead()
         // qDebug() << "Request" << m_url.toString() << "gained" << data.size() << "bytes";
     } else {
         qCCritical(logCat) << getUid().toString() << "Cannot write download data! illegal status" << m_status;
+    }
+}
+
+void NetRequest::deleteCachedDownload()
+{
+    auto* rs = dynamic_cast<Net::ResumingFileSink*>(m_sink.get());
+    if (rs) {
+        rs->deleteCache();
     }
 }
 

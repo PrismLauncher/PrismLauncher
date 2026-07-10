@@ -39,8 +39,10 @@
 
 #include <QDebug>
 #include <QKeyEvent>
+#include <QMessageBox>
 #include <limits>
 
+#include "net/NetJob.h"
 #include "tasks/Task.h"
 
 #include "ui/widgets/SubTaskProgressBar.h"
@@ -84,8 +86,25 @@ void ProgressDialog::setSkipButton(bool present, QString label)
 void ProgressDialog::on_skipButton_clicked(bool checked)
 {
     Q_UNUSED(checked);
-    if (ui->skipButton->isEnabled())  // prevent other triggers from aborting
-        m_task->abort();
+    if (!ui->skipButton->isEnabled())  // prevent other triggers from aborting
+        return;
+
+    auto result = QMessageBox::question(
+        this,
+        tr("Abort Download"),
+        tr("Do you also want to delete the cached partial download?\n\n"
+           "If you keep it, the download can be resumed later.\n"
+           "If you delete it, the download will start from scratch."),
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No);
+
+    if (result == QMessageBox::Yes) {
+        if (auto* netJob = qobject_cast<NetJob*>(m_task)) {
+            netJob->deleteCachedDownloads();
+        }
+    }
+
+    m_task->abort();
 }
 
 ProgressDialog::~ProgressDialog()

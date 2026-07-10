@@ -82,6 +82,25 @@ void NetJob::executeNextSubTask()
     ConcurrentTask::executeNextSubTask();
 }
 
+void NetJob::deleteCachedDownloads()
+{
+    for (auto& part : m_queue) {
+        if (auto* req = qobject_cast<Net::NetRequest*>(part.get())) {
+            req->deleteCachedDownload();
+        }
+    }
+    for (auto it = m_doing.begin(); it != m_doing.end(); ++it) {
+        if (auto* req = qobject_cast<Net::NetRequest*>(it.value().get())) {
+            req->deleteCachedDownload();
+        }
+    }
+    for (auto it = m_failed.begin(); it != m_failed.end(); ++it) {
+        if (auto* req = qobject_cast<Net::NetRequest*>(it.value().get())) {
+            req->deleteCachedDownload();
+        }
+    }
+}
+
 auto NetJob::size() const -> int
 {
     return m_queue.size() + m_doing.size() + m_done.size();

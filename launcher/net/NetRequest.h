@@ -69,6 +69,8 @@ class NetRequest : public Task {
     auto abort() -> bool override;
     auto canAbort() const -> bool override { return true; }
 
+    void deleteCachedDownload();
+
     void setNetwork(QNetworkAccessManager* network) { m_network = network; }
     void addHeaderProxy(std::unique_ptr<Net::HeaderProxy> proxy) { m_headerProxies.push_back(std::move(proxy)); }
 

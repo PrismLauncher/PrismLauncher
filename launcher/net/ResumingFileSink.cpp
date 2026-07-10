@@ -93,6 +93,17 @@ Task::State ResumingFileSink::write(QByteArray& data)
     return Task::State::Running;
 }
 
+void ResumingFileSink::deleteCache()
+{
+    if (m_partFile) {
+        m_partFile->close();
+        m_partFile.reset();
+    }
+    if (m_cache) {
+        m_cache->removePart(m_url);
+    }
+}
+
 Task::State ResumingFileSink::abort()
 {
     if (m_partFile) {
