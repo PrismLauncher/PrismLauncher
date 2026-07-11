@@ -77,6 +77,7 @@ AppearanceWidget::AppearanceWidget(bool themesOnly, QWidget* parent)
     connect(m_ui->iconsComboBox, &QComboBox::currentIndexChanged, this, &AppearanceWidget::applyIconTheme);
     connect(m_ui->widgetStyleComboBox, &QComboBox::currentIndexChanged, this, &AppearanceWidget::applyWidgetTheme);
     connect(m_ui->catPackComboBox, &QComboBox::currentIndexChanged, this, &AppearanceWidget::applyCatTheme);
+    connect(m_ui->backgroundComboBox, &QComboBox::currentIndexChanged, this, &AppearanceWidget::applyBackgroundTheme);
     connect(m_ui->catOpacitySlider, &QAbstractSlider::valueChanged, this, &AppearanceWidget::updateCatPreview);
 
     connect(m_ui->iconsFolder, &QPushButton::clicked, this,
@@ -85,6 +86,8 @@ AppearanceWidget::AppearanceWidget(bool themesOnly, QWidget* parent)
             [] { DesktopServices::openPath(APPLICATION->themeManager()->getApplicationThemesFolder().path()); });
     connect(m_ui->catPackFolder, &QPushButton::clicked, this,
             [] { DesktopServices::openPath(APPLICATION->themeManager()->getCatPacksFolder().path()); });
+    connect(m_ui->backgroundFolder, &QPushButton::clicked, this,
+            [] { DesktopServices::openPath(APPLICATION->themeManager()->getBackgroundsFolder().path()); });
     connect(m_ui->reloadThemesButton, &QPushButton::pressed, this, &AppearanceWidget::loadThemeSettings);
 }
 
@@ -102,6 +105,11 @@ void AppearanceWidget::applySettings()
     settings->set("CatOpacity", m_ui->catOpacitySlider->value());
     auto catFit = m_ui->catFitComboBox->currentIndex();
     settings->set("CatFit", catFit == 0 ? "fit" : catFit == 1 ? "fill" : "strech");
+    
+    auto bgTheme = m_ui->backgroundComboBox->itemData(m_ui->backgroundComboBox->currentIndex()).toString();
+    if (!bgTheme.isEmpty()) {
+        settings->set("BackgroundTheme", bgTheme);
+    }
 }
 
 void AppearanceWidget::loadSettings()
@@ -166,6 +174,17 @@ void AppearanceWidget::applyCatTheme(int index)
     updateCatPreview();
 }
 
+void AppearanceWidget::applyBackgroundTheme(int index)
+{
+    auto settings = APPLICATION->settings();
+    auto originalBg = settings->get("BackgroundTheme").toString();
+    auto newBg = m_ui->backgroundComboBox->itemData(index).toString();
+    if (originalBg != newBg) {
+        settings->set("BackgroundTheme", newBg);
+        APPLICATION->themeManager()->applyCurrentlySelectedTheme();
+    }
+}
+
 void AppearanceWidget::loadThemeSettings()
 {
     APPLICATION->themeManager()->refresh();
@@ -173,10 +192,12 @@ void AppearanceWidget::loadThemeSettings()
     m_ui->iconsComboBox->blockSignals(true);
     m_ui->widgetStyleComboBox->blockSignals(true);
     m_ui->catPackComboBox->blockSignals(true);
+    m_ui->backgroundComboBox->blockSignals(true);
 
     m_ui->iconsComboBox->clear();
     m_ui->widgetStyleComboBox->clear();
     m_ui->catPackComboBox->clear();
+    m_ui->backgroundComboBox->clear();
 
     SettingsObject* settings = APPLICATION->settings();
 
@@ -219,11 +240,22 @@ void AppearanceWidget::loadThemeSettings()
             if (currentCat == cat->id())
                 m_ui->catPackComboBox->setCurrentIndex(i);
         }
+
+        const QString currentBackground = settings->get("BackgroundTheme").toString();
+        const auto backgrounds = APPLICATION->themeManager()->getValidBackgrounds();
+        for (int i = 0; i < backgrounds.count(); ++i) {
+            const auto& bgName = backgrounds[i];
+            m_ui->backgroundComboBox->addItem(bgName, bgName);
+
+            if (currentBackground == bgName)
+                m_ui->backgroundComboBox->setCurrentIndex(i);
+        }
     }
 
     m_ui->iconsComboBox->blockSignals(false);
     m_ui->widgetStyleComboBox->blockSignals(false);
     m_ui->catPackComboBox->blockSignals(false);
+    m_ui->backgroundComboBox->blockSignals(false);
 }
 
 void AppearanceWidget::updateConsolePreview()

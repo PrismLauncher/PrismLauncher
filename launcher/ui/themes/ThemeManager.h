@@ -46,6 +46,7 @@ class ThemeManager {
     QDir getIconThemesFolder();
     QDir getApplicationThemesFolder();
     QDir getCatPacksFolder();
+    QDir getBackgroundsFolder();
     void applyCurrentlySelectedTheme(bool initial = false);
     void setIconTheme(const QString& name);
     void setApplicationTheme(const QString& name, bool initial = false);
@@ -55,6 +56,7 @@ class ThemeManager {
     /// @return
     QString getCatPack(QString catName = "");
     QList<CatPack*> getValidCatPacks();
+    QStringList getValidBackgrounds();
 
     const LogColors& getLogColors() { return m_logColors; }
 
@@ -66,7 +68,9 @@ class ThemeManager {
     QDir m_iconThemeFolder{"iconthemes"};
     QDir m_applicationThemeFolder{"themes"};
     QDir m_catPacksFolder{"catpacks"};
+    QDir m_backgroundsFolder{"backgrounds"};
     std::map<QString, std::unique_ptr<CatPack>> m_catPacks;
+    QStringList m_backgrounds;
     QPalette m_defaultPalette;
     QString m_defaultStyle;
     LogColors m_logColors;

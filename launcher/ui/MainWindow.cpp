@@ -156,6 +156,21 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     setAccessibleName(BuildConfig.LAUNCHER_DISPLAYNAME);
 #endif
 
+    // Apply modern title bar styling
+    setWindowFlags(windowFlags() | Qt::FramelessWindowHint | Qt::WindowSystemMenuHint);
+    
+    // Apply title bar stylesheet for consistent theming
+    QString titleBarStyle = 
+        "QMainWindow {"
+        "    border: 1px solid #0088bb;"
+        "    border-radius: 8px;"
+        "}"
+        "QMainWindow::separator {"
+        "    background: linear-gradient(to right, #00a8d8, #0088bb);"
+        "    height: 2px;"
+        "}";
+    this->setStyleSheet(titleBarStyle);
+
     // instance toolbar stuff
     {
         // Qt doesn't like vertical moving toolbars, so we have to force them...

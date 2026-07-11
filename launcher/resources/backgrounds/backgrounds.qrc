@@ -25,5 +25,7 @@
         <!-- https://commons.wikimedia.org/wiki/File:Teawie_Party.png -->
         <file alias="teawie-spooky">teawie-spooky.png</file>
         <!-- https://commons.wikimedia.org/wiki/File:Teawie_Halloween.png -->
+        <!-- SummerSea background -->
+        <file alias="summer_sea_bg">summer_sea_bg.png</file>
     </qresource>
 </RCC>

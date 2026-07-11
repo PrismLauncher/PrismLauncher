@@ -31,6 +31,7 @@
 #include "ui/themes/CustomTheme.h"
 #include "ui/themes/DarkTheme.h"
 #include "ui/themes/SystemTheme.h"
+#include "ui/themes/SummerSeaTheme.h"
 
 #include "Application.h"
 #include "settings/SettingsObject.h"
@@ -138,6 +139,7 @@ void ThemeManager::initializeWidgets()
     auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
     themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BrightTheme>());
+    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SummerSeaTheme>());
 
     themeDebugLog() << "<> Initializing System Widget Themes";
     QStringList styles = QStyleFactory::keys();
@@ -216,6 +218,22 @@ QList<CatPack*> ThemeManager::getValidCatPacks()
     return ret;
 }
 
+QStringList ThemeManager::getValidBackgrounds()
+{
+    if (m_backgrounds.isEmpty()) {
+        QDir backgroundsDir = m_backgroundsFolder;
+        if (backgroundsDir.exists()) {
+            QStringList filters;
+            filters << "*.png" << "*.jpg" << "*.jpeg" << "*.bmp";
+            backgroundsDir.setNameFilters(filters);
+            for (const auto& file : backgroundsDir.entryList(QDir::Files)) {
+                m_backgrounds.append(backgroundsDir.absoluteFilePath(file));
+            }
+        }
+    }
+    return m_backgrounds;
+}
+
 bool ThemeManager::isValidIconTheme(const QString& id)
 {
     return !id.isEmpty() && m_icons.find(id) != m_icons.end();
@@ -239,6 +257,11 @@ QDir ThemeManager::getApplicationThemesFolder()
 QDir ThemeManager::getCatPacksFolder()
 {
     return m_catPacksFolder;
+}
+
+QDir ThemeManager::getBackgroundsFolder()
+{
+    return m_backgroundsFolder;
 }
 
 void ThemeManager::setIconTheme(const QString& name)
@@ -309,7 +332,8 @@ void ThemeManager::initializeCatPacks()
     QList<std::pair<QString, QString>> defaultCats{ { "kitteh", QObject::tr("Background Cat (from MultiMC)") },
                                                     { "rory", QObject::tr("Rory ID 11 (drawn by Ashtaka)") },
                                                     { "rory-flat", QObject::tr("Rory ID 11 (flat edition, drawn by Ashtaka)") },
-                                                    { "teawie", QObject::tr("Teawie (drawn by SympathyTea)") } };
+                                                    { "teawie", QObject::tr("Teawie (drawn by SympathyTea)") },
+                                                    { "summer_sea_bg", QObject::tr("Summer Sea (vibrant ocean view)") } };
     for (auto [id, name] : defaultCats) {
         addCatPack(std::unique_ptr<CatPack>(new BasicCatPack(id, name)));
     }
@@ -357,6 +381,7 @@ void ThemeManager::refresh()
     m_themes.clear();
     m_icons.clear();
     m_catPacks.clear();
+    m_backgrounds.clear();
 
     initializeThemes();
     initializeCatPacks();
