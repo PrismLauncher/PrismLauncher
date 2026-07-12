@@ -163,6 +163,9 @@ void InstallLoaderDialog::done(int result)
         auto* page = pageCast(container->selectedPage());
         if (page->selectedVersion()) {
             profile->setComponentVersion(page->id(), page->selectedVersion()->descriptor());
+            if (auto component = profile->getComponent(page->id())) {
+                component->setEnabled(true);
+            }
             profile->resolve(Net::Mode::Online);
         }
     }
