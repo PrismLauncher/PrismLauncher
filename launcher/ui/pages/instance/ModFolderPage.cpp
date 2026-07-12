@@ -167,10 +167,8 @@ void ModFolderPage::downloadMods()
     }
 
     auto* profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
-    if (!profile->getModLoaders().has_value()) {
-        if (handleNoModLoader()) {
-            return;
-        }
+    if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
+        return;
     }
 
     m_downloadDialog = new ResourceDownload::ModDownloadDialog(this, m_model, m_instance);
@@ -227,10 +225,8 @@ void ModFolderPage::updateMods(bool includeDeps)
     }
 
     auto* profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
-    if (!profile->getModLoaders().has_value()) {
-        if (handleNoModLoader()) {
-            return;
-        }
+    if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
+        return;
     }
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Mod updates are unavailable when metadata is disabled!"));
@@ -337,10 +333,8 @@ void ModFolderPage::changeModVersion()
     }
 
     auto* profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
-    if (!profile->getModLoaders().has_value()) {
-        if (handleNoModLoader()) {
-            return;
-        }
+    if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
+        return;
     }
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Mod updates are unavailable when metadata is disabled!"));
@@ -434,12 +428,21 @@ inline bool ModFolderPage::handleNoModLoader()
         // Should be safe
         auto* profile = static_cast<MinecraftInstance*>(this->m_instance)->getPackProfile();
         InstallLoaderDialog dialog(profile, QString(), this);
-        bool ret = dialog.exec() != 0;
+        // true if the user went through the install loader dialog
+        // false if the dialog got canceled/closed
+        bool dialogAccepted = dialog.exec() != 0;
         this->m_container->refreshContainer();
 
-        // returning negation of dialog.exec which'll be true if the install loader dialog got canceled/closed
-        // and false if the user went through and installed a loader
-        return !ret;
+        if (!dialogAccepted) {
+            return true;
+        }
+        if (!profile->getModLoaders().has_value()) {
+            CustomMessageBox::selectable(
+                this, tr("Error"), tr("No mod loader was installed. Please try again."), QMessageBox::Warning)
+                ->show();
+            return true;
+        }
+        return false;
     }
     // Nothing happens the dialog is already closing
     // returning true so the caller doesn't go and continue with opening it's dialog without a mod loader
