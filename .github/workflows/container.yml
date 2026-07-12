@@ -51,7 +51,7 @@ jobs:
           github-token: ${{ github.token }}
 
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Determine metadata for image
         id: image-metadata
