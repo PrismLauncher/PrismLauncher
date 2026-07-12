@@ -116,7 +116,6 @@ runs:
       if: ${{ inputs.msystem == '' }}
       uses: jurplel/install-qt-action@v4
       with:
-        aqtversion: "==3.1.*"
         version: ${{ inputs.qt-version }}
         modules: qtimageformats qtnetworkauth
         cache: ${{ inputs.build-type == 'Debug' }}
