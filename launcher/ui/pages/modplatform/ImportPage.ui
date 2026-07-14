@@ -99,6 +99,16 @@
      </property>
     </widget>
    </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QLabel" name="warningLabel">
+     <property name="text">
+      <string>&lt;p style=&quot;color: #e67e22; font-weight: bold;&quot;&gt;⚠ Warning: Only install modpacks from sources you trust.&lt;/p&gt;</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>
