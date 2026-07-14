@@ -56,9 +56,9 @@ ResourcePackPage::ResourcePackPage(MinecraftInstance* instance, ResourcePackFold
     connect(ui->actionUpdateItem, &QAction::triggered, this, &ResourcePackPage::updateResourcePacks);
     ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
 
-    auto updateMenu = new QMenu(this);
+    auto* updateMenu = new QMenu(this);
 
-    auto update = updateMenu->addAction(ui->actionUpdateItem->text());
+    auto* update = updateMenu->addAction(ui->actionUpdateItem->text());
     connect(update, &QAction::triggered, this, &ResourcePackPage::updateResourcePacks);
 
     updateMenu->addAction(ui->actionResetItemMetadata);
@@ -75,14 +75,15 @@ void ResourcePackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] 
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
-    auto& rp = static_cast<ResourcePack&>(m_model->at(row));
+    auto& rp = m_model->at(row);
     ui->frame->updateWithResourcePack(rp);
 }
 
 void ResourcePackPage::downloadResourcePacks()
 {
-    if (m_instance->typeName() != "Minecraft")
+    if (m_instance->typeName() != "Minecraft") {
         return;  // this is a null instance or a legacy instance
+    }
 
     m_downloadDialog = new ResourceDownload::ResourcePackDownloadDialog(this, m_model, m_instance);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
@@ -93,9 +94,9 @@ void ResourcePackPage::downloadResourcePacks()
 
 void ResourcePackPage::downloadDialogFinished(int result)
 {
-    if (result) {
-        auto tasks = new ConcurrentTask("Download Resource Pack", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(tasks, &Task::failed, [this, tasks](QString reason) {
+    if (result != 0) {
+        auto* tasks = new ConcurrentTask("Download Resource Pack", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        connect(tasks, &Task::failed, [this, tasks](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
         });
@@ -105,8 +106,9 @@ void ResourcePackPage::downloadDialogFinished(int result)
         });
         connect(tasks, &Task::succeeded, [this, tasks]() {
             QStringList warnings = tasks->warnings();
-            if (warnings.count())
+            if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+            }
 
             tasks->deleteLater();
         });
@@ -125,14 +127,16 @@ void ResourcePackPage::downloadDialogFinished(int result)
 
         m_model->update();
     }
-    if (m_downloadDialog)
+    if (m_downloadDialog) {
         m_downloadDialog->deleteLater();
+    }
 }
 
 void ResourcePackPage::updateResourcePacks()
 {
-    if (m_instance->typeName() != "Minecraft")
+    if (m_instance->typeName() != "Minecraft") {
         return;  // this is a null instance or a legacy instance
+    }
 
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Resource pack updates are unavailable when metadata is disabled!"));
@@ -147,27 +151,29 @@ void ResourcePackPage::updateResourcePacks()
                             QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
-        if (response != QMessageBox::Yes)
+        if (response != QMessageBox::Yes) {
             return;
+        }
     }
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
 
-    auto mods_list = m_model->selectedResources(selection);
-    bool use_all = mods_list.empty();
-    if (use_all)
-        mods_list = m_model->allResources();
+    auto modsList = m_model->selectedResources(selection);
+    bool useAll = modsList.empty();
+    if (useAll) {
+        modsList = m_model->allResources();
+    }
 
-    ResourceUpdateDialog update_dialog(this, m_instance, m_model, mods_list, false);
-    update_dialog.checkCandidates();
+    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, false);
+    updateDialog.checkCandidates();
 
-    if (update_dialog.aborted()) {
+    if (updateDialog.aborted()) {
         CustomMessageBox::selectable(this, tr("Aborted"), tr("The resource pack updater was aborted!"), QMessageBox::Warning)->show();
         return;
     }
-    if (update_dialog.noUpdates()) {
-        QString message{ tr("'%1' is up-to-date! :)").arg(mods_list.front()->name()) };
-        if (mods_list.size() > 1) {
-            if (use_all) {
+    if (updateDialog.noUpdates()) {
+        QString message{ tr("'%1' is up-to-date! :)").arg(modsList.front()->name()) };
+        if (modsList.size() > 1) {
+            if (useAll) {
                 message = tr("All resource packs are up-to-date! :)");
             } else {
                 message = tr("All selected resource packs are up-to-date! :)");
@@ -177,9 +183,9 @@ void ResourcePackPage::updateResourcePacks()
         return;
     }
 
-    if (update_dialog.exec()) {
-        auto tasks = new ConcurrentTask("Download Resource Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(tasks, &Task::failed, [this, tasks](QString reason) {
+    if (updateDialog.exec() != 0) {
+        auto* tasks = new ConcurrentTask("Download Resource Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        connect(tasks, &Task::failed, [this, tasks](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
         });
@@ -195,7 +201,7 @@ void ResourcePackPage::updateResourcePacks()
             tasks->deleteLater();
         });
 
-        for (auto task : update_dialog.getTasks()) {
+        for (const auto& task : updateDialog.getTasks()) {
             tasks->addTask(task);
         }
 
@@ -211,8 +217,9 @@ void ResourcePackPage::deleteResourcePackMetadata()
 {
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
     auto selectionCount = m_model->selectedResourcePacks(selection).length();
-    if (selectionCount == 0)
+    if (selectionCount == 0) {
         return;
+    }
     if (selectionCount > 1) {
         auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
                                                      tr("You are about to remove the metadata for %1 resource packs.\n"
@@ -221,8 +228,9 @@ void ResourcePackPage::deleteResourcePackMetadata()
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
-        if (response != QMessageBox::Yes)
+        if (response != QMessageBox::Yes) {
             return;
+        }
     }
 
     m_model->deleteMetadata(selection);
@@ -230,8 +238,9 @@ void ResourcePackPage::deleteResourcePackMetadata()
 
 void ResourcePackPage::changeResourcePackVersion()
 {
-    if (m_instance->typeName() != "Minecraft")
+    if (m_instance->typeName() != "Minecraft") {
         return;  // this is a null instance or a legacy instance
+    }
 
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Resource pack updates are unavailable when metadata is disabled!"));
@@ -240,15 +249,17 @@ void ResourcePackPage::changeResourcePackVersion()
 
     const QModelIndexList rows = ui->treeView->selectionModel()->selectedRows();
 
-    if (rows.count() != 1)
+    if (rows.count() != 1) {
         return;
+    }
 
     Resource& resource = m_model->at(m_filterModel->mapToSource(rows[0]).row());
 
-    if (resource.metadata() == nullptr)
+    if (resource.metadata() == nullptr) {
         return;
+    }
 
-    m_downloadDialog = new ResourceDownload::ResourcePackDownloadDialog(this, m_model, m_instance);
+    m_downloadDialog = new ResourceDownload::ResourcePackDownloadDialog(this, m_model, m_instance, true);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &ResourcePackPage::downloadDialogFinished);
 

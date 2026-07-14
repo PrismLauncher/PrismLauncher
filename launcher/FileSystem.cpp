@@ -36,6 +36,7 @@
  */
 
 #include "FileSystem.h"
+#include <qcontainerfwd.h>
 #include <QPair>
 
 #include "BuildConfig.h"
@@ -683,6 +684,32 @@ bool deletePath(QString path)
     return err.value() == 0;
 }
 
+bool deleteContents(const QString& path)
+{
+    const QFileInfo info(path);
+    if (!info.exists()) {
+        return true;
+    }
+    if (!info.isDir()) {
+        qWarning() << "Attempted to delete contents of non-directory path:" << path;
+        return false;
+    }
+
+    bool ret = true;
+
+    for (const auto& entry : fs::directory_iterator(StringUtils::toStdString(path))) {
+        std::error_code err;
+
+        fs::remove_all(entry.path(), err);
+        if (err.value() != 0) {
+            qWarning().nospace() << "Could not delete directory entry " << entry.path() << ": " << QString::fromStdString(err.message());
+            ret = false;
+        }
+    }
+
+    return ret;
+}
+
 bool trash(QString path, QString* pathInTrash)
 {
     // FIXME: Figure out trash in Flatpak. Qt seemingly doesn't use the Trash portal
@@ -796,68 +823,33 @@ QString NormalizePath(QString path)
     }
 }
 
-static const QString BAD_WIN_CHARS = "<>:\"|?*\r\n";
-static const QString BAD_NTFS_CHARS = "<>:\"|?*";
-static const QString BAD_HFS_CHARS = ":";
-
-static const QString BAD_FILENAME_CHARS = BAD_WIN_CHARS + "\\/";
-
-QString RemoveInvalidFilenameChars(QString string, QChar replaceWith)
+namespace {
+const QString g_badChars = "<>:\"|?*\r\n!";
+QString removeChars(QString source, QChar replace, const QString& extraChars = "")
 {
-    for (int i = 0; i < string.length(); i++)
-        if (string.at(i) < ' ' || BAD_FILENAME_CHARS.contains(string.at(i)))
-            string[i] = replaceWith;
-    return string;
-}
-
-QString RemoveInvalidPathChars(QString path, QChar replaceWith)
-{
-    QString invalidChars;
-#ifdef Q_OS_WIN
-    invalidChars = BAD_WIN_CHARS;
-#endif
-
-    // the null character is ignored in this check as it was not a problem until now
-    switch (statFS(path).fsType) {
-        case FilesystemType::FAT:  // similar to NTFS
-        /* fallthrough */
-        case FilesystemType::NTFS:
-        /* fallthrough */
-        case FilesystemType::REFS:  // similar to NTFS(should be available only on windows)
-            invalidChars += BAD_NTFS_CHARS;
-            break;
-        // case FilesystemType::EXT:
-        // case FilesystemType::EXT_2_OLD:
-        // case FilesystemType::EXT_2_3_4:
-        // case FilesystemType::XFS:
-        // case FilesystemType::BTRFS:
-        // case FilesystemType::NFS:
-        // case FilesystemType::ZFS:
-        case FilesystemType::APFS:
-        /* fallthrough */
-        case FilesystemType::HFS:
-        /* fallthrough */
-        case FilesystemType::HFSPLUS:
-        /* fallthrough */
-        case FilesystemType::HFSX:
-            invalidChars += BAD_HFS_CHARS;
-            break;
-        // case FilesystemType::FUSEBLK:
-        // case FilesystemType::F2FS:
-        // case FilesystemType::UNKNOWN:
-        default:
-            break;
+    auto badChars = g_badChars;
+    if (!extraChars.isEmpty()) {
+        badChars += extraChars;
     }
 
-    if (invalidChars.size() != 0) {
-        for (int i = 0; i < path.length(); i++) {
-            if (path.at(i) < ' ' || invalidChars.contains(path.at(i))) {
-                path[i] = replaceWith;
-            }
+    for (auto& c : source) {
+        if (c.unicode() < 0x20 || !c.isPrint() || badChars.contains(c)) {
+            c = replace;
         }
     }
 
-    return path;
+    return source;
+}
+}  // namespace
+
+QString RemoveInvalidFilenameChars(QString string, QChar replaceWith)
+{
+    return removeChars(std::move(string), replaceWith, "\\/");
+}
+
+QString RemoveInvalidPathChars(QString string, QChar replaceWith)
+{
+    return removeChars(std::move(string), replaceWith);
 }
 
 QString DirNameFromString(QString string, QString inDir)

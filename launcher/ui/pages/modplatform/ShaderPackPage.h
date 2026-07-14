@@ -23,7 +23,7 @@ class ShaderPackResourcePage : public ResourcePage {
     static T* create(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
     {
         auto page = new T(dialog, instance);
-        auto model = static_cast<ShaderPackResourceModel*>(page->getModel());
+        auto* model = static_cast<ShaderPackResourceModel*>(page->getModel());
 
         connect(model, &ResourceModel::versionListUpdated, page, &ResourcePage::versionListUpdated);
         connect(model, &ResourceModel::projectInfoUpdated, page, &ResourcePage::updateUi);
@@ -33,17 +33,20 @@ class ShaderPackResourcePage : public ResourcePage {
     }
 
     //: The plural version of 'shader pack'
-    inline QString resourcesString() const override { return tr("shader packs"); }
+    QString resourcesString() const override { return tr("shader packs"); }
     //: The singular version of 'shader packs'
-    inline QString resourceString() const override { return tr("shader pack"); }
+    QString resourceString() const override { return tr("shader pack"); }
 
     bool supportsFiltering() const override { return false; };
 
-    void addResourceToPage(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, ResourceFolderModel*) override;
+    void addResourceToPage(ModPlatform::IndexedPack::Ptr /*unused*/,
+                           ModPlatform::IndexedVersion& /*unused*/,
+                           ResourceFolderModel* /*unused*/,
+                           QString downloadReason = "standalone") override;
 
     QMap<QString, QString> urlHandlers() const override;
 
-    inline auto helpPage() const -> QString override { return "shaderpack-platform"; }
+    auto helpPage() const -> QString override { return "shaderpack-platform"; }
 
    protected:
     ShaderPackResourcePage(ShaderPackDownloadDialog* dialog, BaseInstance& instance);

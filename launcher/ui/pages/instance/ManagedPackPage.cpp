@@ -128,7 +128,7 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
         QDesktopServices::openUrl(url);
     });
 
-    connect(ui->urlLine, &QLineEdit::textChanged, this, [this](QString text) { m_inst->settings()->set("ManagedPackURL", text); });
+    connect(ui->urlLine, &QLineEdit::textChanged, this, [this](QString text) { m_inst->settings()->set("ManagedPackURL", text.trimmed()); });
 }
 
 ManagedPackPage::~ManagedPackPage()
@@ -147,7 +147,7 @@ void ManagedPackPage::openedImpl()
         ui->updateToVersionLabel->setText(tr("URL:"));
         ui->updateButton->setText(tr("Update Pack"));
         ui->updateButton->setDisabled(false);
-        ui->urlLine->setText(m_inst->settings()->get("ManagedPackURL").toString());
+        ui->urlLine->setText(m_inst->settings()->get("ManagedPackURL").toString().trimmed());
 
         ui->packName->setText(m_inst->name());
         ui->changelogTextBrowser->setText(tr("This is a local modpack.\n"
@@ -357,7 +357,7 @@ void ManagedPackPage::onUpdateTaskCompleted(bool did_succeed) const
 
 void ModrinthManagedPackPage::update()
 {
-    auto customURL = m_inst->settings()->get("ManagedPackURL").toString();
+    auto customURL = m_inst->settings()->get("ManagedPackURL").toString().trimmed();
     if (m_inst->getManagedPackID().isEmpty() && !customURL.isEmpty()) {
         updatePack(customURL);
         return;
@@ -486,7 +486,7 @@ void FlameManagedPackPage::suggestVersion()
 
 void FlameManagedPackPage::update()
 {
-    auto customURL = m_inst->settings()->get("ManagedPackURL").toString();
+    auto customURL = m_inst->settings()->get("ManagedPackURL").toString().trimmed();
     if (m_inst->getManagedPackID().isEmpty() && !customURL.isEmpty()) {
         updatePack(customURL);
         return;

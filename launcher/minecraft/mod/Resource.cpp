@@ -4,71 +4,75 @@
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <tuple>
+#include <utility>
 
 #include "FileSystem.h"
 #include "StringUtils.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
-Resource::Resource(QObject* parent) : QObject(parent) {}
+Resource::Resource(QObject* parent) : QObject(parent), m_size_info(0) {}
 
-Resource::Resource(QFileInfo file_info) : QObject()
+Resource::Resource(QFileInfo fileInfo) : m_size_info(0)
 {
-    setFile(file_info);
+    setFile(fileInfo);
 }
 
-void Resource::setFile(QFileInfo file_info)
+void Resource::setFile(QFileInfo fileInfo)
 {
-    m_file_info = file_info;
+    m_file_info = std::move(fileInfo);
     parseFile();
 }
 
-static std::tuple<QString, qint64> calculateFileSize(const QFileInfo& file)
+namespace {
+std::tuple<QString, qint64> calculateFileSize(const QFileInfo& file)
 {
     if (file.isDir()) {
         auto dir = QDir(file.absoluteFilePath());
         dir.setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
         auto count = dir.count();
         auto str = QObject::tr("item");
-        if (count != 1)
+        if (count != 1) {
             str = QObject::tr("items");
+        }
         return { QString("%1 %2").arg(QString::number(count), str), count };
     }
     return { StringUtils::humanReadableFileSize(file.size(), true), file.size() };
 }
+}  // namespace
 
 void Resource::parseFile()
 {
-    QString file_name{ m_file_info.fileName() };
+    QString fileName{ m_file_info.fileName() };
 
     m_type = ResourceType::UNKNOWN;
 
-    m_internal_id = file_name;
+    m_internal_id = fileName;
 
     std::tie(m_size_str, m_size_info) = calculateFileSize(m_file_info);
     if (m_file_info.isDir()) {
         m_type = ResourceType::FOLDER;
-        m_name = file_name;
+        m_name = fileName;
     } else if (m_file_info.isFile()) {
-        if (file_name.endsWith(".disabled")) {
-            file_name.chop(9);
+        if (fileName.endsWith(".disabled")) {
+            fileName.chop(9);
             m_enabled = false;
         }
 
-        if (file_name.endsWith(".zip") || file_name.endsWith(".jar")) {
+        if (fileName.endsWith(".zip") || fileName.endsWith(".jar")) {
             m_type = ResourceType::ZIPFILE;
-            file_name.chop(4);
-        } else if (file_name.endsWith(".nilmod")) {
+            fileName.chop(4);
+        } else if (fileName.endsWith(".nilmod")) {
             m_type = ResourceType::ZIPFILE;
-            file_name.chop(7);
-        } else if (file_name.endsWith(".litemod")) {
+            fileName.chop(7);
+        } else if (fileName.endsWith(".litemod")) {
             m_type = ResourceType::LITEMOD;
-            file_name.chop(8);
+            fileName.chop(8);
         } else {
             m_type = ResourceType::SINGLEFILE;
         }
 
-        m_name = file_name;
+        m_name = fileName;
     }
 
     m_changed_date_time = m_file_info.lastModified();
@@ -76,39 +80,45 @@ void Resource::parseFile()
 
 auto Resource::name() const -> QString
 {
-    if (metadata())
+    if (metadata()) {
         return metadata()->name;
+    }
 
     return m_name;
 }
 
-static void removeThePrefix(QString& string)
+namespace {
+void removeThePrefix(QString& string)
 {
     static const QRegularExpression s_regex(QStringLiteral("^(?:the|teh) +"), QRegularExpression::CaseInsensitiveOption);
     string.remove(s_regex);
     string = string.trimmed();
 }
+}  // namespace
 
 auto Resource::provider() const -> QString
 {
-    if (metadata())
+    if (metadata()) {
         return ModPlatform::ProviderCapabilities::readableName(metadata()->provider);
+    }
 
     return tr("Unknown");
 }
 
 auto Resource::homepage() const -> QString
 {
-    if (metadata())
+    if (metadata()) {
         return ModPlatform::getMetaURL(metadata()->provider, metadata()->project_id);
+    }
 
     return {};
 }
 
 void Resource::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
 {
-    if (status() == ResourceStatus::NO_METADATA)
-        setStatus(ResourceStatus::INSTALLED);
+    if (status() == ResourceStatus::NoMetadata) {
+        setStatus(ResourceStatus::Installed);
+    }
 
     m_metadata = metadata;
 }
@@ -133,12 +143,12 @@ void Resource::updateIssues(const BaseInstance* inst)
         return;
     }
 
-    auto mcInst = dynamic_cast<const MinecraftInstance*>(inst);
+    const auto* mcInst = dynamic_cast<const MinecraftInstance*>(inst);
     if (mcInst == nullptr) {
         return;
     }
 
-    auto profile = mcInst->getPackProfile();
+    auto* profile = mcInst->getPackProfile();
     QString mcVersion = profile->getComponentVersion("net.minecraft");
 
     if (!m_metadata->mcVersions.empty() && !m_metadata->mcVersions.contains(mcVersion)) {
@@ -151,46 +161,59 @@ int Resource::compare(const Resource& other, SortType type) const
 {
     switch (type) {
         default:
-        case SortType::ENABLED:
-            if (enabled() && !other.enabled())
+        case SortType::Enabled:
+            if (enabled() && !other.enabled()) {
                 return 1;
-            if (!enabled() && other.enabled())
+            }
+            if (!enabled() && other.enabled()) {
                 return -1;
+            }
             break;
-        case SortType::NAME: {
-            QString this_name{ name() };
-            QString other_name{ other.name() };
+        case SortType::Name: {
+            QString thisName{ name() };
+            QString otherName{ other.name() };
 
             // TODO do we need this? it could result in 0 being returned
-            removeThePrefix(this_name);
-            removeThePrefix(other_name);
+            removeThePrefix(thisName);
+            removeThePrefix(otherName);
 
-            return QString::compare(this_name, other_name, Qt::CaseInsensitive);
+            return QString::compare(thisName, otherName, Qt::CaseInsensitive);
         }
-        case SortType::DATE:
-            if (dateTimeChanged() > other.dateTimeChanged())
+        case SortType::Date:
+            if (dateTimeChanged() > other.dateTimeChanged()) {
                 return 1;
-            if (dateTimeChanged() < other.dateTimeChanged())
+            }
+            if (dateTimeChanged() < other.dateTimeChanged()) {
                 return -1;
+            }
             break;
-        case SortType::SIZE: {
+        case SortType::Filename:
+            return fileinfo().fileName().localeAwareCompare(other.fileinfo().fileName());
+
+        case SortType::Size: {
             if (this->type() != other.type()) {
-                if (this->type() == ResourceType::FOLDER)
+                if (this->type() == ResourceType::FOLDER) {
                     return -1;
-                if (other.type() == ResourceType::FOLDER)
+                }
+                if (other.type() == ResourceType::FOLDER) {
                     return 1;
+                }
             }
 
-            if (sizeInfo() > other.sizeInfo())
+            if (sizeInfo() > other.sizeInfo()) {
                 return 1;
-            if (sizeInfo() < other.sizeInfo())
+            }
+            if (sizeInfo() < other.sizeInfo()) {
                 return -1;
+            }
             break;
         }
-        case SortType::PROVIDER: {
-            auto compare_result = QString::compare(provider(), other.provider(), Qt::CaseInsensitive);
-            if (compare_result != 0)
-                return compare_result;
+
+        case SortType::Provider: {
+            auto compareResult = QString::compare(provider(), other.provider(), Qt::CaseInsensitive);
+            if (compareResult != 0) {
+                return compareResult;
+            }
             break;
         }
     }
@@ -200,13 +223,20 @@ int Resource::compare(const Resource& other, SortType type) const
 
 bool Resource::applyFilter(QRegularExpression filter) const
 {
-    return filter.match(name()).hasMatch();
+    if (filter.match(name()).hasMatch()) {
+        return true;
+    }
+    if (filter.match(fileinfo().fileName()).hasMatch()) {
+        return true;
+    }
+    return false;
 }
 
 bool Resource::enable(EnableAction action)
 {
-    if (m_type == ResourceType::UNKNOWN || m_type == ResourceType::FOLDER)
+    if (m_type == ResourceType::UNKNOWN || m_type == ResourceType::FOLDER) {
         return false;
+    }
 
     QString path = m_file_info.absoluteFilePath();
     QFile file(path);
@@ -225,14 +255,16 @@ bool Resource::enable(EnableAction action)
             break;
     }
 
-    if (m_enabled == enable)
+    if (m_enabled == enable) {
         return false;
+    }
 
     if (enable) {
         // m_enabled is false, but there's no '.disabled' suffix.
         // TODO: Report error?
-        if (!path.endsWith(".disabled"))
+        if (!path.endsWith(".disabled")) {
             return false;
+        }
         path.chop(9);
     } else {
         path += ".disabled";
@@ -240,8 +272,9 @@ bool Resource::enable(EnableAction action)
             path = FS::getUniqueResourceName(path);
         }
     }
-    if (!file.rename(path))
+    if (!file.rename(path)) {
         return false;
+    }
 
     setFile(QFileInfo(path));
 
@@ -249,33 +282,34 @@ bool Resource::enable(EnableAction action)
     return true;
 }
 
-auto Resource::destroy(const QDir& index_dir, bool preserve_metadata, bool attempt_trash) -> bool
+auto Resource::destroy(const QDir& indexDir, bool preserveMetadata, bool attemptTrash) -> bool
 {
     m_type = ResourceType::UNKNOWN;
 
-    if (!preserve_metadata) {
+    if (!preserveMetadata) {
         qDebug() << QString("Destroying metadata for '%1' on purpose").arg(name());
-        destroyMetadata(index_dir);
+        destroyMetadata(indexDir);
     }
 
-    return (attempt_trash && FS::trash(m_file_info.filePath())) || FS::deletePath(m_file_info.filePath());
+    return (attemptTrash && FS::trash(m_file_info.filePath())) || FS::deletePath(m_file_info.filePath());
 }
 
-auto Resource::destroyMetadata(const QDir& index_dir) -> void
+auto Resource::destroyMetadata(const QDir& indexDir) -> void
 {
     if (metadata()) {
-        Metadata::remove(index_dir, metadata()->slug);
+        Metadata::remove(indexDir, metadata()->slug);
     } else {
         auto n = name();
-        Metadata::remove(index_dir, n);
+        Metadata::remove(indexDir, n);
     }
     m_metadata = nullptr;
 }
 
 bool Resource::isSymLinkUnder(const QString& instPath) const
 {
-    if (isSymLink())
+    if (isSymLink()) {
         return true;
+    }
 
     auto instDir = QDir(instPath);
 
@@ -293,8 +327,9 @@ bool Resource::isMoreThanOneHardLink() const
 auto Resource::getOriginalFileName() const -> QString
 {
     auto fileName = m_file_info.fileName();
-    if (!m_enabled)
+    if (!m_enabled) {
         fileName.chop(9);
+    }
     return fileName;
 }
 
@@ -324,16 +359,16 @@ QDebug operator<<(QDebug debug, ResourceType type)
 QDebug operator<<(QDebug debug, ResourceStatus status)
 {
     switch (status) {
-        case ResourceStatus::INSTALLED:
+        case ResourceStatus::Installed:
             debug << "INSTALLED";
             break;
-        case ResourceStatus::NOT_INSTALLED:
+        case ResourceStatus::NotInstalled:
             debug << "NOT_INSTALLED";
             break;
-        case ResourceStatus::NO_METADATA:
+        case ResourceStatus::NoMetadata:
             debug << "NO_METADATA";
             break;
-        case ResourceStatus::UNKNOWN:
+        case ResourceStatus::Unknown:
         default:
             debug << "UNKNOWN";
             break;

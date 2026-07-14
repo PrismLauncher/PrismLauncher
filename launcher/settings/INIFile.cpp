@@ -35,6 +35,8 @@
  */
 
 #include "settings/INIFile.h"
+
+#include <AssertHelpers.h>
 #include <FileSystem.h>
 
 #include <QDebug>
@@ -62,11 +64,10 @@ bool INIFile::saveFile(QString fileName)
     _settings_obj.sync();
 
     if (auto status = _settings_obj.status(); status != QSettings::Status::NoError) {
-        // Shouldn't be possible!
-        Q_ASSERT(status != QSettings::Status::FormatError);
-
         if (status == QSettings::Status::AccessError)
-            qCritical() << "An access error occurred (e.g. trying to write to a read-only file).";
+            qCritical() << "An access error occurred while saving INI file" << fileName << "(is the file read-only?)";
+        if (ASSERT_NEVER(status == QSettings::Status::FormatError))
+            qCritical() << "A format error occurred while saving INI file" << fileName << "(this shouldn't be possible!)";
 
         return false;
     }
@@ -178,9 +179,9 @@ bool INIFile::loadFile(QString fileName)
 
     if (auto status = _settings_obj.status(); status != QSettings::Status::NoError) {
         if (status == QSettings::Status::AccessError)
-            qCritical() << "An access error occurred (e.g. trying to write to a read-only file).";
+            qCritical() << "An access error occurred while loading INI file" << fileName;
         if (status == QSettings::Status::FormatError)
-            qCritical() << "A format error occurred (e.g. loading a malformed INI file).";
+            qCritical() << "A format error occurred while loading INI file" << fileName << "(is the file malformed or corrupted?)";
         return false;
     }
     if (!_settings_obj.value("ConfigVersion").isValid()) {

@@ -87,7 +87,7 @@ void InfoFrame::updateWithMod(const Mod& m)
     QString name = "";
     QString link = m.homepage();
     if (m.name().isEmpty())
-        name = m.internal_id();
+        name = m.internalId();
     else
         name = renderColorCodes(m.name());
 

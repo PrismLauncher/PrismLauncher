@@ -39,7 +39,7 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
    private slots:
     void onMetadataEnsured(Resource* resource);
     void onMetadataFailed(Resource* resource,
-                          bool try_others = false,
+                          bool tryOthers = false,
                           ModPlatform::ResourceProvider firstChoice = ModPlatform::ResourceProvider::MODRINTH);
 
    private:

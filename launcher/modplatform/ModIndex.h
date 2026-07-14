@@ -32,6 +32,7 @@ class QIODevice;
 namespace ModPlatform {
 
 enum class ModLoaderType : std::uint16_t {
+    None = 0U,
     NeoForge = 1U << 0U,
     Forge = 1U << 1U,
     Cauldron = 1U << 2U,

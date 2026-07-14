@@ -106,7 +106,7 @@ InstallLoaderDialog::InstallLoaderDialog(PackProfile* profile, const QString& ui
 
     buttons->setOrientation(Qt::Horizontal);
     buttons->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
-    buttons->button(QDialogButtonBox::Ok)->setText(tr("Ok"));
+    buttons->button(QDialogButtonBox::Ok)->setText(tr("OK"));
     buttons->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
     connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);

@@ -69,7 +69,7 @@ runs:
 
     - name: Sign executables
       if: ${{ env.CI_HAS_ACCESS_TO_AZURE != '' && inputs.azure-client-id != '' }}
-      uses: azure/artifact-signing-action@v1
+      uses: azure/artifact-signing-action@v2
       with:
         endpoint: https://eus.codesigning.azure.net/
         trusted-signing-account-name: PrismLauncher
@@ -142,7 +142,7 @@ runs:
 
     - name: Sign installer
       if: ${{ env.CI_HAS_ACCESS_TO_AZURE != '' && inputs.azure-client-id != '' }}
-      uses: azure/artifact-signing-action@v1
+      uses: azure/artifact-signing-action@v2
       with:
         endpoint: https://eus.codesigning.azure.net/
         trusted-signing-account-name: PrismLauncher

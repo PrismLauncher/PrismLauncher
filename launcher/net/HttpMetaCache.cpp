@@ -182,7 +182,7 @@ auto HttpMetaCache::evictAll() -> bool
         }
         map.entry_list.clear();
         // AND all return codes together so the result is true iff all runs of deletePath() are true
-        ret &= FS::deletePath(map.base_path);
+        ret &= FS::deleteContents(map.base_path);
     }
     return ret;
 }

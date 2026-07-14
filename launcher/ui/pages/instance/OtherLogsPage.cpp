@@ -277,12 +277,15 @@ void OtherLogsPage::reload()
         MessageLevel last = MessageLevel::Unknown;
 
         auto handleLine = [this, &last](QString line) {
-            if (line.isEmpty())
+            if (!line.isEmpty() && line.back() == '\n') {
+                line.resize(line.size() - 1);
+            }
+            if (!line.isEmpty() && line.back() == '\r') {
+                line.resize(line.size() - 1);
+            }
+            if (line.isEmpty()) {
                 return false;
-            if (line.back() == '\n')
-                line.resize(line.size() - 1);
-            if (line.back() == '\r')
-                line.resize(line.size() - 1);
+            }
             MessageLevel level = MessageLevel::Unknown;
 
             QString lineTemp = line;  // don't edit out the time and level for clarity

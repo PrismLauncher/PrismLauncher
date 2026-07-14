@@ -44,14 +44,13 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "net/NetJob.h"
-#include "settings/INISettingsObject.h"
 
-#include <memory>
+#include <cstdint>
 #include <optional>
 
 namespace ATLauncher {
 
-enum class InstallMode {
+enum class InstallMode : std::uint8_t {
     Install,
     Reinstall,
     Update,
@@ -86,13 +85,13 @@ class PackInstallTask : public InstanceTask {
                              QString packName,
                              QString version,
                              InstallMode installMode = InstallMode::Install);
-    virtual ~PackInstallTask() { delete m_support; }
+    ~PackInstallTask() override { delete m_support; }
 
     bool canAbort() const override { return true; }
     bool abort() override;
 
    protected:
-    virtual void executeTask() override;
+    void executeTask() override;
 
    private slots:
     void onDownloadSucceeded(QByteArray* responsePtr);
@@ -103,12 +102,12 @@ class PackInstallTask : public InstanceTask {
     void onModsExtracted();
 
    private:
-    QString getDirForModType(ModType type, QString raw);
-    QString getVersionForLoader(QString uid);
-    QString detectLibrary(const VersionLibrary& library);
+    QString getDirForModType(ModType type, const QString& raw);
+    QString getVersionForLoader(const QString& uid);
+    static QString detectLibrary(const VersionLibrary& library);
 
-    bool createLibrariesComponent(QString instanceRoot, PackProfile* profile);
-    bool createPackComponent(QString instanceRoot, PackProfile* profile);
+    bool createLibrariesComponent(const QString& instanceRoot, PackProfile* profile);
+    bool createPackComponent(const QString& instanceRoot, PackProfile* profile);
 
     void deleteExistingFiles();
     void installConfigs();

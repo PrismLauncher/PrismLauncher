@@ -23,27 +23,64 @@
 #include "BuildConfig.h"
 #include "net/HeaderProxy.h"
 
+#include <QJsonDocument>
+#include <QJsonObject>
+
 namespace Net {
+
+struct ModrinthDownloadMeta {
+    QString reason;
+    QString gameVersion;
+    QString loader;
+
+    bool isEmpty() const { return reason.isEmpty(); }
+
+    QByteArray toJson() const
+    {
+        QJsonObject obj;
+        if (!reason.isEmpty()) {
+            obj["reason"] = reason;
+        }
+        if (!gameVersion.isEmpty()) {
+            obj["game_version"] = gameVersion;
+        }
+        if (!loader.isEmpty()) {
+            obj["loader"] = loader;
+        }
+        return QJsonDocument(obj).toJson(QJsonDocument::Compact);
+    }
+};
 
 class ApiHeaderProxy : public HeaderProxy {
    public:
-    ApiHeaderProxy() : HeaderProxy() {}
-    virtual ~ApiHeaderProxy() = default;
+    ApiHeaderProxy() = default;
+    explicit ApiHeaderProxy(ModrinthDownloadMeta meta) : m_meta(std::move(meta)) {}
+    ~ApiHeaderProxy() override = default;
 
    public:
-    virtual QList<HeaderPair> headers(const QNetworkRequest& request) const override
+    QList<HeaderPair> headers(const QNetworkRequest& request) const override
     {
         QList<HeaderPair> hdrs;
-        if (APPLICATION->capabilities() & Application::SupportsFlame && request.url().host() == QUrl(BuildConfig.FLAME_BASE_URL).host()) {
-            hdrs.append({ "x-api-key", APPLICATION->getFlameAPIKey().toUtf8() });
-        } else if (request.url().host() == QUrl(BuildConfig.MODRINTH_PROD_URL).host() ||
-                   request.url().host() == QUrl(BuildConfig.MODRINTH_STAGING_URL).host()) {
+        const auto host = request.url().host();
+
+        if (APPLICATION->capabilities() & Application::SupportsFlame &&
+            (host == QUrl(BuildConfig.FLAME_BASE_URL).host() || host == BuildConfig.FLAME_DOWNLOAD_HOST)) {
+            hdrs.append({ .headerName = "x-api-key", .headerValue = APPLICATION->getFlameAPIKey().toUtf8() });
+        } else if (host == QUrl(BuildConfig.MODRINTH_PROD_URL).host() || host == QUrl(BuildConfig.MODRINTH_STAGING_URL).host()) {
             QString token = APPLICATION->getModrinthAPIToken();
-            if (!token.isNull())
-                hdrs.append({ "Authorization", token.toUtf8() });
+            if (!token.isNull()) {
+                hdrs.append({ .headerName = "Authorization", .headerValue = token.toUtf8() });
+            }
+        }
+
+        if (host == BuildConfig.MODRINTH_DOWNLOAD_HOST && !m_meta.isEmpty()) {
+            hdrs.append({ .headerName = "modrinth-download-meta", .headerValue = m_meta.toJson() });
         }
         return hdrs;
     };
+
+   private:
+    ModrinthDownloadMeta m_meta;
 };
 
 }  // namespace Net

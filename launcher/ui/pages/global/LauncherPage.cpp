@@ -62,7 +62,9 @@ enum InstSortMode {
     // Sort alphabetically by name.
     Sort_Name,
     // Sort by which instance was launched most recently.
-    Sort_LastLaunch
+    Sort_LastLaunch,
+    // Sort by which instance has the most playtime.
+    Sort_Playtime,
 };
 
 LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::LauncherPage)
@@ -71,6 +73,7 @@ LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::Launch
 
     ui->sortingModeGroup->setId(ui->sortByNameBtn, Sort_Name);
     ui->sortingModeGroup->setId(ui->sortLastLaunchedBtn, Sort_LastLaunch);
+    ui->sortingModeGroup->setId(ui->sortByPlaytimeBtn, Sort_Playtime);
 
     loadSettings();
 
@@ -90,12 +93,12 @@ bool LauncherPage::apply()
 
 void LauncherPage::on_instDirBrowseBtn_clicked()
 {
-    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Instance Folder"), ui->instDirTextBox->text());
+    QString rawDir = QFileDialog::getExistingDirectory(this, tr("Instance Folder"), ui->instDirTextBox->text());
 
     // do not allow current dir - it's dirty. Do not allow dirs that don't exist
-    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
-        QString cooked_dir = FS::NormalizePath(raw_dir);
-        if (FS::checkProblemticPathJava(QDir(cooked_dir))) {
+    if (!rawDir.isEmpty() && QDir(rawDir).exists()) {
+        QString cookedDir = FS::NormalizePath(rawDir);
+        if (FS::checkProblemticPathJava(QDir(cookedDir))) {
             QMessageBox warning;
             warning.setText(
                 tr("You're trying to specify an instance folder which\'s path "
@@ -108,9 +111,9 @@ void LauncherPage::on_instDirBrowseBtn_clicked()
             warning.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
             int result = warning.exec();
             if (result == QMessageBox::Ok) {
-                ui->instDirTextBox->setText(cooked_dir);
+                ui->instDirTextBox->setText(cookedDir);
             }
-        } else if (DesktopServices::isFlatpak() && raw_dir.startsWith("/run/user")) {
+        } else if (DesktopServices::isFlatpak() && rawDir.startsWith("/run/user")) {
             QMessageBox warning;
             warning.setText(tr("You're trying to specify an instance folder "
                                "which was granted temporarily via Flatpak.\n"
@@ -123,64 +126,64 @@ void LauncherPage::on_instDirBrowseBtn_clicked()
             warning.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
             int result = warning.exec();
             if (result == QMessageBox::Ok) {
-                ui->instDirTextBox->setText(cooked_dir);
+                ui->instDirTextBox->setText(cookedDir);
             }
         } else {
-            ui->instDirTextBox->setText(cooked_dir);
+            ui->instDirTextBox->setText(cookedDir);
         }
     }
 }
 
 void LauncherPage::on_iconsDirBrowseBtn_clicked()
 {
-    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Icons Folder"), ui->iconsDirTextBox->text());
+    QString rawDir = QFileDialog::getExistingDirectory(this, tr("Icons Folder"), ui->iconsDirTextBox->text());
 
     // do not allow current dir - it's dirty. Do not allow dirs that don't exist
-    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
-        QString cooked_dir = FS::NormalizePath(raw_dir);
-        ui->iconsDirTextBox->setText(cooked_dir);
+    if (!rawDir.isEmpty() && QDir(rawDir).exists()) {
+        QString cookedDir = FS::NormalizePath(rawDir);
+        ui->iconsDirTextBox->setText(cookedDir);
     }
 }
 
 void LauncherPage::on_modsDirBrowseBtn_clicked()
 {
-    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Mods Folder"), ui->modsDirTextBox->text());
+    QString rawDir = QFileDialog::getExistingDirectory(this, tr("Mods Folder"), ui->modsDirTextBox->text());
 
     // do not allow current dir - it's dirty. Do not allow dirs that don't exist
-    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
-        QString cooked_dir = FS::NormalizePath(raw_dir);
-        ui->modsDirTextBox->setText(cooked_dir);
+    if (!rawDir.isEmpty() && QDir(rawDir).exists()) {
+        QString cookedDir = FS::NormalizePath(rawDir);
+        ui->modsDirTextBox->setText(cookedDir);
     }
 }
 
 void LauncherPage::on_downloadsDirBrowseBtn_clicked()
 {
-    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Downloads Folder"), ui->downloadsDirTextBox->text());
+    QString rawDir = QFileDialog::getExistingDirectory(this, tr("Downloads Folder"), ui->downloadsDirTextBox->text());
 
-    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
-        QString cooked_dir = FS::NormalizePath(raw_dir);
-        ui->downloadsDirTextBox->setText(cooked_dir);
+    if (!rawDir.isEmpty() && QDir(rawDir).exists()) {
+        QString cookedDir = FS::NormalizePath(rawDir);
+        ui->downloadsDirTextBox->setText(cookedDir);
     }
 }
 
 void LauncherPage::on_javaDirBrowseBtn_clicked()
 {
-    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Java Folder"), ui->javaDirTextBox->text());
+    QString rawDir = QFileDialog::getExistingDirectory(this, tr("Java Folder"), ui->javaDirTextBox->text());
 
-    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
-        QString cooked_dir = FS::NormalizePath(raw_dir);
-        ui->javaDirTextBox->setText(cooked_dir);
+    if (!rawDir.isEmpty() && QDir(rawDir).exists()) {
+        QString cookedDir = FS::NormalizePath(rawDir);
+        ui->javaDirTextBox->setText(cookedDir);
     }
 }
 
 void LauncherPage::on_skinsDirBrowseBtn_clicked()
 {
-    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Skins Folder"), ui->skinsDirTextBox->text());
+    QString rawDir = QFileDialog::getExistingDirectory(this, tr("Skins Folder"), ui->skinsDirTextBox->text());
 
     // do not allow current dir - it's dirty. Do not allow dirs that don't exist
-    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
-        QString cooked_dir = FS::NormalizePath(raw_dir);
-        ui->skinsDirTextBox->setText(cooked_dir);
+    if (!rawDir.isEmpty() && QDir(rawDir).exists()) {
+        QString cookedDir = FS::NormalizePath(rawDir);
+        ui->skinsDirTextBox->setText(cookedDir);
     }
 }
 
@@ -191,7 +194,7 @@ void LauncherPage::on_metadataEnableBtn_clicked()
 
 void LauncherPage::applySettings()
 {
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
 
     // Updates
     if (APPLICATION->updater()) {
@@ -227,6 +230,9 @@ void LauncherPage::applySettings()
         case Sort_LastLaunch:
             s->set("InstSortMode", "LastLaunch");
             break;
+        case Sort_Playtime:
+            s->set("InstSortMode", "Playtime");
+            break;
         case Sort_Name:
         default:
             s->set("InstSortMode", "Name");
@@ -246,10 +252,11 @@ void LauncherPage::applySettings()
     s->set("ModDependenciesDisabled", !ui->dependenciesEnableBtn->isChecked());
     s->set("ShowModIncompat", ui->showModIncompatCheckBox->isChecked());
     s->set("SkipModpackUpdatePrompt", !ui->modpackUpdatePromptBtn->isChecked());
+    s->set("DownloadGameFilesDuringInstanceCreation", ui->downloadGameFilesBtn->isChecked());
 }
 void LauncherPage::loadSettings()
 {
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
     // Updates
     if (APPLICATION->updater()) {
         ui->autoUpdateCheckBox->setChecked(APPLICATION->updater()->getAutomaticallyChecksForUpdates());
@@ -281,6 +288,8 @@ void LauncherPage::loadSettings()
     QString sortMode = s->get("InstSortMode").toString();
     if (sortMode == "LastLaunch") {
         ui->sortLastLaunchedBtn->setChecked(true);
+    } else if (sortMode == "Playtime"){
+        ui->sortByPlaytimeBtn->setChecked(true);
     } else {
         ui->sortByNameBtn->setChecked(true);
     }
@@ -296,6 +305,7 @@ void LauncherPage::loadSettings()
     ui->dependenciesEnableBtn->setChecked(!s->get("ModDependenciesDisabled").toBool());
     ui->showModIncompatCheckBox->setChecked(s->get("ShowModIncompat").toBool());
     ui->modpackUpdatePromptBtn->setChecked(!s->get("SkipModpackUpdatePrompt").toBool());
+    ui->downloadGameFilesBtn->setChecked(s->get("DownloadGameFilesDuringInstanceCreation").toBool());
 }
 
 void LauncherPage::retranslate()

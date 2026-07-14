@@ -84,6 +84,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QRadioButton" name="sortByPlaytimeBtn">
+            <property name="text">
+             <string>By total time &amp;played</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">sortingModeGroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item>
            <spacer name="verticalSpacer">
             <property name="orientation">
              <enum>Qt::Orientation::Vertical</enum>
@@ -251,11 +261,11 @@
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="labelJavaDir">
-            <property name="text">
-             <string>&amp;Auto Java Download:</string>
-            </property>
             <property name="toolTip">
              <string>Folder where Prism Launcher stores automatically downloaded Java versions. Do NOT set this to your system Java installation.</string>
+            </property>
+            <property name="text">
+             <string>&amp;Auto Java Download:</string>
             </property>
             <property name="buddy">
              <cstring>javaDirTextBox</cstring>
@@ -438,6 +448,25 @@
             </property>
             <property name="text">
              <string>Suggest to update an existing instance during modpack installation</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="instanceBox">
+         <property name="title">
+          <string>Instance Creation</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QCheckBox" name="downloadGameFilesBtn">
+            <property name="toolTip">
+             <string>Downloads required game files while creating the instance. Disable this to skip the initial download and fetch files when the instance is launched instead.</string>
+            </property>
+            <property name="text">
+             <string>Download game files during instance creation</string>
             </property>
            </widget>
           </item>
@@ -654,6 +683,12 @@
  </widget>
  <tabstops>
   <tabstop>scrollArea</tabstop>
+  <tabstop>sortByNameBtn</tabstop>
+  <tabstop>sortLastLaunchedBtn</tabstop>
+  <tabstop>sortByPlaytimeBtn</tabstop>
+  <tabstop>askToRenameDirBtn</tabstop>
+  <tabstop>alwaysRenameDirBtn</tabstop>
+  <tabstop>neverRenameDirBtn</tabstop>
   <tabstop>preferMenuBarCheckBox</tabstop>
   <tabstop>autoUpdateCheckBox</tabstop>
   <tabstop>updateIntervalSpinBox</tabstop>
@@ -673,7 +708,9 @@
   <tabstop>downloadsDirMoveCheckBox</tabstop>
   <tabstop>metadataEnableBtn</tabstop>
   <tabstop>dependenciesEnableBtn</tabstop>
+  <tabstop>showModIncompatCheckBox</tabstop>
   <tabstop>modpackUpdatePromptBtn</tabstop>
+  <tabstop>downloadGameFilesBtn</tabstop>
   <tabstop>lineLimitSpinBox</tabstop>
   <tabstop>checkStopLogging</tabstop>
   <tabstop>numberOfConcurrentTasksSpinBox</tabstop>

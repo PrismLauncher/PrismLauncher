@@ -22,12 +22,10 @@
 
 #pragma once
 
-#include <QObject>
-
 #include "ExternalUpdater.h"
 
 /*!
- * An implementation for the updater on windows and linux that uses out external updater.
+ * An implementation for the updater on Windows and linux that uses out external updater.
  */
 
 class PrismExternalUpdater : public ExternalUpdater {
@@ -41,7 +39,7 @@ class PrismExternalUpdater : public ExternalUpdater {
      * Check for updates manually, showing the user a progress bar and an alert if no updates are found.
      */
     void checkForUpdates() override;
-    void checkForUpdates(bool triggeredByUser);
+    void checkForUpdates(bool triggeredByUser) const;
 
     /*!
      * Indicates whether or not to check for updates automatically.
@@ -62,7 +60,7 @@ class PrismExternalUpdater : public ExternalUpdater {
      * Set whether or not to check for updates automatically.
      *
      * The update schedule cycle will be reset in a short delay after the property’s new value is set. This is to allow
-     * reverting this property without kicking off a schedule change immediately."
+     * reverting this property without kicking off a schedule change immediately.
      */
     void setAutomaticallyChecksForUpdates(bool check) override;
 
@@ -70,7 +68,7 @@ class PrismExternalUpdater : public ExternalUpdater {
      * Set the current automatic update check interval in seconds.
      *
      * The update schedule cycle will be reset in a short delay after the property’s new value is set. This is to allow
-     * reverting this property without kicking off a schedule change immediately."
+     * reverting this property without kicking off a schedule change immediately.
      */
     void setUpdateCheckInterval(double seconds) override;
 
@@ -79,15 +77,15 @@ class PrismExternalUpdater : public ExternalUpdater {
      */
     void setBetaAllowed(bool allowed) override;
 
-    void resetAutoCheckTimer();
+    void resetAutoCheckTimer() const;
     void disconnectTimer();
     void connectTimer();
 
-    void offerUpdate(const QString& version_name, const QString& version_tag, const QString& release_notes);
-    void performUpdate(const QString& version_tag);
+    void offerUpdate(const QString& versionName, const QString& versionTag, const QString& releaseNotes, bool triggeredByUser) const;
+    void performUpdate(const QString& versionTag) const;
 
    public slots:
-    void autoCheckTimerFired();
+    void autoCheckTimerFired() const;
 
    private:
     class Private;

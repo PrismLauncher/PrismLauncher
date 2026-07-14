@@ -18,28 +18,30 @@
  */
 
 #include "net/ApiDownload.h"
+
+#include <utility>
 #include "net/ApiHeaderProxy.h"
 
 namespace Net {
 
 Download::Ptr ApiDownload::makeCached(QUrl url, MetaEntryPtr entry, Download::Options options)
 {
-    auto dl = Download::makeCached(url, entry, options);
+    auto dl = Download::makeCached(std::move(url), std::move(entry), options);
     dl->addHeaderProxy(std::make_unique<ApiHeaderProxy>());
     return dl;
 }
 
 std::pair<Download::Ptr, QByteArray*> ApiDownload::makeByteArray(QUrl url, Download::Options options)
 {
-    auto [dl, response] = Download::makeByteArray(url, options);
+    auto [dl, response] = Download::makeByteArray(std::move(url), options);
     dl->addHeaderProxy(std::make_unique<ApiHeaderProxy>());
     return { dl, response };
 }
 
-Download::Ptr ApiDownload::makeFile(QUrl url, QString path, Download::Options options)
+Download::Ptr ApiDownload::makeFile(QUrl url, QString path, Download::Options options, ModrinthDownloadMeta meta)
 {
-    auto dl = Download::makeFile(url, path, options);
-    dl->addHeaderProxy(std::make_unique<ApiHeaderProxy>());
+    auto dl = Download::makeFile(std::move(url), std::move(path), options);
+    dl->addHeaderProxy(std::make_unique<ApiHeaderProxy>(std::move(meta)));
     return dl;
 }
 

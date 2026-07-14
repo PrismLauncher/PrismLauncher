@@ -24,38 +24,38 @@ struct Language;
 class TranslationsModel : public QAbstractListModel {
     Q_OBJECT
    public:
-    explicit TranslationsModel(QString path, QObject* parent = 0);
-    virtual ~TranslationsModel();
-
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex& parent) const override;
-
-    bool selectLanguage(QString key);
-    void updateLanguage(QString key);
-    QModelIndex selectedIndex();
-    QString selectedLanguage();
-
-    void downloadIndex();
-    void setUseSystemLocale(bool useSystemLocale);
-
-   private:
-    QList<Language>::Iterator findLanguage(const QString& key);
-    std::optional<Language> findLanguageAsOptional(const QString& key);
-    void reloadLocalFiles();
-    void downloadTranslation(QString key);
-    void downloadNext();
+    explicit TranslationsModel(const QString& path, QObject* parent = nullptr);
+    ~TranslationsModel() override;
 
     // hide copy constructor
     TranslationsModel(const TranslationsModel&) = delete;
     // hide assign op
     TranslationsModel& operator=(const TranslationsModel&) = delete;
 
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;  // NOLINT(*-default-arguments)
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;  // NOLINT(*-default-arguments)
+    bool selectLanguage(QString key) const;
+    void updateLanguage(const QString& key);
+    QModelIndex selectedIndex() const;
+    QString selectedLanguage() const;
+
+    void downloadIndex();
+    void setUseSystemLocale(bool useSystemLocale) const;
+
+   private:
+    int columnCount(const QModelIndex& parent) const override;
+
+    QList<Language>::Iterator findLanguage(const QString& key) const;
+    std::optional<Language> findLanguageAsOptional(const QString& key) const;
+    void reloadLocalFiles();
+    void downloadTranslation(const QString& key);
+    void downloadNext();
+
    private slots:
     void indexReceived();
-    void indexFailed(QString reason);
-    void dlFailed(QString reason);
+    void indexFailed(const QString& reason) const;
+    void dlFailed(const QString& reason);
     void dlGood();
     void translationDirChanged(const QString& path);
 

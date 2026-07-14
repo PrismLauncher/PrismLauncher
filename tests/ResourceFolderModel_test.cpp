@@ -217,8 +217,8 @@ class ResourceFolderModelTest : public QObject {
 
         auto& res_1 = model.at(0).type() != ResourceType::FOLDER ? model.at(0) : model.at(1);
         auto& res_2 = model.at(0).type() == ResourceType::FOLDER ? model.at(0) : model.at(1);
-        auto id_1 = res_1.internal_id();
-        auto id_2 = res_2.internal_id();
+        auto id_1 = res_1.internalId();
+        auto id_2 = res_2.internalId();
         bool initial_enabled_res_2 = res_2.enabled();
         bool initial_enabled_res_1 = res_1.enabled();
 
@@ -236,12 +236,12 @@ class ResourceFolderModelTest : public QObject {
         qDebug() << "res_1 got successfully toggled again.";
 
         QVERIFY(res_1.enabled() == initial_enabled_res_1);
-        QVERIFY(res_1.internal_id() == id_1);
+        QVERIFY(res_1.internalId() == id_1);
         qDebug() << "res_1 got back to its initial state.";
 
         QVERIFY(!res_2.enable(initial_enabled_res_2 ? EnableAction::ENABLE : EnableAction::DISABLE));
         QVERIFY(res_2.enabled() == initial_enabled_res_2);
-        QVERIFY(res_2.internal_id() == id_2);
+        QVERIFY(res_2.internalId() == id_2);
     }
 };
 

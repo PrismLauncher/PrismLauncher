@@ -28,19 +28,14 @@ jobs:
           fetch-depth: 0 # Required for diffing later on
           submodules: "true"
 
-      - name: Setup sccache
-        uses: hendrikmuhs/ccache-action@v1.2.23
-        with:
-          variant: sccache
-
       - name: Install Nix
         uses: cachix/install-nix-action@v31
 
-      - name: Run build
+      - name: Run source generators
         # TODO(@getchoo): Figure out how to make this work with PCH
         run: |
           nix develop --command bash -c '
-            cmake -B build -D Launcher_USE_PCH=OFF -D CMAKE_CXX_COMPILER_LAUNCHER=sccache && cmake --build build
+            cmake -B build -D Launcher_USE_PCH=OFF && cmake --build build --target autogen autorcc
           '
 
       # TODO: Use SARIF after https://github.com/psastras/sarif-rs/issues/638 is fixed

@@ -44,11 +44,20 @@ class TexturePackFolderModel : public ResourceFolderModel {
     Q_OBJECT
 
    public:
-    enum Columns { ActiveColumn = 0, ImageColumn, NameColumn, DateColumn, ProviderColumn, SizeColumn, NUM_COLUMNS };
+    enum Columns : std::uint8_t {
+        ActiveColumn = 0,
+        ImageColumn,
+        NameColumn,
+        DateColumn,
+        ProviderColumn,
+        SizeColumn,
+        FileNameColumn,
+        NumColumns
+    };
 
-    explicit TexturePackFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent = nullptr);
+    explicit TexturePackFolderModel(const QDir& dir, BaseInstance* instance, bool isIndexed, bool createDir, QObject* parent = nullptr);
 
-    virtual QString id() const override { return "texturepacks"; }
+    QString id() const override { return "texturepacks"; }
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
@@ -56,7 +65,7 @@ class TexturePackFolderModel : public ResourceFolderModel {
     int columnCount(const QModelIndex& parent) const override;
 
     [[nodiscard]] Resource* createResource(const QFileInfo& file) override { return new TexturePack(file); }
-    [[nodiscard]] Task* createParseTask(Resource&) override;
+    [[nodiscard]] Task* createParseTask(Resource& /*unused*/) override;
 
     RESOURCE_HELPERS(TexturePack)
 };

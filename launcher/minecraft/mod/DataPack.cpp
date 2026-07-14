@@ -216,7 +216,7 @@ static std::pair<Version, Version> map(int format, const QMap<std::pair<int, int
 int DataPack::compare(const Resource& other, SortType type) const
 {
     const auto& cast_other = static_cast<const DataPack&>(other);
-    if (type == SortType::PACK_FORMAT) {
+    if (type == SortType::PackFormat) {
         auto this_ver = packFormat();
         auto other_ver = cast_other.packFormat();
 

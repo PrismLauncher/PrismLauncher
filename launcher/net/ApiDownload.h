@@ -20,13 +20,17 @@
 #pragma once
 
 #include "Download.h"
+#include "net/ApiHeaderProxy.h"
 
 namespace Net {
 
 namespace ApiDownload {
 Download::Ptr makeCached(QUrl url, MetaEntryPtr entry, Download::Options options = Download::Option::NoOptions);
 std::pair<Download::Ptr, QByteArray*> makeByteArray(QUrl url, Download::Options options = Download::Option::NoOptions);
-Download::Ptr makeFile(QUrl url, QString path, Download::Options options = Download::Option::NoOptions);
+Download::Ptr makeFile(QUrl url,
+                       QString path,
+                       Download::Options options = Download::Option::NoOptions,
+                       ModrinthDownloadMeta meta = ModrinthDownloadMeta());
 };  // namespace ApiDownload
 
 }  // namespace Net

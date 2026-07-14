@@ -2,7 +2,7 @@
 
 #include <QJsonDocument>
 #include <QJsonParseError>
-#include <QNetworkRequest>
+#include <utility>
 
 #include "Application.h"
 #include "Logging.h"
@@ -12,7 +12,7 @@
 #include "net/Upload.h"
 
 XboxAuthorizationStep::XboxAuthorizationStep(AccountData* data, Token* token, QString relyingParty, QString authorizationKind)
-    : AuthStep(data), m_token(token), m_relyingParty(relyingParty), m_authorizationKind(authorizationKind)
+    : AuthStep(data), m_token(token), m_relyingParty(std::move(relyingParty)), m_authorizationKind(std::move(authorizationKind))
 {}
 
 QString XboxAuthorizationStep::describe()
@@ -22,7 +22,7 @@ QString XboxAuthorizationStep::describe()
 
 void XboxAuthorizationStep::perform()
 {
-    QString xbox_auth_template = R"XXX(
+    const QString xboxAuthTemplate = R"XXX(
 {
     "Properties": {
         "SandboxId": "RETAIL",
@@ -34,15 +34,13 @@ void XboxAuthorizationStep::perform()
     "TokenType": "JWT"
 }
 )XXX";
-    auto xbox_auth_data = xbox_auth_template.arg(m_data->userToken.token, m_relyingParty);
+    const auto xboxAuthData = xboxAuthTemplate.arg(m_data->userToken.token, m_relyingParty);
     // http://xboxlive.com
-    QUrl url("https://xsts.auth.xboxlive.com/xsts/authorize");
-    auto headers = QList<Net::HeaderPair>{
-        { "Content-Type", "application/json" },
-        { "Accept", "application/json" },
-        { "x-xbl-contract-version", "1" }
-    };
-    auto [request, response] = Net::Upload::makeByteArray(url, xbox_auth_data.toUtf8());
+    const QUrl url("https://xsts.auth.xboxlive.com/xsts/authorize");
+    auto headers = QList<Net::HeaderPair>{ { .headerName = "Content-Type", .headerValue = "application/json" },
+                                           { .headerName = "Accept", .headerValue = "application/json" },
+                                           { .headerName = "x-xbl-contract-version", .headerValue = "1" } };
+    auto [request, response] = Net::Upload::makeByteArray(url, xboxAuthData.toUtf8());
     m_request = request;
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);
@@ -62,15 +60,14 @@ void XboxAuthorizationStep::onRequestDone(QByteArray* response)
     qCDebug(authCredentials()) << *response;
     if (m_request->error() != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << m_request->error();
-        if (Net::isApplicationError(m_request->error())) {
-            if (!processSTSError(*response)) {
-                emit finished(AccountTaskState::STATE_FAILED_SOFT,
-                              tr("Failed to get authorization for %1 services. Error %2.").arg(m_authorizationKind, m_request->error()));
-            } else {
-                emit finished(AccountTaskState::STATE_FAILED_SOFT,
-                              tr("Unknown STS error for %1 services: %2").arg(m_authorizationKind, m_request->errorString()));
+        if (Net::isApplicationError(m_request->error()) && !Net::isServerError(m_request->error())) {
+            if (processSTSError(*response)) {
+                return;
             }
+            emit finished(AccountTaskState::STATE_FAILED_SOFT,
+                          tr("Unknown STS error for %1 services: %2").arg(m_authorizationKind, m_request->errorString()));
         } else {
+            m_data->networkError = m_request->error();
             emit finished(AccountTaskState::STATE_OFFLINE,
                           tr("Failed to get authorization for %1 services: %2").arg(m_authorizationKind, m_request->errorString()));
         }
@@ -99,8 +96,8 @@ bool XboxAuthorizationStep::processSTSError(const QByteArray& response)
 {
     if (m_request->error() == QNetworkReply::AuthenticationRequiredError) {
         QJsonParseError jsonError;
-        QJsonDocument doc = QJsonDocument::fromJson(response, &jsonError);
-        if (jsonError.error) {
+        const QJsonDocument doc = QJsonDocument::fromJson(response, &jsonError);
+        if (jsonError.error != QJsonParseError::NoError) {
             qWarning() << "Cannot parse error XSTS response as JSON:" << jsonError.errorString();
             emit finished(AccountTaskState::STATE_FAILED_SOFT,
                           tr("Cannot parse %1 authorization error response as JSON: %2").arg(m_authorizationKind, jsonError.errorString()));

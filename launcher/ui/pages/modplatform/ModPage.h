@@ -29,10 +29,10 @@ class ModPage : public ResourcePage {
     static T* create(ModDownloadDialog* dialog, BaseInstance& instance)
     {
         auto page = new T(dialog, instance);
-        auto model = static_cast<ModModel*>(page->getModel());
+        auto* model = static_cast<ModModel*>(page->getModel());
 
-        auto filter_widget = page->createFilterWidget();
-        page->setFilterWidget(filter_widget);
+        auto filterWidget = page->createFilterWidget();
+        page->setFilterWidget(filterWidget);
         model->setFilter(page->getFilter());
 
         connect(model, &ResourceModel::versionListUpdated, page, &ResourcePage::versionListUpdated);
@@ -43,18 +43,21 @@ class ModPage : public ResourcePage {
     }
 
     //: The plural version of 'mod'
-    inline QString resourcesString() const override { return tr("mods"); }
+    QString resourcesString() const override { return tr("mods"); }
     //: The singular version of 'mods'
-    inline QString resourceString() const override { return tr("mod"); }
+    QString resourceString() const override { return tr("mod"); }
 
     QMap<QString, QString> urlHandlers() const override;
 
-    void addResourceToPage(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, ResourceFolderModel*) override;
+    void addResourceToPage(ModPlatform::IndexedPack::Ptr /*unused*/,
+                           ModPlatform::IndexedVersion& /*unused*/,
+                           ResourceFolderModel* /*unused*/,
+                           QString downloadReason = "standalone") override;
 
     virtual std::unique_ptr<ModFilterWidget> createFilterWidget() = 0;
 
     bool supportsFiltering() const override { return true; };
-    auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
+    auto getFilter() const -> std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
     void setFilterWidget(std::unique_ptr<ModFilterWidget>&);
 
    protected:

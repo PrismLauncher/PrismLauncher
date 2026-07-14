@@ -18,7 +18,7 @@ class ShaderPackFolderModel : public ResourceFolderModel {
 
     [[nodiscard]] Task* createParseTask(Resource& resource) override
     {
-        return new LocalShaderPackParseTask(m_next_resolution_ticket, static_cast<ShaderPack&>(resource));
+        return new LocalShaderPackParseTask(m_nextResolutionTicket, static_cast<ShaderPack&>(resource));
     }
 
     QDir indexDir() const override { return m_dir; }

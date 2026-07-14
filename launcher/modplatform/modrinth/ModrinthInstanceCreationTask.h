@@ -24,18 +24,18 @@ class ModrinthCreationTask final : public InstanceCreationTask {
     };
 
    public:
-    ModrinthCreationTask(QString staging_path,
-                         SettingsObject* global_settings,
+    ModrinthCreationTask(const QString& stagingPath,
+                         SettingsObject* globalSettings,
                          QWidget* parent,
                          QString id,
-                         QString version_id = {},
-                         QString original_instance_id = {})
-        : InstanceCreationTask(), m_parent(parent), m_managed_id(std::move(id)), m_managed_version_id(std::move(version_id))
+                         QString versionId = {},
+                         QString originalInstanceId = {})
+        : m_parent(parent), m_managed_id(std::move(id)), m_managed_version_id(std::move(versionId))
     {
-        setStagingPath(staging_path);
-        setParentSettings(global_settings);
+        setStagingPath(stagingPath);
+        setParentSettings(globalSettings);
 
-        m_original_instance_id = std::move(original_instance_id);
+        m_original_instance_id = std::move(originalInstanceId);
     }
 
     bool abort() override;
@@ -44,7 +44,7 @@ class ModrinthCreationTask final : public InstanceCreationTask {
     std::unique_ptr<MinecraftInstance> createInstance() override;
 
    private:
-    bool parseManifest(const QString&, std::vector<File>&, bool set_internal_data = true, bool show_optional_dialog = true);
+    bool parseManifest(const QString&, std::vector<File>&, bool setInternalData = true, bool showOptionalDialog = true);
 
    private:
     QWidget* m_parent = nullptr;

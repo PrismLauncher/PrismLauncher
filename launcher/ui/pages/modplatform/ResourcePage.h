@@ -9,7 +9,6 @@
 
 #include "ResourceDownloadTask.h"
 #include "modplatform/ModIndex.h"
-#include "modplatform/ResourceAPI.h"
 
 #include "ui/pages/BasePage.h"
 #include "ui/pages/modplatform/ResourceModel.h"
@@ -44,9 +43,9 @@ class ResourcePage : public QWidget, public BasePage {
     virtual auto debugName() const -> QString = 0;
 
     //: The plural version of 'resource'
-    virtual inline QString resourcesString() const { return tr("resources"); }
+    virtual QString resourcesString() const { return tr("resources"); }
     //: The singular version of 'resources'
-    virtual inline QString resourceString() const { return tr("resource"); }
+    virtual QString resourceString() const { return tr("resource"); }
 
     /* Features this resource's page supports */
     virtual bool supportsFiltering() const = 0;
@@ -58,7 +57,7 @@ class ResourcePage : public QWidget, public BasePage {
     /** Get the current term in the search bar. */
     auto getSearchTerm() const -> QString;
     /** Programatically set the term in the search bar. */
-    void setSearchTerm(QString);
+    void setSearchTerm(const QString&);
 
     bool setCurrentPack(ModPlatform::IndexedPack::Ptr);
     auto getCurrentPack() const -> ModPlatform::IndexedPack::Ptr;
@@ -76,21 +75,26 @@ class ResourcePage : public QWidget, public BasePage {
     virtual void versionListUpdated(const QModelIndex& index);
 
     void addResourceToDialog(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&);
-    void removeResourceFromDialog(const QString& pack_name);
+    void removeResourceFromDialog(const QString& packName);
     virtual void removeResourceFromPage(const QString& name);
-    virtual void addResourceToPage(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, ResourceFolderModel*);
+    virtual void addResourceToPage(ModPlatform::IndexedPack::Ptr,
+                                   ModPlatform::IndexedVersion&,
+                                   ResourceFolderModel*,
+                                   QString downloadReason = "standalone");
 
     virtual void modelReset();
 
     QList<DownloadTaskPtr> selectedPacks() { return m_model->selectedPacks(); }
     bool hasSelectedPacks() { return !(m_model->selectedPacks().isEmpty()); }
 
-    virtual void openProject(QVariant projectID);
+    virtual void openProject(const QVariant& projectID);
+
+    void setSuppressInitialSearch(bool suppress);
 
    protected slots:
     virtual void triggerSearch() = 0;
 
-    void onSelectionChanged(QModelIndex first, QModelIndex second);
+    void onSelectionChanged(QModelIndex curr, QModelIndex prev);
     void onVersionSelectionChanged(int index);
     void onResourceSelected();
     void onResourceToggle(const QModelIndex& index);
@@ -118,6 +122,9 @@ class ResourcePage : public QWidget, public BasePage {
     bool m_doNotJumpToMod = false;
 
     QSet<int> m_enableQueue;
+
+   private:
+    bool m_suppressInitialSearch = false;
 };
 
 }  // namespace ResourceDownload

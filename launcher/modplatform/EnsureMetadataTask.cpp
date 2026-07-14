@@ -99,7 +99,7 @@ void EnsureMetadataTask::executeTask()
         }
 
         // They already have the right metadata :o
-        if (resource->status() != ResourceStatus::NO_METADATA && resource->metadata() && resource->metadata()->provider == m_provider) {
+        if (resource->status() != ResourceStatus::NoMetadata && resource->metadata() && resource->metadata()->provider == m_provider) {
             qDebug() << "Resource" << resource->name() << "already has metadata!";
             emitReady(resource);
             continue;
@@ -263,7 +263,7 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
 Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
 {
     QHash<QString, QString> addonIds;
-    for (auto const& data : m_tempVersions)
+    for (const auto& data : m_tempVersions)
         addonIds.insert(data.addonId.toString(), data.hash);
 
     Task::Ptr proj_task;
@@ -404,7 +404,7 @@ Task::Ptr EnsureMetadataTask::flameVersionsTask()
 Task::Ptr EnsureMetadataTask::flameProjectsTask()
 {
     QHash<QString, QString> addonIds;
-    for (auto const& hash : m_resources.keys()) {
+    for (const auto& hash : m_resources.keys()) {
         if (m_tempVersions.contains(hash)) {
             auto data = m_tempVersions.find(hash).value();
 

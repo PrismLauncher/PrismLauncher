@@ -41,7 +41,7 @@
 #include <QObject>
 #include <QRunnable>
 #include <memory>
-#include "minecraft/mod/Mod.h"
+#include "minecraft/mod/Resource.h"
 #include "tasks/Task.h"
 
 class ResourceFolderLoadTask : public Task {
@@ -54,11 +54,11 @@ class ResourceFolderLoadTask : public Task {
     ResultPtr result() const { return m_result; }
 
    public:
-    ResourceFolderLoadTask(const QDir& resource_dir,
-                           const QDir& index_dir,
-                           bool is_indexed,
-                           bool clean_orphan,
-                           std::function<Resource*(const QFileInfo&)> create_function);
+    ResourceFolderLoadTask(const QDir& resourceDir,
+                           const QDir& indexDir,
+                           bool isIndexed,
+                           bool cleanOrphan,
+                           std::function<Resource*(const QFileInfo&)> createFunction);
 
     bool canAbort() const override { return true; }
     bool abort() override
@@ -76,7 +76,7 @@ class ResourceFolderLoadTask : public Task {
     QDir m_resource_dir, m_index_dir;
     bool m_is_indexed;
     bool m_clean_orphan;
-    std::function<Resource*(QFileInfo const&)> m_create_func;
+    std::function<Resource*(const QFileInfo&)> m_create_func;
     ResultPtr m_result;
 
     std::atomic<bool> m_aborted = false;

@@ -47,30 +47,31 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
         painter->setOpacity(0.4);  // Fade out the entire item
     }
     // The default icon size will be a square (and height is usually the lower value).
-    auto icon_width = rect.height(), icon_height = rect.height();
+    auto icon_width = rect.height();
     int icon_x_margin = (rect.height() - icon_width) / 2;
-    int icon_y_margin = (rect.height() - icon_height) / 2;
 
     if (!opt.icon.isNull()) {  // Icon painting
+        auto icon_height = 0;
         {
             auto icon_size = opt.decorationSize;
             icon_width = icon_size.width();
             icon_height = icon_size.height();
 
-            icon_y_margin = (rect.height() - icon_height) / 2;
-            icon_x_margin = icon_y_margin;  // use same margins for consistency
+            icon_x_margin = (rect.height() - icon_height) / 2;  // use same margins for consistency
         }
 
         // Centralize icon with a margin to separate from the other elements
         int x = rect.x() + icon_x_margin;
-        int y = rect.y() + icon_y_margin;
+        int y = rect.y() + icon_x_margin;
 
-        if (opt.features & QStyleOptionViewItem::HasCheckIndicator)
+        if (opt.features & QStyleOptionViewItem::HasCheckIndicator) {
             rect.translate(icon_x_margin / 2, 0);
+        }
 
         // Prevent 'scaling null pixmap' warnings
-        if (icon_width > 0 && icon_height > 0)
+        if (icon_width > 0 && icon_height > 0) {
             opt.icon.paint(painter, x, y, icon_width, icon_height);
+        }
     }
 
     // Change the rect so that funther painting is easier

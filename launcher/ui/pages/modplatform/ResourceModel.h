@@ -36,16 +36,16 @@ class ResourceModel : public QAbstractListModel {
     ResourceModel(ResourceAPI* api);
     ~ResourceModel() override;
 
-    auto data(const QModelIndex&, int role) const -> QVariant override;
+    auto data(const QModelIndex& /*index*/, int role) const -> QVariant override;
     auto roleNames() const -> QHash<int, QByteArray> override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
     virtual auto debugName() const -> QString;
     virtual auto metaEntryBase() const -> QString = 0;
 
-    inline int rowCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : static_cast<int>(m_packs.size()); }
-    inline int columnCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : 1; }
-    inline auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); }
+    int rowCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : static_cast<int>(m_packs.size()); }
+    int columnCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : 1; }
+    auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); }
 
     bool hasActiveSearchJob() const { return m_current_search_job && m_current_search_job->isRunning(); }
     bool hasActiveInfoJob() const { return m_current_info_job.isRunning(); }
@@ -66,7 +66,7 @@ class ResourceModel : public QAbstractListModel {
 
    public slots:
     void fetchMore(const QModelIndex& parent) override;
-    inline bool canFetchMore(const QModelIndex& parent) const override
+    bool canFetchMore(const QModelIndex& parent) const override
     {
         return parent.isValid() ? false : m_search_state == SearchState::CanFetchMore;
     }
@@ -94,7 +94,8 @@ class ResourceModel : public QAbstractListModel {
     void addPack(ModPlatform::IndexedPack::Ptr pack,
                  ModPlatform::IndexedVersion& version,
                  ResourceFolderModel* packs,
-                 bool is_indexed = false);
+                 bool isIndexed = false,
+                 QString downloadReason = "standalone");
     void removePack(const QString& rem);
     QList<DownloadTaskPtr> selectedPacks() { return m_selected; }
 

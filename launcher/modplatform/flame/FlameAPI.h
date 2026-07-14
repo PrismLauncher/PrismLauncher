@@ -79,6 +79,7 @@ class FlameAPI : public ResourceAPI {
             case ModPlatform::LegacyFabric:
             case ModPlatform::Ornithe:
             case ModPlatform::Rift:
+            case ModPlatform::None:
                 break;  // not supported
         }
         return 0;

@@ -36,28 +36,30 @@
 #include "TexturePackFolderModel.h"
 
 #include "minecraft/mod/tasks/LocalTexturePackParseTask.h"
-#include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
 
-TexturePackFolderModel::TexturePackFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)
-    : ResourceFolderModel(QDir(dir), instance, is_indexed, create_dir, parent)
+TexturePackFolderModel::TexturePackFolderModel(const QDir& dir, BaseInstance* instance, bool isIndexed, bool createDir, QObject* parent)
+    : ResourceFolderModel(QDir(dir), instance, isIndexed, createDir, parent)
 {
-    m_column_names = QStringList({ "Enable", "Image", "Name", "Last Modified", "Provider", "Size" });
-    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Last Modified"), tr("Provider"), tr("Size") });
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::DATE, SortType::PROVIDER, SortType::SIZE };
-    m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,
-                              QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
-    m_columnsHideable = { false, true, false, true, true, true };
+    m_columnNames = QStringList({ "Enable", "Image", "Name", "Last Modified", "Provider", "Size", "File Name" });
+    m_columnNamesTranslated =
+        QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Last Modified"), tr("Provider"), tr("Size"), tr("File Name") });
+    m_columnSortKeys = { SortType::Enabled,  SortType::Name, SortType::Name,    SortType::Date,
+                         SortType::Provider, SortType::Size, SortType::Filename };
+    m_columnResizeModes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,    QHeaderView::Interactive,
+                            QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
+    m_columnsHideable = { false, true, false, true, true, true, true };
 }
 
 Task* TexturePackFolderModel::createParseTask(Resource& resource)
 {
-    return new LocalTexturePackParseTask(m_next_resolution_ticket, static_cast<TexturePack&>(resource));
+    return new LocalTexturePackParseTask(m_nextResolutionTicket, static_cast<TexturePack&>(resource));
 }
 
 QVariant TexturePackFolderModel::data(const QModelIndex& index, int role) const
 {
-    if (!validateIndex(index))
+    if (!validateIndex(index)) {
         return {};
+    }
 
     int row = index.row();
     int column = index.column();
@@ -75,6 +77,8 @@ QVariant TexturePackFolderModel::data(const QModelIndex& index, int role) const
             if (column == ImageColumn) {
                 return QSize(32, 32);
             }
+            break;
+        default:
             break;
     }
 
@@ -96,6 +100,11 @@ QVariant TexturePackFolderModel::data(const QModelIndex& index, int role) const
         case SizeColumn:
             mappedIndex = index.siblingAtColumn(ResourceFolderModel::SizeColumn);
             break;
+        case FileNameColumn:
+            mappedIndex = index.siblingAtColumn(ResourceFolderModel::FileNameColumn);
+            break;
+        default:
+            break;
     }
 
     if (mappedIndex.isValid()) {
@@ -116,6 +125,7 @@ QVariant TexturePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Or
                 case ImageColumn:
                 case ProviderColumn:
                 case SizeColumn:
+                case FileNameColumn:
                     return columnNames().at(section);
                 default:
                     return {};
@@ -132,6 +142,8 @@ QVariant TexturePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Or
                     return tr("The source provider of the texture pack.");
                 case SizeColumn:
                     return tr("The size of the texture pack.");
+                case FileNameColumn:
+                    return tr("The file name of the texture pack.");
                 default:
                     return {};
             }
@@ -145,5 +157,5 @@ QVariant TexturePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Or
 
 int TexturePackFolderModel::columnCount(const QModelIndex& parent) const
 {
-    return parent.isValid() ? 0 : NUM_COLUMNS;
+    return parent.isValid() ? 0 : NumColumns;
 }
