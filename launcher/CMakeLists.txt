@@ -1269,7 +1269,7 @@ if(TARGET PkgConfig::libqrencode)
     target_link_libraries(Launcher_logic PkgConfig::libqrencode)
 else()
     target_include_directories(Launcher_logic PRIVATE ${LIBQRENCODE_INCLUDE_DIR})
-    target_link_libraries(Launcher_logic ${LIBQRENCODE_LIBRARIES})
+    target_link_libraries(Launcher_logic ${LIBQRENCODE_LIBRARY})
 endif()
 
 if(TARGET PkgConfig::tomlplusplus)
