@@ -444,6 +444,61 @@ QStatusBar {
     padding: 4px 8px;
 }
 
+/* ========== ToolBar ========== */
+QToolBar {
+    background-color: #0f172a;
+    border: none;
+    border-bottom: 1px solid #334155;
+    padding: 4px 8px;
+    spacing: 4px;
+}
+
+QToolBar::separator {
+    background-color: #334155;
+    width: 1px;
+    margin: 8px 8px;
+}
+
+QToolButton {
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: #cbd5e1;
+}
+
+QToolButton:hover {
+    background-color: #334155;
+    border-color: #475569;
+    color: #f1f5f9;
+}
+
+QToolButton:pressed {
+    background-color: #1e293b;
+}
+
+QToolButton:checked {
+    background-color: #1e3a5f;
+    border-color: #3b82f6;
+    color: #93c5fd;
+}
+
+QToolButton:disabled {
+    color: #64748b;
+}
+
+/* Vertical toolbar (instance sidebar) */
+QToolBar[orientation="1"] {
+    border-bottom: none;
+    border-right: 1px solid #334155;
+    padding: 12px 8px;
+}
+
+QToolBar[orientation="1"] QToolButton {
+    padding: 10px 8px;
+    min-width: 80px;
+}
+
 /* ========== Splitter ========== */
 QSplitter::handle {
     background-color: #334155;

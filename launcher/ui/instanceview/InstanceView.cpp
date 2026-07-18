@@ -469,41 +469,89 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
 
     if (model()->rowCount() == 0) {
         painter.save();
-        QString emptyString = tr("Welcome!") + "\n" + tr("Click \"Add Instance\" to get started.");
-
-        // calculate the rect for the overlay
         painter.setRenderHint(QPainter::Antialiasing, true);
-        QFont font("sans", 20);
-        font.setBold(true);
 
         QRect bounds = viewport()->geometry();
         bounds.moveTop(0);
-        auto innerBounds = bounds;
-        innerBounds.adjust(10, 10, -10, -10);
 
-        QColor background = QApplication::palette().color(QPalette::WindowText);
-        QColor foreground = QApplication::palette().color(QPalette::Base);
-        foreground.setAlpha(190);
-        painter.setFont(font);
-        auto fontMetrics = painter.fontMetrics();
-        auto textRect = fontMetrics.boundingRect(innerBounds, Qt::AlignHCenter | Qt::TextWordWrap, emptyString);
-        textRect.moveCenter(bounds.center());
+        // Modern empty state - friendly onboarding
+        QString titleText = tr("Welcome to Prism Launcher");
+        QString subtitleText = tr("Create your first instance to start playing");
+        QString hintText = tr("Click \"Add Instance\" above →");
 
-        auto wrapRect = textRect;
-        wrapRect.adjust(-10, -10, 10, 10);
+        // Title font - large and bold
+        QFont titleFont("sans", 22);
+        titleFont.setBold(true);
+        titleFont.setStyleStrategy(QFont::PreferAntialias);
 
-        // check if we are allowed to draw in our area
-        if (!event->rect().intersects(wrapRect)) {
-            return;
-        }
+        // Subtitle font - medium weight
+        QFont subtitleFont("sans", 11);
+        subtitleFont.setWeight(QFont::Medium);
 
-        painter.setBrush(QBrush(background));
-        painter.setPen(foreground);
-        painter.drawRoundedRect(wrapRect, 5.0, 5.0);
+        // Hint font - smaller, muted
+        QFont hintFont("sans", 10);
 
-        painter.setPen(foreground);
-        painter.setFont(font);
-        painter.drawText(textRect, Qt::AlignHCenter | Qt::TextWordWrap, emptyString);
+        // Calculate text sizes
+        QFontMetrics titleFm(titleFont);
+        QFontMetrics subtitleFm(subtitleFont);
+        QFontMetrics hintFm(hintFont);
+
+        int titleWidth = titleFm.horizontalAdvance(titleText);
+        int subtitleWidth = subtitleFm.horizontalAdvance(subtitleText);
+        int hintWidth = hintFm.horizontalAdvance(hintText);
+
+        int maxWidth = qMax(qMax(titleWidth, subtitleWidth), hintWidth);
+        int totalHeight = titleFm.height() + 12 + subtitleFm.height() + 24 + hintFm.height();
+
+        // Center the whole block
+        QRect contentRect;
+        contentRect.setWidth(maxWidth + 80);
+        contentRect.setHeight(totalHeight + 80);
+        contentRect.moveCenter(bounds.center());
+
+        // Draw subtle card background
+        QColor cardBg = option.palette.color(QPalette::Base);
+        cardBg.setAlphaF(0.7f);
+        painter.setBrush(cardBg);
+        painter.setPen(Qt::NoPen);
+        painter.drawRoundedRect(contentRect, 16.0, 16.0);
+
+        // Draw subtle border
+        QColor borderColor = option.palette.color(QPalette::Text);
+        borderColor.setAlphaF(0.08f);
+        painter.setPen(QPen(borderColor, 1));
+        painter.setBrush(Qt::NoBrush);
+        painter.drawRoundedRect(contentRect, 16.0, 16.0);
+
+        // Calculate text positions
+        int contentX = contentRect.center().x();
+        int startY = contentRect.top() + 40;
+
+        // Draw title
+        painter.setFont(titleFont);
+        QColor titleColor = option.palette.color(QPalette::Text);
+        painter.setPen(titleColor);
+        QRect titleRect(0, startY, titleWidth, titleFm.height());
+        titleRect.moveCenter(QPoint(contentX, titleRect.center().y()));
+        painter.drawText(titleRect, Qt::AlignCenter, titleText);
+
+        // Draw subtitle
+        painter.setFont(subtitleFont);
+        QColor subtitleColor = option.palette.color(QPalette::Text);
+        subtitleColor.setAlphaF(0.7f);
+        painter.setPen(subtitleColor);
+        QRect subtitleRect(0, startY + titleFm.height() + 12, subtitleWidth, subtitleFm.height());
+        subtitleRect.moveCenter(QPoint(contentX, subtitleRect.center().y()));
+        painter.drawText(subtitleRect, Qt::AlignCenter, subtitleText);
+
+        // Draw hint
+        painter.setFont(hintFont);
+        QColor hintColor = option.palette.color(QPalette::Text);
+        hintColor.setAlphaF(0.5f);
+        painter.setPen(hintColor);
+        QRect hintRect(0, startY + titleFm.height() + 12 + subtitleFm.height() + 24, hintWidth, hintFm.height());
+        hintRect.moveCenter(QPoint(contentX, hintRect.center().y()));
+        painter.drawText(hintRect, Qt::AlignCenter, hintText);
 
         painter.restore();
         return;
