@@ -533,6 +533,98 @@ QToolBox::tab:selected {
     font-weight: 600;
 }
 
+/* ========== Settings / Page Navigation ========== */
+PageView {
+    background-color: #0f172a;
+    border: none;
+    border-right: 1px solid #334155;
+    padding: 8px 4px;
+    outline: none;
+}
+
+PageView::item {
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 2px 4px;
+    color: #cbd5e1;
+}
+
+PageView::item:hover {
+    background-color: #334155;
+    color: #f1f5f9;
+}
+
+PageView::item:selected {
+    background-color: #1e3a5f;
+    color: #93c5fd;
+    font-weight: 500;
+}
+
+PageView::item:selected:active {
+    background-color: #1e40af;
+}
+
+/* Search field in settings */
+PageContainer QLineEdit {
+    margin: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+/* Settings page content area */
+QScrollArea {
+    border: none;
+    background-color: #1e293b;
+}
+
+QScrollArea > QWidget > QWidget {
+    background-color: #1e293b;
+}
+
+/* Settings group sections */
+QGroupBox {
+    margin-top: 16px;
+    padding-top: 16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 12px;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    background-color: #0f172a;
+    font-weight: 600;
+    color: #f1f5f9;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 16px;
+    padding: 0 8px;
+    color: #f1f5f9;
+}
+
+/* ========== Dialog Buttons ========== */
+QDialogButtonBox {
+    padding: 12px 16px;
+    border-top: 1px solid #334155;
+    background-color: #0f172a;
+}
+
+QDialogButtonBox QPushButton {
+    min-width: 80px;
+    padding: 6px 16px;
+}
+
+QDialogButtonBox QPushButton[dialogButtonCode="1"] {
+    background-color: #3b82f6;
+    color: white;
+    border: 1px solid #3b82f6;
+}
+
+QDialogButtonBox QPushButton[dialogButtonCode="1"]:hover {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
 /* ========== Instance View Specific ========== */
 InstanceView {
     background-color: #0f172a;

@@ -29,7 +29,7 @@ class PageViewDelegate : public QStyledItemDelegate {
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
     {
         QSize size = QStyledItemDelegate::sizeHint(option, index);
-        size.setHeight(qMax(size.height(), 32));
+        size.setHeight(qMax(size.height(), 40));
         return size;
     }
 };
