@@ -142,41 +142,51 @@ VisualGroup::HitResults VisualGroup::hitScan(const QPoint& pos) const
 void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& option) const
 {
     QRect optRect = option.rect;
-    optRect.setTop(optRect.top() + 7);
+    optRect.setTop(optRect.top() + 12);  // Increased top padding
+
     QFont font(QApplication::font());
     font.setBold(true);
+    font.setPointSizeF(font.pointSizeF() * 0.95);  // Slightly smaller but bolder for modern look
     const QFontMetrics fontMetrics = QFontMetrics(font);
     painter->setFont(font);
 
     QPen pen;
-    pen.setWidth(2);
+    pen.setWidth(1);
     QColor penColor = option.palette.text().color();
-    penColor.setAlphaF(0.6f);
+    penColor.setAlphaF(0.85f);  // Higher opacity for better readability
     pen.setColor(penColor);
     painter->setPen(pen);
     painter->setRenderHint(QPainter::Antialiasing);
 
-    // sizes and offsets, to keep things consistent below
-    const int arrowOffsetLeft = fontMetrics.height() / 2 + 7;
+    // sizes and offsets - modern spacing
+    const int arrowOffsetLeft = fontMetrics.height() / 2 + 16;  // More left padding
     const int textOffsetLeft = arrowOffsetLeft * 2;
     const int centerHeight = optRect.top() + fontMetrics.height() / 2;
     const QString& textToDraw = text.isEmpty() ? QObject::tr("Ungrouped") : text;
 
-    // BEGIN: arrow
+    // BEGIN: arrow - modern chevron style
     {
-        constexpr int arrowSize = 6;
+        constexpr int arrowSize = 7;
+        painter->save();
+        QColor arrowColor = option.palette.text().color();
+        arrowColor.setAlphaF(0.6f);
+        painter->setPen(QPen(arrowColor, 2));
+        painter->setRenderHint(QPainter::Antialiasing, true);
+
         QPolygon arrowPolygon;
         if (collapsed) {
+            // Right-pointing chevron
             arrowPolygon << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight - arrowSize)
                          << QPoint(arrowOffsetLeft + arrowSize / 2, centerHeight)
                          << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight + arrowSize);
-            painter->drawPolyline(arrowPolygon);
         } else {
+            // Down-pointing chevron
             arrowPolygon << QPoint(arrowOffsetLeft - arrowSize, centerHeight - arrowSize / 2)
                          << QPoint(arrowOffsetLeft, centerHeight + arrowSize / 2)
                          << QPoint(arrowOffsetLeft + arrowSize, centerHeight - arrowSize / 2);
-            painter->drawPolyline(arrowPolygon);
         }
+        painter->drawPolyline(arrowPolygon);
+        painter->restore();
     }
     // END: arrow
 
@@ -186,26 +196,27 @@ void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& opti
         textRect.setTop(textRect.top());
         textRect.setLeft(textOffsetLeft);
         textRect.setHeight(fontMetrics.height());
-        textRect.setRight(textRect.right() - 7);
+        textRect.setRight(textRect.right() - 16);  // More right padding
 
         painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, textToDraw);
     }
     // END: text
 
-    // BEGIN: horizontal line
+    // BEGIN: horizontal line - modern subtle separator
     {
-        penColor.setAlphaF(0.05f);
-        pen.setColor(penColor);
-        painter->setPen(pen);
-        // startPoint is left + arrow + text + space
-        const int startPoint =
-            optRect.left() + fontMetrics.height() + fontMetrics.size(Qt::AlignLeft | Qt::AlignVCenter, textToDraw).width() + 20;
+        painter->save();
+        QColor lineColor = option.palette.text().color();
+        lineColor.setAlphaF(0.08f);  // Very subtle line
+        QPen linePen(lineColor);
+        linePen.setWidth(1);
+        painter->setPen(linePen);
+
+        const int startPoint = optRect.left() + textOffsetLeft + fontMetrics.size(Qt::AlignLeft | Qt::AlignVCenter, textToDraw).width() + 24;
         painter->setRenderHint(QPainter::Antialiasing, false);
-        QPolygon polygon;
-        // for some reason the height (yPos) doesn't look centered, so we are adding 1 to the center height
-        const int lineHeight = centerHeight + 1;
-        polygon << QPoint(startPoint, lineHeight) << QPoint(optRect.right() - 3, lineHeight);
-        painter->drawPolyline(polygon);
+
+        QLineF line(startPoint, centerHeight, optRect.right() - 16, centerHeight);
+        painter->drawLine(line);
+        painter->restore();
     }
     // END: horizontal line
 }
@@ -219,18 +230,12 @@ int VisualGroup::headerHeight()
 {
     QFont font(QApplication::font());
     font.setBold(true);
+    font.setPointSizeF(font.pointSizeF() * 0.95);
     QFontMetrics fontMetrics(font);
 
-    const int height = fontMetrics.height() + 1 /* 1 pixel-width gradient */
-                       + 11 /* top and bottom separation */;
+    // Increased height for modern spacing (top + bottom padding)
+    const int height = fontMetrics.height() + 24 /* top and bottom separation */;
     return height;
-    /*
-    int raw = view->viewport()->fontMetrics().height() + 4;
-    // add english. maybe. depends on font height.
-    if (raw % 2 == 0)
-        raw++;
-    return std::min(raw, 25);
-    */
 }
 
 int VisualGroup::contentHeight() const

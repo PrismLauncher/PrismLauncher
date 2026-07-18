@@ -72,13 +72,38 @@ ListViewDelegate::ListViewDelegate(QObject* parent) : QStyledItemDelegate(parent
 
 void drawSelectionRect(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect)
 {
-    if ((option.state & QStyle::State_Selected))
-        painter->fillRect(rect, option.palette.brush(QPalette::Highlight));
-    else {
-        QColor backgroundColor = option.palette.color(QPalette::Window);
-        backgroundColor.setAlpha(160);
-        painter->fillRect(rect, QBrush(backgroundColor));
+    // Modern card-style background with rounded corners
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing, true);
+
+    QRect cardRect = rect.adjusted(4, 4, -4, -4);
+    const qreal radius = 12.0;
+
+    if ((option.state & QStyle::State_Selected)) {
+        // Selected state - accent color background with subtle border
+        QColor selectedBg = option.palette.color(QPalette::Highlight);
+        selectedBg.setAlphaF(0.12f);
+        painter->setBrush(selectedBg);
+
+        QPen borderPen(option.palette.color(QPalette::Highlight));
+        borderPen.setWidthF(1.5);
+        painter->setPen(borderPen);
+    } else if (option.state & QStyle::State_MouseOver) {
+        // Hover state - subtle background
+        QColor hoverBg = option.palette.color(QPalette::Text);
+        hoverBg.setAlphaF(0.05f);
+        painter->setBrush(hoverBg);
+        painter->setPen(Qt::NoPen);
+    } else {
+        // Normal state - subtle card background
+        QColor cardBg = option.palette.color(QPalette::Base);
+        cardBg.setAlphaF(0.6f);
+        painter->setBrush(cardBg);
+        painter->setPen(Qt::NoPen);
     }
+
+    painter->drawRoundedRect(cardRect, radius, radius);
+    painter->restore();
 }
 
 void drawFocusRect(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect)
@@ -182,6 +207,7 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     initStyleOption(&opt, index);
     painter->save();
     painter->setClipRect(opt.rect);
+    painter->setRenderHint(QPainter::Antialiasing, true);
 
     opt.features |= QStyleOptionViewItem::WrapText;
     opt.text = index.data().toString();
@@ -190,22 +216,25 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 
     QStyle* style = opt.widget ? opt.widget->style() : QApplication::style();
 
-    // const int iconSize =  style->pixelMetric(QStyle::PM_IconViewIconSize);
-    const int iconSize = 48;
-    QRect iconbox = opt.rect;
+    // Modern card layout with increased padding
+    const int iconSize = 56;  // Slightly larger icon for modern look
+    const int cardPadding = 12;
     const int textMargin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, 0, opt.widget) + 1;
+
+    QRect iconbox = opt.rect;
+    iconbox.adjust(cardPadding, cardPadding + 4, -cardPadding, 0);
+    iconbox.setHeight(iconSize);
+
     QRect textRect = opt.rect;
-    QRect textHighlightRect = textRect;
-    // clip the decoration on top, remove width padding
-    textRect.adjust(textMargin, iconSize + textMargin + 5, -textMargin, 0);
+    QRect textHighlightRect = opt.rect;
+    // Adjust text position for better spacing below icon
+    textRect.adjust(cardPadding, iconSize + cardPadding + 8, -cardPadding, -cardPadding);
+    textHighlightRect = opt.rect;
 
-    textHighlightRect.adjust(0, iconSize + 5, 0, 0);
-
-    // draw background
+    // draw card background
     {
-        // FIXME: unused
-        // QSize textSize = viewItemTextSize ( &opt );
         drawSelectionRect(painter, opt, textHighlightRect);
+    }
         /*
         QPalette::ColorGroup cg;
         QStyleOptionViewItem opt2(opt);
@@ -330,11 +359,15 @@ QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem& option, const QMode
 
     QStyle* style = opt.widget ? opt.widget->style() : QApplication::style();
     const int textMargin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, &option, opt.widget) + 1;
-    int height = 48 + textMargin * 2 + 5;  // TODO: turn constants into variables
+    const int cardPadding = 12;
+    const int iconSize = 56;
+
+    int height = iconSize + cardPadding * 2 + 8;  // icon + padding + gap
     QSize szz = viewItemTextSize(&opt);
     height += szz.height();
-    // FIXME: maybe the icon items could scale and keep proportions?
-    QSize sz(100, height);
+
+    // Modern card dimensions - slightly wider and taller
+    QSize sz(120, height);
     return sz;
 }
 
