@@ -507,6 +507,31 @@ QToolButton:disabled {
     color: #64748b;
 }
 
+/* Primary CTA tool button */
+QToolButton[objectName="primary"] {
+    background-color: #3b82f6;
+    border: 1px solid #3b82f6;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+QToolButton[objectName="primary"]:hover {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}
+
+QToolButton[objectName="primary"]:pressed {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+QToolButton[objectName="primary"]:disabled {
+    background-color: #475569;
+    border-color: #475569;
+    color: #94a3b8;
+}
+
 /* Vertical toolbar (instance sidebar) */
 QToolBar[orientation="1"] {
     border-bottom: none;
