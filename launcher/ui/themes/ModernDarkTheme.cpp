@@ -105,6 +105,8 @@ QPushButton:hover {
 
 QPushButton:pressed {
     background-color: #1e293b;
+    padding-top: 9px;
+    padding-bottom: 7px;
 }
 
 QPushButton:disabled {
@@ -129,8 +131,11 @@ QDialogButtonBox QPushButton[dialogButtonRole="acceptButton"]:hover {
 }
 
 QPushButton[objectName="primary"]:pressed,
-QDialogButtonBox QPushButton[dialogButtonRole="acceptButton"]:pressed {
+QDialogButtonBox QPushButton[dialogButtonRole="acceptButton"]:pressed,
+QDialogButtonBox QPushButton[dialogButtonCode="1"]:pressed {
     background-color: #1d4ed8;
+    padding-top: 9px;
+    padding-bottom: 7px;
 }
 
 /* ========== Input Fields ========== */
@@ -433,6 +438,21 @@ QSlider::handle:horizontal {
     width: 16px;
     height: 16px;
     margin: -6px 0;
+    border-radius: 9px;
+}
+
+QSlider::handle:horizontal:hover {
+    width: 20px;
+    height: 20px;
+    margin: -8px 0;
+    border-radius: 10px;
+}
+
+QSlider::handle:horizontal:pressed {
+    background: #2563eb;
+    width: 18px;
+    height: 18px;
+    margin: -7px 0;
     border-radius: 9px;
 }
 
