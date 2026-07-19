@@ -80,26 +80,36 @@ void drawSelectionRect(QPainter* painter, const QStyleOptionViewItem& option, co
     const qreal radius = 12.0;
 
     if ((option.state & QStyle::State_Selected)) {
-        // Selected state - accent color background with subtle border
+        // Selected state - accent color background with border
         QColor selectedBg = option.palette.color(QPalette::Highlight);
-        selectedBg.setAlphaF(0.12f);
+        selectedBg.setAlphaF(0.15f);
         painter->setBrush(selectedBg);
 
         QPen borderPen(option.palette.color(QPalette::Highlight));
         borderPen.setWidthF(1.5);
         painter->setPen(borderPen);
     } else if (option.state & QStyle::State_MouseOver) {
-        // Hover state - subtle background
+        // Hover state - elevated card with subtle border
         QColor hoverBg = option.palette.color(QPalette::Text);
-        hoverBg.setAlphaF(0.05f);
+        hoverBg.setAlphaF(0.08f);
         painter->setBrush(hoverBg);
-        painter->setPen(Qt::NoPen);
+
+        QColor borderColor = option.palette.color(QPalette::Text);
+        borderColor.setAlphaF(0.12f);
+        QPen borderPen(borderColor);
+        borderPen.setWidthF(1.0);
+        painter->setPen(borderPen);
     } else {
-        // Normal state - subtle card background
+        // Normal state - subtle card with hairline border
         QColor cardBg = option.palette.color(QPalette::Base);
-        cardBg.setAlphaF(0.6f);
+        cardBg.setAlphaF(0.5f);
         painter->setBrush(cardBg);
-        painter->setPen(Qt::NoPen);
+
+        QColor borderColor = option.palette.color(QPalette::Text);
+        borderColor.setAlphaF(0.06f);
+        QPen borderPen(borderColor);
+        borderPen.setWidthF(1.0);
+        painter->setPen(borderPen);
     }
 
     painter->drawRoundedRect(cardRect, radius, radius);
@@ -299,10 +309,20 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
         mode = QIcon::Selected;
     QIcon::State state = opt.state & QStyle::State_Open ? QIcon::On : QIcon::Off;
 
-    // draw the icon
+    // draw the icon with rounded corners
     {
         iconbox.setHeight(iconSize);
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+        // Create rounded clip path for the icon
+        QPainterPath clipPath;
+        clipPath.addRoundedRect(iconbox, 8.0, 8.0);
+        painter->setClipPath(clipPath);
+
         opt.icon.paint(painter, iconbox, Qt::AlignCenter, mode, state);
+        painter->restore();
     }
     // set the text colors
     QPalette::ColorGroup cg = opt.state & QStyle::State_Enabled ? QPalette::Normal : QPalette::Disabled;
