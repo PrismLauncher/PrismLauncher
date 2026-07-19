@@ -163,7 +163,8 @@ void FtbPage::onSelectionChanged(QModelIndex first, QModelIndex /*second*/)
         return;
     }
 
-    m_selected = m_filterModel->data(first, Qt::UserRole).value<FTB::Modpack>();
+    auto vdata = m_filterModel->data(first, Qt::UserRole);
+    m_selected = vdata.value<FTB::Modpack>();
 
     QString output = markdownToHTML(m_selected.description.toUtf8());
     m_ui->packDescription->setHtml(output);
