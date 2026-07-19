@@ -10,6 +10,23 @@
  *  - Border: #334155
  *  - Radius: 8px (md), 12px (lg)
  *  - Shadow: subtle elevation
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 #include "ModernDarkTheme.h"
 
@@ -77,10 +94,6 @@ QString ModernDarkTheme::appStyleSheet()
     // Modern Dark UI Stylesheet - Design System Implementation
     return R"(
 /* ========== Global Reset & Base ========== */
-* {
-    outline: none;
-}
-
 QWidget {
     font-family: "Segoe UI", "Inter", "Noto Sans", sans-serif;
     font-size: 10pt;
@@ -113,6 +126,10 @@ QPushButton:disabled {
     background-color: #1e293b;
     color: #64748b;
     border-color: #334155;
+}
+
+QPushButton:focus {
+    border-color: #3b82f6;
 }
 
 /* Primary button variant */
@@ -505,6 +522,10 @@ QToolButton:checked {
 
 QToolButton:disabled {
     color: #64748b;
+}
+
+QToolButton:focus {
+    border-color: #3b82f6;
 }
 
 /* Primary CTA tool button */
