@@ -21,7 +21,6 @@
 #include <QDialog>
 #include "ui/pages/BasePageProvider.h"
 
-class Component;
 class InstallLoaderPage;
 class MinecraftInstance;
 class PageContainer;
@@ -41,9 +40,7 @@ class InstallLoaderDialog final : public QDialog, protected BasePageProvider {
     void done(int result) override;
 
    private:
-    static QString describeVersionChange(InstallLoaderPage* page, const QString& installedVersion, const QString& selectedVersion);
     bool resolveLoaderConflicts(InstallLoaderPage* page);
-    bool confirmReinstall(InstallLoaderPage* page, Component* component);
 
     PackProfile* profile;
     PageContainer* container;

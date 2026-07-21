@@ -25,7 +25,6 @@
 #include "BuildConfig.h"
 #include "DesktopServices.h"
 #include "meta/Index.h"
-#include "meta/Version.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -84,12 +83,6 @@ static InstallLoaderPage* pageCast(BasePage* page)
     auto result = dynamic_cast<InstallLoaderPage*>(page);
     Q_ASSERT(result != nullptr);
     return result;
-}
-
-static bool askYesNo(QWidget* parent, const QString& title, const QString& text, QMessageBox::Icon icon)
-{
-    return CustomMessageBox::selectable(parent, title, text, icon, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)->exec() ==
-           QMessageBox::Yes;
 }
 
 InstallLoaderDialog::InstallLoaderDialog(PackProfile* profile, const QString& uid, QWidget* parent)
@@ -165,20 +158,6 @@ void InstallLoaderDialog::validate(BasePage* page)
     buttons->button(QDialogButtonBox::Ok)->setEnabled(pageCast(page)->selectedVersion() != nullptr);
 }
 
-QString InstallLoaderDialog::describeVersionChange(InstallLoaderPage* page, const QString& installedVersion, const QString& selectedVersion)
-{
-    auto list = APPLICATION->metadataIndex()->get(page->id());
-    auto installedMetaVersion = std::dynamic_pointer_cast<Meta::Version>(list->findVersion(installedVersion));
-    auto selectedMetaVersion = std::dynamic_pointer_cast<Meta::Version>(page->selectedVersion());
-
-    if (installedMetaVersion && selectedMetaVersion && installedMetaVersion->rawTime() != selectedMetaVersion->rawTime()) {
-        if (installedMetaVersion->rawTime() < selectedMetaVersion->rawTime())
-            return tr("update it to %1").arg(selectedVersion);
-        return tr("downgrade it to %1").arg(selectedVersion);
-    }
-    return tr("switch it to %1").arg(selectedVersion);
-}
-
 bool InstallLoaderDialog::resolveLoaderConflicts(InstallLoaderPage* page)
 {
     QList<ComponentPtr> conflicts;
@@ -225,61 +204,6 @@ bool InstallLoaderDialog::resolveLoaderConflicts(InstallLoaderPage* page)
     return true;
 }
 
-bool InstallLoaderDialog::confirmReinstall(InstallLoaderPage* page, Component* component)
-{
-    const QString installedVersion = component->getVersion();
-    const QString selectedVersion = page->selectedVersion()->descriptor();
-    const bool sameVersion = installedVersion == selectedVersion;
-
-    if (component->isEnabled() && sameVersion) {
-        if (askYesNo(this, tr("Loader already installed"),
-                     tr("%1 %2 is already installed. Do you want to reinstall it?").arg(page->displayName(), installedVersion),
-                     QMessageBox::Warning))
-            return true;
-        QDialog::done(Accepted);
-        return false;
-    }
-
-    if (component->isEnabled()) {
-        return askYesNo(this, tr("Loader already installed"),
-                        tr("%1 %2 is currently installed. Do you want to %3?")
-                            .arg(page->displayName(), installedVersion, describeVersionChange(page, installedVersion, selectedVersion)),
-                        QMessageBox::Warning);
-    }
-
-    if (sameVersion) {
-        auto* msgBox = CustomMessageBox::selectable(
-            this, tr("Loader already installed"),
-            tr("%1 %2 is already installed, but disabled. Do you want to enable it?").arg(page->displayName(), installedVersion),
-            QMessageBox::Question, QMessageBox::No);
-        QAbstractButton* enableButton = msgBox->addButton(tr("Enable"), QMessageBox::AcceptRole);
-        QAbstractButton* reinstallButton = msgBox->addButton(tr("Reinstall"), QMessageBox::DestructiveRole);
-        msgBox->exec();
-
-        auto* clicked = msgBox->clickedButton();
-        if (clicked == enableButton) {
-            component->setEnabled(true);
-            profile->resolve(Net::Mode::Online);
-            QDialog::done(Accepted);
-            return false;
-        }
-        if (clicked != reinstallButton) {
-            QDialog::done(Rejected);
-            return false;
-        }
-        component->setEnabled(true);
-        return true;
-    }
-
-    if (!askYesNo(this, tr("Loader already installed"),
-                  tr("%1 %2 is currently installed, but disabled. Do you want to %3 and enable it?")
-                      .arg(page->displayName(), installedVersion, describeVersionChange(page, installedVersion, selectedVersion)),
-                  QMessageBox::Question))
-        return false;
-    component->setEnabled(true);
-    return true;
-}
-
 void InstallLoaderDialog::done(int result)
 {
     if (result == Accepted) {
@@ -288,9 +212,8 @@ void InstallLoaderDialog::done(int result)
             if (!resolveLoaderConflicts(page))
                 return;
 
-            const ComponentPtr component = profile->getComponent(page->id());
-            if (component && !confirmReinstall(page, component.get()))
-                return;
+            if (const ComponentPtr component = profile->getComponent(page->id()); component && !component->isEnabled())
+                component->setEnabled(true);
 
             profile->setComponentVersion(page->id(), page->selectedVersion()->descriptor());
             profile->resolve(Net::Mode::Online);
