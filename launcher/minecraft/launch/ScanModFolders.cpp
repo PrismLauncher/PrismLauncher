@@ -45,19 +45,19 @@ void ScanModFolders::executeTask()
     auto m_inst = m_parent->instance();
 
     auto loaders = m_inst->loaderModList();
-    connect(loaders, &ModFolderModel::updateFinished, this, &ScanModFolders::modsDone);
+    connect(loaders, &ModFolderModel::updateFinished, this, &ScanModFolders::modsDone, Qt::SingleShotConnection);
     if (!loaders->update()) {
         m_modsDone = true;
     }
 
     auto cores = m_inst->coreModList();
-    connect(cores, &ModFolderModel::updateFinished, this, &ScanModFolders::coreModsDone);
+    connect(cores, &ModFolderModel::updateFinished, this, &ScanModFolders::coreModsDone, Qt::SingleShotConnection);
     if (!cores->update()) {
         m_coreModsDone = true;
     }
 
     auto nils = m_inst->nilModList();
-    connect(nils, &ModFolderModel::updateFinished, this, &ScanModFolders::nilModsDone);
+    connect(nils, &ModFolderModel::updateFinished, this, &ScanModFolders::nilModsDone, Qt::SingleShotConnection);
     if (!nils->update()) {
         m_nilModsDone = true;
     }
@@ -66,21 +66,18 @@ void ScanModFolders::executeTask()
 
 void ScanModFolders::modsDone()
 {
-    disconnect(sender(), nullptr, this, nullptr);
     m_modsDone = true;
     checkDone();
 }
 
 void ScanModFolders::coreModsDone()
 {
-    disconnect(sender(), nullptr, this, nullptr);
     m_coreModsDone = true;
     checkDone();
 }
 
 void ScanModFolders::nilModsDone()
 {
-    disconnect(sender(), nullptr, this, nullptr);
     m_nilModsDone = true;
     checkDone();
 }
