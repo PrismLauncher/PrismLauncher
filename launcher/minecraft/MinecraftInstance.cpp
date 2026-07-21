@@ -73,6 +73,7 @@
 #include "minecraft/update/FoldersTask.h"
 #include "minecraft/update/LegacyFMLLibrariesTask.h"
 #include "minecraft/update/LibrariesTask.h"
+#include "minecraft/update/ModUpdateTask.h"
 
 #include "java/JavaUtils.h"
 
@@ -263,9 +264,15 @@ void MinecraftInstance::loadSpecificSettings()
     connect(dataPacksEnabled.get(), &Setting::SettingChanged, this, [this] { m_data_pack_list.reset(); });
     connect(dataPacksPath.get(), &Setting::SettingChanged, this, [this] { m_data_pack_list.reset(); });
 
-    // Join server on launch, this does not have a global override
+    // Set mod downloaders, this does not have a global override
     m_settings->registerSetting("OverrideModDownloadLoaders", false);
     m_settings->registerSetting("ModDownloadLoaders", "[]");
+
+    // Enable automatic mod updates, this does not have a global override
+    m_settings->registerSetting("AutomaticallyUpdateMods", false);
+    m_settings->registerSetting("AutomaticallyUpdateModsAll", false);
+    m_settings->registerSetting("AutomaticallyUpdateModsEnabled", true);
+    // m_settings->registerSetting("AutomaticallyUpdateModsSpecified", "[]");
 
     qDebug() << "Instance-type specific settings were loaded!";
 
@@ -1200,6 +1207,13 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     // Scan mods folders for mods
     {
         process->appendStep(makeShared<ScanModFolders>(pptr));
+    }
+
+    // Update mods if "AutomaticallyUpdateMods" is true.
+    // Must come after ScanModFolders to ensure mods are loaded.
+    if (settings()->get("AutomaticallyUpdateMods").toBool()) {
+        process->appendStep(
+            makeShared<TaskStepWrapper>(pptr, makeShared<ModUpdateTask>(this, settings()->get("AutomaticallyUpdateModsEnabled").toBool())));
     }
 
     // make sure we have enough RAM, warn the user if we don't

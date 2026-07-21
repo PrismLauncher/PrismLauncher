@@ -268,7 +268,7 @@
                <widget class="QLabel" name="label_3">
                 <property name="text">
                  <string>Allows installing data packs across all worlds if an applicable mod is installed.
-It is most likely you will need to change the path - please refer to the mod's website.</string>
+                 It is most likely you will need to change the path - please refer to the mod's website.</string>
                 </property>
                </widget>
               </item>
@@ -548,6 +548,35 @@ It is most likely you will need to change the path - please refer to the mod's w
                <widget class="QCheckBox" name="rift">
                 <property name="text">
                  <string>Rift</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="autoModUpdateGroup">
+             <property name="title">
+              <string>Automatically Update Mods</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_19">
+              <item>
+               <widget class="QRadioButton" name="allMods">
+                <property name="text">
+                 <string>All mods</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="enabledMods">
+                <property name="text">
+                 <string>Enabled mods only</string>
                 </property>
                </widget>
               </item>
