@@ -234,7 +234,7 @@ void ModFilterWidget::prepareBasicFilter()
                 loaders |= ModPlatform::getModLoaderFromString(loader);
             }
         } else {
-            loaders = m_instance->getPackProfile()->getSupportedModLoaders().value();
+            loaders = m_instance->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
         }
         ui->neoForge->setChecked(loaders & ModPlatform::NeoForge);
         ui->forge->setChecked(loaders & ModPlatform::Forge);
