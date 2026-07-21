@@ -170,10 +170,10 @@ bool InstallLoaderDialog::resolveLoaderConflicts(InstallLoaderPage* page)
         }
     }
 
-    const QString targetVersion = tr("%1 %2").arg(page->displayName(), page->selectedVersion()->descriptor());
+    const QString targetVersion = QString("%1 %2").arg(page->displayName(), page->selectedVersion()->descriptor());
 
     for (const ComponentPtr& conflict : conflicts) {
-        const QString conflictVersion = tr("%1 %2").arg(conflict->getName(), conflict->getVersion());
+        const QString conflictVersion = QString("%1 %2").arg(conflict->getName(), conflict->getVersion());
         auto* msgBox = CustomMessageBox::selectable(
             this, tr("Installing a second loader"),
             tr("%1 is known to conflict with %2, which is already enabled on this instance. Having both enabled at the same time will "
