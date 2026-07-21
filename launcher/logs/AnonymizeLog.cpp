@@ -58,6 +58,8 @@ static const QVector<RegReplace> anonymizeRules = {
                "new refresh token: \"<TOKEN>\""),  // refresh token
     RegReplace(QRegularExpression("\"device_code\" :  \"[^\"]+\"", QRegularExpression::CaseInsensitiveOption),
                "\"device_code\" :  \"<DEVICE_CODE>\""),  // device code
+    RegReplace(QRegularExpression("Setting user: [a-zA-Z0-9_]{2,16}", QRegularExpression::CaseInsensitiveOption),
+               "Setting user: *****"),  // MC username
 };
 
 void anonymizeLog(QString& log)
