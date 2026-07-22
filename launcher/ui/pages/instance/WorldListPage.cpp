@@ -60,6 +60,7 @@
 #include "ui/GuiUtil.h"
 
 #include "Application.h"
+#include "icons/IconList.h"
 #include "DataPackPage.h"
 
 class WorldListProxyModel : public QSortFilterProxyModel {
@@ -82,26 +83,43 @@ class WorldListProxyModel : public QSortFilterProxyModel {
             return QIcon(iconFile);
         }
 
+        if (index.column() == 1 && role == Qt::DecorationRole) {
+            WorldList* worlds = qobject_cast<WorldList*>(sourceModel());
+            auto icon = worlds->data(sourceIndex, WorldList::InstanceIconFileRole).value<QIcon>();
+            return icon.pixmap(24, 24);
+        }
+
         return sourceIndex.data(role);
     }
 };
 
-WorldListPage::WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget* parent)
-    : QMainWindow(parent), m_inst(inst), ui(new Ui::WorldListPage), m_worlds(worlds)
+WorldListPage::WorldListPage(WorldList* worlds, QWidget* parent)
+    : QMainWindow(parent), ui(new Ui::WorldListPage), m_worlds(worlds), m_proxy(new WorldListProxyModel(this))
 {
     ui->setupUi(this);
 
     ui->toolBar->insertSpacer(ui->actionRefresh);
+    ui->actionJoin->setEnabled(true);
 
-    WorldListProxyModel* proxy = new WorldListProxyModel(this);
-    proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
-    proxy->setSourceModel(m_worlds);
-    proxy->setSortRole(Qt::UserRole);
+    m_proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
+    m_proxy->setSourceModel(m_worlds);
+    m_proxy->setSortRole(Qt::UserRole);
     ui->worldTreeView->setSortingEnabled(true);
-    ui->worldTreeView->setModel(proxy);
+    ui->worldTreeView->setModel(m_proxy);
+    ui->worldTreeView->sortByColumn(0, Qt::AscendingOrder);
     ui->worldTreeView->installEventFilter(this);
     ui->worldTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->worldTreeView->setIconSize(QSize(64, 64));
+
+    //remove useless info when only one instance
+    if (m_worlds->getInstances().size() == 1) {
+        ui->worldTreeView->setColumnHidden(1, true);
+        ui->worldTreeView->setColumnHidden(2, true);
+        ui->toolBar->removeAction(ui->actionInstance_Settings);
+    }
+
+    connect(ui->filterEdit, &QLineEdit::textChanged, this, &WorldListPage::onFilterTextChanged);
     connect(ui->worldTreeView, &QTreeView::customContextMenuRequested, this, &WorldListPage::ShowContextMenu);
 
     auto head = ui->worldTreeView->header();
@@ -110,18 +128,24 @@ WorldListPage::WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget
     head->setSectionResizeMode(4, QHeaderView::ResizeToContents);
 
     connect(ui->worldTreeView->selectionModel(), &QItemSelectionModel::currentChanged, this, &WorldListPage::worldChanged);
+    connect(ui->worldTreeView, &QAbstractItemView::activated, this, &WorldListPage::worldActivated);
     worldChanged(QModelIndex(), QModelIndex());
+
+    connect(m_worlds, &WorldList::fileDropped, this, &WorldListPage::fileDropped);
 }
 
 void WorldListPage::openedImpl()
 {
     m_worlds->startWatching();
 
-    if (!m_inst || !m_inst->traits().contains("feature:is_quick_play_singleplayer")) {
-        ui->toolBar->removeAction(ui->actionJoin);
+    if (m_worlds->getInstances().size() == 1) {
+        if (m_worlds->getInstances()[0] == nullptr || !m_worlds->getInstances()[0]->traits().contains("feature:is_quick_play_singleplayer")) {
+            ui->toolBar->removeAction(ui->actionJoin);
+            ui->toolBar->removeAction(ui->actionJoin_Offline);
+        }
     }
 
-    const auto setting_name = QString("WideBarVisibility_%1").arg(id());
+    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
     ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
@@ -195,7 +219,7 @@ void WorldListPage::on_actionRemove_triggered()
                                                tr("You are about to delete \"%1\".\n"
                                                   "The world may be gone forever (A LONG TIME).\n\n"
                                                   "Are you sure?")
-                                                   .arg(m_worlds->allWorlds().at(proxiedIndex.row()).name()),
+                                                   .arg(m_worlds->allWorlds().at(proxiedIndex.row()).world.name()),
                                                QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                       ->exec();
 
@@ -209,7 +233,19 @@ void WorldListPage::on_actionRemove_triggered()
 
 void WorldListPage::on_actionView_Folder_triggered()
 {
-    DesktopServices::openPath(m_worlds->dir().absolutePath(), true);
+    if (m_worlds->getInstances().size() == 1) {
+        DesktopServices::openPath(QDir(dynamic_cast<MinecraftInstance*>(m_worlds->getInstances()[0])->worldDir()).absolutePath(), true);
+    } else {
+        QModelIndex index = getSelectedWorld();
+        if (!index.isValid()) {
+            return;
+        }
+
+        auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
+        auto world = (World*)worldVariant.value<void*>();
+
+        DesktopServices::openPath(world->canonicalFilePath(), true);
+    }
 }
 
 void WorldListPage::on_actionData_Packs_triggered()
@@ -236,10 +272,12 @@ void WorldListPage::on_actionData_Packs_triggered()
 
     GenericPageProvider provider(dialog->windowTitle());
 
-    bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-    m_datapackModel.reset(new DataPackFolderModel(folder, m_inst, isIndexed, true));
+    auto instance = (static_cast<InstanceWorld*>(m_worlds->data(index, WorldList::ObjectRole).value<void*>()))->instance;
 
-    provider.addPageCreator([this] { return new DataPackPage(m_inst, m_datapackModel.get(), this); });
+    bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+    m_datapackModel.reset(new DataPackFolderModel(folder, instance, isIndexed, true));
+
+    provider.addPageCreator([this, instance] { return new DataPackPage(instance, m_datapackModel.get(), this); });
 
     auto layout = new QVBoxLayout(dialog);
 
@@ -378,15 +416,14 @@ void WorldListPage::worldChanged([[maybe_unused]] const QModelIndex& current, [[
     ui->actionCopy->setEnabled(enable);
     ui->actionRename->setEnabled(enable);
     ui->actionData_Packs->setEnabled(enable);
+    if (m_worlds->getInstances().size() != 1) {
+        ui->actionView_Folder->setEnabled(enable);
+    }
+    ui->actionJoin->setEnabled(enable);
+    ui->actionJoin_Offline->setEnabled(enable);
+    ui->actionInstance_Settings->setEnabled(enable);
     bool hasIcon = !index.data(WorldList::IconFileRole).isNull();
     ui->actionReset_Icon->setEnabled(enable && hasIcon);
-
-    auto supportsJoin = m_inst && m_inst->traits().contains("feature:is_quick_play_singleplayer");
-    ui->actionJoin->setEnabled(enable && supportsJoin);
-
-    if (!supportsJoin) {
-        ui->toolBar->removeAction(ui->actionJoin);
-    }
 }
 
 void WorldListPage::on_actionAdd_triggered()
@@ -395,16 +432,24 @@ void WorldListPage::on_actionAdd_triggered()
                                         QString(), this->parentWidget());
     if (!list.empty()) {
         m_worlds->stopWatching();
-        for (auto filename : list) {
-            m_worlds->installWorld(QFileInfo(filename));
+        for (const auto& filename : list) {
+            if (m_worlds->getInstances().size() == 1) {
+                m_worlds->installWorld(m_worlds->getInstances()[0], QFileInfo(filename));
+            } else {
+                auto *instance = selectInstance(tr("Select instance to add world '%1' to.").arg(QFileInfo(filename).fileName()));
+
+                if (instance != nullptr) {
+                    m_worlds->installWorld(instance, QFileInfo(filename));
+                }
+            }
         }
         m_worlds->startWatching();
     }
 }
 
-bool WorldListPage::isWorldSafe(QModelIndex)
+bool WorldListPage::isWorldSafe(QModelIndex index)
 {
-    return !m_inst->isRunning();
+    return !static_cast<InstanceWorld*>(m_worlds->data(index, WorldList::ObjectRole).value<void*>())->instance->isRunning();
 }
 
 bool WorldListPage::worldSafetyNagQuestion(const QString& actionType)
@@ -430,14 +475,73 @@ void WorldListPage::on_actionCopy_triggered()
         return;
 
     auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
-    auto world = (World*)worldVariant.value<void*>();
+    auto *world = static_cast<InstanceWorld*>(worldVariant.value<void*>());
+
     bool ok = false;
     QString name =
-        QInputDialog::getText(this, tr("World name"), tr("Enter a new name for the copy."), QLineEdit::Normal, world->name(), &ok);
+        QInputDialog::getText(this, tr("World name"), tr("Enter a new name for the copy."), QLineEdit::Normal, world->world.name(), &ok);
 
     if (ok && name.length() > 0) {
-        world->install(m_worlds->dir().absolutePath(), name);
+        if (m_worlds->getInstances().size() == 1) {
+            world->world.install((QDir(dynamic_cast<MinecraftInstance*>(world->instance)->worldDir())).absolutePath(), name);
+            m_worlds->update();
+        } else {
+            auto *instance = selectInstance(tr("Select instance to copy world to."), world->instance);
+
+            if (instance != nullptr) {
+                world->world.install((QDir(instance->worldDir())).absolutePath(), name);
+                m_worlds->update();
+            }
+        }
     }
+}
+
+// TODO: Make this a separate dialog class in launcher/ui/dialogs
+Q_DECLARE_METATYPE(BaseInstance*);
+MinecraftInstance* WorldListPage::selectInstance(const QString& message, const BaseInstance* preselectedInstance)
+{
+    auto *dialog = new QDialog(this);
+    dialog->setWindowTitle(tr("Select Instance"));
+
+    dialog->resize(static_cast<int>(std::max(0.5 * window()->width(), 400.0)),
+                   static_cast<int>(std::max(0.75 * window()->height(), 400.0)));
+    dialog->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("SelectInstanceGeometry").toByteArray()));
+
+    auto *layout = new QVBoxLayout(dialog);
+
+    layout->addWidget(new QLabel(message));
+
+    auto *instanceList = new QListWidget(dialog);
+
+    for (auto *instance : m_worlds->getInstances()) {
+        auto *item = new QListWidgetItem(instanceList);
+        item->setText(instance->name());
+        item->setIcon(APPLICATION->icons()->getIcon(instance->iconKey()));
+        item->setData(Qt::UserRole, QVariant::fromValue(instance));
+        if (instance == preselectedInstance) {
+            instanceList->setCurrentItem(item);
+        }
+    }
+
+    instanceList->sortItems(Qt::AscendingOrder);
+
+    layout->addWidget(instanceList);
+
+    auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    connect(buttonBox, &QDialogButtonBox::rejected, dialog, &QDialog::reject);
+    connect(buttonBox, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
+    layout->addWidget(buttonBox);
+
+    dialog->setLayout(layout);
+
+    connect(dialog, &QDialog::finished, this,
+            [dialog]() { APPLICATION->settings()->set("SelectInstanceGeometry", dialog->saveGeometry().toBase64()); });
+
+    if (dialog->exec() == QDialog::Accepted) {
+        return static_cast<MinecraftInstance*>(instanceList->currentItem()->data(Qt::UserRole).value<BaseInstance*>());
+    }
+
+    return nullptr;
 }
 
 void WorldListPage::on_actionRename_triggered()
@@ -461,20 +565,79 @@ void WorldListPage::on_actionRename_triggered()
     }
 }
 
-void WorldListPage::on_actionRefresh_triggered()
-{
-    m_worlds->update();
-}
-
-void WorldListPage::on_actionJoin_triggered()
+void WorldListPage::on_actionInstance_Settings_triggered()
 {
     QModelIndex index = getSelectedWorld();
     if (!index.isValid()) {
         return;
     }
     auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
-    auto world = (World*)worldVariant.value<void*>();
-    APPLICATION->launch(m_inst, LaunchMode::Normal, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world->folderName(), true)));
+    auto *world = static_cast<InstanceWorld*>(worldVariant.value<void*>());
+
+    if (world->instance->canEdit()) {
+        APPLICATION->showInstanceWindow(world->instance);
+    } else {
+        CustomMessageBox::selectable(this, tr("Instance not editable"),
+                                     tr("This instance is not editable. It may be broken, invalid, or too old. Check logs for details."),
+                                     QMessageBox::Critical)
+            ->show();
+    }
+}
+
+void WorldListPage::on_actionRefresh_triggered()
+{
+    m_worlds->update();
+}
+
+void WorldListPage::worldActivated(const QModelIndex& index)
+{
+    if (m_worlds->getInstances().size() == 1) {
+        if (m_worlds->getInstances()[0] == nullptr || !m_worlds->getInstances()[0]->traits().contains("feature:is_quick_play_singleplayer")) {
+            return;
+        }
+    }
+
+    auto *proxy = static_cast<QSortFilterProxyModel*>(ui->worldTreeView->model());
+    join(proxy->mapToSource(index), LaunchMode::Normal);
+}
+
+void WorldListPage::onFilterTextChanged(const QString& newContents)
+{
+    m_proxy->setFilterFixedString(newContents);
+}
+
+void WorldListPage::fileDropped(const QFileInfo& worldInfo)
+{
+    auto *instance = selectInstance(tr("Select instance to add world '%1' to.").arg(worldInfo.fileName()));
+
+    if (instance != nullptr) {
+        if (!QDir(instance->worldDir()).entryInfoList().contains(worldInfo)) {
+            m_worlds->installWorld(instance, worldInfo);
+        }
+    }
+}
+
+void WorldListPage::on_actionJoin_triggered()
+{
+    QModelIndex index = getSelectedWorld();
+    join(index, LaunchMode::Normal);
+}
+
+void WorldListPage::on_actionJoin_Offline_triggered()
+{
+    QModelIndex index = getSelectedWorld();
+    join(index, LaunchMode::Offline);
+}
+
+void WorldListPage::join(const QModelIndex& index, const LaunchMode launchMode)
+{
+    if (!index.isValid()) {
+        return;
+    }
+    auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
+    auto *world = static_cast<InstanceWorld*>(worldVariant.value<void*>());
+    APPLICATION->launch(world->instance, launchMode, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world->world.folderName(), true)));
+    emit worldJoined(world->instance);
 }
 
 #include "WorldListPage.moc"

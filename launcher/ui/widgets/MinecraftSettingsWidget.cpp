@@ -85,8 +85,8 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
         if (m_quickPlaySingleplayer) {
             auto worlds = m_instance->worldList();
             worlds->update();
-            for (const auto& world : worlds->allWorlds()) {
-                m_ui->worldsCb->addItem(world.folderName());
+            for (const auto& instanceWorld : worlds->allWorlds()) {
+                m_ui->worldsCb->addItem(instanceWorld.world.folderName());
             }
         } else {
             m_ui->worldsCb->hide();

@@ -46,11 +46,23 @@
 #include <QUuid>
 #include <Qt>
 
-WorldList::WorldList(const QString& dir, BaseInstance* instance) : QAbstractListModel(), m_instance(instance), m_dir(dir)
+#include "Application.h"
+#include "MinecraftInstance.h"
+#include "PackProfile.h"
+#include "icons/IconList.h"
+
+WorldList::WorldList(const QList<BaseInstance*>& instances) : QAbstractListModel(), allInstances(instances)
 {
-    FS::ensureFolderPathExists(m_dir.absolutePath());
-    m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
-    m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
+    for (BaseInstance* inst : allInstances) {
+        m_dirs.append(dynamic_cast<MinecraftInstance*>(inst)->worldDir());
+    }
+
+    for (QDir dir : m_dirs) {
+        FS::ensureFolderPathExists(dir.absolutePath());
+        dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
+        dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
+    }
+
     m_watcher = new QFileSystemWatcher(this);
     m_isWatching = false;
     connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &WorldList::directoryChanged);
@@ -62,11 +74,16 @@ void WorldList::startWatching()
         return;
     }
     update();
-    m_isWatching = m_watcher->addPath(m_dir.absolutePath());
-    if (m_isWatching) {
-        qDebug() << "Started watching" << m_dir.absolutePath();
-    } else {
-        qDebug() << "Failed to start watching" << m_dir.absolutePath();
+
+    m_isWatching = true;
+
+    for (const QDir& dir : m_dirs) {
+        if (m_watcher->addPath(dir.absolutePath())) {
+            qDebug() << "Started watching" << dir.absolutePath();
+        } else {
+            m_isWatching = false;
+            qDebug() << "Failed to start watching" << dir.absolutePath();
+        }
     }
 }
 
@@ -75,11 +92,16 @@ void WorldList::stopWatching()
     if (!m_isWatching) {
         return;
     }
-    m_isWatching = !m_watcher->removePath(m_dir.absolutePath());
-    if (!m_isWatching) {
-        qDebug() << "Stopped watching" << m_dir.absolutePath();
-    } else {
-        qDebug() << "Failed to stop watching" << m_dir.absolutePath();
+
+    m_isWatching = false;
+
+    for (QDir dir : m_dirs) {
+        if (m_watcher->removePath(dir.absolutePath())) {
+            qDebug() << "Stopped watching" << dir.absolutePath();
+        } else {
+            m_isWatching = true;
+            qDebug() << "Failed to stop watching" << dir.absolutePath();
+        }
     }
 }
 
@@ -88,19 +110,24 @@ bool WorldList::update()
     if (!isValid())
         return false;
 
-    QList<World> newWorlds;
-    m_dir.refresh();
-    auto folderContents = m_dir.entryInfoList();
-    // if there are any untracked files...
-    for (QFileInfo entry : folderContents) {
-        if (!entry.isDir())
-            continue;
+    QList<InstanceWorld> newWorlds;
 
-        World w(entry);
-        if (w.isValid()) {
-            newWorlds.append(w);
+    for (BaseInstance* inst : allInstances) {
+        QDir dir = dynamic_cast<MinecraftInstance*>(inst)->worldDir();
+        dir.refresh();
+        auto folderContents = dir.entryInfoList();
+        // if there are any untracked files...
+        for (QFileInfo entry : folderContents) {
+            if (!entry.isDir())
+                continue;
+
+            World w(entry);
+            if (w.isValid()) {
+                newWorlds.append(InstanceWorld(w, inst));
+            }
         }
     }
+    
     beginResetModel();
     m_worlds.swap(newWorlds);
     endResetModel();
@@ -115,19 +142,33 @@ void WorldList::directoryChanged(QString)
 
 bool WorldList::isValid()
 {
-    return m_dir.exists() && m_dir.isReadable();
+    bool valid = true;
+
+    for (const QDir& dir : m_dirs) {
+        if (!(dir.exists() && dir.isReadable())) {
+            valid = false;
+        }
+    }
+
+    return valid;
 }
 
-QString WorldList::instDirPath() const
+QList<QString> WorldList::instDirPaths() const
 {
-    return QFileInfo(m_instance->instanceRoot()).absoluteFilePath();
+    QList<QString> dirList;
+
+    for (BaseInstance const* instance : allInstances) {
+        dirList.append(QFileInfo(instance->instanceRoot()).absoluteFilePath());
+    }
+
+    return dirList;
 }
 
 bool WorldList::deleteWorld(int index)
 {
     if (index >= m_worlds.size() || index < 0)
         return false;
-    World& m = m_worlds[index];
+    World& m = m_worlds[index].world;
     if (m.destroy()) {
         beginRemoveRows(QModelIndex(), index, index);
         m_worlds.removeAt(index);
@@ -141,7 +182,7 @@ bool WorldList::deleteWorld(int index)
 bool WorldList::deleteWorlds(int first, int last)
 {
     for (int i = first; i <= last; i++) {
-        World& m = m_worlds[i];
+        World& m = m_worlds[i].world;
         m.destroy();
     }
     beginRemoveRows(QModelIndex(), first, last);
@@ -155,7 +196,7 @@ bool WorldList::resetIcon(int row)
 {
     if (row >= m_worlds.size() || row < 0)
         return false;
-    World& m = m_worlds[row];
+    World& m = m_worlds[row].world;
     if (m.resetIcon()) {
         QModelIndex modelIndex = index(row, NameColumn);
         emit dataChanged(modelIndex, modelIndex, { WorldList::IconFileRole });
@@ -166,7 +207,7 @@ bool WorldList::resetIcon(int row)
 
 int WorldList::columnCount(const QModelIndex& parent) const
 {
-    return parent.isValid() ? 0 : 5;
+    return parent.isValid() ? 0 : 7;
 }
 
 QVariant WorldList::data(const QModelIndex& index, int role) const
@@ -182,27 +223,34 @@ QVariant WorldList::data(const QModelIndex& index, int role) const
 
     QLocale locale;
 
-    auto& world = m_worlds[row];
+    const auto& instanceWorld = m_worlds[row];
     switch (role) {
         case Qt::DisplayRole:
             switch (column) {
                 case NameColumn:
-                    return world.name();
+                    return instanceWorld.world.name();
+
+                case InstanceColumn:
+                    return instanceWorld.instance->name();
+
+                case VersionColumn:
+                    static_cast<MinecraftInstance*>(instanceWorld.instance)->getPackProfile()->reload(Net::Mode::Online);
+                    return static_cast<MinecraftInstance*>(instanceWorld.instance)->getPackProfile()->getComponentVersion("net.minecraft");
 
                 case GameModeColumn:
-                    return world.gameType().toTranslatedString();
+                    return instanceWorld.world.gameType().toTranslatedString();
 
                 case LastPlayedColumn:
-                    return world.lastPlayed();
+                    return instanceWorld.world.lastPlayed();
 
                 case SizeColumn:
-                    return locale.formattedDataSize(world.bytes());
+                    return locale.formattedDataSize(instanceWorld.world.bytes());
 
                 case InfoColumn:
-                    if (world.isSymLinkUnder(instDirPath())) {
+                    if (instanceWorld.world.isSymLinkUnder(QFileInfo(instanceWorld.instance->instanceRoot()).absoluteFilePath())) {
                         return tr("This world is symbolically linked from elsewhere.");
                     }
-                    if (world.isMoreThanOneHardLink()) {
+                    if (instanceWorld.world.isMoreThanOneHardLink()) {
                         return tr("\nThis world is hard linked elsewhere.");
                     }
                     return "";
@@ -212,42 +260,45 @@ QVariant WorldList::data(const QModelIndex& index, int role) const
 
         case Qt::UserRole:
             if (column == SizeColumn)
-                return QVariant::fromValue<qlonglong>(world.bytes());
+                return QVariant::fromValue<qlonglong>(instanceWorld.world.bytes());
             return data(index, Qt::DisplayRole);
 
         case Qt::ToolTipRole: {
             if (column == InfoColumn) {
-                if (world.isSymLinkUnder(instDirPath())) {
+                if (instanceWorld.world.isSymLinkUnder(QFileInfo(instanceWorld.instance->instanceRoot()).absoluteFilePath())) {
                     return tr("Warning: This world is symbolically linked from elsewhere. Editing it will also change the original."
-                              "\nCanonical Path: %1")
-                        .arg(world.canonicalFilePath());
+                        "\nCanonical Path: %1")
+                        .arg(instanceWorld.world.canonicalFilePath());
                 }
-                if (world.isMoreThanOneHardLink()) {
+                if (instanceWorld.world.isMoreThanOneHardLink()) {
                     return tr("Warning: This world is hard linked elsewhere. Editing it will also change the original.");
                 }
             }
-            return world.folderName();
+            return instanceWorld.world.folderName();
         }
         case ObjectRole: {
-            return QVariant::fromValue<void*>((void*)&world);
+            return QVariant::fromValue<void*>((void*)&instanceWorld);
         }
         case FolderRole: {
-            return QDir::toNativeSeparators(dir().absoluteFilePath(world.folderName()));
+            return QDir::toNativeSeparators(QDir(dynamic_cast<MinecraftInstance*>(instanceWorld.instance)->worldDir()).absoluteFilePath(instanceWorld.world.folderName()));
         }
         case SeedRole: {
-            return QVariant::fromValue<qlonglong>(world.seed());
+            return QVariant::fromValue<qlonglong>(instanceWorld.world.seed());
         }
         case NameRole: {
-            return world.name();
+            return instanceWorld.world.name();
         }
         case LastPlayedRole: {
-            return world.lastPlayed();
+            return instanceWorld.world.lastPlayed();
         }
         case SizeRole: {
-            return QVariant::fromValue<qlonglong>(world.bytes());
+            return QVariant::fromValue<qlonglong>(instanceWorld.world.bytes());
         }
         case IconFileRole: {
-            return world.iconFile();
+            return instanceWorld.world.iconFile();
+        }
+        case InstanceIconFileRole: {
+            return APPLICATION->icons()->getIcon(instanceWorld.instance->iconKey());
         }
         default:
             return QVariant();
@@ -261,6 +312,10 @@ QVariant WorldList::headerData(int section, [[maybe_unused]] Qt::Orientation ori
             switch (section) {
                 case NameColumn:
                     return tr("Name");
+                case InstanceColumn:
+                    return tr("Instance");
+                case VersionColumn:
+                    return tr("Version");
                 case GameModeColumn:
                     return tr("Game Mode");
                 case LastPlayedColumn:
@@ -279,6 +334,10 @@ QVariant WorldList::headerData(int section, [[maybe_unused]] Qt::Orientation ori
             switch (section) {
                 case NameColumn:
                     return tr("The name of the world.");
+                case InstanceColumn:
+                    return tr("The instance the world belongs to.");
+                case VersionColumn:
+                    return tr("The Minecraft version of the world.");
                 case GameModeColumn:
                     return tr("Game mode of the world.");
                 case LastPlayedColumn:
@@ -314,7 +373,7 @@ QMimeData* WorldList::mimeData(const QModelIndexList& indexes) const
         if (row < 0 || row >= this->m_worlds.size())
             continue;
 
-        const World& world = m_worlds[row];
+        const World& world = m_worlds[row].world;
 
         if (!world.isValid() || !world.isOnFS())
             continue;
@@ -350,14 +409,24 @@ Qt::DropActions WorldList::supportedDropActions() const
     return Qt::CopyAction | Qt::MoveAction;
 }
 
-void WorldList::installWorld(QFileInfo filename)
+void WorldList::installWorld(BaseInstance* instance, const QFileInfo& filename)
 {
     qDebug() << "installing:" << filename.absoluteFilePath();
     World w(filename);
     if (!w.isValid()) {
         return;
     }
-    w.install(m_dir.absolutePath());
+    w.install(QDir(dynamic_cast<MinecraftInstance*>(instance)->worldDir()).absolutePath());
+    update();
+}
+
+void WorldList::installWorld(const QFileInfo& filename)
+{
+    if (allInstances.size() == 1) {
+        installWorld(allInstances[0], filename);
+    } else {
+        qDebug() << "world could not be installed, instance was not specified";
+    }
 }
 
 bool WorldList::dropMimeData(const QMimeData* data,
@@ -385,9 +454,7 @@ bool WorldList::dropMimeData(const QMimeData* data,
 
             QFileInfo worldInfo(filename);
 
-            if (!m_dir.entryInfoList().contains(worldInfo)) {
-                installWorld(worldInfo);
-            }
+            emit fileDropped(worldInfo);
         }
         if (was_watching)
             startWatching();
@@ -396,11 +463,13 @@ bool WorldList::dropMimeData(const QMimeData* data,
     return false;
 }
 
-int64_t calculateWorldSize(const QFileInfo& file)
+static int64_t calculateWorldSize(const QFileInfo& file)
 {
     if (file.isFile() && file.suffix() == "zip") {
         return file.size();
-    } else if (file.isDir()) {
+    }
+
+    if (file.isDir()) {
         QDirIterator it(file.absoluteFilePath(), QDir::Files, QDirIterator::Subdirectories);
         int64_t total = 0;
         while (it.hasNext()) {
@@ -415,7 +484,7 @@ int64_t calculateWorldSize(const QFileInfo& file)
 void WorldList::loadWorldsAsync()
 {
     for (int i = 0; i < m_worlds.size(); ++i) {
-        auto file = m_worlds.at(i).container();
+        auto file = m_worlds.at(i).world.container();
         int row = i;
         QThreadPool::globalInstance()->start([this, file, row]() mutable {
             auto size = calculateWorldSize(file);
@@ -423,8 +492,8 @@ void WorldList::loadWorldsAsync()
             QMetaObject::invokeMethod(
                 this,
                 [this, size, row, file]() {
-                    if (row < m_worlds.size() && m_worlds[row].container() == file) {
-                        m_worlds[row].setSize(size);
+                    if (row < m_worlds.size() && m_worlds[row].world.container() == file) {
+                        m_worlds[row].world.setSize(size);
 
                         // Notify views
                         QModelIndex modelIndex = index(row, SizeColumn);

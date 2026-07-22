@@ -96,13 +96,14 @@ class InstanceList : public QAbstractListModel {
      */
     enum InstListError { NoError = 0, UnknownError };
 
-    BaseInstance* at(int i) const { return m_instances.at(i).get(); }
+    BaseInstance* at(int i) const { return instances.at(i).get(); }
 
-    int count() const { return static_cast<int>(m_instances.size()); }
+    int count() const { return static_cast<int>(instances.size()); }
 
     InstListError loadList();
     void saveNow();
 
+    QList<BaseInstance*> getAllInstances() const;
     /* O(n) */
     BaseInstance* getInstanceById(QString id) const;
     /* O(n) */
@@ -192,7 +193,7 @@ class InstanceList : public QAbstractListModel {
     int m_watchLevel = 0;
     int totalPlayTime = 0;
     bool m_dirty = false;
-    std::vector<std::unique_ptr<BaseInstance>> m_instances;
+    std::vector<std::unique_ptr<BaseInstance>> instances;
     // id -> refs
     QMap<QString, int> m_groupNameCache;
 

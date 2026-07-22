@@ -41,7 +41,7 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
         values.append(new TexturePackPage(onesix, onesix->texturePackList()));
         values.append(new ShaderPackPage(onesix, onesix->shaderPackList()));
         values.append(new NotesPage(onesix));
-        values.append(new WorldListPage(onesix, onesix->worldList()));
+        values.append(new WorldListPage(onesix->worldList()));
         values.append(new ServersPage(onesix));
         values.append(new ScreenshotsPage(FS::PathCombine(onesix->gameRoot(), "screenshots")));
         values.append(new InstanceSettingsPage(onesix));

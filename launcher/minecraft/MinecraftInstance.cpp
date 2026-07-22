@@ -1324,7 +1324,7 @@ QList<ResourceFolderModel*> MinecraftInstance::resourceLists()
 WorldList* MinecraftInstance::worldList()
 {
     if (!m_world_list) {
-        m_world_list.reset(new WorldList(worldDir(), this));
+        m_world_list.reset(new WorldList(QList{dynamic_cast<BaseInstance*>(this)}));
     }
     return m_world_list.get();
 }

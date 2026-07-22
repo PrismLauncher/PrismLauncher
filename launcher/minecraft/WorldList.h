@@ -25,14 +25,19 @@
 
 class QFileSystemWatcher;
 
+struct InstanceWorld {
+    World world;
+    BaseInstance* instance;
+};
+
 class WorldList : public QAbstractListModel {
     Q_OBJECT
    public:
-    enum Columns { NameColumn, GameModeColumn, LastPlayedColumn, SizeColumn, InfoColumn };
+    enum Columns { NameColumn, InstanceColumn, VersionColumn, GameModeColumn, LastPlayedColumn, SizeColumn, InfoColumn };
 
-    enum Roles { ObjectRole = Qt::UserRole + 1, FolderRole, SeedRole, NameRole, GameModeRole, LastPlayedRole, SizeRole, IconFileRole };
+    enum Roles { ObjectRole = Qt::UserRole + 1, FolderRole, SeedRole, NameRole, InstanceRole, VersionRole, GameModeRole, LastPlayedRole, SizeRole, IconFileRole, InstanceIconFileRole };
 
-    WorldList(const QString& dir, BaseInstance* instance);
+    WorldList(const QList<BaseInstance*>& instances);
 
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
 
@@ -42,13 +47,14 @@ class WorldList : public QAbstractListModel {
 
     size_t size() const { return m_worlds.size(); };
     bool empty() const { return size() == 0; }
-    World& operator[](size_t index) { return m_worlds[index]; }
+    World& operator[](size_t index) { return m_worlds[index].world; }
 
     /// Reloads the mod list and returns true if the list changed.
     virtual bool update();
 
     /// Install a world from location
-    void installWorld(QFileInfo filename);
+    void installWorld(BaseInstance* instance, const QFileInfo& filename);
+    void installWorld(const QFileInfo& filename);
 
     /// Deletes the mod at the given index.
     virtual bool deleteWorld(int index);
@@ -78,11 +84,13 @@ class WorldList : public QAbstractListModel {
 
     virtual bool isValid();
 
-    QDir dir() const { return m_dir; }
+    QList<QDir> dirs() const { return m_dirs; }
 
-    QString instDirPath() const;
+    QList<QString> instDirPaths() const;
 
-    const QList<World>& allWorlds() const { return m_worlds; }
+    const QList<InstanceWorld>& allWorlds() const { return m_worlds; }
+
+    QList<BaseInstance*> getInstances() const { return allInstances; }
 
    private slots:
     void directoryChanged(QString path);
@@ -90,11 +98,14 @@ class WorldList : public QAbstractListModel {
 
    signals:
     void changed();
+    void fileDropped(QFileInfo worldInfo);
 
    protected:
-    BaseInstance* m_instance;
     QFileSystemWatcher* m_watcher;
     bool m_isWatching;
-    QDir m_dir;
-    QList<World> m_worlds;
+    QList<QDir> m_dirs;
+    QList<InstanceWorld> m_worlds;
+
+   private:
+    QList<BaseInstance*> allInstances;
 };

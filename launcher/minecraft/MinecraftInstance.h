@@ -40,6 +40,7 @@
 #include <QDir>
 #include <QProcess>
 #include "BaseInstance.h"
+#include "WorldList.h"
 #include "minecraft/launch/MinecraftTarget.h"
 #include "minecraft/mod/Mod.h"
 

@@ -43,6 +43,7 @@
 
 #include "settings/Setting.h"
 
+class WorldListProxyModel;
 class WorldList;
 namespace Ui {
 class WorldListPage;
@@ -52,7 +53,7 @@ class WorldListPage : public QMainWindow, public BasePage {
     Q_OBJECT
 
    public:
-    explicit WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget* parent = 0);
+    explicit WorldListPage(WorldList* worlds, QWidget* parent = 0);
     virtual ~WorldListPage();
 
     virtual QString displayName() const override { return tr("Worlds"); }
@@ -65,23 +66,26 @@ class WorldListPage : public QMainWindow, public BasePage {
     virtual void openedImpl() override;
     virtual void closedImpl() override;
 
+   signals:
+    void worldJoined(BaseInstance* instance);
+
    protected:
     bool eventFilter(QObject* obj, QEvent* ev) override;
     bool worldListFilter(QKeyEvent* ev);
     QMenu* createPopupMenu() override;
-
-   protected:
-    MinecraftInstance* m_inst;
 
    private:
     QModelIndex getSelectedWorld();
     bool isWorldSafe(QModelIndex index);
     bool worldSafetyNagQuestion(const QString& actionType);
     void mceditError();
+    void join(const QModelIndex& index, LaunchMode launchMode);
+    MinecraftInstance* selectInstance(const QString& message, const BaseInstance* preselectedInstance = nullptr);
 
    private:
     Ui::WorldListPage* ui;
     WorldList* m_worlds;
+    WorldListProxyModel* m_proxy;
     unique_qobject_ptr<LoggedProcess> m_mceditProcess;
     bool m_mceditStarting = false;
 
@@ -95,6 +99,7 @@ class WorldListPage : public QMainWindow, public BasePage {
     void on_actionAdd_triggered();
     void on_actionCopy_triggered();
     void on_actionRename_triggered();
+    void on_actionInstance_Settings_triggered();
     void on_actionRefresh_triggered();
     void on_actionView_Folder_triggered();
     void on_actionData_Packs_triggered();
@@ -102,6 +107,10 @@ class WorldListPage : public QMainWindow, public BasePage {
     void worldChanged(const QModelIndex& current, const QModelIndex& previous);
     void mceditState(LoggedProcess::State state);
     void on_actionJoin_triggered();
+    void on_actionJoin_Offline_triggered();
+    void worldActivated(const QModelIndex& index);
+    void fileDropped(const QFileInfo& worldInfo);
+    void onFilterTextChanged(const QString& newContents);
 
     void ShowContextMenu(const QPoint& pos);
 };

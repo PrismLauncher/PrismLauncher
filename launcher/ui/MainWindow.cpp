@@ -113,6 +113,7 @@
 #include "ui/themes/ThemeManager.h"
 #include "ui/widgets/LabeledToolButton.h"
 
+#include "minecraft/WorldList.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/VersionFile.h"
 #include "minecraft/WorldList.h"
@@ -134,6 +135,7 @@
 #include "Json.h"
 
 #include "MMCTime.h"
+#include "pages/instance/WorldListPage.h"
 
 namespace {
 QString profileInUseFilter(const QString& profile, bool used)
@@ -333,7 +335,16 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
             [](const QString& groupName) -> bool { return APPLICATION->instances()->isGroupCollapsed(groupName); });
         connect(view, &InstanceView::groupStateChanged, APPLICATION->instances(), &InstanceList::on_GroupStateChanged);
         ui->horizontalLayout->addWidget(view);
+
+        connect(this, &MainWindow::selectInstance, view, &InstanceView::selectInstance);
     }
+
+    // All worlds toggle
+    {
+        connect(ui->actionAllWorlds, &QAction::toggled, this, &MainWindow::onAllWorldsToggled);
+        connect(allWorldsPage, &WorldListPage::worldJoined, this, &MainWindow::worldJoined);
+    }
+
     // The cat background
     {
         // set the cat action priority here so you can still see the action in qt designer
@@ -840,6 +851,59 @@ QString intListToString(const QList<int>& list)
         slist.append(QString::number(list.at(i)));
     }
     return slist.join(',');
+}
+
+void MainWindow::onAllWorldsToggled(bool toggled)
+{
+    toggleAllWorldsScreen(toggled);
+}
+
+void MainWindow::worldJoined(BaseInstance* instance)
+{
+    ui->actionAllWorlds->setChecked(false);
+    toggleAllWorldsScreen(false);
+    emit selectInstance(instance);
+}
+
+void MainWindow::toggleAllWorldsScreen(bool toggled)
+{
+    if (toggled) {
+        QList<BaseInstance*> const allInstances = APPLICATION->instances()->getAllInstances();
+
+        allWorldsList = new WorldList(allInstances);
+        allWorldsList->update();
+
+        allWorldsPage = new WorldListPage(allWorldsList);
+        ui->horizontalLayout->addWidget(allWorldsPage);
+
+        view->setVisible(false);
+        m_oldInstanceToolbarSetting = ui->instanceToolBar->isVisible();
+        ui->instanceToolBar->setVisible(false);
+        allWorldsPage->setVisible(true);
+        statusBar()->setVisible(false);
+
+        allWorldsList->startWatching();
+
+        connect(allWorldsPage, &WorldListPage::worldJoined, this, &MainWindow::worldJoined);
+    } else {
+        if (allWorldsList == nullptr || allWorldsPage == nullptr) {
+            view->setVisible(true);
+            ui->instanceToolBar->setVisible(m_oldInstanceToolbarSetting);
+            statusBar()->setVisible(APPLICATION->settings()->get("StatusBarVisible").toBool());
+        } else {
+            allWorldsPage->setVisible(false);
+            view->setVisible(true);
+            ui->instanceToolBar->setVisible(m_oldInstanceToolbarSetting);
+            statusBar()->setVisible(APPLICATION->settings()->get("StatusBarVisible").toBool());
+
+            allWorldsList->stopWatching();
+
+            allWorldsPage->deleteLater();
+            allWorldsPage = nullptr;
+            allWorldsList->deleteLater();
+            allWorldsList = nullptr;
+        }
+    }
 }
 
 void MainWindow::onCatToggled(bool state)
@@ -1580,6 +1644,10 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+    if (view->isVisible()) {
+        m_oldInstanceToolbarSetting = ui->instanceToolBar->isVisible();
+    }
+    toggleAllWorldsScreen(false);
     // Save the window state and geometry.
     APPLICATION->settings()->set("MainWindowState", QString::fromUtf8(saveState().toBase64()));
     APPLICATION->settings()->set("MainWindowGeometry", QString::fromUtf8(saveGeometry().toBase64()));

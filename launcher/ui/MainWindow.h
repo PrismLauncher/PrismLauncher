@@ -58,6 +58,8 @@ class QLabel;
 class MinecraftLauncher;
 class BaseProfilerFactory;
 class InstanceView;
+class WorldList;
+class WorldListPage;
 class KonamiCode;
 class InstanceTask;
 class LabeledToolButton;
@@ -84,10 +86,14 @@ class MainWindow : public QMainWindow {
    signals:
     void isClosing();
 
+    void selectInstance(BaseInstance* instance);
+
    protected:
     QMenu* createPopupMenu() override;
 
    private slots:
+    void onAllWorldsToggled(bool);
+
     void onCatToggled(bool);
 
     void onCatChanged(int);
@@ -171,6 +177,8 @@ class MainWindow : public QMainWindow {
 
     void taskEnd();
 
+    void worldJoined(BaseInstance* instance);
+
     /**
      * called when an icon is changed in the icon model.
      */
@@ -232,10 +240,13 @@ class MainWindow : public QMainWindow {
     void runModalTask(Task* task);
     void instanceFromInstanceTask(InstanceTask* task);
 
+    void toggleAllWorldsScreen(bool toggled);
+
    private:
     Ui::MainWindow* ui;
     // these are managed by Qt's memory management model!
     InstanceView* view = nullptr;
+    WorldListPage* allWorldsPage = nullptr;
     InstanceProxyModel* proxymodel = nullptr;
     QToolButton* newsLabel = nullptr;
     QLabel* m_statusLeft = nullptr;
@@ -244,8 +255,10 @@ class MainWindow : public QMainWindow {
     LabeledToolButton* renameButton = nullptr;
     QToolButton* helpMenuButton = nullptr;
     KonamiCode* secretEventFilter = nullptr;
+    WorldList* allWorldsList = nullptr;
 
     std::shared_ptr<Setting> instanceToolbarSetting = nullptr;
+    bool m_oldInstanceToolbarSetting;
 
     unique_qobject_ptr<NewsChecker> m_newsChecker;
 

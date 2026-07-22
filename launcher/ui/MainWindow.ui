@@ -56,6 +56,7 @@
    <addaction name="actionHelpButton"/>
    <addaction name="actionCheckUpdate"/>
    <addaction name="separator"/>
+   <addaction name="actionAllWorlds"/>
    <addaction name="actionCAT"/>
    <addaction name="actionAccountsButton"/>
   </widget>
@@ -175,6 +176,7 @@
     </property>
     <addaction name="actionChangeTheme"/>
     <addaction name="separator"/>
+    <addaction name="actionAllWorlds"/>
     <addaction name="actionCAT"/>
     <addaction name="actionToggleStatusBar"/>
     <addaction name="actionLockToolbars"/>
@@ -777,6 +779,20 @@
    </property>
    <property name="toolTip">
     <string>Open the Java folder in a file browser. Only available if the built-in Java downloader is used.</string>
+   </property>
+  </action>
+  <action name="actionAllWorlds">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="worlds"/>
+   </property>
+   <property name="text">
+    <string>&amp;All Worlds</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle All Worlds Screen</string>
    </property>
   </action>
  </widget>
