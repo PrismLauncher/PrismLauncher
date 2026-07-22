@@ -92,7 +92,7 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
     m_settings->registerSetting("shortcuts", QString());
     m_settings->registerSetting("uuid", QString());
     if (m_settings->get("uuid").toString().isEmpty()) {
-        m_settings->set("uuid", QUuid::createUuid().toString(QUuid::Id128));
+        regenerateUuid();
     }
 
     // Game time override
