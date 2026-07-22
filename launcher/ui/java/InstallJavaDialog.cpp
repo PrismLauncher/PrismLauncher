@@ -42,7 +42,7 @@
 #include "ui/widgets/PageContainer.h"
 #include "ui/widgets/VersionSelectWidget.h"
 
-#if defined(Q_OS_MACOS)
+#ifdef Q_OS_MACOS
 #include "java/download/SymlinkTask.h"
 #include "tasks/SequentialTask.h"
 #endif
@@ -346,7 +346,7 @@ void InstallDialog::done(int result)
                         deletePath();
                         return;
                 }
-#if defined(Q_OS_MACOS)
+#ifdef Q_OS_MACOS
                 auto seq = makeShared<SequentialTask>(tr("Install Java"));
                 seq->addTask(task);
                 seq->addTask(makeShared<Java::SymlinkTask>(finalPath));

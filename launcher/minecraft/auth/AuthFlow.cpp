@@ -75,7 +75,7 @@ void AuthFlow::nextStep()
 
 void AuthFlow::stepFinished(AccountTaskState resultingState, QString message)
 {
-    if (changeState(resultingState, std::move(message))) {
+    if (changeState(resultingState, message)) {
         nextStep();
     }
 }
