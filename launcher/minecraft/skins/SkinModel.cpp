@@ -21,7 +21,7 @@
 #include <QFileInfo>
 #include <QPainter>
 #include <array>
-#include <bit>
+#include <span>
 
 #include "FileSystem.h"
 
@@ -29,7 +29,7 @@ namespace {
 void setAlpha(QImage& image, const QRect& region, const int alpha)
 {
     for (int y = region.top(); y < region.bottom(); ++y) {
-        auto line = std::span(std::bit_cast<QRgb*>(image.scanLine(y)), image.width());
+        auto line = std::span(reinterpret_cast<QRgb*>(image.scanLine(y)), image.width());
         for (int x = region.left(); x < region.right(); ++x) {
             QRgb pixel = line[x];
             line[x] = qRgba(qRed(pixel), qGreen(pixel), qBlue(pixel), alpha);
@@ -40,7 +40,7 @@ void setAlpha(QImage& image, const QRect& region, const int alpha)
 void doNotchTransparencyHack(QImage& image)
 {
     for (int y = 0; y < 32; y++) {
-        auto line = std::span(std::bit_cast<QRgb*>(image.scanLine(y)), image.width());
+        auto line = std::span(reinterpret_cast<QRgb*>(image.scanLine(y)), image.width());
         for (int x = 32; x < 64; x++) {
             if (qAlpha(line[x]) < 128) {
                 return;
@@ -182,7 +182,7 @@ SkinModel::SkinModel(const QString& path) : m_path(path), m_texture(getSkin(path
     m_preview = generatePreviews(m_texture, false);
 }
 
-SkinModel::SkinModel(const QDir& skinDir, QJsonObject obj) : m_capeId(obj["capeId"].toString()), m_url(obj["url"].toString())
+SkinModel::SkinModel(const QDir& skinDir, QJsonObject obj) : m_capeId(obj.value("capeId").toString()), m_url(obj.value("url").toString())
 {
     auto name = obj["name"].toString();
 
