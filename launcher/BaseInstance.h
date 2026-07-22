@@ -116,6 +116,7 @@ class BaseInstance : public QObject {
     /// be unique.
     virtual QString id() const;
     virtual QString uuid() const;
+    void regenerateUuid();
 
     void setMinecraftRunning(bool running);
     void setRunning(bool running);
