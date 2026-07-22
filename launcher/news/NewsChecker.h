@@ -29,7 +29,7 @@ class NewsChecker : public QObject {
     /*!
      * Constructs a news reader to read from the given RSS feed URL.
      */
-    NewsChecker(QNetworkAccessManager* network, const QString& feedUrl);
+    NewsChecker(QNetworkAccessManager* network, QString feedUrl);
 
     /*!
      * Returns the error message for the last time the news was loaded.

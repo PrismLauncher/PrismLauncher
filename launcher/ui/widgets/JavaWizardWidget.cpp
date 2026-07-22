@@ -13,6 +13,7 @@
 #include <QToolButton>
 #include <QVBoxLayout>
 #include <algorithm>
+#include <utility>
 
 #include "DesktopServices.h"
 #include "FileSystem.h"
@@ -309,9 +310,9 @@ int JavaWizardWidget::permGenSize() const
 void JavaWizardWidget::memoryValueChanged()
 {
     bool actuallyChanged = false;
-    int min = m_minMemSpinBox->value();
-    int max = m_maxMemSpinBox->value();
-    int permgen = m_permGenSpinBox->value();
+    const int min = m_minMemSpinBox->value();
+    const int max = m_maxMemSpinBox->value();
+    const int permgen = m_permGenSpinBox->value();
     if (min != m_observedMinMemory) {
         m_observedMinMemory = min;
         actuallyChanged = true;
@@ -506,7 +507,7 @@ void JavaWizardWidget::updateThresholds()
 {
     QString iconName;
 
-    if (static_cast<uint64_t>(m_observedMaxMemory) >= m_availableMemory) {
+    if (std::cmp_greater_equal(m_observedMaxMemory, m_availableMemory)) {
         iconName = "status-bad";
         m_labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation exceeds your system memory capacity."));
     } else if (static_cast<double>(m_observedMaxMemory) > (static_cast<double>(m_availableMemory) * 0.9)) {

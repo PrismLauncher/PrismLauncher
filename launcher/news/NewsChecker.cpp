@@ -39,9 +39,11 @@
 #include <QDomDocument>
 
 #include <QDebug>
+#include <utility>
+
 #include "Application.h"
 
-NewsChecker::NewsChecker(QNetworkAccessManager* network, const QString& feedUrl) : m_feedUrl(feedUrl), m_network(network) {}
+NewsChecker::NewsChecker(QNetworkAccessManager* network, QString feedUrl) : m_feedUrl(std::move(feedUrl)), m_network(network) {}
 
 void NewsChecker::reloadNews()
 {
@@ -79,10 +81,10 @@ void NewsChecker::rssDownloadFinished()
             // Parse the XML.
             auto result = doc.setContent(in.readAll());
             if (!result) {
-                QString fullErrorMsg = QString("Error parsing RSS feed XML. %1 at %2:%3.")
-                                           .arg(result.errorMessage)
-                                           .arg(result.errorLine)
-                                           .arg(result.errorColumn);
+                const QString fullErrorMsg = QString("Error parsing RSS feed XML. %1 at %2:%3.")
+                                                 .arg(result.errorMessage)
+                                                 .arg(result.errorLine)
+                                                 .arg(result.errorColumn);
                 fail(fullErrorMsg);
                 return;
             }

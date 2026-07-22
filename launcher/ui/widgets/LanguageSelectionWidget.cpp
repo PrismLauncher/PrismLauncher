@@ -20,13 +20,6 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent)
 {
     m_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
 
-    formatCheckbox = new QCheckBox(this);
-    formatCheckbox->setObjectName(QStringLiteral("formatCheckbox"));
-    formatCheckbox->setCheckState(APPLICATION->settings()->get("UseSystemLocale").toBool() ? Qt::Checked : Qt::Unchecked);
-    connect(formatCheckbox, &QCheckBox::checkStateChanged, this,
-            [this] { APPLICATION->translations()->setUseSystemLocale(formatCheckbox->isChecked()); });
-    verticalLayout->addWidget(formatCheckbox);
-
     m_helpUsLabel->setObjectName(QStringLiteral("helpUsLabel"));
     m_helpUsLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse);
     m_helpUsLabel->setOpenExternalLinks(true);
@@ -35,7 +28,7 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent)
 
     m_formatCheckbox->setObjectName(QStringLiteral("formatCheckbox"));
     m_formatCheckbox->setCheckState(APPLICATION->settings()->get("UseSystemLocale").toBool() ? Qt::Checked : Qt::Unchecked);
-    connect(m_formatCheckbox, &QCheckBox::checkStateChanged,
+    connect(m_formatCheckbox, &QCheckBox::checkStateChanged, this,
             [this] { APPLICATION->translations()->setUseSystemLocale(m_formatCheckbox->isChecked()); });
     m_verticalLayout->addWidget(m_formatCheckbox);
 

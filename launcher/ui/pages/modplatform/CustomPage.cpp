@@ -195,20 +195,20 @@ QString CustomPage::selectedLoader() const
 
 QString CustomPage::selectedLoaderName() const
 {
-    if (ui->neoForgeFilter->isChecked()) {
-        return ui->neoForgeFilter->text();
+    if (m_ui->neoForgeFilter->isChecked()) {
+        return m_ui->neoForgeFilter->text();
     }
-    if (ui->forgeFilter->isChecked()) {
-        return ui->forgeFilter->text();
+    if (m_ui->forgeFilter->isChecked()) {
+        return m_ui->forgeFilter->text();
     }
-    if (ui->fabricFilter->isChecked()) {
-        return ui->fabricFilter->text();
+    if (m_ui->fabricFilter->isChecked()) {
+        return m_ui->fabricFilter->text();
     }
-    if (ui->quiltFilter->isChecked()) {
-        return ui->quiltFilter->text();
+    if (m_ui->quiltFilter->isChecked()) {
+        return m_ui->quiltFilter->text();
     }
-    if (ui->liteLoaderFilter->isChecked()) {
-        return ui->liteLoaderFilter->text();
+    if (m_ui->liteLoaderFilter->isChecked()) {
+        return m_ui->liteLoaderFilter->text();
     }
     return QString();
 }

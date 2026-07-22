@@ -53,13 +53,13 @@ void PackFetchTask::fetch()
     qDebug() << "Downloading public version info from" << publicPacksUrl.toString();
 
     auto [publicAction, publicResponse] = Net::ApiRequest::makeByteArray(publicPacksUrl);
-    jobPtr->addNetAction(publicAction);
+    m_jobPtr->addNetAction(publicAction);
 
     QUrl thirdPartyUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/thirdparty.xml");
     qDebug() << "Downloading thirdparty version info from" << thirdPartyUrl.toString();
 
     auto [thirdPartyAction, thirdPartyResponse] = Net::Request::makeByteArray(thirdPartyUrl);
-    jobPtr->addNetAction(thirdPartyAction);
+    m_jobPtr->addNetAction(thirdPartyAction);
 
     connect(m_jobPtr.get(), &NetJob::succeeded, this,
             [this, publicResponse, thirdPartyResponse] { fileDownloadFinished(publicResponse, thirdPartyResponse); });
