@@ -42,6 +42,7 @@
 #include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QUuid>
 
 #include "Application.h"
 #include "Json.h"
@@ -89,6 +90,9 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
 
     m_settings->registerSetting("linkedInstances", "[]");
     m_settings->registerSetting("shortcuts", QString());
+    m_settings->registerSetting("uuid", QString());
+    if (m_settings->get("uuid").toString().isEmpty())
+        m_settings->set("uuid", QUuid::createUuid().toString(QUuid::Id128));
 
     // Game time override
     auto gameTimeOverride = m_settings->registerSetting("OverrideGameTime", false);
@@ -267,6 +271,11 @@ BaseInstance::Status BaseInstance::currentStatus() const
 QString BaseInstance::id() const
 {
     return QFileInfo(instanceRoot()).fileName();
+}
+
+QString BaseInstance::uuid() const
+{
+    return m_settings->get("uuid").toString();
 }
 
 bool BaseInstance::isRunning() const
