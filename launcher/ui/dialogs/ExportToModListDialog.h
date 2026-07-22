@@ -51,5 +51,5 @@ class ExportToModListDialog : public QDialog {
     QString m_name;
     ExportToModList::Formats m_format = ExportToModList::Formats::HTML;
     Ui::ExportToModListDialog* m_ui;
-    static const QHash<ExportToModList::Formats, QString> ExampleLines;
+    static const QHash<ExportToModList::Formats, QString>& exampleLines();
 };

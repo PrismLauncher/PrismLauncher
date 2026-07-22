@@ -50,6 +50,23 @@ class VersionFilterModel : public QSortFilterProxyModel {
         sort(0, Qt::DescendingOrder);
     }
 
+    void beginChange()
+    {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+        beginFilterChange();
+#endif
+    }
+
+    void endChange()
+    {
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
+        invalidateFilter();
+#else
+        endFilterChange();
+#endif
+    }
+
+   protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override
     {
         const auto& filters = m_parent->filters();
@@ -68,16 +85,6 @@ class VersionFilterModel : public QSortFilterProxyModel {
             }
         }
         return true;
-    }
-
-    void filterChanged()
-    {
-#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
-        invalidateFilter();
-#else
-        beginFilterChange();
-        endFilterChange();
-#endif
     }
 
    private:
@@ -236,7 +243,7 @@ QVariant VersionProxyModel::data(const QModelIndex& index, int role) const
             return QVariant();
         }
         default: {
-            if (m_roles.contains((BaseVersionList::ModelRoles)role)) {
+            if (m_roles.contains(static_cast<BaseVersionList::ModelRoles>(role))) {
                 return sourceModel()->data(parentIndex, role);
             }
             return QVariant();
@@ -388,21 +395,24 @@ QModelIndex VersionProxyModel::getVersion(const QString& version) const
 
 void VersionProxyModel::clearFilters()
 {
+    m_filterModel->beginChange();
     m_filters.clear();
     m_search.clear();
-    m_filterModel->filterChanged();
+    m_filterModel->endChange();
 }
 
 void VersionProxyModel::setFilter(const BaseVersionList::ModelRoles column, Filter f)
 {
+    m_filterModel->beginChange();
     m_filters[column] = std::move(f);
-    m_filterModel->filterChanged();
+    m_filterModel->endChange();
 }
 
 void VersionProxyModel::setSearch(const QString& search)
 {
+    m_filterModel->beginChange();
     m_search = search;
-    m_filterModel->filterChanged();
+    m_filterModel->endChange();
 }
 
 const VersionProxyModel::FilterMap& VersionProxyModel::filters() const
