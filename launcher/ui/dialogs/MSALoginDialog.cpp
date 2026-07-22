@@ -170,12 +170,11 @@ void paintQR(QPainter& painter, const QSize canvasSize, const QString& data, QCo
     const auto offsetX = (canvasWidth - (qrSize * scale)) / 2;
     const auto offsetY = (canvasHeight - (qrSize * scale)) / 2;
 
-    auto qrData = std::span(qr->data, static_cast<long>(qrSize) * qrSize);
     for (int y = 0; y < qrSize; y++) {
         for (int x = 0; x < qrSize; x++) {
-            auto shouldFillIn = qrData[(y * qrSize) + x] & 1U;
+            auto shouldFillIn = qr->data[(y * qrSize) + x] & 1U;
             if (shouldFillIn != 0) {
-                QRectF r(offsetX + (x * scale), offsetY + (y * scale), scale, scale);
+                const QRectF r(offsetX + (x * scale), offsetY + (y * scale), scale, scale);
                 painter.drawRects(&r, 1);
             }
         }
