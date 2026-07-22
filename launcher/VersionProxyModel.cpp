@@ -50,6 +50,17 @@ class VersionFilterModel : public QSortFilterProxyModel {
         sort(0, Qt::DescendingOrder);
     }
 
+    void filterChanged()
+    {
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
+        invalidateFilter();
+#else
+        beginFilterChange();
+        endFilterChange();
+#endif
+    }
+
+   protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override
     {
         const auto& filters = m_parent->filters();
@@ -68,16 +79,6 @@ class VersionFilterModel : public QSortFilterProxyModel {
             }
         }
         return true;
-    }
-
-    void filterChanged()
-    {
-#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
-        invalidateFilter();
-#else
-        beginFilterChange();
-        endFilterChange();
-#endif
     }
 
    private:
@@ -236,7 +237,7 @@ QVariant VersionProxyModel::data(const QModelIndex& index, int role) const
             return QVariant();
         }
         default: {
-            if (m_roles.contains((BaseVersionList::ModelRoles)role)) {
+            if (m_roles.contains(static_cast<BaseVersionList::ModelRoles>(role))) {
                 return sourceModel()->data(parentIndex, role);
             }
             return QVariant();
