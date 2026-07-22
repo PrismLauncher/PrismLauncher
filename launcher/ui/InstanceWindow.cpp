@@ -100,6 +100,8 @@ InstanceWindow::InstanceWindow(BaseInstance* instance, QWidget* parent) : QMainW
         horizontalLayout->addWidget(m_restartButton);
         connect(m_restartButton, &QPushButton::clicked, this, &InstanceWindow::restartInstance);
 
+        m_restartButton->hide();
+
         m_killButton = new QPushButton(this);
         m_killButton->setText(tr("&Kill"));
         m_killButton->setToolTip(tr("Kill the running instance"));
@@ -160,6 +162,9 @@ void InstanceWindow::on_instanceStatusChanged(BaseInstance::Status, BaseInstance
 void InstanceWindow::updateButtons()
 {
     const bool running = m_instance->isRunning();
+
+    m_launchButton->setVisible(!running);
+    m_restartButton->setVisible(running);
 
     m_launchButton->setEnabled(m_instance->canLaunch());
     m_restartButton->setEnabled(running && !m_restartQueued);
