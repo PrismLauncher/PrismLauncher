@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include <array>
+#include <utility>
+
 #include <QFileDialog>
 #include <QKeyEvent>
 #include <QLineEdit>
@@ -30,37 +33,45 @@
 #include "icons/IconList.h"
 #include "icons/IconUtils.h"
 
-class IconProxyModel : public QSortFilterProxyModel
-{
-public:
-    explicit IconProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent)
-    {
-    }
+namespace {
+
+class IconProxyModel : public QSortFilterProxyModel {
+   public:
+    explicit IconProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}
 
     void setCategory(IconPickerDialog::IconPickerCategory category)
     {
-        if (m_category == category)
+        if (m_category == category) {
             return;
+        }
         m_category = category;
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
         invalidateFilter();
+#else
+        beginFilterChange();
+        endFilterChange();
+#endif
     }
 
-protected:
-    bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override
+   protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override
     {
-        if (!QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent))
+        if (!QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent)) {
             return false;
+        }
 
-        if (m_category == IconPickerDialog::Any)
+        if (m_category == IconPickerDialog::IconPickerCategory::Any) {
             return true;
+        }
 
-        auto model = static_cast<IconList*>(sourceModel());
-        QModelIndex index = model->index(source_row, 0, source_parent);
+        auto* model = static_cast<IconList*>(sourceModel());
+        const QModelIndex index = model->index(sourceRow, 0, sourceParent);
         QString key = model->data(index, Qt::UserRole).toString();
         const MMCIcon* icon = model->icon(key);
 
-        if (!icon)
+        if (!icon) {
             return false;
+        }
 
         bool isModpack = false;
         bool isBuiltin = icon->isBuiltIn();
@@ -68,66 +79,57 @@ protected:
 
         if (!isBuiltin) {
             const QString& name = icon->name();
-            if (name.startsWith("curseforge_", Qt::CaseInsensitive) ||
-                name.startsWith("modrinth_", Qt::CaseInsensitive) ||
-                name.startsWith("ftb_", Qt::CaseInsensitive) ||
-                name.startsWith("technic_", Qt::CaseInsensitive) ||
+            if (name.startsWith("curseforge_", Qt::CaseInsensitive) || name.startsWith("modrinth_", Qt::CaseInsensitive) ||
+                name.startsWith("ftb_", Qt::CaseInsensitive) || name.startsWith("technic_", Qt::CaseInsensitive) ||
                 name.startsWith("atl_", Qt::CaseInsensitive)) {
                 isModpack = true;
             }
         }
 
         switch (m_category) {
-            case IconPickerDialog::Legacy:
+            case IconPickerDialog::IconPickerCategory::Legacy:
                 return isBuiltin && isLegacy;
-            case IconPickerDialog::Modpacks:
+            case IconPickerDialog::IconPickerCategory::Modpacks:
                 return isModpack;
-            case IconPickerDialog::Modern:
+            case IconPickerDialog::IconPickerCategory::Modern:
                 return isBuiltin && !isLegacy;
-            case IconPickerDialog::Custom:
+            case IconPickerDialog::IconPickerCategory::Custom:
                 return !isBuiltin && !isModpack;
             default:
                 return true;
         }
     }
 
-private:
-    IconPickerDialog::IconPickerCategory m_category = IconPickerDialog::Any;
+   private:
+    IconPickerDialog::IconPickerCategory m_category = IconPickerDialog::IconPickerCategory::Any;
 };
+}  // namespace
 
-IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui::IconPickerDialog)
+IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), m_ui(new Ui::IconPickerDialog)
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
     setWindowModality(Qt::WindowModal);
 
-    static const QString context_text[] = {
-        tr("All"),
-        tr("Modern"),
-        tr("Legacy"),
-        tr("Modpacks"),
-        tr("Custom"),
+    static const std::array s_context_text = {
+        tr("All"), tr("Modern"), tr("Legacy"), tr("Modpacks"), tr("Custom"),
     };
-    static const IconPickerCategory context_id[] = {
-        Any,
-        Modern,
-        Legacy,
-        Modpacks,
-        Custom,
+    static const std::array s_context_id = {
+        IconPickerCategory::Any,      IconPickerCategory::Modern, IconPickerCategory::Legacy,
+        IconPickerCategory::Modpacks, IconPickerCategory::Custom,
     };
-    const int cnt = sizeof(context_text) / sizeof(context_text[0]);
-    for (int i = 0; i < cnt; ++i) {
-        ui->contextCombo->addItem(context_text[i], context_id[i]);
+    for (int i = 0; std::cmp_less(i, s_context_text.size()); ++i) {
+        m_ui->contextCombo->addItem(s_context_text.at(i), static_cast<int>(s_context_id.at(i)));
         if (i == 0) {
-            ui->contextCombo->insertSeparator(i + 1);
+            m_ui->contextCombo->insertSeparator(i + 1);
         }
     }
 
-    proxyModel = new IconProxyModel(this);
-    proxyModel->setSourceModel(APPLICATION->icons());
-    proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    ui->iconView->setModel(proxyModel);
+    m_proxyModel = new IconProxyModel(this);
+    m_proxyModel->setSourceModel(APPLICATION->icons());
+    m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_ui->iconView->setModel(m_proxyModel);
 
-    auto contentsWidget = ui->iconView;
+    auto* contentsWidget = m_ui->iconView;
     contentsWidget->setFlow(QListView::LeftToRight);
     contentsWidget->setIconSize(QSize(48, 48));
     contentsWidget->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -148,41 +150,42 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
 
     contentsWidget->installEventFilter(this);
 
-    contentsWidget->setModel(proxyModel);
+    contentsWidget->setModel(m_proxyModel);
 
     // NOTE: ResetRole forces the button to be on the left, while the OK/Cancel ones are on the right. We win.
-    auto buttonAdd = ui->buttonBox->addButton(tr("Add Icon"), QDialogButtonBox::ResetRole);
-    buttonRemove = ui->buttonBox->addButton(tr("Remove Icon"), QDialogButtonBox::ResetRole);
+    auto* buttonAdd = m_ui->buttonBox->addButton(tr("Add Icon"), QDialogButtonBox::ResetRole);
+    m_buttonRemove = m_ui->buttonBox->addButton(tr("Remove Icon"), QDialogButtonBox::ResetRole);
 
-    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
-    ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
+    m_ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
+    m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
 
     connect(buttonAdd, &QPushButton::clicked, this, &IconPickerDialog::addNewIcon);
-    connect(buttonRemove, &QPushButton::clicked, this, &IconPickerDialog::removeSelectedIcon);
+    connect(m_buttonRemove, &QPushButton::clicked, this, &IconPickerDialog::removeSelectedIcon);
 
     connect(contentsWidget, &QAbstractItemView::doubleClicked, this, &IconPickerDialog::activated);
 
     connect(contentsWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &IconPickerDialog::selectionChanged);
 
-    auto buttonFolder = ui->buttonBox->addButton(tr("Open Folder"), QDialogButtonBox::ResetRole);
+    auto* buttonFolder = m_ui->buttonBox->addButton(tr("Open Folder"), QDialogButtonBox::ResetRole);
     connect(buttonFolder, &QPushButton::clicked, this, &IconPickerDialog::openFolder);
-    connect(ui->searchLine, &QLineEdit::textChanged, this, &IconPickerDialog::filterIcons);
-    connect(ui->contextCombo, &QComboBox::currentIndexChanged, this, [this](int index) {
-        IconPickerCategory category = static_cast<IconPickerCategory>(ui->contextCombo->itemData(index).toInt());
+    connect(m_ui->searchLine, &QLineEdit::textChanged, this, &IconPickerDialog::filterIcons);
+    connect(m_ui->contextCombo, &QComboBox::currentIndexChanged, this, [this](int index) {
+        const IconPickerCategory category = static_cast<IconPickerCategory>(m_ui->contextCombo->itemData(index).toInt());
         filterIconsByCategory(category);
     });
     // Prevent incorrect indices from e.g. filesystem changes
-    connect(APPLICATION->icons(), &IconList::iconUpdated, this, [this]() { proxyModel->invalidate(); });
+    connect(APPLICATION->icons(), &IconList::iconUpdated, this, [this]() { m_proxyModel->invalidate(); });
 }
 
 bool IconPickerDialog::eventFilter(QObject* obj, QEvent* evt)
 {
-    if (obj != ui->iconView)
+    if (obj != m_ui->iconView) {
         return QDialog::eventFilter(obj, evt);
+    }
     if (evt->type() != QEvent::KeyPress) {
         return QDialog::eventFilter(obj, evt);
     }
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evt);
+    auto* keyEvent = static_cast<QKeyEvent*>(evt);
     switch (keyEvent->key()) {
         case Qt::Key_Delete:
             removeSelectedIcon();
@@ -206,10 +209,11 @@ void IconPickerDialog::addNewIcon()
     APPLICATION->icons()->installIcons(fileNames);
 }
 
-void IconPickerDialog::removeSelectedIcon()
+void IconPickerDialog::removeSelectedIcon() const
 {
-    if (APPLICATION->icons()->trashIcon(selectedIconKey))
+    if (APPLICATION->icons()->trashIcon(selectedIconKey)) {
         return;
+    }
 
     APPLICATION->icons()->deleteIcon(selectedIconKey);
 }
@@ -220,54 +224,55 @@ void IconPickerDialog::activated(QModelIndex index)
     accept();
 }
 
-void IconPickerDialog::selectionChanged(QItemSelection selected, QItemSelection deselected)
+void IconPickerDialog::selectionChanged(const QItemSelection& selected, const QItemSelection& /*deselected*/)
 {
-    if (selected.empty())
+    if (selected.empty()) {
         return;
+    }
 
     QString key = selected.first().indexes().first().data(Qt::UserRole).toString();
     if (!key.isEmpty()) {
         selectedIconKey = key;
     }
-    buttonRemove->setEnabled(APPLICATION->icons()->iconFileExists(selectedIconKey));
+    m_buttonRemove->setEnabled(APPLICATION->icons()->iconFileExists(selectedIconKey));
 }
 
-int IconPickerDialog::execWithSelection(QString selection)
+int IconPickerDialog::execWithSelection(const QString& selection)
 {
-    auto list = APPLICATION->icons();
-    auto contentsWidget = ui->iconView;
+    auto* list = APPLICATION->icons();
+    auto* contentsWidget = m_ui->iconView;
     selectedIconKey = selection;
 
-    int index_nr = list->getIconIndex(selection);
-    auto model_index = list->index(index_nr);
-    contentsWidget->selectionModel()->select(model_index, QItemSelectionModel::Current | QItemSelectionModel::Select);
+    const int indexNr = list->getIconIndex(selection);
+    auto modelIndex = list->index(indexNr);
+    contentsWidget->selectionModel()->select(modelIndex, QItemSelectionModel::Current | QItemSelectionModel::Select);
 
-    QMetaObject::invokeMethod(this, "delayed_scroll", Qt::QueuedConnection, Q_ARG(QModelIndex, model_index));
+    QMetaObject::invokeMethod(this, "delayed_scroll", Qt::QueuedConnection, Q_ARG(QModelIndex, modelIndex));
     return QDialog::exec();
 }
 
-void IconPickerDialog::delayed_scroll(QModelIndex model_index)
+void IconPickerDialog::delayed_scroll(QModelIndex modelIndex)
 {
-    auto contentsWidget = ui->iconView;
-    contentsWidget->scrollTo(model_index);
+    auto* contentsWidget = m_ui->iconView;
+    contentsWidget->scrollTo(modelIndex);
 }
 
 IconPickerDialog::~IconPickerDialog()
 {
-    delete ui;
+    delete m_ui;
 }
 
-void IconPickerDialog::openFolder()
+void IconPickerDialog::openFolder() const
 {
     DesktopServices::openPath(APPLICATION->icons()->iconDirectory(selectedIconKey), true);
 }
 
-void IconPickerDialog::filterIcons(const QString& query)
+void IconPickerDialog::filterIcons(const QString& text)
 {
-    proxyModel->setFilterFixedString(query);
+    m_proxyModel->setFilterFixedString(text);
 }
 
 void IconPickerDialog::filterIconsByCategory(IconPickerCategory category)
 {
-    static_cast<IconProxyModel*>(proxyModel)->setCategory(category);
+    static_cast<IconProxyModel*>(m_proxyModel)->setCategory(category);
 }
