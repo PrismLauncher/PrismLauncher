@@ -151,6 +151,7 @@ void InstanceCopyTask::copyFinished()
     BaseInstance* inst(new NullInstance(m_globalSettings, std::move(instanceSettings), m_stagingPath));
     inst->setName(name());
     inst->setIconKey(m_instIcon);
+    inst->regenerateUuid();
     if (!m_keepPlaytime) {
         inst->resetTimePlayed();
     }
