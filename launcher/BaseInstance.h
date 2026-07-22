@@ -115,6 +115,8 @@ class BaseInstance : public QObject {
     /// The instance's ID. The ID SHALL be determined by LAUNCHER internally. The ID IS guaranteed to
     /// be unique.
     virtual QString id() const;
+    virtual QString uuid() const;
+    void regenerateUuid();
 
     void setMinecraftRunning(bool running);
     void setRunning(bool running);

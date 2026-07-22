@@ -612,7 +612,7 @@ BaseInstance* InstanceList::getInstanceById(QString instId) const
     if (instId.isEmpty())
         return nullptr;
     for (auto& inst : m_instances) {
-        if (inst->id() == instId) {
+        if (inst->id() == instId || inst->uuid() == instId) {
             return inst.get();
         }
     }
