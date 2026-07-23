@@ -134,6 +134,63 @@ void LauncherPage::on_instDirBrowseBtn_clicked()
     }
 }
 
+void LauncherPage::on_addInstDirBtn_clicked()
+{
+    QString rawDir = QFileDialog::getExistingDirectory(this, tr("Additional Instance Folder"));
+
+    if (rawDir.isEmpty() || !QDir(rawDir).exists())
+        return;
+
+    QString cookedDir = FS::NormalizePath(rawDir);
+
+    // don't allow duplicates of the primary dir or of an already-added additional dir
+    if (cookedDir == FS::NormalizePath(ui->instDirTextBox->text())) {
+        QMessageBox::warning(this, tr("Duplicate directory"), tr("This is already your primary instance directory."));
+        return;
+    }
+    for (int i = 0; i < ui->additionalInstDirsList->count(); ++i) {
+        if (FS::NormalizePath(ui->additionalInstDirsList->item(i)->text()) == cookedDir) {
+            QMessageBox::warning(this, tr("Duplicate directory"), tr("This directory has already been added."));
+            return;
+        }
+    }
+
+    if (FS::checkProblemticPathJava(QDir(cookedDir))) {
+        QMessageBox warning;
+        warning.setText(
+            tr("You're trying to specify an instance folder which\'s path "
+               "contains at least one \'!\'. "
+               "Java is known to cause problems if that is the case, your "
+               "instances (probably) won't start!"));
+        warning.setInformativeText(
+            tr("Do you really want to use this path? "
+               "Selecting \"No\" will close this and not alter your instance path."));
+        warning.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+        if (warning.exec() != QMessageBox::Ok)
+            return;
+    } else if (DesktopServices::isFlatpak() && rawDir.startsWith("/run/user")) {
+        QMessageBox warning;
+        warning.setText(tr("You're trying to specify an instance folder "
+                           "which was granted temporarily via Flatpak.\n"
+                           "This is known to cause problems. "
+                           "After a restart the launcher might break, "
+                           "because it will no longer have access to that directory.\n\n"
+                           "Granting %1 access to it via Flatseal is recommended.")
+                            .arg(BuildConfig.LAUNCHER_DISPLAYNAME));
+        warning.setInformativeText(tr("Do you want to proceed anyway?"));
+        warning.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+        if (warning.exec() != QMessageBox::Ok)
+            return;
+    }
+
+    ui->additionalInstDirsList->addItem(cookedDir);
+}
+
+void LauncherPage::on_removeInstDirBtn_clicked()
+{
+    qDeleteAll(ui->additionalInstDirsList->selectedItems());
+}
+
 void LauncherPage::on_iconsDirBrowseBtn_clicked()
 {
     QString rawDir = QFileDialog::getExistingDirectory(this, tr("Icons Folder"), ui->iconsDirTextBox->text());
@@ -216,6 +273,12 @@ void LauncherPage::applySettings()
     // Folders
     // TODO: Offer to move instances to new instance folder.
     s->set("InstanceDir", ui->instDirTextBox->text());
+    {
+        QStringList additionalDirs;
+        for (int i = 0; i < ui->additionalInstDirsList->count(); ++i)
+            additionalDirs << ui->additionalInstDirsList->item(i)->text();
+        s->set("AdditionalInstanceDirs", additionalDirs);
+    }
     s->set("CentralModsDir", ui->modsDirTextBox->text());
     s->set("IconsDir", ui->iconsDirTextBox->text());
     s->set("DownloadsDir", ui->downloadsDirTextBox->text());
@@ -276,6 +339,8 @@ void LauncherPage::loadSettings()
 
     // Folders
     ui->instDirTextBox->setText(s->get("InstanceDir").toString());
+    ui->additionalInstDirsList->clear();
+    ui->additionalInstDirsList->addItems(s->get("AdditionalInstanceDirs").toStringList());
     ui->modsDirTextBox->setText(s->get("CentralModsDir").toString());
     ui->iconsDirTextBox->setText(s->get("IconsDir").toString());
     ui->downloadsDirTextBox->setText(s->get("DownloadsDir").toString());
@@ -288,7 +353,7 @@ void LauncherPage::loadSettings()
     QString sortMode = s->get("InstSortMode").toString();
     if (sortMode == "LastLaunch") {
         ui->sortLastLaunchedBtn->setChecked(true);
-    } else if (sortMode == "Playtime"){
+    } else if (sortMode == "Playtime") {
         ui->sortByPlaytimeBtn->setChecked(true);
     } else {
         ui->sortByNameBtn->setChecked(true);

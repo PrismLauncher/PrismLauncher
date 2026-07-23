@@ -64,22 +64,28 @@
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
-InstanceList::InstanceList(SettingsObject* settings, const QString& instDir, QObject* parent)
+InstanceList::InstanceList(SettingsObject* settings, const QStringList& instDirs, QObject* parent)
     : QAbstractListModel(parent), m_globalSettings(settings)
 {
     resumeWatch();
-    // Create aand normalize path
-    if (!QDir::current().exists(instDir)) {
-        QDir::current().mkpath(instDir);
-    }
 
     connect(this, &InstanceList::instancesChanged, this, &InstanceList::providerUpdated);
 
-    // NOTE: canonicalPath requires the path to exist. Do not move this above the creation block!
-    m_instDir = QDir(instDir).canonicalPath();
     m_watcher = new QFileSystemWatcher(this);
     connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &InstanceList::instanceDirContentsChanged);
-    m_watcher->addPath(m_instDir);
+
+    for (const auto& dir : instDirs) {
+        // Create and normalize path
+        if (!QDir::current().exists(dir)) {
+            QDir::current().mkpath(dir);
+        }
+        // NOTE: canonicalPath requires the path to exist. Do not move this above the creation block!
+        QString canonical = QDir(dir).canonicalPath();
+        if (!canonical.isEmpty() && !m_instDirs.contains(canonical)) {
+            m_instDirs << canonical;
+            m_watcher->addPath(canonical);
+        }
+    }
 }
 
 InstanceList::~InstanceList() {}
@@ -469,30 +475,44 @@ static QMap<InstanceId, InstanceLocator> getIdMapping(const std::vector<std::uni
 
 QList<InstanceId> InstanceList::discoverInstances()
 {
-    qInfo() << "Discovering instances in" << m_instDir;
     QList<InstanceId> out;
-    QDirIterator iter(m_instDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden, QDirIterator::FollowSymlinks);
-    while (iter.hasNext()) {
-        QString subDir = iter.next();
-        QFileInfo dirInfo(subDir);
-        if (!QFileInfo(FS::PathCombine(subDir, "instance.cfg")).exists())
-            continue;
-        // if it is a symlink, ignore it if it goes to the instance folder
-        if (dirInfo.isSymLink()) {
-            QFileInfo targetInfo(dirInfo.symLinkTarget());
-            QFileInfo instDirInfo(m_instDir);
-            if (targetInfo.canonicalPath() == instDirInfo.canonicalFilePath()) {
-                qDebug() << "Ignoring symlink" << subDir << "that leads into the instances folder";
+    m_instanceRootDir.clear();
+    for (const auto& rootDir : m_instDirs) {
+        qInfo() << "Discovering instances in" << rootDir;
+        QDirIterator iter(rootDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden, QDirIterator::FollowSymlinks);
+        while (iter.hasNext()) {
+            QString subDir = iter.next();
+            QFileInfo dirInfo(subDir);
+            if (!QFileInfo(FS::PathCombine(subDir, "instance.cfg")).exists())
+                continue;
+            // if it is a symlink, ignore it if it goes to the instance folder
+            if (dirInfo.isSymLink()) {
+                QFileInfo targetInfo(dirInfo.symLinkTarget());
+                QFileInfo instDirInfo(rootDir);
+                if (targetInfo.canonicalPath() == instDirInfo.canonicalFilePath()) {
+                    qDebug() << "Ignoring symlink" << subDir << "that leads into the instances folder";
+                    continue;
+                }
+            }
+            auto id = dirInfo.fileName();
+            if (m_instanceRootDir.contains(id)) {
+                qWarning() << "Duplicate instance ID" << id << "found in" << rootDir << "- already claimed by"
+                           << m_instanceRootDir.value(id) << ". Skipping.";
                 continue;
             }
+            m_instanceRootDir[id] = rootDir;
+            out.append(id);
+            qInfo() << "Found instance ID" << id << "in" << rootDir;
         }
-        auto id = dirInfo.fileName();
-        out.append(id);
-        qInfo() << "Found instance ID" << id;
     }
     instanceSet = QSet<QString>(out.begin(), out.end());
     m_instancesProbed = true;
     return out;
+}
+
+QString InstanceList::rootDirOf(const InstanceId& id) const
+{
+    return m_instanceRootDir.value(id, primaryDir());
 }
 
 InstanceList::InstListError InstanceList::loadList()
@@ -663,7 +683,7 @@ std::unique_ptr<BaseInstance> InstanceList::loadInstance(const InstanceId& id)
         loadGroupList();
     }
 
-    auto instanceRoot = FS::PathCombine(m_instDir, id);
+    auto instanceRoot = FS::PathCombine(rootDirOf(id), id);
     auto instanceSettings = std::make_unique<INISettingsObject>(FS::PathCombine(instanceRoot, "instance.cfg"));
     std::unique_ptr<BaseInstance> inst;
 
@@ -713,28 +733,18 @@ void InstanceList::saveGroupList()
         qDebug() << "Group saving prevented because we don't know the full list of instances yet.";
         return;
     }
-    WatchLock foo(m_watcher, m_instDir);
-    QString groupFileName = m_instDir + "/instgroups.json";
+
+    QString groupFileName = QDir::current().filePath("instgroups.json");
+
     QMap<QString, QSet<QString>> reverseGroupMap;
     for (auto iter = m_instanceGroupIndex.begin(); iter != m_instanceGroupIndex.end(); iter++) {
         const QString& id = iter.key();
         QString group = iter.value();
         if (group.isEmpty())
             continue;
-        if (!instanceSet.contains(id)) {
-            qDebug() << "Skipping saving missing instance" << id << "to groups list.";
-            continue;
-        }
-
-        if (!reverseGroupMap.count(group)) {
-            QSet<QString> set;
-            set.insert(id);
-            reverseGroupMap[group] = set;
-        } else {
-            QSet<QString>& set = reverseGroupMap[group];
-            set.insert(id);
-        }
+        reverseGroupMap[group].insert(id);
     }
+
     QJsonObject toplevel;
     toplevel.insert("formatVersion", QJsonValue(QString("1")));
     QJsonObject groupsArr;
@@ -770,9 +780,12 @@ void InstanceList::loadGroupList()
 {
     qDebug() << "Will load group list now.";
 
-    QString groupFileName = m_instDir + "/instgroups.json";
+    QString groupFileName = QDir::current().filePath("instgroups.json");
 
-    // if there's no group file, fail
+    m_instanceGroupIndex.clear();
+    m_groupNameCache.clear();
+    m_collapsedGroups.clear();
+
     if (!QFileInfo(groupFileName).exists())
         return;
 
@@ -813,20 +826,13 @@ void InstanceList::loadGroupList()
         return;
     }
 
-    m_instanceGroupIndex.clear();
-    m_groupNameCache.clear();
-
-    // Iterate through all the groups.
     QJsonObject groupMapping = rootObj.value("groups").toObject();
     for (QJsonObject::iterator iter = groupMapping.begin(); iter != groupMapping.end(); iter++) {
         QString groupName = iter.key();
-
-        if (iter.key().isEmpty()) {
+        if (groupName.isEmpty()) {
             qWarning() << "Redundant empty group found";
             continue;
         }
-
-        // If not an object, complain and skip to the next one.
         if (!iter.value().isObject()) {
             qWarning() << QString("Group '%1' in the group list should be an object").arg(groupName).toUtf8();
             continue;
@@ -839,14 +845,10 @@ void InstanceList::loadGroupList()
                               .toUtf8();
             continue;
         }
-
-        auto hidden = groupObj.value("hidden").toBool(false);
-        if (hidden)
+        if (groupObj.value("hidden").toBool(false))
             m_collapsedGroups.insert(groupName);
 
-        // Iterate through the list of instances in the group.
         QJsonArray instancesArray = groupObj.value("instances").toArray();
-
         for (auto value : instancesArray) {
             m_instanceGroupIndex[value.toString()] = groupName;
             increaseGroupCount(groupName);
@@ -855,8 +857,7 @@ void InstanceList::loadGroupList()
 
     bool ungroupedHidden = false;
     if (rootObj.value("ungrouped").isObject()) {
-        QJsonObject ungrouped = rootObj.value("ungrouped").toObject();
-        ungroupedHidden = ungrouped.value("hidden").toBool(false);
+        ungroupedHidden = rootObj.value("ungrouped").toObject().value("hidden").toBool(false);
     }
     if (ungroupedHidden) {
         // empty string represents ungrouped "group"
@@ -872,14 +873,33 @@ void InstanceList::instanceDirContentsChanged(const QString& path)
     emit instancesChanged();
 }
 
-void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting, QVariant value)
+void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting, [[maybe_unused]] QVariant value)
 {
-    QString newInstDir = QDir(value.toString()).canonicalPath();
-    if (newInstDir != m_instDir) {
+    QString instDir = m_globalSettings->get("InstanceDir").toString();
+    QStringList additionalDirs = m_globalSettings->get("AdditionalInstanceDirs").toStringList();
+
+    QStringList newDirs;
+    QStringList candidates;
+    candidates << instDir << additionalDirs;
+    for (const auto& dir : candidates) {
+        if (dir.isEmpty())
+            continue;
+        if (!QDir::current().exists(dir))
+            QDir::current().mkpath(dir);
+        QString canonical = QDir(dir).canonicalPath();
+        if (!canonical.isEmpty() && !newDirs.contains(canonical))
+            newDirs << canonical;
+    }
+
+    if (newDirs != m_instDirs) {
         if (m_groupsLoaded) {
             saveGroupList();
         }
-        m_instDir = newInstDir;
+        for (const auto& dir : m_instDirs)
+            m_watcher->removePath(dir);
+        m_instDirs = newDirs;
+        for (const auto& dir : m_instDirs)
+            m_watcher->addPath(dir);
         m_groupsLoaded = false;
         beginRemoveRows(QModelIndex(), 0, count());
         m_instances.erase(m_instances.begin(), m_instances.end());
@@ -1003,7 +1023,7 @@ Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 
 QString InstanceList::getStagedInstancePath()
 {
-    const QString tempRoot = FS::PathCombine(m_instDir, ".tmp");
+    const QString tempRoot = FS::PathCombine(primaryDir(), ".tmp");
 
     QString result;
     int tries = 0;
@@ -1039,14 +1059,14 @@ bool InstanceList::commitStagedInstance(const QString& path,
     if (should_override) {
         instID = commiting.originalInstanceID();
     } else {
-        instID = FS::DirNameFromString(instanceName.modifiedName(), m_instDir);
+        instID = FS::DirNameFromString(instanceName.modifiedName(), primaryDir());
     }
 
     Q_ASSERT(!instID.isEmpty());
 
     {
-        WatchLock lock(m_watcher, m_instDir);
-        QString destination = FS::PathCombine(m_instDir, instID);
+        WatchLock lock(m_watcher, primaryDir());
+        QString destination = FS::PathCombine(primaryDir(), instID);
 
         if (should_override) {
             if (!FS::overrideFolder(destination, path)) {
@@ -1061,6 +1081,7 @@ bool InstanceList::commitStagedInstance(const QString& path,
 
             m_instanceGroupIndex[instID] = groupName;
             increaseGroupCount(groupName);
+            m_instanceRootDir[instID] = primaryDir();
         }
 
         instanceSet.insert(instID);

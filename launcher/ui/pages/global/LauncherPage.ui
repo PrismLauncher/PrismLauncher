@@ -346,6 +346,43 @@
             </property>
            </widget>
           </item>
+          <item row="6" column="0" colspan="3">
+           <widget class="QGroupBox" name="additionalInstDirsGroupBox">
+            <property name="title">
+             <string>Additional instance directories</string>
+            </property>
+            <layout class="QVBoxLayout" name="additionalInstDirsLayout">
+             <item>
+              <widget class="QListWidget" name="additionalInstDirsList"/>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="additionalInstDirsBtnLayout">
+               <item>
+                <widget class="QPushButton" name="addInstDirBtn">
+                 <property name="text">
+                  <string>Add</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="removeInstDirBtn">
+                 <property name="text">
+                  <string>Remove</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="additionalInstDirsSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Orientation::Horizontal</enum>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
           <item row="0" column="1">
            <widget class="QLineEdit" name="instDirTextBox"/>
           </item>
@@ -694,6 +731,9 @@
   <tabstop>updateIntervalSpinBox</tabstop>
   <tabstop>instDirTextBox</tabstop>
   <tabstop>instDirBrowseBtn</tabstop>
+  <tabstop>additionalInstDirsList</tabstop>
+  <tabstop>addInstDirBtn</tabstop>
+  <tabstop>removeInstDirBtn</tabstop>
   <tabstop>modsDirTextBox</tabstop>
   <tabstop>modsDirBrowseBtn</tabstop>
   <tabstop>iconsDirTextBox</tabstop>

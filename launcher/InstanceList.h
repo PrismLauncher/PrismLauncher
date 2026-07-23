@@ -36,6 +36,7 @@
 #pragma once
 
 #include <QAbstractListModel>
+#include <QHash>
 #include <QList>
 #include <QObject>
 #include <QPair>
@@ -73,7 +74,7 @@ class InstanceList : public QAbstractListModel {
     Q_OBJECT
 
    public:
-    explicit InstanceList(SettingsObject* settings, const QString& instDir, QObject* parent = 0);
+    explicit InstanceList(SettingsObject* settings, const QStringList& instDirs, QObject* parent = 0);
     virtual ~InstanceList();
 
    public:
@@ -159,6 +160,8 @@ class InstanceList : public QAbstractListModel {
 
     QStringList getLinkedInstancesById(const QString& id) const;
 
+    QString primaryDir() const { return m_instDirs.isEmpty() ? QString() : m_instDirs.first(); }
+
    signals:
     void dataIsInvalid();
     void instancesChanged();
@@ -197,7 +200,9 @@ class InstanceList : public QAbstractListModel {
     QMap<QString, int> m_groupNameCache;
 
     SettingsObject* m_globalSettings;
-    QString m_instDir;
+    QStringList m_instDirs;
+    QHash<InstanceId, QString> m_instanceRootDir;
+    QString rootDirOf(const InstanceId& id) const;
     QFileSystemWatcher* m_watcher;
     // FIXME: this is so inefficient that looking at it is almost painful.
     QSet<QString> m_collapsedGroups;
