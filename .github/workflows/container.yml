@@ -133,7 +133,7 @@ jobs:
           github-token: ${{ github.token }}
 
       - name: Login to registry
-        uses: redhat-actions/podman-login@v1
+        uses: redhat-actions/podman-login@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.repository_owner }}
