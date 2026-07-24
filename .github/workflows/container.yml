@@ -81,7 +81,7 @@ jobs:
       - name: Push image
         id: push-image
         if: ${{ github.event_name != 'pull_request' }}
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           tags: ${{ steps.build-image.outputs.tags }}
           username: ${{ github.repository_owner }}
@@ -166,7 +166,7 @@ jobs:
           done <<< "$DOCKER_METADATA_OUTPUT_TAGS"
 
       - name: Push manifest
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           tags: ${{ steps.manifest-metadata.outputs.tags }}
           username: ${{ github.repository_owner }}
