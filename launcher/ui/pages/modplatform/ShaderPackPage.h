@@ -42,7 +42,8 @@ class ShaderPackResourcePage : public ResourcePage {
     void addResourceToPage(ModPlatform::IndexedPack::Ptr /*unused*/,
                            ModPlatform::IndexedVersion& /*unused*/,
                            ResourceFolderModel* /*unused*/,
-                           QString downloadReason = "standalone") override;
+                           QString downloadReason = "standalone",
+                           QString dependentOn = "") override;
 
     QMap<QString, QString> urlHandlers() const override;
 

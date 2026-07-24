@@ -519,10 +519,11 @@ void ResourceModel::addPack(ModPlatform::IndexedPack::Ptr pack,
                             ModPlatform::IndexedVersion& version,
                             ResourceFolderModel* packs,
                             bool isIndexed,
-                            QString downloadReason)
+                            QString downloadReason,
+                            QString dependentOn)
 {
     version.is_currently_selected = true;
-    m_selected.append(makeShared<ResourceDownloadTask>(std::move(pack), version, packs, isIndexed, std::move(downloadReason)));
+    m_selected.append(makeShared<ResourceDownloadTask>(std::move(pack), version, packs, isIndexed, std::move(downloadReason), std::move(dependentOn)));
 }
 
 void ResourceModel::removePack(const QString& rem)

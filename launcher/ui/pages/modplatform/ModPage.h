@@ -52,7 +52,8 @@ class ModPage : public ResourcePage {
     void addResourceToPage(ModPlatform::IndexedPack::Ptr /*unused*/,
                            ModPlatform::IndexedVersion& /*unused*/,
                            ResourceFolderModel* /*unused*/,
-                           QString downloadReason = "standalone") override;
+                           QString downloadReason = "standalone",
+                           QString dependentOn = "") override;
 
     virtual std::unique_ptr<ModFilterWidget> createFilterWidget() = 0;
 

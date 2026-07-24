@@ -44,10 +44,11 @@ QMap<QString, QString> ShaderPackResourcePage::urlHandlers() const
 void ShaderPackResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
                                                ModPlatform::IndexedVersion& version,
                                                ResourceFolderModel* baseModel,
-                                               QString downloadReason)
+                                               QString downloadReason,
+                                               QString dependentOn)
 {
     bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-    m_model->addPack(pack, version, baseModel, isIndexed, downloadReason);
+    m_model->addPack(pack, version, baseModel, isIndexed, downloadReason, dependentOn);
 }
 
 }  // namespace ResourceDownload

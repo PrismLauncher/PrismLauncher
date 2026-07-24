@@ -184,11 +184,12 @@ void ResourceDownloadDialog::confirm()
             QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
             return;
         }
+        dependencyExtraInfo = task->getExtraInfo();
         for (const auto& dep : task->getDependecies()) {
-            addResource(dep->pack, dep->version, "dependency");
+            auto depExtra = dependencyExtraInfo.value(dep->pack->addonId.toString());
+            addResource(dep->pack, dep->version, "dependency", depExtra.required_by_ids.first());
             depNames << dep->pack->name;
         }
-        dependencyExtraInfo = task->getExtraInfo();
     }
 
     auto selected = getTasks();
@@ -200,7 +201,7 @@ void ResourceDownloadDialog::confirm()
         confirmDialog->appendResource({ .name = task->getName(),
                                         .filename = task->getFilename(),
                                         .provider = ModPlatform::ProviderCapabilities::name(task->getProvider()),
-                                        .required_by = extraInfo.required_by,
+                                        .required_by = extraInfo.required_by_names,
                                         .version_type = task->getVersion().version_type.toString(),
                                         .enabled = !extraInfo.maybe_installed });
     }
@@ -234,10 +235,10 @@ ResourcePage* ResourceDownloadDialog::selectedPage()
     return result;
 }
 
-void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack::Ptr pack, ModPlatform::IndexedVersion& ver, QString downloadReason)
+void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack::Ptr pack, ModPlatform::IndexedVersion& ver, QString downloadReason, QString dependentOn)
 {
     removeResource(pack->name);
-    selectedPage()->addResourceToPage(pack, ver, getBaseModel(), std::move(downloadReason));
+    selectedPage()->addResourceToPage(pack, ver, getBaseModel(), std::move(downloadReason), std::move(dependentOn));
     setButtonStatus();
 }
 
