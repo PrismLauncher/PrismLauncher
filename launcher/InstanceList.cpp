@@ -477,6 +477,7 @@ QList<InstanceId> InstanceList::discoverInstances()
 {
     QList<InstanceId> out;
     m_instanceRootDir.clear();
+    QSet<QString> visitedCanonicalPaths;
     for (const auto& rootDir : m_instDirs) {
         qInfo() << "Discovering instances in" << rootDir;
         QDirIterator iter(rootDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden, QDirIterator::FollowSymlinks);
@@ -485,14 +486,22 @@ QList<InstanceId> InstanceList::discoverInstances()
             QFileInfo dirInfo(subDir);
             if (!QFileInfo(FS::PathCombine(subDir, "instance.cfg")).exists())
                 continue;
-            // if it is a symlink, ignore it if it goes to the instance folder
+            // if it is a symlink, ignore it if it goes to ANY configured instance
             if (dirInfo.isSymLink()) {
                 QFileInfo targetInfo(dirInfo.symLinkTarget());
-                QFileInfo instDirInfo(rootDir);
-                if (targetInfo.canonicalPath() == instDirInfo.canonicalFilePath()) {
-                    qDebug() << "Ignoring symlink" << subDir << "that leads into the instances folder";
+                QString targetCanonical = targetInfo.canonicalFilePath();
+                bool pointsIntoAnyRoot = false;
+                for (const auto& otherRoot : m_instDirs) {
+                    if (targetCanonical.startsWith(QFileInfo(otherRoot).canonicalFilePath())) {
+                        pointsIntoAnyRoot = true;
+                        break;
+                    }
+                }
+                if (pointsIntoAnyRoot || visitedCanonicalPaths.contains(targetCanonical)) {
+                    qDebug() << "Ignoring symlink" << subDir << "that leads into a configured instance root or was already visited";
                     continue;
                 }
+                visitedCanonicalPaths.insert(targetCanonical);
             }
             auto id = dirInfo.fileName();
             if (m_instanceRootDir.contains(id)) {

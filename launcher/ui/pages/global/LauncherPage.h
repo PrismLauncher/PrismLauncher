@@ -66,6 +66,7 @@ class LauncherPage : public QWidget, public BasePage {
    private:
     void applySettings();
     void loadSettings();
+    bool confirmInstanceDirPath(const QString& rawDir, const QString& cookedDir);
 
    private slots:
     void on_instDirBrowseBtn_clicked();
