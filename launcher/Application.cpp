@@ -84,6 +84,7 @@
 #include "ApplicationMessage.h"
 
 #include <iostream>
+#include <memory>
 #include <mutex>
 
 #include <QAccessible>
@@ -983,11 +984,48 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     // and accounts
     {
-        m_accounts.reset(new AccountList(this));
+        m_accounts = std::make_unique<AccountList>(this);
         qInfo() << "Loading accounts...";
         m_accounts->setListFilePath("accounts.json", true);
         m_accounts->loadList();
+
+        auto secretsTask = m_accounts->loadSecrets();
+        while (secretsTask != nullptr) {
+            QEventLoop loop;
+            connect(secretsTask.get(), &Task::finished, &loop, &QEventLoop::quit);
+            secretsTask->start();
+            loop.exec();
+
+            if (secretsTask->wasSuccessful()) {
+                break;
+            }
+
+            const auto title = tr("Failed to load credentials");
+            const auto msg = tr("Account credentials could not be retrieved from the system keychain.");
+            auto* dialog =
+                CustomMessageBox::selectable(nullptr, title, msg, QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Retry);
+            dialog->setDetailedText(secretsTask->failReason());
+            if (dialog->exec() == QMessageBox::Ok) {
+                break;
+            }
+
+            secretsTask = m_accounts->loadSecrets();
+        }
+
         m_accounts->fillQueue();
+
+        connect(m_accounts.get(), &AccountList::saveSecretsFailed, [](const QString& profileName, const QString& error) {
+            const auto title = tr("Failed to save account credentials");
+            const auto msg = tr("The account credentials for user %1 could not be saved: %2.").arg(profileName, error);
+            CustomMessageBox::selectable(nullptr, title, msg, QMessageBox::Warning)->open();
+        });
+
+        connect(m_accounts.get(), &AccountList::deleteSecretsFailed, [](const QString& profileName, const QString& error) {
+            const auto title = tr("Failed to delete account credentials");
+            const auto msg = tr("The account credentials for user %1 could not be deleted: %2.").arg(profileName, error);
+            CustomMessageBox::selectable(nullptr, title, msg, QMessageBox::Warning)->open();
+        });
+
         qInfo() << "<> Accounts loaded.";
     }
 

@@ -158,6 +158,8 @@ class MinecraftAccount : public QObject, public Usable {
      */
     void changed();
 
+    void secretsChanged();
+
     void activityChanged(bool active);
 
     // TODO: better signalling for the various possible state changes - especially errors
