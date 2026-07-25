@@ -92,7 +92,11 @@ class MinecraftAccount : public QObject, public Usable {
     static QUuid uuidFromUsername(QString username);
 
     //! Saves a MinecraftAccount to a JSON object and returns it.
-    QJsonObject saveToJson() const;
+    QJsonObject saveState() const;
+
+    QJsonObject saveSecrets() const;
+
+    void loadSecrets(const QJsonObject& input);
 
    public: /* manipulation */
     shared_qobject_ptr<AuthFlow> login(bool useDeviceCode = false);
