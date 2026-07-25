@@ -495,7 +495,7 @@ bool AccountList::loadV3(QJsonObject& root)
     QJsonArray accounts = root.value("accounts").toArray();
     for (QJsonValue accountVal : accounts) {
         QJsonObject accountObj = accountVal.toObject();
-        MinecraftAccountPtr account = MinecraftAccount::loadFromJsonV3(accountObj);
+        MinecraftAccountPtr account = MinecraftAccount::loadFromJsonV3(accountObj, accountObj);
         if (account.get() != nullptr) {
             auto profileId = account->profileId();
             if (profileId.size()) {
@@ -546,8 +546,8 @@ bool AccountList::saveList()
     // Build a list of accounts.
     qDebug() << "Building account array.";
     QJsonArray accounts;
-    for (MinecraftAccountPtr account : m_accounts) {
-        QJsonObject accountObj = account->saveToJson();
+    for (const auto& account : m_accounts) {
+        const QJsonObject accountObj = account->saveState();
         if (m_defaultAccount == account) {
             accountObj["active"] = true;
         }
