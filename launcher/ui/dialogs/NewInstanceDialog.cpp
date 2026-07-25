@@ -255,7 +255,7 @@ InstanceTask* NewInstanceDialog::extractTask()
     InstanceTask* extracted = creationTask.release();
 
     InstanceName inst_name(ui->instNameTextBox->placeholderText().trimmed(), importVersion);
-    inst_name.setName(ui->instNameTextBox->text().trimmed());
+    inst_name.setName(resolveWildcardName(ui->instNameTextBox->text().trimmed()));
     extracted->setName(inst_name);
 
     extracted->setGroup(instGroup());
@@ -276,13 +276,24 @@ QString NewInstanceDialog::instName() const
 {
     auto result = ui->instNameTextBox->text().trimmed();
     if (result.size()) {
-        return result;
+        return resolveWildcardName(result);
     }
     result = ui->instNameTextBox->placeholderText().trimmed();
     if (result.size()) {
         return result;
     }
     return QString();
+}
+
+QString NewInstanceDialog::resolveWildcardName(const QString& typed) const
+{
+    if (!typed.contains('*')) {
+        return typed;
+    }
+
+    auto suggested = ui->instNameTextBox->placeholderText().trimmed();
+    QString result = typed;
+    return result.replace('*', suggested);
 }
 
 QString NewInstanceDialog::instGroup() const

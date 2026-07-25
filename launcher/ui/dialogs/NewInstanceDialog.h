@@ -75,6 +75,8 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
     QString instGroup() const;
     QString iconKey() const;
 
+    QString resolveWildcardName(const QString& typed) const;
+
    public slots:
     void accept() override;
     void reject() override;
