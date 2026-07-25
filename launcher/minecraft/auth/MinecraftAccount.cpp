@@ -160,6 +160,7 @@ void MinecraftAccount::authSucceeded()
 {
     m_currentTask.reset();
     emit changed();
+    emit secretsChanged();
     emit activityChanged(false);
 }
 
@@ -185,10 +186,12 @@ void MinecraftAccount::authFailed(QString reason)
                 data.validity_ = Validity::None;
             }
             emit changed();
+            emit secretsChanged();
         } break;
         case AccountTaskState::STATE_FAILED_GONE: {
             data.validity_ = Validity::None;
             emit changed();
+            emit secretsChanged();
         } break;
         case AccountTaskState::STATE_WORKING: {
             data.accountState = AccountState::Unchecked;

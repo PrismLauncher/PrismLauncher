@@ -35,8 +35,13 @@
 
 #include "AccountList.h"
 #include "AccountData.h"
+#include "Application.h"
+#include "BuildConfig.h"
+#include "settings/SettingsObject.h"
+#include "tasks/SequentialTask.h"
 #include "tasks/Task.h"
 
+#include <qt6keychain/keychain.h>
 #include <QDir>
 #include <QFile>
 #include <QIODevice>
@@ -53,6 +58,8 @@
 
 #include <FileSystem.h>
 #include <QSaveFile>
+
+using namespace Qt::Literals;
 
 enum AccountListVersion { MojangMSA = 3 };
 
@@ -106,6 +113,7 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
 
     // hook up notifications for changes in the account
     connect(account.get(), &MinecraftAccount::changed, this, &AccountList::accountChanged);
+    connect(account.get(), &MinecraftAccount::secretsChanged, this, [this, account = account.get()] { saveSecrets(*account); });
     connect(account.get(), &MinecraftAccount::activityChanged, this, &AccountList::accountActivityChanged);
 
     // override/replace existing account with the same profileId
@@ -124,6 +132,7 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
             existingAccountPtr->disconnect(this);
             emit dataChanged(index(existingAccount), index(existingAccount, columnCount(QModelIndex()) - 1));
             onListChanged();
+            saveSecrets(*existingAccountPtr);
             return;
         }
     }
@@ -137,6 +146,7 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
     endInsertRows();
 
     onListChanged();
+    saveSecrets(*account);
 }
 
 void AccountList::removeAccount(QModelIndex index)
@@ -154,6 +164,7 @@ void AccountList::removeAccount(QModelIndex index)
         m_accounts.removeAt(index.row());
         endRemoveRows();
         onListChanged();
+        deleteSecrets(*account);
     }
 }
 
@@ -459,7 +470,7 @@ bool AccountList::loadList()
     // Make sure the format version matches.
     auto listVersion = root.value("formatVersion").toVariant().toInt();
     if (listVersion == AccountListVersion::MojangMSA) {
-        return loadV3(root);
+        return loadListV3(root);
     }
 
     QString newName = "accounts-old.json";
@@ -469,13 +480,13 @@ bool AccountList::loadList()
     return false;
 }
 
-bool AccountList::loadV3(QJsonObject& root)
+bool AccountList::loadListV3(QJsonObject& root)
 {
     beginResetModel();
     QJsonArray accounts = root.value("accounts").toArray();
     for (QJsonValue accountVal : accounts) {
         QJsonObject accountObj = accountVal.toObject();
-        MinecraftAccountPtr account = MinecraftAccount::loadFromJsonV3(accountObj, accountObj);
+        MinecraftAccountPtr account = MinecraftAccount::loadFromJsonV3(accountObj);
         if (account.get() != nullptr) {
             auto profileId = account->profileId();
             if (profileId.size()) {
@@ -484,6 +495,7 @@ bool AccountList::loadV3(QJsonObject& root)
                 }
             }
             connect(account.get(), &MinecraftAccount::changed, this, &AccountList::accountChanged);
+            connect(account.get(), &MinecraftAccount::secretsChanged, this, [this, account = account.get()] { saveSecrets(*account); });
             connect(account.get(), &MinecraftAccount::activityChanged, this, &AccountList::accountActivityChanged);
             m_accounts.append(account);
             if (accountObj.value("active").toBool(false)) {
@@ -495,6 +507,68 @@ bool AccountList::loadV3(QJsonObject& root)
     }
     endResetModel();
     return true;
+}
+
+namespace {
+QString makeKeychainKey(const MinecraftAccount& account)
+{
+    return u"account:"_s + account.profileId();
+}
+
+class ReadAccountSecretsTask : public Task {
+    Q_OBJECT
+   public:
+    explicit ReadAccountSecretsTask(MinecraftAccount& account) : m_account{ &account }, m_job{ BuildConfig.LAUNCHER_APPID }
+    {
+        m_job.setAutoDelete(false);
+        m_job.setKey(makeKeychainKey(account));
+        connect(&m_job, &QKeychain::Job::finished, this, &ReadAccountSecretsTask::handleFinish);
+    }
+
+    void executeTask() override { m_job.start(); }
+
+   private:
+    MinecraftAccount* m_account;
+    QKeychain::ReadPasswordJob m_job;
+
+    void handleFinish()
+    {
+        if (m_job.error() == QKeychain::EntryNotFound) {
+            logWarning(u"Entry '%1' not found"_s.arg(m_job.key()));
+            emitSucceeded();
+            return;
+        }
+
+        if (m_job.error() != QKeychain::NoError) {
+            emitFailed(u"Could not read '%1': %2"_s.arg(m_job.key(), m_job.errorString()));
+            return;
+        }
+
+        const QByteArray secretsJson = m_job.textData().toUtf8();
+        QJsonParseError jsonErr;
+        const auto secretsObj = QJsonDocument::fromJson(secretsJson, &jsonErr).object();
+        if (jsonErr.error != QJsonParseError::NoError) {
+            emitFailed(u"Could not parse '%1': %2"_s.arg(m_job.key(), jsonErr.errorString()));
+            return;
+        }
+
+        m_account->loadSecrets(secretsObj);
+        emitSucceeded();
+    }
+};
+}  // namespace
+
+std::unique_ptr<Task> AccountList::loadSecrets()
+{
+    auto task = std::make_unique<SequentialTask>("AccountList::loadSecrets");
+
+    for (const auto& account : m_accounts) {
+        if (account->accountType() != AccountType::Offline) {
+            task->addTask(makeShared<ReadAccountSecretsTask>(*account));
+        }
+    }
+
+    return task;
 }
 
 bool AccountList::saveList()
@@ -527,7 +601,7 @@ bool AccountList::saveList()
     qDebug() << "Building account array.";
     QJsonArray accounts;
     for (const auto& account : m_accounts) {
-        const QJsonObject accountObj = account->saveState();
+        QJsonObject accountObj = account->saveState();
         if (m_defaultAccount == account) {
             accountObj["active"] = true;
         }
@@ -561,6 +635,58 @@ bool AccountList::saveList()
         qDebug() << "Failed to save accounts to" << m_listFilePath << "error:" << file.errorString();
         return false;
     }
+}
+
+void AccountList::saveSecrets(const MinecraftAccount& account)
+{
+    if (account.accountType() == AccountType::Offline) {
+        return;
+    }
+
+    qDebug() << u"Saving secrets for account" << account.profileId();
+
+    auto* job = new QKeychain::WritePasswordJob{ BuildConfig.LAUNCHER_APPID };
+    job->setAutoDelete(true);
+    job->setKey(makeKeychainKey(account));
+
+    const QJsonObject secretsObj = account.saveSecrets();
+    const auto secretsJson = QString::fromUtf8(QJsonDocument{ secretsObj }.toJson(QJsonDocument::Compact));
+    job->setTextData(secretsJson);
+
+    connect(job, &QKeychain::Job::finished, this, [this, job, profileId = account.profileId(), profileName = account.profileName()] {
+        if (job->error() != QKeychain::NoError) {
+            qWarning() << u"Failed to save secrets for account" << profileId;
+            emit saveSecretsFailed(profileName, job->errorString());
+        } else {
+            qDebug() << u"Saved secrets for account" << profileId;
+        }
+    });
+
+    job->start();
+}
+
+void AccountList::deleteSecrets(const MinecraftAccount& account)
+{
+    if (account.accountType() == AccountType::Offline) {
+        return;
+    }
+
+    qDebug() << u"Deleting secrets for account" << account.profileId();
+
+    auto* job = new QKeychain::DeletePasswordJob{ BuildConfig.LAUNCHER_APPID };
+    job->setAutoDelete(true);
+    job->setKey(makeKeychainKey(account));
+
+    connect(job, &QKeychain::Job::finished, this, [this, job, profileId = account.profileId(), profileName = account.profileName()] {
+        if (job->error() != QKeychain::NoError) {
+            qWarning() << u"Failed to delete secrets for account" << profileId;
+            emit deleteSecretsFailed(profileName, job->errorString());
+        } else {
+            qDebug() << u"Deleted secrets for account" << profileId;
+        }
+    });
+
+    job->start();
 }
 
 void AccountList::setListFilePath(QString path, bool autosave)
@@ -701,3 +827,5 @@ void AccountList::endActivity()
         emit activityChanged(false);
     }
 }
+
+#include "AccountList.moc"
