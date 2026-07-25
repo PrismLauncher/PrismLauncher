@@ -50,7 +50,8 @@ class GetModDependenciesTask : public SequentialTask {
 
     struct PackDependencyExtraInfo {
         bool maybe_installed{};
-        QStringList required_by;
+        QStringList required_by_names;
+        QStringList required_by_ids;
     };
 
     explicit GetModDependenciesTask(BaseInstance* instance, ModFolderModel* folder, QList<std::shared_ptr<PackDependency>> selected);

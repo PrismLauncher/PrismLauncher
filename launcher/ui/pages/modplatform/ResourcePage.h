@@ -80,7 +80,8 @@ class ResourcePage : public QWidget, public BasePage {
     virtual void addResourceToPage(ModPlatform::IndexedPack::Ptr,
                                    ModPlatform::IndexedVersion&,
                                    ResourceFolderModel*,
-                                   QString downloadReason = "standalone");
+                                   QString downloadReason = "standalone",
+                                   QString dependentOn = "");
 
     virtual void modelReset();
 

@@ -398,10 +398,11 @@ void ResourcePage::removeResourceFromDialog(const QString& packName)
 void ResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
                                      ModPlatform::IndexedVersion& ver,
                                      ResourceFolderModel* baseModel,
-                                     QString downloadReason)
+                                     QString downloadReason,
+                                     QString dependentOn)
 {
     bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-    m_model->addPack(std::move(pack), ver, baseModel, isIndexed, std::move(downloadReason));
+    m_model->addPack(std::move(pack), ver, baseModel, isIndexed, std::move(downloadReason), std::move(dependentOn));
 }
 
 void ResourcePage::modelReset()
