@@ -87,6 +87,8 @@ struct Language {
             result = u8"Cute Engwish";
         } else if (key == "tok") {
             result = u8"toki pona";
+        } else if (key == "zh_Hant_HK") {
+            result = u8"繁體中文 (香港)";
         } else if (key == "nan") {
             result = u8"閩南語";  // Using traditional Chinese script. Not sure if we should use simplified instead?
         } else {
