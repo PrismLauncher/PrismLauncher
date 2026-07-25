@@ -341,6 +341,7 @@ endif()
 
 find_package(ZLIB REQUIRED)
 
+find_package(Qt6Keychain 0.15.0 REQUIRED)
 
 include(ECMQtDeclareLoggingCategory)
 
