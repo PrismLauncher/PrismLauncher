@@ -620,9 +620,9 @@ void ModFolderPage::saveCurrentProfileState()
     }
     QSet<QString> enabledMods;
     for (int i = 0; i < m_model->rowCount(); ++i) {
-        const Resource& res = m_model->at(i);
+        const Mod& res = m_model->at(i);
         if (res.enabled()) {
-            enabledMods.insert(res.getOriginalFileName());
+            enabledMods.insert(res.mod_id());
         }
     }
     m_profileStates[m_currentProfile] = enabledMods;
@@ -660,9 +660,9 @@ void ModFolderPage::applyProfileSwitch(int index, int generation) {
         QModelIndexList toEnable;
         QModelIndexList toDisable;
         for (int i = 0; i < m_model->rowCount(); ++i) {
-            const Resource& res = m_model->at(i);
+            const Mod& res = m_model->at(i);
             QModelIndex idx = m_model->index(i, 0);
-            if (enabledMods.contains(res.getOriginalFileName())) {
+            if (enabledMods.contains(res.mod_id())) {
                 if (!res.enabled()) {
                     toEnable.append(idx);
                 }
@@ -832,9 +832,9 @@ void ModFolderPage::onTabDuplicate(int sourceIndex)
     if (!m_currentProfile.isEmpty()) {
         QSet<QString> enabledMods;
         for (int i = 0; i < m_model->rowCount(); ++i) {
-            const Resource& res = m_model->at(i);
+            const Mod& res = m_model->at(i);
             if (res.enabled()) {
-                enabledMods.insert(res.getOriginalFileName());
+                enabledMods.insert(res.mod_id());
             }
         }
         m_profileStates[m_currentProfile] = enabledMods;
