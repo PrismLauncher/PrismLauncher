@@ -925,40 +925,76 @@ void ModFolderPage::onTabRemove(int tabIndex)
 
 void ModFolderPage::onTabEnableAll(int tabIndex)
 {
-    if (m_profileTabBar->currentIndex() != tabIndex) {
-        m_profileTabBar->setCurrentIndex(tabIndex);
+    if (m_applyingProfile) {
+        return;
     }
-    applyProfileSwitch(tabIndex, m_profileSwitchGeneration);
 
-    // Build the full index list and enable every mod in the active profile.
-    QModelIndexList allIndices;
-    allIndices.reserve(m_model->rowCount());
-    for (int i = 0; i < m_model->rowCount(); ++i) {
-        allIndices.append(m_model->index(i, 0));
+    ++m_profileSwitchGeneration;
+    int capturedGeneration = m_profileSwitchGeneration;
+
+    // Block signals to prevent currentChanged from double-firing applyProfileSwitch
+    if (m_profileTabBar->currentIndex() != tabIndex) {
+        m_profileTabBar->blockSignals(true);
+        m_profileTabBar->setCurrentIndex(tabIndex);
+        m_profileTabBar->blockSignals(false);
     }
-    if (!allIndices.isEmpty()) {
-        m_model->setResourceEnabled(allIndices, EnableAction::ENABLE);
-        m_model->update();
-    }
+
+    applyProfileSwitch(tabIndex, capturedGeneration);
+
+    // Chain enable-all after profile switch update finishes
+    connect(m_model, &ResourceFolderModel::updateFinished, this,
+        [this, capturedGeneration] {
+            if (capturedGeneration != m_profileSwitchGeneration) {
+                return;
+            }
+            QModelIndexList allIndices;
+            allIndices.reserve(m_model->rowCount());
+            for (int i = 0; i < m_model->rowCount(); ++i) {
+                allIndices.append(m_model->index(i, 0));
+            }
+            if (!allIndices.isEmpty()) {
+                m_model->setResourceEnabled(allIndices, EnableAction::ENABLE);
+                m_model->update();
+            }
+        },
+        Qt::SingleShotConnection);
 }
 
 void ModFolderPage::onTabDisableAll(int tabIndex)
 {
-    if (m_profileTabBar->currentIndex() != tabIndex) {
-        m_profileTabBar->setCurrentIndex(tabIndex);
+    if (m_applyingProfile) {
+        return;
     }
-    applyProfileSwitch(tabIndex, m_profileSwitchGeneration);
 
-    // Build the full index list and disable every mod in the active profile.
-    QModelIndexList allIndices;
-    allIndices.reserve(m_model->rowCount());
-    for (int i = 0; i < m_model->rowCount(); ++i) {
-        allIndices.append(m_model->index(i, 0));
+    ++m_profileSwitchGeneration;
+    int capturedGeneration = m_profileSwitchGeneration;
+
+    // Block signals to prevent currentChanged from double-firing applyProfileSwitch
+    if (m_profileTabBar->currentIndex() != tabIndex) {
+        m_profileTabBar->blockSignals(true);
+        m_profileTabBar->setCurrentIndex(tabIndex);
+        m_profileTabBar->blockSignals(false);
     }
-    if (!allIndices.isEmpty()) {
-        m_model->setResourceEnabled(allIndices, EnableAction::DISABLE);
-        m_model->update();
-    }
+
+    applyProfileSwitch(tabIndex, capturedGeneration);
+
+    // Chain disable-all after profile switch update finishes
+    connect(m_model, &ResourceFolderModel::updateFinished, this,
+        [this, capturedGeneration] {
+            if (capturedGeneration != m_profileSwitchGeneration) {
+                return;
+            }
+            QModelIndexList allIndices;
+            allIndices.reserve(m_model->rowCount());
+            for (int i = 0; i < m_model->rowCount(); ++i) {
+                allIndices.append(m_model->index(i, 0));
+            }
+            if (!allIndices.isEmpty()) {
+                m_model->setResourceEnabled(allIndices, EnableAction::DISABLE);
+                m_model->update();
+            }
+        },
+        Qt::SingleShotConnection);
 }
 
 bool ModFolderPage::eventFilter(QObject* obj, QEvent* ev)
