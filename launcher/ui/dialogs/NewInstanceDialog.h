@@ -101,6 +101,8 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
 
     QString importVersion;
 
+    QString m_suggestedName;
+
     QString m_searchTerm;
 
     void importIconNow();

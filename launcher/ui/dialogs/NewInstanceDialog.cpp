@@ -201,7 +201,8 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task
 {
     creationTask.reset(task);
 
-    ui->instNameTextBox->setPlaceholderText(name);
+    m_suggestedName = name;
+    ui->instNameTextBox->setPlaceholderText(name.isEmpty() ? name : tr("%1  (tip: use * to insert this name)").arg(name));
     importVersion.clear();
 
     if (!task) {
@@ -217,7 +218,8 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, QString version, I
 {
     creationTask.reset(task);
 
-    ui->instNameTextBox->setPlaceholderText(name);
+    m_suggestedName = name;
+    ui->instNameTextBox->setPlaceholderText(name.isEmpty() ? name : tr("%1  (tip: use * to insert this name)").arg(name));
     importVersion = std::move(version);
 
     if (!task) {
@@ -254,7 +256,7 @@ InstanceTask* NewInstanceDialog::extractTask()
 {
     InstanceTask* extracted = creationTask.release();
 
-    InstanceName inst_name(ui->instNameTextBox->placeholderText().trimmed(), importVersion);
+    InstanceName inst_name(m_suggestedName.trimmed(), importVersion);
     inst_name.setName(resolveWildcardName(ui->instNameTextBox->text().trimmed()));
     extracted->setName(inst_name);
 
@@ -278,7 +280,7 @@ QString NewInstanceDialog::instName() const
     if (result.size()) {
         return resolveWildcardName(result);
     }
-    result = ui->instNameTextBox->placeholderText().trimmed();
+    result = m_suggestedName.trimmed();
     if (result.size()) {
         return result;
     }
@@ -291,9 +293,8 @@ QString NewInstanceDialog::resolveWildcardName(const QString& typed) const
         return typed;
     }
 
-    auto suggested = ui->instNameTextBox->placeholderText().trimmed();
     QString result = typed;
-    return result.replace('*', suggested);
+    return result.replace('*', m_suggestedName.trimmed());
 }
 
 QString NewInstanceDialog::instGroup() const
