@@ -168,7 +168,7 @@
              <string>Opens the edit instance window on double-clicking an instance instead of running the instance.</string>
             </property>
             <property name="text">
-             <string>&amp;Open edit window on Instance double-click</string>
+             <string>&amp;Open Edit window on instance double-click</string>
             </property>
            </widget>
           </item>
