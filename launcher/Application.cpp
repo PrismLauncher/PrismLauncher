@@ -801,7 +801,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // Instance
         m_settings->registerSetting("InstSortMode", "Name");
         m_settings->registerSetting("InstRenamingMode", "AskEverytime");
-        m_settings->registerSetting("OpenEditWindowOnInstanceDoubleClick", false);
+        m_settings->registerSetting("EditInstanceOnDoubleClick", false);
         m_settings->registerSetting("SelectedInstance", QString());
 
         // Window state and geometry

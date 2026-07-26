@@ -1617,7 +1617,7 @@ void MainWindow::on_actionLaunchInstance_triggered()
 
 void MainWindow::activateInstance(BaseInstance* instance)
 {
-    if (APPLICATION->settings()->get("OpenEditWindowOnInstanceDoubleClick").toBool()) {
+    if (APPLICATION->settings()->get("EditInstanceOnDoubleClick").toBool()) {
         if (instance->canEdit()) {
             APPLICATION->showInstanceWindow(instance);
         } else {

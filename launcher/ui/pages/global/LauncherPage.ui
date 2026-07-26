@@ -41,9 +41,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-149</y>
-        <width>746</width>
-        <height>1222</height>
+        <y>0</y>
+        <width>753</width>
+        <height>1138</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -163,7 +163,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="openEditWindowOnInstanceDoubleClickCheckBox">
+           <widget class="QCheckBox" name="editInstanceOnDoubleClick">
             <property name="toolTip">
              <string>Opens the edit instance window on double-clicking an instance instead of running the instance.</string>
             </property>
@@ -713,7 +713,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="renamingBehaviorGroup"/>
   <buttongroup name="sortingModeGroup"/>
+  <buttongroup name="renamingBehaviorGroup"/>
  </buttongroups>
 </ui>
