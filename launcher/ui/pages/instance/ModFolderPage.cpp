@@ -641,6 +641,21 @@ void ModFolderPage::applyProfileSwitch(int index, int generation) {
     saveCurrentProfileState();
 
     if (index >= 0 && index < m_profileTabBar->count()) {
+        if (m_instance != nullptr && m_instance->isRunning()) {
+            CustomMessageBox::selectable(this, tr("Cannot Switch Profile"),
+                                         tr("Mod profiles cannot be switched while the game is running.\n"
+                                            "Please close the game first."),
+                                         QMessageBox::Warning)
+                ->exec();
+            int previousIndex = m_instance->settings()->get(lastActiveIndexKey()).toInt();
+            if (m_profileTabBar->currentIndex() != previousIndex) {
+                m_profileTabBar->blockSignals(true);
+                m_profileTabBar->setCurrentIndex(previousIndex);
+                m_profileTabBar->blockSignals(false);
+            }
+            return;
+        }
+
         QString tabName = m_profileTabBar->tabText(index);
         m_currentProfile = tabName;
         m_profileTabBar->setProperty("currentProfileName", tabName);
@@ -856,6 +871,15 @@ void ModFolderPage::onTabRename(int tabIndex)
 {
     if (tabIndex == 0) return;  // Guard: base profile cannot be renamed
 
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        CustomMessageBox::selectable(this, tr("Cannot Rename Profile"),
+                                     tr("Mod profiles cannot be renamed while the game is running.\n"
+                                        "Please close the game first."),
+                                     QMessageBox::Warning)
+            ->exec();
+        return;
+    }
+
     QString oldName = m_profileTabBar->tabText(tabIndex);
 
     bool ok;
@@ -903,6 +927,15 @@ void ModFolderPage::onTabRemove(int tabIndex)
 {
     if (tabIndex == 0) return;  // Guard: base profile cannot be removed
 
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        CustomMessageBox::selectable(this, tr("Cannot Remove Profile"),
+                                     tr("Mod profiles cannot be removed while the game is running.\n"
+                                        "Please close the game first."),
+                                     QMessageBox::Warning)
+            ->exec();
+        return;
+    }
+
     QString name = m_profileTabBar->tabText(tabIndex);
 
     auto response = CustomMessageBox::selectable(
@@ -926,6 +959,14 @@ void ModFolderPage::onTabRemove(int tabIndex)
 void ModFolderPage::onTabEnableAll(int tabIndex)
 {
     if (m_applyingProfile) {
+        return;
+    }
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        CustomMessageBox::selectable(this, tr("Cannot Enable All"),
+                                     tr("Mods cannot be bulk-enabled while the game is running.\n"
+                                        "Please close the game first."),
+                                     QMessageBox::Warning)
+            ->exec();
         return;
     }
 
@@ -963,6 +1004,14 @@ void ModFolderPage::onTabEnableAll(int tabIndex)
 void ModFolderPage::onTabDisableAll(int tabIndex)
 {
     if (m_applyingProfile) {
+        return;
+    }
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        CustomMessageBox::selectable(this, tr("Cannot Disable All"),
+                                     tr("Mods cannot be bulk-disabled while the game is running.\n"
+                                        "Please close the game first."),
+                                     QMessageBox::Warning)
+            ->exec();
         return;
     }
 
