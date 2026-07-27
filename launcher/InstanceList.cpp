@@ -47,6 +47,7 @@
 #include <QStack>
 #include <QTimer>
 #include <QUuid>
+#include <algorithm>
 
 #include "BaseInstance.h"
 #include "ExponentialSeries.h"
@@ -76,9 +77,7 @@ InstanceList::InstanceList(SettingsObject* settings, const QStringList& instDirs
 
     for (const auto& dir : instDirs) {
         // Create and normalize path
-        if (!QDir::current().exists(dir)) {
-            QDir::current().mkpath(dir);
-        }
+        QDir::current().mkpath(dir);
         // NOTE: canonicalPath requires the path to exist. Do not move this above the creation block!
         QString canonical = QDir(dir).canonicalPath();
         if (!canonical.isEmpty() && !m_instDirs.contains(canonical)) {
@@ -476,8 +475,7 @@ static QMap<InstanceId, InstanceLocator> getIdMapping(const std::vector<std::uni
 QList<InstanceId> InstanceList::discoverInstances()
 {
     QList<InstanceId> out;
-    m_instanceRootDir.clear();
-    QSet<QString> visitedCanonicalPaths;
+    m_instanceRootDirMap.clear();
     for (const auto& rootDir : m_instDirs) {
         qInfo() << "Discovering instances in" << rootDir;
         QDirIterator iter(rootDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden, QDirIterator::FollowSymlinks);
@@ -490,26 +488,21 @@ QList<InstanceId> InstanceList::discoverInstances()
             if (dirInfo.isSymLink()) {
                 QFileInfo targetInfo(dirInfo.symLinkTarget());
                 QString targetCanonical = targetInfo.canonicalFilePath();
-                bool pointsIntoAnyRoot = false;
-                for (const auto& otherRoot : m_instDirs) {
-                    if (targetCanonical.startsWith(QFileInfo(otherRoot).canonicalFilePath())) {
-                        pointsIntoAnyRoot = true;
-                        break;
-                    }
-                }
-                if (pointsIntoAnyRoot || visitedCanonicalPaths.contains(targetCanonical)) {
-                    qDebug() << "Ignoring symlink" << subDir << "that leads into a configured instance root or was already visited";
+                bool pointsIntoAnyRoot = std::ranges::any_of(m_instDirs, [&targetCanonical](const QString& otherRoot) {
+                    return targetCanonical.startsWith(QFileInfo(otherRoot).canonicalFilePath());
+                });
+                if (pointsIntoAnyRoot) {
+                    qDebug() << "Ignoring symlink" << subDir << "that leads into a configured instance root";
                     continue;
                 }
-                visitedCanonicalPaths.insert(targetCanonical);
             }
             auto id = dirInfo.fileName();
-            if (m_instanceRootDir.contains(id)) {
+            if (m_instanceRootDirMap.contains(id)) {
                 qWarning() << "Duplicate instance ID" << id << "found in" << rootDir << "- already claimed by"
-                           << m_instanceRootDir.value(id) << ". Skipping.";
+                           << m_instanceRootDirMap.value(id) << ". Skipping.";
                 continue;
             }
-            m_instanceRootDir[id] = rootDir;
+            m_instanceRootDirMap[id] = rootDir;
             out.append(id);
             qInfo() << "Found instance ID" << id << "in" << rootDir;
         }
@@ -521,7 +514,7 @@ QList<InstanceId> InstanceList::discoverInstances()
 
 QString InstanceList::rootDirOf(const InstanceId& id) const
 {
-    return m_instanceRootDir.value(id, primaryDir());
+    return m_instanceRootDirMap.value(id, primaryDir());
 }
 
 InstanceList::InstListError InstanceList::loadList()
@@ -893,8 +886,7 @@ void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting,
     for (const auto& dir : candidates) {
         if (dir.isEmpty())
             continue;
-        if (!QDir::current().exists(dir))
-            QDir::current().mkpath(dir);
+        QDir::current().mkpath(dir);
         QString canonical = QDir(dir).canonicalPath();
         if (!canonical.isEmpty() && !newDirs.contains(canonical))
             newDirs << canonical;
@@ -1090,7 +1082,7 @@ bool InstanceList::commitStagedInstance(const QString& path,
 
             m_instanceGroupIndex[instID] = groupName;
             increaseGroupCount(groupName);
-            m_instanceRootDir[instID] = primaryDir();
+            m_instanceRootDirMap[instID] = primaryDir();
         }
 
         instanceSet.insert(instID);

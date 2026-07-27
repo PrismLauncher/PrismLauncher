@@ -201,7 +201,7 @@ class InstanceList : public QAbstractListModel {
 
     SettingsObject* m_globalSettings;
     QStringList m_instDirs;
-    QHash<InstanceId, QString> m_instanceRootDir;
+    QHash<InstanceId, QString> m_instanceRootDirMap;
     QString rootDirOf(const InstanceId& id) const;
     QFileSystemWatcher* m_watcher;
     // FIXME: this is so inefficient that looking at it is almost painful.
