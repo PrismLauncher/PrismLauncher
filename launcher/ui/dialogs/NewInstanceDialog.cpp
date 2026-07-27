@@ -54,6 +54,7 @@
 #include <QLayout>
 #include <QPushButton>
 #include <QScreen>
+#include <QTimer>
 #include <QValidator>
 #include <utility>
 
@@ -74,6 +75,8 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     : QDialog(parent), ui(new Ui::NewInstanceDialog)
 {
     ui->setupUi(this);
+
+    ui->instNameTextBox->installEventFilter(this);
 
     setWindowIcon(QIcon::fromTheme("new"));
 
@@ -202,7 +205,8 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task
     creationTask.reset(task);
 
     m_suggestedName = name;
-    ui->instNameTextBox->setPlaceholderText(name.isEmpty() ? name : tr("%1  (tip: use * to insert this name)").arg(name));
+    ui->instNameTextBox->setText(name);
+    m_nameFieldSelectedOnce = false;
     importVersion.clear();
 
     if (!task) {
@@ -219,7 +223,8 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, QString version, I
     creationTask.reset(task);
 
     m_suggestedName = name;
-    ui->instNameTextBox->setPlaceholderText(name.isEmpty() ? name : tr("%1  (tip: use * to insert this name)").arg(name));
+    ui->instNameTextBox->setText(name);
+    m_nameFieldSelectedOnce = false;
     importVersion = std::move(version);
 
     if (!task) {
@@ -257,7 +262,7 @@ InstanceTask* NewInstanceDialog::extractTask()
     InstanceTask* extracted = creationTask.release();
 
     InstanceName inst_name(m_suggestedName.trimmed(), importVersion);
-    inst_name.setName(resolveWildcardName(ui->instNameTextBox->text().trimmed()));
+    inst_name.setName(ui->instNameTextBox->text().trimmed());
     extracted->setName(inst_name);
 
     extracted->setGroup(instGroup());
@@ -278,23 +283,13 @@ QString NewInstanceDialog::instName() const
 {
     auto result = ui->instNameTextBox->text().trimmed();
     if (result.size()) {
-        return resolveWildcardName(result);
+        return result;
     }
     result = m_suggestedName.trimmed();
     if (result.size()) {
         return result;
     }
     return QString();
-}
-
-QString NewInstanceDialog::resolveWildcardName(const QString& typed) const
-{
-    if (!typed.contains('*')) {
-        return typed;
-    }
-
-    QString result = typed;
-    return result.replace('*', m_suggestedName.trimmed());
 }
 
 QString NewInstanceDialog::instGroup() const
@@ -332,6 +327,15 @@ void NewInstanceDialog::importIconNow()
         importIcon = false;
     }
     APPLICATION->settings()->set("NewInstanceGeometry", QString::fromUtf8(saveGeometry().toBase64()));
+}
+
+bool NewInstanceDialog::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched == ui->instNameTextBox && event->type() == QEvent::FocusIn && !m_nameFieldSelectedOnce) {
+        m_nameFieldSelectedOnce = true;
+        QTimer::singleShot(0, ui->instNameTextBox, &QLineEdit::selectAll);
+    }
+    return QDialog::eventFilter(watched, event);
 }
 
 void NewInstanceDialog::selectedPageChanged(BasePage* previous, BasePage* selected)
