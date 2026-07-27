@@ -101,6 +101,8 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
 
     QString m_suggestedName;
     bool m_nameFieldSelectedOnce = false;
+    bool m_nameFieldEditedByUser = false;
+    bool m_settingTextProgrammatically = false;
 
     QString m_searchTerm;
 
