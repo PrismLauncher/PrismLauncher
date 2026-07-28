@@ -731,9 +731,6 @@
   <tabstop>updateIntervalSpinBox</tabstop>
   <tabstop>instDirTextBox</tabstop>
   <tabstop>instDirBrowseBtn</tabstop>
-  <tabstop>additionalInstDirsList</tabstop>
-  <tabstop>addInstDirBtn</tabstop>
-  <tabstop>removeInstDirBtn</tabstop>
   <tabstop>modsDirTextBox</tabstop>
   <tabstop>modsDirBrowseBtn</tabstop>
   <tabstop>iconsDirTextBox</tabstop>
@@ -742,6 +739,9 @@
   <tabstop>javaDirBrowseBtn</tabstop>
   <tabstop>skinsDirTextBox</tabstop>
   <tabstop>skinsDirBrowseBtn</tabstop>
+  <tabstop>additionalInstDirsList</tabstop>
+  <tabstop>addInstDirBtn</tabstop>
+  <tabstop>removeInstDirBtn</tabstop>
   <tabstop>downloadsDirTextBox</tabstop>
   <tabstop>downloadsDirBrowseBtn</tabstop>
   <tabstop>downloadsDirWatchRecursiveCheckBox</tabstop>
