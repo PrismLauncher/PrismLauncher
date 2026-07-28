@@ -207,9 +207,10 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task
     m_suggestedName = name;
 
     if (!m_nameFieldEditedByUser) {
-        m_settingTextProgrammatically = true;
+        ui->instNameTextBox->blockSignals(true);
         ui->instNameTextBox->setText(name);
-        m_settingTextProgrammatically = false;
+        updateDialogState();
+        ui->instNameTextBox->blockSignals(false);
         m_nameFieldSelectedOnce = false;
     }
     importVersion.clear();
@@ -230,9 +231,10 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, QString version, I
     m_suggestedName = name;
 
     if (!m_nameFieldEditedByUser) {
-        m_settingTextProgrammatically = true;
+        ui->instNameTextBox->blockSignals(true);
         ui->instNameTextBox->setText(name);
-        m_settingTextProgrammatically = false;
+        updateDialogState();
+        ui->instNameTextBox->blockSignals(false);
         m_nameFieldSelectedOnce = false;
     }
     importVersion = std::move(version);
@@ -326,9 +328,7 @@ void NewInstanceDialog::on_iconButton_clicked()
 
 void NewInstanceDialog::on_instNameTextBox_textChanged([[maybe_unused]] const QString& arg1)
 {
-    if (!m_settingTextProgrammatically) {
-        m_nameFieldEditedByUser = true;
-    }
+    m_nameFieldEditedByUser = true;
     updateDialogState();
 }
 
