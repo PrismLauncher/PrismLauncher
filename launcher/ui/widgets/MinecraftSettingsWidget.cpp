@@ -61,6 +61,7 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
         m_ui->serverJoinGroupBox->hide();
         m_ui->globalDataPacksGroupBox->hide();
         m_ui->loaderGroup->hide();
+        m_ui->countGameTime->hide();
     } else {
         m_javaSettings = new JavaSettingsWidget(m_instance, this);
         m_ui->javaScrollArea->setWidget(m_javaSettings);
@@ -174,6 +175,7 @@ void MinecraftSettingsWidget::loadSettings()
     m_ui->gameTimeGroupBox->setChecked(m_instance == nullptr || settings->get("OverrideGameTime").toBool());
     m_ui->showGameTime->setChecked(settings->get("ShowGameTime").toBool());
     m_ui->recordGameTime->setChecked(settings->get("RecordGameTime").toBool());
+    m_ui->countGameTime->setChecked(settings->get("CountGameTime").toBool());
     m_ui->showGlobalGameTime->setChecked(m_instance == nullptr && settings->get("ShowGlobalGameTime").toBool());
     m_ui->showGameTimeWithoutDays->setChecked(m_instance == nullptr && settings->get("ShowGameTimeWithoutDays").toBool());
 
@@ -422,8 +424,15 @@ void MinecraftSettingsWidget::saveSettings()
         // Game time
         bool gameTime = m_instance == nullptr || m_ui->gameTimeGroupBox->isChecked();
 
-        if (m_instance != nullptr)
+        if (m_instance != nullptr) {
             settings->set("OverrideGameTime", gameTime);
+
+            if (gameTime) {
+                settings->set("CountGameTime", m_ui->countGameTime->isChecked());
+            } else {
+                settings->reset("CountGameTime");
+            }
+        }
 
         if (gameTime) {
             settings->set("ShowGameTime", m_ui->showGameTime->isChecked());

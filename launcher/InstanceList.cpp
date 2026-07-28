@@ -561,7 +561,9 @@ void InstanceList::updateTotalPlayTime()
 {
     totalPlayTime = 0;
     for (const auto& itr : m_instances) {
-        totalPlayTime += itr->totalTimePlayed();
+        if (itr->countTimePlayed()) {
+            totalPlayTime += itr->totalTimePlayed();
+        }
     }
 }
 

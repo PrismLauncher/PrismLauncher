@@ -346,6 +346,13 @@ It is most likely you will need to change the path - please refer to the mod's w
                </widget>
               </item>
               <item>
+               <widget class="QCheckBox" name="countGameTime">
+                <property name="text">
+                 <string>&amp;Count time playing this instance into total time played</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QCheckBox" name="showGlobalGameTime">
                 <property name="text">
                  <string>Show the &amp;total time played across instances</string>
