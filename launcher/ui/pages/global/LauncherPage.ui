@@ -739,11 +739,11 @@
   <tabstop>javaDirBrowseBtn</tabstop>
   <tabstop>skinsDirTextBox</tabstop>
   <tabstop>skinsDirBrowseBtn</tabstop>
+  <tabstop>downloadsDirTextBox</tabstop>
+  <tabstop>downloadsDirBrowseBtn</tabstop>
   <tabstop>additionalInstDirsList</tabstop>
   <tabstop>addInstDirBtn</tabstop>
   <tabstop>removeInstDirBtn</tabstop>
-  <tabstop>downloadsDirTextBox</tabstop>
-  <tabstop>downloadsDirBrowseBtn</tabstop>
   <tabstop>downloadsDirWatchRecursiveCheckBox</tabstop>
   <tabstop>downloadsDirMoveCheckBox</tabstop>
   <tabstop>metadataEnableBtn</tabstop>
