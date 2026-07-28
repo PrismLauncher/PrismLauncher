@@ -99,7 +99,12 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
 
     QString importVersion;
 
+    QString m_suggestedName;
+    bool m_nameFieldSelectedOnce = false;
+    bool m_nameFieldEditedByUser = false;
+
     QString m_searchTerm;
 
     void importIconNow();
+    bool eventFilter(QObject* watched, QEvent* event) override;
 };
