@@ -464,17 +464,17 @@ void WorldList::loadWorldsAsync()
         auto file = m_worlds.at(i).container();
         int row = i;
         QThreadPool::globalInstance()->start([this, file, row]() mutable {
-            auto size = calculateWorldSize(file);
+            World w(file);
+            w.loadMetadata();
+            w.setSize(calculateWorldSize(file));
 
             QMetaObject::invokeMethod(
                 this,
-                [this, size, row, file]() {
+                [this, w, row, file]() {
                     if (row < m_worlds.size() && m_worlds[row].container() == file) {
-                        m_worlds[row].setSize(size);
+                        m_worlds[row] = w;
 
-                        // Notify views
-                        QModelIndex modelIndex = index(row, SizeColumn);
-                        emit dataChanged(modelIndex, modelIndex, { SizeRole });
+                        emit dataChanged(index(row, 0), index(row, columnCount(QModelIndex()) - 1));
                     }
                 },
                 Qt::QueuedConnection);
