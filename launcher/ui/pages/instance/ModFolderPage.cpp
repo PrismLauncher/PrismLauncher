@@ -348,7 +348,11 @@ void ModFolderPage::bisectMods()
         }
     }
 
-    QList<Mod*> locked = pickLockedMods(allMods);
+    auto lockedOpt = pickLockedMods(allMods);
+    if (!lockedOpt) {
+        return;
+    }
+    QList<Mod*> locked = *lockedOpt;
 
     QList<Mod*> candidates;
     for (auto* mod : allMods) {
@@ -434,7 +438,7 @@ void ModFolderPage::bisectMods()
     bisect->start();
 }
 
-QList<Mod*> ModFolderPage::pickLockedMods(const QList<Mod*>& allMods)
+std::optional<QList<Mod*>> ModFolderPage::pickLockedMods(const QList<Mod*>& allMods)
 {
     auto* dialog = ReviewMessageBox::create(this, tr("Choose mods to lock"));
     dialog->setLabels(tr("Locked mods stay enabled for the whole bisect and are assumed not to be the cause.\n"
@@ -448,13 +452,15 @@ QList<Mod*> ModFolderPage::pickLockedMods(const QList<Mod*>& allMods)
         dialog->appendResource({ .name = mod->name(), .filename = mod->fileinfo().fileName(), .enabled = false });
     }
 
+    if (dialog->exec() == 0) {
+        return std::nullopt;
+    }
+
     QList<Mod*> locked;
-    if (dialog->exec() != 0) {
-        auto deselected = dialog->deselectedResources();
-        for (auto* mod : sorted) {
-            if (!deselected.contains(mod->name())) {
-                locked << mod;
-            }
+    auto deselected = dialog->deselectedResources();
+    for (auto* mod : sorted) {
+        if (!deselected.contains(mod->name())) {
+            locked << mod;
         }
     }
     return locked;

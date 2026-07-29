@@ -39,6 +39,8 @@
 #pragma once
 
 #include <QPointer>
+#include <optional>
+
 #include "ExternalResourcesPage.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
@@ -65,7 +67,7 @@ class ModFolderPage : public ExternalResourcesPage {
 
    private slots:
     void bisectMods();
-    QList<Mod*> pickLockedMods(const QList<Mod*>& allMods);
+    std::optional<QList<Mod*>> pickLockedMods(const QList<Mod*>& allMods);
     void removeItems(const QItemSelection& selection) override;
 
     void downloadMods();
