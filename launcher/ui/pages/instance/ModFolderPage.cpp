@@ -341,6 +341,13 @@ void ModFolderPage::bisectMods()
         allMods << static_cast<Mod*>(&m_model->at(row));
     }
 
+    QSet<Mod*> originallyEnabled;
+    for (auto* mod : allMods) {
+        if (mod->enabled()) {
+            originallyEnabled << mod;
+        }
+    }
+
     QList<Mod*> locked = pickLockedMods(allMods);
 
     QList<Mod*> candidates;
@@ -352,15 +359,45 @@ void ModFolderPage::bisectMods()
 
     auto* bisect = new BisectController(m_instance, m_model, locked, candidates, this);
 
+    auto restoreOriginalState = [this, allMods, originallyEnabled] {
+        QSet<Mod*> toEnable, toDisable;
+        for (auto* mod : allMods) {
+            (originallyEnabled.contains(mod) ? toEnable : toDisable) << mod;
+        }
+        m_model->setResourceEnabledSilent(toDisable, EnableAction::DISABLE);
+        m_model->setResourceEnabledSilent(toEnable, EnableAction::ENABLE);
+    };
+
+    auto enableOnlyCulprits = [this, allMods](const QList<Mod*>& culprits) {
+        QSet<Mod*> culpritSet(culprits.begin(), culprits.end());
+        QSet<Mod*> toEnable, toDisable;
+        for (auto* mod : allMods) {
+            (culpritSet.contains(mod) || mod->enabled() ? toEnable : toDisable) << mod;
+        }
+        m_model->setResourceEnabledSilent(toDisable, EnableAction::DISABLE);
+        m_model->setResourceEnabledSilent(toEnable, EnableAction::ENABLE);
+    };
+
     connect(bisect, &BisectController::readyToLaunch, this, [this] { APPLICATION->launch(m_instance); }, Qt::QueuedConnection);
 
     connect(APPLICATION, &Application::instanceLaunchFinished, bisect, &BisectController::onLaunchEnded, Qt::QueuedConnection);
 
-    connect(bisect, &BisectController::promptUser, this, [this, bisect] {
+    connect(bisect, &BisectController::promptUser, this, [this, bisect, restoreOriginalState] {
         auto* box = CustomMessageBox::selectable(this, tr("Bisect: does the issue occur?"), tr("Does this mod set reproduce the issue?"),
-                                                 QMessageBox::Question, QMessageBox::Yes | QMessageBox::No | QMessageBox::Retry);
+                                                 QMessageBox::Question,
+                                                 QMessageBox::Yes | QMessageBox::No | QMessageBox::Retry | QMessageBox::Abort);
         box->button(QMessageBox::Retry)->setText(tr("Relaunch"));
+        box->button(QMessageBox::Abort)->setText(tr("End Bisect"));
+
         auto response = box->exec();
+
+        if (response == QMessageBox::Abort) {
+            bisect->cancel();
+            restoreOriginalState();
+            bisect->deleteLater();
+            return;
+        }
+
         BisectController::Answer answer;
         if (response == QMessageBox::Yes) {
             answer = BisectController::Answer::Yes;
@@ -372,7 +409,8 @@ void ModFolderPage::bisectMods()
         bisect->onUserAnswered(answer);
     });
 
-    connect(bisect, &BisectController::finished, this, [this](QList<Mod*> culprits) {
+    connect(bisect, &BisectController::finished, this, [this, enableOnlyCulprits](QList<Mod*> culprits) {
+        enableOnlyCulprits(culprits);
         QStringList names;
         for (auto* m : culprits)
             names << m->name();
@@ -380,9 +418,14 @@ void ModFolderPage::bisectMods()
                                      QMessageBox::Information)
             ->exec();
     });
-    connect(bisect, &BisectController::bailedOut, this,
-            [this](QString reason) { CustomMessageBox::selectable(this, tr("Bisect stopped"), reason, QMessageBox::Warning)->exec(); });
-    connect(bisect, &BisectController::heisenbugDetected, this, [this](QString set) {
+
+    connect(bisect, &BisectController::bailedOut, this, [this, restoreOriginalState](QString reason) {
+        restoreOriginalState();
+        CustomMessageBox::selectable(this, tr("Bisect stopped"), reason, QMessageBox::Warning)->exec();
+    });
+
+    connect(bisect, &BisectController::heisenbugDetected, this, [this, restoreOriginalState](QString set) {
+        restoreOriginalState();
         CustomMessageBox::selectable(this, tr("Inconsistent result"),
                                      tr("The same mod set produced different results on retest:\n%1").arg(set), QMessageBox::Warning)
             ->exec();
