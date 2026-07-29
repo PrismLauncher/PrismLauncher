@@ -64,6 +64,8 @@ class ModFolderPage : public ExternalResourcesPage {
     void updateFrame(const QModelIndex& current, const QModelIndex& previous) override;
 
    private slots:
+    void bisectMods();
+    QList<Mod*> pickLockedMods(const QList<Mod*>& allMods);
     void removeItems(const QItemSelection& selection) override;
 
     void downloadMods();
