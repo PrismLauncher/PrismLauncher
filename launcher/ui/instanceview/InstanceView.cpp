@@ -348,36 +348,38 @@ void InstanceView::mouseMoveEvent(QMouseEvent* event)
     executeDelayedItemsLayout();
 
     QPoint topLeft;
-    QPoint visualPos = event->pos();
-    QPoint geometryPos = event->pos() + offset();
+    const QPoint visualPos = event->pos();
+    const QPoint geometryPos = event->pos() + offset();
 
     if (m_draggingGroup) {
         topLeft = m_pressedPosition - offset();
-        qreal dist = (topLeft - event->pos()).manhattanLength();
-        qreal threshold = QApplication::startDragDistance();
+        const qreal dist = (topLeft - event->pos()).manhattanLength();
+        const qreal threshold = QApplication::startDragDistance();
         if (dist > threshold) {
             // Drag preview: compute visual target index and show indicator
             setState(NoState);
-            QPoint cursorPos = geometryPos;
+            const QPoint cursorPos = geometryPos;
             m_groupDragTargetIndex = -1;
             for (int i = 0; i < m_groups.size(); i++) {
-                if (m_groups[i]->text == m_draggedGroupName)
+                if (m_groups[i]->text == m_draggedGroupName) {
                     continue;
-                int gTop = m_groups[i]->verticalPosition();
-                int gBot = gTop + m_groups[i]->totalHeight();
-                int hMid = gTop + VisualGroup::headerHeight() / 2;
+                }
+                const int gTop = m_groups[i]->verticalPosition();
+                const int gBot = gTop + m_groups[i]->totalHeight();
+                const int hMid = gTop + (VisualGroup::headerHeight() / 2);
                 if (cursorPos.y() < hMid) {
                     m_groupDragTargetIndex = i;
                     break;
-                } else if (cursorPos.y() < gBot) {
+                }
+                if (cursorPos.y() < gBot) {
                     m_groupDragTargetIndex = i + 1;
                     break;
                 }
             }
-            if (m_groupDragTargetIndex < 0)
-                m_groupDragTargetIndex = m_groups.size();
-            if (m_groupDragTargetIndex > m_groups.size())
-                m_groupDragTargetIndex = m_groups.size();
+            if (m_groupDragTargetIndex < 0) {
+                m_groupDragTargetIndex = static_cast<int>(m_groups.size());
+            }
+            m_groupDragTargetIndex = std::min(m_groupDragTargetIndex, static_cast<int>(m_groups.size()));
             viewport()->update();
             return;
         }
@@ -429,21 +431,22 @@ void InstanceView::mouseReleaseEvent(QMouseEvent* event)
 
     // Commit group drag reorder on release
     if (m_draggingGroup && m_groupDragTargetIndex >= 0) {
-        auto groupOrder = APPLICATION->instances()->groupOrder();
-        int currentOrderIdx = groupOrder.indexOf(m_draggedGroupName);
+        const auto groupOrder = APPLICATION->instances()->groupOrder();
+        const int currentOrderIdx = static_cast<int>(groupOrder.indexOf(m_draggedGroupName));
         if (currentOrderIdx >= 0) {
             // Convert visual target index to groupOrder index
             int orderTarget = 0;
             for (int i = 0; i < m_groupDragTargetIndex && i < m_groups.size(); i++) {
-                if (m_groups[i]->text == m_draggedGroupName)
+                if (m_groups[i]->text == m_draggedGroupName) {
                     continue;
-                int orderPos = groupOrder.indexOf(m_groups[i]->text);
-                if (orderPos >= 0 && orderPos >= orderTarget)
+                }
+                const int orderPos = static_cast<int>(groupOrder.indexOf(m_groups[i]->text));
+                if (orderPos >= 0 && orderPos >= orderTarget) {
                     orderTarget = orderPos + 1;
+                }
             }
             // Clamp to valid range
-            if (orderTarget > groupOrder.size())
-                orderTarget = groupOrder.size();
+            orderTarget = std::min(orderTarget, static_cast<int>(groupOrder.size()));
             if (orderTarget != currentOrderIdx) {
                 APPLICATION->instances()->moveGroup(m_draggedGroupName, orderTarget);
                 updateGeometries();
@@ -616,13 +619,16 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
     if (m_groupDragTargetIndex >= 0) {
         int indicatorY = 0;
         if (m_groupDragTargetIndex < m_groups.size()) {
-            indicatorY = m_groups[m_groupDragTargetIndex]->verticalPosition() - verticalOffset();
+            indicatorY = m_groups[m_groupDragTargetIndex]->verticalPosition() - verticalOffset() + 5;
         } else if (!m_groups.isEmpty()) {
             auto* last = m_groups.last();
-            indicatorY = last->verticalPosition() + last->totalHeight() - verticalOffset();
+            indicatorY = last->verticalPosition() + last->totalHeight() - verticalOffset() + 10;
         }
         painter.save();
-        painter.setPen(QPen(Qt::white, 1));
+        {
+            const QColor indicatorColor = option.palette.color(QPalette::Highlight);
+            painter.setPen(QPen(indicatorColor, 2));
+        }
         painter.drawLine(m_leftMargin, indicatorY, wpWidth - m_rightMargin, indicatorY);
         painter.restore();
     }
