@@ -34,8 +34,8 @@ class BisectController : public QObject {
 
     BisectController(BaseInstance* instance,
                      ModFolderModel* model,
-                     QList<Mod*> lockedMods,
-                     QList<Mod*> candidateMods,
+                     const QList<Mod*>& lockedMods,
+                     const QList<Mod*>& candidateMods,
                      QObject* parent = nullptr);
 
     void start();

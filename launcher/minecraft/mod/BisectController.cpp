@@ -23,8 +23,8 @@
 
 BisectController::BisectController(BaseInstance* instance,
                                    ModFolderModel* model,
-                                   QList<Mod*> lockedMods,
-                                   QList<Mod*> candidateMods,
+                                   const QList<Mod*>& lockedMods,
+                                   const QList<Mod*>& candidateMods,
                                    QObject* parent)
     : QObject(parent), m_instance(instance), m_model(model)
 {
@@ -39,10 +39,9 @@ BisectController::BisectController(BaseInstance* instance,
 Mod* BisectController::resolveByModId(const QString& modId) const
 {
     for (int row = 0; row < m_model->rowCount({}); ++row) {
-        auto& res = m_model->at(row);
-        auto* mod = static_cast<Mod*>(&res);
-        if (mod->mod_id() == modId) {
-            return mod;
+        auto& mod = m_model->at(row);
+        if (mod.mod_id() == modId) {
+            return &mod;
         }
     }
     return nullptr;
@@ -91,8 +90,9 @@ void BisectController::applyState(const QSet<QString>& enabledIdsFromPool)
 
 void BisectController::onLaunchEnded(BaseInstance* finishedInstance, bool /*wasSuccessful*/)
 {
-    if (!m_running || finishedInstance != m_instance)
+    if (!m_running || finishedInstance != m_instance) {
         return;
+    }
     emit promptUser();
 }
 
@@ -105,15 +105,16 @@ QString BisectController::canonicalKey(const QList<QString>& ids)
 
 void BisectController::onUserAnswered(Answer answer)
 {
-    if (!m_running)
+    if (!m_running) {
         return;
+    }
 
     if (answer == Answer::Relaunch) {
         emit readyToLaunch();
         return;
     }
 
-    bool issueOccurred = (answer == Answer::Yes);
+    const bool issueOccurred = (answer == Answer::Yes);
 
     QList<QString> currentlyEnabled;
     for (const auto& id : m_pool) {
@@ -122,12 +123,12 @@ void BisectController::onUserAnswered(Answer answer)
         }
     }
     auto key = canonicalKey(currentlyEnabled);
-    if (m_history.contains(key) && m_history[key] != issueOccurred) {
+    if (m_history.contains(key) && m_history.value(key) != issueOccurred) {
         m_running = false;
         emit heisenbugDetected(key);
         return;
     }
-    m_history[key] = issueOccurred;
+    m_history.insert(key, issueOccurred);
 
     switch (m_phase) {
         case Phase::BaselineEmpty: {
@@ -165,8 +166,9 @@ void BisectController::onUserAnswered(Answer answer)
             if (issueOccurred) {
                 QList<Mod*> culprits;
                 for (const auto& id : m_failing) {
-                    if (auto* mod = resolveByModId(id))
+                    if (auto* mod = resolveByModId(id)) {
                         culprits << mod;
+                    }
                 }
                 emit finished(culprits);
             } else {
@@ -180,16 +182,20 @@ void BisectController::onUserAnswered(Answer answer)
 QList<QList<QString>> BisectController::splitIntoChunks(const QList<QString>& ids, int granularity)
 {
     QList<QList<QString>> chunks;
-    int n = ids.size();
+    const int n = static_cast<int>(ids.size());
     granularity = std::clamp(granularity, 2, std::max(2, n));
-    int base = n / granularity, rem = n % granularity, idx = 0;
+    const int base = n / granularity;
+    const int rem = n % granularity;
+    int idx = 0;
     for (int i = 0; i < granularity; ++i) {
-        int size = base + (i < rem ? 1 : 0);
+        const int size = base + (i < rem ? 1 : 0);
         QList<QString> chunk;
-        for (int j = 0; j < size && idx < n; ++j, ++idx)
-            chunk << ids[idx];
-        if (!chunk.isEmpty())
+        for (int j = 0; j < size && idx < n; ++j, ++idx) {
+            chunk << ids.at(idx);
+        }
+        if (!chunk.isEmpty()) {
             chunks << chunk;
+        }
     }
     return chunks;
 }
@@ -205,8 +211,9 @@ void BisectController::beginRound()
     m_subphase = Subphase::Complements;
     m_chunkIndex = 0;
     QSet<QString> complement(m_failing.begin(), m_failing.end());
-    for (const auto& id : m_chunks[0])
+    for (const auto& id : m_chunks.at(0)) {
         complement.remove(id);
+    }
     applyState(complement);
 }
 
@@ -215,12 +222,13 @@ void BisectController::advance(bool issueOccurred)
     if (issueOccurred) {
         if (m_subphase == Subphase::Complements) {
             QSet<QString> newFailing(m_failing.begin(), m_failing.end());
-            for (const auto& id : m_chunks[m_chunkIndex])
+            for (const auto& id : m_chunks.at(m_chunkIndex)) {
                 newFailing.remove(id);
+            }
             m_failing = QList<QString>(newFailing.begin(), newFailing.end());
             m_granularity = std::max(2, m_granularity - 1);
         } else {
-            m_failing = m_chunks[m_chunkIndex];
+            m_failing = m_chunks.at(m_chunkIndex);
             m_granularity = 2;
         }
         beginRound();
@@ -231,11 +239,13 @@ void BisectController::advance(bool issueOccurred)
     if (m_chunkIndex < m_chunks.size()) {
         if (m_subphase == Subphase::Complements) {
             QSet<QString> complement(m_failing.begin(), m_failing.end());
-            for (const auto& id : m_chunks[m_chunkIndex])
+            for (const auto& id : m_chunks.at(m_chunkIndex)) {
                 complement.remove(id);
+            }
             applyState(complement);
         } else {
-            applyState(QSet<QString>(m_chunks[m_chunkIndex].begin(), m_chunks[m_chunkIndex].end()));
+            const auto& chunk = m_chunks.at(m_chunkIndex);
+            applyState(QSet<QString>(chunk.begin(), chunk.end()));
         }
         return;
     }
@@ -243,12 +253,14 @@ void BisectController::advance(bool issueOccurred)
     if (m_subphase == Subphase::Complements) {
         m_subphase = Subphase::Singles;
         m_chunkIndex = 0;
-        applyState(QSet<QString>(m_chunks[0].begin(), m_chunks[0].end()));
+        const auto& chunk = m_chunks.at(0);
+        applyState(QSet<QString>(chunk.begin(), chunk.end()));
         return;
     }
 
     if (m_granularity < m_failing.size()) {
-        m_granularity = static_cast<int>(std::min<qsizetype>(m_failing.size(), m_granularity * 2));
+        const qsizetype doubled = static_cast<qsizetype>(m_granularity) * 2;
+        m_granularity = static_cast<int>(std::min<qsizetype>(m_failing.size(), doubled));
         beginRound();
     } else {
         m_phase = Phase::Verifying;

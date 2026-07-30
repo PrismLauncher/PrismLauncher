@@ -48,6 +48,7 @@
 #include <QKeyEvent>
 #include <QMenu>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QSortFilterProxyModel>
 #include <algorithm>
 #include <memory>
@@ -366,7 +367,7 @@ void ModFolderPage::bisectMods()
     if (!lockedOpt) {
         return;
     }
-    QList<Mod*> locked = *lockedOpt;
+    const QList<Mod*>& locked = *lockedOpt;
 
     QList<Mod*> candidates;
     for (auto* mod : allMods) {
@@ -381,7 +382,8 @@ void ModFolderPage::bisectMods()
     m_bisectAction->setText(tr("Bisect in progress..."));
 
     auto restoreOriginalState = [this, allMods, originallyEnabled] {
-        QSet<Mod*> toEnable, toDisable;
+        QSet<Mod*> toEnable;
+        QSet<Mod*> toDisable;
         for (auto* mod : allMods) {
             (originallyEnabled.contains(mod) ? toEnable : toDisable) << mod;
         }
@@ -390,8 +392,9 @@ void ModFolderPage::bisectMods()
     };
 
     auto enableOnlyCulprits = [this, allMods](const QList<Mod*>& culprits) {
-        QSet<Mod*> culpritSet(culprits.begin(), culprits.end());
-        QSet<Mod*> toEnable, toDisable;
+        const QSet<Mod*> culpritSet(culprits.begin(), culprits.end());
+        QSet<Mod*> toEnable;
+        QSet<Mod*> toDisable;
         for (auto* mod : allMods) {
             (culpritSet.contains(mod) || mod->enabled() ? toEnable : toDisable) << mod;
         }
@@ -422,31 +425,30 @@ void ModFolderPage::bisectMods()
             return;
         }
 
-        BisectController::Answer answer;
+        BisectController::Answer answer = BisectController::Answer::No;
         if (response == QMessageBox::Yes) {
             answer = BisectController::Answer::Yes;
         } else if (response == QMessageBox::Retry) {
             answer = BisectController::Answer::Relaunch;
-        } else {
-            answer = BisectController::Answer::No;
         }
         bisect->onUserAnswered(answer);
     });
 
-    connect(bisect, &BisectController::finished, this, [this, enableOnlyCulprits](QList<Mod*> culprits) {
+    connect(bisect, &BisectController::finished, this, [this, enableOnlyCulprits](const QList<Mod*>& culprits) {
         enableOnlyCulprits(culprits);
         m_activeBisect = nullptr;
         m_bisectAction->setEnabled(true);
         m_bisectAction->setText(tr("Bisect Mods"));
         QStringList names;
-        for (auto* m : culprits)
+        for (auto* m : culprits) {
             names << m->name();
+        }
         CustomMessageBox::selectable(this, tr("Bisect complete"), tr("Likely culprit mod(s): %1").arg(names.join(", ")),
                                      QMessageBox::Information)
             ->exec();
     });
 
-    connect(bisect, &BisectController::bailedOut, this, [this, restoreOriginalState](QString reason) {
+    connect(bisect, &BisectController::bailedOut, this, [this, restoreOriginalState](const QString& reason) {
         restoreOriginalState();
         m_activeBisect = nullptr;
         m_bisectAction->setEnabled(true);
@@ -454,7 +456,7 @@ void ModFolderPage::bisectMods()
         CustomMessageBox::selectable(this, tr("Bisect stopped"), reason, QMessageBox::Warning)->exec();
     });
 
-    connect(bisect, &BisectController::heisenbugDetected, this, [this, restoreOriginalState](QString set) {
+    connect(bisect, &BisectController::heisenbugDetected, this, [this, restoreOriginalState](const QString& set) {
         restoreOriginalState();
         m_activeBisect = nullptr;
         m_bisectAction->setEnabled(true);

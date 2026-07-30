@@ -431,7 +431,7 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
     auto toList = [this](const QSet<Mod*>& mods) {
         QModelIndexList list;
         for (auto* mod : mods) {
-            auto row = m_resourcesIndex[mod->internalId()];
+            auto row = m_resourcesIndex.value(mod->internalId());
             list << index(row, 0);
         }
         return list;
@@ -514,7 +514,7 @@ bool ModFolderModel::setResourceEnabledSilent(const QSet<Mod*>& mods, EnableActi
     auto toList = [this](const QSet<Mod*>& mods) {
         QModelIndexList list;
         for (auto* mod : mods) {
-            auto row = m_resourcesIndex[mod->internalId()];
+            auto row = m_resourcesIndex.value(mod->internalId());
             list << index(row, 0);
         }
         return list;
