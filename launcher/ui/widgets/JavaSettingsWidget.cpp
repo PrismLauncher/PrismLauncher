@@ -167,8 +167,6 @@ void JavaSettingsWidget::saveSettings()
     else
         settings = APPLICATION->settings();
 
-    SettingsObject::Lock lock(settings);
-
     // Java Install Settings
     bool javaInstall = m_instance == nullptr || m_ui->javaInstallationGroupBox->isChecked();
 
