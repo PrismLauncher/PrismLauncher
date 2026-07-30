@@ -134,7 +134,7 @@ void BisectController::onUserAnswered(Answer answer)
             if (issueOccurred) {
                 m_running = false;
                 emit bailedOut(
-                    tr("Issue still occurs with all candidate mods disabled — it isn't "
+                    tr("Issue still occurs with all candidate mods disabled - it isn't "
                        "caused by any unlocked mod. Check locked mods or the modloader/base game."));
                 return;
             }
@@ -147,7 +147,7 @@ void BisectController::onUserAnswered(Answer answer)
             if (!issueOccurred) {
                 m_running = false;
                 emit bailedOut(
-                    tr("Issue did not reproduce with all candidate mods enabled — "
+                    tr("Issue did not reproduce with all candidate mods enabled - "
                        "the bug may be intermittent. Try again, or check locked mods."));
                 return;
             }

@@ -44,6 +44,8 @@
 #include "ExternalResourcesPage.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
+class BisectController;
+
 class ModFolderPage : public ExternalResourcesPage {
     Q_OBJECT
 
@@ -80,6 +82,8 @@ class ModFolderPage : public ExternalResourcesPage {
    protected:
     ModFolderModel* m_model;
     QPointer<ResourceDownload::ModDownloadDialog> m_downloadDialog;
+    QPointer<BisectController> m_activeBisect;
+    QAction* m_bisectAction = nullptr;
 };
 
 class CoreModFolderPage : public ModFolderPage {
