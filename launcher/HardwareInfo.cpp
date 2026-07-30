@@ -21,12 +21,14 @@
 #include <QDebug>
 #include <QStringList>
 
-#if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
+#if defined(Q_OS_MACOS) || defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
 namespace {
+#if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
 QString afterColon(QString str)
 {
     return str.remove(0, str.indexOf(':') + 2).trimmed();
 }
+#endif
 
 template <typename F>
 bool readFromOutput(const char* command, F function)
