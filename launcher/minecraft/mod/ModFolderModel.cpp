@@ -457,9 +457,14 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
             noButton = tr("Only Enable Selected");
             yesButton = tr("Enable Required");
         } else {
+            QString affectedModsNames = "";
+            for (auto* mod : requiredToDisable) {
+                affectedModsNames += "\n- " + mod->name() + " (" + mod->mod_id() + ")";
+            }
             title = tr("Confirm disable");
             message = tr("The disabled mod(s) are required by %n mod(s).\n", "", requiredToDisable.size()) +
-                      tr("Would you like to disable them as well?\nIgnoring them may break the game.");
+                      tr("Would you like to disable them as well?\nIgnoring them may break the game.") +
+                      tr("\n\nThe following mods depend the mod(s) you want to disable:") + affectedModsNames;
             noButton = tr("Only Disable Selected");
             yesButton = tr("Disable Required");
         }
