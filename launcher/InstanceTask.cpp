@@ -1,4 +1,5 @@
 #include "InstanceTask.h"
+#include <QApplication>
 #include <QDir>
 
 #include "Application.h"
@@ -156,11 +157,12 @@ void InstanceTask::downloadFiles(MinecraftInstance* inst)
         if (isRunning()) {
             return;
         }
-        if (task->wasSuccessful()) {
-            emitSucceeded();
-        } else {
-            emitFailed(tr("Could not download game files: %1").arg(task->failReason()));
+        if (!task->wasSuccessful()) {
+            CustomMessageBox::selectable(QApplication::activeWindow(), tr("Error"),
+                                         tr("Could not download game files: %1").arg(task->failReason()), QMessageBox::Warning)
+                ->show();
         }
+        emitSucceeded();
     });
     propagateFromOther(task.get());
     setDetails(tr("Downloading game files"));
