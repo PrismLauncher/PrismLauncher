@@ -475,7 +475,7 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
         box->button(QMessageBox::No)->setText(noButton);
         box->button(QMessageBox::Yes)->setText(yesButton);
 
-        if (details != nullptr) {
+        if (!details.isNull()) {
             box->setDetailedText(details);
         }
 
