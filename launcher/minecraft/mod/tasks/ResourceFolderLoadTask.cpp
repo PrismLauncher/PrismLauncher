@@ -55,12 +55,12 @@ ResourceFolderLoadTask::ResourceFolderLoadTask(const QDir& resourceDir,
     , m_clean_orphan(cleanOrphan)
     , m_create_func(std::move(createFunction))
     , m_result(new Result())
-    , m_thread_to_spawn_into(thread())
+    , m_mainThread(thread())
 {}
 
 void ResourceFolderLoadTask::executeTask()
 {
-    if (thread() != m_thread_to_spawn_into) {
+    if (thread() != m_mainThread) {
         connect(this, &Task::finished, this->thread(), &QThread::quit);
     }
 

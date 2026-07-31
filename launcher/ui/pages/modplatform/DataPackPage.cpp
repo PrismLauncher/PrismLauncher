@@ -18,8 +18,8 @@ namespace {
 ResourceDownload::ResourceDescriptor prepareDataPackDescriptor()
 {
     QMap<QString, QString> urlHandlers;
-    urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?modrinth\.com\/resourcepack\/([^\/]+)\/?)"), "modrinth");
-    urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?curseforge\.com\/minecraft\/texture-packs\/([^\/]+)\/?)"),
+    urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?modrinth\.com\/datapack\/([^\/]+)\/?)"), "modrinth");
+    urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?curseforge\.com\/minecraft\/data-packs\/([^\/]+)\/?)"),
                        "curseforge");
     urlHandlers.insert(QRegularExpression::anchoredPattern(R"(minecraft\.curseforge\.com\/projects\/([^\/]+)\/?)"), "curseforge");
     return {

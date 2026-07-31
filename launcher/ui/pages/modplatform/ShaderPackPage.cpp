@@ -17,10 +17,9 @@ namespace {
 ResourceDownload::ResourceDescriptor prepareShaderPackDescriptor()
 {
     QMap<QString, QString> urlHandlers;
-    urlHandlers.insert(QRegularExpression::anchoredPattern("(?:www\\.)?modrinth\\.com\\/shaders\\/([^\\/]+)\\/?"), "modrinth");
-    urlHandlers.insert(QRegularExpression::anchoredPattern("(?:www\\.)?curseforge\\.com\\/minecraft\\/customization\\/([^\\/]+)\\/?"),
-                       "curseforge");
-    urlHandlers.insert(QRegularExpression::anchoredPattern("minecraft\\.curseforge\\.com\\/projects\\/([^\\/]+)\\/?"), "curseforge");
+    urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?modrinth\.com\/shader\/([^\/]+)\/?)"), "modrinth");
+    urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?curseforge\.com\/minecraft\/shaders\/([^\/]+)\/?)"), "curseforge");
+    urlHandlers.insert(QRegularExpression::anchoredPattern(R"(minecraft\.curseforge\.com\/projects\/([^\/]+)\/?)"), "curseforge");
     return {
         .helpPage = {},
         //: The singular version of 'shader packs'
