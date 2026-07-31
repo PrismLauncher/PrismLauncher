@@ -268,9 +268,10 @@ void MinecraftInstance::loadSpecificSettings()
     m_settings->registerSetting("OverrideModDownloadLoaders", false);
     m_settings->registerSetting("ModDownloadLoaders", "[]");
 
-    // Developing Mod — watch build output folders and sync JARs into mods/
+    // Developing Mod — watch build output folders/JARs and sync into mods/
     m_settings->registerSetting("DevelopingModEnabled", false);
     m_settings->registerSetting("DevelopingModFolders", "[]");
+    m_settings->registerSetting("DevelopingModJars", "[]");
     m_settings->registerSetting("DevelopingModIgnorePatterns",
                                 "*-sources.jar\n*-javadoc.jar\n*-dev.jar\n*-api.jar\n*-thin.jar");
     m_settings->registerSetting("DevelopingModManagedFiles", "[]");

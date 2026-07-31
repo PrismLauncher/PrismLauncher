@@ -24,9 +24,15 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QListWidgetItem>
+#include <QVariant>
 
 #include "FileSystem.h"
 #include "minecraft/mod/DevelopingModWatcher.h"
+
+namespace {
+constexpr int kKindRole = Qt::UserRole;
+constexpr int kPathRole = Qt::UserRole + 1;
+}  // namespace
 
 DevelopingModPage::DevelopingModPage(MinecraftInstance* inst, QWidget* parent)
     : QWidget(parent), ui(new Ui::DevelopingModPage), m_inst(inst)
@@ -35,7 +41,8 @@ DevelopingModPage::DevelopingModPage(MinecraftInstance* inst, QWidget* parent)
 
     connect(ui->enableGroup, &QGroupBox::toggled, this, &DevelopingModPage::enableToggled);
     connect(ui->addFolderButton, &QPushButton::clicked, this, &DevelopingModPage::addFolder);
-    connect(ui->removeFolderButton, &QPushButton::clicked, this, &DevelopingModPage::removeSelectedFolder);
+    connect(ui->addJarButton, &QPushButton::clicked, this, &DevelopingModPage::addJar);
+    connect(ui->removeButton, &QPushButton::clicked, this, &DevelopingModPage::removeSelected);
     connect(ui->syncNowButton, &QPushButton::clicked, this, &DevelopingModPage::syncNowClicked);
 
     loadFromSettings();
@@ -58,6 +65,59 @@ void DevelopingModPage::openedImpl()
         updateStatusLabel(watcher->statusText());
 }
 
+QString DevelopingModPage::displayText(WatchKind kind, const QString& path)
+{
+    if (kind == WatchKind::Folder)
+        return QObject::tr("Folder — %1").arg(path);
+    return QObject::tr("Jar — %1").arg(path);
+}
+
+void DevelopingModPage::setControlsEnabled(bool enabled)
+{
+    ui->watchList->setEnabled(enabled);
+    ui->addFolderButton->setEnabled(enabled);
+    ui->addJarButton->setEnabled(enabled);
+    ui->removeButton->setEnabled(enabled);
+    ui->ignoreEdit->setEnabled(enabled);
+    ui->syncNowButton->setEnabled(enabled);
+}
+
+void DevelopingModPage::addWatchItem(WatchKind kind, const QString& path)
+{
+    const auto normalized = FS::NormalizePath(path);
+    if (normalized.isEmpty() || containsPath(normalized))
+        return;
+
+    auto* item = new QListWidgetItem(displayText(kind, normalized), ui->watchList);
+    item->setData(kKindRole, static_cast<int>(kind));
+    item->setData(kPathRole, normalized);
+}
+
+bool DevelopingModPage::containsPath(const QString& path) const
+{
+    const auto normalized = FS::NormalizePath(path);
+    for (int i = 0; i < ui->watchList->count(); ++i) {
+        if (FS::NormalizePath(ui->watchList->item(i)->data(kPathRole).toString()) == normalized)
+            return true;
+    }
+    return false;
+}
+
+QStringList DevelopingModPage::pathsOfKind(WatchKind kind) const
+{
+    QStringList paths;
+    for (int i = 0; i < ui->watchList->count(); ++i) {
+        auto* item = ui->watchList->item(i);
+        if (static_cast<WatchKind>(item->data(kKindRole).toInt()) != kind)
+            continue;
+        const auto path = FS::NormalizePath(item->data(kPathRole).toString());
+        if (!path.isEmpty())
+            paths << path;
+    }
+    paths.removeDuplicates();
+    return paths;
+}
+
 void DevelopingModPage::loadFromSettings()
 {
     auto* settings = m_inst->settings();
@@ -66,18 +126,22 @@ void DevelopingModPage::loadFromSettings()
     ui->ignoreEdit->blockSignals(true);
 
     ui->enableGroup->setChecked(settings->get("DevelopingModEnabled").toBool());
+    ui->watchList->clear();
 
-    ui->foldersList->clear();
-    const auto foldersRaw = settings->get("DevelopingModFolders").toString().trimmed();
-    QJsonParseError error{};
-    const auto doc = QJsonDocument::fromJson(foldersRaw.toUtf8(), &error);
-    if (error.error == QJsonParseError::NoError && doc.isArray()) {
+    auto loadJsonPaths = [this](const QString& raw, WatchKind kind) {
+        QJsonParseError error{};
+        const auto doc = QJsonDocument::fromJson(raw.toUtf8(), &error);
+        if (error.error != QJsonParseError::NoError || !doc.isArray())
+            return;
         for (const auto& value : doc.array()) {
             const auto path = value.toString().trimmed();
             if (!path.isEmpty())
-                ui->foldersList->addItem(path);
+                addWatchItem(kind, path);
         }
-    }
+    };
+
+    loadJsonPaths(settings->get("DevelopingModFolders").toString().trimmed(), WatchKind::Folder);
+    loadJsonPaths(settings->get("DevelopingModJars").toString().trimmed(), WatchKind::Jar);
 
     auto ignore = settings->get("DevelopingModIgnorePatterns").toString();
     if (ignore.trimmed().isEmpty())
@@ -87,32 +151,20 @@ void DevelopingModPage::loadFromSettings()
     ui->enableGroup->blockSignals(false);
     ui->ignoreEdit->blockSignals(false);
 
-    const bool enabled = ui->enableGroup->isChecked();
-    ui->foldersList->setEnabled(enabled);
-    ui->addFolderButton->setEnabled(enabled);
-    ui->removeFolderButton->setEnabled(enabled);
-    ui->ignoreEdit->setEnabled(enabled);
-    ui->syncNowButton->setEnabled(enabled);
+    setControlsEnabled(ui->enableGroup->isChecked());
 }
 
-QStringList DevelopingModPage::foldersFromUi() const
+void DevelopingModPage::saveWatchTargets()
 {
-    QStringList folders;
-    for (int i = 0; i < ui->foldersList->count(); ++i) {
-        const auto path = ui->foldersList->item(i)->text().trimmed();
-        if (!path.isEmpty())
-            folders << FS::NormalizePath(path);
-    }
-    folders.removeDuplicates();
-    return folders;
-}
+    QJsonArray folders;
+    for (const auto& folder : pathsOfKind(WatchKind::Folder))
+        folders.append(folder);
+    m_inst->settings()->set("DevelopingModFolders", QString::fromUtf8(QJsonDocument(folders).toJson(QJsonDocument::Compact)));
 
-void DevelopingModPage::saveFolders()
-{
-    QJsonArray array;
-    for (const auto& folder : foldersFromUi())
-        array.append(folder);
-    m_inst->settings()->set("DevelopingModFolders", QString::fromUtf8(QJsonDocument(array).toJson(QJsonDocument::Compact)));
+    QJsonArray jars;
+    for (const auto& jar : pathsOfKind(WatchKind::Jar))
+        jars.append(jar);
+    m_inst->settings()->set("DevelopingModJars", QString::fromUtf8(QJsonDocument(jars).toJson(QJsonDocument::Compact)));
 }
 
 void DevelopingModPage::saveIgnorePatterns()
@@ -123,11 +175,7 @@ void DevelopingModPage::saveIgnorePatterns()
 void DevelopingModPage::enableToggled(bool checked)
 {
     m_inst->settings()->set("DevelopingModEnabled", checked);
-    ui->foldersList->setEnabled(checked);
-    ui->addFolderButton->setEnabled(checked);
-    ui->removeFolderButton->setEnabled(checked);
-    ui->ignoreEdit->setEnabled(checked);
-    ui->syncNowButton->setEnabled(checked);
+    setControlsEnabled(checked);
 }
 
 void DevelopingModPage::addFolder()
@@ -136,25 +184,30 @@ void DevelopingModPage::addFolder()
     if (path.isEmpty())
         return;
 
-    const auto normalized = FS::NormalizePath(path);
-    for (int i = 0; i < ui->foldersList->count(); ++i) {
-        if (FS::NormalizePath(ui->foldersList->item(i)->text()) == normalized)
-            return;
-    }
-
-    ui->foldersList->addItem(normalized);
-    saveFolders();
+    addWatchItem(WatchKind::Folder, path);
+    saveWatchTargets();
 }
 
-void DevelopingModPage::removeSelectedFolder()
+void DevelopingModPage::addJar()
 {
-    const auto items = ui->foldersList->selectedItems();
+    const auto path = QFileDialog::getOpenFileName(this, tr("Select JAR to watch"), QDir::homePath(),
+                                                   tr("JAR files (*.jar);;All files (*)"));
+    if (path.isEmpty())
+        return;
+
+    addWatchItem(WatchKind::Jar, path);
+    saveWatchTargets();
+}
+
+void DevelopingModPage::removeSelected()
+{
+    const auto items = ui->watchList->selectedItems();
     if (items.isEmpty())
         return;
 
     for (auto* item : items)
         delete item;
-    saveFolders();
+    saveWatchTargets();
 }
 
 void DevelopingModPage::syncNowClicked()
@@ -172,7 +225,7 @@ void DevelopingModPage::updateStatusLabel(const QString& status)
 bool DevelopingModPage::apply()
 {
     m_inst->settings()->set("DevelopingModEnabled", ui->enableGroup->isChecked());
-    saveFolders();
+    saveWatchTargets();
     saveIgnorePatterns();
     return true;
 }
@@ -180,4 +233,11 @@ bool DevelopingModPage::apply()
 void DevelopingModPage::retranslate()
 {
     ui->retranslateUi(this);
+    // Refresh list labels for current language.
+    for (int i = 0; i < ui->watchList->count(); ++i) {
+        auto* item = ui->watchList->item(i);
+        const auto kind = static_cast<WatchKind>(item->data(kKindRole).toInt());
+        const auto path = item->data(kPathRole).toString();
+        item->setText(displayText(kind, path));
+    }
 }

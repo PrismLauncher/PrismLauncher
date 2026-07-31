@@ -66,6 +66,7 @@ DevelopingModWatcher::DevelopingModWatcher(MinecraftInstance* instance) : QObjec
     };
     reconnect(settings->getSetting("DevelopingModEnabled"));
     reconnect(settings->getSetting("DevelopingModFolders"));
+    reconnect(settings->getSetting("DevelopingModJars"));
     reconnect(settings->getSetting("DevelopingModIgnorePatterns"));
 
     reloadFromSettings();
@@ -109,11 +110,17 @@ void DevelopingModWatcher::writeStringListSetting(const QString& key, const QStr
     m_instance->settings()->set(key, QString::fromUtf8(QJsonDocument(array).toJson(QJsonDocument::Compact)));
 }
 
+bool DevelopingModWatcher::hasWatchTargets() const
+{
+    return !m_folders.isEmpty() || !m_jars.isEmpty();
+}
+
 void DevelopingModWatcher::reloadFromSettings()
 {
     auto* settings = m_instance->settings();
     m_enabled = settings->get("DevelopingModEnabled").toBool();
     m_folders = readStringListSetting("DevelopingModFolders");
+    m_jars = readStringListSetting("DevelopingModJars");
     m_managedFiles = readStringListSetting("DevelopingModManagedFiles");
 
     const auto ignoreRaw = settings->get("DevelopingModIgnorePatterns").toString().trimmed();
@@ -128,10 +135,16 @@ void DevelopingModWatcher::reloadFromSettings()
 
     updateWatches();
 
-    if (m_enabled && !m_folders.isEmpty()) {
+    if (m_enabled && hasWatchTargets()) {
         m_lastSeenSources = collectSourceSignatures();
         m_poll.start();
-        setStatus(tr("Auto-watching %n folder(s).", "", m_folders.size()));
+        if (!m_folders.isEmpty() && !m_jars.isEmpty()) {
+            setStatus(tr("Auto-watching %1 folder(s) and %2 jar(s).").arg(m_folders.size()).arg(m_jars.size()));
+        } else if (!m_folders.isEmpty()) {
+            setStatus(tr("Auto-watching %n folder(s).", "", m_folders.size()));
+        } else {
+            setStatus(tr("Auto-watching %n jar(s).", "", m_jars.size()));
+        }
         scheduleSync();
     } else {
         m_poll.stop();
@@ -139,7 +152,7 @@ void DevelopingModWatcher::reloadFromSettings()
         if (!m_enabled)
             setStatus(tr("Disabled."));
         else
-            setStatus(tr("Enabled, but no folders are configured."));
+            setStatus(tr("Enabled, but no folders or jars are configured."));
     }
 }
 
@@ -152,6 +165,15 @@ void DevelopingModWatcher::updateWatches()
     if (!m_enabled)
         return;
 
+    auto tryWatch = [this](const QString& path, const char* what) {
+        if (path.isEmpty())
+            return;
+        if (m_watcher.files().contains(path) || m_watcher.directories().contains(path))
+            return;
+        if (!m_watcher.addPath(path))
+            qCWarning(developingModLog) << "Failed to watch developing mod" << what << ":" << path;
+    };
+
     for (const auto& folder : m_folders) {
         QFileInfo info(folder);
         if (!info.exists() || !info.isDir()) {
@@ -159,8 +181,7 @@ void DevelopingModWatcher::updateWatches()
             continue;
         }
         const auto absolute = QDir::cleanPath(info.absoluteFilePath());
-        if (!m_watcher.addPath(absolute))
-            qCWarning(developingModLog) << "Failed to watch developing mod folder:" << absolute;
+        tryWatch(absolute, "folder");
 
         // Also watch individual JARs: some Windows/Gradle rewrite paths only notify file watches.
         QDir dir(absolute);
@@ -168,10 +189,22 @@ void DevelopingModWatcher::updateWatches()
         for (const auto& jar : jars) {
             if (shouldIgnore(jar.fileName()))
                 continue;
-            const auto jarPath = jar.absoluteFilePath();
-            if (!m_watcher.files().contains(jarPath) && !m_watcher.addPath(jarPath))
-                qCDebug(developingModLog) << "Could not watch developing mod JAR:" << jarPath;
+            tryWatch(jar.absoluteFilePath(), "folder jar");
         }
+    }
+
+    for (const auto& jar : m_jars) {
+        QFileInfo info(jar);
+        const auto absolute = QDir::cleanPath(info.absoluteFilePath());
+        if (info.exists() && info.isFile()) {
+            tryWatch(absolute, "jar");
+        } else {
+            qCWarning(developingModLog) << "Developing mod jar does not exist yet:" << jar;
+        }
+        // Watch the parent directory so atomic delete/recreate still notifies us.
+        const auto parent = QDir::cleanPath(info.absolutePath());
+        if (!parent.isEmpty())
+            tryWatch(parent, "jar parent folder");
     }
 }
 
@@ -202,24 +235,39 @@ QStringList DevelopingModWatcher::collectSourceJars() const
     QStringList jars;
     QSet<QString> seenNames;
 
+    auto appendJar = [&](const QFileInfo& entry, bool applyIgnore) {
+        if (!entry.exists() || !entry.isFile())
+            return;
+        if (applyIgnore && shouldIgnore(entry.fileName()))
+            return;
+        if (!entry.fileName().endsWith(QLatin1String(".jar"), Qt::CaseInsensitive))
+            return;
+        if (entry.size() <= 0)
+            return;
+        if (seenNames.contains(entry.fileName())) {
+            qCWarning(developingModLog) << "Duplicate developing mod JAR name, later source wins:" << entry.absoluteFilePath();
+            for (int i = jars.size() - 1; i >= 0; --i) {
+                if (QFileInfo(jars.at(i)).fileName() == entry.fileName())
+                    jars.removeAt(i);
+            }
+        }
+        seenNames.insert(entry.fileName());
+        jars << entry.absoluteFilePath();
+    };
+
     for (const auto& folder : m_folders) {
         QDir dir(folder);
         if (!dir.exists())
             continue;
 
         const auto entries = dir.entryInfoList(QStringList{ QStringLiteral("*.jar") }, QDir::Files | QDir::Readable, QDir::Name);
-        for (const auto& entry : entries) {
-            if (shouldIgnore(entry.fileName()))
-                continue;
-            if (entry.size() <= 0)
-                continue;
-            if (seenNames.contains(entry.fileName())) {
-                qCWarning(developingModLog) << "Duplicate developing mod JAR name, later folder wins:" << entry.absoluteFilePath();
-            }
-            seenNames.insert(entry.fileName());
-            jars << entry.absoluteFilePath();
-        }
+        for (const auto& entry : entries)
+            appendJar(entry, true);
     }
+
+    // Explicitly watched JARs always sync; ignore patterns do not apply to them.
+    for (const auto& jar : m_jars)
+        appendJar(QFileInfo(jar), false);
 
     return jars;
 }
@@ -275,7 +323,7 @@ void DevelopingModWatcher::fileChanged(const QString& path)
 
 void DevelopingModWatcher::pollSources()
 {
-    if (!m_enabled || m_folders.isEmpty())
+    if (!m_enabled || !hasWatchTargets())
         return;
 
     const auto current = collectSourceSignatures();

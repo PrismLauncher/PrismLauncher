@@ -48,18 +48,26 @@ class DevelopingModPage : public QWidget, public BasePage {
     void retranslate() override;
     void openedImpl() override;
 
+   private:
+    enum class WatchKind { Folder = 0, Jar = 1 };
+
    private slots:
     void enableToggled(bool checked);
     void addFolder();
-    void removeSelectedFolder();
+    void addJar();
+    void removeSelected();
     void syncNowClicked();
     void updateStatusLabel(const QString& status);
 
    private:
     void loadFromSettings();
-    void saveFolders();
+    void setControlsEnabled(bool enabled);
+    void saveWatchTargets();
     void saveIgnorePatterns();
-    QStringList foldersFromUi() const;
+    void addWatchItem(WatchKind kind, const QString& path);
+    bool containsPath(const QString& path) const;
+    QStringList pathsOfKind(WatchKind kind) const;
+    static QString displayText(WatchKind kind, const QString& path);
 
     Ui::DevelopingModPage* ui;
     MinecraftInstance* m_inst;

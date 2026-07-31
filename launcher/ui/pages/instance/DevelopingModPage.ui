@@ -41,26 +41,32 @@
          <bool>true</bool>
         </property>
         <property name="text">
-         <string>Watch one or more build output folders (for example Gradle build/libs). Matching JAR files are copied into this instance's mods folder automatically whenever they change, so you do not need to remove and re-add the mod manually.</string>
+         <string>Add folders, jars, or both. Watched artifacts are copied into this instance's mods folder automatically whenever they change, so you do not need to remove and re-add the mod manually.</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="foldersLabel">
+       <widget class="QLabel" name="watchLabel">
         <property name="text">
-         <string>Watched folders:</string>
+         <string>Watched paths (folders and/or jars):</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QListWidget" name="foldersList">
+       <widget class="QListWidget" name="watchList">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>160</height>
+         </size>
+        </property>
         <property name="selectionMode">
-         <enum>QAbstractItemView::SingleSelection</enum>
+         <enum>QAbstractItemView::ExtendedSelection</enum>
         </property>
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="folderButtonsLayout">
+       <layout class="QHBoxLayout" name="watchButtonsLayout">
         <item>
          <widget class="QPushButton" name="addFolderButton">
           <property name="text">
@@ -69,14 +75,21 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="removeFolderButton">
+         <widget class="QPushButton" name="addJarButton">
+          <property name="text">
+           <string>Add Jar...</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="removeButton">
           <property name="text">
            <string>Remove</string>
           </property>
          </widget>
         </item>
         <item>
-         <spacer name="folderButtonsSpacer">
+         <spacer name="watchButtonsSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -100,7 +113,7 @@
       <item>
        <widget class="QLabel" name="ignoreLabel">
         <property name="text">
-         <string>Ignore patterns (one wildcard per line, matched against file names):</string>
+         <string>Ignore patterns (one wildcard per line, applied to watched folders only; watched jars are always synced):</string>
         </property>
        </widget>
       </item>

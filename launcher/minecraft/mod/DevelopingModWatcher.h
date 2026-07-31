@@ -28,8 +28,9 @@
 class MinecraftInstance;
 
 /**
- * Watches Gradle/Java build output folders and copies matching JAR files into
- * the instance mods folder, replacing previous developing-mod copies.
+ * Watches Gradle/Java build output folders and specific JAR files, copying
+ * matching artifacts into the instance mods folder and replacing previous
+ * developing-mod copies.
  *
  * Uses QFileSystemWatcher plus a polling timer so Windows/Gradle atomic
  * rewrites (same filename/version) are still picked up automatically.
@@ -69,6 +70,7 @@ class DevelopingModWatcher : public QObject {
     void setStatus(const QString& status);
     void scheduleSync();
     void updateWatches();
+    bool hasWatchTargets() const;
     bool shouldIgnore(const QString& fileName) const;
     QStringList collectSourceJars() const;
     QHash<QString, SourceSignature> collectSourceSignatures() const;
@@ -85,6 +87,7 @@ class DevelopingModWatcher : public QObject {
     QTimer m_poll;
     bool m_enabled = false;
     QStringList m_folders;
+    QStringList m_jars;
     QStringList m_ignorePatterns;
     QStringList m_managedFiles;
     QHash<QString, SourceSignature> m_lastSyncedSources;  // dest file name -> last copied source signature
