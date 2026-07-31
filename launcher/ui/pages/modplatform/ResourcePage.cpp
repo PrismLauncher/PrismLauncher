@@ -57,8 +57,17 @@
 
 namespace ResourceDownload {
 
-ResourcePage::ResourcePage(ResourceDownloadDialog* parent, BaseInstance& baseInstance)
-    : QWidget(parent), m_baseInstance(baseInstance), m_ui(new Ui::ResourcePage), m_parentDialog(parent), m_fetchProgress(this, false)
+ResourcePage::ResourcePage(ResourceDownloadDialog* parent,
+                           BaseInstance& baseInstance,
+                           ResourceDescriptor desc,
+                           ResourceProviderData provider)
+    : QWidget(parent)
+    , m_baseInstance(baseInstance)
+    , m_ui(new Ui::ResourcePage)
+    , m_parentDialog(parent)
+    , m_fetchProgress(this, false)
+    , m_desc(std::move(desc))
+    , m_provider(std::move(provider))
 {
     m_ui->setupUi(this);
 
@@ -401,7 +410,7 @@ void ResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
                                      QString downloadReason,
                                      QString dependentOn)
 {
-    bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+    bool isIndexed = m_desc.isIndexed && !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
     m_model->addPack(std::move(pack), ver, baseModel, isIndexed, std::move(downloadReason), std::move(dependentOn));
 }
 
@@ -489,8 +498,17 @@ void ResourcePage::onResourceToggle(const QModelIndex& index)
     }
 }
 
-void ResourcePage::openUrl(const QUrl& url)
+void ResourcePage::openUrl(QUrl url)
 {
+    if (url.scheme().isEmpty()) {
+        QString query = url.query(QUrl::FullyDecoded);
+
+        if (query.startsWith("remoteUrl=")) {
+            // attempt to resolve url from warning page
+            query.remove(0, 10);
+            url = QUrl::fromPercentEncoding(query.toUtf8());  // double decoding is necessary
+        }
+    }
     // do not allow other url schemes for security reasons
     if (!(url.scheme() == "http" || url.scheme() == "https")) {
         qWarning() << "Unsupported scheme" << url.scheme();

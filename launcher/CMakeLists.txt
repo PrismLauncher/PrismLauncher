@@ -978,8 +978,10 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/ResourcePackModel.cpp
 
     # Needed for MOC to find them without a corresponding .cpp
+    ui/pages/modplatform/TexturePackPage.cpp
     ui/pages/modplatform/TexturePackPage.h
     ui/pages/modplatform/TexturePackModel.cpp
+    ui/pages/modplatform/TexturePackModel.h
 
     ui/pages/modplatform/ShaderPackPage.cpp
     ui/pages/modplatform/ShaderPackModel.cpp

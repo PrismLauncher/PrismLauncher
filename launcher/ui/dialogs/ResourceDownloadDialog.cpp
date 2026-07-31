@@ -29,9 +29,6 @@
 
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
-#include "minecraft/mod/ResourcePackFolderModel.h"
-#include "minecraft/mod/ShaderPackFolderModel.h"
-#include "minecraft/mod/TexturePackFolderModel.h"
 
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
@@ -50,12 +47,20 @@
 
 namespace ResourceDownload {
 
-ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, ResourceFolderModel* baseModel, bool suppressInitialSearch)
+ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent,
+                                               ResourceFolderModel* baseModel,
+                                               BaseInstance* instance,
+                                               QString resourcesString,
+                                               QString geometrySaveKey,
+                                               bool suppressInitialSearch)
     : QDialog(parent)
     , m_base_model(baseModel)
     , m_buttons(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel)
     , m_vertical_layout(this)
     , m_suppressInitialSearch(suppressInitialSearch)
+    , m_instance(instance)
+    , m_resourcesString(std::move(resourcesString))
+    , m_geometrySaveKey(std::move(geometrySaveKey))
 {
     setObjectName(QStringLiteral("ResourceDownloadDialog"));
 
@@ -85,6 +90,8 @@ ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, ResourceFolderMo
     helpButton->setAutoDefault(false);
 
     setWindowModality(Qt::WindowModal);
+
+    setWindowTitle(dialogTitle());
 }
 
 void ResourceDownloadDialog::accept()
@@ -289,147 +296,6 @@ void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* s
     result->setSearchTerm(prevPage->getSearchTerm());
 }
 
-ModDownloadDialog::ModDownloadDialog(QWidget* parent, ModFolderModel* mods, BaseInstance* instance, bool suppressInitialSearch)
-    : ResourceDownloadDialog(parent, mods, suppressInitialSearch), m_instance(instance)
-{
-    setWindowTitle(dialogTitle());
-
-    initializeContainer();
-    connectButtons();
-
-    if (!geometrySaveKey().isEmpty()) {
-        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toString().toUtf8()));
-    }
-}
-
-QList<BasePage*> ModDownloadDialog::getPages()
-{
-    QList<BasePage*> pages;
-
-    auto loaders = static_cast<MinecraftInstance*>(m_instance)->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
-
-    if (ModrinthAPI::validateModLoaders(loaders)) {
-        auto* page = ModrinthModPage::create(this, *m_instance);
-        page->setSuppressInitialSearch(m_suppressInitialSearch);
-        pages.append(page);
-    }
-    if (APPLICATION->capabilities() & Application::SupportsFlame && FlameAPI::validateModLoaders(loaders)) {
-        auto* page = FlameModPage::create(this, *m_instance);
-        page->setSuppressInitialSearch(m_suppressInitialSearch);
-        pages.append(page);
-    }
-
-    return pages;
-}
-
-GetModDependenciesTask::Ptr ModDownloadDialog::getModDependenciesTask()
-{
-    if (!APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
-        if (auto* model = dynamic_cast<ModFolderModel*>(getBaseModel()); model) {
-            QList<std::shared_ptr<GetModDependenciesTask::PackDependency>> selectedVers;
-            for (const auto& selected : getTasks()) {
-                selectedVers.append(std::make_shared<GetModDependenciesTask::PackDependency>(selected->getPack(), selected->getVersion()));
-            }
-
-            return makeShared<GetModDependenciesTask>(m_instance, model, selectedVers);
-        }
-    }
-    return nullptr;
-}
-
-ResourcePackDownloadDialog::ResourcePackDownloadDialog(QWidget* parent,
-                                                       ResourcePackFolderModel* resourcePacks,
-                                                       BaseInstance* instance,
-                                                       bool suppressInitialSearch)
-    : ResourceDownloadDialog(parent, resourcePacks, suppressInitialSearch), m_instance(instance)
-{
-    setWindowTitle(dialogTitle());
-
-    initializeContainer();
-    connectButtons();
-
-    if (!geometrySaveKey().isEmpty()) {
-        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toString().toUtf8()));
-    }
-}
-
-QList<BasePage*> ResourcePackDownloadDialog::getPages()
-{
-    QList<BasePage*> pages;
-
-    auto* modrinthPage = ModrinthResourcePackPage::create(this, *m_instance);
-    modrinthPage->setSuppressInitialSearch(m_suppressInitialSearch);
-    pages.append(modrinthPage);
-    if (APPLICATION->capabilities() & Application::SupportsFlame) {
-        auto* flamePage = FlameResourcePackPage::create(this, *m_instance);
-        flamePage->setSuppressInitialSearch(m_suppressInitialSearch);
-        pages.append(flamePage);
-    }
-
-    return pages;
-}
-
-TexturePackDownloadDialog::TexturePackDownloadDialog(QWidget* parent,
-                                                     TexturePackFolderModel* resourcePacks,
-                                                     BaseInstance* instance,
-                                                     bool suppressInitialSearch)
-    : ResourceDownloadDialog(parent, resourcePacks, suppressInitialSearch), m_instance(instance)
-{
-    setWindowTitle(dialogTitle());
-
-    initializeContainer();
-    connectButtons();
-
-    if (!geometrySaveKey().isEmpty()) {
-        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toString().toUtf8()));
-    }
-}
-
-QList<BasePage*> TexturePackDownloadDialog::getPages()
-{
-    QList<BasePage*> pages;
-
-    auto* modrinthPage = ModrinthTexturePackPage::create(this, *m_instance);
-    modrinthPage->setSuppressInitialSearch(m_suppressInitialSearch);
-    pages.append(modrinthPage);
-    if (APPLICATION->capabilities() & Application::SupportsFlame) {
-        auto* flamePage = FlameTexturePackPage::create(this, *m_instance);
-        flamePage->setSuppressInitialSearch(m_suppressInitialSearch);
-        pages.append(flamePage);
-    }
-
-    return pages;
-}
-
-ShaderPackDownloadDialog::ShaderPackDownloadDialog(QWidget* parent,
-                                                   ShaderPackFolderModel* shaders,
-                                                   BaseInstance* instance,
-                                                   bool suppressInitialSearch)
-    : ResourceDownloadDialog(parent, shaders, suppressInitialSearch), m_instance(instance)
-{
-    setWindowTitle(dialogTitle());
-
-    initializeContainer();
-    connectButtons();
-
-    if (!geometrySaveKey().isEmpty()) {
-        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toString().toUtf8()));
-    }
-}
-
-QList<BasePage*> ShaderPackDownloadDialog::getPages()
-{
-    QList<BasePage*> pages;
-    auto* modrinthPage = ModrinthShaderPackPage::create(this, *m_instance);
-    modrinthPage->setSuppressInitialSearch(m_suppressInitialSearch);
-    pages.append(modrinthPage);
-    if (APPLICATION->capabilities() & Application::SupportsFlame) {
-        auto* flamePage = FlameShaderPackPage::create(this, *m_instance);
-        flamePage->setSuppressInitialSearch(m_suppressInitialSearch);
-        pages.append(flamePage);
-    }
-    return pages;
-}
 
 void ResourceDownloadDialog::setResourceMetadata(const std::shared_ptr<Metadata::ModStruct>& meta)
 {
@@ -449,34 +315,138 @@ void ResourceDownloadDialog::setResourceMetadata(const std::shared_ptr<Metadata:
     page->openProject(meta->project_id);
 }
 
-DataPackDownloadDialog::DataPackDownloadDialog(QWidget* parent,
-                                               DataPackFolderModel* dataPacks,
-                                               BaseInstance* instance,
-                                               bool suppressInitialSearch)
-    : ResourceDownloadDialog(parent, dataPacks, suppressInitialSearch), m_instance(instance)
+GetModDependenciesTask::Ptr ResourceDownloadDialog::getModDependenciesTask()
 {
-    setWindowTitle(dialogTitle());
+    if (!APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
+        if (auto* model = dynamic_cast<ModFolderModel*>(getBaseModel()); model) {
+            QList<std::shared_ptr<GetModDependenciesTask::PackDependency>> selectedVers;
+            for (auto& selected : getTasks()) {
+                selectedVers.append(std::make_shared<GetModDependenciesTask::PackDependency>(selected->getPack(), selected->getVersion()));
+            }
+
+            return makeShared<GetModDependenciesTask>(m_instance, model, selectedVers);
+        }
+    }
+    return nullptr;
+}
+
+ResourceDownloadDialog* ResourceDownloadDialog::createMod(QWidget* parent,
+                                                          ResourceFolderModel* mods,
+                                                          BaseInstance* instance,
+                                                          bool suppressInitialSearch)
+{
+    auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("mods"), "ModDownloadGeometry", suppressInitialSearch);
+    QList<BasePage*> pages;
+
+    auto loaders = static_cast<MinecraftInstance*>(instance)->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
+
+    if (ModrinthAPI::validateModLoaders(loaders)) {
+        auto* page = Modrinth::createModPage(dialog, *instance);
+        page->setSuppressInitialSearch(suppressInitialSearch);
+        pages.append(page);
+    }
+    if (APPLICATION->capabilities() & Application::SupportsFlame && FlameAPI::validateModLoaders(loaders)) {
+        auto* flamePage = Flame::createModPage(dialog, *instance);
+        flamePage->setSuppressInitialSearch(suppressInitialSearch);
+        pages.append(flamePage);
+    }
+    dialog->initPages(pages);
+    return dialog;
+}
+
+ResourceDownloadDialog* ResourceDownloadDialog::createResourcePack(QWidget* parent,
+                                                                   ResourceFolderModel* mods,
+                                                                   BaseInstance* instance,
+                                                                   bool suppressInitialSearch)
+{
+    auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("resource packs"), "RPDownloadGeometry", suppressInitialSearch);
+    QList<BasePage*> pages;
+
+    auto* page = Modrinth::createResourcePackResourcePage(dialog, *instance);
+    page->setSuppressInitialSearch(suppressInitialSearch);
+    pages.append(page);
+    if (APPLICATION->capabilities() & Application::SupportsFlame) {
+        auto* flamePage = Flame::createResourcePackResourcePage(dialog, *instance);
+        flamePage->setSuppressInitialSearch(suppressInitialSearch);
+        pages.append(flamePage);
+    }
+    dialog->initPages(pages);
+
+    return dialog;
+}
+
+ResourceDownloadDialog* ResourceDownloadDialog::createTexturePack(QWidget* parent,
+                                                                  ResourceFolderModel* mods,
+                                                                  BaseInstance* instance,
+                                                                  bool suppressInitialSearch)
+{
+    auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("texture packs"), "TPDownloadGeometry", suppressInitialSearch);
+    QList<BasePage*> pages;
+
+    auto* page = Modrinth::createTexturePackResourcePage(dialog, *instance);
+    page->setSuppressInitialSearch(suppressInitialSearch);
+    pages.append(page);
+    if (APPLICATION->capabilities() & Application::SupportsFlame) {
+        auto* flamePage = Flame::createTexturePackResourcePage(dialog, *instance);
+        flamePage->setSuppressInitialSearch(suppressInitialSearch);
+        pages.append(flamePage);
+    }
+    dialog->initPages(pages);
+
+    return dialog;
+}
+
+ResourceDownloadDialog* ResourceDownloadDialog::createShaderPack(QWidget* parent,
+                                                                 ResourceFolderModel* mods,
+                                                                 BaseInstance* instance,
+                                                                 bool suppressInitialSearch)
+{
+    auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("shader packs"), "ShaderDownloadGeometry", suppressInitialSearch);
+    QList<BasePage*> pages;
+
+    auto* page = Modrinth::createShaderPackResourcePage(dialog, *instance);
+    page->setSuppressInitialSearch(suppressInitialSearch);
+    pages.append(page);
+    if (APPLICATION->capabilities() & Application::SupportsFlame) {
+        auto* flamePage = Flame::createShaderPackResourcePage(dialog, *instance);
+        flamePage->setSuppressInitialSearch(suppressInitialSearch);
+        pages.append(flamePage);
+    }
+    dialog->initPages(pages);
+
+    return dialog;
+}
+
+ResourceDownloadDialog* ResourceDownloadDialog::createDataPack(QWidget* parent,
+                                                               ResourceFolderModel* mods,
+                                                               BaseInstance* instance,
+                                                               bool suppressInitialSearch)
+{
+    auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("data packs"), "DataPackDownloadGeometry", suppressInitialSearch);
+    QList<BasePage*> pages;
+
+    auto* page = Modrinth::createDataPackResourcePage(dialog, *instance);
+    page->setSuppressInitialSearch(suppressInitialSearch);
+    pages.append(page);
+    if (APPLICATION->capabilities() & Application::SupportsFlame) {
+        auto* flamePage = Flame::createDataPackResourcePage(dialog, *instance);
+        flamePage->setSuppressInitialSearch(suppressInitialSearch);
+        pages.append(flamePage);
+    }
+    dialog->initPages(pages);
+
+    return dialog;
+}
+
+void ResourceDownloadDialog::initPages(QList<BasePage*> pages)
+{
+    m_pages = std::move(pages);
 
     initializeContainer();
     connectButtons();
 
     if (!geometrySaveKey().isEmpty()) {
-        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toByteArray()));
+        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toString().toUtf8()));
     }
 }
-
-QList<BasePage*> DataPackDownloadDialog::getPages()
-{
-    QList<BasePage*> pages;
-    auto* modrinthPage = ModrinthDataPackPage::create(this, *m_instance);
-    modrinthPage->setSuppressInitialSearch(m_suppressInitialSearch);
-    pages.append(modrinthPage);
-    if (APPLICATION->capabilities() & Application::SupportsFlame) {
-        auto* flamePage = FlameDataPackPage::create(this, *m_instance);
-        flamePage->setSuppressInitialSearch(m_suppressInitialSearch);
-        pages.append(flamePage);
-    }
-    return pages;
-}
-
 }  // namespace ResourceDownload

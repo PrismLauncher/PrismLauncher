@@ -44,7 +44,7 @@ class DataPackPage : public ExternalResourcesPage {
 
    private:
     DataPackFolderModel* m_model;
-    QPointer<ResourceDownload::DataPackDownloadDialog> m_downloadDialog;
+    QPointer<ResourceDownload::ResourceDownloadDialog> m_downloadDialog;
 };
 
 /**

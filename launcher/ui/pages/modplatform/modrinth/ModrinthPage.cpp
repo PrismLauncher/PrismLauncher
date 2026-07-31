@@ -43,28 +43,28 @@
 
 #include "ModrinthModel.h"
 
-#include "BuildConfig.h"
 #include "InstanceImportTask.h"
-#include "Json.h"
 #include "Markdown.h"
 #include "StringUtils.h"
 
 #include "ui/widgets/ProjectItem.h"
-
-#include "net/ApiDownload.h"
 
 #include <QComboBox>
 #include <QKeyEvent>
 #include <QPushButton>
 
 ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
-    : QWidget(parent), m_ui(new Ui::ModrinthPage), m_dialog(dialog), m_fetch_progress(this, false)
+    : QWidget(parent)
+    , m_ui(new Ui::ModrinthPage)
+    , m_dialog(dialog)
+    , m_model(new Modrinth::ModpackListModel(this))
+    , m_fetch_progress(this, false)
 {
     m_ui->setupUi(this);
     createFilterWidget();
 
     m_ui->searchEdit->installEventFilter(this);
-    m_model = new Modrinth::ModpackListModel(this);
+
     m_ui->packView->setModel(m_model);
 
     m_ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -116,17 +116,17 @@ void ModrinthPage::openedImpl()
 bool ModrinthPage::eventFilter(QObject* watched, QEvent* event)
 {
     if (watched == m_ui->searchEdit && event->type() == QEvent::KeyPress) {
-        auto* keyEvent = reinterpret_cast<QKeyEvent*>(event);
+        auto* keyEvent = static_cast<QKeyEvent*>(event);
         if (keyEvent->key() == Qt::Key_Return) {
             this->triggerSearch();
             keyEvent->accept();
             return true;
-        } else {
-            if (m_search_timer.isActive())
-                m_search_timer.stop();
-
-            m_search_timer.start(350);
         }
+        if (m_search_timer.isActive()) {
+            m_search_timer.stop();
+        }
+
+        m_search_timer.start(350);
     }
     return QObject::eventFilter(watched, event);
 }
@@ -150,7 +150,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
         ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks;
 
         auto id = m_current->addonId;
-        callbacks.on_fail = [this](QString reason, int) {
+        callbacks.on_fail = [this](const QString& reason, int) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
         };
         callbacks.on_succeed = [this, id, curr](auto& pack) {
@@ -161,8 +161,9 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             QVariant current_updated;
             current_updated.setValue(pack);
 
-            if (!m_model->setData(curr, current_updated, Qt::UserRole))
+            if (!m_model->setData(curr, current_updated, Qt::UserRole)) {
                 qWarning() << "Failed to cache extra info for the current pack!";
+            }
 
             suggestCurrent();
             updateUI();
@@ -172,8 +173,9 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             m_job->start();
         }
 
-    } else
+    } else {
         updateUI();
+    }
 
     if (!m_current->versionsLoaded || m_filterWidget->changed()) {
         qDebug() << "Loading modrinth modpack versions";
@@ -190,8 +192,9 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             m_current->versions = doc;
             m_current->versionsLoaded = true;
             auto pred = [this](const ModPlatform::IndexedVersion& v) {
-                if (auto filter = m_filterWidget->getFilter())
+                if (auto filter = m_filterWidget->getFilter()) {
                     return !filter->checkModpackFilters(v);
+                }
                 return false;
             };
 #if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
@@ -210,12 +213,13 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             QVariant current_updated;
             current_updated.setValue(m_current);
 
-            if (!m_model->setData(curr, current_updated, Qt::UserRole))
+            if (!m_model->setData(curr, current_updated, Qt::UserRole)) {
                 qWarning() << "Failed to cache versions for the current pack!";
+            }
 
             suggestCurrent();
         };
-        callbacks.on_fail = [this](QString reason, int) {
+        callbacks.on_fail = [this](const QString& reason, int) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
         };
 
@@ -225,12 +229,13 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
         m_job2->start();
 
     } else {
-        for (auto version : m_current->versions) {
-            if (!version.version.contains(version.version))
+        for (const auto& version : m_current->versions) {
+            if (!version.version.contains(version.version)) {
                 m_ui->versionSelectionBox->addItem(QString("%1 - %2").arg(version.version, version.version_number),
                                                    QVariant(version.fileId));
-            else
+            } else {
                 m_ui->versionSelectionBox->addItem(version.version, QVariant(version.fileId));
+            }
         }
 
         suggestCurrent();
@@ -283,14 +288,18 @@ void ModrinthPage::updateUI()
             text += "<br><br>" + tr("External links:") + "<br>";
         }
 
-        if (!m_current->extraData.issuesUrl.isEmpty())
+        if (!m_current->extraData.issuesUrl.isEmpty()) {
             text += "- " + tr("Issues: <a href=%1>%1</a>").arg(m_current->extraData.issuesUrl) + "<br>";
-        if (!m_current->extraData.wikiUrl.isEmpty())
+        }
+        if (!m_current->extraData.wikiUrl.isEmpty()) {
             text += "- " + tr("Wiki: <a href=%1>%1</a>").arg(m_current->extraData.wikiUrl) + "<br>";
-        if (!m_current->extraData.sourceUrl.isEmpty())
+        }
+        if (!m_current->extraData.sourceUrl.isEmpty()) {
             text += "- " + tr("Source code: <a href=%1>%1</a>").arg(m_current->extraData.sourceUrl) + "<br>";
-        if (!m_current->extraData.discordUrl.isEmpty())
+        }
+        if (!m_current->extraData.discordUrl.isEmpty()) {
             text += "- " + tr("Discord: <a href=%1>%1</a>").arg(m_current->extraData.discordUrl) + "<br>";
+        }
     }
 
     text += "<hr>";
@@ -321,7 +330,7 @@ void ModrinthPage::suggestCurrent()
             m_dialog->setSuggestedPack(m_current->name, ver.version, new InstanceImportTask(ver.downloadUrl, this, std::move(extra_info)));
             QString editedLogoName = "modrinth_" + m_current->logoName;
             m_model->getLogo(m_current->logoName, m_current->logoUrl,
-                             [this, editedLogoName](QString logo) { m_dialog->setSuggestedIconFromFile(logo, editedLogoName); });
+                             [this, editedLogoName](const QString& logo) { m_dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 
             break;
         }
@@ -361,18 +370,18 @@ QString ModrinthPage::getSerachTerm() const
 
 void ModrinthPage::createFilterWidget()
 {
-    auto widget = ModFilterWidget::create(nullptr, true);
-    m_filterWidget.swap(widget);
-    auto old = m_ui->splitter->replaceWidget(0, m_filterWidget.get());
+    auto* widget = ModFilterWidget::create(nullptr, true);
+    m_filterWidget.reset(widget);
+    auto* old = m_ui->splitter->replaceWidget(0, m_filterWidget.get());
     // because we replaced the widget we also need to delete it
     if (old) {
-        delete old;
+        old->deleteLater();
     }
 
     connect(m_ui->filterButton, &QPushButton::clicked, this, [this] { m_filterWidget->setHidden(!m_filterWidget->isHidden()); });
 
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &ModrinthPage::triggerSearch);
-    auto [categoriesTask, response] = ModrinthAPI::getModCategories();
+    auto [categoriesTask, response] = ModrinthAPI().getModCategories();
     m_categoriesTask = categoriesTask;
     connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
         auto categories = ModrinthAPI::loadCategories(*response, "modpack");

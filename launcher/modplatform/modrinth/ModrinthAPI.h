@@ -30,9 +30,9 @@ class ModrinthAPI : public ResourceAPI {
 
     std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
 
-    static std::pair<Task::Ptr, QByteArray*> getModCategories();
+    std::pair<Task::Ptr, QByteArray*> getModCategories() override;
     static QList<ModPlatform::Category> loadCategories(const QByteArray& response, const QString& projectType);
-    static QList<ModPlatform::Category> loadModCategories(const QByteArray& response);
+    QList<ModPlatform::Category> loadModCategories(const QByteArray& response) override;
 
    public:
     auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
@@ -180,7 +180,7 @@ class ModrinthAPI : public ResourceAPI {
         return BuildConfig.MODRINTH_PROD_URL + "/project/" + id;
     };
 
-    auto getMultipleModInfoURL(const QStringList& ids) const -> QString
+    static auto getMultipleModInfoURL(const QStringList& ids) -> QString
     {
         return BuildConfig.MODRINTH_PROD_URL + QString("/projects?ids=[\"%1\"]").arg(ids.join("\",\""));
     };
