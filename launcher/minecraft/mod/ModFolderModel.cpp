@@ -442,6 +442,7 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
         QString message;
         QString noButton;
         QString yesButton;
+        QString details;
         if (requiredToEnable.size() > 0 && requiredToDisable.size() > 0) {
             title = tr("Confirm toggle");
             message = tr("Toggling these mod(s) will cause changes to other mods.\n") +
@@ -459,12 +460,12 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
         } else {
             QString affectedModsNames = "";
             for (auto* mod : requiredToDisable) {
-                affectedModsNames += "\n- " + mod->name() + " (" + mod->mod_id() + ")";
+                affectedModsNames += "\n- " + mod->name() + " (" + mod->internalId() + ")";
             }
+            details = tr("The following mods depend the mod(s) you want to disable:") + affectedModsNames;
             title = tr("Confirm disable");
             message = tr("The disabled mod(s) are required by %n mod(s).\n", "", requiredToDisable.size()) +
-                      tr("Would you like to disable them as well?\nIgnoring them may break the game.") +
-                      tr("\n\nThe following mods depend the mod(s) you want to disable:") + affectedModsNames;
+                      tr("Would you like to disable them as well?\nIgnoring them may break the game.");
             noButton = tr("Only Disable Selected");
             yesButton = tr("Disable Required");
         }
@@ -473,6 +474,11 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
                                                  QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::No);
         box->button(QMessageBox::No)->setText(noButton);
         box->button(QMessageBox::Yes)->setText(yesButton);
+
+        if (details != nullptr) {
+            box->setDetailedText(details);
+        }
+
         auto response = box->exec();
 
         if (response == QMessageBox::Yes) {

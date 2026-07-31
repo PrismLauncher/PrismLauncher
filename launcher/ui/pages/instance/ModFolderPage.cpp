@@ -142,13 +142,19 @@ void ModFolderPage::removeItems(const QItemSelection& selection)
     auto indexes = selection.indexes();
     auto affected = m_model->getAffectedMods(indexes, EnableAction::DISABLE);
     if (!affected.isEmpty()) {
-        auto response = CustomMessageBox::selectable(this, tr("Confirm Disable"),
-                                                     tr("The mods you are trying to delete are required by %1 mods.\n"
-                                                        "Do you want to disable them?")
-                                                         .arg(affected.length()),
-                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
-                                                     QMessageBox::Cancel)
-                            ->exec();
+        auto box = CustomMessageBox::selectable(this, tr("Confirm Disable"),
+                                                tr("The mods you are trying to delete are required by %1 mods.\n"
+                                                   "Do you want to disable them?")
+                                                    .arg(affected.length()),
+                                                QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
+                                                QMessageBox::Cancel);
+        QString details = tr("The following mods depend the mod(s) you want to remove:");
+        for (auto indx : affected) {
+            const Mod& mod = m_model->at(indx.row());
+            details += "\n- " + mod.name() + " (" + mod.internalId() + ")";
+        }
+        box->setDetailedText(details);
+        auto response = box->exec();
 
         if (response == QMessageBox::Cancel) {
             return;
@@ -437,8 +443,7 @@ inline bool ModFolderPage::handleNoModLoader()
             return true;
         }
         if (!profile->getModLoaders().has_value()) {
-            CustomMessageBox::selectable(
-                this, tr("Error"), tr("No mod loader was installed. Please try again."), QMessageBox::Warning)
+            CustomMessageBox::selectable(this, tr("Error"), tr("No mod loader was installed. Please try again."), QMessageBox::Warning)
                 ->show();
             return true;
         }
