@@ -48,6 +48,7 @@ class ResourceFolderModel;
 class ResourcePackFolderModel;
 class ShaderPackFolderModel;
 class TexturePackFolderModel;
+class DevelopingModWatcher;
 class WorldList;
 class LaunchStep;
 class LaunchProfile;
@@ -122,6 +123,9 @@ class MinecraftInstance : public BaseInstance {
     QList<ResourceFolderModel*> resourceLists();
     WorldList* worldList();
 
+    /** Watches build output folders and syncs JARs into mods/. */
+    DevelopingModWatcher* developingModWatcher();
+
     //////  Launch stuff //////
     QList<Task::Ptr> createUpdateTask() override;
     LaunchTask* createLaunchTask(AuthSessionPtr account, MinecraftTarget::Ptr targetToJoin) override;
@@ -171,4 +175,5 @@ class MinecraftInstance : public BaseInstance {
     std::unique_ptr<TexturePackFolderModel> m_texture_pack_list;
     std::unique_ptr<DataPackFolderModel> m_data_pack_list;
     std::unique_ptr<WorldList> m_world_list;
+    std::unique_ptr<DevelopingModWatcher> m_developing_mod_watcher;
 };

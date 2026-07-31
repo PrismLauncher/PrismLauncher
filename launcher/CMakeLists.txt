@@ -331,6 +331,8 @@ set(MINECRAFT_SOURCES
     minecraft/mod/ModDetails.h
     minecraft/mod/ModFolderModel.h
     minecraft/mod/ModFolderModel.cpp
+    minecraft/mod/DevelopingModWatcher.h
+    minecraft/mod/DevelopingModWatcher.cpp
     minecraft/mod/Resource.h
     minecraft/mod/Resource.cpp
     minecraft/mod/ResourceFolderModel.h
@@ -922,6 +924,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/instance/ShaderPackPage.cpp
     ui/pages/instance/ModFolderPage.cpp
     ui/pages/instance/ModFolderPage.h
+    ui/pages/instance/DevelopingModPage.cpp
+    ui/pages/instance/DevelopingModPage.h
     ui/pages/instance/NotesPage.cpp
     ui/pages/instance/NotesPage.h
     ui/pages/instance/LogPage.cpp

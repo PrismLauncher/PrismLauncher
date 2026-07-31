@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DevelopingModPage</class>
+ <widget class="QWidget" name="DevelopingModPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>720</width>
+    <height>560</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QGroupBox" name="enableGroup">
+     <property name="title">
+      <string>Enable Developing Mod</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <layout class="QVBoxLayout" name="enableLayout">
+      <item>
+       <widget class="QLabel" name="descriptionLabel">
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Watch one or more build output folders (for example Gradle build/libs). Matching JAR files are copied into this instance's mods folder automatically whenever they change, so you do not need to remove and re-add the mod manually.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="foldersLabel">
+        <property name="text">
+         <string>Watched folders:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QListWidget" name="foldersList">
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SingleSelection</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="folderButtonsLayout">
+        <item>
+         <widget class="QPushButton" name="addFolderButton">
+          <property name="text">
+           <string>Add Folder...</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="removeFolderButton">
+          <property name="text">
+           <string>Remove</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="folderButtonsSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="syncNowButton">
+          <property name="text">
+           <string>Sync Now</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QLabel" name="ignoreLabel">
+        <property name="text">
+         <string>Ignore patterns (one wildcard per line, matched against file names):</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPlainTextEdit" name="ignoreEdit">
+        <property name="maximumHeight">
+         <number>110</number>
+        </property>
+        <property name="placeholderText">
+         <string>*-sources.jar
+*-javadoc.jar
+*-dev.jar
+*-api.jar
+*-thin.jar</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="statusLabel">
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Status: —</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

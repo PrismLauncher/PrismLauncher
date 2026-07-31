@@ -79,6 +79,7 @@
 #include "icons/IconList.h"
 
 #include "mod/ModFolderModel.h"
+#include "mod/DevelopingModWatcher.h"
 #include "mod/ResourcePackFolderModel.h"
 #include "mod/ShaderPackFolderModel.h"
 #include "mod/TexturePackFolderModel.h"
@@ -267,11 +268,21 @@ void MinecraftInstance::loadSpecificSettings()
     m_settings->registerSetting("OverrideModDownloadLoaders", false);
     m_settings->registerSetting("ModDownloadLoaders", "[]");
 
+    // Developing Mod — watch build output folders and sync JARs into mods/
+    m_settings->registerSetting("DevelopingModEnabled", false);
+    m_settings->registerSetting("DevelopingModFolders", "[]");
+    m_settings->registerSetting("DevelopingModIgnorePatterns",
+                                "*-sources.jar\n*-javadoc.jar\n*-dev.jar\n*-api.jar\n*-thin.jar");
+    m_settings->registerSetting("DevelopingModManagedFiles", "[]");
+
     qDebug() << "Instance-type specific settings were loaded!";
 
     setSpecificSettingsLoaded(true);
 
     updateRuntimeContext();
+
+    // Start watching after settings are available (no-op when disabled).
+    developingModWatcher();
 }
 
 void MinecraftInstance::updateRuntimeContext()
@@ -1260,6 +1271,13 @@ ModFolderModel* MinecraftInstance::loaderModList()
         m_loader_mod_list.reset(new ModFolderModel(modsRoot(), this, is_indexed, true));
     }
     return m_loader_mod_list.get();
+}
+
+DevelopingModWatcher* MinecraftInstance::developingModWatcher()
+{
+    if (!m_developing_mod_watcher)
+        m_developing_mod_watcher = std::make_unique<DevelopingModWatcher>(this);
+    return m_developing_mod_watcher.get();
 }
 
 ModFolderModel* MinecraftInstance::coreModList()

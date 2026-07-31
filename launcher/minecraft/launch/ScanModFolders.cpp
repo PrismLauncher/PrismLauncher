@@ -38,11 +38,16 @@
 #include "MMCZip.h"
 #include "launch/LaunchTask.h"
 #include "minecraft/MinecraftInstance.h"
+#include "minecraft/mod/DevelopingModWatcher.h"
 #include "minecraft/mod/ModFolderModel.h"
 
 void ScanModFolders::executeTask()
 {
     auto m_inst = m_parent->instance();
+
+    // Ensure developing mods are up to date before scanning/launching.
+    if (auto* watcher = m_inst->developingModWatcher())
+        watcher->syncNow();
 
     auto loaders = m_inst->loaderModList();
     connect(loaders, &ModFolderModel::updateFinished, this, &ScanModFolders::modsDone, Qt::SingleShotConnection);

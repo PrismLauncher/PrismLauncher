@@ -8,6 +8,7 @@
 #include "ui/pages/instance/LogPage.h"
 #include "ui/pages/instance/ManagedPackPage.h"
 #include "ui/pages/instance/ModFolderPage.h"
+#include "ui/pages/instance/DevelopingModPage.h"
 #include "ui/pages/instance/NotesPage.h"
 #include "ui/pages/instance/OtherLogsPage.h"
 #include "ui/pages/instance/ResourcePackPage.h"
@@ -36,6 +37,7 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
         values.append(modsPage);
         values.append(new CoreModFolderPage(onesix, onesix->coreModList()));
         values.append(new NilModFolderPage(onesix, onesix->nilModList()));
+        values.append(new DevelopingModPage(onesix));
         values.append(new ResourcePackPage(onesix, onesix->resourcePackList()));
         values.append(new GlobalDataPackPage(onesix));
         values.append(new TexturePackPage(onesix, onesix->texturePackList()));
