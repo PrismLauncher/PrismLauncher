@@ -39,7 +39,11 @@
 
 #include <Application.h>
 #include <QFileSystemWatcher>
+#include <QFutureWatcher>
+#include <QPair>
+#include <QTimer>
 #include "LogPage.h"
+#include "MessageLevel.h"
 #include "ui/pages/BasePage.h"
 
 namespace Ui {
@@ -47,6 +51,17 @@ class OtherLogsPage;
 }
 
 class RecursiveFileSystemWatcher;
+
+/** Result of parsing a log file off the GUI thread, see OtherLogsPage::parseLogFile. */
+struct OtherLogsParseResult {
+    enum class Error { None, OpenFailed, GzipFailed };
+
+    QString fileName;
+    QList<QPair<MessageLevel, QString>> lines;
+    Error error = Error::None;
+    QString errorDetail;
+    bool tooBig = false;
+};
 
 class OtherLogsPage : public QWidget, public BasePage {
     Q_OBJECT
@@ -83,6 +98,8 @@ class OtherLogsPage : public QWidget, public BasePage {
     void findNextActivated();
     void findPreviousActivated();
 
+    void applyParseResult();
+
    private:
     void reload();
     void modelStateToUI();
@@ -90,6 +107,19 @@ class OtherLogsPage : public QWidget, public BasePage {
     void setControlsEnabled(bool enabled);
 
     QStringList getPaths();
+
+    /** Reads and parses a log file off the GUI thread. Must not touch any QObject state shared
+     *  with the page (m_model, ui, ...) since it runs on a QtConcurrent worker thread. */
+    static OtherLogsParseResult parseLogFile(QString fileName,
+                                             QString filePath,
+                                             bool isInstanceLog,
+                                             int maxLines,
+                                             bool stopOnOverflow,
+                                             QString overflowMessage);
+
+    /** The message shown in place of a line once a log hits maxLines, shared by every place
+     *  that sets up console line-limit config so the wording can't drift between them. */
+    static QString overflowMessageFor(int maxLines);
 
    private:
     QString m_id;
@@ -103,6 +133,17 @@ class OtherLogsPage : public QWidget, public BasePage {
     QStringList m_logSearchPaths;
     QString m_currentFile;
     QFileSystemWatcher m_watcher;
+    /** Coalesces bursts of directoryChanged signals (e.g. a rapidly-growing log during an
+     *  instance launch) into a single populateSelectLogBox() call. */
+    QTimer m_repopulateTimer;
+
+    QFutureWatcher<OtherLogsParseResult> m_parseWatcher;
+    /** File a parse is currently in flight for, empty if none. Used to coalesce repeated
+     *  reload() calls for the same file (e.g. from the debounce timer firing again while a
+     *  large/slow parse is still running) instead of piling up redundant concurrent reads. */
+    QString m_inFlightFile;
+    /** Set when reload() is coalesced away; re-issued once the in-flight parse finishes. */
+    bool m_reloadPending = false;
 
     LogFormatProxyModel* m_proxy;
     LogModel* m_model;

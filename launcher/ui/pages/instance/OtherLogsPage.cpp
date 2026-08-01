@@ -39,6 +39,7 @@
 
 #include <QMessageBox>
 
+#include "logs/LogParser.h"
 #include "ui/GuiUtil.h"
 #include "ui/themes/ThemeManager.h"
 
@@ -49,6 +50,7 @@
 #include <QFileSystemWatcher>
 #include <QShortcut>
 #include <QUrl>
+#include <QtConcurrentRun>
 
 OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, BaseInstance* instance, QWidget* parent)
     : QWidget(parent)
@@ -86,13 +88,27 @@ OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, 
     if (m_instance) {
         m_model->setMaxLines(getConsoleMaxLines(m_instance->settings()));
         m_model->setStopOnOverflow(shouldStopOnConsoleOverflow(m_instance->settings()));
-        m_model->setOverflowMessage(tr("Cannot display this log since the log length surpassed %1 lines.").arg(m_model->getMaxLines()));
+        m_model->setOverflowMessage(overflowMessageFor(m_model->getMaxLines()));
     } else {
         modelStateToUI();
     }
     m_proxy->setSourceModel(m_model);
 
-    connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &OtherLogsPage::populateSelectLogBox);
+    m_repopulateTimer.setSingleShot(true);
+    m_repopulateTimer.setInterval(300);
+    connect(&m_repopulateTimer, &QTimer::timeout, this, &OtherLogsPage::populateSelectLogBox);
+    // Coalesce bursts of directoryChanged (e.g. a log file growing during an instance launch)
+    // instead of re-scanning and re-loading the log on every single change.
+    connect(&m_watcher, &QFileSystemWatcher::directoryChanged, &m_repopulateTimer, qOverload<>(&QTimer::start));
+
+    connect(&m_parseWatcher, &QFutureWatcher<OtherLogsParseResult>::finished, this, [this] {
+        m_inFlightFile.clear();
+        bool hadPending = m_reloadPending;
+        m_reloadPending = false;
+        applyParseResult();
+        if (hadPending)
+            reload();
+    });
 
     auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
     connect(findShortcut, &QShortcut::activated, this, &OtherLogsPage::findActivated);
@@ -219,8 +235,8 @@ void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
         setControlsEnabled(false);
     } else {
         m_currentFile = file;
+        // reload() owns enabling controls once the (async) load completes.
         reload();
-        setControlsEnabled(true);
     }
 }
 
@@ -253,103 +269,204 @@ void OtherLogsPage::reload()
         return;
     }
 
-    QFile file(FS::PathCombine(m_basePath, m_currentFile));
-    if (!file.open(QFile::ReadOnly)) {
-        setControlsEnabled(false);
-        ui->btnReload->setEnabled(true);  // allow reload
-        m_currentFile = QString();
-        QMessageBox::critical(this, tr("Error"), tr("Unable to open %1 for reading: %2").arg(m_currentFile, file.errorString()));
+    // A parse for this exact file is already running (e.g. the debounce timer fired again
+    // while a large/slow parse is still in flight); coalesce instead of piling up redundant
+    // concurrent reads of the same file. It'll be re-issued once the running one finishes.
+    if (!m_inFlightFile.isEmpty() && m_inFlightFile == m_currentFile && m_parseWatcher.isRunning()) {
+        m_reloadPending = true;
+        return;
+    }
+
+    // Config for the parse depends on settings that may only be safely read on the GUI thread,
+    // so resolve it here and hand plain values to the worker thread.
+    int maxLines;
+    bool stopOnOverflow;
+    QString overflowMessage;
+    if (m_instance) {
+        maxLines = getConsoleMaxLines(m_instance->settings());
+        stopOnOverflow = shouldStopOnConsoleOverflow(m_instance->settings());
     } else {
-        auto setPlainText = [this](const QString& text) {
-            QTextDocument* doc = ui->text->document();
-            doc->setDefaultFont(m_proxy->getFont());
-            ui->text->setPlainText(text);
-        };
-        auto showTooBig = [setPlainText, &file]() {
-            setPlainText(tr("The file (%1) is too big. You may want to open it in a viewer optimized "
-                            "for large files.")
-                             .arg(file.fileName()));
-        };
-        if (file.size() > (1024ll * 1024ll * 12ll)) {
-            showTooBig();
-            return;
+        maxLines = getConsoleMaxLines(APPLICATION->settings());
+        stopOnOverflow = shouldStopOnConsoleOverflow(APPLICATION->settings());
+        overflowMessage = overflowMessageFor(maxLines);
+    }
+
+    // Disable controls while the (potentially large) file is read and parsed off the GUI
+    // thread; applyParseResult() re-enables them once a result comes back.
+    setControlsEnabled(false);
+
+    m_inFlightFile = m_currentFile;
+    auto filePath = FS::PathCombine(m_basePath, m_currentFile);
+    auto future = QtConcurrent::run(&OtherLogsPage::parseLogFile, m_currentFile, filePath, m_instance != nullptr, maxLines,
+                                    stopOnOverflow, overflowMessage);
+    m_parseWatcher.setFuture(future);
+}
+
+OtherLogsParseResult OtherLogsPage::parseLogFile(QString fileName,
+                                                  QString filePath,
+                                                  bool isInstanceLog,
+                                                  int maxLines,
+                                                  bool stopOnOverflow,
+                                                  QString overflowMessage)
+{
+    OtherLogsParseResult result;
+    result.fileName = fileName;
+
+    QFile file(filePath);
+    if (!file.open(QFile::ReadOnly)) {
+        result.error = OtherLogsParseResult::Error::OpenFailed;
+        result.errorDetail = file.errorString();
+        return result;
+    }
+
+    if (file.size() > (1024ll * 1024ll * 12ll)) {
+        result.tooBig = true;
+        return result;
+    }
+
+    // Avoid repeated reallocation while appending below; maxLines is a hard upper bound only
+    // when stopOnOverflow is set, otherwise the final line count is unknown ahead of time.
+    if (stopOnOverflow)
+        result.lines.reserve(maxLines);
+
+    MessageLevel last = MessageLevel::Unknown;
+    int count = 0;
+
+    // Returns true once the line buffer is full and no further lines should be processed.
+    auto handleLine = [&](QString line) {
+        if (!line.isEmpty() && line.back() == '\n') {
+            line.resize(line.size() - 1);
         }
-        MessageLevel last = MessageLevel::Unknown;
-
-        auto handleLine = [this, &last](QString line) {
-            if (!line.isEmpty() && line.back() == '\n') {
-                line.resize(line.size() - 1);
-            }
-            if (!line.isEmpty() && line.back() == '\r') {
-                line.resize(line.size() - 1);
-            }
-            if (line.isEmpty()) {
-                return false;
-            }
-            MessageLevel level = MessageLevel::Unknown;
-
-            QString lineTemp = line;  // don't edit out the time and level for clarity
-            if (!m_instance) {
-                level = MessageLevel::takeFromLauncherLine(lineTemp);
-            } else {
-                level = LogParser::guessLevel(line, last);
-            }
-
-            last = level;
-            m_model->append(level, line);
-            return m_model->isOverFlow();
-        };
-
-        // Try to determine a level for each line
-        ui->text->clear();
-        ui->text->setModel(nullptr);
-        if (!m_instance) {
-            m_model = new LogModel(this);
-            m_model->setMaxLines(getConsoleMaxLines(APPLICATION->settings()));
-            m_model->setStopOnOverflow(shouldStopOnConsoleOverflow(APPLICATION->settings()));
-            m_model->setOverflowMessage(tr("Cannot display this log since the log length surpassed %1 lines.").arg(m_model->getMaxLines()));
+        if (!line.isEmpty() && line.back() == '\r') {
+            line.resize(line.size() - 1);
         }
-        m_model->clear();
-        if (file.fileName().endsWith(".gz")) {
-            QString line;
-            auto error = GZip::readGzFileByBlocks(&file, [&line, handleLine](const QByteArray& d) {
-                auto block = d;
-                int newlineIndex = block.indexOf('\n');
-                while (newlineIndex != -1) {
-                    line += QString::fromUtf8(block).left(newlineIndex);
-                    block.remove(0, newlineIndex + 1);
-                    if (handleLine(line)) {
-                        line.clear();
-                        return false;
-                    }
+        if (line.isEmpty()) {
+            return false;
+        }
+        MessageLevel level = MessageLevel::Unknown;
+
+        QString lineTemp = line;  // don't edit out the time and level for clarity
+        if (!isInstanceLog) {
+            level = MessageLevel::takeFromLauncherLine(lineTemp);
+        } else {
+            level = LogParser::guessLevel(line, last);
+        }
+        last = level;
+
+        if (stopOnOverflow && count >= maxLines) {
+            return true;
+        }
+        // Mirrors LogModel::append's overflow behavior: the last line before the cap becomes
+        // the overflow message.
+        if (stopOnOverflow && count == maxLines - 1) {
+            level = MessageLevel::Fatal;
+            line = overflowMessage;
+        }
+        result.lines.append({ level, line });
+        count++;
+        return stopOnOverflow && count >= maxLines;
+    };
+
+    if (file.fileName().endsWith(".gz")) {
+        QString line;
+        auto error = GZip::readGzFileByBlocks(&file, [&line, &handleLine](const QByteArray& d) {
+            auto block = d;
+            int newlineIndex = block.indexOf('\n');
+            while (newlineIndex != -1) {
+                line += QString::fromUtf8(block).left(newlineIndex);
+                block.remove(0, newlineIndex + 1);
+                if (handleLine(line)) {
                     line.clear();
-                    newlineIndex = block.indexOf('\n');
+                    return false;
                 }
-                line += QString::fromUtf8(block);
-                return true;
-            });
-            if (!error.isEmpty()) {
-                setPlainText(tr("The file (%1) encountered an error when reading: %2.").arg(file.fileName(), error));
-                return;
-            } else if (!line.isEmpty()) {
-                handleLine(line);
+                line.clear();
+                newlineIndex = block.indexOf('\n');
             }
-        } else {
-            while (!file.atEnd() && !handleLine(QString::fromUtf8(file.readLine()))) {
-            }
+            line += QString::fromUtf8(block);
+            return true;
+        });
+        if (!error.isEmpty()) {
+            result.error = OtherLogsParseResult::Error::GzipFailed;
+            result.errorDetail = error;
+            result.lines.clear();
+        } else if (!line.isEmpty()) {
+            handleLine(line);
         }
-
-        if (m_instance) {
-            ui->text->setModel(m_proxy);
-            ui->text->scrollToBottom();
-        } else {
-            m_proxy->setSourceModel(m_model);
-            ui->text->setModel(m_proxy);
-            ui->text->scrollToBottom();
-            UIToModelState();
-            setControlsEnabled(true);
+    } else {
+        while (!file.atEnd() && !handleLine(QString::fromUtf8(file.readLine()))) {
         }
     }
+
+    return result;
+}
+
+QString OtherLogsPage::overflowMessageFor(int maxLines)
+{
+    return tr("Cannot display this log since the log length surpassed %1 lines.").arg(maxLines);
+}
+
+void OtherLogsPage::applyParseResult()
+{
+    auto result = m_parseWatcher.result();
+
+    // The user may have switched to a different log (or closed/re-opened it) while this parse
+    // was in flight; discard results that no longer match the current selection.
+    if (result.fileName != m_currentFile) {
+        return;
+    }
+
+    if (result.error == OtherLogsParseResult::Error::OpenFailed) {
+        setControlsEnabled(false);
+        ui->btnReload->setEnabled(true);  // allow reload
+        QString badFile = m_currentFile;
+        m_currentFile = QString();
+        QMessageBox::critical(this, tr("Error"), tr("Unable to open %1 for reading: %2").arg(badFile, result.errorDetail));
+        return;
+    }
+
+    auto setPlainText = [this](const QString& text) {
+        QTextDocument* doc = ui->text->document();
+        doc->setDefaultFont(m_proxy->getFont());
+        ui->text->setPlainText(text);
+    };
+
+    if (result.error == OtherLogsParseResult::Error::GzipFailed) {
+        setPlainText(tr("The file (%1) encountered an error when reading: %2.").arg(result.fileName, result.errorDetail));
+        setControlsEnabled(true);
+        return;
+    }
+
+    if (result.tooBig) {
+        setPlainText(tr("The file (%1) is too big. You may want to open it in a viewer optimized "
+                        "for large files.")
+                         .arg(result.fileName));
+        setControlsEnabled(true);
+        return;
+    }
+
+    ui->text->clear();
+    ui->text->setModel(nullptr);
+    if (!m_instance) {
+        m_model = new LogModel(this);
+        m_model->setMaxLines(getConsoleMaxLines(APPLICATION->settings()));
+        m_model->setStopOnOverflow(shouldStopOnConsoleOverflow(APPLICATION->settings()));
+        m_model->setOverflowMessage(overflowMessageFor(m_model->getMaxLines()));
+    }
+    m_model->clear();
+    for (const auto& entry : result.lines) {
+        m_model->append(entry.first, entry.second);
+    }
+
+    if (m_instance) {
+        ui->text->setModel(m_proxy);
+        ui->text->scrollToBottom();
+    } else {
+        m_proxy->setSourceModel(m_model);
+        ui->text->setModel(m_proxy);
+        ui->text->scrollToBottom();
+        UIToModelState();
+    }
+    setControlsEnabled(true);
 }
 
 void OtherLogsPage::on_btnPaste_clicked()
