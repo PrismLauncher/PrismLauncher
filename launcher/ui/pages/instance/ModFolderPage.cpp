@@ -142,19 +142,19 @@ void ModFolderPage::removeItems(const QItemSelection& selection)
     auto indexes = selection.indexes();
     auto affected = m_model->getAffectedMods(indexes, EnableAction::DISABLE);
     if (!affected.isEmpty()) {
-        auto box = CustomMessageBox::selectable(this, tr("Confirm Disable"),
-                                                tr("The mods you are trying to delete are required by %1 mods.\n"
-                                                   "Do you want to disable them?")
-                                                    .arg(affected.length()),
-                                                QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
-                                                QMessageBox::Cancel);
+        auto* box = CustomMessageBox::selectable(this, tr("Confirm Disable"),
+                                                 tr("The mods you are trying to delete are required by %1 mods.\n"
+                                                    "Do you want to disable them?")
+                                                     .arg(affected.length()),
+                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
+                                                 QMessageBox::Cancel);
         QString details = tr("The following mods depend on the mod(s) you want to remove:");
         for (auto indx : affected) {
             const Mod& mod = m_model->at(indx.row());
             details += QString("\n- %1 (%2)").arg(mod.name(), mod.internalId());
         }
         box->setDetailedText(details);
-        auto response = box->exec();
+        const auto response = box->exec();
 
         if (response == QMessageBox::Cancel) {
             return;
