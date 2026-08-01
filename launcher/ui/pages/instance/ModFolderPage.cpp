@@ -148,10 +148,10 @@ void ModFolderPage::removeItems(const QItemSelection& selection)
                                                     .arg(affected.length()),
                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
                                                 QMessageBox::Cancel);
-        QString details = tr("The following mods depend the mod(s) you want to remove:");
+        QString details = tr("The following mods depend on the mod(s) you want to remove:");
         for (auto indx : affected) {
             const Mod& mod = m_model->at(indx.row());
-            details += "\n- " + mod.name() + " (" + mod.internalId() + ")";
+            details += QString("\n- %1 (%2)").arg(mod.name(), mod.internalId());
         }
         box->setDetailedText(details);
         auto response = box->exec();
