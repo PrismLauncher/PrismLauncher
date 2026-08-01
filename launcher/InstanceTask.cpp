@@ -154,7 +154,7 @@ void InstanceTask::downloadFiles(MinecraftInstance* inst)
         task->addTask(t);
     }
     connect(task.get(), &Task::finished, this, [this, task] {
-        if (isRunning()) {
+        if (!isRunning()) {
             return;
         }
         if (!task->wasSuccessful()) {

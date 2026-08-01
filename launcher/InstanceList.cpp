@@ -800,7 +800,7 @@ void InstanceList::loadGroupList()
     m_collapsedGroups.clear();
 
     // if there's no group file, fail
-    if (!QFileInfo(groupFileName).exists()) {
+    if (!QFileInfo::exists(groupFileName)) {
         return;
     }
 
