@@ -445,13 +445,13 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
         QString details;
         if(requiredToEnable.size() > 0) {
             message += tr("%n mod(s) will be enabled\n", "", requiredToEnable.size());
-            details += "The following mods will be enabled:";
+            details += tr("The following mods will be enabled:");
             for(auto* mod : requiredToEnable) details += QString("\n- %1 (%2)").arg(mod->name(), mod->internalId());
         }
         if(requiredToDisable.size() > 0) {
             message += tr("%n mod(s) will be disabled\n", "", requiredToDisable.size());
             if(!details.isNull()) details += "\n\n";
-            details += "The following mods will be disabled:";
+            details += tr("The following mods will be disabled:");
             for(auto* mod : requiredToDisable) details += QString("\n- %1 (%2)").arg(mod->name(), mod->internalId());
         }
         message += tr("Do you want to automatically apply these related changes?\nIgnoring them may break the game.");
