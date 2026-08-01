@@ -81,7 +81,7 @@ class ModFolderPage : public ExternalResourcesPage {
 
    protected:
     ModFolderModel* m_model;
-    QPointer<ResourceDownload::ModDownloadDialog> m_downloadDialog;
+    QPointer<ResourceDownload::ResourceDownloadDialog> m_downloadDialog;
     QPointer<BisectController> m_activeBisect;
     QAction* m_bisectAction = nullptr;
 };

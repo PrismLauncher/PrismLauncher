@@ -178,7 +178,7 @@ void ModFolderPage::downloadMods()
         return;
     }
 
-    m_downloadDialog = new ResourceDownload::ModDownloadDialog(this, m_model, m_instance);
+    m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createMod(this, m_model, m_instance);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &ModFolderPage::downloadDialogFinished);
 
@@ -517,7 +517,7 @@ void ModFolderPage::changeModVersion()
         return;
     }
 
-    m_downloadDialog = new ResourceDownload::ModDownloadDialog(this, m_model, m_instance, true);
+    m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createMod(this, m_model, m_instance, true);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &ModFolderPage::downloadDialogFinished);
 

@@ -38,8 +38,6 @@
 #include "ShaderPackPage.h"
 #include "ui_ExternalResourcesPage.h"
 
-#include "ResourceDownloadTask.h"
-
 #include "minecraft/mod/ShaderPackFolderModel.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
@@ -82,7 +80,7 @@ void ShaderPackPage::downloadShaderPack()
         return;  // this is a null instance or a legacy instance
     }
 
-    m_downloadDialog = new ResourceDownload::ShaderPackDownloadDialog(this, m_model, m_instance);
+    m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createShaderPack(this, m_model, m_instance);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &ShaderPackPage::downloadDialogFinished);
 
@@ -256,7 +254,7 @@ void ShaderPackPage::changeShaderPackVersion()
         return;
     }
 
-    m_downloadDialog = new ResourceDownload::ShaderPackDownloadDialog(this, m_model, m_instance, true);
+    m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createShaderPack(this, m_model, m_instance, true);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &ShaderPackPage::downloadDialogFinished);
 

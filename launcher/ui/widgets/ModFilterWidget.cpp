@@ -38,7 +38,6 @@
 #include <QComboBox>
 #include <QListWidget>
 #include <algorithm>
-#include <list>
 #include "BaseVersionList.h"
 #include "Json.h"
 #include "Version.h"
@@ -50,9 +49,9 @@
 #include "Application.h"
 #include "minecraft/PackProfile.h"
 
-std::unique_ptr<ModFilterWidget> ModFilterWidget::create(MinecraftInstance* instance, bool extended)
+ModFilterWidget* ModFilterWidget::create(MinecraftInstance* instance, bool extended)
 {
-    return std::unique_ptr<ModFilterWidget>(new ModFilterWidget(instance, extended));
+    return new ModFilterWidget(instance, extended);
 }
 
 class VersionBasicModel : public QIdentityProxyModel {

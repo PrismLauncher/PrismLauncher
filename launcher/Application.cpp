@@ -686,6 +686,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // Folders
         m_settings->registerSetting("InstanceDir", "instances");
+        m_settings->registerSetting("AdditionalInstanceDirs", QVariant(QStringList()));
         m_settings->registerSetting({ "CentralModsDir", "ModsDir" }, "mods");
         m_settings->registerSetting("IconsDir", "icons");
         m_settings->registerSetting("DownloadsDir", QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
@@ -967,6 +968,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     // initialize and load all instances
     {
         auto InstDirSetting = m_settings->getSetting("InstanceDir");
+        auto AdditionalInstanceDirsSetting = m_settings->getSetting("AdditionalInstanceDirs");
         // instance path: check for problems with '!' in instance path and warn the user in the log
         // and remember that we have to show him a dialog when the gui starts (if it does so)
         QString instDir = m_settings->get("InstanceDir").toString();
@@ -974,8 +976,17 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         if (FS::checkProblemticPathJava(QDir(instDir))) {
             qWarning() << "Your instance path contains \'!\' and this is known to cause java problems!";
         }
-        m_instances.reset(new InstanceList(m_settings.get(), instDir, this));
+        QStringList additionalDirs = m_settings->get("AdditionalInstanceDirs").toStringList();
+        QStringList allInstDirs;
+        allInstDirs << instDir;
+        for (const auto& dir : additionalDirs) {
+            if (!dir.isEmpty() && !allInstDirs.contains(dir))
+                allInstDirs << dir;
+        }
+
+        m_instances.reset(new InstanceList(m_settings.get(), allInstDirs, this));
         connect(InstDirSetting.get(), &Setting::SettingChanged, m_instances.get(), &InstanceList::on_InstFolderChanged);
+        connect(AdditionalInstanceDirsSetting.get(), &Setting::SettingChanged, m_instances.get(), &InstanceList::on_InstFolderChanged);
         qInfo() << "Loading Instances...";
         m_instances->loadList();
         qInfo() << "<> Instances loaded.";

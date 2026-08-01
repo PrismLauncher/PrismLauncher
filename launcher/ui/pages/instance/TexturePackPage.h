@@ -67,5 +67,5 @@ class TexturePackPage : public ExternalResourcesPage {
 
    private:
     TexturePackFolderModel* m_model;
-    QPointer<ResourceDownload::TexturePackDownloadDialog> m_downloadDialog;
+    QPointer<ResourceDownload::ResourceDownloadDialog> m_downloadDialog;
 };
