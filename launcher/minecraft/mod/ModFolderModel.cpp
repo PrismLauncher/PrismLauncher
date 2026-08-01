@@ -437,22 +437,29 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
         return list;
     };
 
-    if (requiredToEnable.size() > 0 || requiredToDisable.size() > 0) {
-        QString title = tr("Confirm toggle");
+    if (!requiredToEnable.isEmpty() || !requiredToDisable.isEmpty()) {
+        const QString title = tr("Confirm toggle");
+        const QString noButton = tr("Only Toggle Selected");
+        const QString yesButton = tr("Toggle Required Mods");
+
         QString message = tr("Toggling these mod(s) will cause changes to other mods.\n");
-        QString noButton = tr("Only Toggle Selected");
-        QString yesButton = tr("Toggle Required Mods");
         QString details;
-        if(requiredToEnable.size() > 0) {
+        if (!requiredToEnable.isEmpty()) {
             message += tr("%n mod(s) will be enabled\n", "", requiredToEnable.size());
             details += tr("The following mods will be enabled:");
-            for(auto* mod : requiredToEnable) details += QString("\n- %1 (%2)").arg(mod->name(), mod->internalId());
+            for (const auto* mod : requiredToEnable) {
+                details += QString("\n- %1 (%2)").arg(mod->name(), mod->internalId());
+            }
         }
-        if(requiredToDisable.size() > 0) {
+        if (!requiredToDisable.isEmpty()) {
             message += tr("%n mod(s) will be disabled\n", "", requiredToDisable.size());
-            if(!details.isNull()) details += "\n\n";
+            if (!details.isEmpty()) {
+                details += "\n\n";
+            }
             details += tr("The following mods will be disabled:");
-            for(auto* mod : requiredToDisable) details += QString("\n- %1 (%2)").arg(mod->name(), mod->internalId());
+            for (const auto* mod : requiredToDisable) {
+                details += QString("\n- %1 (%2)").arg(mod->name(), mod->internalId());
+            }
         }
         message += tr("Do you want to automatically apply these related changes?\nIgnoring them may break the game.");
 
