@@ -2,7 +2,7 @@
 BasedOnStyle: Chromium
 IndentWidth: 4
 AllowShortIfStatementsOnASingleLine: false
-ColumnLimit: 140
+ColumnLimit: 0
 ---
 Language: Cpp
 AccessModifierOffset: -1
