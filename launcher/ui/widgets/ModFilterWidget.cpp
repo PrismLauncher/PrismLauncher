@@ -137,8 +137,6 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended)
         ui->openSource->hide();
     }
 
-    ui->versions->setStyleSheet("combobox-popup: 0;");
-    ui->version->setStyleSheet("combobox-popup: 0;");
     connect(ui->showAllVersions, &QCheckBox::stateChanged, this, &ModFilterWidget::onShowAllVersionsChanged);
     connect(ui->versions, &QComboBox::currentIndexChanged, this, &ModFilterWidget::onVersionFilterChanged);
     connect(ui->versions, &CheckComboBox::checkedItemsChanged, this, [this] { onVersionFilterChanged(0); });

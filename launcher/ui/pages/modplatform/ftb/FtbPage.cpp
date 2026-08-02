@@ -61,7 +61,6 @@ FtbPage::FtbPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), 
 
     m_ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_ui->versionSelectionBox->view()->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    m_ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
     for (int i = 0; i < m_filterModel->getAvailableSortings().size(); i++) {
         m_ui->sortByBox->addItem(m_filterModel->getAvailableSortings().keys().at(i));
