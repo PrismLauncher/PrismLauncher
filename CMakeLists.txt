@@ -67,6 +67,10 @@ if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
     # TODO(@getchoo): Is sccache affected by this? Would be nice to use `ProgramDatabase`....
     set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>")
 
+    # Ensure our runtime library matches our vcpkg dependencies
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+
+    # TODO(@getchoo): Do we actually need this???
     if(CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreadedDLL")
         set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release "")
         set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release "")
