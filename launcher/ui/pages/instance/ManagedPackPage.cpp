@@ -11,9 +11,6 @@
 #include "ui_ManagedPackPage.h"
 
 #include <QFileDialog>
-#include <QListView>
-#include <QProxyStyle>
-#include <QStyleFactory>
 #include <memory>
 
 #include "Application.h"
@@ -26,58 +23,6 @@
 #include "ui/InstanceWindow.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
-
-/** This is just to override the combo box popup behavior so that the combo box doesn't take the whole screen.
- *  ... thanks Qt.
- */
-namespace {
-class NoBigComboBoxStyle : public QProxyStyle {
-    Q_OBJECT
-
-   public:
-    int styleHint(QStyle::StyleHint hint,
-                  const QStyleOption* option = nullptr,
-                  const QWidget* widget = nullptr,
-                  QStyleHintReturn* returnData = nullptr) const override
-    {
-        if (hint == QStyle::SH_ComboBox_Popup) {
-            return 0;
-        }
-
-        return QProxyStyle::styleHint(hint, option, widget, returnData);
-    }
-
-    /**
-     * Something about QProxyStyle and QStyle objects means they can't be free'd just
-     * because all the widgets using them are gone.
-     * They seems to be tied to the QApplicaiton lifecycle.
-     * So make singletons tied to the lifetime of the application to clean them up and ensure they aren't
-     * being remade over and over again, thus leaking memory.
-     */
-   public:
-    static NoBigComboBoxStyle* getInstance(QStyle* style)
-    {
-        static QHash<QStyle*, NoBigComboBoxStyle*> s_singleton_instances = {};
-        static std::mutex s_singleton_instances_mutex;
-
-        const std::scoped_lock lock(s_singleton_instances_mutex);
-        auto instIter = s_singleton_instances.constFind(style);
-        NoBigComboBoxStyle* inst = nullptr;
-        if (instIter == s_singleton_instances.constEnd() || *instIter == nullptr) {
-            inst = new NoBigComboBoxStyle(style);
-            inst->setParent(APPLICATION);
-            s_singleton_instances.insert(style, inst);
-            qDebug() << "QProxyStyle NoBigComboBox created for" << style->objectName() << style;
-        } else {
-            inst = *instIter;
-        }
-        return inst;
-    }
-
-   private:
-    explicit NoBigComboBoxStyle(QStyle* style) : QProxyStyle(style) {}
-};
-}  // namespace
 
 ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, const QString& type, QWidget* parent)
 {
@@ -97,13 +42,6 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWin
     Q_ASSERT(inst);
 
     ui->setupUi(this);
-
-    // NOTE: GTK2 themes crash with the proxy style.
-    // This seems like an upstream bug, so there's not much else that can be done.
-    if (!QStyleFactory::keys().contains("gtk2")) {
-        auto* comboStyle = NoBigComboBoxStyle::getInstance(ui->versionsComboBox->style());
-        ui->versionsComboBox->setStyle(comboStyle);
-    }
 
     ui->versionsComboBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionsComboBox->view()->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
@@ -543,5 +481,3 @@ void ManagedPackPage::updatePack(const QUrl& url, const QString& versionID, cons
     auto didSucceed = runUpdateTask(extracted);
     onUpdateTaskCompleted(didSucceed);
 }
-
-#include "ManagedPackPage.moc"
