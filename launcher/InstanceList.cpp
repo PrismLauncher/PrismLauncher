@@ -1045,7 +1045,14 @@ Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 
 QString InstanceList::getStagedInstancePath(const QString& targetDir)
 {
-    QString root = (!targetDir.isEmpty() && m_instDirs.contains(targetDir)) ? targetDir : primaryDir();
+    QString root = primaryDir();
+    if (!targetDir.isEmpty()) {
+        if (!m_instDirs.contains(targetDir) || !QDir(targetDir).exists()) {
+            qWarning() << "Requested instance directory" << targetDir << "is no longer configured or accessible on disk. Aborting...";
+            return {};
+        }
+        root = targetDir;
+    }
     const QString tempRoot = FS::PathCombine(root, ".tmp");
 
     QString result;
@@ -1080,7 +1087,11 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
     auto shouldOverride = instanceTask.shouldOverride();
 
     QString targetDir = instanceTask.targetDir();
-    if (targetDir.isEmpty() || !m_instDirs.contains(targetDir)) {
+    if (!targetDir.isEmpty() && !m_instDirs.contains(targetDir)) {
+        qWarning() << "Target directory" << targetDir << "for instance is no longer configured or accessible. Aborting commit...";
+        return false;
+    }
+    if (targetDir.isEmpty()) {
         targetDir = primaryDir();
     }
 

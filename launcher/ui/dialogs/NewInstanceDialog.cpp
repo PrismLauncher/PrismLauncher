@@ -77,12 +77,21 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 
     ui->instNameTextBox->installEventFilter(this);
 
-    auto instDir = APPLICATION->settings()->get("InstanceDir").toString();
-    ui->instDirBox->addItem(tr("Default (%1)").arg(instDir), instDir);
-    for (const auto& dir : APPLICATION->settings()->get("AdditionalInstanceDirs").toStringList()) {
-        if (!dir.isEmpty()) {
-            ui->instDirBox->addItem(dir, dir);
+    auto addAccessibleDir = [this](const QString& dir, const QString& label) {
+        if (dir.isEmpty()) {
+            return;
         }
+        QString canonical = QDir(dir).canonicalPath();
+        if (canonical.isEmpty()) {
+            return;
+        }
+        ui->instDirBox->addItem(label.isEmpty() ? canonical : label, canonical);
+    };
+
+    auto instDir = APPLICATION->settings()->get("InstanceDir").toString();
+    addAccessibleDir(instDir, tr("Default (%1)").arg(instDir));
+    for (const auto& dir : APPLICATION->settings()->get("AdditionalInstanceDirs").toStringList()) {
+        addAccessibleDir(dir, {});
     }
 
     auto lastUsedDir = APPLICATION->settings()->get("LastUsedInstDirForNewInstance").toString();
