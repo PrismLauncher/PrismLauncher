@@ -35,47 +35,51 @@
 
 #pragma once
 
-#include "InstanceCreationTask.h"
-
+#include <memory>
 #include <optional>
 
+#include "BaseInstance.h"
+#include "InstanceTask.h"
 #include "minecraft/MinecraftInstance.h"
-
 #include "modplatform/flame/FileResolvingTask.h"
 
 #include "net/NetJob.h"
 
 #include "ui/dialogs/BlockedModsDialog.h"
 
-class FlameCreationTask final : public InstanceCreationTask {
+class FlameCreationTask final : public InstanceTask {
     Q_OBJECT
 
    public:
-    FlameCreationTask(const QString& staging_path,
-                      SettingsObject* global_settings,
+    FlameCreationTask(const QString& stagingPath,
+                      SettingsObject* globalSettings,
                       QWidget* parent,
                       QString id,
-                      QString version_id,
-                      QString original_instance_id = {})
-        : InstanceCreationTask(), m_parent(parent), m_managedId(std::move(id)), m_managedVersionId(std::move(version_id))
+                      QString versionId,
+                      const QString& originalInstanceId = {})
+        : m_parent(parent), m_managedId(std::move(id)), m_managedVersionId(std::move(versionId))
     {
-        setStagingPath(staging_path);
-        setParentSettings(global_settings);
+        setStagingPath(stagingPath);
+        setParentSettings(globalSettings);
 
-        m_original_instance_id = std::move(original_instance_id);
+        m_originalInstanceId = originalInstanceId;
     }
 
     bool abort() override;
 
-    bool updateInstance() override;
-    std::unique_ptr<MinecraftInstance> createInstance() override;
+    void createInstance();
+    void executeTask() override;
 
    private slots:
-    void idResolverSucceeded(QEventLoop&);
-    void setupDownloadJob(QEventLoop&);
-    void copyBlockedMods(QList<BlockedMod> const& blocked_mods);
-    void validateOtherResources(QEventLoop& loop);
-    QString getVersionForLoader(QString uid, QString loaderType, QString version, QString mcVersion);
+    void idResolverSucceeded();
+    void setupDownloadJob();
+    void copyBlockedMods(const QList<BlockedMod>& blockedMods);
+    void validateOtherResources();
+    QString getVersionForLoader(const QString& uid, const QString& loaderType, const QString& version, const QString& mcVersion);
+    void finishInstall();
+
+   private:
+    void setManagedPack(BaseInstance* instance);
 
    private:
     QWidget* m_parent = nullptr;
@@ -91,7 +95,8 @@ class FlameCreationTask final : public InstanceCreationTask {
 
     QList<std::pair<QString, QString>> m_otherResources;
 
-    std::optional<BaseInstance*> m_instance;
+    std::optional<BaseInstance*> m_oldInstance{};
+    std::unique_ptr<MinecraftInstance> m_newInstance{};
 
     QStringList m_selectedOptionalMods;
 };

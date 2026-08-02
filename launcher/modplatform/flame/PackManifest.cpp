@@ -1,20 +1,20 @@
 #include "PackManifest.h"
 #include "Json.h"
-
-static void loadFileV1(Flame::File& f, QJsonObject& file)
+namespace {
+void loadFileV1(Flame::File& f, QJsonObject& file)
 {
     f.projectId = Json::requireInteger(file, "projectID");
     f.fileId = Json::requireInteger(file, "fileID");
     f.required = file["required"].toBool(true);
 }
 
-static void loadModloaderV1(Flame::Modloader& m, QJsonObject& modLoader)
+void loadModloaderV1(Flame::Modloader& m, QJsonObject& modLoader)
 {
     m.id = Json::requireString(modLoader, "id");
     m.primary = modLoader["primary"].toBool();
 }
 
-static void loadMinecraftV1(Flame::Minecraft& m, QJsonObject& minecraft)
+void loadMinecraftV1(Flame::Minecraft& m, QJsonObject& minecraft)
 {
     m.version = Json::requireString(minecraft, "version");
     // extra libraries... apparently only used for a custom Minecraft launcher in the 1.2.5 FTB retro pack
@@ -30,7 +30,7 @@ static void loadMinecraftV1(Flame::Minecraft& m, QJsonObject& minecraft)
     m.recommendedRAM = minecraft["recommendedRam"].toInt();
 }
 
-static void loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)
+void loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)
 {
     auto mc = Json::requireObject(manifest, "minecraft");
 
@@ -52,8 +52,9 @@ static void loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)
 
     pack.overrides = manifest["overrides"].toString("overrides");
 
-    pack.is_loaded = true;
+    pack.isLoaded = true;
 }
+}  // namespace
 
 void Flame::loadManifest(Flame::Manifest& m, const QString& filepath)
 {
