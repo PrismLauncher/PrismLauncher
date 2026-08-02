@@ -133,6 +133,45 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget*
             tabRowLayout->addWidget(m_profileTabBar, 0);  // natural tab-bar width
             tabRowLayout->addWidget(m_newTabButton,  0);  // fixed right of last tab
             tabRowLayout->addStretch(1);                  // remaining space left empty
+
+            // The "Active Profiles" button sits at the far right of the tab row.
+            // Its popup menu lets users pick which profiles are combined at launch.
+            m_runtimeMenu = new QMenu(this);
+            m_runtimeProfilesButton = new QToolButton(this);
+            m_runtimeProfilesButton->setText(tr("Active Profiles") + QStringLiteral(" ▾"));
+            m_runtimeProfilesButton->setToolTip(
+                tr("Choose which profiles are combined when launching the game.\n"
+                   "If empty, the game uses whatever the editing profile last set."));
+            m_runtimeProfilesButton->setPopupMode(QToolButton::InstantPopup);
+            m_runtimeProfilesButton->setMenu(m_runtimeMenu);
+            // Explicit QSS instead of relying on native autoRaise chrome -- the
+            // default rendering had a cramped hitbox and no visible border or
+            // hover/press feedback.
+            m_runtimeProfilesButton->setAutoRaise(false);
+            m_runtimeProfilesButton->setStyleSheet(
+                "QToolButton {"
+                "  padding: 3px 8px;"
+                "  min-height: 18px;"
+                "  border: 1px solid palette(mid);"
+                "  border-radius: 3px;"
+                "  background: palette(button);"
+                "  color: palette(button-text);"
+                "}"
+                "QToolButton:hover {"
+                "  background: palette(highlight);"
+                "  color: palette(highlighted-text);"
+                "  border: 1px solid palette(highlight);"
+                "}"
+                "QToolButton:pressed {"
+                "  background: palette(highlight);"
+                "  color: palette(highlighted-text);"
+                "}"
+                "QToolButton::menu-indicator { image: none; width: 0px; }");
+            tabRowLayout->addWidget(m_runtimeProfilesButton, 0);
+            qDebug() << "[ModFolderPage] runtime profiles button created"
+                     << "page=" << this << "visible=" << m_runtimeProfilesButton->isVisible()
+                     << "prefix=" << m_settingsPrefix;
+
             grid->addWidget(tabRowContainer, 0, 1, 1, 2);
         }
     }
@@ -218,8 +257,24 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget*
     m_profileTabBar->setCurrentIndex(savedIndex);
     applyProfileSwitch(m_profileTabBar->currentIndex(), m_profileSwitchGeneration);
 
+    m_instanceRunning = m_instance->isRunning();
+    connect(m_instance, &BaseInstance::runningStatusChanged, this, [this](bool running) {
+        qDebug() << "[ModFolderPage] runningStatusChanged"
+                 << "running=" << running
+                 << "prefix=" << m_settingsPrefix
+                 << "timestamp=" << QDateTime::currentDateTime().toString(Qt::ISODateWithMs);
+        m_instanceRunning = running;
+        if (!running) {
+            restoreCurrentProfileToFilesystem();
+        }
+    });
+
+    // Register the runtime-profiles key and populate the dropdown from the saved selection.
+    m_instance->settings()->getOrRegisterSetting(runtimeProfilesKey(), QStringList());
+    rebuildRuntimeMenu();
+
     connect(m_model, &QAbstractItemModel::dataChanged, this, [this]() {
-        if (!m_applyingProfile) {
+        if (!m_applyingProfile && !m_instanceRunning) {
             saveCurrentProfileState();
         }
     });
@@ -603,7 +658,7 @@ inline bool ModFolderPage::handleNoModLoader()
     return true;
 }
 
-void ModFolderPage::saveCurrentProfileState()
+void ModFolderPage::saveCurrentProfileState(bool refuseSuspiciousEmptyOverwrite)
 {
     if (m_currentProfile.isEmpty()) {
         return;
@@ -618,18 +673,119 @@ void ModFolderPage::saveCurrentProfileState()
     if (!stillExists) {
         return;
     }
+
     QSet<QString> enabledMods;
+    bool anyPendingParse = m_model->hasPendingParseTasks();
+    bool sawUnresolvedEnabledMod = false;
     for (int i = 0; i < m_model->rowCount(); ++i) {
         const Mod& res = m_model->at(i);
+        // Skip mods still resolving metadata: mod_id() returns a placeholder
+        // until LocalModParseTask finishes, which is NOT the id
+        // applyEnabledIds()/setResourceEnabled() will match against later.
+        // Safe to omit here -- ModFolderModel::onParseSucceeded() unconditionally
+        // fires dataChanged() for this row once resolved, which re-triggers this
+        // save with the correct, final mod_id().
+        if (res.enabled() && res.isResolving()) {
+            // At least one currently-enabled mod hasn't finished resolving,
+            // so we don't have a trustworthy full picture yet. Bail out of
+            // the WHOLE save rather than persisting a partial/empty set --
+            // writing an empty list here silently overwrites this profile's
+            // real saved data (confirmed: produced literal "@Invalid()" on
+            // disk for a profile whose only enabled mod was still resolving
+            // at save time). This mod's own onParseSucceeded() unconditionally
+            // fires dataChanged() for its row once resolved, re-triggering
+            // this save with a complete set.
+            sawUnresolvedEnabledMod = true;
+            continue;
+        }
         if (res.enabled()) {
             enabledMods.insert(res.mod_id());
         }
     }
-    m_profileStates[m_currentProfile] = enabledMods;
+    if (sawUnresolvedEnabledMod) {
+        qDebug() << "[ModFolderPage] saveCurrentProfileState deferred -- an enabled mod is still resolving"
+                 << "profile=" << m_currentProfile << "prefix=" << m_settingsPrefix;
+        return;
+    }
     QString key = profileKey(m_currentProfile);
+    if (refuseSuspiciousEmptyOverwrite && enabledMods.isEmpty() && !anyPendingParse) {
+        auto stored =
+            m_instance->settings()->getOrRegisterSetting(key, QStringList())->get().toStringList();
+        if (!stored.isEmpty()) {
+            qDebug() << "[ModFolderPage] refusing automatic re-apply save: computed enabled set is empty"
+                     << "but stored profile is non-empty"
+                     << "profile=" << m_currentProfile
+                     << "storedCount=" << stored.size()
+                     << "key=" << key
+                     << "prefix=" << m_settingsPrefix;
+            return;
+        }
+    }
+    m_profileStates[m_currentProfile] = enabledMods;
 
     m_instance->settings()->getOrRegisterSetting(key, QStringList());
     m_instance->settings()->set(key, QStringList(enabledMods.begin(), enabledMods.end()));
+}
+// Called when the game process exits (runningStatusChanged(false)). The
+// launch path (ScanModFolders::applyRuntimeProfiles -> applyEnabledIds)
+// mutates the filesystem to the temporary runtime-profile union (or the
+// last-active editing profile) for the duration of the launch. This page
+// object persists for as long as it exists, but it does NOT exist at all
+// for a launch started from the main window without Edit Instance ever
+// being opened -- ScanModFolders now also registers its own UI-independent
+// restore trigger for exactly that case (see applyRuntimeProfiles()). This
+// function remains as a redundant safety net while a page happens to be
+// open; nothing else ever puts the filesystem back, so if this page
+// the leftover union as the "real" current state and the normal, correctly
+// -guarded dataChanged -> saveCurrentProfileState() path will faithfully
+// persist that union into whichever profile happens to be open. This
+// restores the filesystem to match the currently-open profile's last saved
+// state as soon as the game exits, so any later rescan finds nothing to
+// (incorrectly) save.
+void ModFolderPage::restoreCurrentProfileToFilesystem()
+{
+    if (m_currentProfile.isEmpty()) {
+        return;
+    }
+
+    QSet<QString> savedMods = m_profileStates.value(m_currentProfile);
+
+    QModelIndexList toEnable;
+    QModelIndexList toDisable;
+    for (int i = 0; i < m_model->rowCount(); ++i) {
+        const Mod& res = m_model->at(i);
+        QModelIndex idx = m_model->index(i, 0);
+        bool shouldBeEnabled = savedMods.contains(res.mod_id());
+        if (shouldBeEnabled && !res.enabled()) {
+            toEnable.append(idx);
+        } else if (!shouldBeEnabled && res.enabled()) {
+            toDisable.append(idx);
+        }
+    }
+
+    if (toEnable.isEmpty() && toDisable.isEmpty()) {
+        return;  // filesystem already matches the saved profile -- no runtime override was applied, or it already matched
+    }
+
+    qDebug() << "[ModFolderPage] restoring filesystem to saved profile after game exit"
+             << "profile=" << m_currentProfile << "toEnable=" << toEnable.size()
+             << "toDisable=" << toDisable.size() << "prefix=" << m_settingsPrefix;
+
+    // Suppress the dataChanged-triggered save while we perform this
+    // corrective write -- the filesystem is about to match
+    // m_profileStates[m_currentProfile] exactly, so there is nothing new to
+    // persist once it settles.
+    m_applyingProfile = true;
+    // Bypass ModFolderModel::setResourceEnabled()'s dependency-cascade dialog --
+    // this is an automatic background correction the user never asked for and
+    // has no dialog-worthy "action" to confirm. Same reasoning as
+    // applyProfileSwitch() and the ScanModFolders launch path.
+    m_model->applyEnabledIds(savedMods);
+
+    connect(m_model, &ResourceFolderModel::updateFinished, this,
+        [this] { m_applyingProfile = false; },
+        Qt::SingleShotConnection);
+    m_model->update();
 }
 
 void ModFolderPage::applyProfileSwitch(int index, int generation) {
@@ -638,7 +794,9 @@ void ModFolderPage::applyProfileSwitch(int index, int generation) {
         m_currentProfile = val.isValid() ? val.toString() : QString();
     }
 
-    saveCurrentProfileState();
+    if (!m_instanceRunning) {
+        saveCurrentProfileState(/*refuseSuspiciousEmptyOverwrite=*/true);
+    }
 
     if (index >= 0 && index < m_profileTabBar->count()) {
         if (m_instance != nullptr && m_instance->isRunning()) {
@@ -672,28 +830,17 @@ void ModFolderPage::applyProfileSwitch(int index, int generation) {
             m_profileStates[tabName] = enabledMods;
         }
 
-        QModelIndexList toEnable;
-        QModelIndexList toDisable;
-        for (int i = 0; i < m_model->rowCount(); ++i) {
-            const Mod& res = m_model->at(i);
-            QModelIndex idx = m_model->index(i, 0);
-            if (enabledMods.contains(res.mod_id())) {
-                if (!res.enabled()) {
-                    toEnable.append(idx);
-                }
-            } else {
-                if (res.enabled()) {
-                    toDisable.append(idx);
-                }
-            }
-        }
         m_applyingProfile = true;
-        if (!toEnable.isEmpty()) {
-            m_model->setResourceEnabled(toEnable, EnableAction::ENABLE);
-        }
-        if (!toDisable.isEmpty()) {
-            m_model->setResourceEnabled(toDisable, EnableAction::DISABLE);
-        }
+        // Apply the target profile's exact enabled-mod set directly, bypassing
+        // ModFolderModel::setResourceEnabled()'s dependency-cascade confirmation
+        // dialog. That dialog exists for a user manually toggling a mod's
+        // checkbox; a profile *switch* is not that -- it deterministically
+        // restores a previously-saved set, and a popup firing mid-switch (with
+        // no clear "which mod did I toggle" context for the user) is a bug, not
+        // a safety feature. applyEnabledIds() already exists for exactly this
+        // purpose -- the launch path (ScanModFolders) uses it for the same
+        // reason; see its doc comment in ModFolderModel.cpp.
+        m_model->applyEnabledIds(enabledMods);
 
         // Capture generation token. If tab changes again before this update
         // completes, the token will be stale and we discard the result.
@@ -701,7 +848,7 @@ void ModFolderPage::applyProfileSwitch(int index, int generation) {
         connect(m_model, &ResourceFolderModel::updateFinished, this,
             [this, capturedGeneration] {
                 if (capturedGeneration == m_profileSwitchGeneration) {
-                    saveCurrentProfileState();
+                    saveCurrentProfileState(/*refuseSuspiciousEmptyOverwrite=*/true);
                 }
                 m_applyingProfile = false;
             },
@@ -767,6 +914,7 @@ void ModFolderPage::createProfile(const QString& name, const QSet<QString>& init
     m_profileTabBar->setUsesScrollButtons(m_profileTabBar->count() > 1);
 
     saveProfileList();
+    rebuildRuntimeMenu();
 }
 
 void ModFolderPage::saveProfileList()
@@ -921,6 +1069,7 @@ void ModFolderPage::onTabRename(int tabIndex)
     }
 
     saveProfileList();
+    rebuildRuntimeMenu();
 }
 
 void ModFolderPage::onTabRemove(int tabIndex)
@@ -951,9 +1100,19 @@ void ModFolderPage::onTabRemove(int tabIndex)
 
     m_instance->settings()->reset(profileKey(name));
 
+    // Also drop this profile from the runtime (Active Profiles) selection if
+    // present -- otherwise a deleted profile's name lingers as a dangling
+    // reference in ModRuntimeProfiles_<prefix> even though its own key was
+    // just reset().
+    QStringList runtimeSelected = loadRuntimeSelection();
+    if (runtimeSelected.removeAll(name) > 0) {
+        saveRuntimeSelection(runtimeSelected);
+    }
+
     m_profileTabBar->removeTab(tabIndex);
     m_profileTabBar->setUsesScrollButtons(m_profileTabBar->count() > 1);
     saveProfileList();
+    rebuildRuntimeMenu();
 }
 
 void ModFolderPage::onTabEnableAll(int tabIndex)
@@ -1116,4 +1275,65 @@ void ModFolderPage::hideEvent(QHideEvent* event)
         m_filterWindow = nullptr;
     }
     ExternalResourcesPage::hideEvent(event);
+}
+
+// ---------------------------------------------------------------------------
+// Runtime profile selection
+// ---------------------------------------------------------------------------
+
+void ModFolderPage::rebuildRuntimeMenu()
+{
+    if (!m_runtimeMenu)
+        return;
+
+    QStringList selected = loadRuntimeSelection();
+    m_runtimeMenu->clear();
+
+    for (int i = 0; i < m_profileTabBar->count(); ++i) {
+        QString name = m_profileTabBar->tabText(i);
+        QAction* action = m_runtimeMenu->addAction(name);
+        action->setCheckable(true);
+        action->setChecked(selected.contains(name));
+        connect(action, &QAction::triggered, this, [this, name](bool checked) {
+            onRuntimeProfileToggled(name, checked);
+        });
+    }
+}
+
+void ModFolderPage::onRuntimeProfileToggled(const QString& name, bool checked)
+{
+    QStringList selected = loadRuntimeSelection();
+
+    if (checked) {
+        // Tab 0 ("All Mods" or whatever the base profile is named) is mutually
+        // exclusive with all other runtime selections to keep the launch intent clear.
+        bool isBaseProfile = (m_profileTabBar->count() > 0 && name == m_profileTabBar->tabText(0));
+        if (isBaseProfile) {
+            selected.clear();
+        } else {
+            // Selecting any non-base profile deselects the base profile.
+            if (m_profileTabBar->count() > 0)
+                selected.removeAll(m_profileTabBar->tabText(0));
+        }
+        if (!selected.contains(name))
+            selected.append(name);
+    } else {
+        selected.removeAll(name);
+    }
+
+    saveRuntimeSelection(selected);
+
+    // Sync all checkmarks in the existing menu without rebuilding it.
+    for (QAction* action : m_runtimeMenu->actions())
+        action->setChecked(selected.contains(action->text()));
+}
+
+QStringList ModFolderPage::loadRuntimeSelection() const
+{
+    return m_instance->settings()->get(runtimeProfilesKey()).toStringList();
+}
+
+void ModFolderPage::saveRuntimeSelection(const QStringList& selected)
+{
+    m_instance->settings()->set(runtimeProfilesKey(), selected);
 }

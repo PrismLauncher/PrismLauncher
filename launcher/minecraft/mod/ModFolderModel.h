@@ -94,6 +94,11 @@ class ModFolderModel : public ResourceFolderModel {
 
     QModelIndexList getAffectedMods(const QModelIndexList& indexes, EnableAction action);
 
+    // Enables mods whose mod_id() is in enabledModIds and disables all others.
+    // Calls ResourceFolderModel::setResourceEnabled() directly, so no
+    // dependency-cascade dialog is shown. Intended for the launch path.
+    void applyEnabledIds(const QSet<QString>& enabledModIds);
+
     RESOURCE_HELPERS(Mod)
 
    public:
