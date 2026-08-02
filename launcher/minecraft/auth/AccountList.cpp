@@ -541,6 +541,7 @@ class ReadAccountSecretsTask : public Task {
     explicit ReadAccountSecretsTask(MinecraftAccount& account) : m_account{ &account }, m_job{ BuildConfig.LAUNCHER_APPID }
     {
         m_job.setAutoDelete(false);
+        m_job.setInsecureFallback(true);
         m_job.setKey(makeKeychainKey(account));
         connect(&m_job, &QKeychain::Job::finished, this, &ReadAccountSecretsTask::handleFinish);
     }
@@ -667,6 +668,7 @@ void AccountList::saveSecrets(const MinecraftAccount& account)
 
     auto* job = new QKeychain::WritePasswordJob{ BuildConfig.LAUNCHER_APPID };
     job->setAutoDelete(true);
+    job->setInsecureFallback(true);
     job->setKey(makeKeychainKey(account));
 
     const QJsonObject secretsObj = account.saveSecrets();
@@ -695,6 +697,7 @@ void AccountList::deleteSecrets(const MinecraftAccount& account)
 
     auto* job = new QKeychain::DeletePasswordJob{ BuildConfig.LAUNCHER_APPID };
     job->setAutoDelete(true);
+    job->setInsecureFallback(true);
     job->setKey(makeKeychainKey(account));
 
     connect(job, &QKeychain::Job::finished, this, [this, job, profileId = account.profileId(), profileName = account.profileName()] {
