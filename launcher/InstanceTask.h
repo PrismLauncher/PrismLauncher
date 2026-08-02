@@ -46,6 +46,9 @@ class InstanceTask : public Task, public InstanceName {
     void setGroup(const QString& group) { m_instGroup = group; }
     QString group() const { return m_instGroup; }
 
+    void setTargetDir(const QString& dir) { m_targetDir = dir; }
+    QString targetDir() const { return m_targetDir; }
+
     bool shouldConfirmUpdate() const { return m_confirm_update; }
     void setConfirmUpdate(bool confirm) { m_confirm_update = confirm; }
 
@@ -65,6 +68,7 @@ class InstanceTask : public Task, public InstanceName {
     SettingsObject* m_globalSettings;
     QString m_instIcon;
     QString m_instGroup;
+    QString m_targetDir;
     QString m_stagingPath;
 
     bool m_override_existing = false;

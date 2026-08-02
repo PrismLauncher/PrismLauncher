@@ -921,6 +921,7 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
         return;
 
     APPLICATION->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
+    APPLICATION->settings()->set("LastUsedInstDirForNewInstance", newInstDlg.instDir());
 
     InstanceTask* creationTask = newInstDlg.extractTask();
     if (creationTask) {

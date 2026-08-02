@@ -930,7 +930,7 @@ class InstanceStaging : public Task {
    public:
     InstanceStaging(InstanceList* parent, InstanceTask* child, SettingsObject* settings) : m_parent(parent), backoff(minBackoff, maxBackoff)
     {
-        m_stagingPath = parent->getStagedInstancePath();
+        m_stagingPath = parent->getStagedInstancePath(child->targetDir());
 
         m_child.reset(child);
 
@@ -1024,9 +1024,10 @@ Task* InstanceList::wrapInstanceTask(InstanceTask* task)
     return new InstanceStaging(this, task, m_globalSettings);
 }
 
-QString InstanceList::getStagedInstancePath()
+QString InstanceList::getStagedInstancePath(const QString& targetDir)
 {
-    const QString tempRoot = FS::PathCombine(primaryDir(), ".tmp");
+    QString root = (!targetDir.isEmpty() && m_instDirs.contains(targetDir)) ? targetDir : primaryDir();
+    const QString tempRoot = FS::PathCombine(root, ".tmp");
 
     QString result;
     int tries = 0;
@@ -1059,17 +1060,22 @@ bool InstanceList::commitStagedInstance(const QString& path,
 
     auto should_override = commiting.shouldOverride();
 
+    QString targetDir = commiting.targetDir();
+    if (targetDir.isEmpty() || !m_instDirs.contains(targetDir)) {
+        targetDir = primaryDir();
+    }
+
     if (should_override) {
         instID = commiting.originalInstanceID();
     } else {
-        instID = FS::DirNameFromString(instanceName.modifiedName(), primaryDir());
+        instID = FS::DirNameFromString(instanceName.modifiedName(), targetDir);
     }
 
     Q_ASSERT(!instID.isEmpty());
 
     {
-        WatchLock lock(m_watcher, primaryDir());
-        QString destination = FS::PathCombine(primaryDir(), instID);
+        WatchLock lock(m_watcher, targetDir);
+        QString destination = FS::PathCombine(targetDir, instID);
 
         if (should_override) {
             if (!FS::overrideFolder(destination, path)) {
@@ -1084,7 +1090,7 @@ bool InstanceList::commitStagedInstance(const QString& path,
 
             m_instanceGroupIndex[instID] = groupName;
             increaseGroupCount(groupName);
-            m_instanceRootDirMap[instID] = primaryDir();
+            m_instanceRootDirMap[instID] = targetDir;
         }
 
         instanceSet.insert(instID);

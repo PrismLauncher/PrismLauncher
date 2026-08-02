@@ -687,6 +687,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // Folders
         m_settings->registerSetting("InstanceDir", "instances");
         m_settings->registerSetting("AdditionalInstanceDirs", QVariant(QStringList()));
+        m_settings->registerSetting("LastUsedInstDirForNewInstance", "");
         m_settings->registerSetting({ "CentralModsDir", "ModsDir" }, "mods");
         m_settings->registerSetting("IconsDir", "icons");
         m_settings->registerSetting("DownloadsDir", QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));

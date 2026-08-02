@@ -78,6 +78,18 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 
     ui->instNameTextBox->installEventFilter(this);
 
+    auto instDir = APPLICATION->settings()->get("InstanceDir").toString();
+    ui->instDirBox->addItem(tr("Default (%1)").arg(instDir), instDir);
+    for (const auto& dir : APPLICATION->settings()->get("AdditionalInstanceDirs").toStringList()) {
+        if (!dir.isEmpty()) {
+            ui->instDirBox->addItem(dir, dir);
+        }
+    }
+
+    auto lastUsedDir = APPLICATION->settings()->get("LastUsedInstDirForNewInstance").toString();
+    int lastUsedIdx = ui->instDirBox->findData(lastUsedDir);
+    ui->instDirBox->setCurrentIndex(lastUsedIdx >= 0 ? lastUsedIdx : 0);
+
     setWindowIcon(QIcon::fromTheme("new"));
 
     InstIconKey = "default";
@@ -279,6 +291,7 @@ InstanceTask* NewInstanceDialog::extractTask()
 
     extracted->setGroup(instGroup());
     extracted->setIcon(iconKey());
+    extracted->setTargetDir(ui->instDirBox->currentData().toString());
     return extracted;
 }
 
@@ -311,6 +324,11 @@ QString NewInstanceDialog::instGroup() const
 QString NewInstanceDialog::iconKey() const
 {
     return InstIconKey;
+}
+
+QString NewInstanceDialog::instDir() const
+{
+    return ui->instDirBox->currentData().toString();
 }
 
 void NewInstanceDialog::on_iconButton_clicked()
