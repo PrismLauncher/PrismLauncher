@@ -174,6 +174,7 @@ class InstanceList : public QAbstractListModel {
    private:
     int getInstIndex(BaseInstance* inst) const;
     void updateTotalPlayTime();
+    void migrateTotalPlayTime();
     void suspendWatch();
     void resumeWatch();
     void add(std::vector<std::unique_ptr<BaseInstance>>& list);

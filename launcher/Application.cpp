@@ -772,6 +772,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("ShowGlobalGameTime", true);
         m_settings->registerSetting("RecordGameTime", true);
         m_settings->registerSetting("ShowGameTimeWithoutDays", false);
+        m_settings->registerSetting("TotalPlayTime", 0);
+        m_settings->registerSetting("TotalPlayTimeMigrated", false);
 
         // Minecraft mods
         m_settings->registerSetting("ModMetadataDisabled", false);

@@ -578,6 +578,7 @@ InstanceList::InstListError InstanceList::loadList()
     }
     m_dirty = false;
     updateTotalPlayTime();
+    migrateTotalPlayTime();
     return NoError;
 }
 
@@ -589,6 +590,24 @@ void InstanceList::updateTotalPlayTime()
             m_totalPlayTime += itr->totalTimePlayed();
         }
     }
+}
+
+void InstanceList::migrateTotalPlayTime()
+{
+    if (m_globalSettings->get("TotalPlayTimeMigrated").toBool()) {
+        return;
+    }
+
+    qint64 existingTotal = 0;
+    for (const auto& itr : m_instances) {
+        existingTotal += itr->totalTimePlayed();
+    }
+
+    qint64 current = m_globalSettings->get("TotalPlayTime").toLongLong();
+    m_globalSettings->set("TotalPlayTime", current + existingTotal);
+    m_globalSettings->set("TotalPlayTimeMigrated", true);
+
+    qDebug() << "Migrated" << existingTotal << "seconds of existing instance playtime into global TotalPlayTime.";
 }
 
 void InstanceList::saveNow()
