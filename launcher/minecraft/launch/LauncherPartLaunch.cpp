@@ -48,9 +48,17 @@
 #include "gamemode_client.h"
 #endif
 
+#ifdef Q_OS_WIN
+#include <windows.h>
+#endif
+
 LauncherPartLaunch::LauncherPartLaunch(LaunchTask* parent)
     : LaunchStep(parent)
+#ifdef Q_OS_WIN
+    , m_process(GetACP() == 65001 ? QStringConverter::Utf8 : QStringConverter::System)
+#else
     , m_process(parent->instance()->getJavaVersion().defaultsToUtf8() ? QStringConverter::Utf8 : QStringConverter::System)
+#endif
 {
     if (parent->instance()->settings()->get("CloseAfterLaunch").toBool()) {
         static const QRegularExpression s_settingUser(".*Setting user.+", QRegularExpression::CaseInsensitiveOption);
