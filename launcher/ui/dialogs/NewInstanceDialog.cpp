@@ -167,7 +167,7 @@ void NewInstanceDialog::reject()
 void NewInstanceDialog::accept()
 {
     auto chosenDir = instDir();
-    if (!chosenDir.isEmpty() && !QDir(chosenDir).exists()) {
+    if (!QDir(chosenDir).exists()) {
         CustomMessageBox::selectable(
             this, tr("Directory unavailable"),
             tr("The instance directory \"%1\" is no longer accessible. Please choose another location.").arg(chosenDir),
@@ -320,7 +320,7 @@ InstanceTask* NewInstanceDialog::extractTask()
 
     extracted->setGroup(instGroup());
     extracted->setIcon(iconKey());
-    extracted->setTargetDir(ui->instDirBox->currentData().toString());
+    extracted->setTargetDir(instDir());
     return extracted;
 }
 

@@ -129,7 +129,7 @@ class InstanceList : public QAbstractListModel {
      * Create a new empty staging area for instance creation and @return a path/key top commit it later.
      * Used by instance manipulation tasks.
      */
-    QString getStagedInstancePath(const QString& targetDir = QString());
+    QString getStagedInstancePath(const QString& targetDir);
 
     /**
      * Commit the staging area given by @keyPath to the provider - used when creation succeeds.
