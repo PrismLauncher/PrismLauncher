@@ -48,22 +48,9 @@
 #include "gamemode_client.h"
 #endif
 
-#ifdef Q_OS_WIN
-#include <windows.h>
-#endif
-
 LauncherPartLaunch::LauncherPartLaunch(LaunchTask* parent)
     : LaunchStep(parent)
-#ifdef Q_OS_WIN
-    // On Windows with a legacy ANSI code page (e.g. 936/GBK, 932/Shift-JIS), the JVM
-    // and some modloaders/mods print to stdout/stderr using that system code page instead
-    // of UTF-8, so decoding as UTF-8 produces mojibake. Use the system codec in that case;
-    // on systems using UTF-8 (ACP == 65001, i.e. "Beta: Use Unicode UTF-8") this resolves
-    // to UTF-8 and behaves exactly as before.
-    , m_process(GetACP() == 65001 ? QStringConverter::Utf8 : QStringConverter::System)
-#else
     , m_process(parent->instance()->getJavaVersion().defaultsToUtf8() ? QStringConverter::Utf8 : QStringConverter::System)
-#endif
 {
     if (parent->instance()->settings()->get("CloseAfterLaunch").toBool()) {
         static const QRegularExpression s_settingUser(".*Setting user.+", QRegularExpression::CaseInsensitiveOption);
