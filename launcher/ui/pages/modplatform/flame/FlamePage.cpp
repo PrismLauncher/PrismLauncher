@@ -335,7 +335,7 @@ void FlamePage::createFilterWidget()
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &FlamePage::triggerSearch);
     auto [task, response] = FlameAPI::getCategories(ModPlatform::ResourceType::Modpack);
     m_categoriesTask = task;
-    connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
+    connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() {
         auto categories = FlameAPI().loadModCategories(*response);
         m_filterWidget->setCategories(categories);
     });
