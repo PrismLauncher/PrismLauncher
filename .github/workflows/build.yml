@@ -131,6 +131,11 @@ jobs:
           cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE"
 
       - name: Run tests
+        # NOTE(@getchoo): Tests are skipped for MinGW-arm64 builds due to
+        # repeated, random test failures exclusive to the platform
+        #
+        # As of Qt 6.11, official ARM support for Windows is also limited to MSVC...so
+        if: ${{ !(runner.os == 'Windows' && runner.arch == 'ARM64' && matrix.msystem != '') }}
         run: |
           ctest --preset "$CMAKE_PRESET" --build-config "$BUILD_TYPE"
 
