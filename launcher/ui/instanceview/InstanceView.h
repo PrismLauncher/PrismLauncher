@@ -50,6 +50,24 @@ struct InstanceViewRoles {
 class InstanceView : public QAbstractItemView {
     Q_OBJECT
 
+    // Appearance knobs a theme can set from QSS, e.g.
+    //     InstanceView { qproperty-labelBackgroundAlpha: 160; }
+    //
+    // labelBackgroundAlpha draws a translucent plate behind the instance name.
+    // It is off by default because the item background covers readability;
+    // themes that leave the item transparent may want it back.
+    //
+    // highlightSelectedText paints selected labels with HighlightedText. It is
+    // off by default because the default selection has no filled background.
+    // Themes that fill InstanceView::item:selected should turn it on.
+    Q_PROPERTY(int labelBackgroundAlpha MEMBER m_labelBackgroundAlpha)
+    Q_PROPERTY(bool highlightSelectedText MEMBER m_highlightSelectedText)
+    //
+    // highlightSelectedIcon tints the icon with QIcon::Selected. Off by
+    // default: instance icons are user artwork and the tint only makes sense
+    // when the selection is a solid block of Highlight behind them.
+    Q_PROPERTY(bool highlightSelectedIcon MEMBER m_highlightSelectedIcon)
+
    public:
     InstanceView(QWidget* parent = 0);
     ~InstanceView();
@@ -99,6 +117,7 @@ class InstanceView : public QAbstractItemView {
     bool isIndexHidden(const QModelIndex& index) const override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
+    bool viewportEvent(QEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseDoubleClickEvent(QMouseEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
@@ -134,6 +153,12 @@ class InstanceView : public QAbstractItemView {
     // point where the currently active mouse action started in geometry coordinates
     QPoint m_pressedPosition;
     QPersistentModelIndex m_pressedIndex;
+    QPersistentModelIndex m_hoveredIndex;
+
+    // theme-settable appearance, see the Q_PROPERTY declarations above
+    int m_labelBackgroundAlpha = 0;
+    bool m_highlightSelectedText = false;
+    bool m_highlightSelectedIcon = false;
     bool m_pressedAlreadySelected;
     VisualGroup* m_pressedCategory;
     QItemSelectionModel::SelectionFlag m_ctrlDragSelectionFlag;
