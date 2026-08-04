@@ -90,8 +90,6 @@ class MainWindow : public QMainWindow {
    private slots:
     void onCatToggled(bool);
 
-    void onCatChanged(int);
-
     void on_actionAbout_triggered();
 
     void on_actionAddInstance_triggered();
@@ -224,6 +222,7 @@ class MainWindow : public QMainWindow {
     void addInstance(const QString& url = QString(), const QMap<QString, QString>& extra_info = {});
     void activateInstance(BaseInstance* instance);
     void setCatBackground(bool enabled);
+    void updateCatState();
     void updateInstanceToolIcon(QString new_icon);
     void setSelectedInstanceById(const QString& id);
     void updateStatusCenter();

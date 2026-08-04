@@ -204,6 +204,16 @@
        </spacer>
       </item>
       <item>
+       <widget class="QCheckBox" name="enableCatCheckBox">
+        <property name="text">
+         <string>Enable cat</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="catOpacityLabel">
         <property name="text">
          <string>Cat Opacity</string>
@@ -235,7 +245,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QWidget" name="widget" native="true">
+       <widget class="QWidget" name="catOpacityWidget" native="true">
         <property name="maximumSize">
          <size>
           <width>300</width>
@@ -623,8 +633,9 @@
   <tabstop>reloadThemesButton</tabstop>
   <tabstop>consoleFont</tabstop>
   <tabstop>fontSizeBox</tabstop>
-  <tabstop>catFitComboBox</tabstop>
+  <tabstop>enableCatCheckBox</tabstop>
   <tabstop>catOpacitySlider</tabstop>
+  <tabstop>catFitComboBox</tabstop>
   <tabstop>consolePreview</tabstop>
  </tabstops>
  <resources/>

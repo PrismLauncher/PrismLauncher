@@ -338,11 +338,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     {
         // set the cat action priority here so you can still see the action in qt designer
         ui->actionCAT->setPriority(QAction::LowPriority);
-        bool cat_enable = APPLICATION->settings()->get("TheCat").toBool();
-        ui->actionCAT->setChecked(cat_enable);
+        updateCatState();
         connect(ui->actionCAT, &QAction::toggled, this, &MainWindow::onCatToggled);
-        connect(APPLICATION, &Application::currentCatChanged, this, &MainWindow::onCatChanged);
-        setCatBackground(cat_enable);
+        connect(APPLICATION, &Application::currentCatChanged, this, &MainWindow::updateCatState);
     }
 
     // Togglable status bar
@@ -852,6 +850,21 @@ void MainWindow::setCatBackground(bool enabled)
 {
     view->setPaintCat(enabled);
     view->viewport()->repaint();
+}
+
+void MainWindow::updateCatState()
+{
+    SettingsObject* settings = APPLICATION->settings();
+    const bool catEnabled = settings->get("EnableCat").toBool();
+    bool catVisible = settings->get("TheCat").toBool();
+    if (!catEnabled && catVisible) {
+        settings->set("TheCat", false);
+        catVisible = false;
+    }
+
+    ui->actionCAT->setVisible(catEnabled);
+    ui->actionCAT->setChecked(catVisible);
+    setCatBackground(catVisible);
 }
 
 void MainWindow::runModalTask(Task* task)
@@ -1374,6 +1387,7 @@ void MainWindow::globalSettingsClosed()
     updateLaunchButton();
     updateThemeMenu();
     updateStatusCenter();
+    updateCatState();
     // This needs to be done to prevent UI elements disappearing in the event the config is changed
     // but Prism Launcher exits abnormally, causing the window state to never be saved:
     APPLICATION->settings()->set("MainWindowState", QString::fromUtf8(saveState().toBase64()));
@@ -1470,11 +1484,6 @@ void MainWindow::newsButtonClicked()
     NewsDialog news_dialog(entries, this);
     news_dialog.toggleArticleList();
     news_dialog.exec();
-}
-
-void MainWindow::onCatChanged(int)
-{
-    setCatBackground(APPLICATION->settings()->get("TheCat").toBool());
 }
 
 void MainWindow::on_actionAbout_triggered()
