@@ -296,8 +296,8 @@ void BaseInstance::setMinecraftRunning(bool running)
         settings()->set("totalTimePlayed", current + secondsPlayed);
         settings()->set("lastTimePlayed", secondsPlayed);
 
-        qint64 globalTotal = m_global_settings->get("TotalPlayTime").toLongLong();
-        m_global_settings->set("TotalPlayTime", globalTotal + secondsPlayed);
+        qint64 globalTotal = APPLICATION->playtimeSettings()->get("TotalPlayTime").toLongLong();
+        APPLICATION->playtimeSettings()->set("TotalPlayTime", globalTotal + secondsPlayed);
 
         emit propertiesChanged(this);
     }

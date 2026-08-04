@@ -772,8 +772,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("ShowGlobalGameTime", true);
         m_settings->registerSetting("RecordGameTime", true);
         m_settings->registerSetting("ShowGameTimeWithoutDays", false);
-        m_settings->registerSetting("TotalPlayTime", 0);
-        m_settings->registerSetting("TotalPlayTimeMigrated", false);
 
         // Minecraft mods
         m_settings->registerSetting("ModMetadataDisabled", false);
@@ -920,6 +918,14 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         PixmapCache::setInstance(new PixmapCache(this));
 
         qInfo() << "<> Settings loaded.";
+    }
+
+    // Initialize playtime settings, stored separately so this data can be synced
+    // independently of machine-specific configuration
+    {
+        m_playtimeSettings.reset(new INISettingsObject(QString("playtime.cfg"), this));
+        m_playtimeSettings->registerSetting("TotalPlayTime", 0);
+        m_playtimeSettings->registerSetting("TotalPlayTimeMigrated", false);
     }
 
 #ifndef QT_NO_ACCESSIBILITY

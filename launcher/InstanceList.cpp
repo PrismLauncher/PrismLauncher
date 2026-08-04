@@ -49,6 +49,7 @@
 #include <QUuid>
 #include <algorithm>
 
+#include "Application.h"
 #include "BaseInstance.h"
 #include "ExponentialSeries.h"
 #include "FileSystem.h"
@@ -594,7 +595,7 @@ void InstanceList::updateTotalPlayTime()
 
 void InstanceList::migrateTotalPlayTime()
 {
-    if (m_globalSettings->get("TotalPlayTimeMigrated").toBool()) {
+    if (APPLICATION->playtimeSettings()->get("TotalPlayTimeMigrated").toBool()) {
         return;
     }
 
@@ -603,9 +604,9 @@ void InstanceList::migrateTotalPlayTime()
         existingTotal += itr->totalTimePlayed();
     }
 
-    qint64 current = m_globalSettings->get("TotalPlayTime").toLongLong();
-    m_globalSettings->set("TotalPlayTime", current + existingTotal);
-    m_globalSettings->set("TotalPlayTimeMigrated", true);
+    qint64 current = APPLICATION->playtimeSettings()->get("TotalPlayTime").toLongLong();
+    APPLICATION->playtimeSettings()->set("TotalPlayTime", current + existingTotal);
+    APPLICATION->playtimeSettings()->set("TotalPlayTimeMigrated", true);
 
     qDebug() << "Migrated" << existingTotal << "seconds of existing instance playtime into global TotalPlayTime.";
 }

@@ -1759,7 +1759,7 @@ void MainWindow::checkInstancePathForProblems()
 void MainWindow::updateStatusCenter()
 {
     m_statusCenter->setVisible(APPLICATION->settings()->get("ShowGlobalGameTime").toBool());
-    int64_t timePlayed = APPLICATION->settings()->get("TotalPlayTime").toLongLong();
+    int64_t timePlayed = APPLICATION->playtimeSettings()->get("TotalPlayTime").toLongLong();
     if (timePlayed > 0) {
         m_statusCenter->setText(
             tr("Total playtime: %1")
