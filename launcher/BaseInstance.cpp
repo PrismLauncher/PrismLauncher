@@ -91,8 +91,12 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
     m_settings->registerSetting("linkedInstances", "[]");
     m_settings->registerSetting("shortcuts", QString());
     m_settings->registerSetting("uuid", QString());
-    if (m_settings->get("uuid").toString().isEmpty()) {
+
+    const auto savedUUID = m_settings->get("uuid").toString();
+    if (savedUUID.isEmpty()) {
         regenerateUuid();
+    } else {
+        m_uuid = savedUUID;
     }
 
     // Game time override
@@ -274,14 +278,11 @@ QString BaseInstance::id() const
     return QFileInfo(instanceRoot()).fileName();
 }
 
-QString BaseInstance::uuid() const
-{
-    return m_settings->get("uuid").toString();
-}
-
 void BaseInstance::regenerateUuid()
 {
-    m_settings->set("uuid", QUuid::createUuid().toString(QUuid::Id128));
+    const auto newUUID = QUuid::createUuid().toString(QUuid::Id128);
+    m_settings->set("uuid", newUUID);
+    m_uuid = newUUID;
 }
 
 bool BaseInstance::isRunning() const
