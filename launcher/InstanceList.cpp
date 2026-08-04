@@ -578,19 +578,8 @@ InstanceList::InstListError InstanceList::loadList()
         add(newList);
     }
     m_dirty = false;
-    updateTotalPlayTime();
     migrateTotalPlayTime();
     return NoError;
-}
-
-void InstanceList::updateTotalPlayTime()
-{
-    m_totalPlayTime = 0;
-    for (const auto& itr : m_instances) {
-        if (itr->countTimePlayed()) {
-            m_totalPlayTime += itr->totalTimePlayed();
-        }
-    }
 }
 
 void InstanceList::migrateTotalPlayTime()
@@ -702,7 +691,6 @@ void InstanceList::propertiesChanged(BaseInstance* inst)
     int i = getInstIndex(inst);
     if (i != -1) {
         emit dataChanged(index(i), index(i));
-        updateTotalPlayTime();
     }
 }
 
@@ -1134,12 +1122,6 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
 
     saveGroupList();
     return true;
-}
-
-int64_t InstanceList::getTotalPlayTime()
-{
-    updateTotalPlayTime();
-    return m_totalPlayTime;
 }
 
 #include "InstanceList.moc"
