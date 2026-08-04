@@ -590,7 +590,9 @@ void InstanceList::migrateTotalPlayTime()
 
     qint64 existingTotal = 0;
     for (const auto& itr : m_instances) {
-        existingTotal += itr->totalTimePlayed();
+        if (itr->countTimePlayed()) {
+            existingTotal += itr->totalTimePlayed();
+        }
     }
 
     qint64 current = APPLICATION->playtimeSettings()->get("TotalPlayTime").toLongLong();
