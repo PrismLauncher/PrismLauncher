@@ -68,7 +68,7 @@ void DataPackPage::downloadDataPacks()
         return;  // this is a null instance or a legacy instance
     }
 
-    m_downloadDialog = new ResourceDownload::DataPackDownloadDialog(this, m_model, m_instance);
+    m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createDataPack(this, m_model, m_instance);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &DataPackPage::downloadDialogFinished);
 
@@ -242,9 +242,9 @@ void DataPackPage::changeDataPackVersion()
         return;
     }
 
-    ResourceDownload::DataPackDownloadDialog mdownload(this, m_model, m_instance, true);
-    mdownload.setResourceMetadata(resource.metadata());
-    if (mdownload.exec() != 0) {
+    m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createDataPack(this, m_model, m_instance, true);
+    m_downloadDialog->setResourceMetadata(resource.metadata());
+    if (m_downloadDialog->exec() != 0) {
         auto* tasks = new ConcurrentTask("Download Data Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
@@ -263,7 +263,7 @@ void DataPackPage::changeDataPackVersion()
             tasks->deleteLater();
         });
 
-        for (auto& task : mdownload.getTasks()) {
+        for (auto& task : m_downloadDialog->getTasks()) {
             tasks->addTask(task);
         }
 

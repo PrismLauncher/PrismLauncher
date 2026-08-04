@@ -68,6 +68,11 @@ stdenv.mkDerivation {
     ln -s ${libnbtplusplus} source/libraries/libnbtplusplus
   '';
 
+  postPatch = ''
+    substituteInPlace launcher/minecraft/ShortcutUtils.cpp \
+      --replace-fail 'QApplication::applicationFilePath()' 'QProcessEnvironment::systemEnvironment().value("NIX_LAUNCHER_WRAPPER", "${placeholder "out"}/bin/prismlauncher")'
+  '';
+
   nativeBuildInputs = [
     cmake
     ninja

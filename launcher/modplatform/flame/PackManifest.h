@@ -81,7 +81,7 @@ struct Manifest {
     QMap<int, Flame::File> files;
     QString overrides;
 
-    bool is_loaded = false;
+    bool isLoaded = false;
 };
 
 void loadManifest(Flame::Manifest& m, const QString& filepath);

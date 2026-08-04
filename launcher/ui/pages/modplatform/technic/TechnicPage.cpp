@@ -63,7 +63,6 @@ TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent)
     ui->packView->setModel(model);
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
     m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
     m_search_timer.setSingleShot(true);

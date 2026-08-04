@@ -36,25 +36,26 @@
 #pragma once
 
 #include <QAbstractListModel>
+#include <QHash>
 #include <QList>
 #include <QObject>
 #include <QPair>
 #include <QSet>
 #include <QStack>
+#include <cstdint>
 
 #include "BaseInstance.h"
 
 class QFileSystemWatcher;
 class InstanceTask;
-struct InstanceName;
 
 using InstanceId = QString;
 using GroupId = QString;
 using InstanceLocator = std::pair<BaseInstance*, int>;
 
-enum class InstCreateError { NoCreateError = 0, NoSuchVersion, UnknownCreateError, InstExists, CantCreateDir };
+enum class InstCreateError : std::uint8_t { NoCreateError = 0, NoSuchVersion, UnknownCreateError, InstExists, CantCreateDir };
 
-enum class GroupsState { NotLoaded, Steady, Dirty };
+enum class GroupsState : std::uint8_t { NotLoaded, Steady, Dirty };
 
 struct TrashShortcutItem {
     ShortcutData data;
@@ -73,8 +74,8 @@ class InstanceList : public QAbstractListModel {
     Q_OBJECT
 
    public:
-    explicit InstanceList(SettingsObject* settings, const QString& instDir, QObject* parent = 0);
-    virtual ~InstanceList();
+    explicit InstanceList(SettingsObject* settings, const QStringList& instDirs, QObject* parent = nullptr);
+    ~InstanceList() override = default;
 
    public:
     QModelIndex index(int row, int column = 0, const QModelIndex& parent = QModelIndex()) const override;
@@ -94,7 +95,7 @@ class InstanceList : public QAbstractListModel {
      * NoError Indicates that no error occurred.
      * UnknownError indicates that an unspecified error occurred.
      */
-    enum InstListError { NoError = 0, UnknownError };
+    enum InstListError : std::uint8_t { NoError = 0, UnknownError };
 
     BaseInstance* at(int i) const { return m_instances.at(i).get(); }
 
@@ -104,9 +105,9 @@ class InstanceList : public QAbstractListModel {
     void saveNow();
 
     /* O(n) */
-    BaseInstance* getInstanceById(QString id) const;
+    BaseInstance* getInstanceById(const QString& id) const;
     /* O(n) */
-    BaseInstance* getInstanceByManagedName(const QString& managed_name) const;
+    BaseInstance* getInstanceByManagedName(const QString& managedName) const;
     QModelIndex getInstanceIndexById(const QString& id) const;
     QStringList getGroups();
     bool isGroupCollapsed(const QString& groupName);
@@ -136,15 +137,9 @@ class InstanceList : public QAbstractListModel {
      * should_override is used when another similar instance already exists, and we want to override it
      * - for instance, when updating it.
      */
-    bool commitStagedInstance(const QString& keyPath, const InstanceName& instanceName, QString groupName, const InstanceTask&);
+    bool commitStagedInstance(const QString& keyPath, const InstanceTask& instanceTask, QString groupName);
 
-    /**
-     * Destroy a previously created staging area given by @keyPath - used when creation fails.
-     * Used by instance manipulation tasks.
-     */
-    bool destroyStagingPath(const QString& keyPath);
-
-    int getTotalPlayTime();
+    int64_t getTotalPlayTime();
 
     Qt::DropActions supportedDragActions() const override;
 
@@ -159,6 +154,8 @@ class InstanceList : public QAbstractListModel {
 
     QStringList getLinkedInstancesById(const QString& id) const;
 
+    QString primaryDir() const { return m_instDirs.isEmpty() ? QString() : m_instDirs.first(); }
+
    signals:
     void dataIsInvalid();
     void instancesChanged();
@@ -166,7 +163,7 @@ class InstanceList : public QAbstractListModel {
     void groupsChanged(QSet<QString> groups);
 
    public slots:
-    void on_InstFolderChanged(const Setting& setting, QVariant value);
+    void on_InstFolderChanged(const Setting& setting, const QVariant& value);
     void on_GroupStateChanged(const QString& group, bool collapsed);
 
    private slots:
@@ -190,19 +187,21 @@ class InstanceList : public QAbstractListModel {
 
    private:
     int m_watchLevel = 0;
-    int totalPlayTime = 0;
+    int64_t m_totalPlayTime = 0;
     bool m_dirty = false;
     std::vector<std::unique_ptr<BaseInstance>> m_instances;
     // id -> refs
     QMap<QString, int> m_groupNameCache;
 
     SettingsObject* m_globalSettings;
-    QString m_instDir;
+    QStringList m_instDirs;
+    QHash<InstanceId, QString> m_instanceRootDirMap;
+    QString rootDirOf(const InstanceId& id) const;
     QFileSystemWatcher* m_watcher;
     // FIXME: this is so inefficient that looking at it is almost painful.
     QSet<QString> m_collapsedGroups;
     QMap<InstanceId, GroupId> m_instanceGroupIndex;
-    QSet<InstanceId> instanceSet;
+    QSet<InstanceId> m_instanceSet;
     bool m_groupsLoaded = false;
     bool m_instancesProbed = false;
 

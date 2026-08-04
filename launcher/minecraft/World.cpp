@@ -220,16 +220,32 @@ void World::repath(const QFileInfo& file)
 {
     m_containerFile = file;
     m_folderName = file.fileName();
+    m_metadataLoaded = false;
     if (file.isFile() && file.suffix() == "zip") {
         m_iconFile = QString();
-        readFromZip(file);
+        m_isValid = true;
     } else if (file.isDir()) {
         QFileInfo assumedIconPath(file.absoluteFilePath() + "/icon.png");
         if (assumedIconPath.exists()) {
             m_iconFile = assumedIconPath.absoluteFilePath();
         }
-        readFromFS(file);
+        m_isValid = QFileInfo(file.absoluteFilePath() + "/level.dat").exists();
+    } else {
+        m_isValid = false;
     }
+}
+
+void World::loadMetadata()
+{
+    if (m_metadataLoaded) {
+        return;
+    }
+    if (m_containerFile.isFile() && m_containerFile.suffix() == "zip") {
+        readFromZip(m_containerFile);
+    } else if (m_containerFile.isDir()) {
+        readFromFS(m_containerFile);
+    }
+    m_metadataLoaded = true;
 }
 
 bool World::resetIcon()

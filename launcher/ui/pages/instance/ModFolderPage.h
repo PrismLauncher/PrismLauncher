@@ -136,7 +136,7 @@ class ModFolderPage : public ExternalResourcesPage {
      void hideEvent(QHideEvent* event) override;
 
      ModFolderModel* m_model;
-     QPointer<ResourceDownload::ModDownloadDialog> m_downloadDialog;
+     QPointer<ResourceDownload::ResourceDownloadDialog> m_downloadDialog;
      QPointer<QWidget> m_filterWindow;
      bool m_downloadFlowActive = false;
      QTabBar*       m_profileTabBar  = nullptr;

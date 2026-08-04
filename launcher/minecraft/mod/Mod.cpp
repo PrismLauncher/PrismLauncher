@@ -152,7 +152,7 @@ int Mod::compare(const Resource& other, SortType type) const
     return 0;
 }
 
-bool Mod::applyFilter(QRegularExpression filter) const
+bool Mod::applyFilter(const QRegularExpression& filter) const
 {
     if (filter.match(description()).hasMatch())
         return true;
@@ -259,8 +259,8 @@ auto Mod::authors() const -> QStringList
 
 void Mod::finishResolvingWithDetails(ModDetails&& details)
 {
-    m_is_resolving = false;
-    m_is_resolved = true;
+    m_isResolving = false;
+    m_isResolved = true;
 
     m_local_details = std::move(details);
     if (!iconPath().isEmpty()) {

@@ -23,7 +23,6 @@ AuthFlow::AuthFlow(AccountData* data, Action action) : Task(), m_data(data)
         if (action == Action::DeviceCode) {
             auto oauthStep = makeShared<MSADeviceCodeStep>(m_data);
             connect(oauthStep.get(), &MSADeviceCodeStep::authorizeWithBrowser, this, &AuthFlow::authorizeWithBrowserWithExtra);
-            connect(this, &Task::aborted, oauthStep.get(), &MSADeviceCodeStep::abort);
             m_steps.append(oauthStep);
         } else {
             auto oauthStep = makeShared<MSAStep>(m_data, action == Action::Refresh);

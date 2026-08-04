@@ -1091,7 +1091,7 @@ void PackInstallTask::install()
 
         jarmods.clear();
     }
-    emitSucceeded();
+    downloadFiles(&instance);
 }
 
 }  // namespace ATLauncher

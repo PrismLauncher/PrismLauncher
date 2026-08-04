@@ -2,6 +2,7 @@
 
 #include <QDirIterator>
 #include <QFileInfo>
+#include <QObject>
 #include <QRegularExpression>
 #include <tuple>
 #include <utility>
@@ -11,16 +12,14 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
-Resource::Resource(QObject* parent) : QObject(parent), m_size_info(0) {}
-
-Resource::Resource(QFileInfo fileInfo) : m_size_info(0)
+Resource::Resource(const QFileInfo& fileInfo)
 {
     setFile(fileInfo);
 }
 
 void Resource::setFile(QFileInfo fileInfo)
 {
-    m_file_info = std::move(fileInfo);
+    m_fileInfo = std::move(fileInfo);
     parseFile();
 }
 
@@ -37,23 +36,24 @@ std::tuple<QString, qint64> calculateFileSize(const QFileInfo& file)
         }
         return { QString("%1 %2").arg(QString::number(count), str), count };
     }
-    return { StringUtils::humanReadableFileSize(file.size(), true), file.size() };
+    return { StringUtils::humanReadableFileSize(static_cast<double>(file.size()), true), file.size() };
 }
 }  // namespace
 
 void Resource::parseFile()
 {
-    QString fileName{ m_file_info.fileName() };
+    QString fileName{ m_fileInfo.fileName() };
 
     m_type = ResourceType::UNKNOWN;
 
-    m_internal_id = fileName;
+    m_internalId = fileName;
 
-    std::tie(m_size_str, m_size_info) = calculateFileSize(m_file_info);
-    if (m_file_info.isDir()) {
+    std::tie(m_sizeStr, m_sizeInfo) = calculateFileSize(m_fileInfo);
+    m_hardLinkCount = FS::hardLinkCount(m_fileInfo.absoluteFilePath());
+    if (m_fileInfo.isDir()) {
         m_type = ResourceType::FOLDER;
         m_name = fileName;
-    } else if (m_file_info.isFile()) {
+    } else if (m_fileInfo.isFile()) {
         if (fileName.endsWith(".disabled")) {
             fileName.chop(9);
             m_enabled = false;
@@ -75,7 +75,7 @@ void Resource::parseFile()
         m_name = fileName;
     }
 
-    m_changed_date_time = m_file_info.lastModified();
+    m_changedDateTime = m_fileInfo.lastModified();
 }
 
 auto Resource::name() const -> QString
@@ -102,7 +102,7 @@ auto Resource::provider() const -> QString
         return ModPlatform::ProviderCapabilities::readableName(metadata()->provider);
     }
 
-    return tr("Unknown");
+    return QObject::tr("Unknown");
 }
 
 auto Resource::homepage() const -> QString
@@ -120,7 +120,7 @@ void Resource::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
         setStatus(ResourceStatus::Installed);
     }
 
-    m_metadata = metadata;
+    m_metadata = std::move(metadata);
 }
 
 QStringList Resource::issues() const
@@ -129,7 +129,7 @@ QStringList Resource::issues() const
     result.reserve(m_issues.length());
 
     for (const char* issue : m_issues) {
-        result.append(tr(issue));
+        result.append(QObject::tr(issue));
     }
 
     return result;
@@ -221,7 +221,7 @@ int Resource::compare(const Resource& other, SortType type) const
     return 0;
 }
 
-bool Resource::applyFilter(QRegularExpression filter) const
+bool Resource::applyFilter(const QRegularExpression& filter) const
 {
     if (filter.match(name()).hasMatch()) {
         return true;
@@ -238,7 +238,7 @@ bool Resource::enable(EnableAction action)
         return false;
     }
 
-    QString path = m_file_info.absoluteFilePath();
+    QString path = m_fileInfo.absoluteFilePath();
     QFile file(path);
 
     bool enable = true;
@@ -291,7 +291,7 @@ auto Resource::destroy(const QDir& indexDir, bool preserveMetadata, bool attempt
         destroyMetadata(indexDir);
     }
 
-    return (attemptTrash && FS::trash(m_file_info.filePath())) || FS::deletePath(m_file_info.filePath());
+    return (attemptTrash && FS::trash(m_fileInfo.filePath())) || FS::deletePath(m_fileInfo.filePath());
 }
 
 auto Resource::destroyMetadata(const QDir& indexDir) -> void
@@ -313,20 +313,20 @@ bool Resource::isSymLinkUnder(const QString& instPath) const
 
     auto instDir = QDir(instPath);
 
-    auto relAbsPath = instDir.relativeFilePath(m_file_info.absoluteFilePath());
-    auto relCanonPath = instDir.relativeFilePath(m_file_info.canonicalFilePath());
+    auto relAbsPath = instDir.relativeFilePath(m_fileInfo.absoluteFilePath());
+    auto relCanonPath = instDir.relativeFilePath(m_fileInfo.canonicalFilePath());
 
     return relAbsPath != relCanonPath;
 }
 
 bool Resource::isMoreThanOneHardLink() const
 {
-    return FS::hardLinkCount(m_file_info.absoluteFilePath()) > 1;
+    return m_hardLinkCount > 1;
 }
 
 auto Resource::getOriginalFileName() const -> QString
 {
-    auto fileName = m_file_info.fileName();
+    auto fileName = m_fileInfo.fileName();
     if (!m_enabled) {
         fileName.chop(9);
     }

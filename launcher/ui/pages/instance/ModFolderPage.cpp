@@ -310,13 +310,19 @@ void ModFolderPage::removeItems(const QItemSelection& selection)
     auto indexes = selection.indexes();
     auto affected = m_model->getAffectedMods(indexes, EnableAction::DISABLE);
     if (!affected.isEmpty()) {
-        auto response = CustomMessageBox::selectable(this, tr("Confirm Disable"),
-                                                     tr("The mods you are trying to delete are required by %1 mods.\n"
-                                                        "Do you want to disable them?")
-                                                         .arg(affected.length()),
-                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
-                                                     QMessageBox::Cancel)
-                            ->exec();
+        auto* box = CustomMessageBox::selectable(this, tr("Confirm Disable"),
+                                                 tr("The mods you are trying to delete are required by %1 mods.\n"
+                                                    "Do you want to disable them?")
+                                                     .arg(affected.length()),
+                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
+                                                 QMessageBox::Cancel);
+        QString details = tr("The following mods depend on the mod(s) you want to remove:");
+        for (auto indx : affected) {
+            const Mod& mod = m_model->at(indx.row());
+            details += QString("\n- %1 (%2)").arg(mod.name(), mod.internalId());
+        }
+        box->setDetailedText(details);
+        const auto response = box->exec();
 
         if (response == QMessageBox::Cancel) {
             return;
@@ -339,7 +345,7 @@ void ModFolderPage::downloadMods()
         return;
     }
 
-    m_downloadDialog = new ResourceDownload::ModDownloadDialog(this, m_model, m_instance);
+    m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createMod(this, m_model, m_instance);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &ModFolderPage::downloadDialogFinished);
 
@@ -549,7 +555,7 @@ void ModFolderPage::changeModVersion()
         return;
     }
 
-    m_downloadDialog = new ResourceDownload::ModDownloadDialog(this, m_model, m_instance, true);
+    m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createMod(this, m_model, m_instance, true);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &ModFolderPage::downloadDialogFinished);
 
@@ -646,8 +652,7 @@ inline bool ModFolderPage::handleNoModLoader()
             return true;
         }
         if (!profile->getModLoaders().has_value()) {
-            CustomMessageBox::selectable(
-                this, tr("Error"), tr("No mod loader was installed. Please try again."), QMessageBox::Warning)
+            CustomMessageBox::selectable(this, tr("Error"), tr("No mod loader was installed. Please try again."), QMessageBox::Warning)
                 ->show();
             return true;
         }
