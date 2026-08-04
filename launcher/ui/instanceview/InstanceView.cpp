@@ -72,6 +72,9 @@ InstanceView::InstanceView(QWidget* parent) : QAbstractItemView(parent)
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setAcceptDrops(true);
     setAutoScroll(true);
+    // needed so items can report State_MouseOver, for the hover state and for
+    // themes using InstanceView::item:hover
+    viewport()->setMouseTracking(true);
     setPaintCat(APPLICATION->settings()->get("TheCat").toBool());
     connect(verticalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
     connect(horizontalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
@@ -317,9 +320,24 @@ void InstanceView::mousePressEvent(QMouseEvent* event)
     }
 }
 
+bool InstanceView::viewportEvent(QEvent* event)
+{
+    if (event->type() == QEvent::Leave && m_hoveredIndex.isValid()) {
+        m_hoveredIndex = QModelIndex();
+        viewport()->update();
+    }
+    return QAbstractItemView::viewportEvent(event);
+}
+
 void InstanceView::mouseMoveEvent(QMouseEvent* event)
 {
     executeDelayedItemsLayout();
+
+    const QPersistentModelIndex hovered = indexAt(event->pos());
+    if (hovered != m_hoveredIndex) {
+        m_hoveredIndex = hovered;
+        viewport()->update();
+    }
 
     QPoint topLeft;
     QPoint visualPos = event->pos();
@@ -537,7 +555,18 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
         } else {
             option.state &= ~QStyle::State_Selected;
         }
-        option.state |= (index == currentIndex()) ? QStyle::State_HasFocus : QStyle::State_None;
+        // option is reused across iterations, so these have to be cleared as
+        // well as set - otherwise the flag leaks onto every later item. The
+        // view is also under the mouse as a whole, which sets State_MouseOver
+        // on the shared option before the loop even starts.
+        if (index == currentIndex())
+            option.state |= QStyle::State_HasFocus;
+        else
+            option.state &= ~QStyle::State_HasFocus;
+        if (index == m_hoveredIndex)
+            option.state |= QStyle::State_MouseOver;
+        else
+            option.state &= ~QStyle::State_MouseOver;
         if (!(flags & Qt::ItemIsEnabled)) {
             option.state &= ~QStyle::State_Enabled;
         }
