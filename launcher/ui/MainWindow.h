@@ -90,6 +90,8 @@ class MainWindow : public QMainWindow {
    private slots:
     void onCatToggled(bool);
 
+    void onCatChanged(int);
+
     void on_actionAbout_triggered();
 
     void on_actionAddInstance_triggered();

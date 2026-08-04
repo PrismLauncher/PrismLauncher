@@ -340,7 +340,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->actionCAT->setPriority(QAction::LowPriority);
         updateCatState();
         connect(ui->actionCAT, &QAction::toggled, this, &MainWindow::onCatToggled);
-        connect(APPLICATION, &Application::currentCatChanged, this, &MainWindow::updateCatState);
+        connect(APPLICATION, &Application::currentCatChanged, this, &MainWindow::onCatChanged);
     }
 
     // Togglable status bar
@@ -1484,6 +1484,11 @@ void MainWindow::newsButtonClicked()
     NewsDialog news_dialog(entries, this);
     news_dialog.toggleArticleList();
     news_dialog.exec();
+}
+
+void MainWindow::onCatChanged(int)
+{
+    setCatBackground(APPLICATION->settings()->get("TheCat").toBool());
 }
 
 void MainWindow::on_actionAbout_triggered()

@@ -51,10 +51,7 @@ AppearanceWidget::AppearanceWidget(bool themesOnly, QWidget* parent)
 {
     m_ui->setupUi(this);
 
-    connect(m_ui->enableCatCheckBox, &QCheckBox::toggled, m_ui->catOpacityLabel, &QWidget::setEnabled);
-    connect(m_ui->enableCatCheckBox, &QCheckBox::toggled, m_ui->catOpacityWidget, &QWidget::setEnabled);
-    connect(m_ui->enableCatCheckBox, &QCheckBox::toggled, m_ui->catFitLabel, &QWidget::setEnabled);
-    connect(m_ui->enableCatCheckBox, &QCheckBox::toggled, m_ui->catFitComboBox, &QWidget::setEnabled);
+    connect(m_ui->enableCatCheckBox, &QCheckBox::toggled, m_ui->catSettingsBox, &QWidget::setEnabled);
 
     m_ui->catPreview->setGraphicsEffect(new QGraphicsOpacityEffect(this));
 
