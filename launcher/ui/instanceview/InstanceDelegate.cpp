@@ -42,7 +42,9 @@
 #include <QtMath>
 
 #include <QIcon>
+#include <QStyle>
 #include <QTextEdit>
+#include <QWidget>
 #include "BaseInstance.h"
 #include "InstanceList.h"
 #include "InstanceView.h"
@@ -70,15 +72,113 @@ static void viewItemTextLayout(QTextLayout& textLayout, int lineWidth, qreal& he
 
 ListViewDelegate::ListViewDelegate(QObject* parent) : QStyledItemDelegate(parent) {}
 
+static bool highlightSelectedText(const QStyleOptionViewItem& option)
+{
+    if (option.widget) {
+        const QVariant value = option.widget->property("highlightSelectedText");
+        if (value.isValid())
+            return value.toBool();
+    }
+    return false;
+}
+
+static bool highlightSelectedIcon(const QStyleOptionViewItem& option)
+{
+    if (option.widget) {
+        const QVariant value = option.widget->property("highlightSelectedIcon");
+        if (value.isValid())
+            return value.toBool();
+    }
+    return false;
+}
+
+static QColor mixColor(const QColor& from, const QColor& to, qreal amount)
+{
+    return QColor::fromRgbF(from.redF() + (to.redF() - from.redF()) * amount, from.greenF() + (to.greenF() - from.greenF()) * amount,
+                            from.blueF() + (to.blueF() - from.blueF()) * amount);
+}
+
+// Built-in look for the instance grid, used when no theme stylesheet is loaded.
+//
+// Hover and selection are separated by kind rather than by strength. Hover is
+// transient, so it takes the brighter fill. Selection is permanent, so it stays
+// dim and is marked with a border instead - that keeps a constant block of
+// colour off the instance icons, and the two states remain distinct when they
+// overlap. Colours are mixed from the palette so this follows any theme,
+// including light ones, instead of hardcoding greys.
+static void drawDefaultItemPanel(QPainter* painter, const QStyleOptionViewItem& option)
+{
+    const bool selected = option.state & QStyle::State_Selected;
+    const bool hovered = option.state & QStyle::State_MouseOver;
+    if (!selected && !hovered)
+        return;
+
+    const QColor base = option.palette.color(QPalette::Window);
+    const QColor toward = option.palette.color(QPalette::Text);
+
+    // even tonal steps, roughly 1.1-1.2:1 apart from each other
+    qreal fillAmount = 0.05;
+    if (selected && hovered)
+        fillAmount = 0.15;
+    else if (hovered)
+        fillAmount = 0.11;
+
+    const qreal radius = 5.0;
+    const QRectF rounded = QRectF(option.rect).adjusted(0.5, 0.5, -0.5, -0.5);
+
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(mixColor(base, toward, fillAmount));
+    painter->drawRoundedRect(rounded, radius, radius);
+
+    if (selected) {
+        painter->setBrush(Qt::NoBrush);
+        painter->setPen(QPen(mixColor(base, toward, hovered ? 0.50 : 0.40), 1.0));
+        painter->drawRoundedRect(rounded, radius, radius);
+    }
+    painter->restore();
+}
+
+// With a theme stylesheet loaded, hand the item panel to QStyleSheetStyle so
+// InstanceView::item and its :hover / :selected rules take effect, the same way
+// QTreeView::item already works. Otherwise draw the built-in look above.
+static void drawItemPanel(QPainter* painter, const QStyleOptionViewItem& option)
+{
+    if (qApp && !qApp->styleSheet().isEmpty()) {
+        QStyle* style = option.widget ? option.widget->style() : QApplication::style();
+        QStyleOptionViewItem panel = option;
+        panel.showDecorationSelected = true;
+        style->drawPrimitive(QStyle::PE_PanelItemViewItem, &panel, painter, option.widget);
+        return;
+    }
+
+    drawDefaultItemPanel(painter, option);
+}
+
+// Optional translucent plate behind the instance name, for themes that leave
+// the item background transparent. Off unless a theme asks for it with
+// InstanceView { qproperty-labelBackgroundAlpha: 160; }
+static void drawLabelBackground(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect)
+{
+    int alpha = 0;
+    if (option.widget) {
+        const QVariant value = option.widget->property("labelBackgroundAlpha");
+        if (value.isValid())
+            alpha = qBound(0, value.toInt(), 255);
+    }
+    if (alpha == 0)
+        return;
+
+    QColor backgroundColor = option.palette.color(QPalette::Window);
+    backgroundColor.setAlpha(alpha);
+    painter->fillRect(rect, QBrush(backgroundColor));
+}
+
 void drawSelectionRect(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect)
 {
-    if ((option.state & QStyle::State_Selected))
-        painter->fillRect(rect, option.palette.brush(QPalette::Highlight));
-    else {
-        QColor backgroundColor = option.palette.color(QPalette::Window);
-        backgroundColor.setAlpha(160);
-        painter->fillRect(rect, QBrush(backgroundColor));
-    }
+    drawItemPanel(painter, option);
+    drawLabelBackground(painter, option, rect);
 }
 
 void drawFocusRect(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect)
@@ -266,7 +366,7 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     QIcon::Mode mode = QIcon::Normal;
     if (!(opt.state & QStyle::State_Enabled))
         mode = QIcon::Disabled;
-    else if (opt.state & QStyle::State_Selected)
+    else if ((opt.state & QStyle::State_Selected) && highlightSelectedIcon(opt))
         mode = QIcon::Selected;
     QIcon::State state = opt.state & QStyle::State_Open ? QIcon::On : QIcon::Off;
 
@@ -279,7 +379,7 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     QPalette::ColorGroup cg = opt.state & QStyle::State_Enabled ? QPalette::Normal : QPalette::Disabled;
     if (cg == QPalette::Normal && !(opt.state & QStyle::State_Active))
         cg = QPalette::Inactive;
-    if (opt.state & QStyle::State_Selected) {
+    if ((opt.state & QStyle::State_Selected) && highlightSelectedText(opt)) {
         painter->setPen(opt.palette.color(cg, QPalette::HighlightedText));
     } else {
         painter->setPen(opt.palette.color(cg, QPalette::Text));
