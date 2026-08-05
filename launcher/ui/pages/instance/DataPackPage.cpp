@@ -78,23 +78,20 @@ void DataPackPage::downloadDataPacks()
 void DataPackPage::downloadDialogFinished(int result)
 {
     if (result != 0) {
-        auto* tasks = new ConcurrentTask(tr("Download Data Packs"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(tasks, &Task::failed, this, [this, tasks](const QString& reason) {
+        ConcurrentTask tasks(tr("Download Data Packs"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-            tasks->deleteLater();
         });
-        connect(tasks, &Task::succeeded, this, [this, tasks]() {
-            QStringList warnings = tasks->warnings();
+        connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
+            QStringList warnings = tasks.warnings();
             if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
             }
-
-            tasks->deleteLater();
         });
 
         if (m_downloadDialog) {
             for (auto& task : m_downloadDialog->getTasks()) {
-                tasks->addTask(task);
+                tasks.addTask(task);
             }
         } else {
             qWarning() << "ResourceDownloadDialog vanished before we could collect tasks!";
@@ -102,7 +99,7 @@ void DataPackPage::downloadDialogFinished(int result)
 
         ProgressDialog loadDialog(this);
         loadDialog.setSkipButton(true, tr("Abort"));
-        loadDialog.execWithTask(tasks);
+        loadDialog.execWithTask(&tasks);
 
         m_model->update();
     }
@@ -162,26 +159,24 @@ void DataPackPage::updateDataPacks()
     }
 
     if (updateDialog.exec() != 0) {
-        auto* tasks = new ConcurrentTask("Download Data Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(tasks, &Task::failed, this, [this, tasks](const QString& reason) {
+        ConcurrentTask tasks("Download Data Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-            tasks->deleteLater();
         });
-        connect(tasks, &Task::succeeded, this, [this, tasks]() {
-            QStringList warnings = tasks->warnings();
+        connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
+            QStringList warnings = tasks.warnings();
             if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
             }
-            tasks->deleteLater();
         });
 
         for (const auto& task : updateDialog.getTasks()) {
-            tasks->addTask(task);
+            tasks.addTask(task);
         }
 
         ProgressDialog loadDialog(this);
         loadDialog.setSkipButton(true, tr("Abort"));
-        loadDialog.execWithTask(tasks);
+        loadDialog.execWithTask(&tasks);
 
         m_model->update();
     }
@@ -236,27 +231,24 @@ void DataPackPage::changeDataPackVersion()
     m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createDataPack(this, m_model, m_instance, true);
     m_downloadDialog->setResourceMetadata(resource.metadata());
     if (m_downloadDialog->exec() != 0) {
-        auto* tasks = new ConcurrentTask("Download Data Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(tasks, &Task::failed, this, [this, tasks](const QString& reason) {
+        ConcurrentTask tasks("Download Data Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-            tasks->deleteLater();
         });
-        connect(tasks, &Task::succeeded, this, [this, tasks]() {
-            QStringList warnings = tasks->warnings();
+        connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
+            QStringList warnings = tasks.warnings();
             if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
             }
-
-            tasks->deleteLater();
         });
 
         for (auto& task : m_downloadDialog->getTasks()) {
-            tasks->addTask(task);
+            tasks.addTask(task);
         }
 
         ProgressDialog loadDialog(this);
         loadDialog.setSkipButton(true, tr("Abort"));
-        loadDialog.execWithTask(tasks);
+        loadDialog.execWithTask(&tasks);
 
         m_model->update();
     }
