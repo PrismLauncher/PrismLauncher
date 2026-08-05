@@ -218,6 +218,8 @@ void MinecraftInstance::loadSpecificSettings()
         m_settings->registerOverride(global_settings->getSetting("CustomOpenALPath"), nativeLibraryWorkaroundsOverride);
         m_settings->registerOverride(global_settings->getSetting("UseNativeGLFW"), nativeLibraryWorkaroundsOverride);
         m_settings->registerOverride(global_settings->getSetting("CustomGLFWPath"), nativeLibraryWorkaroundsOverride);
+        m_settings->registerOverride(global_settings->getSetting("UseNativeSDL"), nativeLibraryWorkaroundsOverride);
+        m_settings->registerOverride(global_settings->getSetting("CustomSDLPath"), nativeLibraryWorkaroundsOverride);
 
         // Performance related options
         auto performanceOverride = m_settings->registerSetting("OverridePerformance", false);
