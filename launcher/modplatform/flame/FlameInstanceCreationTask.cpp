@@ -67,6 +67,7 @@
 #include "minecraft/World.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
 #include "net/ApiDownload.h"
+#include "ui/dialogs/UntrustedModsDialog.h"
 #include "ui/pages/modplatform/OptionalModDialog.h"
 
 bool FlameCreationTask::abort()
@@ -343,6 +344,31 @@ void FlameCreationTask::setManagedPack(BaseInstance* instance)
     }
 }
 
+bool FlameCreationTask::promptForUntrustedMods()
+{
+    if (m_trustedSource) {
+        return true;
+    }
+
+    QStringList untrustedMods;
+
+    const QDir mcDir{ FS::PathCombine(m_stagingPath, "minecraft") };
+    const QString modsPath{ FS::PathCombine(m_stagingPath, "minecraft/mods") };
+    if (QDir(modsPath).exists()) {
+        QDirIterator iter{ modsPath, QDir::Files, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks };
+        while (iter.hasNext()) {
+            untrustedMods.append(mcDir.relativeFilePath(iter.next()));
+        }
+    }
+
+    if (untrustedMods.empty()) {
+        return true;
+    }
+
+    UntrustedModsDialog dialog{ untrustedMods, m_parent };
+    return dialog.exec() == QDialog::Accepted;
+}
+
 void FlameCreationTask::createInstance()
 {
     const QString parentFolder(FS::PathCombine(m_stagingPath, "flame"));
@@ -378,6 +404,11 @@ void FlameCreationTask::createInstance()
             logWarning(
                 tr("The specified overrides folder (%1) is missing. Maybe the modpack was already used before?").arg(m_pack.overrides));
         }
+    }
+
+    if (!promptForUntrustedMods()) {
+        emitAborted();
+        return;
     }
 
     QString loaderType;

@@ -22,6 +22,7 @@
 #include "settings/INISettingsObject.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/UntrustedModsDialog.h"
 #include "ui/pages/modplatform/OptionalModDialog.h"
 
 #include <QAbstractButton>
@@ -202,6 +203,11 @@ void ModrinthCreationTask::createInstance()
             emitFailed(tr("Could not rename the client overrides folder:\n") + "client overrides");
             return;
         }
+    }
+
+    if (!promptForUntrustedMods()) {
+        emitAborted();
+        return;
     }
 
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
@@ -448,6 +454,40 @@ void ModrinthCreationTask::ensureMetaLoop()
 
     ensureMetadataTask->start();
     m_task = ensureMetadataTask;
+}
+
+bool ModrinthCreationTask::promptForUntrustedMods()
+{
+    if (m_trustedSource) {
+        return true;
+    }
+
+    QStringList untrustedMods;
+
+    for (const auto& file : m_files) {
+        for (const auto& url : file.downloads) {
+            if (url.scheme() != "https" || url.host() != BuildConfig.MODRINTH_DOWNLOAD_HOST) {
+                untrustedMods.append(file.path);
+                break;
+            }
+        }
+    }
+
+    const QDir mcDir{ FS::PathCombine(m_stagingPath, m_rootPath) };
+    const QString modsPath{ FS::PathCombine(m_stagingPath, m_rootPath, "mods") };
+    if (QDir(modsPath).exists()) {
+        QDirIterator iter{ modsPath, QDir::Files, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks };
+        while (iter.hasNext()) {
+            untrustedMods.append(mcDir.relativeFilePath(iter.next()));
+        }
+    }
+
+    if (untrustedMods.empty()) {
+        return true;
+    }
+
+    UntrustedModsDialog dialog{ untrustedMods, m_parent };
+    return dialog.exec() == QDialog::Accepted;
 }
 
 ModrinthCreationTask::~ModrinthCreationTask()
