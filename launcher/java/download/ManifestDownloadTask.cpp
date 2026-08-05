@@ -56,7 +56,7 @@ void ManifestDownloadTask::executeTask()
     connect(download.get(), &Task::status, this, &ManifestDownloadTask::setStatus);
     connect(download.get(), &Task::details, this, &ManifestDownloadTask::setDetails);
 
-    connect(download.get(), &Task::succeeded, [files, this] {
+    connect(download.get(), &Task::succeeded, this, [files, this] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*files, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -108,7 +108,7 @@ void ManifestDownloadTask::downloadJava(const QJsonDocument& doc)
             dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, file.hash));
         }
         if (file.isExec) {
-            connect(dl.get(), &Net::Download::succeeded,
+            connect(dl.get(), &Net::Download::succeeded, dl.get(),
                     [file] { QFile(file.path).setPermissions(QFile(file.path).permissions() | QFileDevice::Permissions(0x1111)); });
         }
         elementDownload->addNetAction(dl);

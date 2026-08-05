@@ -46,7 +46,7 @@ QString FlameAPI::getModFileChangelog(int modId, int fileId)
             .arg(QString::fromStdString(std::to_string(modId)), QString::fromStdString(std::to_string(fileId))));
     netJob->addNetAction(action);
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, [&netJob, response, &changelog] {
+    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [&netJob, response, &changelog] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -61,7 +61,7 @@ QString FlameAPI::getModFileChangelog(int modId, int fileId)
         changelog = doc.object()["data"].toString();
     });
 
-    QObject::connect(netJob.get(), &NetJob::finished, [&lock] { lock.quit(); });
+    QObject::connect(netJob.get(), &NetJob::finished, &lock, &QEventLoop::quit);
 
     netJob->start();
     lock.exec();
@@ -79,7 +79,7 @@ QString FlameAPI::getModDescription(int modId)
         Net::ApiDownload::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/description").arg(QString::number(modId)));
     netJob->addNetAction(action);
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, [&netJob, response, &description] {
+    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [&netJob, response, &description] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -94,7 +94,7 @@ QString FlameAPI::getModDescription(int modId)
         description = doc.object()["data"].toString();
     });
 
-    QObject::connect(netJob.get(), &NetJob::finished, [&lock] { lock.quit(); });
+    QObject::connect(netJob.get(), &NetJob::finished, &lock, &QEventLoop::quit);
 
     netJob->start();
     lock.exec();
@@ -119,7 +119,7 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getProjects(QStringList addonIds) co
     auto [action, response] = Net::ApiUpload::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods"), body_raw);
     netJob->addNetAction(action);
 
-    QObject::connect(netJob.get(), &NetJob::failed, [body_raw] { qDebug() << body_raw; });
+    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [body_raw] { qDebug() << body_raw; });
 
     return { netJob, response };
 }
@@ -142,7 +142,7 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds)
     auto [action, response] = Net::ApiUpload::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods/files"), body_raw);
     netJob->addNetAction(action);
 
-    QObject::connect(netJob.get(), &NetJob::failed, [body_raw] { qDebug() << body_raw; });
+    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [body_raw] { qDebug() << body_raw; });
 
     return { netJob, response };
 }
@@ -154,7 +154,7 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getFile(const QString& addonId, cons
         Net::ApiDownload::makeByteArray(QUrl(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2").arg(addonId, fileId)));
     netJob->addNetAction(action);
 
-    QObject::connect(netJob.get(), &NetJob::failed, [addonId, fileId] { qDebug() << "Flame API file failure" << addonId << fileId; });
+    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [addonId, fileId] { qDebug() << "Flame API file failure" << addonId << fileId; });
 
     return { netJob, response };
 }
@@ -178,7 +178,7 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getCategories(ModPlatform::ResourceT
     auto [action, response] = Net::ApiDownload::makeByteArray(
         QUrl(QString(BuildConfig.FLAME_BASE_URL + "/categories?gameId=432&classId=%1").arg(getClassId(type))));
     netJob->addNetAction(action);
-    QObject::connect(netJob.get(), &Task::failed, [](QString msg) { qDebug() << "Flame failed to get categories:" << msg; });
+    QObject::connect(netJob.get(), &Task::failed, netJob.get(), [](QString msg) { qDebug() << "Flame failed to get categories:" << msg; });
     return { netJob, response };
 }
 

@@ -434,10 +434,10 @@ void ScreenshotsPage::on_actionUpload_triggered()
         auto screenshot = std::make_shared<ScreenShot>(info);
         job->addNetAction(ImgurUpload::make(screenshot));
 
-        connect(job.get(), &Task::failed, [this](const QString& reason) {
+        connect(job.get(), &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), reason, QMessageBox::Critical)->show();
         });
-        connect(job.get(), &Task::aborted, [this] {
+        connect(job.get(), &Task::aborted, this, [this] {
             CustomMessageBox::selectable(this, tr("Screenshots upload aborted"), tr("The task has been aborted by the user."),
                                          QMessageBox::Information)
                 ->show();
@@ -475,10 +475,10 @@ void ScreenshotsPage::on_actionUpload_triggered()
     task.addTask(job);
     task.addTask(albumTask);
 
-    connect(&task, &Task::failed, [this](const QString& reason) {
+    connect(&task, &Task::failed, this, [this](const QString& reason) {
         CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), reason, QMessageBox::Critical)->show();
     });
-    connect(&task, &Task::aborted, [this] {
+    connect(&task, &Task::aborted, this, [this] {
         CustomMessageBox::selectable(this, tr("Screenshots upload aborted"), tr("The task has been aborted by the user."),
                                      QMessageBox::Information)
             ->show();

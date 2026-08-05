@@ -673,17 +673,17 @@ void PackInstallTask::installConfigs()
         jobPtr.reset();
         extractConfigs();
     });
-    connect(jobPtr.get(), &NetJob::failed, [this](QString reason) {
+    connect(jobPtr.get(), &NetJob::failed, this, [this](QString reason) {
         abortable = false;
         jobPtr.reset();
         emitFailed(std::move(reason));
     });
-    connect(jobPtr.get(), &NetJob::progress, [this](qint64 current, qint64 total) {
+    connect(jobPtr.get(), &NetJob::progress, this, [this](qint64 current, qint64 total) {
         abortable = true;
         setProgress(current, total);
     });
     connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propagateStepProgress);
-    connect(jobPtr.get(), &NetJob::aborted, [this] {
+    connect(jobPtr.get(), &NetJob::aborted, this, [this] {
         abortable = false;
         jobPtr.reset();
         emitAborted();
@@ -897,14 +897,14 @@ void PackInstallTask::downloadMods()
     }
 
     connect(jobPtr.get(), &NetJob::succeeded, this, &PackInstallTask::onModsDownloaded);
-    connect(jobPtr.get(), &NetJob::progress, [this](qint64 current, qint64 total) {
+    connect(jobPtr.get(), &NetJob::progress, this, [this](qint64 current, qint64 total) {
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         abortable = true;
         setProgress(current, total);
     });
     connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propagateStepProgress);
-    connect(jobPtr.get(), &NetJob::aborted, &PackInstallTask::emitAborted);
-    connect(jobPtr.get(), &NetJob::failed, &PackInstallTask::emitFailed);
+    connect(jobPtr.get(), &NetJob::aborted, this, &PackInstallTask::emitAborted);
+    connect(jobPtr.get(), &NetJob::failed, this, &PackInstallTask::emitFailed);
 
     jobPtr->start();
 }

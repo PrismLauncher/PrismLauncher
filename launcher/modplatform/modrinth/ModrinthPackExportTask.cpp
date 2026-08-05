@@ -161,7 +161,7 @@ void ModrinthPackExportTask::makeApiRequest()
         setStatus(tr("Finding versions for hashes..."));
         auto [versionsTask, response] = api.currentVersions(pendingHashes.values(), "sha512");
         task = versionsTask;
-        connect(task.get(), &Task::succeeded, [this, response]() { parseApiResponse(response); });
+        connect(task.get(), &Task::succeeded, this, [this, response]() { parseApiResponse(response); });
         connect(task.get(), &Task::failed, this, &ModrinthPackExportTask::emitFailed);
         connect(task.get(), &Task::aborted, this, &ModrinthPackExportTask::emitAborted);
         task->start();

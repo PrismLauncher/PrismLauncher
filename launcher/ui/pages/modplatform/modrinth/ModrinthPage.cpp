@@ -382,7 +382,7 @@ void ModrinthPage::createFilterWidget()
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &ModrinthPage::triggerSearch);
     auto [categoriesTask, response] = ModrinthAPI().getModCategories();
     m_categoriesTask = categoriesTask;
-    connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
+    connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() {
         auto categories = ModrinthAPI::loadCategories(*response, "modpack");
         m_filterWidget->setCategories(categories);
     });

@@ -561,7 +561,7 @@ void ResourcePage::openUrl(QUrl url)
             newPage->triggerSearch();
 
             if (model->hasActiveSearchJob()) {
-                connect(model->activeSearchJob().get(), &Task::finished, jump);
+                connect(model->activeSearchJob().get(), &Task::finished, newPage, jump);
             } else {
                 jump();
             }
@@ -620,7 +620,7 @@ void ResourcePage::openProject(const QVariant& projectID)
     triggerSearch();
 
     if (m_model->hasActiveSearchJob()) {
-        connect(m_model->activeSearchJob().get(), &Task::finished, jump);
+        connect(m_model->activeSearchJob().get(), &Task::finished, this, jump);
     } else {
         jump();
     }

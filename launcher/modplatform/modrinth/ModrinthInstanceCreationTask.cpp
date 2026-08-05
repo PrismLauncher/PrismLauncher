@@ -283,7 +283,7 @@ void ModrinthCreationTask::createInstance()
             // FIXME: This really needs to be put into a ConcurrentTask of
             // MultipleOptionsTask's , once those exist :)
             auto param = dl.toWeakRef();
-            connect(dl.get(), &Task::failed, [&file, filePath, param, downloadMods, meta] {
+            connect(dl.get(), &Task::failed, dl.get(), [&file, filePath, param, downloadMods, meta] {
                 QUrl fallbackUrl = file.downloads.dequeue();
                 auto ndl = Net::ApiDownload::makeFile(fallbackUrl, filePath, Net::Download::Option::NoOptions, meta);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
@@ -298,7 +298,7 @@ void ModrinthCreationTask::createInstance()
     connect(downloadMods.get(), &NetJob::succeeded, this, &ModrinthCreationTask::ensureMetaLoop);
     connect(downloadMods.get(), &NetJob::failed, this, &ModrinthCreationTask::emitFailed);
     connect(downloadMods.get(), &NetJob::aborted, this, &ModrinthCreationTask::emitAborted);
-    connect(downloadMods.get(), &NetJob::progress, [this](qint64 current, qint64 total) {
+    connect(downloadMods.get(), &NetJob::progress, this, [this](qint64 current, qint64 total) {
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         setProgress(current, total);
     });
@@ -440,7 +440,7 @@ void ModrinthCreationTask::ensureMetaLoop()
     connect(ensureMetadataTask.get(), &Task::succeeded, this, &ModrinthCreationTask::finishInstall);
     connect(ensureMetadataTask.get(), &Task::failed, this, &ModrinthCreationTask::emitFailed);
     connect(ensureMetadataTask.get(), &Task::aborted, this, &ModrinthCreationTask::emitAborted);
-    connect(ensureMetadataTask.get(), &Task::progress, [this](qint64 current, qint64 total) {
+    connect(ensureMetadataTask.get(), &Task::progress, this, [this](qint64 current, qint64 total) {
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         setProgress(current, total);
     });

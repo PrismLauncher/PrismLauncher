@@ -203,7 +203,7 @@ void ModFilterWidget::loadVersionList()
 
         auto task = m_version_list->getLoadTask();
 
-        connect(task.get(), &Task::failed, [this] {
+        connect(task.get(), &Task::failed, this, [this] {
             ui->versions->setEnabled(false);
             ui->showAllVersions->setEnabled(false);
         });
