@@ -149,6 +149,8 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
     contentsWidget->installEventFilter(this);
 
     contentsWidget->setModel(proxyModel);
+    contentsWidget->setAccessibleName(tr("Icons List"));
+    ui->searchLine->setAccessibleName(tr("Search Icons"));
 
     // NOTE: ResetRole forces the button to be on the left, while the OK/Cancel ones are on the right. We win.
     auto buttonAdd = ui->buttonBox->addButton(tr("Add Icon"), QDialogButtonBox::ResetRole);
