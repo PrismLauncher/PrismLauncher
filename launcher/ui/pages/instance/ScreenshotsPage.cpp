@@ -437,11 +437,6 @@ void ScreenshotsPage::on_actionUpload_triggered()
         connect(job.get(), &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), reason, QMessageBox::Critical)->show();
         });
-        connect(job.get(), &Task::aborted, this, [this] {
-            CustomMessageBox::selectable(this, tr("Screenshots upload aborted"), tr("The task has been aborted by the user."),
-                                         QMessageBox::Information)
-                ->show();
-        });
 
         m_uploadActive = true;
 
@@ -477,11 +472,6 @@ void ScreenshotsPage::on_actionUpload_triggered()
 
     connect(&task, &Task::failed, this, [this](const QString& reason) {
         CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), reason, QMessageBox::Critical)->show();
-    });
-    connect(&task, &Task::aborted, this, [this] {
-        CustomMessageBox::selectable(this, tr("Screenshots upload aborted"), tr("The task has been aborted by the user."),
-                                     QMessageBox::Information)
-            ->show();
     });
 
     m_uploadActive = true;
