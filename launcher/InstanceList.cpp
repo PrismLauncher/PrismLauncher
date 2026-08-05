@@ -799,9 +799,17 @@ void InstanceList::loadGroupList()
     m_groupNameCache.clear();
     m_collapsedGroups.clear();
 
-    // if there's no group file, fail
+    bool migratingLegacyGroups = false;
+
+    // If there's no group file, try the legacy location.
     if (!QFileInfo::exists(groupFileName)) {
-        return;
+        QString legacyGroupFileName = FS::PathCombine(primaryDir(), "instgroups.json");
+        if (!QFileInfo::exists(legacyGroupFileName)) {
+            return;
+        }
+        qInfo() << "Migrating instance groups from legacy location" << legacyGroupFileName;
+        groupFileName = legacyGroupFileName;
+        migratingLegacyGroups = true;
     }
 
     QByteArray jsonData;
@@ -884,6 +892,10 @@ void InstanceList::loadGroupList()
     }
     m_groupsLoaded = true;
     qDebug() << "Group list loaded.";
+
+    if (migratingLegacyGroups) {
+        saveGroupList();
+    }
 }
 
 void InstanceList::instanceDirContentsChanged(const QString& path)
