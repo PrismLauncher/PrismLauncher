@@ -40,7 +40,7 @@ class ActionButton : public QToolButton {
             setToolTip(m_action->toolTip());
             setHidden(!m_action->isVisible());
         }
-        setFocusPolicy(Qt::NoFocus);
+        setFocusPolicy(Qt::TabFocus);
     }
 
    private:

@@ -220,6 +220,7 @@ class MainWindow : public QMainWindow {
 
    private:
     void retranslateUi();
+    void setupFocusAndTabOrder();
 
     void addInstance(const QString& url = QString(), const QMap<QString, QString>& extra_info = {});
     void activateInstance(BaseInstance* instance);

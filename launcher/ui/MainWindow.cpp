@@ -45,6 +45,8 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
+#include <algorithm>
+
 #include <QDir>
 #include <QFileInfo>
 #include <QUrl>
@@ -282,7 +284,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         newsLabel->setIcon(QIcon::fromTheme("news"));
         newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
         newsLabel->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        newsLabel->setFocusPolicy(Qt::NoFocus);
+        newsLabel->setFocusPolicy(Qt::TabFocus);
         ui->newsToolBar->insertWidget(ui->actionMoreNews, newsLabel);
 
         connect(newsLabel, &QAbstractButton::clicked, this, &MainWindow::newsButtonClicked);
@@ -477,9 +479,84 @@ void MainWindow::retranslateUi()
         if (action->toolTip().contains("%1"))
             action->setToolTip(action->toolTip().arg(BuildConfig.LAUNCHER_DISPLAYNAME));
     }
+
+    setupFocusAndTabOrder();
 }
 
 MainWindow::~MainWindow() {}
+
+void MainWindow::setupFocusAndTabOrder()
+{
+    for (auto* action : ui->mainToolBar->actions()) {
+        if (auto* w = ui->mainToolBar->widgetForAction(action)) {
+            w->setFocusPolicy(Qt::TabFocus);
+        }
+    }
+
+    for (auto* action : ui->instanceToolBar->actions()) {
+        if (auto* w = ui->instanceToolBar->widgetForAction(action)) {
+            w->setFocusPolicy(Qt::TabFocus);
+        }
+    }
+
+    if (changeIconButton) {
+        changeIconButton->setFocusPolicy(Qt::TabFocus);
+        changeIconButton->setAccessibleName(tr("Change Icon"));
+        changeIconButton->setAccessibleDescription(ui->actionChangeInstIcon->toolTip());
+    }
+    if (renameButton) {
+        renameButton->setFocusPolicy(Qt::TabFocus);
+        renameButton->setAccessibleName(tr("Rename Instance"));
+        renameButton->setAccessibleDescription(ui->actionRenameInstance->toolTip());
+    }
+
+    if (newsLabel) {
+        newsLabel->setFocusPolicy(Qt::TabFocus);
+        newsLabel->setAccessibleName(tr("News"));
+    }
+    for (auto* action : ui->newsToolBar->actions()) {
+        if (auto* w = ui->newsToolBar->widgetForAction(action)) {
+            w->setFocusPolicy(Qt::TabFocus);
+        }
+    }
+
+    if (view) {
+        view->setFocusPolicy(Qt::StrongFocus);
+        view->setAccessibleName(tr("Instances"));
+        view->setAccessibleDescription(tr("List of Minecraft instances"));
+    }
+
+    auto getSortedWidgets = [](QWidget* parent, bool isHorizontal) -> QList<QWidget*> {
+        QList<QWidget*> list;
+        for (auto* obj : parent->children()) {
+            if (auto* child = qobject_cast<QWidget*>(obj)) {
+                if (child->isVisible() && child->focusPolicy() != Qt::NoFocus && child->width() > 0 && child->height() > 0) {
+                    list.append(child);
+                }
+            }
+        }
+        std::sort(list.begin(), list.end(), [isHorizontal](QWidget* a, QWidget* b) {
+            return isHorizontal ? a->x() < b->x() : a->y() < b->y();
+        });
+        return list;
+    };
+
+    QList<QWidget*> mainToolbarWidgets = getSortedWidgets(ui->mainToolBar, true);
+    QList<QWidget*> instanceToolbarWidgets = getSortedWidgets(ui->instanceToolBar, false);
+    QList<QWidget*> newsToolbarWidgets = getSortedWidgets(ui->newsToolBar, true);
+
+    QList<QWidget*> allFocusChain;
+    allFocusChain.append(mainToolbarWidgets);
+    if (view) {
+        allFocusChain.append(view);
+    }
+    allFocusChain.append(instanceToolbarWidgets);
+    allFocusChain.append(newsToolbarWidgets);
+
+    for (int i = 0; i < allFocusChain.size() - 1; ++i) {
+        QWidget::setTabOrder(allFocusChain[i], allFocusChain[i + 1]);
+    }
+}
 
 QMenu* MainWindow::createPopupMenu()
 {
