@@ -760,6 +760,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("CustomOpenALPath", "");
         m_settings->registerSetting("UseNativeGLFW", false);
         m_settings->registerSetting("CustomGLFWPath", "");
+        m_settings->registerSetting("UseNativeSDL", false);
+        m_settings->registerSetting("CustomSDLPath", "");
 
         // Performance related options
         m_settings->registerSetting("EnableFeralGamemode", false);
