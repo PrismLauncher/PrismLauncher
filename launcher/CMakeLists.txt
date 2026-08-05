@@ -1097,6 +1097,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/InstallLoaderDialog.h
     ui/dialogs/ChooseOfflineNameDialog.cpp
     ui/dialogs/ChooseOfflineNameDialog.h
+    ui/dialogs/UntrustedModsDialog.cpp
+    ui/dialogs/UntrustedModsDialog.h
 
     ui/dialogs/skins/SkinManageDialog.cpp
     ui/dialogs/skins/SkinManageDialog.h

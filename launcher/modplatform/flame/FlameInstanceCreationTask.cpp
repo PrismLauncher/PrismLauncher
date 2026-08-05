@@ -68,6 +68,7 @@
 #include "minecraft/World.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
 #include "net/ApiDownload.h"
+#include "ui/dialogs/UntrustedModsDialog.h"
 #include "ui/pages/modplatform/OptionalModDialog.h"
 
 static const FlameAPI api;
@@ -307,6 +308,31 @@ QString FlameCreationTask::getVersionForLoader(QString uid, QString loaderType, 
     return loaderVersion;
 }
 
+bool FlameCreationTask::promptForUntrustedMods()
+{
+    if (m_trustedSource) {
+        return true;
+    }
+
+    QStringList untrustedMods;
+
+    const QDir mcDir{ FS::PathCombine(m_stagingPath, "minecraft") };
+    const QString modsPath{ FS::PathCombine(m_stagingPath, "minecraft/mods") };
+    if (QDir(modsPath).exists()) {
+        QDirIterator iter{ modsPath, QDir::Files, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks };
+        while (iter.hasNext()) {
+            untrustedMods.append(mcDir.relativeFilePath(iter.next()));
+        }
+    }
+
+    if (untrustedMods.empty()) {
+        return true;
+    }
+
+    UntrustedModsDialog dialog{ untrustedMods, m_parent };
+    return dialog.exec() == QDialog::Accepted;
+}
+
 std::unique_ptr<MinecraftInstance> FlameCreationTask::createInstance()
 {
     QEventLoop loop;
@@ -343,6 +369,11 @@ std::unique_ptr<MinecraftInstance> FlameCreationTask::createInstance()
             logWarning(
                 tr("The specified overrides folder (%1) is missing. Maybe the modpack was already used before?").arg(m_pack.overrides));
         }
+    }
+
+    if (!promptForUntrustedMods()) {
+        emitAborted();
+        return;
     }
 
     QString loaderType;

@@ -25,12 +25,13 @@ class ModrinthCreationTask final : public InstanceCreationTask {
 
    public:
     ModrinthCreationTask(const QString& stagingPath,
+                         bool trustedSource,
                          SettingsObject* globalSettings,
                          QWidget* parent,
                          QString id,
                          QString versionId = {},
                          QString originalInstanceId = {})
-        : m_parent(parent), m_managed_id(std::move(id)), m_managed_version_id(std::move(versionId))
+        : m_parent(parent), m_trustedSource(trustedSource), m_managed_id(std::move(id)), m_managed_version_id(std::move(versionId))
     {
         setStagingPath(stagingPath);
         setParentSettings(globalSettings);
@@ -46,8 +47,11 @@ class ModrinthCreationTask final : public InstanceCreationTask {
    private:
     bool parseManifest(const QString&, std::vector<File>&, bool setInternalData = true, bool showOptionalDialog = true);
 
+    [[nodiscard]] bool promptForUntrustedMods();
+
    private:
     QWidget* m_parent = nullptr;
+    bool m_trustedSource;
 
     QString m_minecraft_version, m_fabric_version, m_quilt_version, m_forge_version, m_neoForge_version;
     QString m_managed_id, m_managed_version_id, m_managed_name;
