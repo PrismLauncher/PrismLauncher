@@ -54,7 +54,7 @@ class GetModDependenciesTask : public SequentialTask {
         QStringList required_by_ids;
     };
 
-    explicit GetModDependenciesTask(BaseInstance* instance, ModFolderModel* folder, QList<std::shared_ptr<PackDependency>> selected);
+    explicit GetModDependenciesTask(MinecraftInstance* instance, ModFolderModel* folder, QList<std::shared_ptr<PackDependency>> selected);
 
     auto getDependecies() const -> QList<std::shared_ptr<PackDependency>> { return m_pack_dependencies; }
     QHash<QString, PackDependencyExtraInfo> getExtraInfo();

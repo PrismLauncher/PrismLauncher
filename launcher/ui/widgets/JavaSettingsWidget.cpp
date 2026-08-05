@@ -47,6 +47,7 @@
 #include "SysInfo.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
+#include "minecraft/MinecraftInstance.h"
 #include "settings/Setting.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/VersionSelectDialog.h"
@@ -54,7 +55,7 @@
 
 #include "ui_JavaSettingsWidget.h"
 
-JavaSettingsWidget::JavaSettingsWidget(BaseInstance* instance, QWidget* parent)
+JavaSettingsWidget::JavaSettingsWidget(MinecraftInstance* instance, QWidget* parent)
     : QWidget(parent), m_instance(instance), m_ui(new Ui::JavaSettingsWidget)
 {
     m_ui->setupUi(this);
