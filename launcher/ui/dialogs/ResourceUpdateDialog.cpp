@@ -354,11 +354,11 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
     // prepare task for the modrinth mods
     if (!modrinthTmp.empty()) {
         auto modrinthTask = makeShared<EnsureMetadataTask>(modrinthTmp, indexDir2, ModPlatform::ResourceProvider::MODRINTH);
-        connect(modrinthTask.get(), &EnsureMetadataTask::metadataReady, [this](Resource* candidate) { onMetadataEnsured(candidate); });
-        connect(modrinthTask.get(), &EnsureMetadataTask::metadataFailed, [this, &shouldTryOthers](Resource* candidate) {
+        connect(modrinthTask.get(), &EnsureMetadataTask::metadataReady, this, [this](Resource* candidate) { onMetadataEnsured(candidate); });
+        connect(modrinthTask.get(), &EnsureMetadataTask::metadataFailed, this, [this, &shouldTryOthers](Resource* candidate) {
             onMetadataFailed(candidate, shouldTryOthers.find(candidate->internalId()).value(), ModPlatform::ResourceProvider::MODRINTH);
         });
-        connect(modrinthTask.get(), &EnsureMetadataTask::failed,
+        connect(modrinthTask.get(), &EnsureMetadataTask::failed, this,
                 [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         if (modrinthTask->getHashingTask()) {
@@ -371,11 +371,11 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
     // prepare task for the flame mods
     if (!flameTmp.empty()) {
         auto flameTask = makeShared<EnsureMetadataTask>(flameTmp, indexDir2, ModPlatform::ResourceProvider::FLAME);
-        connect(flameTask.get(), &EnsureMetadataTask::metadataReady, [this](Resource* candidate) { onMetadataEnsured(candidate); });
-        connect(flameTask.get(), &EnsureMetadataTask::metadataFailed, [this, &shouldTryOthers](Resource* candidate) {
+        connect(flameTask.get(), &EnsureMetadataTask::metadataReady, this, [this](Resource* candidate) { onMetadataEnsured(candidate); });
+        connect(flameTask.get(), &EnsureMetadataTask::metadataFailed, this, [this, &shouldTryOthers](Resource* candidate) {
             onMetadataFailed(candidate, shouldTryOthers.find(candidate->internalId()).value(), ModPlatform::ResourceProvider::FLAME);
         });
-        connect(flameTask.get(), &EnsureMetadataTask::failed,
+        connect(flameTask.get(), &EnsureMetadataTask::failed, this,
                 [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         if (flameTask->getHashingTask()) {
@@ -431,9 +431,9 @@ void ResourceUpdateDialog::onMetadataFailed(Resource* resource, bool tryOthers, 
         auto indexDir2 = indexDir();
 
         auto task = makeShared<EnsureMetadataTask>(resource, indexDir2, next(firstChoice));
-        connect(task.get(), &EnsureMetadataTask::metadataReady, [this](Resource* candidate) { onMetadataEnsured(candidate); });
-        connect(task.get(), &EnsureMetadataTask::metadataFailed, [this](Resource* candidate) { onMetadataFailed(candidate, false); });
-        connect(task.get(), &EnsureMetadataTask::failed,
+        connect(task.get(), &EnsureMetadataTask::metadataReady, this, [this](Resource* candidate) { onMetadataEnsured(candidate); });
+        connect(task.get(), &EnsureMetadataTask::metadataFailed, this, [this](Resource* candidate) { onMetadataFailed(candidate, false); });
+        connect(task.get(), &EnsureMetadataTask::failed, this,
                 [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
         if (task->getHashingTask()) {
             auto seq = makeShared<SequentialTask>();

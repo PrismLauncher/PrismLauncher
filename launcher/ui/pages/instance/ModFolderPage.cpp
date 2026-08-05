@@ -188,15 +188,15 @@ void ModFolderPage::downloadDialogFinished(int result)
 {
     if (result != 0) {
         auto* tasks = new ConcurrentTask(tr("Download Mods"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(tasks, &Task::failed, [this, tasks](const QString& reason) {
+        connect(tasks, &Task::failed, this, [this, tasks](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
         });
-        connect(tasks, &Task::aborted, [this, tasks]() {
+        connect(tasks, &Task::aborted, this, [this, tasks]() {
             CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
             tasks->deleteLater();
         });
-        connect(tasks, &Task::succeeded, [this, tasks]() {
+        connect(tasks, &Task::succeeded, this, [this, tasks]() {
             QStringList warnings = tasks->warnings();
             if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
@@ -281,15 +281,15 @@ void ModFolderPage::updateMods(bool includeDeps)
 
     if (updateDialog.exec() != 0) {
         auto* tasks = new ConcurrentTask("Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(tasks, &Task::failed, [this, tasks](const QString& reason) {
+        connect(tasks, &Task::failed, this, [this, tasks](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
         });
-        connect(tasks, &Task::aborted, [this, tasks]() {
+        connect(tasks, &Task::aborted, this, [this, tasks]() {
             CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
             tasks->deleteLater();
         });
-        connect(tasks, &Task::succeeded, [this, tasks]() {
+        connect(tasks, &Task::succeeded, this, [this, tasks]() {
             QStringList warnings = tasks->warnings();
             if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();

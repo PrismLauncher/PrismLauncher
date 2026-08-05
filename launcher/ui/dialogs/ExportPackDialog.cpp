@@ -196,13 +196,13 @@ void ExportPackDialog::done(int result)
             task = new FlamePackExportTask(std::move(options));
         }
 
-        connect(task, &Task::failed,
+        connect(task, &Task::failed, this,
                 [this](const QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-        connect(task, &Task::aborted, [this] {
+        connect(task, &Task::aborted, this, [this] {
             CustomMessageBox::selectable(this, tr("Task aborted"), tr("The task has been aborted by the user."), QMessageBox::Information)
                 ->show();
         });
-        connect(task, &Task::finished, [task] { task->deleteLater(); });
+        connect(task, &Task::finished, task, &Task::deleteLater);
 
         ProgressDialog progress(this);
         progress.setSkipButton(true, tr("Abort"));

@@ -216,7 +216,7 @@ void TechnicPage::suggestCurrent()
 
         metadataLoaded();
     });
-    connect(jobPtr.get(), &NetJob::failed,
+    connect(jobPtr.get(), &NetJob::failed, this,
             [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
     jobPtr = netJob;
@@ -269,7 +269,7 @@ void TechnicPage::metadataLoaded()
         netJob->addNetAction(action);
 
         connect(netJob.get(), &NetJob::succeeded, this, [this, response] { onSolderLoaded(response); });
-        connect(jobPtr.get(), &NetJob::failed,
+        connect(jobPtr.get(), &NetJob::failed, this,
                 [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         jobPtr = netJob;

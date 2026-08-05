@@ -128,7 +128,7 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getModCategories()
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetCategories"), APPLICATION->network());
     auto [action, response] = Net::ApiDownload::makeByteArray(QUrl(BuildConfig.MODRINTH_PROD_URL + "/tag/category"));
     netJob->addNetAction(action);
-    QObject::connect(netJob.get(), &Task::failed, [](const QString& msg) { qDebug() << "Modrinth failed to get categories:" << msg; });
+    QObject::connect(netJob.get(), &Task::failed, netJob.get(), [](const QString& msg) { qDebug() << "Modrinth failed to get categories:" << msg; });
 
     return { netJob, response };
 }

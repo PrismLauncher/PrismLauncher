@@ -145,7 +145,7 @@ void ModPage::prepareProviderCategories()
 {
     auto [task, response] = m_api->getModCategories();
     m_categoriesTask = task;
-    connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
+    connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() {
         auto categories = m_api->loadModCategories(*response);
         m_filterWidget->setCategories(categories);
     });

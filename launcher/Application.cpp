@@ -942,7 +942,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         QStringList instFolders = { ":/icons/multimc/32x32/instances/", ":/icons/multimc/50x50/instances/",
                                     ":/icons/multimc/128x128/instances/", ":/icons/multimc/scalable/instances/" };
         m_icons.reset(new IconList(instFolders, setting->get().toString()));
-        connect(setting.get(), &Setting::SettingChanged,
+        connect(setting.get(), &Setting::SettingChanged, this,
                 [this](const Setting&, QVariant value) { m_icons->directoryChanged(value.toString()); });
         qInfo() << "<> Instance icons initialized.";
     }
@@ -1046,10 +1046,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
 
 #ifdef Q_OS_MACOS
-    connect(this, &Application::clickedOnDock, [this]() { this->showMainWindow(); });
+    connect(this, &Application::clickedOnDock, this, [this]() { this->showMainWindow(); });
 #endif
 
-    connect(this, &Application::aboutToQuit, [this]() {
+    connect(this, &Application::aboutToQuit, this, [this]() {
         if (m_instances) {
             // save any remaining instance state
             m_instances->saveNow();

@@ -315,16 +315,16 @@ void MinecraftInstance::populateLaunchMenu(QMenu* menu)
 
     normalLaunchDemo->setEnabled(supportsDemo());
 
-    connect(normalLaunch, &QAction::triggered, [this] { APPLICATION->launch(this); });
-    connect(normalLaunchOffline, &QAction::triggered, [this] { APPLICATION->launch(this, LaunchMode::Offline); });
-    connect(normalLaunchDemo, &QAction::triggered, [this] { APPLICATION->launch(this, LaunchMode::Demo); });
+    connect(normalLaunch, &QAction::triggered, this, [this] { APPLICATION->launch(this); });
+    connect(normalLaunchOffline, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Offline); });
+    connect(normalLaunchDemo, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Demo); });
 
     QString profilersTitle = tr("Profilers");
     menu->addSeparator()->setText(profilersTitle);
 
     auto profilers = new QActionGroup(menu);
     profilers->setExclusive(true);
-    connect(profilers, &QActionGroup::triggered, [this](QAction* action) {
+    connect(profilers, &QActionGroup::triggered, this, [this](QAction* action) {
         settings()->set("Profiler", action->data());
         emit profilerChanged();
     });

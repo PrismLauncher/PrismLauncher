@@ -146,15 +146,15 @@ bool ManagedPackPage::runUpdateTask(InstanceTask* task)
 
     const unique_qobject_ptr<Task> wrappedTask(APPLICATION->instances()->wrapInstanceTask(task));
 
-    connect(wrappedTask.get(), &Task::failed,
+    connect(wrappedTask.get(), &Task::failed, this,
             [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-    connect(wrappedTask.get(), &Task::succeeded, [this, task]() {
+    connect(wrappedTask.get(), &Task::succeeded, this, [this, task]() {
         QStringList warnings = task->warnings();
         if (warnings.count()) {
             CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
         }
     });
-    connect(wrappedTask.get(), &Task::aborted, [this] {
+    connect(wrappedTask.get(), &Task::aborted, this, [this] {
         CustomMessageBox::selectable(this, tr("Task aborted"), tr("The task has been aborted by the user."), QMessageBox::Information)
             ->show();
     });

@@ -188,7 +188,7 @@ void ResourceFolderModel::installResourceWithFlameMetadata(const QString& path, 
         auto [job, response] = FlameAPI().getProject(vers.addonId.toString());
         connect(job.get(), &Task::failed, this, install);
         connect(job.get(), &Task::aborted, this, install);
-        connect(job.get(), &Task::succeeded, [response, this, &vers, install, &pack] {
+        connect(job.get(), &Task::succeeded, this, [response, this, &vers, install, &pack] {
             QJsonParseError parseError{};
             QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
             if (parseError.error != QJsonParseError::NoError) {
@@ -361,7 +361,7 @@ bool ResourceFolderModel::update()
         task->addTask(preUpdate);
         task->addTask(m_currentUpdateTask);
 
-        connect(task, &Task::finished, [task] { task->deleteLater(); });
+        connect(task, &Task::finished, task, &Task::deleteLater);
 
         QThreadPool::globalInstance()->start(task);
     } else {

@@ -488,7 +488,7 @@ void FlameCreationTask::createInstance()
 
     m_modIdResolver.reset(new Flame::FileResolvingTask(m_pack));
     connect(m_modIdResolver.get(), &Flame::FileResolvingTask::succeeded, this, &FlameCreationTask::idResolverSucceeded);
-    connect(m_modIdResolver.get(), &Flame::FileResolvingTask::failed, [this](const QString& reason) {
+    connect(m_modIdResolver.get(), &Flame::FileResolvingTask::failed, this, [this](const QString& reason) {
         m_modIdResolver.reset();
         emitFailed(tr("Unable to resolve mod IDs:\n") + reason);
     });
@@ -600,7 +600,7 @@ void FlameCreationTask::setupDownloadJob()
         m_filesJob.reset();
         validateOtherResources();
     });
-    connect(m_filesJob.get(), &NetJob::failed, [this](QString reason) {
+    connect(m_filesJob.get(), &NetJob::failed, this, [this](QString reason) {
         m_filesJob.reset();
         emitFailed(std::move(reason));
     });
