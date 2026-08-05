@@ -192,10 +192,6 @@ void ModFolderPage::downloadDialogFinished(int result)
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
         });
-        connect(tasks, &Task::aborted, this, [this, tasks]() {
-            CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
-            tasks->deleteLater();
-        });
         connect(tasks, &Task::succeeded, this, [this, tasks]() {
             QStringList warnings = tasks->warnings();
             if (warnings.count()) {
@@ -283,10 +279,6 @@ void ModFolderPage::updateMods(bool includeDeps)
         auto* tasks = new ConcurrentTask("Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, this, [this, tasks](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-            tasks->deleteLater();
-        });
-        connect(tasks, &Task::aborted, this, [this, tasks]() {
-            CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
             tasks->deleteLater();
         });
         connect(tasks, &Task::succeeded, this, [this, tasks]() {
