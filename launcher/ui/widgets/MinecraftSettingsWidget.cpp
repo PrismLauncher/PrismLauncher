@@ -53,6 +53,9 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
 {
     m_ui->setupUi(this);
 
+    m_ui->windowWidthSpinBox->setAccessibleName(tr("Window Width"));
+    m_ui->windowHeightSpinBox->setAccessibleName(tr("Window Height"));
+
     if (m_instance == nullptr) {
         m_ui->settingsTabs->removeTab(1);
 

@@ -375,7 +375,11 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_6">
       <item row="1" column="1">
-       <widget class="QPlainTextEdit" name="jvmArgsTextBox"/>
+       <widget class="QPlainTextEdit" name="jvmArgsTextBox">
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

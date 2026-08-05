@@ -59,6 +59,22 @@ JavaSettingsWidget::JavaSettingsWidget(BaseInstance* instance, QWidget* parent)
 {
     m_ui->setupUi(this);
 
+    m_ui->jvmArgsTextBox->setTabChangesFocus(true);
+    m_ui->jvmArgsTextBox->setAccessibleName(tr("Java Arguments"));
+    m_ui->jvmArgsTextBox->setAccessibleDescription(tr("Java Arguments"));
+
+    m_ui->javaPathTextBox->setAccessibleName(tr("Java Executable Path"));
+    m_ui->javaPathTextBox->setAccessibleDescription(tr("Java Executable Path"));
+
+    m_ui->minMemSpinBox->setAccessibleName(tr("Minimum Memory Usage"));
+    m_ui->minMemSpinBox->setAccessibleDescription(tr("Minimum Memory Usage"));
+
+    m_ui->maxMemSpinBox->setAccessibleName(tr("Maximum Memory Usage"));
+    m_ui->maxMemSpinBox->setAccessibleDescription(tr("Maximum Memory Usage"));
+
+    m_ui->permGenSpinBox->setAccessibleName(tr("PermGen Memory Usage"));
+    m_ui->permGenSpinBox->setAccessibleDescription(tr("PermGen Memory Usage"));
+
     if (m_instance == nullptr) {
         m_ui->javaDownloadBtn->hide();
         if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {

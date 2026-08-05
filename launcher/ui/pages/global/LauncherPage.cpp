@@ -75,6 +75,26 @@ LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::Launch
     ui->sortingModeGroup->setId(ui->sortLastLaunchedBtn, Sort_LastLaunch);
     ui->sortingModeGroup->setId(ui->sortByPlaytimeBtn, Sort_Playtime);
 
+    ui->instanceSortingLabel->setBuddy(ui->sortByNameBtn);
+    ui->sortByNameBtn->setAccessibleName(tr("Instance Sorting: By name"));
+    ui->sortByNameBtn->setAccessibleDescription(tr("Instance Sorting"));
+    ui->sortLastLaunchedBtn->setAccessibleName(tr("Instance Sorting: By last launched"));
+    ui->sortLastLaunchedBtn->setAccessibleDescription(tr("Instance Sorting"));
+    ui->sortByPlaytimeBtn->setAccessibleName(tr("Instance Sorting: By total time played"));
+    ui->sortByPlaytimeBtn->setAccessibleDescription(tr("Instance Sorting"));
+
+    ui->renamingBehaviorLabel->setBuddy(ui->askToRenameDirBtn);
+    ui->askToRenameDirBtn->setAccessibleName(tr("Instance Renaming: Ask what to do"));
+    ui->askToRenameDirBtn->setAccessibleDescription(tr("Instance Renaming"));
+    ui->alwaysRenameDirBtn->setAccessibleName(tr("Instance Renaming: Always rename the folder"));
+    ui->alwaysRenameDirBtn->setAccessibleDescription(tr("Instance Renaming"));
+    ui->neverRenameDirBtn->setAccessibleName(tr("Instance Renaming: Never rename the folder"));
+    ui->neverRenameDirBtn->setAccessibleDescription(tr("Instance Renaming"));
+
+    ui->updateIntervalLabel->setBuddy(ui->updateIntervalSpinBox);
+    ui->updateIntervalSpinBox->setAccessibleName(tr("Update Check Interval"));
+    ui->updateIntervalSpinBox->setAccessibleDescription(tr("Update Check Interval in hours"));
+
     loadSettings();
 
     ui->updateSettingsBox->setHidden(!APPLICATION->updater());
