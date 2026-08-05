@@ -233,7 +233,7 @@ class BaseInstance : public QObject {
     {
         if (m_hasBrokenVersion != value) {
             m_hasBrokenVersion = value;
-            emit propertiesChanged(this);
+            emit propertiesChanged();
         }
     }
 
@@ -242,7 +242,7 @@ class BaseInstance : public QObject {
     {
         if (m_hasUpdate != value) {
             m_hasUpdate = value;
-            emit propertiesChanged(this);
+            emit propertiesChanged();
         }
     }
 
@@ -251,7 +251,7 @@ class BaseInstance : public QObject {
     {
         if (m_crashed != value) {
             m_crashed = value;
-            emit propertiesChanged(this);
+            emit propertiesChanged();
         }
     }
 
@@ -290,7 +290,7 @@ class BaseInstance : public QObject {
     /*!
      * \brief Signal emitted when properties relevant to the instance view change
      */
-    void propertiesChanged(BaseInstance* inst);
+    void propertiesChanged();
 
     void launchTaskChanged(LaunchTask*);
 
