@@ -79,9 +79,12 @@ auto ResourceModel::data(const QModelIndex& index, int role) const -> QVariant
             v.setValue(pack);
             return v;
         }
-            // Custom data
+            // Custom & Accessible data
+        case Qt::DisplayRole:
+        case Qt::AccessibleTextRole:
         case UserDataTypes::TITLE:
             return pack->name;
+        case Qt::AccessibleDescriptionRole:
         case UserDataTypes::DESCRIPTION:
             return pack->description;
         case Qt::CheckStateRole:

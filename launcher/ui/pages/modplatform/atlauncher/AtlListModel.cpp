@@ -74,14 +74,14 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
             return v;
         }
         case Qt::DisplayRole:
-            return pack.name;
-        case Qt::SizeHintRole:
-            return QSize(0, 58);
-        // Custom data
+        case Qt::AccessibleTextRole:
         case UserDataTypes::TITLE:
             return pack.name;
+        case Qt::AccessibleDescriptionRole:
         case UserDataTypes::DESCRIPTION:
             return pack.description;
+        case Qt::SizeHintRole:
+            return QSize(0, 58);
         case UserDataTypes::INSTALLED:
             return false;
         default:

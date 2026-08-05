@@ -27,6 +27,7 @@ OptionalModDialog::OptionalModDialog(QWidget* parent, const QStringList& mods) :
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
         item->setCheckState(Qt::Unchecked);
         item->setData(Qt::UserRole, mod);
+        item->setData(Qt::AccessibleTextRole, mod);
     }
 
     connect(ui->selectAllButton, &QPushButton::clicked, ui->list, [this] {

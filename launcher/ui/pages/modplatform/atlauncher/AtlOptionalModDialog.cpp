@@ -93,13 +93,15 @@ QVariant AtlOptionalModListModel::data(const QModelIndex& index, int role) const
     auto row = index.row();
     auto mod = m_mods.at(row);
 
-    if (role == Qt::DisplayRole) {
-        if (index.column() == NameColumn) {
+    if (role == Qt::DisplayRole || role == Qt::AccessibleTextRole) {
+        if (index.column() == NameColumn || index.column() == EnabledColumn) {
             return mod.name;
         }
         if (index.column() == DescriptionColumn) {
             return mod.description;
         }
+    } else if (role == Qt::AccessibleDescriptionRole) {
+        return mod.description;
     } else if (role == Qt::ToolTipRole) {
         if (index.column() == DescriptionColumn) {
             return mod.description;

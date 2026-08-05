@@ -62,8 +62,11 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
         }
         case Qt::SizeHintRole:
             return QSize(0, 58);
+        case Qt::DisplayRole:
+        case Qt::AccessibleTextRole:
         case UserDataTypes::TITLE:
             return pack->name;
+        case Qt::AccessibleDescriptionRole:
         case UserDataTypes::DESCRIPTION:
             return pack->description;
         case UserDataTypes::INSTALLED:

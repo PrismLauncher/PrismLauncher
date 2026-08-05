@@ -98,6 +98,23 @@ ResourcePage::ResourcePage(ResourceDownloadDialog* parent,
 
     connect(m_ui->packView, &QAbstractItemView::doubleClicked, this, &ResourcePage::onResourceToggle);
     connect(delegate, &ProjectItemDelegate::checkboxClicked, this, &ResourcePage::onResourceToggle);
+
+    m_ui->searchEdit->setAccessibleName(tr("Search mods"));
+    m_ui->searchEdit->setAccessibleDescription(tr("Search mods"));
+    m_ui->resourceFilterButton->setAccessibleName(tr("Filter options"));
+    m_ui->packView->setAccessibleName(tr("Mods list"));
+    m_ui->packDescription->setAccessibleName(tr("Mod description"));
+    m_ui->sortByBox->setAccessibleName(tr("Sort by"));
+    m_ui->label->setBuddy(m_ui->versionSelectionBox);
+    m_ui->versionSelectionBox->setAccessibleName(tr("Version selected"));
+    m_ui->resourceSelectionButton->setAccessibleName(tr("Download selected mod"));
+
+    setTabOrder(m_ui->resourceFilterButton, m_ui->searchEdit);
+    setTabOrder(m_ui->searchEdit, m_ui->packView);
+    setTabOrder(m_ui->packView, m_ui->packDescription);
+    setTabOrder(m_ui->packDescription, m_ui->sortByBox);
+    setTabOrder(m_ui->sortByBox, m_ui->versionSelectionBox);
+    setTabOrder(m_ui->versionSelectionBox, m_ui->resourceSelectionButton);
 }
 
 ResourcePage::~ResourcePage()

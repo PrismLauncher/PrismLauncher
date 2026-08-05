@@ -46,8 +46,10 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     }
 
     FTB::Modpack pack = m_modpacks.at(pos);
-    if (role == Qt::DisplayRole) {
+    if (role == Qt::DisplayRole || role == Qt::AccessibleTextRole) {
         return pack.name;
+    } else if (role == Qt::AccessibleDescriptionRole) {
+        return pack.synopsis;
     } else if (role == Qt::ToolTipRole) {
         return pack.synopsis;
     } else if (role == Qt::DecorationRole) {
