@@ -63,6 +63,24 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, ResourceFol
     ui->treeView->setModel(m_filterModel);
     // must come after setModel
     ui->treeView->setResizeModes(m_model->columnResizeModes());
+    ui->treeView->setAccessibleName(tr("Resource List"));
+    ui->filterEdit->setAccessibleName(tr("Search"));
+
+    for (auto* action : ui->actionsToolbar->actions()) {
+        if (auto* w = ui->actionsToolbar->widgetForAction(action)) {
+            w->setFocusPolicy(Qt::TabFocus);
+        }
+    }
+
+    QWidget::setTabOrder(ui->filterEdit, ui->treeView);
+    QWidget* prevWidget = ui->treeView;
+    for (auto* action : ui->actionsToolbar->actions()) {
+        if (action->isSeparator()) continue;
+        if (auto* w = ui->actionsToolbar->widgetForAction(action)) {
+            QWidget::setTabOrder(prevWidget, w);
+            prevWidget = w;
+        }
+    }
 
     ui->treeView->installEventFilter(this);
     ui->treeView->sortByColumn(1, Qt::AscendingOrder);

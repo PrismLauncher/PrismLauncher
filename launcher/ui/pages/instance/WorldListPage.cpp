@@ -112,6 +112,23 @@ WorldListPage::WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget
 
     connect(ui->worldTreeView->selectionModel(), &QItemSelectionModel::currentChanged, this, &WorldListPage::worldChanged);
     worldChanged(QModelIndex(), QModelIndex());
+
+    ui->worldTreeView->setAccessibleName(tr("Worlds List"));
+
+    for (auto* action : ui->toolBar->actions()) {
+        if (auto* w = ui->toolBar->widgetForAction(action)) {
+            w->setFocusPolicy(Qt::TabFocus);
+        }
+    }
+
+    QWidget* prevWidget = ui->worldTreeView;
+    for (auto* action : ui->toolBar->actions()) {
+        if (action->isSeparator()) continue;
+        if (auto* w = ui->toolBar->widgetForAction(action)) {
+            QWidget::setTabOrder(prevWidget, w);
+            prevWidget = w;
+        }
+    }
 }
 
 void WorldListPage::openedImpl()

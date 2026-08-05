@@ -560,6 +560,17 @@ QVariant PackProfile::data(const QModelIndex& index, int role) const
             }
             return QVariant();
         }
+        case Qt::AccessibleTextRole:
+        case Qt::AccessibleDescriptionRole: {
+            switch (column) {
+                case NameColumn:
+                    return patch->getName();
+                case VersionColumn:
+                    return patch->getVersion();
+                default:
+                    return QVariant();
+            }
+        }
     }
     return QVariant();
 }

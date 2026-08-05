@@ -598,6 +598,23 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
                 return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
             }
             return {};
+        case Qt::AccessibleTextRole:
+        case Qt::AccessibleDescriptionRole:
+            switch (column) {
+                case ActiveColumn:
+                case NameColumn:
+                    return m_resources[row]->name();
+                case DateColumn:
+                    return m_resources[row]->dateTimeChanged();
+                case ProviderColumn:
+                    return m_resources[row]->provider();
+                case SizeColumn:
+                    return m_resources[row]->sizeStr();
+                case FileNameColumn:
+                    return m_resources[row]->fileinfo().fileName();
+                default:
+                    return {};
+            }
         default:
             return {};
     }

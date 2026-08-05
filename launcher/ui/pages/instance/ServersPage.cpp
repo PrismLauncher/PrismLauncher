@@ -580,6 +580,23 @@ ServersPage::ServersPage(BaseInstance* inst, QWidget* parent) : QMainWindow(pare
     }
 
     updateState();
+
+    ui->serversView->setAccessibleName(tr("Servers List"));
+
+    for (auto* action : ui->toolBar->actions()) {
+        if (auto* w = ui->toolBar->widgetForAction(action)) {
+            w->setFocusPolicy(Qt::TabFocus);
+        }
+    }
+
+    QWidget* prevWidget = ui->serversView;
+    for (auto* action : ui->toolBar->actions()) {
+        if (action->isSeparator()) continue;
+        if (auto* w = ui->toolBar->widgetForAction(action)) {
+            QWidget::setTabOrder(prevWidget, w);
+            prevWidget = w;
+        }
+    }
 }
 
 ServersPage::~ServersPage()

@@ -176,6 +176,25 @@ VersionPage::VersionPage(MinecraftInstance* inst, QWidget* parent) : QMainWindow
         auto component = m_profile->getComponent(index.row());
         component->setEnabled(!component->isEnabled());
     });
+    ui->packageView->setAccessibleName(tr("Version Components"));
+    ui->filterEdit->setAccessibleName(tr("Search"));
+
+    for (auto* action : ui->toolBar->actions()) {
+        if (auto* w = ui->toolBar->widgetForAction(action)) {
+            w->setFocusPolicy(Qt::TabFocus);
+        }
+    }
+
+    QWidget::setTabOrder(ui->filterEdit, ui->packageView);
+    QWidget* prevWidget = ui->packageView;
+    for (auto* action : ui->toolBar->actions()) {
+        if (action->isSeparator()) continue;
+        if (auto* w = ui->toolBar->widgetForAction(action)) {
+            QWidget::setTabOrder(prevWidget, w);
+            prevWidget = w;
+        }
+    }
+
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &VersionPage::onFilterTextChanged);
 }
 

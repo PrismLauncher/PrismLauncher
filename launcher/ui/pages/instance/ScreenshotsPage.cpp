@@ -293,6 +293,23 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent)
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->listView, &QListView::customContextMenuRequested, this, &ScreenshotsPage::showContextMenu);
     connect(ui->listView, &QAbstractItemView::activated, this, &ScreenshotsPage::onItemActivated);
+
+    ui->listView->setAccessibleName(tr("Screenshots List"));
+
+    for (auto* action : ui->toolBar->actions()) {
+        if (auto* w = ui->toolBar->widgetForAction(action)) {
+            w->setFocusPolicy(Qt::TabFocus);
+        }
+    }
+
+    QWidget* prevWidget = ui->listView;
+    for (auto* action : ui->toolBar->actions()) {
+        if (action->isSeparator()) continue;
+        if (auto* w = ui->toolBar->widgetForAction(action)) {
+            QWidget::setTabOrder(prevWidget, w);
+            prevWidget = w;
+        }
+    }
 }
 
 bool ScreenshotsPage::eventFilter(QObject* obj, QEvent* evt)
