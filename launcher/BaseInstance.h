@@ -223,8 +223,6 @@ class BaseInstance : public QObject {
     /// get variables this instance exports
     virtual QMap<QString, QString> getVariables() = 0;
 
-    virtual QString typeName() const = 0;
-
     virtual void updateRuntimeContext();
     RuntimeContext runtimeContext() const { return m_runtimeContext; }
 
