@@ -163,7 +163,6 @@ void ResourcePackPage::updateResourcePacks()
     updateDialog.checkCandidates();
 
     if (updateDialog.aborted()) {
-        CustomMessageBox::selectable(this, tr("Aborted"), tr("The resource pack updater was aborted!"), QMessageBox::Warning)->show();
         return;
     }
     if (updateDialog.noUpdates()) {

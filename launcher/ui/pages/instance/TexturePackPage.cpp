@@ -164,7 +164,6 @@ void TexturePackPage::updateTexturePacks()
     updateDialog.checkCandidates();
 
     if (updateDialog.aborted()) {
-        CustomMessageBox::selectable(this, tr("Aborted"), tr("The texture pack updater was aborted!"), QMessageBox::Warning)->show();
         return;
     }
     if (updateDialog.noUpdates()) {
