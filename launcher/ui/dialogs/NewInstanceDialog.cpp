@@ -80,6 +80,8 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     setWindowIcon(QIcon::fromTheme("new"));
 
     ui->iconButton->setIcon(APPLICATION->icons()->getIcon(m_instIconKey));
+    ui->iconButton->setAccessibleName(tr("Choose Instance Icon"));
+    ui->iconButton->setToolTip(tr("Change icon for the new instance"));
 
     QStringList groups = APPLICATION->instances()->getGroups();
     groups.prepend("");

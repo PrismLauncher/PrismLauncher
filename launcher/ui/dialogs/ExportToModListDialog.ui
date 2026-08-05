@@ -73,6 +73,9 @@
           <layout class="QVBoxLayout" name="verticalLayout_4">
            <item>
             <widget class="QTextEdit" name="templateText">
+             <property name="tabChangesFocus">
+              <bool>true</bool>
+             </property>
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
                <horstretch>0</horstretch>
@@ -185,6 +188,9 @@
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QPlainTextEdit" name="finalText">
+          <property name="tabChangesFocus">
+           <bool>true</bool>
+          </property>
           <property name="minimumSize">
            <size>
             <width>0</width>
