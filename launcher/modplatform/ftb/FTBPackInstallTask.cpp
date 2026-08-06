@@ -97,7 +97,7 @@ void PackInstallTask::executeTask()
 
     auto searchUrl = QString(BuildConfig.FTB_API_BASE_URL + "/modpack/%1/%2").arg(m_pack.id).arg(version.id);
 
-    auto [action, response] = Net::Download::makeByteArray(QUrl(searchUrl));
+    auto [action, response] = Net::NetRequest::makeByteArray(QUrl(searchUrl));
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, this, [this, response] { onManifestDownloadSucceeded(response); });
@@ -315,7 +315,7 @@ void PackInstallTask::downloadPack()
 
         const QFileInfo fileInfo(file.name);
 
-        auto dl = Net::Download::makeFile(file.url, path);
+        auto dl = Net::NetRequest::makeFile(file.url, path);
         if (!file.sha1.isEmpty()) {
             dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, file.sha1));
         }

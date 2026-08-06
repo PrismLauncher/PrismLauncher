@@ -43,7 +43,6 @@
 #include "tasks/ConcurrentTask.h"
 
 // Those are included so that they are also included by anyone using NetJob
-#include "net/Download.h"
 #include "net/HttpMetaCache.h"
 
 class NetJob : public ConcurrentTask {

@@ -40,11 +40,12 @@
 #pragma once
 
 #include <QNetworkReply>
-#include <QUrl>
 #include <QTimer>
+#include <QUrl>
 #include <chrono>
 
 #include "HeaderProxy.h"
+#include "HttpMetaCache.h"
 #include "Sink.h"
 #include "Validator.h"
 
@@ -53,15 +54,39 @@
 #include "tasks/Task.h"
 
 namespace Net {
+class ByteArraySink;
+
 class NetRequest : public Task {
     Q_OBJECT
-   protected:
-    explicit NetRequest();
-
    public:
     using Ptr = shared_qobject_ptr<class NetRequest>;
-    enum class Option { NoOptions = 0, AcceptLocalFiles = 1, MakeEternal = 2, AutoRetry = 4 };
+    enum class Option {
+        NoOptions = 0,
+        AcceptLocalFiles = 1,
+        MakeEternal = 2,
+        AutoRetry = 4,
+        AddAPIHeaders = 8,
+    };
     Q_DECLARE_FLAGS(Options, Option)
+
+   public:
+    explicit NetRequest();
+    NetRequest(QUrl url, Options options = Option::NoOptions, QString name = QString());
+    NetRequest(QUrl url, QByteArray postData, Options options);
+
+   public:
+#if defined(LAUNCHER_APPLICATION)
+    static auto makeCached(QUrl url, MetaEntryPtr entry, Options options = Option::NoOptions) -> NetRequest::Ptr;
+#endif
+
+    /**
+     * Creates a request downloading to the returned QByteArray,.
+     * The QByteArray will live as long as the Download object.
+     */
+    static auto makeByteArray(QUrl url, Options options = Option::NoOptions) -> std::pair<NetRequest::Ptr, QByteArray*>;
+    static auto makeByteArray(QUrl url, QByteArray postData, Options options = Option::NoOptions)
+        -> std::pair<NetRequest::Ptr, QByteArray*>;
+    static auto makeFile(QUrl url, QString path, Options options = Option::NoOptions) -> NetRequest::Ptr;
 
    public:
     ~NetRequest() override = default;
@@ -84,7 +109,7 @@ class NetRequest : public Task {
    private:
     auto handleRedirect() -> bool;
     void handleAutoRetry(int64_t delay);
-    virtual QNetworkReply* getReply(QNetworkRequest&) = 0;
+    virtual QNetworkReply* getReply(QNetworkRequest&);
 
    protected slots:
     void onProgress(qint64 bytesReceived, qint64 bytesTotal);
@@ -117,6 +142,8 @@ class NetRequest : public Task {
 
     int m_retryCount = 0;
     QTimer m_retryTimer;
+
+    std::optional<QByteArray> m_postData;
 };
 }  // namespace Net
 

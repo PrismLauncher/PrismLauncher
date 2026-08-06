@@ -49,9 +49,14 @@
 
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
+#include "net/ApiHeaderProxy.h"
+#include "net/ChecksumValidator.h"
+#include "net/MetaCacheSink.h"
 #include "settings/SettingsObject.h"
 #endif
 #include "BuildConfig.h"
+#include "net/ByteArraySink.h"
+#include "net/FileSink.h"
 
 #include "MMCTime.h"
 #include "StringUtils.h"
@@ -61,6 +66,29 @@ namespace Net {
 NetRequest::NetRequest() : Task()
 {
     connect(&m_retryTimer, &QTimer::timeout, this, &NetRequest::executeTask);
+}
+
+NetRequest::NetRequest(QUrl url, Options options, QString name) : NetRequest()
+{
+    m_url = std::move(url);
+    m_options = options;
+    if (name.isEmpty()) {
+        setObjectName(QString("BYTES:") + m_url.toString());
+    } else {
+        setObjectName(name);
+    }
+    logCat = taskDownloadLogC;
+    if (options & Option::AddAPIHeaders) {
+#if defined(LAUNCHER_APPLICATION)
+        addHeaderProxy(std::make_unique<ApiHeaderProxy>());
+#endif
+    }
+}
+
+NetRequest::NetRequest(QUrl url, QByteArray postData, Options options) : NetRequest(std::move(url), options)
+{
+    m_postData = std::move(postData);
+    logCat = taskUploadLogC;
 }
 
 void NetRequest::addValidator(Validator* v)
@@ -107,7 +135,6 @@ void NetRequest::executeTask()
 #else
     auto user_agent = BuildConfig.USER_AGENT;
 #endif
-
     request.setHeader(QNetworkRequest::UserAgentHeader, user_agent.toUtf8());
     for (auto& header_proxy : m_headerProxies) {
         header_proxy->writeHeaders(request);
@@ -407,6 +434,58 @@ void NetRequest::enableAutoRetry(bool enable)
     } else {
         m_options &= ~static_cast<int>(Option::AutoRetry);
     }
+}
+
+QNetworkReply* NetRequest::getReply(QNetworkRequest& request)
+{
+    if (m_postData.has_value()) {
+        if (!request.hasRawHeader("Content-Type")) {
+            request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+        }
+        return m_network->post(request, *m_postData);
+    }
+    return m_network->get(request);
+}
+
+#if defined(LAUNCHER_APPLICATION)
+auto NetRequest::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Ptr
+{
+    auto dl = makeShared<NetRequest>(url, options, (QString("CACHE:") + url.toString()));
+    auto md5Node = new ChecksumValidator(QCryptographicHash::Md5);
+    auto cachedNode = new MetaCacheSink(entry, md5Node, options.testFlag(Option::MakeEternal));
+    dl->m_sink.reset(cachedNode);
+    return dl;
+}
+#endif
+
+auto NetRequest::makeByteArray(QUrl url, QByteArray postData, Options options) -> std::pair<Ptr, QByteArray*>
+{
+    auto dl = makeShared<NetRequest>(url, std::move(postData), options);
+
+    auto sink = std::make_unique<ByteArraySink>();
+    auto response = sink->output();
+    dl->m_sink = std::move(sink);
+
+    return { dl, response };
+}
+
+auto NetRequest::makeByteArray(QUrl url, Options options) -> std::pair<Ptr, QByteArray*>
+{
+    auto dl = makeShared<NetRequest>(url, options);
+
+    auto sink = std::make_unique<ByteArraySink>();
+    auto response = sink->output();
+    dl->m_sink = std::move(sink);
+
+    return { dl, response };
+}
+
+auto NetRequest::makeFile(QUrl url, QString path, Options options) -> Ptr
+{
+    auto dl = makeShared<NetRequest>(url, options, QString("FILE:") + url.toString());
+    dl->m_sink.reset(new FileSink(path));
+
+    return dl;
 }
 
 }  // namespace Net

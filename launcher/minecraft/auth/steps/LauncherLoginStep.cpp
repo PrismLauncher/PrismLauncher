@@ -8,7 +8,7 @@
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
 #include "net/RawHeaderProxy.h"
-#include "net/Upload.h"
+#include "net/NetRequest.h"
 
 LauncherLoginStep::LauncherLoginStep(AccountData* data) : AuthStep(data) {}
 
@@ -36,7 +36,7 @@ void LauncherLoginStep::perform()
         { "Accept", "application/json" },
     };
 
-    auto [request, response] = Net::Upload::makeByteArray(url, requestBody.toUtf8());
+    auto [request, response] = Net::NetRequest::makeByteArray(url, requestBody.toUtf8());
     m_request = request;
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);

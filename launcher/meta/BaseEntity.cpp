@@ -19,7 +19,7 @@
 #include "FileSystem.h"
 #include "Json.h"
 #include "modplatform/helpers/HashUtils.h"
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 #include "net/ChecksumValidator.h"
 #include "net/HttpMetaCache.h"
 #include "net/Mode.h"
@@ -166,7 +166,7 @@ void BaseEntityLoadTask::executeTask()
         entry->setRemoteChangedTimestamp({});
     }
     entry->setStale(true);
-    auto dl = Net::ApiDownload::makeCached(url, entry);
+    auto dl = Net::ApiRequest::makeCached(url, entry);
     /*
      * The validator parses the file and loads it into the object.
      * If that fails, the file is not written to storage.

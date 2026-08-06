@@ -46,7 +46,7 @@
 #include "minecraft/skins/SkinModel.h"
 #include "minecraft/skins/SkinUpload.h"
 
-#include "net/Download.h"
+#include "net/NetRequest.h"
 #include "net/NetJob.h"
 #include "tasks/Task.h"
 
@@ -228,7 +228,7 @@ void SkinManageDialog::setupCapes()
         }
         if (!cape.url.isEmpty()) {
             needsToDownload = true;
-            job->addNetAction(Net::Download::makeFile(cape.url, path));
+            job->addNetAction(Net::NetRequest::makeFile(cape.url, path));
         }
     }
     if (needsToDownload) {
@@ -416,7 +416,7 @@ void SkinManageDialog::on_urlBtn_clicked()
     job->setAskRetry(false);
 
     auto path = FS::PathCombine(m_list.getDir(), url.fileName());
-    job->addNetAction(Net::Download::makeFile(url, path));
+    job->addNetAction(Net::NetRequest::makeFile(url, path));
     ProgressDialog dlg(this);
     dlg.execWithTask(job.get());
     SkinModel s(path);
@@ -475,9 +475,9 @@ void SkinManageDialog::on_userBtn_clicked()
     auto uuidLoop = makeShared<WaitTask>();
     auto profileLoop = makeShared<WaitTask>();
 
-    auto [getUUID, uuidOut] = Net::Download::makeByteArray("https://api.minecraftservices.com/minecraft/profile/lookup/name/" + user);
-    auto [getProfile, profileOut] = Net::Download::makeByteArray(QUrl());
-    auto downloadSkin = Net::Download::makeFile(QUrl(), path);
+    auto [getUUID, uuidOut] = Net::NetRequest::makeByteArray("https://api.minecraftservices.com/minecraft/profile/lookup/name/" + user);
+    auto [getProfile, profileOut] = Net::NetRequest::makeByteArray(QUrl());
+    auto downloadSkin = Net::NetRequest::makeFile(QUrl(), path);
 
     QString failReason;
 
