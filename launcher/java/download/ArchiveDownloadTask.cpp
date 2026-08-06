@@ -38,7 +38,7 @@ void ArchiveDownloadTask::executeTask()
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("java", m_url.fileName());
 
     auto download = makeShared<NetJob>(QString("JRE::DownloadJava"), APPLICATION->network());
-    auto action = Net::Download::makeCached(m_url, entry);
+    auto action = Net::NetRequest::makeCached(m_url, entry);
     if (!m_checksum_hash.isEmpty() && !m_checksum_type.isEmpty()) {
         auto hashType = QCryptographicHash::Algorithm::Sha1;
         if (m_checksum_type == "sha256") {

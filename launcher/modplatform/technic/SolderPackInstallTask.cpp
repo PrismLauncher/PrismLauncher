@@ -42,7 +42,7 @@
 
 #include "SolderPackManifest.h"
 #include "TechnicPackProcessor.h"
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 #include "net/ChecksumValidator.h"
 
 Technic::SolderPackInstallTask::SolderPackInstallTask(QNetworkAccessManager* network,
@@ -72,7 +72,7 @@ void Technic::SolderPackInstallTask::executeTask()
 
     m_filesNetJob.reset(new NetJob(tr("Resolving modpack files"), m_network));
     auto sourceUrl = QString("%1/modpack/%2/%3").arg(m_solderUrl.toString(), m_pack, m_version);
-    auto [action, response] = Net::ApiDownload::makeByteArray(sourceUrl);
+    auto [action, response] = Net::ApiRequest::makeByteArray(sourceUrl);
     m_filesNetJob->addNetAction(action);
 
     auto job = m_filesNetJob.get();
@@ -113,7 +113,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded(QByteArray* response)
     for (const auto& mod : build.mods) {
         auto path = FS::PathCombine(m_outputDir.path(), QString("%1").arg(i));
 
-        auto dl = Net::ApiDownload::makeFile(mod.url, path);
+        auto dl = Net::ApiRequest::makeFile(mod.url, path);
         if (!mod.md5.isEmpty()) {
             dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
         }

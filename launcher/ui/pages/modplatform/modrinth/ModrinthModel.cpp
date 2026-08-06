@@ -44,7 +44,7 @@
 #include "net/NetJob.h"
 #include "ui/widgets/ProjectItem.h"
 
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 
 #include <QMessageBox>
 #include <memory>
@@ -253,7 +253,7 @@ void ModpackListModel::requestLogo(QString logo, QString url)
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("%1 Icon Download %2").arg(m_parent->debugName()).arg(logo), APPLICATION->network());
     job->setAskRetry(false);
-    job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
+    job->addNetAction(Net::ApiRequest::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
     connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job] {

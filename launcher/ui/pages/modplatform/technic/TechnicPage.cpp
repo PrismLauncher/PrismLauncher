@@ -52,7 +52,7 @@
 #include "Application.h"
 #include "modplatform/technic/SolderPackManifest.h"
 
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 
 TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent)
     : QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog), m_fetch_progress(this, false)
@@ -164,7 +164,7 @@ void TechnicPage::suggestCurrent()
 
     auto netJob = makeShared<NetJob>(QString("Technic::PackMeta(%1)").arg(current.name), APPLICATION->network());
     QString slug = current.slug;
-    auto [action, responsePtr] = Net::ApiDownload::makeByteArray(
+    auto [action, responsePtr] = Net::ApiRequest::makeByteArray(
         QString("%1modpack/%2?build=%3").arg(BuildConfig.TECHNIC_API_BASE_URL, slug, BuildConfig.TECHNIC_API_BUILD));
     netJob->addNetAction(action);
     connect(netJob.get(), &NetJob::succeeded, this, [this, responsePtr, slug] {
@@ -265,7 +265,7 @@ void TechnicPage::metadataLoaded()
 
         auto netJob = makeShared<NetJob>(QString("Technic::SolderMeta(%1)").arg(current.name), APPLICATION->network());
         auto url = QString("%1/modpack/%2").arg(current.url, current.slug);
-        auto [action, response] = Net::ApiDownload::makeByteArray(QUrl(url));
+        auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(url));
         netJob->addNetAction(action);
 
         connect(netJob.get(), &NetJob::succeeded, this, [this, response] { onSolderLoaded(response); });

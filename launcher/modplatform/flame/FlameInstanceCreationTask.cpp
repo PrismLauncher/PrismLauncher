@@ -66,7 +66,7 @@
 #include "meta/Index.h"
 #include "minecraft/World.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 #include "ui/dialogs/UntrustedModsDialog.h"
 #include "ui/pages/modplatform/OptionalModDialog.h"
 
@@ -622,7 +622,7 @@ void FlameCreationTask::setupDownloadJob()
 
         if (!result.version.downloadUrl.isEmpty()) {
             qDebug() << "Will download" << result.version.downloadUrl << "to" << path;
-            auto dl = Net::ApiDownload::makeFile(result.version.downloadUrl, path);
+            auto dl = Net::ApiRequest::makeFile(result.version.downloadUrl, path);
             m_filesJob->addNetAction(dl);
         }
     }
