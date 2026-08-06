@@ -15,7 +15,7 @@
 #include "net/ApiUpload.h"
 #include "net/NetJob.h"
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::matchFingerprints(const QList<uint>& fingerprints)
+std::pair<Task::Ptr, QByteArray*> FlameAPI::matchFingerprints(const QList<uint>& fingerprints) const
 {
     auto netJob = makeShared<NetJob>(QString("Flame::MatchFingerprints"), APPLICATION->network());
 
@@ -35,7 +35,7 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::matchFingerprints(const QList<uint>&
     return { netJob, response };
 }
 
-QString FlameAPI::getModFileChangelog(int modId, int fileId)
+QString FlameAPI::getModFileChangelog(int modId, int fileId) const
 {
     QEventLoop lock;
     QString changelog;
@@ -69,7 +69,7 @@ QString FlameAPI::getModFileChangelog(int modId, int fileId)
     return changelog;
 }
 
-QString FlameAPI::getModDescription(int modId)
+QString FlameAPI::getModDescription(int modId) const
 {
     QEventLoop lock;
     QString description;
@@ -154,7 +154,8 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getFile(const QString& addonId, cons
         Net::ApiDownload::makeByteArray(QUrl(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2").arg(addonId, fileId)));
     netJob->addNetAction(action);
 
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [addonId, fileId] { qDebug() << "Flame API file failure" << addonId << fileId; });
+    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(),
+                     [addonId, fileId] { qDebug() << "Flame API file failure" << addonId << fileId; });
 
     return { netJob, response };
 }
@@ -182,12 +183,12 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getCategories(ModPlatform::ResourceT
     return { netJob, response };
 }
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getModCategories()
+std::pair<Task::Ptr, QByteArray*> FlameAPI::getModCategories() const
 {
     return getCategories(ModPlatform::ResourceType::Mod);
 }
 
-QList<ModPlatform::Category> FlameAPI::loadModCategories(const QByteArray& response)
+QList<ModPlatform::Category> FlameAPI::loadModCategories(const QByteArray& response) const
 {
     QList<ModPlatform::Category> categories;
     QJsonParseError parse_error{};
@@ -221,7 +222,7 @@ QList<ModPlatform::Category> FlameAPI::loadModCategories(const QByteArray& respo
 std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
                                                                       QList<ModPlatform::ModLoaderType> instanceLoaders,
                                                                       ModPlatform::ModLoaderTypes modLoaders,
-                                                                      bool checkLoaders)
+                                                                      bool checkLoaders) const
 {
     static const auto noLoader = ModPlatform::ModLoaderType(0);
     if (!checkLoaders) {

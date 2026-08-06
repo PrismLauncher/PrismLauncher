@@ -157,7 +157,7 @@ class ResourceAPI {
 
     virtual void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&) const = 0;
 
-    virtual std::pair<Task::Ptr, QByteArray*> getModCategories() = 0;
+    virtual std::pair<Task::Ptr, QByteArray*> getModCategories() const = 0;
 
-    virtual QList<ModPlatform::Category> loadModCategories(const QByteArray& response) = 0;
+    virtual QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const = 0;
 };
