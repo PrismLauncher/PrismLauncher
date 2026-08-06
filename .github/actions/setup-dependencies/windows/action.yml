@@ -73,10 +73,6 @@ runs:
           ccache:p
           cmake:p
           ninja:p
-          qt6-base:p
-          qt6-svg:p
-          qt6-imageformats:p
-          qt6-networkauth:p
 
     - name: List pacman packages (MinGW)
       if: ${{ inputs.msystem != '' }}
