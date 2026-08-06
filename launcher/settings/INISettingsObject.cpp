@@ -84,7 +84,6 @@ void INISettingsObject::changeSetting(const Setting& setting, QVariant value)
             for (auto iter : setting.configKeys())
                 m_ini.remove(iter);
         }
-        doSave();
     }
 }
 
@@ -103,7 +102,6 @@ void INISettingsObject::resetSetting(const Setting& setting)
     if (contains(setting.id())) {
         for (auto iter : setting.configKeys())
             m_ini.remove(iter);
-        doSave();
     }
 }
 

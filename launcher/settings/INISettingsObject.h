@@ -48,6 +48,7 @@ class INISettingsObject : public SettingsObject {
 
     void suspendSave() override;
     void resumeSave() override;
+    void doSave() override;
 
    protected slots:
     virtual void changeSetting(const Setting& setting, QVariant value) override;
@@ -55,7 +56,6 @@ class INISettingsObject : public SettingsObject {
 
    protected:
     virtual QVariant retrieveValue(const Setting& setting) override;
-    void doSave();
 
    protected:
     INIFile m_ini;

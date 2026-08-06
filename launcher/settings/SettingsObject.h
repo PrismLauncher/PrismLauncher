@@ -172,6 +172,7 @@ class SettingsObject : public QObject {
 
     virtual void suspendSave() = 0;
     virtual void resumeSave() = 0;
+    virtual void doSave() = 0;
    signals:
     /*!
      * \brief Signal emitted when one of this SettingsObject object's settings changes.
