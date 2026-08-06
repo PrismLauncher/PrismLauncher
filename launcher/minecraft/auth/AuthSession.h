@@ -8,9 +8,6 @@
 class MinecraftAccount;
 
 struct AuthSession {
-    bool MakeOffline(QString offline_playername);
-    void MakeDemo(QString name, QString uuid);
-
     QString serializeUserProperties();
 
     // combined session ID
@@ -21,8 +18,10 @@ struct AuthSession {
     QString player_name;
     // profile ID
     QString uuid;
-    // 'msa' or 'offline', depending on account type
+    // Minecraft-compatible user type for modern launch arguments.
     QString user_type;
+    // Apply the Ely.by Authlib-compatible session patch before launching the game.
+    bool wantsElyPatch = false;
     // the actual launch mode for this session
     LaunchMode launchMode;
 };

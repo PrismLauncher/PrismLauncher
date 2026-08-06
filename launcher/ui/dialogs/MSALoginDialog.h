@@ -34,20 +34,20 @@ class MSALoginDialog : public QDialog {
     static MinecraftAccountPtr newAccount(QWidget* parent);
     int exec() override;
 
-   private:
+   protected:
     explicit MSALoginDialog(QWidget* parent = 0);
+    AccountType m_accountType = AccountType::MSA;
+    QString m_linkUrl = "https://www.microsoft.com/link";
+    Ui::MSALoginDialog* ui;
+    MinecraftAccountPtr m_account;
 
    protected slots:
     void onTaskFailed(QString reason);
-    void onDeviceFlowStatus(QString status);
     void onAuthFlowStatus(QString status);
     void authorizeWithBrowser(const QUrl& url);
     void authorizeWithBrowserWithExtra(QString url, QString code, int expiresIn);
 
    private:
-    Ui::MSALoginDialog* ui;
-    MinecraftAccountPtr m_account;
-    shared_qobject_ptr<AuthFlow> m_devicecode_task;
     shared_qobject_ptr<AuthFlow> m_authflow_task;
 
     QUrl m_url;

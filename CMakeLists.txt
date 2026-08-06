@@ -271,6 +271,10 @@ endif()
 # https://docs.microsoft.com/en-us/legal/microsoft-identity-platform/terms-of-use
 set(Launcher_MSA_CLIENT_ID "c36a9fb6-4f2a-41ff-90bd-ae7cc92031eb" CACHE STRING "Client ID you can get from Microsoft Identity Platform when you register an application")
 
+# This is a public OAuth client identifier. Rebranded builds should register their own application in Ely.by Accounts.
+# The launcher intentionally does not embed or persist an OAuth client secret.
+set(Launcher_ELY_CLIENT_ID "elyprism-launcher" CACHE STRING "Public OAuth client ID registered with Ely.by")
+
 # By using this key in your builds you accept the terms and conditions laid down in
 # https://support.curseforge.com/en/support/solutions/articles/9000207405-curse-forge-3rd-party-api-terms-and-conditions
 # NOTE: CurseForge requires you to change this if you make any kind of derivative work.

@@ -53,7 +53,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionAddMicrosoft"/>
-   <addaction name="actionAddOffline"/>
+   <addaction name="actionAddEly"/>
    <addaction name="actionRefresh"/>
    <addaction name="actionRemove"/>
    <addaction name="actionSetDefault"/>
@@ -65,7 +65,7 @@
   </widget>
   <action name="actionSetDefault">
    <property name="text">
-    <string>&amp;Set Default</string>
+    <string>&amp;Make Primary</string>
    </property>
   </action>
   <action name="actionNoDefault">
@@ -86,12 +86,18 @@
   </action>
   <action name="actionAddMicrosoft">
    <property name="text">
-    <string>&amp;Add Microsoft</string>
+    <string>Sign in with &amp;Microsoft</string>
+   </property>
+   <property name="toolTip">
+    <string>Add an official Microsoft Minecraft account using browser OAuth</string>
    </property>
   </action>
-  <action name="actionAddOffline">
+  <action name="actionAddEly">
    <property name="text">
-    <string>Add &amp;Offline</string>
+    <string>Sign in with &amp;Ely.by</string>
+   </property>
+   <property name="toolTip">
+    <string>Add an Ely.by account using browser OAuth</string>
    </property>
   </action>
   <action name="actionRefresh">
@@ -104,7 +110,7 @@
   </action>
   <action name="actionRemove">
    <property name="text">
-    <string>Remo&amp;ve</string>
+    <string>Remo&amp;ve Account</string>
    </property>
   </action>
   <action name="actionMoveUp">

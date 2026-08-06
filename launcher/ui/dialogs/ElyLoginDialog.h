@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2026 Octol1ttle <l1ttleofficial@outlook.com>
+ *  ElyPrismLauncher - Minecraft Launcher
+ *  Copyright (c) 2025 Octol1ttle <l1ttleofficial@outlook.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,7 +17,16 @@
  */
 
 #pragma once
+#include "MSALoginDialog.h"
 
-enum class LaunchMode {
-    Normal,
+class ElyLoginDialog : public MSALoginDialog {
+    Q_OBJECT
+
+   public:
+    ~ElyLoginDialog() = default;
+
+    static MinecraftAccountPtr newAccount(QWidget* parent);
+
+   private:
+    explicit ElyLoginDialog(QWidget* parent = 0);
 };

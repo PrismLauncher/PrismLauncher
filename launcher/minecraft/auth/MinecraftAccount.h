@@ -85,10 +85,11 @@ class MinecraftAccount : public QObject, public Usable {
 
     static MinecraftAccountPtr createBlankMSA();
 
-    static MinecraftAccountPtr createOffline(const QString& username);
+    static MinecraftAccountPtr createBlank(AccountType type);
 
     static MinecraftAccountPtr loadFromJsonV3(const QJsonObject& json);
 
+    // Compatibility helper used by the game's independent demo launch path.
     static QUuid uuidFromUsername(QString username);
 
     //! Saves a MinecraftAccount to a JSON object and returns it.
@@ -116,7 +117,7 @@ class MinecraftAccount : public QObject, public Usable {
 
     AccountType accountType() const noexcept { return data.type; }
 
-    bool ownsMinecraft() const { return data.type != AccountType::Offline && data.minecraftEntitlement.ownsMinecraft; }
+    bool ownsMinecraft() const { return data.type == AccountType::Ely || data.minecraftEntitlement.ownsMinecraft; }
 
     bool hasProfile() const { return data.profileId().size() != 0; }
 
@@ -126,8 +127,9 @@ class MinecraftAccount : public QObject, public Usable {
             case AccountType::MSA: {
                 return "msa";
             } break;
-            case AccountType::Offline: {
-                return "offline";
+            case AccountType::Ely: {
+                // Minecraft expects the Microsoft-compatible value for modern launch arguments.
+                return "msa";
             } break;
             default: {
                 return "unknown";

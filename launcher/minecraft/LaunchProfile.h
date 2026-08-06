@@ -56,6 +56,7 @@ class LaunchProfile : public ProblemProvider {
     void applyJarMods(const QList<LibraryPtr>& jarMods);
     void applyMods(const QList<LibraryPtr>& jarMods);
     void applyLibrary(LibraryPtr library, const RuntimeContext& runtimeContext);
+    void removeLibrariesByPrefix(const QString& artifactPrefix);
     void applyMavenFile(LibraryPtr library, const RuntimeContext& runtimeContext);
     void applyAgent(const Agent& agent, const RuntimeContext& runtimeContext);
     void applyCompatibleJavaMajors(QList<int>& javaMajor);

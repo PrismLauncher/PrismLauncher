@@ -58,8 +58,6 @@ class LaunchController : public Task {
 
     void setLaunchMode(const LaunchMode mode) { m_wantedLaunchMode = mode; }
 
-    void setOfflineName(const QString& offlineName) { m_offlineName = offlineName; }
-
     void setProfiler(BaseProfilerFactory* profiler) { m_profiler = profiler; }
 
     void setParentWidget(QWidget* widget) { m_parentWidget = widget; }
@@ -77,8 +75,6 @@ class LaunchController : public Task {
     void launchInstance();
     void decideAccount();
     LaunchDecision decideLaunchMode();
-    bool askPlayDemo() const;
-    QString askOfflineName(const QString& playerName, bool* ok = nullptr);
     bool reauthenticateAccount(const MinecraftAccountPtr& account, const QString& reason);
 
    private slots:
@@ -92,7 +88,6 @@ class LaunchController : public Task {
     LaunchMode m_wantedLaunchMode = LaunchMode::Normal;
     LaunchMode m_actualLaunchMode = LaunchMode::Normal;
     BaseProfilerFactory* m_profiler = nullptr;
-    QString m_offlineName;
     MinecraftInstance* m_instance = nullptr;
     QWidget* m_parentWidget = nullptr;
     InstanceWindow* m_console = nullptr;

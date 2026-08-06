@@ -656,7 +656,7 @@ void MainWindow::repopulateAccountsMenu()
     auto accounts = APPLICATION->accounts();
     MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
 
-    bool canChangeSkin = defaultAccount && (defaultAccount->accountType() == AccountType::MSA) && !defaultAccount->isActive();
+    bool canChangeSkin = defaultAccount && !defaultAccount->isActive();
     ui->actionManageSkins->setEnabled(canChangeSkin);
 
     QString active_profileId = "";
@@ -1395,9 +1395,15 @@ void MainWindow::on_actionManageSkins_triggered()
 {
     auto account = APPLICATION->accounts()->defaultAccount();
 
-    if (account && (account->accountType() == AccountType::MSA) && !account->isActive()) {
+    if (!account || account->isActive()) {
+        return;
+    }
+
+    if (account->accountType() == AccountType::MSA) {
         SkinManageDialog dialog(this, account);
         dialog.exec();
+    } else if (account->accountType() == AccountType::Ely) {
+        DesktopServices::openUrl(QUrl("https://ely.by/skins"));
     }
 }
 

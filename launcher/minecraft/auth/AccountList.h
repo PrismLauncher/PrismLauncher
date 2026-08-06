@@ -56,6 +56,7 @@ class AccountList : public QAbstractListModel {
         // TODO: Add icon column.
         ProfileNameColumn = 0,
         TypeColumn,
+        UuidColumn,
         StatusColumn,
 
         NUM_COLUMNS

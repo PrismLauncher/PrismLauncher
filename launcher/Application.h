@@ -106,9 +106,10 @@ class Application : public QApplication {
         None = 0,
 
         SupportsMSA = 1 << 0,
-        SupportsFlame = 1 << 1,
-        SupportsGameMode = 1 << 2,
-        SupportsMangoHud = 1 << 3,
+        SupportsEly = 1 << 1,
+        SupportsFlame = 1 << 2,
+        SupportsGameMode = 1 << 3,
+        SupportsMangoHud = 1 << 4,
     };
     Q_DECLARE_FLAGS(Capabilities, Capability)
 
@@ -165,6 +166,7 @@ class Application : public QApplication {
     QString getJarPath(QString jarFile);
 
     QString getMSAClientID();
+    QString getElyClientID();
     QString getFlameAPIKey();
     QString getModrinthAPIToken();
     QString getUserAgent();
@@ -218,8 +220,7 @@ class Application : public QApplication {
     bool launch(MinecraftInstance* instance,
                 LaunchMode mode = LaunchMode::Normal,
                 std::shared_ptr<MinecraftTarget> targetToJoin = nullptr,
-                shared_qobject_ptr<MinecraftAccount> accountToUse = nullptr,
-                const QString& offlineName = QString());
+                shared_qobject_ptr<MinecraftAccount> accountToUse = nullptr);
     bool kill(BaseInstance* instance);
     void closeCurrentWindow();
 
@@ -311,8 +312,6 @@ class Application : public QApplication {
     QString m_serverToJoin;
     QString m_worldToJoin;
     QString m_profileToUse;
-    bool m_launchOffline = false;
-    QString m_offlineName;
     bool m_liveCheck = false;
     QList<QUrl> m_urlsToImport;
     QString m_instanceIdToShowWindowOf;

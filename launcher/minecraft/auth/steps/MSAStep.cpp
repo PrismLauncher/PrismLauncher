@@ -111,10 +111,12 @@ class LoggingOAuthHttpServerReplyHandler final : public QOAuthHttpServerReplyHan
     }
 };
 
-MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(silent)
+MSAStep::MSAStep(AccountData* data, bool silent, QString clientId, QString scopes, QUrl authorizeUrl, QUrl tokenUrl)
+    : AuthStep(data), m_silent(silent)
 {
-    m_clientId = APPLICATION->getMSAClientID();
-    if (QCoreApplication::applicationFilePath().startsWith("/tmp/.mount_") || APPLICATION->isPortable() || !isSchemeHandlerRegistered())
+    m_clientId = !clientId.isEmpty() ? clientId : APPLICATION->getMSAClientID();
+    if (QCoreApplication::applicationFilePath().startsWith("/tmp/.mount_") || APPLICATION->isPortable() || !isSchemeHandlerRegistered() ||
+        !clientId.isEmpty())
 
     {
         auto replyHandler = new LoggingOAuthHttpServerReplyHandler(this);
@@ -132,9 +134,9 @@ MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(sile
     } else {
         m_oauth2.setReplyHandler(new CustomOAuthOobReplyHandler(this));
     }
-    m_oauth2.setAuthorizationUrl(QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize"));
-    m_oauth2.setAccessTokenUrl(QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/token"));
-    m_oauth2.setScope("XboxLive.SignIn XboxLive.offline_access");
+    m_oauth2.setAuthorizationUrl(authorizeUrl);
+    m_oauth2.setAccessTokenUrl(tokenUrl);
+    m_oauth2.setScope(scopes);
     m_oauth2.setClientIdentifier(m_clientId);
     m_oauth2.setNetworkAccessManager(APPLICATION->network());
 
@@ -157,7 +159,7 @@ MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(sile
                 state = AccountTaskState::STATE_FAILED_SOFT;
             }
         }
-        auto message = tr("Microsoft user authentication failed.");
+        auto message = tr("OAuth2 user authentication failed.");
         if (silent) {
             message = tr("Failed to refresh token.");
         }
@@ -187,11 +189,11 @@ void MSAStep::perform()
     if (m_silent) {
         if (m_data->msaClientID != m_clientId) {
             emit finished(AccountTaskState::STATE_DISABLED,
-                          tr("Microsoft user authentication failed - client identification has changed."));
+                          tr("OAuth2 user authentication failed - client identification has changed."));
             return;
         }
         if (m_data->msaToken.refresh_token.isEmpty()) {
-            emit finished(AccountTaskState::STATE_DISABLED, tr("Microsoft user authentication failed - refresh token is empty."));
+            emit finished(AccountTaskState::STATE_DISABLED, tr("OAuth2 user authentication failed - refresh token is empty."));
             return;
         }
         m_oauth2.setRefreshToken(m_data->msaToken.refresh_token);
@@ -200,7 +202,9 @@ void MSAStep::perform()
         m_oauth2.setModifyParametersFunction(
             [](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* map) { map->insert("prompt", "select_account"); });
 
+        const auto accountType = m_data->type;
         *m_data = AccountData();
+        m_data->type = accountType;
         m_data->msaClientID = m_clientId;
         m_oauth2.grant();
     }

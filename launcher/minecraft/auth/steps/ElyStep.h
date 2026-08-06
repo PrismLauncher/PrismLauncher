@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2026 Octol1ttle <l1ttleofficial@outlook.com>
+ *  ElyPrismLauncher - Minecraft Launcher
+ *  Copyright (c) 2025 Octol1ttle <l1ttleofficial@outlook.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,7 +17,14 @@
  */
 
 #pragma once
+#include "MSAStep.h"
 
-enum class LaunchMode {
-    Normal,
+class ElyStep : public MSAStep {
+    Q_OBJECT
+
+   public:
+    explicit ElyStep(AccountData* data, bool silent = false);
+    virtual ~ElyStep() noexcept = default;
+
+    QString describe() override;
 };

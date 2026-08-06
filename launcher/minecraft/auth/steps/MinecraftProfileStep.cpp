@@ -16,7 +16,7 @@ QString MinecraftProfileStep::describe()
 
 void MinecraftProfileStep::perform()
 {
-    QUrl url("https://api.minecraftservices.com/minecraft/profile");
+    const QUrl& url = m_profileUrl;
     auto headers = QList<Net::HeaderPair>{ { "Content-Type", "application/json" },
                                            { "Accept", "application/json" },
                                            { "Authorization", QString("Bearer %1").arg(m_data->yggdrasilToken.token).toUtf8() } };

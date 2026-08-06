@@ -111,6 +111,7 @@ Config::Config()
     LOGIN_CALLBACK_URL = "@Launcher_LOGIN_CALLBACK_URL@";
     IMGUR_CLIENT_ID = "@Launcher_IMGUR_CLIENT_ID@";
     MSA_CLIENT_ID = "@Launcher_MSA_CLIENT_ID@";
+    ELY_CLIENT_ID = "@Launcher_ELY_CLIENT_ID@";
     FLAME_API_KEY = "@Launcher_CURSEFORGE_API_KEY@";
     META_URL = "@Launcher_META_URL@";
     LEGACY_FMLLIBS_BASE_URL = "@Launcher_LEGACY_FMLLIBS_BASE_URL@";

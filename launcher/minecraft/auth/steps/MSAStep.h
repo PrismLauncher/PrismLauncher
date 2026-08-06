@@ -42,7 +42,12 @@
 class MSAStep : public AuthStep {
     Q_OBJECT
    public:
-    explicit MSAStep(AccountData* data, bool silent = false);
+    explicit MSAStep(AccountData* data,
+                     bool silent = false,
+                     QString clientId = "",
+                     QString scopes = "XboxLive.SignIn XboxLive.offline_access",
+                     QUrl authorizeUrl = QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize"),
+                     QUrl tokenUrl = QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/token"));
     virtual ~MSAStep() noexcept = default;
 
     void perform() override;

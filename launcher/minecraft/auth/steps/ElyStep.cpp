@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2026 Octol1ttle <l1ttleofficial@outlook.com>
+ *  ElyPrismLauncher - Minecraft Launcher
+ *  Copyright (c) 2025 Octol1ttle <l1ttleofficial@outlook.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,8 +16,19 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "ElyStep.h"
 
-enum class LaunchMode {
-    Normal,
-};
+#include "Application.h"
+
+ElyStep::ElyStep(AccountData* data, bool silent)
+    : MSAStep(data, silent, APPLICATION->getElyClientID(),
+              "account_info offline_access minecraft_server_session",
+              QUrl("https://account.ely.by/oauth2/v1"),
+              QUrl("https://account.ely.by/api/oauth2/v1/token"))
+{
+}
+
+QString ElyStep::describe()
+{
+    return tr("Logging in with Ely.by account.");
+}

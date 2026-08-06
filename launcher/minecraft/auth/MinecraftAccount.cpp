@@ -69,23 +69,14 @@ MinecraftAccountPtr MinecraftAccount::loadFromJsonV3(const QJsonObject& json)
 
 MinecraftAccountPtr MinecraftAccount::createBlankMSA()
 {
-    MinecraftAccountPtr account(new MinecraftAccount());
-    account->data.type = AccountType::MSA;
-    return account;
+    return createBlank(AccountType::MSA);
 }
 
-MinecraftAccountPtr MinecraftAccount::createOffline(const QString& username)
+MinecraftAccountPtr MinecraftAccount::createBlank(AccountType type)
 {
-    auto account = makeShared<MinecraftAccount>();
-    account->data.type = AccountType::Offline;
-    account->data.yggdrasilToken.token = "0";
-    account->data.yggdrasilToken.validity = Validity::Certain;
-    account->data.yggdrasilToken.issueInstant = QDateTime::currentDateTimeUtc();
-    account->data.yggdrasilToken.extra["userName"] = username;
-    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString(QUuid::Id128);
-    account->data.minecraftProfile.id = uuidFromUsername(username).toString(QUuid::Id128);
-    account->data.minecraftProfile.name = username;
-    account->data.minecraftProfile.validity = Validity::Certain;
+    Q_ASSERT(type == AccountType::MSA || type == AccountType::Ely);
+    MinecraftAccountPtr account(new MinecraftAccount());
+    account->data.type = type;
     return account;
 }
 
@@ -163,16 +154,12 @@ void MinecraftAccount::authFailed(QString reason)
             // NOTE: this doesn't do much. There was an error of some sort.
         } break;
         case AccountTaskState::STATE_FAILED_HARD: {
-            if (accountType() == AccountType::MSA) {
-                data.msaToken.token = QString();
-                data.msaToken.refresh_token = QString();
-                data.msaToken.validity = Validity::None;
-                data.validity_ = Validity::None;
-            } else {
-                data.yggdrasilToken.token = QString();
-                data.yggdrasilToken.validity = Validity::None;
-                data.validity_ = Validity::None;
-            }
+            data.msaToken.token = QString();
+            data.msaToken.refresh_token = QString();
+            data.msaToken.validity = Validity::None;
+            data.yggdrasilToken.token = QString();
+            data.yggdrasilToken.validity = Validity::None;
+            data.validity_ = Validity::None;
             emit changed();
         } break;
         case AccountTaskState::STATE_FAILED_GONE: {
@@ -247,10 +234,9 @@ void MinecraftAccount::fillSession(AuthSessionPtr session)
     session->player_name = data.profileName();
     // profile ID
     session->uuid = data.profileId();
-    if (session->uuid.isEmpty())
-        session->uuid = uuidFromUsername(session->player_name).toString(QUuid::Id128);
-    // 'legacy' or 'mojang', depending on account type
+    // Minecraft-compatible user type and optional Ely.by runtime patch.
     session->user_type = typeString();
+    session->wantsElyPatch = data.type == AccountType::Ely;
     if (!session->access_token.isEmpty()) {
         session->session = "token:" + data.accessToken() + ":" + data.profileId();
     } else {
@@ -281,17 +267,14 @@ void MinecraftAccount::incrementUses()
 
 QUuid MinecraftAccount::uuidFromUsername(QString username)
 {
-    auto input = QString("OfflinePlayer:%1").arg(username).toUtf8();
-
-    // basically a reimplementation of Java's UUID#nameUUIDFromBytes
+    const auto input = QString("OfflinePlayer:%1").arg(username).toUtf8();
     QByteArray digest = QCryptographicHash::hash(input, QCryptographicHash::Md5);
 
-    auto bOr = [](QByteArray& array, qsizetype index, uint8_t value) { array[index] |= value; };
-    auto bAnd = [](QByteArray& array, qsizetype index, uint8_t value) { array[index] &= value; };
-    bAnd(digest, 6, 0x0f);  // clear version
-    bOr(digest, 6, 0x30);   // set to version 3
-    bAnd(digest, 8, 0x3f);  // clear variant
-    bOr(digest, 8, 0x80);   // set to IETF variant
-
+    auto setBits = [](QByteArray& bytes, qsizetype index, uint8_t clearMask, uint8_t setMask) {
+        bytes[index] &= clearMask;
+        bytes[index] |= setMask;
+    };
+    setBits(digest, 6, 0x0f, 0x30);  // version 3
+    setBits(digest, 8, 0x3f, 0x80);  // IETF variant
     return QUuid::fromRfc4122(digest);
 }

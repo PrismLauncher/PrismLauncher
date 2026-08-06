@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2026 Octol1ttle <l1ttleofficial@outlook.com>
+ *  ElyPrismLauncher - Minecraft Launcher
+ *  Copyright (c) 2025 Octol1ttle <l1ttleofficial@outlook.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,8 +16,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "MinecraftProfileStepEly.h"
 
-enum class LaunchMode {
-    Normal,
-};
+MinecraftProfileStepEly::MinecraftProfileStepEly(AccountData* data) : MinecraftProfileStep(data)
+{
+    m_profileUrl = QUrl("https://account.ely.by/api/mojang/services/minecraft/profile");
+}

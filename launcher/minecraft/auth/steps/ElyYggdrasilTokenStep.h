@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2026 Octol1ttle <l1ttleofficial@outlook.com>
+ *  ElyPrismLauncher - Minecraft Launcher
+ *  Copyright (c) 2025 Octol1ttle <l1ttleofficial@outlook.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,16 @@
 
 #pragma once
 
-enum class LaunchMode {
-    Normal,
+#include "minecraft/auth/AuthStep.h"
+
+class ElyYggdrasilTokenStep : public AuthStep {
+    Q_OBJECT
+
+   public:
+    explicit ElyYggdrasilTokenStep(AccountData* data);
+    virtual ~ElyYggdrasilTokenStep() noexcept = default;
+
+    void perform() override;
+
+    QString describe() override;
 };

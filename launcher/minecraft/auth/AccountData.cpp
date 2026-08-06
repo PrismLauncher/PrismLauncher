@@ -289,28 +289,26 @@ bool AccountData::resumeStateFromV3(QJsonObject data)
     auto typeS = typeV.toString();
     if (typeS == "MSA") {
         type = AccountType::MSA;
-    } else if (typeS == "Offline") {
-        type = AccountType::Offline;
+    } else if (typeS == "Ely") {
+        type = AccountType::Ely;
     } else {
         qWarning() << "Failed to parse account data: type is not recognized.";
         return false;
     }
 
-    if (type == AccountType::MSA) {
+    if (type == AccountType::MSA || type == AccountType::Ely) {
         auto clientIDV = data.value("msa-client-id");
         if (clientIDV.isString()) {
             msaClientID = clientIDV.toString();
         }  // leave msaClientID empty if it doesn't exist or isn't a string
         msaToken = tokenFromJSONV3(data, "msa");
-        userToken = tokenFromJSONV3(data, "utoken");
-        mojangservicesToken = tokenFromJSONV3(data, "xrp-mc");
+        if (type == AccountType::MSA) {
+            userToken = tokenFromJSONV3(data, "utoken");
+            mojangservicesToken = tokenFromJSONV3(data, "xrp-mc");
+        }
     }
 
     yggdrasilToken = tokenFromJSONV3(data, "ygg");
-    // versions before 7.2 used "offline" as the offline token
-    if (yggdrasilToken.token == "offline")
-        yggdrasilToken.token = "0";
-
     minecraftProfile = profileFromJSONV3(data, "profile");
     if (!entitlementFromJSONV3(data, minecraftEntitlement)) {
         if (minecraftProfile.validity != Validity::None) {
@@ -327,14 +325,14 @@ bool AccountData::resumeStateFromV3(QJsonObject data)
 QJsonObject AccountData::saveState() const
 {
     QJsonObject output;
-    if (type == AccountType::MSA) {
-        output["type"] = "MSA";
+    if (type == AccountType::MSA || type == AccountType::Ely) {
+        output["type"] = type == AccountType::MSA ? "MSA" : "Ely";
         output["msa-client-id"] = msaClientID;
         tokenToJSONV3(output, msaToken, "msa");
-        tokenToJSONV3(output, userToken, "utoken");
-        tokenToJSONV3(output, mojangservicesToken, "xrp-mc");
-    } else if (type == AccountType::Offline) {
-        output["type"] = "Offline";
+        if (type == AccountType::MSA) {
+            tokenToJSONV3(output, userToken, "utoken");
+            tokenToJSONV3(output, mojangservicesToken, "xrp-mc");
+        }
     }
 
     tokenToJSONV3(output, yggdrasilToken, "ygg");

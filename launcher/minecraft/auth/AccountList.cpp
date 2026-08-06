@@ -285,21 +285,17 @@ QString getAccountStatus(AccountState status)
 {
     switch (status) {
         case AccountState::Unchecked:
-            return QObject::tr("Unchecked", "Account status");
+        case AccountState::Online:
+            return QObject::tr("Online", "Account status");
         case AccountState::Offline:
             return QObject::tr("Offline", "Account status");
-        case AccountState::Online:
-            return QObject::tr("Ready", "Account status");
         case AccountState::Working:
-            return QObject::tr("Working", "Account status");
+            return QObject::tr("Refreshing", "Account status");
         case AccountState::Errored:
-            return QObject::tr("Errored", "Account status");
         case AccountState::Expired:
-            return QObject::tr("Expired", "Account status");
         case AccountState::Disabled:
-            return QObject::tr("Disabled", "Account status");
         case AccountState::Gone:
-            return QObject::tr("Gone", "Account status");
+            return QObject::tr("Expired", "Account status");
         default:
             return QObject::tr("Unknown", "Account status");
     }
@@ -341,14 +337,16 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
                 case TypeColumn: {
                     switch (account->accountType()) {
                         case AccountType::MSA: {
-                            return tr("MSA", "Account type");
+                            return tr("Microsoft", "Account type");
                         }
-                        case AccountType::Offline: {
-                            return tr("Offline", "Account type");
+                        case AccountType::Ely: {
+                            return tr("Ely.by", "Account type");
                         }
                     }
                     return tr("Unknown", "Account type");
                 }
+                case UuidColumn:
+                    return account->profileId();
                 case StatusColumn:
                     return getAccountStatus(account->accountState());
                 default:
@@ -377,6 +375,8 @@ QVariant AccountList::headerData(int section, [[maybe_unused]] Qt::Orientation o
                     return tr("Username");
                 case TypeColumn:
                     return tr("Type");
+                case UuidColumn:
+                    return tr("UUID");
                 case StatusColumn:
                     return tr("Status");
                 default:
@@ -388,7 +388,9 @@ QVariant AccountList::headerData(int section, [[maybe_unused]] Qt::Orientation o
                 case ProfileNameColumn:
                     return tr("Minecraft username associated with the account.");
                 case TypeColumn:
-                    return tr("Type of the account (MSA or Offline)");
+                    return tr("Microsoft or Ely.by account type.");
+                case UuidColumn:
+                    return tr("Unique Minecraft profile identifier.");
                 case StatusColumn:
                     return tr("Current status of the account.");
                 default:

@@ -70,6 +70,7 @@
 #include "minecraft/launch/VerifyJavaInstall.h"
 
 #include "minecraft/update/AssetUpdateTask.h"
+#include "minecraft/update/ElyPatchTask.h"
 #include "minecraft/update/FoldersTask.h"
 #include "minecraft/update/LegacyFMLLibrariesTask.h"
 #include "minecraft/update/LibrariesTask.h"
@@ -305,16 +306,7 @@ void MinecraftInstance::populateLaunchMenu(QMenu* menu)
 {
     QAction* normalLaunch = menu->addAction(tr("&Launch"));
     normalLaunch->setShortcut(QKeySequence::Open);
-    QAction* normalLaunchOffline = menu->addAction(tr("Launch &Offline"));
-    normalLaunchOffline->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
-    QAction* normalLaunchDemo = menu->addAction(tr("Launch &Demo"));
-    normalLaunchDemo->setShortcut(QKeySequence(tr("Ctrl+Alt+O")));
-
-    normalLaunchDemo->setEnabled(supportsDemo());
-
     connect(normalLaunch, &QAction::triggered, this, [this] { APPLICATION->launch(this); });
-    connect(normalLaunchOffline, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Offline); });
-    connect(normalLaunchDemo, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Demo); });
 
     QString profilersTitle = tr("Profilers");
     menu->addSeparator()->setText(profilersTitle);
@@ -785,9 +777,6 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, Mine
         tokenMapping["user_properties"] = session->serializeUserProperties();
         tokenMapping["user_type"] = session->user_type;
 
-        if (session->launchMode == LaunchMode::Demo) {
-            args << "--demo";
-        }
     }
 
     for (int i = 0; i < args.length(); i++) {
@@ -1173,8 +1162,12 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
 
     // load meta
     {
-        auto mode = session->launchMode != LaunchMode::Offline ? Net::Mode::Online : Net::Mode::Offline;
-        process->appendStep(makeShared<TaskStepWrapper>(pptr, makeShared<MinecraftLoadAndCheck>(this, mode)));
+        process->appendStep(makeShared<TaskStepWrapper>(pptr, makeShared<MinecraftLoadAndCheck>(this, Net::Mode::Online)));
+    }
+
+    // Apply the Ely.by-compatible Authlib metadata before resolving regular game updates.
+    if (session->wantsElyPatch) {
+        process->appendStep(makeShared<TaskStepWrapper>(pptr, makeShared<ElyPatchTask>(this, runtimeContext(), Net::Mode::Online)));
     }
 
     // check java
@@ -1192,14 +1185,9 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
         process->appendStep(step);
     }
 
-    // if we aren't in offline mode
-    if (session->launchMode != LaunchMode::Offline) {
-        process->appendStep(makeShared<ClaimAccount>(pptr, session));
-        for (auto t : createUpdateTask()) {
-            process->appendStep(makeShared<TaskStepWrapper>(pptr, t));
-        }
-    } else {
-        process->appendStep(makeShared<EnsureOfflineLibraries>(pptr, this));
+    process->appendStep(makeShared<ClaimAccount>(pptr, session));
+    for (auto t : createUpdateTask()) {
+        process->appendStep(makeShared<TaskStepWrapper>(pptr, t));
     }
 
     // if there are any jar mods

@@ -316,7 +316,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
           { { "s", "server" }, "Join the specified server on launch (only valid in combination with --launch)", "address" },
           { { "w", "world" }, "Join the specified world on launch (only valid in combination with --launch)", "world" },
           { { "a", "profile" }, "Use the account specified by its profile name (only valid in combination with --launch)", "profile" },
-          { { "o", "offline" }, "Launch offline, with given player name (only valid in combination with --launch)", "offline" },
           { "alive", "Write a small '" + liveCheckFile + "' file after the launcher starts" },
           { "show-window", "Show the main launcher window (useful in combination with --launch)" },
           { { "I", "import" }, "Import instance or resource from specified local path or URL", "url" },
@@ -333,10 +332,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     m_serverToJoin = parser.value("server");
     m_worldToJoin = parser.value("world");
     m_profileToUse = parser.value("profile");
-    if (parser.isSet("offline")) {
-        m_launchOffline = true;
-        m_offlineName = parser.value("offline");
-    }
     m_liveCheck = parser.isSet("alive");
 
     m_instanceIdToShowWindowOf = parser.value("show");
@@ -351,10 +346,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_urlsToImport.append(normalizeImportUrl(url));
     }
 
-    // error if --launch is missing with --server or --profile
-    if ((!m_serverToJoin.isEmpty() || !m_worldToJoin.isEmpty() || !m_profileToUse.isEmpty() || m_launchOffline) &&
-        m_instanceIdToLaunch.isEmpty()) {
-        std::cerr << "--server, --profile and --offline can only be used in combination with --launch!" << std::endl;
+    // error if --launch is missing with --server, --world or --profile
+    if ((!m_serverToJoin.isEmpty() || !m_worldToJoin.isEmpty() || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty()) {
+        std::cerr << "--server, --world and --profile can only be used in combination with --launch!" << std::endl;
         m_status = Application::Failed;
         return;
     }
@@ -479,10 +473,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                 }
                 if (!m_profileToUse.isEmpty()) {
                     launch.args["profile"] = m_profileToUse;
-                }
-                if (m_launchOffline) {
-                    launch.args["offline_enabled"] = "true";
-                    launch.args["offline_name"] = m_offlineName;
                 }
                 sentMessage = m_peerInstance->sendMessage(launch.serialize(), timeout);
             }
@@ -882,6 +872,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // Custom Microsoft Authentication Client ID
         m_settings->registerSetting("MSAClientIDOverride", "");
+        // Custom Ely.by OAuth Client ID; a client secret is never stored in launcher settings.
+        m_settings->registerSetting("ElyClientIDOverride", "");
 
         // Custom Flame API Key
         {
@@ -1240,7 +1232,8 @@ bool Application::createSetupWizard()
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
     bool validWidgets = m_themeManager->isValidApplicationTheme(settings()->get("ApplicationTheme").toString());
     bool validIcons = m_themeManager->isValidIconTheme(settings()->get("IconTheme").toString());
-    bool login = !m_accounts->anyAccountIsValid() && capabilities() & Application::SupportsMSA;
+    bool login = !m_accounts->anyAccountIsValid() &&
+                 (capabilities().testFlag(Application::SupportsMSA) || capabilities().testFlag(Application::SupportsEly));
     bool themeInterventionRequired = !validWidgets || !validIcons;
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired || askjava || login;
     if (wizardRequired) {
@@ -1366,7 +1359,7 @@ void Application::performMainStartupAction()
                 qDebug() << "   Launching with account" << m_profileToUse;
             }
 
-            launch(inst, m_launchOffline ? LaunchMode::Offline : LaunchMode::Normal, targetToJoin, accountToUse, m_offlineName);
+            launch(inst, LaunchMode::Normal, targetToJoin, accountToUse);
 
             if (!m_showMainWindow) {
                 return;
@@ -1461,9 +1454,6 @@ void Application::messageReceived(const QByteArray& message)
         QString server = received.args["server"];
         QString world = received.args["world"];
         QString profile = received.args["profile"];
-        bool offline = received.args["offline_enabled"] == "true";
-        QString offlineName = received.args["offline_name"];
-
         MinecraftInstance* instance;
         if (!id.isEmpty()) {
             instance = instances()->getInstanceById(id);
@@ -1492,7 +1482,7 @@ void Application::messageReceived(const QByteArray& message)
             }
         }
 
-        launch(instance, offline ? LaunchMode::Offline : LaunchMode::Normal, serverObject, accountObject, offlineName);
+        launch(instance, LaunchMode::Normal, serverObject, accountObject);
     } else {
         qWarning() << "Received invalid message" << message;
     }
@@ -1530,8 +1520,7 @@ bool Application::openJsonEditor(const QString& filename)
 bool Application::launch(MinecraftInstance* instance,
                          LaunchMode mode,
                          MinecraftTarget::Ptr targetToJoin,
-                         MinecraftAccountPtr accountToUse,
-                         const QString& offlineName)
+                         MinecraftAccountPtr accountToUse)
 {
     if (m_updateRunning) {
         qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
@@ -1551,7 +1540,6 @@ bool Application::launch(MinecraftInstance* instance,
         controller->setProfiler(profilers().value(instance->settings()->get("Profiler").toString(), nullptr).get());
         controller->setTargetToJoin(targetToJoin);
         controller->setAccountToUse(accountToUse);
-        controller->setOfflineName(offlineName);
         if (window) {
             controller->setParentWidget(window);
         } else if (m_mainWindow) {
@@ -1844,6 +1832,8 @@ void Application::updateCapabilities()
     m_capabilities = None;
     if (!getMSAClientID().isEmpty())
         m_capabilities |= SupportsMSA;
+    if (!getElyClientID().isEmpty())
+        m_capabilities |= SupportsEly;
     if (!getFlameAPIKey().isEmpty())
         m_capabilities |= SupportsFlame;
 
@@ -1891,6 +1881,16 @@ QString Application::getMSAClientID()
     }
 
     return BuildConfig.MSA_CLIENT_ID;
+}
+
+QString Application::getElyClientID()
+{
+    QString clientIDOverride = m_settings->get("ElyClientIDOverride").toString();
+    if (!clientIDOverride.isEmpty()) {
+        return clientIDOverride;
+    }
+
+    return BuildConfig.ELY_CLIENT_ID;
 }
 
 QString Application::getFlameAPIKey()

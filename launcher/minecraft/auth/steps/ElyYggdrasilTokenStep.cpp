@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2026 Octol1ttle <l1ttleofficial@outlook.com>
+ *  ElyPrismLauncher - Minecraft Launcher
+ *  Copyright (c) 2025 Octol1ttle <l1ttleofficial@outlook.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,8 +16,17 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "ElyYggdrasilTokenStep.h"
 
-enum class LaunchMode {
-    Normal,
-};
+ElyYggdrasilTokenStep::ElyYggdrasilTokenStep(AccountData* data) : AuthStep(data) {}
+
+QString ElyYggdrasilTokenStep::describe()
+{
+    return tr("Updating Yggdrasil token");
+}
+
+void ElyYggdrasilTokenStep::perform()
+{
+    m_data->yggdrasilToken = m_data->msaToken;
+    emit finished(AccountTaskState::STATE_WORKING, tr("Yggdrasil token update succeeded"));
+}

@@ -44,18 +44,19 @@
 
 #include <QDebug>
 
-#include "ui/dialogs/ChooseOfflineNameDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/ElyLoginDialog.h"
 #include "ui/dialogs/MSALoginDialog.h"
 
 #include "Application.h"
+#include "DesktopServices.h"
 
 AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::AccountListPage)
 {
     ui->setupUi(this);
     ui->listView->setEmptyString(
         tr("Welcome!\n"
-           "If you're new here, you can select the \"Add Microsoft\" button to link your Microsoft account."));
+           "Choose \"Sign in with Microsoft\" or \"Sign in with Ely.by\" to add your account."));
     ui->listView->setEmptyMode(VersionListView::String);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -64,6 +65,7 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
     ui->listView->setModel(m_accounts);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::ProfileNameColumn, QHeaderView::Stretch);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::TypeColumn, QHeaderView::ResizeToContents);
+    ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::UuidColumn, QHeaderView::ResizeToContents);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::StatusColumn, QHeaderView::ResizeToContents);
     ui->listView->setSelectionMode(QAbstractItemView::SingleSelection);
 
@@ -83,10 +85,13 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
 
     updateButtonStates();
 
-    // Xbox authentication won't work without a client identifier, so disable the button if it is missing
-    if (~APPLICATION->capabilities() & Application::SupportsMSA) {
+    if (!APPLICATION->capabilities().testFlag(Application::SupportsMSA)) {
         ui->actionAddMicrosoft->setVisible(false);
-        ui->actionAddMicrosoft->setToolTip(tr("No Microsoft Authentication client ID was set."));
+        ui->actionAddMicrosoft->setToolTip(tr("No Microsoft OAuth client ID was set."));
+    }
+    if (!APPLICATION->capabilities().testFlag(Application::SupportsEly)) {
+        ui->actionAddEly->setVisible(false);
+        ui->actionAddEly->setToolTip(tr("No Ely.by OAuth client ID was set."));
     }
 }
 
@@ -138,23 +143,10 @@ void AccountListPage::on_actionAddMicrosoft_triggered()
     }
 }
 
-void AccountListPage::on_actionAddOffline_triggered()
+void AccountListPage::on_actionAddEly_triggered()
 {
-    if (!m_accounts->anyAccountIsValid()) {
-        QMessageBox::warning(this, tr("Error"),
-                             tr("You must add a Microsoft account that owns Minecraft before you can add an offline account."
-                                "<br><br>"
-                                "If you have lost your account you can contact Microsoft for support."));
-        return;
-    }
-
-    ChooseOfflineNameDialog dialog(tr("Please enter your desired username to add your offline account."), this);
-    if (dialog.exec() != QDialog::Accepted) {
-        return;
-    }
-
-    if (const MinecraftAccountPtr account = MinecraftAccount::createOffline(dialog.getUsername())) {
-        account->login()->start();  // The task will complete here.
+    auto account = ElyLoginDialog::newAccount(this);
+    if (account) {
         m_accounts->addAccount(account);
         if (m_accounts->count() == 1) {
             m_accounts->setDefaultAccount(account);
@@ -215,7 +207,7 @@ void AccountListPage::updateButtonStates()
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
         accountIsReady = !account->isActive();
-        accountIsOnline = account->accountType() != AccountType::Offline;
+        accountIsOnline = account->accountState() == AccountState::Online || account->accountState() == AccountState::Unchecked;
 
         accountCanMoveUp = selected.row() > 0;
         int indexOfLast = m_accounts->count() - 1;
@@ -244,8 +236,12 @@ void AccountListPage::on_actionManageSkins_triggered()
     if (selection.size() > 0) {
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
-        SkinManageDialog dialog(this, account);
-        dialog.exec();
+        if (account->accountType() == AccountType::MSA) {
+            SkinManageDialog dialog(this, account);
+            dialog.exec();
+        } else if (account->accountType() == AccountType::Ely) {
+            DesktopServices::openUrl(QUrl("https://ely.by/skins"));
+        }
     }
 }
 

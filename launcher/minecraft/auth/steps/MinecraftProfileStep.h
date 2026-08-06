@@ -1,5 +1,6 @@
 #pragma once
 #include <QObject>
+#include <QUrl>
 
 #include "minecraft/auth/AuthStep.h"
 #include "net/Download.h"
@@ -18,6 +19,9 @@ class MinecraftProfileStep : public AuthStep {
 
    private slots:
     void onRequestDone(QByteArray* response);
+
+   protected:
+    QUrl m_profileUrl = QUrl("https://api.minecraftservices.com/minecraft/profile");
 
    private:
     Net::Download::Ptr m_request;

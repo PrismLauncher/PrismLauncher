@@ -199,6 +199,15 @@ void LaunchProfile::applyLibrary(LibraryPtr library, const RuntimeContext& runti
     }
 }
 
+void LaunchProfile::removeLibrariesByPrefix(const QString& artifactPrefix)
+{
+    for (qsizetype index = m_libraries.size() - 1; index >= 0; --index) {
+        if (m_libraries.at(index)->artifactPrefix() == artifactPrefix) {
+            m_libraries.removeAt(index);
+        }
+    }
+}
+
 void LaunchProfile::applyMavenFile(LibraryPtr mavenFile, const RuntimeContext& runtimeContext)
 {
     if (!mavenFile->isActive(runtimeContext)) {
