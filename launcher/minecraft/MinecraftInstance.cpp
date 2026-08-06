@@ -218,6 +218,8 @@ void MinecraftInstance::loadSpecificSettings()
         m_settings->registerOverride(global_settings->getSetting("CustomOpenALPath"), nativeLibraryWorkaroundsOverride);
         m_settings->registerOverride(global_settings->getSetting("UseNativeGLFW"), nativeLibraryWorkaroundsOverride);
         m_settings->registerOverride(global_settings->getSetting("CustomGLFWPath"), nativeLibraryWorkaroundsOverride);
+        m_settings->registerOverride(global_settings->getSetting("UseNativeSDL"), nativeLibraryWorkaroundsOverride);
+        m_settings->registerOverride(global_settings->getSetting("CustomSDLPath"), nativeLibraryWorkaroundsOverride);
 
         // Performance related options
         auto performanceOverride = m_settings->registerSetting("OverridePerformance", false);
@@ -536,6 +538,7 @@ QStringList MinecraftInstance::extraArguments()
     {
         QString openALPath;
         QString glfwPath;
+        QString sdlPath;
 
         if (settings()->get("UseNativeOpenAL").toBool()) {
             openALPath = APPLICATION->m_detectedOpenALPath;
@@ -549,14 +552,23 @@ QStringList MinecraftInstance::extraArguments()
             if (!customPath.isEmpty())
                 glfwPath = customPath;
         }
+        if (settings()->get("UseNativeSDL").toBool()) {
+            sdlPath = APPLICATION->m_detectedSDLPath;
+            auto customPath = settings()->get("CustomSDLPath").toString();
+            if (!customPath.isEmpty())
+                sdlPath = customPath;
+        }
 
         QFileInfo openALInfo(openALPath);
         QFileInfo glfwInfo(glfwPath);
+        QFileInfo sdlInfo(sdlPath);
 
         if (!openALPath.isEmpty() && openALInfo.exists())
             list.append("-Dorg.lwjgl.openal.libname=" + openALInfo.absoluteFilePath());
         if (!glfwPath.isEmpty() && glfwInfo.exists())
             list.append("-Dorg.lwjgl.glfw.libname=" + glfwInfo.absoluteFilePath());
+        if (!sdlPath.isEmpty() && sdlInfo.exists())
+            list.append("-Dorg.lwjgl.sdl.libname=" + sdlInfo.absoluteFilePath());
     }
 
     return list;
@@ -960,11 +972,14 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
     auto settings = this->settings();
     bool nativeOpenAL = settings->get("UseNativeOpenAL").toBool();
     bool nativeGLFW = settings->get("UseNativeGLFW").toBool();
-    if (nativeOpenAL || nativeGLFW) {
+    bool nativeSDL = settings->get("UseNativeSDL").toBool();
+    if (nativeOpenAL || nativeGLFW || nativeSDL) {
         if (nativeOpenAL)
             out << "Using system OpenAL.";
         if (nativeGLFW)
             out << "Using system GLFW.";
+        if (nativeSDL)
+            out << "Using system SDL.";
         out << emptyLine;
     }
 
