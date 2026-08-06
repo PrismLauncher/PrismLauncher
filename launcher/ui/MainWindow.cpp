@@ -1596,21 +1596,9 @@ void MainWindow::instanceActivated(QModelIndex index)
     if (!inst)
         return;
 
-    APPLICATION->launch(inst);
-}
-
-void MainWindow::on_actionLaunchInstance_triggered()
-{
-    if (m_selectedInstance && !m_selectedInstance->isRunning()) {
-        APPLICATION->launch(m_selectedInstance);
-    }
-}
-
-void MainWindow::activateInstance(BaseInstance* instance)
-{
     if (APPLICATION->settings()->get("EditInstanceOnDoubleClick").toBool()) {
-        if (instance->canEdit()) {
-            APPLICATION->showInstanceWindow(instance);
+        if (inst->canEdit()) {
+            APPLICATION->showInstanceWindow(inst);
         } else {
             CustomMessageBox::selectable(
                 this, tr("Instance not editable"),
@@ -1619,7 +1607,14 @@ void MainWindow::activateInstance(BaseInstance* instance)
         }
         return;
     }
-    APPLICATION->launch(instance);
+    APPLICATION->launch(inst);
+}
+
+void MainWindow::on_actionLaunchInstance_triggered()
+{
+    if (m_selectedInstance && !m_selectedInstance->isRunning()) {
+        APPLICATION->launch(m_selectedInstance);
+    }
 }
 
 void MainWindow::on_actionKillInstance_triggered()
