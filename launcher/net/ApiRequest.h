@@ -30,29 +30,29 @@
 namespace Net {
 
 namespace ApiRequest {
-inline NetRequest::Ptr makeCached(QUrl url, MetaEntryPtr entry, NetRequest::Options options = NetRequest::Option::NoOptions)
+inline NetRequest::Ptr makeCached(const QUrl& url, MetaEntryPtr entry, NetRequest::Options options = NetRequest::Option::NoOptions)
 {
-    return NetRequest::makeCached(std::move(url), std::move(entry), options | NetRequest::Option::AddAPIHeaders);
+    return NetRequest::makeCached(url, std::move(entry), options | NetRequest::Option::AddAPIHeaders);
 }
 
-inline std::pair<NetRequest::Ptr, QByteArray*> makeByteArray(QUrl url, NetRequest::Options options = NetRequest::Option::NoOptions)
+inline std::pair<NetRequest::Ptr, QByteArray*> makeByteArray(const QUrl& url, NetRequest::Options options = NetRequest::Option::NoOptions)
 {
-    return NetRequest::makeByteArray(std::move(url), options | NetRequest::Option::AddAPIHeaders);
+    return NetRequest::makeByteArray(url, options | NetRequest::Option::AddAPIHeaders);
 }
 
-inline std::pair<NetRequest::Ptr, QByteArray*> makeByteArray(QUrl url,
+inline std::pair<NetRequest::Ptr, QByteArray*> makeByteArray(const QUrl& url,
                                                              QByteArray postData,
                                                              NetRequest::Options options = NetRequest::Option::NoOptions)
 {
-    return NetRequest::makeByteArray(std::move(url), std::move(postData), options | NetRequest::Option::AddAPIHeaders);
+    return NetRequest::makeByteArray(url, std::move(postData), options | NetRequest::Option::AddAPIHeaders);
 }
 
-inline NetRequest::Ptr makeFile(QUrl url,
-                                QString path,
+inline NetRequest::Ptr makeFile(const QUrl& url,
+                                const QString& path,
                                 NetRequest::Options options = NetRequest::Option::NoOptions,
                                 ModrinthDownloadMeta meta = ModrinthDownloadMeta())
 {
-    auto req = NetRequest::makeFile(std::move(url), std::move(path), options);
+    auto req = NetRequest::makeFile(url, path, options);
     req->addHeaderProxy(std::make_unique<ApiHeaderProxy>(std::move(meta)));
     return req;
 }
