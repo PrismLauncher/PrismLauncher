@@ -83,7 +83,7 @@ class ResourceAPI {
         std::optional<SortingMethod> sorting;
         std::optional<ModPlatform::ModLoaderTypes> loaders;
         std::optional<std::vector<Version>> versions;
-        std::optional<ModPlatform::Side> side;
+        std::optional<ModPlatform::SideType> side;
         std::optional<QStringList> categoryIds;
         bool openSource{};
     };
@@ -156,4 +156,8 @@ class ResourceAPI {
      */
 
     virtual void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&) const = 0;
+
+    virtual std::pair<Task::Ptr, QByteArray*> getModCategories() = 0;
+
+    virtual QList<ModPlatform::Category> loadModCategories(const QByteArray& response) = 0;
 };

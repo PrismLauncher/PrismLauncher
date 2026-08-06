@@ -61,7 +61,7 @@ class ModFilterWidget : public QTabWidget {
         std::vector<Version> versions;
         std::vector<ModPlatform::IndexedVersionType> releases;
         ModPlatform::ModLoaderTypes loaders;
-        ModPlatform::Side side;
+        ModPlatform::SideType side;
         bool hideInstalled;
         QStringList categoryIds;
         bool openSource;
@@ -91,7 +91,7 @@ class ModFilterWidget : public QTabWidget {
         }
     };
 
-    static std::unique_ptr<ModFilterWidget> create(MinecraftInstance* instance, bool extended);
+    static ModFilterWidget* create(MinecraftInstance* instance, bool extended);
     virtual ~ModFilterWidget();
 
     auto getFilter() -> std::shared_ptr<Filter>;

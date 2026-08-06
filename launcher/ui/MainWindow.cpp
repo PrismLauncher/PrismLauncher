@@ -160,7 +160,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     {
         // Qt doesn't like vertical moving toolbars, so we have to force them...
         // See https://github.com/PolyMC/PolyMC/issues/493
-        connect(ui->instanceToolBar, &QToolBar::orientationChanged,
+        connect(ui->instanceToolBar, &QToolBar::orientationChanged, this,
                 [this](Qt::Orientation) { ui->instanceToolBar->setOrientation(Qt::Vertical); });
 
         // if you try to add a widget to a toolbar in a .ui file
@@ -396,9 +396,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Update the menu when the active account changes.
     // Shouldn't have to use lambdas here like this, but if I don't, the compiler throws a fit.
     // Template hell sucks...
-    connect(APPLICATION->accounts(), &AccountList::defaultAccountChanged, [this] { defaultAccountChanged(); });
-    connect(APPLICATION->accounts(), &AccountList::listActivityChanged, [this] { defaultAccountChanged(); });
-    connect(APPLICATION->accounts(), &AccountList::listChanged, [this] { defaultAccountChanged(); });
+    connect(APPLICATION->accounts(), &AccountList::defaultAccountChanged, this, [this] { defaultAccountChanged(); });
+    connect(APPLICATION->accounts(), &AccountList::listActivityChanged, this, [this] { defaultAccountChanged(); });
+    connect(APPLICATION->accounts(), &AccountList::listChanged, this, [this] { defaultAccountChanged(); });
 
     // Show initial account
     defaultAccountChanged();
@@ -631,7 +631,7 @@ void MainWindow::updateThemeMenu()
         }
         themeAction->setActionGroup(themesGroup);
 
-        connect(themeAction, &QAction::triggered, [theme]() {
+        connect(themeAction, &QAction::triggered, APPLICATION, [theme]() {
             APPLICATION->themeManager()->setApplicationTheme(theme->id());
             APPLICATION->settings()->set("ApplicationTheme", theme->id());
         });
@@ -655,7 +655,7 @@ void MainWindow::repopulateAccountsMenu()
 
     auto accounts = APPLICATION->accounts();
     MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
-    
+
     bool canChangeSkin = defaultAccount && (defaultAccount->accountType() == AccountType::MSA) && !defaultAccount->isActive();
     ui->actionManageSkins->setEnabled(canChangeSkin);
 
@@ -856,17 +856,13 @@ void MainWindow::setCatBackground(bool enabled)
 
 void MainWindow::runModalTask(Task* task)
 {
-    connect(task, &Task::failed,
+    connect(task, &Task::failed, this,
             [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-    connect(task, &Task::succeeded, [this, task]() {
+    connect(task, &Task::succeeded, this, [this, task]() {
         QStringList warnings = task->warnings();
         if (warnings.count()) {
             CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
         }
-    });
-    connect(task, &Task::aborted, [this] {
-        CustomMessageBox::selectable(this, tr("Task aborted"), tr("The task has been aborted by the user."), QMessageBox::Information)
-            ->show();
     });
     ProgressDialog loadDialog(this);
     loadDialog.setSkipButton(true, tr("Abort"));
@@ -921,6 +917,7 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
         return;
 
     APPLICATION->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
+    APPLICATION->settings()->set("LastUsedInstDirForNewInstance", newInstDlg.instDir());
 
     InstanceTask* creationTask = newInstDlg.extractTask();
     if (creationTask) {
@@ -1147,7 +1144,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
         qDebug() << "Adding resource" << localFileName << "to" << dlg.selectedInstanceKey;
 
         auto inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
-        auto minecraftInst = dynamic_cast<MinecraftInstance*>(inst);
+        auto minecraftInst = inst;
 
         switch (type) {
             case ModPlatform::ResourceType::ResourcePack:
@@ -1537,29 +1534,23 @@ void MainWindow::on_actionExportInstanceZip_triggered()
 void MainWindow::on_actionExportInstanceMrPack_triggered()
 {
     if (m_selectedInstance) {
-        auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance);
-        if (instance != nullptr) {
-            ExportPackDialog dlg(instance, this);
-            dlg.exec();
-        }
+        ExportPackDialog dlg(m_selectedInstance, this);
+        dlg.exec();
     }
 }
 
 void MainWindow::on_actionExportInstanceFlamePack_triggered()
 {
     if (m_selectedInstance) {
-        auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance);
-        if (instance) {
-            if (auto cmp = instance->getPackProfile()->getComponent("net.minecraft");
-                cmp && cmp->getVersionFile() && cmp->getVersionFile()->type == "snapshot") {
-                QMessageBox msgBox(this);
-                msgBox.setText("Snapshots are currently not supported by CurseForge modpacks.");
-                msgBox.exec();
-                return;
-            }
-            ExportPackDialog dlg(instance, this, ModPlatform::ResourceProvider::FLAME);
-            dlg.exec();
+        if (auto cmp = m_selectedInstance->getPackProfile()->getComponent("net.minecraft");
+            cmp && cmp->getVersionFile() && cmp->getVersionFile()->type == "snapshot") {
+            QMessageBox msgBox(this);
+            msgBox.setText("Snapshots are currently not supported by CurseForge modpacks.");
+            msgBox.exec();
+            return;
         }
+        ExportPackDialog dlg(m_selectedInstance, this, ModPlatform::ResourceProvider::FLAME);
+        dlg.exec();
     }
 }
 
@@ -1601,11 +1592,11 @@ void MainWindow::instanceActivated(QModelIndex index)
     if (!index.isValid())
         return;
     QString id = index.data(InstanceList::InstanceIDRole).toString();
-    BaseInstance* inst = APPLICATION->instances()->getInstanceById(id);
+    MinecraftInstance* inst = APPLICATION->instances()->getInstanceById(id);
     if (!inst)
         return;
 
-    activateInstance(inst);
+    APPLICATION->launch(inst);
 }
 
 void MainWindow::on_actionLaunchInstance_triggered()
@@ -1771,7 +1762,7 @@ void MainWindow::updateStatusCenter()
 {
     m_statusCenter->setVisible(APPLICATION->settings()->get("ShowGlobalGameTime").toBool());
 
-    int timePlayed = APPLICATION->instances()->getTotalPlayTime();
+    int64_t timePlayed = APPLICATION->instances()->getTotalPlayTime();
     if (timePlayed > 0) {
         m_statusCenter->setText(
             tr("Total playtime: %1")

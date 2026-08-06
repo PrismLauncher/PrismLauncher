@@ -63,7 +63,6 @@ TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent)
     ui->packView->setModel(model);
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
     m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
     m_search_timer.setSingleShot(true);
@@ -217,7 +216,7 @@ void TechnicPage::suggestCurrent()
 
         metadataLoaded();
     });
-    connect(jobPtr.get(), &NetJob::failed,
+    connect(jobPtr.get(), &NetJob::failed, this,
             [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
     jobPtr = netJob;
@@ -270,7 +269,7 @@ void TechnicPage::metadataLoaded()
         netJob->addNetAction(action);
 
         connect(netJob.get(), &NetJob::succeeded, this, [this, response] { onSolderLoaded(response); });
-        connect(jobPtr.get(), &NetJob::failed,
+        connect(jobPtr.get(), &NetJob::failed, this,
                 [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         jobPtr = netJob;

@@ -34,7 +34,8 @@ class ResourceDownloadTask : public SequentialTask {
                                   ModPlatform::IndexedVersion version,
                                   ResourceFolderModel* packs,
                                   bool isIndexed = true,
-                                  QString downloadReason = "standalone");
+                                  QString downloadReason = "standalone",
+                                  QString dependentOn = "");
     const QString& getFilename() const { return m_pack_version.fileName; }
     const QVariant& getVersionID() const { return m_pack_version.fileId; }
     const ModPlatform::IndexedVersion& getVersion() const { return m_pack_version; }

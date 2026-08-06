@@ -20,6 +20,7 @@
 #include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
 
 #include "Json.h"
+#include "minecraft/MinecraftInstance.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
@@ -28,7 +29,7 @@
 #include "tasks/Task.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
-ResourceFolderModel::ResourceFolderModel(const QDir& dir, BaseInstance* instance, bool isIndexed, bool createDir, QObject* parent)
+ResourceFolderModel::ResourceFolderModel(const QDir& dir, MinecraftInstance* instance, bool isIndexed, bool createDir, QObject* parent)
     : QAbstractListModel(parent), m_dir(dir), m_instance(instance), m_watcher(this), m_isIndexed(isIndexed)
 {
     if (createDir) {
@@ -188,7 +189,7 @@ void ResourceFolderModel::installResourceWithFlameMetadata(const QString& path, 
         auto [job, response] = FlameAPI().getProject(vers.addonId.toString());
         connect(job.get(), &Task::failed, this, install);
         connect(job.get(), &Task::aborted, this, install);
-        connect(job.get(), &Task::succeeded, [response, this, &vers, install, &pack] {
+        connect(job.get(), &Task::succeeded, this, [response, this, &vers, install, &pack] {
             QJsonParseError parseError{};
             QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
             if (parseError.error != QJsonParseError::NoError) {
@@ -361,7 +362,7 @@ bool ResourceFolderModel::update()
         task->addTask(preUpdate);
         task->addTask(m_currentUpdateTask);
 
-        connect(task, &Task::finished, [task] { task->deleteLater(); });
+        connect(task, &Task::finished, task, &Task::deleteLater);
 
         QThreadPool::globalInstance()->start(task);
     } else {
@@ -890,7 +891,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& currentSet, QSet<QString>&
                 }
             }
 
-            m_resources[row].reset(newResource);
+            m_resources[row].swap(newResource);
             newResource->updateIssues(m_instance);
 
             resolveResource(m_resources.at(row));

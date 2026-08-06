@@ -37,10 +37,6 @@
 
 #include "TexturePackPage.h"
 
-#include "ResourceDownloadTask.h"
-
-#include "minecraft/mod/TexturePack.h"
-
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
@@ -87,11 +83,7 @@ void TexturePackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] c
 
 void TexturePackPage::downloadTexturePacks()
 {
-    if (m_instance->typeName() != "Minecraft") {
-        return;  // this is a null instance or a legacy instance
-    }
-
-    m_downloadDialog = new ResourceDownload::TexturePackDownloadDialog(this, m_model, m_instance);
+    m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createTexturePack(this, m_model, m_instance);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &TexturePackPage::downloadDialogFinished);
     m_downloadDialog->open();
@@ -100,27 +92,20 @@ void TexturePackPage::downloadTexturePacks()
 void TexturePackPage::downloadDialogFinished(int result)
 {
     if (result != 0) {
-        auto* tasks = new ConcurrentTask("Download Texture Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(tasks, &Task::failed, [this, tasks](const QString& reason) {
+        ConcurrentTask tasks("Download Texture Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-            tasks->deleteLater();
         });
-        connect(tasks, &Task::aborted, [this, tasks]() {
-            CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
-            tasks->deleteLater();
-        });
-        connect(tasks, &Task::succeeded, [this, tasks]() {
-            QStringList warnings = tasks->warnings();
+        connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
+            QStringList warnings = tasks.warnings();
             if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
             }
-
-            tasks->deleteLater();
         });
 
         if (m_downloadDialog) {
             for (auto& task : m_downloadDialog->getTasks()) {
-                tasks->addTask(task);
+                tasks.addTask(task);
             }
         } else {
             qWarning() << "ResourceDownloadDialog vanished before we could collect tasks!";
@@ -128,7 +113,7 @@ void TexturePackPage::downloadDialogFinished(int result)
 
         ProgressDialog loadDialog(this);
         loadDialog.setSkipButton(true, tr("Abort"));
-        loadDialog.execWithTask(tasks);
+        loadDialog.execWithTask(&tasks);
 
         m_model->update();
     }
@@ -139,10 +124,6 @@ void TexturePackPage::downloadDialogFinished(int result)
 
 void TexturePackPage::updateTexturePacks()
 {
-    if (m_instance->typeName() != "Minecraft") {
-        return;  // this is a null instance or a legacy instance
-    }
-
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Texture pack updates are unavailable when metadata is disabled!"));
         return;
@@ -172,7 +153,6 @@ void TexturePackPage::updateTexturePacks()
     updateDialog.checkCandidates();
 
     if (updateDialog.aborted()) {
-        CustomMessageBox::selectable(this, tr("Aborted"), tr("The texture pack updater was aborted!"), QMessageBox::Warning)->show();
         return;
     }
     if (updateDialog.noUpdates()) {
@@ -189,30 +169,24 @@ void TexturePackPage::updateTexturePacks()
     }
 
     if (updateDialog.exec() != 0) {
-        auto* tasks = new ConcurrentTask("Download Texture Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(tasks, &Task::failed, [this, tasks](const QString& reason) {
+        ConcurrentTask tasks("Download Texture Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-            tasks->deleteLater();
         });
-        connect(tasks, &Task::aborted, [this, tasks]() {
-            CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
-            tasks->deleteLater();
-        });
-        connect(tasks, &Task::succeeded, [this, tasks]() {
-            QStringList warnings = tasks->warnings();
+        connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
+            QStringList warnings = tasks.warnings();
             if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
             }
-            tasks->deleteLater();
         });
 
         for (const auto& task : updateDialog.getTasks()) {
-            tasks->addTask(task);
+            tasks.addTask(task);
         }
 
         ProgressDialog loadDialog(this);
         loadDialog.setSkipButton(true, tr("Abort"));
-        loadDialog.execWithTask(tasks);
+        loadDialog.execWithTask(&tasks);
 
         m_model->update();
     }
@@ -243,10 +217,6 @@ void TexturePackPage::deleteTexturePackMetadata()
 
 void TexturePackPage::changeTexturePackVersion()
 {
-    if (m_instance->typeName() != "Minecraft") {
-        return;  // this is a null instance or a legacy instance
-    }
-
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Texture pack updates are unavailable when metadata is disabled!"));
         return;
@@ -264,7 +234,7 @@ void TexturePackPage::changeTexturePackVersion()
         return;
     }
 
-    m_downloadDialog = new ResourceDownload::TexturePackDownloadDialog(this, m_model, m_instance, true);
+    m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createTexturePack(this, m_model, m_instance, true);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &TexturePackPage::downloadDialogFinished);
 

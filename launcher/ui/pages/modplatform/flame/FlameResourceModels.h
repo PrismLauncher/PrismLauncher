@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include "ui/pages/modplatform/ModModel.h"
-#include "ui/pages/modplatform/flame/FlameResourcePages.h"
+#include "ui/pages/modplatform/TexturePackModel.h"
 
 namespace ResourceDownload {
 
@@ -19,9 +18,6 @@ class FlameTexturePackModel : public TexturePackResourceModel {
     bool optedOut(const ModPlatform::IndexedVersion& ver) const override;
 
    private:
-    QString debugName() const override { return Flame::debugName() + " (Model)"; }
-    QString metaEntryBase() const override { return Flame::metaEntryBase(); }
-
     ResourceAPI::SearchArgs createSearchArguments() override;
     ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) override;
 };

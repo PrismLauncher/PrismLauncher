@@ -6,6 +6,7 @@
   glfw3-minecraft,
   jdk17,
   jdk21,
+  jdk25,
   jdk8,
   kdePackages,
   lib,
@@ -23,6 +24,7 @@
   pciutils,
   pipewire,
   prismlauncher-unwrapped,
+  sdl3,
   stdenv,
   symlinkJoin,
   udev,
@@ -34,6 +36,7 @@
   controllerSupport ? stdenv.hostPlatform.isLinux,
   gamemodeSupport ? stdenv.hostPlatform.isLinux,
   jdks ? [
+    jdk25
     jdk21
     jdk17
     jdk8
@@ -81,6 +84,7 @@ symlinkJoin {
         ## native versions
         glfw3-minecraft
         openal
+        sdl3
 
         ## openal
         alsa-lib
@@ -113,7 +117,10 @@ symlinkJoin {
       ++ additionalPrograms;
 
     in
-    [ "--prefix PRISMLAUNCHER_JAVA_PATHS : ${lib.makeSearchPath "bin/java" jdks}" ]
+    [
+      "--set NIX_LAUNCHER_WRAPPER ${placeholder "out"}/bin/prismlauncher"
+      "--prefix PRISMLAUNCHER_JAVA_PATHS : ${lib.makeSearchPath "bin/java" jdks}"
+    ]
     ++ lib.optionals stdenv.hostPlatform.isLinux [
       "--set LD_LIBRARY_PATH ${addDriverRunpath.driverLink}/lib:${lib.makeLibraryPath runtimeLibs}"
       "--prefix PATH : ${lib.makeBinPath runtimePrograms}"

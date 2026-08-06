@@ -38,6 +38,7 @@
 #include "WorldListPage.h"
 #include "minecraft/WorldList.h"
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/ProgressDialog.h"
 #include "ui_WorldListPage.h"
 
 #include <ui/widgets/PageContainer.h>
@@ -121,7 +122,7 @@ void WorldListPage::openedImpl()
         ui->toolBar->removeAction(ui->actionJoin);
     }
 
-    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
+    const auto setting_name = QString("WideBarVisibility_%1").arg(id());
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
     ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
@@ -187,23 +188,34 @@ bool WorldListPage::eventFilter(QObject* obj, QEvent* ev)
 void WorldListPage::on_actionRemove_triggered()
 {
     auto proxiedIndex = getSelectedWorld();
-
-    if (!proxiedIndex.isValid())
+    if (!proxiedIndex.isValid()) {
         return;
+    }
+
+    const auto& world = m_worlds->allWorlds().at(proxiedIndex.row());
 
     auto result = CustomMessageBox::selectable(this, tr("Confirm Deletion"),
                                                tr("You are about to delete \"%1\".\n"
                                                   "The world may be gone forever (A LONG TIME).\n\n"
                                                   "Are you sure?")
-                                                   .arg(m_worlds->allWorlds().at(proxiedIndex.row()).name()),
+                                                   .arg(world.name()),
                                                QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                       ->exec();
 
     if (result != QMessageBox::Yes) {
         return;
     }
+
+    auto task = m_worlds->createDeleteWorldTask(proxiedIndex.row());
+    if (!task) {
+        return;
+    }
+
     m_worlds->stopWatching();
-    m_worlds->deleteWorld(proxiedIndex.row());
+
+    ProgressDialog dialog(this);
+    dialog.execWithTask(std::move(task));
+
     m_worlds->startWatching();
 }
 
@@ -259,9 +271,12 @@ void WorldListPage::on_actionData_Packs_triggered()
 
     dialog->setLayout(layout);
 
-    dialog->exec();
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
 
-    APPLICATION->settings()->set("DataPackDownloadGeometry", dialog->saveGeometry().toBase64());
+    connect(dialog, &QDialog::finished, this,
+            [dialog]() { APPLICATION->settings()->set("DataPackDownloadGeometry", dialog->saveGeometry().toBase64()); });
+
+    dialog->open();
 }
 
 void WorldListPage::on_actionReset_Icon_triggered()
@@ -390,13 +405,20 @@ void WorldListPage::on_actionAdd_triggered()
 {
     auto list = GuiUtil::BrowseForFiles(displayName(), tr("Select a Minecraft world zip"), tr("Minecraft World Zip File") + " (*.zip)",
                                         QString(), this->parentWidget());
-    if (!list.empty()) {
-        m_worlds->stopWatching();
-        for (auto filename : list) {
-            m_worlds->installWorld(QFileInfo(filename));
-        }
-        m_worlds->startWatching();
+    if (list.empty()) {
+        return;
     }
+
+    m_worlds->stopWatching();
+    for (auto filename : list) {
+        auto task = m_worlds->createInstallWorldTask(QFileInfo(filename));
+        if (!task) {
+            continue;
+        }
+        ProgressDialog dialog(this);
+        dialog.execWithTask(std::move(task));
+    }
+    m_worlds->startWatching();
 }
 
 bool WorldListPage::isWorldSafe(QModelIndex)
@@ -423,18 +445,31 @@ void WorldListPage::on_actionCopy_triggered()
         return;
     }
 
-    if (!worldSafetyNagQuestion(tr("Copy World")))
+    if (!worldSafetyNagQuestion(tr("Copy World"))) {
         return;
+    }
 
-    auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
-    auto world = (World*)worldVariant.value<void*>();
+    const auto world = m_worlds->allWorlds().at(index.row());
+
     bool ok = false;
     QString name =
-        QInputDialog::getText(this, tr("World name"), tr("Enter a new name for the copy."), QLineEdit::Normal, world->name(), &ok);
+        QInputDialog::getText(this, tr("World name"), tr("Enter a new name for the copy."), QLineEdit::Normal, world.name(), &ok);
 
-    if (ok && name.length() > 0) {
-        world->install(m_worlds->dir().absolutePath(), name);
+    if (!ok || name.isEmpty()) {
+        return;
     }
+
+    auto task = m_worlds->createCopyWorldTask(index.row(), name);
+    if (!task) {
+        return;
+    }
+
+    m_worlds->stopWatching();
+
+    ProgressDialog dialog(this);
+    dialog.execWithTask(std::move(task));
+
+    m_worlds->startWatching();
 }
 
 void WorldListPage::on_actionRename_triggered()

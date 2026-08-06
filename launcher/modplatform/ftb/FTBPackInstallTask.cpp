@@ -38,6 +38,8 @@
 
 #include "FTBPackInstallTask.h"
 
+#include <utility>
+
 #include "FileSystem.h"
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
@@ -59,15 +61,18 @@ PackInstallTask::PackInstallTask(Modpack pack, QString version, QWidget* parent)
 
 bool PackInstallTask::abort()
 {
-    if (!canAbort())
+    if (!canAbort()) {
         return false;
+    }
 
     bool aborted = true;
 
-    if (m_net_job)
+    if (m_net_job) {
         aborted &= m_net_job->abort();
-    if (m_modIdResolverTask)
+    }
+    if (m_modIdResolverTask) {
         aborted &= m_modIdResolverTask->abort();
+    }
 
     return aborted ? InstanceTask::abort() : false;
 }
@@ -78,15 +83,15 @@ void PackInstallTask::executeTask()
     setAbortable(false);
 
     // Find pack version
-    auto version_it = std::find_if(m_pack.versions.constBegin(), m_pack.versions.constEnd(),
-                                   [this](const FTB::VersionInfo& a) { return a.name == m_versionName; });
+    auto versionIt = std::find_if(m_pack.versions.constBegin(), m_pack.versions.constEnd(),
+                                  [this](const FTB::VersionInfo& a) { return a.name == m_versionName; });
 
-    if (version_it == m_pack.versions.constEnd()) {
+    if (versionIt == m_pack.versions.constEnd()) {
         emitFailed(tr("Failed to find pack version %1").arg(m_versionName));
         return;
     }
 
-    auto version = *version_it;
+    const auto& version = *versionIt;
 
     auto netJob = makeShared<NetJob>("FTB::VersionFetch", APPLICATION->network());
 
@@ -112,10 +117,10 @@ void PackInstallTask::onManifestDownloadSucceeded(QByteArray* responsePtr)
     QByteArray response = std::move(*responsePtr);
     m_net_job.reset();
 
-    QJsonParseError parse_error{};
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
-    if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from FTB at " << parse_error.offset << " reason: " << parse_error.errorString();
+    QJsonParseError parseError{};
+    const QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+    if (parseError.error != QJsonParseError::NoError) {
+        qWarning() << "Error while parsing JSON response from FTB at " << parseError.offset << " reason: " << parseError.errorString();
         qWarning() << response;
         return;
     }
@@ -179,24 +184,25 @@ void PackInstallTask::onResolveModsSucceeded()
 
     Flame::Manifest results = m_modIdResolverTask->getResults();
     for (int index = 0; index < m_fileIds.size(); index++) {
-        const auto file_id = m_fileIds.at(index);
-        if (file_id < 0)
+        const auto fileId = m_fileIds.at(index);
+        if (fileId < 0) {
             continue;
+        }
 
-        Flame::File resultsFile = results.files[file_id];
+        const Flame::File resultsFile = results.files.value(fileId);
         VersionFile& localFile = m_version.files[index];
 
         // First check for blocked mods
         if (resultsFile.version.downloadUrl.isEmpty()) {
-            BlockedMod blocked_mod;
-            blocked_mod.name = resultsFile.version.fileName;
-            blocked_mod.websiteUrl = QString("%1/download/%2").arg(resultsFile.pack.websiteUrl, QString::number(resultsFile.fileId));
-            blocked_mod.hash = resultsFile.version.hash;
-            blocked_mod.matched = false;
-            blocked_mod.localPath = "";
-            blocked_mod.targetFolder = resultsFile.targetFolder;
+            BlockedMod blockedMod;
+            blockedMod.name = resultsFile.version.fileName;
+            blockedMod.websiteUrl = QString("%1/download/%2").arg(resultsFile.pack.websiteUrl, QString::number(resultsFile.fileId));
+            blockedMod.hash = resultsFile.version.hash;
+            blockedMod.matched = false;
+            blockedMod.localPath = "";
+            blockedMod.targetFolder = resultsFile.targetFolder;
 
-            m_blockedMods.append(blocked_mod);
+            m_blockedMods.append(blockedMod);
 
             anyBlocked = true;
         } else {
@@ -209,14 +215,14 @@ void PackInstallTask::onResolveModsSucceeded()
     if (anyBlocked) {
         qDebug() << "Blocked files found, displaying file list";
 
-        BlockedModsDialog message_dialog(m_parent, tr("Blocked files found"),
-                                         tr("The following files are not available for download in third party launchers.<br/>"
-                                            "You will need to manually download them and add them to the instance."),
-                                         m_blockedMods);
+        BlockedModsDialog messageDialog(m_parent, tr("Blocked files found"),
+                                        tr("The following files are not available for download in third party launchers.<br/>"
+                                           "You will need to manually download them and add them to the instance."),
+                                        m_blockedMods);
 
-        message_dialog.setModal(true);
+        messageDialog.setModal(true);
 
-        if (message_dialog.exec() == QDialog::Accepted) {
+        if (messageDialog.exec() == QDialog::Accepted) {
             qDebug() << "Post dialog blocked mods list: " << m_blockedMods;
             createInstance();
         } else {
@@ -238,20 +244,21 @@ void PackInstallTask::createInstance()
     auto instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_unique<INISettingsObject>(instanceConfigPath);
 
-    MinecraftInstance instance(m_globalSettings, std::move(instanceSettings), m_stagingPath);
-    auto components = instance.getPackProfile();
+    m_instance = std::make_unique<MinecraftInstance>(m_globalSettings, std::move(instanceSettings), m_stagingPath);
+    auto* components = m_instance->getPackProfile();
     components->buildingFromScratch();
 
-    for (auto target : m_version.targets) {
+    for (const auto& target : m_version.targets) {
         if (target.type == "game" && target.name == "minecraft") {
             components->setComponentVersion("net.minecraft", target.version, true);
             break;
         }
     }
 
-    for (auto target : m_version.targets) {
-        if (target.type != "modloader")
+    for (const auto& target : m_version.targets) {
+        if (target.type != "modloader") {
             continue;
+        }
 
         if (target.name == "forge") {
             components->setComponentVersion("net.minecraftforge", target.version);
@@ -278,11 +285,11 @@ void PackInstallTask::createInstance()
 
     components->saveNow();
 
-    instance.setName(name());
-    instance.setIconKey(m_instIcon);
-    instance.setManagedPack("ftb", QString::number(m_pack.id), m_pack.name, QString::number(m_version.id), m_version.name);
+    m_instance->setName(name());
+    m_instance->setIconKey(m_instIcon);
+    m_instance->setManagedPack("ftb", QString::number(m_pack.id), m_pack.name, QString::number(m_version.id), m_version.name);
 
-    instance.saveNow();
+    m_instance->saveNow();
 
     onCreateInstanceSucceeded();
 }
@@ -299,13 +306,14 @@ void PackInstallTask::downloadPack()
 
     auto jobPtr = makeShared<NetJob>(tr("Mod download"), APPLICATION->network());
     for (const auto& file : m_version.files) {
-        if (file.serverOnly || file.url.isEmpty())
+        if (file.serverOnly || file.url.isEmpty()) {
             continue;
+        }
 
         auto path = FS::PathCombine(m_stagingPath, ".minecraft", file.path, file.name);
         qDebug() << "Will try to download" << file.url << "to" << path;
 
-        QFileInfo file_info(file.name);
+        const QFileInfo fileInfo(file.name);
 
         auto dl = Net::Download::makeFile(file.url, path);
         if (!file.sha1.isEmpty()) {
@@ -333,27 +341,27 @@ void PackInstallTask::onModDownloadSucceeded()
     if (!m_blockedMods.isEmpty()) {
         copyBlockedMods();
     }
-    emitSucceeded();
+    downloadFiles(m_instance.get());
 }
 
 void PackInstallTask::onManifestDownloadFailed(QString reason)
 {
     m_net_job.reset();
-    emitFailed(reason);
+    emitFailed(std::move(reason));
 }
 void PackInstallTask::onResolveModsFailed(QString reason)
 {
     m_net_job.reset();
-    emitFailed(reason);
+    emitFailed(std::move(reason));
 }
 void PackInstallTask::onCreateInstanceFailed(QString reason)
 {
-    emitFailed(reason);
+    emitFailed(std::move(reason));
 }
 void PackInstallTask::onModDownloadFailed(QString reason)
 {
     m_net_job.reset();
-    emitFailed(reason);
+    emitFailed(std::move(reason));
 }
 
 /// @brief copy the matched blocked mods to the instance staging area
@@ -362,7 +370,7 @@ void PackInstallTask::copyBlockedMods()
     setStatus(tr("Copying Blocked Mods..."));
     setAbortable(false);
     int i = 0;
-    int total = m_blockedMods.length();
+    auto total = m_blockedMods.length();
     setProgress(i, total);
     for (const auto& mod : m_blockedMods) {
         if (!mod.matched) {
@@ -370,14 +378,14 @@ void PackInstallTask::copyBlockedMods()
             continue;
         }
 
-        auto dest_path = FS::PathCombine(m_stagingPath, ".minecraft", mod.targetFolder, mod.name);
+        auto destPath = FS::PathCombine(m_stagingPath, ".minecraft", mod.targetFolder, mod.name);
 
         setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
 
-        qDebug() << "Will try to copy" << mod.localPath << "to" << dest_path;
+        qDebug() << "Will try to copy" << mod.localPath << "to" << destPath;
 
-        if (!FS::copy(mod.localPath, dest_path)()) {
-            qDebug() << "Copy of" << mod.localPath << "to" << dest_path << "Failed";
+        if (!FS::copy(mod.localPath, destPath)()) {
+            qDebug() << "Copy of" << mod.localPath << "to" << destPath << "Failed";
         }
 
         i++;

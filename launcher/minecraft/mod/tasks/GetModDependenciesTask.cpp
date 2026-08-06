@@ -30,14 +30,14 @@
 #include "tasks/SequentialTask.h"
 #include "ui/pages/modplatform/ModModel.h"
 
-static Version mcVersion(BaseInstance* inst)
+static Version mcVersion(MinecraftInstance* inst)
 {
-    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion();
+    return inst->getPackProfile()->getComponent("net.minecraft")->getVersion();
 }
 
-static ModPlatform::ModLoaderTypes mcLoaders(BaseInstance* inst)
+static ModPlatform::ModLoaderTypes mcLoaders(MinecraftInstance* inst)
 {
-    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders().value();
+    return inst->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
 }
 
 static bool checkDependencies(std::shared_ptr<GetModDependenciesTask::PackDependency> sel,
@@ -48,7 +48,7 @@ static bool checkDependencies(std::shared_ptr<GetModDependenciesTask::PackDepend
            (!loaders || !sel->version.loaders || sel->version.loaders & loaders);
 }
 
-GetModDependenciesTask::GetModDependenciesTask(BaseInstance* instance,
+GetModDependenciesTask::GetModDependenciesTask(MinecraftInstance* instance,
                                                ModFolderModel* folder,
                                                QList<std::shared_ptr<PackDependency>> selected)
     : SequentialTask(tr("Get dependencies")), m_selected(selected), m_version(mcVersion(instance)), m_loaderType(mcLoaders(instance))
@@ -140,7 +140,7 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDepende
 {
     auto provider = pDep->pack->provider;
     auto [info, responseInfo] = getAPI(provider)->getProject(pDep->pack->addonId.toString());
-    connect(info.get(), &NetJob::succeeded, [this, responseInfo, provider, pDep] {
+    connect(info.get(), &NetJob::succeeded, this, [this, responseInfo, provider, pDep] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*responseInfo, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -263,7 +263,8 @@ auto GetModDependenciesTask::getExtraInfo() -> QHash<QString, PackDependencyExtr
         auto addonId = mod->pack->addonId;
         auto provider = mod->pack->provider;
         auto version = mod->version.fileId;
-        auto req = QStringList();
+        auto reqNames = QStringList();
+        auto reqIds = QStringList();
         for (auto& smod : fullList) {
             if (provider != smod->pack->provider)
                 continue;
@@ -276,10 +277,11 @@ auto GetModDependenciesTask::getExtraInfo() -> QHash<QString, PackDependencyExtr
                                                         : d.addonId == addonId);
                                         });
                 dep != deps.end()) {
-                req.append(smod->pack->name);
+                reqNames.append(smod->pack->name);
+                reqIds.append(smod->version.fileId.toString());
             }
         }
-        rby[addonId.toString()] = { maybeInstalled(mod), req };
+        rby[addonId.toString()] = { maybeInstalled(mod), reqNames, reqIds };
     }
     return rby;
 }

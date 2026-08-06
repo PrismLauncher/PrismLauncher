@@ -4,43 +4,25 @@
 
 #pragma once
 
-#include "ui/dialogs/ResourceDownloadDialog.h"
-#include "ui/pages/modplatform/ResourcePackPage.h"
-#include "ui/pages/modplatform/TexturePackModel.h"
-#include "ui_ResourcePage.h"
-
-namespace Ui {
-class ResourcePage;
-}
+#include "ui/pages/modplatform/ResourcePage.h"
 
 namespace ResourceDownload {
 
 class TexturePackDownloadDialog;
+class TexturePackResourceModel;
 
-class TexturePackResourcePage : public ResourcePackResourcePage {
+class TexturePackResourcePage : public ResourcePage {
     Q_OBJECT
 
    public:
-    template <typename T>
-    static T* create(TexturePackDownloadDialog* dialog, BaseInstance& instance)
-    {
-        auto page = new T(dialog, instance);
-        auto model = static_cast<TexturePackResourceModel*>(page->getModel());
+    TexturePackResourcePage(ResourceDownloadDialog* dialog,
+                            BaseInstance& instance,
+                            ResourceProviderData provider,
+                            ResourceAPI* api,
+                            TexturePackResourceModel* model = nullptr);
 
-        connect(model, &ResourceModel::versionListUpdated, page, &ResourcePage::versionListUpdated);
-        connect(model, &ResourceModel::projectInfoUpdated, page, &ResourcePage::updateUi);
-        connect(model, &QAbstractListModel::modelReset, page, &ResourcePage::modelReset);
-
-        return page;
-    }
-
-    //: The plural version of 'texture pack'
-    inline QString resourcesString() const override { return tr("texture packs"); }
-    //: The singular version of 'texture packs'
-    inline QString resourceString() const override { return tr("texture pack"); }
-
-   protected:
-    TexturePackResourcePage(TexturePackDownloadDialog* dialog, BaseInstance& instance) : ResourcePackResourcePage(dialog, instance) {}
+   protected slots:
+    void triggerSearch() override;
 };
 
 }  // namespace ResourceDownload

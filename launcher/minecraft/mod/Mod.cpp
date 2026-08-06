@@ -40,6 +40,7 @@
 #include <QDir>
 #include <QRegularExpression>
 #include <QString>
+#include <algorithm>
 
 #include "MTPixmapCache.h"
 #include "MetadataHandler.h"
@@ -48,6 +49,34 @@
 #include "minecraft/mod/ModDetails.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "modplatform/ModIndex.h"
+
+namespace {
+
+int compareVersionLists(const QStringList& leftVersions, const QStringList& rightVersions)
+{
+    const qsizetype commonSize = std::min(leftVersions.size(), rightVersions.size());
+
+    for (qsizetype i = 0; i < commonSize; i++) {
+        const auto leftVersion = Version(leftVersions.at(i).trimmed());
+        const auto rightVersion = Version(rightVersions.at(i).trimmed());
+
+        if (leftVersion > rightVersion)
+            return 1;
+
+        if (leftVersion < rightVersion)
+            return -1;
+    }
+
+    if (leftVersions.size() > rightVersions.size())
+        return 1;
+
+    if (leftVersions.size() < rightVersions.size())
+        return -1;
+
+    return 0;
+}
+
+}  // namespace
 
 Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
 {
@@ -88,7 +117,7 @@ int Mod::compare(const Resource& other, SortType type) const
             break;
         }
         case SortType::McVersions: {
-            auto compare_result = QString::compare(mcVersions(), cast_other->mcVersions(), Qt::CaseInsensitive);
+            auto compare_result = compareVersionLists(mcVersions(), cast_other->mcVersions());
             if (compare_result != 0)
                 return compare_result;
             break;
@@ -123,7 +152,7 @@ int Mod::compare(const Resource& other, SortType type) const
     return 0;
 }
 
-bool Mod::applyFilter(QRegularExpression filter) const
+bool Mod::applyFilter(const QRegularExpression& filter) const
 {
     if (filter.match(description()).hasMatch())
         return true;
@@ -192,17 +221,22 @@ auto Mod::loaders() const -> QString
 auto Mod::side() const -> QString
 {
     if (metadata())
-        return ModPlatform::SideUtils::toString(metadata()->side);
+        return metadata()->side.toString();
 
-    return ModPlatform::SideUtils::toString(ModPlatform::Side::UniversalSide);
+    return ModPlatform::SideType(ModPlatform::SideType::UniversalSide).toString();
 }
 
-auto Mod::mcVersions() const -> QString
+auto Mod::mcVersions() const -> QStringList
 {
     if (metadata())
-        return metadata()->mcVersions.join(", ");
+        return metadata()->mcVersions;
 
     return {};
+}
+
+auto Mod::mcVersionsString() const -> QString
+{
+    return mcVersions().join(", ");
 }
 
 auto Mod::releaseType() const -> QString
@@ -225,8 +259,8 @@ auto Mod::authors() const -> QStringList
 
 void Mod::finishResolvingWithDetails(ModDetails&& details)
 {
-    m_is_resolving = false;
-    m_is_resolved = true;
+    m_isResolving = false;
+    m_isResolved = true;
 
     m_local_details = std::move(details);
     if (!iconPath().isEmpty()) {

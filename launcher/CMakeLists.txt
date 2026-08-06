@@ -39,10 +39,9 @@ set(CORE_SOURCES
     QVariantUtils.h
     RuntimeContext.h
     PSaveFile.h
+    EnumWrapper.h
 
     # Basic instance manipulation tasks (derived from InstanceTask)
-    InstanceCreationTask.h
-    InstanceCreationTask.cpp
     InstanceCopyPrefs.h
     InstanceCopyPrefs.cpp
     InstanceCopyTask.h
@@ -321,6 +320,8 @@ set(MINECRAFT_SOURCES
     minecraft/World.cpp
     minecraft/WorldList.h
     minecraft/WorldList.cpp
+    minecraft/WorldTasks.h
+    minecraft/WorldTasks.cpp
 
     minecraft/mod/MetadataHandler.h
     minecraft/mod/Mod.h
@@ -975,8 +976,10 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/ResourcePackModel.cpp
 
     # Needed for MOC to find them without a corresponding .cpp
+    ui/pages/modplatform/TexturePackPage.cpp
     ui/pages/modplatform/TexturePackPage.h
     ui/pages/modplatform/TexturePackModel.cpp
+    ui/pages/modplatform/TexturePackModel.h
 
     ui/pages/modplatform/ShaderPackPage.cpp
     ui/pages/modplatform/ShaderPackModel.cpp
@@ -1097,6 +1100,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/InstallLoaderDialog.h
     ui/dialogs/ChooseOfflineNameDialog.cpp
     ui/dialogs/ChooseOfflineNameDialog.h
+    ui/dialogs/UntrustedModsDialog.cpp
+    ui/dialogs/UntrustedModsDialog.h
 
     ui/dialogs/skins/SkinManageDialog.cpp
     ui/dialogs/skins/SkinManageDialog.h

@@ -38,6 +38,18 @@ class XmlLogParseTest : public QObject {
 
    private slots:
 
+    void guessLevel_timestampFormats()
+    {
+        QCOMPARE(LogParser::guessLevel("[21:16:07] [Server thread/WARN]: short timestamp", MessageLevel::Unknown), MessageLevel::Warning);
+        QCOMPARE(LogParser::guessLevel("[23Jul2026 18:12:07.877] [main/WARN] [Sodium-Workarounds/]: date and millis timestamp",
+                                       MessageLevel::Unknown),
+                 MessageLevel::Warning);
+        QCOMPARE(LogParser::guessLevel(
+                     "[25Jul2026 14:10:58.723] [main/ERROR] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: error",
+                     MessageLevel::Unknown),
+                 MessageLevel::Error);
+    }
+
     void parseXml_data()
     {
         QString source = QFINDTESTDATA("testdata/TestLogs");

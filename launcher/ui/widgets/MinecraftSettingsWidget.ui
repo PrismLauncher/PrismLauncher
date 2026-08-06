@@ -346,6 +346,13 @@ It is most likely you will need to change the path - please refer to the mod's w
                </widget>
               </item>
               <item>
+               <widget class="QCheckBox" name="countGameTime">
+                <property name="text">
+                 <string>&amp;Count time playing this instance into total time played</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QCheckBox" name="showGlobalGameTime">
                 <property name="text">
                  <string>Show the &amp;total time played across instances</string>
@@ -660,6 +667,14 @@ It is most likely you will need to change the path - please refer to the mod's w
               <property name="labelAlignment">
                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
               </property>
+
+              <item row="1" column="0" colspan="2">
+               <widget class="QCheckBox" name="useNativeGLFWCheck">
+                <property name="text">
+                 <string>Use system installation of GLFW</string>
+                </property>
+               </widget>
+              </item>
               <item row="2" column="0">
                <widget class="QLabel" name="labelGLFWPath">
                 <property name="text">
@@ -670,6 +685,14 @@ It is most likely you will need to change the path - please refer to the mod's w
                 </property>
                </widget>
               </item>
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="lineEditGLFWPath">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+
               <item row="4" column="0">
                <spacer name="verticalSpacer_6">
                 <property name="orientation">
@@ -686,6 +709,14 @@ It is most likely you will need to change the path - please refer to the mod's w
                 </property>
                </spacer>
               </item>
+
+              <item row="5" column="0" colspan="2">
+               <widget class="QCheckBox" name="useNativeOpenALCheck">
+                <property name="text">
+                 <string>Use system installation of OpenAL</string>
+                </property>
+               </widget>
+              </item>
               <item row="6" column="0">
                <widget class="QLabel" name="labelOpenALPath">
                 <property name="text">
@@ -696,29 +727,50 @@ It is most likely you will need to change the path - please refer to the mod's w
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
-               <widget class="QLineEdit" name="lineEditGLFWPath">
+              <item row="6" column="1">
+               <widget class="QLineEdit" name="lineEditOpenALPath">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
                </widget>
               </item>
-              <item row="1" column="0" colspan="2">
-               <widget class="QCheckBox" name="useNativeGLFWCheck">
+              
+              <item row="8" column="0">
+               <spacer name="verticalSpacer_7">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>6</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+
+              <item row="9" column="0" colspan="2">
+               <widget class="QCheckBox" name="useNativeSDLCheck">
                 <property name="text">
-                 <string>Use system installation of GLFW</string>
+                 <string>Use system installation of SDL</string>
                 </property>
                </widget>
               </item>
-              <item row="5" column="0" colspan="2">
-               <widget class="QCheckBox" name="useNativeOpenALCheck">
+              <item row="10" column="0">
+               <widget class="QLabel" name="labelSDLPath">
                 <property name="text">
-                 <string>Use system installation of OpenAL</string>
+                 <string>&amp;SDL library path:</string>
+                </property>
+                <property name="buddy">
+                 <cstring>lineEditSDLPath</cstring>
                 </property>
                </widget>
               </item>
-              <item row="6" column="1">
-               <widget class="QLineEdit" name="lineEditOpenALPath">
+              <item row="10" column="1">
+               <widget class="QLineEdit" name="lineEditSDLPath">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -858,32 +910,73 @@ It is most likely you will need to change the path - please refer to the mod's w
   <tabstop>openGlobalSettingsButton</tabstop>
   <tabstop>settingsTabs</tabstop>
   <tabstop>scrollArea</tabstop>
+
+  <!-- game window settings -->
+  <tabstop>windowSizeGroupBox</tabstop>
   <tabstop>maximizedCheckBox</tabstop>
-  <tabstop>windowHeightSpinBox</tabstop>
   <tabstop>windowWidthSpinBox</tabstop>
+  <tabstop>windowHeightSpinBox</tabstop>
   <tabstop>closeAfterLaunchCheck</tabstop>
   <tabstop>quitAfterGameStopCheck</tabstop>
+
+  <!-- console settings -->
+  <tabstop>consoleSettingsBox</tabstop>
   <tabstop>showConsoleCheck</tabstop>
   <tabstop>showConsoleErrorCheck</tabstop>
   <tabstop>autoCloseConsoleCheck</tabstop>
+
+  <!-- global data packs -->
+  <tabstop>globalDataPacksGroupBox</tabstop>
+  <tabstop>dataPacksPathEdit</tabstop>
+  <tabstop>dataPacksPathBrowse</tabstop>
+
+  <!-- game time -->-->
+  <tabstop>gameTimeGroupBox</tabstop>
   <tabstop>showGameTime</tabstop>
   <tabstop>recordGameTime</tabstop>
   <tabstop>showGlobalGameTime</tabstop>
   <tabstop>showGameTimeWithoutDays</tabstop>
+
+  <!-- default account -->
   <tabstop>instanceAccountGroupBox</tabstop>
   <tabstop>instanceAccountSelector</tabstop>
+
+  <!-- auto join -->
   <tabstop>serverJoinGroupBox</tabstop>
   <tabstop>serverJoinAddressButton</tabstop>
   <tabstop>serverJoinAddress</tabstop>
   <tabstop>worldJoinButton</tabstop>
   <tabstop>worldsCb</tabstop>
+
+  <!-- mod loaders-->
+  <tabstop>loaderGroup</tabstop>
+  <tabstop>neoForge</tabstop>
+  <tabstop>forge</tabstop>
+  <tabstop>fabric</tabstop>
+  <tabstop>quilt</tabstop>
+  <tabstop>liteLoader</tabstop>
+  <tabstop>babric</tabstop>
+  <tabstop>btaBabric</tabstop>
+  <tabstop>legacyFabric</tabstop>
+  <tabstop>ornithe</tabstop>
+  <tabstop>rift</tabstop>
+
   <tabstop>javaScrollArea</tabstop>
   <tabstop>scrollArea_2</tabstop>
+
+  <!-- legacy tweaks -->
+  <tabstop>legacySettingsGroupBox</tabstop>
   <tabstop>onlineFixes</tabstop>
+
+  <!-- native library workarounds -->
+  <tabstop>nativeWorkaroundsGroupBox</tabstop>
   <tabstop>useNativeGLFWCheck</tabstop>
   <tabstop>lineEditGLFWPath</tabstop>
   <tabstop>useNativeOpenALCheck</tabstop>
   <tabstop>lineEditOpenALPath</tabstop>
+  <tabstop>useNativeSDLCheck</tabstop>
+  <tabstop>lineEditSDLPath</tabstop>
+  
   <tabstop>enableFeralGamemodeCheck</tabstop>
   <tabstop>enableMangoHud</tabstop>
   <tabstop>useDiscreteGpuCheck</tabstop>

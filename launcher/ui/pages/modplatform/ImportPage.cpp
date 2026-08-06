@@ -118,7 +118,7 @@ void ImportPage::updateState()
             if (fi.exists() && (isZip || isMRPack)) {
                 auto extra_info = QMap(m_extra_info);
                 qDebug() << "Pack Extra Info" << extra_info << m_extra_info;
-                dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, this, std::move(extra_info)));
+                dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, false, this, std::move(extra_info)));
                 dialog->setSuggestedIcon("default");
             }
         } else if (url.scheme() == "curseforge") {
@@ -163,7 +163,7 @@ void ImportPage::updateState()
                     extra_info.insert("pack_id", addonId);
                     extra_info.insert("pack_version_id", fileId);
 
-                    dialog->setSuggestedPack(pack_name, new InstanceImportTask(dl_url, this, std::move(extra_info)));
+                    dialog->setSuggestedPack(pack_name, new InstanceImportTask(dl_url, false, this, std::move(extra_info)));
                     dialog->setSuggestedIcon("default");
 
                 } else {
@@ -183,7 +183,7 @@ void ImportPage::updateState()
             // hook, line and sinker.
             QFileInfo fi(url.fileName());
             auto extra_info = QMap(m_extra_info);
-            dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, this, std::move(extra_info)));
+            dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, false, this, std::move(extra_info)));
             dialog->setSuggestedIcon("default");
         }
     } else {

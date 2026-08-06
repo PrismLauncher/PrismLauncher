@@ -38,6 +38,7 @@ include(GenerateExportHeader)
 add_compile_definitions($<$<NOT:$<CONFIG:Debug>>:QT_NO_DEBUG>)
 add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060400)
 add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x060400)
+add_compile_definitions(QT_NO_CONTEXTLESS_CONNECT)
 
 if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
     add_compile_options(
@@ -244,12 +245,15 @@ option(Launcher_ENABLE_JAVA_DOWNLOADER "Build the java downloader feature" ${Lau
 if(UNIX AND APPLE)
     set(Launcher_GLFW_LIBRARY_NAME "libglfw.dylib" CACHE STRING "Name of native glfw library")
     set(Launcher_OPENAL_LIBRARY_NAME "libopenal.dylib" CACHE STRING "Name of native openal library")
+    set(Launcher_SDL_LIBRARY_NAME "libSDL3.dylib" CACHE STRING "Name of native sdl library")
 elseif(UNIX)
     set(Launcher_GLFW_LIBRARY_NAME "libglfw.so" CACHE STRING "Name of native glfw library")
     set(Launcher_OPENAL_LIBRARY_NAME "libopenal.so" CACHE STRING "Name of native openal library")
+    set(Launcher_SDL_LIBRARY_NAME "libSDL3.so" CACHE STRING "Name of native sdl library")
 elseif(WIN32)
     set(Launcher_GLFW_LIBRARY_NAME "glfw.dll" CACHE STRING "Name of native glfw library")
     set(Launcher_OPENAL_LIBRARY_NAME "OpenAL.dll" CACHE STRING "Name of native openal library")
+    set(Launcher_SDL_LIBRARY_NAME "SDL3.dll" CACHE STRING "Name of native sdl library")
 endif()
 
 # API Keys
@@ -292,8 +296,25 @@ set(Launcher_BUILD_TIMESTAMP "${TODAY}")
 # Find the required Qt parts
 if(Launcher_QT_VERSION_MAJOR EQUAL 6)
     set(QT_VERSION_MAJOR 6)
-    find_package(Qt6 6.4 REQUIRED COMPONENTS Core CoreTools Widgets Concurrent Network Test Xml NetworkAuth OpenGL)
-    find_package(Qt6 COMPONENTS DBus)
+    find_package(
+        Qt6 6.4
+        REQUIRED
+        COMPONENTS
+            Concurrent
+            Core
+            CoreTools
+            Network
+            NetworkAuth
+            OpenGL
+            Test
+            Widgets
+            Xml
+        HINTS
+            C:/Qt/*/*/lib/cmake
+            /opt/qt/*/*/lib/cmake
+            $ENV{MINGW_PREFIX}/opt/qt/*/*/li/cmake
+    )
+    find_package(Qt6 COMPONENTS DBus HINTS /opt/qt/*/*/lib/cmake)
     list(APPEND Launcher_QT_DBUS Qt6::DBus)
 else()
     message(FATAL_ERROR "Qt version ${Launcher_QT_VERSION_MAJOR} is not supported")

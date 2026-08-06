@@ -30,9 +30,9 @@ class ModrinthAPI : public ResourceAPI {
 
     std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
 
-    static std::pair<Task::Ptr, QByteArray*> getModCategories();
+    std::pair<Task::Ptr, QByteArray*> getModCategories() override;
     static QList<ModPlatform::Category> loadCategories(const QByteArray& response, const QString& projectType);
-    static QList<ModPlatform::Category> loadModCategories(const QByteArray& response);
+    QList<ModPlatform::Category> loadModCategories(const QByteArray& response) override;
 
    public:
     auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
@@ -70,16 +70,16 @@ class ModrinthAPI : public ResourceAPI {
         return l.join(',');
     }
 
-    static QString getSideFilters(ModPlatform::Side side)
+    static QString getSideFilters(ModPlatform::SideType side)
     {
-        switch (side) {
-            case ModPlatform::Side::ClientSide:
+        switch (side.value()) {
+            case ModPlatform::SideType::ClientSide:
                 return { R"("client_side:required","client_side:optional"],["server_side:optional","server_side:unsupported")" };
-            case ModPlatform::Side::ServerSide:
+            case ModPlatform::SideTypeValue::ServerSide:
                 return { R"("server_side:required","server_side:optional"],["client_side:optional","client_side:unsupported")" };
-            case ModPlatform::Side::UniversalSide:
+            case ModPlatform::SideTypeValue::UniversalSide:
                 return { R"("client_side:required"],["server_side:required")" };
-            case ModPlatform::Side::NoSide:
+            case ModPlatform::SideTypeValue::NoSide:
             // fallthrough
             default:
                 return {};
@@ -180,7 +180,7 @@ class ModrinthAPI : public ResourceAPI {
         return BuildConfig.MODRINTH_PROD_URL + "/project/" + id;
     };
 
-    auto getMultipleModInfoURL(const QStringList& ids) const -> QString
+    static auto getMultipleModInfoURL(const QStringList& ids) -> QString
     {
         return BuildConfig.MODRINTH_PROD_URL + QString("/projects?ids=[\"%1\"]").arg(ids.join("\",\""));
     };

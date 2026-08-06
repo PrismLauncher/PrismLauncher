@@ -23,9 +23,11 @@
 #include <QMetaType>
 #include <QString>
 #include <QVariant>
-#include <compare>
+#include <array>
 #include <cstdint>
 #include <memory>
+#include <utility>
+#include "EnumWrapper.h"
 
 class QIODevice;
 
@@ -56,19 +58,48 @@ QList<ModLoaderType> modLoaderTypesToList(ModLoaderTypes flags);
 
 enum class ResourceProvider : std::uint8_t { MODRINTH, FLAME };
 
-enum class DependencyType : std::uint8_t { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
+enum class DependencyTypeValue : std::uint8_t { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
+struct DependencyType : EnumWrapper<DependencyType, DependencyTypeValue> {
+    static constexpr auto invalid() { return UNKNOWN; };
 
-enum class Side : std::uint8_t { NoSide = 0, ClientSide = 1U << 0U, ServerSide = 1U << 1U, UniversalSide = ClientSide | ServerSide };
+    static constexpr auto mapping()
+    {
+        return std::array{
+            std::pair{ REQUIRED, "REQUIRED" }, std::pair{ OPTIONAL, "OPTIONAL" }, std::pair{ INCOMPATIBLE, "INCOMPATIBLE" },
+            std::pair{ EMBEDDED, "EMBEDDED" }, std::pair{ TOOL, "TOOL" },         std::pair{ INCLUDE, "INCLUDE" },
+            std::pair{ UNKNOWN, "UNKNOWN" },
+        };
+    };
+    static DependencyType fromString(const QString& str)
+    {
+        return EnumWrapper<DependencyType, DependencyTypeValue>::fromString(str.toUpper());
+    }
 
-namespace SideUtils {
-QString toString(Side side);
-Side fromString(QString side);
-}  // namespace SideUtils
+    using enum DependencyTypeValue;
+    using Base = EnumWrapper<DependencyType, DependencyTypeValue>;
+    using Base::Base; /* inherit ctor */
+};
 
-namespace DependencyTypeUtils {
-QString toString(DependencyType type);
-DependencyType fromString(const QString& str);
-}  // namespace DependencyTypeUtils
+enum class SideTypeValue : std::uint8_t {
+    NoSide = 0,
+    ClientSide = 1U << 0U,
+    ServerSide = 1U << 1U,
+    UniversalSide = ClientSide | ServerSide
+};
+
+struct SideType : EnumWrapper<SideType, SideTypeValue> {
+    static constexpr auto invalid() { return NoSide; };
+
+    static constexpr auto mapping()
+    {
+        return std::array{ std::pair{ ClientSide, "client" }, std::pair{ ServerSide, "server" }, std::pair{ UniversalSide, "both" },
+                           std::pair{ NoSide, "" } };
+    };
+
+    using enum SideTypeValue;
+    using Base = EnumWrapper<SideType, SideTypeValue>;
+    using Base::Base; /* inherit ctor */
+};
 
 namespace ProviderCapabilities {
 const char* name(ResourceProvider);
@@ -87,20 +118,19 @@ struct DonationData {
     QString url;
 };
 
-struct IndexedVersionType {
-    enum class Enum : std::uint8_t { Unknown = 0, Release = 1, Beta = 2, Alpha = 3 };
-    using enum Enum;
-    constexpr IndexedVersionType(Enum e = Unknown) : m_type(e) {}  // NOLINT(hicpp-explicit-conversions)
-    static IndexedVersionType fromString(const QString& type);
-    bool isValid() const { return m_type != Unknown; }
-    std::strong_ordering operator<=>(const IndexedVersionType& other) const = default;
-    std::strong_ordering operator<=>(const IndexedVersionType::Enum& other) const { return m_type <=> other; }
-    QString toString() const;
-    explicit operator int() const { return static_cast<int>(m_type); }
-    explicit operator IndexedVersionType::Enum() { return m_type; }
+enum class IndexedVersionTypeValue : std::uint8_t { Unknown = 0, Release = 1, Beta = 2, Alpha = 3 };
+struct IndexedVersionType : EnumWrapper<IndexedVersionType, IndexedVersionTypeValue> {
+    static constexpr auto invalid() { return Unknown; };
 
-   private:
-    Enum m_type;
+    static constexpr auto mapping()
+    {
+        return std::array{ std::pair{ Unknown, "Unknown" }, std::pair{ Release, "Release" }, std::pair{ Beta, "Beta" },
+                           std::pair{ Alpha, "Alpha" } };
+    };
+
+    using enum IndexedVersionTypeValue;
+    using Base = EnumWrapper<IndexedVersionType, IndexedVersionTypeValue>;
+    using Base::Base; /* inherit ctor */
 };
 
 struct Dependency {
@@ -125,7 +155,7 @@ struct IndexedVersion {
     bool is_preferred = true;
     QString changelog;
     QList<Dependency> dependencies;
-    Side side = Side::NoSide;  // this is for flame API
+    SideType side = SideType::NoSide;  // this is for flame API
 
     // For internal use, not provided by APIs
     bool is_currently_selected = false;
@@ -173,7 +203,7 @@ struct IndexedPack {
     QString logoName;
     QString logoUrl;
     QString websiteUrl;
-    Side side = Side::NoSide;
+    SideType side = SideType::NoSide;
 
     bool versionsLoaded = false;
     QList<IndexedVersion> versions;
