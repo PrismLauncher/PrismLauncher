@@ -83,10 +83,10 @@ void JavaChecker::executeTask()
     m_process->setProcessEnvironment(CleanEnviroment());
     qDebug() << "Running java checker:" << m_path << args.join(" ");
 
-    connect(m_process.get(), &QProcess::finished, this, &JavaChecker::finished);
-    connect(m_process.get(), &QProcess::errorOccurred, this, &JavaChecker::error);
-    connect(m_process.get(), &QProcess::readyReadStandardOutput, this, &JavaChecker::stdoutReady);
-    connect(m_process.get(), &QProcess::readyReadStandardError, this, &JavaChecker::stderrReady);
+    connect(m_process.get(), &QProcess::finished, this, &JavaChecker::finished, Qt::QueuedConnection);
+    connect(m_process.get(), &QProcess::errorOccurred, this, &JavaChecker::error, Qt::QueuedConnection);
+    connect(m_process.get(), &QProcess::readyReadStandardOutput, this, &JavaChecker::stdoutReady, Qt::QueuedConnection);
+    connect(m_process.get(), &QProcess::readyReadStandardError, this, &JavaChecker::stderrReady, Qt::QueuedConnection);
     connect(&m_killTimer, &QTimer::timeout, this, &JavaChecker::timeout);
     m_killTimer.setSingleShot(true);
     m_killTimer.start(15000);
