@@ -60,12 +60,12 @@ class GetModDependenciesTask : public SequentialTask {
     QHash<QString, PackDependencyExtraInfo> getExtraInfo();
 
    private:
-    ResourceAPI* getAPI(ModPlatform::ResourceProvider provider)
+    const ResourceAPI* getAPI(ModPlatform::ResourceProvider provider)
     {
         if (provider == ModPlatform::ResourceProvider::FLAME) {
-            return &m_flameAPI;
+            return &FlameAPI::get();
         }
-        return &m_modrinthAPI;
+        return &ModrinthAPI::get();
     }
 
    protected slots:
@@ -88,7 +88,4 @@ class GetModDependenciesTask : public SequentialTask {
 
     Version m_version;
     ModPlatform::ModLoaderTypes m_loaderType;
-
-    ModrinthAPI m_modrinthAPI;
-    FlameAPI m_flameAPI;
 };

@@ -10,7 +10,7 @@
 namespace ResourceDownload {
 
 ShaderPackResourceModel::ShaderPackResourceModel(const BaseInstance& baseInst,
-                                                 ResourceAPI* api,
+                                                 const ResourceAPI* api,
                                                  const QString& debugName,
                                                  QString metaEntryBase)
     : ResourceModel(api), m_baseInstance(baseInst), m_debugName(debugName + " (Model)"), m_metaEntryBase(std::move(metaEntryBase))

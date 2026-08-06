@@ -186,7 +186,7 @@ void ResourceFolderModel::installResourceWithFlameMetadata(const QString& path, 
             .provider = ModPlatform::ResourceProvider::FLAME,
         };
 
-        auto [job, response] = FlameAPI().getProject(vers.addonId.toString());
+        auto [job, response] = FlameAPI::get().getProject(vers.addonId.toString());
         connect(job.get(), &Task::failed, this, install);
         connect(job.get(), &Task::aborted, this, install);
         connect(job.get(), &Task::succeeded, this, [response, this, &vers, install, &pack] {

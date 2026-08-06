@@ -167,7 +167,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             suggestCurrent();
             updateUI();
         };
-        if (auto netJob = m_api.getProjectInfo({ m_current }, std::move(callbacks)); netJob) {
+        if (auto netJob = ModrinthAPI::get().getProjectInfo({ m_current }, std::move(callbacks)); netJob) {
             m_job = netJob;
             m_job->start();
         }
@@ -222,7 +222,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
         };
 
-        auto netJob = m_api.getProjectVersions({ m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
+        auto netJob = ModrinthAPI::get().getProjectVersions({ m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
 
         m_job2 = netJob;
         m_job2->start();
@@ -381,7 +381,7 @@ void ModrinthPage::createFilterWidget()
     connect(m_ui->filterButton, &QPushButton::clicked, this, [this] { m_filterWidget->setHidden(!m_filterWidget->isHidden()); });
 
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &ModrinthPage::triggerSearch);
-    auto [categoriesTask, response] = ModrinthAPI().getModCategories();
+    auto [categoriesTask, response] = ModrinthAPI::get().getModCategories();
     m_categoriesTask = categoriesTask;
     connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() {
         auto categories = ModrinthAPI::loadCategories(*response, "modpack");

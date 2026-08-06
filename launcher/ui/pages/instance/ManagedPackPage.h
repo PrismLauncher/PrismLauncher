@@ -132,7 +132,6 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
     Task::Ptr m_fetchJob = nullptr;
 
     ModPlatform::IndexedPack m_pack;
-    ModrinthAPI m_api;
 };
 
 class FlameManagedPackPage final : public ManagedPackPage {
@@ -156,5 +155,4 @@ class FlameManagedPackPage final : public ManagedPackPage {
     Task::Ptr m_fetchJob = nullptr;
 
     ModPlatform::IndexedPack m_pack;
-    FlameAPI m_api;
 };

@@ -231,14 +231,13 @@ void ResourceUpdateDialog::checkCandidates()
                 QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
                 return;
             }
-            static FlameAPI s_api;
 
             auto dependencyExtraInfo = depTask->getExtraInfo();
 
             for (const auto& dep : depTask->getDependecies()) {
                 auto changelog = dep->version.changelog;
                 if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME) {
-                    changelog = s_api.getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
+                    changelog = FlameAPI::get().getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
                 }
 
                 auto [maybe_installed, required_by_names, required_by_ids] = dependencyExtraInfo.value(dep->version.addonId.toString());

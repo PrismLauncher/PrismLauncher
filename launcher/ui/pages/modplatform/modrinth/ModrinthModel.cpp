@@ -133,7 +133,6 @@ void ModpackListModel::performPaginatedSearch()
 {
     if (hasActiveSearchJob())
         return;
-    static const ModrinthAPI api;
 
     // Modrinth ids are not limited to numbers and can be any length
     if (m_searchState != ResetRequested && m_currentSearchTerm.startsWith("#")) {
@@ -154,7 +153,7 @@ void ModpackListModel::performPaginatedSearch()
             };
             auto project = std::make_shared<ModPlatform::IndexedPack>();
             project->addonId = projectId;
-            if (auto job = api.getProjectInfo({ project }, std::move(callbacks), false); job) {
+            if (auto job = ModrinthAPI::get().getProjectInfo({ project }, std::move(callbacks), false); job) {
                 m_jobPtr = job;
                 m_jobPtr->start();
             }
@@ -173,8 +172,8 @@ void ModpackListModel::performPaginatedSearch()
         searchRequestFailed("Aborted", 0);
     };
 
-    auto netJob = api.searchProjects({ ModPlatform::ResourceType::Modpack, m_nextSearchOffset, m_currentSearchTerm, sort, m_filter->loaders,
-                                       m_filter->versions, ModPlatform::SideType::NoSide, m_filter->categoryIds, m_filter->openSource },
+    auto netJob = ModrinthAPI::get().searchProjects({ .type=ModPlatform::ResourceType::Modpack, .offset=m_nextSearchOffset, .search=m_currentSearchTerm, .sorting=sort, .loaders=m_filter->loaders,
+                                       .versions=m_filter->versions, .side=ModPlatform::SideType::NoSide, .categoryIds=m_filter->categoryIds, .openSource=m_filter->openSource },
                                      std::move(callbacks));
 
     m_jobPtr = netJob;

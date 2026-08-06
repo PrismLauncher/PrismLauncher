@@ -15,24 +15,30 @@
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
 
-class FlameAPI : public ResourceAPI {
+class FlameAPI final : public ResourceAPI {
    public:
-    QString getModFileChangelog(int modId, int fileId);
-    QString getModDescription(int modId);
+    static const FlameAPI& get()
+    {
+        static const FlameAPI s_instance;
+        return s_instance;
+    }
+
+    QString getModFileChangelog(int modId, int fileId) const;
+    QString getModDescription(int modId) const;
 
     std::optional<ModPlatform::IndexedVersion> getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
                                                                 QList<ModPlatform::ModLoaderType> instanceLoaders,
                                                                 ModPlatform::ModLoaderTypes fallback,
-                                                                bool checkLoaders);
+                                                                bool checkLoaders) const;
 
     std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
-    std::pair<Task::Ptr, QByteArray*> matchFingerprints(const QList<uint>& fingerprints);
+    std::pair<Task::Ptr, QByteArray*> matchFingerprints(const QList<uint>& fingerprints) const;
     std::pair<Task::Ptr, QByteArray*> getFiles(const QStringList& fileIds) const;
     std::pair<Task::Ptr, QByteArray*> getFile(const QString& addonId, const QString& fileId) const;
 
     static std::pair<Task::Ptr, QByteArray*> getCategories(ModPlatform::ResourceType type);
-    std::pair<Task::Ptr, QByteArray*> getModCategories() override;
-    QList<ModPlatform::Category> loadModCategories(const QByteArray& response) override;
+    std::pair<Task::Ptr, QByteArray*> getModCategories() const override;
+    QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const override;
 
     QList<ResourceAPI::SortingMethod> getSortingMethods() const override;
 
@@ -42,6 +48,11 @@ class FlameAPI : public ResourceAPI {
     }
 
    private:
+    // NOTE: prevent creation and deletion of type - get should be used instead
+    FlameAPI() = default;
+
+    ~FlameAPI() = default;
+
     static int getClassId(ModPlatform::ResourceType type)
     {
         switch (type) {

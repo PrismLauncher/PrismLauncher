@@ -72,7 +72,7 @@ namespace ResourceDownload {
 ModPage::ModPage(ResourceDownloadDialog* dialog,
                  BaseInstance& instance,
                  ResourceProviderData p,
-                 ResourceAPI* api,
+                 const ResourceAPI* api,
                  ModFilterWidget* filterWidget)
     : ResourcePage(dialog, instance, prepareModDescriptor(), std::move(p)), m_api(api)
 {

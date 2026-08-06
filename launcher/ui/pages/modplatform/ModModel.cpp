@@ -21,7 +21,7 @@
 
 namespace ResourceDownload {
 
-ModModel::ModModel(BaseInstance& base_inst, ResourceAPI* api, const QString& debugName, QString metaEntryBase)
+ModModel::ModModel(BaseInstance& base_inst, const ResourceAPI* api, const QString& debugName, QString metaEntryBase)
     : ResourceModel(api), m_base_instance(base_inst), m_debugName(debugName + " (Model)"), m_metaEntryBase(std::move(metaEntryBase))
 {}
 

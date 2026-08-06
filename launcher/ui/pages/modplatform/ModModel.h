@@ -28,7 +28,7 @@ class ModModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    ModModel(BaseInstance&, ResourceAPI* api, const QString& debugName, QString metaEntryBase);
+    ModModel(BaseInstance&, const ResourceAPI* api, const QString& debugName, QString metaEntryBase);
 
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, unsigned int sort, bool filter_changed);

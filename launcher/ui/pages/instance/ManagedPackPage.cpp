@@ -240,12 +240,12 @@ void ModrinthManagedPackPage::parseManagedPack()
     };
     callbacks.on_fail = [this](const QString& /*reason*/, int) { setFailState(); };
     callbacks.on_abort = [this]() { setFailState(); };
-    m_fetchJob = m_api.getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
-                                            .mcVersions = {},
-                                            .loaders = {},
-                                            .resourceType = ModPlatform::ResourceType::Modpack,
-                                            .includeChangelog = true },
-                                          std::move(callbacks));
+    m_fetchJob = ModrinthAPI::get().getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
+                                                         .mcVersions = {},
+                                                         .loaders = {},
+                                                         .resourceType = ModPlatform::ResourceType::Modpack,
+                                                         .includeChangelog = true },
+                                                       std::move(callbacks));
 
     ui->changelogTextBrowser->setText(tr("Fetching changelogs..."));
 
@@ -395,12 +395,12 @@ void FlameManagedPackPage::parseManagedPack()
     };
     callbacks.on_fail = [this](const QString& /*reason*/, int) { setFailState(); };
     callbacks.on_abort = [this]() { setFailState(); };
-    m_fetchJob = m_api.getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
-                                            .mcVersions = {},
-                                            .loaders = {},
-                                            .resourceType = ModPlatform::ResourceType::Modpack,
-                                            .includeChangelog = true },
-                                          std::move(callbacks));
+    m_fetchJob = FlameAPI::get().getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
+                                                      .mcVersions = {},
+                                                      .loaders = {},
+                                                      .resourceType = ModPlatform::ResourceType::Modpack,
+                                                      .includeChangelog = true },
+                                                    std::move(callbacks));
 
     m_fetchJob->start();
 }
@@ -421,7 +421,7 @@ void FlameManagedPackPage::suggestVersion()
     auto version = m_pack.versions.at(index);
 
     ui->changelogTextBrowser->setHtml(
-        StringUtils::htmlListPatch(m_api.getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt())));
+        StringUtils::htmlListPatch(FlameAPI::get().getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt())));
 
     ManagedPackPage::suggestVersion();
 }
