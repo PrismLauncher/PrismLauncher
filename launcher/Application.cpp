@@ -1461,7 +1461,7 @@ void Application::messageReceived(const QByteArray& message)
         bool offline = received.args["offline_enabled"] == "true";
         QString offlineName = received.args["offline_name"];
 
-        BaseInstance* instance;
+        MinecraftInstance* instance;
         if (!id.isEmpty()) {
             instance = instances()->getInstanceById(id);
             if (!instance) {
@@ -1524,7 +1524,7 @@ bool Application::openJsonEditor(const QString& filename)
     }
 }
 
-bool Application::launch(BaseInstance* instance,
+bool Application::launch(MinecraftInstance* instance,
                          LaunchMode mode,
                          MinecraftTarget::Ptr targetToJoin,
                          MinecraftAccountPtr accountToUse,
@@ -1706,7 +1706,7 @@ ViewLogWindow* Application::showLogWindow()
     return m_viewLogWindow;
 }
 
-InstanceWindow* Application::showInstanceWindow(BaseInstance* instance, QString page)
+InstanceWindow* Application::showInstanceWindow(MinecraftInstance* instance, QString page)
 {
     if (!instance)
         return nullptr;

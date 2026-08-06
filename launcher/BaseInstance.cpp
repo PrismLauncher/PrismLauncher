@@ -224,7 +224,7 @@ bool BaseInstance::isLinkedToInstanceId(const QString& id) const
 void BaseInstance::iconUpdated(const QString& key)
 {
     if (iconKey() == key) {
-        emit propertiesChanged(this);
+        emit propertiesChanged();
     }
 }
 
@@ -295,7 +295,7 @@ void BaseInstance::setMinecraftRunning(bool running)
         settings()->set("totalTimePlayed", current + m_timeStarted.secsTo(timeEnded));
         settings()->set("lastTimePlayed", m_timeStarted.secsTo(timeEnded));
 
-        emit propertiesChanged(this);
+        emit propertiesChanged();
     }
 }
 
@@ -365,7 +365,7 @@ void BaseInstance::setLastLaunch(qint64 val)
 {
     // FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("lastLaunchTime", val);
-    emit propertiesChanged(this);
+    emit propertiesChanged();
 }
 
 void BaseInstance::setNotes(const QString& val)
@@ -383,7 +383,7 @@ void BaseInstance::setIconKey(const QString& val)
 {
     // FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("iconKey", val);
-    emit propertiesChanged(this);
+    emit propertiesChanged();
 }
 
 QString BaseInstance::iconKey() const
@@ -395,7 +395,7 @@ void BaseInstance::setName(const QString& val)
 {
     // FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("name", val);
-    emit propertiesChanged(this);
+    emit propertiesChanged();
 }
 
 bool BaseInstance::syncInstanceDirName(const QString& newRoot) const

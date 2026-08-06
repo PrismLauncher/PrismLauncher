@@ -75,7 +75,7 @@ class ModFolderModel : public ResourceFolderModel {
         FileNameColumn,
         NumColumns
     };
-    ModFolderModel(const QDir& dir, BaseInstance* instance, bool isIndexed, bool createDir, QObject* parent = nullptr);
+    ModFolderModel(const QDir& dir, MinecraftInstance* instance, bool isIndexed, bool createDir, QObject* parent = nullptr);
 
     QString id() const override { return "mods"; }
 

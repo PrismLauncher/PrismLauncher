@@ -30,14 +30,14 @@
 #include <optional>
 
 namespace {
-std::vector<Version> mcVersions(BaseInstance* inst)
+std::vector<Version> mcVersions(MinecraftInstance* inst)
 {
-    return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion() };
+    return { inst->getPackProfile()->getComponent("net.minecraft")->getVersion() };
 }
 }  // namespace
 
 ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
-                                           BaseInstance* instance,
+                                           MinecraftInstance* instance,
                                            ResourceFolderModel* resourceModel,
                                            QList<Resource*>& searchFor,
                                            bool includeDeps,

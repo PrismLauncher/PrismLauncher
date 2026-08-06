@@ -280,11 +280,6 @@ void MinecraftInstance::updateRuntimeContext()
     m_components->invalidateLaunchProfile();
 }
 
-QString MinecraftInstance::typeName() const
-{
-    return "Minecraft";
-}
-
 PackProfile* MinecraftInstance::getPackProfile() const
 {
     return m_components.get();

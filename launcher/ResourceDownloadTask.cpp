@@ -35,14 +35,9 @@
 #include "net/ChecksumValidator.h"
 
 namespace {
-Net::ModrinthDownloadMeta createModrinthMeta(BaseInstance* instance, QString reason, QString dependentOn)
+Net::ModrinthDownloadMeta createModrinthMeta(MinecraftInstance* instance, QString reason, QString dependentOn)
 {
-    auto* mcInstance = dynamic_cast<MinecraftInstance*>(instance);
-    if (!mcInstance) {
-        return {};
-    }
-
-    auto* profile = mcInstance->getPackProfile();
+    auto* profile = instance->getPackProfile();
     if (!profile) {
         return {};
     }

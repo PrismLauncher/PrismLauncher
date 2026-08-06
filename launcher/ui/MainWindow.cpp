@@ -655,7 +655,7 @@ void MainWindow::repopulateAccountsMenu()
 
     auto accounts = APPLICATION->accounts();
     MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
-    
+
     bool canChangeSkin = defaultAccount && (defaultAccount->accountType() == AccountType::MSA) && !defaultAccount->isActive();
     ui->actionManageSkins->setEnabled(canChangeSkin);
 
@@ -1143,7 +1143,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
         qDebug() << "Adding resource" << localFileName << "to" << dlg.selectedInstanceKey;
 
         auto inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
-        auto minecraftInst = dynamic_cast<MinecraftInstance*>(inst);
+        auto minecraftInst = inst;
 
         switch (type) {
             case ModPlatform::ResourceType::ResourcePack:
@@ -1533,29 +1533,23 @@ void MainWindow::on_actionExportInstanceZip_triggered()
 void MainWindow::on_actionExportInstanceMrPack_triggered()
 {
     if (m_selectedInstance) {
-        auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance);
-        if (instance != nullptr) {
-            ExportPackDialog dlg(instance, this);
-            dlg.exec();
-        }
+        ExportPackDialog dlg(m_selectedInstance, this);
+        dlg.exec();
     }
 }
 
 void MainWindow::on_actionExportInstanceFlamePack_triggered()
 {
     if (m_selectedInstance) {
-        auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance);
-        if (instance) {
-            if (auto cmp = instance->getPackProfile()->getComponent("net.minecraft");
-                cmp && cmp->getVersionFile() && cmp->getVersionFile()->type == "snapshot") {
-                QMessageBox msgBox(this);
-                msgBox.setText("Snapshots are currently not supported by CurseForge modpacks.");
-                msgBox.exec();
-                return;
-            }
-            ExportPackDialog dlg(instance, this, ModPlatform::ResourceProvider::FLAME);
-            dlg.exec();
+        if (auto cmp = m_selectedInstance->getPackProfile()->getComponent("net.minecraft");
+            cmp && cmp->getVersionFile() && cmp->getVersionFile()->type == "snapshot") {
+            QMessageBox msgBox(this);
+            msgBox.setText("Snapshots are currently not supported by CurseForge modpacks.");
+            msgBox.exec();
+            return;
         }
+        ExportPackDialog dlg(m_selectedInstance, this, ModPlatform::ResourceProvider::FLAME);
+        dlg.exec();
     }
 }
 
@@ -1597,11 +1591,11 @@ void MainWindow::instanceActivated(QModelIndex index)
     if (!index.isValid())
         return;
     QString id = index.data(InstanceList::InstanceIDRole).toString();
-    BaseInstance* inst = APPLICATION->instances()->getInstanceById(id);
+    MinecraftInstance* inst = APPLICATION->instances()->getInstanceById(id);
     if (!inst)
         return;
 
-    activateInstance(inst);
+    APPLICATION->launch(inst);
 }
 
 void MainWindow::on_actionLaunchInstance_triggered()
@@ -1609,11 +1603,6 @@ void MainWindow::on_actionLaunchInstance_triggered()
     if (m_selectedInstance && !m_selectedInstance->isRunning()) {
         APPLICATION->launch(m_selectedInstance);
     }
-}
-
-void MainWindow::activateInstance(BaseInstance* instance)
-{
-    APPLICATION->launch(instance);
 }
 
 void MainWindow::on_actionKillInstance_triggered()

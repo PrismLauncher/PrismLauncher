@@ -75,6 +75,7 @@ class MCEditTool;
 class ThemeManager;
 class IconTheme;
 class BaseInstance;
+class MinecraftInstance;
 
 class LogModel;
 
@@ -187,7 +188,7 @@ class Application : public QApplication {
      */
     bool openJsonEditor(const QString& filename);
 
-    InstanceWindow* showInstanceWindow(BaseInstance* instance, QString page = QString());
+    InstanceWindow* showInstanceWindow(MinecraftInstance* instance, QString page = QString());
     MainWindow* showMainWindow(bool minimized = false);
     ViewLogWindow* showLogWindow();
 
@@ -214,7 +215,7 @@ class Application : public QApplication {
 #endif
 
    public slots:
-    bool launch(BaseInstance* instance,
+    bool launch(MinecraftInstance* instance,
                 LaunchMode mode = LaunchMode::Normal,
                 std::shared_ptr<MinecraftTarget> targetToJoin = nullptr,
                 shared_qobject_ptr<MinecraftAccount> accountToUse = nullptr,

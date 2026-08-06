@@ -81,10 +81,6 @@ void ResourcePackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] 
 
 void ResourcePackPage::downloadResourcePacks()
 {
-    if (m_instance->typeName() != "Minecraft") {
-        return;  // this is a null instance or a legacy instance
-    }
-
     m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createResourcePack(this, m_model, m_instance);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &ResourcePackPage::downloadDialogFinished);
@@ -127,10 +123,6 @@ void ResourcePackPage::downloadDialogFinished(int result)
 
 void ResourcePackPage::updateResourcePacks()
 {
-    if (m_instance->typeName() != "Minecraft") {
-        return;  // this is a null instance or a legacy instance
-    }
-
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Resource pack updates are unavailable when metadata is disabled!"));
         return;
@@ -224,10 +216,6 @@ void ResourcePackPage::deleteResourcePackMetadata()
 
 void ResourcePackPage::changeResourcePackVersion()
 {
-    if (m_instance->typeName() != "Minecraft") {
-        return;  // this is a null instance or a legacy instance
-    }
-
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Resource pack updates are unavailable when metadata is disabled!"));
         return;

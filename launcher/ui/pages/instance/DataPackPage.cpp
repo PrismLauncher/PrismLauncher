@@ -25,7 +25,7 @@
 #include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui/dialogs/ResourceUpdateDialog.h"
 
-DataPackPage::DataPackPage(BaseInstance* instance, DataPackFolderModel* model, QWidget* parent)
+DataPackPage::DataPackPage(MinecraftInstance* instance, DataPackFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(instance, model, parent), m_model(model)
 {
     ui->actionDownloadItem->setText(tr("Download Packs"));
@@ -64,10 +64,6 @@ void DataPackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] cons
 
 void DataPackPage::downloadDataPacks()
 {
-    if (m_instance->typeName() != "Minecraft") {
-        return;  // this is a null instance or a legacy instance
-    }
-
     m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createDataPack(this, m_model, m_instance);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &DataPackPage::downloadDialogFinished);
@@ -110,10 +106,6 @@ void DataPackPage::downloadDialogFinished(int result)
 
 void DataPackPage::updateDataPacks()
 {
-    if (m_instance->typeName() != "Minecraft") {
-        return;  // this is a null instance or a legacy instance
-    }
-
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Data pack updates are unavailable when metadata is disabled!"));
         return;
@@ -207,10 +199,6 @@ void DataPackPage::deleteDataPackMetadata()
 
 void DataPackPage::changeDataPackVersion()
 {
-    if (m_instance->typeName() != "Minecraft") {
-        return;  // this is a null instance or a legacy instance
-    }
-
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Data pack updates are unavailable when metadata is disabled!"));
         return;
