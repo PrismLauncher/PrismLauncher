@@ -68,6 +68,10 @@ if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
     # TODO(@getchoo): Is sccache affected by this? Would be nice to use `ProgramDatabase`....
     set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>")
 
+    # Ensure our runtime library matches our vcpkg dependencies
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+
+    # TODO(@getchoo): Do we actually need this???
     if(CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreadedDLL")
         set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release "")
         set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release "")
@@ -337,9 +341,7 @@ endif()
 ## NOTE(@getchoo): Never use pkg-config with MSVC since the vcpkg port makes our install bundle fail to find the dll
 if(MSVC)
     find_path(LIBQRENCODE_INCLUDE_DIR qrencode.h REQUIRED)
-    find_library(LIBQRENCODE_LIBRARY_RELEASE qrencode REQUIRED)
-    find_library(LIBQRENCODE_LIBRARY_DEBUG qrencoded)
-    set(LIBQRENCODE_LIBRARIES optimized ${LIBQRENCODE_LIBRARY_RELEASE} debug ${LIBQRENCODE_LIBRARY_DEBUG})
+    find_library(LIBQRENCODE_LIBRARY qrencode REQUIRED)
 else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(libqrencode REQUIRED IMPORTED_TARGET libqrencode)

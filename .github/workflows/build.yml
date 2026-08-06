@@ -124,7 +124,7 @@ jobs:
 
       - name: Configure project
         run: |
-          cmake --preset "$CMAKE_PRESET"
+          cmake --preset "$CMAKE_PRESET" -D VCPKG_HOST_TRIPLET="$VCPKG_TRIPLET" -D VCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET"
 
       - name: Run build
         run: |
