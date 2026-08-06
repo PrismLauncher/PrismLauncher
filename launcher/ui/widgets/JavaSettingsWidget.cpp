@@ -95,6 +95,7 @@ JavaSettingsWidget::JavaSettingsWidget(MinecraftInstance* instance, QWidget* par
         connect(m_ui->javaPathTextBox, &QLineEdit::textChanged, this, [this](QString newValue) {
             if (m_instance->settings()->get("JavaPath").toString() != newValue) {
                 m_instance->settings()->set("AutomaticJava", false);
+                m_instance->settings()->doSave();
             }
         });
     }
@@ -224,6 +225,8 @@ void JavaSettingsWidget::saveSettings()
     } else {
         settings->reset("JvmArgs");
     }
+
+    settings->doSave();
 }
 
 void JavaSettingsWidget::onJavaBrowse()

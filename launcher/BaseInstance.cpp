@@ -80,6 +80,7 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
     m_settings->registerSetting("totalTimePlayed", 0);
     if (m_settings->get("totalTimePlayed").toLongLong() < 0) {
         m_settings->reset("totalTimePlayed");
+        m_settings->doSave();
     }
     m_settings->registerSetting("lastTimePlayed", 0);
 
@@ -191,6 +192,7 @@ void BaseInstance::setManagedPack(const QString& type,
     m_settings->set("ManagedPackName", name);
     m_settings->set("ManagedPackVersionID", versionId);
     m_settings->set("ManagedPackVersionName", version);
+    m_settings->doSave();
 }
 
 QStringList BaseInstance::getLinkedInstances() const
@@ -202,6 +204,7 @@ QStringList BaseInstance::getLinkedInstances() const
 void BaseInstance::setLinkedInstances(const QStringList& list)
 {
     m_settings->set("linkedInstances", Json::fromStringList(list));
+    m_settings->doSave();
 }
 
 void BaseInstance::addLinkedInstanceId(const QString& id)
@@ -261,6 +264,7 @@ void BaseInstance::regenerateUuid()
 {
     const auto newUUID = QUuid::createUuid().toString(QUuid::Id128);
     m_settings->set("uuid", newUUID);
+    m_settings->doSave();
     m_uuid = newUUID;
 }
 
@@ -295,6 +299,7 @@ void BaseInstance::setMinecraftRunning(bool running)
         qint64 current = settings()->get("totalTimePlayed").toLongLong();
         settings()->set("totalTimePlayed", current + m_timeStarted.secsTo(timeEnded));
         settings()->set("lastTimePlayed", m_timeStarted.secsTo(timeEnded));
+        settings()->doSave();
 
         emit propertiesChanged();
     }
@@ -328,6 +333,7 @@ void BaseInstance::resetTimePlayed()
 {
     settings()->reset("totalTimePlayed");
     settings()->reset("lastTimePlayed");
+    settings()->doSave();
 }
 
 QString BaseInstance::instanceType() const
@@ -364,15 +370,17 @@ qint64 BaseInstance::lastLaunch() const
 
 void BaseInstance::setLastLaunch(qint64 val)
 {
-    // FIXME: if no change, do not set. setting involves saving a file.
+    // FIXME: if no change, do not save.
     m_settings->set("lastLaunchTime", val);
+    m_settings->doSave();
     emit propertiesChanged();
 }
 
 void BaseInstance::setNotes(const QString& val)
 {
-    // FIXME: if no change, do not set. setting involves saving a file.
+    // FIXME: if no change, do not save.
     m_settings->set("notes", val);
+    m_settings->doSave();
 }
 
 QString BaseInstance::notes() const
@@ -384,6 +392,7 @@ void BaseInstance::setIconKey(const QString& val)
 {
     // FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("iconKey", val);
+    m_settings->doSave();
     emit propertiesChanged();
 }
 
@@ -396,6 +405,7 @@ void BaseInstance::setName(const QString& val)
 {
     // FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("name", val);
+    m_settings->doSave();
     emit propertiesChanged();
 }
 
@@ -424,6 +434,7 @@ void BaseInstance::setShortcuts(const QList<ShortcutData>& shortcuts)
     QJsonDocument document;
     document.setArray(array);
     m_settings->set("shortcuts", QString::fromUtf8(document.toJson(QJsonDocument::Compact)));
+    m_settings->doSave();
 }
 
 QList<ShortcutData> BaseInstance::shortcuts() const

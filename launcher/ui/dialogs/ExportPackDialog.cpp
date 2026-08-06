@@ -156,6 +156,8 @@ void ExportPackDialog::done(int result)
             settings->reset("ExportRecommendedRAM");
     }
 
+    settings->doSave();
+
     if (result == Accepted) {
         const QString name = m_ui->name->text().isEmpty() ? m_instance->name() : m_ui->name->text();
         const QString filename = FS::RemoveInvalidFilenameChars(name);

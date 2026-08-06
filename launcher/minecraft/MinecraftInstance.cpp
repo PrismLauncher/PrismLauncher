@@ -240,7 +240,10 @@ void MinecraftInstance::loadSpecificSettings()
         auto envSetting = m_settings->registerSetting("OverrideEnv", false);
         m_settings->registerOverride(global_settings->getSetting("Env"), envSetting);
 
-        m_settings->set("InstanceType", "OneSix");
+        if (m_settings->get("InstanceType").toString() != "OneSix") {
+            m_settings->set("InstanceType", "OneSix");
+            m_settings->doSave();
+        }
     }
 
     // Join server on launch, this does not have a global override
@@ -323,6 +326,7 @@ void MinecraftInstance::populateLaunchMenu(QMenu* menu)
     profilers->setExclusive(true);
     connect(profilers, &QActionGroup::triggered, this, [this](QAction* action) {
         settings()->set("Profiler", action->data());
+        settings()->doSave();
         emit profilerChanged();
     });
 

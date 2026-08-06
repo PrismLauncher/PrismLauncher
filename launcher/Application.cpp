@@ -637,6 +637,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     {
         // Provide a fallback for migration from PolyMC
         m_settings.reset(new INISettingsObject({ BuildConfig.LAUNCHER_CONFIGFILE, "polymc.cfg", "multimc.cfg" }, this));
+        SettingsObject::Lock saveLock{m_settings.get()};
 
         // Theming
         m_settings->registerSetting("IconTheme", QString());
@@ -847,6 +848,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                 m_settings->set("PastebinType", PasteUpload::PasteType::NullPointer);
                 m_settings->set("PastebinCustomAPIBase", pastebinURL);
                 m_settings->reset("PastebinURL");
+                m_settings->doSave();
             }
 
             bool ok;
@@ -855,12 +857,14 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             if (!ok || !(PasteUpload::PasteType::First <= pasteType && pasteType <= PasteUpload::PasteType::Last)) {
                 m_settings->reset("PastebinType");
                 m_settings->reset("PastebinCustomAPIBase");
+                m_settings->doSave();
             }
         }
         {
             auto resetIfInvalid = [this](const Setting* setting) {
                 if (const QUrl url(setting->get().toString()); !url.isValid() || (url.scheme() != "http" && url.scheme() != "https")) {
                     m_settings->reset(setting->id());
+                    m_settings->doSave();
                 }
             };
 
@@ -893,6 +897,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             if (!flameKey.isEmpty())
                 m_settings->set("FlameKeyOverride", flameKey);
             m_settings->reset("CFKeyOverride");
+            m_settings->doSave();
         }
         m_settings->registerSetting("FallbackMRBlockedMods", true);
         m_settings->registerSetting("ModrinthToken", "");
@@ -1228,6 +1233,7 @@ bool Application::createSetupWizard()
         QString oldHostName = settings()->get("LastHostname").toString();
         if (currentHostName != oldHostName) {
             settings()->set("LastHostname", currentHostName);
+            settings()->doSave();
             return true;
         }
         QString currentJavaPath = settings()->get("JavaPath").toString();
@@ -1245,8 +1251,10 @@ bool Application::createSetupWizard()
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired || askjava || login;
     if (wizardRequired) {
         // set default theme after going into theme wizard
-        if (!validIcons)
+        if (!validIcons) {
             settings()->set("IconTheme", QString("pe_colored"));
+            settings()->doSave();
+        }
         if (!validWidgets) {
 #if defined(Q_OS_WIN32) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
             const QString style =
@@ -1256,6 +1264,7 @@ bool Application::createSetupWizard()
 #endif
 
             settings()->set("ApplicationTheme", style);
+            settings()->doSave();
         }
 
         m_themeManager->applyCurrentlySelectedTheme(true);

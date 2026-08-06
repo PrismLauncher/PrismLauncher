@@ -98,6 +98,7 @@ void ResourceDownloadDialog::accept()
 {
     if (!geometrySaveKey().isEmpty()) {
         APPLICATION->settings()->set(geometrySaveKey(), QString::fromUtf8(saveGeometry().toBase64()));
+        APPLICATION->settings()->doSave();
     }
 
     QDialog::accept();
@@ -120,6 +121,7 @@ void ResourceDownloadDialog::reject()
 
     if (!geometrySaveKey().isEmpty()) {
         APPLICATION->settings()->set(geometrySaveKey(), QString::fromUtf8(saveGeometry().toBase64()));
+        APPLICATION->settings()->doSave();
     }
 
     QDialog::reject();

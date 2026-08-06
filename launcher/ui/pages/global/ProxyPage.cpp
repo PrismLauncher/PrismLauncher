@@ -95,6 +95,7 @@ void ProxyPage::applySettings()
     s->set("ProxyPort", ui->proxyPortEdit->value());
     s->set("ProxyUser", ui->proxyUserEdit->text());
     s->set("ProxyPass", ui->proxyPassEdit->text());
+    s->doSave();
 
     APPLICATION->updateProxySettings(proxyType, ui->proxyAddrEdit->text(), ui->proxyPortEdit->value(), ui->proxyUserEdit->text(),
                                      ui->proxyPassEdit->text());

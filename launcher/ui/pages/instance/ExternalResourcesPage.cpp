@@ -157,6 +157,7 @@ void ExternalResourcesPage::closedImpl()
     m_model->stopWatching();
 
     m_wide_bar_setting->set(QString::fromUtf8(ui->actionsToolbar->getVisibilityState().toBase64()));
+    APPLICATION->settings()->doSave();
 }
 
 void ExternalResourcesPage::retranslate()

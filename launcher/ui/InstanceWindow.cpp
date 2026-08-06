@@ -223,6 +223,7 @@ void InstanceWindow::closeEvent(QCloseEvent* event)
 
     APPLICATION->settings()->set("ConsoleWindowState", QString::fromUtf8(saveState().toBase64()));
     APPLICATION->settings()->set("ConsoleWindowGeometry", QString::fromUtf8(saveGeometry().toBase64()));
+    APPLICATION->settings()->doSave();
     emit isClosing();
     event->accept();
 }

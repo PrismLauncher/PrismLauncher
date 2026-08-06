@@ -91,6 +91,7 @@ void ExternalToolsPage::applySettings()
         }
     }
     s->set("JsonEditor", jsonEditor);
+    s->doSave();
 }
 
 void ExternalToolsPage::on_jprofilerPathBtn_clicked()

@@ -64,6 +64,7 @@ void LanguagePage::applySettings()
     auto settings = APPLICATION->settings();
     QString key = mainWidget->getSelectedLanguageKey();
     settings->set("Language", key);
+    settings->doSave();
 }
 
 void LanguagePage::loadSettings()

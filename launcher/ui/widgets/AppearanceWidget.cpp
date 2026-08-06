@@ -102,6 +102,7 @@ void AppearanceWidget::applySettings()
     settings->set("CatOpacity", m_ui->catOpacitySlider->value());
     auto catFit = m_ui->catFitComboBox->currentIndex();
     settings->set("CatFit", catFit == 0 ? "fit" : catFit == 1 ? "fill" : "strech");
+    settings->doSave();
 }
 
 void AppearanceWidget::loadSettings()

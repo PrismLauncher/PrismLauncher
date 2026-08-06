@@ -287,6 +287,8 @@ void LauncherPage::applySettings()
     s->set("ShowModIncompat", ui->showModIncompatCheckBox->isChecked());
     s->set("SkipModpackUpdatePrompt", !ui->modpackUpdatePromptBtn->isChecked());
     s->set("DownloadGameFilesDuringInstanceCreation", ui->downloadGameFilesBtn->isChecked());
+
+    s->doSave();
 }
 void LauncherPage::loadSettings()
 {

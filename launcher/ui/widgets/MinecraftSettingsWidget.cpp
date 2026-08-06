@@ -105,6 +105,7 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
             m_instance->settings()->set("GlobalDataPacksEnabled", value);
             if (!value)
                 m_instance->settings()->reset("GlobalDataPacksPath");
+            m_instance->settings()->doSave();
         });
         connect(m_ui->dataPacksPathEdit, &QLineEdit::editingFinished, this, &MinecraftSettingsWidget::saveDataPacksPath);
         connect(m_ui->dataPacksPathBrowse, &QPushButton::clicked, this, &MinecraftSettingsWidget::selectDataPacksFolder);
@@ -113,8 +114,10 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
             m_instance->settings()->set("OverrideModDownloadLoaders", value);
             if (value)
                 saveSelectedLoaders();
-            else
+            else {
                 m_instance->settings()->reset("ModDownloadLoaders");
+                m_instance->settings()->doSave();
+            }
         });
 
         for (auto c : { m_ui->neoForge, m_ui->forge, m_ui->fabric, m_ui->quilt, m_ui->liteLoader, m_ui->babric, m_ui->btaBabric,
@@ -500,6 +503,8 @@ void MinecraftSettingsWidget::saveSettings()
         settings->reset("OnlineFixes");
     }
 
+    settings->doSave();
+
     if (m_javaSettings != nullptr)
         m_javaSettings->saveSettings();
 }
@@ -567,6 +572,7 @@ void MinecraftSettingsWidget::saveSelectedLoaders()
         loaders << getModLoaderAsString(ModPlatform::Rift);
 
     m_instance->settings()->set("ModDownloadLoaders", Json::fromStringList(loaders));
+    m_instance->settings()->doSave();
 }
 
 void MinecraftSettingsWidget::saveDataPacksPath()

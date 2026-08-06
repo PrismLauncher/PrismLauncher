@@ -495,6 +495,7 @@ void MainWindow::setStatusBarVisibility(bool state)
 {
     statusBar()->setVisible(state);
     APPLICATION->settings()->set("StatusBarVisible", state);
+    APPLICATION->settings()->doSave();
 }
 void MainWindow::lockToolbars(bool state)
 {
@@ -502,6 +503,7 @@ void MainWindow::lockToolbars(bool state)
     ui->instanceToolBar->setMovable(!state);
     ui->newsToolBar->setMovable(!state);
     APPLICATION->settings()->set("ToolbarsLocked", state);
+    APPLICATION->settings()->doSave();
 }
 
 void MainWindow::konamiTriggered()
@@ -634,6 +636,7 @@ void MainWindow::updateThemeMenu()
         connect(themeAction, &QAction::triggered, APPLICATION, [theme]() {
             APPLICATION->themeManager()->setApplicationTheme(theme->id());
             APPLICATION->settings()->set("ApplicationTheme", theme->id());
+            APPLICATION->settings()->doSave();
         });
     }
 
@@ -846,6 +849,7 @@ void MainWindow::onCatToggled(bool state)
 {
     setCatBackground(state);
     APPLICATION->settings()->set("TheCat", state);
+    APPLICATION->settings()->doSave();
 }
 
 void MainWindow::setCatBackground(bool enabled)
@@ -918,6 +922,7 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
 
     APPLICATION->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
     APPLICATION->settings()->set("LastUsedInstDirForNewInstance", newInstDlg.instDir());
+    APPLICATION->settings()->doSave();
 
     InstanceTask* creationTask = newInstDlg.extractTask();
     if (creationTask) {
@@ -1374,6 +1379,7 @@ void MainWindow::globalSettingsClosed()
     // This needs to be done to prevent UI elements disappearing in the event the config is changed
     // but Prism Launcher exits abnormally, causing the window state to never be saved:
     APPLICATION->settings()->set("MainWindowState", QString::fromUtf8(saveState().toBase64()));
+    APPLICATION->settings()->doSave();
     update();
 }
 
@@ -1520,6 +1526,7 @@ void MainWindow::on_actionDeleteInstance_triggered()
         APPLICATION->instances()->deleteInstance(id);
     }
     APPLICATION->settings()->set("SelectedInstance", QString());
+    APPLICATION->settings()->doSave();
     selectionBad();
 }
 
@@ -1575,6 +1582,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
     APPLICATION->settings()->set("MainWindowState", QString::fromUtf8(saveState().toBase64()));
     APPLICATION->settings()->set("MainWindowGeometry", QString::fromUtf8(saveGeometry().toBase64()));
     instanceToolbarSetting->set(QString::fromUtf8(ui->instanceToolBar->getVisibilityState().toBase64()));
+    APPLICATION->settings()->doSave();
     event->accept();
     emit isClosing();
 }
@@ -1644,6 +1652,7 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
 {
     if (!current.isValid()) {
         APPLICATION->settings()->set("SelectedInstance", QString());
+        APPLICATION->settings()->doSave();
         selectionBad();
         return;
     }
@@ -1668,11 +1677,13 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
         updateLaunchButton();
 
         APPLICATION->settings()->set("SelectedInstance", m_selectedInstance->id());
+        APPLICATION->settings()->doSave();
 
         connect(m_selectedInstance, &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
         connect(m_selectedInstance, &BaseInstance::profilerChanged, this, &MainWindow::refreshCurrentInstance);
     } else {
         APPLICATION->settings()->set("SelectedInstance", QString());
+        APPLICATION->settings()->doSave();
         selectionBad();
         return;
     }

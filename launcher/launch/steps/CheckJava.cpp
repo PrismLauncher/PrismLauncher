@@ -136,6 +136,7 @@ void CheckJava::checkJavaFinished(const JavaChecker::Result& result)
             instance->settings()->set("JavaRealArchitecture", result.realPlatform);
             instance->settings()->set("JavaVendor", result.javaVendor);
             instance->settings()->set("JavaSignature", m_javaSignature);
+            instance->settings()->doSave();
             m_parent->instance()->updateRuntimeContext();
             emitSucceeded();
             return;

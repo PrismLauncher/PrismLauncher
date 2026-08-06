@@ -133,6 +133,7 @@ void WorldListPage::closedImpl()
     m_worlds->stopWatching();
 
     m_wide_bar_setting->set(QString::fromUtf8(ui->toolBar->getVisibilityState().toBase64()));
+    APPLICATION->settings()->doSave();
 }
 
 WorldListPage::~WorldListPage()
@@ -273,8 +274,10 @@ void WorldListPage::on_actionData_Packs_triggered()
 
     dialog->setAttribute(Qt::WA_DeleteOnClose);
 
-    connect(dialog, &QDialog::finished, this,
-            [dialog]() { APPLICATION->settings()->set("DataPackDownloadGeometry", dialog->saveGeometry().toBase64()); });
+    connect(dialog, &QDialog::finished, this, [dialog]() {
+        APPLICATION->settings()->set("DataPackDownloadGeometry", dialog->saveGeometry().toBase64());
+        APPLICATION->settings()->doSave();
+    });
 
     dialog->open();
 }

@@ -25,6 +25,7 @@ bool AutoJavaWizardPage::validatePage()
         s->set("AutomaticJavaDownload", true);
     }
     s->set("UserAskedAboutAutomaticJavaDownload", true);
+    s->doSave();
     return true;
 }
 

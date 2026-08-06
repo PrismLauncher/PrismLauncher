@@ -214,6 +214,7 @@ void TranslationsModel::indexReceived()
         }
         selectLanguage(language);
         APPLICATION->settings()->set("Language", selectedLanguage());
+        APPLICATION->settings()->doSave();
         d->m_noLanguageSet = false;
     }
 
@@ -443,6 +444,7 @@ std::optional<Language> TranslationsModel::findLanguageAsOptional(const QString&
 void TranslationsModel::setUseSystemLocale(const bool useSystemLocale) const
 {
     APPLICATION->settings()->set("UseSystemLocale", useSystemLocale);
+    APPLICATION->settings()->doSave();
     QLocale::setDefault(useSystemLocale ? QLocale::system() : QLocale(selectedLanguage()));
 }
 

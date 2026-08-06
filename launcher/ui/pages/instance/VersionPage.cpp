@@ -123,7 +123,7 @@ void VersionPage::retranslate()
 
 void VersionPage::openedImpl()
 {
-    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
+    const auto setting_name = QString("WideBarVisibility_%1").arg(id());
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
     ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
@@ -131,6 +131,7 @@ void VersionPage::openedImpl()
 void VersionPage::closedImpl()
 {
     m_wide_bar_setting->set(QString::fromUtf8(ui->toolBar->getVisibilityState().toBase64()));
+    APPLICATION->settings()->doSave();
 }
 
 QMenu* VersionPage::createPopupMenu()
@@ -413,6 +414,7 @@ void VersionPage::on_actionChange_version_triggered()
             m_inst->settings()->get("OverrideJavaLocation").toBool()) {
             m_inst->settings()->set("OverrideJavaLocation", false);
             m_inst->settings()->set("JavaPath", "");
+            m_inst->settings()->doSave();
         }
     }
     m_profile->setComponentVersion(uid, vselect.selectedVersion()->descriptor(), important);

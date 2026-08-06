@@ -598,6 +598,7 @@ void ScreenshotsPage::openedImpl()
 void ScreenshotsPage::closedImpl()
 {
     m_wide_bar_setting->set(QString::fromUtf8(ui->toolBar->getVisibilityState().toBase64()));
+    APPLICATION->settings()->doSave();
 }
 
 #include "ScreenshotsPage.moc"

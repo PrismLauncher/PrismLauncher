@@ -61,6 +61,7 @@ void PackInstallTask::copySettings()
             m_instance->settings()->set("OverrideJavaArgs", true);
             m_instance->settings()->set("JvmArgs", m_pack.jvmArgs.toString());
         }
+        m_instance->settings()->doSave();
 
         auto* components = m_instance->getPackProfile();
         components->buildingFromScratch();

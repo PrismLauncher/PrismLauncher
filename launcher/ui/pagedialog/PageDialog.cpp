@@ -77,6 +77,7 @@ bool PageDialog::handleClose()
 
     qDebug() << "Paged dialog close approved";
     APPLICATION->settings()->set("PagedGeometry", QString::fromUtf8(saveGeometry().toBase64()));
+    APPLICATION->settings()->doSave();
     qDebug() << "Paged dialog geometry saved";
 
     emit applied();

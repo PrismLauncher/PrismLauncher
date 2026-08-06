@@ -494,6 +494,7 @@ void FlameCreationTask::createInstance()
 
         m_newInstance->settings()->set("OverrideMemory", true);
         m_newInstance->settings()->set("MaxMemAlloc", recommendedRAM);
+        m_newInstance->settings()->doSave();
     }
 
     QString jarmodsPath = FS::PathCombine(m_stagingPath, "minecraft", "jarmods");

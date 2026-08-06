@@ -709,6 +709,7 @@ void ServersPage::closedImpl()
     m_model->unobserve();
 
     m_wide_bar_setting->set(QString::fromUtf8(ui->toolBar->getVisibilityState().toBase64()));
+    APPLICATION->settings()->doSave();
 }
 
 void ServersPage::on_actionAdd_triggered()

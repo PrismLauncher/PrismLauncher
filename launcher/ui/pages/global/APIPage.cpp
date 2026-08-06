@@ -204,6 +204,8 @@ void APIPage::applySettings()
     s->set("ModrinthToken", modrinthToken);
     s->set("UserAgentOverride", ui->userAgentLineEdit->text());
     s->set("TechnicClientID", ui->technicClientID->text());
+
+    s->doSave();
 }
 
 bool APIPage::apply()

@@ -205,6 +205,7 @@ FilterModel::Sorting FilterModel::getCurrentSorting()
 void ListModel::setPath(QString path)
 {
     APPLICATION->settings()->set("FTBAppInstancesPath", path);
+    APPLICATION->settings()->doSave();
     update();
 }
 

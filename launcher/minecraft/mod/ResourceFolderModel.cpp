@@ -674,6 +674,7 @@ void ResourceFolderModel::saveColumns(QTreeView* tree)
 
     auto stateSetting = m_instance->settings()->getSetting(stateSettingName);
     stateSetting->set(QString::fromUtf8(tree->header()->saveState().toBase64()));
+    m_instance->settings()->doSave();
 
     // neither passthrough nor override settings works for this usecase as I need to only set the global when the gate is false
     auto* settings = m_instance->settings();
@@ -688,6 +689,7 @@ void ResourceFolderModel::saveColumns(QTreeView* tree)
         }
     }
     settings->set(visibilitySettingName, Json::fromMap(visibility));
+    settings->doSave();
 }
 
 void ResourceFolderModel::loadColumns(QTreeView* tree)
@@ -746,6 +748,7 @@ QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
 
         connect(act, &QAction::toggled, tree, [this, tree, overrideSettingName](bool toggled) {
             m_instance->settings()->set(overrideSettingName, toggled);
+            m_instance->settings()->doSave();
             saveColumns(tree);
         });
 

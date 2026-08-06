@@ -157,6 +157,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 void NewInstanceDialog::reject()
 {
     APPLICATION->settings()->set("NewInstanceGeometry", QString::fromUtf8(saveGeometry().toBase64()));
+    APPLICATION->settings()->doSave();
 
     // This is just so that the pages get the close() call and can react to it, if needed.
     m_container->prepareToClose();
@@ -178,6 +179,7 @@ void NewInstanceDialog::accept()
     }
 
     APPLICATION->settings()->set("NewInstanceGeometry", QString::fromUtf8(saveGeometry().toBase64()));
+    APPLICATION->settings()->doSave();
     importIconNow();
 
     // This is just so that the pages get the close() call and can react to it, if needed.
@@ -387,6 +389,7 @@ void NewInstanceDialog::importIconNow()
         m_importIcon = false;
     }
     APPLICATION->settings()->set("NewInstanceGeometry", QString::fromUtf8(saveGeometry().toBase64()));
+    APPLICATION->settings()->doSave();
 }
 
 bool NewInstanceDialog::eventFilter(QObject* watched, QEvent* event)

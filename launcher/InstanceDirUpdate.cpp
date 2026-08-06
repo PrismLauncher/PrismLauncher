@@ -90,6 +90,7 @@ QString askToUpdateInstanceDirName(BaseInstance* instance, const QString& oldNam
                 APPLICATION->settings()->set("InstRenamingMode", "PhysicalDir");
             else
                 APPLICATION->settings()->set("InstRenamingMode", "MetadataOnly");
+            APPLICATION->settings()->doSave();
         }
         if (res == QMessageBox::No)
             return QString();

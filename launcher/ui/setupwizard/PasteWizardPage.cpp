@@ -28,6 +28,7 @@ bool PasteWizardPage::validatePage()
         if (!usingDefaultBase)
             s->set("PastebinCustomAPIBase", prevPasteURL);
     }
+    s->doSave();
 
     return true;
 }

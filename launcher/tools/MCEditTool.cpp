@@ -17,6 +17,7 @@ MCEditTool::MCEditTool(SettingsObject* settings)
 void MCEditTool::setPath(QString& path)
 {
     m_settings->set("MCEditPath", path);
+    m_settings->doSave();
 }
 
 QString MCEditTool::path() const

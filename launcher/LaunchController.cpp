@@ -268,6 +268,7 @@ QString LaunchController::askOfflineName(const QString& playerName, bool* ok)
 
     usedname = dialog.getUsername();
     APPLICATION->settings()->set("LastOfflinePlayerName", usedname);
+    APPLICATION->settings()->doSave();
 
     if (ok != nullptr) {
         *ok = true;
