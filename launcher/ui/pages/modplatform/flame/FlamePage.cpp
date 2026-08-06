@@ -203,7 +203,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
         };
 
-        auto netJob = FlameAPI().getProjectVersions({ m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
+        auto netJob = FlameAPI::get().getProjectVersions({ m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
 
         m_job = netJob;
         netJob->start();
@@ -305,7 +305,7 @@ void FlamePage::updateUi()
     }
 
     text += "<hr>";
-    text += FlameAPI().getModDescription(m_current->addonId.toInt()).toUtf8();
+    text += FlameAPI::get().getModDescription(m_current->addonId.toInt()).toUtf8();
 
     m_ui->packDescription->setHtml(StringUtils::htmlListPatch(text + m_current->description));
     m_ui->packDescription->flush();
@@ -336,7 +336,7 @@ void FlamePage::createFilterWidget()
     auto [task, response] = FlameAPI::getCategories(ModPlatform::ResourceType::Modpack);
     m_categoriesTask = task;
     connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() {
-        auto categories = FlameAPI().loadModCategories(*response);
+        auto categories = FlameAPI::get().loadModCategories(*response);
         m_filterWidget->setCategories(categories);
     });
     m_categoriesTask->start();

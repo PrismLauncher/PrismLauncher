@@ -24,7 +24,7 @@ class ModPage : public ResourcePage {
     ModPage(ResourceDownloadDialog* dialog,
             BaseInstance& instance,
             ResourceProviderData provider,
-            ResourceAPI* api,
+            const ResourceAPI* api,
             ModFilterWidget* filterWidget);
 
    protected:
@@ -39,7 +39,7 @@ class ModPage : public ResourcePage {
     std::unique_ptr<ModFilterWidget> m_filterWidget;
     std::shared_ptr<ModFilterWidget::Filter> m_filter;
     Task::Ptr m_categoriesTask;
-    ResourceAPI* m_api = nullptr;
+    const ResourceAPI* m_api = nullptr;
 };
 
 }  // namespace ResourceDownload

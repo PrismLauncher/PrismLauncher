@@ -212,7 +212,7 @@ void FlameCreationTask::executeTask()
             fileIds.append(QString::number(file.fileId));
         }
 
-        auto [job, rawResponse] = FlameAPI().getFiles(fileIds);
+        auto [job, rawResponse] = FlameAPI::get().getFiles(fileIds);
 
         connect(job.get(), &Task::succeeded, this,
                 [this, rawResponse, fileIds, oldInstDir, oldFiles, oldMinecraftDir, createInst]() mutable {

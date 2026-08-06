@@ -173,7 +173,7 @@ void FlamePackExportTask::makeApiRequest()
         fingerprints.push_back(murmur.toUInt());
     }
 
-    auto [matchTask, response] = api.matchFingerprints(fingerprints);
+    auto [matchTask, response] = FlameAPI::get().matchFingerprints(fingerprints);
     task = matchTask;
 
     connect(task.get(), &Task::succeeded, this, [this, response] {
@@ -252,9 +252,9 @@ void FlamePackExportTask::getProjectsInfo()
         buildZip();
         return;
     } else if (addonIds.size() == 1) {
-        std::tie(projTask, response) = api.getProject(*addonIds.begin());
+        std::tie(projTask, response) = FlameAPI::get().getProject(*addonIds.begin());
     } else {
-        std::tie(projTask, response) = api.getProjects(addonIds);
+        std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds);
     }
 
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {

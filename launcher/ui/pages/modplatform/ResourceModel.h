@@ -33,7 +33,7 @@ class ResourceModel : public QAbstractListModel {
    public:
     using DownloadTaskPtr = shared_qobject_ptr<ResourceDownloadTask>;
 
-    ResourceModel(ResourceAPI* api);
+    ResourceModel(const ResourceAPI* api);
     ~ResourceModel() override;
 
     auto data(const QModelIndex& /*index*/, int role) const -> QVariant override;
@@ -118,7 +118,7 @@ class ResourceModel : public QAbstractListModel {
     QString m_search_term;
     unsigned int m_current_sort_index = 0;
 
-    std::unique_ptr<ResourceAPI> m_api;
+    const ResourceAPI* m_api;
 
     // Job for searching for new entries
     shared_qobject_ptr<Task> m_current_search_job;

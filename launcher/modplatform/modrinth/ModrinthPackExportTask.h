@@ -60,7 +60,6 @@ class ModrinthPackExportTask : public Task {
     const QString output;
     const MMCZip::FilterFileFunction filter;
 
-    ModrinthAPI api;
     QFileInfoList files;
     QMap<QString, QString> pendingHashes;
     QMap<QString, ResolvedFile> resolvedFiles;

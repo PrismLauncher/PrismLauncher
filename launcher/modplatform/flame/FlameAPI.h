@@ -15,8 +15,14 @@
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
 
-class FlameAPI : public ResourceAPI {
+class FlameAPI final : public ResourceAPI {
    public:
+    static const FlameAPI& get()
+    {
+        static const FlameAPI s_instance;
+        return s_instance;
+    }
+
     QString getModFileChangelog(int modId, int fileId) const;
     QString getModDescription(int modId) const;
 
@@ -42,6 +48,11 @@ class FlameAPI : public ResourceAPI {
     }
 
    private:
+    // NOTE: prevent creation and deletion of type - get should be used instead
+    FlameAPI() = default;
+
+    ~FlameAPI() = default;
+
     static int getClassId(ModPlatform::ResourceType type)
     {
         switch (type) {
