@@ -958,7 +958,7 @@ class InstanceStaging : public Task {
     InstanceStaging(InstanceList* parent, InstanceTask* child, SettingsObject* settings)
         : m_parent(parent), m_backoff(minBackoff, maxBackoff)
     {
-        m_stagingPath = parent->getStagedInstancePath();
+        m_stagingPath = parent->getStagedInstancePath(child->targetDir());
 
         m_child.reset(child);
 
@@ -1053,9 +1053,17 @@ Task* InstanceList::wrapInstanceTask(InstanceTask* task)
     return new InstanceStaging(this, task, m_globalSettings);
 }
 
-QString InstanceList::getStagedInstancePath()
+QString InstanceList::getStagedInstancePath(const QString& targetDir)
 {
-    const QString tempRoot = FS::PathCombine(primaryDir(), ".tmp");
+    QString root = primaryDir();
+    if (!targetDir.isEmpty()) {
+        if (!m_instDirs.contains(targetDir) || !QDir(targetDir).exists()) {
+            qCritical() << "Requested instance directory" << targetDir << "is no longer configured or accessible on disk";
+            return {};
+        }
+        root = targetDir;
+    }
+    const QString tempRoot = FS::PathCombine(root, ".tmp");
 
     QString result;
     int tries = 0;
@@ -1088,17 +1096,26 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
 
     auto shouldOverride = instanceTask.shouldOverride();
 
+    QString targetDir = instanceTask.targetDir();
+    if (!targetDir.isEmpty() && !m_instDirs.contains(targetDir)) {
+        qCritical() << "Target directory" << targetDir << "for instance is no longer configured or accessible";
+        return false;
+    }
+    if (targetDir.isEmpty()) {
+        targetDir = primaryDir();
+    }
+
     if (shouldOverride) {
         instID = instanceTask.originalInstanceID();
     } else {
-        instID = FS::DirNameFromString(instanceTask.modifiedName(), primaryDir());
+        instID = FS::DirNameFromString(instanceTask.modifiedName(), targetDir);
     }
 
     Q_ASSERT(!instID.isEmpty());
 
     {
-        WatchLock lock(m_watcher, primaryDir());
-        QString destination = FS::PathCombine(primaryDir(), instID);
+        WatchLock lock(m_watcher, targetDir);
+        QString destination = FS::PathCombine(targetDir, instID);
 
         if (shouldOverride) {
             if (!FS::overrideFolder(destination, path)) {
@@ -1113,7 +1130,7 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
 
             m_instanceGroupIndex[instID] = groupName;
             increaseGroupCount(groupName);
-            m_instanceRootDirMap[instID] = primaryDir();
+            m_instanceRootDirMap[instID] = targetDir;
         }
 
         m_instanceSet.insert(instID);

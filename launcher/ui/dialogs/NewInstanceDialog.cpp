@@ -47,6 +47,7 @@
 
 #include "IconPickerDialog.h"
 #include "VersionSelectDialog.h"
+#include "ui/dialogs/CustomMessageBox.h"
 
 #include <QDialogButtonBox>
 #include <QFileDialog>
@@ -76,6 +77,12 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     ui->setupUi(this);
 
     ui->instNameTextBox->installEventFilter(this);
+
+    refreshInstDirBox();
+
+    auto lastUsedDir = APPLICATION->settings()->get("LastUsedInstDirForNewInstance").toString();
+    int lastUsedIdx = ui->instDirBox->findData(lastUsedDir);
+    ui->instDirBox->setCurrentIndex(lastUsedIdx >= 0 ? lastUsedIdx : 0);
 
     setWindowIcon(QIcon::fromTheme("new"));
 
@@ -159,6 +166,17 @@ void NewInstanceDialog::reject()
 
 void NewInstanceDialog::accept()
 {
+    auto chosenDir = instDir();
+    if (!QDir(chosenDir).exists()) {
+        CustomMessageBox::selectable(
+            this, tr("Directory unavailable"),
+            tr("The instance directory \"%1\" is no longer accessible. Please choose another location.").arg(chosenDir),
+            QMessageBox::Warning)
+            ->exec();
+        refreshInstDirBox();
+        return;
+    }
+
     APPLICATION->settings()->set("NewInstanceGeometry", QString::fromUtf8(saveGeometry().toBase64()));
     importIconNow();
 
@@ -197,6 +215,30 @@ QString NewInstanceDialog::dialogTitle()
 NewInstanceDialog::~NewInstanceDialog()
 {
     delete ui;
+}
+
+void NewInstanceDialog::refreshInstDirBox()
+{
+    QString previouslySelected = ui->instDirBox->currentData().toString();
+    ui->instDirBox->clear();
+
+    auto addAccessibleDir = [this](const QString& dir, const QString& label) {
+        if (dir.isEmpty())
+            return;
+        QString canonical = QDir(dir).canonicalPath();
+        if (canonical.isEmpty())
+            return;
+        ui->instDirBox->addItem(label.isEmpty() ? canonical : label, canonical);
+    };
+
+    auto instDir = APPLICATION->settings()->get("InstanceDir").toString();
+    addAccessibleDir(instDir, tr("Default (%1)").arg(instDir));
+    for (const auto& dir : APPLICATION->settings()->get("AdditionalInstanceDirs").toStringList()) {
+        addAccessibleDir(dir, {});
+    }
+
+    int idx = ui->instDirBox->findData(previouslySelected);
+    ui->instDirBox->setCurrentIndex(idx >= 0 ? idx : 0);
 }
 
 void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task)
@@ -278,6 +320,7 @@ InstanceTask* NewInstanceDialog::extractTask()
 
     extracted->setGroup(instGroup());
     extracted->setIcon(iconKey());
+    extracted->setTargetDir(instDir());
     return extracted;
 }
 
@@ -310,6 +353,11 @@ QString NewInstanceDialog::instGroup() const
 QString NewInstanceDialog::iconKey() const
 {
     return m_instIconKey;
+}
+
+QString NewInstanceDialog::instDir() const
+{
+    return ui->instDirBox->currentData().toString();
 }
 
 void NewInstanceDialog::on_iconButton_clicked()
