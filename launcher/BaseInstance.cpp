@@ -86,8 +86,12 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
     m_settings->registerSetting("linkedInstances", "[]");
     m_settings->registerSetting("shortcuts", QString());
     m_settings->registerSetting("uuid", QString());
-    if (m_settings->get("uuid").toString().isEmpty()) {
+
+    const auto savedUUID = m_settings->get("uuid").toString();
+    if (savedUUID.isEmpty()) {
         regenerateUuid();
+    } else {
+        m_uuid = savedUUID;
     }
 
     // Game time override
@@ -224,7 +228,7 @@ bool BaseInstance::isLinkedToInstanceId(const QString& id) const
 void BaseInstance::iconUpdated(const QString& key)
 {
     if (iconKey() == key) {
-        emit propertiesChanged(this);
+        emit propertiesChanged();
     }
 }
 
@@ -253,14 +257,11 @@ QString BaseInstance::id() const
     return QFileInfo(instanceRoot()).fileName();
 }
 
-QString BaseInstance::uuid() const
-{
-    return m_settings->get("uuid").toString();
-}
-
 void BaseInstance::regenerateUuid()
 {
-    m_settings->set("uuid", QUuid::createUuid().toString(QUuid::Id128));
+    const auto newUUID = QUuid::createUuid().toString(QUuid::Id128);
+    m_settings->set("uuid", newUUID);
+    m_uuid = newUUID;
 }
 
 bool BaseInstance::isRunning() const
@@ -301,7 +302,7 @@ void BaseInstance::setMinecraftRunning(bool running)
             APPLICATION->playtimeSettings()->set("TotalPlayTime", globalTotal + secondsPlayed);
         }
 
-        emit propertiesChanged(this);
+        emit propertiesChanged();
     }
 }
 
@@ -371,7 +372,7 @@ void BaseInstance::setLastLaunch(qint64 val)
 {
     // FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("lastLaunchTime", val);
-    emit propertiesChanged(this);
+    emit propertiesChanged();
 }
 
 void BaseInstance::setNotes(const QString& val)
@@ -389,7 +390,7 @@ void BaseInstance::setIconKey(const QString& val)
 {
     // FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("iconKey", val);
-    emit propertiesChanged(this);
+    emit propertiesChanged();
 }
 
 QString BaseInstance::iconKey() const
@@ -401,7 +402,7 @@ void BaseInstance::setName(const QString& val)
 {
     // FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("name", val);
-    emit propertiesChanged(this);
+    emit propertiesChanged();
 }
 
 bool BaseInstance::syncInstanceDirName(const QString& newRoot) const

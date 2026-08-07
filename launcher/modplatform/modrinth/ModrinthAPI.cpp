@@ -123,12 +123,13 @@ QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const
              { .index = 5, .name = "updated", .readable_name = QObject::tr("Sort by Last Updated") } };
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getModCategories()
+std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getModCategories() const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetCategories"), APPLICATION->network());
     auto [action, response] = Net::ApiDownload::makeByteArray(QUrl(BuildConfig.MODRINTH_PROD_URL + "/tag/category"));
     netJob->addNetAction(action);
-    QObject::connect(netJob.get(), &Task::failed, [](const QString& msg) { qDebug() << "Modrinth failed to get categories:" << msg; });
+    QObject::connect(netJob.get(), &Task::failed, netJob.get(),
+                     [](const QString& msg) { qDebug() << "Modrinth failed to get categories:" << msg; });
 
     return { netJob, response };
 }
@@ -164,7 +165,7 @@ QList<ModPlatform::Category> ModrinthAPI::loadCategories(const QByteArray& respo
     return categories;
 }
 
-QList<ModPlatform::Category> ModrinthAPI::loadModCategories(const QByteArray& response)
+QList<ModPlatform::Category> ModrinthAPI::loadModCategories(const QByteArray& response) const
 {
     return loadCategories(response, "mod");
-};
+}

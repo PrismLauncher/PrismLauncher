@@ -548,7 +548,7 @@ class ServersModel : public QAbstractListModel {
     ConcurrentTask::Ptr m_currentQueryTask = nullptr;
 };
 
-ServersPage::ServersPage(BaseInstance* inst, QWidget* parent) : QMainWindow(parent), ui(new Ui::ServersPage)
+ServersPage::ServersPage(MinecraftInstance* inst, QWidget* parent) : QMainWindow(parent), ui(new Ui::ServersPage)
 {
     ui->setupUi(this);
     m_inst = inst;

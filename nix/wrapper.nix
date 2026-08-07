@@ -24,6 +24,7 @@
   pciutils,
   pipewire,
   prismlauncher-unwrapped,
+  sdl3,
   stdenv,
   symlinkJoin,
   udev,
@@ -83,6 +84,7 @@ symlinkJoin {
         ## native versions
         glfw3-minecraft
         openal
+        sdl3
 
         ## openal
         alsa-lib

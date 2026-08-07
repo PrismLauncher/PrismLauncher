@@ -72,16 +72,11 @@ runs:
           toolchain:p
           ccache:p
           cmake:p
-          extra-cmake-modules:p
           ninja:p
           qt6-base:p
           qt6-svg:p
           qt6-imageformats:p
           qt6-networkauth:p
-          cmark:p
-          qrencode:p
-          tomlplusplus:p
-          libarchive:p
 
     - name: List pacman packages (MinGW)
       if: ${{ inputs.msystem != '' }}

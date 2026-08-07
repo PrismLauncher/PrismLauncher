@@ -52,23 +52,23 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
 
     static ResourceDownloadDialog* createMod(QWidget* parent,
                                              ResourceFolderModel* mods,
-                                             BaseInstance* instance,
+                                             MinecraftInstance* instance,
                                              bool suppressInitialSearch = false);
     static ResourceDownloadDialog* createResourcePack(QWidget* parent,
                                                       ResourceFolderModel* mods,
-                                                      BaseInstance* instance,
+                                                      MinecraftInstance* instance,
                                                       bool suppressInitialSearch = false);
     static ResourceDownloadDialog* createTexturePack(QWidget* parent,
                                                      ResourceFolderModel* mods,
-                                                     BaseInstance* instance,
+                                                     MinecraftInstance* instance,
                                                      bool suppressInitialSearch = false);
     static ResourceDownloadDialog* createShaderPack(QWidget* parent,
                                                     ResourceFolderModel* mods,
-                                                    BaseInstance* instance,
+                                                    MinecraftInstance* instance,
                                                     bool suppressInitialSearch = false);
     static ResourceDownloadDialog* createDataPack(QWidget* parent,
                                                   ResourceFolderModel* mods,
-                                                  BaseInstance* instance,
+                                                  MinecraftInstance* instance,
                                                   bool suppressInitialSearch = false);
 
     void initializeContainer();
@@ -104,7 +104,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
    protected:
     ResourceDownloadDialog(QWidget* parent,
                            ResourceFolderModel* baseModel,
-                           BaseInstance* instance,
+                           MinecraftInstance* instance,
                            QString resourcesString = tr("resources"),
                            QString geometrySaveKey = "",
                            bool suppressInitialSearch = false);
@@ -126,7 +126,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
 
    protected:
     bool m_suppressInitialSearch = false;
-    BaseInstance* m_instance;
+    MinecraftInstance* m_instance;
 
     QString m_resourcesString;
     QString m_geometrySaveKey;

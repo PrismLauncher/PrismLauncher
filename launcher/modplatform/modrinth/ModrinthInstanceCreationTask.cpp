@@ -22,6 +22,7 @@
 #include "settings/INISettingsObject.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/UntrustedModsDialog.h"
 #include "ui/pages/modplatform/OptionalModDialog.h"
 
 #include <QAbstractButton>
@@ -204,6 +205,11 @@ void ModrinthCreationTask::createInstance()
         }
     }
 
+    if (!promptForUntrustedMods()) {
+        emitAborted();
+        return;
+    }
+
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_unique<INISettingsObject>(configPath);
     m_newInstance = std::make_unique<MinecraftInstance>(m_globalSettings, std::move(instanceSettings), m_stagingPath);
@@ -283,7 +289,7 @@ void ModrinthCreationTask::createInstance()
             // FIXME: This really needs to be put into a ConcurrentTask of
             // MultipleOptionsTask's , once those exist :)
             auto param = dl.toWeakRef();
-            connect(dl.get(), &Task::failed, [&file, filePath, param, downloadMods, meta] {
+            connect(dl.get(), &Task::failed, dl.get(), [&file, filePath, param, downloadMods, meta] {
                 QUrl fallbackUrl = file.downloads.dequeue();
                 auto ndl = Net::ApiDownload::makeFile(fallbackUrl, filePath, Net::Download::Option::NoOptions, meta);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
@@ -298,7 +304,7 @@ void ModrinthCreationTask::createInstance()
     connect(downloadMods.get(), &NetJob::succeeded, this, &ModrinthCreationTask::ensureMetaLoop);
     connect(downloadMods.get(), &NetJob::failed, this, &ModrinthCreationTask::emitFailed);
     connect(downloadMods.get(), &NetJob::aborted, this, &ModrinthCreationTask::emitAborted);
-    connect(downloadMods.get(), &NetJob::progress, [this](qint64 current, qint64 total) {
+    connect(downloadMods.get(), &NetJob::progress, this, [this](qint64 current, qint64 total) {
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         setProgress(current, total);
     });
@@ -440,7 +446,7 @@ void ModrinthCreationTask::ensureMetaLoop()
     connect(ensureMetadataTask.get(), &Task::succeeded, this, &ModrinthCreationTask::finishInstall);
     connect(ensureMetadataTask.get(), &Task::failed, this, &ModrinthCreationTask::emitFailed);
     connect(ensureMetadataTask.get(), &Task::aborted, this, &ModrinthCreationTask::emitAborted);
-    connect(ensureMetadataTask.get(), &Task::progress, [this](qint64 current, qint64 total) {
+    connect(ensureMetadataTask.get(), &Task::progress, this, [this](qint64 current, qint64 total) {
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         setProgress(current, total);
     });
@@ -448,6 +454,40 @@ void ModrinthCreationTask::ensureMetaLoop()
 
     ensureMetadataTask->start();
     m_task = ensureMetadataTask;
+}
+
+bool ModrinthCreationTask::promptForUntrustedMods()
+{
+    if (m_trustedSource) {
+        return true;
+    }
+
+    QStringList untrustedMods;
+
+    for (const auto& file : m_files) {
+        for (const auto& url : file.downloads) {
+            if (url.scheme() != "https" || url.host() != BuildConfig.MODRINTH_DOWNLOAD_HOST) {
+                untrustedMods.append(file.path);
+                break;
+            }
+        }
+    }
+
+    const QDir mcDir{ FS::PathCombine(m_stagingPath, m_rootPath) };
+    const QString modsPath{ FS::PathCombine(m_stagingPath, m_rootPath, "mods") };
+    if (QDir(modsPath).exists()) {
+        QDirIterator iter{ modsPath, QDir::Files, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks };
+        while (iter.hasNext()) {
+            untrustedMods.append(mcDir.relativeFilePath(iter.next()));
+        }
+    }
+
+    if (untrustedMods.empty()) {
+        return true;
+    }
+
+    UntrustedModsDialog dialog{ untrustedMods, m_parent };
+    return dialog.exec() == QDialog::Accepted;
 }
 
 ModrinthCreationTask::~ModrinthCreationTask()

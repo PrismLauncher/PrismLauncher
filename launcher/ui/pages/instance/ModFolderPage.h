@@ -48,7 +48,7 @@ class ModFolderPage : public ExternalResourcesPage {
     inline bool handleNoModLoader();
 
    public:
-    explicit ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget* parent = nullptr);
+    explicit ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWidget* parent = nullptr);
     virtual ~ModFolderPage() = default;
 
     void setFilter(const QString& filter) { m_fileSelectionFilter = filter; }
@@ -81,7 +81,7 @@ class ModFolderPage : public ExternalResourcesPage {
 class CoreModFolderPage : public ModFolderPage {
     Q_OBJECT
    public:
-    explicit CoreModFolderPage(BaseInstance* inst, ModFolderModel* mods, QWidget* parent = 0);
+    explicit CoreModFolderPage(MinecraftInstance* inst, ModFolderModel* mods, QWidget* parent = 0);
     virtual ~CoreModFolderPage() = default;
 
     virtual QString displayName() const override { return tr("Core Mods"); }
@@ -95,7 +95,7 @@ class CoreModFolderPage : public ModFolderPage {
 class NilModFolderPage : public ModFolderPage {
     Q_OBJECT
    public:
-    explicit NilModFolderPage(BaseInstance* inst, ModFolderModel* mods, QWidget* parent = 0);
+    explicit NilModFolderPage(MinecraftInstance* inst, ModFolderModel* mods, QWidget* parent = 0);
     virtual ~NilModFolderPage() = default;
 
     virtual QString displayName() const override { return tr("Nilmods"); }

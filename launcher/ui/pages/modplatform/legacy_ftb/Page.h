@@ -82,7 +82,6 @@ class Page : public QWidget, public ModpackProviderBasePage {
    private slots:
     void ftbPackDataDownloadSuccessfully(ModpackList publicPacks, ModpackList thirdPartyPacks);
     void ftbPackDataDownloadFailed(QString reason);
-    void ftbPackDataDownloadAborted();
 
     void ftbPrivatePackDataDownloadSuccessfully(const Modpack& pack);
     void ftbPrivatePackDataDownloadFailed(QString reason, QString packCode);

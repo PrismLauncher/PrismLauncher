@@ -45,7 +45,7 @@
 
 #include "MetadataHandler.h"
 
-class BaseInstance;
+class MinecraftInstance;
 
 enum class ResourceType : std::uint8_t {
     UNKNOWN,     //!< Indicates an unspecified resource type.
@@ -133,7 +133,7 @@ class Resource {
      * This is initially empty, and may be updated when calling updateIssues.
      */
     QStringList issues() const;
-    void updateIssues(const BaseInstance* inst);
+    void updateIssues(const MinecraftInstance* inst);
     bool hasIssues() const { return !m_issues.empty(); }
 
     /** Compares two Resources, for sorting purposes, considering a ascending order, returning:

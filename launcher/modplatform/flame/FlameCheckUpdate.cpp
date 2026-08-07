@@ -46,7 +46,7 @@ void FlameCheckUpdate::executeTask()
     for (auto* resource : m_resources) {
         auto project = std::make_shared<ModPlatform::IndexedPack>();
         project->addonId = resource->metadata()->project_id.toString();
-        auto versionsUrlOptional = FlameAPI().getVersionsURL({ .pack = project, .mcVersions = m_gameVersions });
+        auto versionsUrlOptional = FlameAPI::get().getVersionsURL({ .pack = project, .mcVersions = m_gameVersions });
         if (!versionsUrlOptional.has_value()) {
             continue;
         }
@@ -87,7 +87,8 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QByteArray* 
         qCritical() << e.what();
         qDebug() << doc;
     }
-    auto latestVer = FlameAPI().getLatestVersion(pack->versions, m_loadersList, resource->metadata()->loaders, !m_loadersList.isEmpty());
+    auto latestVer =
+        FlameAPI::get().getLatestVersion(pack->versions, m_loadersList, resource->metadata()->loaders, !m_loadersList.isEmpty());
 
     setStatus(tr("Parsing the API response from CurseForge for '%1'...").arg(resource->name()));
 
@@ -123,7 +124,7 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QByteArray* 
 
         auto downloadTask = makeShared<ResourceDownloadTask>(pack, latestVer.value(), m_resourceModel, true, "update");
         m_updates.emplace_back(pack->name, resource->metadata()->hash, oldVersion, latestVer->version, latestVer->version_type,
-                               FlameAPI().getModFileChangelog(latestVer->addonId.toInt(), latestVer->fileId.toInt()),
+                               FlameAPI::get().getModFileChangelog(latestVer->addonId.toInt(), latestVer->fileId.toInt()),
                                ModPlatform::ResourceProvider::FLAME, downloadTask, resource->enabled());
     }
     m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, latestVer.value()));
@@ -147,9 +148,9 @@ void FlameCheckUpdate::collectBlockedMods()
         return;
     }
     if (addonIds.size() == 1) {
-        std::tie(projTask, response) = FlameAPI().getProject(*addonIds.begin());
+        std::tie(projTask, response) = FlameAPI::get().getProject(*addonIds.begin());
     } else {
-        std::tie(projTask, response) = FlameAPI().getProjects(addonIds);
+        std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds);
     }
 
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds, quickSearch] {

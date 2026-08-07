@@ -54,18 +54,18 @@ class GetModDependenciesTask : public SequentialTask {
         QStringList required_by_ids;
     };
 
-    explicit GetModDependenciesTask(BaseInstance* instance, ModFolderModel* folder, QList<std::shared_ptr<PackDependency>> selected);
+    explicit GetModDependenciesTask(MinecraftInstance* instance, ModFolderModel* folder, QList<std::shared_ptr<PackDependency>> selected);
 
     auto getDependecies() const -> QList<std::shared_ptr<PackDependency>> { return m_pack_dependencies; }
     QHash<QString, PackDependencyExtraInfo> getExtraInfo();
 
    private:
-    ResourceAPI* getAPI(ModPlatform::ResourceProvider provider)
+    const ResourceAPI* getAPI(ModPlatform::ResourceProvider provider)
     {
         if (provider == ModPlatform::ResourceProvider::FLAME) {
-            return &m_flameAPI;
+            return &FlameAPI::get();
         }
-        return &m_modrinthAPI;
+        return &ModrinthAPI::get();
     }
 
    protected slots:
@@ -88,7 +88,4 @@ class GetModDependenciesTask : public SequentialTask {
 
     Version m_version;
     ModPlatform::ModLoaderTypes m_loaderType;
-
-    ModrinthAPI m_modrinthAPI;
-    FlameAPI m_flameAPI;
 };

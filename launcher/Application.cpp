@@ -687,6 +687,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // Folders
         m_settings->registerSetting("InstanceDir", "instances");
         m_settings->registerSetting("AdditionalInstanceDirs", QVariant(QStringList()));
+        m_settings->registerSetting("LastUsedInstDirForNewInstance", "");
         m_settings->registerSetting({ "CentralModsDir", "ModsDir" }, "mods");
         m_settings->registerSetting("IconsDir", "icons");
         m_settings->registerSetting("DownloadsDir", QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
@@ -760,6 +761,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("CustomOpenALPath", "");
         m_settings->registerSetting("UseNativeGLFW", false);
         m_settings->registerSetting("CustomGLFWPath", "");
+        m_settings->registerSetting("UseNativeSDL", false);
+        m_settings->registerSetting("CustomSDLPath", "");
 
         // Performance related options
         m_settings->registerSetting("EnableFeralGamemode", false);
@@ -950,7 +953,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         QStringList instFolders = { ":/icons/multimc/32x32/instances/", ":/icons/multimc/50x50/instances/",
                                     ":/icons/multimc/128x128/instances/", ":/icons/multimc/scalable/instances/" };
         m_icons.reset(new IconList(instFolders, setting->get().toString()));
-        connect(setting.get(), &Setting::SettingChanged,
+        connect(setting.get(), &Setting::SettingChanged, this,
                 [this](const Setting&, QVariant value) { m_icons->directoryChanged(value.toString()); });
         qInfo() << "<> Instance icons initialized.";
     }
@@ -1054,10 +1057,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
 
 #ifdef Q_OS_MACOS
-    connect(this, &Application::clickedOnDock, [this]() { this->showMainWindow(); });
+    connect(this, &Application::clickedOnDock, this, [this]() { this->showMainWindow(); });
 #endif
 
-    connect(this, &Application::aboutToQuit, [this]() {
+    connect(this, &Application::aboutToQuit, this, [this]() {
         if (m_instances) {
             // save any remaining instance state
             m_instances->saveNow();
@@ -1469,7 +1472,7 @@ void Application::messageReceived(const QByteArray& message)
         bool offline = received.args["offline_enabled"] == "true";
         QString offlineName = received.args["offline_name"];
 
-        BaseInstance* instance;
+        MinecraftInstance* instance;
         if (!id.isEmpty()) {
             instance = instances()->getInstanceById(id);
             if (!instance) {
@@ -1532,7 +1535,7 @@ bool Application::openJsonEditor(const QString& filename)
     }
 }
 
-bool Application::launch(BaseInstance* instance,
+bool Application::launch(MinecraftInstance* instance,
                          LaunchMode mode,
                          MinecraftTarget::Ptr targetToJoin,
                          MinecraftAccountPtr accountToUse,
@@ -1714,7 +1717,7 @@ ViewLogWindow* Application::showLogWindow()
     return m_viewLogWindow;
 }
 
-InstanceWindow* Application::showInstanceWindow(BaseInstance* instance, QString page)
+InstanceWindow* Application::showInstanceWindow(MinecraftInstance* instance, QString page)
 {
     if (!instance)
         return nullptr;
@@ -1866,7 +1869,8 @@ void Application::detectLibraries()
 #ifdef Q_OS_LINUX
     m_detectedGLFWPath = LibraryUtils::find(BuildConfig.GLFW_LIBRARY_NAME);
     m_detectedOpenALPath = LibraryUtils::find(BuildConfig.OPENAL_LIBRARY_NAME);
-    qDebug() << "Detected native libraries:" << m_detectedGLFWPath << m_detectedOpenALPath;
+    m_detectedSDLPath = LibraryUtils::find(BuildConfig.SDL_LIBRARY_NAME);
+    qDebug() << "Detected native libraries:" << m_detectedGLFWPath << m_detectedOpenALPath << m_detectedSDLPath;
 #endif
 }
 

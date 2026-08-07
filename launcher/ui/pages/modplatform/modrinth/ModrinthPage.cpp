@@ -167,7 +167,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             suggestCurrent();
             updateUI();
         };
-        if (auto netJob = m_api.getProjectInfo({ m_current }, std::move(callbacks)); netJob) {
+        if (auto netJob = ModrinthAPI::get().getProjectInfo({ m_current }, std::move(callbacks)); netJob) {
             m_job = netJob;
             m_job->start();
         }
@@ -222,7 +222,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
         };
 
-        auto netJob = m_api.getProjectVersions({ m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
+        auto netJob = ModrinthAPI::get().getProjectVersions({ m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
 
         m_job2 = netJob;
         m_job2->start();
@@ -326,7 +326,8 @@ void ModrinthPage::suggestCurrent()
             extra_info.insert("pack_id", m_current->addonId.toString());
             extra_info.insert("pack_version_id", ver.fileId.toString());
 
-            m_dialog->setSuggestedPack(m_current->name, ver.version, new InstanceImportTask(ver.downloadUrl, this, std::move(extra_info)));
+            m_dialog->setSuggestedPack(m_current->name, ver.version,
+                                       new InstanceImportTask(ver.downloadUrl, true, this, std::move(extra_info)));
             QString editedLogoName = "modrinth_" + m_current->logoName;
             m_model->getLogo(m_current->logoName, m_current->logoUrl,
                              [this, editedLogoName](const QString& logo) { m_dialog->setSuggestedIconFromFile(logo, editedLogoName); });
@@ -380,9 +381,9 @@ void ModrinthPage::createFilterWidget()
     connect(m_ui->filterButton, &QPushButton::clicked, this, [this] { m_filterWidget->setHidden(!m_filterWidget->isHidden()); });
 
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &ModrinthPage::triggerSearch);
-    auto [categoriesTask, response] = ModrinthAPI().getModCategories();
+    auto [categoriesTask, response] = ModrinthAPI::get().getModCategories();
     m_categoriesTask = categoriesTask;
-    connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
+    connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() {
         auto categories = ModrinthAPI::loadCategories(*response, "modpack");
         m_filterWidget->setCategories(categories);
     });

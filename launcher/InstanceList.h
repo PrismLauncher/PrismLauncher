@@ -44,14 +44,14 @@
 #include <QStack>
 #include <cstdint>
 
-#include "BaseInstance.h"
+#include "minecraft/MinecraftInstance.h"
 
 class QFileSystemWatcher;
 class InstanceTask;
 
 using InstanceId = QString;
 using GroupId = QString;
-using InstanceLocator = std::pair<BaseInstance*, int>;
+using InstanceLocator = std::pair<MinecraftInstance*, int>;
 
 enum class InstCreateError : std::uint8_t { NoCreateError = 0, NoSuchVersion, UnknownCreateError, InstExists, CantCreateDir };
 
@@ -97,7 +97,7 @@ class InstanceList : public QAbstractListModel {
      */
     enum InstListError : std::uint8_t { NoError = 0, UnknownError };
 
-    BaseInstance* at(int i) const { return m_instances.at(i).get(); }
+    MinecraftInstance* at(int i) const { return m_instances.at(i).get(); }
 
     int count() const { return static_cast<int>(m_instances.size()); }
 
@@ -105,9 +105,9 @@ class InstanceList : public QAbstractListModel {
     void saveNow();
 
     /* O(n) */
-    BaseInstance* getInstanceById(const QString& id) const;
+    MinecraftInstance* getInstanceById(const QString& id) const;
     /* O(n) */
-    BaseInstance* getInstanceByManagedName(const QString& managedName) const;
+    MinecraftInstance* getInstanceByManagedName(const QString& managedName) const;
     QModelIndex getInstanceIndexById(const QString& id) const;
     QStringList getGroups();
     bool isGroupCollapsed(const QString& groupName);
@@ -129,7 +129,7 @@ class InstanceList : public QAbstractListModel {
      * Create a new empty staging area for instance creation and @return a path/key top commit it later.
      * Used by instance manipulation tasks.
      */
-    QString getStagedInstancePath();
+    QString getStagedInstancePath(const QString& targetDir);
 
     /**
      * Commit the staging area given by @keyPath to the provider - used when creation succeeds.
@@ -165,20 +165,20 @@ class InstanceList : public QAbstractListModel {
     void on_GroupStateChanged(const QString& group, bool collapsed);
 
    private slots:
-    void propertiesChanged(BaseInstance* inst);
+    void propertiesChanged(MinecraftInstance* inst);
     void providerUpdated();
     void instanceDirContentsChanged(const QString& path);
 
    private:
-    int getInstIndex(BaseInstance* inst) const;
+    int getInstIndex(MinecraftInstance* inst) const;
     void migrateTotalPlayTime();
     void suspendWatch();
     void resumeWatch();
-    void add(std::vector<std::unique_ptr<BaseInstance>>& list);
+    void add(std::vector<std::unique_ptr<MinecraftInstance>>& list);
     void loadGroupList();
     void saveGroupList();
     QList<InstanceId> discoverInstances();
-    std::unique_ptr<BaseInstance> loadInstance(const InstanceId& id);
+    std::unique_ptr<MinecraftInstance> loadInstance(const InstanceId& id);
 
     void increaseGroupCount(const QString& group);
     void decreaseGroupCount(const QString& group);
@@ -186,7 +186,7 @@ class InstanceList : public QAbstractListModel {
    private:
     int m_watchLevel = 0;
     bool m_dirty = false;
-    std::vector<std::unique_ptr<BaseInstance>> m_instances;
+    std::vector<std::unique_ptr<MinecraftInstance>> m_instances;
     // id -> refs
     QMap<QString, int> m_groupNameCache;
 

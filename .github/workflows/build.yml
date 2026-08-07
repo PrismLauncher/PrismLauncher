@@ -59,12 +59,6 @@ jobs:
             msystem: CLANG64
             vcvars-arch: amd64_x86
 
-          - os: windows-11-arm
-            artifact-name: Windows-MinGW-arm64
-            cmake-preset: windows_mingw
-            msystem: CLANGARM64
-            vcvars-arch: arm64
-
           - os: windows-2022
             artifact-name: Windows-MSVC
             cmake-preset: windows_msvc
@@ -124,7 +118,7 @@ jobs:
 
       - name: Configure project
         run: |
-          cmake --preset "$CMAKE_PRESET"
+          cmake --preset "$CMAKE_PRESET" -D VCPKG_HOST_TRIPLET="$VCPKG_TRIPLET" -D VCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET"
 
       - name: Run build
         run: |

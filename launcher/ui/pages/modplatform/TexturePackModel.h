@@ -13,7 +13,7 @@ class TexturePackResourceModel : public ResourcePackResourceModel {
     Q_OBJECT
 
    public:
-    TexturePackResourceModel(const BaseInstance& inst, ResourceAPI* api, const QString& debugName, QString metaEntryBase);
+    TexturePackResourceModel(const BaseInstance& inst, const ResourceAPI* api, const QString& debugName, QString metaEntryBase);
 
     inline ::Version maximumTexturePackVersion() const { return { "1.6" }; }
 

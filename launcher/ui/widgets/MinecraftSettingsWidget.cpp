@@ -144,6 +144,7 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
 
     connect(m_ui->useNativeOpenALCheck, &QAbstractButton::toggled, m_ui->lineEditOpenALPath, &QWidget::setEnabled);
     connect(m_ui->useNativeGLFWCheck, &QAbstractButton::toggled, m_ui->lineEditGLFWPath, &QWidget::setEnabled);
+    connect(m_ui->useNativeSDLCheck, &QAbstractButton::toggled, m_ui->lineEditSDLPath, &QWidget::setEnabled);
 
     loadSettings();
 }
@@ -216,6 +217,13 @@ void MinecraftSettingsWidget::loadSettings()
     m_ui->lineEditOpenALPath->setPlaceholderText(APPLICATION->m_detectedOpenALPath);
 #else
     m_ui->lineEditOpenALPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.OPENAL_LIBRARY_NAME));
+#endif
+    m_ui->useNativeSDLCheck->setChecked(settings->get("UseNativeSDL").toBool());
+    m_ui->lineEditSDLPath->setText(settings->get("CustomSDLPath").toString().trimmed());
+#ifdef Q_OS_LINUX
+    m_ui->lineEditSDLPath->setPlaceholderText(APPLICATION->m_detectedSDLPath);
+#else
+    m_ui->lineEditSDLPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.SDL_LIBRARY_NAME));
 #endif
 
     // Performance
@@ -393,11 +401,15 @@ void MinecraftSettingsWidget::saveSettings()
         settings->set("CustomGLFWPath", m_ui->lineEditGLFWPath->text());
         settings->set("UseNativeOpenAL", m_ui->useNativeOpenALCheck->isChecked());
         settings->set("CustomOpenALPath", m_ui->lineEditOpenALPath->text());
+        settings->set("UseNativeSDL", m_ui->useNativeSDLCheck->isChecked());
+        settings->set("CustomSDLPath", m_ui->lineEditSDLPath->text());
     } else {
         settings->reset("UseNativeGLFW");
         settings->reset("CustomGLFWPath");
         settings->reset("UseNativeOpenAL");
         settings->reset("CustomOpenALPath");
+        settings->reset("UseNativeSDL");
+        settings->reset("CustomSDLPath");
     }
 
     // Performance
