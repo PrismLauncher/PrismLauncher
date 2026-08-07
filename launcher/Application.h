@@ -119,6 +119,7 @@ class Application : public QApplication {
     bool event(QEvent* event) override;
 
     SettingsObject* settings() const { return m_settings.get(); }
+    SettingsObject* playtimeSettings() const { return m_playtimeSettings.get(); }
 
     qint64 timeSinceStart() const { return m_startTime.msecsTo(QDateTime::currentDateTime()); }
 
@@ -258,6 +259,7 @@ class Application : public QApplication {
     std::unique_ptr<Meta::Index> m_metadataIndex;
 
     std::unique_ptr<SettingsObject> m_settings;
+    std::unique_ptr<SettingsObject> m_playtimeSettings;
     std::unique_ptr<InstanceList> m_instances;
     std::unique_ptr<IconList> m_icons;
     std::unique_ptr<JavaInstallList> m_javalist;

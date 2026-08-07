@@ -924,6 +924,14 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         qInfo() << "<> Settings loaded.";
     }
 
+    // Initialize playtime settings, stored separately so this data can be synced
+    // independently of machine-specific configuration
+    {
+        m_playtimeSettings.reset(new INISettingsObject(QString("playtime.cfg"), this));
+        m_playtimeSettings->registerSetting("TotalPlayTime", 0);
+        m_playtimeSettings->registerSetting("TotalPlayTimeMigrated", false);
+    }
+
 #ifndef QT_NO_ACCESSIBILITY
     QAccessible::installFactory(groupViewAccessibleFactory);
 #endif /* !QT_NO_ACCESSIBILITY */

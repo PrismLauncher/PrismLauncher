@@ -49,6 +49,7 @@
 #include <QUuid>
 #include <algorithm>
 
+#include "Application.h"
 #include "BaseInstance.h"
 #include "ExponentialSeries.h"
 #include "FileSystem.h"
@@ -577,18 +578,28 @@ InstanceList::InstListError InstanceList::loadList()
         add(newList);
     }
     m_dirty = false;
-    updateTotalPlayTime();
+    migrateTotalPlayTime();
     return NoError;
 }
 
-void InstanceList::updateTotalPlayTime()
+void InstanceList::migrateTotalPlayTime()
 {
-    m_totalPlayTime = 0;
+    if (APPLICATION->playtimeSettings()->get("TotalPlayTimeMigrated").toBool()) {
+        return;
+    }
+
+    qint64 existingTotal = 0;
     for (const auto& itr : m_instances) {
         if (itr->countTimePlayed()) {
-            m_totalPlayTime += itr->totalTimePlayed();
+            existingTotal += itr->totalTimePlayed();
         }
     }
+
+    qint64 current = APPLICATION->playtimeSettings()->get("TotalPlayTime").toLongLong();
+    APPLICATION->playtimeSettings()->set("TotalPlayTime", current + existingTotal);
+    APPLICATION->playtimeSettings()->set("TotalPlayTimeMigrated", true);
+
+    qDebug() << "Migrated" << existingTotal << "seconds of existing instance playtime into global TotalPlayTime.";
 }
 
 void InstanceList::saveNow()
@@ -683,7 +694,6 @@ void InstanceList::propertiesChanged(MinecraftInstance* inst)
     int i = getInstIndex(inst);
     if (i != -1) {
         emit dataChanged(index(i), index(i));
-        updateTotalPlayTime();
     }
 }
 
@@ -1141,12 +1151,6 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
 
     saveGroupList();
     return true;
-}
-
-int64_t InstanceList::getTotalPlayTime()
-{
-    updateTotalPlayTime();
-    return m_totalPlayTime;
 }
 
 #include "InstanceList.moc"
