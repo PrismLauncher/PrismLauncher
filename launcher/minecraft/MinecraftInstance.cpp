@@ -238,7 +238,9 @@ void MinecraftInstance::loadSpecificSettings()
         auto envSetting = m_settings->registerSetting("OverrideEnv", false);
         m_settings->registerOverride(global_settings->getSetting("Env"), envSetting);
 
-        m_settings->set("InstanceType", "OneSix");
+        if (m_settings->get("InstanceType").toString() != "OneSix") {
+            m_settings->set("InstanceType", "OneSix");
+        }
     }
 
     // Join server on launch, this does not have a global override
