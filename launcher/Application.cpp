@@ -881,6 +881,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("QuitAfterGameStop", false);
 
         m_settings->registerSetting("Env", "{}");
+        m_settings->registerSetting("LogAnonymizeRules", "[]");
 
         // Custom Microsoft Authentication Client ID
         m_settings->registerSetting("MSAClientIDOverride", "");

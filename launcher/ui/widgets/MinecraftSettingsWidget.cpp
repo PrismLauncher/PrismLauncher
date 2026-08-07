@@ -40,6 +40,9 @@
 #include "ui_MinecraftSettingsWidget.h"
 
 #include <QFileDialog>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include "Application.h"
 #include "BuildConfig.h"
 #include "Json.h"
@@ -47,6 +50,7 @@
 #include "minecraft/WorldList.h"
 #include "minecraft/auth/AccountList.h"
 #include "settings/Setting.h"
+#include "ui/widgets/LogAnonymization.h"
 
 MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QWidget* parent)
     : QWidget(parent), m_instance(std::move(instance)), m_ui(new Ui::MinecraftSettingsWidget)
@@ -63,6 +67,11 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
         m_ui->loaderGroup->hide();
         m_ui->countGameTime->hide();
     } else {
+        for (int i = 0; i < m_ui->settingsTabs->count(); i++) {
+            if (m_ui->settingsTabs->widget(i)->objectName() == "logAnonymizationPage") {
+                m_ui->settingsTabs->removeTab(i);
+            }
+        }
         m_javaSettings = new JavaSettingsWidget(m_instance, this);
         m_ui->javaScrollArea->setWidget(m_javaSettings);
 
@@ -197,6 +206,21 @@ void MinecraftSettingsWidget::loadSettings()
     // Environment variables
     m_ui->environmentVariables->initialize(m_instance != nullptr, m_instance == nullptr || settings->get("OverrideEnv").toBool(),
                                            Json::toMap(settings->get("Env").toString()));
+
+    // Log anonymization (global only)
+    if (m_instance == nullptr) {
+        QList<LogAnonymization::Rule> rules;
+        const auto doc = QJsonDocument::fromJson(settings->get("LogAnonymizeRules").toString().toUtf8());
+        if (doc.isArray()) {
+            for (const auto& value : doc.array()) {
+                if (value.isObject()) {
+                    const auto obj = value.toObject();
+                    rules.append({ .regex = obj.value("regex").toString(), .replace = obj.value("replace").toString() });
+                }
+            }
+        }
+        m_ui->logAnonymization->initialize(rules);
+    }
 
     // Legacy Tweaks
     m_ui->legacySettingsGroupBox->setChecked(m_instance == nullptr || settings->get("OverrideLegacySettings").toBool());
@@ -389,6 +413,20 @@ void MinecraftSettingsWidget::saveSettings()
         settings->set("Env", Json::fromMap(m_ui->environmentVariables->value()));
     else
         settings->reset("Env");
+
+    // Log anonymization (global only)
+    if (m_instance == nullptr) {
+        QJsonArray rules;
+        for (const auto& rule : m_ui->logAnonymization->value()) {
+            QJsonObject obj;
+            obj.insert("regex", rule.regex);
+            if (!rule.replace.isEmpty()) {
+                obj.insert("replace", rule.replace);
+            }
+            rules.append(obj);
+        }
+        settings->set("LogAnonymizeRules", QString::fromUtf8(QJsonDocument(rules).toJson(QJsonDocument::Compact)));
+    }
 
     // Workarounds
     bool workarounds = m_instance == nullptr || m_ui->nativeWorkaroundsGroupBox->isChecked();

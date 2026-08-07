@@ -35,7 +35,11 @@
  */
 #include "AnonymizeLog.h"
 
+#include <QJsonDocument>
 #include <QRegularExpression>
+
+#include "Application.h"
+#include "settings/SettingsObject.h"
 
 struct RegReplace {
     RegReplace(QRegularExpression r, QString w) : reg(r), with(w) { reg.optimize(); }
@@ -64,5 +68,27 @@ void anonymizeLog(QString& log)
 {
     for (auto rule : anonymizeRules) {
         log.replace(rule.reg, rule.with);
+    }
+
+    // user-defined rules from global settings
+    const auto userRules = QJsonDocument::fromJson(APPLICATION->settings()->get("LogAnonymizeRules").toString().toUtf8());
+    if (userRules.isArray()) {
+        for (const auto& value : userRules.array()) {
+            QString pattern;
+            QString replacement = "********";
+            if (value.isObject()) {
+                const auto obj = value.toObject();
+                pattern = obj.value("regex").toString();
+                const auto replace = obj.value("replace").toString().trimmed();
+                if (!replace.isEmpty()) {
+                    replacement = replace;
+                }
+            }
+            QRegularExpression regex(pattern, QRegularExpression::CaseInsensitiveOption);
+            if (!regex.isValid()) {
+                continue;
+            }
+            log.replace(regex, replacement);
+        }
     }
 }
