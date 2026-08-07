@@ -1595,6 +1595,17 @@ void MainWindow::instanceActivated(QModelIndex index)
     if (!inst)
         return;
 
+    if (APPLICATION->settings()->get("EditInstanceOnDoubleClick").toBool()) {
+        if (inst->canEdit()) {
+            APPLICATION->showInstanceWindow(inst);
+        } else {
+            CustomMessageBox::selectable(
+                this, tr("Instance not editable"),
+                tr("This instance is not editable. It may be broken, invalid, or too old. Check logs for details."), QMessageBox::Critical)
+                ->show();
+        }
+        return;
+    }
     APPLICATION->launch(inst);
 }
 

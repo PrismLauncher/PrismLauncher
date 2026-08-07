@@ -41,9 +41,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-149</y>
-        <width>746</width>
-        <height>1222</height>
+        <y>0</y>
+        <width>753</width>
+        <height>1138</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -169,6 +169,16 @@
             </property>
             <property name="text">
              <string>&amp;Replace toolbar with menubar</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="editInstanceOnDoubleClick">
+            <property name="toolTip">
+             <string>Opens the edit instance window on double-clicking an instance instead of running the instance.</string>
+            </property>
+            <property name="text">
+             <string>&amp;Open Edit window on instance double-click</string>
             </property>
            </widget>
           </item>
@@ -727,6 +737,7 @@
   <tabstop>alwaysRenameDirBtn</tabstop>
   <tabstop>neverRenameDirBtn</tabstop>
   <tabstop>preferMenuBarCheckBox</tabstop>
+  <tabstop>editInstanceOnDoubleClick</tabstop>
   <tabstop>autoUpdateCheckBox</tabstop>
   <tabstop>updateIntervalSpinBox</tabstop>
   <tabstop>instDirTextBox</tabstop>
