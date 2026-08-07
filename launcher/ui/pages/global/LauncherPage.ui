@@ -737,6 +737,7 @@
   <tabstop>alwaysRenameDirBtn</tabstop>
   <tabstop>neverRenameDirBtn</tabstop>
   <tabstop>preferMenuBarCheckBox</tabstop>
+  <tabstop>editInstanceOnDoubleClick</tabstop>
   <tabstop>autoUpdateCheckBox</tabstop>
   <tabstop>updateIntervalSpinBox</tabstop>
   <tabstop>instDirTextBox</tabstop>
@@ -771,7 +772,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="sortingModeGroup"/>
   <buttongroup name="renamingBehaviorGroup"/>
+  <buttongroup name="sortingModeGroup"/>
  </buttongroups>
 </ui>
