@@ -37,6 +37,7 @@
 #include "TranslationsModel.h"
 
 #include <QDebug>
+#include <algorithm>
 #include <memory>
 #include <utility>
 
@@ -292,10 +293,7 @@ void TranslationsModel::reloadLocalFiles()
         auto langIter = languages.find(langCode);
         if (langIter != languages.end()) {
             auto& language = *langIter;
-            // TODO: use std::to_underlying in C++23
-            if (static_cast<int>(fileType) > static_cast<int>(language.localFileType)) {
-                language.localFileType = fileType;
-            }
+            language.localFileType = std::max(fileType, language.localFileType);
         } else {
             if (fileType == FileType::Po) {
                 Language localFound(langCode);
