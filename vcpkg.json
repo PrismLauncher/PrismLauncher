@@ -11,7 +11,7 @@
     {
       "name": "pkgconf",
       "host": true,
-      "platform": "windows & !mingw"
+      "platform": "windows"
     },
 
     "cmark",
