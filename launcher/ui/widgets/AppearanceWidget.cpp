@@ -51,6 +51,8 @@ AppearanceWidget::AppearanceWidget(bool themesOnly, QWidget* parent)
 {
     m_ui->setupUi(this);
 
+    connect(m_ui->enableCatCheckBox, &QCheckBox::toggled, m_ui->catSettingsBox, &QWidget::setEnabled);
+
     m_ui->catPreview->setGraphicsEffect(new QGraphicsOpacityEffect(this));
 
     m_defaultFormat = QTextCharFormat(m_ui->consolePreview->currentCharFormat());
@@ -99,6 +101,11 @@ void AppearanceWidget::applySettings()
     QString consoleFontFamily = m_ui->consoleFont->currentFont().family();
     settings->set("ConsoleFont", consoleFontFamily);
     settings->set("ConsoleFontSize", m_ui->fontSizeBox->value());
+    const bool catEnabled = m_ui->enableCatCheckBox->isChecked();
+    settings->set("EnableCat", catEnabled);
+    if (!catEnabled) {
+        settings->set("TheCat", false);
+    }
     settings->set("CatOpacity", m_ui->catOpacitySlider->value());
     auto catFit = m_ui->catFitComboBox->currentIndex();
     settings->set("CatFit", catFit == 0 ? "fit" : catFit == 1 ? "fill" : "strech");
@@ -118,6 +125,7 @@ void AppearanceWidget::loadSettings()
     }
     m_ui->fontSizeBox->setValue(fontSize);
 
+    m_ui->enableCatCheckBox->setChecked(settings->get("EnableCat").toBool());
     m_ui->catOpacitySlider->setValue(settings->get("CatOpacity").toInt());
 
     auto catFit = settings->get("CatFit").toString();
