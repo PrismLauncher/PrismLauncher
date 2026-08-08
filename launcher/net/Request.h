@@ -104,7 +104,8 @@ class Request : public Task {
 
     using DeviceFactory = std::function<QIODevice*()>;
     using MultiPartFactory = std::function<QHttpMultiPart*()>;
-    using PostData = std::variant<std::monostate, QByteArray, DeviceFactory, MultiPartFactory>;
+    using ByteArrayFactory = std::function<QByteArray()>;
+    using PostData = std::variant<std::monostate, QByteArray, DeviceFactory, MultiPartFactory, ByteArrayFactory>;
     using LogCatFunc = const QLoggingCategory& (*)();
 
     struct Spec {
