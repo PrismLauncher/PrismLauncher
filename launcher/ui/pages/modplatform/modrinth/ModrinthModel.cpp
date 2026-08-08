@@ -139,23 +139,23 @@ void ModpackListModel::performPaginatedSearch()
     if (m_searchState != ResetRequested && m_currentSearchTerm.startsWith("#")) {
         auto projectId = m_currentSearchTerm.mid(1);
         if (!projectId.isEmpty()) {
-            ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks;
-
-            callbacks.on_fail = [this](QString reason, int network_error_code) {
-                if (network_error_code == 404) {
-                    m_searchState = ResetRequested;
-                }
-                searchRequestFailed(reason, network_error_code);
-            };
-            callbacks.on_succeed = [this](auto& pack) { searchRequestForOneSucceeded(pack); };
-            callbacks.on_abort = [this] {
-                qCritical() << "Search task aborted by an unknown reason!";
-                searchRequestFailed("Aborted", 0);
-            };
-            auto project = std::make_shared<ModPlatform::IndexedPack>();
-            project->addonId = projectId;
-            if (auto job = ModrinthAPI::get().getProjectInfo({ project }, std::move(callbacks)); job) {
-                m_jobPtr = job;
+            auto [netJob, result] = ModrinthAPI::get().getProject(projectId, true).make();
+            if (netJob) {
+                auto weak = netJob.toWeakRef();
+                connect(netJob.get(), &Task::succeeded, this, [this, result] { searchRequestForOneSucceeded(*result); });
+                connect(netJob.get(), &Task::failed, this, [this, weak](const QString& reason) {
+                    if (auto job = weak.lock()) {
+                        if (job->replyStatusCode() == 404) {
+                            m_searchState = ResetRequested;
+                        }
+                        searchRequestFailed(reason, job->replyStatusCode());
+                    }
+                });
+                connect(netJob.get(), &Task::aborted, this, [this] {
+                    qCritical() << "Search task aborted by an unknown reason!";
+                    searchRequestFailed("Aborted", 0);
+                });
+                m_jobPtr = netJob;
                 m_jobPtr->start();
             }
             return;

@@ -146,28 +146,29 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
 
     if (!m_current->extraDataLoaded) {
         qDebug() << "Loading modrinth modpack information";
-        ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks;
 
         auto id = m_current->addonId;
-        callbacks.on_fail = [this](const QString& reason, int) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
-        };
-        callbacks.on_succeed = [this, id, curr](auto& pack) {
-            if (id != m_current->addonId) {
-                return;  // wrong request?
-            }
+        auto [netJob, result] = ModrinthAPI::get().getProject(m_current->addonId.toString(), true).make();
+        if (netJob) {
+            connect(netJob.get(), &Task::succeeded, this, [this, id, curr, result] {
+                if (id != m_current->addonId) {
+                    return;  // wrong request?
+                }
 
-            QVariant current_updated;
-            current_updated.setValue(pack);
+                auto& pack = *result;
+                QVariant current_updated;
+                current_updated.setValue(pack);
 
-            if (!m_model->setData(curr, current_updated, Qt::UserRole)) {
-                qWarning() << "Failed to cache extra info for the current pack!";
-            }
+                if (!m_model->setData(curr, current_updated, Qt::UserRole)) {
+                    qWarning() << "Failed to cache extra info for the current pack!";
+                }
 
-            suggestCurrent();
-            updateUI();
-        };
-        if (auto netJob = ModrinthAPI::get().getProjectInfo({ m_current }, std::move(callbacks)); netJob) {
+                suggestCurrent();
+                updateUI();
+            });
+            connect(netJob.get(), &Task::failed, this, [this](const QString& reason) {
+                CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
+            });
             m_job = netJob;
             m_job->start();
         }
@@ -222,7 +223,8 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
         };
 
-        auto netJob = ModrinthAPI::get().getProjectVersions({ m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
+        auto netJob =
+            ModrinthAPI::get().getProjectVersions({ m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
 
         m_job2 = netJob;
         m_job2->start();
