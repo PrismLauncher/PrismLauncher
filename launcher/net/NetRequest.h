@@ -42,10 +42,14 @@
 #include <QNetworkReply>
 #include <QTimer>
 #include <QUrl>
+#include <array>
 #include <chrono>
 #include <cstdint>
 #include <utility>
+#include <variant>
 
+#include "Application.h"
+#include "EnumWrapper.h"
 #include "HeaderProxy.h"
 #include "HttpMetaCache.h"
 #include "Sink.h"
@@ -54,6 +58,9 @@
 #include "QObjectPtr.h"
 #include "net/Logging.h"
 #include "tasks/Task.h"
+
+class QIODevice;
+class QHttpMultiPart;
 
 namespace Net {
 class ByteArraySink;
@@ -71,10 +78,32 @@ class NetRequest : public Task {
     };
     Q_DECLARE_FLAGS(Options, Option)
 
-   public:
-    explicit NetRequest();
-    explicit NetRequest(const QUrl& url, Options options = Option::NoOptions, const QString& name = QString());
-    NetRequest(const QUrl& url, QByteArray postData, Options options);
+    enum class HttpMethodValue : std::uint8_t {
+        Get,
+        Post,
+        Put,
+        Patch,
+        Delete,
+        Head,
+        Options,
+        Connect,
+        Trace,
+    };
+    struct HttpMethod : EnumWrapper<HttpMethod, HttpMethodValue> {
+        static constexpr auto invalid() { return Get; };
+        static constexpr auto mapping()
+        {
+            return std::array{ std::pair{ Get, "GET" },         std::pair{ Post, "POST" },       std::pair{ Put, "PUT" },
+                               std::pair{ Patch, "PATCH" },     std::pair{ Delete, "DELETE" },   std::pair{ Head, "HEAD" },
+                               std::pair{ Options, "OPTIONS" }, std::pair{ Connect, "CONNECT" }, std::pair{ Trace, "TRACE" } };
+        };
+        using enum HttpMethodValue;
+        using Base = EnumWrapper<HttpMethod, HttpMethodValue>;
+        using Base::Base; /* inherit ctor */
+    };
+
+    using PostData = std::variant<QIODevice*, QHttpMultiPart*, QByteArray, std::nullptr_t>;
+    using LogCatFunc = const QLoggingCategory& (*)();
 
    public:
 #if defined(LAUNCHER_APPLICATION)
@@ -89,6 +118,12 @@ class NetRequest : public Task {
     static auto makeByteArray(const QUrl& url, QByteArray postData, Options options = Option::NoOptions)
         -> std::pair<NetRequest::Ptr, QByteArray*>;
     static auto makeFile(const QUrl& url, const QString& path, Options options = Option::NoOptions) -> NetRequest::Ptr;
+    static auto makeCustomRequest(const QUrl& url,
+                                  PostData postData,
+                                  HttpMethod method = HttpMethod::Post,
+                                  Options options = Option::NoOptions,
+                                  const QString& name = QString(),
+                                  LogCatFunc logCat = taskNetLogC) -> NetRequest::Ptr;
 
    public:
     ~NetRequest() override = default;
@@ -98,6 +133,7 @@ class NetRequest : public Task {
 
     void setNetwork(QNetworkAccessManager* network) { m_network = network; }
     void addHeaderProxy(std::unique_ptr<Net::HeaderProxy> proxy) { m_headerProxies.push_back(std::move(proxy)); }
+    void setSink(std::unique_ptr<Sink> sink) { m_sink = std::move(sink); }
 
     // automatically handle HTTP 429 Too Many Requests errors and retry
     void enableAutoRetry(bool enable);
@@ -111,7 +147,7 @@ class NetRequest : public Task {
    private:
     auto handleRedirect() -> bool;
     void handleAutoRetry(int64_t delay);
-    virtual QNetworkReply* getReply(QNetworkRequest&);
+    QNetworkReply* getReply(QNetworkRequest&);
 
    protected slots:
     void onProgress(qint64 bytesReceived, qint64 bytesTotal);
@@ -122,11 +158,20 @@ class NetRequest : public Task {
     void executeTask() override;
 
    protected:
+    explicit NetRequest();
+    explicit NetRequest(const QUrl& url, Options options = Option::NoOptions, const QString& name = QString());
+    NetRequest(const QUrl& url, QByteArray postData, Options options);
+    explicit NetRequest(const QUrl& url,
+                        PostData postData,
+                        HttpMethod method = HttpMethod::Post,
+                        Options options = Option::NoOptions,
+                        const QString& name = QString(),
+                        LogCatFunc logCat = taskNetLogC);
+
     std::unique_ptr<Sink> m_sink;
     Options m_options;
 
-    using LogCatFunc = const QLoggingCategory& (*)();
-    LogCatFunc m_logCat = taskUploadLogC;
+    LogCatFunc m_logCat = taskNetLogC;
 
     std::chrono::time_point<std::chrono::steady_clock> m_lastProgressTime;
     qint64 m_lastProgressBytes = 0;
@@ -144,8 +189,10 @@ class NetRequest : public Task {
     int m_retryCount = 0;
     QTimer m_retryTimer;
 
-    std::optional<QByteArray> m_postData;
+    HttpMethod m_httpMethod = HttpMethod::Get;
+    PostData m_postData{ nullptr };
 };
+
 }  // namespace Net
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Net::NetRequest::Options)

@@ -41,12 +41,16 @@
 
 #include <QDateTime>
 #include <QFileInfo>
+#include <QHttpMultiPart>
 #include <QLocale>
+#include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QUrl>
+#include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <utility>
+#include <variant>
 
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
@@ -74,6 +78,7 @@ NetRequest::NetRequest(const QUrl& url, Options options, const QString& name) : 
 {
     m_url = url;
     m_options = options;
+    m_httpMethod = HttpMethod::Get;
     if (name.isEmpty()) {
         setObjectName(QString("BYTES:") + m_url.toString());
     } else {
@@ -90,7 +95,19 @@ NetRequest::NetRequest(const QUrl& url, Options options, const QString& name) : 
 NetRequest::NetRequest(const QUrl& url, QByteArray postData, Options options) : NetRequest(url, options)
 {
     m_postData = std::move(postData);
+    m_httpMethod = HttpMethod::Post;
     m_logCat = taskUploadLogC;
+}
+
+NetRequest::NetRequest(const QUrl& url, PostData postData, HttpMethod method, Options options, const QString& name, LogCatFunc logCat)
+    : NetRequest(url, options, name)
+{
+    m_postData = std::move(postData);
+    m_httpMethod = method;
+    m_logCat = logCat;
+    if (auto* multiPart = std::get_if<QHttpMultiPart*>(&m_postData); multiPart && *multiPart && (*multiPart)->parent() == nullptr) {
+        (*multiPart)->setParent(this);
+    }
 }
 
 void NetRequest::addValidator(Validator* v)
@@ -102,6 +119,16 @@ void NetRequest::executeTask()
 {
     setStatus(tr("Requesting %1").arg(StringUtils::truncateUrlHumanFriendly(m_url, 80)));
 
+    if (m_network == nullptr) {
+#if defined(LAUNCHER_APPLICATION)
+        m_network = APPLICATION->network();
+#else
+        qCCritical(m_logCat) << getUid().toString() << "No network manager set for request:" << m_url.toString();
+        emit failed("No network manager set for request");
+        emit finished();
+        return;
+#endif
+    }
     if (getState() == Task::State::AbortedByUser) {
         qCWarning(m_logCat) << getUid().toString() << "Attempt to start an aborted Request:" << m_url.toString();
         emit aborted();
@@ -197,10 +224,12 @@ void NetRequest::onProgress(qint64 bytesReceived, qint64 bytesTotal)
 
 void NetRequest::downloadError(QNetworkReply::NetworkError error)
 {
+    static const auto s_retryableStatusCodes = { 408, 421, 425, 429, 500, 502, 503, 504 };
+
     if (error == QNetworkReply::OperationCanceledError) {
         qCCritical(m_logCat) << getUid().toString() << "Aborted" << m_url.toString();
         m_state = State::Failed;
-    } else if (replyStatusCode() == 429 /* HTTP Too Many Requests*/ && m_options.testFlag(Option::AutoRetry)) {
+    } else if (m_options.testFlag(Option::AutoRetry) && std::ranges::contains(s_retryableStatusCodes, replyStatusCode())) {
         qCDebug(m_logCat) << getUid().toString() << "Rate Limited!";
         auto delay = static_cast<int64_t>(10 * std::pow(2, m_retryCount));
         if (m_reply->hasRawHeader("Retry-After")) {
@@ -445,19 +474,49 @@ void NetRequest::enableAutoRetry(bool enable)
 
 QNetworkReply* NetRequest::getReply(QNetworkRequest& request)
 {
-    if (m_postData.has_value()) {
-        if (!request.hasRawHeader("Content-Type")) {
-            request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-        }
-        return m_network->post(request, *m_postData);
+    switch (m_httpMethod.value()) {
+        case HttpMethod::Get:
+            return m_network->get(request);
+        case HttpMethod::Post:
+            return std::visit(
+                [&](const auto& data) -> QNetworkReply* {
+                    using T = std::remove_cvref_t<decltype(data)>;
+                    if constexpr (std::is_same_v<T, QByteArray>) {
+                        if (!request.hasRawHeader("Content-Type")) {
+                            request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+                        }
+                        return m_network->post(request, data);
+                    }
+                    if constexpr (std::is_same_v<T, QIODevice*> || std::is_same_v<T, QHttpMultiPart*>) {
+                        return m_network->post(request, data);
+                    }
+                    if constexpr (std::is_same_v<T, std::nullptr_t>) {
+                        return m_network->sendCustomRequest(request, "POST");
+                    }
+                },
+                m_postData);
+        default:
+            return std::visit(
+                [&](const auto& data) -> QNetworkReply* {
+                    using T = std::remove_cvref_t<decltype(data)>;
+                    if constexpr (std::is_same_v<T, QByteArray>) {
+                        return m_network->sendCustomRequest(request, m_httpMethod.toString().toUtf8(), data);
+                    }
+                    if constexpr (std::is_same_v<T, QIODevice*> || std::is_same_v<T, QHttpMultiPart*>) {
+                        return m_network->sendCustomRequest(request, m_httpMethod.toString().toUtf8(), data);
+                    }
+                    if constexpr (std::is_same_v<T, std::nullptr_t>) {
+                        return m_network->sendCustomRequest(request, m_httpMethod.toString().toUtf8());
+                    }
+                },
+                m_postData);
     }
-    return m_network->get(request);
 }
 
 #if defined(LAUNCHER_APPLICATION)
 auto NetRequest::makeCached(const QUrl& url, MetaEntryPtr entry, Options options) -> Ptr
 {
-    auto dl = makeShared<NetRequest>(url, options, (QString("CACHE:") + url.toString()));
+    auto dl = Ptr(new NetRequest(url, options, (QString("CACHE:") + url.toString())));
     auto* md5Node = new ChecksumValidator(QCryptographicHash::Md5);
     auto* cachedNode = new MetaCacheSink(std::move(entry), md5Node, options.testFlag(Option::MakeEternal));
     dl->m_sink.reset(cachedNode);
@@ -467,7 +526,7 @@ auto NetRequest::makeCached(const QUrl& url, MetaEntryPtr entry, Options options
 
 auto NetRequest::makeByteArray(const QUrl& url, QByteArray postData, Options options) -> std::pair<Ptr, QByteArray*>
 {
-    auto dl = makeShared<NetRequest>(url, std::move(postData), options);
+    auto dl = Ptr(new NetRequest(url, std::move(postData), options));
 
     auto sink = std::make_unique<ByteArraySink>();
     auto* response = sink->output();
@@ -478,7 +537,7 @@ auto NetRequest::makeByteArray(const QUrl& url, QByteArray postData, Options opt
 
 auto NetRequest::makeByteArray(const QUrl& url, Options options) -> std::pair<Ptr, QByteArray*>
 {
-    auto dl = makeShared<NetRequest>(url, options);
+    auto dl = Ptr(new NetRequest(url, options));
 
     auto sink = std::make_unique<ByteArraySink>();
     auto* response = sink->output();
@@ -489,10 +548,20 @@ auto NetRequest::makeByteArray(const QUrl& url, Options options) -> std::pair<Pt
 
 auto NetRequest::makeFile(const QUrl& url, const QString& path, Options options) -> Ptr
 {
-    auto dl = makeShared<NetRequest>(url, options, QString("FILE:") + url.toString());
+    auto dl = Ptr(new NetRequest(url, options, QString("FILE:") + url.toString()));
     dl->m_sink = std::make_unique<FileSink>(path);
 
     return dl;
+}
+
+auto NetRequest::makeCustomRequest(const QUrl& url,
+                                   PostData postData,
+                                   HttpMethod method,
+                                   Options options,
+                                   const QString& name,
+                                   LogCatFunc logCat) -> Ptr
+{
+    return Ptr(new NetRequest(url, std::move(postData), method, options, name, logCat));
 }
 
 }  // namespace Net
