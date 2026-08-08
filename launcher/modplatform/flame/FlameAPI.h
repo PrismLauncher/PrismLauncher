@@ -33,8 +33,8 @@ class FlameAPI final : public ResourceAPI {
 
     Net::Spec<QList<ModPlatform::IndexedPack::Ptr>> getProjects(QStringList addonIds) const override;
     static Net::Spec<QList<FlameMod::FingerprintMatch>> matchFingerprints(const QList<uint>& fingerprints);
-    std::pair<Task::Ptr, QByteArray*> getFiles(const QStringList& fileIds) const;
-    std::pair<Task::Ptr, QByteArray*> getFile(const QString& addonId, const QString& fileId) const;
+    static Net::Spec<QList<ModPlatform::IndexedVersion>> getFiles(const QStringList& fileIds);
+    static Net::Spec<ModPlatform::IndexedVersion> getFile(const QString& addonId, const QString& fileId);
 
     Net::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const override;
 

@@ -18,6 +18,7 @@
 #pragma once
 
 #include "PackManifest.h"
+#include "modplatform/ModIndex.h"
 #include "tasks/Task.h"
 
 namespace Flame {
@@ -25,7 +26,7 @@ class FileResolvingTask : public Task {
     Q_OBJECT
    public:
     explicit FileResolvingTask(Flame::Manifest& toProcess);
-    virtual ~FileResolvingTask() = default;
+    ~FileResolvingTask() override = default;
 
     bool canAbort() const override { return true; }
     bool abort() override;
@@ -33,10 +34,10 @@ class FileResolvingTask : public Task {
     const Flame::Manifest& getResults() const { return m_manifest; }
 
    protected:
-    virtual void executeTask() override;
+    void executeTask() override;
 
    protected slots:
-    void netJobFinished(QByteArray* response);
+    void netJobFinished(QList<ModPlatform::IndexedVersion>* files);
 
    private:
     void getFlameProjects();

@@ -51,17 +51,17 @@ class ImportPage : public QWidget, public BasePage {
 
    public:
     explicit ImportPage(NewInstanceDialog* dialog, QWidget* parent = 0);
-    virtual ~ImportPage();
-    virtual QString displayName() const override { return tr("Import"); }
-    virtual QIcon icon() const override { return QIcon::fromTheme("viewfolder"); }
-    virtual QString id() const override { return "import"; }
-    virtual QString helpPage() const override { return "Zip-import"; }
-    virtual bool shouldDisplay() const override;
+    ~ImportPage() override;
+    QString displayName() const override { return tr("Import"); }
+    QIcon icon() const override { return QIcon::fromTheme("viewfolder"); }
+    QString id() const override { return "import"; }
+    QString helpPage() const override { return "Zip-import"; }
+    bool shouldDisplay() const override;
     void retranslate() override;
 
     void setUrl(const QString& url);
     void openedImpl() override;
-    void setExtraInfo(const QMap<QString, QString>& extra_info);
+    void setExtraInfo(const QMap<QString, QString>& extraInfo);
    private slots:
     void on_modpackBtn_clicked();
     void updateState();
