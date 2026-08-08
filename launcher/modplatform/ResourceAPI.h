@@ -42,7 +42,6 @@
 #include <QList>
 #include <QString>
 
-#include <list>
 #include <optional>
 #include <utility>
 
@@ -64,14 +63,7 @@ class ResourceAPI {
         // Used by Modrinth in the API request.
         QString name;
         // The human-readable name of the sorting, used for display in the UI.
-        QString readable_name;
-    };
-
-    template <typename T>
-    struct Callback {
-        std::function<void(T&)> on_succeed;
-        std::function<void(const QString& reason, int network_error_code)> on_fail;
-        std::function<void()> on_abort;
+        QString readableName;
     };
 
     struct SearchArgs {
@@ -117,17 +109,17 @@ class ResourceAPI {
     virtual Net::Spec<ModPlatform::IndexedPack::Ptr> getProject(const QString& addonId, bool includeExtra = false) const;
     virtual Net::Spec<QList<ModPlatform::IndexedPack::Ptr>> getProjects(QStringList addonIds) const = 0;
 
-    Net::Spec<QVector<ModPlatform::IndexedVersion>> getProjectVersions(const VersionSearchArgs& args) const;
-    virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, Callback<ModPlatform::IndexedVersion>&&) const;
+    virtual Net::Spec<QVector<ModPlatform::IndexedVersion>> getProjectVersions(const VersionSearchArgs& args) const;
+    virtual Net::Spec<ModPlatform::IndexedVersion> getDependencyVersion(const DependencySearchArgs& args) const;
 
    protected:
     ~ResourceAPI() = default;
 
-    inline QString debugName() const { return "External resource API"; }
+    static QString debugName() { return "External resource API"; }
 
-    QString mapMCVersionToModrinth(Version v) const;
+    static QString mapMCVersionToModrinth(const Version& v);
 
-    QString getGameVersionsString(std::vector<Version> mcVersions) const;
+    static QString getGameVersionsString(const std::vector<Version>& mcVersions);
 
    public:
     virtual auto getSearchURL(const SearchArgs& args) const -> std::optional<QString> = 0;

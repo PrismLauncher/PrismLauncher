@@ -190,7 +190,7 @@ void ResourcePage::addSortings()
     std::ranges::sort(sorts, [](const auto& l, const auto& r) { return l.index < r.index; });
 
     for (auto&& sorting : sorts) {
-        m_ui->sortByBox->addItem(sorting.readable_name, QVariant(sorting.index));
+        m_ui->sortByBox->addItem(sorting.readableName, QVariant(sorting.index));
     }
 }
 

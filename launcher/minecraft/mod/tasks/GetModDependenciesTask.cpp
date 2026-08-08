@@ -177,11 +177,13 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     ResourceAPI::DependencySearchArgs args = {
         .dependency = dep, .mcVersion = m_version, .loader = m_loaderType, .includeChangelog = true
     };
-    ResourceAPI::Callback<ModPlatform::IndexedVersion> callbacks;
-    callbacks.on_fail = [](const QString& reason, int) {
-        qCritical() << tr("A network error occurred. Could not load project dependencies:%1").arg(reason);
-    };
-    callbacks.on_succeed = [dep, provider, pDep, level, this](auto& pack) {
+
+    auto [version, result] = getAPI(provider)->getDependencyVersion(args).make();
+    if (!version) {
+        return tasks;
+    }
+    connect(version.get(), &Task::succeeded, this, [dep, provider, pDep, level, this, result] {
+        auto& pack = *result;
         pDep->version = pack;
         if (!pDep->version.addonId.isValid()) {
             if (m_loaderType & ModPlatform::Quilt) {  // falback for quilt
@@ -223,9 +225,10 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
         for (const auto& dep2 : getDependenciesForVersion(pDep->version, provider)) {
             addTask(prepareDependencyTask(dep2, provider, level - 1));
         }
-    };
-
-    auto version = getAPI(provider)->getDependencyVersion(std::move(args), std::move(callbacks));
+    });
+    connect(version.get(), &Task::failed, this, [](const QString& reason) {
+        qCritical() << tr("A network error occurred. Could not load project dependencies:%1").arg(reason);
+    });
     tasks->addTask(version);
     return tasks;
 }
