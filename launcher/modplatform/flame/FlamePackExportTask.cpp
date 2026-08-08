@@ -245,19 +245,47 @@ void FlamePackExportTask::getProjectsInfo()
         }
     }
 
-    Task::Ptr projTask;
-    QByteArray* response;
-
     if (addonIds.isEmpty()) {
         buildZip();
         return;
-    } else if (addonIds.size() == 1) {
-        std::tie(projTask, response) = FlameAPI::get().getProject(*addonIds.begin());
-    } else {
-        std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds);
     }
 
-    connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
+    auto fillProjectInfo = [this](ModPlatform::IndexedPack& pack) {
+        for (auto key : resolvedFiles.keys()) {
+            auto val = resolvedFiles.value(key);
+            if (val.addonId == pack.addonId) {
+                val.name = pack.name;
+                val.slug = pack.slug;
+                QStringList authors;
+                for (auto author : pack.authors)
+                    authors << author.name;
+
+                val.authors = authors.join(", ");
+                resolvedFiles[key] = val;
+            }
+        }
+    };
+
+    if (addonIds.size() == 1) {
+        auto [projTask, result] = FlameAPI::get().getProject(*addonIds.begin()).make();
+        connect(projTask.get(), &Task::succeeded, this, [this, result, fillProjectInfo] {
+            auto pack = *result;
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(pack->name));
+            fillProjectInfo(*pack);
+            buildZip();
+        });
+        connect(projTask.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
+        connect(projTask.get(), &Task::aborted, this, &FlamePackExportTask::emitAborted);
+        task.reset(projTask);
+        task->start();
+        return;
+    }
+
+    Task::Ptr projTask;
+    QByteArray* response;
+    std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds);
+
+    connect(projTask.get(), &Task::succeeded, this, [this, response, fillProjectInfo] {
         QJsonParseError parseError{};
         auto doc = QJsonDocument::fromJson(*response, &parseError);
         if (parseError.error != QJsonParseError::NoError) {
@@ -269,11 +297,7 @@ void FlamePackExportTask::getProjectsInfo()
         }
 
         try {
-            QJsonArray entries;
-            if (addonIds.size() == 1)
-                entries = { Json::requireObject(Json::requireObject(doc), "data") };
-            else
-                entries = Json::requireArray(Json::requireObject(doc), "data");
+            QJsonArray entries = Json::requireArray(Json::requireObject(doc), "data");
 
             for (auto entry : entries) {
                 auto entryObj = Json::requireObject(entry);
@@ -283,20 +307,7 @@ void FlamePackExportTask::getProjectsInfo()
 
                     ModPlatform::IndexedPack pack;
                     FlameMod::loadIndexedPack(pack, entryObj);
-                    for (auto key : resolvedFiles.keys()) {
-                        auto val = resolvedFiles.value(key);
-                        if (val.addonId == pack.addonId) {
-                            val.name = pack.name;
-                            val.slug = pack.slug;
-                            QStringList authors;
-                            for (auto author : pack.authors)
-                                authors << author.name;
-
-                            val.authors = authors.join(", ");
-                            resolvedFiles[key] = val;
-                        }
-                    }
-
+                    fillProjectInfo(pack);
                 } catch (Json::JsonException& e) {
                     qDebug() << e.cause();
                     qDebug() << entries;

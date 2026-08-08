@@ -140,20 +140,36 @@ void FlameCheckUpdate::collectBlockedMods()
         quickSearch[addonId] = resource;
     }
 
-    Task::Ptr projTask;
-    QByteArray* response = nullptr;
-
     if (addonIds.isEmpty()) {
         emitSucceeded();
         return;
     }
+
     if (addonIds.size() == 1) {
-        std::tie(projTask, response) = FlameAPI::get().getProject(*addonIds.begin());
-    } else {
-        std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds);
+        auto [projTask, result] = FlameAPI::get().getProject(*addonIds.begin()).make();
+        connect(projTask.get(), &Task::succeeded, this, [this, result, quickSearch] {
+            auto pack = *result;
+            auto* resource = quickSearch.find(pack->addonId.toString()).value();
+
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(resource->name()));
+            auto recoverUrl = QString("%1/download/%2").arg(pack->websiteUrl, m_blocked[resource]);
+            emit checkFailed(resource, tr("Resource has a new update available, but is not downloadable using CurseForge."), recoverUrl);
+        });
+        connect(projTask.get(), &Task::finished, this, &FlameCheckUpdate::emitSucceeded);  // do not care much about error
+        connect(projTask.get(), &Task::progress, this, &FlameCheckUpdate::setProgress);
+        connect(projTask.get(), &Task::stepProgress, this, &FlameCheckUpdate::propagateStepProgress);
+        connect(projTask.get(), &Task::details, this, &FlameCheckUpdate::setDetails);
+        m_task = projTask;
+        m_task->start();
+        return;
     }
 
-    connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds, quickSearch] {
+    Task::Ptr projTask;
+    QByteArray* response = nullptr;
+
+    std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds);
+
+    connect(projTask.get(), &Task::succeeded, this, [this, response, quickSearch] {
         QJsonParseError parseError{};
         auto doc = QJsonDocument::fromJson(*response, &parseError);
         if (parseError.error != QJsonParseError::NoError) {
@@ -164,12 +180,7 @@ void FlameCheckUpdate::collectBlockedMods()
         }
 
         try {
-            QJsonArray entries;
-            if (addonIds.size() == 1) {
-                entries = { Json::requireObject(Json::requireObject(doc), "data") };
-            } else {
-                entries = Json::requireArray(Json::requireObject(doc), "data");
-            }
+            QJsonArray entries = Json::requireArray(Json::requireObject(doc), "data");
 
             for (auto entry : entries) {
                 auto entryObj = Json::requireObject(entry);
