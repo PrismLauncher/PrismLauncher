@@ -40,10 +40,10 @@ ResourceAPI::VersionSearchArgs ShaderPackResourceModel::createVersionsArguments(
     return { .pack = pack, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::ShaderPack };
 }
 
-ResourceAPI::ProjectInfoArgs ShaderPackResourceModel::createInfoArguments(const QModelIndex& entry)
+QString ShaderPackResourceModel::createInfoArguments(const QModelIndex& entry)
 {
     auto pack = m_packs[entry.row()];
-    return { .pack = pack };
+    return pack->addonId.toString();
 }
 
 void ShaderPackResourceModel::searchWithTerm(const QString& term, unsigned int sort)

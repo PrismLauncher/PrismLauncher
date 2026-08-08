@@ -83,10 +83,10 @@ ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(const QModelInd
     return { .pack = pack, .mcVersions = versions, .loaders = loaders, .resourceType = ModPlatform::ResourceType::Mod };
 }
 
-ResourceAPI::ProjectInfoArgs ModModel::createInfoArguments(const QModelIndex& index)
+QString ModModel::createInfoArguments(const QModelIndex& index)
 {
     auto pack = m_packs[index.row()];
-    return { pack };
+    return pack->addonId.toString();
 }
 
 void ModModel::searchWithTerm(const QString& term, unsigned int sort, bool filter_changed)

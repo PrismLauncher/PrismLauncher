@@ -27,10 +27,10 @@ ResourceAPI::VersionSearchArgs DataPackResourceModel::createVersionsArguments(co
     return { pack, {}, ModPlatform::ModLoaderType::DataPack };
 }
 
-ResourceAPI::ProjectInfoArgs DataPackResourceModel::createInfoArguments(const QModelIndex& entry)
+QString DataPackResourceModel::createInfoArguments(const QModelIndex& entry)
 {
     auto pack = m_packs[entry.row()];
-    return { pack };
+    return pack->addonId.toString();
 }
 
 void DataPackResourceModel::searchWithTerm(const QString& term, unsigned int sort)

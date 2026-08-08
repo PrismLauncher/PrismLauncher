@@ -239,8 +239,8 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
     }
 
     if (!pack->extraDataLoaded) {
-        auto args{ createInfoArguments(entry) };
-        auto [job, result] = m_api->getProject(args.pack->addonId.toString(), true).make();
+        auto addonId = createInfoArguments(entry);
+        auto [job, result] = m_api->getProject(addonId, true).make();
         if (job) {
             connect(job.get(), &Task::succeeded, this, [this, entry, result] {
                 if (!s_running_models.constFind(this).value()) {

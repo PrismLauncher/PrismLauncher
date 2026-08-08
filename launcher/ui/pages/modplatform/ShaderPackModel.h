@@ -29,7 +29,7 @@ class ShaderPackResourceModel : public ResourceModel {
    public slots:
     ResourceAPI::SearchArgs createSearchArguments() override;
     ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) override;
-    ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex&) override;
+    QString createInfoArguments(const QModelIndex&) override;
 
    protected:
     const BaseInstance& m_baseInstance;

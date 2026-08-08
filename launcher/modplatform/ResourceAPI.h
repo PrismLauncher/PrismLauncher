@@ -86,10 +86,6 @@ class ResourceAPI {
         bool includeChangelog{};
     };
 
-    struct ProjectInfoArgs {
-        ModPlatform::IndexedPack::Ptr pack;
-    };
-
     struct DependencySearchArgs {
         ModPlatform::Dependency dependency;
         Version mcVersion;
