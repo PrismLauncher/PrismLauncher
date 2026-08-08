@@ -25,7 +25,7 @@ ResourceAPI::SearchArgs FlameTexturePackModel::createSearchArguments()
 {
     auto args = TexturePackResourceModel::createSearchArguments();
 
-    auto profile = static_cast<const MinecraftInstance&>(m_base_instance).getPackProfile();
+    auto profile = static_cast<const MinecraftInstance&>(m_baseInstance).getPackProfile();
     QString instance_minecraft_version = profile->getComponentVersion("net.minecraft");
 
     // Bypass the texture pack logic, because we can't do multiple versions in the API query

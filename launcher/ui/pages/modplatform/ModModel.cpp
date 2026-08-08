@@ -21,15 +21,15 @@
 
 namespace ResourceDownload {
 
-ModModel::ModModel(BaseInstance& base_inst, const ResourceAPI* api, const QString& debugName, QString metaEntryBase)
-    : ResourceModel(api), m_base_instance(base_inst), m_debugName(debugName + " (Model)"), m_metaEntryBase(std::move(metaEntryBase))
+ModModel::ModModel(BaseInstance& baseInst, const ResourceAPI* api, const QString& debugName, QString metaEntryBase)
+    : ResourceModel(api), m_baseInstance(baseInst), m_debugName(debugName + " (Model)"), m_metaEntryBase(std::move(metaEntryBase))
 {}
 
 /******** Make data requests ********/
 
 ResourceAPI::SearchArgs ModModel::createSearchArguments()
 {
-    auto* profile = static_cast<const MinecraftInstance&>(m_base_instance).getPackProfile();
+    auto* profile = static_cast<const MinecraftInstance&>(m_baseInstance).getPackProfile();
 
     Q_ASSERT(profile);
     Q_ASSERT(m_filter);
@@ -66,7 +66,7 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
 ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(const QModelIndex& index)
 {
     auto pack = m_packs[index.row()];
-    auto* profile = static_cast<const MinecraftInstance&>(m_base_instance).getPackProfile();
+    auto* profile = static_cast<const MinecraftInstance&>(m_baseInstance).getPackProfile();
 
     Q_ASSERT(profile);
     Q_ASSERT(m_filter);
@@ -89,9 +89,9 @@ QString ModModel::createInfoArguments(const QModelIndex& index)
     return pack->addonId.toString();
 }
 
-void ModModel::searchWithTerm(const QString& term, unsigned int sort, bool filter_changed)
+void ModModel::searchWithTerm(const QString& term, unsigned int sort, bool filterChanged)
 {
-    if (m_search_term == term && m_search_term.isNull() == term.isNull() && m_current_sort_index == sort && !filter_changed) {
+    if (m_search_term == term && m_search_term.isNull() == term.isNull() && m_current_sort_index == sort && !filterChanged) {
         return;
     }
 
@@ -103,7 +103,7 @@ void ModModel::searchWithTerm(const QString& term, unsigned int sort, bool filte
 
 bool ModModel::isPackInstalled(ModPlatform::IndexedPack::Ptr pack) const
 {
-    auto allMods = static_cast<MinecraftInstance&>(m_base_instance).loaderModList()->allMods();
+    auto allMods = static_cast<MinecraftInstance&>(m_baseInstance).loaderModList()->allMods();
     return std::ranges::any_of(allMods, [pack](Mod* mod) {
         if (auto meta = mod->metadata(); meta) {
             return meta->provider == pack->provider && meta->project_id == pack->addonId;
@@ -114,7 +114,7 @@ bool ModModel::isPackInstalled(ModPlatform::IndexedPack::Ptr pack) const
 
 QVariant ModModel::getInstalledPackVersion(ModPlatform::IndexedPack::Ptr pack) const
 {
-    auto allMods = static_cast<MinecraftInstance&>(m_base_instance).loaderModList()->allMods();
+    auto allMods = static_cast<MinecraftInstance&>(m_baseInstance).loaderModList()->allMods();
     for (auto* mod : allMods) {
         if (auto meta = mod->metadata(); meta && meta->provider == pack->provider && meta->project_id == pack->addonId) {
             return meta->version();
@@ -145,7 +145,7 @@ bool ModModel::checkVersionFilters(const ModPlatform::IndexedVersion& v)
     if (!m_filter) {
         return true;
     }
-    auto loaders = static_cast<MinecraftInstance&>(m_base_instance).getPackProfile()->getSupportedModLoaders();
+    auto loaders = static_cast<MinecraftInstance&>(m_baseInstance).getPackProfile()->getSupportedModLoaders();
     if (m_filter->loaders != 0U) {
         loaders = m_filter->loaders;
     }
