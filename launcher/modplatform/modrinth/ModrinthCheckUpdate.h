@@ -1,6 +1,7 @@
 #pragma once
 
 #include "modplatform/CheckUpdateTask.h"
+#include "modplatform/ModIndex.h"
 
 class ModrinthCheckUpdate : public CheckUpdateTask {
     Q_OBJECT
@@ -17,7 +18,8 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
    protected slots:
     void executeTask() override;
     void getUpdateModsForLoader(std::optional<ModPlatform::ModLoaderTypes> loader = {}, bool forceModLoaderCheck = false);
-    void checkVersionsResponse(QByteArray* response, std::optional<ModPlatform::ModLoaderTypes> loader);
+    void checkVersionsResponse(const QHash<QString, ModPlatform::IndexedVersion>& versions,
+                               std::optional<ModPlatform::ModLoaderTypes> loader);
     void checkNextLoader();
 
    private:

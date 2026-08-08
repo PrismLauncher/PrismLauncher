@@ -4,21 +4,21 @@
 
 #include "ModrinthAPI.h"
 
-#include "Application.h"
 #include "FileSystem.h"
 #include "Json.h"
-#include "net/ApiRequest.h"
-#include "net/NetJob.h"
 #include "net/NetRequest.h"
 #include "net/RPCSink.h"
 
-Net::Spec<ModPlatform::IndexedVersion> ModrinthAPI::currentVersion(const QString& hash, const QString& hashFormat)
+namespace {
+
+// Shared parse function for single version responses (currentVersion, latestVersion)
+auto makeVersionParseFunc(const QString& taskName) -> Net::RpcSink<ModPlatform::IndexedVersion>::ParseFunc
 {
-    auto parseFunc = [](const QByteArray& response) -> Net::RpcSink<ModPlatform::IndexedVersion>::ParseResult {
+    return [taskName](const QByteArray& response) -> Net::RpcSink<ModPlatform::IndexedVersion>::ParseResult {
         QJsonParseError parseError{};
         QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
         if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth::GetCurrentVersion at" << parseError.offset
+            qWarning() << "Error while parsing JSON response from" << taskName << "at" << parseError.offset
                        << "reason:" << parseError.errorString();
             qWarning() << response;
             return std::unexpected(parseError.errorString());
@@ -34,6 +34,73 @@ Net::Spec<ModPlatform::IndexedVersion> ModrinthAPI::currentVersion(const QString
             return std::unexpected(e.cause());
         }
     };
+}
+
+// Shared parse function for hash-keyed version responses (currentVersions, latestVersions)
+auto makeVersionHashParseFunc(const QString& hashFormat, const QString& taskName)
+    -> Net::RpcSink<QHash<QString, ModPlatform::IndexedVersion>>::ParseFunc
+{
+    return [hashFormat, taskName](const QByteArray& response) -> Net::RpcSink<QHash<QString, ModPlatform::IndexedVersion>>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from" << taskName << "at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
+        }
+
+        QHash<QString, ModPlatform::IndexedVersion> versions;
+        try {
+            auto entries = Json::requireObject(doc);
+            for (auto it = entries.constBegin(); it != entries.constEnd(); ++it) {
+                try {
+                    auto entry = Json::requireObject(it.value());
+
+                    auto version = Modrinth::loadIndexedPackVersion(entry);
+                    auto files = Json::requireArray(entry, "files");
+                    for (auto fileVal : files) {
+                        auto fileObj = fileVal.toObject();
+                        auto hashList = Json::requireObject(fileObj, "hashes");
+                        if (hashList.contains(hashFormat)) {
+                            auto fileHash = Json::requireString(hashList, hashFormat);
+                            if (fileHash == it.key()) {
+                                version.downloadUrl = Json::requireString(fileObj, "url");
+                                version.fileName = Json::requireString(fileObj, "filename");
+                                version.fileName = FS::RemoveInvalidPathChars(version.fileName);
+                                version.hash = fileHash;
+                                version.hash_type = hashFormat;
+                                version.is_preferred = true;
+                                if (hashList.contains("sha1")) {
+                                    version.sha1 = Json::requireString(hashList, "sha1");
+                                }
+                                if (fileObj.contains("size")) {
+                                    version.size = fileObj["size"].toInt();
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    versions.insert(it.key(), version);
+                } catch (Json::JsonException& e) {
+                    qDebug() << "Skipping invalid version entry for hash" << it.key() << ":" << e.cause();
+                }
+            }
+        } catch (Json::JsonException& e) {
+            qDebug() << e.cause();
+            qDebug() << doc;
+            return std::unexpected(e.cause());
+        }
+        return versions;
+    };
+}
+
+}  // namespace
+
+Net::Spec<ModPlatform::IndexedVersion> ModrinthAPI::currentVersion(const QString& hash, const QString& hashFormat)
+{
+    auto parseFunc = makeVersionParseFunc("Modrinth::GetCurrentVersion");
 
     return Net::Spec<ModPlatform::IndexedVersion>{
         .url = QUrl(QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1?algorithm=%2").arg(hash, hashFormat)),
@@ -51,67 +118,7 @@ Net::Spec<QHash<QString, ModPlatform::IndexedVersion>> ModrinthAPI::currentVersi
     QJsonDocument body(bodyObj);
     auto bodyRaw = body.toJson();
 
-    auto parseFunc = [hashFormat](const QByteArray& response) -> Net::RpcSink<QHash<QString, ModPlatform::IndexedVersion>>::ParseResult {
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth::GetCurrentVersions at" << parseError.offset
-                       << "reason:" << parseError.errorString();
-            qWarning() << response;
-            return std::unexpected(parseError.errorString());
-        }
-
-        QHash<QString, ModPlatform::IndexedVersion> versions;
-        try {
-            auto entries = Json::requireObject(doc);
-            for (auto it = entries.constBegin(); it != entries.constEnd(); ++it) {
-                try {
-                    auto entry = Json::requireObject(it.value());
-
-                    // First load the base version info
-                    auto version = Modrinth::loadIndexedPackVersion(entry);
-
-                    // Now find the specific file that matches the requested hash (it.key())
-                    auto files = Json::requireArray(entry, "files");
-                    for (auto fileVal : files) {
-                        auto fileObj = fileVal.toObject();
-                        auto hashList = Json::requireObject(fileObj, "hashes");
-                        if (hashList.contains(hashFormat)) {
-                            auto fileHash = Json::requireString(hashList, hashFormat);
-                            if (fileHash == it.key()) {
-                                // Found the matching file, update version with this file's info
-                                version.downloadUrl = Json::requireString(fileObj, "url");
-                                version.fileName = Json::requireString(fileObj, "filename");
-                                version.fileName = FS::RemoveInvalidPathChars(version.fileName);
-                                version.hash = fileHash;
-                                version.hash_type = hashFormat;
-                                version.is_preferred = true;
-
-                                // Also get sha1 and size if available
-                                if (hashList.contains("sha1")) {
-                                    version.sha1 = Json::requireString(hashList, "sha1");
-                                }
-                                if (fileObj.contains("size")) {
-                                    version.size = fileObj["size"].toInt();
-                                }
-                                break;
-                            }
-                        }
-                    }
-
-                    versions.insert(it.key(), version);
-                } catch (Json::JsonException& e) {
-                    qDebug() << "Skipping invalid version entry for hash" << it.key() << ":" << e.cause();
-                    // Skip missing/invalid keys as per design
-                }
-            }
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
-            return std::unexpected(e.cause());
-        }
-        return versions;
-    };
+    auto parseFunc = makeVersionHashParseFunc(hashFormat, "Modrinth::GetCurrentVersions");
 
     return Net::Spec<QHash<QString, ModPlatform::IndexedVersion>>{ .method = Net::NetRequest::HttpMethod::Post,
                                                                    .url = QUrl(BuildConfig.MODRINTH_PROD_URL + "/version_files"),
@@ -120,13 +127,11 @@ Net::Spec<QHash<QString, ModPlatform::IndexedVersion>> ModrinthAPI::currentVersi
                                                                    .name = "Modrinth::GetCurrentVersions" };
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash,
-                                                             const QString& hashFormat,
-                                                             std::optional<std::vector<Version>> mcVersions,
-                                                             std::optional<ModPlatform::ModLoaderTypes> loaders) const
+Net::Spec<ModPlatform::IndexedVersion> ModrinthAPI::latestVersion(const QString& hash,
+                                                                  const QString& hashFormat,
+                                                                  std::optional<std::vector<Version>> mcVersions,
+                                                                  std::optional<ModPlatform::ModLoaderTypes> loaders)
 {
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersion"), APPLICATION->network());
-
     QJsonObject bodyObj;
 
     if (loaders.has_value()) {
@@ -144,20 +149,22 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash
     QJsonDocument body(bodyObj);
     auto bodyRaw = body.toJson();
 
-    auto [action, response] = Net::ApiRequest::makeByteArray(
-        QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1/update?algorithm=%2").arg(hash, hashFormat), bodyRaw);
-    netJob->addNetAction(action);
+    auto parseFunc = makeVersionParseFunc("Modrinth::GetLatestVersion");
 
-    return { netJob, response };
+    return Net::Spec<ModPlatform::IndexedVersion>{
+        .method = Net::NetRequest::HttpMethod::Post,
+        .url = QUrl(QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1/update?algorithm=%2").arg(hash, hashFormat)),
+        .data = bodyRaw,
+        .parse = parseFunc,
+        .name = "Modrinth::GetLatestVersion"
+    };
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(const QStringList& hashes,
-                                                              const QString& hashFormat,
-                                                              std::optional<std::vector<Version>> mcVersions,
-                                                              std::optional<ModPlatform::ModLoaderTypes> loaders) const
+Net::Spec<QHash<QString, ModPlatform::IndexedVersion>> ModrinthAPI::latestVersions(const QStringList& hashes,
+                                                                                   const QString& hashFormat,
+                                                                                   std::optional<std::vector<Version>> mcVersions,
+                                                                                   std::optional<ModPlatform::ModLoaderTypes> loaders)
 {
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersions"), APPLICATION->network());
-
     QJsonObject bodyObj;
 
     Json::writeStringList(bodyObj, "hashes", hashes);
@@ -177,10 +184,14 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(const QStringList&
 
     QJsonDocument body(bodyObj);
     auto bodyRaw = body.toJson();
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"), bodyRaw);
-    netJob->addNetAction(action);
 
-    return { netJob, response };
+    auto parseFunc = makeVersionHashParseFunc(hashFormat, "Modrinth::GetLatestVersions");
+
+    return Net::Spec<QHash<QString, ModPlatform::IndexedVersion>>{ .method = Net::NetRequest::HttpMethod::Post,
+                                                                   .url = QUrl(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"),
+                                                                   .data = bodyRaw,
+                                                                   .parse = parseFunc,
+                                                                   .name = "Modrinth::GetLatestVersions" };
 }
 
 Net::Spec<QList<ModPlatform::IndexedPack::Ptr>> ModrinthAPI::getProjects(QStringList addonIds) const

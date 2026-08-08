@@ -175,13 +175,13 @@ void ModrinthPackExportTask::resolveAPIHashes(QHash<QString, ModPlatform::Indexe
             continue;
         }
 
-        const auto& version = *it;
-        if (version.downloadUrl.isEmpty()) {
+        const auto& ver = *it;
+        if (ver.downloadUrl.isEmpty()) {
             continue;
         }
 
         resolvedFiles[iterator.key()] =
-            ResolvedFile{ .sha1 = version.sha1, .sha512 = iterator.value(), .url = version.downloadUrl, .size = version.size };
+            ResolvedFile{ .sha1 = ver.sha1, .sha512 = iterator.value(), .url = ver.downloadUrl, .size = ver.size };
     }
     pendingHashes.clear();
     buildZip();
