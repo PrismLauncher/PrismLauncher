@@ -1,5 +1,7 @@
 #include "modplatform/ResourceAPI.h"
 
+#include <algorithm>
+
 #include "Application.h"
 #include "Json.h"
 #include "net/NetJob.h"
@@ -51,27 +53,21 @@ Net::Spec<QList<ModPlatform::IndexedPack::Ptr>> ResourceAPI::searchProjects(cons
                                                             .name = "ResourceAPI::searchProjects" };
 }
 
-Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVector<ModPlatform::IndexedVersion>>&& callbacks) const
+Net::Spec<QVector<ModPlatform::IndexedVersion>> ResourceAPI::getProjectVersions(const VersionSearchArgs& args) const
 {
-    auto versions_url_optional = getVersionsURL(args);
-    if (!versions_url_optional.has_value())
-        return nullptr;
+    auto versionsUrlOptional = getVersionsURL(args);
+    if (!versionsUrlOptional.has_value()) {
+        return {};
+    }
 
-    auto versions_url = versions_url_optional.value();
-
-    auto netJob = makeShared<NetJob>(QString("%1::Versions").arg(args.pack->name), APPLICATION->network());
-
-    auto [action, response] = Net::ApiRequest::makeByteArray(versions_url);
-    netJob->addNetAction(action);
-
-    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks, args] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for getting versions at" << parse_error.offset
-                       << "reason:" << parse_error.errorString();
-            qWarning() << *response;
-            return;
+    auto parseFunc = [this, args](const QByteArray& response) -> Net::RpcSink<QVector<ModPlatform::IndexedVersion>>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response for getting versions at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
         }
 
         QVector<ModPlatform::IndexedVersion> unsortedVersions;
@@ -95,33 +91,19 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
                 // dates are in RFC 3339 format
                 return a.date > b.date;
             };
-            std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);
+            std::ranges::sort(unsortedVersions, orderSortPredicate);
         } catch (const JSONValidationError& e) {
             qDebug() << doc;
             qWarning() << "Error while reading" << debugName() << "resource version:" << e.cause();
+            return std::unexpected(e.cause());
         }
 
-        callbacks.on_succeed(unsortedVersions);
-    });
+        return unsortedVersions;
+    };
 
-    // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
-    // This prevents the lambda from extending the lifetime of the shared resource,
-    // as it only temporarily locks the resource when needed.
-    auto weak = netJob.toWeakRef();
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [weak, callbacks](const QString& reason) {
-        int network_error_code = -1;
-        if (auto netJob = weak.lock()) {
-            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
-                network_error_code = failed_action->replyStatusCode();
-        }
-        callbacks.on_fail(reason, network_error_code);
-    });
-    QObject::connect(netJob.get(), &NetJob::aborted, netJob.get(), [callbacks] {
-        if (callbacks.on_abort != nullptr)
-            callbacks.on_abort();
-    });
-
-    return netJob;
+    return Net::Spec<QVector<ModPlatform::IndexedVersion>>{ .url = QUrl(versionsUrlOptional.value()),
+                                                            .parse = parseFunc,
+                                                            .name = "ResourceAPI::getProjectVersions" };
 }
 
 Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callback<ModPlatform::IndexedVersion>&& callbacks) const
@@ -158,8 +140,9 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
             auto obj = versionIter.toObject();
 
             auto file = loadIndexedPackVersion(obj, ModPlatform::ResourceType::Mod);
-            if (!file.addonId.isValid())
+            if (!file.addonId.isValid()) {
                 file.addonId = args.dependency.addonId;
+            }
 
             if (file.fileId.isValid() &&
                 (!file.loaders || args.loader & file.loaders))  // Heuristic to check if the returned value is valid
@@ -170,7 +153,7 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
             // dates are in RFC 3339 format
             return a.date > b.date;
         };
-        std::sort(versions.begin(), versions.end(), orderSortPredicate);
+        std::ranges::sort(versions, orderSortPredicate);
         auto bestMatch = versions.size() != 0 ? versions.front() : ModPlatform::IndexedVersion();
         callbacks.on_succeed(bestMatch);
     });
@@ -180,12 +163,13 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
     // as it only temporarily locks the resource when needed.
     auto weak = netJob.toWeakRef();
     QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [weak, callbacks](const QString& reason) {
-        int network_error_code = -1;
+        int networkErrorCode = -1;
         if (auto netJob = weak.lock()) {
-            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
-                network_error_code = failed_action->replyStatusCode();
+            if (auto* failedAction = netJob->getFailedActions().at(0); failedAction) {
+                networkErrorCode = failedAction->replyStatusCode();
+            }
         }
-        callbacks.on_fail(reason, network_error_code);
+        callbacks.on_fail(reason, networkErrorCode);
     });
     return netJob;
 }
@@ -202,11 +186,11 @@ QString ResourceAPI::getGameVersionsString(std::vector<Version> mcVersions) cons
 
 QString ResourceAPI::mapMCVersionToModrinth(Version v) const
 {
-    static const QString preString = " Pre-Release ";
+    static const QString s_preString = " Pre-Release ";
     auto verStr = v.toString();
 
-    if (verStr.contains(preString)) {
-        verStr.replace(preString, "-pre");
+    if (verStr.contains(s_preString)) {
+        verStr.replace(s_preString, "-pre");
     }
     verStr.replace(" ", "-");
     return verStr;

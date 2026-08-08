@@ -35,7 +35,6 @@
  */
 
 #include "ModrinthPage.h"
-#include "Version.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -156,10 +155,10 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
                 }
 
                 auto& pack = *result;
-                QVariant current_updated;
-                current_updated.setValue(pack);
+                QVariant currentUpdated;
+                currentUpdated.setValue(pack);
 
-                if (!m_model->setData(curr, current_updated, Qt::UserRole)) {
+                if (!m_model->setData(curr, currentUpdated, Qt::UserRole)) {
                     qWarning() << "Failed to cache extra info for the current pack!";
                 }
 
@@ -180,54 +179,51 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
     if (!m_current->versionsLoaded || m_filterWidget->changed()) {
         qDebug() << "Loading modrinth modpack versions";
 
-        ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
-
         auto addonId = m_current->addonId;
-        // Use default if no callbacks are set
-        callbacks.on_succeed = [this, curr, addonId](auto& doc) {
-            if (addonId != m_current->addonId) {
-                return;  // wrong request
-            }
-
-            m_current->versions = doc;
-            m_current->versionsLoaded = true;
-            auto pred = [this](const ModPlatform::IndexedVersion& v) {
-                if (auto filter = m_filterWidget->getFilter()) {
-                    return !filter->checkModpackFilters(v);
+        auto [netJob, result] = ModrinthAPI::get().getProjectVersions({ m_current, {}, {}, ModPlatform::ResourceType::Modpack }).make();
+        if (netJob) {
+            connect(netJob.get(), &Task::succeeded, this, [this, curr, addonId, result] {
+                if (addonId != m_current->addonId) {
+                    return;  // wrong request
                 }
-                return false;
-            };
+
+                auto& doc = *result;
+                m_current->versions = doc;
+                m_current->versionsLoaded = true;
+                auto pred = [this](const ModPlatform::IndexedVersion& v) {
+                    if (auto filter = m_filterWidget->getFilter()) {
+                        return !filter->checkModpackFilters(v);
+                    }
+                    return false;
+                };
 #if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
-            m_current->versions.removeIf(pred);
+                m_current->versions.removeIf(pred);
 #else
-            for (auto it = m_current->versions.begin(); it != m_current->versions.end();)
-                if (pred(*it))
-                    it = m_current->versions.erase(it);
-                else
-                    ++it;
+                for (auto it = m_current->versions.begin(); it != m_current->versions.end();)
+                    if (pred(*it))
+                        it = m_current->versions.erase(it);
+                    else
+                        ++it;
 #endif
-            for (const auto& version : m_current->versions) {
-                m_ui->versionSelectionBox->addItem(version.getVersionDisplayString(), QVariant(version.fileId));
-            }
+                for (const auto& version : m_current->versions) {
+                    m_ui->versionSelectionBox->addItem(version.getVersionDisplayString(), QVariant(version.fileId));
+                }
 
-            QVariant current_updated;
-            current_updated.setValue(m_current);
+                QVariant currentUpdated;
+                currentUpdated.setValue(m_current);
 
-            if (!m_model->setData(curr, current_updated, Qt::UserRole)) {
-                qWarning() << "Failed to cache versions for the current pack!";
-            }
+                if (!m_model->setData(curr, currentUpdated, Qt::UserRole)) {
+                    qWarning() << "Failed to cache versions for the current pack!";
+                }
 
-            suggestCurrent();
-        };
-        callbacks.on_fail = [this](const QString& reason, int) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
-        };
-
-        auto netJob =
-            ModrinthAPI::get().getProjectVersions({ m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
-
-        m_job2 = netJob;
-        m_job2->start();
+                suggestCurrent();
+            });
+            connect(netJob.get(), &Task::failed, this, [this](const QString& reason) {
+                CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
+            });
+            m_job2 = netJob;
+            m_job2->start();
+        }
 
     } else {
         for (const auto& version : m_current->versions) {
@@ -247,10 +243,11 @@ void ModrinthPage::updateUI()
 {
     QString text = "";
 
-    if (m_current->websiteUrl.isEmpty())
+    if (m_current->websiteUrl.isEmpty()) {
         text = m_current->name;
-    else
+    } else {
         text = "<a href=\"" + m_current->websiteUrl + "\">" + m_current->name + "</a>";
+    }
 
     if (!m_current->authors.empty()) {
         auto authorToStr = [](ModPlatform::ModpackAuthor& author) {
@@ -324,12 +321,12 @@ void ModrinthPage::suggestCurrent()
 
     for (auto& ver : m_current->versions) {
         if (ver.fileId == m_selectedVersion) {
-            QMap<QString, QString> extra_info;
-            extra_info.insert("pack_id", m_current->addonId.toString());
-            extra_info.insert("pack_version_id", ver.fileId.toString());
+            QMap<QString, QString> extraInfo;
+            extraInfo.insert("pack_id", m_current->addonId.toString());
+            extraInfo.insert("pack_version_id", ver.fileId.toString());
 
             m_dialog->setSuggestedPack(m_current->name, ver.version,
-                                       new InstanceImportTask(ver.downloadUrl, true, this, std::move(extra_info)));
+                                       new InstanceImportTask(ver.downloadUrl, true, this, std::move(extraInfo)));
             QString editedLogoName = "modrinth_" + m_current->logoName;
             m_model->getLogo(m_current->logoName, m_current->logoUrl,
                              [this, editedLogoName](const QString& logo) { m_dialog->setSuggestedIconFromFile(logo, editedLogoName); });

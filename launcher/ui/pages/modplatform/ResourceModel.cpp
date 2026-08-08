@@ -220,26 +220,20 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
 
     if (!pack->versionsLoaded) {
         auto args{ createVersionsArguments(entry) };
-        ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
 
         auto addonId = pack->addonId;
-        // Use default if no callbacks are set
-        if (!callbacks.on_succeed) {
-            callbacks.on_succeed = [this, entry, addonId](auto& doc) {
+        auto [job, result] = m_api->getProjectVersions(args).make();
+        if (job) {
+            connect(job.get(), &Task::succeeded, this, [this, entry, addonId, result] {
                 if (!s_running_models.constFind(this).value()) {
                     return;
                 }
-                versionRequestSucceeded(doc, addonId, entry);
-            };
-        }
-        if (!callbacks.on_fail) {
-            callbacks.on_fail = [](const QString& reason, int) {
+                versionRequestSucceeded(*result, addonId, entry);
+            });
+            connect(job.get(), &Task::failed, this, [](const QString& reason) {
                 QMessageBox::critical(nullptr, tr("Error"),
                                       tr("A network error occurred. Could not load project versions: %1").arg(reason));
-            };
-        }
-
-        if (auto job = m_api->getProjectVersions(std::move(args), std::move(callbacks)); job) {
+            });
             runInfoJob(job);
         }
     }
