@@ -128,38 +128,7 @@ Task::Ptr ResourceAPI::getProjectVersions(const VersionSearchArgs& args,
     return netJob;
 }
 
-Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<ModPlatform::IndexedPack::Ptr>&& callbacks) const
-{
-    auto [job, result] = getProject(args.pack->addonId.toString(), true).make();
-    if (!job) {
-        return nullptr;
-    }
-
-// Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
-    // This prevents the lambda from extending the lifetime of the shared resource,
-    // as it only temporarily locks the resource when needed.
-    auto weak = job.toWeakRef();
-    QObject::connect(job.get(), &Task::succeeded, job.get(), [weak, callbacks, result] {
-        if (auto job = weak.lock()) {
-            callbacks.onSucceed(*result);
-        }
-    });
-    QObject::connect(job.get(), &Task::failed, job.get(), [weak, callbacks](const QString& reason) {
-        int networkErrorCode = -1;
-        if (auto job = weak.lock()) {
-            networkErrorCode = job->replyStatusCode();
-        }
-        callbacks.onFail(reason, networkErrorCode);
-    });
-    QObject::connect(job.get(), &Task::aborted, job.get(), [callbacks] {
-        if (callbacks.onAbort != nullptr) {
-            callbacks.onAbort();
-        }
-    });
-    return job;
-}
-
-Task::Ptr ResourceAPI::getDependencyVersion(const DependencySearchArgs& args, const Callback<ModPlatform::IndexedVersion>& callbacks) const
+Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callback<ModPlatform::IndexedVersion>&& callbacks) const
 {
     auto versionsUrlOptional = getDependencyURL(args);
     if (!versionsUrlOptional.has_value()) {
