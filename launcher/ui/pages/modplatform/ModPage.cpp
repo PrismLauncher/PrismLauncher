@@ -143,12 +143,13 @@ void ModPage::triggerSearch()
 
 void ModPage::prepareProviderCategories()
 {
-    auto [task, response] = m_api->getModCategories();
+    auto [task, result] = m_api->getCategories(ModPlatform::ResourceType::Mod).make();
+    if (!task) {
+        return;
+    }
     m_categoriesTask = task;
-    connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() {
-        auto categories = m_api->loadModCategories(*response);
-        m_filterWidget->setCategories(categories);
-    });
-    m_categoriesTask->start();
+    connect(task.get(), &Task::succeeded, this, [this, result]() { m_filterWidget->setCategories(*result); });
+    connect(task.get(), &Task::failed, this, [](const QString& msg) { qDebug() << "Failed to get categories:" << msg; });
+    task->start();
 };
 }  // namespace ResourceDownload

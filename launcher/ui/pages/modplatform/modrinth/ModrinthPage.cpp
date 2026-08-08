@@ -380,11 +380,12 @@ void ModrinthPage::createFilterWidget()
     connect(m_ui->filterButton, &QPushButton::clicked, this, [this] { m_filterWidget->setHidden(!m_filterWidget->isHidden()); });
 
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &ModrinthPage::triggerSearch);
-    auto [categoriesTask, response] = ModrinthAPI::get().getModCategories();
+    auto [categoriesTask, result] = ModrinthAPI::get().getCategories(ModPlatform::ResourceType::Modpack).make();
+    if (!categoriesTask) {
+        return;
+    }
     m_categoriesTask = categoriesTask;
-    connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() {
-        auto categories = ModrinthAPI::loadCategories(*response, "modpack");
-        m_filterWidget->setCategories(categories);
-    });
+    connect(categoriesTask.get(), &Task::succeeded, this, [this, result]() { m_filterWidget->setCategories(*result); });
+    connect(categoriesTask.get(), &Task::failed, this, [](const QString& msg) { qDebug() << "Modrinth failed to get categories:" << msg; });
     m_categoriesTask->start();
 }

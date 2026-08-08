@@ -145,48 +145,40 @@ QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const
              { .index = 5, .name = "updated", .readableName = QObject::tr("Sort by Last Updated") } };
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getModCategories() const
+Net::Spec<QList<ModPlatform::Category>> ModrinthAPI::getCategories(ModPlatform::ResourceType type) const
 {
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetCategories"), APPLICATION->network());
-    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(BuildConfig.MODRINTH_PROD_URL + "/tag/category"));
-    netJob->addNetAction(action);
-    QObject::connect(netJob.get(), &Task::failed, netJob.get(),
-                     [](const QString& msg) { qDebug() << "Modrinth failed to get categories:" << msg; });
-
-    return { netJob, response };
-}
-
-QList<ModPlatform::Category> ModrinthAPI::loadCategories(const QByteArray& response, const QString& projectType)
-{
-    QList<ModPlatform::Category> categories;
-    QJsonParseError parseError{};
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
-    if (parseError.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from categories at" << parseError.offset << "reason:" << parseError.errorString();
-        qWarning() << *response;
-        return categories;
-    }
-
-    try {
-        auto arr = Json::requireArray(doc);
-
-        for (auto val : arr) {
-            auto cat = Json::requireObject(val);
-            auto name = Json::requireString(cat, "name");
-            if (cat["project_type"].toString() == projectType) {
-                categories.push_back({ .name = name, .id = name });
-            }
+    auto parseFunc = [type](const QByteArray& response) -> Net::RpcSink<QList<ModPlatform::Category>>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from categories at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << *response;
+            return std::unexpected(parseError.errorString());
         }
+        const auto resourceType = resourceTypeParameter(type);
+        QList<ModPlatform::Category> categories;
+        try {
+            auto arr = Json::requireArray(doc);
 
-    } catch (Json::JsonException& e) {
-        qCritical() << "Failed to parse response from a version request.";
-        qCritical() << e.what();
-        qDebug() << doc;
-    }
-    return categories;
-}
+            for (auto val : arr) {
+                auto cat = Json::requireObject(val);
+                auto name = Json::requireString(cat, "name");
+                if (cat["project_type"].toString() == resourceType) {
+                    categories.push_back({ .name = name, .id = name });
+                }
+            }
 
-QList<ModPlatform::Category> ModrinthAPI::loadModCategories(const QByteArray& response) const
-{
-    return loadCategories(response, "mod");
+        } catch (Json::JsonException& e) {
+            qCritical() << "Failed to parse response from a version request.";
+            qCritical() << e.what();
+            qDebug() << doc;
+            return std::unexpected(e.what());
+        }
+        return categories;
+    };
+
+    return Net::Spec<QList<ModPlatform::Category>>{ .url = QUrl(BuildConfig.MODRINTH_PROD_URL + "/tag/category"),
+                                                    .parse = parseFunc,
+                                                    .name = "ModrinthAPI::getCategories" };
 }

@@ -36,9 +36,7 @@ class FlameAPI final : public ResourceAPI {
     std::pair<Task::Ptr, QByteArray*> getFiles(const QStringList& fileIds) const;
     std::pair<Task::Ptr, QByteArray*> getFile(const QString& addonId, const QString& fileId) const;
 
-    static std::pair<Task::Ptr, QByteArray*> getCategories(ModPlatform::ResourceType type);
-    std::pair<Task::Ptr, QByteArray*> getModCategories() const override;
-    QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const override;
+    Net::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const override;
 
     QList<ResourceAPI::SortingMethod> getSortingMethods() const override;
 

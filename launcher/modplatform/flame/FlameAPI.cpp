@@ -187,61 +187,55 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getFile(const QString& addonId, cons
 QList<ResourceAPI::SortingMethod> FlameAPI::getSortingMethods() const
 {
     // https://docs.curseforge.com/?python#tocS_ModsSearchSortField
-    return { { 1, "Featured", QObject::tr("Sort by Featured") },
-             { 2, "Popularity", QObject::tr("Sort by Popularity") },
-             { 3, "LastUpdated", QObject::tr("Sort by Last Updated") },
-             { 4, "Name", QObject::tr("Sort by Name") },
-             { 5, "Author", QObject::tr("Sort by Author") },
-             { 6, "TotalDownloads", QObject::tr("Sort by Downloads") },
-             { 7, "Category", QObject::tr("Sort by Category") },
-             { 8, "GameVersion", QObject::tr("Sort by Game Version") } };
+    return { { .index = 1, .name = "Featured", .readableName = QObject::tr("Sort by Featured") },
+             { .index = 2, .name = "Popularity", .readableName = QObject::tr("Sort by Popularity") },
+             { .index = 3, .name = "LastUpdated", .readableName = QObject::tr("Sort by Last Updated") },
+             { .index = 4, .name = "Name", .readableName = QObject::tr("Sort by Name") },
+             { .index = 5, .name = "Author", .readableName = QObject::tr("Sort by Author") },
+             { .index = 6, .name = "TotalDownloads", .readableName = QObject::tr("Sort by Downloads") },
+             { .index = 7, .name = "Category", .readableName = QObject::tr("Sort by Category") },
+             { .index = 8, .name = "GameVersion", .readableName = QObject::tr("Sort by Game Version") } };
 }
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getCategories(ModPlatform::ResourceType type)
+Net::Spec<QList<ModPlatform::Category>> FlameAPI::getCategories(ModPlatform::ResourceType type) const
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::GetCategories"), APPLICATION->network());
-    auto [action, response] = Net::ApiRequest::makeByteArray(
-        QUrl(QString(BuildConfig.FLAME_BASE_URL + "/categories?gameId=432&classId=%1").arg(getClassId(type))));
-    netJob->addNetAction(action);
-    QObject::connect(netJob.get(), &Task::failed, netJob.get(), [](QString msg) { qDebug() << "Flame failed to get categories:" << msg; });
-    return { netJob, response };
-}
-
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getModCategories() const
-{
-    return getCategories(ModPlatform::ResourceType::Mod);
-}
-
-QList<ModPlatform::Category> FlameAPI::loadModCategories(const QByteArray& response) const
-{
-    QList<ModPlatform::Category> categories;
-    QJsonParseError parse_error{};
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
-    if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from categories at" << parse_error.offset
-                   << "reason:" << parse_error.errorString();
-        qWarning() << *response;
-        return categories;
-    }
-
-    try {
-        auto obj = Json::requireObject(doc);
-        auto arr = Json::requireArray(obj, "data");
-
-        for (auto val : arr) {
-            auto cat = Json::requireObject(val);
-            auto id = Json::requireInteger(cat, "id");
-            auto name = Json::requireString(cat, "name");
-            categories.push_back({ name, QString::number(id) });
+    auto parseFunc = [](const QByteArray& response) -> Net::RpcSink<QList<ModPlatform::Category>>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from categories at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
         }
 
-    } catch (Json::JsonException& e) {
-        qCritical() << "Failed to parse response from a version request.";
-        qCritical() << e.what();
-        qDebug() << doc;
-    }
-    return categories;
-};
+        QList<ModPlatform::Category> categories;
+        try {
+            auto obj = Json::requireObject(doc);
+            auto arr = Json::requireArray(obj, "data");
+
+            for (auto val : arr) {
+                auto cat = Json::requireObject(val);
+                auto id = Json::requireInteger(cat, "id");
+                auto name = Json::requireString(cat, "name");
+                categories.push_back({ .name = name, .id = QString::number(id) });
+            }
+
+        } catch (Json::JsonException& e) {
+            qCritical() << "Failed to parse response from a version request.";
+            qCritical() << e.what();
+            qDebug() << doc;
+            return std::unexpected(e.what());
+        }
+        return categories;
+    };
+
+    return Net::Spec<QList<ModPlatform::Category>>{
+        .url = QUrl(QString(BuildConfig.FLAME_BASE_URL + "/categories?gameId=432&classId=%1").arg(getClassId(type))),
+        .parse = parseFunc,
+        .name = "FlameAPI::getCategories"
+    };
+}
 
 std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
                                                                       QList<ModPlatform::ModLoaderType> instanceLoaders,

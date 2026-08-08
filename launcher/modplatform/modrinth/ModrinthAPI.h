@@ -36,11 +36,7 @@ class ModrinthAPI final : public ResourceAPI {
 
     Net::Spec<QList<ModPlatform::IndexedPack::Ptr>> getProjects(QStringList addonIds) const override;
 
-    std::pair<Task::Ptr, QByteArray*> getModCategories() const override;
-    static QList<ModPlatform::Category> loadCategories(const QByteArray& response, const QString& projectType);
-    QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const override;
-
-   public:
+    Net::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const override;
     auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 
     static auto getAuthorURL(const QString& name) -> QString { return "https://modrinth.com/user/" + name; };

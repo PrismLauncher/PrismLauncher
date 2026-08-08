@@ -334,11 +334,12 @@ void FlamePage::createFilterWidget()
     connect(m_ui->filterButton, &QPushButton::clicked, this, [this] { m_filterWidget->setHidden(!m_filterWidget->isHidden()); });
 
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &FlamePage::triggerSearch);
-    auto [task, response] = FlameAPI::getCategories(ModPlatform::ResourceType::Modpack);
+    auto [task, result] = FlameAPI::get().getCategories(ModPlatform::ResourceType::Modpack).make();
+    if (!task) {
+        return;
+    }
     m_categoriesTask = task;
-    connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() {
-        auto categories = FlameAPI::get().loadModCategories(*response);
-        m_filterWidget->setCategories(categories);
-    });
-    m_categoriesTask->start();
+    connect(task.get(), &Task::succeeded, this, [this, result]() { m_filterWidget->setCategories(*result); });
+    connect(task.get(), &Task::failed, this, [](const QString& msg) { qDebug() << "Flame failed to get categories:" << msg; });
+    task->start();
 }
