@@ -20,13 +20,10 @@
 #include <algorithm>
 #include <utility>
 
-#include "Json.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 
-#include "modplatform/modrinth/ModrinthPackIndex.h"
 #include "net/NetJob.h"
 #include "settings/SettingsObject.h"
 #include "tasks/Task.h"
@@ -57,80 +54,55 @@ void Flame::FileResolvingTask::executeTask()
     for (const auto& file : m_manifest.files) {
         fileIds.push_back(QString::number(file.fileId));
     }
-    auto [task, response] = FlameAPI::get().getFiles(fileIds);
+    auto [task, result] = FlameAPI::getFiles(fileIds).make();
     m_task = task;
 
-    auto stepProgress2 = std::make_shared<TaskStepProgress>();
-    connect(m_task.get(), &Task::succeeded, this, [this, response, stepProgress2]() {
-        stepProgress2->state = TaskStepState::Succeeded;
-        stepProgress(*stepProgress2);
-        netJobFinished(response);
+auto stepProgressV = std::make_shared<TaskStepProgress>();
+    connect(m_task.get(), &Task::succeeded, this, [this, result, stepProgressV]() {
+        stepProgressV->state = TaskStepState::Succeeded;
+        stepProgress(*stepProgressV);
+        netJobFinished(result);
     });
-    connect(m_task.get(), &Task::failed, this, [this, stepProgress2](QString reason) {
-        stepProgress2->state = TaskStepState::Failed;
-        stepProgress(*stepProgress2);
+    connect(m_task.get(), &Task::failed, this, [this, stepProgressV](QString reason) {
+        stepProgressV->state = TaskStepState::Failed;
+        stepProgress(*stepProgressV);
         emitFailed(std::move(reason));
     });
     connect(m_task.get(), &Task::stepProgress, this, &FileResolvingTask::propagateStepProgress);
-    connect(m_task.get(), &Task::progress, this, [this, stepProgress2](qint64 current, qint64 total) {
+    connect(m_task.get(), &Task::progress, this, [this, stepProgressV](qint64 current, qint64 total) {
         qDebug() << "Resolve slug progress" << current << total;
-        stepProgress2->update(current, total);
-        stepProgress(*stepProgress2);
+        stepProgressV->update(current, total);
+        stepProgress(*stepProgressV);
     });
-    connect(m_task.get(), &Task::status, this, [this, stepProgress2](QString status) {
-        stepProgress2->status = std::move(status);
-        stepProgress(*stepProgress2);
+    connect(m_task.get(), &Task::status, this, [this, stepProgressV](QString status) {
+        stepProgressV->status = std::move(status);
+        stepProgress(*stepProgressV);
     });
 
     m_task->start();
 }
 
-void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
+void Flame::FileResolvingTask::netJobFinished(QList<ModPlatform::IndexedVersion>* files)
 {
     setProgress(1, 3);
     // job to check modrinth for blocked projects
-    QJsonDocument doc;
-    QJsonArray array;
-
-    try {
-        doc = Json::requireDocument(*response);
-        array = Json::requireArray(doc.object()["data"]);
-    } catch (Json::JsonException& e) {
-        qCritical() << "Non-JSON data returned from the CF API";
-        qCritical() << e.cause();
-
-        emitFailed(tr("Invalid data returned from the API."));
-
-        return;
-    }
 
     QStringList hashes;
-    for (QJsonValueRef file : array) {
-        try {
-            auto obj = Json::requireObject(file);
-            auto version = FlameMod::loadIndexedPackVersion(obj);
-            auto fileid = version.fileId.toInt();
-            Q_ASSERT(fileid != 0);
-            Q_ASSERT(m_manifest.files.contains(fileid));
-            m_manifest.files[fileid].version = version;
-            auto url = QUrl(version.downloadUrl, QUrl::TolerantMode);
-            if (!url.isValid() && "sha1" == version.hashType && !version.hash.isEmpty()) {
-                hashes.push_back(version.hash);
-            }
-        } catch (Json::JsonException& e) {
-            qCritical() << "Non-JSON data returned from the CF API";
-            qCritical() << e.cause();
-
-            emitFailed(tr("Invalid data returned from the API."));
-
-            return;
+for (const auto& version : *files) {
+        auto fileid = version.fileId.toInt();
+        Q_ASSERT(fileid != 0);
+        Q_ASSERT(m_manifest.files.contains(fileid));
+        m_manifest.files[fileid].version = version;
+        auto url = QUrl(version.downloadUrl, QUrl::TolerantMode);
+        if (!url.isValid() && "sha1" == version.hashType && !version.hash.isEmpty()) {
+            hashes.push_back(version.hash);
         }
     }
     if (hashes.isEmpty()) {
         getFlameProjects();
         return;
     }
-    auto [modrinthTask, result] = ModrinthAPI::get().currentVersions(hashes, "sha1").make();
+    auto [modrinthTask, result] = ModrinthAPI::currentVersions(hashes, "sha1").make();
     m_task = modrinthTask;
     (dynamic_cast<NetJob*>(m_task.get()))->setAskRetry(false);
     auto stepProgressV = std::make_shared<TaskStepProgress>();

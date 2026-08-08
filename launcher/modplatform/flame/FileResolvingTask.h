@@ -18,6 +18,7 @@
 #pragma once
 
 #include "PackManifest.h"
+#include "modplatform/ModIndex.h"
 #include "tasks/Task.h"
 
 namespace Flame {
@@ -36,7 +37,7 @@ class FileResolvingTask : public Task {
     void executeTask() override;
 
    protected slots:
-    void netJobFinished(QByteArray* response);
+    void netJobFinished(QList<ModPlatform::IndexedVersion>* files);
 
    private:
     void getFlameProjects();

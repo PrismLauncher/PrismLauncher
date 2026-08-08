@@ -186,10 +186,8 @@ Net::RPC::Spec<QList<FlameMod::FingerprintMatch>> FlameAPI::matchFingerprints(co
                                                           .name = "Flame::MatchFingerprints" };
 }
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds) const
+Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> FlameAPI::getFiles(const QStringList& fileIds)
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::GetFiles"), APPLICATION->network());
-
     QJsonObject bodyObj;
     QJsonArray filesArr;
     for (const auto& fileId : fileIds) {
@@ -201,25 +199,66 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds)
     QJsonDocument body(bodyObj);
     auto bodyRaw = body.toJson();
 
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods/files"), bodyRaw);
-    netJob->addNetAction(action);
+    auto parseFunc = [](const QByteArray& response) -> Net::RPC::Sink<QList<ModPlatform::IndexedVersion>>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Flame::GetFiles at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
+        }
 
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [bodyRaw] { qDebug() << bodyRaw; });
+        QList<ModPlatform::IndexedVersion> files;
+        try {
+            auto dataArr = Json::requireArray(Json::requireObject(doc), "data");
+            for (auto entry : dataArr) {
+                auto entryObj = Json::requireObject(entry);
+                auto version = FlameMod::loadIndexedPackVersion(entryObj);
+                files.append(version);
+            }
+        } catch (Json::JsonException& e) {
+            qDebug() << doc;
+            qWarning() << "Error while reading Flame files:" << e.cause();
+            return std::unexpected(e.cause());
+        }
+        return files;
+    };
 
-    return { netJob, response };
+    return Net::RPC::Spec<QList<ModPlatform::IndexedVersion>>{ .method = Net::Request::HttpMethod::Post,
+                                                          .url = QUrl(BuildConfig.FLAME_BASE_URL + "/mods/files"),
+                                                          .data = bodyRaw,
+                                                          .parse = parseFunc,
+                                                          .name = "Flame::GetFiles" };
 }
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getFile(const QString& addonId, const QString& fileId) const
+Net::RPC::Spec<ModPlatform::IndexedVersion> FlameAPI::getFile(const QString& addonId, const QString& fileId)
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::GetFile"), APPLICATION->network());
-    auto [action, response] =
-        Net::ApiRequest::makeByteArray(QUrl(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2").arg(addonId, fileId)));
-    netJob->addNetAction(action);
+    auto parseFunc = [](const QByteArray& response) -> Net::RPC::Sink<ModPlatform::IndexedVersion>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Flame::GetFile at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
+        }
 
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(),
-                     [addonId, fileId] { qDebug() << "Flame API file failure" << addonId << fileId; });
+        try {
+            auto dataObj = Json::requireObject(Json::requireObject(doc), "data");
+            auto version = FlameMod::loadIndexedPackVersion(dataObj);
+            return version;
+        } catch (Json::JsonException& e) {
+            qDebug() << doc;
+            qWarning() << "Error while reading Flame file:" << e.cause();
+            return std::unexpected(e.cause());
+        }
+    };
 
-    return { netJob, response };
+    return Net::RPC::Spec<ModPlatform::IndexedVersion>{ .url =
+                                                       QUrl(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2").arg(addonId, fileId)),
+                                                   .parse = parseFunc,
+                                                   .name = "Flame::GetFile" };
 }
 
 QList<ResourceAPI::SortingMethod> FlameAPI::getSortingMethods() const

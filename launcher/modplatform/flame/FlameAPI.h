@@ -31,10 +31,10 @@ class FlameAPI final : public ResourceAPI {
                                                                        ModPlatform::ModLoaderTypes fallback,
                                                                        bool checkLoaders);
 
-    Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> getProjects(QStringList addonIds) const override;
+Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> getProjects(QStringList addonIds) const override;
     static Net::RPC::Spec<QList<FlameMod::FingerprintMatch>> matchFingerprints(const QList<uint>& fingerprints);
-    std::pair<Task::Ptr, QByteArray*> getFiles(const QStringList& fileIds) const;
-    std::pair<Task::Ptr, QByteArray*> getFile(const QString& addonId, const QString& fileId) const;
+    static Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> getFiles(const QStringList& fileIds);
+    static Net::RPC::Spec<ModPlatform::IndexedVersion> getFile(const QString& addonId, const QString& fileId);
 
     Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const override;
 
