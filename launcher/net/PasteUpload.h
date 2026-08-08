@@ -35,63 +35,40 @@
 
 #pragma once
 
-#include "net/ByteArraySink.h"
 #include "net/NetRequest.h"
-#include "tasks/Task.h"
 
-#include <QNetworkReply>
-#include <QRegularExpression>
 #include <QString>
 
 #include <array>
-#include <memory>
+#include <cstdint>
 #include <utility>
 
-class PasteUpload : public Net::NetRequest {
-   public:
-    enum PasteType : int {
-        // 0x0.st
-        NullPointer,
-        // hastebin.com
-        Hastebin,
-        // paste.gg
-        PasteGG,
-        // mclo.gs
-        Mclogs,
-        // Helpful to get the range of valid values on the enum for input sanitisation:
-        First = NullPointer,
-        Last = Mclogs
-    };
-    struct PasteTypeInfo {
-        const QString name;
-        const QString defaultBase;
-        const QString endpointPath;
-    };
+namespace PasteUpload {
 
-    static const std::array<PasteTypeInfo, 4> PasteTypes;
-
-    class Sink : public Net::ByteArraySink {
-       public:
-        Sink(PasteUpload* p) : m_d(p) {};
-        virtual ~Sink() = default;
-
-       public:
-        auto finalize(QNetworkReply& reply) -> Task::State override;
-
-       private:
-        PasteUpload* m_d;
-    };
-    friend Sink;
-
-    PasteUpload(const QString& log, QString url, PasteType pasteType);
-    virtual ~PasteUpload() = default;
-
-    QString pasteLink() { return m_pasteLink; }
-
-   private:
-    virtual QNetworkReply* getReply(QNetworkRequest&) override;
-    QString m_log;
-    QString m_pasteLink;
-    QString m_baseUrl;
-    const PasteType m_paste_type;
+enum class PasteType : std::uint8_t {
+    // 0x0.st
+    NullPointer = 0,
+    // hastebin.com
+    Hastebin = 1,
+    // paste.gg
+    PasteGG = 2,
+    // mclo.gs
+    Mclogs = 3,
+    // Helpful to get the range of valid values on the enum for input sanitisation:
+    First = PasteType::NullPointer,
+    Last = PasteType::Mclogs
 };
+struct PasteTypeInfo {
+    QString name;
+    QString defaultBase;
+    QString endpointPath;
+};
+
+inline const std::array<PasteTypeInfo, 4> g_PasteTypes = { { { "0x0.st", "https://0x0.st", "" },
+                                                             { "hastebin", "https://hst.sh", "/documents" },
+                                                             { "paste.gg", "https://paste.gg", "/api/v1/pastes" },
+                                                             { "mclo.gs", "https://api.mclo.gs", "/1/log" } } };
+
+auto make(const QString& log, QString baseUrl, PasteType pasteType) -> std::pair<Net::NetRequest::Ptr, QString*>;
+
+}  // namespace PasteUpload
