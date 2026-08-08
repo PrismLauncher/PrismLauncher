@@ -13,7 +13,6 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <utility>
 
 class ModrinthAPI final : public ResourceAPI {
    public:
@@ -27,15 +26,15 @@ class ModrinthAPI final : public ResourceAPI {
 
     static Net::RPC::Spec<QHash<QString, ModPlatform::IndexedVersion>> currentVersions(const QStringList& hashes, const QString& hashFormat);
 
-    std::pair<Task::Ptr, QByteArray*> latestVersion(const QString& hash,
-                                                    const QString& hashFormat,
-                                                    std::optional<std::vector<Version>> mcVersions,
-                                                    std::optional<ModPlatform::ModLoaderTypes> loaders) const;
+    static Net::RPC::Spec<ModPlatform::IndexedVersion> latestVersion(const QString& hash,
+                                                                const QString& hashFormat,
+                                                                std::optional<std::vector<Version>> mcVersions,
+                                                                std::optional<ModPlatform::ModLoaderTypes> loaders);
 
-    std::pair<Task::Ptr, QByteArray*> latestVersions(const QStringList& hashes,
-                                                     const QString& hashFormat,
-                                                     std::optional<std::vector<Version>> mcVersions,
-                                                     std::optional<ModPlatform::ModLoaderTypes> loaders) const;
+    static Net::RPC::Spec<QHash<QString, ModPlatform::IndexedVersion>> latestVersions(const QStringList& hashes,
+                                                                                 const QString& hashFormat,
+                                                                                 std::optional<std::vector<Version>> mcVersions,
+                                                                                 std::optional<ModPlatform::ModLoaderTypes> loaders);
 
     Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> getProjects(QStringList addonIds) const override;
 

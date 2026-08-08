@@ -1,7 +1,6 @@
 #include "ModrinthCheckUpdate.h"
 #include "Application.h"
 #include "ModrinthAPI.h"
-#include "ModrinthPackIndex.h"
 
 #include "Json.h"
 
@@ -104,31 +103,34 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
         return;
     }
 
-    auto [job, response] = ModrinthAPI::get().latestVersions(hashes, m_hashType, m_gameVersions, loader);
+    auto spec = ModrinthAPI::latestVersions(hashes, m_hashType, m_gameVersions, loader);
+    auto [req, resultPtr] = spec.make();
 
-    connect(job.get(), &Task::succeeded, this, [this, response, loader] { checkVersionsResponse(response, loader); });
+    if (!req) {
+        emitFailed(tr("Invalid request request"));
+        return;
+    }
 
-    connect(job.get(), &Task::failed, this, &ModrinthCheckUpdate::checkNextLoader);
+    connect(req.get(), &Task::succeeded, this, [this, resultPtr, loader] {
+        // resultPtr points to the parsed QHash<QString, ModPlatform::IndexedVersion>
+        QHash<QString, ModPlatform::IndexedVersion>& versions = *resultPtr;
+        checkVersionsResponse(versions, loader);
+    });
 
-    m_job = job;
-    job->start();
+    connect(req.get(), &Task::failed, this, [this](const QString& reason) {
+        qWarning() << "Modrinth update check failed:" << reason;
+        checkNextLoader();
+    });
+
+    m_job = req;
+    req->start();
 }
 
-void ModrinthCheckUpdate::checkVersionsResponse(QByteArray* response, std::optional<ModPlatform::ModLoaderTypes> loader)
+void ModrinthCheckUpdate::checkVersionsResponse(const QHash<QString, ModPlatform::IndexedVersion>& versions,
+                                                std::optional<ModPlatform::ModLoaderTypes> loader)
 {
     setStatus(tr("Parsing the API response from Modrinth..."));
     setProgress(m_progress + 1, m_progressTotal);
-
-    QJsonParseError parseError{};
-    QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-    if (parseError.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from ModrinthCheckUpdate at" << parseError.offset
-                   << "reason:" << parseError.errorString();
-        qWarning() << *response;
-
-        emitFailed(parseError.errorString());
-        return;
-    }
 
     try {
         auto iter = m_mappings.begin();
@@ -137,12 +139,19 @@ void ModrinthCheckUpdate::checkVersionsResponse(QByteArray* response, std::optio
             const QString hash = iter.key();
             Resource* resource = iter.value();
 
-            auto projectObj = doc[hash].toObject();
+            // Find the version for this hash in the response
+            auto it = versions.find(hash);
+            if (it == versions.end()) {
+                qDebug() << "Mod" << resource->name() << "got no response for hash:" << hash;
+                ++iter;
+                continue;
+            }
 
-            // If the returned project is empty, but we have Modrinth metadata,
-            // it means this specific version is not available
-            if (projectObj.isEmpty()) {
-                qDebug() << "Mod" << m_mappings.find(hash).value()->name() << "got an empty response. Hash:" << hash;
+            auto projectVer = it.value();
+
+            // If the returned version is empty/invalid, it means this specific version is not available
+            if (projectVer.downloadUrl.isEmpty() && projectVer.fileName.isEmpty()) {
+                qDebug() << "Mod" << resource->name() << "got an empty version. Hash:" << hash;
                 ++iter;
                 continue;
             }
@@ -163,7 +172,7 @@ void ModrinthCheckUpdate::checkVersionsResponse(QByteArray* response, std::optio
             // - The version reported by the JAR is different from the version reported by the indexed version (it's usually the case)
             // Such is the pain of having arbitrary files for a given version .-.
 
-            auto projectVer = Modrinth::loadIndexedPackVersion(projectObj, m_hashType, loaderFilter);
+            // Version is already parsed by RPCSink, no need to call loadIndexedPackVersion again
             if (projectVer.downloadUrl.isEmpty()) {
                 qCritical() << "Modrinth mod without download url!" << projectVer.fileName;
                 ++iter;
