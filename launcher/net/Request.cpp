@@ -505,22 +505,41 @@ QNetworkReply* Request::getReply(QNetworkRequest& request)
                     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
                 }
                 return m_network->sendCustomRequest(request, verb, data);
+            } else if constexpr (std::is_same_v<T, ByteArrayFactory>) {
+                if (m_httpMethod == HttpMethod::Post && !request.hasRawHeader("Content-Type")) {
+                    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+                }
+                auto body = data();
+                if (!body) {
+                    emitFailed(body.error());
+                    return nullptr;
+                }
+                return m_network->sendCustomRequest(request, verb, body.value());
+
             } else if constexpr (std::is_same_v<T, std::monostate>) {
                 return m_network->sendCustomRequest(request, verb);
             } else if constexpr (std::is_same_v<T, DeviceFactory>) {
-                if (QIODevice* device = data(); device != nullptr) {
+                auto payload = data();
+                if (!payload) {
+                    emitFailed(payload.error());
+                    return nullptr;
+                }
+                auto device = payload.value();
+                if (device != nullptr) {
                     device->setParent(this);
-                    return m_network->sendCustomRequest(request, verb, device);
                 }
-                return m_network->sendCustomRequest(request, verb);
+                return m_network->sendCustomRequest(request, verb, device);
             } else if constexpr (std::is_same_v<T, MultiPartFactory>) {
-                if (QHttpMultiPart* multiPart = data(); multiPart != nullptr) {
-                    if (multiPart->parent() == nullptr) {
-                        multiPart->setParent(this);
-                    }
-                    return m_network->sendCustomRequest(request, verb, multiPart);
+                auto payload = data();
+                if (!payload) {
+                    emitFailed(payload.error());
+                    return nullptr;
                 }
-                return m_network->sendCustomRequest(request, verb);
+                auto multiPart = payload.value();
+                if (multiPart != nullptr) {
+                    multiPart->setParent(this);
+                }
+                return m_network->sendCustomRequest(request, verb, multiPart);
             }
         },
         m_postData);
