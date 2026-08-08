@@ -43,14 +43,12 @@
 #include <QString>
 
 #include <optional>
-#include <utility>
 
 #include "../Version.h"
 
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceType.h"
 #include "net/RPCSink.h"
-#include "tasks/Task.h"
 
 /* Simple class with a common interface for interacting with APIs */
 class ResourceAPI {
@@ -150,7 +148,5 @@ virtual Net::RPC::Spec<QVector<ModPlatform::IndexedVersion>> getProjectVersions(
 
     virtual void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&) const = 0;
 
-    virtual std::pair<Task::Ptr, QByteArray*> getModCategories() const = 0;
-
-    virtual QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const = 0;
+    virtual Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const = 0;
 };

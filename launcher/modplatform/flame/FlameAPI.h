@@ -36,9 +36,7 @@ Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> getProjects(QStringList add
     static std::pair<Task::Ptr, QByteArray*> getFiles(const QStringList& fileIds);
     static std::pair<Task::Ptr, QByteArray*> getFile(const QString& addonId, const QString& fileId);
 
-    static std::pair<Task::Ptr, QByteArray*> getCategories(ModPlatform::ResourceType type);
-    std::pair<Task::Ptr, QByteArray*> getModCategories() const override;
-    QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const override;
+    Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const override;
 
     QList<ResourceAPI::SortingMethod> getSortingMethods() const override;
 
