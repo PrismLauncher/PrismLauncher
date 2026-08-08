@@ -25,15 +25,16 @@
 #include <memory>
 
 #include "FileSystem.h"
-#include "net/NetRequest.h"
 #include "net/DummySink.h"
 #include "net/RawHeaderProxy.h"
+#include "net/Request.h"
 
-inline Net::NetRequest::Ptr makeSkinDeleteRequest(QString token)
+inline Net::Request::Ptr makeSkinDeleteRequest(QString token)
 {
-    auto req = Net::NetRequest::makeCustomRequest(QUrl("https://api.minecraftservices.com/minecraft/profile/skins/active"), nullptr,
-                                                  Net::NetRequest::HttpMethod::Delete, Net::NetRequest::Option::NoOptions, QString(),
-                                                  taskMCSkinsLogC);
+    auto req = Net::Request::makeCustomRequest(Net::Request::Spec{
+        .method = Net::Request::HttpMethodValue::Delete,
+        .url = QUrl("https://api.minecraftservices.com/minecraft/profile/skins/active"),
+    });
     req->setSink(std::make_unique<Net::DummySink>());
     req->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(QList<Net::HeaderPair>{
         { .headerName = "Authorization", .headerValue = QString("Bearer %1").arg(token).toLocal8Bit() },
@@ -41,9 +42,9 @@ inline Net::NetRequest::Ptr makeSkinDeleteRequest(QString token)
     return req;
 }
 
-inline Net::NetRequest::Ptr makeSkinUploadRequest(QString token, QString path, QString variant)
+inline Net::Request::Ptr makeSkinUploadRequest(QString token, QString path, QString variant)
 {
-    auto multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    auto* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
     QHttpPart skin;
     skin.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/png"));
@@ -57,9 +58,11 @@ inline Net::NetRequest::Ptr makeSkinUploadRequest(QString token, QString path, Q
     multiPart->append(skin);
     multiPart->append(model);
 
-    auto req = Net::NetRequest::makeCustomRequest(QUrl("https://api.minecraftservices.com/minecraft/profile/skins"), multiPart,
-                                                  Net::NetRequest::HttpMethod::Post, Net::NetRequest::Option::NoOptions, QString(),
-                                                  taskMCSkinsLogC);
+    auto req = Net::Request::makeCustomRequest(Net::Request::Spec{
+        .method = Net::Request::HttpMethodValue::Post,
+        .url = QUrl("https://api.minecraftservices.com/minecraft/profile/skins"),
+        .data = [multiPart]() { return multiPart; },
+    });
     req->setSink(std::make_unique<Net::DummySink>());
     req->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(QList<Net::HeaderPair>{
         { .headerName = "Authorization", .headerValue = QString("Bearer %1").arg(token).toLocal8Bit() },
@@ -67,14 +70,13 @@ inline Net::NetRequest::Ptr makeSkinUploadRequest(QString token, QString path, Q
     return req;
 }
 
-inline Net::NetRequest::Ptr makeCapeChangeRequest(QString token, QString capeId)
+inline Net::Request::Ptr makeCapeChangeRequest(QString token, QString capeId)
 {
-    auto req = Net::NetRequest::makeCustomRequest(QUrl("https://api.minecraftservices.com/minecraft/profile/capes/active"),
-                                                  capeId.isEmpty()
-                                                      ? Net::NetRequest::PostData{ nullptr }
-                                                      : Net::NetRequest::PostData{ QString(R"({"capeId":"%1"})").arg(capeId).toUtf8() },
-                                                  capeId.isEmpty() ? Net::NetRequest::HttpMethod::Delete : Net::NetRequest::HttpMethod::Put,
-                                                  Net::NetRequest::Option::NoOptions, QString(), taskMCSkinsLogC);
+    auto req = Net::Request::makeCustomRequest(Net::Request::Spec{
+        .method = capeId.isEmpty() ? Net::Request::HttpMethodValue::Delete : Net::Request::HttpMethodValue::Put,
+        .url = QUrl("https://api.minecraftservices.com/minecraft/profile/capes/active"),
+        .data = capeId.isEmpty() ? Net::Request::PostData{} : Net::Request::PostData{ QString(R"({"capeId":"%1"})").arg(capeId).toUtf8() },
+    });
     req->setSink(std::make_unique<Net::DummySink>());
     req->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(QList<Net::HeaderPair>{
         { .headerName = "Authorization", .headerValue = QString("Bearer %1").arg(token).toLocal8Bit() },
