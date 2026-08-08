@@ -368,12 +368,7 @@ set(MINECRAFT_SOURCES
     minecraft/AssetsUtils.cpp
 
     # Minecraft skins
-    minecraft/skins/CapeChange.cpp
-    minecraft/skins/CapeChange.h
-    minecraft/skins/SkinUpload.cpp
-    minecraft/skins/SkinUpload.h
-    minecraft/skins/SkinDelete.cpp
-    minecraft/skins/SkinDelete.h
+    minecraft/skins/SkinRequests.h
     minecraft/skins/SkinModel.cpp
     minecraft/skins/SkinModel.h
     minecraft/skins/SkinList.cpp

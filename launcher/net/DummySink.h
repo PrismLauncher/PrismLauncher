@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "net/Sink.h"
 namespace Net {
 
 class DummySink : public Sink {
