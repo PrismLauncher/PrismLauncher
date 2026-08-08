@@ -136,6 +136,7 @@ set(NET_SOURCES
     net/RawHeaderProxy.h
     net/ApiHeaderProxy.h
     net/ApiRequest.h
+    net/RPCSink.h
     net/NetRequest.cpp
     net/NetRequest.h
 )
