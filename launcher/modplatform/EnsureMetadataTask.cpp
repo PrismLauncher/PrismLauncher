@@ -280,16 +280,43 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
         addonIds.insert(data.addonId.toString(), data.hash);
     }
 
-    Task::Ptr projTask;
-    QByteArray* response = nullptr;
-
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
-    } else if (addonIds.size() == 1) {
-        std::tie(projTask, response) = ModrinthAPI::get().getProject(*addonIds.keyBegin());
-    } else {
-        std::tie(projTask, response) = ModrinthAPI::get().getProjects(addonIds.keys());
+        return Task::Ptr{ nullptr };
     }
+
+    if (addonIds.size() == 1) {
+        auto [projTask, result] = ModrinthAPI::get().getProject(*addonIds.keyBegin()).make();
+
+        // Prevents unfortunate timings when aborting the task
+        if (!projTask) {
+            return Task::Ptr{ nullptr };
+        }
+
+        connect(projTask.get(), &Task::succeeded, this, [this, result, addonIds] {
+            auto pack = *result;
+
+            auto hash = addonIds.find(pack->addonId.toString()).value();
+
+            auto resourceIter = m_resources.find(hash);
+            if (resourceIter == m_resources.end()) {
+                qWarning() << "Invalid project id from the API response.";
+                return;
+            }
+
+            auto* resource = resourceIter.value();
+
+            setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(resource->name()));
+
+            updateMetadata(*pack, m_tempVersions.find(hash).value(), resource);
+        });
+
+        return projTask;
+    }
+
+    Task::Ptr projTask;
+    QByteArray* response;
+    std::tie(projTask, response) = ModrinthAPI::get().getProjects(addonIds.keys());
 
     // Prevents unfortunate timings when aborting the task
     if (!projTask) {
@@ -309,11 +336,7 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
         QJsonArray entries;
 
         try {
-            if (addonIds.size() == 1) {
-                entries = { doc.object() };
-            } else {
-                entries = Json::requireArray(doc);
-            }
+            entries = Json::requireArray(doc);
         } catch (Json::JsonException& e) {
             qDebug() << e.cause();
             qDebug() << doc;
@@ -431,16 +454,40 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
         }
     }
 
-    Task::Ptr projTask;
-    QByteArray* response = nullptr;
-
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
-    } else if (addonIds.size() == 1) {
-        std::tie(projTask, response) = FlameAPI::get().getProject(*addonIds.keyBegin());
-    } else {
-        std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds.keys());
+        return Task::Ptr{ nullptr };
     }
+
+    if (addonIds.size() == 1) {
+        auto [proj_task, result] = FlameAPI::get().getProject(*addonIds.keyBegin()).make();
+
+        // Prevents unfortunate timings when aborting the task
+        if (!proj_task)
+            return Task::Ptr{ nullptr };
+
+        connect(proj_task.get(), &Task::succeeded, this, [this, result, addonIds] {
+            auto pack = *result;
+
+            auto hash = addonIds.find(pack->addonId.toString()).value();
+            auto resource_iter = m_resources.find(hash);
+            if (resource_iter == m_resources.end()) {
+                qWarning() << "Invalid project id from the API response.";
+                return;
+            }
+            auto* resource = resource_iter.value();
+
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(resource->name()));
+
+            updateMetadata(*pack, m_tempVersions.find(hash).value(), resource);
+        });
+
+        return proj_task;
+    }
+
+    Task::Ptr projTask;
+    QByteArray* response;
+    std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds.keys());
 
     // Prevents unfortunate timings when aborting the task
     if (!projTask) {
@@ -458,12 +505,7 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
         }
 
         try {
-            QJsonArray entries;
-            if (addonIds.size() == 1) {
-                entries = { Json::requireObject(Json::requireObject(doc), "data") };
-            } else {
-                entries = Json::requireArray(Json::requireObject(doc), "data");
-            }
+            QJsonArray entries = Json::requireArray(Json::requireObject(doc), "data");
 
             for (auto entry : entries) {
                 auto entryObj = Json::requireObject(entry);

@@ -183,31 +183,9 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
 
 Task::Ptr GetModDependenciesTask::getProjectInfoTask(const std::shared_ptr<PackDependency>& pDep)
 {
-    auto provider = pDep->pack->provider;
-    auto [info, responseInfo] = getAPI(provider)->getProject(pDep->pack->addonId.toString());
-    connect(info.get(), &NetJob::succeeded, this, [this, responseInfo, provider, pDep] {
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*responseInfo, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            removePack(pDep->pack->addonId);
-            qWarning() << "Error while parsing JSON response for mod info at" << parseError.offset << "reason:" << parseError.errorString();
-            qDebug() << *responseInfo;
-            return;
-        }
-        try {
-            auto obj = provider == ModPlatform::ResourceProvider::FLAME ? Json::requireObject(Json::requireObject(doc), "data")
-                                                                        : Json::requireObject(doc);
-
-            getAPI(provider)->loadIndexedPack(*pDep->pack, obj);
-        } catch (const JSONValidationError& e) {
-            removePack(pDep->pack->addonId);
-            qDebug() << doc;
-            qWarning() << "Error while reading mod info:" << e.cause();
-        }
-    });
-    QObject::connect(info.get(), &NetJob::failed, this, [this, info, pDep] {
-        removePack(pDep->pack->addonId);
-        m_failed.remove(info.get());
+    auto [info, result] = getAPI(pDep->pack->provider)->getProject(pDep->pack->addonId.toString()).make();
+    connect(info.get(), &Task::succeeded, this, [this, result, pDep] {
+        *pDep->pack = **result;
     });
     return info;
 }

@@ -156,50 +156,30 @@ Task::Ptr ResourceAPI::getProjectVersions(const VersionSearchArgs& args,
     return netJob;
 }
 
-Task::Ptr ResourceAPI::getProjectInfo(const ProjectInfoArgs& args,
-                                      const Callback<ModPlatform::IndexedPack::Ptr>& callbacks,
-                                      bool askRetry) const
+Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<ModPlatform::IndexedPack::Ptr>&& callbacks) const
 {
-    auto [job, response] = getProject(args.pack->addonId.toString(), askRetry);
+    auto [job, result] = getProject(args.pack->addonId.toString(), true).make();
+    if (!job) {
+        return nullptr;
+    }
 
-    QObject::connect(job.get(), &NetJob::succeeded, job.get(), [this, response, callbacks, args] {
-        auto pack = args.pack;
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for mod info at" << parseError.offset << "reason:" << parseError.errorString();
-            qWarning() << *response;
-            return;
-        }
-        try {
-            auto obj = Json::requireObject(doc);
-            if (obj.contains("data")) {
-                obj = Json::requireObject(obj, "data");
-            }
-            loadIndexedPack(*pack, obj);
-            loadExtraPackInfo(*pack, obj);
-        } catch (const JSONValidationError& e) {
-            qDebug() << doc;
-            qWarning() << "Error while reading" << debugName() << "resource info:" << e.cause();
-        }
-        callbacks.onSucceed(pack);
-    });
-    // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
+// Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
     // This prevents the lambda from extending the lifetime of the shared resource,
     // as it only temporarily locks the resource when needed.
     auto weak = job.toWeakRef();
-    QObject::connect(job.get(), &NetJob::failed, job.get(), [weak, callbacks](const QString& reason) {
+    QObject::connect(job.get(), &Task::succeeded, job.get(), [weak, callbacks, result] {
+        if (auto job = weak.lock()) {
+            callbacks.onSucceed(*result);
+        }
+    });
+    QObject::connect(job.get(), &Task::failed, job.get(), [weak, callbacks](const QString& reason) {
         int networkErrorCode = -1;
         if (auto job = weak.lock()) {
-            if (auto netJob = qSharedPointerDynamicCast<NetJob>(job)) {
-                if (auto* failedAction = netJob->getFailedActions().at(0); failedAction) {
-                    networkErrorCode = failedAction->replyStatusCode();
-                }
-            }
+            networkErrorCode = job->replyStatusCode();
         }
         callbacks.onFail(reason, networkErrorCode);
     });
-    QObject::connect(job.get(), &NetJob::aborted, job.get(), [callbacks] {
+    QObject::connect(job.get(), &Task::aborted, job.get(), [callbacks] {
         if (callbacks.onAbort != nullptr) {
             callbacks.onAbort();
         }
@@ -299,20 +279,41 @@ QString ResourceAPI::mapMCVersionToModrinth(const Version& v)
     return verStr;
 }
 
-std::pair<Task::Ptr, QByteArray*> ResourceAPI::getProject(const QString& addonId, bool askRetry) const
+Net::RPC::Spec<ModPlatform::IndexedPack::Ptr> ResourceAPI::getProject(const QString& addonId, bool includeExtra) const
 {
     auto projectUrlOptional = getInfoURL(addonId);
     if (!projectUrlOptional.has_value()) {
-        return { nullptr, nullptr };
+        return {};
     }
 
     const auto& projectUrl = projectUrlOptional.value();
 
-    auto netJob = makeShared<NetJob>(QString("%1::GetProject").arg(addonId), APPLICATION->network());
-    netJob->setAskRetry(askRetry);
+    auto parseFunc = [this, includeExtra](const QByteArray& response) -> Net::RPC::Sink<ModPlatform::IndexedPack::Ptr>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response for project info at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
+        }
+        try {
+            auto obj = Json::requireObject(doc);
+            if (obj.contains("data")) {
+                obj = Json::requireObject(obj, "data");
+            }
+            auto pack = std::make_shared<ModPlatform::IndexedPack>();
+            loadIndexedPack(*pack, obj);
+            if (includeExtra) {
+                loadExtraPackInfo(*pack, obj);
+            }
+            return pack;
+        } catch (const JSONValidationError& e) {
+            qDebug() << doc;
+            qWarning() << "Error while reading" << debugName() << "resource info:" << e.cause();
+            return std::unexpected(e.cause());
+        }
+    };
 
-    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(projectUrl));
-    netJob->addNetAction(action);
-
-    return { netJob, response };
+    return Net::RPC::Spec<ModPlatform::IndexedPack::Ptr>{ .url = QUrl(projectUrl), .parse = parseFunc };
 }
