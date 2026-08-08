@@ -117,7 +117,7 @@ class ResourceAPI {
     virtual Net::RPC::Spec<ModPlatform::IndexedPack::Ptr> getProject(const QString& addonId, bool includeExtra = false) const;
     virtual Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> getProjects(QStringList addonIds) const = 0;
 
-    Task::Ptr getProjectVersions(VersionSearchArgs&& args, Callback<QVector<ModPlatform::IndexedVersion>>&& callbacks) const;
+    Net::RPC::Spec<QVector<ModPlatform::IndexedVersion>> getProjectVersions(const VersionSearchArgs& args) const;
     virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, Callback<ModPlatform::IndexedVersion>&&) const;
 
    protected:

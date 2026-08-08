@@ -51,29 +51,21 @@ Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> ResourceAPI::searchProjects
 return Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>>{ .url = QUrl(searchUrl), .parse = parseFunc };
 }
 
-Task::Ptr ResourceAPI::getProjectVersions(const VersionSearchArgs& args,
-                                          const Callback<QVector<ModPlatform::IndexedVersion>>& callbacks) const
+Net::RPC::Spec<QVector<ModPlatform::IndexedVersion>> ResourceAPI::getProjectVersions(const VersionSearchArgs& args) const
 {
     auto versionsUrlOptional = getVersionsURL(args);
     if (!versionsUrlOptional.has_value()) {
-        return nullptr;
+        return {};
     }
 
-    const auto& versionsUrl = versionsUrlOptional.value();
-
-    auto netJob = makeShared<NetJob>(QString("%1::Versions").arg(args.pack->name), APPLICATION->network());
-
-    auto [action, response] = Net::ApiRequest::makeByteArray(versionsUrl);
-    netJob->addNetAction(action);
-
-    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks, args] {
+    auto parseFunc = [this, args](const QByteArray& response) -> Net::RPC::Sink<QVector<ModPlatform::IndexedVersion>>::ParseResult {
         QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
         if (parseError.error != QJsonParseError::NoError) {
             qWarning() << "Error while parsing JSON response for getting versions at" << parseError.offset
                        << "reason:" << parseError.errorString();
-            qWarning() << *response;
-            return;
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
         }
 
         QVector<ModPlatform::IndexedVersion> unsortedVersions;
@@ -101,31 +93,15 @@ Task::Ptr ResourceAPI::getProjectVersions(const VersionSearchArgs& args,
         } catch (const JSONValidationError& e) {
             qDebug() << doc;
             qWarning() << "Error while reading" << debugName() << "resource version:" << e.cause();
+            return std::unexpected(e.cause());
         }
 
-        callbacks.onSucceed(unsortedVersions);
-    });
+return unsortedVersions;
+    };
 
-    // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
-    // This prevents the lambda from extending the lifetime of the shared resource,
-    // as it only temporarily locks the resource when needed.
-    auto weak = netJob.toWeakRef();
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [weak, callbacks](const QString& reason) {
-        int networkErrorCode = -1;
-        if (auto netJob = weak.lock()) {
-            if (auto* failedAction = netJob->getFailedActions().at(0); failedAction) {
-                networkErrorCode = failedAction->replyStatusCode();
-            }
-        }
-        callbacks.onFail(reason, networkErrorCode);
-    });
-    QObject::connect(netJob.get(), &NetJob::aborted, netJob.get(), [callbacks] {
-        if (callbacks.onAbort != nullptr) {
-            callbacks.onAbort();
-        }
-    });
-
-    return netJob;
+    return Net::RPC::Spec<QVector<ModPlatform::IndexedVersion>>{ .url = QUrl(versionsUrlOptional.value()),
+                                                                .parse = parseFunc,
+                                                                .name = "ResourceAPI::getProjectVersions" };
 }
 
 Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callback<ModPlatform::IndexedVersion>&& callbacks) const
@@ -193,7 +169,7 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
                 networkErrorCode = failedAction->replyStatusCode();
             }
         }
-        callbacks.onFail(reason, networkErrorCode);
+callbacks.onFail(reason, networkErrorCode);
     });
     return netJob;
 }

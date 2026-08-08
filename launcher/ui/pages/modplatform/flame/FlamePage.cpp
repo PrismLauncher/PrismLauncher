@@ -34,9 +34,7 @@
  */
 
 #include "FlamePage.h"
-#include "Version.h"
 #include "modplatform/ModIndex.h"
-#include "modplatform/ResourceAPI.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/widgets/ModFilterWidget.h"
 #include "ui_FlamePage.h"
@@ -156,50 +154,59 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
     if (!m_current->versionsLoaded || m_filterWidget->changed()) {
         qDebug() << "Loading flame modpack versions";
 
-        ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion> > callbacks{};
-
         auto addonId = m_current->addonId;
-        // Use default if no callbacks are set
-        callbacks.onSucceed = [this, curr, addonId](auto& doc) {
-            if (addonId != m_current->addonId) {
-                return;  // wrong request
-            }
-
-            m_current->versions = doc;
-            m_current->versionsLoaded = true;
-            auto pred = [this](const ModPlatform::IndexedVersion& v) {
-                if (auto filter = m_filterWidget->getFilter()) {
-                    return !filter->checkModpackFilters(v);
+        auto [netJob, result] =
+            FlameAPI::get()
+                .getProjectVersions(
+                    { .pack = m_current, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::Modpack })
+                .make();
+        if (netJob) {
+            connect(netJob.get(), &Task::succeeded, this, [this, curr, addonId, result] {
+                if (addonId != m_current->addonId) {
+                    return;  // wrong request
                 }
-                return false;
-            };
-            m_current->versions.removeIf(pred);
-            for (const auto& version : m_current->versions) {
-                m_ui->versionSelectionBox->addItem(version.getVersionDisplayString(), QVariant(version.downloadUrl));
-            }
 
-            QVariant currentUpdated;
-            currentUpdated.setValue(m_current);
+                auto& doc = *result;
+                m_current->versions = doc;
+                m_current->versionsLoaded = true;
+                auto pred = [this](const ModPlatform::IndexedVersion& v) {
+                    if (auto filter = m_filterWidget->getFilter()) {
+                        return !filter->checkModpackFilters(v);
+                    }
+                    return false;
+                };
+#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
+                m_current->versions.removeIf(pred);
+#else 
+                for (auto it = m_current->versions.begin(); it != m_current->versions.end();)
+                    if (pred(*it))
+                        it = m_current->versions.erase(it);
+                    else
+                        ++it;
+#endif
+                for (const auto& version : m_current->versions) {
+                    m_ui->versionSelectionBox->addItem(version.getVersionDisplayString(), QVariant(version.downloadUrl));
+                }
 
-            if (!m_listModel->setData(curr, currentUpdated, Qt::UserRole)) {
-                qWarning() << "Failed to cache versions for the current pack!";
-            }
+                QVariant currentUpdated;
+                currentUpdated.setValue(m_current);
 
-            // TODO: Check whether it's a connection issue or the project disabled 3rd-party distribution.
-            if (m_current->versionsLoaded && m_ui->versionSelectionBox->count() < 1) {
-                m_ui->versionSelectionBox->addItem(tr("No version is available!"), -1);
-            }
-            suggestCurrent();
-        };
-        callbacks.onFail = [this](const QString& reason, int) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
-        };
+                if (!m_listModel->setData(curr, currentUpdated, Qt::UserRole)) {
+                    qWarning() << "Failed to cache versions for the current pack!";
+                }
 
-        auto netJob = FlameAPI::get().getProjectVersions(
-            { .pack = m_current, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::Modpack }, callbacks);
-
-        m_job = netJob;
-        netJob->start();
+                // TODO: Check whether it's a connection issue or the project disabled 3rd-party distribution.
+                if (m_current->versionsLoaded && m_ui->versionSelectionBox->count() < 1) {
+                    m_ui->versionSelectionBox->addItem(tr("No version is available!"), -1);
+                }
+                suggestCurrent();
+            });
+            connect(netJob.get(), &Task::failed, this, [this](const QString& reason) {
+                CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
+            });
+            m_job = netJob;
+            netJob->start();
+        }
     } else {
         for (const auto& version : m_current->versions) {
             m_ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
