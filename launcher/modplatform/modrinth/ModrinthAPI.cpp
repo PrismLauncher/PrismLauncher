@@ -101,15 +101,38 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(const QStringList&
     return { netJob, response };
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getProjects(QStringList addonIds) const
+Net::Spec<QList<ModPlatform::IndexedPack::Ptr>> ModrinthAPI::getProjects(QStringList addonIds) const
 {
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetProjects"), APPLICATION->network());
     auto searchUrl = getMultipleModInfoURL(addonIds);
 
-    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(searchUrl));
-    netJob->addNetAction(action);
+    auto parseFunc = [this](const QByteArray& response) -> Net::RpcSink<QList<ModPlatform::IndexedPack::Ptr>>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Modrinth projects task at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
+        }
 
-    return { netJob, response };
+        QList<ModPlatform::IndexedPack::Ptr> projects;
+        try {
+            auto entries = Json::requireArray(doc);
+            for (auto entry : entries) {
+                auto pack = std::make_shared<ModPlatform::IndexedPack>();
+                auto entryObj = Json::requireObject(entry);
+                loadIndexedPack(*pack, entryObj);
+                projects.append(pack);
+            }
+        } catch (Json::JsonException& e) {
+            qDebug() << doc;
+            qWarning() << "Error while reading" << debugName() << "resource info:" << e.cause();
+            return std::unexpected(e.cause());
+        }
+        return projects;
+    };
+
+    return Net::Spec<QList<ModPlatform::IndexedPack::Ptr>>{ .url = QUrl(searchUrl), .parse = parseFunc, .name = "Modrinth::GetProjects" };
 }
 
 QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const

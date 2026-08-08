@@ -8,6 +8,7 @@
 
 namespace FlameMod {
 
+ModPlatform::ResourceType getResourceType(int classId);
 void loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj);
 void loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj);
 void loadBody(ModPlatform::IndexedPack& pack);

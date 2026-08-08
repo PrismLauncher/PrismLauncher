@@ -101,10 +101,8 @@ QString FlameAPI::getModDescription(int modId) const
     return description;
 }
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getProjects(QStringList addonIds) const
+Net::Spec<QList<ModPlatform::IndexedPack::Ptr>> FlameAPI::getProjects(QStringList addonIds) const
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::GetProjects"), APPLICATION->network());
-
     QJsonObject body_obj;
     QJsonArray addons_arr;
     for (auto& addonId : addonIds) {
@@ -115,12 +113,39 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getProjects(QStringList addonIds) co
 
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods"), body_raw);
-    netJob->addNetAction(action);
 
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [body_raw] { qDebug() << body_raw; });
+    auto parseFunc = [this](const QByteArray& response) -> Net::RpcSink<QList<ModPlatform::IndexedPack::Ptr>>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from CurseForge projects task at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
+        }
 
-    return { netJob, response };
+        QList<ModPlatform::IndexedPack::Ptr> projects;
+        try {
+            auto entries = Json::requireArray(Json::requireObject(doc), "data");
+            for (auto entry : entries) {
+                auto pack = std::make_shared<ModPlatform::IndexedPack>();
+                auto entryObj = Json::requireObject(entry);
+                loadIndexedPack(*pack, entryObj);
+                projects.append(pack);
+            }
+        } catch (Json::JsonException& e) {
+            qDebug() << doc;
+            qWarning() << "Error while reading" << debugName() << "resource info:" << e.cause();
+            return std::unexpected(e.cause());
+        }
+        return projects;
+    };
+
+    return Net::Spec<QList<ModPlatform::IndexedPack::Ptr>>{ .method = Net::NetRequest::HttpMethod::Post,
+                                                            .url = QUrl(BuildConfig.FLAME_BASE_URL + "/mods"),
+                                                            .data = body_raw,
+                                                            .parse = parseFunc,
+                                                            .name = "Flame::GetProjects" };
 }
 
 std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds) const

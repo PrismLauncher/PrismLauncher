@@ -5,6 +5,18 @@
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
 
+ModPlatform::ResourceType FlameMod::getResourceType(int classId)
+{
+    switch (classId) {
+        case 17:  // Worlds
+            return ModPlatform::ResourceType::World;
+        case 6:  // Mods
+            return ModPlatform::ResourceType::Mod;
+        default:
+            return ModPlatform::ResourceType::Unknown;
+    }
+}
+
 void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::requireInteger(obj, "id");
@@ -13,6 +25,7 @@ void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     pack.slug = Json::requireString(obj, "slug");
     pack.websiteUrl = obj["links"].toObject()["websiteUrl"].toString("");
     pack.description = obj["summary"].toString("");
+    pack.resourceType = FlameMod::getResourceType(obj["classId"].toInt());
 
     QJsonObject logo = obj["logo"].toObject();
     pack.logoName = logo["title"].toString();

@@ -281,41 +281,12 @@ void FlamePackExportTask::getProjectsInfo()
         return;
     }
 
-    Task::Ptr projTask;
-    QByteArray* response;
-    std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds);
+    auto [projTask, result] = FlameAPI::get().getProjects(addonIds).make();
 
-    connect(projTask.get(), &Task::succeeded, this, [this, response, fillProjectInfo] {
-        QJsonParseError parseError{};
-        auto doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from CurseForge projects task at" << parseError.offset
-                       << "reason:" << parseError.errorString();
-            qWarning() << *response;
-            emitFailed(parseError.errorString());
-            return;
-        }
-
-        try {
-            QJsonArray entries = Json::requireArray(Json::requireObject(doc), "data");
-
-            for (auto entry : entries) {
-                auto entryObj = Json::requireObject(entry);
-
-                try {
-                    setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(Json::requireString(entryObj, "name")));
-
-                    ModPlatform::IndexedPack pack;
-                    FlameMod::loadIndexedPack(pack, entryObj);
-                    fillProjectInfo(pack);
-                } catch (Json::JsonException& e) {
-                    qDebug() << e.cause();
-                    qDebug() << entries;
-                }
-            }
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
+    connect(projTask.get(), &Task::succeeded, this, [this, result, fillProjectInfo] {
+        for (auto pack : *result) {
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(pack->name));
+            fillProjectInfo(*pack);
         }
         buildZip();
     });

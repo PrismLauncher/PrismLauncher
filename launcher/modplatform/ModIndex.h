@@ -28,6 +28,7 @@
 #include <memory>
 #include <utility>
 #include "EnumWrapper.h"
+#include "modplatform/ResourceType.h"
 
 class QIODevice;
 
@@ -204,6 +205,7 @@ struct IndexedPack {
     QString logoUrl;
     QString websiteUrl;
     SideType side = SideType::NoSide;
+    ResourceType resourceType = ResourceType::Unknown;
 
     bool versionsLoaded = false;
     QList<IndexedVersion> versions;

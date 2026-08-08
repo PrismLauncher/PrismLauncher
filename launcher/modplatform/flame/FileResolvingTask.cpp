@@ -83,30 +83,6 @@ void Flame::FileResolvingTask::executeTask()
     m_task->start();
 }
 
-ModPlatform::ResourceType getResourceType(int classId)
-{
-    switch (classId) {
-        case 17:  // Worlds
-            return ModPlatform::ResourceType::World;
-        case 6:  // Mods
-            return ModPlatform::ResourceType::Mod;
-        case 12:  // Resource Packs
-                  // return ModPlatform::ResourceType::ResourcePack; // not really a resourcepack
-            /* fallthrough */
-        case 4546:  // Customization
-                    // return ModPlatform::ResourceType::ShaderPack; // not really a shaderPack
-            /* fallthrough */
-        case 4471:  // Modpacks
-            /* fallthrough */
-        case 5:  // Bukkit Plugins
-            /* fallthrough */
-        case 4559:  // Addons
-            /* fallthrough */
-        default:
-            return ModPlatform::ResourceType::Unknown;
-    }
-}
-
 void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
 {
     setProgress(1, 3);
@@ -221,43 +197,25 @@ void Flame::FileResolvingTask::getFlameProjects()
         addonIds.push_back(QString::number(file.projectId));
     }
 
-    auto [task, response] = FlameAPI::get().getProjects(addonIds);
+    auto [task, result] = FlameAPI::get().getProjects(addonIds).make();
     m_task = task;
 
     auto step_progress = std::make_shared<TaskStepProgress>();
-    connect(m_task.get(), &Task::succeeded, this, [this, response, step_progress] {
-        QJsonParseError parse_error{};
-        auto doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth projects task at" << parse_error.offset
-                       << "reason:" << parse_error.errorString();
-            qWarning() << *response;
-            return;
-        }
-
-        try {
-            QJsonArray entries;
-            entries = Json::requireArray(Json::requireObject(doc), "data");
-
-            for (auto entry : entries) {
-                auto entry_obj = Json::requireObject(entry);
-                auto id = Json::requireInteger(entry_obj, "id");
-                auto file = std::find_if(m_manifest.files.begin(), m_manifest.files.end(),
-                                         [id](const Flame::File& file) { return file.projectId == id; });
-                if (file == m_manifest.files.end()) {
-                    continue;
-                }
-
-                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
-                FlameMod::loadIndexedPack(file->pack, entry_obj);
-                file->resourceType = getResourceType(Json::requireInteger(entry_obj, "classId", "modClassId"));
-                if (file->resourceType == ModPlatform::ResourceType::World) {
-                    file->targetFolder = "saves";
-                }
+    connect(m_task.get(), &Task::succeeded, this, [this, result, step_progress] {
+        for (auto pack : *result) {
+            auto id = pack->addonId.toInt();
+            auto file = std::find_if(m_manifest.files.begin(), m_manifest.files.end(),
+                                     [id](const Flame::File& file) { return file.projectId == id; });
+            if (file == m_manifest.files.end()) {
+                continue;
             }
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
+
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
+            file->pack = *pack;
+            file->resourceType = pack->resourceType;
+            if (file->resourceType == ModPlatform::ResourceType::World) {
+                file->targetFolder = "saves";
+            }
         }
         step_progress->state = TaskStepState::Succeeded;
         stepProgress(*step_progress);
