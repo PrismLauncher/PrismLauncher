@@ -18,6 +18,7 @@
 
 #include "FileResolvingTask.h"
 #include <algorithm>
+#include <utility>
 
 #include "Json.h"
 #include "modplatform/ModIndex.h"
@@ -128,63 +129,41 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
         getFlameProjects();
         return;
     }
-    auto [modrinthTask, modrinthResponse] = ModrinthAPI::get().currentVersions(hashes, "sha1");
+    auto [modrinthTask, result] = ModrinthAPI::get().currentVersions(hashes, "sha1").make();
     m_task = modrinthTask;
     (dynamic_cast<NetJob*>(m_task.get()))->setAskRetry(false);
-    auto step_progress = std::make_shared<TaskStepProgress>();
-    connect(m_task.get(), &Task::succeeded, this, [this, modrinthResponse, step_progress]() {
-        step_progress->state = TaskStepState::Succeeded;
-        stepProgress(*step_progress);
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*modrinthResponse, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions at" << parse_error.offset
-                       << "reason:" << parse_error.errorString();
-            qWarning() << *modrinthResponse;
-
-            getFlameProjects();
-            return;
-            }
-        if (APPLICATION->settings()->get("FallbackMRBlockedMods").toBool()){
-            try {
-                auto entries = Json::requireObject(doc);
-                for (auto& out : m_manifest.files) {
-                    auto url = QUrl(out.version.downloadUrl, QUrl::TolerantMode);
-                    if (!url.isValid() && "sha1" == out.version.hash_type && !out.version.hash.isEmpty()) {
-                        try {
-                            auto entry = Json::requireObject(entries, out.version.hash);
-
-                            auto file = Modrinth::loadIndexedPackVersion(entry);
-
-                            out.version.downloadUrl = file.downloadUrl;
-                            qDebug() << "Found alternative on modrinth" << out.version.fileName;
-                        } catch (Json::JsonException& e) {
-                            qDebug() << e.cause();
-                            qDebug() << entries;
-                        }
+    auto stepProgressV = std::make_shared<TaskStepProgress>();
+    connect(m_task.get(), &Task::succeeded, this, [this, result, stepProgressV]() {
+        stepProgressV->state = TaskStepState::Succeeded;
+        stepProgress(*stepProgressV);
+        if (APPLICATION->settings()->get("FallbackMRBlockedMods").toBool()) {
+            for (auto& out : m_manifest.files) {
+                auto url = QUrl(out.version.downloadUrl, QUrl::TolerantMode);
+                if (!url.isValid() && "sha1" == out.version.hash_type && !out.version.hash.isEmpty()) {
+                    auto it = result->find(out.version.hash);
+                    if (it != result->end()) {
+                        out.version.downloadUrl = it->downloadUrl;
+                        qDebug() << "Found alternative on modrinth" << out.version.fileName;
                     }
                 }
-            } catch (Json::JsonException& e) {
-                qDebug() << e.cause();
-                qDebug() << doc;
             }
         }
         getFlameProjects();
     });
-    connect(m_task.get(), &Task::failed, this, [this, step_progress](QString reason) {
-        step_progress->state = TaskStepState::Failed;
-        stepProgress(*step_progress);
+    connect(m_task.get(), &Task::failed, this, [this, stepProgressV](const QString& /*reason*/) {
+        stepProgressV->state = TaskStepState::Failed;
+        stepProgress(*stepProgressV);
         getFlameProjects();
     });
     connect(m_task.get(), &Task::stepProgress, this, &FileResolvingTask::propagateStepProgress);
-    connect(m_task.get(), &Task::progress, this, [this, step_progress](qint64 current, qint64 total) {
+    connect(m_task.get(), &Task::progress, this, [this, stepProgressV](qint64 current, qint64 total) {
         qDebug() << "Resolve slug progress" << current << total;
-        step_progress->update(current, total);
-        stepProgress(*step_progress);
+        stepProgressV->update(current, total);
+        stepProgress(*stepProgressV);
     });
-    connect(m_task.get(), &Task::status, this, [this, step_progress](QString status) {
-        step_progress->status = status;
-        stepProgress(*step_progress);
+    connect(m_task.get(), &Task::status, this, [this, stepProgressV](QString status) {
+        stepProgressV->status = std::move(status);
+        stepProgress(*stepProgressV);
     });
     m_task->start();
 }
@@ -193,16 +172,16 @@ void Flame::FileResolvingTask::getFlameProjects()
 {
     setProgress(2, 3);
     QStringList addonIds;
-    for (auto file : m_manifest.files) {
+    for (const auto& file : m_manifest.files) {
         addonIds.push_back(QString::number(file.projectId));
     }
 
     auto [task, result] = FlameAPI::get().getProjects(addonIds).make();
     m_task = task;
 
-    auto step_progress = std::make_shared<TaskStepProgress>();
-    connect(m_task.get(), &Task::succeeded, this, [this, result, step_progress] {
-        for (auto pack : *result) {
+    auto stepProgressV = std::make_shared<TaskStepProgress>();
+    connect(m_task.get(), &Task::succeeded, this, [this, result, stepProgressV] {
+        for (const auto& pack : *result) {
             auto id = pack->addonId.toInt();
             auto file = std::find_if(m_manifest.files.begin(), m_manifest.files.end(),
                                      [id](const Flame::File& file) { return file.projectId == id; });
@@ -217,25 +196,25 @@ void Flame::FileResolvingTask::getFlameProjects()
                 file->targetFolder = "saves";
             }
         }
-        step_progress->state = TaskStepState::Succeeded;
-        stepProgress(*step_progress);
+        stepProgressV->state = TaskStepState::Succeeded;
+        stepProgress(*stepProgressV);
         emitSucceeded();
     });
 
-    connect(m_task.get(), &Task::failed, this, [this, step_progress](QString reason) {
-        step_progress->state = TaskStepState::Failed;
-        stepProgress(*step_progress);
-        emitFailed(reason);
+    connect(m_task.get(), &Task::failed, this, [this, stepProgressV](QString reason) {
+        stepProgressV->state = TaskStepState::Failed;
+        stepProgress(*stepProgressV);
+        emitFailed(std::move(reason));
     });
     connect(m_task.get(), &Task::stepProgress, this, &FileResolvingTask::propagateStepProgress);
-    connect(m_task.get(), &Task::progress, this, [this, step_progress](qint64 current, qint64 total) {
+    connect(m_task.get(), &Task::progress, this, [this, stepProgressV](qint64 current, qint64 total) {
         qDebug() << "Resolve slug progress" << current << total;
-        step_progress->update(current, total);
-        stepProgress(*step_progress);
+        stepProgressV->update(current, total);
+        stepProgress(*stepProgressV);
     });
-    connect(m_task.get(), &Task::status, this, [this, step_progress](QString status) {
-        step_progress->status = status;
-        stepProgress(*step_progress);
+    connect(m_task.get(), &Task::status, this, [this, stepProgressV](QString status) {
+        stepProgressV->status = std::move(status);
+        stepProgress(*stepProgressV);
     });
 
     m_task->start();

@@ -211,51 +211,33 @@ void EnsureMetadataTask::emitFail(Resource* resource, QString key, RemoveFromLis
 
 Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
 {
-    auto hash_type = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
+    auto hashType = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
-    auto [ver_task, response] = ModrinthAPI::get().currentVersions(m_resources.keys(), hash_type);
+    auto [verTask, result] = ModrinthAPI::get().currentVersions(m_resources.keys(), hashType).make();
 
     // Prevents unfortunate timings when aborting the task
-    if (!ver_task)
+    if (!verTask) {
         return Task::Ptr{ nullptr };
+    }
 
-    connect(ver_task.get(), &Task::succeeded, this, [this, response] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions at" << parse_error.offset
-                       << "reason:" << parse_error.errorString();
-            qWarning() << *response;
-
-            failed(parse_error.errorString());
-            return;
-        }
-
-        try {
-            auto entries = Json::requireObject(doc);
-            for (auto& hash : m_resources.keys()) {
-                auto resource = m_resources.find(hash).value();
-                try {
-                    auto entry = Json::requireObject(entries, hash);
-
-                    setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(resource->name()));
-                    qDebug() << "Getting version for" << resource->name() << "from Modrinth";
-
-                    m_tempVersions.insert(hash, Modrinth::loadIndexedPackVersion(entry));
-                } catch (Json::JsonException& e) {
-                    qDebug() << e.cause();
-                    qDebug() << entries;
-
-                    emitFail(resource);
-                }
+    connect(verTask.get(), &Task::succeeded, this, [this, result] {
+        for (auto& hash : m_resources.keys()) {
+            auto* resource = m_resources.find(hash).value();
+            auto it = result->find(hash);
+            if (it == result->end()) {
+                qDebug() << "Version not found for hash" << hash << "from Modrinth";
+                emitFail(resource);
+                continue;
             }
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
+
+            setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(resource->name()));
+            qDebug() << "Getting version for" << resource->name() << "from Modrinth";
+
+            m_tempVersions.insert(hash, *it);
         }
     });
 
-    return ver_task;
+    return verTask;
 }
 
 Task::Ptr EnsureMetadataTask::modrinthProjectsTask()

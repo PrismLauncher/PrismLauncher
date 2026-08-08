@@ -20,9 +20,9 @@ class ModrinthAPI final : public ResourceAPI {
         return s_instance;
     }
 
-    std::pair<Task::Ptr, QByteArray*> currentVersion(const QString& hash, const QString& hashFormat) const;
+    static Net::Spec<ModPlatform::IndexedVersion> currentVersion(const QString& hash, const QString& hashFormat);
 
-    std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, QString hashFormat) const;
+    static Net::Spec<QHash<QString, ModPlatform::IndexedVersion>> currentVersions(const QStringList& hashes, const QString& hashFormat);
 
     std::pair<Task::Ptr, QByteArray*> latestVersion(const QString& hash,
                                                     const QString& hashFormat,
