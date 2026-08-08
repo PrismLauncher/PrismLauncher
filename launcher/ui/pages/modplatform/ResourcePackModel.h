@@ -28,11 +28,11 @@ class ResourcePackResourceModel : public ResourceModel {
 
    public slots:
     ResourceAPI::SearchArgs createSearchArguments() override;
-    ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) override;
-    QString createInfoArguments(const QModelIndex&) override;
+    ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex& /*unused*/) override;
+    QString createInfoArguments(const QModelIndex& /*unused*/) override;
 
    protected:
-    const BaseInstance& m_base_instance;
+    const BaseInstance& m_baseInstance;
 
    private:
     QString m_debugName;
