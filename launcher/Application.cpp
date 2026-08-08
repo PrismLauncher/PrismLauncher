@@ -157,6 +157,7 @@
 #endif
 #include <windows.h>
 #include <QStyleHints>
+#include "windows/WindowsAppContainer.h"
 #endif
 
 #include "console/Console.h"
@@ -321,6 +322,12 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
           { "show-window", "Show the main launcher window (useful in combination with --launch)" },
           { { "I", "import" }, "Import instance or resource from specified local path or URL", "url" },
           { "show", "Opens the window for the specified instance (by instance ID)", "show" } });
+
+#ifdef Q_OS_WIN32
+    // Not meant for users
+    parser.addOption({"internal-denied-traverse-path", {}, "path"});
+#endif
+
     // Has to be positional for some OS to handle that properly
     parser.addPositionalArgument("URL", "Import the resource(s) at the given URL(s) (same as -I / --import)", "[URL...]");
 
@@ -328,6 +335,25 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     parser.addVersionOption();
 
     parser.process(arguments());
+
+#ifdef Q_OS_WIN32
+    const auto traversePaths = parser.values("internal-denied-traverse-path");
+    if (!traversePaths.isEmpty()) {
+        auto containerResult = WindowsAppContainer::create();
+        if (!containerResult) {
+            qFatal() << "Could not create AppContainer:" << Qt::hex << containerResult.error();
+        }
+        const auto container = std::move(containerResult.value());
+
+        for (const QString& path : traversePaths) {
+            if (const auto result = container->grantFSAccess(path, WindowsAppContainer::AccessMode::Traverse); !result) {
+                qFatal() << "Could not grant traverse access to path:" << path << "-" << result.error().message();
+            }
+        }
+
+        ::exit(0);
+    }
+#endif
 
     m_instanceIdToLaunch = parser.value("launch");
     m_serverToJoin = parser.value("server");
