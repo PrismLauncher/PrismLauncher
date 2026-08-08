@@ -2,13 +2,10 @@
 
 #include <algorithm>
 
-#include "Application.h"
 #include "Json.h"
-#include "net/NetJob.h"
 
 #include "modplatform/ModIndex.h"
 
-#include "net/ApiRequest.h"
 #include "net/RPCSink.h"
 
 Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> ResourceAPI::searchProjects(const SearchArgs& args) const
@@ -104,27 +101,21 @@ return unsortedVersions;
                                                                 .name = "ResourceAPI::getProjectVersions" };
 }
 
-Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callback<ModPlatform::IndexedVersion>&& callbacks) const
+Net::RPC::Spec<ModPlatform::IndexedVersion> ResourceAPI::getDependencyVersion(const DependencySearchArgs& args) const
 {
-    auto versionsUrlOptional = getDependencyURL(args);
-    if (!versionsUrlOptional.has_value()) {
-        return nullptr;
+    auto urlOptional = getDependencyURL(args);
+    if (!urlOptional.has_value()) {
+        return {};
     }
 
-    const auto& versionsUrl = versionsUrlOptional.value();
-
-    auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.addonId.toString()), APPLICATION->network());
-    auto [action, response] = Net::ApiRequest::makeByteArray(versionsUrl);
-    netJob->addNetAction(action);
-
-    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks, args] {
+    auto parseFunc = [this, args](const QByteArray& response) -> Net::RPC::Sink<ModPlatform::IndexedVersion>::ParseResult {
         QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
         if (parseError.error != QJsonParseError::NoError) {
             qWarning() << "Error while parsing JSON response for getting dependency version at" << parseError.offset
                        << "reason:" << parseError.errorString();
-            qWarning() << *response;
-            return;
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
         }
 
         QJsonArray arr;
@@ -155,23 +146,12 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
         };
         std::ranges::sort(versions, orderSortPredicate);
         auto bestMatch = versions.size() != 0 ? versions.front() : ModPlatform::IndexedVersion();
-        callbacks.onSucceed(bestMatch);
-    });
+return bestMatch;
+    };
 
-    // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
-    // This prevents the lambda from extending the lifetime of the shared resource,
-    // as it only temporarily locks the resource when needed.
-    auto weak = netJob.toWeakRef();
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [weak, callbacks](const QString& reason) {
-        int networkErrorCode = -1;
-        if (auto netJob = weak.lock()) {
-            if (auto* failedAction = netJob->getFailedActions().at(0); failedAction) {
-                networkErrorCode = failedAction->replyStatusCode();
-            }
-        }
-callbacks.onFail(reason, networkErrorCode);
-    });
-    return netJob;
+    return Net::RPC::Spec<ModPlatform::IndexedVersion>{ .url = QUrl(urlOptional.value()),
+                                                       .parse = parseFunc,
+                                                       .name = "ResourceAPI::getDependencyVersion" };
 }
 
 QString ResourceAPI::getGameVersionsString(const std::vector<Version>& mcVersions)

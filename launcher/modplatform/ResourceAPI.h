@@ -66,13 +66,6 @@ class ResourceAPI {
         QString readableName;
     };
 
-    template <typename T>
-    struct Callback {
-        std::function<void(T&)> onSucceed;
-        std::function<void(const QString& reason, int networkErrorCode)> onFail;
-        std::function<void()> onAbort;
-    };
-
     struct SearchArgs {
         ModPlatform::ResourceType type{};
         int offset = 0;
@@ -117,13 +110,13 @@ class ResourceAPI {
     virtual Net::RPC::Spec<ModPlatform::IndexedPack::Ptr> getProject(const QString& addonId, bool includeExtra = false) const;
     virtual Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> getProjects(QStringList addonIds) const = 0;
 
-    Net::RPC::Spec<QVector<ModPlatform::IndexedVersion>> getProjectVersions(const VersionSearchArgs& args) const;
-    virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, Callback<ModPlatform::IndexedVersion>&&) const;
+virtual Net::RPC::Spec<QVector<ModPlatform::IndexedVersion>> getProjectVersions(const VersionSearchArgs& args) const;
+    virtual Net::RPC::Spec<ModPlatform::IndexedVersion> getDependencyVersion(const DependencySearchArgs& args) const;
 
    protected:
     ~ResourceAPI() = default;
 
-    virtual QString debugName() const { return "External resource API"; }
+    static QString debugName() { return "External resource API"; }
 
     static QString mapMCVersionToModrinth(const Version& v);
 
