@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <memory>
 #include <utility>
+#include <variant>
 
 #include "Application.h"
 #include "BuildConfig.h"
@@ -24,6 +25,7 @@
 
 #include "modplatform/ModIndex.h"
 
+#include "tasks/Task.h"
 #include "ui/widgets/ProjectItem.h"
 
 namespace ResourceDownload {
@@ -172,7 +174,7 @@ void ResourceModel::search()
             };
             auto project = std::make_shared<ModPlatform::IndexedPack>();
             project->addonId = projectId;
-            if (auto job = m_api->getProjectInfo({ project }, std::move(callbacks), false); job) {
+            if (auto job = m_api->getProjectInfo({ project }, std::move(callbacks)); job) {
                 runSearchJob(job);
             }
             return;
@@ -180,29 +182,32 @@ void ResourceModel::search()
     }
     auto args{ createSearchArguments() };
 
-    ResourceAPI::Callback<QList<ModPlatform::IndexedPack::Ptr>> callbacks{};
+    if (auto [job, result] = m_api->searchProjects(args).make(); job) {
+        auto weak = job.toWeakRef();
 
-    callbacks.on_succeed = [this](auto& doc) {
-        if (!s_running_models.constFind(this).value()) {
-            return;
-        }
-        searchRequestSucceeded(doc);
-    };
-    callbacks.on_fail = [this](QString reason, int networkErrorCode) {
-        if (!s_running_models.constFind(this).value()) {
-            return;
-        }
-        searchRequestFailed(std::move(reason), networkErrorCode);
-    };
-    callbacks.on_abort = [this] {
-        if (!s_running_models.constFind(this).value()) {
-            return;
-        }
-        searchRequestAborted();
-    };
-
-    if (auto job = m_api->searchProjects(std::move(args), std::move(callbacks)); job) {
+        connect(job.get(), &Task::failed, this, [this, weak](const QString& reason) {
+            if (!s_running_models.constFind(this).value()) {
+                return;
+            }
+            if (auto job = weak.lock()) {
+                searchRequestFailed(reason, job->replyStatusCode());
+            }
+        });
+        connect(job.get(), &Task::aborted, this, [this] {
+            if (!s_running_models.constFind(this).value()) {
+                return;
+            }
+            searchRequestAborted();
+        });
+        connect(job.get(), &Task::succeeded, this, [this, result] {
+            if (!s_running_models.constFind(this).value()) {
+                return;
+            }
+            searchRequestSucceeded(*result);
+        });
         runSearchJob(job);
+    } else {
+        searchRequestFailed("Failed to create search URL", -1);
     }
 }
 
@@ -523,7 +528,8 @@ void ResourceModel::addPack(ModPlatform::IndexedPack::Ptr pack,
                             QString dependentOn)
 {
     version.is_currently_selected = true;
-    m_selected.append(makeShared<ResourceDownloadTask>(std::move(pack), version, packs, isIndexed, std::move(downloadReason), std::move(dependentOn)));
+    m_selected.append(
+        makeShared<ResourceDownloadTask>(std::move(pack), version, packs, isIndexed, std::move(downloadReason), std::move(dependentOn)));
 }
 
 void ResourceModel::removePack(const QString& rem)

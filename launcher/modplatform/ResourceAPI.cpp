@@ -7,33 +7,25 @@
 #include "modplatform/ModIndex.h"
 
 #include "net/ApiRequest.h"
+#include "net/RPCSink.h"
 
-Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatform::IndexedPack::Ptr>>&& callbacks) const
+Net::Spec<QList<ModPlatform::IndexedPack::Ptr>> ResourceAPI::searchProjects(const SearchArgs& args) const
 {
-    auto search_url_optional = getSearchURL(args);
-    if (!search_url_optional.has_value()) {
-        callbacks.on_fail("Failed to create search URL", -1);
-        return nullptr;
+    auto searchUrlOptional = getSearchURL(args);
+    if (!searchUrlOptional.has_value()) {
+        return {};
     }
 
-    auto search_url = search_url_optional.value();
+    const auto& searchUrl = searchUrlOptional.value();
+    auto parseFunc = [this](const QByteArray& response) -> Net::RpcSink<QList<ModPlatform::IndexedPack::Ptr>>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from" << debugName() << "at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
 
-    auto netJob = makeShared<NetJob>(QString("%1::Search").arg(debugName()), APPLICATION->network());
-
-    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(search_url));
-    netJob->addNetAction(action);
-
-    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from" << debugName() << "at" << parse_error.offset
-                       << "reason:" << parse_error.errorString();
-            qWarning() << *response;
-
-            callbacks.on_fail(parse_error.errorString(), -1);
-
-            return;
+            return std::unexpected(parseError.errorString());
         }
 
         QList<ModPlatform::IndexedPack::Ptr> newList;
@@ -51,28 +43,10 @@ Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatf
                 continue;
             }
         }
+        return newList;
+    };
 
-        callbacks.on_succeed(newList);
-    });
-
-    // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
-    // This prevents the lambda from extending the lifetime of the shared resource,
-    // as it only temporarily locks the resource when needed.
-    auto weak = netJob.toWeakRef();
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [weak, callbacks](const QString& reason) {
-        int network_error_code = -1;
-        if (auto netJob = weak.lock()) {
-            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
-                network_error_code = failed_action->replyStatusCode();
-        }
-        callbacks.on_fail(reason, network_error_code);
-    });
-    QObject::connect(netJob.get(), &NetJob::aborted, netJob.get(), [callbacks] {
-        if (callbacks.on_abort != nullptr)
-            callbacks.on_abort();
-    });
-
-    return netJob;
+    return Net::Spec<QList<ModPlatform::IndexedPack::Ptr>>{ .url = QUrl(searchUrl), .parse = parseFunc };
 }
 
 Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVector<ModPlatform::IndexedVersion>>&& callbacks) const
