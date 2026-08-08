@@ -33,8 +33,6 @@
  *      limitations under the License.
  */
 
-#include <iostream>
-
 #include "Application.h"
 
 #if defined Q_OS_WIN32
