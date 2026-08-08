@@ -9,93 +9,93 @@
 #include "net/ApiRequest.h"
 #include "net/NetJob.h"
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersion(const QString& hash, const QString& hash_format) const
+std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersion(const QString& hash, const QString& hashFormat) const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersion"), APPLICATION->network());
 
     auto [action, response] =
-        Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1?algorithm=%2").arg(hash, hash_format));
+        Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1?algorithm=%2").arg(hash, hashFormat));
     netJob->addNetAction(action);
 
     return { netJob, response };
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_format) const
+std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersions(const QStringList& hashes, QString hashFormat) const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersions"), APPLICATION->network());
 
-    QJsonObject body_obj;
+    QJsonObject bodyObj;
 
-    Json::writeStringList(body_obj, "hashes", hashes);
-    Json::writeString(body_obj, "algorithm", hash_format);
+    Json::writeStringList(bodyObj, "hashes", hashes);
+    Json::writeString(bodyObj, "algorithm", hashFormat);
 
-    QJsonDocument body(body_obj);
-    auto body_raw = body.toJson();
+    QJsonDocument body(bodyObj);
+    auto bodyRaw = body.toJson();
 
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files"), body_raw);
+    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files"), bodyRaw);
     netJob->addNetAction(action);
     netJob->setAskRetry(false);
     return { netJob, response };
 }
 
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash,
-                                                             const QString& hash_format,
+                                                             const QString& hashFormat,
                                                              std::optional<std::vector<Version>> mcVersions,
                                                              std::optional<ModPlatform::ModLoaderTypes> loaders) const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersion"), APPLICATION->network());
 
-    QJsonObject body_obj;
+    QJsonObject bodyObj;
 
     if (loaders.has_value()) {
-        Json::writeStringList(body_obj, "loaders", getModLoaderStrings(loaders.value()));
+        Json::writeStringList(bodyObj, "loaders", getModLoaderStrings(loaders.value()));
     }
 
     if (mcVersions.has_value()) {
-        QStringList game_versions;
+        QStringList gameVersions;
         for (auto& ver : mcVersions.value()) {
-            game_versions.append(mapMCVersionToModrinth(ver));
+            gameVersions.append(mapMCVersionToModrinth(ver));
         }
-        Json::writeStringList(body_obj, "game_versions", game_versions);
+        Json::writeStringList(bodyObj, "game_versions", gameVersions);
     }
 
-    QJsonDocument body(body_obj);
-    auto body_raw = body.toJson();
+    QJsonDocument body(bodyObj);
+    auto bodyRaw = body.toJson();
 
     auto [action, response] = Net::ApiRequest::makeByteArray(
-        QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1/update?algorithm=%2").arg(hash, hash_format), body_raw);
+        QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1/update?algorithm=%2").arg(hash, hashFormat), bodyRaw);
     netJob->addNetAction(action);
 
     return { netJob, response };
 }
 
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(const QStringList& hashes,
-                                                              const QString& hash_format,
+                                                              const QString& hashFormat,
                                                               std::optional<std::vector<Version>> mcVersions,
                                                               std::optional<ModPlatform::ModLoaderTypes> loaders) const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersions"), APPLICATION->network());
 
-    QJsonObject body_obj;
+    QJsonObject bodyObj;
 
-    Json::writeStringList(body_obj, "hashes", hashes);
-    Json::writeString(body_obj, "algorithm", hash_format);
+    Json::writeStringList(bodyObj, "hashes", hashes);
+    Json::writeString(bodyObj, "algorithm", hashFormat);
 
     if (loaders.has_value()) {
-        Json::writeStringList(body_obj, "loaders", getModLoaderStrings(loaders.value()));
+        Json::writeStringList(bodyObj, "loaders", getModLoaderStrings(loaders.value()));
     }
 
     if (mcVersions.has_value()) {
-        QStringList game_versions;
+        QStringList gameVersions;
         for (auto& ver : mcVersions.value()) {
-            game_versions.append(mapMCVersionToModrinth(ver));
+            gameVersions.append(mapMCVersionToModrinth(ver));
         }
-        Json::writeStringList(body_obj, "game_versions", game_versions);
+        Json::writeStringList(bodyObj, "game_versions", gameVersions);
     }
 
-    QJsonDocument body(body_obj);
-    auto body_raw = body.toJson();
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"), body_raw);
+    QJsonDocument body(bodyObj);
+    auto bodyRaw = body.toJson();
+    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"), bodyRaw);
     netJob->addNetAction(action);
 
     return { netJob, response };

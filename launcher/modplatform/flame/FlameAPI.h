@@ -42,7 +42,7 @@ class FlameAPI final : public ResourceAPI {
 
     static bool validateModLoaders(ModPlatform::ModLoaderTypes loaders)
     {
-        return loaders & (ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt);
+        return loaders.testAnyFlag(ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt);
     }
 
    private:
@@ -100,7 +100,7 @@ class FlameAPI final : public ResourceAPI {
     {
         QStringList l;
         for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt }) {
-            if (types & loader) {
+            if (types.testFlag(loader)) {
                 l << QString::number(getMappedModLoader(loader));
             }
         }
@@ -112,33 +112,33 @@ class FlameAPI final : public ResourceAPI {
    public:
     std::optional<QString> getSearchURL(const SearchArgs& args) const override
     {
-        QStringList get_arguments;
-        get_arguments.append(QString("classId=%1").arg(getClassId(args.type)));
-        get_arguments.append(QString("index=%1").arg(args.offset));
-        get_arguments.append("pageSize=25");
+        QStringList getArguments;
+        getArguments.append(QString("classId=%1").arg(getClassId(args.type)));
+        getArguments.append(QString("index=%1").arg(args.offset));
+        getArguments.append("pageSize=25");
         if (args.search.has_value()) {
-            get_arguments.append(QString("searchFilter=%1").arg(args.search.value()));
+            getArguments.append(QString("searchFilter=%1").arg(args.search.value()));
         }
         if (args.sorting.has_value()) {
-            get_arguments.append(QString("sortField=%1").arg(args.sorting.value().index));
+            getArguments.append(QString("sortField=%1").arg(args.sorting.value().index));
         }
-        get_arguments.append("sortOrder=desc");
+        getArguments.append("sortOrder=desc");
         if (args.loaders.has_value()) {
             ModPlatform::ModLoaderTypes loaders = args.loaders.value();
             loaders &= ~static_cast<std::uint16_t>(ModPlatform::ModLoaderType::DataPack);
             if (loaders != 0) {
-                get_arguments.append(QString("modLoaderTypes=%1").arg(getModLoaderFilters(loaders)));
+                getArguments.append(QString("modLoaderTypes=%1").arg(getModLoaderFilters(loaders)));
             }
         }
         if (args.categoryIds.has_value() && !args.categoryIds->empty()) {
-            get_arguments.append(QString("categoryIds=[%1]").arg(args.categoryIds->join(",")));
+            getArguments.append(QString("categoryIds=[%1]").arg(args.categoryIds->join(",")));
         }
 
         if (args.versions.has_value() && !args.versions.value().empty()) {
-            get_arguments.append(QString("gameVersion=%1").arg(args.versions.value().front().toString()));
+            getArguments.append(QString("gameVersion=%1").arg(args.versions.value().front().toString()));
         }
 
-        return BuildConfig.FLAME_BASE_URL + "/mods/search?gameId=432&" + get_arguments.join('&');
+        return BuildConfig.FLAME_BASE_URL + "/mods/search?gameId=432&" + getArguments.join('&');
     }
 
     std::optional<QString> getVersionsURL(const VersionSearchArgs& args) const override
@@ -167,10 +167,10 @@ class FlameAPI final : public ResourceAPI {
             return arr;
         }
         // FIXME: Client-side version filtering. This won't take into account any user-selected filtering.
-        const auto& mc_versions = arr.mcVersion;
+        const auto& mcVersions = arr.mcVersion;
 
-        if (std::any_of(mc_versions.constBegin(), mc_versions.constEnd(),
-                        [](const auto& mc_version) { return Version(mc_version) <= Version("1.6"); })) {
+        if (std::any_of(mcVersions.constBegin(), mcVersions.constEnd(),
+                        [](const auto& mcVersion) { return Version(mcVersion) <= Version("1.6"); })) {
             return arr;
         }
         return {};
@@ -184,7 +184,7 @@ class FlameAPI final : public ResourceAPI {
         auto addonId = args.dependency.addonId.toString();
         auto url =
             QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files?pageSize=10000&gameVersion=%2").arg(addonId, args.mcVersion.toString());
-        if (args.loader && ModPlatform::hasSingleModLoaderSelected(args.loader)) {
+        if ((args.loader != 0U) && ModPlatform::hasSingleModLoaderSelected(args.loader)) {
             int mappedModLoader = getMappedModLoader(static_cast<ModPlatform::ModLoaderType>(static_cast<int>(args.loader)));
             url += QString("&modLoaderType=%1").arg(mappedModLoader);
         }
