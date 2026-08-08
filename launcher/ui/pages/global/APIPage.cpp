@@ -56,8 +56,8 @@
 APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
 {
     // This is here so you can reorder the entries in the combobox without messing stuff up
-    int comboBoxEntries[] = { PasteUpload::PasteType::Mclogs, PasteUpload::PasteType::NullPointer, PasteUpload::PasteType::PasteGG,
-                              PasteUpload::PasteType::Hastebin };
+    int comboBoxEntries[] = { static_cast<int>(PasteUpload::PasteType::Mclogs), static_cast<int>(PasteUpload::PasteType::NullPointer),
+                              static_cast<int>(PasteUpload::PasteType::PasteGG), static_cast<int>(PasteUpload::PasteType::Hastebin) };
 
     static const QRegularExpression s_validUrlRegExp("https?://.+");
     static const QRegularExpression s_validMSAClientID(
@@ -66,7 +66,7 @@ APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
     ui->setupUi(this);
 
     for (auto pasteType : comboBoxEntries) {
-        ui->pasteTypeComboBox->addItem(PasteUpload::PasteTypes.at(pasteType).name, pasteType);
+        ui->pasteTypeComboBox->addItem(PasteUpload::g_PasteTypes.at(static_cast<std::size_t>(pasteType)).name, pasteType);
     }
 
     void (QComboBox::*currentIndexChangedSignal)(int)(&QComboBox::currentIndexChanged);
@@ -115,7 +115,7 @@ void APIPage::updateBaseURLNote(int index)
 void APIPage::updateBaseURLPlaceholder(int index)
 {
     int pasteType = ui->pasteTypeComboBox->itemData(index).toInt();
-    QString pasteDefaultURL = PasteUpload::PasteTypes.at(pasteType).defaultBase;
+    QString pasteDefaultURL = PasteUpload::g_PasteTypes.at(static_cast<std::size_t>(pasteType)).defaultBase;
     ui->baseURLEntry->setPlaceholderText(pasteDefaultURL);
 }
 
@@ -129,7 +129,7 @@ void APIPage::loadSettings()
     ui->baseURLEntry->setText(pastebinURL);
     int pasteTypeIndex = ui->pasteTypeComboBox->findData(pasteType);
     if (pasteTypeIndex == -1) {
-        pasteTypeIndex = ui->pasteTypeComboBox->findData(PasteUpload::PasteType::Mclogs);
+        pasteTypeIndex = ui->pasteTypeComboBox->findData(static_cast<int>(PasteUpload::PasteType::Mclogs));
         ui->baseURLEntry->clear();
     }
 
