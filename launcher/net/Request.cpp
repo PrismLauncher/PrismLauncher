@@ -47,6 +47,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QUrl>
+#include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <utility>
@@ -225,10 +226,12 @@ void Request::onProgress(qint64 bytesReceived, qint64 bytesTotal)
 
 void Request::downloadError(QNetworkReply::NetworkError error)
 {
+    static const auto s_retryableStatusCodes = { 408, 421, 425, 429, 500, 502, 503, 504 };
+
     if (error == QNetworkReply::OperationCanceledError) {
         qCCritical(m_logCat) << getUid().toString() << "Aborted" << m_url.toString();
         m_state = State::Failed;
-    } else if (replyStatusCode() == 429 /* HTTP Too Many Requests*/ && m_options.testFlag(Option::AutoRetry)) {
+    } else if (m_options.testFlag(Option::AutoRetry) && std::ranges::contains(s_retryableStatusCodes, replyStatusCode())) {
         qCDebug(m_logCat) << getUid().toString() << "Rate Limited!";
         auto delay = static_cast<int64_t>(10 * std::pow(2, m_retryCount));
         if (m_reply->hasRawHeader("Retry-After")) {
