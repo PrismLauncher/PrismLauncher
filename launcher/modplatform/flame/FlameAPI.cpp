@@ -12,26 +12,6 @@
 #include "net/ApiRequest.h"
 #include "net/NetJob.h"
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::matchFingerprints(const QList<uint>& fingerprints)
-{
-    auto netJob = makeShared<NetJob>(QString("Flame::MatchFingerprints"), APPLICATION->network());
-
-    QJsonObject bodyObj;
-    QJsonArray fingerprintsArr;
-    for (const auto& fp : fingerprints) {
-        fingerprintsArr.append(QString("%1").arg(fp));
-    }
-
-    bodyObj["fingerprints"] = fingerprintsArr;
-
-    QJsonDocument body(bodyObj);
-    auto bodyRaw = body.toJson();
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/fingerprints"), bodyRaw);
-    netJob->addNetAction(action);
-
-    return { netJob, response };
-}
-
 QString FlameAPI::getModFileChangelog(int modId, int fileId)
 {
     QEventLoop lock;
@@ -146,7 +126,67 @@ return Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>>{ .method = Net::Requ
                                                              .name = "Flame::GetProjects" };
 }
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds)
+Net::RPC::Spec<QList<FlameMod::FingerprintMatch>> FlameAPI::matchFingerprints(const QList<uint>& fingerprints)
+{
+    QJsonObject bodyObj;
+    QJsonArray fingerprintsArr;
+    for (const auto& fp : fingerprints) {
+        fingerprintsArr.append(QString("%1").arg(fp));
+    }
+
+    bodyObj["fingerprints"] = fingerprintsArr;
+
+    QJsonDocument body(bodyObj);
+    auto bodyRaw = body.toJson();
+
+    auto parseFunc = [](const QByteArray& response) -> Net::RPC::Sink<QList<FlameMod::FingerprintMatch>>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Flame::MatchFingerprints at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
+        }
+
+        QList<FlameMod::FingerprintMatch> matches;
+        try {
+            auto docObj = Json::requireObject(doc);
+            auto dataObj = Json::requireObject(docObj, "data");
+            auto dataArr = Json::requireArray(dataObj, "exactMatches");
+
+            for (auto match : dataArr) {
+                auto matchObj = match.toObject();
+                auto fileObj = matchObj["file"].toObject();
+
+                if (matchObj.isEmpty() || fileObj.isEmpty()) {
+                    qWarning() << "Fingerprint match is empty!";
+                    continue;
+                }
+
+                FlameMod::FingerprintMatch fm{};
+                fm.fileFingerprint = fileObj["fileFingerprint"].toVariant().toLongLong();
+                fm.modId = fileObj["modId"].toVariant().toLongLong();
+                fm.fileId = fileObj["id"].toVariant().toLongLong();
+                fm.isAvailable = fileObj["isAvailable"].toBool();
+                matches.append(fm);
+            }
+        } catch (Json::JsonException& e) {
+            qDebug() << doc;
+            qWarning() << "Error while reading Flame fingerprint matches:" << e.cause();
+            return std::unexpected(e.cause());
+        }
+        return matches;
+    };
+
+    return Net::RPC::Spec<QList<FlameMod::FingerprintMatch>>{ .method = Net::Request::HttpMethod::Post,
+                                                          .url = QUrl(BuildConfig.FLAME_BASE_URL + "/fingerprints"),
+                                                          .data = bodyRaw,
+                                                          .parse = parseFunc,
+                                                          .name = "Flame::MatchFingerprints" };
+}
+
+std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds) const
 {
     auto netJob = makeShared<NetJob>(QString("Flame::GetFiles"), APPLICATION->network());
 
@@ -169,7 +209,7 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds)
     return { netJob, response };
 }
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getFile(const QString& addonId, const QString& fileId)
+std::pair<Task::Ptr, QByteArray*> FlameAPI::getFile(const QString& addonId, const QString& fileId) const
 {
     auto netJob = makeShared<NetJob>(QString("Flame::GetFile"), APPLICATION->network());
     auto [action, response] =
@@ -263,9 +303,9 @@ Net::RPC::Spec<QList<ModPlatform::Category>> FlameAPI::getCategories(ModPlatform
 }
 
 std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(const QList<ModPlatform::IndexedVersion>& versions,
-                                                                      const QList<ModPlatform::ModLoaderType>& instanceLoaders,
-                                                                      ModPlatform::ModLoaderTypes fallback,
-                                                                      bool checkLoaders)
+const QList<ModPlatform::ModLoaderType>& instanceLoaders,
+                                                                       ModPlatform::ModLoaderTypes fallback,
+                                                                       bool checkLoaders)
 {
     static const auto s_noLoader = ModPlatform::ModLoaderType(0);
     if (!checkLoaders) {

@@ -57,7 +57,7 @@ void Flame::FileResolvingTask::executeTask()
     for (const auto& file : m_manifest.files) {
         fileIds.push_back(QString::number(file.fileId));
     }
-    auto [task, response] = FlameAPI::getFiles(fileIds);
+    auto [task, response] = FlameAPI::get().getFiles(fileIds);
     m_task = task;
 
     auto stepProgress2 = std::make_shared<TaskStepProgress>();
