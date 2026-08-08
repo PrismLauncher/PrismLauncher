@@ -24,12 +24,9 @@
 #include <QVector2D>
 #include <QVector3D>
 #include <QtMath>
-#include <functional>
 
 #include "BuildConfig.h"
 #include "minecraft/skins/SkinModel.h"
-#include "rainbow.h"
-#include "ui/dialogs/skins/draw/BoxGeometry.h"
 #include "ui/dialogs/skins/draw/Scene.h"
 
 SkinOpenGLWindow::SkinOpenGLWindow(SkinProvider* parent, QColor color)
@@ -50,28 +47,12 @@ SkinOpenGLWindow::~SkinOpenGLWindow()
     if (m_scene) {
         delete m_scene;
     }
-    if (m_background) {
-        delete m_background;
-    }
-    if (m_backgroundTexture) {
-        if (m_backgroundTexture->isCreated()) {
-            m_backgroundTexture->destroy();
-        }
-        delete m_backgroundTexture;
-    }
     if (m_modelProgram) {
         if (m_modelProgram->isLinked()) {
             m_modelProgram->release();
         }
         m_modelProgram->removeAllShaders();
         delete m_modelProgram;
-    }
-    if (m_backgroundProgram) {
-        if (m_backgroundProgram->isLinked()) {
-            m_backgroundProgram->release();
-        }
-        m_backgroundProgram->removeAllShaders();
-        delete m_backgroundProgram;
     }
     doneCurrent();
 }
@@ -118,11 +99,9 @@ void SkinOpenGLWindow::initializeGL()
 {
     initializeOpenGLFunctions();
 
-    glClearColor(0, 0, 1, 1);
+    glClearColor(m_baseColor.redF(), m_baseColor.greenF(), m_baseColor.blueF(), 1.f);
 
     initShaders();
-
-    generateBackgroundTexture(32, 32, 1);
 
     QImage skin, cape;
     bool slim = false;
@@ -135,7 +114,6 @@ void SkinOpenGLWindow::initializeGL()
     }
 
     m_scene = new opengl::Scene(skin, slim, cape);
-    m_background = opengl::BoxGeometry::Plane();
     glEnable(GL_TEXTURE_2D);
 }
 
@@ -157,24 +135,6 @@ void SkinOpenGLWindow::initShaders()
 
     // Bind shader pipeline for use
     if (!m_modelProgram->bind())
-        close();
-
-    // Background shaders
-    m_backgroundProgram = new QOpenGLShaderProgram(this);
-    // Compile vertex shader
-    if (!m_backgroundProgram->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vshader_skin_background.glsl"))
-        close();
-
-    // Compile fragment shader
-    if (!m_backgroundProgram->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fshader.glsl"))
-        close();
-
-    // Link shader pipeline
-    if (!m_backgroundProgram->link())
-        close();
-
-    // Bind shader pipeline for use (verification)
-    if (!m_backgroundProgram->bind())
         close();
 }
 
@@ -222,10 +182,6 @@ void SkinOpenGLWindow::paintGL()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    m_backgroundProgram->bind();
-    renderBackground();
-    m_backgroundProgram->release();
-
     // Calculate model view transformation
     QMatrix4x4 matrix;
     float yawRad = qDegreesToRadians(m_yaw);
@@ -268,54 +224,6 @@ void SkinOpenGLWindow::updateCape(const QImage& cape)
     }
 }
 
-QColor calculateContrastingColor(const QColor& color)
-{
-    auto luma = Rainbow::luma(color);
-    if (luma < 0.5) {
-        constexpr float contrast = 0.05f;
-        return Rainbow::lighten(color, contrast);
-    } else {
-        constexpr float contrast = 0.2f;
-        return Rainbow::darken(color, contrast);
-    }
-}
-
-QImage generateChessboardImage(int width, int height, int tileSize, QColor baseColor)
-{
-    QImage image(width, height, QImage::Format_RGB888);
-    bool isDarkBase = Rainbow::luma(baseColor) < 0.5;
-    float contrast = isDarkBase ? 0.05 : 0.45;
-    auto contrastFunc = std::bind(isDarkBase ? Rainbow::lighten : Rainbow::darken, std::placeholders::_1, contrast, 1.0);
-    auto white = contrastFunc(baseColor);
-    auto black = contrastFunc(calculateContrastingColor(baseColor));
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            bool isWhite = ((x / tileSize) + (y / tileSize)) % 2 == 0;
-            image.setPixelColor(x, y, isWhite ? white : black);
-        }
-    }
-    return image;
-}
-
-void SkinOpenGLWindow::generateBackgroundTexture(int width, int height, int tileSize)
-{
-    m_backgroundTexture = new QOpenGLTexture(generateChessboardImage(width, height, tileSize, m_baseColor));
-    m_backgroundTexture->setMinificationFilter(QOpenGLTexture::Nearest);
-    m_backgroundTexture->setMagnificationFilter(QOpenGLTexture::Nearest);
-}
-
-void SkinOpenGLWindow::renderBackground()
-{
-    glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);  // Disable depth buffer writing
-    m_backgroundTexture->bind();
-    m_backgroundProgram->setUniformValue("texture", 0);
-    m_background->draw(m_backgroundProgram);
-    m_backgroundTexture->release();
-    glDepthMask(GL_TRUE);  // Re-enable depth buffer writing
-    glEnable(GL_DEPTH_TEST);
-}
-
 void SkinOpenGLWindow::wheelEvent(QWheelEvent* event)
 {
     // Adjust distance based on scroll
@@ -326,8 +234,10 @@ void SkinOpenGLWindow::wheelEvent(QWheelEvent* event)
 }
 void SkinOpenGLWindow::setElytraVisible(bool visible)
 {
-    if (m_scene)
+    if (m_scene) {
         m_scene->setElytraVisible(visible);
+        update();
+    }
 }
 
 bool SkinOpenGLWindow::hasOpenGL()
