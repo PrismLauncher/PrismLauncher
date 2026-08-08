@@ -227,7 +227,7 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
 {
     auto hashType = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
-    auto [verTask, response] = ModrinthAPI::currentVersions(m_resources.keys(), hashType);
+    auto [verTask, response] = ModrinthAPI::get().currentVersions(m_resources.keys(), hashType);
 
     // Prevents unfortunate timings when aborting the task
     if (!verTask) {

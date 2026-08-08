@@ -139,11 +139,11 @@ Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> FlameAPI::getProjects(QStri
         return projects;
     };
 
-    return Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>>{ .method = Net::Request::HttpMethod::Post,
-                                                                 .url = QUrl(BuildConfig.FLAME_BASE_URL + "/mods"),
-                                                                 .data = bodyRaw,
-                                                                 .parse = parseFunc,
-                                                                 .name = "Flame::GetProjects" };
+return Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>>{ .method = Net::Request::HttpMethod::Post,
+                                                             .url = QUrl(BuildConfig.FLAME_BASE_URL + "/mods"),
+                                                             .data = bodyRaw,
+                                                             .parse = parseFunc,
+                                                             .name = "Flame::GetProjects" };
 }
 
 std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds)
@@ -299,7 +299,7 @@ std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(const QLis
         }
     }
     // edge case: mod has installed for forge but the instance is fabric => fabric version will be prioritizated on update
-    auto currentLoaders = instanceLoaders + ModPlatform::modLoaderTypesToList(fallback);
+auto currentLoaders = instanceLoaders + ModPlatform::modLoaderTypesToList(fallback);
     currentLoaders.append(s_noLoader);  // add a fallback in case the versions do not define a loader
 
     for (auto loader : currentLoaders) {

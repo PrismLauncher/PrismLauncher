@@ -42,7 +42,7 @@ Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> getProjects(QStringList add
 
     static bool validateModLoaders(ModPlatform::ModLoaderTypes loaders)
     {
-        return (loaders & (ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt)) != 0;
+return loaders.testAnyFlag(ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt);
     }
 
     static ModPlatform::ResourceType getResourceType(int classId);
@@ -82,7 +82,7 @@ Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> getProjects(QStringList add
     {
         QStringList l;
         for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt }) {
-            if ((types & loader) != 0) {
+if (types.testFlag(loader)) {
                 l << QString::number(getMappedModLoader(loader));
             }
         }

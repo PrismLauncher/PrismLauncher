@@ -130,7 +130,7 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
         getFlameProjects();
         return;
     }
-    auto [modrinthTask, modrinthResponse] = ModrinthAPI::currentVersions(hashes, "sha1");
+    auto [modrinthTask, modrinthResponse] = ModrinthAPI::get().currentVersions(hashes, "sha1");
     m_task = modrinthTask;
     (dynamic_cast<NetJob*>(m_task.get()))->setAskRetry(false);
     auto stepProgress2 = std::make_shared<TaskStepProgress>();
