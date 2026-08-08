@@ -23,16 +23,16 @@ class FlameAPI final : public ResourceAPI {
         return s_instance;
     }
 
-    QString getModFileChangelog(int modId, int fileId) const;
-    QString getModDescription(int modId) const;
+    static QString getModFileChangelog(int modId, int fileId);
+    static QString getModDescription(int modId);
 
-    std::optional<ModPlatform::IndexedVersion> getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
-                                                                QList<ModPlatform::ModLoaderType> instanceLoaders,
-                                                                ModPlatform::ModLoaderTypes fallback,
-                                                                bool checkLoaders) const;
+    static std::optional<ModPlatform::IndexedVersion> getLatestVersion(const QList<ModPlatform::IndexedVersion>& versions,
+                                                                       const QList<ModPlatform::ModLoaderType>& instanceLoaders,
+                                                                       ModPlatform::ModLoaderTypes modLoaders,
+                                                                       bool checkLoaders);
 
     Net::Spec<QList<ModPlatform::IndexedPack::Ptr>> getProjects(QStringList addonIds) const override;
-    std::pair<Task::Ptr, QByteArray*> matchFingerprints(const QList<uint>& fingerprints) const;
+    static Net::Spec<QList<FlameMod::FingerprintMatch>> matchFingerprints(const QList<uint>& fingerprints);
     std::pair<Task::Ptr, QByteArray*> getFiles(const QStringList& fileIds) const;
     std::pair<Task::Ptr, QByteArray*> getFile(const QString& addonId, const QString& fileId) const;
 
