@@ -62,8 +62,7 @@
 #include "ui/dialogs/ProgressDialog.h"
 
 #include "net/NetJob.h"
-#include "screenshots/ImgurAlbumCreation.h"
-#include "screenshots/ImgurUpload.h"
+#include "screenshots/ImgurAPI.h"
 #include "tasks/SequentialTask.h"
 
 #include <DesktopServices.h>
@@ -432,7 +431,15 @@ void ScreenshotsPage::on_actionUpload_triggered()
         auto item = selection.at(0);
         auto info = m_model->fileInfo(item);
         auto screenshot = std::make_shared<ScreenShot>(info);
-        job->addNetAction(ImgurUpload::make(screenshot));
+        auto [uploadRequest, result] = ImgurAPI::makeUpload(screenshot);
+        if (!uploadRequest) {
+            CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"),
+                                         tr("Could not open file %1 for reading").arg(info.absoluteFilePath()),
+                                         QMessageBox::Critical)
+                ->show();
+            return;
+        }
+        job->addNetAction(uploadRequest);
 
         connect(job.get(), &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), reason, QMessageBox::Critical)->show();
@@ -441,7 +448,7 @@ void ScreenshotsPage::on_actionUpload_triggered()
         m_uploadActive = true;
 
         if (dialog.execWithTask(job.get()) == QDialog::Accepted) {
-            auto link = screenshot->m_url;
+            auto link = *result;
             QClipboard* clipboard = QApplication::clipboard();
             qDebug() << "ImgurUpload link" << link;
             clipboard->setText(link);
@@ -460,12 +467,19 @@ void ScreenshotsPage::on_actionUpload_triggered()
         auto info = m_model->fileInfo(item);
         auto screenshot = std::make_shared<ScreenShot>(info);
         uploaded.push_back(screenshot);
-        job->addNetAction(ImgurUpload::make(screenshot));
+        auto uploadRequest = ImgurAPI::makeUpload(screenshot).first;
+        if (!uploadRequest) {
+            CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"),
+                                         tr("Could not open file %1 for reading").arg(info.absoluteFilePath()),
+                                         QMessageBox::Critical)
+                ->show();
+            return;
+        }
+        job->addNetAction(uploadRequest);
     }
     SequentialTask task;
     auto albumTask = NetJob::Ptr(new NetJob("Imgur Album Creation", APPLICATION->network()));
-    auto imgurResult = std::make_shared<ImgurAlbumCreation::Result>();
-    auto imgurAlbum = ImgurAlbumCreation::make(imgurResult, uploaded);
+    auto [imgurAlbum, result] = ImgurAPI::makeAlbum(uploaded);
     albumTask->addNetAction(imgurAlbum);
     task.addTask(job);
     task.addTask(albumTask);
@@ -476,10 +490,10 @@ void ScreenshotsPage::on_actionUpload_triggered()
 
     m_uploadActive = true;
     if (dialog.execWithTask(&task) == QDialog::Accepted) {
-        if (imgurResult->id.isEmpty()) {
+        if (result->id.isEmpty()) {
             CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), tr("Unknown error"), QMessageBox::Warning)->exec();
         } else {
-            auto link = QString("https://imgur.com/a/%1").arg(imgurResult->id);
+            auto link = QString("https://imgur.com/a/%1").arg(result->id);
             qDebug() << "ImgurUpload link" << link;
             QClipboard* clipboard = QApplication::clipboard();
             clipboard->setText(link);
