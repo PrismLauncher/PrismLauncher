@@ -112,7 +112,7 @@ class ResourceAPI {
     virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
 
    public slots:
-    virtual Task::Ptr searchProjects(const SearchArgs&, const Callback<QList<ModPlatform::IndexedPack::Ptr>>&) const;
+    virtual Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> searchProjects(const SearchArgs&) const;
 
     virtual Net::RPC::Spec<ModPlatform::IndexedPack::Ptr> getProject(const QString& addonId, bool includeExtra = false) const;
     virtual std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const = 0;
