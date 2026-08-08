@@ -199,42 +199,25 @@ void Flame::FileResolvingTask::getFlameProjects()
         addonIds.push_back(QString::number(file.projectId));
     }
 
-    auto [task, response] = FlameAPI::get().getProjects(addonIds);
+    auto [task, result] = FlameAPI::get().getProjects(addonIds).make();
     m_task = task;
 
-    auto stepProgress2 = std::make_shared<TaskStepProgress>();
-    connect(m_task.get(), &Task::succeeded, this, [this, response, stepProgress2] {
-        QJsonParseError parseError{};
-        auto doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth projects task at" << parseError.offset
-                       << "reason:" << parseError.errorString();
-            qWarning() << *response;
-            return;
-        }
-
-        try {
-            QJsonArray entries;
-            entries = Json::requireArray(Json::requireObject(doc), "data");
-
-            for (auto entry : entries) {
-                auto entryObj = Json::requireObject(entry);
-                auto id = Json::requireInteger(entryObj, "id");
-                auto file = std::find_if(m_manifest.files.begin(), m_manifest.files.end(),
-                                         [id](const Flame::File& file) { return file.projectId == id; });
-                if (file == m_manifest.files.end()) {
-                    continue;
-                }
-
-                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
-                FlameMod::loadIndexedPack(file->pack, entryObj);
-                if (file->pack.resourceType == ModPlatform::ResourceType::World) {
-                    file->targetFolder = "saves";
-                }
+auto stepProgress2 = std::make_shared<TaskStepProgress>();
+    connect(m_task.get(), &Task::succeeded, this, [this, result, stepProgress2] {
+        for (auto pack : *result) {
+            auto id = pack->addonId.toInt();
+            auto file = std::find_if(m_manifest.files.begin(), m_manifest.files.end(),
+                                     [id](const Flame::File& file) { return file.projectId == id; });
+            if (file == m_manifest.files.end()) {
+                continue;
             }
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
+
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
+            file->pack = *pack;
+            file->resourceType = pack->resourceType;
+            if (file->resourceType == ModPlatform::ResourceType::World) {
+                file->targetFolder = "saves";
+            }
         }
         stepProgress2->state = TaskStepState::Succeeded;
         stepProgress(*stepProgress2);

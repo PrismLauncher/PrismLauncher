@@ -314,50 +314,16 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
         return projTask;
     }
 
-    Task::Ptr projTask;
-    QByteArray* response;
-    std::tie(projTask, response) = ModrinthAPI::get().getProjects(addonIds.keys());
+    auto [projTask, result] = ModrinthAPI::get().getProjects(addonIds.keys()).make();
 
     // Prevents unfortunate timings when aborting the task
     if (!projTask) {
         return Task::Ptr{ nullptr };
     }
 
-    connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
-        QJsonParseError parseError{};
-        auto doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth projects task at" << parseError.offset
-                       << "reason:" << parseError.errorString();
-            qWarning() << *response;
-            return;
-        }
-
-        QJsonArray entries;
-
-        try {
-            entries = Json::requireArray(doc);
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
-        }
-
-        for (auto entry : entries) {
-            ModPlatform::IndexedPack pack;
-
-            try {
-                auto entryObj = Json::requireObject(entry);
-
-                Modrinth::loadIndexedPack(pack, entryObj);
-            } catch (Json::JsonException& e) {
-                qDebug() << e.cause();
-                qDebug() << doc;
-
-                // Skip this entry, since it has problems
-                continue;
-            }
-
-            auto hash = addonIds.find(pack.addonId.toString()).value();
+    connect(projTask.get(), &Task::succeeded, this, [this, result, addonIds] {
+        for (auto pack : *result) {
+            auto hash = addonIds.find(pack->addonId.toString()).value();
 
             auto resourceIter = m_resources.find(hash);
             if (resourceIter == m_resources.end()) {
@@ -369,7 +335,7 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
 
             setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(resource->name()));
 
-            updateMetadata(pack, m_tempVersions.find(hash).value(), resource);
+            updateMetadata(*pack, m_tempVersions.find(hash).value(), resource);
         }
     });
 
@@ -485,52 +451,22 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
         return proj_task;
     }
 
-    Task::Ptr projTask;
-    QByteArray* response;
-    std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds.keys());
+    auto [projTask, result] = FlameAPI::get().getProjects(addonIds.keys()).make();
 
     // Prevents unfortunate timings when aborting the task
     if (!projTask) {
         return Task::Ptr{ nullptr };
     }
 
-    connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
-        QJsonParseError parseError{};
-        auto doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Flame projects task at" << parseError.offset
-                       << "reason:" << parseError.errorString();
-            qWarning() << *response;
-            return;
-        }
+    connect(projTask.get(), &Task::succeeded, this, [this, result, addonIds] {
+        for (auto pack : *result) {
+            auto id = pack->addonId.toString();
+            auto hash = addonIds.find(id).value();
+            auto resource = m_resources.find(hash).value();
 
-        try {
-            QJsonArray entries = Json::requireArray(Json::requireObject(doc), "data");
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(resource->name()));
 
-            for (auto entry : entries) {
-                auto entryObj = Json::requireObject(entry);
-
-                auto id = QString::number(Json::requireInteger(entryObj, "id"));
-                auto hash = addonIds.find(id).value();
-                auto* resource = m_resources.find(hash).value();
-
-                ModPlatform::IndexedPack pack;
-                try {
-                    setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(resource->name()));
-
-                    FlameMod::loadIndexedPack(pack, entryObj);
-
-                } catch (Json::JsonException& e) {
-                    qDebug() << e.cause();
-                    qDebug() << entries;
-
-                    emitFail(resource);
-                }
-                updateMetadata(pack, m_tempVersions.find(hash).value(), resource);
-            }
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
+            updateMetadata(*pack, m_tempVersions.find(hash).value(), resource);
         }
     });
 

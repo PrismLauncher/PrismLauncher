@@ -48,7 +48,7 @@ Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> ResourceAPI::searchProjects
         return newList;
     };
 
-    return Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>>{ .url = QUrl(searchUrl), .parse = parseFunc };
+return Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>>{ .url = QUrl(searchUrl), .parse = parseFunc };
 }
 
 Task::Ptr ResourceAPI::getProjectVersions(const VersionSearchArgs& args,
@@ -287,5 +287,5 @@ Net::RPC::Spec<ModPlatform::IndexedPack::Ptr> ResourceAPI::getProject(const QStr
         }
     };
 
-    return Net::RPC::Spec<ModPlatform::IndexedPack::Ptr>{ .url = QUrl(projectUrl), .parse = parseFunc };
+return Net::RPC::Spec<ModPlatform::IndexedPack::Ptr>{ .url = QUrl(projectUrl), .parse = parseFunc };
 }

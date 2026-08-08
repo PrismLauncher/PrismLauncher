@@ -252,6 +252,7 @@ struct IndexedPack {
     QString logoUrl;
     QString websiteUrl;
     SideType side = SideType::NoSide;
+    ResourceType resourceType = ResourceType::Unknown;
 
     bool versionsLoaded = false;
     QList<IndexedVersion> versions;
