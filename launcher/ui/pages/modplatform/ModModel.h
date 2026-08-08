@@ -42,7 +42,7 @@ class ModModel : public ResourceModel {
    public slots:
     ResourceAPI::SearchArgs createSearchArguments() override;
     ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex& index) override;
-    ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex& index) override;
+    QString createInfoArguments(const QModelIndex& index) override;
 
    protected:
     bool isPackInstalled(ModPlatform::IndexedPack::Ptr pack) const override;

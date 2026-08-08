@@ -40,10 +40,10 @@ ResourceAPI::VersionSearchArgs ResourcePackResourceModel::createVersionsArgument
     return { .pack = pack, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::ResourcePack };
 }
 
-ResourceAPI::ProjectInfoArgs ResourcePackResourceModel::createInfoArguments(const QModelIndex& entry)
+QString ResourcePackResourceModel::createInfoArguments(const QModelIndex& entry)
 {
     auto pack = m_packs[entry.row()];
-    return { .pack = pack };
+    return pack->addonId.toString();
 }
 
 void ResourcePackResourceModel::searchWithTerm(const QString& term, unsigned int sort)
