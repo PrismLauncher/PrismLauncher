@@ -41,12 +41,16 @@
 
 #include <QDateTime>
 #include <QFileInfo>
+#include <QHttpMultiPart>
+#include <QIODevice>
 #include <QLocale>
+#include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QUrl>
 #include <cstdint>
 #include <memory>
 #include <utility>
+#include <variant>
 
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
@@ -65,32 +69,46 @@
 
 namespace Net {
 
-Request::Request()
+namespace {
+auto logCatForMethod(HttpMethod method) -> Request::LogCatFunc
+{
+    switch (method.value()) {
+        case HttpMethod::Get:
+            return taskDownloadLogC;
+        case HttpMethod::Post:
+            return taskUploadLogC;
+        default:
+            break;
+    }
+    return taskNetLogC;
+}
+}  // namespace
+
+Request::Request() : Request(Spec{}) {}
+
+Request::Request(const QUrl& url, Options options, const QString& name)
+    : Request(Spec{ .method = HttpMethod::Get, .url = url, .data = std::monostate{}, .options = options, .name = name })
+{}
+
+Request::Request(const QUrl& url, QByteArray postData, Options options)
+    : Request(Spec{ .method = HttpMethod::Post, .url = url, .data = std::move(postData), .options = options })
+{}
+
+Request::Request(const Spec& spec) : m_options(spec.options), m_url(spec.url), m_httpMethod(spec.method), m_postData(spec.data)
 {
     connect(&m_retryTimer, &QTimer::timeout, this, &Request::executeTask);
-}
 
-Request::Request(const QUrl& url, Options options, const QString& name) : Request()
-{
-    m_url = url;
-    m_options = options;
-    if (name.isEmpty()) {
+    if (spec.name.isEmpty()) {
         setObjectName(QString("BYTES:") + m_url.toString());
     } else {
-        setObjectName(name);
+        setObjectName(spec.name);
     }
-    m_logCat = taskDownloadLogC;
+    m_logCat = logCatForMethod(m_httpMethod);
 #if defined(LAUNCHER_APPLICATION)
-    if (options.testFlag(Option::AddAPIHeaders)) {
+    if (spec.options.testFlag(Option::AddAPIHeaders)) {
         addHeaderProxy(std::make_unique<ApiHeaderProxy>());
     }
 #endif
-}
-
-Request::Request(const QUrl& url, QByteArray postData, Options options) : Request(url, options)
-{
-    m_postData = std::move(postData);
-    m_logCat = taskUploadLogC;
 }
 
 void Request::addValidator(Validator* v)
@@ -102,6 +120,16 @@ void Request::executeTask()
 {
     setStatus(tr("Requesting %1").arg(StringUtils::truncateUrlHumanFriendly(m_url, 80)));
 
+    if (m_network == nullptr) {
+#if defined(LAUNCHER_APPLICATION)
+        m_network = APPLICATION->network();
+#else
+        qCCritical(m_logCat) << getUid().toString() << "No network manager set for request:" << m_url.toString();
+        emit failed("No network manager set for request");
+        emit finished();
+        return;
+#endif
+    }
     if (getState() == Task::State::AbortedByUser) {
         qCWarning(m_logCat) << getUid().toString() << "Attempt to start an aborted Request:" << m_url.toString();
         emit aborted();
@@ -207,10 +235,18 @@ void Request::downloadError(QNetworkReply::NetworkError error)
             auto retryAfter = m_reply->rawHeader("Retry-After");
             if (retryAfter.trimmed().endsWith("GMT")) /* HTTP Date format */ {
                 auto afterTimestamp = QDateTime::fromString(QString::fromUtf8(retryAfter.trimmed()), "ddd, dd MMM yyyy HH:mm:ss 'GMT'");
-                auto now = QDateTime::currentDateTime();
-                delay = now.secsTo(afterTimestamp);
+                if (afterTimestamp.isValid()) {
+                    auto seconds = QDateTime::currentDateTime().secsTo(afterTimestamp);
+                    if (seconds > 0) {
+                        delay = seconds;
+                    }
+                }
             } else {
-                delay = retryAfter.toLong();
+                bool ok = false;
+                auto seconds = retryAfter.toLongLong(&ok);
+                if (ok && seconds > 0) {
+                    delay = seconds;
+                }
             }
         }
         handleAutoRetry(delay);
@@ -278,7 +314,8 @@ auto Request::handleRedirect() -> bool
         }
 
         /*
-         * Next, make sure the URL is parsed in tolerant mode. Qt doesn't parse the location header in tolerant mode, which causes issues.
+         * Next, make sure the URL is parsed in tolerant mode. Qt doesn't parse the location header in tolerant mode, which causes
+         * issues.
          * FIXME: report Qt bug for this
          */
         redirect = QUrl(redirectStr, QUrl::TolerantMode);
@@ -294,6 +331,12 @@ auto Request::handleRedirect() -> bool
 
     m_url = QUrl(redirect.toString());
     qCDebug(m_logCat) << getUid().toString() << "Following redirect to" << m_url.toString();
+    if (++m_redirectCount > 10) {
+        qCWarning(m_logCat) << getUid().toString() << "Too many redirects for" << m_url.toString();
+        m_sink->abort();
+        emitFailed(tr("Too many redirects"));
+        return true;
+    }
     executeTask();
 
     return true;
@@ -406,10 +449,14 @@ void Request::downloadReadyRead()
 
 auto Request::abort() -> bool
 {
+    m_retryTimer.stop();
     m_state = State::AbortedByUser;
-    if (m_reply) {
+    if (m_reply && !m_reply->isFinished()) {
         disconnect(m_reply.get(), &QNetworkReply::errorOccurred, nullptr, nullptr);
         m_reply->abort();
+    } else {
+        emit aborted();
+        emit finished();
     }
     return true;
 }
@@ -445,19 +492,44 @@ void Request::enableAutoRetry(bool enable)
 
 QNetworkReply* Request::getReply(QNetworkRequest& request)
 {
-    if (m_postData.has_value()) {
-        if (!request.hasRawHeader("Content-Type")) {
-            request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-        }
-        return m_network->post(request, *m_postData);
+    if (m_httpMethod == HttpMethod::Get) {
+        Q_ASSERT(std::holds_alternative<std::monostate>(m_postData));
+        return m_network->get(request);
     }
-    return m_network->get(request);
+    return std::visit(
+        [this, &request](const auto& data) -> QNetworkReply* {
+            using T = std::remove_cvref_t<decltype(data)>;
+            const auto verb = m_httpMethod.toString().toUtf8();
+            if constexpr (std::is_same_v<T, QByteArray>) {
+                if (m_httpMethod == HttpMethod::Post && !request.hasRawHeader("Content-Type")) {
+                    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+                }
+                return m_network->sendCustomRequest(request, verb, data);
+            } else if constexpr (std::is_same_v<T, std::monostate>) {
+                return m_network->sendCustomRequest(request, verb);
+            } else if constexpr (std::is_same_v<T, DeviceFactory>) {
+                if (QIODevice* device = data(); device != nullptr) {
+                    device->setParent(this);
+                    return m_network->sendCustomRequest(request, verb, device);
+                }
+                return m_network->sendCustomRequest(request, verb);
+            } else if constexpr (std::is_same_v<T, MultiPartFactory>) {
+                if (QHttpMultiPart* multiPart = data(); multiPart != nullptr) {
+                    if (multiPart->parent() == nullptr) {
+                        multiPart->setParent(this);
+                    }
+                    return m_network->sendCustomRequest(request, verb, multiPart);
+                }
+                return m_network->sendCustomRequest(request, verb);
+            }
+        },
+        m_postData);
 }
 
 #if defined(LAUNCHER_APPLICATION)
 auto Request::makeCached(const QUrl& url, MetaEntryPtr entry, Options options) -> Ptr
 {
-    auto dl = makeShared<Request>(url, options, (QString("CACHE:") + url.toString()));
+    auto dl = Ptr(new Request(url, options, (QString("CACHE:") + url.toString())));
     auto* md5Node = new ChecksumValidator(QCryptographicHash::Md5);
     auto* cachedNode = new MetaCacheSink(std::move(entry), md5Node, options.testFlag(Option::MakeEternal));
     dl->m_sink.reset(cachedNode);
@@ -467,7 +539,7 @@ auto Request::makeCached(const QUrl& url, MetaEntryPtr entry, Options options) -
 
 auto Request::makeByteArray(const QUrl& url, QByteArray postData, Options options) -> std::pair<Ptr, QByteArray*>
 {
-    auto dl = makeShared<Request>(url, std::move(postData), options);
+    auto dl = Ptr(new Request(url, std::move(postData), options));
 
     auto sink = std::make_unique<ByteArraySink>();
     auto* response = sink->output();
@@ -478,7 +550,7 @@ auto Request::makeByteArray(const QUrl& url, QByteArray postData, Options option
 
 auto Request::makeByteArray(const QUrl& url, Options options) -> std::pair<Ptr, QByteArray*>
 {
-    auto dl = makeShared<Request>(url, options);
+    auto dl = Ptr(new Request(url, options));
 
     auto sink = std::make_unique<ByteArraySink>();
     auto* response = sink->output();
@@ -489,10 +561,15 @@ auto Request::makeByteArray(const QUrl& url, Options options) -> std::pair<Ptr, 
 
 auto Request::makeFile(const QUrl& url, const QString& path, Options options) -> Ptr
 {
-    auto dl = makeShared<Request>(url, options, QString("FILE:") + url.toString());
+    auto dl = Ptr(new Request(url, options, QString("FILE:") + url.toString()));
     dl->m_sink = std::make_unique<FileSink>(path);
 
     return dl;
+}
+
+auto Request::makeCustomRequest(const Spec& spec) -> Ptr
+{
+    return Ptr(new Request(spec));
 }
 
 }  // namespace Net
