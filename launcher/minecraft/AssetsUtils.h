@@ -18,13 +18,13 @@
 #include <QMap>
 #include <QString>
 #include "net/NetJob.h"
-#include "net/NetRequest.h"
+#include "net/Request.h"
 
 struct AssetObject {
     QString getRelPath();
     QUrl getUrl();
     QString getLocalPath();
-    Net::NetRequest::Ptr getDownloadAction();
+    Net::Request::Ptr getDownloadAction();
 
     QString hash;
     qint64 size;

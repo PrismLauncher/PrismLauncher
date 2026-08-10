@@ -37,7 +37,7 @@ void XboxUserStep::perform()
         // https://learn.microsoft.com/en-us/gaming/gdk/_content/gc/reference/live/rest/additional/httpstandardheaders
         { "x-xbl-contract-version", "1" }
     };
-    auto [request, response] = Net::NetRequest::makeByteArray(url, xbox_auth_data.toUtf8());
+    auto [request, response] = Net::Request::makeByteArray(url, xbox_auth_data.toUtf8());
     m_request = request;
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);

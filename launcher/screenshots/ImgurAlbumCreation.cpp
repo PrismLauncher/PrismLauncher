@@ -48,7 +48,7 @@
 #include "BuildConfig.h"
 #include "net/RawHeaderProxy.h"
 
-Net::NetRequest::Ptr ImgurAlbumCreation::make(std::shared_ptr<ImgurAlbumCreation::Result> output, QList<ScreenShot::Ptr> screenshots)
+Net::Request::Ptr ImgurAlbumCreation::make(std::shared_ptr<ImgurAlbumCreation::Result> output, QList<ScreenShot::Ptr> screenshots)
 {
     auto up = makeShared<ImgurAlbumCreation>();
     up->m_url = BuildConfig.IMGUR_BASE_URL + "album";

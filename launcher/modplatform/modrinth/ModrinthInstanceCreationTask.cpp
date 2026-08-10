@@ -282,7 +282,7 @@ void ModrinthCreationTask::createInstance()
                                         .dependentOn = !m_managedId.isEmpty() ? m_managedVersionId : "" };
 
         QUrl downloadUrl = file.downloads.dequeue();
-        auto dl = Net::ApiRequest::makeFile(downloadUrl, filePath, Net::NetRequest::Option::NoOptions, meta);
+        auto dl = Net::ApiRequest::makeFile(downloadUrl, filePath, Net::Request::Option::NoOptions, meta);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
         downloadMods->addNetAction(dl);
         if (!file.downloads.empty()) {
@@ -291,7 +291,7 @@ void ModrinthCreationTask::createInstance()
             auto param = dl.toWeakRef();
             connect(dl.get(), &Task::failed, dl.get(), [&file, filePath, param, downloadMods, meta] {
                 QUrl fallbackUrl = file.downloads.dequeue();
-                auto ndl = Net::ApiRequest::makeFile(fallbackUrl, filePath, Net::NetRequest::Option::NoOptions, meta);
+                auto ndl = Net::ApiRequest::makeFile(fallbackUrl, filePath, Net::Request::Option::NoOptions, meta);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 downloadMods->addNetAction(ndl);
                 if (auto shared = param.lock()) {

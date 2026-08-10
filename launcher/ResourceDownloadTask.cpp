@@ -70,7 +70,7 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
     m_filesNetJob->setStatus(tr("Downloading resource:\n%1").arg(m_pack_version.downloadUrl));
 
     auto action = Net::ApiRequest::makeFile(
-        m_pack_version.downloadUrl, m_pack_model->dir().absoluteFilePath(getFilename()), Net::NetRequest::Option::NoOptions,
+        m_pack_version.downloadUrl, m_pack_model->dir().absoluteFilePath(getFilename()), Net::Request::Option::NoOptions,
         createModrinthMeta(m_pack_model->instance(), std::move(downloadReason), std::move(dependentOn)));
     if (!m_pack_version.hash_type.isEmpty() && !m_pack_version.hash.isEmpty()) {
         switch (Hashing::algorithmFromString(m_pack_version.hash_type)) {

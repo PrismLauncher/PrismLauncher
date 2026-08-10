@@ -58,10 +58,10 @@
 namespace Net {
 class ByteArraySink;
 
-class NetRequest : public Task {
+class Request : public Task {
     Q_OBJECT
    public:
-    using Ptr = shared_qobject_ptr<class NetRequest>;
+    using Ptr = shared_qobject_ptr<class Request>;
     enum class Option : std::uint8_t {
         NoOptions = 0,
         AcceptLocalFiles = 1,
@@ -72,26 +72,26 @@ class NetRequest : public Task {
     Q_DECLARE_FLAGS(Options, Option)
 
    public:
-    explicit NetRequest();
-    explicit NetRequest(const QUrl& url, Options options = Option::NoOptions, const QString& name = QString());
-    NetRequest(const QUrl& url, QByteArray postData, Options options);
+    explicit Request();
+    explicit Request(const QUrl& url, Options options = Option::NoOptions, const QString& name = QString());
+    Request(const QUrl& url, QByteArray postData, Options options);
 
    public:
 #if defined(LAUNCHER_APPLICATION)
-    static auto makeCached(const QUrl& url, MetaEntryPtr entry, Options options = Option::NoOptions) -> NetRequest::Ptr;
+    static auto makeCached(const QUrl& url, MetaEntryPtr entry, Options options = Option::NoOptions) -> Request::Ptr;
 #endif
 
     /**
      * Creates a request downloading to the returned QByteArray,.
      * The QByteArray will live as long as the Download object.
      */
-    static auto makeByteArray(const QUrl& url, Options options = Option::NoOptions) -> std::pair<NetRequest::Ptr, QByteArray*>;
+    static auto makeByteArray(const QUrl& url, Options options = Option::NoOptions) -> std::pair<Request::Ptr, QByteArray*>;
     static auto makeByteArray(const QUrl& url, QByteArray postData, Options options = Option::NoOptions)
-        -> std::pair<NetRequest::Ptr, QByteArray*>;
-    static auto makeFile(const QUrl& url, const QString& path, Options options = Option::NoOptions) -> NetRequest::Ptr;
+        -> std::pair<Request::Ptr, QByteArray*>;
+    static auto makeFile(const QUrl& url, const QString& path, Options options = Option::NoOptions) -> Request::Ptr;
 
    public:
-    ~NetRequest() override = default;
+    ~Request() override = default;
     void addValidator(Validator* v);
     auto abort() -> bool override;
     auto canAbort() const -> bool override { return true; }
@@ -148,4 +148,4 @@ class NetRequest : public Task {
 };
 }  // namespace Net
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(Net::NetRequest::Options)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Net::Request::Options)

@@ -37,7 +37,7 @@
  *      limitations under the License.
  */
 
-#include "NetRequest.h"
+#include "Request.h"
 
 #include <QDateTime>
 #include <QFileInfo>
@@ -65,12 +65,12 @@
 
 namespace Net {
 
-NetRequest::NetRequest()
+Request::Request()
 {
-    connect(&m_retryTimer, &QTimer::timeout, this, &NetRequest::executeTask);
+    connect(&m_retryTimer, &QTimer::timeout, this, &Request::executeTask);
 }
 
-NetRequest::NetRequest(const QUrl& url, Options options, const QString& name) : NetRequest()
+Request::Request(const QUrl& url, Options options, const QString& name) : Request()
 {
     m_url = url;
     m_options = options;
@@ -87,18 +87,18 @@ NetRequest::NetRequest(const QUrl& url, Options options, const QString& name) : 
 #endif
 }
 
-NetRequest::NetRequest(const QUrl& url, QByteArray postData, Options options) : NetRequest(url, options)
+Request::Request(const QUrl& url, QByteArray postData, Options options) : Request(url, options)
 {
     m_postData = std::move(postData);
     m_logCat = taskUploadLogC;
 }
 
-void NetRequest::addValidator(Validator* v)
+void Request::addValidator(Validator* v)
 {
     m_sink->addValidator(v);
 }
 
-void NetRequest::executeTask()
+void Request::executeTask()
 {
     setStatus(tr("Requesting %1").arg(StringUtils::truncateUrlHumanFriendly(m_url, 80)));
 
@@ -156,15 +156,15 @@ void NetRequest::executeTask()
         return;
     }
     m_reply.reset(rep);
-    connect(rep, &QNetworkReply::uploadProgress, this, &NetRequest::onProgress);
-    connect(rep, &QNetworkReply::downloadProgress, this, &NetRequest::onProgress);
-    connect(rep, &QNetworkReply::finished, this, &NetRequest::downloadFinished);
-    connect(rep, &QNetworkReply::errorOccurred, this, &NetRequest::downloadError);
-    connect(rep, &QNetworkReply::sslErrors, this, &NetRequest::sslErrors);
-    connect(rep, &QNetworkReply::readyRead, this, &NetRequest::downloadReadyRead);
+    connect(rep, &QNetworkReply::uploadProgress, this, &Request::onProgress);
+    connect(rep, &QNetworkReply::downloadProgress, this, &Request::onProgress);
+    connect(rep, &QNetworkReply::finished, this, &Request::downloadFinished);
+    connect(rep, &QNetworkReply::errorOccurred, this, &Request::downloadError);
+    connect(rep, &QNetworkReply::sslErrors, this, &Request::sslErrors);
+    connect(rep, &QNetworkReply::readyRead, this, &Request::downloadReadyRead);
 }
 
-void NetRequest::onProgress(qint64 bytesReceived, qint64 bytesTotal)
+void Request::onProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     auto now = std::chrono::steady_clock::now();
     auto elapsed = now - m_lastProgressTime;
@@ -195,7 +195,7 @@ void NetRequest::onProgress(qint64 bytesReceived, qint64 bytesTotal)
     setProgress(bytesReceived, bytesTotal);
 }
 
-void NetRequest::downloadError(QNetworkReply::NetworkError error)
+void Request::downloadError(QNetworkReply::NetworkError error)
 {
     if (error == QNetworkReply::OperationCanceledError) {
         qCCritical(m_logCat) << getUid().toString() << "Aborted" << m_url.toString();
@@ -233,7 +233,7 @@ void NetRequest::downloadError(QNetworkReply::NetworkError error)
     }
 }
 
-void NetRequest::sslErrors(const QList<QSslError>& errors)
+void Request::sslErrors(const QList<QSslError>& errors)
 {
     int i = 1;
     for (const auto& error : errors) {
@@ -245,7 +245,7 @@ void NetRequest::sslErrors(const QList<QSslError>& errors)
     }
 }
 
-auto NetRequest::handleRedirect() -> bool
+auto Request::handleRedirect() -> bool
 {
     QUrl redirect = m_reply->header(QNetworkRequest::LocationHeader).toUrl();
     if (!redirect.isValid()) {
@@ -299,7 +299,7 @@ auto NetRequest::handleRedirect() -> bool
     return true;
 }
 
-void NetRequest::handleAutoRetry(int64_t delay)
+void Request::handleAutoRetry(int64_t delay)
 {
     m_retryCount++;
     if (delay > 60 || m_retryCount > 4) {
@@ -318,7 +318,7 @@ void NetRequest::handleAutoRetry(int64_t delay)
     m_retryTimer.start();
 }
 
-void NetRequest::downloadFinished()
+void Request::downloadFinished()
 {
     // currently waiting for retry
     if (m_retryTimer.isActive()) {
@@ -387,7 +387,7 @@ void NetRequest::downloadFinished()
     emit finished();
 }
 
-void NetRequest::downloadReadyRead()
+void Request::downloadReadyRead()
 {
     if (m_state == State::Running) {
         auto data = m_reply->readAll();
@@ -404,7 +404,7 @@ void NetRequest::downloadReadyRead()
     }
 }
 
-auto NetRequest::abort() -> bool
+auto Request::abort() -> bool
 {
     m_state = State::AbortedByUser;
     if (m_reply) {
@@ -414,27 +414,27 @@ auto NetRequest::abort() -> bool
     return true;
 }
 
-int NetRequest::replyStatusCode() const
+int Request::replyStatusCode() const
 {
     return m_reply ? m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() : -1;
 }
 
-QNetworkReply::NetworkError NetRequest::error() const
+QNetworkReply::NetworkError Request::error() const
 {
     return m_reply ? m_reply->error() : QNetworkReply::NoError;
 }
 
-QUrl NetRequest::url() const
+QUrl Request::url() const
 {
     return m_url;
 }
 
-QString NetRequest::errorString() const
+QString Request::errorString() const
 {
     return m_reply ? m_reply->errorString() : "";
 }
 
-void NetRequest::enableAutoRetry(bool enable)
+void Request::enableAutoRetry(bool enable)
 {
     if (enable) {
         m_options |= Option::AutoRetry;
@@ -443,7 +443,7 @@ void NetRequest::enableAutoRetry(bool enable)
     }
 }
 
-QNetworkReply* NetRequest::getReply(QNetworkRequest& request)
+QNetworkReply* Request::getReply(QNetworkRequest& request)
 {
     if (m_postData.has_value()) {
         if (!request.hasRawHeader("Content-Type")) {
@@ -455,9 +455,9 @@ QNetworkReply* NetRequest::getReply(QNetworkRequest& request)
 }
 
 #if defined(LAUNCHER_APPLICATION)
-auto NetRequest::makeCached(const QUrl& url, MetaEntryPtr entry, Options options) -> Ptr
+auto Request::makeCached(const QUrl& url, MetaEntryPtr entry, Options options) -> Ptr
 {
-    auto dl = makeShared<NetRequest>(url, options, (QString("CACHE:") + url.toString()));
+    auto dl = makeShared<Request>(url, options, (QString("CACHE:") + url.toString()));
     auto* md5Node = new ChecksumValidator(QCryptographicHash::Md5);
     auto* cachedNode = new MetaCacheSink(std::move(entry), md5Node, options.testFlag(Option::MakeEternal));
     dl->m_sink.reset(cachedNode);
@@ -465,9 +465,9 @@ auto NetRequest::makeCached(const QUrl& url, MetaEntryPtr entry, Options options
 }
 #endif
 
-auto NetRequest::makeByteArray(const QUrl& url, QByteArray postData, Options options) -> std::pair<Ptr, QByteArray*>
+auto Request::makeByteArray(const QUrl& url, QByteArray postData, Options options) -> std::pair<Ptr, QByteArray*>
 {
-    auto dl = makeShared<NetRequest>(url, std::move(postData), options);
+    auto dl = makeShared<Request>(url, std::move(postData), options);
 
     auto sink = std::make_unique<ByteArraySink>();
     auto* response = sink->output();
@@ -476,9 +476,9 @@ auto NetRequest::makeByteArray(const QUrl& url, QByteArray postData, Options opt
     return { dl, response };
 }
 
-auto NetRequest::makeByteArray(const QUrl& url, Options options) -> std::pair<Ptr, QByteArray*>
+auto Request::makeByteArray(const QUrl& url, Options options) -> std::pair<Ptr, QByteArray*>
 {
-    auto dl = makeShared<NetRequest>(url, options);
+    auto dl = makeShared<Request>(url, options);
 
     auto sink = std::make_unique<ByteArraySink>();
     auto* response = sink->output();
@@ -487,9 +487,9 @@ auto NetRequest::makeByteArray(const QUrl& url, Options options) -> std::pair<Pt
     return { dl, response };
 }
 
-auto NetRequest::makeFile(const QUrl& url, const QString& path, Options options) -> Ptr
+auto Request::makeFile(const QUrl& url, const QString& path, Options options) -> Ptr
 {
-    auto dl = makeShared<NetRequest>(url, options, QString("FILE:") + url.toString());
+    auto dl = makeShared<Request>(url, options, QString("FILE:") + url.toString());
     dl->m_sink = std::make_unique<FileSink>(path);
 
     return dl;

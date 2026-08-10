@@ -46,7 +46,7 @@
 #include "FileSystem.h"
 #include "logs/AnonymizeLog.h"
 #include "net/NetJob.h"
-#include "net/NetRequest.h"
+#include "net/Request.h"
 #include "net/PasteUpload.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -136,7 +136,7 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
     auto job = NetJob::Ptr(new NetJob("Log Upload", APPLICATION->network()));
 
     auto pasteJob = new PasteUpload(textToUpload, baseURL, pasteType);
-    job->addNetAction(Net::NetRequest::Ptr(pasteJob));
+    job->addNetAction(Net::Request::Ptr(pasteJob));
     QObject::connect(job.get(), &Task::failed, parentWidget, [parentWidget](QString reason) {
         CustomMessageBox::selectable(parentWidget, QObject::tr("Failed to upload logs!"), reason, QMessageBox::Critical)->show();
     });

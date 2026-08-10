@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include "net/NetRequest.h"
+#include "net/Request.h"
 
-class SkinUpload : public Net::NetRequest {
+class SkinUpload : public Net::Request {
     Q_OBJECT
    public:
     using Ptr = shared_qobject_ptr<SkinUpload>;
