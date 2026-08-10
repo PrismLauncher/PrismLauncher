@@ -60,7 +60,7 @@ void NewsChecker::reloadNews()
     qDebug() << "Reloading news.";
 
     NetJob::Ptr job{ new NetJob("News RSS Feed", m_network) };
-    job->addNetAction(Net::Download::makeCached(m_feedUrl, m_entry));
+    job->addNetAction(Net::NetRequest::makeCached(m_feedUrl, m_entry));
     job->setAskRetry(false);
     connect(job.get(), &NetJob::succeeded, this, &NewsChecker::rssDownloadFinished);
     connect(job.get(), &NetJob::failed, this, &NewsChecker::rssDownloadFailed);

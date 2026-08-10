@@ -39,7 +39,6 @@
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/flame/PackManifest.h"
 
 #include "Application.h"
@@ -66,7 +65,7 @@
 #include "meta/Index.h"
 #include "minecraft/World.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 #include "ui/dialogs/UntrustedModsDialog.h"
 #include "ui/pages/modplatform/OptionalModDialog.h"
 
@@ -212,53 +211,30 @@ void FlameCreationTask::executeTask()
             fileIds.append(QString::number(file.fileId));
         }
 
-        auto [job, rawResponse] = FlameAPI::get().getFiles(fileIds);
+        auto [job, result] = FlameAPI::getFiles(fileIds).make();
 
-        connect(job.get(), &Task::succeeded, this,
-                [this, rawResponse, fileIds, oldInstDir, oldFiles, oldMinecraftDir, createInst]() mutable {
-                    // Parse the API response
-                    QJsonParseError parseError{};
-                    auto doc = QJsonDocument::fromJson(*rawResponse, &parseError);
-                    if (parseError.error != QJsonParseError::NoError) {
-                        qWarning() << "Error while parsing JSON response from Flame files task at" << parseError.offset
-                                   << "reason:" << parseError.errorString();
-                        qWarning() << *rawResponse;
-                        return;
-                    }
+        connect(job.get(), &Task::succeeded, this, [this, result, fileIds, oldInstDir, oldFiles, oldMinecraftDir, createInst]() mutable {
+            auto files = *result;
 
-                    try {
-                        QJsonArray entries;
-                        if (fileIds.size() == 1) {
-                            entries = { Json::requireObject(Json::requireObject(doc), "data") };
-                        } else {
-                            entries = Json::requireArray(Json::requireObject(doc), "data");
-                        }
+            for (const auto& entry : files) {
+                Flame::File file;
+                file.version = entry;
+                auto id = entry.fileId.toInt();
+                oldFiles.insert(id, file);
+            }
 
-                        for (auto entry : entries) {
-                            auto entryObj = Json::requireObject(entry);
+            // Delete the files
+            for (const auto& file : oldFiles) {
+                if (file.version.fileName.isEmpty() || file.targetFolder.isEmpty()) {
+                    continue;
+                }
 
-                            Flame::File file;
-                            // We don't care about blocked mods, we just need local data to delete the file
-                            file.version = FlameMod::loadIndexedPackVersion(entryObj);
-                            auto id = Json::requireInteger(entryObj, "id");
-                            oldFiles.insert(id, file);
-                        }
-                    } catch (Json::JsonException& e) {
-                        qCritical() << e.cause() << e.what();
-                    }
+                const QString relativePath(FS::PathCombine(file.targetFolder, file.version.fileName));
+                scheduleToDelete(m_parent, oldMinecraftDir, relativePath, true);
+            }
 
-                    // Delete the files
-                    for (const auto& file : oldFiles) {
-                        if (file.version.fileName.isEmpty() || file.targetFolder.isEmpty()) {
-                            continue;
-                        }
-
-                        const QString relativePath(FS::PathCombine(file.targetFolder, file.version.fileName));
-                        scheduleToDelete(m_parent, oldMinecraftDir, relativePath, true);
-                    }
-
-                    createInst();
-                });
+            createInst();
+        });
         connect(job.get(), &Task::aborted, this, [warnUser] {
             warnUser(tr("Failed to fetch the old files."),
                      tr("We couldn't fetch the old files because the task was aborted. This may cause "
@@ -622,7 +598,7 @@ void FlameCreationTask::setupDownloadJob()
 
         if (!result.version.downloadUrl.isEmpty()) {
             qDebug() << "Will download" << result.version.downloadUrl << "to" << path;
-            auto dl = Net::ApiDownload::makeFile(result.version.downloadUrl, path);
+            auto dl = Net::ApiRequest::makeFile(result.version.downloadUrl, path);
             m_filesJob->addNetAction(dl);
         }
     }

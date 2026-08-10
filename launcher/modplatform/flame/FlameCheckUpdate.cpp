@@ -14,7 +14,7 @@
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 
 #include "modplatform/ModIndex.h"
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 #include "net/NetJob.h"
 #include "tasks/Task.h"
 
@@ -51,7 +51,7 @@ void FlameCheckUpdate::executeTask()
             continue;
         }
 
-        auto [task, response] = Net::ApiDownload::makeByteArray(versionsUrlOptional.value());
+        auto [task, response] = Net::ApiRequest::makeByteArray(versionsUrlOptional.value());
 
         connect(task.get(), &Task::succeeded, this, [this, resource, response] { getLatestVersionCallback(resource, response); });
         netJob->addNetAction(task);
@@ -140,60 +140,43 @@ void FlameCheckUpdate::collectBlockedMods()
         quickSearch[addonId] = resource;
     }
 
-    Task::Ptr projTask;
-    QByteArray* response = nullptr;
-
     if (addonIds.isEmpty()) {
         emitSucceeded();
         return;
     }
+
     if (addonIds.size() == 1) {
-        std::tie(projTask, response) = FlameAPI::get().getProject(*addonIds.begin());
-    } else {
-        std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds);
+        auto [projTask, result] = FlameAPI::get().getProject(*addonIds.begin()).make();
+        connect(projTask.get(), &Task::succeeded, this, [this, result, quickSearch] {
+            auto pack = *result;
+            auto* resource = quickSearch.find(pack->addonId.toString()).value();
+
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(resource->name()));
+            auto recoverUrl = QString("%1/download/%2").arg(pack->websiteUrl, m_blocked[resource]);
+            emit checkFailed(resource, tr("Resource has a new update available, but is not downloadable using CurseForge."), recoverUrl);
+        });
+        connect(projTask.get(), &Task::finished, this, &FlameCheckUpdate::emitSucceeded);  // do not care much about error
+        connect(projTask.get(), &Task::progress, this, &FlameCheckUpdate::setProgress);
+        connect(projTask.get(), &Task::stepProgress, this, &FlameCheckUpdate::propagateStepProgress);
+        connect(projTask.get(), &Task::details, this, &FlameCheckUpdate::setDetails);
+        m_task = projTask;
+        m_task->start();
+        return;
     }
 
-    connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds, quickSearch] {
-        QJsonParseError parseError{};
-        auto doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Flame projects task at" << parseError.offset
-                       << "reason:" << parseError.errorString();
-            qWarning() << *response;
-            return;
-        }
+    auto [projTask, result] = FlameAPI::get().getProjects(addonIds).make();
 
-        try {
-            QJsonArray entries;
-            if (addonIds.size() == 1) {
-                entries = { Json::requireObject(Json::requireObject(doc), "data") };
-            } else {
-                entries = Json::requireArray(Json::requireObject(doc), "data");
+    connect(projTask.get(), &Task::succeeded, this, [this, result, quickSearch] {
+        for (auto pack : *result) {
+            auto* resource = quickSearch.find(pack->addonId.toString()).value();
+            if (resource == nullptr) {
+                continue;
             }
 
-            for (auto entry : entries) {
-                auto entryObj = Json::requireObject(entry);
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(resource->name()));
 
-                auto id = QString::number(Json::requireInteger(entryObj, "id"));
-
-                auto* resource = quickSearch.find(id).value();
-
-                ModPlatform::IndexedPack pack;
-                try {
-                    setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(resource->name()));
-
-                    FlameMod::loadIndexedPack(pack, entryObj);
-                    auto recoverUrl = QString("%1/download/%2").arg(pack.websiteUrl, m_blocked[resource]);
-                    emit checkFailed(resource, tr("Resource has a new update available, but is not downloadable using CurseForge."),
-                                     recoverUrl);
-                } catch (Json::JsonException& e) {
-                    qDebug() << e.cause();
-                    qDebug() << entries;
-                }
-            }
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
+            auto recoverUrl = QString("%1/download/%2").arg(pack->websiteUrl, m_blocked[resource]);
+            emit checkFailed(resource, tr("Resource has a new update available, but is not downloadable using CurseForge."), recoverUrl);
         }
     });
 

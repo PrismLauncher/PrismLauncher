@@ -194,7 +194,7 @@ void ResourceDownloadDialog::confirm()
         dependencyExtraInfo = task->getExtraInfo();
         for (const auto& dep : task->getDependecies()) {
             auto depExtra = dependencyExtraInfo.value(dep->pack->addonId.toString());
-            addResource(dep->pack, dep->version, "dependency", depExtra.required_by_ids.first());
+            addResource(dep->pack, dep->version, "dependency", depExtra.requiredByIds.first());
             depNames << dep->pack->name;
         }
     }
@@ -208,9 +208,9 @@ void ResourceDownloadDialog::confirm()
         confirmDialog->appendResource({ .name = task->getName(),
                                         .filename = task->getFilename(),
                                         .provider = ModPlatform::ProviderCapabilities::name(task->getProvider()),
-                                        .required_by = extraInfo.required_by_names,
+                                        .required_by = extraInfo.requiredByNames,
                                         .version_type = task->getVersion().version_type.toString(),
-                                        .enabled = !extraInfo.maybe_installed });
+                                        .enabled = !extraInfo.maybeInstalled });
     }
 
     if (confirmDialog->exec() != 0) {

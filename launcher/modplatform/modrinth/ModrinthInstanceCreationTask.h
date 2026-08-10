@@ -32,14 +32,7 @@ class ModrinthCreationTask final : public InstanceTask {
                          QWidget* parent,
                          QString id,
                          QString versionId = {},
-                         QString originalInstanceId = {})
-        : m_parent(parent), m_trustedSource(trustedSource), m_managedId(std::move(id)), m_managedVersionId(std::move(versionId))
-    {
-        setStagingPath(stagingPath);
-        setParentSettings(globalSettings);
-
-        m_originalInstanceId = std::move(originalInstanceId);
-    }
+                         QString originalInstanceId = {});
     ~ModrinthCreationTask() override;
 
     bool abort() override;

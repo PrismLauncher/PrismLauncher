@@ -40,13 +40,11 @@
 #include "QObjectPtr.h"
 
 #include "minecraft/auth/Parsers.h"
-#include "minecraft/skins/CapeChange.h"
-#include "minecraft/skins/SkinDelete.h"
 #include "minecraft/skins/SkinList.h"
 #include "minecraft/skins/SkinModel.h"
-#include "minecraft/skins/SkinUpload.h"
+#include "minecraft/skins/SkinRequests.h"
 
-#include "net/Download.h"
+#include "net/NetRequest.h"
 #include "net/NetJob.h"
 #include "tasks/Task.h"
 
@@ -228,7 +226,7 @@ void SkinManageDialog::setupCapes()
         }
         if (!cape.url.isEmpty()) {
             needsToDownload = true;
-            job->addNetAction(Net::Download::makeFile(cape.url, path));
+            job->addNetAction(Net::NetRequest::makeFile(cape.url, path));
         }
     }
     if (needsToDownload) {
@@ -309,11 +307,11 @@ void SkinManageDialog::accept()
         return;
     }
 
-    skinUpload->addNetAction(SkinUpload::make(m_acct->accessToken(), skin->getPath(), skin->getModelString()));
+    skinUpload->addNetAction(makeSkinUploadRequest(m_acct->accessToken(), skin->getPath(), skin->getModelString()));
 
     auto selectedCape = skin->getCapeId();
     if (selectedCape != m_acct->accountData()->minecraftProfile.currentCape) {
-        skinUpload->addNetAction(CapeChange::make(m_acct->accessToken(), selectedCape));
+        skinUpload->addNetAction(makeCapeChangeRequest(m_acct->accessToken(), selectedCape));
     }
 
     skinUpload->addTask(m_acct->refresh().staticCast<Task>());
@@ -330,7 +328,7 @@ void SkinManageDialog::on_resetBtn_clicked()
 {
     ProgressDialog prog(this);
     NetJob::Ptr skinReset{ new NetJob(tr("Reset skin"), APPLICATION->network(), 1) };
-    skinReset->addNetAction(SkinDelete::make(m_acct->accessToken()));
+    skinReset->addNetAction(makeSkinDeleteRequest(m_acct->accessToken()));
     skinReset->addTask(m_acct->refresh().staticCast<Task>());
     if (prog.execWithTask(skinReset.get()) != QDialog::Accepted) {
         CustomMessageBox::selectable(this, tr("Skin Delete"), tr("Failed to delete current skin!"), QMessageBox::Warning)->exec();
@@ -416,7 +414,7 @@ void SkinManageDialog::on_urlBtn_clicked()
     job->setAskRetry(false);
 
     auto path = FS::PathCombine(m_list.getDir(), url.fileName());
-    job->addNetAction(Net::Download::makeFile(url, path));
+    job->addNetAction(Net::NetRequest::makeFile(url, path));
     ProgressDialog dlg(this);
     dlg.execWithTask(job.get());
     SkinModel s(path);
@@ -475,9 +473,9 @@ void SkinManageDialog::on_userBtn_clicked()
     auto uuidLoop = makeShared<WaitTask>();
     auto profileLoop = makeShared<WaitTask>();
 
-    auto [getUUID, uuidOut] = Net::Download::makeByteArray("https://api.minecraftservices.com/minecraft/profile/lookup/name/" + user);
-    auto [getProfile, profileOut] = Net::Download::makeByteArray(QUrl());
-    auto downloadSkin = Net::Download::makeFile(QUrl(), path);
+    auto [getUUID, uuidOut] = Net::NetRequest::makeByteArray("https://api.minecraftservices.com/minecraft/profile/lookup/name/" + user);
+    auto [getProfile, profileOut] = Net::NetRequest::makeByteArray(QUrl());
+    auto downloadSkin = Net::NetRequest::makeFile(QUrl(), path);
 
     QString failReason;
 

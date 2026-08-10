@@ -116,8 +116,6 @@ set(NET_SOURCES
     # network stuffs
     net/ByteArraySink.h
     net/ChecksumValidator.h
-    net/Download.cpp
-    net/Download.h
     net/DummySink.h
     net/FileSink.cpp
     net/FileSink.h
@@ -134,15 +132,11 @@ set(NET_SOURCES
     net/PasteUpload.h
     net/Sink.h
     net/Validator.h
-    net/Upload.cpp
-    net/Upload.h
     net/HeaderProxy.h
     net/RawHeaderProxy.h
     net/ApiHeaderProxy.h
-    net/ApiDownload.h
-    net/ApiDownload.cpp
-    net/ApiUpload.cpp
-    net/ApiUpload.h
+    net/ApiRequest.h
+    net/RPCSink.h
     net/NetRequest.cpp
     net/NetRequest.h
 )
@@ -375,12 +369,7 @@ set(MINECRAFT_SOURCES
     minecraft/AssetsUtils.cpp
 
     # Minecraft skins
-    minecraft/skins/CapeChange.cpp
-    minecraft/skins/CapeChange.h
-    minecraft/skins/SkinUpload.cpp
-    minecraft/skins/SkinUpload.h
-    minecraft/skins/SkinDelete.cpp
-    minecraft/skins/SkinDelete.h
+    minecraft/skins/SkinRequests.h
     minecraft/skins/SkinModel.cpp
     minecraft/skins/SkinModel.h
     minecraft/skins/SkinList.cpp
@@ -391,10 +380,8 @@ set(MINECRAFT_SOURCES
 # the screenshots feature
 set(SCREENSHOTS_SOURCES
     screenshots/Screenshot.h
-    screenshots/ImgurUpload.h
-    screenshots/ImgurUpload.cpp
-    screenshots/ImgurAlbumCreation.h
-    screenshots/ImgurAlbumCreation.cpp
+    screenshots/ImgurAPI.h
+    screenshots/ImgurAPI.cpp
 )
 
 set(TASKS_SOURCES
@@ -642,8 +629,6 @@ set(PRISMUPDATER_SOURCES
 
     net/ByteArraySink.h
     net/ChecksumValidator.h
-    net/Download.cpp
-    net/Download.h
     net/FileSink.cpp
     net/FileSink.h
     net/HttpMetaCache.cpp

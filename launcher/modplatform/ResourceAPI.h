@@ -42,15 +42,13 @@
 #include <QList>
 #include <QString>
 
-#include <list>
 #include <optional>
-#include <utility>
 
 #include "../Version.h"
 
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceType.h"
-#include "tasks/Task.h"
+#include "net/RPCSink.h"
 
 /* Simple class with a common interface for interacting with APIs */
 class ResourceAPI {
@@ -63,14 +61,7 @@ class ResourceAPI {
         // Used by Modrinth in the API request.
         QString name;
         // The human-readable name of the sorting, used for display in the UI.
-        QString readable_name;
-    };
-
-    template <typename T>
-    struct Callback {
-        std::function<void(T&)> on_succeed;
-        std::function<void(const QString& reason, int network_error_code)> on_fail;
-        std::function<void()> on_abort;
+        QString readableName;
     };
 
     struct SearchArgs {
@@ -95,10 +86,6 @@ class ResourceAPI {
         bool includeChangelog{};
     };
 
-    struct ProjectInfoArgs {
-        ModPlatform::IndexedPack::Ptr pack;
-    };
-
     struct DependencySearchArgs {
         ModPlatform::Dependency dependency;
         Version mcVersion;
@@ -111,23 +98,22 @@ class ResourceAPI {
     virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
 
    public slots:
-    virtual Task::Ptr searchProjects(SearchArgs&&, Callback<QList<ModPlatform::IndexedPack::Ptr>>&&) const;
+    virtual Net::Spec<QList<ModPlatform::IndexedPack::Ptr>> searchProjects(const SearchArgs&) const;
 
-    virtual std::pair<Task::Ptr, QByteArray*> getProject(QString addonId, bool askRetry = true) const;
-    virtual std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const = 0;
+    virtual Net::Spec<ModPlatform::IndexedPack::Ptr> getProject(const QString& addonId, bool includeExtra = false) const;
+    virtual Net::Spec<QList<ModPlatform::IndexedPack::Ptr>> getProjects(QStringList addonIds) const = 0;
 
-    virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, Callback<ModPlatform::IndexedPack::Ptr>&&, bool askRetry = true) const;
-    Task::Ptr getProjectVersions(VersionSearchArgs&& args, Callback<QVector<ModPlatform::IndexedVersion>>&& callbacks) const;
-    virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, Callback<ModPlatform::IndexedVersion>&&) const;
+    virtual Net::Spec<QVector<ModPlatform::IndexedVersion>> getProjectVersions(const VersionSearchArgs& args) const;
+    virtual Net::Spec<ModPlatform::IndexedVersion> getDependencyVersion(const DependencySearchArgs& args) const;
 
    protected:
     ~ResourceAPI() = default;
 
-    inline QString debugName() const { return "External resource API"; }
+    static QString debugName() { return "External resource API"; }
 
-    QString mapMCVersionToModrinth(Version v) const;
+    static QString mapMCVersionToModrinth(const Version& v);
 
-    QString getGameVersionsString(std::vector<Version> mcVersions) const;
+    static QString getGameVersionsString(const std::vector<Version>& mcVersions);
 
    public:
     virtual auto getSearchURL(const SearchArgs& args) const -> std::optional<QString> = 0;
@@ -157,7 +143,5 @@ class ResourceAPI {
 
     virtual void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&) const = 0;
 
-    virtual std::pair<Task::Ptr, QByteArray*> getModCategories() const = 0;
-
-    virtual QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const = 0;
+    virtual Net::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const = 0;
 };

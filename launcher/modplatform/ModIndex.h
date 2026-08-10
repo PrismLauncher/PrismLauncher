@@ -28,6 +28,7 @@
 #include <memory>
 #include <utility>
 #include "EnumWrapper.h"
+#include "modplatform/ResourceType.h"
 
 class QIODevice;
 
@@ -157,6 +158,10 @@ struct IndexedVersion {
     QList<Dependency> dependencies;
     SideType side = SideType::NoSide;  // this is for flame API
 
+    // for export
+    QString sha1;      // Additional hash (e.g., sha1 when hash_type is sha512)
+    qint64 size = -1;  // File size in bytes
+
     // For internal use, not provided by APIs
     bool is_currently_selected = false;
 
@@ -204,6 +209,7 @@ struct IndexedPack {
     QString logoUrl;
     QString websiteUrl;
     SideType side = SideType::NoSide;
+    ResourceType resourceType = ResourceType::Unknown;
 
     bool versionsLoaded = false;
     QList<IndexedVersion> versions;

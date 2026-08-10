@@ -85,7 +85,7 @@
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftInstance.h>
 #include <minecraft/auth/AccountList.h>
-#include <net/ApiDownload.h>
+#include <net/ApiRequest.h>
 #include <net/NetJob.h>
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
@@ -990,17 +990,13 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 extra_info.insert("pack_id", addonId);
                 extra_info.insert("pack_version_id", fileId);
 
-                auto [job, array] = FlameAPI::get().getFile(addonId, fileId);
+                auto [job, result] = FlameAPI::getFile(addonId, fileId).make();
 
-                connect(job.get(), &Task::failed, this,
-                        [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &version] {
-                    qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
-                    auto doc = Json::requireDocument(*array);
-                    auto data = doc.object()["data"].toObject();
-                    // No way to find out if it's a mod or a modpack before here
-                    // And also we need to check if it ends with .zip, instead of any better way
-                    version = FlameMod::loadIndexedPackVersion(data);
+                connect(job.get(), &Task::failed, this, [this](const QString& reason) {
+                    CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+                });
+                connect(job.get(), &Task::succeeded, this, [this, result, addonId, fileId, &dl_url, &version] {
+                    version = *result;
                     auto fileName = version.fileName;
 
                     // Have to use ensureString then use QUrl to get proper url encoding
@@ -1014,7 +1010,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                         return;
                     }
 
-                    QFileInfo dl_file(dl_url.fileName());
+                    QFileInfo dlFile(dl_url.fileName());
                 });
 
                 {  // drop stack
@@ -1027,8 +1023,9 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 QVariantMap receivedData;
                 const QUrlQuery query(url.query());
                 const auto items = query.queryItems();
-                for (auto it = items.begin(), end = items.end(); it != end; ++it)
+                for (auto it = items.begin(), end = items.end(); it != end; ++it) {
                     receivedData.insert(it->first, it->second);
+                }
                 emit APPLICATION->oauthReplyRecieved(receivedData);
                 continue;
             } else if ((url.scheme() == "prismlauncher" || url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME) && isExternalURLImport) {
@@ -1102,7 +1099,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
             auto entry = APPLICATION->metacache()->resolveEntry("general", path);
             entry->setStale(true);
             auto dl_job = unique_qobject_ptr<NetJob>(new NetJob(tr("Modpack download"), APPLICATION->network()));
-            dl_job->addNetAction(Net::ApiDownload::makeCached(dl_url, entry));
+            dl_job->addNetAction(Net::ApiRequest::makeCached(dl_url, entry));
             auto archivePath = entry->getFullPath();
 
             bool dl_success = false;

@@ -9,11 +9,11 @@
 
 namespace ResourceDownload {
 
-ResourcePackResourceModel::ResourcePackResourceModel(const BaseInstance& base_inst,
+ResourcePackResourceModel::ResourcePackResourceModel(const BaseInstance& baseInst,
                                                      const ResourceAPI* api,
                                                      const QString& debugName,
                                                      QString metaEntryBase)
-    : ResourceModel(api), m_base_instance(base_inst), m_debugName(debugName + " (Model)"), m_metaEntryBase(std::move(metaEntryBase))
+    : ResourceModel(api), m_baseInstance(baseInst), m_debugName(debugName + " (Model)"), m_metaEntryBase(std::move(metaEntryBase))
 {}
 
 /******** Make data requests ********/
@@ -40,10 +40,10 @@ ResourceAPI::VersionSearchArgs ResourcePackResourceModel::createVersionsArgument
     return { .pack = pack, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::ResourcePack };
 }
 
-ResourceAPI::ProjectInfoArgs ResourcePackResourceModel::createInfoArguments(const QModelIndex& entry)
+QString ResourcePackResourceModel::createInfoArguments(const QModelIndex& entry)
 {
     auto pack = m_packs[entry.row()];
-    return { .pack = pack };
+    return pack->addonId.toString();
 }
 
 void ResourcePackResourceModel::searchWithTerm(const QString& term, unsigned int sort)

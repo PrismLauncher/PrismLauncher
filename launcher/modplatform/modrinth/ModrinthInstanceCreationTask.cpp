@@ -15,7 +15,7 @@
 
 #include "net/ChecksumValidator.h"
 
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 #include "net/NetJob.h"
 
 #include "modplatform/ModIndex.h"
@@ -282,7 +282,7 @@ void ModrinthCreationTask::createInstance()
                                         .dependentOn = !m_managedId.isEmpty() ? m_managedVersionId : "" };
 
         QUrl downloadUrl = file.downloads.dequeue();
-        auto dl = Net::ApiDownload::makeFile(downloadUrl, filePath, Net::Download::Option::NoOptions, meta);
+        auto dl = Net::ApiRequest::makeFile(downloadUrl, filePath, Net::NetRequest::Option::NoOptions, meta);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
         downloadMods->addNetAction(dl);
         if (!file.downloads.empty()) {
@@ -291,7 +291,7 @@ void ModrinthCreationTask::createInstance()
             auto param = dl.toWeakRef();
             connect(dl.get(), &Task::failed, dl.get(), [&file, filePath, param, downloadMods, meta] {
                 QUrl fallbackUrl = file.downloads.dequeue();
-                auto ndl = Net::ApiDownload::makeFile(fallbackUrl, filePath, Net::Download::Option::NoOptions, meta);
+                auto ndl = Net::ApiRequest::makeFile(fallbackUrl, filePath, Net::NetRequest::Option::NoOptions, meta);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 downloadMods->addNetAction(ndl);
                 if (auto shared = param.lock()) {
@@ -488,6 +488,21 @@ bool ModrinthCreationTask::promptForUntrustedMods()
 
     UntrustedModsDialog dialog{ untrustedMods, m_parent };
     return dialog.exec() == QDialog::Accepted;
+}
+
+ModrinthCreationTask::ModrinthCreationTask(const QString& stagingPath,
+                                           bool trustedSource,
+                                           SettingsObject* globalSettings,
+                                           QWidget* parent,
+                                           QString id,
+                                           QString versionId,
+                                           QString originalInstanceId)
+    : m_parent(parent), m_trustedSource(trustedSource), m_managedId(std::move(id)), m_managedVersionId(std::move(versionId))
+{
+    setStagingPath(stagingPath);
+    setParentSettings(globalSettings);
+
+    m_originalInstanceId = std::move(originalInstanceId);
 }
 
 ModrinthCreationTask::~ModrinthCreationTask()

@@ -3,7 +3,6 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,27 +36,20 @@
 
 #pragma once
 
+#include <QString>
 #include <utility>
 
+#include "Screenshot.h"
 #include "net/NetRequest.h"
 
-namespace Net {
+namespace ImgurAPI {
 
-class Upload : public NetRequest {
-    Q_OBJECT
-   public:
-    using Ptr = shared_qobject_ptr<Upload>;
-    explicit Upload() : NetRequest() { logCat = taskUploadLogC; };
-
-    /**
-     * Creates a request downloading to the returned QByteArray,.
-     * The QByteArray will live as long as the Upload object.
-     */
-    static std::pair<Upload::Ptr, QByteArray*> makeByteArray(QUrl url, QByteArray m_post_data);
-
-   protected:
-    virtual QNetworkReply* getReply(QNetworkRequest&) override;
-    QByteArray m_post_data;
+struct AlbumResult {
+    QString deleteHash;
+    QString id;
 };
 
-}  // namespace Net
+std::pair<Net::NetRequest::Ptr, QString*> makeUpload(ScreenShot::Ptr shot);
+std::pair<Net::NetRequest::Ptr, AlbumResult*> makeAlbum(const QList<ScreenShot::Ptr>& screenshots);
+
+}  // namespace ImgurAPI

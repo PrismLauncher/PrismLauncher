@@ -34,9 +34,7 @@
  */
 
 #include "FlamePage.h"
-#include "Version.h"
 #include "modplatform/ModIndex.h"
-#include "modplatform/ResourceAPI.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/widgets/ModFilterWidget.h"
 #include "ui_FlamePage.h"
@@ -156,57 +154,60 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
     if (!m_current->versionsLoaded || m_filterWidget->changed()) {
         qDebug() << "Loading flame modpack versions";
 
-        ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion> > callbacks{};
-
         auto addonId = m_current->addonId;
-        // Use default if no callbacks are set
-        callbacks.on_succeed = [this, curr, addonId](auto& doc) {
-            if (addonId != m_current->addonId) {
-                return;  // wrong request
-            }
-
-            m_current->versions = doc;
-            m_current->versionsLoaded = true;
-            auto pred = [this](const ModPlatform::IndexedVersion& v) {
-                if (auto filter = m_filterWidget->getFilter()) {
-                    return !filter->checkModpackFilters(v);
+        auto [netJob, result] =
+            FlameAPI::get()
+                .getProjectVersions(
+                    { .pack = m_current, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::Modpack })
+                .make();
+        if (netJob) {
+            connect(netJob.get(), &Task::succeeded, this, [this, curr, addonId, result] {
+                if (addonId != m_current->addonId) {
+                    return;  // wrong request
                 }
-                return false;
-            };
+
+                auto& doc = *result;
+                m_current->versions = doc;
+                m_current->versionsLoaded = true;
+                auto pred = [this](const ModPlatform::IndexedVersion& v) {
+                    if (auto filter = m_filterWidget->getFilter()) {
+                        return !filter->checkModpackFilters(v);
+                    }
+                    return false;
+                };
 #if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
-            m_current->versions.removeIf(pred);
-#else
-            for (auto it = m_current->versions.begin(); it != m_current->versions.end();)
-                if (pred(*it))
-                    it = m_current->versions.erase(it);
-                else
-                    ++it;
+                m_current->versions.removeIf(pred);
+#else 
+                for (auto it = m_current->versions.begin(); it != m_current->versions.end();)
+                    if (pred(*it))
+                        it = m_current->versions.erase(it);
+                    else
+                        ++it;
 #endif
-            for (const auto& version : m_current->versions) {
-                m_ui->versionSelectionBox->addItem(version.getVersionDisplayString(), QVariant(version.downloadUrl));
-            }
+                for (const auto& version : m_current->versions) {
+                    m_ui->versionSelectionBox->addItem(version.getVersionDisplayString(), QVariant(version.downloadUrl));
+                }
 
-            QVariant current_updated;
-            current_updated.setValue(m_current);
+                QVariant currentUpdated;
+                currentUpdated.setValue(m_current);
 
-            if (!m_listModel->setData(curr, current_updated, Qt::UserRole)) {
-                qWarning() << "Failed to cache versions for the current pack!";
-            }
+                if (!m_listModel->setData(curr, currentUpdated, Qt::UserRole)) {
+                    qWarning() << "Failed to cache versions for the current pack!";
+                }
 
-            // TODO: Check whether it's a connection issue or the project disabled 3rd-party distribution.
-            if (m_current->versionsLoaded && m_ui->versionSelectionBox->count() < 1) {
-                m_ui->versionSelectionBox->addItem(tr("No version is available!"), -1);
-            }
-            suggestCurrent();
-        };
-        callbacks.on_fail = [this](const QString& reason, int) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
-        };
+                // TODO: Check whether it's a connection issue or the project disabled 3rd-party distribution.
+                if (m_current->versionsLoaded && m_ui->versionSelectionBox->count() < 1) {
+                    m_ui->versionSelectionBox->addItem(tr("No version is available!"), -1);
+                }
+                suggestCurrent();
+            });
+            connect(netJob.get(), &Task::failed, this, [this](const QString& reason) {
+                CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
+            });
+            m_job = netJob;
+            netJob->start();
+        }
 
-        auto netJob = FlameAPI::get().getProjectVersions({ m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
-
-        m_job = netJob;
-        netJob->start();
     } else {
         for (const auto& version : m_current->versions) {
             m_ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
@@ -236,11 +237,11 @@ void FlamePage::suggestCurrent()
 
     auto version = m_current->versions.at(m_selected_version_index);
 
-    QMap<QString, QString> extra_info;
-    extra_info.insert("pack_id", m_current->addonId.toString());
-    extra_info.insert("pack_version_id", version.fileId.toString());
+    QMap<QString, QString> extraInfo;
+    extraInfo.insert("pack_id", m_current->addonId.toString());
+    extraInfo.insert("pack_version_id", version.fileId.toString());
 
-    m_dialog->setSuggestedPack(m_current->name, new InstanceImportTask(version.downloadUrl, true, this, std::move(extra_info)));
+    m_dialog->setSuggestedPack(m_current->name, new InstanceImportTask(version.downloadUrl, true, this, std::move(extraInfo)));
     QString editedLogoName = "curseforge_" + m_current->logoName;
     m_listModel->getLogo(m_current->logoName, m_current->logoUrl,
                          [this, editedLogoName](const QString& logo) { m_dialog->setSuggestedIconFromFile(logo, editedLogoName); });
@@ -248,10 +249,10 @@ void FlamePage::suggestCurrent()
 
 void FlamePage::onVersionSelectionChanged(int index)
 {
-    bool is_blocked = false;
-    m_ui->versionSelectionBox->itemData(index).toInt(&is_blocked);
+    bool isBlocked = false;
+    m_ui->versionSelectionBox->itemData(index).toInt(&isBlocked);
 
-    if (index == -1 || is_blocked) {
+    if (index == -1 || isBlocked) {
         m_selected_version_index = -1;
         return;
     }
@@ -333,11 +334,12 @@ void FlamePage::createFilterWidget()
     connect(m_ui->filterButton, &QPushButton::clicked, this, [this] { m_filterWidget->setHidden(!m_filterWidget->isHidden()); });
 
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &FlamePage::triggerSearch);
-    auto [task, response] = FlameAPI::getCategories(ModPlatform::ResourceType::Modpack);
+    auto [task, result] = FlameAPI::get().getCategories(ModPlatform::ResourceType::Modpack).make();
+    if (!task) {
+        return;
+    }
     m_categoriesTask = task;
-    connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() {
-        auto categories = FlameAPI::get().loadModCategories(*response);
-        m_filterWidget->setCategories(categories);
-    });
-    m_categoriesTask->start();
+    connect(task.get(), &Task::succeeded, this, [this, result]() { m_filterWidget->setCategories(*result); });
+    connect(task.get(), &Task::failed, this, [](const QString& msg) { qDebug() << "Flame failed to get categories:" << msg; });
+    task->start();
 }

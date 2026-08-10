@@ -6,55 +6,33 @@
 #include <memory>
 #include <optional>
 #include "BuildConfig.h"
-#include "FlameModIndex.h"
 
 #include "Application.h"
 #include "Json.h"
 #include "modplatform/ModIndex.h"
-#include "net/ApiDownload.h"
-#include "net/ApiUpload.h"
+#include "net/ApiRequest.h"
 #include "net/NetJob.h"
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::matchFingerprints(const QList<uint>& fingerprints) const
-{
-    auto netJob = makeShared<NetJob>(QString("Flame::MatchFingerprints"), APPLICATION->network());
-
-    QJsonObject body_obj;
-    QJsonArray fingerprints_arr;
-    for (auto& fp : fingerprints) {
-        fingerprints_arr.append(QString("%1").arg(fp));
-    }
-
-    body_obj["fingerprints"] = fingerprints_arr;
-
-    QJsonDocument body(body_obj);
-    auto body_raw = body.toJson();
-    auto [action, response] = Net::ApiUpload::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/fingerprints"), body_raw);
-    netJob->addNetAction(action);
-
-    return { netJob, response };
-}
-
-QString FlameAPI::getModFileChangelog(int modId, int fileId) const
+QString FlameAPI::getModFileChangelog(int modId, int fileId)
 {
     QEventLoop lock;
     QString changelog;
 
     auto netJob = makeShared<NetJob>(QString("Flame::FileChangelog"), APPLICATION->network());
-    auto [action, response] = Net::ApiDownload::makeByteArray(
+    auto [action, response] = Net::ApiRequest::makeByteArray(
         QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2/changelog")
             .arg(QString::fromStdString(std::to_string(modId)), QString::fromStdString(std::to_string(fileId))));
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [&netJob, response, &changelog] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Flame::FileChangelog at" << parse_error.offset
-                       << "reason:" << parse_error.errorString();
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Flame::FileChangelog at" << parseError.offset
+                       << "reason:" << parseError.errorString();
             qWarning() << *response;
 
-            netJob->failed(parse_error.errorString());
+            netJob->failed(parseError.errorString());
             return;
         }
 
@@ -69,25 +47,25 @@ QString FlameAPI::getModFileChangelog(int modId, int fileId) const
     return changelog;
 }
 
-QString FlameAPI::getModDescription(int modId) const
+QString FlameAPI::getModDescription(int modId)
 {
     QEventLoop lock;
     QString description;
 
     auto netJob = makeShared<NetJob>(QString("Flame::ModDescription"), APPLICATION->network());
     auto [action, response] =
-        Net::ApiDownload::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/description").arg(QString::number(modId)));
+        Net::ApiRequest::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/description").arg(QString::number(modId)));
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [&netJob, response, &description] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Flame::ModDescription at" << parse_error.offset
-                       << "reason:" << parse_error.errorString();
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Flame::ModDescription at" << parseError.offset
+                       << "reason:" << parseError.errorString();
             qWarning() << *response;
 
-            netJob->failed(parse_error.errorString());
+            netJob->failed(parseError.errorString());
             return;
         }
 
@@ -102,134 +80,252 @@ QString FlameAPI::getModDescription(int modId) const
     return description;
 }
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getProjects(QStringList addonIds) const
+Net::Spec<QList<ModPlatform::IndexedPack::Ptr>> FlameAPI::getProjects(QStringList addonIds) const
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::GetProjects"), APPLICATION->network());
-
-    QJsonObject body_obj;
-    QJsonArray addons_arr;
+    QJsonObject bodyObj;
+    QJsonArray addonsArr;
     for (auto& addonId : addonIds) {
-        addons_arr.append(addonId);
+        addonsArr.append(addonId);
     }
 
-    body_obj["modIds"] = addons_arr;
+    bodyObj["modIds"] = addonsArr;
 
-    QJsonDocument body(body_obj);
-    auto body_raw = body.toJson();
-    auto [action, response] = Net::ApiUpload::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods"), body_raw);
-    netJob->addNetAction(action);
+    QJsonDocument body(bodyObj);
+    auto bodyRaw = body.toJson();
 
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [body_raw] { qDebug() << body_raw; });
+    auto parseFunc = [this](const QByteArray& response) -> Net::RpcSink<QList<ModPlatform::IndexedPack::Ptr>>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from CurseForge projects task at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
+        }
 
-    return { netJob, response };
+        QList<ModPlatform::IndexedPack::Ptr> projects;
+        try {
+            auto entries = Json::requireArray(Json::requireObject(doc), "data");
+            for (auto entry : entries) {
+                auto pack = std::make_shared<ModPlatform::IndexedPack>();
+                auto entryObj = Json::requireObject(entry);
+                loadIndexedPack(*pack, entryObj);
+                projects.append(pack);
+            }
+        } catch (Json::JsonException& e) {
+            qDebug() << doc;
+            qWarning() << "Error while reading" << debugName() << "resource info:" << e.cause();
+            return std::unexpected(e.cause());
+        }
+        return projects;
+    };
+
+    return Net::Spec<QList<ModPlatform::IndexedPack::Ptr>>{ .method = Net::NetRequest::HttpMethod::Post,
+                                                            .url = QUrl(BuildConfig.FLAME_BASE_URL + "/mods"),
+                                                            .data = bodyRaw,
+                                                            .parse = parseFunc,
+                                                            .name = "Flame::GetProjects" };
 }
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds) const
+Net::Spec<QList<FlameMod::FingerprintMatch>> FlameAPI::matchFingerprints(const QList<uint>& fingerprints)
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::GetFiles"), APPLICATION->network());
-
-    QJsonObject body_obj;
-    QJsonArray files_arr;
-    for (auto& fileId : fileIds) {
-        files_arr.append(fileId);
+    QJsonObject bodyObj;
+    QJsonArray fingerprintsArr;
+    for (const auto& fp : fingerprints) {
+        fingerprintsArr.append(QString("%1").arg(fp));
     }
 
-    body_obj["fileIds"] = files_arr;
+    bodyObj["fingerprints"] = fingerprintsArr;
 
-    QJsonDocument body(body_obj);
-    auto body_raw = body.toJson();
+    QJsonDocument body(bodyObj);
+    auto bodyRaw = body.toJson();
 
-    auto [action, response] = Net::ApiUpload::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods/files"), body_raw);
-    netJob->addNetAction(action);
+    auto parseFunc = [](const QByteArray& response) -> Net::RpcSink<QList<FlameMod::FingerprintMatch>>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Flame::MatchFingerprints at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
+        }
 
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [body_raw] { qDebug() << body_raw; });
+        QList<FlameMod::FingerprintMatch> matches;
+        try {
+            auto docObj = Json::requireObject(doc);
+            auto dataObj = Json::requireObject(docObj, "data");
+            auto dataArr = Json::requireArray(dataObj, "exactMatches");
 
-    return { netJob, response };
+            for (auto match : dataArr) {
+                auto matchObj = match.toObject();
+                auto fileObj = matchObj["file"].toObject();
+
+                if (matchObj.isEmpty() || fileObj.isEmpty()) {
+                    qWarning() << "Fingerprint match is empty!";
+                    continue;
+                }
+
+                FlameMod::FingerprintMatch fm{};
+                fm.fileFingerprint = fileObj["fileFingerprint"].toVariant().toLongLong();
+                fm.modId = fileObj["modId"].toVariant().toLongLong();
+                fm.fileId = fileObj["id"].toVariant().toLongLong();
+                fm.isAvailable = fileObj["isAvailable"].toBool();
+                matches.append(fm);
+            }
+        } catch (Json::JsonException& e) {
+            qDebug() << doc;
+            qWarning() << "Error while reading Flame fingerprint matches:" << e.cause();
+            return std::unexpected(e.cause());
+        }
+        return matches;
+    };
+
+    return Net::Spec<QList<FlameMod::FingerprintMatch>>{ .method = Net::NetRequest::HttpMethod::Post,
+                                                         .url = QUrl(BuildConfig.FLAME_BASE_URL + "/fingerprints"),
+                                                         .data = bodyRaw,
+                                                         .parse = parseFunc,
+                                                         .name = "Flame::MatchFingerprints" };
 }
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getFile(const QString& addonId, const QString& fileId) const
+Net::Spec<QList<ModPlatform::IndexedVersion>> FlameAPI::getFiles(const QStringList& fileIds)
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::GetFile"), APPLICATION->network());
-    auto [action, response] =
-        Net::ApiDownload::makeByteArray(QUrl(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2").arg(addonId, fileId)));
-    netJob->addNetAction(action);
+    QJsonObject bodyObj;
+    QJsonArray filesArr;
+    for (const auto& fileId : fileIds) {
+        filesArr.append(fileId);
+    }
 
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(),
-                     [addonId, fileId] { qDebug() << "Flame API file failure" << addonId << fileId; });
+    bodyObj["fileIds"] = filesArr;
 
-    return { netJob, response };
+    QJsonDocument body(bodyObj);
+    auto bodyRaw = body.toJson();
+
+    auto parseFunc = [](const QByteArray& response) -> Net::RpcSink<QList<ModPlatform::IndexedVersion>>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Flame::GetFiles at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
+        }
+
+        QList<ModPlatform::IndexedVersion> files;
+        try {
+            auto dataArr = Json::requireArray(Json::requireObject(doc), "data");
+            for (auto entry : dataArr) {
+                auto entryObj = Json::requireObject(entry);
+                auto version = FlameMod::loadIndexedPackVersion(entryObj);
+                files.append(version);
+            }
+        } catch (Json::JsonException& e) {
+            qDebug() << doc;
+            qWarning() << "Error while reading Flame files:" << e.cause();
+            return std::unexpected(e.cause());
+        }
+        return files;
+    };
+
+    return Net::Spec<QList<ModPlatform::IndexedVersion>>{ .method = Net::NetRequest::HttpMethod::Post,
+                                                          .url = QUrl(BuildConfig.FLAME_BASE_URL + "/mods/files"),
+                                                          .data = bodyRaw,
+                                                          .parse = parseFunc,
+                                                          .name = "Flame::GetFiles" };
+}
+
+Net::Spec<ModPlatform::IndexedVersion> FlameAPI::getFile(const QString& addonId, const QString& fileId)
+{
+    auto parseFunc = [](const QByteArray& response) -> Net::RpcSink<ModPlatform::IndexedVersion>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Flame::GetFile at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
+        }
+
+        try {
+            auto dataObj = Json::requireObject(Json::requireObject(doc), "data");
+            auto version = FlameMod::loadIndexedPackVersion(dataObj);
+            return version;
+        } catch (Json::JsonException& e) {
+            qDebug() << doc;
+            qWarning() << "Error while reading Flame file:" << e.cause();
+            return std::unexpected(e.cause());
+        }
+    };
+
+    return Net::Spec<ModPlatform::IndexedVersion>{ .url =
+                                                       QUrl(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2").arg(addonId, fileId)),
+                                                   .parse = parseFunc,
+                                                   .name = "Flame::GetFile" };
 }
 
 QList<ResourceAPI::SortingMethod> FlameAPI::getSortingMethods() const
 {
     // https://docs.curseforge.com/?python#tocS_ModsSearchSortField
-    return { { 1, "Featured", QObject::tr("Sort by Featured") },
-             { 2, "Popularity", QObject::tr("Sort by Popularity") },
-             { 3, "LastUpdated", QObject::tr("Sort by Last Updated") },
-             { 4, "Name", QObject::tr("Sort by Name") },
-             { 5, "Author", QObject::tr("Sort by Author") },
-             { 6, "TotalDownloads", QObject::tr("Sort by Downloads") },
-             { 7, "Category", QObject::tr("Sort by Category") },
-             { 8, "GameVersion", QObject::tr("Sort by Game Version") } };
+    return { { .index = 1, .name = "Featured", .readableName = QObject::tr("Sort by Featured") },
+             { .index = 2, .name = "Popularity", .readableName = QObject::tr("Sort by Popularity") },
+             { .index = 3, .name = "LastUpdated", .readableName = QObject::tr("Sort by Last Updated") },
+             { .index = 4, .name = "Name", .readableName = QObject::tr("Sort by Name") },
+             { .index = 5, .name = "Author", .readableName = QObject::tr("Sort by Author") },
+             { .index = 6, .name = "TotalDownloads", .readableName = QObject::tr("Sort by Downloads") },
+             { .index = 7, .name = "Category", .readableName = QObject::tr("Sort by Category") },
+             { .index = 8, .name = "GameVersion", .readableName = QObject::tr("Sort by Game Version") } };
 }
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getCategories(ModPlatform::ResourceType type)
+Net::Spec<QList<ModPlatform::Category>> FlameAPI::getCategories(ModPlatform::ResourceType type) const
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::GetCategories"), APPLICATION->network());
-    auto [action, response] = Net::ApiDownload::makeByteArray(
-        QUrl(QString(BuildConfig.FLAME_BASE_URL + "/categories?gameId=432&classId=%1").arg(getClassId(type))));
-    netJob->addNetAction(action);
-    QObject::connect(netJob.get(), &Task::failed, netJob.get(), [](QString msg) { qDebug() << "Flame failed to get categories:" << msg; });
-    return { netJob, response };
-}
-
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getModCategories() const
-{
-    return getCategories(ModPlatform::ResourceType::Mod);
-}
-
-QList<ModPlatform::Category> FlameAPI::loadModCategories(const QByteArray& response) const
-{
-    QList<ModPlatform::Category> categories;
-    QJsonParseError parse_error{};
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
-    if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from categories at" << parse_error.offset
-                   << "reason:" << parse_error.errorString();
-        qWarning() << *response;
-        return categories;
-    }
-
-    try {
-        auto obj = Json::requireObject(doc);
-        auto arr = Json::requireArray(obj, "data");
-
-        for (auto val : arr) {
-            auto cat = Json::requireObject(val);
-            auto id = Json::requireInteger(cat, "id");
-            auto name = Json::requireString(cat, "name");
-            categories.push_back({ name, QString::number(id) });
+    auto parseFunc = [](const QByteArray& response) -> Net::RpcSink<QList<ModPlatform::Category>>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from categories at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
         }
 
-    } catch (Json::JsonException& e) {
-        qCritical() << "Failed to parse response from a version request.";
-        qCritical() << e.what();
-        qDebug() << doc;
-    }
-    return categories;
-};
+        QList<ModPlatform::Category> categories;
+        try {
+            auto obj = Json::requireObject(doc);
+            auto arr = Json::requireArray(obj, "data");
 
-std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
-                                                                      QList<ModPlatform::ModLoaderType> instanceLoaders,
+            for (auto val : arr) {
+                auto cat = Json::requireObject(val);
+                auto id = Json::requireInteger(cat, "id");
+                auto name = Json::requireString(cat, "name");
+                categories.push_back({ .name = name, .id = QString::number(id) });
+            }
+
+        } catch (Json::JsonException& e) {
+            qCritical() << "Failed to parse response from a version request.";
+            qCritical() << e.what();
+            qDebug() << doc;
+            return std::unexpected(e.what());
+        }
+        return categories;
+    };
+
+    return Net::Spec<QList<ModPlatform::Category>>{
+        .url = QUrl(QString(BuildConfig.FLAME_BASE_URL + "/categories?gameId=432&classId=%1").arg(getClassId(type))),
+        .parse = parseFunc,
+        .name = "FlameAPI::getCategories"
+    };
+}
+
+std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(const QList<ModPlatform::IndexedVersion>& versions,
+                                                                      const QList<ModPlatform::ModLoaderType>& instanceLoaders,
                                                                       ModPlatform::ModLoaderTypes modLoaders,
-                                                                      bool checkLoaders) const
+                                                                      bool checkLoaders)
 {
-    static const auto noLoader = ModPlatform::ModLoaderType(0);
+    static const auto s_noLoader = ModPlatform::ModLoaderType(0);
     if (!checkLoaders) {
         std::optional<ModPlatform::IndexedVersion> ver;
-        for (auto file_tmp : versions) {
-            if (!ver.has_value() || file_tmp.date > ver->date) {
-                ver = file_tmp;
+        for (const auto& fileTmp : versions) {
+            if (!ver.has_value() || fileTmp.date > ver->date) {
+                ver = fileTmp;
             }
         }
         return ver;
@@ -245,26 +341,26 @@ std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModP
             bestMatch[loader] = version;
         }
     };
-    for (auto file_tmp : versions) {
-        auto loaders = ModPlatform::modLoaderTypesToList(file_tmp.loaders);
+    for (const auto& fileTmp : versions) {
+        auto loaders = ModPlatform::modLoaderTypesToList(fileTmp.loaders);
         if (loaders.isEmpty()) {
-            checkVersion(file_tmp, noLoader);
+            checkVersion(fileTmp, s_noLoader);
         } else {
             for (auto loader : loaders) {
-                checkVersion(file_tmp, loader);
+                checkVersion(fileTmp, loader);
             }
         }
     }
     // edge case: mod has installed for forge but the instance is fabric => fabric version will be prioritizated on update
     auto currentLoaders = instanceLoaders + ModPlatform::modLoaderTypesToList(modLoaders);
-    currentLoaders.append(noLoader);  // add a fallback in case the versions do not define a loader
+    currentLoaders.append(s_noLoader);  // add a fallback in case the versions do not define a loader
 
     for (auto loader : currentLoaders) {
         if (bestMatch.contains(loader)) {
             auto bestForLoader = bestMatch.value(loader);
             // awkward case where the mod has only two loaders and one of them is not specified
-            if (loader != noLoader && bestMatch.contains(noLoader) && bestMatch.size() == 2) {
-                auto bestForNoLoader = bestMatch.value(noLoader);
+            if (loader != s_noLoader && bestMatch.contains(s_noLoader) && bestMatch.size() == 2) {
+                auto bestForNoLoader = bestMatch.value(s_noLoader);
                 if (bestForNoLoader.date > bestForLoader.date) {
                     return bestForNoLoader;
                 }

@@ -44,10 +44,11 @@
 #include "net/NetJob.h"
 #include "ui/widgets/ProjectItem.h"
 
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 
 #include <QMessageBox>
 #include <memory>
+#include <variant>
 
 namespace Modrinth {
 
@@ -138,23 +139,23 @@ void ModpackListModel::performPaginatedSearch()
     if (m_searchState != ResetRequested && m_currentSearchTerm.startsWith("#")) {
         auto projectId = m_currentSearchTerm.mid(1);
         if (!projectId.isEmpty()) {
-            ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks;
-
-            callbacks.on_fail = [this](QString reason, int network_error_code) {
-                if (network_error_code == 404) {
-                    m_searchState = ResetRequested;
-                }
-                searchRequestFailed(reason, network_error_code);
-            };
-            callbacks.on_succeed = [this](auto& pack) { searchRequestForOneSucceeded(pack); };
-            callbacks.on_abort = [this] {
-                qCritical() << "Search task aborted by an unknown reason!";
-                searchRequestFailed("Aborted", 0);
-            };
-            auto project = std::make_shared<ModPlatform::IndexedPack>();
-            project->addonId = projectId;
-            if (auto job = ModrinthAPI::get().getProjectInfo({ project }, std::move(callbacks), false); job) {
-                m_jobPtr = job;
+            auto [netJob, result] = ModrinthAPI::get().getProject(projectId, true).make();
+            if (netJob) {
+                auto weak = netJob.toWeakRef();
+                connect(netJob.get(), &Task::succeeded, this, [this, result] { searchRequestForOneSucceeded(*result); });
+                connect(netJob.get(), &Task::failed, this, [this, weak](const QString& reason) {
+                    if (auto job = weak.lock()) {
+                        if (job->replyStatusCode() == 404) {
+                            m_searchState = ResetRequested;
+                        }
+                        searchRequestFailed(reason, job->replyStatusCode());
+                    }
+                });
+                connect(netJob.get(), &Task::aborted, this, [this] {
+                    qCritical() << "Search task aborted by an unknown reason!";
+                    searchRequestFailed("Aborted", 0);
+                });
+                m_jobPtr = netJob;
                 m_jobPtr->start();
             }
             return;
@@ -163,18 +164,29 @@ void ModpackListModel::performPaginatedSearch()
     ResourceAPI::SortingMethod sort{};
     sort.name = m_currentSort;
 
-    ResourceAPI::Callback<QList<ModPlatform::IndexedPack::Ptr>> callbacks{};
+    auto [netJob, result] = ModrinthAPI::get()
+                                .searchProjects({ .type = ModPlatform::ResourceType::Modpack,
+                                                  .offset = m_nextSearchOffset,
+                                                  .search = m_currentSearchTerm,
+                                                  .sorting = sort,
+                                                  .loaders = m_filter->loaders,
+                                                  .versions = m_filter->versions,
+                                                  .side = ModPlatform::SideType::NoSide,
+                                                  .categoryIds = m_filter->categoryIds,
+                                                  .openSource = m_filter->openSource })
+                                .make();
 
-    callbacks.on_succeed = [this](auto& doc) { searchRequestFinished(doc); };
-    callbacks.on_fail = [this](QString reason, int network_error_code) { searchRequestFailed(reason, network_error_code); };
-    callbacks.on_abort = [this] {
+    auto weak = netJob.toWeakRef();
+    connect(netJob.get(), &Task::succeeded, this, [this, result] { searchRequestFinished(*result); });
+    connect(netJob.get(), &Task::failed, this, [this, weak](const QString& reason) {
+        if (auto job = weak.lock()) {
+            searchRequestFailed(reason, job->replyStatusCode());
+        }
+    });
+    connect(netJob.get(), &Task::aborted, this, [this] {
         qCritical() << "Search task aborted by an unknown reason!";
         searchRequestFailed("Aborted", 0);
-    };
-
-    auto netJob = ModrinthAPI::get().searchProjects({ .type=ModPlatform::ResourceType::Modpack, .offset=m_nextSearchOffset, .search=m_currentSearchTerm, .sorting=sort, .loaders=m_filter->loaders,
-                                       .versions=m_filter->versions, .side=ModPlatform::SideType::NoSide, .categoryIds=m_filter->categoryIds, .openSource=m_filter->openSource },
-                                     std::move(callbacks));
+    });
 
     m_jobPtr = netJob;
     m_jobPtr->start();
@@ -253,7 +265,7 @@ void ModpackListModel::requestLogo(QString logo, QString url)
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("%1 Icon Download %2").arg(m_parent->debugName()).arg(logo), APPLICATION->network());
     job->setAskRetry(false);
-    job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
+    job->addNetAction(Net::ApiRequest::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
     connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job] {

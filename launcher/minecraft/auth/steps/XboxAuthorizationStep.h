@@ -3,7 +3,7 @@
 
 #include "minecraft/auth/AuthStep.h"
 #include "net/NetJob.h"
-#include "net/Upload.h"
+#include "net/NetRequest.h"
 
 class XboxAuthorizationStep : public AuthStep {
     Q_OBJECT
@@ -27,6 +27,6 @@ class XboxAuthorizationStep : public AuthStep {
     QString m_relyingParty;
     QString m_authorizationKind;
 
-    Net::Upload::Ptr m_request;
+    Net::NetRequest::Ptr m_request;
     NetJob::Ptr m_task;
 };

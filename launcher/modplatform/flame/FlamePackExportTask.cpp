@@ -29,7 +29,6 @@
 #include <iterator>
 #include <memory>
 #include "Application.h"
-#include "Json.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/ModIndex.h"
@@ -173,59 +172,33 @@ void FlamePackExportTask::makeApiRequest()
         fingerprints.push_back(murmur.toUInt());
     }
 
-    auto [matchTask, response] = FlameAPI::get().matchFingerprints(fingerprints);
+    auto [matchTask, result] = FlameAPI::matchFingerprints(fingerprints).make();
     task = matchTask;
 
-    connect(task.get(), &Task::succeeded, this, [this, response] {
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from CurseForge::CurrentVersions at" << parseError.offset
-                       << "reason:" << parseError.errorString();
-            qWarning() << *response;
+    connect(task.get(), &Task::succeeded, this, [this, result] {
+        auto matches = *result;
 
-            emitFailed(parseError.errorString());
+        if (matches.isEmpty()) {
+            qWarning() << "No matches found for fingerprint search!";
+
+            getProjectsInfo();
             return;
         }
-
-        try {
-            auto docObj = Json::requireObject(doc);
-            auto dataObj = Json::requireObject(docObj, "data");
-            auto dataArr = Json::requireArray(dataObj, "exactMatches");
-
-            if (dataArr.isEmpty()) {
-                qWarning() << "No matches found for fingerprint search!";
-
-                getProjectsInfo();
-                return;
-            }
-            for (auto match : dataArr) {
-                auto matchObj = match.toObject();
-                auto fileObj = matchObj["file"].toObject();
-
-                if (matchObj.isEmpty() || fileObj.isEmpty()) {
-                    qWarning() << "Fingerprint match is empty!";
-
-                    return;
-                }
-
-                auto fingerprint = QString::number(fileObj["fileFingerprint"].toInteger());
-                auto mod = pendingHashes.find(fingerprint);
-                if (mod == pendingHashes.end()) {
-                    qWarning() << "Invalid fingerprint from the API response.";
-                    continue;
-                }
-
-                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name));
-                if (fileObj["isAvailable"].toBool())
-                    resolvedFiles.insert(mod->path, { Json::requireInteger(fileObj, "modId"), Json::requireInteger(fileObj, "id"),
-                                                      mod->enabled, mod->isMod });
+        for (const auto& match : matches) {
+            auto fingerprint = QString::number(match.fileFingerprint);
+            auto mod = pendingHashes.find(fingerprint);
+            if (mod == pendingHashes.end()) {
+                qWarning() << "Invalid fingerprint from the API response.";
+                continue;
             }
 
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name));
+            if (match.isAvailable) {
+                resolvedFiles.insert(
+                    mod->path, { .addonId = int(match.modId), .version = int(match.fileId), .enabled = mod->enabled, .isMod = mod->isMod });
+            }
         }
+
         pendingHashes.clear();
         getProjectsInfo();
     });
@@ -245,66 +218,48 @@ void FlamePackExportTask::getProjectsInfo()
         }
     }
 
-    Task::Ptr projTask;
-    QByteArray* response;
-
     if (addonIds.isEmpty()) {
         buildZip();
         return;
-    } else if (addonIds.size() == 1) {
-        std::tie(projTask, response) = FlameAPI::get().getProject(*addonIds.begin());
-    } else {
-        std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds);
     }
 
-    connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
-        QJsonParseError parseError{};
-        auto doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from CurseForge projects task at" << parseError.offset
-                       << "reason:" << parseError.errorString();
-            qWarning() << *response;
-            emitFailed(parseError.errorString());
-            return;
-        }
+    auto fillProjectInfo = [this](ModPlatform::IndexedPack& pack) {
+        for (auto key : resolvedFiles.keys()) {
+            auto val = resolvedFiles.value(key);
+            if (val.addonId == pack.addonId) {
+                val.name = pack.name;
+                val.slug = pack.slug;
+                QStringList authors;
+                for (auto author : pack.authors)
+                    authors << author.name;
 
-        try {
-            QJsonArray entries;
-            if (addonIds.size() == 1)
-                entries = { Json::requireObject(Json::requireObject(doc), "data") };
-            else
-                entries = Json::requireArray(Json::requireObject(doc), "data");
-
-            for (auto entry : entries) {
-                auto entryObj = Json::requireObject(entry);
-
-                try {
-                    setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(Json::requireString(entryObj, "name")));
-
-                    ModPlatform::IndexedPack pack;
-                    FlameMod::loadIndexedPack(pack, entryObj);
-                    for (auto key : resolvedFiles.keys()) {
-                        auto val = resolvedFiles.value(key);
-                        if (val.addonId == pack.addonId) {
-                            val.name = pack.name;
-                            val.slug = pack.slug;
-                            QStringList authors;
-                            for (auto author : pack.authors)
-                                authors << author.name;
-
-                            val.authors = authors.join(", ");
-                            resolvedFiles[key] = val;
-                        }
-                    }
-
-                } catch (Json::JsonException& e) {
-                    qDebug() << e.cause();
-                    qDebug() << entries;
-                }
+                val.authors = authors.join(", ");
+                resolvedFiles[key] = val;
             }
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
+        }
+    };
+
+    if (addonIds.size() == 1) {
+        auto [projTask, result] = FlameAPI::get().getProject(*addonIds.begin()).make();
+        connect(projTask.get(), &Task::succeeded, this, [this, result, fillProjectInfo] {
+            auto pack = *result;
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(pack->name));
+            fillProjectInfo(*pack);
+            buildZip();
+        });
+        connect(projTask.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
+        connect(projTask.get(), &Task::aborted, this, &FlamePackExportTask::emitAborted);
+        task.reset(projTask);
+        task->start();
+        return;
+    }
+
+    auto [projTask, result] = FlameAPI::get().getProjects(addonIds).make();
+
+    connect(projTask.get(), &Task::succeeded, this, [this, result, fillProjectInfo] {
+        for (auto pack : *result) {
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(pack->name));
+            fillProjectInfo(*pack);
         }
         buildZip();
     });

@@ -209,47 +209,49 @@ void ModrinthManagedPackPage::parseManagedPack()
         m_fetchJob->abort();
     }
 
-    ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
     m_pack = { .addonId = m_inst->getManagedPackID() };
 
-    // Use default if no callbacks are set
-    callbacks.on_succeed = [this](auto& doc) {
-        m_pack.versions = doc;
-        m_pack.versionsLoaded = true;
+    auto [fetchJob, result] = ModrinthAPI::get()
+                                  .getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
+                                                        .mcVersions = {},
+                                                        .loaders = {},
+                                                        .resourceType = ModPlatform::ResourceType::Modpack,
+                                                        .includeChangelog = true })
+                                  .make();
+    if (fetchJob) {
+        connect(fetchJob.get(), &Task::succeeded, this, [this, result] {
+            auto& doc = *result;
+            m_pack.versions = doc;
+            m_pack.versionsLoaded = true;
 
-        // We block signals here so that suggestVersion() doesn't get called, causing an assertion fail.
-        ui->versionsComboBox->blockSignals(true);
-        ui->versionsComboBox->clear();
-        ui->versionsComboBox->blockSignals(false);
+            // We block signals here so that suggestVersion() doesn't get called, causing an assertion fail.
+            ui->versionsComboBox->blockSignals(true);
+            ui->versionsComboBox->clear();
+            ui->versionsComboBox->blockSignals(false);
 
-        for (const auto& version : m_pack.versions) {
-            QString name = version.getVersionDisplayString();
+            for (const auto& version : m_pack.versions) {
+                QString name = version.getVersionDisplayString();
 
-            // NOTE: the id from version isn't the same id in the modpack format spec...
-            // e.g. HexMC's 4.4.0 has versionId 4.0.0 in the modpack index..............
-            if (version.version == m_inst->getManagedPackVersionName()) {
-                name = tr("%1 (Current)").arg(name);
+                // NOTE: the id from version isn't the same id in the modpack format spec...
+                // e.g. HexMC's 4.4.0 has versionId 4.0.0 in the modpack index..............
+                if (version.version == m_inst->getManagedPackVersionName()) {
+                    name = tr("%1 (Current)").arg(name);
+                }
+
+                ui->versionsComboBox->addItem(name, version.fileId);
             }
 
-            ui->versionsComboBox->addItem(name, version.fileId);
-        }
+            suggestVersion();
 
-        suggestVersion();
-
-        m_loaded = true;
-    };
-    callbacks.on_fail = [this](const QString& /*reason*/, int) { setFailState(); };
-    callbacks.on_abort = [this]() { setFailState(); };
-    m_fetchJob = ModrinthAPI::get().getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
-                                                         .mcVersions = {},
-                                                         .loaders = {},
-                                                         .resourceType = ModPlatform::ResourceType::Modpack,
-                                                         .includeChangelog = true },
-                                                       std::move(callbacks));
+            m_loaded = true;
+        });
+        connect(fetchJob.get(), &Task::failed, this, [this](const QString&) { setFailState(); });
+        connect(fetchJob.get(), &Task::aborted, this, [this] { setFailState(); });
+        m_fetchJob = fetchJob;
+        m_fetchJob->start();
+    }
 
     ui->changelogTextBrowser->setText(tr("Fetching changelogs..."));
-
-    m_fetchJob->start();
 }
 
 QString ModrinthManagedPackPage::url() const
@@ -367,42 +369,43 @@ void FlameManagedPackPage::parseManagedPack()
     QString id = m_inst->getManagedPackID();
     m_pack = { .addonId = id };
 
-    ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
+    auto [fetchJob, result] = FlameAPI::get()
+                                  .getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
+                                                        .mcVersions = {},
+                                                        .loaders = {},
+                                                        .resourceType = ModPlatform::ResourceType::Modpack,
+                                                        .includeChangelog = true })
+                                  .make();
+    if (fetchJob) {
+        connect(fetchJob.get(), &Task::succeeded, this, [this, result] {
+            auto& doc = *result;
+            m_pack.versions = doc;
+            m_pack.versionsLoaded = true;
 
-    // Use default if no callbacks are set
-    callbacks.on_succeed = [this](auto& doc) {
-        m_pack.versions = doc;
-        m_pack.versionsLoaded = true;
+            // We block signals here so that suggestVersion() doesn't get called, causing an assertion fail.
+            ui->versionsComboBox->blockSignals(true);
+            ui->versionsComboBox->clear();
+            ui->versionsComboBox->blockSignals(false);
 
-        // We block signals here so that suggestVersion() doesn't get called, causing an assertion fail.
-        ui->versionsComboBox->blockSignals(true);
-        ui->versionsComboBox->clear();
-        ui->versionsComboBox->blockSignals(false);
+            for (const auto& version : m_pack.versions) {
+                QString name = version.getVersionDisplayString();
 
-        for (const auto& version : m_pack.versions) {
-            QString name = version.getVersionDisplayString();
+                if (version.fileId == m_inst->getManagedPackVersionID().toInt()) {
+                    name = tr("%1 (Current)").arg(name);
+                }
 
-            if (version.fileId == m_inst->getManagedPackVersionID().toInt()) {
-                name = tr("%1 (Current)").arg(name);
+                ui->versionsComboBox->addItem(name, QVariant(version.fileId));
             }
 
-            ui->versionsComboBox->addItem(name, QVariant(version.fileId));
-        }
+            suggestVersion();
 
-        suggestVersion();
-
-        m_loaded = true;
-    };
-    callbacks.on_fail = [this](const QString& /*reason*/, int) { setFailState(); };
-    callbacks.on_abort = [this]() { setFailState(); };
-    m_fetchJob = FlameAPI::get().getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
-                                                      .mcVersions = {},
-                                                      .loaders = {},
-                                                      .resourceType = ModPlatform::ResourceType::Modpack,
-                                                      .includeChangelog = true },
-                                                    std::move(callbacks));
-
-    m_fetchJob->start();
+            m_loaded = true;
+        });
+        connect(fetchJob.get(), &Task::failed, this, [this](const QString&) { setFailState(); });
+        connect(fetchJob.get(), &Task::aborted, this, [this] { setFailState(); });
+        m_fetchJob = fetchJob;
+        m_fetchJob->start();
+    }
 }
 
 QString FlameManagedPackPage::url() const
