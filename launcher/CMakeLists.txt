@@ -118,9 +118,13 @@ set(NET_SOURCES
     net/ChecksumValidator.h
     net/Download.cpp
     net/Download.h
+    net/DownloadCache.h
+    net/DownloadCache.cpp
     net/DummySink.h
     net/FileSink.cpp
     net/FileSink.h
+    net/ResumingFileSink.h
+    net/ResumingFileSink.cpp
     net/HttpMetaCache.cpp
     net/HttpMetaCache.h
     net/MetaCacheSink.cpp
@@ -644,6 +648,8 @@ set(PRISMUPDATER_SOURCES
     net/ChecksumValidator.h
     net/Download.cpp
     net/Download.h
+    net/DownloadCache.h
+    net/DownloadCache.cpp
     net/FileSink.cpp
     net/FileSink.h
     net/HttpMetaCache.cpp
@@ -655,6 +661,8 @@ set(PRISMUPDATER_SOURCES
     net/NetJob.cpp
     net/NetJob.h
     net/NetUtils.h
+    net/ResumingFileSink.h
+    net/ResumingFileSink.cpp
     net/Sink.h
     net/Validator.h
     net/HeaderProxy.h

@@ -45,7 +45,9 @@
 
 #include "ByteArraySink.h"
 #include "ChecksumValidator.h"
+#include "DownloadCache.h"
 #include "MetaCacheSink.h"
+#include "ResumingFileSink.h"
 
 namespace Net {
 
@@ -84,6 +86,20 @@ auto Download::makeFile(QUrl url, QString path, Options options) -> Download::Pt
     dl->setObjectName(QString("FILE:") + url.toString());
     dl->m_options = options;
     dl->m_sink.reset(new FileSink(path));
+    return dl;
+}
+
+auto Download::makeResumable(QUrl url, QString path, Options options) -> Download::Ptr
+{
+    auto dl = makeShared<Download>();
+    dl->m_url = url;
+    dl->setObjectName(QString("RESUME:") + url.toString());
+    dl->m_options = options;
+#if defined(LAUNCHER_APPLICATION)
+    dl->m_sink.reset(new ResumingFileSink(path, url, APPLICATION->downloadCache()));
+#else
+    dl->m_sink.reset(new ResumingFileSink(path, url, nullptr));
+#endif
     return dl;
 }
 

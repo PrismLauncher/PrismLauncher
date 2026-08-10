@@ -40,7 +40,7 @@ std::pair<Download::Ptr, QByteArray*> ApiDownload::makeByteArray(QUrl url, Downl
 
 Download::Ptr ApiDownload::makeFile(QUrl url, QString path, Download::Options options, ModrinthDownloadMeta meta)
 {
-    auto dl = Download::makeFile(std::move(url), std::move(path), options);
+    auto dl = Download::makeResumable(std::move(url), std::move(path), options);
     dl->addHeaderProxy(std::make_unique<ApiHeaderProxy>(std::move(meta)));
     return dl;
 }

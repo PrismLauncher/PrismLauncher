@@ -40,8 +40,8 @@
 #pragma once
 
 #include <QNetworkReply>
-#include <QUrl>
 #include <QTimer>
+#include <QUrl>
 #include <chrono>
 
 #include "HeaderProxy.h"
@@ -68,6 +68,8 @@ class NetRequest : public Task {
     void addValidator(Validator* v);
     auto abort() -> bool override;
     auto canAbort() const -> bool override { return true; }
+
+    void deleteCachedDownload();
 
     void setNetwork(QNetworkAccessManager* network) { m_network = network; }
     void addHeaderProxy(std::unique_ptr<Net::HeaderProxy> proxy) { m_headerProxies.push_back(std::move(proxy)); }

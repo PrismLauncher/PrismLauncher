@@ -54,6 +54,7 @@
 #include "BuildConfig.h"
 
 #include "MMCTime.h"
+#include "ResumingFileSink.h"
 #include "StringUtils.h"
 
 namespace Net {
@@ -184,6 +185,20 @@ void NetRequest::downloadError(QNetworkReply::NetworkError error)
         }
         handleAutoRetry(delay);
     } else {
+        // If a resumable download gets 404/416, the server can't satisfy the Range request.
+        // Delete the stale .part and retry once from scratch.
+        int status = replyStatusCode();
+        if ((status == 404 || status == 416) && m_retryCount < 1) {
+            auto* rs = dynamic_cast<Net::ResumingFileSink*>(m_sink.get());
+            if (rs && rs->hasUsedRange()) {
+                qCDebug(logCat) << getUid().toString() << "Range not accepted, retrying from scratch:" << m_url.toString();
+                rs->deleteCache();
+                m_retryCount++;
+                executeTask();
+                return;
+            }
+        }
+
         if (m_options & Option::AcceptLocalFiles) {
             if (m_sink->hasLocalData()) {
                 m_state = State::Succeeded;
@@ -367,6 +382,14 @@ void NetRequest::downloadReadyRead()
         // qDebug() << "Request" << m_url.toString() << "gained" << data.size() << "bytes";
     } else {
         qCCritical(logCat) << getUid().toString() << "Cannot write download data! illegal status" << m_status;
+    }
+}
+
+void NetRequest::deleteCachedDownload()
+{
+    auto* rs = dynamic_cast<Net::ResumingFileSink*>(m_sink.get());
+    if (rs) {
+        rs->deleteCache();
     }
 }
 

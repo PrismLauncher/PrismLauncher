@@ -107,6 +107,7 @@
 
 #include <minecraft/auth/AccountList.h>
 #include "icons/IconList.h"
+#include "net/DownloadCache.h"
 #include "net/HttpMetaCache.h"
 
 #include "updater/ExternalUpdater.h"
@@ -653,6 +654,12 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("NumberOfManualRetries", 1);
         m_settings->registerSetting("RequestTimeout", 60);
 
+        // Download cache settings
+        m_settings->registerSetting("DownloadCacheEnabled", true);
+        m_settings->registerSetting("DownloadCacheMaxSize", 1024);  // MB
+        m_settings->registerSetting("DownloadCacheDuration", 24);   // hours
+        m_settings->registerSetting("DownloadCacheCleanupOnLaunch", true);
+
         QString defaultMonospace;
         int defaultSize = 11;
 #ifdef Q_OS_WIN32
@@ -1035,6 +1042,19 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_metacache->addBase("feed", QDir("cache/feed").absolutePath());
         m_metacache->Load();
         qInfo() << "<> Cache initialized.";
+    }
+
+    // init the download cache (for resumable file downloads)
+    {
+        QString downloadCachePath = FS::PathCombine(m_dataPath, "cache", "downloads");
+        m_downloadCache.reset(new DownloadCache(downloadCachePath));
+        if (m_settings->get("DownloadCacheCleanupOnLaunch").toBool()) {
+            qint64 maxSize = static_cast<qint64>(m_settings->get("DownloadCacheMaxSize").toInt()) * 1024 * 1024;
+            int maxHours = m_settings->get("DownloadCacheDuration").toInt();
+            m_downloadCache->cleanup(maxSize, maxHours);
+            qInfo() << "<> Download cache cleaned.";
+        }
+        qInfo() << "<> Download cache initialized.";
     }
 
     // load translations
@@ -1834,6 +1854,11 @@ void Application::updateProxySettings(QString proxyTypeStr, QString addr, int po
 HttpMetaCache* Application::metacache()
 {
     return m_metacache.get();
+}
+
+DownloadCache* Application::downloadCache()
+{
+    return m_downloadCache.get();
 }
 
 QNetworkAccessManager* Application::network()

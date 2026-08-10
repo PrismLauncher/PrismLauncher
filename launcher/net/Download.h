@@ -47,6 +47,7 @@
 
 namespace Net {
 class ByteArraySink;
+class DownloadCache;
 
 class Download : public NetRequest {
     Q_OBJECT
@@ -64,6 +65,12 @@ class Download : public NetRequest {
      */
     static auto makeByteArray(QUrl url, Options options = Option::NoOptions) -> std::pair<Download::Ptr, QByteArray*>;
     static auto makeFile(QUrl url, QString path, Options options = Option::NoOptions) -> Download::Ptr;
+
+    /**
+     * Creates a request that can resume interrupted downloads using Range headers.
+     * The cache is consulted for existing .part files to continue from.
+     */
+    static auto makeResumable(QUrl url, QString path, Options options = Option::NoOptions) -> Download::Ptr;
 
    protected:
     virtual QNetworkReply* getReply(QNetworkRequest&) override;

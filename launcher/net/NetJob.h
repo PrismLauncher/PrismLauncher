@@ -64,6 +64,7 @@ class NetJob : public ConcurrentTask {
     auto getFailedActions() -> QList<Net::NetRequest*>;
     auto getFailedFiles() -> QList<QString>;
     void setAskRetry(bool askRetry);
+    void deleteCachedDownloads();
 
    public slots:
     // Qt can't handle auto at the start for some reason?
