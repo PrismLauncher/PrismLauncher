@@ -61,7 +61,10 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
 {
     if (isIndexed) {
         m_update_task.reset(new LocalResourceUpdateTask(m_pack_model->indexDir(), *m_pack, m_pack_version));
-        connect(m_update_task.get(), &LocalResourceUpdateTask::hasOldResource, this, &ResourceDownloadTask::hasOldResource);
+        // prevent deleting the old resource if multiple versions are allowed
+        if (!m_pack_model->allowsMultipleVersions()) {
+            connect(m_update_task.get(), &LocalResourceUpdateTask::hasOldResource, this, &ResourceDownloadTask::hasOldResource);
+        }
 
         addTask(m_update_task);
     }

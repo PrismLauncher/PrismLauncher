@@ -23,6 +23,8 @@ class ShaderPackFolderModel : public ResourceFolderModel {
 
     QDir indexDir() const override { return m_dir; }
 
+    [[nodiscard]] bool allowsMultipleVersions() const override { return true; }
+
     Task* createPreUpdateTask() override;
 
     // avoid watching twice
