@@ -49,7 +49,7 @@
 #include "Application.h"
 #include "BuildConfig.h"
 
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 
 namespace LegacyFTB {
 
@@ -79,7 +79,7 @@ void PackInstallTask::downloadPack()
     } else {
         url = QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "modpacks/%1").arg(path);
     }
-    m_netJobContainer->addNetAction(Net::ApiDownload::makeCached(url, entry));
+    m_netJobContainer->addNetAction(Net::ApiRequest::makeCached(url, entry));
 
     connect(m_netJobContainer.get(), &NetJob::succeeded, this, &PackInstallTask::unzip);
     connect(m_netJobContainer.get(), &NetJob::failed, this, &PackInstallTask::emitFailed);

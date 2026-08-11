@@ -6,7 +6,7 @@
 #include "modplatform/flame/FlameAPI.h"
 #include "ui/widgets/ProjectItem.h"
 
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 
 #include <Version.h>
 
@@ -111,7 +111,7 @@ void ListModel::requestLogo(QString logo, QString url)
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("Flame Icon Download %1").arg(logo), APPLICATION->network());
     job->setAskRetry(false);
-    job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
+    job->addNetAction(Net::ApiRequest::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
     connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job] {

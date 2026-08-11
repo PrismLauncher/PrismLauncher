@@ -85,7 +85,7 @@
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftInstance.h>
 #include <minecraft/auth/AccountList.h>
-#include <net/ApiDownload.h>
+#include <net/ApiRequest.h>
 #include <net/NetJob.h>
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
@@ -1102,7 +1102,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
             auto entry = APPLICATION->metacache()->resolveEntry("general", path);
             entry->setStale(true);
             auto dl_job = unique_qobject_ptr<NetJob>(new NetJob(tr("Modpack download"), APPLICATION->network()));
-            dl_job->addNetAction(Net::ApiDownload::makeCached(dl_url, entry));
+            dl_job->addNetAction(Net::ApiRequest::makeCached(dl_url, entry));
             auto archivePath = entry->getFullPath();
 
             bool dl_success = false;

@@ -116,8 +116,6 @@ set(NET_SOURCES
     # network stuffs
     net/ByteArraySink.h
     net/ChecksumValidator.h
-    net/Download.cpp
-    net/Download.h
     net/DummySink.h
     net/FileSink.cpp
     net/FileSink.h
@@ -134,15 +132,10 @@ set(NET_SOURCES
     net/PasteUpload.h
     net/Sink.h
     net/Validator.h
-    net/Upload.cpp
-    net/Upload.h
     net/HeaderProxy.h
     net/RawHeaderProxy.h
     net/ApiHeaderProxy.h
-    net/ApiDownload.h
-    net/ApiDownload.cpp
-    net/ApiUpload.cpp
-    net/ApiUpload.h
+    net/ApiRequest.h
     net/NetRequest.cpp
     net/NetRequest.h
 )
@@ -642,8 +635,6 @@ set(PRISMUPDATER_SOURCES
 
     net/ByteArraySink.h
     net/ChecksumValidator.h
-    net/Download.cpp
-    net/Download.h
     net/FileSink.cpp
     net/FileSink.h
     net/HttpMetaCache.cpp

@@ -8,7 +8,7 @@
 #include "Application.h"
 #include "BuildConfig.h"
 
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 
 LegacyFMLLibrariesTask::LegacyFMLLibrariesTask(MinecraftInstance* inst)
 {
@@ -60,12 +60,12 @@ void LegacyFMLLibrariesTask::executeTask()
     setStatus(tr("Downloading FML libraries..."));
     NetJob::Ptr dljob{ new NetJob("FML libraries", APPLICATION->network()) };
     auto metacache = APPLICATION->metacache();
-    Net::Download::Options options = Net::Download::Option::MakeEternal;
+    Net::NetRequest::Options options = Net::NetRequest::Option::MakeEternal;
     const QString base = baseUrl();
     for (auto& lib : fmlLibsToProcess) {
         auto entry = metacache->resolveEntry("fmllibs", lib.filename);
         QString urlString = base + lib.filename;
-        dljob->addNetAction(Net::ApiDownload::makeCached(QUrl(urlString), entry, options));
+        dljob->addNetAction(Net::ApiRequest::makeCached(QUrl(urlString), entry, options));
     }
 
     connect(dljob.get(), &NetJob::succeeded, this, &LegacyFMLLibrariesTask::fmllibsFinished);

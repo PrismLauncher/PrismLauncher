@@ -14,7 +14,7 @@
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 
 #include "modplatform/ModIndex.h"
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 #include "net/NetJob.h"
 #include "tasks/Task.h"
 
@@ -51,7 +51,7 @@ void FlameCheckUpdate::executeTask()
             continue;
         }
 
-        auto [task, response] = Net::ApiDownload::makeByteArray(versionsUrlOptional.value());
+        auto [task, response] = Net::ApiRequest::makeByteArray(versionsUrlOptional.value());
 
         connect(task.get(), &Task::succeeded, this, [this, resource, response] { getLatestVersionCallback(resource, response); });
         netJob->addNetAction(task);

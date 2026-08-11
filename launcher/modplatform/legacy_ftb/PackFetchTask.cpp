@@ -40,7 +40,7 @@
 #include "Application.h"
 #include "BuildConfig.h"
 
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 
 namespace LegacyFTB {
 
@@ -54,13 +54,13 @@ void PackFetchTask::fetch()
     QUrl publicPacksUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/modpacks.xml");
     qDebug() << "Downloading public version info from" << publicPacksUrl.toString();
 
-    auto [publicAction, publicResponse] = Net::ApiDownload::makeByteArray(publicPacksUrl);
+    auto [publicAction, publicResponse] = Net::ApiRequest::makeByteArray(publicPacksUrl);
     jobPtr->addNetAction(publicAction);
 
     QUrl thirdPartyUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/thirdparty.xml");
     qDebug() << "Downloading thirdparty version info from" << thirdPartyUrl.toString();
 
-    auto [thirdPartyAction, thirdPartyResponse] = Net::Download::makeByteArray(thirdPartyUrl);
+    auto [thirdPartyAction, thirdPartyResponse] = Net::NetRequest::makeByteArray(thirdPartyUrl);
     jobPtr->addNetAction(thirdPartyAction);
 
     connect(jobPtr.get(), &NetJob::succeeded, this,
@@ -78,7 +78,7 @@ void PackFetchTask::fetchPrivate(const QStringList& toFetch)
     for (auto& packCode : toFetch) {
         NetJob* job = new NetJob("Fetching private pack", m_network);
 
-        auto [action, data] = Net::ApiDownload::makeByteArray(privatePackBaseUrl.arg(packCode));
+        auto [action, data] = Net::ApiRequest::makeByteArray(privatePackBaseUrl.arg(packCode));
         job->addNetAction(action);
         job->setAskRetry(false);
 

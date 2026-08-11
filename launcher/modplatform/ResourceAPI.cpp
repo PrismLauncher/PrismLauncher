@@ -6,7 +6,7 @@
 
 #include "modplatform/ModIndex.h"
 
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 
 Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatform::IndexedPack::Ptr>>&& callbacks) const
 {
@@ -20,7 +20,7 @@ Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatf
 
     auto netJob = makeShared<NetJob>(QString("%1::Search").arg(debugName()), APPLICATION->network());
 
-    auto [action, response] = Net::ApiDownload::makeByteArray(QUrl(search_url));
+    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(search_url));
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks] {
@@ -85,7 +85,7 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
 
     auto netJob = makeShared<NetJob>(QString("%1::Versions").arg(args.pack->name), APPLICATION->network());
 
-    auto [action, response] = Net::ApiDownload::makeByteArray(versions_url);
+    auto [action, response] = Net::ApiRequest::makeByteArray(versions_url);
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks, args] {
@@ -205,7 +205,7 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
     auto versions_url = versions_url_optional.value();
 
     auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.addonId.toString()), APPLICATION->network());
-    auto [action, response] = Net::ApiDownload::makeByteArray(versions_url);
+    auto [action, response] = Net::ApiRequest::makeByteArray(versions_url);
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks, args] {
@@ -295,7 +295,7 @@ std::pair<Task::Ptr, QByteArray*> ResourceAPI::getProject(QString addonId, bool 
     auto netJob = makeShared<NetJob>(QString("%1::GetProject").arg(addonId), APPLICATION->network());
     netJob->setAskRetry(askRetry);
 
-    auto [action, response] = Net::ApiDownload::makeByteArray(QUrl(project_url));
+    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(project_url));
     netJob->addNetAction(action);
 
     return { netJob, response };

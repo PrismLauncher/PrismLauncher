@@ -40,11 +40,14 @@
 #pragma once
 
 #include <QNetworkReply>
-#include <QUrl>
 #include <QTimer>
+#include <QUrl>
 #include <chrono>
+#include <cstdint>
+#include <utility>
 
 #include "HeaderProxy.h"
+#include "HttpMetaCache.h"
 #include "Sink.h"
 #include "Validator.h"
 
@@ -53,15 +56,39 @@
 #include "tasks/Task.h"
 
 namespace Net {
+class ByteArraySink;
+
 class NetRequest : public Task {
     Q_OBJECT
-   protected:
-    explicit NetRequest();
-
    public:
     using Ptr = shared_qobject_ptr<class NetRequest>;
-    enum class Option { NoOptions = 0, AcceptLocalFiles = 1, MakeEternal = 2, AutoRetry = 4 };
+    enum class Option : std::uint8_t {
+        NoOptions = 0,
+        AcceptLocalFiles = 1,
+        MakeEternal = 2,
+        AutoRetry = 4,
+        AddAPIHeaders = 8,
+    };
     Q_DECLARE_FLAGS(Options, Option)
+
+   public:
+    explicit NetRequest();
+    explicit NetRequest(const QUrl& url, Options options = Option::NoOptions, const QString& name = QString());
+    NetRequest(const QUrl& url, QByteArray postData, Options options);
+
+   public:
+#if defined(LAUNCHER_APPLICATION)
+    static auto makeCached(const QUrl& url, MetaEntryPtr entry, Options options = Option::NoOptions) -> NetRequest::Ptr;
+#endif
+
+    /**
+     * Creates a request downloading to the returned QByteArray,.
+     * The QByteArray will live as long as the Download object.
+     */
+    static auto makeByteArray(const QUrl& url, Options options = Option::NoOptions) -> std::pair<NetRequest::Ptr, QByteArray*>;
+    static auto makeByteArray(const QUrl& url, QByteArray postData, Options options = Option::NoOptions)
+        -> std::pair<NetRequest::Ptr, QByteArray*>;
+    static auto makeFile(const QUrl& url, const QString& path, Options options = Option::NoOptions) -> NetRequest::Ptr;
 
    public:
     ~NetRequest() override = default;
@@ -76,7 +103,7 @@ class NetRequest : public Task {
     void enableAutoRetry(bool enable);
 
     QUrl url() const;
-    void setUrl(QUrl url) { m_url = url; }
+    void setUrl(QUrl url) { m_url = std::move(url); }
     int replyStatusCode() const;
     QNetworkReply::NetworkError error() const;
     QString errorString() const;
@@ -84,7 +111,7 @@ class NetRequest : public Task {
    private:
     auto handleRedirect() -> bool;
     void handleAutoRetry(int64_t delay);
-    virtual QNetworkReply* getReply(QNetworkRequest&) = 0;
+    virtual QNetworkReply* getReply(QNetworkRequest&);
 
    protected slots:
     void onProgress(qint64 bytesReceived, qint64 bytesTotal);
@@ -98,14 +125,13 @@ class NetRequest : public Task {
     std::unique_ptr<Sink> m_sink;
     Options m_options;
 
-    using logCatFunc = const QLoggingCategory& (*)();
-    logCatFunc logCat = taskUploadLogC;
+    using LogCatFunc = const QLoggingCategory& (*)();
+    LogCatFunc m_logCat = taskUploadLogC;
 
-    std::chrono::steady_clock m_clock;
-    std::chrono::time_point<std::chrono::steady_clock> m_last_progress_time;
-    qint64 m_last_progress_bytes;
+    std::chrono::time_point<std::chrono::steady_clock> m_lastProgressTime;
+    qint64 m_lastProgressBytes = 0;
 
-    QNetworkAccessManager* m_network;
+    QNetworkAccessManager* m_network = nullptr;
 
     /// the network reply
     std::unique_ptr<QNetworkReply> m_reply;
@@ -117,6 +143,8 @@ class NetRequest : public Task {
 
     int m_retryCount = 0;
     QTimer m_retryTimer;
+
+    std::optional<QByteArray> m_postData;
 };
 }  // namespace Net
 
