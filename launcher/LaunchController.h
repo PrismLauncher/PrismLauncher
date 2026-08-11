@@ -35,6 +35,7 @@
 
 #pragma once
 #include <tools/BaseProfiler.h>
+#include <QPointer>
 
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/auth/MinecraftAccount.h"
@@ -69,6 +70,7 @@ class LaunchController : public Task {
     void setAccountToUse(MinecraftAccountPtr accountToUse) { m_accountToUse = std::move(accountToUse); }
 
     QString id() const { return m_instance->id(); }
+    LaunchTask* launcher() const;
 
     bool abort() override;
 
@@ -98,6 +100,6 @@ class LaunchController : public Task {
     InstanceWindow* m_console = nullptr;
     MinecraftAccountPtr m_accountToUse = nullptr;
     AuthSessionPtr m_session = nullptr;
-    LaunchTask* m_launcher = nullptr;
+    QPointer<LaunchTask> m_launcher;
     MinecraftTarget::Ptr m_targetToJoin = nullptr;
 };

@@ -43,6 +43,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QUuid>
+#include <algorithm>
 
 #include "Application.h"
 #include "Json.h"
@@ -266,50 +267,81 @@ void BaseInstance::regenerateUuid()
 
 bool BaseInstance::isRunning() const
 {
-    return m_isRunning;
+    return !m_activeLaunchProcesses.isEmpty();
 }
 
-void BaseInstance::setRunning(bool running)
+void BaseInstance::launchSessionStarted(LaunchTask* task)
 {
-    if (running == m_isRunning) {
+    if (!task || m_activeLaunchProcesses.contains(task))
         return;
+
+    const bool wasRunning = isRunning();
+    if (!wasRunning) {
+        m_launchIntervalCrashed = false;
+        setCrashed(false);
     }
-
-    m_isRunning = running;
-
-    emit runningStatusChanged(running);
+    m_activeLaunchProcesses.insert(task);
+    if (!wasRunning) {
+        emit runningStatusChanged(true);
+    }
 }
 
-void BaseInstance::setMinecraftRunning(bool running)
+void BaseInstance::launchSessionFinished(LaunchTask* task, bool crashed)
 {
-    if (!settings()->get("RecordGameTime").toBool()) {
+    if (!task || !m_activeLaunchProcesses.remove(task))
         return;
+
+    setMinecraftRunning(task, false);
+    m_launchIntervalCrashed |= crashed;
+    if (!isRunning()) {
+        setCrashed(m_launchIntervalCrashed);
+        emit runningStatusChanged(false);
     }
+}
+
+void BaseInstance::setMinecraftRunning(LaunchTask* task, bool running)
+{
+    if (!task)
+        return;
 
     if (running) {
-        m_timeStarted = QDateTime::currentDateTime();
-        setLastLaunch(m_timeStarted.toMSecsSinceEpoch());
-    } else {
-        QDateTime timeEnded = QDateTime::currentDateTime();
-        qint64 secondsPlayed = m_timeStarted.secsTo(timeEnded);
+        if (m_minecraftProcesses.contains(task))
+            return;
 
-        qint64 current = settings()->get("totalTimePlayed").toLongLong();
-        settings()->set("totalTimePlayed", current + secondsPlayed);
-        settings()->set("lastTimePlayed", secondsPlayed);
-
-        if (countTimePlayed()) {
-            qint64 globalTotal = APPLICATION->playtimeSettings()->get("TotalPlayTime").toLongLong();
-            APPLICATION->playtimeSettings()->set("TotalPlayTime", globalTotal + secondsPlayed);
+        const auto now = QDateTime::currentDateTime();
+        setLastLaunch(now.toMSecsSinceEpoch());
+        if (m_minecraftProcesses.isEmpty() && settings()->get("RecordGameTime").toBool()) {
+            m_timeStarted = now;
         }
+        m_minecraftProcesses.insert(task);
+    } else {
+        if (!m_minecraftProcesses.remove(task))
+            return;
+        if (!m_minecraftProcesses.isEmpty())
+            return;
 
-        emit propertiesChanged();
+        if (settings()->get("RecordGameTime").toBool() && m_timeStarted.isValid()) {
+            const auto timeEnded = QDateTime::currentDateTime();
+            const auto elapsed = m_timeStarted.secsTo(timeEnded);
+            qint64 current = settings()->get("totalTimePlayed").toLongLong();
+            settings()->set("totalTimePlayed", current + elapsed);
+            settings()->set("lastTimePlayed", elapsed);
+
+            if (countTimePlayed()) {
+                qint64 globalTotal = APPLICATION->playtimeSettings()->get("TotalPlayTime").toLongLong();
+                APPLICATION->playtimeSettings()->set("TotalPlayTime", globalTotal + elapsed);
+            }
+
+            emit propertiesChanged();
+        }
+        m_timeStarted = {};
     }
 }
 
 int64_t BaseInstance::totalTimePlayed() const
 {
     qint64 current = m_settings->get("totalTimePlayed").toLongLong();
-    if (m_isRunning) {
+    if (!m_minecraftProcesses.isEmpty() && m_timeStarted.isValid() && m_settings->get("RecordGameTime").toBool()) {
         QDateTime timeNow = QDateTime::currentDateTime();
         return current + m_timeStarted.secsTo(timeNow);
     }
@@ -318,7 +350,7 @@ int64_t BaseInstance::totalTimePlayed() const
 
 int64_t BaseInstance::lastTimePlayed() const
 {
-    if (m_isRunning) {
+    if (!m_minecraftProcesses.isEmpty() && m_timeStarted.isValid() && m_settings->get("RecordGameTime").toBool()) {
         QDateTime timeNow = QDateTime::currentDateTime();
         return m_timeStarted.secsTo(timeNow);
     }
@@ -355,7 +387,7 @@ SettingsObject* BaseInstance::settings()
 
 bool BaseInstance::canLaunch() const
 {
-    return (!hasVersionBroken() && !isRunning());
+    return !hasVersionBroken();
 }
 
 bool BaseInstance::reloadSettings()
@@ -482,9 +514,58 @@ QStringList BaseInstance::extraArguments()
     return Commandline::splitArgs(settings()->get("JvmArgs").toString());
 }
 
-LaunchTask* BaseInstance::getLaunchTask()
+QList<LaunchTask*> BaseInstance::launchTasks() const
 {
-    return m_launchProcess.get();
+    QList<LaunchTask*> result;
+    result.reserve(static_cast<qsizetype>(m_launchProcesses.size()));
+    for (const auto& task : m_launchProcesses) {
+        result.append(task.get());
+    }
+    return result;
+}
+
+QList<LaunchTask*> BaseInstance::activeLaunchTasks() const
+{
+    QList<LaunchTask*> result;
+    result.reserve(m_activeLaunchProcesses.size());
+    for (const auto& task : m_launchProcesses) {
+        if (m_activeLaunchProcesses.contains(task.get()))
+            result.append(task.get());
+    }
+    return result;
+}
+
+bool BaseInstance::isLaunchTaskActive(LaunchTask* task) const
+{
+    return task && m_activeLaunchProcesses.contains(task);
+}
+
+LaunchTask* BaseInstance::launchTask(quint64 sessionId) const
+{
+    const auto iter = std::find_if(m_launchProcesses.begin(), m_launchProcesses.end(),
+                                   [sessionId](const auto& task) { return task->sessionId() == sessionId; });
+    return iter == m_launchProcesses.end() ? nullptr : iter->get();
+}
+
+LaunchTask* BaseInstance::adoptLaunchTask(std::unique_ptr<LaunchTask> task)
+{
+    if (!task)
+        return nullptr;
+
+    // Keep completed sessions (and their logs) available until the next
+    // independent run group starts. Overlapping launches stay grouped.
+    if (!isRunning()) {
+        for (const auto& previous : m_launchProcesses)
+            emit launchTaskRemoved(previous->sessionId());
+        m_launchProcesses.clear();
+    }
+
+    auto* result = task.get();
+    result->setSessionId(m_nextLaunchSessionId++);
+    m_launchProcesses.emplace_back(std::move(task));
+    result->init();
+    emit launchTaskAdded(result);
+    return result;
 }
 
 void BaseInstance::updateRuntimeContext()

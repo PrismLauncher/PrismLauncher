@@ -172,7 +172,7 @@ void LauncherPartLaunch::on_state(LoggedProcess::State state)
         case LoggedProcess::Aborted:
         case LoggedProcess::Crashed: {
             m_parent->setPid(-1);
-            m_parent->instance()->setMinecraftRunning(false);
+            m_parent->instance()->setMinecraftRunning(m_parent, false);
             emitFailed(tr("Game crashed."));
             return;
         }
@@ -182,7 +182,7 @@ void LauncherPartLaunch::on_state(LoggedProcess::State state)
                 APPLICATION->showMainWindow();
 
             m_parent->setPid(-1);
-            m_parent->instance()->setMinecraftRunning(false);
+            m_parent->instance()->setMinecraftRunning(m_parent, false);
             // if the exit code wasn't 0, report this as a crash
             auto exitCode = m_process.exitCode();
             if (exitCode != 0) {
@@ -217,7 +217,7 @@ void LauncherPartLaunch::setWorkingDirectory(const QString& wd)
 void LauncherPartLaunch::proceed()
 {
     if (mayProceed) {
-        m_parent->instance()->setMinecraftRunning(true);
+        m_parent->instance()->setMinecraftRunning(m_parent, true);
         QString launchString("launch\n");
         m_process.write(launchString.toUtf8());
         mayProceed = false;

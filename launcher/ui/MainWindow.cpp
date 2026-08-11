@@ -1625,7 +1625,7 @@ void MainWindow::instanceActivated(QModelIndex index)
 
 void MainWindow::on_actionLaunchInstance_triggered()
 {
-    if (m_selectedInstance && !m_selectedInstance->isRunning()) {
+    if (m_selectedInstance) {
         APPLICATION->launch(m_selectedInstance);
     }
 }
@@ -1791,6 +1791,20 @@ void MainWindow::setInstanceActionsEnabled(bool enabled)
 
 void MainWindow::refreshCurrentInstance()
 {
-    auto current = view->selectionModel()->currentIndex();
-    instanceChanged(current, current);
+    if (!m_selectedInstance)
+        return;
+
+    // Running state changes can cause the sorted instance model to move the
+    // selected row. Do not re-resolve the selection through a transient model
+    // index here: an invalid index would disable the whole instance toolbar.
+    ui->instanceToolBar->setEnabled(true);
+    setInstanceActionsEnabled(true);
+    ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
+    ui->actionKillInstance->setEnabled(m_selectedInstance->isRunning());
+    ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
+    renameButton->setText(m_selectedInstance->name());
+    m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
+    updateStatusCenter();
+    updateInstanceToolIcon(m_selectedInstance->iconKey());
+    updateLaunchButton();
 }

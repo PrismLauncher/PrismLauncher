@@ -72,7 +72,9 @@ class InstanceWindow : public QMainWindow, public BasePageContainer {
     void isClosing();
 
    private slots:
-    void instanceLaunchTaskChanged(LaunchTask* proc);
+    void instanceLaunchTaskAdded(LaunchTask* proc);
+    void instanceLaunchTaskRemoved(quint64 sessionId);
+    void selectedLaunchTaskChanged(LaunchTask* proc);
     void runningStateChanged(bool running);
     void restartInstance();
     void on_instanceStatusChanged(BaseInstance::Status, BaseInstance::Status newStatus);
@@ -84,7 +86,7 @@ class InstanceWindow : public QMainWindow, public BasePageContainer {
     void updateButtons();
 
    private:
-    LaunchTask* m_proc;
+    LaunchTask* m_proc = nullptr;
     MinecraftInstance* m_instance;
     bool m_doNotSave = false;
     bool m_restartQueued = false;

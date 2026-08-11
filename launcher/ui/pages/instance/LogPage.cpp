@@ -149,11 +149,18 @@ LogPage::LogPage(BaseInstance* instance, QWidget* parent) : QWidget(parent), ui(
 
     // set up instance and launch process recognition
     {
-        auto launchTask = m_instance->getLaunchTask();
-        if (launchTask) {
-            setInstanceLaunchTaskChanged(launchTask, true);
+        const auto tasks = m_instance->launchTasks();
+        for (auto* task : tasks) {
+            ui->sessionCombo->addItem(tr("Minecraft #%1").arg(task->sessionId()), QVariant::fromValue<qulonglong>(task->sessionId()));
         }
-        connect(m_instance, &BaseInstance::launchTaskChanged, this, &LogPage::onInstanceLaunchTaskChanged);
+        if (!tasks.isEmpty()) {
+            ui->sessionCombo->setCurrentIndex(tasks.size() - 1);
+            setInstanceLaunchTaskChanged(tasks.last(), true);
+        }
+        ui->sessionLabel->setVisible(!tasks.isEmpty());
+        ui->sessionCombo->setVisible(!tasks.isEmpty());
+        connect(m_instance, &BaseInstance::launchTaskAdded, this, &LogPage::onInstanceLaunchTaskAdded);
+        connect(m_instance, &BaseInstance::launchTaskRemoved, this, &LogPage::onInstanceLaunchTaskRemoved);
     }
 
     auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
@@ -220,9 +227,43 @@ void LogPage::setInstanceLaunchTaskChanged(LaunchTask* proc, bool initial)
     }
 }
 
-void LogPage::onInstanceLaunchTaskChanged(LaunchTask* proc)
+int LogPage::sessionIndex(quint64 sessionId) const
 {
-    setInstanceLaunchTaskChanged(proc, false);
+    for (int index = 0; index < ui->sessionCombo->count(); ++index) {
+        if (ui->sessionCombo->itemData(index).toULongLong() == sessionId)
+            return index;
+    }
+    return -1;
+}
+
+void LogPage::on_sessionCombo_currentIndexChanged(int index)
+{
+    auto* task = index < 0 ? nullptr : m_instance->launchTask(ui->sessionCombo->itemData(index).toULongLong());
+    if (task != m_process)
+        setInstanceLaunchTaskChanged(task, false);
+    emit selectedLaunchTaskChanged(task);
+}
+
+void LogPage::onInstanceLaunchTaskAdded(LaunchTask* proc)
+{
+    ui->sessionCombo->addItem(tr("Minecraft #%1").arg(proc->sessionId()), QVariant::fromValue<qulonglong>(proc->sessionId()));
+    ui->sessionLabel->show();
+    ui->sessionCombo->show();
+    ui->sessionCombo->setCurrentIndex(ui->sessionCombo->count() - 1);
+}
+
+void LogPage::onInstanceLaunchTaskRemoved(quint64 sessionId)
+{
+    const int index = sessionIndex(sessionId);
+    if (index >= 0)
+        ui->sessionCombo->removeItem(index);
+    const bool hasSessions = ui->sessionCombo->count() > 0;
+    ui->sessionLabel->setVisible(hasSessions);
+    ui->sessionCombo->setVisible(hasSessions);
+    if (!hasSessions) {
+        setInstanceLaunchTaskChanged(nullptr, false);
+        emit selectedLaunchTaskChanged(nullptr);
+    }
 }
 
 bool LogPage::apply()

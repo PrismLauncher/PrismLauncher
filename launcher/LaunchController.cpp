@@ -61,6 +61,11 @@
 
 LaunchController::LaunchController() = default;
 
+LaunchTask* LaunchController::launcher() const
+{
+    return m_launcher.data();
+}
+
 void LaunchController::executeTask()
 {
     if (!m_instance) {
@@ -390,6 +395,7 @@ void LaunchController::launchInstance()
     connect(m_launcher, &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
     connect(m_launcher, &LaunchTask::succeeded, this, &LaunchController::onSucceeded);
     connect(m_launcher, &LaunchTask::failed, this, &LaunchController::onFailed);
+    connect(m_launcher, &LaunchTask::aborted, this, [this] { emitAborted(); });
     connect(m_launcher, &LaunchTask::requestProgress, this, &LaunchController::onProgressRequested);
 
     // Prepend Online and Auth Status
@@ -425,8 +431,8 @@ void LaunchController::readyForLaunch()
 
     QString error;
     if (!m_profiler->check(&error)) {
-        m_launcher->abort();
-        emitFailed("Profiler startup failed!");
+        if (!m_launcher->abort())
+            emitFailed("Profiler startup failed!");
         QMessageBox::critical(m_parentWidget, tr("Error!"), tr("Profiler check for %1 failed: %2").arg(m_profiler->name(), error));
         return;
     }
@@ -452,8 +458,8 @@ void LaunchController::readyForLaunch()
         msg.addButton(QMessageBox::Ok);
         msg.setModal(true);
         msg.exec();
-        m_launcher->abort();
-        emitFailed("Profiler startup failed!");
+        if (!m_launcher->abort())
+            emitFailed("Profiler startup failed!");
     });
     profilerInstance->beginProfiling(m_launcher);
 }
