@@ -39,6 +39,7 @@
 #include <QWidget>
 #include "JavaCommon.h"
 
+struct GlobalConfig;
 class MinecraftInstance;
 
 namespace Ui {
@@ -63,6 +64,11 @@ class JavaSettingsWidget : public QWidget {
     void updateThresholds();
 
    private:
+    template <typename T>
+    void loadSettingsFrom(const T& conf, const GlobalConfig& global);
+    template <typename T>
+    void saveSettingsTo(T& conf) const;
+
     MinecraftInstance* m_instance;
     Ui::JavaSettingsWidget* m_ui;
     unique_qobject_ptr<JavaCommon::TestCheck> m_checker;

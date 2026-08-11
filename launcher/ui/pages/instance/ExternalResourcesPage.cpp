@@ -34,6 +34,7 @@
  */
 
 #include "ExternalResourcesPage.h"
+#include "config/GlobalConfig.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ExternalResourcesPage.h"
 
@@ -146,17 +147,14 @@ void ExternalResourcesPage::openedImpl()
 {
     m_model->startWatching();
 
-    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
-    m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
-
-    ui->actionsToolbar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
+    ui->actionsToolbar->setVisibilityState(APPLICATION->config()->uiWideBarState.value(id()));
 }
 
 void ExternalResourcesPage::closedImpl()
 {
     m_model->stopWatching();
 
-    m_wide_bar_setting->set(QString::fromUtf8(ui->actionsToolbar->getVisibilityState().toBase64()));
+    APPLICATION->config().update().uiWideBarState[id()] = ui->actionsToolbar->getVisibilityState();
 }
 
 void ExternalResourcesPage::retranslate()
@@ -212,7 +210,7 @@ void ExternalResourcesPage::addItem()
 {
     auto list = GuiUtil::BrowseForFiles(
         helpPage(), tr("Select %1", "Select whatever type of files the page contains. Example: 'Loader Mods'").arg(displayName()),
-        m_fileSelectionFilter.arg(displayName()), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+        m_fileSelectionFilter.arg(displayName()), APPLICATION->config()->centralModsDir, this->parentWidget());
 
     if (!list.isEmpty()) {
         for (auto filename : list) {
@@ -335,7 +333,7 @@ void ExternalResourcesPage::updateFrame(const QModelIndex& current, [[maybe_unus
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
-    Resource const& resource = m_model->at(row);
+    const Resource& resource = m_model->at(row);
     ui->frame->updateWithResource(resource);
 }
 

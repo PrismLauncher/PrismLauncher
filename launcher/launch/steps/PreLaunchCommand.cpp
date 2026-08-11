@@ -33,13 +33,16 @@
  *      limitations under the License.
  */
 
+#include "Application.h"
 #include "PreLaunchCommand.h"
 #include <launch/LaunchTask.h>
+#include "config/InstanceConfig.h"
 
 PreLaunchCommand::PreLaunchCommand(LaunchTask* parent) : LaunchStep(parent)
 {
     auto instance = m_parent->instance();
-    m_command = instance->getPreLaunchCommand();
+    const auto commands = instance->config()->commandsOrGlobal(*APPLICATION->config());
+    m_command = commands.preLaunch;
     m_process.setProcessEnvironment(instance->createEnvironment());
     connect(&m_process, &LoggedProcess::log, this, &PreLaunchCommand::logLines);
     connect(&m_process, &LoggedProcess::stateChanged, this, &PreLaunchCommand::on_state);

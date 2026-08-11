@@ -33,13 +33,16 @@
  *      limitations under the License.
  */
 
+#include "Application.h"
+#include "config/InstanceConfig.h"
 #include "PostLaunchCommand.h"
 #include <launch/LaunchTask.h>
 
 PostLaunchCommand::PostLaunchCommand(LaunchTask* parent) : LaunchStep(parent)
 {
     auto instance = m_parent->instance();
-    m_command = instance->getPostExitCommand();
+    const auto commands = instance->config()->commandsOrGlobal(*APPLICATION->config());
+    m_command = commands.postExit;
     m_process.setProcessEnvironment(instance->createEnvironment());
     connect(&m_process, &LoggedProcess::log, this, &PostLaunchCommand::logLines);
     connect(&m_process, &LoggedProcess::stateChanged, this, &PostLaunchCommand::on_state);

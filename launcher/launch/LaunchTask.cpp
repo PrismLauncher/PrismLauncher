@@ -43,6 +43,8 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <variant>
+#include "Application.h"
+#include "config/GlobalConfig.h"
 #include "MessageLevel.h"
 #include "tasks/Task.h"
 
@@ -204,8 +206,8 @@ shared_qobject_ptr<LogModel> LaunchTask::getLogModel()
 {
     if (!m_logModel) {
         m_logModel.reset(new LogModel());
-        m_logModel->setMaxLines(getConsoleMaxLines(m_instance->settings()));
-        m_logModel->setStopOnOverflow(shouldStopOnConsoleOverflow(m_instance->settings()));
+        m_logModel->setMaxLines(APPLICATION->config()->consoleMaxLines);
+        m_logModel->setStopOnOverflow(APPLICATION->config()->consoleOverflowStop);
         // FIXME: should this really be here?
         m_logModel->setOverflowMessage(tr("Stopped watching the game log because the log length surpassed %1 lines.\n"
                                           "You may have to fix your mods because the game is still logging to files and"
@@ -215,7 +217,7 @@ shared_qobject_ptr<LogModel> LaunchTask::getLogModel()
     return m_logModel;
 }
 
-bool LaunchTask::parseXmlLogs(QString const& line, MessageLevel level)
+bool LaunchTask::parseXmlLogs(const QString& line, MessageLevel level)
 {
     LogParser* parser;
     switch (static_cast<MessageLevel::Enum>(level)) {
@@ -241,7 +243,7 @@ bool LaunchTask::parseXmlLogs(QString const& line, MessageLevel level)
         return true;
 
     auto model = getLogModel();
-    for (auto const& item : items) {
+    for (const auto& item : items) {
         if (std::holds_alternative<LogParser::LogEntry>(item)) {
             auto entry = std::get<LogParser::LogEntry>(item);
             auto msg = QString("[%1] [%2/%3] [%4]: %5")

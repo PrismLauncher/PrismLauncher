@@ -35,7 +35,7 @@
 
 #include "MSALoginDialog.h"
 #include "Application.h"
-#include "settings/SettingsObject.h"
+#include "config/GlobalConfig.h"
 
 #include "ui_MSALoginDialog.h"
 
@@ -60,7 +60,7 @@ MSALoginDialog::MSALoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::MS
     // make font monospace
     QFont font;
     font.setPixelSize(ui->code->fontInfo().pixelSize());
-    font.setFamily(APPLICATION->settings()->get("ConsoleFont").toString());
+    font.setFamily(APPLICATION->config()->consoleFont);
     font.setStyleHint(QFont::Monospace);
     font.setFixedPitch(true);
     ui->code->setFont(font);

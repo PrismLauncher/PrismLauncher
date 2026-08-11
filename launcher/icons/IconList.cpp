@@ -232,14 +232,6 @@ void IconList::fileChanged(const QString& path)
     emit iconUpdated(key);
 }
 
-void IconList::SettingChanged(const Setting& setting, const QVariant& value)
-{
-    if (setting.id() != "IconsDir")
-        return;
-
-    directoryChanged(value.toString());
-}
-
 void IconList::startWatching()
 {
     auto abs_path = m_dir.absolutePath();

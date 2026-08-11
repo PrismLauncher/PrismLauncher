@@ -29,7 +29,7 @@
 class OverrideSetting : public Setting {
     Q_OBJECT
    public:
-    explicit OverrideSetting(std::shared_ptr<Setting> overridden, std::shared_ptr<Setting> gate);
+    explicit OverrideSetting(QStringList synonyms, std::function<QVariant()> overridden, std::shared_ptr<Setting> gate);
 
     virtual QVariant defValue() const;
     virtual QVariant get() const;
@@ -40,6 +40,6 @@ class OverrideSetting : public Setting {
     bool isOverriding() const;
 
    protected:
-    std::shared_ptr<Setting> m_other;
+    std::function<QVariant()> m_other;
     std::shared_ptr<Setting> m_gate;
 };

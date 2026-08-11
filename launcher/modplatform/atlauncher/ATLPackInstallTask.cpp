@@ -44,6 +44,7 @@
 #include "Json.h"
 #include "MMCZip.h"
 #include "Version.h"
+#include "config/InstanceConfig.h"
 #include "meta/Index.h"
 #include "meta/Version.h"
 #include "meta/VersionList.h"
@@ -52,7 +53,6 @@
 #include "minecraft/PackProfile.h"
 #include "modplatform/atlauncher/ATLPackManifest.h"
 #include "net/ChecksumValidator.h"
-#include "settings/INISettingsObject.h"
 
 #include "net/ApiRequest.h"
 
@@ -1027,9 +1027,8 @@ void PackInstallTask::install()
     setStatus(tr("Installing modpack"));
 
     auto instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    MinecraftInstance instance(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
+    MinecraftInstance instance(std::make_unique<InstanceConfigHolder>(instanceConfigPath), m_stagingPath);
     {
-        SettingsObject::Lock lock(instance.settings());
         auto* components = instance.getPackProfile();
         components->buildingFromScratch();
 
@@ -1087,10 +1086,20 @@ void PackInstallTask::install()
 
         instance.setName(name());
         instance.setIconKey(m_instIcon);
-        instance.setManagedPack("atlauncher", m_pack_safe_name, m_pack_name, m_version_name, m_version_name);
+        instance.config().update().managedPack = {
+            .type = "atlauncher",
+            .id = m_pack_safe_name,
+            .name = m_pack_name,
+            .versionId = m_version_name,
+            .versionName = m_version_name,
+            .url = QString(),
+        };
 
         jarmods.clear();
     }
+
+    instance.config().save();
+
     downloadFiles(&instance);
 }
 

@@ -37,6 +37,7 @@
  */
 
 #include "APIPage.h"
+#include "config/GlobalConfig.h"
 #include "ui_APIPage.h"
 
 #include <QFileDialog>
@@ -50,7 +51,6 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "net/PasteUpload.h"
-#include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
 
 APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
@@ -121,51 +121,38 @@ void APIPage::updateBaseURLPlaceholder(int index)
 
 void APIPage::loadSettings()
 {
-    auto s = APPLICATION->settings();
+    const auto& conf = *APPLICATION->config();
 
-    int pasteType = s->get("PastebinType").toInt();
-    QString pastebinURL = s->get("PastebinCustomAPIBase").toString();
+    QString pastebinURL = conf.pastebinCustomApiBase.toString();
 
     ui->baseURLEntry->setText(pastebinURL);
-    int pasteTypeIndex = ui->pasteTypeComboBox->findData(pasteType);
+    int pasteTypeIndex = ui->pasteTypeComboBox->findData(conf.pastebinType);
     if (pasteTypeIndex == -1) {
         pasteTypeIndex = ui->pasteTypeComboBox->findData(PasteUpload::PasteType::Mclogs);
         ui->baseURLEntry->clear();
     }
 
     ui->pasteTypeComboBox->setCurrentIndex(pasteTypeIndex);
-
-    if (bool fallbackMRBlockedMods = s->get("FallbackMRBlockedMods").toBool()) {
-        ui->FallbackMRBlockedMods->setChecked(fallbackMRBlockedMods);
-    }
-
-    QString msaClientID = s->get("MSAClientIDOverride").toString();
-    ui->msaClientID->setText(msaClientID);
-    QString metaURL = s->get("MetaURLOverride").toString();
-    ui->metaURL->setText(metaURL);
-    ui->metaRefreshOnLaunchCB->setCheckState(s->get("MetaRefreshOnLaunch").toBool() ? Qt::Checked : Qt::Unchecked);
-    QString resourceURL = s->get("ResourceURLOverride").toString();
-    ui->resourceURL->setText(resourceURL);
-    QString fmlLibsURL = s->get("LegacyFMLLibsURLOverride").toString();
-    ui->legacyFMLLibsURL->setText(fmlLibsURL);
-    QString flameKey = s->get("FlameKeyOverride").toString();
-    ui->flameKey->setText(flameKey);
-    QString modrinthToken = s->get("ModrinthToken").toString();
-    ui->modrinthToken->setText(modrinthToken);
-    QString customUserAgent = s->get("UserAgentOverride").toString();
-    ui->userAgentLineEdit->setText(customUserAgent);
-    ui->technicClientID->setText(s->get("TechnicClientID").toString());
+    ui->FallbackMRBlockedMods->setChecked(conf.fallbackModrinthBlockedMods);
+    ui->msaClientID->setText(conf.msaClientIdOverride);
+    ui->metaURL->setText(conf.metaUrlOverride.toString());
+    ui->metaRefreshOnLaunchCB->setChecked(conf.metaRefreshOnLaunch);
+    ui->resourceURL->setText(conf.resourceUrlOverride.toString());
+    ui->legacyFMLLibsURL->setText(conf.legacyFmlLibsUrlOverride.toString());
+    ui->flameKey->setText(conf.flameKeyOverride);
+    ui->modrinthToken->setText(conf.modrinthToken);
+    ui->userAgentLineEdit->setText(conf.userAgentOverride);
+    ui->technicClientID->setText(conf.technicClientId);
 }
 
 void APIPage::applySettings()
 {
-    auto s = APPLICATION->settings();
+    auto& conf = APPLICATION->config().update();
 
-    s->set("PastebinType", ui->pasteTypeComboBox->currentData().toInt());
-    s->set("PastebinCustomAPIBase", ui->baseURLEntry->text());
+    conf.pastebinType = static_cast<PasteUpload::PasteType>(ui->pasteTypeComboBox->currentData().toInt());
+    conf.pastebinCustomApiBase = ui->baseURLEntry->text();
 
-    QString msaClientID = ui->msaClientID->text();
-    s->set("MSAClientIDOverride", msaClientID);
+    conf.msaClientIdOverride = ui->msaClientID->text();
     QUrl metaURL(ui->metaURL->text());
     QUrl resourceURL(ui->resourceURL->text());
     QUrl fmlLibsURL(ui->legacyFMLLibsURL->text());
@@ -193,17 +180,15 @@ void APIPage::applySettings()
     upgradeToHTTPS(resourceURL);
     upgradeToHTTPS(fmlLibsURL);
 
-    s->set("FallbackMRBlockedMods", ui->FallbackMRBlockedMods->checkState());
-    s->set("MetaURLOverride", metaURL.toString());
-    s->set("MetaRefreshOnLaunch", ui->metaRefreshOnLaunchCB->checkState() == Qt::Checked);
-    s->set("ResourceURLOverride", resourceURL.toString());
-    s->set("LegacyFMLLibsURLOverride", fmlLibsURL.toString());
-    QString flameKey = ui->flameKey->text();
-    s->set("FlameKeyOverride", flameKey);
-    QString modrinthToken = ui->modrinthToken->text();
-    s->set("ModrinthToken", modrinthToken);
-    s->set("UserAgentOverride", ui->userAgentLineEdit->text());
-    s->set("TechnicClientID", ui->technicClientID->text());
+    conf.fallbackModrinthBlockedMods = ui->FallbackMRBlockedMods->isChecked();
+    conf.metaUrlOverride = metaURL;
+    conf.metaRefreshOnLaunch = ui->metaRefreshOnLaunchCB->isChecked();
+    conf.resourceUrlOverride = resourceURL;
+    conf.legacyFmlLibsUrlOverride = fmlLibsURL;
+    conf.flameKeyOverride = ui->flameKey->text();
+    conf.modrinthToken = ui->modrinthToken->text();
+    conf.userAgentOverride = ui->userAgentLineEdit->text();
+    conf.technicClientId = ui->technicClientID->text();
 }
 
 bool APIPage::apply()

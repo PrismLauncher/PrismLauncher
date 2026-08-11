@@ -23,7 +23,6 @@ set(CORE_SOURCES
     BaseInstance.cpp
     InstanceDirUpdate.h
     InstanceDirUpdate.cpp
-    NullInstance.h
     MMCZip.h
     MMCZip.cpp
     archive/ArchiveReader.cpp
@@ -850,8 +849,6 @@ SET(LAUNCHER_SOURCES
     ui/setupwizard/JavaWizardPage.h
     ui/setupwizard/LanguageWizardPage.cpp
     ui/setupwizard/LanguageWizardPage.h
-    ui/setupwizard/PasteWizardPage.cpp
-    ui/setupwizard/PasteWizardPage.h
     ui/setupwizard/ThemeWizardPage.h
     ui/setupwizard/AutoJavaWizardPage.cpp
     ui/setupwizard/AutoJavaWizardPage.h

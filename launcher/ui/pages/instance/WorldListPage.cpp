@@ -36,6 +36,7 @@
  */
 
 #include "WorldListPage.h"
+#include "config/GlobalConfig.h"
 #include "minecraft/WorldList.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -126,17 +127,14 @@ void WorldListPage::openedImpl()
         ui->toolBar->removeAction(ui->actionJoin);
     }
 
-    const auto setting_name = QString("WideBarVisibility_%1").arg(id());
-    m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
-
-    ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
+    ui->toolBar->setVisibilityState(APPLICATION->config()->uiWideBarState.value(id()));
 }
 
 void WorldListPage::closedImpl()
 {
     m_worlds->stopWatching();
 
-    m_wide_bar_setting->set(QString::fromUtf8(ui->toolBar->getVisibilityState().toBase64()));
+    APPLICATION->config().update().uiWideBarState[id()] = ui->toolBar->getVisibilityState();
 }
 
 WorldListPage::~WorldListPage()
@@ -248,11 +246,11 @@ void WorldListPage::on_actionData_Packs_triggered()
 
     dialog->resize(static_cast<int>(std::max(0.5 * window()->width(), 400.0)),
                    static_cast<int>(std::max(0.75 * window()->height(), 400.0)));
-    dialog->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("DataPackDownloadGeometry").toByteArray()));
+    dialog->restoreGeometry(QByteArray::fromBase64(APPLICATION->config()->uiGeometry.value("DataPackDownload")));
 
     GenericPageProvider provider(dialog->windowTitle());
 
-    bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+    bool isIndexed = !APPLICATION->config()->modMetadataDisabled;
     m_datapackModel.reset(new DataPackFolderModel(folder, m_inst, isIndexed, true));
 
     provider.addPageCreator([this] { return new DataPackPage(m_inst, m_datapackModel.get(), this); });
@@ -278,7 +276,7 @@ void WorldListPage::on_actionData_Packs_triggered()
     dialog->setAttribute(Qt::WA_DeleteOnClose);
 
     connect(dialog, &QDialog::finished, this,
-            [dialog]() { APPLICATION->settings()->set("DataPackDownloadGeometry", dialog->saveGeometry().toBase64()); });
+            [dialog]() { APPLICATION->config().update().uiGeometry["DataPackDownload"] = dialog->saveGeometry(); });
 
     dialog->open();
 }

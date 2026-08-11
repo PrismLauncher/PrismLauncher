@@ -17,6 +17,7 @@
 
 #include "Exception.h"
 #include "FileSystem.h"
+#include "config/GlobalConfig.h"
 #include "Json.h"
 #include "modplatform/helpers/HashUtils.h"
 #include "net/ApiRequest.h"
@@ -26,7 +27,6 @@
 #include "net/NetJob.h"
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "BuildConfig.h"
 #include "tasks/Task.h"
 
@@ -74,12 +74,11 @@ class ParsingValidator : public Net::Validator {
 
 QUrl BaseEntity::url() const
 {
-    auto s = APPLICATION->settings();
-    QString metaOverride = s->get("MetaURLOverride").toString();
+    const QUrl& metaOverride = APPLICATION->config()->metaUrlOverride;
     if (metaOverride.isEmpty()) {
         return QUrl(BuildConfig.META_URL).resolved(localFilename());
     }
-    return QUrl(metaOverride).resolved(localFilename());
+    return metaOverride.resolved(localFilename());
 }
 
 Task::Ptr BaseEntity::loadTask(Net::Mode mode, bool forceReload)

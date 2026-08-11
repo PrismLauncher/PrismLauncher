@@ -16,7 +16,7 @@
 
 #include "Application.h"
 #include "BuildConfig.h"
-#include "settings/SettingsObject.h"
+#include "config/GlobalConfig.h"
 
 #include "modplatform/ResourceAPI.h"
 #include "net/ApiRequest.h"
@@ -34,7 +34,7 @@ ResourceModel::ResourceModel(const ResourceAPI* api) : m_api(api)
 {
     s_running_models.insert(this, true);
     if (APPLICATION_DYN) {
-        m_current_info_job.setMaxConcurrent(APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        m_current_info_job.setMaxConcurrent(APPLICATION->config()->numberOfConcurrentDownloads);
     }
 }
 

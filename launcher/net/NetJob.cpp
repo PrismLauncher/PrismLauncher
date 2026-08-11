@@ -37,11 +37,11 @@
 
 #include "NetJob.h"
 #include <QNetworkReply>
+#include "config/GlobalConfig.h"
 #include "net/Request.h"
 #include "tasks/ConcurrentTask.h"
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "ui/dialogs/NetworkJobFailedDialog.h"
 #endif
 
@@ -49,7 +49,7 @@ NetJob::NetJob(QString job_name, QNetworkAccessManager* network, int max_concurr
 {
 #if defined(LAUNCHER_APPLICATION)
     if (APPLICATION_DYN && max_concurrent < 0)
-        max_concurrent = APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt();
+        max_concurrent = APPLICATION->config()->numberOfConcurrentDownloads;
 #endif
     if (max_concurrent > 0)
         setMaxConcurrent(max_concurrent);
@@ -171,7 +171,7 @@ void NetJob::emitFailed(QString reason)
 {
 #if defined(LAUNCHER_APPLICATION)
 
-    if (APPLICATION_DYN && m_ask_retry && m_manual_try < APPLICATION->settings()->get("NumberOfManualRetries").toInt() && isOnline()) {
+    if (APPLICATION_DYN && m_ask_retry && m_manual_try < APPLICATION->config()->numberOfManualRetries && isOnline()) {
         m_manual_try++;
         auto failed = getFailedActions();
         auto dialog = new NetworkJobFailedDialog(objectName(), m_try, m_done.size(), failed.size(), nullptr);

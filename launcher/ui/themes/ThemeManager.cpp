@@ -26,6 +26,7 @@
 #include <QStyle>
 #include <QStyleFactory>
 #include "Exception.h"
+#include "config/GlobalConfig.h"
 #include "ui/themes/BrightTheme.h"
 #include "ui/themes/CatPack.h"
 #include "ui/themes/CustomTheme.h"
@@ -33,7 +34,6 @@
 #include "ui/themes/SystemTheme.h"
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 
 ThemeManager::ThemeManager()
 {
@@ -269,10 +269,10 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
 
 void ThemeManager::applyCurrentlySelectedTheme(bool initial)
 {
-    auto settings = APPLICATION->settings();
-    setIconTheme(settings->get("IconTheme").toString());
+    const auto& conf = *APPLICATION->config();
+    setIconTheme(conf.iconTheme);
     themeDebugLog() << "<> Icon theme set.";
-    auto applicationTheme = settings->get("ApplicationTheme").toString();
+    auto applicationTheme = conf.applicationTheme;
     if (applicationTheme == "") {
         applicationTheme = m_defaultStyle;
     }
@@ -282,7 +282,7 @@ void ThemeManager::applyCurrentlySelectedTheme(bool initial)
 
 QString ThemeManager::getCatPack(QString catName)
 {
-    auto catIter = m_catPacks.find(!catName.isEmpty() ? catName : APPLICATION->settings()->get("BackgroundCat").toString());
+    auto catIter = m_catPacks.find(!catName.isEmpty() ? catName : APPLICATION->config()->backgroundCat);
     if (catIter != m_catPacks.end()) {
         auto& catPack = catIter->second;
         themeDebugLog() << "applying catpack" << catPack->id();

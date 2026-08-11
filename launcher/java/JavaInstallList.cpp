@@ -41,10 +41,10 @@
 #include <algorithm>
 
 #include "Application.h"
+#include "config/GlobalConfig.h"
 #include "java/JavaChecker.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
-#include "settings/SettingsObject.h"
 #include "tasks/ConcurrentTask.h"
 
 JavaInstallList::JavaInstallList(QObject* parent, bool onlyManagedVersions)
@@ -161,7 +161,7 @@ void JavaListLoadTask::executeTask()
     JavaUtils ju;
     QList<QString> candidate_paths = m_only_managed_versions ? getPrismJavaBundle() : ju.FindJavaPaths();
 
-    ConcurrentTask::Ptr job(new ConcurrentTask("Java detection", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));
+    ConcurrentTask::Ptr job(new ConcurrentTask("Java detection", APPLICATION->config()->numberOfConcurrentTasks));
     m_job.reset(job);
     // HACK: as long as m_list is alive, we will be
     // however, for some reason sometimes we outlive m_list (which javaCheckerFinished accesses)

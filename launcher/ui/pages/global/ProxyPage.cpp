@@ -35,13 +35,13 @@
  */
 
 #include "ProxyPage.h"
+#include "config/GlobalConfig.h"
 #include "ui_ProxyPage.h"
 
 #include <QButtonGroup>
 #include <QTabBar>
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 
 ProxyPage::ProxyPage(QWidget* parent) : QWidget(parent), ui(new Ui::ProxyPage)
 {
@@ -77,7 +77,7 @@ void ProxyPage::proxyGroupChanged([[maybe_unused]] QAbstractButton* button)
 
 void ProxyPage::applySettings()
 {
-    auto s = APPLICATION->settings();
+    auto& conf = APPLICATION->config().update();
 
     // Proxy
     QString proxyType = "None";
@@ -90,20 +90,20 @@ void ProxyPage::applySettings()
     else if (ui->proxyHTTPBtn->isChecked())
         proxyType = "HTTP";
 
-    s->set("ProxyType", proxyType);
-    s->set("ProxyAddr", ui->proxyAddrEdit->text());
-    s->set("ProxyPort", ui->proxyPortEdit->value());
-    s->set("ProxyUser", ui->proxyUserEdit->text());
-    s->set("ProxyPass", ui->proxyPassEdit->text());
+    conf.proxyType = proxyType;
+    conf.proxyAddr = ui->proxyAddrEdit->text();
+    conf.proxyPort = ui->proxyPortEdit->value();
+    conf.proxyUser = ui->proxyUserEdit->text();
+    conf.proxyPass = ui->proxyPassEdit->text();
 
     APPLICATION->updateProxySettings(proxyType, ui->proxyAddrEdit->text(), ui->proxyPortEdit->value(), ui->proxyUserEdit->text(),
                                      ui->proxyPassEdit->text());
 }
 void ProxyPage::loadSettings()
 {
-    auto s = APPLICATION->settings();
+    const auto& conf = *APPLICATION->config();
     // Proxy
-    QString proxyType = s->get("ProxyType").toString();
+    QString proxyType = conf.proxyType;
     if (proxyType == "Default")
         ui->proxyDefaultBtn->setChecked(true);
     else if (proxyType == "None")
@@ -113,10 +113,10 @@ void ProxyPage::loadSettings()
     else if (proxyType == "HTTP")
         ui->proxyHTTPBtn->setChecked(true);
 
-    ui->proxyAddrEdit->setText(s->get("ProxyAddr").toString());
-    ui->proxyPortEdit->setValue(s->get("ProxyPort").value<uint16_t>());
-    ui->proxyUserEdit->setText(s->get("ProxyUser").toString());
-    ui->proxyPassEdit->setText(s->get("ProxyPass").toString());
+    ui->proxyAddrEdit->setText(conf.proxyAddr);
+    ui->proxyPortEdit->setValue(conf.proxyPort);
+    ui->proxyUserEdit->setText(conf.proxyUser);
+    ui->proxyPassEdit->setText(conf.proxyPass);
 }
 
 void ProxyPage::retranslate()
