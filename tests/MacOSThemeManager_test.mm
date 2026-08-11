@@ -11,6 +11,15 @@ QColor backgroundColor(NSWindow* window) {
     NSColor* color = [window.backgroundColor colorUsingColorSpace:NSColorSpace.sRGBColorSpace];
     return QColor::fromRgbF(color.redComponent, color.greenComponent, color.blueComponent, color.alphaComponent);
 }
+
+QColor backgroundColor(NSWindow* window, NSAppearanceName appearanceName) {
+    NSAppearance* appearance = [NSAppearance appearanceNamed:appearanceName];
+    __block QColor result;
+    [appearance performAsCurrentDrawingAppearance:^{
+      result = backgroundColor(window);
+    }];
+    return result;
+}
 }  // namespace
 
 class MacOSThemeManagerTest : public QObject {
@@ -18,6 +27,7 @@ class MacOSThemeManagerTest : public QObject {
 
    private slots:
     void observerUsesCurrentApplicationPalette();
+    void systemThemeUsesDynamicWindowBackground();
 };
 
 void MacOSThemeManagerTest::observerUsesCurrentApplicationPalette() {
@@ -26,7 +36,7 @@ void MacOSThemeManagerTest::observerUsesCurrentApplicationPalette() {
     widget.show();
     QVERIFY(QTest::qWaitForWindowExposed(&widget));
 
-    manager.setApplicationTheme("system", true);
+    manager.setApplicationTheme("bright", true);
 
     auto palette = QApplication::palette();
     const QColor currentWindowColor(12, 34, 56);
@@ -38,6 +48,22 @@ void MacOSThemeManagerTest::observerUsesCurrentApplicationPalette() {
     [[NSNotificationCenter defaultCenter] postNotificationName:NSWindowDidChangeOcclusionStateNotification object:window];
 
     QCOMPARE(backgroundColor(window), currentWindowColor);
+}
+
+void MacOSThemeManagerTest::systemThemeUsesDynamicWindowBackground() {
+    ThemeManager manager;
+    QWidget widget;
+    widget.show();
+    QVERIFY(QTest::qWaitForWindowExposed(&widget));
+
+    manager.setApplicationTheme("system", true);
+
+    NSView* view = reinterpret_cast<NSView*>(widget.winId());
+    NSWindow* window = view.window;
+    const QColor lightBackground = backgroundColor(window, NSAppearanceNameAqua);
+    const QColor darkBackground = backgroundColor(window, NSAppearanceNameDarkAqua);
+
+    QVERIFY(lightBackground != darkBackground);
 }
 
 QTEST_MAIN(MacOSThemeManagerTest)

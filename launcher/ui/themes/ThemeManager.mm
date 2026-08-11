@@ -21,7 +21,7 @@
 #include <AppKit/AppKit.h>
 #include <QApplication>
 
-void ThemeManager::setTitlebarColorOnMac(WId windowId, QColor color) {
+void ThemeManager::setTitlebarColorOnMac(WId windowId, QColor color, bool useSystemWindowBackground) {
     if (windowId == 0) {
         return;
     }
@@ -29,13 +29,15 @@ void ThemeManager::setTitlebarColorOnMac(WId windowId, QColor color) {
     NSView* view = (NSView*)windowId;
     NSWindow* window = [view window];
     window.titlebarAppearsTransparent = YES;
-    window.backgroundColor = [NSColor colorWithRed:color.redF() green:color.greenF() blue:color.blueF() alpha:color.alphaF()];
+    window.backgroundColor = useSystemWindowBackground
+                                 ? NSColor.windowBackgroundColor
+                                 : [NSColor colorWithRed:color.redF() green:color.greenF() blue:color.blueF() alpha:color.alphaF()];
 }
 
-void ThemeManager::setTitlebarColorOfAllWindowsOnMac(QColor color) {
+void ThemeManager::setTitlebarColorOfAllWindowsOnMac(QColor color, bool useSystemWindowBackground) {
     NSArray<NSWindow*>* windows = [NSApp windows];
     for (NSWindow* window : windows) {
-        setTitlebarColorOnMac((WId)window.contentView, color);
+        setTitlebarColorOnMac((WId)window.contentView, color, useSystemWindowBackground);
     }
 
     // We want to change the titlebar color of newly opened windows as well.
@@ -43,13 +45,14 @@ void ThemeManager::setTitlebarColorOfAllWindowsOnMac(QColor color) {
     // from occluded to visible, which also fires on open.
     NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
     stopSettingNewWindowColorsOnMac();
-    m_windowTitlebarObserver = [center addObserverForName:NSWindowDidChangeOcclusionStateNotification
-                                                   object:nil
-                                                    queue:[NSOperationQueue mainQueue]
-                                               usingBlock:^(NSNotification* notification) {
-                                                 NSWindow* window = notification.object;
-                                                 setTitlebarColorOnMac((WId)window.contentView, qApp->palette().window().color());
-                                               }];
+    m_windowTitlebarObserver =
+        [center addObserverForName:NSWindowDidChangeOcclusionStateNotification
+                            object:nil
+                             queue:[NSOperationQueue mainQueue]
+                        usingBlock:^(NSNotification* notification) {
+                          NSWindow* window = notification.object;
+                          setTitlebarColorOnMac((WId)window.contentView, qApp->palette().window().color(), useSystemWindowBackground);
+                        }];
 }
 
 void ThemeManager::stopSettingNewWindowColorsOnMac() {
