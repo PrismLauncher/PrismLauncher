@@ -47,10 +47,12 @@
 #include "Application.h"
 #include "Json.h"
 #include "launch/LaunchTask.h"
+#include "settings/INISettingsObject.h"
 #include "settings/Setting.h"
 
 #include "BuildConfig.h"
 #include "Commandline.h"
+#include "FileSystem.h"
 
 int getConsoleMaxLines(SettingsObject* settings)
 {
@@ -76,12 +78,30 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
     m_settings->registerSetting("iconKey", "default");
     m_settings->registerSetting("notes", "");
 
-    m_settings->registerSetting("lastLaunchTime", 0);
-    m_settings->registerSetting("totalTimePlayed", 0);
-    if (m_settings->get("totalTimePlayed").toLongLong() < 0) {
-        m_settings->reset("totalTimePlayed");
+    m_metadataSettings = std::make_unique<INISettingsObject>(FS::PathCombine(m_rootDir, "metadata.cfg"));
+    m_metadataSettings->registerSetting("lastLaunchTime", 0);
+    m_metadataSettings->registerSetting("totalTimePlayed", 0);
+    if (m_metadataSettings->get("totalTimePlayed").toLongLong() < 0) {
+        m_metadataSettings->reset("totalTimePlayed");
     }
-    m_settings->registerSetting("lastTimePlayed", 0);
+    m_metadataSettings->registerSetting("lastTimePlayed", 0);
+
+    // One time migration
+    auto metadataMigrated = m_metadataSettings->registerSetting("PlaytimeMetadataMigrated", false);
+    if (!metadataMigrated->get().toBool()) {
+        m_settings->registerSetting("lastLaunchTime", 0);
+        m_settings->registerSetting("totalTimePlayed", 0);
+        m_settings->registerSetting("lastTimePlayed", 0);
+
+        m_metadataSettings->set("totalTimePlayed", m_settings->get("totalTimePlayed").toLongLong());
+        m_metadataSettings->set("lastLaunchTime", m_settings->get("lastLaunchTime").toLongLong());
+        m_metadataSettings->set("lastTimePlayed", m_settings->get("lastTimePlayed").toLongLong());
+        m_metadataSettings->set("PlaytimeMetadataMigrated", true);
+
+        m_settings->reset("lastLaunchTime");
+        m_settings->reset("totalTimePlayed");
+        m_settings->reset("lastTimePlayed");
+    }
 
     m_settings->registerSetting("linkedInstances", "[]");
     m_settings->registerSetting("shortcuts", QString());
@@ -293,9 +313,9 @@ void BaseInstance::setMinecraftRunning(bool running)
         QDateTime timeEnded = QDateTime::currentDateTime();
         qint64 secondsPlayed = m_timeStarted.secsTo(timeEnded);
 
-        qint64 current = settings()->get("totalTimePlayed").toLongLong();
-        settings()->set("totalTimePlayed", current + secondsPlayed);
-        settings()->set("lastTimePlayed", secondsPlayed);
+        qint64 current = m_metadataSettings->get("totalTimePlayed").toLongLong();
+        m_metadataSettings->set("totalTimePlayed", current + secondsPlayed);
+        m_metadataSettings->set("lastTimePlayed", secondsPlayed);
 
         if (countTimePlayed()) {
             qint64 globalTotal = APPLICATION->playtimeSettings()->get("TotalPlayTime").toLongLong();
@@ -308,7 +328,7 @@ void BaseInstance::setMinecraftRunning(bool running)
 
 int64_t BaseInstance::totalTimePlayed() const
 {
-    qint64 current = m_settings->get("totalTimePlayed").toLongLong();
+    qint64 current = m_metadataSettings->get("totalTimePlayed").toLongLong();
     if (m_isRunning) {
         QDateTime timeNow = QDateTime::currentDateTime();
         return current + m_timeStarted.secsTo(timeNow);
@@ -322,7 +342,7 @@ int64_t BaseInstance::lastTimePlayed() const
         QDateTime timeNow = QDateTime::currentDateTime();
         return m_timeStarted.secsTo(timeNow);
     }
-    return m_settings->get("lastTimePlayed").toLongLong();
+    return m_metadataSettings->get("lastTimePlayed").toLongLong();
 }
 
 bool BaseInstance::countTimePlayed() const
@@ -332,8 +352,8 @@ bool BaseInstance::countTimePlayed() const
 
 void BaseInstance::resetTimePlayed()
 {
-    settings()->reset("totalTimePlayed");
-    settings()->reset("lastTimePlayed");
+    m_metadataSettings->reset("totalTimePlayed");
+    m_metadataSettings->reset("lastTimePlayed");
 }
 
 QString BaseInstance::instanceType() const
@@ -365,13 +385,13 @@ bool BaseInstance::reloadSettings()
 
 qint64 BaseInstance::lastLaunch() const
 {
-    return m_settings->get("lastLaunchTime").value<qint64>();
+    return m_metadataSettings->get("lastLaunchTime").value<qint64>();
 }
 
 void BaseInstance::setLastLaunch(qint64 val)
 {
     // FIXME: if no change, do not set. setting involves saving a file.
-    m_settings->set("lastLaunchTime", val);
+    m_metadataSettings->set("lastLaunchTime", val);
     emit propertiesChanged();
 }
 

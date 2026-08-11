@@ -304,6 +304,7 @@ class BaseInstance : public QObject {
    protected: /* data */
     QString m_rootDir;
     std::unique_ptr<SettingsObject> m_settings;
+    std::unique_ptr<SettingsObject> m_metadataSettings;
     // InstanceFlags m_flags;
     bool m_isRunning = false;
     std::unique_ptr<LaunchTask> m_launchProcess;
