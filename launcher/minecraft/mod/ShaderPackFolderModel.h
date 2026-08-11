@@ -23,6 +23,8 @@ class ShaderPackFolderModel : public ResourceFolderModel {
 
     QDir indexDir() const override { return m_dir; }
 
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+
     [[nodiscard]] bool allowsMultipleVersions() const override { return true; }
 
     Task* createPreUpdateTask() override;
