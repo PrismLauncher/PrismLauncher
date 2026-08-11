@@ -99,6 +99,7 @@ class LogPage : public QWidget, public BasePage {
     void modelStateToUI();
     void UIToModelState();
     void setInstanceLaunchTaskChanged(LaunchTask* proc, bool initial);
+    QString launchTaskDisplayName(const LaunchTask* task) const;
     int sessionIndex(quint64 sessionId) const;
 
    private:

@@ -23,6 +23,8 @@ struct AuthSession {
     QString uuid;
     // 'msa' or 'offline', depending on account type
     QString user_type;
+    // user-facing account type for launch session labels
+    QString account_type;
     // the actual launch mode for this session
     LaunchMode launchMode;
 };

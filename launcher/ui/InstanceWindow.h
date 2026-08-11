@@ -76,7 +76,6 @@ class InstanceWindow : public QMainWindow, public BasePageContainer {
     void instanceLaunchTaskRemoved(quint64 sessionId);
     void selectedLaunchTaskChanged(LaunchTask* proc);
     void runningStateChanged(bool running);
-    void restartInstance();
     void on_instanceStatusChanged(BaseInstance::Status, BaseInstance::Status newStatus);
 
    protected:
@@ -89,10 +88,8 @@ class InstanceWindow : public QMainWindow, public BasePageContainer {
     LaunchTask* m_proc = nullptr;
     MinecraftInstance* m_instance;
     bool m_doNotSave = false;
-    bool m_restartQueued = false;
     PageContainer* m_container = nullptr;
     QPushButton* m_closeButton = nullptr;
     QToolButton* m_launchButton = nullptr;
-    QPushButton* m_restartButton = nullptr;
     QPushButton* m_killButton = nullptr;
 };

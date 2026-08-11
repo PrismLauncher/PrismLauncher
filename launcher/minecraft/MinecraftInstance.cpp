@@ -1255,6 +1255,7 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     if (m_settings->get("QuitAfterGameStop").toBool()) {
         process->appendStep(makeShared<QuitAfterGameStop>(pptr));
     }
+    process->setAccountInfo(session->player_name, session->account_type);
     return adoptLaunchTask(std::move(process));
 }
 

@@ -151,7 +151,7 @@ LogPage::LogPage(BaseInstance* instance, QWidget* parent) : QWidget(parent), ui(
     {
         const auto tasks = m_instance->launchTasks();
         for (auto* task : tasks) {
-            ui->sessionCombo->addItem(tr("Minecraft #%1").arg(task->sessionId()), QVariant::fromValue<qulonglong>(task->sessionId()));
+            ui->sessionCombo->addItem(launchTaskDisplayName(task), QVariant::fromValue<qulonglong>(task->sessionId()));
         }
         if (!tasks.isEmpty()) {
             ui->sessionCombo->setCurrentIndex(tasks.size() - 1);
@@ -236,6 +236,16 @@ int LogPage::sessionIndex(quint64 sessionId) const
     return -1;
 }
 
+QString LogPage::launchTaskDisplayName(const LaunchTask* task) const
+{
+    auto name = tr("Minecraft #%1").arg(task->sessionId());
+    if (!task->accountName().isEmpty())
+        name += QString(" %1").arg(task->accountName());
+    if (!task->accountType().isEmpty())
+        name += QString(" [%1]").arg(task->accountType());
+    return name;
+}
+
 void LogPage::on_sessionCombo_currentIndexChanged(int index)
 {
     auto* task = index < 0 ? nullptr : m_instance->launchTask(ui->sessionCombo->itemData(index).toULongLong());
@@ -246,7 +256,7 @@ void LogPage::on_sessionCombo_currentIndexChanged(int index)
 
 void LogPage::onInstanceLaunchTaskAdded(LaunchTask* proc)
 {
-    ui->sessionCombo->addItem(tr("Minecraft #%1").arg(proc->sessionId()), QVariant::fromValue<qulonglong>(proc->sessionId()));
+    ui->sessionCombo->addItem(launchTaskDisplayName(proc), QVariant::fromValue<qulonglong>(proc->sessionId()));
     ui->sessionLabel->show();
     ui->sessionCombo->show();
     ui->sessionCombo->setCurrentIndex(ui->sessionCombo->count() - 1);

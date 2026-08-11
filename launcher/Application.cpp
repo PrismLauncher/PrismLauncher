@@ -1566,11 +1566,45 @@ bool Application::launch(MinecraftInstance* instance,
             warning.setInformativeText(
                 tr("Both Minecraft processes will use the same game folder and the same config, options, logs, and saves. "
                    "Running them together can cause conflicting writes and data loss."));
+            const auto activeSessions = instance->activeLaunchTasks();
             auto* launchButton = warning.addButton(tr("Launch Anyway"), QMessageBox::AcceptRole);
+            QPushButton* restartButton = nullptr;
+            if (activeSessions.size() == 1)
+                restartButton = warning.addButton(tr("Restart Instead"), QMessageBox::ActionRole);
             warning.addButton(tr("Cancel"), QMessageBox::RejectRole);
             QCheckBox dontShowAgain(tr("Don't show this warning again"), &warning);
             warning.setCheckBox(&dontShowAgain);
             warning.exec();
+            if (restartButton && warning.clickedButton() == restartButton) {
+                auto* session = activeSessions.first();
+                LaunchController* controller = nullptr;
+                {
+                    QMutexLocker locker(&m_instanceExtrasMutex);
+                    auto& controllers = m_instanceExtras[instance->id()].controllers;
+                    const auto iter = std::find_if(controllers.begin(), controllers.end(),
+                                                   [session](const auto& candidate) { return candidate->launcher() == session; });
+                    if (iter != controllers.end())
+                        controller = iter->get();
+                }
+                if (!controller)
+                    return false;
+
+                auto restartConnection = std::make_shared<QMetaObject::Connection>();
+                *restartConnection = connect(controller, &Task::finished, this,
+                                             [this, restartConnection, instance, mode, targetToJoin, accountToUse, offlineName] {
+                                                 disconnect(*restartConnection);
+                                                 QMetaObject::invokeMethod(
+                                                     this,
+                                                     [this, instance, mode, targetToJoin, accountToUse, offlineName] {
+                                                         launch(instance, mode, targetToJoin, accountToUse, offlineName);
+                                                     },
+                                                     Qt::QueuedConnection);
+                                             });
+                if (kill(instance, session))
+                    return true;
+                disconnect(*restartConnection);
+                return false;
+            }
             if (warning.clickedButton() != launchButton)
                 return false;
             if (dontShowAgain.isChecked())

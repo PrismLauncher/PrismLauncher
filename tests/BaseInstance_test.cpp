@@ -115,6 +115,15 @@ class BaseInstanceTest : public QObject {
         QVERIFY(instance.totalTimePlayed() <= 2);
         QCOMPARE(instance.lastTimePlayed(), instance.totalTimePlayed());
     }
+
+    void launchTaskStoresAccountLabel()
+    {
+        TestLaunchTask task;
+        task.setAccountInfo("Player", "Microsoft");
+
+        QCOMPARE(task.accountName(), QString("Player"));
+        QCOMPARE(task.accountType(), QString("Microsoft"));
+    }
 };
 
 QTEST_GUILESS_MAIN(BaseInstanceTest)
