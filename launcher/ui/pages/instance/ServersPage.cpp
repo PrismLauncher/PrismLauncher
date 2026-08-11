@@ -37,6 +37,7 @@
 
 #include "ServersPage.h"
 #include "Application.h"
+#include "config/GlobalConfig.h"
 #include "ServerPingTask.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ServersPage.h"
@@ -433,7 +434,7 @@ class ServersModel : public QAbstractListModel {
         }
 
         m_currentQueryTask = ConcurrentTask::Ptr(
-            new ConcurrentTask("Query servers status", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));
+            new ConcurrentTask("Query servers status", APPLICATION->config()->numberOfConcurrentTasks));
         int row = 0;
         for (Server& server : m_servers) {
             // reset current players
@@ -700,10 +701,7 @@ void ServersPage::openedImpl()
 {
     m_model->observe();
 
-    const auto setting_name = QString("WideBarVisibility_%1").arg(id());
-    m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
-
-    ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
+    ui->toolBar->setVisibilityState(APPLICATION->config()->uiWideBarState.value(id()));
 
     // ping servers
     m_model->queryServersStatus();
@@ -713,7 +711,7 @@ void ServersPage::closedImpl()
 {
     m_model->unobserve();
 
-    m_wide_bar_setting->set(QString::fromUtf8(ui->toolBar->getVisibilityState().toBase64()));
+    APPLICATION->config().update().uiWideBarState[id()] = ui->toolBar->getVisibilityState();
 }
 
 void ServersPage::on_actionAdd_triggered()

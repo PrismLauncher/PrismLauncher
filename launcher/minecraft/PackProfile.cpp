@@ -55,6 +55,7 @@
 #include "Exception.h"
 #include "FileSystem.h"
 #include "Json.h"
+#include "config/InstanceConfig.h"
 #include "meta/Index.h"
 #include "meta/JsonFormat.h"
 #include "minecraft/Component.h"
@@ -69,8 +70,6 @@
 
 #include "minecraft/Logging.h"
 
-#include "settings/Setting.h"
-
 PackProfile::PackProfile(MinecraftInstance* instance)
 {
     d = std::make_unique<PackProfileData>();
@@ -81,8 +80,11 @@ PackProfile::PackProfile(MinecraftInstance* instance)
     connect(d->m_instance, &BaseInstance::runningStatusChanged, this, &PackProfile::disableInteraction);
     connect(&d->m_saveTimer, &QTimer::timeout, this, &PackProfile::save_internal);
     QTimer::singleShot(0, this, [this] {
-        auto latestVersion = d->m_instance->settings()->getSetting("UseLatestMinecraftVersion");
-        connect(latestVersion.get(), &Setting::SettingChanged, this, [this](const Setting&, const QVariant&) {
+        auto latestVersion = d->m_instance->config()->useLatestMinecraftVersionType;
+        connect(&d->m_instance->config(), &InstanceConfigHolder::updated, this, [this, &conf = d->m_instance->config()]() {
+            if (conf->useLatestMinecraftVersionType.has_value() == conf.prev()->useLatestMinecraftVersionType.has_value()) {
+                return;
+            }
             for (int i = 0; i < d->components.size(); i++) {
                 if (d->components.at(i)->getID() == "net.minecraft") {
                     emit dataChanged(createIndex(i, 0), createIndex(i, columnCount(QModelIndex()) - 1));
@@ -554,7 +556,7 @@ QVariant PackProfile::data(const QModelIndex& index, int role) const
                     if (patch->isCustom()) {
                         return QString("%1 (Custom)").arg(patch->getVersion());
                     }
-                    if (patch->getID() == "net.minecraft" && d->m_instance->settings()->get("UseLatestMinecraftVersion").toBool()) {
+                    if (patch->getID() == "net.minecraft" && d->m_instance->config()->useLatestMinecraftVersionType.has_value()) {
                         return QString("%1 (auto-update)").arg(patch->getVersion());
                     }
                     return patch->getVersion();

@@ -37,6 +37,7 @@
  */
 
 #include "LauncherPage.h"
+#include "config/GlobalConfig.h"
 #include "ui_LauncherPage.h"
 
 #include <QDir>
@@ -49,7 +50,6 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "DesktopServices.h"
-#include "settings/SettingsObject.h"
 #include "ui/themes/ITheme.h"
 #include "ui/themes/ThemeManager.h"
 #include "updater/ExternalUpdater.h"
@@ -221,7 +221,7 @@ void LauncherPage::on_metadataEnableBtn_clicked()
 
 void LauncherPage::applySettings()
 {
-    auto* s = APPLICATION->settings();
+    auto& conf = APPLICATION->config().update();
 
     // Updates
     if (APPLICATION->updater()) {
@@ -229,101 +229,101 @@ void LauncherPage::applySettings()
         APPLICATION->updater()->setUpdateCheckInterval(ui->updateIntervalSpinBox->value() * 3600);
     }
 
-    s->set("MenuBarInsteadOfToolBar", ui->preferMenuBarCheckBox->isChecked());
+    conf.menuBarInsteadOfToolBar = ui->preferMenuBarCheckBox->isChecked();
 
-    s->set("NumberOfConcurrentTasks", ui->numberOfConcurrentTasksSpinBox->value());
-    s->set("NumberOfConcurrentDownloads", ui->numberOfConcurrentDownloadsSpinBox->value());
-    s->set("NumberOfManualRetries", ui->numberOfManualRetriesSpinBox->value());
-    s->set("RequestTimeout", ui->timeoutSecondsSpinBox->value());
+    conf.numberOfConcurrentTasks = ui->numberOfConcurrentTasksSpinBox->value();
+    conf.numberOfConcurrentDownloads = ui->numberOfConcurrentDownloadsSpinBox->value();
+    conf.numberOfManualRetries = ui->numberOfManualRetriesSpinBox->value();
+    conf.requestTimeout = ui->timeoutSecondsSpinBox->value();
 
     // Console settings
-    s->set("ConsoleMaxLines", ui->lineLimitSpinBox->value());
-    s->set("ConsoleOverflowStop", ui->checkStopLogging->checkState() != Qt::Unchecked);
+    conf.consoleMaxLines = ui->lineLimitSpinBox->value();
+    conf.consoleOverflowStop = ui->checkStopLogging->checkState() != Qt::Unchecked;
 
     // Folders
     // TODO: Offer to move instances to new instance folder.
-    s->set("InstanceDir", ui->instDirTextBox->text());
+    conf.instanceDir = ui->instDirTextBox->text();
     {
         QStringList additionalDirs;
         for (int i = 0; i < ui->additionalInstDirsList->count(); ++i) {
             additionalDirs << ui->additionalInstDirsList->item(i)->text();
         }
-        s->set("AdditionalInstanceDirs", additionalDirs);
+        conf.additionalInstanceDirs = additionalDirs;
     }
-    s->set("CentralModsDir", ui->modsDirTextBox->text());
-    s->set("IconsDir", ui->iconsDirTextBox->text());
-    s->set("DownloadsDir", ui->downloadsDirTextBox->text());
-    s->set("SkinsDir", ui->skinsDirTextBox->text());
-    s->set("JavaDir", ui->javaDirTextBox->text());
-    s->set("DownloadsDirWatchRecursive", ui->downloadsDirWatchRecursiveCheckBox->isChecked());
-    s->set("MoveModsFromDownloadsDir", ui->downloadsDirMoveCheckBox->isChecked());
+    conf.centralModsDir = ui->modsDirTextBox->text();
+    conf.iconsDir = ui->iconsDirTextBox->text();
+    conf.downloadsDir = ui->downloadsDirTextBox->text();
+    conf.skinsDir = ui->skinsDirTextBox->text();
+    conf.javaDir = ui->javaDirTextBox->text();
+    conf.downloadsDirWatchRecursive = ui->downloadsDirWatchRecursiveCheckBox->isChecked();
+    conf.moveModsFromDownloadsDir = ui->downloadsDirMoveCheckBox->isChecked();
 
     // Instance
     auto sortMode = (InstSortMode)ui->sortingModeGroup->checkedId();
     switch (sortMode) {
         case Sort_LastLaunch:
-            s->set("InstSortMode", "LastLaunch");
+            conf.instSortMode = "LastLaunch";
             break;
         case Sort_Playtime:
-            s->set("InstSortMode", "Playtime");
+            conf.instSortMode = "Playtime";
             break;
         case Sort_Name:
         default:
-            s->set("InstSortMode", "Name");
+            conf.instSortMode = "Name";
             break;
     }
 
     if (ui->askToRenameDirBtn->isChecked()) {
-        s->set("InstRenamingMode", "AskEverytime");
+        conf.instRenamingMode = "AskEverytime";
     } else if (ui->alwaysRenameDirBtn->isChecked()) {
-        s->set("InstRenamingMode", "PhysicalDir");
+        conf.instRenamingMode = "PhysicalDir";
     } else if (ui->neverRenameDirBtn->isChecked()) {
-        s->set("InstRenamingMode", "MetadataOnly");
+        conf.instRenamingMode = "MetadataOnly";
     }
 
-    s->set("EditInstanceOnDoubleClick", ui->editInstanceOnDoubleClick->isChecked());
+    conf.editInstanceOnDoubleClick = ui->editInstanceOnDoubleClick->isChecked();
 
     // Mods
-    s->set("ModMetadataDisabled", !ui->metadataEnableBtn->isChecked());
-    s->set("ModDependenciesDisabled", !ui->dependenciesEnableBtn->isChecked());
-    s->set("ShowModIncompat", ui->showModIncompatCheckBox->isChecked());
-    s->set("SkipModpackUpdatePrompt", !ui->modpackUpdatePromptBtn->isChecked());
-    s->set("DownloadGameFilesDuringInstanceCreation", ui->downloadGameFilesBtn->isChecked());
+    conf.modMetadataDisabled = !ui->metadataEnableBtn->isChecked();
+    conf.modDependenciesDisabled = !ui->dependenciesEnableBtn->isChecked();
+    conf.showModIncompat = ui->showModIncompatCheckBox->isChecked();
+    conf.skipModpackUpdatePrompt = !ui->modpackUpdatePromptBtn->isChecked();
+    conf.downloadGameFilesDuringInstanceCreation = ui->downloadGameFilesBtn->isChecked();
 }
 void LauncherPage::loadSettings()
 {
-    auto* s = APPLICATION->settings();
+    const auto& conf = *APPLICATION->config();
     // Updates
     if (APPLICATION->updater()) {
         ui->autoUpdateCheckBox->setChecked(APPLICATION->updater()->getAutomaticallyChecksForUpdates());
         ui->updateIntervalSpinBox->setValue(APPLICATION->updater()->getUpdateCheckInterval() / 3600);
     }
 
-    ui->preferMenuBarCheckBox->setChecked(s->get("MenuBarInsteadOfToolBar").toBool());
+    ui->preferMenuBarCheckBox->setChecked(conf.menuBarInsteadOfToolBar);
 
-    ui->numberOfConcurrentTasksSpinBox->setValue(s->get("NumberOfConcurrentTasks").toInt());
-    ui->numberOfConcurrentDownloadsSpinBox->setValue(s->get("NumberOfConcurrentDownloads").toInt());
-    ui->numberOfManualRetriesSpinBox->setValue(s->get("NumberOfManualRetries").toInt());
-    ui->timeoutSecondsSpinBox->setValue(s->get("RequestTimeout").toInt());
+    ui->numberOfConcurrentTasksSpinBox->setValue(conf.numberOfConcurrentTasks);
+    ui->numberOfConcurrentDownloadsSpinBox->setValue(conf.numberOfConcurrentDownloads);
+    ui->numberOfManualRetriesSpinBox->setValue(conf.numberOfManualRetries);
+    ui->timeoutSecondsSpinBox->setValue(conf.requestTimeout);
 
     // Console settings
-    ui->lineLimitSpinBox->setValue(s->get("ConsoleMaxLines").toInt());
-    ui->checkStopLogging->setChecked(s->get("ConsoleOverflowStop").toBool());
+    ui->lineLimitSpinBox->setValue(conf.consoleMaxLines);
+    ui->checkStopLogging->setChecked(conf.consoleOverflowStop);
 
     // Folders
-    ui->instDirTextBox->setText(s->get("InstanceDir").toString());
+    ui->instDirTextBox->setText(conf.instanceDir);
     ui->additionalInstDirsList->clear();
-    ui->additionalInstDirsList->addItems(s->get("AdditionalInstanceDirs").toStringList());
-    ui->modsDirTextBox->setText(s->get("CentralModsDir").toString());
-    ui->iconsDirTextBox->setText(s->get("IconsDir").toString());
-    ui->downloadsDirTextBox->setText(s->get("DownloadsDir").toString());
-    ui->skinsDirTextBox->setText(s->get("SkinsDir").toString());
-    ui->javaDirTextBox->setText(s->get("JavaDir").toString());
-    ui->downloadsDirWatchRecursiveCheckBox->setChecked(s->get("DownloadsDirWatchRecursive").toBool());
-    ui->downloadsDirMoveCheckBox->setChecked(s->get("MoveModsFromDownloadsDir").toBool());
+    ui->additionalInstDirsList->addItems(conf.additionalInstanceDirs);
+    ui->modsDirTextBox->setText(conf.centralModsDir);
+    ui->iconsDirTextBox->setText(conf.iconsDir);
+    ui->downloadsDirTextBox->setText(conf.downloadsDir);
+    ui->skinsDirTextBox->setText(conf.skinsDir);
+    ui->javaDirTextBox->setText(conf.javaDir);
+    ui->downloadsDirWatchRecursiveCheckBox->setChecked(conf.downloadsDirWatchRecursive);
+    ui->downloadsDirMoveCheckBox->setChecked(conf.moveModsFromDownloadsDir);
 
     // Instance
-    QString sortMode = s->get("InstSortMode").toString();
+    QString sortMode = conf.instSortMode;
     if (sortMode == "LastLaunch") {
         ui->sortLastLaunchedBtn->setChecked(true);
     } else if (sortMode == "Playtime") {
@@ -332,20 +332,20 @@ void LauncherPage::loadSettings()
         ui->sortByNameBtn->setChecked(true);
     }
 
-    ui->editInstanceOnDoubleClick->setChecked(s->get("EditInstanceOnDoubleClick").toBool());
+    ui->editInstanceOnDoubleClick->setChecked(conf.editInstanceOnDoubleClick);
 
-    QString renamingMode = s->get("InstRenamingMode").toString();
+    QString renamingMode = conf.instRenamingMode;
     ui->askToRenameDirBtn->setChecked(renamingMode == "AskEverytime");
     ui->alwaysRenameDirBtn->setChecked(renamingMode == "PhysicalDir");
     ui->neverRenameDirBtn->setChecked(renamingMode == "MetadataOnly");
 
     // Mods
-    ui->metadataEnableBtn->setChecked(!s->get("ModMetadataDisabled").toBool());
+    ui->metadataEnableBtn->setChecked(!conf.modMetadataDisabled);
     ui->metadataWarningLabel->setHidden(ui->metadataEnableBtn->isChecked());
-    ui->dependenciesEnableBtn->setChecked(!s->get("ModDependenciesDisabled").toBool());
-    ui->showModIncompatCheckBox->setChecked(s->get("ShowModIncompat").toBool());
-    ui->modpackUpdatePromptBtn->setChecked(!s->get("SkipModpackUpdatePrompt").toBool());
-    ui->downloadGameFilesBtn->setChecked(s->get("DownloadGameFilesDuringInstanceCreation").toBool());
+    ui->dependenciesEnableBtn->setChecked(!conf.modDependenciesDisabled);
+    ui->showModIncompatCheckBox->setChecked(conf.showModIncompat);
+    ui->modpackUpdatePromptBtn->setChecked(!conf.skipModpackUpdatePrompt);
+    ui->downloadGameFilesBtn->setChecked(conf.downloadGameFilesDuringInstanceCreation);
 }
 
 void LauncherPage::retranslate()

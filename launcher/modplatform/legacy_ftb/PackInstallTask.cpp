@@ -41,10 +41,10 @@
 #include "BaseInstance.h"
 #include "FileSystem.h"
 #include "MMCZip.h"
+#include "config/InstanceConfig.h"
 #include "minecraft/GradleSpecifier.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "settings/INISettingsObject.h"
 
 #include "Application.h"
 #include "BuildConfig.h"
@@ -131,11 +131,8 @@ void PackInstallTask::install()
     }
 
     QString instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    m_instance =
-        std::make_unique<MinecraftInstance>(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
+    m_instance = std::make_unique<MinecraftInstance>(std::make_unique<InstanceConfigHolder>(instanceConfigPath), m_stagingPath);
     {
-        SettingsObject::Lock const lock(m_instance->settings());
-
         auto* components = m_instance->getPackProfile();
         components->buildingFromScratch();
         components->setComponentVersion("net.minecraft", m_pack.mcVersion, true);
@@ -204,6 +201,8 @@ void PackInstallTask::install()
         }
         m_instance->setIconKey(m_instIcon);
     }
+
+    m_instance->config().save();
 
     downloadFiles(m_instance.get());
 }

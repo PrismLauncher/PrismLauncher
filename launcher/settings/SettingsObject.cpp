@@ -34,13 +34,15 @@ SettingsObject::~SettingsObject()
     m_settings.clear();
 }
 
-std::shared_ptr<Setting> SettingsObject::registerOverride(std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate)
+std::shared_ptr<Setting> SettingsObject::registerOverride(QStringList synonyms,
+                                                          std::function<QVariant()> original,
+                                                          std::shared_ptr<Setting> gate)
 {
-    if (contains(original->id())) {
-        qCritical() << QString("Failed to register setting %1. ID already exists.").arg(original->id());
+    if (contains(synonyms.first())) {
+        qCritical() << QString("Failed to register setting %1. ID already exists.").arg(synonyms.first());
         return nullptr;  // Fail
     }
-    auto override = std::make_shared<OverrideSetting>(original, gate);
+    auto override = std::make_shared<OverrideSetting>(std::move(synonyms), std::move(original), std::move(gate));
     override->m_storage = this;
     connectSignals(*override);
     m_settings.insert(override->id(), override);

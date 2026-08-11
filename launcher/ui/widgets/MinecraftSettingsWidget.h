@@ -40,6 +40,8 @@
 #include "JavaSettingsWidget.h"
 #include "minecraft/MinecraftInstance.h"
 
+struct InstanceConfig;
+
 namespace Ui {
 class MinecraftSettingsWidget;
 }
@@ -53,8 +55,13 @@ class MinecraftSettingsWidget : public QWidget {
     void saveSettings();
 
    private:
+    template <typename T>
+    void loadSettingsFrom(const T& conf, const GlobalConfig& global);
+    template <typename T>
+    void saveSettingsTo(T& conf) const;
+
     void openGlobalSettings();
-    void updateAccountsMenu(SettingsObject& settings);
+    void updateAccountsMenu(const InstanceConfig& conf);
     bool isQuickPlaySupported();
    private slots:
     void saveSelectedLoaders();

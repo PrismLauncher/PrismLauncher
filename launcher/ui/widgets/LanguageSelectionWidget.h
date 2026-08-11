@@ -34,7 +34,7 @@ class LanguageSelectionWidget : public QWidget {
 
    protected slots:
     void languageRowChanged(const QModelIndex& current, const QModelIndex& previous);
-    void languageSettingChanged(const Setting&, const QVariant&);
+    void languageSettingChanged();
 
    private:
     QVBoxLayout* verticalLayout = nullptr;

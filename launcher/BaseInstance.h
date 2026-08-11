@@ -48,31 +48,16 @@
 #include <cstdint>
 #include "QObjectPtr.h"
 
-#include "settings/SettingsObject.h"
-
 #include "minecraft/auth/MinecraftAccount.h"
 
 #include "RuntimeContext.h"
 #include "minecraft/launch/MinecraftTarget.h"
 
+class InstanceConfigHolder;
 class QDir;
 class Task;
 class LaunchTask;
 class BaseInstance;
-
-/// Shortcut saving target representations
-enum class ShortcutTarget : std::uint8_t { Desktop, Applications, Other };
-
-/// Shortcut data representation
-struct ShortcutData {
-    QString name;
-    QString filePath;
-    ShortcutTarget target = ShortcutTarget::Other;
-};
-
-/// Console settings
-int getConsoleMaxLines(SettingsObject* settings);
-bool shouldStopOnConsoleOverflow(SettingsObject* settings);
 
 /*!
  * \brief Base class for instances.
@@ -86,7 +71,7 @@ class BaseInstance : public QObject {
     Q_OBJECT
    protected:
     /// no-touchy!
-    BaseInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, QString rootDir);
+    BaseInstance(std::unique_ptr<InstanceConfigHolder> conf, QString rootDir);
 
    public: /* types */
     enum class Status : std::uint8_t {
@@ -111,7 +96,7 @@ class BaseInstance : public QObject {
     /// The instance's ID. The ID SHALL be determined by LAUNCHER internally. The ID IS guaranteed to
     /// be unique.
     QString id() const;
-    QString uuid() const { return m_uuid; }
+    QString uuid() const;
     void regenerateUuid();
 
     void setMinecraftRunning(bool running);
@@ -119,11 +104,7 @@ class BaseInstance : public QObject {
     bool isRunning() const;
     int64_t totalTimePlayed() const;
     int64_t lastTimePlayed() const;
-    bool countTimePlayed() const;
     void resetTimePlayed();
-
-    /// get the type of this instance
-    QString instanceType() const;
 
     /// Path to the instance's root directory.
     QString instanceRoot() const;
@@ -140,60 +121,22 @@ class BaseInstance : public QObject {
     /// Sync name and rename instance dir accordingly; returns true if successful
     bool syncInstanceDirName(const QString& newRoot) const;
 
-    /// Register a created shortcut
-    void registerShortcut(const ShortcutData& data);
-    QList<ShortcutData> shortcuts() const;
-    void setShortcuts(const QList<ShortcutData>& shortcuts);
-
     /// Value used for instance window titles
     QString windowTitle() const;
 
-    QString iconKey() const;
     void setIconKey(const QString& val);
-
-    QString notes() const;
-    void setNotes(const QString& val);
-
-    QString getPreLaunchCommand();
-    QString getPostExitCommand();
-    QString getWrapperCommand();
-
-    bool isManagedPack() const;
-    QString getManagedPackType() const;
-    QString getManagedPackID() const;
-    QString getManagedPackName() const;
-    QString getManagedPackVersionID() const;
-    QString getManagedPackVersionName() const;
-    void setManagedPack(const QString& type, const QString& id, const QString& name, const QString& versionId, const QString& version);
 
     virtual QStringList extraArguments();
 
     /// Traits. Normally inside the version, depends on instance implementation.
     virtual QSet<QString> traits() const = 0;
 
-    /**
-     * Gets the time that the instance was last launched.
-     * Stored in milliseconds since epoch.
-     */
-    qint64 lastLaunch() const;
     /// Sets the last launched time to 'val' milliseconds since epoch
     void setLastLaunch(qint64 val = QDateTime::currentMSecsSinceEpoch());
 
-    /*!
-     * \brief Gets this instance's settings object.
-     * This settings object stores instance-specific settings.
-     *
-     * Note that this method is not const.
-     * It may call loadSpecificSettings() to ensure those are loaded.
-     *
-     * \return A pointer to this instance's settings object.
-     */
-    virtual SettingsObject* settings();
+    InstanceConfigHolder& config() { return *m_config; }
 
-    /*!
-     * \brief Loads settings specific to an instance type if they're not already loaded.
-     */
-    virtual void loadSpecificSettings() = 0;
+    const InstanceConfigHolder& config() const { return *m_config; }
 
     /// returns a valid update task
     virtual QList<Task::Ptr> createUpdateTask() = 0;
@@ -259,8 +202,6 @@ class BaseInstance : public QObject {
 
     virtual void populateLaunchMenu(QMenu* menu) = 0;
 
-    bool reloadSettings();
-
     /**
      * 'print' a verbose description of the instance into a QStringList
      */
@@ -268,21 +209,10 @@ class BaseInstance : public QObject {
 
     Status currentStatus() const;
 
-    QStringList getLinkedInstances() const;
-    void setLinkedInstances(const QStringList& list);
-    void addLinkedInstanceId(const QString& id);
-    bool removeLinkedInstanceId(const QString& id);
-    bool isLinkedToInstanceId(const QString& id) const;
-
     bool isLegacy() const;
 
    protected:
     void changeStatus(Status newStatus);
-
-    SettingsObject* globalSettings() const { return m_globalSettings; }
-
-    bool isSpecificSettingsLoaded() const { return m_specificSettingsLoaded; }
-    void setSpecificSettingsLoaded(bool loaded) { m_specificSettingsLoaded = loaded; }
 
    signals:
     /*!
@@ -298,12 +228,9 @@ class BaseInstance : public QObject {
 
     void statusChanged(Status from, Status to);
 
-   protected slots:
-    void iconUpdated(const QString& key);
-
    protected: /* data */
     QString m_rootDir;
-    std::unique_ptr<SettingsObject> m_settings;
+    std::unique_ptr<InstanceConfigHolder> m_config;
     // InstanceFlags m_flags;
     bool m_isRunning = false;
     std::unique_ptr<LaunchTask> m_launchProcess;
@@ -316,9 +243,6 @@ class BaseInstance : public QObject {
     bool m_crashed = false;
     bool m_hasUpdate = false;
     bool m_hasBrokenVersion = false;
-
-    SettingsObject* m_globalSettings;
-    bool m_specificSettingsLoaded = false;
 };
 
 Q_DECLARE_METATYPE(shared_qobject_ptr<BaseInstance>)

@@ -54,10 +54,10 @@
 
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
+#include "config/GlobalConfig.h"
 #include "net/ApiHeaderProxy.h"
 #include "net/ChecksumValidator.h"
 #include "net/MetaCacheSink.h"
-#include "settings/SettingsObject.h"
 #else
 #include "BuildConfig.h"
 #endif
@@ -171,7 +171,7 @@ void Request::executeTask()
     }
 
 #if defined(LAUNCHER_APPLICATION)
-    request.setTransferTimeout(APPLICATION->settings()->get("RequestTimeout").toInt() * 1000);
+    request.setTransferTimeout(APPLICATION->config()->requestTimeout * 1000);
 #else
     request.setTransferTimeout();
 #endif

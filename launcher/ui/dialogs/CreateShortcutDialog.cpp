@@ -50,6 +50,7 @@
 #include "InstanceList.h"
 #include "icons/IconList.h"
 
+#include "config/InstanceConfig.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/ShortcutUtils.h"
 #include "minecraft/WorldList.h"
@@ -60,7 +61,7 @@ CreateShortcutDialog::CreateShortcutDialog(MinecraftInstance* instance, QWidget*
 {
     ui->setupUi(this);
 
-    InstIconKey = instance->iconKey();
+    InstIconKey = instance->config()->iconKey;
     ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
     ui->instNameTextBox->setPlaceholderText(instance->name());
 
@@ -81,12 +82,12 @@ CreateShortcutDialog::CreateShortcutDialog(MinecraftInstance* instance, QWidget*
         QString applicationDir = FS::getApplicationsDir();
 
         if (!desktopDir.isEmpty())
-            ui->saveTargetSelectionBox->addItem(tr("Desktop"), QVariant::fromValue(ShortcutTarget::Desktop));
+            ui->saveTargetSelectionBox->addItem(tr("Desktop"), QVariant::fromValue(InstanceConfig::ShortcutTarget::Desktop));
 
         if (!applicationDir.isEmpty())
-            ui->saveTargetSelectionBox->addItem(tr("Applications"), QVariant::fromValue(ShortcutTarget::Applications));
+            ui->saveTargetSelectionBox->addItem(tr("Applications"), QVariant::fromValue(InstanceConfig::ShortcutTarget::Applications));
     }
-    ui->saveTargetSelectionBox->addItem(tr("Other..."), QVariant::fromValue(ShortcutTarget::Other));
+    ui->saveTargetSelectionBox->addItem(tr("Other..."), QVariant::fromValue(InstanceConfig::ShortcutTarget::Other));
 
     // Populate worlds
     if (m_QuickJoinSupported) {
@@ -204,7 +205,7 @@ void CreateShortcutDialog::createShortcut()
         }
     }
 
-    auto target = ui->saveTargetSelectionBox->currentData().value<ShortcutTarget>();
+    auto target = ui->saveTargetSelectionBox->currentData().value<InstanceConfig::ShortcutTarget>();
     auto name = ui->instNameTextBox->text();
     if (name.isEmpty())
         name = ui->instNameTextBox->placeholderText();
@@ -212,9 +213,9 @@ void CreateShortcutDialog::createShortcut()
         extraArgs.append({ "--profile", ui->accountSelectionBox->currentData().toString() });
 
     ShortcutUtils::Shortcut args{ m_instance, name, targetString, this, extraArgs, InstIconKey, target };
-    if (target == ShortcutTarget::Desktop)
+    if (target == InstanceConfig::ShortcutTarget::Desktop)
         ShortcutUtils::createInstanceShortcutOnDesktop(args);
-    else if (target == ShortcutTarget::Applications)
+    else if (target == InstanceConfig::ShortcutTarget::Applications)
         ShortcutUtils::createInstanceShortcutInApplications(args);
     else
         ShortcutUtils::createInstanceShortcutInOther(args);

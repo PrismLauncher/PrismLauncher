@@ -21,10 +21,10 @@
 #include <QtConcurrent>
 
 #include "FileSystem.h"
+#include "config/InstanceConfig.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "modplatform/import_ftb/PackHelpers.h"
-#include "settings/INISettingsObject.h"
 
 namespace FTBImportAPP {
 
@@ -49,17 +49,14 @@ void PackInstallTask::copySettings()
     progress(2, 2);
 
     QString instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    m_instance =
-        std::make_unique<MinecraftInstance>(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
+    m_instance = std::make_unique<MinecraftInstance>(std::make_unique<InstanceConfigHolder>(instanceConfigPath), m_stagingPath);
 
     {
-        SettingsObject::Lock const lock(m_instance->settings());
-        m_instance->settings()->set("InstanceType", "OneSix");
-        m_instance->settings()->set("totalTimePlayed", m_pack.totalPlayTime / 1000);
+        auto& conf = m_instance->config().update();
+        conf.totalTimePlayed = m_pack.totalPlayTime / 1000;
 
         if (m_pack.jvmArgs.isValid() && !m_pack.jvmArgs.toString().isEmpty()) {
-            m_instance->settings()->set("OverrideJavaArgs", true);
-            m_instance->settings()->set("JvmArgs", m_pack.jvmArgs.toString());
+            conf.jvmArgs = m_pack.jvmArgs.toString();
         }
 
         auto* components = m_instance->getPackProfile();
@@ -97,6 +94,9 @@ void PackInstallTask::copySettings()
         }
         m_instance->setIconKey(m_instIcon);
     }
+
+    m_instance->config().save();
+
     downloadFiles(m_instance.get());
 }
 

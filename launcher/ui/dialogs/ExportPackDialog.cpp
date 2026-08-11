@@ -17,6 +17,8 @@
  */
 
 #include "ExportPackDialog.h"
+#include "Application.h"
+#include "config/InstanceConfig.h"
 #include "minecraft/mod/ResourceFolderModel.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlamePackExportTask.h"
@@ -40,9 +42,9 @@ ExportPackDialog::ExportPackDialog(MinecraftInstance* instance, QWidget* parent,
 
     m_ui->setupUi(this);
     m_ui->name->setPlaceholderText(instance->name());
-    m_ui->name->setText(instance->settings()->get("ExportName").toString());
-    m_ui->version->setText(instance->settings()->get("ExportVersion").toString());
-    m_ui->optionalFiles->setChecked(instance->settings()->get("ExportOptionalFiles").toBool());
+    m_ui->name->setText(instance->config()->exportName);
+    m_ui->version->setText(instance->config()->exportVersion);
+    m_ui->optionalFiles->setChecked(instance->config()->exportOptionalFiles);
 
     connect(m_ui->recommendedMemoryCheckBox, &QCheckBox::toggled, m_ui->recommendedMemory, &QWidget::setEnabled);
 
@@ -54,14 +56,14 @@ ExportPackDialog::ExportPackDialog(MinecraftInstance* instance, QWidget* parent,
 
         m_ui->recommendedMemoryWidget->hide();
 
-        m_ui->summary->setPlainText(instance->settings()->get("ExportSummary").toString());
+        m_ui->summary->setPlainText(instance->config()->exportSummary);
     } else {
         setWindowTitle(tr("Export CurseForge Pack"));
 
         m_ui->summaryLabel->hide();
         m_ui->summary->hide();
 
-        const int recommendedRAM = instance->settings()->get("ExportRecommendedRAM").toInt();
+        const int recommendedRAM = instance->config()->exportRecommendedRam;
 
         if (recommendedRAM > 0) {
             m_ui->recommendedMemoryCheckBox->setChecked(true);
@@ -70,11 +72,12 @@ ExportPackDialog::ExportPackDialog(MinecraftInstance* instance, QWidget* parent,
             m_ui->recommendedMemoryCheckBox->setChecked(false);
 
             // recommend based on setting - limited to 12 GiB (CurseForge warns above this amount)
-            const int defaultRecommendation = qMin(m_instance->settings()->get("MaxMemAlloc").toInt(), 1024 * 12);
+            const auto memory = m_instance->config()->memoryOrGlobal(*APPLICATION->config());
+            const int defaultRecommendation = qMin(memory.maxAlloc, 1024 * 12);
             m_ui->recommendedMemory->setValue(defaultRecommendation);
         }
 
-        m_ui->author->setText(instance->settings()->get("ExportAuthor").toString());
+        m_ui->author->setText(m_instance->config()->exportAuthor);
     }
 
     // ensure a valid pack is generated
@@ -140,20 +143,20 @@ ExportPackDialog::~ExportPackDialog()
 void ExportPackDialog::done(int result)
 {
     m_proxy->saveBlockedPathsToFile(ignoreFileName());
-    auto settings = m_instance->settings();
-    settings->set("ExportName", m_ui->name->text());
-    settings->set("ExportVersion", m_ui->version->text());
-    settings->set("ExportOptionalFiles", m_ui->optionalFiles->isChecked());
+    auto &conf = m_instance->config().update();
+    conf.exportName = m_ui->name->text();
+    conf.exportVersion = m_ui->version->text();
+    conf.exportOptionalFiles = m_ui->optionalFiles->isChecked();
 
     if (m_provider == ModPlatform::ResourceProvider::MODRINTH)
-        settings->set("ExportSummary", m_ui->summary->toPlainText());
+        conf.exportSummary = m_ui->summary->toPlainText();
     else {
-        settings->set("ExportAuthor", m_ui->author->text());
+        conf.exportAuthor = m_ui->author->text();
 
         if (m_ui->recommendedMemoryCheckBox->isChecked())
-            settings->set("ExportRecommendedRAM", m_ui->recommendedMemory->value());
+            conf.exportRecommendedRam = m_ui->recommendedMemory->value();
         else
-            settings->reset("ExportRecommendedRAM");
+            conf.exportRecommendedRam = 0;
     }
 
     if (result == Accepted) {

@@ -39,6 +39,8 @@
 #include <QStandardPaths>
 
 #include "Application.h"
+#include "config/GlobalConfig.h"
+#include "config/InstanceConfig.h"
 #include "FileSystem.h"
 #include "launch/LaunchTask.h"
 #include "minecraft/MinecraftInstance.h"
@@ -51,7 +53,9 @@ LauncherPartLaunch::LauncherPartLaunch(LaunchTask* parent)
     : LaunchStep(parent)
     , m_process(parent->instance()->getJavaVersion().defaultsToUtf8() ? QStringConverter::Utf8 : QStringConverter::System)
 {
-    if (parent->instance()->settings()->get("CloseAfterLaunch").toBool()) {
+    const auto gameWindow = parent->instance()->config()->gameWindowOrGlobal(*APPLICATION->config());
+    if (gameWindow.hideLauncherOnOpen) {
+        // FIXME: batshit crazy
         static const QRegularExpression s_settingUser(".*Setting user.+", QRegularExpression::CaseInsensitiveOption);
         std::shared_ptr<QMetaObject::Connection> connection{ new QMetaObject::Connection };
         *connection =
@@ -96,7 +100,8 @@ void LauncherPartLaunch::executeTask()
     QString allArgs = args.join(" ");
     emit logLine("Java arguments:\n  " + m_parent->censorPrivateInfo(allArgs) + "\n", MessageLevel::Launcher);
 
-    auto javaPath = FS::ResolveExecutable(instance->settings()->get("JavaPath").toString());
+    const auto installation = instance->config()->javaInstallationOrGlobal(*APPLICATION->config());
+    auto javaPath = FS::ResolveExecutable(installation.path);
 
     m_process.setProcessEnvironment(instance->createLaunchEnvironment());
 
@@ -130,7 +135,8 @@ void LauncherPartLaunch::executeTask()
 
     qDebug() << args.join(' ');
 
-    QString wrapperCommandStr = instance->getWrapperCommand().trimmed();
+    const auto commands = instance->config()->commandsOrGlobal(*APPLICATION->config());
+    QString wrapperCommandStr = commands.wrapper.trimmed();
     if (!wrapperCommandStr.isEmpty()) {
         auto wrapperArgs = m_parent->substituteVariables(wrapperCommandStr);
         auto wrapperCommand = wrapperArgs.takeFirst();
@@ -149,7 +155,8 @@ void LauncherPartLaunch::executeTask()
     }
 
 #ifdef Q_OS_LINUX
-    if (instance->settings()->get("EnableFeralGamemode").toBool() && APPLICATION->capabilities() & Application::SupportsGameMode) {
+    const auto performance = instance->config()->performanceOrGlobal(*APPLICATION->config());
+    if (performance.enableFeralGamemode && APPLICATION->capabilities() & Application::SupportsGameMode) {
         auto pid = m_process.processId();
         if (pid != 0) {
             gamemode_request_start_for(static_cast<pid_t>(pid));
@@ -177,7 +184,8 @@ void LauncherPartLaunch::on_state(LoggedProcess::State state)
         }
         case LoggedProcess::Finished: {
             auto* instance = m_parent->instance();
-            if (instance->settings()->get("CloseAfterLaunch").toBool()) {
+            const auto gameWindow = instance->config()->gameWindowOrGlobal(*APPLICATION->config());
+            if (gameWindow.hideLauncherOnOpen) {
                 APPLICATION->showMainWindow();
             }
 

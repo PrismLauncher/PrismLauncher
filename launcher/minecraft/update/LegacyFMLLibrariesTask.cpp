@@ -1,6 +1,7 @@
 #include "LegacyFMLLibrariesTask.h"
 
 #include "FileSystem.h"
+#include "config/GlobalConfig.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/VersionFilterData.h"
@@ -127,8 +128,8 @@ bool LegacyFMLLibrariesTask::abort()
 
 QString LegacyFMLLibrariesTask::baseUrl()
 {
-    if (const QString urlOverride = APPLICATION->settings()->get("LegacyFMLLibsURLOverride").toString(); !urlOverride.isEmpty()) {
-        return urlOverride;
+    if (QUrl urlOverride = APPLICATION->config()->legacyFmlLibsUrlOverride; !urlOverride.isEmpty()) {
+        return urlOverride.toString();
     }
 
     return BuildConfig.LEGACY_FMLLIBS_BASE_URL;

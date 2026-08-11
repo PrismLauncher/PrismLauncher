@@ -51,8 +51,6 @@
 #include <QUrl>
 #include <utility>
 
-#include "settings/SettingsObject.h"
-
 #include "ui/widgets/IconLabel.h"
 
 #include "Application.h"

@@ -36,8 +36,8 @@
 #include "TechnicModel.h"
 #include "Application.h"
 #include "BuildConfig.h"
+#include "config/GlobalConfig.h"
 #include "Json.h"
-#include "settings/SettingsObject.h"
 
 #include "net/ApiRequest.h"
 #include "ui/widgets/ProjectItem.h"
@@ -153,7 +153,7 @@ void Technic::ListModel::performSearch()
             QString("%1search?build=%2&q=%3").arg(BuildConfig.TECHNIC_API_BASE_URL, BuildConfig.TECHNIC_API_BUILD, currentSearchTerm);
         searchMode = List;
     }
-    auto clientId = APPLICATION->settings()->get("TechnicClientID").toString();
+    auto clientId = APPLICATION->config()->technicClientId;
     if (!clientId.isEmpty()) {
         searchUrl += "?cid=" + clientId;
     }

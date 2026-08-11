@@ -25,7 +25,7 @@
 #include <utility>
 
 #include "Application.h"
-#include "BaseInstance.h"
+#include "config/GlobalConfig.h"
 #include "ResourceDownloadTask.h"
 
 #include "minecraft/PackProfile.h"
@@ -97,12 +97,14 @@ ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent,
     setWindowModality(Qt::WindowModal);
 
     setWindowTitle(dialogTitle());
+
+    restoreGeometry(APPLICATION->config()->uiGeometry.value(geometrySaveKey));
 }
 
 void ResourceDownloadDialog::accept()
 {
-    if (!geometrySaveKey().isEmpty()) {
-        APPLICATION->settings()->set(geometrySaveKey(), QString::fromUtf8(saveGeometry().toBase64()));
+    if (!m_geometrySaveKey.isEmpty()) {
+        APPLICATION->config().update().uiGeometry[m_geometrySaveKey] = saveGeometry();
     }
 
     QDialog::accept();
@@ -123,8 +125,8 @@ void ResourceDownloadDialog::reject()
         }
     }
 
-    if (!geometrySaveKey().isEmpty()) {
-        APPLICATION->settings()->set(geometrySaveKey(), QString::fromUtf8(saveGeometry().toBase64()));
+    if (!m_geometrySaveKey.isEmpty()) {
+        APPLICATION->config().update().uiGeometry[m_geometrySaveKey] = saveGeometry();
     }
 
     QDialog::reject();
@@ -349,7 +351,7 @@ void ResourceDownloadDialog::setResourceMetadata(const std::shared_ptr<Metadata:
 
 GetModDependenciesTask::Ptr ResourceDownloadDialog::getModDependenciesTask()
 {
-    if (!APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
+    if (!APPLICATION->config()->modDependenciesDisabled) {  // dependencies
         if (auto* model = dynamic_cast<ModFolderModel*>(getBaseModel()); model) {
             QList<std::shared_ptr<GetModDependenciesTask::PackDependency>> selectedVers;
             for (auto& selected : getTasks()) {
@@ -367,7 +369,7 @@ ResourceDownloadDialog* ResourceDownloadDialog::createMod(QWidget* parent,
                                                           MinecraftInstance* instance,
                                                           bool suppressInitialSearch)
 {
-    auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("mods"), "ModDownloadGeometry", suppressInitialSearch);
+    auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("mods"), "ModDownload", suppressInitialSearch);
     QList<BasePage*> pages;
 
     // need to load all resources for dependency task
@@ -403,7 +405,7 @@ ResourceDownloadDialog* ResourceDownloadDialog::createResourcePack(QWidget* pare
                                                                    MinecraftInstance* instance,
                                                                    bool suppressInitialSearch)
 {
-    auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("resource packs"), "RPDownloadGeometry", suppressInitialSearch);
+    auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("resource packs"), "RPDownload", suppressInitialSearch);
     QList<BasePage*> pages;
 
     auto* page = Modrinth::createResourcePackResourcePage(dialog, *instance);
@@ -424,7 +426,7 @@ ResourceDownloadDialog* ResourceDownloadDialog::createTexturePack(QWidget* paren
                                                                   MinecraftInstance* instance,
                                                                   bool suppressInitialSearch)
 {
-    auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("texture packs"), "TPDownloadGeometry", suppressInitialSearch);
+    auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("texture packs"), "TPDownload", suppressInitialSearch);
     QList<BasePage*> pages;
 
     auto* page = Modrinth::createTexturePackResourcePage(dialog, *instance);
@@ -445,7 +447,7 @@ ResourceDownloadDialog* ResourceDownloadDialog::createShaderPack(QWidget* parent
                                                                  MinecraftInstance* instance,
                                                                  bool suppressInitialSearch)
 {
-    auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("shader packs"), "ShaderDownloadGeometry", suppressInitialSearch);
+    auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("shader packs"), "ShaderDownload", suppressInitialSearch);
     QList<BasePage*> pages;
 
     auto* page = Modrinth::createShaderPackResourcePage(dialog, *instance);
@@ -466,7 +468,7 @@ ResourceDownloadDialog* ResourceDownloadDialog::createDataPack(QWidget* parent,
                                                                MinecraftInstance* instance,
                                                                bool suppressInitialSearch)
 {
-    auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("data packs"), "DataPackDownloadGeometry", suppressInitialSearch);
+    auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("data packs"), "DataPackDownload", suppressInitialSearch);
     QList<BasePage*> pages;
 
     auto* page = Modrinth::createDataPackResourcePage(dialog, *instance);
@@ -488,9 +490,5 @@ void ResourceDownloadDialog::initPages(QList<BasePage*> pages)
 
     initializeContainer();
     connectButtons();
-
-    if (!geometrySaveKey().isEmpty()) {
-        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toString().toUtf8()));
-    }
 }
 }  // namespace ResourceDownload

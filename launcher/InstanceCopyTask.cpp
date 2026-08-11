@@ -4,8 +4,8 @@
 #include <memory>
 #include "FileSystem.h"
 #include "Filter.h"
-#include "NullInstance.h"
-#include "settings/INISettingsObject.h"
+#include "config/GlobalConfig.h"
+#include "config/InstanceConfig.h"
 #include "tasks/Task.h"
 
 InstanceCopyTask::InstanceCopyTask(BaseInstance* origInstance, const InstanceCopyPrefs& prefs)
@@ -146,19 +146,23 @@ void InstanceCopyTask::copyFinished()
         return;
     }
 
-    // FIXME: shouldn't this be able to report errors?
-    auto instanceSettings = std::make_unique<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg"));
+    QString confPath = FS::PathCombine(m_stagingPath, "instance.cfg");
+    auto conf = InstanceConfig::load(confPath);
+    if (!conf.has_value()) {
+        emitFailed(tr("Could not read copied instance config."));
+        return;
+    }
 
-    BaseInstance* inst(new NullInstance(m_globalSettings, std::move(instanceSettings), m_stagingPath));
-    inst->setName(name());
-    inst->setIconKey(m_instIcon);
-    inst->regenerateUuid();
+    conf->name = name();
+    conf->iconKey = m_instIcon;
+    conf->uuid = QString();
     if (!m_keepPlaytime) {
-        inst->resetTimePlayed();
+        conf->totalTimePlayed = 0;
+        conf->lastTimePlayed = 0;
     }
     if (m_useLinks) {
-        inst->addLinkedInstanceId(m_origInstance->id());
-        auto allowed_symlinks_file = QFileInfo(FS::PathCombine(inst->gameRoot(), "allowed_symlinks.txt"));
+        conf->linkedInstances.append(m_origInstance->id());
+        auto allowed_symlinks_file = QFileInfo(FS::PathCombine(m_stagingPath, "allowed_symlinks.txt"));
 
         QByteArray allowed_symlinks;
         if (allowed_symlinks_file.exists()) {
@@ -178,6 +182,11 @@ void InstanceCopyTask::copyFinished()
         } catch (const FS::FileSystemException& e) {
             qCritical() << "Failed to write symlink :" << e.cause();
         }
+    }
+
+    if (!conf->save(confPath)) {
+        emitFailed(tr("Could not write modified instance config."));
+        return;
     }
 
     emitSucceeded();
