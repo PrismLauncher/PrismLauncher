@@ -260,6 +260,7 @@ set(MINECRAFT_SOURCES
     minecraft/launch/ModMinecraftJar.h
     minecraft/launch/ExtractNatives.cpp
     minecraft/launch/ExtractNatives.h
+    minecraft/launch/NativePath.h
     minecraft/launch/LauncherPartLaunch.cpp
     minecraft/launch/LauncherPartLaunch.h
     minecraft/launch/MinecraftTarget.cpp

@@ -43,6 +43,7 @@
 #include "FileSystem.h"
 #include "launch/LaunchTask.h"
 #include "minecraft/MinecraftInstance.h"
+#include "minecraft/launch/NativePath.h"
 
 #ifdef Q_OS_LINUX
 #include "gamemode_client.h"
@@ -110,7 +111,7 @@ void LauncherPartLaunch::executeTask()
     if (!legacyJarPath.isEmpty())
         classPath.prepend(legacyJarPath);
 
-    auto natPath = instance->getNativePath();
+    auto natPath = launchNativePath(instance->getNativePath(), m_parent->sessionId());
 #ifdef Q_OS_WIN
     natPath = FS::getPathNameInLocal8bit(natPath);
 #endif

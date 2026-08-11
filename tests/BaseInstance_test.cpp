@@ -1,9 +1,11 @@
+#include <QFileInfo>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QTest>
 
 #include <BaseInstance.h>
 #include <launch/LaunchTask.h>
+#include <minecraft/launch/NativePath.h>
 #include <settings/INISettingsObject.h>
 #include <tasks/Task.h>
 
@@ -131,6 +133,20 @@ class BaseInstanceTest : public QObject {
 
         QCOMPARE(task.accountName(), QString("Player"));
         QCOMPARE(task.accountType(), QString("Microsoft"));
+    }
+
+    void parallelLaunchTasksUseSeparateNativeDirectories()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const auto nativeRoot = dir.filePath("natives");
+        const auto first = launchNativePath(nativeRoot, 1);
+        const auto second = launchNativePath(nativeRoot, 2);
+
+        QVERIFY(first != second);
+        QCOMPARE(first, launchNativePath(nativeRoot, 1));
+        QCOMPARE(QFileInfo(first).absolutePath(), QDir(nativeRoot).absolutePath());
+        QCOMPARE(QFileInfo(second).absolutePath(), QDir(nativeRoot).absolutePath());
     }
 
     void completedLaunchTaskRetainsLog()
