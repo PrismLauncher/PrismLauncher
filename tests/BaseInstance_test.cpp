@@ -18,6 +18,14 @@ class TestInstance final : public BaseInstance {
         : BaseInstance(globalSettings, std::move(settings), rootDir)
     {}
 
+    TestLaunchTask* retainLaunchTaskForTest()
+    {
+        auto task = std::make_unique<TestLaunchTask>();
+        auto* result = task.get();
+        m_launchProcesses.emplace_back(std::move(task));
+        return result;
+    }
+
     void saveNow() override {}
     QString modsRoot() const override { return instanceRoot(); }
     QSet<QString> traits() const override { return {}; }
@@ -123,6 +131,24 @@ class BaseInstanceTest : public QObject {
 
         QCOMPARE(task.accountName(), QString("Player"));
         QCOMPARE(task.accountType(), QString("Microsoft"));
+    }
+
+    void completedLaunchTaskRetainsLog()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        auto global = createGlobalSettings(dir.filePath("global.cfg"));
+        auto local = std::make_unique<INISettingsObject>(dir.filePath("instance.cfg"));
+        TestInstance instance(global.get(), std::move(local), dir.path());
+        auto* task = instance.retainLaunchTaskForTest();
+
+        instance.launchSessionStarted(task);
+        instance.launchSessionFinished(task, false);
+        QCoreApplication::processEvents();
+
+        QCOMPARE(instance.launchTasks().size(), 1);
+        QCOMPARE(instance.launchTasks().first(), task);
+        QVERIFY(instance.activeLaunchTasks().isEmpty());
     }
 };
 
