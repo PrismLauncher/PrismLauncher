@@ -74,11 +74,23 @@ auto logCatForMethod(HttpMethod method) -> Request::LogCatFunc
 {
     switch (method.value()) {
         case HttpMethod::Get:
-            return taskDownloadLogC;
+            return taskNetGetLogC;
         case HttpMethod::Post:
-            return taskUploadLogC;
-        default:
-            break;
+            return taskNetPostLogC;
+        case HttpMethod::Put:
+            return taskNetPutLogC;
+        case HttpMethod::Patch:
+            return taskNetPatchLogC;
+        case HttpMethod::Delete:
+            return taskNetDeleteLogC;
+        case HttpMethod::Head:
+            return taskNetHeadLogC;
+        case HttpMethod::Options:
+            return taskNetOptionsLogC;
+        case HttpMethod::Connect:
+            return taskNetConnectLogC;
+        case HttpMethod::Trace:
+            return taskNetTraceLogC;
     }
     return taskNetLogC;
 }

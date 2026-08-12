@@ -710,17 +710,66 @@ ecm_qt_export_logging_category(
 )
 
 ecm_qt_export_logging_category(
-    IDENTIFIER taskDownloadLogC
-    CATEGORY_NAME "launcher.task.net.download"
+    IDENTIFIER taskNetGetLogC
+    CATEGORY_NAME "launcher.task.net.get"
     DEFAULT_SEVERITY Debug
-    DESCRIPTION "Task network download actions"
+    DESCRIPTION "Task network GET actions"
     EXPORT "${Launcher_Name}"
 )
 ecm_qt_export_logging_category(
-    IDENTIFIER taskUploadLogC
-    CATEGORY_NAME "launcher.task.net.upload"
+    IDENTIFIER taskNetPostLogC
+    CATEGORY_NAME "launcher.task.net.post"
     DEFAULT_SEVERITY Debug
-    DESCRIPTION "Task network upload actions"
+    DESCRIPTION "Task network POST actions"
+    EXPORT "${Launcher_Name}"
+)
+ecm_qt_export_logging_category(
+    IDENTIFIER taskNetPutLogC
+    CATEGORY_NAME "launcher.task.net.put"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "Task network PUT actions"
+    EXPORT "${Launcher_Name}"
+)
+ecm_qt_export_logging_category(
+    IDENTIFIER taskNetPatchLogC
+    CATEGORY_NAME "launcher.task.net.patch"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "Task network PATCH actions"
+    EXPORT "${Launcher_Name}"
+)
+ecm_qt_export_logging_category(
+    IDENTIFIER taskNetDeleteLogC
+    CATEGORY_NAME "launcher.task.net.delete"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "Task network DELETE actions"
+    EXPORT "${Launcher_Name}"
+)
+ecm_qt_export_logging_category(
+    IDENTIFIER taskNetHeadLogC
+    CATEGORY_NAME "launcher.task.net.head"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "Task network HEAD actions"
+    EXPORT "${Launcher_Name}"
+)
+ecm_qt_export_logging_category(
+    IDENTIFIER taskNetOptionsLogC
+    CATEGORY_NAME "launcher.task.net.options"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "Task network OPTIONS actions"
+    EXPORT "${Launcher_Name}"
+)
+ecm_qt_export_logging_category(
+    IDENTIFIER taskNetConnectLogC
+    CATEGORY_NAME "launcher.task.net.connect"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "Task network CONNECT actions"
+    EXPORT "${Launcher_Name}"
+)
+ecm_qt_export_logging_category(
+    IDENTIFIER taskNetTraceLogC
+    CATEGORY_NAME "launcher.task.net.trace"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "Task network TRACE actions"
     EXPORT "${Launcher_Name}"
 )
 
