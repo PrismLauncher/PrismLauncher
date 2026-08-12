@@ -311,8 +311,9 @@ void ModrinthCreationTask::createInstance()
     connect(downloadMods.get(), &NetJob::stepProgress, this, &ModrinthCreationTask::propagateStepProgress);
 
     setStatus(tr("Downloading mods..."));
-    downloadMods->start();
     m_task = downloadMods;
+    setAbortable(true);
+    downloadMods->start();
 }
 
 bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<File>& files, bool setInternalData, bool showOptionalDialog)
