@@ -26,10 +26,11 @@
 
 #include "FileSystem.h"
 #include "net/DummySink.h"
+#include "net/Logging.h"
 #include "net/RawHeaderProxy.h"
 #include "net/Request.h"
 
-inline Net::Request::Ptr makeSkinDeleteRequest(QString token)
+inline Net::Request::Ptr makeSkinDeleteRequest(const QString& token)
 {
     auto req = Net::Request::makeCustomRequest({
         .method = Net::HttpMethod::Delete,
@@ -43,7 +44,7 @@ inline Net::Request::Ptr makeSkinDeleteRequest(QString token)
     return req;
 }
 
-inline Net::Request::Ptr makeSkinUploadRequest(QString token, QString path, QString variant)
+inline Net::Request::Ptr makeSkinUploadRequest(const QString& token, const QString& path, const QString& variant)
 {
     auto getPayload = [path, variant]() {
         auto* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
@@ -71,7 +72,7 @@ inline Net::Request::Ptr makeSkinUploadRequest(QString token, QString path, QStr
     return req;
 }
 
-inline Net::Request::Ptr makeCapeChangeRequest(QString token, QString capeId)
+inline Net::Request::Ptr makeCapeChangeRequest(const QString& token, const QString& capeId)
 {
     auto req = Net::Request::makeCustomRequest({
         .method = capeId.isEmpty() ? Net::HttpMethod::Delete : Net::HttpMethod::Put,

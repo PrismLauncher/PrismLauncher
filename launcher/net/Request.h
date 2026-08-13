@@ -56,14 +56,13 @@
 #include "Validator.h"
 
 #include "QObjectPtr.h"
-#include "net/Logging.h"
+
 #include "tasks/Task.h"
 
 class QIODevice;
 class QHttpMultiPart;
 
 namespace Net {
-class ByteArraySink;
 
 enum class HttpMethodValue : std::uint8_t {
     Get,
