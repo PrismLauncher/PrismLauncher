@@ -9,17 +9,6 @@
 #include "net/ApiRequest.h"
 #include "net/NetJob.h"
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersion(const QString& hash, const QString& hash_format) const
-{
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersion"), APPLICATION->network());
-
-    auto [action, response] =
-        Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1?algorithm=%2").arg(hash, hash_format));
-    netJob->addNetAction(action);
-
-    return { netJob, response };
-}
-
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_format) const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersions"), APPLICATION->network());
@@ -35,37 +24,6 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersions(const QStringList
     auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files"), body_raw);
     netJob->addNetAction(action);
     netJob->setAskRetry(false);
-    return { netJob, response };
-}
-
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash,
-                                                             const QString& hash_format,
-                                                             std::optional<std::vector<Version>> mcVersions,
-                                                             std::optional<ModPlatform::ModLoaderTypes> loaders) const
-{
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersion"), APPLICATION->network());
-
-    QJsonObject body_obj;
-
-    if (loaders.has_value()) {
-        Json::writeStringList(body_obj, "loaders", getModLoaderStrings(loaders.value()));
-    }
-
-    if (mcVersions.has_value()) {
-        QStringList game_versions;
-        for (auto& ver : mcVersions.value()) {
-            game_versions.append(mapMCVersionToModrinth(ver));
-        }
-        Json::writeStringList(body_obj, "game_versions", game_versions);
-    }
-
-    QJsonDocument body(body_obj);
-    auto body_raw = body.toJson();
-
-    auto [action, response] = Net::ApiRequest::makeByteArray(
-        QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1/update?algorithm=%2").arg(hash, hash_format), body_raw);
-    netJob->addNetAction(action);
-
     return { netJob, response };
 }
 

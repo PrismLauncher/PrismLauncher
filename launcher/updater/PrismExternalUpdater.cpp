@@ -197,11 +197,10 @@ void PrismExternalUpdater::checkForUpdates(bool triggeredByUser) const
             {
                 auto [firstLine, remainder1] = StringUtils::splitFirst(stdOutput, '\n');
                 auto [secondLine, remainder2] = StringUtils::splitFirst(remainder1, '\n');
-                auto [thirdLine, releaseNotes] = StringUtils::splitFirst(remainder2, '\n');
+                auto releaseNotes = StringUtils::splitFirst(remainder2, '\n').second;
                 auto versionName = StringUtils::splitFirst(firstLine, ": ").second.trimmed();
                 auto versionTag = StringUtils::splitFirst(secondLine, ": ").second.trimmed();
-                auto releaseTimestamp = QDateTime::fromString(StringUtils::splitFirst(thirdLine, ": ").second.trimmed(), Qt::ISODate);
-                qDebug() << "Update available:" << versionName << versionTag << releaseTimestamp;
+                qDebug() << "Update available:" << versionName << versionTag;
                 qDebug() << "Update release notes:" << releaseNotes;
 
                 offerUpdate(versionName, versionTag, releaseNotes, triggeredByUser);
@@ -315,13 +314,6 @@ void PrismExternalUpdater::offerUpdate(const QString& versionName,
     priv->settings->endGroup();
 
     if (shouldSkip) {
-        if (triggeredByUser) {
-            auto msgBox = QMessageBox(QMessageBox::Information, tr("No Update Available"), tr("There are no new updates available."),
-                                      QMessageBox::Ok, priv->parent);
-            msgBox.setMinimumWidth(460);
-            msgBox.adjustSize();
-            msgBox.exec();
-        }
         return;
     }
 

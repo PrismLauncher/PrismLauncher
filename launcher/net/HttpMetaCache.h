@@ -61,17 +61,14 @@ class MetaEntry {
     auto getETag() -> QString { return m_etag; }
     void setETag(QString etag) { m_etag = etag; }
 
-    auto getMD5Sum() -> QString { return m_md5sum; }
     void setMD5Sum(QString md5sum) { m_md5sum = md5sum; }
 
     /* Whether the entry expires after some time (false) or not (true). */
     void makeEternal(bool eternal) { m_is_eternal = eternal; }
     bool isEternal() const { return m_is_eternal; }
 
-    auto getCurrentAge() -> qint64 { return m_current_age; }
     void setCurrentAge(qint64 age) { m_current_age = age; }
 
-    auto getMaximumAge() -> qint64 { return m_max_age; }
     void setMaximumAge(qint64 age) { m_max_age = age; }
 
     bool isExpired(qint64 offset) { return !m_is_eternal && (m_current_age >= m_max_age - offset); }

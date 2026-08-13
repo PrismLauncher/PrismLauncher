@@ -53,42 +53,21 @@ class PixmapCache final : public QObject {
     static void setInstance(PixmapCache* i) { s_instance = i; }
 
    public:
-    DEFINE_FUNC_NO_PARAM(cacheLimit, int, -1)
-    DEFINE_FUNC_NO_PARAM(clear, bool, false)
-    DEFINE_FUNC_TWO_PARAM(find, bool, false, const QString&, QPixmap*)
     DEFINE_FUNC_TWO_PARAM(find, bool, false, const QPixmapCache::Key&, QPixmap*)
-    DEFINE_FUNC_TWO_PARAM(insert, bool, false, const QString&, const QPixmap&)
     DEFINE_FUNC_ONE_PARAM(insert, QPixmapCache::Key, {}, const QPixmap&)
-    DEFINE_FUNC_ONE_PARAM(remove, bool, false, const QString&)
     DEFINE_FUNC_ONE_PARAM(remove, bool, false, const QPixmapCache::Key&)
-    DEFINE_FUNC_TWO_PARAM(replace, bool, false, const QPixmapCache::Key&, const QPixmap&)
-    DEFINE_FUNC_ONE_PARAM(setCacheLimit, bool, false, int)
     DEFINE_FUNC_NO_PARAM(markCacheMissByEviciton, bool, false)
-    DEFINE_FUNC_ONE_PARAM(setFastEvictionThreshold, bool, false, int)
 
     // NOTE: Every function returns something non-void to simplify the macros.
    private slots:
     int _cacheLimit() { return QPixmapCache::cacheLimit(); }
-    bool _clear()
-    {
-        QPixmapCache::clear();
-        return true;
-    }
-    bool _find(const QString& key, QPixmap* pixmap) { return QPixmapCache::find(key, pixmap); }
     bool _find(const QPixmapCache::Key& key, QPixmap* pixmap) { return QPixmapCache::find(key, pixmap); }
-    bool _insert(const QString& key, const QPixmap& pixmap) { return QPixmapCache::insert(key, pixmap); }
     QPixmapCache::Key _insert(const QPixmap& pixmap) { return QPixmapCache::insert(pixmap); }
-    bool _remove(const QString& key)
-    {
-        QPixmapCache::remove(key);
-        return true;
-    }
     bool _remove(const QPixmapCache::Key& key)
     {
         QPixmapCache::remove(key);
         return true;
     }
-    bool _replace(const QPixmapCache::Key& key, const QPixmap& pixmap) { return QPixmapCache::replace(key, pixmap); }
     bool _setCacheLimit(int n)
     {
         QPixmapCache::setCacheLimit(n);
@@ -102,8 +81,9 @@ class PixmapCache final : public QObject {
     bool _markCacheMissByEviciton()
     {
         static constexpr uint maxCache = static_cast<uint>(std::numeric_limits<int>::max()) / 4;
-        static constexpr uint step = 10240;
+        static constexpr int step = 10240;
         static constexpr int oneSecond = 1000;
+        static constexpr int threshold = 15;
 
         auto now = QTime::currentTime();
         if (!m_last_cache_miss_by_eviciton.isNull()) {
@@ -115,7 +95,7 @@ class PixmapCache final : public QObject {
             }
         }
         m_last_cache_miss_by_eviciton = now;
-        if (m_consecutive_fast_evicitons >= m_consecutive_fast_evicitons_threshold) {
+        if (m_consecutive_fast_evicitons >= threshold) {
             // increase the cache size
             uint newSize = _cacheLimit() + step;
             if (newSize >= maxCache) {  // increase it until you overflow :D
@@ -133,15 +113,8 @@ class PixmapCache final : public QObject {
         return false;
     }
 
-    bool _setFastEvictionThreshold(int threshold)
-    {
-        m_consecutive_fast_evicitons_threshold = threshold;
-        return true;
-    }
-
    private:
     static PixmapCache* s_instance;
     QTime m_last_cache_miss_by_eviciton;
     int m_consecutive_fast_evicitons = 0;
-    int m_consecutive_fast_evicitons_threshold = 15;
 };

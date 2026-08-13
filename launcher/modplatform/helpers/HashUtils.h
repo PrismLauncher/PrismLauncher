@@ -12,7 +12,6 @@ namespace Hashing {
 
 enum class Algorithm { Md4, Md5, Sha1, Sha256, Sha512, Murmur2, Unknown };
 
-QString algorithmToString(Algorithm type);
 Algorithm algorithmFromString(QString type);
 QString hash(QIODevice* device, Algorithm type);
 QString hash(QString fileName, Algorithm type);

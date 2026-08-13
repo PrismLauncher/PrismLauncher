@@ -41,28 +41,6 @@ class QIODeviceReader : public Murmur2::Reader {
     QIODevice* m_device;
 };
 
-QString algorithmToString(Algorithm type)
-{
-    switch (type) {
-        case Algorithm::Md4:
-            return "md4";
-        case Algorithm::Md5:
-            return "md5";
-        case Algorithm::Sha1:
-            return "sha1";
-        case Algorithm::Sha256:
-            return "sha256";
-        case Algorithm::Sha512:
-            return "sha512";
-        case Algorithm::Murmur2:
-            return "murmur2";
-        // case Algorithm::Unknown:
-        default:
-            break;
-    }
-    return "unknown";
-}
-
 Algorithm algorithmFromString(QString type)
 {
     if (type == "md4")

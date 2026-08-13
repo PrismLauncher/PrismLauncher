@@ -27,11 +27,6 @@ using namespace Json;
 
 namespace Meta {
 
-MetadataVersion currentFormatVersion()
-{
-    return MetadataVersion::InitialRelease;
-}
-
 // Index
 static std::shared_ptr<Index> parseIndexInternal(const QJsonObject& obj)
 {

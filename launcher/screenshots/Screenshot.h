@@ -11,6 +11,5 @@ struct ScreenShot {
     ScreenShot(QFileInfo file) { m_file = file; }
     QFileInfo m_file;
     QString m_url;
-    QString m_imgurId;
     QString m_imgurDeleteHash;
 };

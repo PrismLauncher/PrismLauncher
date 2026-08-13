@@ -271,7 +271,6 @@ class BaseInstance : public QObject {
     QStringList getLinkedInstances() const;
     void setLinkedInstances(const QStringList& list);
     void addLinkedInstanceId(const QString& id);
-    bool removeLinkedInstanceId(const QString& id);
     bool isLinkedToInstanceId(const QString& id) const;
 
     bool isLegacy() const;

@@ -63,11 +63,8 @@ class ProgressDialog : public QDialog {
 
     int execWithTask(Task* task);
     int execWithTask(std::unique_ptr<Task>&& task);
-    int execWithTask(std::unique_ptr<Task>& task);
 
     void setSkipButton(bool present, QString label = QString());
-
-    Task* getTask();
 
    public slots:
     void onTaskStarted();

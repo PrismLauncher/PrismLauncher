@@ -44,12 +44,9 @@ class World {
     QFileInfo container() const { return m_containerFile; }
     // delete all the files of this world
     bool destroy();
-    // replace this world with a copy of the other
-    bool replace(World& with);
     // change the world's filesystem path (used by world lists for *MAGIC* purposes)
     void repath(const QFileInfo& file);
     void loadMetadata();
-    bool isMetadataLoaded() const { return m_metadataLoaded; }
     // remove the icon file, if any
     bool resetIcon();
 

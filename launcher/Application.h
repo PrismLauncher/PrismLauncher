@@ -68,7 +68,6 @@ class QNetworkAccessManager;
 class JavaInstallList;
 class ExternalUpdater;
 class BaseProfilerFactory;
-class BaseDetachedToolFactory;
 class TranslationsModel;
 class ITheme;
 class MCEditTool;

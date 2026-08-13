@@ -30,7 +30,4 @@ class ShaderPackFolderModel : public ResourceFolderModel {
     virtual bool stopWatching() override { return ResourceFolderModel::stopWatching({ m_dir.absolutePath() }); }
 
     RESOURCE_HELPERS(ShaderPack);
-
-   private:
-    QMutex m_migrateLock;
 };

@@ -144,19 +144,6 @@ bool WorldList::removeWorldFromModel(const QFileInfo& sourceFile)
     return false;
 }
 
-bool WorldList::deleteWorlds(int first, int last)
-{
-    for (int i = first; i <= last; i++) {
-        World& m = m_worlds[i];
-        m.destroy();
-    }
-    beginRemoveRows(QModelIndex(), first, last);
-    m_worlds.erase(m_worlds.begin() + first, m_worlds.begin() + last + 1);
-    endRemoveRows();
-    emit changed();
-    return true;
-}
-
 bool WorldList::resetIcon(int row)
 {
     if (row >= m_worlds.size() || row < 0)

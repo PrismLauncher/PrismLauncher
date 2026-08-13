@@ -77,9 +77,6 @@ class VersionFile : public ProblemContainer {
     /// Prism Launcher: version of this package
     QString version;
 
-    /// Prism Launcher: DEPRECATED dependency on a Minecraft version
-    QString dependsOnMinecraftVersion;
-
     /// Mojang: DEPRECATED used to version the Mojang version format
     int minimumLauncherVersion = -1;
 

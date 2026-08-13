@@ -39,7 +39,7 @@
 #include "Agent.h"
 #include "Library.h"
 
-class LaunchProfile : public ProblemProvider {
+class LaunchProfile {
    public:
     virtual ~LaunchProfile() {}
 
@@ -90,8 +90,7 @@ class LaunchProfile : public ProblemProvider {
                          const QString& tempPath,
                          bool addJarMods = true) const;
     bool hasTrait(const QString& trait) const;
-    ProblemSeverity getProblemSeverity() const override;
-    const QList<PatchProblem> getProblems() const override;
+    ProblemSeverity getProblemSeverity() const;
 
    private:
     /// the version of Minecraft - jar to use

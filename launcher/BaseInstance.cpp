@@ -211,14 +211,6 @@ void BaseInstance::addLinkedInstanceId(const QString& id)
     setLinkedInstances(linkedInstances);
 }
 
-bool BaseInstance::removeLinkedInstanceId(const QString& id)
-{
-    auto linkedInstances = getLinkedInstances();
-    auto numRemoved = linkedInstances.removeAll(id);
-    setLinkedInstances(linkedInstances);
-    return numRemoved > 0;
-}
-
 bool BaseInstance::isLinkedToInstanceId(const QString& id) const
 {
     auto linkedInstances = getLinkedInstances();

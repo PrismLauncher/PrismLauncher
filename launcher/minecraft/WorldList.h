@@ -67,9 +67,6 @@ class WorldList : public QAbstractListModel {
     /// Removes the world icon, if any
     virtual bool resetIcon(int index);
 
-    /// Deletes all the selected mods
-    virtual bool deleteWorlds(int first, int last);
-
     /// flags, mostly to support drag&drop
     virtual Qt::ItemFlags flags(const QModelIndex& index) const;
     /// get data for drag action

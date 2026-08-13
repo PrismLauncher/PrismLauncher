@@ -71,11 +71,9 @@ if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
     # Ensure our runtime library matches our vcpkg dependencies
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
 
-    # TODO(@getchoo): Do we actually need this???
-    if(CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreadedDLL")
-        set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release "")
-        set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release "")
-    endif()
+    # Map imported (Qt/vcpkg) Debug configs to Release: only Release binaries are shipped
+    set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release "")
+    set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release "")
 else()
     add_compile_options("$<$<COMPILE_LANGUAGE:C,CXX>:-fstack-protector-strong;--param=ssp-buffer-size=4>")
 
@@ -101,46 +99,6 @@ endif()
 if(CMAKE_GENERATOR STREQUAL "Unix Makefiles" OR CMAKE_GENERATOR MATCHES "^Ninja")
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
-
-option(USE_CLANG_TIDY "Enable the use of clang-tidy during compilation" OFF)
-
-if(USE_CLANG_TIDY)
-    find_program(CLANG_TIDY clang-tidy OPTIONAL)
-    if(CLANG_TIDY)
-        message(STATUS "Using clang-tidy during compilation")
-        set(CLANG_TIDY_COMMAND "${CLANG_TIDY}" "--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy")
-        set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_COMMAND})
-    else()
-        message(WARNING "Unable to find `clang-tidy`. Not using during compilation")
-    endif()
-endif()
-
-option(DEBUG_ADDRESS_SANITIZER "Enable Address Sanitizer in Debug builds" OFF)
-
-# If this is a Debug build turn on address sanitiser
-if (DEBUG_ADDRESS_SANITIZER)
-    message(STATUS "Address Sanitizer enabled for Debug builds, Turn it off with -DDEBUG_ADDRESS_SANITIZER=off")
-
-    set(USE_ASAN_COMPILE_OPTIONS $<AND:$<CONFIG:Debug,RelWithDebInfo>,$<COMPILE_LANGUAGE:C,CXX>>)
-    if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
-        message(STATUS "Using Address Sanitizer compile options for MSVC frontend")
-        add_compile_options(
-                $<${USE_ASAN_COMPILE_OPTIONS}:/fsanitize=address>
-                $<${USE_ASAN_COMPILE_OPTIONS}:/Oy->
-        )
-    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-        message(STATUS "Using Address Sanitizer compile options for GCC/Clang")
-        add_compile_options(
-                $<${USE_ASAN_COMPILE_OPTIONS}:-fsanitize=address,undefined>
-                $<${USE_ASAN_COMPILE_OPTIONS}:-fno-omit-frame-pointer>
-                $<${USE_ASAN_COMPILE_OPTIONS}:-fno-sanitize-recover=null>
-        )
-        link_libraries("asan" "ubsan")
-    else()
-        message(STATUS "Address Sanitizer not available on compiler ${CMAKE_CXX_COMPILER_ID}")
-    endif()
-endif()
-
 
 option(ENABLE_LTO "Enable Link Time Optimization" off)
 

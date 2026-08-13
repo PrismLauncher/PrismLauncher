@@ -100,12 +100,9 @@ void NewsChecker::rssDownloadFinished()
         QDomElement element = items.at(i).toElement();
         NewsEntryPtr entry;
         entry.reset(new NewsEntry());
-        QString errorMsg = "An unknown error occurred.";
-        if (NewsEntry::fromXmlElement(element, entry.get(), &errorMsg)) {
+        if (NewsEntry::fromXmlElement(element, entry.get())) {
             qDebug() << "Loaded news entry" << entry->title;
             m_newsEntries.append(entry);
-        } else {
-            qWarning() << "Failed to load news entry at index" << i << ":" << errorMsg;
         }
     }
 
@@ -128,14 +125,8 @@ bool NewsChecker::isLoadingNews() const
     return m_newsNetJob.get() != nullptr;
 }
 
-QString NewsChecker::getLastLoadErrorMsg() const
-{
-    return m_lastLoadError;
-}
-
 void NewsChecker::succeed()
 {
-    m_lastLoadError = "";
     qDebug() << "News loading succeeded.";
     m_newsNetJob.reset();
     emit newsLoaded();
@@ -143,7 +134,6 @@ void NewsChecker::succeed()
 
 void NewsChecker::fail(const QString& errorMsg)
 {
-    m_lastLoadError = errorMsg;
     qDebug() << "Failed to load news:" << errorMsg;
     m_newsNetJob.reset();
     emit newsLoadingFailed(errorMsg);

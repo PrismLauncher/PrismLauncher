@@ -109,7 +109,6 @@ auto ImgurUpload::Sink::finalize(QNetworkReply&) -> Task::State
         m_fail_reason = "Screenshot was not uploaded successfully";
         return Task::State::Failed;
     }
-    m_shot->m_imgurId = object.value("data").toObject().value("id").toString();
     m_shot->m_url = object.value("data").toObject().value("link").toString();
     m_shot->m_imgurDeleteHash = object.value("data").toObject().value("deletehash").toString();
     return Task::State::Succeeded;

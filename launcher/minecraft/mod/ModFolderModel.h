@@ -87,8 +87,6 @@ class ModFolderModel : public ResourceFolderModel {
     [[nodiscard]] Resource* createResource(const QFileInfo& file) override { return new Mod(file); }
     [[nodiscard]] Task* createParseTask(Resource& /*unused*/) override;
 
-    bool isValid();
-
     bool setResourceEnabled(const QModelIndexList& indexes, EnableAction action) override;
     bool deleteResources(const QModelIndexList& indexes) override;
 

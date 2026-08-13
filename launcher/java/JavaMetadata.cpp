@@ -68,12 +68,11 @@ MetadataPtr parseJavaMeta(const QJsonObject& in)
 
     if (in.contains("version")) {
         auto obj = Json::requireObject(in, "version");
-        auto name = obj["name"].toString("");
         auto major = obj["major"].toInteger();
         auto minor = obj["minor"].toInteger();
         auto security = obj["security"].toInteger();
         auto build = obj["build"].toInteger();
-        meta->version = JavaVersion(major, minor, security, build, name);
+        meta->version = JavaVersion(major, minor, security, build);
     }
     return meta;
 }

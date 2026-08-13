@@ -80,7 +80,6 @@ class MinecraftInstance : public BaseInstance {
     QString coreModsDir() const;
     QString nilModsDir() const;
     QString dataPacksDir();
-    QString modsCacheLocation() const;
     QString libDir() const;
     QString worldDir() const;
     QString resourcesDir() const;

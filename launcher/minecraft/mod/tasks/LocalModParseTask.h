@@ -15,13 +15,11 @@ ModDetails ReadQuiltModInfo(QByteArray contents);
 ModDetails ReadForgeInfo(QByteArray contents);
 ModDetails ReadLiteModInfo(QByteArray contents);
 
-enum class ProcessingLevel { Full, BasicInfoOnly };
+bool process(Mod& mod);
 
-bool process(Mod& mod, ProcessingLevel level = ProcessingLevel::Full);
-
-bool processZIP(Mod& mod, ProcessingLevel level = ProcessingLevel::Full);
-bool processFolder(Mod& mod, ProcessingLevel level = ProcessingLevel::Full);
-bool processLitemod(Mod& mod, ProcessingLevel level = ProcessingLevel::Full);
+bool processZIP(Mod& mod);
+bool processFolder(Mod& mod);
+bool processLitemod(Mod& mod);
 
 /** Checks whether a file is valid as a mod or not. */
 bool validate(QFileInfo file);
@@ -42,14 +40,13 @@ class LocalModParseTask : public Task {
     bool canAbort() const override { return true; }
     bool abort() override;
 
-    LocalModParseTask(int token, ResourceType type, const QFileInfo& modFile);
+    LocalModParseTask(int token, const QFileInfo& modFile);
     void executeTask() override;
 
     int token() const { return m_token; }
 
    private:
     int m_token;
-    ResourceType m_type;
     QFileInfo m_modFile;
     ResultPtr m_result;
 

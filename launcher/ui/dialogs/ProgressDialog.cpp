@@ -175,11 +175,6 @@ int ProgressDialog::execWithTask(std::unique_ptr<Task>&& task)
     connect(this, &ProgressDialog::destroyed, task.get(), &Task::deleteLater);
     return execWithTask(task.release());
 }
-int ProgressDialog::execWithTask(std::unique_ptr<Task>& task)
-{
-    connect(this, &ProgressDialog::destroyed, task.get(), &Task::deleteLater);
-    return execWithTask(task.release());
-}
 
 bool ProgressDialog::handleImmediateResult(QDialog::DialogCode& result)
 {
@@ -192,11 +187,6 @@ bool ProgressDialog::handleImmediateResult(QDialog::DialogCode& result)
         return true;
     }
     return false;
-}
-
-Task* ProgressDialog::getTask()
-{
-    return m_task;
 }
 
 void ProgressDialog::onTaskStarted() {}

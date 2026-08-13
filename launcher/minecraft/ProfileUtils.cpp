@@ -45,51 +45,6 @@
 
 namespace ProfileUtils {
 
-static const int currentOrderFileVersion = 1;
-
-bool readOverrideOrders(QString path, PatchOrder& order)
-{
-    QFile orderFile(path);
-    if (!orderFile.exists()) {
-        qWarning() << "Order file doesn't exist. Ignoring.";
-        return false;
-    }
-    if (!orderFile.open(QFile::ReadOnly)) {
-        qCritical() << "Couldn't open" << orderFile.fileName() << "for reading:" << orderFile.errorString();
-        qWarning() << "Ignoring overridden order";
-        return false;
-    }
-
-    // and it's valid JSON
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson(orderFile.readAll(), &error);
-    if (error.error != QJsonParseError::NoError) {
-        qCritical() << "Couldn't parse" << orderFile.fileName() << ":" << error.errorString();
-        qWarning() << "Ignoring overridden order";
-        return false;
-    }
-
-    // and then read it and process it if all above is true.
-    try {
-        auto obj = Json::requireObject(doc);
-        // check order file version.
-        auto version = Json::requireInteger(obj.value("version"));
-        if (version != currentOrderFileVersion) {
-            throw JSONValidationError(QObject::tr("Invalid order file version, expected %1").arg(currentOrderFileVersion));
-        }
-        auto orderArray = Json::requireArray(obj.value("order"));
-        for (auto item : orderArray) {
-            order.append(Json::requireString(item));
-        }
-    } catch ([[maybe_unused]] const JSONValidationError& err) {
-        qCritical() << "Couldn't parse" << orderFile.fileName() << ": bad file format";
-        qWarning() << "Ignoring overridden order";
-        order.clear();
-        return false;
-    }
-    return true;
-}
-
 static VersionFilePtr createErrorVersionFile(QString fileId, QString filepath, QString error)
 {
     auto outError = std::make_shared<VersionFile>();

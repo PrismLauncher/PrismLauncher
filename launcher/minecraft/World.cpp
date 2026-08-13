@@ -501,18 +501,6 @@ void World::loadFromLevelDat(QByteArray data)
     qDebug() << "GameType:" << m_gameType.toLogString();
 }
 
-bool World::replace(World& with)
-{
-    if (!destroy())
-        return false;
-    bool success = FS::copy(with.m_containerFile.filePath(), m_containerFile.path())();
-    if (success) {
-        m_folderName = with.m_folderName;
-        m_containerFile.refresh();
-    }
-    return success;
-}
-
 bool World::destroy()
 {
     if (!m_isValid)

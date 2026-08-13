@@ -15,18 +15,4 @@ BaseExternalTool::BaseExternalTool(SettingsObject* settings, BaseInstance* insta
 
 BaseExternalTool::~BaseExternalTool() {}
 
-BaseDetachedTool::BaseDetachedTool(SettingsObject* settings, BaseInstance* instance, QObject* parent)
-    : BaseExternalTool(settings, instance, parent)
-{}
-
-void BaseDetachedTool::run()
-{
-    runImpl();
-}
-
 BaseExternalToolFactory::~BaseExternalToolFactory() {}
-
-BaseDetachedTool* BaseDetachedToolFactory::createDetachedTool(BaseInstance* instance, QObject* parent)
-{
-    return qobject_cast<BaseDetachedTool*>(createTool(instance, parent));
-}

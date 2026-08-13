@@ -18,18 +18,6 @@ class BaseExternalTool : public QObject {
     SettingsObject* globalSettings;
 };
 
-class BaseDetachedTool : public BaseExternalTool {
-    Q_OBJECT
-   public:
-    explicit BaseDetachedTool(SettingsObject* settings, BaseInstance* instance, QObject* parent = 0);
-
-   public slots:
-    void run();
-
-   protected:
-    virtual void runImpl() = 0;
-};
-
 class BaseExternalToolFactory {
    public:
     virtual ~BaseExternalToolFactory();
@@ -45,9 +33,4 @@ class BaseExternalToolFactory {
 
    protected:
     SettingsObject* globalSettings;
-};
-
-class BaseDetachedToolFactory : public BaseExternalToolFactory {
-   public:
-    virtual BaseDetachedTool* createDetachedTool(BaseInstance* instance, QObject* parent = 0);
 };

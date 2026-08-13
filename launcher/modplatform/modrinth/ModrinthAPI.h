@@ -20,14 +20,7 @@ class ModrinthAPI final : public ResourceAPI {
         return s_instance;
     }
 
-    std::pair<Task::Ptr, QByteArray*> currentVersion(const QString& hash, const QString& hash_format) const;
-
     std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, QString hash_format) const;
-
-    std::pair<Task::Ptr, QByteArray*> latestVersion(const QString& hash,
-                                                    const QString& hash_format,
-                                                    std::optional<std::vector<Version>> mcVersions,
-                                                    std::optional<ModPlatform::ModLoaderTypes> loaders) const;
 
     std::pair<Task::Ptr, QByteArray*> latestVersions(const QStringList& hashes,
                                                      const QString& hash_format,

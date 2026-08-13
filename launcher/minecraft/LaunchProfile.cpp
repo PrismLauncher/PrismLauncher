@@ -246,12 +246,6 @@ void LaunchProfile::applyProblemSeverity(ProblemSeverity severity)
     }
 }
 
-const QList<PatchProblem> LaunchProfile::getProblems() const
-{
-    // FIXME: implement something that actually makes sense here
-    return {};
-}
-
 QString LaunchProfile::getMinecraftVersion() const
 {
     return m_minecraftVersion;

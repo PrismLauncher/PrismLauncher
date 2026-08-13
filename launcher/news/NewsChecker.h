@@ -32,12 +32,6 @@ class NewsChecker : public QObject {
     NewsChecker(QNetworkAccessManager* network, const QString& feedUrl);
 
     /*!
-     * Returns the error message for the last time the news was loaded.
-     * Empty string if the last load was successful.
-     */
-    QString getLastLoadErrorMsg() const;
-
-    /*!
      * Returns true if the news has been loaded successfully.
      */
     bool isNewsLoaded() const;
@@ -87,18 +81,12 @@ class NewsChecker : public QObject {
     //! The cache entry for the feed.
     MetaEntryPtr m_entry;
 
-    /*!
-     * Gets the error message that was given last time the news was loaded.
-     * If the last news load succeeded, this will be an empty string.
-     */
-    QString m_lastLoadError;
-
     QNetworkAccessManager* m_network;
 
    protected slots:
-    /// Emits newsLoaded() and sets m_lastLoadError to empty string.
+    /// Emits newsLoaded().
     void succeed();
 
-    /// Emits newsLoadingFailed() and sets m_lastLoadError to the given message.
+    /// Emits newsLoadingFailed() with the given message.
     void fail(const QString& errorMsg);
 };

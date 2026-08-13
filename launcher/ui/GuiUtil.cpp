@@ -79,11 +79,6 @@ QString truncateLogForMclogs(const QString& logContent)
     return logContent;
 }
 
-std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QFileInfo& filePath, QWidget* parentWidget)
-{
-    return uploadPaste(name, FS::read(filePath.absoluteFilePath()), parentWidget);
-};
-
 std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& text, QWidget* parentWidget)
 {
     ProgressDialog dialog(parentWidget);

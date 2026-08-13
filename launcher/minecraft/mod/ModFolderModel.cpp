@@ -239,12 +239,7 @@ int ModFolderModel::columnCount(const QModelIndex& parent) const
 
 Task* ModFolderModel::createParseTask(Resource& resource)
 {
-    return new LocalModParseTask(m_nextResolutionTicket, resource.type(), resource.fileinfo());
-}
-
-bool ModFolderModel::isValid()
-{
-    return m_dir.exists() && m_dir.isReadable();
+    return new LocalModParseTask(m_nextResolutionTicket, resource.fileinfo());
 }
 
 void ModFolderModel::onParseSucceeded(int ticket, const QString& resourceId)

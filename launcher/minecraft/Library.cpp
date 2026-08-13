@@ -300,16 +300,6 @@ QString Library::getCompatibleNative(const RuntimeContext& runtimeContext) const
 }
 
 /**
- * @brief Set the storage prefix for the library.
- *
- * @param prefix The storage prefix to set.
- */
-void Library::setStoragePrefix(QString prefix)
-{
-    m_storagePrefix = prefix;
-}
-
-/**
  * @brief Get the default storage prefix for libraries.
  *
  * @return QString The default storage prefix.
