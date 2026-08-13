@@ -1298,7 +1298,7 @@ target_link_libraries(Launcher_logic
     Launcher_rainbow
 )
 if (TARGET ${Launcher_QT_DBUS})
-    add_compile_definitions(WITH_QTDBUS)
+    target_compile_definitions(Launcher_logic PUBLIC WITH_QTDBUS)
 endif()
 
 if(APPLE)
