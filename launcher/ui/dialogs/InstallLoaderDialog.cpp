@@ -176,7 +176,7 @@ bool InstallLoaderDialog::resolveLoaderConflicts(InstallLoaderPage* page)
         const QString conflictVersion = QString("%1 %2").arg(conflict->getName(), conflict->getVersion());
         auto* msgBox = CustomMessageBox::selectable(
             this, tr("Installing a second loader"),
-            tr("%1 is known to conflict with %2, which is already enabled on this instance. Having both enabled at the same time will "
+            tr("%1 is known to conflict with %2, which is enabled on this instance. Having both enabled at the same time will "
                "likely break the instance.\n\nWhat would you like to do with %2?")
                 .arg(targetVersion, conflictVersion),
             QMessageBox::Warning, QMessageBox::Cancel);
