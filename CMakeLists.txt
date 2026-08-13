@@ -316,7 +316,7 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 6)
         HINTS
             C:/Qt/*/*/lib/cmake
             /opt/qt/*/*/lib/cmake
-            $ENV{MINGW_PREFIX}/opt/qt/*/*/li/cmake
+            $ENV{MINGW_PREFIX}/opt/qt/*/*/lib/cmake
     )
     find_package(Qt6 COMPONENTS DBus HINTS /opt/qt/*/*/lib/cmake)
     list(APPEND Launcher_QT_DBUS Qt6::DBus)
