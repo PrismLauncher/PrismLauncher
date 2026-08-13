@@ -44,6 +44,7 @@ struct RegReplace {
 };
 
 static const QVector<RegReplace> anonymizeRules = {
+    // OS username
     RegReplace(QRegularExpression("C:\\\\Users\\\\([^\\\\]+)\\\\", QRegularExpression::CaseInsensitiveOption),
                "C:\\Users\\********\\"),  // windows
     RegReplace(QRegularExpression("C:\\/Users\\/([^\\/]+)\\/", QRegularExpression::CaseInsensitiveOption),
@@ -52,19 +53,32 @@ static const QVector<RegReplace> anonymizeRules = {
                "/home/********/"),  // linux
     RegReplace(QRegularExpression("(?<!\\\\w)\\/Users\\/[^\\/]+\\/", QRegularExpression::CaseInsensitiveOption),
                "/Users/********/"),  // macos
+    // Tokens
     RegReplace(QRegularExpression("\\(Session ID is [^\\)]+\\)", QRegularExpression::CaseInsensitiveOption),
                "(Session ID is <SESSION_TOKEN>)"),  // SESSION_TOKEN
     RegReplace(QRegularExpression("new refresh token: \"[^\"]+\"", QRegularExpression::CaseInsensitiveOption),
                "new refresh token: \"<TOKEN>\""),  // refresh token
     RegReplace(QRegularExpression("\"device_code\" :  \"[^\"]+\"", QRegularExpression::CaseInsensitiveOption),
                "\"device_code\" :  \"<DEVICE_CODE>\""),  // device code
-    RegReplace(QRegularExpression("Setting user: [a-zA-Z0-9_]{2,16}", QRegularExpression::CaseInsensitiveOption),
-               "Setting user: *****"),  // MC username
+    // MC username and UUID
+    RegReplace(QRegularExpression("Setting user: [a-zA-Z0-9_]{2,16}"), "Setting user: *****"),
+    RegReplace(QRegularExpression("[a-zA-Z0-9_]{2,16} joined the game"), "***** joined the game"),
+    RegReplace(QRegularExpression(R"(Player \[[a-zA-Z0-9_]{2,16}\] joined\.)"), "***** joined the game"),
+    RegReplace(QRegularExpression("[a-zA-Z0-9_]{2,16} lost connection: "), "***** lost connection: "),
+    RegReplace(QRegularExpression("[a-zA-Z0-9_]{2,16} left the game"), "***** left the game"),
+    RegReplace(QRegularExpression(R"([a-zA-Z0-9_]{2,16} has made the advancement \[[)"), "***** has made the advancement ["),
+    RegReplace(QRegularExpression("UUID of player [a-zA-Z0-9_]{2,16} is [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"), "UUID of player ***** is *****"),
+    RegReplace(QRegularExpression("id=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12},name=[a-zA-Z0-9_]{2,16}"), "id=*****,name=*****"),
+    RegReplace(QRegularExpression(R"([a-zA-Z0-9_]{2,16}\[[^\]]{3,30}\] logged in with entity id )"), "*****[****] logged in with entity id "),
+    RegReplace(QRegularExpression("[a-zA-Z0-9_]{2,16} \\([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\)"), "***** (*****)"),
+    RegReplace(QRegularExpression("ServerPlayer\\['[a-zA-Z0-9_]{2,16}'"), "ServerPlayer['*****'"), // crash report
+    RegReplace(QRegularExpression("Player: [a-zA-Z0-9_]{2,16}"), "Player: *****"),
+    RegReplace(QRegularExpression("Authenticating to Mojang as [a-zA-Z0-9_]{2,16} \\([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\)"), "Authenticating to Mojang as ***** (*****)"),
 };
 
 void anonymizeLog(QString& log)
 {
-    for (auto rule : anonymizeRules) {
+    for (const auto& rule : anonymizeRules) {
         log.replace(rule.reg, rule.with);
     }
 }
