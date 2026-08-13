@@ -38,7 +38,9 @@ QVariant Setting::defValue() const
 
 void Setting::set(QVariant value)
 {
-    emit SettingChanged(*this, value);
+    if (const auto currentValue = get(); value != currentValue) {
+        emit SettingChanged(*this, value);
+    }
 }
 
 void Setting::reset()
