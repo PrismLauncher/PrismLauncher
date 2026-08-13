@@ -62,17 +62,19 @@ static const QVector<RegReplace> anonymizeRules = {
                "\"device_code\" :  \"<DEVICE_CODE>\""),  // device code
     // MC username and UUID
     RegReplace(QRegularExpression("Setting user: [a-zA-Z0-9_]{2,16}"), "Setting user: *****"),
+    RegReplace(QRegularExpression("--username, [a-zA-Z0-9_]{2,16}"), "--username, *****"),
     RegReplace(QRegularExpression("[a-zA-Z0-9_]{2,16} joined the game"), "***** joined the game"),
     RegReplace(QRegularExpression(R"(Player \[[a-zA-Z0-9_]{2,16}\] joined\.)"), "***** joined the game"),
     RegReplace(QRegularExpression("[a-zA-Z0-9_]{2,16} lost connection: "), "***** lost connection: "),
     RegReplace(QRegularExpression("[a-zA-Z0-9_]{2,16} left the game"), "***** left the game"),
-    RegReplace(QRegularExpression(R"([a-zA-Z0-9_]{2,16} has made the advancement \[[)"), "***** has made the advancement ["),
+    RegReplace(QRegularExpression(R"([a-zA-Z0-9_]{2,16} has (made the advancement)|(reached the goal) \[[)"), "***** has made the advancement ["),
     RegReplace(QRegularExpression("UUID of player [a-zA-Z0-9_]{2,16} is [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"), "UUID of player ***** is *****"),
     RegReplace(QRegularExpression("id=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12},name=[a-zA-Z0-9_]{2,16}"), "id=*****,name=*****"),
     RegReplace(QRegularExpression(R"([a-zA-Z0-9_]{2,16}\[[^\]]{3,30}\] logged in with entity id )"), "*****[****] logged in with entity id "),
     RegReplace(QRegularExpression("[a-zA-Z0-9_]{2,16} \\([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\)"), "***** (*****)"),
     RegReplace(QRegularExpression("ServerPlayer\\['[a-zA-Z0-9_]{2,16}'"), "ServerPlayer['*****'"), // crash report
     RegReplace(QRegularExpression("Player: [a-zA-Z0-9_]{2,16}"), "Player: *****"),
+    RegReplace(QRegularExpression("player [a-zA-Z0-9_]{2,16}"), "player *****"),
     RegReplace(QRegularExpression("Authenticating to Mojang as [a-zA-Z0-9_]{2,16} \\([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\)"), "Authenticating to Mojang as ***** (*****)"),
 };
 
