@@ -34,22 +34,20 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::matchFingerprints(const QList<uint>&
     return { netJob, response };
 }
 
-QString FlameAPI::getModFileChangelog(int modId, int fileId) const
+QString FlameAPI::getFlameText(const QString& endpoint) const
 {
     QEventLoop lock;
-    QString changelog;
+    QString text;
 
-    auto netJob = makeShared<NetJob>(QString("Flame::FileChangelog"), APPLICATION->network());
-    auto [action, response] = Net::ApiRequest::makeByteArray(
-        QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2/changelog")
-            .arg(QString::fromStdString(std::to_string(modId)), QString::fromStdString(std::to_string(fileId))));
+    auto netJob = makeShared<NetJob>(QString("Flame::%1").arg(endpoint), APPLICATION->network());
+    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/%1").arg(endpoint));
     netJob->addNetAction(action);
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [&netJob, response, &changelog] {
+    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [&netJob, response, &text, endpoint] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Flame::FileChangelog at" << parse_error.offset
+            qWarning() << "Error while parsing JSON response from Flame::" << endpoint << "at" << parse_error.offset
                        << "reason:" << parse_error.errorString();
             qWarning() << *response;
 
@@ -57,7 +55,7 @@ QString FlameAPI::getModFileChangelog(int modId, int fileId) const
             return;
         }
 
-        changelog = doc.object()["data"].toString();
+        text = doc.object()["data"].toString();
     });
 
     QObject::connect(netJob.get(), &NetJob::finished, &lock, &QEventLoop::quit);
@@ -65,40 +63,7 @@ QString FlameAPI::getModFileChangelog(int modId, int fileId) const
     netJob->start();
     lock.exec();
 
-    return changelog;
-}
-
-QString FlameAPI::getModDescription(int modId) const
-{
-    QEventLoop lock;
-    QString description;
-
-    auto netJob = makeShared<NetJob>(QString("Flame::ModDescription"), APPLICATION->network());
-    auto [action, response] =
-        Net::ApiRequest::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/description").arg(QString::number(modId)));
-    netJob->addNetAction(action);
-
-    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [&netJob, response, &description] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Flame::ModDescription at" << parse_error.offset
-                       << "reason:" << parse_error.errorString();
-            qWarning() << *response;
-
-            netJob->failed(parse_error.errorString());
-            return;
-        }
-
-        description = doc.object()["data"].toString();
-    });
-
-    QObject::connect(netJob.get(), &NetJob::finished, &lock, &QEventLoop::quit);
-
-    netJob->start();
-    lock.exec();
-
-    return description;
+    return text;
 }
 
 std::pair<Task::Ptr, QByteArray*> FlameAPI::getProjects(QStringList addonIds) const

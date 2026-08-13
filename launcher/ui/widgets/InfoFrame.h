@@ -77,6 +77,7 @@ class InfoFrame : public QFrame {
    private:
     void updateHiddenState();
     void resetScroll();
+    void setInfo(QString name, const QString& homepage, const QString& description, const QPixmap& image);
 
    private:
     Ui::InfoFrame* ui;

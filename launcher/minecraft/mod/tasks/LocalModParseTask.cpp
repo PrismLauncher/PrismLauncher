@@ -276,6 +276,56 @@ ModDetails ReadMCModTOML(QByteArray contents)
     return details;
 }
 
+static void parseLicenseAndIcon(const QJsonObject& object, ModDetails& details)
+{
+    if (object.contains("license")) {
+        auto license = object.value("license");
+        if (license.isArray()) {
+            for (auto l : license.toArray()) {
+                if (l.isString()) {
+                    details.licenses.append(ModLicense(l.toString()));
+                } else if (l.isObject()) {
+                    auto obj = l.toObject();
+                    details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(),
+                                                       obj.value("url").toString(), obj.value("description").toString()));
+                }
+            }
+        } else if (license.isString()) {
+            details.licenses.append(ModLicense(license.toString()));
+        } else if (license.isObject()) {
+            auto obj = license.toObject();
+            details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(), obj.value("url").toString(),
+                                               obj.value("description").toString()));
+        }
+    }
+
+    if (object.contains("icon")) {
+        auto icon = object.value("icon");
+        if (icon.isObject()) {
+            auto obj = icon.toObject();
+            // take the largest icon
+            int largest = 0;
+            for (auto key : obj.keys()) {
+                auto size = key.split('x').first().toInt();
+                if (size > largest) {
+                    largest = size;
+                }
+            }
+            if (largest > 0) {
+                auto key = QString::number(largest) + "x" + QString::number(largest);
+                details.icon_file = obj.value(key).toString();
+            } else {  // parsing the sizes failed
+                // take the first
+                if (auto it = obj.begin(); it != obj.end()) {
+                    details.icon_file = it->toString();
+                }
+            }
+        } else if (icon.isString()) {
+            details.icon_file = icon.toString();
+        }
+    }
+}
+
 // https://fabricmc.net/wiki/documentation:fabric_mod_json
 ModDetails ReadFabricModInfo(QByteArray contents)
 {
@@ -313,52 +363,7 @@ ModDetails ReadFabricModInfo(QByteArray contents)
             }
         }
 
-        if (object.contains("license")) {
-            auto license = object.value("license");
-            if (license.isArray()) {
-                for (auto l : license.toArray()) {
-                    if (l.isString()) {
-                        details.licenses.append(ModLicense(l.toString()));
-                    } else if (l.isObject()) {
-                        auto obj = l.toObject();
-                        details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(),
-                                                           obj.value("url").toString(), obj.value("description").toString()));
-                    }
-                }
-            } else if (license.isString()) {
-                details.licenses.append(ModLicense(license.toString()));
-            } else if (license.isObject()) {
-                auto obj = license.toObject();
-                details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(), obj.value("url").toString(),
-                                                   obj.value("description").toString()));
-            }
-        }
-
-        if (object.contains("icon")) {
-            auto icon = object.value("icon");
-            if (icon.isObject()) {
-                auto obj = icon.toObject();
-                // take the largest icon
-                int largest = 0;
-                for (auto key : obj.keys()) {
-                    auto size = key.split('x').first().toInt();
-                    if (size > largest) {
-                        largest = size;
-                    }
-                }
-                if (largest > 0) {
-                    auto key = QString::number(largest) + "x" + QString::number(largest);
-                    details.icon_file = obj.value(key).toString();
-                } else {  // parsing the sizes failed
-                    // take the first
-                    if (auto it = obj.begin(); it != obj.end()) {
-                        details.icon_file = it->toString();
-                    }
-                }
-            } else if (icon.isString()) {
-                details.icon_file = icon.toString();
-            }
-        }
+        parseLicenseAndIcon(object, details);
 
         if (object.contains("depends")) {
             auto depends = object.value("depends");
@@ -411,52 +416,8 @@ ModDetails ReadQuiltModInfo(QByteArray contents)
                 details.issue_tracker = Json::requireString(modContact.value("issues"));
             }
 
-            if (modMetadata.contains("license")) {
-                auto license = modMetadata.value("license");
-                if (license.isArray()) {
-                    for (auto l : license.toArray()) {
-                        if (l.isString()) {
-                            details.licenses.append(ModLicense(l.toString()));
-                        } else if (l.isObject()) {
-                            auto obj = l.toObject();
-                            details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(),
-                                                               obj.value("url").toString(), obj.value("description").toString()));
-                        }
-                    }
-                } else if (license.isString()) {
-                    details.licenses.append(ModLicense(license.toString()));
-                } else if (license.isObject()) {
-                    auto obj = license.toObject();
-                    details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(),
-                                                       obj.value("url").toString(), obj.value("description").toString()));
-                }
-            }
+            parseLicenseAndIcon(modMetadata, details);
 
-            if (modMetadata.contains("icon")) {
-                auto icon = modMetadata.value("icon");
-                if (icon.isObject()) {
-                    auto obj = icon.toObject();
-                    // take the largest icon
-                    int largest = 0;
-                    for (auto key : obj.keys()) {
-                        auto size = key.split('x').first().toInt();
-                        if (size > largest) {
-                            largest = size;
-                        }
-                    }
-                    if (largest > 0) {
-                        auto key = QString::number(largest) + "x" + QString::number(largest);
-                        details.icon_file = obj.value(key).toString();
-                    } else {  // parsing the sizes failed
-                        // take the first
-                        if (auto it = obj.begin(); it != obj.end()) {
-                            details.icon_file = it->toString();
-                        }
-                    }
-                } else if (icon.isString()) {
-                    details.icon_file = icon.toString();
-                }
-            }
             if (object.contains("depends")) {
                 auto depends = object.value("depends");
                 if (depends.isArray()) {

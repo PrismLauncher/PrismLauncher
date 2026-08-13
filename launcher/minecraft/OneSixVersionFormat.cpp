@@ -151,7 +151,7 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument& doc
         for (auto libVal : requireArray(root.value("jarMods"))) {
             QJsonObject libObj = requireObject(libVal);
             // parse the jarmod
-            auto lib = OneSixVersionFormat::jarModFromJson(*out, libObj, filename);
+            auto lib = OneSixVersionFormat::libraryFromJson(*out, libObj, filename);
             // and add to jar mods
             out->jarMods.append(lib);
         }
@@ -170,7 +170,7 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument& doc
         for (auto libVal : requireArray(root.value("mods"))) {
             QJsonObject libObj = requireObject(libVal);
             // parse the jarmod
-            auto lib = OneSixVersionFormat::modFromJson(*out, libObj, filename);
+            auto lib = OneSixVersionFormat::libraryFromJson(*out, libObj, filename);
             // and add to jar mods
             out->mods.append(lib);
         }
@@ -330,14 +330,14 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr& patch
     if (!patch->jarMods.isEmpty()) {
         QJsonArray array;
         for (auto value : patch->jarMods) {
-            array.append(OneSixVersionFormat::jarModtoJson(value.get()));
+            array.append(OneSixVersionFormat::libraryToJson(value.get()));
         }
         root.insert("jarMods", array);
     }
     if (!patch->mods.isEmpty()) {
         QJsonArray array;
         for (auto value : patch->jarMods) {
-            array.append(OneSixVersionFormat::modtoJson(value.get()));
+            array.append(OneSixVersionFormat::libraryToJson(value.get()));
         }
         root.insert("mods", array);
     }
@@ -389,24 +389,4 @@ LibraryPtr OneSixVersionFormat::plusJarModFromJson([[maybe_unused]] ProblemConta
         out->setDisplayName(displayName);
     }
     return out;
-}
-
-LibraryPtr OneSixVersionFormat::jarModFromJson(ProblemContainer& problems, const QJsonObject& libObj, const QString& filename)
-{
-    return libraryFromJson(problems, libObj, filename);
-}
-
-QJsonObject OneSixVersionFormat::jarModtoJson(Library* jarmod)
-{
-    return libraryToJson(jarmod);
-}
-
-LibraryPtr OneSixVersionFormat::modFromJson(ProblemContainer& problems, const QJsonObject& libObj, const QString& filename)
-{
-    return libraryFromJson(problems, libObj, filename);
-}
-
-QJsonObject OneSixVersionFormat::modtoJson(Library* jarmod)
-{
-    return libraryToJson(jarmod);
 }

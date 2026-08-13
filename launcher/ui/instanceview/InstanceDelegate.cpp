@@ -46,27 +46,7 @@
 #include "BaseInstance.h"
 #include "InstanceList.h"
 #include "InstanceView.h"
-
-// Origin: Qt
-static void viewItemTextLayout(QTextLayout& textLayout, int lineWidth, qreal& height, qreal& widthUsed)
-{
-    height = 0;
-    widthUsed = 0;
-    textLayout.beginLayout();
-    QString str = textLayout.text();
-    while (true) {
-        QTextLine line = textLayout.createLine();
-        if (!line.isValid())
-            break;
-        if (line.textLength() == 0)
-            break;
-        line.setLineWidth(lineWidth);
-        line.setPosition(QPointF(0, height));
-        height += line.height();
-        widthUsed = qMax(widthUsed, line.naturalTextWidth());
-    }
-    textLayout.endLayout();
-}
+#include "ui/widgets/Common.h"
 
 ListViewDelegate::ListViewDelegate(QObject* parent) : QStyledItemDelegate(parent) {}
 
@@ -171,7 +151,7 @@ static QSize viewItemTextSize(const QStyleOptionViewItem* option)
     const int textMargin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, option, option->widget) + 1;
     QRect bounds(0, 0, 100 - 2 * textMargin, 600);
     qreal height = 0, widthUsed = 0;
-    viewItemTextLayout(textLayout, bounds.width(), height, widthUsed);
+    viewItemTextLayout(textLayout, bounds.width(), height, &widthUsed);
     const QSize size(qCeil(widthUsed), qCeil(height));
     return QSize(size.width() + 2 * textMargin, size.height());
 }
@@ -296,7 +276,7 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     textLayout.setText(opt.text);
 
     qreal width, height;
-    viewItemTextLayout(textLayout, textRect.width(), height, width);
+    viewItemTextLayout(textLayout, textRect.width(), height, &width);
 
     const int lineCount = textLayout.lineCount();
 

@@ -421,7 +421,7 @@ void FlameManagedPackPage::suggestVersion()
     auto version = m_pack.versions.at(index);
 
     ui->changelogTextBrowser->setHtml(
-        StringUtils::htmlListPatch(FlameAPI::get().getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt())));
+        StringUtils::htmlListPatch(FlameAPI::get().getFlameText(QString("mods/%1/files/%2/changelog").arg(m_inst->getManagedPackID().toInt(), version.fileId.toInt()))));
 
     ManagedPackPage::suggestVersion();
 }

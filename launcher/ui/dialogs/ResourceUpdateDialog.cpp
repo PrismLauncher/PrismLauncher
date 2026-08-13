@@ -237,7 +237,7 @@ void ResourceUpdateDialog::checkCandidates()
             for (const auto& dep : depTask->getDependecies()) {
                 auto changelog = dep->version.changelog;
                 if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME) {
-                    changelog = FlameAPI::get().getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
+                    changelog = FlameAPI::get().getFlameText(QString("mods/%1/files/%2/changelog").arg(dep->version.addonId.toInt(), dep->version.fileId.toInt()));
                 }
 
                 auto [maybe_installed, required_by_names, required_by_ids] = dependencyExtraInfo.value(dep->version.addonId.toString());

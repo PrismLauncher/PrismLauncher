@@ -215,39 +215,32 @@ QString InfoFrame::renderColorCodes(QString input)
     return html;
 }
 
-void InfoFrame::updateWithResourcePack(ResourcePack& resource_pack)
+void InfoFrame::setInfo(QString name, const QString& homepage, const QString& description, const QPixmap& image)
 {
-    QString name = renderColorCodes(resource_pack.name());
-
-    const QString homepage = resource_pack.homepage();
     if (!homepage.isEmpty()) {
         name = "<a href=\"" + homepage + "\">" + name + "</a>";
     }
 
     setName(name);
-    setDescription(renderColorCodes(resource_pack.description()));
-    setImage(resource_pack.image({ 64, 64 }));
+    setDescription(description);
+    setImage(image);
+}
+
+void InfoFrame::updateWithResourcePack(ResourcePack& resource_pack)
+{
+    setInfo(renderColorCodes(resource_pack.name()), resource_pack.homepage(), renderColorCodes(resource_pack.description()),
+            resource_pack.image({ 64, 64 }));
 }
 
 void InfoFrame::updateWithDataPack(DataPack& data_pack)
 {
-    setName(renderColorCodes(data_pack.name()));
-    setDescription(renderColorCodes(data_pack.description()));
-    setImage(data_pack.image({ 64, 64 }));
+    setInfo(renderColorCodes(data_pack.name()), {}, renderColorCodes(data_pack.description()), data_pack.image({ 64, 64 }));
 }
 
 void InfoFrame::updateWithTexturePack(TexturePack& texture_pack)
 {
-    QString name = renderColorCodes(texture_pack.name());
-
-    const QString homepage = texture_pack.homepage();
-    if (!homepage.isEmpty()) {
-        name = "<a href=\"" + homepage + "\">" + name + "</a>";
-    }
-
-    setName(name);
-    setDescription(renderColorCodes(texture_pack.description()));
-    setImage(texture_pack.image({ 64, 64 }));
+    setInfo(renderColorCodes(texture_pack.name()), texture_pack.homepage(), renderColorCodes(texture_pack.description()),
+            texture_pack.image({ 64, 64 }));
 }
 
 void InfoFrame::clear()

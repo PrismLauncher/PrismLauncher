@@ -23,8 +23,7 @@ class FlameAPI final : public ResourceAPI {
         return s_instance;
     }
 
-    QString getModFileChangelog(int modId, int fileId) const;
-    QString getModDescription(int modId) const;
+    QString getFlameText(const QString& endpoint) const;
 
     std::optional<ModPlatform::IndexedVersion> getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
                                                                 QList<ModPlatform::ModLoaderType> instanceLoaders,

@@ -21,12 +21,4 @@ class OneSixVersionFormat {
                                          const QJsonObject& libObj,
                                          const QString& filename,
                                          const QString& originalName);
-
-    // new jar mods derived from libraries
-    static LibraryPtr jarModFromJson(ProblemContainer& problems, const QJsonObject& libObj, const QString& filename);
-    static QJsonObject jarModtoJson(Library* jarmod);
-
-    // mods, also derived from libraries
-    static LibraryPtr modFromJson(ProblemContainer& problems, const QJsonObject& libObj, const QString& filename);
-    static QJsonObject modtoJson(Library* jarmod);
 };

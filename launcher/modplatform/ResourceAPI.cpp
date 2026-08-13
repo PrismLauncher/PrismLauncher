@@ -8,6 +8,26 @@
 
 #include "net/ApiRequest.h"
 
+namespace {
+template <typename T>
+void bindFailHandlers(Task::Ptr netJob, ResourceAPI::Callback<T> callbacks)
+{
+    auto weak = netJob.toWeakRef();
+    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [weak, callbacks](const QString& reason) {
+        int network_error_code = -1;
+        if (auto netJob = qSharedPointerDynamicCast<NetJob>(weak.lock()); netJob) {
+            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
+                network_error_code = failed_action->replyStatusCode();
+        }
+        callbacks.on_fail(reason, network_error_code);
+    });
+    QObject::connect(netJob.get(), &NetJob::aborted, netJob.get(), [callbacks] {
+        if (callbacks.on_abort != nullptr)
+            callbacks.on_abort();
+    });
+}
+}  // namespace
+
 Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatform::IndexedPack::Ptr>>&& callbacks) const
 {
     auto search_url_optional = getSearchURL(args);
@@ -55,22 +75,7 @@ Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatf
         callbacks.on_succeed(newList);
     });
 
-    // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
-    // This prevents the lambda from extending the lifetime of the shared resource,
-    // as it only temporarily locks the resource when needed.
-    auto weak = netJob.toWeakRef();
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [weak, callbacks](const QString& reason) {
-        int network_error_code = -1;
-        if (auto netJob = weak.lock()) {
-            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
-                network_error_code = failed_action->replyStatusCode();
-        }
-        callbacks.on_fail(reason, network_error_code);
-    });
-    QObject::connect(netJob.get(), &NetJob::aborted, netJob.get(), [callbacks] {
-        if (callbacks.on_abort != nullptr)
-            callbacks.on_abort();
-    });
+    bindFailHandlers(netJob, callbacks);
 
     return netJob;
 }
@@ -128,22 +133,7 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
         callbacks.on_succeed(unsortedVersions);
     });
 
-    // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
-    // This prevents the lambda from extending the lifetime of the shared resource,
-    // as it only temporarily locks the resource when needed.
-    auto weak = netJob.toWeakRef();
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [weak, callbacks](const QString& reason) {
-        int network_error_code = -1;
-        if (auto netJob = weak.lock()) {
-            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
-                network_error_code = failed_action->replyStatusCode();
-        }
-        callbacks.on_fail(reason, network_error_code);
-    });
-    QObject::connect(netJob.get(), &NetJob::aborted, netJob.get(), [callbacks] {
-        if (callbacks.on_abort != nullptr)
-            callbacks.on_abort();
-    });
+    bindFailHandlers(netJob, callbacks);
 
     return netJob;
 }
@@ -174,25 +164,7 @@ Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<ModPlatfo
         }
         callbacks.on_succeed(pack);
     });
-    // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
-    // This prevents the lambda from extending the lifetime of the shared resource,
-    // as it only temporarily locks the resource when needed.
-    auto weak = job.toWeakRef();
-    QObject::connect(job.get(), &NetJob::failed, job.get(), [weak, callbacks](const QString& reason) {
-        int network_error_code = -1;
-        if (auto job = weak.lock()) {
-            if (auto netJob = qSharedPointerDynamicCast<NetJob>(job)) {
-                if (auto* failed_action = netJob->getFailedActions().at(0); failed_action) {
-                    network_error_code = failed_action->replyStatusCode();
-                }
-            }
-        }
-        callbacks.on_fail(reason, network_error_code);
-    });
-    QObject::connect(job.get(), &NetJob::aborted, job.get(), [callbacks] {
-        if (callbacks.on_abort != nullptr)
-            callbacks.on_abort();
-    });
+    bindFailHandlers(job, callbacks);
     return job;
 }
 
@@ -247,18 +219,7 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
         callbacks.on_succeed(bestMatch);
     });
 
-    // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
-    // This prevents the lambda from extending the lifetime of the shared resource,
-    // as it only temporarily locks the resource when needed.
-    auto weak = netJob.toWeakRef();
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [weak, callbacks](const QString& reason) {
-        int network_error_code = -1;
-        if (auto netJob = weak.lock()) {
-            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
-                network_error_code = failed_action->replyStatusCode();
-        }
-        callbacks.on_fail(reason, network_error_code);
-    });
+    bindFailHandlers(netJob, callbacks);
     return netJob;
 }
 

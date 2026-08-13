@@ -3,10 +3,12 @@
 // Origin: Qt
 // More specifically, this is a trimmed down version on the algorithm in:
 // https://code.woboq.org/qt5/qtbase/src/widgets/styles/qcommonstyle.cpp.html#846
-QList<std::pair<qreal, QString>> viewItemTextLayout(QTextLayout& textLayout, int lineWidth, qreal& height)
+QList<std::pair<qreal, QString>> viewItemTextLayout(QTextLayout& textLayout, int lineWidth, qreal& height, qreal* widthUsed)
 {
     QList<std::pair<qreal, QString>> lines;
     height = 0;
+    if (widthUsed)
+        *widthUsed = 0;
 
     textLayout.beginLayout();
 
@@ -23,6 +25,8 @@ QList<std::pair<qreal, QString>> viewItemTextLayout(QTextLayout& textLayout, int
         line.setPosition(QPointF(0, height));
 
         height += line.height();
+        if (widthUsed)
+            *widthUsed = qMax(*widthUsed, line.naturalTextWidth());
 
         lines.append(std::make_pair(line.naturalTextWidth(), str.mid(line.textStart(), line.textLength())));
     }

@@ -169,67 +169,62 @@ bool loadAssetsIndexJson(const QString& assetsId, const QString& path, AssetsInd
     return true;
 }
 
-// FIXME: ugly code duplication
+struct AssetsPaths {
+    QDir assetsDir{ "assets/" };
+    QDir indexDir{ FS::PathCombine(assetsDir.path(), "indexes") };
+    QDir objectDir{ FS::PathCombine(assetsDir.path(), "objects") };
+    QDir virtualDir{ FS::PathCombine(assetsDir.path(), "virtual") };
+    QDir virtualRoot;
+    QString indexPath;
+
+    explicit AssetsPaths(const QString& assetsId)
+        : virtualRoot(FS::PathCombine(virtualDir.path(), assetsId)), indexPath(FS::PathCombine(indexDir.path(), assetsId + ".json"))
+    {}
+};
+
 QDir getAssetsDir(const QString& assetsId, const QString& resourcesFolder)
 {
-    QDir assetsDir = QDir("assets/");
-    QDir indexDir = QDir(FS::PathCombine(assetsDir.path(), "indexes"));
-    QDir objectDir = QDir(FS::PathCombine(assetsDir.path(), "objects"));
-    QDir virtualDir = QDir(FS::PathCombine(assetsDir.path(), "virtual"));
+    AssetsPaths paths(assetsId);
 
-    QString indexPath = FS::PathCombine(indexDir.path(), assetsId + ".json");
-    QFile indexFile(indexPath);
-    QDir virtualRoot(FS::PathCombine(virtualDir.path(), assetsId));
-
-    if (!indexFile.exists()) {
-        qCritical() << "No assets index file" << indexPath << "; can't determine assets path!";
-        return virtualRoot;
+    if (!QFile::exists(paths.indexPath)) {
+        qCritical() << "No assets index file" << paths.indexPath << "; can't determine assets path!";
+        return paths.virtualRoot;
     }
 
     AssetsIndex index;
-    if (!AssetsUtils::loadAssetsIndexJson(assetsId, indexPath, index)) {
-        qCritical() << "Failed to load asset index file" << indexPath << "; can't determine assets path!";
-        return virtualRoot;
+    if (!AssetsUtils::loadAssetsIndexJson(assetsId, paths.indexPath, index)) {
+        qCritical() << "Failed to load asset index file" << paths.indexPath << "; can't determine assets path!";
+        return paths.virtualRoot;
     }
 
-    QString targetPath;
-    if (index.isVirtual) {
-        return virtualRoot;
-    } else if (index.mapToResources) {
+    if (index.mapToResources) {
         return QDir(resourcesFolder);
     }
-    return virtualRoot;
+    return paths.virtualRoot;
 }
 
-// FIXME: ugly code duplication
 bool reconstructAssets(QString assetsId, QString resourcesFolder)
 {
-    QDir assetsDir = QDir("assets/");
-    QDir indexDir = QDir(FS::PathCombine(assetsDir.path(), "indexes"));
-    QDir objectDir = QDir(FS::PathCombine(assetsDir.path(), "objects"));
-    QDir virtualDir = QDir(FS::PathCombine(assetsDir.path(), "virtual"));
+    AssetsPaths paths(assetsId);
 
-    QString indexPath = FS::PathCombine(indexDir.path(), assetsId + ".json");
-    QFile indexFile(indexPath);
-    QDir virtualRoot(FS::PathCombine(virtualDir.path(), assetsId));
-
-    if (!indexFile.exists()) {
-        qCritical() << "No assets index file" << indexPath << "; can't reconstruct assets!";
+    if (!QFile::exists(paths.indexPath)) {
+        qCritical() << "No assets index file" << paths.indexPath << "; can't reconstruct assets!";
         return false;
     }
 
-    qDebug() << "reconstructAssets" << assetsDir.path() << indexDir.path() << objectDir.path() << virtualDir.path() << virtualRoot.path();
+    qDebug() << "reconstructAssets" << paths.assetsDir.path() << paths.indexDir.path() << paths.objectDir.path() << paths.virtualDir.path()
+             << paths.virtualRoot.path();
 
     AssetsIndex index;
-    if (!AssetsUtils::loadAssetsIndexJson(assetsId, indexPath, index)) {
-        qCritical() << "Failed to load asset index file" << indexPath << "; can't reconstruct assets!";
+    if (!AssetsUtils::loadAssetsIndexJson(assetsId, paths.indexPath, index)) {
+        qCritical() << "Failed to load asset index file" << paths.indexPath << "; can't reconstruct assets!";
         return false;
     }
 
     QString targetPath;
     bool removeLeftovers = false;
     if (index.isVirtual) {
-        targetPath = virtualRoot.path();
+        targetPath = paths.virtualRoot.path();
         removeLeftovers = true;
         qDebug() << "Reconstructing virtual assets folder at" << targetPath;
     } else if (index.mapToResources) {
@@ -246,7 +241,7 @@ bool reconstructAssets(QString assetsId, QString resourcesFolder)
 
             QString tlk = asset_object.hash.left(2);
 
-            QString original_path = FS::PathCombine(objectDir.path(), tlk, asset_object.hash);
+            QString original_path = FS::PathCombine(paths.objectDir.path(), tlk, asset_object.hash);
             QFile original(original_path);
             if (!original.exists())
                 continue;
