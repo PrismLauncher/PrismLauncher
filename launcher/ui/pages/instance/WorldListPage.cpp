@@ -104,6 +104,11 @@ WorldListPage::WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget
     ui->worldTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->worldTreeView->setIconSize(QSize(64, 64));
     connect(ui->worldTreeView, &QTreeView::customContextMenuRequested, this, &WorldListPage::ShowContextMenu);
+    connect(ui->worldTreeView, &QAbstractItemView::activated, this, [this](auto) {
+        if (ui->actionJoin->isEnabled()) {
+            on_actionJoin_triggered();
+        }
+    });
 
     auto head = ui->worldTreeView->header();
     head->setSectionResizeMode(0, QHeaderView::Stretch);
