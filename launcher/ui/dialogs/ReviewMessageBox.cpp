@@ -17,6 +17,7 @@ ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] QString con
     ui->modTreeWidget->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     ui->modTreeWidget->header()->setStretchLastSection(false);
     ui->modTreeWidget->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    ui->modTreeWidget->topLevelItem(0)->setExpanded(true);
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &ReviewMessageBox::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &ReviewMessageBox::reject);
@@ -57,7 +58,7 @@ auto ReviewMessageBox::create(QWidget* parent, QString&& title, QString&& icon) 
 
 void ReviewMessageBox::appendResource(ResourceInformation&& info)
 {
-    auto itemTop = new QTreeWidgetItem(ui->modTreeWidget);
+    auto itemTop = new QTreeWidgetItem(ui->modTreeWidget->topLevelItem(0));
     itemTop->setCheckState(0, info.enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     itemTop->setText(0, info.name);
     if (!info.enabled) {
@@ -92,22 +93,20 @@ void ReviewMessageBox::appendResource(ResourceInformation&& info)
     auto versionTypeItem = new QTreeWidgetItem(itemTop);
     versionTypeItem->setText(0, tr("Version Type: %1").arg(info.version_type));
     versionTypeItem->setData(0, Qt::UserRole, info.version_type);
-
-    ui->modTreeWidget->addTopLevelItem(itemTop);
 }
 
 auto ReviewMessageBox::deselectedResources() -> QStringList
 {
     QStringList list;
 
-    auto* item = ui->modTreeWidget->topLevelItem(0);
+    auto* item = ui->modTreeWidget->topLevelItem(0)->child(0);
 
     for (int i = 1; item != nullptr; ++i) {
         if (item->checkState(0) == Qt::CheckState::Unchecked) {
             list.append(item->text(0));
         }
 
-        item = ui->modTreeWidget->topLevelItem(i);
+        item = ui->modTreeWidget->topLevelItem(0)->child(i);
     }
 
     return list;
