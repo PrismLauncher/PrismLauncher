@@ -17,7 +17,28 @@ ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] QString con
     ui->modTreeWidget->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     ui->modTreeWidget->header()->setStretchLastSection(false);
     ui->modTreeWidget->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-    ui->modTreeWidget->topLevelItem(0)->setExpanded(true);
+
+    auto* resourcesItem = ui->modTreeWidget->topLevelItem(0);
+    resourcesItem->setExpanded(true);
+    connect(ui->modTreeWidget, &QTreeWidget::itemCollapsed, this, [resourcesItem](QTreeWidgetItem* item) {
+        if (item != resourcesItem) {
+            return;
+        }
+
+        bool expandChildren = true;
+        for (int i = 0; i < resourcesItem->childCount(); ++i) {
+            if (resourcesItem->child(i)->isExpanded()) {
+                expandChildren = false;
+                break;
+            }
+        }
+
+        // Keep the resource rows visible and apply the root's toggle to their details instead.
+        resourcesItem->setExpanded(true);
+        for (int i = 0; i < resourcesItem->childCount(); ++i) {
+            resourcesItem->child(i)->setExpanded(expandChildren);
+        }
+    });
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &ReviewMessageBox::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &ReviewMessageBox::reject);
@@ -93,6 +114,8 @@ void ReviewMessageBox::appendResource(ResourceInformation&& info)
     auto versionTypeItem = new QTreeWidgetItem(itemTop);
     versionTypeItem->setText(0, tr("Version Type: %1").arg(info.version_type));
     versionTypeItem->setData(0, Qt::UserRole, info.version_type);
+
+    itemTop->setExpanded(true);
 }
 
 auto ReviewMessageBox::deselectedResources() -> QStringList
