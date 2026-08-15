@@ -218,20 +218,20 @@
     <string>View the homepages of all selected items.</string>
    </property>
   </action>
-  <action name="actionEnableUpdates">
+  <action name="actionLockUpdates">
    <property name="text">
-    <string>Ena&amp;ble Updates</string>
+    <string>&amp;Lock Updates</string>
    </property>
    <property name="toolTip">
-    <string>Mark resource to be updated</string>
+    <string>Lock the resource to prevent it from being updated</string>
    </property>
   </action>
-  <action name="actionDisableUpdates">
+  <action name="actionUnlockUpdates">
    <property name="text">
-    <string>Disable U&amp;pdates</string>
+    <string>&amp;Unlock Updates</string>
    </property>
    <property name="toolTip">
-    <string>Mark resource to prevent it from being updated</string>
+    <string>Unlock the resource to allow it to be updated</string>
    </property>
   </action>
  </widget>

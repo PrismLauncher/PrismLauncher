@@ -139,14 +139,14 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
         case Qt::ToolTipRole:
             switch (column) {
                 case RequiredByColumn: {
-                    const auto list = requiredByList(at(row).mod_id());
+                    const auto list = requiredByList(at(row).modId());
                     if (!list.isEmpty()) {
                         return list.join(QLatin1Char('\n'));
                     }
                     break;
                 }
                 case RequiresColumn: {
-                    const auto list = requiresList(at(row).mod_id());
+                    const auto list = requiresList(at(row).modId());
                     if (!list.isEmpty()) {
                         return list.join(QLatin1Char('\n'));
                     }
