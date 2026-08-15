@@ -81,6 +81,7 @@ enum class SortType : std::uint8_t {
     Requires,
     RequiredBy,
     Filename,
+    LOCK_UPDATE
 };
 
 enum class EnableAction : std::uint8_t { ENABLE, DISABLE, TOGGLE };
