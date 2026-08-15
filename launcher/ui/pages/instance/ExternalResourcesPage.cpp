@@ -81,6 +81,9 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
     connect(ui->treeView, &ModListView::customContextMenuRequested, this, &ExternalResourcesPage::ShowContextMenu);
     connect(ui->treeView, &ModListView::activated, this, &ExternalResourcesPage::itemActivated);
 
+    connect(ui->actionEnableUpdates, &QAction::triggered, this, &ExternalResourcesPage::enableUpdates);
+    connect(ui->actionDisableUpdates, &QAction::triggered, this, &ExternalResourcesPage::disableUpdates);
+
     auto selection_model = ui->treeView->selectionModel();
 
     connect(selection_model, &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
@@ -146,7 +149,7 @@ void ExternalResourcesPage::openedImpl()
 {
     m_model->startWatching();
 
-    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
+    const auto setting_name = QString("WideBarVisibility_%1").arg(id());
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
     ui->actionsToolbar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
@@ -316,8 +319,16 @@ void ExternalResourcesPage::updateActions()
     const bool hasSelection = ui->treeView->selectionModel()->hasSelection();
     const QModelIndexList selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
     const QList<Resource*> selectedResources = m_model->selectedResources(selection);
+    const bool hasUpdatesEnabled = hasSelection && std::ranges::any_of(selectedResources, [](Resource* resource) {
+                                       return resource->metadata() && !resource->lockUpdate();
+                                   });
+    const bool hasUpdatesDisabled = hasSelection && std::ranges::any_of(selectedResources, [](Resource* resource) {
+                                        return resource->metadata() && resource->lockUpdate();
+                                    });
+    const bool allSelectedUpdatesDisabled =
+        hasSelection && std::ranges::all_of(selectedResources, [](Resource* resource) { return resource->lockUpdate(); });
 
-    ui->actionUpdateItem->setEnabled(!m_model->empty());
+    ui->actionUpdateItem->setEnabled(!m_model->empty() && !allSelectedUpdatesDisabled);
     ui->actionResetItemMetadata->setEnabled(hasSelection);
 
     ui->actionChangeVersion->setEnabled(selectedResources.size() == 1 && selectedResources[0]->metadata() != nullptr);
@@ -328,6 +339,9 @@ void ExternalResourcesPage::updateActions()
 
     ui->actionViewHomepage->setEnabled(hasSelection && std::any_of(selectedResources.begin(), selectedResources.end(),
                                                                    [](Resource* resource) { return !resource->homepage().isEmpty(); }));
+
+    ui->actionEnableUpdates->setEnabled(hasUpdatesDisabled);
+    ui->actionDisableUpdates->setEnabled(hasUpdatesEnabled);
     ui->actionExportMetadata->setEnabled(!m_model->empty());
 }
 
@@ -335,7 +349,7 @@ void ExternalResourcesPage::updateFrame(const QModelIndex& current, [[maybe_unus
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
-    Resource const& resource = m_model->at(row);
+    const Resource& resource = m_model->at(row);
     ui->frame->updateWithResource(resource);
 }
 
@@ -355,4 +369,18 @@ QString ExternalResourcesPage::extraHeaderInfoString()
         return tr(" (%1 installed, %2 enabled)").arg(installedCount).arg(enabledCount);
 
     return tr(" (%1 installed)").arg(installedCount);
+}
+
+void ExternalResourcesPage::enableUpdates()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_model->setUpdateLock(selection.indexes(), EnableAction::ENABLE);
+    updateActions();
+}
+
+void ExternalResourcesPage::disableUpdates()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_model->setUpdateLock(selection.indexes(), EnableAction::DISABLE);
+    updateActions();
 }

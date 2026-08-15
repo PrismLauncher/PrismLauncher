@@ -63,17 +63,17 @@ ModFolderModel::ModFolderModel(const QDir& dir, MinecraftInstance* instance, boo
     : ResourceFolderModel(QDir(dir), instance, isIndexed, createDir, parent)
 {
     m_columnNames = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider", "Size", "Side", "Loaders",
-                                  "Minecraft Versions", "Release Type", "Requires", "Required By", "File Name" });
-    m_columnNamesTranslated =
-        QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"), tr("Size"), tr("Side"),
-                      tr("Loaders"), tr("Minecraft Versions"), tr("Release Type"), tr("Requires"), tr("Required By"), tr("File Name") });
-    m_columnSortKeys = { SortType::Enabled,     SortType::Name,     SortType::Name,       SortType::Version, SortType::Date,
-                         SortType::Provider,    SortType::Size,     SortType::Side,       SortType::Loaders, SortType::McVersions,
-                         SortType::ReleaseType, SortType::Requires, SortType::RequiredBy, SortType::Filename };
+                                  "Minecraft Versions", "Release Type", "Requires", "Required By", "File Name", "Update" });
+    m_columnNamesTranslated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"),
+                                            tr("Size"), tr("Side"), tr("Loaders"), tr("Minecraft Versions"), tr("Release Type"),
+                                            tr("Requires"), tr("Required By"), tr("File Name"), tr("Update") });
+    m_columnSortKeys = { SortType::Enabled,     SortType::Name,     SortType::Name,       SortType::Version,  SortType::Date,
+                         SortType::Provider,    SortType::Size,     SortType::Side,       SortType::Loaders,  SortType::McVersions,
+                         SortType::ReleaseType, SortType::Requires, SortType::RequiredBy, SortType::Filename, SortType::LOCK_UPDATE };
     m_columnResizeModes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,     QHeaderView::Interactive,
                             QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
                             QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
-                            QHeaderView::Interactive, QHeaderView::Interactive };
+                            QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
     m_columnsHideable = { false, true, false, true, true, true, true, true, true, true, true, true, true, true };
 
     connect(this, &ModFolderModel::parseFinished, this, &ModFolderModel::onParseFinished);
@@ -156,6 +156,12 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
                     break;
             }
             break;
+        case Qt::CheckStateRole:
+            if (column == ActiveColumn)
+                return at(row).enabled() ? Qt::Checked : Qt::Unchecked;
+            else if (column == LockUpdateColumn)
+                return !at(row).lockUpdate() ? Qt::Checked : Qt::Unchecked;
+            return QVariant();
         default:
             break;
     }
@@ -211,6 +217,7 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                 case RequiredByColumn:
                 case RequiresColumn:
                 case FileNameColumn:
+                case LockUpdateColumn:
                     return columnNames().at(section);
                 default:
                     return QVariant();
@@ -244,6 +251,8 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                     return tr("For each mod, the number of other mods it depends on.");
                 case FileNameColumn:
                     return tr("The file name of the mod.");
+                case LockUpdateColumn:
+                    return tr("Should this mod be updated?");
                 default:
                     return QVariant();
             }
