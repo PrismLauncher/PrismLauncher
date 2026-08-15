@@ -64,6 +64,9 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     void ShowContextMenu(const QPoint& pos);
     void ShowHeaderContextMenu(const QPoint& pos);
 
+    void enableUpdates();
+    void disableUpdates();
+
    protected:
     MinecraftInstance* m_instance = nullptr;
 

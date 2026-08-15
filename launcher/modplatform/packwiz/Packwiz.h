@@ -54,6 +54,7 @@ class V1 {
         QString version_number{};
 
         QList<ModPlatform::Dependency> dependencies;
+        bool lockUpdate;
 
        public:
         // This is a totally heuristic, but should work for now.
