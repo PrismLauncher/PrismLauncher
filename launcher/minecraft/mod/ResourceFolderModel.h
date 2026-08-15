@@ -141,6 +141,7 @@ class ResourceFolderModel : public QAbstractListModel {
         ProviderColumn,
         SizeColumn,
         FileNameColumn,
+        LockUpdateColumn,
         NumColumns
     };
 
@@ -189,6 +190,8 @@ class ResourceFolderModel : public QAbstractListModel {
 
     QString instDirPath() const;
     MinecraftInstance* instance() const { return m_instance; }
+
+    bool setUpdateLock(const QModelIndexList& indexes, EnableAction action);
 
    signals:
     void updateFinished();
@@ -247,13 +250,13 @@ class ResourceFolderModel : public QAbstractListModel {
     // As such, the order in with they appear is very important!
     QList<SortType> m_columnSortKeys = { SortType::Enabled,  SortType::Name, SortType::Version, SortType::Date,
                                          SortType::Provider, SortType::Size, SortType::Filename };
-    QStringList m_columnNames = { "Enable", "Name", "Version", "Last Modified", "Provider", "Size", "File Name" };
-    QStringList m_columnNamesTranslated = { tr("Enable"),   tr("Name"), tr("Version"),  tr("Last Modified"),
-                                            tr("Provider"), tr("Size"), tr("File Name") };
+    QStringList m_columnNames = { "Enable", "Name", "Version", "Last Modified", "Provider", "Size", "File Name", "Update" };
+    QStringList m_columnNamesTranslated = { tr("Enable"),   tr("Name"), tr("Version"),   tr("Last Modified"),
+                                            tr("Provider"), tr("Size"), tr("File Name"), tr("Update") };
     QList<QHeaderView::ResizeMode> m_columnResizeModes = { QHeaderView::Interactive, QHeaderView::Stretch,     QHeaderView::Interactive,
                                                            QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
-                                                           QHeaderView::Interactive };
-    QList<bool> m_columnsHideable = { false, false, true, true, true, true, true };
+                                                           QHeaderView::Interactive, QHeaderView::Interactive };
+    QList<bool> m_columnsHideable = { false, false, true, true, true, true, true, true };
 
     QDir m_dir;
     MinecraftInstance* m_instance;
@@ -274,7 +277,7 @@ class ResourceFolderModel : public QAbstractListModel {
     // Runs off-thread
     ConcurrentTask m_resourceResolver;
     bool m_resourceResolverRunning = false;
-    QThread m_resourceResolverThread{this};
+    QThread m_resourceResolverThread{ this };
 
     QMap<int, Task::Ptr> m_activeParseTasks;
     std::atomic<int> m_nextResolutionTicket = 0;
