@@ -126,8 +126,8 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
     connect(m_ui->treeView, &ModListView::customContextMenuRequested, this, &ExternalResourcesPage::showContextMenu);
     connect(m_ui->treeView, &ModListView::activated, this, &ExternalResourcesPage::itemActivated);
 
-    connect(m_ui->actionEnableUpdates, &QAction::triggered, this, &ExternalResourcesPage::enableUpdates);
-    connect(m_ui->actionDisableUpdates, &QAction::triggered, this, &ExternalResourcesPage::disableUpdates);
+    connect(m_ui->actionLockUpdates, &QAction::triggered, this, &ExternalResourcesPage::lockUpdates);
+    connect(m_ui->actionUnlockUpdates, &QAction::triggered, this, &ExternalResourcesPage::unlockUpdates);
 
     auto* selectionModel = m_ui->treeView->selectionModel();
 
@@ -392,8 +392,8 @@ void ExternalResourcesPage::updateActions()
     m_ui->actionViewHomepage->setEnabled(hasSelection && std::any_of(selectedResources.begin(), selectedResources.end(),
                                                                      [](Resource* resource) { return !resource->homepage().isEmpty(); }));
 
-    m_ui->actionEnableUpdates->setEnabled(hasUpdatesDisabled);
-    m_ui->actionDisableUpdates->setEnabled(hasUpdatesEnabled);
+    m_ui->actionLockUpdates->setEnabled(hasUpdatesEnabled);
+    m_ui->actionUnlockUpdates->setEnabled(hasUpdatesDisabled);
     m_ui->actionExportMetadata->setEnabled(!m_model->empty());
 }
 
@@ -425,14 +425,14 @@ QString ExternalResourcesPage::extraHeaderInfoString()
     return tr(" (%1 installed)").arg(installedCount);
 }
 
-void ExternalResourcesPage::enableUpdates()
+void ExternalResourcesPage::lockUpdates()
 {
     auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection());
     m_model->setUpdateLock(selection.indexes(), EnableAction::ENABLE);
     updateActions();
 }
 
-void ExternalResourcesPage::disableUpdates()
+void ExternalResourcesPage::unlockUpdates()
 {
     auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection());
     m_model->setUpdateLock(selection.indexes(), EnableAction::DISABLE);

@@ -1020,28 +1020,28 @@ bool ResourceFolderModel::setUpdateLock(const QModelIndexList& indexes, EnableAc
         int row = idx.row();
         auto& resource = m_resources[row];
 
-        bool update = true;
+        bool lockUpdate = true;
         switch (action) {
             case EnableAction::ENABLE:
-                update = false;
+                lockUpdate = true;
                 break;
             case EnableAction::DISABLE:
-                update = true;
+                lockUpdate = false;
                 break;
             case EnableAction::TOGGLE:
             default:
-                update = !resource->lockUpdate();
+                lockUpdate = !resource->lockUpdate();
                 break;
         }
 
-        if (resource->lockUpdate() == update) {
+        if (resource->lockUpdate() == lockUpdate) {
             succeeded = false;
             continue;
         }
 
         auto meta = resource->metadata();
         if (meta) {
-            meta->lockUpdate = update;
+            meta->lockUpdate = lockUpdate;
             Metadata::update(indexDir(), *meta.get());
             resource->setMetadata(*meta.get());
             emit dataChanged(index(row, updateColumn), index(row, columnCount(QModelIndex()) - 1));

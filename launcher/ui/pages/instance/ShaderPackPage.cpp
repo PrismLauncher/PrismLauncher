@@ -73,8 +73,8 @@ ShaderPackPage::ShaderPackPage(MinecraftInstance* instance, ShaderPackFolderMode
     connect(m_ui->actionChangeVersion, &QAction::triggered, this, &ShaderPackPage::changeShaderPackVersion);
     m_ui->actionsToolbar->insertActionAfter(m_ui->actionUpdateItem, m_ui->actionChangeVersion);
 
-    m_ui->actionsToolbar->insertActionAfter(m_ui->actionUpdateItem, m_ui->actionEnableUpdates);
-    m_ui->actionsToolbar->insertActionAfter(m_ui->actionEnableUpdates, m_ui->actionDisableUpdates);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionUpdateItem, m_ui->actionLockUpdates);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionLockUpdates, m_ui->actionUnlockUpdates);
 }
 
 void ShaderPackPage::downloadShaderPack()
