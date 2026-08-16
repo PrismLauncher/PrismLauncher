@@ -210,12 +210,14 @@ void ResourceDownloadDialog::confirm()
     });
     for (auto& task : selected) {
         auto extraInfo = dependencyExtraInfo.value(task->getPack()->addonId.toString());
-        confirmDialog->appendResource({ .name = task->getName(),
-                                        .filename = task->getFilename(),
-                                        .provider = ModPlatform::ProviderCapabilities::name(task->getProvider()),
-                                        .required_by = extraInfo.requiredByNames,
-                                        .version_type = task->getVersion().versionType.toString(),
-                                        .enabled = !extraInfo.maybeInstalled });
+        confirmDialog->appendResource({
+            .name = task->getName(),
+            .filename = task->getFilename(),
+            .provider = ModPlatform::ProviderCapabilities::name(task->getProvider()),
+            .required_by = extraInfo.requiredByNames,
+            .version_type = task->getVersion().versionType.toString(),
+            .enabled = !extraInfo.maybeInstalled,
+        });
     }
 
     if (confirmDialog->exec() != 0) {
