@@ -51,7 +51,19 @@ void INISettingsObject::setFilePath(const QString& filePath)
 
 bool INISettingsObject::reload()
 {
-    return m_ini.loadFile(m_filePath) && SettingsObject::reload();
+    if (!m_ini.loadFile(m_filePath)) {
+        return false;
+    }
+
+    bool suspendSavePrev = m_suspendSave;
+    bool doSavePrev = m_doSave;
+
+    m_suspendSave = true;
+    bool result = SettingsObject::reload();
+
+    m_suspendSave = suspendSavePrev;
+    m_doSave = doSavePrev;
+    return result;
 }
 
 void INISettingsObject::suspendSave()
@@ -65,7 +77,7 @@ void INISettingsObject::resumeSave()
     Q_ASSERT(m_suspendSave);
     m_suspendSave = false;
     if (m_doSave) {
-        m_ini.saveFile(m_filePath);
+        doSave();
     }
 }
 
@@ -93,6 +105,7 @@ void INISettingsObject::doSave()
     if (m_suspendSave) {
         m_doSave = true;
     } else {
+        qDebug() << "Saving INI settings to " << m_filePath;
         m_ini.saveFile(m_filePath);
     }
 }
