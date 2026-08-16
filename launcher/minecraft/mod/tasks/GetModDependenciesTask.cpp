@@ -34,14 +34,15 @@
 #include "ui/pages/modplatform/ModModel.h"
 
 namespace {
-Version mcVersion(BaseInstance* inst)
+
+Version mcVersion(MinecraftInstance* inst)
 {
-    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion();
+    return inst->getPackProfile()->getComponent("net.minecraft")->getVersion();
 }
 
-ModPlatform::ModLoaderTypes mcLoaders(BaseInstance* inst)
+ModPlatform::ModLoaderTypes mcLoaders(MinecraftInstance* inst)
 {
-    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
+    return inst->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
 }
 
 bool checkDependencies(const std::shared_ptr<GetModDependenciesTask::PackDependency>& sel,
@@ -128,9 +129,10 @@ ModPlatform::Dependency GetModDependenciesTask::getOverride(const ModPlatform::D
 {
     if (auto isQuilt = (m_loaderType & ModPlatform::Quilt) != 0U; isQuilt || (m_loaderType & ModPlatform::Fabric) != 0U) {
         auto overide = ModPlatform::getOverrideDeps();
-        auto over = std::ranges::find_if(overide, [dep, providerName, isQuilt](const auto& o) {
+        auto isOverrideForProvider = [dep, providerName, isQuilt](const auto& o) {
             return o.provider == providerName && dep.addonId == (isQuilt ? o.fabric : o.quilt);
-        });
+        };
+        auto over = std::ranges::find_if(overide, isOverrideForProvider);
         if (over != overide.cend()) {
             return { .addonId = isQuilt ? over->quilt : over->fabric, .type = dep.type, .version = "" };
         }
@@ -148,9 +150,10 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
         }
         verDep = getOverride(verDep, providerName);
         auto isOnlyVersion = providerName == ModPlatform::ResourceProvider::MODRINTH && verDep.addonId.toString().isEmpty();
-        if (std::ranges::contains(cDependencies, true, [&verDep, isOnlyVersion](const ModPlatform::Dependency& i) {
-                return isOnlyVersion ? i.version == verDep.version : i.addonId == verDep.addonId;
-            })) {
+        auto isDuplicateDep = [&verDep, isOnlyVersion](const ModPlatform::Dependency& i) {
+            return isOnlyVersion ? i.version == verDep.version : i.addonId == verDep.addonId;
+        };
+        if (std::ranges::any_of(cDependencies, isDuplicateDep)) {
             continue;  // check the current dependency list
         }
 
@@ -158,17 +161,18 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
             return i->pack->provider == providerName &&
                    (isOnlyVersion ? i->version.version == verDep.version : i->pack->addonId == verDep.addonId);
         };
-        if (std::ranges::contains(m_selected, true, isKnownDependency)) {
+        if (std::ranges::any_of(m_selected, isKnownDependency)) {
             continue;  // check the selected versions
         }
 
-        if (std::ranges::contains(m_mods, true, [&verDep, providerName, isOnlyVersion](const std::shared_ptr<Metadata::ModStruct>& i) {
-                return i->provider == providerName && (isOnlyVersion ? i->file_id == verDep.version : i->project_id == verDep.addonId);
-            })) {
+        auto isInstalledMod = [&verDep, providerName, isOnlyVersion](const std::shared_ptr<Metadata::ModStruct>& i) {
+            return i->provider == providerName && (isOnlyVersion ? i->file_id == verDep.version : i->project_id == verDep.addonId);
+        };
+        if (std::ranges::any_of(m_mods, isInstalledMod)) {
             continue;  // check the existing mods
         }
 
-        if (std::ranges::contains(m_packDependencies, true, isKnownDependency)) {  // check loaded dependencies
+        if (std::ranges::any_of(m_packDependencies, isKnownDependency)) {  // check loaded dependencies
             continue;
         }
 
@@ -241,8 +245,8 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
         if (!pDep->version.addonId.isValid()) {
             if (m_loaderType & ModPlatform::Quilt) {  // falback for quilt
                 auto overide = ModPlatform::getOverrideDeps();
-                auto over = std::find_if(overide.cbegin(), overide.cend(),
-                                         [dep, provider](const auto& o) { return o.provider == provider && dep.addonId == o.quilt; });
+                auto isQuiltFallback = [dep, provider](const auto& o) { return o.provider == provider && dep.addonId == o.quilt; };
+                auto over = std::ranges::find_if(overide, isQuiltFallback);
                 if (over != overide.cend()) {
                     removePack(dep.addonId);
                     addTask(prepareDependencyTask({ .addonId = over->fabric, .type = dep.type, .version = "" }, provider, level));
@@ -318,15 +322,12 @@ auto GetModDependenciesTask::getExtraInfo() -> QHash<QString, PackDependencyExtr
                 continue;
             }
             auto deps = smod->version.dependencies;
-            if (auto dep =
-                    std::ranges::find_if(deps,
-                                         [addonId, provider, version](const ModPlatform::Dependency& d) {
-                                             return d.type == ModPlatform::DependencyType::REQUIRED &&
-                                                    (provider == ModPlatform::ResourceProvider::MODRINTH && d.addonId.toString().isEmpty()
-                                                         ? version == d.version
-                                                         : d.addonId == addonId);
-                                         });
-                dep != deps.end()) {
+            auto isRequiredByOther = [addonId, provider, version](const ModPlatform::Dependency& d) {
+                return d.type == ModPlatform::DependencyType::REQUIRED &&
+                       (provider == ModPlatform::ResourceProvider::MODRINTH && d.addonId.toString().isEmpty() ? version == d.version
+                                                                                                              : d.addonId == addonId);
+            };
+            if (std::ranges::any_of(deps, isRequiredByOther)) {
                 reqNames.append(smod->pack->name);
                 reqIds.append(smod->version.fileId.toString());
             }
@@ -338,25 +339,22 @@ auto GetModDependenciesTask::getExtraInfo() -> QHash<QString, PackDependencyExtr
 
 bool GetModDependenciesTask::isLocalyInstalled(const std::shared_ptr<PackDependency>& pDep)
 {
-    return pDep->version.fileName.isEmpty() ||
-           std::ranges::find_if(m_selected,
-                                [pDep](const std::shared_ptr<PackDependency>& i) {
-                                    return !i->version.fileName.isEmpty() && laxCompare(i->version.fileName, pDep->version.fileName);
-                                }) != m_selected.end() ||  // check the selected versions
+    auto isAlreadySelected = [pDep](const std::shared_ptr<PackDependency>& i) {
+        return !i->version.fileName.isEmpty() && laxCompare(i->version.fileName, pDep->version.fileName);
+    };
+    auto isExistingFile = [pDep](const QString& i) { return !i.isEmpty() && laxCompare(i, pDep->version.fileName); };
+    auto isKnownFile = [pDep](const std::shared_ptr<PackDependency>& i) {
+        return pDep->pack->addonId != i->pack->addonId && !i->version.fileName.isEmpty() &&
+               laxCompare(pDep->version.fileName, i->version.fileName);
+    };
 
-           std::ranges::find_if(m_modsFileNames,
-                                [pDep](const QString& i) { return !i.isEmpty() && laxCompare(i, pDep->version.fileName); }) !=
-               m_modsFileNames.end() ||  // check the existing mods
-
-           std::ranges::find_if(m_packDependencies, [pDep](const std::shared_ptr<PackDependency>& i) {
-               return pDep->pack->addonId != i->pack->addonId && !i->version.fileName.isEmpty() &&
-                      laxCompare(pDep->version.fileName, i->version.fileName);
-           }) != m_packDependencies.end();  // check loaded dependencies
+    return pDep->version.fileName.isEmpty() || std::ranges::any_of(m_selected, isAlreadySelected) ||  // check the selected versions
+           std::ranges::any_of(m_modsFileNames, isExistingFile) ||                                    // check the existing mods
+           std::ranges::any_of(m_packDependencies, isKnownFile);                                      // check loaded dependencies
 }
 
 bool GetModDependenciesTask::maybeInstalled(const std::shared_ptr<PackDependency>& pDep)
 {
-    return std::ranges::find_if(m_modsFileNames, [pDep](const QString& i) {
-               return !i.isEmpty() && laxCompare(i, pDep->version.fileName, true);
-           }) != m_modsFileNames.end();  // check the existing mods
+    auto isExistingFileLoose = [pDep](const QString& i) { return !i.isEmpty() && laxCompare(i, pDep->version.fileName, true); };
+    return std::ranges::any_of(m_modsFileNames, isExistingFileLoose);  // check the existing mods
 }
