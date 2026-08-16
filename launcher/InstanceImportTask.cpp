@@ -59,8 +59,8 @@
 #include <QtConcurrentRun>
 #include <memory>
 
-InstanceImportTask::InstanceImportTask(const QUrl& sourceUrl, QWidget* parent, QMap<QString, QString>&& extra_info)
-    : m_sourceUrl(sourceUrl), m_extra_info(extra_info), m_parent(parent)
+InstanceImportTask::InstanceImportTask(const QUrl& sourceUrl, bool trustedSource, QWidget* parent, QMap<QString, QString>&& extra_info)
+    : m_sourceUrl(sourceUrl), m_trustedSource(trustedSource), m_extra_info(extra_info), m_parent(parent)
 {}
 
 bool InstanceImportTask::abort()
@@ -287,11 +287,12 @@ void InstanceImportTask::processFlame()
         if (original_instance_id_it != m_extra_info.constEnd())
             original_instance_id = original_instance_id_it.value();
 
-        inst_creation_task =
-            makeShared<FlameCreationTask>(m_stagingPath, m_globalSettings, m_parent, pack_id, pack_version_id, original_instance_id);
+        inst_creation_task = makeShared<FlameCreationTask>(m_stagingPath, m_trustedSource, m_globalSettings, m_parent, pack_id,
+                                                           pack_version_id, original_instance_id);
     } else {
         // FIXME: Find a way to get IDs in directly imported ZIPs
-        inst_creation_task = makeShared<FlameCreationTask>(m_stagingPath, m_globalSettings, m_parent, QString(), QString());
+        inst_creation_task =
+            makeShared<FlameCreationTask>(m_stagingPath, m_trustedSource, m_globalSettings, m_parent, QString(), QString());
     }
 
     inst_creation_task->setName(*this);
@@ -381,8 +382,8 @@ void InstanceImportTask::processModrinth()
         if (original_instance_id_it != m_extra_info.constEnd())
             original_instance_id = original_instance_id_it.value();
 
-        inst_creation_task =
-            makeShared<ModrinthCreationTask>(m_stagingPath, m_globalSettings, m_parent, pack_id, pack_version_id, original_instance_id);
+        inst_creation_task = makeShared<ModrinthCreationTask>(m_stagingPath, m_trustedSource, m_globalSettings, m_parent, pack_id,
+                                                              pack_version_id, original_instance_id);
     } else {
         QString pack_id;
         if (!m_sourceUrl.isEmpty()) {
@@ -391,7 +392,7 @@ void InstanceImportTask::processModrinth()
         }
 
         // FIXME: Find a way to get the ID in directly imported ZIPs
-        inst_creation_task = makeShared<ModrinthCreationTask>(m_stagingPath, m_globalSettings, m_parent, pack_id);
+        inst_creation_task = makeShared<ModrinthCreationTask>(m_stagingPath, m_trustedSource, m_globalSettings, m_parent, pack_id);
     }
 
     inst_creation_task->setName(*this);

@@ -359,7 +359,7 @@ void ModrinthManagedPackPage::update()
 {
     auto customURL = m_inst->settings()->get("ManagedPackURL").toString().trimmed();
     if (m_inst->getManagedPackID().isEmpty() && !customURL.isEmpty()) {
-        updatePack(customURL);
+        updatePack(customURL, false);
         return;
     }
     auto index = ui->versionsComboBox->currentIndex();
@@ -369,7 +369,7 @@ void ModrinthManagedPackPage::update()
     }
     auto version = m_pack.versions.at(index);
 
-    updatePack(version.downloadUrl, version.fileId.toString(), version.version);
+    updatePack(version.downloadUrl, true, version.fileId.toString(), version.version);
 }
 
 void ModrinthManagedPackPage::updateFromFile()
@@ -378,7 +378,7 @@ void ModrinthManagedPackPage::updateFromFile()
     if (output.isEmpty())
         return;
 
-    updatePack(output);
+    updatePack(output, false);
 }
 
 // FLAME
@@ -488,7 +488,7 @@ void FlameManagedPackPage::update()
 {
     auto customURL = m_inst->settings()->get("ManagedPackURL").toString().trimmed();
     if (m_inst->getManagedPackID().isEmpty() && !customURL.isEmpty()) {
-        updatePack(customURL);
+        updatePack(customURL, false);
         return;
     }
     auto index = ui->versionsComboBox->currentIndex();
@@ -498,7 +498,7 @@ void FlameManagedPackPage::update()
     }
     auto version = m_pack.versions.at(index);
 
-    updatePack(version.downloadUrl, version.fileId.toString());
+    updatePack(version.downloadUrl, true, version.fileId.toString());
 }
 
 void FlameManagedPackPage::updateFromFile()
@@ -507,10 +507,10 @@ void FlameManagedPackPage::updateFromFile()
     if (output.isEmpty())
         return;
 
-    updatePack(output);
+    updatePack(output, false);
 }
 
-void ManagedPackPage::updatePack(const QUrl& url, QString versionID, QString versionName)
+void ManagedPackPage::updatePack(const QUrl& url, bool trusted, QString versionID, QString versionName)
 {
     QMap<QString, QString> extra_info;
     // NOTE: Don't use 'm_pack.id' here, since we didn't completely parse all the metadata for the pack, including this field.
@@ -518,7 +518,7 @@ void ManagedPackPage::updatePack(const QUrl& url, QString versionID, QString ver
     extra_info.insert("pack_version_id", versionID);
     extra_info.insert("original_instance_id", m_inst->id());
 
-    auto extracted = new InstanceImportTask(url, this, std::move(extra_info));
+    auto extracted = new InstanceImportTask(url, trusted, this, std::move(extra_info));
 
     if (versionName.isEmpty()) {
         extracted->setName(m_inst->name());

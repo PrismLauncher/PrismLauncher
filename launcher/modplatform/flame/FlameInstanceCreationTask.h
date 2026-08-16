@@ -52,12 +52,13 @@ class FlameCreationTask final : public InstanceCreationTask {
 
    public:
     FlameCreationTask(const QString& staging_path,
+                      bool trustedSource,
                       SettingsObject* global_settings,
                       QWidget* parent,
                       QString id,
                       QString version_id,
                       QString original_instance_id = {})
-        : InstanceCreationTask(), m_parent(parent), m_managedId(std::move(id)), m_managedVersionId(std::move(version_id))
+        : InstanceCreationTask(), m_parent(parent), m_trustedSource(trustedSource), m_managedId(std::move(id)), m_managedVersionId(std::move(version_id))
     {
         setStagingPath(staging_path);
         setParentSettings(global_settings);
@@ -77,8 +78,11 @@ class FlameCreationTask final : public InstanceCreationTask {
     void validateOtherResources(QEventLoop& loop);
     QString getVersionForLoader(QString uid, QString loaderType, QString version, QString mcVersion);
 
+    [[nodiscard]] bool promptForUntrustedMods();
+
    private:
     QWidget* m_parent = nullptr;
+    bool m_trustedSource;
 
     shared_qobject_ptr<Flame::FileResolvingTask> m_modIdResolver;
     Flame::Manifest m_pack;

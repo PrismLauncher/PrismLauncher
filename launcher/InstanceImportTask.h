@@ -43,7 +43,7 @@
 class InstanceImportTask : public InstanceTask {
     Q_OBJECT
    public:
-    explicit InstanceImportTask(const QUrl& sourceUrl, QWidget* parent = nullptr, QMap<QString, QString>&& extra_info = {});
+    explicit InstanceImportTask(const QUrl& sourceUrl, bool trustedSource, QWidget* parent = nullptr, QMap<QString, QString>&& extra_info = {});
     virtual ~InstanceImportTask() = default;
     bool abort() override;
 
@@ -63,6 +63,7 @@ class InstanceImportTask : public InstanceTask {
 
    private: /* data */
     QUrl m_sourceUrl;
+    bool m_trustedSource;
     QString m_archivePath;
     Task::Ptr m_task;
     enum class ModpackType {
