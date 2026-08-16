@@ -207,8 +207,9 @@ std::unique_ptr<MinecraftInstance> ModrinthCreationTask::createInstance()
     }
 
     if (!promptForUntrustedMods()) {
+        m_abort = true;
         emitAborted();
-        return;
+        return nullptr;
     }
 
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
@@ -519,8 +520,8 @@ bool ModrinthCreationTask::promptForUntrustedMods()
         }
     }
 
-    const QDir mcDir{ FS::PathCombine(m_stagingPath, m_rootPath) };
-    const QString modsPath{ FS::PathCombine(m_stagingPath, m_rootPath, "mods") };
+    const QDir mcDir{ FS::PathCombine(m_stagingPath, m_root_path) };
+    const QString modsPath{ FS::PathCombine(m_stagingPath, m_root_path, "mods") };
     if (QDir(modsPath).exists()) {
         QDirIterator iter{ modsPath, QDir::Files, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks };
         while (iter.hasNext()) {

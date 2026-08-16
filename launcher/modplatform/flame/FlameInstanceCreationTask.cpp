@@ -372,8 +372,9 @@ std::unique_ptr<MinecraftInstance> FlameCreationTask::createInstance()
     }
 
     if (!promptForUntrustedMods()) {
+        m_abort = true;
         emitAborted();
-        return;
+        return nullptr;
     }
 
     QString loaderType;
