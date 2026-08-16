@@ -82,7 +82,6 @@ bool laxCompare(const QString& fsfilename, const QString& metadataFilename, bool
 
     return fsName.compare(metaName) == 0;
 };
-
 }  // namespace
 
 GetModDependenciesTask::GetModDependenciesTask(MinecraftInstance* instance,
