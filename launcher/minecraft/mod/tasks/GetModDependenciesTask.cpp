@@ -49,7 +49,7 @@ bool checkDependencies(const std::shared_ptr<GetModDependenciesTask::PackDepende
                        ModPlatform::ModLoaderTypes loaders)
 {
     return (sel->pack->versions.isEmpty() || sel->version.mcVersion.contains(mcVersion.toString())) &&
-           (!loaders || !sel->version.loaders || (sel->version.loaders & loaders) != 0U);
+           (!loaders || !sel->version.loaders || sel->version.loaders.testAnyFlags(loaders));
 }
 
 // super lax compare (but not fuzzy)
@@ -148,40 +148,27 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
         }
         verDep = getOverride(verDep, providerName);
         auto isOnlyVersion = providerName == ModPlatform::ResourceProvider::MODRINTH && verDep.addonId.toString().isEmpty();
-        if (auto dep = std::ranges::find_if(cDependencies,
-                                            [&verDep, isOnlyVersion](const ModPlatform::Dependency& i) {
-                                                return isOnlyVersion ? i.version == verDep.version : i.addonId == verDep.addonId;
-                                            });
-            dep != cDependencies.end()) {
+        if (std::ranges::contains(cDependencies, true, [&verDep, isOnlyVersion](const ModPlatform::Dependency& i) {
+                return isOnlyVersion ? i.version == verDep.version : i.addonId == verDep.addonId;
+            })) {
             continue;  // check the current dependency list
         }
 
-        if (auto dep =
-                std::ranges::find_if(m_selected,
-                                     [&verDep, providerName, isOnlyVersion](const std::shared_ptr<PackDependency>& i) {
-                                         return i->pack->provider == providerName &&
-                                                (isOnlyVersion ? i->version.version == verDep.version : i->pack->addonId == verDep.addonId);
-                                     });
-            dep != m_selected.end()) {
+        auto isKnownDependency = [&verDep, providerName, isOnlyVersion](const std::shared_ptr<PackDependency>& i) {
+            return i->pack->provider == providerName &&
+                   (isOnlyVersion ? i->version.version == verDep.version : i->pack->addonId == verDep.addonId);
+        };
+        if (std::ranges::contains(m_selected, true, isKnownDependency)) {
             continue;  // check the selected versions
         }
 
-        if (auto dep = std::ranges::find_if(m_mods,
-                                            [&verDep, providerName, isOnlyVersion](const std::shared_ptr<Metadata::ModStruct>& i) {
-                                                return i->provider == providerName &&
-                                                       (isOnlyVersion ? i->file_id == verDep.version : i->project_id == verDep.addonId);
-                                            });
-            dep != m_mods.end()) {
+        if (std::ranges::contains(m_mods, true, [&verDep, providerName, isOnlyVersion](const std::shared_ptr<Metadata::ModStruct>& i) {
+                return i->provider == providerName && (isOnlyVersion ? i->file_id == verDep.version : i->project_id == verDep.addonId);
+            })) {
             continue;  // check the existing mods
         }
 
-        if (auto dep =
-                std::ranges::find_if(m_packDependencies,
-                                     [&verDep, providerName, isOnlyVersion](const std::shared_ptr<PackDependency>& i) {
-                                         return i->pack->provider == providerName &&
-                                                (isOnlyVersion ? i->version.version == verDep.addonId : i->pack->addonId == verDep.addonId);
-                                     });
-            dep != m_packDependencies.end()) {  // check loaded dependencies
+        if (std::ranges::contains(m_packDependencies, true, isKnownDependency)) {  // check loaded dependencies
             continue;
         }
 
@@ -293,7 +280,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
         }
     };
 
-    auto version = getAPI(provider)->getDependencyVersion(std::move(args), std::move(callbacks));
+    auto version = getAPI(provider)->getDependencyVersion(args, callbacks);
     QObject::connect(version.get(), &NetJob::failed, this, [this, version, pDep] {
         removePack(pDep->pack->addonId);
         m_failed.remove(version.get());
