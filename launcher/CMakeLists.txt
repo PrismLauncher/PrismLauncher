@@ -1270,6 +1270,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/ChooseProviderDialog.ui
     ui/dialogs/skins/SkinManageDialog.ui
     ui/dialogs/ChooseOfflineNameDialog.ui
+    ui/dialogs/UntrustedModsDialog.ui
 )
 
 qt_wrap_ui(PRISM_UPDATE_UI

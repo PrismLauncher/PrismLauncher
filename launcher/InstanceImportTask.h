@@ -43,7 +43,10 @@
 class InstanceImportTask : public InstanceTask {
     Q_OBJECT
    public:
-    explicit InstanceImportTask(const QUrl& sourceUrl, bool trustedSource, QWidget* parent = nullptr, QMap<QString, QString>&& extra_info = {});
+    explicit InstanceImportTask(const QUrl& sourceUrl,
+                                bool trustedSource,
+                                QWidget* parent = nullptr,
+                                QMap<QString, QString>&& extra_info = {});
     virtual ~InstanceImportTask() = default;
     bool abort() override;
 
