@@ -135,7 +135,7 @@ if (DEBUG_ADDRESS_SANITIZER)
                 $<${USE_ASAN_COMPILE_OPTIONS}:-fno-omit-frame-pointer>
                 $<${USE_ASAN_COMPILE_OPTIONS}:-fno-sanitize-recover=null>
         )
-        link_libraries("asan" "ubsan")
+        add_link_options($<${USE_ASAN_COMPILE_OPTIONS}:-fsanitize=address,undefined>)
     else()
         message(STATUS "Address Sanitizer not available on compiler ${CMAKE_CXX_COMPILER_ID}")
     endif()
