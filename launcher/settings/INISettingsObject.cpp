@@ -105,7 +105,7 @@ void INISettingsObject::doSave()
     if (m_suspendSave) {
         m_doSave = true;
     } else {
-        qDebug() << "Saving INI settings to " << m_filePath;
+        qDebug() << "Saving INI settings to" << m_filePath;
         m_ini.saveFile(m_filePath);
     }
 }
