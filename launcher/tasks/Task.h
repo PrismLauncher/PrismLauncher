@@ -53,8 +53,6 @@ struct TaskStepProgress {
     qint64 current = 0;
     qint64 total = -1;
 
-    qint64 old_current = 0;
-    qint64 old_total = -1;
 
     QString status = "";
     QString details = "";
@@ -66,8 +64,6 @@ struct TaskStepProgress {
     bool isDone() const { return (state == TaskStepState::Failed) || (state == TaskStepState::Succeeded); }
     void update(qint64 new_current, qint64 new_total)
     {
-        this->old_current = this->current;
-        this->old_total = this->total;
 
         this->current = new_current;
         this->total = new_total;

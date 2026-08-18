@@ -100,7 +100,6 @@ class ConcurrentTask : public Task {
     QHash<Task*, Task::Ptr> m_doing;
     QHash<Task*, Task::Ptr> m_done;
     QHash<Task*, Task::Ptr> m_failed;
-    QHash<Task*, Task::Ptr> m_succeeded;
 
     QHash<QUuid, std::shared_ptr<TaskStepProgress>> m_task_progress;
 

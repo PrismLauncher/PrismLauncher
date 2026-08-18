@@ -174,7 +174,9 @@ void ConcurrentTask::startSubTask(Task::Ptr next)
 void ConcurrentTask::subTaskFinished(Task::Ptr task, TaskStepState state)
 {
     m_done.insert(task.get(), task);
-    (state == TaskStepState::Succeeded ? m_succeeded : m_failed).insert(task.get(), task);
+    if (state == TaskStepState::Failed) {
+        m_failed.insert(task.get(), task);
+    }
 
     m_doing.remove(task.get());
 

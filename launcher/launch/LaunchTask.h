@@ -102,8 +102,6 @@ class LaunchTask : public Task {
 
     void requestProgress(Task* task);
 
-    void requestLogging();
-
    public slots:
     void onLogLines(const QStringList& lines, MessageLevel defaultLevel = MessageLevel::Launcher);
     void onLogLine(QString line, MessageLevel defaultLevel = MessageLevel::Launcher);
