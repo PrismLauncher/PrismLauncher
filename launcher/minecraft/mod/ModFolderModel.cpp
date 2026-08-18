@@ -277,14 +277,6 @@ Mod* findById(QSet<Mod*> mods, const QString& resourceId)
     auto found = std::ranges::find_if(mods, [resourceId](Mod* m) { return m->mod_id() == resourceId; });
     return found != mods.end() ? *found : nullptr;
 }
-
-// Normalizes a mod id or display name for fuzzy matching by stripping
-// everything but letters and numbers, lowercasing, then SORTING the
-// remaining characters into a canonical string. Sorting is deliberate:
-// e.g. slug "skinlayers3d" vs display name "3d-Skin-Layers" -- plain
-// stripping gives "skinlayers3d" vs "3dskinlayers" (no match), but the
-// sorted char-multisets match. Acceptable trade-off: true anagram
-// collisions between distinct mods would falsely match (narrow/unlikely).
 QString normalizeForFuzzyModMatch(const QString& s)
 {
     QString stripped;
@@ -557,52 +549,20 @@ bool ModFolderModel::deleteResources(const QModelIndexList& indexes)
     }
     return rsp;
 }
-
 void ModFolderModel::applyEnabledIds(const QSet<QString>& enabledModIds)
 {
-    // Called from the launch path (ScanModFolders::applyRuntimeProfiles).
-    //
-    // We cannot call ResourceFolderModel::setResourceEnabled here because it
-    // contains a QMessageBox guard that fires whenever m_instance->isRunning()
-    // is true.  isRunning() is set to true in LaunchTask::init() — before any
-    // launch step executes — so it is always true during ScanModFolders, even
-    // though the game process has not started yet.  Showing a dialog mid-launch
-    // would block the launch sequence.
-    //
-    // Similarly, we bypass ModFolderModel::setResourceEnabled to avoid its
-    // dependency-cascade dialog.
-    //
-    // Instead we replicate the minimal core of ResourceFolderModel::
-    // setResourceEnabled (the Resource::enable() call and m_resourcesIndex
-    // update) without the dialog guard.  This is safe because no game process
-    // is alive yet: the process starts only in LauncherPartLaunch::proceed(),
-    // many steps after ScanModFolders completes.
-    // Precompute the normalized (anagram-canonical) form of every requested id
-    // once, before the row loop, so the fuzzy match below is O(rows x ids)
-    // without re-normalizing the same requested ids for every row.
     QSet<QString> normalizedEnabledModIds;
     for (const QString& id : enabledModIds) {
         normalizedEnabledModIds.insert(normalizeForFuzzyModMatch(id));
     }
     for (int i = 0; i < rowCount(); ++i) {
         const Mod& mod = at(i);
-        // Legacy compatibility: some profiles were saved before the
-        // resolving-mod save guard existed and may still contain a mod's
-        // display name instead of its real mod_id() (a placeholder id
-        // captured mid-resolve -- see saveCurrentProfileState()). Matching
-        // on name() too means a stale entry still enables the right mod
-        // instead of silently and permanently vanishing on the next save;
-        // the next save persists the corrected mod_id() automatically.
-        // The fuzzy variants extend this to slug-vs-display-name mismatches
-        // ("fabric-api" vs "Fabric API", "3d-Skin-Layers" vs "skinlayers3d").
         bool shouldBeEnabled = enabledModIds.contains(mod.mod_id()) || enabledModIds.contains(mod.name()) ||
                                normalizedEnabledModIds.contains(normalizeForFuzzyModMatch(mod.mod_id())) ||
                                normalizedEnabledModIds.contains(normalizeForFuzzyModMatch(mod.name()));
         if (mod.enabled() == shouldBeEnabled)
-            continue;  // already in the correct state — no rename needed
-
+            continue;
         EnableAction action = shouldBeEnabled ? EnableAction::ENABLE : EnableAction::DISABLE;
-
         auto& resource = m_resources[i];
         auto oldId = resource->internalId();
         if (!resource->enable(action)) {

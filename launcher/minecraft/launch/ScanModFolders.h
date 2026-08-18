@@ -30,27 +30,16 @@ class ScanModFolders : public LaunchStep {
     void coreModsDone();
     void modsDone();
     void nilModsDone();
-    // Re-runs checkDone() on every ModFolderModel::parseFinished so the launch
-    // apply happens as soon as the last per-mod parse task completes.
     void onParseFinished();
 
    private:
     void checkDone();
-    // Reads runtime-profile selection from instance settings and applies the
-    // union of enabled mod IDs to each folder model. Called once, synchronously,
-    // after all three folder scans are complete AND no per-mod parse tasks are
-    // pending (see checkDone()). Does nothing if no runtime selection has been
-    // configured (preserving the existing launch behaviour).
     void applyRuntimeProfiles();
 
    private:  // DATA
     bool m_modsDone = false;
     bool m_nilModsDone = false;
     bool m_coreModsDone = false;
-    // Guards the runningStatusChanged connection in applyRuntimeProfiles()
-    // so it's registered exactly once, not once per launch.
     bool m_restoreListenerConnected = false;
-    // True once applyRuntimeProfiles() + emitSucceeded() have run. checkDone()
-    // is reachable again via parseFinished, so this prevents a double apply.
     bool m_applyDone = false;
 };

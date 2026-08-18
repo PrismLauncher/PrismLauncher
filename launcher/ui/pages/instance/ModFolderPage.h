@@ -79,24 +79,9 @@ class ModFolderPage : public ExternalResourcesPage {
      void changeModVersion();
      void onAddProfileClicked();
      void onRemoveProfileClicked();
-     // Saves the currently-visible model state into the active profile's settings key.
-     //
-     // The bool parameter is a defensive guard for the AUTOMATIC re-apply save
-     // paths inside applyProfileSwitch() ONLY. When true, the save is refused if
-     // the computed enabled-set is empty, nothing is still resolving, and the
-     // profile already has a non-empty value stored on disk — persisting a stale
-     // empty view would otherwise clobber a real saved profile (the two-phase
-     // corruption bug: entry-save + post-updateFinished save both writing an
-     // empty set over an @Invalid() key).
-     //
-     // All other call sites — the dataChanged-triggered save and the
-     // onTabEnableAll/onTabDisableAll bulk-action flows — MUST keep the default
-     // (false), because "Disable All"/"Enable All" legitimately persist
-     // empty/full sets and must never be refused.
      void saveCurrentProfileState(bool refuseSuspiciousEmptyOverwrite = false);
      void restoreCurrentProfileToFilesystem();
 
-     // Tab context-menu slots
      void onTabContextMenuRequested(const QPoint& pos);
      void onTabNewToRight(int sourceIndex);
      void onTabDuplicate(int sourceIndex);
@@ -104,58 +89,38 @@ class ModFolderPage : public ExternalResourcesPage {
      void onTabRemove(int tabIndex);
      void onTabEnableAll(int tabIndex);
      void onTabDisableAll(int tabIndex);
-
     private:
-     void applyProfileSwitch(int index, int generation);
-
-     // Creates a new profile tab with the given initial mod-enable state.
-     // Pass an empty QSet for a blank slate; pass a copied QSet for duplication.
+     void applyProfileSwitch(int index, int generation, bool isInitialLoad = false);
      void createProfile(const QString& name, const QSet<QString>& initialState, int insertAfterIndex = -1);
-     // Re-serialises the current tab order into the "ModProfileList" setting.
      void saveProfileList();
-
-     // Settings-key helpers — all keys are namespaced by model directory to prevent
-     // Mods / CoreMods / NilMods pages from overwriting each other's state.
-     // The format strings are defined in ModProfileKeys.h so the launch path can
-     // read the same keys without depending on this UI class.
      QString profileListKey() const { return ModProfileKeys::profileListKey(m_settingsPrefix); }
      QString profileKey(const QString& name) const { return ModProfileKeys::profileKey(m_settingsPrefix, name); }
      QString lastActiveIndexKey() const { return ModProfileKeys::lastActiveIndexKey(m_settingsPrefix); }
      QString runtimeProfilesKey() const { return ModProfileKeys::runtimeProfilesKey(m_settingsPrefix); }
-
-     // Runtime profile dropdown helpers
      void rebuildRuntimeMenu();
      void onRuntimeProfileToggled(const QString& name, bool checked);
      QStringList loadRuntimeSelection() const;
      void saveRuntimeSelection(const QStringList& selected);
-
     protected:
      bool eventFilter(QObject* obj, QEvent* ev) override;
      void mousePressEvent(QMouseEvent* event) override;
      void showEvent(QShowEvent* event) override;
      void hideEvent(QHideEvent* event) override;
-
      ModFolderModel* m_model;
      QPointer<ResourceDownload::ResourceDownloadDialog> m_downloadDialog;
      QPointer<QWidget> m_filterWindow;
      bool m_downloadFlowActive = false;
      QTabBar*       m_profileTabBar  = nullptr;
-     QToolButton*   m_newTabButton   = nullptr;  ///< Chrome-style "+" button appended after last tab
-     QToolButton*   m_runtimeProfilesButton = nullptr;  ///< Dropdown to select runtime-active profiles
-     QMenu*         m_runtimeMenu    = nullptr;  ///< Popup menu owned by m_runtimeProfilesButton
+     QToolButton*   m_newTabButton   = nullptr;
+     QToolButton*   m_runtimeProfilesButton = nullptr;
+     QMenu*         m_runtimeMenu    = nullptr;
      QMap<QString, QSet<QString>> m_profileStates;
      QString m_currentProfile;
      QString m_settingsPrefix;
      bool m_destructorStarted = false;
      int            m_profileSwitchGeneration = 0;
      bool           m_applyingProfile = false;
-     // True for the entire duration of a launch task (set by runningStatusChanged).
-     // Prevents saveCurrentProfileState() from persisting the runtime-union
-     // filesystem state over the user's saved editing profile.
      bool           m_instanceRunning = false;
-     // Index of the tab that applyProfileSwitch is currently switching to.
-     // Read by the currentChanged guard to revert any concurrent tab click
-     // without reading from settings.
      int            m_inFlightTabIndex = 0;
  };
 
