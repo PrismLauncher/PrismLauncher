@@ -146,17 +146,13 @@ bool ManagedPackPage::runUpdateTask(InstanceTask* task)
 
     const unique_qobject_ptr<Task> wrappedTask(APPLICATION->instances()->wrapInstanceTask(task));
 
-    connect(wrappedTask.get(), &Task::failed,
+    connect(wrappedTask.get(), &Task::failed, this,
             [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-    connect(wrappedTask.get(), &Task::succeeded, [this, task]() {
+    connect(wrappedTask.get(), &Task::succeeded, this, [this, task]() {
         QStringList warnings = task->warnings();
         if (warnings.count()) {
             CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
         }
-    });
-    connect(wrappedTask.get(), &Task::aborted, [this] {
-        CustomMessageBox::selectable(this, tr("Task aborted"), tr("The task has been aborted by the user."), QMessageBox::Information)
-            ->show();
     });
 
     ProgressDialog loadDialog(this);
@@ -244,12 +240,12 @@ void ModrinthManagedPackPage::parseManagedPack()
     };
     callbacks.on_fail = [this](const QString& /*reason*/, int) { setFailState(); };
     callbacks.on_abort = [this]() { setFailState(); };
-    m_fetchJob = m_api.getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
-                                            .mcVersions = {},
-                                            .loaders = {},
-                                            .resourceType = ModPlatform::ResourceType::Modpack,
-                                            .includeChangelog = true },
-                                          std::move(callbacks));
+    m_fetchJob = ModrinthAPI::get().getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
+                                                         .mcVersions = {},
+                                                         .loaders = {},
+                                                         .resourceType = ModPlatform::ResourceType::Modpack,
+                                                         .includeChangelog = true },
+                                                       std::move(callbacks));
 
     ui->changelogTextBrowser->setText(tr("Fetching changelogs..."));
 
@@ -304,7 +300,7 @@ void ModrinthManagedPackPage::update()
 {
     auto customURL = m_inst->settings()->get("ManagedPackURL").toString().trimmed();
     if (m_inst->getManagedPackID().isEmpty() && !customURL.isEmpty()) {
-        updatePack(customURL);
+        updatePack(customURL, false);
         return;
     }
     auto index = ui->versionsComboBox->currentIndex();
@@ -314,7 +310,7 @@ void ModrinthManagedPackPage::update()
     }
     auto version = m_pack.versions.at(index);
 
-    updatePack(version.downloadUrl, version.fileId.toString(), version.version);
+    updatePack(version.downloadUrl, true, version.fileId.toString(), version.version);
 }
 
 void ModrinthManagedPackPage::updateFromFile()
@@ -324,7 +320,7 @@ void ModrinthManagedPackPage::updateFromFile()
         return;
     }
 
-    updatePack(output);
+    updatePack(output, false);
 }
 
 // FLAME
@@ -399,12 +395,12 @@ void FlameManagedPackPage::parseManagedPack()
     };
     callbacks.on_fail = [this](const QString& /*reason*/, int) { setFailState(); };
     callbacks.on_abort = [this]() { setFailState(); };
-    m_fetchJob = m_api.getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
-                                            .mcVersions = {},
-                                            .loaders = {},
-                                            .resourceType = ModPlatform::ResourceType::Modpack,
-                                            .includeChangelog = true },
-                                          std::move(callbacks));
+    m_fetchJob = FlameAPI::get().getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
+                                                      .mcVersions = {},
+                                                      .loaders = {},
+                                                      .resourceType = ModPlatform::ResourceType::Modpack,
+                                                      .includeChangelog = true },
+                                                    std::move(callbacks));
 
     m_fetchJob->start();
 }
@@ -425,7 +421,7 @@ void FlameManagedPackPage::suggestVersion()
     auto version = m_pack.versions.at(index);
 
     ui->changelogTextBrowser->setHtml(
-        StringUtils::htmlListPatch(m_api.getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt())));
+        StringUtils::htmlListPatch(FlameAPI::get().getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt())));
 
     ManagedPackPage::suggestVersion();
 }
@@ -434,7 +430,7 @@ void FlameManagedPackPage::update()
 {
     auto customURL = m_inst->settings()->get("ManagedPackURL").toString().trimmed();
     if (m_inst->getManagedPackID().isEmpty() && !customURL.isEmpty()) {
-        updatePack(customURL);
+        updatePack(customURL, false);
         return;
     }
     auto index = ui->versionsComboBox->currentIndex();
@@ -444,7 +440,7 @@ void FlameManagedPackPage::update()
     }
     auto version = m_pack.versions.at(index);
 
-    updatePack(version.downloadUrl, version.fileId.toString());
+    updatePack(version.downloadUrl, true, version.fileId.toString());
 }
 
 void FlameManagedPackPage::updateFromFile()
@@ -454,10 +450,10 @@ void FlameManagedPackPage::updateFromFile()
         return;
     }
 
-    updatePack(output);
+    updatePack(output, false);
 }
 
-void ManagedPackPage::updatePack(const QUrl& url, const QString& versionID, const QString& versionName)
+void ManagedPackPage::updatePack(const QUrl& url, bool trusted, const QString& versionID, const QString& versionName)
 {
     QMap<QString, QString> extraInfo;
     // NOTE: Don't use 'm_pack.id' here, since we didn't completely parse all the metadata for the pack, including this field.
@@ -465,7 +461,7 @@ void ManagedPackPage::updatePack(const QUrl& url, const QString& versionID, cons
     extraInfo.insert("pack_version_id", versionID);
     extraInfo.insert("original_instance_id", m_inst->id());
 
-    auto* extracted = new InstanceImportTask(url, this, std::move(extraInfo));
+    auto* extracted = new InstanceImportTask(url, trusted, this, std::move(extraInfo));
 
     if (versionName.isEmpty()) {
         extracted->setName(m_inst->name());

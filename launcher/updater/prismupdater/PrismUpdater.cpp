@@ -51,7 +51,7 @@ namespace fs = std::filesystem;
 #include "Json.h"
 #include "StringUtils.h"
 
-#include "net/Download.h"
+#include "net/NetRequest.h"
 #include "net/RawHeaderProxy.h"
 
 #include "MMCZip.h"
@@ -766,7 +766,7 @@ QFileInfo PrismUpdaterApp::downloadAsset(const GitHubReleaseAsset& asset)
     auto out_file_path = FS::PathCombine(temp_dir, file_url.fileName());
 
     qDebug() << "downloading" << file_url << "to" << out_file_path;
-    auto download = Net::Download::makeFile(file_url, out_file_path);
+    auto download = Net::NetRequest::makeFile(file_url, out_file_path);
     download->setNetwork(m_network.get());
     auto progress_dialog = ProgressDialog();
     progress_dialog.adjustSize();
@@ -1136,7 +1136,7 @@ void PrismUpdaterApp::downloadReleasePage(const QString& api_url, int page)
 {
     int per_page = 30;
     auto page_url = QString("%1?per_page=%2&page=%3").arg(api_url).arg(QString::number(per_page)).arg(QString::number(page));
-    auto [download, response] = Net::Download::makeByteArray(page_url);
+    auto [download, response] = Net::NetRequest::makeByteArray(page_url);
     download->setNetwork(m_network.get());
     m_current_url = page_url;
 
@@ -1147,7 +1147,7 @@ void PrismUpdaterApp::downloadReleasePage(const QString& api_url, int page)
     });
     download->addHeaderProxy(std::move(github_api_headers));
 
-    connect(download.get(), &Net::Download::succeeded, this, [this, response, per_page, api_url, page]() {
+    connect(download.get(), &Net::NetRequest::succeeded, this, [this, response, per_page, api_url, page]() {
         int num_found = parseReleasePage(response);
         if (!(num_found < per_page)) {  // there may be more, fetch next page
             downloadReleasePage(api_url, page + 1);
@@ -1155,10 +1155,10 @@ void PrismUpdaterApp::downloadReleasePage(const QString& api_url, int page)
             run();
         }
     });
-    connect(download.get(), &Net::Download::failed, this, &PrismUpdaterApp::downloadError);
+    connect(download.get(), &Net::NetRequest::failed, this, &PrismUpdaterApp::downloadError);
 
     m_current_task.reset(download);
-    connect(download.get(), &Net::Download::finished, this, [this]() {
+    connect(download.get(), &Net::NetRequest::finished, this, [this]() {
         qDebug() << "Download" << m_current_task->getUid().toString() << "finished";
     });
 

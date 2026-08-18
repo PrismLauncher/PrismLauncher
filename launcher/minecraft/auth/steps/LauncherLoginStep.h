@@ -3,7 +3,7 @@
 
 #include "minecraft/auth/AuthStep.h"
 #include "net/NetJob.h"
-#include "net/Upload.h"
+#include "net/NetRequest.h"
 
 class LauncherLoginStep : public AuthStep {
     Q_OBJECT
@@ -20,6 +20,6 @@ class LauncherLoginStep : public AuthStep {
     void onRequestDone(QByteArray* response);
 
    private:
-    Net::Upload::Ptr m_request;
+    Net::NetRequest::Ptr m_request;
     NetJob::Ptr m_task;
 };

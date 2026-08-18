@@ -14,7 +14,7 @@ class DataPackResourcePage : public ResourcePage {
     Q_OBJECT
 
    public:
-    DataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, ResourceProviderData provider, ResourceAPI* api);
+    DataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, ResourceProviderData provider, const ResourceAPI* api);
 
    protected slots:
     void triggerSearch() override;

@@ -38,6 +38,7 @@ include(GenerateExportHeader)
 add_compile_definitions($<$<NOT:$<CONFIG:Debug>>:QT_NO_DEBUG>)
 add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060400)
 add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x060400)
+add_compile_definitions(QT_NO_CONTEXTLESS_CONNECT)
 
 if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
     add_compile_options(
@@ -67,6 +68,10 @@ if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
     # TODO(@getchoo): Is sccache affected by this? Would be nice to use `ProgramDatabase`....
     set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>")
 
+    # Ensure our runtime library matches our vcpkg dependencies
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+
+    # TODO(@getchoo): Do we actually need this???
     if(CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreadedDLL")
         set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release "")
         set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release "")
@@ -244,12 +249,15 @@ option(Launcher_ENABLE_JAVA_DOWNLOADER "Build the java downloader feature" ${Lau
 if(UNIX AND APPLE)
     set(Launcher_GLFW_LIBRARY_NAME "libglfw.dylib" CACHE STRING "Name of native glfw library")
     set(Launcher_OPENAL_LIBRARY_NAME "libopenal.dylib" CACHE STRING "Name of native openal library")
+    set(Launcher_SDL_LIBRARY_NAME "libSDL3.dylib" CACHE STRING "Name of native sdl library")
 elseif(UNIX)
     set(Launcher_GLFW_LIBRARY_NAME "libglfw.so" CACHE STRING "Name of native glfw library")
     set(Launcher_OPENAL_LIBRARY_NAME "libopenal.so" CACHE STRING "Name of native openal library")
+    set(Launcher_SDL_LIBRARY_NAME "libSDL3.so" CACHE STRING "Name of native sdl library")
 elseif(WIN32)
     set(Launcher_GLFW_LIBRARY_NAME "glfw.dll" CACHE STRING "Name of native glfw library")
     set(Launcher_OPENAL_LIBRARY_NAME "OpenAL.dll" CACHE STRING "Name of native openal library")
+    set(Launcher_SDL_LIBRARY_NAME "SDL3.dll" CACHE STRING "Name of native sdl library")
 endif()
 
 # API Keys
@@ -308,7 +316,7 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 6)
         HINTS
             C:/Qt/*/*/lib/cmake
             /opt/qt/*/*/lib/cmake
-            $ENV{MINGW_PREFIX}/opt/qt/*/*/li/cmake
+            $ENV{MINGW_PREFIX}/opt/qt/*/*/lib/cmake
     )
     find_package(Qt6 COMPONENTS DBus HINTS /opt/qt/*/*/lib/cmake)
     list(APPEND Launcher_QT_DBUS Qt6::DBus)
@@ -333,9 +341,7 @@ endif()
 ## NOTE(@getchoo): Never use pkg-config with MSVC since the vcpkg port makes our install bundle fail to find the dll
 if(MSVC)
     find_path(LIBQRENCODE_INCLUDE_DIR qrencode.h REQUIRED)
-    find_library(LIBQRENCODE_LIBRARY_RELEASE qrencode REQUIRED)
-    find_library(LIBQRENCODE_LIBRARY_DEBUG qrencoded)
-    set(LIBQRENCODE_LIBRARIES optimized ${LIBQRENCODE_LIBRARY_RELEASE} debug ${LIBQRENCODE_LIBRARY_DEBUG})
+    find_library(LIBQRENCODE_LIBRARY qrencode REQUIRED)
 else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(libqrencode REQUIRED IMPORTED_TARGET libqrencode)

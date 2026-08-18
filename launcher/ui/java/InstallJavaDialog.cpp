@@ -182,7 +182,7 @@ QStringList getRecommendedJavaVersionsFromVersionList(Meta::VersionList::Ptr lis
     return recommendedJavas;
 }
 
-InstallDialog::InstallDialog(const QString& uid, BaseInstance* instance, QWidget* parent)
+InstallDialog::InstallDialog(const QString& uid, MinecraftInstance* instance, QWidget* parent)
     : QDialog(parent), container(new PageContainer(this, QString(), this)), buttons(new QDialogButtonBox(this))
 {
     auto layout = new QVBoxLayout(this);
@@ -231,8 +231,8 @@ InstallDialog::InstallDialog(const QString& uid, BaseInstance* instance, QWidget
     resize(840, 480);
 
     QStringList recommendedJavas;
-    if (auto mcInst = dynamic_cast<MinecraftInstance*>(instance); mcInst) {
-        auto mc = mcInst->getPackProfile()->getComponent("net.minecraft");
+    if (instance != nullptr) {
+        auto mc = instance->getPackProfile()->getComponent("net.minecraft");
         if (mc) {
             auto file = mc->getVersionFile();  // no need for load as it should already be loaded
             if (file) {

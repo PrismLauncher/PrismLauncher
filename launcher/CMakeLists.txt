@@ -116,8 +116,6 @@ set(NET_SOURCES
     # network stuffs
     net/ByteArraySink.h
     net/ChecksumValidator.h
-    net/Download.cpp
-    net/Download.h
     net/DummySink.h
     net/FileSink.cpp
     net/FileSink.h
@@ -134,15 +132,10 @@ set(NET_SOURCES
     net/PasteUpload.h
     net/Sink.h
     net/Validator.h
-    net/Upload.cpp
-    net/Upload.h
     net/HeaderProxy.h
     net/RawHeaderProxy.h
     net/ApiHeaderProxy.h
-    net/ApiDownload.h
-    net/ApiDownload.cpp
-    net/ApiUpload.cpp
-    net/ApiUpload.h
+    net/ApiRequest.h
     net/NetRequest.cpp
     net/NetRequest.h
 )
@@ -643,8 +636,6 @@ set(PRISMUPDATER_SOURCES
 
     net/ByteArraySink.h
     net/ChecksumValidator.h
-    net/Download.cpp
-    net/Download.h
     net/FileSink.cpp
     net/FileSink.h
     net/HttpMetaCache.cpp
@@ -1101,6 +1092,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/InstallLoaderDialog.h
     ui/dialogs/ChooseOfflineNameDialog.cpp
     ui/dialogs/ChooseOfflineNameDialog.h
+    ui/dialogs/UntrustedModsDialog.cpp
+    ui/dialogs/UntrustedModsDialog.h
 
     ui/dialogs/skins/SkinManageDialog.cpp
     ui/dialogs/skins/SkinManageDialog.h
@@ -1268,7 +1261,7 @@ if(TARGET PkgConfig::libqrencode)
     target_link_libraries(Launcher_logic PkgConfig::libqrencode)
 else()
     target_include_directories(Launcher_logic PRIVATE ${LIBQRENCODE_INCLUDE_DIR})
-    target_link_libraries(Launcher_logic ${LIBQRENCODE_LIBRARIES})
+    target_link_libraries(Launcher_logic ${LIBQRENCODE_LIBRARY})
 endif()
 
 if(TARGET PkgConfig::tomlplusplus)

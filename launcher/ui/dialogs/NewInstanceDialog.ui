@@ -26,6 +26,19 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout_2">
+     <item row="2" column="1">
+      <widget class="QLabel" name="instDirLabel">
+       <property name="text">
+        <string>&amp;Location:</string>
+       </property>
+       <property name="buddy">
+        <cstring>instDirBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QComboBox" name="instDirBox"/>
+     </item>
      <item row="1" column="2">
       <widget class="QComboBox" name="groupBox">
        <property name="editable">
@@ -85,6 +98,7 @@
   <tabstop>iconButton</tabstop>
   <tabstop>instNameTextBox</tabstop>
   <tabstop>groupBox</tabstop>
+  <tabstop>instDirBox</tabstop>
  </tabstops>
  <resources/>
  <connections/>

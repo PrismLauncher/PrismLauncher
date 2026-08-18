@@ -17,6 +17,7 @@
 #include "tasks/ConcurrentTask.h"
 #include "tasks/Task.h"
 
+class MinecraftInstance;
 class QSortFilterProxyModel;
 
 /* A macro to define useful functions to handle Resource* -> T* more easily on derived classes */
@@ -61,7 +62,7 @@ class QSortFilterProxyModel;
 class ResourceFolderModel : public QAbstractListModel {
     Q_OBJECT
    public:
-    ResourceFolderModel(const QDir& dir, BaseInstance* instance, bool isIndexed, bool createDir, QObject* parent = nullptr);
+    ResourceFolderModel(const QDir& dir, MinecraftInstance* instance, bool isIndexed, bool createDir, QObject* parent = nullptr);
     ~ResourceFolderModel() override;
 
     virtual QString id() const { return "resource"; }
@@ -183,7 +184,7 @@ class ResourceFolderModel : public QAbstractListModel {
     };
 
     QString instDirPath() const;
-    BaseInstance* instance() const { return m_instance; }
+    MinecraftInstance* instance() const { return m_instance; }
 
    signals:
     void updateFinished();
@@ -249,7 +250,7 @@ class ResourceFolderModel : public QAbstractListModel {
     QList<bool> m_columnsHideable = { false, false, true, true, true, true };
 
     QDir m_dir;
-    BaseInstance* m_instance;
+    MinecraftInstance* m_instance;
     QFileSystemWatcher m_watcher;
     bool m_isWatching = false;
 

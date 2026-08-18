@@ -38,7 +38,7 @@ void ArchiveDownloadTask::executeTask()
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("java", m_url.fileName());
 
     auto download = makeShared<NetJob>(QString("JRE::DownloadJava"), APPLICATION->network());
-    auto action = Net::Download::makeCached(m_url, entry);
+    auto action = Net::NetRequest::makeCached(m_url, entry);
     if (!m_checksum_hash.isEmpty() && !m_checksum_type.isEmpty()) {
         auto hashType = QCryptographicHash::Algorithm::Sha1;
         if (m_checksum_type == "sha256") {
@@ -55,7 +55,7 @@ void ArchiveDownloadTask::executeTask()
     connect(download.get(), &Task::status, this, &ArchiveDownloadTask::setStatus);
     connect(download.get(), &Task::details, this, &ArchiveDownloadTask::setDetails);
     connect(download.get(), &Task::aborted, this, &ArchiveDownloadTask::emitAborted);
-    connect(download.get(), &Task::succeeded, [this, fullPath] {
+    connect(download.get(), &Task::succeeded, this, [this, fullPath] {
         // This should do all of the extracting and creating folders
         extractJava(fullPath);
     });

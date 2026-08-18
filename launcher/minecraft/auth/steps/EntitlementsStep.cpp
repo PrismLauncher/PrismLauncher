@@ -9,7 +9,7 @@
 #include "Application.h"
 #include "Logging.h"
 #include "minecraft/auth/Parsers.h"
-#include "net/Download.h"
+#include "net/NetRequest.h"
 #include "net/NetJob.h"
 #include "net/RawHeaderProxy.h"
 #include "tasks/Task.h"
@@ -30,7 +30,7 @@ void EntitlementsStep::perform()
                                            { "Accept", "application/json" },
                                            { "Authorization", QString("Bearer %1").arg(m_data->yggdrasilToken.token).toUtf8() } };
 
-    auto [request, response] = Net::Download::makeByteArray(url);
+    auto [request, response] = Net::NetRequest::makeByteArray(url);
     m_request = request;
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);

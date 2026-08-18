@@ -21,7 +21,7 @@ class DataPackResourceModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    DataPackResourceModel(BaseInstance const&, ResourceAPI*, QString, QString);
+    DataPackResourceModel(BaseInstance const&, const ResourceAPI*, QString, QString);
 
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, unsigned int sort);

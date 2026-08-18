@@ -42,7 +42,7 @@
 
 CapeChange::CapeChange(QString cape) : NetRequest(), m_capeId(cape)
 {
-    logCat = taskMCSkinsLogC;
+    m_logCat = taskMCSkinsLogC;
 }
 
 QNetworkReply* CapeChange::getReply(QNetworkRequest& request)

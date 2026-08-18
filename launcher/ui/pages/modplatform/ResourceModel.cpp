@@ -19,7 +19,7 @@
 #include "settings/SettingsObject.h"
 
 #include "modplatform/ResourceAPI.h"
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 #include "net/NetJob.h"
 
 #include "modplatform/ModIndex.h"
@@ -30,7 +30,7 @@ namespace ResourceDownload {
 
 QHash<ResourceModel*, bool> ResourceModel::s_running_models;
 
-ResourceModel::ResourceModel(ResourceAPI* api) : m_api(api)
+ResourceModel::ResourceModel(const ResourceAPI* api) : m_api(api)
 {
     s_running_models.insert(this, true);
     if (APPLICATION_DYN) {
@@ -358,7 +358,7 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
     auto cacheEntry = APPLICATION->metacache()->resolveEntry(
         metaEntryBase(),
         QString("logos/%1").arg(QString(QCryptographicHash::hash(url.toEncoded(), QCryptographicHash::Algorithm::Sha1).toHex())));
-    auto iconFetchAction = Net::ApiDownload::makeCached(url, cacheEntry);
+    auto iconFetchAction = Net::ApiRequest::makeCached(url, cacheEntry);
 
     auto fullFilePath = cacheEntry->getFullPath();
     connect(iconFetchAction.get(), &Task::succeeded, this, [this, url, fullFilePath, index] {

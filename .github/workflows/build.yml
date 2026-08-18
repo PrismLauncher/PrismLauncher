@@ -59,12 +59,6 @@ jobs:
             msystem: CLANG64
             vcvars-arch: amd64_x86
 
-          - os: windows-11-arm
-            artifact-name: Windows-MinGW-arm64
-            cmake-preset: windows_mingw
-            msystem: CLANGARM64
-            vcvars-arch: arm64
-
           - os: windows-2022
             artifact-name: Windows-MSVC
             cmake-preset: windows_msvc
@@ -124,18 +118,13 @@ jobs:
 
       - name: Configure project
         run: |
-          cmake --preset "$CMAKE_PRESET"
+          cmake --preset "$CMAKE_PRESET" -D VCPKG_HOST_TRIPLET="$VCPKG_TRIPLET" -D VCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET"
 
       - name: Run build
         run: |
           cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE"
 
       - name: Run tests
-        # NOTE(@getchoo): Tests are skipped for MinGW-arm64 builds due to
-        # repeated, random test failures exclusive to the platform
-        #
-        # As of Qt 6.11, official ARM support for Windows is also limited to MSVC...so
-        if: ${{ !(runner.os == 'Windows' && runner.arch == 'ARM64' && matrix.msystem != '') }}
         run: |
           ctest --preset "$CMAKE_PRESET" --build-config "$BUILD_TYPE"
 

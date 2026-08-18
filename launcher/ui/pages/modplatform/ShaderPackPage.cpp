@@ -37,7 +37,7 @@ namespace ResourceDownload {
 ShaderPackResourcePage::ShaderPackResourcePage(ResourceDownloadDialog* dialog,
                                                BaseInstance& instance,
                                                ResourceProviderData provider,
-                                               ResourceAPI* api)
+                                               const ResourceAPI* api)
     : ResourcePage(dialog, instance, prepareShaderPackDescriptor(), std::move(provider))
 {
     m_model = new ShaderPackResourceModel(instance, api, debugName(), metaEntryBase());

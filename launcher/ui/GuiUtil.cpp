@@ -137,13 +137,8 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
 
     auto pasteJob = new PasteUpload(textToUpload, baseURL, pasteType);
     job->addNetAction(Net::NetRequest::Ptr(pasteJob));
-    QObject::connect(job.get(), &Task::failed, [parentWidget](QString reason) {
+    QObject::connect(job.get(), &Task::failed, parentWidget, [parentWidget](QString reason) {
         CustomMessageBox::selectable(parentWidget, QObject::tr("Failed to upload logs!"), reason, QMessageBox::Critical)->show();
-    });
-    QObject::connect(job.get(), &Task::aborted, [parentWidget] {
-        CustomMessageBox::selectable(parentWidget, QObject::tr("Logs upload aborted"),
-                                     QObject::tr("The task has been aborted by the user."), QMessageBox::Information)
-            ->show();
     });
 
     if (dialog.execWithTask(job.get()) == QDialog::Accepted) {

@@ -84,7 +84,7 @@ class ManagedPackPage : public QWidget, public BasePage {
      */
     bool runUpdateTask(InstanceTask*);
 
-    void updatePack(const QUrl& url, const QString& versionID = {}, const QString& versionName = {});
+    void updatePack(const QUrl& url, bool trusted, const QString& versionID = {}, const QString& versionName = {});
 
     void onUpdateTaskCompleted(bool didSucceed) const;
 
@@ -132,7 +132,6 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
     Task::Ptr m_fetchJob = nullptr;
 
     ModPlatform::IndexedPack m_pack;
-    ModrinthAPI m_api;
 };
 
 class FlameManagedPackPage final : public ManagedPackPage {
@@ -156,5 +155,4 @@ class FlameManagedPackPage final : public ManagedPackPage {
     Task::Ptr m_fetchJob = nullptr;
 
     ModPlatform::IndexedPack m_pack;
-    FlameAPI m_api;
 };

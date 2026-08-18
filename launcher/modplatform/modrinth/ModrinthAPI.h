@@ -12,8 +12,14 @@
 #include <QDebug>
 #include <utility>
 
-class ModrinthAPI : public ResourceAPI {
+class ModrinthAPI final : public ResourceAPI {
    public:
+    static const ModrinthAPI& get()
+    {
+        static const ModrinthAPI s_instance;
+        return s_instance;
+    }
+
     std::pair<Task::Ptr, QByteArray*> currentVersion(const QString& hash, const QString& hash_format) const;
 
     std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, QString hash_format) const;
@@ -30,9 +36,9 @@ class ModrinthAPI : public ResourceAPI {
 
     std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
 
-    std::pair<Task::Ptr, QByteArray*> getModCategories() override;
+    std::pair<Task::Ptr, QByteArray*> getModCategories() const override;
     static QList<ModPlatform::Category> loadCategories(const QByteArray& response, const QString& projectType);
-    QList<ModPlatform::Category> loadModCategories(const QByteArray& response) override;
+    QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const override;
 
    public:
     auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
@@ -102,6 +108,10 @@ class ModrinthAPI : public ResourceAPI {
     }
 
    private:
+    // NOTE: prevent creation and deletion of type - get should be used instead
+    ModrinthAPI() = default;
+    ~ModrinthAPI() = default;
+
     static QString resourceTypeParameter(ModPlatform::ResourceType type)
     {
         switch (type) {

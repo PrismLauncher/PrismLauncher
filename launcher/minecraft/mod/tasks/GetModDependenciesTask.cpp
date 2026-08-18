@@ -30,14 +30,14 @@
 #include "tasks/SequentialTask.h"
 #include "ui/pages/modplatform/ModModel.h"
 
-static Version mcVersion(BaseInstance* inst)
+static Version mcVersion(MinecraftInstance* inst)
 {
-    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion();
+    return inst->getPackProfile()->getComponent("net.minecraft")->getVersion();
 }
 
-static ModPlatform::ModLoaderTypes mcLoaders(BaseInstance* inst)
+static ModPlatform::ModLoaderTypes mcLoaders(MinecraftInstance* inst)
 {
-    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
+    return inst->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
 }
 
 static bool checkDependencies(std::shared_ptr<GetModDependenciesTask::PackDependency> sel,
@@ -48,7 +48,7 @@ static bool checkDependencies(std::shared_ptr<GetModDependenciesTask::PackDepend
            (!loaders || !sel->version.loaders || sel->version.loaders & loaders);
 }
 
-GetModDependenciesTask::GetModDependenciesTask(BaseInstance* instance,
+GetModDependenciesTask::GetModDependenciesTask(MinecraftInstance* instance,
                                                ModFolderModel* folder,
                                                QList<std::shared_ptr<PackDependency>> selected)
     : SequentialTask(tr("Get dependencies")), m_selected(selected), m_version(mcVersion(instance)), m_loaderType(mcLoaders(instance))
@@ -140,7 +140,7 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDepende
 {
     auto provider = pDep->pack->provider;
     auto [info, responseInfo] = getAPI(provider)->getProject(pDep->pack->addonId.toString());
-    connect(info.get(), &NetJob::succeeded, [this, responseInfo, provider, pDep] {
+    connect(info.get(), &NetJob::succeeded, this, [this, responseInfo, provider, pDep] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*responseInfo, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {

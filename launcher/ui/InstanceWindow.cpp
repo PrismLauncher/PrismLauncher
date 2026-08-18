@@ -50,7 +50,7 @@
 
 #include "icons/IconList.h"
 
-InstanceWindow::InstanceWindow(BaseInstance* instance, QWidget* parent) : QMainWindow(parent), m_instance(instance)
+InstanceWindow::InstanceWindow(MinecraftInstance* instance, QWidget* parent) : QMainWindow(parent), m_instance(instance)
 {
     setAttribute(Qt::WA_DeleteOnClose);
 

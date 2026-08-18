@@ -38,7 +38,7 @@
 #include <optional>
 
 #include "QObjectPtr.h"
-#include "net/Download.h"
+#include "net/NetRequest.h"
 
 #define PRISM_EXTERNAL_EXE
 #include "FileSystem.h"

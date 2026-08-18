@@ -66,7 +66,8 @@
 #include "meta/Index.h"
 #include "minecraft/World.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
+#include "ui/dialogs/UntrustedModsDialog.h"
 #include "ui/pages/modplatform/OptionalModDialog.h"
 
 bool FlameCreationTask::abort()
@@ -211,7 +212,7 @@ void FlameCreationTask::executeTask()
             fileIds.append(QString::number(file.fileId));
         }
 
-        auto [job, rawResponse] = FlameAPI().getFiles(fileIds);
+        auto [job, rawResponse] = FlameAPI::get().getFiles(fileIds);
 
         connect(job.get(), &Task::succeeded, this,
                 [this, rawResponse, fileIds, oldInstDir, oldFiles, oldMinecraftDir, createInst]() mutable {
@@ -343,6 +344,31 @@ void FlameCreationTask::setManagedPack(BaseInstance* instance)
     }
 }
 
+bool FlameCreationTask::promptForUntrustedMods()
+{
+    if (m_trustedSource) {
+        return true;
+    }
+
+    QStringList untrustedMods;
+
+    const QDir mcDir{ FS::PathCombine(m_stagingPath, "minecraft") };
+    const QString modsPath{ FS::PathCombine(m_stagingPath, "minecraft/mods") };
+    if (QDir(modsPath).exists()) {
+        QDirIterator iter{ modsPath, QDir::Files, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks };
+        while (iter.hasNext()) {
+            untrustedMods.append(mcDir.relativeFilePath(iter.next()));
+        }
+    }
+
+    if (untrustedMods.empty()) {
+        return true;
+    }
+
+    UntrustedModsDialog dialog{ untrustedMods, m_parent };
+    return dialog.exec() == QDialog::Accepted;
+}
+
 void FlameCreationTask::createInstance()
 {
     const QString parentFolder(FS::PathCombine(m_stagingPath, "flame"));
@@ -378,6 +404,11 @@ void FlameCreationTask::createInstance()
             logWarning(
                 tr("The specified overrides folder (%1) is missing. Maybe the modpack was already used before?").arg(m_pack.overrides));
         }
+    }
+
+    if (!promptForUntrustedMods()) {
+        emitAborted();
+        return;
     }
 
     QString loaderType;
@@ -488,7 +519,7 @@ void FlameCreationTask::createInstance()
 
     m_modIdResolver.reset(new Flame::FileResolvingTask(m_pack));
     connect(m_modIdResolver.get(), &Flame::FileResolvingTask::succeeded, this, &FlameCreationTask::idResolverSucceeded);
-    connect(m_modIdResolver.get(), &Flame::FileResolvingTask::failed, [this](const QString& reason) {
+    connect(m_modIdResolver.get(), &Flame::FileResolvingTask::failed, this, [this](const QString& reason) {
         m_modIdResolver.reset();
         emitFailed(tr("Unable to resolve mod IDs:\n") + reason);
     });
@@ -591,7 +622,7 @@ void FlameCreationTask::setupDownloadJob()
 
         if (!result.version.downloadUrl.isEmpty()) {
             qDebug() << "Will download" << result.version.downloadUrl << "to" << path;
-            auto dl = Net::ApiDownload::makeFile(result.version.downloadUrl, path);
+            auto dl = Net::ApiRequest::makeFile(result.version.downloadUrl, path);
             m_filesJob->addNetAction(dl);
         }
     }
@@ -600,7 +631,7 @@ void FlameCreationTask::setupDownloadJob()
         m_filesJob.reset();
         validateOtherResources();
     });
-    connect(m_filesJob.get(), &NetJob::failed, [this](QString reason) {
+    connect(m_filesJob.get(), &NetJob::failed, this, [this](QString reason) {
         m_filesJob.reset();
         emitFailed(std::move(reason));
     });

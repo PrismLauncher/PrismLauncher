@@ -74,6 +74,8 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
     QString instName() const;
     QString instGroup() const;
     QString iconKey() const;
+    QString instDir() const;
+    void refreshInstDirBox();
 
    public slots:
     void accept() override;

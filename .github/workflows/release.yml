@@ -81,17 +81,6 @@ jobs:
             cd ..
           done
 
-          for d in PrismLauncher-Windows-MinGW-arm64*; do
-            cd "${d}" || continue
-            INST="$(echo -n ${d} | grep -o Setup || true)"
-            PORT="$(echo -n ${d} | grep -o Portable || true)"
-            NAME="PrismLauncher-Windows-MinGW-arm64"
-            test -z "${PORT}" || NAME="${NAME}-Portable"
-            test -z "${INST}" || mv PrismLauncher-*.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
-            test -n "${INST}" || zip -r -9 "../${NAME}-${{ env.VERSION }}.zip" *
-            cd ..
-          done
-
       - name: Create release
         id: create_release
         uses: softprops/action-gh-release@v3
@@ -112,9 +101,6 @@ jobs:
             PrismLauncher-Windows-MinGW-w64-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MinGW-w64-Portable-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MinGW-w64-Setup-${{ env.VERSION }}.exe
-            PrismLauncher-Windows-MinGW-arm64-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-MinGW-arm64-Portable-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-MinGW-arm64-Setup-${{ env.VERSION }}.exe
             PrismLauncher-Windows-MSVC-arm64-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-arm64-Portable-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-arm64-Setup-${{ env.VERSION }}.exe

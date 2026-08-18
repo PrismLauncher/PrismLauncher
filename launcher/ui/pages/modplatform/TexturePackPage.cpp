@@ -38,7 +38,7 @@ namespace ResourceDownload {
 TexturePackResourcePage::TexturePackResourcePage(ResourceDownloadDialog* dialog,
                                                  BaseInstance& instance,
                                                  ResourceProviderData provider,
-                                                 ResourceAPI* api,
+                                                 const ResourceAPI* api,
                                                  TexturePackResourceModel* model)
     : ResourcePage(dialog, instance, prepareResourcePackDescriptor(), std::move(provider))
 {

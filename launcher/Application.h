@@ -75,6 +75,7 @@ class MCEditTool;
 class ThemeManager;
 class IconTheme;
 class BaseInstance;
+class MinecraftInstance;
 
 class LogModel;
 
@@ -118,6 +119,7 @@ class Application : public QApplication {
     bool event(QEvent* event) override;
 
     SettingsObject* settings() const { return m_settings.get(); }
+    SettingsObject* playtimeSettings() const { return m_playtimeSettings.get(); }
 
     qint64 timeSinceStart() const { return m_startTime.msecsTo(QDateTime::currentDateTime()); }
 
@@ -187,7 +189,7 @@ class Application : public QApplication {
      */
     bool openJsonEditor(const QString& filename);
 
-    InstanceWindow* showInstanceWindow(BaseInstance* instance, QString page = QString());
+    InstanceWindow* showInstanceWindow(MinecraftInstance* instance, QString page = QString());
     MainWindow* showMainWindow(bool minimized = false);
     ViewLogWindow* showLogWindow();
 
@@ -214,7 +216,7 @@ class Application : public QApplication {
 #endif
 
    public slots:
-    bool launch(BaseInstance* instance,
+    bool launch(MinecraftInstance* instance,
                 LaunchMode mode = LaunchMode::Normal,
                 std::shared_ptr<MinecraftTarget> targetToJoin = nullptr,
                 shared_qobject_ptr<MinecraftAccount> accountToUse = nullptr,
@@ -257,6 +259,7 @@ class Application : public QApplication {
     std::unique_ptr<Meta::Index> m_metadataIndex;
 
     std::unique_ptr<SettingsObject> m_settings;
+    std::unique_ptr<SettingsObject> m_playtimeSettings;
     std::unique_ptr<InstanceList> m_instances;
     std::unique_ptr<IconList> m_icons;
     std::unique_ptr<JavaInstallList> m_javalist;
@@ -305,6 +308,7 @@ class Application : public QApplication {
    public:
     QString m_detectedGLFWPath;
     QString m_detectedOpenALPath;
+    QString m_detectedSDLPath;
     QString m_instanceIdToLaunch;
     QString m_serverToJoin;
     QString m_worldToJoin;

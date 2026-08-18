@@ -47,6 +47,7 @@
 #include "SysInfo.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
+#include "minecraft/MinecraftInstance.h"
 #include "settings/Setting.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/VersionSelectDialog.h"
@@ -54,7 +55,7 @@
 
 #include "ui_JavaSettingsWidget.h"
 
-JavaSettingsWidget::JavaSettingsWidget(BaseInstance* instance, QWidget* parent)
+JavaSettingsWidget::JavaSettingsWidget(MinecraftInstance* instance, QWidget* parent)
     : QWidget(parent), m_instance(instance), m_ui(new Ui::JavaSettingsWidget)
 {
     m_ui->setupUi(this);
@@ -91,7 +92,7 @@ JavaSettingsWidget::JavaSettingsWidget(BaseInstance* instance, QWidget* parent)
             auto javaDialog = new Java::InstallDialog({}, m_instance, this);
             javaDialog->exec();
         });
-        connect(m_ui->javaPathTextBox, &QLineEdit::textChanged, [this](QString newValue) {
+        connect(m_ui->javaPathTextBox, &QLineEdit::textChanged, this, [this](QString newValue) {
             if (m_instance->settings()->get("JavaPath").toString() != newValue) {
                 m_instance->settings()->set("AutomaticJava", false);
             }

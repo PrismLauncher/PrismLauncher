@@ -6,7 +6,7 @@
 
 #include "modplatform/ModIndex.h"
 
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 
 Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatform::IndexedPack::Ptr>>&& callbacks) const
 {
@@ -20,10 +20,10 @@ Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatf
 
     auto netJob = makeShared<NetJob>(QString("%1::Search").arg(debugName()), APPLICATION->network());
 
-    auto [action, response] = Net::ApiDownload::makeByteArray(QUrl(search_url));
+    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(search_url));
     netJob->addNetAction(action);
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, [this, response, callbacks] {
+    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -59,7 +59,7 @@ Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatf
     // This prevents the lambda from extending the lifetime of the shared resource,
     // as it only temporarily locks the resource when needed.
     auto weak = netJob.toWeakRef();
-    QObject::connect(netJob.get(), &NetJob::failed, [weak, callbacks](const QString& reason) {
+    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [weak, callbacks](const QString& reason) {
         int network_error_code = -1;
         if (auto netJob = weak.lock()) {
             if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
@@ -67,7 +67,7 @@ Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatf
         }
         callbacks.on_fail(reason, network_error_code);
     });
-    QObject::connect(netJob.get(), &NetJob::aborted, [callbacks] {
+    QObject::connect(netJob.get(), &NetJob::aborted, netJob.get(), [callbacks] {
         if (callbacks.on_abort != nullptr)
             callbacks.on_abort();
     });
@@ -85,10 +85,10 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
 
     auto netJob = makeShared<NetJob>(QString("%1::Versions").arg(args.pack->name), APPLICATION->network());
 
-    auto [action, response] = Net::ApiDownload::makeByteArray(versions_url);
+    auto [action, response] = Net::ApiRequest::makeByteArray(versions_url);
     netJob->addNetAction(action);
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, [this, response, callbacks, args] {
+    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks, args] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -132,7 +132,7 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
     // This prevents the lambda from extending the lifetime of the shared resource,
     // as it only temporarily locks the resource when needed.
     auto weak = netJob.toWeakRef();
-    QObject::connect(netJob.get(), &NetJob::failed, [weak, callbacks](const QString& reason) {
+    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [weak, callbacks](const QString& reason) {
         int network_error_code = -1;
         if (auto netJob = weak.lock()) {
             if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
@@ -140,7 +140,7 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
         }
         callbacks.on_fail(reason, network_error_code);
     });
-    QObject::connect(netJob.get(), &NetJob::aborted, [callbacks] {
+    QObject::connect(netJob.get(), &NetJob::aborted, netJob.get(), [callbacks] {
         if (callbacks.on_abort != nullptr)
             callbacks.on_abort();
     });
@@ -152,7 +152,7 @@ Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<ModPlatfo
 {
     auto [job, response] = getProject(args.pack->addonId.toString(), askRetry);
 
-    QObject::connect(job.get(), &NetJob::succeeded, [this, response, callbacks, args] {
+    QObject::connect(job.get(), &NetJob::succeeded, job.get(), [this, response, callbacks, args] {
         auto pack = args.pack;
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
@@ -178,7 +178,7 @@ Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<ModPlatfo
     // This prevents the lambda from extending the lifetime of the shared resource,
     // as it only temporarily locks the resource when needed.
     auto weak = job.toWeakRef();
-    QObject::connect(job.get(), &NetJob::failed, [weak, callbacks](const QString& reason) {
+    QObject::connect(job.get(), &NetJob::failed, job.get(), [weak, callbacks](const QString& reason) {
         int network_error_code = -1;
         if (auto job = weak.lock()) {
             if (auto netJob = qSharedPointerDynamicCast<NetJob>(job)) {
@@ -189,7 +189,7 @@ Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<ModPlatfo
         }
         callbacks.on_fail(reason, network_error_code);
     });
-    QObject::connect(job.get(), &NetJob::aborted, [callbacks] {
+    QObject::connect(job.get(), &NetJob::aborted, job.get(), [callbacks] {
         if (callbacks.on_abort != nullptr)
             callbacks.on_abort();
     });
@@ -205,10 +205,10 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
     auto versions_url = versions_url_optional.value();
 
     auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.addonId.toString()), APPLICATION->network());
-    auto [action, response] = Net::ApiDownload::makeByteArray(versions_url);
+    auto [action, response] = Net::ApiRequest::makeByteArray(versions_url);
     netJob->addNetAction(action);
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, [this, response, callbacks, args] {
+    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks, args] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -251,7 +251,7 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
     // This prevents the lambda from extending the lifetime of the shared resource,
     // as it only temporarily locks the resource when needed.
     auto weak = netJob.toWeakRef();
-    QObject::connect(netJob.get(), &NetJob::failed, [weak, callbacks](const QString& reason) {
+    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [weak, callbacks](const QString& reason) {
         int network_error_code = -1;
         if (auto netJob = weak.lock()) {
             if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
@@ -295,7 +295,7 @@ std::pair<Task::Ptr, QByteArray*> ResourceAPI::getProject(QString addonId, bool 
     auto netJob = makeShared<NetJob>(QString("%1::GetProject").arg(addonId), APPLICATION->network());
     netJob->setAskRetry(askRetry);
 
-    auto [action, response] = Net::ApiDownload::makeByteArray(QUrl(project_url));
+    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(project_url));
     netJob->addNetAction(action);
 
     return { netJob, response };

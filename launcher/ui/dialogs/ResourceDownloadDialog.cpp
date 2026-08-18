@@ -49,7 +49,7 @@ namespace ResourceDownload {
 
 ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent,
                                                ResourceFolderModel* baseModel,
-                                               BaseInstance* instance,
+                                               MinecraftInstance* instance,
                                                QString resourcesString,
                                                QString geometrySaveKey,
                                                bool suppressInitialSearch)
@@ -242,7 +242,10 @@ ResourcePage* ResourceDownloadDialog::selectedPage()
     return result;
 }
 
-void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack::Ptr pack, ModPlatform::IndexedVersion& ver, QString downloadReason, QString dependentOn)
+void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack::Ptr pack,
+                                         ModPlatform::IndexedVersion& ver,
+                                         QString downloadReason,
+                                         QString dependentOn)
 {
     removeResource(pack->name);
     selectedPage()->addResourceToPage(pack, ver, getBaseModel(), std::move(downloadReason), std::move(dependentOn));
@@ -296,7 +299,6 @@ void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* s
     result->setSearchTerm(prevPage->getSearchTerm());
 }
 
-
 void ResourceDownloadDialog::setResourceMetadata(const std::shared_ptr<Metadata::ModStruct>& meta)
 {
     switch (meta->provider) {
@@ -332,13 +334,13 @@ GetModDependenciesTask::Ptr ResourceDownloadDialog::getModDependenciesTask()
 
 ResourceDownloadDialog* ResourceDownloadDialog::createMod(QWidget* parent,
                                                           ResourceFolderModel* mods,
-                                                          BaseInstance* instance,
+                                                          MinecraftInstance* instance,
                                                           bool suppressInitialSearch)
 {
     auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("mods"), "ModDownloadGeometry", suppressInitialSearch);
     QList<BasePage*> pages;
 
-    auto loaders = static_cast<MinecraftInstance*>(instance)->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
+    auto loaders = instance->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
 
     if (ModrinthAPI::validateModLoaders(loaders)) {
         auto* page = Modrinth::createModPage(dialog, *instance);
@@ -356,7 +358,7 @@ ResourceDownloadDialog* ResourceDownloadDialog::createMod(QWidget* parent,
 
 ResourceDownloadDialog* ResourceDownloadDialog::createResourcePack(QWidget* parent,
                                                                    ResourceFolderModel* mods,
-                                                                   BaseInstance* instance,
+                                                                   MinecraftInstance* instance,
                                                                    bool suppressInitialSearch)
 {
     auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("resource packs"), "RPDownloadGeometry", suppressInitialSearch);
@@ -377,7 +379,7 @@ ResourceDownloadDialog* ResourceDownloadDialog::createResourcePack(QWidget* pare
 
 ResourceDownloadDialog* ResourceDownloadDialog::createTexturePack(QWidget* parent,
                                                                   ResourceFolderModel* mods,
-                                                                  BaseInstance* instance,
+                                                                  MinecraftInstance* instance,
                                                                   bool suppressInitialSearch)
 {
     auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("texture packs"), "TPDownloadGeometry", suppressInitialSearch);
@@ -398,7 +400,7 @@ ResourceDownloadDialog* ResourceDownloadDialog::createTexturePack(QWidget* paren
 
 ResourceDownloadDialog* ResourceDownloadDialog::createShaderPack(QWidget* parent,
                                                                  ResourceFolderModel* mods,
-                                                                 BaseInstance* instance,
+                                                                 MinecraftInstance* instance,
                                                                  bool suppressInitialSearch)
 {
     auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("shader packs"), "ShaderDownloadGeometry", suppressInitialSearch);
@@ -419,7 +421,7 @@ ResourceDownloadDialog* ResourceDownloadDialog::createShaderPack(QWidget* parent
 
 ResourceDownloadDialog* ResourceDownloadDialog::createDataPack(QWidget* parent,
                                                                ResourceFolderModel* mods,
-                                                               BaseInstance* instance,
+                                                               MinecraftInstance* instance,
                                                                bool suppressInitialSearch)
 {
     auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("data packs"), "DataPackDownloadGeometry", suppressInitialSearch);

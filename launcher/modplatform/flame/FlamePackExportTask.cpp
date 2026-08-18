@@ -99,7 +99,7 @@ void FlamePackExportTask::collectHashes()
         if (relative.startsWith("resourcepacks/") &&
             (relative.endsWith(".zip") || relative.endsWith(".zip.disabled"))) {  // is resourcepack
             auto hashTask = Hashing::createHasher(file.absoluteFilePath(), ModPlatform::ResourceProvider::FLAME);
-            connect(hashTask.get(), &Hashing::Hasher::resultsReady, [this, relative, file](QString hash) {
+            connect(hashTask.get(), &Hashing::Hasher::resultsReady, this, [this, relative, file](QString hash) {
                 if (m_state == Task::State::Running) {
                     pendingHashes.insert(hash, { relative, file.absoluteFilePath(), relative.endsWith(".zip") });
                 }
@@ -123,7 +123,7 @@ void FlamePackExportTask::collectHashes()
             }
 
             auto hashTask = Hashing::createHasher(mod->fileinfo().absoluteFilePath(), ModPlatform::ResourceProvider::FLAME);
-            connect(hashTask.get(), &Hashing::Hasher::resultsReady, [this, mod](QString hash) {
+            connect(hashTask.get(), &Hashing::Hasher::resultsReady, this, [this, mod](QString hash) {
                 if (m_state == Task::State::Running) {
                     pendingHashes.insert(hash, { mod->name(), mod->fileinfo().absoluteFilePath(), mod->enabled(), true });
                 }
@@ -173,7 +173,7 @@ void FlamePackExportTask::makeApiRequest()
         fingerprints.push_back(murmur.toUInt());
     }
 
-    auto [matchTask, response] = api.matchFingerprints(fingerprints);
+    auto [matchTask, response] = FlameAPI::get().matchFingerprints(fingerprints);
     task = matchTask;
 
     connect(task.get(), &Task::succeeded, this, [this, response] {
@@ -252,9 +252,9 @@ void FlamePackExportTask::getProjectsInfo()
         buildZip();
         return;
     } else if (addonIds.size() == 1) {
-        std::tie(projTask, response) = api.getProject(*addonIds.begin());
+        std::tie(projTask, response) = FlameAPI::get().getProject(*addonIds.begin());
     } else {
-        std::tie(projTask, response) = api.getProjects(addonIds);
+        std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds);
     }
 
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {

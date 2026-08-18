@@ -49,6 +49,7 @@
 #include <QUuid>
 #include <algorithm>
 
+#include "Application.h"
 #include "BaseInstance.h"
 #include "ExponentialSeries.h"
 #include "FileSystem.h"
@@ -163,7 +164,7 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
     if (!index.isValid()) {
         return QVariant();
     }
-    auto* pdata = static_cast<BaseInstance*>(index.internalPointer());
+    auto* pdata = static_cast<MinecraftInstance*>(index.internalPointer());
     switch (role) {
         case InstancePointerRole: {
             QVariant v = QVariant::fromValue((void*)pdata);
@@ -203,7 +204,7 @@ bool InstanceList::setData(const QModelIndex& index, const QVariant& value, int 
     if (role != Qt::EditRole) {
         return false;
     }
-    auto* pdata = static_cast<BaseInstance*>(index.internalPointer());
+    auto* pdata = static_cast<MinecraftInstance*>(index.internalPointer());
     auto newName = value.toString();
     if (pdata->name() == newName) {
         return true;
@@ -458,7 +459,7 @@ void InstanceList::deleteInstance(const InstanceId& id)
 }
 
 namespace {
-QMap<InstanceId, InstanceLocator> getIdMapping(const std::vector<std::unique_ptr<BaseInstance>>& list)
+QMap<InstanceId, InstanceLocator> getIdMapping(const std::vector<std::unique_ptr<MinecraftInstance>>& list)
 {
     QMap<InstanceId, InstanceLocator> out;
     int i = 0;
@@ -523,14 +524,14 @@ InstanceList::InstListError InstanceList::loadList()
 {
     auto existingIds = getIdMapping(m_instances);
 
-    std::vector<std::unique_ptr<BaseInstance>> newList;
+    std::vector<std::unique_ptr<MinecraftInstance>> newList;
 
     for (auto& id : discoverInstances()) {
         if (existingIds.contains(id)) {
             existingIds.remove(id);
             qInfo() << "Should keep and soft-reload" << id;
         } else {
-            std::unique_ptr<BaseInstance> instPtr = loadInstance(id);
+            std::unique_ptr<MinecraftInstance> instPtr = loadInstance(id);
             if (instPtr) {
                 newList.push_back(std::move(instPtr));
             }
@@ -577,18 +578,28 @@ InstanceList::InstListError InstanceList::loadList()
         add(newList);
     }
     m_dirty = false;
-    updateTotalPlayTime();
+    migrateTotalPlayTime();
     return NoError;
 }
 
-void InstanceList::updateTotalPlayTime()
+void InstanceList::migrateTotalPlayTime()
 {
-    m_totalPlayTime = 0;
+    if (APPLICATION->playtimeSettings()->get("TotalPlayTimeMigrated").toBool()) {
+        return;
+    }
+
+    qint64 existingTotal = 0;
     for (const auto& itr : m_instances) {
         if (itr->countTimePlayed()) {
-            m_totalPlayTime += itr->totalTimePlayed();
+            existingTotal += itr->totalTimePlayed();
         }
     }
+
+    qint64 current = APPLICATION->playtimeSettings()->get("TotalPlayTime").toLongLong();
+    APPLICATION->playtimeSettings()->set("TotalPlayTime", current + existingTotal);
+    APPLICATION->playtimeSettings()->set("TotalPlayTimeMigrated", true);
+
+    qDebug() << "Migrated" << existingTotal << "seconds of existing instance playtime into global TotalPlayTime.";
 }
 
 void InstanceList::saveNow()
@@ -598,12 +609,13 @@ void InstanceList::saveNow()
     }
 }
 
-void InstanceList::add(std::vector<std::unique_ptr<BaseInstance>>& t)
+void InstanceList::add(std::vector<std::unique_ptr<MinecraftInstance>>& t)
 {
     beginInsertRows(QModelIndex(), count(), static_cast<int>(count() + t.size() - 1));
     for (auto& ptr : t) {
+        MinecraftInstance* inst = ptr.get();
         m_instances.push_back(std::move(ptr));
-        connect(m_instances.back().get(), &BaseInstance::propertiesChanged, this, &InstanceList::propertiesChanged);
+        connect(inst, &MinecraftInstance::propertiesChanged, this, [this, inst]() { propertiesChanged(inst); });
     }
     endInsertRows();
 }
@@ -633,7 +645,7 @@ void InstanceList::providerUpdated()
     }
 }
 
-BaseInstance* InstanceList::getInstanceById(const QString& instId) const
+MinecraftInstance* InstanceList::getInstanceById(const QString& instId) const
 {
     if (instId.isEmpty()) {
         return nullptr;
@@ -646,7 +658,7 @@ BaseInstance* InstanceList::getInstanceById(const QString& instId) const
     return nullptr;
 }
 
-BaseInstance* InstanceList::getInstanceByManagedName(const QString& managedName) const
+MinecraftInstance* InstanceList::getInstanceByManagedName(const QString& managedName) const
 {
     if (managedName.isEmpty()) {
         return {};
@@ -666,7 +678,7 @@ QModelIndex InstanceList::getInstanceIndexById(const QString& id) const
     return index(getInstIndex(getInstanceById(id)));
 }
 
-int InstanceList::getInstIndex(BaseInstance* inst) const
+int InstanceList::getInstIndex(MinecraftInstance* inst) const
 {
     int count = this->count();
     for (int i = 0; i < count; i++) {
@@ -677,16 +689,15 @@ int InstanceList::getInstIndex(BaseInstance* inst) const
     return -1;
 }
 
-void InstanceList::propertiesChanged(BaseInstance* inst)
+void InstanceList::propertiesChanged(MinecraftInstance* inst)
 {
     int i = getInstIndex(inst);
     if (i != -1) {
         emit dataChanged(index(i), index(i));
-        updateTotalPlayTime();
     }
 }
 
-std::unique_ptr<BaseInstance> InstanceList::loadInstance(const InstanceId& id)
+std::unique_ptr<MinecraftInstance> InstanceList::loadInstance(const InstanceId& id)
 {
     if (!m_groupsLoaded) {
         loadGroupList();
@@ -694,19 +705,16 @@ std::unique_ptr<BaseInstance> InstanceList::loadInstance(const InstanceId& id)
 
     auto instanceRoot = FS::PathCombine(rootDirOf(id), id);
     auto instanceSettings = std::make_unique<INISettingsObject>(FS::PathCombine(instanceRoot, "instance.cfg"));
-    std::unique_ptr<BaseInstance> inst;
 
     instanceSettings->registerSetting("InstanceType", "");
 
     const QString instType = instanceSettings->get("InstanceType").toString();
-
-    // NOTE: Some launcher versions didn't save the InstanceType properly. We will just bank on the probability that this is probably a
-    // OneSix instance
-    if (instType == "OneSix" || instType.isEmpty()) {
-        inst.reset(new MinecraftInstance(m_globalSettings, std::move(instanceSettings), instanceRoot));
-    } else {
-        inst.reset(new NullInstance(m_globalSettings, std::move(instanceSettings), instanceRoot));
+    if (!instType.isEmpty() && instType != "OneSix") {
+        qDebug() << "Instance " << id << "has invalid type" << instType;
+        return nullptr;
     }
+
+    auto inst = std::make_unique<MinecraftInstance>(m_globalSettings, std::move(instanceSettings), instanceRoot);
     qDebug() << "Loaded instance" << inst->name() << "from" << inst->instanceRoot();
 
     auto shortcut = inst->shortcuts();
@@ -799,9 +807,17 @@ void InstanceList::loadGroupList()
     m_groupNameCache.clear();
     m_collapsedGroups.clear();
 
-    // if there's no group file, fail
+    bool migratingLegacyGroups = false;
+
+    // If there's no group file, try the legacy location.
     if (!QFileInfo::exists(groupFileName)) {
-        return;
+        QString legacyGroupFileName = FS::PathCombine(primaryDir(), "instgroups.json");
+        if (!QFileInfo::exists(legacyGroupFileName)) {
+            return;
+        }
+        qInfo() << "Migrating instance groups from legacy location" << legacyGroupFileName;
+        groupFileName = legacyGroupFileName;
+        migratingLegacyGroups = true;
     }
 
     QByteArray jsonData;
@@ -884,6 +900,10 @@ void InstanceList::loadGroupList()
     }
     m_groupsLoaded = true;
     qDebug() << "Group list loaded.";
+
+    if (migratingLegacyGroups) {
+        saveGroupList();
+    }
 }
 
 void InstanceList::instanceDirContentsChanged(const QString& path)
@@ -948,7 +968,7 @@ class InstanceStaging : public Task {
     InstanceStaging(InstanceList* parent, InstanceTask* child, SettingsObject* settings)
         : m_parent(parent), m_backoff(minBackoff, maxBackoff)
     {
-        m_stagingPath = parent->getStagedInstancePath();
+        m_stagingPath = parent->getStagedInstancePath(child->targetDir());
 
         m_child.reset(child);
 
@@ -1043,9 +1063,17 @@ Task* InstanceList::wrapInstanceTask(InstanceTask* task)
     return new InstanceStaging(this, task, m_globalSettings);
 }
 
-QString InstanceList::getStagedInstancePath()
+QString InstanceList::getStagedInstancePath(const QString& targetDir)
 {
-    const QString tempRoot = FS::PathCombine(primaryDir(), ".tmp");
+    QString root = primaryDir();
+    if (!targetDir.isEmpty()) {
+        if (!m_instDirs.contains(targetDir) || !QDir(targetDir).exists()) {
+            qCritical() << "Requested instance directory" << targetDir << "is no longer configured or accessible on disk";
+            return {};
+        }
+        root = targetDir;
+    }
+    const QString tempRoot = FS::PathCombine(root, ".tmp");
 
     QString result;
     int tries = 0;
@@ -1078,17 +1106,26 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
 
     auto shouldOverride = instanceTask.shouldOverride();
 
+    QString targetDir = instanceTask.targetDir();
+    if (!targetDir.isEmpty() && !m_instDirs.contains(targetDir)) {
+        qCritical() << "Target directory" << targetDir << "for instance is no longer configured or accessible";
+        return false;
+    }
+    if (targetDir.isEmpty()) {
+        targetDir = primaryDir();
+    }
+
     if (shouldOverride) {
         instID = instanceTask.originalInstanceID();
     } else {
-        instID = FS::DirNameFromString(instanceTask.modifiedName(), primaryDir());
+        instID = FS::DirNameFromString(instanceTask.modifiedName(), targetDir);
     }
 
     Q_ASSERT(!instID.isEmpty());
 
     {
-        WatchLock lock(m_watcher, primaryDir());
-        QString destination = FS::PathCombine(primaryDir(), instID);
+        WatchLock lock(m_watcher, targetDir);
+        QString destination = FS::PathCombine(targetDir, instID);
 
         if (shouldOverride) {
             if (!FS::overrideFolder(destination, path)) {
@@ -1103,7 +1140,7 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
 
             m_instanceGroupIndex[instID] = groupName;
             increaseGroupCount(groupName);
-            m_instanceRootDirMap[instID] = primaryDir();
+            m_instanceRootDirMap[instID] = targetDir;
         }
 
         m_instanceSet.insert(instID);
@@ -1114,12 +1151,6 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
 
     saveGroupList();
     return true;
-}
-
-int64_t InstanceList::getTotalPlayTime()
-{
-    updateTotalPlayTime();
-    return m_totalPlayTime;
 }
 
 #include "InstanceList.moc"

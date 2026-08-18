@@ -18,7 +18,7 @@ class TexturePackResourcePage : public ResourcePage {
     TexturePackResourcePage(ResourceDownloadDialog* dialog,
                             BaseInstance& instance,
                             ResourceProviderData provider,
-                            ResourceAPI* api,
+                            const ResourceAPI* api,
                             TexturePackResourceModel* model = nullptr);
 
    protected slots:

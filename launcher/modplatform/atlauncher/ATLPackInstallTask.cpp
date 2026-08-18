@@ -54,7 +54,7 @@
 #include "net/ChecksumValidator.h"
 #include "settings/INISettingsObject.h"
 
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 
 #include "Application.h"
 #include "BuildConfig.h"
@@ -99,7 +99,7 @@ void PackInstallTask::executeTask()
     auto searchUrl =
         QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json").arg(m_pack_safe_name).arg(m_version_name);
 
-    auto [action, response] = Net::ApiDownload::makeByteArray(QUrl(searchUrl));
+    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(searchUrl));
     netJob->addNetAction(action);
 
     connect(netJob.get(), &NetJob::succeeded, this, [this, response] { onDownloadSucceeded(response); });
@@ -661,7 +661,7 @@ void PackInstallTask::installConfigs()
     auto entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", path);
     entry->setStale(true);
 
-    auto dl = Net::ApiDownload::makeCached(url, entry);
+    auto dl = Net::ApiRequest::makeCached(url, entry);
     if (!m_version.configs.sha1.isEmpty()) {
         dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, m_version.configs.sha1));
     }
@@ -673,17 +673,17 @@ void PackInstallTask::installConfigs()
         jobPtr.reset();
         extractConfigs();
     });
-    connect(jobPtr.get(), &NetJob::failed, [this](QString reason) {
+    connect(jobPtr.get(), &NetJob::failed, this, [this](QString reason) {
         abortable = false;
         jobPtr.reset();
         emitFailed(std::move(reason));
     });
-    connect(jobPtr.get(), &NetJob::progress, [this](qint64 current, qint64 total) {
+    connect(jobPtr.get(), &NetJob::progress, this, [this](qint64 current, qint64 total) {
         abortable = true;
         setProgress(current, total);
     });
     connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propagateStepProgress);
-    connect(jobPtr.get(), &NetJob::aborted, [this] {
+    connect(jobPtr.get(), &NetJob::aborted, this, [this] {
         abortable = false;
         jobPtr.reset();
         emitAborted();
@@ -770,7 +770,7 @@ void PackInstallTask::downloadMods()
             entry->setStale(true);
             modsToExtract.insert(entry->getFullPath(), mod);
 
-            auto dl = Net::ApiDownload::makeCached(url, entry);
+            auto dl = Net::ApiRequest::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
                 dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
             }
@@ -780,7 +780,7 @@ void PackInstallTask::downloadMods()
             entry->setStale(true);
             modsToDecomp.insert(entry->getFullPath(), mod);
 
-            auto dl = Net::ApiDownload::makeCached(url, entry);
+            auto dl = Net::ApiRequest::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
                 dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
             }
@@ -794,7 +794,7 @@ void PackInstallTask::downloadMods()
             auto entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", cacheName);
             entry->setStale(true);
 
-            auto dl = Net::ApiDownload::makeCached(url, entry);
+            auto dl = Net::ApiRequest::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
                 dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
             }
@@ -897,14 +897,14 @@ void PackInstallTask::downloadMods()
     }
 
     connect(jobPtr.get(), &NetJob::succeeded, this, &PackInstallTask::onModsDownloaded);
-    connect(jobPtr.get(), &NetJob::progress, [this](qint64 current, qint64 total) {
+    connect(jobPtr.get(), &NetJob::progress, this, [this](qint64 current, qint64 total) {
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         abortable = true;
         setProgress(current, total);
     });
     connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propagateStepProgress);
-    connect(jobPtr.get(), &NetJob::aborted, &PackInstallTask::emitAborted);
-    connect(jobPtr.get(), &NetJob::failed, &PackInstallTask::emitFailed);
+    connect(jobPtr.get(), &NetJob::aborted, this, &PackInstallTask::emitAborted);
+    connect(jobPtr.get(), &NetJob::failed, this, &PackInstallTask::emitFailed);
 
     jobPtr->start();
 }

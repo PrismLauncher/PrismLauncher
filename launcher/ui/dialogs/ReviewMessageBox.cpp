@@ -26,7 +26,7 @@ ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] QString con
 
     // Overwrite Ctrl+C functionality to exclude the label when copying text from tree
     auto shortcut = new QShortcut(QKeySequence::Copy, ui->modTreeWidget);
-    connect(shortcut, &QShortcut::activated, [this]() {
+    connect(shortcut, &QShortcut::activated, this, [this]() {
         auto currentItem = this->ui->modTreeWidget->currentItem();
         if (!currentItem)
             return;

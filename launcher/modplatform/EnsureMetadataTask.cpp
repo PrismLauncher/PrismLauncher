@@ -16,17 +16,14 @@
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 
-static ModrinthAPI modrinth_api;
-static FlameAPI flame_api;
-
 EnsureMetadataTask::EnsureMetadataTask(Resource* resource, QDir dir, ModPlatform::ResourceProvider prov)
     : Task(), m_indexDir(dir), m_provider(prov), m_hashingTask(nullptr), m_currentTask(nullptr)
 {
     auto hashTask = createNewHash(resource);
     if (!hashTask)
         return;
-    connect(hashTask.get(), &Hashing::Hasher::resultsReady, [this, resource](QString hash) { m_resources.insert(hash, resource); });
-    connect(hashTask.get(), &Task::failed, [this, resource] { emitFail(resource, "", RemoveFromList::No); });
+    connect(hashTask.get(), &Hashing::Hasher::resultsReady, this, [this, resource](QString hash) { m_resources.insert(hash, resource); });
+    connect(hashTask.get(), &Task::failed, this, [this, resource] { emitFail(resource, "", RemoveFromList::No); });
     m_hashingTask = hashTask;
 }
 
@@ -39,8 +36,8 @@ EnsureMetadataTask::EnsureMetadataTask(QList<Resource*>& resources, QDir dir, Mo
         auto hash_task = createNewHash(resource);
         if (!hash_task)
             continue;
-        connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, resource](QString hash) { m_resources.insert(hash, resource); });
-        connect(hash_task.get(), &Task::failed, [this, resource] { emitFail(resource, "", RemoveFromList::No); });
+        connect(hash_task.get(), &Hashing::Hasher::resultsReady, this, [this, resource](QString hash) { m_resources.insert(hash, resource); });
+        connect(hash_task.get(), &Task::failed, this, [this, resource] { emitFail(resource, "", RemoveFromList::No); });
         hashTask->addTask(hash_task);
     }
 }
@@ -215,7 +212,7 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
 {
     auto hash_type = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
-    auto [ver_task, response] = modrinth_api.currentVersions(m_resources.keys(), hash_type);
+    auto [ver_task, response] = ModrinthAPI::get().currentVersions(m_resources.keys(), hash_type);
 
     // Prevents unfortunate timings when aborting the task
     if (!ver_task)
@@ -272,9 +269,9 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
     } else if (addonIds.size() == 1) {
-        std::tie(proj_task, response) = modrinth_api.getProject(*addonIds.keyBegin());
+        std::tie(proj_task, response) = ModrinthAPI::get().getProject(*addonIds.keyBegin());
     } else {
-        std::tie(proj_task, response) = modrinth_api.getProjects(addonIds.keys());
+        std::tie(proj_task, response) = ModrinthAPI::get().getProjects(addonIds.keys());
     }
 
     // Prevents unfortunate timings when aborting the task
@@ -345,7 +342,7 @@ Task::Ptr EnsureMetadataTask::flameVersionsTask()
         fingerprints.push_back(murmur.toUInt());
     }
 
-    auto [ver_task, response] = flame_api.matchFingerprints(fingerprints);
+    auto [ver_task, response] = FlameAPI::get().matchFingerprints(fingerprints);
 
     connect(ver_task.get(), &Task::succeeded, this, [this, response] {
         QJsonParseError parse_error{};
@@ -420,9 +417,9 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
     } else if (addonIds.size() == 1) {
-        std::tie(proj_task, response) = flame_api.getProject(*addonIds.keyBegin());
+        std::tie(proj_task, response) = FlameAPI::get().getProject(*addonIds.keyBegin());
     } else {
-        std::tie(proj_task, response) = flame_api.getProjects(addonIds.keys());
+        std::tie(proj_task, response) = FlameAPI::get().getProjects(addonIds.keys());
     }
 
     // Prevents unfortunate timings when aborting the task

@@ -6,7 +6,7 @@
 #include "modplatform/flame/FlameAPI.h"
 #include "ui/widgets/ProjectItem.h"
 
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 
 #include <Version.h>
 
@@ -111,7 +111,7 @@ void ListModel::requestLogo(QString logo, QString url)
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("Flame Icon Download %1").arg(logo), APPLICATION->network());
     job->setAskRetry(false);
-    job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
+    job->addNetAction(Net::ApiRequest::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
     connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job] {
@@ -164,8 +164,6 @@ void ListModel::fetchMore(const QModelIndex& parent)
 
 void ListModel::performPaginatedSearch()
 {
-    static const FlameAPI api;
-
     // activate search by id only for numerical values because all CurseForge ids are numerical
     static const QRegularExpression s_projectIdExpr("^\\#[0-9]+$");
     if (m_searchState != ResetRequested && s_projectIdExpr.match(m_currentSearchTerm).hasMatch()) {
@@ -186,7 +184,7 @@ void ListModel::performPaginatedSearch()
             };
             auto project = std::make_shared<ModPlatform::IndexedPack>();
             project->addonId = projectId;
-            if (auto job = api.getProjectInfo({ project }, std::move(callbacks), false); job) {
+            if (auto job = FlameAPI::get().getProjectInfo({ project }, std::move(callbacks), false); job) {
                 m_jobPtr = job;
                 m_jobPtr->start();
             }
@@ -205,9 +203,10 @@ void ListModel::performPaginatedSearch()
         searchRequestFailed("Aborted");
     };
 
-    auto netJob = api.searchProjects({ ModPlatform::ResourceType::Modpack, m_nextSearchOffset, m_currentSearchTerm, sort, m_filter->loaders,
-                                       m_filter->versions, ModPlatform::SideType::NoSide, m_filter->categoryIds, m_filter->openSource },
-                                     std::move(callbacks));
+    auto netJob = FlameAPI::get().searchProjects(
+        { ModPlatform::ResourceType::Modpack, m_nextSearchOffset, m_currentSearchTerm, sort, m_filter->loaders, m_filter->versions,
+          ModPlatform::SideType::NoSide, m_filter->categoryIds, m_filter->openSource },
+        std::move(callbacks));
 
     m_jobPtr = netJob;
     m_jobPtr->start();
