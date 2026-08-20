@@ -254,19 +254,19 @@ void ResourceUpdateDialog::checkCandidates()
     }
 
     // If there's no resource to be updated
-    if (ui->modTreeWidget->topLevelItemCount() == 0) {
+    if (ui->modTreeWidget->topLevelItem(0)->childCount() == 0) {
         m_noUpdates = true;
     } else {
         // FIXME: Find a more efficient way of doing this!
 
         // Sort major items in alphabetical order (also sorts the children unfortunately)
-        ui->modTreeWidget->sortItems(0, Qt::SortOrder::AscendingOrder);
+        ui->modTreeWidget->topLevelItem(0)->sortChildren(0, Qt::SortOrder::AscendingOrder);
 
         // Re-sort the children
-        auto* item = ui->modTreeWidget->topLevelItem(0);
+        auto* item = ui->modTreeWidget->topLevelItem(0)->child(0);
         for (int i = 1; item != nullptr; ++i) {
             item->sortChildren(0, Qt::SortOrder::DescendingOrder);
-            item = ui->modTreeWidget->topLevelItem(i);
+            item = ui->modTreeWidget->topLevelItem(0)->child(i);
         }
     }
 
@@ -451,7 +451,7 @@ void ResourceUpdateDialog::onMetadataFailed(Resource* resource, bool tryOthers, 
 
 void ResourceUpdateDialog::appendResource(const CheckUpdateTask::Update& info, QStringList requiredBy)
 {
-    auto* itemTop = new QTreeWidgetItem(ui->modTreeWidget);
+    auto* itemTop = new QTreeWidgetItem(ui->modTreeWidget->topLevelItem(0));
     itemTop->setCheckState(0, info.enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     if (!info.enabled) {
         itemTop->setToolTip(0, tr("Mod was disabled as it may be already installed."));
@@ -513,22 +513,20 @@ void ResourceUpdateDialog::appendResource(const CheckUpdateTask::Update& info, Q
     changelogArea->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
 
     ui->modTreeWidget->setItemWidget(changelog, 0, changelogArea);
-
-    ui->modTreeWidget->addTopLevelItem(itemTop);
 }
 
 auto ResourceUpdateDialog::getTasks() -> const QList<ResourceDownloadTask::Ptr>
 {
     QList<ResourceDownloadTask::Ptr> list;
 
-    auto* item = ui->modTreeWidget->topLevelItem(0);
+    auto* item = ui->modTreeWidget->topLevelItem(0)->child(0);
 
     for (int i = 1; item != nullptr; ++i) {
         if (item->checkState(0) == Qt::CheckState::Checked) {
             list.push_back(m_tasks.find(item->text(0)).value());
         }
 
-        item = ui->modTreeWidget->topLevelItem(i);
+        item = ui->modTreeWidget->topLevelItem(0)->child(i);
     }
 
     return list;
