@@ -123,7 +123,7 @@ struct Language {
     bool isIdenticalTo(const Language& other) const
     {
         return (key == other.key && fileName == other.fileName && fileSize == other.fileSize && fileSha1 == other.fileSha1 &&
-                translated == other.translated && fuzzy == other.fuzzy && total == other.fuzzy && localFileType == other.localFileType);
+                translated == other.translated && fuzzy == other.fuzzy && total == other.total && localFileType == other.localFileType);
     }
 
     Language& apply(const Language& other)
