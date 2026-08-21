@@ -160,6 +160,15 @@ ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWi
     ui->treeView->viewport()->installEventFilter(this);
     m_profileTabBar->installEventFilter(this);
     connect(m_profileTabBar, &QTabBar::currentChanged, this, [this](int index) {
+        if (m_applyingProfile) {
+            int previousIndex = m_instance->settings()->get(lastActiveIndexKey()).toInt();
+            if (m_profileTabBar->currentIndex() != previousIndex) {
+                m_profileTabBar->blockSignals(true);
+                m_profileTabBar->setCurrentIndex(previousIndex);
+                m_profileTabBar->blockSignals(false);
+            }
+            return;
+        }
         ++m_profileSwitchGeneration;
         applyProfileSwitch(index, m_profileSwitchGeneration);
     });
@@ -646,7 +655,7 @@ void ModFolderPage::saveCurrentProfileState(bool refuseSuspiciousEmptyOverwrite)
 }
 void ModFolderPage::restoreCurrentProfileToFilesystem()
 {
-    if (m_currentProfile.isEmpty()) {
+    if (m_currentProfile.isEmpty() || (m_instance != nullptr && m_instance->isRunning())) {
         return;
     }
     QSet<QString> savedMods = m_profileStates.value(m_currentProfile);
@@ -665,10 +674,17 @@ void ModFolderPage::restoreCurrentProfileToFilesystem()
     if (toEnable.isEmpty() && toDisable.isEmpty()) {
         return;
     }
+    ++m_profileSwitchGeneration;
+    int capturedGeneration = m_profileSwitchGeneration;
+    QString capturedProfile = m_currentProfile;
     m_applyingProfile = true;
     m_model->applyEnabledIds(savedMods);
     connect(m_model, &ResourceFolderModel::updateFinished, this,
-        [this] { m_applyingProfile = false; },
+        [this, capturedGeneration, capturedProfile] {
+            if (capturedGeneration == m_profileSwitchGeneration && capturedProfile == m_currentProfile) {
+                m_applyingProfile = false;
+            }
+        },
         Qt::SingleShotConnection);
     m_model->update();
 }
@@ -680,9 +696,6 @@ void ModFolderPage::applyProfileSwitch(int index, int generation, bool isInitial
     if (m_currentProfile.isEmpty()) {
         QVariant val = m_profileTabBar->property("currentProfileName");
         m_currentProfile = val.isValid() ? val.toString() : QString();
-    }
-    if (!m_instance->isRunning()) {
-        saveCurrentProfileState(/*refuseSuspiciousEmptyOverwrite=*/true);
     }
     if (index >= 0 && index < m_profileTabBar->count()) {
         if (m_instance != nullptr && m_instance->isRunning()) {
@@ -716,11 +729,13 @@ void ModFolderPage::applyProfileSwitch(int index, int generation, bool isInitial
         m_applyingProfile = true;
         m_model->applyEnabledIds(enabledMods);
         int capturedGeneration = generation;
+        QString capturedProfile = tabName;
         connect(m_model, &ResourceFolderModel::updateFinished, this,
-            [this, capturedGeneration] {
-                if (capturedGeneration == m_profileSwitchGeneration) {
-                    saveCurrentProfileState(/*refuseSuspiciousEmptyOverwrite=*/true);
+            [this, capturedGeneration, capturedProfile] {
+                if (capturedGeneration != m_profileSwitchGeneration || capturedProfile != m_currentProfile) {
+                    return;
                 }
+                saveCurrentProfileState(/*refuseSuspiciousEmptyOverwrite=*/true);
                 m_applyingProfile = false;
             },
             Qt::SingleShotConnection);
@@ -823,16 +838,7 @@ void ModFolderPage::onTabNewToRight(int sourceIndex)
 }
 void ModFolderPage::onTabDuplicate(int sourceIndex)
 {
-    if (!m_currentProfile.isEmpty()) {
-        QSet<QString> enabledMods;
-        for (int i = 0; i < m_model->rowCount(); ++i) {
-            const Mod& res = m_model->at(i);
-            if (res.enabled()) {
-                enabledMods.insert(res.mod_id());
-            }
-        }
-        m_profileStates[m_currentProfile] = enabledMods;
-    }
+    if (m_applyingProfile) return;
     QString sourceName = m_profileTabBar->tabText(sourceIndex);
     QSet<QString> sourceState = m_profileStates.value(sourceName);
     bool ok;
@@ -846,6 +852,7 @@ void ModFolderPage::onTabDuplicate(int sourceIndex)
 void ModFolderPage::onTabRename(int tabIndex)
 {
     if (tabIndex == 0) return;
+    if (m_applyingProfile) return;
     if (m_instance != nullptr && m_instance->isRunning()) {
         CustomMessageBox::selectable(this, tr("Cannot Rename Profile"),
                                      tr("Mod profiles cannot be renamed while the game is running.\n"
@@ -887,6 +894,7 @@ void ModFolderPage::onTabRename(int tabIndex)
 void ModFolderPage::onTabRemove(int tabIndex)
 {
     if (tabIndex == 0) return;
+    if (m_applyingProfile) return;
     if (m_instance != nullptr && m_instance->isRunning()) {
         CustomMessageBox::selectable(this, tr("Cannot Remove Profile"),
                                      tr("Mod profiles cannot be removed while the game is running.\n"
@@ -927,6 +935,15 @@ void ModFolderPage::onTabEnableAll(int tabIndex)
             ->exec();
         return;
     }
+    QString targetProfile = m_profileTabBar->tabText(tabIndex);
+    QSet<QString> allModIds;
+    for (int i = 0; i < m_model->rowCount(); ++i) {
+        allModIds.insert(m_model->at(i).mod_id());
+    }
+    m_profileStates[targetProfile] = allModIds;
+    QString key = profileKey(targetProfile);
+    m_instance->settings()->getOrRegisterSetting(key, QStringList());
+    m_instance->settings()->set(key, QStringList(allModIds.begin(), allModIds.end()));
     ++m_profileSwitchGeneration;
     int capturedGeneration = m_profileSwitchGeneration;
     if (m_profileTabBar->currentIndex() != tabIndex) {
@@ -934,23 +951,20 @@ void ModFolderPage::onTabEnableAll(int tabIndex)
         m_profileTabBar->setCurrentIndex(tabIndex);
         m_profileTabBar->blockSignals(false);
     }
-    applyProfileSwitch(tabIndex, capturedGeneration);
+    m_currentProfile = targetProfile;
+    m_profileTabBar->setProperty("currentProfileName", targetProfile);
+    m_instance->settings()->set(lastActiveIndexKey(), tabIndex);
+    m_applyingProfile = true;
+    m_model->applyEnabledIds(allModIds);
     connect(m_model, &ResourceFolderModel::updateFinished, this,
-        [this, capturedGeneration] {
-            if (capturedGeneration != m_profileSwitchGeneration) {
+        [this, capturedGeneration, targetProfile] {
+            if (capturedGeneration != m_profileSwitchGeneration || targetProfile != m_currentProfile) {
                 return;
             }
-            QModelIndexList allIndices;
-            allIndices.reserve(m_model->rowCount());
-            for (int i = 0; i < m_model->rowCount(); ++i) {
-                allIndices.append(m_model->index(i, 0));
-            }
-            if (!allIndices.isEmpty()) {
-                m_model->setResourceEnabled(allIndices, EnableAction::ENABLE);
-                m_model->update();
-            }
+            m_applyingProfile = false;
         },
         Qt::SingleShotConnection);
+    m_model->update();
 }
 void ModFolderPage::onTabDisableAll(int tabIndex)
 {
@@ -965,6 +979,12 @@ void ModFolderPage::onTabDisableAll(int tabIndex)
             ->exec();
         return;
     }
+    QString targetProfile = m_profileTabBar->tabText(tabIndex);
+    QSet<QString> emptySet;
+    m_profileStates[targetProfile] = emptySet;
+    QString key = profileKey(targetProfile);
+    m_instance->settings()->getOrRegisterSetting(key, QStringList());
+    m_instance->settings()->set(key, QStringList());
     ++m_profileSwitchGeneration;
     int capturedGeneration = m_profileSwitchGeneration;
     if (m_profileTabBar->currentIndex() != tabIndex) {
@@ -972,23 +992,20 @@ void ModFolderPage::onTabDisableAll(int tabIndex)
         m_profileTabBar->setCurrentIndex(tabIndex);
         m_profileTabBar->blockSignals(false);
     }
-    applyProfileSwitch(tabIndex, capturedGeneration);
+    m_currentProfile = targetProfile;
+    m_profileTabBar->setProperty("currentProfileName", targetProfile);
+    m_instance->settings()->set(lastActiveIndexKey(), tabIndex);
+    m_applyingProfile = true;
+    m_model->applyEnabledIds(emptySet);
     connect(m_model, &ResourceFolderModel::updateFinished, this,
-        [this, capturedGeneration] {
-            if (capturedGeneration != m_profileSwitchGeneration) {
+        [this, capturedGeneration, targetProfile] {
+            if (capturedGeneration != m_profileSwitchGeneration || targetProfile != m_currentProfile) {
                 return;
             }
-            QModelIndexList allIndices;
-            allIndices.reserve(m_model->rowCount());
-            for (int i = 0; i < m_model->rowCount(); ++i) {
-                allIndices.append(m_model->index(i, 0));
-            }
-            if (!allIndices.isEmpty()) {
-                m_model->setResourceEnabled(allIndices, EnableAction::DISABLE);
-                m_model->update();
-            }
+            m_applyingProfile = false;
         },
         Qt::SingleShotConnection);
+    m_model->update();
 }
 bool ModFolderPage::eventFilter(QObject* obj, QEvent* ev)
 {
