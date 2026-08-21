@@ -239,11 +239,15 @@ ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWi
     });
     m_instance->settings()->getOrRegisterSetting(runtimeProfilesKey(), QStringList());
     rebuildRuntimeMenu();
-    connect(m_model, &QAbstractItemModel::dataChanged, this, [this]() {
-        if (!m_applyingProfile && !m_instanceRunning) {
-            saveCurrentProfileState();
-        }
-    });
+    connect(m_model, &QAbstractItemModel::dataChanged, this,
+        [this](const QModelIndex& topLeft, const QModelIndex& bottomRight) {
+            if (!m_applyingProfile && !m_instance->isRunning()) {
+                if (topLeft.column() <= ResourceFolderModel::ActiveColumn &&
+                    bottomRight.column() >= ResourceFolderModel::ActiveColumn) {
+                    saveCurrentProfileState();
+                }
+            }
+        });
 }
 
 bool ModFolderPage::shouldDisplay() const
@@ -334,8 +338,8 @@ void ModFolderPage::downloadDialogFinished(int result)
             }
         });
 
-        if (m_downloadDialog) {
-            for (auto& task : m_downloadDialog->getTasks()) {
+        if (dialog) {
+            for (auto& task : dialog->getTasks()) {
                 tasks.addTask(task);
             }
         } else {
@@ -346,6 +350,39 @@ void ModFolderPage::downloadDialogFinished(int result)
         loadDialog.setSkipButton(true, tr("Abort"));
         loadDialog.execWithTask(&tasks);
 
+        int capturedGeneration = m_profileSwitchGeneration;
+        QString capturedProfile = m_currentProfile;
+        if (!capturedProfile.isEmpty()) {
+            auto parseConn = std::make_shared<QMetaObject::Connection>();
+            auto checkAndSave = [this, capturedGeneration, capturedProfile, parseConn]() {
+                if (capturedGeneration != m_profileSwitchGeneration || capturedProfile != m_currentProfile) {
+                    if (*parseConn) {
+                        disconnect(*parseConn);
+                    }
+                    return true;
+                }
+                if (!m_model->hasPendingParseTasks()) {
+                    if (*parseConn) {
+                        disconnect(*parseConn);
+                    }
+                    if (!m_applyingProfile && !m_instance->isRunning()) {
+                        saveCurrentProfileState();
+                    }
+                    return true;
+                }
+                return false;
+            };
+
+            *parseConn = connect(m_model, &ResourceFolderModel::parseFinished, this, [checkAndSave] {
+                checkAndSave();
+            });
+
+            connect(m_model, &ResourceFolderModel::updateFinished, this,
+                [checkAndSave] {
+                    checkAndSave();
+                },
+                Qt::SingleShotConnection);
+        }
         m_model->update();
     }
     if (dialog) {
@@ -644,7 +681,7 @@ void ModFolderPage::applyProfileSwitch(int index, int generation, bool isInitial
         QVariant val = m_profileTabBar->property("currentProfileName");
         m_currentProfile = val.isValid() ? val.toString() : QString();
     }
-    if (!m_instanceRunning) {
+    if (!m_instance->isRunning()) {
         saveCurrentProfileState(/*refuseSuspiciousEmptyOverwrite=*/true);
     }
     if (index >= 0 && index < m_profileTabBar->count()) {
