@@ -44,14 +44,14 @@ set(Launcher_Authors "Cloudy Launcher, Prism Launcher, PolyMC & MultiMC Contribu
 
 set(Launcher_Portable_File "program_info/portable.txt" PARENT_SCOPE)
 
-configure_file(${Launcher_AppID}.desktop.in ${Launcher_AppID}.desktop)
-configure_file(${Launcher_AppID}.metainfo.xml.in ${Launcher_AppID}.metainfo.xml)
-configure_file(${Launcher_APP_BINARY_NAME}.rc.in ${Launcher_APP_BINARY_NAME}.rc @ONLY)
-configure_file(${Launcher_APP_BINARY_NAME}.qrc.in ${Launcher_APP_BINARY_NAME}.qrc @ONLY)
-configure_file(${Launcher_APP_BINARY_NAME}.manifest.in ${Launcher_APP_BINARY_NAME}.manifest @ONLY)
-configure_file(${Launcher_APP_BINARY_NAME}.ico ${Launcher_APP_BINARY_NAME}.ico COPYONLY)
+configure_file(org.prismlauncher.PrismLauncher.desktop.in ${Launcher_AppID}.desktop)
+configure_file(org.prismlauncher.PrismLauncher.metainfo.xml.in ${Launcher_AppID}.metainfo.xml)
+configure_file(prismlauncher.rc.in ${Launcher_APP_BINARY_NAME}.rc @ONLY)
+configure_file(prismlauncher.qrc.in ${Launcher_APP_BINARY_NAME}.qrc @ONLY)
+configure_file(prismlauncher.manifest.in ${Launcher_APP_BINARY_NAME}.manifest @ONLY)
+configure_file(prismlauncher.ico ${Launcher_APP_BINARY_NAME}.ico COPYONLY)
 configure_file(${Launcher_SVGFileName} ${Launcher_SVGFileName} COPYONLY)
-configure_file(${Launcher_AppID}.mime.xml ${Launcher_AppID}.xml COPYONLY)
+configure_file(org.prismlauncher.PrismLauncher.mime.xml ${Launcher_AppID}.xml COPYONLY)
 
 if(MSVC)
     set(Launcher_MSVC_Redist_NSIS_Section [=[
