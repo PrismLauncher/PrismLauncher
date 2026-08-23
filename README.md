@@ -1,18 +1,40 @@
 # Cloudy Launcher
 
-Cloudy Launcher is an independent modern desktop Minecraft launcher built on the proven Prism Launcher codebase. It preserves the upstream project's functionality and required GPL-3.0 notices while developing a distinct Cloudy identity and desktop UX.
+<p align="center">
+  <img src="launcher/resources/cloudy/cloudy-logo-reference.png" alt="Cloudy Launcher" width="420">
+</p>
+
+<p align="center"><strong>A modern, safe, and focused Minecraft launcher for desktop.</strong></p>
+
+<p align="center">
+  Manage instances, mods, resource packs, shader packs, files, accounts, backups, snapshots, and updates from one calm workspace.
+</p>
+
+Cloudy Launcher is an independent desktop launcher built on the proven Prism Launcher foundation. It keeps the mature Minecraft instance and authentication functionality while rethinking the experience around clear navigation, reliable recovery, safe updates, and a distinct Cloudy identity.
 
 > Cloudy Launcher is not an official Prism Launcher project.
 
-## Visual direction
+## What Cloudy is building
 
-The Cloudy identity is based on a restrained pixel-art cloud mark: light blue and white on a dark background. The interface direction is purpose-built desktop software—clear hierarchy, compact navigation, useful states, and no decorative AI-generated UI patterns.
+- A focused Sidebar or compact Notch Panel navigation model.
+- A useful Home surface for quick launch, recent instances, downloads, and updates.
+- A central Instances library with groups, filters, favorites, and list/grid views.
+- Integrated mod, resource pack, shader, server, and file management.
+- Safe updates with snapshots, dependency checks, validation, backups, and rollback.
+- Clear account, Java, log, crash, and recovery workflows instead of opaque dialogs.
+- A restrained pixel-art cloud visual language—no decorative gradients, excessive glow, or meaningless UI.
 
-See [docs/CLOUDY-BRANDING.md](docs/CLOUDY-BRANDING.md) and the [logo reference](launcher/resources/cloudy/cloudy-logo-reference.png).
+## Project status
 
-## Upstream foundation
+Cloudy Launcher is in active redesign. The current branch preserves the upstream launcher foundation while the new product architecture is introduced incrementally. Existing functionality remains the source of truth until each redesigned surface is verified by a successful build and runtime check.
 
-Cloudy Launcher is based on [Prism Launcher](https://github.com/PrismLauncher/PrismLauncher). Preserve the upstream license files, copyright notices, and third-party notices when modifying or redistributing the project.
+## Visual reference
+
+The Cloudy mark is a pale blue and white pixel-art cloud on a dark background. The reference is stored at [launcher/resources/cloudy/cloudy-logo-reference.png](launcher/resources/cloudy/cloudy-logo-reference.png), with implementation rules documented in [docs/CLOUDY-BRANDING.md](docs/CLOUDY-BRANDING.md).
+
+## Upstream and licensing
+
+Cloudy Launcher is based on [Prism Launcher](https://github.com/PrismLauncher/PrismLauncher). Prism Launcher is licensed under GPL-3.0. Keep the repository's license files, copyright notices, and third-party notices intact when modifying or redistributing Cloudy Launcher.
 
 ---
 
