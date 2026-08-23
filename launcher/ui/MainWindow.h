@@ -82,6 +82,10 @@ class MainWindow : public QMainWindow {
     void updatesAllowedChanged(bool allowed);
 
     void processURLs(QList<QUrl> urls);
+
+    // Present launcher pages inside the main window instead of spawning utility windows.
+    void showEmbeddedPage(QWidget* page);
+    void restoreMainContent();
    signals:
     void isClosing();
 
@@ -255,4 +259,5 @@ class MainWindow : public QMainWindow {
 
     // managed by the application object
     Task* m_versionLoadTask = nullptr;
+    QStackedWidget* m_contentStack = nullptr;
 };
