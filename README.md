@@ -1,3 +1,21 @@
+# Cloudy Launcher
+
+Cloudy Launcher is an independent modern desktop Minecraft launcher built on the proven Prism Launcher codebase. It preserves the upstream project's functionality and required GPL-3.0 notices while developing a distinct Cloudy identity and desktop UX.
+
+> Cloudy Launcher is not an official Prism Launcher project.
+
+## Visual direction
+
+The Cloudy identity is based on a restrained pixel-art cloud mark: light blue and white on a dark background. The interface direction is purpose-built desktop software—clear hierarchy, compact navigation, useful states, and no decorative AI-generated UI patterns.
+
+See [docs/CLOUDY-BRANDING.md](docs/CLOUDY-BRANDING.md) and the [logo reference](launcher/resources/cloudy/cloudy-logo-reference.png).
+
+## Upstream foundation
+
+Cloudy Launcher is based on [Prism Launcher](https://github.com/PrismLauncher/PrismLauncher). Preserve the upstream license files, copyright notices, and third-party notices when modifying or redistributing the project.
+
+---
+
 <p align="center">
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="/program_info/org.prismlauncher.PrismLauncher.logo-darkmode.svg">
