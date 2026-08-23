@@ -1443,7 +1443,15 @@ void MainWindow::on_actionEditInstance_triggered()
         return;
 
     if (m_selectedInstance->canEdit()) {
-        APPLICATION->showInstanceWindow(m_selectedInstance);
+        // Reuse the real InstanceWindow/page container, but host it inside Cloudy.
+        // The editor keeps its existing pages and save/launch behaviour.
+        auto* editor = APPLICATION->showInstanceWindow(m_selectedInstance);
+        if (editor) {
+            editor->setWindowFlags(Qt::Widget);
+            editor->setAttribute(Qt::WA_DeleteOnClose, false);
+            connect(editor, &InstanceWindow::isClosing, this, &MainWindow::restoreMainContent, Qt::UniqueConnection);
+            showEmbeddedPage(editor);
+        }
     } else {
         CustomMessageBox::selectable(this, tr("Instance not editable"),
                                      tr("This instance is not editable. It may be broken, invalid, or too old. Check logs for details."),
