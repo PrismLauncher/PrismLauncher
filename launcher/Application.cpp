@@ -1662,17 +1662,29 @@ void Application::controllerFinished()
 
 void Application::ShowGlobalSettings(class QWidget* parent, QString open_page)
 {
-    if (!m_globalSettingsProvider) {
+    if (!m_globalSettingsProvider)
+        return;
+
+    emit globalSettingsAboutToOpen();
+    auto* dialog = new PageDialog(m_globalSettingsProvider.get(), open_page, parent);
+
+    if (auto* mainWindow = qobject_cast<MainWindow*>(parent)) {
+        // PageDialog already contains the real settings pages. Turn it into an in-app page
+        // rather than duplicating settings logic or exposing credentials to the UI layer.
+        dialog->setWindowFlags(Qt::Widget);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+        mainWindow->showEmbeddedPage(dialog);
+        connect(dialog, &QDialog::finished, mainWindow, [mainWindow] { mainWindow->restoreMainContent(); });
+        dialog->show();
         return;
     }
-    emit globalSettingsAboutToOpen();
-    {
-        SettingsObject::Lock lock(APPLICATION->settings());
-        PageDialog dlg(m_globalSettingsProvider.get(), open_page, parent);
-        connect(&dlg, &PageDialog::applied, this, &Application::globalSettingsApplied);
-        dlg.exec();
-    }
+
+    SettingsObject::Lock lock(APPLICATION->settings());
+    connect(dialog, &PageDialog::applied, this, &Application::globalSettingsApplied);
+    dialog->exec();
+    delete dialog;
 }
+
 
 MainWindow* Application::showMainWindow(bool minimized)
 {
