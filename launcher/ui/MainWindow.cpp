@@ -71,6 +71,7 @@
 #include <QToolBar>
 #include <QToolButton>
 #include <QWidget>
+#include <QStackedWidget>
 #include <QWidgetAction>
 #include <memory>
 
@@ -149,6 +150,11 @@ QString profileInUseFilter(const QString& profile, bool used)
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    // Keep the existing instance view as the first in-app page. New pages are stacked here.
+    m_contentStack = new QStackedWidget(this);
+    m_contentStack->addWidget(ui->centralWidget);
+    setCentralWidget(m_contentStack);
 
     setWindowIcon(APPLICATION->logo());
     setWindowTitle(APPLICATION->applicationDisplayName());
@@ -494,6 +500,28 @@ void MainWindow::retranslateUi()
         if (action->toolTip().contains("%1"))
             action->setToolTip(action->toolTip().arg(BuildConfig.LAUNCHER_DISPLAYNAME));
     }
+}
+
+void MainWindow::showEmbeddedPage(QWidget* page)
+{
+    if (!page || !m_contentStack)
+        return;
+
+    page->setParent(m_contentStack);
+    m_contentStack->addWidget(page);
+    m_contentStack->setCurrentWidget(page);
+    page->show();
+}
+
+void MainWindow::restoreMainContent()
+{
+    if (!m_contentStack || m_contentStack->count() < 2)
+        return;
+
+    QWidget* page = m_contentStack->currentWidget();
+    m_contentStack->setCurrentWidget(ui->centralWidget);
+    m_contentStack->removeWidget(page);
+    page->deleteLater();
 }
 
 MainWindow::~MainWindow() {}
