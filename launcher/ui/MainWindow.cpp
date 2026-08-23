@@ -152,6 +152,25 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     setWindowIcon(APPLICATION->logo());
     setWindowTitle(APPLICATION->applicationDisplayName());
+
+    // Cloudy Launcher foundation: calm hierarchy, compact controls, and purposeful contrast.
+    // Keep the existing widgets and backend connections; this layer changes presentation only.
+    setMinimumSize(QSize(980, 620));
+    setStyleSheet(QStringLiteral(
+        "QMainWindow { background: #111827; }"
+        "QToolBar#mainToolBar { background: #172033; border: 0; border-bottom: 1px solid #26344b; padding: 8px 12px; spacing: 6px; }"
+        "QToolBar#instanceToolBar { background: #131d2e; border: 0; border-right: 1px solid #26344b; padding: 10px 6px; spacing: 5px; }"
+        "QToolButton { color: #d8e4f2; border: 1px solid transparent; border-radius: 6px; padding: 7px 9px; }"
+        "QToolButton:hover { background: #22324a; border-color: #314968; }"
+        "QToolButton:pressed, QToolButton:checked { background: #2b4d7d; color: #ffffff; }"
+        "QLabel { color: #d8e4f2; }"
+        "QStatusBar { background: #0d1523; color: #9fb1c8; border-top: 1px solid #26344b; }"
+        "QMenuBar { background: #111827; color: #c9d7e8; }"
+        "QMenuBar::item:selected, QMenu::item:selected { background: #2b4d7d; }"
+        "QMenu { background: #172033; color: #d8e4f2; border: 1px solid #31415a; }"
+    ));
+    ui->mainToolBar->setMovable(false);
+    ui->mainToolBar->setIconSize(QSize(18, 18));
 #ifndef QT_NO_ACCESSIBILITY
     setAccessibleName(BuildConfig.LAUNCHER_DISPLAYNAME);
 #endif
