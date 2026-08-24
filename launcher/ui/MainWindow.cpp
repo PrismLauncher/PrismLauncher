@@ -176,6 +176,23 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         "QMenu { background: #172033; color: #d8e4f2; border: 1px solid #31415a; }"
     ));
     ui->mainToolBar->setMovable(false);
+    // Cloudy navigation rail: keep primary destinations in the same window.
+    auto* cloudySidebar = new QToolBar(tr("Cloudy navigation"), this);
+    cloudySidebar->setObjectName(QStringLiteral("cloudySidebar"));
+    cloudySidebar->setOrientation(Qt::Vertical);
+    cloudySidebar->setMovable(false);
+    cloudySidebar->setFloatable(false);
+    cloudySidebar->setIconSize(QSize(20, 20));
+    cloudySidebar->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    addToolBar(Qt::LeftToolBarArea, cloudySidebar);
+
+    auto* libraryAction = cloudySidebar->addAction(tr("Library"));
+    libraryAction->setToolTip(tr("Return to your instances"));
+    connect(libraryAction, &QAction::triggered, this, &MainWindow::restoreMainContent);
+    cloudySidebar->addSeparator();
+    cloudySidebar->addAction(ui->actionManageAccounts);
+    cloudySidebar->addAction(ui->actionSettings);
+
     ui->mainToolBar->setIconSize(QSize(18, 18));
 #ifndef QT_NO_ACCESSIBILITY
     setAccessibleName(BuildConfig.LAUNCHER_DISPLAYNAME);
