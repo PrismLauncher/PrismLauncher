@@ -51,6 +51,7 @@
 class LaunchController;
 class NewsChecker;
 class QToolButton;
+class QStackedWidget;
 class InstanceProxyModel;
 class LabeledToolButton;
 class QLabel;
