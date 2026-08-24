@@ -171,7 +171,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         "QToolBar#cloudySidebar QToolButton:hover { background: #172a43; }"
         "QToolBar#cloudySidebar QToolButton:pressed { background: #244a78; }"
         "QToolBar#cloudySidebar::separator { height: 1px; background: #26344b; margin: 10px 6px; }"
-        "QLabel#cloudyBrand { color: #f2f7ff; font-size: 15px; font-weight: 600; padding: 3px 6px 12px 6px; }"
+        "QLabel#cloudyBrandName { color: #f2f7ff; font-size: 15px; font-weight: 600; }"
         "QToolButton { color: #d8e4f2; border: 1px solid transparent; border-radius: 6px; padding: 7px 9px; }"
         "QToolButton:hover { background: #22324a; border-color: #314968; }"
         "QToolButton:pressed, QToolButton:checked { background: #2b4d7d; color: #ffffff; }"
@@ -192,10 +192,18 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     cloudySidebar->setToolButtonStyle(Qt::ToolButtonTextOnly);
     cloudySidebar->setMinimumWidth(190);
     cloudySidebar->setMaximumWidth(210);
-    auto* cloudyBrand = new QLabel(tr("Cloudy Launcher"), this);
+    auto* cloudyBrand = new QWidget(this);
     cloudyBrand->setObjectName(QStringLiteral("cloudyBrand"));
-    cloudyBrand->setPixmap(APPLICATION->logo().pixmap(QSize(28, 28)));
-    cloudyBrand->setText(tr("  Cloudy Launcher"));
+    auto* brandLayout = new QHBoxLayout(cloudyBrand);
+    brandLayout->setContentsMargins(6, 3, 6, 12);
+    brandLayout->setSpacing(8);
+    auto* brandIcon = new QLabel(cloudyBrand);
+    brandIcon->setPixmap(APPLICATION->logo().pixmap(QSize(28, 28)));
+    auto* brandName = new QLabel(tr("Cloudy Launcher"), cloudyBrand);
+    brandName->setObjectName(QStringLiteral("cloudyBrandName"));
+    brandLayout->addWidget(brandIcon);
+    brandLayout->addWidget(brandName);
+    brandLayout->addStretch();
     cloudySidebar->addWidget(cloudyBrand);
     addToolBar(Qt::LeftToolBarArea, cloudySidebar);
 
