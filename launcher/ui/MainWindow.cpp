@@ -989,17 +989,21 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
         groupName = APPLICATION->settings()->get("LastUsedGroupForNewInstance").toString();
     }
 
-    NewInstanceDialog newInstDlg(groupName, url, extra_info, this);
-    if (!newInstDlg.exec())
-        return;
+    // Keep the complete existing provider pages, but host the dialog in Cloudy's content stack.
+    auto* newInstDlg = new NewInstanceDialog(groupName, url, extra_info, this);
+    newInstDlg->setWindowFlags(Qt::Widget);
+    newInstDlg->setAttribute(Qt::WA_DeleteOnClose, false);
 
-    APPLICATION->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
-    APPLICATION->settings()->set("LastUsedInstDirForNewInstance", newInstDlg.instDir());
-
-    InstanceTask* creationTask = newInstDlg.extractTask();
-    if (creationTask) {
-        instanceFromInstanceTask(creationTask);
-    }
+    connect(newInstDlg, &QDialog::accepted, this, [this, newInstDlg] {
+        APPLICATION->settings()->set("LastUsedGroupForNewInstance", newInstDlg->instGroup());
+        APPLICATION->settings()->set("LastUsedInstDirForNewInstance", newInstDlg->instDir());
+        if (auto* creationTask = newInstDlg->extractTask()) {
+            instanceFromInstanceTask(creationTask);
+        }
+        restoreMainContent();
+    });
+    connect(newInstDlg, &QDialog::rejected, this, [this] { restoreMainContent(); });
+    showEmbeddedPage(newInstDlg);
 }
 
 void MainWindow::on_actionAddInstance_triggered()
