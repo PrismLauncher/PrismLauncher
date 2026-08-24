@@ -341,10 +341,18 @@ void ExternalResourcesPage::updateFrame(const QModelIndex& current, [[maybe_unus
 
 QString ExternalResourcesPage::extraHeaderInfoString()
 {
+    auto all = m_model->allResources();
+    auto enabledCount = std::count_if(all.cbegin(), all.cend(), [](Resource* res) { return res->enabled(); });
+    auto installedCount = m_model->size();
+
     if (ui && ui->treeView && ui->treeView->selectionModel()) {
         auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
         if (auto count = std::count_if(selection.cbegin(), selection.cend(), [](auto v) { return v.column() == 0; }); count != 0)
-            return tr(" (%1 installed, %2 selected)").arg(m_model->size()).arg(count);
+            return tr(" (%1 installed, %2 enabled, %3 selected)").arg(installedCount).arg(enabledCount).arg(count);
     }
-    return tr(" (%1 installed)").arg(m_model->size());
+
+    if (installedCount == 0)
+        return tr(" (%1 installed)").arg(installedCount);
+
+    return tr(" (%1 installed, %2 enabled)").arg(installedCount).arg(enabledCount);
 }
