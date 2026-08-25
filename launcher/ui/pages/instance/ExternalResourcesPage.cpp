@@ -342,7 +342,7 @@ void ExternalResourcesPage::updateFrame(const QModelIndex& current, [[maybe_unus
 QString ExternalResourcesPage::extraHeaderInfoString()
 {
     auto all = m_model->allResources();
-    auto enabledCount = std::count_if(all.cbegin(), all.cend(), [](Resource* res) { return res->enabled(); });
+    auto enabledCount = std::ranges::count_if(all, [](Resource* res) { return res->enabled(); });
     auto installedCount = m_model->size();
 
     if (ui && ui->treeView && ui->treeView->selectionModel()) {
@@ -351,8 +351,8 @@ QString ExternalResourcesPage::extraHeaderInfoString()
             return tr(" (%1 installed, %2 enabled, %3 selected)").arg(installedCount).arg(enabledCount).arg(count);
     }
 
-    if (installedCount == 0)
-        return tr(" (%1 installed)").arg(installedCount);
+    if (enabledCount != 0)
+        return tr(" (%1 installed, %2 enabled)").arg(installedCount).arg(enabledCount);
 
-    return tr(" (%1 installed, %2 enabled)").arg(installedCount).arg(enabledCount);
+    return tr(" (%1 installed)").arg(installedCount);
 }
