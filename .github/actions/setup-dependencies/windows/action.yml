@@ -27,7 +27,7 @@ runs:
         vsversion: 2022
 
     - name: Setup Java (MSVC)
-      uses: actions/setup-java@v5
+      uses: actions/setup-java@v6
       with:
         # NOTE(@getchoo): We should probably stay on Zulu.
         # Temurin doesn't have Java 17 builds for WoA
