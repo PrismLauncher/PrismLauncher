@@ -39,6 +39,7 @@
 #include <QDebug>
 #include <QDirListing>
 #include <QFile>
+#include <QDir>
 #include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -1138,6 +1139,13 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
         }
 
         m_instanceSet.insert(instID);
+
+        QString templateDir = APPLICATION->settings()->get("TemplateDir").toString();
+        if (!templateDir.isEmpty() && QDir(templateDir).exists()){
+            if (!FS::copy(templateDir, destination)()) {
+                qWarning() << "Failed to copy instance template";
+            }
+        }
 
         emit instancesChanged();
         emit instanceSelectRequest(instID);
