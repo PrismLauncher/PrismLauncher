@@ -191,6 +191,7 @@
     <addaction name="actionViewLogsFolder"/>
     <addaction name="separator"/>
     <addaction name="actionViewInstanceFolder"/>
+    <addaction name="actionViewTemplateFolder"/>
     <addaction name="actionViewIconsFolder"/>
     <addaction name="actionViewCentralModsFolder"/>
     <addaction name="actionViewJavaFolder"/>
@@ -775,6 +776,17 @@
    </property>
    <property name="toolTip">
     <string>Open the Java folder in a file browser. Only available if the built-in Java downloader is used.</string>
+   </property>
+  </action>
+  <action name="actionViewTemplateFolder">
+   <property name="icon">
+    <iconset theme="viewfolder"/>
+   </property>
+   <property name="text">
+    <string>&amp;Templates</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the templates folder in a file browser.</string>
    </property>
   </action>
  </widget>
