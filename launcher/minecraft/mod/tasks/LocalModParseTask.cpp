@@ -340,20 +340,19 @@ ModDetails ReadFabricModInfo(QByteArray contents)
                 auto obj = icon.toObject();
                 // take the largest icon
                 int largest = 0;
-                for (auto key : obj.keys()) {
+                QString bestIcon;
+                for (const auto& key : obj.keys()) {
                     auto size = key.split('x').first().toInt();
                     if (size > largest) {
                         largest = size;
+                        bestIcon = obj.value(key).toString();
                     }
                 }
-                if (largest > 0) {
-                    auto key = QString::number(largest) + "x" + QString::number(largest);
-                    details.icon_file = obj.value(key).toString();
-                } else {  // parsing the sizes failed
+                if (!bestIcon.isEmpty()) {
+                    details.icon_file = bestIcon;
+                } else if (!obj.isEmpty()) {
                     // take the first
-                    if (auto it = obj.begin(); it != obj.end()) {
-                        details.icon_file = it->toString();
-                    }
+                    details.icon_file = obj.begin().value().toString();
                 }
             } else if (icon.isString()) {
                 details.icon_file = icon.toString();
