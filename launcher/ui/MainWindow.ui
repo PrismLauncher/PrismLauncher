@@ -131,7 +131,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
@@ -193,6 +193,8 @@
     <addaction name="actionViewCentralModsFolder"/>
     <addaction name="actionViewSkinsFolder"/>
     <addaction name="actionViewJavaFolder"/>
+    <addaction name="actionViewTemplatesFolder"/>
+
     <addaction name="separator"/>
     <addaction name="actionViewIconThemeFolder"/>
     <addaction name="actionViewWidgetThemeFolder"/>
@@ -777,6 +779,17 @@
    </property>
    <property name="toolTip">
     <string>Open the Java folder in a file browser. Only available if the built-in Java downloader is used.</string>
+   </property>
+  </action>
+  <action name="actionViewTemplatesFolder">
+   <property name="icon">
+    <iconset theme="viewfolder"/>
+   </property>
+   <property name="text">
+    <string>&amp;Templates</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the templates folder in a file browser.</string>
    </property>
   </action>
  </widget>
