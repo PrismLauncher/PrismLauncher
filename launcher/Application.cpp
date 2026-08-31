@@ -1271,33 +1271,36 @@ bool Application::createSetupWizard()
 
         m_themeManager->applyCurrentlySelectedTheme(true);
 
-        m_setupWizard = new SetupWizard(nullptr);
+        SetupWizard setupWizard;
         if (languageRequired) {
-            m_setupWizard->addPage(new LanguageWizardPage(m_setupWizard));
+            setupWizard.addPage(new LanguageWizardPage(&setupWizard));
         }
 
         if (javaRequired) {
-            m_setupWizard->addPage(new JavaWizardPage(m_setupWizard));
+            setupWizard.addPage(new JavaWizardPage(&setupWizard));
         } else if (askjava) {
-            m_setupWizard->addPage(new AutoJavaWizardPage(m_setupWizard));
+            setupWizard.addPage(new AutoJavaWizardPage(&setupWizard));
         }
 
         if (pasteInterventionRequired) {
-            m_setupWizard->addPage(new PasteWizardPage(m_setupWizard));
+            setupWizard.addPage(new PasteWizardPage(&setupWizard));
         }
 
         if (themeInterventionRequired) {
-            m_setupWizard->addPage(new ThemeWizardPage(m_setupWizard));
+            setupWizard.addPage(new ThemeWizardPage(&setupWizard));
         }
 
         if (login) {
-            m_setupWizard->addPage(new LoginWizardPage(m_setupWizard));
+            setupWizard.addPage(new LoginWizardPage(&setupWizard));
         }
-        connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
-        m_setupWizard->show();
+        if (setupWizard.exec() != 0) {
+            qDebug() << "Setup wizard failed!";
+            return false;
+        }
+        performMainStartupAction();
     }
 
-    return wizardRequired || login;
+    return wizardRequired;
 }
 
 bool Application::updaterEnabled()

@@ -299,8 +299,6 @@ class Application : public QApplication {
     // peer launcher instance connector - used to implement single instance launcher and signalling
     LocalPeer* m_peerInstance = nullptr;
 
-    SetupWizard* m_setupWizard = nullptr;
-
    public:
     QString m_detectedGLFWPath;
     QString m_detectedOpenALPath;
