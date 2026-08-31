@@ -30,7 +30,13 @@ void OffloadInstanceTask::executeTask()
 void OffloadInstanceTask::processResourceFolder(const QString& folderName)
 {
     const QString resourcePath = FS::PathCombine(m_instance->instanceRoot(), "minecraft", folderName);
-    const QString indexPath = FS::PathCombine(resourcePath, ".index");
+    
+    QString indexPath;
+    if (folderName == "shaderpacks") {
+        indexPath = resourcePath;
+    } else {
+        indexPath = FS::PathCombine(resourcePath, ".index");
+    }
 
     QDir indexDir(indexPath);
     if (!indexDir.exists())

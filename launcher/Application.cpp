@@ -104,6 +104,7 @@
 
 #include "InstanceList.h"
 #include "MTPixmapCache.h"
+#include "RestoreInstanceTask.h"
 
 #include <minecraft/auth/AccountList.h>
 #include "icons/IconList.h"
@@ -1539,6 +1540,26 @@ bool Application::launch(MinecraftInstance* instance,
 {
     if (m_updateRunning) {
         qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
+    } else if (instance->isOffloaded()) {
+        auto reply = QMessageBox::question(m_mainWindow, tr("Restore Instance"),
+                                           tr("This instance is currently offloaded and cannot be launched. Do you want to download the "
+                                              "missing files and restore it now?"),
+                                           QMessageBox::Yes | QMessageBox::No);
+
+        if (reply == QMessageBox::Yes) {
+            Task::Ptr task(new RestoreInstanceTask(instance));
+            ProgressDialog prog(m_mainWindow);
+            prog.setSkipButton(true, tr("Abort"));
+            prog.execWithTask(task.get());
+
+            if (task->wasSuccessful()) {
+                // Task succeeded, mark as not offloaded and proceed to launch
+                instance->setOffloaded(false);
+                return launch(instance, mode, targetToJoin, accountToUse, offlineName);
+            }
+        }
+
+        return false;
     } else if (instance->canLaunch()) {
         QMutexLocker locker(&m_instanceExtrasMutex);
         auto& extras = m_instanceExtras[instance->id()];
