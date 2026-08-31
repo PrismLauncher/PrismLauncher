@@ -120,6 +120,7 @@
    <addaction name="actionEditInstance"/>
    <addaction name="actionChangeInstGroup"/>
    <addaction name="actionViewSelectedInstFolder"/>
+   <addaction name="actionOffloadInstance"/>
    <addaction name="actionExportInstance"/>
    <addaction name="actionCopyInstance"/>
    <addaction name="actionDeleteInstance"/>
@@ -149,6 +150,7 @@
     <addaction name="actionEditInstance"/>
     <addaction name="actionChangeInstGroup"/>
     <addaction name="actionViewSelectedInstFolder"/>
+    <addaction name="actionOffloadInstance"/>
     <addaction name="actionExportInstance"/>
     <addaction name="actionCopyInstance"/>
     <addaction name="actionDeleteInstance"/>
@@ -458,6 +460,17 @@
    </property>
    <property name="toolTip">
     <string>Export the selected instance to supported formats.</string>
+   </property>
+  </action>
+  <action name="actionOffloadInstance">
+   <property name="icon">
+    <iconset theme="clean"/>
+   </property>
+   <property name="text">
+    <string>Offload...</string>
+   </property>
+   <property name="toolTip">
+    <string>Offloads heavy mod files from the selected instance to free up disk space.</string>
    </property>
   </action>
   <action name="actionExportInstanceZip">

@@ -105,6 +105,7 @@
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/dialogs/NewsDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
+#include "OffloadInstanceTask.h"
 #include "ui/dialogs/skins/SkinManageDialog.h"
 #include "ui/instanceview/InstanceDelegate.h"
 #include "ui/instanceview/InstanceProxyModel.h"
@@ -1536,6 +1537,44 @@ void MainWindow::on_actionDeleteInstance_triggered()
     selectionBad();
 }
 
+void MainWindow::on_actionOffloadInstance_triggered()
+{
+    if (!m_selectedInstance) {
+        return;
+    }
+
+    if (m_selectedInstance->isRunning()) {
+        CustomMessageBox::selectable(this, tr("Cannot Offload Running Instance"),
+                                     tr("The selected instance is currently running and cannot be offloaded. Please stop the instance before attempting to offload it."),
+                                     QMessageBox::Warning, QMessageBox::Ok)->exec();
+        return;
+    }
+
+    if (m_selectedInstance->isOffloaded()) {
+        return; // Already offloaded
+    }
+
+    auto response = CustomMessageBox::selectable(this, tr("Confirm Offload"),
+                                                 tr("You are about to offload \"%1\".\n"
+                                                    "This will delete downloaded mods and resource packs from disk, but keep the metadata needed to download them again.\n\n"
+                                                    "Are you sure?").arg(m_selectedInstance->name()),
+                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)->exec();
+
+    if (response != QMessageBox::Yes) {
+        return;
+    }
+
+    std::unique_ptr<Task> task(new OffloadInstanceTask(m_selectedInstance));
+    connect(task.get(), &Task::succeeded, this, [this]() {
+        // Redraw instance view
+        view->viewport()->update();
+    });
+
+    ProgressDialog progressDialog(this);
+    //progressDialog.setSkipButton(true, tr("Abort"));
+    progressDialog.execWithTask(std::move(task));
+}
+
 void MainWindow::on_actionExportInstanceZip_triggered()
 {
     if (m_selectedInstance) {
@@ -1680,10 +1719,11 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
     if (m_selectedInstance) {
         ui->instanceToolBar->setEnabled(true);
         setInstanceActionsEnabled(true);
-        ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
+        ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch() || m_selectedInstance->isOffloaded());
 
         ui->actionKillInstance->setEnabled(m_selectedInstance->isRunning());
         ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
+        ui->actionOffloadInstance->setEnabled(!m_selectedInstance->isOffloaded() && !m_selectedInstance->isRunning());
         renameButton->setText(m_selectedInstance->name());
         m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
         updateStatusCenter();
@@ -1787,6 +1827,7 @@ void MainWindow::setInstanceActionsEnabled(bool enabled)
     ui->actionDeleteInstance->setEnabled(enabled);
     ui->actionCopyInstance->setEnabled(enabled);
     ui->actionCreateInstanceShortcut->setEnabled(enabled);
+    ui->actionOffloadInstance->setEnabled(enabled && m_selectedInstance && !m_selectedInstance->isOffloaded());
 }
 
 void MainWindow::refreshCurrentInstance()
