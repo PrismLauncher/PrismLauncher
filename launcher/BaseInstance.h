@@ -159,6 +159,10 @@ class BaseInstance : public QObject {
     QString getWrapperCommand();
 
     bool isManagedPack() const;
+
+    bool isOffloaded() const;
+    void setOffloaded(bool offloaded);
+
     QString getManagedPackType() const;
     QString getManagedPackID() const;
     QString getManagedPackName() const;
