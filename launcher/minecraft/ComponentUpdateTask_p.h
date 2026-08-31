@@ -11,7 +11,6 @@
 class PackProfile;
 
 struct RemoteLoadStatus {
-    enum class Type { Index, List, Version } type = Type::Version;
     size_t PackProfileIndex = 0;
     bool finished = false;
     bool succeeded = false;

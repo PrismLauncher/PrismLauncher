@@ -144,33 +144,6 @@ static LoadResult loadComponent(ComponentPtr component, Task::Ptr& loadTask, Net
     return result;
 }
 
-// FIXME: dead code. determine if this can still be useful?
-/*
-static LoadResult loadPackProfile(ComponentPtr component, Task::Ptr& loadTask, Net::Mode netmode)
-{
-    if(component->m_loaded)
-    {
-        qDebug() << component->getName() << "is already loaded";
-        return LoadResult::LoadedLocal;
-    }
-
-    LoadResult result = LoadResult::Failed;
-    auto metaList = APPLICATION->metadataIndex()->get(component->m_uid);
-    if(metaList->isLoaded())
-    {
-        component->m_loaded = true;
-        result = LoadResult::LoadedLocal;
-    }
-    else
-    {
-        metaList->load(netmode);
-        loadTask = metaList->getCurrentTask();
-        result = LoadResult::RequiresRemote;
-    }
-    return result;
-}
-*/
-
 }  // namespace
 
 void ComponentUpdateTask::loadComponents()
@@ -184,30 +157,10 @@ void ComponentUpdateTask::loadComponents()
     for (auto component : d->m_profile->d->components) {
         Task::Ptr loadTask;
         LoadResult singleResult;
-        RemoteLoadStatus::Type loadType;
         component->resetComponentProblems();
         // FIXME: to do this right, we need to load the lists and decide on which versions to use during dependency resolution. For now,
         // ignore all that...
-#if 0
-        switch(d->mode)
-        {
-            case Mode::Launch:
-            {
-                singleResult = loadComponent(component, loadTask, d->netmode);
-                loadType = RemoteLoadStatus::Type::Version;
-                break;
-            }
-            case Mode::Resolution:
-            {
-                singleResult = loadPackProfile(component, loadTask, d->netmode);
-                loadType = RemoteLoadStatus::Type::List;
-                break;
-            }
-        }
-#else
         singleResult = loadComponent(component, loadTask, d->netmode);
-        loadType = RemoteLoadStatus::Type::Version;
-#endif
         if (singleResult == LoadResult::LoadedLocal) {
             component->updateCachedData();
         }
@@ -219,7 +172,6 @@ void ComponentUpdateTask::loadComponents()
             connect(loadTask.get(), &Task::failed, this, [this, taskIndex](const QString& error) { remoteLoadFailed(taskIndex, error); });
             connect(loadTask.get(), &Task::aborted, this, [this, taskIndex]() { remoteLoadFailed(taskIndex, tr("Aborted")); });
             RemoteLoadStatus status;
-            status.type = loadType;
             status.PackProfileIndex = componentIndex;
             status.task = loadTask;
             d->remoteLoadStatusList.append(status);
@@ -757,11 +709,9 @@ void ComponentUpdateTask::remoteLoadSucceeded(size_t taskIndex)
     taskSlot.finished = true;
     d->remoteTasksInProgress--;
     // update the cached data of the component from the downloaded version file.
-    if (taskSlot.type == RemoteLoadStatus::Type::Version) {
-        auto component = d->m_profile->getComponent(taskSlot.PackProfileIndex);
-        component->m_loaded = true;
-        component->updateCachedData();
-    }
+    auto component = d->m_profile->getComponent(taskSlot.PackProfileIndex);
+    component->m_loaded = true;
+    component->updateCachedData();
     checkIfAllFinished();
 }
 
