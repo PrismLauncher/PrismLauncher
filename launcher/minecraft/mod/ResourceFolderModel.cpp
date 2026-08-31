@@ -439,7 +439,12 @@ void ResourceFolderModel::onParseSucceeded(int ticket, const QString& resourceId
 Task* ResourceFolderModel::createUpdateTask()
 {
     auto indexDir2 = indexDir();
-    auto* task = new ResourceFolderLoadTask(dir(), indexDir2, m_isIndexed, m_firstFolderLoad,
+    bool shouldCleanOrphan = m_firstFolderLoad;
+    if (m_instance && m_instance->isOffloaded()) {
+        shouldCleanOrphan = false;
+    }
+
+    auto* task = new ResourceFolderLoadTask(dir(), indexDir2, m_isIndexed, shouldCleanOrphan,
                                             [this](const QFileInfo& file) { return createResource(file); });
     m_firstFolderLoad = false;
     return task;
