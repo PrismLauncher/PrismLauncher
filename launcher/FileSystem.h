@@ -115,6 +115,17 @@ class copy : public QObject {
         m_followSymlinks = follow;
         return *this;
     }
+    /**
+     * Setting this to true copies empty and symlinked directories (if follow symlinks is not set)
+     * instead of ignoring them.
+     *
+     * Defaults to false
+     */
+    copy& copyDirectories(const bool copyDirectories)
+    {
+        m_copyDirectories = copyDirectories;
+        return *this;
+    }
     copy& matcher(Filter filter)
     {
         m_matcher = std::move(filter);
@@ -146,6 +157,7 @@ class copy : public QObject {
     bool operator()(const QString& offset, bool dryRun = false);
 
    private:
+    bool m_copyDirectories = false;
     bool m_followSymlinks = true;
     Filter m_matcher = nullptr;
     bool m_whitelist = false;

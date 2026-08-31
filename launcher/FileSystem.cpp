@@ -338,7 +338,12 @@ bool copy::operator()(const QString& offset, bool dryRun)
 
         auto dst_path = PathCombine(dst, relative_dst_path);
         if (!dryRun) {
-            ensureFilePathExists(dst_path);
+            std::string src_std_path = StringUtils::toStdString(src_path);
+            if (fs::is_directory(src_std_path) && ! fs::is_symlink(src_std_path)){
+                ensureFolderPathExists(dst_path);
+            }else{
+                ensureFilePathExists(dst_path);
+            }
 #ifdef Q_OS_WIN32
             copyFolderAttributes(src, dst, relative_dst_path);
 #endif
@@ -360,7 +365,13 @@ bool copy::operator()(const QString& offset, bool dryRun)
     // blacklisted paths, so we iterate over the source directory, and if there's no blacklist
     // match, we copy the file.
     QDir src_dir(src);
-    QDirIterator source_it(src, QDir::Filter::Files | QDir::Filter::Hidden, QDirIterator::Subdirectories);
+    QDir::Filters filters = QDir::Filter::Files | QDir::Filter::Hidden;
+
+    if (m_copyDirectories) {
+        filters |= QDir::Filter::NoDotAndDotDot | QDir::Filter::Dirs;
+    }
+
+    QDirIterator source_it(src, filters, QDirIterator::Subdirectories);
 
     while (source_it.hasNext()) {
         auto src_path = source_it.next();
