@@ -70,7 +70,7 @@ bool shouldStopOnConsoleOverflow(SettingsObject* settings)
 }
 
 BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, QString rootDir)
-    : m_rootDir(std::move(rootDir)), m_settings(std::move(settings)), m_global_settings(globalSettings)
+    : m_rootDir(std::move(rootDir)), m_settings(std::move(settings)), m_globalSettings(globalSettings)
 {
     m_settings->registerSetting("name", "Unnamed Instance");
     m_settings->registerSetting("iconKey", "default");
