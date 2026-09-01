@@ -37,6 +37,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include <QAbstractListModel>
 #include <QDir>
 #include <QHash>
@@ -51,10 +53,6 @@
 class BaseInstance;
 class QFileSystemWatcher;
 
-/**
- * A legacy mod list.
- * Backed by a folder.
- */
 class ModFolderModel : public ResourceFolderModel {
     Q_OBJECT
    public:
@@ -94,17 +92,24 @@ class ModFolderModel : public ResourceFolderModel {
 
     QModelIndexList getAffectedMods(const QModelIndexList& indexes, EnableAction action);
 
+    void applyEnabledIds(const QSet<QString>& enabledModIds);
+
+    void setLaunchSnapshot(const QSet<QString>& enabledModIds);
+    std::optional<QSet<QString>> launchSnapshot() const;
+    void clearLaunchSnapshot();
+
     RESOURCE_HELPERS(Mod)
 
    public:
-    QStringList requiresList(const QString& id) const;
-    QStringList requiredByList(const QString& id) const;
+    QStringList requiresList(const QString& id);
+    QStringList requiredByList(const QString& id);
 
    private slots:
     void onParseSucceeded(int ticket, const QString& resourceId) override;
     void onParseFinished();
 
    private:
+    std::optional<QSet<QString>> m_launchSnapshot;
     QHash<QString, QSet<Mod*>> m_requiredBy;
     QHash<QString, QSet<Mod*>> m_requires;
 };

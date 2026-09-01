@@ -136,31 +136,10 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
                 return QSize(32, 32);
             }
             break;
-        case Qt::ToolTipRole:
-            switch (column) {
-                case RequiredByColumn: {
-                    const auto list = requiredByList(at(row).mod_id());
-                    if (!list.isEmpty()) {
-                        return list.join(QLatin1Char('\n'));
-                    }
-                    break;
-                }
-                case RequiresColumn: {
-                    const auto list = requiresList(at(row).mod_id());
-                    if (!list.isEmpty()) {
-                        return list.join(QLatin1Char('\n'));
-                    }
-                    break;
-                }
-                default:
-                    break;
-            }
-            break;
         default:
             break;
     }
 
-    // map the columns to the base equivilents
     QModelIndex mappedIndex;
     switch (column) {
         case ActiveColumn:
@@ -297,6 +276,22 @@ Mod* findById(QSet<Mod*> mods, const QString& resourceId)
     auto found = std::ranges::find_if(mods, [resourceId](Mod* m) { return m->mod_id() == resourceId; });
     return found != mods.end() ? *found : nullptr;
 }
+QString normalizeForFuzzyModMatch(const QString& s)
+{
+    QString stripped;
+    for (const QChar& c : s) {
+        if (c.isLetterOrNumber()) {
+            stripped.append(c.toLower());
+        }
+    }
+    QList<QChar> chars(stripped.begin(), stripped.end());
+    std::sort(chars.begin(), chars.end());
+    QString sorted;
+    for (const QChar& c : chars) {
+        sorted.append(c);
+    }
+    return sorted;
+}
 }  // namespace
 
 void ModFolderModel::onParseFinished()
@@ -370,7 +365,6 @@ QSet<Mod*> collectMods(const QSet<Mod*>& mods, QHash<QString, QSet<Mod*>> relati
             }
         }
     }
-    // collect the affected mods until all of them are included in the list
     if (!needToCheck.isEmpty()) {
         affectedList += collectMods(needToCheck, relation, seen, shouldBeEnabled);
     }
@@ -399,7 +393,7 @@ QModelIndexList ModFolderModel::getAffectedMods(const QModelIndexList& indexes, 
             break;
         }
         case EnableAction::TOGGLE: {
-            return {};  // this function should not be called with TOGGLE
+            return {};
         }
     }
     for (auto* affected : affectedMods) {
@@ -515,14 +509,14 @@ QStringList reqToList(const QSet<Mod*>& l)
 }
 }  // namespace
 
-QStringList ModFolderModel::requiresList(const QString& id) const
+QStringList ModFolderModel::requiresList(const QString& id)
 {
-    return reqToList(m_requires.value(id));
+    return reqToList(m_requires[id]);
 }
 
-QStringList ModFolderModel::requiredByList(const QString& id) const
+QStringList ModFolderModel::requiredByList(const QString& id)
 {
-    return reqToList(m_requiredBy.value(id));
+    return reqToList(m_requiredBy[id]);
 }
 
 bool ModFolderModel::deleteResources(const QModelIndexList& indexes)
@@ -530,8 +524,6 @@ bool ModFolderModel::deleteResources(const QModelIndexList& indexes)
     auto deleteInvalid = [](QSet<Mod*>& mods) {
         for (auto it = mods.begin(); it != mods.end();) {
             auto* mod = *it;
-            // the QFileInfo::exists is used instead of mod->fileinfo().exists
-            // because the later somehow caches that the file exists
             if (!mod || !QFileInfo::exists(mod->fileinfo().absoluteFilePath())) {
                 it = mods.erase(it);
             } else {
@@ -552,4 +544,47 @@ bool ModFolderModel::deleteResources(const QModelIndexList& indexes)
         }
     }
     return rsp;
+}
+void ModFolderModel::applyEnabledIds(const QSet<QString>& enabledModIds)
+{
+    QSet<QString> normalizedEnabledModIds;
+    for (const QString& id : enabledModIds) {
+        normalizedEnabledModIds.insert(normalizeForFuzzyModMatch(id));
+    }
+    for (int i = 0; i < rowCount(); ++i) {
+        const Mod& mod = at(i);
+        bool shouldBeEnabled = enabledModIds.contains(mod.mod_id()) || enabledModIds.contains(mod.name()) ||
+                               normalizedEnabledModIds.contains(normalizeForFuzzyModMatch(mod.mod_id())) ||
+                               normalizedEnabledModIds.contains(normalizeForFuzzyModMatch(mod.name()));
+        if (mod.enabled() == shouldBeEnabled)
+            continue;
+        EnableAction action = shouldBeEnabled ? EnableAction::ENABLE : EnableAction::DISABLE;
+        auto& resource = m_resources[i];
+        auto oldId = resource->internalId();
+        if (!resource->enable(action)) {
+            qWarning() << "applyEnabledIds: could not"
+                       << (shouldBeEnabled ? "enable" : "disable")
+                       << resource->name();
+            continue;
+        }
+        auto newId = resource->internalId();
+        m_resourcesIndex.remove(oldId);
+        m_resourcesIndex[newId] = i;
+        emit dataChanged(index(i, 0), index(i, columnCount(QModelIndex()) - 1));
+    }
+}
+
+void ModFolderModel::setLaunchSnapshot(const QSet<QString>& enabledModIds)
+{
+    m_launchSnapshot = enabledModIds;
+}
+
+std::optional<QSet<QString>> ModFolderModel::launchSnapshot() const
+{
+    return m_launchSnapshot;
+}
+
+void ModFolderModel::clearLaunchSnapshot()
+{
+    m_launchSnapshot.reset();
 }

@@ -37,6 +37,8 @@
  */
 
 #include "ModFolderPage.h"
+#include "ProfileCheckStateDelegate.h"
+#include "ProfileOverviewWidget.h"
 #include "minecraft/mod/Resource.h"
 #include "ui/dialogs/ExportToModListDialog.h"
 #include "ui/dialogs/InstallLoaderDialog.h"
@@ -46,9 +48,16 @@
 #include <QAction>
 #include <QEvent>
 #include <QKeyEvent>
+#include <QMouseEvent>
+#include <QHideEvent>
 #include <QMenu>
+#include <QShowEvent>
 #include <QMessageBox>
 #include <QSortFilterProxyModel>
+#include <QInputDialog>
+#include <QBoxLayout>
+#include <QGridLayout>
+#include <QStackedWidget>
 #include <algorithm>
 #include <memory>
 
@@ -67,13 +76,168 @@
 #include "tasks/Task.h"
 #include "ui/dialogs/ProgressDialog.h"
 
+ModFolderPage::~ModFolderPage()
+{
+    if (m_filterWindow) {
+        m_filterWindow->removeEventFilter(this);
+    }
+    if (ui && ui->treeView && ui->treeView->viewport()) {
+        ui->treeView->viewport()->removeEventFilter(this);
+    }
+}
+
+void ModFolderPage::repaintActiveColumn()
+{
+    if (ui && ui->treeView && ui->treeView->viewport())
+        ui->treeView->viewport()->update();
+}
+
+void ModFolderPage::refreshOverviewIfActive()
+{
+    if (m_actionProfileOverview && m_actionProfileOverview->isChecked())
+        refreshOverview();
+}
+
 ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(inst, model, parent), m_model(model)
 {
+    disconnect(ui->treeView, &ModListView::activated, this, nullptr);
+    connect(ui->treeView, &ModListView::activated,
+            this, &ModFolderPage::onModItemActivated);
+
+    m_profileTabBar = new QTabBar(this);
+    m_profileTabBar->setExpanding(false);
+    m_profileTabBar->setDrawBase(false);
+    m_profileTabBar->setDocumentMode(false);
+    m_profileTabBar->setUsesScrollButtons(m_profileTabBar->count() > 1);
+    m_profileTabBar->setElideMode(Qt::ElideNone);
+    m_profileTabBar->setContextMenuPolicy(Qt::CustomContextMenu);
+    m_profileTabBar->setStyleSheet(
+        "QTabBar::tab {"
+        "  padding: 4px 12px;"
+        "  border: none;"
+        "  background: palette(button);"
+        "  color: palette(button-text);"
+        "  margin-right: 1px;"
+        "}"
+        "QTabBar::tab:first {"
+        "  font-weight: bold;"
+        "  margin-right: 8px;"
+        "}"
+        "QTabBar::tab:selected {"
+        "  background: palette(base);"
+        "  color: palette(text);"
+        "  border-bottom: 2px solid palette(highlight);"
+        "}"
+        "QTabBar::tab:hover:!selected {"
+        "  background: palette(alternate-base);"
+        "  color: palette(button-text);"
+        "}");
+    m_newTabButton = new QToolButton(this);
+    m_newTabButton->setText(QStringLiteral("+"));
+    m_newTabButton->setToolTip(tr("New Tab"));
+    m_newTabButton->setAutoRaise(true);
+    m_newTabButton->setFixedSize(24, 24);
+
+    if (ui->treeView->parentWidget() && ui->treeView->parentWidget()->layout()) {
+        QLayout* layout = ui->treeView->parentWidget()->layout();
+        if (auto* grid = qobject_cast<QGridLayout*>(layout)) {
+
+            m_tabRowContainer = new QWidget(this);
+            auto* tabRowLayout = new QHBoxLayout(m_tabRowContainer);
+            tabRowLayout->setContentsMargins(0, 0, 0, 0);
+            tabRowLayout->setSpacing(0);
+            tabRowLayout->addWidget(m_profileTabBar, 0);
+            tabRowLayout->addWidget(m_newTabButton,  0);
+            tabRowLayout->addStretch(1);
+            grid->addWidget(m_tabRowContainer, 0, 1, 1, 2);
+
+            grid->removeWidget(ui->treeView);
+            m_contentStack = new QStackedWidget(this);
+            m_contentStack->addWidget(ui->treeView);
+            m_overviewWidget = new ProfileOverviewWidget(this);
+            m_contentStack->addWidget(m_overviewWidget);
+            m_contentStack->setCurrentIndex(0);
+            grid->addWidget(m_contentStack, 1, 1, 1, 2);
+        }
+    }
+
+    auto* delegate = new ProfileCheckStateDelegate(
+        &m_profileStates, &m_currentProfile,
+        qobject_cast<QSortFilterProxyModel*>(m_filterModel),
+        m_model, this);
+    ui->treeView->setItemDelegateForColumn(ModFolderModel::ActiveColumn, delegate);
+    connect(delegate, &ProfileCheckStateDelegate::membershipToggled,
+            this, &ModFolderPage::onDelegateMembershipToggled);
+
+    ui->treeView->viewport()->installEventFilter(this);
+    m_profileTabBar->installEventFilter(this);
+    connect(m_profileTabBar, &QTabBar::currentChanged, this, [this](int index) {
+        if (m_applyingProfile) {
+            return;
+        }
+        ++m_profileSwitchGeneration;
+        applyProfileSwitch(index, m_profileSwitchGeneration);
+    });
+    connect(m_profileTabBar, &QTabBar::customContextMenuRequested,
+            this, &ModFolderPage::onTabContextMenuRequested);
+    connect(m_newTabButton, &QToolButton::clicked, this, [this] {
+        onTabNewToRight(m_profileTabBar->count() - 1);
+    });
+
+    connect(ui->filterEdit, &QLineEdit::textChanged, this, [this](const QString& text) {
+        if (m_overviewWidget)
+            m_overviewWidget->filterTextChanged(text);
+    });
+
     ui->actionDownloadItem->setText(tr("Download Mods"));
     ui->actionDownloadItem->setToolTip(tr("Download mods from online mod platforms"));
     ui->actionDownloadItem->setEnabled(true);
     ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionDownloadItem);
+
+    ui->actionsToolbar->setIconSize(QSize(16, 16));
+    m_actionProfileOverview = new QAction(tr("Profile Overview"), this);
+    m_actionProfileOverview->setCheckable(true);
+    m_actionProfileOverview->setIcon(QIcon::fromTheme("loadermods"));
+    m_actionProfileOverview->setToolTip(
+        tr("Show the read-only launch composition overview.\n"
+           "Select which profiles are combined when launching the game."));
+    ui->actionsToolbar->insertActionBefore(ui->actionDownloadItem, m_actionProfileOverview);
+    ui->actionsToolbar->insertSeparator(ui->actionDownloadItem);
+    ui->actionsToolbar->setContextMenuPolicy(Qt::PreventContextMenu);
+
+    for (auto* barAction : ui->actionsToolbar->actions()) {
+        QWidget* wid = ui->actionsToolbar->widgetForAction(barAction);
+        if (auto* btn = qobject_cast<QToolButton*>(wid)) {
+            if (btn->text() == m_actionProfileOverview->text()) {
+                QObject::disconnect(ui->actionsToolbar, &QToolBar::iconSizeChanged,
+                                    btn, &QToolButton::setIconSize);
+                btn->setIconSize(QSize(16, 16));
+                btn->setStyleSheet("QToolButton { text-align: left; spacing: 4px; padding-left: 6px; }");
+                break;
+            }
+        }
+    }
+
+    if (m_actionProfileOverview && m_contentStack) {
+        connect(m_actionProfileOverview, &QAction::toggled, this, [this](bool checked) {
+            if (m_contentStack)
+                m_contentStack->setCurrentIndex(checked ? 1 : 0);
+            if (m_tabRowContainer)
+                m_tabRowContainer->setVisible(!checked);
+            if (ui && ui->frame)
+                ui->frame->setVisible(!checked);
+
+            if (ui && ui->actionsToolbar)
+                ui->actionsToolbar->setVisible(!checked);
+
+            if (m_overviewWidget)
+                m_overviewWidget->setOverviewActive(checked);
+
+            if (checked)
+                refreshOverview();
+        });
+    }
 
     connect(ui->actionDownloadItem, &QAction::triggered, this, &ModFolderPage::downloadMods);
 
@@ -110,6 +274,91 @@ ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWi
     ui->actionsToolbar->insertActionAfter(ui->actionViewHomepage, ui->actionExportMetadata);
 
     ui->actionsToolbar->insertActionAfter(ui->actionViewFolder, ui->actionViewConfigs);
+
+    m_settingsPrefix = m_model->dir().dirName();
+    m_instance->settings()->getOrRegisterSetting(profileListKey(), QStringList() << "Default");
+    m_instance->settings()->getOrRegisterSetting(lastActiveIndexKey(), 0);
+    m_instance->settings()->getOrRegisterSetting(lastActiveNameKey(), QString());
+    m_instance->settings()->getOrRegisterSetting(runtimeProfilesKey(), QStringList());
+    m_instance->settings()->getOrRegisterSetting(overviewDefaultKey(), true);
+
+    QStringList profileList = m_instance->settings()->get(profileListKey()).toStringList();
+    if (profileList.isEmpty()) {
+        profileList.append("Default");
+    } else if (profileList.at(0) == "All Mods") {
+        profileList[0] = "Default";
+        QString oldKey = profileKey("All Mods");
+        QString newKey = profileKey("Default");
+        QStringList oldState = m_instance->settings()->get(oldKey).toStringList();
+        if (!oldState.isEmpty() && m_instance->settings()->get(newKey).toStringList().isEmpty()) {
+            m_instance->settings()->getOrRegisterSetting(newKey, QStringList());
+            m_instance->settings()->set(newKey, oldState);
+        }
+        m_instance->settings()->reset(oldKey);
+        m_instance->settings()->set(profileListKey(), profileList);
+    }
+    m_profileTabBar->blockSignals(true);
+    for (const QString& name : profileList) {
+        m_profileTabBar->addTab(name);
+        QString key = profileKey(name);
+        m_instance->settings()->getOrRegisterSetting(key, QStringList());
+        QStringList saved = m_instance->settings()->get(key).toStringList();
+        m_profileStates[name] = QSet<QString>(saved.begin(), saved.end());
+    }
+    m_profileTabBar->blockSignals(false);
+    m_profileTabBar->setUsesScrollButtons(m_profileTabBar->count() > 1);
+
+    int savedIndex = m_instance->settings()->get(lastActiveIndexKey()).toInt();
+    if (savedIndex < 0 || savedIndex >= m_profileTabBar->count()) {
+        savedIndex = 0;
+    }
+    QString savedName = m_instance->settings()->get(lastActiveNameKey()).toString();
+    if (savedName == "All Mods") {
+        savedName = "Default";
+        m_instance->settings()->set(lastActiveNameKey(), savedName);
+    }
+    if (!savedName.isEmpty()) {
+        for (int i = 0; i < m_profileTabBar->count(); ++i) {
+            if (m_profileTabBar->tabText(i) == savedName) {
+                savedIndex = i;
+                break;
+            }
+        }
+    }
+    m_profileTabBar->blockSignals(true);
+    m_profileTabBar->setCurrentIndex(savedIndex);
+    m_profileTabBar->blockSignals(false);
+
+    applyProfileSwitch(m_profileTabBar->currentIndex(), m_profileSwitchGeneration, /*isInitialLoad=*/true);
+
+    connect(m_instance, &BaseInstance::runningStatusChanged, this, [this](bool running) {
+        if (!running) {
+            refreshOverviewIfActive();
+            if (m_overviewWidget)
+                m_overviewWidget->setRunningLocked(false);
+        } else {
+            if (m_overviewWidget)
+                m_overviewWidget->setRunningLocked(true);
+            refreshOverviewIfActive();
+        }
+    });
+
+    connect(m_overviewWidget, &ProfileOverviewWidget::defaultSelected,
+            this, &ModFolderPage::onOverviewDefaultSelected);
+    connect(m_overviewWidget, &ProfileOverviewWidget::profileSelectionToggled,
+            this, &ModFolderPage::onOverviewProfileSelectionToggled);
+    connect(m_overviewWidget, &ProfileOverviewWidget::overviewExitRequested,
+            this, [this] {
+                if (m_actionProfileOverview)
+                    m_actionProfileOverview->setChecked(false);
+            });
+
+    connect(m_model, &ModFolderModel::updateFinished, this, [this] {
+        refreshOverviewIfActive();
+    });
+    connect(m_model, &ModFolderModel::dataChanged, this, [this] {
+        refreshOverviewIfActive();
+    });
 }
 
 bool ModFolderPage::shouldDisplay() const
@@ -182,6 +431,12 @@ void ModFolderPage::downloadMods()
 
 void ModFolderPage::downloadDialogFinished(int result)
 {
+    if (m_downloadFlowActive) {
+        return;
+    }
+    m_downloadFlowActive = true;
+    auto dialog = m_downloadDialog;
+    m_downloadDialog.clear();
     if (result != 0) {
         ConcurrentTask tasks(tr("Download Mods"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(&tasks, &Task::failed, this, [this](const QString& reason) {
@@ -194,8 +449,8 @@ void ModFolderPage::downloadDialogFinished(int result)
             }
         });
 
-        if (m_downloadDialog) {
-            for (auto& task : m_downloadDialog->getTasks()) {
+        if (dialog) {
+            for (auto& task : dialog->getTasks()) {
                 tasks.addTask(task);
             }
         } else {
@@ -206,11 +461,62 @@ void ModFolderPage::downloadDialogFinished(int result)
         loadDialog.setSkipButton(true, tr("Abort"));
         loadDialog.execWithTask(&tasks);
 
+        const QString capturedProfile = m_currentProfile;
+        const int capturedGeneration  = m_profileSwitchGeneration;
+
+        QSet<QString> knownModIds;
+        for (int i = 0; i < m_model->rowCount(); ++i)
+            knownModIds.insert(m_model->at(i).mod_id());
+
+        if (!capturedProfile.isEmpty()) {
+            auto parseConn = std::make_shared<QMetaObject::Connection>();
+            auto checkAndAddDelta = [this, capturedProfile, capturedGeneration,
+                                     knownModIds, parseConn]() -> bool {
+                if (capturedGeneration != m_profileSwitchGeneration ||
+                    capturedProfile != m_currentProfile) {
+                    if (*parseConn)
+                        disconnect(*parseConn);
+                    return true;
+                }
+                if (m_model->hasPendingParseTasks())
+                    return false;
+                if (*parseConn)
+                    disconnect(*parseConn);
+                QSet<QString> currentModIds;
+                for (int i = 0; i < m_model->rowCount(); ++i)
+                    currentModIds.insert(m_model->at(i).mod_id());
+                QSet<QString> newIds = currentModIds - knownModIds;
+                if (!newIds.isEmpty()) {
+                    bool profileStillExists = false;
+                    for (int i = 0; i < m_profileTabBar->count(); ++i) {
+                        if (m_profileTabBar->tabText(i) == capturedProfile) {
+                            profileStillExists = true;
+                            break;
+                        }
+                    }
+                    if (profileStillExists) {
+                        for (const QString& id : std::as_const(newIds))
+                            m_profileStates[capturedProfile].insert(id);
+                        persistProfileState(capturedProfile);
+                        repaintActiveColumn();
+                    }
+                }
+                return true;
+            };
+
+            *parseConn = connect(m_model, &ResourceFolderModel::parseFinished, this,
+                                 [checkAndAddDelta] { checkAndAddDelta(); });
+
+            connect(m_model, &ResourceFolderModel::updateFinished, this,
+                [checkAndAddDelta] { checkAndAddDelta(); },
+                Qt::SingleShotConnection);
+        }
         m_model->update();
     }
-    if (m_downloadDialog) {
-        m_downloadDialog->deleteLater();
+    if (dialog) {
+        dialog->deleteLater();
     }
+    m_downloadFlowActive = false;
 }
 
 void ModFolderPage::updateMods(bool includeDeps)
@@ -339,7 +645,11 @@ void ModFolderPage::exportModMetadata()
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
     auto selectedMods = m_model->selectedMods(selection);
     if (selectedMods.length() == 0) {
-        selectedMods = m_model->allMods();
+        for (auto* mod : m_model->allMods()) {
+            if (mod->enabled()) {
+                selectedMods.append(mod);
+            }
+        }
     }
 
     std::ranges::sort(selectedMods, [](const Mod* a, const Mod* b) { return a->name() < b->name(); });
@@ -389,7 +699,6 @@ bool NilModFolderPage::shouldDisplay() const
     return m_model->dir().exists();
 }
 
-// Helper function so this doesn't need to be duplicated 3 times
 inline bool ModFolderPage::handleNoModLoader()
 {
     int resp = QMessageBox::question(
@@ -397,11 +706,8 @@ inline bool ModFolderPage::handleNoModLoader()
         ModFolderPage::tr("You need to install a compatible mod loader before installing mods. Would you like to do so?"),
         QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
     if (resp == QMessageBox::Yes) {
-        // Should be safe
         auto* profile = this->m_instance->getPackProfile();
         InstallLoaderDialog dialog(profile, QString(), this);
-        // true if the user went through the install loader dialog
-        // false if the dialog got canceled/closed
         bool dialogAccepted = dialog.exec() != 0;
         this->m_container->refreshContainer();
 
@@ -415,7 +721,110 @@ inline bool ModFolderPage::handleNoModLoader()
         }
         return false;
     }
-    // Nothing happens the dialog is already closing
-    // returning true so the caller doesn't go and continue with opening it's dialog without a mod loader
     return true;
+}
+
+bool ModFolderPage::eventFilter(QObject* obj, QEvent* ev)
+{
+    if (!ui || !ui->treeView || !m_model) {
+        return ExternalResourcesPage::eventFilter(obj, ev);
+    }
+    if (obj == m_profileTabBar && ev->type() == QEvent::Wheel) {
+        return true;
+    }
+    if (ev->type() == QEvent::MouseButtonPress || ev->type() == QEvent::FocusIn) {
+        if (this->isVisible()) {
+            QWidget* widget = qobject_cast<QWidget*>(obj);
+            if (widget) {
+                if (!this->isAncestorOf(widget) && widget != this) {
+                    ui->treeView->clearSelection();
+                    ui->treeView->setCurrentIndex(QModelIndex());
+                }
+            }
+        }
+    }
+    if (obj == ui->treeView->viewport() && ev->type() == QEvent::MouseButtonPress) {
+        auto* me = static_cast<QMouseEvent*>(ev);
+        const QModelIndex idx = ui->treeView->indexAt(me->pos());
+        if (!idx.isValid()) {
+            ui->treeView->clearSelection();
+            ui->treeView->setCurrentIndex(QModelIndex());
+            return true;
+        }
+    }
+    return ExternalResourcesPage::eventFilter(obj, ev);
+}
+
+void ModFolderPage::mousePressEvent(QMouseEvent* event)
+{
+    if (ui->treeView) {
+        QPoint posInTreeView = ui->treeView->mapFrom(this, event->pos());
+        if (!ui->treeView->rect().contains(posInTreeView)) {
+            ui->treeView->clearSelection();
+            ui->treeView->setCurrentIndex(QModelIndex());
+        }
+    }
+    ExternalResourcesPage::mousePressEvent(event);
+}
+
+void ModFolderPage::showEvent(QShowEvent* event)
+{
+    ExternalResourcesPage::showEvent(event);
+    QWidget* w = window();
+    if (w && m_filterWindow != w) {
+        if (m_filterWindow) {
+            m_filterWindow->removeEventFilter(this);
+        }
+        m_filterWindow = w;
+        w->installEventFilter(this);
+    }
+}
+
+void ModFolderPage::hideEvent(QHideEvent* event)
+{
+    if (m_filterWindow) {
+        m_filterWindow->removeEventFilter(this);
+        m_filterWindow = nullptr;
+    }
+    ExternalResourcesPage::hideEvent(event);
+}
+
+void ModFolderPage::openedImpl()
+{
+    ExternalResourcesPage::openedImpl();
+
+    if (ui && ui->actionsToolbar) {
+        ui->actionsToolbar->setIconSize(QSize(16, 16));
+        for (auto* barAction : ui->actionsToolbar->actions()) {
+            barAction->setVisible(true);
+            if (QWidget* wid = ui->actionsToolbar->widgetForAction(barAction)) {
+                wid->setVisible(true);
+                if (auto* btn = qobject_cast<QToolButton*>(wid)) {
+                    if (btn->text() == m_actionProfileOverview->text()) {
+                        QObject::disconnect(ui->actionsToolbar, &QToolBar::iconSizeChanged,
+                                            btn, &QToolButton::setIconSize);
+                        btn->setIconSize(QSize(16, 16));
+                        btn->setStyleSheet("QToolButton { text-align: left; spacing: 4px; padding-left: 6px; }");
+                    }
+                }
+            }
+        }
+    }
+
+    const bool isOverview = m_actionProfileOverview && m_actionProfileOverview->isChecked();
+    if (ui && ui->actionsToolbar)
+        ui->actionsToolbar->setVisible(!isOverview);
+}
+
+void ModFolderPage::closedImpl()
+{
+    if (ui && ui->actionsToolbar) {
+        for (auto* barAction : ui->actionsToolbar->actions()) {
+            barAction->setVisible(true);
+            if (QWidget* wid = ui->actionsToolbar->widgetForAction(barAction))
+                wid->setVisible(true);
+        }
+    }
+
+    ExternalResourcesPage::closedImpl();
 }
