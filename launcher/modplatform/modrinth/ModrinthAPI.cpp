@@ -9,6 +9,20 @@
 #include "net/ApiRequest.h"
 #include "net/NetJob.h"
 
+QString ModrinthAPI::getModpackIdFromUrl(const QUrl& url)
+{
+    if (url.scheme().compare("modrinth", Qt::CaseInsensitive) != 0 || url.host().compare("modpack", Qt::CaseInsensitive) != 0) {
+        return {};
+    }
+
+    const auto segments = QUrl::fromPercentEncoding(url.path().toUtf8()).split('/', Qt::SkipEmptyParts);
+    if (segments.size() != 1) {
+        return {};
+    }
+
+    return segments.constFirst().trimmed();
+}
+
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersion(const QString& hash, const QString& hash_format) const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersion"), APPLICATION->network());
