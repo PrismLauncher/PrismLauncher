@@ -78,13 +78,20 @@ ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWi
     connect(ui->actionDownloadItem, &QAction::triggered, this, &ModFolderPage::downloadMods);
 
     ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
-    connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
+    connect(ui->actionUpdateItem, &QAction::triggered, this, [this] { updateMods(); });
     ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
 
     auto* updateMenu = new QMenu(this);
 
     auto* update = updateMenu->addAction(tr("Check for Updates"));
-    connect(update, &QAction::triggered, this, &ModFolderPage::updateMods);
+    connect(update, &QAction::triggered, this, [this] { updateMods(); });
+
+    auto* updateReleasesOnly = updateMenu->addAction(tr("Check for Updates (Release only)"));
+    connect(updateReleasesOnly, &QAction::triggered, this, [this] { updateMods(false, { ModPlatform::IndexedVersionType::Release }); });
+
+    auto* updateIncludeBetas = updateMenu->addAction(tr("Check for Updates (Release and Beta)"));
+    connect(updateIncludeBetas, &QAction::triggered, this,
+            [this] { updateMods(false, { ModPlatform::IndexedVersionType::Release, ModPlatform::IndexedVersionType::Beta }); });
 
     updateMenu->addAction(ui->actionVerifyItemDependencies);
     connect(ui->actionVerifyItemDependencies, &QAction::triggered, this, [this] { updateMods(true); });
@@ -184,9 +191,8 @@ void ModFolderPage::downloadDialogFinished(int result)
 {
     if (result != 0) {
         ConcurrentTask tasks(tr("Download Mods"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-        });
+        connect(&tasks, &Task::failed, this,
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
         connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
             QStringList warnings = tasks.warnings();
             if (warnings.count()) {
@@ -213,7 +219,7 @@ void ModFolderPage::downloadDialogFinished(int result)
     }
 }
 
-void ModFolderPage::updateMods(bool includeDeps)
+void ModFolderPage::updateMods(bool includeDeps, std::vector<ModPlatform::IndexedVersionType> releaseTypes)
 {
     auto* profile = m_instance->getPackProfile();
     if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
@@ -223,6 +229,7 @@ void ModFolderPage::updateMods(bool includeDeps)
         QMessageBox::critical(this, tr("Error"), tr("Mod updates are unavailable when metadata is disabled!"));
         return;
     }
+
     if (m_instance != nullptr && m_instance->isRunning()) {
         auto response =
             CustomMessageBox::selectable(this, tr("Confirm Update"),
@@ -244,7 +251,22 @@ void ModFolderPage::updateMods(bool includeDeps)
         modsList = m_model->allResources();
     }
 
-    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoadersList());
+    if (releaseTypes.empty()) {
+        auto settingVal =
+            m_instance ? m_instance->settings()->get("ModUpdateReleaseTypes") : APPLICATION->settings()->get("ModUpdateReleaseTypes");
+        auto typesList = settingVal.toStringList();
+        if (typesList.isEmpty() && !settingVal.toString().isEmpty()) {
+            typesList = settingVal.toString().split(',', Qt::SkipEmptyParts);
+        }
+        for (const auto& t : typesList) {
+            auto type = ModPlatform::IndexedVersionType::fromString(t);
+            if (type.isValid()) {
+                releaseTypes.push_back(type);
+            }
+        }
+    }
+
+    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoadersList(), releaseTypes);
     updateDialog.checkCandidates();
 
     if (updateDialog.aborted()) {
@@ -265,9 +287,8 @@ void ModFolderPage::updateMods(bool includeDeps)
 
     if (updateDialog.exec() != 0) {
         ConcurrentTask tasks("Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-        });
+        connect(&tasks, &Task::failed, this,
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
         connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
             QStringList warnings = tasks.warnings();
             if (warnings.count()) {
