@@ -336,24 +336,24 @@ bool copy::operator()(const QString& offset, bool dryRun)
         if (m_matcher && (m_matcher(relative_dst_path) != m_whitelist))
             return;
 
-        auto dst_path = PathCombine(dst, relative_dst_path);
+        auto dstPath = PathCombine(dst, relative_dst_path);
         if (!dryRun) {
-            std::string src_std_path = StringUtils::toStdString(src_path);
-            if (fs::is_directory(src_std_path) && ! fs::is_symlink(src_std_path)){
-                ensureFolderPathExists(dst_path);
-            }else{
-                ensureFilePathExists(dst_path);
+            std::string srcStdPath = StringUtils::toStdString(src_path);
+            if (fs::is_directory(srcStdPath) && !fs::is_symlink(srcStdPath)) {
+                ensureFolderPathExists(dstPath);
+            } else {
+                ensureFilePathExists(dstPath);
             }
 #ifdef Q_OS_WIN32
             copyFolderAttributes(src, dst, relative_dst_path);
 #endif
-            fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
+            fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dstPath), opt, err);
         }
         if (err) {
             qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
             qDebug() << "Source file:" << src_path;
-            qDebug() << "Destination file:" << dst_path;
-            m_failedPaths.append(dst_path);
+            qDebug() << "Destination file:" << dstPath;
+            m_failedPaths.append(dstPath);
             emit copyFailed(relative_dst_path);
             return;
         }
