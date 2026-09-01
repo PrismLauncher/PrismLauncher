@@ -68,7 +68,7 @@ class ModFolderPage : public ExternalResourcesPage {
 
     void downloadMods();
     void downloadDialogFinished(int result);
-    void updateMods(bool includeDeps = false);
+    void updateMods(bool includeDeps = false, std::vector<ModPlatform::IndexedVersionType> releaseTypes = {});
     void deleteModMetadata();
     void exportModMetadata();
     void changeModVersion();
