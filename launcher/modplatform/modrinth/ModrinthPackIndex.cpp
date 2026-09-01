@@ -22,14 +22,14 @@
 #include "ModrinthAPI.h"
 
 #include "Json.h"
-#include "minecraft/MinecraftInstance.h"
-#include "minecraft/PackProfile.h"
 #include "modplatform/ModIndex.h"
 
+namespace {
 bool shouldDownloadOnSide(const QString& side)
 {
     return side == "required" || side == "optional";
 }
+}  // namespace
 
 // https://docs.modrinth.com/api/operations/getproject/
 void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
@@ -41,6 +41,7 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 
     pack.provider = ModPlatform::ResourceProvider::MODRINTH;
     pack.name = Json::requireString(obj, "title");
+    pack.resourceType = ModrinthAPI::getResourceType(obj["project_type"].toString());
 
     pack.slug = obj["slug"].toString("");
     if (!pack.slug.isEmpty()) {
@@ -79,31 +80,34 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.extraData.issuesUrl = obj["issues_url"].toString();
-    if (pack.extraData.issuesUrl.endsWith('/'))
+    if (pack.extraData.issuesUrl.endsWith('/')) {
         pack.extraData.issuesUrl.chop(1);
+    }
 
     pack.extraData.sourceUrl = obj["source_url"].toString();
-    if (pack.extraData.sourceUrl.endsWith('/'))
+    if (pack.extraData.sourceUrl.endsWith('/')) {
         pack.extraData.sourceUrl.chop(1);
+    }
 
     pack.extraData.wikiUrl = obj["wiki_url"].toString();
-    if (pack.extraData.wikiUrl.endsWith('/'))
+    if (pack.extraData.wikiUrl.endsWith('/')) {
         pack.extraData.wikiUrl.chop(1);
+    }
 
     pack.extraData.discordUrl = obj["discord_url"].toString();
     if (pack.extraData.discordUrl.endsWith('/')) {
         pack.extraData.discordUrl.chop(1);
     }
 
-    auto donate_arr = obj["donation_urls"].toArray();
-    for (auto d : donate_arr) {
-        auto d_obj = Json::requireObject(d);
+    auto donateArr = obj["donation_urls"].toArray();
+    for (auto d : donateArr) {
+        auto dObj = Json::requireObject(d);
 
         ModPlatform::DonationData donate;
 
-        donate.id = d_obj["id"].toString();
-        donate.platform = d_obj["platform"].toString();
-        donate.url = d_obj["url"].toString();
+        donate.id = dObj["id"].toString();
+        donate.platform = dObj["platform"].toString();
+        donate.url = dObj["url"].toString();
 
         pack.extraData.donate.append(donate);
     }
@@ -116,8 +120,8 @@ void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& ob
 }
 
 ModPlatform::IndexedVersion Modrinth::loadIndexedPackVersion(QJsonObject& obj,
-                                                             const QString& preferred_hash_type,
-                                                             const QString& preferred_file_name)
+                                                             const QString& preferredHashType,
+                                                             const QString& preferredFileName)
 {
     ModPlatform::IndexedVersion file;
 
@@ -149,8 +153,8 @@ ModPlatform::IndexedVersion Modrinth::loadIndexedPackVersion(QJsonObject& obj,
         }
     }
     file.version = Json::requireString(obj, "name");
-    file.version_number = Json::requireString(obj, "version_number");
-    file.version_type = ModPlatform::IndexedVersionType::fromString(Json::requireString(obj, "version_type"));
+    file.versionNumber = Json::requireString(obj, "version_number");
+    file.versionType = ModPlatform::IndexedVersionType::fromString(Json::requireString(obj, "version_type"));
 
     if (obj.contains("changelog")) {
         file.changelog = Json::requireString(obj, "changelog");
@@ -196,8 +200,8 @@ ModPlatform::IndexedVersion Modrinth::loadIndexedPackVersion(QJsonObject& obj,
         auto parent = files[i].toObject();
         auto fileName = Json::requireString(parent, "filename");
 
-        if (!preferred_file_name.isEmpty() && fileName.contains(preferred_file_name)) {
-            file.is_preferred = true;
+        if (!preferredFileName.isEmpty() && fileName.contains(preferredFileName)) {
+            file.isPreferred = true;
             break;
         }
 
@@ -214,18 +218,18 @@ ModPlatform::IndexedVersion Modrinth::loadIndexedPackVersion(QJsonObject& obj,
         file.downloadUrl = Json::requireString(parent, "url");
         file.fileName = Json::requireString(parent, "filename");
         file.fileName = FS::RemoveInvalidPathChars(file.fileName);
-        file.is_preferred = Json::requireBoolean(parent, "primary") || (files.count() == 1);
-        auto hash_list = Json::requireObject(parent, "hashes");
+        file.isPreferred = Json::requireBoolean(parent, "primary") || (files.count() == 1);
+        auto hashList = Json::requireObject(parent, "hashes");
 
-        if (hash_list.contains(preferred_hash_type)) {
-            file.hash = Json::requireString(hash_list, preferred_hash_type);
-            file.hash_type = preferred_hash_type;
+        if (hashList.contains(preferredHashType)) {
+            file.hash = Json::requireString(hashList, preferredHashType);
+            file.hashType = preferredHashType;
         } else {
-            auto hash_types = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH);
-            for (auto& hash_type : hash_types) {
-                if (hash_list.contains(hash_type)) {
-                    file.hash = Json::requireString(hash_list, hash_type);
-                    file.hash_type = hash_type;
+            auto hashTypes = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH);
+            for (auto& hashType : hashTypes) {
+                if (hashList.contains(hashType)) {
+                    file.hash = Json::requireString(hashList, hashType);
+                    file.hashType = hashType;
                     break;
                 }
             }

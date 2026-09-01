@@ -160,7 +160,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
 
         auto addonId = m_current->addonId;
         // Use default if no callbacks are set
-        callbacks.on_succeed = [this, curr, addonId](auto& doc) {
+        callbacks.onSucceed = [this, curr, addonId](auto& doc) {
             if (addonId != m_current->addonId) {
                 return;  // wrong request
             }
@@ -186,10 +186,10 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
                 m_ui->versionSelectionBox->addItem(version.getVersionDisplayString(), QVariant(version.downloadUrl));
             }
 
-            QVariant current_updated;
-            current_updated.setValue(m_current);
+            QVariant currentUpdated;
+            currentUpdated.setValue(m_current);
 
-            if (!m_listModel->setData(curr, current_updated, Qt::UserRole)) {
+            if (!m_listModel->setData(curr, currentUpdated, Qt::UserRole)) {
                 qWarning() << "Failed to cache versions for the current pack!";
             }
 
@@ -199,11 +199,12 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
             }
             suggestCurrent();
         };
-        callbacks.on_fail = [this](const QString& reason, int) {
+        callbacks.onFail = [this](const QString& reason, int) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
         };
 
-        auto netJob = FlameAPI::get().getProjectVersions({ m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
+        auto netJob = FlameAPI::get().getProjectVersions(
+            { .pack = m_current, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::Modpack }, callbacks);
 
         m_job = netJob;
         netJob->start();
@@ -236,11 +237,11 @@ void FlamePage::suggestCurrent()
 
     auto version = m_current->versions.at(m_selected_version_index);
 
-    QMap<QString, QString> extra_info;
-    extra_info.insert("pack_id", m_current->addonId.toString());
-    extra_info.insert("pack_version_id", version.fileId.toString());
+    QMap<QString, QString> extraInfo;
+    extraInfo.insert("pack_id", m_current->addonId.toString());
+    extraInfo.insert("pack_version_id", version.fileId.toString());
 
-    m_dialog->setSuggestedPack(m_current->name, new InstanceImportTask(version.downloadUrl, true, this, std::move(extra_info)));
+    m_dialog->setSuggestedPack(m_current->name, new InstanceImportTask(version.downloadUrl, true, this, std::move(extraInfo)));
     QString editedLogoName = "curseforge_" + m_current->logoName;
     m_listModel->getLogo(m_current->logoName, m_current->logoUrl,
                          [this, editedLogoName](const QString& logo) { m_dialog->setSuggestedIconFromFile(logo, editedLogoName); });
@@ -248,10 +249,10 @@ void FlamePage::suggestCurrent()
 
 void FlamePage::onVersionSelectionChanged(int index)
 {
-    bool is_blocked = false;
-    m_ui->versionSelectionBox->itemData(index).toInt(&is_blocked);
+    bool isBlocked = false;
+    m_ui->versionSelectionBox->itemData(index).toInt(&isBlocked);
 
-    if (index == -1 || is_blocked) {
+    if (index == -1 || isBlocked) {
         m_selected_version_index = -1;
         return;
     }
@@ -305,7 +306,7 @@ void FlamePage::updateUi()
     }
 
     text += "<hr>";
-    text += FlameAPI::get().getModDescription(m_current->addonId.toInt()).toUtf8();
+    text += FlameAPI::getModDescription(m_current->addonId.toInt()).toUtf8();
 
     m_ui->packDescription->setHtml(StringUtils::htmlListPatch(text + m_current->description));
     m_ui->packDescription->flush();

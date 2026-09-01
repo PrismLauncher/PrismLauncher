@@ -34,6 +34,18 @@ std::vector<Version> mcVersions(MinecraftInstance* inst)
 {
     return { inst->getPackProfile()->getComponent("net.minecraft")->getVersion() };
 }
+ModPlatform::ResourceProvider next(ModPlatform::ResourceProvider p)
+{
+    switch (p) {
+        case ModPlatform::ResourceProvider::MODRINTH:
+            return ModPlatform::ResourceProvider::FLAME;
+        case ModPlatform::ResourceProvider::FLAME:
+            return ModPlatform::ResourceProvider::MODRINTH;
+    }
+
+    return ModPlatform::ResourceProvider::FLAME;
+}
+
 }  // namespace
 
 ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
@@ -183,7 +195,7 @@ void ResourceUpdateDialog::checkCandidates()
         ScrollMessageBox messageDialog(m_parent, tr("Failed to check for updates"),
                                        tr("Could not check or get the following resources for updates:<br>"
                                           "Do you wish to proceed without those resources?"),
-                                       text, "Disable unavailable mods");
+                                       text, tr("Disable unavailable mods"));
         messageDialog.setModal(true);
         if (messageDialog.exec() == QDialog::Rejected) {
             m_aborted = true;
@@ -237,17 +249,18 @@ void ResourceUpdateDialog::checkCandidates()
             for (const auto& dep : depTask->getDependecies()) {
                 auto changelog = dep->version.changelog;
                 if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME) {
-                    changelog = FlameAPI::get().getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
+                    changelog = FlameAPI::getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
                 }
 
-                auto [maybe_installed, required_by_names, required_by_ids] = dependencyExtraInfo.value(dep->version.addonId.toString());
-                auto downloadTask = makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_resourceModel, true, "dependency", required_by_ids.first());
+                auto [maybeInstalled, requiredByNames, requiredByIds] = dependencyExtraInfo.value(dep->version.addonId.toString());
+                auto downloadTask =
+                    makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_resourceModel, true, "dependency", requiredByIds.first());
                 CheckUpdateTask::Update updatable = {
-                    dep->pack->name, dep->version.hash,   tr("Not installed"), dep->version.version,      dep->version.version_type,
-                    changelog,       dep->pack->provider, downloadTask,        !maybe_installed
+                    dep->pack->name, dep->version.hash,   tr("Not installed"), dep->version.version, dep->version.versionType,
+                    changelog,       dep->pack->provider, downloadTask,        !maybeInstalled
                 };
 
-                appendResource(updatable, required_by_names);
+                appendResource(updatable, requiredByNames);
                 m_tasks.insert(updatable.name, updatable.download);
             }
         }
@@ -353,7 +366,8 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
     // prepare task for the modrinth mods
     if (!modrinthTmp.empty()) {
         auto modrinthTask = makeShared<EnsureMetadataTask>(modrinthTmp, indexDir2, ModPlatform::ResourceProvider::MODRINTH);
-        connect(modrinthTask.get(), &EnsureMetadataTask::metadataReady, this, [this](Resource* candidate) { onMetadataEnsured(candidate); });
+        connect(modrinthTask.get(), &EnsureMetadataTask::metadataReady, this,
+                [this](Resource* candidate) { onMetadataEnsured(candidate); });
         connect(modrinthTask.get(), &EnsureMetadataTask::metadataFailed, this, [this, &shouldTryOthers](Resource* candidate) {
             onMetadataFailed(candidate, shouldTryOthers.find(candidate->internalId()).value(), ModPlatform::ResourceProvider::MODRINTH);
         });
@@ -410,18 +424,6 @@ void ResourceUpdateDialog::onMetadataEnsured(Resource* resource)
             m_flameToUpdate.push_back(resource);
             break;
     }
-}
-
-ModPlatform::ResourceProvider next(ModPlatform::ResourceProvider p)
-{
-    switch (p) {
-        case ModPlatform::ResourceProvider::MODRINTH:
-            return ModPlatform::ResourceProvider::FLAME;
-        case ModPlatform::ResourceProvider::FLAME:
-            return ModPlatform::ResourceProvider::MODRINTH;
-    }
-
-    return ModPlatform::ResourceProvider::FLAME;
 }
 
 void ResourceUpdateDialog::onMetadataFailed(Resource* resource, bool tryOthers, ModPlatform::ResourceProvider firstChoice)
@@ -515,7 +517,7 @@ void ResourceUpdateDialog::appendResource(const CheckUpdateTask::Update& info, Q
     ui->modTreeWidget->setItemWidget(changelog, 0, changelogArea);
 }
 
-auto ResourceUpdateDialog::getTasks() -> const QList<ResourceDownloadTask::Ptr>
+auto ResourceUpdateDialog::getTasks() const -> QList<ResourceDownloadTask::Ptr>
 {
     QList<ResourceDownloadTask::Ptr> list;
 

@@ -72,8 +72,8 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
     auto action = Net::ApiRequest::makeFile(
         m_pack_version.downloadUrl, m_pack_model->dir().absoluteFilePath(getFilename()), Net::NetRequest::Option::NoOptions,
         createModrinthMeta(m_pack_model->instance(), std::move(downloadReason), std::move(dependentOn)));
-    if (!m_pack_version.hash_type.isEmpty() && !m_pack_version.hash.isEmpty()) {
-        switch (Hashing::algorithmFromString(m_pack_version.hash_type)) {
+    if (!m_pack_version.hashType.isEmpty() && !m_pack_version.hash.isEmpty()) {
+        switch (Hashing::algorithmFromString(m_pack_version.hashType)) {
             case Hashing::Algorithm::Md4:
                 action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Md4, m_pack_version.hash));
                 break;

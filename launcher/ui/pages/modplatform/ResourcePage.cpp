@@ -190,7 +190,7 @@ void ResourcePage::addSortings()
     std::ranges::sort(sorts, [](const auto& l, const auto& r) { return l.index < r.index; });
 
     for (auto&& sorting : sorts) {
-        m_ui->sortByBox->addItem(sorting.readable_name, QVariant(sorting.index));
+        m_ui->sortByBox->addItem(sorting.readableName, QVariant(sorting.index));
     }
 }
 
@@ -326,8 +326,8 @@ void ResourcePage::versionListUpdated(const QModelIndex& index)
                 }
 
                 auto versionText = version.version;
-                if (version.version_type.isValid()) {
-                    versionText += QString(" [%1]").arg(version.version_type.toString());
+                if (version.versionType.isValid()) {
+                    versionText += QString(" [%1]").arg(version.versionType.toString());
                 }
                 if (version.fileId == installedVersion) {
                     versionText += tr(" [installed]", "Mod version select");
@@ -436,7 +436,7 @@ void ResourcePage::onResourceSelected()
 
     auto& version = currentPack->versions[m_selectedVersionIndex];
     Q_ASSERT(!version.downloadUrl.isNull());
-    if (version.is_currently_selected) {
+    if (version.isCurrentlySelected) {
         removeResourceFromDialog(currentPack->name);
     } else {
         addResourceToDialog(currentPack, version);

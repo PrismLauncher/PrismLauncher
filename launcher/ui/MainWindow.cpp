@@ -990,10 +990,11 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 extra_info.insert("pack_id", addonId);
                 extra_info.insert("pack_version_id", fileId);
 
-                auto [job, array] = FlameAPI::get().getFile(addonId, fileId);
+                auto [job, array] = FlameAPI::getFile(addonId, fileId);
 
-                connect(job.get(), &Task::failed, this,
-                        [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+                connect(job.get(), &Task::failed, this, [this](const QString& reason) {
+                    CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+                });
                 connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &version] {
                     qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
                     auto doc = Json::requireDocument(*array);
@@ -1135,7 +1136,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
 
         auto type = ResourceUtils::identify(localFileInfo);
 
-        if (ModPlatform::ResourceTypeUtils::VALID_RESOURCES.count(type) == 0) {  // probably instance/modpack
+        if (ModPlatform::ResourceTypeUtils::g_VALID_RESOURCES.count(type) == 0) {  // probably instance/modpack
             addInstance(localFileName, extra_info);
             continue;
         }

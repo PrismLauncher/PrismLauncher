@@ -1,5 +1,6 @@
 #include "PackManifest.h"
 #include "Json.h"
+
 namespace {
 void loadFileV1(Flame::File& f, QJsonObject& file)
 {

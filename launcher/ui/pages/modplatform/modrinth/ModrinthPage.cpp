@@ -149,25 +149,25 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
         ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks;
 
         auto id = m_current->addonId;
-        callbacks.on_fail = [this](const QString& reason, int) {
+        callbacks.onFail = [this](const QString& reason, int) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
         };
-        callbacks.on_succeed = [this, id, curr](auto& pack) {
+        callbacks.onSucceed = [this, id, curr](auto& pack) {
             if (id != m_current->addonId) {
                 return;  // wrong request?
             }
 
-            QVariant current_updated;
-            current_updated.setValue(pack);
+            QVariant currentUpdated;
+            currentUpdated.setValue(pack);
 
-            if (!m_model->setData(curr, current_updated, Qt::UserRole)) {
+            if (!m_model->setData(curr, currentUpdated, Qt::UserRole)) {
                 qWarning() << "Failed to cache extra info for the current pack!";
             }
 
             suggestCurrent();
             updateUI();
         };
-        if (auto netJob = ModrinthAPI::get().getProjectInfo({ m_current }, std::move(callbacks)); netJob) {
+        if (auto netJob = ModrinthAPI::get().getProjectInfo({ m_current }, callbacks); netJob) {
             m_job = netJob;
             m_job->start();
         }
@@ -183,7 +183,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
 
         auto addonId = m_current->addonId;
         // Use default if no callbacks are set
-        callbacks.on_succeed = [this, curr, addonId](auto& doc) {
+        callbacks.onSucceed = [this, curr, addonId](auto& doc) {
             if (addonId != m_current->addonId) {
                 return;  // wrong request
             }
@@ -209,20 +209,21 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
                 m_ui->versionSelectionBox->addItem(version.getVersionDisplayString(), QVariant(version.fileId));
             }
 
-            QVariant current_updated;
-            current_updated.setValue(m_current);
+            QVariant currentUpdated;
+            currentUpdated.setValue(m_current);
 
-            if (!m_model->setData(curr, current_updated, Qt::UserRole)) {
+            if (!m_model->setData(curr, currentUpdated, Qt::UserRole)) {
                 qWarning() << "Failed to cache versions for the current pack!";
             }
 
             suggestCurrent();
         };
-        callbacks.on_fail = [this](const QString& reason, int) {
+        callbacks.onFail = [this](const QString& reason, int) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
         };
 
-        auto netJob = ModrinthAPI::get().getProjectVersions({ m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
+        auto netJob = ModrinthAPI::get().getProjectVersions(
+            { .pack = m_current, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::Modpack }, callbacks);
 
         m_job2 = netJob;
         m_job2->start();
@@ -230,7 +231,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
     } else {
         for (const auto& version : m_current->versions) {
             if (!version.version.contains(version.version)) {
-                m_ui->versionSelectionBox->addItem(QString("%1 - %2").arg(version.version, version.version_number),
+                m_ui->versionSelectionBox->addItem(QString("%1 - %2").arg(version.version, version.versionNumber),
                                                    QVariant(version.fileId));
             } else {
                 m_ui->versionSelectionBox->addItem(version.version, QVariant(version.fileId));
@@ -245,10 +246,11 @@ void ModrinthPage::updateUI()
 {
     QString text = "";
 
-    if (m_current->websiteUrl.isEmpty())
+    if (m_current->websiteUrl.isEmpty()) {
         text = m_current->name;
-    else
+    } else {
         text = "<a href=\"" + m_current->websiteUrl + "\">" + m_current->name + "</a>";
+    }
 
     if (!m_current->authors.empty()) {
         auto authorToStr = [](ModPlatform::ModpackAuthor& author) {
@@ -322,12 +324,12 @@ void ModrinthPage::suggestCurrent()
 
     for (auto& ver : m_current->versions) {
         if (ver.fileId == m_selectedVersion) {
-            QMap<QString, QString> extra_info;
-            extra_info.insert("pack_id", m_current->addonId.toString());
-            extra_info.insert("pack_version_id", ver.fileId.toString());
+            QMap<QString, QString> extraInfo;
+            extraInfo.insert("pack_id", m_current->addonId.toString());
+            extraInfo.insert("pack_version_id", ver.fileId.toString());
 
             m_dialog->setSuggestedPack(m_current->name, ver.version,
-                                       new InstanceImportTask(ver.downloadUrl, true, this, std::move(extra_info)));
+                                       new InstanceImportTask(ver.downloadUrl, true, this, std::move(extraInfo)));
             QString editedLogoName = "modrinth_" + m_current->logoName;
             m_model->getLogo(m_current->logoName, m_current->logoUrl,
                              [this, editedLogoName](const QString& logo) { m_dialog->setSuggestedIconFromFile(logo, editedLogoName); });

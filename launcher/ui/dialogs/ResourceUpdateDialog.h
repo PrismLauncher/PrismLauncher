@@ -27,7 +27,7 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
 
     void appendResource(const CheckUpdateTask::Update& info, QStringList requiredBy = {});
 
-    const QList<ResourceDownloadTask::Ptr> getTasks();
+    QList<ResourceDownloadTask::Ptr> getTasks() const;
     auto indexDir() const -> QDir { return m_resourceModel->indexDir(); }
 
     auto noUpdates() const -> bool { return m_noUpdates; };

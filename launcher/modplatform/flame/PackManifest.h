@@ -41,7 +41,6 @@
 #include <QString>
 #include <QUrl>
 #include "modplatform/ModIndex.h"
-#include "modplatform/ResourceType.h"
 
 namespace Flame {
 struct File {
@@ -55,7 +54,6 @@ struct File {
 
     // our
     QString targetFolder = QStringLiteral("mods");
-    ModPlatform::ResourceType resourceType;
 };
 
 struct Modloader {

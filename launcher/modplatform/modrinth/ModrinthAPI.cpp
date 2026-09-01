@@ -3,99 +3,101 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ModrinthAPI.h"
+#include <array>
 
 #include "Application.h"
 #include "Json.h"
+#include "modplatform/ResourceType.h"
 #include "net/ApiRequest.h"
 #include "net/NetJob.h"
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersion(const QString& hash, const QString& hash_format) const
+std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersion(const QString& hash, const QString& hashFormat)
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersion"), APPLICATION->network());
 
     auto [action, response] =
-        Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1?algorithm=%2").arg(hash, hash_format));
+        Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1?algorithm=%2").arg(hash, hashFormat));
     netJob->addNetAction(action);
 
     return { netJob, response };
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_format) const
+std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersions(const QStringList& hashes, const QString& hashFormat)
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersions"), APPLICATION->network());
 
-    QJsonObject body_obj;
+    QJsonObject bodyObj;
 
-    Json::writeStringList(body_obj, "hashes", hashes);
-    Json::writeString(body_obj, "algorithm", hash_format);
+    Json::writeStringList(bodyObj, "hashes", hashes);
+    Json::writeString(bodyObj, "algorithm", hashFormat);
 
-    QJsonDocument body(body_obj);
-    auto body_raw = body.toJson();
+    QJsonDocument body(bodyObj);
+    auto bodyRaw = body.toJson();
 
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files"), body_raw);
+    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files"), bodyRaw);
     netJob->addNetAction(action);
     netJob->setAskRetry(false);
     return { netJob, response };
 }
 
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash,
-                                                             const QString& hash_format,
+                                                             const QString& hashFormat,
                                                              std::optional<std::vector<Version>> mcVersions,
                                                              std::optional<ModPlatform::ModLoaderTypes> loaders) const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersion"), APPLICATION->network());
 
-    QJsonObject body_obj;
+    QJsonObject bodyObj;
 
     if (loaders.has_value()) {
-        Json::writeStringList(body_obj, "loaders", getModLoaderStrings(loaders.value()));
+        Json::writeStringList(bodyObj, "loaders", getModLoaderStrings(loaders.value()));
     }
 
     if (mcVersions.has_value()) {
-        QStringList game_versions;
+        QStringList gameVersions;
         for (auto& ver : mcVersions.value()) {
-            game_versions.append(mapMCVersionToModrinth(ver));
+            gameVersions.append(mapMCVersionToModrinth(ver));
         }
-        Json::writeStringList(body_obj, "game_versions", game_versions);
+        Json::writeStringList(bodyObj, "game_versions", gameVersions);
     }
 
-    QJsonDocument body(body_obj);
-    auto body_raw = body.toJson();
+    QJsonDocument body(bodyObj);
+    auto bodyRaw = body.toJson();
 
     auto [action, response] = Net::ApiRequest::makeByteArray(
-        QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1/update?algorithm=%2").arg(hash, hash_format), body_raw);
+        QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1/update?algorithm=%2").arg(hash, hashFormat), bodyRaw);
     netJob->addNetAction(action);
 
     return { netJob, response };
 }
 
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(const QStringList& hashes,
-                                                              const QString& hash_format,
+                                                              const QString& hashFormat,
                                                               std::optional<std::vector<Version>> mcVersions,
                                                               std::optional<ModPlatform::ModLoaderTypes> loaders) const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersions"), APPLICATION->network());
 
-    QJsonObject body_obj;
+    QJsonObject bodyObj;
 
-    Json::writeStringList(body_obj, "hashes", hashes);
-    Json::writeString(body_obj, "algorithm", hash_format);
+    Json::writeStringList(bodyObj, "hashes", hashes);
+    Json::writeString(bodyObj, "algorithm", hashFormat);
 
     if (loaders.has_value()) {
-        Json::writeStringList(body_obj, "loaders", getModLoaderStrings(loaders.value()));
+        Json::writeStringList(bodyObj, "loaders", getModLoaderStrings(loaders.value()));
     }
 
     if (mcVersions.has_value()) {
-        QStringList game_versions;
+        QStringList gameVersions;
         for (auto& ver : mcVersions.value()) {
-            game_versions.append(mapMCVersionToModrinth(ver));
+            gameVersions.append(mapMCVersionToModrinth(ver));
         }
-        Json::writeStringList(body_obj, "game_versions", game_versions);
+        Json::writeStringList(bodyObj, "game_versions", gameVersions);
     }
 
-    QJsonDocument body(body_obj);
-    auto body_raw = body.toJson();
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"), body_raw);
+    QJsonDocument body(bodyObj);
+    auto bodyRaw = body.toJson();
+    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"), bodyRaw);
     netJob->addNetAction(action);
 
     return { netJob, response };
@@ -115,11 +117,42 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getProjects(QStringList addonIds)
 QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const
 {
     // https://docs.modrinth.com/api-spec/#tag/projects/operation/searchProjects
-    return { { .index = 1, .name = "relevance", .readable_name = QObject::tr("Sort by Relevance") },
-             { .index = 2, .name = "downloads", .readable_name = QObject::tr("Sort by Downloads") },
-             { .index = 3, .name = "follows", .readable_name = QObject::tr("Sort by Follows") },
-             { .index = 4, .name = "newest", .readable_name = QObject::tr("Sort by Newest") },
-             { .index = 5, .name = "updated", .readable_name = QObject::tr("Sort by Last Updated") } };
+    return { { .index = 1, .name = "relevance", .readableName = QObject::tr("Sort by Relevance") },
+             { .index = 2, .name = "downloads", .readableName = QObject::tr("Sort by Downloads") },
+             { .index = 3, .name = "follows", .readableName = QObject::tr("Sort by Follows") },
+             { .index = 4, .name = "newest", .readableName = QObject::tr("Sort by Newest") },
+             { .index = 5, .name = "updated", .readableName = QObject::tr("Sort by Last Updated") } };
+}
+namespace {
+const auto g_resourceTypeMap = std::array{
+    std::pair{ ModPlatform::ResourceType::Mod, "mod" },           std::pair{ ModPlatform::ResourceType::ResourcePack, "resourcepack" },
+    std::pair{ ModPlatform::ResourceType::ShaderPack, "shader" }, std::pair{ ModPlatform::ResourceType::DataPack, "datapack" },
+    std::pair{ ModPlatform::ResourceType::Modpack, "modpack" },
+};
+}
+
+ModPlatform::ResourceType ModrinthAPI::getResourceType(const QString& param)
+{
+    for (const auto& [key, value] : g_resourceTypeMap) {
+        if (value == param) {
+            return key;
+        }
+    }
+
+    qWarning() << "Invalid resource type for Modrinth API!" << param;
+    return ModPlatform::ResourceType::Unknown;
+}
+
+QString ModrinthAPI::resourceTypeParameter(ModPlatform::ResourceType type)
+{
+    for (const auto& [key, value] : g_resourceTypeMap) {
+        if (key == type) {
+            return value;
+        }
+    }
+
+    qWarning() << "Invalid resource type for Modrinth API!" << static_cast<std::uint8_t>(type);
+    return "";
 }
 
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getModCategories() const
@@ -136,11 +169,10 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getModCategories() const
 QList<ModPlatform::Category> ModrinthAPI::loadCategories(const QByteArray& response, const QString& projectType)
 {
     QList<ModPlatform::Category> categories;
-    QJsonParseError parse_error{};
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
-    if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from categories at" << parse_error.offset
-                   << "reason:" << parse_error.errorString();
+    QJsonParseError parseError{};
+    QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+    if (parseError.error != QJsonParseError::NoError) {
+        qWarning() << "Error while parsing JSON response from categories at" << parseError.offset << "reason:" << parseError.errorString();
         qWarning() << *response;
         return categories;
     }
