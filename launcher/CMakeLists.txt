@@ -405,16 +405,6 @@ set(SETTINGS_SOURCES
     # Settings
     settings/INIFile.cpp
     settings/INIFile.h
-    settings/INISettingsObject.cpp
-    settings/INISettingsObject.h
-    settings/OverrideSetting.cpp
-    settings/OverrideSetting.h
-    settings/PassthroughSetting.cpp
-    settings/PassthroughSetting.h
-    settings/Setting.cpp
-    settings/Setting.h
-    settings/SettingsObject.cpp
-    settings/SettingsObject.h
 )
 
 set(JAVA_SOURCES
