@@ -135,7 +135,7 @@ void drawBadges(QPainter* painter, const QStyleOptionViewItem& option, BaseInsta
         pixmaps.append("checkupdate");
     }
     if (instance->isOffloaded()) {
-        pixmaps.append("clean"); // pick a final icon
+        pixmaps.append("delete");
     }
 
     static const int itemSide = 24;

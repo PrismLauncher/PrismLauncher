@@ -583,6 +583,10 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
                 if (at(row).isMoreThanOneHardLink()) {
                     tooltip += tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
                 }
+
+                if (instance()->isOffloaded() && !at(row).fileinfo().exists()) {
+                    tooltip += tr("\nOffloaded — this resource will be re-downloaded when the instance is restored.");
+                }
             }
 
             return tooltip;
@@ -604,6 +608,8 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
                 return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
             }
             return {};
+        case OffloadedRole:
+            return instance()->isOffloaded() && !m_resources[row]->fileinfo().exists();
         default:
             return {};
     }

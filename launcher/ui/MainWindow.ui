@@ -464,7 +464,7 @@
   </action>
   <action name="actionOffloadInstance">
    <property name="icon">
-    <iconset theme="clean"/>
+    <iconset theme="delete"/>
    </property>
    <property name="text">
     <string>Offload...</string>

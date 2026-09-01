@@ -14,6 +14,9 @@ class OffloadInstanceTask : public Task
         explicit OffloadInstanceTask(BaseInstance* instance);
         ~OffloadInstanceTask() override = default;
 
+        int filesFreed() const;
+        qint64 bytesFreed() const;
+
     protected:
         void executeTask() override;
 

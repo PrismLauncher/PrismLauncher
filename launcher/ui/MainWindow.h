@@ -165,6 +165,8 @@ class MainWindow : public QMainWindow {
     void on_actionExportInstanceFlamePack_triggered();
 
     void on_actionOffloadInstance_triggered();
+    void restoreOffloadedInstance();
+    void setOffloadActionState();
 
     void on_actionRenameInstance_triggered();
 

@@ -41,6 +41,7 @@
 #include "Version.h"
 #include "minecraft/mod/ResourceFolderModel.h"
 #include "ui/GuiUtil.h"
+#include "ui/widgets/ModListView.h"
 
 #include <QHeaderView>
 #include <QKeyEvent>
@@ -63,6 +64,7 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
     ui->treeView->setModel(m_filterModel);
     // must come after setModel
     ui->treeView->setResizeModes(m_model->columnResizeModes());
+    ui->treeView->setItemDelegate(new ModListViewDelegate(ui->treeView));
 
     ui->treeView->installEventFilter(this);
     ui->treeView->sortByColumn(1, Qt::AscendingOrder);

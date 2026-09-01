@@ -223,3 +223,13 @@ void OffloadInstanceTask::finishOffload()
         emitSucceeded();
     });
 }
+
+int OffloadInstanceTask::filesFreed() const
+{
+    return m_filesFreed;
+}
+
+qint64 OffloadInstanceTask::bytesFreed() const
+{
+    return m_bytesFreed;
+}
