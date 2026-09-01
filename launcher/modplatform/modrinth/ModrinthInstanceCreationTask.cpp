@@ -97,26 +97,27 @@ void ModrinthCreationTask::executeTask()
         parseManifest(oldIndexPath, oldFiles, false, false);
 
         // Let's remove all duplicated, identical resources!
-        auto filesIterator = m_files.begin();
-    begin:
-        while (filesIterator != m_files.end()) {
+        for (auto filesIterator = m_files.begin(); filesIterator != m_files.end();) {
             const auto& file = *filesIterator;
+            bool erased = false;
 
-            auto oldFilesIterator = oldFiles.begin();
-            while (oldFilesIterator != oldFiles.end()) {
+            for (auto oldFilesIterator = oldFiles.begin(); oldFilesIterator != oldFiles.end();) {
                 const auto& oldFile = *oldFilesIterator;
 
                 if (oldFile.hash == file.hash) {
                     qDebug() << "Removed file at" << file.path << "from list of downloads";
                     filesIterator = m_files.erase(filesIterator);
                     oldFilesIterator = oldFiles.erase(oldFilesIterator);
-                    goto begin;  // Sorry :c
+                    erased = true;
+                    break;
                 }
 
-                oldFilesIterator++;
+                ++oldFilesIterator;
             }
 
-            filesIterator++;
+            if (!erased) {
+                ++filesIterator;
+            }
         }
 
         QDir oldMinecraftDir(inst->gameRoot());
@@ -442,7 +443,7 @@ bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<F
 
 void ModrinthCreationTask::ensureMetaLoop()
 {
-    const QDir folder = FS::PathCombine(m_stagingPath, "minecraft", "jarmods");
+    const QDir folder = FS::PathCombine(m_newInstance->modsRoot(), ".index");
     auto ensureMetadataTask = makeShared<EnsureMetadataTask>(m_resources, folder, ModPlatform::ResourceProvider::MODRINTH);
     connect(ensureMetadataTask.get(), &Task::succeeded, this, &ModrinthCreationTask::finishInstall);
     connect(ensureMetadataTask.get(), &Task::failed, this, &ModrinthCreationTask::emitFailed);
