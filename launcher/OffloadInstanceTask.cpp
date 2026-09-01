@@ -1,7 +1,7 @@
 #include "OffloadInstanceTask.h"
-#include <qdir.h>
 #include <QTimer>
 #include <memory>
+#include <QDir>
 
 #include "BaseInstance.h"
 #include "FileSystem.h"
@@ -59,6 +59,7 @@ void OffloadInstanceTask::processResourceFolder(const QString& folderName)
 
         QString fileToRemove;
         QFileInfo fileToRemoveInfo;
+        bool isDisabled = false;
 
         const QString targetFile = FS::PathCombine(resourcePath, mod.filename);
         QFileInfo targetFileInfo(targetFile);
@@ -76,12 +77,25 @@ void OffloadInstanceTask::processResourceFolder(const QString& folderName)
                 fileToRemove = disabledFile;
                 fileToRemoveInfo = disabledFileInfo;
 
-                m_disabledFiles.append(mod.filename);
+                isDisabled = true;
             }
             else
             {
                 continue;
             }
+        }
+
+        // Skip if it's a symlink
+        // using isSymLink() would not work if the whole resource folder was symlinked
+        if (fileToRemoveInfo.canonicalFilePath() != fileToRemoveInfo.absoluteFilePath())
+        {
+            qDebug() << "Found Symlink while offloading. Skipping.";
+            continue;
+        }
+
+        if (isDisabled)
+        {
+            m_disabledFiles.append(mod.filename);
         }
 
 

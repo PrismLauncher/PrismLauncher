@@ -7,6 +7,7 @@
 #include "modplatform/packwiz/Packwiz.h"
 #include "net/ApiRequest.h"
 #include "net/ChecksumValidator.h"
+#include <QFileInfo>
 
 namespace {
 void addDownloadHashValidator(const Net::NetRequest::Ptr& action, const QString& hashFormat, const QString& hash)
@@ -107,6 +108,13 @@ void RestoreInstanceTask::restoreResourceFolder(const QString& folderName, Flame
         }
         else {
             targetFile = FS::PathCombine(resourcePath, mod.filename);
+        }
+
+        // Handles symlink and adds general robustness
+        if (QFileInfo(targetFile).exists())
+        {
+            qDebug() << "File:" << targetFile << "already exists. Skipping.";
+            continue;
         }
 
         // Modrinth
