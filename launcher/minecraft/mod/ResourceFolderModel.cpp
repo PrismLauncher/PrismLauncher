@@ -609,7 +609,7 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
             }
             return {};
         case OffloadedRole:
-            return instance()->isOffloaded() && !m_resources[row]->fileinfo().exists();
+            return instance()->isOffloaded() && !at(row).fileinfo().exists();
         default:
             return {};
     }

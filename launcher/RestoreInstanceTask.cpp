@@ -1,4 +1,5 @@
 #include "RestoreInstanceTask.h"
+#include <QFileInfo>
 #include "Application.h"
 #include "BaseInstance.h"
 #include "FileSystem.h"
@@ -7,7 +8,6 @@
 #include "modplatform/packwiz/Packwiz.h"
 #include "net/ApiRequest.h"
 #include "net/ChecksumValidator.h"
-#include <QFileInfo>
 
 namespace {
 void addDownloadHashValidator(const Net::NetRequest::Ptr& action, const QString& hashFormat, const QString& hash)
@@ -43,7 +43,7 @@ void RestoreInstanceTask::executeTask()
 {
     setStatus(tr("Restoring offloaded instance..."));
     qDebug() << "Starting Restore for offloaded instance.";
-    NetJob::Ptr job{ new NetJob(tr("Restoring offloaded files"), APPLICATION->network()) };
+    const NetJob::Ptr job{ new NetJob(tr("Restoring offloaded files"), APPLICATION->network()) };
     m_netJob.reset(job);
 
     m_disabledFilenames = m_instance->getOffloadedDisabledFiles();
@@ -76,15 +76,14 @@ void RestoreInstanceTask::restoreResourceFolder(const QString& folderName, Flame
         indexPath = FS::PathCombine(resourcePath, ".index");
     }
 
-    QDir indexDir(indexPath);
+    const QDir indexDir(indexPath);
     if (!indexDir.exists()) {
         qDebug() << "Attempting to restore resource folder with no .index directory:" << indexPath << "does not exist. Skipping.";
         return;
     }
 
     const auto indexFiles = indexDir.entryList({ "*.pw.toml" }, QDir::Files);
-    if (indexFiles.count() == 0)
-    {
+    if (indexFiles.count() == 0) {
         qDebug() << "Metadata directory exists but has no entries. Skipping.";
         return;
     }
@@ -100,19 +99,16 @@ void RestoreInstanceTask::restoreResourceFolder(const QString& folderName, Flame
 
         bool isDisabled = false;
         QString targetFile;
-        if (m_disabledFilenames.contains(mod.filename))
-        {
+        if (m_disabledFilenames.contains(mod.filename)) {
             // Resource is disabled
             targetFile = FS::PathCombine(resourcePath, mod.filename + ".disabled");
             isDisabled = true;
-        }
-        else {
+        } else {
             targetFile = FS::PathCombine(resourcePath, mod.filename);
         }
 
         // Handles symlink and adds general robustness
-        if (QFileInfo(targetFile).exists())
-        {
+        if (QFileInfo(targetFile).exists()) {
             qDebug() << "File:" << targetFile << "already exists. Skipping.";
             continue;
         }
@@ -161,11 +157,9 @@ void RestoreInstanceTask::resolveCurseForgeFiles(Flame::Manifest& manifest)
         for (const auto& result : results.files) {
             // get file path
             QString fileName;
-            if (m_disabledCFFileIds.contains(result.fileId))
-            {
+            if (m_disabledCFFileIds.contains(result.fileId)) {
                 fileName = result.version.fileName + ".disabled";
-            }
-            else {
+            } else {
                 fileName = result.version.fileName;
             }
 

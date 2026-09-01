@@ -1,19 +1,14 @@
 #include "OffloadInstanceTask.h"
+#include <QDir>
 #include <QTimer>
 #include <memory>
-#include <QDir>
 
 #include "BaseInstance.h"
 #include "FileSystem.h"
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/packwiz/Packwiz.h"
 
-
-OffloadInstanceTask::OffloadInstanceTask(BaseInstance* baseInstance)
-    : Task(true), m_instance(baseInstance)
-{
-
-}
+OffloadInstanceTask::OffloadInstanceTask(BaseInstance* baseInstance) : Task(true), m_instance(baseInstance) {}
 
 void OffloadInstanceTask::executeTask()
 {
@@ -26,7 +21,6 @@ void OffloadInstanceTask::executeTask()
     resolveCurseForgeFiles();
 }
 
-
 void OffloadInstanceTask::processResourceFolder(const QString& folderName)
 {
     const QString resourcePath = FS::PathCombine(m_instance->instanceRoot(), "minecraft", folderName);
@@ -38,22 +32,19 @@ void OffloadInstanceTask::processResourceFolder(const QString& folderName)
         indexPath = FS::PathCombine(resourcePath, ".index");
     }
 
-    QDir indexDir(indexPath);
-    if (!indexDir.exists())
-    {
+    const QDir indexDir(indexPath);
+    if (!indexDir.exists()) {
         return;
     }
 
-
-    const auto indexFiles = indexDir.entryList({"*.pw.toml"}, QDir::Files);
-    for (const auto& fileName : indexFiles)
-    {
+    const auto indexFiles = indexDir.entryList({ "*.pw.toml" }, QDir::Files);
+    for (const auto& fileName : indexFiles) {
         QString stripped = fileName;
         stripped.remove(".pw.toml");
 
         // Packwiz uses 'mod' for every resource
         auto mod = Packwiz::V1::getIndexForMod(indexDir, stripped);
-        if (!mod.isValid()){
+        if (!mod.isValid()) {
             continue;
         }
 
@@ -62,79 +53,59 @@ void OffloadInstanceTask::processResourceFolder(const QString& folderName)
         bool isDisabled = false;
 
         const QString targetFile = FS::PathCombine(resourcePath, mod.filename);
-        QFileInfo targetFileInfo(targetFile);
-        if (targetFileInfo.exists())
-        {
+        const QFileInfo targetFileInfo(targetFile);
+        if (targetFileInfo.exists()) {
             fileToRemove = targetFile;
             fileToRemoveInfo = targetFileInfo;
-        }
-        else
-        {
+        } else {
             // Check if the file is disabled
             const QString disabledFile = targetFile + ".disabled";
-            QFileInfo disabledFileInfo(disabledFile);
+            const QFileInfo disabledFileInfo(disabledFile);
             if (disabledFileInfo.exists()) {
                 fileToRemove = disabledFile;
                 fileToRemoveInfo = disabledFileInfo;
 
                 isDisabled = true;
-            }
-            else
-            {
+            } else {
                 continue;
             }
         }
 
         // Skip if it's a symlink
         // using isSymLink() would not work if the whole resource folder was symlinked
-        if (fileToRemoveInfo.canonicalFilePath() != fileToRemoveInfo.absoluteFilePath())
-        {
+        if (fileToRemoveInfo.canonicalFilePath() != fileToRemoveInfo.absoluteFilePath()) {
             qDebug() << "Found Symlink while offloading. Skipping.";
             continue;
         }
 
-        if (isDisabled)
-        {
+        if (isDisabled) {
             m_disabledFiles.append(mod.filename);
         }
 
-
-        qint64 size = fileToRemoveInfo.size();
-        if (mod.mode == "url" && !mod.url.isEmpty())
-        {
+        const qint64 size = fileToRemoveInfo.size();
+        if (mod.mode == "url" && !mod.url.isEmpty()) {
             // Modrinth
-            if (QFile::remove(fileToRemove))
-            {
+            if (QFile::remove(fileToRemove)) {
                 m_filesFreed++;
                 m_bytesFreed += size;
                 qDebug() << "Offloading file: " << fileToRemove;
-            }
-            else {
+            } else {
                 qWarning() << "Failed to remove offloaded file:" << fileToRemove;
             }
-        }
-        else if (mod.mode == "metadata:curseforge")
-        {
+        } else if (mod.mode == "metadata:curseforge") {
             // Curseforge, need to check with API first
-            m_curseForgeFiles.insert(mod.file_id.toInt(),
-                    CurseForgeOffloadTarget {
-                    .projectId = mod.project_id.toInt(),
-                    .fileToRemove = fileToRemove,
-                    .fileSize = size});
-        }
-        else
-        {
+            m_curseForgeFiles.insert(
+                mod.file_id.toInt(),
+                CurseForgeOffloadTarget{ .projectId = mod.project_id.toInt(), .fileToRemove = fileToRemove, .fileSize = size });
+        } else {
             qDebug() << "Unexpected mod mode when offloading: " << mod.name;
         }
-
     }
 }
 
-
 void OffloadInstanceTask::resolveCurseForgeFiles()
 {
-    if (m_curseForgeFiles.isEmpty())
-    {
+    if (m_curseForgeFiles.isEmpty()) {
         finishOffload();
         return;
     }
@@ -145,8 +116,7 @@ void OffloadInstanceTask::resolveCurseForgeFiles()
     // Create the manifest
     Flame::Manifest manifest;
     QMapIterator<int, CurseForgeOffloadTarget> i(m_curseForgeFiles);
-    while (i.hasNext())
-    {
+    while (i.hasNext()) {
         i.next();
         Flame::File f;
         f.fileId = i.key();
@@ -155,59 +125,48 @@ void OffloadInstanceTask::resolveCurseForgeFiles()
         manifest.files.insert(f.fileId, f);
     }
 
-    auto resolveTask =
-        std::make_shared<Flame::FileResolvingTask>(manifest);
+    auto resolveTask = std::make_shared<Flame::FileResolvingTask>(manifest);
     m_flameApiJob = resolveTask;
 
-    connect(resolveTask.get(), &Task::succeeded, this,
-            [this, resolveTask]() {
-                const Flame::Manifest& results = resolveTask->getResults();
+    connect(resolveTask.get(), &Task::succeeded, this, [this, resolveTask]() {
+        const Flame::Manifest& results = resolveTask->getResults();
 
-                // check if we have the downloadUrl
-                for (const auto& resolvedFile : results.files)
-                {
-                    auto targetInfo =
-                        m_curseForgeFiles.value(resolvedFile.fileId);
+        // check if we have the downloadUrl
+        for (const auto& resolvedFile : results.files) {
+            auto targetInfo = m_curseForgeFiles.value(resolvedFile.fileId);
 
-                    // mod is blocked and there is no Modrinth alternative
-                    if (resolvedFile.version.downloadUrl.isEmpty())
-                    {
-                        qDebug() << "Skipping blocked mod:" << targetInfo.fileToRemove;
-                        continue;
-                    }
+            // mod is blocked and there is no Modrinth alternative
+            if (resolvedFile.version.downloadUrl.isEmpty()) {
+                qDebug() << "Skipping blocked mod:" << targetInfo.fileToRemove;
+                continue;
+            }
 
-                    // URL is valid so it's safe to offload
-                    if (QFile::remove(targetInfo.fileToRemove))
-                    {
-                        m_filesFreed++;
-                        m_bytesFreed += targetInfo.fileSize;
-                        qDebug() << "Offloaded CurseForge file:" << targetInfo.fileToRemove;
-                    }
-                    else {
-                        qDebug() << "Failed to offload CurseForge file:"
-                            << targetInfo.fileToRemove;
-                    }
-                }
+            // URL is valid so it's safe to offload
+            if (QFile::remove(targetInfo.fileToRemove)) {
+                m_filesFreed++;
+                m_bytesFreed += targetInfo.fileSize;
+                qDebug() << "Offloaded CurseForge file:" << targetInfo.fileToRemove;
+            } else {
+                qDebug() << "Failed to offload CurseForge file:" << targetInfo.fileToRemove;
+            }
+        }
 
-                finishOffload();
-            });
+        finishOffload();
+    });
 
-    connect(resolveTask.get(), &Task::failed, this,
-            [this](const QString& reason) {
-                // Modrinth or CurseForge files could have been deleted, flag as offloaded
-                m_instance->setOffloadedDisabledFiles(m_disabledFiles);
-                m_instance->setOffloaded(true);
+    connect(resolveTask.get(), &Task::failed, this, [this](const QString& reason) {
+        // Modrinth or CurseForge files could have been deleted, flag as offloaded
+        m_instance->setOffloadedDisabledFiles(m_disabledFiles);
+        m_instance->setOffloaded(true);
 
-                emitFailed(tr("Failed to resolve CurseForge files: %1").arg(reason));
-            });
+        emitFailed(tr("Failed to resolve CurseForge files: %1").arg(reason));
+    });
 
     connect(resolveTask.get(), &Task::progress, this, &Task::setProgress);
     connect(resolveTask.get(), &Task::status, this, &Task::setStatus);
 
     resolveTask->start();
-
 }
-
 
 void OffloadInstanceTask::finishOffload()
 {
@@ -219,9 +178,7 @@ void OffloadInstanceTask::finishOffload()
     // Delay emitSucceeded() to the next event loop iteration.
     // If the task completes synchronously, the ProgressDialog gets destroyed too quickly,
     // which leaves the main window dimmed until the next input event.
-    QTimer::singleShot(0, this, [this]() {
-        emitSucceeded();
-    });
+    QTimer::singleShot(0, this, [this]() { emitSucceeded(); });
 }
 
 int OffloadInstanceTask::filesFreed() const

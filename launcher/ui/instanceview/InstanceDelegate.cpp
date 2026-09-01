@@ -186,7 +186,7 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     painter->save();
     painter->setClipRect(opt.rect);
 
-    auto inst = (BaseInstance*)index.data(InstanceList::InstancePointerRole).value<void*>();
+    auto* inst = static_cast<BaseInstance*>(index.data(InstanceList::InstancePointerRole).value<void*>());
     if (inst && inst->isOffloaded()) {
         painter->setOpacity(0.5);
     }

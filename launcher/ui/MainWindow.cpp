@@ -1591,7 +1591,7 @@ void MainWindow::on_actionOffloadInstance_triggered()
         CustomMessageBox::selectable(this, tr("Offload Complete"),
                                      tr("Offloaded %1 files, freeing %2 of disk space.")
                                          .arg(filesFreed)
-                                         .arg(StringUtils::humanReadableFileSize(bytesFreed)),
+                                         .arg(StringUtils::humanReadableFileSize(static_cast<double>(bytesFreed))),
                                      QMessageBox::Information, QMessageBox::Ok)->exec();
     }
 }

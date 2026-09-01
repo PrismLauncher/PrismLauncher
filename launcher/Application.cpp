@@ -1547,7 +1547,7 @@ bool Application::launch(MinecraftInstance* instance,
                                            QMessageBox::Yes | QMessageBox::No);
 
         if (reply == QMessageBox::Yes) {
-            Task::Ptr task(new RestoreInstanceTask(instance));
+            const Task::Ptr task(new RestoreInstanceTask(instance));
             ProgressDialog prog(m_mainWindow);
             prog.setSkipButton(true, tr("Abort"));
             prog.execWithTask(task.get());

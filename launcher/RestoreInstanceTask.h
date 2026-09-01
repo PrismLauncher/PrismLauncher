@@ -4,24 +4,23 @@
 #include "net/NetJob.h"
 #include "tasks/Task.h"
 
-#include <QStringList>
 #include <QSet>
+#include <QStringList>
 
 class BaseInstance;
 
-class RestoreInstanceTask : public Task
-{
+class RestoreInstanceTask : public Task {
     Q_OBJECT
-public:
+   public:
     explicit RestoreInstanceTask(BaseInstance* instance);
     ~RestoreInstanceTask() override = default;
 
-protected:
+   protected:
     void executeTask() override;
 
     bool abort() override;
 
-private:
+   private:
     BaseInstance* m_instance;
     NetJob::Ptr m_netJob;
     std::shared_ptr<Task> m_resolveTask;
