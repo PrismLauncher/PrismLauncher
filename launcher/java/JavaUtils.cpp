@@ -38,8 +38,6 @@
 #include <QString>
 #include <QStringList>
 
-#include <settings/Setting.h>
-
 #include <QDebug>
 #include "Application.h"
 #include "BuildConfig.h"
