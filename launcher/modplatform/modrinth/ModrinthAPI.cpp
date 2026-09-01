@@ -43,7 +43,8 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersions(const QStringList
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash,
                                                              const QString& hashFormat,
                                                              std::optional<std::vector<Version>> mcVersions,
-                                                             std::optional<ModPlatform::ModLoaderTypes> loaders) const
+                                                             std::optional<ModPlatform::ModLoaderTypes> loaders,
+                                                             std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes) const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersion"), APPLICATION->network());
 
@@ -61,6 +62,19 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash
         Json::writeStringList(bodyObj, "game_versions", gameVersions);
     }
 
+    if (releaseTypes.has_value() && !releaseTypes->empty()) {
+        QStringList versionTypes;
+        for (const auto& type : releaseTypes.value()) {
+            const auto s = indexedVersionTypeToModrinth(type);
+            if (!s.isEmpty()) {
+                versionTypes.append(s);
+            }
+        }
+        if (!versionTypes.isEmpty()) {
+            Json::writeStringList(bodyObj, "version_types", versionTypes);
+        }
+    }
+
     QJsonDocument body(bodyObj);
     auto bodyRaw = body.toJson();
 
@@ -71,10 +85,12 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash
     return { netJob, response };
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(const QStringList& hashes,
-                                                              const QString& hashFormat,
-                                                              std::optional<std::vector<Version>> mcVersions,
-                                                              std::optional<ModPlatform::ModLoaderTypes> loaders) const
+std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(
+    const QStringList& hashes,
+    const QString& hashFormat,
+    std::optional<std::vector<Version>> mcVersions,
+    std::optional<ModPlatform::ModLoaderTypes> loaders,
+    std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes) const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersions"), APPLICATION->network());
 
@@ -93,6 +109,19 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(const QStringList&
             gameVersions.append(mapMCVersionToModrinth(ver));
         }
         Json::writeStringList(bodyObj, "game_versions", gameVersions);
+    }
+
+    if (releaseTypes.has_value() && !releaseTypes->empty()) {
+        QStringList versionTypes;
+        for (const auto& type : releaseTypes.value()) {
+            const auto s = indexedVersionTypeToModrinth(type);
+            if (!s.isEmpty()) {
+                versionTypes.append(s);
+            }
+        }
+        if (!versionTypes.isEmpty()) {
+            Json::writeStringList(bodyObj, "version_types", versionTypes);
+        }
     }
 
     QJsonDocument body(bodyObj);

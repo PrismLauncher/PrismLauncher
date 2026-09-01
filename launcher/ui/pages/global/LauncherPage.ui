@@ -498,6 +498,42 @@
             </property>
            </widget>
           </item>
+          <item>
+           <layout class="QHBoxLayout" name="modUpdateChannelLayout">
+            <item>
+             <widget class="QLabel" name="modUpdateChannelLabel">
+              <property name="toolTip">
+               <string>Select the preferred release channel when checking for mod updates.</string>
+              </property>
+              <property name="text">
+               <string>Mod update channel:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="modUpdateChannelComboBox">
+              <property name="toolTip">
+               <string>Select the preferred release channel when checking for mod updates.</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>All (Release, Beta, Alpha)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Release only</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Release and Beta</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </item>
          </layout>
         </widget>
        </item>
