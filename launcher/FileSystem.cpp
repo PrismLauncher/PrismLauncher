@@ -86,6 +86,13 @@ namespace fs = std::filesystem;
 #include <linux/fs.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+
+#if defined(WITH_QTDBUS)
+#include <QDBusConnection>
+#include <QDBusReply>
+#include <QDBusUnixFileDescriptor>
+#endif
+
 #elif defined(Q_OS_MACOS)
 #include <sys/attr.h>
 #include <sys/clonefile.h>
@@ -712,9 +719,36 @@ bool deleteContents(const QString& path)
 
 bool trash(QString path, QString* pathInTrash)
 {
-    // FIXME: Figure out trash in Flatpak. Qt seemingly doesn't use the Trash portal
-    if (DesktopServices::isFlatpak())
+#ifdef Q_OS_LINUX
+    if (DesktopServices::isFlatpak()) {
+#if defined(WITH_QTDBUS)
+        const int file = open(path.toUtf8().data(), O_PATH | O_CLOEXEC, 0);
+        if (file == -1) {
+            return false;
+        }
+        const QDBusUnixFileDescriptor fileDescriptor(file);
+        close(file);
+
+        QDBusMessage message = QDBusMessage::createMethodCall("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop",
+                                                              "org.freedesktop.portal.Trash", "TrashFile");
+
+        message << QVariant::fromValue(fileDescriptor);
+
+        const QDBusReply<uint32_t> reply = QDBusConnection::sessionBus().call(message);
+        if (!reply.isValid()) {
+            qWarning() << "Error while trying to trash the file" << path << reply.error().name() << ":" << reply.error().message();
+            return false;
+        }
+        if (pathInTrash) {
+            *pathInTrash = QString();  // No info provided by the API, use the same semantics as QFile::moveToTrash
+        }
+
+        return reply.value() != 0;
+#else
         return false;
+#endif
+    }
+#endif
 #if defined Q_OS_WIN32
     if (IsWindowsServer())
         return false;
