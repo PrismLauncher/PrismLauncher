@@ -38,7 +38,6 @@
 #include "net/ApiRequest.h"
 #include "net/HttpMetaCache.h"
 #include "net/NetJob.h"
-#include "settings/SettingsObject.h"
 
 #include <Version.h>
 #include "StringUtils.h"
