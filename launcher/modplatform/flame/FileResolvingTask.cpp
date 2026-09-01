@@ -29,7 +29,6 @@
 
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 #include "net/NetJob.h"
-#include "settings/SettingsObject.h"
 #include "tasks/Task.h"
 
 #include "Application.h"
