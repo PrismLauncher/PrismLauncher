@@ -30,7 +30,7 @@ void OffloadInstanceTask::executeTask()
 void OffloadInstanceTask::processResourceFolder(const QString& folderName)
 {
     const QString resourcePath = FS::PathCombine(m_instance->instanceRoot(), "minecraft", folderName);
-    
+
     QString indexPath;
     if (folderName == "shaderpacks") {
         indexPath = resourcePath;
@@ -57,26 +57,46 @@ void OffloadInstanceTask::processResourceFolder(const QString& folderName)
             continue;
         }
 
+        QString fileToRemove;
+        QFileInfo fileToRemoveInfo;
+
         const QString targetFile = FS::PathCombine(resourcePath, mod.filename);
         QFileInfo targetFileInfo(targetFile);
-        if(!targetFileInfo.exists()){
-            // already missing or offloaded
-            qDebug() << "Attempting to offload a file that doesn't exist. Skipping.";
-            continue;
+        if (targetFileInfo.exists())
+        {
+            fileToRemove = targetFile;
+            fileToRemoveInfo = targetFileInfo;
+        }
+        else
+        {
+            // Check if the file is disabled
+            const QString disabledFile = targetFile + ".disabled";
+            QFileInfo disabledFileInfo(disabledFile);
+            if (disabledFileInfo.exists()) {
+                fileToRemove = disabledFile;
+                fileToRemoveInfo = disabledFileInfo;
+
+                m_disabledFiles.append(mod.filename);
+            }
+            else
+            {
+                continue;
+            }
         }
 
-        qint64 size = targetFileInfo.size();
+
+        qint64 size = fileToRemoveInfo.size();
         if (mod.mode == "url" && !mod.url.isEmpty())
         {
             // Modrinth
-            if (QFile::remove(targetFile))
+            if (QFile::remove(fileToRemove))
             {
                 m_filesFreed++;
                 m_bytesFreed += size;
-                qDebug() << "Offloading file: " << targetFile;
+                qDebug() << "Offloading file: " << fileToRemove;
             }
             else {
-                qWarning() << "Failed to remove offloaded file:" << targetFile;
+                qWarning() << "Failed to remove offloaded file:" << fileToRemove;
             }
         }
         else if (mod.mode == "metadata:curseforge")
@@ -85,7 +105,7 @@ void OffloadInstanceTask::processResourceFolder(const QString& folderName)
             m_curseForgeFiles.insert(mod.file_id.toInt(),
                     CurseForgeOffloadTarget {
                     .projectId = mod.project_id.toInt(),
-                    .targetFile = targetFile,
+                    .fileToRemove = fileToRemove,
                     .fileSize = size});
         }
         else
@@ -138,20 +158,20 @@ void OffloadInstanceTask::resolveCurseForgeFiles()
                     // mod is blocked and there is no Modrinth alternative
                     if (resolvedFile.version.downloadUrl.isEmpty())
                     {
-                        qDebug() << "Skipping blocked mod:" << targetInfo.targetFile;
+                        qDebug() << "Skipping blocked mod:" << targetInfo.fileToRemove;
                         continue;
                     }
 
                     // URL is valid so it's safe to offload
-                    if (QFile::remove(targetInfo.targetFile))
+                    if (QFile::remove(targetInfo.fileToRemove))
                     {
                         m_filesFreed++;
                         m_bytesFreed += targetInfo.fileSize;
-                        qDebug() << "Offloaded CurseForge file:" << targetInfo.targetFile;
+                        qDebug() << "Offloaded CurseForge file:" << targetInfo.fileToRemove;
                     }
                     else {
                         qDebug() << "Failed to offload CurseForge file:"
-                            << targetInfo.targetFile;
+                            << targetInfo.fileToRemove;
                     }
                 }
 
@@ -160,6 +180,10 @@ void OffloadInstanceTask::resolveCurseForgeFiles()
 
     connect(resolveTask.get(), &Task::failed, this,
             [this](const QString& reason) {
+                // Modrinth or CurseForge files could have been deleted, flag as offloaded
+                m_instance->setOffloadedDisabledFiles(m_disabledFiles);
+                m_instance->setOffloaded(true);
+
                 emitFailed(tr("Failed to resolve CurseForge files: %1").arg(reason));
             });
 
@@ -173,7 +197,9 @@ void OffloadInstanceTask::resolveCurseForgeFiles()
 
 void OffloadInstanceTask::finishOffload()
 {
+    m_instance->setOffloadedDisabledFiles(m_disabledFiles);
     m_instance->setOffloaded(true);
+
     qDebug() << "Offload Complete. Freed" << m_filesFreed << "files (" << m_bytesFreed << ") bytes";
 
     // Delay emitSucceeded() to the next event loop iteration.

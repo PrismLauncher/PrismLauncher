@@ -1565,8 +1565,7 @@ void MainWindow::on_actionOffloadInstance_triggered()
     }
 
     std::unique_ptr<Task> task(new OffloadInstanceTask(m_selectedInstance));
-    connect(task.get(), &Task::succeeded, this, [this]() {
-        // Redraw instance view
+    connect(task.get(), &Task::finished, this, [this](){
         view->viewport()->update();
     });
 

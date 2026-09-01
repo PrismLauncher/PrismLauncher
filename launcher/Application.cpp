@@ -1554,6 +1554,7 @@ bool Application::launch(MinecraftInstance* instance,
 
             if (task->wasSuccessful()) {
                 // Task succeeded, mark as not offloaded and proceed to launch
+                instance->setOffloadedDisabledFiles(QStringList());
                 instance->setOffloaded(false);
                 return launch(instance, mode, targetToJoin, accountToUse, offlineName);
             }

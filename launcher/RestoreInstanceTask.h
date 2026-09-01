@@ -4,6 +4,9 @@
 #include "net/NetJob.h"
 #include "tasks/Task.h"
 
+#include <QStringList>
+#include <QSet>
+
 class BaseInstance;
 
 class RestoreInstanceTask : public Task
@@ -22,6 +25,9 @@ private:
     BaseInstance* m_instance;
     NetJob::Ptr m_netJob;
     std::shared_ptr<Task> m_resolveTask;
+
+    QStringList m_disabledFilenames;
+    QSet<int> m_disabledCFFileIds;
 
     void restoreResourceFolder(const QString& folderName, Flame::Manifest& manifest);
     void resolveCurseForgeFiles(Flame::Manifest& manifest);

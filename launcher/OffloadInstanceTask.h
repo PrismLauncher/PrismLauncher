@@ -2,6 +2,7 @@
 
 #include "tasks/Task.h"
 
+#include <QStringList>
 #include <QMap>
 #include <memory>
 class BaseInstance;
@@ -21,12 +22,9 @@ class OffloadInstanceTask : public Task
         struct CurseForgeOffloadTarget
         {
             int projectId;
-            QString targetFile;
+            QString fileToRemove;
             qint64 fileSize;
         };
-        void processResourceFolder(const QString& folderName);
-        void resolveCurseForgeFiles();
-        void finishOffload();
 
         BaseInstance* m_instance;
         std::shared_ptr<Task> m_flameApiJob;
@@ -36,4 +34,10 @@ class OffloadInstanceTask : public Task
 
         // Maps curseforge file ID to the offload target struct
         QMap<int, CurseForgeOffloadTarget> m_curseForgeFiles;
+        QStringList m_disabledFiles;
+
+        void processResourceFolder(const QString& folderName);
+        void resolveCurseForgeFiles();
+        void finishOffload();
+
 };

@@ -131,7 +131,9 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
     m_settings->registerSetting("ManagedPackVersionName", "");
     m_settings->registerSetting("ManagedPackURL", "");
 
+    // Instance Offloading
     m_settings->registerSetting("Offloaded", false);
+    m_settings->registerSetting("OffloadedDisabledFiles", "[]");
 
     m_settings->registerSetting("Profiler", "");
 }
@@ -165,6 +167,17 @@ void BaseInstance::setOffloaded(bool offloaded)
 {
     m_settings->set("Offloaded", offloaded);
     emit propertiesChanged();
+}
+
+QStringList BaseInstance::getOffloadedDisabledFiles() const
+{
+    auto setting = m_settings->get("OffloadedDisabledFiles").toString();
+    return Json::toStringList(setting);
+}
+
+void BaseInstance::setOffloadedDisabledFiles(const QStringList& list)
+{
+    m_settings->set("OffloadedDisabledFiles", Json::fromStringList(list));
 }
 
 QString BaseInstance::getManagedPackType() const

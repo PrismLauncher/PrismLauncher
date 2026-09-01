@@ -162,6 +162,8 @@ class BaseInstance : public QObject {
 
     bool isOffloaded() const;
     void setOffloaded(bool offloaded);
+    QStringList getOffloadedDisabledFiles() const;
+    void setOffloadedDisabledFiles(const QStringList& list);
 
     QString getManagedPackType() const;
     QString getManagedPackID() const;
