@@ -150,4 +150,15 @@ QStringList process(const QString& cmd, const QProcessEnvironment& dict)
     return splited;
 }
 
+QString quoteForSplitCommand(const QString& input)
+{
+    if (!input.contains(' ')) {
+        return input;
+    }
+
+    QString escaped = input;
+    escaped.replace("\"", R"(""")");
+    return "\"" + escaped + "\"";
+}
+
 }  // namespace Commandline
