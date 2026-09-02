@@ -87,9 +87,8 @@
    <addaction name="actionJoin"/>
    <addaction name="actionRename"/>
    <addaction name="actionCopy"/>
-   <addaction name="actionRemove"/>
-   <addaction name="actionMCEdit"/>
-   <addaction name="actionData_Packs"/>
+    <addaction name="actionRemove"/>
+    <addaction name="actionData_Packs"/>
    <addaction name="actionReset_Icon"/>
    <addaction name="separator"/>
    <addaction name="actionCopy_Seed"/>
@@ -119,11 +118,6 @@
   <action name="actionRemove">
    <property name="text">
     <string>Delete</string>
-   </property>
-  </action>
-  <action name="actionMCEdit">
-   <property name="text">
-    <string>MCEdit</string>
    </property>
   </action>
   <action name="actionCopy_Seed">

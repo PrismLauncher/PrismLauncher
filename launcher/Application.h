@@ -71,7 +71,6 @@ class BaseProfilerFactory;
 class BaseDetachedToolFactory;
 class TranslationsModel;
 class ITheme;
-class MCEditTool;
 class ThemeManager;
 class IconTheme;
 class BaseInstance;
@@ -138,8 +137,6 @@ class Application : public QApplication {
     InstanceList* instances() const { return m_instances.get(); }
 
     IconList* icons() const { return m_icons.get(); }
-
-    MCEditTool* mcedit() const { return m_mcedit.get(); }
 
     AccountList* accounts() const { return m_accounts.get(); }
 
@@ -265,7 +262,6 @@ class Application : public QApplication {
     std::unique_ptr<JavaInstallList> m_javalist;
     std::unique_ptr<TranslationsModel> m_translations;
     std::unique_ptr<GenericPageProvider> m_globalSettingsProvider;
-    std::unique_ptr<MCEditTool> m_mcedit;
     QSet<QString> m_features;
     std::unique_ptr<ThemeManager> m_themeManager;
 

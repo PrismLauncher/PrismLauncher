@@ -462,8 +462,6 @@ set(TOOLS_SOURCES
     tools/JProfiler.h
     tools/JVisualVM.cpp
     tools/JVisualVM.h
-    tools/MCEditTool.cpp
-    tools/MCEditTool.h
     tools/GenericProfiler.cpp
     tools/GenericProfiler.h
 )
