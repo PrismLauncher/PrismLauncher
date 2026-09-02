@@ -37,15 +37,16 @@
 
 #include "WorldListPage.h"
 #include "minecraft/WorldList.h"
+#include "settings/SettingsObject.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui_WorldListPage.h"
 
 #include <ui/widgets/PageContainer.h>
 #include <QClipboard>
+#include <QCursor>
 #include <QDialogButtonBox>
 #include <QEvent>
-#include <QCursor>
 #include <QInputDialog>
 #include <QKeyEvent>
 #include <QMenu>
@@ -137,6 +138,8 @@ WorldListPage::WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget
             m_worldToolsMenu->popup(QCursor::pos());
         }
     });
+    connect(APPLICATION->settings()->getSetting("WorldTools").get(), &Setting::SettingChanged, this,
+            [this](const Setting& /*setting*/, QVariant /*value*/) { populateWorldToolsMenu(); });
 
     worldChanged(QModelIndex(), QModelIndex());
 }
@@ -342,15 +345,25 @@ void WorldListPage::populateWorldToolsMenu()
 {
     m_worldToolsMenu->clear();
     const QVariantMap tools = Json::toMap(APPLICATION->settings()->get("WorldTools").toString());
-    for (auto it = tools.constBegin(); it != tools.constEnd(); ++it) {
-        if (it.key().isEmpty()) {
-            continue;
+
+    if (tools.isEmpty()) {
+        auto* noToolsAction = m_worldToolsMenu->addAction(tr("No Tools Added"));
+        noToolsAction->setEnabled(false);
+        m_worldToolsMenu->addSeparator();
+        auto* settingsAction = m_worldToolsMenu->addAction(tr("Open Settings"));
+        connect(settingsAction, &QAction::triggered, this, []() { APPLICATION->ShowGlobalSettings(nullptr, "external-tools"); });
+    } else {
+        for (auto it = tools.constBegin(); it != tools.constEnd(); ++it) {
+            if (it.key().isEmpty()) {
+                continue;
+            }
+            auto* action = m_worldToolsMenu->addAction(it.key());
+            connect(action, &QAction::triggered, this,
+                    [this, name = it.key(), command = it.value().toString()]() { launchWorldTool(name, command); });
         }
-        auto* action = m_worldToolsMenu->addAction(it.key());
-        connect(action, &QAction::triggered, this,
-                [this, name = it.key(), command = it.value().toString()]() { launchWorldTool(name, command); });
     }
-    ui->actionWorldTools->setEnabled(getSelectedWorld().isValid() && !m_worldToolsMenu->isEmpty());
+
+    ui->actionWorldTools->setEnabled(getSelectedWorld().isValid());
 }
 
 void WorldListPage::launchWorldTool(const QString& name, const QString& command)

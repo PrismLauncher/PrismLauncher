@@ -56,6 +56,13 @@ ExternalToolsPage::ExternalToolsPage(QWidget* parent) : QWidget(parent), ui(new 
 
     ui->jvisualvmLink->setOpenExternalLinks(true);
     ui->jprofilerLink->setOpenExternalLinks(true);
+
+    ui->worldToolTree->header()->setStretchLastSection(false);
+    ui->worldToolTree->header()->setSectionResizeMode(0, QHeaderView::Interactive);
+    ui->worldToolTree->header()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui->worldToolTree->header()->setSectionResizeMode(2, QHeaderView::Interactive);
+    ui->worldToolTree->header()->resizeSection(0, 150);
+    ui->worldToolTree->header()->resizeSection(2, 36);
     loadSettings();
 }
 
@@ -82,7 +89,21 @@ void ExternalToolsPage::loadSettings()
         item->setText(1, it.value().toString());
         item->setFlags(item->flags() | Qt::ItemIsEditable);
         ui->worldToolTree->addTopLevelItem(item);
+        setupWorldToolBrowseBtn(item);
     }
+}
+
+void ExternalToolsPage::setupWorldToolBrowseBtn(QTreeWidgetItem* item)
+{
+    auto* btn = new QPushButton("...");
+    btn->setFixedWidth(30);
+    connect(btn, &QPushButton::clicked, this, [this, item]() {
+        QString filePath = QFileDialog::getOpenFileName(this, tr("Select Executable"));
+        if (!filePath.isEmpty()) {
+            item->setText(1, filePath + " {{world_path}}");
+        }
+    });
+    ui->worldToolTree->setItemWidget(item, 2, btn);
 }
 void ExternalToolsPage::applySettings()
 {
@@ -177,6 +198,7 @@ void ExternalToolsPage::on_worldToolAddBtn_clicked()
     auto* item = new QTreeWidgetItem(ui->worldToolTree);
     item->setFlags(item->flags() | Qt::ItemIsEditable);
     ui->worldToolTree->addTopLevelItem(item);
+    setupWorldToolBrowseBtn(item);
     ui->worldToolTree->setCurrentItem(item);
     ui->worldToolTree->editItem(item, 0);
 }

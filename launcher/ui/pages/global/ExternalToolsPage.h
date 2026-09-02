@@ -39,6 +39,8 @@
 
 #include "ui/pages/BasePage.h"
 
+class QTreeWidgetItem;
+
 namespace Ui {
 class ExternalToolsPage;
 }
@@ -67,6 +69,7 @@ class ExternalToolsPage : public QWidget, public BasePage {
    private:
     void loadSettings();
     void applySettings();
+    void setupWorldToolBrowseBtn(QTreeWidgetItem* item);
 
    private:
     Ui::ExternalToolsPage* ui;
