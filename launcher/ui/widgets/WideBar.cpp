@@ -29,6 +29,7 @@ class ActionButton : public QToolButton {
     {
         setEnabled(m_action->isEnabled());
         // better pop up mode
+        setMenu(m_action->menu());
         if (m_action->menu()) {
             setPopupMode(QToolButton::MenuButtonPopup);
         }

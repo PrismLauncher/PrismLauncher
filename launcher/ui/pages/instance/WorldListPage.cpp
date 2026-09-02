@@ -45,10 +45,12 @@
 #include <QClipboard>
 #include <QDialogButtonBox>
 #include <QEvent>
+#include <QCursor>
 #include <QInputDialog>
 #include <QKeyEvent>
 #include <QMenu>
 #include <QMessageBox>
+#include <QProcess>
 #include <QPushButton>
 #include <QSortFilterProxyModel>
 #include <QTreeView>
@@ -57,10 +59,23 @@
 #include "FileSystem.h"
 
 #include "DesktopServices.h"
+#include "Json.h"
 #include "ui/GuiUtil.h"
 
 #include "Application.h"
 #include "DataPackPage.h"
+
+namespace {
+QString expandWorldToolVars(const QString& command, const QVariantMap& vars)
+{
+    QString result = command;
+    for (auto it = vars.constBegin(); it != vars.constEnd(); ++it) {
+        const QString placeholder = "{{" + it.key().toLower() + "}}";
+        result.replace(placeholder, it.value().toString());
+    }
+    return result;
+}
+}  // namespace
 
 class WorldListProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
@@ -87,7 +102,7 @@ class WorldListProxyModel : public QSortFilterProxyModel {
 };
 
 WorldListPage::WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget* parent)
-    : QMainWindow(parent), m_inst(inst), ui(new Ui::WorldListPage), m_worlds(worlds)
+    : QMainWindow(parent), m_inst(inst), ui(new Ui::WorldListPage), m_worlds(worlds), m_worldToolsMenu(new QMenu(this))
 {
     ui->setupUi(this);
 
@@ -115,6 +130,14 @@ WorldListPage::WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget
     head->setSectionResizeMode(4, QHeaderView::ResizeToContents);
 
     connect(ui->worldTreeView->selectionModel(), &QItemSelectionModel::currentChanged, this, &WorldListPage::worldChanged);
+
+    ui->actionWorldTools->setMenu(m_worldToolsMenu);
+    connect(ui->actionWorldTools, &QAction::triggered, this, [this]() {
+        if (getSelectedWorld().isValid() && !m_worldToolsMenu->isEmpty()) {
+            m_worldToolsMenu->popup(QCursor::pos());
+        }
+    });
+
     worldChanged(QModelIndex(), QModelIndex());
 }
 
@@ -130,6 +153,8 @@ void WorldListPage::openedImpl()
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
     ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
+
+    populateWorldToolsMenu();
 }
 
 void WorldListPage::closedImpl()
@@ -151,7 +176,6 @@ void WorldListPage::ShowContextMenu(const QPoint& pos)
     menu->exec(ui->worldTreeView->mapToGlobal(pos));
     delete menu;
 }
-
 QMenu* WorldListPage::createPopupMenu()
 {
     QMenu* filteredMenu = QMainWindow::createPopupMenu();
@@ -314,6 +338,51 @@ void WorldListPage::on_actionCopy_Seed_triggered()
     APPLICATION->clipboard()->setText(QString::number(seed));
 }
 
+void WorldListPage::populateWorldToolsMenu()
+{
+    m_worldToolsMenu->clear();
+    const QVariantMap tools = Json::toMap(APPLICATION->settings()->get("WorldTools").toString());
+    for (auto it = tools.constBegin(); it != tools.constEnd(); ++it) {
+        if (it.key().isEmpty()) {
+            continue;
+        }
+        auto* action = m_worldToolsMenu->addAction(it.key());
+        connect(action, &QAction::triggered, this,
+                [this, name = it.key(), command = it.value().toString()]() { launchWorldTool(name, command); });
+    }
+    ui->actionWorldTools->setEnabled(getSelectedWorld().isValid() && !m_worldToolsMenu->isEmpty());
+}
+
+void WorldListPage::launchWorldTool(const QString& name, const QString& command)
+{
+    QModelIndex index = getSelectedWorld();
+    if (!index.isValid()) {
+        return;
+    }
+
+    if (!worldSafetyNagQuestion(name)) {
+        return;
+    }
+
+    const auto folderPath = m_worlds->data(index, WorldList::FolderRole).toString();
+    QVariantMap vars;
+    vars.insert("world_path", folderPath);
+    const auto toolCommand = expandWorldToolVars(command, vars);
+
+    const auto args = QProcess::splitCommand(toolCommand);
+    if (args.isEmpty()) {
+        QMessageBox::warning(this->parentWidget(), tr("Invalid command"), tr("The tool command is empty."));
+        return;
+    }
+    const auto& program = args.first();
+    const auto rest = args.mid(1);
+
+    if (!QProcess::startDetached(program, rest, folderPath)) {
+        QMessageBox::warning(this->parentWidget(), tr("Tool failed to start!"),
+                             tr("The tool could not be started.\nIt may be necessary to check its command."));
+    }
+}
+
 void WorldListPage::worldChanged([[maybe_unused]] const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     QModelIndex index = getSelectedWorld();
@@ -323,6 +392,7 @@ void WorldListPage::worldChanged([[maybe_unused]] const QModelIndex& current, [[
     ui->actionCopy->setEnabled(enable);
     ui->actionRename->setEnabled(enable);
     ui->actionData_Packs->setEnabled(enable);
+    ui->actionWorldTools->setEnabled(enable && !m_worldToolsMenu->isEmpty());
     bool hasIcon = !index.data(WorldList::IconFileRole).isNull();
     ui->actionReset_Icon->setEnabled(enable && hasIcon);
 

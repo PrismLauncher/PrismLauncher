@@ -42,6 +42,7 @@
 
 #include "settings/Setting.h"
 
+class QMenu;
 class WorldList;
 namespace Ui {
 class WorldListPage;
@@ -76,10 +77,13 @@ class WorldListPage : public QMainWindow, public BasePage {
     QModelIndex getSelectedWorld();
     bool isWorldSafe(QModelIndex index);
     bool worldSafetyNagQuestion(const QString& actionType);
+    void populateWorldToolsMenu();
+    void launchWorldTool(const QString& name, const QString& command);
 
    private:
     Ui::WorldListPage* ui;
     WorldList* m_worlds;
+    QMenu* m_worldToolsMenu = nullptr;
 
     std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
     std::unique_ptr<DataPackFolderModel> m_datapackModel;

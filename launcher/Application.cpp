@@ -883,6 +883,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         m_settings->registerSetting("Env", "{}");
 
+        m_settings->registerSetting("WorldTools", "{}");
+
         // Custom Microsoft Authentication Client ID
         m_settings->registerSetting("MSAClientIDOverride", "");
 

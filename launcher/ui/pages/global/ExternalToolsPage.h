@@ -77,4 +77,6 @@ class ExternalToolsPage : public QWidget, public BasePage {
     void on_jvisualvmPathBtn_clicked();
     void on_jvisualvmCheckBtn_clicked();
     void on_jsonEditorBrowseBtn_clicked();
+    void on_worldToolAddBtn_clicked();
+    void on_worldToolRemoveBtn_clicked();
 };
