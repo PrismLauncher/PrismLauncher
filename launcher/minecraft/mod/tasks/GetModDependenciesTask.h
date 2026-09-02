@@ -75,9 +75,8 @@ class GetModDependenciesTask : public SequentialTask {
     Task::Ptr getProjectInfoTask(const std::shared_ptr<PackDependency>& pDep);
     ModPlatform::Dependency getOverride(const ModPlatform::Dependency&, ModPlatform::ResourceProvider providerName);
     void removePack(const QVariant& addonId);
+
     bool isLocalyInstalled(const std::shared_ptr<PackDependency>& pDep);
-
-
     bool maybeInstalled(const std::shared_ptr<PackDependency>& pDep);
 
    private:
