@@ -2,6 +2,7 @@
 #include <QMessageBox>
 
 #include <QCoreApplication>
+#include <QDataStream>
 #include <QDebug>
 #include <QFileInfo>
 #include <QHeaderView>
@@ -455,6 +456,18 @@ void ResourceFolderModel::directoryChanged(const QString& /*path*/)
     update();
 }
 
+const QString ResourceFolderModel::CustomOrderMimeType = QStringLiteral("application/x-prismlauncher-resource");
+
+void ResourceFolderModel::setCustomOrder(bool enabled)
+{
+    if (m_customOrderEnabled == enabled)
+        return;
+    m_customOrderEnabled = enabled;
+    emit customOrderChanged(enabled);
+    // Force proxy to re-evaluate sorting
+    emit layoutChanged();
+}
+
 Qt::DropActions ResourceFolderModel::supportedDropActions() const
 {
     // copy from outside, move from within and other resource lists
@@ -467,6 +480,14 @@ Qt::ItemFlags ResourceFolderModel::flags(const QModelIndex& index) const
     auto flags = defaultFlags | Qt::ItemIsDropEnabled;
     if (index.isValid()) {
         flags |= Qt::ItemIsUserCheckable;
+        if (m_customOrderEnabled) {
+            flags |= Qt::ItemIsDragEnabled;
+        }
+    } else {
+        // allow dropping on empty area when custom order is on
+        if (m_customOrderEnabled) {
+            flags |= Qt::ItemIsDropEnabled;
+        }
     }
     return flags;
 }
@@ -474,15 +495,38 @@ Qt::ItemFlags ResourceFolderModel::flags(const QModelIndex& index) const
 QStringList ResourceFolderModel::mimeTypes() const
 {
     QStringList types;
-    types << "text/uri-list";
+    types << "text/uri-list" << CustomOrderMimeType;
     return types;
 }
 
-bool ResourceFolderModel::dropMimeData(const QMimeData* data,
-                                       Qt::DropAction action,
-                                       int /*row*/,
-                                       int /*column*/,
-                                       const QModelIndex& /*parent*/)
+QMimeData* ResourceFolderModel::mimeData(const QModelIndexList& indexes) const
+{
+    auto* mime = new QMimeData();
+
+    // Encode source rows for internal drag
+    if (m_customOrderEnabled) {
+        QList<int> rows;
+        for (const auto& idx : indexes) {
+            if (!idx.isValid() || idx.column() != 0)
+                continue;
+            if (!rows.contains(idx.row()))
+                rows.append(idx.row());
+        }
+        if (!rows.isEmpty()) {
+            std::sort(rows.begin(), rows.end());
+            QByteArray encoded;
+            QDataStream stream(&encoded, QIODevice::WriteOnly);
+            stream << rows;
+            mime->setData(CustomOrderMimeType, encoded);
+        }
+    }
+
+    // Also provide uri-list for external drags? Not needed for internal move
+    // but keep compatibility: if we have file paths, we could add them, but not required for custom order
+    return mime;
+}
+
+bool ResourceFolderModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent)
 {
     if (action == Qt::IgnoreAction) {
         return true;
@@ -491,6 +535,91 @@ bool ResourceFolderModel::dropMimeData(const QMimeData* data,
     // check if the action is supported
     if ((data == nullptr) || !(action & supportedDropActions())) {
         return false;
+    }
+
+    // Internal reordering when custom order is enabled
+    if (m_customOrderEnabled && data->hasFormat(CustomOrderMimeType) && (action & Qt::MoveAction)) {
+        QByteArray encoded = data->data(CustomOrderMimeType);
+        QDataStream stream(&encoded, QIODevice::ReadOnly);
+        QList<int> sourceRows;
+        stream >> sourceRows;
+        if (sourceRows.isEmpty())
+            return false;
+
+        std::sort(sourceRows.begin(), sourceRows.end());
+        // remove duplicates
+        sourceRows.erase(std::unique(sourceRows.begin(), sourceRows.end()), sourceRows.end());
+
+        // Determine destination row in source coordinates
+        int destRow = row;
+        if (destRow == -1) {
+            if (parent.isValid()) {
+                destRow = parent.row();
+                // if drop on item, insert after? For flat list, parent.row indicates that item; we insert before it
+                // When dropped on an item, Qt gives parent as that index and row=-1; treat as dest = parent.row()
+                // If we want to insert at end, parent invalid and row==-1 -> append
+            } else {
+                destRow = static_cast<int>(m_resources.size());
+            }
+        }
+        if (destRow < 0)
+            destRow = 0;
+        if (destRow > static_cast<int>(m_resources.size()))
+            destRow = static_cast<int>(m_resources.size());
+
+        // No-op if dest inside the selection
+        // Check if moving a contiguous block to its own position
+        if (sourceRows.size() == 1 && (sourceRows.first() == destRow || sourceRows.first() + 1 == destRow)) {
+            return true;
+        }
+        // If dest is inside the moved range, adjust (already covered for single? for multi need check)
+        // For multi-select, if dest is between first and last moved+1, it's effectively no move
+        // We treat as false to avoid shuffling
+
+        // Build sets for quick lookup
+        QSet<int> sourceSet(sourceRows.begin(), sourceRows.end());
+        // Count how many source rows are before dest to adjust insertion point after removal
+        int beforeCount = 0;
+        for (int r : sourceRows) {
+            if (r < destRow)
+                beforeCount++;
+        }
+        int adjustedDest = destRow - beforeCount;
+        if (adjustedDest < 0)
+            adjustedDest = 0;
+
+        // Collect resources to move preserving original order
+        QList<Resource::Ptr> toMove;
+        toMove.reserve(sourceRows.size());
+        for (int r : sourceRows) {
+            toMove.append(m_resources.at(r));
+        }
+
+        // Build new list without moved items
+        QList<Resource::Ptr> filtered;
+        filtered.reserve(m_resources.size() - toMove.size());
+        for (int i = 0; i < m_resources.size(); ++i) {
+            if (!sourceSet.contains(i))
+                filtered.append(m_resources.at(i));
+        }
+
+        // Insert
+        if (adjustedDest > filtered.size())
+            adjustedDest = static_cast<int>(filtered.size());
+        for (int i = 0; i < toMove.size(); ++i) {
+            filtered.insert(adjustedDest + i, toMove.at(i));
+        }
+
+        // Visual-only reorder: reset model to reflect new order (does not touch files)
+        beginResetModel();
+        m_resources = filtered;
+        // rebuild index
+        m_resourcesIndex.clear();
+        for (int i = 0; i < m_resources.size(); ++i) {
+            m_resourcesIndex[m_resources.at(i)->internalId()] = i;
+        }
+        endResetModel();
+        return true;
     }
 
     // files dropped from outside?
@@ -809,6 +938,11 @@ bool ResourceFolderModel::ProxyModel::lessThan(const QModelIndex& sourceLeft, co
     auto* model = qobject_cast<ResourceFolderModel*>(sourceModel());
     if (!model || !sourceLeft.isValid() || !sourceRight.isValid() || sourceLeft.column() != sourceRight.column()) {
         return QSortFilterProxyModel::lessThan(sourceLeft, sourceRight);
+    }
+
+    // When custom order is enabled, preserve manual order (visual only) - no sorting
+    if (model->isCustomOrderEnabled()) {
+        return sourceLeft.row() < sourceRight.row();
     }
 
     // we are now guaranteed to have two valid indexes in the same column... we love the provided invariants unconditionally and

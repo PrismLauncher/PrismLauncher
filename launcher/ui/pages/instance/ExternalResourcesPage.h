@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QCheckBox>
 #include <QMainWindow>
 #include <QSortFilterProxyModel>
 
@@ -75,4 +76,7 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     QString m_viewFilter;
 
     std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
+
+    QCheckBox* m_customOrderCheck = nullptr;
+    void setCustomOrder(bool enabled);
 };

@@ -150,7 +150,13 @@ class ResourceFolderModel : public QAbstractListModel {
     /// flags, mostly to support drag&drop
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QStringList mimeTypes() const override;
+    QMimeData* mimeData(const QModelIndexList& indexes) const override;
     [[nodiscard]] bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
+
+    static const QString CustomOrderMimeType;
+
+    bool isCustomOrderEnabled() const { return m_customOrderEnabled; }
+    void setCustomOrder(bool enabled);
 
     [[nodiscard]] bool validateIndex(const QModelIndex& index) const;
 
@@ -189,6 +195,7 @@ class ResourceFolderModel : public QAbstractListModel {
    signals:
     void updateFinished();
     void parseFinished();
+    void customOrderChanged(bool enabled);
 
    protected:
     [[nodiscard]] virtual Task* createPreUpdateTask() { return nullptr; }
@@ -271,4 +278,6 @@ class ResourceFolderModel : public QAbstractListModel {
 
     QMap<int, Task::Ptr> m_activeParseTasks;
     std::atomic<int> m_nextResolutionTicket = 0;
+
+    bool m_customOrderEnabled = false;
 };

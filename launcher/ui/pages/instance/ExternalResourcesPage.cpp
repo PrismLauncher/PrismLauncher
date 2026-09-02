@@ -42,6 +42,8 @@
 #include "minecraft/mod/ResourceFolderModel.h"
 #include "ui/GuiUtil.h"
 
+#include <QCheckBox>
+#include <QGridLayout>
 #include <QHeaderView>
 #include <QKeyEvent>
 #include <QMenu>
@@ -67,6 +69,32 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
     ui->treeView->installEventFilter(this);
     ui->treeView->sortByColumn(1, Qt::AscendingOrder);
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    // Custom order checkbox (visual only, enables drag reordering)
+    m_customOrderCheck = new QCheckBox(tr("Custom order"), this);
+    m_customOrderCheck->setToolTip(tr("Enable custom ordering (visual only, allows dragging items to reorder)"));
+    // Insert next to filterEdit: place in the grid layout below the filter
+    if (auto* layout = qobject_cast<QGridLayout*>(ui->centralwidget->layout())) {
+        // filterEdit is at row 3 col 1 colspan 2; put checkbox at row 4
+        layout->addWidget(m_customOrderCheck, 4, 1, 1, 2);
+    } else {
+        // fallback: add to layout
+        ui->centralwidget->layout()->addWidget(m_customOrderCheck);
+    }
+    connect(m_customOrderCheck, &QCheckBox::toggled, this, &ExternalResourcesPage::setCustomOrder);
+    // Disable custom order while filtering (visual order vs filter is ambiguous)
+    connect(ui->filterEdit, &QLineEdit::textChanged, this, [this](const QString& text) {
+        bool hasFilter = !text.trimmed().isEmpty();
+        if (hasFilter && m_customOrderCheck->isChecked()) {
+            m_customOrderCheck->setChecked(false);
+        }
+        m_customOrderCheck->setEnabled(!hasFilter);
+        if (hasFilter) {
+            m_customOrderCheck->setToolTip(tr("Clear the search filter to use custom ordering"));
+        } else {
+            m_customOrderCheck->setToolTip(tr("Enable custom ordering (visual only, allows dragging items to reorder)"));
+        }
+    });
 
     // The default function names by Qt are pretty ugly, so let's just connect the actions manually,
     // to make it easier to read :)
@@ -162,6 +190,14 @@ void ExternalResourcesPage::closedImpl()
 void ExternalResourcesPage::retranslate()
 {
     ui->retranslateUi(this);
+    if (m_customOrderCheck) {
+        m_customOrderCheck->setText(tr("Custom order"));
+        if (m_customOrderCheck->isEnabled()) {
+            m_customOrderCheck->setToolTip(tr("Enable custom ordering (visual only, allows dragging items to reorder)"));
+        } else {
+            m_customOrderCheck->setToolTip(tr("Clear the search filter to use custom ordering"));
+        }
+    }
 }
 
 void ExternalResourcesPage::itemActivated(const QModelIndex&)
@@ -174,6 +210,31 @@ void ExternalResourcesPage::filterTextChanged(const QString& newContents)
 {
     m_viewFilter = newContents;
     m_filterModel->setFilterRegularExpression(m_viewFilter);
+}
+
+void ExternalResourcesPage::setCustomOrder(bool enabled)
+{
+    m_model->setCustomOrder(enabled);
+
+    if (enabled) {
+        // Visual-only custom order: disable sorting, enable internal drag reordering, no file changes
+        ui->treeView->setSortingEnabled(false);
+        m_filterModel->sort(-1);
+        ui->treeView->header()->setSortIndicatorShown(false);
+        ui->treeView->setDragEnabled(true);
+        ui->treeView->setDragDropMode(QAbstractItemView::InternalMove);
+        ui->treeView->setDefaultDropAction(Qt::MoveAction);
+        ui->treeView->setDropIndicatorShown(true);
+    } else {
+        ui->treeView->setSortingEnabled(true);
+        ui->treeView->header()->setSortIndicatorShown(true);
+        ui->treeView->sortByColumn(1, Qt::AscendingOrder);
+        ui->treeView->setDragEnabled(true);
+        ui->treeView->setDragDropMode(QAbstractItemView::DropOnly);
+        ui->treeView->setDropIndicatorShown(true);
+    }
+    // Ensure proxy re-sorts correctly
+    m_filterModel->invalidate();
 }
 
 bool ExternalResourcesPage::shouldDisplay() const
