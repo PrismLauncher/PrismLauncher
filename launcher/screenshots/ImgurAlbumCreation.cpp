@@ -67,7 +67,7 @@ QNetworkReply* ImgurAlbumCreation::getReply(QNetworkRequest& request)
     for (auto shot : m_screenshots) {
         hashes.append(shot->m_imgurDeleteHash);
     }
-    const QByteArray data = "deletehashes=" + hashes.join(',').toUtf8() + "&title=Minecraft%20Screenshots&privacy=hidden";
+    const QByteArray data = "deletehashes=" + hashes.join("&deletehashes=").toUtf8() + "&title=Minecraft%20Screenshots&privacy=hidden";
     return m_network->post(request, data);
 }
 
