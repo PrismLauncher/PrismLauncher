@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include "net/NetRequest.h"
+#include "net/Request.h"
 
-class SkinDelete : public Net::NetRequest {
+class SkinDelete : public Net::Request {
     Q_OBJECT
    public:
     using Ptr = shared_qobject_ptr<SkinDelete>;

@@ -37,9 +37,9 @@
 
 #include <QFileInfo>
 #include "Screenshot.h"
-#include "net/NetRequest.h"
+#include "net/Request.h"
 
-class ImgurUpload : public Net::NetRequest {
+class ImgurUpload : public Net::Request {
    public:
     class Sink : public Net::Sink {
        public:
@@ -60,7 +60,7 @@ class ImgurUpload : public Net::NetRequest {
     ImgurUpload(QFileInfo info) : m_fileInfo(info) {}
     virtual ~ImgurUpload() = default;
 
-    static NetRequest::Ptr make(ScreenShot::Ptr m_shot);
+    static Request::Ptr make(ScreenShot::Ptr m_shot);
 
    private:
     virtual QNetworkReply* getReply(QNetworkRequest&) override;

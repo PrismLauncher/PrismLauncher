@@ -50,7 +50,7 @@
 #include "net/ChecksumValidator.h"
 
 #include "Application.h"
-#include "net/NetRequest.h"
+#include "net/Request.h"
 #include "update/AssetUpdateTask.h"
 
 namespace {
@@ -277,7 +277,7 @@ bool reconstructAssets(QString assetsId, QString resourcesFolder)
 
 }  // namespace AssetsUtils
 
-Net::NetRequest::Ptr AssetObject::getDownloadAction()
+Net::Request::Ptr AssetObject::getDownloadAction()
 {
     QFileInfo objectFile(getLocalPath());
     if ((!objectFile.isFile()) || (objectFile.size() != size)) {

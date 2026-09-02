@@ -167,7 +167,7 @@ struct TranslationsModel::Private {
     std::unique_ptr<QTranslator> m_qtTranslator;
     std::unique_ptr<QTranslator> m_appTranslator;
 
-    Net::NetRequest* m_indexTask = nullptr;
+    Net::Request* m_indexTask = nullptr;
     QString m_downloadingTranslation;
     NetJob::Ptr m_downloadJob;
     NetJob::Ptr m_indexJob;
@@ -557,7 +557,7 @@ void TranslationsModel::downloadIndex()
     d->m_indexJob.reset(new NetJob("Translations Index", APPLICATION->network()));
     const MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "index_v2.json");
     entry->setStale(true);
-    auto task = Net::NetRequest::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + "index_v2.json"), entry);
+    auto task = Net::Request::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + "index_v2.json"), entry);
     d->m_indexTask = task.get();
     d->m_indexJob->addNetAction(task);
     d->m_indexJob->setAskRetry(false);
@@ -598,7 +598,7 @@ void TranslationsModel::downloadTranslation(const QString& key)
     const MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "mmc_" + key + ".qm");
     entry->setStale(true);
 
-    auto dl = Net::NetRequest::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + lang->fileName), entry);
+    auto dl = Net::Request::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + lang->fileName), entry);
     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, lang->fileSha1));
     dl->setProgress(dl->getProgress(), lang->fileSize);
 

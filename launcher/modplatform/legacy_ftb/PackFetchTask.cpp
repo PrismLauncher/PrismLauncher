@@ -60,7 +60,7 @@ void PackFetchTask::fetch()
     QUrl thirdPartyUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/thirdparty.xml");
     qDebug() << "Downloading thirdparty version info from" << thirdPartyUrl.toString();
 
-    auto [thirdPartyAction, thirdPartyResponse] = Net::NetRequest::makeByteArray(thirdPartyUrl);
+    auto [thirdPartyAction, thirdPartyResponse] = Net::Request::makeByteArray(thirdPartyUrl);
     jobPtr->addNetAction(thirdPartyAction);
 
     connect(jobPtr.get(), &NetJob::succeeded, this,

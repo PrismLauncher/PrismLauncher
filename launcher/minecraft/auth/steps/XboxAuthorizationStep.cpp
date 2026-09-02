@@ -9,7 +9,7 @@
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
 #include "net/RawHeaderProxy.h"
-#include "net/NetRequest.h"
+#include "net/Request.h"
 
 XboxAuthorizationStep::XboxAuthorizationStep(AccountData* data, Token* token, QString relyingParty, QString authorizationKind)
     : AuthStep(data), m_token(token), m_relyingParty(std::move(relyingParty)), m_authorizationKind(std::move(authorizationKind))
@@ -40,7 +40,7 @@ void XboxAuthorizationStep::perform()
     auto headers = QList<Net::HeaderPair>{ { .headerName = "Content-Type", .headerValue = "application/json" },
                                            { .headerName = "Accept", .headerValue = "application/json" },
                                            { .headerName = "x-xbl-contract-version", .headerValue = "1" } };
-    auto [request, response] = Net::NetRequest::makeByteArray(url, xboxAuthData.toUtf8());
+    auto [request, response] = Net::Request::makeByteArray(url, xboxAuthData.toUtf8());
     m_request = request;
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);

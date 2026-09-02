@@ -98,7 +98,7 @@ class LibraryTest : public QObject {
         auto downloads = test.getDownloads(r, cache.get(), failedFiles, QString());
         QCOMPARE(downloads.size(), 1);
         QCOMPARE(failedFiles, {});
-        Net::NetRequest::Ptr dl = downloads[0];
+        Net::Request::Ptr dl = downloads[0];
         QCOMPARE(dl->url(), QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion.jar"));
     }
     void test_legacy_url_local_broken()

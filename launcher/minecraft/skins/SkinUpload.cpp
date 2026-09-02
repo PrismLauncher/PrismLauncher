@@ -42,7 +42,7 @@
 #include "net/DummySink.h"
 #include "net/RawHeaderProxy.h"
 
-SkinUpload::SkinUpload(QString path, QString variant) : NetRequest(), m_path(path), m_variant(variant)
+SkinUpload::SkinUpload(QString path, QString variant) : Request(), m_path(path), m_variant(variant)
 {
     m_logCat = taskMCSkinsLogC;
 }

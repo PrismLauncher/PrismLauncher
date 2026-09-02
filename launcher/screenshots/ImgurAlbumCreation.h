@@ -36,9 +36,9 @@
 #pragma once
 
 #include "Screenshot.h"
-#include "net/NetRequest.h"
+#include "net/Request.h"
 
-class ImgurAlbumCreation : public Net::NetRequest {
+class ImgurAlbumCreation : public Net::Request {
    public:
     virtual ~ImgurAlbumCreation() = default;
 
@@ -64,7 +64,7 @@ class ImgurAlbumCreation : public Net::NetRequest {
         QByteArray m_output;
     };
 
-    static NetRequest::Ptr make(std::shared_ptr<Result> output, QList<ScreenShot::Ptr> screenshots);
+    static Request::Ptr make(std::shared_ptr<Result> output, QList<ScreenShot::Ptr> screenshots);
     QNetworkReply* getReply(QNetworkRequest& request) override;
 
    private:
