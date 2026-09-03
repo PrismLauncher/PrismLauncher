@@ -59,18 +59,16 @@ class LockDelegate : public QStyledItemDelegate {
 
         bool locked = index.data(Qt::UserRole).toBool();
 
-        const QIcon& icon = QIcon::fromTheme(locked ? "lock" : "unlock");
-
-        // Draw default background / selection
         option.text.clear();
-        option.icon = QIcon();
-
-        option.widget->style()->drawControl(QStyle::CE_ItemViewItem, &option, painter);
+        option.icon = QIcon::fromTheme(locked ? "lock" : "unlock");
+        option.features |= QStyleOptionViewItem::HasDecoration;
+        option.decorationAlignment = Qt::AlignCenter;
+        option.decorationPosition = QStyleOptionViewItem::Top;
 
         int size = qMin(option.rect.width(), option.rect.height()) * 3 / 4;
-        QRect iconRect(option.rect.center().x() - (size / 2), option.rect.center().y() - (size / 2), size, size);
+        option.decorationSize = QSize(size, size);
 
-        icon.paint(painter, iconRect);
+        option.widget->style()->drawControl(QStyle::CE_ItemViewItem, &option, painter);
     }
 
     bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& /*option*/, const QModelIndex& index) override
