@@ -55,7 +55,6 @@
 #include <Qt>
 
 #include "FileSystem.h"
-#include "tools/MCEditTool.h"
 
 #include "DesktopServices.h"
 #include "ui/GuiUtil.h"
@@ -315,82 +314,11 @@ void WorldListPage::on_actionCopy_Seed_triggered()
     APPLICATION->clipboard()->setText(QString::number(seed));
 }
 
-void WorldListPage::on_actionMCEdit_triggered()
-{
-    if (m_mceditStarting)
-        return;
-
-    auto mcedit = APPLICATION->mcedit();
-
-    const QString mceditPath = mcedit->path();
-
-    QModelIndex index = getSelectedWorld();
-
-    if (!index.isValid()) {
-        return;
-    }
-
-    if (!worldSafetyNagQuestion(tr("Open World in MCEdit")))
-        return;
-
-    auto fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
-
-    auto program = mcedit->getProgramPath();
-    if (program.size()) {
-#ifdef Q_OS_WIN32
-        if (!QProcess::startDetached(program, { fullPath }, mceditPath)) {
-            mceditError();
-        }
-#else
-        m_mceditProcess.reset(new LoggedProcess());
-        m_mceditProcess->setDetachable(true);
-        connect(m_mceditProcess.get(), &LoggedProcess::stateChanged, this, &WorldListPage::mceditState);
-        m_mceditProcess->start(program, { fullPath });
-        m_mceditProcess->setWorkingDirectory(mceditPath);
-        m_mceditStarting = true;
-#endif
-    } else {
-        QMessageBox::warning(this->parentWidget(), tr("No MCEdit found or set up!"),
-                             tr("You do not have MCEdit set up or it was moved.\nYou can set it up in the global settings."));
-    }
-}
-
-void WorldListPage::mceditError()
-{
-    QMessageBox::warning(this->parentWidget(), tr("MCEdit failed to start!"),
-                         tr("MCEdit failed to start.\nIt may be necessary to reinstall it."));
-}
-
-void WorldListPage::mceditState(LoggedProcess::State state)
-{
-    bool failed = false;
-    switch (state) {
-        case LoggedProcess::NotRunning:
-        case LoggedProcess::Starting:
-            return;
-        case LoggedProcess::FailedToStart:
-        case LoggedProcess::Crashed:
-        case LoggedProcess::Aborted: {
-            failed = true;
-        }
-        /* fallthrough */
-        case LoggedProcess::Running:
-        case LoggedProcess::Finished: {
-            m_mceditStarting = false;
-            break;
-        }
-    }
-    if (failed) {
-        mceditError();
-    }
-}
-
 void WorldListPage::worldChanged([[maybe_unused]] const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     QModelIndex index = getSelectedWorld();
     bool enable = index.isValid();
     ui->actionCopy_Seed->setEnabled(enable);
-    ui->actionMCEdit->setEnabled(enable);
     ui->actionRemove->setEnabled(enable);
     ui->actionCopy->setEnabled(enable);
     ui->actionRename->setEnabled(enable);

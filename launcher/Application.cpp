@@ -113,7 +113,6 @@
 
 #include "tools/JProfiler.h"
 #include "tools/JVisualVM.h"
-#include "tools/MCEditTool.h"
 
 #include "settings/INISettingsObject.h"
 #include "settings/Setting.h"
@@ -1045,11 +1044,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     m_profilers.insert("generic", std::shared_ptr<BaseProfilerFactory>(new GenericProfilerFactory()));
     for (auto profiler : m_profilers.values()) {
         profiler->registerSettings(m_settings.get());
-    }
-
-    // Create the MCEdit thing... why is this here?
-    {
-        m_mcedit.reset(new MCEditTool(m_settings.get()));
     }
 
 #ifdef Q_OS_MACOS
