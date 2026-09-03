@@ -70,7 +70,7 @@ ResourcePackPage::ResourcePackPage(MinecraftInstance* instance, ResourcePackFold
     connect(m_ui->actionChangeVersion, &QAction::triggered, this, &ResourcePackPage::changeResourcePackVersion);
     m_ui->actionsToolbar->insertActionAfter(m_ui->actionUpdateItem, m_ui->actionChangeVersion);
 
-    m_ui->actionsToolbar->insertActionAfter(m_ui->actionUpdateItem, m_ui->actionLockUpdates);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionChangeVersion, m_ui->actionLockUpdates);
     m_ui->actionsToolbar->insertActionAfter(m_ui->actionLockUpdates, m_ui->actionUnlockUpdates);
 }
 
