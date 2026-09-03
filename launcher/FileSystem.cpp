@@ -338,7 +338,7 @@ bool copy::operator()(const QString& offset, bool dryRun)
 
         auto dstPath = PathCombine(dst, relative_dst_path);
         if (!dryRun) {
-            std::string srcStdPath = StringUtils::toStdString(src_path);
+            auto srcStdPath = StringUtils::toStdString(src_path);
             if (fs::is_directory(srcStdPath) && !fs::is_symlink(srcStdPath)) {
                 ensureFolderPathExists(dstPath);
             } else {
