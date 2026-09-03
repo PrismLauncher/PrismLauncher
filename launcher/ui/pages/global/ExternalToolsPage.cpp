@@ -100,7 +100,7 @@ void ExternalToolsPage::setupWorldToolBrowseBtn(QTreeWidgetItem* item)
     connect(btn, &QPushButton::clicked, this, [this, item]() {
         QString filePath = QFileDialog::getOpenFileName(this, tr("Select Executable"));
         if (!filePath.isEmpty()) {
-            item->setText(1, filePath + " {{world_path}}");
+            item->setText(1, filePath + " ${WORLD_PATH}");
         }
     });
     ui->worldToolTree->setItemWidget(item, 2, btn);

@@ -242,7 +242,7 @@
           <item>
            <widget class="QLabel" name="worldToolsHint">
             <property name="text">
-             <string>Custom tools launchable on worlds from the instance Worlds menu. Command supports the {{world_path}} placeholder.</string>
+             <string>Custom tools launchable on worlds from the instance Worlds menu. Command supports the ${WORLD_PATH} placeholder.</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>

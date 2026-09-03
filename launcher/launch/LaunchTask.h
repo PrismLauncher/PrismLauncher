@@ -39,10 +39,13 @@
 #include <QObjectPtr.h>
 #include <minecraft/MinecraftInstance.h>
 #include <QProcess>
+#include <QProcessEnvironment>
 #include "LaunchStep.h"
 #include "LogModel.h"
 #include "MessageLevel.h"
 #include "logs/LogParser.h"
+
+QString expandVariables(const QString& input, QProcessEnvironment dict);
 
 class LaunchTask : public Task {
     Q_OBJECT
@@ -115,7 +118,7 @@ class LaunchTask : public Task {
     void finalizeSteps(bool successful, const QString& error);
 
    protected:
-    bool parseXmlLogs(QString const& line, MessageLevel level);
+    bool parseXmlLogs(const QString& line, MessageLevel level);
 
    protected: /* data */
     MinecraftInstance* m_instance;

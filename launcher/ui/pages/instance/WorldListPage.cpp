@@ -65,18 +65,7 @@
 
 #include "Application.h"
 #include "DataPackPage.h"
-
-namespace {
-QString expandWorldToolVars(const QString& command, const QVariantMap& vars)
-{
-    QString result = command;
-    for (auto it = vars.constBegin(); it != vars.constEnd(); ++it) {
-        const QString placeholder = "{{" + it.key().toLower() + "}}";
-        result.replace(placeholder, it.value().toString());
-    }
-    return result;
-}
-}  // namespace
+#include "launch/LaunchTask.h"
 
 class WorldListProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
@@ -378,19 +367,20 @@ void WorldListPage::launchWorldTool(const QString& name, const QString& command)
     }
 
     const auto folderPath = m_worlds->data(index, WorldList::FolderRole).toString();
-    QVariantMap vars;
-    vars.insert("world_path", folderPath);
-    const auto toolCommand = expandWorldToolVars(command, vars);
+    QProcessEnvironment vars;
+    vars.insert("WORLD_PATH", folderPath);
 
-    const auto args = QProcess::splitCommand(toolCommand);
+    auto args = QProcess::splitCommand(command);
     if (args.isEmpty()) {
         QMessageBox::warning(this->parentWidget(), tr("Invalid command"), tr("The tool command is empty."));
         return;
     }
-    const auto& program = args.first();
-    const auto rest = args.mid(1);
+    for (auto& arg : args) {
+        arg = expandVariables(arg, vars);
+    }
 
-    if (!QProcess::startDetached(program, rest, folderPath)) {
+    const auto program = args.takeFirst();
+    if (!QProcess::startDetached(program, args, folderPath)) {
         QMessageBox::warning(this->parentWidget(), tr("Tool failed to start!"),
                              tr("The tool could not be started.\nIt may be necessary to check its command."));
     }
