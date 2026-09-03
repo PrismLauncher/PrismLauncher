@@ -53,8 +53,8 @@ body:
     required: true
 - type: textarea
   attributes:
-    label: Suspected cause
-    description: If you know what could be causing this bug, describe it here.
+    label: Other information
+    description: If you have an idea where the problem might lie, let us know that here. Please include any pointers to code, relevant changes, or related issues you know of.
   validations:
     required: false
 - type: checkboxes
