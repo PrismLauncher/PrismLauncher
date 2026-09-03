@@ -5,6 +5,7 @@
 #include "ProgressDialog.h"
 #include "ScrollMessageBox.h"
 #include "StringUtils.h"
+#include "Version.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
@@ -71,6 +72,24 @@ ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
 
 void ResourceUpdateDialog::checkCandidates()
 {
+    // If multiple versions are allowed, only check the newest installed one
+    if (m_resourceModel->allowsMultipleVersions()) {
+        QHash<QString, Resource*> newestPerProject;
+        for (auto* candidate : m_candidates) {
+            auto metadata = candidate->metadata();
+            if (!metadata)
+                continue;
+            auto* newest = newestPerProject.value(metadata->project_id.toString());
+            if (newest == nullptr || Version(metadata->version_number) > Version(newest->metadata()->version_number))
+                newestPerProject.insert(metadata->project_id.toString(), candidate);
+        }
+        auto isOldVersion = [&newestPerProject](Resource* candidate) {
+            auto metadata = candidate->metadata();
+            return metadata && newestPerProject.value(metadata->project_id.toString()) != candidate;
+        };
+        m_candidates.removeIf(isOldVersion);
+    }
+
     // Ensure mods have valid metadata
     auto wentWell = ensureMetadata();
     if (!wentWell) {

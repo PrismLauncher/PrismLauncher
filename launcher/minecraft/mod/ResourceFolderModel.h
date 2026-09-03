@@ -87,6 +87,8 @@ class ResourceFolderModel : public QAbstractListModel {
 
     virtual QDir indexDir() const { return { QString("%1/.index").arg(dir().absolutePath()) }; }
 
+    [[nodiscard]] virtual bool allowsMultipleVersions() const { return false; }
+
     /** Given a path in the system, install that resource, moving it to its place in the
      *  instance file hierarchy.
      *
