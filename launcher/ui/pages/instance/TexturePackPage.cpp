@@ -72,7 +72,7 @@ TexturePackPage::TexturePackPage(MinecraftInstance* instance, TexturePackFolderM
 
     m_ui->actionViewHomepage->setToolTip(tr("View the homepages of all selected texture packs."));
 
-    m_ui->actionsToolbar->insertActionAfter(m_ui->actionUpdateItem, m_ui->actionLockUpdates);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionChangeVersion, m_ui->actionLockUpdates);
     m_ui->actionsToolbar->insertActionAfter(m_ui->actionLockUpdates, m_ui->actionUnlockUpdates);
 }
 

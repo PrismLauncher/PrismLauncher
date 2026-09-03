@@ -598,7 +598,7 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
             if (column == ActiveColumn) {
                 return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
             }
-            [[fallthrough]];
+            return {};
         case Qt::UserRole:
             if (column == LockUpdateColumn) {
                 return at(row).lockUpdate();
@@ -681,11 +681,15 @@ void ResourceFolderModel::setupHeaderAction(QAction* act, int column) const
 void ResourceFolderModel::saveColumns(QTreeView* tree)
 {
     const auto stateSettingName = QString("UI/%1_Page/Columns").arg(id());
+    const auto columnsCountSettingName = QString("UI/%1_Page/ColumnsCount").arg(id());
     const auto overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
     const auto visibilitySettingName = QString("UI/%1_Page/ColumnsVisibility").arg(id());
 
     auto stateSetting = m_instance->settings()->getSetting(stateSettingName);
     stateSetting->set(QString::fromUtf8(tree->header()->saveState().toBase64()));
+
+    auto columnsCountSetting = m_instance->settings()->getSetting(columnsCountSettingName);
+    columnsCountSetting->set(columnCount());
 
     // neither passthrough nor override settings works for this usecase as I need to only set the global when the gate is false
     auto* settings = m_instance->settings();
@@ -705,11 +709,23 @@ void ResourceFolderModel::saveColumns(QTreeView* tree)
 void ResourceFolderModel::loadColumns(QTreeView* tree)
 {
     const auto stateSettingName = QString("UI/%1_Page/Columns").arg(id());
+    const auto columnsCountSettingName = QString("UI/%1_Page/ColumnsCount").arg(id());
     const auto overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
     const auto visibilitySettingName = QString("UI/%1_Page/ColumnsVisibility").arg(id());
 
     auto stateSetting = m_instance->settings()->getOrRegisterSetting(stateSettingName, "");
+    auto columnsCountSetting = m_instance->settings()->getOrRegisterSetting(columnsCountSettingName, 0);
+    int savedColumnsCount = columnsCountSetting->get().toInt();
+
     tree->header()->restoreState(QByteArray::fromBase64(stateSetting->get().toString().toUtf8()));
+
+    if (savedColumnsCount < columnCount()) {
+        // force redraw of the columns that were added after the last save, otherwise they will not work properly
+        for (int col = savedColumnsCount; col < columnCount(); ++col) {
+            tree->setColumnHidden(col, true);
+            tree->setColumnHidden(col, false);
+        }
+    }
 
     auto setVisible = [this, tree](const QVariant& value) {
         auto visibility = Json::toMap(value.toString());

@@ -102,7 +102,7 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
             if (column == ActiveColumn) {
                 return at(row).enabled() ? Qt::Checked : Qt::Unchecked;
             }
-            [[fallthrough]];
+            return {};
         case Qt::UserRole:
             if (column == LockUpdateColumn) {
                 return at(row).lockUpdate();

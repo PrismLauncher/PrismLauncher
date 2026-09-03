@@ -116,11 +116,7 @@ auto Resource::homepage() const -> QString
 
 bool Resource::lockUpdate() const
 {
-    if (metadata()) {
-        return metadata()->lockUpdate;
-    }
-
-    return false;
+    return metadata() && metadata()->lockUpdate;
 }
 
 void Resource::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
