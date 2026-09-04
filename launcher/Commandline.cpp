@@ -140,4 +140,15 @@ QString expandVariables(const QString& input, const QProcessEnvironment& dict)
     }
     return result;
 }
+
+QString quoteForSplitCommand(const QString& input)
+{
+    if (!input.contains(' ')) {
+        return input;
+    }
+
+    QString escaped = input;
+    escaped.replace("\"", "\"\"\"");
+    return "\"" + escaped + "\"";
+}
 }  // namespace Commandline

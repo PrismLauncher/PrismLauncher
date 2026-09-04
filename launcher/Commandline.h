@@ -41,4 +41,11 @@ QStringList splitArgs(const QString& args);
  * @return the expanded string
  */
 QString expandVariables(const QString& input, const QProcessEnvironment& dict);
+
+/**
+ * @brief quote a single argument so that QProcess::splitCommand() parses it back out unchanged
+ * @param input the argument to quote
+ * @return the quoted argument, or the input unchanged if quoting isn't necessary
+ */
+QString quoteForSplitCommand(const QString& input);
 }  // namespace Commandline

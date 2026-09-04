@@ -44,6 +44,7 @@
 #include <FileSystem.h>
 #include <QTreeWidgetItem>
 #include "Application.h"
+#include "Commandline.h"
 #include "Json.h"
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
@@ -100,7 +101,7 @@ void ExternalToolsPage::setupWorldToolBrowseBtn(QTreeWidgetItem* item)
     connect(btn, &QPushButton::clicked, this, [this, item]() {
         QString filePath = QFileDialog::getOpenFileName(this, tr("Select Executable"));
         if (!filePath.isEmpty()) {
-            item->setText(1, filePath + " ${WORLD_PATH}");
+            item->setText(1, Commandline::quoteForSplitCommand(filePath) + " ${WORLD_PATH}");
         }
     });
     ui->worldToolTree->setItemWidget(item, 2, btn);
