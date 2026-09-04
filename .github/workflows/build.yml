@@ -43,15 +43,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-24.04
-            artifact-name: Linux
-            cmake-preset: linux
-            qt-version: 6.10.2
+          # - os: ubuntu-24.04
+          #   artifact-name: Linux
+          #   cmake-preset: linux
+          #   qt-version: 6.10.2
 
-          - os: ubuntu-24.04-arm
-            artifact-name: Linux-aarch64
-            cmake-preset: linux
-            qt-version: 6.10.2
+          # - os: ubuntu-24.04-arm
+          #   artifact-name: Linux-aarch64
+          #   cmake-preset: linux
+          #   qt-version: 6.10.2
 
           - os: windows-2022
             artifact-name: Windows-MinGW-w64
@@ -72,11 +72,11 @@ jobs:
             vcvars-arch: arm64
             qt-version: 6.10.2
 
-          - os: macos-26
-            artifact-name: macOS
-            cmake-preset: macos_universal
-            macosx-deployment-target: 12.0
-            qt-version: 6.9.3
+          # - os: macos-26
+          #   artifact-name: macOS
+          #   cmake-preset: macos_universal
+          #   macosx-deployment-target: 12.0
+          #   qt-version: 6.9.3
 
     runs-on: ${{ matrix.os }}
 
@@ -138,33 +138,33 @@ jobs:
         run: |
           echo "version=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Package (Linux)
-        if: ${{ runner.os == 'Linux' }}
-        uses: ./.github/actions/package/linux
-        with:
-          version: ${{ steps.short-version.outputs.version }}
-          build-type: ${{ steps.setup-dependencies.outputs.build-type }}
-          artifact-name: ${{ matrix.artifact-name }}
-          qt-version: ${{ steps.setup-dependencies.outputs.qt-version }}
+      # - name: Package (Linux)
+      #   if: ${{ runner.os == 'Linux' }}
+      #   uses: ./.github/actions/package/linux
+      #   with:
+      #     version: ${{ steps.short-version.outputs.version }}
+      #     build-type: ${{ steps.setup-dependencies.outputs.build-type }}
+      #     artifact-name: ${{ matrix.artifact-name }}
+      #     qt-version: ${{ steps.setup-dependencies.outputs.qt-version }}
 
-          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          gpg-private-key-id: ${{ secrets.GPG_PRIVATE_KEY_ID }}
+      #     gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+      #     gpg-private-key-id: ${{ secrets.GPG_PRIVATE_KEY_ID }}
 
-      - name: Package (macOS)
-        if: ${{ runner.os == 'macOS' }}
-        uses: ./.github/actions/package/macos
-        with:
-          version: ${{ steps.short-version.outputs.version }}
-          build-type: ${{ steps.setup-dependencies.outputs.build-type }}
-          artifact-name: ${{ matrix.artifact-name }}
+      # - name: Package (macOS)
+      #   if: ${{ runner.os == 'macOS' }}
+      #   uses: ./.github/actions/package/macos
+      #   with:
+      #     version: ${{ steps.short-version.outputs.version }}
+      #     build-type: ${{ steps.setup-dependencies.outputs.build-type }}
+      #     artifact-name: ${{ matrix.artifact-name }}
 
-          apple-codesign-cert: ${{ secrets.APPLE_CODESIGN_CERT }}
-          apple-codesign-password: ${{ secrets.APPLE_CODESIGN_PASSWORD }}
-          apple-codesign-id: ${{ secrets.APPLE_CODESIGN_ID }}
-          apple-notarize-apple-id: ${{ secrets.APPLE_NOTARIZE_APPLE_ID }}
-          apple-notarize-team-id: ${{ secrets.APPLE_NOTARIZE_TEAM_ID }}
-          apple-notarize-password: ${{ secrets.APPLE_NOTARIZE_PASSWORD }}
-          sparkle-ed25519-key: ${{ secrets.SPARKLE_ED25519_KEY }}
+      #     apple-codesign-cert: ${{ secrets.APPLE_CODESIGN_CERT }}
+      #     apple-codesign-password: ${{ secrets.APPLE_CODESIGN_PASSWORD }}
+      #     apple-codesign-id: ${{ secrets.APPLE_CODESIGN_ID }}
+      #     apple-notarize-apple-id: ${{ secrets.APPLE_NOTARIZE_APPLE_ID }}
+      #     apple-notarize-team-id: ${{ secrets.APPLE_NOTARIZE_TEAM_ID }}
+      #     apple-notarize-password: ${{ secrets.APPLE_NOTARIZE_PASSWORD }}
+      #     sparkle-ed25519-key: ${{ secrets.SPARKLE_ED25519_KEY }}
 
       - name: Package (Windows)
         if: ${{ runner.os == 'Windows' }}
