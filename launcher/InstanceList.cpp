@@ -144,6 +144,30 @@ QStringList InstanceList::getLinkedInstancesById(const QString& id) const
     return linkedInstances;
 }
 
+QStringList InstanceList::groupOrder() const
+{
+    return m_groupOrder;
+}
+
+void InstanceList::moveGroup(const QString& group, int toIndex)
+{
+    int fromIndex = m_groupOrder.indexOf(group);
+    if (fromIndex < 0)
+        return;
+
+    int size = m_groupOrder.size();
+    toIndex = qBound(0, toIndex, size);
+    if (fromIndex == toIndex)
+        return;
+
+    QString name = m_groupOrder.takeAt(fromIndex);
+    // After takeAt, insert position shifts if target was after the removed position
+    int insertAt = (fromIndex < toIndex) ? (toIndex - 1) : toIndex;
+    m_groupOrder.insert(insertAt, name);
+    emit groupOrderChanged();
+    saveGroupList();
+}
+
 int InstanceList::rowCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
@@ -296,6 +320,8 @@ void InstanceList::deleteGroup(const GroupId& name)
     if (removed) {
         saveGroupList();
     }
+    m_groupOrder.removeAll(name);
+    emit groupOrderChanged();
 }
 
 void InstanceList::renameGroup(const QString& src, const QString& dst)
@@ -324,6 +350,14 @@ void InstanceList::renameGroup(const QString& src, const QString& dst)
     if (modified) {
         saveGroupList();
     }
+    if (src != dst) {
+        m_groupOrder.removeAll(dst);
+        const int idx = static_cast<int>(m_groupOrder.indexOf(src));
+        if (idx >= 0) {
+            m_groupOrder[idx] = dst;
+        }
+    }
+    emit groupOrderChanged();
 }
 
 bool InstanceList::isGroupCollapsed(const QString& group)
@@ -731,7 +765,11 @@ void InstanceList::increaseGroupCount(const QString& group)
         return;
     }
 
+    bool wasNew = !m_groupNameCache.contains(group);
     ++m_groupNameCache[group];
+    if (wasNew && !m_groupOrder.contains(group)) {
+        m_groupOrder.append(group);
+    }
 }
 
 void InstanceList::decreaseGroupCount(const QString& group)
@@ -743,6 +781,7 @@ void InstanceList::decreaseGroupCount(const QString& group)
     if (--m_groupNameCache[group] < 1) {
         m_groupNameCache.remove(group);
         m_collapsedGroups.remove(group);
+        m_groupOrder.removeAll(group);
     }
 }
 
@@ -788,6 +827,16 @@ void InstanceList::saveGroupList()
         ungrouped.insert("hidden", QJsonValue(true));
         toplevel.insert("ungrouped", ungrouped);
     }
+    // Save group order (deduplicate to prevent silent corruption)
+    QJsonArray orderArr;
+    QStringList savedOrder;
+    for (const auto& name : m_groupOrder) {
+        if (!savedOrder.contains(name) && (name.isEmpty() || m_groupNameCache.contains(name))) {
+            savedOrder.append(name);
+            orderArr.append(name);
+        }
+    }
+    toplevel.insert("groupOrder", orderArr);
     QJsonDocument doc(toplevel);
     try {
         FS::write(groupFileName, doc.toJson());
@@ -813,6 +862,10 @@ void InstanceList::loadGroupList()
     if (!QFileInfo::exists(groupFileName)) {
         QString legacyGroupFileName = FS::PathCombine(primaryDir(), "instgroups.json");
         if (!QFileInfo::exists(legacyGroupFileName)) {
+            // No group file at all: set up the default state
+            m_groupOrder.clear();
+            m_groupOrder.append("");
+            m_groupsLoaded = true;
             return;
         }
         qInfo() << "Migrating instance groups from legacy location" << legacyGroupFileName;
@@ -858,6 +911,18 @@ void InstanceList::loadGroupList()
         return;
     }
 
+    m_groupOrder.clear();
+
+    // Load saved group order FIRST, so increaseGroupCount won't re-add groups out of order
+    if (rootObj.value("groupOrder").isArray()) {
+        const QJsonArray orderArr = rootObj.value("groupOrder").toArray();
+        for (const auto& val : orderArr) {
+            const QString name = val.toString();
+            m_groupOrder.append(name);
+        }
+    }
+
+    // Iterate through all the groups.
     QJsonObject groupMapping = rootObj.value("groups").toObject();
     for (QJsonObject::iterator iter = groupMapping.begin(); iter != groupMapping.end(); iter++) {
         QString groupName = iter.key();
@@ -898,6 +963,23 @@ void InstanceList::loadGroupList()
         // empty string represents ungrouped "group"
         m_collapsedGroups.insert("");
     }
+
+    // Deduplicate group order (defense against previously-corrupted data)
+    QStringList uniqueOrder;
+    for (const auto& name : m_groupOrder) {
+        if (!uniqueOrder.contains(name))
+            uniqueOrder.append(name);
+    }
+    m_groupOrder = uniqueOrder;
+
+    // Treat ungrouped group (empty string) as a regular group for ordering
+    if (m_groupOrder.isEmpty()) {
+        m_groupOrder = m_groupNameCache.keys();
+        m_groupOrder.sort();
+    }
+    if (!m_groupOrder.contains(""))
+        m_groupOrder.append("");
+
     m_groupsLoaded = true;
     qDebug() << "Group list loaded.";
 
