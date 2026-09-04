@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <QProcessEnvironment>
 #include <QString>
 #include <QStringList>
 

@@ -4,6 +4,8 @@
 #include <QCryptographicHash>
 #include <QToolButton>
 
+#include <algorithm>
+
 class ActionButton : public QToolButton {
     Q_OBJECT
    public:
@@ -92,7 +94,7 @@ void WideBar::addSeparator()
 
 auto WideBar::getMatching(QAction* act) -> QList<BarEntry>::iterator
 {
-    auto iter = std::find_if(m_entries.begin(), m_entries.end(), [act](const BarEntry& entry) { return entry.menu_action == act; });
+    auto iter = std::ranges::find_if(m_entries, [act](const BarEntry& entry) { return entry.menu_action == act; });
 
     return iter;
 }
@@ -307,9 +309,9 @@ QByteArray WideBar::getHash() const
     return hash.result().toBase64();
 }
 
-bool WideBar::checkHash(const QByteArray& old_hash) const
+bool WideBar::checkHash(const QByteArray& oldHash) const
 {
-    return old_hash == getHash();
+    return oldHash == getHash();
 }
 
 void WideBar::removeAction(QAction* action)

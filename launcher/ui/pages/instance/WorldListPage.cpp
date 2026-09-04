@@ -66,7 +66,6 @@
 
 #include "Application.h"
 #include "DataPackPage.h"
-#include "launch/LaunchTask.h"
 
 class WorldListProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
@@ -129,7 +128,7 @@ WorldListPage::WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget
         }
     });
     connect(APPLICATION->settings()->getSetting("WorldTools").get(), &Setting::SettingChanged, this,
-            [this](const Setting& /*setting*/, QVariant /*value*/) { populateWorldToolsMenu(); });
+            [this](const Setting& /*setting*/, const QVariant& /*value*/) { populateWorldToolsMenu(); });
 
     worldChanged(QModelIndex(), QModelIndex());
 }
@@ -358,7 +357,7 @@ void WorldListPage::populateWorldToolsMenu()
 
 void WorldListPage::launchWorldTool(const QString& name, const QString& command)
 {
-    QModelIndex index = getSelectedWorld();
+    const QModelIndex index = getSelectedWorld();
     if (!index.isValid()) {
         return;
     }

@@ -99,7 +99,7 @@ void ExternalToolsPage::setupWorldToolBrowseBtn(QTreeWidgetItem* item)
     auto* btn = new QPushButton("...");
     btn->setFixedWidth(30);
     connect(btn, &QPushButton::clicked, this, [this, item]() {
-        QString filePath = QFileDialog::getOpenFileName(this, tr("Select Executable"));
+        const QString filePath = QFileDialog::getOpenFileName(this, tr("Select Executable"));
         if (!filePath.isEmpty()) {
             item->setText(1, Commandline::quoteForSplitCommand(filePath) + " ${WORLD_PATH}");
         }

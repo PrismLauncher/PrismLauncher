@@ -90,50 +90,50 @@ QString expandVariables(const QString& input, const QProcessEnvironment& dict)
 {
     QString result = input;
 
-    enum State : std::uint8_t { Base, MaybeBrace, Variable, Brace } state = Base;
+    enum class State : std::uint8_t { Base, MaybeBrace, Variable, Brace } state = State::Base;
     int startIdx = -1;
     for (int i = 0; i < result.length();) {
-        QChar c = result.at(i++);
+        const QChar c = result.at(i++);
         switch (state) {
-            case Base:
+            case State::Base:
                 if (c == '$') {
-                    state = MaybeBrace;
+                    state = State::MaybeBrace;
                 }
                 break;
-            case MaybeBrace:
+            case State::MaybeBrace:
                 if (c == '{') {
-                    state = Brace;
+                    state = State::Brace;
                     startIdx = i;
                 } else if (c.isLetterOrNumber() || c == '_') {
-                    state = Variable;
+                    state = State::Variable;
                     startIdx = i - 1;
                 } else {
-                    state = Base;
+                    state = State::Base;
                 }
                 break;
-            case Brace:
+            case State::Brace:
                 if (c == '}') {
                     const auto res = dict.value(result.mid(startIdx, i - 1 - startIdx), "");
                     if (!res.isEmpty()) {
                         result.replace(startIdx - 2, i - startIdx + 2, res);
                         i = startIdx - 2 + res.length();
                     }
-                    state = Base;
+                    state = State::Base;
                 }
                 break;
-            case Variable:
+            case State::Variable:
                 if (!c.isLetterOrNumber() && c != '_') {
                     const auto res = dict.value(result.mid(startIdx, i - startIdx - 1), "");
                     if (!res.isEmpty()) {
                         result.replace(startIdx - 1, i - startIdx, res);
                         i = startIdx - 1 + res.length();
                     }
-                    state = Base;
+                    state = State::Base;
                 }
                 break;
         }
     }
-    if (state == Variable) {
+    if (state == State::Variable) {
         if (const auto res = dict.value(result.mid(startIdx), ""); !res.isEmpty()) {
             result.replace(startIdx - 1, result.length() - startIdx + 1, res);
         }
@@ -148,7 +148,7 @@ QString quoteForSplitCommand(const QString& input)
     }
 
     QString escaped = input;
-    escaped.replace("\"", "\"\"\"");
+    escaped.replace("\"", R"(""")");
     return "\"" + escaped + "\"";
 }
 }  // namespace Commandline
