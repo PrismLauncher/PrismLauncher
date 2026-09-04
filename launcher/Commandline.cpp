@@ -44,7 +44,7 @@
 namespace Commandline {
 
 // commandline splitter
-QStringList splitArgs(QString args)
+QStringList splitArgs(const QString& args)
 {
     QStringList argv;
     QString current;
@@ -59,12 +59,13 @@ QStringList splitArgs(QString args)
             escape = false;
             // in "quotes"
         } else if (!inquotes.isNull()) {
-            if (cchar == '\\')
+            if (cchar == '\\') {
                 escape = true;
-            else if (cchar == inquotes)
+            } else if (cchar == inquotes) {
                 inquotes = QChar::Null;
-            else
+            } else {
                 current += cchar;
+            }
             // otherwise
         } else {
             if (cchar == ' ') {
@@ -72,14 +73,82 @@ QStringList splitArgs(QString args)
                     argv << current;
                     current.clear();
                 }
-            } else if (cchar == '"' || cchar == '\'')
+            } else if (cchar == '"' || cchar == '\'') {
                 inquotes = cchar;
-            else
+            } else {
                 current += cchar;
+            }
         }
     }
-    if (!current.isEmpty())
+    if (!current.isEmpty()) {
         argv << current;
+    }
     return argv;
+}
+
+QString expandVariables(const QString& input, const QProcessEnvironment& dict)
+{
+    QString result = input;
+
+    enum class State : std::uint8_t { Base, MaybeBrace, Variable, Brace } state = State::Base;
+    int startIdx = -1;
+    for (int i = 0; i < result.length();) {
+        const QChar c = result.at(i++);
+        switch (state) {
+            case State::Base:
+                if (c == '$') {
+                    state = State::MaybeBrace;
+                }
+                break;
+            case State::MaybeBrace:
+                if (c == '{') {
+                    state = State::Brace;
+                    startIdx = i;
+                } else if (c.isLetterOrNumber() || c == '_') {
+                    state = State::Variable;
+                    startIdx = i - 1;
+                } else {
+                    state = State::Base;
+                }
+                break;
+            case State::Brace:
+                if (c == '}') {
+                    const auto res = dict.value(result.mid(startIdx, i - 1 - startIdx), "");
+                    if (!res.isEmpty()) {
+                        result.replace(startIdx - 2, i - startIdx + 2, res);
+                        i = startIdx - 2 + res.length();
+                    }
+                    state = State::Base;
+                }
+                break;
+            case State::Variable:
+                if (!c.isLetterOrNumber() && c != '_') {
+                    const auto res = dict.value(result.mid(startIdx, i - startIdx - 1), "");
+                    if (!res.isEmpty()) {
+                        result.replace(startIdx - 1, i - startIdx, res);
+                        i = startIdx - 1 + res.length();
+                    }
+                    state = State::Base;
+                }
+                break;
+        }
+    }
+    if (state == State::Variable) {
+        if (const auto res = dict.value(result.mid(startIdx), ""); !res.isEmpty()) {
+            result.replace(startIdx - 1, result.length() - startIdx + 1, res);
+        }
+    }
+    return result;
+}
+
+QString quoteForSplitCommand(const QString& input)
+{
+    if (!input.contains(' ')) {
+        return input;
+    }
+
+    QString escaped = input;
+    escaped.replace("\"", R"(""")");
+    return "\"" + escaped + "\"";
 }
 }  // namespace Commandline

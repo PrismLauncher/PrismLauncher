@@ -43,6 +43,7 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <variant>
+#include "Commandline.h"
 #include "MessageLevel.h"
 #include "tasks/Task.h"
 
@@ -215,7 +216,7 @@ shared_qobject_ptr<LogModel> LaunchTask::getLogModel()
     return m_logModel;
 }
 
-bool LaunchTask::parseXmlLogs(QString const& line, MessageLevel level)
+bool LaunchTask::parseXmlLogs(const QString& line, MessageLevel level)
 {
     LogParser* parser;
     switch (static_cast<MessageLevel::Enum>(level)) {
@@ -241,7 +242,7 @@ bool LaunchTask::parseXmlLogs(QString const& line, MessageLevel level)
         return true;
 
     auto model = getLogModel();
-    for (auto const& item : items) {
+    for (const auto& item : items) {
         if (std::holds_alternative<LogParser::LogEntry>(item)) {
             auto entry = std::get<LogParser::LogEntry>(item);
             auto msg = QString("[%1] [%2/%3] [%4]: %5")
@@ -301,60 +302,7 @@ void LaunchTask::emitFailed(QString reason)
     Task::emitFailed(reason);
 }
 
-QString expandVariables(const QString& input, QProcessEnvironment dict)
-{
-    QString result = input;
-
-    enum { base, maybeBrace, variable, brace } state = base;
-    int startIdx = -1;
-    for (int i = 0; i < result.length();) {
-        QChar c = result.at(i++);
-        switch (state) {
-            case base:
-                if (c == '$')
-                    state = maybeBrace;
-                break;
-            case maybeBrace:
-                if (c == '{') {
-                    state = brace;
-                    startIdx = i;
-                } else if (c.isLetterOrNumber() || c == '_') {
-                    state = variable;
-                    startIdx = i - 1;
-                } else {
-                    state = base;
-                }
-                break;
-            case brace:
-                if (c == '}') {
-                    const auto res = dict.value(result.mid(startIdx, i - 1 - startIdx), "");
-                    if (!res.isEmpty()) {
-                        result.replace(startIdx - 2, i - startIdx + 2, res);
-                        i = startIdx - 2 + res.length();
-                    }
-                    state = base;
-                }
-                break;
-            case variable:
-                if (!c.isLetterOrNumber() && c != '_') {
-                    const auto res = dict.value(result.mid(startIdx, i - startIdx - 1), "");
-                    if (!res.isEmpty()) {
-                        result.replace(startIdx - 1, i - startIdx, res);
-                        i = startIdx - 1 + res.length();
-                    }
-                    state = base;
-                }
-                break;
-        }
-    }
-    if (state == variable) {
-        if (const auto res = dict.value(result.mid(startIdx), ""); !res.isEmpty())
-            result.replace(startIdx - 1, result.length() - startIdx + 1, res);
-    }
-    return result;
-}
-
 QString LaunchTask::substituteVariables(QString& cmd, bool isLaunch) const
 {
-    return expandVariables(cmd, isLaunch ? m_instance->createLaunchEnvironment() : m_instance->createEnvironment());
+    return Commandline::expandVariables(cmd, isLaunch ? m_instance->createLaunchEnvironment() : m_instance->createEnvironment());
 }

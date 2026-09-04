@@ -42,7 +42,10 @@
 #include <QTabBar>
 
 #include <FileSystem.h>
+#include <QTreeWidgetItem>
 #include "Application.h"
+#include "Commandline.h"
+#include "Json.h"
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
 
@@ -54,6 +57,13 @@ ExternalToolsPage::ExternalToolsPage(QWidget* parent) : QWidget(parent), ui(new 
 
     ui->jvisualvmLink->setOpenExternalLinks(true);
     ui->jprofilerLink->setOpenExternalLinks(true);
+
+    ui->worldToolTree->header()->setStretchLastSection(false);
+    ui->worldToolTree->header()->setSectionResizeMode(0, QHeaderView::Interactive);
+    ui->worldToolTree->header()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui->worldToolTree->header()->setSectionResizeMode(2, QHeaderView::Interactive);
+    ui->worldToolTree->header()->resizeSection(0, 150);
+    ui->worldToolTree->header()->resizeSection(2, 36);
     loadSettings();
 }
 
@@ -70,6 +80,31 @@ void ExternalToolsPage::loadSettings()
 
     // Editors
     ui->jsonEditorTextBox->setText(s->get("JsonEditor").toString());
+
+    // World Tools
+    ui->worldToolTree->clear();
+    const QVariantMap tools = Json::toMap(APPLICATION->settings()->get("WorldTools").toString());
+    for (auto it = tools.constBegin(); it != tools.constEnd(); ++it) {
+        auto* item = new QTreeWidgetItem(ui->worldToolTree);
+        item->setText(0, it.key());
+        item->setText(1, it.value().toString());
+        item->setFlags(item->flags() | Qt::ItemIsEditable);
+        ui->worldToolTree->addTopLevelItem(item);
+        setupWorldToolBrowseBtn(item);
+    }
+}
+
+void ExternalToolsPage::setupWorldToolBrowseBtn(QTreeWidgetItem* item)
+{
+    auto* btn = new QPushButton("...");
+    btn->setFixedWidth(30);
+    connect(btn, &QPushButton::clicked, this, [this, item]() {
+        const QString filePath = QFileDialog::getOpenFileName(this, tr("Select Executable"));
+        if (!filePath.isEmpty()) {
+            item->setText(1, Commandline::quoteForSplitCommand(filePath) + " ${WORLD_PATH}");
+        }
+    });
+    ui->worldToolTree->setItemWidget(item, 2, btn);
 }
 void ExternalToolsPage::applySettings()
 {
@@ -87,6 +122,18 @@ void ExternalToolsPage::applySettings()
         }
     }
     s->set("JsonEditor", jsonEditor);
+
+    // World Tools
+    QVariantMap tools;
+    auto* item = ui->worldToolTree->topLevelItem(0);
+    for (int i = 1; item != nullptr; item = ui->worldToolTree->topLevelItem(i++)) {
+        const QString name = item->text(0).trimmed();
+        const QString command = item->text(1).trimmed();
+        if (!name.isEmpty() || !command.isEmpty()) {
+            tools.insert(name, command);
+        }
+    }
+    APPLICATION->settings()->set("WorldTools", Json::fromMap(tools));
 }
 
 void ExternalToolsPage::on_jprofilerPathBtn_clicked()
@@ -144,6 +191,23 @@ void ExternalToolsPage::on_jvisualvmCheckBtn_clicked()
         QMessageBox::critical(this, tr("Error"), tr("Error while checking VisualVM install:\n%1").arg(error));
     } else {
         QMessageBox::information(this, tr("OK"), tr("VisualVM setup seems to be OK"));
+    }
+}
+
+void ExternalToolsPage::on_worldToolAddBtn_clicked()
+{
+    auto* item = new QTreeWidgetItem(ui->worldToolTree);
+    item->setFlags(item->flags() | Qt::ItemIsEditable);
+    ui->worldToolTree->addTopLevelItem(item);
+    setupWorldToolBrowseBtn(item);
+    ui->worldToolTree->setCurrentItem(item);
+    ui->worldToolTree->editItem(item, 0);
+}
+
+void ExternalToolsPage::on_worldToolRemoveBtn_clicked()
+{
+    for (QTreeWidgetItem* item : ui->worldToolTree->selectedItems()) {
+        ui->worldToolTree->takeTopLevelItem(ui->worldToolTree->indexOfTopLevelItem(item));
     }
 }
 
