@@ -53,6 +53,10 @@
 class BaseInstance;
 class QFileSystemWatcher;
 
+/**
+ * A legacy mod list.
+ * Backed by a folder.
+ */
 class ModFolderModel : public ResourceFolderModel {
     Q_OBJECT
    public:

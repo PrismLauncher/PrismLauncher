@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *  Copyright (C) 2026 Vivek Kushwaha <notvivekkushwaha@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,23 +14,6 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
- * This file incorporates work covered by the following copyright and
- * permission notice:
- *
- *      Copyright 2013-2021 MultiMC Contributors
- *
- *      Licensed under the Apache License, Version 2.0 (the "License");
- *      you may not use this file except in compliance with the License.
- *      You may obtain a copy of the License at
- *
- *          http://www.apache.org/licenses/LICENSE-2.0
- *
- *      Unless required by applicable law or agreed to in writing, software
- *      distributed under the License is distributed on an "AS IS" BASIS,
- *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *      See the License for the specific language governing permissions and
- *      limitations under the License.
  */
 
 #include "ModFolderPage.h"
@@ -241,6 +221,9 @@ void ModFolderPage::refreshOverview()
                               m_model->launchSnapshot());
     if (ui && ui->filterEdit)
         m_overviewWidget->filterTextChanged(ui->filterEdit->text());
+
+    if (updateExtraInfo)
+        updateExtraInfo(id(), extraHeaderInfoString());
 }
 
 bool ModFolderPage::loadOverviewDefault() const
@@ -402,20 +385,26 @@ void ModFolderPage::applyProfileSwitch(int index, int generation, bool isInitial
         }
 
         if (!m_instance->isRunning()) {
-            int capturedGeneration = generation;
-            QString capturedProfile = tabName;
-            m_applyingProfile = true;
-            m_model->applyEnabledIds(enabledMods);
-            connect(m_model, &ResourceFolderModel::updateFinished, this,
-                [this, capturedGeneration, capturedProfile] {
-                    if (capturedGeneration != m_profileSwitchGeneration ||
-                        capturedProfile != m_currentProfile) {
-                        return;
-                    }
-                    m_applyingProfile = false;
-                },
-                Qt::SingleShotConnection);
-            m_model->update();
+            // On initial load, an absent profile key means the filesystem state remains authoritative.
+            if (isInitialLoad && !m_instance->settings()->containsValue(profileKey(tabName))) {
+                m_applyingProfile = false;
+                repaintActiveColumn();
+            } else {
+                int capturedGeneration = generation;
+                QString capturedProfile = tabName;
+                m_applyingProfile = true;
+                m_model->applyEnabledIds(enabledMods);
+                connect(m_model, &ResourceFolderModel::updateFinished, this,
+                    [this, capturedGeneration, capturedProfile] {
+                        if (capturedGeneration != m_profileSwitchGeneration ||
+                            capturedProfile != m_currentProfile) {
+                            return;
+                        }
+                        m_applyingProfile = false;
+                    },
+                    Qt::SingleShotConnection);
+                m_model->update();
+            }
         } else {
             m_applyingProfile = false;
             repaintActiveColumn();

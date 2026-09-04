@@ -146,6 +146,8 @@ class ModFolderPage : public ExternalResourcesPage {
     void showEvent(QShowEvent* event) override;
     void hideEvent(QHideEvent* event) override;
 
+    QString extraHeaderInfoString() override;
+
     ModFolderModel*   m_model;
     QPointer<ResourceDownload::ResourceDownloadDialog> m_downloadDialog;
     QPointer<QWidget> m_filterWindow;

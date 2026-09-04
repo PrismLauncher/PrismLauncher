@@ -64,17 +64,18 @@ bool applyLastActiveProfile(ModFolderModel* model,
             lastActiveIndex = 0;
         profileName = profileList.at(lastActiveIndex);
     }
-    if (profileName == QStringLiteral("All Mods")) {
-        profileName = QStringLiteral("Default");
+
+    QString profileKeyStr = ModProfileKeys::profileKey(prefix, profileName);
+    auto profileSetting = settings->getOrRegisterSetting(profileKeyStr, QStringList());
+    QStringList ids = profileSetting->get().toStringList();
+
+    // An absent profile key means the filesystem remains authoritative.
+    bool hasPersistedState = settings->containsValue(profileKeyStr);
+
+    if (!hasPersistedState) {
+        return false;
     }
 
-    auto profileSetting = settings->getOrRegisterSetting(ModProfileKeys::profileKey(prefix, profileName), QStringList());
-    QStringList ids = profileSetting->get().toStringList();
-    if (ids.isEmpty() && profileName == QStringLiteral("Default")) {
-        auto legacySetting = settings->getOrRegisterSetting(
-            ModProfileKeys::profileKey(prefix, QStringLiteral("All Mods")), QStringList());
-        ids = legacySetting->get().toStringList();
-    }
     QSet<QString> enabledModIds(ids.begin(), ids.end());
     model->applyEnabledIds(enabledModIds);
     if (outApplied)
@@ -85,6 +86,7 @@ bool applyLastActiveProfile(ModFolderModel* model,
 QSet<QString> applyForModel(ModFolderModel* model, SettingsObject* settings, const QString& prefix)
 {
     QSet<QString> enabledModIds;
+    bool haveExplicitConfig = false;
 
     auto defaultSelectedSetting = settings->getOrRegisterSetting(
         ModProfileKeys::overviewDefaultSelectedKey(prefix), true);
@@ -96,17 +98,15 @@ QSet<QString> applyForModel(ModFolderModel* model, SettingsObject* settings, con
         QStringList profileList = profileListSetting->get().toStringList();
         if (!profileList.isEmpty()) {
             QString defaultName = profileList.at(0);
-            if (defaultName == QStringLiteral("All Mods"))
-                defaultName = QStringLiteral("Default");
-            auto profileSetting = settings->getOrRegisterSetting(
-                ModProfileKeys::profileKey(prefix, defaultName), QStringList());
-            QStringList ids = profileSetting->get().toStringList();
-            if (ids.isEmpty()) {
-                auto legacySetting = settings->getOrRegisterSetting(
-                    ModProfileKeys::profileKey(prefix, QStringLiteral("All Mods")), QStringList());
-                ids = legacySetting->get().toStringList();
+            QString profileKeyStr = ModProfileKeys::profileKey(prefix, defaultName);
+            auto profileSetting = settings->getOrRegisterSetting(profileKeyStr, QStringList());
+
+            // An absent profile key means the filesystem remains authoritative.
+            if (settings->containsValue(profileKeyStr)) {
+                QStringList ids = profileSetting->get().toStringList();
+                enabledModIds = QSet<QString>(ids.begin(), ids.end());
+                haveExplicitConfig = true;
             }
-            enabledModIds = QSet<QString>(ids.begin(), ids.end());
         }
     } else {
         auto rtSetting = settings->getOrRegisterSetting(ModProfileKeys::runtimeProfilesKey(prefix), QStringList());
@@ -124,9 +124,12 @@ QSet<QString> applyForModel(ModFolderModel* model, SettingsObject* settings, con
             for (const QString& id : modIds)
                 enabledModIds.insert(id);
         }
+        haveExplicitConfig = true;
     }
 
-    model->applyEnabledIds(enabledModIds);
+    if (haveExplicitConfig) {
+        model->applyEnabledIds(enabledModIds);
+    }
     model->setLaunchSnapshot(enabledModIds);
     return enabledModIds;
 }

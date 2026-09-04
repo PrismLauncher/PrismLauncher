@@ -165,6 +165,18 @@ class SettingsObject : public QObject {
     bool contains(const QString& id);
 
     /*!
+     * \brief Checks whether the setting has an explicitly persisted value in the backing store.
+     *
+     * Unlike contains(), which returns true for any registered setting regardless of whether a
+     * value was written, containsValue() returns true only when the backing store actually holds
+     * a value — distinguishing an absent key from a key present with an empty value.
+     *
+     * \param id The ID of the setting to check.
+     * \return True if the backing store has an explicit value for this setting.
+     */
+    bool containsValue(const QString& id);
+
+    /*!
      * \brief Reloads the settings and emit signals for changed settings
      * \return True if reloading was successful
      */

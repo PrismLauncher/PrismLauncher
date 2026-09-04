@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2026 Vivek Kushwaha <notvivekkushwaha@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -51,4 +52,4 @@ inline QString overviewDefaultSelectedKey(const QString& prefix)
     return QStringLiteral("ModProfileOverviewDefaultSelected_") + prefix;
 }
 
-}  // namespace ModProfileKeys
+}  

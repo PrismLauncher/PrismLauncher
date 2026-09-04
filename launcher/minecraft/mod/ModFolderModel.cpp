@@ -140,6 +140,7 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
             break;
     }
 
+    // map the columns to the base equivilents
     QModelIndex mappedIndex;
     switch (column) {
         case ActiveColumn:
@@ -365,6 +366,7 @@ QSet<Mod*> collectMods(const QSet<Mod*>& mods, QHash<QString, QSet<Mod*>> relati
             }
         }
     }
+    // collect the affected mods until all of them are included in the list
     if (!needToCheck.isEmpty()) {
         affectedList += collectMods(needToCheck, relation, seen, shouldBeEnabled);
     }
@@ -393,7 +395,7 @@ QModelIndexList ModFolderModel::getAffectedMods(const QModelIndexList& indexes, 
             break;
         }
         case EnableAction::TOGGLE: {
-            return {};
+            return {};  // this function should not be called with TOGGLE
         }
     }
     for (auto* affected : affectedMods) {
@@ -524,6 +526,8 @@ bool ModFolderModel::deleteResources(const QModelIndexList& indexes)
     auto deleteInvalid = [](QSet<Mod*>& mods) {
         for (auto it = mods.begin(); it != mods.end();) {
             auto* mod = *it;
+            // the QFileInfo::exists is used instead of mod->fileinfo().exists
+            // because the later somehow caches that the file exists
             if (!mod || !QFileInfo::exists(mod->fileinfo().absoluteFilePath())) {
                 it = mods.erase(it);
             } else {

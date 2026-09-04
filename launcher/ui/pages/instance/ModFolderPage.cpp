@@ -98,6 +98,36 @@ void ModFolderPage::refreshOverviewIfActive()
         refreshOverview();
 }
 
+QString ModFolderPage::extraHeaderInfoString()
+{
+    if (m_actionProfileOverview && m_actionProfileOverview->isChecked()) {
+        QStringList profileNames;
+        for (int i = 0; i < m_profileTabBar->count(); ++i)
+            profileNames.append(m_profileTabBar->tabText(i));
+
+        const bool overviewDefault = loadOverviewDefault();
+        const QStringList selected = loadRuntimeSelection();
+
+        QSet<QString> overviewIds;
+        if (overviewDefault) {
+            if (!profileNames.isEmpty())
+                overviewIds = m_profileStates.value(profileNames.at(0));
+        } else {
+            for (const QString& pname : selected)
+                overviewIds += m_profileStates.value(pname);
+        }
+
+        const int installedCount = m_model->size();
+        const int enabledCount   = static_cast<int>(overviewIds.size());
+
+        if (enabledCount != 0)
+            return tr(" (%1 installed, %2 enabled)").arg(installedCount).arg(enabledCount);
+        return tr(" (%1 installed)").arg(installedCount);
+    }
+
+    return ExternalResourcesPage::extraHeaderInfoString();
+}
+
 ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(inst, model, parent), m_model(model)
 {
@@ -234,8 +264,12 @@ ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWi
             if (m_overviewWidget)
                 m_overviewWidget->setOverviewActive(checked);
 
-            if (checked)
+            if (checked) {
                 refreshOverview();
+            } else {
+                if (updateExtraInfo)
+                    updateExtraInfo(id(), extraHeaderInfoString());
+            }
         });
     }
 
@@ -285,17 +319,6 @@ ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWi
     QStringList profileList = m_instance->settings()->get(profileListKey()).toStringList();
     if (profileList.isEmpty()) {
         profileList.append("Default");
-    } else if (profileList.at(0) == "All Mods") {
-        profileList[0] = "Default";
-        QString oldKey = profileKey("All Mods");
-        QString newKey = profileKey("Default");
-        QStringList oldState = m_instance->settings()->get(oldKey).toStringList();
-        if (!oldState.isEmpty() && m_instance->settings()->get(newKey).toStringList().isEmpty()) {
-            m_instance->settings()->getOrRegisterSetting(newKey, QStringList());
-            m_instance->settings()->set(newKey, oldState);
-        }
-        m_instance->settings()->reset(oldKey);
-        m_instance->settings()->set(profileListKey(), profileList);
     }
     m_profileTabBar->blockSignals(true);
     for (const QString& name : profileList) {
@@ -313,10 +336,6 @@ ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWi
         savedIndex = 0;
     }
     QString savedName = m_instance->settings()->get(lastActiveNameKey()).toString();
-    if (savedName == "All Mods") {
-        savedName = "Default";
-        m_instance->settings()->set(lastActiveNameKey(), savedName);
-    }
     if (!savedName.isEmpty()) {
         for (int i = 0; i < m_profileTabBar->count(); ++i) {
             if (m_profileTabBar->tabText(i) == savedName) {
@@ -356,6 +375,45 @@ ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWi
     connect(m_model, &ModFolderModel::updateFinished, this, [this] {
         refreshOverviewIfActive();
     });
+    // mod_id() is only stable after all LocalModParseTask instances finish — until then it returns a filename-based fallback rather than the declared metadata ID.
+    // Seeding updates only the in-memory profile state; it does not modify settings or the filesystem.
+    {
+        auto seeded = std::make_shared<bool>(false);
+
+        auto doSeed = [this, seeded]() {
+            if (*seeded)
+                return;
+            if (m_model->rowCount() == 0 || m_model->hasPendingParseTasks())
+                return;
+            for (int i = 0; i < m_model->rowCount(); ++i) {
+                if (!m_model->at(i).isResolved())
+                    return;
+            }
+            *seeded = true;
+
+            auto* settings = m_instance->settings();
+            bool needsRepaint = false;
+            for (auto it = m_profileStates.begin(); it != m_profileStates.end(); ++it) {
+                const QString& name = it.key();
+                if (settings->containsValue(profileKey(name))) {
+                    continue;
+                }
+                QSet<QString> fromDisk;
+                for (int i = 0; i < m_model->rowCount(); ++i) {
+                    const Mod& mod = m_model->at(i);
+                    if (mod.enabled())
+                        fromDisk.insert(mod.mod_id());
+                }
+                it.value() = fromDisk;
+                needsRepaint = true;
+            }
+            if (needsRepaint)
+                repaintActiveColumn();
+        };
+
+        connect(m_model, &ModFolderModel::updateFinished,     this, doSeed, Qt::SingleShotConnection);
+        connect(m_model, &ResourceFolderModel::parseFinished, this, doSeed);
+    }
     connect(m_model, &ModFolderModel::dataChanged, this, [this] {
         refreshOverviewIfActive();
     });
@@ -699,6 +757,7 @@ bool NilModFolderPage::shouldDisplay() const
     return m_model->dir().exists();
 }
 
+// Helper function so this doesn't need to be duplicated 3 times
 inline bool ModFolderPage::handleNoModLoader()
 {
     int resp = QMessageBox::question(
@@ -706,8 +765,11 @@ inline bool ModFolderPage::handleNoModLoader()
         ModFolderPage::tr("You need to install a compatible mod loader before installing mods. Would you like to do so?"),
         QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
     if (resp == QMessageBox::Yes) {
+        // Should be safe
         auto* profile = this->m_instance->getPackProfile();
         InstallLoaderDialog dialog(profile, QString(), this);
+        // true if the user went through the install loader dialog
+        // false if the dialog got canceled/closed
         bool dialogAccepted = dialog.exec() != 0;
         this->m_container->refreshContainer();
 
@@ -721,6 +783,8 @@ inline bool ModFolderPage::handleNoModLoader()
         }
         return false;
     }
+    // Nothing happens the dialog is already closing
+    // returning true so the caller doesn't go and continue with opening it's dialog without a mod loader
     return true;
 }
 
