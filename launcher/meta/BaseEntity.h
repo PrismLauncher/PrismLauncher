@@ -29,7 +29,7 @@ class BaseEntity {
 
    public: /* types */
     using Ptr = std::shared_ptr<BaseEntity>;
-    enum class LoadStatus { NotLoaded, Local, Remote };
+    enum class LoadStatus : std::uint8_t { NotLoaded, Local, Remote };
 
    public:
     virtual ~BaseEntity() = default;
@@ -46,11 +46,11 @@ class BaseEntity {
     [[nodiscard]] Task::Ptr loadTask(Net::Mode loadType = Net::Mode::Online, bool forceReload = false);
 
    protected:
-    QString m_sha256;       // the expected sha256
-    QString m_file_sha256;  // the file sha256
+    QString m_sha256;      // the expected sha256
+    QString m_fileSha256;  // the file sha256
 
    private:
-    LoadStatus m_load_status = LoadStatus::NotLoaded;
+    LoadStatus m_loadStatus = LoadStatus::NotLoaded;
     Task::Ptr m_task;
 };
 
@@ -61,14 +61,14 @@ class BaseEntityLoadTask : public Task {
     explicit BaseEntityLoadTask(BaseEntity* parent, Net::Mode mode, bool forceReload);
     ~BaseEntityLoadTask() override = default;
 
-    virtual void executeTask() override;
-    virtual bool canAbort() const override;
-    virtual bool abort() override;
+    void executeTask() override;
+    bool canAbort() const override;
+    bool abort() override;
 
    private:
     BaseEntity* m_entity;
     Net::Mode m_mode;
-    bool m_force_reload = false;
+    bool m_forceReload = false;
     NetJob::Ptr m_task;
 };
 }  // namespace Meta

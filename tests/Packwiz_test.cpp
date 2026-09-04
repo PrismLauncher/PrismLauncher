@@ -46,14 +46,14 @@ class PackwizTest : public QObject {
         QCOMPARE(metadata.side, ModPlatform::SideType::ClientSide);
 
         QCOMPARE(metadata.url, QUrl("https://cdn.modrinth.com/data/kYq5qkSL/versions/1.1.1+1.18/borderless-mining-1.1.1+1.18.jar"));
-        QCOMPARE(metadata.hash_format, "sha512");
+        QCOMPARE(metadata.hashFormat, "sha512");
         QCOMPARE(metadata.hash,
                  "c8fe6e15ddea32668822dddb26e1851e5f03834be4bcb2eff9c0da7fdc086a9b6cead78e31a44d3bc66335cba11144ee0337c6d5346f1ba6362306449"
                  "9b3188d");
 
         QCOMPARE(metadata.provider, ModPlatform::ResourceProvider::MODRINTH);
         QCOMPARE(metadata.version(), "ug2qKTPR");
-        QCOMPARE(metadata.mod_id(), "kYq5qkSL");
+        QCOMPARE(metadata.modId(), "kYq5qkSL");
     }
 
     void loadFromFile_Curseforge()
@@ -76,12 +76,12 @@ class PackwizTest : public QObject {
         QCOMPARE(metadata.side, ModPlatform::SideType::UniversalSide);
 
         QCOMPARE(metadata.url, QUrl("https://edge.forgecdn.net/files/3509/43/screenshot-to-clipboard-1.0.7-fabric.jar"));
-        QCOMPARE(metadata.hash_format, "murmur2");
+        QCOMPARE(metadata.hashFormat, "murmur2");
         QCOMPARE(metadata.hash, "1781245820");
 
         QCOMPARE(metadata.provider, ModPlatform::ResourceProvider::FLAME);
-        QCOMPARE(metadata.file_id, 3509043);
-        QCOMPARE(metadata.project_id, 327154);
+        QCOMPARE(metadata.fileId, 3509043);
+        QCOMPARE(metadata.projectId, 327154);
     }
 };
 

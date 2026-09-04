@@ -45,7 +45,7 @@ void FlameCheckUpdate::executeTask()
     connect(netJob, &Task::details, this, &FlameCheckUpdate::setDetails);
     for (auto* resource : m_resources) {
         auto project = std::make_shared<ModPlatform::IndexedPack>();
-        project->addonId = resource->metadata()->project_id.toString();
+        project->addonId = resource->metadata()->projectId.toString();
         auto versionsUrlOptional = FlameAPI::get().getVersionsURL({ .pack = project, .mcVersions = m_gameVersions });
         if (!versionsUrlOptional.has_value()) {
             continue;
@@ -75,7 +75,7 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QByteArray* 
     auto pack = std::make_shared<ModPlatform::IndexedPack>();
     pack->name = resource->name();
     pack->slug = resource->metadata()->slug;
-    pack->addonId = resource->metadata()->project_id;
+    pack->addonId = resource->metadata()->projectId;
     pack->provider = ModPlatform::ResourceProvider::FLAME;
     try {
         auto obj = Json::requireObject(doc);
@@ -105,14 +105,14 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QByteArray* 
         return;
     }
 
-    if (latestVer->downloadUrl.isEmpty() && latestVer->fileId != resource->metadata()->file_id) {
+    if (latestVer->downloadUrl.isEmpty() && latestVer->fileId != resource->metadata()->fileId) {
         m_blocked[resource] = latestVer->fileId.toString();
         return;
     }
 
     if (!latestVer->hash.isEmpty() &&
         (resource->metadata()->hash != latestVer->hash || resource->status() == ResourceStatus::NotInstalled)) {
-        auto oldVersion = resource->metadata()->version_number;
+        auto oldVersion = resource->metadata()->versionNumber;
         if (oldVersion.isEmpty()) {
             if (resource->status() == ResourceStatus::NotInstalled) {
                 oldVersion = tr("Not installed");
@@ -134,7 +134,7 @@ void FlameCheckUpdate::collectBlockedMods()
     QStringList addonIds;
     QHash<QString, Resource*> quickSearch;
     for (const auto& resource : m_blocked.keys()) {
-        auto addonId = resource->metadata()->project_id.toString();
+        auto addonId = resource->metadata()->projectId.toString();
         addonIds.append(addonId);
         quickSearch[addonId] = resource;
     }

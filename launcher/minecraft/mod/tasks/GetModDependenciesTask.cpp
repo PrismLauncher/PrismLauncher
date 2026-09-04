@@ -82,7 +82,6 @@ bool laxCompare(const QString& fsfilename, const QString& metadataFilename, bool
 
     return fsName.compare(metaName) == 0;
 };
-
 }  // namespace
 
 GetModDependenciesTask::GetModDependenciesTask(MinecraftInstance* instance,
@@ -166,7 +165,7 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
         }
 
         auto isInstalledMod = [&verDep, providerName, isOnlyVersion](const std::shared_ptr<Metadata::ModStruct>& i) {
-            return i->provider == providerName && (isOnlyVersion ? i->file_id == verDep.version : i->project_id == verDep.addonId);
+            return i->provider == providerName && (isOnlyVersion ? i->fileId == verDep.version : i->projectId == verDep.addonId);
         };
         if (std::ranges::any_of(m_mods, isInstalledMod)) {
             continue;  // check the existing mods
