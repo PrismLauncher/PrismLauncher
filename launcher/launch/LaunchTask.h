@@ -45,8 +45,6 @@
 #include "MessageLevel.h"
 #include "logs/LogParser.h"
 
-QString expandVariables(const QString& input, QProcessEnvironment dict);
-
 class LaunchTask : public Task {
     Q_OBJECT
    protected:

@@ -32,5 +32,13 @@ namespace Commandline {
  * @param args the argument string
  * @return a QStringList containing all arguments
  */
-QStringList splitArgs(QString args);
+QStringList splitArgs(const QString& args);
+
+/**
+ * @brief expand variables in a string like a shell would do
+ * @param input the input string
+ * @param dict the environment dictionary
+ * @return the expanded string
+ */
+QString expandVariables(const QString& input, const QProcessEnvironment& dict);
 }  // namespace Commandline

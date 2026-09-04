@@ -36,6 +36,7 @@
  */
 
 #include "WorldListPage.h"
+#include "Commandline.h"
 #include "minecraft/WorldList.h"
 #include "settings/SettingsObject.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -376,7 +377,7 @@ void WorldListPage::launchWorldTool(const QString& name, const QString& command)
         return;
     }
     for (auto& arg : args) {
-        arg = expandVariables(arg, vars);
+        arg = Commandline::expandVariables(arg, vars);
     }
 
     const auto program = args.takeFirst();
