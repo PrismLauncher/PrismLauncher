@@ -37,7 +37,7 @@ ResourceDownload::ResourceDescriptor prepareResourcePackDescriptor()
 namespace ResourceDownload {
 
 ResourcePackResourcePage::ResourcePackResourcePage(ResourceDownloadDialog* dialog,
-                                                   BaseInstance& instance,
+                                                   MinecraftInstance& instance,
                                                    ResourceProviderData provider,
                                                    const ResourceAPI* api)
     : ResourcePage(dialog, instance, prepareResourcePackDescriptor(), std::move(provider))

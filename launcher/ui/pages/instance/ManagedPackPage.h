@@ -4,12 +4,9 @@
 
 #pragma once
 
-#include "BaseInstance.h"
+#include "minecraft/MinecraftInstance.h"
 
 #include "modplatform/ModIndex.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
-
-#include "modplatform/flame/FlameAPI.h"
 
 #include "ui/pages/BasePage.h"
 
@@ -26,12 +23,12 @@ class ManagedPackPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    static ManagedPackPage* createPage(BaseInstance* inst, QWidget* parent = nullptr)
+    static ManagedPackPage* createPage(MinecraftInstance* inst, QWidget* parent = nullptr)
     {
         return ManagedPackPage::createPage(inst, inst->getManagedPackType(), parent);
     }
 
-    static ManagedPackPage* createPage(BaseInstance* inst, const QString& type, QWidget* parent = nullptr);
+    static ManagedPackPage* createPage(MinecraftInstance* inst, const QString& type, QWidget* parent = nullptr);
     ~ManagedPackPage() override;
 
     QString displayName() const override;
@@ -75,7 +72,7 @@ class ManagedPackPage : public QWidget, public BasePage {
     void setFailState();
 
    protected:
-    ManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWindow, QWidget* parent = nullptr);
+    ManagedPackPage(MinecraftInstance* inst, InstanceWindow* instanceWindow, QWidget* parent = nullptr);
 
     /** Run the InstanceTask, with a progress dialog and all.
      *  Similar to MainWindow::instanceFromInstanceTask
@@ -91,8 +88,8 @@ class ManagedPackPage : public QWidget, public BasePage {
    protected:
     InstanceWindow* m_instanceWindow = nullptr;
 
-    Ui::ManagedPackPage* ui;
-    BaseInstance* m_inst;
+    Ui::ManagedPackPage* m_ui;
+    MinecraftInstance* m_inst;
 
     bool m_loaded = false;
 };
@@ -102,7 +99,7 @@ class GenericManagedPackPage final : public ManagedPackPage {
     Q_OBJECT
 
    public:
-    GenericManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWindow, QWidget* parent = nullptr)
+    GenericManagedPackPage(MinecraftInstance* inst, InstanceWindow* instanceWindow, QWidget* parent = nullptr)
         : ManagedPackPage(inst, instanceWindow, parent)
     {}
     ~GenericManagedPackPage() override = default;
@@ -115,7 +112,7 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
     Q_OBJECT
 
    public:
-    ModrinthManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWindow, QWidget* parent = nullptr);
+    ModrinthManagedPackPage(MinecraftInstance* inst, InstanceWindow* instanceWindow, QWidget* parent = nullptr);
     ~ModrinthManagedPackPage() override = default;
 
     void parseManagedPack() override;
@@ -138,7 +135,7 @@ class FlameManagedPackPage final : public ManagedPackPage {
     Q_OBJECT
 
    public:
-    FlameManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWindow, QWidget* parent = nullptr);
+    FlameManagedPackPage(MinecraftInstance* inst, InstanceWindow* instanceWindow, QWidget* parent = nullptr);
     ~FlameManagedPackPage() override = default;
 
     void parseManagedPack() override;

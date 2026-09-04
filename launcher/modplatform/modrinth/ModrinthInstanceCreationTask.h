@@ -9,8 +9,8 @@
 #include <QUrl>
 #include <QVector>
 
-#include "BaseInstance.h"
 #include "InstanceTask.h"
+#include "minecraft/MinecraftInstance.h"
 
 class Resource;
 
@@ -47,7 +47,7 @@ class ModrinthCreationTask final : public InstanceTask {
     bool parseManifest(const QString&, std::vector<File>&, bool setInternalData = true, bool showOptionalDialog = true);
 
     void ensureMetaLoop();
-    void setManagedPack(BaseInstance* instance);
+    void setManagedPack(MinecraftInstance* instance);
 
     [[nodiscard]] bool promptForUntrustedMods();
 
@@ -61,7 +61,7 @@ class ModrinthCreationTask final : public InstanceTask {
     std::vector<File> m_files;
     Task::Ptr m_task;
 
-    std::optional<BaseInstance*> m_oldInstance;
+    std::optional<MinecraftInstance*> m_oldInstance;
     std::unique_ptr<MinecraftInstance> m_newInstance;
 
     QString m_rootPath = "minecraft";

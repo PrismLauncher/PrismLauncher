@@ -17,20 +17,22 @@
  */
 #include "GenericProfiler.h"
 
-#include "BaseInstance.h"
 #include "launch/LaunchTask.h"
+#include "minecraft/MinecraftInstance.h"
 #include "settings/SettingsObject.h"
+
+namespace {
 
 class GenericProfiler : public BaseProfiler {
     Q_OBJECT
    public:
-    GenericProfiler(SettingsObject* settings, BaseInstance* instance, QObject* parent = 0);
+    GenericProfiler(SettingsObject* settings, MinecraftInstance* instance, QObject* parent = nullptr);
 
    protected:
-    void beginProfilingImpl(LaunchTask* process);
+    void beginProfilingImpl(LaunchTask* process) override;
 };
 
-GenericProfiler::GenericProfiler(SettingsObject* settings, BaseInstance* instance, QObject* parent)
+GenericProfiler::GenericProfiler(SettingsObject* settings, MinecraftInstance* instance, QObject* parent)
     : BaseProfiler(settings, instance, parent)
 {}
 
@@ -38,9 +40,10 @@ void GenericProfiler::beginProfilingImpl(LaunchTask* process)
 {
     emit readyToLaunch(tr("Started process: %1").arg(process->pid()));
 }
+}  // namespace
 
-BaseExternalTool* GenericProfilerFactory::createTool(BaseInstance* instance, QObject* parent)
+BaseExternalTool* GenericProfilerFactory::createTool(MinecraftInstance* instance, QObject* parent)
 {
-    return new GenericProfiler(globalSettings, instance, parent);
+    return new GenericProfiler(m_globalSettings, instance, parent);
 }
 #include "GenericProfiler.moc"

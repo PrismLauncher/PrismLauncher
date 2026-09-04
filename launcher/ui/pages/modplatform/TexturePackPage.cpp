@@ -36,7 +36,7 @@ ResourceDownload::ResourceDescriptor prepareResourcePackDescriptor()
 namespace ResourceDownload {
 
 TexturePackResourcePage::TexturePackResourcePage(ResourceDownloadDialog* dialog,
-                                                 BaseInstance& instance,
+                                                 MinecraftInstance& instance,
                                                  ResourceProviderData provider,
                                                  const ResourceAPI* api,
                                                  TexturePackResourceModel* model)

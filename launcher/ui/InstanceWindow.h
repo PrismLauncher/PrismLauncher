@@ -45,16 +45,14 @@
 
 #include "ui/pages/BasePageContainer.h"
 
-#include "QObjectPtr.h"
-
 class QPushButton;
 class PageContainer;
 class InstanceWindow : public QMainWindow, public BasePageContainer {
     Q_OBJECT
 
    public:
-    explicit InstanceWindow(MinecraftInstance* proc, QWidget* parent = 0);
-    virtual ~InstanceWindow() = default;
+    explicit InstanceWindow(MinecraftInstance* proc, QWidget* parent = nullptr);
+    ~InstanceWindow() override = default;
 
     bool selectPage(QString pageId) override;
     BasePage* selectedPage() const override;
@@ -75,7 +73,7 @@ class InstanceWindow : public QMainWindow, public BasePageContainer {
     void instanceLaunchTaskChanged(LaunchTask* proc);
     void runningStateChanged(bool running);
     void restartInstance();
-    void on_instanceStatusChanged(BaseInstance::Status, BaseInstance::Status newStatus);
+    void on_instanceStatusChanged(MinecraftInstance::Status, MinecraftInstance::Status newStatus);
 
    protected:
     void closeEvent(QCloseEvent*) override;

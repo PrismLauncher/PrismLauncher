@@ -3,24 +3,25 @@
 #include <QDir>
 #include <QStandardPaths>
 
-#include "BaseInstance.h"
 #include "launch/LaunchTask.h"
+#include "minecraft/MinecraftInstance.h"
 #include "settings/SettingsObject.h"
 
+namespace {
 class JVisualVM : public BaseProfiler {
     Q_OBJECT
    public:
-    JVisualVM(SettingsObject* settings, BaseInstance* instance, QObject* parent = 0);
+    JVisualVM(SettingsObject* settings, MinecraftInstance* instance, QObject* parent = nullptr);
 
    private slots:
     void profilerStarted();
     void profilerFinished(int exit, QProcess::ExitStatus status);
 
    protected:
-    void beginProfilingImpl(LaunchTask* process);
+    void beginProfilingImpl(LaunchTask* process) override;
 };
 
-JVisualVM::JVisualVM(SettingsObject* settings, BaseInstance* instance, QObject* parent) : BaseProfiler(settings, instance, parent) {}
+JVisualVM::JVisualVM(SettingsObject* settings, MinecraftInstance* instance, QObject* parent) : BaseProfiler(settings, instance, parent) {}
 
 void JVisualVM::profilerStarted()
 {
@@ -34,15 +35,15 @@ void JVisualVM::profilerFinished([[maybe_unused]] int exit, QProcess::ExitStatus
     }
     if (m_profilerProcess) {
         m_profilerProcess->deleteLater();
-        m_profilerProcess = 0;
+        m_profilerProcess = nullptr;
     }
 }
 
 void JVisualVM::beginProfilingImpl(LaunchTask* process)
 {
-    QProcess* profiler = new QProcess(this);
+    auto* profiler = new QProcess(this);
     QStringList profilerArgs = { "--openpid", QString::number(process->pid()) };
-    auto programPath = globalSettings->get("JVisualVMPath").toString();
+    auto programPath = m_globalSettings->get("JVisualVMPath").toString();
 
     profiler->setArguments(profilerArgs);
     profiler->setProgram(programPath);
@@ -53,6 +54,7 @@ void JVisualVM::beginProfilingImpl(LaunchTask* process)
     profiler->start();
     m_profilerProcess = profiler;
 }
+}  // namespace
 
 void JVisualVMFactory::registerSettings(SettingsObject* settings)
 {
@@ -61,17 +63,17 @@ void JVisualVMFactory::registerSettings(SettingsObject* settings)
         defaultValue = QStandardPaths::findExecutable("visualvm");
     }
     settings->registerSetting("JVisualVMPath", defaultValue);
-    globalSettings = settings;
+    m_globalSettings = settings;
 }
 
-BaseExternalTool* JVisualVMFactory::createTool(BaseInstance* instance, QObject* parent)
+BaseExternalTool* JVisualVMFactory::createTool(MinecraftInstance* instance, QObject* parent)
 {
-    return new JVisualVM(globalSettings, instance, parent);
+    return new JVisualVM(m_globalSettings, instance, parent);
 }
 
 bool JVisualVMFactory::check(QString* error)
 {
-    return check(globalSettings->get("JVisualVMPath").toString(), error);
+    return check(m_globalSettings->get("JVisualVMPath").toString(), error);
 }
 
 bool JVisualVMFactory::check(const QString& path, QString* error)

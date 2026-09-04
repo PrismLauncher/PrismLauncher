@@ -22,7 +22,7 @@ class ModPage : public ResourcePage {
     auto getFilter() const -> std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
 
     ModPage(ResourceDownloadDialog* dialog,
-            BaseInstance& instance,
+            MinecraftInstance& instance,
             ResourceProviderData provider,
             const ResourceAPI* api,
             ModFilterWidget* filterWidget);

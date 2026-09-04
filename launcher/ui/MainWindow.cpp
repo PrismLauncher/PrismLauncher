@@ -74,7 +74,6 @@
 #include <QWidgetAction>
 #include <memory>
 
-#include <BaseInstance.h>
 #include <BuildConfig.h>
 #include <DesktopServices.h>
 #include <InstanceList.h>
@@ -91,6 +90,7 @@
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
 #include "InstanceWindow.h"
+#include "minecraft/MinecraftInstance.h"
 
 #include "ui/GuiUtil.h"
 #include "ui/ViewLogWindow.h"
@@ -1394,14 +1394,7 @@ void MainWindow::on_actionEditInstance_triggered()
     if (!m_selectedInstance)
         return;
 
-    if (m_selectedInstance->canEdit()) {
-        APPLICATION->showInstanceWindow(m_selectedInstance);
-    } else {
-        CustomMessageBox::selectable(this, tr("Instance not editable"),
-                                     tr("This instance is not editable. It may be broken, invalid, or too old. Check logs for details."),
-                                     QMessageBox::Critical)
-            ->show();
-    }
+    APPLICATION->showInstanceWindow(m_selectedInstance);
 }
 
 void MainWindow::on_actionManageSkins_triggered()
@@ -1609,14 +1602,7 @@ void MainWindow::instanceActivated(QModelIndex index)
         return;
 
     if (APPLICATION->settings()->get("EditInstanceOnDoubleClick").toBool()) {
-        if (inst->canEdit()) {
-            APPLICATION->showInstanceWindow(inst);
-        } else {
-            CustomMessageBox::selectable(
-                this, tr("Instance not editable"),
-                tr("This instance is not editable. It may be broken, invalid, or too old. Check logs for details."), QMessageBox::Critical)
-                ->show();
-        }
+        APPLICATION->showInstanceWindow(inst);
         return;
     }
     APPLICATION->launch(inst);
@@ -1671,8 +1657,8 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
         return;
     }
     if (m_selectedInstance) {
-        disconnect(m_selectedInstance, &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
-        disconnect(m_selectedInstance, &BaseInstance::profilerChanged, this, &MainWindow::refreshCurrentInstance);
+        disconnect(m_selectedInstance, &MinecraftInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
+        disconnect(m_selectedInstance, &MinecraftInstance::profilerChanged, this, &MainWindow::refreshCurrentInstance);
     }
     QString id = current.data(InstanceList::InstanceIDRole).toString();
     m_selectedInstance = APPLICATION->instances()->getInstanceById(id);
@@ -1682,7 +1668,6 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
         ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
 
         ui->actionKillInstance->setEnabled(m_selectedInstance->isRunning());
-        ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
         renameButton->setText(m_selectedInstance->name());
         m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
         updateStatusCenter();
@@ -1692,8 +1677,8 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
 
         APPLICATION->settings()->set("SelectedInstance", m_selectedInstance->id());
 
-        connect(m_selectedInstance, &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
-        connect(m_selectedInstance, &BaseInstance::profilerChanged, this, &MainWindow::refreshCurrentInstance);
+        connect(m_selectedInstance, &MinecraftInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
+        connect(m_selectedInstance, &MinecraftInstance::profilerChanged, this, &MainWindow::refreshCurrentInstance);
     } else {
         APPLICATION->settings()->set("SelectedInstance", QString());
         selectionBad();

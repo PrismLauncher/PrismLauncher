@@ -46,9 +46,7 @@
 #include "ui/pages/modplatform/ShaderPackPage.h"
 #include "ui/pages/modplatform/TexturePackPage.h"
 
-namespace ResourceDownload {
-
-namespace Flame {
+namespace ResourceDownload::Flame {
 static inline QString displayName()
 {
     return "CurseForge";
@@ -70,11 +68,9 @@ static inline QString metaEntryBase()
     return "FlameMods";
 }
 
-ShaderPackResourcePage* createShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
-DataPackResourcePage* createDataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
-ResourcePackResourcePage* createResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
-TexturePackResourcePage* createTexturePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
-ModPage* createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance);
-}  // namespace Flame
-
-}  // namespace ResourceDownload
+ShaderPackResourcePage* createShaderPackResourcePage(ResourceDownloadDialog* dialog, MinecraftInstance& instance);
+DataPackResourcePage* createDataPackResourcePage(ResourceDownloadDialog* dialog, MinecraftInstance& instance);
+ResourcePackResourcePage* createResourcePackResourcePage(ResourceDownloadDialog* dialog, MinecraftInstance& instance);
+TexturePackResourcePage* createTexturePackResourcePage(ResourceDownloadDialog* dialog, MinecraftInstance& instance);
+ModPage* createModPage(ResourceDownloadDialog* dialog, MinecraftInstance& instance);
+}  // namespace ResourceDownload::Flame

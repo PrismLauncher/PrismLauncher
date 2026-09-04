@@ -8,10 +8,12 @@
 #include <QUrl>
 #include <QUrlQuery>
 #include "modplatform/ModIndex.h"
+#include "modplatform/ResourceAPI.h"
+#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui_ManagedPackPage.h"
 
 #include <QFileDialog>
-#include <memory>
 
 #include "Application.h"
 #include "InstanceImportTask.h"
@@ -24,7 +26,7 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 
-ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, const QString& type, QWidget* parent)
+ManagedPackPage* ManagedPackPage::createPage(MinecraftInstance* inst, const QString& type, QWidget* parent)
 {
     if (type == "modrinth") {
         return new ModrinthManagedPackPage(inst, nullptr, parent);
@@ -36,26 +38,26 @@ ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, const QString& 
     return new GenericManagedPackPage(inst, nullptr, parent);
 }
 
-ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWindow, QWidget* parent)
-    : QWidget(parent), m_instanceWindow(instanceWindow), ui(new Ui::ManagedPackPage), m_inst(inst)
+ManagedPackPage::ManagedPackPage(MinecraftInstance* inst, InstanceWindow* instanceWindow, QWidget* parent)
+    : QWidget(parent), m_instanceWindow(instanceWindow), m_ui(new Ui::ManagedPackPage), m_inst(inst)
 {
     Q_ASSERT(inst);
 
-    ui->setupUi(this);
+    m_ui->setupUi(this);
 
-    ui->versionsComboBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    ui->versionsComboBox->view()->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    m_ui->versionsComboBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    m_ui->versionsComboBox->view()->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    ui->reloadButton->setVisible(false);
-    connect(ui->reloadButton, &QPushButton::clicked, this, [this](bool) {
-        ui->reloadButton->setVisible(false);
+    m_ui->reloadButton->setVisible(false);
+    connect(m_ui->reloadButton, &QPushButton::clicked, this, [this](bool) {
+        m_ui->reloadButton->setVisible(false);
 
         m_loaded = false;
         // Pretend we're opening the page again
         openedImpl();
     });
 
-    connect(ui->changelogTextBrowser, &QTextBrowser::anchorClicked, this, [](const QUrl& url) {
+    connect(m_ui->changelogTextBrowser, &QTextBrowser::anchorClicked, this, [](const QUrl& url) {
         if (url.scheme().isEmpty()) {
             auto querry =
                 QUrlQuery(url.query()).queryItemValue("remoteUrl", QUrl::FullyDecoded);  // curseforge workaround for linkout?remoteUrl=
@@ -69,41 +71,41 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWin
         QDesktopServices::openUrl(url);
     });
 
-    connect(ui->urlLine, &QLineEdit::textChanged, this,
+    connect(m_ui->urlLine, &QLineEdit::textChanged, this,
             [this](const QString& text) { m_inst->settings()->set("ManagedPackURL", text.trimmed()); });
 }
 
 ManagedPackPage::~ManagedPackPage()
 {
-    delete ui;
+    delete m_ui;
 }
 
 void ManagedPackPage::openedImpl()
 {
     if (m_inst->getManagedPackID().isEmpty()) {
-        ui->packVersion->hide();
-        ui->packVersionLabel->hide();
-        ui->packOrigin->hide();
-        ui->packOriginLabel->hide();
-        ui->versionsComboBox->hide();
-        ui->updateToVersionLabel->setText(tr("URL:"));
-        ui->updateButton->setText(tr("Update Pack"));
-        ui->updateButton->setDisabled(false);
-        ui->urlLine->setText(m_inst->settings()->get("ManagedPackURL").toString().trimmed());
+        m_ui->packVersion->hide();
+        m_ui->packVersionLabel->hide();
+        m_ui->packOrigin->hide();
+        m_ui->packOriginLabel->hide();
+        m_ui->versionsComboBox->hide();
+        m_ui->updateToVersionLabel->setText(tr("URL:"));
+        m_ui->updateButton->setText(tr("Update Pack"));
+        m_ui->updateButton->setDisabled(false);
+        m_ui->urlLine->setText(m_inst->settings()->get("ManagedPackURL").toString().trimmed());
 
-        ui->packName->setText(m_inst->name());
-        ui->changelogTextBrowser->setText(tr("This is a local modpack.\n"
-                                             "This can be updated either using a file in %1 format or an URL.\n"
-                                             "Do not use a different format than the one mentioned as it may break the instance.\n"
-                                             "Make sure you also trust the URL.\n")
-                                              .arg(displayName()));
+        m_ui->packName->setText(m_inst->name());
+        m_ui->changelogTextBrowser->setText(tr("This is a local modpack.\n"
+                                               "This can be updated either using a file in %1 format or an URL.\n"
+                                               "Do not use a different format than the one mentioned as it may break the instance.\n"
+                                               "Make sure you also trust the URL.\n")
+                                                .arg(displayName()));
         return;
     }
-    ui->urlLine->hide();
-    ui->packName->setText(m_inst->getManagedPackName());
-    ui->packVersion->setText(m_inst->getManagedPackVersionName());
-    ui->packOrigin->setText(tr("Website: <a href=%1>%2</a>    |    Pack ID: %3    |    Version ID: %4")
-                                .arg(url(), displayName(), m_inst->getManagedPackID(), m_inst->getManagedPackVersionID()));
+    m_ui->urlLine->hide();
+    m_ui->packName->setText(m_inst->getManagedPackName());
+    m_ui->packVersion->setText(m_inst->getManagedPackVersionName());
+    m_ui->packOrigin->setText(tr("Website: <a href=%1>%2</a>    |    Pack ID: %3    |    Version ID: %4")
+                                  .arg(url(), displayName(), m_inst->getManagedPackID(), m_inst->getManagedPackVersionID()));
 
     parseManagedPack();
 }
@@ -132,7 +134,7 @@ QString ManagedPackPage::helpPage() const
 
 void ManagedPackPage::retranslate()
 {
-    ui->retranslateUi(this);
+    m_ui->retranslateUi(this);
 }
 
 bool ManagedPackPage::shouldDisplay() const
@@ -164,8 +166,8 @@ bool ManagedPackPage::runUpdateTask(InstanceTask* task)
 
 void ManagedPackPage::suggestVersion()
 {
-    ui->updateButton->setText(tr("Update Pack"));
-    ui->updateButton->setDisabled(false);
+    m_ui->updateButton->setText(tr("Update Pack"));
+    m_ui->updateButton->setDisabled(false);
 }
 
 void ManagedPackPage::setFailState()
@@ -173,26 +175,26 @@ void ManagedPackPage::setFailState()
     qDebug() << "Setting fail state!";
 
     // We block signals here so that suggestVersion() doesn't get called, causing an assertion fail.
-    ui->versionsComboBox->blockSignals(true);
-    ui->versionsComboBox->clear();
-    ui->versionsComboBox->addItem(tr("Failed to search for available versions."), {});
-    ui->versionsComboBox->blockSignals(false);
+    m_ui->versionsComboBox->blockSignals(true);
+    m_ui->versionsComboBox->clear();
+    m_ui->versionsComboBox->addItem(tr("Failed to search for available versions."), {});
+    m_ui->versionsComboBox->blockSignals(false);
 
-    ui->changelogTextBrowser->setText(tr("Failed to request changelog data for this modpack."));
+    m_ui->changelogTextBrowser->setText(tr("Failed to request changelog data for this modpack."));
 
-    ui->updateButton->setText(tr("Cannot update!"));
-    ui->updateButton->setDisabled(true);
+    m_ui->updateButton->setText(tr("Cannot update!"));
+    m_ui->updateButton->setDisabled(true);
 
-    ui->reloadButton->setVisible(true);
+    m_ui->reloadButton->setVisible(true);
 }
 
-ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWindow, QWidget* parent)
+ModrinthManagedPackPage::ModrinthManagedPackPage(MinecraftInstance* inst, InstanceWindow* instanceWindow, QWidget* parent)
     : ManagedPackPage(inst, instanceWindow, parent)
 {
     Q_ASSERT(inst->isManagedPack());
-    connect(ui->versionsComboBox, &QComboBox::currentIndexChanged, this, &ModrinthManagedPackPage::suggestVersion);
-    connect(ui->updateButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::update);
-    connect(ui->updateFromFileButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::updateFromFile);
+    connect(m_ui->versionsComboBox, &QComboBox::currentIndexChanged, this, &ModrinthManagedPackPage::suggestVersion);
+    connect(m_ui->updateButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::update);
+    connect(m_ui->updateFromFileButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::updateFromFile);
 }
 
 // MODRINTH
@@ -218,9 +220,9 @@ void ModrinthManagedPackPage::parseManagedPack()
         m_pack.versionsLoaded = true;
 
         // We block signals here so that suggestVersion() doesn't get called, causing an assertion fail.
-        ui->versionsComboBox->blockSignals(true);
-        ui->versionsComboBox->clear();
-        ui->versionsComboBox->blockSignals(false);
+        m_ui->versionsComboBox->blockSignals(true);
+        m_ui->versionsComboBox->clear();
+        m_ui->versionsComboBox->blockSignals(false);
 
         for (const auto& version : m_pack.versions) {
             QString name = version.getVersionDisplayString();
@@ -231,7 +233,7 @@ void ModrinthManagedPackPage::parseManagedPack()
                 name = tr("%1 (Current)").arg(name);
             }
 
-            ui->versionsComboBox->addItem(name, version.fileId);
+            m_ui->versionsComboBox->addItem(name, version.fileId);
         }
 
         suggestVersion();
@@ -247,7 +249,7 @@ void ModrinthManagedPackPage::parseManagedPack()
                                                          .includeChangelog = true },
                                                        callbacks);
 
-    ui->changelogTextBrowser->setText(tr("Fetching changelogs..."));
+    m_ui->changelogTextBrowser->setText(tr("Fetching changelogs..."));
 
     m_fetchJob->start();
 }
@@ -259,14 +261,14 @@ QString ModrinthManagedPackPage::url() const
 
 void ModrinthManagedPackPage::suggestVersion()
 {
-    auto index = ui->versionsComboBox->currentIndex();
+    auto index = m_ui->versionsComboBox->currentIndex();
     if (m_pack.versions.length() == 0) {
         setFailState();
         return;
     }
     auto version = m_pack.versions.at(index);
 
-    ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(markdownToHTML(version.changelog.toUtf8())));
+    m_ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(markdownToHTML(version.changelog.toUtf8())));
 
     ManagedPackPage::suggestVersion();
 }
@@ -303,7 +305,7 @@ void ModrinthManagedPackPage::update()
         updatePack(customURL, false);
         return;
     }
-    auto index = ui->versionsComboBox->currentIndex();
+    auto index = m_ui->versionsComboBox->currentIndex();
     if (m_pack.versions.length() == 0) {
         setFailState();
         return;
@@ -324,13 +326,13 @@ void ModrinthManagedPackPage::updateFromFile()
 }
 
 // FLAME
-FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWindow, QWidget* parent)
+FlameManagedPackPage::FlameManagedPackPage(MinecraftInstance* inst, InstanceWindow* instanceWindow, QWidget* parent)
     : ManagedPackPage(inst, instanceWindow, parent)
 {
     Q_ASSERT(inst->isManagedPack());
-    connect(ui->versionsComboBox, &QComboBox::currentIndexChanged, this, &FlameManagedPackPage::suggestVersion);
-    connect(ui->updateButton, &QPushButton::clicked, this, &FlameManagedPackPage::update);
-    connect(ui->updateFromFileButton, &QPushButton::clicked, this, &FlameManagedPackPage::updateFromFile);
+    connect(m_ui->versionsComboBox, &QComboBox::currentIndexChanged, this, &FlameManagedPackPage::suggestVersion);
+    connect(m_ui->updateButton, &QPushButton::clicked, this, &FlameManagedPackPage::update);
+    connect(m_ui->updateFromFileButton, &QPushButton::clicked, this, &FlameManagedPackPage::updateFromFile);
 }
 
 void FlameManagedPackPage::parseManagedPack()
@@ -351,7 +353,7 @@ void FlameManagedPackPage::parseManagedPack()
                "Don't worry though, it will ask you to update this instance instead, so you'll not lose this instance!"
                "</h4>");
 
-        ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(message));
+        m_ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(message));
         return;
     }
 
@@ -375,9 +377,9 @@ void FlameManagedPackPage::parseManagedPack()
         m_pack.versionsLoaded = true;
 
         // We block signals here so that suggestVersion() doesn't get called, causing an assertion fail.
-        ui->versionsComboBox->blockSignals(true);
-        ui->versionsComboBox->clear();
-        ui->versionsComboBox->blockSignals(false);
+        m_ui->versionsComboBox->blockSignals(true);
+        m_ui->versionsComboBox->clear();
+        m_ui->versionsComboBox->blockSignals(false);
 
         for (const auto& version : m_pack.versions) {
             QString name = version.getVersionDisplayString();
@@ -386,7 +388,7 @@ void FlameManagedPackPage::parseManagedPack()
                 name = tr("%1 (Current)").arg(name);
             }
 
-            ui->versionsComboBox->addItem(name, QVariant(version.fileId));
+            m_ui->versionsComboBox->addItem(name, QVariant(version.fileId));
         }
 
         suggestVersion();
@@ -413,14 +415,14 @@ QString FlameManagedPackPage::url() const
 
 void FlameManagedPackPage::suggestVersion()
 {
-    auto index = ui->versionsComboBox->currentIndex();
+    auto index = m_ui->versionsComboBox->currentIndex();
     if (m_pack.versions.length() == 0) {
         setFailState();
         return;
     }
     auto version = m_pack.versions.at(index);
 
-    ui->changelogTextBrowser->setHtml(
+    m_ui->changelogTextBrowser->setHtml(
         StringUtils::htmlListPatch(FlameAPI::getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt())));
 
     ManagedPackPage::suggestVersion();
@@ -433,7 +435,7 @@ void FlameManagedPackPage::update()
         updatePack(customURL, false);
         return;
     }
-    auto index = ui->versionsComboBox->currentIndex();
+    auto index = m_ui->versionsComboBox->currentIndex();
     if (m_pack.versions.length() == 0) {
         setFailState();
         return;

@@ -16,11 +16,10 @@
 #pragma once
 
 #include <QDialog>
-#include "BaseInstance.h"
-#include "BaseVersion.h"
 #include "InstanceCopyPrefs.h"
+#include "minecraft/MinecraftInstance.h"
 
-class BaseInstance;
+class MinecraftInstance;
 
 namespace Ui {
 class CopyInstanceDialog;
@@ -30,8 +29,8 @@ class CopyInstanceDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit CopyInstanceDialog(BaseInstance* original, QWidget* parent = 0);
-    ~CopyInstanceDialog();
+    explicit CopyInstanceDialog(MinecraftInstance* original, QWidget* parent = nullptr);
+    ~CopyInstanceDialog() override;
 
     void updateDialogState();
 
@@ -69,9 +68,9 @@ class CopyInstanceDialog : public QDialog {
     void updateLinkOptions();
 
     /* data */
-    Ui::CopyInstanceDialog* ui;
-    QString InstIconKey;
-    BaseInstance* m_original;
+    Ui::CopyInstanceDialog* m_ui;
+    QString m_instIconKey;
+    MinecraftInstance* m_original;
     InstanceCopyPrefs m_selectedOptions;
     bool m_cloneSupported = false;
     bool m_linkSupported = false;

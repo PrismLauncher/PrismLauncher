@@ -6,11 +6,10 @@
 
 #include <QAbstractListModel>
 
-#include "BaseInstance.h"
-
 #include "ui/pages/modplatform/ResourceModel.h"
 
 class Version;
+class MinecraftInstance;
 
 namespace ResourceDownload {
 
@@ -18,7 +17,7 @@ class ResourcePackResourceModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    ResourcePackResourceModel(const BaseInstance&, const ResourceAPI*, const QString& debugName, QString metaEntryBase);
+    ResourcePackResourceModel(const MinecraftInstance&, const ResourceAPI*, const QString& debugName, QString metaEntryBase);
 
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, unsigned int sort);
@@ -32,7 +31,7 @@ class ResourcePackResourceModel : public ResourceModel {
     ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex&) override;
 
    protected:
-    const BaseInstance& m_base_instance;
+    const MinecraftInstance& m_baseInstance;
 
    private:
     QString m_debugName;

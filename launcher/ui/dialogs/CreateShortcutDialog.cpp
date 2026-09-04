@@ -38,19 +38,16 @@
 #include <QLayout>
 #include <QPushButton>
 
-#include "BuildConfig.h"
 #include "CreateShortcutDialog.h"
 #include "ui_CreateShortcutDialog.h"
 
 #include "ui/dialogs/IconPickerDialog.h"
 
-#include "BaseInstance.h"
 #include "DesktopServices.h"
 #include "FileSystem.h"
-#include "InstanceList.h"
 #include "icons/IconList.h"
-
 #include "minecraft/MinecraftInstance.h"
+
 #include "minecraft/ShortcutUtils.h"
 #include "minecraft/WorldList.h"
 #include "minecraft/auth/AccountList.h"
@@ -64,8 +61,8 @@ CreateShortcutDialog::CreateShortcutDialog(MinecraftInstance* instance, QWidget*
     ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
     ui->instNameTextBox->setPlaceholderText(instance->name());
 
-    m_QuickJoinSupported = instance && instance->traits().contains("feature:is_quick_play_singleplayer");
-    auto worldList = instance->worldList();
+    m_QuickJoinSupported = instance->traits().contains("feature:is_quick_play_singleplayer");
+    auto* worldList = instance->worldList();
     worldList->update();
     if (!m_QuickJoinSupported || worldList->empty()) {
         ui->worldTarget->hide();

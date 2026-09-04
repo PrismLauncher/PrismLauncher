@@ -77,7 +77,7 @@ PackProfile::PackProfile(MinecraftInstance* instance) : QAbstractListModel()
     d->m_saveTimer.setSingleShot(true);
     d->m_saveTimer.setInterval(5000);
     d->interactionDisabled = instance->isRunning();
-    connect(d->m_instance, &BaseInstance::runningStatusChanged, this, &PackProfile::disableInteraction);
+    connect(d->m_instance, &MinecraftInstance::runningStatusChanged, this, &PackProfile::disableInteraction);
     connect(&d->m_saveTimer, &QTimer::timeout, this, &PackProfile::save_internal);
 }
 
@@ -913,8 +913,9 @@ bool PackProfile::installAgents_internal(QStringList filepaths)
         const QFileInfo targetInfo(target);
         Q_ASSERT(!targetInfo.exists());
 
-        if (!QFile::copy(source, target))
+        if (!QFile::copy(source, target)) {
             return false;
+        }
 
         auto versionFile = std::make_shared<VersionFile>();
 
@@ -925,7 +926,7 @@ bool PackProfile::installAgents_internal(QStringList filepaths)
         agent->setDisplayName(sourceInfo.completeBaseName());
         agent->setHint("local");
 
-        versionFile->agents.append(Agent{agent, QString()});
+        versionFile->agents.append(Agent{ .library = agent, .argument = QString() });
 
         versionFile->name = targetName;
         versionFile->uid = targetId;

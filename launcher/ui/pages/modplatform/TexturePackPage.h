@@ -16,7 +16,7 @@ class TexturePackResourcePage : public ResourcePage {
 
    public:
     TexturePackResourcePage(ResourceDownloadDialog* dialog,
-                            BaseInstance& instance,
+                            MinecraftInstance& instance,
                             ResourceProviderData provider,
                             const ResourceAPI* api,
                             TexturePackResourceModel* model = nullptr);

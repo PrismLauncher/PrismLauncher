@@ -35,7 +35,7 @@ ResourceDownload::ResourceDescriptor prepareShaderPackDescriptor()
 namespace ResourceDownload {
 
 ShaderPackResourcePage::ShaderPackResourcePage(ResourceDownloadDialog* dialog,
-                                               BaseInstance& instance,
+                                               MinecraftInstance& instance,
                                                ResourceProviderData provider,
                                                const ResourceAPI* api)
     : ResourcePage(dialog, instance, prepareShaderPackDescriptor(), std::move(provider))

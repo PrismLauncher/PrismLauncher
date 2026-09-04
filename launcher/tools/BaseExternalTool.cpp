@@ -7,15 +7,15 @@
 #include <windows.h>
 #endif
 
-#include "BaseInstance.h"
+#include "minecraft/MinecraftInstance.h"
 
-BaseExternalTool::BaseExternalTool(SettingsObject* settings, BaseInstance* instance, QObject* parent)
-    : QObject(parent), m_instance(instance), globalSettings(settings)
+BaseExternalTool::BaseExternalTool(SettingsObject* settings, MinecraftInstance* instance, QObject* parent)
+    : QObject(parent), m_instance(instance), m_globalSettings(settings)
 {}
 
-BaseExternalTool::~BaseExternalTool() {}
+BaseExternalTool::~BaseExternalTool() = default;
 
-BaseDetachedTool::BaseDetachedTool(SettingsObject* settings, BaseInstance* instance, QObject* parent)
+BaseDetachedTool::BaseDetachedTool(SettingsObject* settings, MinecraftInstance* instance, QObject* parent)
     : BaseExternalTool(settings, instance, parent)
 {}
 
@@ -24,9 +24,9 @@ void BaseDetachedTool::run()
     runImpl();
 }
 
-BaseExternalToolFactory::~BaseExternalToolFactory() {}
+BaseExternalToolFactory::~BaseExternalToolFactory() = default;
 
-BaseDetachedTool* BaseDetachedToolFactory::createDetachedTool(BaseInstance* instance, QObject* parent)
+BaseDetachedTool* BaseDetachedToolFactory::createDetachedTool(MinecraftInstance* instance, QObject* parent)
 {
     return qobject_cast<BaseDetachedTool*>(createTool(instance, parent));
 }

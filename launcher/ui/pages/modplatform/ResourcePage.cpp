@@ -58,7 +58,7 @@
 namespace ResourceDownload {
 
 ResourcePage::ResourcePage(ResourceDownloadDialog* parent,
-                           BaseInstance& baseInstance,
+                           MinecraftInstance& baseInstance,
                            ResourceDescriptor desc,
                            ResourceProviderData provider)
     : QWidget(parent)

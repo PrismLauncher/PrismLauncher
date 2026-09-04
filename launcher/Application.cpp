@@ -1533,6 +1533,7 @@ bool Application::launch(MinecraftInstance* instance,
 {
     if (m_updateRunning) {
         qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
+        return false;
     } else if (instance->canLaunch()) {
         QMutexLocker locker(&m_instanceExtrasMutex);
         auto& extras = m_instanceExtras[instance->id()];
@@ -1562,14 +1563,13 @@ bool Application::launch(MinecraftInstance* instance,
     } else if (instance->isRunning()) {
         showInstanceWindow(instance, "console");
         return true;
-    } else if (instance->canEdit()) {
+    } else {
         showInstanceWindow(instance);
         return true;
     }
-    return false;
 }
 
-bool Application::kill(BaseInstance* instance)
+bool Application::kill(MinecraftInstance* instance)
 {
     if (!instance->isRunning()) {
         qWarning() << "Attempted to kill instance" << instance->id() << ", which isn't running.";

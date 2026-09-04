@@ -44,42 +44,42 @@
 #include "FlameResourceModels.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
-namespace ResourceDownload {
-
-static ResourceProviderData prepareFlame()
+namespace {
+ResourceDownload::ResourceProviderData prepareFlame()
 {
     return {
-        .displayName = Flame::displayName(),
-        .icon = Flame::icon(),
-        .id = Flame::id(),
-        .metaEntryBase = Flame::metaEntryBase(),
-        .debugName = Flame::debugName(),
+        .displayName = ResourceDownload::Flame::displayName(),
+        .icon = ResourceDownload::Flame::icon(),
+        .id = ResourceDownload::Flame::id(),
+        .metaEntryBase = ResourceDownload::Flame::metaEntryBase(),
+        .debugName = ResourceDownload::Flame::debugName(),
     };
 }
+}  // namespace
+namespace ResourceDownload {
 
-ShaderPackResourcePage* Flame::createShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+ShaderPackResourcePage* Flame::createShaderPackResourcePage(ResourceDownloadDialog* dialog, MinecraftInstance& instance)
 {
     return new ShaderPackResourcePage(dialog, instance, prepareFlame(), &FlameAPI::get());
 }
 
-DataPackResourcePage* Flame::createDataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+DataPackResourcePage* Flame::createDataPackResourcePage(ResourceDownloadDialog* dialog, MinecraftInstance& instance)
 {
     return new DataPackResourcePage(dialog, instance, prepareFlame(), &FlameAPI::get());
 }
 
-ResourcePackResourcePage* Flame::createResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+ResourcePackResourcePage* Flame::createResourcePackResourcePage(ResourceDownloadDialog* dialog, MinecraftInstance& instance)
 {
     return new ResourcePackResourcePage(dialog, instance, prepareFlame(), &FlameAPI::get());
 }
 
-TexturePackResourcePage* Flame::createTexturePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+TexturePackResourcePage* Flame::createTexturePackResourcePage(ResourceDownloadDialog* dialog, MinecraftInstance& instance)
 {
     return new TexturePackResourcePage(dialog, instance, prepareFlame(), &FlameAPI::get(), new FlameTexturePackModel(instance));
 }
 
-ModPage* Flame::createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+ModPage* Flame::createModPage(ResourceDownloadDialog* dialog, MinecraftInstance& instance)
 {
-    return new ModPage(dialog, instance, prepareFlame(), &FlameAPI::get(),
-                       ModFilterWidget::create(&static_cast<MinecraftInstance&>(instance), false));
+    return new ModPage(dialog, instance, prepareFlame(), &FlameAPI::get(), ModFilterWidget::create(&instance, false));
 }
 }  // namespace ResourceDownload

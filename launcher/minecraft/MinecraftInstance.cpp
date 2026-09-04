@@ -36,8 +36,19 @@
  */
 
 #include "MinecraftInstance.h"
+#include <QDebug>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonParseError>
+#include <QTimer>
+#include <QUuid>
 #include "Application.h"
 #include "BuildConfig.h"
+#include "Commandline.h"
 #include "Json.h"
 #include "QObjectPtr.h"
 #include "settings/Setting.h"
@@ -164,9 +175,87 @@ class OrSetting : public Setting {
     std::shared_ptr<Setting> m_b;
 };
 
-MinecraftInstance::MinecraftInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, const QString& rootDir)
-    : BaseInstance(globalSettings, std::move(settings), rootDir)
+int getConsoleMaxLines(SettingsObject* settings)
 {
+    auto lineSetting = settings->getSetting("ConsoleMaxLines");
+    bool conversionOk = false;
+    int maxLines = lineSetting->get().toInt(&conversionOk);
+    if (!conversionOk) {
+        maxLines = lineSetting->defValue().toInt();
+        qWarning() << "ConsoleMaxLines has nonsensical value, defaulting to" << maxLines;
+    }
+    return maxLines;
+}
+
+bool shouldStopOnConsoleOverflow(SettingsObject* settings)
+{
+    return settings->get("ConsoleOverflowStop").toBool();
+}
+
+MinecraftInstance::MinecraftInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, const QString& rootDir)
+    : m_rootDir(rootDir), m_settings(std::move(settings)), m_globalSettings(globalSettings)
+{
+    m_settings->registerSetting("name", "Unnamed Instance");
+    m_settings->registerSetting("iconKey", "default");
+    m_settings->registerSetting("notes", "");
+
+    m_settings->registerSetting("lastLaunchTime", 0);
+    m_settings->registerSetting("totalTimePlayed", 0);
+    if (m_settings->get("totalTimePlayed").toLongLong() < 0) {
+        m_settings->reset("totalTimePlayed");
+    }
+    m_settings->registerSetting("lastTimePlayed", 0);
+
+    m_settings->registerSetting("linkedInstances", "[]");
+    m_settings->registerSetting("shortcuts", QString());
+    m_settings->registerSetting("uuid", QString());
+
+    const auto savedUUID = m_settings->get("uuid").toString();
+    if (savedUUID.isEmpty()) {
+        regenerateUuid();
+    } else {
+        m_uuid = savedUUID;
+    }
+
+    // Game time override
+    auto gameTimeOverride = m_settings->registerSetting("OverrideGameTime", false);
+    m_settings->registerOverride(globalSettings->getSetting("ShowGameTime"), gameTimeOverride);
+    m_settings->registerOverride(globalSettings->getSetting("RecordGameTime"), gameTimeOverride);
+    m_settings->registerSetting("CountGameTime", true);
+
+    // NOTE: Sometimees InstanceType is already registered, as it was used to identify the type of
+    // a locally stored instance
+    if (!m_settings->getSetting("InstanceType")) {
+        m_settings->registerSetting("InstanceType", "");
+    }
+
+    // Custom Commands
+    auto commandSetting = m_settings->registerSetting({ "OverrideCommands", "OverrideLaunchCmd" }, false);
+    m_settings->registerOverride(globalSettings->getSetting("PreLaunchCommand"), commandSetting);
+    m_settings->registerOverride(globalSettings->getSetting("WrapperCommand"), commandSetting);
+    m_settings->registerOverride(globalSettings->getSetting("PostExitCommand"), commandSetting);
+
+    // Console
+    auto consoleSetting = m_settings->registerSetting("OverrideConsole", false);
+    m_settings->registerOverride(globalSettings->getSetting("ShowConsole"), consoleSetting);
+    m_settings->registerOverride(globalSettings->getSetting("AutoCloseConsole"), consoleSetting);
+    m_settings->registerOverride(globalSettings->getSetting("ShowConsoleOnError"), consoleSetting);
+    m_settings->registerOverride(globalSettings->getSetting("LogPrePostOutput"), consoleSetting);
+
+    m_settings->registerPassthrough(globalSettings->getSetting("ConsoleMaxLines"), nullptr);
+    m_settings->registerPassthrough(globalSettings->getSetting("ConsoleOverflowStop"), nullptr);
+
+    // Managed Packs
+    m_settings->registerSetting("ManagedPack", false);
+    m_settings->registerSetting("ManagedPackType", "");
+    m_settings->registerSetting("ManagedPackID", "");
+    m_settings->registerSetting("ManagedPackName", "");
+    m_settings->registerSetting("ManagedPackVersionID", "");
+    m_settings->registerSetting("ManagedPackVersionName", "");
+    m_settings->registerSetting("ManagedPackURL", "");
+
+    m_settings->registerSetting("Profiler", "");
+
     m_components.reset(new PackProfile(this));
 }
 
@@ -175,6 +264,364 @@ MinecraftInstance::~MinecraftInstance() {}
 void MinecraftInstance::saveNow()
 {
     m_components->saveNow();
+}
+
+QString MinecraftInstance::getPreLaunchCommand()
+{
+    return settings()->get("PreLaunchCommand").toString();
+}
+
+QString MinecraftInstance::getWrapperCommand()
+{
+    return settings()->get("WrapperCommand").toString();
+}
+
+QString MinecraftInstance::getPostExitCommand()
+{
+    return settings()->get("PostExitCommand").toString();
+}
+
+bool MinecraftInstance::isManagedPack() const
+{
+    return m_settings->get("ManagedPack").toBool();
+}
+
+QString MinecraftInstance::getManagedPackType() const
+{
+    return m_settings->get("ManagedPackType").toString();
+}
+
+QString MinecraftInstance::getManagedPackID() const
+{
+    return m_settings->get("ManagedPackID").toString();
+}
+
+QString MinecraftInstance::getManagedPackName() const
+{
+    return m_settings->get("ManagedPackName").toString();
+}
+
+QString MinecraftInstance::getManagedPackVersionID() const
+{
+    return m_settings->get("ManagedPackVersionID").toString();
+}
+
+QString MinecraftInstance::getManagedPackVersionName() const
+{
+    return m_settings->get("ManagedPackVersionName").toString();
+}
+
+void MinecraftInstance::setManagedPack(const QString& type,
+                                       const QString& id,
+                                       const QString& name,
+                                       const QString& versionId,
+                                       const QString& version)
+{
+    m_settings->set("ManagedPack", true);
+    m_settings->set("ManagedPackType", type);
+    m_settings->set("ManagedPackID", id);
+    m_settings->set("ManagedPackName", name);
+    m_settings->set("ManagedPackVersionID", versionId);
+    m_settings->set("ManagedPackVersionName", version);
+
+    if (APPLICATION->settings()->get("AutomaticJavaSwitch").toBool() && m_settings->get("AutomaticJava").toBool() &&
+        m_settings->get("OverrideJavaLocation").toBool()) {
+        m_settings->set("OverrideJavaLocation", false);
+        m_settings->set("JavaPath", "");
+    }
+}
+
+QStringList MinecraftInstance::getLinkedInstances() const
+{
+    auto setting = m_settings->get("linkedInstances").toString();
+    return Json::toStringList(setting);
+}
+
+void MinecraftInstance::setLinkedInstances(const QStringList& list)
+{
+    m_settings->set("linkedInstances", Json::fromStringList(list));
+}
+
+void MinecraftInstance::addLinkedInstanceId(const QString& id)
+{
+    auto linkedInstances = getLinkedInstances();
+    linkedInstances.append(id);
+    setLinkedInstances(linkedInstances);
+}
+
+bool MinecraftInstance::removeLinkedInstanceId(const QString& id)
+{
+    auto linkedInstances = getLinkedInstances();
+    auto numRemoved = linkedInstances.removeAll(id);
+    setLinkedInstances(linkedInstances);
+    return numRemoved > 0;
+}
+
+bool MinecraftInstance::isLinkedToInstanceId(const QString& id) const
+{
+    auto linkedInstances = getLinkedInstances();
+    return linkedInstances.contains(id);
+}
+
+void MinecraftInstance::iconUpdated(const QString& key)
+{
+    if (iconKey() == key) {
+        emit propertiesChanged();
+    }
+}
+
+void MinecraftInstance::invalidate()
+{
+    changeStatus(Status::Gone);
+    qDebug() << "Instance" << id() << "has been invalidated.";
+}
+
+void MinecraftInstance::changeStatus(MinecraftInstance::Status newStatus)
+{
+    Status status = currentStatus();
+    if (status != newStatus) {
+        m_status = newStatus;
+        emit statusChanged(status, newStatus);
+    }
+}
+
+MinecraftInstance::Status MinecraftInstance::currentStatus() const
+{
+    return m_status;
+}
+
+QString MinecraftInstance::id() const
+{
+    return QFileInfo(instanceRoot()).fileName();
+}
+
+void MinecraftInstance::regenerateUuid()
+{
+    const auto newUUID = QUuid::createUuid().toString(QUuid::Id128);
+    m_settings->set("uuid", newUUID);
+    m_uuid = newUUID;
+}
+
+bool MinecraftInstance::isRunning() const
+{
+    return m_isRunning;
+}
+
+void MinecraftInstance::setRunning(bool running)
+{
+    if (running == m_isRunning) {
+        return;
+    }
+
+    m_isRunning = running;
+
+    emit runningStatusChanged(running);
+}
+
+void MinecraftInstance::setMinecraftRunning(bool running)
+{
+    if (!settings()->get("RecordGameTime").toBool()) {
+        return;
+    }
+
+    if (running) {
+        m_timeStarted = QDateTime::currentDateTime();
+        setLastLaunch(m_timeStarted.toMSecsSinceEpoch());
+    } else {
+        QDateTime timeEnded = QDateTime::currentDateTime();
+        qint64 secondsPlayed = m_timeStarted.secsTo(timeEnded);
+
+        qint64 current = settings()->get("totalTimePlayed").toLongLong();
+        settings()->set("totalTimePlayed", current + secondsPlayed);
+        settings()->set("lastTimePlayed", secondsPlayed);
+
+        if (countTimePlayed()) {
+            qint64 globalTotal = APPLICATION->playtimeSettings()->get("TotalPlayTime").toLongLong();
+            APPLICATION->playtimeSettings()->set("TotalPlayTime", globalTotal + secondsPlayed);
+        }
+
+        emit propertiesChanged();
+    }
+}
+
+int64_t MinecraftInstance::totalTimePlayed() const
+{
+    qint64 current = m_settings->get("totalTimePlayed").toLongLong();
+    if (m_isRunning) {
+        QDateTime timeNow = QDateTime::currentDateTime();
+        return current + m_timeStarted.secsTo(timeNow);
+    }
+    return current;
+}
+
+int64_t MinecraftInstance::lastTimePlayed() const
+{
+    if (m_isRunning) {
+        QDateTime timeNow = QDateTime::currentDateTime();
+        return m_timeStarted.secsTo(timeNow);
+    }
+    return m_settings->get("lastTimePlayed").toLongLong();
+}
+
+bool MinecraftInstance::countTimePlayed() const
+{
+    return m_settings->get("CountGameTime").toBool();
+}
+
+void MinecraftInstance::resetTimePlayed()
+{
+    settings()->reset("totalTimePlayed");
+    settings()->reset("lastTimePlayed");
+}
+
+QString MinecraftInstance::instanceType() const
+{
+    return m_settings->get("InstanceType").toString();
+}
+
+QString MinecraftInstance::instanceRoot() const
+{
+    return m_rootDir;
+}
+
+SettingsObject* MinecraftInstance::settings()
+{
+    loadSpecificSettings();
+
+    return m_settings.get();
+}
+
+bool MinecraftInstance::canLaunch() const
+{
+    return (!hasVersionBroken() && !isRunning());
+}
+
+bool MinecraftInstance::reloadSettings()
+{
+    return m_settings->reload();
+}
+
+qint64 MinecraftInstance::lastLaunch() const
+{
+    return m_settings->get("lastLaunchTime").value<qint64>();
+}
+
+void MinecraftInstance::setLastLaunch(qint64 val)
+{
+    // FIXME: if no change, do not set. setting involves saving a file.
+    m_settings->set("lastLaunchTime", val);
+    emit propertiesChanged();
+}
+
+void MinecraftInstance::setNotes(const QString& val)
+{
+    // FIXME: if no change, do not set. setting involves saving a file.
+    m_settings->set("notes", val);
+}
+
+QString MinecraftInstance::notes() const
+{
+    return m_settings->get("notes").toString();
+}
+
+void MinecraftInstance::setIconKey(const QString& val)
+{
+    // FIXME: if no change, do not set. setting involves saving a file.
+    m_settings->set("iconKey", val);
+    emit propertiesChanged();
+}
+
+QString MinecraftInstance::iconKey() const
+{
+    return m_settings->get("iconKey").toString();
+}
+
+void MinecraftInstance::setName(const QString& val)
+{
+    // FIXME: if no change, do not set. setting involves saving a file.
+    m_settings->set("name", val);
+    emit propertiesChanged();
+}
+
+bool MinecraftInstance::syncInstanceDirName(const QString& newRoot) const
+{
+    auto oldRoot = instanceRoot();
+    return oldRoot == newRoot || QFile::rename(oldRoot, newRoot);
+}
+
+void MinecraftInstance::registerShortcut(const ShortcutData& data)
+{
+    auto currentShortcuts = shortcuts();
+    currentShortcuts.append(data);
+    qDebug() << "Registering shortcut for instance" << id() << "with name" << data.name << "and path" << data.filePath;
+    setShortcuts(currentShortcuts);
+}
+
+void MinecraftInstance::setShortcuts(const QList<ShortcutData>& shortcuts)
+{
+    // FIXME: if no change, do not set. setting involves saving a file.
+    QJsonArray array;
+    for (const auto& elem : shortcuts) {
+        array.append(QJsonObject{ { "name", elem.name }, { "filePath", elem.filePath }, { "target", static_cast<int>(elem.target) } });
+    }
+
+    QJsonDocument document;
+    document.setArray(array);
+    m_settings->set("shortcuts", QString::fromUtf8(document.toJson(QJsonDocument::Compact)));
+}
+
+QList<ShortcutData> MinecraftInstance::shortcuts() const
+{
+    auto data = m_settings->get("shortcuts").toString().toUtf8();
+    QJsonParseError parseError;
+    auto document = QJsonDocument::fromJson(data, &parseError);
+    if (parseError.error != QJsonParseError::NoError || !document.isArray()) {
+        return {};
+    }
+
+    QList<ShortcutData> results;
+    for (const auto& elem : document.array()) {
+        if (!elem.isObject()) {
+            continue;
+        }
+        auto dict = elem.toObject();
+        if (!dict.contains("name") || !dict.contains("filePath") || !dict.contains("target")) {
+            continue;
+        }
+        int value = dict["target"].toInt(-1);
+        if (!dict.value("name").isString() || !dict.value("filePath").isString() || value < 0 || value >= 3) {
+            continue;
+        }
+
+        QString shortcutName = dict["name"].toString();
+        QString filePath = dict["filePath"].toString();
+        if (!QFileInfo::exists(filePath)) {
+            qWarning() << "Shortcut" << shortcutName << "for instance" << name() << "have non-existent path" << filePath;
+            continue;
+        }
+        results.append({ shortcutName, filePath, static_cast<ShortcutTarget>(value) });
+    }
+    return results;
+}
+
+QString MinecraftInstance::name() const
+{
+    return m_settings->get("name").toString();
+}
+
+QString MinecraftInstance::windowTitle() const
+{
+    return BuildConfig.LAUNCHER_DISPLAYNAME + ": " + name();
+}
+
+LaunchTask* MinecraftInstance::getLaunchTask()
+{
+    return m_launchProcess.get();
+}
+
+bool MinecraftInstance::isLegacy() const
+{
+    return traits().contains("legacyLaunch") || traits().contains("alphaLaunch");
 }
 
 void MinecraftInstance::loadSpecificSettings()
@@ -514,7 +961,7 @@ static QString replaceTokensIn(const QString& text, const QMap<QString, QString>
 
 QStringList MinecraftInstance::extraArguments()
 {
-    auto list = BaseInstance::extraArguments();
+    auto list = Commandline::splitArgs(settings()->get("JvmArgs").toString());
     auto version = getPackProfile();
     if (!version)
         return list;

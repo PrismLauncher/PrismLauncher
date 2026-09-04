@@ -19,11 +19,8 @@ set(CORE_SOURCES
     MessageLevel.cpp
     MessageLevel.h
     BaseVersion.h
-    BaseInstance.h
-    BaseInstance.cpp
     InstanceDirUpdate.h
     InstanceDirUpdate.cpp
-    NullInstance.h
     MMCZip.h
     MMCZip.cpp
     archive/ArchiveReader.cpp

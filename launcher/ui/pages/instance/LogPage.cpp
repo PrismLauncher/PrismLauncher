@@ -92,9 +92,10 @@ QModelIndex LogFormatProxyModel::find(const QModelIndex& start, const QString& v
         }
         QVariant v = data(idx, Qt::DisplayRole);
         QString t = v.toString();
-        if (t.contains(value, Qt::CaseInsensitive))
+        if (t.contains(value, Qt::CaseInsensitive)) {
             return idx;
-        return QModelIndex();
+        }
+        return {};
     };
     if (reverse) {
         int from = start.row();
@@ -128,7 +129,7 @@ QModelIndex LogFormatProxyModel::find(const QModelIndex& start, const QString& v
     return QModelIndex();
 }
 
-LogPage::LogPage(BaseInstance* instance, QWidget* parent) : QWidget(parent), ui(new Ui::LogPage), m_instance(instance)
+LogPage::LogPage(MinecraftInstance* instance, QWidget* parent) : QWidget(parent), ui(new Ui::LogPage), m_instance(instance)
 {
     ui->setupUi(this);
 
@@ -153,7 +154,7 @@ LogPage::LogPage(BaseInstance* instance, QWidget* parent) : QWidget(parent), ui(
         if (launchTask) {
             setInstanceLaunchTaskChanged(launchTask, true);
         }
-        connect(m_instance, &BaseInstance::launchTaskChanged, this, &LogPage::onInstanceLaunchTaskChanged);
+        connect(m_instance, &MinecraftInstance::launchTaskChanged, this, &LogPage::onInstanceLaunchTaskChanged);
     }
 
     auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);

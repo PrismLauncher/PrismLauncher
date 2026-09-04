@@ -37,7 +37,7 @@
 
 #pragma once
 #include "Application.h"
-#include "BaseInstance.h"
+#include "minecraft/MinecraftInstance.h"
 
 #include <QList>
 #include <QMessageBox>
@@ -45,7 +45,7 @@
 namespace ShortcutUtils {
 /// A struct to hold parameters for creating a shortcut
 struct Shortcut {
-    BaseInstance* instance;
+    MinecraftInstance* instance;
     QString name;
     QString targetString;
     QWidget* parent = nullptr;

@@ -118,7 +118,7 @@ InstanceWindow::InstanceWindow(MinecraftInstance* instance, QWidget* parent) : Q
 
         m_container->addButtons(horizontalLayout);
 
-        connect(m_instance, &BaseInstance::profilerChanged, this, &InstanceWindow::updateButtons);
+        connect(m_instance, &MinecraftInstance::profilerChanged, this, &InstanceWindow::updateButtons);
         connect(APPLICATION, &Application::globalSettingsApplied, this, &InstanceWindow::updateButtons);
     }
 
@@ -132,15 +132,15 @@ InstanceWindow::InstanceWindow(MinecraftInstance* instance, QWidget* parent) : Q
 
     // set up instance and launch process recognition
     {
-        auto launchTask = m_instance->getLaunchTask();
+        auto* launchTask = m_instance->getLaunchTask();
         instanceLaunchTaskChanged(launchTask);
-        connect(m_instance, &BaseInstance::launchTaskChanged, this, &InstanceWindow::instanceLaunchTaskChanged);
-        connect(m_instance, &BaseInstance::runningStatusChanged, this, &InstanceWindow::runningStateChanged);
+        connect(m_instance, &MinecraftInstance::launchTaskChanged, this, &InstanceWindow::instanceLaunchTaskChanged);
+        connect(m_instance, &MinecraftInstance::runningStatusChanged, this, &InstanceWindow::runningStateChanged);
     }
 
     // set up instance destruction detection
     {
-        connect(m_instance, &BaseInstance::statusChanged, this, &InstanceWindow::on_instanceStatusChanged);
+        connect(m_instance, &MinecraftInstance::statusChanged, this, &InstanceWindow::on_instanceStatusChanged);
     }
 
     // add ourself as the modpack page's instance window
@@ -151,9 +151,9 @@ InstanceWindow::InstanceWindow(MinecraftInstance* instance, QWidget* parent) : Q
     show();
 }
 
-void InstanceWindow::on_instanceStatusChanged(BaseInstance::Status, BaseInstance::Status newStatus)
+void InstanceWindow::on_instanceStatusChanged(MinecraftInstance::Status /*unused*/, MinecraftInstance::Status newStatus)
 {
-    if (newStatus == BaseInstance::Status::Gone) {
+    if (newStatus == MinecraftInstance::Status::Gone) {
         m_doNotSave = true;
         close();
     }

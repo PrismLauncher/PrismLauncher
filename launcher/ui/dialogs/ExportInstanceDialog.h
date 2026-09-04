@@ -38,11 +38,10 @@
 
 #include <QDialog>
 #include <QModelIndex>
-#include <memory>
 #include "FastFileIconProvider.h"
 #include "FileIgnoreProxy.h"
 
-class BaseInstance;
+class MinecraftInstance;
 
 namespace Ui {
 class ExportInstanceDialog;
@@ -52,10 +51,10 @@ class ExportInstanceDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit ExportInstanceDialog(BaseInstance* instance, QWidget* parent = 0);
-    ~ExportInstanceDialog();
+    explicit ExportInstanceDialog(MinecraftInstance* instance, QWidget* parent = nullptr);
+    ~ExportInstanceDialog() override;
 
-    virtual void done(int result);
+    void done(int result) override;
 
    private:
     void doExport();
@@ -63,7 +62,7 @@ class ExportInstanceDialog : public QDialog {
 
    private:
     Ui::ExportInstanceDialog* m_ui;
-    BaseInstance* m_instance;
+    MinecraftInstance* m_instance;
     FileIgnoreProxy* m_proxyModel;
     FastFileIconProvider m_icons;
 

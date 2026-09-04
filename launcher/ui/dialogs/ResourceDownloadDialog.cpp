@@ -25,8 +25,8 @@
 #include <utility>
 
 #include "Application.h"
-#include "BaseInstance.h"
 #include "ResourceDownloadTask.h"
+#include "minecraft/MinecraftInstance.h"
 
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/DataPackFolderModel.h"
@@ -254,29 +254,26 @@ void ResourceDownloadDialog::addResource(const ModPlatform::IndexedPack::Ptr& pa
 {
     removeResource(pack->name);
     auto* model = getBaseModel();
-    auto* instance = dynamic_cast<MinecraftInstance*>(m_instance);
-    if (instance) {
-        switch (pack->resourceType) {
-            case ModPlatform::ResourceType::Mod:
-                model = instance->loaderModList();
-                break;
-            case ModPlatform::ResourceType::ResourcePack:
-                model = instance->resourcePackList();
-                break;
-            case ModPlatform::ResourceType::ShaderPack:
-                model = instance->shaderPackList();
-                break;
-            case ModPlatform::ResourceType::DataPack:
-                model = instance->dataPackList();
-                break;
-                // case ModPlatform::ResourceType::World:
-                // model = instance->worldList();
-            case ModPlatform::ResourceType::TexturePack:
-                model = instance->texturePackList();
-                break;
-            default:
-                break;
-        }
+    switch (pack->resourceType) {
+        case ModPlatform::ResourceType::Mod:
+            model = m_instance->loaderModList();
+            break;
+        case ModPlatform::ResourceType::ResourcePack:
+            model = m_instance->resourcePackList();
+            break;
+        case ModPlatform::ResourceType::ShaderPack:
+            model = m_instance->shaderPackList();
+            break;
+        case ModPlatform::ResourceType::DataPack:
+            model = m_instance->dataPackList();
+            break;
+            // case ModPlatform::ResourceType::World:
+            // model = instance->worldList();
+        case ModPlatform::ResourceType::TexturePack:
+            model = m_instance->texturePackList();
+            break;
+        default:
+            break;
     }
     selectedPage()->addResourceToPage(pack, ver, model, std::move(downloadReason), std::move(dependentOn));
     setButtonStatus();
@@ -371,13 +368,10 @@ ResourceDownloadDialog* ResourceDownloadDialog::createMod(QWidget* parent,
     QList<BasePage*> pages;
 
     // need to load all resources for dependency task
-    auto* mInstance = dynamic_cast<MinecraftInstance*>(instance);
-    if (mInstance) {
-        for (auto* model : mInstance->resourceLists()) {
-            if (model) {
-                if (model->empty()) {
-                    model->startWatching();
-                }
+    for (auto* model : instance->resourceLists()) {
+        if (model) {
+            if (model->empty()) {
+                model->startWatching();
             }
         }
     }

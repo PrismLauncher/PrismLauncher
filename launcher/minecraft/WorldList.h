@@ -21,7 +21,7 @@
 #include <QMimeData>
 #include <QString>
 #include <memory>
-#include "BaseInstance.h"
+#include "minecraft/MinecraftInstance.h"
 #include "minecraft/World.h"
 
 class QFileSystemWatcher;
@@ -34,7 +34,7 @@ class WorldList : public QAbstractListModel {
 
     enum Roles { ObjectRole = Qt::UserRole + 1, FolderRole, SeedRole, NameRole, GameModeRole, LastPlayedRole, SizeRole, IconFileRole };
 
-    WorldList(const QString& dir, BaseInstance* instance);
+    WorldList(const QString& dir, MinecraftInstance* instance);
 
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
 
@@ -103,7 +103,7 @@ class WorldList : public QAbstractListModel {
     void changed();
 
    protected:
-    BaseInstance* m_instance;
+    MinecraftInstance* m_instance;
     QFileSystemWatcher* m_watcher;
     bool m_isWatching;
     QDir m_dir;

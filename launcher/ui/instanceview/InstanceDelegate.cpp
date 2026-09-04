@@ -43,9 +43,9 @@
 
 #include <QIcon>
 #include <QTextEdit>
-#include "BaseInstance.h"
 #include "InstanceList.h"
 #include "InstanceView.h"
+#include "minecraft/MinecraftInstance.h"
 
 // Origin: Qt
 static void viewItemTextLayout(QTextLayout& textLayout, int lineWidth, qreal& height, qreal& widthUsed)
@@ -123,7 +123,7 @@ void drawProgressOverlay(QPainter* painter, const QStyleOptionViewItem& option, 
     painter->restore();
 }
 
-void drawBadges(QPainter* painter, const QStyleOptionViewItem& option, BaseInstance* instance, QIcon::Mode mode, QIcon::State state)
+void drawBadges(QPainter* painter, const QStyleOptionViewItem& option, MinecraftInstance* instance, QIcon::Mode mode, QIcon::State state)
 {
     QList<QString> pixmaps;
     if (instance->isRunning()) {
@@ -308,7 +308,7 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     }
 
     // FIXME: this really has no business of being here. Make generic.
-    auto instance = (BaseInstance*)index.data(InstanceList::InstancePointerRole).value<void*>();
+    auto instance = (MinecraftInstance*)index.data(InstanceList::InstancePointerRole).value<void*>();
     if (instance) {
         drawBadges(painter, opt, instance, mode, state);
     }

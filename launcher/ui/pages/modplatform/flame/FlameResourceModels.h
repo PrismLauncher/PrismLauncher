@@ -12,14 +12,14 @@ class FlameTexturePackModel : public TexturePackResourceModel {
     Q_OBJECT
 
    public:
-    FlameTexturePackModel(const BaseInstance&);
+    FlameTexturePackModel(const MinecraftInstance&);
     ~FlameTexturePackModel() override = default;
 
     bool optedOut(const ModPlatform::IndexedVersion& ver) const override;
 
    private:
     ResourceAPI::SearchArgs createSearchArguments() override;
-    ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) override;
+    ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex& /*unused*/) override;
 };
 
 }  // namespace ResourceDownload

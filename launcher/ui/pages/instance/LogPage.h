@@ -38,8 +38,8 @@
 #include <QIdentityProxyModel>
 #include <QWidget>
 
-#include "BaseInstance.h"
 #include "launch/LaunchTask.h"
+#include "minecraft/MinecraftInstance.h"
 #include "ui/pages/BasePage.h"
 
 namespace Ui {
@@ -63,7 +63,7 @@ class LogPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit LogPage(BaseInstance* instance, QWidget* parent = 0);
+    explicit LogPage(MinecraftInstance* instance, QWidget* parent = 0);
     virtual ~LogPage();
     virtual QString displayName() const override { return tr("Minecraft Log"); }
     virtual QIcon icon() const override { return QIcon::fromTheme("log"); }
@@ -97,7 +97,7 @@ class LogPage : public QWidget, public BasePage {
 
    private:
     Ui::LogPage* ui;
-    BaseInstance* m_instance;
+    MinecraftInstance* m_instance;
     LaunchTask* m_process;
 
     LogFormatProxyModel* m_proxy;

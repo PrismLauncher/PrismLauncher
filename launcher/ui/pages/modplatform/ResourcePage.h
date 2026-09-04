@@ -18,7 +18,7 @@ namespace Ui {
 class ResourcePage;
 }
 
-class BaseInstance;
+class MinecraftInstance;
 
 namespace ResourceDownload {
 
@@ -84,7 +84,7 @@ class ResourcePage : public QWidget, public BasePage {
 
    protected:
     ResourcePage(ResourceDownloadDialog* parent,
-                 BaseInstance& baseInstance,
+                 MinecraftInstance& baseInstance,
                  ResourceDescriptor desc = {},
                  ResourceProviderData provider = {});
 
@@ -126,7 +126,7 @@ class ResourcePage : public QWidget, public BasePage {
     void openUrl(QUrl);
 
    public:
-    BaseInstance& m_baseInstance;
+    MinecraftInstance& m_baseInstance;
 
    protected:
     Ui::ResourcePage* m_ui;

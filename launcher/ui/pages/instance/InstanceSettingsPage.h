@@ -36,7 +36,8 @@
 #pragma once
 
 #include <QWidget>
-#include "BaseInstance.h"
+#include "Application.h"
+#include "minecraft/MinecraftInstance.h"
 #include "ui/pages/BasePage.h"
 #include "ui/widgets/MinecraftSettingsWidget.h"
 
@@ -49,7 +50,7 @@ class InstanceSettingsPage : public MinecraftSettingsWidget, public BasePage {
         connect(APPLICATION, &Application::globalSettingsAboutToOpen, this, &InstanceSettingsPage::apply);
         connect(APPLICATION, &Application::globalSettingsApplied, this, &InstanceSettingsPage::loadSettings);
     }
-    ~InstanceSettingsPage() override {}
+    ~InstanceSettingsPage() override = default;
     QString displayName() const override { return tr("Settings"); }
     QIcon icon() const override { return QIcon::fromTheme("instance-settings"); }
     QString id() const override { return "settings"; }

@@ -39,7 +39,7 @@
 #include <QMainWindow>
 #include <QString>
 
-#include "BaseInstance.h"
+#include "minecraft/MinecraftInstance.h"
 #include "ui/pages/BasePage.h"
 
 #include "settings/Setting.h"

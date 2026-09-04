@@ -68,11 +68,11 @@ static inline QString metaEntryBase()
     return "ModrinthPacks";
 }
 
-ShaderPackResourcePage* createShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
-DataPackResourcePage* createDataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
-ResourcePackResourcePage* createResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
-TexturePackResourcePage* createTexturePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
-ModPage* createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance);
+ShaderPackResourcePage* createShaderPackResourcePage(ResourceDownloadDialog* dialog, MinecraftInstance& instance);
+DataPackResourcePage* createDataPackResourcePage(ResourceDownloadDialog* dialog, MinecraftInstance& instance);
+ResourcePackResourcePage* createResourcePackResourcePage(ResourceDownloadDialog* dialog, MinecraftInstance& instance);
+TexturePackResourcePage* createTexturePackResourcePage(ResourceDownloadDialog* dialog, MinecraftInstance& instance);
+ModPage* createModPage(ResourceDownloadDialog* dialog, MinecraftInstance& instance);
 }  // namespace Modrinth
 
 }  // namespace ResourceDownload

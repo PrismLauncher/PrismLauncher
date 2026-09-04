@@ -14,7 +14,10 @@ class DataPackResourcePage : public ResourcePage {
     Q_OBJECT
 
    public:
-    DataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, ResourceProviderData provider, const ResourceAPI* api);
+    DataPackResourcePage(ResourceDownloadDialog* dialog,
+                         MinecraftInstance& instance,
+                         ResourceProviderData provider,
+                         const ResourceAPI* api);
 
    protected slots:
     void triggerSearch() override;
