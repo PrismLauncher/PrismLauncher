@@ -138,6 +138,7 @@ set(NET_SOURCES
     net/ApiRequest.h
     net/Request.cpp
     net/Request.h
+    net/RPCSink.h
 )
 
 # Game launch logic
