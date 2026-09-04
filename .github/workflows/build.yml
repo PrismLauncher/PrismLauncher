@@ -66,11 +66,11 @@ jobs:
             vcvars-arch: amd64
             qt-version: 6.10.2
 
-          - os: windows-11-arm
-            artifact-name: Windows-MSVC-arm64
-            cmake-preset: windows_msvc
-            vcvars-arch: arm64
-            qt-version: 6.10.2
+          # - os: windows-11-arm
+          #   artifact-name: Windows-MSVC-arm64
+          #   cmake-preset: windows_msvc
+          #   vcvars-arch: arm64
+          #   qt-version: 6.10.2
 
           # - os: macos-26
           #   artifact-name: macOS
