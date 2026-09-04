@@ -37,7 +37,7 @@
 
 #include <QWidget>
 
-#include "BaseInstance.h"
+#include "minecraft/MinecraftInstance.h"
 #include "ui/pages/BasePage.h"
 
 namespace Ui {
@@ -48,7 +48,7 @@ class NotesPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit NotesPage(BaseInstance* inst, QWidget* parent = 0);
+    explicit NotesPage(MinecraftInstance* inst, QWidget* parent = 0);
     virtual ~NotesPage();
     virtual QString displayName() const override { return tr("Notes"); }
     virtual QIcon icon() const override
@@ -65,5 +65,5 @@ class NotesPage : public QWidget, public BasePage {
 
    private:
     Ui::NotesPage* ui;
-    BaseInstance* m_inst;
+    MinecraftInstance* m_inst;
 };

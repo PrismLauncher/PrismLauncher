@@ -42,7 +42,7 @@
 #include "InstanceList.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
-QString askToUpdateInstanceDirName(BaseInstance* instance, const QString& oldName, const QString& newName, QWidget* parent)
+QString askToUpdateInstanceDirName(MinecraftInstance* instance, const QString& oldName, const QString& newName, QWidget* parent)
 {
     if (oldName == newName)
         return QString();

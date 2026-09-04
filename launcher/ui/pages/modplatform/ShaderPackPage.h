@@ -14,7 +14,10 @@ class ShaderPackResourcePage : public ResourcePage {
     Q_OBJECT
 
    public:
-    ShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, ResourceProviderData provider, const ResourceAPI* api);
+    ShaderPackResourcePage(ResourceDownloadDialog* dialog,
+                           MinecraftInstance& instance,
+                           ResourceProviderData provider,
+                           const ResourceAPI* api);
 
    protected slots:
     void triggerSearch() override;

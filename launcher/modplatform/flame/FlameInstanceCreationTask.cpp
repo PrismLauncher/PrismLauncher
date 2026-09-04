@@ -94,7 +94,7 @@ void FlameCreationTask::executeTask()
     auto* instanceList = APPLICATION->instances();
 
     // FIXME: How to handle situations when there's more than one install already for a given modpack?
-    BaseInstance* inst = nullptr;
+    MinecraftInstance* inst = nullptr;
     if (auto originalId = originalInstanceID(); !originalId.isEmpty()) {
         inst = instanceList->getInstanceById(originalId);
         Q_ASSERT(inst);
@@ -334,7 +334,7 @@ QString FlameCreationTask::getVersionForLoader(const QString& uid,
     return loaderVersion;
 }
 
-void FlameCreationTask::setManagedPack(BaseInstance* instance)
+void FlameCreationTask::setManagedPack(MinecraftInstance* instance)
 {
     // Don't add managed info to packs without an ID (most likely imported from ZIP)
     if (!m_managedId.isEmpty()) {

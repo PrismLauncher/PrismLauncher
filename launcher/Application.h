@@ -73,7 +73,6 @@ class TranslationsModel;
 class ITheme;
 class ThemeManager;
 class IconTheme;
-class BaseInstance;
 class MinecraftInstance;
 
 class LogModel;
@@ -218,7 +217,7 @@ class Application : public QApplication {
                 std::shared_ptr<MinecraftTarget> targetToJoin = nullptr,
                 shared_qobject_ptr<MinecraftAccount> accountToUse = nullptr,
                 const QString& offlineName = QString());
-    bool kill(BaseInstance* instance);
+    bool kill(MinecraftInstance* instance);
     void closeCurrentWindow();
 
    private slots:

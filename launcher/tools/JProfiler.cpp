@@ -2,31 +2,33 @@
 
 #include <QDir>
 
-#include "BaseInstance.h"
 #include "launch/LaunchTask.h"
+#include "minecraft/MinecraftInstance.h"
 #include "settings/SettingsObject.h"
+
+namespace {
 
 class JProfiler : public BaseProfiler {
     Q_OBJECT
    public:
-    JProfiler(SettingsObject* settings, BaseInstance* instance, QObject* parent = 0);
+    JProfiler(SettingsObject* settings, MinecraftInstance* instance, QObject* parent = nullptr);
 
    private slots:
     void profilerStarted();
     void profilerFinished(int exit, QProcess::ExitStatus status);
 
    protected:
-    void beginProfilingImpl(LaunchTask* process);
+    void beginProfilingImpl(LaunchTask* process) override;
 
    private:
-    int listeningPort = 0;
+    int m_listeningPort = 0;
 };
 
-JProfiler::JProfiler(SettingsObject* settings, BaseInstance* instance, QObject* parent) : BaseProfiler(settings, instance, parent) {}
+JProfiler::JProfiler(SettingsObject* settings, MinecraftInstance* instance, QObject* parent) : BaseProfiler(settings, instance, parent) {}
 
 void JProfiler::profilerStarted()
 {
-    emit readyToLaunch(tr("Listening on port: %1").arg(listeningPort));
+    emit readyToLaunch(tr("Listening on port: %1").arg(m_listeningPort));
 }
 
 void JProfiler::profilerFinished([[maybe_unused]] int exit, QProcess::ExitStatus status)
@@ -36,16 +38,16 @@ void JProfiler::profilerFinished([[maybe_unused]] int exit, QProcess::ExitStatus
     }
     if (m_profilerProcess) {
         m_profilerProcess->deleteLater();
-        m_profilerProcess = 0;
+        m_profilerProcess = nullptr;
     }
 }
 
 void JProfiler::beginProfilingImpl(LaunchTask* process)
 {
-    listeningPort = globalSettings->get("JProfilerPort").toInt();
-    QProcess* profiler = new QProcess(this);
-    QStringList profilerArgs = { "-d", QString::number(process->pid()), "--gui", "-p", QString::number(listeningPort) };
-    auto basePath = globalSettings->get("JProfilerPath").toString();
+    m_listeningPort = m_globalSettings->get("JProfilerPort").toInt();
+    auto* profiler = new QProcess(this);
+    QStringList profilerArgs = { "-d", QString::number(process->pid()), "--gui", "-p", QString::number(m_listeningPort) };
+    auto basePath = m_globalSettings->get("JProfilerPath").toString();
 
 #ifdef Q_OS_WIN
     QString profilerProgram = QDir(basePath).absoluteFilePath("bin/jpenable.exe");
@@ -62,22 +64,22 @@ void JProfiler::beginProfilingImpl(LaunchTask* process)
     m_profilerProcess = profiler;
     profiler->start();
 }
-
+}  // namespace
 void JProfilerFactory::registerSettings(SettingsObject* settings)
 {
     settings->registerSetting("JProfilerPath");
     settings->registerSetting("JProfilerPort", 42042);
-    globalSettings = settings;
+    m_globalSettings = settings;
 }
 
-BaseExternalTool* JProfilerFactory::createTool(BaseInstance* instance, QObject* parent)
+BaseExternalTool* JProfilerFactory::createTool(MinecraftInstance* instance, QObject* parent)
 {
-    return new JProfiler(globalSettings, instance, parent);
+    return new JProfiler(m_globalSettings, instance, parent);
 }
 
 bool JProfilerFactory::check(QString* error)
 {
-    return check(globalSettings->get("JProfilerPath").toString(), error);
+    return check(m_globalSettings->get("JProfilerPath").toString(), error);
 }
 
 bool JProfilerFactory::check(const QString& path, QString* error)

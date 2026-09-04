@@ -6,11 +6,15 @@
 #include "DataPackModel.h"
 
 #include <QMessageBox>
+#include <utility>
 
 namespace ResourceDownload {
 
-DataPackResourceModel::DataPackResourceModel(BaseInstance const& base_inst, const ResourceAPI* api, QString debugName, QString metaEntryBase)
-    : ResourceModel(api), m_base_instance(base_inst), m_debugName(debugName + " (Model)"), m_metaEntryBase(metaEntryBase)
+DataPackResourceModel::DataPackResourceModel(const MinecraftInstance& baseInst,
+                                             const ResourceAPI* api,
+                                             QString debugName,
+                                             QString metaEntryBase)
+    : ResourceModel(api), m_baseInstance(baseInst), m_debugName(debugName + " (Model)"), m_metaEntryBase(std::move(metaEntryBase))
 {}
 
 /******** Make data requests ********/
@@ -18,19 +22,23 @@ DataPackResourceModel::DataPackResourceModel(BaseInstance const& base_inst, cons
 ResourceAPI::SearchArgs DataPackResourceModel::createSearchArguments()
 {
     auto sort = getCurrentSortingMethodByIndex();
-    return { ModPlatform::ResourceType::DataPack, m_next_search_offset, m_search_term, sort, ModPlatform::ModLoaderType::DataPack };
+    return { .type = ModPlatform::ResourceType::DataPack,
+             .offset = m_next_search_offset,
+             .search = m_search_term,
+             .sorting = sort,
+             .loaders = ModPlatform::ModLoaderType::DataPack };
 }
 
 ResourceAPI::VersionSearchArgs DataPackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto pack = m_packs[entry.row()];
-    return { pack, {}, ModPlatform::ModLoaderType::DataPack };
+    return { .pack = pack, .mcVersions = {}, .loaders = ModPlatform::ModLoaderType::DataPack };
 }
 
 ResourceAPI::ProjectInfoArgs DataPackResourceModel::createInfoArguments(const QModelIndex& entry)
 {
     auto pack = m_packs[entry.row()];
-    return { pack };
+    return { .pack = pack };
 }
 
 void DataPackResourceModel::searchWithTerm(const QString& term, unsigned int sort)

@@ -50,7 +50,7 @@
 #include <QShortcut>
 #include <QUrl>
 
-OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, BaseInstance* instance, QWidget* parent)
+OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, MinecraftInstance* instance, QWidget* parent)
     : QWidget(parent)
     , m_id(id)
     , m_displayName(displayName)

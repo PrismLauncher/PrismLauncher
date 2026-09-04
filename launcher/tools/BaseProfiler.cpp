@@ -1,9 +1,9 @@
 #include "BaseProfiler.h"
-#include "QObjectPtr.h"
 
 #include <QProcess>
 
-BaseProfiler::BaseProfiler(SettingsObject* settings, BaseInstance* instance, QObject* parent) : BaseExternalTool(settings, instance, parent)
+BaseProfiler::BaseProfiler(SettingsObject* settings, MinecraftInstance* instance, QObject* parent)
+    : BaseExternalTool(settings, instance, parent)
 {}
 
 void BaseProfiler::beginProfiling(LaunchTask* process)
@@ -23,11 +23,11 @@ void BaseProfiler::abortProfilingImpl()
     }
     m_profilerProcess->terminate();
     m_profilerProcess->deleteLater();
-    m_profilerProcess = 0;
+    m_profilerProcess = nullptr;
     emit abortLaunch(tr("Profiler aborted"));
 }
 
-BaseProfiler* BaseProfilerFactory::createProfiler(BaseInstance* instance, QObject* parent)
+BaseProfiler* BaseProfilerFactory::createProfiler(MinecraftInstance* instance, QObject* parent)
 {
     return qobject_cast<BaseProfiler*>(createTool(instance, parent));
 }

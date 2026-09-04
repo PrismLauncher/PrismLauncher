@@ -10,8 +10,6 @@
 #include <memory>
 #include <utility>
 
-#include "BaseInstance.h"
-
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 
@@ -19,6 +17,7 @@
 #include "ui/widgets/ModFilterWidget.h"
 
 class Version;
+class MinecraftInstance;
 
 namespace ResourceDownload {
 
@@ -28,7 +27,7 @@ class ModModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    ModModel(BaseInstance&, const ResourceAPI* api, const QString& debugName, QString metaEntryBase);
+    ModModel(MinecraftInstance&, const ResourceAPI* api, const QString& debugName, QString metaEntryBase);
 
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, unsigned int sort, bool filterChanged);
@@ -51,7 +50,7 @@ class ModModel : public ResourceModel {
     bool checkVersionFilters(const ModPlatform::IndexedVersion& version) override;
 
    protected:
-    BaseInstance& m_baseInstance;
+    MinecraftInstance& m_baseInstance;
 
     std::shared_ptr<ModFilterWidget::Filter> m_filter = nullptr;
 

@@ -19,10 +19,9 @@
 #pragma once
 
 #include <QDialog>
-#include "BaseInstance.h"
+#include "minecraft/MinecraftInstance.h"
 #include "ui/pages/BasePageProvider.h"
 
-class MinecraftInstance;
 class PageContainer;
 class PackProfile;
 class QDialogButtonBox;

@@ -36,7 +36,7 @@
 #include <QTemporaryDir>
 #include <QTest>
 #include <QTimer>
-#include "BaseInstance.h"
+#include "minecraft/MinecraftInstance.h"
 
 #include <FileSystem.h>
 

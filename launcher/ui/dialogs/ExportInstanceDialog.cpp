@@ -36,7 +36,6 @@
  */
 
 #include "ExportInstanceDialog.h"
-#include <BaseInstance.h>
 #include <MMCZip.h>
 #include <QFileDialog>
 #include <QFileSystemModel>
@@ -44,6 +43,7 @@
 #include "FileIgnoreProxy.h"
 #include "QObjectPtr.h"
 #include "archive/ExportToZipTask.h"
+#include "minecraft/MinecraftInstance.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui_ExportInstanceDialog.h"
@@ -60,11 +60,11 @@
 #include "Application.h"
 #include "SeparatorPrefixTree.h"
 
-ExportInstanceDialog::ExportInstanceDialog(BaseInstance* instance, QWidget* parent)
+ExportInstanceDialog::ExportInstanceDialog(MinecraftInstance* instance, QWidget* parent)
     : QDialog(parent), m_ui(new Ui::ExportInstanceDialog), m_instance(instance)
 {
     m_ui->setupUi(this);
-    auto model = new QFileSystemModel(this);
+    auto* model = new QFileSystemModel(this);
     model->setIconProvider(&m_icons);
     auto root = instance->instanceRoot();
     m_proxyModel = new FileIgnoreProxy(root, this);
@@ -98,22 +98,23 @@ ExportInstanceDialog::~ExportInstanceDialog()
 }
 
 /// Save icon to instance's folder is needed
-void SaveIcon(BaseInstance* m_instance)
+namespace {
+void saveIcon(MinecraftInstance* mInstance)
 {
-    auto iconKey = m_instance->iconKey();
-    auto iconList = APPLICATION->icons();
-    auto mmcIcon = iconList->icon(iconKey);
+    auto iconKey = mInstance->iconKey();
+    auto* iconList = APPLICATION->icons();
+    const auto* mmcIcon = iconList->icon(iconKey);
     if (!mmcIcon || mmcIcon->isBuiltIn()) {
         return;
     }
     auto path = mmcIcon->getFilePath();
     if (!path.isNull()) {
         QFileInfo inInfo(path);
-        FS::copy(path, FS::PathCombine(m_instance->instanceRoot(), inInfo.fileName()))();
+        FS::copy(path, FS::PathCombine(mInstance->instanceRoot(), inInfo.fileName()))();
         return;
     }
-    auto& image = mmcIcon->m_images[mmcIcon->type()];
-    auto& icon = image.icon;
+    const auto& image = mmcIcon->m_images[mmcIcon->type()];
+    const auto& icon = image.icon;
     auto sizes = icon.availableSizes();
     if (sizes.size() == 0) {
         return;
@@ -127,8 +128,9 @@ void SaveIcon(BaseInstance* m_instance)
         }
     }
     auto pixmap = icon.pixmap(largest);
-    pixmap.save(FS::PathCombine(m_instance->instanceRoot(), iconKey + ".png"));
+    pixmap.save(FS::PathCombine(mInstance->instanceRoot(), iconKey + ".png"));
 }
+}  // namespace
 
 void ExportInstanceDialog::doExport()
 {
@@ -141,7 +143,7 @@ void ExportInstanceDialog::doExport()
         return;
     }
 
-    SaveIcon(m_instance);
+    saveIcon(m_instance);
 
     auto files = QFileInfoList();
     if (!MMCZip::collectFileListRecursively(m_instance->instanceRoot(), nullptr, &files,

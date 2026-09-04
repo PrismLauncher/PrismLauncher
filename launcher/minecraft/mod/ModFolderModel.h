@@ -48,7 +48,7 @@
 #include "ResourceFolderModel.h"
 #include "minecraft/mod/Resource.h"
 
-class BaseInstance;
+class MinecraftInstance;
 class QFileSystemWatcher;
 
 /**

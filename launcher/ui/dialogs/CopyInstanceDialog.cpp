@@ -44,48 +44,48 @@
 
 #include "ui/dialogs/IconPickerDialog.h"
 
-#include "BaseInstance.h"
-#include "BaseVersion.h"
 #include "DesktopServices.h"
 #include "FileSystem.h"
 #include "InstanceList.h"
 #include "icons/IconList.h"
+#include "minecraft/MinecraftInstance.h"
 
-CopyInstanceDialog::CopyInstanceDialog(BaseInstance* original, QWidget* parent)
-    : QDialog(parent), ui(new Ui::CopyInstanceDialog), m_original(original)
+CopyInstanceDialog::CopyInstanceDialog(MinecraftInstance* original, QWidget* parent)
+    : QDialog(parent), m_ui(new Ui::CopyInstanceDialog), m_original(original)
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
     resize(minimumSizeHint());
     layout()->setSizeConstraint(QLayout::SetFixedSize);
 
-    InstIconKey = original->iconKey();
-    ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
-    ui->instNameTextBox->setText(original->name());
-    ui->instNameTextBox->setFocus();
+    m_instIconKey = original->iconKey();
+    m_ui->iconButton->setIcon(APPLICATION->icons()->getIcon(m_instIconKey));
+    m_ui->instNameTextBox->setText(original->name());
+    m_ui->instNameTextBox->setFocus();
 
     QStringList groups = APPLICATION->instances()->getGroups();
     groups.prepend("");
-    ui->groupBox->addItems(groups);
+    m_ui->groupBox->addItems(groups);
     int index = groups.indexOf(APPLICATION->instances()->getInstanceGroup(m_original->id()));
-    if (index == -1)
+    if (index == -1) {
         index = 0;
+    }
 
-    ui->groupBox->setCurrentIndex(index);
-    ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
-    ui->copySavesCheckbox->setChecked(m_selectedOptions.isCopySavesEnabled());
-    ui->keepPlaytimeCheckbox->setChecked(m_selectedOptions.isKeepPlaytimeEnabled());
-    ui->copyGameOptionsCheckbox->setChecked(m_selectedOptions.isCopyGameOptionsEnabled());
-    ui->copyResPacksCheckbox->setChecked(m_selectedOptions.isCopyResourcePacksEnabled());
-    ui->copyShaderPacksCheckbox->setChecked(m_selectedOptions.isCopyShaderPacksEnabled());
-    ui->copyServersCheckbox->setChecked(m_selectedOptions.isCopyServersEnabled());
-    ui->copyModsCheckbox->setChecked(m_selectedOptions.isCopyModsEnabled());
-    ui->copyScreenshotsCheckbox->setChecked(m_selectedOptions.isCopyScreenshotsEnabled());
+    m_ui->groupBox->setCurrentIndex(index);
+    m_ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
+    m_ui->copySavesCheckbox->setChecked(m_selectedOptions.isCopySavesEnabled());
+    m_ui->keepPlaytimeCheckbox->setChecked(m_selectedOptions.isKeepPlaytimeEnabled());
+    m_ui->copyGameOptionsCheckbox->setChecked(m_selectedOptions.isCopyGameOptionsEnabled());
+    m_ui->copyResPacksCheckbox->setChecked(m_selectedOptions.isCopyResourcePacksEnabled());
+    m_ui->copyShaderPacksCheckbox->setChecked(m_selectedOptions.isCopyShaderPacksEnabled());
+    m_ui->copyServersCheckbox->setChecked(m_selectedOptions.isCopyServersEnabled());
+    m_ui->copyModsCheckbox->setChecked(m_selectedOptions.isCopyModsEnabled());
+    m_ui->copyScreenshotsCheckbox->setChecked(m_selectedOptions.isCopyScreenshotsEnabled());
 
-    ui->symbolicLinksCheckbox->setChecked(m_selectedOptions.isUseSymLinksEnabled());
-    ui->hardLinksCheckbox->setChecked(m_selectedOptions.isUseHardLinksEnabled());
+    m_ui->symbolicLinksCheckbox->setChecked(m_selectedOptions.isUseSymLinksEnabled());
+    m_ui->hardLinksCheckbox->setChecked(m_selectedOptions.isUseHardLinksEnabled());
 
-    ui->recursiveLinkCheckbox->setChecked(m_selectedOptions.isLinkRecursivelyEnabled());
-    ui->dontLinkSavesCheckbox->setChecked(m_selectedOptions.isDontLinkSavesEnabled());
+    m_ui->recursiveLinkCheckbox->setChecked(m_selectedOptions.isLinkRecursivelyEnabled());
+    m_ui->dontLinkSavesCheckbox->setChecked(m_selectedOptions.isDontLinkSavesEnabled());
 
     auto detectedFS = FS::statFS(m_original->instanceRoot()).fsType;
 
@@ -93,45 +93,45 @@ CopyInstanceDialog::CopyInstanceDialog(BaseInstance* original, QWidget* parent)
     m_linkSupported = FS::canLinkOnFS(detectedFS);
 
     if (m_cloneSupported) {
-        ui->cloneSupportedLabel->setText(tr("Reflinks are supported on %1").arg(FS::getFilesystemTypeName(detectedFS)));
+        m_ui->cloneSupportedLabel->setText(tr("Reflinks are supported on %1").arg(FS::getFilesystemTypeName(detectedFS)));
     } else {
-        ui->cloneSupportedLabel->setText(tr("Reflinks aren't supported on %1").arg(FS::getFilesystemTypeName(detectedFS)));
+        m_ui->cloneSupportedLabel->setText(tr("Reflinks aren't supported on %1").arg(FS::getFilesystemTypeName(detectedFS)));
     }
 
 #if defined(Q_OS_WIN)
-    ui->symbolicLinksCheckbox->setIcon(style()->standardIcon(QStyle::SP_VistaShield));
-    ui->symbolicLinksCheckbox->setToolTip(tr("Use symbolic links instead of copying files.") + "\n" +
-                                          tr("On Windows, symbolic links may require admin permission to create."));
+    m_ui->symbolicLinksCheckbox->setIcon(style()->standardIcon(QStyle::SP_VistaShield));
+    m_ui->symbolicLinksCheckbox->setToolTip(tr("Use symbolic links instead of copying files.") + "\n" +
+                                            tr("On Windows, symbolic links may require admin permission to create."));
 #endif
 
     updateLinkOptions();
     updateUseCloneCheckbox();
 
-    auto HelpButton = ui->buttonBox->button(QDialogButtonBox::Help);
-    connect(HelpButton, &QPushButton::clicked, this, &CopyInstanceDialog::help);
-    HelpButton->setText(tr("Help"));
-    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
-    ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
+    auto* helpButton = m_ui->buttonBox->button(QDialogButtonBox::Help);
+    connect(helpButton, &QPushButton::clicked, this, &CopyInstanceDialog::help);
+    helpButton->setText(tr("Help"));
+    m_ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
+    m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
 }
 
 CopyInstanceDialog::~CopyInstanceDialog()
 {
-    delete ui;
+    delete m_ui;
 }
 
 void CopyInstanceDialog::updateDialogState()
 {
     auto allowOK = !instName().isEmpty();
-    auto OkButton = ui->buttonBox->button(QDialogButtonBox::Ok);
-    if (OkButton->isEnabled() != allowOK) {
-        OkButton->setEnabled(allowOK);
+    auto* okButton = m_ui->buttonBox->button(QDialogButtonBox::Ok);
+    if (okButton->isEnabled() != allowOK) {
+        okButton->setEnabled(allowOK);
     }
 }
 
 QString CopyInstanceDialog::instName() const
 {
-    auto result = ui->instNameTextBox->text().trimmed();
-    if (result.size()) {
+    auto result = m_ui->instNameTextBox->text().trimmed();
+    if (result.size() != 0) {
         return result;
     }
     return QString();
@@ -139,12 +139,12 @@ QString CopyInstanceDialog::instName() const
 
 QString CopyInstanceDialog::iconKey() const
 {
-    return InstIconKey;
+    return m_instIconKey;
 }
 
 QString CopyInstanceDialog::instGroup() const
 {
-    return ui->groupBox->currentText();
+    return m_ui->groupBox->currentText();
 }
 
 const InstanceCopyPrefs& CopyInstanceDialog::getChosenOptions() const
@@ -159,48 +159,52 @@ void CopyInstanceDialog::help()
 
 void CopyInstanceDialog::checkAllCheckboxes(const bool& b)
 {
-    ui->keepPlaytimeCheckbox->setChecked(b);
-    ui->copySavesCheckbox->setChecked(b);
-    ui->copyGameOptionsCheckbox->setChecked(b);
-    ui->copyResPacksCheckbox->setChecked(b);
-    ui->copyShaderPacksCheckbox->setChecked(b);
-    ui->copyServersCheckbox->setChecked(b);
-    ui->copyModsCheckbox->setChecked(b);
-    ui->copyScreenshotsCheckbox->setChecked(b);
+    m_ui->keepPlaytimeCheckbox->setChecked(b);
+    m_ui->copySavesCheckbox->setChecked(b);
+    m_ui->copyGameOptionsCheckbox->setChecked(b);
+    m_ui->copyResPacksCheckbox->setChecked(b);
+    m_ui->copyShaderPacksCheckbox->setChecked(b);
+    m_ui->copyServersCheckbox->setChecked(b);
+    m_ui->copyModsCheckbox->setChecked(b);
+    m_ui->copyScreenshotsCheckbox->setChecked(b);
 }
 
 // Check the "Select all" checkbox if all options are already selected:
 void CopyInstanceDialog::updateSelectAllCheckbox()
 {
-    ui->selectAllCheckbox->blockSignals(true);
-    ui->selectAllCheckbox->setChecked(m_selectedOptions.allTrue());
-    ui->selectAllCheckbox->blockSignals(false);
+    m_ui->selectAllCheckbox->blockSignals(true);
+    m_ui->selectAllCheckbox->setChecked(m_selectedOptions.allTrue());
+    m_ui->selectAllCheckbox->blockSignals(false);
 }
 
 void CopyInstanceDialog::updateUseCloneCheckbox()
 {
-    ui->useCloneCheckbox->setEnabled(m_cloneSupported && !ui->symbolicLinksCheckbox->isChecked() && !ui->hardLinksCheckbox->isChecked());
-    ui->useCloneCheckbox->setChecked(m_cloneSupported && m_selectedOptions.isUseCloneEnabled() && !ui->symbolicLinksCheckbox->isChecked() &&
-                                     !ui->hardLinksCheckbox->isChecked());
+    m_ui->useCloneCheckbox->setEnabled(m_cloneSupported && !m_ui->symbolicLinksCheckbox->isChecked() &&
+                                       !m_ui->hardLinksCheckbox->isChecked());
+    m_ui->useCloneCheckbox->setChecked(m_cloneSupported && m_selectedOptions.isUseCloneEnabled() &&
+                                       !m_ui->symbolicLinksCheckbox->isChecked() && !m_ui->hardLinksCheckbox->isChecked());
 }
 
 void CopyInstanceDialog::updateLinkOptions()
 {
-    ui->symbolicLinksCheckbox->setEnabled(m_linkSupported && !ui->hardLinksCheckbox->isChecked() && !ui->useCloneCheckbox->isChecked());
-    ui->hardLinksCheckbox->setEnabled(m_linkSupported && !ui->symbolicLinksCheckbox->isChecked() && !ui->useCloneCheckbox->isChecked());
+    m_ui->symbolicLinksCheckbox->setEnabled(m_linkSupported && !m_ui->hardLinksCheckbox->isChecked() &&
+                                            !m_ui->useCloneCheckbox->isChecked());
+    m_ui->hardLinksCheckbox->setEnabled(m_linkSupported && !m_ui->symbolicLinksCheckbox->isChecked() &&
+                                        !m_ui->useCloneCheckbox->isChecked());
 
-    ui->symbolicLinksCheckbox->setChecked(m_linkSupported && m_selectedOptions.isUseSymLinksEnabled() &&
-                                          !ui->useCloneCheckbox->isChecked());
-    ui->hardLinksCheckbox->setChecked(m_linkSupported && m_selectedOptions.isUseHardLinksEnabled() && !ui->useCloneCheckbox->isChecked());
+    m_ui->symbolicLinksCheckbox->setChecked(m_linkSupported && m_selectedOptions.isUseSymLinksEnabled() &&
+                                            !m_ui->useCloneCheckbox->isChecked());
+    m_ui->hardLinksCheckbox->setChecked(m_linkSupported && m_selectedOptions.isUseHardLinksEnabled() &&
+                                        !m_ui->useCloneCheckbox->isChecked());
 
-    bool linksInUse = (ui->symbolicLinksCheckbox->isChecked() || ui->hardLinksCheckbox->isChecked());
-    ui->recursiveLinkCheckbox->setEnabled(m_linkSupported && linksInUse && !ui->hardLinksCheckbox->isChecked());
-    ui->dontLinkSavesCheckbox->setEnabled(m_linkSupported && linksInUse);
-    ui->recursiveLinkCheckbox->setChecked(m_linkSupported && linksInUse && m_selectedOptions.isLinkRecursivelyEnabled());
-    ui->dontLinkSavesCheckbox->setChecked(m_linkSupported && linksInUse && m_selectedOptions.isDontLinkSavesEnabled());
+    bool linksInUse = (m_ui->symbolicLinksCheckbox->isChecked() || m_ui->hardLinksCheckbox->isChecked());
+    m_ui->recursiveLinkCheckbox->setEnabled(m_linkSupported && linksInUse && !m_ui->hardLinksCheckbox->isChecked());
+    m_ui->dontLinkSavesCheckbox->setEnabled(m_linkSupported && linksInUse);
+    m_ui->recursiveLinkCheckbox->setChecked(m_linkSupported && linksInUse && m_selectedOptions.isLinkRecursivelyEnabled());
+    m_ui->dontLinkSavesCheckbox->setChecked(m_linkSupported && linksInUse && m_selectedOptions.isDontLinkSavesEnabled());
 
 #if defined(Q_OS_WIN)
-    auto OkButton = ui->buttonBox->button(QDialogButtonBox::Ok);
+    auto OkButton = m_ui->buttonBox->button(QDialogButtonBox::Ok);
     OkButton->setIcon(m_selectedOptions.isUseSymLinksEnabled() ? style()->standardIcon(QStyle::SP_VistaShield) : QIcon());
 #endif
 }
@@ -208,11 +212,11 @@ void CopyInstanceDialog::updateLinkOptions()
 void CopyInstanceDialog::on_iconButton_clicked()
 {
     IconPickerDialog dlg(this);
-    dlg.execWithSelection(InstIconKey);
+    dlg.execWithSelection(m_instIconKey);
 
     if (dlg.result() == QDialog::Accepted) {
-        InstIconKey = dlg.selectedIconKey;
-        ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
+        m_instIconKey = dlg.selectedIconKey;
+        m_ui->iconButton->setIcon(APPLICATION->icons()->getIcon(m_instIconKey));
     }
 }
 
@@ -223,7 +227,7 @@ void CopyInstanceDialog::on_instNameTextBox_textChanged([[maybe_unused]] const Q
 
 void CopyInstanceDialog::on_selectAllCheckbox_stateChanged(int state)
 {
-    bool checked;
+    bool checked = false;
     checked = (state == Qt::Checked);
     checkAllCheckboxes(checked);
 }
@@ -231,7 +235,7 @@ void CopyInstanceDialog::on_selectAllCheckbox_stateChanged(int state)
 void CopyInstanceDialog::on_copySavesCheckbox_stateChanged(int state)
 {
     m_selectedOptions.enableCopySaves(state == Qt::Checked);
-    ui->dontLinkSavesCheckbox->setChecked((state == Qt::Checked) && ui->dontLinkSavesCheckbox->isChecked());
+    m_ui->dontLinkSavesCheckbox->setChecked((state == Qt::Checked) && m_ui->dontLinkSavesCheckbox->isChecked());
     updateSelectAllCheckbox();
 }
 
@@ -287,8 +291,8 @@ void CopyInstanceDialog::on_symbolicLinksCheckbox_stateChanged(int state)
 void CopyInstanceDialog::on_hardLinksCheckbox_stateChanged(int state)
 {
     m_selectedOptions.enableUseHardLinks(state == Qt::Checked);
-    if (state == Qt::Checked && !ui->recursiveLinkCheckbox->isChecked()) {
-        ui->recursiveLinkCheckbox->setChecked(true);
+    if (state == Qt::Checked && !m_ui->recursiveLinkCheckbox->isChecked()) {
+        m_ui->recursiveLinkCheckbox->setChecked(true);
     }
     updateUseCloneCheckbox();
     updateLinkOptions();

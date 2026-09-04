@@ -50,14 +50,12 @@
 #include <algorithm>
 
 #include "Application.h"
-#include "BaseInstance.h"
 #include "ExponentialSeries.h"
 #include "FileSystem.h"
+#include "minecraft/MinecraftInstance.h"
 
 #include "InstanceTask.h"
-#include "NullInstance.h"
 #include "WatchLock.h"
-#include "minecraft/MinecraftInstance.h"
 #include "settings/INISettingsObject.h"
 
 #ifdef Q_OS_WIN32

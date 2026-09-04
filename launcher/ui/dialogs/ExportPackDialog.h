@@ -19,7 +19,6 @@
 #pragma once
 
 #include <QDialog>
-#include "BaseInstance.h"
 #include "FastFileIconProvider.h"
 #include "FileIgnoreProxy.h"
 #include "minecraft/MinecraftInstance.h"

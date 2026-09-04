@@ -4,24 +4,23 @@
 #include <memory>
 #include "FileSystem.h"
 #include "Filter.h"
-#include "NullInstance.h"
 #include "settings/INISettingsObject.h"
 #include "tasks/Task.h"
 
-InstanceCopyTask::InstanceCopyTask(BaseInstance* origInstance, const InstanceCopyPrefs& prefs)
+InstanceCopyTask::InstanceCopyTask(MinecraftInstance* origInstance, const InstanceCopyPrefs& prefs)
+    : m_origInstance(origInstance)
+    , m_keepPlaytime(prefs.isKeepPlaytimeEnabled())
+    , m_useLinks(prefs.isUseSymLinksEnabled())
+    , m_useHardLinks(prefs.isLinkRecursivelyEnabled() && prefs.isUseHardLinksEnabled())
+    , m_copySaves(prefs.isLinkRecursivelyEnabled() && prefs.isDontLinkSavesEnabled() && prefs.isCopySavesEnabled())
+    , m_linkRecursively(prefs.isLinkRecursivelyEnabled())
+    , m_useClone(prefs.isUseCloneEnabled())
 {
-    m_origInstance = origInstance;
-    m_keepPlaytime = prefs.isKeepPlaytimeEnabled();
-    m_useLinks = prefs.isUseSymLinksEnabled();
-    m_linkRecursively = prefs.isLinkRecursivelyEnabled();
-    m_useHardLinks = prefs.isLinkRecursivelyEnabled() && prefs.isUseHardLinksEnabled();
-    m_copySaves = prefs.isLinkRecursivelyEnabled() && prefs.isDontLinkSavesEnabled() && prefs.isCopySavesEnabled();
-    m_useClone = prefs.isUseCloneEnabled();
-
     QString filters = prefs.getSelectedFiltersAsRegex();
     if (m_useLinks || m_useHardLinks) {
-        if (!filters.isEmpty())
+        if (!filters.isEmpty()) {
             filters += "|";
+        }
         filters += "instance.cfg";
     }
 
@@ -149,32 +148,34 @@ void InstanceCopyTask::copyFinished()
     // FIXME: shouldn't this be able to report errors?
     auto instanceSettings = std::make_unique<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg"));
 
-    BaseInstance* inst(new NullInstance(m_globalSettings, std::move(instanceSettings), m_stagingPath));
-    inst->setName(name());
-    inst->setIconKey(m_instIcon);
-    inst->regenerateUuid();
+    MinecraftInstance inst(m_globalSettings, std::move(instanceSettings), m_stagingPath);
+    inst.setName(name());
+    inst.setIconKey(m_instIcon);
+    inst.regenerateUuid();
     if (!m_keepPlaytime) {
-        inst->resetTimePlayed();
+        inst.resetTimePlayed();
     }
     if (m_useLinks) {
-        inst->addLinkedInstanceId(m_origInstance->id());
-        auto allowed_symlinks_file = QFileInfo(FS::PathCombine(inst->gameRoot(), "allowed_symlinks.txt"));
+        inst.addLinkedInstanceId(m_origInstance->id());
+        auto allowedSymlinksFile = QFileInfo(FS::PathCombine(inst.gameRoot(), "allowed_symlinks.txt"));
 
-        QByteArray allowed_symlinks;
-        if (allowed_symlinks_file.exists()) {
-            allowed_symlinks.append(FS::read(allowed_symlinks_file.filePath()));
-            if (allowed_symlinks.right(1) != "\n")
-                allowed_symlinks.append("\n");  // we want to be on a new line
+        QByteArray allowedSymlinks;
+        if (allowedSymlinksFile.exists()) {
+            allowedSymlinks.append(FS::read(allowedSymlinksFile.filePath()));
+            if (allowedSymlinks.right(1) != "\n") {
+                allowedSymlinks.append("\n");  // we want to be on a new line
+            }
         }
-        allowed_symlinks.append(m_origInstance->gameRoot().toUtf8());
-        allowed_symlinks.append("\n");
-        if (allowed_symlinks_file.isSymLink())
+        allowedSymlinks.append(m_origInstance->gameRoot().toUtf8());
+        allowedSymlinks.append("\n");
+        if (allowedSymlinksFile.isSymLink()) {
             FS::deletePath(
-                allowed_symlinks_file
+                allowedSymlinksFile
                     .filePath());  // we dont want to modify the original. also make sure the resulting file is not itself a link.
+        }
 
         try {
-            FS::write(allowed_symlinks_file.filePath(), allowed_symlinks);
+            FS::write(allowedSymlinksFile.filePath(), allowedSymlinks);
         } catch (const FS::FileSystemException& e) {
             qCritical() << "Failed to write symlink :" << e.cause();
         }
@@ -186,7 +187,6 @@ void InstanceCopyTask::copyFinished()
 void InstanceCopyTask::copyAborted()
 {
     emitFailed(tr("Instance folder copy has been aborted."));
-    return;
 }
 
 bool InstanceCopyTask::abort()

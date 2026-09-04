@@ -42,42 +42,42 @@
 
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
-namespace ResourceDownload {
-
-static ResourceProviderData prepareModrinth()
+namespace {
+ResourceDownload::ResourceProviderData prepareModrinth()
 {
     return {
-        .displayName = Modrinth::displayName(),
-        .icon = Modrinth::icon(),
-        .id = Modrinth::id(),
-        .metaEntryBase = Modrinth::metaEntryBase(),
-        .debugName = Modrinth::debugName(),
+        .displayName = ResourceDownload::Modrinth::displayName(),
+        .icon = ResourceDownload::Modrinth::icon(),
+        .id = ResourceDownload::Modrinth::id(),
+        .metaEntryBase = ResourceDownload::Modrinth::metaEntryBase(),
+        .debugName = ResourceDownload::Modrinth::debugName(),
     };
 }
+}  // namespace
+namespace ResourceDownload {
 
-ShaderPackResourcePage* Modrinth::createShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+ShaderPackResourcePage* Modrinth::createShaderPackResourcePage(ResourceDownloadDialog* dialog, MinecraftInstance& instance)
 {
     return new ShaderPackResourcePage(dialog, instance, prepareModrinth(), &ModrinthAPI::get());
 }
 
-DataPackResourcePage* Modrinth::createDataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+DataPackResourcePage* Modrinth::createDataPackResourcePage(ResourceDownloadDialog* dialog, MinecraftInstance& instance)
 {
     return new DataPackResourcePage(dialog, instance, prepareModrinth(), &ModrinthAPI::get());
 }
 
-ResourcePackResourcePage* Modrinth::createResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+ResourcePackResourcePage* Modrinth::createResourcePackResourcePage(ResourceDownloadDialog* dialog, MinecraftInstance& instance)
 {
     return new ResourcePackResourcePage(dialog, instance, prepareModrinth(), &ModrinthAPI::get());
 }
 
-TexturePackResourcePage* Modrinth::createTexturePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+TexturePackResourcePage* Modrinth::createTexturePackResourcePage(ResourceDownloadDialog* dialog, MinecraftInstance& instance)
 {
     return new TexturePackResourcePage(dialog, instance, prepareModrinth(), &ModrinthAPI::get());
 }
 
-ModPage* Modrinth::createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+ModPage* Modrinth::createModPage(ResourceDownloadDialog* dialog, MinecraftInstance& instance)
 {
-    return new ModPage(dialog, instance, prepareModrinth(), &ModrinthAPI::get(),
-                       ModFilterWidget::create(&static_cast<MinecraftInstance&>(instance), true));
+    return new ModPage(dialog, instance, prepareModrinth(), &ModrinthAPI::get(), ModFilterWidget::create(&instance, true));
 }
 }  // namespace ResourceDownload

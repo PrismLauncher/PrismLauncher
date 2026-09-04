@@ -9,7 +9,7 @@
 
 namespace ResourceDownload {
 
-ShaderPackResourceModel::ShaderPackResourceModel(const BaseInstance& baseInst,
+ShaderPackResourceModel::ShaderPackResourceModel(const MinecraftInstance& baseInst,
                                                  const ResourceAPI* api,
                                                  const QString& debugName,
                                                  QString metaEntryBase)

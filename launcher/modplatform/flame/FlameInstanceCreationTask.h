@@ -38,7 +38,6 @@
 #include <memory>
 #include <optional>
 
-#include "BaseInstance.h"
 #include "InstanceTask.h"
 #include "minecraft/MinecraftInstance.h"
 #include "modplatform/flame/FileResolvingTask.h"
@@ -80,7 +79,7 @@ class FlameCreationTask final : public InstanceTask {
     void finishInstall();
 
    private:
-    void setManagedPack(BaseInstance* instance);
+    void setManagedPack(MinecraftInstance* instance);
 
     [[nodiscard]] bool promptForUntrustedMods();
 
@@ -99,7 +98,7 @@ class FlameCreationTask final : public InstanceTask {
 
     QList<std::pair<QString, QString>> m_otherResources;
 
-    std::optional<BaseInstance*> m_oldInstance{};
+    std::optional<MinecraftInstance*> m_oldInstance{};
     std::unique_ptr<MinecraftInstance> m_newInstance{};
 
     QStringList m_selectedOptionalMods;

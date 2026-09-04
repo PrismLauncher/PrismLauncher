@@ -52,7 +52,7 @@ class OtherLogsPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit OtherLogsPage(QString id, QString displayName, QString helpPage, BaseInstance* instance = nullptr, QWidget* parent = 0);
+    explicit OtherLogsPage(QString id, QString displayName, QString helpPage, MinecraftInstance* instance = nullptr, QWidget* parent = 0);
     ~OtherLogsPage();
 
     QString id() const override { return m_id; }
@@ -97,7 +97,7 @@ class OtherLogsPage : public QWidget, public BasePage {
     QString m_helpPage;
 
     Ui::OtherLogsPage* ui;
-    BaseInstance* m_instance;
+    MinecraftInstance* m_instance;
     /** Path to display log paths relative to. */
     QString m_basePath;
     QStringList m_logSearchPaths;

@@ -3,7 +3,7 @@
 #include "BaseExternalTool.h"
 #include "QObjectPtr.h"
 
-class BaseInstance;
+class MinecraftInstance;
 class SettingsObject;
 class LaunchTask;
 class QProcess;
@@ -11,14 +11,14 @@ class QProcess;
 class BaseProfiler : public BaseExternalTool {
     Q_OBJECT
    public:
-    explicit BaseProfiler(SettingsObject* settings, BaseInstance* instance, QObject* parent = 0);
+    explicit BaseProfiler(SettingsObject* settings, MinecraftInstance* instance, QObject* parent = nullptr);
 
    public slots:
     void beginProfiling(LaunchTask* process);
     void abortProfiling();
 
    protected:
-    QProcess* m_profilerProcess;
+    QProcess* m_profilerProcess = nullptr;
 
     virtual void beginProfilingImpl(LaunchTask* process) = 0;
     virtual void abortProfilingImpl();
@@ -30,5 +30,5 @@ class BaseProfiler : public BaseExternalTool {
 
 class BaseProfilerFactory : public BaseExternalToolFactory {
    public:
-    virtual BaseProfiler* createProfiler(BaseInstance* instance, QObject* parent = 0);
+    virtual BaseProfiler* createProfiler(MinecraftInstance* instance, QObject* parent = nullptr);
 };

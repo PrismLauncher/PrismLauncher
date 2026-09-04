@@ -70,7 +70,7 @@ ResourceDownload::ResourceDescriptor prepareModDescriptor()
 
 namespace ResourceDownload {
 ModPage::ModPage(ResourceDownloadDialog* dialog,
-                 BaseInstance& instance,
+                 MinecraftInstance& instance,
                  ResourceProviderData p,
                  const ResourceAPI* api,
                  ModFilterWidget* filterWidget)

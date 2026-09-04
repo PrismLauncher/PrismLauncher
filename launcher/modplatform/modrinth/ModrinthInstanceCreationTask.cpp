@@ -47,7 +47,7 @@ void ModrinthCreationTask::executeTask()
     auto* instanceList = APPLICATION->instances();
 
     // FIXME: How to handle situations when there's more than one install already for a given modpack?
-    BaseInstance* inst = nullptr;
+    MinecraftInstance* inst = nullptr;
     if (auto originalId = originalInstanceID(); !originalId.isEmpty()) {
         inst = instanceList->getInstanceById(originalId);
         Q_ASSERT(inst);
@@ -515,7 +515,7 @@ ModrinthCreationTask::~ModrinthCreationTask()
     m_resources.clear();
 }
 
-void ModrinthCreationTask::setManagedPack(BaseInstance* instance)
+void ModrinthCreationTask::setManagedPack(MinecraftInstance* instance)
 {
     // Don't add managed info to packs without an ID (most likely imported from ZIP)
     if (!m_managedId.isEmpty()) {

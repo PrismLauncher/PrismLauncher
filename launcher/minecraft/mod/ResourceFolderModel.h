@@ -12,8 +12,6 @@
 
 #include "Resource.h"
 
-#include "BaseInstance.h"
-
 #include "tasks/ConcurrentTask.h"
 #include "tasks/Task.h"
 

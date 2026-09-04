@@ -38,7 +38,6 @@
 #include <QtConcurrent>
 #include <utility>
 
-#include "BaseInstance.h"
 #include "FileSystem.h"
 #include "MMCZip.h"
 #include "minecraft/GradleSpecifier.h"
@@ -134,7 +133,7 @@ void PackInstallTask::install()
     m_instance =
         std::make_unique<MinecraftInstance>(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
     {
-        SettingsObject::Lock const lock(m_instance->settings());
+        const SettingsObject::Lock lock(m_instance->settings());
 
         auto* components = m_instance->getPackProfile();
         components->buildingFromScratch();

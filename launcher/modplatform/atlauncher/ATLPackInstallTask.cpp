@@ -1027,14 +1027,15 @@ void PackInstallTask::install()
     setStatus(tr("Installing modpack"));
 
     auto instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    MinecraftInstance instance(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
+    m_instance = std::make_unique<MinecraftInstance>(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath),
+                                                     m_stagingPath);
     {
-        SettingsObject::Lock lock(instance.settings());
-        auto* components = instance.getPackProfile();
+        SettingsObject::Lock lock(m_instance->settings());
+        auto* components = m_instance->getPackProfile();
         components->buildingFromScratch();
 
         // Use a component to add libraries BEFORE Minecraft
-        if (!createLibrariesComponent(instance.instanceRoot(), components)) {
+        if (!createLibrariesComponent(m_instance->instanceRoot(), components)) {
             emitFailed(tr("Failed to create libraries component"));
             return;
         }
@@ -1078,20 +1079,20 @@ void PackInstallTask::install()
 
         // Use a component to fill in the rest of the data
         // todo: use more detection
-        if (!createPackComponent(instance.instanceRoot(), components)) {
+        if (!createPackComponent(m_instance->instanceRoot(), components)) {
             emitFailed(tr("Failed to create pack component"));
             return;
         }
 
         components->saveNow();
 
-        instance.setName(name());
-        instance.setIconKey(m_instIcon);
-        instance.setManagedPack("atlauncher", m_pack_safe_name, m_pack_name, m_version_name, m_version_name);
+        m_instance->setName(name());
+        m_instance->setIconKey(m_instIcon);
+        m_instance->setManagedPack("atlauncher", m_pack_safe_name, m_pack_name, m_version_name, m_version_name);
 
         jarmods.clear();
     }
-    downloadFiles(&instance);
+    downloadFiles(m_instance.get());
 }
 
 }  // namespace ATLauncher

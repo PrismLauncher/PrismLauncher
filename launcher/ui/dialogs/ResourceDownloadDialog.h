@@ -29,7 +29,7 @@
 #include "modplatform/ModIndex.h"
 #include "ui/pages/BasePageProvider.h"
 
-class BaseInstance;
+class MinecraftInstance;
 class ModFolderModel;
 class PageContainer;
 class QVBoxLayout;

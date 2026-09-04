@@ -20,7 +20,6 @@
 
 #include <QFuture>
 #include <QFutureWatcher>
-#include "BaseInstance.h"
 #include "MMCZip.h"
 #include "minecraft/MinecraftInstance.h"
 #include "modplatform/ModIndex.h"

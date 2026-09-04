@@ -47,13 +47,13 @@
 #include <QUuid>
 #include <Qt>
 
-WorldList::WorldList(const QString& dir, BaseInstance* instance) : QAbstractListModel(), m_instance(instance), m_dir(dir)
+WorldList::WorldList(const QString& dir, MinecraftInstance* instance)
+    : m_instance(instance), m_watcher(new QFileSystemWatcher(this)), m_isWatching(false), m_dir(dir)
 {
     FS::ensureFolderPathExists(m_dir.absolutePath());
     m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
     m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
-    m_watcher = new QFileSystemWatcher(this);
-    m_isWatching = false;
+
     connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &WorldList::directoryChanged);
 }
 

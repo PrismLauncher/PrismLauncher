@@ -145,6 +145,8 @@ class PackInstallTask : public InstanceTask {
 
     QFuture<bool> m_modExtractFuture;
     QFutureWatcher<bool> m_modExtractFutureWatcher;
+
+    std::unique_ptr<MinecraftInstance> m_instance;
 };
 
 }  // namespace ATLauncher
