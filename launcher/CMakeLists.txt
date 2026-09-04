@@ -322,6 +322,7 @@ set(MINECRAFT_SOURCES
     minecraft/mod/ModDetails.h
     minecraft/mod/ModFolderModel.h
     minecraft/mod/ModFolderModel.cpp
+    minecraft/mod/ModProfileKeys.h
     minecraft/mod/Resource.h
     minecraft/mod/Resource.cpp
     minecraft/mod/ResourceFolderModel.h
@@ -908,7 +909,12 @@ SET(LAUNCHER_SOURCES
     ui/pages/instance/ShaderPackPage.h
     ui/pages/instance/ShaderPackPage.cpp
     ui/pages/instance/ModFolderPage.cpp
+    ui/pages/instance/ModFolderPageProfiles.cpp
     ui/pages/instance/ModFolderPage.h
+    ui/pages/instance/ProfileCheckStateDelegate.cpp
+    ui/pages/instance/ProfileCheckStateDelegate.h
+    ui/pages/instance/ProfileOverviewWidget.cpp
+    ui/pages/instance/ProfileOverviewWidget.h
     ui/pages/instance/NotesPage.cpp
     ui/pages/instance/NotesPage.h
     ui/pages/instance/LogPage.cpp
