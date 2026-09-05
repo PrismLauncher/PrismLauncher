@@ -75,7 +75,6 @@ class MacSparkleUpdater::Private {
     SPUStandardUpdaterController* updaterController;
     UpdaterObserver* updaterObserver;
     UpdaterDelegate* updaterDelegate;
-    NSAutoreleasePool* autoReleasePool;
 };
 
 MacSparkleUpdater::MacSparkleUpdater() {
@@ -83,7 +82,6 @@ MacSparkleUpdater::MacSparkleUpdater() {
 
     // Enable Cocoa's memory management.
     NSApplicationLoad();
-    priv->autoReleasePool = [[NSAutoreleasePool alloc] init];
 
     // Delegate is used for setting/getting allowed update channels.
     priv->updaterDelegate = [[UpdaterDelegate alloc] init];
@@ -101,17 +99,19 @@ MacSparkleUpdater::MacSparkleUpdater() {
 }
 
 MacSparkleUpdater::~MacSparkleUpdater() {
-    [priv->updaterObserver removeObserver:priv->updaterObserver forKeyPath:@"updater.canCheckForUpdates"];
-
-    [priv->updaterController release];
+    @autoreleasepool {
+        [priv->updaterObserver removeObserver:priv->updaterObserver forKeyPath:@"updater.canCheckForUpdates"];
+    }
     [priv->updaterObserver release];
+    [priv->updaterController release];
     [priv->updaterDelegate release];
-    [priv->autoReleasePool release];
     delete priv;
 }
 
 void MacSparkleUpdater::checkForUpdates() {
-    [priv->updaterController checkForUpdates:nil];
+    @autoreleasepool {
+        [priv->updaterController checkForUpdates:nil];
+    }
 }
 
 bool MacSparkleUpdater::getAutomaticallyChecksForUpdates() {
@@ -123,12 +123,14 @@ double MacSparkleUpdater::getUpdateCheckInterval() {
 }
 
 QSet<QString> MacSparkleUpdater::getAllowedChannels() {
-    // Convert NSSet<NSString> -> QSet<QString>
-    __block QSet<QString> channels;
-    [priv->updaterDelegate.allowedChannels enumerateObjectsUsingBlock:^(NSString* channel, BOOL* stop) {
-      channels.insert(QString::fromNSString(channel));
-    }];
-    return channels;
+    @autoreleasepool {
+        // Convert NSSet<NSString> -> QSet<QString>
+        __block QSet<QString> channels;
+        [priv->updaterDelegate.allowedChannels enumerateObjectsUsingBlock:^(NSString* channel, BOOL* stop) {
+          channels.insert(QString::fromNSString(channel));
+        }];
+        return channels;
+    }
 }
 
 bool MacSparkleUpdater::getBetaAllowed() {
@@ -144,34 +146,40 @@ void MacSparkleUpdater::setUpdateCheckInterval(double seconds) {
 }
 
 void MacSparkleUpdater::clearAllowedChannels() {
-    priv->updaterDelegate.allowedChannels = [NSSet set];
+    @autoreleasepool {
+        priv->updaterDelegate.allowedChannels = [NSSet set];
+    }
 }
 
 void MacSparkleUpdater::setAllowedChannel(const QString& channel) {
-    if (channel.isEmpty()) {
-        clearAllowedChannels();
-        return;
-    }
+    @autoreleasepool {
+        if (channel.isEmpty()) {
+            clearAllowedChannels();
+            return;
+        }
 
-    NSSet<NSString*>* nsChannels = [NSSet setWithObject:channel.toNSString()];
-    priv->updaterDelegate.allowedChannels = nsChannels;
+        NSSet<NSString*>* nsChannels = [NSSet setWithObject:channel.toNSString()];
+        priv->updaterDelegate.allowedChannels = nsChannels;
+    }
 }
 
 void MacSparkleUpdater::setAllowedChannels(const QSet<QString>& channels) {
-    if (channels.isEmpty()) {
-        clearAllowedChannels();
-        return;
-    }
+    @autoreleasepool {
+        if (channels.isEmpty()) {
+            clearAllowedChannels();
+            return;
+        }
 
-    QString channelsConfig = "";
-    // Convert QSet<QString> -> NSSet<NSString>
-    NSMutableSet<NSString*>* nsChannels = [NSMutableSet setWithCapacity:channels.count()];
-    for (const QString& channel : channels) {
-        [nsChannels addObject:channel.toNSString()];
-        channelsConfig += channel + " ";
-    }
+        QString channelsConfig = "";
+        // Convert QSet<QString> -> NSSet<NSString>
+        NSMutableSet<NSString*>* nsChannels = [NSMutableSet setWithCapacity:channels.count()];
+        for (const QString& channel : channels) {
+            [nsChannels addObject:channel.toNSString()];
+            channelsConfig += channel + " ";
+        }
 
-    priv->updaterDelegate.allowedChannels = nsChannels;
+        priv->updaterDelegate.allowedChannels = nsChannels;
+    }
 }
 
 void MacSparkleUpdater::setBetaAllowed(bool allowed) {
