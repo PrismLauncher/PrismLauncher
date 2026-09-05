@@ -39,6 +39,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QUuid>
+#include "Application.h"
+#include "settings/SettingsObject.h"
 
 namespace {
 void tokenToJSONV3(QJsonObject& parent, const Token& t, const char* tokenName)
@@ -279,7 +281,7 @@ bool entitlementFromJSONV3(const QJsonObject& parent, MinecraftEntitlement& out)
 
 }  // namespace
 
-bool AccountData::resumeStateFromV3(QJsonObject data)
+bool AccountData::loadStateV3(const QJsonObject& data)
 {
     auto typeV = data.value("type");
     if (!typeV.isString()) {
@@ -301,15 +303,7 @@ bool AccountData::resumeStateFromV3(QJsonObject data)
         if (clientIDV.isString()) {
             msaClientID = clientIDV.toString();
         }  // leave msaClientID empty if it doesn't exist or isn't a string
-        msaToken = tokenFromJSONV3(data, "msa");
-        userToken = tokenFromJSONV3(data, "utoken");
-        mojangservicesToken = tokenFromJSONV3(data, "xrp-mc");
     }
-
-    yggdrasilToken = tokenFromJSONV3(data, "ygg");
-    // versions before 7.2 used "offline" as the offline token
-    if (yggdrasilToken.token == "offline")
-        yggdrasilToken.token = "0";
 
     minecraftProfile = profileFromJSONV3(data, "profile");
     if (!entitlementFromJSONV3(data, minecraftEntitlement)) {
@@ -327,19 +321,46 @@ bool AccountData::resumeStateFromV3(QJsonObject data)
 QJsonObject AccountData::saveState() const
 {
     QJsonObject output;
+
     if (type == AccountType::MSA) {
         output["type"] = "MSA";
         output["msa-client-id"] = msaClientID;
-        tokenToJSONV3(output, msaToken, "msa");
-        tokenToJSONV3(output, userToken, "utoken");
-        tokenToJSONV3(output, mojangservicesToken, "xrp-mc");
     } else if (type == AccountType::Offline) {
         output["type"] = "Offline";
     }
 
-    tokenToJSONV3(output, yggdrasilToken, "ygg");
     profileToJSONV3(output, minecraftProfile, "profile");
     entitlementToJSONV3(output, minecraftEntitlement);
+
+    return output;
+}
+
+void AccountData::loadSecrets(const QJsonObject& data)
+{
+    if (type == AccountType::MSA) {
+        msaToken = tokenFromJSONV3(data, "msa");
+        userToken = tokenFromJSONV3(data, "utoken");
+        mojangservicesToken = tokenFromJSONV3(data, "xrp-mc");
+    }
+
+    yggdrasilToken = tokenFromJSONV3(data, "ygg");
+    // versions before 7.2 used "offline" as the offline token
+    if (yggdrasilToken.token == "offline") {
+        yggdrasilToken.token = "0";
+    }
+}
+
+QJsonObject AccountData::saveSecrets() const
+{
+    QJsonObject output;
+
+    if (type == AccountType::MSA) {
+        tokenToJSONV3(output, msaToken, "msa");
+        tokenToJSONV3(output, userToken, "utoken");
+        tokenToJSONV3(output, mojangservicesToken, "xrp-mc");
+    }
+
+    tokenToJSONV3(output, yggdrasilToken, "ygg");
     return output;
 }
 

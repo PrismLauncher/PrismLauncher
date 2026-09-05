@@ -94,7 +94,10 @@ enum class AccountState { Unchecked, Offline, Working, Online, Disabled, Errored
 
 struct AccountData {
     QJsonObject saveState() const;
-    bool resumeStateFromV3(QJsonObject data);
+    bool loadStateV3(const QJsonObject& data);
+
+    QJsonObject saveSecrets() const;
+    void loadSecrets(const QJsonObject& data);
 
     //! Yggdrasil access token, as passed to the game.
     QString accessToken() const;
