@@ -48,6 +48,7 @@
 #include "ui/dialogs/ProfileSetupDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
 
+#include <QCheckBox>
 #include <QInputDialog>
 #include <QList>
 #include <QPushButton>
@@ -440,8 +441,14 @@ void LaunchController::readyForLaunch()
                         .arg(message));
         msg.setWindowTitle(tr("Waiting."));
         msg.setIcon(QMessageBox::Information);
+        msg.setCheckBox(new QCheckBox(tr("Disable profiler on next launch"), &msg));
         msg.addButton(tr("&Launch"), QMessageBox::AcceptRole);
         msg.exec();
+
+        if (msg.checkBox()->isChecked()) {
+            m_launcher->instance()->settings()->set("Profiler", "");
+        }
+
         m_launcher->proceed();
     });
     connect(profilerInstance, &BaseProfiler::abortLaunch, this, [this](const QString& message) {
