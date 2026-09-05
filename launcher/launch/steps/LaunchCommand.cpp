@@ -33,31 +33,36 @@
  *      limitations under the License.
  */
 
-#include "PostLaunchCommand.h"
+#include "LaunchCommand.h"
 #include <launch/LaunchTask.h>
 
-PostLaunchCommand::PostLaunchCommand(LaunchTask* parent) : LaunchStep(parent)
+#include <utility>
+
+LaunchCommand::LaunchCommand(LaunchTask* parent, QString command, QString phaseName)
+    : LaunchStep(parent), m_command(std::move(command)), m_phaseName(std::move(phaseName))
 {
-    auto instance = m_parent->instance();
-    m_command = instance->getPostExitCommand();
+    auto* instance = m_parent->instance();
     m_process.setProcessEnvironment(instance->createEnvironment());
-    connect(&m_process, &LoggedProcess::log, this, &PostLaunchCommand::logLines);
-    connect(&m_process, &LoggedProcess::stateChanged, this, &PostLaunchCommand::on_state);
+    connect(&m_process, &LoggedProcess::log, this, &LaunchCommand::logLines);
+    connect(&m_process, &LoggedProcess::stateChanged, this, &LaunchCommand::onState);
 }
 
-void PostLaunchCommand::executeTask()
+void LaunchCommand::executeTask()
 {
     auto cmd = m_parent->substituteVariables(m_command);
-    emit logLine(tr("Running Post-Launch command: %1").arg(cmd), MessageLevel::Launcher);
+    emit logLine(tr("Running %1 command: %2").arg(m_phaseName, cmd), MessageLevel::Launcher);
     auto args = QProcess::splitCommand(cmd);
 
     const QString program = args.takeFirst();
     m_process.start(program, args);
 }
 
-void PostLaunchCommand::on_state(LoggedProcess::State state)
+void LaunchCommand::onState(LoggedProcess::State state)
 {
-    auto getError = [this]() { return tr("Post-Launch command failed with code %1.\n\n").arg(m_process.exitCode()); };
+    auto getError = [this]() {
+        auto error = tr("%1 command failed with code %2.\n\n").arg(m_phaseName).arg(m_process.exitCode());
+        return error;
+    };
     switch (state) {
         case LoggedProcess::Aborted:
         case LoggedProcess::Crashed:
@@ -73,7 +78,7 @@ void PostLaunchCommand::on_state(LoggedProcess::State state)
                 emit logLine(error, MessageLevel::Fatal);
                 emitFailed(error);
             } else {
-                emit logLine(tr("Post-Launch command ran successfully.\n\n"), MessageLevel::Launcher);
+                emit logLine(tr("%1 command ran successfully.\n\n").arg(m_phaseName), MessageLevel::Launcher);
                 emitSucceeded();
             }
         }
@@ -82,12 +87,12 @@ void PostLaunchCommand::on_state(LoggedProcess::State state)
     }
 }
 
-void PostLaunchCommand::setWorkingDirectory(const QString& wd)
+void LaunchCommand::setWorkingDirectory(const QString& wd)
 {
     m_process.setWorkingDirectory(wd);
 }
 
-bool PostLaunchCommand::abort()
+bool LaunchCommand::abort()
 {
     auto state = m_process.state();
     if (state == LoggedProcess::Running || state == LoggedProcess::Starting) {
