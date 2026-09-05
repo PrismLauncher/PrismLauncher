@@ -474,10 +474,14 @@ void ResourceModel::searchRequestAborted()
 
 void ResourceModel::versionRequestSucceeded(QVector<ModPlatform::IndexedVersion>& doc, const QVariant& pack, const QModelIndex& index)
 {
+    if (!index.isValid()) {
+        return;
+    }
+
     auto currentPack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
 
     // Check if the index is still valid for this resource or not
-    if (pack != currentPack->addonId) {
+    if (!currentPack || pack != currentPack->addonId) {
         return;
     }
 
@@ -497,10 +501,14 @@ void ResourceModel::versionRequestSucceeded(QVector<ModPlatform::IndexedVersion>
 
 void ResourceModel::infoRequestSucceeded(ModPlatform::IndexedPack::Ptr pack, const QModelIndex& index)
 {
+    if (!index.isValid()) {
+        return;
+    }
+
     auto currentPack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
 
     // Check if the index is still valid for this resource or not
-    if (pack->addonId != currentPack->addonId) {
+    if (!currentPack || pack->addonId != currentPack->addonId) {
         return;
     }
 
