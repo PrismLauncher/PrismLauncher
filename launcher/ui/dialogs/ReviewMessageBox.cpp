@@ -5,7 +5,7 @@
 #include <QPushButton>
 #include <QShortcut>
 
-ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] QString const& title, [[maybe_unused]] QString const& icon)
+ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] const QString& title, [[maybe_unused]] const QString& icon)
     : QDialog(parent), ui(new Ui::ReviewMessageBox)
 {
     ui->setupUi(this);
@@ -142,6 +142,13 @@ void ReviewMessageBox::retranslateUi(QString resources_name)
     ui->explainLabel->setText(tr("You're about to download the following %1:").arg(resources_name));
     ui->onlyCheckedLabel->setText(tr("Only %1 with a check will be downloaded!").arg(resources_name));
 }
+
+void ReviewMessageBox::setLabels(const QString& explainText, const QString& onlyCheckedText)
+{
+    ui->explainLabel->setText(explainText);
+    ui->onlyCheckedLabel->setText(onlyCheckedText);
+}
+
 void ReviewMessageBox::on_toggleDepsButton_clicked()
 {
     m_deps_checked = !m_deps_checked;

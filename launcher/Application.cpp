@@ -1638,6 +1638,7 @@ void Application::controllerFinished()
     auto& extras = m_instanceExtras.at(id);
 
     const bool wasSuccessful = controller->wasSuccessful();
+    auto* instance = controller->instance();
     // on success, do...
     if (wasSuccessful && controller->instance()->settings()->get("AutoCloseConsole").toBool()) {
         if (extras.window) {
@@ -1646,6 +1647,7 @@ void Application::controllerFinished()
     }
     extras.controller.reset();
     subRunningInstance();
+    emit instanceLaunchFinished(instance, wasSuccessful);
 
     // quit when there are no more windows.
     if (shouldExitNow()) {
