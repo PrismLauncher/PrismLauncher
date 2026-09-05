@@ -66,7 +66,8 @@ bool isPathTraversal(const QString& basePath, const QString& entryName)
     auto safeName = FS::RemoveInvalidPathChars(entryName);
     auto fullPath = FS::PathCombine(basePath, safeName);
     auto baseUrl = QUrl::fromLocalFile(basePath);
-    return !baseUrl.isParentOf(QUrl::fromLocalFile(fullPath));
+    auto fullUrl = QUrl::fromLocalFile(fullPath);
+    return !(baseUrl == fullUrl || baseUrl.isParentOf(fullUrl));
 }
 
 Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version)
