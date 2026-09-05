@@ -39,7 +39,6 @@
 #include <QPushButton>
 #include <QSortFilterProxyModel>
 
-#include "BuildConfig.h"
 #include "CreateShortcutDialog.h"
 #include "ui_CreateShortcutDialog.h"
 
@@ -48,7 +47,6 @@
 #include "BaseInstance.h"
 #include "DesktopServices.h"
 #include "FileSystem.h"
-#include "InstanceList.h"
 #include "icons/IconList.h"
 
 #include "minecraft/MinecraftInstance.h"
@@ -61,9 +59,9 @@ class WorldSelectionProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
 
    public:
-    WorldSelectionProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {}
+    explicit WorldSelectionProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {}
 
-    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
     {
         // World metadata parsing logic
         if (index.column() == 0 && role == Qt::DisplayRole) {

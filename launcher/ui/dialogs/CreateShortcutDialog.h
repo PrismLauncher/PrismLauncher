@@ -30,7 +30,7 @@ class CreateShortcutDialog : public QDialog {
 
    public:
     explicit CreateShortcutDialog(MinecraftInstance* instance, QWidget* parent = nullptr);
-    ~CreateShortcutDialog();
+    ~CreateShortcutDialog() override;
 
     void createShortcut();
 
