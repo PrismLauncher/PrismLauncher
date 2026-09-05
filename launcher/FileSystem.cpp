@@ -947,6 +947,26 @@ QString quoteArgs(const QStringList& args, const QString& wrap, const QString& e
     return result;
 }
 
+QString quoteDesktopExecArg(QString arg)
+{
+    arg.replace("\\", "\\\\\\\\");
+    arg.replace("$", "\\\\$");
+    arg.replace("\"", "\\\"");
+    arg.replace("`", "\\`");
+    arg.replace("%", "%%");
+    return QStringLiteral("\"") + arg + QStringLiteral("\"");
+}
+
+QString quoteDesktopExecArgs(const QStringList& args)
+{
+    QStringList result;
+    result.reserve(args.size());
+    for (auto arg : args) {
+        result.append(quoteDesktopExecArg(arg));
+    }
+    return result.join(' ');
+}
+
 // Cross-platform Shortcut creation
 QString createShortcut(QString destination, QString target, QStringList args, QString name, QString icon)
 {
@@ -1041,12 +1061,13 @@ QString createShortcut(QString destination, QString target, QStringList args, QS
     }
     QTextStream stream(&f);
 
-    auto argstring = quoteArgs(args, "'", "'\\''");
+    args.prepend(target);
+    auto argstring = quoteDesktopExecArgs(args);
 
     stream << "[Desktop Entry]" << "\n";
     stream << "Type=Application" << "\n";
     stream << "Categories=Game;ActionGame;AdventureGame;Simulation" << "\n";
-    stream << "Exec=\"" << target.toLocal8Bit() << "\" " << argstring.toLocal8Bit() << "\n";
+    stream << "Exec=" << argstring.toLocal8Bit() << "\n";
     stream << "Name=" << name.toLocal8Bit() << "\n";
     if (!icon.isEmpty()) {
         stream << "Icon=" << icon.toLocal8Bit() << "\n";
