@@ -34,15 +34,15 @@ class SkinManageDialog;
 class SkinManageDialog : public QDialog, public SkinProvider {
     Q_OBJECT
    public:
-    explicit SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct);
+    explicit SkinManageDialog(QWidget* parent, const MinecraftAccountPtr& acct);
     virtual ~SkinManageDialog();
     void resizeEvent(QResizeEvent* event) override;
 
-    virtual SkinModel* getSelectedSkin() override;
-    virtual QHash<QString, QImage> capes() override;
+    SkinModel* getSelectedSkin() override;
+    QHash<QString, QImage> capes() override;
 
    public slots:
-    void selectionChanged(QItemSelection, QItemSelection);
+    void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void activated(QModelIndex);
     void delayed_scroll(QModelIndex);
     void on_openDirBtn_clicked();

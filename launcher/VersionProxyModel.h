@@ -9,22 +9,22 @@ class VersionFilterModel;
 class VersionProxyModel : public QAbstractProxyModel {
     Q_OBJECT
    public:
-    enum Column { Name, ParentVersion, Branch, Type, CPUArchitecture, Path, Time, JavaName, JavaMajor };
+    enum Column : std::uint8_t { Name, ParentVersion, Branch, Type, CPUArchitecture, Path, Time, JavaName, JavaMajor };
     using FilterMap = QHash<BaseVersionList::ModelRoles, Filter>;
 
    public:
-    VersionProxyModel(QObject* parent = 0);
-    virtual ~VersionProxyModel() {};
+    explicit VersionProxyModel(QObject* parent = nullptr);
+    ~VersionProxyModel() override = default;
 
-    virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-    virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-    virtual QModelIndex mapFromSource(const QModelIndex& sourceIndex) const override;
-    virtual QModelIndex mapToSource(const QModelIndex& proxyIndex) const override;
-    virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
-    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    virtual QModelIndex parent(const QModelIndex& child) const override;
-    virtual void setSourceModel(QAbstractItemModel* sourceModel) override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    QModelIndex mapFromSource(const QModelIndex& sourceIndex) const override;
+    QModelIndex mapToSource(const QModelIndex& proxyIndex) const override;
+    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QModelIndex parent(const QModelIndex& child) const override;
+    void setSourceModel(QAbstractItemModel* sourceModel) override;
 
     const FilterMap& filters() const;
     const QString& search() const;
@@ -36,7 +36,7 @@ class VersionProxyModel : public QAbstractProxyModel {
     void setCurrentVersion(const QString& version);
    private slots:
 
-    void sourceDataChanged(const QModelIndex& source_top_left, const QModelIndex& source_bottom_right);
+    void sourceDataChanged(const QModelIndex& sourceTopLeft, const QModelIndex& sourceBottomRight);
 
     void sourceAboutToBeReset();
     void sourceReset();
@@ -51,9 +51,9 @@ class VersionProxyModel : public QAbstractProxyModel {
     QList<Column> m_columns;
     FilterMap m_filters;
     QString m_search;
-    BaseVersionList::RoleList roles;
-    VersionFilterModel* filterModel;
-    bool hasRecommended = false;
-    bool hasLatest = false;
+    BaseVersionList::RoleList m_roles;
+    VersionFilterModel* m_filterModel;
+    bool m_hasRecommended = false;
+    bool m_hasLatest = false;
     QString m_currentVersion;
 };

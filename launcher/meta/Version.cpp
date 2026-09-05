@@ -27,8 +27,9 @@ QString Meta::Version::descriptor() const
 }
 QString Meta::Version::name() const
 {
-    if (m_data)
+    if (m_data) {
         return m_data->name;
+    }
     return m_uid;
 }
 QString Meta::Version::typeString() const
@@ -38,7 +39,7 @@ QString Meta::Version::typeString() const
 
 QDateTime Meta::Version::time() const
 {
-    return QDateTime::fromMSecsSinceEpoch(m_time * 1000, Qt::UTC);
+    return QDateTime::fromMSecsSinceEpoch(m_time * 1000, QTimeZone::UTC);
 }
 
 void Meta::Version::parse(const QJsonObject& obj)
@@ -110,9 +111,9 @@ void Meta::Version::setRequires(const Meta::RequireSet& reqs, const Meta::Requir
     emit requiresChanged();
 }
 
-void Meta::Version::setVolatile(bool volatile_)
+void Meta::Version::setVolatile(bool volatileVar)
 {
-    m_volatile = volatile_;
+    m_volatile = volatileVar;
 }
 
 void Meta::Version::setData(const VersionFilePtr& data)

@@ -39,6 +39,7 @@
 #include <QList>
 #include <QListWidgetItem>
 #include <QTabWidget>
+#include <algorithm>
 
 #include "Version.h"
 
@@ -49,6 +50,7 @@
 #include "modplatform/ModIndex.h"
 
 class MinecraftInstance;
+class QVBoxLayout;
 
 namespace Ui {
 class ModFilterWidget;
@@ -73,29 +75,31 @@ class ModFilterWidget : public QTabWidget {
         }
         bool operator!=(const Filter& other) const { return !(*this == other); }
 
-        bool checkMcVersions(QStringList value)
+        bool checkMcVersions(const QStringList& value)
         {
-            for (auto mcVersion : versions)
-                if (value.contains(mcVersion.toString()))
+            for (const auto& mcVersion : versions) {
+                if (value.contains(mcVersion.toString())) {
                     return true;
+                }
+            }
 
             return versions.empty();
         }
 
         bool checkModpackFilters(const ModPlatform::IndexedVersion& v)
         {
-            return ((!loaders || !v.loaders || loaders & v.loaders) &&  // loaders
-                    (releases.empty() ||                                // releases
-                     std::find(releases.cbegin(), releases.cend(), v.versionType) != releases.cend()) &&
+            return ((!loaders || !v.loaders || loaders.testAnyFlags(v.loaders)) &&  // loaders
+                    (releases.empty() ||                                            // releases
+                     std::ranges::contains(releases, v.versionType)) &&
                     checkMcVersions({ v.mcVersion }));  // gameVersion}
         }
     };
 
     static ModFilterWidget* create(MinecraftInstance* instance, bool extended);
-    virtual ~ModFilterWidget();
+    ~ModFilterWidget() override;
 
     auto getFilter() -> std::shared_ptr<Filter>;
-    auto changed() const -> bool { return m_filter_changed; }
+    auto changed() const -> bool { return m_filterChanged; }
 
    signals:
     void filterChanged();
@@ -121,14 +125,15 @@ class ModFilterWidget : public QTabWidget {
     void onShowMoreClicked();
 
    private:
-    Ui::ModFilterWidget* ui;
+    Ui::ModFilterWidget* m_ui;
 
     MinecraftInstance* m_instance = nullptr;
     std::shared_ptr<Filter> m_filter;
-    bool m_filter_changed = false;
+    bool m_filterChanged = false;
 
-    Meta::VersionList::Ptr m_version_list;
-    VersionProxyModel* m_versions_proxy = nullptr;
+    Meta::VersionList::Ptr m_versionList;
+    VersionProxyModel* m_versionsProxy = nullptr;
 
     QList<ModPlatform::Category> m_categories;
+    QVBoxLayout* m_categoryLayout = nullptr;
 };

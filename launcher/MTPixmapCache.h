@@ -46,7 +46,7 @@ class PixmapCache final : public QObject {
     Q_OBJECT
 
    public:
-    PixmapCache(QObject* parent) : QObject(parent) {}
+    explicit PixmapCache(QObject* parent) : QObject(parent) {}
     ~PixmapCache() override = default;
 
     static PixmapCache& instance() { return *s_instance; }
@@ -88,7 +88,15 @@ class PixmapCache final : public QObject {
         QPixmapCache::remove(key);
         return true;
     }
-    bool _replace(const QPixmapCache::Key& key, const QPixmap& pixmap) { return QPixmapCache::replace(key, pixmap); }
+    bool _replace(const QPixmapCache::Key& key, const QPixmap& pixmap)
+    {
+        if (!key.isValid()) {
+            return false;
+        }
+        remove(key);
+        const_cast<QPixmapCache::Key&>(key) = insert(pixmap);
+        return key.isValid();
+    }
     bool _setCacheLimit(int n)
     {
         QPixmapCache::setCacheLimit(n);
@@ -101,33 +109,33 @@ class PixmapCache final : public QObject {
      */
     bool _markCacheMissByEviciton()
     {
-        static constexpr uint maxCache = static_cast<uint>(std::numeric_limits<int>::max()) / 4;
-        static constexpr uint step = 10240;
-        static constexpr int oneSecond = 1000;
+        static constexpr uint s_maxCache = static_cast<uint>(std::numeric_limits<int>::max()) / 4;
+        static constexpr uint s_step = 10240;
+        static constexpr int s_oneSecond = 1000;
 
         auto now = QTime::currentTime();
-        if (!m_last_cache_miss_by_eviciton.isNull()) {
-            auto diff = m_last_cache_miss_by_eviciton.msecsTo(now);
-            if (diff < oneSecond) {  // less than a second ago
-                ++m_consecutive_fast_evicitons;
+        if (!m_lastCacheMissByEviciton.isNull()) {
+            auto diff = m_lastCacheMissByEviciton.msecsTo(now);
+            if (diff < s_oneSecond) {  // less than a second ago
+                ++m_consecutiveFastEvicitons;
             } else {
-                m_consecutive_fast_evicitons = 0;
+                m_consecutiveFastEvicitons = 0;
             }
         }
-        m_last_cache_miss_by_eviciton = now;
-        if (m_consecutive_fast_evicitons >= m_consecutive_fast_evicitons_threshold) {
+        m_lastCacheMissByEviciton = now;
+        if (m_consecutiveFastEvicitons >= m_consecutiveFastEvicitonsThreshold) {
             // increase the cache size
-            uint newSize = _cacheLimit() + step;
-            if (newSize >= maxCache) {  // increase it until you overflow :D
-                newSize = maxCache;
-                qDebug() << m_consecutive_fast_evicitons
+            uint newSize = _cacheLimit() + s_step;
+            if (newSize >= s_maxCache) {  // increase it until you overflow :D
+                newSize = s_maxCache;
+                qDebug() << m_consecutiveFastEvicitons
                          << tr("pixmap cache misses by eviction happened too fast, doing nothing as the cache size reached it's limit");
             } else {
-                qDebug() << m_consecutive_fast_evicitons
-                         << tr("pixmap cache misses by eviction happened too fast, increasing cache size to") << static_cast<int>(newSize);
+                qDebug() << m_consecutiveFastEvicitons << tr("pixmap cache misses by eviction happened too fast, increasing cache size to")
+                         << static_cast<int>(newSize);
             }
             _setCacheLimit(static_cast<int>(newSize));
-            m_consecutive_fast_evicitons = 0;
+            m_consecutiveFastEvicitons = 0;
             return true;
         }
         return false;
@@ -135,13 +143,13 @@ class PixmapCache final : public QObject {
 
     bool _setFastEvictionThreshold(int threshold)
     {
-        m_consecutive_fast_evicitons_threshold = threshold;
+        m_consecutiveFastEvicitonsThreshold = threshold;
         return true;
     }
 
    private:
     static PixmapCache* s_instance;
-    QTime m_last_cache_miss_by_eviciton;
-    int m_consecutive_fast_evicitons = 0;
-    int m_consecutive_fast_evicitons_threshold = 15;
+    QTime m_lastCacheMissByEviciton;
+    int m_consecutiveFastEvicitons = 0;
+    int m_consecutiveFastEvicitonsThreshold = 15;
 };
