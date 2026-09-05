@@ -292,8 +292,12 @@ message(STATUS "Git commit: ${Launcher_GIT_COMMIT}")
 message(STATUS "Git tag: ${Launcher_GIT_TAG}")
 message(STATUS "Git refspec: ${Launcher_GIT_REFSPEC}")
 
-string(TIMESTAMP TODAY "%Y-%m-%d")
-set(Launcher_BUILD_TIMESTAMP "${TODAY}")
+if(DEFINED ENV{SOURCE_DATE_EPOCH})
+    set(Launcher_BUILD_TIMESTAMP "")
+else()
+    string(TIMESTAMP TODAY "%Y-%m-%d")
+    set(Launcher_BUILD_TIMESTAMP "${TODAY}")
+endif()
 
 ################################ 3rd Party Libs ################################
 
