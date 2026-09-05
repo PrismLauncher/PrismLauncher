@@ -343,19 +343,24 @@ bool copy::operator()(const QString& offset, bool dryRun)
         if (m_matcher && (m_matcher(relative_dst_path) != m_whitelist))
             return;
 
-        auto dst_path = PathCombine(dst, relative_dst_path);
+        auto dstPath = PathCombine(dst, relative_dst_path);
         if (!dryRun) {
-            ensureFilePathExists(dst_path);
+            auto srcStdPath = StringUtils::toStdString(src_path);
+            if (fs::is_directory(srcStdPath) && !fs::is_symlink(srcStdPath)) {
+                ensureFolderPathExists(dstPath);
+            } else {
+                ensureFilePathExists(dstPath);
+            }
 #ifdef Q_OS_WIN32
             copyFolderAttributes(src, dst, relative_dst_path);
 #endif
-            fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
+            fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dstPath), opt, err);
         }
         if (err) {
             qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
             qDebug() << "Source file:" << src_path;
-            qDebug() << "Destination file:" << dst_path;
-            m_failedPaths.append(dst_path);
+            qDebug() << "Destination file:" << dstPath;
+            m_failedPaths.append(dstPath);
             emit copyFailed(relative_dst_path);
             return;
         }
@@ -367,7 +372,13 @@ bool copy::operator()(const QString& offset, bool dryRun)
     // blacklisted paths, so we iterate over the source directory, and if there's no blacklist
     // match, we copy the file.
     QDir src_dir(src);
-    QDirIterator source_it(src, QDir::Filter::Files | QDir::Filter::Hidden, QDirIterator::Subdirectories);
+    QDir::Filters filters = QDir::Filter::Files | QDir::Filter::Hidden;
+
+    if (m_copyDirectories) {
+        filters |= QDir::Filter::NoDotAndDotDot | QDir::Filter::Dirs;
+    }
+
+    QDirIterator source_it(src, filters, QDirIterator::Subdirectories);
 
     while (source_it.hasNext()) {
         auto src_path = source_it.next();
