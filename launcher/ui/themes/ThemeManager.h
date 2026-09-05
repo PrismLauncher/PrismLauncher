@@ -81,10 +81,10 @@ class ThemeManager {
     void initializeWidgets();
 
     // On non-Mac systems, this is a no-op.
-    void setTitlebarColorOnMac(WId windowId, QColor color);
+    void setTitlebarColorOnMac(WId windowId, QColor color, bool useSystemWindowBackground);
     // This also will set the titlebar color of newly opened windows after this method is called.
     // On non-Mac systems, this is a no-op.
-    void setTitlebarColorOfAllWindowsOnMac(QColor color);
+    void setTitlebarColorOfAllWindowsOnMac(QColor color, bool useSystemWindowBackground);
     // On non-Mac systems, this is a no-op.
     void stopSettingNewWindowColorsOnMac();
 #ifdef Q_OS_MACOS
