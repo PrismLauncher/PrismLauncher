@@ -22,6 +22,7 @@
 
 #include "PrismUpdater.h"
 #include "BuildConfig.h"
+#include "net/NetworkAccessManager.h"
 #include "ui/dialogs/ProgressDialog.h"
 
 #include <cstdlib>
@@ -278,7 +279,7 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
     }
 
     {  // network
-        m_network = std::make_unique<QNetworkAccessManager>();
+        m_network = std::make_unique<Net::NetworkAccessManager>();
         qDebug() << "Detecting proxy settings...";
         QNetworkProxy proxy = QNetworkProxy::applicationProxy();
         m_network->setProxy(proxy);

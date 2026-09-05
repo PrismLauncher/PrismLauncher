@@ -128,6 +128,8 @@ set(NET_SOURCES
     net/NetJob.cpp
     net/NetJob.h
     net/NetUtils.h
+    net/NetworkAccessManager.cpp
+    net/NetworkAccessManager.h
     net/PasteUpload.cpp
     net/PasteUpload.h
     net/Sink.h
@@ -644,6 +646,8 @@ set(PRISMUPDATER_SOURCES
     net/NetJob.cpp
     net/NetJob.h
     net/NetUtils.h
+    net/NetworkAccessManager.cpp
+    net/NetworkAccessManager.h
     net/Sink.h
     net/Validator.h
     net/HeaderProxy.h

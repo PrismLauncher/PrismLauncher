@@ -45,6 +45,7 @@
 
 #include "DataMigrationTask.h"
 #include "java/JavaInstallList.h"
+#include "net/NetworkAccessManager.h"
 #include "net/PasteUpload.h"
 #include "tasks/Task.h"
 #include "tools/GenericProfiler.h"
@@ -932,7 +933,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     // initialize network access and proxy setup
     {
-        m_network.reset(new QNetworkAccessManager());
+        m_network.reset(new Net::NetworkAccessManager());
         QString proxyTypeStr = settings()->get("ProxyType").toString();
         QString addr = settings()->get("ProxyAddr").toString();
         int port = settings()->get("ProxyPort").value<qint16>();
