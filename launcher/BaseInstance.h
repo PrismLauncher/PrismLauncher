@@ -154,6 +154,12 @@ class BaseInstance : public QObject {
     QString notes() const;
     void setNotes(const QString& val);
 
+    QString exportTemplate() const;
+    void setExportTemplate(QString val);
+
+    int exportSettings() const;
+    void setExportSettings(int val);
+
     QString getPreLaunchCommand();
     QString getPostExitCommand();
     QString getWrapperCommand();
