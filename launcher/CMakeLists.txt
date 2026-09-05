@@ -378,6 +378,8 @@ set(MINECRAFT_SOURCES
     minecraft/skins/SkinModel.h
     minecraft/skins/SkinList.cpp
     minecraft/skins/SkinList.h
+    minecraft/skins/CapeList.cpp
+    minecraft/skins/CapeList.h
 
     minecraft/Agent.h)
 

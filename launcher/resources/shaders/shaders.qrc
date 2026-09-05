@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/shaders">
         <file>vshader_skin_model.glsl</file>
-        <file>vshader_skin_background.glsl</file>
         <file>fshader.glsl</file>
     </qresource>
 </RCC>
