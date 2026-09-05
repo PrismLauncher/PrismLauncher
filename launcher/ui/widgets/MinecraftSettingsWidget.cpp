@@ -99,6 +99,7 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
 
         connect(m_ui->openGlobalSettingsButton, &QCommandLinkButton::clicked, this, &MinecraftSettingsWidget::openGlobalSettings);
         connect(m_ui->serverJoinAddressButton, &QAbstractButton::toggled, m_ui->serverJoinAddress, &QWidget::setEnabled);
+        connect(m_ui->serverJoinAddressButton, &QAbstractButton::toggled, m_ui->serverJoinPreResolveSrv, &QWidget::setEnabled);
         connect(m_ui->worldJoinButton, &QAbstractButton::toggled, m_ui->worldsCb, &QWidget::setEnabled);
 
         connect(m_ui->globalDataPacksGroupBox, &QGroupBox::toggled, this, [this](bool value) {
@@ -257,6 +258,8 @@ void MinecraftSettingsWidget::loadSettings()
         }
 
         m_ui->serverJoinGroupBox->setChecked(settings->get("JoinServerOnLaunch").toBool());
+        m_ui->serverJoinPreResolveSrv->setChecked(settings->get("JoinServerOnLaunchPreResolveSrv").toBool());
+        m_ui->serverJoinPreResolveSrv->setEnabled(m_ui->serverJoinAddressButton->isChecked());
 
         m_ui->instanceAccountGroupBox->setChecked(settings->get("UseAccountForInstance").toBool());
         updateAccountsMenu(*settings);
@@ -460,6 +463,7 @@ void MinecraftSettingsWidget::saveSettings()
         // Join server on launch
         bool joinServerOnLaunch = m_ui->serverJoinGroupBox->isChecked();
         settings->set("JoinServerOnLaunch", joinServerOnLaunch);
+        settings->set("JoinServerOnLaunchPreResolveSrv", m_ui->serverJoinPreResolveSrv->isChecked());
         if (joinServerOnLaunch) {
             if (m_ui->serverJoinAddressButton->isChecked() || !m_quickPlaySingleplayer) {
                 settings->set("JoinServerOnLaunchAddress", m_ui->serverJoinAddress->text());
