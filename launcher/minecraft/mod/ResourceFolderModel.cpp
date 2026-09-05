@@ -51,7 +51,8 @@ ResourceFolderModel::ResourceFolderModel(const QDir& dir, MinecraftInstance* ins
 
 ResourceFolderModel::~ResourceFolderModel()
 {
-    while (!QThreadPool::globalInstance()->waitForDone(100)) {
+    m_resourceResolverThread.quit();
+    while (!m_resourceResolverThread.wait(100)) {
         QCoreApplication::processEvents();
     }
 }
@@ -383,6 +384,8 @@ void ResourceFolderModel::resolveResource(Resource::Ptr res)
         return;
     }
 
+    task->moveToThread(&m_resourceResolverThread);
+
     int ticket = m_nextResolutionTicket.fetch_add(1);
 
     res->setResolving(true, ticket);
@@ -405,7 +408,8 @@ void ResourceFolderModel::resolveResource(Resource::Ptr res)
     m_resourceResolver.addTask(task);
 
     if (!m_resourceResolverRunning) {
-        QThreadPool::globalInstance()->start(&m_resourceResolver);
+        m_resourceResolverThread.start();
+        m_resourceResolver.start();
         m_resourceResolverRunning = true;
     }
 }
