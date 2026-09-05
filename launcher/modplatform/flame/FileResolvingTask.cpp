@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <utility>
 
+#include "config/GlobalConfig.h"
 #include "Json.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
@@ -147,7 +148,7 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
             getFlameProjects();
             return;
         }
-        if (APPLICATION->settings()->get("FallbackMRBlockedMods").toBool()) {
+        if (APPLICATION->config()->fallbackModrinthBlockedMods) {
             try {
                 auto entries = Json::requireObject(doc);
                 for (auto& out : m_manifest.files) {

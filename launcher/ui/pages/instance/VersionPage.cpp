@@ -53,6 +53,8 @@
 
 #include "QObjectPtr.h"
 #include "VersionPage.h"
+#include "config/GlobalConfig.h"
+#include "config/InstanceConfig.h"
 #include "meta/JsonFormat.h"
 #include "tasks/SequentialTask.h"
 #include "ui/dialogs/InstallLoaderDialog.h"
@@ -109,7 +111,7 @@ class IconProxy : public QIdentityProxyModel {
 
 QIcon VersionPage::icon() const
 {
-    return APPLICATION->icons()->getIcon(m_inst->iconKey());
+    return APPLICATION->icons()->getIcon(m_inst->config()->iconKey);
 }
 bool VersionPage::shouldDisplay() const
 {
@@ -123,14 +125,11 @@ void VersionPage::retranslate()
 
 void VersionPage::openedImpl()
 {
-    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
-    m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
-
-    ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
+    ui->toolBar->setVisibilityState(APPLICATION->config()->uiWideBarState.value(id()));
 }
 void VersionPage::closedImpl()
 {
-    m_wide_bar_setting->set(QString::fromUtf8(ui->toolBar->getVisibilityState().toBase64()));
+    APPLICATION->config().update().uiWideBarState[id()] = ui->toolBar->getVisibilityState();
 }
 
 QMenu* VersionPage::createPopupMenu()
@@ -300,7 +299,7 @@ void VersionPage::on_actionRemove_triggered()
 void VersionPage::on_actionAdd_to_Minecraft_jar_triggered()
 {
     auto list = GuiUtil::BrowseForFiles("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods") + " (*.zip *.jar)",
-                                        APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+                                        APPLICATION->config()->centralModsDir, this->parentWidget());
     if (!list.empty()) {
         m_profile->installJarMods(list);
     }
@@ -310,7 +309,7 @@ void VersionPage::on_actionAdd_to_Minecraft_jar_triggered()
 void VersionPage::on_actionReplace_Minecraft_jar_triggered()
 {
     auto jarPath = GuiUtil::BrowseForFile("jar", tr("Select jar"), tr("Minecraft.jar replacement") + " (*.jar)",
-                                          APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+                                          APPLICATION->config()->centralModsDir, this->parentWidget());
     if (!jarPath.isEmpty()) {
         m_profile->installCustomJar(jarPath);
     }
@@ -320,7 +319,7 @@ void VersionPage::on_actionReplace_Minecraft_jar_triggered()
 void VersionPage::on_actionImport_Components_triggered()
 {
     QStringList list = GuiUtil::BrowseForFiles("component", tr("Select components"), tr("Components") + " (*.json)",
-                                               APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+                                               APPLICATION->config()->centralModsDir, this->parentWidget());
 
     if (!list.isEmpty()) {
         if (!m_profile->installComponents(list)) {
@@ -335,7 +334,7 @@ void VersionPage::on_actionImport_Components_triggered()
 void VersionPage::on_actionAdd_Agents_triggered()
 {
     QStringList list = GuiUtil::BrowseForFiles("agent", tr("Select agents"), tr("Java agents") + " (*.jar)",
-                                               APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+                                               APPLICATION->config()->centralModsDir, this->parentWidget());
 
     if (!list.isEmpty())
         m_profile->installAgents(list);
@@ -409,10 +408,9 @@ void VersionPage::on_actionChange_version_triggered()
     bool important = false;
     if (uid == "net.minecraft") {
         important = true;
-        if (APPLICATION->settings()->get("AutomaticJavaSwitch").toBool() && m_inst->settings()->get("AutomaticJava").toBool() &&
-            m_inst->settings()->get("OverrideJavaLocation").toBool()) {
-            m_inst->settings()->set("OverrideJavaLocation", false);
-            m_inst->settings()->set("JavaPath", "");
+        if (APPLICATION->config()->automaticJavaSwitch && m_inst->config()->automaticJava &&
+            m_inst->config()->javaInstallation.has_value()) {
+            m_inst->config().update().javaInstallation = std::nullopt;
         }
     }
     m_profile->setComponentVersion(uid, vselect.selectedVersion()->descriptor(), important);

@@ -37,6 +37,7 @@
  */
 
 #include "ModFolderPage.h"
+#include "config/GlobalConfig.h"
 #include "minecraft/mod/Resource.h"
 #include "ui/dialogs/ExportToModListDialog.h"
 #include "ui/dialogs/InstallLoaderDialog.h"
@@ -89,10 +90,10 @@ ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWi
     updateMenu->addAction(ui->actionVerifyItemDependencies);
     connect(ui->actionVerifyItemDependencies, &QAction::triggered, this, [this] { updateMods(true); });
 
-    auto depsDisabled = APPLICATION->settings()->getSetting("ModDependenciesDisabled");
-    ui->actionVerifyItemDependencies->setVisible(!depsDisabled->get().toBool());
-    connect(depsDisabled.get(), &Setting::SettingChanged, this,
-            [this](const Setting&, const QVariant& value) { ui->actionVerifyItemDependencies->setVisible(!value.toBool()); });
+    auto depsDisabled = APPLICATION->config()->modDependenciesDisabled;
+    ui->actionVerifyItemDependencies->setVisible(!depsDisabled);
+    connect(&APPLICATION->config(), &GlobalConfigHolder::updated, this,
+            [this]() { ui->actionVerifyItemDependencies->setVisible(!APPLICATION->config()->modDependenciesDisabled); });
 
     updateMenu->addAction(ui->actionResetItemMetadata);
     connect(ui->actionResetItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
@@ -183,10 +184,9 @@ void ModFolderPage::downloadMods()
 void ModFolderPage::downloadDialogFinished(int result)
 {
     if (result != 0) {
-        ConcurrentTask tasks(tr("Download Mods"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-        });
+        ConcurrentTask tasks(tr("Download Mods"), APPLICATION->config()->numberOfConcurrentDownloads);
+        connect(&tasks, &Task::failed, this,
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
         connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
             QStringList warnings = tasks.warnings();
             if (warnings.count()) {
@@ -219,7 +219,7 @@ void ModFolderPage::updateMods(bool includeDeps)
     if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
         return;
     }
-    if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+    if (APPLICATION->config()->modMetadataDisabled) {
         QMessageBox::critical(this, tr("Error"), tr("Mod updates are unavailable when metadata is disabled!"));
         return;
     }
@@ -264,10 +264,9 @@ void ModFolderPage::updateMods(bool includeDeps)
     }
 
     if (updateDialog.exec() != 0) {
-        ConcurrentTask tasks("Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-        });
+        ConcurrentTask tasks("Download Mods", APPLICATION->config()->numberOfConcurrentDownloads);
+        connect(&tasks, &Task::failed, this,
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
         connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
             QStringList warnings = tasks.warnings();
             if (warnings.count()) {
@@ -316,7 +315,7 @@ void ModFolderPage::changeModVersion()
     if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
         return;
     }
-    if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+    if (APPLICATION->config()->modMetadataDisabled) {
         QMessageBox::critical(this, tr("Error"), tr("Mod updates are unavailable when metadata is disabled!"));
         return;
     }

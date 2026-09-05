@@ -109,8 +109,6 @@ class VersionPage : public QMainWindow, public BasePage {
     MinecraftInstance* m_inst;
     int currentIdx = 0;
 
-    std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
-
    public slots:
     void versionCurrent(const QModelIndex& current, const QModelIndex& previous);
 

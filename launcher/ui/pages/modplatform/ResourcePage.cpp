@@ -38,6 +38,7 @@
  */
 
 #include "ResourcePage.h"
+#include "config/GlobalConfig.h"
 #include "modplatform/ModIndex.h"
 #include "ui_ResourcePage.h"
 
@@ -409,7 +410,7 @@ void ResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
                                      QString downloadReason,
                                      QString dependentOn)
 {
-    bool isIndexed = m_desc.isIndexed && !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+    bool isIndexed = m_desc.isIndexed && !APPLICATION->config()->modMetadataDisabled;
     m_model->addPack(std::move(pack), ver, baseModel, isIndexed, std::move(downloadReason), std::move(dependentOn));
 }
 

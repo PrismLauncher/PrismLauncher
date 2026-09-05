@@ -43,6 +43,7 @@
 
 #include "BuildConfig.h"
 #include "FileSystem.h"
+#include "config/GlobalConfig.h"
 #include "Json.h"
 #include "net/ChecksumValidator.h"
 #include "net/NetJob.h"
@@ -50,7 +51,6 @@
 #include "POTranslator.h"
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 
 static constexpr QLatin1String g_defaultLangCode("en_US");
 
@@ -182,7 +182,7 @@ TranslationsModel::TranslationsModel(const QString& path, QObject* parent) : QAb
 {
     d = std::make_unique<Private>();
     d->m_dir.setPath(path);
-    d->m_selectedLanguage = APPLICATION->settings()->get("Language").toString();
+    d->m_selectedLanguage = APPLICATION->config()->language;
     FS::ensureFolderPathExists(path);
     reloadLocalFiles();
 
@@ -214,7 +214,7 @@ void TranslationsModel::indexReceived()
             language = getSystemLanguage();
         }
         selectLanguage(language);
-        APPLICATION->settings()->set("Language", selectedLanguage());
+        APPLICATION->config().update().language = selectedLanguage();
         d->m_noLanguageSet = false;
     }
 
@@ -440,7 +440,7 @@ std::optional<Language> TranslationsModel::findLanguageAsOptional(const QString&
 
 void TranslationsModel::setUseSystemLocale(const bool useSystemLocale) const
 {
-    APPLICATION->settings()->set("UseSystemLocale", useSystemLocale);
+    APPLICATION->config().update().useSystemLocale = useSystemLocale;
     QLocale::setDefault(useSystemLocale ? QLocale::system() : QLocale(selectedLanguage()));
 }
 
@@ -475,7 +475,7 @@ bool TranslationsModel::selectLanguage(QString key) const
      * In a multithreaded application, the default locale should be set at application startup, before any non-GUI threads are created.
      * This function is not reentrant.
      */
-    const bool useSystemLocale = APPLICATION->settings()->get("UseSystemLocale").toBool();
+    const bool useSystemLocale = APPLICATION->config()->useSystemLocale;
     QLocale::setDefault(useSystemLocale ? QLocale::system() : QLocale(langCode));
 
     // if it's the default UI language, finish

@@ -44,6 +44,7 @@
 #include <QStack>
 #include <cstdint>
 
+#include "config/InstanceConfig.h"
 #include "minecraft/MinecraftInstance.h"
 
 class QFileSystemWatcher;
@@ -58,7 +59,7 @@ enum class InstCreateError : std::uint8_t { NoCreateError = 0, NoSuchVersion, Un
 enum class GroupsState : std::uint8_t { NotLoaded, Steady, Dirty };
 
 struct TrashShortcutItem {
-    ShortcutData data;
+    InstanceConfig::Shortcut data;
     QString trashPath;
 };
 
@@ -74,7 +75,7 @@ class InstanceList : public QAbstractListModel {
     Q_OBJECT
 
    public:
-    explicit InstanceList(SettingsObject* settings, const QStringList& instDirs, QObject* parent = nullptr);
+    explicit InstanceList(const QStringList& instDirs, QObject* parent = nullptr);
     ~InstanceList() override = default;
 
    public:
@@ -161,7 +162,7 @@ class InstanceList : public QAbstractListModel {
     void groupsChanged(QSet<QString> groups);
 
    public slots:
-    void on_InstFolderChanged(const Setting& setting, const QVariant& value);
+    void onConfigUpdate();
     void on_GroupStateChanged(const QString& group, bool collapsed);
 
    private slots:
@@ -190,7 +191,6 @@ class InstanceList : public QAbstractListModel {
     // id -> refs
     QMap<QString, int> m_groupNameCache;
 
-    SettingsObject* m_globalSettings;
     QStringList m_instDirs;
     QHash<InstanceId, QString> m_instanceRootDirMap;
     QString rootDirOf(const InstanceId& id) const;

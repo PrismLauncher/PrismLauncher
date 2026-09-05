@@ -3,9 +3,9 @@
 #include <QDir>
 
 #include "Application.h"
+#include "config/GlobalConfig.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/MinecraftLoadAndCheck.h"
-#include "settings/SettingsObject.h"
 #include "tasks/SequentialTask.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
@@ -30,7 +30,7 @@ InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& ol
 
 ShouldUpdate askIfShouldUpdate(QWidget* parent, const QString& originalVersionName)
 {
-    if (APPLICATION->settings()->get("SkipModpackUpdatePrompt").toBool()) {
+    if (APPLICATION->config()->skipModpackUpdatePrompt) {
         return ShouldUpdate::SkipUpdating;
     }
 
@@ -135,7 +135,7 @@ void InstanceTask::scheduleToDelete(QWidget* parent, const QDir& dir, const QStr
 
 void InstanceTask::downloadFiles(MinecraftInstance* inst)
 {
-    if (!APPLICATION->settings()->get("DownloadGameFilesDuringInstanceCreation").toBool()) {
+    if (!APPLICATION->config()->downloadGameFilesDuringInstanceCreation) {
         emitSucceeded();
         return;
     }

@@ -36,6 +36,8 @@
 
 #include "LaunchController.h"
 #include "Application.h"
+#include "config/GlobalConfig.h"
+#include "config/InstanceConfig.h"
 #include "launch/steps/PrintServers.h"
 #include "minecraft/auth/AccountData.h"
 #include "minecraft/auth/AccountList.h"
@@ -68,7 +70,8 @@ void LaunchController::executeTask()
         return;
     }
 
-    if (!JavaCommon::checkJVMArgs(m_instance->settings()->get("JvmArgs").toString(), m_parentWidget)) {
+    const QString jvmArgs = m_instance->config()->jvmArgsOrGlobal(*APPLICATION->config());
+    if (!JavaCommon::checkJVMArgs(jvmArgs, m_parentWidget)) {
         emitFailed(tr("Invalid Java arguments specified. Please fix this first."));
         return;
     }
@@ -84,12 +87,13 @@ void LaunchController::decideAccount()
 
     // Select the account to use. If the instance has a specific account set, that will be used. Otherwise, the default account will be used
     auto* accounts = APPLICATION->accounts();
-    const auto instanceAccountId = m_instance->settings()->get("InstanceAccountId").toString();
-    const auto instanceAccountIndex = accounts->findAccountByProfileId(instanceAccountId);
-    if (instanceAccountIndex == -1 || instanceAccountId.isEmpty()) {
-        m_accountToUse = accounts->defaultAccount();
-    } else {
-        m_accountToUse = accounts->at(instanceAccountIndex);
+    const auto instanceAccountId = m_instance->config()->defaultAccount;
+    m_accountToUse = accounts->defaultAccount();
+    if (instanceAccountId.has_value()) {
+        const auto instanceAccountIndex = accounts->findAccountByProfileId(instanceAccountId.value());
+        if (instanceAccountIndex != -1) {
+            m_accountToUse = accounts->at(instanceAccountIndex);
+        }
     }
 
     if (!accounts->anyAccountIsValid()) {
@@ -256,7 +260,7 @@ QString LaunchController::askOfflineName(const QString& playerName, bool* ok)
             break;
     }
 
-    const QString lastOfflinePlayerName = APPLICATION->settings()->get("LastOfflinePlayerName").toString();
+    const QString& lastOfflinePlayerName = APPLICATION->config()->lastOfflinePlayerName;
     QString usedname = lastOfflinePlayerName.isEmpty() ? playerName : lastOfflinePlayerName;
 
     ChooseOfflineNameDialog dialog(message, m_parentWidget);
@@ -267,7 +271,7 @@ QString LaunchController::askOfflineName(const QString& playerName, bool* ok)
     }
 
     usedname = dialog.getUsername();
-    APPLICATION->settings()->set("LastOfflinePlayerName", usedname);
+    APPLICATION->config().update().lastOfflinePlayerName = usedname;
 
     if (ok != nullptr) {
         *ok = true;
@@ -370,7 +374,7 @@ void LaunchController::launchInstance()
     Q_ASSERT(m_instance != nullptr);
     Q_ASSERT(m_session.get() != nullptr);
 
-    if (!m_instance->reloadSettings()) {
+    if (!m_instance->config().reload()) {
         QMessageBox::critical(m_parentWidget, tr("Error!"), tr("Couldn't load the instance profile."));
         emitFailed(tr("Couldn't load the instance profile."));
         return;
@@ -382,9 +386,9 @@ void LaunchController::launchInstance()
         return;
     }
 
-    const auto* console = qobject_cast<InstanceWindow*>(m_parentWidget);
-    const auto showConsole = m_instance->settings()->get("ShowConsole").toBool();
-    if (!console && showConsole) {
+    const auto* consoleWindow = qobject_cast<InstanceWindow*>(m_parentWidget);
+    const auto console = m_instance->config()->consoleOrGlobal(*APPLICATION->config());
+    if (!consoleWindow && console.show) {
         APPLICATION->showInstanceWindow(m_instance);
     }
     connect(m_launcher, &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
@@ -430,7 +434,7 @@ void LaunchController::readyForLaunch()
         QMessageBox::critical(m_parentWidget, tr("Error!"), tr("Profiler check for %1 failed: %2").arg(m_profiler->name(), error));
         return;
     }
-    BaseProfiler* profilerInstance = m_profiler->createProfiler(m_launcher->instance(), this);
+    BaseProfiler* profilerInstance = m_profiler->createProfiler(this);
 
     connect(profilerInstance, &BaseProfiler::readyToLaunch, this, [this](const QString& message) {
         QMessageBox msg(m_parentWidget);
@@ -465,7 +469,8 @@ void LaunchController::onSucceeded()
 
 void LaunchController::onFailed(QString reason)
 {
-    if (m_instance->settings()->get("ShowConsoleOnError").toBool()) {
+    const auto console = m_instance->config()->consoleOrGlobal(*APPLICATION->config());
+    if (console.showOnError) {
         APPLICATION->showInstanceWindow(m_instance, "console");
     }
     emitFailed(std::move(reason));

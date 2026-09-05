@@ -53,7 +53,7 @@ class FlameCreationTask final : public InstanceTask {
    public:
     FlameCreationTask(const QString& stagingPath,
                       bool trustedSource,
-                      SettingsObject* globalSettings,
+                      const GlobalConfig& globalSettings,
                       QWidget* parent,
                       QString id,
                       QString versionId,

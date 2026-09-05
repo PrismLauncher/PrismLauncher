@@ -36,6 +36,8 @@
 #include "FlameInstanceCreationTask.h"
 
 #include "QObjectPtr.h"
+#include "config/GlobalConfig.h"
+#include "config/InstanceConfig.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/FlameAPI.h"
@@ -51,8 +53,6 @@
 #include "minecraft/PackProfile.h"
 
 #include "modplatform/helpers/OverrideUtils.h"
-
-#include "settings/INISettingsObject.h"
 
 #include "tasks/ConcurrentTask.h"
 #include "ui/dialogs/BlockedModsDialog.h"
@@ -121,8 +121,11 @@ void FlameCreationTask::executeTask()
         return;
     }
 
-    auto versionId = inst->getManagedPackVersionName();
-    auto versionStr = !versionId.isEmpty() ? tr(" (version %1)").arg(versionId) : "";
+    QString versionStr;
+    const auto& managedPack = inst->config()->managedPack;
+    if (managedPack.has_value() && !managedPack->versionId.isEmpty()) {
+        versionStr = tr(" (version %1)").arg(managedPack->versionId);
+    }
 
     if (shouldConfirmUpdate()) {
         auto shouldUpdate = askIfShouldUpdate(m_parent, versionStr);
@@ -338,9 +341,21 @@ void FlameCreationTask::setManagedPack(BaseInstance* instance)
 {
     // Don't add managed info to packs without an ID (most likely imported from ZIP)
     if (!m_managedId.isEmpty()) {
-        instance->setManagedPack("flame", m_managedId, m_pack.name, m_managedVersionId, m_pack.version);
+        instance->config().update().managedPack = {
+            .type = "flame",
+            .id = m_managedId,
+            .name = m_pack.name,
+            .versionId = m_managedVersionId,
+            .versionName = m_pack.version,
+        };
     } else {
-        instance->setManagedPack("flame", "", name(), "", "");
+        instance->config().update().managedPack = {
+            .type = "flame",
+            .id = "",
+            .name = name(),
+            .versionId = "",
+            .versionName = "",
+        };
     }
 }
 
@@ -444,8 +459,7 @@ void FlameCreationTask::createInstance()
     }
 
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    auto instanceSettings = std::make_unique<INISettingsObject>(configPath);
-    m_newInstance = std::make_unique<MinecraftInstance>(m_globalSettings, std::move(instanceSettings), m_stagingPath);
+    m_newInstance = std::make_unique<MinecraftInstance>(std::make_unique<InstanceConfigHolder>(configPath), m_stagingPath);
     auto mcVersion = m_pack.minecraft.version;
 
     // Hack to correct some 'special sauce'...
@@ -492,8 +506,9 @@ void FlameCreationTask::createInstance()
             recommendedRAM = max;
         }
 
-        m_newInstance->settings()->set("OverrideMemory", true);
-        m_newInstance->settings()->set("MaxMemAlloc", recommendedRAM);
+        auto& conf = m_newInstance->config().update();
+        conf.memory = APPLICATION->config()->memory;
+        conf.memory->maxAlloc = recommendedRAM;
     }
 
     QString jarmodsPath = FS::PathCombine(m_stagingPath, "minecraft", "jarmods");
@@ -757,10 +772,10 @@ void FlameCreationTask::validateOtherResources()
         }
     }
     // TODO make this work with other sorts of resource
-    auto task = makeShared<ConcurrentTask>("CreateModMetadata", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
+    auto task = makeShared<ConcurrentTask>("CreateModMetadata", APPLICATION->config()->numberOfConcurrentTasks);
     auto results = m_modIdResolver->getResults().files;
     auto folder = FS::PathCombine(m_stagingPath, "minecraft", "mods", ".index");
-    for (const auto& file : results) {
+    for (auto& file : results) {
         if (file.targetFolder != "mods" || (file.version.fileName.endsWith(".zip") && !zipMods.contains(file.version.fileName))) {
             continue;
         }
@@ -804,5 +819,8 @@ void FlameCreationTask::finishInstall()
             return;
         }
     }
+
+    m_newInstance->config().save();
+
     downloadFiles(m_newInstance.get());
 }

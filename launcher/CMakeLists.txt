@@ -23,7 +23,6 @@ set(CORE_SOURCES
     BaseInstance.cpp
     InstanceDirUpdate.h
     InstanceDirUpdate.cpp
-    NullInstance.h
     MMCZip.h
     MMCZip.cpp
     archive/ArchiveReader.cpp
@@ -406,16 +405,6 @@ set(SETTINGS_SOURCES
     # Settings
     settings/INIFile.cpp
     settings/INIFile.h
-    settings/INISettingsObject.cpp
-    settings/INISettingsObject.h
-    settings/OverrideSetting.cpp
-    settings/OverrideSetting.h
-    settings/PassthroughSetting.cpp
-    settings/PassthroughSetting.h
-    settings/Setting.cpp
-    settings/Setting.h
-    settings/SettingsObject.cpp
-    settings/SettingsObject.h
 )
 
 set(JAVA_SOURCES
@@ -792,6 +781,13 @@ SET(LAUNCHER_SOURCES
     HardwareInfo.cpp
     HardwareInfo.h
 
+    # Configuration
+    config/Config.h
+    config/GlobalConfig.h
+    config/GlobalConfig.cpp
+    config/InstanceConfig.h
+    config/InstanceConfig.cpp
+
     # console utils
     console/Console.h
 
@@ -843,8 +839,6 @@ SET(LAUNCHER_SOURCES
     ui/setupwizard/JavaWizardPage.h
     ui/setupwizard/LanguageWizardPage.cpp
     ui/setupwizard/LanguageWizardPage.h
-    ui/setupwizard/PasteWizardPage.cpp
-    ui/setupwizard/PasteWizardPage.h
     ui/setupwizard/ThemeWizardPage.h
     ui/setupwizard/AutoJavaWizardPage.cpp
     ui/setupwizard/AutoJavaWizardPage.h

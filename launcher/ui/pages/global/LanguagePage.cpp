@@ -38,7 +38,7 @@
 
 #include <QVBoxLayout>
 #include "Application.h"
-#include "settings/SettingsObject.h"
+#include "config/GlobalConfig.h"
 #include "ui/widgets/LanguageSelectionWidget.h"
 
 LanguagePage::LanguagePage(QWidget* parent) : QWidget(parent)
@@ -61,9 +61,8 @@ bool LanguagePage::apply()
 
 void LanguagePage::applySettings()
 {
-    auto settings = APPLICATION->settings();
     QString key = mainWidget->getSelectedLanguageKey();
-    settings->set("Language", key);
+    APPLICATION->config().update().language = key;
 }
 
 void LanguagePage::loadSettings()

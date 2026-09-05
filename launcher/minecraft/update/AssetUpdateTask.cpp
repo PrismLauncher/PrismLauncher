@@ -1,6 +1,7 @@
 #include "AssetUpdateTask.h"
 
 #include "BuildConfig.h"
+#include "config/GlobalConfig.h"
 #include "launch/LaunchStep.h"
 #include "minecraft/AssetsUtils.h"
 #include "minecraft/MinecraftInstance.h"
@@ -114,8 +115,8 @@ bool AssetUpdateTask::abort()
 
 QString AssetUpdateTask::resourceUrl()
 {
-    if (const QString urlOverride = APPLICATION->settings()->get("ResourceURLOverride").toString(); !urlOverride.isEmpty()) {
-        return urlOverride;
+    if (QUrl urlOverride = APPLICATION->config()->resourceUrlOverride; !urlOverride.isEmpty()) {
+        return urlOverride.toString();
     }
 
     return BuildConfig.DEFAULT_RESOURCE_BASE;

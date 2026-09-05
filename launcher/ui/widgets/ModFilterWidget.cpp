@@ -41,6 +41,7 @@
 #include "BaseVersionList.h"
 #include "Json.h"
 #include "Version.h"
+#include "config/InstanceConfig.h"
 #include "meta/Index.h"
 #include "modplatform/ModIndex.h"
 #include "ui/widgets/CheckComboBox.h"
@@ -226,8 +227,8 @@ void ModFilterWidget::prepareBasicFilter()
         m_filter->hideInstalled = false;
         m_filter->side = ModPlatform::SideType::NoSide;  // or "both"
         ModPlatform::ModLoaderTypes loaders;
-        if (m_instance->settings()->get("OverrideModDownloadLoaders").toBool()) {
-            for (auto loader : Json::toStringList(m_instance->settings()->get("ModDownloadLoaders").toString())) {
+        if (m_instance->config()->modDownloadLoaders.has_value()) {
+            for (auto loader : m_instance->config()->modDownloadLoaders.value()) {
                 loaders |= ModPlatform::getModLoaderFromString(loader);
             }
         } else {

@@ -28,7 +28,7 @@ class ModrinthCreationTask final : public InstanceTask {
    public:
     ModrinthCreationTask(const QString& stagingPath,
                          bool trustedSource,
-                         SettingsObject* globalSettings,
+                         const GlobalConfig& globalSettings,
                          QWidget* parent,
                          QString id,
                          QString versionId = {},

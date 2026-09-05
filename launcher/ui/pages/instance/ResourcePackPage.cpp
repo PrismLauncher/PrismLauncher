@@ -37,6 +37,7 @@
 
 #include "ResourcePackPage.h"
 
+#include "config/GlobalConfig.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
@@ -91,7 +92,7 @@ void ResourcePackPage::downloadResourcePacks()
 void ResourcePackPage::downloadDialogFinished(int result)
 {
     if (result != 0) {
-        ConcurrentTask tasks("Download Resource Pack", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        ConcurrentTask tasks("Download Resource Pack", APPLICATION->config()->numberOfConcurrentDownloads);
         connect(&tasks, &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
         });
@@ -123,7 +124,7 @@ void ResourcePackPage::downloadDialogFinished(int result)
 
 void ResourcePackPage::updateResourcePacks()
 {
-    if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+    if (APPLICATION->config()->modMetadataDisabled) {
         QMessageBox::critical(this, tr("Error"), tr("Resource pack updates are unavailable when metadata is disabled!"));
         return;
     }
@@ -168,7 +169,7 @@ void ResourcePackPage::updateResourcePacks()
     }
 
     if (updateDialog.exec() != 0) {
-        ConcurrentTask tasks("Download Resource Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        ConcurrentTask tasks("Download Resource Packs", APPLICATION->config()->numberOfConcurrentDownloads);
         connect(&tasks, &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
         });
@@ -216,7 +217,7 @@ void ResourcePackPage::deleteResourcePackMetadata()
 
 void ResourcePackPage::changeResourcePackVersion()
 {
-    if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+    if (APPLICATION->config()->modMetadataDisabled) {
         QMessageBox::critical(this, tr("Error"), tr("Resource pack updates are unavailable when metadata is disabled!"));
         return;
     }

@@ -34,16 +34,17 @@
  */
 
 #include "ExternalToolsPage.h"
+#include "config/GlobalConfig.h"
 #include "ui_ExternalToolsPage.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QStandardPaths>
 #include <QTabBar>
+#include <utility>
 
 #include <FileSystem.h>
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
 
 ExternalToolsPage::ExternalToolsPage(QWidget* parent) : QWidget(parent), ui(new Ui::ExternalToolsPage)
@@ -64,19 +65,19 @@ ExternalToolsPage::~ExternalToolsPage()
 
 void ExternalToolsPage::loadSettings()
 {
-    auto s = APPLICATION->settings();
-    ui->jprofilerPathEdit->setText(s->get("JProfilerPath").toString());
-    ui->jvisualvmPathEdit->setText(s->get("JVisualVMPath").toString());
+    const auto& conf = *APPLICATION->config();
+    ui->jprofilerPathEdit->setText(conf.jProfilerPath);
+    ui->jvisualvmPathEdit->setText(conf.jVisualVmPath);
 
     // Editors
-    ui->jsonEditorTextBox->setText(s->get("JsonEditor").toString());
+    ui->jsonEditorTextBox->setText(conf.jsonEditorPath);
 }
 void ExternalToolsPage::applySettings()
 {
-    auto s = APPLICATION->settings();
+    auto& conf = APPLICATION->config().update();
 
-    s->set("JProfilerPath", ui->jprofilerPathEdit->text());
-    s->set("JVisualVMPath", ui->jvisualvmPathEdit->text());
+    conf.jProfilerPath = ui->jprofilerPathEdit->text();
+    conf.jVisualVmPath = ui->jvisualvmPathEdit->text();
 
     // Editors
     QString jsonEditor = ui->jsonEditorTextBox->text();
@@ -86,7 +87,7 @@ void ExternalToolsPage::applySettings()
             jsonEditor = found;
         }
     }
-    s->set("JsonEditor", jsonEditor);
+    conf.jsonEditorPath = std::move(jsonEditor);
 }
 
 void ExternalToolsPage::on_jprofilerPathBtn_clicked()

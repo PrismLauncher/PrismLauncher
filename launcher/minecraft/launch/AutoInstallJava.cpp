@@ -43,6 +43,8 @@
 #include "MessageLevel.h"
 #include "QObjectPtr.h"
 #include "SysInfo.h"
+#include "config/GlobalConfig.h"
+#include "config/InstanceConfig.h"
 #include "java/JavaInstall.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
@@ -61,14 +63,14 @@ AutoInstallJava::AutoInstallJava(LaunchTask* parent)
 
 void AutoInstallJava::executeTask()
 {
-    auto settings = m_instance->settings();
-    if (!APPLICATION->settings()->get("AutomaticJavaSwitch").toBool() ||
-        (settings->get("OverrideJavaLocation").toBool() && QFileInfo::exists(settings->get("JavaPath").toString()))) {
+    const auto& conf = *m_instance->config();
+    if (!APPLICATION->config()->automaticJavaSwitch ||
+        (conf.javaInstallation.has_value() && QFileInfo::exists(conf.javaInstallation->path))) {
         emitSucceeded();
         return;
     }
     auto packProfile = m_instance->getPackProfile();
-    if (!APPLICATION->settings()->get("AutomaticJavaDownload").toBool()) {
+    if (!APPLICATION->config()->automaticJavaDownload) {
         auto javas = APPLICATION->javalist();
         m_current_task = javas->getLoadTask();
         connect(m_current_task.get(), &Task::finished, this, [this, javas, packProfile] {
@@ -131,10 +133,12 @@ void AutoInstallJava::executeTask()
 
 void AutoInstallJava::setJavaPath(QString path)
 {
-    auto settings = m_instance->settings();
-    settings->set("OverrideJavaLocation", true);
-    settings->set("JavaPath", path);
-    settings->set("AutomaticJava", true);
+    auto& conf = m_instance->config().update();
+    if (!conf.javaInstallation.has_value()) {
+        conf.javaInstallation = GlobalConfig::JavaInstallationOverrides{};
+    }
+    conf.javaInstallation->path = path;
+    conf.automaticJava = true;
     emit logLine(tr("Compatible Java found at: %1.").arg(path), MessageLevel::Launcher);
     emitSucceeded();
 }
