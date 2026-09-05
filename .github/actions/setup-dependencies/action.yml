@@ -113,10 +113,15 @@ runs:
         echo "VCPKG_TRIPLET=$vcpkg_arch-$vcpkg_platform" >> "$GITHUB_ENV"
 
     - name: Install Qt
-      if: ${{ inputs.msystem == '' }}
       uses: jurplel/install-qt-action@v4
       with:
         aqtversion: "==3.1.*"
         version: ${{ inputs.qt-version }}
         modules: qtimageformats qtnetworkauth
         cache: ${{ inputs.build-type == 'Debug' }}
+        arch: ${{ inputs.msystem != '' && 'win64_llvm_mingw' || '' }}
+
+    - name: Set Qt6_DIR
+      shell: bash
+      run: |
+        echo "Qt6_DIR=$QT_ROOT_DIR" >> "$GITHUB_ENV"

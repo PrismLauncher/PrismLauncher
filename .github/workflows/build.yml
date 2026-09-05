@@ -58,6 +58,7 @@ jobs:
             cmake-preset: windows_mingw
             msystem: CLANG64
             vcvars-arch: amd64_x86
+            qt-version: 6.10.2
 
           - os: windows-2022
             artifact-name: Windows-MSVC
