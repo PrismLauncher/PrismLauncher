@@ -69,7 +69,7 @@ class ScreenshotsPage : public QMainWindow, public BasePage {
     virtual QString displayName() const override { return tr("Screenshots"); }
     virtual QIcon icon() const override { return QIcon::fromTheme("screenshots"); }
     virtual QString id() const override { return "screenshots"; }
-    virtual QString helpPage() const override { return "Screenshots-management"; }
+    virtual QString helpPage() const override { return "screenshots-management"; }
     virtual bool apply() override { return !m_uploadActive; }
     void retranslate() override;
 

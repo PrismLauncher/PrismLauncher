@@ -53,6 +53,7 @@ class ResourcePackPage : public ExternalResourcesPage {
     QString displayName() const override { return tr("Resource Packs"); }
     QIcon icon() const override { return QIcon::fromTheme("resourcepacks"); }
     QString id() const override { return "resourcepacks"; }
+    /// Wiki is missing a page for resource packs.
     QString helpPage() const override { return "Resource-packs"; }
 
     virtual bool shouldDisplay() const override

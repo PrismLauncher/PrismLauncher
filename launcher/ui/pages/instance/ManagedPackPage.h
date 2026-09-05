@@ -120,7 +120,8 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
 
     void parseManagedPack() override;
     QString url() const override;
-    QString helpPage() const override { return "modrinth-managed-pack"; }
+    /// Wiki is missing a page for Modrinth managed packs, using modrinth-platform instead.
+    QString helpPage() const override { return "modrinth-platform"; }
 
    public slots:
     void suggestVersion() override;
@@ -143,7 +144,8 @@ class FlameManagedPackPage final : public ManagedPackPage {
 
     void parseManagedPack() override;
     QString url() const override;
-    QString helpPage() const override { return "curseforge-managed-pack"; }
+    /// Wiki is missing a page for CurseForge managed packs, using flame-platform instead.
+    QString helpPage() const override { return "flame-platform"; }
 
    public slots:
     void suggestVersion() override;

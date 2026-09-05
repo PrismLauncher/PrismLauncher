@@ -65,7 +65,8 @@ class AccountListPage : public QMainWindow, public BasePage {
         return icon;
     }
     QString id() const override { return "accounts"; }
-    QString helpPage() const override { return "getting-started/adding-an-account"; }
+    /// Wiki is missing a page for accounts.
+    QString helpPage() const override { return "adding-an-account"; }
     void retranslate() override;
 
    public slots:
