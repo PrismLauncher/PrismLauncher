@@ -154,6 +154,7 @@ class BaseInstance : public QObject {
     QString notes() const;
     void setNotes(const QString& val);
 
+    QString getEarlyLaunchCommand();
     QString getPreLaunchCommand();
     QString getPostExitCommand();
     QString getWrapperCommand();

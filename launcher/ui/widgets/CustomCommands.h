@@ -47,10 +47,16 @@ class CustomCommands : public QWidget {
    public:
     explicit CustomCommands(QWidget* parent = 0);
     virtual ~CustomCommands();
-    void initialize(bool checkable, bool checked, const QString& prelaunch, const QString& wrapper, const QString& postexit);
+    void initialize(bool checkable,
+                    bool checked,
+                    const QString& earlyLaunch,
+                    const QString& prelaunch,
+                    const QString& wrapper,
+                    const QString& postexit);
 
     void retranslate();
     bool checked() const;
+    QString earlyLaunchCommand() const;
     QString prelaunchCommand() const;
     QString wrapperCommand() const;
     QString postexitCommand() const;

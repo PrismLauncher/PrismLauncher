@@ -50,8 +50,8 @@
 #include "launch/LaunchTask.h"
 #include "launch/TaskStepWrapper.h"
 #include "launch/steps/CheckJava.h"
-#include "launch/steps/LookupServerAddress.h"
 #include "launch/steps/LaunchCommand.h"
+#include "launch/steps/LookupServerAddress.h"
 #include "launch/steps/QuitAfterGameStop.h"
 #include "launch/steps/TextPrint.h"
 
@@ -1172,6 +1172,13 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
         process->appendStep(step);
     }
 
+    // run early-launch command if that's needed, before the metadata is loaded
+    if (!getEarlyLaunchCommand().isEmpty()) {
+        auto step = makeShared<LaunchCommand>(pptr, getEarlyLaunchCommand(), tr("Early-Launch"));
+        step->setWorkingDirectory(gameRoot());
+        process->appendStep(step);
+    }
+
     // load meta
     {
         auto mode = session->launchMode != LaunchMode::Offline ? Net::Mode::Online : Net::Mode::Offline;
@@ -1187,7 +1194,7 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     }
 
     // run pre-launch command if that's needed
-    if (getPreLaunchCommand().size()) {
+    if (!getPreLaunchCommand().isEmpty()) {
         auto step = makeShared<LaunchCommand>(pptr, getPreLaunchCommand(), tr("Pre-Launch"));
         step->setWorkingDirectory(gameRoot());
         process->appendStep(step);
@@ -1243,7 +1250,7 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     }
 
     // run post-exit command if that's needed
-    if (getPostExitCommand().size()) {
+    if (!getPostExitCommand().isEmpty()) {
         auto step = makeShared<LaunchCommand>(pptr, getPostExitCommand(), tr("Post-Launch"));
         step->setWorkingDirectory(gameRoot());
         process->appendStep(step);
