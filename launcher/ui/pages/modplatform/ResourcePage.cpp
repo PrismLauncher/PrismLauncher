@@ -454,6 +454,9 @@ void ResourcePage::onResourceSelected()
 
 void ResourcePage::onResourceToggle(const QModelIndex& index)
 {
+    if (!index.isValid()) {
+        return;
+    }
     const bool isSelected = index == m_ui->packView->currentIndex();
     auto pack = m_model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
 
