@@ -789,6 +789,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("WrapperCommand", "");
 
         // Custom Commands
+        m_settings->registerSetting({ "EarlyLaunchCommand", "EarlyLaunchCmd" }, "");
         m_settings->registerSetting({ "PreLaunchCommand", "PreLaunchCmd" }, "");
         m_settings->registerSetting({ "PostExitCommand", "PostExitCmd" }, "");
 

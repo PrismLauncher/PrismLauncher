@@ -146,10 +146,8 @@ set(LAUNCH_SOURCES
     launch/steps/CheckJava.h
     launch/steps/LookupServerAddress.cpp
     launch/steps/LookupServerAddress.h
-    launch/steps/PostLaunchCommand.cpp
-    launch/steps/PostLaunchCommand.h
-    launch/steps/PreLaunchCommand.cpp
-    launch/steps/PreLaunchCommand.h
+    launch/steps/LaunchCommand.cpp
+    launch/steps/LaunchCommand.h
     launch/steps/TextPrint.cpp
     launch/steps/TextPrint.h
     launch/steps/QuitAfterGameStop.cpp

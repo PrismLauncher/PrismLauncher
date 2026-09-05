@@ -108,6 +108,7 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
 
     // Custom Commands
     auto commandSetting = m_settings->registerSetting({ "OverrideCommands", "OverrideLaunchCmd" }, false);
+    m_settings->registerOverride(globalSettings->getSetting("EarlyLaunchCommand"), commandSetting);
     m_settings->registerOverride(globalSettings->getSetting("PreLaunchCommand"), commandSetting);
     m_settings->registerOverride(globalSettings->getSetting("WrapperCommand"), commandSetting);
     m_settings->registerOverride(globalSettings->getSetting("PostExitCommand"), commandSetting);
@@ -137,6 +138,11 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
 QString BaseInstance::getPreLaunchCommand()
 {
     return settings()->get("PreLaunchCommand").toString();
+}
+
+QString BaseInstance::getEarlyLaunchCommand()
+{
+    return settings()->get("EarlyLaunchCommand").toString();
 }
 
 QString BaseInstance::getWrapperCommand()

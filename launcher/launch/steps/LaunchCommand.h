@@ -35,32 +35,24 @@
 
 #pragma once
 
-#include <QWidget>
+#include <LoggedProcess.h>
+#include <launch/LaunchStep.h>
 
-namespace Ui {
-class CustomCommands;
-}
-
-class CustomCommands : public QWidget {
+class LaunchCommand : public LaunchStep {
     Q_OBJECT
-
    public:
-    explicit CustomCommands(QWidget* parent = 0);
-    virtual ~CustomCommands();
-    void initialize(bool checkable,
-                    bool checked,
-                    const QString& earlyLaunch,
-                    const QString& prelaunch,
-                    const QString& wrapper,
-                    const QString& postexit);
+    LaunchCommand(LaunchTask* parent, QString command, QString phaseName = {});
+    ~LaunchCommand() override = default;
 
-    void retranslate();
-    bool checked() const;
-    QString earlyLaunchCommand() const;
-    QString prelaunchCommand() const;
-    QString wrapperCommand() const;
-    QString postexitCommand() const;
+    void executeTask() override;
+    bool abort() override;
+    bool canAbort() const override { return true; }
+    void setWorkingDirectory(const QString& wd);
+   private slots:
+    void onState(LoggedProcess::State state);
 
    private:
-    Ui::CustomCommands* ui;
+    LoggedProcess m_process;
+    QString m_command;
+    QString m_phaseName;
 };
