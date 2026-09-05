@@ -62,6 +62,7 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
         m_ui->globalDataPacksGroupBox->hide();
         m_ui->loaderGroup->hide();
         m_ui->countGameTime->hide();
+        m_ui->latestMCVersionGroupBox->hide();
     } else {
         m_javaSettings = new JavaSettingsWidget(m_instance, this);
         m_ui->javaScrollArea->setWidget(m_javaSettings);
@@ -303,6 +304,11 @@ void MinecraftSettingsWidget::loadSettings()
         for (auto c : blockSignalsCheckBoxes) {
             c->blockSignals(false);
         }
+
+        m_ui->latestMCVersionGroupBox->setChecked(settings->get("UseLatestMinecraftVersion").toBool());
+        auto autoUpdateType = settings->get("UseLatestMinecraftVersionType").toString() == "release";
+        m_ui->releaseRadioButton->setChecked(autoUpdateType);
+        m_ui->anyRadioButton->setChecked(!autoUpdateType);
     }
 
     m_ui->legacySettingsGroupBox->setChecked(settings->get("OverrideLegacySettings").toBool());
@@ -487,6 +493,9 @@ void MinecraftSettingsWidget::saveSettings()
         } else {
             settings->reset("InstanceAccountId");
         }
+
+        settings->set("UseLatestMinecraftVersion", m_ui->latestMCVersionGroupBox->isChecked());
+        settings->set("UseLatestMinecraftVersionType", m_ui->releaseRadioButton->isChecked() ? "release" : "any");
     }
 
     bool overrideLegacySettings = m_instance == nullptr || m_ui->legacySettingsGroupBox->isChecked();
