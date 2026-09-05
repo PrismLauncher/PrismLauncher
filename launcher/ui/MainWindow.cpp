@@ -41,6 +41,7 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "FileSystem.h"
+#include "StringUtils.h"
 
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
@@ -105,6 +106,8 @@
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/dialogs/NewsDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
+#include "OffloadInstanceTask.h"
+#include "RestoreInstanceTask.h"
 #include "ui/dialogs/skins/SkinManageDialog.h"
 #include "ui/instanceview/InstanceDelegate.h"
 #include "ui/instanceview/InstanceProxyModel.h"
@@ -1535,6 +1538,112 @@ void MainWindow::on_actionDeleteInstance_triggered()
     selectionBad();
 }
 
+void MainWindow::on_actionOffloadInstance_triggered()
+{
+    if (!m_selectedInstance) {
+        return;
+    }
+
+    if (m_selectedInstance->isRunning()) {
+        CustomMessageBox::selectable(this, tr("Cannot Offload or Restore Running Instance"),
+                                     tr("The selected instance is currently running and cannot be offloaded or restored. Please stop the instance before continuing."),
+                                     QMessageBox::Warning, QMessageBox::Ok)->exec();
+        return;
+    }
+
+    if (m_selectedInstance->isOffloaded()) {
+        restoreOffloadedInstance();
+        return;
+    }
+
+    auto response = CustomMessageBox::selectable(this, tr("Confirm Offload"),
+                                                 tr("You are about to offload \"%1\".\n"
+                                                    "This will delete downloaded mods and resource packs from disk, but keep the metadata needed to download them again.\n\n"
+                                                    "Are you sure?").arg(m_selectedInstance->name()),
+                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)->exec();
+
+    if (response != QMessageBox::Yes) {
+        return;
+    }
+
+    int filesFreed = 0;
+    qint64 bytesFreed = 0;
+    bool offloadSucceeded = false;
+
+    std::unique_ptr<Task> task(new OffloadInstanceTask(m_selectedInstance));
+    auto* offloadTask = static_cast<OffloadInstanceTask*>(task.get());
+    connect(offloadTask, &Task::finished, this, [this, offloadTask, &filesFreed, &bytesFreed, &offloadSucceeded]() {
+        view->viewport()->update();
+
+        if (offloadTask->wasSuccessful()) {
+            offloadSucceeded = true;
+            filesFreed = offloadTask->filesFreed();
+            bytesFreed = offloadTask->bytesFreed();
+        }
+        setOffloadActionState();
+    });
+
+    ProgressDialog progressDialog(this);
+    progressDialog.execWithTask(std::move(task));
+
+    if (offloadSucceeded) {
+        CustomMessageBox::selectable(this, tr("Offload Complete"),
+                                     tr("Offloaded %1 files, freeing %2 of disk space.")
+                                         .arg(filesFreed)
+                                         .arg(StringUtils::humanReadableFileSize(static_cast<double>(bytesFreed))),
+                                     QMessageBox::Information, QMessageBox::Ok)->exec();
+    }
+}
+
+void MainWindow::restoreOffloadedInstance()
+{
+    auto response = CustomMessageBox::selectable(this, tr("Confirm Restore"),
+                                                 tr("You are about to restore \"%1\".\n"
+                                                    "This will re-download the mods and resource packs that were offloaded.\n\n"
+                                                    "Are you sure?").arg(m_selectedInstance->name()),
+                                                 QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)->exec();
+
+    if (response != QMessageBox::Yes) {
+        return;
+    }
+
+    std::unique_ptr<Task> task(new RestoreInstanceTask(m_selectedInstance));
+    auto* restoreTask = task.get();
+    connect(restoreTask, &Task::finished, this, [this, restoreTask]() {
+        view->viewport()->update();
+
+        if (restoreTask->wasSuccessful()) {
+            m_selectedInstance->setOffloadedDisabledFiles(QStringList());
+            m_selectedInstance->setOffloaded(false);
+        }
+        setOffloadActionState();
+    });
+
+    ProgressDialog progressDialog(this);
+    progressDialog.execWithTask(std::move(task));
+}
+
+void MainWindow::setOffloadActionState()
+{
+    if (!m_selectedInstance) {
+        ui->actionOffloadInstance->setEnabled(false);
+        return;
+    }
+
+    const bool offloaded = m_selectedInstance->isOffloaded();
+    ui->actionOffloadInstance->setEnabled(offloaded || !m_selectedInstance->isRunning());
+
+    if (offloaded) {
+        ui->actionOffloadInstance->setText(tr("Restore..."));
+        ui->actionOffloadInstance->setIcon(QIcon::fromTheme("refresh"));
+        ui->actionOffloadInstance->setToolTip(tr("Restores offloaded files by re-downloading them for the selected instance."));
+    } else {
+        ui->actionOffloadInstance->setText(tr("Offload..."));
+        ui->actionOffloadInstance->setIcon(QIcon::fromTheme("delete"));
+        ui->actionOffloadInstance->setToolTip(tr("Offloads heavy mod files from the selected instance to free up disk space."));
+    }
+}
+
 void MainWindow::on_actionExportInstanceZip_triggered()
 {
     if (m_selectedInstance) {
@@ -1679,10 +1788,11 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
     if (m_selectedInstance) {
         ui->instanceToolBar->setEnabled(true);
         setInstanceActionsEnabled(true);
-        ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
+        ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch() || m_selectedInstance->isOffloaded());
 
         ui->actionKillInstance->setEnabled(m_selectedInstance->isRunning());
         ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
+        setOffloadActionState();
         renameButton->setText(m_selectedInstance->name());
         m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
         updateStatusCenter();
@@ -1786,6 +1896,7 @@ void MainWindow::setInstanceActionsEnabled(bool enabled)
     ui->actionDeleteInstance->setEnabled(enabled);
     ui->actionCopyInstance->setEnabled(enabled);
     ui->actionCreateInstanceShortcut->setEnabled(enabled);
+    setOffloadActionState();
 }
 
 void MainWindow::refreshCurrentInstance()

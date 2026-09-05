@@ -1,0 +1,42 @@
+#pragma once
+
+#include "tasks/Task.h"
+
+#include <QMap>
+#include <QStringList>
+#include <memory>
+class BaseInstance;
+
+class OffloadInstanceTask : public Task {
+    Q_OBJECT
+   public:
+    explicit OffloadInstanceTask(BaseInstance* instance);
+    ~OffloadInstanceTask() override = default;
+
+    int filesFreed() const;
+    qint64 bytesFreed() const;
+
+   protected:
+    void executeTask() override;
+
+   private:
+    struct CurseForgeOffloadTarget {
+        int projectId;
+        QString fileToRemove;
+        qint64 fileSize;
+    };
+
+    BaseInstance* m_instance;
+    std::shared_ptr<Task> m_flameApiJob;
+
+    int m_filesFreed = 0;
+    qint64 m_bytesFreed = 0;
+
+    // Maps curseforge file ID to the offload target struct
+    QMap<int, CurseForgeOffloadTarget> m_curseForgeFiles;
+    QStringList m_disabledFiles;
+
+    void processResourceFolder(const QString& folderName);
+    void resolveCurseForgeFiles();
+    void finishOffload();
+};

@@ -140,6 +140,9 @@ class ResourceFolderModel : public QAbstractListModel {
     /* Basic columns */
     enum Columns : std::uint8_t { ActiveColumn = 0, NameColumn, DateColumn, ProviderColumn, SizeColumn, FileNameColumn, NumColumns };
 
+    /* Custom roles */
+    enum Roles { OffloadedRole = Qt::UserRole };
+
     QStringList columnNames(bool translated = true) const { return translated ? m_columnNamesTranslated : m_columnNames; }
 
     int rowCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : static_cast<int>(size()); }
