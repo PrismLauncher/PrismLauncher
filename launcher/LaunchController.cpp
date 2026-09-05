@@ -61,6 +61,11 @@
 
 LaunchController::LaunchController() = default;
 
+LaunchTask* LaunchController::launcher() const
+{
+    return m_launcher.data();
+}
+
 void LaunchController::executeTask()
 {
     if (!m_instance) {
@@ -295,6 +300,7 @@ void LaunchController::login()
             if (ok) {
                 m_session = std::make_shared<AuthSession>();
                 m_session->MakeDemo(name, MinecraftAccount::uuidFromUsername(name).toString(QUuid::Id128));
+                m_session->account_type = "Demo";
                 launchInstance();
                 return;
             }
@@ -307,6 +313,7 @@ void LaunchController::login()
     m_session = std::make_shared<AuthSession>();
     m_session->launchMode = m_actualLaunchMode;
     m_accountToUse->fillSession(m_session);
+    m_session->account_type = m_accountToUse->accountType() == AccountType::MSA ? "Microsoft" : "Offline";
 
     if (m_accountToUse->accountType() != AccountType::Offline) {
         if (m_actualLaunchMode == LaunchMode::Normal && !m_accountToUse->hasProfile()) {
@@ -330,6 +337,9 @@ void LaunchController::login()
             m_session->MakeOffline(name);
         }
     }
+
+    if (m_actualLaunchMode == LaunchMode::Offline)
+        m_session->account_type = "Offline";
 
     launchInstance();
 }
@@ -390,6 +400,7 @@ void LaunchController::launchInstance()
     connect(m_launcher, &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
     connect(m_launcher, &LaunchTask::succeeded, this, &LaunchController::onSucceeded);
     connect(m_launcher, &LaunchTask::failed, this, &LaunchController::onFailed);
+    connect(m_launcher, &LaunchTask::aborted, this, [this] { emitAborted(); });
     connect(m_launcher, &LaunchTask::requestProgress, this, &LaunchController::onProgressRequested);
 
     // Prepend Online and Auth Status
@@ -425,8 +436,8 @@ void LaunchController::readyForLaunch()
 
     QString error;
     if (!m_profiler->check(&error)) {
-        m_launcher->abort();
-        emitFailed("Profiler startup failed!");
+        if (!m_launcher->abort())
+            emitFailed("Profiler startup failed!");
         QMessageBox::critical(m_parentWidget, tr("Error!"), tr("Profiler check for %1 failed: %2").arg(m_profiler->name(), error));
         return;
     }
@@ -452,8 +463,8 @@ void LaunchController::readyForLaunch()
         msg.addButton(QMessageBox::Ok);
         msg.setModal(true);
         msg.exec();
-        m_launcher->abort();
-        emitFailed("Profiler startup failed!");
+        if (!m_launcher->abort())
+            emitFailed("Profiler startup failed!");
     });
     profilerInstance->beginProfiling(m_launcher);
 }

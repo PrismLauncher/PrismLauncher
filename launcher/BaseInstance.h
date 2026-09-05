@@ -46,6 +46,7 @@
 #include <QProcess>
 #include <QSet>
 #include <cstdint>
+#include <list>
 #include "QObjectPtr.h"
 
 #include "settings/SettingsObject.h"
@@ -114,8 +115,7 @@ class BaseInstance : public QObject {
     QString uuid() const { return m_uuid; }
     void regenerateUuid();
 
-    void setMinecraftRunning(bool running);
-    void setRunning(bool running);
+    void setMinecraftRunning(LaunchTask* task, bool running);
     bool isRunning() const;
     int64_t totalTimePlayed() const;
     int64_t lastTimePlayed() const;
@@ -201,8 +201,14 @@ class BaseInstance : public QObject {
     /// returns a valid launcher (task container)
     virtual LaunchTask* createLaunchTask(AuthSessionPtr account, MinecraftTarget::Ptr targetToJoin) = 0;
 
-    /// returns the current launch task (if any)
-    LaunchTask* getLaunchTask();
+    /// Returns launch sessions from the current run group, in creation order.
+    QList<LaunchTask*> launchTasks() const;
+    QList<LaunchTask*> activeLaunchTasks() const;
+    bool isLaunchTaskActive(LaunchTask* task) const;
+    LaunchTask* launchTask(quint64 sessionId) const;
+    LaunchTask* adoptLaunchTask(std::unique_ptr<LaunchTask> task);
+    void launchSessionStarted(LaunchTask* task);
+    void launchSessionFinished(LaunchTask* task, bool crashed);
 
     /*!
      * Create envrironment variables for running the instance
@@ -290,7 +296,8 @@ class BaseInstance : public QObject {
      */
     void propertiesChanged();
 
-    void launchTaskChanged(LaunchTask*);
+    void launchTaskAdded(LaunchTask*);
+    void launchTaskRemoved(quint64 sessionId);
 
     void runningStatusChanged(bool running);
 
@@ -305,8 +312,11 @@ class BaseInstance : public QObject {
     QString m_rootDir;
     std::unique_ptr<SettingsObject> m_settings;
     // InstanceFlags m_flags;
-    bool m_isRunning = false;
-    std::unique_ptr<LaunchTask> m_launchProcess;
+    std::list<std::unique_ptr<LaunchTask>> m_launchProcesses;
+    QSet<LaunchTask*> m_activeLaunchProcesses;
+    QSet<LaunchTask*> m_minecraftProcesses;
+    quint64 m_nextLaunchSessionId = 1;
+    bool m_launchIntervalCrashed = false;
     QDateTime m_timeStarted;
     RuntimeContext m_runtimeContext;
 

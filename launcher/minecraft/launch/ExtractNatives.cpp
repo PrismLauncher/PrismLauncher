@@ -16,6 +16,7 @@
 #include "ExtractNatives.h"
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftInstance.h>
+#include "NativePath.h"
 
 #include <QDir>
 #include "FileSystem.h"
@@ -66,7 +67,7 @@ void ExtractNatives::executeTask()
         return;
     }
 
-    auto outputPath = instance->getNativePath();
+    const auto outputPath = launchNativePath(instance->getNativePath(), m_parent->sessionId());
     FS::ensureFolderPathExists(outputPath);
     auto javaVersion = instance->getJavaVersion();
     bool jniHackEnabled = javaVersion.major() >= 8;
@@ -84,7 +85,6 @@ void ExtractNatives::executeTask()
 void ExtractNatives::finalize()
 {
     auto instance = m_parent->instance();
-    QString target_dir = FS::PathCombine(instance->instanceRoot(), "natives/");
-    QDir dir(target_dir);
+    QDir dir(launchNativePath(instance->getNativePath(), m_parent->sessionId()));
     dir.removeRecursively();
 }

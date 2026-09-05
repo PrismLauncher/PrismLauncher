@@ -48,14 +48,12 @@
 
 void LaunchTask::init()
 {
-    m_instance->setRunning(true);
+    m_instance->launchSessionStarted(this);
 }
 
 std::unique_ptr<LaunchTask> LaunchTask::create(MinecraftInstance* inst)
 {
-    auto task = std::unique_ptr<LaunchTask>(new LaunchTask(inst));
-    task->init();
-    return task;
+    return std::unique_ptr<LaunchTask>(new LaunchTask(inst));
 }
 
 LaunchTask::LaunchTask(MinecraftInstance* instance) : m_instance(instance) {}
@@ -72,7 +70,6 @@ void LaunchTask::prependStep(shared_qobject_ptr<LaunchStep> step)
 
 void LaunchTask::executeTask()
 {
-    m_instance->setCrashed(false);
     if (!m_steps.size()) {
         state = LaunchTask::Finished;
         emitSucceeded();
@@ -90,6 +87,13 @@ void LaunchTask::onReadyForLaunch()
 
 void LaunchTask::onStepFinished()
 {
+    if (state == LaunchTask::Aborted) {
+        for (auto step = currentStep; step >= 0; --step)
+            m_steps[step]->finalize();
+        emitAborted();
+        return;
+    }
+
     // initial -> just start the first step
     if (currentStep == -1) {
         currentStep++;
@@ -189,10 +193,12 @@ bool LaunchTask::abort()
             if (!step->canAbort()) {
                 return false;
             }
+            const auto previousState = state;
+            state = LaunchTask::Aborted;
             if (step->abort()) {
-                state = LaunchTask::Aborted;
                 return true;
             }
+            state = previousState;
         }
         default:
             break;
@@ -215,7 +221,7 @@ shared_qobject_ptr<LogModel> LaunchTask::getLogModel()
     return m_logModel;
 }
 
-bool LaunchTask::parseXmlLogs(QString const& line, MessageLevel level)
+bool LaunchTask::parseXmlLogs(const QString& line, MessageLevel level)
 {
     LogParser* parser;
     switch (static_cast<MessageLevel::Enum>(level)) {
@@ -241,7 +247,7 @@ bool LaunchTask::parseXmlLogs(QString const& line, MessageLevel level)
         return true;
 
     auto model = getLogModel();
-    for (auto const& item : items) {
+    for (const auto& item : items) {
         if (std::holds_alternative<LogParser::LogEntry>(item)) {
             auto entry = std::get<LogParser::LogEntry>(item);
             auto msg = QString("[%1] [%2/%3] [%4]: %5")
@@ -290,15 +296,23 @@ void LaunchTask::onLogLine(QString line, MessageLevel level)
 
 void LaunchTask::emitSucceeded()
 {
-    m_instance->setRunning(false);
+    state = LaunchTask::Finished;
+    m_instance->launchSessionFinished(this, false);
     Task::emitSucceeded();
 }
 
 void LaunchTask::emitFailed(QString reason)
 {
-    m_instance->setRunning(false);
-    m_instance->setCrashed(true);
+    state = LaunchTask::Failed;
+    m_instance->launchSessionFinished(this, true);
     Task::emitFailed(reason);
+}
+
+void LaunchTask::emitAborted()
+{
+    state = LaunchTask::Aborted;
+    m_instance->launchSessionFinished(this, false);
+    Task::emitAborted();
 }
 
 QString expandVariables(const QString& input, QProcessEnvironment dict)

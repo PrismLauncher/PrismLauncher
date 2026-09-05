@@ -37,6 +37,7 @@
 
 #pragma once
 
+#include <list>
 #include <memory>
 
 #include <QApplication>
@@ -52,6 +53,7 @@
 #include "minecraft/auth/MinecraftAccount.h"
 
 class LaunchController;
+class LaunchTask;
 class LocalPeer;
 class InstanceWindow;
 class MainWindow;
@@ -218,7 +220,7 @@ class Application : public QApplication {
                 std::shared_ptr<MinecraftTarget> targetToJoin = nullptr,
                 shared_qobject_ptr<MinecraftAccount> accountToUse = nullptr,
                 const QString& offlineName = QString());
-    bool kill(BaseInstance* instance);
+    bool kill(MinecraftInstance* instance, LaunchTask* session = nullptr);
     void closeCurrentWindow();
 
    private slots:
@@ -280,7 +282,7 @@ class Application : public QApplication {
     // FIXME: attach to instances instead.
     struct InstanceXtras {
         InstanceWindow* window = nullptr;
-        std::unique_ptr<LaunchController> controller;
+        std::list<std::unique_ptr<LaunchController>> controllers;
     };
     std::map<QString, InstanceXtras> m_instanceExtras;
     mutable QMutex m_instanceExtrasMutex;
