@@ -82,6 +82,7 @@ class LoggedProcess : public QProcess {
    private:
     QStringDecoder m_err_decoder;
     QStringDecoder m_out_decoder;
+    QStringDecoder m_fallback_decoder;
     QString m_leftover_line;
     bool m_killed = false;
     State m_state = NotRunning;
