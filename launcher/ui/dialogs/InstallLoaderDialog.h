@@ -21,6 +21,7 @@
 #include <QDialog>
 #include "ui/pages/BasePageProvider.h"
 
+class InstallLoaderPage;
 class MinecraftInstance;
 class PageContainer;
 class PackProfile;
@@ -39,6 +40,8 @@ class InstallLoaderDialog final : public QDialog, protected BasePageProvider {
     void done(int result) override;
 
    private:
+    bool resolveLoaderConflicts(InstallLoaderPage* page);
+
     PackProfile* profile;
     PageContainer* container;
     QDialogButtonBox* buttons;

@@ -121,7 +121,7 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent), ui(new Ui::AboutDia
 
     connect(ui->closeButton, &QPushButton::clicked, this, &AboutDialog::close);
 
-    connect(ui->aboutQt, &QPushButton::clicked, &QApplication::aboutQt);
+    connect(ui->aboutQt, &QPushButton::clicked, APPLICATION, &QApplication::aboutQt);
 }
 
 AboutDialog::~AboutDialog()

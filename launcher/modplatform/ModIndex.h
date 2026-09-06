@@ -23,9 +23,12 @@
 #include <QMetaType>
 #include <QString>
 #include <QVariant>
-#include <compare>
+#include <array>
 #include <cstdint>
 #include <memory>
+#include <utility>
+#include "EnumWrapper.h"
+#include "modplatform/ResourceType.h"
 
 class QIODevice;
 
@@ -56,19 +59,48 @@ QList<ModLoaderType> modLoaderTypesToList(ModLoaderTypes flags);
 
 enum class ResourceProvider : std::uint8_t { MODRINTH, FLAME };
 
-enum class DependencyType : std::uint8_t { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
+enum class DependencyTypeValue : std::uint8_t { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
+struct DependencyType : EnumWrapper<DependencyType, DependencyTypeValue> {
+    static constexpr auto invalid() { return UNKNOWN; };
 
-enum class Side : std::uint8_t { NoSide = 0, ClientSide = 1U << 0U, ServerSide = 1U << 1U, UniversalSide = ClientSide | ServerSide };
+    static constexpr auto mapping()
+    {
+        return std::array{
+            std::pair{ REQUIRED, "REQUIRED" }, std::pair{ OPTIONAL, "OPTIONAL" }, std::pair{ INCOMPATIBLE, "INCOMPATIBLE" },
+            std::pair{ EMBEDDED, "EMBEDDED" }, std::pair{ TOOL, "TOOL" },         std::pair{ INCLUDE, "INCLUDE" },
+            std::pair{ UNKNOWN, "UNKNOWN" },
+        };
+    };
+    static DependencyType fromString(const QString& str)
+    {
+        return EnumWrapper<DependencyType, DependencyTypeValue>::fromString(str.toUpper());
+    }
 
-namespace SideUtils {
-QString toString(Side side);
-Side fromString(QString side);
-}  // namespace SideUtils
+    using enum DependencyTypeValue;
+    using Base = EnumWrapper<DependencyType, DependencyTypeValue>;
+    using Base::Base; /* inherit ctor */
+};
 
-namespace DependencyTypeUtils {
-QString toString(DependencyType type);
-DependencyType fromString(const QString& str);
-}  // namespace DependencyTypeUtils
+enum class SideTypeValue : std::uint8_t {
+    NoSide = 0,
+    ClientSide = 1U << 0U,
+    ServerSide = 1U << 1U,
+    UniversalSide = ClientSide | ServerSide
+};
+
+struct SideType : EnumWrapper<SideType, SideTypeValue> {
+    static constexpr auto invalid() { return NoSide; };
+
+    static constexpr auto mapping()
+    {
+        return std::array{ std::pair{ ClientSide, "client" }, std::pair{ ServerSide, "server" }, std::pair{ UniversalSide, "both" },
+                           std::pair{ NoSide, "" } };
+    };
+
+    using enum SideTypeValue;
+    using Base = EnumWrapper<SideType, SideTypeValue>;
+    using Base::Base; /* inherit ctor */
+};
 
 namespace ProviderCapabilities {
 const char* name(ResourceProvider);
@@ -87,20 +119,19 @@ struct DonationData {
     QString url;
 };
 
-struct IndexedVersionType {
-    enum class Enum : std::uint8_t { Unknown = 0, Release = 1, Beta = 2, Alpha = 3 };
-    using enum Enum;
-    constexpr IndexedVersionType(Enum e = Unknown) : m_type(e) {}  // NOLINT(hicpp-explicit-conversions)
-    static IndexedVersionType fromString(const QString& type);
-    bool isValid() const { return m_type != Unknown; }
-    std::strong_ordering operator<=>(const IndexedVersionType& other) const = default;
-    std::strong_ordering operator<=>(const IndexedVersionType::Enum& other) const { return m_type <=> other; }
-    QString toString() const;
-    explicit operator int() const { return static_cast<int>(m_type); }
-    explicit operator IndexedVersionType::Enum() { return m_type; }
+enum class IndexedVersionTypeValue : std::uint8_t { Unknown = 0, Release = 1, Beta = 2, Alpha = 3 };
+struct IndexedVersionType : EnumWrapper<IndexedVersionType, IndexedVersionTypeValue> {
+    static constexpr auto invalid() { return Unknown; };
 
-   private:
-    Enum m_type;
+    static constexpr auto mapping()
+    {
+        return std::array{ std::pair{ Unknown, "Unknown" }, std::pair{ Release, "Release" }, std::pair{ Beta, "Beta" },
+                           std::pair{ Alpha, "Alpha" } };
+    };
+
+    using enum IndexedVersionTypeValue;
+    using Base = EnumWrapper<IndexedVersionType, IndexedVersionTypeValue>;
+    using Base::Base; /* inherit ctor */
 };
 
 struct Dependency {
@@ -113,27 +144,27 @@ struct IndexedVersion {
     QVariant addonId;
     QVariant fileId;
     QString version;
-    QString version_number;
-    IndexedVersionType version_type;
+    QString versionNumber;
+    IndexedVersionType versionType;
     QStringList mcVersion;
     QString downloadUrl;
     QString date;
     QString fileName;
     ModLoaderTypes loaders;
-    QString hash_type;
+    QString hashType;
     QString hash;
-    bool is_preferred = true;
+    bool isPreferred = true;
     QString changelog;
     QList<Dependency> dependencies;
-    Side side = Side::NoSide;  // this is for flame API
+    SideType side = SideType::NoSide;  // this is for flame API
 
     // For internal use, not provided by APIs
-    bool is_currently_selected = false;
+    bool isCurrentlySelected = false;
 
     QString getVersionDisplayString() const
     {
-        auto release_type = version_type.isValid() ? QString(" [%1]").arg(version_type.toString()) : "";
-        auto versionStr = !version.contains(version_number) ? version_number : "";
+        auto releaseType = versionType.isValid() ? QString(" [%1]").arg(versionType.toString()) : "";
+        auto versionStr = !version.contains(versionNumber) ? versionNumber : "";
         QString gameVersion = "";
         for (const auto& v : mcVersion) {
             if (version.contains(v)) {
@@ -144,7 +175,7 @@ struct IndexedVersion {
                 gameVersion = QObject::tr(" for %1").arg(v);
             }
         }
-        return QString("%1%2 — %3%4").arg(version, gameVersion, versionStr, release_type);
+        return QString("%1%2 — %3%4").arg(version, gameVersion, versionStr, releaseType);
     }
 };
 
@@ -173,7 +204,7 @@ struct IndexedPack {
     QString logoName;
     QString logoUrl;
     QString websiteUrl;
-    Side side = Side::NoSide;
+    SideType side = SideType::NoSide;
 
     bool versionsLoaded = false;
     QList<IndexedVersion> versions;
@@ -182,6 +213,8 @@ struct IndexedPack {
     bool extraDataLoaded = true;
     ExtraPackData extraData;
 
+    ResourceType resourceType = ResourceType::Unknown;
+
     // For internal use, not provided by APIs
     bool isVersionSelected(int index) const
     {
@@ -189,7 +222,7 @@ struct IndexedPack {
             return false;
         }
 
-        return versions.at(index).is_currently_selected;
+        return versions.at(index).isCurrentlySelected;
     }
     bool isAnyVersionSelected() const
     {
@@ -197,7 +230,7 @@ struct IndexedPack {
             return false;
         }
 
-        return std::any_of(versions.constBegin(), versions.constEnd(), [](const auto& v) { return v.is_currently_selected; });
+        return std::any_of(versions.constBegin(), versions.constEnd(), [](const auto& v) { return v.isCurrentlySelected; });
     }
 };
 

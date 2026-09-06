@@ -30,14 +30,26 @@
 #include <optional>
 
 namespace {
-std::vector<Version> mcVersions(BaseInstance* inst)
+std::vector<Version> mcVersions(MinecraftInstance* inst)
 {
-    return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion() };
+    return { inst->getPackProfile()->getComponent("net.minecraft")->getVersion() };
 }
+ModPlatform::ResourceProvider next(ModPlatform::ResourceProvider p)
+{
+    switch (p) {
+        case ModPlatform::ResourceProvider::MODRINTH:
+            return ModPlatform::ResourceProvider::FLAME;
+        case ModPlatform::ResourceProvider::FLAME:
+            return ModPlatform::ResourceProvider::MODRINTH;
+    }
+
+    return ModPlatform::ResourceProvider::FLAME;
+}
+
 }  // namespace
 
 ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
-                                           BaseInstance* instance,
+                                           MinecraftInstance* instance,
                                            ResourceFolderModel* resourceModel,
                                            QList<Resource*>& searchFor,
                                            bool includeDeps,
@@ -183,7 +195,7 @@ void ResourceUpdateDialog::checkCandidates()
         ScrollMessageBox messageDialog(m_parent, tr("Failed to check for updates"),
                                        tr("Could not check or get the following resources for updates:<br>"
                                           "Do you wish to proceed without those resources?"),
-                                       text, "Disable unavailable mods");
+                                       text, tr("Disable unavailable mods"));
         messageDialog.setModal(true);
         if (messageDialog.exec() == QDialog::Rejected) {
             m_aborted = true;
@@ -231,42 +243,43 @@ void ResourceUpdateDialog::checkCandidates()
                 QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
                 return;
             }
-            static FlameAPI s_api;
 
             auto dependencyExtraInfo = depTask->getExtraInfo();
 
             for (const auto& dep : depTask->getDependecies()) {
                 auto changelog = dep->version.changelog;
                 if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME) {
-                    changelog = s_api.getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
+                    changelog = FlameAPI::getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
                 }
-                auto downloadTask = makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_resourceModel, true, "dependency");
-                auto extraInfo = dependencyExtraInfo.value(dep->version.addonId.toString());
+
+                auto [maybeInstalled, requiredByNames, requiredByIds] = dependencyExtraInfo.value(dep->version.addonId.toString());
+                auto downloadTask =
+                    makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_resourceModel, true, "dependency", requiredByIds.first());
                 CheckUpdateTask::Update updatable = {
-                    dep->pack->name, dep->version.hash,   tr("Not installed"), dep->version.version,      dep->version.version_type,
-                    changelog,       dep->pack->provider, downloadTask,        !extraInfo.maybe_installed
+                    dep->pack->name, dep->version.hash,   tr("Not installed"), dep->version.version, dep->version.versionType,
+                    changelog,       dep->pack->provider, downloadTask,        !maybeInstalled
                 };
 
-                appendResource(updatable, extraInfo.required_by);
+                appendResource(updatable, requiredByNames);
                 m_tasks.insert(updatable.name, updatable.download);
             }
         }
     }
 
     // If there's no resource to be updated
-    if (ui->modTreeWidget->topLevelItemCount() == 0) {
+    if (ui->modTreeWidget->topLevelItem(0)->childCount() == 0) {
         m_noUpdates = true;
     } else {
         // FIXME: Find a more efficient way of doing this!
 
         // Sort major items in alphabetical order (also sorts the children unfortunately)
-        ui->modTreeWidget->sortItems(0, Qt::SortOrder::AscendingOrder);
+        ui->modTreeWidget->topLevelItem(0)->sortChildren(0, Qt::SortOrder::AscendingOrder);
 
         // Re-sort the children
-        auto* item = ui->modTreeWidget->topLevelItem(0);
+        auto* item = ui->modTreeWidget->topLevelItem(0)->child(0);
         for (int i = 1; item != nullptr; ++i) {
             item->sortChildren(0, Qt::SortOrder::DescendingOrder);
-            item = ui->modTreeWidget->topLevelItem(i);
+            item = ui->modTreeWidget->topLevelItem(0)->child(i);
         }
     }
 
@@ -353,11 +366,12 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
     // prepare task for the modrinth mods
     if (!modrinthTmp.empty()) {
         auto modrinthTask = makeShared<EnsureMetadataTask>(modrinthTmp, indexDir2, ModPlatform::ResourceProvider::MODRINTH);
-        connect(modrinthTask.get(), &EnsureMetadataTask::metadataReady, [this](Resource* candidate) { onMetadataEnsured(candidate); });
-        connect(modrinthTask.get(), &EnsureMetadataTask::metadataFailed, [this, &shouldTryOthers](Resource* candidate) {
+        connect(modrinthTask.get(), &EnsureMetadataTask::metadataReady, this,
+                [this](Resource* candidate) { onMetadataEnsured(candidate); });
+        connect(modrinthTask.get(), &EnsureMetadataTask::metadataFailed, this, [this, &shouldTryOthers](Resource* candidate) {
             onMetadataFailed(candidate, shouldTryOthers.find(candidate->internalId()).value(), ModPlatform::ResourceProvider::MODRINTH);
         });
-        connect(modrinthTask.get(), &EnsureMetadataTask::failed,
+        connect(modrinthTask.get(), &EnsureMetadataTask::failed, this,
                 [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         if (modrinthTask->getHashingTask()) {
@@ -370,11 +384,11 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
     // prepare task for the flame mods
     if (!flameTmp.empty()) {
         auto flameTask = makeShared<EnsureMetadataTask>(flameTmp, indexDir2, ModPlatform::ResourceProvider::FLAME);
-        connect(flameTask.get(), &EnsureMetadataTask::metadataReady, [this](Resource* candidate) { onMetadataEnsured(candidate); });
-        connect(flameTask.get(), &EnsureMetadataTask::metadataFailed, [this, &shouldTryOthers](Resource* candidate) {
+        connect(flameTask.get(), &EnsureMetadataTask::metadataReady, this, [this](Resource* candidate) { onMetadataEnsured(candidate); });
+        connect(flameTask.get(), &EnsureMetadataTask::metadataFailed, this, [this, &shouldTryOthers](Resource* candidate) {
             onMetadataFailed(candidate, shouldTryOthers.find(candidate->internalId()).value(), ModPlatform::ResourceProvider::FLAME);
         });
-        connect(flameTask.get(), &EnsureMetadataTask::failed,
+        connect(flameTask.get(), &EnsureMetadataTask::failed, this,
                 [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         if (flameTask->getHashingTask()) {
@@ -412,27 +426,15 @@ void ResourceUpdateDialog::onMetadataEnsured(Resource* resource)
     }
 }
 
-ModPlatform::ResourceProvider next(ModPlatform::ResourceProvider p)
-{
-    switch (p) {
-        case ModPlatform::ResourceProvider::MODRINTH:
-            return ModPlatform::ResourceProvider::FLAME;
-        case ModPlatform::ResourceProvider::FLAME:
-            return ModPlatform::ResourceProvider::MODRINTH;
-    }
-
-    return ModPlatform::ResourceProvider::FLAME;
-}
-
 void ResourceUpdateDialog::onMetadataFailed(Resource* resource, bool tryOthers, ModPlatform::ResourceProvider firstChoice)
 {
     if (tryOthers) {
         auto indexDir2 = indexDir();
 
         auto task = makeShared<EnsureMetadataTask>(resource, indexDir2, next(firstChoice));
-        connect(task.get(), &EnsureMetadataTask::metadataReady, [this](Resource* candidate) { onMetadataEnsured(candidate); });
-        connect(task.get(), &EnsureMetadataTask::metadataFailed, [this](Resource* candidate) { onMetadataFailed(candidate, false); });
-        connect(task.get(), &EnsureMetadataTask::failed,
+        connect(task.get(), &EnsureMetadataTask::metadataReady, this, [this](Resource* candidate) { onMetadataEnsured(candidate); });
+        connect(task.get(), &EnsureMetadataTask::metadataFailed, this, [this](Resource* candidate) { onMetadataFailed(candidate, false); });
+        connect(task.get(), &EnsureMetadataTask::failed, this,
                 [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
         if (task->getHashingTask()) {
             auto seq = makeShared<SequentialTask>();
@@ -451,7 +453,7 @@ void ResourceUpdateDialog::onMetadataFailed(Resource* resource, bool tryOthers, 
 
 void ResourceUpdateDialog::appendResource(const CheckUpdateTask::Update& info, QStringList requiredBy)
 {
-    auto* itemTop = new QTreeWidgetItem(ui->modTreeWidget);
+    auto* itemTop = new QTreeWidgetItem(ui->modTreeWidget->topLevelItem(0));
     itemTop->setCheckState(0, info.enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     if (!info.enabled) {
         itemTop->setToolTip(0, tr("Mod was disabled as it may be already installed."));
@@ -513,22 +515,20 @@ void ResourceUpdateDialog::appendResource(const CheckUpdateTask::Update& info, Q
     changelogArea->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
 
     ui->modTreeWidget->setItemWidget(changelog, 0, changelogArea);
-
-    ui->modTreeWidget->addTopLevelItem(itemTop);
 }
 
-auto ResourceUpdateDialog::getTasks() -> const QList<ResourceDownloadTask::Ptr>
+auto ResourceUpdateDialog::getTasks() const -> QList<ResourceDownloadTask::Ptr>
 {
     QList<ResourceDownloadTask::Ptr> list;
 
-    auto* item = ui->modTreeWidget->topLevelItem(0);
+    auto* item = ui->modTreeWidget->topLevelItem(0)->child(0);
 
     for (int i = 1; item != nullptr; ++i) {
         if (item->checkState(0) == Qt::CheckState::Checked) {
             list.push_back(m_tasks.find(item->text(0)).value());
         }
 
-        item = ui->modTreeWidget->topLevelItem(i);
+        item = ui->modTreeWidget->topLevelItem(0)->child(i);
     }
 
     return list;

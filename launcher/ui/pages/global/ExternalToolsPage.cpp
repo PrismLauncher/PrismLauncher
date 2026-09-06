@@ -42,7 +42,6 @@
 #include <QTabBar>
 
 #include <FileSystem.h>
-#include <tools/MCEditTool.h>
 #include "Application.h"
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
@@ -53,7 +52,6 @@ ExternalToolsPage::ExternalToolsPage(QWidget* parent) : QWidget(parent), ui(new 
 
     ui->jsonEditorTextBox->setClearButtonEnabled(true);
 
-    ui->mceditLink->setOpenExternalLinks(true);
     ui->jvisualvmLink->setOpenExternalLinks(true);
     ui->jprofilerLink->setOpenExternalLinks(true);
     loadSettings();
@@ -69,7 +67,6 @@ void ExternalToolsPage::loadSettings()
     auto s = APPLICATION->settings();
     ui->jprofilerPathEdit->setText(s->get("JProfilerPath").toString());
     ui->jvisualvmPathEdit->setText(s->get("JVisualVMPath").toString());
-    ui->mceditPathEdit->setText(s->get("MCEditPath").toString());
 
     // Editors
     ui->jsonEditorTextBox->setText(s->get("JsonEditor").toString());
@@ -80,7 +77,6 @@ void ExternalToolsPage::applySettings()
 
     s->set("JProfilerPath", ui->jprofilerPathEdit->text());
     s->set("JVisualVMPath", ui->jvisualvmPathEdit->text());
-    s->set("MCEditPath", ui->mceditPathEdit->text());
 
     // Editors
     QString jsonEditor = ui->jsonEditorTextBox->text();
@@ -148,39 +144,6 @@ void ExternalToolsPage::on_jvisualvmCheckBtn_clicked()
         QMessageBox::critical(this, tr("Error"), tr("Error while checking VisualVM install:\n%1").arg(error));
     } else {
         QMessageBox::information(this, tr("OK"), tr("VisualVM setup seems to be OK"));
-    }
-}
-
-void ExternalToolsPage::on_mceditPathBtn_clicked()
-{
-    QString raw_dir = ui->mceditPathEdit->text();
-    QString error;
-    do {
-#ifdef Q_OS_MACOS
-        raw_dir = QFileDialog::getOpenFileName(this, tr("MCEdit Application"), raw_dir);
-#else
-        raw_dir = QFileDialog::getExistingDirectory(this, tr("MCEdit Folder"), raw_dir);
-#endif
-        if (raw_dir.isEmpty()) {
-            break;
-        }
-        QString cooked_dir = FS::NormalizePath(raw_dir);
-        if (!APPLICATION->mcedit()->check(cooked_dir, error)) {
-            QMessageBox::critical(this, tr("Error"), tr("Error while checking MCEdit install:\n%1").arg(error));
-            continue;
-        } else {
-            ui->mceditPathEdit->setText(cooked_dir);
-            break;
-        }
-    } while (1);
-}
-void ExternalToolsPage::on_mceditCheckBtn_clicked()
-{
-    QString error;
-    if (!APPLICATION->mcedit()->check(ui->mceditPathEdit->text(), error)) {
-        QMessageBox::critical(this, tr("Error"), tr("Error while checking MCEdit install:\n%1").arg(error));
-    } else {
-        QMessageBox::information(this, tr("OK"), tr("MCEdit setup seems to be OK"));
     }
 }
 

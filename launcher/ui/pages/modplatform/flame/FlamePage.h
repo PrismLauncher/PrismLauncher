@@ -82,7 +82,7 @@ class FlamePage : public QWidget, public ModpackProviderBasePage {
 
    private slots:
     void triggerSearch();
-    void onSelectionChanged(QModelIndex first, QModelIndex second);
+    void onSelectionChanged(QModelIndex curr, QModelIndex prev);
     void onVersionSelectionChanged(int index);
     void createFilterWidget();
 

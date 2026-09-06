@@ -20,10 +20,12 @@
 #include <QList>
 #include <QMimeData>
 #include <QString>
+#include <memory>
 #include "BaseInstance.h"
 #include "minecraft/World.h"
 
 class QFileSystemWatcher;
+class Task;
 
 class WorldList : public QAbstractListModel {
     Q_OBJECT
@@ -50,8 +52,17 @@ class WorldList : public QAbstractListModel {
     /// Install a world from location
     void installWorld(QFileInfo filename);
 
-    /// Deletes the mod at the given index.
-    virtual bool deleteWorld(int index);
+    /// Create a task to install a world from location
+    std::unique_ptr<Task> createInstallWorldTask(QFileInfo filename);
+
+    /// Create a task to copy the world at the given index.
+    std::unique_ptr<Task> createCopyWorldTask(int index, const QString& name);
+
+    /// Create a task to delete the world at the given index.
+    std::unique_ptr<Task> createDeleteWorldTask(int index);
+
+    /// Remove an already deleted world from the model.
+    bool removeWorldFromModel(const QFileInfo& sourceFile);
 
     /// Removes the world icon, if any
     virtual bool resetIcon(int index);

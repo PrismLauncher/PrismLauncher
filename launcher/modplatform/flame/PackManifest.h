@@ -41,7 +41,6 @@
 #include <QString>
 #include <QUrl>
 #include "modplatform/ModIndex.h"
-#include "modplatform/ResourceType.h"
 
 namespace Flame {
 struct File {
@@ -55,7 +54,6 @@ struct File {
 
     // our
     QString targetFolder = QStringLiteral("mods");
-    ModPlatform::ResourceType resourceType;
 };
 
 struct Modloader {
@@ -81,7 +79,7 @@ struct Manifest {
     QMap<int, Flame::File> files;
     QString overrides;
 
-    bool is_loaded = false;
+    bool isLoaded = false;
 };
 
 void loadManifest(Flame::Manifest& m, const QString& filepath);

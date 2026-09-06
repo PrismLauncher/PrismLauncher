@@ -33,7 +33,7 @@ class ResourceModel : public QAbstractListModel {
    public:
     using DownloadTaskPtr = shared_qobject_ptr<ResourceDownloadTask>;
 
-    ResourceModel(ResourceAPI* api);
+    ResourceModel(const ResourceAPI* api);
     ~ResourceModel() override;
 
     auto data(const QModelIndex& /*index*/, int role) const -> QVariant override;
@@ -89,13 +89,14 @@ class ResourceModel : public QAbstractListModel {
     void refresh();
 
     /** Gets the icon at the URL for the given index. If it's not fetched yet, fetch it and update when fisinhed. */
-    std::optional<QIcon> getIcon(QModelIndex&, const QUrl&);
+    std::optional<QIcon> getIcon(const QModelIndex&, const QUrl&);
 
     void addPack(ModPlatform::IndexedPack::Ptr pack,
                  ModPlatform::IndexedVersion& version,
                  ResourceFolderModel* packs,
                  bool isIndexed = false,
-                 QString downloadReason = "standalone");
+                 QString downloadReason = "standalone",
+                 QString dependentOn = "");
     void removePack(const QString& rem);
     QList<DownloadTaskPtr> selectedPacks() { return m_selected; }
 
@@ -103,7 +104,7 @@ class ResourceModel : public QAbstractListModel {
     /** Resets the model's data. */
     void clearData();
 
-    void runSearchJob(Task::Ptr);
+    void runSearchJob(const Task::Ptr&);
     void runInfoJob(Task::Ptr);
 
     auto getCurrentSortingMethodByIndex() const -> std::optional<ResourceAPI::SortingMethod>;
@@ -117,7 +118,7 @@ class ResourceModel : public QAbstractListModel {
     QString m_search_term;
     unsigned int m_current_sort_index = 0;
 
-    std::unique_ptr<ResourceAPI> m_api;
+    const ResourceAPI* m_api;
 
     // Job for searching for new entries
     shared_qobject_ptr<Task> m_current_search_job;
@@ -138,11 +139,11 @@ class ResourceModel : public QAbstractListModel {
    private:
     /* Default search request callbacks */
     void searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>&);
-    void searchRequestForOneSucceeded(ModPlatform::IndexedPack::Ptr);
-    void searchRequestFailed(QString reason, int network_error_code);
+    void searchRequestForOneSucceeded(const ModPlatform::IndexedPack::Ptr&);
+    void searchRequestFailed(const QString& reason, int networkErrorCode);
     void searchRequestAborted();
 
-    void versionRequestSucceeded(QVector<ModPlatform::IndexedVersion>&, QVariant, const QModelIndex&);
+    void versionRequestSucceeded(QVector<ModPlatform::IndexedVersion>&, const QVariant&, const QModelIndex&);
 
     void infoRequestSucceeded(ModPlatform::IndexedPack::Ptr, const QModelIndex&);
 

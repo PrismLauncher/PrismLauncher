@@ -42,7 +42,6 @@
 #include <QList>
 #include <QString>
 
-#include <list>
 #include <optional>
 #include <utility>
 
@@ -55,8 +54,6 @@
 /* Simple class with a common interface for interacting with APIs */
 class ResourceAPI {
    public:
-    virtual ~ResourceAPI() = default;
-
     struct SortingMethod {
         // The index of the sorting method. Used to allow for arbitrary ordering in the list of methods.
         // Used by Flame in the API request.
@@ -65,14 +62,14 @@ class ResourceAPI {
         // Used by Modrinth in the API request.
         QString name;
         // The human-readable name of the sorting, used for display in the UI.
-        QString readable_name;
+        QString readableName;
     };
 
     template <typename T>
     struct Callback {
-        std::function<void(T&)> on_succeed;
-        std::function<void(const QString& reason, int network_error_code)> on_fail;
-        std::function<void()> on_abort;
+        std::function<void(T&)> onSucceed;
+        std::function<void(const QString& reason, int networkErrorCode)> onFail;
+        std::function<void()> onAbort;
     };
 
     struct SearchArgs {
@@ -83,7 +80,7 @@ class ResourceAPI {
         std::optional<SortingMethod> sorting;
         std::optional<ModPlatform::ModLoaderTypes> loaders;
         std::optional<std::vector<Version>> versions;
-        std::optional<ModPlatform::Side> side;
+        std::optional<ModPlatform::SideType> side;
         std::optional<QStringList> categoryIds;
         bool openSource{};
     };
@@ -113,21 +110,23 @@ class ResourceAPI {
     virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
 
    public slots:
-    virtual Task::Ptr searchProjects(SearchArgs&&, Callback<QList<ModPlatform::IndexedPack::Ptr>>&&) const;
+    virtual Task::Ptr searchProjects(const SearchArgs&, const Callback<QList<ModPlatform::IndexedPack::Ptr>>&) const;
 
-    virtual std::pair<Task::Ptr, QByteArray*> getProject(QString addonId, bool askRetry = true) const;
+    virtual std::pair<Task::Ptr, QByteArray*> getProject(const QString& addonId, bool askRetry = true) const;
     virtual std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const = 0;
 
-    virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, Callback<ModPlatform::IndexedPack::Ptr>&&, bool askRetry = true) const;
-    Task::Ptr getProjectVersions(VersionSearchArgs&& args, Callback<QVector<ModPlatform::IndexedVersion>>&& callbacks) const;
-    virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, Callback<ModPlatform::IndexedVersion>&&) const;
+    virtual Task::Ptr getProjectInfo(const ProjectInfoArgs&, const Callback<ModPlatform::IndexedPack::Ptr>&, bool askRetry = true) const;
+    Task::Ptr getProjectVersions(const VersionSearchArgs& args, const Callback<QVector<ModPlatform::IndexedVersion>>& callbacks) const;
+    virtual Task::Ptr getDependencyVersion(const DependencySearchArgs&, const Callback<ModPlatform::IndexedVersion>&) const;
 
    protected:
-    inline QString debugName() const { return "External resource API"; }
+    ~ResourceAPI() = default;
 
-    QString mapMCVersionToModrinth(Version v) const;
+    virtual QString debugName() const { return "External resource API"; }
 
-    QString getGameVersionsString(std::vector<Version> mcVersions) const;
+    static QString mapMCVersionToModrinth(const Version& v);
+
+    static QString getGameVersionsString(const std::vector<Version>& mcVersions);
 
    public:
     virtual auto getSearchURL(const SearchArgs& args) const -> std::optional<QString> = 0;
@@ -156,4 +155,8 @@ class ResourceAPI {
      */
 
     virtual void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&) const = 0;
+
+    virtual std::pair<Task::Ptr, QByteArray*> getModCategories() const = 0;
+
+    virtual QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const = 0;
 };

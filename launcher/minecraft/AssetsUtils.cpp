@@ -46,12 +46,11 @@
 #include "AssetsUtils.h"
 #include "BuildConfig.h"
 #include "FileSystem.h"
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 #include "net/ChecksumValidator.h"
-#include "net/Download.h"
 
 #include "Application.h"
-#include "net/NetRequest.h"
+#include "net/Request.h"
 #include "update/AssetUpdateTask.h"
 
 namespace {
@@ -278,11 +277,11 @@ bool reconstructAssets(QString assetsId, QString resourcesFolder)
 
 }  // namespace AssetsUtils
 
-Net::NetRequest::Ptr AssetObject::getDownloadAction()
+Net::Request::Ptr AssetObject::getDownloadAction()
 {
     QFileInfo objectFile(getLocalPath());
     if ((!objectFile.isFile()) || (objectFile.size() != size)) {
-        auto objectDL = Net::ApiDownload::makeFile(getUrl(), objectFile.filePath());
+        auto objectDL = Net::ApiRequest::makeFile(getUrl(), objectFile.filePath());
         if (hash.size()) {
             objectDL->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, hash));
         }

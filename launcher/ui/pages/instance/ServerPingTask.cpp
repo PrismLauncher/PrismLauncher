@@ -42,6 +42,6 @@ void ServerPingTask::executeTask()
     connect(resolver, &McResolver::failed, this, [this](QString error) { emitFailed(error); });
 
     // Delete McResolver object when done
-    connect(resolver, &McResolver::finished, [resolver]() { resolver->deleteLater(); });
+    connect(resolver, &McResolver::finished, resolver, &McResolver::deleteLater);
     resolver->ping();
 }

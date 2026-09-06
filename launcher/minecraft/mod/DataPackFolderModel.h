@@ -54,7 +54,7 @@ class DataPackFolderModel : public ResourceFolderModel {
         NumColumns
     };
 
-    explicit DataPackFolderModel(const QString& dir, BaseInstance* instance, bool isIndexed, bool createDir, QObject* parent = nullptr);
+    explicit DataPackFolderModel(const QString& dir, MinecraftInstance* instance, bool isIndexed, bool createDir, QObject* parent = nullptr);
 
     QString id() const override { return "datapacks"; }
 

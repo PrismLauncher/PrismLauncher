@@ -48,7 +48,7 @@
 #include "BuildConfig.h"
 #include "net/RawHeaderProxy.h"
 
-Net::NetRequest::Ptr ImgurAlbumCreation::make(std::shared_ptr<ImgurAlbumCreation::Result> output, QList<ScreenShot::Ptr> screenshots)
+Net::Request::Ptr ImgurAlbumCreation::make(std::shared_ptr<ImgurAlbumCreation::Result> output, QList<ScreenShot::Ptr> screenshots)
 {
     auto up = makeShared<ImgurAlbumCreation>();
     up->m_url = BuildConfig.IMGUR_BASE_URL + "album";
@@ -67,7 +67,7 @@ QNetworkReply* ImgurAlbumCreation::getReply(QNetworkRequest& request)
     for (auto shot : m_screenshots) {
         hashes.append(shot->m_imgurDeleteHash);
     }
-    const QByteArray data = "deletehashes=" + hashes.join(',').toUtf8() + "&title=Minecraft%20Screenshots&privacy=hidden";
+    const QByteArray data = "deletehashes=" + hashes.join("&deletehashes=").toUtf8() + "&title=Minecraft%20Screenshots&privacy=hidden";
     return m_network->post(request, data);
 }
 

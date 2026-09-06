@@ -59,7 +59,7 @@
 #include "modplatform/ModIndex.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
-ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool isIndexed, bool createDir, QObject* parent)
+ModFolderModel::ModFolderModel(const QDir& dir, MinecraftInstance* instance, bool isIndexed, bool createDir, QObject* parent)
     : ResourceFolderModel(QDir(dir), instance, isIndexed, createDir, parent)
 {
     m_columnNames = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider", "Size", "Side", "Loaders",
@@ -134,6 +134,26 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
         case Qt::SizeHintRole:
             if (column == ImageColumn) {
                 return QSize(32, 32);
+            }
+            break;
+        case Qt::ToolTipRole:
+            switch (column) {
+                case RequiredByColumn: {
+                    const auto list = requiredByList(at(row).mod_id());
+                    if (!list.isEmpty()) {
+                        return list.join(QLatin1Char('\n'));
+                    }
+                    break;
+                }
+                case RequiresColumn: {
+                    const auto list = requiresList(at(row).mod_id());
+                    if (!list.isEmpty()) {
+                        return list.join(QLatin1Char('\n'));
+                    }
+                    break;
+                }
+                default:
+                    break;
             }
             break;
         default:
@@ -437,37 +457,38 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
         return list;
     };
 
-    if (requiredToEnable.size() > 0 || requiredToDisable.size() > 0) {
-        QString title;
-        QString message;
-        QString noButton;
-        QString yesButton;
-        if (requiredToEnable.size() > 0 && requiredToDisable.size() > 0) {
-            title = tr("Confirm toggle");
-            message = tr("Toggling these mod(s) will cause changes to other mods.\n") +
-                      tr("%n mod(s) will be enabled\n", "", requiredToEnable.size()) +
-                      tr("%n mod(s) will be disabled\n", "", requiredToDisable.size()) +
-                      tr("Do you want to automatically apply these related changes?\nIgnoring them may break the game.");
-            noButton = tr("Only Toggle Selected");
-            yesButton = tr("Toggle Required Mods");
-        } else if (requiredToEnable.size() > 0) {
-            title = tr("Confirm enable");
-            message = tr("The enabled mod(s) require %n mod(s).\n", "", requiredToEnable.size()) +
-                      tr("Would you like to enable them as well?\nIgnoring them may break the game.");
-            noButton = tr("Only Enable Selected");
-            yesButton = tr("Enable Required");
-        } else {
-            title = tr("Confirm disable");
-            message = tr("The disabled mod(s) are required by %n mod(s).\n", "", requiredToDisable.size()) +
-                      tr("Would you like to disable them as well?\nIgnoring them may break the game.");
-            noButton = tr("Only Disable Selected");
-            yesButton = tr("Disable Required");
+    if (!requiredToEnable.isEmpty() || !requiredToDisable.isEmpty()) {
+        const QString title = tr("Confirm toggle");
+        const QString noButton = tr("Only Toggle Selected");
+        const QString yesButton = tr("Toggle Required Mods");
+
+        QString message = tr("Toggling these mod(s) will cause changes to other mods.\n");
+        QString details;
+        if (!requiredToEnable.isEmpty()) {
+            message += tr("%n mod(s) will be enabled\n", "", requiredToEnable.size());
+            details += tr("The following mods will be enabled:");
+            for (const auto* mod : requiredToEnable) {
+                details += QString("\n- %1 (%2)").arg(mod->name(), mod->internalId());
+            }
         }
+        if (!requiredToDisable.isEmpty()) {
+            message += tr("%n mod(s) will be disabled\n", "", requiredToDisable.size());
+            if (!details.isEmpty()) {
+                details += "\n\n";
+            }
+            details += tr("The following mods will be disabled:");
+            for (const auto* mod : requiredToDisable) {
+                details += QString("\n- %1 (%2)").arg(mod->name(), mod->internalId());
+            }
+        }
+        message += tr("Do you want to automatically apply these related changes?\nIgnoring them may break the game.");
 
         auto* box = CustomMessageBox::selectable(nullptr, title, message, QMessageBox::Warning,
                                                  QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::No);
         box->button(QMessageBox::No)->setText(noButton);
         box->button(QMessageBox::Yes)->setText(yesButton);
+        box->setDetailedText(details);
+
         auto response = box->exec();
 
         if (response == QMessageBox::Yes) {
@@ -494,14 +515,14 @@ QStringList reqToList(const QSet<Mod*>& l)
 }
 }  // namespace
 
-QStringList ModFolderModel::requiresList(const QString& id)
+QStringList ModFolderModel::requiresList(const QString& id) const
 {
-    return reqToList(m_requires[id]);
+    return reqToList(m_requires.value(id));
 }
 
-QStringList ModFolderModel::requiredByList(const QString& id)
+QStringList ModFolderModel::requiredByList(const QString& id) const
 {
-    return reqToList(m_requiredBy[id]);
+    return reqToList(m_requiredBy.value(id));
 }
 
 bool ModFolderModel::deleteResources(const QModelIndexList& indexes)

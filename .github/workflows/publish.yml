@@ -17,7 +17,8 @@ jobs:
 
     steps:
       - name: Publish on Winget
-        uses: vedantmgoyal2009/winget-releaser@v2
+        # @Octol1ttle: Pinned to a commit because no release has been published that works on ubuntu-slim
+        uses: vedantmgoyal2009/winget-releaser@7bd472be23763def6e16bd06cc8b1cdfab0e2fd5 # docs: add description to inputs (#335)
         with:
           identifier: PrismLauncher.PrismLauncher
           version: ${{ github.event.release.tag_name }}

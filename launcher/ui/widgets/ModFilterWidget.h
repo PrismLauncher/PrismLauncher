@@ -61,7 +61,7 @@ class ModFilterWidget : public QTabWidget {
         std::vector<Version> versions;
         std::vector<ModPlatform::IndexedVersionType> releases;
         ModPlatform::ModLoaderTypes loaders;
-        ModPlatform::Side side;
+        ModPlatform::SideType side;
         bool hideInstalled;
         QStringList categoryIds;
         bool openSource;
@@ -86,12 +86,12 @@ class ModFilterWidget : public QTabWidget {
         {
             return ((!loaders || !v.loaders || loaders & v.loaders) &&  // loaders
                     (releases.empty() ||                                // releases
-                     std::find(releases.cbegin(), releases.cend(), v.version_type) != releases.cend()) &&
+                     std::find(releases.cbegin(), releases.cend(), v.versionType) != releases.cend()) &&
                     checkMcVersions({ v.mcVersion }));  // gameVersion}
         }
     };
 
-    static std::unique_ptr<ModFilterWidget> create(MinecraftInstance* instance, bool extended);
+    static ModFilterWidget* create(MinecraftInstance* instance, bool extended);
     virtual ~ModFilterWidget();
 
     auto getFilter() -> std::shared_ptr<Filter>;

@@ -19,7 +19,7 @@
 #include "FileSystem.h"
 #include "Json.h"
 #include "modplatform/helpers/HashUtils.h"
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 #include "net/ChecksumValidator.h"
 #include "net/HttpMetaCache.h"
 #include "net/Mode.h"
@@ -143,7 +143,7 @@ void BaseEntityLoadTask::executeTask()
             }
 
         } catch (const Exception& e) {
-            qDebug() << QString("Unable to parse file %1: %2").arg(fname, e.cause());
+            qCritical() << QString("Unable to parse file %1: %2").arg(fname, e.cause());
             // just make sure it's gone and we never consider it again.
             FS::deletePath(fname);
             m_entity->m_load_status = BaseEntity::LoadStatus::NotLoaded;
@@ -166,7 +166,7 @@ void BaseEntityLoadTask::executeTask()
         entry->setRemoteChangedTimestamp({});
     }
     entry->setStale(true);
-    auto dl = Net::ApiDownload::makeCached(url, entry);
+    auto dl = Net::ApiRequest::makeCached(url, entry);
     /*
      * The validator parses the file and loads it into the object.
      * If that fails, the file is not written to storage.
@@ -177,10 +177,10 @@ void BaseEntityLoadTask::executeTask()
     m_task->addNetAction(dl);
     m_task->setAskRetry(false);
     connect(m_task.get(), &Task::failed, this, &BaseEntityLoadTask::emitFailed);
-    connect(m_task.get(), &Task::succeeded, this, &BaseEntityLoadTask::emitSucceeded);
     connect(m_task.get(), &Task::succeeded, this, [this]() {
         m_entity->m_load_status = BaseEntity::LoadStatus::Remote;
         m_entity->m_file_sha256 = m_entity->m_sha256;
+        emitSucceeded();
     });
 
     connect(m_task.get(), &Task::progress, this, &Task::setProgress);

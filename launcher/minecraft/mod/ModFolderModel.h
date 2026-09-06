@@ -75,7 +75,7 @@ class ModFolderModel : public ResourceFolderModel {
         FileNameColumn,
         NumColumns
     };
-    ModFolderModel(const QDir& dir, BaseInstance* instance, bool isIndexed, bool createDir, QObject* parent = nullptr);
+    ModFolderModel(const QDir& dir, MinecraftInstance* instance, bool isIndexed, bool createDir, QObject* parent = nullptr);
 
     QString id() const override { return "mods"; }
 
@@ -97,8 +97,8 @@ class ModFolderModel : public ResourceFolderModel {
     RESOURCE_HELPERS(Mod)
 
    public:
-    QStringList requiresList(const QString& id);
-    QStringList requiredByList(const QString& id);
+    QStringList requiresList(const QString& id) const;
+    QStringList requiredByList(const QString& id) const;
 
    private slots:
     void onParseSucceeded(int ticket, const QString& resourceId) override;

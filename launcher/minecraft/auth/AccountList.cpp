@@ -623,6 +623,7 @@ void AccountList::requestRefresh(QString accountId)
         m_refreshQueue.removeAt(index);
     }
     m_refreshQueue.push_front(accountId);
+    m_explicitRefreshes.insert(accountId);
     qDebug() << "AccountList: Pushed account with internal ID" << accountId << "to the front of the queue";
     if (!isActive()) {
         tryNext();
@@ -648,7 +649,8 @@ void AccountList::tryNext()
             auto account = at(i);
             if (account->internalId() == accountId) {
                 found = true;
-                if (!account->shouldRefresh()) {
+                bool wasRequested = m_explicitRefreshes.remove(accountId);
+                if (!wasRequested && !account->shouldRefresh()) {
                     // Account no longer needs refreshing, skip it.
                     qDebug() << "RefreshSchedule: Skipping account" << account->profileName() << "with internal ID"
                              << accountId << "(no longer needs refresh)";
@@ -667,6 +669,7 @@ void AccountList::tryNext()
             }
         }
         if (!found) {
+            m_explicitRefreshes.remove(accountId);
             qDebug() << "RefreshSchedule: Account with internal ID" << accountId << "not found.";
         }
     }

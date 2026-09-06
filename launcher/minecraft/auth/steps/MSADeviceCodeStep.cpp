@@ -66,7 +66,7 @@ void MSADeviceCodeStep::perform()
         { "Content-Type", "application/x-www-form-urlencoded" },
         { "Accept", "application/json" },
     };
-    auto [request, response] = Net::Upload::makeByteArray(url, payload);
+    auto [request, response] = Net::Request::makeByteArray(url, payload);
     m_request = request;
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);
@@ -153,7 +153,6 @@ void MSADeviceCodeStep::abort()
         m_request->abort();
     }
     m_is_aborted = true;
-    emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Task aborted"));
 }
 
 void MSADeviceCodeStep::startPoolTimer()
@@ -182,7 +181,7 @@ void MSADeviceCodeStep::authenticateUser()
         { "Content-Type", "application/x-www-form-urlencoded" },
         { "Accept", "application/json" },
     };
-    auto [request, response] = Net::Upload::makeByteArray(url, payload);
+    auto [request, response] = Net::Request::makeByteArray(url, payload);
     m_request = request;
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
 

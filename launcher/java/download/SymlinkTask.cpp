@@ -70,7 +70,7 @@ void SymlinkTask::executeTask()
 
     setStatus(tr("Symlinking Java binary path"));
     FS::create_link folderLink(files);
-    connect(&folderLink, &FS::create_link::fileLinked, [this](QString src, QString dst) { setProgress(m_progress + 1, m_progressTotal); });
+    connect(&folderLink, &FS::create_link::fileLinked, this, [this](QString src, QString dst) { setProgress(m_progress + 1, m_progressTotal); });
     if (!folderLink()) {
         emitFailed(folderLink.getOSError().message().c_str());
     } else {

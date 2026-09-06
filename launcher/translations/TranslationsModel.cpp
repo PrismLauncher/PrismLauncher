@@ -37,6 +37,7 @@
 #include "TranslationsModel.h"
 
 #include <QDebug>
+#include <algorithm>
 #include <memory>
 #include <utility>
 
@@ -87,6 +88,8 @@ struct Language {
             result = u8"Cute Engwish";
         } else if (key == "tok") {
             result = u8"toki pona";
+        } else if (key == "zh_Hant_HK") {
+            result = u8"繁體中文 (香港)";
         } else if (key == "nan") {
             result = u8"閩南語";  // Using traditional Chinese script. Not sure if we should use simplified instead?
         } else {
@@ -120,7 +123,7 @@ struct Language {
     bool isIdenticalTo(const Language& other) const
     {
         return (key == other.key && fileName == other.fileName && fileSize == other.fileSize && fileSha1 == other.fileSha1 &&
-                translated == other.translated && fuzzy == other.fuzzy && total == other.fuzzy && localFileType == other.localFileType);
+                translated == other.translated && fuzzy == other.fuzzy && total == other.total && localFileType == other.localFileType);
     }
 
     Language& apply(const Language& other)
@@ -164,7 +167,7 @@ struct TranslationsModel::Private {
     std::unique_ptr<QTranslator> m_qtTranslator;
     std::unique_ptr<QTranslator> m_appTranslator;
 
-    Net::Download* m_indexTask = nullptr;
+    Net::Request* m_indexTask = nullptr;
     QString m_downloadingTranslation;
     NetJob::Ptr m_downloadJob;
     NetJob::Ptr m_indexJob;
@@ -290,10 +293,7 @@ void TranslationsModel::reloadLocalFiles()
         auto langIter = languages.find(langCode);
         if (langIter != languages.end()) {
             auto& language = *langIter;
-            // TODO: use std::to_underlying in C++23
-            if (static_cast<int>(fileType) > static_cast<int>(language.localFileType)) {
-                language.localFileType = fileType;
-            }
+            language.localFileType = std::max(fileType, language.localFileType);
         } else {
             if (fileType == FileType::Po) {
                 Language localFound(langCode);
@@ -557,7 +557,7 @@ void TranslationsModel::downloadIndex()
     d->m_indexJob.reset(new NetJob("Translations Index", APPLICATION->network()));
     const MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "index_v2.json");
     entry->setStale(true);
-    auto task = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + "index_v2.json"), entry);
+    auto task = Net::Request::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + "index_v2.json"), entry);
     d->m_indexTask = task.get();
     d->m_indexJob->addNetAction(task);
     d->m_indexJob->setAskRetry(false);
@@ -598,7 +598,7 @@ void TranslationsModel::downloadTranslation(const QString& key)
     const MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "mmc_" + key + ".qm");
     entry->setStale(true);
 
-    auto dl = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + lang->fileName), entry);
+    auto dl = Net::Request::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + lang->fileName), entry);
     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, lang->fileSha1));
     dl->setProgress(dl->getProgress(), lang->fileSize);
 

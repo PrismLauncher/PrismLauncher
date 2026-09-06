@@ -36,7 +36,7 @@
 #pragma once
 
 #include "net/ByteArraySink.h"
-#include "net/NetRequest.h"
+#include "net/Request.h"
 #include "tasks/Task.h"
 
 #include <QNetworkReply>
@@ -47,7 +47,7 @@
 #include <memory>
 #include <utility>
 
-class PasteUpload : public Net::NetRequest {
+class PasteUpload : public Net::Request {
    public:
     enum PasteType : int {
         // 0x0.st

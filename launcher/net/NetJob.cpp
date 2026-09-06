@@ -37,7 +37,7 @@
 
 #include "NetJob.h"
 #include <QNetworkReply>
-#include "net/NetRequest.h"
+#include "net/Request.h"
 #include "tasks/ConcurrentTask.h"
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
@@ -55,7 +55,7 @@ NetJob::NetJob(QString job_name, QNetworkAccessManager* network, int max_concurr
         setMaxConcurrent(max_concurrent);
 }
 
-auto NetJob::addNetAction(Net::NetRequest::Ptr action) -> bool
+auto NetJob::addNetAction(Net::Request::Ptr action) -> bool
 {
     action->setNetwork(m_network);
 
@@ -71,7 +71,7 @@ void NetJob::executeNextSubTask()
         m_try += 1;
         m_failed.removeIf([this](QHash<Task*, Task::Ptr>::iterator task) {
             // there is no point in retying on 404 Not Found
-            if (static_cast<Net::NetRequest*>(task->get())->replyStatusCode() == 404) {
+            if (static_cast<Net::Request*>(task->get())->replyStatusCode() == 404) {
                 return false;
             }
             m_done.remove(task->get());
@@ -130,11 +130,11 @@ auto NetJob::abort() -> bool
     return fullyAborted;
 }
 
-auto NetJob::getFailedActions() -> QList<Net::NetRequest*>
+auto NetJob::getFailedActions() -> QList<Net::Request*>
 {
-    QList<Net::NetRequest*> failed;
+    QList<Net::Request*> failed;
     for (auto index : m_failed) {
-        failed.push_back(dynamic_cast<Net::NetRequest*>(index.get()));
+        failed.push_back(dynamic_cast<Net::Request*>(index.get()));
     }
     return failed;
 }
@@ -143,7 +143,7 @@ auto NetJob::getFailedFiles() -> QList<QString>
 {
     QList<QString> failed;
     for (auto index : m_failed) {
-        failed.append(static_cast<Net::NetRequest*>(index.get())->url().toString());
+        failed.append(static_cast<Net::Request*>(index.get())->url().toString());
     }
     return failed;
 }

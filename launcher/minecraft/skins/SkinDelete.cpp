@@ -39,9 +39,9 @@
 #include <net/DummySink.h>
 #include "net/RawHeaderProxy.h"
 
-SkinDelete::SkinDelete() : NetRequest()
+SkinDelete::SkinDelete() : Request()
 {
-    logCat = taskMCSkinsLogC;
+    m_logCat = taskMCSkinsLogC;
 }
 
 QNetworkReply* SkinDelete::getReply(QNetworkRequest& request)

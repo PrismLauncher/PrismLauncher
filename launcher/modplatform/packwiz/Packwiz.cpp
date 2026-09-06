@@ -122,20 +122,20 @@ auto V1::createModFormat([[maybe_unused]] const QDir& index_dir,
         mod.url = mod_version.downloadUrl;
     }
 
-    mod.hash_format = mod_version.hash_type;
+    mod.hash_format = mod_version.hashType;
     mod.hash = mod_version.hash;
 
     mod.provider = mod_pack.provider;
     mod.file_id = mod_version.fileId;
     mod.project_id = mod_pack.addonId;
-    mod.side = mod_version.side == ModPlatform::Side::NoSide ? mod_pack.side : mod_version.side;
+    mod.side = !mod_version.side.isValid() ? mod_pack.side : mod_version.side;
     mod.loaders = mod_version.loaders;
     mod.mcVersions = mod_version.mcVersion;
     mod.mcVersions.removeDuplicates();
     std::ranges::sort(mod.mcVersions, sortMCVersions);
-    mod.releaseType = mod_version.version_type;
+    mod.releaseType = mod_version.versionType;
 
-    mod.version_number = mod_version.version_number;
+    mod.version_number = mod_version.versionNumber;
     if (mod.version_number.isNull())  // on CurseForge, there is only a version name - not a version number
         mod.version_number = mod_version.version;
 
@@ -210,8 +210,7 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
 
     toml::array deps;
     for (auto dep : mod.dependencies) {
-        auto tbl = toml::table{ { "addonId", dep.addonId.toString().toStdString() },
-                                { "type", ModPlatform::DependencyTypeUtils::toString(dep.type).toStdString() } };
+        auto tbl = toml::table{ { "addonId", dep.addonId.toString().toStdString() }, { "type", dep.type.toString().toStdString() } };
         if (!dep.version.isEmpty()) {
             tbl.emplace("version", dep.version.toStdString());
         }
@@ -223,7 +222,7 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
     {
         auto tbl = toml::table{ { "name", mod.name.toStdString() },
                                 { "filename", mod.filename.toStdString() },
-                                { "side", ModPlatform::SideUtils::toString(mod.side).toStdString() },
+                                { "side", mod.side.toString().toStdString() },
                                 { "x-prismlauncher-loaders", loaders },
                                 { "x-prismlauncher-mc-versions", mcVersions },
                                 { "x-prismlauncher-release-type", mod.releaseType.toString().toStdString() },
@@ -300,7 +299,7 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
     {  // Basic info
         mod.name = stringEntry(table, "name");
         mod.filename = stringEntry(table, "filename");
-        mod.side = ModPlatform::SideUtils::fromString(stringEntry(table, "side"));
+        mod.side = ModPlatform::SideType::fromString(stringEntry(table, "side"));
         mod.releaseType = ModPlatform::IndexedVersionType::fromString(table["x-prismlauncher-release-type"].value_or(""));
         if (auto loaders = table["x-prismlauncher-loaders"]; loaders && loaders.is_array()) {
             for (auto&& loader : *loaders.as_array()) {
@@ -371,7 +370,7 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
                     if (dep->contains("version")) {
                         d.version = stringEntry(*dep, "version");
                     }
-                    d.type = ModPlatform::DependencyTypeUtils::fromString(stringEntry(*dep, "type"));
+                    d.type = ModPlatform::DependencyType::fromString(stringEntry(*dep, "type"));
                     mod.dependencies << d;
                 }
             }

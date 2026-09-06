@@ -58,7 +58,6 @@ class NullInstance : public BaseInstance {
     QProcessEnvironment createLaunchEnvironment() override { return QProcessEnvironment(); }
     QMap<QString, QString> getVariables() override { return QMap<QString, QString>(); }
     QStringList getLogFileSearchPaths() override { return {}; }
-    QString typeName() const override { return "Null"; }
     bool canExport() const override { return false; }
     bool canEdit() const override { return false; }
     bool canLaunch() const override { return false; }

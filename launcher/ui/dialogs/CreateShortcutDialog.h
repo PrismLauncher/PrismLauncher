@@ -16,9 +16,8 @@
 #pragma once
 
 #include <QDialog>
-#include "BaseInstance.h"
 
-class BaseInstance;
+class MinecraftInstance;
 
 namespace Ui {
 class CreateShortcutDialog;
@@ -28,7 +27,7 @@ class CreateShortcutDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit CreateShortcutDialog(BaseInstance* instance, QWidget* parent = nullptr);
+    explicit CreateShortcutDialog(MinecraftInstance* instance, QWidget* parent = nullptr);
     ~CreateShortcutDialog();
 
     void createShortcut();
@@ -51,7 +50,7 @@ class CreateShortcutDialog : public QDialog {
     // Data
     Ui::CreateShortcutDialog* ui;
     QString InstIconKey;
-    BaseInstance* m_instance;
+    MinecraftInstance* m_instance;
     bool m_QuickJoinSupported = false;
 
     // Functions

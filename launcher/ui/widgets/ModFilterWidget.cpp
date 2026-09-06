@@ -38,7 +38,6 @@
 #include <QComboBox>
 #include <QListWidget>
 #include <algorithm>
-#include <list>
 #include "BaseVersionList.h"
 #include "Json.h"
 #include "Version.h"
@@ -50,9 +49,9 @@
 #include "Application.h"
 #include "minecraft/PackProfile.h"
 
-std::unique_ptr<ModFilterWidget> ModFilterWidget::create(MinecraftInstance* instance, bool extended)
+ModFilterWidget* ModFilterWidget::create(MinecraftInstance* instance, bool extended)
 {
-    return std::unique_ptr<ModFilterWidget>(new ModFilterWidget(instance, extended));
+    return new ModFilterWidget(instance, extended);
 }
 
 class VersionBasicModel : public QIdentityProxyModel {
@@ -138,8 +137,6 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended)
         ui->openSource->hide();
     }
 
-    ui->versions->setStyleSheet("combobox-popup: 0;");
-    ui->version->setStyleSheet("combobox-popup: 0;");
     connect(ui->showAllVersions, &QCheckBox::stateChanged, this, &ModFilterWidget::onShowAllVersionsChanged);
     connect(ui->versions, &QComboBox::currentIndexChanged, this, &ModFilterWidget::onVersionFilterChanged);
     connect(ui->versions, &CheckComboBox::checkedItemsChanged, this, [this] { onVersionFilterChanged(0); });
@@ -206,7 +203,7 @@ void ModFilterWidget::loadVersionList()
 
         auto task = m_version_list->getLoadTask();
 
-        connect(task.get(), &Task::failed, [this] {
+        connect(task.get(), &Task::failed, this, [this] {
             ui->versions->setEnabled(false);
             ui->showAllVersions->setEnabled(false);
         });
@@ -227,14 +224,14 @@ void ModFilterWidget::prepareBasicFilter()
     m_filter->openSource = false;
     if (m_instance) {
         m_filter->hideInstalled = false;
-        m_filter->side = ModPlatform::Side::NoSide;  // or "both"
+        m_filter->side = ModPlatform::SideType::NoSide;  // or "both"
         ModPlatform::ModLoaderTypes loaders;
         if (m_instance->settings()->get("OverrideModDownloadLoaders").toBool()) {
             for (auto loader : Json::toStringList(m_instance->settings()->get("ModDownloadLoaders").toString())) {
                 loaders |= ModPlatform::getModLoaderFromString(loader);
             }
         } else {
-            loaders = m_instance->getPackProfile()->getSupportedModLoaders().value();
+            loaders = m_instance->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
         }
         ui->neoForge->setChecked(loaders & ModPlatform::NeoForge);
         ui->forge->setChecked(loaders & ModPlatform::Forge);
@@ -311,16 +308,16 @@ void ModFilterWidget::onLoadersFilterChanged()
 
 void ModFilterWidget::onSideFilterChanged()
 {
-    ModPlatform::Side side;
+    ModPlatform::SideType side;
 
     if (ui->clientSide->isChecked() && !ui->serverSide->isChecked()) {
-        side = ModPlatform::Side::ClientSide;
+        side = ModPlatform::SideType::ClientSide;
     } else if (!ui->clientSide->isChecked() && ui->serverSide->isChecked()) {
-        side = ModPlatform::Side::ServerSide;
+        side = ModPlatform::SideType::ServerSide;
     } else if (ui->clientSide->isChecked() && ui->serverSide->isChecked()) {
-        side = ModPlatform::Side::UniversalSide;
+        side = ModPlatform::SideType::UniversalSide;
     } else {
-        side = ModPlatform::Side::NoSide;
+        side = ModPlatform::SideType::NoSide;
     }
 
     m_filter_changed = side != m_filter->side;

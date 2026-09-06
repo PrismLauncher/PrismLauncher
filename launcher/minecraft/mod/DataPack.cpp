@@ -230,7 +230,7 @@ int DataPack::compare(const Resource& other, SortType type) const
     return 0;
 }
 
-bool DataPack::applyFilter(QRegularExpression filter) const
+bool DataPack::applyFilter(const QRegularExpression& filter) const
 {
     if (filter.match(description()).hasMatch()) {
         return true;
@@ -279,7 +279,7 @@ QString DataPack::packFormatStr() const
     auto min_version = min_bound.first;
     auto max_version = max_bound.second;
     if (min_version.isEmpty() || max_version.isEmpty()) {
-        return tr("Unrecognized");
+        return QObject::tr("Unrecognized");
     }
     auto str = QString("[") + QString::number(m_min_format.first);
     if (m_min_format.second != 0) {

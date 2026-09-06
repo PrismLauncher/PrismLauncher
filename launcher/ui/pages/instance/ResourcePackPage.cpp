@@ -81,11 +81,7 @@ void ResourcePackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] 
 
 void ResourcePackPage::downloadResourcePacks()
 {
-    if (m_instance->typeName() != "Minecraft") {
-        return;  // this is a null instance or a legacy instance
-    }
-
-    m_downloadDialog = new ResourceDownload::ResourcePackDownloadDialog(this, m_model, m_instance);
+    m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createResourcePack(this, m_model, m_instance);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &ResourcePackPage::downloadDialogFinished);
 
@@ -95,27 +91,20 @@ void ResourcePackPage::downloadResourcePacks()
 void ResourcePackPage::downloadDialogFinished(int result)
 {
     if (result != 0) {
-        auto* tasks = new ConcurrentTask("Download Resource Pack", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(tasks, &Task::failed, [this, tasks](const QString& reason) {
+        ConcurrentTask tasks("Download Resource Pack", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-            tasks->deleteLater();
         });
-        connect(tasks, &Task::aborted, [this, tasks]() {
-            CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
-            tasks->deleteLater();
-        });
-        connect(tasks, &Task::succeeded, [this, tasks]() {
-            QStringList warnings = tasks->warnings();
+        connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
+            QStringList warnings = tasks.warnings();
             if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
             }
-
-            tasks->deleteLater();
         });
 
         if (m_downloadDialog) {
             for (auto& task : m_downloadDialog->getTasks()) {
-                tasks->addTask(task);
+                tasks.addTask(task);
             }
         } else {
             qWarning() << "ResourceDownloadDialog vanished before we could collect tasks!";
@@ -123,7 +112,7 @@ void ResourcePackPage::downloadDialogFinished(int result)
 
         ProgressDialog loadDialog(this);
         loadDialog.setSkipButton(true, tr("Abort"));
-        loadDialog.execWithTask(tasks);
+        loadDialog.execWithTask(&tasks);
 
         m_model->update();
     }
@@ -134,10 +123,6 @@ void ResourcePackPage::downloadDialogFinished(int result)
 
 void ResourcePackPage::updateResourcePacks()
 {
-    if (m_instance->typeName() != "Minecraft") {
-        return;  // this is a null instance or a legacy instance
-    }
-
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Resource pack updates are unavailable when metadata is disabled!"));
         return;
@@ -167,7 +152,6 @@ void ResourcePackPage::updateResourcePacks()
     updateDialog.checkCandidates();
 
     if (updateDialog.aborted()) {
-        CustomMessageBox::selectable(this, tr("Aborted"), tr("The resource pack updater was aborted!"), QMessageBox::Warning)->show();
         return;
     }
     if (updateDialog.noUpdates()) {
@@ -184,30 +168,24 @@ void ResourcePackPage::updateResourcePacks()
     }
 
     if (updateDialog.exec() != 0) {
-        auto* tasks = new ConcurrentTask("Download Resource Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(tasks, &Task::failed, [this, tasks](const QString& reason) {
+        ConcurrentTask tasks("Download Resource Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-            tasks->deleteLater();
         });
-        connect(tasks, &Task::aborted, [this, tasks]() {
-            CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
-            tasks->deleteLater();
-        });
-        connect(tasks, &Task::succeeded, [this, tasks]() {
-            QStringList warnings = tasks->warnings();
+        connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
+            QStringList warnings = tasks.warnings();
             if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
             }
-            tasks->deleteLater();
         });
 
         for (const auto& task : updateDialog.getTasks()) {
-            tasks->addTask(task);
+            tasks.addTask(task);
         }
 
         ProgressDialog loadDialog(this);
         loadDialog.setSkipButton(true, tr("Abort"));
-        loadDialog.execWithTask(tasks);
+        loadDialog.execWithTask(&tasks);
 
         m_model->update();
     }
@@ -238,10 +216,6 @@ void ResourcePackPage::deleteResourcePackMetadata()
 
 void ResourcePackPage::changeResourcePackVersion()
 {
-    if (m_instance->typeName() != "Minecraft") {
-        return;  // this is a null instance or a legacy instance
-    }
-
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Resource pack updates are unavailable when metadata is disabled!"));
         return;
@@ -259,7 +233,7 @@ void ResourcePackPage::changeResourcePackVersion()
         return;
     }
 
-    m_downloadDialog = new ResourceDownload::ResourcePackDownloadDialog(this, m_model, m_instance, true);
+    m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createResourcePack(this, m_model, m_instance, true);
     connect(this, &QObject::destroyed, m_downloadDialog, &QDialog::close);
     connect(m_downloadDialog, &QDialog::finished, this, &ResourcePackPage::downloadDialogFinished);
 

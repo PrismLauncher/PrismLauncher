@@ -65,6 +65,7 @@ class CustomPage : public QWidget, public BasePage {
     BaseVersion::Ptr selectedVersion() const;
     BaseVersion::Ptr selectedLoaderVersion() const;
     QString selectedLoader() const;
+    QString selectedLoaderName() const;
 
    public slots:
     void setSelectedVersion(BaseVersion::Ptr version);

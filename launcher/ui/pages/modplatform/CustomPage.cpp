@@ -184,6 +184,26 @@ QString CustomPage::selectedLoader() const
     return m_selectedLoader;
 }
 
+QString CustomPage::selectedLoaderName() const
+{
+    if (ui->neoForgeFilter->isChecked()) {
+        return ui->neoForgeFilter->text();
+    }
+    if (ui->forgeFilter->isChecked()) {
+        return ui->forgeFilter->text();
+    }
+    if (ui->fabricFilter->isChecked()) {
+        return ui->fabricFilter->text();
+    }
+    if (ui->quiltFilter->isChecked()) {
+        return ui->quiltFilter->text();
+    }
+    if (ui->liteLoaderFilter->isChecked()) {
+        return ui->liteLoaderFilter->text();
+    }
+    return QString();
+}
+
 void CustomPage::suggestCurrent()
 {
     if (!isOpened) {
@@ -199,8 +219,8 @@ void CustomPage::suggestCurrent()
     if (ui->loaderVersionList->selectedVersion() == nullptr)
         dialog->setSuggestedPack(m_selectedVersion->descriptor(), new VanillaCreationTask(m_selectedVersion));
     else {
-        dialog->setSuggestedPack(m_selectedVersion->descriptor(),
-                                 new VanillaCreationTask(m_selectedVersion, m_selectedLoader, m_selectedLoaderVersion));
+        QString suggestedName = QString("%1 %2").arg(m_selectedVersion->descriptor(), selectedLoaderName());
+        dialog->setSuggestedPack(suggestedName, new VanillaCreationTask(m_selectedVersion, m_selectedLoader, m_selectedLoaderVersion));
     }
     dialog->setSuggestedIcon("default");
 }

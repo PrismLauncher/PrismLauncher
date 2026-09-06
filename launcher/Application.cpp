@@ -113,7 +113,6 @@
 
 #include "tools/JProfiler.h"
 #include "tools/JVisualVM.h"
-#include "tools/MCEditTool.h"
 
 #include "settings/INISettingsObject.h"
 #include "settings/Setting.h"
@@ -686,6 +685,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // Folders
         m_settings->registerSetting("InstanceDir", "instances");
+        m_settings->registerSetting("AdditionalInstanceDirs", QVariant(QStringList()));
+        m_settings->registerSetting("LastUsedInstDirForNewInstance", "");
         m_settings->registerSetting({ "CentralModsDir", "ModsDir" }, "mods");
         m_settings->registerSetting("IconsDir", "icons");
         m_settings->registerSetting("DownloadsDir", QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
@@ -759,6 +760,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("CustomOpenALPath", "");
         m_settings->registerSetting("UseNativeGLFW", false);
         m_settings->registerSetting("CustomGLFWPath", "");
+        m_settings->registerSetting("UseNativeSDL", false);
+        m_settings->registerSetting("CustomSDLPath", "");
 
         // Performance related options
         m_settings->registerSetting("EnableFeralGamemode", false);
@@ -790,6 +793,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting({ "PostExitCommand", "PostExitCmd" }, "");
 
         // The cat
+        m_settings->registerSetting("EnableCat", true);
         m_settings->registerSetting("TheCat", false);
         m_settings->registerSetting("CatOpacity", 100);
         m_settings->registerSetting("CatFit", "fit");
@@ -801,6 +805,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // Instance
         m_settings->registerSetting("InstSortMode", "Name");
         m_settings->registerSetting("InstRenamingMode", "AskEverytime");
+        m_settings->registerSetting("EditInstanceOnDoubleClick", false);
         m_settings->registerSetting("SelectedInstance", QString());
 
         // Window state and geometry
@@ -855,8 +860,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         }
         {
             auto resetIfInvalid = [this](const Setting* setting) {
-                if (const QUrl url(setting->get().toString()); !url.isValid() || (url.scheme() != "http" && url.scheme() != "https")) {
-                    m_settings->reset(setting->id());
+                if (const auto value = setting->get().toString(); !value.isEmpty()) {
+                    if (const QUrl url(value); !url.isValid() || (url.scheme() != "http" && url.scheme() != "https")) {
+                        m_settings->reset(setting->id());
+                    }
                 }
             };
 
@@ -880,16 +887,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("MSAClientIDOverride", "");
 
         // Custom Flame API Key
-        {
-            m_settings->registerSetting("CFKeyOverride", "");
-            m_settings->registerSetting("FlameKeyOverride", "");
+        m_settings->registerSetting({ "FlameKeyOverride", "CFKeyOverride" }, "");
 
-            QString flameKey = m_settings->get("CFKeyOverride").toString();
-
-            if (!flameKey.isEmpty())
-                m_settings->set("FlameKeyOverride", flameKey);
-            m_settings->reset("CFKeyOverride");
-        }
         m_settings->registerSetting("FallbackMRBlockedMods", true);
         m_settings->registerSetting("ModrinthToken", "");
         m_settings->registerSetting("UserAgentOverride", "");
@@ -919,6 +918,14 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         qInfo() << "<> Settings loaded.";
     }
 
+    // Initialize playtime settings, stored separately so this data can be synced
+    // independently of machine-specific configuration
+    {
+        m_playtimeSettings.reset(new INISettingsObject(QString("playtime.cfg"), this));
+        m_playtimeSettings->registerSetting("TotalPlayTime", 0);
+        m_playtimeSettings->registerSetting("TotalPlayTimeMigrated", false);
+    }
+
 #ifndef QT_NO_ACCESSIBILITY
     QAccessible::installFactory(groupViewAccessibleFactory);
 #endif /* !QT_NO_ACCESSIBILITY */
@@ -941,7 +948,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         QStringList instFolders = { ":/icons/multimc/32x32/instances/", ":/icons/multimc/50x50/instances/",
                                     ":/icons/multimc/128x128/instances/", ":/icons/multimc/scalable/instances/" };
         m_icons.reset(new IconList(instFolders, setting->get().toString()));
-        connect(setting.get(), &Setting::SettingChanged,
+        connect(setting.get(), &Setting::SettingChanged, this,
                 [this](const Setting&, QVariant value) { m_icons->directoryChanged(value.toString()); });
         qInfo() << "<> Instance icons initialized.";
     }
@@ -967,6 +974,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     // initialize and load all instances
     {
         auto InstDirSetting = m_settings->getSetting("InstanceDir");
+        auto AdditionalInstanceDirsSetting = m_settings->getSetting("AdditionalInstanceDirs");
         // instance path: check for problems with '!' in instance path and warn the user in the log
         // and remember that we have to show him a dialog when the gui starts (if it does so)
         QString instDir = m_settings->get("InstanceDir").toString();
@@ -974,8 +982,17 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         if (FS::checkProblemticPathJava(QDir(instDir))) {
             qWarning() << "Your instance path contains \'!\' and this is known to cause java problems!";
         }
-        m_instances.reset(new InstanceList(m_settings.get(), instDir, this));
+        QStringList additionalDirs = m_settings->get("AdditionalInstanceDirs").toStringList();
+        QStringList allInstDirs;
+        allInstDirs << instDir;
+        for (const auto& dir : additionalDirs) {
+            if (!dir.isEmpty() && !allInstDirs.contains(dir))
+                allInstDirs << dir;
+        }
+
+        m_instances.reset(new InstanceList(m_settings.get(), allInstDirs, this));
         connect(InstDirSetting.get(), &Setting::SettingChanged, m_instances.get(), &InstanceList::on_InstFolderChanged);
+        connect(AdditionalInstanceDirsSetting.get(), &Setting::SettingChanged, m_instances.get(), &InstanceList::on_InstFolderChanged);
         qInfo() << "Loading Instances...";
         m_instances->loadList();
         qInfo() << "<> Instances loaded.";
@@ -1029,16 +1046,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         profiler->registerSettings(m_settings.get());
     }
 
-    // Create the MCEdit thing... why is this here?
-    {
-        m_mcedit.reset(new MCEditTool(m_settings.get()));
-    }
-
 #ifdef Q_OS_MACOS
-    connect(this, &Application::clickedOnDock, [this]() { this->showMainWindow(); });
+    connect(this, &Application::clickedOnDock, this, [this]() { this->showMainWindow(); });
 #endif
 
-    connect(this, &Application::aboutToQuit, [this]() {
+    connect(this, &Application::aboutToQuit, this, [this]() {
         if (m_instances) {
             // save any remaining instance state
             m_instances->saveNow();
@@ -1450,7 +1462,7 @@ void Application::messageReceived(const QByteArray& message)
         bool offline = received.args["offline_enabled"] == "true";
         QString offlineName = received.args["offline_name"];
 
-        BaseInstance* instance;
+        MinecraftInstance* instance;
         if (!id.isEmpty()) {
             instance = instances()->getInstanceById(id);
             if (!instance) {
@@ -1513,7 +1525,7 @@ bool Application::openJsonEditor(const QString& filename)
     }
 }
 
-bool Application::launch(BaseInstance* instance,
+bool Application::launch(MinecraftInstance* instance,
                          LaunchMode mode,
                          MinecraftTarget::Ptr targetToJoin,
                          MinecraftAccountPtr accountToUse,
@@ -1695,7 +1707,7 @@ ViewLogWindow* Application::showLogWindow()
     return m_viewLogWindow;
 }
 
-InstanceWindow* Application::showInstanceWindow(BaseInstance* instance, QString page)
+InstanceWindow* Application::showInstanceWindow(MinecraftInstance* instance, QString page)
 {
     if (!instance)
         return nullptr;
@@ -1847,7 +1859,8 @@ void Application::detectLibraries()
 #ifdef Q_OS_LINUX
     m_detectedGLFWPath = LibraryUtils::find(BuildConfig.GLFW_LIBRARY_NAME);
     m_detectedOpenALPath = LibraryUtils::find(BuildConfig.OPENAL_LIBRARY_NAME);
-    qDebug() << "Detected native libraries:" << m_detectedGLFWPath << m_detectedOpenALPath;
+    m_detectedSDLPath = LibraryUtils::find(BuildConfig.SDL_LIBRARY_NAME);
+    qDebug() << "Detected native libraries:" << m_detectedGLFWPath << m_detectedOpenALPath << m_detectedSDLPath;
 #endif
 }
 

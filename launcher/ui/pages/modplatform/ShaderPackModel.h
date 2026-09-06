@@ -8,8 +8,6 @@
 
 #include "BaseInstance.h"
 
-#include "modplatform/ModIndex.h"
-
 #include "ui/pages/modplatform/ResourceModel.h"
 
 class Version;
@@ -20,7 +18,7 @@ class ShaderPackResourceModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    ShaderPackResourceModel(const BaseInstance&, ResourceAPI*, const QString& debugName, QString metaEntryBase);
+    ShaderPackResourceModel(const BaseInstance&, const ResourceAPI*, const QString& debugName, QString metaEntryBase);
 
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, unsigned int sort);
@@ -34,7 +32,7 @@ class ShaderPackResourceModel : public ResourceModel {
     ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex&) override;
 
    protected:
-    const BaseInstance& m_base_instance;
+    const BaseInstance& m_baseInstance;
 
    private:
     QString m_debugName;

@@ -27,7 +27,7 @@ runs:
         vsversion: 2022
 
     - name: Setup Java (MSVC)
-      uses: actions/setup-java@v5
+      uses: actions/setup-java@v6
       with:
         # NOTE(@getchoo): We should probably stay on Zulu.
         # Temurin doesn't have Java 17 builds for WoA
@@ -72,16 +72,11 @@ runs:
           toolchain:p
           ccache:p
           cmake:p
-          extra-cmake-modules:p
           ninja:p
           qt6-base:p
           qt6-svg:p
           qt6-imageformats:p
           qt6-networkauth:p
-          cmark:p
-          qrencode:p
-          tomlplusplus:p
-          libarchive:p
 
     - name: List pacman packages (MinGW)
       if: ${{ inputs.msystem != '' }}
@@ -91,7 +86,7 @@ runs:
 
     - name: Retrieve ccache cache (MinGW)
       if: ${{ inputs.msystem != '' && inputs.build-type == 'Debug' }}
-      uses: actions/cache@v5.0.5
+      uses: actions/cache@v6.1.0
       with:
         path: '${{ github.workspace }}\.ccache'
         key: ${{ runner.os }}-mingw-w64-ccache-${{ github.run_id }}

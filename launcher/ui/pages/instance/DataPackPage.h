@@ -26,7 +26,7 @@
 class DataPackPage : public ExternalResourcesPage {
     Q_OBJECT
    public:
-    explicit DataPackPage(BaseInstance* instance, DataPackFolderModel* model, QWidget* parent = nullptr);
+    explicit DataPackPage(MinecraftInstance* instance, DataPackFolderModel* model, QWidget* parent = nullptr);
 
     QString displayName() const override { return QObject::tr("Data Packs"); }
     QIcon icon() const override { return QIcon::fromTheme("datapacks"); }
@@ -44,7 +44,7 @@ class DataPackPage : public ExternalResourcesPage {
 
    private:
     DataPackFolderModel* m_model;
-    QPointer<ResourceDownload::DataPackDownloadDialog> m_downloadDialog;
+    QPointer<ResourceDownload::ResourceDownloadDialog> m_downloadDialog;
 };
 
 /**

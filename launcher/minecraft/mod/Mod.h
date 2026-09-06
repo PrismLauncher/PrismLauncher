@@ -48,12 +48,7 @@
 #include "Resource.h"
 
 class Mod : public Resource {
-    Q_OBJECT
    public:
-    using Ptr = shared_qobject_ptr<Mod>;
-    using WeakPtr = QPointer<Mod>;
-
-    Mod() = default;
     Mod(const QFileInfo& file);
     Mod(QString file_path) : Mod(QFileInfo(file_path)) {}
 
@@ -91,7 +86,7 @@ class Mod : public Resource {
     bool valid() const override;
 
     [[nodiscard]] int compare(const Resource& other, SortType type) const override;
-    [[nodiscard]] bool applyFilter(QRegularExpression filter) const override;
+    [[nodiscard]] bool applyFilter(const QRegularExpression& filter) const override;
 
     // Delete all the files of this mod
     auto destroy(QDir& index_dir, bool preserve_metadata = false, bool attempt_trash = true) -> bool;

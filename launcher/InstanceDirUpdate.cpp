@@ -66,6 +66,13 @@ QString askToUpdateInstanceDirName(BaseInstance* instance, const QString& oldNam
         return QString();
     }
 
+    if (instance->isRunning()) {
+        QMessageBox::warning(parent, QObject::tr("Cannot rename instance folder"),
+                             QObject::tr("The instance folder cannot be renamed while the instance is running.\n\n"
+                                         "Only the instance name will be changed. The folder will keep its current name."));
+        return QString();
+    }
+
     // Ask if we should rename
     if (renamingMode == "AskEverytime") {
         auto checkBox = new QCheckBox(QObject::tr("&Remember my choice"), parent);

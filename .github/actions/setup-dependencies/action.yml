@@ -71,6 +71,47 @@ runs:
         echo "CMAKE_C_COMPILER_LAUNCHER=$CCACHE_VARIANT" >> "$GITHUB_ENV"
         echo "CMAKE_CXX_COMPILER_LAUNCHER=$CCACHE_VARIANT" >> "$GITHUB_ENV"
 
+    - name: Determine vcpkg triplet
+      shell: bash
+      run: |
+        declare vcpkg_arch vcpkg_platform
+
+        case "$RUNNER_ARCH" in
+        "X64")
+        	vcpkg_arch=x64
+        	;;
+        "ARM64")
+          vcpkg_arch=arm64
+          ;;
+        *)
+        	echo "# 🚨 The architecture \"$RUNNER_ARCH\" is not supported by vcpkg in CI!" >>"$GITHUB_STEP_SUMMARY"
+        	exit 1
+        	;;
+        esac
+
+        case "$RUNNER_OS" in
+        "Linux")
+        	vcpkg_platform=linux
+        	;;
+        "macOS")
+        	vcpkg_arch=universal
+        	vcpkg_platform=osx
+        	;;
+        "Windows")
+        	if [[ "${{ inputs.msystem }}" != "" ]]; then
+        		vcpkg_platform=mingw-static-release
+        	else
+        		vcpkg_platform=windows
+        	fi
+        	;;
+        *)
+        	echo "# 🚨 The platform \"$platform\" is not supported by vcpkg in CI!" >>"$GITHUB_STEP_SUMMARY"
+        	exit 1
+        	;;
+        esac
+
+        echo "VCPKG_TRIPLET=$vcpkg_arch-$vcpkg_platform" >> "$GITHUB_ENV"
+
     - name: Install Qt
       if: ${{ inputs.msystem == '' }}
       uses: jurplel/install-qt-action@v4

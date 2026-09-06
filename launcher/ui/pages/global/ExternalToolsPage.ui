@@ -91,50 +91,6 @@
             </property>
            </spacer>
           </item>
-          <item>
-           <widget class="QLabel" name="mceditLabel">
-            <property name="text">
-             <string>&amp;MCEdit</string>
-            </property>
-            <property name="buddy">
-             <cstring>mceditPathEdit</cstring>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_6">
-            <item>
-             <widget class="QLineEdit" name="mceditPathEdit"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="mceditPathBtn">
-              <property name="text">
-               <string>Browse</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QPushButton" name="mceditCheckBtn">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Check</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="mceditLink">
-            <property name="text">
-             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://www.mcedit.net/&quot;&gt;MCEdit Website&lt;/a&gt; - Used as world editor in the instance Worlds menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>

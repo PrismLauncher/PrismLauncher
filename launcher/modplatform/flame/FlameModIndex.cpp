@@ -1,13 +1,11 @@
 #include "FlameModIndex.h"
 
+#include <algorithm>
+
 #include "FileSystem.h"
 #include "Json.h"
-#include "minecraft/MinecraftInstance.h"
-#include "minecraft/PackProfile.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
-
-static FlameAPI api;
 
 void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
@@ -37,41 +35,48 @@ void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
         }
     }
 
+    pack.resourceType = FlameAPI::getResourceType(obj["classId"].toInt(0));
     pack.extraDataLoaded = false;
     loadURLs(pack, obj);
 }
 
 void FlameMod::loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
-    auto links_obj = obj["links"].toObject();
+    auto linksObj = obj["links"].toObject();
 
-    pack.extraData.issuesUrl = links_obj["issuesUrl"].toString();
-    if (pack.extraData.issuesUrl.endsWith('/'))
+    pack.extraData.issuesUrl = linksObj["issuesUrl"].toString();
+    if (pack.extraData.issuesUrl.endsWith('/')) {
         pack.extraData.issuesUrl.chop(1);
+    }
 
-    pack.extraData.sourceUrl = links_obj["sourceUrl"].toString();
-    if (pack.extraData.sourceUrl.endsWith('/'))
+    pack.extraData.sourceUrl = linksObj["sourceUrl"].toString();
+    if (pack.extraData.sourceUrl.endsWith('/')) {
         pack.extraData.sourceUrl.chop(1);
+    }
 
-    pack.extraData.wikiUrl = links_obj["wikiUrl"].toString();
-    if (pack.extraData.wikiUrl.endsWith('/'))
+    pack.extraData.wikiUrl = linksObj["wikiUrl"].toString();
+    if (pack.extraData.wikiUrl.endsWith('/')) {
         pack.extraData.wikiUrl.chop(1);
+    }
 
-    if (!pack.extraData.body.isEmpty())
+    if (!pack.extraData.body.isEmpty()) {
         pack.extraDataLoaded = true;
+    }
 }
 
 void FlameMod::loadBody(ModPlatform::IndexedPack& pack)
 {
-    pack.extraData.body = api.getModDescription(pack.addonId.toInt());
+    pack.extraData.body = FlameAPI::getModDescription(pack.addonId.toInt());
 
-    if (!pack.extraData.issuesUrl.isEmpty() || !pack.extraData.sourceUrl.isEmpty() || !pack.extraData.wikiUrl.isEmpty())
+    if (!pack.extraData.issuesUrl.isEmpty() || !pack.extraData.sourceUrl.isEmpty() || !pack.extraData.wikiUrl.isEmpty()) {
         pack.extraDataLoaded = true;
+    }
 }
 
-static QString enumToString(int hash_algorithm)
+namespace {
+QString enumToString(int hashAlgorithm)
 {
-    switch (hash_algorithm) {
+    switch (hashAlgorithm) {
         default:
         case 1:
             return "sha1";
@@ -79,6 +84,7 @@ static QString enumToString(int hash_algorithm)
             return "md5";
     }
 }
+}  // namespace
 
 void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArray& arr)
 {
@@ -87,23 +93,25 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArra
         auto obj = versionIter.toObject();
 
         auto file = loadIndexedPackVersion(obj);
-        if (!file.addonId.isValid())
+        if (!file.addonId.isValid()) {
             file.addonId = pack.addonId;
+        }
 
-        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
+        if (file.fileId.isValid()) {  // Heuristic to check if the returned value is valid
             unsortedVersions.append(file);
+        }
     }
 
     auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
         // dates are in RFC 3339 format
         return a.date > b.date;
     };
-    std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);
+    std::ranges::sort(unsortedVersions, orderSortPredicate);
     pack.versions = unsortedVersions;
     pack.versionsLoaded = true;
 }
 
-auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> ModPlatform::IndexedVersion
+auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool loadChangelog) -> ModPlatform::IndexedVersion
 {
     auto versionArray = Json::requireArray(obj, "gameVersions");
 
@@ -111,27 +119,29 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     for (auto mcVer : versionArray) {
         auto str = mcVer.toString();
 
-        if (str.contains('.'))
+        if (str.contains('.')) {
             file.mcVersion.append(str);
+        }
 
-        file.side = ModPlatform::Side::NoSide;
-        if (auto loader = str.toLower(); loader == "neoforge")
+        file.side = ModPlatform::SideType::NoSide;
+        if (auto loader = str.toLower(); loader == "neoforge") {
             file.loaders |= ModPlatform::NeoForge;
-        else if (loader == "forge")
+        } else if (loader == "forge") {
             file.loaders |= ModPlatform::Forge;
-        else if (loader == "cauldron")
+        } else if (loader == "cauldron") {
             file.loaders |= ModPlatform::Cauldron;
-        else if (loader == "liteloader")
+        } else if (loader == "liteloader") {
             file.loaders |= ModPlatform::LiteLoader;
-        else if (loader == "fabric")
+        } else if (loader == "fabric") {
             file.loaders |= ModPlatform::Fabric;
-        else if (loader == "quilt")
+        } else if (loader == "quilt") {
             file.loaders |= ModPlatform::Quilt;
-        else if (loader == "server" || loader == "client") {
-            if (file.side == ModPlatform::Side::NoSide)
-                file.side = ModPlatform::SideUtils::fromString(loader);
-            else if (file.side != ModPlatform::SideUtils::fromString(loader))
-                file.side = ModPlatform::Side::UniversalSide;
+        } else if (loader == "server" || loader == "client") {
+            if (!file.side.isValid()) {
+                file.side = ModPlatform::SideType::fromString(loader);
+            } else if (file.side != ModPlatform::SideType::fromString(loader)) {
+                file.side = ModPlatform::SideType::UniversalSide;
+            }
         }
     }
 
@@ -143,31 +153,31 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     file.fileName = Json::requireString(obj, "fileName");
     file.fileName = FS::RemoveInvalidPathChars(file.fileName);
 
-    ModPlatform::IndexedVersionType ver_type;
+    ModPlatform::IndexedVersionType verType;
     switch (Json::requireInteger(obj, "releaseType")) {
         case 1:
-            ver_type = ModPlatform::IndexedVersionType::Release;
+            verType = ModPlatform::IndexedVersionType::Release;
             break;
         case 2:
-            ver_type = ModPlatform::IndexedVersionType::Beta;
+            verType = ModPlatform::IndexedVersionType::Beta;
             break;
         case 3:
-            ver_type = ModPlatform::IndexedVersionType::Alpha;
+            verType = ModPlatform::IndexedVersionType::Alpha;
             break;
         default:
-            ver_type = ModPlatform::IndexedVersionType::Unknown;
+            verType = ModPlatform::IndexedVersionType::Unknown;
             break;
     }
-    file.version_type = ver_type;
+    file.versionType = verType;
 
-    auto hash_list = obj["hashes"].toArray();
-    for (auto h : hash_list) {
-        auto hash_entry = h.toObject();
-        auto hash_types = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::FLAME);
-        auto hash_algo = enumToString(hash_entry["algo"].toInt(1));
-        if (hash_types.contains(hash_algo)) {
-            file.hash = Json::requireString(hash_entry, "value");
-            file.hash_type = hash_algo;
+    auto hashList = obj["hashes"].toArray();
+    for (auto h : hashList) {
+        auto hashEntry = h.toObject();
+        auto hashTypes = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::FLAME);
+        auto hashAlgo = enumToString(hashEntry["algo"].toInt(1));
+        if (hashTypes.contains(hashAlgo)) {
+            file.hash = Json::requireString(hashEntry, "value");
+            file.hashType = hashAlgo;
             break;
         }
     }
@@ -203,8 +213,9 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
         file.dependencies.append(dependency);
     }
 
-    if (load_changelog)
-        file.changelog = api.getModFileChangelog(file.addonId.toInt(), file.fileId.toInt());
+    if (loadChangelog) {
+        file.changelog = FlameAPI::getModFileChangelog(file.addonId.toInt(), file.fileId.toInt());
+    }
 
     return file;
 }
