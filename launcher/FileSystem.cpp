@@ -312,6 +312,7 @@ bool copy::operator()(const QString& offset, bool dryRun)
     using copy_opts = fs::copy_options;
     m_copied = 0;  // reset counter
     m_failedPaths.clear();
+    m_symlinksToCopy.clear();
 
 // NOTE always deep copy on windows. the alternatives are too messy.
 #if defined Q_OS_WIN32
@@ -332,9 +333,6 @@ bool copy::operator()(const QString& offset, bool dryRun)
     if (m_overwrite)
         opt |= copy_opts::overwrite_existing;
 
-    QList<LinkPair> symlinksToCopy;
-    m_symlinksToCopy.clear();
-
     // Function that'll do the actual copying
     auto copy_file = [this, dryRun, src, dst, opt, &err](QString src_path, QString relative_dst_path) {
         if (m_matcher && (m_matcher(relative_dst_path) != m_whitelist))
@@ -343,10 +341,6 @@ bool copy::operator()(const QString& offset, bool dryRun)
         auto dst_path = PathCombine(dst, relative_dst_path);
         if (!dryRun) {
             auto srcStdPath = StringUtils::toStdString(src_path);
-            bool isfile = fs::is_regular_file(srcStdPath);
-            bool isdir = fs::is_directory(srcStdPath);
-            bool islink = fs::is_symlink(srcStdPath);
-            qDebug() << src_path << "is" << (isfile ? "file" : "") << (isdir ? "dir" : "") << (islink ? "link" : "");
 #ifdef Q_OS_WIN32
             if (fs::is_symlink(srcStdPath)) {
                 auto symlinkTarget = QString(fs::read_symlink(srcStdPath).c_str());
@@ -372,13 +366,11 @@ bool copy::operator()(const QString& offset, bool dryRun)
             // Behavior varies on OS, on windows symlink directories seem to get follow/deep copied regardless of copy_opts flags,
             // so skip them now (don't copy them with fs::copy but with privileged FS::create_link later)
             // On linux symlink directories get correctly copied as symlinks if the flag is set, so only skip non symlink dirs
-
             bool skip = fs::is_directory(srcStdPath) && !fs::is_symlink(srcStdPath);
 #ifdef Q_OS_WIN32
             skip = fs::is_directory(srcStdPath) || fs::is_symlink(srcStdPath);
 #endif
             if (!skip) {
-                qDebug() << "calling copy now with" << src_path << "," << dst_path;
                 fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
             }
         }
@@ -417,8 +409,6 @@ bool copy::operator()(const QString& offset, bool dryRun)
     if (!fs::is_directory(StringUtils::toStdString(src)))
         copy_file(src, "");
 
-    // do symlink stuff
-    //
     bool there_were_errors = false;
 #ifdef Q_OS_WIN32
     if (!m_symlinksToCopy.empty()) {
