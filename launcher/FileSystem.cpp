@@ -343,6 +343,10 @@ bool copy::operator()(const QString& offset, bool dryRun)
         auto dst_path = PathCombine(dst, relative_dst_path);
         if (!dryRun) {
             auto srcStdPath = StringUtils::toStdString(src_path);
+            bool isfile = fs::is_regular_file(srcStdPath);
+            bool isdir = fs::is_directory(srcStdPath);
+            bool islink = fs::is_symlink(srcStdPath);
+            qDebug() << src_path << "is" << (isfile ? "file" : "") << (isdir ? "dir" : "") << (islink ? "link" : "");
 #ifdef Q_OS_WIN32
             if (fs::is_symlink(srcStdPath)) {
                 auto symlinkTarget = QString(fs::read_symlink(srcStdPath).c_str());
