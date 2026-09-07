@@ -123,7 +123,7 @@ void VersionPage::retranslate()
 
 void VersionPage::openedImpl()
 {
-    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
+    const auto setting_name = QString("WideBarVisibility_%1").arg(id());
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
     ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
@@ -402,8 +402,9 @@ void VersionPage::on_actionChange_version_triggered()
     if (!currentVersion.isEmpty()) {
         vselect.setCurrentVersion(currentVersion);
     }
-    if (!vselect.exec() || !vselect.selectedVersion())
+    if ((vselect.exec() == 0) || !vselect.selectedVersion()) {
         return;
+    }
 
     qDebug() << "Change" << uid << "to" << vselect.selectedVersion()->descriptor();
     bool important = false;
@@ -413,6 +414,9 @@ void VersionPage::on_actionChange_version_triggered()
             m_inst->settings()->get("OverrideJavaLocation").toBool()) {
             m_inst->settings()->set("OverrideJavaLocation", false);
             m_inst->settings()->set("JavaPath", "");
+        }
+        if (m_inst->settings()->get("UseLatestMinecraftVersion").toBool()) {
+            m_inst->settings()->set("UseLatestMinecraftVersion", false);
         }
     }
     m_profile->setComponentVersion(uid, vselect.selectedVersion()->descriptor(), important);
