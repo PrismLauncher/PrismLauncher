@@ -347,7 +347,7 @@ bool copy::operator()(const QString& offset, bool dryRun)
             if (fs::is_symlink(srcStdPath)) {
                 auto symlinkTarget = QString(fs::read_symlink(srcStdPath).c_str());
 
-                LinkPair link = { .src = dst_path, .dst = symlinkTarget };
+                LinkPair link = { .src = symlinkTarget, .dst = dst_path };
                 m_symlinksToCopy.append(link);
             }
 #endif
