@@ -83,11 +83,15 @@ class ModrinthAPI final : public ResourceAPI {
     {
         switch (side.value()) {
             case ModPlatform::SideType::ClientSide:
-                return { R"("client_side:required","client_side:optional"],["server_side:optional","server_side:unsupported")" };
+                return {
+                    R"("environment:client_only","environment:client_only_server_optional","environment:singleplayer_only","environment:client_or_server","environment:client_or_server_prefers_both")"
+                };
             case ModPlatform::SideTypeValue::ServerSide:
-                return { R"("server_side:required","server_side:optional"],["client_side:optional","client_side:unsupported")" };
+                return {
+                    R"("environment:server_only","environment:server_only_client_optional","environment:dedicated_server_only","environment:client_or_server","environment:client_or_server_prefers_both")"
+                };
             case ModPlatform::SideTypeValue::UniversalSide:
-                return { R"("client_side:required"],["server_side:required")" };
+                return { R"("environment:client_and_server","client_or_server_prefers_both")" };
             case ModPlatform::SideTypeValue::NoSide:
             // fallthrough
             default:
