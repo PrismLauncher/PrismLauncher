@@ -361,6 +361,7 @@ bool copy::operator()(const QString& offset, bool dryRun)
             copyFolderAttributes(src, dst, relative_dst_path);
 #endif
             // TODO probably don't call that on windows if handling a symlink (but verify that it does not work before)
+            qDebug() << "calling copy now with" << src_path << "," << dst_path;
             fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
         }
         if (err) {
@@ -401,7 +402,7 @@ bool copy::operator()(const QString& offset, bool dryRun)
     // do symlink stuff
     //
     bool there_were_errors = false;
-    // #ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN32
     if (!m_symlinksToCopy.empty()) {
         qDebug() << "attempting to run symlinking with privelage";
 
@@ -426,11 +427,11 @@ bool copy::operator()(const QString& offset, bool dryRun)
                 there_were_errors = true;
             }
         }
-        if (there_were_errors){
+        if (there_were_errors) {
             qDebug() << "errors encountered while trying to link files";
         }
     }
-    // #endif
+#endif
 
     return err.value() == 0 && !there_were_errors;
 }
