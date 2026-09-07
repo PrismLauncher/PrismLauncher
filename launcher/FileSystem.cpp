@@ -413,7 +413,6 @@ bool copy::operator()(const QString& offset, bool dryRun)
     if (!m_symlinksToCopy.empty()) {
         FS::create_link folderLink(m_symlinksToCopy);
         folderLink.linkRecursively(false);
-        folderLink(true);
 
         if (!folderLink()) {
             qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
