@@ -364,9 +364,23 @@ bool copy::operator()(const QString& offset, bool dryRun)
 #ifdef Q_OS_WIN32
             copyFolderAttributes(src, dst, relative_dst_path);
 #endif
-            // TODO probably don't call that on windows if handling a symlink (but verify that it does not work before)
-            qDebug() << "calling copy now with" << src_path << "," << dst_path;
-            fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
+
+            // don't copy directories as we loop over the individual files and copy them instead
+            // check is necessary as directories are still looped over to copy directory symlinks or empty directories
+            // and otherwise both the directories *and* the files in them will be copied which is messy and weird
+
+            // Behavior varies on OS, on windows symlink directories seem to get follow/deep copied regardless of copy_opts flags,
+            // so skip them now (don't copy them with fs::copy but with privileged FS::create_link later)
+            // On linux symlink directories get correctly copied as symlinks if the flag is set, so only skip non symlink dirs
+
+            bool skip = fs::is_directory(srcStdPath) && !fs::is_symlink(srcStdPath);
+#ifdef Q_OS_WIN32
+            skip = fs::is_directory(srcStdPath) || fs::is_symlink(srcStdPath);
+#endif
+            if (!skip) {
+                qDebug() << "calling copy now with" << src_path << "," << dst_path;
+                fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
+            }
         }
         if (err) {
             qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
@@ -411,6 +425,7 @@ bool copy::operator()(const QString& offset, bool dryRun)
         qDebug() << "attempting to run symlinking with privelage";
 
         FS::create_link folderLink(m_symlinksToCopy);
+        folderLink.linkRecursively(false);
 
         QEventLoop loop;
         bool got_priv_results = false;
