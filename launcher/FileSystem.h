@@ -51,11 +51,6 @@
 
 namespace FS {
 
-struct LinkPair {
-    QString src;
-    QString dst;
-};
-
 class FileSystemException : public ::Exception {
    public:
     FileSystemException(const QString& message) : Exception(message) {}
@@ -103,6 +98,8 @@ bool ensureFolderPathExists(const QFileInfo folderPath);
  * last segment of the path is treated as a folder name and is created!
  */
 bool ensureFolderPathExists(const QString folderPathName);
+
+struct LinkPair;
 
 /**
  * @brief Copies a directory and it's contents from src to dest
@@ -172,6 +169,11 @@ class copy : public QObject {
     QDir m_dst;
     qsizetype m_copied;
     QStringList m_failedPaths;
+};
+
+struct LinkPair {
+    QString src;
+    QString dst;
 };
 
 struct LinkResult {

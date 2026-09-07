@@ -37,7 +37,6 @@
 
 #include "FileSystem.h"
 #include <qcontainerfwd.h>
-#include <qlogging.h>
 #include <QPair>
 
 #include "BuildConfig.h"
@@ -412,32 +411,36 @@ bool copy::operator()(const QString& offset, bool dryRun)
     bool there_were_errors = false;
 #ifdef Q_OS_WIN32
     if (!m_symlinksToCopy.empty()) {
-        qDebug() << "attempting to run symlinking with privelage";
-
         FS::create_link folderLink(m_symlinksToCopy);
         folderLink.linkRecursively(false);
+        folderLink(true);
 
-        QEventLoop loop;
-        bool got_priv_results = false;
+        if (!folderLink()) {
+            qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
+            qDebug() << "attempting to run symlinking with privilege";
 
-        connect(&folderLink, &FS::create_link::finishedPrivileged, this, [&got_priv_results, &loop](bool gotResults) {
-            if (!gotResults) {
-                qDebug() << "Privileged run exited without results!";
+            QEventLoop loop;
+            bool got_priv_results = false;
+
+            connect(&folderLink, &FS::create_link::finishedPrivileged, this, [&got_priv_results, &loop](bool gotResults) {
+                if (!gotResults) {
+                    qDebug() << "Privileged run exited without results!";
+                }
+                got_priv_results = gotResults;
+                loop.quit();
+            });
+            folderLink.runPrivileged();
+
+            loop.exec();  // wait for the finished signal
+
+            for (auto result : folderLink.getResults()) {
+                if (result.err_value != 0) {
+                    there_were_errors = true;
+                }
             }
-            got_priv_results = gotResults;
-            loop.quit();
-        });
-        folderLink.runPrivileged();
-
-        loop.exec();  // wait for the finished signal
-
-        for (auto result : folderLink.getResults()) {
-            if (result.err_value != 0) {
-                there_were_errors = true;
+            if (there_were_errors) {
+                qDebug() << "errors encountered while trying to link files";
             }
-        }
-        if (there_were_errors) {
-            qDebug() << "errors encountered while trying to link files";
         }
     }
 #endif
