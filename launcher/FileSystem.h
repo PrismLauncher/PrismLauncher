@@ -51,6 +51,11 @@
 
 namespace FS {
 
+struct LinkPair {
+    QString src;
+    QString dst;
+};
+
 class FileSystemException : public ::Exception {
    public:
     FileSystemException(const QString& message) : Exception(message) {}
@@ -159,6 +164,7 @@ class copy : public QObject {
    private:
     bool m_copyDirectories = false;
     bool m_followSymlinks = true;
+    QList<LinkPair> m_symlinksToCopy;
     Filter m_matcher = nullptr;
     bool m_whitelist = false;
     bool m_overwrite = false;
@@ -166,11 +172,6 @@ class copy : public QObject {
     QDir m_dst;
     qsizetype m_copied;
     QStringList m_failedPaths;
-};
-
-struct LinkPair {
-    QString src;
-    QString dst;
 };
 
 struct LinkResult {

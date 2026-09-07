@@ -37,6 +37,7 @@
 
 #include "FileSystem.h"
 #include <qcontainerfwd.h>
+#include <qlogging.h>
 #include <QPair>
 
 #include "BuildConfig.h"
@@ -331,29 +332,42 @@ bool copy::operator()(const QString& offset, bool dryRun)
     if (m_overwrite)
         opt |= copy_opts::overwrite_existing;
 
+    QList<LinkPair> symlinksToCopy;
+    m_symlinksToCopy.clear();
+
     // Function that'll do the actual copying
     auto copy_file = [this, dryRun, src, dst, opt, &err](QString src_path, QString relative_dst_path) {
         if (m_matcher && (m_matcher(relative_dst_path) != m_whitelist))
             return;
 
-        auto dstPath = PathCombine(dst, relative_dst_path);
+        auto dst_path = PathCombine(dst, relative_dst_path);
         if (!dryRun) {
             auto srcStdPath = StringUtils::toStdString(src_path);
+#ifdef Q_OS_WIN32
+            if (fs::is_symlink(srcStdPath)) {
+                auto symlinkTarget = QString(fs::read_symlink(srcStdPath).c_str());
+
+                LinkPair link = { .src = dst_path, .dst = symlinkTarget };
+                m_symlinksToCopy.append(link);
+            }
+#endif
+
             if (fs::is_directory(srcStdPath) && !fs::is_symlink(srcStdPath)) {
-                ensureFolderPathExists(dstPath);
+                ensureFolderPathExists(dst_path);
             } else {
-                ensureFilePathExists(dstPath);
+                ensureFilePathExists(dst_path);
             }
 #ifdef Q_OS_WIN32
             copyFolderAttributes(src, dst, relative_dst_path);
 #endif
-            fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dstPath), opt, err);
+            // TODO probably don't call that on windows if handling a symlink (but verify that it does not work before)
+            fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
         }
         if (err) {
             qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
             qDebug() << "Source file:" << src_path;
-            qDebug() << "Destination file:" << dstPath;
-            m_failedPaths.append(dstPath);
+            qDebug() << "Destination file:" << dst_path;
+            m_failedPaths.append(dst_path);
             emit copyFailed(relative_dst_path);
             return;
         }
@@ -384,7 +398,41 @@ bool copy::operator()(const QString& offset, bool dryRun)
     if (!fs::is_directory(StringUtils::toStdString(src)))
         copy_file(src, "");
 
-    return err.value() == 0;
+    // do symlink stuff
+    //
+    bool there_were_errors = false;
+    // #ifdef Q_OS_WIN32
+    if (!m_symlinksToCopy.empty()) {
+        qDebug() << "attempting to run symlinking with privelage";
+
+        FS::create_link folderLink(m_symlinksToCopy);
+
+        QEventLoop loop;
+        bool got_priv_results = false;
+
+        connect(&folderLink, &FS::create_link::finishedPrivileged, this, [&got_priv_results, &loop](bool gotResults) {
+            if (!gotResults) {
+                qDebug() << "Privileged run exited without results!";
+            }
+            got_priv_results = gotResults;
+            loop.quit();
+        });
+        folderLink.runPrivileged();
+
+        loop.exec();  // wait for the finished signal
+
+        for (auto result : folderLink.getResults()) {
+            if (result.err_value != 0) {
+                there_were_errors = true;
+            }
+        }
+        if (there_were_errors){
+            qDebug() << "errors encountered while trying to link files";
+        }
+    }
+    // #endif
+
+    return err.value() == 0 && !there_were_errors;
 }
 
 /// qDebug print support for the LinkPair struct
