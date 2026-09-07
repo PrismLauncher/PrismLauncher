@@ -118,7 +118,7 @@ class ModrinthAPI final : public ResourceAPI {
    private:
     static QString resourceTypeParameter(ModPlatform::ResourceType type);
 
-    QString createFacets(const SearchArgs& args) const
+    static QString createFacets(const SearchArgs& args)
     {
         QStringList facetsList;
 
@@ -200,7 +200,7 @@ class ModrinthAPI final : public ResourceAPI {
             .arg(BuildConfig.MODRINTH_PROD_URL, args.pack->addonId.toString(), getArguments.isEmpty() ? "" : "?", getArguments.join('&'));
     };
 
-    QString getGameVersionsArray(const std::vector<Version>& mcVersions) const
+    static QString getGameVersionsArray(const std::vector<Version>& mcVersions)
     {
         QString s;
         for (const auto& ver : mcVersions) {
