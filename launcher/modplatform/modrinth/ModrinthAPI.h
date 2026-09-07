@@ -83,11 +83,15 @@ class ModrinthAPI final : public ResourceAPI {
     {
         switch (side.value()) {
             case ModPlatform::SideType::ClientSide:
-                return { R"("client_side:required","client_side:optional"],["server_side:optional","server_side:unsupported")" };
+                return {
+                    R"("environment:client_only","environment:client_only_server_optional","environment:singleplayer_only","environment:client_or_server","environment:client_or_server_prefers_both")"
+                };
             case ModPlatform::SideTypeValue::ServerSide:
-                return { R"("server_side:required","server_side:optional"],["client_side:optional","client_side:unsupported")" };
+                return {
+                    R"("environment:server_only","environment:server_only_client_optional","environment:dedicated_server_only","environment:client_or_server","environment:client_or_server_prefers_both")"
+                };
             case ModPlatform::SideTypeValue::UniversalSide:
-                return { R"("client_side:required"],["server_side:required")" };
+                return { R"("environment:client_and_server","client_or_server_prefers_both")" };
             case ModPlatform::SideTypeValue::NoSide:
             // fallthrough
             default:
@@ -114,7 +118,7 @@ class ModrinthAPI final : public ResourceAPI {
    private:
     static QString resourceTypeParameter(ModPlatform::ResourceType type);
 
-    QString createFacets(const SearchArgs& args) const
+    static QString createFacets(const SearchArgs& args)
     {
         QStringList facetsList;
 
@@ -132,6 +136,11 @@ class ModrinthAPI final : public ResourceAPI {
         }
         if (args.categoryIds.has_value() && !args.categoryIds->empty()) {
             facetsList.append(QString("[%1]").arg(getCategoriesFilters(args.categoryIds.value())));
+        }
+        if (!args.excludeDisclosureTypes.empty()) {
+            for (const auto& d : args.excludeDisclosureTypes) {
+                facetsList.append(QString("[\"disclosure_types!=%1\"]").arg(d.toString()));
+            }
         }
         if (args.openSource) {
             facetsList.append("[\"open_source:true\"]");
@@ -191,7 +200,7 @@ class ModrinthAPI final : public ResourceAPI {
             .arg(BuildConfig.MODRINTH_PROD_URL, args.pack->addonId.toString(), getArguments.isEmpty() ? "" : "?", getArguments.join('&'));
     };
 
-    QString getGameVersionsArray(const std::vector<Version>& mcVersions) const
+    static QString getGameVersionsArray(const std::vector<Version>& mcVersions)
     {
         QString s;
         for (const auto& ver : mcVersions) {

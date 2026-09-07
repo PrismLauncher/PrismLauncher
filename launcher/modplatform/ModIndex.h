@@ -102,6 +102,53 @@ struct SideType : EnumWrapper<SideType, SideTypeValue> {
     using Base::Base; /* inherit ctor */
 };
 
+enum class DisclosureTypeValue : std::uint8_t {
+    Unknown,
+    AIContent,
+    AIContentCode,
+    AIContentAssets,
+    AIContentText,
+    AIContentFunctionality,
+    Advertisements,
+    EpilepsyTriggers,
+    SystemInteractions,
+    Telemetry,
+    TelemetryOptIn,
+    TelemetryOptOut,
+    TelemetryAlwaysActive,
+    DerivativeWork,
+    PaidFeatures,
+    Archived,
+};
+struct DisclosureType : EnumWrapper<DisclosureType, DisclosureTypeValue> {
+    static constexpr auto invalid() { return Unknown; };
+
+    static constexpr auto mapping()
+    {
+        return std::array{
+            std::pair{ AIContent, "ai_content" },
+            std::pair{ AIContentCode, "ai_content_code" },
+            std::pair{ AIContentAssets, "ai_content_assets" },
+            std::pair{ AIContentText, "ai_content_text" },
+            std::pair{ AIContentFunctionality, "ai_content_functionality" },
+            std::pair{ Advertisements, "advertisements" },
+            std::pair{ EpilepsyTriggers, "epilepsy_triggers" },
+            std::pair{ SystemInteractions, "system_interactions" },
+            std::pair{ Telemetry, "telemetry" },
+            std::pair{ TelemetryOptIn, "telemetry_opt_in" },
+            std::pair{ TelemetryOptOut, "telemetry_opt_out" },
+            std::pair{ TelemetryAlwaysActive, "telemetry_always_active" },
+            std::pair{ DerivativeWork, "derivative_work" },
+            std::pair{ PaidFeatures, "paid_features" },
+            std::pair{ Archived, "archived" },
+        };
+    };
+
+    using enum DisclosureTypeValue;
+    using Base = EnumWrapper<DisclosureType, DisclosureTypeValue>;
+    using Base::Base; /* inherit ctor */
+};
+
 namespace ProviderCapabilities {
 const char* name(ResourceProvider);
 QString readableName(ResourceProvider);
