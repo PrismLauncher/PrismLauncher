@@ -65,11 +65,13 @@ class ModFilterWidget : public QTabWidget {
         bool hideInstalled;
         QStringList categoryIds;
         bool openSource;
+        std::vector<ModPlatform::DisclosureType> excludeDisclosureTypes;
 
         bool operator==(const Filter& other) const
         {
             return hideInstalled == other.hideInstalled && side == other.side && loaders == other.loaders && versions == other.versions &&
-                   releases == other.releases && categoryIds == other.categoryIds && openSource == other.openSource;
+                   releases == other.releases && categoryIds == other.categoryIds && openSource == other.openSource &&
+                   excludeDisclosureTypes == other.excludeDisclosureTypes;
         }
         bool operator!=(const Filter& other) const { return !(*this == other); }
 
@@ -119,6 +121,7 @@ class ModFilterWidget : public QTabWidget {
     void onOpenSourceFilterChanged();
     void onReleaseFilterChanged();
     void onShowMoreClicked();
+    void onDisclosureFilterChanged();
 
    private:
     Ui::ModFilterWidget* ui;

@@ -172,9 +172,20 @@ void ModpackListModel::performPaginatedSearch()
         searchRequestFailed("Aborted", 0);
     };
 
-    auto netJob = ModrinthAPI::get().searchProjects({ .type=ModPlatform::ResourceType::Modpack, .offset=m_nextSearchOffset, .search=m_currentSearchTerm, .sorting=sort, .loaders=m_filter->loaders,
-                                       .versions=m_filter->versions, .side=ModPlatform::SideType::NoSide, .categoryIds=m_filter->categoryIds, .openSource=m_filter->openSource },
-                                     std::move(callbacks));
+    auto netJob = ModrinthAPI::get().searchProjects(
+        {
+            .type = ModPlatform::ResourceType::Modpack,
+            .offset = m_nextSearchOffset,
+            .search = m_currentSearchTerm,
+            .sorting = sort,
+            .loaders = m_filter->loaders,
+            .versions = m_filter->versions,
+            .side = ModPlatform::SideType::NoSide,
+            .categoryIds = m_filter->categoryIds,
+            .openSource = m_filter->openSource,
+            .excludeDisclosureTypes = m_filter->excludeDisclosureTypes,
+        },
+        std::move(callbacks));
 
     m_jobPtr = netJob;
     m_jobPtr->start();

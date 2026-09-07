@@ -52,15 +52,18 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
 
     auto sort = getCurrentSortingMethodByIndex();
 
-    return { .type = ModPlatform::ResourceType::Mod,
-             .offset = m_next_search_offset,
-             .search = m_search_term,
-             .sorting = sort,
-             .loaders = loaders,
-             .versions = versions,
-             .side = side,
-             .categoryIds = categories,
-             .openSource = m_filter->openSource };
+    return {
+        .type = ModPlatform::ResourceType::Mod,
+        .offset = m_next_search_offset,
+        .search = m_search_term,
+        .sorting = sort,
+        .loaders = loaders,
+        .versions = versions,
+        .side = side,
+        .categoryIds = categories,
+        .openSource = m_filter->openSource,
+        .excludeDisclosureTypes = m_filter->excludeDisclosureTypes,
+    };
 }
 
 ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(const QModelIndex& index)

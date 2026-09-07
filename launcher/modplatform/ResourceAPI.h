@@ -83,6 +83,7 @@ class ResourceAPI {
         std::optional<ModPlatform::SideType> side;
         std::optional<QStringList> categoryIds;
         bool openSource{};
+        std::vector<ModPlatform::DisclosureType> excludeDisclosureTypes;
     };
 
     struct VersionSearchArgs {

@@ -134,6 +134,7 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended)
         ui->versions->hide();
         ui->showAllVersions->hide();
         ui->environmentGroup->hide();
+        ui->disclosureGroup->hide();
         ui->openSource->hide();
     }
 
@@ -172,6 +173,22 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended)
     connect(ui->betaCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
     connect(ui->alphaCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
     connect(ui->unknownCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
+
+    connect(ui->aiContent, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(ui->aiContentCode, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(ui->aiContentAssets, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(ui->aiContentText, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(ui->aiContentFunctionality, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(ui->advertisements, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(ui->epilepsyTriggers, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(ui->systemInteractions, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(ui->telemetry, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(ui->telemetryOptIn, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(ui->telemetryOptOut, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(ui->telemetryAlwaysActive, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(ui->derivativeWork, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(ui->paidFeatures, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(ui->archived, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
 
     setHidden(true);
     loadVersionList();
@@ -400,6 +417,39 @@ void ModFilterWidget::onReleaseFilterChanged()
     m_filter->releases = releases;
     if (m_filter_changed)
         emit filterChanged();
+}
+
+void ModFilterWidget::onDisclosureFilterChanged()
+{
+    std::vector<ModPlatform::DisclosureType> exclude;
+
+    auto collect = [&](QCheckBox* checkbox, ModPlatform::DisclosureType type) {
+        if (checkbox->checkState() == Qt::Checked) {
+            exclude.push_back(type);
+        }
+    };
+
+    collect(ui->aiContent, ModPlatform::DisclosureType::AIContent);
+    collect(ui->aiContentCode, ModPlatform::DisclosureType::AIContentCode);
+    collect(ui->aiContentAssets, ModPlatform::DisclosureType::AIContentAssets);
+    collect(ui->aiContentText, ModPlatform::DisclosureType::AIContentText);
+    collect(ui->aiContentFunctionality, ModPlatform::DisclosureType::AIContentFunctionality);
+    collect(ui->advertisements, ModPlatform::DisclosureType::Advertisements);
+    collect(ui->epilepsyTriggers, ModPlatform::DisclosureType::EpilepsyTriggers);
+    collect(ui->systemInteractions, ModPlatform::DisclosureType::SystemInteractions);
+    collect(ui->telemetry, ModPlatform::DisclosureType::Telemetry);
+    collect(ui->telemetryOptIn, ModPlatform::DisclosureType::TelemetryOptIn);
+    collect(ui->telemetryOptOut, ModPlatform::DisclosureType::TelemetryOptOut);
+    collect(ui->telemetryAlwaysActive, ModPlatform::DisclosureType::TelemetryAlwaysActive);
+    collect(ui->derivativeWork, ModPlatform::DisclosureType::DerivativeWork);
+    collect(ui->paidFeatures, ModPlatform::DisclosureType::PaidFeatures);
+    collect(ui->archived, ModPlatform::DisclosureType::Archived);
+
+    m_filter_changed = exclude != m_filter->excludeDisclosureTypes;
+    m_filter->excludeDisclosureTypes = exclude;
+    if (m_filter_changed) {
+        emit filterChanged();
+    }
 }
 
 void ModFilterWidget::onShowMoreClicked()

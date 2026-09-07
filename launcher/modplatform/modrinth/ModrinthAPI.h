@@ -137,6 +137,11 @@ class ModrinthAPI final : public ResourceAPI {
         if (args.categoryIds.has_value() && !args.categoryIds->empty()) {
             facetsList.append(QString("[%1]").arg(getCategoriesFilters(args.categoryIds.value())));
         }
+        if (!args.excludeDisclosureTypes.empty()) {
+            for (const auto& d : args.excludeDisclosureTypes) {
+                facetsList.append(QString("[\"disclosure_types!=%1\"]").arg(d.toString()));
+            }
+        }
         if (args.openSource) {
             facetsList.append("[\"open_source:true\"]");
         }
