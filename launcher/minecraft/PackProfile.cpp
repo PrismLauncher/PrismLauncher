@@ -48,6 +48,7 @@
 #include <QTimer>
 #include <QUuid>
 #include <algorithm>
+#include <memory>
 #include <utility>
 
 #include "Application.h"
@@ -68,17 +69,28 @@
 
 #include "minecraft/Logging.h"
 
-#include "ui/dialogs/CustomMessageBox.h"
+#include "settings/Setting.h"
 
-PackProfile::PackProfile(MinecraftInstance* instance) : QAbstractListModel()
+PackProfile::PackProfile(MinecraftInstance* instance)
 {
-    d.reset(new PackProfileData);
+    d = std::make_unique<PackProfileData>();
     d->m_instance = instance;
     d->m_saveTimer.setSingleShot(true);
     d->m_saveTimer.setInterval(5000);
     d->interactionDisabled = instance->isRunning();
     connect(d->m_instance, &BaseInstance::runningStatusChanged, this, &PackProfile::disableInteraction);
     connect(&d->m_saveTimer, &QTimer::timeout, this, &PackProfile::save_internal);
+    QTimer::singleShot(0, this, [this] {
+        auto latestVersion = d->m_instance->settings()->getSetting("UseLatestMinecraftVersion");
+        connect(latestVersion.get(), &Setting::SettingChanged, this, [this](const Setting&, const QVariant&) {
+            for (int i = 0; i < d->components.size(); i++) {
+                if (d->components.at(i)->getID() == "net.minecraft") {
+                    emit dataChanged(createIndex(i, 0), createIndex(i, columnCount(QModelIndex()) - 1));
+                    break;
+                }
+            }
+        });
+    });
 }
 
 PackProfile::~PackProfile()
@@ -514,22 +526,25 @@ ComponentPtr PackProfile::getComponent(size_t index)
 
 QVariant PackProfile::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid())
-        return QVariant();
+    if (!index.isValid()) {
+        return {};
+    }
 
     int row = index.row();
     int column = index.column();
 
-    if (row < 0 || row >= d->components.size())
-        return QVariant();
+    if (row < 0 || row >= d->components.size()) {
+        return {};
+    }
 
     auto patch = d->components.at(row);
 
     switch (role) {
         case Qt::CheckStateRole: {
-            if (column == NameColumn)
+            if (column == NameColumn) {
                 return patch->isEnabled() ? Qt::Checked : Qt::Unchecked;
-            return QVariant();
+            }
+            return {};
         }
         case Qt::DisplayRole: {
             switch (column) {
@@ -538,12 +553,14 @@ QVariant PackProfile::data(const QModelIndex& index, int role) const
                 case VersionColumn: {
                     if (patch->isCustom()) {
                         return QString("%1 (Custom)").arg(patch->getVersion());
-                    } else {
-                        return patch->getVersion();
                     }
+                    if (patch->getID() == "net.minecraft" && d->m_instance->settings()->get("UseLatestMinecraftVersion").toBool()) {
+                        return QString("%1 (auto-update)").arg(patch->getVersion());
+                    }
+                    return patch->getVersion();
                 }
                 default:
-                    return QVariant();
+                    return {};
             }
         }
         case Qt::DecorationRole: {
@@ -555,13 +572,15 @@ QVariant PackProfile::data(const QModelIndex& index, int role) const
                     case ProblemSeverity::Error:
                         return "error";
                     default:
-                        return QVariant();
+                        return {};
                 }
             }
-            return QVariant();
+            return {};
         }
+        default:
+            break;
     }
-    return QVariant();
+    return {};
 }
 
 bool PackProfile::setData(const QModelIndex& index, [[maybe_unused]] const QVariant& value, int role)
@@ -925,7 +944,7 @@ bool PackProfile::installAgents_internal(QStringList filepaths)
         agent->setDisplayName(sourceInfo.completeBaseName());
         agent->setHint("local");
 
-        versionFile->agents.append(Agent{agent, QString()});
+        versionFile->agents.append(Agent{ .library = agent, .argument = QString() });
 
         versionFile->name = targetName;
         versionFile->uid = targetId;
@@ -1088,7 +1107,6 @@ bool PackProfile::updateLatestMinecraft(bool onlyRelease)
     if (oldVersion != latest->descriptor()) {
         qDebug() << "Change" << uid << "to" << latest.get();
         setComponentVersion(uid, latest->descriptor(), true);
-        resolve(Net::Mode::Online);
     }
     return oldVersion != latest->descriptor();
 }
