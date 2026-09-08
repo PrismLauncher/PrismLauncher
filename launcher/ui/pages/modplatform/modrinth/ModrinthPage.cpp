@@ -200,15 +200,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
                 }
                 return false;
             };
-#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
             m_current->versions.removeIf(pred);
-#else
-            for (auto it = m_current->versions.begin(); it != m_current->versions.end();)
-                if (pred(*it))
-                    it = m_current->versions.erase(it);
-                else
-                    ++it;
-#endif
             for (const auto& version : m_current->versions) {
                 m_ui->versionSelectionBox->addItem(version.getVersionDisplayString(), QVariant(version.fileId));
             }

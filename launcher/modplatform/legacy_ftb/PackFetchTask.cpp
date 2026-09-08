@@ -134,12 +134,10 @@ bool PackFetchTask::parseAndAddPacks(QByteArray& data, PackType packType, Modpac
 {
     QDomDocument doc;
 
-    QString errorMsg = "Unknown error.";
-    int errorLine = -1;
-    int errorCol = -1;
-
-    if (!doc.setContent(data, false, &errorMsg, &errorLine, &errorCol)) {
-        auto fullErrMsg = QString("Failed to fetch modpack data: %1 %2:%3!").arg(errorMsg).arg(errorLine).arg(errorCol);
+    auto result = doc.setContent(data);
+    if (!result) {
+        const QString fullErrMsg =
+            QString("Failed to fetch modpack data: %1 %2:%3!").arg(result.errorMessage).arg(result.errorLine).arg(result.errorColumn);
         qWarning() << fullErrMsg;
         return false;
     }
