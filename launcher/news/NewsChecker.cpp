@@ -39,13 +39,10 @@
 #include <QDomDocument>
 
 #include <QDebug>
+#include <utility>
 #include "Application.h"
 
-NewsChecker::NewsChecker(QNetworkAccessManager* network, const QString& feedUrl)
-{
-    m_network = network;
-    m_feedUrl = feedUrl;
-}
+NewsChecker::NewsChecker(QNetworkAccessManager* network, QString feedUrl) : m_feedUrl(std::move(feedUrl)), m_network(network) {}
 
 void NewsChecker::reloadNews()
 {
@@ -112,7 +109,7 @@ void NewsChecker::rssDownloadFinished()
     succeed();
 }
 
-void NewsChecker::rssDownloadFailed(QString reason)
+void NewsChecker::rssDownloadFailed(const QString& reason)
 {
     // Set an error message and fail.
     fail(tr("Failed to load news RSS feed:\n%1").arg(reason));

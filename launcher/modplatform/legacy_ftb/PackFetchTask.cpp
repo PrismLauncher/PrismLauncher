@@ -34,10 +34,8 @@
  */
 
 #include "PackFetchTask.h"
-#include "PrivatePackManager.h"
 
 #include <QDomDocument>
-#include "Application.h"
 #include "BuildConfig.h"
 
 #include "net/ApiRequest.h"
@@ -46,37 +44,37 @@ namespace LegacyFTB {
 
 void PackFetchTask::fetch()
 {
-    publicPacks.clear();
-    thirdPartyPacks.clear();
+    m_publicPacks.clear();
+    m_thirdPartyPacks.clear();
 
-    jobPtr.reset(new NetJob("LegacyFTB::ModpackFetch", m_network));
+    m_jobPtr.reset(new NetJob("LegacyFTB::ModpackFetch", m_network));
 
     QUrl publicPacksUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/modpacks.xml");
     qDebug() << "Downloading public version info from" << publicPacksUrl.toString();
 
     auto [publicAction, publicResponse] = Net::ApiRequest::makeByteArray(publicPacksUrl);
-    jobPtr->addNetAction(publicAction);
+    m_jobPtr->addNetAction(publicAction);
 
     QUrl thirdPartyUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/thirdparty.xml");
     qDebug() << "Downloading thirdparty version info from" << thirdPartyUrl.toString();
 
     auto [thirdPartyAction, thirdPartyResponse] = Net::Request::makeByteArray(thirdPartyUrl);
-    jobPtr->addNetAction(thirdPartyAction);
+    m_jobPtr->addNetAction(thirdPartyAction);
 
-    connect(jobPtr.get(), &NetJob::succeeded, this,
+    connect(m_jobPtr.get(), &NetJob::succeeded, this,
             [this, publicResponse, thirdPartyResponse] { fileDownloadFinished(publicResponse, thirdPartyResponse); });
-    connect(jobPtr.get(), &NetJob::failed, this, &PackFetchTask::fileDownloadFailed);
-    connect(jobPtr.get(), &NetJob::aborted, this, &PackFetchTask::fileDownloadAborted);
+    connect(m_jobPtr.get(), &NetJob::failed, this, &PackFetchTask::fileDownloadFailed);
+    connect(m_jobPtr.get(), &NetJob::aborted, this, &PackFetchTask::fileDownloadAborted);
 
-    jobPtr->start();
+    m_jobPtr->start();
 }
 
 void PackFetchTask::fetchPrivate(const QStringList& toFetch)
 {
     QString privatePackBaseUrl = BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/%1.xml";
 
-    for (auto& packCode : toFetch) {
-        NetJob* job = new NetJob("Fetching private pack", m_network);
+    for (const auto& packCode : toFetch) {
+        auto* job = new NetJob("Fetching private pack", m_network);
 
         auto [action, data] = Net::ApiRequest::makeByteArray(privatePackBaseUrl.arg(packCode));
         job->addNetAction(action);
@@ -93,7 +91,7 @@ void PackFetchTask::fetchPrivate(const QStringList& toFetch)
             job->deleteLater();
         });
 
-        connect(job, &NetJob::failed, this, [this, job, packCode](QString reason) {
+        connect(job, &NetJob::failed, this, [this, job, packCode](const QString& reason) {
             emit privateFileDownloadFailed(reason, packCode);
             job->deleteLater();
         });
@@ -108,25 +106,25 @@ void PackFetchTask::fetchPrivate(const QStringList& toFetch)
     }
 }
 
-void PackFetchTask::fileDownloadFinished(QByteArray* publicPtr, QByteArray* thirdPartyPtr)
+void PackFetchTask::fileDownloadFinished(QByteArray* publicResponse, QByteArray* thirdPartyResponse)
 {
     QStringList failedLists;
 
-    if (!parseAndAddPacks(*publicPtr, PackType::Public, publicPacks)) {
+    if (!parseAndAddPacks(*publicResponse, PackType::Public, m_publicPacks)) {
         failedLists.append(tr("Public Packs"));
     }
 
-    if (!parseAndAddPacks(*thirdPartyPtr, PackType::ThirdParty, thirdPartyPacks)) {
+    if (!parseAndAddPacks(*thirdPartyResponse, PackType::ThirdParty, m_thirdPartyPacks)) {
         failedLists.append(tr("Third Party Packs"));
     }
 
     // NOTE(TheKodeToad): we don't want to reset the jobPtr earlier as it may invalidate the responses!
-    jobPtr.reset();
+    m_jobPtr.reset();
 
     if (failedLists.size() > 0) {
         emit failed(tr("Failed to download some pack lists: %1").arg(failedLists.join("\n- ")));
     } else {
-        emit finished(publicPacks, thirdPartyPacks);
+        emit finished(m_publicPacks, m_thirdPartyPacks);
     }
 }
 
@@ -158,7 +156,7 @@ bool PackFetchTask::parseAndAddPacks(QByteArray& data, PackType packType, Modpac
         modpack.bugged = false;
 
         // remove empty if the xml is bugged
-        for (QString curr : modpack.oldVersions) {
+        for (const auto& curr : modpack.oldVersions) {
             if (curr.isNull() || curr.isEmpty()) {
                 modpack.oldVersions.removeAll(curr);
                 modpack.bugged = true;
@@ -189,7 +187,7 @@ bool PackFetchTask::parseAndAddPacks(QByteArray& data, PackType packType, Modpac
     return true;
 }
 
-void PackFetchTask::fileDownloadFailed(QString reason)
+void PackFetchTask::fileDownloadFailed(const QString& reason)
 {
     qWarning() << "Fetching FTBPacks failed:" << reason;
     emit failed(reason);

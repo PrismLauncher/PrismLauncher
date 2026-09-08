@@ -58,12 +58,12 @@ class FlamePage : public QWidget, public ModpackProviderBasePage {
 
    public:
     explicit FlamePage(NewInstanceDialog* dialog, QWidget* parent = 0);
-    virtual ~FlamePage();
-    virtual QString displayName() const override { return "CurseForge"; }
-    virtual QIcon icon() const override { return QIcon::fromTheme("flame"); }
-    virtual QString id() const override { return "flame"; }
-    virtual QString helpPage() const override { return "Flame-platform"; }
-    virtual bool shouldDisplay() const override;
+    ~FlamePage() override;
+    QString displayName() const override { return "CurseForge"; }
+    QIcon icon() const override { return QIcon::fromTheme("flame"); }
+    QString id() const override { return "flame"; }
+    QString helpPage() const override { return "Flame-platform"; }
+    bool shouldDisplay() const override;
     void retranslate() override;
 
     void updateUi();
@@ -73,9 +73,9 @@ class FlamePage : public QWidget, public ModpackProviderBasePage {
     bool eventFilter(QObject* watched, QEvent* event) override;
 
     /** Programatically set the term in the search bar. */
-    virtual void setSearchTerm(QString) override;
+    void setSearchTerm(QString /*unused*/) override;
     /** Get the current term in the search bar. */
-    virtual QString getSerachTerm() const override;
+    QString getSerachTerm() const override;
 
    private:
     void suggestCurrent();
@@ -92,12 +92,12 @@ class FlamePage : public QWidget, public ModpackProviderBasePage {
     Flame::ListModel* m_listModel = nullptr;
     ModPlatform::IndexedPack::Ptr m_current;
 
-    int m_selected_version_index = -1;
+    int m_selectedVersionIndex = -1;
 
-    ProgressWidget m_fetch_progress;
+    ProgressWidget m_fetchProgress;
 
     // Used to do instant searching with a delay to cache quick changes
-    QTimer m_search_timer;
+    QTimer m_searchTimer;
 
     std::unique_ptr<ModFilterWidget> m_filterWidget;
     Task::Ptr m_categoriesTask;

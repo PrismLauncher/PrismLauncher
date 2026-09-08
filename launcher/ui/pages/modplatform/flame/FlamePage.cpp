@@ -52,7 +52,7 @@
 #include "ui/widgets/ProjectItem.h"
 
 FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
-    : QWidget(parent), m_ui(new Ui::FlamePage), m_dialog(dialog), m_listModel(new Flame::ListModel(this)), m_fetch_progress(this, false)
+    : QWidget(parent), m_ui(new Ui::FlamePage), m_dialog(dialog), m_listModel(new Flame::ListModel(this)), m_fetchProgress(this, false)
 {
     m_ui->setupUi(this);
     m_ui->searchEdit->installEventFilter(this);
@@ -62,16 +62,16 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
     m_ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_ui->versionSelectionBox->view()->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
-    m_search_timer.setSingleShot(true);
+    m_searchTimer.setTimerType(Qt::TimerType::CoarseTimer);
+    m_searchTimer.setSingleShot(true);
 
-    connect(&m_search_timer, &QTimer::timeout, this, &FlamePage::triggerSearch);
+    connect(&m_searchTimer, &QTimer::timeout, this, &FlamePage::triggerSearch);
 
-    m_fetch_progress.hideIfInactive(true);
-    m_fetch_progress.setFixedHeight(24);
-    m_fetch_progress.progressFormat("");
+    m_fetchProgress.hideIfInactive(true);
+    m_fetchProgress.setFixedHeight(24);
+    m_fetchProgress.progressFormat("");
 
-    m_ui->verticalLayout->insertWidget(2, &m_fetch_progress);
+    m_ui->verticalLayout->insertWidget(2, &m_fetchProgress);
 
     // index is used to set the sorting with the curseforge api
     m_ui->sortByBox->addItem(tr("Sort by Featured"));
@@ -104,11 +104,11 @@ bool FlamePage::eventFilter(QObject* watched, QEvent* event)
             keyEvent->accept();
             return true;
         }
-        if (m_search_timer.isActive()) {
-            m_search_timer.stop();
+        if (m_searchTimer.isActive()) {
+            m_searchTimer.stop();
         }
 
-        m_search_timer.start(350);
+        m_searchTimer.start(350);
     }
     return QWidget::eventFilter(watched, event);
 }
@@ -137,7 +137,7 @@ void FlamePage::triggerSearch()
     m_ui->versionSelectionBox->clear();
     bool filterChanged = m_filterWidget->changed();
     m_listModel->searchWithTerm(m_ui->searchEdit->text(), m_ui->sortByBox->currentIndex(), m_filterWidget->getFilter(), filterChanged);
-    m_fetch_progress.watch(m_listModel->activeSearchJob().get());
+    m_fetchProgress.watch(m_listModel->activeSearchJob().get());
 }
 
 void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)
@@ -222,12 +222,12 @@ void FlamePage::suggestCurrent()
         return;
     }
 
-    if (m_selected_version_index == -1) {
+    if (m_selectedVersionIndex == -1) {
         m_dialog->setSuggestedPack();
         return;
     }
 
-    auto version = m_current->versions.at(m_selected_version_index);
+    auto version = m_current->versions.at(m_selectedVersionIndex);
 
     QMap<QString, QString> extraInfo;
     extraInfo.insert("pack_id", m_current->addonId.toString());
@@ -245,13 +245,13 @@ void FlamePage::onVersionSelectionChanged(int index)
     m_ui->versionSelectionBox->itemData(index).toInt(&isBlocked);
 
     if (index == -1 || isBlocked) {
-        m_selected_version_index = -1;
+        m_selectedVersionIndex = -1;
         return;
     }
 
-    m_selected_version_index = index;
+    m_selectedVersionIndex = index;
 
-    Q_ASSERT(m_current->versions.at(m_selected_version_index).downloadUrl == m_ui->versionSelectionBox->currentData().toString());
+    Q_ASSERT(m_current->versions.at(m_selectedVersionIndex).downloadUrl == m_ui->versionSelectionBox->currentData().toString());
 
     suggestCurrent();
 }

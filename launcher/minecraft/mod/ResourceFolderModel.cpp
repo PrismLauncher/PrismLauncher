@@ -322,11 +322,11 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, Ena
     return succeeded;
 }
 
-static QMutex s_update_task_mutex;
+static QMutex s_updateTaskMutex;
 bool ResourceFolderModel::update()
 {
     // We hold a lock here to prevent race conditions on the m_current_update_task reset.
-    QMutexLocker lock(&s_update_task_mutex);
+    QMutexLocker lock(&s_updateTaskMutex);
 
     // Already updating, so we schedule a future update and return.
     if (m_currentUpdateTask) {
