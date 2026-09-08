@@ -390,6 +390,15 @@ void ResourcePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
 void ResourcePage::onVersionSelectionChanged(int index)
 {
     m_selectedVersionIndex = m_ui->versionSelectionBox->itemData(index).toInt();
+
+    if (auto currentPack = getCurrentPack(); currentPack && currentPack->isAnyVersionSelected()) {
+        if (m_selectedVersionIndex >= 0 && m_selectedVersionIndex < currentPack->versions.size()) {
+            auto& newVersion = currentPack->versions[m_selectedVersionIndex];
+            removeResourceFromDialog(currentPack->name);
+            addResourceToDialog(currentPack, newVersion);
+        }
+    }
+
     updateSelectionButton();
 }
 
