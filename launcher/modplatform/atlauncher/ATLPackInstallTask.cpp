@@ -288,15 +288,12 @@ void PackInstallTask::deleteExistingFiles()
         auto targetPath = convertToSystemPath(item.target);
         auto fullPath = FS::PathCombine(basePath, targetPath);
 
-        QDirIterator it(fullPath, QDirIterator::Subdirectories);
-        while (it.hasNext()) {
-            auto path = it.next();
-
-            if (shouldKeep(path)) {
+        for (const auto& entry : QDirListing(fullPath, QDirListing::IteratorFlag::ResolveSymlinks | QDirListing::IteratorFlag::Recursive)) {
+            if (shouldKeep(entry.absoluteFilePath())) {
                 continue;
             }
 
-            filesToDelete.insert(path);
+            filesToDelete.insert(entry.absoluteFilePath());
         }
     }
 

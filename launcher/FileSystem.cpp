@@ -37,13 +37,14 @@
 
 #include "FileSystem.h"
 #include <qcontainerfwd.h>
+#include <qdir.h>
 #include <QPair>
 
 #include "BuildConfig.h"
 
 #include <QDebug>
 #include <QDir>
-#include <QDirIterator>
+#include <QDirListing>
 #include <QFile>
 #include <QFileInfo>
 #include <QStandardPaths>
@@ -395,20 +396,19 @@ bool copy::operator()(const QString& offset, bool dryRun)
     // We can't use copy_opts::recursive because we need to take into account the
     // blacklisted paths, so we iterate over the source directory, and if there's no blacklist
     // match, we copy the file.
-    QDir src_dir(src);
-    QDir::Filters filters = QDir::Filter::Files | QDir::Filter::Hidden;
+    QDir srcDir(src);
+    auto filters = QDirListing::IteratorFlag::FilesOnly | QDirListing::IteratorFlag::ResolveSymlinks |
+                   QDirListing::IteratorFlag::IncludeHidden | QDirListing::IteratorFlag::Recursive |
+                   QDirListing::IteratorFlag::FollowDirSymlinks;
 
-    if (m_copyDirectories) {
-        filters |= QDir::Filter::NoDotAndDotDot | QDir::Filter::Dirs;
+    if (!m_copyDirectories) {
+        filters |= QDirListing::IteratorFlag::FilesOnly;
     }
 
-    QDirIterator source_it(src, filters, QDirIterator::Subdirectories);
-
-    while (source_it.hasNext()) {
-        auto src_path = source_it.next();
-        auto relative_path = src_dir.relativeFilePath(src_path);
-
-        copy_file(src_path, relative_path);
+    for (const auto& entry : QDirListing(src, filters)) {
+        auto srcPath = entry.absoluteFilePath();
+        auto relativePath = srcDir.relativeFilePath(srcPath);
+        copy_file(srcPath, relativePath);
     }
 
     // If the root src is not a directory, the previous iterator won't run.
@@ -513,28 +513,29 @@ void create_link::make_link_list(const QString& offset)
                 qDebug() << "linking single file or dir:" << src << "to" << dst;
             link_file(src, "");
         } else {
-            if (m_debug)
+            if (m_debug) {
                 qDebug().nospace() << "linking recursively: " << src << " to " << dst << ", max_depth: " << m_max_depth;
-            QDir src_dir(src);
-            QDirIterator source_it(src, QDir::Filter::Files | QDir::Filter::Hidden, QDirIterator::Subdirectories);
+            }
+            QDir srcDir(src);
 
             QStringList linkedPaths;
+            for (const auto& entry :
+                 QDirListing(src, QDirListing::IteratorFlag::FilesOnly | QDirListing::IteratorFlag::ResolveSymlinks |
+                                      QDirListing::IteratorFlag::IncludeHidden | QDirListing::IteratorFlag::Recursive)) {
+                auto srcPath = entry.absoluteFilePath();
+                auto relativePath = srcDir.relativeFilePath(srcPath);
 
-            while (source_it.hasNext()) {
-                auto src_path = source_it.next();
-                auto relative_path = src_dir.relativeFilePath(src_path);
-
-                if (m_max_depth >= 0 && pathDepth(relative_path) > m_max_depth) {
-                    relative_path = pathTruncate(relative_path, m_max_depth);
-                    src_path = src_dir.filePath(relative_path);
-                    if (linkedPaths.contains(src_path)) {
+                if (m_max_depth >= 0 && pathDepth(relativePath) > m_max_depth) {
+                    relativePath = pathTruncate(relativePath, m_max_depth);
+                    srcPath = srcDir.filePath(relativePath);
+                    if (linkedPaths.contains(srcPath)) {
                         continue;
                     }
                 }
 
-                linkedPaths.append(src_path);
+                linkedPaths.append(srcPath);
 
-                link_file(src_path, relative_path);
+                link_file(srcPath, relativePath);
             }
         }
     }
@@ -1407,14 +1408,14 @@ bool clone::operator()(const QString& offset, bool dryRun)
     // We can't use copy_opts::recursive because we need to take into account the
     // blacklisted paths, so we iterate over the source directory, and if there's no blacklist
     // match, we copy the file.
-    QDir src_dir(src);
-    QDirIterator source_it(src, QDir::Filter::Files | QDir::Filter::Hidden, QDirIterator::Subdirectories);
+    QDir srcDir(src);
 
-    while (source_it.hasNext()) {
-        auto src_path = source_it.next();
-        auto relative_path = src_dir.relativeFilePath(src_path);
+    for (const auto& entry : QDirListing(src, QDirListing::IteratorFlag::FilesOnly | QDirListing::IteratorFlag::ResolveSymlinks |
+                                                  QDirListing::IteratorFlag::IncludeHidden | QDirListing::IteratorFlag::Recursive)) {
+        auto srcPath = entry.absoluteFilePath();
+        auto relativePath = srcDir.relativeFilePath(srcPath);
 
-        cloneFile(src_path, relative_path);
+        cloneFile(srcPath, relativePath);
     }
 
     // If the root src is not a directory, the previous iterator won't run.

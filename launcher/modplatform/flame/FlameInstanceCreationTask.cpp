@@ -355,9 +355,10 @@ bool FlameCreationTask::promptForUntrustedMods()
     const QDir mcDir{ FS::PathCombine(m_stagingPath, "minecraft") };
     const QString modsPath{ FS::PathCombine(m_stagingPath, "minecraft/mods") };
     if (QDir(modsPath).exists()) {
-        QDirIterator iter{ modsPath, QDir::Files, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks };
-        while (iter.hasNext()) {
-            untrustedMods.append(mcDir.relativeFilePath(iter.next()));
+        for (const auto& entry :
+             QDirListing(modsPath, QDirListing::IteratorFlag::FilesOnly | QDirListing::IteratorFlag::ResolveSymlinks |
+                                       QDirListing::IteratorFlag::FollowDirSymlinks | QDirListing::IteratorFlag::Recursive)) {
+            untrustedMods.append(mcDir.relativeFilePath(entry.absoluteFilePath()));
         }
     }
 

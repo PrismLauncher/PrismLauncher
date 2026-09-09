@@ -31,6 +31,7 @@
 
 #include <QAccessible>
 #include <QCommandLineParser>
+#include <QDirListing>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QNetworkProxy>
@@ -51,8 +52,8 @@ namespace fs = std::filesystem;
 #include "Json.h"
 #include "StringUtils.h"
 
-#include "net/Request.h"
 #include "net/RawHeaderProxy.h"
+#include "net/Request.h"
 
 #include "MMCZip.h"
 
@@ -549,19 +550,24 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
     };
 
     int i = 0;
-    for (auto glob : file_list) {
-        QDirIterator iter(m_rootPath, QStringList({ glob }), QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const auto& glob : file_list) {
         progress.setValue(i);
         QCoreApplication::processEvents();
-        if (!iter.hasNext() && !glob.isEmpty()) {
-            if (auto file_info = QFileInfo(FS::PathCombine(m_rootPath, glob)); file_info.exists()) {
-                error |= copy(file_info.absoluteFilePath());
+        QList<QString> matches;
+        if (!glob.isEmpty()) {
+            for (const auto& entry : QDirListing(m_rootPath, { glob }, QDirListing::IteratorFlag::ResolveSymlinks)) {
+                matches.append(entry.absoluteFilePath());
+            }
+        }
+        if (matches.isEmpty() && !glob.isEmpty()) {
+            if (auto fileInfo = QFileInfo(FS::PathCombine(m_rootPath, glob)); fileInfo.exists()) {
+                error |= copy(fileInfo.absoluteFilePath());
             } else {
                 logUpdate(tr("File doesn't exist, ignoring: %1").arg(FS::PathCombine(m_rootPath, glob)));
             }
         } else {
-            while (iter.hasNext()) {
-                error |= copy(iter.next());
+            for (const auto& path : matches) {
+                error |= copy(path);
             }
         }
         i++;
@@ -1024,19 +1030,24 @@ void PrismUpdaterApp::backupAppDir()
     };
 
     int i = 0;
-    for (auto glob : file_list) {
-        QDirIterator iter(app_dir.absolutePath(), QStringList({ glob }), QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const auto& glob : file_list) {
         progress.setValue(i);
         QCoreApplication::processEvents();
-        if (!iter.hasNext() && !glob.isEmpty()) {
-            if (auto file_info = QFileInfo(FS::PathCombine(app_dir.absolutePath(), glob)); file_info.exists()) {
-                copy(file_info.absoluteFilePath());
+        QList<QString> matches;
+        if (!glob.isEmpty()) {
+            for (const auto& entry : QDirListing(appDir.absolutePath(), { glob }, QDirListing::IteratorFlag::ResolveSymlinks)) {
+                matches.append(entry.absoluteFilePath());
+            }
+        }
+        if (matches.isEmpty() && !glob.isEmpty()) {
+            if (auto fileInfo = QFileInfo(FS::PathCombine(app_dir.absolutePath(), glob)); fileInfo.exists()) {
+                copy(fileInfo.absoluteFilePath());
             } else {
                 logUpdate(tr("File doesn't exist, ignoring: %1").arg(FS::PathCombine(app_dir.absolutePath(), glob)));
             }
         } else {
-            while (iter.hasNext()) {
-                copy(iter.next());
+            for (const auto& path : matches) {
+                copy(path);
             }
         }
         i++;
@@ -1158,9 +1169,8 @@ void PrismUpdaterApp::downloadReleasePage(const QString& api_url, int page)
     connect(download.get(), &Net::Request::failed, this, &PrismUpdaterApp::downloadError);
 
     m_current_task.reset(download);
-    connect(download.get(), &Net::Request::finished, this, [this]() {
-        qDebug() << "Download" << m_current_task->getUid().toString() << "finished";
-    });
+    connect(download.get(), &Net::Request::finished, this,
+            [this]() { qDebug() << "Download" << m_current_task->getUid().toString() << "finished"; });
 
     QCoreApplication::processEvents();
 

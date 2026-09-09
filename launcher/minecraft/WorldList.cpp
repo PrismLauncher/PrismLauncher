@@ -38,7 +38,7 @@
 
 #include <FileSystem.h>
 #include <QDebug>
-#include <QDirIterator>
+#include <QDirListing>
 #include <QFileSystemWatcher>
 #include <QMimeData>
 #include <QString>
@@ -446,12 +446,13 @@ int64_t calculateWorldSize(const QFileInfo& file)
 {
     if (file.isFile() && file.suffix() == "zip") {
         return file.size();
-    } else if (file.isDir()) {
-        QDirIterator it(file.absoluteFilePath(), QDir::Files, QDirIterator::Subdirectories);
+    }
+    if (file.isDir()) {
         int64_t total = 0;
-        while (it.hasNext()) {
-            it.next();
-            total += it.fileInfo().size();
+        for (const auto& entry :
+             QDirListing(file.absoluteFilePath(), QDirListing::IteratorFlag::FilesOnly | QDirListing::IteratorFlag::ResolveSymlinks |
+                                                      QDirListing::IteratorFlag::Recursive)) {
+            total += entry.fileInfo().size();
         }
         return total;
     }

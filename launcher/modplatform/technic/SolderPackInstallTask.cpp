@@ -38,6 +38,7 @@
 #include <FileSystem.h>
 #include <Json.h>
 #include <MMCZip.h>
+#include <QDirListing>
 #include <QtConcurrentRun>
 
 #include "SolderPackManifest.h"
@@ -182,14 +183,10 @@ void Technic::SolderPackInstallTask::extractFinished()
         emitFailed(tr("Failed to extract modpack"));
         return;
     }
-    QDir extractDir(m_stagingPath);
 
     qDebug() << "Fixing permissions for extracted pack files...";
-    QDirIterator it(extractDir, QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        auto filepath = it.next();
-        QFileInfo file(filepath);
-        auto permissions = QFile::permissions(filepath);
+    for (const auto& file : QDirListing(m_stagingPath, QDirListing::IteratorFlag::ResolveSymlinks | QDirListing::IteratorFlag::Recursive)) {
+        auto permissions = QFile::permissions(file.absoluteFilePath());
         auto origPermissions = permissions;
         if (file.isDir()) {
             // Folder +rwx for current user
@@ -199,10 +196,10 @@ void Technic::SolderPackInstallTask::extractFinished()
             permissions |= QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser;
         }
         if (origPermissions != permissions) {
-            if (!QFile::setPermissions(filepath, permissions)) {
-                logWarning(tr("Could not fix permissions for %1").arg(filepath));
+            if (!QFile::setPermissions(file.absoluteFilePath(), permissions)) {
+                logWarning(tr("Could not fix permissions for %1").arg(file.absoluteFilePath()));
             } else {
-                qDebug() << "Fixed" << filepath;
+                qDebug() << "Fixed" << file.absoluteFilePath();
             }
         }
     }

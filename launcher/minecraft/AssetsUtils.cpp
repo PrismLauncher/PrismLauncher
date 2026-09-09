@@ -36,7 +36,7 @@
 #include <QCryptographicHash>
 #include <QDebug>
 #include <QDir>
-#include <QDirIterator>
+#include <QDirListing>
 #include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -64,14 +64,10 @@ QSet<QString> collectPathsFromDir(QString dirPath)
 
     QSet<QString> out;
 
-    QDirIterator iter(dirPath, QDirIterator::Subdirectories);
-    while (iter.hasNext()) {
-        QString value = iter.next();
-        QFileInfo info(value);
-        if (info.isFile()) {
-            out.insert(value);
-            qDebug() << value;
-        }
+    for (const auto& entry : QDirListing(dirPath, QDirListing::IteratorFlag::FilesOnly | QDirListing::IteratorFlag::ResolveSymlinks |
+                                                      QDirListing::IteratorFlag::Recursive)) {
+        out.insert(entry.absoluteFilePath());
+        qDebug() << entry.absoluteFilePath();
     }
     return out;
 }

@@ -18,17 +18,17 @@
 
 #include "ListModel.h"
 #include <QDir>
-#include <QDirIterator>
+#include <QDirListing>
 #include <QFileInfo>
 #include <QIcon>
 #include <QProcessEnvironment>
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "Exception.h"
 #include "FileSystem.h"
 #include "Json.h"
 #include "StringUtils.h"
 #include "modplatform/import_ftb/PackHelpers.h"
+#include "settings/SettingsObject.h"
 #include "ui/widgets/ProjectItem.h"
 
 namespace FTBImportAPP {
@@ -75,19 +75,22 @@ void ListModel::update()
         return false;
     };
 
-    auto scanPath = [this, wasPathAdded](QString path) {
-        if (path.isEmpty())
+    auto scanPath = [this, wasPathAdded](const QString& path) {
+        if (path.isEmpty()) {
             return;
-        if (auto instancesInfo = QFileInfo(path); !instancesInfo.exists() || !instancesInfo.isDir())
+        }
+        if (auto instancesInfo = QFileInfo(path); !instancesInfo.exists() || !instancesInfo.isDir()) {
             return;
-        QDirIterator directoryIterator(path, QDir::Dirs | QDir::NoDotAndDotDot | QDir::Readable | QDir::Hidden,
-                                       QDirIterator::FollowSymlinks);
-        while (directoryIterator.hasNext()) {
-            auto currentPath = directoryIterator.next();
+        }
+        for (const auto& entry :
+             QDirListing(path, QDirListing::IteratorFlag::DirsOnly | QDirListing::IteratorFlag::ResolveSymlinks |
+                                   QDirListing::IteratorFlag::IncludeHidden | QDirListing::IteratorFlag::FollowDirSymlinks)) {
+            auto currentPath = entry.absoluteFilePath();
             if (!wasPathAdded(currentPath)) {
                 auto modpack = parseDirectory(currentPath);
-                if (!modpack.path.isEmpty())
+                if (!modpack.path.isEmpty()) {
                     m_modpacks.append(modpack);
+                }
             }
         }
     };

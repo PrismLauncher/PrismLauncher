@@ -35,8 +35,7 @@
 
 #include "IconUtils.h"
 
-#include <QDirIterator>
-#include "FileSystem.h"
+#include <QDirListing>
 
 namespace {
 static const QStringList validIconExtensions = { { "svg", "png", "ico", "gif", "jpg", "jpeg", "webp" } };
@@ -48,12 +47,11 @@ QString findBestIconIn(const QString& folder, const QString& iconKey)
 {
     QString best_filename;
 
-    QDirIterator it(folder, QDir::NoDotAndDotDot | QDir::Files, QDirIterator::NoIteratorFlags);
-    while (it.hasNext()) {
-        it.next();
-        auto fileInfo = it.fileInfo();
-        if ((fileInfo.completeBaseName() == iconKey || fileInfo.fileName() == iconKey) && isIconSuffix(fileInfo.suffix()))
+    for (const auto& entry : QDirListing(folder, QDirListing::IteratorFlag::FilesOnly | QDirListing::IteratorFlag::ResolveSymlinks)) {
+        auto fileInfo = entry.fileInfo();
+        if ((fileInfo.completeBaseName() == iconKey || fileInfo.fileName() == iconKey) && isIconSuffix(fileInfo.suffix())) {
             return fileInfo.absoluteFilePath();
+        }
     }
     return {};
 }

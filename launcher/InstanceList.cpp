@@ -35,9 +35,10 @@
  */
 
 #include "InstanceList.h"
+#include <qdirlisting.h>
 
 #include <QDebug>
-#include <QDirIterator>
+#include <QDirListing>
 #include <QFile>
 #include <QFileInfo>
 #include <QJsonArray>
@@ -481,21 +482,21 @@ QList<InstanceId> InstanceList::discoverInstances()
     m_instanceRootDirMap.clear();
     for (const auto& rootDir : m_instDirs) {
         qInfo() << "Discovering instances in" << rootDir;
-        QDirIterator iter(rootDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden, QDirIterator::FollowSymlinks);
-        while (iter.hasNext()) {
-            QString subDir = iter.next();
-            QFileInfo dirInfo(subDir);
-            if (!QFileInfo(FS::PathCombine(subDir, "instance.cfg")).exists())
+        for (const auto& dirInfo :
+             QDirListing(rootDir, QDirListing::IteratorFlag::DirsOnly | QDirListing::IteratorFlag::ResolveSymlinks |
+                                      QDirListing::IteratorFlag::IncludeHidden | QDirListing::IteratorFlag::FollowDirSymlinks)) {
+            if (!QFileInfo::exists(FS::PathCombine(dirInfo.absoluteFilePath(), "instance.cfg"))) {
                 continue;
+            }
             // if it is a symlink, ignore it if it goes to ANY configured instance
             if (dirInfo.isSymLink()) {
-                QFileInfo targetInfo(dirInfo.symLinkTarget());
+                QFileInfo targetInfo(dirInfo.fileInfo().symLinkTarget());
                 QString targetCanonical = targetInfo.canonicalFilePath();
                 bool pointsIntoAnyRoot = std::ranges::any_of(m_instDirs, [&targetCanonical](const QString& otherRoot) {
                     return targetCanonical.startsWith(QFileInfo(otherRoot).canonicalFilePath());
                 });
                 if (pointsIntoAnyRoot) {
-                    qDebug() << "Ignoring symlink" << subDir << "that leads into a configured instance root";
+                    qDebug() << "Ignoring symlink" << dirInfo.filePath() << "that leads into a configured instance root";
                     continue;
                 }
             }
