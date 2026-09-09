@@ -52,6 +52,9 @@ DataPackPage::DataPackPage(MinecraftInstance* instance, DataPackFolderModel* mod
     m_ui->actionChangeVersion->setToolTip(tr("Change a data pack's version."));
     connect(m_ui->actionChangeVersion, &QAction::triggered, this, &DataPackPage::changeDataPackVersion);
     m_ui->actionsToolbar->insertActionAfter(m_ui->actionUpdateItem, m_ui->actionChangeVersion);
+
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionChangeVersion, m_ui->actionLockUpdates);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionLockUpdates, m_ui->actionUnlockUpdates);
 }
 
 void DataPackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
