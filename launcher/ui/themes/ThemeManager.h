@@ -53,7 +53,7 @@ class ThemeManager {
     /// @brief Returns the background based on selected and with events (Birthday, XMas, etc.)
     /// @param catName Optional, if you need a specific background.
     /// @return
-    QString getCatPack(QString catName = "");
+    QString getCatPack(const QString& catName = "");
     QList<CatPack*> getValidCatPacks();
 
     const LogColors& getLogColors() { return m_logColors; }
@@ -74,23 +74,23 @@ class ThemeManager {
     void initializeThemes();
     void initializeCatPacks();
     QString addTheme(std::unique_ptr<ITheme> theme);
-    ITheme* getTheme(QString themeId);
+    ITheme* getTheme(const QString& themeId);
     QString addIconTheme(IconTheme theme);
     QString addCatPack(std::unique_ptr<CatPack> catPack);
     void initializeIcons();
     void initializeWidgets();
 
     // On non-Mac systems, this is a no-op.
-    void setTitlebarColorOnMac(WId windowId, QColor color);
+    void setTitlebarColorOnMac(WId windowId, const QColor& color);
     // This also will set the titlebar color of newly opened windows after this method is called.
     // On non-Mac systems, this is a no-op.
-    void setTitlebarColorOfAllWindowsOnMac(QColor color);
+    void setTitlebarColorOfAllWindowsOnMac(const QColor& color);
     // On non-Mac systems, this is a no-op.
     void stopSettingNewWindowColorsOnMac();
 #ifdef Q_OS_MACOS
     NSObject* m_windowTitlebarObserver = nullptr;
 #endif
 
-    const QStringList builtinIcons{"pe_colored", "pe_light", "pe_dark", "pe_blue",    "breeze_light", "breeze_dark",
-                                   "OSX",        "iOS",      "flat",    "flat_white", "multimc"};
+    static inline const QStringList BuiltinIcons{"pe_colored", "pe_light", "pe_dark", "pe_blue",    "breeze_light", "breeze_dark",
+                                                 "OSX",        "iOS",      "flat",    "flat_white", "multimc"};
 };

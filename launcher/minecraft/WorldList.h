@@ -30,30 +30,39 @@ class Task;
 class WorldList : public QAbstractListModel {
     Q_OBJECT
    public:
-    enum Columns { NameColumn, GameModeColumn, LastPlayedColumn, SizeColumn, InfoColumn };
+    enum Columns : std::uint8_t { NameColumn, GameModeColumn, LastPlayedColumn, SizeColumn, InfoColumn };
 
-    enum Roles { ObjectRole = Qt::UserRole + 1, FolderRole, SeedRole, NameRole, GameModeRole, LastPlayedRole, SizeRole, IconFileRole };
+    enum Roles : std::uint16_t {
+        ObjectRole = Qt::UserRole + 1,
+        FolderRole,
+        SeedRole,
+        NameRole,
+        GameModeRole,
+        LastPlayedRole,
+        SizeRole,
+        IconFileRole
+    };
 
     WorldList(const QString& dir, BaseInstance* instance);
 
-    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
-    virtual int rowCount(const QModelIndex& parent = QModelIndex()) const { return parent.isValid() ? 0 : static_cast<int>(size()); };
-    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-    virtual int columnCount(const QModelIndex& parent) const;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override { return parent.isValid() ? 0 : static_cast<int>(size()); };
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    int columnCount(const QModelIndex& parent) const override;
 
-    size_t size() const { return m_worlds.size(); };
+    qsizetype size() const { return m_worlds.size(); };
     bool empty() const { return size() == 0; }
-    World& operator[](size_t index) { return m_worlds[index]; }
+    World& operator[](qsizetype index) { return m_worlds[index]; }
 
     /// Reloads the mod list and returns true if the list changed.
     virtual bool update();
 
     /// Install a world from location
-    void installWorld(QFileInfo filename);
+    void installWorld(const QFileInfo& filename);
 
     /// Create a task to install a world from location
-    std::unique_ptr<Task> createInstallWorldTask(QFileInfo filename);
+    std::unique_ptr<Task> createInstallWorldTask(const QFileInfo& filename);
 
     /// Create a task to copy the world at the given index.
     std::unique_ptr<Task> createCopyWorldTask(int index, const QString& name);
@@ -65,24 +74,24 @@ class WorldList : public QAbstractListModel {
     bool removeWorldFromModel(const QFileInfo& sourceFile);
 
     /// Removes the world icon, if any
-    virtual bool resetIcon(int index);
+    virtual bool resetIcon(int row);
 
     /// Deletes all the selected mods
     virtual bool deleteWorlds(int first, int last);
 
     /// flags, mostly to support drag&drop
-    virtual Qt::ItemFlags flags(const QModelIndex& index) const;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
     /// get data for drag action
-    virtual QMimeData* mimeData(const QModelIndexList& indexes) const;
+    QMimeData* mimeData(const QModelIndexList& indexes) const override;
     /// get the supported mime types
-    virtual QStringList mimeTypes() const;
+    QStringList mimeTypes() const override;
     /// process data from drop action
-    virtual bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent);
+    bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
     /// what drag actions do we support?
-    virtual Qt::DropActions supportedDragActions() const;
+    Qt::DropActions supportedDragActions() const override;
 
     /// what drop actions do we support?
-    virtual Qt::DropActions supportedDropActions() const;
+    Qt::DropActions supportedDropActions() const override;
 
     void startWatching();
     void stopWatching();
@@ -96,7 +105,7 @@ class WorldList : public QAbstractListModel {
     const QList<World>& allWorlds() const { return m_worlds; }
 
    private slots:
-    void directoryChanged(QString path);
+    void directoryChanged(const QString& path);
     void loadWorldsAsync();
 
    signals:

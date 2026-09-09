@@ -9,12 +9,12 @@ namespace Override {
  *
  *  If there's already an existing such file, it will be ovewritten.
  */
-void createOverrides(const QString& name, const QString& parent_folder, const QString& override_path);
+void createOverrides(const QString& name, const QString& parentFolder, const QString& overridePath);
 
 /** This reads an existing overrides archive, returning a list of overrides.
  *
  *  If there's no such file in `parent_folder`, it will return an empty list.
  */
-QStringList readOverrides(const QString& name, const QString& parent_folder);
+QStringList readOverrides(const QString& name, const QString& parentFolder);
 
 }  // namespace Override

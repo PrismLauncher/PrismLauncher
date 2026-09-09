@@ -48,9 +48,9 @@
 class PrismUpdaterApp : public QApplication {
     Q_OBJECT
    public:
-    enum Status { Starting, Failed, Succeeded, Initialized, Aborted };
+    enum Status : std::uint8_t { Starting, Failed, Succeeded, Initialized, Aborted };
     PrismUpdaterApp(int& argc, char** argv);
-    virtual ~PrismUpdaterApp();
+    ~PrismUpdaterApp() override;
     void loadReleaseList();
     void run();
     Status status() const { return m_status; }
@@ -60,12 +60,12 @@ class PrismUpdaterApp : public QApplication {
     void abort(const QString& reason);
     void showFatalErrorMessage(const QString& title, const QString& content);
 
-    bool loadPrismVersionFromExe(const QString& exe_path);
+    bool loadPrismVersionFromExe(const QString& exePath);
 
-    void downloadReleasePage(const QString& api_url, int page);
+    void downloadReleasePage(const QString& apiUrl, int page);
     int parseReleasePage(const QByteArray* response);
 
-    bool needUpdate(const GitHubRelease& release);
+    bool needUpdate(const GitHubRelease& release) const;
 
     GitHubRelease getLatestRelease();
     GitHubRelease selectRelease();
@@ -74,26 +74,26 @@ class PrismUpdaterApp : public QApplication {
 
     void printReleases();
 
-    QList<GitHubReleaseAsset> validReleaseArtifacts(const GitHubRelease& release);
-    GitHubReleaseAsset selectAsset(const QList<GitHubReleaseAsset>& assets);
+    QList<GitHubReleaseAsset> validReleaseArtifacts(const GitHubRelease& release) const;
+    static GitHubReleaseAsset selectAsset(const QList<GitHubReleaseAsset>& assets);
     void performUpdate(const GitHubRelease& release);
-    void performInstall(QFileInfo file);
-    void unpackAndInstall(QFileInfo file);
+    void performInstall(const QFileInfo& file);
+    void unpackAndInstall(const QFileInfo& archive);
     void backupAppDir();
-    std::optional<QDir> unpackArchive(QFileInfo file);
+    std::optional<QDir> unpackArchive(const QFileInfo& archive);
 
     QFileInfo downloadAsset(const GitHubReleaseAsset& asset);
     bool callAppImageUpdate();
 
-    void moveAndFinishUpdate(QDir target);
+    void moveAndFinishUpdate(const QDir& target);
 
    public slots:
-    void downloadError(QString reason);
+    void downloadError(const QString& reason);
 
    private:
     const QString& root() { return m_rootPath; }
 
-    bool isPortable() { return m_isPortable; }
+    bool isPortable() const { return m_isPortable; }
 
     void clearUpdateLog();
     void logUpdate(const QString& msg);
@@ -124,12 +124,12 @@ class PrismUpdaterApp : public QApplication {
     QString m_prsimVersionChannel;
     QString m_prismGitCommit;
 
-    GitHubRelease m_install_release;
+    GitHubRelease m_installRelease;
 
     Status m_status = Status::Starting;
     std::unique_ptr<QNetworkAccessManager> m_network;
-    QString m_current_url;
-    Task::Ptr m_current_task;
+    QString m_currentUrl;
+    Task::Ptr m_currentTask;
     QList<GitHubRelease> m_releases;
 
    public:
