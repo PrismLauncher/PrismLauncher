@@ -40,11 +40,14 @@
 
 #include "Application.h"
 #include "Commandline.h"
+#include "ExpectedHelpers.h"
 #include "FileSystem.h"
 #include "launch/LaunchTask.h"
 #include "minecraft/MinecraftInstance.h"
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_WIN32
+#include "windows/WindowsAppContainer.h"
+#elifdef Q_OS_LINUX
 #include "gamemode_client.h"
 #endif
 
@@ -68,6 +71,8 @@ LauncherPartLaunch::LauncherPartLaunch(LaunchTask* parent)
     connect(&m_process, &LoggedProcess::log, this, &LauncherPartLaunch::logLines);
     connect(&m_process, &LoggedProcess::stateChanged, this, &LauncherPartLaunch::on_state);
 }
+
+LauncherPartLaunch::~LauncherPartLaunch() = default;
 
 void LauncherPartLaunch::executeTask()
 {
@@ -105,10 +110,23 @@ void LauncherPartLaunch::executeTask()
     m_process.setDetachable(true);
 
     auto classPath = instance->getClassPath();
+    QStringList extraSandboxPaths;
     classPath.prepend(jarPath);
+    extraSandboxPaths.prepend(jarPath);
 
-    if (!legacyJarPath.isEmpty())
+    if (!legacyJarPath.isEmpty()) {
         classPath.prepend(legacyJarPath);
+        extraSandboxPaths.prepend(legacyJarPath);
+    }
+
+    if (const auto result = setupSandbox(javaPath, extraSandboxPaths); !result) {
+        constexpr auto reason = QT_TR_NOOP("Unable to set up sandbox: %1");
+        const auto error = QString::fromStdString(result.error().message());
+
+        emit logLine(tr(reason).arg(error), MessageLevel::Fatal);
+        emitFailed(QString(reason).arg(error));
+        return;
+    }
 
     auto natPath = instance->getNativePath();
 #ifdef Q_OS_WIN
@@ -207,6 +225,46 @@ void LauncherPartLaunch::on_state(LoggedProcess::State state)
         default:
             break;
     }
+}
+
+std::expected<void, std::error_code> LauncherPartLaunch::setupSandbox(const QString& javaPath, const QStringList& extraPaths)
+{
+#ifdef Q_OS_WIN32
+    auto appContainerResult = WindowsAppContainer::create();
+    if (!appContainerResult) {
+        return UNEXPECTED_WIN32_ERROR(appContainerResult.error());
+    }
+    m_appContainer = std::move(appContainerResult.value());
+
+    auto splitPath = javaPath.split('/'); // java/bin/javaw.exe
+    splitPath.removeLast(); // java/bin
+    splitPath.removeLast(); // java
+    const auto javaDir = splitPath.join('/');
+    TRY(m_appContainer->grantFSAccess(javaDir, WindowsAppContainer::AccessMode::Read));
+
+    for (const QString& path : extraPaths) {
+        TRY(m_appContainer->grantFSAccess(path, WindowsAppContainer::AccessMode::Read));
+    }
+
+    TRY(m_appContainer->grantFSAccess(m_parent->instance()->librariesPath().path(), WindowsAppContainer::AccessMode::ReadWrite));  // Write access needed for ForgeWrapper
+
+    if (auto nativePath = m_parent->instance()->getNativePath(); QFileInfo::exists(nativePath)) {
+        TRY(m_appContainer->grantFSAccess(nativePath, WindowsAppContainer::AccessMode::Read));
+    }
+
+    auto assetsPath = QDir::current().absoluteFilePath("assets");
+    auto skinsPath = QDir::current().absoluteFilePath("assets/skins");
+    FS::ensureFolderPathExists(assetsPath);
+    FS::ensureFolderPathExists(skinsPath);
+    TRY(m_appContainer->grantFSAccess(assetsPath, WindowsAppContainer::AccessMode::Read));
+    TRY(m_appContainer->grantFSAccess(skinsPath, WindowsAppContainer::AccessMode::ReadWrite));
+
+    TRY(m_appContainer->grantFSAccess(m_process.workingDirectory(), WindowsAppContainer::AccessMode::ReadWrite));
+
+    return m_appContainer->finalizeSetup(&m_process);
+#else
+    return {};
+#endif
 }
 
 void LauncherPartLaunch::setWorkingDirectory(const QString& wd)

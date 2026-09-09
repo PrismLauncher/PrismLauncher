@@ -21,11 +21,17 @@
 
 #include "MinecraftTarget.h"
 
+#include <expected>
+
+#ifdef Q_OS_WIN32
+class WindowsAppContainer;
+#endif
+
 class LauncherPartLaunch : public LaunchStep {
     Q_OBJECT
    public:
     explicit LauncherPartLaunch(LaunchTask* parent);
-    virtual ~LauncherPartLaunch() = default;
+    virtual ~LauncherPartLaunch();
 
     virtual void executeTask();
     virtual bool abort();
@@ -40,6 +46,9 @@ class LauncherPartLaunch : public LaunchStep {
     void on_state(LoggedProcess::State state);
 
    private:
+    std::expected<void, std::error_code> setupSandbox(const QString& javaPath, const QStringList& extraPaths);
+
+   private:
     LoggedProcess m_process;
     QString m_command;
     AuthSessionPtr m_session;
@@ -47,4 +56,8 @@ class LauncherPartLaunch : public LaunchStep {
     MinecraftTarget::Ptr m_targetToJoin;
 
     bool mayProceed = false;
+
+#ifdef Q_OS_WIN32
+    std::unique_ptr<WindowsAppContainer> m_appContainer;
+#endif
 };

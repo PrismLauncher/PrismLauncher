@@ -1196,6 +1196,8 @@ if(WIN32)
     set(LAUNCHER_SOURCES
         console/WindowsConsole.h
         console/WindowsConsole.cpp
+        windows/WindowsAppContainer.h
+        windows/WindowsAppContainer.cpp
         ${LAUNCHER_SOURCES}
     )
 endif()
@@ -1270,6 +1272,12 @@ if(TARGET PkgConfig::libarchive)
     target_link_libraries(Launcher_logic PkgConfig::libarchive)
 else()
     target_link_libraries(Launcher_logic LibArchive::LibArchive)
+endif()
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_link_libraries(Launcher_logic
+        windowsapp # Required for DeriveCapabilitySidsFromName
+    )
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
