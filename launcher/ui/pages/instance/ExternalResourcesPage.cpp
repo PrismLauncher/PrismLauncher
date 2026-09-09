@@ -151,6 +151,7 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
     connect(selectionModel, &QItemSelectionModel::selectionChanged, this, [this] { updateActions(); });
     connect(m_model, &ResourceFolderModel::rowsInserted, this, [this] { updateActions(); });
     connect(m_model, &ResourceFolderModel::rowsRemoved, this, [this] { updateActions(); });
+    connect(m_model, &ResourceFolderModel::dataChanged, this, [this] { updateActions(); });
 
     auto* viewHeader = m_ui->treeView->header();
     viewHeader->setContextMenuPolicy(Qt::CustomContextMenu);
