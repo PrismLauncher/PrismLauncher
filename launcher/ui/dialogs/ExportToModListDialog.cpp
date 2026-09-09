@@ -47,10 +47,10 @@ ExportToModListDialog::ExportToModListDialog(QString name, QList<Mod*> mods, QWi
     enableCustom(false);
 
     connect(ui->formatComboBox, &QComboBox::currentIndexChanged, this, &ExportToModListDialog::formatChanged);
-    connect(ui->authorsCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
-    connect(ui->versionCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
-    connect(ui->urlCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
-    connect(ui->filenameCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
+    connect(ui->authorsCheckBox, &QCheckBox::checkStateChanged, this, &ExportToModListDialog::trigger);
+    connect(ui->versionCheckBox, &QCheckBox::checkStateChanged, this, &ExportToModListDialog::trigger);
+    connect(ui->urlCheckBox, &QCheckBox::checkStateChanged, this, &ExportToModListDialog::trigger);
+    connect(ui->filenameCheckBox, &QCheckBox::checkStateChanged, this, &ExportToModListDialog::trigger);
     connect(ui->authorsButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Authors); });
     connect(ui->versionButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Version); });
     connect(ui->urlButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Url); });

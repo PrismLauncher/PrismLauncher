@@ -152,13 +152,13 @@ void JavaWizardWidget::setupUi()
         m_autodownloadCheckBox->setObjectName("autodownloadCheckBox");
         m_autodownloadCheckBox->setEnabled(m_autodetectJavaCheckBox->isChecked());
         m_veriticalJavaLayout->addWidget(m_autodownloadCheckBox);
-        connect(m_autodetectJavaCheckBox, &QCheckBox::stateChanged, this, [this] {
+        connect(m_autodetectJavaCheckBox, &QCheckBox::checkStateChanged, this, [this] {
             m_autodownloadCheckBox->setEnabled(m_autodetectJavaCheckBox->isChecked());
             if (!m_autodetectJavaCheckBox->isChecked())
                 m_autodownloadCheckBox->setChecked(false);
         });
 
-        connect(m_autodownloadCheckBox, &QCheckBox::stateChanged, this, [this] {
+        connect(m_autodownloadCheckBox, &QCheckBox::checkStateChanged, this, [this] {
             auto isChecked = m_autodownloadCheckBox->isChecked();
             m_versionWidget->setVisible(!isChecked);
             m_javaStatusBtn->setVisible(!isChecked);

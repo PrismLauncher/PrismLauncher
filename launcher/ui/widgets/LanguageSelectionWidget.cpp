@@ -6,9 +6,9 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "BuildConfig.h"
 #include "settings/Setting.h"
+#include "settings/SettingsObject.h"
 #include "translations/TranslationsModel.h"
 
 LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent) : QWidget(parent)
@@ -35,7 +35,7 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent) : QWidget(pare
     formatCheckbox = new QCheckBox(this);
     formatCheckbox->setObjectName(QStringLiteral("formatCheckbox"));
     formatCheckbox->setCheckState(APPLICATION->settings()->get("UseSystemLocale").toBool() ? Qt::Checked : Qt::Unchecked);
-    connect(formatCheckbox, &QCheckBox::stateChanged, this,
+    connect(formatCheckbox, &QCheckBox::checkStateChanged, this,
             [this]() { APPLICATION->translations()->setUseSystemLocale(formatCheckbox->isChecked()); });
     verticalLayout->addWidget(formatCheckbox);
 

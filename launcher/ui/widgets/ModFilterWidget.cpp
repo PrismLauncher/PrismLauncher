@@ -142,21 +142,21 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended)
         m_ui->openSource->hide();
     }
 
-    connect(m_ui->showAllVersions, &QCheckBox::stateChanged, this, &ModFilterWidget::onShowAllVersionsChanged);
+    connect(m_ui->showAllVersions, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onShowAllVersionsChanged);
     connect(m_ui->versions, &QComboBox::currentIndexChanged, this, &ModFilterWidget::onVersionFilterChanged);
     connect(m_ui->versions, &CheckComboBox::checkedItemsChanged, this, [this] { onVersionFilterChanged(0); });
     connect(m_ui->version, &QComboBox::currentTextChanged, this, &ModFilterWidget::onVersionFilterTextChanged);
 
-    connect(m_ui->neoForge, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
-    connect(m_ui->forge, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
-    connect(m_ui->fabric, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
-    connect(m_ui->quilt, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
-    connect(m_ui->liteLoader, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
-    connect(m_ui->babric, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
-    connect(m_ui->btaBabric, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
-    connect(m_ui->legacyFabric, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
-    connect(m_ui->ornithe, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
-    connect(m_ui->rift, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
+    connect(m_ui->neoForge, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
+    connect(m_ui->forge, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
+    connect(m_ui->fabric, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
+    connect(m_ui->quilt, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
+    connect(m_ui->liteLoader, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
+    connect(m_ui->babric, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
+    connect(m_ui->btaBabric, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
+    connect(m_ui->legacyFabric, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
+    connect(m_ui->ornithe, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
+    connect(m_ui->rift, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
 
     connect(m_ui->showMoreButton, &QPushButton::clicked, this, &ModFilterWidget::onShowMoreClicked);
 
@@ -166,33 +166,33 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended)
     }
 
     if (extended) {
-        connect(m_ui->clientSide, &QCheckBox::stateChanged, this, &ModFilterWidget::onSideFilterChanged);
-        connect(m_ui->serverSide, &QCheckBox::stateChanged, this, &ModFilterWidget::onSideFilterChanged);
+        connect(m_ui->clientSide, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onSideFilterChanged);
+        connect(m_ui->serverSide, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onSideFilterChanged);
     }
 
-    connect(m_ui->hideInstalled, &QCheckBox::stateChanged, this, &ModFilterWidget::onHideInstalledFilterChanged);
-    connect(m_ui->openSource, &QCheckBox::stateChanged, this, &ModFilterWidget::onOpenSourceFilterChanged);
+    connect(m_ui->hideInstalled, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onHideInstalledFilterChanged);
+    connect(m_ui->openSource, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onOpenSourceFilterChanged);
 
-    connect(m_ui->releaseCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
-    connect(m_ui->betaCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
-    connect(m_ui->alphaCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
-    connect(m_ui->unknownCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
+    connect(m_ui->releaseCb, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
+    connect(m_ui->betaCb, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
+    connect(m_ui->alphaCb, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
+    connect(m_ui->unknownCb, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
 
-    connect(m_ui->aiContent, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
-    connect(m_ui->aiContentCode, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
-    connect(m_ui->aiContentAssets, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
-    connect(m_ui->aiContentText, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
-    connect(m_ui->aiContentFunctionality, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
-    connect(m_ui->advertisements, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
-    connect(m_ui->epilepsyTriggers, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
-    connect(m_ui->systemInteractions, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
-    connect(m_ui->telemetry, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
-    connect(m_ui->telemetryOptIn, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
-    connect(m_ui->telemetryOptOut, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
-    connect(m_ui->telemetryAlwaysActive, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
-    connect(m_ui->derivativeWork, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
-    connect(m_ui->paidFeatures, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
-    connect(m_ui->archived, &QCheckBox::stateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(m_ui->aiContent, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(m_ui->aiContentCode, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(m_ui->aiContentAssets, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(m_ui->aiContentText, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(m_ui->aiContentFunctionality, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(m_ui->advertisements, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(m_ui->epilepsyTriggers, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(m_ui->systemInteractions, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(m_ui->telemetry, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(m_ui->telemetryOptIn, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(m_ui->telemetryOptOut, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(m_ui->telemetryAlwaysActive, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(m_ui->derivativeWork, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(m_ui->paidFeatures, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
+    connect(m_ui->archived, &QCheckBox::checkStateChanged, this, &ModFilterWidget::onDisclosureFilterChanged);
 
     setHidden(true);
     loadVersionList();
