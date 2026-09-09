@@ -132,8 +132,12 @@ final class LegacyFrame extends JFrame {
         launcher.setParameter("sessionid", session);
         launcher.setParameter("stand-alone", true); // Show the quit button. This often doesn't seem to work.
         launcher.setParameter("haspaid", true); // Some old versions need this for world saves to work.
-        launcher.setParameter("demo", demo);
         launcher.setParameter("fullscreen", false);
+
+        // The first versions with demo support (12w16a to 12w18a) enable it whenever this parameter is present,
+        // ignoring its value, so it must be left unset entirely for a normal launch.
+        if (demo)
+            launcher.setParameter("demo", true);
 
         add(launcher);
 
