@@ -46,7 +46,7 @@ class MinecraftSettingsWidget;
 
 class MinecraftSettingsWidget : public QWidget {
    public:
-    MinecraftSettingsWidget(MinecraftInstance* instance, QWidget* parent = nullptr);
+    explicit MinecraftSettingsWidget(MinecraftInstance* instance, QWidget* parent = nullptr);
     ~MinecraftSettingsWidget() override;
 
     void loadSettings();
@@ -54,7 +54,7 @@ class MinecraftSettingsWidget : public QWidget {
 
    private:
     void openGlobalSettings();
-    void updateAccountsMenu(SettingsObject& settings);
+    void updateAccountsMenu(SettingsObject& settings) const;
     bool isQuickPlaySupported();
    private slots:
     void saveSelectedLoaders();
