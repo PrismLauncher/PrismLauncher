@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <QProcessEnvironment>
 #include <QString>
 #include <QStringList>
 
@@ -32,5 +33,22 @@ namespace Commandline {
  * @param args the argument string
  * @return a QStringList containing all arguments
  */
-QStringList splitArgs(QString args);
+QStringList splitArgs(const QString& args);
+
+/**
+ * @brief expand variables in a string like a shell would do
+ * @param input the input string
+ * @param dict the environment dictionary
+ * @return the expanded string
+ */
+QString expandVariables(const QString& input, const QProcessEnvironment& dict);
+
+/**
+ * @brief process a commandline string into a QStringList of arguments, expanding variables
+ * @param cmd the commandline string
+ * @param dict the environment dictionary
+ * @return a QStringList containing all arguments
+ */
+QStringList process(const QString& cmd, const QProcessEnvironment& dict = {});
+
 }  // namespace Commandline
