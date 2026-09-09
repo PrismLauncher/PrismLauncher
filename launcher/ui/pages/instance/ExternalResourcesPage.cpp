@@ -369,16 +369,16 @@ void ExternalResourcesPage::updateActions()
     const bool hasSelection = m_ui->treeView->selectionModel()->hasSelection();
     const QModelIndexList selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
     const QList<Resource*> selectedResources = m_model->selectedResources(selection);
-    const bool hasUpdatesEnabled = hasSelection && std::ranges::any_of(selectedResources, [](Resource* resource) {
-                                       return resource->metadata() && !resource->lockUpdate();
-                                   });
-    const bool hasUpdatesDisabled = hasSelection && std::ranges::any_of(selectedResources, [](Resource* resource) {
-                                        return resource->metadata() && resource->lockUpdate();
+    const bool hasUpdatesUnlocked = hasSelection && std::ranges::any_of(selectedResources, [](Resource* resource) {
+                                        return resource->metadata() && !resource->lockUpdate();
                                     });
-    const bool allSelectedUpdatesDisabled =
+    const bool hasUpdatesLocked = hasSelection && std::ranges::any_of(selectedResources, [](Resource* resource) {
+                                      return resource->metadata() && resource->lockUpdate();
+                                  });
+    const bool allSelectedUpdatesLocked =
         hasSelection && std::ranges::all_of(selectedResources, [](Resource* resource) { return resource->lockUpdate(); });
 
-    m_ui->actionUpdateItem->setEnabled(!m_model->empty() && !allSelectedUpdatesDisabled);
+    m_ui->actionUpdateItem->setEnabled(!m_model->empty() && !allSelectedUpdatesLocked);
     m_ui->actionResetItemMetadata->setEnabled(hasSelection);
 
     m_ui->actionChangeVersion->setEnabled(selectedResources.size() == 1 && selectedResources[0]->metadata() != nullptr);
@@ -390,8 +390,8 @@ void ExternalResourcesPage::updateActions()
     m_ui->actionViewHomepage->setEnabled(hasSelection && std::any_of(selectedResources.begin(), selectedResources.end(),
                                                                      [](Resource* resource) { return !resource->homepage().isEmpty(); }));
 
-    m_ui->actionLockUpdates->setEnabled(hasUpdatesEnabled);
-    m_ui->actionUnlockUpdates->setEnabled(hasUpdatesDisabled);
+    m_ui->actionLockUpdates->setEnabled(hasUpdatesUnlocked);
+    m_ui->actionUnlockUpdates->setEnabled(hasUpdatesLocked);
     m_ui->actionExportMetadata->setEnabled(!m_model->empty());
 }
 
