@@ -1,18 +1,13 @@
 #pragma once
 
-#include <QAbstractListModel>
-#include <QAction>
 #include <QDir>
 #include <QFileSystemWatcher>
 #include <QHeaderView>
-#include <QMutex>
-#include <QSet>
 #include <QSortFilterProxyModel>
+#include <QThread>
 #include <QTreeView>
 
 #include "Resource.h"
-
-#include "BaseInstance.h"
 
 #include "tasks/ConcurrentTask.h"
 #include "tasks/Task.h"
