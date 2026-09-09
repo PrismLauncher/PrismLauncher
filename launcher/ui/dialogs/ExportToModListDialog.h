@@ -22,6 +22,7 @@
 #include <QList>
 #include "minecraft/mod/Mod.h"
 #include "modplatform/helpers/ExportToModList.h"
+#include "BaseInstance.h"
 
 namespace Ui {
 class ExportToModListDialog;
@@ -31,7 +32,7 @@ class ExportToModListDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit ExportToModListDialog(QString name, QList<Mod*> mods, QWidget* parent = nullptr);
+    explicit ExportToModListDialog(QString name, QList<Mod*> mods, BaseInstance* inst, QWidget* parent = nullptr);
     ~ExportToModListDialog();
 
     void done(int result) override;
@@ -45,10 +46,12 @@ class ExportToModListDialog : public QDialog {
    private:
     QString extension();
     void enableCustom(bool enabled);
+    void saveExportSettings();
 
     QList<Mod*> m_mods;
     bool m_template_changed;
     QString m_name;
+    BaseInstance* m_inst;
     ExportToModList::Formats m_format = ExportToModList::Formats::HTML;
     Ui::ExportToModListDialog* ui;
     static const QHash<ExportToModList::Formats, QString> exampleLines;

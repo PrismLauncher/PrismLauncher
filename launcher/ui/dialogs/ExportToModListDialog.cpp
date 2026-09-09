@@ -40,8 +40,8 @@ const QHash<ExportToModList::Formats, QString> ExportToModListDialog::exampleLin
     { ExportToModList::CSV, "{name},{url},{version},\"{authors}\"" },
 };
 
-ExportToModListDialog::ExportToModListDialog(QString name, QList<Mod*> mods, QWidget* parent)
-    : QDialog(parent), m_mods(mods), m_template_changed(false), m_name(name), ui(new Ui::ExportToModListDialog)
+ExportToModListDialog::ExportToModListDialog(QString name, QList<Mod*> mods, BaseInstance* inst, QWidget* parent)
+    : QDialog(parent), m_mods(mods), m_template_changed(false), m_name(name), m_inst(inst), ui(new Ui::ExportToModListDialog)
 {
     ui->setupUi(this);
     enableCustom(false);
@@ -68,6 +68,27 @@ ExportToModListDialog::ExportToModListDialog(QString name, QList<Mod*> mods, QWi
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
     ui->buttonBox->button(QDialogButtonBox::Save)->setText(tr("Save"));
     triggerImp();
+
+    // Grab the settings we saved
+    int exportSettings = m_inst->exportSettings();
+
+    // Set the format
+    ui->formatComboBox->setCurrentIndex(exportSettings / 10000 % 10);
+
+    // Check if the format is "Custom"
+    if(m_format != 5)
+    {
+        qDebug() << exportSettings % 10 << ", " << exportSettings / 10 % 10 << ", " << exportSettings / 100 % 10 << ", " << exportSettings / 1000 % 10;
+        ui->filenameCheckBox->setChecked(exportSettings % 10);
+        ui->urlCheckBox->setChecked(exportSettings / 10 % 10);
+        ui->versionCheckBox->setChecked(exportSettings / 100 % 10);
+        ui->authorsCheckBox->setChecked(exportSettings / 1000 % 10);
+    }
+    else
+    {
+        auto exportTemplate = m_inst->exportTemplate();
+        ui->templateText->setPlainText(exportTemplate);
+    }
 }
 
 ExportToModListDialog::~ExportToModListDialog()
@@ -174,7 +195,7 @@ void ExportToModListDialog::done(int result)
             qCritical() << "Failed to save mod list file :" << e.cause();
         }
     }
-
+    ExportToModListDialog::saveExportSettings();
     QDialog::done(result);
 }
 
@@ -231,4 +252,21 @@ void ExportToModListDialog::enableCustom(bool enabled)
 
     ui->filenameCheckBox->setHidden(enabled);
     ui->filenameButton->setHidden(!enabled);
+}
+
+void ExportToModListDialog::saveExportSettings()
+{
+    // Save the settings as an integer of form abcde
+    // a = format, b = author checkbox, c = version checkbox, d = url checkbox, e = filename checkbox
+    int exportSettings = m_format*10000 + ui->authorsCheckBox->isChecked()*1000 + ui->versionCheckBox->isChecked()*100
+                            + ui->urlCheckBox->isChecked() * 10 + ui->filenameCheckBox->isChecked();
+
+    // If the format is "Custom", save the template as well
+    if(m_format == ExportToModList::CUSTOM)
+    {
+        QString exportTemplate = ui->templateText->toPlainText();
+        m_inst->setExportTemplate(exportTemplate);
+    }
+    // Save the settings
+    m_inst->setExportSettings(exportSettings);
 }
