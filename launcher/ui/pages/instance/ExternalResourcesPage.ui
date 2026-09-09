@@ -220,7 +220,7 @@
   </action>
   <action name="actionLockUpdates">
    <property name="text">
-    <string>&amp;Lock Updates</string>
+    <string>Lock Updates</string>
    </property>
    <property name="toolTip">
     <string>Lock the resource to prevent it from being updated</string>
@@ -228,7 +228,7 @@
   </action>
   <action name="actionUnlockUpdates">
    <property name="text">
-    <string>&amp;Unlock Updates</string>
+    <string>Unlock Updates</string>
    </property>
    <property name="toolTip">
     <string>Unlock the resource to allow it to be updated</string>
