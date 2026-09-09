@@ -58,7 +58,7 @@ class JavaPage : public QWidget, public BasePage {
     QString displayName() const override { return tr("Java"); }
     QIcon icon() const override { return QIcon::fromTheme("java"); }
     QString id() const override { return "java-settings"; }
-    QString helpPage() const override { return "Java-settings"; }
+    QString helpPage() const override { return "java-settings"; }
     void retranslate() override;
 
     bool apply() override;

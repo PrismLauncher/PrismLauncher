@@ -69,6 +69,7 @@ class LogPage : public QWidget, public BasePage {
     virtual QIcon icon() const override { return QIcon::fromTheme("log"); }
     virtual QString id() const override { return "console"; }
     virtual bool apply() override;
+    /// Wiki is missing a page for Minecraft logs.
     virtual QString helpPage() const override { return "Minecraft-Logs"; }
     virtual bool shouldDisplay() const override;
     void retranslate() override;

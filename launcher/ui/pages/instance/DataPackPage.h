@@ -31,6 +31,7 @@ class DataPackPage : public ExternalResourcesPage {
     QString displayName() const override { return QObject::tr("Data Packs"); }
     QIcon icon() const override { return QIcon::fromTheme("datapacks"); }
     QString id() const override { return "datapacks"; }
+    /// Wiki is missing a page for data packs.
     QString helpPage() const override { return "Data-packs"; }
     bool shouldDisplay() const override { return true; }
 

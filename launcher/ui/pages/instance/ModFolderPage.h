@@ -56,7 +56,7 @@ class ModFolderPage : public ExternalResourcesPage {
     virtual QString displayName() const override { return tr("Mods"); }
     virtual QIcon icon() const override { return QIcon::fromTheme("loadermods"); }
     virtual QString id() const override { return "mods"; }
-    virtual QString helpPage() const override { return "Loader-mods"; }
+    virtual QString helpPage() const override { return "loader-mods"; }
 
     virtual bool shouldDisplay() const override;
 
@@ -87,7 +87,8 @@ class CoreModFolderPage : public ModFolderPage {
     virtual QString displayName() const override { return tr("Core Mods"); }
     virtual QIcon icon() const override { return QIcon::fromTheme("coremods"); }
     virtual QString id() const override { return "coremods"; }
-    virtual QString helpPage() const override { return "Core-mods"; }
+    /// Wiki is missing a page for Core Mods, using loader-mods instead.
+    virtual QString helpPage() const override { return "loader-mods"; }
 
     virtual bool shouldDisplay() const override;
 };
@@ -101,7 +102,8 @@ class NilModFolderPage : public ModFolderPage {
     virtual QString displayName() const override { return tr("Nilmods"); }
     virtual QIcon icon() const override { return QIcon::fromTheme("coremods"); }
     virtual QString id() const override { return "nilmods"; }
-    virtual QString helpPage() const override { return "Nilmods"; }
+    /// Wiki is missing a page for Nilmods, using loader-mods instead.
+    virtual QString helpPage() const override { return "loader-mods"; }
 
     virtual bool shouldDisplay() const override;
 };

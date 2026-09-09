@@ -54,7 +54,7 @@ class MinecraftPage : public MinecraftSettingsWidget, public BasePage {
     QString displayName() const override { return tr("Minecraft"); }
     QIcon icon() const override { return QIcon::fromTheme("minecraft"); }
     QString id() const override { return "minecraft-settings"; }
-    QString helpPage() const override { return "Minecraft-settings"; }
+    QString helpPage() const override { return "minecraft-settings"; }
     bool apply() override
     {
         saveSettings();

@@ -60,7 +60,7 @@ class FtbPage : public QWidget, public ModpackProviderBasePage {
     virtual QString displayName() const override { return "FTB"; }
     virtual QIcon icon() const override { return QIcon::fromTheme("ftb_logo"); }
     virtual QString id() const override { return "ftb"; }
-    virtual QString helpPage() const override { return "FTB-platform"; }
+    virtual QString helpPage() const override { return "ftb-platform"; }
     virtual bool shouldDisplay() const override;
     void retranslate() override;
 

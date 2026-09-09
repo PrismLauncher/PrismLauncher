@@ -60,7 +60,7 @@ class ExternalToolsPage : public QWidget, public BasePage {
         return icon;
     }
     QString id() const override { return "external-tools"; }
-    QString helpPage() const override { return "Tools"; }
+    QString helpPage() const override { return "tools"; }
     virtual bool apply() override;
     void retranslate() override;
 
