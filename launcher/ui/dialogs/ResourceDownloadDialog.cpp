@@ -256,26 +256,30 @@ void ResourceDownloadDialog::addResource(const ModPlatform::IndexedPack::Ptr& pa
     auto* model = getBaseModel();
     auto* instance = dynamic_cast<MinecraftInstance*>(m_instance);
     if (instance) {
+        ResourceFolderModel* targetModel = nullptr;
         switch (pack->resourceType) {
             case ModPlatform::ResourceType::Mod:
-                model = instance->loaderModList();
+                targetModel = instance->loaderModList();
                 break;
             case ModPlatform::ResourceType::ResourcePack:
-                model = instance->resourcePackList();
+                targetModel = instance->resourcePackList();
                 break;
             case ModPlatform::ResourceType::ShaderPack:
-                model = instance->shaderPackList();
+                targetModel = instance->shaderPackList();
                 break;
             case ModPlatform::ResourceType::DataPack:
-                model = instance->dataPackList();
+                targetModel = instance->dataPackList();
                 break;
                 // case ModPlatform::ResourceType::World:
-                // model = instance->worldList();
+                // targetModel = instance->worldList();
             case ModPlatform::ResourceType::TexturePack:
-                model = instance->texturePackList();
+                targetModel = instance->texturePackList();
                 break;
             default:
                 break;
+        }
+        if (targetModel != nullptr && targetModel->id() != model->id()) {
+            model = targetModel;
         }
     }
     selectedPage()->addResourceToPage(pack, ver, model, std::move(downloadReason), std::move(dependentOn));
@@ -371,7 +375,7 @@ ResourceDownloadDialog* ResourceDownloadDialog::createMod(QWidget* parent,
     QList<BasePage*> pages;
 
     // need to load all resources for dependency task
-    auto* mInstance = dynamic_cast<MinecraftInstance*>(instance);
+    auto* mInstance = instance;
     if (mInstance) {
         for (auto* model : mInstance->resourceLists()) {
             if (model) {

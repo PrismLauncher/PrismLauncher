@@ -23,6 +23,7 @@
 
 #include "Json.h"
 #include "modplatform/ModIndex.h"
+#include "modplatform/ResourceType.h"
 
 namespace {
 bool shouldDownloadOnSide(const QString& side)
@@ -42,6 +43,10 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     pack.provider = ModPlatform::ResourceProvider::MODRINTH;
     pack.name = Json::requireString(obj, "title");
     pack.resourceType = ModrinthAPI::getResourceType(obj["project_type"].toString());
+    if ((obj.contains("loaders") && obj.value("loaders").toArray({}).contains("datapack")) ||
+        (obj.contains("all_project_types") && obj.value("all_project_types").toArray({}).contains("datapack"))) {
+        pack.resourceType = ModPlatform::ResourceType::DataPack;
+    }
 
     pack.slug = obj["slug"].toString("");
     if (!pack.slug.isEmpty()) {
