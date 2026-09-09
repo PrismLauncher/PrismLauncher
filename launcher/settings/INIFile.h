@@ -48,10 +48,10 @@ class INIFile : public QMap<QString, QVariant> {
    public:
     explicit INIFile();
 
-    bool loadFile(QString fileName);
-    bool loadFile(QByteArray data);
-    bool saveFile(QString fileName);
+    bool loadFile(const QString& fileName);
+    bool loadFile(const QByteArray& data);
+    bool saveFile(const QString& fileName);
 
-    QVariant get(QString key, QVariant def) const;
-    void set(QString key, QVariant val);
+    QVariant get(const QString& key, QVariant def) const;
+    void set(const QString& key, QVariant val);
 };

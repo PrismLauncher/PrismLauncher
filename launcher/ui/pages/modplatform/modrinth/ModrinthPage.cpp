@@ -58,7 +58,7 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
     , m_ui(new Ui::ModrinthPage)
     , m_dialog(dialog)
     , m_model(new Modrinth::ModpackListModel(this))
-    , m_fetch_progress(this, false)
+    , m_fetchProgress(this, false)
 {
     m_ui->setupUi(this);
     createFilterWidget();
@@ -70,16 +70,16 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
     m_ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_ui->versionSelectionBox->view()->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
-    m_search_timer.setSingleShot(true);
+    m_searchTimer.setTimerType(Qt::TimerType::CoarseTimer);
+    m_searchTimer.setSingleShot(true);
 
-    connect(&m_search_timer, &QTimer::timeout, this, &ModrinthPage::triggerSearch);
+    connect(&m_searchTimer, &QTimer::timeout, this, &ModrinthPage::triggerSearch);
 
-    m_fetch_progress.hideIfInactive(true);
-    m_fetch_progress.setFixedHeight(24);
-    m_fetch_progress.progressFormat("");
+    m_fetchProgress.hideIfInactive(true);
+    m_fetchProgress.setFixedHeight(24);
+    m_fetchProgress.progressFormat("");
 
-    m_ui->verticalLayout->insertWidget(1, &m_fetch_progress);
+    m_ui->verticalLayout->insertWidget(1, &m_fetchProgress);
 
     m_ui->sortByBox->addItem(tr("Sort by Relevance"));
     m_ui->sortByBox->addItem(tr("Sort by Total Downloads"));
@@ -121,11 +121,11 @@ bool ModrinthPage::eventFilter(QObject* watched, QEvent* event)
             keyEvent->accept();
             return true;
         }
-        if (m_search_timer.isActive()) {
-            m_search_timer.stop();
+        if (m_searchTimer.isActive()) {
+            m_searchTimer.stop();
         }
 
-        m_search_timer.start(350);
+        m_searchTimer.start(350);
     }
     return QObject::eventFilter(watched, event);
 }
@@ -200,15 +200,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
                 }
                 return false;
             };
-#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
             m_current->versions.removeIf(pred);
-#else
-            for (auto it = m_current->versions.begin(); it != m_current->versions.end();)
-                if (pred(*it))
-                    it = m_current->versions.erase(it);
-                else
-                    ++it;
-#endif
             for (const auto& version : m_current->versions) {
                 m_ui->versionSelectionBox->addItem(version.getVersionDisplayString(), QVariant(version.fileId));
             }
@@ -351,7 +343,7 @@ void ModrinthPage::triggerSearch()
     m_ui->versionSelectionBox->clear();
     bool filterChanged = m_filterWidget->changed();
     m_model->searchWithTerm(m_ui->searchEdit->text(), m_ui->sortByBox->currentIndex(), m_filterWidget->getFilter(), filterChanged);
-    m_fetch_progress.watch(m_model->activeSearchJob().get());
+    m_fetchProgress.watch(m_model->activeSearchJob().get());
 }
 
 void ModrinthPage::onVersionSelectionChanged(int index)

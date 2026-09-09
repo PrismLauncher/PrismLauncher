@@ -322,11 +322,11 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, Ena
     return succeeded;
 }
 
-static QMutex s_update_task_mutex;
+static QMutex s_updateTaskMutex;
 bool ResourceFolderModel::update()
 {
     // We hold a lock here to prevent race conditions on the m_current_update_task reset.
-    QMutexLocker lock(&s_update_task_mutex);
+    QMutexLocker lock(&s_updateTaskMutex);
 
     // Already updating, so we schedule a future update and return.
     if (m_currentUpdateTask) {
@@ -852,7 +852,7 @@ void ResourceFolderModel::onParseFailed(int ticket, const QString& resourceId)
     // update index
     m_resourcesIndex.clear();
     int idx = 0;
-    for (const auto& mod : qAsConst(m_resources)) {
+    for (const auto& mod : std::as_const(m_resources)) {
         m_resourcesIndex[mod->internalId()] = idx;
         idx++;
     }
@@ -959,7 +959,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& currentSet, QSet<QString>&
     {
         m_resourcesIndex.clear();
         int idx = 0;
-        for (const auto& mod : qAsConst(m_resources)) {
+        for (const auto& mod : std::as_const(m_resources)) {
             m_resourcesIndex[mod->internalId()] = idx;
             idx++;
         }

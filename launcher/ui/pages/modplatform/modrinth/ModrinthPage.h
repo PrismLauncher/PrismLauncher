@@ -37,7 +37,6 @@
 #pragma once
 
 #include "modplatform/ModIndex.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 
 #include "ui/pages/modplatform/ModpackProviderBasePage.h"
@@ -80,7 +79,7 @@ class ModrinthPage : public QWidget, public ModpackProviderBasePage {
     bool eventFilter(QObject* watched, QEvent* event) override;
 
     /** Programatically set the term in the search bar. */
-    void setSearchTerm(QString) override;
+    void setSearchTerm(QString /*unused*/) override;
     /** Get the current term in the search bar. */
     QString getSerachTerm() const override;
 
@@ -98,10 +97,10 @@ class ModrinthPage : public QWidget, public ModpackProviderBasePage {
     ModPlatform::IndexedPack::Ptr m_current;
     QString m_selectedVersion;
 
-    ProgressWidget m_fetch_progress;
+    ProgressWidget m_fetchProgress;
 
     // Used to do instant searching with a delay to cache quick changes
-    QTimer m_search_timer;
+    QTimer m_searchTimer;
 
     std::unique_ptr<ModFilterWidget> m_filterWidget;
     Task::Ptr m_categoriesTask;

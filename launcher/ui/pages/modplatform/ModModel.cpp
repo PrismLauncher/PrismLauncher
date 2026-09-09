@@ -54,8 +54,8 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
 
     return {
         .type = ModPlatform::ResourceType::Mod,
-        .offset = m_next_search_offset,
-        .search = m_search_term,
+        .offset = m_nextSearchOffset,
+        .search = m_searchTerm,
         .sorting = sort,
         .loaders = loaders,
         .versions = versions,
@@ -94,12 +94,12 @@ ResourceAPI::ProjectInfoArgs ModModel::createInfoArguments(const QModelIndex& in
 
 void ModModel::searchWithTerm(const QString& term, unsigned int sort, bool filterChanged)
 {
-    if (m_search_term == term && m_search_term.isNull() == term.isNull() && m_current_sort_index == sort && !filterChanged) {
+    if (m_searchTerm == term && m_searchTerm.isNull() == term.isNull() && m_currentSortIndex == sort && !filterChanged) {
         return;
     }
 
     setSearchTerm(term);
-    m_current_sort_index = sort;
+    m_currentSortIndex = sort;
 
     refresh();
 }
