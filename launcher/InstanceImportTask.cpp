@@ -62,7 +62,7 @@
 #include <utility>
 
 InstanceImportTask::InstanceImportTask(QUrl sourceUrl, bool trustedSource, QWidget* parent, QMap<QString, QString> extraInfo)
-    : m_sourceUrl(std::move(sourceUrl)), m_trustedSource(trustedSource), m_extra_info(std::move(extraInfo)), m_parent(parent)
+    : m_sourceUrl(std::move(sourceUrl)), m_trustedSource(trustedSource), m_extraInfo(std::move(extraInfo)), m_parent(parent)
 {}
 
 bool InstanceImportTask::abort()
@@ -282,18 +282,18 @@ bool installIcon(const QString& root, const QString& instIconKey)
 void InstanceImportTask::processFlame()
 {
     shared_qobject_ptr<FlameCreationTask> instCreationTask = nullptr;
-    if (!m_extra_info.isEmpty()) {
-        auto packIdIt = m_extra_info.constFind("pack_id");
-        Q_ASSERT(packIdIt != m_extra_info.constEnd());
+    if (!m_extraInfo.isEmpty()) {
+        auto packIdIt = m_extraInfo.constFind("pack_id");
+        Q_ASSERT(packIdIt != m_extraInfo.constEnd());
         const auto& packId = packIdIt.value();
 
-        auto packVersionIdIt = m_extra_info.constFind("pack_version_id");
-        Q_ASSERT(packVersionIdIt != m_extra_info.constEnd());
+        auto packVersionIdIt = m_extraInfo.constFind("pack_version_id");
+        Q_ASSERT(packVersionIdIt != m_extraInfo.constEnd());
         const auto& packVersionId = packVersionIdIt.value();
 
         QString originalInstanceId;
-        auto originalInstanceIdIt = m_extra_info.constFind("original_instance_id");
-        if (originalInstanceIdIt != m_extra_info.constEnd()) {
+        auto originalInstanceIdIt = m_extraInfo.constFind("original_instance_id");
+        if (originalInstanceIdIt != m_extraInfo.constEnd()) {
             originalInstanceId = originalInstanceIdIt.value();
         }
 
@@ -380,20 +380,20 @@ void InstanceImportTask::processMultiMC()
 void InstanceImportTask::processModrinth()
 {
     shared_qobject_ptr<ModrinthCreationTask> instCreationTask = nullptr;
-    if (!m_extra_info.isEmpty()) {
-        auto packIdIt = m_extra_info.constFind("pack_id");
-        Q_ASSERT(packIdIt != m_extra_info.constEnd());
+    if (!m_extraInfo.isEmpty()) {
+        auto packIdIt = m_extraInfo.constFind("pack_id");
+        Q_ASSERT(packIdIt != m_extraInfo.constEnd());
         const auto& packId = packIdIt.value();
 
         QString packVersionId;
-        auto packVersionIdIt = m_extra_info.constFind("pack_version_id");
-        if (packVersionIdIt != m_extra_info.constEnd()) {
+        auto packVersionIdIt = m_extraInfo.constFind("pack_version_id");
+        if (packVersionIdIt != m_extraInfo.constEnd()) {
             packVersionId = packVersionIdIt.value();
         }
 
         QString originalInstanceId;
-        auto originalInstanceIdIt = m_extra_info.constFind("original_instance_id");
-        if (originalInstanceIdIt != m_extra_info.constEnd()) {
+        auto originalInstanceIdIt = m_extraInfo.constFind("original_instance_id");
+        if (originalInstanceIdIt != m_extraInfo.constEnd()) {
             originalInstanceId = originalInstanceIdIt.value();
         }
 

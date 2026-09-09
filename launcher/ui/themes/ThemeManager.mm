@@ -20,7 +20,7 @@
 
 #include <AppKit/AppKit.h>
 
-void ThemeManager::setTitlebarColorOnMac(WId windowId, QColor color)
+void ThemeManager::setTitlebarColorOnMac(WId windowId, const QColor& color)
 {
     if (windowId == 0) {
         return;
@@ -33,7 +33,7 @@ void ThemeManager::setTitlebarColorOnMac(WId windowId, QColor color)
 
 }
 
-void ThemeManager::setTitlebarColorOfAllWindowsOnMac(QColor color)
+void ThemeManager::setTitlebarColorOfAllWindowsOnMac(const QColor& color)
 {
     NSArray<NSWindow*>* windows = [NSApp windows];
     for (NSWindow* window : windows) {

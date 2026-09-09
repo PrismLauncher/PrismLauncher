@@ -26,11 +26,9 @@
 
 #include "net/ApiRequest.h"
 
-Technic::SingleZipPackInstallTask::SingleZipPackInstallTask(const QUrl& sourceUrl, const QString& minecraftVersion)
-{
-    m_sourceUrl = sourceUrl;
-    m_minecraftVersion = minecraftVersion;
-}
+Technic::SingleZipPackInstallTask::SingleZipPackInstallTask(QUrl sourceUrl, QString minecraftVersion)
+    : m_sourceUrl(std::move(sourceUrl)), m_minecraftVersion(std::move(minecraftVersion))
+{}
 
 bool Technic::SingleZipPackInstallTask::abort()
 {
@@ -50,7 +48,7 @@ void Technic::SingleZipPackInstallTask::executeTask()
     m_filesNetJob.reset(new NetJob(tr("Modpack download"), APPLICATION->network()));
     m_filesNetJob->addNetAction(Net::ApiRequest::makeCached(m_sourceUrl, entry));
     m_archivePath = entry->getFullPath();
-    auto job = m_filesNetJob.get();
+    auto* job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SingleZipPackInstallTask::downloadSucceeded);
     connect(job, &NetJob::progress, this, &Technic::SingleZipPackInstallTask::downloadProgressChanged);
     connect(job, &NetJob::stepProgress, this, &Technic::SingleZipPackInstallTask::propagateStepProgress);
@@ -80,7 +78,7 @@ void Technic::SingleZipPackInstallTask::downloadFailed(QString reason)
 {
     m_abortable = false;
     m_filesNetJob.reset();
-    emitFailed(reason);
+    emitFailed(std::move(reason));
 }
 
 void Technic::SingleZipPackInstallTask::downloadProgressChanged(qint64 current, qint64 total)

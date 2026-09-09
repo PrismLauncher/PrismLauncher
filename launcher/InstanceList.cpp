@@ -35,7 +35,6 @@
  */
 
 #include "InstanceList.h"
-#include <qdirlisting.h>
 
 #include <QDebug>
 #include <QDirListing>
@@ -57,7 +56,6 @@
 #include "FileSystem.h"
 
 #include "InstanceTask.h"
-#include "NullInstance.h"
 #include "WatchLock.h"
 #include "minecraft/MinecraftInstance.h"
 #include "settings/INISettingsObject.h"
@@ -69,13 +67,12 @@
 const static int g_GROUP_FILE_FORMAT_VERSION = 1;
 
 InstanceList::InstanceList(SettingsObject* settings, const QStringList& instDirs, QObject* parent)
-    : QAbstractListModel(parent), m_globalSettings(settings)
+    : QAbstractListModel(parent), m_globalSettings(settings), m_watcher(new QFileSystemWatcher(this))
 {
     resumeWatch();
 
     connect(this, &InstanceList::instancesChanged, this, &InstanceList::providerUpdated);
 
-    m_watcher = new QFileSystemWatcher(this);
     connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &InstanceList::instanceDirContentsChanged);
 
     for (const auto& dir : instDirs) {
@@ -914,23 +911,27 @@ void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting,
     QStringList candidates;
     candidates << instDir << additionalDirs;
     for (const auto& dir : candidates) {
-        if (dir.isEmpty())
+        if (dir.isEmpty()) {
             continue;
+        }
         QDir::current().mkpath(dir);
         QString canonical = QDir(dir).canonicalPath();
-        if (!canonical.isEmpty() && !newDirs.contains(canonical))
+        if (!canonical.isEmpty() && !newDirs.contains(canonical)) {
             newDirs << canonical;
+        }
     }
 
     if (newDirs != m_instDirs) {
         if (m_groupsLoaded) {
             saveGroupList();
         }
-        for (const auto& dir : m_instDirs)
+        for (const auto& dir : m_instDirs) {
             m_watcher->removePath(dir);
+        }
         m_instDirs = newDirs;
-        for (const auto& dir : m_instDirs)
+        for (const auto& dir : m_instDirs) {
             m_watcher->addPath(dir);
+        }
         m_groupsLoaded = false;
         beginRemoveRows(QModelIndex(), 0, count());
         m_instances.erase(m_instances.begin(), m_instances.end());
@@ -954,12 +955,12 @@ namespace {
 
 class InstanceStaging : public Task {
     Q_OBJECT
-    const unsigned minBackoff = 1;
-    const unsigned maxBackoff = 16;
+    const unsigned m_minBackoff = 1;
+    const unsigned m_maxBackoff = 16;
 
    public:
     InstanceStaging(InstanceList* parent, InstanceTask* child, SettingsObject* settings)
-        : m_parent(parent), m_backoff(minBackoff, maxBackoff)
+        : m_parent(parent), m_backoff(m_minBackoff, m_maxBackoff)
     {
         m_stagingPath = parent->getStagedInstancePath(child->targetDir());
 
@@ -1015,13 +1016,13 @@ class InstanceStaging : public Task {
             return;
         }
         // we actually failed, retry?
-        if (sleepTime == maxBackoff) {
+        if (sleepTime == m_maxBackoff) {
             m_backoffTimer.stop();
             emitFailed(tr("Failed to commit instance, even after multiple retries. It is being blocked by something."));
             return;
         }
         qDebug() << "Failed to commit instance" << m_child->name() << "Initiating backoff:" << sleepTime;
-        m_backoffTimer.start(sleepTime * 500);
+        m_backoffTimer.start(static_cast<int>(sleepTime * 500));
     }
     void childFailed(const QString& reason)
     {

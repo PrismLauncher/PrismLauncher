@@ -40,6 +40,7 @@
 #include <MMCZip.h>
 #include <QDirListing>
 #include <QtConcurrentRun>
+#include <utility>
 
 #include "SolderPackManifest.h"
 #include "TechnicPackProcessor.h"
@@ -51,13 +52,8 @@ Technic::SolderPackInstallTask::SolderPackInstallTask(QNetworkAccessManager* net
                                                       const QString& pack,
                                                       const QString& version,
                                                       const QString& minecraftVersion)
-{
-    m_solderUrl = solderUrl;
-    m_pack = pack;
-    m_version = version;
-    m_network = network;
-    m_minecraftVersion = minecraftVersion;
-}
+    : m_network(network), m_solderUrl(solderUrl), m_pack(pack), m_version(version), m_minecraftVersion(minecraftVersion)
+{}
 
 bool Technic::SolderPackInstallTask::abort()
 {
@@ -76,7 +72,7 @@ void Technic::SolderPackInstallTask::executeTask()
     auto [action, response] = Net::ApiRequest::makeByteArray(sourceUrl);
     m_filesNetJob->addNetAction(action);
 
-    auto job = m_filesNetJob.get();
+    auto* job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, [this, response] { fileListSucceeded(response); });
     connect(job, &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
     connect(job, &NetJob::aborted, this, &Technic::SolderPackInstallTask::downloadAborted);
@@ -119,7 +115,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded(QByteArray* response)
         i++;
     }
 
-    m_modCount = build.mods.size();
+    m_modCount = static_cast<int>(build.mods.size());
 
     connect(m_filesNetJob.get(), &NetJob::succeeded, this, &Technic::SolderPackInstallTask::downloadSucceeded);
     connect(m_filesNetJob.get(), &NetJob::progress, this, &Technic::SolderPackInstallTask::downloadProgressChanged);
@@ -158,7 +154,7 @@ void Technic::SolderPackInstallTask::downloadFailed(QString reason)
 {
     m_abortable = false;
     m_filesNetJob.reset();
-    emitFailed(reason);
+    emitFailed(std::move(reason));
 }
 
 void Technic::SolderPackInstallTask::downloadProgressChanged(qint64 current, qint64 total)

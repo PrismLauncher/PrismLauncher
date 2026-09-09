@@ -36,17 +36,14 @@
 #include "IconUtils.h"
 
 #include <QDirListing>
+#include <QFileInfo>
 
-namespace {
-static const QStringList validIconExtensions = { { "svg", "png", "ico", "gif", "jpg", "jpeg", "webp" } };
-}
+static const QStringList g_validIconExtensions = { { "svg", "png", "ico", "gif", "jpg", "jpeg", "webp" } };
 
 namespace IconUtils {
 
 QString findBestIconIn(const QString& folder, const QString& iconKey)
 {
-    QString best_filename;
-
     for (const auto& entry : QDirListing(folder, QDirListing::IteratorFlag::FilesOnly | QDirListing::IteratorFlag::ResolveSymlinks)) {
         auto fileInfo = entry.fileInfo();
         if ((fileInfo.completeBaseName() == iconKey || fileInfo.fileName() == iconKey) && isIconSuffix(fileInfo.suffix())) {
@@ -58,12 +55,12 @@ QString findBestIconIn(const QString& folder, const QString& iconKey)
 
 QString getIconFilter()
 {
-    return "(*." + validIconExtensions.join(" *.") + ")";
+    return "(*." + g_validIconExtensions.join(" *.") + ")";
 }
 
-bool isIconSuffix(QString suffix)
+bool isIconSuffix(const QString& suffix)
 {
-    return validIconExtensions.contains(suffix);
+    return g_validIconExtensions.contains(suffix);
 }
 
 }  // namespace IconUtils
