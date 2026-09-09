@@ -438,7 +438,6 @@ void SkinManageDialog::on_urlBtn_clicked()
 }
 
 namespace {
-
 class WaitTask : public Task {
    public:
     WaitTask() = default;

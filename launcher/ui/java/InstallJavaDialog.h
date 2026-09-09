@@ -19,7 +19,6 @@
 #pragma once
 
 #include <QDialog>
-#include "BaseInstance.h"
 #include "ui/pages/BasePageProvider.h"
 
 class MinecraftInstance;
@@ -41,7 +40,7 @@ class InstallDialog final : public QDialog, private BasePageProvider {
     void done(int result) override;
 
    private:
-    PageContainer* container;
-    QDialogButtonBox* buttons;
+    PageContainer* m_container;
+    QDialogButtonBox* m_buttons;
 };
 }  // namespace Java
