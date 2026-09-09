@@ -7,11 +7,11 @@
 #include <QTime>
 #include <limits>
 
-#define GET_TYPE()                                                          \
-    Qt::ConnectionType type;                                                \
-    if (QThread::currentThread() != QCoreApplication::instance()->thread()) \
-        type = Qt::BlockingQueuedConnection;                                \
-    else                                                                    \
+#define GET_TYPE()                           \
+    Qt::ConnectionType type;                 \
+    if (!QThread::isMainThread())            \
+        type = Qt::BlockingQueuedConnection; \
+    else                                     \
         type = Qt::DirectConnection;
 
 #define DEFINE_FUNC_NO_PARAM(NAME, RET_TYPE, RET_DEF)                                        \
