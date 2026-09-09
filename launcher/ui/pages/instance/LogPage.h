@@ -73,6 +73,9 @@ class LogPage : public QWidget, public BasePage {
     virtual bool shouldDisplay() const override;
     void retranslate() override;
 
+   signals:
+    void selectedLaunchTaskChanged(LaunchTask* task);
+
    private slots:
     void on_btnPaste_clicked();
     void on_btnCopy_clicked();
@@ -88,17 +91,21 @@ class LogPage : public QWidget, public BasePage {
     void findNextActivated();
     void findPreviousActivated();
 
-    void onInstanceLaunchTaskChanged(LaunchTask* proc);
+    void on_sessionCombo_currentIndexChanged(int index);
+    void onInstanceLaunchTaskAdded(LaunchTask* proc);
+    void onInstanceLaunchTaskRemoved(quint64 sessionId);
 
    private:
     void modelStateToUI();
     void UIToModelState();
     void setInstanceLaunchTaskChanged(LaunchTask* proc, bool initial);
+    QString launchTaskDisplayName(const LaunchTask* task) const;
+    int sessionIndex(quint64 sessionId) const;
 
    private:
     Ui::LogPage* ui;
     BaseInstance* m_instance;
-    LaunchTask* m_process;
+    LaunchTask* m_process = nullptr;
 
     LogFormatProxyModel* m_proxy;
     shared_qobject_ptr<LogModel> m_model;

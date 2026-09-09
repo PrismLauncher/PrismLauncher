@@ -42,6 +42,20 @@
    <item row="0" column="0" colspan="5">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
+      <widget class="QLabel" name="sessionLabel">
+       <property name="text">
+        <string>Process:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="sessionCombo">
+       <property name="minimumContentsLength">
+        <number>14</number>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QCheckBox" name="trackLogCheckbox">
        <property name="text">
         <string>Keep updating</string>
@@ -168,7 +182,8 @@
    <header>ui/widgets/LogView.h</header>
   </customwidget>
  </customwidgets>
- <tabstops>
+  <tabstops>
+   <tabstop>sessionCombo</tabstop>
   <tabstop>trackLogCheckbox</tabstop>
   <tabstop>wrapCheckbox</tabstop>
   <tabstop>colorCheckbox</tabstop>
