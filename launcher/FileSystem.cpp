@@ -408,7 +408,7 @@ bool copy::operator()(const QString& offset, bool dryRun)
     if (!fs::is_directory(StringUtils::toStdString(src)))
         copy_file(src, "");
 
-    bool there_were_errors = false;
+    bool thereWereErrors = false;
 #ifdef Q_OS_WIN32
     if (!m_symlinksToCopy.empty()) {
         FS::create_link folderLink(m_symlinksToCopy);
@@ -419,13 +419,13 @@ bool copy::operator()(const QString& offset, bool dryRun)
             qDebug() << "attempting to run symlinking with privilege";
 
             QEventLoop loop;
-            bool got_priv_results = false;
+            bool gotPrivResults = false;
 
-            connect(&folderLink, &FS::create_link::finishedPrivileged, this, [&got_priv_results, &loop](bool gotResults) {
+            connect(&folderLink, &FS::create_link::finishedPrivileged, this, [&gotPrivResults, &loop](bool gotResults) {
                 if (!gotResults) {
                     qDebug() << "Privileged run exited without results!";
                 }
-                got_priv_results = gotResults;
+                gotPrivResults = gotResults;
                 loop.quit();
             });
             folderLink.runPrivileged();
@@ -434,17 +434,17 @@ bool copy::operator()(const QString& offset, bool dryRun)
 
             for (auto result : folderLink.getResults()) {
                 if (result.err_value != 0) {
-                    there_were_errors = true;
+                    thereWereErrors = true;
                 }
             }
-            if (there_were_errors) {
+            if (thereWereErrors) {
                 qDebug() << "errors encountered while trying to link files";
             }
         }
     }
 #endif
 
-    return err.value() == 0 && !there_were_errors;
+    return err.value() == 0 && !thereWereErrors;
 }
 
 /// qDebug print support for the LinkPair struct
