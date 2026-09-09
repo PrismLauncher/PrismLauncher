@@ -9,11 +9,11 @@
 
 namespace ResourceDownload {
 
-DataPackResourceModel::DataPackResourceModel(const BaseInstance& base_inst,
+DataPackResourceModel::DataPackResourceModel(ResourceFolderModel* resourceList,
                                              const ResourceAPI* api,
                                              QString debugName,
                                              QString metaEntryBase)
-    : ResourceModel(api), m_base_instance(base_inst), m_debugName(debugName + " (Model)"), m_metaEntryBase(metaEntryBase)
+    : ResourceModel(resourceList, api), m_debugName(debugName + " (Model)"), m_metaEntryBase(metaEntryBase)
 {}
 
 /******** Make data requests ********/
@@ -21,13 +21,17 @@ DataPackResourceModel::DataPackResourceModel(const BaseInstance& base_inst,
 ResourceAPI::SearchArgs DataPackResourceModel::createSearchArguments()
 {
     auto sort = getCurrentSortingMethodByIndex();
-    return { ModPlatform::ResourceType::DataPack, m_nextSearchOffset, m_searchTerm, sort, ModPlatform::ModLoaderType::DataPack };
+    return { .type = ModPlatform::ResourceType::DataPack,
+             .offset = m_nextSearchOffset,
+             .search = m_searchTerm,
+             .sorting = sort,
+             .loaders = ModPlatform::ModLoaderType::DataPack };
 }
 
 ResourceAPI::VersionSearchArgs DataPackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto pack = m_packs[entry.row()];
-    return { pack, {}, ModPlatform::ModLoaderType::DataPack };
+    return { .pack = pack, .mcVersions = {}, .loaders = ModPlatform::ModLoaderType::DataPack };
 }
 
 ResourceAPI::ProjectInfoArgs DataPackResourceModel::createInfoArguments(const QModelIndex& entry)

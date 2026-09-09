@@ -19,6 +19,7 @@
 
 class NetJob;
 class ResourceAPI;
+class ResourceFolderModel;
 
 namespace ModPlatform {
 struct IndexedPack;
@@ -34,7 +35,7 @@ class ResourceModel : public QAbstractListModel {
    public:
     using DownloadTaskPtr = shared_qobject_ptr<ResourceDownloadTask>;
 
-    explicit ResourceModel(const ResourceAPI* api);
+    ResourceModel(ResourceFolderModel*, const ResourceAPI* api);
     ~ResourceModel() override;
 
     auto data(const QModelIndex& /*index*/, int role) const -> QVariant override;
@@ -54,7 +55,7 @@ class ResourceModel : public QAbstractListModel {
 
     auto getSortingMethods() const { return m_api->getSortingMethods(); }
 
-    virtual QVariant getInstalledPackVersion(ModPlatform::IndexedPack::Ptr /*unused*/) const { return {}; }
+    virtual QVariant getInstalledPackVersion(ModPlatform::IndexedPack::Ptr /*unused*/) const;
     /** Whether the version is opted out or not. Currently only makes sense in CF. */
     virtual bool optedOut(const ModPlatform::IndexedVersion& ver) const
     {
@@ -110,7 +111,7 @@ class ResourceModel : public QAbstractListModel {
 
     auto getCurrentSortingMethodByIndex() const -> std::optional<ResourceAPI::SortingMethod>;
 
-    virtual bool isPackInstalled(ModPlatform::IndexedPack::Ptr /*unused*/) const { return false; }
+    virtual bool isPackInstalled(ModPlatform::IndexedPack::Ptr /*unused*/) const;
 
    protected:
     /* Basic search parameters */
@@ -118,6 +119,8 @@ class ResourceModel : public QAbstractListModel {
     int m_nextSearchOffset = 0;
     QString m_searchTerm;
     unsigned int m_currentSortIndex = 0;
+
+    ResourceFolderModel* m_resourceList = nullptr;
 
     const ResourceAPI* m_api;
 

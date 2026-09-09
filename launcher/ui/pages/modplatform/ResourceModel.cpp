@@ -18,11 +18,11 @@
 #include "BuildConfig.h"
 #include "settings/SettingsObject.h"
 
+#include "minecraft/mod/ResourceFolderModel.h"
+#include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "net/ApiRequest.h"
 #include "net/NetJob.h"
-
-#include "modplatform/ModIndex.h"
 
 #include "ui/widgets/ProjectItem.h"
 
@@ -30,7 +30,7 @@ namespace ResourceDownload {
 
 QHash<ResourceModel*, bool> ResourceModel::s_runningModels;
 
-ResourceModel::ResourceModel(const ResourceAPI* api) : m_api(api)
+ResourceModel::ResourceModel(ResourceFolderModel* resourceList, const ResourceAPI* api) : m_resourceList(resourceList), m_api(api)
 {
     s_runningModels.insert(this, true);
     if (APPLICATION_DYN) {
@@ -41,6 +41,38 @@ ResourceModel::ResourceModel(const ResourceAPI* api) : m_api(api)
 ResourceModel::~ResourceModel()
 {
     s_runningModels.find(this).value() = false;
+}
+
+bool ResourceModel::isPackInstalled(ModPlatform::IndexedPack::Ptr pack) const
+{
+    if (!m_resourceList) {
+        return false;
+    }
+
+    for (qsizetype i = 0; i < m_resourceList->size(); ++i) {
+        auto& resource = m_resourceList->at(i);
+        if (auto meta = resource.metadata(); meta && meta->provider == pack->provider && meta->project_id == pack->addonId) {
+            return true;
+        }
+    }
+    return false;
+}
+
+QVariant ResourceModel::getInstalledPackVersion(ModPlatform::IndexedPack::Ptr pack) const
+{
+    if (!m_resourceList) {
+        return {};
+    }
+
+    for (qsizetype i = 0; i < m_resourceList->size(); ++i) {
+        auto& resource = m_resourceList->at(i);
+        if (auto meta = resource.metadata(); meta) {
+            if (meta->provider == pack->provider && meta->project_id == pack->addonId) {
+                return meta->version();
+            }
+        }
+    }
+    return {};
 }
 
 auto ResourceModel::data(const QModelIndex& index, int role) const -> QVariant

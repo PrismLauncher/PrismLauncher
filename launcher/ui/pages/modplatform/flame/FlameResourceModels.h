@@ -12,7 +12,7 @@ class FlameTexturePackModel : public TexturePackResourceModel {
     Q_OBJECT
 
    public:
-    FlameTexturePackModel(const BaseInstance&);
+    FlameTexturePackModel(ResourceFolderModel*);
     ~FlameTexturePackModel() override = default;
 
     bool optedOut(const ModPlatform::IndexedVersion& ver) const override;
