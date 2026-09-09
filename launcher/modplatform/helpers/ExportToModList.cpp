@@ -43,7 +43,7 @@ QString toHTML(const QList<Mod*>& mods, ExportToModList::OptionalData extraData)
                 line += QString(" [%1]").arg(ver.toHtmlEscaped());
             }
         }
-        if (((extraData & ExportToModList::Authors) != 0) && !mod->authors().isEmpty()) {
+        if ((extraData & ExportToModList::Authors) != 0 && !mod->authors().isEmpty()) {
             line += " by " + mod->authors().join(", ").toHtmlEscaped();
         }
         if ((extraData & ExportToModList::FileName) != 0) {
@@ -86,7 +86,7 @@ QString toMarkdown(const QList<Mod*>& mods, ExportToModList::OptionalData extraD
                 line += QString(" [%1]").arg(ver);
             }
         }
-        if (((extraData & ExportToModList::Authors) != 0) && !mod->authors().isEmpty()) {
+        if ((extraData & ExportToModList::Authors) != 0 && !mod->authors().isEmpty()) {
             line += " by " + toMarkdownEscaped(mod->authors().join(", "));
         }
         if ((extraData & ExportToModList::FileName) != 0) {

@@ -62,7 +62,7 @@ class LockDelegate : public QStyledItemDelegate {
         option.text.clear();
         option.icon = QIcon::fromTheme(locked ? "lock" : "unlock");
         option.features |= QStyleOptionViewItem::HasDecoration;
-        option.decorationAlignment = Qt::AlignCenter;
+        option.decorationAlignment = Qt::AlignBottom | Qt::AlignHCenter;
         option.decorationPosition = QStyleOptionViewItem::Top;
 
         int size = qMin(option.rect.width(), option.rect.height()) * 3 / 4;
