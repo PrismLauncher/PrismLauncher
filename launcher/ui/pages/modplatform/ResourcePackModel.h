@@ -32,6 +32,9 @@ class ResourcePackResourceModel : public ResourceModel {
     ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex&) override;
 
    protected:
+    bool checkVersionFilters(const ModPlatform::IndexedVersion&) override;
+
+   protected:
     const BaseInstance& m_base_instance;
 
    private:
