@@ -71,6 +71,11 @@ class FlameCreationTask final : public InstanceTask {
     void createInstance();
     void executeTask() override;
 
+    // Folder (relative to the instance root) that a CurseForge pack update must extract
+    // into: the old instance's game root, so instances rooted at ".minecraft" are not
+    // abandoned in favor of a fresh "minecraft" folder.
+    static QString packRootForUpdate(const BaseInstance* oldInstance);
+
    private slots:
     void idResolverSucceeded();
     void setupDownloadJob();
@@ -96,6 +101,10 @@ class FlameCreationTask final : public InstanceTask {
     NetJob::Ptr m_filesJob = nullptr;
 
     QString m_managedId, m_managedVersionId;
+
+    // Folder (inside the instance) the pack's files are extracted into; matches the old
+    // instance's game root on update so that ".minecraft" instances don't get abandoned.
+    QString m_rootPath = "minecraft";
 
     QList<std::pair<QString, QString>> m_otherResources;
 
