@@ -100,7 +100,6 @@ class IconList : public QAbstractListModel {
 
    protected slots:
     void fileChanged(const QString& path);
-    void SettingChanged(const Setting& setting, const QVariant& value);
 
    private:
     shared_qobject_ptr<QFileSystemWatcher> m_watcher;
