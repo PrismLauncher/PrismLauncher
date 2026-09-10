@@ -116,7 +116,7 @@ QString expandVariables(const QString& input, const QProcessEnvironment& dict)
                     const auto res = dict.value(result.mid(startIdx, i - 1 - startIdx), "");
                     if (!res.isEmpty()) {
                         result.replace(startIdx - 2, i - startIdx + 2, res);
-                        i = startIdx - 2 + res.length();
+                        i = startIdx - 2 + static_cast<int>(res.length());
                     }
                     state = State::Base;
                 }
@@ -126,7 +126,7 @@ QString expandVariables(const QString& input, const QProcessEnvironment& dict)
                     const auto res = dict.value(result.mid(startIdx, i - startIdx - 1), "");
                     if (!res.isEmpty()) {
                         result.replace(startIdx - 1, i - startIdx, res);
-                        i = startIdx - 1 + res.length();
+                        i = startIdx - 1 + static_cast<int>(res.length());
                     }
                     state = State::Base;
                 }

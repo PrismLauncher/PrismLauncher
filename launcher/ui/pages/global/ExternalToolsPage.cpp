@@ -50,47 +50,47 @@
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
 
-ExternalToolsPage::ExternalToolsPage(QWidget* parent) : QWidget(parent), ui(new Ui::ExternalToolsPage)
+ExternalToolsPage::ExternalToolsPage(QWidget* parent) : QWidget(parent), m_ui(new Ui::ExternalToolsPage)
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
 
-    ui->jsonEditorTextBox->setClearButtonEnabled(true);
+    m_ui->jsonEditorTextBox->setClearButtonEnabled(true);
 
-    ui->jvisualvmLink->setOpenExternalLinks(true);
-    ui->jprofilerLink->setOpenExternalLinks(true);
+    m_ui->jvisualvmLink->setOpenExternalLinks(true);
+    m_ui->jprofilerLink->setOpenExternalLinks(true);
 
-    ui->worldToolTree->header()->setStretchLastSection(false);
-    ui->worldToolTree->header()->setSectionResizeMode(0, QHeaderView::Interactive);
-    ui->worldToolTree->header()->setSectionResizeMode(1, QHeaderView::Stretch);
-    ui->worldToolTree->header()->setSectionResizeMode(2, QHeaderView::Interactive);
-    ui->worldToolTree->header()->resizeSection(0, 150);
-    ui->worldToolTree->header()->resizeSection(2, 36);
+    m_ui->worldToolTree->header()->setStretchLastSection(false);
+    m_ui->worldToolTree->header()->setSectionResizeMode(0, QHeaderView::Interactive);
+    m_ui->worldToolTree->header()->setSectionResizeMode(1, QHeaderView::Stretch);
+    m_ui->worldToolTree->header()->setSectionResizeMode(2, QHeaderView::Interactive);
+    m_ui->worldToolTree->header()->resizeSection(0, 150);
+    m_ui->worldToolTree->header()->resizeSection(2, 36);
     loadSettings();
 }
 
 ExternalToolsPage::~ExternalToolsPage()
 {
-    delete ui;
+    delete m_ui;
 }
 
 void ExternalToolsPage::loadSettings()
 {
-    auto s = APPLICATION->settings();
-    ui->jprofilerPathEdit->setText(s->get("JProfilerPath").toString());
-    ui->jvisualvmPathEdit->setText(s->get("JVisualVMPath").toString());
+    auto* s = APPLICATION->settings();
+    m_ui->jprofilerPathEdit->setText(s->get("JProfilerPath").toString());
+    m_ui->jvisualvmPathEdit->setText(s->get("JVisualVMPath").toString());
 
     // Editors
-    ui->jsonEditorTextBox->setText(s->get("JsonEditor").toString());
+    m_ui->jsonEditorTextBox->setText(s->get("JsonEditor").toString());
 
     // World Tools
-    ui->worldToolTree->clear();
+    m_ui->worldToolTree->clear();
     const QVariantMap tools = Json::toMap(APPLICATION->settings()->get("WorldTools").toString());
     for (auto it = tools.constBegin(); it != tools.constEnd(); ++it) {
-        auto* item = new QTreeWidgetItem(ui->worldToolTree);
+        auto* item = new QTreeWidgetItem(m_ui->worldToolTree);
         item->setText(0, it.key());
         item->setText(1, it.value().toString());
         item->setFlags(item->flags() | Qt::ItemIsEditable);
-        ui->worldToolTree->addTopLevelItem(item);
+        m_ui->worldToolTree->addTopLevelItem(item);
         setupWorldToolBrowseBtn(item);
     }
 }
@@ -118,17 +118,17 @@ void ExternalToolsPage::setupWorldToolBrowseBtn(QTreeWidgetItem* item)
             }
         }
     });
-    ui->worldToolTree->setItemWidget(item, 2, btn);
+    m_ui->worldToolTree->setItemWidget(item, 2, btn);
 }
 void ExternalToolsPage::applySettings()
 {
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
 
-    s->set("JProfilerPath", ui->jprofilerPathEdit->text());
-    s->set("JVisualVMPath", ui->jvisualvmPathEdit->text());
+    s->set("JProfilerPath", m_ui->jprofilerPathEdit->text());
+    s->set("JVisualVMPath", m_ui->jvisualvmPathEdit->text());
 
     // Editors
-    QString jsonEditor = ui->jsonEditorTextBox->text();
+    QString jsonEditor = m_ui->jsonEditorTextBox->text();
     if (!jsonEditor.isEmpty() && (!QFileInfo(jsonEditor).exists() || !QFileInfo(jsonEditor).isExecutable())) {
         QString found = QStandardPaths::findExecutable(jsonEditor);
         if (!found.isEmpty()) {
@@ -139,8 +139,8 @@ void ExternalToolsPage::applySettings()
 
     // World Tools
     QVariantMap tools;
-    auto* item = ui->worldToolTree->topLevelItem(0);
-    for (int i = 1; item != nullptr; item = ui->worldToolTree->topLevelItem(i++)) {
+    auto* item = m_ui->worldToolTree->topLevelItem(0);
+    for (int i = 1; item != nullptr; item = m_ui->worldToolTree->topLevelItem(i++)) {
         const QString name = item->text(0).trimmed();
         const QString command = item->text(1).trimmed();
         if (!name.isEmpty() && !command.isEmpty()) {
@@ -152,27 +152,27 @@ void ExternalToolsPage::applySettings()
 
 void ExternalToolsPage::on_jprofilerPathBtn_clicked()
 {
-    QString raw_dir = ui->jprofilerPathEdit->text();
+    QString rawDir = m_ui->jprofilerPathEdit->text();
     QString error;
     do {
-        raw_dir = QFileDialog::getExistingDirectory(this, tr("JProfiler Folder"), raw_dir);
-        if (raw_dir.isEmpty()) {
+        rawDir = QFileDialog::getExistingDirectory(this, tr("JProfiler Folder"), rawDir);
+        if (rawDir.isEmpty()) {
             break;
         }
-        QString cooked_dir = FS::NormalizePath(raw_dir);
-        if (!APPLICATION->profilers()["jprofiler"]->check(cooked_dir, &error)) {
+        QString cookedDir = FS::NormalizePath(rawDir);
+        if (!APPLICATION->profilers()["jprofiler"]->check(cookedDir, &error)) {
             QMessageBox::critical(this, tr("Error"), tr("Error while checking JProfiler install:\n%1").arg(error));
             continue;
-        } else {
-            ui->jprofilerPathEdit->setText(cooked_dir);
-            break;
         }
-    } while (1);
+        m_ui->jprofilerPathEdit->setText(cookedDir);
+        break;
+
+    } while (true);
 }
 void ExternalToolsPage::on_jprofilerCheckBtn_clicked()
 {
     QString error;
-    if (!APPLICATION->profilers()["jprofiler"]->check(ui->jprofilerPathEdit->text(), &error)) {
+    if (!APPLICATION->profilers()["jprofiler"]->check(m_ui->jprofilerPathEdit->text(), &error)) {
         QMessageBox::critical(this, tr("Error"), tr("Error while checking JProfiler install:\n%1").arg(error));
     } else {
         QMessageBox::information(this, tr("OK"), tr("JProfiler setup seems to be OK"));
@@ -181,27 +181,27 @@ void ExternalToolsPage::on_jprofilerCheckBtn_clicked()
 
 void ExternalToolsPage::on_jvisualvmPathBtn_clicked()
 {
-    QString raw_dir = ui->jvisualvmPathEdit->text();
+    QString rawDir = m_ui->jvisualvmPathEdit->text();
     QString error;
     do {
-        raw_dir = QFileDialog::getOpenFileName(this, tr("VisualVM Executable"), raw_dir);
-        if (raw_dir.isEmpty()) {
+        rawDir = QFileDialog::getOpenFileName(this, tr("VisualVM Executable"), rawDir);
+        if (rawDir.isEmpty()) {
             break;
         }
-        QString cooked_dir = FS::NormalizePath(raw_dir);
-        if (!APPLICATION->profilers()["jvisualvm"]->check(cooked_dir, &error)) {
+        QString cookedDir = FS::NormalizePath(rawDir);
+        if (!APPLICATION->profilers()["jvisualvm"]->check(cookedDir, &error)) {
             QMessageBox::critical(this, tr("Error"), tr("Error while checking VisualVM install:\n%1").arg(error));
             continue;
-        } else {
-            ui->jvisualvmPathEdit->setText(cooked_dir);
-            break;
         }
-    } while (1);
+        m_ui->jvisualvmPathEdit->setText(cookedDir);
+        break;
+
+    } while (true);
 }
 void ExternalToolsPage::on_jvisualvmCheckBtn_clicked()
 {
     QString error;
-    if (!APPLICATION->profilers()["jvisualvm"]->check(ui->jvisualvmPathEdit->text(), &error)) {
+    if (!APPLICATION->profilers()["jvisualvm"]->check(m_ui->jvisualvmPathEdit->text(), &error)) {
         QMessageBox::critical(this, tr("Error"), tr("Error while checking VisualVM install:\n%1").arg(error));
     } else {
         QMessageBox::information(this, tr("OK"), tr("VisualVM setup seems to be OK"));
@@ -210,40 +210,40 @@ void ExternalToolsPage::on_jvisualvmCheckBtn_clicked()
 
 void ExternalToolsPage::on_worldToolAddBtn_clicked()
 {
-    auto* item = new QTreeWidgetItem(ui->worldToolTree);
+    auto* item = new QTreeWidgetItem(m_ui->worldToolTree);
     item->setFlags(item->flags() | Qt::ItemIsEditable);
-    ui->worldToolTree->addTopLevelItem(item);
+    m_ui->worldToolTree->addTopLevelItem(item);
     setupWorldToolBrowseBtn(item);
-    ui->worldToolTree->setCurrentItem(item);
-    ui->worldToolTree->editItem(item, 0);
+    m_ui->worldToolTree->setCurrentItem(item);
+    m_ui->worldToolTree->editItem(item, 0);
 }
 
 void ExternalToolsPage::on_worldToolRemoveBtn_clicked()
 {
-    for (QTreeWidgetItem* item : ui->worldToolTree->selectedItems()) {
-        ui->worldToolTree->takeTopLevelItem(ui->worldToolTree->indexOfTopLevelItem(item));
+    for (QTreeWidgetItem* item : m_ui->worldToolTree->selectedItems()) {
+        m_ui->worldToolTree->takeTopLevelItem(m_ui->worldToolTree->indexOfTopLevelItem(item));
     }
 }
 
 void ExternalToolsPage::on_jsonEditorBrowseBtn_clicked()
 {
-    QString raw_file = QFileDialog::getOpenFileName(this, tr("Text Editor"),
-                                                    ui->jsonEditorTextBox->text().isEmpty()
+    QString rawFile = QFileDialog::getOpenFileName(this, tr("Text Editor"),
+                                                   m_ui->jsonEditorTextBox->text().isEmpty()
 #if defined(Q_OS_LINUX)
-                                                        ? QString("/usr/bin")
+                                                       ? QString("/usr/bin")
 #else
-                                                        ? QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first()
+                                                       ? QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first()
 #endif
-                                                        : ui->jsonEditorTextBox->text());
+                                                       : m_ui->jsonEditorTextBox->text());
 
-    if (raw_file.isEmpty()) {
+    if (rawFile.isEmpty()) {
         return;
     }
-    QString cooked_file = FS::NormalizePath(raw_file);
+    QString cookedFile = FS::NormalizePath(rawFile);
 
     // it has to exist and be an executable
-    if (QFileInfo(cooked_file).exists() && QFileInfo(cooked_file).isExecutable()) {
-        ui->jsonEditorTextBox->setText(cooked_file);
+    if (QFileInfo(cookedFile).exists() && QFileInfo(cookedFile).isExecutable()) {
+        m_ui->jsonEditorTextBox->setText(cookedFile);
     } else {
         QMessageBox::warning(this, tr("Invalid"), tr("The file chosen does not seem to be an executable"));
     }
@@ -257,5 +257,5 @@ bool ExternalToolsPage::apply()
 
 void ExternalToolsPage::retranslate()
 {
-    ui->retranslateUi(this);
+    m_ui->retranslateUi(this);
 }
