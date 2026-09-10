@@ -134,9 +134,11 @@ ModDetails ReadMCModTOML(QByteArray contents)
 
     toml::table tomlData;
 #if TOML_EXCEPTIONS
+    // Broad catch, not toml::parse_error: libc++ typeinfo mismatch (tomlplusplus#279)
+    // can let the thrown parse_error escape a handler for its own type.
     try {
         tomlData = toml::parse(contents.toStdString());
-    } catch ([[maybe_unused]] const toml::parse_error& err) {
+    } catch ([[maybe_unused]] const std::exception& err) {
         return {};
     }
 #else
