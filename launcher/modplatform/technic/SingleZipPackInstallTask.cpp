@@ -123,7 +123,7 @@ void Technic::SingleZipPackInstallTask::extractFinished()
     auto packProcessor = makeShared<Technic::TechnicPackProcessor>();
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::succeeded, this, &Technic::SingleZipPackInstallTask::emitSucceeded);
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::failed, this, &Technic::SingleZipPackInstallTask::emitFailed);
-    packProcessor->run(m_globalSettings, name(), m_instIcon, m_stagingPath, m_minecraftVersion);
+    packProcessor->run(*m_globalConfig, name(), m_instIcon, m_stagingPath, m_minecraftVersion);
 }
 
 void Technic::SingleZipPackInstallTask::extractAborted()

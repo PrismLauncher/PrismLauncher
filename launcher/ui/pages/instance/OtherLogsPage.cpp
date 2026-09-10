@@ -35,6 +35,7 @@
  */
 
 #include "OtherLogsPage.h"
+#include "config/GlobalConfig.h"
 #include "ui_OtherLogsPage.h"
 
 #include <QMessageBox>
@@ -72,20 +73,15 @@ OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, 
 
     // set up fonts in the log proxy
     {
-        QString fontFamily = APPLICATION->settings()->get("ConsoleFont").toString();
-        bool conversionOk = false;
-        int fontSize = APPLICATION->settings()->get("ConsoleFontSize").toInt(&conversionOk);
-        if (!conversionOk) {
-            fontSize = 11;
-        }
-        m_proxy->setFont(QFont(fontFamily, fontSize));
+        QString fontFamily = APPLICATION->config()->consoleFont;
+        m_proxy->setFont(QFont(fontFamily, APPLICATION->config()->consoleFontSize));
     }
 
     ui->text->setModel(m_proxy);
 
     if (m_instance) {
-        m_model->setMaxLines(getConsoleMaxLines(m_instance->settings()));
-        m_model->setStopOnOverflow(shouldStopOnConsoleOverflow(m_instance->settings()));
+        m_model->setMaxLines(APPLICATION->config()->consoleMaxLines);
+        m_model->setStopOnOverflow(APPLICATION->config()->consoleOverflowStop);
         m_model->setOverflowMessage(tr("Cannot display this log since the log length surpassed %1 lines.").arg(m_model->getMaxLines()));
     } else {
         modelStateToUI();
@@ -305,8 +301,8 @@ void OtherLogsPage::reload()
         ui->text->setModel(nullptr);
         if (!m_instance) {
             m_model = new LogModel(this);
-            m_model->setMaxLines(getConsoleMaxLines(APPLICATION->settings()));
-            m_model->setStopOnOverflow(shouldStopOnConsoleOverflow(APPLICATION->settings()));
+            m_model->setMaxLines(APPLICATION->config()->consoleMaxLines);
+            m_model->setStopOnOverflow(APPLICATION->config()->consoleOverflowStop);
             m_model->setOverflowMessage(tr("Cannot display this log since the log length surpassed %1 lines.").arg(m_model->getMaxLines()));
         }
         m_model->clear();

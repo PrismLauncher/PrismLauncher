@@ -38,11 +38,11 @@
 
 #include "Application.h"
 #include "FileSystem.h"
-#include "NullInstance.h"
 
 #include "QObjectPtr.h"
 #include "archive/ArchiveReader.h"
 #include "archive/ExtractZipTask.h"
+#include "config/InstanceConfig.h"
 #include "icons/IconList.h"
 #include "icons/IconUtils.h"
 
@@ -50,7 +50,6 @@
 #include "modplatform/modrinth/ModrinthInstanceCreationTask.h"
 #include "modplatform/technic/TechnicPackProcessor.h"
 
-#include "settings/INISettingsObject.h"
 #include "tasks/Task.h"
 
 #include "net/ApiRequest.h"
@@ -300,11 +299,11 @@ void InstanceImportTask::processFlame()
             originalInstanceId = originalInstanceIdIt.value();
         }
 
-        instCreationTask = makeShared<FlameCreationTask>(m_stagingPath, m_trustedSource, m_globalSettings, m_parent, packId, packVersionId,
+        instCreationTask = makeShared<FlameCreationTask>(m_stagingPath, m_trustedSource, *m_globalConfig, m_parent, packId, packVersionId,
                                                          originalInstanceId);
     } else {
         // FIXME: Find a way to get IDs in directly imported ZIPs
-        instCreationTask = makeShared<FlameCreationTask>(m_stagingPath, m_trustedSource, m_globalSettings, m_parent, QString(), QString());
+        instCreationTask = makeShared<FlameCreationTask>(m_stagingPath, m_trustedSource, *m_globalConfig, m_parent, QString(), QString());
     }
 
     instCreationTask->setName(modifiedName());
@@ -350,32 +349,35 @@ void InstanceImportTask::processTechnic()
     shared_qobject_ptr<Technic::TechnicPackProcessor> packProcessor{ new Technic::TechnicPackProcessor };
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::succeeded, this, &InstanceImportTask::emitSucceeded);
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::failed, this, &InstanceImportTask::emitFailed);
-    packProcessor->run(m_globalSettings, name(), m_instIcon, m_stagingPath);
+    packProcessor->run(*m_globalConfig, name(), m_instIcon, m_stagingPath);
 }
 
 void InstanceImportTask::processMultiMC()
 {
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    auto instanceSettings = std::make_unique<INISettingsObject>(configPath);
-
-    NullInstance instance(m_globalSettings, std::move(instanceSettings), m_stagingPath);
+    auto conf = InstanceConfig::load(configPath);
+    if (!conf.has_value()) {
+        emitFailed("Could not load extracted instance.cfg.");
+        return;
+    }
 
     // reset time played on import... because packs.
-    instance.resetTimePlayed();
+    conf->totalTimePlayed = 0;
+    conf->lastTimePlayed = 0;
 
     // UUID is carried over on export, but this is a distinct instance, so give it its own
-    instance.regenerateUuid();
+    conf->uuid = QString();
 
     // set a new nice name
-    instance.setName(name());
+    conf->name = name();
 
     // if the icon was specified by user, use that. otherwise pull icon from the pack
     if (m_instIcon != "default") {
-        instance.setIconKey(m_instIcon);
+        conf->iconKey = m_instIcon;
     } else {
-        m_instIcon = instance.iconKey();
+        m_instIcon = conf->iconKey;
 
-        installIcon(instance.instanceRoot(), m_instIcon);
+        installIcon(m_stagingPath, m_instIcon);
     }
     emitSucceeded();
 }
@@ -400,7 +402,7 @@ void InstanceImportTask::processModrinth()
             originalInstanceId = originalInstanceIdIt.value();
         }
 
-        instCreationTask = makeShared<ModrinthCreationTask>(m_stagingPath, m_trustedSource, m_globalSettings, m_parent, packId,
+        instCreationTask = makeShared<ModrinthCreationTask>(m_stagingPath, m_trustedSource, *m_globalConfig, m_parent, packId,
                                                             packVersionId, originalInstanceId);
     } else {
         QString packId;
@@ -410,7 +412,7 @@ void InstanceImportTask::processModrinth()
         }
 
         // FIXME: Find a way to get the ID in directly imported ZIPs
-        instCreationTask = makeShared<ModrinthCreationTask>(m_stagingPath, m_trustedSource, m_globalSettings, m_parent, packId);
+        instCreationTask = makeShared<ModrinthCreationTask>(m_stagingPath, m_trustedSource, *m_globalConfig, m_parent, packId);
     }
 
     instCreationTask->setName(modifiedName());

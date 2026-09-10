@@ -1,6 +1,6 @@
 #include "JavaWizardPage.h"
 #include "Application.h"
-#include "settings/SettingsObject.h"
+#include "config/GlobalConfig.h"
 
 #include <QFileDialog>
 #include <QGroupBox>
@@ -50,32 +50,30 @@ bool JavaWizardPage::wantsRefreshButton()
 
 bool JavaWizardPage::validatePage()
 {
-    auto settings = APPLICATION->settings();
+    auto& conf = APPLICATION->config().update();
     auto result = m_java_widget->validate();
-    settings->set("AutomaticJavaSwitch", m_java_widget->autoDetectJava());
-    settings->set("AutomaticJavaDownload", m_java_widget->autoDownloadJava());
-    settings->set("UserAskedAboutAutomaticJavaDownload", true);
-    switch (result) {
-        default:
-        case JavaWizardWidget::ValidationStatus::Bad: {
-            return false;
-        }
-        case JavaWizardWidget::ValidationStatus::AllOK: {
-            settings->set("JavaPath", m_java_widget->javaPath());
-        } /* fallthrough */
-        case JavaWizardWidget::ValidationStatus::JavaBad: {
-            // Memory
-            auto s = APPLICATION->settings();
-            s->set("MinMemAlloc", m_java_widget->minHeapSize());
-            s->set("MaxMemAlloc", m_java_widget->maxHeapSize());
-            if (m_java_widget->permGenEnabled()) {
-                s->set("PermGen", m_java_widget->permGenSize());
-            } else {
-                s->reset("PermGen");
-            }
-            return true;
-        }
+    conf.automaticJavaSwitch = m_java_widget->autoDetectJava();
+    conf.automaticJavaDownload = m_java_widget->autoDownloadJava();
+    conf.userAskedAboutAutomaticJavaDownload = true;
+
+    if (result == JavaWizardWidget::ValidationStatus::Bad) {
+        return false;
     }
+
+    if (result == JavaWizardWidget::ValidationStatus::AllOK) {
+        conf.javaInstallation.path = m_java_widget->javaPath();
+    }
+
+    // Memory
+    conf.memory.minAlloc = m_java_widget->minHeapSize();
+    conf.memory.maxAlloc = m_java_widget->maxHeapSize();
+    if (m_java_widget->permGenEnabled()) {
+        conf.memory.permGen = m_java_widget->permGenSize();
+    } else {
+        // FIXME: don't hardcode
+        conf.memory.permGen = 128;
+    }
+    return true;
 }
 
 void JavaWizardPage::retranslate()

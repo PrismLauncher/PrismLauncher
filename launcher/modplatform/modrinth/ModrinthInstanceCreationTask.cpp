@@ -18,8 +18,8 @@
 #include "net/ApiRequest.h"
 #include "net/NetJob.h"
 
+#include "config/InstanceConfig.h"
 #include "modplatform/ModIndex.h"
-#include "settings/INISettingsObject.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/UntrustedModsDialog.h"
@@ -69,9 +69,13 @@ void ModrinthCreationTask::executeTask()
         return;
     }
 
-    auto versionName = inst->getManagedPackVersionName();
     m_rootPath = QFileInfo(inst->gameRoot()).fileName();
-    auto versionStr = !versionName.isEmpty() ? tr(" (version %1)").arg(versionName) : "";
+
+    QString versionStr;
+    const auto& managedPack = inst->config()->managedPack;
+    if (managedPack.has_value() && !managedPack->versionId.isEmpty()) {
+        versionStr = tr(" (version %1)").arg(managedPack->versionId);
+    }
 
     if (shouldConfirmUpdate()) {
         auto shouldUpdate = askIfShouldUpdate(m_parent, versionStr);
@@ -212,8 +216,7 @@ void ModrinthCreationTask::createInstance()
     }
 
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    auto instanceSettings = std::make_unique<INISettingsObject>(configPath);
-    m_newInstance = std::make_unique<MinecraftInstance>(m_globalSettings, std::move(instanceSettings), m_stagingPath);
+    m_newInstance = std::make_unique<MinecraftInstance>(std::make_unique<InstanceConfigHolder>(configPath), m_stagingPath);
 
     auto* components = m_newInstance->getPackProfile();
     components->buildingFromScratch();
@@ -494,7 +497,7 @@ bool ModrinthCreationTask::promptForUntrustedMods()
 
 ModrinthCreationTask::ModrinthCreationTask(const QString& stagingPath,
                                            bool trustedSource,
-                                           SettingsObject* globalSettings,
+                                           const GlobalConfig& globalConf,
                                            QWidget* parent,
                                            QString id,
                                            QString versionId,
@@ -502,7 +505,7 @@ ModrinthCreationTask::ModrinthCreationTask(const QString& stagingPath,
     : m_parent(parent), m_trustedSource(trustedSource), m_managedId(std::move(id)), m_managedVersionId(std::move(versionId))
 {
     setStagingPath(stagingPath);
-    setParentSettings(globalSettings);
+    setParentSettings(globalConf);
 
     m_originalInstanceId = std::move(originalInstanceId);
 }
@@ -519,9 +522,21 @@ void ModrinthCreationTask::setManagedPack(BaseInstance* instance)
 {
     // Don't add managed info to packs without an ID (most likely imported from ZIP)
     if (!m_managedId.isEmpty()) {
-        instance->setManagedPack("modrinth", m_managedId, m_managedName, m_managedVersionId, version());
+        instance->config().update().managedPack = {
+            .type = "modrinth",
+            .id = m_managedId,
+            .name = m_managedName,
+            .versionId = m_managedVersionId,
+            .versionName = version(),
+        };
     } else {
-        instance->setManagedPack("modrinth", "", name(), "", "");
+        instance->config().update().managedPack = {
+            .type = "modrinth",
+            .id = "",
+            .name = name(),
+            .versionId = "",
+            .versionName = "",
+        };
     }
 }
 
@@ -535,7 +550,8 @@ void ModrinthCreationTask::finishInstall()
         // Only change the name if it didn't use a custom name, so that the previous custom name
         // is preserved, but if we're using the original one, we update the version string.
         // NOTE: This needs to come before the setManagedPack call!
-        if (inst->name().contains(inst->getManagedPackVersionName()) && inst->name() != name()) {
+        const auto& managedPack = inst->config()->managedPack;
+        if (managedPack.has_value() && inst->name().contains(managedPack->name) && inst->name() != name()) {
             if (askForChangingInstanceName(m_parent, inst->name(), name()) == InstanceNameChange::ShouldChange) {
                 inst->setName(name());
             }
@@ -569,5 +585,8 @@ void ModrinthCreationTask::finishInstall()
             return;
         }
     }
+
+    m_newInstance->config().save();
+
     downloadFiles(m_newInstance.get());
 }

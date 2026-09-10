@@ -35,6 +35,7 @@
  */
 
 #include "AppearanceWidget.h"
+#include "config/GlobalConfig.h"
 #include "ui_AppearanceWidget.h"
 
 #include <DesktopServices.h>
@@ -44,7 +45,6 @@
 #include "ui/themes/ThemeManager.h"
 
 #include <Application.h>
-#include "settings/SettingsObject.h"
 
 AppearanceWidget::AppearanceWidget(bool themesOnly, QWidget* parent)
     : QWidget(parent), m_ui(new Ui::AppearanceWidget), m_themesOnly(themesOnly)
@@ -97,39 +97,31 @@ AppearanceWidget::~AppearanceWidget()
 
 void AppearanceWidget::applySettings()
 {
-    SettingsObject* settings = APPLICATION->settings();
+    auto& conf = APPLICATION->config().update();
     QString consoleFontFamily = m_ui->consoleFont->currentFont().family();
-    settings->set("ConsoleFont", consoleFontFamily);
-    settings->set("ConsoleFontSize", m_ui->fontSizeBox->value());
-    const bool catEnabled = m_ui->enableCatCheckBox->isChecked();
-    settings->set("EnableCat", catEnabled);
-    if (!catEnabled) {
-        settings->set("TheCat", false);
+    conf.consoleFont = consoleFontFamily;
+    conf.consoleFontSize = m_ui->fontSizeBox->value();
+    conf.catOpacity = m_ui->catOpacitySlider->value();
+    conf.enableCat = m_ui->enableCatCheckBox->isChecked();
+    if (!conf.enableCat) {
+        conf.theCat = false;
     }
-    settings->set("CatOpacity", m_ui->catOpacitySlider->value());
     auto catFit = m_ui->catFitComboBox->currentIndex();
-    settings->set("CatFit", catFit == 0 ? "fit" : catFit == 1 ? "fill" : "strech");
+    conf.catFit = catFit == 0 ? "fit" : catFit == 1 ? "fill" : "strech";
 }
 
 void AppearanceWidget::loadSettings()
 {
-    SettingsObject* settings = APPLICATION->settings();
-    QString fontFamily = settings->get("ConsoleFont").toString();
-    QFont consoleFont(fontFamily);
+    const auto& conf = *APPLICATION->config();
+    QFont consoleFont(conf.consoleFont);
     m_ui->consoleFont->setCurrentFont(consoleFont);
 
-    bool conversionOk = true;
-    int fontSize = settings->get("ConsoleFontSize").toInt(&conversionOk);
-    if (!conversionOk) {
-        fontSize = 11;
-    }
-    m_ui->fontSizeBox->setValue(fontSize);
+    m_ui->fontSizeBox->setValue(conf.consoleFontSize);
 
-    m_ui->enableCatCheckBox->setChecked(settings->get("EnableCat").toBool());
-    m_ui->catOpacitySlider->setValue(settings->get("CatOpacity").toInt());
+    m_ui->enableCatCheckBox->setChecked(conf.enableCat);
+    m_ui->catOpacitySlider->setValue(conf.catOpacity);
 
-    auto catFit = settings->get("CatFit").toString();
-    m_ui->catFitComboBox->setCurrentIndex(catFit == "fit" ? 0 : catFit == "fill" ? 1 : 2);
+    m_ui->catFitComboBox->setCurrentIndex(conf.catFit == "fit" ? 0 : conf.catFit == "fill" ? 1 : 2);
 }
 
 void AppearanceWidget::retranslateUi()
@@ -139,22 +131,20 @@ void AppearanceWidget::retranslateUi()
 
 void AppearanceWidget::applyIconTheme(int index)
 {
-    auto settings = APPLICATION->settings();
-    auto originalIconTheme = settings->get("IconTheme").toString();
+    auto originalIconTheme = APPLICATION->config()->iconTheme;
     auto newIconTheme = m_ui->iconsComboBox->itemData(index).toString();
     if (originalIconTheme != newIconTheme) {
-        settings->set("IconTheme", newIconTheme);
+        APPLICATION->config().update().iconTheme = newIconTheme;
         APPLICATION->themeManager()->applyCurrentlySelectedTheme();
     }
 }
 
 void AppearanceWidget::applyWidgetTheme(int index)
 {
-    auto settings = APPLICATION->settings();
-    auto originalAppTheme = settings->get("ApplicationTheme").toString();
+    auto originalAppTheme = APPLICATION->config()->applicationTheme;
     auto newAppTheme = m_ui->widgetStyleComboBox->itemData(index).toString();
     if (originalAppTheme != newAppTheme) {
-        settings->set("ApplicationTheme", newAppTheme);
+        APPLICATION->config().update().applicationTheme = newAppTheme;
         APPLICATION->themeManager()->applyCurrentlySelectedTheme();
     }
 
@@ -163,11 +153,10 @@ void AppearanceWidget::applyWidgetTheme(int index)
 
 void AppearanceWidget::applyCatTheme(int index)
 {
-    auto settings = APPLICATION->settings();
-    auto originalCat = settings->get("BackgroundCat").toString();
+    auto originalCat = APPLICATION->config()->backgroundCat;
     auto newCat = m_ui->catPackComboBox->itemData(index).toString();
     if (originalCat != newCat) {
-        settings->set("BackgroundCat", newCat);
+        APPLICATION->config().update().backgroundCat = newCat;
     }
 
     APPLICATION->currentCatChanged(index);
@@ -186,9 +175,8 @@ void AppearanceWidget::loadThemeSettings()
     m_ui->widgetStyleComboBox->clear();
     m_ui->catPackComboBox->clear();
 
-    SettingsObject* settings = APPLICATION->settings();
+    const auto& conf = APPLICATION->config().update();
 
-    const QString currentIconTheme = settings->get("IconTheme").toString();
     const auto iconThemes = APPLICATION->themeManager()->getValidIconThemes();
 
     for (int i = 0; i < iconThemes.count(); ++i) {
@@ -197,11 +185,10 @@ void AppearanceWidget::loadThemeSettings()
         QIcon iconForComboBox = QIcon(theme->path() + "/scalable/settings");
         m_ui->iconsComboBox->addItem(iconForComboBox, theme->name(), theme->id());
 
-        if (currentIconTheme == theme->id())
+        if (conf.iconTheme == theme->id())
             m_ui->iconsComboBox->setCurrentIndex(i);
     }
 
-    const QString currentTheme = settings->get("ApplicationTheme").toString();
     auto themes = APPLICATION->themeManager()->getValidApplicationThemes();
     for (int i = 0; i < themes.count(); ++i) {
         ITheme* theme = themes[i];
@@ -211,12 +198,11 @@ void AppearanceWidget::loadThemeSettings()
         if (!theme->tooltip().isEmpty())
             m_ui->widgetStyleComboBox->setItemData(i, theme->tooltip(), Qt::ToolTipRole);
 
-        if (currentTheme == theme->id())
+        if (conf.applicationTheme == theme->id())
             m_ui->widgetStyleComboBox->setCurrentIndex(i);
     }
 
     if (!m_themesOnly) {
-        const QString currentCat = settings->get("BackgroundCat").toString();
         const auto cats = APPLICATION->themeManager()->getValidCatPacks();
         for (int i = 0; i < cats.count(); ++i) {
             const CatPack* cat = cats[i];
@@ -224,7 +210,7 @@ void AppearanceWidget::loadThemeSettings()
             QIcon catIcon = QIcon(QString("%1").arg(cat->path()));
             m_ui->catPackComboBox->addItem(catIcon, cat->name(), cat->id());
 
-            if (currentCat == cat->id())
+            if (conf.backgroundCat == cat->id())
                 m_ui->catPackComboBox->setCurrentIndex(i);
         }
     }

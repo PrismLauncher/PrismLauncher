@@ -6,9 +6,8 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "BuildConfig.h"
-#include "settings/Setting.h"
+#include "config/GlobalConfig.h"
 #include "translations/TranslationsModel.h"
 
 LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent) : QWidget(parent)
@@ -34,7 +33,7 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent) : QWidget(pare
 
     formatCheckbox = new QCheckBox(this);
     formatCheckbox->setObjectName(QStringLiteral("formatCheckbox"));
-    formatCheckbox->setCheckState(APPLICATION->settings()->get("UseSystemLocale").toBool() ? Qt::Checked : Qt::Unchecked);
+    formatCheckbox->setCheckState(APPLICATION->config()->useSystemLocale ? Qt::Checked : Qt::Unchecked);
     connect(formatCheckbox, &QCheckBox::stateChanged, this,
             [this]() { APPLICATION->translations()->setUseSystemLocale(formatCheckbox->isChecked()); });
     verticalLayout->addWidget(formatCheckbox);
@@ -48,8 +47,7 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent) : QWidget(pare
     connect(languageView->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &LanguageSelectionWidget::languageRowChanged);
     verticalLayout->setContentsMargins(0, 0, 0, 0);
 
-    auto language_setting = APPLICATION->settings()->getSetting("Language");
-    connect(language_setting.get(), &Setting::SettingChanged, this, &LanguageSelectionWidget::languageSettingChanged);
+    connect(&APPLICATION->config(), &GlobalConfigHolder::updated, this, &LanguageSelectionWidget::languageSettingChanged);
 }
 
 QString LanguageSelectionWidget::getSelectedLanguageKey() const
@@ -77,7 +75,7 @@ void LanguageSelectionWidget::languageRowChanged(const QModelIndex& current, con
     translations->updateLanguage(key);
 }
 
-void LanguageSelectionWidget::languageSettingChanged(const Setting&, const QVariant&)
+void LanguageSelectionWidget::languageSettingChanged()
 {
     auto translations = APPLICATION->translations();
     auto index = translations->selectedIndex();
