@@ -19,15 +19,16 @@ void PasteWizardPage::initializePage() {}
 
 bool PasteWizardPage::validatePage()
 {
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
     QString prevPasteURL = s->get("PastebinURL").toString();
     s->reset("PastebinURL");
     if (ui->previousSettingsRadioButton->isChecked()) {
-        bool usingDefaultBase =
-            prevPasteURL == PasteUpload::g_PasteTypes.at(static_cast<std::size_t>(PasteUpload::PasteType::NullPointer)).defaultBase;
-        s->set("PastebinType", static_cast<int>(PasteUpload::PasteType::NullPointer));
-        if (!usingDefaultBase)
+        auto nullPointer = PasteUpload::Type(PasteUpload::Type::NullPointer);
+        bool usingDefaultBase = prevPasteURL == nullPointer.defaultBase();
+        s->set("PastebinType", nullPointer.toInt());
+        if (!usingDefaultBase) {
             s->set("PastebinCustomAPIBase", prevPasteURL);
+        }
     }
 
     return true;

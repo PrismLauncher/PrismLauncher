@@ -49,32 +49,56 @@
 #include "net/RPCSink.h"
 #include "net/RawHeaderProxy.h"
 
-auto PasteUpload::make(const QString& log, QString baseUrl, PasteType pasteType) -> std::pair<Net::Request::Ptr, QString*>
-{
-    QString logToUpload = log;
-    anonymizeLog(logToUpload);
+namespace PasteUpload {
+namespace {
+struct PasteTypeInfo {
+    QString name;
+    QString defaultBase;
+    QString endpointPath;
+};
 
-    const auto& base = PasteUpload::g_PasteTypes.at(static_cast<std::size_t>(pasteType));
+const static std::array<PasteTypeInfo, 4> g_PasteTypes = {
+    { { .name = "0x0.st", .defaultBase = "https://0x0.st", .endpointPath = "" },
+      { .name = "hastebin", .defaultBase = "https://hst.sh", .endpointPath = "/documents" },
+      { .name = "paste.gg", .defaultBase = "https://paste.gg", .endpointPath = "/api/v1/pastes" },
+      { .name = "mclo.gs", .defaultBase = "https://api.mclo.gs", .endpointPath = "/1/log" } }
+};
+}  // namespace
+
+QString Type::defaultBase() const
+{
+    return g_PasteTypes.at(static_cast<std::size_t>(toInt())).defaultBase;
+}
+
+QString Type::endpointPath() const
+{
+    return g_PasteTypes.at(static_cast<std::size_t>(toInt())).endpointPath;
+}
+
+std::pair<Net::Request::Ptr, QString*> Type::make(QString log, QString baseUrl) const
+{
+    anonymizeLog(log);
+
     if (baseUrl.isEmpty()) {
-        baseUrl = base.defaultBase;
+        baseUrl = defaultBase();
     }
 
     QUrl url;
     // HACK: Paste's docs say the standard API path is at /api/<version> but the official instance paste.gg doesn't follow that??
-    if (pasteType == PasteUpload::PasteType::PasteGG && baseUrl == base.defaultBase) {
+    if (value() == PasteUpload::Type::PasteGG && baseUrl == defaultBase()) {
         url = "https://api.paste.gg/v1/pastes";
     } else {
-        url = baseUrl + base.endpointPath;
+        url = baseUrl + endpointPath();
     }
 
     Net::Request::PostData postData;
-    switch (pasteType) {
-        case PasteUpload::PasteType::NullPointer: {
-            postData = [logToUpload] {
+    switch (value()) {
+        case PasteUpload::Type::NullPointer: {
+            postData = [log = std::move(log)] {
                 auto* multiPart = new QHttpMultiPart{ QHttpMultiPart::FormDataType };
 
                 QHttpPart filePart;
-                filePart.setBody(logToUpload.toUtf8());
+                filePart.setBody(log.toUtf8());
                 filePart.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");
                 filePart.setHeader(QNetworkRequest::ContentDispositionHeader, R"(form-data; name="file"; filename="log.txt")");
                 multiPart->append(filePart);
@@ -82,17 +106,17 @@ auto PasteUpload::make(const QString& log, QString baseUrl, PasteType pasteType)
             };
             break;
         }
-        case PasteUpload::PasteType::Hastebin: {
-            postData = logToUpload.toUtf8();
+        case PasteUpload::Type::Hastebin: {
+            postData = log.toUtf8();
             break;
         }
-        case PasteUpload::PasteType::Mclogs: {
+        case PasteUpload::Type::Mclogs: {
             QUrlQuery postDataQuery;
-            postDataQuery.addQueryItem("content", logToUpload);
+            postDataQuery.addQueryItem("content", log);
             postData = postDataQuery.toString().toUtf8();
             break;
         }
-        case PasteUpload::PasteType::PasteGG: {
+        case PasteUpload::Type::PasteGG: {
             QJsonObject obj;
             QJsonDocument doc;
             obj.insert("expires", QDateTime::currentDateTimeUtc().addDays(100).toString(Qt::DateFormat::ISODate));
@@ -101,7 +125,7 @@ auto PasteUpload::make(const QString& log, QString baseUrl, PasteType pasteType)
             QJsonObject logFileInfo;
             QJsonObject logFileContentInfo;
             logFileContentInfo.insert("format", "text");
-            logFileContentInfo.insert("value", logToUpload);
+            logFileContentInfo.insert("value", log);
             logFileInfo.insert("name", "log.txt");
             logFileInfo.insert("content", logFileContentInfo);
             files.append(logFileInfo);
@@ -112,13 +136,15 @@ auto PasteUpload::make(const QString& log, QString baseUrl, PasteType pasteType)
             postData = doc.toJson();
             break;
         }
+        case PasteUpload::Type::Invalid:
+            break;
     }
 
-    auto parseFunc = [baseUrl, url, pasteType](const QByteArray& response) -> Net::RPC::Sink<QString>::ParseResult {
-        switch (pasteType) {
-            case PasteType::NullPointer:
+    auto parseFunc = [baseUrl, url, this](const QByteArray& response) -> Net::RPC::Sink<QString>::ParseResult {
+        switch (value()) {
+            case Type::NullPointer:
                 return QString::fromUtf8(response).trimmed();
-            case PasteType::Hastebin: {
+            case Type::Hastebin: {
                 QJsonParseError jsonError;
                 auto doc = QJsonDocument::fromJson(response, &jsonError);
                 if (jsonError.error != QJsonParseError::NoError) {
@@ -134,7 +160,7 @@ auto PasteUpload::make(const QString& log, QString baseUrl, PasteType pasteType)
                 qDebug() << "Log upload failed:" << doc.toJson();
                 return std::unexpected(QObject::tr("Error: %1 returned a malformed response body").arg(url.toString()));
             }
-            case PasteType::Mclogs: {
+            case Type::Mclogs: {
                 QJsonParseError jsonError;
                 auto doc = QJsonDocument::fromJson(response, &jsonError);
                 if (jsonError.error != QJsonParseError::NoError) {
@@ -155,7 +181,7 @@ auto PasteUpload::make(const QString& log, QString baseUrl, PasteType pasteType)
                 qDebug() << "Log upload failed:" << doc.toJson();
                 return std::unexpected(QObject::tr("Error: %1 returned a malformed response body").arg(url.toString()));
             }
-            case PasteType::PasteGG: {
+            case Type::PasteGG: {
                 QJsonParseError jsonError;
                 auto doc = QJsonDocument::fromJson(response, &jsonError);
                 if (jsonError.error != QJsonParseError::NoError) {
@@ -178,6 +204,8 @@ auto PasteUpload::make(const QString& log, QString baseUrl, PasteType pasteType)
                 qDebug() << "Log upload failed:" << doc.toJson();
                 return std::unexpected(QObject::tr("Error: %1 returned a malformed response body").arg(url.toString()));
             }
+            case Type::Invalid:
+                return std::unexpected(QObject::tr("Unknown paste type"));
         }
         return std::unexpected(QObject::tr("Unknown paste type"));
     };
@@ -189,17 +217,19 @@ auto PasteUpload::make(const QString& log, QString baseUrl, PasteType pasteType)
     dl->setSink(std::move(sink));
 
     QList<Net::HeaderPair> headers;
-    switch (pasteType) {
-        case PasteUpload::PasteType::NullPointer:
+    switch (value()) {
+        case PasteUpload::Type::NullPointer:
             break;
-        case PasteUpload::PasteType::Hastebin:
+        case PasteUpload::Type::Hastebin:
             headers = { { .headerName = "Content-Type", .headerValue = "text/plain" } };
             break;
-        case PasteUpload::PasteType::Mclogs:
+        case PasteUpload::Type::Mclogs:
             headers = { { .headerName = "Content-Type", .headerValue = "application/x-www-form-urlencoded" } };
             break;
-        case PasteUpload::PasteType::PasteGG:
+        case PasteUpload::Type::PasteGG:
             headers = { { .headerName = "Content-Type", .headerValue = "application/json" } };
+            break;
+        case PasteUpload::Type::Invalid:
             break;
     }
     if (!headers.isEmpty()) {
@@ -208,3 +238,4 @@ auto PasteUpload::make(const QString& log, QString baseUrl, PasteType pasteType)
 
     return { dl, pasteLink };
 }
+}  // namespace PasteUpload

@@ -42,12 +42,12 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <utility>
 
 #include "FileSystem.h"
 #include "logs/AnonymizeLog.h"
 #include "net/NetJob.h"
 #include "net/PasteUpload.h"
-#include "net/Request.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 
@@ -89,12 +89,12 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QFileInfo
 std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& data, QWidget* parentWidget)
 {
     ProgressDialog dialog(parentWidget);
-    auto pasteType = static_cast<PasteUpload::PasteType>(APPLICATION->settings()->get("PastebinType").toInt());
+    auto pasteType = static_cast<PasteUpload::Type>(APPLICATION->settings()->get("PastebinType").toInt());
     auto baseURL = APPLICATION->settings()->get("PastebinCustomAPIBase").toString();
     bool shouldTruncate = false;
 
     if (baseURL.isEmpty()) {
-        baseURL = PasteUpload::g_PasteTypes.at(static_cast<std::size_t>(pasteType)).defaultBase;
+        baseURL = pasteType.defaultBase();
     }
 
     auto url = QUrl(baseURL);
@@ -114,7 +114,7 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
         return {};
     }
 
-    if (pasteType == PasteUpload::PasteType::Mclogs && data.count("\n") > g_MaxMclogsLines) {
+    if (pasteType == PasteUpload::Type::Mclogs && data.count("\n") > g_MaxMclogsLines) {
         auto truncateResponse =
             CustomMessageBox::selectable(parentWidget, QObject::tr("Confirm Truncation"),
                                          QObject::tr("The log has %1 lines, exceeding mclo.gs' limit of %2.\n"
@@ -142,7 +142,7 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
 
     auto job = NetJob::Ptr(new NetJob("Log Upload", APPLICATION->network()));
 
-    auto [pasteJob, pasteLink] = PasteUpload::make(textToUpload, baseURL, pasteType);
+    auto [pasteJob, pasteLink] = pasteType.make(std::move(textToUpload), baseURL);
     job->addNetAction(pasteJob);
     QObject::connect(job.get(), &Task::failed, parentWidget, [parentWidget](const QString& reason) {
         CustomMessageBox::selectable(parentWidget, QObject::tr("Failed to upload logs!"), reason, QMessageBox::Critical)->show();

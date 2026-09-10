@@ -35,6 +35,7 @@
 
 #pragma once
 
+#include "EnumWrapper.h"
 #include "net/Request.h"
 
 #include <QString>
@@ -45,7 +46,7 @@
 
 namespace PasteUpload {
 
-enum class PasteType : std::uint8_t {
+enum class TypeValue : std::uint8_t {
     // 0x0.st
     NullPointer = 0,
     // hastebin.com
@@ -54,23 +55,27 @@ enum class PasteType : std::uint8_t {
     PasteGG = 2,
     // mclo.gs
     Mclogs = 3,
-    // Helpful to get the range of valid values on the enum for input sanitisation:
-    First = PasteType::NullPointer,
-    Last = PasteType::Mclogs
-};
-struct PasteTypeInfo {
-    QString name;
-    QString defaultBase;
-    QString endpointPath;
+    Invalid = 4
 };
 
-inline const std::array<PasteTypeInfo, 4> g_PasteTypes = {
-    { { .name = "0x0.st", .defaultBase = "https://0x0.st", .endpointPath = "" },
-      { .name = "hastebin", .defaultBase = "https://hst.sh", .endpointPath = "/documents" },
-      { .name = "paste.gg", .defaultBase = "https://paste.gg", .endpointPath = "/api/v1/pastes" },
-      { .name = "mclo.gs", .defaultBase = "https://api.mclo.gs", .endpointPath = "/1/log" } }
-};
+struct Type : EnumWrapper<Type, TypeValue> {
+    static constexpr auto invalid() { return Invalid; };
+    static constexpr auto mapping()
+    {
+        return std::array{ std::pair{ NullPointer, "0x0.st" }, std::pair{ Hastebin, "hastebin" }, std::pair{ PasteGG, "paste.gg" },
+                           std::pair{ Mclogs, "mclo.gs" } };
+    };
 
-auto make(const QString& log, QString baseUrl, PasteType pasteType) -> std::pair<Net::Request::Ptr, QString*>;
+    explicit Type(int v) : Type{ v >= 0 && v < static_cast<int>(Invalid) ? static_cast<TypeValue>(v) : Invalid } {}
+    int toInt() const { return std::to_underlying(value()); }
+
+    QString defaultBase() const;
+    QString endpointPath() const;
+    std::pair<Net::Request::Ptr, QString*> make(QString log, QString baseUrl) const;
+
+    using enum TypeValue;
+    using Base = EnumWrapper<Type, TypeValue>;
+    using Base::Base; /* inherit ctor */
+};
 
 }  // namespace PasteUpload
