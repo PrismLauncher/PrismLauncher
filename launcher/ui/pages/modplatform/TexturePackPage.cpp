@@ -44,7 +44,7 @@ TexturePackResourcePage::TexturePackResourcePage(ResourceDownloadDialog* dialog,
 {
     m_model = model;
     if (!m_model) {
-        m_model = new TexturePackResourceModel(instance, api, debugName(), metaEntryBase());
+        m_model = new TexturePackResourceModel(getDialog()->getBaseModel(), api, debugName(), metaEntryBase());
     }
     m_ui->packView->setModel(m_model);
 
