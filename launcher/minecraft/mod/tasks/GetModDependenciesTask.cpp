@@ -183,31 +183,9 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
 
 Task::Ptr GetModDependenciesTask::getProjectInfoTask(const std::shared_ptr<PackDependency>& pDep)
 {
-    auto provider = pDep->pack->provider;
-    auto [info, responseInfo] = getAPI(provider)->getProject(pDep->pack->addonId.toString());
-    connect(info.get(), &NetJob::succeeded, this, [this, responseInfo, provider, pDep] {
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*responseInfo, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            removePack(pDep->pack->addonId);
-            qWarning() << "Error while parsing JSON response for mod info at" << parseError.offset << "reason:" << parseError.errorString();
-            qDebug() << *responseInfo;
-            return;
-        }
-        try {
-            auto obj = provider == ModPlatform::ResourceProvider::FLAME ? Json::requireObject(Json::requireObject(doc), "data")
-                                                                        : Json::requireObject(doc);
-
-            getAPI(provider)->loadIndexedPack(*pDep->pack, obj);
-        } catch (const JSONValidationError& e) {
-            removePack(pDep->pack->addonId);
-            qDebug() << doc;
-            qWarning() << "Error while reading mod info:" << e.cause();
-        }
-    });
-    QObject::connect(info.get(), &NetJob::failed, this, [this, info, pDep] {
-        removePack(pDep->pack->addonId);
-        m_failed.remove(info.get());
+    auto [info, result] = getAPI(pDep->pack->provider)->getProject(pDep->pack->addonId.toString()).make();
+    connect(info.get(), &Task::succeeded, this, [this, result, pDep] {
+        *pDep->pack = **result;
     });
     return info;
 }
@@ -236,11 +214,12 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     ResourceAPI::DependencySearchArgs args = {
         .dependency = dep, .mcVersion = m_version, .loader = m_loaderType, .includeChangelog = true
     };
-    ResourceAPI::Callback<ModPlatform::IndexedVersion> callbacks;
-    callbacks.onFail = [](const QString& reason, int) {
-        qCritical() << tr("A network error occurred. Could not load project dependencies:%1").arg(reason);
-    };
-    callbacks.onSucceed = [dep, provider, pDep, level, this](auto& pack) {
+    auto [version, result] = getAPI(provider)->getDependencyVersion(args).make();
+    if (!version) {
+        return tasks;
+    }
+    connect(version.get(), &Task::succeeded, this, [dep, provider, pDep, level, this, result] {
+        auto& pack = *result;
         pDep->version = pack;
         if (!pDep->version.addonId.isValid()) {
             if (m_loaderType & ModPlatform::Quilt) {  // falback for quilt
@@ -282,12 +261,9 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
         for (const auto& dependency : getDependenciesForVersion(pDep->version, provider)) {
             addTask(prepareDependencyTask(dependency, provider, level - 1));
         }
-    };
-
-    auto version = getAPI(provider)->getDependencyVersion(args, callbacks);
-    QObject::connect(version.get(), &NetJob::failed, this, [this, version, pDep] {
-        removePack(pDep->pack->addonId);
-        m_failed.remove(version.get());
+    });
+    connect(version.get(), &Task::failed, this, [](const QString& reason) {
+        qCritical() << tr("A network error occurred. Could not load project dependencies:%1").arg(reason);
     });
     tasks->addTask(version);
     return tasks;

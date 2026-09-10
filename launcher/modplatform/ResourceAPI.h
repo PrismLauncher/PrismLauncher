@@ -43,13 +43,12 @@
 #include <QString>
 
 #include <optional>
-#include <utility>
 
 #include "../Version.h"
 
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceType.h"
-#include "tasks/Task.h"
+#include "net/RPCSink.h"
 
 /* Simple class with a common interface for interacting with APIs */
 class ResourceAPI {
@@ -63,13 +62,6 @@ class ResourceAPI {
         QString name;
         // The human-readable name of the sorting, used for display in the UI.
         QString readableName;
-    };
-
-    template <typename T>
-    struct Callback {
-        std::function<void(T&)> onSucceed;
-        std::function<void(const QString& reason, int networkErrorCode)> onFail;
-        std::function<void()> onAbort;
     };
 
     struct SearchArgs {
@@ -95,10 +87,6 @@ class ResourceAPI {
         bool includeChangelog{};
     };
 
-    struct ProjectInfoArgs {
-        ModPlatform::IndexedPack::Ptr pack;
-    };
-
     struct DependencySearchArgs {
         ModPlatform::Dependency dependency;
         Version mcVersion;
@@ -111,19 +99,18 @@ class ResourceAPI {
     virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
 
    public slots:
-    virtual Task::Ptr searchProjects(const SearchArgs&, const Callback<QList<ModPlatform::IndexedPack::Ptr>>&) const;
+    virtual Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> searchProjects(const SearchArgs&) const;
 
-    virtual std::pair<Task::Ptr, QByteArray*> getProject(const QString& addonId, bool askRetry = true) const;
-    virtual std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const = 0;
+    virtual Net::RPC::Spec<ModPlatform::IndexedPack::Ptr> getProject(const QString& addonId, bool includeExtra = false) const;
+    virtual Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> getProjects(QStringList addonIds) const = 0;
 
-    virtual Task::Ptr getProjectInfo(const ProjectInfoArgs&, const Callback<ModPlatform::IndexedPack::Ptr>&, bool askRetry = true) const;
-    Task::Ptr getProjectVersions(const VersionSearchArgs& args, const Callback<QVector<ModPlatform::IndexedVersion>>& callbacks) const;
-    virtual Task::Ptr getDependencyVersion(const DependencySearchArgs&, const Callback<ModPlatform::IndexedVersion>&) const;
+virtual Net::RPC::Spec<QVector<ModPlatform::IndexedVersion>> getProjectVersions(const VersionSearchArgs& args) const;
+    virtual Net::RPC::Spec<ModPlatform::IndexedVersion> getDependencyVersion(const DependencySearchArgs& args) const;
 
    protected:
     ~ResourceAPI() = default;
 
-    virtual QString debugName() const { return "External resource API"; }
+    static QString debugName() { return "External resource API"; }
 
     static QString mapMCVersionToModrinth(const Version& v);
 
@@ -157,7 +144,5 @@ class ResourceAPI {
 
     virtual void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&) const = 0;
 
-    virtual std::pair<Task::Ptr, QByteArray*> getModCategories() const = 0;
-
-    virtual QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const = 0;
+    virtual Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const = 0;
 };

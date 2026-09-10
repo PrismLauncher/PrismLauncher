@@ -25,7 +25,6 @@
 #include <QtConcurrentRun>
 #include <algorithm>
 #include <utility>
-#include "Json.h"
 #include "MMCZip.h"
 #include "archive/ExportToZipTask.h"
 #include "minecraft/PackProfile.h"
@@ -154,45 +153,35 @@ void ModrinthPackExportTask::makeApiRequest()
         buildZip();
     } else {
         setStatus(tr("Finding versions for hashes..."));
-        auto [versionsTask, response] = ModrinthAPI::get().currentVersions(pendingHashes.values(), "sha512");
+        auto [versionsTask, result] = ModrinthAPI::get().currentVersions(pendingHashes.values(), "sha512").make();
         task = versionsTask;
-        connect(task.get(), &Task::succeeded, this, [this, response]() { parseApiResponse(response); });
+        connect(task.get(), &Task::succeeded, this, [this, result]() { resolveAPIHashes(result); });
         connect(task.get(), &Task::failed, this, &ModrinthPackExportTask::emitFailed);
         connect(task.get(), &Task::aborted, this, &ModrinthPackExportTask::emitAborted);
         task->start();
     }
 }
 
-void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
+void ModrinthPackExportTask::resolveAPIHashes(QHash<QString, ModPlatform::IndexedVersion>* result)
 {
     task = nullptr;
 
-    try {
-        const QJsonDocument doc = Json::requireDocument(*response);
+    QMapIterator<QString, QString> iterator(pendingHashes);
+    while (iterator.hasNext()) {
+        iterator.next();
 
-        QMapIterator<QString, QString> iterator(pendingHashes);
-        while (iterator.hasNext()) {
-            iterator.next();
-
-            const QJsonObject obj = doc[iterator.value()].toObject();
-            if (obj.isEmpty()) {
-                continue;
-            }
-
-            const QJsonArray files_array = obj["files"].toArray();
-            if (auto fileIter = std::find_if(files_array.begin(), files_array.end(),
-                                             [&iterator](const QJsonValue& file) { return file["hashes"]["sha512"] == iterator.value(); });
-                fileIter != files_array.end()) {
-                // map the file to the url
-                resolvedFiles[iterator.key()] = ResolvedFile{ .sha1 = fileIter->toObject()["hashes"].toObject()["sha1"].toString(),
-                                                              .sha512 = iterator.value(),
-                                                              .url = fileIter->toObject()["url"].toString(),
-                                                              .size = fileIter->toObject()["size"].toInt() };
-            }
+        auto it = result->find(iterator.value());
+        if (it == result->end()) {
+            continue;
         }
-    } catch (const Json::JsonException& e) {
-        emitFailed(tr("Failed to parse versions response: %1").arg(e.what()));
-        return;
+
+        const auto& ver = *it;
+        if (ver.downloadUrl.isEmpty()) {
+            continue;
+        }
+
+        resolvedFiles[iterator.key()] =
+            ResolvedFile{ .sha1 = ver.sha1, .sha512 = iterator.value(), .url = ver.downloadUrl, .size = ver.size };
     }
     pendingHashes.clear();
     buildZip();

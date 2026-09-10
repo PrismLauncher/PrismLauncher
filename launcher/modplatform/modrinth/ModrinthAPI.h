@@ -13,7 +13,6 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <utility>
 
 class ModrinthAPI final : public ResourceAPI {
    public:
@@ -23,27 +22,23 @@ class ModrinthAPI final : public ResourceAPI {
         return s_instance;
     }
 
-    static std::pair<Task::Ptr, QByteArray*> currentVersion(const QString& hash, const QString& hashFormat);
+    static Net::RPC::Spec<ModPlatform::IndexedVersion> currentVersion(const QString& hash, const QString& hashFormat);
 
-    static std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, const QString& hashFormat);
+    static Net::RPC::Spec<QHash<QString, ModPlatform::IndexedVersion>> currentVersions(const QStringList& hashes, const QString& hashFormat);
 
-    std::pair<Task::Ptr, QByteArray*> latestVersion(const QString& hash,
-                                                    const QString& hashFormat,
-                                                    std::optional<std::vector<Version>> mcVersions,
-                                                    std::optional<ModPlatform::ModLoaderTypes> loaders) const;
+    static Net::RPC::Spec<ModPlatform::IndexedVersion> latestVersion(const QString& hash,
+                                                                const QString& hashFormat,
+                                                                std::optional<std::vector<Version>> mcVersions,
+                                                                std::optional<ModPlatform::ModLoaderTypes> loaders);
 
-    std::pair<Task::Ptr, QByteArray*> latestVersions(const QStringList& hashes,
-                                                     const QString& hashFormat,
-                                                     std::optional<std::vector<Version>> mcVersions,
-                                                     std::optional<ModPlatform::ModLoaderTypes> loaders) const;
+    static Net::RPC::Spec<QHash<QString, ModPlatform::IndexedVersion>> latestVersions(const QStringList& hashes,
+                                                                                 const QString& hashFormat,
+                                                                                 std::optional<std::vector<Version>> mcVersions,
+                                                                                 std::optional<ModPlatform::ModLoaderTypes> loaders);
 
-    std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
+    Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> getProjects(QStringList addonIds) const override;
 
-    std::pair<Task::Ptr, QByteArray*> getModCategories() const override;
-    static QList<ModPlatform::Category> loadCategories(const QByteArray& response, const QString& projectType);
-    QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const override;
-
-   public:
+    Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const override;
     auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 
     static auto getAuthorURL(const QString& name) -> QString { return "https://modrinth.com/user/" + name; };

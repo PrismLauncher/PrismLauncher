@@ -8,6 +8,14 @@
 
 namespace FlameMod {
 
+struct FingerprintMatch {
+    qint64 fileFingerprint;
+    qint64 modId;
+    qint64 fileId;
+    bool isAvailable;
+};
+
+ModPlatform::ResourceType getResourceType(int classId);
 void loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj);
 void loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj);
 void loadBody(ModPlatform::IndexedPack& pack);

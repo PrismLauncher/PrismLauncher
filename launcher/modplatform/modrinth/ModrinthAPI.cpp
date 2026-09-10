@@ -5,48 +5,134 @@
 #include "ModrinthAPI.h"
 #include <array>
 
-#include "Application.h"
+#include "FileSystem.h"
 #include "Json.h"
-#include "modplatform/ResourceType.h"
-#include "net/ApiRequest.h"
-#include "net/NetJob.h"
+#include "net/NetRequest.h"
+#include "net/RPCSink.h"
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersion(const QString& hash, const QString& hashFormat)
+namespace {
+
+// Shared parse function for single version responses (currentVersion, latestVersion)
+auto makeVersionParseFunc(const QString& taskName) -> Net::RPC::Sink<ModPlatform::IndexedVersion>::ParseFunc
 {
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersion"), APPLICATION->network());
+    return [taskName](const QByteArray& response) -> Net::RPC::Sink<ModPlatform::IndexedVersion>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from" << taskName << "at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
+        }
 
-    auto [action, response] =
-        Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1?algorithm=%2").arg(hash, hashFormat));
-    netJob->addNetAction(action);
-
-    return { netJob, response };
+        try {
+            auto obj = Json::requireObject(doc);
+            auto version = Modrinth::loadIndexedPackVersion(obj);
+            return version;
+        } catch (Json::JsonException& e) {
+            qWarning() << "Error while reading Modrinth version info:" << e.cause();
+            qDebug() << doc;
+            return std::unexpected(e.cause());
+        }
+    };
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersions(const QStringList& hashes, const QString& hashFormat)
+// Shared parse function for hash-keyed version responses (currentVersions, latestVersions)
+auto makeVersionHashParseFunc(const QString& hashFormat, const QString& taskName)
+    -> Net::RPC::Sink<QHash<QString, ModPlatform::IndexedVersion>>::ParseFunc
 {
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersions"), APPLICATION->network());
+    return [hashFormat, taskName](const QByteArray& response) -> Net::RPC::Sink<QHash<QString, ModPlatform::IndexedVersion>>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from" << taskName << "at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
+        }
 
+        QHash<QString, ModPlatform::IndexedVersion> versions;
+        try {
+            auto entries = Json::requireObject(doc);
+            for (auto it = entries.constBegin(); it != entries.constEnd(); ++it) {
+                try {
+                    auto entry = Json::requireObject(it.value());
+
+                    auto version = Modrinth::loadIndexedPackVersion(entry);
+                    auto files = Json::requireArray(entry, "files");
+                    for (auto fileVal : files) {
+                        auto fileObj = fileVal.toObject();
+                        auto hashList = Json::requireObject(fileObj, "hashes");
+                        if (hashList.contains(hashFormat)) {
+                            auto fileHash = Json::requireString(hashList, hashFormat);
+                            if (fileHash == it.key()) {
+                                version.downloadUrl = Json::requireString(fileObj, "url");
+                                version.fileName = Json::requireString(fileObj, "filename");
+                                version.fileName = FS::RemoveInvalidPathChars(version.fileName);
+                                version.hash = fileHash;
+                                version.hashType = hashFormat;
+                                version.isPreferred = true;
+                                if (hashList.contains("sha1")) {
+                                    version.sha1 = Json::requireString(hashList, "sha1");
+                                }
+                                if (fileObj.contains("size")) {
+                                    version.size = fileObj["size"].toInt();
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    versions.insert(it.key(), version);
+                } catch (Json::JsonException& e) {
+                    qDebug() << "Skipping invalid version entry for hash" << it.key() << ":" << e.cause();
+                }
+            }
+        } catch (Json::JsonException& e) {
+            qDebug() << e.cause();
+            qDebug() << doc;
+            return std::unexpected(e.cause());
+        }
+        return versions;
+    };
+}
+
+}  // namespace
+
+Net::RPC::Spec<ModPlatform::IndexedVersion> ModrinthAPI::currentVersion(const QString& hash, const QString& hashFormat)
+{
+    auto parseFunc = makeVersionParseFunc("Modrinth::GetCurrentVersion");
+
+    return Net::RPC::Spec<ModPlatform::IndexedVersion>{
+        .url = QUrl(QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1?algorithm=%2").arg(hash, hashFormat)),
+        .parse = parseFunc,
+        .name = "Modrinth::GetCurrentVersion"
+    };
+}
+
+Net::RPC::Spec<QHash<QString, ModPlatform::IndexedVersion>> ModrinthAPI::currentVersions(const QStringList& hashes, const QString& hashFormat)
+{
     QJsonObject bodyObj;
-
     Json::writeStringList(bodyObj, "hashes", hashes);
     Json::writeString(bodyObj, "algorithm", hashFormat);
 
     QJsonDocument body(bodyObj);
     auto bodyRaw = body.toJson();
 
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files"), bodyRaw);
-    netJob->addNetAction(action);
-    netJob->setAskRetry(false);
-    return { netJob, response };
+auto parseFunc = makeVersionHashParseFunc(hashFormat, "Modrinth::GetCurrentVersions");
+
+    return Net::RPC::Spec<QHash<QString, ModPlatform::IndexedVersion>>{ .method = Net::Request::HttpMethod::Post,
+                                                                   .url = QUrl(BuildConfig.MODRINTH_PROD_URL + "/version_files"),
+                                                                   .data = bodyRaw,
+                                                                   .parse = parseFunc,
+                                                                   .name = "Modrinth::GetCurrentVersions" };
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash,
-                                                             const QString& hashFormat,
-                                                             std::optional<std::vector<Version>> mcVersions,
-                                                             std::optional<ModPlatform::ModLoaderTypes> loaders) const
+Net::RPC::Spec<ModPlatform::IndexedVersion> ModrinthAPI::latestVersion(const QString& hash,
+                                                                  const QString& hashFormat,
+                                                                  std::optional<std::vector<Version>> mcVersions,
+                                                                  std::optional<ModPlatform::ModLoaderTypes> loaders)
 {
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersion"), APPLICATION->network());
-
     QJsonObject bodyObj;
 
     if (loaders.has_value()) {
@@ -64,20 +150,22 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash
     QJsonDocument body(bodyObj);
     auto bodyRaw = body.toJson();
 
-    auto [action, response] = Net::ApiRequest::makeByteArray(
-        QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1/update?algorithm=%2").arg(hash, hashFormat), bodyRaw);
-    netJob->addNetAction(action);
+    auto parseFunc = makeVersionParseFunc("Modrinth::GetLatestVersion");
 
-    return { netJob, response };
+    return Net::RPC::Spec<ModPlatform::IndexedVersion>{
+        .method = Net::Request::HttpMethod::Post,
+        .url = QUrl(QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1/update?algorithm=%2").arg(hash, hashFormat)),
+        .data = bodyRaw,
+        .parse = parseFunc,
+        .name = "Modrinth::GetLatestVersion"
+    };
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(const QStringList& hashes,
-                                                              const QString& hashFormat,
-                                                              std::optional<std::vector<Version>> mcVersions,
-                                                              std::optional<ModPlatform::ModLoaderTypes> loaders) const
+Net::RPC::Spec<QHash<QString, ModPlatform::IndexedVersion>> ModrinthAPI::latestVersions(const QStringList& hashes,
+                                                                                   const QString& hashFormat,
+                                                                                   std::optional<std::vector<Version>> mcVersions,
+                                                                                   std::optional<ModPlatform::ModLoaderTypes> loaders)
 {
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersions"), APPLICATION->network());
-
     QJsonObject bodyObj;
 
     Json::writeStringList(bodyObj, "hashes", hashes);
@@ -97,21 +185,48 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(const QStringList&
 
     QJsonDocument body(bodyObj);
     auto bodyRaw = body.toJson();
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"), bodyRaw);
-    netJob->addNetAction(action);
 
-    return { netJob, response };
+    auto parseFunc = makeVersionHashParseFunc(hashFormat, "Modrinth::GetLatestVersions");
+
+    return Net::RPC::Spec<QHash<QString, ModPlatform::IndexedVersion>>{ .method = Net::Request::HttpMethod::Post,
+                                                                   .url = QUrl(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"),
+                                                                   .data = bodyRaw,
+                                                                   .parse = parseFunc,
+                                                                   .name = "Modrinth::GetLatestVersions" };
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getProjects(QStringList addonIds) const
+Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> ModrinthAPI::getProjects(QStringList addonIds) const
 {
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetProjects"), APPLICATION->network());
     auto searchUrl = getMultipleModInfoURL(addonIds);
 
-    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(searchUrl));
-    netJob->addNetAction(action);
+    auto parseFunc = [this](const QByteArray& response) -> Net::RPC::Sink<QList<ModPlatform::IndexedPack::Ptr>>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Modrinth projects task at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
+        }
 
-    return { netJob, response };
+        QList<ModPlatform::IndexedPack::Ptr> projects;
+        try {
+            auto entries = Json::requireArray(doc);
+            for (auto entry : entries) {
+                auto pack = std::make_shared<ModPlatform::IndexedPack>();
+                auto entryObj = Json::requireObject(entry);
+                loadIndexedPack(*pack, entryObj);
+                projects.append(pack);
+            }
+        } catch (Json::JsonException& e) {
+            qDebug() << doc;
+            qWarning() << "Error while reading" << debugName() << "resource info:" << e.cause();
+            return std::unexpected(e.cause());
+        }
+        return projects;
+    };
+
+    return Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>>{ .url = QUrl(searchUrl), .parse = parseFunc, .name = "Modrinth::GetProjects" };
 }
 
 QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const
@@ -155,48 +270,40 @@ QString ModrinthAPI::resourceTypeParameter(ModPlatform::ResourceType type)
     return "";
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getModCategories() const
+Net::RPC::Spec<QList<ModPlatform::Category>> ModrinthAPI::getCategories(ModPlatform::ResourceType type) const
 {
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetCategories"), APPLICATION->network());
-    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(BuildConfig.MODRINTH_PROD_URL + "/tag/category"));
-    netJob->addNetAction(action);
-    QObject::connect(netJob.get(), &Task::failed, netJob.get(),
-                     [](const QString& msg) { qDebug() << "Modrinth failed to get categories:" << msg; });
-
-    return { netJob, response };
-}
-
-QList<ModPlatform::Category> ModrinthAPI::loadCategories(const QByteArray& response, const QString& projectType)
-{
-    QList<ModPlatform::Category> categories;
-    QJsonParseError parseError{};
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
-    if (parseError.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from categories at" << parseError.offset << "reason:" << parseError.errorString();
-        qWarning() << *response;
-        return categories;
-    }
-
-    try {
-        auto arr = Json::requireArray(doc);
-
-        for (auto val : arr) {
-            auto cat = Json::requireObject(val);
-            auto name = Json::requireString(cat, "name");
-            if (cat["project_type"].toString() == projectType) {
-                categories.push_back({ .name = name, .id = name });
-            }
+    auto parseFunc = [type](const QByteArray& response) -> Net::RPC::Sink<QList<ModPlatform::Category>>::ParseResult {
+        QJsonParseError parseError{};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from categories at" << parseError.offset
+                       << "reason:" << parseError.errorString();
+            qWarning() << response;
+            return std::unexpected(parseError.errorString());
         }
+        const auto resourceType = resourceTypeParameter(type);
+        QList<ModPlatform::Category> categories;
+        try {
+            auto arr = Json::requireArray(doc);
 
-    } catch (Json::JsonException& e) {
-        qCritical() << "Failed to parse response from a version request.";
-        qCritical() << e.what();
-        qDebug() << doc;
-    }
-    return categories;
-}
+            for (auto val : arr) {
+                auto cat = Json::requireObject(val);
+                auto name = Json::requireString(cat, "name");
+                if (cat["project_type"].toString() == resourceType) {
+                    categories.push_back({ .name = name, .id = name });
+                }
+            }
 
-QList<ModPlatform::Category> ModrinthAPI::loadModCategories(const QByteArray& response) const
-{
-    return loadCategories(response, "mod");
+        } catch (Json::JsonException& e) {
+            qCritical() << "Failed to parse response from a version request.";
+            qCritical() << e.what();
+            qDebug() << doc;
+            return std::unexpected(e.what());
+        }
+        return categories;
+    };
+
+    return Net::RPC::Spec<QList<ModPlatform::Category>>{ .url = QUrl(BuildConfig.MODRINTH_PROD_URL + "/tag/category"),
+                                                    .parse = parseFunc,
+                                                    .name = "ModrinthAPI::getCategories" };
 }

@@ -31,20 +31,18 @@ class FlameAPI final : public ResourceAPI {
                                                                        ModPlatform::ModLoaderTypes fallback,
                                                                        bool checkLoaders);
 
-    std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
-    static std::pair<Task::Ptr, QByteArray*> matchFingerprints(const QList<uint>& fingerprints);
-    static std::pair<Task::Ptr, QByteArray*> getFiles(const QStringList& fileIds);
-    static std::pair<Task::Ptr, QByteArray*> getFile(const QString& addonId, const QString& fileId);
+Net::RPC::Spec<QList<ModPlatform::IndexedPack::Ptr>> getProjects(QStringList addonIds) const override;
+    static Net::RPC::Spec<QList<FlameMod::FingerprintMatch>> matchFingerprints(const QList<uint>& fingerprints);
+    static Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> getFiles(const QStringList& fileIds);
+    static Net::RPC::Spec<ModPlatform::IndexedVersion> getFile(const QString& addonId, const QString& fileId);
 
-    static std::pair<Task::Ptr, QByteArray*> getCategories(ModPlatform::ResourceType type);
-    std::pair<Task::Ptr, QByteArray*> getModCategories() const override;
-    QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const override;
+    Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const override;
 
     QList<ResourceAPI::SortingMethod> getSortingMethods() const override;
 
     static bool validateModLoaders(ModPlatform::ModLoaderTypes loaders)
     {
-        return (loaders & (ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt)) != 0;
+return loaders.testAnyFlag(ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt);
     }
 
     static ModPlatform::ResourceType getResourceType(int classId);
@@ -84,7 +82,7 @@ class FlameAPI final : public ResourceAPI {
     {
         QStringList l;
         for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt }) {
-            if ((types & loader) != 0) {
+if (types.testFlag(loader)) {
                 l << QString::number(getMappedModLoader(loader));
             }
         }

@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <memory>
 #include <utility>
+#include <variant>
 
 #include "Application.h"
 #include "BuildConfig.h"
@@ -24,6 +25,7 @@
 
 #include "modplatform/ModIndex.h"
 
+#include "tasks/Task.h"
 #include "ui/widgets/ProjectItem.h"
 
 namespace ResourceDownload {
@@ -145,33 +147,32 @@ void ResourceModel::search()
     if (m_searchState != SearchState::ResetRequested && m_searchTerm.startsWith("#")) {
         auto projectId = m_searchTerm.mid(1);
         if (!projectId.isEmpty()) {
-            ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks;
-
-            callbacks.onFail = [this](const QString& reason, int networkErrorCode) {
-                if (!s_runningModels.constFind(this).value()) {
-                    return;
-                }
-                if (networkErrorCode == 404) {
-                    m_searchState = SearchState::ResetRequested;
-                }
-                searchRequestFailed(reason, networkErrorCode);
-            };
-            callbacks.onAbort = [this] {
-                if (!s_runningModels.constFind(this).value()) {
-                    return;
-                }
-                searchRequestAborted();
-            };
-
-            callbacks.onSucceed = [this](auto& pack) {
-                if (!s_runningModels.constFind(this).value()) {
-                    return;
-                }
-                searchRequestForOneSucceeded(pack);
-            };
-            auto project = std::make_shared<ModPlatform::IndexedPack>();
-            project->addonId = projectId;
-            if (auto job = m_api->getProjectInfo({ project }, callbacks, false); job) {
+            auto [job, result] = m_api->getProject(projectId, true).make();
+            if (job) {
+                auto weak = job.toWeakRef();
+                connect(job.get(), &Task::succeeded, this, [this, result] {
+                    if (!s_runningModels.constFind(this).value()) {
+                        return;
+                    }
+                    searchRequestForOneSucceeded(*result);
+                });
+                connect(job.get(), &Task::failed, this, [this, weak](const QString& reason) {
+                    if (!s_runningModels.constFind(this).value()) {
+                        return;
+                    }
+                    if (auto job = weak.lock()) {
+                        if (job->replyStatusCode() == 404) {
+                            m_searchState = SearchState::ResetRequested;
+                        }
+                        searchRequestFailed(reason, job->replyStatusCode());
+                    }
+                });
+                connect(job.get(), &Task::aborted, this, [this] {
+                    if (!s_runningModels.constFind(this).value()) {
+                        return;
+                    }
+                    searchRequestAborted();
+                });
                 runSearchJob(job);
             }
             return;
@@ -179,29 +180,31 @@ void ResourceModel::search()
     }
     auto args{ createSearchArguments() };
 
-    ResourceAPI::Callback<QList<ModPlatform::IndexedPack::Ptr>> callbacks{};
-
-    callbacks.onSucceed = [this](auto& doc) {
-        if (!s_runningModels.constFind(this).value()) {
-            return;
-        }
-        searchRequestSucceeded(doc);
-    };
-    callbacks.onFail = [this](const QString& reason, int networkErrorCode) {
-        if (!s_runningModels.constFind(this).value()) {
-            return;
-        }
-        searchRequestFailed(reason, networkErrorCode);
-    };
-    callbacks.onAbort = [this] {
-        if (!s_runningModels.constFind(this).value()) {
-            return;
-        }
-        searchRequestAborted();
-    };
-
-    if (auto job = m_api->searchProjects(args, callbacks); job) {
+    if (auto [job, result] = m_api->searchProjects(args).make(); job) {
+        auto weak = job.toWeakRef();
+        connect(job.get(), &Task::failed, this, [this, weak](const QString& reason) {
+            if (!s_runningModels.constFind(this).value()) {
+                return;
+            }
+            if (auto job = weak.lock()) {
+                searchRequestFailed(reason, job->replyStatusCode());
+            }
+        });
+        connect(job.get(), &Task::aborted, this, [this] {
+            if (!s_runningModels.constFind(this).value()) {
+                return;
+            }
+            searchRequestAborted();
+        });
+        connect(job.get(), &Task::succeeded, this, [this, result] {
+            if (!s_runningModels.constFind(this).value()) {
+                return;
+            }
+            searchRequestSucceeded(*result);
+        });
         runSearchJob(job);
+    } else {
+        searchRequestFailed("Failed to create search URL", -1);
     }
 }
 
@@ -215,54 +218,47 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
 
     if (!pack->versionsLoaded) {
         auto args{ createVersionsArguments(entry) };
-        ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
 
         auto addonId = pack->addonId;
-        // Use default if no callbacks are set
-        if (!callbacks.onSucceed) {
-            callbacks.onSucceed = [this, entry, addonId](auto& doc) {
+        auto [job, result] = m_api->getProjectVersions(args).make();
+        if (job) {
+            connect(job.get(), &Task::succeeded, this, [this, entry, addonId, result] {
                 if (!s_runningModels.constFind(this).value()) {
                     return;
                 }
-                versionRequestSucceeded(doc, addonId, entry);
-            };
-        }
-        if (!callbacks.onFail) {
-            callbacks.onFail = [](const QString& reason, int) {
+                }
+                versionRequestSucceeded(*result, addonId, entry);
+            });
+            connect(job.get(), &Task::failed, this, [](const QString& reason) {
                 QMessageBox::critical(nullptr, tr("Error"),
                                       tr("A network error occurred. Could not load project versions: %1").arg(reason));
-            };
-        }
-
-        if (auto job = m_api->getProjectVersions(args, callbacks); job) {
+            });
             runInfoJob(job);
         }
     }
 
     if (!pack->extraDataLoaded) {
-        auto args{ createInfoArguments(entry) };
-        ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks{};
-
-        callbacks.onSucceed = [this, entry](auto& newpack) {
-            if (!s_runningModels.constFind(this).value()) {
-                return;
-            }
-            infoRequestSucceeded(newpack, entry);
-        };
-        callbacks.onFail = [this](const QString& reason, int) {
-            if (!s_runningModels.constFind(this).value()) {
-                return;
-            }
-            QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load project info: %1").arg(reason));
-        };
-        callbacks.onAbort = [this] {
-            if (!s_runningModels.constFind(this).value()) {
-                return;
-            }
-            qCritical() << tr("The request was aborted for an unknown reason");
-        };
-
-        if (auto job = m_api->getProjectInfo(args, callbacks); job) {
+        auto addonId = createInfoArguments(entry);
+        auto [job, result] = m_api->getProject(addonId, true).make();
+        if (job) {
+            connect(job.get(), &Task::succeeded, this, [this, entry, result] {
+                if (!s_runningModels.constFind(this).value()) {
+                    return;
+                }
+                infoRequestSucceeded(*result, entry);
+            });
+            connect(job.get(), &Task::failed, this, [this](const QString& reason) {
+                if (!s_runningModels.constFind(this).value()) {
+                    return;
+                }
+                QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load project info: %1").arg(reason));
+            });
+            connect(job.get(), &Task::aborted, this, [this] {
+                if (!s_runningModels.constFind(this).value()) {
+                    return;
+                }
+                qCritical() << tr("The request was aborted for an unknown reason");
+            });
             runInfoJob(job);
         }
     }
@@ -530,7 +526,7 @@ void ResourceModel::addPack(ModPlatform::IndexedPack::Ptr pack,
                             QString downloadReason,
                             QString dependentOn)
 {
-    version.isCurrentlySelected = true;
+version.isCurrentlySelected = true;
     m_selected.append(
         makeShared<ResourceDownloadTask>(std::move(pack), version, packs, isIndexed, std::move(downloadReason), std::move(dependentOn)));
 }

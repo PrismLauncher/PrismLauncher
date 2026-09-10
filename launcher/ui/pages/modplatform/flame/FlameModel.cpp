@@ -12,6 +12,7 @@
 
 #include <QtMath>
 #include <memory>
+#include <variant>
 
 namespace Flame {
 
@@ -169,24 +170,23 @@ void ListModel::performPaginatedSearch()
     if (m_searchState != ResetRequested && s_projectIdExpr.match(m_currentSearchTerm).hasMatch()) {
         auto projectId = m_currentSearchTerm.mid(1);
         if (!projectId.isEmpty()) {
-            ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks;
-
-            callbacks.onFail = [this](QString reason, int networkErrorCode) {
-                if (networkErrorCode == 404) {
-                    m_searchState = ResetRequested;
-                }
-                searchRequestFailed(reason);
-            };
-            callbacks.onSucceed = [this](auto& pack) { searchRequestForOneSucceeded(pack); };
-            callbacks.onAbort = [this] {
-                qCritical() << "Search task aborted by an unknown reason!";
-                searchRequestFailed("Aborted");
-            };
-            auto project = std::make_shared<ModPlatform::IndexedPack>();
-            project->addonId = projectId;
-            if (auto job = FlameAPI::get().getProjectInfo({ project }, std::move(callbacks), false); job) {
-                m_jobPtr = job;
-                m_jobPtr->start();
+auto [netJob, result] = FlameAPI::get().getProject(projectId, true).make();
+            if (netJob) {
+                auto weak = netJob.toWeakRef();
+                connect(netJob.get(), &Task::succeeded, this, [this, result] { searchRequestForOneSucceeded(*result); });
+                connect(netJob.get(), &Task::failed, this, [this, weak](const QString& reason) {
+                    if (auto job = weak.lock()) {
+                        if (job->replyStatusCode() == 404) {
+                            m_searchState = ResetRequested;
+                        }
+                        searchRequestFailed(reason);
+                    }
+                });
+                connect(netJob.get(), &Task::aborted, this, [this] {
+                    qCritical() << "Search task aborted by an unknown reason!";
+                    searchRequestFailed("Aborted");
+                });
+                m_jobPtr = netJob;
             }
             return;
         }
@@ -194,19 +194,29 @@ void ListModel::performPaginatedSearch()
     ResourceAPI::SortingMethod sort{};
     sort.index = m_currentSort + 1;
 
-    ResourceAPI::Callback<QList<ModPlatform::IndexedPack::Ptr>> callbacks{};
+    auto [netJob, result] = FlameAPI::get()
+                                .searchProjects({ .type = ModPlatform::ResourceType::Modpack,
+                                                  .offset = m_nextSearchOffset,
+                                                  .search = m_currentSearchTerm,
+                                                  .sorting = sort,
+                                                  .loaders = m_filter->loaders,
+                                                  .versions = m_filter->versions,
+                                                  .side = ModPlatform::SideType::NoSide,
+                                                  .categoryIds = m_filter->categoryIds,
+                                                  .openSource = m_filter->openSource })
+                                .make();
 
-    callbacks.onSucceed = [this](auto& doc) { searchRequestFinished(doc); };
-    callbacks.onFail = [this](QString reason, int) { searchRequestFailed(reason); };
-    callbacks.onAbort = [this] {
+auto weak = netJob.toWeakRef();
+    connect(netJob.get(), &Task::succeeded, this, [this, result] { searchRequestFinished(*result); });
+    connect(netJob.get(), &Task::failed, this, [this, weak](const QString& reason) {
+        if (auto job = weak.lock()) {
+            searchRequestFailed(reason);
+        }
+    });
+    connect(netJob.get(), &Task::aborted, this, [this] {
         qCritical() << "Search task aborted by an unknown reason!";
         searchRequestFailed("Aborted");
-    };
-
-    auto netJob = FlameAPI::get().searchProjects(
-        { ModPlatform::ResourceType::Modpack, m_nextSearchOffset, m_currentSearchTerm, sort, m_filter->loaders, m_filter->versions,
-          ModPlatform::SideType::NoSide, m_filter->categoryIds, m_filter->openSource },
-        std::move(callbacks));
+    });
 
     m_jobPtr = netJob;
     m_jobPtr->start();
