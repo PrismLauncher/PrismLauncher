@@ -333,6 +333,7 @@
         <file>scalable/instances/neoforged.svg</file>
         <file>128x128/instances/forge.png</file>  <!-- LGPL3 Forge Development LLC -->
         <file>128x128/instances/liteloader.png</file>  <!-- CC-BY-SA 4.0 LiteLoader -->
+        <file>128x128/instances/ornithe.png</file>  <!-- CC-BY-SA 4.0 Vickie J Anderson, cropped from https://commons.wikimedia.org/wiki/File:House_Finch,_southeastern_Arizona_06.jpg -->
 
         <!-- java providers -->
         <file>scalable/adoptium.svg</file>  <!-- The Adoptium Logo is a registered trademark of the Eclipse Foundation. -->

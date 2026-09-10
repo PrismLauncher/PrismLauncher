@@ -149,7 +149,7 @@ QList<BasePage*> InstallLoaderDialog::getPages()
              // Quilt
              new InstallLoaderPage("org.quiltmc.quilt-loader", "quiltmc", tr("Quilt"), profile),
              // Ornithe
-             new InstallLoaderPage("net.ornithemc.fabric-loader", "fabricmc", tr("Ornithe (Fabric)"), profile),
+             new InstallLoaderPage("net.ornithemc.fabric-loader", "ornithe", tr("Ornithe (Fabric)"), profile),
              // LiteLoader
              new InstallLoaderPage("com.mumfrey.liteloader", "liteloader", tr("LiteLoader"), profile)
     };
