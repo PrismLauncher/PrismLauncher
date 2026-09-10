@@ -36,6 +36,7 @@
  */
 
 #include "WorldListPage.h"
+#include "AssertHelpers.h"
 #include "Commandline.h"
 #include "minecraft/WorldList.h"
 #include "settings/SettingsObject.h"
@@ -348,7 +349,7 @@ void WorldListPage::populateWorldToolsMenu()
         connect(settingsAction, &QAction::triggered, this, [] { APPLICATION->ShowGlobalSettings(nullptr, "external-tools"); });
     } else {
         for (auto it = tools.constBegin(); it != tools.constEnd(); ++it) {
-            if (it.key().isEmpty()) {
+            if (ASSERT_NEVER(it.key().isEmpty())) {
                 continue;
             }
             auto* action = m_worldToolsMenu->addAction(it.key());

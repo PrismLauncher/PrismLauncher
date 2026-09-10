@@ -109,7 +109,7 @@ void ExternalToolsPage::setupWorldToolBrowseBtn(QTreeWidgetItem* item)
         if (!filePath.isEmpty()) {
             QFileInfo fileInfo(filePath);
             if (!fileInfo.isExecutable()) {
-                QMessageBox::warning(this, tr("Invalid"), tr("The selected file is not executable"));
+                QMessageBox::warning(this, tr("Invalid command"), tr("The selected file is not executable"));
                 return;
             }
             item->setText(1, Commandline::quoteForSplitCommand(filePath) + " ${WORLD_PATH}");
