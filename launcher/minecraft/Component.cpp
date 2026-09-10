@@ -65,12 +65,21 @@ QStringList conflictsFor(const QString& uid)
 }  // namespace
 
 const QMap<QString, ModloaderMapEntry> Component::KNOWN_MODLOADERS = {
-    { "net.neoforged", { ModPlatform::NeoForge, conflictsFor("net.neoforged") } },
-    { "net.minecraftforge", { ModPlatform::Forge, conflictsFor("net.minecraftforge") } },
-    { "net.fabricmc.fabric-loader", { ModPlatform::Fabric, conflictsFor("net.fabricmc.fabric-loader"), FABRIC_INTERMEDIARY } },
-    { "org.quiltmc.quilt-loader", { ModPlatform::Quilt, conflictsFor("org.quiltmc.quilt-loader"), FABRIC_INTERMEDIARY } },
-    { "net.ornithemc.fabric-loader", { ModPlatform::Ornithe, conflictsFor("net.ornithemc.fabric-loader"), ORNITHE_INTERMEDIARY } },
-    { "com.mumfrey.liteloader", { ModPlatform::LiteLoader, {} } }
+    { "net.neoforged", { .type = ModPlatform::NeoForge, .knownConflictingComponents = conflictsFor("net.neoforged") } },
+    { "net.minecraftforge", { .type = ModPlatform::Forge, .knownConflictingComponents = conflictsFor("net.minecraftforge") } },
+    { "net.fabricmc.fabric-loader",
+      { .type = ModPlatform::Fabric,
+        .knownConflictingComponents = conflictsFor("net.fabricmc.fabric-loader"),
+        .intermediaryComponent = FABRIC_INTERMEDIARY } },
+    { "org.quiltmc.quilt-loader",
+      { .type = ModPlatform::Quilt,
+        .knownConflictingComponents = conflictsFor("org.quiltmc.quilt-loader"),
+        .intermediaryComponent = FABRIC_INTERMEDIARY } },
+    { "net.ornithemc.fabric-loader",
+      { .type = ModPlatform::Ornithe,
+        .knownConflictingComponents = conflictsFor("net.ornithemc.fabric-loader"),
+        .intermediaryComponent = ORNITHE_INTERMEDIARY } },
+    { "com.mumfrey.liteloader", { .type = ModPlatform::LiteLoader } }
 };
 
 const QStringList Component::KNOWN_INTERMEDIARIES = { FABRIC_INTERMEDIARY, "org.quiltmc.hashed", ORNITHE_INTERMEDIARY };

@@ -162,8 +162,7 @@ void LaunchProfile::applyMods(const QList<LibraryPtr>& mods)
 
 void LaunchProfile::applyCompatibleJavaMajors(QList<int>& javaMajor)
 {
-    if (!javaMajor.isEmpty())
-        m_compatibleJavaMajors = javaMajor;
+    m_compatibleJavaMajors.append(javaMajor);
 }
 
 void LaunchProfile::applyCompatibleJavaName(QString javaName)
