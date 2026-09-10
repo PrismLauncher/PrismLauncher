@@ -4,8 +4,9 @@
 #include <QDebug>
 #include <QPixmapCache>
 #include <QThread>
-#include <QTime>
+#include <chrono>
 #include <limits>
+#include <optional>
 
 #define GET_TYPE()                                                          \
     Qt::ConnectionType type;                                                \
@@ -113,9 +114,9 @@ class PixmapCache final : public QObject {
         static constexpr uint s_step = 10240;
         static constexpr int s_oneSecond = 1000;
 
-        auto now = QTime::currentTime();
-        if (!m_lastCacheMissByEviciton.isNull()) {
-            auto diff = m_lastCacheMissByEviciton.msecsTo(now);
+        auto now = std::chrono::steady_clock::now();
+        if (m_lastCacheMissByEviciton.has_value()) {
+            auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - *m_lastCacheMissByEviciton).count();
             if (diff < s_oneSecond) {  // less than a second ago
                 ++m_consecutiveFastEvicitons;
             } else {
@@ -149,7 +150,7 @@ class PixmapCache final : public QObject {
 
    private:
     static PixmapCache* s_instance;
-    QTime m_lastCacheMissByEviciton;
+    std::optional<std::chrono::steady_clock::time_point> m_lastCacheMissByEviciton;
     int m_consecutiveFastEvicitons = 0;
     int m_consecutiveFastEvicitonsThreshold = 15;
 };

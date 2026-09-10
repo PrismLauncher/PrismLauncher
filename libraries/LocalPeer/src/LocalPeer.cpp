@@ -45,7 +45,6 @@
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QRegularExpression>
-#include <QTime>
 #include "LockedFile.h"
 
 #if defined(Q_OS_WIN)
