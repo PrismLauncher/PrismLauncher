@@ -58,7 +58,7 @@ jobs:
             cmake-preset: windows_mingw
             msystem: CLANG64
             vcvars-arch: amd64_x86
-            qt-version: 6.10.2
+            qt-version: 6.11.2
 
           - os: windows-2022
             artifact-name: Windows-MSVC
@@ -126,6 +126,8 @@ jobs:
           cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE"
 
       - name: Run tests
+        env:
+          MSYS2_PATH_TYPE: inherit
         run: |
           ctest --preset "$CMAKE_PRESET" --build-config "$BUILD_TYPE"
 
