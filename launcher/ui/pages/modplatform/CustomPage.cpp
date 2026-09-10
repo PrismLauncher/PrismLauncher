@@ -65,7 +65,6 @@ CustomPage::CustomPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(par
     connect(ui->fabricFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
     connect(ui->quiltFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
     connect(ui->ornitheFabricFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
-    connect(ui->ornitheQuiltFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
     connect(ui->liteLoaderFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
     connect(ui->loaderRefreshBtn, &QPushButton::clicked, this, &CustomPage::loaderRefresh);
 }
@@ -136,8 +135,6 @@ void CustomPage::loaderFilterChanged()
         m_selectedLoader = "org.quiltmc.quilt-loader";
     } else if (ui->ornitheFabricFilter->isChecked()) {
         m_selectedLoader = "net.ornithemc.fabric-loader";
-    } else if (ui->ornitheQuiltFilter->isChecked()) {
-        m_selectedLoader = "net.ornithemc.quilt-loader";
     } else if (ui->liteLoaderFilter->isChecked()) {
         m_selectedLoader = "com.mumfrey.liteloader";
     }

@@ -49,12 +49,8 @@
 
 #include <assert.h>
 
-static const QStringList ALL_LOADERS = { "net.neoforged",
-                                         "net.minecraftforge",
-                                         "net.fabricmc.fabric-loader",
-                                         "org.quiltmc.quilt-loader",
-                                         "net.ornithemc.fabric-loader",
-                                         "net.ornithemc.quilt-loader" };
+static const QStringList ALL_LOADERS = { "net.neoforged", "net.minecraftforge", "net.fabricmc.fabric-loader", "org.quiltmc.quilt-loader",
+                                         "net.ornithemc.fabric-loader" };
 
 static const QString FABRIC_INTERMEDIARY = "net.fabricmc.intermediary";
 static const QString ORNITHE_INTERMEDIARY = "net.ornithemc.calamus-intermediary";
@@ -74,7 +70,6 @@ const QMap<QString, ModloaderMapEntry> Component::KNOWN_MODLOADERS = {
     { "net.fabricmc.fabric-loader", { ModPlatform::Fabric, conflictsFor("net.fabricmc.fabric-loader"), FABRIC_INTERMEDIARY } },
     { "org.quiltmc.quilt-loader", { ModPlatform::Quilt, conflictsFor("org.quiltmc.quilt-loader"), FABRIC_INTERMEDIARY } },
     { "net.ornithemc.fabric-loader", { ModPlatform::Ornithe, conflictsFor("net.ornithemc.fabric-loader"), ORNITHE_INTERMEDIARY } },
-    { "net.ornithemc.quilt-loader", { ModPlatform::Ornithe, conflictsFor("net.ornithemc.quilt-loader"), ORNITHE_INTERMEDIARY } },
     { "com.mumfrey.liteloader", { ModPlatform::LiteLoader, {} } }
 };
 
