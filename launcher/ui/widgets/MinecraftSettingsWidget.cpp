@@ -198,8 +198,8 @@ void MinecraftSettingsWidget::loadSettings()
 
     // Custom commands
     m_ui->customCommands->initialize(m_instance != nullptr, m_instance == nullptr || settings->get("OverrideCommands").toBool(),
-                                     settings->get("PreLaunchCommand").toString(), settings->get("WrapperCommand").toString(),
-                                     settings->get("PostExitCommand").toString());
+                                     settings->get("PreLoadCommand").toString(), settings->get("PreLaunchCommand").toString(),
+                                     settings->get("WrapperCommand").toString(), settings->get("PostExitCommand").toString());
 
     // Environment variables
     m_ui->environmentVariables->initialize(m_instance != nullptr, m_instance == nullptr || settings->get("OverrideEnv").toBool(),
@@ -382,10 +382,12 @@ void MinecraftSettingsWidget::saveSettings()
         settings->set("OverrideCommands", custcmd);
 
     if (custcmd) {
+        settings->set("PreLoadCommand", m_ui->customCommands->preLoadCommand());
         settings->set("PreLaunchCommand", m_ui->customCommands->prelaunchCommand());
         settings->set("WrapperCommand", m_ui->customCommands->wrapperCommand());
         settings->set("PostExitCommand", m_ui->customCommands->postexitCommand());
     } else {
+        settings->reset("PreLoadCommand");
         settings->reset("PreLaunchCommand");
         settings->reset("WrapperCommand");
         settings->reset("PostExitCommand");
