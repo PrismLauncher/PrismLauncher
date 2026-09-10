@@ -34,8 +34,6 @@
  */
 
 #include "Component.h"
-#include <meta/Index.h>
-#include <meta/VersionList.h>
 
 #include <QSaveFile>
 
@@ -43,19 +41,58 @@
 #include "FileSystem.h"
 #include "OneSixVersionFormat.h"
 #include "VersionFile.h"
+#include "meta/Index.h"
 #include "meta/Version.h"
+#include "meta/VersionList.h"
 #include "minecraft/Component.h"
 #include "minecraft/PackProfile.h"
 
 #include <assert.h>
 
+static const QStringList ALL_LOADERS = { "net.neoforged",
+                                         "net.minecraftforge",
+                                         "net.fabricmc.fabric-loader",
+                                         "org.quiltmc.quilt-loader",
+                                         "net.ornithemc.fabric-loader",
+                                         "net.ornithemc.quilt-loader" };
+
+static const QString FABRIC_INTERMEDIARY = "net.fabricmc.intermediary";
+static const QString ORNITHE_INTERMEDIARY = "net.ornithemc.calamus-intermediary";
+
+namespace {
+QStringList conflictsFor(const QString& uid)
+{
+    QStringList result = ALL_LOADERS;
+    result.removeAll(uid);
+    return result;
+}
+}  // namespace
+
 const QMap<QString, ModloaderMapEntry> Component::KNOWN_MODLOADERS = {
-    { "net.neoforged", { ModPlatform::NeoForge, { "net.minecraftforge", "net.fabricmc.fabric-loader", "org.quiltmc.quilt-loader" } } },
-    { "net.minecraftforge", { ModPlatform::Forge, { "net.neoforged", "net.fabricmc.fabric-loader", "org.quiltmc.quilt-loader" } } },
-    { "net.fabricmc.fabric-loader", { ModPlatform::Fabric, { "net.minecraftforge", "net.neoforged", "org.quiltmc.quilt-loader" } } },
-    { "org.quiltmc.quilt-loader", { ModPlatform::Quilt, { "net.minecraftforge", "net.neoforged", "net.fabricmc.fabric-loader" } } },
+    { "net.neoforged", { ModPlatform::NeoForge, conflictsFor("net.neoforged") } },
+    { "net.minecraftforge", { ModPlatform::Forge, conflictsFor("net.minecraftforge") } },
+    { "net.fabricmc.fabric-loader", { ModPlatform::Fabric, conflictsFor("net.fabricmc.fabric-loader"), FABRIC_INTERMEDIARY } },
+    { "org.quiltmc.quilt-loader", { ModPlatform::Quilt, conflictsFor("org.quiltmc.quilt-loader"), FABRIC_INTERMEDIARY } },
+    { "net.ornithemc.fabric-loader", { ModPlatform::Ornithe, conflictsFor("net.ornithemc.fabric-loader"), ORNITHE_INTERMEDIARY } },
+    { "net.ornithemc.quilt-loader", { ModPlatform::Ornithe, conflictsFor("net.ornithemc.quilt-loader"), ORNITHE_INTERMEDIARY } },
     { "com.mumfrey.liteloader", { ModPlatform::LiteLoader, {} } }
 };
+
+const QStringList Component::KNOWN_INTERMEDIARIES = { FABRIC_INTERMEDIARY, "org.quiltmc.hashed", ORNITHE_INTERMEDIARY };
+
+bool Component::loaderSupportsMinecraft(const QString& loaderUid, const QString& minecraftVersion)
+{
+    const auto loader = KNOWN_MODLOADERS.find(loaderUid);
+    if (loader == KNOWN_MODLOADERS.cend() || loader->intermediaryComponent.isEmpty())
+        return true;
+
+    auto mappings = APPLICATION->metadataIndex()->get(loader->intermediaryComponent);
+    if (!mappings)
+        return false;
+
+    mappings->waitToLoad();
+    return mappings->hasVersion(minecraftVersion);
+}
 
 Component::Component(PackProfile* parent, const QString& uid)
 {
