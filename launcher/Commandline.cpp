@@ -59,7 +59,8 @@ QStringList splitArgs(const QString& args)
             escape = false;
             // in "quotes"
         } else if (!inquotes.isNull()) {
-            if (cchar == '\\') {
+            // a backslash only escapes the matching quote or another backslash, so Windows paths survive intact
+            if (cchar == '\\' && i + 1 < args.length() && (args.at(i + 1) == inquotes || args.at(i + 1) == '\\')) {
                 escape = true;
             } else if (cchar == inquotes) {
                 inquotes = QChar::Null;
