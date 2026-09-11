@@ -1,0 +1,54 @@
+name: Merge Branches
+description: Merge two sets of branches automatically
+
+inputs:
+  base:
+    description: Base branch to merge into
+    required: true
+  head:
+    description: Head branch to merge
+    required: true
+  token:
+    description: GitHub token used to query the API
+
+outputs:
+  base:
+    description: Base branch to merge into
+    value: ${{ inputs.base }}
+  head:
+    description: Head branch to merge
+    value: ${{ inputs.head }}
+
+runs:
+  using: composite
+
+  steps:
+    - name: Compare branches
+      id: compare
+      shell: bash
+      env:
+        BASE: ${{ inputs.base }}
+        HEAD: ${{ inputs.head }}
+        GH_TOKEN: ${{ inputs.token }}
+      run: |
+        status="$(gh api "/repos/$GITHUB_REPOSITORY/compare/$BASE...$HEAD" --jq '.status')"
+        echo "status=$status" >> "$GITHUB_OUTPUT"
+
+    - name: Skip merge if branches are identical
+      if: ${{ steps.compare.outputs.status == 'identical' }}
+      shell: bash
+      run: |
+        echo "Base and head branches are identical. Skipping merge." >&2
+
+    - name: Merge branches
+      if: ${{ steps.compare.outputs.status != 'identical' }}
+      shell: bash
+      env:
+        BASE: ${{ inputs.base }}
+        HEAD: ${{ inputs.head }}
+        GH_TOKEN: ${{ inputs.token }}
+      run: |
+        gh api "/repos/$GITHUB_REPOSITORY/merges" \
+          -F base="$BASE" \
+          -F head="$HEAD" \
+          -F commit_message="chore: automatic merge of $HEAD into $BASE"
