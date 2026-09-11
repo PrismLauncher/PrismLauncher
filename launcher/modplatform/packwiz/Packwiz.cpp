@@ -171,7 +171,7 @@ void V1::updateModIndex(const QDir& indexDir, Mod& mod)
     }
 
     toml::table update;
-    switch (mod.provider) {
+    switch (mod.provider.value()) {
         case (ModPlatform::ResourceProvider::FLAME):
             if (mod.fileId.toInt() == 0 || mod.projectId.toInt() == 0) {
                 qCritical() << QString("Did not write file %1 because missing information!").arg(normalizedFname);
@@ -191,6 +191,8 @@ void V1::updateModIndex(const QDir& indexDir, Mod& mod)
                 { "mod-id", mod.modId().toString().toStdString() },
                 { "version", mod.version().toString().toStdString() },
             };
+            break;
+        case ModPlatform::ResourceProviderValue::UNKNOWN:
             break;
     }
 
@@ -236,7 +238,7 @@ void V1::updateModIndex(const QDir& indexDir, Mod& mod)
                                       { "hash-format", mod.hashFormat.toStdString() },
                                       { "hash", mod.hash.toStdString() },
                                   } },
-                                { "update", toml::table{ { ModPlatform::ProviderCapabilities::name(mod.provider), update } } } };
+                                { "update", toml::table{ { mod.provider.toString().toStdString(), update } } } };
         std::stringstream ss;
         ss << tbl;
         inStream << QString::fromStdString(ss.str());
@@ -349,21 +351,16 @@ auto V1::getIndexForMod(const QDir& indexDir, const QString& slug) -> Mod
             return {};
         }
 
-        auto* modProviderTable = updateTable[ModPlatform::ProviderCapabilities::name(Provider::FLAME)].as_table();
-        if (modProviderTable != nullptr) {
+        toml::table* modProviderTable = nullptr;
+        if ((modProviderTable = updateTable[Provider(Provider::FLAME).toString().toStdString()].as_table()); modProviderTable != nullptr) {
             mod.provider = Provider::FLAME;
             mod.fileId = intEntry(*modProviderTable, "file-id");
             mod.projectId = intEntry(*modProviderTable, "project-id");
-        } else {
-            modProviderTable = updateTable[ModPlatform::ProviderCapabilities::name(Provider::MODRINTH)].as_table();
-            if (modProviderTable != nullptr) {
-                mod.provider = Provider::MODRINTH;
-                mod.modId() = stringEntry(*modProviderTable, "mod-id");
-                mod.version() = stringEntry(*modProviderTable, "version");
-            } else {
-                qCritical() << QString("No mod provider on mod metadata!");
-                return {};
-            }
+        } else if ((modProviderTable = updateTable[Provider(Provider::MODRINTH).toString().toStdString()].as_table());
+                   modProviderTable != nullptr) {
+            mod.provider = Provider::MODRINTH;
+            mod.modId() = stringEntry(*modProviderTable, "mod-id");
+            mod.version() = stringEntry(*modProviderTable, "version");
         }
     }
     {  // dependencies

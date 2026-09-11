@@ -213,7 +213,7 @@ void ResourceDownloadDialog::confirm()
         confirmDialog->appendResource({
             .name = task->getName(),
             .filename = task->getFilename(),
-            .provider = ModPlatform::ProviderCapabilities::name(task->getProvider()),
+            .provider = task->getProvider().toString(),
             .required_by = extraInfo.requiredByNames,
             .version_type = task->getVersion().versionType.toString(),
             .enabled = !extraInfo.maybeInstalled,
@@ -337,12 +337,14 @@ void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* s
 
 void ResourceDownloadDialog::setResourceMetadata(const std::shared_ptr<Metadata::ModStruct>& meta)
 {
-    switch (meta->provider) {
+    switch (meta->provider.value()) {
         case ModPlatform::ResourceProvider::MODRINTH:
             selectPage(Modrinth::id());
             break;
         case ModPlatform::ResourceProvider::FLAME:
             selectPage(Flame::id());
+            break;
+        case ModPlatform::ResourceProviderValue::UNKNOWN:
             break;
     }
 

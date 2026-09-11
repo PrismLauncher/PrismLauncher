@@ -176,7 +176,7 @@ Result<ModPlatform::IndexedVersion> FlameMod::loadIndexedPackVersion(const QJson
     auto hashList = obj["hashes"].toArray();
     for (auto h : hashList) {
         auto hashEntry = h.toObject();
-        auto hashTypes = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::FLAME);
+        auto hashTypes = ModPlatform::ResourceProvider(ModPlatform::ResourceProvider::FLAME).hashType();
         auto hashAlgo = enumToString(hashEntry["algo"].toInt(1));
         if (hashTypes.contains(hashAlgo)) {
             TRY_INTO(file.hash, Json::requireString(hashEntry, "value"))
