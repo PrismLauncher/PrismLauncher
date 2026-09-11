@@ -87,12 +87,14 @@ const QStringList Component::KNOWN_INTERMEDIARIES = { FABRIC_INTERMEDIARY, "org.
 bool Component::loaderSupportsMinecraft(const QString& loaderUid, const QString& minecraftVersion)
 {
     const auto loader = KNOWN_MODLOADERS.find(loaderUid);
-    if (loader == KNOWN_MODLOADERS.cend() || loader->intermediaryComponent.isEmpty())
+    if (loader == KNOWN_MODLOADERS.cend() || loader->intermediaryComponent.isEmpty()) {
         return true;
+    }
 
     auto mappings = APPLICATION->metadataIndex()->get(loader->intermediaryComponent);
-    if (!mappings)
+    if (!mappings) {
         return false;
+    }
 
     mappings->waitToLoad();
     return mappings->hasVersion(minecraftVersion);
