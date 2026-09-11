@@ -49,7 +49,7 @@ Net::Request::Ptr makeSkinUploadRequest(const QString& token, const QString& pat
         if (!file->open(QFile::ReadOnly)) {
             qWarning() << "Could not open file" << path << "for reading:" << file->errorString();
             file->deleteLater();
-            return std::unexpected(QObject::tr("Could not open file %1 for reading").arg(path));
+            return std::unexpected(QObject::tr("Could not open file %1 for reading: %2").arg(path, file->errorString()));
         }
 
         QHttpPart skin;
