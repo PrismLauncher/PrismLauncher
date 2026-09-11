@@ -236,7 +236,7 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
             TRY_INTO(file.hash, Json::requireString(hashList.value(), preferredHashType))
             file.hashType = preferredHashType;
         } else {
-            auto hashTypes = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH);
+            auto hashTypes = ModPlatform::ResourceProvider(ModPlatform::ResourceProvider::MODRINTH).hashType();
             for (auto& hashType : hashTypes) {
                 if (hashList->contains(hashType)) {
                     TRY_INTO(file.hash, Json::requireString(hashList.value(), hashType))

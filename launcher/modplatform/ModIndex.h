@@ -57,7 +57,62 @@ using enum ModLoaderType;
 Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
 QList<ModLoaderType> modLoaderTypesToList(ModLoaderTypes flags);
 
-enum class ResourceProvider : std::uint8_t { MODRINTH, FLAME };
+enum class ResourceProviderValue : std::uint8_t { MODRINTH, FLAME, UNKNOWN };
+struct ResourceProvider : EnumWrapper<ResourceProvider, ResourceProviderValue> {
+    static constexpr auto invalid() { return UNKNOWN; };
+
+    static constexpr auto mapping()
+    {
+        return std::array{
+            std::pair{ MODRINTH, "modrinth" },
+            std::pair{ FLAME, "curseforge" },
+        };
+    }
+
+    QString readableName() const
+    {
+        switch (value()) {
+            case MODRINTH:
+                return "Modrinth";
+            case FLAME:
+                return "CurseForge";
+            case ResourceProviderValue::UNKNOWN:
+                break;
+        }
+        return "Unknown";
+    }
+
+    QStringList hashType() const
+    {
+        switch (value()) {
+            case ResourceProvider::MODRINTH:
+                return { "sha512", "sha1" };
+            case ResourceProvider::FLAME:
+                // Try newer formats first, fall back to old format
+                return { "sha1", "md5", "murmur2" };
+            case ResourceProviderValue::UNKNOWN:
+                break;
+        }
+        return {};
+    }
+
+    QString getMetaURL(const QVariant& projectID) const
+    {
+        switch (value()) {
+            case ResourceProvider::MODRINTH:
+                return "https://modrinth.com/mod/" + projectID.toString();
+            case ResourceProvider::FLAME:
+                return "https://www.curseforge.com/projects/" + projectID.toString();
+            case ResourceProviderValue::UNKNOWN:
+                break;
+        }
+        return {};
+    }
+
+    using enum ResourceProviderValue;
+    using Base = EnumWrapper<ResourceProvider, ResourceProviderValue>;
+    using Base::Base;
+};
 
 enum class DependencyTypeValue : std::uint8_t { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
 struct DependencyType : EnumWrapper<DependencyType, DependencyTypeValue> {
@@ -148,12 +203,6 @@ struct DisclosureType : EnumWrapper<DisclosureType, DisclosureTypeValue> {
     using Base = EnumWrapper<DisclosureType, DisclosureTypeValue>;
     using Base::Base; /* inherit ctor */
 };
-
-namespace ProviderCapabilities {
-const char* name(ResourceProvider);
-QString readableName(ResourceProvider);
-QStringList hashType(ResourceProvider);
-}  // namespace ProviderCapabilities
 
 struct ModpackAuthor {
     QString name;
@@ -298,8 +347,6 @@ inline auto getOverrideDeps() -> QList<OverrideDep>
         { .quilt = "lwVhp9o5", .fabric = "Ha28R6CL", .slug = "KotlinLibraries", .provider = ModPlatform::ResourceProvider::MODRINTH }
     };
 }
-
-QString getMetaURL(ResourceProvider provider, QVariant projectID);
 
 auto getModLoaderAsString(ModLoaderType type) -> const QString;
 auto getModLoaderFromString(QString type) -> ModLoaderType;

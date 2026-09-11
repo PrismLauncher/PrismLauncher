@@ -11,10 +11,9 @@ namespace Hashing {
 
 Hasher::Ptr createHasher(QString file_path, ModPlatform::ResourceProvider provider)
 {
-    switch (provider) {
+    switch (provider.value()) {
         case ModPlatform::ResourceProvider::MODRINTH:
-            return makeShared<Hasher>(file_path,
-                                      ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first());
+            return makeShared<Hasher>(file_path, ModPlatform::ResourceProvider(ModPlatform::ResourceProvider::MODRINTH).hashType().first());
         case ModPlatform::ResourceProvider::FLAME:
             return makeShared<Hasher>(file_path, Algorithm::Murmur2);
         default:
