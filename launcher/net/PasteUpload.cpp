@@ -57,7 +57,7 @@ struct PasteTypeInfo {
     QString endpointPath;
 };
 
-const static std::array<PasteTypeInfo, 4> g_PasteTypes = {
+const std::array<PasteTypeInfo, 4> g_PasteTypes = {
     { { .name = "0x0.st", .defaultBase = "https://0x0.st", .endpointPath = "" },
       { .name = "hastebin", .defaultBase = "https://hst.sh", .endpointPath = "/documents" },
       { .name = "paste.gg", .defaultBase = "https://paste.gg", .endpointPath = "/api/v1/pastes" },
@@ -205,7 +205,7 @@ std::pair<Net::Request::Ptr, QString*> Type::make(QString log, QString baseUrl) 
                 return std::unexpected(QObject::tr("Error: %1 returned a malformed response body").arg(url.toString()));
             }
             case Type::Invalid:
-                return std::unexpected(QObject::tr("Unknown paste type"));
+                break;
         }
         return std::unexpected(QObject::tr("Unknown paste type"));
     };
