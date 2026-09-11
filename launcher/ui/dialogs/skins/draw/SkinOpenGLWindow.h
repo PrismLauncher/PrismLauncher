@@ -21,11 +21,9 @@
 #include <QMatrix4x4>
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
-#include <QOpenGLTexture>
 #include <QOpenGLWindow>
 #include <QVector2D>
 #include "minecraft/skins/SkinModel.h"
-#include "ui/dialogs/skins/draw/BoxGeometry.h"
 #include "ui/dialogs/skins/draw/Scene.h"
 
 class SkinProvider {
@@ -59,12 +57,8 @@ class SkinOpenGLWindow : public QOpenGLWindow, protected QOpenGLFunctions {
 
     void initShaders();
 
-    void generateBackgroundTexture(int width, int height, int tileSize);
-    void renderBackground();
-
    private:
-    QOpenGLShaderProgram* m_modelProgram;
-    QOpenGLShaderProgram* m_backgroundProgram;
+    QOpenGLShaderProgram* m_modelProgram = nullptr;
     opengl::Scene* m_scene = nullptr;
 
     QMatrix4x4 m_projection;
@@ -72,14 +66,12 @@ class SkinOpenGLWindow : public QOpenGLWindow, protected QOpenGLFunctions {
     QVector2D m_mousePosition;
 
     bool m_isMousePressed = false;
-    float m_distance = 48;
+    float m_distance = 64;
     float m_yaw = 90;   // Horizontal rotation angle
     float m_pitch = 0;  // Vertical rotation angle
 
     bool m_isFirstFrame = true;
 
-    opengl::BoxGeometry* m_background = nullptr;
-    QOpenGLTexture* m_backgroundTexture = nullptr;
     QColor m_baseColor;
     SkinProvider* m_parent = nullptr;
 };
