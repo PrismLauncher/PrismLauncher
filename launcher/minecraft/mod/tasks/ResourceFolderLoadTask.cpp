@@ -92,6 +92,7 @@ void ResourceFolderLoadTask::executeTask()
             } else {
                 m_result->resources[resource->internalId()].reset(resource);
                 m_result->resources[resource->internalId()]->setStatus(ResourceStatus::NoMetadata);
+                createNoProviderMetadata(resource);
             }
         } else {
             QString choppedId = resource->internalId().chopped(9);
@@ -108,6 +109,7 @@ void ResourceFolderLoadTask::executeTask()
             } else {
                 m_result->resources[resource->internalId()].reset(resource);
                 m_result->resources[resource->internalId()]->setStatus(ResourceStatus::NoMetadata);
+                createNoProviderMetadata(resource);
             }
         }
     }
@@ -151,4 +153,21 @@ void ResourceFolderLoadTask::getFromMetadata()
         resource->setStatus(ResourceStatus::NotInstalled);
         m_result->resources[resource->internalId()].reset(resource);
     }
+}
+
+bool ResourceFolderLoadTask::createNoProviderMetadata(Resource* resource)
+{
+    if (!m_is_indexed) {
+        return false;
+    }
+
+    if (resource->type() == ResourceType::FOLDER || resource->type() == ResourceType::UNKNOWN) {
+        return false;
+    }
+
+    auto mod = Packwiz::V1::createNoProviderModFormat(resource->name(), resource->fileinfo().fileName());
+    Metadata::update(m_index_dir, mod);
+    resource->setMetadata(mod);
+
+    return true;
 }

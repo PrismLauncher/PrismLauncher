@@ -323,7 +323,12 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
 
     // ask the user on what provider to seach for the mod first
     for (auto* candidate : m_candidates) {
-        if (candidate->status() != ResourceStatus::NoMetadata) {
+        if (candidate->metadata() && candidate->metadata()->provider.value() == ModPlatform::ResourceProviderValue::UNKNOWN) {
+            m_rematchSlugs[candidate] = candidate->metadata()->slug;
+        }
+
+        if (candidate->status() != ResourceStatus::NoMetadata &&
+            (candidate->metadata() && candidate->metadata()->provider.value() != ModPlatform::ResourceProviderValue::UNKNOWN)) {
             onMetadataEnsured(candidate);
             continue;
         }
@@ -418,6 +423,14 @@ void ResourceUpdateDialog::onMetadataEnsured(Resource* resource)
     // When the mod is a folder, for instance
     if (!resource->metadata()) {
         return;
+    }
+
+    // remove old file
+    if (m_rematchSlugs.contains(resource)) {
+        auto oldSlug = m_rematchSlugs.take(resource);
+        if (oldSlug != resource->metadata()->slug) {
+            Metadata::remove(indexDir(), oldSlug);
+        }
     }
 
     switch (resource->metadata()->provider.value()) {

@@ -105,7 +105,8 @@ void EnsureMetadataTask::executeTask()
         }
 
         // They already have the right metadata :o
-        if (resource->status() != ResourceStatus::NoMetadata && resource->metadata() && resource->metadata()->provider == m_provider) {
+        if (resource->status() != ResourceStatus::NoMetadata && resource->metadata() && resource->metadata()->provider == m_provider &&
+            resource->metadata()->provider.isValid()) {
             qDebug() << "Resource" << resource->name() << "already has metadata!";
             emitReady(resource);
             continue;
