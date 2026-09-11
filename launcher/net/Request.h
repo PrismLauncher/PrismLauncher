@@ -45,6 +45,7 @@
 #include <array>
 #include <chrono>
 #include <cstdint>
+#include <expected>
 #include <functional>
 #include <utility>
 #include <variant>
@@ -102,15 +103,16 @@ class Request : public Task {
     };
     Q_DECLARE_FLAGS(Options, Option)
 
-    using DeviceFactory = std::function<QIODevice*()>;
-    using MultiPartFactory = std::function<QHttpMultiPart*()>;
-    using PostData = std::variant<std::monostate, QByteArray, DeviceFactory, MultiPartFactory>;
+    using DeviceFactory = std::function<std::expected<QIODevice*, QString>()>;
+    using MultiPartFactory = std::function<std::expected<QHttpMultiPart*, QString>()>;
+    using ByteArrayFactory = std::function<std::expected<QByteArray, QString>()>;
+    using PostData = std::variant<std::monostate, QByteArray, DeviceFactory, MultiPartFactory, ByteArrayFactory>;
     using LogCatFunc = const QLoggingCategory& (*)();
 
     struct Spec {
         HttpMethod method = HttpMethod::Get;
         QUrl url{};
-        Request::PostData data{};
+        Request::PostData data;
         Options options = Option::NoOptions;
         QString name{};
     };
