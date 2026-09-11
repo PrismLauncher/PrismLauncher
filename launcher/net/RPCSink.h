@@ -35,29 +35,25 @@ class Sink : public ByteArraySink {
     ~Sink() override = default;
 
    public:
-    auto finalize(QNetworkReply& /*reply*/) -> Task::State override
+    Result finalize(QNetworkReply& /*reply*/) override
     {
-        auto result = finalizeAllValidators();
-        if (!result) {
-            m_failReason = result.error();
-            return Task::State::Failed;
+        auto validatorResult = finalizeAllValidators();
+        if (!validatorResult) {
+            return validatorResult;
         }
         try {
             auto result = m_parseFunc(m_output);
             if (!result.has_value()) {
-                m_failReason = result.error();
-                return Task::State::Failed;
+                return std::unexpected(result.error());
             }
             m_result = *result;
         } catch (const std::exception& e) {
-            m_failReason = QString::fromUtf8(e.what());
-            return Task::State::Failed;
+            return std::unexpected<Error>(QString::fromUtf8(e.what()));
             // ToDo: make this suppport QJsonException
         } catch (...) {
-            m_failReason = QObject::tr("Unknown error while parsing RPC response");
-            return Task::State::Failed;
+            return std::unexpected<Error>(QObject::tr("Unknown error while parsing RPC response"));
         }
-        return Task::State::Succeeded;
+        return {};
     }
 
     T* result() { return &m_result; }

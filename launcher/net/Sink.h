@@ -35,8 +35,8 @@
 
 #pragma once
 
+#include <expected>
 #include "Validator.h"
-#include "tasks/Task.h"
 
 namespace Net {
 class Sink {
@@ -44,15 +44,19 @@ class Sink {
     Sink() = default;
     virtual ~Sink() = default;
 
+    using Error = Validator::Error;
+    using Result = Validator::Result;
+
+    enum InitType : std::uint8_t { Ok, CacheHit };
+    using InitResult = std::expected<InitType, QString>;
+
    public:
-    virtual auto init(QNetworkRequest& request) -> Task::State = 0;
-    virtual auto write(const QByteArray& data) -> Task::State = 0;
-    virtual auto abort() -> Task::State = 0;
-    virtual auto finalize(QNetworkReply& reply) -> Task::State = 0;
+    virtual InitResult init(QNetworkRequest& request) = 0;
+    virtual Result write(const QByteArray& data) = 0;
+    virtual Result finalize(QNetworkReply& reply) = 0;
+    virtual void abort() = 0;
 
     virtual auto hasLocalData() -> bool = 0;
-
-    QString failReason() const { return m_failReason; }
 
     void addValidator(Validator* validator)
     {
@@ -93,6 +97,5 @@ class Sink {
 
    protected:
     std::vector<std::shared_ptr<Validator>> m_validators;
-    QString m_failReason;
 };
 }  // namespace Net

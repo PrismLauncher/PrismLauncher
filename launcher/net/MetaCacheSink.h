@@ -48,8 +48,8 @@ class MetaCacheSink : public FileSink {
     auto hasLocalData() -> bool override;
 
    protected:
-    auto initCache(QNetworkRequest& request) -> Task::State override;
-    auto finalizeCache(QNetworkReply& reply) -> Task::State override;
+    InitResult initCache(QNetworkRequest& request) override;
+    Result finalizeCache(QNetworkReply& reply) override;
 
    private:
     MetaEntryPtr m_entry;

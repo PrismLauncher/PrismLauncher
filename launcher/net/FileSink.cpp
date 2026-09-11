@@ -34,6 +34,7 @@
  */
 
 #include "FileSink.h"
+#include <expected>
 
 #include "FileSystem.h"
 
@@ -41,18 +42,17 @@
 
 namespace Net {
 
-Task::State FileSink::init(QNetworkRequest& request)
+auto FileSink::init(QNetworkRequest& request) -> InitResult
 {
     auto result = initCache(request);
-    if (result != Task::State::Running) {
+    if (!result || *result != InitType::Ok) {
         return result;
     }
 
     // create a new save file and open it for writing
     if (!FS::ensureFilePathExists(m_filename)) {
         qCCritical(taskNetLogC) << "Could not create folder for " + m_filename;
-        m_failReason = "Could not create folder";
-        return Task::State::Failed;
+        return std::unexpected<Error>("Could not create folder");
     }
 
     m_wroteAnyData = false;
@@ -60,15 +60,14 @@ Task::State FileSink::init(QNetworkRequest& request)
     if (!m_outputFile->open(QIODevice::WriteOnly)) {
         const auto error = QString("Could not open %1 for writing: %2").arg(m_filename).arg(m_outputFile->errorString());
         qCCritical(taskNetLogC) << error;
-        m_failReason = error;
-        return Task::State::Failed;
+        return std::unexpected<Error>(error);
     }
 
     initAllValidators();
-    return Task::State::Running;
+    return InitType::Ok;
 }
 
-Task::State FileSink::write(const QByteArray& data)
+auto FileSink::write(const QByteArray& data) -> Result
 {
     writeAllValidators(data);
     if (m_outputFile->write(data) != data.size()) {
@@ -79,27 +78,25 @@ Task::State FileSink::write(const QByteArray& data)
             error = error.arg(m_outputFile->errorString());
         }
         qCCritical(taskNetLogC) << error;
-        m_failReason = error;
         m_outputFile->cancelWriting();
         m_outputFile.reset();
         m_wroteAnyData = false;
-        return Task::State::Failed;
+        return std::unexpected<Error>(error);
     }
 
     m_wroteAnyData = true;
-    return Task::State::Running;
+    return {};
 }
 
-Task::State FileSink::abort()
+void FileSink::abort()
 {
     if (m_outputFile) {
         m_outputFile->cancelWriting();
     }
     failAllValidators();
-    return Task::State::Failed;
 }
 
-Task::State FileSink::finalize(QNetworkReply& reply)
+auto FileSink::finalize(QNetworkReply& reply) -> Result
 {
     bool gotFile = false;
     QVariant statusCodeV = reply.attribute(QNetworkRequest::HttpStatusCodeAttribute);
@@ -117,17 +114,15 @@ Task::State FileSink::finalize(QNetworkReply& reply)
         // we only do this for actual downloads, not 'your data is still the same' cache hits
         auto result = finalizeAllValidators();
         if (!result) {
-            m_failReason = result.error();
-            return Task::State::Failed;
+            return result;
         }
 
         // nothing went wrong...
         if (!m_outputFile->commit()) {
             const auto error = QString("Failed to commit changes to %1: %2").arg(m_filename).arg(m_outputFile->errorString());
             qCCritical(taskNetLogC) << error;
-            m_failReason = error;
             m_outputFile->cancelWriting();
-            return Task::State::Failed;
+            return std::unexpected<Error>(error);
         }
     }
 
@@ -135,16 +130,6 @@ Task::State FileSink::finalize(QNetworkReply& reply)
     m_outputFile.reset();
 
     return finalizeCache(reply);
-}
-
-Task::State FileSink::initCache(QNetworkRequest& /*unused*/)
-{
-    return Task::State::Running;
-}
-
-Task::State FileSink::finalizeCache(QNetworkReply& /*unused*/)
-{
-    return Task::State::Succeeded;
 }
 
 bool FileSink::hasLocalData()
