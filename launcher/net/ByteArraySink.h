@@ -48,39 +48,34 @@ class ByteArraySink : public Sink {
     ~ByteArraySink() override = default;
 
    public:
-    auto init(QNetworkRequest& request) -> Task::State override
+    auto init(QNetworkRequest& /*request*/) -> Task::State override
     {
         m_output.clear();
-        if (initAllValidators(request)) {
-            return Task::State::Running;
-        }
-        m_fail_reason = "Failed to initialize validators";
-        return Task::State::Failed;
+        initAllValidators();
+        return Task::State::Running;
     };
 
-    auto write(QByteArray& data) -> Task::State override
+    auto write(const QByteArray& data) -> Task::State override
     {
         m_output.append(data);
-        if (writeAllValidators(data)) {
-            return Task::State::Running;
-        }
-        m_fail_reason = "Failed to write validators";
-        return Task::State::Failed;
+        writeAllValidators(data);
+        return Task::State::Running;
     }
 
     auto abort() -> Task::State override
     {
         failAllValidators();
-        m_fail_reason = "Aborted";
+        m_failReason = "Aborted";
         return Task::State::Failed;
     }
 
-    auto finalize(QNetworkReply& reply) -> Task::State override
+    auto finalize(QNetworkReply& /*reply*/) -> Task::State override
     {
-        if (finalizeAllValidators(reply)) {
+        auto result = finalizeAllValidators();
+        if (result) {
             return Task::State::Succeeded;
         }
-        m_fail_reason = "Failed to finalize validators";
+        m_failReason = result.error();
         return Task::State::Failed;
     }
 

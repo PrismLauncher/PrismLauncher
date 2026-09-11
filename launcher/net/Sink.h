@@ -46,57 +46,53 @@ class Sink {
 
    public:
     virtual auto init(QNetworkRequest& request) -> Task::State = 0;
-    virtual auto write(QByteArray& data) -> Task::State = 0;
+    virtual auto write(const QByteArray& data) -> Task::State = 0;
     virtual auto abort() -> Task::State = 0;
     virtual auto finalize(QNetworkReply& reply) -> Task::State = 0;
 
     virtual auto hasLocalData() -> bool = 0;
 
-    QString failReason() const { return m_fail_reason; }
+    QString failReason() const { return m_failReason; }
 
     void addValidator(Validator* validator)
     {
         if (validator) {
-            validators.push_back(std::shared_ptr<Validator>(validator));
+            m_validators.push_back(std::shared_ptr<Validator>(validator));
         }
     }
 
    protected:
-    bool initAllValidators(QNetworkRequest& request)
+    void initAllValidators()
     {
-        for (auto& validator : validators) {
-            if (!validator->init(request))
-                return false;
+        for (auto& validator : m_validators) {
+            validator->init();
         }
-        return true;
     }
-    bool finalizeAllValidators(QNetworkReply& reply)
+    void writeAllValidators(const QByteArray& data)
     {
-        for (auto& validator : validators) {
-            if (!validator->validate(reply))
-                return false;
+        for (auto& validator : m_validators) {
+            validator->write(data);
         }
-        return true;
     }
-    bool failAllValidators()
+    void failAllValidators()
     {
-        bool success = true;
-        for (auto& validator : validators) {
-            success &= validator->abort();
+        for (auto& validator : m_validators) {
+            validator->abort();
         }
-        return success;
     }
-    bool writeAllValidators(QByteArray& data)
+    Validator::Result finalizeAllValidators()
     {
-        for (auto& validator : validators) {
-            if (!validator->write(data))
-                return false;
+        for (auto& validator : m_validators) {
+            auto result = validator->validate();
+            if (!result) {
+                return result;
+            }
         }
-        return true;
+        return {};
     }
 
    protected:
-    std::vector<std::shared_ptr<Validator>> validators;
-    QString m_fail_reason;
+    std::vector<std::shared_ptr<Validator>> m_validators;
+    QString m_failReason;
 };
 }  // namespace Net
