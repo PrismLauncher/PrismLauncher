@@ -35,10 +35,10 @@
     <string>Main Toolbar</string>
    </property>
    <property name="allowedAreas">
-    <set>Qt::BottomToolBarArea|Qt::TopToolBarArea</set>
+    <set>Qt::ToolBarArea::BottomToolBarArea|Qt::ToolBarArea::TopToolBarArea</set>
    </property>
    <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonTextBesideIcon</enum>
+    <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
    </property>
    <property name="floatable">
     <bool>false</bool>
@@ -64,7 +64,7 @@
     <string>News Toolbar</string>
    </property>
    <property name="allowedAreas">
-    <set>Qt::BottomToolBarArea|Qt::TopToolBarArea</set>
+    <set>Qt::ToolBarArea::BottomToolBarArea|Qt::ToolBarArea::TopToolBarArea</set>
    </property>
    <property name="iconSize">
     <size>
@@ -73,7 +73,7 @@
     </size>
    </property>
    <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonTextBesideIcon</enum>
+    <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
    </property>
    <property name="floatable">
     <bool>false</bool>
@@ -91,7 +91,7 @@
     <string>Instance Toolbar</string>
    </property>
    <property name="allowedAreas">
-    <set>Qt::LeftToolBarArea|Qt::RightToolBarArea</set>
+    <set>Qt::ToolBarArea::LeftToolBarArea|Qt::ToolBarArea::RightToolBarArea</set>
    </property>
    <property name="iconSize">
     <size>
@@ -100,7 +100,7 @@
     </size>
    </property>
    <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonTextBesideIcon</enum>
+    <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
    </property>
    <property name="floatable">
     <bool>false</bool>
@@ -131,7 +131,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
@@ -188,18 +188,17 @@
      <bool>true</bool>
     </property>
     <addaction name="actionViewLauncherRootFolder"/>
+    <addaction name="actionViewLogsFolder"/>
     <addaction name="separator"/>
     <addaction name="actionViewInstanceFolder"/>
-    <addaction name="actionViewCentralModsFolder"/>
-    <addaction name="actionViewSkinsFolder"/>
-    <addaction name="actionViewJavaFolder"/>
-    <addaction name="separator"/>
-    <addaction name="actionViewIconThemeFolder"/>
-    <addaction name="actionViewWidgetThemeFolder"/>
-    <addaction name="actionViewCatPackFolder"/>
     <addaction name="actionViewIconsFolder"/>
+    <addaction name="actionViewCentralModsFolder"/>
+    <addaction name="actionViewJavaFolder"/>
+    <addaction name="actionViewSkinsFolder"/>
     <addaction name="separator"/>
-    <addaction name="actionViewLogsFolder"/>
+    <addaction name="actionViewWidgetThemeFolder"/>
+    <addaction name="actionViewIconThemeFolder"/>
+    <addaction name="actionViewCatPackFolder"/>
    </widget>
    <widget class="QMenu" name="accountsMenu">
     <property name="title">
@@ -305,7 +304,7 @@
     <string>Check for new updates for %1.</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::ApplicationSpecificRole</enum>
+    <enum>QAction::MenuRole::ApplicationSpecificRole</enum>
    </property>
   </action>
   <action name="actionSettings">
@@ -319,7 +318,7 @@
     <string>Change settings.</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::PreferencesRole</enum>
+    <enum>QAction::MenuRole::PreferencesRole</enum>
    </property>
   </action>
   <action name="actionManageSkins">
@@ -536,7 +535,7 @@
     <iconset theme="viewfolder"/>
    </property>
    <property name="text">
-    <string>&amp;Instances</string>
+    <string>I&amp;nstances</string>
    </property>
    <property name="toolTip">
     <string>Open the instances folder in a file browser.</string>
@@ -547,7 +546,7 @@
     <iconset theme="viewfolder"/>
    </property>
    <property name="text">
-    <string>Launcher &amp;Root</string>
+    <string>Launcher &amp;Data</string>
    </property>
    <property name="toolTip">
     <string>Open the launcher's root folder in a file browser.</string>
@@ -558,7 +557,7 @@
     <iconset theme="centralmods"/>
    </property>
    <property name="text">
-    <string>&amp;Central Mods</string>
+    <string>&amp;Mods (Quick Access)</string>
    </property>
    <property name="toolTip">
     <string>Open the central mods folder in a file browser.</string>
@@ -580,7 +579,7 @@
     <iconset theme="viewfolder"/>
    </property>
    <property name="text">
-    <string>Instance Icons</string>
+    <string>Instance &amp;Icons</string>
    </property>
    <property name="toolTip">
     <string>Open the instance icons folder in a file browser.</string>
@@ -591,7 +590,7 @@
     <iconset theme="viewfolder"/>
    </property>
    <property name="text">
-    <string>Logs</string>
+    <string>Launcher &amp;Logs</string>
    </property>
    <property name="toolTip">
     <string>Open the logs folder in a file browser.</string>
@@ -657,7 +656,7 @@
     <string>View information about %1.</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::AboutRole</enum>
+    <enum>QAction::MenuRole::AboutRole</enum>
    </property>
   </action>
   <action name="actionClearMetadata">
@@ -673,8 +672,7 @@
   </action>
   <action name="actionViewLog">
    <property name="icon">
-    <iconset theme="log">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="log"/>
    </property>
    <property name="text">
     <string>View logs</string>
@@ -751,7 +749,7 @@
     <iconset theme="viewfolder"/>
    </property>
    <property name="text">
-    <string>I&amp;con Theme</string>
+    <string>I&amp;con Themes</string>
    </property>
    <property name="toolTip">
     <string>Open the icon theme folder in a file browser.</string>
@@ -762,7 +760,7 @@
     <iconset theme="viewfolder"/>
    </property>
    <property name="text">
-    <string>Cat Packs</string>
+    <string>&amp;Cat Packs</string>
    </property>
    <property name="toolTip">
     <string>Open the cat packs folder in a file browser.</string>
@@ -773,7 +771,7 @@
     <iconset theme="viewfolder"/>
    </property>
    <property name="text">
-    <string>Java</string>
+    <string>&amp;Auto Downloaded Java</string>
    </property>
    <property name="toolTip">
     <string>Open the Java folder in a file browser. Only available if the built-in Java downloader is used.</string>
