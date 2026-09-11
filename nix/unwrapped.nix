@@ -80,6 +80,7 @@ stdenv.mkDerivation {
     pkg-config
     jdk17
     stripJavaArchivesHook
+    wrapGAppsHook3
   ];
 
   buildInputs = [
