@@ -89,11 +89,6 @@ bool FlameCreationTask::abort()
     return InstanceTask::abort();
 }
 
-QString FlameCreationTask::packRootForUpdate(const BaseInstance* oldInstance)
-{
-    return QFileInfo(oldInstance->gameRoot()).fileName();
-}
-
 void FlameCreationTask::executeTask()
 {
     auto* instanceList = APPLICATION->instances();
@@ -116,7 +111,7 @@ void FlameCreationTask::executeTask()
         }
     }
 
-    m_rootPath = packRootForUpdate(inst);
+    m_rootPath = QFileInfo(inst->gameRoot()).fileName();
 
     const QString indexPath(FS::PathCombine(m_stagingPath, "manifest.json"));
 

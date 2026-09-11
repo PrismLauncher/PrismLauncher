@@ -71,11 +71,6 @@ class FlameCreationTask final : public InstanceTask {
     void createInstance();
     void executeTask() override;
 
-    // Folder (relative to the instance root) that a CurseForge pack update must extract
-    // into: the old instance's game root, so instances rooted at ".minecraft" are not
-    // abandoned in favor of a fresh "minecraft" folder.
-    static QString packRootForUpdate(const BaseInstance* oldInstance);
-
    private slots:
     void idResolverSucceeded();
     void setupDownloadJob();
