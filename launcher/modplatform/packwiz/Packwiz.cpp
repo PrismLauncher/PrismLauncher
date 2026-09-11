@@ -21,6 +21,7 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QFileInfo>
 #include <QObject>
 #include <algorithm>
 #include <compare>
@@ -142,6 +143,23 @@ auto V1::createModFormat([[maybe_unused]] const QDir& indexDir, ModPlatform::Ind
     return mod;
 }
 
+auto V1::createNoProviderModFormat(const QString& name, const QString& filename) -> Mod
+{
+    Mod mod;
+
+    mod.name = name;
+
+    auto realFilename = filename;
+    if (realFilename.endsWith(".disabled")) {
+        realFilename.chop(9);
+    }
+
+    mod.filename = realFilename;
+    mod.slug = QFileInfo(realFilename).completeBaseName();
+
+    return mod;
+}
+
 void V1::updateModIndex(const QDir& indexDir, Mod& mod)
 {
     if (!mod.isValid()) {
@@ -222,23 +240,25 @@ void V1::updateModIndex(const QDir& indexDir, Mod& mod)
     // Put TOML data into the file
     QTextStream inStream(&indexFile);
     {
-        auto tbl = toml::table{ { "name", mod.name.toStdString() },
-                                { "filename", mod.filename.toStdString() },
-                                { "side", mod.side.toString().toStdString() },
-                                { "x-prismlauncher-loaders", loaders },
-                                { "x-prismlauncher-mc-versions", mcVersions },
-                                { "x-prismlauncher-release-type", mod.releaseType.toString().toStdString() },
-                                { "x-prismlauncher-version-number", mod.versionNumber.toStdString() },
-                                { "x-prismlauncher-dependencies", deps },
-                                { "x-prismlauncher-lock-update", mod.lockUpdate },
-                                { "download",
-                                  toml::table{
-                                      { "mode", mod.mode.toStdString() },
-                                      { "url", mod.url.toString().toStdString() },
-                                      { "hash-format", mod.hashFormat.toStdString() },
-                                      { "hash", mod.hash.toStdString() },
-                                  } },
-                                { "update", toml::table{ { mod.provider.toString().toStdString(), update } } } };
+        auto tbl = toml::table{
+            { "name", mod.name.toStdString() },
+            { "filename", mod.filename.toStdString() },
+            { "side", mod.side.toString().toStdString() },
+            { "x-prismlauncher-loaders", loaders },
+            { "x-prismlauncher-mc-versions", mcVersions },
+            { "x-prismlauncher-release-type", mod.releaseType.toString().toStdString() },
+            { "x-prismlauncher-version-number", mod.versionNumber.toStdString() },
+            { "x-prismlauncher-dependencies", deps },
+            { "x-prismlauncher-lock-update", mod.lockUpdate },
+        };
+        if (mod.provider.isValid()) {
+            tbl.emplace("download", toml::table{ { "mode", mod.mode.toStdString() },
+                                                 { "url", mod.url.toString().toStdString() },
+                                                 { "hash-format", mod.hashFormat.toStdString() },
+                                                 { "hash", mod.hash.toStdString() } });
+            tbl.emplace("update", toml::table{ { mod.provider.toString().toStdString(), update } });
+        }
+
         std::stringstream ss;
         ss << tbl;
         inStream << QString::fromStdString(ss.str());
@@ -331,36 +351,33 @@ auto V1::getIndexForMod(const QDir& indexDir, const QString& slug) -> Mod
 
     {  // [download] info
         auto* downloadTable = table["download"].as_table();
-        if (!downloadTable) {
-            qCritical() << QString("No [download] section found on mod metadata!");
-            return {};
+        if (downloadTable) {
+            mod.mode = stringEntry(*downloadTable, "mode");
+            mod.url = stringEntry(*downloadTable, "url");
+            mod.hashFormat = stringEntry(*downloadTable, "hash-format");
+            mod.hash = stringEntry(*downloadTable, "hash");
         }
-
-        mod.mode = stringEntry(*downloadTable, "mode");
-        mod.url = stringEntry(*downloadTable, "url");
-        mod.hashFormat = stringEntry(*downloadTable, "hash-format");
-        mod.hash = stringEntry(*downloadTable, "hash");
     }
 
     {  // [update] info
         using Provider = ModPlatform::ResourceProvider;
 
         auto updateTable = table["update"];
-        if (!updateTable || !updateTable.is_table()) {
-            qCritical() << QString("No [update] section found on mod metadata!");
-            return {};
-        }
-
-        toml::table* modProviderTable = nullptr;
-        if ((modProviderTable = updateTable[Provider(Provider::FLAME).toString().toStdString()].as_table()); modProviderTable != nullptr) {
-            mod.provider = Provider::FLAME;
-            mod.fileId = intEntry(*modProviderTable, "file-id");
-            mod.projectId = intEntry(*modProviderTable, "project-id");
-        } else if ((modProviderTable = updateTable[Provider(Provider::MODRINTH).toString().toStdString()].as_table());
-                   modProviderTable != nullptr) {
-            mod.provider = Provider::MODRINTH;
-            mod.modId() = stringEntry(*modProviderTable, "mod-id");
-            mod.version() = stringEntry(*modProviderTable, "version");
+        if (updateTable && updateTable.is_table()) {
+            toml::table* modProviderTable = nullptr;
+            if ((modProviderTable = updateTable[Provider(Provider::FLAME).toString().toStdString()].as_table());
+                modProviderTable != nullptr) {
+                mod.provider = Provider::FLAME;
+                mod.fileId = intEntry(*modProviderTable, "file-id");
+                mod.projectId = intEntry(*modProviderTable, "project-id");
+            } else if ((modProviderTable = updateTable[Provider(Provider::MODRINTH).toString().toStdString()].as_table());
+                       modProviderTable != nullptr) {
+                mod.provider = Provider::MODRINTH;
+                mod.modId() = stringEntry(*modProviderTable, "mod-id");
+                mod.version() = stringEntry(*modProviderTable, "version");
+            } else {
+                qWarning() << QString("No supported mod provider found on mod metadata!");
+            }
         }
     }
     {  // dependencies

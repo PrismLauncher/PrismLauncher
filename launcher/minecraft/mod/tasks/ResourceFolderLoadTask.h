@@ -72,6 +72,8 @@ class ResourceFolderLoadTask : public Task {
    private:
     void getFromMetadata();
 
+    bool createNoProviderMetadata(Resource* resource);
+
    private:
     QDir m_resource_dir, m_index_dir;
     bool m_is_indexed;
