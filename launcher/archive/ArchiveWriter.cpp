@@ -128,6 +128,11 @@ bool ArchiveWriter::addFile(const QString& fileName, const QString& fileDest)
         }
 
         archive_entry_copy_bhfi(entry, &file_info);
+        if (fileInfo.isFile() && !fileInfo.isSymLink()) {
+            // archive_entry_copy_bhfi() does not populate POSIX permissions. ZIP archives written by libarchive are marked as
+            // originating on Unix, so leaving the mode unset makes other Unix systems extract these files with mode 000.
+            archive_entry_set_perm(entry, file_info.dwFileAttributes & FILE_ATTRIBUTE_READONLY ? 0444 : 0644);
+        }
         CloseHandle(file_handle);
     }
 #else
