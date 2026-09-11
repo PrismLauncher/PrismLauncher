@@ -62,7 +62,7 @@ std::pair<Net::Request::Ptr, QString*> makeUpload(ScreenShot::Ptr shot)
         if (!file->open(QFile::ReadOnly)) {
             qWarning() << "Could not open file" << shot->m_file.absoluteFilePath() << "for reading:" << file->errorString();
             file->deleteLater();
-            return std::unexpected(QObject::tr("Could not open file %1 for reading").arg(shot->m_file.absoluteFilePath()));
+            return std::unexpected(QObject::tr("Could not open file %1 for reading: %2").arg(shot->m_file.absoluteFilePath(), file->errorString()));
         }
 
         QHttpPart filePart;
