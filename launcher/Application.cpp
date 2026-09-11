@@ -847,14 +847,14 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // HACK: This code feels so stupid is there a less stupid way of doing this?
         {
             m_settings->registerSetting("PastebinURL", "");
-            m_settings->registerSetting("PastebinType", PasteUpload::PasteType::Mclogs);
+            m_settings->registerSetting("PastebinType", static_cast<int>(PasteUpload::Type::Mclogs));
             m_settings->registerSetting("PastebinCustomAPIBase", "");
 
             QString pastebinURL = m_settings->get("PastebinURL").toString();
 
             bool userHadDefaultPastebin = pastebinURL == "https://0x0.st";
             if (!pastebinURL.isEmpty() && !userHadDefaultPastebin) {
-                m_settings->set("PastebinType", PasteUpload::PasteType::NullPointer);
+                m_settings->set("PastebinType", static_cast<int>(PasteUpload::Type::NullPointer));
                 m_settings->set("PastebinCustomAPIBase", pastebinURL);
                 m_settings->reset("PastebinURL");
             }
@@ -862,7 +862,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             bool ok = false;
             int pasteType = m_settings->get("PastebinType").toInt(&ok);
             // If PastebinType is invalid then reset the related settings.
-            if (!ok || pasteType < PasteUpload::PasteType::First || pasteType > PasteUpload::PasteType::Last) {
+            if (!ok || !PasteUpload::Type(pasteType).isValid()) {
                 m_settings->reset("PastebinType");
                 m_settings->reset("PastebinCustomAPIBase");
             }
