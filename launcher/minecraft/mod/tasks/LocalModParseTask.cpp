@@ -134,8 +134,9 @@ ModDetails ReadMCModTOML(QByteArray contents)
 
     toml::table tomlData;
 #if TOML_EXCEPTIONS
-    // Broad catch, not toml::parse_error: libc++ typeinfo mismatch (tomlplusplus#279)
-    // can let the thrown parse_error escape a handler for its own type.
+    // Catch std::exception instead of toml::parse_error to work around
+    // the latter not being caught here when compiled with libc++.
+    // See https://github.com/PrismLauncher/PrismLauncher/issues/6047.
     try {
         tomlData = toml::parse(contents.toStdString());
     } catch ([[maybe_unused]] const std::exception& err) {
