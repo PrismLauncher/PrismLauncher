@@ -61,7 +61,8 @@ MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent)
 MinecraftAccountPtr MinecraftAccount::loadFromJsonV3(const QJsonObject& json)
 {
     MinecraftAccountPtr account(new MinecraftAccount());
-    if (account->data.resumeStateFromV3(json)) {
+    if (account->data.loadStateV3(json)) {
+        account->data.loadSecrets(json);
         return account;
     }
     return nullptr;
@@ -89,9 +90,19 @@ MinecraftAccountPtr MinecraftAccount::createOffline(const QString& username)
     return account;
 }
 
-QJsonObject MinecraftAccount::saveToJson() const
+QJsonObject MinecraftAccount::saveState() const
 {
     return data.saveState();
+}
+
+QJsonObject MinecraftAccount::saveSecrets() const
+{
+    return data.saveSecrets();
+}
+
+void MinecraftAccount::loadSecrets(const QJsonObject& input)
+{
+    data.loadSecrets(input);
 }
 
 AccountState MinecraftAccount::accountState() const
@@ -149,6 +160,7 @@ void MinecraftAccount::authSucceeded()
 {
     m_currentTask.reset();
     emit changed();
+    emit secretsChanged();
     emit activityChanged(false);
 }
 
@@ -174,10 +186,12 @@ void MinecraftAccount::authFailed(QString reason)
                 data.validity_ = Validity::None;
             }
             emit changed();
+            emit secretsChanged();
         } break;
         case AccountTaskState::STATE_FAILED_GONE: {
             data.validity_ = Validity::None;
             emit changed();
+            emit secretsChanged();
         } break;
         case AccountTaskState::STATE_WORKING: {
             data.accountState = AccountState::Unchecked;
@@ -193,7 +207,8 @@ void MinecraftAccount::authFailed(QString reason)
 
 QString MinecraftAccount::displayName() const
 {
-    if (const QList validStates{ AccountState::Unchecked, AccountState::Working, AccountState::Offline, AccountState::Online }; !validStates.contains(accountState())) {
+    if (const QList validStates{ AccountState::Unchecked, AccountState::Working, AccountState::Offline, AccountState::Online };
+        !validStates.contains(accountState())) {
         return QString("⚠ %1").arg(profileName());
     }
     return profileName();
