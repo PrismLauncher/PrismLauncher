@@ -36,11 +36,13 @@ std::vector<Version> mcVersions(MinecraftInstance* inst)
 }
 ModPlatform::ResourceProvider next(ModPlatform::ResourceProvider p)
 {
-    switch (p) {
+    switch (p.value()) {
         case ModPlatform::ResourceProvider::MODRINTH:
             return ModPlatform::ResourceProvider::FLAME;
         case ModPlatform::ResourceProvider::FLAME:
             return ModPlatform::ResourceProvider::MODRINTH;
+        case ModPlatform::ResourceProviderValue::UNKNOWN:
+            break;
     }
 
     return ModPlatform::ResourceProvider::FLAME;
@@ -307,12 +309,14 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
 
     // adds resource to list based on provider
     auto addToTmp = [&modrinthTmp, &flameTmp](Resource* resource, ModPlatform::ResourceProvider p) {
-        switch (p) {
+        switch (p.value()) {
             case ModPlatform::ResourceProvider::MODRINTH:
                 modrinthTmp.push_back(resource);
                 break;
             case ModPlatform::ResourceProvider::FLAME:
                 flameTmp.push_back(resource);
+                break;
+            case ModPlatform::ResourceProviderValue::UNKNOWN:
                 break;
         }
     };
@@ -416,12 +420,14 @@ void ResourceUpdateDialog::onMetadataEnsured(Resource* resource)
         return;
     }
 
-    switch (resource->metadata()->provider) {
+    switch (resource->metadata()->provider.value()) {
         case ModPlatform::ResourceProvider::MODRINTH:
             m_modrinthToUpdate.push_back(resource);
             break;
         case ModPlatform::ResourceProvider::FLAME:
             m_flameToUpdate.push_back(resource);
+            break;
+        case ModPlatform::ResourceProviderValue::UNKNOWN:
             break;
     }
 }
@@ -462,7 +468,7 @@ void ResourceUpdateDialog::appendResource(const CheckUpdateTask::Update& info, Q
     itemTop->setExpanded(true);
 
     auto* providerItem = new QTreeWidgetItem(itemTop);
-    QString providerName = ModPlatform::ProviderCapabilities::readableName(info.provider);
+    QString providerName = info.provider.readableName();
     providerItem->setText(0, tr("Provider: %1").arg(providerName));
     providerItem->setData(0, Qt::UserRole, providerName);
 

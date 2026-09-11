@@ -230,7 +230,7 @@ ModPlatform::IndexedVersion Modrinth::loadIndexedPackVersion(QJsonObject& obj,
             file.hash = Json::requireString(hashList, preferredHashType);
             file.hashType = preferredHashType;
         } else {
-            auto hashTypes = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH);
+            auto hashTypes = ModPlatform::ResourceProvider(ModPlatform::ResourceProvider::MODRINTH).hashType();
             for (auto& hashType : hashTypes) {
                 if (hashList.contains(hashType)) {
                     file.hash = Json::requireString(hashList, hashType);

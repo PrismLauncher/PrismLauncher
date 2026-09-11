@@ -422,10 +422,12 @@ QByteArray FlamePackExportTask::generateHTML()
     QString content = "";
     for (auto mod : resolvedFiles) {
         if (mod.isMod) {
-            content += QString(TEMPLATE)
-                           .replace("{name}", mod.name.toHtmlEscaped())
-                           .replace("{url}", ModPlatform::getMetaURL(ModPlatform::ResourceProvider::FLAME, mod.addonId).toHtmlEscaped())
-                           .replace("{authors}", !mod.authors.isEmpty() ? QString(" (by %1)").arg(mod.authors).toHtmlEscaped() : "");
+            content +=
+                QString(TEMPLATE)
+                    .replace("{name}", mod.name.toHtmlEscaped())
+                    .replace("{url}",
+                             ModPlatform::ResourceProvider(ModPlatform::ResourceProvider::FLAME).getMetaURL(mod.addonId).toHtmlEscaped())
+                    .replace("{authors}", !mod.authors.isEmpty() ? QString(" (by %1)").arg(mod.authors).toHtmlEscaped() : "");
         }
     }
     content = "<ul>" + content + "</ul>";

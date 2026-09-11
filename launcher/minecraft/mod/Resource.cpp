@@ -99,7 +99,7 @@ void removeThePrefix(QString& string)
 auto Resource::provider() const -> QString
 {
     if (metadata()) {
-        return ModPlatform::ProviderCapabilities::readableName(metadata()->provider);
+        return metadata()->provider.readableName();
     }
 
     return QObject::tr("Unknown");
@@ -108,7 +108,7 @@ auto Resource::provider() const -> QString
 auto Resource::homepage() const -> QString
 {
     if (metadata()) {
-        return ModPlatform::getMetaURL(metadata()->provider, metadata()->project_id);
+        return metadata()->provider.getMetaURL(metadata()->project_id);
     }
 
     return {};

@@ -9,6 +9,7 @@
 #include "QObjectPtr.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 
+#include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/helpers/HashUtils.h"
@@ -118,13 +119,16 @@ void EnsureMetadataTask::executeTask()
 
     Task::Ptr versionTask;
 
-    switch (m_provider) {
+    switch (m_provider.value()) {
         case (ModPlatform::ResourceProvider::MODRINTH):
             versionTask = modrinthVersionsTask();
             break;
         case (ModPlatform::ResourceProvider::FLAME):
             versionTask = flameVersionsTask();
             break;
+        default:
+            emitFailed("Unknown provider");
+            return;
     }
 
     auto invalidadeLeftover = [this] {
@@ -139,13 +143,16 @@ void EnsureMetadataTask::executeTask()
     connect(versionTask.get(), &Task::finished, this, [this, invalidadeLeftover] {
         Task::Ptr projectTask;
 
-        switch (m_provider) {
+        switch (m_provider.value()) {
             case (ModPlatform::ResourceProvider::MODRINTH):
                 projectTask = modrinthProjectsTask();
                 break;
             case (ModPlatform::ResourceProvider::FLAME):
                 projectTask = flameProjectsTask();
                 break;
+            default:
+                emitFailed("Unknown provider");
+                return;
         }
 
         if (!projectTask) {
@@ -167,10 +174,10 @@ void EnsureMetadataTask::executeTask()
     });
 
     if (m_resources.size() > 1) {
-        setStatus(tr("Requesting metadata information from %1...").arg(ModPlatform::ProviderCapabilities::readableName(m_provider)));
+        setStatus(tr("Requesting metadata information from %1...").arg(m_provider.readableName()));
     } else if (!m_resources.empty()) {
-        setStatus(tr("Requesting metadata information from %1 for '%2'...")
-                      .arg(ModPlatform::ProviderCapabilities::readableName(m_provider), m_resources.begin().value()->name()));
+        setStatus(
+            tr("Requesting metadata information from %1 for '%2'...").arg(m_provider.readableName(), m_resources.begin().value()->name()));
     }
 
     m_currentTask = versionTask;
@@ -225,7 +232,7 @@ void EnsureMetadataTask::emitFail(Resource* resource, QString key, RemoveFromLis
 
 Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
 {
-    auto hashType = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
+    auto hashType = ModPlatform::ResourceProvider(ModPlatform::ResourceProvider::MODRINTH).hashType().first();
 
     auto [verTask, response] = ModrinthAPI::currentVersions(m_resources.keys(), hashType);
 
@@ -508,7 +515,7 @@ void EnsureMetadataTask::updateMetadata(ModPlatform::IndexedPack& pack, ModPlatf
 
         connect(task.get(), &Task::finished, this, [this, &pack, resource] { updateMetadataCallback(pack, resource); });
 
-        m_updateMetadataTasks[ModPlatform::ProviderCapabilities::name(pack.provider) + pack.addonId.toString()] = task;
+        m_updateMetadataTasks[pack.provider.toString() + pack.addonId.toString()] = task;
         task->start();
     } catch (Json::JsonException& e) {
         qDebug() << e.cause();
