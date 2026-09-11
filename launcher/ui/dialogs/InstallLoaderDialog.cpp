@@ -62,8 +62,9 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
         if (!versions)
             return;
 
-        if (!Component::loaderSupportsMinecraft(uid, minecraftVersion))
+        if (!Component::loaderSupportsMinecraft(uid, minecraftVersion)) {
             setExactFilter(BaseVersionList::ParentVersionRole, "AAA");
+        }
 
         initialize(versions.get());
         loaded = true;
