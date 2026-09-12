@@ -14,6 +14,7 @@
  */
 
 #include "ModListView.h"
+#include "minecraft/mod/ResourceFolderModel.h"
 #include <QDrag>
 #include <QHeaderView>
 #include <QMouseEvent>
@@ -65,5 +66,22 @@ void ModListView::setResizeModes(const QList<QHeaderView::ResizeMode>& modes)
     auto head = header();
     for (int i = 0; i < modes.count(); i++) {
         head->setSectionResizeMode(i, modes[i]);
+    }
+}
+
+void ModListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    // All resource lists share the same logical columns
+    const auto offloadedIndex = index.siblingAtColumn(ResourceFolderModel::ActiveColumn);
+    if (offloadedIndex.isValid() && offloadedIndex.data(ResourceFolderModel::OffloadedRole).toBool())
+    {
+        painter->save();
+        painter->setOpacity(0.5);
+        QStyledItemDelegate::paint(painter, option, index);
+        painter->restore();
+    }
+    else
+    {
+        QStyledItemDelegate::paint(painter, option, index);
     }
 }
