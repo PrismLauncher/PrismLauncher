@@ -38,6 +38,11 @@
 #include <QDebug>
 #include <QString>
 #include <exception>
+#include <expected>
+
+using Error = QString;
+template <typename T>
+using Result = std::expected<T, Error>;
 
 class Exception : public std::exception {
    public:
