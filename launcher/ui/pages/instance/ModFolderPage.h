@@ -39,8 +39,12 @@
 #pragma once
 
 #include <QPointer>
+#include <optional>
+
 #include "ExternalResourcesPage.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
+
+class BisectController;
 
 class ModFolderPage : public ExternalResourcesPage {
     Q_OBJECT
@@ -64,6 +68,8 @@ class ModFolderPage : public ExternalResourcesPage {
     void updateFrame(const QModelIndex& current, const QModelIndex& previous) override;
 
    private slots:
+    void bisectMods();
+    std::optional<QList<Mod*>> pickLockedMods(const QList<Mod*>& allMods);
     void removeItems(const QItemSelection& selection) override;
 
     void downloadMods();
@@ -76,6 +82,8 @@ class ModFolderPage : public ExternalResourcesPage {
    protected:
     ModFolderModel* m_model;
     QPointer<ResourceDownload::ResourceDownloadDialog> m_downloadDialog;
+    QPointer<BisectController> m_activeBisect;
+    QAction* m_bisectAction = nullptr;
 };
 
 class CoreModFolderPage : public ModFolderPage {

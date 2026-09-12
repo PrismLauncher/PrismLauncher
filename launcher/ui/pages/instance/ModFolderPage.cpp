@@ -48,21 +48,24 @@
 #include <QKeyEvent>
 #include <QMenu>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QSortFilterProxyModel>
 #include <algorithm>
 #include <memory>
 
-#include "Application.h"
-
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui/dialogs/ResourceUpdateDialog.h"
+#include "ui/dialogs/ReviewMessageBox.h"
 
 #include "minecraft/PackProfile.h"
 #include "minecraft/VersionFilterData.h"
+#include "minecraft/mod/BisectController.h"
 #include "minecraft/mod/Mod.h"
 #include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/mod/ResourceFolderModel.h"
 
+#include "Application.h"
 #include "tasks/ConcurrentTask.h"
 #include "tasks/Task.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -80,6 +83,10 @@ ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWi
     ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
     connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
     ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
+    m_bisectAction = new QAction(tr("Bisect Mods"), this);
+    m_bisectAction->setToolTip(tr("Repeatedly launch the game, disabling/enabling mods, to locate ones causing an issue"));
+    ui->actionsToolbar->insertActionBefore(ui->actionAddItem, m_bisectAction);
+    connect(m_bisectAction, &QAction::triggered, this, &ModFolderPage::bisectMods);
 
     auto* updateMenu = new QMenu(this);
 
@@ -308,6 +315,170 @@ void ModFolderPage::deleteModMetadata()
     }
 
     m_model->deleteMetadata(selection);
+}
+
+void ModFolderPage::bisectMods()
+{
+    if (m_instance->isRunning()) {
+        CustomMessageBox::selectable(this, tr("Instance is running"),
+                                     tr("Please close the instance before starting a mod bisect - "
+                                        "toggling mods while it's running can crash the game."),
+                                     QMessageBox::Warning)
+            ->exec();
+        return;
+    }
+
+    if (m_activeBisect) {
+        CustomMessageBox::selectable(this, tr("Bisect already running"),
+                                     tr("A bisect is already in progress. Finish or end it before starting another."), QMessageBox::Warning)
+            ->exec();
+        return;
+    }
+
+    QList<Mod*> allMods;
+    for (int row = 0; row < m_model->rowCount({}); ++row) {
+        allMods << static_cast<Mod*>(&m_model->at(row));
+    }
+
+    QSet<Mod*> originallyEnabled;
+    for (auto* mod : allMods) {
+        if (mod->enabled()) {
+            originallyEnabled << mod;
+        }
+    }
+
+    auto lockedOpt = pickLockedMods(allMods);
+    if (!lockedOpt) {
+        return;
+    }
+    const QList<Mod*>& locked = *lockedOpt;
+
+    QList<Mod*> candidates;
+    for (auto* mod : allMods) {
+        if (!locked.contains(mod)) {
+            candidates << mod;
+        }
+    }
+
+    auto* bisect = new BisectController(m_instance, m_model, locked, candidates, this);
+    m_activeBisect = bisect;
+    m_bisectAction->setEnabled(false);
+    m_bisectAction->setText(tr("Bisect in progress..."));
+
+    auto restoreOriginalState = [this, allMods, originallyEnabled] {
+        QSet<Mod*> toEnable;
+        QSet<Mod*> toDisable;
+        for (auto* mod : allMods) {
+            (originallyEnabled.contains(mod) ? toEnable : toDisable) << mod;
+        }
+        m_model->setResourceEnabledSilent(toDisable, EnableAction::DISABLE);
+        m_model->setResourceEnabledSilent(toEnable, EnableAction::ENABLE);
+    };
+
+    auto enableOnlyCulprits = [this, allMods](const QList<Mod*>& culprits) {
+        const QSet<Mod*> culpritSet(culprits.begin(), culprits.end());
+        QSet<Mod*> toEnable;
+        QSet<Mod*> toDisable;
+        for (auto* mod : allMods) {
+            (culpritSet.contains(mod) || mod->enabled() ? toEnable : toDisable) << mod;
+        }
+        m_model->setResourceEnabledSilent(toDisable, EnableAction::DISABLE);
+        m_model->setResourceEnabledSilent(toEnable, EnableAction::ENABLE);
+    };
+
+    connect(bisect, &BisectController::readyToLaunch, this, [this] { APPLICATION->launch(m_instance); }, Qt::QueuedConnection);
+
+    connect(APPLICATION, &Application::instanceLaunchFinished, bisect, &BisectController::onLaunchEnded, Qt::QueuedConnection);
+
+    connect(bisect, &BisectController::promptUser, this, [this, bisect, restoreOriginalState] {
+        auto* box = CustomMessageBox::selectable(this, tr("Bisect: does the issue occur?"), tr("Does this mod set reproduce the issue?"),
+                                                 QMessageBox::Question,
+                                                 QMessageBox::Yes | QMessageBox::No | QMessageBox::Retry | QMessageBox::Abort);
+        box->button(QMessageBox::Retry)->setText(tr("Relaunch"));
+        box->button(QMessageBox::Abort)->setText(tr("End Bisect"));
+
+        auto response = box->exec();
+
+        if (response == QMessageBox::Abort) {
+            bisect->cancel();
+            restoreOriginalState();
+            m_activeBisect = nullptr;
+            m_bisectAction->setEnabled(true);
+            m_bisectAction->setText(tr("Bisect Mods"));
+            bisect->deleteLater();
+            return;
+        }
+
+        BisectController::Answer answer = BisectController::Answer::No;
+        if (response == QMessageBox::Yes) {
+            answer = BisectController::Answer::Yes;
+        } else if (response == QMessageBox::Retry) {
+            answer = BisectController::Answer::Relaunch;
+        }
+        bisect->onUserAnswered(answer);
+    });
+
+    connect(bisect, &BisectController::finished, this, [this, enableOnlyCulprits](const QList<Mod*>& culprits) {
+        enableOnlyCulprits(culprits);
+        m_activeBisect = nullptr;
+        m_bisectAction->setEnabled(true);
+        m_bisectAction->setText(tr("Bisect Mods"));
+        QStringList names;
+        for (auto* m : culprits) {
+            names << m->name();
+        }
+        CustomMessageBox::selectable(this, tr("Bisect complete"), tr("Likely culprit mod(s): %1").arg(names.join(", ")),
+                                     QMessageBox::Information)
+            ->exec();
+    });
+
+    connect(bisect, &BisectController::bailedOut, this, [this, restoreOriginalState](const QString& reason) {
+        restoreOriginalState();
+        m_activeBisect = nullptr;
+        m_bisectAction->setEnabled(true);
+        m_bisectAction->setText(tr("Bisect Mods"));
+        CustomMessageBox::selectable(this, tr("Bisect stopped"), reason, QMessageBox::Warning)->exec();
+    });
+
+    connect(bisect, &BisectController::heisenbugDetected, this, [this, restoreOriginalState](const QString& set) {
+        restoreOriginalState();
+        m_activeBisect = nullptr;
+        m_bisectAction->setEnabled(true);
+        m_bisectAction->setText(tr("Bisect Mods"));
+        CustomMessageBox::selectable(this, tr("Inconsistent result"),
+                                     tr("The same mod set produced different results on retest:\n%1").arg(set), QMessageBox::Warning)
+            ->exec();
+    });
+
+    bisect->start();
+}
+
+std::optional<QList<Mod*>> ModFolderPage::pickLockedMods(const QList<Mod*>& allMods)
+{
+    auto* dialog = ReviewMessageBox::create(this, tr("Choose mods to lock"));
+    dialog->setLabels(tr("Locked mods stay enabled for the whole bisect and are assumed not to be the cause.\n"
+                         "Check any mod you want to lock (e.g. one whose feature you're actively testing):"),
+                      tr("Unchecked mods will be treated as candidates and may be disabled during the bisect."));
+
+    auto sorted = allMods;
+    std::ranges::sort(sorted, [](Mod* a, Mod* b) { return QString::compare(a->name(), b->name(), Qt::CaseInsensitive) < 0; });
+
+    for (auto* mod : sorted) {
+        dialog->appendResource({ .name = mod->name(), .filename = mod->fileinfo().fileName(), .enabled = false });
+    }
+
+    if (dialog->exec() == 0) {
+        return std::nullopt;
+    }
+
+    QList<Mod*> locked;
+    auto deselected = dialog->deselectedResources();
+    for (auto* mod : sorted) {
+        if (!deselected.contains(mod->name())) {
+            locked << mod;
+        }
+    }
+    return locked;
 }
 
 void ModFolderPage::changeModVersion()

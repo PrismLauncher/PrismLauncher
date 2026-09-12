@@ -451,7 +451,7 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
     auto toList = [this](const QSet<Mod*>& mods) {
         QModelIndexList list;
         for (auto* mod : mods) {
-            auto row = m_resourcesIndex[mod->internalId()];
+            auto row = m_resourcesIndex.value(mod->internalId());
             list << index(row, 0);
         }
         return list;
@@ -498,6 +498,48 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
             return false;
         }
     }
+
+    auto disableStatus = ResourceFolderModel::setResourceEnabled(toList(toDisable), EnableAction::DISABLE);
+    auto enableStatus = ResourceFolderModel::setResourceEnabled(toList(toEnable), EnableAction::ENABLE);
+    return disableStatus && enableStatus;
+}
+
+bool ModFolderModel::setResourceEnabledSilent(const QSet<Mod*>& mods, EnableAction action)
+{
+    if (mods.isEmpty()) {
+        return true;
+    }
+
+    QSet<Mod*> toEnable = {};
+    QSet<Mod*> toDisable = {};
+    std::set<QString> seen;
+
+    switch (action) {
+        case EnableAction::ENABLE:
+            toEnable = mods;
+            break;
+        case EnableAction::DISABLE:
+            toDisable = mods;
+            break;
+        case EnableAction::TOGGLE:
+            return false;
+    }
+
+    auto requiredToEnable = collectMods(toEnable, m_requires, seen, true);
+    auto requiredToDisable = collectMods(toDisable, m_requiredBy, seen, false);
+
+    toEnable |= requiredToEnable;
+    toDisable |= requiredToDisable;
+    toDisable.removeIf([toEnable](Mod* m) { return toEnable.contains(m); });
+
+    auto toList = [this](const QSet<Mod*>& mods) {
+        QModelIndexList list;
+        for (auto* mod : mods) {
+            auto row = m_resourcesIndex.value(mod->internalId());
+            list << index(row, 0);
+        }
+        return list;
+    };
 
     auto disableStatus = ResourceFolderModel::setResourceEnabled(toList(toDisable), EnableAction::DISABLE);
     auto enableStatus = ResourceFolderModel::setResourceEnabled(toList(toEnable), EnableAction::ENABLE);

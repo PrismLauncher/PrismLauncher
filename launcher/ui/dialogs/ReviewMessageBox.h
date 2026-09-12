@@ -26,6 +26,7 @@ class ReviewMessageBox : public QDialog {
     auto deselectedResources() -> QStringList;
 
     void retranslateUi(QString resources_name);
+    void setLabels(const QString& explainText, const QString& onlyCheckedText);
 
     ~ReviewMessageBox() override;
 
