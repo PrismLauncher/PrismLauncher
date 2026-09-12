@@ -51,10 +51,15 @@ class DataPackFolderModel : public ResourceFolderModel {
         DateColumn,
         SizeColumn,
         FileNameColumn,
+        LockUpdateColumn,
         NumColumns
     };
 
-    explicit DataPackFolderModel(const QString& dir, MinecraftInstance* instance, bool isIndexed, bool createDir, QObject* parent = nullptr);
+    explicit DataPackFolderModel(const QString& dir,
+                                 MinecraftInstance* instance,
+                                 bool isIndexed,
+                                 bool createDir,
+                                 QObject* parent = nullptr);
 
     QString id() const override { return "datapacks"; }
 

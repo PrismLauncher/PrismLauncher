@@ -43,7 +43,6 @@
 #include <algorithm>
 
 #include "MTPixmapCache.h"
-#include "MetadataHandler.h"
 #include "Resource.h"
 #include "Version.h"
 #include "minecraft/mod/ModDetails.h"
@@ -78,21 +77,22 @@ int compareVersionLists(const QStringList& leftVersions, const QStringList& righ
 
 }  // namespace
 
-Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
+Mod::Mod(const QFileInfo& file) : Resource(file)
 {
     m_enabled = (file.suffix() != "disabled");
 }
 
 void Mod::setDetails(const ModDetails& details)
 {
-    m_local_details = details;
+    m_localDetails = details;
 }
 
 int Mod::compare(const Resource& other, SortType type) const
 {
-    auto cast_other = dynamic_cast<const Mod*>(&other);
-    if (!cast_other)
+    const auto* castOther = dynamic_cast<const Mod*>(&other);
+    if (!castOther) {
         return Resource::compare(other, type);
+    }
 
     switch (type) {
         default:
@@ -102,50 +102,60 @@ int Mod::compare(const Resource& other, SortType type) const
         case SortType::Size:
             return Resource::compare(other, type);
         case SortType::Version: {
-            auto this_ver = Version(version());
-            auto other_ver = Version(cast_other->version());
-            if (this_ver > other_ver)
+            auto thisVer = Version(version());
+            auto otherVer = Version(castOther->version());
+            if (thisVer > otherVer) {
                 return 1;
-            if (this_ver < other_ver)
+            }
+            if (thisVer < otherVer) {
                 return -1;
+            }
             break;
         }
         case SortType::Side: {
-            auto compare_result = QString::compare(side(), cast_other->side(), Qt::CaseInsensitive);
-            if (compare_result != 0)
-                return compare_result;
+            auto compareResult = QString::compare(side(), castOther->side(), Qt::CaseInsensitive);
+            if (compareResult != 0) {
+                return compareResult;
+            }
             break;
         }
         case SortType::McVersions: {
-            auto compare_result = compareVersionLists(mcVersions(), cast_other->mcVersions());
-            if (compare_result != 0)
-                return compare_result;
+            auto compareResult = compareVersionLists(mcVersions(), castOther->mcVersions());
+            if (compareResult != 0) {
+                return compareResult;
+            }
             break;
         }
         case SortType::Loaders: {
-            auto compare_result = QString::compare(loaders(), cast_other->loaders(), Qt::CaseInsensitive);
-            if (compare_result != 0)
-                return compare_result;
+            auto compareResult = QString::compare(loaders(), castOther->loaders(), Qt::CaseInsensitive);
+            if (compareResult != 0) {
+                return compareResult;
+            }
             break;
         }
         case SortType::ReleaseType: {
-            auto compare_result = QString::compare(releaseType(), cast_other->releaseType(), Qt::CaseInsensitive);
-            if (compare_result != 0)
-                return compare_result;
+            auto compareResult = QString::compare(releaseType(), castOther->releaseType(), Qt::CaseInsensitive);
+            if (compareResult != 0) {
+                return compareResult;
+            }
             break;
         }
         case SortType::RequiredBy: {
-            if (requiredByCount() > cast_other->requiredByCount())
+            if (requiredByCount() > castOther->requiredByCount()) {
                 return 1;
-            if (requiredByCount() < cast_other->requiredByCount())
+            }
+            if (requiredByCount() < castOther->requiredByCount()) {
                 return -1;
+            }
             break;
         }
         case SortType::Requires: {
-            if (requiresCount() > cast_other->requiresCount())
+            if (requiresCount() > castOther->requiresCount()) {
                 return 1;
-            if (requiresCount() < cast_other->requiresCount())
+            }
+            if (requiresCount() < castOther->requiresCount()) {
                 return -1;
+            }
             break;
         }
     }
@@ -154,8 +164,9 @@ int Mod::compare(const Resource& other, SortType type) const
 
 bool Mod::applyFilter(const QRegularExpression& filter) const
 {
-    if (filter.match(description()).hasMatch())
+    if (filter.match(description()).hasMatch()) {
         return true;
+    }
 
     for (auto& author : authors()) {
         if (filter.match(author).hasMatch()) {
@@ -168,23 +179,25 @@ bool Mod::applyFilter(const QRegularExpression& filter) const
 
 auto Mod::details() const -> const ModDetails&
 {
-    return m_local_details;
+    return m_localDetails;
 }
 
 auto Mod::name() const -> QString
 {
-    auto d_name = details().name;
-    if (!d_name.isEmpty())
-        return d_name;
+    auto dName = details().name;
+    if (!dName.isEmpty()) {
+        return dName;
+    }
 
     return Resource::name();
 }
 
-auto Mod::mod_id() const -> QString
+auto Mod::modId() const -> QString
 {
-    auto d_mod_id = details().mod_id;
-    if (!d_mod_id.isEmpty())
-        return d_mod_id;
+    auto dModId = details().mod_id;
+    if (!dModId.isEmpty()) {
+        return dModId;
+    }
 
     return Resource::name();
 }
@@ -198,10 +211,10 @@ auto Mod::homepage() const -> QString
 {
     QString metaUrl = Resource::homepage();
 
-    if (metaUrl.isEmpty())
+    if (metaUrl.isEmpty()) {
         return details().homeurl;
-    else
-        return metaUrl;
+    }
+    return metaUrl;
 }
 
 auto Mod::loaders() const -> QString
@@ -220,16 +233,18 @@ auto Mod::loaders() const -> QString
 
 auto Mod::side() const -> QString
 {
-    if (metadata())
+    if (metadata()) {
         return metadata()->side.toString();
+    }
 
     return ModPlatform::SideType(ModPlatform::SideType::UniversalSide).toString();
 }
 
 auto Mod::mcVersions() const -> QStringList
 {
-    if (metadata())
+    if (metadata()) {
         return metadata()->mcVersions;
+    }
 
     return {};
 }
@@ -241,8 +256,9 @@ auto Mod::mcVersionsString() const -> QString
 
 auto Mod::releaseType() const -> QString
 {
-    if (metadata())
+    if (metadata()) {
         return metadata()->releaseType.toString();
+    }
 
     return ModPlatform::IndexedVersionType(ModPlatform::IndexedVersionType::Unknown).toString();
 }
@@ -262,7 +278,7 @@ void Mod::finishResolvingWithDetails(ModDetails&& details)
     m_isResolving = false;
     m_isResolved = true;
 
-    m_local_details = std::move(details);
+    m_localDetails = std::move(details);
     if (!iconPath().isEmpty()) {
         m_packImageCacheKey.wasReadAttempt = false;
     }
@@ -278,18 +294,19 @@ auto Mod::issueTracker() const -> QString
     return details().issue_tracker;
 }
 
-QPixmap Mod::setIcon(QImage new_image) const
+QPixmap Mod::setIcon(const QImage& newImage) const
 {
-    QMutexLocker locker(&m_data_lock);
+    QMutexLocker locker(&m_dataLock);
 
-    Q_ASSERT(!new_image.isNull());
+    Q_ASSERT(!newImage.isNull());
 
-    if (m_packImageCacheKey.key.isValid())
+    if (m_packImageCacheKey.key.isValid()) {
         PixmapCache::remove(m_packImageCacheKey.key);
+    }
 
     // scale the image to avoid flooding the pixmapcache
     auto pixmap =
-        QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
+        QPixmap::fromImage(newImage.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
 
     m_packImageCacheKey.key = PixmapCache::insert(pixmap);
     m_packImageCacheKey.wasEverUsed = true;
@@ -299,20 +316,22 @@ QPixmap Mod::setIcon(QImage new_image) const
 
 QPixmap Mod::icon(QSize size, Qt::AspectRatioMode mode) const
 {
-    auto pixmap_transform = [&size, &mode](QPixmap pixmap) {
-        if (size.isNull())
+    auto pixmapTransform = [&size, &mode](QPixmap pixmap) {
+        if (size.isNull()) {
             return pixmap;
+        }
         return pixmap.scaled(size, mode, Qt::SmoothTransformation);
     };
 
-    QPixmap cached_image;
-    if (PixmapCache::find(m_packImageCacheKey.key, &cached_image)) {
-        return pixmap_transform(cached_image);
+    QPixmap cachedImage;
+    if (PixmapCache::find(m_packImageCacheKey.key, &cachedImage)) {
+        return pixmapTransform(cachedImage);
     }
 
     // No valid image we can get
-    if ((!m_packImageCacheKey.wasEverUsed && m_packImageCacheKey.wasReadAttempt) || iconPath().isEmpty())
+    if ((!m_packImageCacheKey.wasEverUsed && m_packImageCacheKey.wasReadAttempt) || iconPath().isEmpty()) {
         return {};
+    }
 
     if (m_packImageCacheKey.wasEverUsed) {
         qDebug() << "Mod" << name() << "Had it's icon evicted from the cache. reloading...";
@@ -320,8 +339,8 @@ QPixmap Mod::icon(QSize size, Qt::AspectRatioMode mode) const
     }
     // Image got evicted from the cache or an attempt to load it has not been made. load it and retry.
     m_packImageCacheKey.wasReadAttempt = true;
-    if (ModUtils::loadIconFile(*this, &cached_image)) {
-        return pixmap_transform(cached_image);
+    if (ModUtils::loadIconFile(*this, &cachedImage)) {
+        return pixmapTransform(cachedImage);
     }
     // Image failed to load
     return {};
@@ -329,7 +348,7 @@ QPixmap Mod::icon(QSize size, Qt::AspectRatioMode mode) const
 
 bool Mod::valid() const
 {
-    return !m_local_details.mod_id.isEmpty();
+    return !m_localDetails.mod_id.isEmpty();
 }
 
 QStringList Mod::dependencies() const

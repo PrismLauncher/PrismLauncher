@@ -504,7 +504,7 @@ void EnsureMetadataTask::updateMetadata(ModPlatform::IndexedPack& pack, ModPlatf
             ver.fileName.chop(9);
         }
 
-        auto task = makeShared<LocalResourceUpdateTask>(m_indexDir, pack, ver);
+        auto task = makeShared<LocalResourceUpdateTask>(m_indexDir, pack, ver, m_lockUpdate);
 
         connect(task.get(), &Task::finished, this, [this, &pack, resource] { updateMetadataCallback(pack, resource); });
 

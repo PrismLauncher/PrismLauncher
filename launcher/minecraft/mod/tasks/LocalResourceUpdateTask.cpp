@@ -26,18 +26,21 @@
 #include <windows.h>
 #endif
 
-LocalResourceUpdateTask::LocalResourceUpdateTask(QDir index_dir, ModPlatform::IndexedPack project, ModPlatform::IndexedVersion version)
-    : m_index_dir(index_dir), m_project(std::move(project)), m_version(std::move(version))
+LocalResourceUpdateTask::LocalResourceUpdateTask(const QDir& indexDir,
+                                                 ModPlatform::IndexedPack project,
+                                                 ModPlatform::IndexedVersion version,
+                                                 bool lockUpdate)
+    : m_indexDir(indexDir), m_project(std::move(project)), m_version(std::move(version)), m_lockUpdate(lockUpdate)
 {
     // Ensure a '.index' folder exists in the mods folder, and create it if it does not
-    if (!FS::ensureFolderPathExists(index_dir.path())) {
-        emitFailed(QString("Unable to create index directory at %1!").arg(index_dir.absolutePath()));
+    if (!FS::ensureFolderPathExists(indexDir.path())) {
+        emitFailed(QString("Unable to create index directory at %1!").arg(indexDir.absolutePath()));
         return;
     }
 
 #ifdef Q_OS_WIN32
-    std::wstring wpath = index_dir.path().toStdWString();
-    if (index_dir.dirName().startsWith('.')) {
+    std::wstring wpath = indexDir.path().toStdWString();
+    if (indexDir.dirName().startsWith('.')) {
         SetFileAttributesW(wpath.c_str(), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
     } else {
         // fix shaderpacks folder being hidden by Prism Launcher 10.0.1
@@ -50,16 +53,18 @@ void LocalResourceUpdateTask::executeTask()
 {
     setStatus(tr("Updating index for resource:\n%1").arg(m_project.name));
 
-    auto old_metadata = Metadata::get(m_index_dir, m_project.addonId);
-    if (old_metadata.isValid()) {
-        emit hasOldResource(old_metadata.name, old_metadata.filename);
-        if (m_project.slug.isEmpty())
-            m_project.slug = old_metadata.slug;
+    auto oldMetadata = Metadata::get(m_indexDir, m_project.addonId);
+    if (oldMetadata.isValid()) {
+        emit hasOldResource(oldMetadata.name, oldMetadata.filename);
+        if (m_project.slug.isEmpty()) {
+            m_project.slug = oldMetadata.slug;
+        }
     }
 
-    auto pw_mod = Metadata::create(m_index_dir, m_project, m_version);
-    if (pw_mod.isValid()) {
-        Metadata::update(m_index_dir, pw_mod);
+    auto pwMod = Metadata::create(m_indexDir, m_project, m_version);
+    if (pwMod.isValid()) {
+        pwMod.lockUpdate = m_lockUpdate;
+        Metadata::update(m_indexDir, pwMod);
         emitSucceeded();
     } else {
         qCritical() << "Tried to update an invalid resource!";

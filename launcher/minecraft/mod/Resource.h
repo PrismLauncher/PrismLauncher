@@ -81,6 +81,7 @@ enum class SortType : std::uint8_t {
     Requires,
     RequiredBy,
     Filename,
+    LockUpdate
 };
 
 enum class EnableAction : std::uint8_t { ENABLE, DISABLE, TOGGLE };
@@ -97,9 +98,9 @@ class Resource {
 
    public:
     using Ptr = std::shared_ptr<Resource>;
-    Resource(const QFileInfo& fileInfo);
+    explicit Resource(const QFileInfo& fileInfo);
 
-    Resource(const QString& filePath) : Resource(QFileInfo(filePath)) {}
+    explicit Resource(const QString& filePath) : Resource(QFileInfo(filePath)) {}
 
     virtual ~Resource() = default;
 
@@ -123,6 +124,7 @@ class Resource {
     auto metadata() const -> std::shared_ptr<const Metadata::ModStruct> { return m_metadata; }
     auto provider() const -> QString;
     virtual auto homepage() const -> QString;
+    bool lockUpdate() const;
 
     void setStatus(ResourceStatus status) { m_status = status; }
     void setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata);
