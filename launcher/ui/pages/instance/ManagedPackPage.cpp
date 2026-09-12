@@ -455,6 +455,18 @@ void FlameManagedPackPage::updateFromFile()
 
 void ManagedPackPage::updatePack(const QUrl& url, bool trusted, const QString& versionID, const QString& versionName)
 {
+    auto response = CustomMessageBox::selectable(this, tr("Confirm Update"),
+                                                 tr("You are about to update the modpack to version \"%1\".\n"
+                                                    "Irreversible changes may be made to the instance's files.\n"
+                                                    "As such, it is strongly recommended to create a backup copy of the instance.\n\n"
+                                                    "Are you sure?")
+                                                     .arg(versionName),
+                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                        ->exec();
+    if (response != QMessageBox::Yes) {
+        return;
+    }
+
     QMap<QString, QString> extraInfo;
     // NOTE: Don't use 'm_pack.id' here, since we didn't completely parse all the metadata for the pack, including this field.
     extraInfo.insert("pack_id", m_inst->getManagedPackID());
