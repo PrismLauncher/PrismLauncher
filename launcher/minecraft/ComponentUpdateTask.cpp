@@ -534,7 +534,7 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
                         component->m_version = "2.9.1";
                     } else if (add.uid == "org.lwjgl3") {
                         component->m_version = "3.1.2";
-                    } else if (add.uid == "net.fabricmc.intermediary" || add.uid == "org.quiltmc.hashed") {
+                    } else if (Component::KNOWN_INTERMEDIARIES.contains(add.uid)) {
                         auto minecraft = std::find_if(components.begin(), components.end(),
                                                       [](ComponentPtr& cmp) { return cmp->getID() == "net.minecraft"; });
                         if (minecraft != components.end()) {
