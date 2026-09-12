@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>767</width>
+    <width>768</width>
     <height>796</height>
    </rect>
   </property>
@@ -41,9 +41,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
-        <width>753</width>
-        <height>1138</height>
+        <y>-16</y>
+        <width>747</width>
+        <height>1630</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -259,37 +259,10 @@
           <string>Folders</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="4" column="1">
-           <widget class="QLineEdit" name="skinsDirTextBox"/>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="iconsDirTextBox"/>
           </item>
-          <item row="4" column="2">
-           <widget class="QPushButton" name="skinsDirBrowseBtn">
-            <property name="text">
-             <string>Browse</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="labelJavaDir">
-            <property name="toolTip">
-             <string>Folder where Prism Launcher stores automatically downloaded Java versions. Do NOT set this to your system Java installation.</string>
-            </property>
-            <property name="text">
-             <string>&amp;Auto Java Download:</string>
-            </property>
-            <property name="buddy">
-             <cstring>javaDirTextBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QPushButton" name="iconsDirBrowseBtn">
-            <property name="text">
-             <string>Browse</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
+          <item row="5" column="0">
            <widget class="QLabel" name="labelSkinsDir">
             <property name="text">
              <string>&amp;Skins:</string>
@@ -298,39 +271,6 @@
              <cstring>skinsDirTextBox</cstring>
             </property>
            </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="labelModsDir">
-            <property name="text">
-             <string>&amp;Mods:</string>
-            </property>
-            <property name="buddy">
-             <cstring>modsDirTextBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="2">
-           <widget class="QPushButton" name="javaDirBrowseBtn">
-            <property name="text">
-             <string>Browse</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="labelDownloadsDir">
-            <property name="text">
-             <string>&amp;Downloads:</string>
-            </property>
-            <property name="buddy">
-             <cstring>downloadsDirTextBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
-           <widget class="QLineEdit" name="downloadsDirTextBox"/>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="modsDirTextBox"/>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="labelInstDir">
@@ -342,6 +282,16 @@
             </property>
            </widget>
           </item>
+          <item row="10" column="0">
+           <widget class="QLabel" name="labelDownloadsDir">
+            <property name="text">
+             <string>&amp;Downloads:</string>
+            </property>
+            <property name="buddy">
+             <cstring>downloadsDirTextBox</cstring>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="2">
            <widget class="QPushButton" name="instDirBrowseBtn">
             <property name="text">
@@ -349,75 +299,131 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="2">
+          <item row="4" column="0">
+           <widget class="QLabel" name="labelJavaDir">
+            <property name="toolTip">
+             <string>Folder where Prism Launcher stores automatically downloaded Java versions. Do NOT set this to your system Java installation.</string>
+            </property>
+            <property name="text">
+             <string>&amp;Auto Downloaded Java:</string>
+            </property>
+            <property name="buddy">
+             <cstring>javaDirTextBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="2">
            <widget class="QPushButton" name="downloadsDirBrowseBtn">
             <property name="text">
              <string>Browse</string>
             </property>
            </widget>
           </item>
-          <item row="6" column="0" colspan="3">
-           <widget class="QGroupBox" name="additionalInstDirsGroupBox">
-            <property name="title">
-             <string>Additional instance directories</string>
+          <item row="2" column="2">
+           <widget class="QPushButton" name="iconsDirBrowseBtn">
+            <property name="text">
+             <string>Browse</string>
             </property>
-            <layout class="QVBoxLayout" name="additionalInstDirsLayout">
-             <item>
-              <widget class="QListWidget" name="additionalInstDirsList"/>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="additionalInstDirsBtnLayout">
-               <item>
-                <widget class="QPushButton" name="addInstDirBtn">
-                 <property name="text">
-                  <string>Add</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="removeInstDirBtn">
-                 <property name="text">
-                  <string>Remove</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <spacer name="additionalInstDirsSpacer">
-                 <property name="orientation">
-                  <enum>Qt::Orientation::Horizontal</enum>
-                 </property>
-                </spacer>
-               </item>
-              </layout>
-             </item>
-            </layout>
            </widget>
           </item>
           <item row="0" column="1">
            <widget class="QLineEdit" name="instDirTextBox"/>
           </item>
-          <item row="1" column="2">
+          <item row="4" column="1">
+           <widget class="QLineEdit" name="javaDirTextBox"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="labelIconsDir">
+            <property name="text">
+             <string>Instance &amp;Icons:</string>
+            </property>
+            <property name="buddy">
+             <cstring>iconsDirTextBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLineEdit" name="skinsDirTextBox"/>
+          </item>
+          <item row="5" column="2">
+           <widget class="QPushButton" name="skinsDirBrowseBtn">
+            <property name="text">
+             <string>Browse</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1">
+           <widget class="QLineEdit" name="downloadsDirTextBox"/>
+          </item>
+          <item row="4" column="2">
+           <widget class="QPushButton" name="javaDirBrowseBtn">
+            <property name="text">
+             <string>Browse</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="labelModsDir">
+            <property name="text">
+             <string>&amp;Mods (Quick Access):</string>
+            </property>
+            <property name="buddy">
+             <cstring>modsDirTextBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="modsDirTextBox"/>
+          </item>
+          <item row="3" column="2">
            <widget class="QPushButton" name="modsDirBrowseBtn">
             <property name="text">
              <string>Browse</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="javaDirTextBox"/>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="additionalInstDirsGroupBox">
+         <property name="title">
+          <string>Additional Instance Folders</string>
+         </property>
+         <layout class="QVBoxLayout" name="additionalInstDirsLayout">
+          <item>
+           <widget class="QListWidget" name="additionalInstDirsList"/>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="iconsDirTextBox"/>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="labelIconsDir">
-            <property name="text">
-             <string>&amp;Icons:</string>
-            </property>
-            <property name="buddy">
-             <cstring>iconsDirTextBox</cstring>
-            </property>
-           </widget>
+          <item>
+           <layout class="QHBoxLayout" name="additionalInstDirsBtnLayout">
+            <item>
+             <widget class="QPushButton" name="addInstDirBtn">
+              <property name="text">
+               <string>Add</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="removeInstDirBtn">
+              <property name="text">
+               <string>Remove</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="additionalInstDirsSpacer">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -742,16 +748,12 @@
   <tabstop>updateIntervalSpinBox</tabstop>
   <tabstop>instDirTextBox</tabstop>
   <tabstop>instDirBrowseBtn</tabstop>
-  <tabstop>modsDirTextBox</tabstop>
-  <tabstop>modsDirBrowseBtn</tabstop>
   <tabstop>iconsDirTextBox</tabstop>
   <tabstop>iconsDirBrowseBtn</tabstop>
   <tabstop>javaDirTextBox</tabstop>
   <tabstop>javaDirBrowseBtn</tabstop>
   <tabstop>skinsDirTextBox</tabstop>
   <tabstop>skinsDirBrowseBtn</tabstop>
-  <tabstop>downloadsDirTextBox</tabstop>
-  <tabstop>downloadsDirBrowseBtn</tabstop>
   <tabstop>additionalInstDirsList</tabstop>
   <tabstop>addInstDirBtn</tabstop>
   <tabstop>removeInstDirBtn</tabstop>
@@ -772,7 +774,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="renamingBehaviorGroup"/>
   <buttongroup name="sortingModeGroup"/>
+  <buttongroup name="renamingBehaviorGroup"/>
  </buttongroups>
 </ui>
