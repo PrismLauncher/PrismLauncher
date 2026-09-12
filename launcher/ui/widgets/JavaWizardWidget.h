@@ -5,6 +5,7 @@
 #include <QObjectPtr.h>
 #include <java/JavaChecker.h>
 #include <QIcon>
+#include <cstdint>
 
 class QCheckBox;
 class QLineEdit;
@@ -24,11 +25,18 @@ class JavaWizardWidget : public QWidget {
 
    public:
     explicit JavaWizardWidget(QWidget* parent);
-    virtual ~JavaWizardWidget();
+    ~JavaWizardWidget() override;
 
-    enum class JavaStatus { NotSet, Pending, Good, DoesNotExist, DoesNotStart, ReturnedInvalidData } javaStatus = JavaStatus::NotSet;
+    enum class JavaStatus : std ::uint8_t {
+        NotSet,
+        Pending,
+        Good,
+        DoesNotExist,
+        DoesNotStart,
+        ReturnedInvalidData
+    } javaStatus = JavaStatus::NotSet;
 
-    enum class ValidationStatus { Bad, JavaBad, AllOK };
+    enum class ValidationStatus : std ::uint8_t { Bad, JavaBad, AllOK };
 
     void refresh();
     void initialize();
@@ -49,7 +57,7 @@ class JavaWizardWidget : public QWidget {
     void onSpinBoxValueChanged(int);
     void memoryValueChanged();
     void javaPathEdited(const QString& path);
-    void javaVersionSelected(BaseVersion::Ptr version);
+    void javaVersionSelected(const BaseVersion::Ptr& version);
     void on_javaBrowseBtn_clicked();
     void on_javaStatusBtn_clicked();
     void javaDownloadBtn_clicked();
@@ -72,7 +80,7 @@ class JavaWizardWidget : public QWidget {
     QHBoxLayout* m_horizontalLayout = nullptr;
 
     QGroupBox* m_memoryGroupBox = nullptr;
-    QGridLayout* m_gridLayout_2 = nullptr;
+    QGridLayout* m_gridLayout2 = nullptr;
     QSpinBox* m_maxMemSpinBox = nullptr;
     QLabel* m_labelMinMem = nullptr;
     QLabel* m_labelMaxMem = nullptr;
@@ -83,20 +91,20 @@ class JavaWizardWidget : public QWidget {
 
     QHBoxLayout* m_horizontalBtnLayout = nullptr;
     QPushButton* m_javaDownloadBtn = nullptr;
-    QIcon goodIcon;
-    QIcon yellowIcon;
-    QIcon badIcon;
+    QIcon m_goodIcon;
+    QIcon m_yellowIcon;
+    QIcon m_badIcon;
 
     QGroupBox* m_autoJavaGroupBox = nullptr;
-    QVBoxLayout* m_veriticalJavaLayout = nullptr;
+    QVBoxLayout* m_verticalJavaLayout = nullptr;
     QCheckBox* m_autodetectJavaCheckBox = nullptr;
     QCheckBox* m_autodownloadCheckBox = nullptr;
 
-    unsigned int observedMinMemory = 0;
-    unsigned int observedMaxMemory = 0;
-    unsigned int observedPermGenMemory = 0;
-    QString queuedCheck;
-    uint64_t m_availableMemory = 0ull;
+    unsigned int m_observedMinMemory = 0;
+    unsigned int m_observedMaxMemory = 0;
+    unsigned int m_observedPermGenMemory = 0;
+    QString m_queuedCheck;
+    uint64_t m_availableMemory = 0ULL;
     shared_qobject_ptr<JavaChecker> m_checker;
     JavaChecker::Result m_result;
     QTimer* m_memoryTimer;

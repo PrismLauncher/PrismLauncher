@@ -449,8 +449,7 @@ void ResourceModel::searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>&
         return;
     }
 
-    beginInsertRows(QModelIndex(), static_cast<int>(m_packs.size()),
-                    static_cast<int>(m_packs.size() + filteredNewList.size() - 1));
+    beginInsertRows(QModelIndex(), static_cast<int>(m_packs.size()), static_cast<int>(m_packs.size() + filteredNewList.size() - 1));
     m_packs.append(filteredNewList);
     endInsertRows();
 }

@@ -95,7 +95,7 @@ SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
 
     connect(contentsWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SkinManageDialog::selectionChanged);
     connect(m_ui->listView, &QListView::customContextMenuRequested, this, &SkinManageDialog::show_context_menu);
-    connect(m_ui->elytraCB, &QCheckBox::stateChanged, this, [this]() {
+    connect(m_ui->elytraCB, &QCheckBox::checkStateChanged, this, [this]() {
         if (m_skinPreview) {
             m_skinPreview->setElytraVisible(m_ui->elytraCB->isChecked());
         }
@@ -438,7 +438,6 @@ void SkinManageDialog::on_urlBtn_clicked()
 }
 
 namespace {
-
 class WaitTask : public Task {
    public:
     WaitTask() = default;
