@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "ChooseProviderDialog.h"
 #include "CustomMessageBox.h"
+#include "Json.h"
 #include "ProgressDialog.h"
 #include "ScrollMessageBox.h"
 #include "StringUtils.h"
@@ -70,10 +71,7 @@ ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
     if (m_releaseTypes.empty()) {
         auto settingVal =
             m_instance ? m_instance->settings()->get("ModUpdateReleaseTypes") : APPLICATION->settings()->get("ModUpdateReleaseTypes");
-        auto typesList = settingVal.toStringList();
-        if (typesList.isEmpty() && !settingVal.toString().isEmpty()) {
-            typesList = settingVal.toString().split(',', Qt::SkipEmptyParts);
-        }
+        const auto typesList = Json::toStringList(settingVal.toString());
         for (const auto& t : typesList) {
             auto type = ModPlatform::IndexedVersionType::fromString(t);
             if (type.isValid()) {

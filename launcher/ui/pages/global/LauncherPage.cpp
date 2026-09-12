@@ -49,6 +49,7 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "DesktopServices.h"
+#include "Json.h"
 #include "settings/SettingsObject.h"
 #include "ui/themes/ITheme.h"
 #include "ui/themes/ThemeManager.h"
@@ -292,14 +293,14 @@ void LauncherPage::applySettings()
 
     switch (ui->modUpdateChannelComboBox->currentIndex()) {
         case 1:
-            s->set("ModUpdateReleaseTypes", QStringList{ "release" });
+            s->set("ModUpdateReleaseTypes", Json::fromStringList({ "release" }));
             break;
         case 2:
-            s->set("ModUpdateReleaseTypes", QStringList{ "release", "beta" });
+            s->set("ModUpdateReleaseTypes", Json::fromStringList({ "release", "beta" }));
             break;
         case 0:
         default:
-            s->set("ModUpdateReleaseTypes", QStringList{});
+            s->set("ModUpdateReleaseTypes", "[]");
             break;
     }
 }
@@ -360,7 +361,7 @@ void LauncherPage::loadSettings()
     ui->modpackUpdatePromptBtn->setChecked(!s->get("SkipModpackUpdatePrompt").toBool());
     ui->downloadGameFilesBtn->setChecked(s->get("DownloadGameFilesDuringInstanceCreation").toBool());
 
-    auto releaseTypesSetting = s->get("ModUpdateReleaseTypes").toStringList();
+    const auto releaseTypesSetting = Json::toStringList(s->get("ModUpdateReleaseTypes").toString());
     if (releaseTypesSetting.size() == 1 && releaseTypesSetting.contains("release", Qt::CaseInsensitive)) {
         ui->modUpdateChannelComboBox->setCurrentIndex(1);
     } else if (releaseTypesSetting.size() == 2 && releaseTypesSetting.contains("release", Qt::CaseInsensitive) &&
