@@ -702,6 +702,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("MoveModsFromDownloadsDir", false);
         m_settings->registerSetting("SkinsDir", "skins");
         m_settings->registerSetting("JavaDir", "java");
+        m_settings->registerSetting("TemplateDir", "templates");
 
 #ifdef Q_OS_MACOS
         // Folder security-scoped bookmarks
@@ -711,6 +712,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("DownloadsDirBookmark", "");
         m_settings->registerSetting("SkinsDirBookmark", "");
         m_settings->registerSetting("JavaDirBookmark", "");
+        m_settings->registerSetting("TemplateDirBookmark", "");
 #endif
 
         // Editors
@@ -977,6 +979,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->get("DownloadsDir");
         m_settings->get("SkinsDir");
         m_settings->get("JavaDir");
+        m_settings->get("TemplateDir");
     }
 #endif
 

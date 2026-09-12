@@ -76,6 +76,7 @@ class LauncherPage : public QWidget, public BasePage {
     void on_iconsDirBrowseBtn_clicked();
     void on_downloadsDirBrowseBtn_clicked();
     void on_javaDirBrowseBtn_clicked();
+    void on_templateDirBrowseBtn_clicked();
     void on_skinsDirBrowseBtn_clicked();
     void on_metadataEnableBtn_clicked();
 

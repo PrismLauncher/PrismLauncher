@@ -37,6 +37,7 @@
 #include "InstanceList.h"
 
 #include <QDebug>
+#include <QDir>
 #include <QDirIterator>
 #include <QFile>
 #include <QFileInfo>
@@ -1144,6 +1145,18 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
         }
 
         m_instanceSet.insert(instID);
+
+        QString templateDir = APPLICATION->settings()->get("TemplateDir").toString();
+        if (!templateDir.isEmpty() && QDir(templateDir).exists()) {
+            qDebug() << "trying to copy instance template directory";
+            FS::copy folderCopy(templateDir, destination);
+            folderCopy.followSymlinks(false);
+            folderCopy.copyDirectories(true);
+
+            if (!folderCopy()) {
+                qWarning() << "Failed to copy instance template";
+            }
+        }
 
         emit instancesChanged();
         emit instanceSelectRequest(instID);
