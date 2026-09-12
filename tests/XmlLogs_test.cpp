@@ -113,18 +113,57 @@ class XmlLogParseTest : public QObject {
         QCOMPARE(levels, entry_levels);
     }
 
-   private:
-    LogParser m_parser;
+    void parseAngleBrackets_data()
+    {
+        QTest::addColumn<QStringList>("lines");
+        QTest::addColumn<QStringList>("messages");
 
+        // Text that merely begins to look like a log4j event must not be held back: lines reach the
+        // parser whole, so the rest of `<log4j:Event` can never turn up later on. See #5825.
+        QTest::newRow("trailing left angle bracket")
+            << QStringList{ "[21:16:07] [Render thread/INFO]: happy >w<", "[21:16:08] [Render thread/INFO]: unrelated" }
+            << QStringList{ "[21:16:07] [Render thread/INFO]: happy >w<", "[21:16:08] [Render thread/INFO]: unrelated" };
+        QTest::newRow("trailing partial tag") << QStringList{ "generics are <log", "unrelated" }
+                                              << QStringList{ "generics are <log", "unrelated" };
+        QTest::newRow("lone left angle bracket") << QStringList{ "<", "unrelated" } << QStringList{ "<", "unrelated" };
+        QTest::newRow("unrelated markup") << QStringList{ "<html>", "unrelated" } << QStringList{ "<html>", "unrelated" };
+        QTest::newRow("longer element name") << QStringList{ "talking about <log4j:eventually", "unrelated" }
+                                             << QStringList{ "talking about <log4j:eventually", "unrelated" };
+
+        // ... while real events, spread over several lines or not, still have to be recognised.
+        QTest::newRow("event over several lines")
+            << QStringList{ R"(  <log4j:Event logger="fqq" timestamp="1745005150596" level="INFO" thread="Render thread">)",
+                            R"(    <log4j:Message><![CDATA[Setting user: Ryexandrite]]></log4j:Message>)", R"(  </log4j:Event>)" }
+            << QStringList{ "Setting user: Ryexandrite" };
+        QTest::newRow("event with attributes on the next line")
+            << QStringList{ R"(  <log4j:Event)", R"(      logger="fqq" timestamp="1745005150596" level="INFO" thread="Render thread">)",
+                            R"(    <log4j:Message><![CDATA[Setting user: Ryexandrite]]></log4j:Message>)", R"(  </log4j:Event>)" }
+            << QStringList{ "Setting user: Ryexandrite" };
+        QTest::newRow("event preceded by text")
+            << QStringList{ R"(stray output <log4j:Event logger="fqq" timestamp="1745005150596" level="INFO" thread="Render thread">)"
+                            R"(<log4j:Message><![CDATA[Setting user: Ryexandrite]]></log4j:Message></log4j:Event>)" }
+            << QStringList{ "stray output ", "Setting user: Ryexandrite" };
+    }
+
+    void parseAngleBrackets()
+    {
+        QFETCH(QStringList, lines);
+        QFETCH(QStringList, messages);
+
+        QCOMPARE(parseMessages(lines), messages);
+    }
+
+   private:
     QList<std::pair<MessageLevel, QString>> parseLines(const QStringList& lines)
     {
+        LogParser parser;
         QList<std::pair<MessageLevel, QString>> out;
         MessageLevel last = MessageLevel::Unknown;
 
         for (const auto& line : lines) {
-            m_parser.appendLine(line);
+            parser.appendLine(line);
 
-            auto items = m_parser.parseAvailable();
+            auto items = parser.parseAvailable();
             for (const auto& item : items) {
                 if (std::holds_alternative<LogParser::LogEntry>(item)) {
                     auto entry = std::get<LogParser::LogEntry>(item);
@@ -142,6 +181,27 @@ class XmlLogParseTest : public QObject {
 
                     out.append(std::make_pair(level, msg));
                     last = level;
+                }
+            }
+        }
+        return out;
+    }
+
+    /// The messages the parser produces, without the timestamp formatting parseLines() applies - so that
+    /// expectations do not depend on the time zone the test happens to run in.
+    QStringList parseMessages(const QStringList& lines)
+    {
+        LogParser parser;
+        QStringList out;
+
+        for (const auto& line : lines) {
+            parser.appendLine(line);
+
+            for (const auto& item : parser.parseAvailable()) {
+                if (std::holds_alternative<LogParser::LogEntry>(item)) {
+                    out.append(std::get<LogParser::LogEntry>(item).message);
+                } else if (std::holds_alternative<LogParser::PlainText>(item)) {
+                    out.append(std::get<LogParser::PlainText>(item).message);
                 }
             }
         }
