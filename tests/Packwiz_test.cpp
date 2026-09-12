@@ -83,6 +83,35 @@ class PackwizTest : public QObject {
         QCOMPARE(metadata.file_id, 3509043);
         QCOMPARE(metadata.project_id, 327154);
     }
+
+    // A malformed index must come back as an empty, invalid Mod instead of
+    // throwing: the parse error is caught inside getIndexForMod.
+    // Regression case for #6047 (uncaught toml::parse_error crash).
+    void loadFromFile_Broken()
+    {
+        QString source = QFINDTESTDATA("testdata/Packwiz");
+
+        QDir index_dir(source);
+        QString slug_mod("broken");
+        QVERIFY(index_dir.entryList().contains(slug_mod + ".pw.toml"));
+
+        auto metadata = Packwiz::V1::getIndexForMod(index_dir, slug_mod);
+
+        QVERIFY(!metadata.isValid());
+        QVERIFY(metadata.name.isEmpty());
+        QVERIFY(metadata.filename.isEmpty());
+    }
+
+    // A slug with no index file at all must behave the same way.
+    void loadFromFile_Missing()
+    {
+        QString source = QFINDTESTDATA("testdata/Packwiz");
+
+        QDir index_dir(source);
+        auto metadata = Packwiz::V1::getIndexForMod(index_dir, "does-not-exist");
+
+        QVERIFY(!metadata.isValid());
+    }
 };
 
 QTEST_GUILESS_MAIN(PackwizTest)

@@ -275,9 +275,11 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
 
     toml::table table;
 #if TOML_EXCEPTIONS
+    // Broad catch, not toml::parse_error: libc++ typeinfo mismatch (tomlplusplus#279)
+    // can let the thrown parse_error escape a handler for its own type.
     try {
         table = toml::parse_file(StringUtils::toStdString(index_dir.absoluteFilePath(real_fname)));
-    } catch (const toml::parse_error& err) {
+    } catch (const std::exception& err) {
         qWarning() << QString("Could not open file %1!").arg(normalized_fname);
         qWarning() << "Reason:" << QString(err.what());
         return {};

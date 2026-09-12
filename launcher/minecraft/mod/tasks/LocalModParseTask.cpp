@@ -134,9 +134,12 @@ ModDetails ReadMCModTOML(QByteArray contents)
 
     toml::table tomlData;
 #if TOML_EXCEPTIONS
+    // Catch std::exception instead of toml::parse_error to work around
+    // the latter not being caught here when compiled with libc++.
+    // See https://github.com/PrismLauncher/PrismLauncher/issues/6047.
     try {
         tomlData = toml::parse(contents.toStdString());
-    } catch ([[maybe_unused]] const toml::parse_error& err) {
+    } catch ([[maybe_unused]] const std::exception& err) {
         return {};
     }
 #else
