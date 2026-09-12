@@ -89,21 +89,21 @@ class XmlLogParseTest : public QObject {
     {
         QString source = QFINDTESTDATA("testdata/TestLogs");
 
-        QString shortXml = QString::fromUtf8(FS::read(FS::PathCombine(source, "vanilla-1.21.5.xml.log")));
-        QString shortText = QString::fromUtf8(FS::read(FS::PathCombine(source, "vanilla-1.21.5.text.log")));
-        QStringList shortTextLevels_s = QString::fromUtf8(FS::read(FS::PathCombine(source, "vanilla-1.21.5-levels.txt")))
-                                            .split(QRegularExpression("\n|\r\n|\r"), Qt::SkipEmptyParts);
+        QString shortXml = readTextFile(FS::PathCombine(source, "vanilla-1.21.5.xml.log"));
+        QString shortText = readTextFile(FS::PathCombine(source, "vanilla-1.21.5.text.log"));
+        QStringList shortTextLevels_s =
+            readTextFile(FS::PathCombine(source, "vanilla-1.21.5-levels.txt")).split(QRegularExpression("\n|\r\n|\r"), Qt::SkipEmptyParts);
 
         QList<MessageLevel> shortTextLevels;
         shortTextLevels.reserve(24);
         std::transform(shortTextLevels_s.cbegin(), shortTextLevels_s.cend(), std::back_inserter(shortTextLevels),
                        [](const QString& line) { return MessageLevel::fromName(line.trimmed()); });
 
-        QString longXml = QString::fromUtf8(FS::read(FS::PathCombine(source, "TerraFirmaGreg-Modern-forge.xml.log")));
-        QString longText = QString::fromUtf8(FS::read(FS::PathCombine(source, "TerraFirmaGreg-Modern-forge.text.log")));
-        QStringList longTextLevels_s = QString::fromUtf8(FS::read(FS::PathCombine(source, "TerraFirmaGreg-Modern-levels.txt")))
+        QString longXml = readTextFile(FS::PathCombine(source, "TerraFirmaGreg-Modern-forge.xml.log"));
+        QString longText = readTextFile(FS::PathCombine(source, "TerraFirmaGreg-Modern-forge.text.log"));
+        QStringList longTextLevels_s = readTextFile(FS::PathCombine(source, "TerraFirmaGreg-Modern-levels.txt"))
                                            .split(QRegularExpression("\n|\r\n|\r"), Qt::SkipEmptyParts);
-        QStringList longTextLevelsXml_s = QString::fromUtf8(FS::read(FS::PathCombine(source, "TerraFirmaGreg-Modern-xml-levels.txt")))
+        QStringList longTextLevelsXml_s = readTextFile(FS::PathCombine(source, "TerraFirmaGreg-Modern-xml-levels.txt"))
                                               .split(QRegularExpression("\n|\r\n|\r"), Qt::SkipEmptyParts);
 
         QList<MessageLevel> longTextLevelsPlain;
@@ -142,8 +142,7 @@ class XmlLogParseTest : public QObject {
 
         QList<MessageLevel> levels = {};
 
-        std::transform(entries.cbegin(), entries.cend(), std::back_inserter(levels),
-                       [](std::pair<MessageLevel, QString> entry) { return entry.first; });
+        std::ranges::transform(entries, std::back_inserter(levels), [](const auto& entry) { return entry.first; });
 
         QCOMPARE(levels, entry_levels);
     }
@@ -189,6 +188,8 @@ class XmlLogParseTest : public QObject {
     }
 
    private:
+    QString readTextFile(const QString& path) const { return QString::fromUtf8(FS::read(path).value()); }
+
     QList<std::pair<MessageLevel, QString>> parseLines(const QStringList& lines)
     {
         LogParser parser;

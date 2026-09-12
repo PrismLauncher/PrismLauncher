@@ -49,7 +49,7 @@ class MetaCacheSink : public FileSink {
 
    protected:
     InitResult initCache(QNetworkRequest& request) override;
-    Result finalizeCache(QNetworkReply& reply) override;
+    Result<> finalizeCache(QNetworkReply& reply) override;
 
    private:
     MetaEntryPtr m_entry;

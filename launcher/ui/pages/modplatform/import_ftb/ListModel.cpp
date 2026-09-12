@@ -23,15 +23,15 @@
 #include <QIcon>
 #include <QProcessEnvironment>
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "Exception.h"
 #include "FileSystem.h"
 #include "Json.h"
 #include "StringUtils.h"
 #include "modplatform/import_ftb/PackHelpers.h"
+#include "settings/SettingsObject.h"
 #include "ui/widgets/ProjectItem.h"
 
-namespace FTBImportAPP {
+namespace {
 
 QString getFTBRoot()
 {
@@ -45,20 +45,28 @@ QString getFTBRoot()
 QString getDynamicPath()
 {
     auto settingsPath = FS::PathCombine(getFTBRoot(), "storage", "settings.json");
-    if (!QFileInfo::exists(settingsPath))
+    if (!QFileInfo::exists(settingsPath)) {
         settingsPath = FS::PathCombine(getFTBRoot(), "bin", "settings.json");
+    }
     if (!QFileInfo::exists(settingsPath)) {
         qWarning() << "The ftb app setings doesn't exist.";
         return {};
     }
+    auto doc = Json::requireDocument(settingsPath);
+    if (!doc) {
+        qCritical() << "Could not read ftb settings file:" << doc.error();
+        return {};
+    }
     try {
-        auto doc = Json::requireDocument(FS::read(settingsPath));
-        return Json::requireString(Json::requireObject(doc), "instanceLocation");
+        return Json::requireString(Json::requireObject(doc.value()), "instanceLocation");
     } catch (const Exception& e) {
         qCritical() << "Could not read ftb settings file:" << e.cause();
     }
     return {};
 }
+}  // namespace
+
+namespace FTBImportAPP {
 
 ListModel::ListModel(QObject* parent) : QAbstractListModel(parent), m_instances_path(getDynamicPath()) {}
 

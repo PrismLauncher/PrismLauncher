@@ -67,7 +67,7 @@ auto FileSink::init(QNetworkRequest& request) -> InitResult
     return InitType::Ok;
 }
 
-auto FileSink::write(const QByteArray& data) -> Result
+auto FileSink::write(const QByteArray& data) -> Result<>
 {
     writeAllValidators(data);
     if (m_outputFile->write(data) != data.size()) {
@@ -96,7 +96,7 @@ void FileSink::abort()
     failAllValidators();
 }
 
-auto FileSink::finalize(QNetworkReply& reply) -> Result
+auto FileSink::finalize(QNetworkReply& reply) -> Result<>
 {
     bool gotFile = false;
     QVariant statusCodeV = reply.attribute(QNetworkRequest::HttpStatusCodeAttribute);

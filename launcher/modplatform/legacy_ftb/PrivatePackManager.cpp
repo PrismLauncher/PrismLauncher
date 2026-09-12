@@ -43,15 +43,16 @@ namespace LegacyFTB {
 
 void PrivatePackManager::load()
 {
-    try {
-        auto foo = QString::fromUtf8(FS::read(m_filename)).split('\n', Qt::SkipEmptyParts);
-        currentPacks = QSet<QString>(foo.begin(), foo.end());
-
-        dirty = false;
-    } catch (...) {
+    auto rsp = FS::read(m_filename);
+    if (!rsp) {
         currentPacks = {};
         qWarning() << "Failed to read third party FTB pack codes from" << m_filename;
+        return;
     }
+    auto foo = QString::fromUtf8(rsp.value()).split('\n', Qt::SkipEmptyParts);
+    currentPacks = QSet<QString>(foo.begin(), foo.end());
+
+    dirty = false;
 }
 
 void PrivatePackManager::save() const
@@ -59,13 +60,13 @@ void PrivatePackManager::save() const
     if (!dirty) {
         return;
     }
-    try {
-        QStringList list = currentPacks.values();
-        FS::write(m_filename, list.join('\n').toUtf8());
-        dirty = false;
-    } catch (...) {
+    QStringList list = currentPacks.values();
+    auto rsp = FS::write(m_filename, list.join('\n').toUtf8());
+    if (!rsp) {
         qWarning() << "Failed to write third party FTB pack codes to" << m_filename;
+        return;
     }
+    dirty = false;
 }
 
 }  // namespace LegacyFTB

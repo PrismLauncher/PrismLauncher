@@ -55,7 +55,7 @@ class ByteArraySink : public Sink {
         return InitType::Ok;
     };
 
-    Result write(const QByteArray& data) override
+    Result<> write(const QByteArray& data) override
     {
         m_output.append(data);
         writeAllValidators(data);
@@ -64,7 +64,7 @@ class ByteArraySink : public Sink {
 
     void abort() override { failAllValidators(); }
 
-    Result finalize(QNetworkReply& /*reply*/) override { return finalizeAllValidators(); }
+    Result<> finalize(QNetworkReply& /*reply*/) override { return finalizeAllValidators(); }
 
     auto hasLocalData() -> bool override { return false; }
 

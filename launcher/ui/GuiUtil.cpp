@@ -42,6 +42,7 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <expected>
 #include <utility>
 
 #include "FileSystem.h"
@@ -81,12 +82,21 @@ QString truncateLogForMclogs(const QString& logContent)
 }
 }  // namespace
 
-std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QFileInfo& filePath, QWidget* parentWidget)
+bool GuiUtil::isUploadCanceled(const Result<QString>& result)
 {
-    return uploadPaste(name, FS::read(filePath.absoluteFilePath()), parentWidget);
+    return !result.has_value() && result.error().isEmpty();
+}
+
+Result<QString> GuiUtil::uploadPaste(const QString& name, const QFileInfo& filePath, QWidget* parentWidget)
+{
+    auto rsp = FS::read(filePath.absoluteFilePath());
+    if (!rsp) {
+        return std::unexpected(rsp.error());
+    }
+    return uploadPaste(name, rsp.value(), parentWidget);
 };
 
-std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& data, QWidget* parentWidget)
+Result<QString> GuiUtil::uploadPaste(const QString& name, const QString& data, QWidget* parentWidget)
 {
     ProgressDialog dialog(parentWidget);
     auto pasteType = static_cast<PasteUpload::Type>(APPLICATION->settings()->get("PastebinType").toInt());
@@ -99,7 +109,7 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
 
     auto url = QUrl(baseURL);
     if (!url.isValid()) {
-        return {};
+        return std::unexpected("baseURL is not valid");
     }
 
     auto response = CustomMessageBox::selectable(parentWidget, QObject::tr("Confirm Upload"),
@@ -111,7 +121,7 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
                         ->exec();
 
     if (response != QMessageBox::Yes) {
-        return {};
+        return std::unexpected(QString{});
     }
 
     if (pasteType == PasteUpload::Type::Mclogs && data.count("\n") > g_MaxMclogsLines) {
@@ -130,7 +140,7 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
                 ->exec();
 
         if (truncateResponse == QMessageBox::Cancel) {
-            return {};
+            return std::unexpected(QString{});
         }
         shouldTruncate = truncateResponse == QMessageBox::Yes;
     }
@@ -153,7 +163,7 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
             CustomMessageBox::selectable(parentWidget, QObject::tr("Failed to upload logs!"), "The upload link is empty",
                                          QMessageBox::Critical)
                 ->show();
-            return {};
+            return std::unexpected("The upload link is empty");
         }
         setClipboardText(*pasteLink);
         CustomMessageBox::selectable(
@@ -163,7 +173,7 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
             ->exec();
         return *pasteLink;
     }
-    return {};
+    return std::unexpected(QString{});
 }
 
 void GuiUtil::setClipboardText(QString text)

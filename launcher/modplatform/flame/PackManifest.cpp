@@ -57,10 +57,13 @@ void loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)
 }
 }  // namespace
 
-void Flame::loadManifest(Flame::Manifest& m, const QString& filepath)
+Result<void> Flame::loadManifest(Flame::Manifest& m, const QString& filepath)
 {
     auto doc = Json::requireDocument(filepath);
-    auto obj = Json::requireObject(doc);
+    if (!doc) {
+        return std::unexpected(doc.error());
+    }
+    auto obj = Json::requireObject(doc.value());
     m.manifestType = Json::requireString(obj, "manifestType");
     if (m.manifestType != "minecraftModpack") {
         throw JSONValidationError("Not a modpack manifest!");
@@ -70,4 +73,5 @@ void Flame::loadManifest(Flame::Manifest& m, const QString& filepath)
         throw JSONValidationError(QString("Unknown manifest version (%1)").arg(m.manifestVersion));
     }
     loadManifestV1(m, obj);
+    return {};
 }

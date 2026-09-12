@@ -64,29 +64,37 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
 
         m_palette = baseTheme->colorScheme();
 
-        bool hasCustomLogColors = false;
-
-        if (read(themeFilePath, hasCustomLogColors)) {
-            // If theme data was found, fade "Disabled" color of each role according to FadeAmount
-            m_palette = fadeInactive(m_palette, m_fadeAmount, m_fadeColor);
-
-            if (!hasCustomLogColors)
+        try {
+            bool hasCustomLogColors = false;
+            auto rsp = read(themeFilePath, hasCustomLogColors);
+            if (!rsp) {
+                themeWarningLog() << "Couldn't read theme json:" << rsp.error();
                 m_logColors = defaultLogColors(m_palette);
-        } else {
-            themeDebugLog() << "Did not read theme json file correctly, not changing theme, keeping previous.";
+                m_styleSheet = baseTheme->appStyleSheet();
+            } else {
+                // If theme data was found, fade "Disabled" color of each role according to FadeAmount
+                m_palette = fadeInactive(m_palette, m_fadeAmount, m_fadeColor);
+                if (!hasCustomLogColors) {
+                    m_logColors = defaultLogColors(m_palette);
+                }
+            }
+        } catch (const Exception& e) {
+            themeWarningLog() << "Couldn't load theme json:" << e.cause();
             m_logColors = defaultLogColors(m_palette);
+            m_styleSheet = baseTheme->appStyleSheet();
             return;
         }
 
         auto qssFilePath = FS::PathCombine(path, m_qssFilePath);
         QFileInfo info(qssFilePath);
         if (info.isFile()) {
-            try {
-                // TODO: validate qss?
-                m_styleSheet = QString::fromUtf8(FS::read(qssFilePath));
-            } catch (const Exception& e) {
-                themeWarningLog() << "Couldn't load qss:" << e.cause() << "from" << qssFilePath;
-                return;
+            // TODO: validate qss?
+            auto rsp = FS::read(qssFilePath);
+            if (!rsp) {
+                themeWarningLog() << "Couldn't load qss:" << rsp.error() << "from" << qssFilePath;
+                m_styleSheet = baseTheme->appStyleSheet();
+            } else {
+                m_styleSheet = QString::fromUtf8(rsp.value());
             }
         } else {
             themeDebugLog() << "No theme qss present.";
@@ -107,12 +115,13 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
         }
 
         m_palette = baseTheme->colorScheme();
-        try {
-            // TODO: validate qss?
-            m_styleSheet = QString::fromUtf8(FS::read(path));
-        } catch (const Exception& e) {
-            themeWarningLog() << "Couldn't load qss:" << e.cause() << "from" << path;
+        // TODO: validate qss?
+        auto rsp = FS::read(path);
+        if (!rsp) {
+            themeWarningLog() << "Couldn't load qss:" << rsp.error() << "from" << path;
             m_styleSheet = baseTheme->appStyleSheet();
+        } else {
+            m_styleSheet = QString::fromUtf8(rsp.value());
         }
     }
 }
@@ -120,8 +129,9 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
 QStringList CustomTheme::searchPaths()
 {
     QString pathResources = FS::PathCombine("themes", m_id, "resources");
-    if (QFileInfo::exists(pathResources))
+    if (QFileInfo::exists(pathResources)) {
         return { pathResources };
+    }
 
     return {};
 }
@@ -170,98 +180,97 @@ QString CustomTheme::tooltip()
     return m_tooltip;
 }
 
-bool CustomTheme::read(const QString& path, bool& hasCustomLogColors)
+Result<void> CustomTheme::read(const QString& path, bool& hasCustomLogColors)
 {
     QFileInfo pathInfo(path);
-    if (pathInfo.exists() && pathInfo.isFile()) {
-        try {
-            auto doc = Json::requireDocument(path, "Theme JSON file");
-            const QJsonObject root = doc.object();
-            m_name = Json::requireString(root, "name", "Theme name");
-            m_widgets = Json::requireString(root, "widgets", "Qt widget theme");
-            m_qssFilePath = root["qssFilePath"].toString("themeStyle.css");
-
-            auto readColor = [](const QJsonObject& colors, const QString& colorName) -> QColor {
-                auto colorValue = colors[colorName].toString();
-                if (!colorValue.isEmpty()) {
-                    QColor color(colorValue);
-                    if (!color.isValid()) {
-                        themeWarningLog() << "Color value" << colorValue << "for" << colorName << "was not recognized.";
-                        return {};
-                    }
-                    return color;
-                }
-                return {};
-            };
-
-            if (root.contains("colors")) {
-                auto colorsRoot = Json::requireObject(root, "colors");
-                auto readAndSetPaletteColor = [this, readColor, colorsRoot](QPalette::ColorRole role, const QString& colorName) {
-                    auto color = readColor(colorsRoot, colorName);
-                    if (color.isValid()) {
-                        m_palette.setColor(role, color);
-                    } else {
-                        themeDebugLog() << "Color value for" << colorName << "was not present.";
-                    }
-                };
-
-                // palette
-                readAndSetPaletteColor(QPalette::Window, "Window");
-                readAndSetPaletteColor(QPalette::WindowText, "WindowText");
-                readAndSetPaletteColor(QPalette::Base, "Base");
-                readAndSetPaletteColor(QPalette::AlternateBase, "AlternateBase");
-                readAndSetPaletteColor(QPalette::ToolTipBase, "ToolTipBase");
-                readAndSetPaletteColor(QPalette::ToolTipText, "ToolTipText");
-                readAndSetPaletteColor(QPalette::Text, "Text");
-                readAndSetPaletteColor(QPalette::Button, "Button");
-                readAndSetPaletteColor(QPalette::ButtonText, "ButtonText");
-                readAndSetPaletteColor(QPalette::BrightText, "BrightText");
-                readAndSetPaletteColor(QPalette::Link, "Link");
-                readAndSetPaletteColor(QPalette::Highlight, "Highlight");
-                readAndSetPaletteColor(QPalette::HighlightedText, "HighlightedText");
-
-                // fade
-                m_fadeColor = readColor(colorsRoot, "fadeColor");
-                m_fadeAmount = colorsRoot["fadeAmount"].toDouble(0.5);
-            }
-
-            if (root.contains("logColors")) {
-                hasCustomLogColors = true;
-
-                auto logColorsRoot = Json::requireObject(root, "logColors");
-                auto readAndSetLogColor = [this, readColor, logColorsRoot](MessageLevel level, bool fg, const QString& colorName) {
-                    auto color = readColor(logColorsRoot, colorName);
-                    if (color.isValid()) {
-                        if (fg)
-                            m_logColors.foreground[level] = color;
-                        else
-                            m_logColors.background[level] = color;
-                    } else {
-                        themeDebugLog() << "Color value for" << colorName << "was not present.";
-                    }
-                };
-
-                readAndSetLogColor(MessageLevel::Message, false, "MessageHighlight");
-                readAndSetLogColor(MessageLevel::Launcher, false, "LauncherHighlight");
-                readAndSetLogColor(MessageLevel::Debug, false, "DebugHighlight");
-                readAndSetLogColor(MessageLevel::Warning, false, "WarningHighlight");
-                readAndSetLogColor(MessageLevel::Error, false, "ErrorHighlight");
-                readAndSetLogColor(MessageLevel::Fatal, false, "FatalHighlight");
-
-                readAndSetLogColor(MessageLevel::Message, true, "Message");
-                readAndSetLogColor(MessageLevel::Launcher, true, "Launcher");
-                readAndSetLogColor(MessageLevel::Debug, true, "Debug");
-                readAndSetLogColor(MessageLevel::Warning, true, "Warning");
-                readAndSetLogColor(MessageLevel::Error, true, "Error");
-                readAndSetLogColor(MessageLevel::Fatal, true, "Fatal");
-            }
-        } catch (const Exception& e) {
-            themeWarningLog() << "Couldn't load theme json:" << e.cause();
-            return false;
-        }
-    } else {
+    if (!pathInfo.exists() || !pathInfo.isFile()) {
         themeDebugLog() << "No theme json present.";
-        return false;
+        return std::unexpected(QStringLiteral("Theme json file does not exist"));
     }
-    return true;
+
+    auto doc = Json::requireDocument(path, "Theme JSON file");
+    if (!doc) {
+        return std::unexpected(doc.error());
+    }
+    const QJsonObject root = doc.value().object();
+    m_name = Json::requireString(root, "name", "Theme name");
+    m_widgets = Json::requireString(root, "widgets", "Qt widget theme");
+    m_qssFilePath = root["qssFilePath"].toString("themeStyle.css");
+
+    auto readColor = [](const QJsonObject& colors, const QString& colorName) -> QColor {
+        auto colorValue = colors[colorName].toString();
+        if (!colorValue.isEmpty()) {
+            QColor color(colorValue);
+            if (!color.isValid()) {
+                themeWarningLog() << "Color value" << colorValue << "for" << colorName << "was not recognized.";
+                return {};
+            }
+            return color;
+        }
+        return {};
+    };
+
+    if (root.contains("colors")) {
+        auto colorsRoot = Json::requireObject(root, "colors");
+        auto readAndSetPaletteColor = [this, readColor, colorsRoot](QPalette::ColorRole role, const QString& colorName) {
+            auto color = readColor(colorsRoot, colorName);
+            if (color.isValid()) {
+                m_palette.setColor(role, color);
+            } else {
+                themeDebugLog() << "Color value for" << colorName << "was not present.";
+            }
+        };
+
+        // palette
+        readAndSetPaletteColor(QPalette::Window, "Window");
+        readAndSetPaletteColor(QPalette::WindowText, "WindowText");
+        readAndSetPaletteColor(QPalette::Base, "Base");
+        readAndSetPaletteColor(QPalette::AlternateBase, "AlternateBase");
+        readAndSetPaletteColor(QPalette::ToolTipBase, "ToolTipBase");
+        readAndSetPaletteColor(QPalette::ToolTipText, "ToolTipText");
+        readAndSetPaletteColor(QPalette::Text, "Text");
+        readAndSetPaletteColor(QPalette::Button, "Button");
+        readAndSetPaletteColor(QPalette::ButtonText, "ButtonText");
+        readAndSetPaletteColor(QPalette::BrightText, "BrightText");
+        readAndSetPaletteColor(QPalette::Link, "Link");
+        readAndSetPaletteColor(QPalette::Highlight, "Highlight");
+        readAndSetPaletteColor(QPalette::HighlightedText, "HighlightedText");
+
+        // fade
+        m_fadeColor = readColor(colorsRoot, "fadeColor");
+        m_fadeAmount = colorsRoot["fadeAmount"].toDouble(0.5);
+    }
+
+    if (root.contains("logColors")) {
+        hasCustomLogColors = true;
+
+        auto logColorsRoot = Json::requireObject(root, "logColors");
+        auto readAndSetLogColor = [this, readColor, logColorsRoot](MessageLevel level, bool fg, const QString& colorName) {
+            auto color = readColor(logColorsRoot, colorName);
+            if (color.isValid()) {
+                if (fg) {
+                    m_logColors.foreground[level] = color;
+                } else {
+                    m_logColors.background[level] = color;
+                }
+            } else {
+                themeDebugLog() << "Color value for" << colorName << "was not present.";
+            }
+        };
+
+        readAndSetLogColor(MessageLevel::Message, false, "MessageHighlight");
+        readAndSetLogColor(MessageLevel::Launcher, false, "LauncherHighlight");
+        readAndSetLogColor(MessageLevel::Debug, false, "DebugHighlight");
+        readAndSetLogColor(MessageLevel::Warning, false, "WarningHighlight");
+        readAndSetLogColor(MessageLevel::Error, false, "ErrorHighlight");
+        readAndSetLogColor(MessageLevel::Fatal, false, "FatalHighlight");
+
+        readAndSetLogColor(MessageLevel::Message, true, "Message");
+        readAndSetLogColor(MessageLevel::Launcher, true, "Launcher");
+        readAndSetLogColor(MessageLevel::Debug, true, "Debug");
+        readAndSetLogColor(MessageLevel::Warning, true, "Warning");
+        readAndSetLogColor(MessageLevel::Error, true, "Error");
+        readAndSetLogColor(MessageLevel::Fatal, true, "Fatal");
+    }
+    return {};
 }

@@ -355,7 +355,10 @@ void OtherLogsPage::reload()
 void OtherLogsPage::on_btnPaste_clicked()
 {
     QString name = m_currentFile.isEmpty() ? displayName() : m_currentFile;
-    GuiUtil::uploadPaste(name, ui->text->toPlainText(), this);
+    auto rsp = GuiUtil::uploadPaste(name, ui->text->toPlainText(), this);
+    if (!rsp && !GuiUtil::isUploadCanceled(rsp)) {
+        qWarning() << "Log upload failed:" << rsp.error();
+    }
 }
 
 void OtherLogsPage::on_btnCopy_clicked()
@@ -370,8 +373,9 @@ void OtherLogsPage::on_btnBottom_clicked()
 
 void OtherLogsPage::on_trackLogCheckbox_clicked(bool checked)
 {
-    if (!m_model)
+    if (!m_model) {
         return;
+    }
     m_model->suspend(!checked);
 }
 

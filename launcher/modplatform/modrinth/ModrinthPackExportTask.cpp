@@ -154,7 +154,7 @@ void ModrinthPackExportTask::makeApiRequest()
         buildZip();
     } else {
         setStatus(tr("Finding versions for hashes..."));
-        auto [versionsTask, response] = ModrinthAPI::get().currentVersions(pendingHashes.values(), "sha512");
+        auto [versionsTask, response] = ModrinthAPI::currentVersions(pendingHashes.values(), "sha512");
         task = versionsTask;
         connect(task.get(), &Task::succeeded, this, [this, response]() { parseApiResponse(response); });
         connect(task.get(), &Task::failed, this, &ModrinthPackExportTask::emitFailed);
@@ -167,22 +167,25 @@ void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
 {
     task = nullptr;
 
+    auto doc = Json::requireDocument(*response);
+    if (!doc) {
+        emitFailed(tr("Failed to parse versions response: %1").arg(doc.error()));
+        return;
+    }
     try {
-        const QJsonDocument doc = Json::requireDocument(*response);
-
         QMapIterator<QString, QString> iterator(pendingHashes);
         while (iterator.hasNext()) {
             iterator.next();
 
-            const QJsonObject obj = doc[iterator.value()].toObject();
+            const QJsonObject obj = doc.value()[iterator.value()].toObject();
             if (obj.isEmpty()) {
                 continue;
             }
 
-            const QJsonArray files_array = obj["files"].toArray();
-            if (auto fileIter = std::find_if(files_array.begin(), files_array.end(),
+            const QJsonArray filesArray = obj["files"].toArray();
+            if (auto fileIter = std::find_if(filesArray.begin(), filesArray.end(),
                                              [&iterator](const QJsonValue& file) { return file["hashes"]["sha512"] == iterator.value(); });
-                fileIter != files_array.end()) {
+                fileIter != filesArray.end()) {
                 // map the file to the url
                 resolvedFiles[iterator.key()] = ResolvedFile{ .sha1 = fileIter->toObject()["hashes"].toObject()["sha1"].toString(),
                                                               .sha512 = iterator.value(),

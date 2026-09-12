@@ -59,13 +59,18 @@ QIcon loadFTBIcon(const QString& imagePath)
 
 Modpack parseDirectory(QString path)
 {
-    Modpack modpack{ path };
+    Modpack modpack{ .path = path };
     auto instanceFile = QFileInfo(FS::PathCombine(path, "instance.json"));
-    if (!instanceFile.exists() || !instanceFile.isFile())
+    if (!instanceFile.exists() || !instanceFile.isFile()) {
         return {};
+    }
+    auto doc = Json::requireDocument(instanceFile.absoluteFilePath(), "FTB_APP instance JSON file");
+    if (!doc) {
+        qDebug() << "Couldn't load ftb instance json:" << doc.error();
+        return {};
+    }
     try {
-        auto doc = Json::requireDocument(instanceFile.absoluteFilePath(), "FTB_APP instance JSON file");
-        const auto root = doc.object();
+        const auto root = doc.value().object();
         modpack.uuid = Json::requireString(root, "uuid", "uuid");
         modpack.id = Json::requireInteger(root, "id", "id");
         modpack.versionId = Json::requireInteger(root, "versionId", "versionId");
@@ -119,9 +124,13 @@ void legacyInstanceParsing(QString path, std::optional<ModPlatform::ModLoaderTyp
         qDebug() << "Couldn't find ftb version json";
         return;
     }
+    auto doc = Json::requireDocument(versionsFile.absoluteFilePath(), "FTB_APP version JSON file");
+    if (!doc) {
+        qDebug() << "Couldn't load ftb version json:" << doc.error();
+        return;
+    }
     try {
-        auto doc = Json::requireDocument(versionsFile.absoluteFilePath(), "FTB_APP version JSON file");
-        const auto root = doc.object();
+        const auto root = doc.value().object();
         auto targets = Json::requireArray(root, "targets", "targets");
 
         for (auto target : targets) {
@@ -132,15 +141,18 @@ void legacyInstanceParsing(QString path, std::optional<ModPlatform::ModLoaderTyp
                 *loaderType = ModPlatform::NeoForge;
                 *loaderVersion = version;
                 break;
-            } else if (name == "forge") {
+            }
+            if (name == "forge") {
                 *loaderType = ModPlatform::Forge;
                 *loaderVersion = version;
                 break;
-            } else if (name == "fabric") {
+            }
+            if (name == "fabric") {
                 *loaderType = ModPlatform::Fabric;
                 *loaderVersion = version;
                 break;
-            } else if (name == "quilt") {
+            }
+            if (name == "quilt") {
                 *loaderType = ModPlatform::Quilt;
                 *loaderVersion = version;
                 break;

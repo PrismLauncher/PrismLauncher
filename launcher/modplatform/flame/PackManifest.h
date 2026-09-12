@@ -82,5 +82,5 @@ struct Manifest {
     bool isLoaded = false;
 };
 
-void loadManifest(Flame::Manifest& m, const QString& filepath);
+Result<void> loadManifest(Flame::Manifest& m, const QString& filepath);
 }  // namespace Flame

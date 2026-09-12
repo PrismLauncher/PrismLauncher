@@ -223,12 +223,12 @@ bool FileIgnoreProxy::setFilterState(QModelIndex index, Qt::CheckState state)
 bool FileIgnoreProxy::shouldExpand(QModelIndex index)
 {
     QModelIndex sourceIndex = mapToSource(index);
-    QFileSystemModel* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
+    auto* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
     if (!fsm) {
         return false;
     }
     auto blockedPath = relPath(fsm->filePath(sourceIndex));
-    auto found = m_blocked.find(blockedPath);
+    auto* found = m_blocked.find(blockedPath);
     if (found) {
         return !found->leaf();
     }
@@ -249,16 +249,13 @@ bool FileIgnoreProxy::filterAcceptsColumn(int source_column, const QModelIndex& 
 
     // adjust the columns you want to filter out here
     // return false for those that will be hidden
-    if (source_column == 2 || source_column == 3)
-        return false;
-
-    return true;
+    return source_column != 2 && source_column != 3;
 }
 
 bool FileIgnoreProxy::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
 {
     QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
-    QFileSystemModel* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
+    auto* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
 
     auto fileInfo = fsm->fileInfo(index);
     return !ignoreFile(fileInfo);
@@ -276,11 +273,7 @@ bool FileIgnoreProxy::ignoreFile(QFileInfo fileInfo) const
         }
     }
 
-    if (m_ignoreFilePaths.covers(relPath(fileInfo.absoluteFilePath()))) {
-        return true;
-    }
-
-    return false;
+    return m_ignoreFilePaths.covers(relPath(fileInfo.absoluteFilePath()));
 }
 
 bool FileIgnoreProxy::filterFile(const QFileInfo& file) const
@@ -302,9 +295,8 @@ void FileIgnoreProxy::loadBlockedPathsFromFile(const QString& fileName)
 void FileIgnoreProxy::saveBlockedPathsToFile(const QString& fileName)
 {
     auto ignoreData = blockedPaths().toStringList().join('\n').toUtf8();
-    try {
-        FS::write(fileName, ignoreData);
-    } catch (const Exception& e) {
-        qWarning() << e.cause();
+    auto rsp = FS::write(fileName, ignoreData);
+    if (!rsp) {
+        qWarning() << rsp.error();
     }
 }

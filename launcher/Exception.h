@@ -41,7 +41,7 @@
 #include <expected>
 
 using Error = QString;
-template <typename T>
+template <typename T = void>
 using Result = std::expected<T, Error>;
 
 class Exception : public std::exception {

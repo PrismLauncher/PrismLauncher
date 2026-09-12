@@ -174,75 +174,91 @@ using PFSCTL_SET_INTEGRITY_INFORMATION_BUFFER = _FSCTL_SET_INTEGRITY_INFORMATION
 
 #endif
 
-namespace FS {
+namespace {
 
-void ensureExists(const QDir& dir)
+Result<void> ensureExists(const QDir& dir)
 {
     if (!QDir().mkpath(dir.absolutePath())) {
-        throw FileSystemException("Unable to create folder " + dir.dirName() + " (" + dir.absolutePath() + ")");
+        return std::unexpected("Unable to create folder " + dir.dirName() + " (" + dir.absolutePath() + ")");
     }
+    return {};
 }
+}  // namespace
 
-void write(const QString& filename, const QByteArray& data)
+namespace FS {
+
+Result<void> write(const QString& filename, const QByteArray& data)
 {
-    ensureExists(QFileInfo(filename).dir());
+    auto rsp = ensureExists(QFileInfo(filename).dir());
+    if (!rsp) {
+        return rsp;
+    }
     PSaveFile file(filename);
     if (!file.open(PSaveFile::WriteOnly)) {
-        throw FileSystemException("Couldn't open " + filename + " for writing: " + file.errorString());
+        return std::unexpected("Couldn't open " + filename + " for writing: " + file.errorString());
     }
     if (data.size() != file.write(data)) {
-        throw FileSystemException("Error writing data to " + filename + ": " + file.errorString());
+        return std::unexpected("Error writing data to " + filename + ": " + file.errorString());
     }
     if (!file.commit()) {
-        throw FileSystemException("Error while committing data to " + filename + ": " + file.errorString());
+        return std::unexpected("Error while committing data to " + filename + ": " + file.errorString());
     }
+    return {};
 }
 
-void appendSafe(const QString& filename, const QByteArray& data)
+Result<void> appendSafe(const QString& filename, const QByteArray& data)
 {
-    ensureExists(QFileInfo(filename).dir());
+    auto rsp = ensureExists(QFileInfo(filename).dir());
+    if (!rsp) {
+        return rsp;
+    }
+
     QByteArray buffer;
-    try {
-        buffer = read(filename);
-    } catch (FileSystemException&) {
-        buffer = QByteArray();
+    auto bRsp = read(filename);
+    if (bRsp) {
+        buffer = bRsp.value();
     }
     buffer.append(data);
     PSaveFile file(filename);
     if (!file.open(PSaveFile::WriteOnly)) {
-        throw FileSystemException("Couldn't open " + filename + " for writing: " + file.errorString());
+        return std::unexpected("Couldn't open " + filename + " for writing: " + file.errorString());
     }
     if (buffer.size() != file.write(buffer)) {
-        throw FileSystemException("Error writing data to " + filename + ": " + file.errorString());
+        return std::unexpected("Error writing data to " + filename + ": " + file.errorString());
     }
     if (!file.commit()) {
-        throw FileSystemException("Error while committing data to " + filename + ": " + file.errorString());
+        return std::unexpected("Error while committing data to " + filename + ": " + file.errorString());
     }
+    return {};
 }
 
-void append(const QString& filename, const QByteArray& data)
+Result<void> append(const QString& filename, const QByteArray& data)
 {
-    ensureExists(QFileInfo(filename).dir());
+    auto rsp = ensureExists(QFileInfo(filename).dir());
+    if (!rsp) {
+        return rsp;
+    }
     QFile file(filename);
     if (!file.open(QFile::Append)) {
-        throw FileSystemException("Couldn't open " + filename + " for writing: " + file.errorString());
+        return std::unexpected("Couldn't open " + filename + " for writing: " + file.errorString());
     }
     if (data.size() != file.write(data)) {
-        throw FileSystemException("Error writing data to " + filename + ": " + file.errorString());
+        return std::unexpected("Error writing data to " + filename + ": " + file.errorString());
     }
+    return {};
 }
 
-QByteArray read(const QString& filename)
+Result<QByteArray> read(const QString& filename)
 {
     QFile file(filename);
     if (!file.open(QFile::ReadOnly)) {
-        throw FileSystemException("Unable to open " + filename + " for reading: " + file.errorString());
+        return std::unexpected("Unable to open " + filename + " for reading: " + file.errorString());
     }
     const qint64 size = file.size();
     QByteArray data(int(size), 0);
     const qint64 ret = file.read(data.data(), size);
     if (ret == -1 || ret != size) {
-        throw FileSystemException("Error reading data from " + filename + ": " + file.errorString());
+        return std::unexpected("Error reading data from " + filename + ": " + file.errorString());
     }
     return data;
 }

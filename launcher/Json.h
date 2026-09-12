@@ -53,20 +53,15 @@ class JsonException : public ::Exception {
     JsonException(const QString& message) : Exception(message) {}
 };
 
-/// @throw FileSystemException
-void write(const QJsonDocument& doc, const QString& filename);
-/// @throw FileSystemException
-void write(const QJsonObject& object, const QString& filename);
-/// @throw FileSystemException
-void write(const QJsonArray& array, const QString& filename);
+Result<void> write(const QJsonDocument& doc, const QString& filename);
+Result<void> write(const QJsonObject& object, const QString& filename);
+Result<void> write(const QJsonArray& array, const QString& filename);
 
 QByteArray toText(const QJsonObject& obj);
 QByteArray toText(const QJsonArray& array);
 
-/// @throw JsonException
-QJsonDocument requireDocument(const QByteArray& data, const QString& what = "Document");
-/// @throw JsonException
-QJsonDocument requireDocument(const QString& filename, const QString& what = "Document");
+Result<QJsonDocument> requireDocument(const QByteArray& data, const QString& what = "Document");
+Result<QJsonDocument> requireDocument(const QString& filename, const QString& what = "Document");
 /// @throw JsonException
 QJsonObject requireObject(const QJsonDocument& doc, const QString& what = "Document");
 /// @throw JsonException

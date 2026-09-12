@@ -485,8 +485,9 @@ QList<InstanceId> InstanceList::discoverInstances()
         while (iter.hasNext()) {
             QString subDir = iter.next();
             QFileInfo dirInfo(subDir);
-            if (!QFileInfo(FS::PathCombine(subDir, "instance.cfg")).exists())
+            if (!QFileInfo(FS::PathCombine(subDir, "instance.cfg")).exists()) {
                 continue;
+            }
             // if it is a symlink, ignore it if it goes to ANY configured instance
             if (dirInfo.isSymLink()) {
                 QFileInfo targetInfo(dirInfo.symLinkTarget());
@@ -789,11 +790,11 @@ void InstanceList::saveGroupList()
         toplevel.insert("ungrouped", ungrouped);
     }
     QJsonDocument doc(toplevel);
-    try {
-        FS::write(groupFileName, doc.toJson());
+    auto rsp = FS::write(groupFileName, doc.toJson());
+    if (!rsp) {
+        qCritical() << "Failed to write instance group file :" << rsp.error();
+    } else {
         qDebug() << "Group list saved.";
-    } catch (const FS::FileSystemException& e) {
-        qCritical() << "Failed to write instance group file :" << e.cause();
     }
 }
 
@@ -820,13 +821,12 @@ void InstanceList::loadGroupList()
         migratingLegacyGroups = true;
     }
 
-    QByteArray jsonData;
-    try {
-        jsonData = FS::read(groupFileName);
-    } catch (const FS::FileSystemException& e) {
-        qCritical() << "Failed to read instance group file :" << e.cause();
+    auto rsp = FS::read(groupFileName);
+    if (!rsp) {
+        qCritical() << "Failed to read instance group file :" << rsp.error();
         return;
     }
+    const auto& jsonData = rsp.value();
 
     QJsonParseError error;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &error);

@@ -89,12 +89,19 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
 {
     setProgress(1, 3);
     // job to check modrinth for blocked projects
-    QJsonDocument doc;
     QJsonArray array;
 
+    auto doc = Json::requireDocument(*response);
+    if (!doc) {
+        qCritical() << "Non-JSON data returned from the CF API";
+        qCritical() << doc.error();
+
+        emitFailed(tr("Invalid data returned from the API."));
+
+        return;
+    }
     try {
-        doc = Json::requireDocument(*response);
-        array = Json::requireArray(doc.object()["data"]);
+        array = Json::requireArray(doc.value().object()["data"]);
     } catch (Json::JsonException& e) {
         qCritical() << "Non-JSON data returned from the CF API";
         qCritical() << e.cause();

@@ -35,7 +35,7 @@ class Sink : public ByteArraySink {
     ~Sink() override = default;
 
    public:
-    Result finalize(QNetworkReply& /*reply*/) override
+    Result<> finalize(QNetworkReply& /*reply*/) override
     {
         auto validatorResult = finalizeAllValidators();
         if (!validatorResult) {

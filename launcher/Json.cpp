@@ -41,17 +41,17 @@
 #include "FileSystem.h"
 
 namespace Json {
-void write(const QJsonDocument& doc, const QString& filename)
+Result<void> write(const QJsonDocument& doc, const QString& filename)
 {
-    FS::write(filename, doc.toJson());
+    return FS::write(filename, doc.toJson());
 }
-void write(const QJsonObject& object, const QString& filename)
+Result<void> write(const QJsonObject& object, const QString& filename)
 {
-    write(QJsonDocument(object), filename);
+    return write(QJsonDocument(object), filename);
 }
-void write(const QJsonArray& array, const QString& filename)
+Result<void> write(const QJsonArray& array, const QString& filename)
 {
-    write(QJsonDocument(array), filename);
+    return write(QJsonDocument(array), filename);
 }
 
 QByteArray toText(const QJsonObject& obj)
@@ -68,23 +68,24 @@ static bool isBinaryJson(const QByteArray& data)
     decltype(QJsonDocument::BinaryFormatTag) tag = QJsonDocument::BinaryFormatTag;
     return memcmp(data.constData(), &tag, sizeof(QJsonDocument::BinaryFormatTag)) == 0;
 }
-QJsonDocument requireDocument(const QByteArray& data, const QString& what)
+Result<QJsonDocument> requireDocument(const QByteArray& data, const QString& what)
 {
     if (isBinaryJson(data)) {
         // FIXME: Is this needed?
-        throw JsonException(what + ": Invalid JSON. Binary JSON unsupported");
-    } else {
-        QJsonParseError error;
-        QJsonDocument doc = QJsonDocument::fromJson(data, &error);
-        if (error.error != QJsonParseError::NoError) {
-            throw JsonException(what + ": Error parsing JSON: " + error.errorString());
-        }
-        return doc;
+        return std::unexpected(what + ": Invalid JSON. Binary JSON unsupported");
     }
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+    if (error.error != QJsonParseError::NoError) {
+        return std::unexpected(what + ": Error parsing JSON: " + error.errorString());
+    }
+    return doc;
 }
-QJsonDocument requireDocument(const QString& filename, const QString& what)
+Result<QJsonDocument> requireDocument(const QString& filename, const QString& what)
 {
-    return requireDocument(FS::read(filename), what);
+    return FS::read(filename).transform_error([what](auto v) { return what + ": Error reading file: " + v; }).and_then([what](auto v) {
+        return requireDocument(v, what);
+    });
 }
 QJsonObject requireObject(const QJsonDocument& doc, const QString& what)
 {

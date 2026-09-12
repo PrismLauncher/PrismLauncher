@@ -226,16 +226,14 @@ void TranslationsModel::indexReceived()
 namespace {
 void readIndex(const QString& path, QMap<QString, Language>& languages)
 {
-    QByteArray data;
-    try {
-        data = FS::read(path);
-    } catch ([[maybe_unused]] const Exception& e) {
-        qCritical() << "Translations Download Failed: index file not readable";
+    auto rsp = Json::requireDocument(path);
+    if (!rsp) {
+        qCritical() << "Translations Download Failed: " << rsp.error();
         return;
     }
+    const auto& toplevelDoc = rsp.value();
 
     try {
-        auto toplevelDoc = Json::requireDocument(data);
         auto doc = Json::requireObject(toplevelDoc);
         auto fileType = Json::requireString(doc, "file_type");
         if (fileType != "MMC-TRANSLATION-INDEX") {

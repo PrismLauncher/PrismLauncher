@@ -43,12 +43,16 @@ class ParsingValidator : public Net::Validator {
     void init() override { m_data.clear(); }
     void write(const QByteArray& data) override { this->m_data.append(data); }
     void abort() override { m_data.clear(); }
-    Result validate() override
+    Result<> validate() override
     {
         auto fname = m_entity->localFilename();
+        auto doc = Json::requireDocument(m_data, fname);
+        if (!doc) {
+            qWarning() << "Unable to parse response:" << doc.error();
+            return {};
+        }
         try {
-            auto doc = Json::requireDocument(m_data, fname);
-            auto obj = Json::requireObject(doc, fname);
+            auto obj = Json::requireObject(doc.value(), fname);
             m_entity->parse(obj);
             return {};
         } catch (const Exception& e) {
@@ -108,12 +112,17 @@ void BaseEntityLoadTask::executeTask()
     auto hashMatches = false;
     // the file exists on disk try to load it
     if (QFile::exists(fname)) {
-        try {
+        auto parse = [this, &hashMatches, fname] -> Result<> {
             QByteArray fileData;
             // read local file if nothing is loaded yet
             if (m_entity->m_load_status == BaseEntity::LoadStatus::NotLoaded || m_entity->m_file_sha256.isEmpty()) {
                 setStatus(tr("Loading local file"));
-                fileData = FS::read(fname);
+
+                auto rsp = FS::read(fname);
+                if (!rsp) {
+                    return std::unexpected(rsp.error());
+                }
+                fileData = rsp.value();
                 m_entity->m_file_sha256 = Hashing::hash(fileData, Hashing::Algorithm::Sha256);
             }
 
@@ -122,19 +131,28 @@ void BaseEntityLoadTask::executeTask()
             const auto& actual = m_entity->m_file_sha256;
             hashMatches = expected == actual;
             if (m_mode == Net::Mode::Online && !m_entity->m_sha256.isEmpty() && !hashMatches) {
-                throw Exception(QString("Checksum mismatch, expected sha256: %1, got: %2").arg(expected, actual));
+                return std::unexpected(QString("Checksum mismatch, expected sha256: %1, got: %2").arg(expected, actual));
             }
 
             // load local file
             if (m_entity->m_load_status == BaseEntity::LoadStatus::NotLoaded) {
                 auto doc = Json::requireDocument(fileData, fname);
-                auto obj = Json::requireObject(doc, fname);
-                m_entity->parse(obj);
-                m_entity->m_load_status = BaseEntity::LoadStatus::Local;
+                if (!doc) {
+                    return std::unexpected(doc.error());
+                }
+                try {
+                    auto obj = Json::requireObject(doc.value(), fname);
+                    m_entity->parse(obj);
+                    m_entity->m_load_status = BaseEntity::LoadStatus::Local;
+                } catch (const Exception& e) {
+                    return std::unexpected(e.what());
+                }
             }
-
-        } catch (const Exception& e) {
-            qCritical() << QString("Unable to parse file %1: %2").arg(fname, e.cause());
+            return {};
+        };
+        auto rsp = parse();
+        if (!rsp) {
+            qCritical() << QString("Unable to parse file %1: %2").arg(fname, rsp.error());
             // just make sure it's gone and we never consider it again.
             FS::deletePath(fname);
             m_entity->m_load_status = BaseEntity::LoadStatus::NotLoaded;

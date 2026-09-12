@@ -260,9 +260,19 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext& context, const QSt
     fflush(stderr);
 }
 
+[[noreturn]] static void unrecoverable(const QString& msg)
+{
+    qCritical().noquote() << msg;
+    exit(1);
+}
+
 std::tuple<QDateTime, QString, QString, QString, QString> readLockFile(const QString& path)
 {
-    auto contents = QString(FS::read(path));
+    auto rsp = FS::read(path);
+    if (!rsp) {
+        unrecoverable("Failed to read lock file: " + rsp.error());
+    }
+    auto contents = QString(rsp.value());
     auto lines = contents.split('\n');
 
     QDateTime timestamp;
@@ -1104,7 +1114,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             auto msgBox = QMessageBox(QMessageBox::Warning, tr("Update In Progress"), infoMsg, QMessageBox::Ignore | QMessageBox::Abort);
             msgBox.setDefaultButton(QMessageBox::Abort);
             msgBox.setModal(true);
-            msgBox.setDetailedText(FS::read(updateLogPath));
+            auto rsp = FS::read(updateLogPath);
+            if (!rsp) {
+                unrecoverable("Failed to read update log: " + rsp.error());
+            }
+            msgBox.setDetailedText(rsp.value());
             msgBox.setMinimumWidth(460);
             msgBox.adjustSize();
             auto res = msgBox.exec();
@@ -1136,7 +1150,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             auto msgBox = QMessageBox(QMessageBox::Warning, tr("Update Failed"), infoMsg, QMessageBox::Ignore | QMessageBox::Abort);
             msgBox.setDefaultButton(QMessageBox::Abort);
             msgBox.setModal(true);
-            msgBox.setDetailedText(FS::read(updateLogPath));
+            auto rsp = FS::read(updateLogPath);
+            if (!rsp) {
+                unrecoverable("Failed to read update log: " + rsp.error());
+            }
+            msgBox.setDetailedText(rsp.value());
             msgBox.setMinimumWidth(460);
             msgBox.adjustSize();
             auto res = msgBox.exec();
@@ -1167,7 +1185,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                                .arg(updateLogPath);
             auto* msgBox = new QMessageBox(QMessageBox::Information, tr("Update Succeeded"), infoMsg, QMessageBox::Ok);
             msgBox->setDefaultButton(QMessageBox::Ok);
-            msgBox->setDetailedText(FS::read(updateLogPath));
+            auto rsp = FS::read(updateLogPath);
+            if (!rsp) {
+                unrecoverable("Failed to read update log: " + rsp.error());
+            }
+            msgBox->setDetailedText(rsp.value());
             msgBox->setAttribute(Qt::WA_DeleteOnClose);
             msgBox->setMinimumWidth(460);
             msgBox->adjustSize();
@@ -1439,7 +1461,11 @@ Application::~Application()
 void Application::messageReceived(const QByteArray& message)
 {
     ApplicationMessage received;
-    received.parse(message);
+    auto rsp = received.parse(message);
+    if (!rsp) {
+        qWarning() << "Received invalid message:" << rsp.error();
+        return;
+    }
 
     auto& command = received.command;
 

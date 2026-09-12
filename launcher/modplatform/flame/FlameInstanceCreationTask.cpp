@@ -114,10 +114,14 @@ void FlameCreationTask::executeTask()
     const QString indexPath(FS::PathCombine(m_stagingPath, "manifest.json"));
 
     try {
-        Flame::loadManifest(m_pack, indexPath);
-    } catch (const JSONValidationError&) {
+        if (!Flame::loadManifest(m_pack, indexPath)) {
+            // emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
+            createInstance();  // to keep the backwards compatibility here just create the instance
+            return;
+        }
+    } catch ([[maybe_unused]] const JSONValidationError&) {
         // emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
-        createInstance();  // to keep the backwards comatibility here just create the instance
+        createInstance();  // to keep the backwards compatibility here just create the instance
         return;
     }
 
@@ -166,7 +170,10 @@ void FlameCreationTask::executeTask()
 
     if (oldIndexFile.exists()) {
         Flame::Manifest oldPack;
-        Flame::loadManifest(oldPack, oldIndexPath);
+        auto rsp = Flame::loadManifest(oldPack, oldIndexPath);
+        if (!rsp) {
+            qWarning() << "Error while parsing old manifest: " << rsp.error();
+        }
 
         auto oldFiles = oldPack.files;
 
@@ -376,7 +383,11 @@ void FlameCreationTask::createInstance()
     try {
         const QString indexPath(FS::PathCombine(m_stagingPath, "manifest.json"));
         if (!m_pack.isLoaded) {
-            Flame::loadManifest(m_pack, indexPath);
+            auto rsp = Flame::loadManifest(m_pack, indexPath);
+            if (!rsp) {
+                emitFailed(tr("Could not understand pack manifest:\n") + rsp.error());
+                return;
+            }
         }
 
         // Keep index file in case we need it some other time (like when changing versions)
