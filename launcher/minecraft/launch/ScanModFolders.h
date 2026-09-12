@@ -30,12 +30,16 @@ class ScanModFolders : public LaunchStep {
     void coreModsDone();
     void modsDone();
     void nilModsDone();
+    void onParseFinished();
 
    private:
     void checkDone();
+    void applyRuntimeProfiles();
 
    private:  // DATA
     bool m_modsDone = false;
     bool m_nilModsDone = false;
     bool m_coreModsDone = false;
+    bool m_restoreListenerConnected = false;
+    bool m_applyDone = false;
 };
