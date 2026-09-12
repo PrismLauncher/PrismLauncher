@@ -20,7 +20,7 @@
 
 #include <QApplication>
 #include <QDir>
-#include <QDirIterator>
+#include <QDirListing>
 #include <QIcon>
 #include <QImageReader>
 #include <QStyle>
@@ -62,17 +62,18 @@ ThemeManager::~ThemeManager()
 QString ThemeManager::addTheme(std::unique_ptr<ITheme> theme)
 {
     QString id = theme->id();
-    if (m_themes.find(id) == m_themes.end())
+    if (!m_themes.contains(id)) {
         m_themes.emplace(id, std::move(theme));
-    else
+    } else {
         themeWarningLog() << "Theme(" << id << ") not added to prevent id duplication";
+    }
     return id;
 }
 
 /// @brief Gets the Theme from the List via ID
 /// @param themeId Theme ID of theme to fetch
 /// @return Theme at themeId
-ITheme* ThemeManager::getTheme(QString themeId)
+ITheme* ThemeManager::getTheme(const QString& themeId)
 {
     return m_themes[themeId].get();
 }
@@ -80,10 +81,11 @@ ITheme* ThemeManager::getTheme(QString themeId)
 QString ThemeManager::addIconTheme(IconTheme theme)
 {
     QString id = theme.id();
-    if (m_icons.find(id) == m_icons.end())
+    if (!m_icons.contains(id)) {
         m_icons.emplace(id, std::move(theme));
-    else
+    } else {
         themeWarningLog() << "IconTheme(" << id << ") not added to prevent id duplication";
+    }
     return id;
 }
 
@@ -102,7 +104,7 @@ void ThemeManager::initializeIcons()
     // set icon theme search path!
     themeDebugLog() << "<> Initializing Icon Themes";
 
-    for (const QString& id : builtinIcons) {
+    for (const QString& id : BuiltinIcons) {
         IconTheme theme(id, QString(":/icons/%1").arg(id));
         if (!theme.load()) {
             themeWarningLog() << "Couldn't load built-in icon theme" << id;
@@ -113,16 +115,18 @@ void ThemeManager::initializeIcons()
         themeDebugLog() << "Loaded Built-In Icon Theme" << id;
     }
 
-    if (!m_iconThemeFolder.mkpath("."))
+    if (!m_iconThemeFolder.mkpath(".")) {
         themeWarningLog() << "Couldn't create icon theme folder";
+    }
     themeDebugLog() << "Icon Theme Folder Path:" << m_iconThemeFolder.absolutePath();
 
-    QDirIterator directoryIterator(m_iconThemeFolder.path(), QDir::Dirs | QDir::NoDotAndDotDot);
-    while (directoryIterator.hasNext()) {
-        QDir dir(directoryIterator.next());
+    for (const auto& entry :
+         QDirListing(m_iconThemeFolder.path(), QDirListing::IteratorFlag::DirsOnly | QDirListing::IteratorFlag::ResolveSymlinks)) {
+        QDir dir(entry.filePath());
         IconTheme theme(dir.dirName(), dir.path());
-        if (!theme.load())
+        if (!theme.load()) {
             continue;
+        }
 
         addIconTheme(std::move(theme));
         themeDebugLog() << "Loaded Custom Icon Theme from" << dir.path();
@@ -153,13 +157,14 @@ void ThemeManager::initializeWidgets()
     // TODO: need some way to differentiate same name themes in different subdirectories
     //  (maybe smaller grey text next to theme name in dropdown?)
 
-    if (!m_applicationThemeFolder.mkpath("."))
+    if (!m_applicationThemeFolder.mkpath(".")) {
         themeWarningLog() << "Couldn't create theme folder";
+    }
     themeDebugLog() << "Theme Folder Path:" << m_applicationThemeFolder.absolutePath();
 
-    QDirIterator directoryIterator(m_applicationThemeFolder.path(), QDir::Dirs | QDir::NoDotAndDotDot);
-    while (directoryIterator.hasNext()) {
-        QDir dir(directoryIterator.next());
+    for (const auto& directoryEntry :
+         QDirListing(m_applicationThemeFolder.path(), QDirListing::IteratorFlag::DirsOnly | QDirListing::IteratorFlag::ResolveSymlinks)) {
+        QDir dir(directoryEntry.filePath());
         QFileInfo themeJson(dir.absoluteFilePath("theme.json"));
         if (themeJson.exists()) {
             // Load "theme.json" based themes
@@ -167,9 +172,10 @@ void ThemeManager::initializeWidgets()
             addTheme(std::make_unique<CustomTheme>(getTheme(darkThemeId), themeJson, true));
         } else {
             // Load pure QSS Themes
-            QDirIterator stylesheetFileIterator(dir.absoluteFilePath(""), { "*.qss", "*.css" }, QDir::Files);
-            while (stylesheetFileIterator.hasNext()) {
-                QFile customThemeFile(stylesheetFileIterator.next());
+            for (const auto& stylesheetEntry :
+                 QDirListing(dir.absoluteFilePath(""), { "*.qss", "*.css" },
+                             QDirListing::IteratorFlag::FilesOnly | QDirListing::IteratorFlag::ResolveSymlinks)) {
+                QFile customThemeFile(stylesheetEntry.absoluteFilePath());
                 QFileInfo customThemeFileInfo(customThemeFile);
                 themeDebugLog() << "Loading QSS Theme from:" << customThemeFileInfo.absoluteFilePath();
                 addTheme(std::make_unique<CustomTheme>(getTheme(darkThemeId), customThemeFileInfo, false));
@@ -181,15 +187,15 @@ void ThemeManager::initializeWidgets()
 }
 
 #ifndef Q_OS_MACOS
-void ThemeManager::setTitlebarColorOnMac(WId windowId, QColor color) {}
-void ThemeManager::setTitlebarColorOfAllWindowsOnMac(QColor color) {}
+void ThemeManager::setTitlebarColorOnMac(WId windowId, const QColor& color) {}
+void ThemeManager::setTitlebarColorOfAllWindowsOnMac(const QColor& color) {}
 void ThemeManager::stopSettingNewWindowColorsOnMac() {}
 #endif
 
 QList<IconTheme*> ThemeManager::getValidIconThemes()
 {
     QList<IconTheme*> ret;
-    ret.reserve(m_icons.size());
+    ret.reserve(static_cast<qsizetype>(m_icons.size()));
     for (auto&& [id, theme] : m_icons) {
         ret.append(&theme);
     }
@@ -199,7 +205,7 @@ QList<IconTheme*> ThemeManager::getValidIconThemes()
 QList<ITheme*> ThemeManager::getValidApplicationThemes()
 {
     QList<ITheme*> ret;
-    ret.reserve(m_themes.size());
+    ret.reserve(static_cast<qsizetype>(m_themes.size()));
     for (auto&& [id, theme] : m_themes) {
         ret.append(theme.get());
     }
@@ -209,7 +215,7 @@ QList<ITheme*> ThemeManager::getValidApplicationThemes()
 QList<CatPack*> ThemeManager::getValidCatPacks()
 {
     QList<CatPack*> ret;
-    ret.reserve(m_catPacks.size());
+    ret.reserve(static_cast<qsizetype>(m_catPacks.size()));
     for (auto&& [id, theme] : m_catPacks) {
         ret.append(theme.get());
     }
@@ -218,12 +224,12 @@ QList<CatPack*> ThemeManager::getValidCatPacks()
 
 bool ThemeManager::isValidIconTheme(const QString& id)
 {
-    return !id.isEmpty() && m_icons.find(id) != m_icons.end();
+    return !id.isEmpty() && m_icons.contains(id);
 }
 
 bool ThemeManager::isValidApplicationTheme(const QString& id)
 {
-    return !id.isEmpty() && m_themes.find(id) != m_themes.end();
+    return !id.isEmpty() && m_themes.contains(id);
 }
 
 QDir ThemeManager::getIconThemesFolder()
@@ -243,7 +249,7 @@ QDir ThemeManager::getCatPacksFolder()
 
 void ThemeManager::setIconTheme(const QString& name)
 {
-    if (m_icons.find(name) == m_icons.end()) {
+    if (!m_icons.contains(name)) {
         themeWarningLog() << "Tried to set invalid icon theme:" << name;
         return;
     }
@@ -269,7 +275,7 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
 
 void ThemeManager::applyCurrentlySelectedTheme(bool initial)
 {
-    auto settings = APPLICATION->settings();
+    auto* settings = APPLICATION->settings();
     setIconTheme(settings->get("IconTheme").toString());
     themeDebugLog() << "<> Icon theme set.";
     auto applicationTheme = settings->get("ApplicationTheme").toString();
@@ -280,16 +286,15 @@ void ThemeManager::applyCurrentlySelectedTheme(bool initial)
     themeDebugLog() << "<> Application theme set.";
 }
 
-QString ThemeManager::getCatPack(QString catName)
+QString ThemeManager::getCatPack(const QString& catName)
 {
     auto catIter = m_catPacks.find(!catName.isEmpty() ? catName : APPLICATION->settings()->get("BackgroundCat").toString());
     if (catIter != m_catPacks.end()) {
         auto& catPack = catIter->second;
         themeDebugLog() << "applying catpack" << catPack->id();
         return catPack->path();
-    } else {
-        themeWarningLog() << "Tried to get invalid catPack:" << catName;
     }
+    themeWarningLog() << "Tried to get invalid catPack:" << catName;
 
     return m_catPacks.begin()->second->path();
 }
@@ -297,10 +302,11 @@ QString ThemeManager::getCatPack(QString catName)
 QString ThemeManager::addCatPack(std::unique_ptr<CatPack> catPack)
 {
     QString id = catPack->id();
-    if (m_catPacks.find(id) == m_catPacks.end())
+    if (!m_catPacks.contains(id)) {
         m_catPacks.emplace(id, std::move(catPack));
-    else
+    } else {
         themeWarningLog() << "CatPack(" << id << ") not added to prevent id duplication";
+    }
     return id;
 }
 
@@ -310,22 +316,23 @@ void ThemeManager::initializeCatPacks()
                                                     { "rory", QObject::tr("Rory ID 11 (drawn by Ashtaka)") },
                                                     { "rory-flat", QObject::tr("Rory ID 11 (flat edition, drawn by Ashtaka)") },
                                                     { "teawie", QObject::tr("Teawie (drawn by SympathyTea)") } };
-    for (auto [id, name] : defaultCats) {
+    for (const auto& [id, name] : defaultCats) {
         addCatPack(std::unique_ptr<CatPack>(new BasicCatPack(id, name)));
     }
-    if (!m_catPacksFolder.mkpath("."))
+    if (!m_catPacksFolder.mkpath(".")) {
         themeWarningLog() << "Couldn't create catpacks folder";
+    }
     themeDebugLog() << "CatPacks Folder Path:" << m_catPacksFolder.absolutePath();
 
     QStringList supportedImageFormats;
-    for (auto format : QImageReader::supportedImageFormats()) {
+    for (const auto& format : QImageReader::supportedImageFormats()) {
         supportedImageFormats.append("*." + format);
     }
-    auto loadFiles = [this, supportedImageFormats](QDir dir) {
+    auto loadFiles = [this, supportedImageFormats](const QDir& dir) {
         // Load image files directly
-        QDirIterator ImageFileIterator(dir.absoluteFilePath(""), supportedImageFormats, QDir::Files);
-        while (ImageFileIterator.hasNext()) {
-            QFile customCatFile(ImageFileIterator.next());
+        for (const auto& entry : QDirListing(dir.absoluteFilePath(""), supportedImageFormats,
+                                             QDirListing::IteratorFlag::FilesOnly | QDirListing::IteratorFlag::ResolveSymlinks)) {
+            QFile customCatFile(entry.absoluteFilePath());
             QFileInfo customCatFileInfo(customCatFile);
             themeDebugLog() << "Loading CatPack from:" << customCatFileInfo.absoluteFilePath();
             addCatPack(std::unique_ptr<CatPack>(new FileCatPack(customCatFileInfo)));
@@ -334,9 +341,9 @@ void ThemeManager::initializeCatPacks()
 
     loadFiles(m_catPacksFolder);
 
-    QDirIterator directoryIterator(m_catPacksFolder.path(), QDir::Dirs | QDir::NoDotAndDotDot);
-    while (directoryIterator.hasNext()) {
-        QDir dir(directoryIterator.next());
+    for (const auto& dirEntry :
+         QDirListing(m_catPacksFolder.path(), QDirListing::IteratorFlag::DirsOnly | QDirListing::IteratorFlag::ResolveSymlinks)) {
+        QDir dir(dirEntry.filePath());
         QFileInfo manifest(dir.absoluteFilePath("catpack.json"));
         if (manifest.isFile()) {
             try {

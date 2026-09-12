@@ -20,18 +20,18 @@
 
 struct GameType {
     GameType() = default;
-    GameType(std::optional<int> original);
+    explicit GameType(std::optional<int> original);
 
     QString toTranslatedString() const;
     QString toLogString() const;
 
-    enum { Unknown = -1, Survival, Creative, Adventure, Spectator } type = Unknown;
+    enum : std::int8_t { Unknown = -1, Survival, Creative, Adventure, Spectator } type = Unknown;
     std::optional<int> original;
 };
 
 class World {
    public:
-    World(const QFileInfo& file);
+    explicit World(const QFileInfo& file);
     QString folderName() const { return m_folderName; }
     QString name() const { return m_actualName; }
     QString iconFile() const { return m_iconFile; }

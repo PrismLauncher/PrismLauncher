@@ -99,8 +99,8 @@ class FlameCreationTask final : public InstanceTask {
 
     QList<std::pair<QString, QString>> m_otherResources;
 
-    std::optional<BaseInstance*> m_oldInstance{};
-    std::unique_ptr<MinecraftInstance> m_newInstance{};
+    std::optional<BaseInstance*> m_oldInstance;
+    std::unique_ptr<MinecraftInstance> m_newInstance;
 
     QStringList m_selectedOptionalMods;
 };

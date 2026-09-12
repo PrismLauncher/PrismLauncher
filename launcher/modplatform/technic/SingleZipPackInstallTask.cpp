@@ -15,6 +15,7 @@
 
 #include "SingleZipPackInstallTask.h"
 
+#include <QDirListing>
 #include <QtConcurrent>
 
 #include "FileSystem.h"
@@ -25,11 +26,9 @@
 
 #include "net/ApiRequest.h"
 
-Technic::SingleZipPackInstallTask::SingleZipPackInstallTask(const QUrl& sourceUrl, const QString& minecraftVersion)
-{
-    m_sourceUrl = sourceUrl;
-    m_minecraftVersion = minecraftVersion;
-}
+Technic::SingleZipPackInstallTask::SingleZipPackInstallTask(QUrl sourceUrl, QString minecraftVersion)
+    : m_sourceUrl(std::move(sourceUrl)), m_minecraftVersion(std::move(minecraftVersion))
+{}
 
 bool Technic::SingleZipPackInstallTask::abort()
 {
@@ -49,7 +48,7 @@ void Technic::SingleZipPackInstallTask::executeTask()
     m_filesNetJob.reset(new NetJob(tr("Modpack download"), APPLICATION->network()));
     m_filesNetJob->addNetAction(Net::ApiRequest::makeCached(m_sourceUrl, entry));
     m_archivePath = entry->getFullPath();
-    auto job = m_filesNetJob.get();
+    auto* job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SingleZipPackInstallTask::downloadSucceeded);
     connect(job, &NetJob::progress, this, &Technic::SingleZipPackInstallTask::downloadProgressChanged);
     connect(job, &NetJob::stepProgress, this, &Technic::SingleZipPackInstallTask::propagateStepProgress);
@@ -79,7 +78,7 @@ void Technic::SingleZipPackInstallTask::downloadFailed(QString reason)
 {
     m_abortable = false;
     m_filesNetJob.reset();
-    emitFailed(reason);
+    emitFailed(std::move(reason));
 }
 
 void Technic::SingleZipPackInstallTask::downloadProgressChanged(qint64 current, qint64 total)
@@ -95,14 +94,9 @@ void Technic::SingleZipPackInstallTask::extractFinished()
         emitFailed(tr("Failed to extract modpack"));
         return;
     }
-    QDir extractDir(m_stagingPath);
-
     qDebug() << "Fixing permissions for extracted pack files...";
-    QDirIterator it(extractDir, QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        auto filepath = it.next();
-        QFileInfo file(filepath);
-        auto permissions = QFile::permissions(filepath);
+    for (const auto& file : QDirListing(m_stagingPath, QDirListing::IteratorFlag::ResolveSymlinks | QDirListing::IteratorFlag::Recursive)) {
+        auto permissions = QFile::permissions(file.absoluteFilePath());
         auto origPermissions = permissions;
         if (file.isDir()) {
             // Folder +rwx for current user
@@ -112,10 +106,10 @@ void Technic::SingleZipPackInstallTask::extractFinished()
             permissions |= QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser;
         }
         if (origPermissions != permissions) {
-            if (!QFile::setPermissions(filepath, permissions)) {
-                logWarning(tr("Could not fix permissions for %1").arg(filepath));
+            if (!QFile::setPermissions(file.absoluteFilePath(), permissions)) {
+                logWarning(tr("Could not fix permissions for %1").arg(file.absoluteFilePath()));
             } else {
-                qDebug() << "Fixed" << filepath;
+                qDebug() << "Fixed" << file.absoluteFilePath();
             }
         }
     }

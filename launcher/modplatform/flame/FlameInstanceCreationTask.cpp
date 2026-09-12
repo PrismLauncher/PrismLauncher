@@ -355,9 +355,10 @@ bool FlameCreationTask::promptForUntrustedMods()
     const QDir mcDir{ FS::PathCombine(m_stagingPath, "minecraft") };
     const QString modsPath{ FS::PathCombine(m_stagingPath, "minecraft/mods") };
     if (QDir(modsPath).exists()) {
-        QDirIterator iter{ modsPath, QDir::Files, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks };
-        while (iter.hasNext()) {
-            untrustedMods.append(mcDir.relativeFilePath(iter.next()));
+        for (const auto& entry :
+             QDirListing(modsPath, QDirListing::IteratorFlag::FilesOnly | QDirListing::IteratorFlag::ResolveSymlinks |
+                                       QDirListing::IteratorFlag::FollowDirSymlinks | QDirListing::IteratorFlag::Recursive)) {
+            untrustedMods.append(mcDir.relativeFilePath(entry.absoluteFilePath()));
         }
     }
 
@@ -482,14 +483,14 @@ void FlameCreationTask::createInstance()
 
     // only set memory if this is a fresh instance
     if (!m_oldInstance && recommendedRAM > 0) {
-        const uint64_t sysMiB = HardwareInfo::totalRamMiB();
-        const uint64_t max = sysMiB * 0.9;
+        const auto sysMiB = HardwareInfo::totalRamMiB();
+        const auto max = static_cast<double>(sysMiB) * 0.9;
 
-        if (static_cast<uint64_t>(recommendedRAM) > max) {
+        if (static_cast<double>(recommendedRAM) > max) {
             logWarning(tr("The recommended memory of the modpack exceeds 90% of your system RAM—reducing it from %1 MiB to %2 MiB!")
                            .arg(recommendedRAM)
                            .arg(max));
-            recommendedRAM = max;
+            recommendedRAM = static_cast<int>(max);
         }
 
         m_newInstance->settings()->set("OverrideMemory", true);
