@@ -64,6 +64,7 @@
 #include "net/ByteArraySink.h"
 #include "net/FileSink.h"
 #include "net/Logging.h"
+#include "tasks/Task.h"
 
 #include "MMCTime.h"
 #include "StringUtils.h"
@@ -139,24 +140,22 @@ void Request::executeTask()
     }
 
     QNetworkRequest request(m_url);
-    m_state = m_sink->init(request);
-    switch (m_state) {
-        case State::Succeeded:
-            qCDebug(m_logCat) << getUid().toString() << "Request cache hit" << m_url.toString();
-            emit succeeded();
-            emit finished();
-            return;
-        case State::Running:
+    auto result = m_sink->init(request);
+    if (!result) {
+        m_state = Task::State::Failed;
+        m_failReason = result.error();
+        emit failed(m_failReason);
+        emit finished();
+        return;
+    }
+    switch (*result) {
+        case Sink::Ok:
             qCDebug(m_logCat) << getUid().toString() << "Running" << m_url.toString();
             break;
-        case State::Inactive:
-        case State::Failed:
-            m_failReason = m_sink->failReason();
-            emit failed(m_sink->failReason());
-            emit finished();
-            return;
-        case State::AbortedByUser:
-            emit aborted();
+        case Sink::CacheHit:
+            m_state = Task::State::Succeeded;
+            qCDebug(m_logCat) << getUid().toString() << "Request cache hit" << m_url.toString();
+            emit succeeded();
             emit finished();
             return;
     }
@@ -404,24 +403,26 @@ void Request::downloadFinished()
     auto data = m_reply->readAll();
     if (!data.isEmpty()) {
         qCDebug(m_logCat) << getUid().toString() << "Writing extra" << data.size() << "bytes";
-        m_state = m_sink->write(data);
-        if (m_state != State::Succeeded) {
+        auto result = m_sink->write(data);
+        if (!result) {
+            m_state = Task::State::Failed;
             qCDebug(m_logCat) << getUid().toString() << "Request failed to write:" << m_url.toString();
             m_sink->abort();
-            m_failReason = m_sink->failReason();
-            emit failed(m_sink->failReason());
+            m_failReason = result.error();
+            emit failed(m_failReason);
             emit finished();
             return;
         }
     }
 
     // otherwise, finalize the whole graph
-    m_state = m_sink->finalize(*m_reply);
-    if (m_state != State::Succeeded) {
+    auto result = m_sink->finalize(*m_reply);
+    if (!result) {
+        m_state = Task::State::Failed;
         qCDebug(m_logCat) << getUid().toString() << "Request failed to finalize:" << m_url.toString();
         m_sink->abort();
-        m_failReason = m_sink->failReason();
-        emit failed(m_sink->failReason());
+        m_failReason = result.error();
+        emit failed(m_failReason);
         emit finished();
         return;
     }
@@ -435,12 +436,14 @@ void Request::downloadReadyRead()
 {
     if (m_state == State::Running) {
         auto data = m_reply->readAll();
-        m_state = m_sink->write(data);
+        auto result = m_sink->write(data);
         if (replyStatusCode() >= 400) {
             m_errorResponse.append(data);
         }
-        if (m_state == State::Failed) {
-            qCCritical(m_logCat) << getUid().toString() << "Failed to process response chunk:" << m_sink->failReason();
+        if (!result) {
+            m_state = Task::State::Failed;
+            m_failReason = result.error();
+            qCCritical(m_logCat) << getUid().toString() << "Failed to process response chunk:" << m_failReason;
         }
         // qDebug() << "Request" << m_url.toString() << "gained" << data.size() << "bytes";
     } else {

@@ -53,11 +53,9 @@
 #include "EnumWrapper.h"
 #include "HeaderProxy.h"
 #include "HttpMetaCache.h"
+#include "QObjectPtr.h"
 #include "Sink.h"
 #include "Validator.h"
-
-#include "QObjectPtr.h"
-
 #include "tasks/Task.h"
 
 class QIODevice;
@@ -195,7 +193,7 @@ class Request : public Task {
     int m_redirectCount = 0;
 
     HttpMethod m_httpMethod = HttpMethod::Get;
-    PostData m_postData{};
+    PostData m_postData;
 };
 
 }  // namespace Net

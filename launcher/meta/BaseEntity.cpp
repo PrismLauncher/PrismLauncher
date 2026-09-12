@@ -14,6 +14,8 @@
  */
 
 #include "BaseEntity.h"
+#include <expected>
+#include <utility>
 
 #include "Exception.h"
 #include "FileSystem.h"
@@ -26,55 +28,44 @@
 #include "net/NetJob.h"
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "BuildConfig.h"
+#include "settings/SettingsObject.h"
 #include "tasks/Task.h"
 
-namespace Meta {
+namespace {
 
 class ParsingValidator : public Net::Validator {
    public: /* con/des */
-    ParsingValidator(BaseEntity* entity) : m_entity(entity) {};
-    virtual ~ParsingValidator() = default;
+    explicit ParsingValidator(Meta::BaseEntity* entity) : m_entity(entity) {};
+    ~ParsingValidator() override = default;
 
    public: /* methods */
-    bool init(QNetworkRequest&) override
-    {
-        m_data.clear();
-        return true;
-    }
-    bool write(QByteArray& data) override
-    {
-        this->m_data.append(data);
-        return true;
-    }
-    bool abort() override
-    {
-        m_data.clear();
-        return true;
-    }
-    bool validate(QNetworkReply&) override
+    void init() override { m_data.clear(); }
+    void write(const QByteArray& data) override { this->m_data.append(data); }
+    void abort() override { m_data.clear(); }
+    Result validate() override
     {
         auto fname = m_entity->localFilename();
         try {
             auto doc = Json::requireDocument(m_data, fname);
             auto obj = Json::requireObject(doc, fname);
             m_entity->parse(obj);
-            return true;
+            return {};
         } catch (const Exception& e) {
-            qWarning() << "Unable to parse response:" << e.cause();
-            return false;
+            return std::unexpected<Error>("Unable to parse response:" + e.cause());
         }
     }
 
    private: /* data */
     QByteArray m_data;
-    BaseEntity* m_entity;
+    Meta::BaseEntity* m_entity;
 };
+}  // namespace
+namespace Meta {
 
 QUrl BaseEntity::url() const
 {
-    auto s = APPLICATION->settings();
+    auto* s = APPLICATION->settings();
     QString metaOverride = s->get("MetaURLOverride").toString();
     if (metaOverride.isEmpty()) {
         return QUrl(BuildConfig.META_URL).resolved(localFilename());
@@ -99,7 +90,7 @@ bool BaseEntity::isLoaded() const
 
 void BaseEntity::setSha256(QString sha256)
 {
-    m_sha256 = sha256;
+    m_sha256 = std::move(sha256);
 }
 
 BaseEntity::LoadStatus BaseEntity::status() const
@@ -171,8 +162,9 @@ void BaseEntityLoadTask::executeTask()
      * The validator parses the file and loads it into the object.
      * If that fails, the file is not written to storage.
      */
-    if (!m_entity->m_sha256.isEmpty())
+    if (!m_entity->m_sha256.isEmpty()) {
         dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Sha256, m_entity->m_sha256));
+    }
     dl->addValidator(new ParsingValidator(m_entity));
     m_task->addNetAction(dl);
     m_task->setAskRetry(false);

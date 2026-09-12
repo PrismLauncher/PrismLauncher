@@ -25,10 +25,10 @@ class DummySink : public Sink {
    public:
     explicit DummySink() = default;
     ~DummySink() override = default;
-    auto init(QNetworkRequest& /*request*/) -> Task::State override { return Task::State::Running; }
-    auto write(QByteArray& /*data*/) -> Task::State override { return Task::State::Succeeded; }
-    auto abort() -> Task::State override { return Task::State::AbortedByUser; }
-    auto finalize(QNetworkReply& /*reply*/) -> Task::State override { return Task::State::Succeeded; }
+    InitResult init(QNetworkRequest& /*request*/) override { return InitType::Ok; }
+    Result write(const QByteArray& /*data*/) override { return {}; }
+    Result finalize(QNetworkReply& /*reply*/) override { return {}; }
+    void abort() override {}
     auto hasLocalData() -> bool override { return false; }
 };
 
