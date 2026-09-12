@@ -789,7 +789,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("SkipModpackUpdatePrompt", false);
         m_settings->registerSetting("ShowModIncompat", false);
         m_settings->registerSetting("DownloadGameFilesDuringInstanceCreation", true);
-        m_settings->registerSetting("ModUpdateReleaseTypes", QStringList());
+        m_settings->registerSetting("ModUpdateReleaseTypes", "[]");
 
         // Minecraft offline player name
         m_settings->registerSetting("LastOfflinePlayerName", "");

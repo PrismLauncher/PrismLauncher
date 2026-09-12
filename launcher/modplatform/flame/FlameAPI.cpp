@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "FlameAPI.h"
+#include <algorithm>
 #include <optional>
 #include "BuildConfig.h"
 
@@ -253,8 +254,7 @@ std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(const QLis
     if (!checkLoaders) {
         std::optional<ModPlatform::IndexedVersion> ver;
         for (const auto& fileTmp : versions) {
-            if (!releaseTypes.empty() &&
-                std::find(releaseTypes.cbegin(), releaseTypes.cend(), fileTmp.versionType) == releaseTypes.cend()) {
+            if (!releaseTypes.empty() && !std::ranges::contains(releaseTypes, fileTmp.versionType)) {
                 continue;
             }
             if (!ver.has_value() || fileTmp.date > ver->date) {
@@ -275,7 +275,7 @@ std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(const QLis
         }
     };
     for (const auto& fileTmp : versions) {
-        if (!releaseTypes.empty() && std::find(releaseTypes.cbegin(), releaseTypes.cend(), fileTmp.versionType) == releaseTypes.cend()) {
+        if (!releaseTypes.empty() && !std::ranges::contains(releaseTypes, fileTmp.versionType)) {
             continue;
         }
         auto loaders = ModPlatform::modLoaderTypesToList(fileTmp.loaders);

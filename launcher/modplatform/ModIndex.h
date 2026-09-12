@@ -186,24 +186,24 @@ struct IndexedVersionType : EnumWrapper<IndexedVersionType, IndexedVersionTypeVa
         return IndexedVersionType(invalid());
     }
 
+    [[nodiscard]] auto toModrinth() const -> QString
+    {
+        switch (value()) {
+            case Release:
+                return "release";
+            case Beta:
+                return "beta";
+            case Alpha:
+                return "alpha";
+            default:
+                return {};
+        }
+    }
+
     using enum IndexedVersionTypeValue;
     using Base = EnumWrapper<IndexedVersionType, IndexedVersionTypeValue>;
     using Base::Base; /* inherit ctor */
 };
-
-inline QString indexedVersionTypeToModrinth(IndexedVersionType type)
-{
-    switch (type.value()) {
-        case IndexedVersionTypeValue::Release:
-            return "release";
-        case IndexedVersionTypeValue::Beta:
-            return "beta";
-        case IndexedVersionTypeValue::Alpha:
-            return "alpha";
-        default:
-            return {};
-    }
-}
 
 struct Dependency {
     QVariant addonId;

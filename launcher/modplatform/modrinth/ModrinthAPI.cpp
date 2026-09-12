@@ -65,7 +65,7 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash
     if (releaseTypes.has_value() && !releaseTypes->empty()) {
         QStringList versionTypes;
         for (const auto& type : releaseTypes.value()) {
-            const auto s = indexedVersionTypeToModrinth(type);
+            const auto s = type.toModrinth();
             if (!s.isEmpty()) {
                 versionTypes.append(s);
             }
@@ -114,7 +114,7 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(
     if (releaseTypes.has_value() && !releaseTypes->empty()) {
         QStringList versionTypes;
         for (const auto& type : releaseTypes.value()) {
-            const auto s = indexedVersionTypeToModrinth(type);
+            const auto s = type.toModrinth();
             if (!s.isEmpty()) {
                 versionTypes.append(s);
             }
