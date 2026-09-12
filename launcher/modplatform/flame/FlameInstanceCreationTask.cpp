@@ -111,6 +111,8 @@ void FlameCreationTask::executeTask()
         }
     }
 
+    m_rootPath = QFileInfo(inst->gameRoot()).fileName();
+
     const QString indexPath(FS::PathCombine(m_stagingPath, "manifest.json"));
 
     try {
@@ -352,8 +354,8 @@ bool FlameCreationTask::promptForUntrustedMods()
 
     QStringList untrustedMods;
 
-    const QDir mcDir{ FS::PathCombine(m_stagingPath, "minecraft") };
-    const QString modsPath{ FS::PathCombine(m_stagingPath, "minecraft/mods") };
+    const QDir mcDir{ FS::PathCombine(m_stagingPath, m_rootPath) };
+    const QString modsPath{ FS::PathCombine(m_stagingPath, m_rootPath, "mods") };
     if (QDir(modsPath).exists()) {
         QDirIterator iter{ modsPath, QDir::Files, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks };
         while (iter.hasNext()) {
@@ -395,7 +397,7 @@ void FlameCreationTask::createInstance()
             // Create a list of overrides in "overrides.txt" inside flame/
             Override::createOverrides("overrides", parentFolder, overridePath);
 
-            QString mcPath = FS::PathCombine(m_stagingPath, "minecraft");
+            QString mcPath = FS::PathCombine(m_stagingPath, m_rootPath);
             if (!FS::move(overridePath, mcPath)) {
                 emitFailed(tr("Could not rename the overrides folder:\n") + m_pack.overrides);
                 return;
@@ -496,7 +498,7 @@ void FlameCreationTask::createInstance()
         m_newInstance->settings()->set("MaxMemAlloc", recommendedRAM);
     }
 
-    QString jarmodsPath = FS::PathCombine(m_stagingPath, "minecraft", "jarmods");
+    QString jarmodsPath = FS::PathCombine(m_stagingPath, m_rootPath, "jarmods");
     QFileInfo jarmodsInfo(jarmodsPath);
     if (jarmodsInfo.isDir()) {
         // install all the jar mods
@@ -617,7 +619,7 @@ void FlameCreationTask::setupDownloadJob()
             relpath += ".disabled";
         }
 
-        relpath = FS::PathCombine("minecraft", relpath);
+        relpath = FS::PathCombine(m_rootPath, relpath);
         auto path = FS::PathCombine(m_stagingPath, relpath);
 
         if (!result.version.downloadUrl.isEmpty()) {
@@ -660,7 +662,7 @@ void FlameCreationTask::copyBlockedMods(const QList<BlockedMod>& blockedMods)
             continue;
         }
 
-        auto destPath = FS::PathCombine(m_stagingPath, "minecraft", mod.targetFolder, mod.name);
+        auto destPath = FS::PathCombine(m_stagingPath, m_rootPath, mod.targetFolder, mod.name);
         if (mod.disabled) {
             destPath += ".disabled";
         }
@@ -692,14 +694,14 @@ void FlameCreationTask::validateOtherResources()
     QStringList zipMods;
     for (const auto& [fileName, targetFolder] : m_otherResources) {
         qDebug() << "Checking" << fileName << "...";
-        auto localPath = FS::PathCombine(m_stagingPath, "minecraft", targetFolder, fileName);
+        auto localPath = FS::PathCombine(m_stagingPath, m_rootPath, targetFolder, fileName);
 
         /// @brief check the target and move the the file
         /// @return path where file can now be found
         auto validatePath = [&localPath, this](const QString& fileName, const QString& targetFolder, const QString& realTarget) {
             if (targetFolder != realTarget) {
                 qDebug() << "Target folder of" << fileName << "is incorrect, it belongs in" << realTarget;
-                auto destPath = FS::PathCombine(m_stagingPath, "minecraft", realTarget, fileName);
+                auto destPath = FS::PathCombine(m_stagingPath, m_rootPath, realTarget, fileName);
                 qDebug() << "Moving" << localPath << "to" << destPath;
                 if (FS::move(localPath, destPath)) {
                     return destPath;
@@ -717,7 +719,7 @@ void FlameCreationTask::validateOtherResources()
             if (!w.isValid()) {
                 qDebug() << "World at" << worldPath << "is not valid, skipping install.";
             } else {
-                w.install(FS::PathCombine(m_stagingPath, "minecraft", "saves"));
+                w.install(FS::PathCombine(m_stagingPath, m_rootPath, "saves"));
             }
         };
 
@@ -759,7 +761,7 @@ void FlameCreationTask::validateOtherResources()
     // TODO make this work with other sorts of resource
     auto task = makeShared<ConcurrentTask>("CreateModMetadata", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
     auto results = m_modIdResolver->getResults().files;
-    auto folder = FS::PathCombine(m_stagingPath, "minecraft", "mods", ".index");
+    auto folder = FS::PathCombine(m_stagingPath, m_rootPath, "mods", ".index");
     for (const auto& file : results) {
         if (file.targetFolder != "mods" || (file.version.fileName.endsWith(".zip") && !zipMods.contains(file.version.fileName))) {
             continue;
