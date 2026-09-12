@@ -18,7 +18,7 @@ ModrinthCheckUpdate::ModrinthCheckUpdate(QList<Resource*>& resources,
                                          QList<ModPlatform::ModLoaderType> loadersList,
                                          ResourceFolderModel* resourceModel)
     : CheckUpdateTask(resources, mcVersions, std::move(loadersList), resourceModel)
-    , m_hashType(ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first())
+    , m_hashType(ModPlatform::ResourceProvider(ModPlatform::ResourceProvider::MODRINTH).hashType().first())
 {
     if (!m_loadersList.isEmpty()) {  // this is for mods so append all the other posible loaders to the initial list
         m_initialSize = m_loadersList.length();
