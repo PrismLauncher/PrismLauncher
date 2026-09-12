@@ -50,6 +50,7 @@
 #include "modplatform/ModIndex.h"
 
 class MinecraftInstance;
+class QVBoxLayout;
 
 namespace Ui {
 class ModFilterWidget;
@@ -91,7 +92,7 @@ class ModFilterWidget : public QTabWidget {
         {
             return ((!loaders || !v.loaders || loaders.testAnyFlags(v.loaders)) &&  // loaders
                     (releases.empty() ||                                            // releases
-                     std::ranges::find(releases, v.versionType) != releases.cend()) &&
+                     std::ranges::contains(releases, v.versionType)) &&
                     checkMcVersions({ v.mcVersion }));  // gameVersion}
         }
     };
@@ -137,4 +138,5 @@ class ModFilterWidget : public QTabWidget {
     VersionProxyModel* m_versionsProxy = nullptr;
 
     QList<ModPlatform::Category> m_categories;
+    QVBoxLayout* m_categoryLayout = nullptr;
 };

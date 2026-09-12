@@ -80,10 +80,10 @@ void NewsChecker::rssDownloadFinished()
             // Parse the XML.
             auto result = doc.setContent(in.readAll());
             if (!result) {
-                const QString fullErrorMsg = QString("Error parsing RSS feed XML. %1 at %2:%3.")
-                                                 .arg(result.errorMessage)
-                                                 .arg(result.errorLine)
-                                                 .arg(result.errorColumn);
+                const auto fullErrorMsg = QString("Error parsing RSS feed XML. %1 at %2:%3.")
+                                              .arg(result.errorMessage)
+                                              .arg(result.errorLine)
+                                              .arg(result.errorColumn);
                 fail(fullErrorMsg);
                 return;
             }

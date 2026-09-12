@@ -51,7 +51,7 @@
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/instanceview/InstanceDelegate.h"
 
-SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
+SkinManageDialog::SkinManageDialog(QWidget* parent, const MinecraftAccountPtr& acct)
     : QDialog(parent), m_acct(acct), m_ui(new Ui::SkinManageDialog), m_list(this, APPLICATION->settings()->get("SkinsDir").toString(), acct)
 {
     m_ui->setupUi(this);
@@ -95,7 +95,7 @@ SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
 
     connect(contentsWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SkinManageDialog::selectionChanged);
     connect(m_ui->listView, &QListView::customContextMenuRequested, this, &SkinManageDialog::show_context_menu);
-    connect(m_ui->elytraCB, &QCheckBox::stateChanged, this, [this]() {
+    connect(m_ui->elytraCB, &QCheckBox::checkStateChanged, this, [this]() {
         if (m_skinPreview) {
             m_skinPreview->setElytraVisible(m_ui->elytraCB->isChecked());
         }
@@ -170,7 +170,7 @@ void SkinManageDialog::on_openDirBtn_clicked()
 void SkinManageDialog::on_fileBtn_clicked()
 {
     auto filter = QMimeDatabase().mimeTypeForName("image/png").filterString();
-    QString rawPath = QFileDialog::getOpenFileName(this, tr("Select Skin Texture"), QString(), filter);
+    const QString rawPath = QFileDialog::getOpenFileName(this, tr("Select Skin Texture"), QString(), filter);
     if (rawPath.isNull()) {
         return;
     }
@@ -180,12 +180,13 @@ void SkinManageDialog::on_fileBtn_clicked()
         return;
     }
 }
+
 namespace {
 QPixmap previewCape(const QImage& capeImage, bool elytra = false)
 {
     if (elytra) {
         auto wing = capeImage.copy(34, 2, 12, 20);
-        QImage mirrored = wing.mirrored(true, false);
+        const QImage mirrored = wing.flipped(Qt::Horizontal);
 
         QImage combined((wing.width() * 2) + 1, wing.height() + 14, capeImage.format());
         combined.fill(Qt::transparent);
@@ -507,7 +508,7 @@ void SkinManageDialog::on_userBtn_clicked()
     connect(getUUID.get(), &Task::succeeded, this, [uuidLoop, uuidOut, job, getProfile, &failReason] {
         try {
             QJsonParseError parseError{};
-            QJsonDocument doc = QJsonDocument::fromJson(*uuidOut, &parseError);
+            const QJsonDocument doc = QJsonDocument::fromJson(*uuidOut, &parseError);
             if (parseError.error != QJsonParseError::NoError) {
                 qWarning() << "Error while parsing JSON response from Minecraft skin service at" << parseError.offset
                            << "reason:" << parseError.errorString();

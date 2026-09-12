@@ -29,26 +29,26 @@ class MSALoginDialog : public QDialog {
     Q_OBJECT
 
    public:
-    ~MSALoginDialog();
+    ~MSALoginDialog() override;
 
     static MinecraftAccountPtr newAccount(QWidget* parent);
     int exec() override;
 
    private:
-    explicit MSALoginDialog(QWidget* parent = 0);
+    explicit MSALoginDialog(QWidget* parent = nullptr);
 
    protected slots:
-    void onTaskFailed(QString reason);
-    void onDeviceFlowStatus(QString status);
-    void onAuthFlowStatus(QString status);
+    void onTaskFailed(const QString& reason);
+    void onDeviceFlowStatus(const QString& status);
+    void onAuthFlowStatus(const QString& status);
     void authorizeWithBrowser(const QUrl& url);
-    void authorizeWithBrowserWithExtra(QString url, QString code, int expiresIn);
+    void authorizeWithBrowserWithExtra(const QUrl& verificationUrl, const QString& code, const QUrl& completeVerificationUrl);
 
    private:
-    Ui::MSALoginDialog* ui;
+    Ui::MSALoginDialog* m_ui;
     MinecraftAccountPtr m_account;
-    shared_qobject_ptr<AuthFlow> m_devicecode_task;
-    shared_qobject_ptr<AuthFlow> m_authflow_task;
+    shared_qobject_ptr<AuthFlow> m_devicecodeTask;
+    shared_qobject_ptr<AuthFlow> m_authflowTask;
 
     QUrl m_url;
 };
