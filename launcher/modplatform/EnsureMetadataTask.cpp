@@ -297,29 +297,19 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
     }
 
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
-        QJsonParseError parseError{};
-        auto doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth projects task at" << parseError.offset
-                       << "reason:" << parseError.errorString();
+        auto doc = Json::requireDocument(*response).and_then([addonIds](const auto& v) -> Result<QJsonArray> {
+            if (addonIds.size() == 1) {
+                return { { v.object() } };
+            }
+            return Json::requireArray(v);
+        });
+        if (!doc) {
+            qWarning() << "Error while parsing JSON response from Modrinth projects task:" << doc.error();
             qWarning() << *response;
             return;
         }
 
-        QJsonArray entries;
-
-        try {
-            if (addonIds.size() == 1) {
-                entries = { doc.object() };
-            } else {
-                entries = Json::requireArray(doc);
-            }
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
-        }
-
-        for (auto entry : entries) {
+        for (auto entry : doc.value()) {
             ModPlatform::IndexedPack pack;
 
             try {
@@ -328,7 +318,7 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
                 Modrinth::loadIndexedPack(pack, entryObj);
             } catch (Json::JsonException& e) {
                 qDebug() << e.cause();
-                qDebug() << doc;
+                qDebug() << *doc;
 
                 // Skip this entry, since it has problems
                 continue;

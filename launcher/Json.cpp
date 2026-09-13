@@ -36,6 +36,7 @@
 #include "Json.h"
 
 #include <QFile>
+#include <expected>
 
 #include <math.h>
 #include "FileSystem.h"
@@ -96,10 +97,10 @@ Result<QJsonObject> requireObject(const QJsonDocument& doc, const QString& what)
     }
     return doc.object();
 }
-QJsonArray requireArray(const QJsonDocument& doc, const QString& what)
+Result<QJsonArray> requireArray(const QJsonDocument& doc, const QString& what)
 {
     if (!doc.isArray()) {
-        throw JsonException(what + " is not an array");
+        return std::unexpected(what + " is not an array");
     }
     return doc.array();
 }
@@ -299,17 +300,7 @@ QJsonValue requireIsType<QJsonValue>(const QJsonValue& value, const QString& wha
 
 QStringList toStringList(const QString& jsonString)
 {
-    QJsonParseError parseError;
-    QJsonDocument doc = QJsonDocument::fromJson(jsonString.toUtf8(), &parseError);
-
-    if (parseError.error != QJsonParseError::NoError || !doc.isArray()) {
-        return {};
-    }
-    try {
-        return requireIsArrayOf<QString>(doc);
-    } catch (Json::JsonException&) {
-        return {};
-    }
+    return requireDocument(jsonString.toUtf8()).and_then([](const auto& v) { return requireIsArrayOf<QString>(v); }).value_or({});
 }
 
 QString fromStringList(const QStringList& list)

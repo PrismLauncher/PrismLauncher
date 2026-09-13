@@ -4,6 +4,8 @@
 #include <QHash>
 #include <QString>
 
+#include "Exception.h"
+
 struct ApplicationMessage {
     QString command;
     QHash<QString, QString> args;

@@ -63,8 +63,7 @@ QByteArray toText(const QJsonArray& array);
 Result<QJsonDocument> requireDocument(const QByteArray& data, const QString& what = "Document");
 Result<QJsonDocument> requireDocument(const QString& filename, const QString& what = "Document");
 Result<QJsonObject> requireObject(const QJsonDocument& doc, const QString& what = "Document");
-/// @throw JsonException
-QJsonArray requireArray(const QJsonDocument& doc, const QString& what = "Document");
+Result<QJsonArray> requireArray(const QJsonDocument& doc, const QString& what = "Document");
 
 /////////////////// WRITING ////////////////////
 
@@ -163,11 +162,12 @@ T requireIsType(const QJsonObject& parent, const QString& key, const QString& wh
 }
 
 template <typename T>
-QList<T> requireIsArrayOf(const QJsonDocument& doc)
+Result<QList<T>> requireIsArrayOf(const QJsonDocument& doc)
 {
-    const QJsonArray array = requireArray(doc);
+    const auto array = requireArray(doc);
+    TRY(array)
     QList<T> out;
-    for (const QJsonValue val : array) {
+    for (const QJsonValue val : array.value()) {
         out.append(requireIsType<T>(val, "Document"));
     }
     return out;
