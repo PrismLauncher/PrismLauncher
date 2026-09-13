@@ -97,9 +97,9 @@ Version::Ptr Index::get(const QString& uid, const QString& version)
     return list->getVersion(version);
 }
 
-void Index::parse(const QJsonObject& obj)
+Result<void> Index::parse(const QJsonObject& obj)
 {
-    parseIndex(obj, this);
+    return parseIndex(obj, this);
 }
 
 void Index::merge(const std::shared_ptr<Index>& other)

@@ -159,7 +159,7 @@ Version::Ptr VersionList::getVersion(const QString& version)
 bool VersionList::hasVersion(QString version) const
 {
     auto ver = std::find_if(m_versions.constBegin(), m_versions.constEnd(),
-                            [version](Meta::Version::Ptr const& a) { return a->version() == version; });
+                            [version](const Meta::Version::Ptr& a) { return a->version() == version; });
     return (ver != m_versions.constEnd());
 }
 
@@ -187,9 +187,9 @@ void VersionList::setVersions(const QList<Version::Ptr>& versions)
     endResetModel();
 }
 
-void VersionList::parse(const QJsonObject& obj)
+Result<void> VersionList::parse(const QJsonObject& obj)
 {
-    parseVersionList(obj, this);
+    return parseVersionList(obj, this);
 }
 
 void VersionList::addExternalRecommends(const QStringList& recommends)

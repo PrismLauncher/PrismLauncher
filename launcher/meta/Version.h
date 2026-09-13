@@ -56,7 +56,7 @@ class Version : public QObject, public BaseVersion, public BaseEntity {
 
     void merge(const Version::Ptr& other);
     void mergeFromList(const Version::Ptr& other);
-    void parse(const QJsonObject& obj) override;
+    Result<void> parse(const QJsonObject& obj) override;
 
     QString localFilename() const override;
 

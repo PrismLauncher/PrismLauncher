@@ -18,6 +18,7 @@
 #include <QJsonObject>
 #include <QObject>
 
+#include "Exception.h"
 #include "net/Mode.h"
 #include "net/NetJob.h"
 #include "tasks/Task.h"
@@ -42,7 +43,7 @@ class BaseEntity {
     /* for parsers */
     void setSha256(QString sha256);
 
-    virtual void parse(const QJsonObject& obj) = 0;
+    virtual Result<void> parse(const QJsonObject& obj) = 0;
     [[nodiscard]] Task::Ptr loadTask(Net::Mode loadType = Net::Mode::Online, bool forceReload = false);
 
    protected:

@@ -49,15 +49,15 @@ class ParsingValidator : public Net::Validator {
         auto doc = Json::requireDocument(m_data, fname);
         if (!doc) {
             qWarning() << "Unable to parse response:" << doc.error();
-            return {};
+            return std::unexpected(doc.error());
         }
-        try {
-            auto obj = Json::requireObject(doc.value(), fname);
-            m_entity->parse(obj);
-            return {};
-        } catch (const Exception& e) {
-            return std::unexpected<Error>("Unable to parse response:" + e.cause());
+        auto obj = Json::requireObject(doc.value(), fname);
+        auto rsp = m_entity->parse(obj);
+        if (!rsp) {
+            qWarning() << "Unable to parse response:" << rsp.error();
+            return std::unexpected(rsp.error());
         }
+        return {};
     }
 
    private: /* data */
@@ -142,7 +142,10 @@ void BaseEntityLoadTask::executeTask()
                 }
                 try {
                     auto obj = Json::requireObject(doc.value(), fname);
-                    m_entity->parse(obj);
+                    auto rsp = m_entity->parse(obj);
+                    if (!rsp) {
+                        return std::unexpected(rsp.error());
+                    }
                     m_entity->m_load_status = BaseEntity::LoadStatus::Local;
                 } catch (const Exception& e) {
                     return std::unexpected(e.what());

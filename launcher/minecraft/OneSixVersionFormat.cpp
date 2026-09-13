@@ -42,6 +42,7 @@
 #include "minecraft/ParseUtils.h"
 
 #include <QRegularExpression>
+#include <memory>
 
 using namespace Json;
 
@@ -79,7 +80,7 @@ QJsonObject OneSixVersionFormat::libraryToJson(Library* library)
 
 VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument& doc, const QString& filename, const bool requireOrder)
 {
-    VersionFilePtr out(new VersionFile());
+    auto out = std::make_shared<VersionFile>();
     if (doc.isEmpty() || doc.isNull()) {
         throw JSONValidationError(filename + " is empty or null");
     }
@@ -89,12 +90,9 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument& doc
 
     QJsonObject root = doc.object();
 
-    Meta::MetadataVersion formatVersion = Meta::parseFormatVersion(root, false);
-    switch (formatVersion) {
-        case Meta::MetadataVersion::InitialRelease:
-            break;
-        case Meta::MetadataVersion::Invalid:
-            throw JSONValidationError(filename + " does not contain a recognizable version of the metadata format.");
+    auto formatVersion = Meta::parseFormatVersion(root, false);
+    if (!formatVersion) {
+        throw JSONValidationError(filename + " does not contain a recognizable version of the metadata format.");
     }
 
     if (requireOrder) {
@@ -291,7 +289,7 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr& patch
 
     writeString(root, "version", patch->version);
 
-    Meta::serializeFormatVersion(root, Meta::MetadataVersion::InitialRelease);
+    Meta::serializeFormatVersion(root, 1);
 
     MojangVersionFormat::writeVersionProperties(patch.get(), root);
 
