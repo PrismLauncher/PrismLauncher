@@ -76,6 +76,8 @@ ModFolderModel::ModFolderModel(const QDir& dir, MinecraftInstance* instance, boo
                             QHeaderView::Interactive, QHeaderView::Interactive };
     m_columnsHideable = { false, true, false, true, true, true, true, true, true, true, true, true, true, true };
 
+    m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files);
+
     connect(this, &ModFolderModel::parseFinished, this, &ModFolderModel::onParseFinished);
 }
 
