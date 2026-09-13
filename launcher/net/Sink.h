@@ -47,7 +47,7 @@ class Sink {
     using Error = Validator::Error;
     using Result = Validator::Result;
 
-    enum InitType : std::uint8_t { Ok, CacheHit };
+    enum class InitType : std::uint8_t { Ok, CacheHit };
     using InitResult = std::expected<InitType, QString>;
 
    public:
