@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <optional>
 
+#include "Exception.h"
+
 namespace GuiUtil {
 [[nodiscard]] bool isUploadCanceled(const Result<QString>& result);
 Result<QString> uploadPaste(const QString& name, const QFileInfo& filePath, QWidget* parentWidget);

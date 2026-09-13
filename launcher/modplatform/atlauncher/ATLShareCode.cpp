@@ -22,39 +22,47 @@
 
 namespace ATLauncher {
 
-static void loadShareCodeMod(ShareCodeMod& m, QJsonObject& obj)
+Result<> loadShareCodeMod(ShareCodeMod& m, QJsonObject& obj)
 {
-    m.selected = Json::requireBoolean(obj, "selected");
-    m.name = Json::requireString(obj, "name");
+    TRY_INTO(m.selected, Json::requireBoolean(obj, "selected"))
+    TRY_INTO(m.name, Json::requireString(obj, "name"))
+    return {};
 }
 
-static void loadShareCode(ShareCode& c, QJsonObject& obj)
+Result<> loadShareCode(ShareCode& c, QJsonObject& obj)
 {
-    c.pack = Json::requireString(obj, "pack");
-    c.version = Json::requireString(obj, "version");
+    TRY_INTO(c.pack, Json::requireString(obj, "pack"))
+    TRY_INTO(c.version, Json::requireString(obj, "version"))
 
     auto mods = Json::requireObject(obj, "mods");
-    auto optional = Json::requireArray(mods, "optional");
-    for (const auto modRaw : optional) {
+    TRY(mods)
+    auto optional = Json::requireArray(mods.value(), "optional");
+    TRY(optional)
+    for (const auto modRaw : optional.value()) {
         auto modObj = Json::requireObject(modRaw);
+        TRY(modObj)
         ShareCodeMod mod;
-        loadShareCodeMod(mod, modObj);
+        TRY(loadShareCodeMod(mod, modObj.value()))
         c.mods.append(mod);
     }
+    return {};
 }
 
-void loadShareCodeResponse(ShareCodeResponse& r, QJsonObject& obj)
+Result<> loadShareCodeResponse(ShareCodeResponse& r, QJsonObject& obj)
 {
-    r.error = Json::requireBoolean(obj, "error");
-    r.code = Json::requireInteger(obj, "code");
+    TRY_INTO(r.error, Json::requireBoolean(obj, "error"))
+    TRY_INTO(r.code, Json::requireInteger(obj, "code"))
 
-    if (obj.contains("message") && !obj.value("message").isNull())
-        r.message = Json::requireString(obj, "message");
+    if (obj.contains("message") && !obj.value("message").isNull()) {
+        TRY_INTO(r.message, Json::requireString(obj, "message"))
+    }
 
     if (!r.error) {
         auto dataRaw = Json::requireObject(obj, "data");
-        loadShareCode(r.data, dataRaw);
+        TRY(dataRaw)
+        TRY(loadShareCode(r.data, dataRaw.value()))
     }
+    return {};
 }
 
 }  // namespace ATLauncher

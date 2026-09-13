@@ -93,21 +93,23 @@ struct DeviceAuthorizationResponse {
 
 DeviceAuthorizationResponse parseDeviceAuthorizationResponse(const QByteArray& data)
 {
-    QJsonParseError err;
-    QJsonDocument doc = QJsonDocument::fromJson(data, &err);
-    if (err.error != QJsonParseError::NoError) {
-        qWarning() << "Failed to parse device authorization response due to err:" << err.errorString();
+    auto doc = Json::requireDocument(data, "device authorization response").and_then([](const auto& v) {
+        return Json::requireObject(v, "device authorization response");
+    });
+    if (!doc) {
+        qWarning() << "Failed to parse device authorization response due to err:" << doc.error();
         return {};
     }
 
-    if (!doc.isObject()) {
-        qWarning() << "Device authorization response is not an object";
-        return {};
-    }
-    auto obj = doc.object();
+    auto obj = doc.value();
     return {
-        obj["device_code"].toString(), obj["user_code"].toString(), obj["verification_uri"].toString(),  obj["expires_in"].toInt(),
-        obj["interval"].toInt(),       obj["error"].toString(),     obj["error_description"].toString(),
+        .device_code = obj["device_code"].toString(),
+        .user_code = obj["user_code"].toString(),
+        .verification_uri = obj["verification_uri"].toString(),
+        .expires_in = obj["expires_in"].toInt(),
+        .interval = obj["interval"].toInt(),
+        .error = obj["error"].toString(),
+        .error_description = obj["error_description"].toString(),
     };
 }
 
@@ -205,25 +207,22 @@ struct AuthenticationResponse {
 
 AuthenticationResponse parseAuthenticationResponse(const QByteArray& data)
 {
-    QJsonParseError err;
-    QJsonDocument doc = QJsonDocument::fromJson(data, &err);
-    if (err.error != QJsonParseError::NoError) {
-        qWarning() << "Failed to parse device authorization response due to err:" << err.errorString();
+    auto doc = Json::requireDocument(data, "authentication response").and_then([](const auto& v) {
+        return Json::requireObject(v, "authentication response");
+    });
+    if (!doc) {
+        qWarning() << "Failed to parse device authorization response due to err:" << doc.error();
         return {};
     }
 
-    if (!doc.isObject()) {
-        qWarning() << "Device authorization response is not an object";
-        return {};
-    }
-    auto obj = doc.object();
-    return { obj["access_token"].toString(),
-             obj["token_type"].toString(),
-             obj["refresh_token"].toString(),
-             obj["expires_in"].toInt(),
-             obj["error"].toString(),
-             obj["error_description"].toString(),
-             obj.toVariantMap() };
+    auto obj = doc.value();
+    return { .access_token = obj["access_token"].toString(),
+             .token_type = obj["token_type"].toString(),
+             .refresh_token = obj["refresh_token"].toString(),
+             .expires_in = obj["expires_in"].toInt(),
+             .error = obj["error"].toString(),
+             .error_description = obj["error_description"].toString(),
+             .extra = obj.toVariantMap() };
 }
 
 void MSADeviceCodeStep::authenticationFinished(QByteArray* response)

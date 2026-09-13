@@ -64,37 +64,30 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
 
         m_palette = baseTheme->colorScheme();
 
-        try {
-            bool hasCustomLogColors = false;
-            auto rsp = read(themeFilePath, hasCustomLogColors);
-            if (!rsp) {
-                themeWarningLog() << "Couldn't read theme json:" << rsp.error();
-                m_logColors = defaultLogColors(m_palette);
-                m_styleSheet = baseTheme->appStyleSheet();
-            } else {
-                // If theme data was found, fade "Disabled" color of each role according to FadeAmount
-                m_palette = fadeInactive(m_palette, m_fadeAmount, m_fadeColor);
-                if (!hasCustomLogColors) {
-                    m_logColors = defaultLogColors(m_palette);
-                }
-            }
-        } catch (const Exception& e) {
-            themeWarningLog() << "Couldn't load theme json:" << e.cause();
+        bool hasCustomLogColors = false;
+        auto rsp = read(themeFilePath, hasCustomLogColors);
+        if (!rsp) {
+            themeWarningLog() << "Couldn't read theme json:" << rsp.error();
             m_logColors = defaultLogColors(m_palette);
             m_styleSheet = baseTheme->appStyleSheet();
-            return;
+        } else {
+            // If theme data was found, fade "Disabled" color of each role according to FadeAmount
+            m_palette = fadeInactive(m_palette, m_fadeAmount, m_fadeColor);
+            if (!hasCustomLogColors) {
+                m_logColors = defaultLogColors(m_palette);
+            }
         }
 
         auto qssFilePath = FS::PathCombine(path, m_qssFilePath);
         QFileInfo info(qssFilePath);
         if (info.isFile()) {
             // TODO: validate qss?
-            auto rsp = FS::read(qssFilePath);
-            if (!rsp) {
-                themeWarningLog() << "Couldn't load qss:" << rsp.error() << "from" << qssFilePath;
+            auto qssResult = FS::read(qssFilePath);
+            if (!qssResult) {
+                themeWarningLog() << "Couldn't load qss:" << qssResult.error() << "from" << qssFilePath;
                 m_styleSheet = baseTheme->appStyleSheet();
             } else {
-                m_styleSheet = QString::fromUtf8(rsp.value());
+                m_styleSheet = QString::fromUtf8(qssResult.value());
             }
         } else {
             themeDebugLog() << "No theme qss present.";
@@ -191,8 +184,8 @@ Result<> CustomTheme::read(const QString& path, bool& hasCustomLogColors)
     auto doc = Json::requireDocument(path, "Theme JSON file");
     TRY(doc)
     const QJsonObject root = doc.value().object();
-    m_name = Json::requireString(root, "name", "Theme name");
-    m_widgets = Json::requireString(root, "widgets", "Qt widget theme");
+    TRY_INTO(m_name, Json::requireString(root, "name", "Theme name"))
+    TRY_INTO(m_widgets, Json::requireString(root, "widgets", "Qt widget theme"))
     m_qssFilePath = root["qssFilePath"].toString("themeStyle.css");
 
     auto readColor = [](const QJsonObject& colors, const QString& colorName) -> QColor {
@@ -210,8 +203,9 @@ Result<> CustomTheme::read(const QString& path, bool& hasCustomLogColors)
 
     if (root.contains("colors")) {
         auto colorsRoot = Json::requireObject(root, "colors");
+        TRY(colorsRoot)
         auto readAndSetPaletteColor = [this, readColor, colorsRoot](QPalette::ColorRole role, const QString& colorName) {
-            auto color = readColor(colorsRoot, colorName);
+            auto color = readColor(colorsRoot.value(), colorName);
             if (color.isValid()) {
                 m_palette.setColor(role, color);
             } else {
@@ -235,16 +229,17 @@ Result<> CustomTheme::read(const QString& path, bool& hasCustomLogColors)
         readAndSetPaletteColor(QPalette::HighlightedText, "HighlightedText");
 
         // fade
-        m_fadeColor = readColor(colorsRoot, "fadeColor");
-        m_fadeAmount = colorsRoot["fadeAmount"].toDouble(0.5);
+        m_fadeColor = readColor(colorsRoot.value(), "fadeColor");
+        m_fadeAmount = colorsRoot.value()["fadeAmount"].toDouble(0.5);
     }
 
     if (root.contains("logColors")) {
         hasCustomLogColors = true;
 
         auto logColorsRoot = Json::requireObject(root, "logColors");
+        TRY(logColorsRoot)
         auto readAndSetLogColor = [this, readColor, logColorsRoot](MessageLevel level, bool fg, const QString& colorName) {
-            auto color = readColor(logColorsRoot, colorName);
+            auto color = readColor(logColorsRoot.value(), colorName);
             if (color.isValid()) {
                 if (fg) {
                     m_logColors.foreground[level] = color;

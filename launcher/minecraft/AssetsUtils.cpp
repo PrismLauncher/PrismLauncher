@@ -42,6 +42,7 @@
 #include <QJsonObject>
 #include <QJsonParseError>
 #include <QVariant>
+#include "Json.h"
 
 #include "AssetsUtils.h"
 #include "BuildConfig.h"
@@ -112,23 +113,17 @@ bool loadAssetsIndexJson(const QString& assetsId, const QString& path, AssetsInd
     QByteArray jsonData = file.readAll();
     file.close();
 
-    QJsonParseError parseError;
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &parseError);
+    auto jsonResult = Json::requireDocument(jsonData, "assets index file").and_then([](const auto& v) {
+        return Json::requireObject(v, "assets index file");
+    });
 
-    // Fail if the JSON is invalid.
-    if (parseError.error != QJsonParseError::NoError) {
-        qCritical() << "Failed to parse assets index file:" << parseError.errorString() << "at offset "
-                    << QString::number(parseError.offset);
+    // Fail if the JSON is invalid or the root is not an object.
+    if (!jsonResult) {
+        qCritical() << "Failed to parse assets index file:" << jsonResult.error();
         return false;
     }
 
-    // Make sure the root is an object.
-    if (!jsonDoc.isObject()) {
-        qCritical() << "Invalid assets index JSON: Root should be an array.";
-        return false;
-    }
-
-    QJsonObject root = jsonDoc.object();
+    const auto& root = jsonResult.value();
 
     QJsonValue isVirtual = root.value("virtual");
     if (!isVirtual.isUndefined()) {

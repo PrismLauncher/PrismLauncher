@@ -135,69 +135,62 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
         emit failed(tr("Could not understand \"version.json\":\n") + doc.error());
         return;
     }
-    try {
-        QJsonObject root = doc.value();
-        QString packMinecraftVersion = root["inheritsFrom"].toString();
-        if (packMinecraftVersion.isEmpty()) {
-            if (fmlMinecraftVersion.isEmpty()) {
-                emit failed(tr("Could not understand \"version.json\":\ninheritsFrom is missing"));
-                return;
-            }
-            packMinecraftVersion = fmlMinecraftVersion;
+    QJsonObject root = doc.value();
+    QString packMinecraftVersion = root["inheritsFrom"].toString();
+    if (packMinecraftVersion.isEmpty()) {
+        if (fmlMinecraftVersion.isEmpty()) {
+            emit failed(tr("Could not understand \"version.json\":\ninheritsFrom is missing"));
+            return;
         }
-        components->setComponentVersion("net.minecraft", packMinecraftVersion, true);
-        for (auto library : root["libraries"].toArray()) {
-            if (!library.isObject()) {
-                continue;
+        packMinecraftVersion = fmlMinecraftVersion;
+    }
+    components->setComponentVersion("net.minecraft", packMinecraftVersion, true);
+    for (auto library : root["libraries"].toArray()) {
+        if (!library.isObject()) {
+            continue;
+        }
+
+        auto libraryObject = library.toObject();
+        auto libraryName = libraryObject["name"].toString();
+
+        if (libraryName.startsWith("net.neoforged.fancymodloader:")) {  // it is neoforge
+            // no easy way to get the version from the libs so use the arguments
+            auto arguments = root["arguments"].toObject();
+            bool isVersionArg = false;
+            QString neoforgeVersion;
+            for (auto arg : arguments["game"].toArray()) {
+                auto argument = arg.toString("");
+                if (isVersionArg) {
+                    neoforgeVersion = argument;
+                    break;
+                }
+                isVersionArg = "--fml.neoForgeVersion" == argument || "--fml.forgeVersion" == argument;
             }
-
-            auto libraryObject = library.toObject();
-            auto libraryName = libraryObject["name"].toString();
-
-            if (libraryName.startsWith("net.neoforged.fancymodloader:")) {  // it is neoforge
-                // no easy way to get the version from the libs so use the arguments
-                auto arguments = root["arguments"].toObject();
-                bool isVersionArg = false;
-                QString neoforgeVersion;
-                for (auto arg : arguments["game"].toArray()) {
-                    auto argument = arg.toString("");
-                    if (isVersionArg) {
-                        neoforgeVersion = argument;
-                        break;
-                    } else {
-                        isVersionArg = "--fml.neoForgeVersion" == argument || "--fml.forgeVersion" == argument;
-                    }
-                }
-                if (!neoforgeVersion.isEmpty()) {
-                    components->setComponentVersion("net.neoforged", neoforgeVersion);
-                }
-                break;
-            } else if ((libraryName.startsWith("net.minecraftforge:forge:") || libraryName.startsWith("net.minecraftforge:fmlloader:")) &&
-                       libraryName.contains('-')) {
-                QString libraryVersion = libraryName.section(':', 2);
-                if (!libraryVersion.startsWith("1.7.10-")) {
-                    components->setComponentVersion("net.minecraftforge", libraryName.section('-', 1));
-                } else {
-                    // 1.7.10 versions sometimes look like 1.7.10-10.13.4.1614-1.7.10, this filters out the 10.13.4.1614 part
-                    components->setComponentVersion("net.minecraftforge", libraryName.section('-', 1, 1));
-                }
-                break;
+            if (!neoforgeVersion.isEmpty()) {
+                components->setComponentVersion("net.neoforged", neoforgeVersion);
+            }
+            break;
+        }
+        if ((libraryName.startsWith("net.minecraftforge:forge:") || libraryName.startsWith("net.minecraftforge:fmlloader:")) &&
+            libraryName.contains('-')) {
+            QString libraryVersion = libraryName.section(':', 2);
+            if (!libraryVersion.startsWith("1.7.10-")) {
+                components->setComponentVersion("net.minecraftforge", libraryName.section('-', 1));
             } else {
-                // <Technic library name prefix> -> <our component name>
-                static QMap<QString, QString> loaderMap{ { "net.minecraftforge:minecraftforge:", "net.minecraftforge" },
-                                                         { "net.fabricmc:fabric-loader:", "net.fabricmc.fabric-loader" },
-                                                         { "org.quiltmc:quilt-loader:", "org.quiltmc.quilt-loader" } };
-                for (const auto& loader : loaderMap.keys()) {
-                    if (libraryName.startsWith(loader)) {
-                        components->setComponentVersion(loaderMap.value(loader), libraryName.section(':', 2));
-                        break;
-                    }
-                }
+                // 1.7.10 versions sometimes look like 1.7.10-10.13.4.1614-1.7.10, this filters out the 10.13.4.1614 part
+                components->setComponentVersion("net.minecraftforge", libraryName.section('-', 1, 1));
+            }
+            break;
+        }  // <Technic library name prefix> -> <our component name>
+        static QMap<QString, QString> loaderMap{ { "net.minecraftforge:minecraftforge:", "net.minecraftforge" },
+                                                 { "net.fabricmc:fabric-loader:", "net.fabricmc.fabric-loader" },
+                                                 { "org.quiltmc:quilt-loader:", "org.quiltmc.quilt-loader" } };
+        for (const auto& loader : loaderMap.keys()) {
+            if (libraryName.startsWith(loader)) {
+                components->setComponentVersion(loaderMap.value(loader), libraryName.section(':', 2));
+                break;
             }
         }
-    } catch (const JSONValidationError& e) {
-        emit failed(tr("Could not understand \"version.json\":\n") + e.cause());
-        return;
     }
 
     components->saveNow();

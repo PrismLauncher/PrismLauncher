@@ -297,10 +297,11 @@ QString ThemeManager::getCatPack(QString catName)
 QString ThemeManager::addCatPack(std::unique_ptr<CatPack> catPack)
 {
     QString id = catPack->id();
-    if (m_catPacks.find(id) == m_catPacks.end())
+    if (!m_catPacks.contains(id)) {
         m_catPacks.emplace(id, std::move(catPack));
-    else
+    } else {
         themeWarningLog() << "CatPack(" << id << ") not added to prevent id duplication";
+    }
     return id;
 }
 

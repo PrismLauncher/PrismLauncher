@@ -40,6 +40,7 @@
 
 #include "BaseInstance.h"
 #include "FileSystem.h"
+#include "Json.h"
 #include "MMCZip.h"
 #include "minecraft/GradleSpecifier.h"
 #include "minecraft/MinecraftInstance.h"
@@ -134,7 +135,7 @@ void PackInstallTask::install()
     m_instance =
         std::make_unique<MinecraftInstance>(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
     {
-        SettingsObject::Lock const lock(m_instance->settings());
+        const SettingsObject::Lock lock(m_instance->settings());
 
         auto* components = m_instance->getPackProfile();
         components->buildingFromScratch();
@@ -143,15 +144,15 @@ void PackInstallTask::install()
         bool fallback = true;
 
         // handle different versions
-        QFile packJson(m_stagingPath + "/minecraft/pack.json");
+        QFileInfo packJson(m_stagingPath + "/minecraft/pack.json");
         QDir jarmodDir = QDir(m_stagingPath + "/unzip/instMods");
         if (packJson.exists()) {
-            if (packJson.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                QJsonDocument doc = QJsonDocument::fromJson(packJson.readAll());
-                packJson.close();
-
+            qWarning() << "File doesn't exists:" << packJson.fileName();
+        } else {
+            auto doc = Json::requireDocument(packJson.absoluteFilePath());
+            if (!doc) {
                 // we only care about the libs
-                QJsonArray libs = doc.object().value("libraries").toArray();
+                QJsonArray libs = doc->object().value("libraries").toArray();
 
                 for (const auto& value : libs) {
                     QString nameValue = value.toObject().value("name").toString();
@@ -163,12 +164,10 @@ void PackInstallTask::install()
 
                     components->setComponentVersion("net.minecraftforge",
                                                     forgeVersion.version().replace(m_pack.mcVersion, "").replace("-", ""));
-                    packJson.remove();
+                    FS::deletePath(packJson.absoluteFilePath());
                     fallback = false;
                     break;
                 }
-            } else {
-                qWarning() << "Failed to open file" << packJson.fileName() << "for reading:" << packJson.errorString();
             }
         }
 

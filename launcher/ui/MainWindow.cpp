@@ -1005,7 +1005,12 @@ void MainWindow::processURLs(QList<QUrl> urls)
                     auto data = doc.value().object()["data"].toObject();
                     // No way to find out if it's a mod or a modpack before here
                     // And also we need to check if it ends with .zip, instead of any better way
-                    version = FlameMod::loadIndexedPackVersion(data);
+                    auto versionRes = FlameMod::loadIndexedPackVersion(data);
+                    if (!versionRes) {
+                        CustomMessageBox::selectable(this, tr("Error"), versionRes.error(), QMessageBox::Critical)->show();
+                        return;
+                    }
+                    version = versionRes.value();
                     auto fileName = version.fileName;
 
                     // Have to use ensureString then use QUrl to get proper url encoding

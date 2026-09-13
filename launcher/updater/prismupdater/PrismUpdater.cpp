@@ -1175,8 +1175,13 @@ void PrismUpdaterApp::downloadReleasePage(const QString& api_url, int page)
     download->addHeaderProxy(std::move(github_api_headers));
 
     connect(download.get(), &Net::Request::succeeded, this, [this, response, per_page, api_url, page]() {
-        int num_found = parseReleasePage(response);
-        if (!(num_found < per_page)) {  // there may be more, fetch next page
+        auto numFound = parseReleasePage(response);
+        if (!numFound) {
+            auto errMsg = QString("Failed to parse releases from github: %1\n%2")
+                              .arg(numFound.error())
+                              .arg(QString::fromStdString(response->toStdString()));
+            fail(errMsg);
+        } else if (!(numFound.value() < per_page)) {  // there may be more, fetch next page
             downloadReleasePage(api_url, page + 1);
         } else {
             run();
@@ -1193,56 +1198,50 @@ void PrismUpdaterApp::downloadReleasePage(const QString& api_url, int page)
     QMetaObject::invokeMethod(download.get(), &Task::start, Qt::QueuedConnection);
 }
 
-int PrismUpdaterApp::parseReleasePage(const QByteArray* response)
+Result<int> PrismUpdaterApp::parseReleasePage(const QByteArray* response)
 {
-    if (response->isEmpty())  // empty page
-        return 0;
-    int numReleases = 0;
-    auto doc = Json::requireDocument(*response);
-    if (!doc) {
-        auto errMsg =
-            QString("Failed to parse releases from github: %1\n%2").arg(doc.error()).arg(QString::fromStdString(response->toStdString()));
-        fail(errMsg);
+    if (response->isEmpty()) {  // empty page
         return 0;
     }
-    try {
-        auto releaseList = Json::requireArray(doc.value());
-        for (auto releaseJson : releaseList) {
-            auto releaseObj = Json::requireObject(releaseJson);
+    int numReleases = 0;
+    auto doc = Json::requireDocument(*response).and_then([](const auto& v) { return Json::requireArray(v); });
+    TRY(doc)
+    auto toDate = [](const QString& v) -> Result<QDateTime> { return QDateTime::fromString(v, Qt::ISODate); };
+    for (auto releaseJson : doc.value()) {
+        auto releaseObj = Json::requireObject(releaseJson);
+        TRY(releaseObj)
+        auto obj = releaseObj.value();
 
-            GitHubRelease release = {};
-            release.id = Json::requireInteger(releaseObj, "id");
-            release.name = releaseObj["name"].toString();
-            release.tag_name = Json::requireString(releaseObj, "tag_name");
-            release.created_at = QDateTime::fromString(Json::requireString(releaseObj, "created_at"), Qt::ISODate);
-            release.published_at = QDateTime::fromString(releaseObj["published_at"].toString(), Qt::ISODate);
-            release.draft = Json::requireBoolean(releaseObj, "draft");
-            release.prerelease = Json::requireBoolean(releaseObj, "prerelease");
-            release.body = releaseObj["body"].toString();
-            release.version = Version(release.tag_name);
+        GitHubRelease release = {};
+        TRY_INTO(release.id, Json::requireInteger(obj, "id"))
+        release.name = obj["name"].toString();
+        TRY_INTO(release.tag_name, Json::requireString(obj, "tag_name"))
+        TRY_INTO(release.created_at, Json::requireString(obj, "created_at").and_then(toDate))
+        release.published_at = QDateTime::fromString(obj["published_at"].toString(), Qt::ISODate);
+        TRY_INTO(release.draft, Json::requireBoolean(obj, "draft"))
+        TRY_INTO(release.prerelease, Json::requireBoolean(obj, "prerelease"))
+        release.body = obj["body"].toString();
+        release.version = Version(release.tag_name);
 
-            auto releaseAssetsObj = Json::requireArray(releaseObj, "assets");
-            for (auto assetJson : releaseAssetsObj) {
-                QJsonObject assetObj = Json::requireObject(assetJson);
-                GitHubReleaseAsset asset = {};
-                asset.id = Json::requireInteger(assetObj, "id");
-                asset.name = Json::requireString(assetObj, "name");
-                asset.label = assetObj["label"].toString();
-                asset.content_type = Json::requireString(assetObj, "content_type");
-                asset.size = Json::requireInteger(assetObj, "size");
-                asset.created_at = QDateTime::fromString(Json::requireString(assetObj, "created_at"), Qt::ISODate);
-                asset.updated_at = QDateTime::fromString(Json::requireString(assetObj, "updated_at"), Qt::ISODate);
-                asset.browser_download_url = Json::requireString(assetObj, "browser_download_url");
-                release.assets.append(asset);
-            }
-            m_releases.append(release);
-            numReleases++;
+        auto releaseAssetsObj = Json::requireArray(obj, "assets");
+        TRY(releaseAssetsObj)
+        for (auto assetJson : releaseAssetsObj.value()) {
+            auto assetObjRsp = Json::requireObject(assetJson);
+            TRY(assetObjRsp)
+            auto assetObj = assetObjRsp.value();
+            GitHubReleaseAsset asset = {};
+            TRY_INTO(asset.id, Json::requireInteger(assetObj, "id"))
+            TRY_INTO(asset.name, Json::requireString(assetObj, "name"))
+            asset.label = assetObj["label"].toString();
+            TRY_INTO(asset.content_type, Json::requireString(assetObj, "content_type"))
+            TRY_INTO(asset.size, Json::requireInteger(assetObj, "size"))
+            TRY_INTO(asset.created_at, Json::requireString(assetObj, "created_at").and_then(toDate))
+            TRY_INTO(asset.updated_at, Json::requireString(assetObj, "updated_at").and_then(toDate))
+            TRY_INTO(asset.browser_download_url, Json::requireString(assetObj, "browser_download_url"))
+            release.assets.append(asset);
         }
-    } catch (Json::JsonException& e) {
-        auto errMsg =
-            QString("Failed to parse releases from github: %1\n%2").arg(e.what()).arg(QString::fromStdString(response->toStdString()));
-        fail(errMsg);
-        return 0;
+        m_releases.append(release);
+        numReleases++;
     }
     return numReleases;
 }

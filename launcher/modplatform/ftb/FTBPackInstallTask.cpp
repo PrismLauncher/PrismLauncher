@@ -117,18 +117,14 @@ void PackInstallTask::onManifestDownloadSucceeded(QByteArray* responsePtr)
     QByteArray response = std::move(*responsePtr);
     m_net_job.reset();
 
-    auto doc = Json::requireDocument(response, "FTB pack manifest").and_then([](const auto& v) { return Json::requireObject(v); });
+    FTB::Version version;
+    auto doc = Json::requireDocument(response, "FTB pack manifest")
+                   .and_then([](const auto& v) { return Json::requireObject(v); })
+                   .and_then([&version](const auto& v) { return FTB::loadVersion(version, v); });
     if (!doc) {
         qWarning() << "Error while parsing JSON response from FTB:" << doc.error();
         qWarning() << response;
-        return;
-    }
-
-    FTB::Version version;
-    try {
-        FTB::loadVersion(version, doc.value());
-    } catch (const JSONValidationError& e) {
-        emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
+        emitFailed(tr("Could not understand pack manifest:\n") + doc.error());
         return;
     }
 

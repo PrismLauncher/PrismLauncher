@@ -38,7 +38,7 @@
 #include <QFile>
 #include <expected>
 
-#include <math.h>
+#include <cmath>
 #include "FileSystem.h"
 
 namespace {
@@ -113,8 +113,9 @@ QJsonDocument parseUntilGarbage(const QByteArray& json, QJsonParseError* error, 
         QByteArray validJson = json.left(offset);
         doc = QJsonDocument::fromJson(validJson, error);
 
-        if (garbage)
+        if (garbage) {
             *garbage = json.right(json.size() - offset);
+        }
     }
 
     return doc;
@@ -131,7 +132,7 @@ void writeStringList(QJsonObject& to, const QString& key, const QStringList& val
 {
     if (!values.isEmpty()) {
         QJsonArray array;
-        for (auto value : values) {
+        for (const auto& value : values) {
             array.append(value);
         }
         to.insert(key, array);
@@ -139,168 +140,175 @@ void writeStringList(QJsonObject& to, const QString& key, const QStringList& val
 }
 
 template <>
-QJsonValue toJson<QUrl>(const QUrl& url)
+QJsonValue toJson<QUrl>(const QUrl& t)
 {
-    return QJsonValue(url.toString(QUrl::FullyEncoded));
+    return { t.toString(QUrl::FullyEncoded) };
 }
 template <>
-QJsonValue toJson<QByteArray>(const QByteArray& data)
+QJsonValue toJson<QByteArray>(const QByteArray& t)
 {
-    return QJsonValue(QString::fromLatin1(data.toHex()));
+    return { QString::fromLatin1(t.toHex()) };
 }
 template <>
-QJsonValue toJson<QDateTime>(const QDateTime& datetime)
+QJsonValue toJson<QDateTime>(const QDateTime& t)
 {
-    return QJsonValue(datetime.toString(Qt::ISODate));
+    return { t.toString(Qt::ISODate) };
 }
 template <>
-QJsonValue toJson<QDir>(const QDir& dir)
+QJsonValue toJson<QDir>(const QDir& t)
 {
-    return QDir::current().relativeFilePath(dir.absolutePath());
+    return QDir::current().relativeFilePath(t.absolutePath());
 }
 template <>
-QJsonValue toJson<QUuid>(const QUuid& uuid)
+QJsonValue toJson<QUuid>(const QUuid& t)
 {
-    return uuid.toString();
+    return t.toString();
 }
 template <>
-QJsonValue toJson<QVariant>(const QVariant& variant)
+QJsonValue toJson<QVariant>(const QVariant& t)
 {
-    return QJsonValue::fromVariant(variant);
+    return QJsonValue::fromVariant(t);
 }
 
 template <>
-QByteArray requireIsType<QByteArray>(const QJsonValue& value, const QString& what)
+Result<QByteArray> requireIsType<QByteArray>(const QJsonValue& value, const QString& what)
 {
     const QString string = value.toString(what);
     // ensure that the string can be safely cast to Latin1
     if (string != QString::fromLatin1(string.toLatin1())) {
-        throw JsonException(what + " is not encodable as Latin1");
+        return std::unexpected(what + " is not encodable as Latin1");
     }
     return QByteArray::fromHex(string.toLatin1());
 }
 
 template <>
-QJsonArray requireIsType<QJsonArray>(const QJsonValue& value, const QString& what)
+Result<QJsonArray> requireIsType<QJsonArray>(const QJsonValue& value, const QString& what)
 {
     if (!value.isArray()) {
-        throw JsonException(what + " is not an array");
+        return std::unexpected(what + " is not an array");
     }
     return value.toArray();
 }
 
 template <>
-QString requireIsType<QString>(const QJsonValue& value, const QString& what)
+Result<QString> requireIsType<QString>(const QJsonValue& value, const QString& what)
 {
     if (!value.isString()) {
-        throw JsonException(what + " is not a string");
+        return std::unexpected(what + " is not a string");
     }
     return value.toString();
 }
 
 template <>
-bool requireIsType<bool>(const QJsonValue& value, const QString& what)
+Result<bool> requireIsType<bool>(const QJsonValue& value, const QString& what)
 {
     if (!value.isBool()) {
-        throw JsonException(what + " is not a bool");
+        return std::unexpected(what + " is not a bool");
     }
     return value.toBool();
 }
 
 template <>
-double requireIsType<double>(const QJsonValue& value, const QString& what)
+Result<double> requireIsType<double>(const QJsonValue& value, const QString& what)
 {
     if (!value.isDouble()) {
-        throw JsonException(what + " is not a double");
+        return std::unexpected(what + " is not a double");
     }
     return value.toDouble();
 }
 
 template <>
-int requireIsType<int>(const QJsonValue& value, const QString& what)
+Result<int> requireIsType<int>(const QJsonValue& value, const QString& what)
 {
-    const double doubl = requireIsType<double>(value, what);
-    if (fmod(doubl, 1) != 0) {
-        throw JsonException(what + " is not an integer");
-    }
-    return int(doubl);
+    return requireIsType<double>(value, what).and_then([what](const auto& v) -> Result<int> {
+        if (fmod(v, 1) != 0) {
+            return std::unexpected(what + " is not an integer");
+        }
+        return int(v);
+    });
 }
 
 template <>
-QDateTime requireIsType<QDateTime>(const QJsonValue& value, const QString& what)
+Result<QDateTime> requireIsType<QDateTime>(const QJsonValue& value, const QString& what)
 {
-    const QString string = requireIsType<QString>(value, what);
-    const QDateTime datetime = QDateTime::fromString(string, Qt::ISODate);
-    if (!datetime.isValid()) {
-        throw JsonException(what + " is not a ISO formatted date/time value");
-    }
-    return datetime;
+    return requireIsType<QString>(value, what).and_then([what](const auto& v) -> Result<QDateTime> {
+        auto datetime = QDateTime::fromString(v, Qt::ISODate);
+        if (!datetime.isValid()) {
+            return std::unexpected(what + " is not a ISO formatted date/time value");
+        }
+        return datetime;
+    });
 }
 
 template <>
-QUrl requireIsType<QUrl>(const QJsonValue& value, const QString& what)
+Result<QUrl> requireIsType<QUrl>(const QJsonValue& value, const QString& what)
 {
-    const QString string = value.toString(what);
-    if (string.isEmpty()) {
-        return QUrl();
-    }
-    const QUrl url = QUrl(string, QUrl::StrictMode);
-    if (!url.isValid()) {
-        throw JsonException(what + " is not a correctly formatted URL");
-    }
-    return url;
+    return requireIsType<QString>(value, what).and_then([what](const auto& v) -> Result<QUrl> {
+        if (v.isEmpty()) {
+            return {};
+        }
+        auto url = QUrl(v, QUrl::StrictMode);
+        if (!url.isValid()) {
+            return std::unexpected(what + " is not a correctly formatted URL");
+        }
+        return url;
+    });
 }
 
 template <>
-QDir requireIsType<QDir>(const QJsonValue& value, const QString& what)
+Result<QDir> requireIsType<QDir>(const QJsonValue& value, const QString& what)
 {
-    const QString string = requireIsType<QString>(value, what);
-    // FIXME: does not handle invalid characters!
-    return QDir::current().absoluteFilePath(string);
+    return requireIsType<QString>(value, what).and_then([what](const auto& v) -> Result<QDir> {
+        // FIXME: does not handle invalid characters!
+        return QDir::current().absoluteFilePath(v);
+    });
 }
 
 template <>
-QUuid requireIsType<QUuid>(const QJsonValue& value, const QString& what)
+Result<QUuid> requireIsType<QUuid>(const QJsonValue& value, const QString& what)
 {
-    const QString string = requireIsType<QString>(value, what);
-    const QUuid uuid = QUuid(string);
-    if (uuid.toString() != string)  // converts back => valid
-    {
-        throw JsonException(what + " is not a valid UUID");
-    }
-    return uuid;
+    return requireIsType<QString>(value, what).and_then([what](const auto& v) -> Result<QUuid> {
+        auto uuid = QUuid(v);
+        if (uuid.toString() != v)  // converts back => valid
+        {
+            return std::unexpected(what + " is not a valid UUID");
+        }
+        return uuid;
+    });
 }
 
 template <>
-QJsonObject requireIsType<QJsonObject>(const QJsonValue& value, const QString& what)
+Result<QJsonObject> requireIsType<QJsonObject>(const QJsonValue& value, const QString& what)
 {
     if (!value.isObject()) {
-        throw JsonException(what + " is not an object");
+        return std::unexpected(what + " is not an object");
     }
     return value.toObject();
 }
 
 template <>
-QVariant requireIsType<QVariant>(const QJsonValue& value, const QString& what)
+Result<QVariant> requireIsType<QVariant>(const QJsonValue& value, const QString& what)
 {
     if (value.isNull() || value.isUndefined()) {
-        throw JsonException(what + " is null or undefined");
+        return std::unexpected(what + " is null or undefined");
     }
     return value.toVariant();
 }
 
 template <>
-QJsonValue requireIsType<QJsonValue>(const QJsonValue& value, const QString& what)
+Result<QJsonValue> requireIsType<QJsonValue>(const QJsonValue& value, const QString& what)
 {
     if (value.isNull() || value.isUndefined()) {
-        throw JsonException(what + " is null or undefined");
+        return std::unexpected(what + " is null or undefined");
     }
     return value;
 }
 
 QStringList toStringList(const QString& jsonString)
 {
-    return requireDocument(jsonString.toUtf8()).and_then([](const auto& v) { return requireIsArrayOf<QString>(v); }).value_or({});
+    return requireDocument(jsonString.toUtf8())
+        .and_then([](const auto& v) { return requireIsArrayOf<QString>(v); })
+        .value_or(QStringList());
 }
 
 QString fromStringList(const QStringList& list)
@@ -316,15 +324,8 @@ QString fromStringList(const QStringList& list)
 
 QVariantMap toMap(const QString& jsonString)
 {
-    QJsonParseError parseError;
-    QJsonDocument doc = QJsonDocument::fromJson(jsonString.toUtf8(), &parseError);
-
-    if (parseError.error != QJsonParseError::NoError || !doc.isObject()) {
-        return {};
-    }
-
-    QJsonObject obj = doc.object();
-    return obj.toVariantMap();
+    auto doc = requireDocument(jsonString.toUtf8()).and_then([](const auto& v) { return requireObject(v); }).value_or(QJsonObject());
+    return doc.toVariantMap();
 }
 
 QString fromMap(const QVariantMap& map)

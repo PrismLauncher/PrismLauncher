@@ -18,6 +18,7 @@
 #include <QAbstractListModel>
 
 #include "BaseEntity.h"
+#include "Exception.h"
 #include "meta/VersionList.h"
 #include "net/Mode.h"
 

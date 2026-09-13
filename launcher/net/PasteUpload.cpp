@@ -45,6 +45,7 @@
 #include <QJsonObject>
 #include <QNetworkRequest>
 #include <QUrlQuery>
+#include "Json.h"
 #include "logs/AnonymizeLog.h"
 #include "net/RPCSink.h"
 #include "net/RawHeaderProxy.h"
@@ -145,31 +146,29 @@ std::pair<Net::Request::Ptr, QString*> Type::make(QString log, QString baseUrl) 
             case Type::NullPointer:
                 return QString::fromUtf8(response).trimmed();
             case Type::Hastebin: {
-                QJsonParseError jsonError;
-                auto doc = QJsonDocument::fromJson(response, &jsonError);
-                if (jsonError.error != QJsonParseError::NoError) {
-                    qDebug() << "hastebin server did not reply with JSON" << jsonError.errorString();
+                auto doc = Json::requireDocument(response);
+                if (!doc) {
+                    qDebug() << "hastebin server did not reply with JSON" << doc.error();
                     return std::unexpected(
                         QObject::tr("Failed to parse response from hastebin server: expected JSON but got an invalid response. Error: %1")
-                            .arg(jsonError.errorString()));
+                            .arg(doc.error()));
                 }
-                auto obj = doc.object();
+                auto obj = doc.value().object();
                 if (obj.contains("key") && obj["key"].isString()) {
                     return baseUrl + "/" + obj["key"].toString();
                 }
-                qDebug() << "Log upload failed:" << doc.toJson();
+                qDebug() << "Log upload failed:" << doc->toJson();
                 return std::unexpected(QObject::tr("Error: %1 returned a malformed response body").arg(url.toString()));
             }
             case Type::Mclogs: {
-                QJsonParseError jsonError;
-                auto doc = QJsonDocument::fromJson(response, &jsonError);
-                if (jsonError.error != QJsonParseError::NoError) {
-                    qDebug() << "mclogs server did not reply with JSON" << jsonError.errorString();
+                auto doc = Json::requireDocument(response);
+                if (!doc) {
+                    qDebug() << "mclogs server did not reply with JSON" << doc.error();
                     return std::unexpected(
                         QObject::tr("Failed to parse response from mclogs server: expected JSON but got an invalid response. Error: %1")
-                            .arg(jsonError.errorString()));
+                            .arg(doc.error()));
                 }
-                auto obj = doc.object();
+                auto obj = doc.value().object();
                 if (obj.contains("success") && obj["success"].isBool()) {
                     bool success = obj["success"].toBool();
                     if (success) {
@@ -178,19 +177,18 @@ std::pair<Net::Request::Ptr, QString*> Type::make(QString log, QString baseUrl) 
                     QString error = obj["error"].toString();
                     return std::unexpected(QObject::tr("Error: %1 returned an error: %2").arg(url.toString(), error));
                 }
-                qDebug() << "Log upload failed:" << doc.toJson();
+                qDebug() << "Log upload failed:" << doc->toJson();
                 return std::unexpected(QObject::tr("Error: %1 returned a malformed response body").arg(url.toString()));
             }
             case Type::PasteGG: {
-                QJsonParseError jsonError;
-                auto doc = QJsonDocument::fromJson(response, &jsonError);
-                if (jsonError.error != QJsonParseError::NoError) {
-                    qDebug() << "pastegg server did not reply with JSON" << jsonError.errorString();
+                auto doc = Json::requireDocument(response);
+                if (!doc) {
+                    qDebug() << "pastegg server did not reply with JSON" << doc.error();
                     return std::unexpected(
                         QObject::tr("Failed to parse response from pasteGG server: expected JSON but got an invalid response. Error: %1")
-                            .arg(jsonError.errorString()));
+                            .arg(doc.error()));
                 }
-                auto obj = doc.object();
+                auto obj = doc.value().object();
                 if (obj.contains("status") && obj["status"].isString()) {
                     QString status = obj["status"].toString();
                     if (status == "success") {
@@ -201,7 +199,7 @@ std::pair<Net::Request::Ptr, QString*> Type::make(QString log, QString baseUrl) 
                     return std::unexpected(
                         QObject::tr("Error: %1 returned an error code: %2\nError message: %3").arg(url.toString(), error, message));
                 }
-                qDebug() << "Log upload failed:" << doc.toJson();
+                qDebug() << "Log upload failed:" << doc->toJson();
                 return std::unexpected(QObject::tr("Error: %1 returned a malformed response body").arg(url.toString()));
             }
             case Type::Invalid:

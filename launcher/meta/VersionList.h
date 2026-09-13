@@ -20,6 +20,7 @@
 #include "BaseEntity.h"
 #include "BaseVersionList.h"
 
+#include "Exception.h"
 #include "meta/Version.h"
 
 namespace Meta {

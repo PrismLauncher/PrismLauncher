@@ -221,36 +221,32 @@ auto HttpMetaCache::getBasePath(QString base) -> QString
 
 void HttpMetaCache::Load()
 {
-    if (m_index_file.isNull())
+    if (m_index_file.isNull()) {
         return;
+    }
 
     QFile index(m_index_file);
-    if (!index.open(QIODevice::ReadOnly))
-        return;
-
-    QJsonParseError parseError;
-    QJsonDocument json = QJsonDocument::fromJson(index.readAll(), &parseError);
-
-    // Fail if the JSON is invalid.
-    if (parseError.error != QJsonParseError::NoError) {
-        qCritical() << QString("Failed to parse HttpMetaCache file: %1 at offset %2")
-                           .arg(parseError.errorString(), QString::number(parseError.offset))
-                           .toUtf8();
+    if (!index.open(QIODevice::ReadOnly)) {
         return;
     }
 
-    // Make sure the root is an object.
-    if (!json.isObject()) {
-        qCritical() << "HttpMetaCache root should be an object.";
+    auto json = Json::requireDocument(index.readAll(), "HttpMetaCache").and_then([](const auto& v) {
+        return Json::requireObject(v, "HttpMetaCache");
+    });
+
+    // Fail if the JSON is invalid or the root is not an object.
+    if (!json) {
+        qCritical() << json.error();
         return;
     }
 
-    auto root = json.object();
+    auto root = json.value();
 
     // check file version first
-    auto version_val = root["version"].toString();
-    if (version_val != "1")
+    auto versionVal = root["version"].toString();
+    if (versionVal != "1") {
         return;
+    }
 
     // read the entry array
     auto array = root["entries"].toArray();

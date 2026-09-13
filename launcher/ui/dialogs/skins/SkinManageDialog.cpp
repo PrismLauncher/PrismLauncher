@@ -47,6 +47,7 @@
 #include "net/Request.h"
 #include "tasks/Task.h"
 
+#include "Json.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/instanceview/InstanceDelegate.h"
@@ -506,16 +507,14 @@ void SkinManageDialog::on_userBtn_clicked()
 
     connect(getUUID.get(), &Task::succeeded, this, [uuidLoop, uuidOut, job, getProfile, &failReason] {
         try {
-            QJsonParseError parseError{};
-            QJsonDocument doc = QJsonDocument::fromJson(*uuidOut, &parseError);
-            if (parseError.error != QJsonParseError::NoError) {
-                qWarning() << "Error while parsing JSON response from Minecraft skin service at" << parseError.offset
-                           << "reason:" << parseError.errorString();
+            auto doc = Json::requireDocument(*uuidOut, "Minecraft skin service");
+            if (!doc) {
+                qWarning() << "Error while parsing JSON response from Minecraft skin service:" << doc.error();
                 failReason = tr("failed to parse get user UUID response");
                 uuidLoop->quit();
                 return;
             }
-            const auto root = doc.object();
+            const auto root = doc.value().object();
             auto id = root["id"].toString();
             if (!id.isEmpty()) {
                 getProfile->setUrl("https://sessionserver.mojang.com/session/minecraft/profile/" + id);

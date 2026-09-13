@@ -197,11 +197,10 @@ void ResourceFolderModel::installResourceWithFlameMetadata(const QString& path, 
                 qDebug() << *response;
                 return;
             }
-            try {
-                FlameMod::loadIndexedPack(pack, *obj);
-            } catch (const JSONValidationError& e) {
+            auto loadRes = FlameMod::loadIndexedPack(pack, *obj);
+            if (!loadRes) {
                 qDebug() << *obj;
-                qWarning() << "Error while reading mod info:" << e.cause();
+                qWarning() << "Error while reading mod info:" << loadRes.error();
             }
             LocalResourceUpdateTask updateMetadata(indexDir(), pack, vers);
             connect(&updateMetadata, &Task::finished, this, install);
@@ -965,7 +964,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& currentSet, QSet<QString>&
 Resource::Ptr ResourceFolderModel::find(QString id)
 {
     auto iter =
-        std::find_if(m_resources.constBegin(), m_resources.constEnd(), [&](const Resource::Ptr& r) { return r->internalId() == id; });
+        std::find_if(m_resources.constBegin(), m_resources.constEnd(), [&id](const Resource::Ptr& r) { return r->internalId() == id; });
     if (iter == m_resources.constEnd()) {
         return nullptr;
     }

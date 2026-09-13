@@ -41,6 +41,7 @@
 #include <QImageReader>
 #include <QRandomGenerator>
 #include <algorithm>
+#include "Exception.h"
 #include "FileSystem.h"
 #include "Json.h"
 
@@ -82,19 +83,32 @@ JsonCatPack::PartialDate partialDate(QJsonObject date)
 JsonCatPack::JsonCatPack(QFileInfo& manifestInfo) : BasicCatPack(manifestInfo.dir().dirName())
 {
     QString path = manifestInfo.path();
-    auto doc = Json::requireDocument(manifestInfo.absoluteFilePath(), "CatPack JSON file");
-    if (!doc) {
-        throw Exception(doc.error());
-    }
-    const auto root = doc.value().object();
-    m_name = Json::requireString(root, "name", "Catpack name");
-    m_default_path = FS::PathCombine(path, Json::requireString(root, "default", "Default Cat"));
-    auto variants = root["variants"].toArray();
-    for (auto v : variants) {
-        auto variant = v.toObject();
-        m_variants << Variant{ .path = FS::PathCombine(path, Json::requireString(variant, "path", "Variant path")),
-                               .startTime = partialDate(Json::requireObject(variant, "startTime", "Variant startTime")),
-                               .endTime = partialDate(Json::requireObject(variant, "endTime", "Variant endTime")) };
+    auto parse = [this, &path, &manifestInfo]() -> Result<> {
+        auto doc = Json::requireDocument(manifestInfo.absoluteFilePath(), "CatPack JSON file");
+        TRY(doc)
+        const auto root = doc.value().object();
+        TRY_INTO(m_name, Json::requireString(root, "name", "Catpack name"))
+        QString defaultPath;
+        TRY_INTO(defaultPath, Json::requireString(root, "default", "Default Cat"))
+        m_default_path = FS::PathCombine(path, defaultPath);
+        auto variants = root["variants"].toArray();
+        for (auto v : variants) {
+            auto variant = v.toObject();
+            QString variantPath;
+            TRY_INTO(variantPath, Json::requireString(variant, "path", "Variant path"))
+            auto startTime = Json::requireObject(variant, "startTime", "Variant startTime");
+            TRY(startTime)
+            auto endTime = Json::requireObject(variant, "endTime", "Variant endTime");
+            TRY(endTime)
+            m_variants << Variant{ .path = FS::PathCombine(path, variantPath),
+                                   .startTime = partialDate(startTime.value()),
+                                   .endTime = partialDate(endTime.value()) };
+        }
+        return {};
+    };
+    if (auto rsp = parse(); !rsp) {
+        qCritical() << "Couldn't load catpack json:" << rsp.error();
+        throw Exception(rsp.error());
     }
 }
 

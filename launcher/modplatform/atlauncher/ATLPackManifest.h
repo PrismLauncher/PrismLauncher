@@ -40,6 +40,8 @@
 #include <QMap>
 #include <QString>
 
+#include "Exception.h"
+
 namespace ATLauncher {
 
 enum class PackType { Public, Private };
@@ -183,6 +185,6 @@ struct PackVersion {
     VersionDeletes deletes;
 };
 
-void loadVersion(PackVersion& v, QJsonObject& obj);
+Result<> loadVersion(PackVersion& v, QJsonObject& obj);
 
 }  // namespace ATLauncher

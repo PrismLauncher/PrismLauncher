@@ -169,26 +169,24 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getModCategories() const
 QList<ModPlatform::Category> ModrinthAPI::loadCategories(const QByteArray& response, const QString& projectType)
 {
     QList<ModPlatform::Category> categories;
-    auto doc = Json::requireDocument(response).and_then([](const auto& v) { return Json::requireArray(v); });
-    if (!doc) {
-        qWarning() << "Error while parsing JSON response from categories:" << doc.error();
-        qWarning() << *response;
-        return categories;
-    }
+    auto parse = [&response, &projectType, &categories] -> Result<> {
+        auto doc = Json::requireDocument(response).and_then([](const auto& v) { return Json::requireArray(v); });
+        TRY(doc)
 
-    try {
         for (auto val : doc.value()) {
             auto cat = Json::requireObject(val);
-            auto name = Json::requireString(cat, "name");
-            if (cat["project_type"].toString() == projectType) {
-                categories.push_back({ .name = name, .id = name });
+            TRY(cat)
+            auto name = Json::requireString(cat.value(), "name");
+            TRY(name)
+            if (cat.value()["project_type"].toString() == projectType) {
+                categories.push_back({ .name = name.value(), .id = name.value() });
             }
         }
-
-    } catch (Json::JsonException& e) {
-        qCritical() << "Failed to parse response from a version request.";
-        qCritical() << e.what();
-        qDebug() << *doc;
+        return {};
+    };
+    if (auto rsp = parse(); !rsp) {
+        qWarning() << "Error while parsing JSON response from categories:" << rsp.error();
+        qWarning() << response;
     }
     return categories;
 }

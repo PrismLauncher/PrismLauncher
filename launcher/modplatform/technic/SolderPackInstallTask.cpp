@@ -86,26 +86,22 @@ void Technic::SolderPackInstallTask::fileListSucceeded(QByteArray* response)
 {
     setStatus(tr("Downloading modpack"));
 
-    QJsonParseError parse_error{};
-    QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-    if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from Solder at" << parse_error.offset << "reason:" << parse_error.errorString();
-        qWarning() << *response;
-        return;
-    }
-    auto obj = doc.object();
-
     TechnicSolder::PackBuild build;
-    try {
-        TechnicSolder::loadPackBuild(build, obj);
-    } catch (const JSONValidationError& e) {
+    auto doc = Json::requireDocument(*response).and_then([&build](const auto& v) {
+        auto obj = v.object();
+        return TechnicSolder::loadPackBuild(build, obj);
+    });
+    if (!doc) {
+        qWarning() << "Error while parsing JSON response from Solder:" << doc.error();
+        qWarning() << *response;
         m_filesNetJob.reset();
-        emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
+        emitFailed(tr("Could not understand pack manifest:\n") + doc.error());
         return;
     }
 
-    if (!build.minecraft.isEmpty())
+    if (!build.minecraft.isEmpty()) {
         m_minecraftVersion = build.minecraft;
+    }
 
     m_filesNetJob.reset(new NetJob(tr("Downloading modpack"), m_network));
 

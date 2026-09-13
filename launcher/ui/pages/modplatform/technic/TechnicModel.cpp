@@ -180,20 +180,22 @@ void Technic::ListModel::searchRequestFinished(QByteArray* responsePtr)
 
     const auto& root = doc.value();
     QList<Modpack> newList;
-    try {
+    auto parse = [&root, this, &newList]() -> Result<> {
         switch (searchMode) {
             case List: {
                 auto objs = Json::requireArray(root, "modpacks");
-                for (auto technicPack : objs) {
+                TRY(objs)
+                for (auto technicPack : objs.value()) {
                     Modpack pack;
                     auto technicPackObject = Json::requireObject(technicPack);
-                    pack.name = Json::requireString(technicPackObject, "name");
-                    pack.slug = Json::requireString(technicPackObject, "slug");
+                    TRY(technicPackObject)
+                    TRY_INTO(pack.name, Json::requireString(technicPackObject.value(), "name"))
+                    TRY_INTO(pack.slug, Json::requireString(technicPackObject.value(), "slug"))
                     if (pack.slug == "vanilla") {
                         continue;
                     }
 
-                    auto rawURL = technicPackObject["iconUrl"].toString("null");
+                    auto rawURL = technicPackObject.value()["iconUrl"].toString("null");
                     if (rawURL == "null") {
                         pack.logoUrl = "null";
                         pack.logoName = "null";
@@ -213,12 +215,14 @@ void Technic::ListModel::searchRequestFinished(QByteArray* responsePtr)
                 }
 
                 Modpack pack;
-                pack.name = Json::requireString(root, "displayName");
-                pack.slug = Json::requireString(root, "name");
+                TRY_INTO(pack.name, Json::requireString(root, "displayName"))
+                TRY_INTO(pack.slug, Json::requireString(root, "name"))
 
                 if (root.contains("icon")) {
                     auto iconObj = Json::requireObject(root, "icon");
-                    auto iconUrl = Json::requireString(iconObj, "url");
+                    TRY(iconObj)
+                    QString iconUrl;
+                    TRY_INTO(iconUrl, Json::requireString(iconObj.value(), "url"))
 
                     pack.logoUrl = iconUrl;
                     pack.logoName = pack.slug + "." + QFileInfo(QUrl(iconUrl).fileName()).suffix();
@@ -232,8 +236,10 @@ void Technic::ListModel::searchRequestFinished(QByteArray* responsePtr)
                 break;
             }
         }
-    } catch (const JSONValidationError& err) {
-        qCritical() << "Couldn't parse technic search results:" << err.cause();
+        return {};
+    };
+    if (auto rsp = parse(); !rsp) {
+        qCritical() << "Couldn't parse technic search results:" << rsp.error();
         return;
     }
     searchState = Finished;

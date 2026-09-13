@@ -22,6 +22,7 @@
 #include <QFileInfo>
 #include <QIcon>
 #include <QProcessEnvironment>
+#include <algorithm>
 #include "Application.h"
 #include "Exception.h"
 #include "FileSystem.h"
@@ -52,17 +53,15 @@ QString getDynamicPath()
         qWarning() << "The ftb app setings doesn't exist.";
         return {};
     }
-    auto doc = Json::requireDocument(settingsPath).and_then([](const auto& v) { return Json::requireObject(v); });
+    auto doc =
+        Json::requireDocument(settingsPath).and_then([](const auto& v) { return Json::requireObject(v); }).and_then([](const auto& v) {
+            return Json::requireString(v, "instanceLocation");
+        });
     if (!doc) {
         qCritical() << "Could not read ftb settings file:" << doc.error();
         return {};
     }
-    try {
-        return Json::requireString(doc.value(), "instanceLocation");
-    } catch (const Exception& e) {
-        qCritical() << "Could not read ftb settings file:" << e.cause();
-    }
-    return {};
+    return doc.value();
 }
 }  // namespace
 
@@ -75,27 +74,28 @@ void ListModel::update()
     beginResetModel();
     m_modpacks.clear();
 
-    auto wasPathAdded = [this](QString path) {
-        for (auto pack : m_modpacks) {
-            if (pack.path == path)
-                return true;
-        }
-        return false;
+    auto wasPathAdded = [this](const QString& path) {
+        return std::ranges::any_of(m_modpacks, [&path](const auto& v) { return v.path == path; });
     };
 
-    auto scanPath = [this, wasPathAdded](QString path) {
-        if (path.isEmpty())
+    auto scanPath = [this, wasPathAdded](const QString& path) {
+        if (path.isEmpty()) {
             return;
-        if (auto instancesInfo = QFileInfo(path); !instancesInfo.exists() || !instancesInfo.isDir())
+        }
+        if (auto instancesInfo = QFileInfo(path); !instancesInfo.exists() || !instancesInfo.isDir()) {
             return;
+        }
         QDirIterator directoryIterator(path, QDir::Dirs | QDir::NoDotAndDotDot | QDir::Readable | QDir::Hidden,
                                        QDirIterator::FollowSymlinks);
         while (directoryIterator.hasNext()) {
             auto currentPath = directoryIterator.next();
             if (!wasPathAdded(currentPath)) {
                 auto modpack = parseDirectory(currentPath);
-                if (!modpack.path.isEmpty())
-                    m_modpacks.append(modpack);
+                if (!modpack) {
+                    qDebug() << modpack.error();
+                } else if (!modpack->path.isEmpty()) {
+                    m_modpacks.append(modpack.value());
+                }
             }
         }
     };

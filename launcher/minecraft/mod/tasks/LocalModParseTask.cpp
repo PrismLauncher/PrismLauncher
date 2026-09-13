@@ -8,6 +8,7 @@
 #include <QJsonValue>
 #include <QRegularExpression>
 #include <QString>
+#include <algorithm>
 
 #include "Json.h"
 #include "archive/ArchiveReader.h"
@@ -23,7 +24,7 @@ namespace ModUtils {
 
 // OLD format:
 // https://github.com/MinecraftForge/FML/wiki/FML-mod-information-file/5bf6a2d05145ec79387acc0d45c958642fb049fc
-ModDetails ReadMCModInfo(QByteArray contents)
+ModDetails ReadMCModInfo(const QByteArray& contents)
 {
     auto getInfoFromArray = [](QJsonArray arr) -> ModDetails {
         if (!arr.at(0).isObject()) {
@@ -92,8 +93,7 @@ ModDetails ReadMCModInfo(QByteArray contents)
 
         return details;
     };
-    QJsonParseError jsonError;
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
+    auto jsonDoc = Json::requireDocument(contents).value_or(QJsonDocument());
     // this is the very old format that had just the array
     if (jsonDoc.isArray()) {
         return getInfoFromArray(jsonDoc.array());
@@ -127,7 +127,7 @@ ModDetails ReadMCModInfo(QByteArray contents)
 }
 
 // https://github.com/MinecraftForge/Documentation/blob/5ab4ba6cf9abc0ac4c0abd96ad187461aefd72af/docs/gettingstarted/structuring.md
-ModDetails ReadMCModTOML(QByteArray contents)
+ModDetails ReadMCModTOML(const QByteArray& contents)
 {
     ModDetails details;
 
@@ -276,10 +276,9 @@ ModDetails ReadMCModTOML(QByteArray contents)
 }
 
 // https://fabricmc.net/wiki/documentation:fabric_mod_json
-ModDetails ReadFabricModInfo(QByteArray contents)
+ModDetails ReadFabricModInfo(const QByteArray& contents)
 {
-    QJsonParseError jsonError;
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
+    auto jsonDoc = Json::requireDocument(contents).value_or(QJsonDocument());
     auto object = jsonDoc.object();
     auto schemaVersion = object.contains("schemaVersion") ? object.value("schemaVersion").toInt(0) : 0;
 
@@ -374,123 +373,125 @@ ModDetails ReadFabricModInfo(QByteArray contents)
 }
 
 // https://github.com/QuiltMC/rfcs/blob/master/specification/0002-quilt.mod.json.md
-ModDetails ReadQuiltModInfo(QByteArray contents)
+ModDetails ReadQuiltModInfo(const QByteArray& contents)
 {
     ModDetails details;
-    auto doc =
-        Json::requireDocument(contents, "quilt.mod.json").and_then([](const auto& v) { return Json::requireObject(v, "quilt.mod.json"); });
-    if (!doc) {
-        qWarning() << "Unable to parse mod info:" << doc.error();
-        return {};
-    }
-    try {
+
+    auto parse = [&details, contents]() -> Result<> {
+        auto doc = Json::requireDocument(contents, "quilt.mod.json").and_then([](const auto& v) {
+            return Json::requireObject(v, "quilt.mod.json");
+        });
+        TRY(doc)
         const auto& object = doc.value();
         auto schemaVersion = object.value("schema_version").toInt();
 
         // https://github.com/QuiltMC/rfcs/blob/be6ba280d785395fefa90a43db48e5bfc1d15eb4/specification/0002-quilt.mod.json.md
-        if (schemaVersion == 1) {
-            auto modInfo = Json::requireObject(object.value("quilt_loader"), "Quilt mod info");
+        if (schemaVersion != 1) {
+            return {};
+        }
 
-            details.mod_id = Json::requireString(modInfo.value("id"), "Mod ID");
-            details.version = Json::requireString(modInfo.value("version"), "Mod version");
+        auto modInfo = Json::requireObject(object.value("quilt_loader"), "Quilt mod info");
+        TRY(modInfo)
+        TRY_INTO(details.mod_id, Json::requireString(modInfo->value("id"), "Mod ID"))
+        TRY_INTO(details.version, Json::requireString(modInfo->value("version"), "Mod version"))
 
-            auto modMetadata = modInfo.value("metadata").toObject();
+        auto modMetadata = modInfo->value("metadata").toObject();
 
-            details.name = modMetadata.value("name").toString(details.mod_id);
-            details.description = modMetadata.value("description").toString();
+        details.name = modMetadata.value("name").toString(details.mod_id);
+        details.description = modMetadata.value("description").toString();
 
-            auto modContributors = modMetadata.value("contributors").toObject();
+        auto modContributors = modMetadata.value("contributors").toObject();
 
-            // We don't really care about the role of a contributor here
-            details.authors += modContributors.keys();
+        // We don't really care about the role of a contributor here
+        details.authors += modContributors.keys();
 
-            auto modContact = modMetadata.value("contact").toObject();
+        auto modContact = modMetadata.value("contact").toObject();
 
-            if (modContact.contains("homepage")) {
-                details.homeurl = Json::requireString(modContact.value("homepage"));
-            }
-            if (modContact.contains("issues")) {
-                details.issue_tracker = Json::requireString(modContact.value("issues"));
-            }
+        if (modContact.contains("homepage")) {
+            TRY_INTO(details.homeurl, Json::requireString(modContact.value("homepage")))
+        }
+        if (modContact.contains("issues")) {
+            TRY_INTO(details.issue_tracker, Json::requireString(modContact.value("issues")))
+        }
 
-            if (modMetadata.contains("license")) {
-                auto license = modMetadata.value("license");
-                if (license.isArray()) {
-                    for (auto l : license.toArray()) {
-                        if (l.isString()) {
-                            details.licenses.append(ModLicense(l.toString()));
-                        } else if (l.isObject()) {
-                            auto obj = l.toObject();
-                            details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(),
-                                                               obj.value("url").toString(), obj.value("description").toString()));
-                        }
+        if (modMetadata.contains("license")) {
+            auto license = modMetadata.value("license");
+            if (license.isArray()) {
+                for (auto l : license.toArray()) {
+                    if (l.isString()) {
+                        details.licenses.append(ModLicense(l.toString()));
+                    } else if (l.isObject()) {
+                        auto obj = l.toObject();
+                        details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(),
+                                                           obj.value("url").toString(), obj.value("description").toString()));
                     }
-                } else if (license.isString()) {
-                    details.licenses.append(ModLicense(license.toString()));
-                } else if (license.isObject()) {
-                    auto obj = license.toObject();
-                    details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(),
-                                                       obj.value("url").toString(), obj.value("description").toString()));
                 }
+            } else if (license.isString()) {
+                details.licenses.append(ModLicense(license.toString()));
+            } else if (license.isObject()) {
+                auto obj = license.toObject();
+                details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(), obj.value("url").toString(),
+                                                   obj.value("description").toString()));
             }
+        }
 
-            if (modMetadata.contains("icon")) {
-                auto icon = modMetadata.value("icon");
-                if (icon.isObject()) {
-                    auto obj = icon.toObject();
-                    // take the largest icon
-                    int largest = 0;
-                    for (auto key : obj.keys()) {
-                        auto size = key.split('x').first().toInt();
-                        if (size > largest) {
-                            largest = size;
-                        }
-                    }
-                    if (largest > 0) {
-                        auto key = QString::number(largest) + "x" + QString::number(largest);
-                        details.icon_file = obj.value(key).toString();
-                    } else {  // parsing the sizes failed
-                        // take the first
-                        if (auto it = obj.begin(); it != obj.end()) {
-                            details.icon_file = it->toString();
-                        }
-                    }
-                } else if (icon.isString()) {
-                    details.icon_file = icon.toString();
+        if (modMetadata.contains("icon")) {
+            auto icon = modMetadata.value("icon");
+            if (icon.isObject()) {
+                auto obj = icon.toObject();
+                // take the largest icon
+                int largest = 0;
+                for (const auto& key : obj.keys()) {
+                    auto size = key.split('x').first().toInt();
+                    largest = std::max(size, largest);
                 }
+                if (largest > 0) {
+                    auto key = QString::number(largest) + "x" + QString::number(largest);
+                    details.icon_file = obj.value(key).toString();
+                } else {  // parsing the sizes failed
+                    // take the first
+                    if (auto it = obj.begin(); it != obj.end()) {
+                        details.icon_file = it->toString();
+                    }
+                }
+            } else if (icon.isString()) {
+                details.icon_file = icon.toString();
             }
-            if (object.contains("depends")) {
-                auto depends = object.value("depends");
-                if (depends.isArray()) {
-                    auto array = depends.toArray();
-                    for (auto obj : array) {
-                        QString modId;
-                        if (obj.isString()) {
-                            modId = obj.toString();
-                        } else if (obj.isObject()) {
-                            auto objValue = obj.toObject();
-                            modId = objValue.value("id").toString();
-                            if (objValue.contains("optional") && objValue.value("optional").toBool()) {
-                                continue;
-                            }
-                        } else {
+        }
+        if (object.contains("depends")) {
+            auto depends = object.value("depends");
+            if (depends.isArray()) {
+                auto array = depends.toArray();
+                for (auto obj : array) {
+                    QString modId;
+                    if (obj.isString()) {
+                        modId = obj.toString();
+                    } else if (obj.isObject()) {
+                        auto objValue = obj.toObject();
+                        modId = objValue.value("id").toString();
+                        if (objValue.contains("optional") && objValue.value("optional").toBool()) {
                             continue;
                         }
-                        if (modId != "minecraft" && !modId.startsWith("quilt_")) {
-                            details.dependencies.append(modId);
-                        }
+                    } else {
+                        continue;
+                    }
+                    if (modId != "minecraft" && !modId.startsWith("quilt_")) {
+                        details.dependencies.append(modId);
                     }
                 }
             }
         }
 
-    } catch (const Exception& e) {
-        qWarning() << "Unable to parse mod info:" << e.cause();
+        return {};
+    };
+    auto result = parse();
+    if (!result) {
+        qWarning() << "Unable to parse mod info:" << result.error();
     }
     return details;
 }
 
-ModDetails ReadForgeInfo(QByteArray contents)
+ModDetails ReadForgeInfo(const QByteArray& contents)
 {
     ModDetails details;
     // Read the data
@@ -510,11 +511,10 @@ ModDetails ReadForgeInfo(QByteArray contents)
     return details;
 }
 
-ModDetails ReadLiteModInfo(QByteArray contents)
+ModDetails ReadLiteModInfo(const QByteArray& contents)
 {
     ModDetails details;
-    QJsonParseError jsonError;
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
+    auto jsonDoc = Json::requireDocument(contents).value_or(QJsonDocument());
     auto object = jsonDoc.object();
     if (object.contains("name")) {
         details.mod_id = details.name = object.value("name").toString();
@@ -535,7 +535,7 @@ ModDetails ReadLiteModInfo(QByteArray contents)
 }
 
 // https://git.sleeping.town/unascribed/NilLoader/src/commit/d7fc87b255fc31019ff90f80d45894927fac6efc/src/main/java/nilloader/api/NilMetadata.java#L64
-ModDetails ReadNilModInfo(QByteArray contents, QString fname)
+ModDetails ReadNilModInfo(const QByteArray& contents, QString fname)
 {
     ModDetails details;
 

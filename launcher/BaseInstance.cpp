@@ -447,14 +447,13 @@ void BaseInstance::setShortcuts(const QList<ShortcutData>& shortcuts)
 QList<ShortcutData> BaseInstance::shortcuts() const
 {
     auto data = m_settings->get("shortcuts").toString().toUtf8();
-    QJsonParseError parseError;
-    auto document = QJsonDocument::fromJson(data, &parseError);
-    if (parseError.error != QJsonParseError::NoError || !document.isArray()) {
+    auto document = Json::requireDocument(data).and_then([](const auto& v) { return Json::requireArray(v); });
+    if (!document) {
         return {};
     }
 
     QList<ShortcutData> results;
-    for (const auto& elem : document.array()) {
+    for (const auto& elem : document.value()) {
         if (!elem.isObject()) {
             continue;
         }
@@ -473,7 +472,7 @@ QList<ShortcutData> BaseInstance::shortcuts() const
             qWarning() << "Shortcut" << shortcutName << "for instance" << name() << "have non-existent path" << filePath;
             continue;
         }
-        results.append({ shortcutName, filePath, static_cast<ShortcutTarget>(value) });
+        results.append({ .name = shortcutName, .filePath = filePath, .target = static_cast<ShortcutTarget>(value) });
     }
     return results;
 }

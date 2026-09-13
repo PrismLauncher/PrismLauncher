@@ -319,127 +319,130 @@ void ModrinthCreationTask::createInstance()
 
 bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<File>& files, bool setInternalData, bool showOptionalDialog)
 {
-    auto doc = Json::requireDocument(indexPath).and_then([](const auto& v) { return Json::requireObject(v, "modrinth.index.json"); });
-    if (!doc) {
-        emitFailed(tr("Could not understand pack index:\n") + doc.error());
-        return false;
-    }
-    try {
-        auto obj = doc.value();
-        int formatVersion = Json::requireInteger(obj, "formatVersion", "modrinth.index.json");
-        if (formatVersion == 1) {
-            auto game = Json::requireString(obj, "game", "modrinth.index.json");
-            if (game != "minecraft") {
-                throw JSONValidationError("Unknown game: " + game);
-            }
-
-            if (setInternalData) {
-                if (m_managedVersionId.isEmpty()) {
-                    m_managedVersionId = obj.value("versionId").toString();
-                }
-                m_managedName = obj.value("name").toString();
-            }
-
-            auto jsonFiles = Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json");
-            std::vector<File> optionalFiles;
-            for (const auto& modInfo : jsonFiles) {
-                File file;
-                file.path = Json::requireString(modInfo, "path").replace("\\", "/");
-
-                auto env = modInfo["env"].toObject();
-                // 'env' field is optional
-                if (!env.isEmpty()) {
-                    QString support = env["client"].toString("unsupported");
-                    if (support == "unsupported") {
-                        continue;
-                    }
-                    if (support == "optional") {
-                        file.required = false;
-                    }
-                }
-
-                QJsonObject hashes = Json::requireObject(modInfo, "hashes");
-                file.hash = QByteArray::fromHex(Json::requireString(hashes, "sha512").toLatin1());
-                file.hashAlgorithm = QCryptographicHash::Sha512;
-
-                // Do not use requireUrl, which uses StrictMode, instead use QUrl's default TolerantMode
-                // (as Modrinth seems to incorrectly handle spaces)
-
-                auto downloadArr = modInfo["downloads"].toArray();
-                for (auto download : downloadArr) {
-                    qWarning() << download.toString();
-                    bool isLast = download.toString() == downloadArr.last().toString();
-
-                    auto downloadUrl = QUrl(download.toString());
-
-                    if (!downloadUrl.isValid()) {
-                        qDebug()
-                            << QString("Download URL (%1) for %2 is not a correctly formatted URL").arg(downloadUrl.toString(), file.path);
-                        if (isLast && file.downloads.isEmpty()) {
-                            throw JSONValidationError(tr("Download URL for %1 is not a correctly formatted URL").arg(file.path));
-                        }
-                    } else {
-                        file.downloads.push_back(downloadUrl);
-                    }
-                }
-
-                (file.required ? files : optionalFiles).push_back(file);
-            }
-
-            if (!optionalFiles.empty()) {
-                if (showOptionalDialog) {
-                    QStringList oFiles;
-                    for (const auto& file : optionalFiles) {
-                        oFiles.push_back(file.path);
-                    }
-                    OptionalModDialog optionalModDialog(m_parent, oFiles);
-                    if (optionalModDialog.exec() == QDialog::Rejected) {
-                        emitAborted();
-                        return false;
-                    }
-
-                    auto selectedMods = optionalModDialog.getResult();
-                    for (auto file : optionalFiles) {
-                        if (selectedMods.contains(file.path)) {
-                            file.required = true;
-                        } else {
-                            file.path += ".disabled";
-                        }
-                        files.push_back(file);
-                    }
-                } else {
-                    for (auto file : optionalFiles) {
-                        file.path += ".disabled";
-                        files.push_back(file);
-                    }
-                }
-            }
-            if (setInternalData) {
-                auto dependencies = Json::requireObject(obj, "dependencies", "modrinth.index.json");
-                for (auto it = dependencies.begin(), end = dependencies.end(); it != end; ++it) {
-                    QString name = it.key();
-                    if (name == "minecraft") {
-                        m_minecraftVersion = Json::requireString(*it, "Minecraft version");
-                    } else if (name == "fabric-loader") {
-                        m_fabricVersion = Json::requireString(*it, "Fabric Loader version");
-                    } else if (name == "quilt-loader") {
-                        m_quiltVersion = Json::requireString(*it, "Quilt Loader version");
-                    } else if (name == "forge") {
-                        m_forgeVersion = Json::requireString(*it, "Forge version");
-                    } else if (name == "neoforge") {
-                        m_neoForgeVersion = Json::requireString(*it, "NeoForge version");
-                    } else {
-                        throw JSONValidationError("Unknown dependency type: " + name);
-                    }
-                }
-            }
-        } else {
-            throw JSONValidationError(QStringLiteral("Unknown format version: %s").arg(formatVersion));
+    std::vector<File> optionalFiles;
+    auto parse = [this, &indexPath, &setInternalData, &files, &optionalFiles] -> Result<> {
+        auto doc = Json::requireDocument(indexPath).and_then([](const auto& v) { return Json::requireObject(v, "modrinth.index.json"); });
+        TRY(doc)
+        const auto& obj = doc.value();
+        auto formatVersion = Json::requireInteger(obj, "formatVersion", "modrinth.index.json");
+        TRY(formatVersion)
+        if (formatVersion.value() != 1) {
+            return std::unexpected(QString("Unknown format version: %1").arg(formatVersion.value()));
+        }
+        auto game = Json::requireString(obj, "game", "modrinth.index.json");
+        TRY(game)
+        if (game.value() != "minecraft") {
+            return std::unexpected("Unknown game: " + game.value());
         }
 
-    } catch (const JSONValidationError& e) {
-        emitFailed(tr("Could not understand pack index:\n") + e.cause());
+        if (setInternalData) {
+            if (m_managedVersionId.isEmpty()) {
+                m_managedVersionId = obj.value("versionId").toString();
+            }
+            m_managedName = obj.value("name").toString();
+        }
+
+        auto jsonFiles = Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json");
+        TRY(jsonFiles)
+        for (const auto& modInfo : jsonFiles.value()) {
+            File file;
+            auto path = Json::requireString(modInfo, "path");
+            TRY(path)
+            file.path = path.value().replace("\\", "/");
+
+            auto env = modInfo["env"].toObject();
+            // 'env' field is optional
+            if (!env.isEmpty()) {
+                QString support = env["client"].toString("unsupported");
+                if (support == "unsupported") {
+                    continue;
+                }
+                if (support == "optional") {
+                    file.required = false;
+                }
+            }
+
+            TRY_INTO(file.hash, Json::requireObject(modInfo, "hashes")
+                                    .and_then([](const auto& v) { return Json::requireString(v, "sha512"); })
+                                    .and_then([](const auto& v) -> Result<QByteArray> { return QByteArray::fromHex(v.toLatin1()); }))
+            file.hashAlgorithm = QCryptographicHash::Sha512;
+
+            // Do not use requireUrl, which uses StrictMode, instead use QUrl's default TolerantMode
+            // (as Modrinth seems to incorrectly handle spaces)
+
+            auto downloadArr = modInfo["downloads"].toArray();
+            for (auto download : downloadArr) {
+                qWarning() << download.toString();
+                bool isLast = download.toString() == downloadArr.last().toString();
+
+                auto downloadUrl = QUrl(download.toString());
+
+                if (!downloadUrl.isValid()) {
+                    qDebug() << QString("Download URL (%1) for %2 is not a correctly formatted URL").arg(downloadUrl.toString(), file.path);
+                    if (isLast && file.downloads.isEmpty()) {
+                        return std::unexpected(tr("Download URL for %1 is not a correctly formatted URL").arg(file.path));
+                    }
+                } else {
+                    file.downloads.push_back(downloadUrl);
+                }
+            }
+
+            (file.required ? files : optionalFiles).push_back(file);
+        }
+
+        if (setInternalData) {
+            auto dependencies = Json::requireObject(obj, "dependencies", "modrinth.index.json");
+            TRY(dependencies)
+            for (auto it = dependencies->begin(), end = dependencies->end(); it != end; ++it) {
+                QString name = it.key();
+                if (name == "minecraft") {
+                    TRY_INTO(m_minecraftVersion, Json::requireString(*it, "Minecraft version"))
+                } else if (name == "fabric-loader") {
+                    TRY_INTO(m_fabricVersion, Json::requireString(*it, "Fabric Loader version"))
+                } else if (name == "quilt-loader") {
+                    TRY_INTO(m_quiltVersion, Json::requireString(*it, "Quilt Loader version"))
+                } else if (name == "forge") {
+                    TRY_INTO(m_forgeVersion, Json::requireString(*it, "Forge version"))
+                } else if (name == "neoforge") {
+                    TRY_INTO(m_neoForgeVersion, Json::requireString(*it, "NeoForge version"))
+                } else {
+                    return std::unexpected("Unknown dependency type: " + name);
+                }
+            }
+        }
+        return {};
+    };
+    if (auto rsp = parse(); !rsp) {
+        emitFailed(tr("Could not understand pack index:\n") + rsp.error());
         return false;
+    }
+    if (!optionalFiles.empty()) {
+        if (showOptionalDialog) {
+            QStringList oFiles;
+            for (const auto& file : optionalFiles) {
+                oFiles.push_back(file.path);
+            }
+            OptionalModDialog optionalModDialog(m_parent, oFiles);
+            if (optionalModDialog.exec() == QDialog::Rejected) {
+                emitAborted();
+                return false;
+            }
+
+            auto selectedMods = optionalModDialog.getResult();
+            for (auto file : optionalFiles) {
+                if (selectedMods.contains(file.path)) {
+                    file.required = true;
+                } else {
+                    file.path += ".disabled";
+                }
+                files.push_back(file);
+            }
+        } else {
+            for (auto file : optionalFiles) {
+                file.path += ".disabled";
+                files.push_back(file);
+            }
+        }
     }
 
     return true;

@@ -186,36 +186,36 @@ std::pair<int, int> parseVersion(const QJsonValue& value)
 // https://minecraft.wiki/w/Data_pack#pack.mcmeta
 // https://minecraft.wiki/w/Raw_JSON_text_format
 // https://minecraft.wiki/w/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
-bool processMCMeta(DataPack* pack, QByteArray&& raw_data)
+bool processMCMeta(DataPack* pack, QByteArray&& rawData)
 {
-    QJsonParseError parse_error;
-    auto json_doc = Json::parseUntilGarbage(raw_data, &parse_error);
-    if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Failed to parse JSON:" << parse_error.errorString();
+    QJsonParseError parseError;
+    auto jsonDoc = Json::parseUntilGarbage(rawData, &parseError);
+    if (parseError.error != QJsonParseError::NoError) {
+        qWarning() << "Failed to parse JSON:" << parseError.errorString();
         return false;
     }
 
-    try {
-        auto pack_obj = Json::requireObject(json_doc.object(), "pack", {});
-
-        int pack_format = 0;
-        std::pair<int, int> min_format;
-        std::pair<int, int> max_format;
-        if (pack_obj.contains("pack_format")) {
-            pack_format = pack_obj.value("pack_format").toInt();
-        }
-        if (pack_obj.contains("min_format")) {
-            min_format = parseVersion(pack_obj.value("min_format"));
-        }
-        if (pack_obj.contains("max_format")) {
-            max_format = parseVersion(pack_obj.value("max_format"));
-        }
-        pack->setPackFormat(pack_format, min_format, max_format);
-        pack->setDescription(DataPackUtils::processComponent(pack_obj.value("description")));
-    } catch (Json::JsonException& e) {
-        qWarning() << "JsonException:" << e.what() << e.cause();
+    auto packObjRsp = Json::requireObject(jsonDoc.object(), "pack", {});
+    if (!packObjRsp) {
+        qWarning() << "Json Exception:" << packObjRsp.error();
         return false;
     }
+
+    const auto& packObj = packObjRsp.value();
+    int packFormat = 0;
+    std::pair<int, int> minFormat;
+    std::pair<int, int> maxFormat;
+    if (packObj.contains("pack_format")) {
+        packFormat = packObj.value("pack_format").toInt();
+    }
+    if (packObj.contains("min_format")) {
+        minFormat = parseVersion(packObj.value("min_format"));
+    }
+    if (packObj.contains("max_format")) {
+        maxFormat = parseVersion(packObj.value("max_format"));
+    }
+    pack->setPackFormat(packFormat, minFormat, maxFormat);
+    pack->setDescription(DataPackUtils::processComponent(packObj.value("description")));
     return true;
 }
 

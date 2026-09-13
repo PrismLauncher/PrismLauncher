@@ -1,53 +1,41 @@
 #include <QDebug>
 #include <QTest>
+#include "Json.h"
 
 #include <minecraft/MojangVersionFormat.h>
 
 class MojangVersionFormatTest : public QObject {
     Q_OBJECT
 
-    static QJsonDocument readJson(const QString path)
-    {
-        QFile jsonFile(path);
-        if (!jsonFile.open(QIODevice::ReadOnly)) {
-            qWarning() << "Failed to open file" << jsonFile.fileName() << "for reading:" << jsonFile.errorString();
-            return QJsonDocument();
-        }
-        auto data = jsonFile.readAll();
-        jsonFile.close();
-        return QJsonDocument::fromJson(data);
-    }
-    static void writeJson(const char* file, QJsonDocument doc)
-    {
-        QFile jsonFile(file);
-        if (!jsonFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            qCritical() << "Failed to open file" << jsonFile.fileName() << "for writing:" << jsonFile.errorString();
-            return;
-        }
-        auto data = doc.toJson(QJsonDocument::Indented);
-        qDebug() << QString::fromUtf8(data);
-        jsonFile.write(data);
-        jsonFile.close();
-    }
-
    private slots:
     void test_Through_Simple()
     {
-        QJsonDocument doc = readJson(QFINDTESTDATA("testdata/Libraries/1.9-simple.json"));
-        auto vfile = MojangVersionFormat::versionFileFromJson(doc, "1.9-simple.json");
-        auto doc2 = MojangVersionFormat::versionFileToJson(vfile);
-        writeJson("1.9-simple-passthorugh.json", doc2);
+        auto doc = Json::requireDocument(QFINDTESTDATA("testdata/Libraries/1.9-simple.json"));
+        QVERIFY2(doc, doc.has_value() ? "" : qPrintable(doc.error()));
 
-        QCOMPARE(doc.toJson(), doc2.toJson());
+        auto vfile = MojangVersionFormat::versionFileFromJson(doc.value(), "1.9-simple.json");
+        QVERIFY2(vfile, vfile.has_value() ? "" : qPrintable(vfile.error()));
+
+        auto doc2 = MojangVersionFormat::versionFileToJson(vfile.value());
+        auto wr = Json::write(doc2, "1.9-simple-passthorugh.json");
+        QVERIFY2(wr, wr.has_value() ? "" : qPrintable(wr.error()));
+
+        QCOMPARE(doc.value().toJson(), doc2.toJson());
     }
 
     void test_Through()
     {
-        QJsonDocument doc = readJson(QFINDTESTDATA("testdata/Libraries/1.9.json"));
-        auto vfile = MojangVersionFormat::versionFileFromJson(doc, "1.9.json");
-        auto doc2 = MojangVersionFormat::versionFileToJson(vfile);
-        writeJson("1.9-passthorugh.json", doc2);
-        QCOMPARE(doc.toJson(), doc2.toJson());
+        auto doc = Json::requireDocument(QFINDTESTDATA("testdata/Libraries/1.9.json"));
+        QVERIFY2(doc, doc.has_value() ? "" : qPrintable(doc.error()));
+
+        auto vfile = MojangVersionFormat::versionFileFromJson(doc.value(), "1.9.json");
+        QVERIFY2(vfile, vfile.has_value() ? "" : qPrintable(vfile.error()));
+
+        auto doc2 = MojangVersionFormat::versionFileToJson(vfile.value());
+        auto wr = Json::write(doc2, "1.9-passthorugh.json");
+        QVERIFY2(wr, wr.has_value() ? "" : qPrintable(wr.error()));
+
+        QCOMPARE(doc.value().toJson(), doc2.toJson());
     }
 };
 

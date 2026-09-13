@@ -6,15 +6,17 @@
 #include "McResolver.h"
 #include "ServerPingTask.h"
 
-unsigned getOnlinePlayers(QJsonObject data)
+namespace {
+unsigned getOnlinePlayers(const QJsonObject& data)
 {
-    try {
-        return Json::requireInteger(Json::requireObject(data, "players"), "online");
-    } catch (Exception& e) {
-        qWarning() << "server ping failed to parse response" << e.what();
+    auto rsp = Json::requireObject(data, "players").and_then([](const auto& v) { return Json::requireInteger(v, "online"); });
+    if (!rsp) {
+        qWarning() << "server ping failed to parse response" << rsp.error();
         return 0;
     }
+    return rsp.value();
 }
+}  // namespace
 
 void ServerPingTask::executeTask()
 {

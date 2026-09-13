@@ -119,22 +119,18 @@ void PackInstallTask::onDownloadSucceeded(QByteArray* responsePtr)
     QByteArray response = std::move(*responsePtr);
     m_jobPtr.reset();
 
-    QJsonParseError parseError{};
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
-    if (parseError.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from ATLauncher at" << parseError.offset << "reason:" << parseError.errorString();
-        qWarning() << response;
-        return;
-    }
-    auto obj = doc.object();
-
     ATLauncher::PackVersion version;
-    try {
-        ATLauncher::loadVersion(version, obj);
-    } catch (const JSONValidationError& e) {
-        emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
+    auto doc = Json::requireDocument(response, "ATLauncher pack manifest").and_then([&version](const auto& v) {
+        auto obj = v.object();
+        return ATLauncher::loadVersion(version, obj);
+    });
+    if (!doc) {
+        qWarning() << "Error while parsing JSON response from ATLauncher:" << doc.error();
+        qWarning() << response;
+        emitFailed(tr("Could not understand pack manifest:\n") + doc.error());
         return;
     }
+
     m_version = version;
 
     // Derived from the installation mode

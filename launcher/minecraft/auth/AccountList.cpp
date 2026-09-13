@@ -39,14 +39,15 @@
 
 #include <QDir>
 #include <QFile>
-#include <QIcon>
 #include <QIODevice>
+#include <QIcon>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonParseError>
 #include <QTextStream>
 #include <QTimer>
+#include "Json.h"
 
 #include <QDebug>
 
@@ -458,29 +459,23 @@ bool AccountList::loadList()
     QByteArray jsonData = file.readAll();
     file.close();
 
-    QJsonParseError parseError;
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &parseError);
+    auto jsonDoc = Json::requireDocument(jsonData, "account list file").and_then([](const auto& v) {
+        return Json::requireObject(v, "account list file");
+    });
 
-    // Fail if the JSON is invalid.
-    if (parseError.error != QJsonParseError::NoError) {
-        qCritical() << QString("Failed to parse account list file: %1 at offset %2")
-                           .arg(parseError.errorString(), QString::number(parseError.offset))
-                           .toUtf8();
+    // Fail if the JSON is invalid or the root is not an object.
+    if (!jsonDoc) {
+        qCritical() << "Failed to parse account list file:" << jsonDoc.error();
         return false;
     }
 
-    // Make sure the root is an object.
-    if (!jsonDoc.isObject()) {
-        qCritical() << "Invalid account list JSON: Root should be an array.";
-        return false;
-    }
-
-    QJsonObject root = jsonDoc.object();
+    QJsonObject root = jsonDoc.value();
 
     // Make sure the format version matches.
     auto listVersion = root.value("formatVersion").toVariant().toInt();
-    if (listVersion == AccountListVersion::MojangMSA)
+    if (listVersion == AccountListVersion::MojangMSA) {
         return loadV3(root);
+    }
 
     QString newName = "accounts-old.json";
     qWarning() << "Unknown format version when loading account list. Existing one will be renamed to" << newName;
@@ -657,8 +652,8 @@ void AccountList::tryNext()
                 bool wasRequested = m_explicitRefreshes.remove(accountId);
                 if (!wasRequested && !account->shouldRefresh()) {
                     // Account no longer needs refreshing, skip it.
-                    qDebug() << "RefreshSchedule: Skipping account" << account->profileName() << "with internal ID"
-                             << accountId << "(no longer needs refresh)";
+                    qDebug() << "RefreshSchedule: Skipping account" << account->profileName() << "with internal ID" << accountId
+                             << "(no longer needs refresh)";
                     break;
                 }
                 m_currentTask = account->refresh();
@@ -666,8 +661,7 @@ void AccountList::tryNext()
                     connect(m_currentTask.get(), &Task::succeeded, this, &AccountList::authSucceeded);
                     connect(m_currentTask.get(), &Task::failed, this, &AccountList::authFailed);
                     m_currentTask->start();
-                    qDebug() << "RefreshSchedule: Processing account" << account->profileName() << "with internal ID"
-                             << accountId;
+                    qDebug() << "RefreshSchedule: Processing account" << account->profileName() << "with internal ID" << accountId;
                     return;
                 }
                 break;

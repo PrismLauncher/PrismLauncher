@@ -44,7 +44,7 @@ Result<int> parseFormatVersion(const QJsonObject& obj, bool required = true);
 void serializeFormatVersion(QJsonObject& obj, int version);
 
 // FIXME: this has a different shape than the others...FIX IT!?
-void parseRequires(const QJsonObject& obj, RequireSet* ptr, const char* keyName = "requires");
+Result<void> parseRequires(const QJsonObject& obj, RequireSet* ptr, const char* keyName = "requires");
 void serializeRequires(QJsonObject& objOut, RequireSet* ptr, const char* keyName = "requires");
 }  // namespace Meta
 

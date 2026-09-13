@@ -48,7 +48,7 @@ QString downloadTypeToString(DownloadType javaDownload)
     }
     return "unknown";
 }
-MetadataPtr parseJavaMeta(const QJsonObject& in)
+Result<MetadataPtr> parseJavaMeta(const QJsonObject& in)
 {
     auto meta = std::make_shared<Metadata>();
 
@@ -61,18 +61,20 @@ MetadataPtr parseJavaMeta(const QJsonObject& in)
     meta->runtimeOS = in["runtimeOS"].toString("unknown");
 
     if (in.contains("checksum")) {
-        auto obj = Json::requireObject(in, "checksum");
-        meta->checksumHash = obj["hash"].toString("");
-        meta->checksumType = obj["type"].toString("");
+        auto checksum = Json::requireObject(in, "checksum");
+        TRY(checksum)
+        meta->checksumHash = checksum.value()["hash"].toString("");
+        meta->checksumType = checksum.value()["type"].toString("");
     }
 
     if (in.contains("version")) {
-        auto obj = Json::requireObject(in, "version");
-        auto name = obj["name"].toString("");
-        auto major = obj["major"].toInteger();
-        auto minor = obj["minor"].toInteger();
-        auto security = obj["security"].toInteger();
-        auto build = obj["build"].toInteger();
+        auto version = Json::requireObject(in, "version");
+        TRY(version)
+        auto name = version.value()["name"].toString("");
+        auto major = version.value()["major"].toInteger();
+        auto minor = version.value()["minor"].toInteger();
+        auto security = version.value()["security"].toInteger();
+        auto build = version.value()["build"].toInteger();
         meta->version = JavaVersion(major, minor, security, build, name);
     }
     return meta;

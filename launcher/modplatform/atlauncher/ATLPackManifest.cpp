@@ -97,56 +97,60 @@ static ATLauncher::ModType parseModType(QString rawType)
     return ATLauncher::ModType::Unknown;
 }
 
-static void loadVersionLoader(ATLauncher::VersionLoader& p, QJsonObject& obj)
+Result<> loadVersionLoader(ATLauncher::VersionLoader& p, QJsonObject& obj)
 {
-    p.type = Json::requireString(obj, "type");
+    TRY_INTO(p.type, Json::requireString(obj, "type"))
     p.choose = obj["choose"].toBool();
 
     auto metadata = Json::requireObject(obj, "metadata");
-    p.latest = metadata["latest"].toBool();
-    p.recommended = metadata["recommended"].toBool();
+    TRY(metadata)
+    p.latest = metadata->value("latest").toBool();
+    p.recommended = metadata->value("recommended").toBool();
 
     // Minecraft Forge
     if (p.type == "forge" || p.type == "neoforge") {
-        p.version = metadata["version"].toString("");
+        p.version = metadata->value("version").toString("");
     }
 
     // Fabric Loader
     if (p.type == "fabric") {
-        p.version = metadata["loader"].toString("");
+        p.version = metadata->value("loader").toString("");
     }
+    return {};
 }
 
-static void loadVersionLibrary(ATLauncher::VersionLibrary& p, QJsonObject& obj)
+Result<> loadVersionLibrary(ATLauncher::VersionLibrary& p, QJsonObject& obj)
 {
-    p.url = Json::requireString(obj, "url");
-    p.file = Json::requireString(obj, "file");
-    p.md5 = Json::requireString(obj, "md5");
+    TRY_INTO(p.url, Json::requireString(obj, "url"))
+    TRY_INTO(p.file, Json::requireString(obj, "file"))
+    TRY_INTO(p.md5, Json::requireString(obj, "md5"))
 
-    p.download_raw = Json::requireString(obj, "download");
+    TRY_INTO(p.download_raw, Json::requireString(obj, "download"))
     p.download = parseDownloadType(p.download_raw);
 
     p.server = obj["server"].toString("");
+    return {};
 }
 
-static void loadVersionConfigs(ATLauncher::VersionConfigs& p, QJsonObject& obj)
+Result<> loadVersionConfigs(ATLauncher::VersionConfigs& p, QJsonObject& obj)
 {
-    p.filesize = Json::requireInteger(obj, "filesize");
-    p.sha1 = Json::requireString(obj, "sha1");
+    TRY_INTO(p.filesize, Json::requireInteger(obj, "filesize"))
+    TRY_INTO(p.sha1, Json::requireString(obj, "sha1"))
+    return {};
 }
 
-static void loadVersionMod(ATLauncher::VersionMod& p, QJsonObject& obj)
+Result<> loadVersionMod(ATLauncher::VersionMod& p, QJsonObject& obj)
 {
-    p.name = Json::requireString(obj, "name");
-    p.version = Json::requireString(obj, "version");
-    p.url = Json::requireString(obj, "url");
-    p.file = Json::requireString(obj, "file");
+    TRY_INTO(p.name, Json::requireString(obj, "name"))
+    TRY_INTO(p.version, Json::requireString(obj, "version"))
+    TRY_INTO(p.url, Json::requireString(obj, "url"))
+    TRY_INTO(p.file, Json::requireString(obj, "file"))
     p.md5 = obj["md5"].toString("");
 
-    p.download_raw = Json::requireString(obj, "download");
+    TRY_INTO(p.download_raw, Json::requireString(obj, "download"))
     p.download = parseDownloadType(p.download_raw);
 
-    p.type_raw = Json::requireString(obj, "type");
+    TRY_INTO(p.type_raw, Json::requireString(obj, "type"))
     p.type = parseModType(p.type_raw);
 
     // This contributes to the Minecraft Forge detection, where we rely on mod.type being "Forge"
@@ -159,15 +163,15 @@ static void loadVersionMod(ATLauncher::VersionMod& p, QJsonObject& obj)
     }
 
     if (obj.contains("extractTo")) {
-        p.extractTo_raw = Json::requireString(obj, "extractTo");
+        TRY_INTO(p.extractTo_raw, Json::requireString(obj, "extractTo"))
         p.extractTo = parseModType(p.extractTo_raw);
         p.extractFolder = obj["extractFolder"].toString("").replace("%s%", "/");
     }
 
     if (obj.contains("decompType")) {
-        p.decompType_raw = Json::requireString(obj, "decompType");
+        TRY_INTO(p.decompType_raw, Json::requireString(obj, "decompType"))
         p.decompType = parseModType(p.decompType_raw);
-        p.decompFile = Json::requireString(obj, "decompFile");
+        TRY_INTO(p.decompFile, Json::requireString(obj, "decompFile"))
     }
 
     p.description = obj["description"].toString("");
@@ -179,8 +183,11 @@ static void loadVersionMod(ATLauncher::VersionMod& p, QJsonObject& obj)
     p.group = obj["group"].toString("");
     if (obj.contains("depends")) {
         auto dependsArr = Json::requireArray(obj, "depends");
-        for (const auto depends : dependsArr) {
-            p.depends.append(Json::requireString(depends));
+        TRY(dependsArr)
+        for (const auto depends : dependsArr.value()) {
+            auto v = Json::requireString(depends);
+            TRY(v)
+            p.depends.append(v.value());
         }
     }
     p.colour = obj["colour"].toString("");
@@ -190,6 +197,7 @@ static void loadVersionMod(ATLauncher::VersionMod& p, QJsonObject& obj)
 
     // computed
     p.effectively_hidden = p.hidden || p.library;
+    return {};
 }
 
 static void loadVersionMessages(ATLauncher::VersionMessages& m, QJsonObject& obj)
@@ -210,126 +218,147 @@ static void loadVersionExtraArguments(ATLauncher::PackVersionExtraArguments& a, 
     a.depends = obj["depends"].toString("");
 }
 
-static void loadVersionKeep(ATLauncher::VersionKeep& k, QJsonObject& obj)
+Result<> loadVersionKeep(ATLauncher::VersionKeep& k, QJsonObject& obj)
 {
-    k.base = Json::requireString(obj, "base");
-    k.target = Json::requireString(obj, "target");
+    TRY_INTO(k.base, Json::requireString(obj, "base"))
+    TRY_INTO(k.target, Json::requireString(obj, "target"))
+    return {};
 }
 
-static void loadVersionKeeps(ATLauncher::VersionKeeps& k, QJsonObject& obj)
+Result<> loadVersionKeeps(ATLauncher::VersionKeeps& k, QJsonObject& obj)
 {
     if (obj.contains("files")) {
         auto files = Json::requireArray(obj, "files");
-        for (const auto keepRaw : files) {
+        TRY(files)
+        for (const auto keepRaw : files.value()) {
             auto keepObj = Json::requireObject(keepRaw);
+            TRY(keepObj)
             ATLauncher::VersionKeep keep;
-            loadVersionKeep(keep, keepObj);
+            TRY(loadVersionKeep(keep, *keepObj))
             k.files.append(keep);
         }
     }
 
     if (obj.contains("folders")) {
         auto folders = Json::requireArray(obj, "folders");
-        for (const auto keepRaw : folders) {
+        TRY(folders)
+        for (const auto keepRaw : *folders) {
             auto keepObj = Json::requireObject(keepRaw);
+            TRY(keepObj)
             ATLauncher::VersionKeep keep;
-            loadVersionKeep(keep, keepObj);
+            TRY(loadVersionKeep(keep, *keepObj))
             k.folders.append(keep);
         }
     }
+    return {};
 }
 
-static void loadVersionDelete(ATLauncher::VersionDelete& d, QJsonObject& obj)
+Result<> loadVersionDelete(ATLauncher::VersionDelete& d, QJsonObject& obj)
 {
-    d.base = Json::requireString(obj, "base");
-    d.target = Json::requireString(obj, "target");
+    TRY_INTO(d.base, Json::requireString(obj, "base"))
+    TRY_INTO(d.target, Json::requireString(obj, "target"))
+    return {};
 }
 
-static void loadVersionDeletes(ATLauncher::VersionDeletes& d, QJsonObject& obj)
+Result<> loadVersionDeletes(ATLauncher::VersionDeletes& d, QJsonObject& obj)
 {
     if (obj.contains("files")) {
         auto files = Json::requireArray(obj, "files");
-        for (const auto deleteRaw : files) {
+        TRY(files)
+        for (const auto deleteRaw : files.value()) {
             auto deleteObj = Json::requireObject(deleteRaw);
+            TRY(deleteObj)
             ATLauncher::VersionDelete versionDelete;
-            loadVersionDelete(versionDelete, deleteObj);
+            TRY(loadVersionDelete(versionDelete, deleteObj.value()))
             d.files.append(versionDelete);
         }
     }
 
     if (obj.contains("folders")) {
         auto folders = Json::requireArray(obj, "folders");
-        for (const auto deleteRaw : folders) {
+        TRY(folders)
+        for (const auto deleteRaw : folders.value()) {
             auto deleteObj = Json::requireObject(deleteRaw);
+            TRY(deleteObj)
             ATLauncher::VersionDelete versionDelete;
-            loadVersionDelete(versionDelete, deleteObj);
+            TRY(loadVersionDelete(versionDelete, deleteObj.value()))
             d.folders.append(versionDelete);
         }
     }
+    return {};
 }
 
-void ATLauncher::loadVersion(PackVersion& v, QJsonObject& obj)
+Result<> ATLauncher::loadVersion(PackVersion& v, QJsonObject& obj)
 {
-    v.version = Json::requireString(obj, "version");
-    v.minecraft = Json::requireString(obj, "minecraft");
+    TRY_INTO(v.version, Json::requireString(obj, "version"))
+    TRY_INTO(v.minecraft, Json::requireString(obj, "minecraft"))
     v.noConfigs = obj["noConfigs"].toBool();
 
     if (obj.contains("mainClass")) {
         auto main = Json::requireObject(obj, "mainClass");
-        loadVersionMainClass(v.mainClass, main);
+        TRY(main)
+        loadVersionMainClass(v.mainClass, main.value());
     }
 
     if (obj.contains("extraArguments")) {
         auto arguments = Json::requireObject(obj, "extraArguments");
-        loadVersionExtraArguments(v.extraArguments, arguments);
+        TRY(arguments)
+        loadVersionExtraArguments(v.extraArguments, arguments.value());
     }
 
     if (obj.contains("loader")) {
         auto loader = Json::requireObject(obj, "loader");
-        loadVersionLoader(v.loader, loader);
+        TRY(loader)
+        TRY(loadVersionLoader(v.loader, loader.value()))
     }
 
     if (obj.contains("libraries")) {
         auto libraries = Json::requireArray(obj, "libraries");
-        for (const auto libraryRaw : libraries) {
+        TRY(libraries)
+        for (const auto libraryRaw : libraries.value()) {
             auto libraryObj = Json::requireObject(libraryRaw);
+            TRY(libraryObj)
             ATLauncher::VersionLibrary target;
-            loadVersionLibrary(target, libraryObj);
+            TRY(loadVersionLibrary(target, libraryObj.value()))
             v.libraries.append(target);
         }
     }
 
     if (obj.contains("mods")) {
         auto mods = Json::requireArray(obj, "mods");
-        for (const auto modRaw : mods) {
+        TRY(mods)
+        for (const auto modRaw : mods.value()) {
             auto modObj = Json::requireObject(modRaw);
+            TRY(modObj)
             ATLauncher::VersionMod mod;
-            loadVersionMod(mod, modObj);
+            TRY(loadVersionMod(mod, modObj.value()))
             v.mods.append(mod);
         }
     }
 
     if (obj.contains("configs")) {
         auto configsObj = Json::requireObject(obj, "configs");
-        loadVersionConfigs(v.configs, configsObj);
+        TRY(configsObj)
+        TRY(loadVersionConfigs(v.configs, configsObj.value()))
     }
 
     auto colourObj = obj["colours"].toObject();
     for (const auto& key : colourObj.keys()) {
-        v.colours[key] = Json::requireString(colourObj.value(key), "colour");
+        TRY_INTO(v.colours[key], Json::requireString(colourObj.value(key), "colour"))
     }
 
     auto warningsObj = obj["warnings"].toObject();
     for (const auto& key : warningsObj.keys()) {
-        v.warnings[key] = Json::requireString(warningsObj.value(key), "warning");
+        TRY_INTO(v.warnings[key], Json::requireString(warningsObj.value(key), "warning"))
     }
 
     auto messages = obj["messages"].toObject();
     loadVersionMessages(v.messages, messages);
 
     auto keeps = obj["keeps"].toObject();
-    loadVersionKeeps(v.keeps, keeps);
+    TRY(loadVersionKeeps(v.keeps, keeps))
 
     auto deletes = obj["deletes"].toObject();
-    loadVersionDeletes(v.deletes, deletes);
+    TRY(loadVersionDeletes(v.deletes, deletes))
+    return {};
 }

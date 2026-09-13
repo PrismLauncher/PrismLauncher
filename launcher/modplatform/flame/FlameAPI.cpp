@@ -44,18 +44,16 @@ QString FlameAPI::getModFileChangelog(int modId, int fileId)
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [&netJob, response, &changelog] {
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Flame::FileChangelog at" << parseError.offset
-                       << "reason:" << parseError.errorString();
+        auto doc = Json::requireDocument(*response, "Flame::FileChangelog");
+        if (!doc) {
+            qWarning() << "Error while parsing JSON response from Flame::FileChangelog:" << doc.error();
             qWarning() << *response;
 
-            netJob->failed(parseError.errorString());
+            netJob->failed(doc.error());
             return;
         }
 
-        changelog = doc.object()["data"].toString();
+        changelog = doc->object()["data"].toString();
     });
 
     QObject::connect(netJob.get(), &NetJob::finished, &lock, &QEventLoop::quit);
@@ -77,18 +75,16 @@ QString FlameAPI::getModDescription(int modId)
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [&netJob, response, &description] {
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Flame::ModDescription at" << parseError.offset
-                       << "reason:" << parseError.errorString();
+        auto doc = Json::requireDocument(*response, "Flame::ModDescription");
+        if (!doc) {
+            qWarning() << "Error while parsing JSON response from Flame::ModDescription:" << doc.error();
             qWarning() << *response;
 
-            netJob->failed(parseError.errorString());
+            netJob->failed(doc.error());
             return;
         }
 
-        description = doc.object()["data"].toString();
+        description = doc->object()["data"].toString();
     });
 
     QObject::connect(netJob.get(), &NetJob::finished, &lock, &QEventLoop::quit);
@@ -215,28 +211,28 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getModCategories() const
 
 QList<ModPlatform::Category> FlameAPI::loadModCategories(const QByteArray& response) const
 {
-    auto doc = Json::requireDocument(response).and_then([](const auto& v) { return Json::requireObject(v); });
-    if (!doc) {
-        qWarning() << "Error while parsing JSON response from categories:" << doc.error();
-        qWarning() << *response;
-        return {};
-    }
     QList<ModPlatform::Category> categories;
+    auto parse = [&response, &categories] -> Result<> {
+        auto doc =
+            Json::requireDocument(response).and_then([](const auto& v) { return Json::requireObject(v); }).and_then([](const auto& v) {
+                return Json::requireArray(v, "data");
+            });
+        TRY(doc)
 
-    try {
-        auto arr = Json::requireArray(doc.value(), "data");
-
-        for (auto val : arr) {
+        for (auto val : doc.value()) {
             auto cat = Json::requireObject(val);
-            auto id = Json::requireInteger(cat, "id");
-            auto name = Json::requireString(cat, "name");
-            categories.push_back({ .name = name, .id = QString::number(id) });
+            TRY(cat)
+            auto id = Json::requireInteger(cat.value(), "id");
+            TRY(id)
+            auto name = Json::requireString(cat.value(), "name");
+            TRY(name)
+            categories.push_back({ .name = name.value(), .id = QString::number(id.value()) });
         }
-
-    } catch (Json::JsonException& e) {
-        qCritical() << "Failed to parse response from a version request.";
-        qCritical() << e.what();
-        qDebug() << *doc;
+        return {};
+    };
+    if (auto rsp = parse(); !rsp) {
+        qCritical() << "Failed to parse response from categories:" << rsp.error();
+        qDebug() << response;
     }
     return categories;
 };

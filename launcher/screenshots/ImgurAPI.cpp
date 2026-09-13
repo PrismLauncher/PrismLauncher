@@ -52,6 +52,7 @@
 #include <QUrl>
 #include <expected>
 #include <memory>
+#include "Json.h"
 
 namespace ImgurAPI {
 
@@ -62,7 +63,8 @@ std::pair<Net::Request::Ptr, QString*> makeUpload(ScreenShot::Ptr shot)
         if (!file->open(QFile::ReadOnly)) {
             qWarning() << "Could not open file" << shot->m_file.absoluteFilePath() << "for reading:" << file->errorString();
             file->deleteLater();
-            return std::unexpected(QObject::tr("Could not open file %1 for reading: %2").arg(shot->m_file.absoluteFilePath(), file->errorString()));
+            return std::unexpected(
+                QObject::tr("Could not open file %1 for reading: %2").arg(shot->m_file.absoluteFilePath(), file->errorString()));
         }
 
         QHttpPart filePart;
@@ -86,15 +88,14 @@ std::pair<Net::Request::Ptr, QString*> makeUpload(ScreenShot::Ptr shot)
         return multipart;
     };
     auto parseFunc = [shot](const QByteArray& response) -> Net::RPC::Sink<QString>::ParseResult {
-        QJsonParseError jsonError;
-        QJsonDocument doc = QJsonDocument::fromJson(response, &jsonError);
-        if (jsonError.error != QJsonParseError::NoError) {
-            qDebug() << "imgur server did not reply with JSON" << jsonError.errorString();
+        auto doc = Json::requireDocument(response);
+        if (!doc) {
+            qDebug() << "imgur server did not reply with JSON" << doc.error();
             return std::unexpected("Invalid json reply");
         }
-        auto object = doc.object();
+        auto object = doc.value().object();
         if (!object.value("success").toBool()) {
-            qDebug() << "Screenshot upload not successful:" << doc.toJson();
+            qDebug() << "Screenshot upload not successful:" << doc->toJson();
             return std::unexpected("Screenshot was not uploaded successfully");
         }
         const auto data = object.value("data").toObject();
@@ -127,15 +128,14 @@ std::pair<Net::Request::Ptr, AlbumResult*> makeAlbum(const QList<ScreenShot::Ptr
     };
 
     auto parseFunc = [](const QByteArray& response) -> Net::RPC::Sink<AlbumResult>::ParseResult {
-        QJsonParseError jsonError;
-        QJsonDocument doc = QJsonDocument::fromJson(response, &jsonError);
-        if (jsonError.error != QJsonParseError::NoError) {
-            qDebug() << jsonError.errorString();
+        auto doc = Json::requireDocument(response);
+        if (!doc) {
+            qDebug() << doc.error();
             return std::unexpected("Invalid json reply");
         }
-        auto object = doc.object();
+        auto object = doc.value().object();
         if (!object.value("success").toBool()) {
-            qDebug() << doc.toJson();
+            qDebug() << doc->toJson();
             return std::unexpected("Failed to create album");
         }
         return AlbumResult{ .deleteHash = object.value("data").toObject().value("deletehash").toString(),

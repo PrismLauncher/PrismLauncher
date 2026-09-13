@@ -46,7 +46,7 @@
 #include <utility>
 
 #include "../Version.h"
-
+#include "Exception.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceType.h"
 #include "tasks/Task.h"
@@ -140,8 +140,8 @@ class ResourceAPI {
      *  Those are needed for the same reason as documentToArray, and NEED to be re-implemented in the same way.
      */
 
-    virtual void loadIndexedPack(ModPlatform::IndexedPack&, QJsonObject&) const = 0;
-    virtual ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType) const = 0;
+    virtual Result<> loadIndexedPack(ModPlatform::IndexedPack&, const QJsonObject&) const = 0;
+    virtual Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType) const = 0;
 
     /** Converts a JSON document to a common array format.
      *
@@ -155,7 +155,7 @@ class ResourceAPI {
      *  Those are needed for the same reason as documentToArray, and NEED to be re-implemented in the same way.
      */
 
-    virtual void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&) const = 0;
+    virtual Result<> loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&) const = 0;
 
     virtual std::pair<Task::Ptr, QByteArray*> getModCategories() const = 0;
 

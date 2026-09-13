@@ -20,6 +20,8 @@
 
 #include <expected>
 #include <utility>
+
+#include "Exception.h"
 #include "net/ByteArraySink.h"
 #include "net/Request.h"
 
@@ -28,7 +30,7 @@ namespace Net::RPC {
 template <typename T>
 class Sink : public ByteArraySink {
    public:
-    using ParseResult = std::expected<T, QString>;
+    using ParseResult = Result<T>;
     using ParseFunc = std::function<ParseResult(const QByteArray&)>;
 
     explicit Sink(ParseFunc parseFunc) : m_parseFunc(parseFunc) {}
@@ -38,21 +40,10 @@ class Sink : public ByteArraySink {
     Result<> finalize(QNetworkReply& /*reply*/) override
     {
         auto validatorResult = finalizeAllValidators();
-        if (!validatorResult) {
-            return validatorResult;
-        }
-        try {
-            auto result = m_parseFunc(m_output);
-            if (!result.has_value()) {
-                return std::unexpected(result.error());
-            }
-            m_result = *result;
-        } catch (const std::exception& e) {
-            return std::unexpected<Error>(QString::fromUtf8(e.what()));
-            // ToDo: make this suppport QJsonException
-        } catch (...) {
-            return std::unexpected<Error>(QObject::tr("Unknown error while parsing RPC response"));
-        }
+        TRY(validatorResult)
+        auto result = m_parseFunc(m_output);
+        TRY(result)
+        m_result = *result;
         return {};
     }
 

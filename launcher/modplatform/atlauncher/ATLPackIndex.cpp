@@ -21,28 +21,37 @@
 
 #include "Json.h"
 
-static void loadIndexedVersion(ATLauncher::IndexedVersion& v, QJsonObject& obj)
+namespace {
+Result<> loadIndexedVersion(ATLauncher::IndexedVersion& v, QJsonObject& obj)
 {
-    v.version = Json::requireString(obj, "version");
-    v.minecraft = Json::requireString(obj, "minecraft");
+    TRY_INTO(v.version, Json::requireString(obj, "version"))
+    TRY_INTO(v.minecraft, Json::requireString(obj, "minecraft"))
+    return {};
 }
+}  // namespace
 
-void ATLauncher::loadIndexedPack(ATLauncher::IndexedPack& m, QJsonObject& obj)
+Result<> ATLauncher::loadIndexedPack(ATLauncher::IndexedPack& m, QJsonObject& obj)
 {
-    m.id = Json::requireInteger(obj, "id");
-    m.position = Json::requireInteger(obj, "position");
-    m.name = Json::requireString(obj, "name");
-    m.type = Json::requireString(obj, "type") == "private" ? ATLauncher::PackType::Private : ATLauncher::PackType::Public;
+    TRY_INTO(m.id, Json::requireInteger(obj, "id"))
+    TRY_INTO(m.position, Json::requireInteger(obj, "position"))
+    TRY_INTO(m.name, Json::requireString(obj, "name"))
+    auto type = Json::requireString(obj, "type");
+    TRY(type)
+    m.type = type.value() == "private" ? ATLauncher::PackType::Private : ATLauncher::PackType::Public;
     auto versionsArr = Json::requireArray(obj, "versions");
-    for (const auto versionRaw : versionsArr) {
+    TRY(versionsArr)
+    for (const auto versionRaw : versionsArr.value()) {
         auto versionObj = Json::requireObject(versionRaw);
+        TRY(versionObj)
         ATLauncher::IndexedVersion version;
-        loadIndexedVersion(version, versionObj);
+        TRY(loadIndexedVersion(version, versionObj.value()))
         m.versions.append(version);
     }
     m.system = obj["system"].toBool();
     m.description = obj["description"].toString("");
 
     static const QRegularExpression s_regex("[^A-Za-z0-9]");
-    m.safeName = Json::requireString(obj, "name").replace(s_regex, "").toLower() + ".png";
+    TRY_INTO(m.safeName,
+             Json::requireString(obj, "name").and_then([](auto v) -> Result<QString> { return v.replace(s_regex, "").toLower() + ".png"; }))
+    return {};
 }

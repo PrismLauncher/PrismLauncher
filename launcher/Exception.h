@@ -51,6 +51,13 @@ using Result = std::expected<T, Error>;
         return std::unexpected{ _result.error() }; \
     }
 
+#define TRY_INTO(to, expected)                     \
+    if (const auto _result = expected; !_result) { \
+        return std::unexpected{ _result.error() }; \
+    } else {                                       \
+        to = _result.value();                      \
+    }
+
 class Exception : public std::exception {
    public:
     Exception(const QString& message) : std::exception(), m_message(message.toUtf8()) { qCritical() << "Exception:" << message; }

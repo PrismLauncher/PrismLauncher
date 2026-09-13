@@ -136,12 +136,12 @@ QJsonObject componentToJsonV1(const ComponentPtr& component)
     return obj;
 }
 
-ComponentPtr componentFromJsonV1(PackProfile* parent, const QString& componentJsonPattern, const QJsonObject& obj)
+Result<ComponentPtr> componentFromJsonV1(PackProfile* parent, const QJsonObject& obj)
 {
     // critical
     auto uid = Json::requireString(obj.value("uid"));
-    auto filePath = componentJsonPattern.arg(uid);
-    auto component = makeShared<Component>(parent, uid);
+    TRY(uid)
+    auto component = makeShared<Component>(parent, uid.value());
     component->m_version = obj.value("version").toString();
     component->m_dependencyOnly = obj.value("dependencyOnly").toBool();
     component->m_important = obj.value("important").toBool();
@@ -150,8 +150,8 @@ ComponentPtr componentFromJsonV1(PackProfile* parent, const QString& componentJs
     // TODO @RESILIENCE: ignore invalid values/structure here?
     component->m_cachedVersion = obj.value("cachedVersion").toString();
     component->m_cachedName = obj.value("cachedName").toString();
-    Meta::parseRequires(obj, &component->m_cachedRequires, "cachedRequires");
-    Meta::parseRequires(obj, &component->m_cachedConflicts, "cachedConflicts");
+    TRY(Meta::parseRequires(obj, &component->m_cachedRequires, "cachedRequires"))
+    TRY(Meta::parseRequires(obj, &component->m_cachedConflicts, "cachedConflicts"))
     component->m_cachedVolatile = obj.value("volatile").toBool();
     bool disabled = obj.value("disabled").toBool();
     component->setEnabled(!disabled);
@@ -186,7 +186,7 @@ bool savePackProfile(const QString& filename, const ComponentContainer& containe
 }
 
 // Read the given file into component containers
-Result<> loadPackProfile(PackProfile* parent, const QString& filename, const QString& componentJsonPattern, ComponentContainer& container)
+Result<> loadPackProfile(PackProfile* parent, const QString& filename, ComponentContainer& container)
 {
     QFileInfo componentsFile(filename);
     if (!componentsFile.exists()) {
@@ -203,26 +203,33 @@ Result<> loadPackProfile(PackProfile* parent, const QString& filename, const QSt
         qCWarning(instanceProfileC) << "Ignoring overridden order";
         return std::unexpected(message);
     }
-
-    // and then read it and process it if all above is true.
-    try {
+    auto parse = [&obj, &container, &parent] -> Result<> {
         // check order file version.
         auto version = Json::requireInteger(obj->value("formatVersion"));
-        if (version != currentComponentsFileVersion) {
-            throw JSONValidationError(QObject::tr("Invalid component file version, expected %1").arg(currentComponentsFileVersion));
+        TRY(version)
+        if (version.value() != currentComponentsFileVersion) {
+            auto message = QObject::tr("bad file format");
+            return std::unexpected(message);
         }
         auto orderArray = Json::requireArray(obj->value("components"));
-        for (auto item : orderArray) {
+        TRY(orderArray)
+        for (auto item : orderArray.value()) {
             auto compObj = Json::requireObject(item, "Component must be an object.");
-            container.append(componentFromJsonV1(parent, componentJsonPattern, compObj));
+            TRY(compObj)
+            auto comp = componentFromJsonV1(parent, compObj.value());
+            TRY(comp)
+            container.append(comp.value());
         }
-    } catch ([[maybe_unused]] const JSONValidationError& err) {
+        return {};
+    };
+    if (auto rsp = parse(); !rsp) {
         auto message = QObject::tr("Couldn't parse %1 : bad file format").arg(componentsFile.fileName());
         qCCritical(instanceProfileC) << message;
-        qCWarning(instanceProfileC) << "error:" << err.what();
+        qCWarning(instanceProfileC) << "error:" << rsp.error();
         container.clear();
         return std::unexpected(message);
     }
+
     return {};
 }
 }  // namespace
@@ -299,7 +306,7 @@ Result<> PackProfile::load()
 
     // load the new component list and swap it with the current one...
     ComponentContainer newComponents;
-    if (auto result = loadPackProfile(this, filename, patchesPattern(), newComponents); !result) {
+    if (auto result = loadPackProfile(this, filename, newComponents); !result) {
         qCritical() << d->m_instance->name() << "|" << "Failed to load the component config";
         return result;
     }

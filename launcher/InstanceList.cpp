@@ -48,6 +48,7 @@
 #include <QTimer>
 #include <QUuid>
 #include <algorithm>
+#include "Json.h"
 
 #include "Application.h"
 #include "BaseInstance.h"
@@ -828,24 +829,16 @@ void InstanceList::loadGroupList()
     }
     const auto& jsonData = rsp.value();
 
-    QJsonParseError error;
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &error);
+    auto jsonDoc = Json::requireDocument(jsonData).and_then([](const auto& v) { return Json::requireObject(v); });
 
     // if the json was bad, fail
-    if (error.error != QJsonParseError::NoError) {
-        qCritical() << QString("Failed to parse instance group file: %1 at offset %2")
-                           .arg(error.errorString(), QString::number(error.offset))
-                           .toUtf8();
-        return;
-    }
-
     // if the root of the json wasn't an object, fail
-    if (!jsonDoc.isObject()) {
-        qWarning() << "Invalid group file. Root entry should be an object.";
+    if (!jsonDoc) {
+        qCritical() << QString("Failed to parse instance group file: %1").arg(jsonDoc.error()).toUtf8();
         return;
     }
 
-    QJsonObject rootObj = jsonDoc.object();
+    QJsonObject rootObj = jsonDoc.value();
 
     // Make sure the format version matches, otherwise fail.
     if (rootObj.value("formatVersion").toVariant().toInt() != g_GROUP_FILE_FORMAT_VERSION) {

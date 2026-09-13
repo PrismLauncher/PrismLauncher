@@ -164,14 +164,13 @@ void TechnicPage::suggestCurrent()
             return;
         }
 
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
-        QJsonObject obj = doc.object();
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Technic at" << parseError.offset << "reason:" << parseError.errorString();
+        auto doc = Json::requireDocument(response);
+        if (!doc) {
+            qWarning() << "Error while parsing JSON response from Technic" << doc.error();
             qWarning() << response;
             return;
         }
+        auto obj = doc->object();
         if (!obj.contains("url")) {
             qWarning() << "Json doesn't contain an url key";
             return;
@@ -303,21 +302,14 @@ void TechnicPage::onSolderLoaded(QByteArray* responsePtr)
 
     current.versions.clear();
 
-    QJsonParseError parseError{};
-    auto doc = QJsonDocument::fromJson(response, &parseError);
-    if (parseError.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from Solder at" << parseError.offset << "reason:" << parseError.errorString();
-        qWarning() << response;
-        fallback();
-        return;
-    }
-    auto obj = doc.object();
-
     TechnicSolder::Pack pack;
-    try {
-        TechnicSolder::loadPack(pack, obj);
-    } catch (const JSONValidationError& err) {
-        qCritical() << "Couldn't parse Solder pack metadata:" << err.cause();
+    auto doc = Json::requireDocument(response).and_then([&pack](const auto& v) {
+        auto obj = v.object();
+        return TechnicSolder::loadPack(pack, obj);
+    });
+    if (!doc) {
+        qWarning() << "Error while parsing JSON response from Solder:" << doc.error();
+        qWarning() << response;
         fallback();
         return;
     }

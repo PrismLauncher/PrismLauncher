@@ -172,30 +172,25 @@ void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
         emitFailed(tr("Failed to parse versions response: %1").arg(doc.error()));
         return;
     }
-    try {
-        QMapIterator<QString, QString> iterator(pendingHashes);
-        while (iterator.hasNext()) {
-            iterator.next();
+    QMapIterator<QString, QString> iterator(pendingHashes);
+    while (iterator.hasNext()) {
+        iterator.next();
 
-            const QJsonObject obj = doc.value()[iterator.value()].toObject();
-            if (obj.isEmpty()) {
-                continue;
-            }
-
-            const QJsonArray filesArray = obj["files"].toArray();
-            if (auto fileIter = std::find_if(filesArray.begin(), filesArray.end(),
-                                             [&iterator](const QJsonValue& file) { return file["hashes"]["sha512"] == iterator.value(); });
-                fileIter != filesArray.end()) {
-                // map the file to the url
-                resolvedFiles[iterator.key()] = ResolvedFile{ .sha1 = fileIter->toObject()["hashes"].toObject()["sha1"].toString(),
-                                                              .sha512 = iterator.value(),
-                                                              .url = fileIter->toObject()["url"].toString(),
-                                                              .size = fileIter->toObject()["size"].toInt() };
-            }
+        const QJsonObject obj = doc.value()[iterator.value()].toObject();
+        if (obj.isEmpty()) {
+            continue;
         }
-    } catch (const Json::JsonException& e) {
-        emitFailed(tr("Failed to parse versions response: %1").arg(e.what()));
-        return;
+
+        const QJsonArray filesArray = obj["files"].toArray();
+        if (auto fileIter = std::ranges::find_if(
+                filesArray, [&iterator](const QJsonValue& file) { return file["hashes"]["sha512"] == iterator.value(); });
+            fileIter != filesArray.end()) {
+            // map the file to the url
+            resolvedFiles[iterator.key()] = ResolvedFile{ .sha1 = fileIter->toObject()["hashes"].toObject()["sha1"].toString(),
+                                                          .sha512 = iterator.value(),
+                                                          .url = fileIter->toObject()["url"].toString(),
+                                                          .size = fileIter->toObject()["size"].toInt() };
+        }
     }
     pendingHashes.clear();
     buildZip();

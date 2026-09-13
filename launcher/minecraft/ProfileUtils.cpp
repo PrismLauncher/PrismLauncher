@@ -43,10 +43,32 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QSaveFile>
+#include <utility>
 
-namespace ProfileUtils {
+namespace {
 
 static const int currentOrderFileVersion = 1;
+
+VersionFilePtr createErrorVersionFile(QString fileId, QString filepath, const QString& error)
+{
+    auto outError = std::make_shared<VersionFile>();
+    outError->uid = outError->name = std::move(fileId);
+    // outError->filename = filepath;
+    outError->addProblem(ProblemSeverity::Error, error);
+    return outError;
+}
+
+VersionFilePtr guardedParseJson(const QJsonDocument& doc, const QString& fileId, const QString& filepath, const bool& requireOrder)
+{
+    auto rsp = OneSixVersionFormat::versionFileFromJson(doc, filepath, requireOrder);
+    if (!rsp) {
+        return createErrorVersionFile(fileId, filepath, rsp.error());
+    }
+    return rsp.value();
+}
+
+}  // namespace
+namespace ProfileUtils {
 
 bool readOverrideOrders(QString path, PatchOrder& order)
 {
@@ -55,50 +77,34 @@ bool readOverrideOrders(QString path, PatchOrder& order)
         return false;
     }
 
-    // and it's valid JSON
-    auto obj = Json::requireDocument(path, "order file").and_then([](const auto& v) { return Json::requireObject(v); });
-    if (!obj) {
-        qCritical() << "Couldn't parse" << path << ":" << obj.error();
-        qWarning() << "Ignoring overridden order";
-        return false;
-    }
-
-    // and then read it and process it if all above is true.
-    try {
+    auto parse = [&path, &order] -> Result<> {
+        // and it's valid JSON
+        auto obj = Json::requireDocument(path, "order file").and_then([](const auto& v) { return Json::requireObject(v); });
+        TRY(obj)
+        // and then read it and process it if all above is true.
         // check order file version.
         auto version = Json::requireInteger(obj->value("version"));
+        TRY(version)
         if (version != currentOrderFileVersion) {
-            throw JSONValidationError(QObject::tr("Invalid order file version, expected %1").arg(currentOrderFileVersion));
+            return std::unexpected(QObject::tr("Invalid order file version, expected %1").arg(currentOrderFileVersion));
         }
         auto orderArray = Json::requireArray(obj->value("order"));
-        for (auto item : orderArray) {
-            order.append(Json::requireString(item));
+        TRY(orderArray)
+        for (auto item : orderArray.value()) {
+            auto v = Json::requireString(item);
+            TRY(v)
+            order.append(v.value());
         }
-    } catch ([[maybe_unused]] const JSONValidationError& err) {
-        qCritical() << "Couldn't parse" << path << ": bad file format";
+        return {};
+    };
+    if (auto rsp = parse(); !rsp) {
+        qCritical() << "Couldn't parse" << path << ":" << rsp.error();
         qWarning() << "Ignoring overridden order";
         order.clear();
         return false;
     }
+
     return true;
-}
-
-static VersionFilePtr createErrorVersionFile(QString fileId, QString filepath, QString error)
-{
-    auto outError = std::make_shared<VersionFile>();
-    outError->uid = outError->name = fileId;
-    // outError->filename = filepath;
-    outError->addProblem(ProblemSeverity::Error, error);
-    return outError;
-}
-
-static VersionFilePtr guardedParseJson(const QJsonDocument& doc, const QString& fileId, const QString& filepath, const bool& requireOrder)
-{
-    try {
-        return OneSixVersionFormat::versionFileFromJson(doc, filepath, requireOrder);
-    } catch (const Exception& e) {
-        return createErrorVersionFile(fileId, filepath, e.cause());
-    }
 }
 
 VersionFilePtr parseJsonFile(const QFileInfo& fileInfo, const bool requireOrder)

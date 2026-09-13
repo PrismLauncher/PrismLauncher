@@ -113,13 +113,7 @@ void FlameCreationTask::executeTask()
 
     const QString indexPath(FS::PathCombine(m_stagingPath, "manifest.json"));
 
-    try {
-        if (!Flame::loadManifest(m_pack, indexPath)) {
-            // emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
-            createInstance();  // to keep the backwards compatibility here just create the instance
-            return;
-        }
-    } catch ([[maybe_unused]] const JSONValidationError&) {
+    if (!Flame::loadManifest(m_pack, indexPath)) {
         // emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
         createInstance();  // to keep the backwards compatibility here just create the instance
         return;
@@ -224,32 +218,41 @@ void FlameCreationTask::executeTask()
         connect(job.get(), &Task::succeeded, this,
                 [this, rawResponse, fileIds, oldInstDir, oldFiles, oldMinecraftDir, createInst]() mutable {
                     // Parse the API response
-                    try {
-                        auto doc = Json::requireDocument(*rawResponse).and_then([fileIds](const auto& v) -> Result<QJsonArray> {
-                            return Json::requireObject(v).and_then([fileIds](const auto& o) -> Result<QJsonArray> {
-                                if (fileIds.size() == 1) {
-                                    return { { Json::requireObject(o, "data") } };
-                                }
-                                return Json::requireArray(o, "data");
-                            });
+                    auto doc = Json::requireDocument(*rawResponse).and_then([fileIds](const auto& v) -> Result<QJsonArray> {
+                        return Json::requireObject(v).and_then([fileIds](const auto& o) -> Result<QJsonArray> {
+                            if (fileIds.size() == 1) {
+                                auto obj = Json::requireObject(o, "data");
+                                TRY(obj)
+                                return { { obj.value() } };
+                            }
+                            return Json::requireArray(o, "data");
                         });
-                        if (!doc) {
-                            qWarning() << "Error while parsing JSON response from Flame files task:" << doc.error();
-                            qWarning() << *rawResponse;
-                            return;
-                        }
+                    });
+                    if (!doc) {
+                        qWarning() << "Error while parsing JSON response from Flame files task:" << doc.error();
+                        qWarning() << *rawResponse;
+                        return;
+                    }
 
-                        for (auto entry : doc.value()) {
+                    for (auto entry : doc.value()) {
+                        auto parse = [&entry, &oldFiles] -> Result<> {
                             auto entryObj = Json::requireObject(entry);
+                            TRY(entryObj)
 
                             Flame::File file;
                             // We don't care about blocked mods, we just need local data to delete the file
-                            file.version = FlameMod::loadIndexedPackVersion(entryObj);
-                            auto id = Json::requireInteger(entryObj, "id");
-                            oldFiles.insert(id, file);
+                            auto versionRes = FlameMod::loadIndexedPackVersion(entryObj.value());
+                            TRY(versionRes)
+                            file.version = versionRes.value();
+                            auto id = Json::requireInteger(entryObj.value(), "id");
+                            TRY(id)
+                            oldFiles.insert(id.value(), file);
+                            return {};
+                        };
+                        if (auto rsp = parse(); !rsp) {
+                            qCritical() << rsp.error();
+                            break;
                         }
-                    } catch (Json::JsonException& e) {
-                        qCritical() << e.cause() << e.what();
                     }
 
                     // Delete the files
@@ -378,25 +381,19 @@ void FlameCreationTask::createInstance()
 {
     const QString parentFolder(FS::PathCombine(m_stagingPath, "flame"));
 
-    try {
-        const QString indexPath(FS::PathCombine(m_stagingPath, "manifest.json"));
-        if (!m_pack.isLoaded) {
-            auto rsp = Flame::loadManifest(m_pack, indexPath);
-            if (!rsp) {
-                emitFailed(tr("Could not understand pack manifest:\n") + rsp.error());
-                return;
-            }
+    const QString indexPath(FS::PathCombine(m_stagingPath, "manifest.json"));
+    if (!m_pack.isLoaded) {
+        auto rsp = Flame::loadManifest(m_pack, indexPath);
+        if (!rsp) {
+            emitFailed(tr("Could not understand pack manifest:\n") + rsp.error());
+            return;
         }
-
-        // Keep index file in case we need it some other time (like when changing versions)
-        const QString newIndexPlace(FS::PathCombine(parentFolder, "manifest.json"));
-        FS::ensureFilePathExists(newIndexPlace);
-        FS::move(indexPath, newIndexPlace);
-
-    } catch (const JSONValidationError& e) {
-        emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
-        return;
     }
+
+    // Keep index file in case we need it some other time (like when changing versions)
+    const QString newIndexPlace(FS::PathCombine(parentFolder, "manifest.json"));
+    FS::ensureFilePathExists(newIndexPlace);
+    FS::move(indexPath, newIndexPlace);
 
     if (!m_pack.overrides.isEmpty()) {
         QString overridePath = FS::PathCombine(m_stagingPath, m_pack.overrides);

@@ -4,13 +4,14 @@
 
 #pragma once
 
+#include "Exception.h"
 #include "modplatform/ModIndex.h"
 
 namespace FlameMod {
 
-void loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj);
-void loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj);
+Result<> loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj);
+void loadURLs(ModPlatform::IndexedPack& pack, const QJsonObject& obj);
 void loadBody(ModPlatform::IndexedPack& pack);
-void loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArray& arr);
-ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, bool loadChangelog = false);
+Result<> loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArray& arr);
+Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(QJsonObject& obj, bool loadChangelog = false);
 }  // namespace FlameMod
