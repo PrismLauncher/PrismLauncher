@@ -94,6 +94,12 @@ ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWi
     connect(updateIncludeBetas, &QAction::triggered, this,
             [this] { updateMods(false, { ModPlatform::IndexedVersionType::Release, ModPlatform::IndexedVersionType::Beta }); });
 
+    auto* updateIncludeAlphas = updateMenu->addAction(tr("Check for Updates (Release, Beta and Alpha)"));
+    connect(updateIncludeAlphas, &QAction::triggered, this, [this] {
+        updateMods(false, { ModPlatform::IndexedVersionType::Release, ModPlatform::IndexedVersionType::Beta,
+                            ModPlatform::IndexedVersionType::Alpha });
+    });
+
     updateMenu->addAction(ui->actionVerifyItemDependencies);
     connect(ui->actionVerifyItemDependencies, &QAction::triggered, this, [this] { updateMods(true); });
 
