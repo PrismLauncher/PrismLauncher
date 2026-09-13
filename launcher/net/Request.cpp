@@ -149,10 +149,10 @@ void Request::executeTask()
         return;
     }
     switch (*result) {
-        case Sink::Ok:
+        case Sink::InitType::Ok:
             qCDebug(m_logCat) << getUid().toString() << "Running" << m_url.toString();
             break;
-        case Sink::CacheHit:
+        case Sink::InitType::CacheHit:
             m_state = Task::State::Succeeded;
             qCDebug(m_logCat) << getUid().toString() << "Request cache hit" << m_url.toString();
             emit succeeded();
