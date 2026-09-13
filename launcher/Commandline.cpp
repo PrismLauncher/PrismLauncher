@@ -59,7 +59,8 @@ QStringList splitArgs(const QString& args)
             escape = false;
             // in "quotes"
         } else if (!inquotes.isNull()) {
-            if (cchar == '\\') {
+            // a backslash only escapes the matching quote or another backslash, so Windows paths survive intact
+            if (cchar == '\\' && i + 1 < args.length() && (args.at(i + 1) == inquotes || args.at(i + 1) == '\\')) {
                 escape = true;
             } else if (cchar == inquotes) {
                 inquotes = QChar::Null;
@@ -116,7 +117,7 @@ QString expandVariables(const QString& input, const QProcessEnvironment& dict)
                     const auto res = dict.value(result.mid(startIdx, i - 1 - startIdx), "");
                     if (!res.isEmpty()) {
                         result.replace(startIdx - 2, i - startIdx + 2, res);
-                        i = startIdx - 2 + res.length();
+                        i = startIdx - 2 + static_cast<int>(res.length());
                     }
                     state = State::Base;
                 }
@@ -126,7 +127,7 @@ QString expandVariables(const QString& input, const QProcessEnvironment& dict)
                     const auto res = dict.value(result.mid(startIdx, i - startIdx - 1), "");
                     if (!res.isEmpty()) {
                         result.replace(startIdx - 1, i - startIdx, res);
-                        i = startIdx - 1 + res.length();
+                        i = startIdx - 1 + static_cast<int>(res.length());
                     }
                     state = State::Base;
                 }
@@ -148,6 +149,17 @@ QStringList process(const QString& cmd, const QProcessEnvironment& dict)
         arg = expandVariables(arg, dict);
     }
     return splited;
+}
+
+QString quoteForSplitCommand(const QString& input)
+{
+    if (!input.contains(' ')) {
+        return input;
+    }
+
+    QString escaped = input;
+    escaped.replace("\"", R"(""")");
+    return "\"" + escaped + "\"";
 }
 
 }  // namespace Commandline

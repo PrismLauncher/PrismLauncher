@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,29 +34,22 @@
  *      limitations under the License.
  */
 
-#include "SkinDelete.h"
+#pragma once
 
-#include <net/DummySink.h>
-#include "net/RawHeaderProxy.h"
+#include <QString>
+#include <utility>
 
-SkinDelete::SkinDelete() : Request()
-{
-    m_logCat = taskMCSkinsLogC;
-}
+#include "Screenshot.h"
+#include "net/Request.h"
 
-QNetworkReply* SkinDelete::getReply(QNetworkRequest& request)
-{
-    setStatus(tr("Deleting skin"));
-    return m_network->deleteResource(request);
-}
+namespace ImgurAPI {
 
-SkinDelete::Ptr SkinDelete::make(QString token)
-{
-    auto up = makeShared<SkinDelete>();
-    up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/skins/active");
-    up->m_sink.reset(new Net::DummySink());
-    up->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(QList<Net::HeaderPair>{
-        { "Authorization", QString("Bearer %1").arg(token).toLocal8Bit() },
-    }));
-    return up;
-}
+struct AlbumResult {
+    QString deleteHash;
+    QString id;
+};
+
+std::pair<Net::Request::Ptr, QString*> makeUpload(ScreenShot::Ptr shot);
+std::pair<Net::Request::Ptr, AlbumResult*> makeAlbum(const QList<ScreenShot::Ptr>& screenshots);
+
+}  // namespace ImgurAPI
