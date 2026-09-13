@@ -120,32 +120,26 @@ void serializeFormatVersion(QJsonObject& obj, int version)
     obj.insert("formatVersion", version);
 }
 
-Result<void> parseIndex(const QJsonObject& obj, Index* ptr)
+Result<> parseIndex(const QJsonObject& obj, Index* ptr)
 {
     const auto version = parseFormatVersion(obj);
-    if (!version) {
-        return std::unexpected(version.error());
-    }
+    TRY(version)
     ptr->merge(parseIndexInternal(obj));
     return {};
 }
 
-Result<void> parseVersionList(const QJsonObject& obj, VersionList* ptr)
+Result<> parseVersionList(const QJsonObject& obj, VersionList* ptr)
 {
     const auto version = parseFormatVersion(obj);
-    if (!version) {
-        return std::unexpected(version.error());
-    }
+    TRY(version)
     ptr->merge(parseVersionListInternal(obj));
     return {};
 }
 
-Result<void> parseVersion(const QJsonObject& obj, Version* ptr)
+Result<> parseVersion(const QJsonObject& obj, Version* ptr)
 {
     const auto version = parseFormatVersion(obj);
-    if (!version) {
-        return std::unexpected(version.error());
-    }
+    TRY(version)
     ptr->merge(parseVersionInternal(obj));
     return {};
 }

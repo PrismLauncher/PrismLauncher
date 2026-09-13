@@ -115,9 +115,8 @@ void BaseEntityLoadTask::executeTask()
                 setStatus(tr("Loading local file"));
 
                 auto rsp = FS::read(fname);
-                if (!rsp) {
-                    return std::unexpected(rsp.error());
-                }
+                TRY(rsp)
+
                 fileData = rsp.value();
                 m_entity->m_file_sha256 = Hashing::hash(fileData, Hashing::Algorithm::Sha256);
             }
@@ -136,9 +135,7 @@ void BaseEntityLoadTask::executeTask()
                     auto doc = Json::requireDocument(fileData, fname)
                                    .and_then([fname](const auto& v) { return Json::requireObject(v, fname); })
                                    .and_then([this](const auto& v) { return m_entity->parse(v); });
-                    if (!doc) {
-                        return std::unexpected(doc.error());
-                    }
+                    TRY(doc)
                 } catch (const Exception& e) {
                     return std::unexpected(e.what());
                 }

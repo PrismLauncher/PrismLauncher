@@ -2,6 +2,8 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2024 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2026 Octol1ttle <l1ttleofficial@outlook.com>
+ *  Copyright (C) 2026 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,6 +45,11 @@
 using Error = QString;
 template <typename T = void>
 using Result = std::expected<T, Error>;
+
+#define TRY(expected)                              \
+    if (const auto _result = expected; !_result) { \
+        return std::unexpected{ _result.error() }; \
+    }
 
 class Exception : public std::exception {
    public:

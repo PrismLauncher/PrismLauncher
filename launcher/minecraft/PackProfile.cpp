@@ -48,9 +48,8 @@
 #include <QSaveFile>
 #include <QTimer>
 #include <QUuid>
-#include <algorithm>
+#include <expected>
 #include <memory>
-#include <utility>
 
 #include "Application.h"
 #include "Exception.h"
@@ -100,10 +99,11 @@ PackProfile::~PackProfile()
 }
 
 // BEGIN: component file format
+namespace {
 
 static const int currentComponentsFileVersion = 1;
 
-static QJsonObject componentToJsonV1(ComponentPtr component)
+QJsonObject componentToJsonV1(const ComponentPtr& component)
 {
     QJsonObject obj;
     // critical
@@ -136,7 +136,7 @@ static QJsonObject componentToJsonV1(ComponentPtr component)
     return obj;
 }
 
-static ComponentPtr componentFromJsonV1(PackProfile* parent, const QString& componentJsonPattern, const QJsonObject& obj)
+ComponentPtr componentFromJsonV1(PackProfile* parent, const QString& componentJsonPattern, const QJsonObject& obj)
 {
     // critical
     auto uid = Json::requireString(obj.value("uid"));
@@ -159,12 +159,12 @@ static ComponentPtr componentFromJsonV1(PackProfile* parent, const QString& comp
 }
 
 // Save the given component container data to a file
-static bool savePackProfile(const QString& filename, const ComponentContainer& container)
+bool savePackProfile(const QString& filename, const ComponentContainer& container)
 {
     QJsonObject obj;
     obj.insert("formatVersion", currentComponentsFileVersion);
     QJsonArray orderArray;
-    for (auto component : container) {
+    for (const auto& component : container) {
         orderArray.append(componentToJsonV1(component));
     }
     obj.insert("components", orderArray);
@@ -186,16 +186,13 @@ static bool savePackProfile(const QString& filename, const ComponentContainer& c
 }
 
 // Read the given file into component containers
-static PackProfile::Result loadPackProfile(PackProfile* parent,
-                                           const QString& filename,
-                                           const QString& componentJsonPattern,
-                                           ComponentContainer& container)
+Result<> loadPackProfile(PackProfile* parent, const QString& filename, const QString& componentJsonPattern, ComponentContainer& container)
 {
     QFileInfo componentsFile(filename);
     if (!componentsFile.exists()) {
         auto message = QObject::tr("Components file %1 doesn't exist. This should never happen.").arg(filename);
         qCWarning(instanceProfileC) << message;
-        return PackProfile::Result::Error(message);
+        return std::unexpected(message);
     }
     // and it's valid JSON
     const auto what = componentsFile.fileName();
@@ -204,7 +201,7 @@ static PackProfile::Result loadPackProfile(PackProfile* parent,
         auto message = QObject::tr("Couldn't parse file: %1").arg(obj.error());
         qCCritical(instanceProfileC) << message;
         qCWarning(instanceProfileC) << "Ignoring overridden order";
-        return PackProfile::Result::Error(message);
+        return std::unexpected(message);
     }
 
     // and then read it and process it if all above is true.
@@ -224,10 +221,11 @@ static PackProfile::Result loadPackProfile(PackProfile* parent,
         qCCritical(instanceProfileC) << message;
         qCWarning(instanceProfileC) << "error:" << err.what();
         container.clear();
-        return PackProfile::Result::Error(message);
+        return std::unexpected(message);
     }
-    return PackProfile::Result::Success();
+    return {};
 }
+}  // namespace
 
 // END: component file format
 
@@ -295,7 +293,7 @@ bool PackProfile::save_internal()
     return false;
 }
 
-PackProfile::Result PackProfile::load()
+Result<> PackProfile::load()
 {
     auto filename = componentsFilePath();
 
@@ -324,15 +322,15 @@ PackProfile::Result PackProfile::load()
     }
     endResetModel();
     d->loaded = true;
-    return Result::Success();
+    return {};
 }
 
-PackProfile::Result PackProfile::reload(Net::Mode netmode)
+Result<> PackProfile::reload(Net::Mode netmode)
 {
     // Do not reload when the update/resolve task is running. It is in control.
     if (d->m_updateTask) {
         if (d->m_updateTask->netMode() == netmode) {
-            return Result::Success();
+            return {};
         }
 
         // https://github.com/PrismLauncher/PrismLauncher/issues/5209
@@ -352,7 +350,7 @@ PackProfile::Result PackProfile::reload(Net::Mode netmode)
         return result;
     }
     resolve(netmode);
-    return Result::Success();
+    return {};
 }
 
 Task::Ptr PackProfile::getCurrentTask()

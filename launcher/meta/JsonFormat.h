@@ -36,9 +36,9 @@ struct Require {
 
 using RequireSet = std::set<Require>;
 
-Result<void> parseIndex(const QJsonObject& obj, Index* ptr);
-Result<void> parseVersion(const QJsonObject& obj, Version* ptr);
-Result<void> parseVersionList(const QJsonObject& obj, VersionList* ptr);
+Result<> parseIndex(const QJsonObject& obj, Index* ptr);
+Result<> parseVersion(const QJsonObject& obj, Version* ptr);
+Result<> parseVersionList(const QJsonObject& obj, VersionList* ptr);
 
 Result<int> parseFormatVersion(const QJsonObject& obj, bool required = true);
 void serializeFormatVersion(QJsonObject& obj, int version);

@@ -90,9 +90,7 @@ bool GuiUtil::isUploadCanceled(const Result<QString>& result)
 Result<QString> GuiUtil::uploadPaste(const QString& name, const QFileInfo& filePath, QWidget* parentWidget)
 {
     auto rsp = FS::read(filePath.absoluteFilePath());
-    if (!rsp) {
-        return std::unexpected(rsp.error());
-    }
+    TRY(rsp)
     return uploadPaste(name, rsp.value(), parentWidget);
 };
 

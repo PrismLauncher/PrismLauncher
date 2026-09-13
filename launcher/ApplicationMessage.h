@@ -9,5 +9,5 @@ struct ApplicationMessage {
     QHash<QString, QString> args;
 
     QByteArray serialize() const;
-    Result<void> parse(const QByteArray& input);
+    Result<> parse(const QByteArray& input);
 };

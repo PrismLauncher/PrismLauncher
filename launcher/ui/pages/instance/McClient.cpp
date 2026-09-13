@@ -48,9 +48,7 @@ Result<int> readVarInt(QByteArray& data)
 
     while (position < 32) {
         const auto currentByte = readByte(data);
-        if (!currentByte) {
-            return std::unexpected(currentByte.error());
-        }
+        TRY(currentByte)
         value |= (*currentByte & g_varIntValueMask) << position;
 
         if ((*currentByte & g_varIntContinue) == 0) {

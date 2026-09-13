@@ -180,7 +180,7 @@ QString CustomTheme::tooltip()
     return m_tooltip;
 }
 
-Result<void> CustomTheme::read(const QString& path, bool& hasCustomLogColors)
+Result<> CustomTheme::read(const QString& path, bool& hasCustomLogColors)
 {
     QFileInfo pathInfo(path);
     if (!pathInfo.exists() || !pathInfo.isFile()) {
@@ -189,9 +189,7 @@ Result<void> CustomTheme::read(const QString& path, bool& hasCustomLogColors)
     }
 
     auto doc = Json::requireDocument(path, "Theme JSON file");
-    if (!doc) {
-        return std::unexpected(doc.error());
-    }
+    TRY(doc)
     const QJsonObject root = doc.value().object();
     m_name = Json::requireString(root, "name", "Theme name");
     m_widgets = Json::requireString(root, "widgets", "Qt widget theme");

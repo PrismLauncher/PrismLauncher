@@ -54,17 +54,17 @@ namespace FS {
 /**
  * write data to a file safely
  */
-Result<void> write(const QString& filename, const QByteArray& data);
+Result<> write(const QString& filename, const QByteArray& data);
 
 /**
  * append data to a file safely
  */
-Result<void> appendSafe(const QString& filename, const QByteArray& data);
+Result<> appendSafe(const QString& filename, const QByteArray& data);
 
 /**
  * append data to a file
  */
-Result<void> append(const QString& filename, const QByteArray& data);
+Result<> append(const QString& filename, const QByteArray& data);
 
 /**
  * read data from a file safely

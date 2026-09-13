@@ -187,7 +187,7 @@ void VersionList::setVersions(const QList<Version::Ptr>& versions)
     endResetModel();
 }
 
-Result<void> VersionList::parse(const QJsonObject& obj)
+Result<> VersionList::parse(const QJsonObject& obj)
 {
     return parseVersionList(obj, this);
 }

@@ -57,7 +57,7 @@ class Index : public QAbstractListModel, public BaseEntity {
     void merge(const std::shared_ptr<Index>& other);
 
    protected:
-    Result<void> parse(const QJsonObject& obj) override;
+    Result<> parse(const QJsonObject& obj) override;
 
    private:
     QList<VersionList::Ptr> m_lists;

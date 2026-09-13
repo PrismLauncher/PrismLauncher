@@ -251,9 +251,9 @@ bool VersionPage::reloadPackProfile()
     try {
         auto result = m_profile->reload(Net::Mode::Online);
         if (!result) {
-            QMessageBox::critical(this, tr("Error"), result.error);
+            QMessageBox::critical(this, tr("Error"), result.error());
         }
-        return result;
+        return result.has_value();
     } catch (const Exception& e) {
         QMessageBox::critical(this, tr("Error"), e.cause());
         return false;

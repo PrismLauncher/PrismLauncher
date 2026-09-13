@@ -48,15 +48,15 @@ bool isBinaryJson(const QByteArray& data)
 }
 }  // namespace
 namespace Json {
-Result<void> write(const QJsonDocument& doc, const QString& filename)
+Result<> write(const QJsonDocument& doc, const QString& filename)
 {
     return FS::write(filename, doc.toJson());
 }
-Result<void> write(const QJsonObject& object, const QString& filename)
+Result<> write(const QJsonObject& object, const QString& filename)
 {
     return write(QJsonDocument(object), filename);
 }
-Result<void> write(const QJsonArray& array, const QString& filename)
+Result<> write(const QJsonArray& array, const QString& filename)
 {
     return write(QJsonDocument(array), filename);
 }

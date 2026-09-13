@@ -176,7 +176,7 @@ using PFSCTL_SET_INTEGRITY_INFORMATION_BUFFER = _FSCTL_SET_INTEGRITY_INFORMATION
 
 namespace {
 
-Result<void> ensureExists(const QDir& dir)
+Result<> ensureExists(const QDir& dir)
 {
     if (!QDir().mkpath(dir.absolutePath())) {
         return std::unexpected("Unable to create folder " + dir.dirName() + " (" + dir.absolutePath() + ")");
@@ -187,7 +187,7 @@ Result<void> ensureExists(const QDir& dir)
 
 namespace FS {
 
-Result<void> write(const QString& filename, const QByteArray& data)
+Result<> write(const QString& filename, const QByteArray& data)
 {
     auto rsp = ensureExists(QFileInfo(filename).dir());
     if (!rsp) {
@@ -206,7 +206,7 @@ Result<void> write(const QString& filename, const QByteArray& data)
     return {};
 }
 
-Result<void> appendSafe(const QString& filename, const QByteArray& data)
+Result<> appendSafe(const QString& filename, const QByteArray& data)
 {
     auto rsp = ensureExists(QFileInfo(filename).dir());
     if (!rsp) {
@@ -232,7 +232,7 @@ Result<void> appendSafe(const QString& filename, const QByteArray& data)
     return {};
 }
 
-Result<void> append(const QString& filename, const QByteArray& data)
+Result<> append(const QString& filename, const QByteArray& data)
 {
     auto rsp = ensureExists(QFileInfo(filename).dir());
     if (!rsp) {

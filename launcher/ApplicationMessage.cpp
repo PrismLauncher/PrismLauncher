@@ -39,14 +39,12 @@
 #include <QJsonObject>
 #include "Json.h"
 
-Result<void> ApplicationMessage::parse(const QByteArray& input)
+Result<> ApplicationMessage::parse(const QByteArray& input)
 {
     auto doc = Json::requireDocument(input, "ApplicationMessage").and_then([](const auto& v) {
         return Json::requireObject(v, "ApplicationMessage");
     });
-    if (!doc) {
-        return std::unexpected(doc.error());
-    }
+    TRY(doc)
     auto root = doc.value();
 
     command = root.value("command").toString();

@@ -365,7 +365,9 @@ CoreModFolderPage::CoreModFolderPage(MinecraftInstance* inst, ModFolderModel* mo
     if ((version != nullptr) && version->getComponent("net.minecraftforge") && version->getComponent("net.minecraft")) {
         auto minecraftCmp = version->getComponent("net.minecraft");
         if (!minecraftCmp->m_loaded) {
-            version->reload(Net::Mode::Offline);
+            if (auto rsp = version->reload(Net::Mode::Offline); !rsp) {
+                qWarning() << "Failed to reload components:" << rsp.error();
+            }
             auto update = version->getCurrentTask();
             if (update) {
                 connect(update.get(), &Task::finished, this, [this] {

@@ -56,7 +56,7 @@ class CustomTheme : public ITheme {
     QStringList searchPaths() override;
 
    private:
-    Result<void> read(const QString& path, bool& hasCustomLogColors);
+    Result<> read(const QString& path, bool& hasCustomLogColors);
 
     QPalette m_palette;
     QColor m_fadeColor;
