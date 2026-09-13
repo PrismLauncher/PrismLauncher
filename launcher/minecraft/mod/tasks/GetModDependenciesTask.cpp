@@ -17,6 +17,7 @@
  */
 
 #include "GetModDependenciesTask.h"
+#include <qjsonobject.h>
 
 #include <QDebug>
 #include <algorithm>
@@ -195,10 +196,22 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(const std::shared_ptr<PackD
             return;
         }
         try {
-            auto obj = provider == ModPlatform::ResourceProvider::FLAME ? Json::requireObject(Json::requireObject(doc), "data")
-                                                                        : Json::requireObject(doc);
+            auto obj = Json::requireDocument(*responseInfo).and_then([provider](const auto& v) {
+                if (provider == ModPlatform::ResourceProvider::FLAME) {
+                    return Json::requireObject(v).and_then(
+                        [](const auto& o) -> Result<QJsonObject> { return Json::requireObject(o, "data"); });
+                }
+                return Json::requireObject(v);
+            });
 
-            getAPI(provider)->loadIndexedPack(*pDep->pack, obj);
+            if (!obj) {
+                removePack(pDep->pack->addonId);
+                qWarning() << "Error while parsing JSON response for mod info:" << obj.error();
+                qDebug() << *responseInfo;
+                return;
+            }
+
+            getAPI(provider)->loadIndexedPack(*pDep->pack, *obj);
         } catch (const JSONValidationError& e) {
             removePack(pDep->pack->addonId);
             qDebug() << doc;

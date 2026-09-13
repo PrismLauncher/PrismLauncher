@@ -46,16 +46,12 @@ class ParsingValidator : public Net::Validator {
     Result<> validate() override
     {
         auto fname = m_entity->localFilename();
-        auto doc = Json::requireDocument(m_data, fname);
+        auto doc = Json::requireDocument(m_data, fname)
+                       .and_then([fname](const auto& v) { return Json::requireObject(v, fname); })
+                       .and_then([this](const auto& v) { return m_entity->parse(v); });
         if (!doc) {
             qWarning() << "Unable to parse response:" << doc.error();
             return std::unexpected(doc.error());
-        }
-        auto obj = Json::requireObject(doc.value(), fname);
-        auto rsp = m_entity->parse(obj);
-        if (!rsp) {
-            qWarning() << "Unable to parse response:" << rsp.error();
-            return std::unexpected(rsp.error());
         }
         return {};
     }
@@ -136,20 +132,17 @@ void BaseEntityLoadTask::executeTask()
 
             // load local file
             if (m_entity->m_load_status == BaseEntity::LoadStatus::NotLoaded) {
-                auto doc = Json::requireDocument(fileData, fname);
-                if (!doc) {
-                    return std::unexpected(doc.error());
-                }
                 try {
-                    auto obj = Json::requireObject(doc.value(), fname);
-                    auto rsp = m_entity->parse(obj);
-                    if (!rsp) {
-                        return std::unexpected(rsp.error());
+                    auto doc = Json::requireDocument(fileData, fname)
+                                   .and_then([fname](const auto& v) { return Json::requireObject(v, fname); })
+                                   .and_then([this](const auto& v) { return m_entity->parse(v); });
+                    if (!doc) {
+                        return std::unexpected(doc.error());
                     }
-                    m_entity->m_load_status = BaseEntity::LoadStatus::Local;
                 } catch (const Exception& e) {
                     return std::unexpected(e.what());
                 }
+                m_entity->m_load_status = BaseEntity::LoadStatus::Local;
             }
             return {};
         };

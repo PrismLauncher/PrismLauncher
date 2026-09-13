@@ -144,11 +144,10 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
     connect(m_task.get(), &Task::succeeded, this, [this, modrinthResponse, stepProgress2]() {
         stepProgress2->state = TaskStepState::Succeeded;
         stepProgress(*stepProgress2);
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*modrinthResponse, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions at" << parseError.offset
-                       << "reason:" << parseError.errorString();
+
+        auto doc = Json::requireDocument(*modrinthResponse).and_then([](const auto& v) { return Json::requireObject(v); });
+        if (!doc) {
+            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions:" << doc.error();
             qWarning() << *modrinthResponse;
 
             getFlameProjects();
@@ -156,7 +155,7 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
         }
         if (APPLICATION->settings()->get("FallbackMRBlockedMods").toBool()) {
             try {
-                auto entries = Json::requireObject(doc);
+                const auto& entries = doc.value();
                 for (auto& out : m_manifest.files) {
                     auto url = QUrl(out.version.downloadUrl, QUrl::TolerantMode);
                     if (!url.isValid() && "sha1" == out.version.hashType && !out.version.hash.isEmpty()) {
@@ -175,7 +174,7 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
                 }
             } catch (Json::JsonException& e) {
                 qDebug() << e.cause();
-                qDebug() << doc;
+                qDebug() << *doc;
             }
         }
         getFlameProjects();
@@ -211,18 +210,19 @@ void Flame::FileResolvingTask::getFlameProjects()
 
     auto stepProgress2 = std::make_shared<TaskStepProgress>();
     connect(m_task.get(), &Task::succeeded, this, [this, response, stepProgress2] {
-        QJsonParseError parseError{};
-        auto doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth projects task at" << parseError.offset
-                       << "reason:" << parseError.errorString();
+        auto doc = Json::requireDocument(*response).and_then([](const auto& v) { return Json::requireObject(v); });
+        if (!doc) {
+            qWarning() << "Error while parsing JSON response from Modrinth projects task:" << doc.error();
             qWarning() << *response;
+            // treat a parse failure as success, otherwise the task hangs forever
+            stepProgress2->state = TaskStepState::Succeeded;
+            stepProgress(*stepProgress2);
+            emitSucceeded();
             return;
         }
 
         try {
-            QJsonArray entries;
-            entries = Json::requireArray(Json::requireObject(doc), "data");
+            auto entries = Json::requireArray(doc.value(), "data");
 
             for (auto entry : entries) {
                 auto entryObj = Json::requireObject(entry);
@@ -241,7 +241,7 @@ void Flame::FileResolvingTask::getFlameProjects()
             }
         } catch (Json::JsonException& e) {
             qDebug() << e.cause();
-            qDebug() << doc;
+            qDebug() << *doc;
         }
         stepProgress2->state = TaskStepState::Succeeded;
         stepProgress(*stepProgress2);

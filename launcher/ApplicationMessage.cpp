@@ -41,11 +41,13 @@
 
 Result<void> ApplicationMessage::parse(const QByteArray& input)
 {
-    auto doc = Json::requireDocument(input, "ApplicationMessage");
+    auto doc = Json::requireDocument(input, "ApplicationMessage").and_then([](const auto& v) {
+        return Json::requireObject(v, "ApplicationMessage");
+    });
     if (!doc) {
         return std::unexpected(doc.error());
     }
-    auto root = Json::requireObject(doc.value(), "ApplicationMessage");
+    auto root = doc.value();
 
     command = root.value("command").toString();
     args.clear();
@@ -57,7 +59,7 @@ Result<void> ApplicationMessage::parse(const QByteArray& input)
     return {};
 }
 
-QByteArray ApplicationMessage::serialize()
+QByteArray ApplicationMessage::serialize() const
 {
     QJsonObject root;
     root.insert("command", command);

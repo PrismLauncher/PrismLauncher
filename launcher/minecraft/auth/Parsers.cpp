@@ -287,25 +287,26 @@ bool parseMinecraftProfileMojang(QByteArray& data, MinecraftProfile& output)
     qDebug() << "Parsing Minecraft profile...";
     qCDebug(authCredentials()) << data;
 
-    QJsonParseError jsonError;
-    QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
-    if (jsonError.error) {
-        qWarning() << "Failed to parse response as JSON:" << jsonError.errorString();
+    auto obj = Json::requireDocument(data, "mojang minecraft profile").and_then([](const auto& v) {
+        return Json::requireObject(v, "mojang minecraft profile");
+    });
+
+    if (!obj) {
+        qWarning() << "Failed to parse response as JSON:" << obj.error();
         return false;
     }
 
-    auto obj = Json::requireObject(doc, "mojang minecraft profile");
-    if (!getString(obj.value("id"), output.id)) {
+    if (!getString(obj->value("id"), output.id)) {
         qWarning() << "Minecraft profile id is not a string";
         return false;
     }
 
-    if (!getString(obj.value("name"), output.name)) {
+    if (!getString(obj->value("name"), output.name)) {
         qWarning() << "Minecraft profile name is not a string";
         return false;
     }
 
-    auto propsArray = obj.value("properties").toArray();
+    auto propsArray = obj->value("properties").toArray();
     QByteArray texturePayload;
     for (auto p : propsArray) {
         auto pObj = p.toObject();
@@ -329,14 +330,16 @@ bool parseMinecraftProfileMojang(QByteArray& data, MinecraftProfile& output)
         return false;
     }
 
-    doc = QJsonDocument::fromJson(texturePayload, &jsonError);
-    if (jsonError.error) {
-        qWarning() << "Failed to parse response as JSON:" << jsonError.errorString();
+    obj = Json::requireDocument(texturePayload, "session texture payload").and_then([](const auto& v) {
+        return Json::requireObject(v, "session texture payload");
+    });
+
+    if (!obj) {
+        qWarning() << "Failed to parse response as JSON:" << obj.error();
         return false;
     }
 
-    obj = Json::requireObject(doc, "session texture payload");
-    auto textures = obj.value("textures");
+    auto textures = obj->value("textures");
     if (!textures.isObject()) {
         qWarning() << "No textures array in response";
         return false;

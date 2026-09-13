@@ -319,13 +319,13 @@ void ModrinthCreationTask::createInstance()
 
 bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<File>& files, bool setInternalData, bool showOptionalDialog)
 {
-    auto doc = Json::requireDocument(indexPath);
+    auto doc = Json::requireDocument(indexPath).and_then([](const auto& v) { return Json::requireObject(v, "modrinth.index.json"); });
     if (!doc) {
         emitFailed(tr("Could not understand pack index:\n") + doc.error());
         return false;
     }
     try {
-        auto obj = Json::requireObject(doc.value(), "modrinth.index.json");
+        auto obj = doc.value();
         int formatVersion = Json::requireInteger(obj, "formatVersion", "modrinth.index.json");
         if (formatVersion == 1) {
             auto game = Json::requireString(obj, "game", "modrinth.index.json");

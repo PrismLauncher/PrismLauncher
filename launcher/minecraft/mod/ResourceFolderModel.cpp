@@ -191,19 +191,16 @@ void ResourceFolderModel::installResourceWithFlameMetadata(const QString& path, 
         connect(job.get(), &Task::failed, this, install);
         connect(job.get(), &Task::aborted, this, install);
         connect(job.get(), &Task::succeeded, this, [response, this, &vers, install, &pack] {
-            QJsonParseError parseError{};
-            QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-            if (parseError.error != QJsonParseError::NoError) {
-                qWarning() << "Error while parsing JSON response for mod info at" << parseError.offset
-                           << "reason:" << parseError.errorString();
+            auto obj = Json::requireDocument(*response, "data").and_then([](const auto& v) { return Json::requireObject(v, "data"); });
+            if (!obj) {
+                qWarning() << "Error while parsing JSON response for mod info:" << obj.error();
                 qDebug() << *response;
                 return;
             }
             try {
-                auto obj = Json::requireObject(Json::requireObject(doc), "data");
-                FlameMod::loadIndexedPack(pack, obj);
+                FlameMod::loadIndexedPack(pack, *obj);
             } catch (const JSONValidationError& e) {
-                qDebug() << doc;
+                qDebug() << *obj;
                 qWarning() << "Error while reading mod info:" << e.cause();
             }
             LocalResourceUpdateTask updateMetadata(indexDir(), pack, vers);

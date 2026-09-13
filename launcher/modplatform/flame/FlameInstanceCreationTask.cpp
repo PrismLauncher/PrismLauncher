@@ -224,24 +224,22 @@ void FlameCreationTask::executeTask()
         connect(job.get(), &Task::succeeded, this,
                 [this, rawResponse, fileIds, oldInstDir, oldFiles, oldMinecraftDir, createInst]() mutable {
                     // Parse the API response
-                    QJsonParseError parseError{};
-                    auto doc = QJsonDocument::fromJson(*rawResponse, &parseError);
-                    if (parseError.error != QJsonParseError::NoError) {
-                        qWarning() << "Error while parsing JSON response from Flame files task at" << parseError.offset
-                                   << "reason:" << parseError.errorString();
-                        qWarning() << *rawResponse;
-                        return;
-                    }
-
                     try {
-                        QJsonArray entries;
-                        if (fileIds.size() == 1) {
-                            entries = { Json::requireObject(Json::requireObject(doc), "data") };
-                        } else {
-                            entries = Json::requireArray(Json::requireObject(doc), "data");
+                        auto doc = Json::requireDocument(*rawResponse).and_then([fileIds](const auto& v) -> Result<QJsonArray> {
+                            return Json::requireObject(v).and_then([fileIds](const auto& o) -> Result<QJsonArray> {
+                                if (fileIds.size() == 1) {
+                                    return { { Json::requireObject(o, "data") } };
+                                }
+                                return Json::requireArray(o, "data");
+                            });
+                        });
+                        if (!doc) {
+                            qWarning() << "Error while parsing JSON response from Flame files task:" << doc.error();
+                            qWarning() << *rawResponse;
+                            return;
                         }
 
-                        for (auto entry : entries) {
+                        for (auto entry : doc.value()) {
                             auto entryObj = Json::requireObject(entry);
 
                             Flame::File file;

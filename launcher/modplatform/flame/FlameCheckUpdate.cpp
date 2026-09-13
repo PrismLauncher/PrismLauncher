@@ -62,11 +62,9 @@ void FlameCheckUpdate::executeTask()
 
 void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QByteArray* response)
 {
-    QJsonParseError parseError{};
-    QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-    if (parseError.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from latest mod version at" << parseError.offset
-                   << "reason:" << parseError.errorString();
+    auto doc = Json::requireDocument(*response).and_then([](const auto& v) { return Json::requireObject(v); });
+    if (!doc) {
+        qWarning() << "Error while parsing JSON response from latest mod version:" << doc.error();
         qWarning() << *response;
         return;
     }
@@ -78,14 +76,13 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QByteArray* 
     pack->addonId = resource->metadata()->project_id;
     pack->provider = ModPlatform::ResourceProvider::FLAME;
     try {
-        auto obj = Json::requireObject(doc);
-        auto arr = Json::requireArray(obj, "data");
+        auto arr = Json::requireArray(doc.value(), "data");
 
         FlameMod::loadIndexedPackVersions(*pack.get(), arr);
     } catch (Json::JsonException& e) {
         qCritical() << "Failed to parse response from a version request.";
         qCritical() << e.what();
-        qDebug() << doc;
+        qDebug() << *doc;
     }
     auto latestVer = FlameAPI::getLatestVersion(pack->versions, m_loadersList, resource->metadata()->loaders, !m_loadersList.isEmpty());
 
@@ -153,24 +150,22 @@ void FlameCheckUpdate::collectBlockedMods()
     }
 
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds, quickSearch] {
-        QJsonParseError parseError{};
-        auto doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Flame projects task at" << parseError.offset
-                       << "reason:" << parseError.errorString();
-            qWarning() << *response;
-            return;
-        }
-
         try {
-            QJsonArray entries;
-            if (addonIds.size() == 1) {
-                entries = { Json::requireObject(Json::requireObject(doc), "data") };
-            } else {
-                entries = Json::requireArray(Json::requireObject(doc), "data");
+            auto doc = Json::requireDocument(*response).and_then([addonIds](const auto& v) -> Result<QJsonArray> {
+                return Json::requireObject(v).and_then([addonIds](const auto& o) -> Result<QJsonArray> {
+                    if (addonIds.size() == 1) {
+                        return { { Json::requireObject(o, "data") } };
+                    }
+                    return Json::requireArray(o, "data");
+                });
+            });
+            if (!doc) {
+                qWarning() << "Error while parsing JSON response from Flame projects task:" << doc.error();
+                qWarning() << *response;
+                return;
             }
 
-            for (auto entry : entries) {
+            for (auto entry : doc.value()) {
                 auto entryObj = Json::requireObject(entry);
 
                 auto id = QString::number(Json::requireInteger(entryObj, "id"));
@@ -187,12 +182,12 @@ void FlameCheckUpdate::collectBlockedMods()
                                      recoverUrl);
                 } catch (Json::JsonException& e) {
                     qDebug() << e.cause();
-                    qDebug() << entries;
+                    qDebug() << *doc;
                 }
             }
         } catch (Json::JsonException& e) {
             qDebug() << e.cause();
-            qDebug() << doc;
+            qDebug() << *response;
         }
     });
 

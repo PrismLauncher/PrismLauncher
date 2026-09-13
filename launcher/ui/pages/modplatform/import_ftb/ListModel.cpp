@@ -52,13 +52,13 @@ QString getDynamicPath()
         qWarning() << "The ftb app setings doesn't exist.";
         return {};
     }
-    auto doc = Json::requireDocument(settingsPath);
+    auto doc = Json::requireDocument(settingsPath).and_then([](const auto& v) { return Json::requireObject(v); });
     if (!doc) {
         qCritical() << "Could not read ftb settings file:" << doc.error();
         return {};
     }
     try {
-        return Json::requireString(Json::requireObject(doc.value()), "instanceLocation");
+        return Json::requireString(doc.value(), "instanceLocation");
     } catch (const Exception& e) {
         qCritical() << "Could not read ftb settings file:" << e.cause();
     }

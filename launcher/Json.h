@@ -62,8 +62,7 @@ QByteArray toText(const QJsonArray& array);
 
 Result<QJsonDocument> requireDocument(const QByteArray& data, const QString& what = "Document");
 Result<QJsonDocument> requireDocument(const QString& filename, const QString& what = "Document");
-/// @throw JsonException
-QJsonObject requireObject(const QJsonDocument& doc, const QString& what = "Document");
+Result<QJsonObject> requireObject(const QJsonDocument& doc, const QString& what = "Document");
 /// @throw JsonException
 QJsonArray requireArray(const QJsonDocument& doc, const QString& what = "Document");
 

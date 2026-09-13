@@ -38,6 +38,7 @@
  */
 
 #include <Version.h>
+#include <qfileinfo.h>
 #include <QCryptographicHash>
 #include <QDebug>
 #include <QDir>
@@ -190,24 +191,17 @@ static PackProfile::Result loadPackProfile(PackProfile* parent,
                                            const QString& componentJsonPattern,
                                            ComponentContainer& container)
 {
-    QFile componentsFile(filename);
+    QFileInfo componentsFile(filename);
     if (!componentsFile.exists()) {
         auto message = QObject::tr("Components file %1 doesn't exist. This should never happen.").arg(filename);
         qCWarning(instanceProfileC) << message;
         return PackProfile::Result::Error(message);
     }
-    if (!componentsFile.open(QFile::ReadOnly)) {
-        auto message = QObject::tr("Couldn't open %1 for reading: %2").arg(componentsFile.fileName(), componentsFile.errorString());
-        qCCritical(instanceProfileC) << message;
-        qCWarning(instanceProfileC) << "Ignoring overridden order";
-        return PackProfile::Result::Error(message);
-    }
-
     // and it's valid JSON
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson(componentsFile.readAll(), &error);
-    if (error.error != QJsonParseError::NoError) {
-        auto message = QObject::tr("Couldn't parse %1 as json: %2").arg(componentsFile.fileName(), error.errorString());
+    const auto what = componentsFile.fileName();
+    auto obj = Json::requireDocument(filename, what).and_then([what](const auto& v) { return Json::requireObject(v, what); });
+    if (!obj) {
+        auto message = QObject::tr("Couldn't parse file: %1").arg(obj.error());
         qCCritical(instanceProfileC) << message;
         qCWarning(instanceProfileC) << "Ignoring overridden order";
         return PackProfile::Result::Error(message);
@@ -215,16 +209,15 @@ static PackProfile::Result loadPackProfile(PackProfile* parent,
 
     // and then read it and process it if all above is true.
     try {
-        auto obj = Json::requireObject(doc);
         // check order file version.
-        auto version = Json::requireInteger(obj.value("formatVersion"));
+        auto version = Json::requireInteger(obj->value("formatVersion"));
         if (version != currentComponentsFileVersion) {
             throw JSONValidationError(QObject::tr("Invalid component file version, expected %1").arg(currentComponentsFileVersion));
         }
-        auto orderArray = Json::requireArray(obj.value("components"));
+        auto orderArray = Json::requireArray(obj->value("components"));
         for (auto item : orderArray) {
-            auto comp_obj = Json::requireObject(item, "Component must be an object.");
-            container.append(componentFromJsonV1(parent, componentJsonPattern, comp_obj));
+            auto compObj = Json::requireObject(item, "Component must be an object.");
+            container.append(componentFromJsonV1(parent, componentJsonPattern, compObj));
         }
     } catch ([[maybe_unused]] const JSONValidationError& err) {
         auto message = QObject::tr("Couldn't parse %1 : bad file format").arg(componentsFile.fileName());

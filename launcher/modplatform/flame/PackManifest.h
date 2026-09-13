@@ -40,6 +40,7 @@
 #include <QMap>
 #include <QString>
 #include <QUrl>
+#include "Exception.h"
 #include "modplatform/ModIndex.h"
 
 namespace Flame {

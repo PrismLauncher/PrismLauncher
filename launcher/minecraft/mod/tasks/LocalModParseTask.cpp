@@ -377,10 +377,14 @@ ModDetails ReadFabricModInfo(QByteArray contents)
 ModDetails ReadQuiltModInfo(QByteArray contents)
 {
     ModDetails details;
+    auto doc =
+        Json::requireDocument(contents, "quilt.mod.json").and_then([](const auto& v) { return Json::requireObject(v, "quilt.mod.json"); });
+    if (!doc) {
+        qWarning() << "Unable to parse mod info:" << doc.error();
+        return {};
+    }
     try {
-        QJsonParseError jsonError;
-        QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
-        auto object = Json::requireObject(jsonDoc, "quilt.mod.json");
+        const auto& object = doc.value();
         auto schemaVersion = object.value("schema_version").toInt();
 
         // https://github.com/QuiltMC/rfcs/blob/be6ba280d785395fefa90a43db48e5bfc1d15eb4/specification/0002-quilt.mod.json.md

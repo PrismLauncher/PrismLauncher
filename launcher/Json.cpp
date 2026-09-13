@@ -40,6 +40,13 @@
 #include <math.h>
 #include "FileSystem.h"
 
+namespace {
+bool isBinaryJson(const QByteArray& data)
+{
+    decltype(QJsonDocument::BinaryFormatTag) tag = QJsonDocument::BinaryFormatTag;
+    return memcmp(data.constData(), &tag, sizeof(QJsonDocument::BinaryFormatTag)) == 0;
+}
+}  // namespace
 namespace Json {
 Result<void> write(const QJsonDocument& doc, const QString& filename)
 {
@@ -63,11 +70,6 @@ QByteArray toText(const QJsonArray& array)
     return QJsonDocument(array).toJson(QJsonDocument::Compact);
 }
 
-static bool isBinaryJson(const QByteArray& data)
-{
-    decltype(QJsonDocument::BinaryFormatTag) tag = QJsonDocument::BinaryFormatTag;
-    return memcmp(data.constData(), &tag, sizeof(QJsonDocument::BinaryFormatTag)) == 0;
-}
 Result<QJsonDocument> requireDocument(const QByteArray& data, const QString& what)
 {
     if (isBinaryJson(data)) {
@@ -77,20 +79,20 @@ Result<QJsonDocument> requireDocument(const QByteArray& data, const QString& wha
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(data, &error);
     if (error.error != QJsonParseError::NoError) {
-        return std::unexpected(what + ": Error parsing JSON: " + error.errorString());
+        return std::unexpected(what + ": Error parsing JSON at: " + QString::number(error.offset) + " reason: " + error.errorString());
     }
     return doc;
 }
 Result<QJsonDocument> requireDocument(const QString& filename, const QString& what)
 {
-    return FS::read(filename).transform_error([what](auto v) { return what + ": Error reading file: " + v; }).and_then([what](auto v) {
-        return requireDocument(v, what);
-    });
+    return FS::read(filename)
+        .transform_error([what](const auto& v) { return what + ": Error reading file: " + v; })
+        .and_then([what](const auto& v) { return requireDocument(v, what); });
 }
-QJsonObject requireObject(const QJsonDocument& doc, const QString& what)
+Result<QJsonObject> requireObject(const QJsonDocument& doc, const QString& what)
 {
     if (!doc.isObject()) {
-        throw JsonException(what + " is not an object");
+        return std::unexpected(what + " is not an object");
     }
     return doc.object();
 }
@@ -300,8 +302,9 @@ QStringList toStringList(const QString& jsonString)
     QJsonParseError parseError;
     QJsonDocument doc = QJsonDocument::fromJson(jsonString.toUtf8(), &parseError);
 
-    if (parseError.error != QJsonParseError::NoError || !doc.isArray())
+    if (parseError.error != QJsonParseError::NoError || !doc.isArray()) {
         return {};
+    }
     try {
         return requireIsArrayOf<QString>(doc);
     } catch (Json::JsonException&) {
@@ -325,8 +328,9 @@ QVariantMap toMap(const QString& jsonString)
     QJsonParseError parseError;
     QJsonDocument doc = QJsonDocument::fromJson(jsonString.toUtf8(), &parseError);
 
-    if (parseError.error != QJsonParseError::NoError || !doc.isObject())
+    if (parseError.error != QJsonParseError::NoError || !doc.isObject()) {
         return {};
+    }
 
     QJsonObject obj = doc.object();
     return obj.toVariantMap();

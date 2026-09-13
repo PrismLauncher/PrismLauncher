@@ -1,6 +1,8 @@
 #include "EnsureMetadataTask.h"
 
 #include <MurmurHash2.h>
+#include <qjsonarray.h>
+#include <qjsonobject.h>
 #include <QDebug>
 
 #include "Application.h"
@@ -235,19 +237,17 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
     }
 
     connect(verTask.get(), &Task::succeeded, this, [this, response] {
-        QJsonParseError parseError{};
-        const QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions at" << parseError.offset
-                       << "reason:" << parseError.errorString();
+        auto obj = Json::requireDocument(*response).and_then([](const auto& v) { return Json::requireObject(v); });
+        if (!obj) {
+            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions:" << obj.error();
             qWarning() << *response;
 
-            failed(parseError.errorString());
+            failed(obj.error());
             return;
         }
 
         try {
-            auto entries = Json::requireObject(doc);
+            const auto& entries = obj.value();
             for (auto& hash : m_resources.keys()) {
                 auto* resource = m_resources.find(hash).value();
                 try {
@@ -266,7 +266,7 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
             }
         } catch (Json::JsonException& e) {
             qDebug() << e.cause();
-            qDebug() << doc;
+            qDebug() << *obj;
         }
     });
 
@@ -364,19 +364,17 @@ Task::Ptr EnsureMetadataTask::flameVersionsTask()
     auto [verTask, response] = FlameAPI::matchFingerprints(fingerprints);
 
     connect(verTask.get(), &Task::succeeded, this, [this, response] {
-        QJsonParseError parseError{};
-        const QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Flame::CurrentVersions at" << parseError.offset
-                       << "reason:" << parseError.errorString();
+        auto obj = Json::requireDocument(*response).and_then([](const auto& v) { return Json::requireObject(v); });
+        if (!obj) {
+            qWarning() << "Error while parsing JSON response from Flame::CurrentVersions:" << obj.error();
             qWarning() << *response;
 
-            failed(parseError.errorString());
+            failed(obj.error());
             return;
         }
 
         try {
-            auto docObj = Json::requireObject(doc);
+            const auto& docObj = obj.value();
             auto dataObj = Json::requireObject(docObj, "data");
             auto dataArr = Json::requireArray(dataObj, "exactMatches");
 
@@ -410,7 +408,7 @@ Task::Ptr EnsureMetadataTask::flameVersionsTask()
 
         } catch (Json::JsonException& e) {
             qDebug() << e.cause();
-            qDebug() << doc;
+            qDebug() << *obj;
         }
     });
 
@@ -448,24 +446,22 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
     }
 
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
-        QJsonParseError parseError{};
-        auto doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Flame projects task at" << parseError.offset
-                       << "reason:" << parseError.errorString();
-            qWarning() << *response;
-            return;
-        }
-
         try {
-            QJsonArray entries;
-            if (addonIds.size() == 1) {
-                entries = { Json::requireObject(Json::requireObject(doc), "data") };
-            } else {
-                entries = Json::requireArray(Json::requireObject(doc), "data");
+            auto entries = Json::requireDocument(*response).and_then([addonIds](const auto& v) -> Result<QJsonArray> {
+                return Json::requireObject(v).and_then([addonIds](const auto& o) -> Result<QJsonArray> {
+                    if (addonIds.size() == 1) {
+                        return { { Json::requireObject(o, "data") } };
+                    }
+                    return Json::requireArray(o, "data");
+                });
+            });
+            if (!entries) {
+                qWarning() << "Error while parsing JSON response from Flame projects task:" << entries.error();
+                qWarning() << *response;
+                return;
             }
 
-            for (auto entry : entries) {
+            for (auto entry : entries.value()) {
                 auto entryObj = Json::requireObject(entry);
 
                 auto id = QString::number(Json::requireInteger(entryObj, "id"));
@@ -480,7 +476,7 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
 
                 } catch (Json::JsonException& e) {
                     qDebug() << e.cause();
-                    qDebug() << entries;
+                    qDebug() << *entries;
 
                     emitFail(resource);
                 }
@@ -488,7 +484,7 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
             }
         } catch (Json::JsonException& e) {
             qDebug() << e.cause();
-            qDebug() << doc;
+            qDebug() << *response;
         }
     });
 

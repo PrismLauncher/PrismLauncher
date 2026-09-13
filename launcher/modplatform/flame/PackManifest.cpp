@@ -59,11 +59,11 @@ void loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)
 
 Result<void> Flame::loadManifest(Flame::Manifest& m, const QString& filepath)
 {
-    auto doc = Json::requireDocument(filepath);
+    auto doc = Json::requireDocument(filepath).and_then([](const auto& v) { return Json::requireObject(v); });
     if (!doc) {
         return std::unexpected(doc.error());
     }
-    auto obj = Json::requireObject(doc.value());
+    auto obj = doc.value();
     m.manifestType = Json::requireString(obj, "manifestType");
     if (m.manifestType != "minecraftModpack") {
         throw JSONValidationError("Not a modpack manifest!");

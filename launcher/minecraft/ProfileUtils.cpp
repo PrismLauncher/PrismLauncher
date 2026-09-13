@@ -34,6 +34,7 @@
  */
 
 #include "ProfileUtils.h"
+#include <qfileinfo.h>
 #include <QDebug>
 #include "Json.h"
 #include "minecraft/OneSixVersionFormat.h"
@@ -49,40 +50,32 @@ static const int currentOrderFileVersion = 1;
 
 bool readOverrideOrders(QString path, PatchOrder& order)
 {
-    QFile orderFile(path);
-    if (!orderFile.exists()) {
+    if (!QFileInfo::exists(path)) {
         qWarning() << "Order file doesn't exist. Ignoring.";
-        return false;
-    }
-    if (!orderFile.open(QFile::ReadOnly)) {
-        qCritical() << "Couldn't open" << orderFile.fileName() << "for reading:" << orderFile.errorString();
-        qWarning() << "Ignoring overridden order";
         return false;
     }
 
     // and it's valid JSON
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson(orderFile.readAll(), &error);
-    if (error.error != QJsonParseError::NoError) {
-        qCritical() << "Couldn't parse" << orderFile.fileName() << ":" << error.errorString();
+    auto obj = Json::requireDocument(path, "order file").and_then([](const auto& v) { return Json::requireObject(v); });
+    if (!obj) {
+        qCritical() << "Couldn't parse" << path << ":" << obj.error();
         qWarning() << "Ignoring overridden order";
         return false;
     }
 
     // and then read it and process it if all above is true.
     try {
-        auto obj = Json::requireObject(doc);
         // check order file version.
-        auto version = Json::requireInteger(obj.value("version"));
+        auto version = Json::requireInteger(obj->value("version"));
         if (version != currentOrderFileVersion) {
             throw JSONValidationError(QObject::tr("Invalid order file version, expected %1").arg(currentOrderFileVersion));
         }
-        auto orderArray = Json::requireArray(obj.value("order"));
+        auto orderArray = Json::requireArray(obj->value("order"));
         for (auto item : orderArray) {
             order.append(Json::requireString(item));
         }
     } catch ([[maybe_unused]] const JSONValidationError& err) {
-        qCritical() << "Couldn't parse" << orderFile.fileName() << ": bad file format";
+        qCritical() << "Couldn't parse" << path << ": bad file format";
         qWarning() << "Ignoring overridden order";
         order.clear();
         return false;

@@ -109,11 +109,12 @@ QString findMangoHud()
             continue;
         }
         try {
-            auto conf = Json::requireDocument(filePath, vkLayer);
+            auto conf =
+                Json::requireDocument(filePath, vkLayer).and_then([vkLayer](const auto& v) { return Json::requireObject(v, vkLayer); });
             if (!conf) {
                 continue;
             }
-            auto confObject = Json::requireObject(conf.value(), vkLayer);
+            auto confObject = conf.value();
             auto layer = confObject["layer"].toObject();
             QString libraryName = layer["library_path"].toString();
 

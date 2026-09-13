@@ -130,13 +130,13 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
         return;
     }
 
-    auto doc = Json::requireDocument(data);
+    auto doc = Json::requireDocument(data).and_then([](const auto& v) { return Json::requireObject(v, "version.json"); });
     if (!doc) {
         emit failed(tr("Could not understand \"version.json\":\n") + doc.error());
         return;
     }
     try {
-        QJsonObject root = Json::requireObject(doc.value(), "version.json");
+        QJsonObject root = doc.value();
         QString packMinecraftVersion = root["inheritsFrom"].toString();
         if (packMinecraftVersion.isEmpty()) {
             if (fmlMinecraftVersion.isEmpty()) {

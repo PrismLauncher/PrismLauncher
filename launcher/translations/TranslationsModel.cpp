@@ -226,15 +226,14 @@ void TranslationsModel::indexReceived()
 namespace {
 void readIndex(const QString& path, QMap<QString, Language>& languages)
 {
-    auto rsp = Json::requireDocument(path);
+    auto rsp = Json::requireDocument(path).and_then([](const auto& v) { return Json::requireObject(v); });
     if (!rsp) {
         qCritical() << "Translations Download Failed: " << rsp.error();
         return;
     }
-    const auto& toplevelDoc = rsp.value();
 
+    const auto& doc = rsp.value();
     try {
-        auto doc = Json::requireObject(toplevelDoc);
         auto fileType = Json::requireString(doc, "file_type");
         if (fileType != "MMC-TRANSLATION-INDEX") {
             qCritical() << "Translations Download Failed: index file is of unknown file type" << fileType;

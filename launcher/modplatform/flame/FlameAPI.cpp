@@ -215,30 +215,28 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getModCategories() const
 
 QList<ModPlatform::Category> FlameAPI::loadModCategories(const QByteArray& response) const
 {
-    QList<ModPlatform::Category> categories;
-    QJsonParseError parseError{};
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
-    if (parseError.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from categories at" << parseError.offset << "reason:" << parseError.errorString();
+    auto doc = Json::requireDocument(response).and_then([](const auto& v) { return Json::requireObject(v); });
+    if (!doc) {
+        qWarning() << "Error while parsing JSON response from categories:" << doc.error();
         qWarning() << *response;
-        return categories;
+        return {};
     }
+    QList<ModPlatform::Category> categories;
 
     try {
-        auto obj = Json::requireObject(doc);
-        auto arr = Json::requireArray(obj, "data");
+        auto arr = Json::requireArray(doc.value(), "data");
 
         for (auto val : arr) {
             auto cat = Json::requireObject(val);
             auto id = Json::requireInteger(cat, "id");
             auto name = Json::requireString(cat, "name");
-            categories.push_back({ name, QString::number(id) });
+            categories.push_back({ .name = name, .id = QString::number(id) });
         }
 
     } catch (Json::JsonException& e) {
         qCritical() << "Failed to parse response from a version request.";
         qCritical() << e.what();
-        qDebug() << doc;
+        qDebug() << *doc;
     }
     return categories;
 };

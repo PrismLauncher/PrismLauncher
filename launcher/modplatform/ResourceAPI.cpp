@@ -164,22 +164,21 @@ Task::Ptr ResourceAPI::getProjectInfo(const ProjectInfoArgs& args,
 
     QObject::connect(job.get(), &NetJob::succeeded, job.get(), [this, response, callbacks, args] {
         auto pack = args.pack;
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for mod info at" << parseError.offset << "reason:" << parseError.errorString();
+        auto doc = Json::requireDocument(*response).and_then([](const auto& v) { return Json::requireObject(v); });
+        if (!doc) {
+            qWarning() << "Error while parsing JSON response for mod info:" << doc.error();
             qWarning() << *response;
             return;
         }
         try {
-            auto obj = Json::requireObject(doc);
+            auto obj = doc.value();
             if (obj.contains("data")) {
                 obj = Json::requireObject(obj, "data");
             }
             loadIndexedPack(*pack, obj);
             loadExtraPackInfo(*pack, obj);
         } catch (const JSONValidationError& e) {
-            qDebug() << doc;
+            qDebug() << *doc;
             qWarning() << "Error while reading" << debugName() << "resource info:" << e.cause();
         }
         callbacks.onSucceed(pack);
