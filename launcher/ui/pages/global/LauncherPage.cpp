@@ -293,10 +293,10 @@ void LauncherPage::applySettings()
 
     switch (ui->modUpdateChannelComboBox->currentIndex()) {
         case 1:
-            s->set("ModUpdateReleaseTypes", Json::fromStringList({ "release" }));
+            s->set("ModUpdateReleaseTypes", "[\"release\"]");
             break;
         case 2:
-            s->set("ModUpdateReleaseTypes", Json::fromStringList({ "release", "beta" }));
+            s->set("ModUpdateReleaseTypes", "[\"release\", \"beta\"]");
             break;
         case 0:
         default:

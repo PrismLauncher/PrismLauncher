@@ -278,8 +278,6 @@ void MinecraftInstance::loadSpecificSettings()
     m_settings->registerSetting("OverrideModDownloadLoaders", false);
     m_settings->registerSetting("ModDownloadLoaders", "[]");
 
-    m_settings->registerSetting("ModUpdateReleaseTypes", "[]");
-
     qDebug() << "Instance-type specific settings were loaded!";
 
     setSpecificSettingsLoaded(true);

@@ -40,6 +40,16 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersions(const QStringList
     return { netJob, response };
 }
 
+static void addVersionTypes(QJsonObject& bodyObj, const std::optional<std::vector<ModPlatform::IndexedVersionType>>& releaseTypes)
+{
+    if (releaseTypes.has_value() && !releaseTypes->empty()) {
+        const auto versionTypes = ModPlatform::IndexedVersionType::toModrinthList(releaseTypes.value());
+        if (!versionTypes.isEmpty()) {
+            Json::writeStringList(bodyObj, "version_types", versionTypes);
+        }
+    }
+}
+
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash,
                                                              const QString& hashFormat,
                                                              std::optional<std::vector<Version>> mcVersions,
@@ -62,18 +72,7 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash
         Json::writeStringList(bodyObj, "game_versions", gameVersions);
     }
 
-    if (releaseTypes.has_value() && !releaseTypes->empty()) {
-        QStringList versionTypes;
-        for (const auto& type : releaseTypes.value()) {
-            const auto s = type.toModrinth();
-            if (!s.isEmpty()) {
-                versionTypes.append(s);
-            }
-        }
-        if (!versionTypes.isEmpty()) {
-            Json::writeStringList(bodyObj, "version_types", versionTypes);
-        }
-    }
+    addVersionTypes(bodyObj, releaseTypes);
 
     QJsonDocument body(bodyObj);
     auto bodyRaw = body.toJson();
@@ -111,18 +110,7 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(
         Json::writeStringList(bodyObj, "game_versions", gameVersions);
     }
 
-    if (releaseTypes.has_value() && !releaseTypes->empty()) {
-        QStringList versionTypes;
-        for (const auto& type : releaseTypes.value()) {
-            const auto s = type.toModrinth();
-            if (!s.isEmpty()) {
-                versionTypes.append(s);
-            }
-        }
-        if (!versionTypes.isEmpty()) {
-            Json::writeStringList(bodyObj, "version_types", versionTypes);
-        }
-    }
+    addVersionTypes(bodyObj, releaseTypes);
 
     QJsonDocument body(bodyObj);
     auto bodyRaw = body.toJson();

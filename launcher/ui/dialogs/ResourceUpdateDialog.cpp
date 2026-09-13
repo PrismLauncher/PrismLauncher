@@ -71,13 +71,7 @@ ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
     if (m_releaseTypes.empty()) {
         auto settingVal =
             m_instance ? m_instance->settings()->get("ModUpdateReleaseTypes") : APPLICATION->settings()->get("ModUpdateReleaseTypes");
-        const auto typesList = Json::toStringList(settingVal.toString());
-        for (const auto& t : typesList) {
-            auto type = ModPlatform::IndexedVersionType::fromString(t);
-            if (type.isValid()) {
-                m_releaseTypes.push_back(type);
-            }
-        }
+        m_releaseTypes = ModPlatform::IndexedVersionType::fromStringList(Json::toStringList(settingVal.toString()));
     }
 
     ui->explainLabel->setText(tr("You're about to update the following resources:"));

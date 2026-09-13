@@ -262,13 +262,7 @@ void ModFolderPage::updateMods(bool includeDeps, std::vector<ModPlatform::Indexe
     if (releaseTypes.empty()) {
         auto settingVal =
             m_instance ? m_instance->settings()->get("ModUpdateReleaseTypes") : APPLICATION->settings()->get("ModUpdateReleaseTypes");
-        const auto typesList = Json::toStringList(settingVal.toString());
-        for (const auto& t : typesList) {
-            auto type = ModPlatform::IndexedVersionType::fromString(t);
-            if (type.isValid()) {
-                releaseTypes.push_back(type);
-            }
-        }
+        releaseTypes = ModPlatform::IndexedVersionType::fromStringList(Json::toStringList(settingVal.toString()));
     }
 
     ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoadersList(), releaseTypes);
