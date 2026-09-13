@@ -29,7 +29,8 @@ class FlameAPI final : public ResourceAPI {
     static std::optional<ModPlatform::IndexedVersion> getLatestVersion(const QList<ModPlatform::IndexedVersion>& versions,
                                                                        const QList<ModPlatform::ModLoaderType>& instanceLoaders,
                                                                        ModPlatform::ModLoaderTypes fallback,
-                                                                       bool checkLoaders);
+                                                                       bool checkLoaders,
+                                                                       std::vector<ModPlatform::IndexedVersionType> releaseTypes = {});
 
     std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
     static std::pair<Task::Ptr, QByteArray*> matchFingerprints(const QList<uint>& fingerprints);

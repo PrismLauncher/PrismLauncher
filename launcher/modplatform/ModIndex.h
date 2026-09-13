@@ -176,6 +176,30 @@ struct IndexedVersionType : EnumWrapper<IndexedVersionType, IndexedVersionTypeVa
                            std::pair{ Alpha, "Alpha" } };
     };
 
+    static IndexedVersionType fromString(const QString& str)
+    {
+        for (auto&& [e, name] : mapping()) {
+            if (str.compare(name, Qt::CaseInsensitive) == 0) {
+                return IndexedVersionType(e);
+            }
+        }
+        return IndexedVersionType(invalid());
+    }
+
+    [[nodiscard]] auto toModrinth() const -> QString
+    {
+        switch (value()) {
+            case Release:
+                return "release";
+            case Beta:
+                return "beta";
+            case Alpha:
+                return "alpha";
+            default:
+                return {};
+        }
+    }
+
     using enum IndexedVersionTypeValue;
     using Base = EnumWrapper<IndexedVersionType, IndexedVersionTypeValue>;
     using Base::Base; /* inherit ctor */

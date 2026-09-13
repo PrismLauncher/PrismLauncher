@@ -241,6 +241,9 @@ void MinecraftInstance::loadSpecificSettings()
         auto envSetting = m_settings->registerSetting("OverrideEnv", false);
         m_settings->registerOverride(global_settings->getSetting("Env"), envSetting);
 
+        auto modUpdateReleaseTypesOverride = m_settings->registerSetting("OverrideModUpdateReleaseTypes", false);
+        m_settings->registerOverride(global_settings->getSetting("ModUpdateReleaseTypes"), modUpdateReleaseTypesOverride);
+
         if (m_settings->get("InstanceType").toString() != "OneSix") {
             m_settings->set("InstanceType", "OneSix");
         }
@@ -271,6 +274,8 @@ void MinecraftInstance::loadSpecificSettings()
     // Join server on launch, this does not have a global override
     m_settings->registerSetting("OverrideModDownloadLoaders", false);
     m_settings->registerSetting("ModDownloadLoaders", "[]");
+
+    m_settings->registerSetting("ModUpdateReleaseTypes", "[]");
 
     qDebug() << "Instance-type specific settings were loaded!";
 

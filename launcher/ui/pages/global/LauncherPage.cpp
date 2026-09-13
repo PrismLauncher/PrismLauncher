@@ -49,6 +49,7 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "DesktopServices.h"
+#include "Json.h"
 #include "settings/SettingsObject.h"
 #include "ui/themes/ITheme.h"
 #include "ui/themes/ThemeManager.h"
@@ -289,6 +290,19 @@ void LauncherPage::applySettings()
     s->set("ShowModIncompat", ui->showModIncompatCheckBox->isChecked());
     s->set("SkipModpackUpdatePrompt", !ui->modpackUpdatePromptBtn->isChecked());
     s->set("DownloadGameFilesDuringInstanceCreation", ui->downloadGameFilesBtn->isChecked());
+
+    switch (ui->modUpdateChannelComboBox->currentIndex()) {
+        case 1:
+            s->set("ModUpdateReleaseTypes", Json::fromStringList({ "release" }));
+            break;
+        case 2:
+            s->set("ModUpdateReleaseTypes", Json::fromStringList({ "release", "beta" }));
+            break;
+        case 0:
+        default:
+            s->set("ModUpdateReleaseTypes", "[]");
+            break;
+    }
 }
 void LauncherPage::loadSettings()
 {
@@ -346,6 +360,16 @@ void LauncherPage::loadSettings()
     ui->showModIncompatCheckBox->setChecked(s->get("ShowModIncompat").toBool());
     ui->modpackUpdatePromptBtn->setChecked(!s->get("SkipModpackUpdatePrompt").toBool());
     ui->downloadGameFilesBtn->setChecked(s->get("DownloadGameFilesDuringInstanceCreation").toBool());
+
+    const auto releaseTypesSetting = Json::toStringList(s->get("ModUpdateReleaseTypes").toString());
+    if (releaseTypesSetting.size() == 1 && releaseTypesSetting.contains("release", Qt::CaseInsensitive)) {
+        ui->modUpdateChannelComboBox->setCurrentIndex(1);
+    } else if (releaseTypesSetting.size() == 2 && releaseTypesSetting.contains("release", Qt::CaseInsensitive) &&
+               releaseTypesSetting.contains("beta", Qt::CaseInsensitive)) {
+        ui->modUpdateChannelComboBox->setCurrentIndex(2);
+    } else {
+        ui->modUpdateChannelComboBox->setCurrentIndex(0);
+    }
 }
 
 void LauncherPage::retranslate()
