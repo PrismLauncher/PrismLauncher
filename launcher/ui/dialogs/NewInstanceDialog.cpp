@@ -33,7 +33,8 @@
  *      See the License for the specific language governing permissions and
  *      limitations under the License.
  */
-#if defined(Q_OS_WIN)
+
+#ifdef Q_OS_WIN
 #include "StringUtils.h"
 #endif
 #include "Application.h"
@@ -107,7 +108,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     // move this below.
     // Same is for m_copyTemplateDirCheckbox.
     m_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    m_copyTemplateDirCheckbox = new QCheckBox();
+    m_copyTemplateDirCheckbox = new QCheckBox(this);
 
     m_container = new PageContainer(this, {}, this);
     m_container->useSidebarStyle(false);
@@ -146,7 +147,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     }
     connect(m_copyTemplateDirCheckbox, &QCheckBox::checkStateChanged, this, &NewInstanceDialog::setCopyTemplateDirectory);
 
-    auto* checkboxButtonsContainer = new QVBoxLayout();
+    auto* checkboxButtonsContainer = new QVBoxLayout(this);
     checkboxButtonsContainer->addWidget(m_copyTemplateDirCheckbox);
     checkboxButtonsContainer->setAlignment(m_copyTemplateDirCheckbox, Qt::AlignRight);
 
@@ -200,7 +201,6 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 void NewInstanceDialog::setCopyTemplateDirectory()
 {
     m_creationTask->setshouldCopyTemplateDirectory(m_copyTemplateDirCheckbox->isChecked());
-    qDebug() << "mraowwww" << m_copyTemplateDirCheckbox->isChecked();
 }
 
 void NewInstanceDialog::reject()
