@@ -35,17 +35,20 @@
 #pragma once
 
 #include <QNetworkReply>
+#include <expected>
 
 namespace Net {
 class Validator {
    public: /* con/des */
-    Validator() {}
-    virtual ~Validator() {}
+    Validator() = default;
+    virtual ~Validator() = default;
+    using Error = QString;
+    using Result = std::expected<void, Error>;
 
    public: /* methods */
-    virtual bool init(QNetworkRequest& request) = 0;
-    virtual bool write(QByteArray& data) = 0;
-    virtual bool abort() = 0;
-    virtual bool validate(QNetworkReply& reply) = 0;
+    virtual void init() = 0;
+    virtual void write(const QByteArray& data) = 0;
+    virtual void abort() = 0;
+    virtual Result validate() = 0;
 };
 }  // namespace Net

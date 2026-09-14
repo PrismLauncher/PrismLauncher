@@ -35,28 +35,25 @@ class Sink : public ByteArraySink {
     ~Sink() override = default;
 
    public:
-    auto finalize(QNetworkReply& reply) -> Task::State override
+    Result finalize(QNetworkReply& /*reply*/) override
     {
-        if (finalizeAllValidators(reply)) {
-            try {
-                auto result = m_parseFunc(m_output);
-                if (!result.has_value()) {
-                    m_fail_reason = result.error();
-                    return Task::State::Failed;
-                }
-                m_result = *result;
-            } catch (const std::exception& e) {
-                m_fail_reason = QString::fromUtf8(e.what());
-                return Task::State::Failed;
-                // ToDo: make this suppport QJsonException
-            } catch (...) {
-                m_fail_reason = QObject::tr("Unknown error while parsing RPC response");
-                return Task::State::Failed;
-            }
-            return Task::State::Succeeded;
+        auto validatorResult = finalizeAllValidators();
+        if (!validatorResult) {
+            return validatorResult;
         }
-        m_fail_reason = "Failed to finalize validators";
-        return Task::State::Failed;
+        try {
+            auto result = m_parseFunc(m_output);
+            if (!result.has_value()) {
+                return std::unexpected(result.error());
+            }
+            m_result = *result;
+        } catch (const std::exception& e) {
+            return std::unexpected<Error>(QString::fromUtf8(e.what()));
+            // ToDo: make this suppport QJsonException
+        } catch (...) {
+            return std::unexpected<Error>(QObject::tr("Unknown error while parsing RPC response"));
+        }
+        return {};
     }
 
     T* result() { return &m_result; }

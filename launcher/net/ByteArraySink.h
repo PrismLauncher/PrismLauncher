@@ -48,41 +48,23 @@ class ByteArraySink : public Sink {
     ~ByteArraySink() override = default;
 
    public:
-    auto init(QNetworkRequest& request) -> Task::State override
+    InitResult init(QNetworkRequest& /*request*/) override
     {
         m_output.clear();
-        if (initAllValidators(request)) {
-            return Task::State::Running;
-        }
-        m_fail_reason = "Failed to initialize validators";
-        return Task::State::Failed;
+        initAllValidators();
+        return InitType::Ok;
     };
 
-    auto write(QByteArray& data) -> Task::State override
+    Result write(const QByteArray& data) override
     {
         m_output.append(data);
-        if (writeAllValidators(data)) {
-            return Task::State::Running;
-        }
-        m_fail_reason = "Failed to write validators";
-        return Task::State::Failed;
+        writeAllValidators(data);
+        return {};
     }
 
-    auto abort() -> Task::State override
-    {
-        failAllValidators();
-        m_fail_reason = "Aborted";
-        return Task::State::Failed;
-    }
+    void abort() override { failAllValidators(); }
 
-    auto finalize(QNetworkReply& reply) -> Task::State override
-    {
-        if (finalizeAllValidators(reply)) {
-            return Task::State::Succeeded;
-        }
-        m_fail_reason = "Failed to finalize validators";
-        return Task::State::Failed;
-    }
+    Result finalize(QNetworkReply& /*reply*/) override { return finalizeAllValidators(); }
 
     auto hasLocalData() -> bool override { return false; }
 
