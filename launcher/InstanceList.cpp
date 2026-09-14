@@ -1146,7 +1146,7 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
 
         m_instanceSet.insert(instID);
 
-        if (instanceTask.shouldCopyTemplateDirectory()) {
+        if (instanceTask.shouldCopyTemplateDir()) {
             QString templateDir = APPLICATION->settings()->get("TemplateDir").toString();
             if (!templateDir.isEmpty() && QDir(templateDir).exists()) {
                 qDebug() << "trying to copy instance template directory";

@@ -34,6 +34,7 @@
  *      limitations under the License.
  */
 
+#include "NewInstanceDialog.h"
 #ifdef Q_OS_WIN
 #include "StringUtils.h"
 #endif
@@ -198,9 +199,9 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     connect(m_container, &PageContainer::selectedPageChanged, this, &NewInstanceDialog::selectedPageChanged);
 }
 
-void NewInstanceDialog::setCopyTemplateDirectory()
+void NewInstanceDialog::setCopyTemplateDirectory() const
 {
-    m_creationTask->setshouldCopyTemplateDirectory(m_copyTemplateDirCheckbox->isChecked());
+    m_creationTask->setCopyTemplateDir(m_copyTemplateDirCheckbox->isChecked());
 }
 
 void NewInstanceDialog::reject()
