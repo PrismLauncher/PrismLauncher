@@ -97,8 +97,6 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
             switch (column) {
                 case VersionColumn: {
                     switch (at(row).type()) {
-                        case ResourceType::FOLDER:
-                            return tr("Folder");
                         case ResourceType::SINGLEFILE:
                             return tr("File");
                         default:

@@ -78,11 +78,6 @@ InfoFrame::~InfoFrame()
 
 void InfoFrame::updateWithMod(const Mod& m)
 {
-    if (m.type() == ResourceType::FOLDER) {
-        clear();
-        return;
-    }
-
     QString text = "";
     QString name = "";
     QString link = m.homepage();

@@ -927,11 +927,6 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
                 return aName.localeAwareCompare(bName) < 0;
             });
             for (auto mod : modList) {
-                if (mod->type() == ResourceType::FOLDER) {
-                    out << u8"  [🖿] " + mod->fileinfo().completeBaseName() + " (folder)";
-                    continue;
-                }
-
                 if (mod->enabled()) {
                     out << u8"  [✔] " + mod->fileinfo().completeBaseName();
                 } else {
