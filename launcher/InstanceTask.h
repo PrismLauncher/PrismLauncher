@@ -26,7 +26,7 @@ class InstanceTask : public Task {
     void setStagingPath(const QString& stagingPath) { m_stagingPath = stagingPath; }
 
     void setIcon(const QString& icon) { m_instIcon = icon; }
-
+    void setshouldCopyTemplateDirectory(const bool copyTemplateDir) { m_copyTemplateDir = copyTemplateDir; };
     void setGroup(const QString& group) { m_instGroup = group; }
     QString group() const { return m_instGroup; }
 
@@ -37,6 +37,7 @@ class InstanceTask : public Task {
     void setConfirmUpdate(bool confirm) { m_confirmUpdate = confirm; }
 
     bool shouldOverride() const { return m_overrideExisting; }
+    bool shouldCopyTemplateDirectory() const { return m_copyTemplateDir; }
 
     QString originalInstanceID() const { return m_originalInstanceId; };
 
@@ -66,6 +67,7 @@ class InstanceTask : public Task {
 
     bool m_overrideExisting = false;
     bool m_confirmUpdate = true;
+    bool m_copyTemplateDir = true;
 
     QString m_originalInstanceId;
 
