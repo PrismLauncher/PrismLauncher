@@ -153,7 +153,7 @@ std::pair<Net::Request::Ptr, QString*> Type::make(QString log, QString baseUrl) 
                         QObject::tr("Failed to parse response from hastebin server: expected JSON but got an invalid response. Error: %1")
                             .arg(doc.error()));
                 }
-                auto obj = doc.value().object();
+                auto obj = doc->object();
                 if (obj.contains("key") && obj["key"].isString()) {
                     return baseUrl + "/" + obj["key"].toString();
                 }
@@ -168,7 +168,7 @@ std::pair<Net::Request::Ptr, QString*> Type::make(QString log, QString baseUrl) 
                         QObject::tr("Failed to parse response from mclogs server: expected JSON but got an invalid response. Error: %1")
                             .arg(doc.error()));
                 }
-                auto obj = doc.value().object();
+                auto obj = doc->object();
                 if (obj.contains("success") && obj["success"].isBool()) {
                     bool success = obj["success"].toBool();
                     if (success) {
@@ -188,7 +188,7 @@ std::pair<Net::Request::Ptr, QString*> Type::make(QString log, QString baseUrl) 
                         QObject::tr("Failed to parse response from pasteGG server: expected JSON but got an invalid response. Error: %1")
                             .arg(doc.error()));
                 }
-                auto obj = doc.value().object();
+                auto obj = doc->object();
                 if (obj.contains("status") && obj["status"].isString()) {
                     QString status = obj["status"].toString();
                     if (status == "success") {

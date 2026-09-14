@@ -45,14 +45,14 @@ using Error = QString;
 template <typename T = void>
 using Result = std::expected<T, Error>;
 
-#define TRY(expected)                              \
-    if (const auto _result = expected; !_result) { \
-        return std::unexpected{ _result.error() }; \
+#define TRY(expected)                                \
+    if (const auto _result = (expected); !_result) { \
+        return std::unexpected{ _result.error() };   \
     }
 
-#define TRY_INTO(to, expected)                     \
-    if (const auto _result = expected; !_result) { \
-        return std::unexpected{ _result.error() }; \
-    } else {                                       \
-        to = _result.value();                      \
+#define TRY_INTO(to, expected)                       \
+    if (const auto _result = (expected); !_result) { \
+        return std::unexpected{ _result.error() };   \
+    } else {                                         \
+        (to) = _result.value();                      \
     }

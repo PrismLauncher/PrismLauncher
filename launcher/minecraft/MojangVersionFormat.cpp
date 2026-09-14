@@ -45,7 +45,7 @@ using namespace Json;
 static const int CURRENT_MINIMUM_LAUNCHER_VERSION = 18;
 
 namespace {
-Result<> readString(const QJsonObject& root, const QString& key, QString& variable)
+Result<> optionalString(const QJsonObject& root, const QString& key, QString& variable)
 {
     if (root.contains(key)) {
         TRY_INTO(variable, requireString(root.value(key)))
@@ -56,7 +56,7 @@ Result<> readString(const QJsonObject& root, const QString& key, QString& variab
 Result<> readDownloadInfo(MojangDownloadInfo::Ptr out, const QJsonObject& obj)
 {
     // optional, not used
-    TRY(readString(obj, "path", out->path))
+    TRY(optionalString(obj, "path", out->path))
     // required!
     TRY_INTO(out->sha1, requireString(obj, "sha1"))
     TRY_INTO(out->url, requireString(obj, "url"))
@@ -153,12 +153,12 @@ QJsonObject assetIndexToJson(MojangAssetIndexInfo::Ptr info)
 
 Result<> MojangVersionFormat::readVersionProperties(const QJsonObject& in, VersionFile* out)
 {
-    TRY(readString(in, "id", out->minecraftVersion))
-    TRY(readString(in, "mainClass", out->mainClass))
-    TRY(readString(in, "minecraftArguments", out->minecraftArguments))
-    TRY(readString(in, "type", out->type))
+    TRY(optionalString(in, "id", out->minecraftVersion))
+    TRY(optionalString(in, "mainClass", out->mainClass))
+    TRY(optionalString(in, "minecraftArguments", out->minecraftArguments))
+    TRY(optionalString(in, "type", out->type))
 
-    TRY(readString(in, "assets", out->assets))
+    TRY(optionalString(in, "assets", out->assets))
     if (in.contains("assetIndex")) {
         TRY_INTO(out->mojangAssetIndex, requireObject(in, "assetIndex").and_then(assetIndexFromJson))
     } else if (!out->assets.isNull()) {
@@ -305,7 +305,7 @@ Result<LibraryPtr> MojangVersionFormat::libraryFromJson(ProblemContainer& proble
         problems.addProblem(ProblemSeverity::Error, QObject::tr("Library %1 name is broken and cannot be processed.").arg(rawName));
     }
 
-    TRY(readString(libObj, "url", out->m_repositoryURL))
+    TRY(optionalString(libObj, "url", out->m_repositoryURL))
     if (libObj.contains("extract")) {
         out->m_hasExcludes = true;
         auto extractObj = requireObject(libObj.value("extract")).and_then([](const auto& v) { return requireArray(v.value("exclude")); });

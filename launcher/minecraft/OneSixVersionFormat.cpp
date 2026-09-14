@@ -44,7 +44,7 @@
 
 using namespace Json;
 
-Result<> readString(const QJsonObject& root, const QString& key, QString& variable)
+Result<> optionalString(const QJsonObject& root, const QString& key, QString& variable)
 {
     if (root.contains(key)) {
         TRY_INTO(variable, requireString(root.value(key)))
@@ -57,11 +57,11 @@ Result<LibraryPtr> OneSixVersionFormat::libraryFromJson(ProblemContainer& proble
     auto rsp = MojangVersionFormat::libraryFromJson(problems, libObj, filename);
     TRY(rsp)
     auto out = rsp.value();
-    TRY(readString(libObj, "MMC-hint", out->m_hint))
-    TRY(readString(libObj, "MMC-absulute_url", out->m_absoluteURL))
-    TRY(readString(libObj, "MMC-absoluteUrl", out->m_absoluteURL))
-    TRY(readString(libObj, "MMC-filename", out->m_filename))
-    TRY(readString(libObj, "MMC-displayname", out->m_displayname))
+    TRY(optionalString(libObj, "MMC-hint", out->m_hint))
+    TRY(optionalString(libObj, "MMC-absulute_url", out->m_absoluteURL))
+    TRY(optionalString(libObj, "MMC-absoluteUrl", out->m_absoluteURL))
+    TRY(optionalString(libObj, "MMC-filename", out->m_filename))
+    TRY(optionalString(libObj, "MMC-displayname", out->m_displayname))
     return out;
 }
 
@@ -128,7 +128,7 @@ Result<VersionFilePtr> OneSixVersionFormat::versionFileFromJson(const QJsonDocum
     TRY(MojangVersionFormat::readVersionProperties(root, out.get()))
 
     // added for legacy Minecraft window embedding, TODO: remove
-    TRY(readString(root, "appletClass", out->appletClass))
+    TRY(optionalString(root, "appletClass", out->appletClass))
 
     if (root.contains("+tweakers")) {
         auto arr = requireArray(root.value("+tweakers"));
@@ -241,7 +241,7 @@ Result<VersionFilePtr> OneSixVersionFormat::versionFileFromJson(const QJsonDocum
             TRY(lib)
 
             QString arg = "";
-            TRY(readString(*agentObj, "argument", arg))
+            TRY(optionalString(*agentObj, "argument", arg))
 
             out->agents.append(Agent{ .library = lib.value(), .argument = arg });
         }

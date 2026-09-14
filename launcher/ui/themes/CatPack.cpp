@@ -86,7 +86,7 @@ Result<std::unique_ptr<JsonCatPack>> JsonCatPack::create(const QFileInfo& manife
     auto path = manifestInfo.path();
     auto doc = Json::requireDocument(manifestInfo.absoluteFilePath(), "CatPack JSON file");
     TRY(doc)
-    const auto root = doc.value().object();
+    const auto root = doc->object();
     TRY_INTO(cat->m_name, Json::requireString(root, "name", "Catpack name"))
     QString defaultPath;
     TRY_INTO(defaultPath, Json::requireString(root, "default", "Default Cat"))

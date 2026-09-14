@@ -67,7 +67,7 @@ Result<Modpack> parseDirectory(const QString& path)
     }
     auto doc = Json::requireDocument(instanceFile.absoluteFilePath(), "FTB_APP instance JSON file");
     TRY(doc)
-    const auto root = doc.value().object();
+    const auto root = doc->object();
     TRY_INTO(modpack.uuid, Json::requireString(root, "uuid", "uuid"))
     TRY_INTO(modpack.id, Json::requireInteger(root, "id", "id"))
     TRY_INTO(modpack.versionId, Json::requireInteger(root, "versionId", "versionId"))

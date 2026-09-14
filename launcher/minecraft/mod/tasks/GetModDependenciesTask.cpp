@@ -17,7 +17,6 @@
  */
 
 #include "GetModDependenciesTask.h"
-#include <qjsonobject.h>
 
 #include <QDebug>
 #include <algorithm>

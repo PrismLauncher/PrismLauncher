@@ -1,8 +1,6 @@
 #include "EnsureMetadataTask.h"
 
 #include <MurmurHash2.h>
-#include <qjsonarray.h>
-#include <qjsonobject.h>
 #include <QDebug>
 
 #include "Application.h"

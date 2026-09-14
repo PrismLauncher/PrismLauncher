@@ -330,7 +330,8 @@ std::optional<LogParser::ParsedItem> LogParser::parseLog4J()
     }
 
     // unreachable: already verified this was a complete log4j:Event
-    Q_UNREACHABLE();
+    Q_ASSERT(false);
+    return {};
 }
 
 MessageLevel LogParser::guessLevel(const QString& line, MessageLevel previous)

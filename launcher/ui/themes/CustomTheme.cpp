@@ -183,7 +183,7 @@ Result<> CustomTheme::read(const QString& path, bool& hasCustomLogColors)
 
     auto doc = Json::requireDocument(path, "Theme JSON file");
     TRY(doc)
-    const QJsonObject root = doc.value().object();
+    const QJsonObject root = doc->object();
     TRY_INTO(m_name, Json::requireString(root, "name", "Theme name"))
     TRY_INTO(m_widgets, Json::requireString(root, "widgets", "Qt widget theme"))
     m_qssFilePath = root["qssFilePath"].toString("themeStyle.css");

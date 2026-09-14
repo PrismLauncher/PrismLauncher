@@ -56,7 +56,7 @@ class MetaComponentParseTest : public QObject {
         auto doc = Json::requireDocument(compRp);
         QVERIFY2(doc, doc.has_value() ? "" : qPrintable(doc.error()));
 
-        QJsonObject obj = doc.value().object();
+        QJsonObject obj = doc->object();
 
         QJsonValue descriptionJson = obj.value("description");
         QJsonValue expectedJson = obj.value("expected_output");

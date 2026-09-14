@@ -138,7 +138,7 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
     TRY_INTO(file.date, Json::requireString(obj, "date_published"))
     auto versionArray = Json::requireArray(obj, "game_versions");
     TRY(versionArray)
-    if (versionArray.value().empty()) {
+    if (versionArray->empty()) {
         return {};
     }
     for (auto mcVer : versionArray.value()) {
@@ -200,7 +200,7 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
     TRY(files)
     int i = 0;
 
-    if (files.value().empty()) {
+    if (files->empty()) {
         // This should not happen normally, but check just in case
         qWarning() << "Modrinth returned an unexpected empty list of files:" << obj;
         return {};
@@ -210,7 +210,7 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
     // Will default to the last one if there's no primary (though I think Modrinth requires that
     // at least one file is primary, idk)
     // NOTE: files.count() is 1-indexed, so we need to subtract 1 to become 0-indexed
-    while (i < files.value().count() - 1) {
+    while (i < files->count() - 1) {
         auto parent = files.value()[i].toObject();
         QString fileName;
         TRY_INTO(fileName, Json::requireString(parent, "filename"))
@@ -237,17 +237,17 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
         file.fileName = FS::RemoveInvalidPathChars(file.fileName);
         bool primary = false;
         TRY_INTO(primary, Json::requireBoolean(parent, "primary"))
-        file.isPreferred = primary || (files.value().count() == 1);
+        file.isPreferred = primary || (files->count() == 1);
         auto hashList = Json::requireObject(parent, "hashes");
         TRY(hashList)
 
-        if (hashList.value().contains(preferredHashType)) {
+        if (hashList->contains(preferredHashType)) {
             TRY_INTO(file.hash, Json::requireString(hashList.value(), preferredHashType))
             file.hashType = preferredHashType;
         } else {
             auto hashTypes = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH);
             for (auto& hashType : hashTypes) {
-                if (hashList.value().contains(hashType)) {
+                if (hashList->contains(hashType)) {
                     TRY_INTO(file.hash, Json::requireString(hashList.value(), hashType))
                     file.hashType = hashType;
                     break;

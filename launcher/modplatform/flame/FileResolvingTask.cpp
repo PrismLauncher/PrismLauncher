@@ -92,8 +92,8 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
 
     auto doc = Json::requireDocument(*response).and_then([](const auto& v) { return Json::requireArray(v.object()["data"]); });
     if (!doc) {
-        qCritical() << "Non-JSON data returned from the CF API";
-        qCritical() << doc.error();
+        qCritical() << "Failed to parse CurseForge files response";
+        qCritical() << "Parse error:" << doc.error();
 
         emitFailed(tr("Invalid data returned from the API."));
 
@@ -119,8 +119,8 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
             return {};
         };
         if (auto result = process(file); !result) {
-            qCritical() << "Non-JSON data returned from the CF API";
-            qCritical() << result.error();
+            qCritical() << "Failed to parse CurseForge file entry";
+            qCritical() << "Parse error:" << result.error();
 
             emitFailed(tr("Invalid data returned from the API."));
 
@@ -159,7 +159,7 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
                         auto file = Modrinth::loadIndexedPackVersion(entry.value());
                         TRY(file)
 
-                        out.version.downloadUrl = file.value().downloadUrl;
+                        out.version.downloadUrl = file->downloadUrl;
                         qDebug() << "Found alternative on modrinth" << out.version.fileName;
                         return {};
                     };
@@ -209,7 +209,7 @@ void Flame::FileResolvingTask::getFlameProjects()
                 return Json::requireArray(v, "data");
             });
         if (!doc) {
-            qWarning() << "Error while parsing JSON response from Modrinth projects task:" << doc.error();
+            qWarning() << "Error while parsing CurseForge projects response:" << doc.error();
             qWarning() << *response;
             // treat a parse failure as success, otherwise the task hangs forever
             stepProgress2->state = TaskStepState::Succeeded;

@@ -46,14 +46,9 @@ class ParsingValidator : public Net::Validator {
     Result<> validate() override
     {
         auto fname = m_entity->localFilename();
-        auto doc = Json::requireDocument(m_data, fname)
-                       .and_then([fname](const auto& v) { return Json::requireObject(v, fname); })
-                       .and_then([this](const auto& v) { return m_entity->parse(v); });
-        if (!doc) {
-            qWarning() << "Unable to parse response:" << doc.error();
-            return std::unexpected(doc.error());
-        }
-        return {};
+        auto doc = Json::requireDocument(m_data, fname).and_then([fname](const auto& v) { return Json::requireObject(v, fname); });
+        TRY(doc)
+        return m_entity->parse(doc.value());
     }
 
    private: /* data */

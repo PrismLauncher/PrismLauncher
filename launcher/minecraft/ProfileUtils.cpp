@@ -47,8 +47,6 @@
 
 namespace {
 
-static const int currentOrderFileVersion = 1;
-
 VersionFilePtr createErrorVersionFile(QString fileId, QString filepath, const QString& error)
 {
     auto outError = std::make_shared<VersionFile>();
@@ -69,43 +67,6 @@ VersionFilePtr guardedParseJson(const QJsonDocument& doc, const QString& fileId,
 
 }  // namespace
 namespace ProfileUtils {
-
-bool readOverrideOrders(QString path, PatchOrder& order)
-{
-    if (!QFileInfo::exists(path)) {
-        qWarning() << "Order file doesn't exist. Ignoring.";
-        return false;
-    }
-
-    auto parse = [&path, &order] -> Result<> {
-        // and it's valid JSON
-        auto obj = Json::requireDocument(path, "order file").and_then([](const auto& v) { return Json::requireObject(v); });
-        TRY(obj)
-        // and then read it and process it if all above is true.
-        // check order file version.
-        auto version = Json::requireInteger(obj->value("version"));
-        TRY(version)
-        if (version != currentOrderFileVersion) {
-            return std::unexpected(QObject::tr("Invalid order file version, expected %1").arg(currentOrderFileVersion));
-        }
-        auto orderArray = Json::requireArray(obj->value("order"));
-        TRY(orderArray)
-        for (auto item : orderArray.value()) {
-            auto v = Json::requireString(item);
-            TRY(v)
-            order.append(v.value());
-        }
-        return {};
-    };
-    if (auto rsp = parse(); !rsp) {
-        qCritical() << "Couldn't parse" << path << ":" << rsp.error();
-        qWarning() << "Ignoring overridden order";
-        order.clear();
-        return false;
-    }
-
-    return true;
-}
 
 VersionFilePtr parseJsonFile(const QFileInfo& fileInfo, const bool requireOrder)
 {

@@ -1002,7 +1002,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                         CustomMessageBox::selectable(this, tr("Error"), doc.error(), QMessageBox::Critical)->show();
                         return;
                     }
-                    auto data = doc.value().object()["data"].toObject();
+                    auto data = doc->object()["data"].toObject();
                     // No way to find out if it's a mod or a modpack before here
                     // And also we need to check if it ends with .zip, instead of any better way
                     auto versionRes = FlameMod::loadIndexedPackVersion(data);

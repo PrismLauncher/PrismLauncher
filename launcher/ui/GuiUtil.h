@@ -7,7 +7,7 @@
 #include "Result.h"
 
 namespace GuiUtil {
-[[nodiscard]] bool isUploadCanceled(const Result<QString>& result);
+bool isUploadCanceled(const Result<QString>& result);
 Result<QString> uploadPaste(const QString& name, const QFileInfo& filePath, QWidget* parentWidget);
 Result<QString> uploadPaste(const QString& name, const QString& data, QWidget* parentWidget);
 void setClipboardText(QString text);

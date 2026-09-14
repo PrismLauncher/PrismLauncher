@@ -93,7 +93,7 @@ std::pair<Net::Request::Ptr, QString*> makeUpload(ScreenShot::Ptr shot)
             qDebug() << "imgur server did not reply with JSON" << doc.error();
             return std::unexpected("Invalid json reply");
         }
-        auto object = doc.value().object();
+        auto object = doc->object();
         if (!object.value("success").toBool()) {
             qDebug() << "Screenshot upload not successful:" << doc->toJson();
             return std::unexpected("Screenshot was not uploaded successfully");
@@ -133,7 +133,7 @@ std::pair<Net::Request::Ptr, AlbumResult*> makeAlbum(const QList<ScreenShot::Ptr
             qDebug() << doc.error();
             return std::unexpected("Invalid json reply");
         }
-        auto object = doc.value().object();
+        auto object = doc->object();
         if (!object.value("success").toBool()) {
             qDebug() << doc->toJson();
             return std::unexpected("Failed to create album");

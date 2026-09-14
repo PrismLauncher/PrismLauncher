@@ -838,7 +838,7 @@ void InstanceList::loadGroupList()
         return;
     }
 
-    QJsonObject rootObj = jsonDoc.value();
+    const auto& rootObj = jsonDoc.value();
 
     // Make sure the format version matches, otherwise fail.
     if (rootObj.value("formatVersion").toVariant().toInt() != g_GROUP_FILE_FORMAT_VERSION) {
@@ -852,7 +852,7 @@ void InstanceList::loadGroupList()
     }
 
     QJsonObject groupMapping = rootObj.value("groups").toObject();
-    for (QJsonObject::iterator iter = groupMapping.begin(); iter != groupMapping.end(); iter++) {
+    for (auto iter = groupMapping.begin(); iter != groupMapping.end(); iter++) {
         QString groupName = iter.key();
         if (groupName.isEmpty()) {
             qWarning() << "Redundant empty group found";

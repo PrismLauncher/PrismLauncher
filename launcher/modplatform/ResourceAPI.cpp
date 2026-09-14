@@ -100,7 +100,7 @@ Task::Ptr ResourceAPI::getProjectVersions(const VersionSearchArgs& args,
         }
 
         QVector<ModPlatform::IndexedVersion> unsortedVersions;
-        auto arr = doc.value().isObject() ? doc.value().object()["data"].toArray() : doc.value().array();
+        auto arr = doc->isObject() ? doc->object()["data"].toArray() : doc->array();
 
         for (auto versionIter : arr) {
             auto obj = versionIter.toObject();
@@ -225,10 +225,10 @@ Task::Ptr ResourceAPI::getDependencyVersion(const DependencySearchArgs& args, co
         }
 
         QJsonArray arr;
-        if (args.dependency.version.length() != 0 && doc.value().isObject()) {
-            arr.append(doc.value().object());
+        if (args.dependency.version.length() != 0 && doc->isObject()) {
+            arr.append(doc->object());
         } else {
-            arr = doc.value().isObject() ? doc.value().object()["data"].toArray() : doc.value().array();
+            arr = doc->isObject() ? doc->object()["data"].toArray() : doc.value().array();
         }
 
         QVector<ModPlatform::IndexedVersion> versions;

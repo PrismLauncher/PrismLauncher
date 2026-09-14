@@ -76,7 +76,7 @@ bool SkinList::update()
         if (!doc) {
             qCritical() << "Couldn't load skins json:" << doc.error();
         } else {
-            const auto root = doc.value().object();
+            const auto root = doc->object();
             auto skins = root["skins"].toArray();
             for (auto jSkin : skins) {
                 SkinModel s(m_dir, jSkin.toObject());

@@ -20,7 +20,7 @@ class MojangVersionFormatTest : public QObject {
         auto wr = Json::write(doc2, "1.9-simple-passthorugh.json");
         QVERIFY2(wr, wr.has_value() ? "" : qPrintable(wr.error()));
 
-        QCOMPARE(doc.value().toJson(), doc2.toJson());
+        QCOMPARE(doc->toJson(), doc2.toJson());
     }
 
     void test_Through()
@@ -35,7 +35,7 @@ class MojangVersionFormatTest : public QObject {
         auto wr = Json::write(doc2, "1.9-passthorugh.json");
         QVERIFY2(wr, wr.has_value() ? "" : qPrintable(wr.error()));
 
-        QCOMPARE(doc.value().toJson(), doc2.toJson());
+        QCOMPARE(doc->toJson(), doc2.toJson());
     }
 };
 
