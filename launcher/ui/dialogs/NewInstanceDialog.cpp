@@ -55,7 +55,7 @@
 #include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QDir>
-#include <QDirIterator>
+#include <QDirListing>
 #include <QFileDialog>
 #include <QLayout>
 #include <QPushButton>
@@ -128,13 +128,12 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
         m_copyTemplateDirCheckbox->setChecked(true);
         m_copyTemplateDirCheckbox->setEnabled(true);
 
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
         // iterate over files in template directory to only show symlink disclamier when symlinks are actually present
-        QDir::Filters filters = QDir::Filter::Files | QDir::Filter::Hidden | QDir::Filter::Dirs;
-        QDirIterator sourceIterator(templateDir, filters, QDirIterator::Subdirectories);
         bool containsSymlink = false;
-        while (sourceIterator.hasNext()) {
-            auto path = sourceIterator.next();
+        auto flags =  QDirListing::IteratorFlag::Default | QDirListing::IteratorFlag::Recursive | QDirListing::IteratorFlag::IncludeHidden;
+        for (const auto& entry : QDirListing(templateDir, flags)) {
+            auto path = entry.absoluteFilePath();
             if (std::filesystem::is_symlink(StringUtils::toStdString(path))) {
                 containsSymlink = true;
                 break;
