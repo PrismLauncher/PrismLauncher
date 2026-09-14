@@ -108,35 +108,31 @@ QString findMangoHud()
         if (filePath.isEmpty()) {
             continue;
         }
-        try {
-            auto conf =
-                Json::requireDocument(filePath, vkLayer).and_then([vkLayer](const auto& v) { return Json::requireObject(v, vkLayer); });
-            if (!conf) {
-                continue;
-            }
-            auto confObject = conf.value();
-            auto layer = confObject["layer"].toObject();
-            QString libraryName = layer["library_path"].toString();
+        auto conf = Json::requireDocument(filePath, vkLayer).and_then([vkLayer](const auto& v) { return Json::requireObject(v, vkLayer); });
+        if (!conf) {
+            continue;
+        }
+        auto confObject = conf.value();
+        auto layer = confObject["layer"].toObject();
+        QString libraryName = layer["library_path"].toString();
 
-            if (libraryName.isEmpty()) {
-                continue;
-            }
-            if (QFileInfo(libraryName).isAbsolute()) {
-                return libraryName;
-            }
+        if (libraryName.isEmpty()) {
+            continue;
+        }
+        if (QFileInfo(libraryName).isAbsolute()) {
+            return libraryName;
+        }
 
 #ifdef __GLIBC__
-            // Check whether mangohud is usable on a glibc based system
-            QString libraryPath = find(libraryName);
-            if (!libraryPath.isEmpty()) {
-                return libraryPath;
-            }
-#else
-            // Without glibc return recorded shared library as-is.
-            return libraryName;
-#endif
-        } catch (const Exception& e) {
+        // Check whether mangohud is usable on a glibc based system
+        QString libraryPath = find(libraryName);
+        if (!libraryPath.isEmpty()) {
+            return libraryPath;
         }
+#else
+        // Without glibc return recorded shared library as-is.
+        return libraryName;
+#endif
     }
 
     return {};

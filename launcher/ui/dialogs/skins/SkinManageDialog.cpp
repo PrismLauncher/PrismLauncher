@@ -506,25 +506,20 @@ void SkinManageDialog::on_userBtn_clicked()
     });
 
     connect(getUUID.get(), &Task::succeeded, this, [uuidLoop, uuidOut, job, getProfile, &failReason] {
-        try {
-            auto doc = Json::requireDocument(*uuidOut, "Minecraft skin service");
-            if (!doc) {
-                qWarning() << "Error while parsing JSON response from Minecraft skin service:" << doc.error();
-                failReason = tr("failed to parse get user UUID response");
-                uuidLoop->quit();
-                return;
-            }
-            const auto root = doc.value().object();
-            auto id = root["id"].toString();
-            if (!id.isEmpty()) {
-                getProfile->setUrl("https://sessionserver.mojang.com/session/minecraft/profile/" + id);
-            } else {
-                failReason = tr("user id is empty");
-                job->abort();
-            }
-        } catch (const Exception& e) {
-            qCritical() << "Couldn't load skin json:" << e.cause();
+        auto doc = Json::requireDocument(*uuidOut, "Minecraft skin service");
+        if (!doc) {
+            qWarning() << "Error while parsing JSON response from Minecraft skin service:" << doc.error();
             failReason = tr("failed to parse get user UUID response");
+            uuidLoop->quit();
+            return;
+        }
+        const auto root = doc.value().object();
+        auto id = root["id"].toString();
+        if (!id.isEmpty()) {
+            getProfile->setUrl("https://sessionserver.mojang.com/session/minecraft/profile/" + id);
+        } else {
+            failReason = tr("user id is empty");
+            job->abort();
         }
         uuidLoop->quit();
     });

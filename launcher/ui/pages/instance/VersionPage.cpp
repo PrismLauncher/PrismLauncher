@@ -248,19 +248,11 @@ void VersionPage::updateButtons(int row)
 
 bool VersionPage::reloadPackProfile()
 {
-    try {
-        auto result = m_profile->reload(Net::Mode::Online);
-        if (!result) {
-            QMessageBox::critical(this, tr("Error"), result.error());
-        }
-        return result.has_value();
-    } catch (const Exception& e) {
-        QMessageBox::critical(this, tr("Error"), e.cause());
-        return false;
-    } catch (...) {
-        QMessageBox::critical(this, tr("Error"), tr("Couldn't load the instance profile."));
-        return false;
+    auto result = m_profile->reload(Net::Mode::Online);
+    if (!result) {
+        QMessageBox::critical(this, tr("Error"), result.error());
     }
+    return result.has_value();
 }
 
 void VersionPage::on_actionReload_triggered()
@@ -337,29 +329,22 @@ void VersionPage::on_actionAdd_Agents_triggered()
     QStringList list = GuiUtil::browseForFiles("agent", tr("Select agents"), tr("Java agents") + " (*.jar)",
                                                APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
 
-    if (!list.isEmpty())
+    if (!list.isEmpty()) {
         m_profile->installAgents(list);
+    }
 
     updateButtons();
 }
 
 void VersionPage::on_actionMove_up_triggered()
 {
-    try {
-        m_profile->move(currentRow(), PackProfile::MoveUp);
-    } catch (const Exception& e) {
-        QMessageBox::critical(this, tr("Error"), e.cause());
-    }
+    m_profile->move(currentRow(), PackProfile::MoveUp);
     updateButtons();
 }
 
 void VersionPage::on_actionMove_down_triggered()
 {
-    try {
-        m_profile->move(currentRow(), PackProfile::MoveDown);
-    } catch (const Exception& e) {
-        QMessageBox::critical(this, tr("Error"), e.cause());
-    }
+    m_profile->move(currentRow(), PackProfile::MoveDown);
     updateButtons();
 }
 

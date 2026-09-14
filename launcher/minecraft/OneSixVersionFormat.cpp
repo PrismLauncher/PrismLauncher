@@ -102,7 +102,7 @@ Result<VersionFilePtr> OneSixVersionFormat::versionFileFromJson(const QJsonDocum
         if (root.contains("order")) {
             TRY_INTO(out->order, requireInteger(root.value("order")))
         } else {
-            // FIXME: evaluate if we don't want to throw exceptions here instead
+            // FIXME: evaluate if we don't want to return unexpected
             qCritical() << filename << "doesn't contain an order field";
         }
     }

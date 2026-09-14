@@ -329,7 +329,8 @@ std::optional<LogParser::ParsedItem> LogParser::parseLog4J()
         }
     }
 
-    throw std::runtime_error("unreachable: already verified this was a complete log4j:Event");
+    // unreachable: already verified this was a complete log4j:Event
+    Q_UNREACHABLE();
 }
 
 MessageLevel LogParser::guessLevel(const QString& line, MessageLevel previous)

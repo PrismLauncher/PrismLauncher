@@ -970,17 +970,13 @@ bool PackProfile::installAgents_internal(QStringList filepaths)
 std::shared_ptr<LaunchProfile> PackProfile::getProfile() const
 {
     if (!d->m_profile) {
-        try {
-            auto profile = std::make_shared<LaunchProfile>();
-            for (auto file : d->components) {
-                qCDebug(instanceProfileC) << d->m_instance->name() << "|" << "Applying" << file->getID()
-                                          << (file->getProblemSeverity() == ProblemSeverity::Error ? "ERROR" : "GOOD");
-                file->applyTo(profile.get());
-            }
-            d->m_profile = profile;
-        } catch (const Exception& error) {
-            qCWarning(instanceProfileC) << d->m_instance->name() << "|" << "Couldn't apply profile patches because:" << error.cause();
+        auto profile = std::make_shared<LaunchProfile>();
+        for (const auto& file : d->components) {
+            qCDebug(instanceProfileC) << d->m_instance->name() << "|" << "Applying" << file->getID()
+                                      << (file->getProblemSeverity() == ProblemSeverity::Error ? "ERROR" : "GOOD");
+            file->applyTo(profile.get());
         }
+        d->m_profile = profile;
     }
     return d->m_profile;
 }

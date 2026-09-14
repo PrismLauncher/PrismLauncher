@@ -340,12 +340,13 @@ void ThemeManager::initializeCatPacks()
         QDir dir(directoryIterator.next());
         QFileInfo manifest(dir.absoluteFilePath("catpack.json"));
         if (manifest.isFile()) {
-            try {
-                // Load background manifest
-                themeDebugLog() << "Loading background manifest from:" << manifest.absoluteFilePath();
-                addCatPack(std::unique_ptr<CatPack>(new JsonCatPack(manifest)));
-            } catch (const Exception& e) {
-                themeWarningLog() << "Couldn't load catpack json:" << e.cause();
+            // Load background manifest
+            themeDebugLog() << "Loading background manifest from:" << manifest.absoluteFilePath();
+            auto catPack = JsonCatPack::create(manifest);
+            if (!catPack) {
+                themeWarningLog() << "Couldn't load catpack json:" << catPack.error();
+            } else {
+                addCatPack(std::move(*catPack));
             }
         } else {
             loadFiles(dir);
