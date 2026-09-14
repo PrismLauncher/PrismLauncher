@@ -81,7 +81,7 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
    public slots:
     void accept() override;
     void reject() override;
-    void setCopyTemplateDirectory();
+    void setCopyTemplateDirectory() const;
 
    private slots:
     void on_iconButton_clicked();

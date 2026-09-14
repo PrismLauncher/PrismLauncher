@@ -196,6 +196,9 @@
     <addaction name="actionViewCentralModsFolder"/>
     <addaction name="actionViewJavaFolder"/>
     <addaction name="actionViewSkinsFolder"/>
+    <addaction name="actionViewJavaFolder"/>
+    <addaction name="actionViewTemplateFolder"/>
+
     <addaction name="separator"/>
     <addaction name="actionViewWidgetThemeFolder"/>
     <addaction name="actionViewIconThemeFolder"/>
@@ -783,10 +786,10 @@
     <iconset theme="viewfolder"/>
    </property>
    <property name="text">
-    <string>&amp;Templates</string>
+    <string>&amp;Template</string>
    </property>
    <property name="toolTip">
-    <string>Open the templates folder in a file browser.</string>
+    <string>Open the template folder in a file browser.</string>
    </property>
   </action>
  </widget>
