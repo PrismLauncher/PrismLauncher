@@ -96,8 +96,8 @@ Result<Modpack> parseDirectory(const QString& path)
         }
     }
     if (!modpack.loaderType.has_value()) {
-        if (auto rsp = legacyInstanceParsing(path, &modpack.loaderType, &modpack.loaderVersion); !rsp) {
-            qDebug() << rsp.error();
+        if (auto res = legacyInstanceParsing(path, &modpack.loaderType, &modpack.loaderVersion); !res) {
+            qDebug() << res.error();
         }
     }
 

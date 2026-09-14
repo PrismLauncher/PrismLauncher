@@ -222,10 +222,10 @@ Result<> loadPackProfile(PackProfile* parent, const QString& filename, Component
         }
         return {};
     };
-    if (auto rsp = parse(); !rsp) {
+    if (auto res = parse(); !res) {
         auto message = QObject::tr("Couldn't parse %1 : bad file format").arg(componentsFile.fileName());
         qCCritical(instanceProfileC) << message;
-        qCWarning(instanceProfileC) << "error:" << rsp.error();
+        qCWarning(instanceProfileC) << "error:" << res.error();
         container.clear();
         return std::unexpected(message);
     }

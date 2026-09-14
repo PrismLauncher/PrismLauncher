@@ -164,9 +164,9 @@ void FlameCreationTask::executeTask()
 
     if (oldIndexFile.exists()) {
         Flame::Manifest oldPack;
-        auto rsp = Flame::loadManifest(oldPack, oldIndexPath);
-        if (!rsp) {
-            qWarning() << "Error while parsing old manifest: " << rsp.error();
+        auto res = Flame::loadManifest(oldPack, oldIndexPath);
+        if (!res) {
+            qWarning() << "Error while parsing old manifest: " << res.error();
         }
 
         auto oldFiles = oldPack.files;
@@ -247,8 +247,8 @@ void FlameCreationTask::executeTask()
                             oldFiles.insert(id.value(), file);
                             return {};
                         };
-                        if (auto rsp = parse(); !rsp) {
-                            qCritical() << rsp.error();
+                        if (auto res = parse(); !res) {
+                            qCritical() << res.error();
                             break;
                         }
                     }
@@ -381,9 +381,9 @@ void FlameCreationTask::createInstance()
 
     const QString indexPath(FS::PathCombine(m_stagingPath, "manifest.json"));
     if (!m_pack.isLoaded) {
-        auto rsp = Flame::loadManifest(m_pack, indexPath);
-        if (!rsp) {
-            emitFailed(tr("Could not understand pack manifest:\n") + rsp.error());
+        auto res = Flame::loadManifest(m_pack, indexPath);
+        if (!res) {
+            emitFailed(tr("Could not understand pack manifest:\n") + res.error());
             return;
         }
     }

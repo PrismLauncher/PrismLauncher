@@ -412,8 +412,8 @@ bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<F
         }
         return {};
     };
-    if (auto rsp = parse(); !rsp) {
-        emitFailed(tr("Could not understand pack index:\n") + rsp.error());
+    if (auto res = parse(); !res) {
+        emitFailed(tr("Could not understand pack index:\n") + res.error());
         return false;
     }
     if (!optionalFiles.empty()) {

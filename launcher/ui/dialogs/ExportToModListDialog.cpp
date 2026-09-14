@@ -169,9 +169,9 @@ void ExportToModListDialog::done(int result)
             return;
         }
 
-        auto rsp = FS::write(output, ui->finalText->toPlainText().toUtf8());
-        if (!rsp) {
-            qCritical() << "Failed to save mod list file :" << rsp.error();
+        auto res = FS::write(output, ui->finalText->toPlainText().toUtf8());
+        if (!res) {
+            qCritical() << "Failed to save mod list file :" << res.error();
         }
     }
 

@@ -184,8 +184,8 @@ QList<ModPlatform::Category> ModrinthAPI::loadCategories(const QByteArray& respo
         }
         return {};
     };
-    if (auto rsp = parse(); !rsp) {
-        qWarning() << "Error while parsing JSON response from categories:" << rsp.error();
+    if (auto res = parse(); !res) {
+        qWarning() << "Error while parsing JSON response from categories:" << res.error();
         qWarning() << response;
     }
     return categories;

@@ -261,8 +261,8 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
                 m_tempVersions.insert(hash, version.value());
                 return {};
             };
-            if (auto rsp = parse(); !rsp) {
-                qDebug() << rsp.error();
+            if (auto res = parse(); !res) {
+                qDebug() << res.error();
                 qDebug() << entries;
 
                 emitFail(resource);
@@ -334,8 +334,8 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
                 updateMetadata(pack, m_tempVersions.find(hash).value(), resource);
                 return {};
             };
-            if (auto rsp = parse(); !rsp) {
-                qWarning() << rsp.error();
+            if (auto res = parse(); !res) {
+                qWarning() << res.error();
                 qWarning() << *doc;
                 continue;
             }

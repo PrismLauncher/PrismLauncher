@@ -213,9 +213,7 @@ QList<ModPlatform::Category> FlameAPI::loadModCategories(const QByteArray& respo
 {
     QList<ModPlatform::Category> categories;
     auto parse = [&response, &categories] -> Result<> {
-        auto doc = Json::requireObject(response).and_then([](const auto& v) {
-                return Json::requireArray(v, "data");
-            });
+        auto doc = Json::requireObject(response).and_then([](const auto& v) { return Json::requireArray(v, "data"); });
         TRY(doc)
 
         for (auto val : doc.value()) {
@@ -229,8 +227,8 @@ QList<ModPlatform::Category> FlameAPI::loadModCategories(const QByteArray& respo
         }
         return {};
     };
-    if (auto rsp = parse(); !rsp) {
-        qCritical() << "Failed to parse response from categories:" << rsp.error();
+    if (auto res = parse(); !res) {
+        qCritical() << "Failed to parse response from categories:" << res.error();
         qDebug() << response;
     }
     return categories;

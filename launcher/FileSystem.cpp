@@ -189,9 +189,9 @@ namespace FS {
 
 Result<> write(const QString& filename, const QByteArray& data)
 {
-    auto rsp = ensureExists(QFileInfo(filename).dir());
-    if (!rsp) {
-        return rsp;
+    auto res = ensureExists(QFileInfo(filename).dir());
+    if (!res) {
+        return res;
     }
     PSaveFile file(filename);
     if (!file.open(PSaveFile::WriteOnly)) {
@@ -208,9 +208,9 @@ Result<> write(const QString& filename, const QByteArray& data)
 
 Result<> appendSafe(const QString& filename, const QByteArray& data)
 {
-    auto rsp = ensureExists(QFileInfo(filename).dir());
-    if (!rsp) {
-        return rsp;
+    auto res = ensureExists(QFileInfo(filename).dir());
+    if (!res) {
+        return res;
     }
 
     QByteArray buffer;
@@ -234,9 +234,9 @@ Result<> appendSafe(const QString& filename, const QByteArray& data)
 
 Result<> append(const QString& filename, const QByteArray& data)
 {
-    auto rsp = ensureExists(QFileInfo(filename).dir());
-    if (!rsp) {
-        return rsp;
+    auto res = ensureExists(QFileInfo(filename).dir());
+    if (!res) {
+        return res;
     }
     QFile file(filename);
     if (!file.open(QFile::Append)) {

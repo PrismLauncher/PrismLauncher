@@ -163,8 +163,8 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
                         qDebug() << "Found alternative on modrinth" << out.version.fileName;
                         return {};
                     };
-                    if (auto rsp = parse(); !rsp) {
-                        qDebug() << rsp.error();
+                    if (auto res = parse(); !res) {
+                        qDebug() << res.error();
                         qDebug() << entries;
                         continue;
                     }
@@ -204,9 +204,7 @@ void Flame::FileResolvingTask::getFlameProjects()
 
     auto stepProgress2 = std::make_shared<TaskStepProgress>();
     connect(m_task.get(), &Task::succeeded, this, [this, response, stepProgress2] {
-        auto doc = Json::requireObject(*response).and_then([](const auto& v) {
-            return Json::requireArray(v, "data");
-        });
+        auto doc = Json::requireObject(*response).and_then([](const auto& v) { return Json::requireArray(v, "data"); });
         if (!doc) {
             qWarning() << "Error while parsing CurseForge projects response:" << doc.error();
             qWarning() << *response;

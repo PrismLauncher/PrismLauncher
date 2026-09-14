@@ -791,9 +791,9 @@ void InstanceList::saveGroupList()
         toplevel.insert("ungrouped", ungrouped);
     }
     QJsonDocument doc(toplevel);
-    auto rsp = FS::write(groupFileName, doc.toJson());
-    if (!rsp) {
-        qCritical() << "Failed to write instance group file :" << rsp.error();
+    auto res = FS::write(groupFileName, doc.toJson());
+    if (!res) {
+        qCritical() << "Failed to write instance group file :" << res.error();
     } else {
         qDebug() << "Group list saved.";
     }
@@ -822,12 +822,12 @@ void InstanceList::loadGroupList()
         migratingLegacyGroups = true;
     }
 
-    auto rsp = FS::read(groupFileName);
-    if (!rsp) {
-        qCritical() << "Failed to read instance group file :" << rsp.error();
+    auto res = FS::read(groupFileName);
+    if (!res) {
+        qCritical() << "Failed to read instance group file :" << res.error();
         return;
     }
-    const auto& jsonData = rsp.value();
+    const auto& jsonData = res.value();
 
     auto jsonDoc = Json::requireObject(jsonData);
 

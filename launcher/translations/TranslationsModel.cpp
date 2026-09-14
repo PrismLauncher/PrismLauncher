@@ -227,10 +227,10 @@ namespace {
 void readIndex(const QString& path, QMap<QString, Language>& languages)
 {
     auto parse = [&languages, &path] -> Result<> {
-        auto rsp = Json::requireObject(path);
-        TRY(rsp)
+        auto res = Json::requireObject(path);
+        TRY(res)
 
-        const auto& doc = rsp.value();
+        const auto& doc = res.value();
         auto fileType = Json::requireString(doc, "file_type");
         TRY(fileType)
         if (fileType.value() != "MMC-TRANSLATION-INDEX") {
@@ -258,8 +258,8 @@ void readIndex(const QString& path, QMap<QString, Language>& languages)
         }
         return {};
     };
-    if (auto rsp = parse(); !rsp) {
-        qCritical() << "Translations Download Failed:" << rsp.error();
+    if (auto res = parse(); !res) {
+        qCritical() << "Translations Download Failed:" << res.error();
     }
 }
 }  // namespace

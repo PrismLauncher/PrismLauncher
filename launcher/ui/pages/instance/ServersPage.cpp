@@ -118,11 +118,11 @@ struct Server {
 static std::unique_ptr<nbt::tag_compound> parseServersDat(const QString& filename)
 {
     try {
-        auto rsp = FS::read(filename);
-        if (!rsp) {
+        auto res = FS::read(filename);
+        if (!res) {
             return nullptr;
         }
-        const auto& input = rsp.value();
+        const auto& input = res.value();
         std::istringstream foo(std::string(input.constData(), input.size()));
         auto pair = nbt::io::read_compound(foo);
 
@@ -149,8 +149,8 @@ static bool serializeServerDat(const QString& filename, nbt::tag_compound* level
         std::ostringstream s;
         nbt::io::write_tag("", *levelInfo, s);
         QByteArray val(s.str().data(), (int)s.str().size());
-        auto rsp = FS::write(filename, val);
-        return rsp.has_value();
+        auto res = FS::write(filename, val);
+        return res.has_value();
     } catch (...) {
         return false;
     }

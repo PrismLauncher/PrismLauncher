@@ -222,8 +222,8 @@ void FlamePackExportTask::makeApiRequest()
                                          { .addonId = modid.value(), .version = id.value(), .enabled = mod->enabled, .isMod = mod->isMod });
                     return {};
                 };
-                if (auto rsp = parse(); !rsp) {
-                    qDebug() << rsp.error();
+                if (auto res = parse(); !res) {
+                    qDebug() << res.error();
                     qDebug() << *doc;
                     break;
                 }
@@ -306,8 +306,8 @@ void FlamePackExportTask::getProjectsInfo()
                 }
                 return {};
             };
-            if (auto rsp = parse(); !rsp) {
-                qDebug() << rsp.error();
+            if (auto res = parse(); !res) {
+                qDebug() << res.error();
                 qDebug() << *doc;
                 continue;
             }

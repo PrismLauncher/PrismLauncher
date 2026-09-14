@@ -54,9 +54,9 @@ Result<> optionalString(const QJsonObject& root, const QString& key, QString& va
 
 Result<LibraryPtr> OneSixVersionFormat::libraryFromJson(ProblemContainer& problems, const QJsonObject& libObj, const QString& filename)
 {
-    auto rsp = MojangVersionFormat::libraryFromJson(problems, libObj, filename);
-    TRY(rsp)
-    auto out = rsp.value();
+    auto res = MojangVersionFormat::libraryFromJson(problems, libObj, filename);
+    TRY(res)
+    auto out = res.value();
     TRY(optionalString(libObj, "MMC-hint", out->m_hint))
     TRY(optionalString(libObj, "MMC-absulute_url", out->m_absoluteURL))
     TRY(optionalString(libObj, "MMC-absoluteUrl", out->m_absoluteURL))

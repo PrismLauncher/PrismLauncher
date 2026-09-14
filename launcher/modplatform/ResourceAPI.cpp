@@ -173,8 +173,8 @@ Task::Ptr ResourceAPI::getProjectInfo(const ProjectInfoArgs& args,
 
             return loadExtraPackInfo(*pack, obj);
         };
-        if (auto rsp = parse(); !rsp) {
-            qWarning() << "Error while reading" << debugName() << "resource info:" << rsp.error();
+        if (auto res = parse(); !res) {
+            qWarning() << "Error while reading" << debugName() << "resource info:" << res.error();
             return;
         }
 

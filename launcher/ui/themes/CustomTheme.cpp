@@ -65,9 +65,9 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
         m_palette = baseTheme->colorScheme();
 
         bool hasCustomLogColors = false;
-        auto rsp = read(themeFilePath, hasCustomLogColors);
-        if (!rsp) {
-            themeWarningLog() << "Couldn't read theme json:" << rsp.error();
+        auto res = read(themeFilePath, hasCustomLogColors);
+        if (!res) {
+            themeWarningLog() << "Couldn't read theme json:" << res.error();
             m_logColors = defaultLogColors(m_palette);
             m_styleSheet = baseTheme->appStyleSheet();
         } else {
@@ -109,12 +109,12 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
 
         m_palette = baseTheme->colorScheme();
         // TODO: validate qss?
-        auto rsp = FS::read(path);
-        if (!rsp) {
-            themeWarningLog() << "Couldn't load qss:" << rsp.error() << "from" << path;
+        auto res = FS::read(path);
+        if (!res) {
+            themeWarningLog() << "Couldn't load qss:" << res.error() << "from" << path;
             m_styleSheet = baseTheme->appStyleSheet();
         } else {
-            m_styleSheet = QString::fromUtf8(rsp.value());
+            m_styleSheet = QString::fromUtf8(res.value());
         }
     }
 }

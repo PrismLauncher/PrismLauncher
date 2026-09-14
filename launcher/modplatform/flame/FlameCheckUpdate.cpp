@@ -75,8 +75,8 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QByteArray* 
         TRY(arr)
         return FlameMod::loadIndexedPackVersions(*pack.get(), arr.value());
     };
-    if (auto rsp = parse(); !rsp) {
-        qWarning() << "Error while parsing JSON response from latest mod version:" << rsp.error();
+    if (auto res = parse(); !res) {
+        qWarning() << "Error while parsing JSON response from latest mod version:" << res.error();
         qWarning() << *response;
         return;
     }
@@ -175,15 +175,15 @@ void FlameCheckUpdate::collectBlockedMods()
                 setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(resource->name()));
 
                 ModPlatform::IndexedPack pack;
-                auto rsp = FlameMod::loadIndexedPack(pack, entryObj.value());
-                TRY(rsp)
+                auto res = FlameMod::loadIndexedPack(pack, entryObj.value());
+                TRY(res)
                 auto recoverUrl = QString("%1/download/%2").arg(pack.websiteUrl, m_blocked[resource]);
                 emit checkFailed(resource, tr("Resource has a new update available, but is not downloadable using CurseForge."),
                                  recoverUrl);
                 return {};
             };
-            if (auto rsp = parse(); !rsp) {
-                qDebug() << rsp.error();
+            if (auto res = parse(); !res) {
+                qDebug() << res.error();
                 qDebug() << *doc;
                 continue;
             }

@@ -295,8 +295,8 @@ void FileIgnoreProxy::loadBlockedPathsFromFile(const QString& fileName)
 void FileIgnoreProxy::saveBlockedPathsToFile(const QString& fileName)
 {
     auto ignoreData = blockedPaths().toStringList().join('\n').toUtf8();
-    auto rsp = FS::write(fileName, ignoreData);
-    if (!rsp) {
-        qWarning() << rsp.error();
+    auto res = FS::write(fileName, ignoreData);
+    if (!res) {
+        qWarning() << res.error();
     }
 }

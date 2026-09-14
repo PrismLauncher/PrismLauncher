@@ -9,12 +9,12 @@
 namespace {
 unsigned getOnlinePlayers(const QJsonObject& data)
 {
-    auto rsp = Json::requireObject(data, "players").and_then([](const auto& v) { return Json::requireInteger(v, "online"); });
-    if (!rsp) {
-        qWarning() << "server ping failed to parse response" << rsp.error();
+    auto res = Json::requireObject(data, "players").and_then([](const auto& v) { return Json::requireInteger(v, "online"); });
+    if (!res) {
+        qWarning() << "server ping failed to parse response" << res.error();
         return 0;
     }
-    return rsp.value();
+    return res.value();
 }
 }  // namespace
 

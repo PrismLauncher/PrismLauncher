@@ -238,8 +238,8 @@ void Technic::ListModel::searchRequestFinished(QByteArray* responsePtr)
         }
         return {};
     };
-    if (auto rsp = parse(); !rsp) {
-        qCritical() << "Couldn't parse technic search results:" << rsp.error();
+    if (auto res = parse(); !res) {
+        qCritical() << "Couldn't parse technic search results:" << res.error();
         return;
     }
     searchState = Finished;

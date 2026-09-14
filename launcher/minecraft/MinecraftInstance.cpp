@@ -1090,8 +1090,8 @@ QString MinecraftInstance::getStatusbarDescription()
     QString mcVersion = m_components->getComponentVersion("net.minecraft");
     if (mcVersion.isEmpty()) {
         // Load component info if needed
-        if (auto rsp = m_components->reload(Net::Mode::Offline); !rsp) {
-            qWarning() << "Failed to reload components:" << rsp.error();
+        if (auto res = m_components->reload(Net::Mode::Offline); !res) {
+            qWarning() << "Failed to reload components:" << res.error();
         }
         mcVersion = m_components->getComponentVersion("net.minecraft");
     }

@@ -162,11 +162,11 @@ void InstanceCopyTask::copyFinished()
 
         QByteArray allowedSymlinks;
         if (allowedSymlinksFile.exists()) {
-            auto rsp = FS::read(allowedSymlinksFile.filePath());
-            if (!rsp) {
-                qCritical() << "Failed to read symlink" << rsp.error();
+            auto res = FS::read(allowedSymlinksFile.filePath());
+            if (!res) {
+                qCritical() << "Failed to read symlink" << res.error();
             } else {
-                allowedSymlinks.append(rsp.value());
+                allowedSymlinks.append(res.value());
                 if (allowedSymlinks.right(1) != "\n") {
                     allowedSymlinks.append("\n");  // we want to be on a new line
                 }
@@ -180,9 +180,9 @@ void InstanceCopyTask::copyFinished()
                     .filePath());  // we dont want to modify the original. also make sure the resulting file is not itself a link.
         }
 
-        auto rsp = FS::write(allowedSymlinksFile.filePath(), allowedSymlinks);
-        if (!rsp) {
-            qCritical() << "Failed to write symlink :" << rsp.error();
+        auto res = FS::write(allowedSymlinksFile.filePath(), allowedSymlinks);
+        if (!res) {
+            qCritical() << "Failed to write symlink :" << res.error();
         }
     }
 

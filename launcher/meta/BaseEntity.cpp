@@ -107,10 +107,10 @@ void BaseEntityLoadTask::executeTask()
             if (m_entity->m_load_status == BaseEntity::LoadStatus::NotLoaded || m_entity->m_file_sha256.isEmpty()) {
                 setStatus(tr("Loading local file"));
 
-                auto rsp = FS::read(fname);
-                TRY(rsp)
+                auto res = FS::read(fname);
+                TRY(res)
 
-                fileData = rsp.value();
+                fileData = res.value();
                 m_entity->m_file_sha256 = Hashing::hash(fileData, Hashing::Algorithm::Sha256);
             }
 
@@ -129,9 +129,9 @@ void BaseEntityLoadTask::executeTask()
             }
             return {};
         };
-        auto rsp = parse();
-        if (!rsp) {
-            qCritical() << QString("Unable to parse file %1: %2").arg(fname, rsp.error());
+        auto res = parse();
+        if (!res) {
+            qCritical() << QString("Unable to parse file %1: %2").arg(fname, res.error());
             // just make sure it's gone and we never consider it again.
             FS::deletePath(fname);
             m_entity->m_load_status = BaseEntity::LoadStatus::NotLoaded;

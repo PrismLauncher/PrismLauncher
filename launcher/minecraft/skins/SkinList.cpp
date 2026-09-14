@@ -361,9 +361,9 @@ void SkinList::save()
         arr << s.toJSON();
     }
     doc["skins"] = arr;
-    auto rsp = Json::write(doc, m_dir.absoluteFilePath("index.json"));
-    if (!rsp) {
-        qCritical() << "Failed to write skin index file :" << rsp.error();
+    auto res = Json::write(doc, m_dir.absoluteFilePath("index.json"));
+    if (!res) {
+        qCritical() << "Failed to write skin index file :" << res.error();
     }
 }
 

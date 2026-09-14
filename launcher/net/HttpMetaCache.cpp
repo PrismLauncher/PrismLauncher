@@ -321,8 +321,8 @@ void HttpMetaCache::SaveNow()
     }
     toplevel.insert("entries", entriesArr);
 
-    auto rsp = Json::write(toplevel, m_index_file);
-    if (!rsp) {
-        qCWarning(taskHttpMetaCacheLogC) << "Error writing cache:" << rsp.error();
+    auto res = Json::write(toplevel, m_index_file);
+    if (!res) {
+        qCWarning(taskHttpMetaCacheLogC) << "Error writing cache:" << res.error();
     }
 }

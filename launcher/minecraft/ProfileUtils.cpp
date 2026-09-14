@@ -58,11 +58,11 @@ VersionFilePtr createErrorVersionFile(QString fileId, QString filepath, const QS
 
 VersionFilePtr guardedParseJson(const QJsonDocument& doc, const QString& fileId, const QString& filepath, const bool& requireOrder)
 {
-    auto rsp = OneSixVersionFormat::versionFileFromJson(doc, filepath, requireOrder);
-    if (!rsp) {
-        return createErrorVersionFile(fileId, filepath, rsp.error());
+    auto res = OneSixVersionFormat::versionFileFromJson(doc, filepath, requireOrder);
+    if (!res) {
+        return createErrorVersionFile(fileId, filepath, res.error());
     }
-    return rsp.value();
+    return res.value();
 }
 
 }  // namespace

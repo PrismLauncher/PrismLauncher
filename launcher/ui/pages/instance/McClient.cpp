@@ -122,12 +122,12 @@ void McClient::readRawResponse()
 
     m_resp.append(m_socket.readAll());
     if (m_responseReadState == ResponseReadState::Waiting && m_resp.size() >= 5) {
-        auto rsp = readVarInt(m_resp);
-        if (!rsp) {
-            emitFail(rsp.error());
+        auto res = readVarInt(m_resp);
+        if (!res) {
+            emitFail(res.error());
             return;
         }
-        m_wantedRespLength = *rsp;
+        m_wantedRespLength = *res;
         m_responseReadState = ResponseReadState::GotLength;
     }
 

@@ -539,7 +539,7 @@ bool ModFolderModel::deleteResources(const QModelIndexList& indexes)
             }
         }
     };
-    auto rsp = ResourceFolderModel::deleteResources(indexes);
+    auto res = ResourceFolderModel::deleteResources(indexes);
     for (auto* mod : allMods()) {
         auto id = mod->mod_id();
         deleteInvalid(m_requiredBy[id]);
@@ -551,5 +551,5 @@ bool ModFolderModel::deleteResources(const QModelIndexList& indexes)
             emit dataChanged(index(row, RequiresColumn), index(row, RequiredByColumn));
         }
     }
-    return rsp;
+    return res;
 }
