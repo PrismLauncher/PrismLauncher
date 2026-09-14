@@ -36,8 +36,8 @@
 #pragma once
 
 #include <QFileInfo>
-#include "Exception.h"
 #include "ITheme.h"
+#include "Result.h"
 
 class CustomTheme : public ITheme {
    public:

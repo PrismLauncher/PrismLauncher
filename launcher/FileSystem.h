@@ -37,8 +37,8 @@
 
 #pragma once
 
-#include "Exception.h"
 #include "Filter.h"
+#include "Result.h"
 
 #include <system_error>
 

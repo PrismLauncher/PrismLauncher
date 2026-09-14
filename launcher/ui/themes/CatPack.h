@@ -40,7 +40,7 @@
 #include <QList>
 #include <QString>
 #include <memory>
-#include "Exception.h"
+#include "Result.h"
 
 class CatPack {
    public:

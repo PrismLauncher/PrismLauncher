@@ -35,7 +35,7 @@
 #pragma once
 
 #include <QNetworkReply>
-#include "Exception.h"
+#include "Result.h"
 
 namespace Net {
 class Validator {

@@ -23,7 +23,7 @@
 #include <QStringList>
 #include <memory>
 
-#include "Exception.h"
+#include "Result.h"
 #include "minecraft/VersionFile.h"
 
 #include "BaseEntity.h"

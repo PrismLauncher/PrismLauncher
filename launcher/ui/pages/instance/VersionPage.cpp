@@ -66,7 +66,7 @@
 #include "ui/GuiUtil.h"
 
 #include "DesktopServices.h"
-#include "Exception.h"
+#include "Result.h"
 #include "icons/IconList.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/auth/AccountList.h"

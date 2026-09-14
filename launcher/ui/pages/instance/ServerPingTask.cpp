@@ -1,9 +1,9 @@
 #include <QFutureWatcher>
 
 #include <Json.h>
-#include "Exception.h"
 #include "McClient.h"
 #include "McResolver.h"
+#include "Result.h"
 #include "ServerPingTask.h"
 
 namespace {

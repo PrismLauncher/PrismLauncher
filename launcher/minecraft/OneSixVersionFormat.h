@@ -6,7 +6,7 @@
 #include <minecraft/VersionFile.h>
 #include <QJsonDocument>
 
-#include "Exception.h"
+#include "Result.h"
 
 class OneSixVersionFormat {
    public:

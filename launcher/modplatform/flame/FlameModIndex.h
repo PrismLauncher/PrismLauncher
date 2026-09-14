@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Exception.h"
+#include "Result.h"
 #include "modplatform/ModIndex.h"
 
 namespace FlameMod {

@@ -21,7 +21,7 @@
 #include <expected>
 #include <utility>
 
-#include "Exception.h"
+#include "Result.h"
 #include "net/ByteArraySink.h"
 #include "net/Request.h"
 

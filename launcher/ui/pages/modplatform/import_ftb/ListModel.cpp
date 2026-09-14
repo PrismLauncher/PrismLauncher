@@ -24,9 +24,9 @@
 #include <QProcessEnvironment>
 #include <algorithm>
 #include "Application.h"
-#include "Exception.h"
 #include "FileSystem.h"
 #include "Json.h"
+#include "Result.h"
 #include "StringUtils.h"
 #include "modplatform/import_ftb/PackHelpers.h"
 #include "settings/SettingsObject.h"

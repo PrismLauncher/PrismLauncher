@@ -24,7 +24,7 @@
 #include <memory>
 
 #include "BaseVersion.h"
-#include "Exception.h"
+#include "Result.h"
 #include "java/JavaVersion.h"
 
 namespace Java {

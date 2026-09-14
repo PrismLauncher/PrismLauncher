@@ -98,6 +98,7 @@ Result<Meta::VersionList::Ptr> parseVersionListInternal(const QJsonObject& obj)
     TRY(uid)
 
     const auto versionsRaw = requireIsArrayOf<QJsonObject>(obj, "versions");
+    TRY(versionsRaw)
 
     QList<Meta::Version::Ptr> versions;
     versions.reserve(versionsRaw->size());
@@ -180,7 +181,7 @@ Result<> parseVersion(const QJsonObject& obj, Version* ptr)
 {"uid":"foo", "equals":"version"}
 ]
 */
-Result<void> parseRequires(const QJsonObject& obj, RequireSet* ptr, const char* keyName)
+Result<> parseRequires(const QJsonObject& obj, RequireSet* ptr, const char* keyName)
 {
     if (obj.contains(keyName)) {
         auto reqArray = requireArray(obj, keyName);

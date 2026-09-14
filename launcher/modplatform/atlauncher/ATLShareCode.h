@@ -22,7 +22,7 @@
 #include <QList>
 #include <QString>
 
-#include "Exception.h"
+#include "Result.h"
 
 namespace ATLauncher {
 

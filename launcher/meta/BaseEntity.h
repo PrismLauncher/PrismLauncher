@@ -18,7 +18,7 @@
 #include <QJsonObject>
 #include <QObject>
 
-#include "Exception.h"
+#include "Result.h"
 #include "net/Mode.h"
 #include "net/NetJob.h"
 #include "tasks/Task.h"

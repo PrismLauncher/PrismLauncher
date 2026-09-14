@@ -47,8 +47,8 @@
 #include <optional>
 
 #include "Component.h"
-#include "Exception.h"
 #include "LaunchProfile.h"
+#include "Result.h"
 #include "modplatform/ModIndex.h"
 #include "net/Mode.h"
 

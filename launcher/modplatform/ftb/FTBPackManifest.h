@@ -42,7 +42,7 @@
 #include <QUrl>
 #include <QVector>
 
-#include "Exception.h"
+#include "Result.h"
 
 namespace FTB {
 

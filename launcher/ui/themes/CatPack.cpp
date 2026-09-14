@@ -41,9 +41,9 @@
 #include <QImageReader>
 #include <QRandomGenerator>
 #include <algorithm>
-#include "Exception.h"
 #include "FileSystem.h"
 #include "Json.h"
+#include "Result.h"
 
 QString BasicCatPack::path() const
 {

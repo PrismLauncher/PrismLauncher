@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <optional>
 
-#include "Exception.h"
+#include "Result.h"
 
 namespace GuiUtil {
 [[nodiscard]] bool isUploadCanceled(const Result<QString>& result);

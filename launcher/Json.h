@@ -44,7 +44,7 @@
 #include <QUuid>
 #include <QVariant>
 
-#include "Exception.h"
+#include "Result.h"
 
 namespace Json {
 

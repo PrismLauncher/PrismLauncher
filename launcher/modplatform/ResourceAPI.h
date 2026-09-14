@@ -46,7 +46,7 @@
 #include <utility>
 
 #include "../Version.h"
-#include "Exception.h"
+#include "Result.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceType.h"
 #include "tasks/Task.h"
