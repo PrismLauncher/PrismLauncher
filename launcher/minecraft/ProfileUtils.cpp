@@ -34,8 +34,8 @@
  */
 
 #include "ProfileUtils.h"
-#include <qfileinfo.h>
 #include <QDebug>
+#include <QFileInfo>
 #include "Json.h"
 #include "minecraft/OneSixVersionFormat.h"
 #include "minecraft/VersionFilterData.h"

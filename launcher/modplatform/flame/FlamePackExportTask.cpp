@@ -202,7 +202,7 @@ void FlamePackExportTask::makeApiRequest()
             if (matchObj.isEmpty() || fileObj.isEmpty()) {
                 qWarning() << "Fingerprint match is empty!";
 
-                return;
+                continue;
             }
 
             auto fingerprint = QString::number(fileObj["fileFingerprint"].toInteger());

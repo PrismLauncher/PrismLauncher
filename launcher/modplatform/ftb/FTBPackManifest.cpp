@@ -93,9 +93,7 @@ Result<> FTB::loadModpack(FTB::Modpack& m, const QJsonObject& obj)
 {
     TRY_INTO(m.id, Json::requireInteger(obj, "id"))
     TRY_INTO(m.name, Json::requireString(obj, "name"))
-    QString name;
-    TRY_INTO(name, Json::requireString(obj, "name"))
-    m.safeName = name.replace(QRegularExpression("[^A-Za-z0-9]"), "").toLower() + ".png";
+    m.safeName = m.name.replace(QRegularExpression("[^A-Za-z0-9]"), "").toLower() + ".png";
     TRY_INTO(m.synopsis, Json::requireString(obj, "synopsis"))
     TRY_INTO(m.description, Json::requireString(obj, "description"))
     TRY_INTO(m.type, Json::requireString(obj, "type"))
@@ -184,9 +182,7 @@ Result<> FTB::loadVersion(FTB::Version& m, const QJsonObject& obj)
     TRY_INTO(m.plays, Json::requireInteger(obj, "plays"))
     TRY_INTO(m.updated, Json::requireInteger(obj, "updated"))
     m.refreshed = obj["refreshed"].toInt();
-    auto specs = Json::requireObject(obj, "specs");
-    TRY(specs)
-    TRY(loadSpecs(m.specs, specs.value()))
+    TRY(Json::requireObject(obj, "specs").and_then([&m](const auto& v) { return loadSpecs(m.specs, v); }))
     auto targetArr = Json::requireArray(obj, "targets");
     TRY(targetArr)
     for (QJsonValueRef targetRaw : targetArr.value()) {

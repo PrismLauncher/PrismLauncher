@@ -405,7 +405,7 @@ Result<LibraryPtr> OneSixVersionFormat::plusJarModFromJson([[maybe_unused]] Prob
 {
     LibraryPtr out = std::make_shared<Library>();
     if (!libObj.contains("name")) {
-        return std::unexpected(filename + "contains a jarmod that doesn't have a 'name' field");
+        return std::unexpected(filename + " contains a jarmod that doesn't have a 'name' field");
     }
 
     // just make up something unique on the spot for the library name.

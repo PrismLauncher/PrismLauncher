@@ -38,11 +38,11 @@
  */
 
 #include <Version.h>
-#include <qfileinfo.h>
 #include <QCryptographicHash>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QSaveFile>

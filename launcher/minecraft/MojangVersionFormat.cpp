@@ -297,7 +297,7 @@ Result<LibraryPtr> MojangVersionFormat::libraryFromJson(ProblemContainer& proble
 {
     LibraryPtr out(new Library());
     if (!libObj.contains("name")) {
-        return std::unexpected(filename + "contains a library that doesn't have a 'name' field");
+        return std::unexpected(filename + " contains a library that doesn't have a 'name' field");
     }
     auto rawName = libObj.value("name").toString();
     out->m_name = rawName;

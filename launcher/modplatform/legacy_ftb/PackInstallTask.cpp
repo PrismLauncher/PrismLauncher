@@ -150,9 +150,9 @@ void PackInstallTask::install()
             qWarning() << "File doesn't exists:" << packJson.fileName();
         } else {
             auto doc = Json::requireDocument(packJson.absoluteFilePath());
-            if (!doc) {
+            if (doc) {
                 // we only care about the libs
-                QJsonArray libs = doc->object().value("libraries").toArray();
+                auto libs = doc->object().value("libraries").toArray();
 
                 for (const auto& value : libs) {
                     QString nameValue = value.toObject().value("name").toString();
