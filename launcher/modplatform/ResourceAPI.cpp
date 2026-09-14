@@ -160,7 +160,7 @@ Task::Ptr ResourceAPI::getProjectInfo(const ProjectInfoArgs& args,
     QObject::connect(job.get(), &NetJob::succeeded, job.get(), [this, response, callbacks, args] {
         auto pack = args.pack;
         auto parse = [this, &pack, &response]() -> Result<> {
-            auto doc = Json::requireDocument(*response).and_then([](const auto& v) { return Json::requireObject(v); });
+            auto doc = Json::requireObject(*response);
             TRY(doc)
             auto obj = doc.value();
             if (obj.contains("data")) {

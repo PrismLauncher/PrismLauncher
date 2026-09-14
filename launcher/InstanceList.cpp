@@ -829,7 +829,7 @@ void InstanceList::loadGroupList()
     }
     const auto& jsonData = rsp.value();
 
-    auto jsonDoc = Json::requireDocument(jsonData).and_then([](const auto& v) { return Json::requireObject(v); });
+    auto jsonDoc = Json::requireObject(jsonData);
 
     // if the json was bad, fail
     // if the root of the json wasn't an object, fail

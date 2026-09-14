@@ -139,7 +139,7 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
         stepProgress2->state = TaskStepState::Succeeded;
         stepProgress(*stepProgress2);
 
-        auto doc = Json::requireDocument(*modrinthResponse).and_then([](const auto& v) { return Json::requireObject(v); });
+        auto doc = Json::requireObject(*modrinthResponse);
         if (!doc) {
             qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions:" << doc.error();
             qWarning() << *modrinthResponse;
@@ -204,10 +204,9 @@ void Flame::FileResolvingTask::getFlameProjects()
 
     auto stepProgress2 = std::make_shared<TaskStepProgress>();
     connect(m_task.get(), &Task::succeeded, this, [this, response, stepProgress2] {
-        auto doc =
-            Json::requireDocument(*response).and_then([](const auto& v) { return Json::requireObject(v); }).and_then([](const auto& v) {
-                return Json::requireArray(v, "data");
-            });
+        auto doc = Json::requireObject(*response).and_then([](const auto& v) {
+            return Json::requireArray(v, "data");
+        });
         if (!doc) {
             qWarning() << "Error while parsing CurseForge projects response:" << doc.error();
             qWarning() << *response;

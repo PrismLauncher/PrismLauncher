@@ -218,15 +218,13 @@ void FlameCreationTask::executeTask()
         connect(job.get(), &Task::succeeded, this,
                 [this, rawResponse, fileIds, oldInstDir, oldFiles, oldMinecraftDir, createInst]() mutable {
                     // Parse the API response
-                    auto doc = Json::requireDocument(*rawResponse).and_then([fileIds](const auto& v) -> Result<QJsonArray> {
-                        return Json::requireObject(v).and_then([fileIds](const auto& o) -> Result<QJsonArray> {
-                            if (fileIds.size() == 1) {
-                                auto obj = Json::requireObject(o, "data");
-                                TRY(obj)
-                                return { { obj.value() } };
-                            }
-                            return Json::requireArray(o, "data");
-                        });
+                    auto doc = Json::requireObject(*rawResponse).and_then([fileIds](const auto& v) -> Result<QJsonArray> {
+                        if (fileIds.size() == 1) {
+                            auto obj = Json::requireObject(v, "data", "data");
+                            TRY(obj)
+                            return { { obj.value() } };
+                        }
+                        return Json::requireArray(v, "data");
                     });
                     if (!doc) {
                         qWarning() << "Error while parsing JSON response from Flame files task:" << doc.error();

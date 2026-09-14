@@ -321,7 +321,7 @@ bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<F
 {
     std::vector<File> optionalFiles;
     auto parse = [this, &indexPath, &setInternalData, &files, &optionalFiles] -> Result<> {
-        auto doc = Json::requireDocument(indexPath).and_then([](const auto& v) { return Json::requireObject(v, "modrinth.index.json"); });
+        auto doc = Json::requireObject(indexPath, "modrinth.index.json");
         TRY(doc)
         const auto& obj = doc.value();
         auto formatVersion = Json::requireInteger(obj, "formatVersion", "modrinth.index.json");

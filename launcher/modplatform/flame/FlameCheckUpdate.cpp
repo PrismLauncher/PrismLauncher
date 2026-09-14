@@ -64,7 +64,7 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QByteArray* 
 {
     auto pack = std::make_shared<ModPlatform::IndexedPack>();
     auto parse = [&pack, &resource, &response] -> Result<> {
-        auto doc = Json::requireDocument(*response).and_then([](const auto& v) { return Json::requireObject(v); });
+        auto doc = Json::requireObject(*response);
         TRY(doc)
         // Fake pack with the necessary info to pass to the download task :)
         pack->name = resource->name();
@@ -147,15 +147,13 @@ void FlameCheckUpdate::collectBlockedMods()
     }
 
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds, quickSearch] {
-        auto doc = Json::requireDocument(*response).and_then([addonIds](const auto& v) -> Result<QJsonArray> {
-            return Json::requireObject(v).and_then([addonIds](const auto& o) -> Result<QJsonArray> {
-                if (addonIds.size() == 1) {
-                    auto obj = Json::requireObject(o, "data");
-                    TRY(obj)
-                    return { { obj.value() } };
-                }
-                return Json::requireArray(o, "data");
-            });
+        auto doc = Json::requireObject(*response).and_then([addonIds](const auto& v) -> Result<QJsonArray> {
+            if (addonIds.size() == 1) {
+                auto obj = Json::requireObject(v, "data", "data");
+                TRY(obj)
+                return { { obj.value() } };
+            }
+            return Json::requireArray(v, "data");
         });
         if (!doc) {
             qWarning() << "Error while parsing JSON response from Flame projects task:" << doc.error();

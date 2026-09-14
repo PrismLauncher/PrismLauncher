@@ -46,9 +46,7 @@ class ParsingValidator : public Net::Validator {
     Result<> validate() override
     {
         auto fname = m_entity->localFilename();
-        return Json::requireDocument(m_data, fname)
-            .and_then([fname](const auto& v) { return Json::requireObject(v, fname); })
-            .and_then([this](const auto& v) { return m_entity->parse(v); });
+        return Json::requireObject(m_data, fname).and_then([this](const auto& v) { return m_entity->parse(v); });
     }
 
    private: /* data */
@@ -126,9 +124,7 @@ void BaseEntityLoadTask::executeTask()
 
             // load local file
             if (m_entity->m_load_status == BaseEntity::LoadStatus::NotLoaded) {
-                TRY(Json::requireDocument(fileData, fname)
-                        .and_then([fname](const auto& v) { return Json::requireObject(v, fname); })
-                        .and_then([this](const auto& v) { return m_entity->parse(v); }));
+                TRY(Json::requireObject(fileData, fname).and_then([this](const auto& v) { return m_entity->parse(v); }));
                 m_entity->m_load_status = BaseEntity::LoadStatus::Local;
             }
             return {};

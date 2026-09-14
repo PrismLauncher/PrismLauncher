@@ -41,11 +41,9 @@
 
 Result<> ApplicationMessage::parse(const QByteArray& input)
 {
-    auto doc = Json::requireDocument(input, "ApplicationMessage").and_then([](const auto& v) {
-        return Json::requireObject(v, "ApplicationMessage");
-    });
+    auto doc = Json::requireObject(input, "ApplicationMessage");
     TRY(doc)
-    auto root = doc.value();
+    const auto& root = doc.value();
 
     command = root.value("command").toString();
     args.clear();

@@ -447,7 +447,7 @@ void BaseInstance::setShortcuts(const QList<ShortcutData>& shortcuts)
 QList<ShortcutData> BaseInstance::shortcuts() const
 {
     auto data = m_settings->get("shortcuts").toString().toUtf8();
-    auto document = Json::requireDocument(data).and_then([](const auto& v) { return Json::requireArray(v); });
+    auto document = Json::requireArray(data);
     if (!document) {
         return {};
     }

@@ -83,9 +83,7 @@ bool parseXTokenResponse(QByteArray& data, Token& output, QString name)
 {
     qDebug() << "Parsing" << name << ":";
     qCDebug(authCredentials()) << data;
-    auto obj = Json::requireDocument(data, "xbox live auth response").and_then([](const auto& v) {
-        return Json::requireObject(v, "xbox live auth response");
-    });
+    auto obj = Json::requireObject(data, "xbox live auth response");
     if (!obj) {
         qWarning() << "Failed to parse response from user.auth.xboxlive.com as JSON:" << obj.error();
         return false;
@@ -144,9 +142,7 @@ bool parseMinecraftProfile(QByteArray& data, MinecraftProfile& output)
     qDebug() << "Parsing Minecraft profile...";
     qCDebug(authCredentials()) << data;
 
-    auto obj = Json::requireDocument(data, "xbox live profile response").and_then([](const auto& v) {
-        return Json::requireObject(v, "xbox live profile response");
-    });
+    auto obj = Json::requireObject(data, "xbox live profile response");
     if (!obj) {
         qWarning() << "Failed to parse response from user.auth.xboxlive.com as JSON:" << obj.error();
         return false;
@@ -285,9 +281,7 @@ bool parseMinecraftProfileMojang(QByteArray& data, MinecraftProfile& output)
     qDebug() << "Parsing Minecraft profile...";
     qCDebug(authCredentials()) << data;
 
-    auto obj = Json::requireDocument(data, "mojang minecraft profile").and_then([](const auto& v) {
-        return Json::requireObject(v, "mojang minecraft profile");
-    });
+    auto obj = Json::requireObject(data, "mojang minecraft profile");
 
     if (!obj) {
         qWarning() << "Failed to parse response as JSON:" << obj.error();
@@ -328,9 +322,7 @@ bool parseMinecraftProfileMojang(QByteArray& data, MinecraftProfile& output)
         return false;
     }
 
-    obj = Json::requireDocument(texturePayload, "session texture payload").and_then([](const auto& v) {
-        return Json::requireObject(v, "session texture payload");
-    });
+    obj = Json::requireObject(texturePayload, "session texture payload");
 
     if (!obj) {
         qWarning() << "Failed to parse response as JSON:" << obj.error();
@@ -398,9 +390,7 @@ bool parseMinecraftEntitlements(QByteArray& data, MinecraftEntitlement& output)
     qDebug() << "Parsing Minecraft entitlements...";
     qCDebug(authCredentials()) << data;
 
-    auto obj = Json::requireDocument(data, "xbox live entitlements response").and_then([](const auto& v) {
-        return Json::requireObject(v, "xbox live entitlements response");
-    });
+    auto obj = Json::requireObject(data, "xbox live entitlements response");
     if (!obj) {
         qWarning() << "Failed to parse response from user.auth.xboxlive.com as JSON:" << obj.error();
         return false;
@@ -432,8 +422,7 @@ bool parseRolloutResponse(QByteArray& data, bool& result)
     qDebug() << "Parsing Rollout response...";
     qCDebug(authCredentials()) << data;
 
-    auto obj =
-        Json::requireDocument(data, "rollout response").and_then([](const auto& v) { return Json::requireObject(v, "rollout response"); });
+    auto obj = Json::requireObject(data, "rollout response");
     if (!obj) {
         qWarning() << "Failed to parse response from https://api.minecraftservices.com/rollout/v1/msamigration as JSON: " << obj.error();
         return false;
@@ -460,9 +449,7 @@ bool parseMojangResponse(QByteArray& data, Token& output)
     qDebug() << "Parsing Mojang response...";
     qCDebug(authCredentials()) << data;
 
-    auto obj = Json::requireDocument(data, "mojang login response").and_then([](const auto& v) {
-        return Json::requireObject(v, "mojang login response");
-    });
+    auto obj = Json::requireObject(data, "mojang login response");
     if (!obj) {
         qWarning() << "Failed to parse response from api.minecraftservices.com/launcher/login as JSON:" << obj.error();
         return false;

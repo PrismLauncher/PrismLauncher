@@ -130,7 +130,7 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
         return;
     }
 
-    auto doc = Json::requireDocument(data).and_then([](const auto& v) { return Json::requireObject(v, "version.json"); });
+    auto doc = Json::requireObject(data, "version.json");
     if (!doc) {
         emit failed(tr("Could not understand \"version.json\":\n") + doc.error());
         return;

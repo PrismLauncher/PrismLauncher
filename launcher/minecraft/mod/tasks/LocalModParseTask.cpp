@@ -378,9 +378,7 @@ ModDetails ReadQuiltModInfo(const QByteArray& contents)
     ModDetails details;
 
     auto parse = [&details, contents]() -> Result<> {
-        auto doc = Json::requireDocument(contents, "quilt.mod.json").and_then([](const auto& v) {
-            return Json::requireObject(v, "quilt.mod.json");
-        });
+        auto doc = Json::requireObject(contents, "quilt.mod.json");
         TRY(doc)
         const auto& object = doc.value();
         auto schemaVersion = object.value("schema_version").toInt();

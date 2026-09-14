@@ -108,7 +108,7 @@ QString findMangoHud()
         if (filePath.isEmpty()) {
             continue;
         }
-        auto conf = Json::requireDocument(filePath, vkLayer).and_then([vkLayer](const auto& v) { return Json::requireObject(v, vkLayer); });
+        auto conf = Json::requireObject(filePath, vkLayer);
         if (!conf) {
             continue;
         }

@@ -191,7 +191,7 @@ void ResourceFolderModel::installResourceWithFlameMetadata(const QString& path, 
         connect(job.get(), &Task::failed, this, install);
         connect(job.get(), &Task::aborted, this, install);
         connect(job.get(), &Task::succeeded, this, [response, this, &vers, install, &pack] {
-            auto obj = Json::requireDocument(*response, "data").and_then([](const auto& v) { return Json::requireObject(v, "data"); });
+            auto obj = Json::requireObject(*response, "data");
             if (!obj) {
                 qWarning() << "Error while parsing JSON response for mod info:" << obj.error();
                 qDebug() << *response;

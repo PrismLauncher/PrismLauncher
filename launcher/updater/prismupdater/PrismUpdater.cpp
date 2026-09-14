@@ -1204,7 +1204,7 @@ Result<int> PrismUpdaterApp::parseReleasePage(const QByteArray* response)
         return 0;
     }
     int numReleases = 0;
-    auto doc = Json::requireDocument(*response).and_then([](const auto& v) { return Json::requireArray(v); });
+    auto doc = Json::requireArray(*response);
     TRY(doc)
     auto toDate = [](const QString& v) -> Result<QDateTime> { return QDateTime::fromString(v, Qt::ISODate); };
     for (auto releaseJson : doc.value()) {

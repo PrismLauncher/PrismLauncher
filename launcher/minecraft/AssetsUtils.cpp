@@ -113,9 +113,7 @@ bool loadAssetsIndexJson(const QString& assetsId, const QString& path, AssetsInd
     QByteArray jsonData = file.readAll();
     file.close();
 
-    auto jsonResult = Json::requireDocument(jsonData, "assets index file").and_then([](const auto& v) {
-        return Json::requireObject(v, "assets index file");
-    });
+    auto jsonResult = Json::requireObject(jsonData, "assets index file");
 
     // Fail if the JSON is invalid or the root is not an object.
     if (!jsonResult) {

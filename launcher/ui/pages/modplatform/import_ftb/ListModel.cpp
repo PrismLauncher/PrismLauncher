@@ -53,8 +53,7 @@ QString getDynamicPath()
         qWarning() << "The ftb app setings doesn't exist.";
         return {};
     }
-    auto doc =
-        Json::requireDocument(settingsPath).and_then([](const auto& v) { return Json::requireObject(v); }).and_then([](const auto& v) {
+    auto doc = Json::requireObject(settingsPath).and_then([](const auto& v) {
             return Json::requireString(v, "instanceLocation");
         });
     if (!doc) {

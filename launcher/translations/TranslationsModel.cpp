@@ -227,7 +227,7 @@ namespace {
 void readIndex(const QString& path, QMap<QString, Language>& languages)
 {
     auto parse = [&languages, &path] -> Result<> {
-        auto rsp = Json::requireDocument(path).and_then([](const auto& v) { return Json::requireObject(v); });
+        auto rsp = Json::requireObject(path);
         TRY(rsp)
 
         const auto& doc = rsp.value();

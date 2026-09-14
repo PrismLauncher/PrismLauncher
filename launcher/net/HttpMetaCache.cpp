@@ -230,9 +230,7 @@ void HttpMetaCache::Load()
         return;
     }
 
-    auto json = Json::requireDocument(index.readAll(), "HttpMetaCache").and_then([](const auto& v) {
-        return Json::requireObject(v, "HttpMetaCache");
-    });
+    auto json = Json::requireObject(index.readAll(), "HttpMetaCache");
 
     // Fail if the JSON is invalid or the root is not an object.
     if (!json) {

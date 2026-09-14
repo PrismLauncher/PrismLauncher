@@ -170,7 +170,7 @@ QList<ModPlatform::Category> ModrinthAPI::loadCategories(const QByteArray& respo
 {
     QList<ModPlatform::Category> categories;
     auto parse = [&response, &projectType, &categories] -> Result<> {
-        auto doc = Json::requireDocument(response).and_then([](const auto& v) { return Json::requireArray(v); });
+        auto doc = Json::requireArray(response);
         TRY(doc)
 
         for (auto val : doc.value()) {

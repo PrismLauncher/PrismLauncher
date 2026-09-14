@@ -213,8 +213,7 @@ QList<ModPlatform::Category> FlameAPI::loadModCategories(const QByteArray& respo
 {
     QList<ModPlatform::Category> categories;
     auto parse = [&response, &categories] -> Result<> {
-        auto doc =
-            Json::requireDocument(response).and_then([](const auto& v) { return Json::requireObject(v); }).and_then([](const auto& v) {
+        auto doc = Json::requireObject(response).and_then([](const auto& v) {
                 return Json::requireArray(v, "data");
             });
         TRY(doc)

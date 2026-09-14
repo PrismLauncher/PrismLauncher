@@ -196,7 +196,7 @@ Result<> loadPackProfile(PackProfile* parent, const QString& filename, Component
     }
     // and it's valid JSON
     const auto what = componentsFile.fileName();
-    auto obj = Json::requireDocument(filename, what).and_then([what](const auto& v) { return Json::requireObject(v, what); });
+    auto obj = Json::requireObject(filename, what);
     if (!obj) {
         auto message = QObject::tr("Couldn't parse file: %1").arg(obj.error());
         qCCritical(instanceProfileC) << message;

@@ -93,9 +93,7 @@ struct DeviceAuthorizationResponse {
 
 DeviceAuthorizationResponse parseDeviceAuthorizationResponse(const QByteArray& data)
 {
-    auto doc = Json::requireDocument(data, "device authorization response").and_then([](const auto& v) {
-        return Json::requireObject(v, "device authorization response");
-    });
+    auto doc = Json::requireObject(data, "device authorization response");
     if (!doc) {
         qWarning() << "Failed to parse device authorization response due to err:" << doc.error();
         return {};
@@ -207,9 +205,7 @@ struct AuthenticationResponse {
 
 AuthenticationResponse parseAuthenticationResponse(const QByteArray& data)
 {
-    auto doc = Json::requireDocument(data, "authentication response").and_then([](const auto& v) {
-        return Json::requireObject(v, "authentication response");
-    });
+    auto doc = Json::requireObject(data, "authentication response");
     if (!doc) {
         qWarning() << "Failed to parse device authorization response due to err:" << doc.error();
         return {};

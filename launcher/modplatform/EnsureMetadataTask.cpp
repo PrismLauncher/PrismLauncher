@@ -235,7 +235,7 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
     }
 
     connect(verTask.get(), &Task::succeeded, this, [this, response] {
-        auto obj = Json::requireDocument(*response).and_then([](const auto& v) { return Json::requireObject(v); });
+        auto obj = Json::requireObject(*response);
         if (!obj) {
             qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions:" << obj.error();
             qWarning() << *response;
@@ -356,7 +356,7 @@ Task::Ptr EnsureMetadataTask::flameVersionsTask()
     auto [verTask, response] = FlameAPI::matchFingerprints(fingerprints);
 
     connect(verTask.get(), &Task::succeeded, this, [this, response] {
-        auto obj = Json::requireDocument(*response).and_then([](const auto& v) { return Json::requireObject(v); });
+        auto obj = Json::requireObject(*response);
         if (!obj) {
             qWarning() << "Error while parsing JSON response from Flame::CurrentVersions:" << obj.error();
             qWarning() << *response;
@@ -442,15 +442,13 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
     }
 
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
-        auto entries = Json::requireDocument(*response).and_then([addonIds](const auto& v) -> Result<QJsonArray> {
-            return Json::requireObject(v).and_then([addonIds](const auto& o) -> Result<QJsonArray> {
-                if (addonIds.size() == 1) {
-                    auto obj = Json::requireObject(o, "data");
-                    TRY(obj)
-                    return { { obj.value() } };
-                }
-                return Json::requireArray(o, "data");
-            });
+        auto entries = Json::requireObject(*response).and_then([addonIds](const auto& v) -> Result<QJsonArray> {
+            if (addonIds.size() == 1) {
+                auto obj = Json::requireObject(v, "data", "data");
+                TRY(obj)
+                return { { obj.value() } };
+            }
+            return Json::requireArray(v, "data");
         });
         if (!entries) {
             qWarning() << "Error while parsing JSON response from Flame projects task:" << entries.error();

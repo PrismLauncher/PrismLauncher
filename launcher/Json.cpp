@@ -97,12 +97,24 @@ Result<QJsonObject> requireObject(const QJsonDocument& doc, const QString& what)
     }
     return doc.object();
 }
+Result<QJsonObject> requireObject(const QByteArray& data, const QString& what)
+{
+    return requireDocument(data, what).and_then([what](const auto& v) { return requireObject(v, what); });
+}
+Result<QJsonObject> requireObject(const QString& filename, const QString& what)
+{
+    return requireDocument(filename, what).and_then([what](const auto& v) { return requireObject(v, what); });
+}
 Result<QJsonArray> requireArray(const QJsonDocument& doc, const QString& what)
 {
     if (!doc.isArray()) {
         return std::unexpected(what + " is not an array");
     }
     return doc.array();
+}
+Result<QJsonArray> requireArray(const QByteArray& data, const QString& what)
+{
+    return requireDocument(data, what).and_then([what](const auto& v) { return requireArray(v, what); });
 }
 
 QJsonDocument parseUntilGarbage(const QByteArray& json, QJsonParseError* error, QString* garbage)
@@ -324,7 +336,7 @@ QString fromStringList(const QStringList& list)
 
 QVariantMap toMap(const QString& jsonString)
 {
-    auto doc = requireDocument(jsonString.toUtf8()).and_then([](const auto& v) { return requireObject(v); }).value_or(QJsonObject());
+    auto doc = requireObject(jsonString.toUtf8()).value_or(QJsonObject());
     return doc.toVariantMap();
 }
 

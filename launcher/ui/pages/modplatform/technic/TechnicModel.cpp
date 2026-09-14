@@ -171,7 +171,7 @@ void Technic::ListModel::searchRequestFinished(QByteArray* responsePtr)
     QByteArray response = std::move(*responsePtr);
     jobPtr.reset();
 
-    auto doc = Json::requireDocument(response).and_then([](const auto& v) { return Json::requireObject(v); });
+    auto doc = Json::requireObject(response);
     if (!doc) {
         qWarning() << "Error while parsing JSON response from Technic:" << doc.error();
         qWarning() << response;

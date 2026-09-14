@@ -65,7 +65,7 @@ Result<> loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)
 
 Result<> Flame::loadManifest(Flame::Manifest& m, const QString& filepath)
 {
-    auto doc = Json::requireDocument(filepath).and_then([](const auto& v) { return Json::requireObject(v); });
+    auto doc = Json::requireObject(filepath);
     TRY(doc)
     auto obj = doc.value();
     TRY_INTO(m.manifestType, Json::requireString(obj, "manifestType"))

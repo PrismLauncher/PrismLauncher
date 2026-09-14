@@ -459,9 +459,7 @@ bool AccountList::loadList()
     QByteArray jsonData = file.readAll();
     file.close();
 
-    auto jsonDoc = Json::requireDocument(jsonData, "account list file").and_then([](const auto& v) {
-        return Json::requireObject(v, "account list file");
-    });
+    auto jsonDoc = Json::requireObject(jsonData, "account list file");
 
     // Fail if the JSON is invalid or the root is not an object.
     if (!jsonDoc) {
