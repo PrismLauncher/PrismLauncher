@@ -33,8 +33,9 @@
  *      See the License for the specific language governing permissions and
  *      limitations under the License.
  */
-
-#include "NewInstanceDialog.h"
+#if defined(Q_OS_WIN)
+#include "StringUtils.h"
+#endif
 #include "Application.h"
 #include "ui/pages/modplatform/ModpackProviderBasePage.h"
 #include "ui/pages/modplatform/import_ftb/ImportFTBPage.h"
@@ -49,7 +50,10 @@
 #include "VersionSelectDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
+#include <QCheckBox>
 #include <QDialogButtonBox>
+#include <QDir>
+#include <QDirIterator>
 #include <QFileDialog>
 #include <QLayout>
 #include <QPushButton>
@@ -101,7 +105,9 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 
     // NOTE: m_buttons must be initialized before PageContainer, because it indirectly accesses m_buttons through setSuggestedPack! Do not
     // move this below.
+    // Same is for m_copyTemplateDirCheckbox.
     m_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    m_copyTemplateDirCheckbox = new QCheckBox();
 
     m_container = new PageContainer(this, {}, this);
     m_container->useSidebarStyle(false);
@@ -109,7 +115,44 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     m_container->layout()->setContentsMargins(0, 0, 0, 0);
     ui->verticalLayout->insertWidget(2, m_container);
 
-    m_container->addButtons(m_buttons);
+    m_copyTemplateDirCheckbox->setText(tr("Copy instance template directory"));
+
+    QString templateDir = APPLICATION->settings()->get("TemplateDir").toString();
+    if (templateDir.isEmpty() || !QDir(templateDir).exists()) {
+        m_copyTemplateDirCheckbox->setChecked(false);
+        m_copyTemplateDirCheckbox->setEnabled(false);
+        m_copyTemplateDirCheckbox->setToolTip(tr("Template directory does not exist."));
+    } else {
+        m_copyTemplateDirCheckbox->setChecked(true);
+        m_copyTemplateDirCheckbox->setEnabled(true);
+
+#if defined(Q_OS_WIN)
+        // iterate over files in template directory to only show symlink disclamier when symlinks are actually present
+        QDir::Filters filters = QDir::Filter::Files | QDir::Filter::Hidden | QDir::Filter::Dirs;
+        QDirIterator sourceIterator(templateDir, filters, QDirIterator::Subdirectories);
+        bool containsSymlink = false;
+        while (sourceIterator.hasNext()) {
+            auto path = sourceIterator.next();
+            if (std::filesystem::is_symlink(StringUtils::toStdString(path))) {
+                containsSymlink = true;
+                break;
+            }
+        }
+        if (containsSymlink) {
+            m_copyTemplateDirCheckbox->setIcon(style()->standardIcon(QStyle::SP_VistaShield));
+            m_copyTemplateDirCheckbox->setToolTip(tr("On Windows, symbolic links may require admin permission to create."));
+        }
+#endif
+    }
+    connect(m_copyTemplateDirCheckbox, &QCheckBox::checkStateChanged, this, &NewInstanceDialog::setCopyTemplateDirectory);
+
+    auto* checkboxButtonsContainer = new QVBoxLayout();
+    checkboxButtonsContainer->addWidget(m_copyTemplateDirCheckbox);
+    checkboxButtonsContainer->setAlignment(m_copyTemplateDirCheckbox, Qt::AlignRight);
+
+    checkboxButtonsContainer->addWidget(m_buttons);
+    m_container->addButtons(checkboxButtonsContainer);
+
     connect(m_container, &PageContainer::selectedPageChanged, this, [this](BasePage* /*previous*/, BasePage* /*selected*/) {
         m_buttons->button(QDialogButtonBox::Ok)->setEnabled(m_creationTask && !instName().isEmpty());
     });
@@ -152,6 +195,12 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     }
 
     connect(m_container, &PageContainer::selectedPageChanged, this, &NewInstanceDialog::selectedPageChanged);
+}
+
+void NewInstanceDialog::setCopyTemplateDirectory()
+{
+    m_creationTask->setshouldCopyTemplateDirectory(m_copyTemplateDirCheckbox->isChecked());
+    qDebug() << "mraowwww" << m_copyTemplateDirCheckbox->isChecked();
 }
 
 void NewInstanceDialog::reject()
@@ -263,6 +312,7 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task
 
     auto allowOK = task != nullptr && !instName().isEmpty();
     m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
+    setCopyTemplateDirectory();
 }
 
 void NewInstanceDialog::setSuggestedPack(const QString& name, QString version, InstanceTask* task)
@@ -287,6 +337,7 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, QString version, I
 
     auto allowOK = task != nullptr && !instName().isEmpty();
     m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
+    setCopyTemplateDirectory();
 }
 
 void NewInstanceDialog::setSuggestedIconFromFile(const QString& path, const QString& name)
