@@ -70,15 +70,6 @@ class ModrinthAPI final : public ResourceAPI {
         return l.join(',');
     }
 
-    static auto getCategoriesFilters(const QStringList& categories) -> QString
-    {
-        QStringList l;
-        for (const auto& cat : categories) {
-            l << QString("\"categories:%1\"").arg(cat);
-        }
-        return l.join(',');
-    }
-
     static QString getSideFilters(ModPlatform::SideType side)
     {
         switch (side.value()) {
@@ -134,8 +125,13 @@ class ModrinthAPI final : public ResourceAPI {
                 facetsList.append(QString("[%1]").arg(side));
             }
         }
-        if (args.categoryIds.has_value() && !args.categoryIds->empty()) {
-            facetsList.append(QString("[%1]").arg(getCategoriesFilters(args.categoryIds.value())));
+        if (args.categoryIds.has_value()) {
+            // One array per category. Separate arrays are ANDed, so every extra category narrows the
+            // search down, the way the website does it; sharing a single array would OR them and hand
+            // back more results than either category has on its own.
+            for (const auto& category : args.categoryIds.value()) {
+                facetsList.append(QString(R"(["categories:%1"])").arg(category));
+            }
         }
         if (!args.excludeDisclosureTypes.empty()) {
             for (const auto& d : args.excludeDisclosureTypes) {
