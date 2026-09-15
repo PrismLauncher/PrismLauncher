@@ -73,20 +73,10 @@ static QString buildDesktopEntry(const QString& appPath, const QStringList& args
     desktopEntry += QStringLiteral("Type=Application\n");
     desktopEntry += QStringLiteral("Categories=Game\n");
 
-    // Build Exec= line per the desktop entry specification
-    // The executable path is double-quoted if it contains spaces
-    QString execValue = appPath;
-    if (appPath.contains(QLatin1Char(' ')) || appPath.contains(QLatin1Char('\t'))) {
-        execValue = QStringLiteral("\"") + appPath + QStringLiteral("\"");
-    }
-
+    // Quote the executable path and every argument the same way
+    QString execValue = quoteDesktopArg(appPath);
     for (const auto& arg : args) {
-        bool needsQuoting = arg.contains(QLatin1Char(' ')) || arg.contains(QLatin1Char('\t')) || arg.contains(QLatin1Char('\'')) || arg.isEmpty();
-        if (needsQuoting) {
-            execValue += QLatin1Char(' ') + quoteDesktopArg(arg);
-        } else {
-            execValue += QLatin1Char(' ') + arg;
-        }
+        execValue += QLatin1Char(' ') + quoteDesktopArg(arg);
     }
 
     desktopEntry += QStringLiteral("Exec=") + execValue + QStringLiteral("\n");
@@ -94,18 +84,41 @@ static QString buildDesktopEntry(const QString& appPath, const QStringList& args
     return desktopEntry;
 }
 
+static void prepareInstanceLaunchArgs(const Shortcut& shortcut, QString& appPath, QStringList& args)
+{
+    appPath = QApplication::applicationFilePath();
+
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+    if (appPath.startsWith("/tmp/.mount_")) {
+        // AppImage
+        appPath = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
+        if (appPath.isEmpty()) {
+            QMessageBox::critical(
+                shortcut.parent, QObject::tr("Create Shortcut"),
+                QObject::tr("Launcher is running as misconfigured AppImage? ($APPIMAGE environment variable is missing)"));
+        } else if (appPath.endsWith("/")) {
+            appPath.chop(1);
+        }
+    }
+#endif
+
+    args.append({ "--launch", shortcut.instance->uuid() });
+    args.append(shortcut.extraArgs);
+}
+
 bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
 {
     if (!shortcut.instance)
         return false;
 
-    QString appPath = QApplication::applicationFilePath();
+    QString appPath;
     auto icon = APPLICATION->icons()->icon(shortcut.iconKey.isEmpty() ? shortcut.instance->iconKey() : shortcut.iconKey);
     if (icon == nullptr) {
         icon = APPLICATION->icons()->icon("grass");
     }
     QString iconPath;
     QStringList args;
+    prepareInstanceLaunchArgs(shortcut, appPath, args);
 #if defined(Q_OS_MACOS)
     if (appPath.startsWith("/private/var/")) {
         QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"),
@@ -131,18 +144,6 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
         return false;
     }
 #elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-    if (appPath.startsWith("/tmp/.mount_")) {
-        // AppImage!
-        appPath = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
-        if (appPath.isEmpty()) {
-            QMessageBox::critical(
-                shortcut.parent, QObject::tr("Create Shortcut"),
-                QObject::tr("Launcher is running as misconfigured AppImage? ($APPIMAGE environment variable is missing)"));
-        } else if (appPath.endsWith("/")) {
-            appPath.chop(1);
-        }
-    }
-
     iconPath = FS::PathCombine(shortcut.instance->instanceRoot(), "icon.png");
 
     QFile iconFile(iconPath);
@@ -161,7 +162,8 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
 
     if (DesktopServices::isFlatpak()) {
         appPath = "flatpak";
-        args.append({ "run", BuildConfig.LAUNCHER_APPID });
+        args.prepend(BuildConfig.LAUNCHER_APPID);
+        args.prepend("run");
     }
 
 #elif defined(Q_OS_WIN)
@@ -192,8 +194,6 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
     QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"), QObject::tr("Not supported on your platform!"));
     return false;
 #endif
-    args.append({ "--launch", shortcut.instance->uuid() });
-    args.append(shortcut.extraArgs);
 
     QString shortcutPath = FS::createShortcut(filePath, appPath, args, shortcut.name, iconPath);
     if (shortcutPath.isEmpty()) {
@@ -220,27 +220,18 @@ bool createInstanceShortcutViaPortal(const Shortcut& shortcut)
     }
 
     // Set up the application path and arguments (similar to createInstanceShortcut)
-    QString appPath = QApplication::applicationFilePath();
+    QString appPath;
     auto icon = APPLICATION->icons()->icon(shortcut.iconKey.isEmpty() ? shortcut.instance->iconKey() : shortcut.iconKey);
     if (icon == nullptr) {
         icon = APPLICATION->icons()->icon("grass");
     }
     QString iconPath;
     QStringList args;
+    prepareInstanceLaunchArgs(shortcut, appPath, args);
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-    if (appPath.startsWith("/tmp/.mount_")) {
-        // AppImage!
-        appPath = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
-        if (appPath.isEmpty()) {
-            QMessageBox::critical(
-                shortcut.parent, QObject::tr("Create Shortcut"),
-                QObject::tr("Launcher is running as misconfigured AppImage? ($APPIMAGE environment variable is missing)"));
-            return false;
-        }
-        if (appPath.endsWith("/")) {
-            appPath.chop(1);
-        }
+    if (appPath.isEmpty()) {
+        return false;
     }
 
     // NOTE: For the portal flow, we do NOT adjust appPath for Flatpak here.
@@ -255,9 +246,6 @@ bool createInstanceShortcutViaPortal(const Shortcut& shortcut)
     Q_UNUSED(args);
     return false;
 #endif
-
-    args.append({ "--launch", shortcut.instance->uuid() });
-    args.append(shortcut.extraArgs);
 
     // Save the icon as a PNG file (the portal reads it)
     iconPath = FS::PathCombine(shortcut.instance->instanceRoot(), "icon.png");
