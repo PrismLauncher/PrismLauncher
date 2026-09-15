@@ -1216,11 +1216,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         installEventFilter(new ToolTipFilter);
     }
 
-    if (createSetupWizard()) {
-        return;
+    // the setup wizard applies the selected theme itself before it is shown
+    if (!createSetupWizard()) {
+        m_themeManager->applyCurrentlySelectedTheme(true);
     }
-
-    m_themeManager->applyCurrentlySelectedTheme(true);
     performMainStartupAction();
 }
 
@@ -1293,11 +1292,9 @@ bool Application::createSetupWizard()
         if (login) {
             setupWizard.addPage(new LoginWizardPage(&setupWizard));
         }
-        if (setupWizard.exec() != 0) {
-            qDebug() << "Setup wizard failed!";
-            return false;
+        if (setupWizard.exec() != QDialog::Accepted) {
+            qWarning() << "Setup wizard was not completed; continuing with the current settings";
         }
-        performMainStartupAction();
     }
 
     return wizardRequired;
@@ -1345,12 +1342,6 @@ bool Application::event(QEvent* event)
     }
 
     return QApplication::event(event);
-}
-
-void Application::setupWizardFinished(int status)
-{
-    qDebug() << "Wizard result =" << status;
-    performMainStartupAction();
 }
 
 void Application::performMainStartupAction()

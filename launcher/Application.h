@@ -56,7 +56,6 @@ class LocalPeer;
 class InstanceWindow;
 class MainWindow;
 class ViewLogWindow;
-class SetupWizard;
 class GenericPageProvider;
 class QFile;
 class HttpMetaCache;
@@ -225,7 +224,6 @@ class Application : public QApplication {
     void on_windowClose();
     void messageReceived(const QByteArray& message);
     void controllerFinished();
-    void setupWizardFinished(int status);
 
    private:
     static bool handleDataMigration(const QString& currentData, const QString& oldData, const QString& name, const QString& configFile);
