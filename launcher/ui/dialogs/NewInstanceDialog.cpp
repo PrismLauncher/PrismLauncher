@@ -301,12 +301,14 @@ void NewInstanceDialog::setSuggestedIconFromFile(const QString& path, const QStr
 
 void NewInstanceDialog::setSuggestedIcon(const QString& key)
 {
+    m_importIcon = false;
+
     if (key == "default") {
+        ui->iconButton->setIcon(APPLICATION->icons()->getIcon(m_instIconKey));
         return;
     }
 
     auto icon = APPLICATION->icons()->getIcon(key);
-    m_importIcon = false;
 
     ui->iconButton->setIcon(icon);
 }
