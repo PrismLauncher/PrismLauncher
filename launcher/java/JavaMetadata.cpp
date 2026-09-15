@@ -61,20 +61,18 @@ Result<MetadataPtr> parseJavaMeta(const QJsonObject& in)
     meta->runtimeOS = in["runtimeOS"].toString("unknown");
 
     if (in.contains("checksum")) {
-        auto checksum = Json::requireObject(in, "checksum");
-        TRY(checksum)
-        meta->checksumHash = checksum.value()["hash"].toString("");
-        meta->checksumType = checksum.value()["type"].toString("");
+        TRY_INTO(const auto& checksum, Json::requireObject(in, "checksum"))
+        meta->checksumHash = checksum["hash"].toString("");
+        meta->checksumType = checksum["type"].toString("");
     }
 
     if (in.contains("version")) {
-        auto version = Json::requireObject(in, "version");
-        TRY(version)
-        auto name = version.value()["name"].toString("");
-        auto major = version.value()["major"].toInteger();
-        auto minor = version.value()["minor"].toInteger();
-        auto security = version.value()["security"].toInteger();
-        auto build = version.value()["build"].toInteger();
+        TRY_INTO(const auto& version, Json::requireObject(in, "version"))
+        auto name = version["name"].toString("");
+        auto major = version["major"].toInteger();
+        auto minor = version["minor"].toInteger();
+        auto security = version["security"].toInteger();
+        auto build = version["build"].toInteger();
         meta->version = JavaVersion(major, minor, security, build, name);
     }
     return meta;

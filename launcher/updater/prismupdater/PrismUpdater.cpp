@@ -511,7 +511,7 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
         logUpdate(tr("Reading manifest from %1").arg(manifest.absoluteFilePath()));
         auto res = FS::read(manifest.absoluteFilePath());
         if (!res) {
-            logUpdate(tr("Could not read manifest: %1").% sar, (res.error().toUtf8().constData()));
+            logUpdate(tr("Could not read manifest: %1").arg(res.error()));
         } else {
             auto contents = QString::fromUtf8(res.value());
             auto files = contents.split('\n');
@@ -808,7 +808,7 @@ void PrismUpdaterApp::logUpdate(const QString& msg)
     qDebug() << qUtf8Printable(msg);
     auto res = FS::append(m_updateLogPath, QStringLiteral("%1\n").arg(msg).toUtf8());
     if (!res) {
-        qWarning() << "Failed to write update log:" % s <, res.error().toUtf8().constData();
+        qWarning() << "Failed to write update log:" << res.error();
     }
 }
 
@@ -855,7 +855,7 @@ bool write_lock_file(const QString& path, QDateTime timestamp, QString from, QSt
                                    .arg(data_path)
                                    .toUtf8());
     if (!res) {
-        qWarning() << "Error writing lockfile:" % s <, res.error().toUtf8().constData();
+        qWarning() << "Error writing lockfile:" << res.error();
         return false;
     }
     return true;
@@ -907,7 +907,7 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
 
     auto changelogPath = FS::PathCombine(m_dataPath, ".prism_launcher_update.changelog");
     if (auto res = FS::write(changelogPath, m_install_release.body.toUtf8()); !res) {
-        logUpdate(tr("Failed to write changelog: %1").% sar, (res.error().toUtf8().constData()));
+        logUpdate(tr("Failed to write changelog: %1").arg(res.error()));
     }
 
     logUpdate(tr("Updating from %1 to %2").arg(m_prismVersion).arg(m_install_release.tag_name));
@@ -977,7 +977,7 @@ void PrismUpdaterApp::backupAppDir()
         logUpdate(tr("Reading manifest from %1").arg(manifest.absoluteFilePath()));
         auto res = FS::read(manifest.absoluteFilePath());
         if (!res) {
-            logUpdate(tr("Could not read manifest: %1").% sar, (res.error().toUtf8().constData()));
+            logUpdate(tr("Could not read manifest: %1").arg(res.error()));
         } else {
             auto contents = QString::fromUtf8(res.value());
             auto files = contents.split('\n');
@@ -1198,13 +1198,10 @@ Result<int> PrismUpdaterApp::parseReleasePage(const QByteArray* response)
         return 0;
     }
     int numReleases = 0;
-    auto doc = Json::requireArray(*response);
-    TRY(doc)
+    TRY_INTO(const auto& doc, Json::requireArray(*response))
     auto toDate = [](const QString& v) -> Result<QDateTime> { return QDateTime::fromString(v, Qt::ISODate); };
-    for (auto releaseJson : doc.value()) {
-        auto releaseObj = Json::requireObject(releaseJson);
-        TRY(releaseObj)
-        auto obj = releaseObj.value();
+    for (auto releaseJson : doc) {
+        TRY_INTO(const auto& obj, Json::requireObject(releaseJson))
 
         GitHubRelease release = {};
         TRY_INTO(release.id, Json::requireInteger(obj, "id"))
@@ -1217,12 +1214,9 @@ Result<int> PrismUpdaterApp::parseReleasePage(const QByteArray* response)
         release.body = obj["body"].toString();
         release.version = Version(release.tag_name);
 
-        auto releaseAssetsObj = Json::requireArray(obj, "assets");
-        TRY(releaseAssetsObj)
-        for (auto assetJson : releaseAssetsObj.value()) {
-            auto assetObjRsp = Json::requireObject(assetJson);
-            TRY(assetObjRsp)
-            auto assetObj = assetObjRsp.value();
+        TRY_INTO(const auto& releaseAssetsObj, Json::requireArray(obj, "assets"))
+        for (auto assetJson : releaseAssetsObj) {
+            TRY_INTO(const auto& assetObj, Json::requireObject(assetJson))
             GitHubReleaseAsset asset = {};
             TRY_INTO(asset.id, Json::requireInteger(assetObj, "id"))
             TRY_INTO(asset.name, Json::requireString(assetObj, "name"))

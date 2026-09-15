@@ -378,9 +378,7 @@ ModDetails ReadQuiltModInfo(const QByteArray& contents)
     ModDetails details;
 
     auto parse = [&details, contents]() -> Result<> {
-        auto doc = Json::requireObject(contents, "quilt.mod.json");
-        TRY(doc)
-        const auto& object = doc.value();
+        TRY_INTO(const auto& object, Json::requireObject(contents, "quilt.mod.json"))
         auto schemaVersion = object.value("schema_version").toInt();
 
         // https://github.com/QuiltMC/rfcs/blob/be6ba280d785395fefa90a43db48e5bfc1d15eb4/specification/0002-quilt.mod.json.md
@@ -388,12 +386,11 @@ ModDetails ReadQuiltModInfo(const QByteArray& contents)
             return {};
         }
 
-        auto modInfo = Json::requireObject(object.value("quilt_loader"), "Quilt mod info");
-        TRY(modInfo)
-        TRY_INTO(details.mod_id, Json::requireString(modInfo->value("id"), "Mod ID"))
-        TRY_INTO(details.version, Json::requireString(modInfo->value("version"), "Mod version"))
+        TRY_INTO(const auto& modInfo, Json::requireObject(object.value("quilt_loader"), "Quilt mod info"))
+        TRY_INTO(details.mod_id, Json::requireString(modInfo.value("id"), "Mod ID"))
+        TRY_INTO(details.version, Json::requireString(modInfo.value("version"), "Mod version"))
 
-        auto modMetadata = modInfo->value("metadata").toObject();
+        auto modMetadata = modInfo.value("metadata").toObject();
 
         details.name = modMetadata.value("name").toString(details.mod_id);
         details.description = modMetadata.value("description").toString();

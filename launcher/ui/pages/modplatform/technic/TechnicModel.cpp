@@ -183,19 +183,17 @@ void Technic::ListModel::searchRequestFinished(QByteArray* responsePtr)
     auto parse = [&root, this, &newList]() -> Result<> {
         switch (searchMode) {
             case List: {
-                auto objs = Json::requireArray(root, "modpacks");
-                TRY(objs)
-                for (auto technicPack : objs.value()) {
+                TRY_INTO(const auto& objs, Json::requireArray(root, "modpacks"))
+                for (auto technicPack : objs) {
                     Modpack pack;
-                    auto technicPackObject = Json::requireObject(technicPack);
-                    TRY(technicPackObject)
-                    TRY_INTO(pack.name, Json::requireString(technicPackObject.value(), "name"))
-                    TRY_INTO(pack.slug, Json::requireString(technicPackObject.value(), "slug"))
+                    TRY_INTO(const auto& technicPackObject, Json::requireObject(technicPack))
+                    TRY_INTO(pack.name, Json::requireString(technicPackObject, "name"))
+                    TRY_INTO(pack.slug, Json::requireString(technicPackObject, "slug"))
                     if (pack.slug == "vanilla") {
                         continue;
                     }
 
-                    auto rawURL = technicPackObject.value()["iconUrl"].toString("null");
+                    auto rawURL = technicPackObject["iconUrl"].toString("null");
                     if (rawURL == "null") {
                         pack.logoUrl = "null";
                         pack.logoName = "null";
@@ -219,10 +217,8 @@ void Technic::ListModel::searchRequestFinished(QByteArray* responsePtr)
                 TRY_INTO(pack.slug, Json::requireString(root, "name"))
 
                 if (root.contains("icon")) {
-                    auto iconObj = Json::requireObject(root, "icon");
-                    TRY(iconObj)
-                    QString iconUrl;
-                    TRY_INTO(iconUrl, Json::requireString(iconObj.value(), "url"))
+                    TRY_INTO(const auto& iconUrl,
+                             Json::requireObject(root, "icon").and_then([](const auto& v) { return Json::requireString(v, "url"); }))
 
                     pack.logoUrl = iconUrl;
                     pack.logoName = pack.slug + "." + QFileInfo(QUrl(iconUrl).fileName()).suffix();

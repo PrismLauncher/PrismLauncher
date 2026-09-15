@@ -227,32 +227,26 @@ namespace {
 void readIndex(const QString& path, QMap<QString, Language>& languages)
 {
     auto parse = [&languages, &path] -> Result<> {
-        auto res = Json::requireObject(path);
-        TRY(res)
+        TRY_INTO(const auto& doc, Json::requireObject(path))
 
-        const auto& doc = res.value();
-        auto fileType = Json::requireString(doc, "file_type");
-        TRY(fileType)
-        if (fileType.value() != "MMC-TRANSLATION-INDEX") {
-            return std::unexpected("index file is of unknown file type " + fileType.value());
+        TRY_INTO(const auto& fileType, Json::requireString(doc, "file_type"))
+        if (fileType != "MMC-TRANSLATION-INDEX") {
+            return std::unexpected("index file is of unknown file type " + fileType);
         }
-        auto version = Json::requireInteger(doc, "version");
-        TRY(version)
-        if (version.value() > 2) {
-            return std::unexpected(QString("index file is of unknown format version %1").arg(version.value()));
+        TRY_INTO(const auto& version, Json::requireInteger(doc, "version"))
+        if (version > 2) {
+            return std::unexpected(QString("index file is of unknown format version %1").arg(version));
         }
-        auto langObjs = Json::requireObject(doc, "languages");
-        TRY(langObjs)
-        for (auto iter = langObjs->begin(); iter != langObjs->end(); ++iter) {
+        TRY_INTO(const auto& langObjs, Json::requireObject(doc, "languages"))
+        for (auto iter = langObjs.begin(); iter != langObjs.end(); ++iter) {
             Language lang(iter.key());
 
-            auto langObj = Json::requireObject(iter.value());
-            TRY(langObj)
-            lang.setTranslationStats(langObj->value("translated").toInt(), langObj->value("untranslated").toInt(),
-                                     langObj->value("fuzzy").toInt());
-            TRY_INTO(lang.fileName, Json::requireString(langObj.value(), "file"))
-            TRY_INTO(lang.fileSha1, Json::requireString(langObj.value(), "sha1"))
-            TRY_INTO(lang.fileSize, Json::requireInteger(langObj.value(), "size"))
+            TRY_INTO(const auto& langObj, Json::requireObject(iter.value()))
+            lang.setTranslationStats(langObj.value("translated").toInt(), langObj.value("untranslated").toInt(),
+                                     langObj.value("fuzzy").toInt());
+            TRY_INTO(lang.fileName, Json::requireString(langObj, "file"))
+            TRY_INTO(lang.fileSha1, Json::requireString(langObj, "sha1"))
+            TRY_INTO(lang.fileSize, Json::requireInteger(langObj, "size"))
 
             languages.insert(lang.key, lang);
         }

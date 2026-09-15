@@ -181,9 +181,7 @@ Result<> CustomTheme::read(const QString& path, bool& hasCustomLogColors)
         return std::unexpected(QStringLiteral("Theme json file does not exist"));
     }
 
-    auto doc = Json::requireDocument(path, "Theme JSON file");
-    TRY(doc)
-    const QJsonObject root = doc->object();
+    TRY_INTO(const auto& root, Json::requireObject(path, "Theme JSON file"))
     TRY_INTO(m_name, Json::requireString(root, "name", "Theme name"))
     TRY_INTO(m_widgets, Json::requireString(root, "widgets", "Qt widget theme"))
     m_qssFilePath = root["qssFilePath"].toString("themeStyle.css");
@@ -202,10 +200,9 @@ Result<> CustomTheme::read(const QString& path, bool& hasCustomLogColors)
     };
 
     if (root.contains("colors")) {
-        auto colorsRoot = Json::requireObject(root, "colors");
-        TRY(colorsRoot)
+        TRY_INTO(const auto& colorsRoot, Json::requireObject(root, "colors"))
         auto readAndSetPaletteColor = [this, readColor, colorsRoot](QPalette::ColorRole role, const QString& colorName) {
-            auto color = readColor(colorsRoot.value(), colorName);
+            auto color = readColor(colorsRoot, colorName);
             if (color.isValid()) {
                 m_palette.setColor(role, color);
             } else {
@@ -229,17 +226,16 @@ Result<> CustomTheme::read(const QString& path, bool& hasCustomLogColors)
         readAndSetPaletteColor(QPalette::HighlightedText, "HighlightedText");
 
         // fade
-        m_fadeColor = readColor(colorsRoot.value(), "fadeColor");
-        m_fadeAmount = colorsRoot.value()["fadeAmount"].toDouble(0.5);
+        m_fadeColor = readColor(colorsRoot, "fadeColor");
+        m_fadeAmount = colorsRoot["fadeAmount"].toDouble(0.5);
     }
 
     if (root.contains("logColors")) {
         hasCustomLogColors = true;
 
-        auto logColorsRoot = Json::requireObject(root, "logColors");
-        TRY(logColorsRoot)
+        TRY_INTO(const auto& logColorsRoot, Json::requireObject(root, "logColors"))
         auto readAndSetLogColor = [this, readColor, logColorsRoot](MessageLevel level, bool fg, const QString& colorName) {
-            auto color = readColor(logColorsRoot.value(), colorName);
+            auto color = readColor(logColorsRoot, colorName);
             if (color.isValid()) {
                 if (fg) {
                     m_logColors.foreground[level] = color;

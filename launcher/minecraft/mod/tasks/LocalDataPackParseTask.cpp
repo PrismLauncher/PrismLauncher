@@ -195,13 +195,13 @@ bool processMCMeta(DataPack* pack, QByteArray&& rawData)
         return false;
     }
 
-    auto packObjRsp = Json::requireObject(jsonDoc.object(), "pack", {});
-    if (!packObjRsp) {
-        qWarning() << "Could not parse data pack:" << packObjRsp.error();
+    auto packObjRes = Json::requireObject(jsonDoc.object(), "pack", {});
+    if (!packObjRes) {
+        qWarning() << "Could not parse data pack:" << packObjRes.error();
         return false;
     }
 
-    const auto& packObj = packObjRsp.value();
+    const auto& packObj = packObjRes.value();
     int packFormat = 0;
     std::pair<int, int> minFormat;
     std::pair<int, int> maxFormat;

@@ -84,25 +84,19 @@ Result<std::unique_ptr<JsonCatPack>> JsonCatPack::create(const QFileInfo& manife
 {
     auto cat = std::unique_ptr<JsonCatPack>(new JsonCatPack(manifestInfo.dir().dirName()));
     auto path = manifestInfo.path();
-    auto doc = Json::requireDocument(manifestInfo.absoluteFilePath(), "CatPack JSON file");
-    TRY(doc)
-    const auto root = doc->object();
+    TRY_INTO(const auto& root, Json::requireObject(manifestInfo.absoluteFilePath(), "CatPack JSON file"))
     TRY_INTO(cat->m_name, Json::requireString(root, "name", "Catpack name"))
-    QString defaultPath;
-    TRY_INTO(defaultPath, Json::requireString(root, "default", "Default Cat"))
+    TRY_INTO(const auto& defaultPath, Json::requireString(root, "default", "Default Cat"))
     cat->m_default_path = FS::PathCombine(path, defaultPath);
     auto variants = root["variants"].toArray();
     for (auto v : variants) {
         auto variant = v.toObject();
-        QString variantPath;
-        TRY_INTO(variantPath, Json::requireString(variant, "path", "Variant path"))
-        auto startTime = Json::requireObject(variant, "startTime", "Variant startTime");
-        TRY(startTime)
-        auto endTime = Json::requireObject(variant, "endTime", "Variant endTime");
-        TRY(endTime)
+        TRY_INTO(const auto& variantPath, Json::requireString(variant, "path", "Variant path"))
+        TRY_INTO(const auto& startTime, Json::requireObject(variant, "startTime", "Variant startTime"))
+        TRY_INTO(const auto& endTime, Json::requireObject(variant, "endTime", "Variant endTime"))
         cat->m_variants << Variant{ .path = FS::PathCombine(path, variantPath),
-                                    .startTime = partialDate(startTime.value()),
-                                    .endTime = partialDate(endTime.value()) };
+                                    .startTime = partialDate(startTime),
+                                    .endTime = partialDate(endTime) };
     }
     return cat;
 }

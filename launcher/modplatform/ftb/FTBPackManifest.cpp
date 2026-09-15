@@ -100,40 +100,28 @@ Result<> FTB::loadModpack(FTB::Modpack& m, const QJsonObject& obj)
     TRY_INTO(m.plays, Json::requireInteger(obj, "plays"))
     TRY_INTO(m.updated, Json::requireInteger(obj, "updated"))
     m.refreshed = obj["refreshed"].toInt();
-    auto artArr = Json::requireArray(obj, "art");
-    TRY(artArr)
-    for (QJsonValueRef artRaw : artArr.value()) {
-        auto artObj = Json::requireObject(artRaw);
-        TRY(artObj)
+    TRY_INTO(const auto& artArr, Json::requireArray(obj, "art"))
+    for (const auto& artRaw : artArr) {
         FTB::Art art;
-        TRY(loadArt(art, artObj.value()))
+        TRY(Json::requireObject(artRaw).and_then([&art](const auto& v) { return loadArt(art, v); }))
         m.art.append(art);
     }
-    auto authorArr = Json::requireArray(obj, "authors");
-    TRY(authorArr)
-    for (QJsonValueRef authorRaw : authorArr.value()) {
-        auto authorObj = Json::requireObject(authorRaw);
-        TRY(authorObj)
+    TRY_INTO(const auto& authorArr, Json::requireArray(obj, "authors"))
+    for (const auto& authorRaw : authorArr) {
         FTB::Author author;
-        TRY(loadAuthor(author, authorObj.value()))
+        TRY(Json::requireObject(authorRaw).and_then([&author](const auto& v) { return loadAuthor(author, v); }))
         m.authors.append(author);
     }
-    auto versionArr = Json::requireArray(obj, "versions");
-    TRY(versionArr)
-    for (QJsonValueRef versionRaw : versionArr.value()) {
-        auto versionObj = Json::requireObject(versionRaw);
-        TRY(versionObj)
+    TRY_INTO(const auto& versionArr, Json::requireArray(obj, "versions"))
+    for (const auto& versionRaw : versionArr) {
         FTB::VersionInfo version;
-        TRY(loadVersionInfo(version, versionObj.value()))
+        TRY(Json::requireObject(versionRaw).and_then([&version](const auto& v) { return loadVersionInfo(version, v); }))
         m.versions.append(version);
     }
-    auto tagArr = Json::requireArray(obj, "tags");
-    TRY(tagArr)
-    for (QJsonValueRef tagRaw : tagArr.value()) {
-        auto tagObj = Json::requireObject(tagRaw);
-        TRY(tagObj)
+    TRY_INTO(const auto& tagArr, Json::requireArray(obj, "tags"))
+    for (const auto& tagRaw : tagArr) {
         FTB::Tag tag;
-        TRY(loadTag(tag, tagObj.value()))
+        TRY(Json::requireObject(tagRaw).and_then([&tag](const auto& v) { return loadTag(tag, v); }))
         m.tags.append(tag);
     }
     TRY_INTO(m.updated, Json::requireInteger(obj, "updated"))
@@ -181,22 +169,16 @@ Result<> FTB::loadVersion(FTB::Version& m, const QJsonObject& obj)
     TRY_INTO(m.updated, Json::requireInteger(obj, "updated"))
     m.refreshed = obj["refreshed"].toInt();
     TRY(Json::requireObject(obj, "specs").and_then([&m](const auto& v) { return loadSpecs(m.specs, v); }))
-    auto targetArr = Json::requireArray(obj, "targets");
-    TRY(targetArr)
-    for (QJsonValueRef targetRaw : targetArr.value()) {
-        auto versionObj = Json::requireObject(targetRaw);
-        TRY(versionObj)
+    TRY_INTO(const auto& targetArr, Json::requireArray(obj, "targets"))
+    for (const auto& targetRaw : targetArr) {
         FTB::VersionTarget target;
-        TRY(loadVersionTarget(target, versionObj.value()))
+        TRY(Json::requireObject(targetRaw).and_then([&target](const auto& v) { return loadVersionTarget(target, v); }))
         m.targets.append(target);
     }
-    auto fileArr = Json::requireArray(obj, "files");
-    TRY(fileArr)
-    for (QJsonValueRef fileRaw : fileArr.value()) {
-        auto fileObj = Json::requireObject(fileRaw);
-        TRY(fileObj)
+    TRY_INTO(const auto& fileArr, Json::requireArray(obj, "files"))
+    for (const auto& fileRaw : fileArr) {
         FTB::VersionFile file;
-        TRY(loadVersionFile(file, fileObj.value()))
+        TRY(Json::requireObject(fileRaw).and_then([&file](const auto& v) { return loadVersionFile(file, v); }))
         m.files.append(file);
     }
     return {};

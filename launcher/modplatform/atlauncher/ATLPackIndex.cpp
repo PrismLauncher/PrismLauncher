@@ -22,7 +22,7 @@
 #include "Json.h"
 
 namespace {
-Result<> loadIndexedVersion(ATLauncher::IndexedVersion& v, QJsonObject& obj)
+Result<> loadIndexedVersion(ATLauncher::IndexedVersion& v, const QJsonObject& obj)
 {
     TRY_INTO(v.version, Json::requireString(obj, "version"))
     TRY_INTO(v.minecraft, Json::requireString(obj, "minecraft"))
@@ -35,16 +35,12 @@ Result<> ATLauncher::loadIndexedPack(ATLauncher::IndexedPack& m, QJsonObject& ob
     TRY_INTO(m.id, Json::requireInteger(obj, "id"))
     TRY_INTO(m.position, Json::requireInteger(obj, "position"))
     TRY_INTO(m.name, Json::requireString(obj, "name"))
-    auto type = Json::requireString(obj, "type");
-    TRY(type)
-    m.type = type.value() == "private" ? ATLauncher::PackType::Private : ATLauncher::PackType::Public;
-    auto versionsArr = Json::requireArray(obj, "versions");
-    TRY(versionsArr)
-    for (const auto versionRaw : versionsArr.value()) {
-        auto versionObj = Json::requireObject(versionRaw);
-        TRY(versionObj)
+    TRY_INTO(const auto& type, Json::requireString(obj, "type"))
+    m.type = type == "private" ? ATLauncher::PackType::Private : ATLauncher::PackType::Public;
+    TRY_INTO(const auto& versionsArr, Json::requireArray(obj, "versions"))
+    for (const auto versionRaw : versionsArr) {
         ATLauncher::IndexedVersion version;
-        TRY(loadIndexedVersion(version, versionObj.value()))
+        TRY(Json::requireObject(versionRaw).and_then([&version](const auto& v) { return loadIndexedVersion(version, v); }))
         m.versions.append(version);
     }
     m.system = obj["system"].toBool();

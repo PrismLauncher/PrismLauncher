@@ -107,14 +107,13 @@ Result<> Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, const QJson
 
     auto donateArr = obj["donation_urls"].toArray();
     for (auto d : donateArr) {
-        auto dObj = Json::requireObject(d);
-        TRY(dObj)
+        TRY_INTO(const auto& dObj, Json::requireObject(d))
 
         ModPlatform::DonationData donate;
 
-        donate.id = dObj.value()["id"].toString();
-        donate.platform = dObj.value()["platform"].toString();
-        donate.url = dObj.value()["url"].toString();
+        donate.id = dObj["id"].toString();
+        donate.platform = dObj["platform"].toString();
+        donate.url = dObj["url"].toString();
 
         pack.extraData.donate.append(donate);
     }
@@ -136,18 +135,16 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
     TRY_INTO(file.addonId, Json::requireString(obj, "project_id"))
     TRY_INTO(file.fileId, Json::requireString(obj, "id"))
     TRY_INTO(file.date, Json::requireString(obj, "date_published"))
-    auto versionArray = Json::requireArray(obj, "game_versions");
-    TRY(versionArray)
-    if (versionArray->empty()) {
+    TRY_INTO(const auto& versionArray, Json::requireArray(obj, "game_versions"))
+    if (versionArray.empty()) {
         return {};
     }
-    for (auto mcVer : versionArray.value()) {
+    for (auto mcVer : versionArray) {
         file.mcVersion.append({ ModrinthAPI::mapMCVersionFromModrinth(mcVer.toString()),
                                 mcVer.toString() });  // double this so we can check both strings when filtering
     }
-    auto loaders = Json::requireArray(obj, "loaders");
-    TRY(loaders)
-    for (auto loader : loaders.value()) {
+    TRY_INTO(const auto& loaders, Json::requireArray(obj, "loaders"))
+    for (auto loader : loaders) {
         if (loader == "neoforge") {
             file.loaders |= ModPlatform::NeoForge;
         } else if (loader == "forge") {
@@ -164,8 +161,7 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
     }
     TRY_INTO(file.version, Json::requireString(obj, "name"))
     TRY_INTO(file.versionNumber, Json::requireString(obj, "version_number"))
-    QString versionType;
-    TRY_INTO(versionType, Json::requireString(obj, "version_type"))
+    TRY_INTO(const auto& versionType, Json::requireString(obj, "version_type"))
     file.versionType = ModPlatform::IndexedVersionType::fromString(versionType);
 
     if (obj.contains("changelog")) {
@@ -178,8 +174,7 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
         ModPlatform::Dependency dependency;
         dependency.addonId = dep["project_id"].toString();
         dependency.version = dep["version_id"].toString();
-        QString depType;
-        TRY_INTO(depType, Json::requireString(dep, "dependency_type"))
+        TRY_INTO(const auto& depType, Json::requireString(dep, "dependency_type"))
 
         if (depType == "required") {
             dependency.type = ModPlatform::DependencyType::REQUIRED;
@@ -196,11 +191,10 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
         file.dependencies.append(dependency);
     }
 
-    auto files = Json::requireArray(obj, "files");
-    TRY(files)
+    TRY_INTO(const auto& files, Json::requireArray(obj, "files"))
     int i = 0;
 
-    if (files->empty()) {
+    if (files.empty()) {
         // This should not happen normally, but check just in case
         qWarning() << "Modrinth returned an unexpected empty list of files:" << obj;
         return {};
@@ -210,18 +204,16 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
     // Will default to the last one if there's no primary (though I think Modrinth requires that
     // at least one file is primary, idk)
     // NOTE: files.count() is 1-indexed, so we need to subtract 1 to become 0-indexed
-    while (i < files->count() - 1) {
-        auto parent = files.value()[i].toObject();
-        QString fileName;
-        TRY_INTO(fileName, Json::requireString(parent, "filename"))
+    while (i < files.count() - 1) {
+        auto parent = files[i].toObject();
+        TRY_INTO(const auto& fileName, Json::requireString(parent, "filename"))
 
         if (!preferredFileName.isEmpty() && fileName.contains(preferredFileName)) {
             file.isPreferred = true;
             break;
         }
 
-        bool primary = false;
-        TRY_INTO(primary, Json::requireBoolean(parent, "primary"))
+        TRY_INTO(const auto& primary, Json::requireBoolean(parent, "primary"))
         // Grab the primary file, if available
         if (primary) {
             break;
@@ -230,14 +222,13 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
         i++;
     }
 
-    auto parent = files.value()[i].toObject();
+    auto parent = files[i].toObject();
     if (parent.contains("url")) {
         TRY_INTO(file.downloadUrl, Json::requireString(parent, "url"))
         TRY_INTO(file.fileName, Json::requireString(parent, "filename"))
         file.fileName = FS::RemoveInvalidPathChars(file.fileName);
-        bool primary = false;
-        TRY_INTO(primary, Json::requireBoolean(parent, "primary"))
-        file.isPreferred = primary || (files->count() == 1);
+        TRY_INTO(const auto& primary, Json::requireBoolean(parent, "primary"))
+        file.isPreferred = primary || (files.count() == 1);
         auto hashList = Json::requireObject(parent, "hashes");
         TRY(hashList)
 

@@ -214,9 +214,9 @@ Result<> appendSafe(const QString& filename, const QByteArray& data)
     }
 
     QByteArray buffer;
-    auto bRsp = read(filename);
-    if (bRsp) {
-        buffer = bRsp.value();
+    auto bRes = read(filename);
+    if (bRes) {
+        buffer = bRes.value();
     }
     buffer.append(data);
     PSaveFile file(filename);

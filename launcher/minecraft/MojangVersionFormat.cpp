@@ -45,10 +45,10 @@ using namespace Json;
 static const int CURRENT_MINIMUM_LAUNCHER_VERSION = 18;
 
 namespace {
-Result<> optionalString(const QJsonObject& root, const QString& key, QString& variable)
+Result<QString> optionalString(const QJsonObject& root, const QString& key)
 {
     if (root.contains(key)) {
-        TRY_INTO(variable, requireString(root.value(key)))
+        return requireString(root.value(key));
     }
     return {};
 }
@@ -56,7 +56,7 @@ Result<> optionalString(const QJsonObject& root, const QString& key, QString& va
 Result<> readDownloadInfo(MojangDownloadInfo::Ptr out, const QJsonObject& obj)
 {
     // optional, not used
-    TRY(optionalString(obj, "path", out->path))
+    TRY_INTO(out->path, optionalString(obj, "path"))
     // required!
     TRY_INTO(out->sha1, requireString(obj, "sha1"))
     TRY_INTO(out->url, requireString(obj, "url"))
@@ -102,19 +102,15 @@ QJsonObject downloadInfoToJson(MojangDownloadInfo::Ptr info)
 Result<MojangLibraryDownloadInfo::Ptr> libDownloadInfoFromJson(const QJsonObject& libObj)
 {
     auto out = std::make_shared<MojangLibraryDownloadInfo>();
-    auto dlObj = requireObject(libObj.value("downloads"));
-    TRY(dlObj)
-    if (dlObj->contains("artifact")) {
-        TRY_INTO(out->artifact, requireObject(dlObj.value(), "artifact").and_then(downloadInfoFromJson))
+    TRY_INTO(const auto& dlObj, requireObject(libObj.value("downloads")))
+    if (dlObj.contains("artifact")) {
+        TRY_INTO(out->artifact, requireObject(dlObj, "artifact").and_then(downloadInfoFromJson))
     }
-    if (dlObj->contains("classifiers")) {
-        auto classifiersObj = requireObject(dlObj.value(), "classifiers");
-        TRY(classifiersObj)
-        for (auto iter = classifiersObj->begin(); iter != classifiersObj->end(); iter++) {
+    if (dlObj.contains("classifiers")) {
+        TRY_INTO(const auto& classifiersObj, requireObject(dlObj, "classifiers"))
+        for (auto iter = classifiersObj.begin(); iter != classifiersObj.end(); iter++) {
             auto classifier = iter.key();
-            auto classifierObj = requireObject(iter.value());
-            TRY(classifierObj)
-            TRY_INTO(out->classifiers[classifier], downloadInfoFromJson(classifierObj.value()))
+            TRY_INTO(out->classifiers[classifier], requireObject(iter.value()).and_then(downloadInfoFromJson))
         }
     }
     return out;
@@ -153,12 +149,12 @@ QJsonObject assetIndexToJson(MojangAssetIndexInfo::Ptr info)
 
 Result<> MojangVersionFormat::readVersionProperties(const QJsonObject& in, VersionFile* out)
 {
-    TRY(optionalString(in, "id", out->minecraftVersion))
-    TRY(optionalString(in, "mainClass", out->mainClass))
-    TRY(optionalString(in, "minecraftArguments", out->minecraftArguments))
-    TRY(optionalString(in, "type", out->type))
+    TRY_INTO(out->minecraftVersion, optionalString(in, "id"))
+    TRY_INTO(out->mainClass, optionalString(in, "mainClass"))
+    TRY_INTO(out->minecraftArguments, optionalString(in, "minecraftArguments"))
+    TRY_INTO(out->type, optionalString(in, "type"))
 
-    TRY(optionalString(in, "assets", out->assets))
+    TRY_INTO(out->assets, optionalString(in, "assets"))
     if (in.contains("assetIndex")) {
         TRY_INTO(out->mojangAssetIndex, requireObject(in, "assetIndex").and_then(assetIndexFromJson))
     } else if (!out->assets.isNull()) {
@@ -180,12 +176,10 @@ Result<> MojangVersionFormat::readVersionProperties(const QJsonObject& in, Versi
     }
 
     if (in.contains("compatibleJavaMajors")) {
-        auto arr = requireArray(in.value("compatibleJavaMajors"));
-        TRY(arr)
-        for (auto compatible : arr.value()) {
-            auto major = requireInteger(compatible);
-            TRY(major)
-            out->compatibleJavaMajors.append(major.value());
+        TRY_INTO(const auto& arr, requireArray(in.value("compatibleJavaMajors")))
+        for (auto compatible : arr) {
+            TRY_INTO(const auto& major, requireInteger(compatible))
+            out->compatibleJavaMajors.append(major);
         }
     }
     if (in.contains("compatibleJavaName")) {
@@ -193,9 +187,8 @@ Result<> MojangVersionFormat::readVersionProperties(const QJsonObject& in, Versi
     }
 
     if (in.contains("downloads")) {
-        auto downloadsObj = requireObject(in, "downloads");
-        TRY(downloadsObj)
-        for (auto iter = downloadsObj->begin(); iter != downloadsObj->end(); iter++) {
+        TRY_INTO(const auto& downloadsObj, requireObject(in, "downloads"))
+        for (auto iter = downloadsObj.begin(); iter != downloadsObj.end(); iter++) {
             auto classifier = iter.key();
             TRY_INTO(out->mojangDownloads[classifier], requireObject(iter.value()).and_then(downloadInfoFromJson))
         }
@@ -223,13 +216,12 @@ Result<VersionFilePtr> MojangVersionFormat::versionFileFromJson(const QJsonDocum
     // out->filename = filename;
 
     if (root.contains("libraries")) {
-        auto libs = requireArray(root.value("libraries"));
-        TRY(libs)
-        for (auto libVal : libs.value()) {
-            auto libObj = requireObject(libVal).and_then(
-                [&out, filename](const auto& v) { return MojangVersionFormat::libraryFromJson(*out, v, filename); });
-            TRY(libObj)
-            out->libraries.append(libObj.value());
+        TRY_INTO(const auto& libs, requireArray(root.value("libraries")))
+        for (auto libVal : libs) {
+            TRY_INTO(const auto& libObj, requireObject(libVal).and_then([&out, filename](const auto& v) {
+                return MojangVersionFormat::libraryFromJson(*out, v, filename);
+            }))
+            out->libraries.append(libObj);
         }
     }
     return out;
@@ -305,21 +297,19 @@ Result<LibraryPtr> MojangVersionFormat::libraryFromJson(ProblemContainer& proble
         problems.addProblem(ProblemSeverity::Error, QObject::tr("Library %1 name is broken and cannot be processed.").arg(rawName));
     }
 
-    TRY(optionalString(libObj, "url", out->m_repositoryURL))
+    TRY_INTO(out->m_repositoryURL, optionalString(libObj, "url"))
     if (libObj.contains("extract")) {
         out->m_hasExcludes = true;
-        auto extractObj = requireObject(libObj.value("extract")).and_then([](const auto& v) { return requireArray(v.value("exclude")); });
-        TRY(extractObj)
-        for (auto excludeVal : extractObj.value()) {
-            auto e = requireString(excludeVal);
-            TRY(e)
-            out->m_extractExcludes.append(e.value());
+        TRY_INTO(const auto& extractObj,
+                 requireObject(libObj.value("extract")).and_then([](const auto& v) { return requireArray(v.value("exclude")); }))
+        for (auto excludeVal : extractObj) {
+            TRY_INTO(const auto& e, requireString(excludeVal))
+            out->m_extractExcludes.append(e);
         }
     }
     if (libObj.contains("natives")) {
-        auto nativesObj = requireObject(libObj.value("natives"));
-        TRY(nativesObj)
-        for (auto it = nativesObj->begin(); it != nativesObj->end(); ++it) {
+        TRY_INTO(const auto& nativesObj, requireObject(libObj.value("natives")))
+        for (auto it = nativesObj.begin(); it != nativesObj.end(); ++it) {
             if (!it.value().isString()) {
                 qWarning() << filename << "contains an invalid native (skipping)";
             }
@@ -330,12 +320,10 @@ Result<LibraryPtr> MojangVersionFormat::libraryFromJson(ProblemContainer& proble
     if (libObj.contains("rules")) {
         out->applyRules = true;
 
-        auto rulesArray = requireArray(libObj.value("rules"));
-        TRY(rulesArray)
-        for (auto rule : rulesArray.value()) {
-            auto r = requireObject(rule);
-            TRY(r)
-            out->m_rules.append(Rule::fromJson(r.value()));
+        TRY_INTO(const auto& rulesArray, requireArray(libObj.value("rules")))
+        for (auto rule : rulesArray) {
+            TRY_INTO(const auto& r, requireObject(rule))
+            out->m_rules.append(Rule::fromJson(r));
         }
     }
     if (libObj.contains("downloads")) {

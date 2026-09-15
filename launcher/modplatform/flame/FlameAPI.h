@@ -149,13 +149,12 @@ class FlameAPI final : public ResourceAPI {
     }
     Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType resourceType) const override
     {
-        auto arr = FlameMod::loadIndexedPackVersion(obj);
-        TRY(arr)
+        TRY_INTO(const auto& arr, FlameMod::loadIndexedPackVersion(obj))
         if (resourceType != ModPlatform::ResourceType::TexturePack) {
             return arr;
         }
         // FIXME: Client-side version filtering. This won't take into account any user-selected filtering.
-        const auto& mcVersions = arr.value().mcVersion;
+        const auto& mcVersions = arr.mcVersion;
 
         if (std::any_of(mcVersions.constBegin(), mcVersions.constEnd(),
                         [](const auto& mcVersion) { return Version(mcVersion) <= Version("1.6"); })) {

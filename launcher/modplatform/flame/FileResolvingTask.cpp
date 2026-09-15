@@ -103,11 +103,8 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
     QStringList hashes;
     for (QJsonValueRef file : doc.value()) {
         auto process = [this, &hashes](const QJsonValue& file) -> Result<> {
-            auto obj = Json::requireObject(file);
-            TRY(obj)
-            auto versionRes = FlameMod::loadIndexedPackVersion(obj.value());
-            TRY(versionRes)
-            auto& version = versionRes.value();
+            TRY_INTO(const auto& version,
+                     Json::requireObject(file).and_then([](const auto& v) { return FlameMod::loadIndexedPackVersion(v); }))
             auto fileid = version.fileId.toInt();
             Q_ASSERT(fileid != 0);
             Q_ASSERT(m_manifest.files.contains(fileid));
@@ -153,13 +150,11 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
                 auto url = QUrl(out.version.downloadUrl, QUrl::TolerantMode);
                 if (!url.isValid() && "sha1" == out.version.hashType && !out.version.hash.isEmpty()) {
                     auto parse = [&entries, &out]() -> Result<> {
-                        auto entry = Json::requireObject(entries, out.version.hash);
-                        TRY(entry)
+                        TRY_INTO(const auto& file, Json::requireObject(entries, out.version.hash).and_then([](const auto& v) {
+                            return Modrinth::loadIndexedPackVersion(v);
+                        }))
 
-                        auto file = Modrinth::loadIndexedPackVersion(entry.value());
-                        TRY(file)
-
-                        out.version.downloadUrl = file->downloadUrl;
+                        out.version.downloadUrl = file.downloadUrl;
                         qDebug() << "Found alternative on modrinth" << out.version.fileName;
                         return {};
                     };
@@ -217,16 +212,13 @@ void Flame::FileResolvingTask::getFlameProjects()
 
         for (auto entry : doc.value()) {
             auto process = [this, &entry]() -> Result<> {
-                auto entryObj = Json::requireObject(entry);
-                TRY(entryObj)
-                auto id = Json::requireInteger(entryObj.value(), "id");
-                TRY(id)
+                TRY_INTO(const auto& entryObj, Json::requireObject(entry))
+                TRY_INTO(const auto& id, Json::requireInteger(entryObj, "id"))
 
-                auto file = std::ranges::find_if(m_manifest.files, [id](const Flame::File& file) { return file.projectId == id.value(); });
+                auto file = std::ranges::find_if(m_manifest.files, [id](const Flame::File& file) { return file.projectId == id; });
                 if (file != m_manifest.files.end()) {
                     setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
-                    auto loadRes = FlameMod::loadIndexedPack(file->pack, entryObj.value());
-                    TRY(loadRes)
+                    TRY(FlameMod::loadIndexedPack(file->pack, entryObj))
                     if (file->pack.resourceType == ModPlatform::ResourceType::World) {
                         file->targetFolder = "saves";
                     }

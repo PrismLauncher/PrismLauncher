@@ -31,17 +31,15 @@ namespace {
 // Index
 Result<std::shared_ptr<Meta::Index>> parseIndexInternal(const QJsonObject& obj)
 {
-    const auto objects = requireIsArrayOf<QJsonObject>(obj, "packages");
-    TRY(objects)
+    TRY_INTO(const auto& objects, requireIsArrayOf<QJsonObject>(obj, "packages"))
 
     QList<Meta::VersionList::Ptr> lists;
-    lists.reserve(objects->size());
+    lists.reserve(objects.size());
 
-    for (const auto& entry : objects.value()) {
-        auto uid = requireString(entry, "uid");
-        TRY(uid)
+    for (const auto& entry : objects) {
+        TRY_INTO(const auto& uid, requireString(entry, "uid"))
 
-        auto list = std::make_shared<Meta::VersionList>(uid.value());
+        auto list = std::make_shared<Meta::VersionList>(uid);
         list->setName(entry["name"].toString());
         list->setSha256(entry["sha256"].toString());
 
@@ -53,13 +51,11 @@ Result<std::shared_ptr<Meta::Index>> parseIndexInternal(const QJsonObject& obj)
 // Version
 Result<Meta::Version::Ptr> parseCommonVersion(const QString& uid, const QJsonObject& obj)
 {
-    auto versionRsp = requireString(obj, "version");
-    TRY(versionRsp)
-    auto releaseTime = requireString(obj, "releaseTime");
-    TRY(releaseTime)
+    TRY_INTO(const auto& versionRes, requireString(obj, "version"))
+    TRY_INTO(const auto& releaseTime, requireString(obj, "releaseTime"))
 
-    auto version = std::make_shared<Meta::Version>(uid, versionRsp.value());
-    version->setTime(QDateTime::fromString(releaseTime.value(), Qt::ISODate).toMSecsSinceEpoch() / 1000);
+    auto version = std::make_shared<Meta::Version>(uid, versionRes);
+    version->setTime(QDateTime::fromString(releaseTime, Qt::ISODate).toMSecsSinceEpoch() / 1000);
     version->setType(obj["type"].toString());
     version->setRecommended(obj["recommended"].toBool());
     version->setVolatile(obj["volatile"].toBool());
@@ -78,40 +74,32 @@ Result<Meta::Version::Ptr> parseCommonVersion(const QString& uid, const QJsonObj
 
 Result<Meta::Version::Ptr> parseVersionInternal(const QJsonObject& obj)
 {
-    auto uid = requireString(obj, "uid");
-    TRY(uid)
-    auto versionRsp = parseCommonVersion(uid.value(), obj);
-    TRY(versionRsp)
-    auto version = versionRsp.value();
+    TRY_INTO(const auto& uid, requireString(obj, "uid"))
+    TRY_INTO(const auto& version, parseCommonVersion(uid, obj))
 
-    auto data = OneSixVersionFormat::versionFileFromJson(QJsonDocument(obj), QString("%1/%2.json").arg(version->uid(), version->version()),
-                                                         obj.contains("order"));
-    TRY(data)
-    version->setData(data.value());
+    TRY_INTO(const auto& data,
+             OneSixVersionFormat::versionFileFromJson(QJsonDocument(obj), QString("%1/%2.json").arg(version->uid(), version->version()),
+                                                      obj.contains("order")))
+    version->setData(data);
     return version;
 }
 
 // Version list / package
 Result<Meta::VersionList::Ptr> parseVersionListInternal(const QJsonObject& obj)
 {
-    const auto uid = requireString(obj, "uid");
-    TRY(uid)
-
-    const auto versionsRaw = requireIsArrayOf<QJsonObject>(obj, "versions");
-    TRY(versionsRaw)
+    TRY_INTO(const auto& uid, requireString(obj, "uid"))
+    TRY_INTO(const auto& versionsRaw, requireIsArrayOf<QJsonObject>(obj, "versions"))
 
     QList<Meta::Version::Ptr> versions;
-    versions.reserve(versionsRaw->size());
-    for (const auto& v : versionsRaw.value()) {
-        auto versionRsp = parseCommonVersion(uid.value(), v);
-        TRY(versionRsp)
+    versions.reserve(versionsRaw.size());
+    for (const auto& v : versionsRaw) {
+        TRY_INTO(const auto& version, parseCommonVersion(uid, v))
 
-        const auto& version = versionRsp.value();
         version->setProvidesRecommendations();
         versions.push_back(version);
     }
 
-    auto list = std::make_shared<Meta::VersionList>(uid.value());
+    auto list = std::make_shared<Meta::VersionList>(uid);
     list->setName(obj["name"].toString());
     list->setVersions(versions);
     return list;
@@ -148,31 +136,25 @@ void serializeFormatVersion(QJsonObject& obj, int version)
 
 Result<> parseIndex(const QJsonObject& obj, Index* ptr)
 {
-    const auto version = parseFormatVersion(obj);
-    TRY(version)
-    const auto index = parseIndexInternal(obj);
-    TRY(index)
-    ptr->merge(index.value());
+    TRY(parseFormatVersion(obj))
+    TRY_INTO(const auto& index, parseIndexInternal(obj))
+    ptr->merge(index);
     return {};
 }
 
 Result<> parseVersionList(const QJsonObject& obj, VersionList* ptr)
 {
-    const auto version = parseFormatVersion(obj);
-    TRY(version)
-    auto list = parseVersionListInternal(obj);
-    TRY(list)
-    ptr->merge(list.value());
+    TRY(parseFormatVersion(obj))
+    TRY_INTO(const auto& list, parseVersionListInternal(obj))
+    ptr->merge(list);
     return {};
 }
 
 Result<> parseVersion(const QJsonObject& obj, Version* ptr)
 {
-    const auto version = parseFormatVersion(obj);
-    TRY(version)
-    auto ver = parseVersionInternal(obj);
-    TRY(ver)
-    ptr->merge(ver.value());
+    TRY(parseFormatVersion(obj))
+    TRY_INTO(const auto& ver, parseVersionInternal(obj))
+    ptr->merge(ver);
     return {};
 }
 
@@ -184,17 +166,13 @@ Result<> parseVersion(const QJsonObject& obj, Version* ptr)
 Result<> parseRequires(const QJsonObject& obj, RequireSet* ptr, const char* keyName)
 {
     if (obj.contains(keyName)) {
-        auto reqArray = requireArray(obj, keyName);
-        TRY(reqArray)
-        for (const auto iter : reqArray.value()) {
-            auto reqObj = requireObject(iter);
-            TRY(reqObj)
-            auto reqObject = reqObj.value();
-            auto uid = requireString(reqObject, "uid");
-            TRY(uid)
+        TRY_INTO(const auto& reqArray, requireArray(obj, keyName))
+        for (const auto iter : reqArray) {
+            TRY_INTO(const auto& reqObject, requireObject(iter))
+            TRY_INTO(const auto& uid, requireString(reqObject, "uid"))
             auto equals = reqObject["equals"].toString();
             auto suggests = reqObject["suggests"].toString();
-            ptr->insert({ .uid = uid.value(), .equalsVersion = equals, .suggests = suggests });
+            ptr->insert({ .uid = uid, .equalsVersion = equals, .suggests = suggests });
         }
     }
     return {};

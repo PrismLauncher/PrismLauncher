@@ -22,33 +22,29 @@
 
 namespace ATLauncher {
 
-Result<> loadShareCodeMod(ShareCodeMod& m, QJsonObject& obj)
+Result<> loadShareCodeMod(ShareCodeMod& m, const QJsonObject& obj)
 {
     TRY_INTO(m.selected, Json::requireBoolean(obj, "selected"))
     TRY_INTO(m.name, Json::requireString(obj, "name"))
     return {};
 }
 
-Result<> loadShareCode(ShareCode& c, QJsonObject& obj)
+Result<> loadShareCode(ShareCode& c, const QJsonObject& obj)
 {
     TRY_INTO(c.pack, Json::requireString(obj, "pack"))
     TRY_INTO(c.version, Json::requireString(obj, "version"))
 
-    auto mods = Json::requireObject(obj, "mods");
-    TRY(mods)
-    auto optional = Json::requireArray(mods.value(), "optional");
-    TRY(optional)
-    for (const auto modRaw : optional.value()) {
-        auto modObj = Json::requireObject(modRaw);
-        TRY(modObj)
+    TRY_INTO(const auto& optional,
+             Json::requireObject(obj, "mods").and_then([](const auto& v) { return Json::requireArray(v, "optional"); }))
+    for (const auto modRaw : optional) {
         ShareCodeMod mod;
-        TRY(loadShareCodeMod(mod, modObj.value()))
+        TRY(Json::requireObject(modRaw).and_then([&mod](const auto& v) { return loadShareCodeMod(mod, v); }))
         c.mods.append(mod);
     }
     return {};
 }
 
-Result<> loadShareCodeResponse(ShareCodeResponse& r, QJsonObject& obj)
+Result<> loadShareCodeResponse(ShareCodeResponse& r, const QJsonObject& obj)
 {
     TRY_INTO(r.error, Json::requireBoolean(obj, "error"))
     TRY_INTO(r.code, Json::requireInteger(obj, "code"))
@@ -58,9 +54,7 @@ Result<> loadShareCodeResponse(ShareCodeResponse& r, QJsonObject& obj)
     }
 
     if (!r.error) {
-        auto dataRaw = Json::requireObject(obj, "data");
-        TRY(dataRaw)
-        TRY(loadShareCode(r.data, dataRaw.value()))
+        TRY(Json::requireObject(obj, "data").and_then([&r](const auto& v) { return loadShareCode(r.data, v); }))
     }
     return {};
 }

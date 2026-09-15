@@ -84,9 +84,9 @@ QString truncateLogForMclogs(const QString& logContent)
 
 Result<std::optional<QString>> GuiUtil::uploadPaste(const QString& name, const QFileInfo& filePath, QWidget* parentWidget)
 {
-    auto res = FS::read(filePath.absoluteFilePath());
-    TRY(res)
-    return uploadPaste(name, res.value(), parentWidget);
+    return FS::read(filePath.absoluteFilePath()).and_then([&name, &parentWidget](const auto& v) {
+        return uploadPaste(name, v, parentWidget);
+    });
 };
 
 Result<std::optional<QString>> GuiUtil::uploadPaste(const QString& name, const QString& data, QWidget* parentWidget)

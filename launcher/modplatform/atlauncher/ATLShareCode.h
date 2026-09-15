@@ -44,6 +44,6 @@ struct ShareCodeResponse {
     ShareCode data;
 };
 
-Result<> loadShareCodeResponse(ShareCodeResponse& r, QJsonObject& obj);
+Result<> loadShareCodeResponse(ShareCodeResponse& r, const QJsonObject& obj);
 
 }  // namespace ATLauncher

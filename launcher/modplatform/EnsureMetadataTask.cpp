@@ -249,16 +249,13 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
             auto* resource = m_resources.find(hash).value();
 
             auto parse = [this, &hash, &entries, resource]() -> Result<> {
-                auto entry = Json::requireObject(entries, hash);
-                TRY(entry)
-
                 setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(resource->name()));
                 qDebug() << "Getting version for" << resource->name() << "from Modrinth";
 
-                auto version = Modrinth::loadIndexedPackVersion(entry.value());
-                TRY(version)
+                TRY_INTO(const auto& version,
+                         Json::requireObject(entries, hash).and_then([](const auto& v) { return Modrinth::loadIndexedPackVersion(v); }))
 
-                m_tempVersions.insert(hash, version.value());
+                m_tempVersions.insert(hash, version);
                 return {};
             };
             if (auto res = parse(); !res) {
@@ -314,11 +311,7 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
             ModPlatform::IndexedPack pack;
 
             auto parse = [this, &entry, &pack, &addonIds]() -> Result<> {
-                auto entryObj = Json::requireObject(entry);
-                TRY(entryObj)
-
-                auto loadRes = Modrinth::loadIndexedPack(pack, entryObj.value());
-                TRY(loadRes)
+                TRY(Json::requireObject(entry).and_then([&pack](const auto& v) { return Modrinth::loadIndexedPack(pack, v); }))
 
                 auto hash = addonIds.find(pack.addonId.toString()).value();
 
@@ -444,9 +437,8 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
         auto entries = Json::requireObject(*response).and_then([addonIds](const auto& v) -> Result<QJsonArray> {
             if (addonIds.size() == 1) {
-                auto obj = Json::requireObject(v, "data", "data");
-                TRY(obj)
-                return { { obj.value() } };
+                TRY_INTO(const auto& obj, Json::requireObject(v, "data", "data"))
+                return { { obj } };
             }
             return Json::requireArray(v, "data");
         });

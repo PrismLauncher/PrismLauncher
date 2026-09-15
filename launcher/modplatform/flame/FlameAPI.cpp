@@ -213,17 +213,13 @@ QList<ModPlatform::Category> FlameAPI::loadModCategories(const QByteArray& respo
 {
     QList<ModPlatform::Category> categories;
     auto parse = [&response, &categories] -> Result<> {
-        auto doc = Json::requireObject(response).and_then([](const auto& v) { return Json::requireArray(v, "data"); });
-        TRY(doc)
+        TRY_INTO(const auto& doc, Json::requireObject(response).and_then([](const auto& v) { return Json::requireArray(v, "data"); }))
 
-        for (auto val : doc.value()) {
-            auto cat = Json::requireObject(val);
-            TRY(cat)
-            auto id = Json::requireInteger(cat.value(), "id");
-            TRY(id)
-            auto name = Json::requireString(cat.value(), "name");
-            TRY(name)
-            categories.push_back({ .name = name.value(), .id = QString::number(id.value()) });
+        for (auto val : doc) {
+            TRY_INTO(const auto& cat, Json::requireObject(val))
+            TRY_INTO(const auto& id, Json::requireInteger(cat, "id"))
+            TRY_INTO(const auto& name, Json::requireString(cat, "name"))
+            categories.push_back({ .name = name, .id = QString::number(id) });
         }
         return {};
     };

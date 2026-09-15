@@ -27,11 +27,10 @@ Result<> FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonOb
     if (!authors.isEmpty()) {
         pack.authors.clear();
         for (auto authorIter : authors) {
-            auto author = Json::requireObject(authorIter);
-            TRY(author)
+            TRY_INTO(const auto& author, Json::requireObject(authorIter))
             ModPlatform::ModpackAuthor packAuthor;
-            TRY_INTO(packAuthor.name, Json::requireString(*author, "name"))
-            TRY_INTO(packAuthor.url, Json::requireString(*author, "url"))
+            TRY_INTO(packAuthor.name, Json::requireString(author, "name"))
+            TRY_INTO(packAuthor.url, Json::requireString(author, "url"))
             pack.authors.append(packAuthor);
         }
     }
@@ -88,15 +87,13 @@ QString enumToString(int hashAlgorithm)
 }
 }  // namespace
 
-Result<> FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArray& arr)
+Result<> FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, const QJsonArray& arr)
 {
     QList<ModPlatform::IndexedVersion> unsortedVersions;
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
 
-        auto fileRes = loadIndexedPackVersion(obj);
-        TRY(fileRes)
-        auto& file = fileRes.value();
+        TRY_INTO(auto file, loadIndexedPackVersion(obj))
         if (!file.addonId.isValid()) {
             file.addonId = pack.addonId;
         }
@@ -116,13 +113,12 @@ Result<> FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJson
     return {};
 }
 
-Result<ModPlatform::IndexedVersion> FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool loadChangelog)
+Result<ModPlatform::IndexedVersion> FlameMod::loadIndexedPackVersion(const QJsonObject& obj, bool loadChangelog)
 {
-    auto versionArray = Json::requireArray(obj, "gameVersions");
-    TRY(versionArray)
+    TRY_INTO(const auto& versionArray, Json::requireArray(obj, "gameVersions"))
 
     ModPlatform::IndexedVersion file;
-    for (auto mcVer : versionArray.value()) {
+    for (auto mcVer : versionArray) {
         auto str = mcVer.toString();
 
         if (str.contains('.')) {
@@ -159,8 +155,7 @@ Result<ModPlatform::IndexedVersion> FlameMod::loadIndexedPackVersion(QJsonObject
     TRY_INTO(file.fileName, Json::requireString(obj, "fileName"))
     file.fileName = FS::RemoveInvalidPathChars(file.fileName);
 
-    int releaseType = 0;
-    TRY_INTO(releaseType, Json::requireInteger(obj, "releaseType"))
+    TRY_INTO(const auto& releaseType, Json::requireInteger(obj, "releaseType"))
     ModPlatform::IndexedVersionType verType;
     switch (releaseType) {
         case 1:
@@ -195,8 +190,7 @@ Result<ModPlatform::IndexedVersion> FlameMod::loadIndexedPackVersion(QJsonObject
         auto dep = d.toObject();
         ModPlatform::Dependency dependency;
         TRY_INTO(dependency.addonId, Json::requireInteger(dep, "modId"))
-        int relationType = 0;
-        TRY_INTO(relationType, Json::requireInteger(dep, "relationType"))
+        TRY_INTO(const auto& relationType, Json::requireInteger(dep, "relationType"))
         switch (relationType) {
             case 1:  // EmbeddedLibrary
                 dependency.type = ModPlatform::DependencyType::EMBEDDED;

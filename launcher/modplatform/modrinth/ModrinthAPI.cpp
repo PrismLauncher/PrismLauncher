@@ -170,16 +170,13 @@ QList<ModPlatform::Category> ModrinthAPI::loadCategories(const QByteArray& respo
 {
     QList<ModPlatform::Category> categories;
     auto parse = [&response, &projectType, &categories] -> Result<> {
-        auto doc = Json::requireArray(response);
-        TRY(doc)
+        TRY_INTO(const auto& doc, Json::requireArray(response))
 
-        for (auto val : doc.value()) {
-            auto cat = Json::requireObject(val);
-            TRY(cat)
-            auto name = Json::requireString(cat.value(), "name");
-            TRY(name)
-            if (cat.value()["project_type"].toString() == projectType) {
-                categories.push_back({ .name = name.value(), .id = name.value() });
+        for (auto val : doc) {
+            TRY_INTO(const auto& cat, Json::requireObject(val))
+            TRY_INTO(const auto& name, Json::requireString(cat, "name"))
+            if (cat["project_type"].toString() == projectType) {
+                categories.push_back({ .name = name, .id = name });
             }
         }
         return {};

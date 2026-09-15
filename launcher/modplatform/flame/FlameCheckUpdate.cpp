@@ -64,16 +64,13 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QByteArray* 
 {
     auto pack = std::make_shared<ModPlatform::IndexedPack>();
     auto parse = [&pack, &resource, &response] -> Result<> {
-        auto doc = Json::requireObject(*response);
-        TRY(doc)
+        TRY_INTO(const auto& doc, Json::requireObject(*response).and_then([](const auto& v) { return Json::requireArray(v, "data"); }))
         // Fake pack with the necessary info to pass to the download task :)
         pack->name = resource->name();
         pack->slug = resource->metadata()->slug;
         pack->addonId = resource->metadata()->project_id;
         pack->provider = ModPlatform::ResourceProvider::FLAME;
-        auto arr = Json::requireArray(doc.value(), "data");
-        TRY(arr)
-        return FlameMod::loadIndexedPackVersions(*pack.get(), arr.value());
+        return FlameMod::loadIndexedPackVersions(*pack.get(), doc);
     };
     if (auto res = parse(); !res) {
         qWarning() << "Error while parsing JSON response from latest mod version:" << res.error();
@@ -149,9 +146,8 @@ void FlameCheckUpdate::collectBlockedMods()
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds, quickSearch] {
         auto doc = Json::requireObject(*response).and_then([addonIds](const auto& v) -> Result<QJsonArray> {
             if (addonIds.size() == 1) {
-                auto obj = Json::requireObject(v, "data", "data");
-                TRY(obj)
-                return { { obj.value() } };
+                TRY_INTO(const auto& obj, Json::requireObject(v, "data", "data"))
+                return { { obj } };
             }
             return Json::requireArray(v, "data");
         });
@@ -163,20 +159,17 @@ void FlameCheckUpdate::collectBlockedMods()
 
         for (auto entry : doc.value()) {
             auto parse = [this, &entry, &quickSearch] -> Result<> {
-                auto entryObj = Json::requireObject(entry);
-                TRY(entryObj)
+                TRY_INTO(const auto& entryObj, Json::requireObject(entry))
 
-                auto idRes = Json::requireInteger(entryObj.value(), "id");
-                TRY(idRes)
-                auto id = QString::number(*idRes);
+                TRY_INTO(const auto& idRes, Json::requireInteger(entryObj, "id"))
+                auto id = QString::number(idRes);
 
                 auto* resource = quickSearch.find(id).value();
 
                 setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(resource->name()));
 
                 ModPlatform::IndexedPack pack;
-                auto res = FlameMod::loadIndexedPack(pack, entryObj.value());
-                TRY(res)
+                TRY(FlameMod::loadIndexedPack(pack, entryObj))
                 auto recoverUrl = QString("%1/download/%2").arg(pack.websiteUrl, m_blocked[resource]);
                 emit checkFailed(resource, tr("Resource has a new update available, but is not downloadable using CurseForge."),
                                  recoverUrl);

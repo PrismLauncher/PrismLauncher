@@ -160,16 +160,11 @@ Task::Ptr ResourceAPI::getProjectInfo(const ProjectInfoArgs& args,
     QObject::connect(job.get(), &NetJob::succeeded, job.get(), [this, response, callbacks, args] {
         auto pack = args.pack;
         auto parse = [this, &pack, &response]() -> Result<> {
-            auto doc = Json::requireObject(*response);
-            TRY(doc)
-            auto obj = doc.value();
+            TRY_INTO(auto obj, Json::requireObject(*response))
             if (obj.contains("data")) {
-                auto dataObj = Json::requireObject(obj, "data");
-                TRY(dataObj)
-                obj = dataObj.value();
+                TRY_INTO(obj, Json::requireObject(obj, "data"))
             }
-            auto loadRes = loadIndexedPack(*pack, obj);
-            TRY(loadRes)
+            TRY(loadIndexedPack(*pack, obj))
 
             return loadExtraPackInfo(*pack, obj);
         };

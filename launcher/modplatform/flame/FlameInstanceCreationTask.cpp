@@ -220,9 +220,8 @@ void FlameCreationTask::executeTask()
                     // Parse the API response
                     auto doc = Json::requireObject(*rawResponse).and_then([fileIds](const auto& v) -> Result<QJsonArray> {
                         if (fileIds.size() == 1) {
-                            auto obj = Json::requireObject(v, "data", "data");
-                            TRY(obj)
-                            return { { obj.value() } };
+                            TRY_INTO(const auto& obj, Json::requireObject(v, "data", "data"))
+                            return { { obj } };
                         }
                         return Json::requireArray(v, "data");
                     });
@@ -234,17 +233,13 @@ void FlameCreationTask::executeTask()
 
                     for (auto entry : doc.value()) {
                         auto parse = [&entry, &oldFiles] -> Result<> {
-                            auto entryObj = Json::requireObject(entry);
-                            TRY(entryObj)
+                            TRY_INTO(const auto& entryObj, Json::requireObject(entry))
 
                             Flame::File file;
                             // We don't care about blocked mods, we just need local data to delete the file
-                            auto versionRes = FlameMod::loadIndexedPackVersion(entryObj.value());
-                            TRY(versionRes)
-                            file.version = versionRes.value();
-                            auto id = Json::requireInteger(entryObj.value(), "id");
-                            TRY(id)
-                            oldFiles.insert(id.value(), file);
+                            TRY_INTO(file.version, FlameMod::loadIndexedPackVersion(entryObj))
+                            TRY_INTO(const auto& id, Json::requireInteger(entryObj, "id"))
+                            oldFiles.insert(id, file);
                             return {};
                         };
                         if (auto res = parse(); !res) {

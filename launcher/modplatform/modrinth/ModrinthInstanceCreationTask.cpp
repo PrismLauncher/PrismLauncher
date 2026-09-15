@@ -321,18 +321,14 @@ bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<F
 {
     std::vector<File> optionalFiles;
     auto parse = [this, &indexPath, &setInternalData, &files, &optionalFiles] -> Result<> {
-        auto doc = Json::requireObject(indexPath, "modrinth.index.json");
-        TRY(doc)
-        const auto& obj = doc.value();
-        auto formatVersion = Json::requireInteger(obj, "formatVersion", "modrinth.index.json");
-        TRY(formatVersion)
-        if (formatVersion.value() != 1) {
-            return std::unexpected(QString("Unknown format version: %1").arg(formatVersion.value()));
+        TRY_INTO(const auto& obj, Json::requireObject(indexPath, "modrinth.index.json"))
+        TRY_INTO(const auto& formatVersion, Json::requireInteger(obj, "formatVersion", "modrinth.index.json"))
+        if (formatVersion != 1) {
+            return std::unexpected(QString("Unknown format version: %1").arg(formatVersion));
         }
-        auto game = Json::requireString(obj, "game", "modrinth.index.json");
-        TRY(game)
-        if (game.value() != "minecraft") {
-            return std::unexpected("Unknown game: " + game.value());
+        TRY_INTO(const auto& game, Json::requireString(obj, "game", "modrinth.index.json"))
+        if (game != "minecraft") {
+            return std::unexpected("Unknown game: " + game);
         }
 
         if (setInternalData) {
@@ -342,13 +338,11 @@ bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<F
             m_managedName = obj.value("name").toString();
         }
 
-        auto jsonFiles = Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json");
-        TRY(jsonFiles)
-        for (const auto& modInfo : jsonFiles.value()) {
+        TRY_INTO(const auto& jsonFiles, Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json"))
+        for (const auto& modInfo : jsonFiles) {
             File file;
-            auto path = Json::requireString(modInfo, "path");
-            TRY(path)
-            file.path = path.value().replace("\\", "/");
+            TRY_INTO(auto path, Json::requireString(modInfo, "path"))
+            file.path = path.replace("\\", "/");
 
             auto env = modInfo["env"].toObject();
             // 'env' field is optional
@@ -391,9 +385,8 @@ bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<F
         }
 
         if (setInternalData) {
-            auto dependencies = Json::requireObject(obj, "dependencies", "modrinth.index.json");
-            TRY(dependencies)
-            for (auto it = dependencies->begin(), end = dependencies->end(); it != end; ++it) {
+            TRY_INTO(const auto& dependencies, Json::requireObject(obj, "dependencies", "modrinth.index.json"))
+            for (auto it = dependencies.begin(), end = dependencies.end(); it != end; ++it) {
                 QString name = it.key();
                 if (name == "minecraft") {
                     TRY_INTO(m_minecraftVersion, Json::requireString(*it, "Minecraft version"))

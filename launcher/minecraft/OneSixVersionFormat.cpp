@@ -44,24 +44,22 @@
 
 using namespace Json;
 
-Result<> optionalString(const QJsonObject& root, const QString& key, QString& variable)
+Result<QString> optionalString(const QJsonObject& root, const QString& key)
 {
     if (root.contains(key)) {
-        TRY_INTO(variable, requireString(root.value(key)))
+        return requireString(root.value(key));
     }
     return {};
 }
 
 Result<LibraryPtr> OneSixVersionFormat::libraryFromJson(ProblemContainer& problems, const QJsonObject& libObj, const QString& filename)
 {
-    auto res = MojangVersionFormat::libraryFromJson(problems, libObj, filename);
-    TRY(res)
-    auto out = res.value();
-    TRY(optionalString(libObj, "MMC-hint", out->m_hint))
-    TRY(optionalString(libObj, "MMC-absulute_url", out->m_absoluteURL))
-    TRY(optionalString(libObj, "MMC-absoluteUrl", out->m_absoluteURL))
-    TRY(optionalString(libObj, "MMC-filename", out->m_filename))
-    TRY(optionalString(libObj, "MMC-displayname", out->m_displayname))
+    TRY_INTO(const auto& out, MojangVersionFormat::libraryFromJson(problems, libObj, filename))
+    TRY_INTO(out->m_hint, optionalString(libObj, "MMC-hint"))
+    TRY_INTO(out->m_absoluteURL, optionalString(libObj, "MMC-absulute_url"))
+    TRY_INTO(out->m_absoluteURL, optionalString(libObj, "MMC-absoluteUrl"))
+    TRY_INTO(out->m_filename, optionalString(libObj, "MMC-filename"))
+    TRY_INTO(out->m_displayname, optionalString(libObj, "MMC-displayname"))
     return out;
 }
 
@@ -95,8 +93,7 @@ Result<VersionFilePtr> OneSixVersionFormat::versionFileFromJson(const QJsonDocum
 
     QJsonObject root = doc.object();
 
-    auto formatVersion = Meta::parseFormatVersion(root, false);
-    TRY(formatVersion)
+    TRY(Meta::parseFormatVersion(root, false))
 
     if (requireOrder) {
         if (root.contains("order")) {
@@ -128,89 +125,74 @@ Result<VersionFilePtr> OneSixVersionFormat::versionFileFromJson(const QJsonDocum
     TRY(MojangVersionFormat::readVersionProperties(root, out.get()))
 
     // added for legacy Minecraft window embedding, TODO: remove
-    TRY(optionalString(root, "appletClass", out->appletClass))
+    TRY_INTO(out->appletClass, optionalString(root, "appletClass"))
 
     if (root.contains("+tweakers")) {
-        auto arr = requireArray(root.value("+tweakers"));
-        TRY(arr)
-        for (auto tweakerVal : arr.value()) {
-            auto v = requireString(tweakerVal);
-            TRY(v)
-            out->addTweakers.append(v.value());
+        TRY_INTO(const auto& arr, requireArray(root.value("+tweakers")))
+        for (auto tweakerVal : arr) {
+            TRY_INTO(const auto& v, requireString(tweakerVal))
+            out->addTweakers.append(v);
         }
     }
 
     if (root.contains("+traits")) {
-        auto arr = requireArray(root.value("+traits"));
-        TRY(arr)
-        for (auto tweakerVal : arr.value()) {
-            auto v = requireString(tweakerVal);
-            TRY(v)
-            out->traits.insert(v.value());
+        TRY_INTO(const auto& arr, requireArray(root.value("+traits")))
+        for (auto tweakerVal : arr) {
+            TRY_INTO(const auto& v, requireString(tweakerVal))
+            out->traits.insert(v);
         }
     }
 
     if (root.contains("+jvmArgs")) {
-        auto arr = requireArray(root.value("+jvmArgs"));
-        TRY(arr)
-        for (auto arg : arr.value()) {
-            auto v = requireString(arg);
-            TRY(v)
-            out->addnJvmArguments.append(v.value());
+        TRY_INTO(const auto& arr, requireArray(root.value("+jvmArgs")))
+        for (auto arg : arr) {
+            TRY_INTO(const auto& v, requireString(arg))
+            out->addnJvmArguments.append(v);
         }
     }
 
     if (root.contains("jarMods")) {
-        auto arr = requireArray(root.value("jarMods"));
-        TRY(arr)
-        for (auto libVal : arr.value()) {
-            auto libObj = requireObject(libVal);
-            TRY(libObj)
+        TRY_INTO(const auto& arr, requireArray(root.value("jarMods")))
+        for (auto libVal : arr) {
             // parse the jarmod
-            auto lib = OneSixVersionFormat::jarModFromJson(*out, *libObj, filename);
-            TRY(lib)
+            TRY_INTO(const auto& lib, requireObject(libVal).and_then([&out, filename](const auto& v) {
+                return OneSixVersionFormat::jarModFromJson(*out, v, filename);
+            }))
             // and add to jar mods
-            out->jarMods.append(lib.value());
+            out->jarMods.append(lib);
         }
     } else if (root.contains("+jarMods"))  // DEPRECATED: old style '+jarMods' are only here for backwards compatibility
     {
-        auto arr = requireArray(root.value("+jarMods"));
-        TRY(arr)
-        for (auto libVal : arr.value()) {
-            auto libObj = requireObject(libVal);
-            TRY(libObj)
+        TRY_INTO(const auto& arr, requireArray(root.value("+jarMods")))
+        for (auto libVal : arr) {
             // parse the jarmod
-            auto lib = OneSixVersionFormat::plusJarModFromJson(*out, *libObj, filename, out->name);
-            TRY(lib)
+            TRY_INTO(const auto& lib, requireObject(libVal).and_then([&out, filename](const auto& v) {
+                return OneSixVersionFormat::plusJarModFromJson(*out, v, filename, out->name);
+            }))
             // and add to jar mods
-            out->jarMods.append(lib.value());
+            out->jarMods.append(lib);
         }
     }
 
     if (root.contains("mods")) {
-        auto arr = requireArray(root.value("mods"));
-        TRY(arr)
-        for (auto libVal : arr.value()) {
-            auto libObj = requireObject(libVal);
-            TRY(libObj)
+        TRY_INTO(const auto& arr, requireArray(root.value("mods")))
+        for (auto libVal : arr) {
             // parse the jarmod
-            auto lib = OneSixVersionFormat::modFromJson(*out, *libObj, filename);
-            TRY(lib)
+            TRY_INTO(const auto& lib, requireObject(libVal).and_then(
+                                          [&out, filename](const auto& v) { return OneSixVersionFormat::modFromJson(*out, v, filename); }))
             // and add to jar mods
-            out->mods.append(lib.value());
+            out->mods.append(lib);
         }
     }
 
     auto readLibs = [&root, &out, &filename](const char* which, QList<LibraryPtr>& outList) -> Result<> {
-        auto arr = requireArray(root.value(which));
-        TRY(arr)
-        for (auto libVal : arr.value()) {
-            auto libObj = requireObject(libVal);
-            TRY(libObj)
+        TRY_INTO(const auto& arr, requireArray(root.value(which)))
+        for (auto libVal : arr) {
             // parse the library
-            auto lib = libraryFromJson(*out, *libObj, filename);
-            TRY(lib)
-            outList.append(lib.value());
+            TRY_INTO(const auto& lib, requireObject(libVal).and_then([&out, filename](const auto& v) {
+                return OneSixVersionFormat::libraryFromJson(*out, v, filename);
+            }))
+            outList.append(lib);
         }
         return {};
     };
@@ -232,28 +214,22 @@ Result<VersionFilePtr> OneSixVersionFormat::versionFileFromJson(const QJsonDocum
     }
 
     if (root.contains("+agents")) {
-        auto arr = requireArray(root.value("+agents"));
-        TRY(arr)
-        for (auto agentVal : arr.value()) {
-            auto agentObj = requireObject(agentVal);
-            TRY(agentObj)
-            auto lib = libraryFromJson(*out, *agentObj, filename);
-            TRY(lib)
+        TRY_INTO(const auto& arr, requireArray(root.value("+agents")))
+        for (auto agentVal : arr) {
+            TRY_INTO(const auto& agentObj, requireObject(agentVal))
+            TRY_INTO(const auto& lib, libraryFromJson(*out, agentObj, filename))
 
-            QString arg = "";
-            TRY(optionalString(*agentObj, "argument", arg))
+            TRY_INTO(const auto& arg, optionalString(agentObj, "argument"))
 
-            out->agents.append(Agent{ .library = lib.value(), .argument = arg });
+            out->agents.append(Agent{ .library = lib, .argument = arg });
         }
     }
 
     // if we have mainJar, just use it
     if (root.contains("mainJar")) {
-        auto libObj = requireObject(root, "mainJar");
-        TRY(libObj)
-        auto mainJar = libraryFromJson(*out, *libObj, filename);
-        TRY(mainJar)
-        out->mainJar = mainJar.value();
+        TRY_INTO(out->mainJar, requireObject(root, "mainJar").and_then([&out, filename](const auto& v) {
+            return OneSixVersionFormat::libraryFromJson(*out, v, filename);
+        }))
     }
     // else reconstruct it from downloads and id ... if that's available
     else if (!out->minecraftVersion.isEmpty()) {
@@ -296,9 +272,8 @@ Result<VersionFilePtr> OneSixVersionFormat::versionFileFromJson(const QJsonDocum
     if (root.contains("runtimes")) {
         out->runtimes = {};
         for (auto runtime : root["runtimes"].toArray()) {
-            auto runtimeMeta = Java::parseJavaMeta(runtime.toObject());
-            TRY(runtimeMeta)
-            out->runtimes.append(runtimeMeta.value());
+            TRY_INTO(const auto& runtimeMeta, Java::parseJavaMeta(runtime.toObject()))
+            out->runtimes.append(runtimeMeta);
         }
     }
 

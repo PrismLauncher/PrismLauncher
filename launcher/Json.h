@@ -147,13 +147,11 @@ Result<T> requireIsType(const QJsonObject& parent, const QString& key, const QSt
 template <typename T>
 Result<QList<T>> requireIsArrayOf(const QJsonDocument& doc)
 {
-    const auto array = requireArray(doc);
-    TRY(array)
+    TRY_INTO(const auto& array, requireArray(doc))
     QList<T> out;
-    for (const QJsonValue val : array.value()) {
-        auto t = requireIsType<T>(val, "Document");
-        TRY(t)
-        out.append(t.value());
+    for (const QJsonValue val : array) {
+        TRY_INTO(const auto& t, requireIsType<T>(val, "Document"))
+        out.append(t);
     }
     return out;
 }
@@ -169,9 +167,8 @@ Result<QList<T>> requireIsArrayOf(const QJsonObject& parent, const QString& key,
     const QJsonArray array = parent[key].toArray();
     QList<T> out;
     for (const QJsonValue val : array) {
-        auto t = requireIsType<T>(val, "Document");
-        TRY(t)
-        out.append(t.value());
+        TRY_INTO(const auto& t, requireIsType<T>(val, localWhat))
+        out.append(t);
     }
     return out;
 }

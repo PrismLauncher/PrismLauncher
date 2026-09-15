@@ -47,11 +47,10 @@ Result<int> readVarInt(QByteArray& data)
     int position = 0;
 
     while (position < 32) {
-        const auto currentByte = readByte(data);
-        TRY(currentByte)
-        value |= (*currentByte & g_varIntValueMask) << position;
+        TRY_INTO(const auto& currentByte, readByte(data))
+        value |= (currentByte & g_varIntValueMask) << position;
 
-        if ((*currentByte & g_varIntContinue) == 0) {
+        if ((currentByte & g_varIntContinue) == 0) {
             break;
         }
 

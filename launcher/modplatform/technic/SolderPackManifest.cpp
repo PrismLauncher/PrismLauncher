@@ -22,22 +22,20 @@
 
 namespace TechnicSolder {
 
-Result<> loadPack(Pack& v, QJsonObject& obj)
+Result<> loadPack(Pack& v, const QJsonObject& obj)
 {
     TRY_INTO(v.recommended, Json::requireString(obj, "recommended"))
     TRY_INTO(v.latest, Json::requireString(obj, "latest"))
 
-    auto builds = Json::requireArray(obj, "builds");
-    TRY(builds)
-    for (const auto buildRaw : builds.value()) {
-        auto build = Json::requireString(buildRaw);
-        TRY(build)
-        v.builds.append(build.value());
+    TRY_INTO(const auto& builds, Json::requireArray(obj, "builds"))
+    for (const auto buildRaw : builds) {
+        TRY_INTO(const auto& build, Json::requireString(buildRaw))
+        v.builds.append(build);
     }
     return {};
 }
 
-static Result<> loadPackBuildMod(PackBuildMod& b, QJsonObject& obj)
+static Result<> loadPackBuildMod(PackBuildMod& b, const QJsonObject& obj)
 {
     TRY_INTO(b.name, Json::requireString(obj, "name"))
     b.version = obj["version"].toString("");
@@ -46,17 +44,14 @@ static Result<> loadPackBuildMod(PackBuildMod& b, QJsonObject& obj)
     return {};
 }
 
-Result<> loadPackBuild(PackBuild& v, QJsonObject& obj)
+Result<> loadPackBuild(PackBuild& v, const QJsonObject& obj)
 {
     TRY_INTO(v.minecraft, Json::requireString(obj, "minecraft"))
 
-    auto mods = Json::requireArray(obj, "mods");
-    TRY(mods)
-    for (const auto modRaw : mods.value()) {
-        auto modObj = Json::requireObject(modRaw);
-        TRY(modObj)
+    TRY_INTO(const auto& mods, Json::requireArray(obj, "mods"))
+    for (const auto modRaw : mods) {
         PackBuildMod mod;
-        TRY(loadPackBuildMod(mod, modObj.value()))
+        TRY(Json::requireObject(modRaw).and_then([&mod](const auto& v) { return loadPackBuildMod(mod, v); }))
         v.mods.append(mod);
     }
     return {};

@@ -139,9 +139,8 @@ QJsonObject componentToJsonV1(const ComponentPtr& component)
 Result<ComponentPtr> componentFromJsonV1(PackProfile* parent, const QJsonObject& obj)
 {
     // critical
-    auto uid = Json::requireString(obj.value("uid"));
-    TRY(uid)
-    auto component = makeShared<Component>(parent, uid.value());
+    TRY_INTO(const auto& uid, Json::requireString(obj.value("uid")))
+    auto component = makeShared<Component>(parent, uid);
     component->m_version = obj.value("version").toString();
     component->m_dependencyOnly = obj.value("dependencyOnly").toBool();
     component->m_important = obj.value("important").toBool();
@@ -205,20 +204,17 @@ Result<> loadPackProfile(PackProfile* parent, const QString& filename, Component
     }
     auto parse = [&obj, &container, &parent] -> Result<> {
         // check order file version.
-        auto version = Json::requireInteger(obj->value("formatVersion"));
-        TRY(version)
-        if (version.value() != currentComponentsFileVersion) {
+        TRY_INTO(const auto& version, Json::requireInteger(obj->value("formatVersion")))
+        if (version != currentComponentsFileVersion) {
             auto message = QObject::tr("bad file format");
             return std::unexpected(message);
         }
-        auto orderArray = Json::requireArray(obj->value("components"));
-        TRY(orderArray)
-        for (auto item : orderArray.value()) {
-            auto compObj = Json::requireObject(item, "Component must be an object.");
-            TRY(compObj)
-            auto comp = componentFromJsonV1(parent, compObj.value());
-            TRY(comp)
-            container.append(comp.value());
+        TRY_INTO(const auto& orderArray, Json::requireArray(obj->value("components")))
+        for (auto item : orderArray) {
+            TRY_INTO(const auto& comp, Json::requireObject(item, "Component must be an object.").and_then([&parent](const auto& v) {
+                return componentFromJsonV1(parent, v);
+            }))
+            container.append(comp);
         }
         return {};
     };

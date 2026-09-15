@@ -39,11 +39,8 @@ class Sink : public ByteArraySink {
    public:
     Result<> finalize(QNetworkReply& /*reply*/) override
     {
-        auto validatorResult = finalizeAllValidators();
-        TRY(validatorResult)
-        auto result = m_parseFunc(m_output);
-        TRY(result)
-        m_result = *result;
+        TRY(finalizeAllValidators())
+        TRY_INTO(m_result, m_parseFunc(m_output))
         return {};
     }
 

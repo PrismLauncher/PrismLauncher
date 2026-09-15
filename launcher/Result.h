@@ -50,9 +50,13 @@ using Result = std::expected<T, Error>;
         return std::unexpected{ _result.error() };   \
     }
 
-#define TRY_INTO(to, expected)                       \
-    if (const auto _result = (expected); !_result) { \
-        return std::unexpected{ _result.error() };   \
-    } else {                                         \
-        (to) = _result.value();                      \
-    }
+#define RESULT_H_CONCAT_(x, y) x##y
+
+#define RESULT_H_CONCAT(x, y) RESULT_H_CONCAT_(x, y)
+
+#define TRY_INTO_VAR_ RESULT_H_CONCAT(_try_tmp_, __LINE__)
+
+#define TRY_INTO(decl, expr)       \
+    auto&& TRY_INTO_VAR_ = (expr); \
+    TRY(TRY_INTO_VAR_)             \
+    decl = TRY_INTO_VAR_.value();

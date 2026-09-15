@@ -65,9 +65,8 @@ Result<Modpack> parseDirectory(const QString& path)
     if (!instanceFile.exists() || !instanceFile.isFile()) {
         return std::unexpected("Couldn't find ftb instance json");
     }
-    auto doc = Json::requireDocument(instanceFile.absoluteFilePath(), "FTB_APP instance JSON file");
-    TRY(doc)
-    const auto root = doc->object();
+    TRY_INTO(const auto& doc, Json::requireDocument(instanceFile.absoluteFilePath(), "FTB_APP instance JSON file"))
+    const auto root = doc.object();
     TRY_INTO(modpack.uuid, Json::requireString(root, "uuid", "uuid"))
     TRY_INTO(modpack.id, Json::requireInteger(root, "id", "id"))
     TRY_INTO(modpack.versionId, Json::requireInteger(root, "versionId", "versionId"))
@@ -77,10 +76,9 @@ Result<Modpack> parseDirectory(const QString& path)
     modpack.jvmArgs = root["jvmArgs"].toVariant();
     TRY_INTO(modpack.totalPlayTime, Json::requireInteger(root, "totalPlayTime", "totalPlayTime"))
 
-    auto modLoader = Json::requireString(root, "modLoader", "modLoader");
-    TRY(modLoader)
-    if (!modLoader->isEmpty()) {
-        const auto parts = modLoader->split('-', Qt::KeepEmptyParts);
+    TRY_INTO(const auto& modLoader, Json::requireString(root, "modLoader", "modLoader"))
+    if (!modLoader.isEmpty()) {
+        const auto parts = modLoader.split('-', Qt::KeepEmptyParts);
         if (parts.size() >= 2) {
             const auto loader = parts.first().toLower();
             modpack.loaderVersion = parts.at(1).trimmed();
@@ -119,19 +117,16 @@ Result<> legacyInstanceParsing(const QString& path, std::optional<ModPlatform::M
     if (!versionsFile.exists() || !versionsFile.isFile()) {
         return std::unexpected("Couldn't find ftb version json");
     }
-    auto targets = Json::requireDocument(versionsFile.absoluteFilePath(), "FTB_APP version JSON file").and_then([](const auto& v) {
-        const auto root = v.object();
-        return Json::requireArray(root, "targets", "targets");
-    });
-    TRY(targets)
+    TRY_INTO(const auto& targets,
+             Json::requireDocument(versionsFile.absoluteFilePath(), "FTB_APP version JSON file").and_then([](const auto& v) {
+                 const auto root = v.object();
+                 return Json::requireArray(root, "targets", "targets");
+             }))
 
-    for (auto target : targets.value()) {
-        auto obj = Json::requireObject(target, "target");
-        TRY(obj)
-        QString name;
-        QString version;
-        TRY_INTO(name, Json::requireString(obj.value(), "name", "name"))
-        TRY_INTO(version, Json::requireString(obj.value(), "version", "version"))
+    for (auto target : targets) {
+        TRY_INTO(const auto& obj, Json::requireObject(target, "target"))
+        TRY_INTO(const auto& name, Json::requireString(obj, "name", "name"))
+        TRY_INTO(const auto& version, Json::requireString(obj, "version", "version"))
         if (name == "neoforge") {
             *loaderType = ModPlatform::NeoForge;
             *loaderVersion = version;

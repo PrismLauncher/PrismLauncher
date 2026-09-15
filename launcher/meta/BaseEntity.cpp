@@ -107,10 +107,8 @@ void BaseEntityLoadTask::executeTask()
             if (m_entity->m_load_status == BaseEntity::LoadStatus::NotLoaded || m_entity->m_file_sha256.isEmpty()) {
                 setStatus(tr("Loading local file"));
 
-                auto res = FS::read(fname);
-                TRY(res)
+                TRY_INTO(fileData, FS::read(fname))
 
-                fileData = res.value();
                 m_entity->m_file_sha256 = Hashing::hash(fileData, Hashing::Algorithm::Sha256);
             }
 

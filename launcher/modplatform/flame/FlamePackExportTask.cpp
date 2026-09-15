@@ -214,12 +214,9 @@ void FlamePackExportTask::makeApiRequest()
             setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name));
             if (fileObj["isAvailable"].toBool()) {
                 auto parse = [&fileObj, this, &mod] -> Result<> {
-                    auto modid = Json::requireInteger(fileObj, "modId");
-                    TRY(modid)
-                    auto id = Json::requireInteger(fileObj, "id");
-                    TRY(id)
-                    resolvedFiles.insert(mod->path,
-                                         { .addonId = modid.value(), .version = id.value(), .enabled = mod->enabled, .isMod = mod->isMod });
+                    TRY_INTO(const auto& modid, Json::requireInteger(fileObj, "modId"))
+                    TRY_INTO(const auto& id, Json::requireInteger(fileObj, "id"))
+                    resolvedFiles.insert(mod->path, { .addonId = modid, .version = id, .enabled = mod->enabled, .isMod = mod->isMod });
                     return {};
                 };
                 if (auto res = parse(); !res) {
@@ -265,9 +262,8 @@ void FlamePackExportTask::getProjectsInfo()
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
         auto doc = Json::requireObject(*response).and_then([addonIds](const auto& v) -> Result<QJsonArray> {
             if (addonIds.size() == 1) {
-                auto obj = Json::requireObject(v, "data", "data");
-                TRY(obj)
-                return { { obj.value() } };
+                TRY_INTO(const auto& obj, Json::requireObject(v, "data", "data"))
+                return { { obj } };
             }
             return Json::requireArray(v, "data");
         });
@@ -280,16 +276,14 @@ void FlamePackExportTask::getProjectsInfo()
 
         for (auto entry : doc.value()) {
             auto parse = [&entry, this] -> Result<> {
-                auto entryObj = Json::requireObject(entry);
-                TRY(entryObj)
+                TRY_INTO(const auto& entryObj, Json::requireObject(entry))
 
-                auto name = Json::requireString(entryObj.value(), "name");
-                TRY(name)
-                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(*name));
+                TRY_INTO(const auto& name, Json::requireString(entryObj, "name"))
+                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(name));
 
                 ModPlatform::IndexedPack pack;
-                auto loadRes = FlameMod::loadIndexedPack(pack, entryObj.value());
-                TRY(loadRes)
+                TRY(FlameMod::loadIndexedPack(pack, entryObj))
+
                 for (const auto& key : resolvedFiles.keys()) {
                     auto val = resolvedFiles.value(key);
                     if (val.addonId == pack.addonId) {

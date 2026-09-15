@@ -41,9 +41,7 @@
 
 Result<> ApplicationMessage::parse(const QByteArray& input)
 {
-    auto doc = Json::requireObject(input, "ApplicationMessage");
-    TRY(doc)
-    const auto& root = doc.value();
+    TRY_INTO(const auto& root, Json::requireObject(input, "ApplicationMessage"))
 
     command = root.value("command").toString();
     args.clear();
