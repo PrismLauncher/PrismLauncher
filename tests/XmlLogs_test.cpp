@@ -21,6 +21,7 @@
 
 #include <QTest>
 
+#include <QDateTime>
 #include <QList>
 #include <QObject>
 #include <QRegularExpression>
@@ -48,6 +49,40 @@ class XmlLogParseTest : public QObject {
                      "[25Jul2026 14:10:58.723] [main/ERROR] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: error",
                      MessageLevel::Unknown),
                  MessageLevel::Error);
+    }
+
+    void parseEventTimestamp()
+    {
+        // Taken verbatim from testdata/TestLogs/vanilla-1.21.5.xml.log. These two events sit just under
+        // two seconds apart, as they do in the plain text capture of the same startup sequence - read as
+        // seconds they would be 33 minutes apart, in the year 57267.
+        const QStringList lines = {
+            R"(  <log4j:Event logger="com.mojang.datafixers.DataFixerBuilder" timestamp="1745005148589" level="INFO" thread="Datafixer Bootstrap">)",
+            R"(    <log4j:Message><![CDATA[263 Datafixer optimizations took 906 milliseconds]]></log4j:Message>)",
+            R"(  </log4j:Event>)",
+            R"(  <log4j:Event logger="com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService" timestamp="1745005150587" level="INFO" thread="Render thread">)",
+            R"(    <log4j:Message><![CDATA[Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]]]></log4j:Message>)",
+            R"(  </log4j:Event>)",
+        };
+
+        LogParser parser;
+        QList<QDateTime> timestamps;
+
+        for (const auto& line : lines) {
+            parser.appendLine(line);
+
+            for (const auto& item : parser.parseAvailable()) {
+                QVERIFY(std::holds_alternative<LogParser::LogEntry>(item));
+                timestamps.append(std::get<LogParser::LogEntry>(item).timestamp);
+            }
+        }
+
+        QCOMPARE(timestamps.length(), 2);
+        // Comparing instants rather than rendered clock times keeps this independent of the time zone.
+        QCOMPARE(timestamps[0], QDateTime::fromMSecsSinceEpoch(1745005148589));
+        QCOMPARE(timestamps[1], QDateTime::fromMSecsSinceEpoch(1745005150587));
+        QCOMPARE(timestamps[0].toUTC().date(), QDate(2025, 4, 18));
+        QCOMPARE(timestamps[0].msecsTo(timestamps[1]), 1998);
     }
 
     void parseXml_data()

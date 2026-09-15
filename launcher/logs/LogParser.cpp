@@ -57,7 +57,8 @@ std::optional<LogParser::LogEntry> LogParser::parseAttributes()
                 m_parser.raiseError("log4j:Event Missing required attribute: timestamp");
                 return {};
             }
-            entry.timestamp = QDateTime::fromSecsSinceEpoch(value.trimmed().toLongLong());
+            // log4j's XMLLayout reports the event time in milliseconds
+            entry.timestamp = QDateTime::fromMSecsSinceEpoch(value.trimmed().toLongLong());
         } else if (name == "level"_L1) {
             entry.levelText = value.trimmed().toString();
             entry.level = MessageLevel::fromName(entry.levelText);
