@@ -46,7 +46,7 @@ in
 
 stdenv.mkDerivation {
   pname = "prismlauncher-unwrapped";
-  version = "10.0-unstable-${date}";
+  version = "12.0-unstable-${date}";
 
   src = lib.fileset.toSource {
     root = ../.;
@@ -68,6 +68,7 @@ stdenv.mkDerivation {
     ln -s ${libnbtplusplus} source/libraries/libnbtplusplus
   '';
 
+  # Ensure that instance shortcuts point to our final wrapper, rather than this unwrapped version
   postPatch = ''
     substituteInPlace launcher/minecraft/ShortcutUtils.cpp \
       --replace-fail 'QApplication::applicationFilePath()' 'QProcessEnvironment::systemEnvironment().value("NIX_LAUNCHER_WRAPPER", "${placeholder "out"}/bin/prismlauncher")'
@@ -76,7 +77,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [
     cmake
     ninja
-    extra-cmake-modules
+    kdePackages.extra-cmake-modules
     pkg-config
     jdk17
     stripJavaArchivesHook
