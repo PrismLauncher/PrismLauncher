@@ -186,6 +186,17 @@ bool ArchiveReader::File::writeFile(archive* out, const QString& targetFileName,
         entry = entryClone.get();
         auto nameUtf8 = targetFileName.toUtf8();
         archive_entry_set_pathname_utf8(entry, nameUtf8.constData());
+
+        // A hard link target names another entry of the archive, so it has to be rebased along with the
+        // pathname; left alone, libarchive would resolve it against the working directory instead of the
+        // extraction root. This also makes the check below inspect the target that is actually written.
+        if (root.has_value()) {
+            auto hardLink = decodeLibArchivePath(entry, archive_entry_hardlink_utf8, archive_entry_hardlink);
+            if (!hardLink.isEmpty() && !QDir::isAbsolutePath(hardLink)) {
+                auto targetUtf8 = QDir::cleanPath(root->filePath(hardLink)).toUtf8();
+                archive_entry_set_hardlink_utf8(entry, targetUtf8.constData());
+            }
+        }
     }
     if (root.has_value() && willEscapeRoot(root.value(), entry)) {
         qCritical() << "Failed to write header to entry:" << filename() << "-" << "file outside root";
