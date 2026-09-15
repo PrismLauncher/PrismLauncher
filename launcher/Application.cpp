@@ -260,17 +260,11 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext& context, const QSt
     fflush(stderr);
 }
 
-[[noreturn]] static void unrecoverable(const QString& msg)
-{
-    qCritical().noquote() << msg;
-    exit(1);
-}
-
 std::tuple<QDateTime, QString, QString, QString, QString> readLockFile(const QString& path)
 {
     auto res = FS::read(path);
     if (!res) {
-        unrecoverable("Failed to read lock file: " + res.error());
+        qFatal("Failed to read lock file: %s", res.error().toUtf8().constData());
     }
     auto contents = QString(res.value());
     auto lines = contents.split('\n');
@@ -1116,7 +1110,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             msgBox.setModal(true);
             auto maybeRes = FS::read(updateLogPath);
             if (!maybeRes) {
-                unrecoverable("Failed to read update log: " + maybeRes.error());
+                qFatal("Failed to read update log: %s", maybeRes.error().toUtf8().constData());
             }
             msgBox.setDetailedText(maybeRes.value());
             msgBox.setMinimumWidth(460);
@@ -1152,7 +1146,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             msgBox.setModal(true);
             auto maybeRes = FS::read(updateLogPath);
             if (!maybeRes) {
-                unrecoverable("Failed to read update log: " + maybeRes.error());
+                qFatal("Failed to read update log: %s", maybeRes.error().toUtf8().constData());
             }
             msgBox.setDetailedText(maybeRes.value());
             msgBox.setMinimumWidth(460);
@@ -1187,7 +1181,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             msgBox->setDefaultButton(QMessageBox::Ok);
             auto res = FS::read(updateLogPath);
             if (!res) {
-                unrecoverable("Failed to read update log: " + res.error());
+                qFatal("Failed to read update log: %s", res.error().toUtf8().constData());
             }
             msgBox->setDetailedText(res.value());
             msgBox->setAttribute(Qt::WA_DeleteOnClose);

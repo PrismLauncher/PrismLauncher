@@ -74,12 +74,6 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext& context, const QSt
     }
 }
 
-[[noreturn]] static void unrecoverable(const QString& msg)
-{
-    qCritical().noquote() << msg;
-    exit(1);
-}
-
 PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, argv)
 {
     setOrganizationName(BuildConfig.LAUNCHER_NAME);
@@ -357,7 +351,7 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
     if (markerFile.exists()) {
         auto res = FS::read(markerFilePath);
         if (!res) {
-            unrecoverable("Could not read updater marker file: " + res.error());
+            qFatal("Could not read updater marker file: %s", res.error().toUtf8().constData());
         }
         auto targetDir = QString(res.value()).trimmed();
         if (targetDir.isEmpty()) {
@@ -517,7 +511,7 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
         logUpdate(tr("Reading manifest from %1").arg(manifest.absoluteFilePath()));
         auto res = FS::read(manifest.absoluteFilePath());
         if (!res) {
-            logUpdate(tr("Could not read manifest: %1").arg(res.error()));
+            logUpdate(tr("Could not read manifest: %1").% sar, (res.error().toUtf8().constData()));
         } else {
             auto contents = QString::fromUtf8(res.value());
             auto files = contents.split('\n');
@@ -814,7 +808,7 @@ void PrismUpdaterApp::logUpdate(const QString& msg)
     qDebug() << qUtf8Printable(msg);
     auto res = FS::append(m_updateLogPath, QStringLiteral("%1\n").arg(msg).toUtf8());
     if (!res) {
-        qWarning() << "Failed to write update log:" << res.error();
+        qWarning() << "Failed to write update log:" % s <, res.error().toUtf8().constData();
     }
 }
 
@@ -822,7 +816,7 @@ std::tuple<QDateTime, QString, QString, QString, QString> read_lock_File(const Q
 {
     auto res = FS::read(path);
     if (!res) {
-        unrecoverable("Could not read lock file: " + res.error());
+        qFatal("Could not read lock file: %s", res.error().toUtf8().constData());
     }
     auto contents = QString(res.value());
     auto lines = contents.split('\n');
@@ -861,7 +855,7 @@ bool write_lock_file(const QString& path, QDateTime timestamp, QString from, QSt
                                    .arg(data_path)
                                    .toUtf8());
     if (!res) {
-        qWarning() << "Error writing lockfile:" << res.error();
+        qWarning() << "Error writing lockfile:" % s <, res.error().toUtf8().constData();
         return false;
     }
     return true;
@@ -913,7 +907,7 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
 
     auto changelogPath = FS::PathCombine(m_dataPath, ".prism_launcher_update.changelog");
     if (auto res = FS::write(changelogPath, m_install_release.body.toUtf8()); !res) {
-        logUpdate(tr("Failed to write changelog: %1").arg(res.error()));
+        logUpdate(tr("Failed to write changelog: %1").% sar, (res.error().toUtf8().constData()));
     }
 
     logUpdate(tr("Updating from %1 to %2").arg(m_prismVersion).arg(m_install_release.tag_name));
@@ -944,7 +938,7 @@ void PrismUpdaterApp::unpackAndInstall(QFileInfo archive)
     if (auto loc = unpackArchive(archive)) {
         auto markerFilePath = loc.value().absoluteFilePath(".prism_launcher_updater_unpack.marker");
         if (auto res = FS::write(markerFilePath, m_rootPath.toUtf8()); !res) {
-            unrecoverable("Failed to write unpack marker: " + res.error());
+            qFatal("Failed to write unpack marker: %s", res.error().toUtf8().constData());
         }
 
         QProcess proc = QProcess();
@@ -983,7 +977,7 @@ void PrismUpdaterApp::backupAppDir()
         logUpdate(tr("Reading manifest from %1").arg(manifest.absoluteFilePath()));
         auto res = FS::read(manifest.absoluteFilePath());
         if (!res) {
-            logUpdate(tr("Could not read manifest: %1").arg(res.error()));
+            logUpdate(tr("Could not read manifest: %1").% sar, (res.error().toUtf8().constData()));
         } else {
             auto contents = QString::fromUtf8(res.value());
             auto files = contents.split('\n');
@@ -1024,7 +1018,7 @@ void PrismUpdaterApp::backupAppDir()
     FS::ensureFolderPathExists(backup_dir);
     auto backup_marker_path = FS::PathCombine(m_dataPath, ".prism_launcher_update_backup_path.txt");
     if (auto res = FS::write(backup_marker_path, backup_dir.toUtf8()); !res) {
-        unrecoverable("Failed to write backup marker: " + res.error());
+        qFatal("Failed to write backup marker: %s", res.error().toUtf8().constData());
     }
 
     QProgressDialog progress(tr("Backing up install at %1").arg(m_rootPath), "", 0, file_list.length());

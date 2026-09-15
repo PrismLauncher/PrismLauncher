@@ -197,7 +197,7 @@ bool processMCMeta(DataPack* pack, QByteArray&& rawData)
 
     auto packObjRsp = Json::requireObject(jsonDoc.object(), "pack", {});
     if (!packObjRsp) {
-        qWarning() << "Json Exception:" << packObjRsp.error();
+        qWarning() << "Could not parse data pack:" << packObjRsp.error();
         return false;
     }
 

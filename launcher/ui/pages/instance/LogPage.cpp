@@ -245,13 +245,12 @@ void LogPage::on_btnPaste_clicked()
     m_model->append(MessageLevel::Launcher,
                     QString("Log upload triggered at: %1").arg(QDateTime::currentDateTime().toString(Qt::RFC2822Date)));
     auto url = GuiUtil::uploadPaste(tr("Minecraft Log"), m_model->toPlainText(), this);
-    if (GuiUtil::isUploadCanceled(url)) {
-        return;
-    }
-    if (!url.has_value()) {
+    if (!url) {
         m_model->append(MessageLevel::Error, QString("Log upload failed: %1").arg(url.error()));
+    } else if (!url->has_value()) {
+        m_model->append(MessageLevel::Error, QString("Log upload canceled"));
     } else {
-        m_model->append(MessageLevel::Launcher, QString("Log uploaded to: %1").arg(url.value()));
+        m_model->append(MessageLevel::Launcher, QString("Log uploaded to: %1").arg(url->value()));
     }
 }
 

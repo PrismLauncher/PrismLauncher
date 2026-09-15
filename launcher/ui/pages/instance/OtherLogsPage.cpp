@@ -356,7 +356,7 @@ void OtherLogsPage::on_btnPaste_clicked()
 {
     QString name = m_currentFile.isEmpty() ? displayName() : m_currentFile;
     auto res = GuiUtil::uploadPaste(name, ui->text->toPlainText(), this);
-    if (!res && !GuiUtil::isUploadCanceled(res)) {
+    if (!res) {
         qWarning() << "Log upload failed:" << res.error();
     }
 }

@@ -82,19 +82,14 @@ QString truncateLogForMclogs(const QString& logContent)
 }
 }  // namespace
 
-bool GuiUtil::isUploadCanceled(const Result<QString>& result)
-{
-    return !result.has_value() && result.error().isEmpty();
-}
-
-Result<QString> GuiUtil::uploadPaste(const QString& name, const QFileInfo& filePath, QWidget* parentWidget)
+Result<std::optional<QString>> GuiUtil::uploadPaste(const QString& name, const QFileInfo& filePath, QWidget* parentWidget)
 {
     auto res = FS::read(filePath.absoluteFilePath());
     TRY(res)
     return uploadPaste(name, res.value(), parentWidget);
 };
 
-Result<QString> GuiUtil::uploadPaste(const QString& name, const QString& data, QWidget* parentWidget)
+Result<std::optional<QString>> GuiUtil::uploadPaste(const QString& name, const QString& data, QWidget* parentWidget)
 {
     ProgressDialog dialog(parentWidget);
     auto pasteType = static_cast<PasteUpload::Type>(APPLICATION->settings()->get("PastebinType").toInt());
@@ -119,7 +114,7 @@ Result<QString> GuiUtil::uploadPaste(const QString& name, const QString& data, Q
                         ->exec();
 
     if (response != QMessageBox::Yes) {
-        return std::unexpected(QString{});
+        return {};
     }
 
     if (pasteType == PasteUpload::Type::Mclogs && data.count("\n") > g_MaxMclogsLines) {
@@ -138,7 +133,7 @@ Result<QString> GuiUtil::uploadPaste(const QString& name, const QString& data, Q
                 ->exec();
 
         if (truncateResponse == QMessageBox::Cancel) {
-            return std::unexpected(QString{});
+            return {};
         }
         shouldTruncate = truncateResponse == QMessageBox::Yes;
     }
@@ -171,7 +166,7 @@ Result<QString> GuiUtil::uploadPaste(const QString& name, const QString& data, Q
             ->exec();
         return *pasteLink;
     }
-    return std::unexpected(QString{});
+    return {};
 }
 
 void GuiUtil::setClipboardText(QString text)

@@ -175,6 +175,7 @@ Task::Ptr ResourceAPI::getProjectInfo(const ProjectInfoArgs& args,
         };
         if (auto res = parse(); !res) {
             qWarning() << "Error while reading" << debugName() << "resource info:" << res.error();
+            callbacks.onFail(res.error(), -1);
             return;
         }
 

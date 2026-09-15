@@ -7,9 +7,8 @@
 #include "Result.h"
 
 namespace GuiUtil {
-bool isUploadCanceled(const Result<QString>& result);
-Result<QString> uploadPaste(const QString& name, const QFileInfo& filePath, QWidget* parentWidget);
-Result<QString> uploadPaste(const QString& name, const QString& data, QWidget* parentWidget);
+Result<std::optional<QString>> uploadPaste(const QString& name, const QFileInfo& filePath, QWidget* parentWidget);
+Result<std::optional<QString>> uploadPaste(const QString& name, const QString& data, QWidget* parentWidget);
 void setClipboardText(QString text);
 QStringList browseForFiles(const QString& context,
                            const QString& caption,

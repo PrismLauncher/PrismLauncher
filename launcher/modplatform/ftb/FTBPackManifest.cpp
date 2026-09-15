@@ -83,9 +83,7 @@ static Result<> loadVersionInfo(FTB::VersionInfo& v, const QJsonObject& obj)
     TRY_INTO(v.name, Json::requireString(obj, "name"))
     TRY_INTO(v.type, Json::requireString(obj, "type"))
     TRY_INTO(v.updated, Json::requireInteger(obj, "updated"))
-    auto specs = Json::requireObject(obj, "specs");
-    TRY(specs)
-    TRY(loadSpecs(v.specs, specs.value()))
+    TRY(Json::requireObject(obj, "specs").and_then([&v](const auto& val) { return loadSpecs(v.specs, val); }))
     return {};
 }
 
