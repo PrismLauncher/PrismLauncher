@@ -5,7 +5,6 @@
 
 #include "Application.h"
 #include "minecraft/MinecraftInstance.h"
-#include "settings/Setting.h"
 #include "ui/pages/BasePage.h"
 
 class ResourceFolderModel;
@@ -73,6 +72,4 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
 
     QString m_fileSelectionFilter;
     QString m_viewFilter;
-
-    std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
 };

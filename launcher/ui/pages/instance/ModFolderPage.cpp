@@ -53,6 +53,7 @@
 #include <memory>
 
 #include "Application.h"
+#include "settings/Setting.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"

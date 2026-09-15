@@ -68,6 +68,7 @@
 
 #include "Application.h"
 #include "DataPackPage.h"
+#include "settings/Setting.h"
 
 namespace {
 class WorldListProxyModel : public QSortFilterProxyModel {
@@ -144,19 +145,12 @@ void WorldListPage::openedImpl()
         m_ui->toolBar->removeAction(m_ui->actionJoin);
     }
 
-    const auto settingName = QString("WideBarVisibility_%1").arg(id());
-    m_wideBarSetting = APPLICATION->settings()->getOrRegisterSetting(settingName);
-
-    m_ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wideBarSetting->get().toString().toUtf8()));
-
     populateWorldToolsMenu();
 }
 
 void WorldListPage::closedImpl()
 {
     m_worlds->stopWatching();
-
-    m_wideBarSetting->set(QString::fromUtf8(m_ui->toolBar->getVisibilityState().toBase64()));
 }
 
 WorldListPage::~WorldListPage()

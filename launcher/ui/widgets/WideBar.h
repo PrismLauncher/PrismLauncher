@@ -28,15 +28,6 @@ class WideBar : public QToolBar {
     void insertWidgetBefore(QAction* before, QWidget* widget);
 
     QMenu* createContextMenu(QWidget* parent = nullptr, const QString& title = QString());
-    void showVisibilityMenu(const QPoint&);
-
-    void addContextMenuAction(QAction* action);
-
-    // Ideally we would use a QBitArray for this, but it doesn't support string conversion,
-    // so using it in settings is very messy.
-
-    QByteArray getVisibilityState() const;
-    void setVisibilityState(QByteArray&&);
 
     void removeAction(QAction* action);
 
@@ -49,14 +40,8 @@ class WideBar : public QToolBar {
 
     auto getMatching(QAction* act) -> QList<BarEntry>::iterator;
 
-    /** Used to distinguish between versions of the WideBar with different actions */
-    QByteArray getHash() const;
-    bool checkHash(QByteArray const&) const;
-
    private:
     QList<BarEntry> m_entries;
-
-    QList<QAction*> m_context_menu_actions;
 
     bool m_use_default_action = false;
 

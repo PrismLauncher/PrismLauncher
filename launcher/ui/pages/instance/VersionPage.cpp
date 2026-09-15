@@ -121,18 +121,6 @@ void VersionPage::retranslate()
     ui->retranslateUi(this);
 }
 
-void VersionPage::openedImpl()
-{
-    const auto setting_name = QString("WideBarVisibility_%1").arg(id());
-    m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
-
-    ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
-}
-void VersionPage::closedImpl()
-{
-    m_wide_bar_setting->set(QString::fromUtf8(ui->toolBar->getVisibilityState().toBase64()));
-}
-
 QMenu* VersionPage::createPopupMenu()
 {
     QMenu* filteredMenu = QMainWindow::createPopupMenu();
