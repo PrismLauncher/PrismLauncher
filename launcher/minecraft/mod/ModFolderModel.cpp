@@ -76,6 +76,8 @@ ModFolderModel::ModFolderModel(const QDir& dir, MinecraftInstance* instance, boo
                             QHeaderView::Interactive, QHeaderView::Interactive };
     m_columnsHideable = { false, true, false, true, true, true, true, true, true, true, true, true, true, true };
 
+    m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files);
+
     connect(this, &ModFolderModel::parseFinished, this, &ModFolderModel::onParseFinished);
 }
 
@@ -95,8 +97,6 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
             switch (column) {
                 case VersionColumn: {
                     switch (at(row).type()) {
-                        case ResourceType::FOLDER:
-                            return tr("Folder");
                         case ResourceType::SINGLEFILE:
                             return tr("File");
                         default:
