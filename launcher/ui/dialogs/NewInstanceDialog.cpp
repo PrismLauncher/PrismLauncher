@@ -131,7 +131,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 #ifdef Q_OS_WIN
         // iterate over files in template directory to only show symlink disclamier when symlinks are actually present
         bool containsSymlink = false;
-        auto flags =  QDirListing::IteratorFlag::Default | QDirListing::IteratorFlag::Recursive | QDirListing::IteratorFlag::IncludeHidden;
+        auto flags = QDirListing::IteratorFlag::Recursive | QDirListing::IteratorFlag::IncludeHidden;
         for (const auto& entry : QDirListing(templateDir, flags)) {
             auto path = entry.absoluteFilePath();
             if (std::filesystem::is_symlink(StringUtils::toStdString(path))) {
