@@ -786,7 +786,7 @@
     <iconset theme="viewfolder"/>
    </property>
    <property name="text">
-    <string>&amp;Template</string>
+    <string>Instance &amp;Template</string>
    </property>
    <property name="toolTip">
     <string>Open the template folder in a file browser.</string>
