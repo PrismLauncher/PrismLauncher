@@ -57,6 +57,23 @@
 
 namespace ResourceDownload {
 
+namespace {
+QString versionText(const ModPlatform::IndexedVersion& version, const QVariant& installedVersion)
+{
+    auto text = version.version;
+    if (version.versionType.isValid()) {
+        text += QString(" [%1]").arg(version.versionType.toString());
+    }
+    if (version.fileId == installedVersion) {
+        text += ResourcePage::tr(" [installed]", "Mod version select");
+    }
+    if (version.isCurrentlySelected) {
+        text += ResourcePage::tr(" [selected]", "Mod version select");
+    }
+    return text;
+}
+}  // namespace
+
 ResourcePage::ResourcePage(ResourceDownloadDialog* parent,
                            BaseInstance& baseInstance,
                            ResourceDescriptor desc,
@@ -75,7 +92,6 @@ ResourcePage::ResourcePage(ResourceDownloadDialog* parent,
 
     m_ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_ui->versionSelectionBox->view()->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    m_ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
     m_searchTimer.setTimerType(Qt::TimerType::CoarseTimer);
     m_searchTimer.setSingleShot(true);
@@ -123,12 +139,18 @@ void ResourcePage::openedImpl()
     m_ui->searchEdit->setPlaceholderText(tr("Search for %1...").arg(resourcesString()));
     m_ui->resourceSelectionButton->setText(tr("Select %1 for download").arg(resourceString()));
 
-    updateSelectionButton();
-    if (!m_suppressInitialSearch) {
+    auto currentPack = getCurrentPack();
+    bool hasSelectedPack = currentPack && currentPack->versionsLoaded;
+
+    if (m_ui->packView->currentIndex().isValid()) {
+        versionListUpdated(m_ui->packView->currentIndex());
+    }
+    if (!m_suppressInitialSearch && !hasSelectedPack) {
         triggerSearch();
     } else {
         m_suppressInitialSearch = false;
     }
+    updateSelectionButton();
     m_ui->searchEdit->setFocus();
 }
 
@@ -191,7 +213,7 @@ void ResourcePage::addSortings()
     std::ranges::sort(sorts, [](const auto& l, const auto& r) { return l.index < r.index; });
 
     for (auto&& sorting : sorts) {
-        m_ui->sortByBox->addItem(sorting.readable_name, QVariant(sorting.index));
+        m_ui->sortByBox->addItem(sorting.readableName, QVariant(sorting.index));
     }
 }
 
@@ -284,12 +306,18 @@ void ResourcePage::updateUi(const QModelIndex& index)
     m_ui->packDescription->setHtml(StringUtils::htmlListPatch(
         text + (currentPack->extraData.body.isEmpty() ? currentPack->description : markdownToHTML(currentPack->extraData.body))));
     m_ui->packDescription->flush();
+
+    refreshVersionComboBox();
+    if (currentPack) {
+        restoreSelectedVersion(currentPack);
+    }
 }
 
 void ResourcePage::updateSelectionButton()
 {
     if (!isOpened || m_selectedVersionIndex < 0) {
         m_ui->resourceSelectionButton->setEnabled(false);
+        m_ui->resourceSelectionButton->setText(tr("Cannot select invalid version :("));
         return;
     }
 
@@ -297,6 +325,7 @@ void ResourcePage::updateSelectionButton()
     if (auto currentPack = getCurrentPack(); currentPack) {
         if (currentPack->versionsLoaded && currentPack->versions.empty()) {
             m_ui->resourceSelectionButton->setEnabled(false);
+            m_ui->resourceSelectionButton->setText(tr("Cannot select invalid version :("));
             qWarning() << tr("No version available for the selected pack");
         } else if (!currentPack->isVersionSelected(m_selectedVersionIndex)) {
             m_ui->resourceSelectionButton->setText(tr("Select %1 for download").arg(resourceString()));
@@ -305,6 +334,56 @@ void ResourcePage::updateSelectionButton()
         }
     } else {
         qWarning() << "Tried to update the selected button but there is not a pack selected";
+        m_ui->resourceSelectionButton->setEnabled(false);
+        m_ui->resourceSelectionButton->setText(tr("Cannot select invalid version :("));
+    }
+}
+
+void ResourcePage::refreshVersionComboBox()
+{
+    if (!isOpened) {
+        return;
+    }
+
+    auto currentPack = getCurrentPack();
+    if (!currentPack || !currentPack->versionsLoaded) {
+        return;
+    }
+
+    auto installedVersion = m_model->getInstalledPackVersion(currentPack);
+
+    for (int i = 0; i < m_ui->versionSelectionBox->count(); i++) {
+        int versionIndex = m_ui->versionSelectionBox->itemData(i).toInt();
+        if (versionIndex < 0 || versionIndex >= currentPack->versions.size()) {
+            continue;
+        }
+
+        auto& version = currentPack->versions[versionIndex];
+
+        m_ui->versionSelectionBox->setItemText(i, versionText(version, installedVersion));
+    }
+}
+
+void ResourcePage::restoreSelectedVersion(const ModPlatform::IndexedPack::Ptr& currentPack)
+{
+    int selectedVersionIndex = -1;
+    for (int i = 0; i < currentPack->versions.size(); i++) {
+        if (currentPack->versions[i].isCurrentlySelected) {
+            selectedVersionIndex = i;
+            break;
+        }
+    }
+
+    if (selectedVersionIndex >= 0) {
+        for (int i = 0; i < m_ui->versionSelectionBox->count(); i++) {
+            if (m_ui->versionSelectionBox->itemData(i).toInt() == selectedVersionIndex) {
+                m_ui->versionSelectionBox->blockSignals(true);
+                m_ui->versionSelectionBox->setCurrentIndex(i);
+                m_selectedVersionIndex = selectedVersionIndex;
+                m_ui->versionSelectionBox->blockSignals(false);
+                break;
+            }
+        }
     }
 }
 
@@ -326,21 +405,17 @@ void ResourcePage::versionListUpdated(const QModelIndex& index)
                     continue;
                 }
 
-                auto versionText = version.version;
-                if (version.version_type.isValid()) {
-                    versionText += QString(" [%1]").arg(version.version_type.toString());
-                }
-                if (version.fileId == installedVersion) {
-                    versionText += tr(" [installed]", "Mod version select");
-                }
-
-                m_ui->versionSelectionBox->addItem(versionText, QVariant(i));
+                m_ui->versionSelectionBox->addItem(versionText(version, installedVersion), QVariant(i));
             }
+
+            restoreSelectedVersion(currentPack);
         }
         if (m_ui->versionSelectionBox->count() == 0) {
             m_ui->versionSelectionBox->addItem(tr("No valid version found."), QVariant(-1));
             m_ui->resourceSelectionButton->setText(tr("Cannot select invalid version :("));
         }
+
+        m_selectedVersionIndex = m_ui->versionSelectionBox->currentData().toInt();
 
         if (m_enableQueue.contains(index.row())) {
             m_enableQueue.remove(index.row());
@@ -391,12 +466,22 @@ void ResourcePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
 void ResourcePage::onVersionSelectionChanged(int index)
 {
     m_selectedVersionIndex = m_ui->versionSelectionBox->itemData(index).toInt();
+
+    if (auto currentPack = getCurrentPack(); currentPack && currentPack->isAnyVersionSelected()) {
+        if (m_selectedVersionIndex >= 0 && m_selectedVersionIndex < currentPack->versions.size()) {
+            auto& newVersion = currentPack->versions[m_selectedVersionIndex];
+            removeResourceFromDialog(currentPack->name);
+            addResourceToDialog(currentPack, newVersion);
+        }
+    }
+
     updateSelectionButton();
+    refreshVersionComboBox();
 }
 
 void ResourcePage::addResourceToDialog(ModPlatform::IndexedPack::Ptr pack, ModPlatform::IndexedVersion& version)
 {
-    m_parentDialog->addResource(std::move(pack), version);
+    m_parentDialog->addResource(pack, version);
 }
 
 void ResourcePage::removeResourceFromDialog(const QString& packName)
@@ -431,13 +516,13 @@ void ResourcePage::onResourceSelected()
     }
 
     auto currentPack = getCurrentPack();
-    if (!currentPack || !currentPack->versionsLoaded || currentPack->versions.size() < m_selectedVersionIndex) {
+    if (!currentPack || !currentPack->versionsLoaded || currentPack->versions.size() <= m_selectedVersionIndex) {
         return;
     }
 
     auto& version = currentPack->versions[m_selectedVersionIndex];
     Q_ASSERT(!version.downloadUrl.isNull());
-    if (version.is_currently_selected) {
+    if (version.isCurrentlySelected) {
         removeResourceFromDialog(currentPack->name);
     } else {
         addResourceToDialog(currentPack, version);
@@ -448,6 +533,7 @@ void ResourcePage::onResourceSelected()
     Q_ASSERT(set);
 
     updateSelectionButton();
+    refreshVersionComboBox();
 
     /* Force redraw on the resource list when the selection changes */
     m_ui->packView->repaint();
@@ -455,6 +541,9 @@ void ResourcePage::onResourceSelected()
 
 void ResourcePage::onResourceToggle(const QModelIndex& index)
 {
+    if (!index.isValid()) {
+        return;
+    }
     const bool isSelected = index == m_ui->packView->currentIndex();
     auto pack = m_model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
 
@@ -480,6 +569,7 @@ void ResourcePage::onResourceToggle(const QModelIndex& index)
 
         if (isSelected) {
             updateSelectionButton();
+            refreshVersionComboBox();
         }
 
         // force update
@@ -562,7 +652,7 @@ void ResourcePage::openUrl(QUrl url)
             newPage->triggerSearch();
 
             if (model->hasActiveSearchJob()) {
-                connect(model->activeSearchJob().get(), &Task::finished, jump);
+                connect(model->activeSearchJob().get(), &Task::finished, newPage, jump);
             } else {
                 jump();
             }
@@ -621,7 +711,7 @@ void ResourcePage::openProject(const QVariant& projectID)
     triggerSearch();
 
     if (m_model->hasActiveSearchJob()) {
-        connect(m_model->activeSearchJob().get(), &Task::finished, jump);
+        connect(m_model->activeSearchJob().get(), &Task::finished, this, jump);
     } else {
         jump();
     }

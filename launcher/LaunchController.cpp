@@ -48,6 +48,7 @@
 #include "ui/dialogs/ProfileSetupDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
 
+#include <QCheckBox>
 #include <QInputDialog>
 #include <QList>
 #include <QPushButton>
@@ -432,7 +433,7 @@ void LaunchController::readyForLaunch()
     }
     BaseProfiler* profilerInstance = m_profiler->createProfiler(m_launcher->instance(), this);
 
-    connect(profilerInstance, &BaseProfiler::readyToLaunch, [this](const QString& message) {
+    connect(profilerInstance, &BaseProfiler::readyToLaunch, this, [this](const QString& message) {
         QMessageBox msg(m_parentWidget);
         msg.setText(tr("The game launch is delayed until you press the "
                        "button. This is the right time to setup the profiler, as the "
@@ -440,11 +441,17 @@ void LaunchController::readyForLaunch()
                         .arg(message));
         msg.setWindowTitle(tr("Waiting."));
         msg.setIcon(QMessageBox::Information);
+        msg.setCheckBox(new QCheckBox(tr("Disable profiler on next launch"), &msg));
         msg.addButton(tr("&Launch"), QMessageBox::AcceptRole);
         msg.exec();
+
+        if (msg.checkBox()->isChecked()) {
+            m_launcher->instance()->settings()->set("Profiler", "");
+        }
+
         m_launcher->proceed();
     });
-    connect(profilerInstance, &BaseProfiler::abortLaunch, [this](const QString& message) {
+    connect(profilerInstance, &BaseProfiler::abortLaunch, this, [this](const QString& message) {
         QMessageBox msg;
         msg.setText(tr("Couldn't start the profiler: %1").arg(message));
         msg.setWindowTitle(tr("Error"));

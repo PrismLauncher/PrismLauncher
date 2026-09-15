@@ -20,11 +20,9 @@
 
 #include <QtConcurrent>
 
-#include "BaseInstance.h"
 #include "FileSystem.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "modplatform/ResourceAPI.h"
 #include "modplatform/import_ftb/PackHelpers.h"
 #include "settings/INISettingsObject.h"
 
@@ -51,19 +49,20 @@ void PackInstallTask::copySettings()
     progress(2, 2);
 
     QString instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    MinecraftInstance instance(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
+    m_instance =
+        std::make_unique<MinecraftInstance>(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
 
     {
-        SettingsObject::Lock lock(instance.settings());
-        instance.settings()->set("InstanceType", "OneSix");
-        instance.settings()->set("totalTimePlayed", m_pack.totalPlayTime / 1000);
+        SettingsObject::Lock const lock(m_instance->settings());
+        m_instance->settings()->set("InstanceType", "OneSix");
+        m_instance->settings()->set("totalTimePlayed", m_pack.totalPlayTime / 1000);
 
         if (m_pack.jvmArgs.isValid() && !m_pack.jvmArgs.toString().isEmpty()) {
-            instance.settings()->set("OverrideJavaArgs", true);
-            instance.settings()->set("JvmArgs", m_pack.jvmArgs.toString());
+            m_instance->settings()->set("OverrideJavaArgs", true);
+            m_instance->settings()->set("JvmArgs", m_pack.jvmArgs.toString());
         }
 
-        auto* components = instance.getPackProfile();
+        auto* components = m_instance->getPackProfile();
         components->buildingFromScratch();
         components->setComponentVersion("net.minecraft", m_pack.mcVersion, true);
 
@@ -92,13 +91,13 @@ void PackInstallTask::copySettings()
         }
         components->saveNow();
 
-        instance.setName(name());
+        m_instance->setName(name());
         if (m_instIcon == "default") {
             m_instIcon = "ftb_logo";
         }
-        instance.setIconKey(m_instIcon);
+        m_instance->setIconKey(m_instIcon);
     }
-    emitSucceeded();
+    downloadFiles(m_instance.get());
 }
 
 }  // namespace FTBImportAPP

@@ -3,14 +3,14 @@
  <class>NewInstanceDialog</class>
  <widget class="QDialog" name="NewInstanceDialog">
   <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
+   <enum>Qt::WindowModality::ApplicationModal</enum>
   </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>730</width>
-    <height>127</height>
+    <height>157</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,6 +26,19 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout_2">
+     <item row="2" column="1">
+      <widget class="QLabel" name="instDirLabel">
+       <property name="text">
+        <string>&amp;Location:</string>
+       </property>
+       <property name="buddy">
+        <cstring>instDirBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QComboBox" name="instDirBox"/>
+     </item>
      <item row="1" column="2">
       <widget class="QComboBox" name="groupBox">
        <property name="editable">
@@ -60,7 +73,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="0" rowspan="2">
+     <item row="0" column="0" rowspan="3">
       <widget class="QToolButton" name="iconButton">
        <property name="iconSize">
         <size>
@@ -75,7 +88,7 @@
    <item>
     <widget class="Line" name="line">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -85,6 +98,7 @@
   <tabstop>iconButton</tabstop>
   <tabstop>instNameTextBox</tabstop>
   <tabstop>groupBox</tabstop>
+  <tabstop>instDirBox</tabstop>
  </tabstops>
  <resources/>
  <connections/>

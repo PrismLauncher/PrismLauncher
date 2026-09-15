@@ -25,10 +25,15 @@
 #include <utility>
 
 #include "Application.h"
+#include "BaseInstance.h"
 #include "ResourceDownloadTask.h"
 
 #include "minecraft/PackProfile.h"
+#include "minecraft/mod/DataPackFolderModel.h"
 #include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/mod/ResourcePackFolderModel.h"
+#include "minecraft/mod/ShaderPackFolderModel.h"
+#include "minecraft/mod/TexturePackFolderModel.h"
 
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
@@ -49,14 +54,14 @@ namespace ResourceDownload {
 
 ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent,
                                                ResourceFolderModel* baseModel,
-                                               BaseInstance* instance,
+                                               MinecraftInstance* instance,
                                                QString resourcesString,
                                                QString geometrySaveKey,
                                                bool suppressInitialSearch)
     : QDialog(parent)
-    , m_base_model(baseModel)
+    , m_baseModel(baseModel)
     , m_buttons(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel)
-    , m_vertical_layout(this)
+    , m_verticalLayout(this)
     , m_suppressInitialSearch(suppressInitialSearch)
     , m_instance(instance)
     , m_resourcesString(std::move(resourcesString))
@@ -137,7 +142,7 @@ void ResourceDownloadDialog::initializeContainer()
     m_container = new PageContainer(this, {}, this);
     m_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
     m_container->layout()->setContentsMargins(0, 0, 0, 0);
-    m_vertical_layout.addWidget(m_container);
+    m_verticalLayout.addWidget(m_container);
 
     m_container->addButtons(&m_buttons);
 
@@ -194,7 +199,7 @@ void ResourceDownloadDialog::confirm()
         dependencyExtraInfo = task->getExtraInfo();
         for (const auto& dep : task->getDependecies()) {
             auto depExtra = dependencyExtraInfo.value(dep->pack->addonId.toString());
-            addResource(dep->pack, dep->version, "dependency", depExtra.required_by_ids.first());
+            addResource(dep->pack, dep->version, "dependency", depExtra.requiredByIds.first());
             depNames << dep->pack->name;
         }
     }
@@ -208,9 +213,9 @@ void ResourceDownloadDialog::confirm()
         confirmDialog->appendResource({ .name = task->getName(),
                                         .filename = task->getFilename(),
                                         .provider = ModPlatform::ProviderCapabilities::name(task->getProvider()),
-                                        .required_by = extraInfo.required_by_names,
-                                        .version_type = task->getVersion().version_type.toString(),
-                                        .enabled = !extraInfo.maybe_installed });
+                                        .required_by = extraInfo.requiredByNames,
+                                        .version_type = task->getVersion().versionType.toString(),
+                                        .enabled = !extraInfo.maybeInstalled });
     }
 
     if (confirmDialog->exec() != 0) {
@@ -242,10 +247,42 @@ ResourcePage* ResourceDownloadDialog::selectedPage()
     return result;
 }
 
-void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack::Ptr pack, ModPlatform::IndexedVersion& ver, QString downloadReason, QString dependentOn)
+void ResourceDownloadDialog::addResource(const ModPlatform::IndexedPack::Ptr& pack,
+                                         ModPlatform::IndexedVersion& ver,
+                                         QString downloadReason,
+                                         QString dependentOn)
 {
     removeResource(pack->name);
-    selectedPage()->addResourceToPage(pack, ver, getBaseModel(), std::move(downloadReason), std::move(dependentOn));
+    auto* model = getBaseModel();
+    auto* instance = dynamic_cast<MinecraftInstance*>(m_instance);
+    if (instance) {
+        ResourceFolderModel* targetModel = nullptr;
+        switch (pack->resourceType) {
+            case ModPlatform::ResourceType::Mod:
+                targetModel = instance->loaderModList();
+                break;
+            case ModPlatform::ResourceType::ResourcePack:
+                targetModel = instance->resourcePackList();
+                break;
+            case ModPlatform::ResourceType::ShaderPack:
+                targetModel = instance->shaderPackList();
+                break;
+            case ModPlatform::ResourceType::DataPack:
+                targetModel = instance->dataPackList();
+                break;
+                // case ModPlatform::ResourceType::World:
+                // targetModel = instance->worldList();
+            case ModPlatform::ResourceType::TexturePack:
+                targetModel = instance->texturePackList();
+                break;
+            default:
+                break;
+        }
+        if (targetModel != nullptr && targetModel->id() != model->id()) {
+            model = targetModel;
+        }
+    }
+    selectedPage()->addResourceToPage(pack, ver, model, std::move(downloadReason), std::move(dependentOn));
     setButtonStatus();
 }
 
@@ -296,7 +333,6 @@ void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* s
     result->setSearchTerm(prevPage->getSearchTerm());
 }
 
-
 void ResourceDownloadDialog::setResourceMetadata(const std::shared_ptr<Metadata::ModStruct>& meta)
 {
     switch (meta->provider) {
@@ -332,13 +368,25 @@ GetModDependenciesTask::Ptr ResourceDownloadDialog::getModDependenciesTask()
 
 ResourceDownloadDialog* ResourceDownloadDialog::createMod(QWidget* parent,
                                                           ResourceFolderModel* mods,
-                                                          BaseInstance* instance,
+                                                          MinecraftInstance* instance,
                                                           bool suppressInitialSearch)
 {
     auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("mods"), "ModDownloadGeometry", suppressInitialSearch);
     QList<BasePage*> pages;
 
-    auto loaders = static_cast<MinecraftInstance*>(instance)->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
+    // need to load all resources for dependency task
+    auto* mInstance = instance;
+    if (mInstance) {
+        for (auto* model : mInstance->resourceLists()) {
+            if (model) {
+                if (model->empty()) {
+                    model->startWatching();
+                }
+            }
+        }
+    }
+
+    auto loaders = instance->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
 
     if (ModrinthAPI::validateModLoaders(loaders)) {
         auto* page = Modrinth::createModPage(dialog, *instance);
@@ -356,7 +404,7 @@ ResourceDownloadDialog* ResourceDownloadDialog::createMod(QWidget* parent,
 
 ResourceDownloadDialog* ResourceDownloadDialog::createResourcePack(QWidget* parent,
                                                                    ResourceFolderModel* mods,
-                                                                   BaseInstance* instance,
+                                                                   MinecraftInstance* instance,
                                                                    bool suppressInitialSearch)
 {
     auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("resource packs"), "RPDownloadGeometry", suppressInitialSearch);
@@ -377,7 +425,7 @@ ResourceDownloadDialog* ResourceDownloadDialog::createResourcePack(QWidget* pare
 
 ResourceDownloadDialog* ResourceDownloadDialog::createTexturePack(QWidget* parent,
                                                                   ResourceFolderModel* mods,
-                                                                  BaseInstance* instance,
+                                                                  MinecraftInstance* instance,
                                                                   bool suppressInitialSearch)
 {
     auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("texture packs"), "TPDownloadGeometry", suppressInitialSearch);
@@ -398,7 +446,7 @@ ResourceDownloadDialog* ResourceDownloadDialog::createTexturePack(QWidget* paren
 
 ResourceDownloadDialog* ResourceDownloadDialog::createShaderPack(QWidget* parent,
                                                                  ResourceFolderModel* mods,
-                                                                 BaseInstance* instance,
+                                                                 MinecraftInstance* instance,
                                                                  bool suppressInitialSearch)
 {
     auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("shader packs"), "ShaderDownloadGeometry", suppressInitialSearch);
@@ -419,7 +467,7 @@ ResourceDownloadDialog* ResourceDownloadDialog::createShaderPack(QWidget* parent
 
 ResourceDownloadDialog* ResourceDownloadDialog::createDataPack(QWidget* parent,
                                                                ResourceFolderModel* mods,
-                                                               BaseInstance* instance,
+                                                               MinecraftInstance* instance,
                                                                bool suppressInitialSearch)
 {
     auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("data packs"), "DataPackDownloadGeometry", suppressInitialSearch);

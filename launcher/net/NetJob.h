@@ -39,11 +39,10 @@
 #include <QtNetwork>
 
 #include <QObject>
-#include "net/NetRequest.h"
+#include "net/Request.h"
 #include "tasks/ConcurrentTask.h"
 
 // Those are included so that they are also included by anyone using NetJob
-#include "net/Download.h"
 #include "net/HttpMetaCache.h"
 
 class NetJob : public ConcurrentTask {
@@ -59,9 +58,9 @@ class NetJob : public ConcurrentTask {
     auto size() const -> int;
 
     auto canAbort() const -> bool override;
-    auto addNetAction(Net::NetRequest::Ptr action) -> bool;
+    auto addNetAction(Net::Request::Ptr action) -> bool;
 
-    auto getFailedActions() -> QList<Net::NetRequest*>;
+    auto getFailedActions() -> QList<Net::Request*>;
     auto getFailedFiles() -> QList<QString>;
     void setAskRetry(bool askRetry);
 

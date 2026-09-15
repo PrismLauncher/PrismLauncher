@@ -56,7 +56,7 @@ class ServersPage : public QMainWindow, public BasePage {
     Q_OBJECT
 
    public:
-    explicit ServersPage(BaseInstance* inst, QWidget* parent = 0);
+    explicit ServersPage(MinecraftInstance* inst, QWidget* parent = 0);
     virtual ~ServersPage();
 
     void openedImpl() override;
@@ -100,7 +100,7 @@ class ServersPage : public QMainWindow, public BasePage {
     bool m_locked = true;
     Ui::ServersPage* ui = nullptr;
     ServersModel* m_model = nullptr;
-    BaseInstance* m_inst = nullptr;
+    MinecraftInstance* m_inst = nullptr;
 
     std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
 };

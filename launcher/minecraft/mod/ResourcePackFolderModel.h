@@ -19,7 +19,7 @@ class ResourcePackFolderModel : public ResourceFolderModel {
         NumColumns
     };
 
-    explicit ResourcePackFolderModel(const QDir& dir, BaseInstance* instance, bool isIndexed, bool createDir, QObject* parent = nullptr);
+    explicit ResourcePackFolderModel(const QDir& dir, MinecraftInstance* instance, bool isIndexed, bool createDir, QObject* parent = nullptr);
 
     QString id() const override { return "resourcepacks"; }
 

@@ -42,8 +42,6 @@ set(CORE_SOURCES
     EnumWrapper.h
 
     # Basic instance manipulation tasks (derived from InstanceTask)
-    InstanceCreationTask.h
-    InstanceCreationTask.cpp
     InstanceCopyPrefs.h
     InstanceCopyPrefs.cpp
     InstanceCopyTask.h
@@ -118,8 +116,6 @@ set(NET_SOURCES
     # network stuffs
     net/ByteArraySink.h
     net/ChecksumValidator.h
-    net/Download.cpp
-    net/Download.h
     net/DummySink.h
     net/FileSink.cpp
     net/FileSink.h
@@ -136,17 +132,13 @@ set(NET_SOURCES
     net/PasteUpload.h
     net/Sink.h
     net/Validator.h
-    net/Upload.cpp
-    net/Upload.h
     net/HeaderProxy.h
     net/RawHeaderProxy.h
     net/ApiHeaderProxy.h
-    net/ApiDownload.h
-    net/ApiDownload.cpp
-    net/ApiUpload.cpp
-    net/ApiUpload.h
-    net/NetRequest.cpp
-    net/NetRequest.h
+    net/ApiRequest.h
+    net/Request.cpp
+    net/Request.h
+    net/RPCSink.h
 )
 
 # Game launch logic
@@ -155,10 +147,8 @@ set(LAUNCH_SOURCES
     launch/steps/CheckJava.h
     launch/steps/LookupServerAddress.cpp
     launch/steps/LookupServerAddress.h
-    launch/steps/PostLaunchCommand.cpp
-    launch/steps/PostLaunchCommand.h
-    launch/steps/PreLaunchCommand.cpp
-    launch/steps/PreLaunchCommand.h
+    launch/steps/LaunchCommand.cpp
+    launch/steps/LaunchCommand.h
     launch/steps/TextPrint.cpp
     launch/steps/TextPrint.h
     launch/steps/QuitAfterGameStop.cpp
@@ -379,12 +369,8 @@ set(MINECRAFT_SOURCES
     minecraft/AssetsUtils.cpp
 
     # Minecraft skins
-    minecraft/skins/CapeChange.cpp
-    minecraft/skins/CapeChange.h
-    minecraft/skins/SkinUpload.cpp
-    minecraft/skins/SkinUpload.h
-    minecraft/skins/SkinDelete.cpp
-    minecraft/skins/SkinDelete.h
+    minecraft/skins/SkinRequests.cpp
+    minecraft/skins/SkinRequests.h
     minecraft/skins/SkinModel.cpp
     minecraft/skins/SkinModel.h
     minecraft/skins/SkinList.cpp
@@ -395,10 +381,8 @@ set(MINECRAFT_SOURCES
 # the screenshots feature
 set(SCREENSHOTS_SOURCES
     screenshots/Screenshot.h
-    screenshots/ImgurUpload.h
-    screenshots/ImgurUpload.cpp
-    screenshots/ImgurAlbumCreation.h
-    screenshots/ImgurAlbumCreation.cpp
+    screenshots/ImgurAPI.h
+    screenshots/ImgurAPI.cpp
 )
 
 set(TASKS_SOURCES
@@ -473,8 +457,6 @@ set(TOOLS_SOURCES
     tools/JProfiler.h
     tools/JVisualVM.cpp
     tools/JVisualVM.h
-    tools/MCEditTool.cpp
-    tools/MCEditTool.h
     tools/GenericProfiler.cpp
     tools/GenericProfiler.h
 )
@@ -646,16 +628,14 @@ set(PRISMUPDATER_SOURCES
 
     net/ByteArraySink.h
     net/ChecksumValidator.h
-    net/Download.cpp
-    net/Download.h
     net/FileSink.cpp
     net/FileSink.h
     net/HttpMetaCache.cpp
     net/HttpMetaCache.h
     net/Logging.h
     net/Logging.cpp
-    net/NetRequest.cpp
-    net/NetRequest.h
+    net/Request.cpp
+    net/Request.h
     net/NetJob.cpp
     net/NetJob.h
     net/NetUtils.h
@@ -1104,6 +1084,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/InstallLoaderDialog.h
     ui/dialogs/ChooseOfflineNameDialog.cpp
     ui/dialogs/ChooseOfflineNameDialog.h
+    ui/dialogs/UntrustedModsDialog.cpp
+    ui/dialogs/UntrustedModsDialog.h
 
     ui/dialogs/skins/SkinManageDialog.cpp
     ui/dialogs/skins/SkinManageDialog.h
@@ -1271,7 +1253,7 @@ if(TARGET PkgConfig::libqrencode)
     target_link_libraries(Launcher_logic PkgConfig::libqrencode)
 else()
     target_include_directories(Launcher_logic PRIVATE ${LIBQRENCODE_INCLUDE_DIR})
-    target_link_libraries(Launcher_logic ${LIBQRENCODE_LIBRARIES})
+    target_link_libraries(Launcher_logic ${LIBQRENCODE_LIBRARY})
 endif()
 
 if(TARGET PkgConfig::tomlplusplus)
@@ -1309,7 +1291,7 @@ target_link_libraries(Launcher_logic
     Launcher_rainbow
 )
 if (TARGET ${Launcher_QT_DBUS})
-    add_compile_definitions(WITH_QTDBUS)
+    target_compile_definitions(Launcher_logic PUBLIC WITH_QTDBUS)
 endif()
 
 if(APPLE)

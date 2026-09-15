@@ -20,7 +20,7 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     Q_OBJECT
 
    public:
-    explicit ExternalResourcesPage(BaseInstance* instance, ResourceFolderModel* model, QWidget* parent = nullptr);
+    explicit ExternalResourcesPage(MinecraftInstance* instance, ResourceFolderModel* model, QWidget* parent = nullptr);
     virtual ~ExternalResourcesPage();
 
     virtual QString displayName() const override = 0;
@@ -65,7 +65,7 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     void ShowHeaderContextMenu(const QPoint& pos);
 
    protected:
-    BaseInstance* m_instance = nullptr;
+    MinecraftInstance* m_instance = nullptr;
 
     Ui::ExternalResourcesPage* ui = nullptr;
     ResourceFolderModel* m_model;

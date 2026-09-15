@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,7 +21,6 @@
  *      Copyright 2013-2021 MultiMC Contributors
  *
  *      Licensed under the Apache License, Version 2.0 (the "License");
-
  *      you may not use this file except in compliance with the License.
  *      You may obtain a copy of the License at
  *
@@ -38,34 +35,24 @@
 
 #pragma once
 
-#include <utility>
+#include <LoggedProcess.h>
+#include <launch/LaunchStep.h>
 
-#include "HttpMetaCache.h"
-
-#include "QObjectPtr.h"
-#include "net/NetRequest.h"
-
-namespace Net {
-class ByteArraySink;
-
-class Download : public NetRequest {
+class LaunchCommand : public LaunchStep {
     Q_OBJECT
    public:
-    using Ptr = shared_qobject_ptr<class Download>;
-    explicit Download() : NetRequest() { logCat = taskDownloadLogC; }
+    LaunchCommand(LaunchTask* parent, QString command, QString phaseName = {});
+    ~LaunchCommand() override = default;
 
-#if defined(LAUNCHER_APPLICATION)
-    static auto makeCached(QUrl url, MetaEntryPtr entry, Options options = Option::NoOptions) -> Download::Ptr;
-#endif
+    void executeTask() override;
+    bool abort() override;
+    bool canAbort() const override { return true; }
+    void setWorkingDirectory(const QString& wd);
+   private slots:
+    void onState(LoggedProcess::State state);
 
-    /**
-     * Creates a request downloading to the returned QByteArray,.
-     * The QByteArray will live as long as the Download object.
-     */
-    static auto makeByteArray(QUrl url, Options options = Option::NoOptions) -> std::pair<Download::Ptr, QByteArray*>;
-    static auto makeFile(QUrl url, QString path, Options options = Option::NoOptions) -> Download::Ptr;
-
-   protected:
-    virtual QNetworkReply* getReply(QNetworkRequest&) override;
+   private:
+    LoggedProcess m_process;
+    QString m_command;
+    QString m_phaseName;
 };
-}  // namespace Net

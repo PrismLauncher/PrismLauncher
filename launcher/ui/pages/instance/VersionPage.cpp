@@ -123,7 +123,7 @@ void VersionPage::retranslate()
 
 void VersionPage::openedImpl()
 {
-    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
+    const auto setting_name = QString("WideBarVisibility_%1").arg(id());
     m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
     ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
@@ -299,7 +299,7 @@ void VersionPage::on_actionRemove_triggered()
 
 void VersionPage::on_actionAdd_to_Minecraft_jar_triggered()
 {
-    auto list = GuiUtil::BrowseForFiles("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods") + " (*.zip *.jar)",
+    auto list = GuiUtil::browseForFiles("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods") + " (*.zip *.jar)",
                                         APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
     if (!list.empty()) {
         m_profile->installJarMods(list);
@@ -309,7 +309,7 @@ void VersionPage::on_actionAdd_to_Minecraft_jar_triggered()
 
 void VersionPage::on_actionReplace_Minecraft_jar_triggered()
 {
-    auto jarPath = GuiUtil::BrowseForFile("jar", tr("Select jar"), tr("Minecraft.jar replacement") + " (*.jar)",
+    auto jarPath = GuiUtil::browseForFile("jar", tr("Select jar"), tr("Minecraft.jar replacement") + " (*.jar)",
                                           APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
     if (!jarPath.isEmpty()) {
         m_profile->installCustomJar(jarPath);
@@ -319,7 +319,7 @@ void VersionPage::on_actionReplace_Minecraft_jar_triggered()
 
 void VersionPage::on_actionImport_Components_triggered()
 {
-    QStringList list = GuiUtil::BrowseForFiles("component", tr("Select components"), tr("Components") + " (*.json)",
+    QStringList list = GuiUtil::browseForFiles("component", tr("Select components"), tr("Components") + " (*.json)",
                                                APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
 
     if (!list.isEmpty()) {
@@ -334,7 +334,7 @@ void VersionPage::on_actionImport_Components_triggered()
 
 void VersionPage::on_actionAdd_Agents_triggered()
 {
-    QStringList list = GuiUtil::BrowseForFiles("agent", tr("Select agents"), tr("Java agents") + " (*.jar)",
+    QStringList list = GuiUtil::browseForFiles("agent", tr("Select agents"), tr("Java agents") + " (*.jar)",
                                                APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
 
     if (!list.isEmpty())
@@ -402,8 +402,9 @@ void VersionPage::on_actionChange_version_triggered()
     if (!currentVersion.isEmpty()) {
         vselect.setCurrentVersion(currentVersion);
     }
-    if (!vselect.exec() || !vselect.selectedVersion())
+    if ((vselect.exec() == 0) || !vselect.selectedVersion()) {
         return;
+    }
 
     qDebug() << "Change" << uid << "to" << vselect.selectedVersion()->descriptor();
     bool important = false;
@@ -413,6 +414,9 @@ void VersionPage::on_actionChange_version_triggered()
             m_inst->settings()->get("OverrideJavaLocation").toBool()) {
             m_inst->settings()->set("OverrideJavaLocation", false);
             m_inst->settings()->set("JavaPath", "");
+        }
+        if (m_inst->settings()->get("UseLatestMinecraftVersion").toBool()) {
+            m_inst->settings()->set("UseLatestMinecraftVersion", false);
         }
     }
     m_profile->setComponentVersion(uid, vselect.selectedVersion()->descriptor(), important);

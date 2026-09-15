@@ -103,7 +103,7 @@ jobs:
         # For PRs
       - name: Setup Nix Magic Cache
         if: ${{ github.event_name == 'pull_request' }}
-        uses: DeterminateSystems/magic-nix-cache-action@v14
+        uses: DeterminateSystems/magic-nix-cache-action@v15
         with:
           diagnostic-endpoint: ""
           use-flakehub: false

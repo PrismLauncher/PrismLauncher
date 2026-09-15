@@ -5,7 +5,7 @@ body:
 - type: markdown
   attributes:
     value: |
-      If you need help with running Minecraft, please visit us on our Discord before making a bug report.
+      If you need help with running Minecraft, please visit us on [our Discord](https://prismlauncher.org/discord) before making a bug report.
 
       Before submitting a bug report, please make sure you have read this *entire* form, and that:
       * You have read the [Prism Launcher wiki](https://prismlauncher.org/wiki/) and it has not answered your question.
@@ -53,8 +53,8 @@ body:
     required: true
 - type: textarea
   attributes:
-    label: Suspected cause
-    description: If you know what could be causing this bug, describe it here.
+    label: Other information
+    description: If you have an idea where the problem might lie, let us know that here. Please include any pointers to code, relevant changes, or related issues you know of.
   validations:
     required: false
 - type: checkboxes

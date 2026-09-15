@@ -99,6 +99,8 @@ bool ensureFolderPathExists(const QFileInfo folderPath);
  */
 bool ensureFolderPathExists(const QString folderPathName);
 
+struct LinkPair;
+
 /**
  * @brief Copies a directory and it's contents from src to dest
  */
@@ -113,6 +115,17 @@ class copy : public QObject {
     copy& followSymlinks(const bool follow)
     {
         m_followSymlinks = follow;
+        return *this;
+    }
+    /**
+     * Setting this to true copies empty and symlinked directories (if follow symlinks is not set)
+     * instead of ignoring them.
+     *
+     * Defaults to false
+     */
+    copy& copyDirectories(const bool copyDirectories)
+    {
+        m_copyDirectories = copyDirectories;
         return *this;
     }
     copy& matcher(Filter filter)
@@ -146,7 +159,9 @@ class copy : public QObject {
     bool operator()(const QString& offset, bool dryRun = false);
 
    private:
+    bool m_copyDirectories = false;
     bool m_followSymlinks = true;
+    QList<LinkPair> m_symlinksToCopy;
     Filter m_matcher = nullptr;
     bool m_whitelist = false;
     bool m_overwrite = false;

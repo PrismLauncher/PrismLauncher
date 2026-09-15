@@ -70,7 +70,7 @@
 #include "tasks/Task.h"
 #include "ui/dialogs/ProgressDialog.h"
 
-ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget* parent)
+ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(inst, model, parent), m_model(model)
 {
     ui->actionDownloadItem->setText(tr("Download Mods"));
@@ -149,13 +149,19 @@ void ModFolderPage::removeItems(const QItemSelection& selection)
     auto indexes = selection.indexes();
     auto affected = m_model->getAffectedMods(indexes, EnableAction::DISABLE);
     if (!affected.isEmpty()) {
-        auto response = CustomMessageBox::selectable(this, tr("Confirm Disable"),
-                                                     tr("The mods you are trying to delete are required by %1 mods.\n"
-                                                        "Do you want to disable them?")
-                                                         .arg(affected.length()),
-                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
-                                                     QMessageBox::Cancel)
-                            ->exec();
+        auto* box = CustomMessageBox::selectable(this, tr("Confirm Disable"),
+                                                 tr("The mods you are trying to delete are required by %1 mods.\n"
+                                                    "Do you want to disable them?")
+                                                     .arg(affected.length()),
+                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
+                                                 QMessageBox::Cancel);
+        QString details = tr("The following mods depend on the mod(s) you want to remove:");
+        for (auto indx : affected) {
+            const Mod& mod = m_model->at(indx.row());
+            details += QString("\n- %1 (%2)").arg(mod.name(), mod.internalId());
+        }
+        box->setDetailedText(details);
+        const auto response = box->exec();
 
         if (response == QMessageBox::Cancel) {
             return;
@@ -169,11 +175,7 @@ void ModFolderPage::removeItems(const QItemSelection& selection)
 
 void ModFolderPage::downloadMods()
 {
-    if (m_instance->typeName() != "Minecraft") {
-        return;  // this is a null instance or a legacy instance
-    }
-
-    auto* profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
+    auto* profile = m_instance->getPackProfile();
     if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
         return;
     }
@@ -188,27 +190,20 @@ void ModFolderPage::downloadMods()
 void ModFolderPage::downloadDialogFinished(int result)
 {
     if (result != 0) {
-        auto* tasks = new ConcurrentTask(tr("Download Mods"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(tasks, &Task::failed, [this, tasks](const QString& reason) {
+        ConcurrentTask tasks(tr("Download Mods"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-            tasks->deleteLater();
         });
-        connect(tasks, &Task::aborted, [this, tasks]() {
-            CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
-            tasks->deleteLater();
-        });
-        connect(tasks, &Task::succeeded, [this, tasks]() {
-            QStringList warnings = tasks->warnings();
+        connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
+            QStringList warnings = tasks.warnings();
             if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
             }
-
-            tasks->deleteLater();
         });
 
         if (m_downloadDialog) {
             for (auto& task : m_downloadDialog->getTasks()) {
-                tasks->addTask(task);
+                tasks.addTask(task);
             }
         } else {
             qWarning() << "ResourceDownloadDialog vanished before we could collect tasks!";
@@ -216,7 +211,7 @@ void ModFolderPage::downloadDialogFinished(int result)
 
         ProgressDialog loadDialog(this);
         loadDialog.setSkipButton(true, tr("Abort"));
-        loadDialog.execWithTask(tasks);
+        loadDialog.execWithTask(&tasks);
 
         m_model->update();
     }
@@ -227,11 +222,7 @@ void ModFolderPage::downloadDialogFinished(int result)
 
 void ModFolderPage::updateMods(bool includeDeps)
 {
-    if (m_instance->typeName() != "Minecraft") {
-        return;  // this is a null instance or a legacy instance
-    }
-
-    auto* profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
+    auto* profile = m_instance->getPackProfile();
     if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
         return;
     }
@@ -264,7 +255,6 @@ void ModFolderPage::updateMods(bool includeDeps)
     updateDialog.checkCandidates();
 
     if (updateDialog.aborted()) {
-        CustomMessageBox::selectable(this, tr("Aborted"), tr("The mod updater was aborted!"), QMessageBox::Warning)->show();
         return;
     }
     if (updateDialog.noUpdates()) {
@@ -281,30 +271,24 @@ void ModFolderPage::updateMods(bool includeDeps)
     }
 
     if (updateDialog.exec() != 0) {
-        auto* tasks = new ConcurrentTask("Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(tasks, &Task::failed, [this, tasks](const QString& reason) {
+        ConcurrentTask tasks("Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-            tasks->deleteLater();
         });
-        connect(tasks, &Task::aborted, [this, tasks]() {
-            CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
-            tasks->deleteLater();
-        });
-        connect(tasks, &Task::succeeded, [this, tasks]() {
-            QStringList warnings = tasks->warnings();
+        connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
+            QStringList warnings = tasks.warnings();
             if (warnings.count()) {
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
             }
-            tasks->deleteLater();
         });
 
         for (const auto& task : updateDialog.getTasks()) {
-            tasks->addTask(task);
+            tasks.addTask(task);
         }
 
         ProgressDialog loadDialog(this);
         loadDialog.setSkipButton(true, tr("Abort"));
-        loadDialog.execWithTask(tasks);
+        loadDialog.execWithTask(&tasks);
 
         m_model->update();
     }
@@ -499,11 +483,7 @@ std::optional<QList<Mod*>> ModFolderPage::pickLockedMods(const QList<Mod*>& allM
 
 void ModFolderPage::changeModVersion()
 {
-    if (m_instance->typeName() != "Minecraft") {
-        return;  // this is a null instance or a legacy instance
-    }
-
-    auto* profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
+    auto* profile = m_instance->getPackProfile();
     if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
         return;
     }
@@ -538,25 +518,22 @@ void ModFolderPage::exportModMetadata()
     dlg.exec();
 }
 
-CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, ModFolderModel* mods, QWidget* parent) : ModFolderPage(inst, mods, parent)
+CoreModFolderPage::CoreModFolderPage(MinecraftInstance* inst, ModFolderModel* mods, QWidget* parent) : ModFolderPage(inst, mods, parent)
 {
-    auto* mcInst = dynamic_cast<MinecraftInstance*>(m_instance);
-    if (mcInst) {
-        auto* version = mcInst->getPackProfile();
-        if ((version != nullptr) && version->getComponent("net.minecraftforge") && version->getComponent("net.minecraft")) {
-            auto minecraftCmp = version->getComponent("net.minecraft");
-            if (!minecraftCmp->m_loaded) {
-                version->reload(Net::Mode::Offline);
-                auto update = version->getCurrentTask();
-                if (update) {
-                    connect(update.get(), &Task::finished, this, [this] {
-                        if (m_container) {
-                            m_container->refreshContainer();
-                        }
-                    });
-                    if (!update->isRunning()) {
-                        update->start();
+    auto* version = inst->getPackProfile();
+    if ((version != nullptr) && version->getComponent("net.minecraftforge") && version->getComponent("net.minecraft")) {
+        auto minecraftCmp = version->getComponent("net.minecraft");
+        if (!minecraftCmp->m_loaded) {
+            version->reload(Net::Mode::Offline);
+            auto update = version->getCurrentTask();
+            if (update) {
+                connect(update.get(), &Task::finished, this, [this] {
+                    if (m_container) {
+                        m_container->refreshContainer();
                     }
+                });
+                if (!update->isRunning()) {
+                    update->start();
                 }
             }
         }
@@ -566,12 +543,7 @@ CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, ModFolderModel* mods, Q
 bool CoreModFolderPage::shouldDisplay() const
 {
     if (ModFolderPage::shouldDisplay()) {
-        auto* inst = dynamic_cast<MinecraftInstance*>(m_instance);
-        if (!inst) {
-            return true;
-        }
-
-        auto* version = inst->getPackProfile();
+        auto* version = m_instance->getPackProfile();
         if ((version == nullptr) || !version->getComponent("net.minecraftforge") || !version->getComponent("net.minecraft")) {
             return false;
         }
@@ -581,7 +553,7 @@ bool CoreModFolderPage::shouldDisplay() const
     return false;
 }
 
-NilModFolderPage::NilModFolderPage(BaseInstance* inst, ModFolderModel* mods, QWidget* parent) : ModFolderPage(inst, mods, parent) {}
+NilModFolderPage::NilModFolderPage(MinecraftInstance* inst, ModFolderModel* mods, QWidget* parent) : ModFolderPage(inst, mods, parent) {}
 
 bool NilModFolderPage::shouldDisplay() const
 {
@@ -597,7 +569,7 @@ inline bool ModFolderPage::handleNoModLoader()
         QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
     if (resp == QMessageBox::Yes) {
         // Should be safe
-        auto* profile = static_cast<MinecraftInstance*>(this->m_instance)->getPackProfile();
+        auto* profile = this->m_instance->getPackProfile();
         InstallLoaderDialog dialog(profile, QString(), this);
         // true if the user went through the install loader dialog
         // false if the dialog got canceled/closed

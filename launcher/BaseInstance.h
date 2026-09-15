@@ -45,16 +45,12 @@
 #include <QObject>
 #include <QProcess>
 #include <QSet>
+#include <cstdint>
 #include "QObjectPtr.h"
 
 #include "settings/SettingsObject.h"
 
-#include "BaseVersionList.h"
-#include "MessageLevel.h"
 #include "minecraft/auth/MinecraftAccount.h"
-#include "settings/INIFile.h"
-
-#include "net/Mode.h"
 
 #include "RuntimeContext.h"
 #include "minecraft/launch/MinecraftTarget.h"
@@ -65,7 +61,7 @@ class LaunchTask;
 class BaseInstance;
 
 /// Shortcut saving target representations
-enum class ShortcutTarget { Desktop, Applications, Other };
+enum class ShortcutTarget : std::uint8_t { Desktop, Applications, Other };
 
 /// Shortcut data representation
 struct ShortcutData {
@@ -90,17 +86,17 @@ class BaseInstance : public QObject {
     Q_OBJECT
    protected:
     /// no-touchy!
-    BaseInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, const QString& rootDir);
+    BaseInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, QString rootDir);
 
    public: /* types */
-    enum class Status {
+    enum class Status : std::uint8_t {
         Present,
         Gone  // either nuked or invalidated
     };
 
    public:
     /// virtual destructor to make sure the destruction is COMPLETE
-    virtual ~BaseInstance();
+    ~BaseInstance() override = default;
 
     virtual void saveNow() = 0;
 
@@ -114,8 +110,8 @@ class BaseInstance : public QObject {
 
     /// The instance's ID. The ID SHALL be determined by LAUNCHER internally. The ID IS guaranteed to
     /// be unique.
-    virtual QString id() const;
-    virtual QString uuid() const;
+    QString id() const;
+    QString uuid() const { return m_uuid; }
     void regenerateUuid();
 
     void setMinecraftRunning(bool running);
@@ -139,7 +135,7 @@ class BaseInstance : public QObject {
     virtual QString modsRoot() const = 0;
 
     QString name() const;
-    void setName(QString val);
+    void setName(const QString& val);
 
     /// Sync name and rename instance dir accordingly; returns true if successful
     bool syncInstanceDirName(const QString& newRoot) const;
@@ -153,11 +149,12 @@ class BaseInstance : public QObject {
     QString windowTitle() const;
 
     QString iconKey() const;
-    void setIconKey(QString val);
+    void setIconKey(const QString& val);
 
     QString notes() const;
-    void setNotes(QString val);
+    void setNotes(const QString& val);
 
+    QString getPreLoadCommand();
     QString getPreLaunchCommand();
     QString getPostExitCommand();
     QString getWrapperCommand();
@@ -169,7 +166,6 @@ class BaseInstance : public QObject {
     QString getManagedPackVersionID() const;
     QString getManagedPackVersionName() const;
     void setManagedPack(const QString& type, const QString& id, const QString& name, const QString& versionId, const QString& version);
-    void copyManagedPack(BaseInstance& other);
 
     virtual QStringList extraArguments();
 
@@ -228,8 +224,6 @@ class BaseInstance : public QObject {
     /// get variables this instance exports
     virtual QMap<QString, QString> getVariables() = 0;
 
-    virtual QString typeName() const = 0;
-
     virtual void updateRuntimeContext();
     RuntimeContext runtimeContext() const { return m_runtimeContext; }
 
@@ -238,7 +232,7 @@ class BaseInstance : public QObject {
     {
         if (m_hasBrokenVersion != value) {
             m_hasBrokenVersion = value;
-            emit propertiesChanged(this);
+            emit propertiesChanged();
         }
     }
 
@@ -247,7 +241,7 @@ class BaseInstance : public QObject {
     {
         if (m_hasUpdate != value) {
             m_hasUpdate = value;
-            emit propertiesChanged(this);
+            emit propertiesChanged();
         }
     }
 
@@ -256,7 +250,7 @@ class BaseInstance : public QObject {
     {
         if (m_crashed != value) {
             m_crashed = value;
-            emit propertiesChanged(this);
+            emit propertiesChanged();
         }
     }
 
@@ -281,21 +275,21 @@ class BaseInstance : public QObject {
     bool removeLinkedInstanceId(const QString& id);
     bool isLinkedToInstanceId(const QString& id) const;
 
-    bool isLegacy();
+    bool isLegacy() const;
 
    protected:
     void changeStatus(Status newStatus);
 
-    SettingsObject* globalSettings() const { return m_global_settings; }
+    SettingsObject* globalSettings() const { return m_globalSettings; }
 
-    bool isSpecificSettingsLoaded() const { return m_specific_settings_loaded; }
-    void setSpecificSettingsLoaded(bool loaded) { m_specific_settings_loaded = loaded; }
+    bool isSpecificSettingsLoaded() const { return m_specificSettingsLoaded; }
+    void setSpecificSettingsLoaded(bool loaded) { m_specificSettingsLoaded = loaded; }
 
    signals:
     /*!
      * \brief Signal emitted when properties relevant to the instance view change
      */
-    void propertiesChanged(BaseInstance* inst);
+    void propertiesChanged();
 
     void launchTaskChanged(LaunchTask*);
 
@@ -306,7 +300,7 @@ class BaseInstance : public QObject {
     void statusChanged(Status from, Status to);
 
    protected slots:
-    void iconUpdated(QString key);
+    void iconUpdated(const QString& key);
 
    protected: /* data */
     QString m_rootDir;
@@ -318,13 +312,14 @@ class BaseInstance : public QObject {
     RuntimeContext m_runtimeContext;
 
    private: /* data */
+    QString m_uuid;
     Status m_status = Status::Present;
     bool m_crashed = false;
     bool m_hasUpdate = false;
     bool m_hasBrokenVersion = false;
 
-    SettingsObject* m_global_settings;
-    bool m_specific_settings_loaded = false;
+    SettingsObject* m_globalSettings;
+    bool m_specificSettingsLoaded = false;
 };
 
 Q_DECLARE_METATYPE(shared_qobject_ptr<BaseInstance>)

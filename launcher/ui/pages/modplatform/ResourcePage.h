@@ -125,6 +125,9 @@ class ResourcePage : public QWidget, public BasePage {
     QMap<QString, QString> urlHandlers() const { return m_desc.urlHandlers; };
     void openUrl(QUrl);
 
+    void refreshVersionComboBox();
+    void restoreSelectedVersion(const ModPlatform::IndexedPack::Ptr& currentPack);
+
    public:
     BaseInstance& m_baseInstance;
 

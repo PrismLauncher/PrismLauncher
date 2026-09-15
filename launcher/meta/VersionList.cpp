@@ -317,4 +317,22 @@ Version::Ptr VersionList::getLatestForParent(const QString& uid, const QString& 
     return latestCompat;
 }
 
+static const Meta::Version::Ptr& getLatestVersion(const Meta::Version::Ptr& a, const Meta::Version::Ptr& b)
+{
+    if (!a)
+        return b;
+    if (!b)
+        return a;
+    return (a->rawTime() > b->rawTime() ? a : b);
+}
+
+Version::Ptr VersionList::getLatest(bool onlyRelease)
+{
+    Version::Ptr latestCompat = nullptr;
+    for (auto ver : m_versions) {
+        if (!onlyRelease || ver->type() == "release")
+            latestCompat = getLatestVersion(latestCompat, ver);
+    }
+    return latestCompat;
+}
 }  // namespace Meta

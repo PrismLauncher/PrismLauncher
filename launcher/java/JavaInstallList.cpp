@@ -41,10 +41,10 @@
 #include <algorithm>
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "java/JavaChecker.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
+#include "settings/SettingsObject.h"
 #include "tasks/ConcurrentTask.h"
 
 JavaInstallList::JavaInstallList(QObject* parent, bool onlyManagedVersions)
@@ -163,14 +163,16 @@ void JavaListLoadTask::executeTask()
 
     ConcurrentTask::Ptr job(new ConcurrentTask("Java detection", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));
     m_job.reset(job);
-    connect(m_job.get(), &Task::finished, this, &JavaListLoadTask::javaCheckerFinished);
+    // HACK: as long as m_list is alive, we will be
+    // however, for some reason sometimes we outlive m_list (which javaCheckerFinished accesses)
+    connect(m_job.get(), &Task::finished, m_list, [this] { javaCheckerFinished(); });
     connect(m_job.get(), &Task::progress, this, &Task::setProgress);
 
     qDebug() << "Probing the following Java paths: ";
     int id = 0;
     for (QString candidate : candidate_paths) {
         auto checker = new JavaChecker(candidate, "", 0, 0, 0, id);
-        connect(checker, &JavaChecker::checkFinished, [this](const JavaChecker::Result& result) { m_results << result; });
+        connect(checker, &JavaChecker::checkFinished, this, [this](const JavaChecker::Result& result) { m_results << result; });
         job->addTask(Task::Ptr(checker));
         id++;
     }

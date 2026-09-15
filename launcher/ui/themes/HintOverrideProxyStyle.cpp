@@ -28,14 +28,19 @@ int HintOverrideProxyStyle::styleHint(QStyle::StyleHint hint,
                                       const QWidget* widget,
                                       QStyleHintReturn* returnData) const
 {
+    // Prevent instances from being activated on single click
     if (hint == QStyle::SH_ItemView_ActivateItemOnSingleClick)
         return 0;
 
+    // Make clicks on sliders directly set absolute position
     if (hint == QStyle::SH_Slider_AbsoluteSetButtons)
         return Qt::LeftButton | Qt::MiddleButton;
-
     if (hint == QStyle::SH_Slider_PageSetButtons)
         return Qt::RightButton;
+
+    // Disable popups, they ignore QComboBox#maxVisibleItems
+    if (hint == QStyle::SH_ComboBox_Popup)
+        return 0;
 
     return QProxyStyle::styleHint(hint, option, widget, returnData);
 }

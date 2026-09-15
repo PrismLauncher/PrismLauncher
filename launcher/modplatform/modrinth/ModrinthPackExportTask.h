@@ -34,7 +34,7 @@ class ModrinthPackExportTask : public Task {
                            const QString& version,
                            const QString& summary,
                            bool optionalFiles,
-                           BaseInstance* instance,
+                           MinecraftInstance* instance,
                            const QString& output,
                            MMCZip::FilterFileFunction filter);
 
@@ -55,13 +55,11 @@ class ModrinthPackExportTask : public Task {
     // inputs
     const QString name, version, summary;
     const bool optionalFiles;
-    const BaseInstance* instance;
-    MinecraftInstance* mcInstance;
+    MinecraftInstance* instance;
     const QDir gameRoot;
     const QString output;
     const MMCZip::FilterFileFunction filter;
 
-    ModrinthAPI api;
     QFileInfoList files;
     QMap<QString, QString> pendingHashes;
     QMap<QString, ResolvedFile> resolvedFiles;

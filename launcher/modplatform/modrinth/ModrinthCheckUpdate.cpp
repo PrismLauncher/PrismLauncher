@@ -13,8 +13,6 @@
 
 #include "tasks/ConcurrentTask.h"
 
-static const ModrinthAPI g_api;
-
 ModrinthCheckUpdate::ModrinthCheckUpdate(QList<Resource*>& resources,
                                          std::vector<Version>& mcVersions,
                                          QList<ModPlatform::ModLoaderType> loadersList,
@@ -64,9 +62,9 @@ void ModrinthCheckUpdate::executeTask()
         // (though it will rarely happen, if at all)
         if (resource->metadata()->hash_format != m_hashType) {
             auto hashTask = Hashing::createHasher(resource->fileinfo().absoluteFilePath(), ModPlatform::ResourceProvider::MODRINTH);
-            connect(hashTask.get(), &Hashing::Hasher::resultsReady,
+            connect(hashTask.get(), &Hashing::Hasher::resultsReady, this,
                     [this, resource](const QString& hash) { m_mappings.insert(hash, resource); });
-            connect(hashTask.get(), &Task::failed, [this] { failed("Failed to generate hash"); });
+            connect(hashTask.get(), &Task::failed, this, [this] { emitFailed("Failed to generate hash"); });
             hashingTask->addTask(hashTask);
             startHasing = true;
         } else {
@@ -106,7 +104,7 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
         return;
     }
 
-    auto [job, response] = g_api.latestVersions(hashes, m_hashType, m_gameVersions, loader);
+    auto [job, response] = ModrinthAPI::get().latestVersions(hashes, m_hashType, m_gameVersions, loader);
 
     connect(job.get(), &Task::succeeded, this, [this, response, loader] { checkVersionsResponse(response, loader); });
 
@@ -178,7 +176,7 @@ void ModrinthCheckUpdate::checkVersionsResponse(QByteArray* response, std::optio
             pack->slug = resource->metadata()->slug;
             pack->addonId = resource->metadata()->project_id;
             pack->provider = ModPlatform::ResourceProvider::MODRINTH;
-            if ((projectVer.hash != hash && projectVer.is_preferred) || (resource->status() == ResourceStatus::NotInstalled)) {
+            if ((projectVer.hash != hash && projectVer.isPreferred) || (resource->status() == ResourceStatus::NotInstalled)) {
                 auto downloadTask = makeShared<ResourceDownloadTask>(pack, projectVer, m_resourceModel, true, "update");
 
                 QString oldVersion = resource->metadata()->version_number;
@@ -190,8 +188,8 @@ void ModrinthCheckUpdate::checkVersionsResponse(QByteArray* response, std::optio
                     }
                 }
 
-                m_updates.emplace_back(pack->name, hash, oldVersion, projectVer.version_number, projectVer.version_type,
-                                       projectVer.changelog, ModPlatform::ResourceProvider::MODRINTH, downloadTask, resource->enabled());
+                m_updates.emplace_back(pack->name, hash, oldVersion, projectVer.versionNumber, projectVer.versionType, projectVer.changelog,
+                                       ModPlatform::ResourceProvider::MODRINTH, downloadTask, resource->enabled());
             }
             m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, projectVer));
 

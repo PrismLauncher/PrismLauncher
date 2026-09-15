@@ -37,12 +37,12 @@
 
 #include <QMainWindow>
 
-#include <LoggedProcess.h>
 #include "minecraft/MinecraftInstance.h"
 #include "ui/pages/BasePage.h"
 
 #include "settings/Setting.h"
 
+class QMenu;
 class WorldList;
 namespace Ui {
 class WorldListPage;
@@ -52,18 +52,18 @@ class WorldListPage : public QMainWindow, public BasePage {
     Q_OBJECT
 
    public:
-    explicit WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget* parent = 0);
-    virtual ~WorldListPage();
+    explicit WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget* parent = nullptr);
+    ~WorldListPage() override;
 
-    virtual QString displayName() const override { return tr("Worlds"); }
-    virtual QIcon icon() const override { return QIcon::fromTheme("worlds"); }
-    virtual QString id() const override { return "worlds"; }
-    virtual QString helpPage() const override { return "Worlds"; }
-    virtual bool shouldDisplay() const override;
+    QString displayName() const override { return tr("Worlds"); }
+    QIcon icon() const override { return QIcon::fromTheme("worlds"); }
+    QString id() const override { return "worlds"; }
+    QString helpPage() const override { return "Worlds"; }
+    bool shouldDisplay() const override;
     void retranslate() override;
 
-    virtual void openedImpl() override;
-    virtual void closedImpl() override;
+    void openedImpl() override;
+    void closedImpl() override;
 
    protected:
     bool eventFilter(QObject* obj, QEvent* ev) override;
@@ -77,20 +77,19 @@ class WorldListPage : public QMainWindow, public BasePage {
     QModelIndex getSelectedWorld();
     bool isWorldSafe(QModelIndex index);
     bool worldSafetyNagQuestion(const QString& actionType);
-    void mceditError();
+    void populateWorldToolsMenu();
+    void launchWorldTool(const QString& name, const QString& command);
 
    private:
-    Ui::WorldListPage* ui;
+    Ui::WorldListPage* m_ui;
     WorldList* m_worlds;
-    unique_qobject_ptr<LoggedProcess> m_mceditProcess;
-    bool m_mceditStarting = false;
+    QMenu* m_worldToolsMenu = nullptr;
 
-    std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
+    std::shared_ptr<Setting> m_wideBarSetting = nullptr;
     std::unique_ptr<DataPackFolderModel> m_datapackModel;
 
    private slots:
     void on_actionCopy_Seed_triggered();
-    void on_actionMCEdit_triggered();
     void on_actionRemove_triggered();
     void on_actionAdd_triggered();
     void on_actionCopy_triggered();
@@ -100,7 +99,6 @@ class WorldListPage : public QMainWindow, public BasePage {
     void on_actionData_Packs_triggered();
     void on_actionReset_Icon_triggered();
     void worldChanged(const QModelIndex& current, const QModelIndex& previous);
-    void mceditState(LoggedProcess::State state);
     void on_actionJoin_triggered();
 
     void ShowContextMenu(const QPoint& pos);

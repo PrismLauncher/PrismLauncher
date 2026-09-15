@@ -25,7 +25,7 @@ class FileResolvingTask : public Task {
     Q_OBJECT
    public:
     explicit FileResolvingTask(Flame::Manifest& toProcess);
-    virtual ~FileResolvingTask() = default;
+    ~FileResolvingTask() override = default;
 
     bool canAbort() const override { return true; }
     bool abort() override;
@@ -33,7 +33,7 @@ class FileResolvingTask : public Task {
     const Flame::Manifest& getResults() const { return m_manifest; }
 
    protected:
-    virtual void executeTask() override;
+    void executeTask() override;
 
    protected slots:
     void netJobFinished(QByteArray* response);

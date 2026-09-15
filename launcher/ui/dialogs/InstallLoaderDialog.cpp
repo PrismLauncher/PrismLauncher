@@ -27,6 +27,7 @@
 #include "meta/Index.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui/widgets/PageContainer.h"
 #include "ui/widgets/VersionSelectWidget.h"
 
@@ -157,11 +158,63 @@ void InstallLoaderDialog::validate(BasePage* page)
     buttons->button(QDialogButtonBox::Ok)->setEnabled(pageCast(page)->selectedVersion() != nullptr);
 }
 
+bool InstallLoaderDialog::resolveLoaderConflicts(InstallLoaderPage* page)
+{
+    QList<ComponentPtr> conflicts;
+    auto knownLoader = Component::KNOWN_MODLOADERS.find(page->id());
+    if (knownLoader != Component::KNOWN_MODLOADERS.cend()) {
+        for (const QString& conflictId : knownLoader->knownConflictingComponents) {
+            const ComponentPtr conflictComponent = profile->getComponent(conflictId);
+            if (conflictComponent && conflictComponent->isEnabled() && !conflictComponent->isCustom())
+                conflicts.append(conflictComponent);
+        }
+    }
+
+    const QString targetVersion = QString("%1 %2").arg(page->displayName(), page->selectedVersion()->descriptor());
+
+    for (const ComponentPtr& conflict : conflicts) {
+        const QString conflictVersion = QString("%1 %2").arg(conflict->getName(), conflict->getVersion());
+        auto* msgBox = CustomMessageBox::selectable(
+            this, tr("Installing a second loader"),
+            tr("%1 is known to conflict with %2, which is enabled on this instance. Having both enabled at the same time will "
+               "likely break the instance.\n\nWhat would you like to do with %2?")
+                .arg(targetVersion, conflictVersion),
+            QMessageBox::Warning, QMessageBox::Cancel);
+        QAbstractButton* keepButton = msgBox->addButton(tr("Keep it"), QMessageBox::AcceptRole);
+        QAbstractButton* disableButton = conflict->canBeDisabled() ? msgBox->addButton(tr("Disable it"), QMessageBox::ActionRole) : nullptr;
+        QAbstractButton* uninstallButton =
+            conflict->isRemovable() ? msgBox->addButton(tr("Uninstall it"), QMessageBox::DestructiveRole) : nullptr;
+        msgBox->exec();
+
+        auto* clicked = msgBox->clickedButton();
+        if (clicked == keepButton)
+            continue;
+        if (disableButton && clicked == disableButton) {
+            conflict->setEnabled(false);
+            profile->resolve(Net::Mode::Online);
+            continue;
+        }
+        if (uninstallButton && clicked == uninstallButton) {
+            profile->remove(conflict->getID());
+            profile->resolve(Net::Mode::Online);
+            continue;
+        }
+        return false;
+    }
+    return true;
+}
+
 void InstallLoaderDialog::done(int result)
 {
     if (result == Accepted) {
         auto* page = pageCast(container->selectedPage());
         if (page->selectedVersion()) {
+            if (!resolveLoaderConflicts(page))
+                return;
+
+            if (const ComponentPtr component = profile->getComponent(page->id()); component && !component->isEnabled())
+                component->setEnabled(true);
+
             profile->setComponentVersion(page->id(), page->selectedVersion()->descriptor());
             if (auto component = profile->getComponent(page->id())) {
                 component->setEnabled(true);

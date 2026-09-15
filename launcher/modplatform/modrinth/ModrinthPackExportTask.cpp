@@ -41,7 +41,7 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
                                                const QString& version,
                                                const QString& summary,
                                                bool optionalFiles,
-                                               BaseInstance* instance,
+                                               MinecraftInstance* instance,
                                                const QString& output,
                                                MMCZip::FilterFileFunction filter)
     : name(name)
@@ -49,7 +49,6 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
     , summary(summary)
     , optionalFiles(optionalFiles)
     , instance(instance)
-    , mcInstance(dynamic_cast<MinecraftInstance*>(instance))
     , gameRoot(instance->gameRoot())
     , output(output)
     , filter(std::move(filter))
@@ -85,12 +84,8 @@ void ModrinthPackExportTask::collectFiles()
     pendingHashes.clear();
     resolvedFiles.clear();
 
-    if (mcInstance) {
-        mcInstance->loaderModList()->update();
-        connect(mcInstance->loaderModList(), &ModFolderModel::updateFinished, this, &ModrinthPackExportTask::collectHashes);
-    } else {
-        collectHashes();
-    }
+    instance->loaderModList()->update();
+    connect(instance->loaderModList(), &ModFolderModel::updateFinished, this, &ModrinthPackExportTask::collectHashes);
 }
 
 void ModrinthPackExportTask::collectHashes()
@@ -123,7 +118,7 @@ void ModrinthPackExportTask::collectHashes()
         }
         auto sha512 = Hashing::hash(data, Hashing::Algorithm::Sha512);
 
-        auto allMods = mcInstance->loaderModList()->allMods();
+        auto allMods = instance->loaderModList()->allMods();
         if (auto modIter = std::find_if(allMods.begin(), allMods.end(), [&file](Mod* mod) { return mod->fileinfo() == file; });
             modIter != allMods.end()) {
             const Mod* mod = *modIter;
@@ -159,9 +154,9 @@ void ModrinthPackExportTask::makeApiRequest()
         buildZip();
     } else {
         setStatus(tr("Finding versions for hashes..."));
-        auto [versionsTask, response] = api.currentVersions(pendingHashes.values(), "sha512");
+        auto [versionsTask, response] = ModrinthAPI::get().currentVersions(pendingHashes.values(), "sha512");
         task = versionsTask;
-        connect(task.get(), &Task::succeeded, [this, response]() { parseApiResponse(response); });
+        connect(task.get(), &Task::succeeded, this, [this, response]() { parseApiResponse(response); });
         connect(task.get(), &Task::failed, this, &ModrinthPackExportTask::emitFailed);
         connect(task.get(), &Task::aborted, this, &ModrinthPackExportTask::emitAborted);
         task->start();
@@ -250,8 +245,8 @@ QByteArray ModrinthPackExportTask::generateIndex()
         out["summary"] = summary;
     }
 
-    if (mcInstance) {
-        auto* profile = mcInstance->getPackProfile();
+    if (instance) {
+        auto* profile = instance->getPackProfile();
         // collect all supported components
         const ComponentPtr minecraft = profile->getComponent("net.minecraft");
         const ComponentPtr quilt = profile->getComponent("org.quiltmc.quilt-loader");

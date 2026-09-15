@@ -9,7 +9,6 @@
 #include <QRegularExpression>
 #include <QString>
 
-#include "FileSystem.h"
 #include "Json.h"
 #include "archive/ArchiveReader.h"
 #include "minecraft/mod/ModDetails.h"
@@ -340,20 +339,19 @@ ModDetails ReadFabricModInfo(QByteArray contents)
                 auto obj = icon.toObject();
                 // take the largest icon
                 int largest = 0;
-                for (auto key : obj.keys()) {
+                QString bestIcon;
+                for (const auto& key : obj.keys()) {
                     auto size = key.split('x').first().toInt();
                     if (size > largest) {
                         largest = size;
+                        bestIcon = obj.value(key).toString();
                     }
                 }
-                if (largest > 0) {
-                    auto key = QString::number(largest) + "x" + QString::number(largest);
-                    details.icon_file = obj.value(key).toString();
-                } else {  // parsing the sizes failed
+                if (!bestIcon.isEmpty()) {
+                    details.icon_file = bestIcon;
+                } else if (!obj.isEmpty()) {
                     // take the first
-                    if (auto it = obj.begin(); it != obj.end()) {
-                        details.icon_file = it->toString();
-                    }
+                    details.icon_file = obj.begin().value().toString();
                 }
             } else if (icon.isString()) {
                 details.icon_file = icon.toString();
@@ -561,8 +559,6 @@ ModDetails ReadNilModInfo(QByteArray contents, QString fname)
 bool process(Mod& mod, ProcessingLevel level)
 {
     switch (mod.type()) {
-        case ResourceType::FOLDER:
-            return processFolder(mod, level);
         case ResourceType::ZIPFILE:
             return processZIP(mod, level);
         case ResourceType::LITEMOD:
@@ -677,27 +673,6 @@ bool processZIP(Mod& mod, [[maybe_unused]] ProcessingLevel level)
     return false;  // no valid mod found in archive
 }
 
-bool processFolder(Mod& mod, [[maybe_unused]] ProcessingLevel level)
-{
-    ModDetails details;
-
-    QFileInfo mcmod_info(FS::PathCombine(mod.fileinfo().filePath(), "mcmod.info"));
-    if (mcmod_info.exists() && mcmod_info.isFile()) {
-        QFile mcmod(mcmod_info.filePath());
-        if (!mcmod.open(QIODevice::ReadOnly))
-            return false;
-        auto data = mcmod.readAll();
-        if (data.isEmpty() || data.isNull())
-            return false;
-        details = ReadMCModInfo(data);
-
-        mod.setDetails(details);
-        return true;
-    }
-
-    return false;  // no valid mcmod.info file found
-}
-
 bool processLitemod(Mod& mod, [[maybe_unused]] ProcessingLevel level)
 {
     ModDetails details;
@@ -746,26 +721,6 @@ bool loadIconFile(const Mod& mod, QPixmap* pixmap)
     };
 
     switch (mod.type()) {
-        case ResourceType::FOLDER: {
-            QFileInfo icon_info(FS::PathCombine(mod.fileinfo().filePath(), mod.iconPath()));
-            if (icon_info.exists() && icon_info.isFile()) {
-                QFile icon(icon_info.filePath());
-                if (!icon.open(QIODevice::ReadOnly)) {
-                    return png_invalid("failed to open file " + icon_info.filePath() + " " + icon.errorString());
-                }
-                auto data = icon.readAll();
-
-                bool icon_result = ModUtils::processIconPNG(mod, std::move(data), pixmap);
-
-                icon.close();
-
-                if (!icon_result) {
-                    return png_invalid("invalid png image");  // icon invalid
-                }
-                return true;
-            }
-            return png_invalid("file '" + icon_info.filePath() + "' does not exists or is not a file");
-        }
         case ResourceType::ZIPFILE: {
             MMCZip::ArchiveReader zip(mod.fileinfo().filePath());
             auto file = zip.goToFile(mod.iconPath());

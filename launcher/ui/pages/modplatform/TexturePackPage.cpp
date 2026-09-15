@@ -38,13 +38,13 @@ namespace ResourceDownload {
 TexturePackResourcePage::TexturePackResourcePage(ResourceDownloadDialog* dialog,
                                                  BaseInstance& instance,
                                                  ResourceProviderData provider,
-                                                 ResourceAPI* api,
+                                                 const ResourceAPI* api,
                                                  TexturePackResourceModel* model)
     : ResourcePage(dialog, instance, prepareResourcePackDescriptor(), std::move(provider))
 {
     m_model = model;
     if (!m_model) {
-        m_model = new TexturePackResourceModel(instance, api, debugName(), metaEntryBase());
+        m_model = new TexturePackResourceModel(getDialog()->getBaseModel(), api, debugName(), metaEntryBase());
     }
     m_ui->packView->setModel(m_model);
 

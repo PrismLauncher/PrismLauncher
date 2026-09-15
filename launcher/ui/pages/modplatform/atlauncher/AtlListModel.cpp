@@ -20,7 +20,7 @@
 #include <BuildConfig.h>
 #include <Json.h>
 
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 #include "ui/widgets/ProjectItem.h"
 
 namespace Atl {
@@ -99,7 +99,7 @@ void ListModel::request()
 
     auto netJob = makeShared<NetJob>("Atl::Request", APPLICATION->network());
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/json/packsnew.json");
-    auto [action, response] = Net::ApiDownload::makeByteArray(QUrl(url));
+    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(url));
     netJob->addNetAction(action);
     jobPtr = netJob;
     jobPtr->start();
@@ -197,7 +197,7 @@ void ListModel::requestLogo(QString file, QString url)
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", QString("logos/%1").arg(file));
     auto job = new NetJob(QString("ATLauncher Icon Download %1").arg(file), APPLICATION->network());
     job->setAskRetry(false);
-    job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
+    job->addNetAction(Net::ApiRequest::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
     connect(job, &NetJob::succeeded, this, [this, file, fullPath, job] {

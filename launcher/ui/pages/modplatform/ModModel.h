@@ -28,14 +28,12 @@ class ModModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    ModModel(BaseInstance&, ResourceAPI* api, const QString& debugName, QString metaEntryBase);
+    ModModel(BaseInstance&, ResourceFolderModel*, const ResourceAPI* api, const QString& debugName, QString metaEntryBase);
 
     /* Ask the API for more information */
-    void searchWithTerm(const QString& term, unsigned int sort, bool filter_changed);
+    void searchWithTerm(const QString& term, unsigned int sort, bool filterChanged);
 
     void setFilter(std::shared_ptr<ModFilterWidget::Filter> filter) { m_filter = std::move(filter); }
-    QVariant getInstalledPackVersion(ModPlatform::IndexedPack::Ptr pack) const override;
-
     [[nodiscard]] QString debugName() const override { return m_debugName; }
     [[nodiscard]] QString metaEntryBase() const override { return m_metaEntryBase; }
 
@@ -45,13 +43,11 @@ class ModModel : public ResourceModel {
     ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex& index) override;
 
    protected:
-    bool isPackInstalled(ModPlatform::IndexedPack::Ptr pack) const override;
-
     bool checkFilters(ModPlatform::IndexedPack::Ptr pack) override;
     bool checkVersionFilters(const ModPlatform::IndexedVersion& version) override;
 
    protected:
-    BaseInstance& m_base_instance;
+    BaseInstance& m_baseInstance;
 
     std::shared_ptr<ModFilterWidget::Filter> m_filter = nullptr;
 

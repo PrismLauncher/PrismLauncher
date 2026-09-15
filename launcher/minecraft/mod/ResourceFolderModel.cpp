@@ -20,6 +20,7 @@
 #include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
 
 #include "Json.h"
+#include "minecraft/MinecraftInstance.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
@@ -28,7 +29,7 @@
 #include "tasks/Task.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
-ResourceFolderModel::ResourceFolderModel(const QDir& dir, BaseInstance* instance, bool isIndexed, bool createDir, QObject* parent)
+ResourceFolderModel::ResourceFolderModel(const QDir& dir, MinecraftInstance* instance, bool isIndexed, bool createDir, QObject* parent)
     : QAbstractListModel(parent), m_dir(dir), m_instance(instance), m_watcher(this), m_isIndexed(isIndexed)
 {
     if (createDir) {
@@ -50,7 +51,8 @@ ResourceFolderModel::ResourceFolderModel(const QDir& dir, BaseInstance* instance
 
 ResourceFolderModel::~ResourceFolderModel()
 {
-    while (!QThreadPool::globalInstance()->waitForDone(100)) {
+    m_resourceResolverThread.quit();
+    while (!m_resourceResolverThread.wait(100)) {
         QCoreApplication::processEvents();
     }
 }
@@ -185,10 +187,10 @@ void ResourceFolderModel::installResourceWithFlameMetadata(const QString& path, 
             .provider = ModPlatform::ResourceProvider::FLAME,
         };
 
-        auto [job, response] = FlameAPI().getProject(vers.addonId.toString());
+        auto [job, response] = FlameAPI::get().getProject(vers.addonId.toString());
         connect(job.get(), &Task::failed, this, install);
         connect(job.get(), &Task::aborted, this, install);
-        connect(job.get(), &Task::succeeded, [response, this, &vers, install, &pack] {
+        connect(job.get(), &Task::succeeded, this, [response, this, &vers, install, &pack] {
             QJsonParseError parseError{};
             QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
             if (parseError.error != QJsonParseError::NoError) {
@@ -320,11 +322,11 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, Ena
     return succeeded;
 }
 
-static QMutex s_update_task_mutex;
+static QMutex s_updateTaskMutex;
 bool ResourceFolderModel::update()
 {
     // We hold a lock here to prevent race conditions on the m_current_update_task reset.
-    QMutexLocker lock(&s_update_task_mutex);
+    QMutexLocker lock(&s_updateTaskMutex);
 
     // Already updating, so we schedule a future update and return.
     if (m_currentUpdateTask) {
@@ -361,7 +363,7 @@ bool ResourceFolderModel::update()
         task->addTask(preUpdate);
         task->addTask(m_currentUpdateTask);
 
-        connect(task, &Task::finished, [task] { task->deleteLater(); });
+        connect(task, &Task::finished, task, &Task::deleteLater);
 
         QThreadPool::globalInstance()->start(task);
     } else {
@@ -381,6 +383,8 @@ void ResourceFolderModel::resolveResource(Resource::Ptr res)
     if (!task) {
         return;
     }
+
+    task->moveToThread(&m_resourceResolverThread);
 
     int ticket = m_nextResolutionTicket.fetch_add(1);
 
@@ -404,7 +408,8 @@ void ResourceFolderModel::resolveResource(Resource::Ptr res)
     m_resourceResolver.addTask(task);
 
     if (!m_resourceResolverRunning) {
-        QThreadPool::globalInstance()->start(&m_resourceResolver);
+        m_resourceResolverThread.start();
+        m_resourceResolver.start();
         m_resourceResolverRunning = true;
     }
 }
@@ -847,7 +852,7 @@ void ResourceFolderModel::onParseFailed(int ticket, const QString& resourceId)
     // update index
     m_resourcesIndex.clear();
     int idx = 0;
-    for (const auto& mod : qAsConst(m_resources)) {
+    for (const auto& mod : std::as_const(m_resources)) {
         m_resourcesIndex[mod->internalId()] = idx;
         idx++;
     }
@@ -954,7 +959,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& currentSet, QSet<QString>&
     {
         m_resourcesIndex.clear();
         int idx = 0;
-        for (const auto& mod : qAsConst(m_resources)) {
+        for (const auto& mod : std::as_const(m_resources)) {
             m_resourcesIndex[mod->internalId()] = idx;
             idx++;
         }

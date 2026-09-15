@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (c) 2026 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,23 +14,14 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
 
 #pragma once
 
-#include "Download.h"
-#include "net/ApiHeaderProxy.h"
+#include "net/Request.h"
 
-namespace Net {
+Net::Request::Ptr makeSkinDeleteRequest(const QString& token);
 
-namespace ApiDownload {
-Download::Ptr makeCached(QUrl url, MetaEntryPtr entry, Download::Options options = Download::Option::NoOptions);
-std::pair<Download::Ptr, QByteArray*> makeByteArray(QUrl url, Download::Options options = Download::Option::NoOptions);
-Download::Ptr makeFile(QUrl url,
-                       QString path,
-                       Download::Options options = Download::Option::NoOptions,
-                       ModrinthDownloadMeta meta = ModrinthDownloadMeta());
-};  // namespace ApiDownload
+Net::Request::Ptr makeSkinUploadRequest(const QString& token, const QString& path, const QString& variant);
 
-}  // namespace Net
+Net::Request::Ptr makeCapeChangeRequest(const QString& token, const QString& capeId);

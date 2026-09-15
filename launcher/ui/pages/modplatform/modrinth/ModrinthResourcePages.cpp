@@ -57,27 +57,27 @@ static ResourceProviderData prepareModrinth()
 
 ShaderPackResourcePage* Modrinth::createShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
-    return new ShaderPackResourcePage(dialog, instance, prepareModrinth(), new ModrinthAPI());
+    return new ShaderPackResourcePage(dialog, instance, prepareModrinth(), &ModrinthAPI::get());
 }
 
 DataPackResourcePage* Modrinth::createDataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
-    return new DataPackResourcePage(dialog, instance, prepareModrinth(), new ModrinthAPI());
+    return new DataPackResourcePage(dialog, instance, prepareModrinth(), &ModrinthAPI::get());
 }
 
 ResourcePackResourcePage* Modrinth::createResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
-    return new ResourcePackResourcePage(dialog, instance, prepareModrinth(), new ModrinthAPI());
+    return new ResourcePackResourcePage(dialog, instance, prepareModrinth(), &ModrinthAPI::get());
 }
 
 TexturePackResourcePage* Modrinth::createTexturePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
-    return new TexturePackResourcePage(dialog, instance, prepareModrinth(), new ModrinthAPI());
+    return new TexturePackResourcePage(dialog, instance, prepareModrinth(), &ModrinthAPI::get());
 }
 
 ModPage* Modrinth::createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
-    return new ModPage(dialog, instance, prepareModrinth(), new ModrinthAPI(),
+    return new ModPage(dialog, instance, prepareModrinth(), &ModrinthAPI::get(),
                        ModFilterWidget::create(&static_cast<MinecraftInstance&>(instance), true));
 }
 }  // namespace ResourceDownload

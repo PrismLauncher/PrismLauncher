@@ -39,10 +39,10 @@ namespace ResourceDownload {
 ResourcePackResourcePage::ResourcePackResourcePage(ResourceDownloadDialog* dialog,
                                                    BaseInstance& instance,
                                                    ResourceProviderData provider,
-                                                   ResourceAPI* api)
+                                                   const ResourceAPI* api)
     : ResourcePage(dialog, instance, prepareResourcePackDescriptor(), std::move(provider))
 {
-    m_model = new ResourcePackResourceModel(instance, api, debugName(), metaEntryBase());
+    m_model = new ResourcePackResourceModel(getDialog()->getBaseModel(), api, debugName(), metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();

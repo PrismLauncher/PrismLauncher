@@ -57,7 +57,8 @@ std::optional<LogParser::LogEntry> LogParser::parseAttributes()
                 m_parser.raiseError("log4j:Event Missing required attribute: timestamp");
                 return {};
             }
-            entry.timestamp = QDateTime::fromSecsSinceEpoch(value.trimmed().toLongLong());
+            // log4j's XMLLayout reports the event time in milliseconds
+            entry.timestamp = QDateTime::fromMSecsSinceEpoch(value.trimmed().toLongLong());
         } else if (name == "level"_L1) {
             entry.levelText = value.trimmed().toString();
             entry.level = MessageLevel::fromName(entry.levelText);
@@ -86,14 +87,25 @@ void LogParser::clearError()
     m_error = {};  // clear previous error
 }
 
-bool isPotentialLog4JStart(QStringView buffer)
+/// Does this slice begin a log4j event?
+///
+/// Data reaches the parser one whole line at a time (see LogParser::appendLine) and log4j's XMLLayout
+/// never splits the `<log4j:Event` start tag across lines, so a slice that is merely a *prefix* of that
+/// tag can never be completed by later input. Accepting such a prefix used to tear a lone `<` (as in the
+/// emoticon `>w<`) off the end of its line and hold it back until the next line arrived.
+static bool isPotentialLog4JStart(QStringView buffer)
 {
-    static QString target = QStringLiteral("<log4j:event");
-    if (buffer.isEmpty() || buffer[0] != '<') {
+    static constexpr auto target = "<log4j:event"_L1;
+    if (!buffer.startsWith(target, Qt::CaseInsensitive)) {
         return false;
     }
-    auto bufLower = buffer.toString().toLower();
-    return target.startsWith(bufLower) || bufLower.startsWith(target);
+    if (buffer.length() == target.size()) {
+        return true;  // the name is complete, whatever follows it is on the next line
+    }
+    // `<log4j:Eventually` names a different element, and taking it for one of ours would swallow the
+    // rest of the line just like the bare `<` did.
+    auto next = buffer.at(target.size());
+    return next.isSpace() || next == '>' || next == '/';
 }
 
 std::optional<LogParser::ParsedItem> LogParser::parseNext()

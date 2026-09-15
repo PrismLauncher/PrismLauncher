@@ -86,6 +86,13 @@ namespace fs = std::filesystem;
 #include <linux/fs.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+
+#if defined(WITH_QTDBUS)
+#include <QDBusConnection>
+#include <QDBusReply>
+#include <QDBusUnixFileDescriptor>
+#endif
+
 #elif defined(Q_OS_MACOS)
 #include <sys/attr.h>
 #include <sys/clonefile.h>
@@ -311,6 +318,7 @@ bool copy::operator()(const QString& offset, bool dryRun)
     using copy_opts = fs::copy_options;
     m_copied = 0;  // reset counter
     m_failedPaths.clear();
+    m_symlinksToCopy.clear();
 
 // NOTE always deep copy on windows. the alternatives are too messy.
 #if defined Q_OS_WIN32
@@ -338,11 +346,39 @@ bool copy::operator()(const QString& offset, bool dryRun)
 
         auto dst_path = PathCombine(dst, relative_dst_path);
         if (!dryRun) {
-            ensureFilePathExists(dst_path);
+            auto srcStdPath = StringUtils::toStdString(src_path);
+#ifdef Q_OS_WIN32
+            if (fs::is_symlink(srcStdPath)) {
+                auto symlinkTarget = QString(fs::read_symlink(srcStdPath).c_str());
+
+                LinkPair link = { .src = symlinkTarget, .dst = dst_path };
+                m_symlinksToCopy.append(link);
+            }
+#endif
+
+            if (fs::is_directory(srcStdPath) && !fs::is_symlink(srcStdPath)) {
+                ensureFolderPathExists(dst_path);
+            } else {
+                ensureFilePathExists(dst_path);
+            }
 #ifdef Q_OS_WIN32
             copyFolderAttributes(src, dst, relative_dst_path);
 #endif
-            fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
+
+            // don't copy directories as we loop over the individual files and copy them instead
+            // check is necessary as directories are still looped over to copy directory symlinks or empty directories
+            // and otherwise both the directories *and* the files in them will be copied which is messy and weird
+
+            // Behavior varies on OS, on windows symlink directories seem to get follow/deep copied regardless of copy_opts flags,
+            // so skip them now (don't copy them with fs::copy but with privileged FS::create_link later)
+            // On linux symlink directories get correctly copied as symlinks if the flag is set, so only skip non symlink dirs
+            bool skip = fs::is_directory(srcStdPath) && !fs::is_symlink(srcStdPath);
+#ifdef Q_OS_WIN32
+            skip = fs::is_directory(srcStdPath) || fs::is_symlink(srcStdPath);
+#endif
+            if (!skip) {
+                fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
+            }
         }
         if (err) {
             qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
@@ -360,7 +396,13 @@ bool copy::operator()(const QString& offset, bool dryRun)
     // blacklisted paths, so we iterate over the source directory, and if there's no blacklist
     // match, we copy the file.
     QDir src_dir(src);
-    QDirIterator source_it(src, QDir::Filter::Files | QDir::Filter::Hidden, QDirIterator::Subdirectories);
+    QDir::Filters filters = QDir::Filter::Files | QDir::Filter::Hidden;
+
+    if (m_copyDirectories) {
+        filters |= QDir::Filter::NoDotAndDotDot | QDir::Filter::Dirs;
+    }
+
+    QDirIterator source_it(src, filters, QDirIterator::Subdirectories);
 
     while (source_it.hasNext()) {
         auto src_path = source_it.next();
@@ -373,7 +415,43 @@ bool copy::operator()(const QString& offset, bool dryRun)
     if (!fs::is_directory(StringUtils::toStdString(src)))
         copy_file(src, "");
 
-    return err.value() == 0;
+    bool thereWereErrors = false;
+#ifdef Q_OS_WIN32
+    if (!m_symlinksToCopy.empty()) {
+        FS::create_link folderLink(m_symlinksToCopy);
+        folderLink.linkRecursively(false);
+
+        if (!folderLink()) {
+            qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
+            qDebug() << "attempting to run symlinking with privilege";
+
+            QEventLoop loop;
+            bool gotPrivResults = false;
+
+            connect(&folderLink, &FS::create_link::finishedPrivileged, this, [&gotPrivResults, &loop](bool gotResults) {
+                if (!gotResults) {
+                    qDebug() << "Privileged run exited without results!";
+                }
+                gotPrivResults = gotResults;
+                loop.quit();
+            });
+            folderLink.runPrivileged();
+
+            loop.exec();  // wait for the finished signal
+
+            for (auto result : folderLink.getResults()) {
+                if (result.err_value != 0) {
+                    thereWereErrors = true;
+                }
+            }
+            if (thereWereErrors) {
+                qDebug() << "errors encountered while trying to link files";
+            }
+        }
+    }
+#endif
+
+    return err.value() == 0 && !thereWereErrors;
 }
 
 /// qDebug print support for the LinkPair struct
@@ -712,9 +790,36 @@ bool deleteContents(const QString& path)
 
 bool trash(QString path, QString* pathInTrash)
 {
-    // FIXME: Figure out trash in Flatpak. Qt seemingly doesn't use the Trash portal
-    if (DesktopServices::isFlatpak())
+#ifdef Q_OS_LINUX
+    if (DesktopServices::isFlatpak()) {
+#if defined(WITH_QTDBUS)
+        const int file = open(path.toUtf8().data(), O_PATH | O_CLOEXEC, 0);
+        if (file == -1) {
+            return false;
+        }
+        const QDBusUnixFileDescriptor fileDescriptor(file);
+        close(file);
+
+        QDBusMessage message = QDBusMessage::createMethodCall("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop",
+                                                              "org.freedesktop.portal.Trash", "TrashFile");
+
+        message << QVariant::fromValue(fileDescriptor);
+
+        const QDBusReply<uint32_t> reply = QDBusConnection::sessionBus().call(message);
+        if (!reply.isValid()) {
+            qWarning() << "Error while trying to trash the file" << path << reply.error().name() << ":" << reply.error().message();
+            return false;
+        }
+        if (pathInTrash) {
+            *pathInTrash = QString();  // No info provided by the API, use the same semantics as QFile::moveToTrash
+        }
+
+        return reply.value() != 0;
+#else
         return false;
+#endif
+    }
+#endif
 #if defined Q_OS_WIN32
     if (IsWindowsServer())
         return false;
