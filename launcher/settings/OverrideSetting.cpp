@@ -15,11 +15,12 @@
 
 #include "OverrideSetting.h"
 
-OverrideSetting::OverrideSetting(std::shared_ptr<Setting> other, std::shared_ptr<Setting> gate) : Setting(other->configKeys(), QVariant())
+OverrideSetting::OverrideSetting(QStringList synonyms, std::function<QVariant()> other, std::shared_ptr<Setting> gate)
+    : Setting(std::move(synonyms), QVariant())
 {
     Q_ASSERT(other);
     Q_ASSERT(gate);
-    m_other = other;
+    m_other = std::move(other);
     m_gate = gate;
 }
 
@@ -30,7 +31,7 @@ bool OverrideSetting::isOverriding() const
 
 QVariant OverrideSetting::defValue() const
 {
-    return m_other->get();
+    return m_other();
 }
 
 QVariant OverrideSetting::get() const
@@ -38,7 +39,7 @@ QVariant OverrideSetting::get() const
     if (isOverriding()) {
         return Setting::get();
     }
-    return m_other->get();
+    return m_other();
 }
 
 void OverrideSetting::reset()

@@ -33,6 +33,7 @@
  *      limitations under the License.
  */
 
+#include "Application.h"
 #include "LaunchCommand.h"
 #include <launch/LaunchTask.h>
 

@@ -38,6 +38,8 @@
 
 #include "Application.h"
 #include "MessageLevel.h"
+#include "config/GlobalConfig.h"
+#include "config/InstanceConfig.h"
 #include "java/JavaInstall.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaVersion.h"
@@ -48,13 +50,11 @@ void VerifyJavaInstall::executeTask()
 {
     auto instance = m_parent->instance();
     auto packProfile = instance->getPackProfile();
-    auto settings = instance->settings();
-    auto storedVersion = settings->get("JavaVersion").toString();
-    auto ignoreCompatibility = settings->get("IgnoreJavaCompatibility").toBool();
-    auto javaArchitecture = settings->get("JavaArchitecture").toString();
-    auto maxMemAlloc = settings->get("MaxMemAlloc").toInt();
+    const auto& conf = *instance->config();
+    const auto installation = conf.javaInstallationOrGlobal(*APPLICATION->config());
+    const auto memory = conf.memoryOrGlobal(*APPLICATION->config());
 
-    if (javaArchitecture == "32" && maxMemAlloc > 2048) {
+    if (installation.architecture == "32" && memory.maxAlloc > 2048) {
         emit logLine(tr("Max memory allocation exceeds the supported value.\n"
                         "The selected installation of Java is 32-bit and doesn't support more than 2048MiB of RAM.\n"
                         "The instance may not start due to this."),
@@ -63,14 +63,14 @@ void VerifyJavaInstall::executeTask()
 
     auto compatibleMajors = packProfile->getProfile()->getCompatibleJavaMajors();
 
-    JavaVersion javaVersion(storedVersion);
+    JavaVersion javaVersion(installation.version);
 
     if (compatibleMajors.isEmpty() || compatibleMajors.contains(javaVersion.major())) {
         emitSucceeded();
         return;
     }
 
-    if (ignoreCompatibility) {
+    if (installation.ignoreCompatibility) {
         emit logLine(tr("Java major version is incompatible. Things might break.\n"), MessageLevel::Warning);
         emitSucceeded();
         return;

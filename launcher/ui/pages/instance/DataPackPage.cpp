@@ -19,8 +19,9 @@
 #include "DataPackPage.h"
 #include "ui_ExternalResourcesPage.h"
 
+#include "config/GlobalConfig.h"
+#include "config/InstanceConfig.h"
 #include "minecraft/PackProfile.h"
-#include "settings/Setting.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
@@ -75,7 +76,7 @@ void DataPackPage::downloadDataPacks()
 void DataPackPage::downloadDialogFinished(int result)
 {
     if (result != 0) {
-        ConcurrentTask tasks(tr("Download Data Packs"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        ConcurrentTask tasks(tr("Download Data Packs"), APPLICATION->config()->numberOfConcurrentDownloads);
         connect(&tasks, &Task::failed, this,
                 [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
         connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
@@ -106,7 +107,7 @@ void DataPackPage::downloadDialogFinished(int result)
 
 void DataPackPage::updateDataPacks()
 {
-    if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+    if (APPLICATION->config()->modMetadataDisabled) {
         QMessageBox::critical(this, tr("Error"), tr("Data pack updates are unavailable when metadata is disabled!"));
         return;
     }
@@ -151,7 +152,7 @@ void DataPackPage::updateDataPacks()
     }
 
     if (updateDialog.exec() != 0) {
-        ConcurrentTask tasks("Download Data Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        ConcurrentTask tasks("Download Data Packs", APPLICATION->config()->numberOfConcurrentDownloads);
         connect(&tasks, &Task::failed, this,
                 [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
         connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
@@ -198,7 +199,7 @@ void DataPackPage::deleteDataPackMetadata()
 
 void DataPackPage::changeDataPackVersion()
 {
-    if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+    if (APPLICATION->config()->modMetadataDisabled) {
         QMessageBox::critical(this, tr("Error"), tr("Data pack updates are unavailable when metadata is disabled!"));
         return;
     }
@@ -218,7 +219,7 @@ void DataPackPage::changeDataPackVersion()
     m_downloadDialog = ResourceDownload::ResourceDownloadDialog::createDataPack(this, m_model, m_instance, true);
     m_downloadDialog->setResourceMetadata(resource.metadata());
     if (m_downloadDialog->exec() != 0) {
-        ConcurrentTask tasks("Download Data Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        ConcurrentTask tasks("Download Data Packs", APPLICATION->config()->numberOfConcurrentDownloads);
         connect(&tasks, &Task::failed, this,
                 [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
         connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
@@ -246,15 +247,14 @@ GlobalDataPackPage::GlobalDataPackPage(MinecraftInstance* instance, QWidget* par
     layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
 
-    connect(instance->settings()->getSetting("GlobalDataPacksEnabled").get(), &Setting::SettingChanged, this, [this] {
-        updateContent();
-        if (m_container != nullptr) {
-            m_container->refreshContainer();
+    connect(&instance->config(), &InstanceConfigHolder::updated, this, [this, &conf = instance->config()] {
+        if (conf.prev()->globalDataPacksPath != conf->globalDataPacksPath) {
+            updateContent();
+            if (m_container != nullptr) {
+                m_container->refreshContainer();
+            }
         }
     });
-
-    connect(instance->settings()->getSetting("GlobalDataPacksPath").get(), &Setting::SettingChanged, this,
-            &GlobalDataPackPage::updateContent);
 }
 
 QString GlobalDataPackPage::displayName() const
@@ -286,7 +286,7 @@ QString GlobalDataPackPage::helpPage() const
 
 bool GlobalDataPackPage::shouldDisplay() const
 {
-    return m_instance->settings()->get("GlobalDataPacksEnabled").toBool();
+    return m_instance->config()->globalDataPacksPath.has_value();
 }
 
 bool GlobalDataPackPage::apply()

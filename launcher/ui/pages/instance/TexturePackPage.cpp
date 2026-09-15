@@ -37,6 +37,7 @@
 
 #include "TexturePackPage.h"
 
+#include "config/GlobalConfig.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
@@ -92,7 +93,7 @@ void TexturePackPage::downloadTexturePacks()
 void TexturePackPage::downloadDialogFinished(int result)
 {
     if (result != 0) {
-        ConcurrentTask tasks("Download Texture Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        ConcurrentTask tasks("Download Texture Packs", APPLICATION->config()->numberOfConcurrentDownloads);
         connect(&tasks, &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
         });
@@ -124,7 +125,7 @@ void TexturePackPage::downloadDialogFinished(int result)
 
 void TexturePackPage::updateTexturePacks()
 {
-    if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+    if (APPLICATION->config()->modMetadataDisabled) {
         QMessageBox::critical(this, tr("Error"), tr("Texture pack updates are unavailable when metadata is disabled!"));
         return;
     }
@@ -169,7 +170,7 @@ void TexturePackPage::updateTexturePacks()
     }
 
     if (updateDialog.exec() != 0) {
-        ConcurrentTask tasks("Download Texture Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        ConcurrentTask tasks("Download Texture Packs", APPLICATION->config()->numberOfConcurrentDownloads);
         connect(&tasks, &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
         });
@@ -217,7 +218,7 @@ void TexturePackPage::deleteTexturePackMetadata()
 
 void TexturePackPage::changeTexturePackVersion()
 {
-    if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+    if (APPLICATION->config()->modMetadataDisabled) {
         QMessageBox::critical(this, tr("Error"), tr("Texture pack updates are unavailable when metadata is disabled!"));
         return;
     }

@@ -1,5 +1,6 @@
 #include "ModrinthCheckUpdate.h"
 #include "Application.h"
+#include "config/GlobalConfig.h"
 #include "ModrinthAPI.h"
 #include "ModrinthPackIndex.h"
 
@@ -52,7 +53,7 @@ void ModrinthCheckUpdate::executeTask()
     setProgress(0, ((m_loadersList.isEmpty() ? 1 : m_loadersList.length()) * 2) + 1);
 
     auto hashingTask =
-        makeShared<ConcurrentTask>("MakeModrinthHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
+        makeShared<ConcurrentTask>("MakeModrinthHashesTask", APPLICATION->config()->numberOfConcurrentTasks);
     bool startHasing = false;
     for (auto* resource : m_resources) {
         auto hash = resource->metadata()->hash;

@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "FileSystem.h"
+#include "config/GlobalConfig.h"
 #include "Json.h"
 #include "Result.h"
 #include "modplatform/helpers/HashUtils.h"
@@ -29,7 +30,6 @@
 
 #include "Application.h"
 #include "BuildConfig.h"
-#include "settings/SettingsObject.h"
 #include "tasks/Task.h"
 
 namespace {
@@ -58,12 +58,11 @@ namespace Meta {
 
 QUrl BaseEntity::url() const
 {
-    auto* s = APPLICATION->settings();
-    QString metaOverride = s->get("MetaURLOverride").toString();
+    const QUrl& metaOverride = APPLICATION->config()->metaUrlOverride;
     if (metaOverride.isEmpty()) {
         return QUrl(BuildConfig.META_URL).resolved(localFilename());
     }
-    return QUrl(metaOverride).resolved(localFilename());
+    return metaOverride.resolved(localFilename());
 }
 
 Task::Ptr BaseEntity::loadTask(Net::Mode mode, bool forceReload)
