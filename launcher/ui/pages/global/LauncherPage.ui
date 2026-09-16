@@ -771,6 +771,8 @@
   <tabstop>updateIntervalSpinBox</tabstop>
   <tabstop>instDirTextBox</tabstop>
   <tabstop>instDirBrowseBtn</tabstop>
+  <tabstop>templateDirTextBox</tabstop>
+  <tabstop>templateDirBrowseBtn</tabstop>
   <tabstop>iconsDirTextBox</tabstop>
   <tabstop>iconsDirBrowseBtn</tabstop>
   <tabstop>modsDirTextBox</tabstop>

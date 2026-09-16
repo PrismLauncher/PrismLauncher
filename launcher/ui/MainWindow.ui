@@ -197,7 +197,6 @@
     <addaction name="actionViewJavaFolder"/>
     <addaction name="actionViewSkinsFolder"/>
     <addaction name="actionViewJavaFolder"/>
-    <addaction name="actionViewTemplateFolder"/>
 
     <addaction name="separator"/>
     <addaction name="actionViewWidgetThemeFolder"/>
