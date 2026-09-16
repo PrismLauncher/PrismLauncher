@@ -35,8 +35,10 @@
  */
 
 #include "ATLPackManifest.h"
+#include <expected>
 
 #include "Json.h"
+#include "modplatform/ModIndex.h"
 
 static ATLauncher::DownloadType parseDownloadType(QString rawType)
 {
@@ -99,21 +101,30 @@ static ATLauncher::ModType parseModType(QString rawType)
 
 Result<> loadVersionLoader(ATLauncher::VersionLoader& p, const QJsonObject& obj)
 {
-    TRY_INTO(p.type, Json::requireString(obj, "type"))
     p.choose = obj["choose"].toBool();
 
     TRY_INTO(const auto& metadata, Json::requireObject(obj, "metadata"))
     p.latest = metadata.value("latest").toBool();
     p.recommended = metadata.value("recommended").toBool();
 
-    // Minecraft Forge
-    if (p.type == "forge" || p.type == "neoforge") {
-        p.version = metadata.value("version").toString("");
+    TRY_INTO(const auto& loaderType, Json::requireString(obj, "type"))
+    if (loaderType.isEmpty()) {  // no loader
+        return {};
     }
-
-    // Fabric Loader
-    if (p.type == "fabric") {
-        p.version = metadata.value("loader").toString("");
+    p.type = ModPlatform::getModLoaderFromString(loaderType);
+    switch (p.type) {
+        case ModPlatform::ModLoaderType::NeoForge:
+        case ModPlatform::ModLoaderType::Forge: {
+            p.version = metadata.value("version").toString("");
+            break;
+        }
+        case ModPlatform::ModLoaderType::Fabric: {
+            p.version = metadata.value("loader").toString("");
+            break;
+        }
+        default: {
+            return std::unexpected("unknown launcher: " + loaderType);
+        }
     }
     return {};
 }

@@ -41,6 +41,7 @@
 #include <QString>
 
 #include "Result.h"
+#include "modplatform/ModIndex.h"
 
 namespace ATLauncher {
 
@@ -72,7 +73,7 @@ enum class ModType {
 enum class DownloadType { Server, Browser, Direct, Unknown };
 
 struct VersionLoader {
-    QString type;
+    ModPlatform::ModLoaderType type;
     bool latest;
     bool recommended;
     bool choose;
