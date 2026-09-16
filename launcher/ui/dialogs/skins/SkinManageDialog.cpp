@@ -49,7 +49,6 @@
 
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
-#include "ui/instanceview/InstanceDelegate.h"
 
 SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
     : QDialog(parent), m_acct(acct), m_ui(new Ui::SkinManageDialog), m_list(this, APPLICATION->settings()->get("SkinsDir").toString(), acct)
@@ -66,21 +65,7 @@ SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
     setWindowModality(Qt::WindowModal);
 
     auto* contentsWidget = m_ui->listView;
-    contentsWidget->setViewMode(QListView::IconMode);
-    contentsWidget->setFlow(QListView::LeftToRight);
-    contentsWidget->setIconSize(QSize(48, 48));
-    contentsWidget->setMovement(QListView::Static);
-    contentsWidget->setResizeMode(QListView::Adjust);
-    contentsWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-    contentsWidget->setSpacing(5);
-    contentsWidget->setWordWrap(false);
-    contentsWidget->setWrapping(true);
-    contentsWidget->setUniformItemSizes(true);
-    contentsWidget->setTextElideMode(Qt::ElideRight);
-    contentsWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    contentsWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     contentsWidget->installEventFilter(this);
-    contentsWidget->setItemDelegate(new ListViewDelegate(this));
 
     contentsWidget->setAcceptDrops(true);
     contentsWidget->setDropIndicatorShown(true);

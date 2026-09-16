@@ -78,7 +78,7 @@
              <bool>false</bool>
             </property>
             <property name="alignment">
-             <set>Qt::AlignCenter</set>
+             <set>Qt::AlignmentFlag::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -90,10 +90,28 @@
      <item>
       <widget class="QListView" name="listView">
        <property name="contextMenuPolicy">
-        <enum>Qt::CustomContextMenu</enum>
+        <enum>Qt::ContextMenuPolicy::CustomContextMenu</enum>
        </property>
        <property name="acceptDrops">
         <bool>false</bool>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="verticalScrollMode">
+        <enum>QAbstractItemView::ScrollMode::ScrollPerPixel</enum>
+       </property>
+       <property name="movement">
+        <enum>QListView::Movement::Static</enum>
+       </property>
+       <property name="resizeMode">
+        <enum>QListView::ResizeMode::Adjust</enum>
+       </property>
+       <property name="spacing">
+        <number>5</number>
+       </property>
+       <property name="viewMode">
+        <enum>QListView::ViewMode::IconMode</enum>
        </property>
        <property name="modelColumn">
         <number>0</number>
@@ -155,7 +173,7 @@
         </sizepolicy>
        </property>
        <property name="standardButtons">
-        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+        <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
        </property>
       </widget>
      </item>
