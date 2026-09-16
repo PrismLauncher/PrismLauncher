@@ -184,9 +184,8 @@ void ModFolderPage::downloadDialogFinished(int result)
 {
     if (result != 0) {
         ConcurrentTask tasks(tr("Download Mods"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-        });
+        connect(&tasks, &Task::failed, this,
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
         connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
             QStringList warnings = tasks.warnings();
             if (warnings.count()) {
@@ -265,9 +264,8 @@ void ModFolderPage::updateMods(bool includeDeps)
 
     if (updateDialog.exec() != 0) {
         ConcurrentTask tasks("Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-        });
+        connect(&tasks, &Task::failed, this,
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
         connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
             QStringList warnings = tasks.warnings();
             if (warnings.count()) {
@@ -312,6 +310,20 @@ void ModFolderPage::deleteModMetadata()
 
 void ModFolderPage::changeModVersion()
 {
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        auto response = CustomMessageBox::selectable(
+                            this, tr("Confirm Change Version"),
+                            tr("Changing version of mods while the game is running may cause mod duplication and game crashes.\n"
+                               "The old files may not be deleted as they are in use.\n"
+                               "Are you sure you want to do this?"),
+                            QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
+
+        if (response != QMessageBox::Yes) {
+            return;
+        }
+    }
+
     auto* profile = m_instance->getPackProfile();
     if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
         return;
