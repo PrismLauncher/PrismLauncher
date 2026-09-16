@@ -117,7 +117,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     m_container->layout()->setContentsMargins(0, 0, 0, 0);
     ui->verticalLayout->insertWidget(2, m_container);
 
-    m_copyTemplateDirCheckbox->setText(tr("Copy instance template directory"));
+    m_copyTemplateDirCheckbox->setText(tr("Use instance template"));
 
     QString templateDir = APPLICATION->settings()->get("TemplateDir").toString();
     if (templateDir.isEmpty() || !QDir(templateDir).exists()) {
