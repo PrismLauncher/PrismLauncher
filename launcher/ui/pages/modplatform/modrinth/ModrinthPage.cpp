@@ -35,7 +35,6 @@
  */
 
 #include "ModrinthPage.h"
-#include "Version.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui/dialogs/CustomMessageBox.h"

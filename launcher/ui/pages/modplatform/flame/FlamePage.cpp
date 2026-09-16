@@ -34,7 +34,6 @@
  */
 
 #include "FlamePage.h"
-#include "Version.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "ui/dialogs/CustomMessageBox.h"
