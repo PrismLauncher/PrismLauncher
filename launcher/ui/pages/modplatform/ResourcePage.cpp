@@ -98,6 +98,13 @@ ResourcePage::ResourcePage(ResourceDownloadDialog* parent,
 
     connect(&m_searchTimer, &QTimer::timeout, this, &ResourcePage::triggerSearch);
 
+    connect(m_ui->searchEdit, &QLineEdit::textEdited, this, [this] {
+        if (m_searchTimer.isActive()) {
+            m_searchTimer.stop();
+        }
+        m_searchTimer.start(350);
+    });
+
     // hide progress bar to prevent weird artifact
     m_fetchProgress.hide();
     m_fetchProgress.hideIfInactive(true);

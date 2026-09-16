@@ -69,6 +69,13 @@ TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent)
 
     connect(&m_search_timer, &QTimer::timeout, this, &TechnicPage::triggerSearch);
 
+    connect(ui->searchEdit, &QLineEdit::textEdited, this, [this] {
+        if (m_search_timer.isActive()) {
+            m_search_timer.stop();
+        }
+        m_search_timer.start(350);
+    });
+
     m_fetch_progress.hideIfInactive(true);
     m_fetch_progress.setFixedHeight(24);
     m_fetch_progress.progressFormat("");

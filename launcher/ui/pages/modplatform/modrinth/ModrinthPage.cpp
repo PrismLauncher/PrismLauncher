@@ -75,6 +75,13 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
 
     connect(&m_searchTimer, &QTimer::timeout, this, &ModrinthPage::triggerSearch);
 
+    connect(m_ui->searchEdit, &QLineEdit::textEdited, this, [this] {
+        if (m_searchTimer.isActive()) {
+            m_searchTimer.stop();
+        }
+        m_searchTimer.start(350);
+    });
+
     m_fetchProgress.hideIfInactive(true);
     m_fetchProgress.setFixedHeight(24);
     m_fetchProgress.progressFormat("");
