@@ -22,10 +22,12 @@
 #include <QImageReader>
 #include <QString>
 #include <QVariant>
+#include <algorithm>
 #include <expected>
 
 #include "FileSystem.h"
 #include "Json.h"
+#include "modplatform/ModIndex.h"
 
 namespace FTBImportAPP {
 
@@ -82,15 +84,7 @@ Result<Modpack> parseDirectory(const QString& path)
         if (parts.size() >= 2) {
             const auto loader = parts.first().toLower();
             modpack.loaderVersion = parts.at(1).trimmed();
-            if (loader == "neoforge") {
-                modpack.loaderType = ModPlatform::NeoForge;
-            } else if (loader == "forge") {
-                modpack.loaderType = ModPlatform::Forge;
-            } else if (loader == "fabric") {
-                modpack.loaderType = ModPlatform::Fabric;
-            } else if (loader == "quilt") {
-                modpack.loaderType = ModPlatform::Quilt;
-            }
+            modpack.loaderType = ModPlatform::getModLoaderFromString(loader);
         }
     }
     if (!modpack.loaderType.has_value()) {
@@ -123,27 +117,14 @@ Result<> legacyInstanceParsing(const QString& path, std::optional<ModPlatform::M
                  return Json::requireArray(root, "targets", "targets");
              }))
 
+    static auto s_supportedLoaders = { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt };
     for (auto target : targets) {
         TRY_INTO(const auto& obj, Json::requireObject(target, "target"))
         TRY_INTO(const auto& name, Json::requireString(obj, "name", "name"))
         TRY_INTO(const auto& version, Json::requireString(obj, "version", "version"))
-        if (name == "neoforge") {
-            *loaderType = ModPlatform::NeoForge;
-            *loaderVersion = version;
-            break;
-        }
-        if (name == "forge") {
-            *loaderType = ModPlatform::Forge;
-            *loaderVersion = version;
-            break;
-        }
-        if (name == "fabric") {
-            *loaderType = ModPlatform::Fabric;
-            *loaderVersion = version;
-            break;
-        }
-        if (name == "quilt") {
-            *loaderType = ModPlatform::Quilt;
+        const auto& loader = ModPlatform::getModLoaderFromString(name);
+        if (std::ranges::contains(s_supportedLoaders, loader)) {
+            *loaderType = loader;
             *loaderVersion = version;
             break;
         }
