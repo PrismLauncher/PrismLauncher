@@ -145,7 +145,6 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
         }
 #endif
     }
-    connect(m_copyTemplateDirCheckbox, &QCheckBox::checkStateChanged, this, &NewInstanceDialog::setCopyTemplateDirectory);
 
     auto* checkboxButtonsContainer = new QVBoxLayout(this);
     checkboxButtonsContainer->addWidget(m_copyTemplateDirCheckbox);
@@ -196,11 +195,6 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     }
 
     connect(m_container, &PageContainer::selectedPageChanged, this, &NewInstanceDialog::selectedPageChanged);
-}
-
-void NewInstanceDialog::setCopyTemplateDirectory() const
-{
-    m_creationTask->setCopyTemplateDir(m_copyTemplateDirCheckbox->isChecked());
 }
 
 void NewInstanceDialog::reject()
@@ -312,7 +306,6 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task
 
     auto allowOK = task != nullptr && !instName().isEmpty();
     m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
-    setCopyTemplateDirectory();
 }
 
 void NewInstanceDialog::setSuggestedPack(const QString& name, QString version, InstanceTask* task)
@@ -337,7 +330,6 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, QString version, I
 
     auto allowOK = task != nullptr && !instName().isEmpty();
     m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
-    setCopyTemplateDirectory();
 }
 
 void NewInstanceDialog::setSuggestedIconFromFile(const QString& path, const QString& name)
@@ -374,6 +366,7 @@ InstanceTask* NewInstanceDialog::extractTask()
     extracted->setGroup(instGroup());
     extracted->setIcon(iconKey());
     extracted->setTargetDir(instDir());
+    extracted->setCopyTemplateDir(copyTemplateDir());
     return extracted;
 }
 
@@ -397,6 +390,11 @@ QString NewInstanceDialog::instName() const
         return result;
     }
     return QString();
+}
+
+bool NewInstanceDialog::copyTemplateDir() const
+{
+    return m_copyTemplateDirCheckbox->isChecked();
 }
 
 QString NewInstanceDialog::instGroup() const

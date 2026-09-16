@@ -73,6 +73,7 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
     QList<BasePage*> getPages() override;
 
     QString instName() const;
+    bool copyTemplateDir() const;
     QString instGroup() const;
     QString iconKey() const;
     QString instDir() const;
@@ -81,7 +82,6 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
    public slots:
     void accept() override;
     void reject() override;
-    void setCopyTemplateDirectory() const;
 
    private slots:
     void on_iconButton_clicked();
