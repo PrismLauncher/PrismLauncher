@@ -300,19 +300,14 @@ bool createInstanceShortcutOnDesktop(const Shortcut& shortcut)
         return false;
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-    // In Flatpak, we can't write directly to the desktop, so try the portal
-    if (DesktopServices::isFlatpak() && DynamicLauncherPortal::isPortalAvailable()) {
-        // For desktop shortcuts via portal, we need a modified shortcut that targets Applications
-        Shortcut portalShortcut = shortcut;
-        portalShortcut.target = ShortcutTarget::Applications;
-        if (createInstanceShortcutViaPortal(portalShortcut)) {
-            QMessageBox::information(shortcut.parent, QObject::tr("Create Shortcut"),
-                                     QObject::tr("Created a shortcut to this %1!\n"
-                                                 "It was installed via the system portal and will appear in your app launcher.")
-                                         .arg(shortcut.targetString));
-            return true;
-        }
-        // Fall through to desktop file method if portal fails
+    // in flatpak, the host desktop is not writable from the sandbox and the
+    // DynamicLauncher portal can only install launchers into the app launcher,
+    // so desktop shortcuts aren't supported there
+    if (DesktopServices::isFlatpak()) {
+        QMessageBox::critical(
+            shortcut.parent, QObject::tr("Create Shortcut"),
+            QObject::tr("Desktop shortcuts are not supported in Flatpak. Please use Applications instead."));
+        return false;
     }
 #endif
 
