@@ -206,8 +206,7 @@ Result<> loadPackProfile(PackProfile* parent, const QString& filename, Component
         // check order file version.
         TRY_INTO(const auto& version, Json::requireInteger(obj->value("formatVersion")))
         if (version != currentComponentsFileVersion) {
-            auto message = QObject::tr("bad file format");
-            return std::unexpected(message);
+            return std::unexpected(QObject::tr("Invalid component file version, expected %1").arg(currentComponentsFileVersion));
         }
         TRY_INTO(const auto& orderArray, Json::requireArray(obj->value("components")))
         for (auto item : orderArray) {

@@ -146,7 +146,7 @@ void PackInstallTask::install()
         // handle different versions
         QFileInfo packJson(m_stagingPath + "/minecraft/pack.json");
         QDir jarmodDir = QDir(m_stagingPath + "/unzip/instMods");
-        if (packJson.exists()) {
+        if (!packJson.exists()) {
             qWarning() << "File doesn't exists:" << packJson.fileName();
         } else {
             auto doc = Json::requireDocument(packJson.absoluteFilePath());
@@ -164,10 +164,12 @@ void PackInstallTask::install()
 
                     components->setComponentVersion("net.minecraftforge",
                                                     forgeVersion.version().replace(m_pack.mcVersion, "").replace("-", ""));
-                    FS::deletePath(packJson.absoluteFilePath());
+                    QFile::remove(packJson.absoluteFilePath());
                     fallback = false;
                     break;
                 }
+            } else {
+                qWarning() << "Failed to read file as JSON:" << packJson.fileName();
             }
         }
 
