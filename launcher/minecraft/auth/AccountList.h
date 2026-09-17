@@ -98,8 +98,12 @@ class AccountList : public QAbstractListModel {
     void setListFilePath(QString path, bool autosave = false);
 
     bool loadList();
-    bool loadV3(QJsonObject& root);
+    bool loadListV3(QJsonObject& root);
+    std::unique_ptr<Task> loadSecrets();
+
     bool saveList();
+    void saveSecrets(const MinecraftAccount& account);
+    void deleteSecrets(const MinecraftAccount& account);
 
     MinecraftAccountPtr defaultAccount() const;
     void setDefaultAccount(MinecraftAccountPtr profileId);
@@ -118,6 +122,9 @@ class AccountList : public QAbstractListModel {
     void listActivityChanged();
     void defaultAccountChanged();
     void activityChanged(bool active);
+
+    void saveSecretsFailed(const QString& profileName, const QString& error);
+    void deleteSecretsFailed(const QString& profileName, const QString& error);
 
    public slots:
     /**
@@ -142,6 +149,8 @@ class AccountList : public QAbstractListModel {
     void authFailed(QString reason);
 
    protected:
+    std::unique_ptr<Task> m_saveSecretsTask;
+
     QList<QString> m_refreshQueue;
     QSet<QString> m_explicitRefreshes;
     QTimer* m_refreshTimer;
