@@ -42,6 +42,7 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <expected>
 #include <utility>
 
 #include "FileSystem.h"
@@ -81,12 +82,14 @@ QString truncateLogForMclogs(const QString& logContent)
 }
 }  // namespace
 
-std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QFileInfo& filePath, QWidget* parentWidget)
+Result<std::optional<QString>> GuiUtil::uploadPaste(const QString& name, const QFileInfo& filePath, QWidget* parentWidget)
 {
-    return uploadPaste(name, FS::read(filePath.absoluteFilePath()), parentWidget);
+    return FS::read(filePath.absoluteFilePath()).and_then([&name, &parentWidget](const auto& v) {
+        return uploadPaste(name, v, parentWidget);
+    });
 };
 
-std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& data, QWidget* parentWidget)
+Result<std::optional<QString>> GuiUtil::uploadPaste(const QString& name, const QString& data, QWidget* parentWidget)
 {
     ProgressDialog dialog(parentWidget);
     auto pasteType = static_cast<PasteUpload::Type>(APPLICATION->settings()->get("PastebinType").toInt());
@@ -99,7 +102,7 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
 
     auto url = QUrl(baseURL);
     if (!url.isValid()) {
-        return {};
+        return std::unexpected("baseURL is not valid");
     }
 
     auto response = CustomMessageBox::selectable(parentWidget, QObject::tr("Confirm Upload"),
@@ -153,7 +156,7 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
             CustomMessageBox::selectable(parentWidget, QObject::tr("Failed to upload logs!"), "The upload link is empty",
                                          QMessageBox::Critical)
                 ->show();
-            return {};
+            return std::unexpected("The upload link is empty");
         }
         setClipboardText(*pasteLink);
         CustomMessageBox::selectable(

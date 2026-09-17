@@ -69,7 +69,7 @@ set(CORE_SOURCES
     FileSystem.h
     FileSystem.cpp
 
-    Exception.h
+    Result.h
 
     # RW lock protected map
     RWStorage.h
@@ -584,7 +584,7 @@ set(LINKEXE_SOURCES
     filelink/FileLink.cpp
     FileSystem.h
     FileSystem.cpp
-    Exception.h
+    Result.h
     StringUtils.h
     StringUtils.cpp
     DesktopServices.h

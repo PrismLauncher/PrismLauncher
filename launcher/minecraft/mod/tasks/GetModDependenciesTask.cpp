@@ -24,6 +24,7 @@
 #include <utility>
 #include "Json.h"
 #include "QObjectPtr.h"
+#include "Result.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/ModFolderModel.h"
@@ -186,23 +187,20 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(const std::shared_ptr<PackD
     auto provider = pDep->pack->provider;
     auto [info, responseInfo] = getAPI(provider)->getProject(pDep->pack->addonId.toString());
     connect(info.get(), &NetJob::succeeded, this, [this, responseInfo, provider, pDep] {
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*responseInfo, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
+        auto obj = Json::requireObject(*responseInfo)
+                       .and_then([provider](const auto& v) -> Result<QJsonObject> {
+                           if (provider == ModPlatform::ResourceProvider::FLAME) {
+                               return Json::requireObject(v, "data", "data");
+                           }
+                           return v;
+                       })
+                       .and_then([&provider, &pDep](const auto& v) { return getAPI(provider)->loadIndexedPack(*pDep->pack, v); });
+
+        if (!obj) {
             removePack(pDep->pack->addonId);
-            qWarning() << "Error while parsing JSON response for mod info at" << parseError.offset << "reason:" << parseError.errorString();
+            qWarning() << "Error while parsing JSON response for mod info:" << obj.error();
             qDebug() << *responseInfo;
             return;
-        }
-        try {
-            auto obj = provider == ModPlatform::ResourceProvider::FLAME ? Json::requireObject(Json::requireObject(doc), "data")
-                                                                        : Json::requireObject(doc);
-
-            getAPI(provider)->loadIndexedPack(*pDep->pack, obj);
-        } catch (const JSONValidationError& e) {
-            removePack(pDep->pack->addonId);
-            qDebug() << doc;
-            qWarning() << "Error while reading mod info:" << e.cause();
         }
     });
     QObject::connect(info.get(), &NetJob::failed, this, [this, info, pDep] {

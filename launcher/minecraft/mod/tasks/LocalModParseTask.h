@@ -10,10 +10,10 @@
 
 namespace ModUtils {
 
-ModDetails ReadFabricModInfo(QByteArray contents);
-ModDetails ReadQuiltModInfo(QByteArray contents);
-ModDetails ReadForgeInfo(QByteArray contents);
-ModDetails ReadLiteModInfo(QByteArray contents);
+ModDetails ReadFabricModInfo(const QByteArray& contents);
+ModDetails ReadQuiltModInfo(const QByteArray& contents);
+ModDetails ReadForgeInfo(const QByteArray& contents);
+ModDetails ReadLiteModInfo(const QByteArray& contents);
 
 enum class ProcessingLevel { Full, BasicInfoOnly };
 

@@ -44,16 +44,13 @@ class Sink {
     Sink() = default;
     virtual ~Sink() = default;
 
-    using Error = Validator::Error;
-    using Result = Validator::Result;
-
     enum class InitType : std::uint8_t { Ok, CacheHit };
-    using InitResult = std::expected<InitType, QString>;
+    using InitResult = Result<InitType>;
 
    public:
     virtual InitResult init(QNetworkRequest& request) = 0;
-    virtual Result write(const QByteArray& data) = 0;
-    virtual Result finalize(QNetworkReply& reply) = 0;
+    virtual Result<> write(const QByteArray& data) = 0;
+    virtual Result<> finalize(QNetworkReply& reply) = 0;
     virtual void abort() = 0;
 
     virtual auto hasLocalData() -> bool = 0;
@@ -84,7 +81,7 @@ class Sink {
             validator->abort();
         }
     }
-    Validator::Result finalizeAllValidators()
+    Result<> finalizeAllValidators()
     {
         for (auto& validator : m_validators) {
             auto result = validator->validate();

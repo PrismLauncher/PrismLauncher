@@ -4,10 +4,12 @@
 #include <QHash>
 #include <QString>
 
+#include "Result.h"
+
 struct ApplicationMessage {
     QString command;
     QHash<QString, QString> args;
 
-    QByteArray serialize();
-    void parse(const QByteArray& input);
+    QByteArray serialize() const;
+    Result<> parse(const QByteArray& input);
 };

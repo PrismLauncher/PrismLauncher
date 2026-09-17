@@ -50,6 +50,7 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/OneSixVersionFormat.h"
 #include "minecraft/PackProfile.h"
+#include "modplatform/ModIndex.h"
 #include "modplatform/atlauncher/ATLPackManifest.h"
 #include "net/ChecksumValidator.h"
 #include "settings/INISettingsObject.h"
@@ -119,22 +120,18 @@ void PackInstallTask::onDownloadSucceeded(QByteArray* responsePtr)
     QByteArray response = std::move(*responsePtr);
     m_jobPtr.reset();
 
-    QJsonParseError parseError{};
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
-    if (parseError.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from ATLauncher at" << parseError.offset << "reason:" << parseError.errorString();
-        qWarning() << response;
-        return;
-    }
-    auto obj = doc.object();
-
     ATLauncher::PackVersion version;
-    try {
-        ATLauncher::loadVersion(version, obj);
-    } catch (const JSONValidationError& e) {
-        emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
+    auto doc = Json::requireDocument(response, "ATLauncher pack manifest").and_then([&version](const auto& v) {
+        auto obj = v.object();
+        return ATLauncher::loadVersion(version, obj);
+    });
+    if (!doc) {
+        qWarning() << "Error while parsing JSON response from ATLauncher:" << doc.error();
+        qWarning() << response;
+        emitFailed(tr("Could not understand pack manifest:\n") + doc.error());
         return;
     }
+
     m_version = version;
 
     // Derived from the installation mode
@@ -373,7 +370,7 @@ QString PackInstallTask::getVersionForLoader(const QString& uid)
                 // filter by minecraft version, if the loader depends on a certain version.
                 // not all mod loaders depend on a given Minecraft version, so we won't do this
                 // filtering for those loaders.
-                if (m_version.loader.type != "fabric") {
+                if (m_version.loader.type != ModPlatform::ModLoaderType::Fabric) {
                     auto iter = std::ranges::find_if(reqs, [](const Meta::Require& req) { return req.uid == "net.minecraft"; });
                     if (iter == reqs.end()) {
                         continue;
@@ -393,12 +390,12 @@ QString PackInstallTask::getVersionForLoader(const QString& uid)
                 return version->descriptor();
             }
 
-            emitFailed(tr("Failed to find version for %1 loader").arg(m_version.loader.type));
+            emitFailed(tr("Failed to find version for %1 loader").arg(ModPlatform::getModLoaderAsString(m_version.loader.type)));
             return Q_NULLPTR;
         }
         if (m_version.loader.choose) {
             // Fabric Loader doesn't depend on a given Minecraft version.
-            if (m_version.loader.type == "fabric") {
+            if (m_version.loader.type == ModPlatform::ModLoaderType::Fabric) {
                 return m_support->chooseVersion(vlist, Q_NULLPTR);
             }
 
@@ -1045,30 +1042,41 @@ void PackInstallTask::install()
         components->setComponentVersion("net.minecraft", m_version.minecraft, true);
 
         // Loader
-        if (m_version.loader.type == QString("forge")) {
-            auto version = getVersionForLoader("net.minecraftforge");
-            if (version == Q_NULLPTR) {
+        switch (m_version.loader.type) {
+            case ModPlatform::ModLoaderType::NeoForge: {
+                auto version = getVersionForLoader("net.neoforged");
+                if (version == Q_NULLPTR) {
+                    return;
+                }
+
+                components->setComponentVersion("net.neoforged", version);
+                break;
+            }
+            case ModPlatform::ModLoaderType::Forge: {
+                auto version = getVersionForLoader("net.minecraftforge");
+                if (version == Q_NULLPTR) {
+                    return;
+                }
+
+                components->setComponentVersion("net.minecraftforge", version);
+                break;
+            }
+            case ModPlatform::ModLoaderType::Fabric: {
+                auto version = getVersionForLoader("net.fabricmc.fabric-loader");
+                if (version == Q_NULLPTR) {
+                    return;
+                }
+
+                components->setComponentVersion("net.fabricmc.fabric-loader", version);
+                break;
+            }
+            case ModPlatform::ModLoaderType::None: {
+                break;
+            }
+            default: {
+                emitFailed(tr("Unknown loader type: ") + ModPlatform::getModLoaderAsString(m_version.loader.type));
                 return;
             }
-
-            components->setComponentVersion("net.minecraftforge", version);
-        } else if (m_version.loader.type == QString("neoforge")) {
-            auto version = getVersionForLoader("net.neoforged");
-            if (version == Q_NULLPTR) {
-                return;
-            }
-
-            components->setComponentVersion("net.neoforged", version);
-        } else if (m_version.loader.type == QString("fabric")) {
-            auto version = getVersionForLoader("net.fabricmc.fabric-loader");
-            if (version == Q_NULLPTR) {
-                return;
-            }
-
-            components->setComponentVersion("net.fabricmc.fabric-loader", version);
-        } else if (m_version.loader.type != QString()) {
-            emitFailed(tr("Unknown loader type: ") + m_version.loader.type);
-            return;
         }
 
         for (const auto& componentUid : m_componentsToInstall.keys()) {

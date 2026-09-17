@@ -26,32 +26,29 @@ Task::Ptr ResourceAPI::searchProjects(const SearchArgs& args, const Callback<QLi
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks] {
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from" << debugName() << "at" << parseError.offset
-                       << "reason:" << parseError.errorString();
+        auto doc = Json::requireDocument(*response, "ResourceAPI");
+        if (!doc) {
+            qWarning() << "Error while parsing JSON response from" << debugName() << ":" << doc.error();
             qWarning() << *response;
 
-            callbacks.onFail(parseError.errorString(), -1);
+            callbacks.onFail(doc.error(), -1);
 
             return;
         }
 
         QList<ModPlatform::IndexedPack::Ptr> newList;
-        auto packs = documentToArray(doc);
+        auto packs = documentToArray(doc.value());
 
         for (auto packRaw : packs) {
             auto packObj = packRaw.toObject();
 
             ModPlatform::IndexedPack::Ptr pack = std::make_shared<ModPlatform::IndexedPack>();
-            try {
-                loadIndexedPack(*pack, packObj);
-                newList << pack;
-            } catch (const JSONValidationError& e) {
-                qWarning().nospace() << "Error while loading resource from " << debugName() << ": " << e.cause();
+            auto loadRes = loadIndexedPack(*pack, packObj);
+            if (!loadRes) {
+                qWarning().nospace() << "Error while loading resource from " << debugName() << ": " << loadRes.error();
                 continue;
             }
+            newList << pack;
         }
 
         callbacks.onSucceed(newList);
@@ -95,41 +92,39 @@ Task::Ptr ResourceAPI::getProjectVersions(const VersionSearchArgs& args,
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks, args] {
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for getting versions at" << parseError.offset
-                       << "reason:" << parseError.errorString();
+        auto doc = Json::requireDocument(*response, "ResourceAPI::getProjectVersions");
+        if (!doc) {
+            qWarning() << "Error while parsing JSON response for getting versions:" << doc.error();
             qWarning() << *response;
             return;
         }
 
         QVector<ModPlatform::IndexedVersion> unsortedVersions;
-        try {
-            auto arr = doc.isObject() ? doc.object()["data"].toArray() : doc.array();
+        auto arr = doc->isObject() ? doc->object()["data"].toArray() : doc->array();
 
-            for (auto versionIter : arr) {
-                auto obj = versionIter.toObject();
+        for (auto versionIter : arr) {
+            auto obj = versionIter.toObject();
 
-                auto file = loadIndexedPackVersion(obj, args.resourceType);
-                if (!file.addonId.isValid()) {
-                    file.addonId = args.pack->addonId;
-                }
-
-                if (file.fileId.isValid() && !file.downloadUrl.isEmpty()) {  // Heuristic to check if the returned value is valid
-                    unsortedVersions.append(file);
-                }
+            auto fileRes = loadIndexedPackVersion(obj, args.resourceType);
+            if (!fileRes) {
+                qWarning() << "Error while reading" << debugName() << "resource version:" << fileRes.error();
+                continue;
+            }
+            auto file = fileRes.value();
+            if (!file.addonId.isValid()) {
+                file.addonId = args.pack->addonId;
             }
 
-            auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
-                // dates are in RFC 3339 format
-                return a.date > b.date;
-            };
-            std::ranges::sort(unsortedVersions, orderSortPredicate);
-        } catch (const JSONValidationError& e) {
-            qDebug() << doc;
-            qWarning() << "Error while reading" << debugName() << "resource version:" << e.cause();
+            if (file.fileId.isValid() && !file.downloadUrl.isEmpty()) {  // Heuristic to check if the returned value is valid
+                unsortedVersions.append(file);
+            }
         }
+
+        auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
+            // dates are in RFC 3339 format
+            return a.date > b.date;
+        };
+        std::ranges::sort(unsortedVersions, orderSortPredicate);
 
         callbacks.onSucceed(unsortedVersions);
     });
@@ -164,24 +159,21 @@ Task::Ptr ResourceAPI::getProjectInfo(const ProjectInfoArgs& args,
 
     QObject::connect(job.get(), &NetJob::succeeded, job.get(), [this, response, callbacks, args] {
         auto pack = args.pack;
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for mod info at" << parseError.offset << "reason:" << parseError.errorString();
-            qWarning() << *response;
+        auto parse = [this, &pack, &response]() -> Result<> {
+            TRY_INTO(auto obj, Json::requireObject(*response))
+            if (obj.contains("data")) {
+                TRY_INTO(obj, Json::requireObject(obj, "data"))
+            }
+            TRY(loadIndexedPack(*pack, obj))
+
+            return loadExtraPackInfo(*pack, obj);
+        };
+        if (auto res = parse(); !res) {
+            qWarning() << "Error while reading" << debugName() << "resource info:" << res.error();
+            callbacks.onFail(res.error(), -1);
             return;
         }
-        try {
-            auto obj = Json::requireObject(doc);
-            if (obj.contains("data")) {
-                obj = Json::requireObject(obj, "data");
-            }
-            loadIndexedPack(*pack, obj);
-            loadExtraPackInfo(*pack, obj);
-        } catch (const JSONValidationError& e) {
-            qDebug() << doc;
-            qWarning() << "Error while reading" << debugName() << "resource info:" << e.cause();
-        }
+
         callbacks.onSucceed(pack);
     });
     // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
@@ -221,27 +213,30 @@ Task::Ptr ResourceAPI::getDependencyVersion(const DependencySearchArgs& args, co
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks, args] {
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for getting dependency version at" << parseError.offset
-                       << "reason:" << parseError.errorString();
+        auto doc = Json::requireDocument(*response, "ResourceAPI::getDependencyVersions");
+        if (!doc) {
+            qWarning() << "Error while parsing JSON response for getting dependency version:" << doc.error();
             qWarning() << *response;
             return;
         }
 
         QJsonArray arr;
-        if (args.dependency.version.length() != 0 && doc.isObject()) {
-            arr.append(doc.object());
+        if (args.dependency.version.length() != 0 && doc->isObject()) {
+            arr.append(doc->object());
         } else {
-            arr = doc.isObject() ? doc.object()["data"].toArray() : doc.array();
+            arr = doc->isObject() ? doc->object()["data"].toArray() : doc.value().array();
         }
 
         QVector<ModPlatform::IndexedVersion> versions;
         for (auto versionIter : arr) {
             auto obj = versionIter.toObject();
 
-            auto file = loadIndexedPackVersion(obj, ModPlatform::ResourceType::Mod);
+            auto fileRes = loadIndexedPackVersion(obj, ModPlatform::ResourceType::Mod);
+            if (!fileRes) {
+                qWarning() << "Error while reading" << debugName() << "resource version:" << fileRes.error();
+                continue;
+            }
+            auto file = fileRes.value();
             if (!file.addonId.isValid()) {
                 file.addonId = args.dependency.addonId;
             }

@@ -48,7 +48,7 @@ QString downloadTypeToString(DownloadType javaDownload)
     }
     return "unknown";
 }
-MetadataPtr parseJavaMeta(const QJsonObject& in)
+Result<MetadataPtr> parseJavaMeta(const QJsonObject& in)
 {
     auto meta = std::make_shared<Metadata>();
 
@@ -61,18 +61,18 @@ MetadataPtr parseJavaMeta(const QJsonObject& in)
     meta->runtimeOS = in["runtimeOS"].toString("unknown");
 
     if (in.contains("checksum")) {
-        auto obj = Json::requireObject(in, "checksum");
-        meta->checksumHash = obj["hash"].toString("");
-        meta->checksumType = obj["type"].toString("");
+        TRY_INTO(const auto& checksum, Json::requireObject(in, "checksum"))
+        meta->checksumHash = checksum["hash"].toString("");
+        meta->checksumType = checksum["type"].toString("");
     }
 
     if (in.contains("version")) {
-        auto obj = Json::requireObject(in, "version");
-        auto name = obj["name"].toString("");
-        auto major = obj["major"].toInteger();
-        auto minor = obj["minor"].toInteger();
-        auto security = obj["security"].toInteger();
-        auto build = obj["build"].toInteger();
+        TRY_INTO(const auto& version, Json::requireObject(in, "version"))
+        TRY_INTO(const auto& name, Json::requireString(version, "name"))
+        TRY_INTO(const auto& major, Json::requireInteger(version, "major"))
+        TRY_INTO(const auto& minor, Json::requireInteger(version, "minor"))
+        TRY_INTO(const auto& security, Json::requireInteger(version, "security"))
+        TRY_INTO(const auto& build, Json::requireInteger(version, "build"))
         meta->version = JavaVersion(major, minor, security, build, name);
     }
     return meta;
@@ -109,20 +109,18 @@ bool Metadata::operator>(const Metadata& rhs) const
 
 bool Metadata::operator<(BaseVersion& a) const
 {
-    try {
-        return operator<(dynamic_cast<Metadata&>(a));
-    } catch (const std::bad_cast&) {
-        return BaseVersion::operator<(a);
+    if (auto* metadata = dynamic_cast<Metadata*>(&a)) {
+        return operator<(*metadata);
     }
+    return BaseVersion::operator<(a);
 }
 
 bool Metadata::operator>(BaseVersion& a) const
 {
-    try {
-        return operator>(dynamic_cast<Metadata&>(a));
-    } catch (const std::bad_cast&) {
-        return BaseVersion::operator>(a);
+    if (auto* metadata = dynamic_cast<Metadata*>(&a)) {
+        return operator>(*metadata);
     }
+    return BaseVersion::operator>(a);
 }
 
 }  // namespace Java

@@ -165,13 +165,13 @@ void ExportToModListDialog::done(int result)
             QFileDialog::getSaveFileName(this, tr("Export %1").arg(m_name), FS::PathCombine(QDir::homePath(), filename + extension()),
                                          tr("File") + " (*.txt *.html *.md *.json *.csv)", nullptr);
 
-        if (output.isEmpty())
+        if (output.isEmpty()) {
             return;
+        }
 
-        try {
-            FS::write(output, ui->finalText->toPlainText().toUtf8());
-        } catch (const FS::FileSystemException& e) {
-            qCritical() << "Failed to save mod list file :" << e.cause();
+        auto res = FS::write(output, ui->finalText->toPlainText().toUtf8());
+        if (!res) {
+            qCritical() << "Failed to save mod list file :" << res.error();
         }
     }
 

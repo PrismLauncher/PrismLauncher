@@ -26,8 +26,8 @@ class DummySink : public Sink {
     explicit DummySink() = default;
     ~DummySink() override = default;
     InitResult init(QNetworkRequest& /*request*/) override { return InitType::Ok; }
-    Result write(const QByteArray& /*data*/) override { return {}; }
-    Result finalize(QNetworkReply& /*reply*/) override { return {}; }
+    Result<> write(const QByteArray& /*data*/) override { return {}; }
+    Result<> finalize(QNetworkReply& /*reply*/) override { return {}; }
     void abort() override {}
     auto hasLocalData() -> bool override { return false; }
 };

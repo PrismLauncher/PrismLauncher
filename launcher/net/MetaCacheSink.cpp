@@ -74,7 +74,7 @@ auto MetaCacheSink::initCache(QNetworkRequest& request) -> InitResult
     return InitType::Ok;
 }
 
-auto MetaCacheSink::finalizeCache(QNetworkReply& reply) -> Result
+auto MetaCacheSink::finalizeCache(QNetworkReply& reply) -> Result<>
 {
     QFileInfo outputFileInfo(m_filename);
 

@@ -56,10 +56,10 @@ class ChecksumValidator : public Validator {
     void write(const QByteArray& data) override { m_checksum.addData(data); }
     void abort() override { m_checksum.reset(); }
 
-    Result validate() override
+    Result<> validate() override
     {
         if (!m_expected.isEmpty() && m_expected != hash()) {
-            return std::unexpected<Error>(QString("Checksum mismatch: expected %1, got %2").arg(m_expected.toHex(), hash().toHex()));
+            return std::unexpected(QString("Checksum mismatch: expected %1, got %2").arg(m_expected.toHex(), hash().toHex()));
         }
         return {};
     }

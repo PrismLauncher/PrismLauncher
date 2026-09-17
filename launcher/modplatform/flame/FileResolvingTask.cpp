@@ -89,15 +89,11 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
 {
     setProgress(1, 3);
     // job to check modrinth for blocked projects
-    QJsonDocument doc;
-    QJsonArray array;
 
-    try {
-        doc = Json::requireDocument(*response);
-        array = Json::requireArray(doc.object()["data"]);
-    } catch (Json::JsonException& e) {
-        qCritical() << "Non-JSON data returned from the CF API";
-        qCritical() << e.cause();
+    auto doc = Json::requireDocument(*response).and_then([](const auto& v) { return Json::requireArray(v.object()["data"]); });
+    if (!doc) {
+        qCritical() << "Failed to parse CurseForge files response";
+        qCritical() << "Parse error:" << doc.error();
 
         emitFailed(tr("Invalid data returned from the API."));
 
@@ -105,10 +101,10 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
     }
 
     QStringList hashes;
-    for (QJsonValueRef file : array) {
-        try {
-            auto obj = Json::requireObject(file);
-            auto version = FlameMod::loadIndexedPackVersion(obj);
+    for (QJsonValueRef file : doc.value()) {
+        auto process = [this, &hashes](const QJsonValue& file) -> Result<> {
+            TRY_INTO(const auto& version,
+                     Json::requireObject(file).and_then([](const auto& v) { return FlameMod::loadIndexedPackVersion(v); }))
             auto fileid = version.fileId.toInt();
             Q_ASSERT(fileid != 0);
             Q_ASSERT(m_manifest.files.contains(fileid));
@@ -117,9 +113,11 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
             if (!url.isValid() && "sha1" == version.hashType && !version.hash.isEmpty()) {
                 hashes.push_back(version.hash);
             }
-        } catch (Json::JsonException& e) {
-            qCritical() << "Non-JSON data returned from the CF API";
-            qCritical() << e.cause();
+            return {};
+        };
+        if (auto result = process(file); !result) {
+            qCritical() << "Failed to parse CurseForge file entry";
+            qCritical() << "Parse error:" << result.error();
 
             emitFailed(tr("Invalid data returned from the API."));
 
@@ -137,38 +135,35 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
     connect(m_task.get(), &Task::succeeded, this, [this, modrinthResponse, stepProgress2]() {
         stepProgress2->state = TaskStepState::Succeeded;
         stepProgress(*stepProgress2);
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*modrinthResponse, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions at" << parseError.offset
-                       << "reason:" << parseError.errorString();
+
+        auto doc = Json::requireObject(*modrinthResponse);
+        if (!doc) {
+            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions:" << doc.error();
             qWarning() << *modrinthResponse;
 
             getFlameProjects();
             return;
         }
         if (APPLICATION->settings()->get("FallbackMRBlockedMods").toBool()) {
-            try {
-                auto entries = Json::requireObject(doc);
-                for (auto& out : m_manifest.files) {
-                    auto url = QUrl(out.version.downloadUrl, QUrl::TolerantMode);
-                    if (!url.isValid() && "sha1" == out.version.hashType && !out.version.hash.isEmpty()) {
-                        try {
-                            auto entry = Json::requireObject(entries, out.version.hash);
+            const auto& entries = doc.value();
+            for (auto& out : m_manifest.files) {
+                auto url = QUrl(out.version.downloadUrl, QUrl::TolerantMode);
+                if (!url.isValid() && "sha1" == out.version.hashType && !out.version.hash.isEmpty()) {
+                    auto parse = [&entries, &out]() -> Result<> {
+                        TRY_INTO(const auto& file, Json::requireObject(entries, out.version.hash).and_then([](const auto& v) {
+                            return Modrinth::loadIndexedPackVersion(v);
+                        }))
 
-                            auto file = Modrinth::loadIndexedPackVersion(entry);
-
-                            out.version.downloadUrl = file.downloadUrl;
-                            qDebug() << "Found alternative on modrinth" << out.version.fileName;
-                        } catch (Json::JsonException& e) {
-                            qDebug() << e.cause();
-                            qDebug() << entries;
-                        }
+                        out.version.downloadUrl = file.downloadUrl;
+                        qDebug() << "Found alternative on modrinth" << out.version.fileName;
+                        return {};
+                    };
+                    if (auto res = parse(); !res) {
+                        qDebug() << res.error();
+                        qDebug() << entries;
+                        continue;
                     }
                 }
-            } catch (Json::JsonException& e) {
-                qDebug() << e.cause();
-                qDebug() << doc;
             }
         }
         getFlameProjects();
@@ -204,37 +199,37 @@ void Flame::FileResolvingTask::getFlameProjects()
 
     auto stepProgress2 = std::make_shared<TaskStepProgress>();
     connect(m_task.get(), &Task::succeeded, this, [this, response, stepProgress2] {
-        QJsonParseError parseError{};
-        auto doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth projects task at" << parseError.offset
-                       << "reason:" << parseError.errorString();
+        auto doc = Json::requireObject(*response).and_then([](const auto& v) { return Json::requireArray(v, "data"); });
+        if (!doc) {
+            qWarning() << "Error while parsing CurseForge projects response:" << doc.error();
             qWarning() << *response;
+            // treat a parse failure as success, otherwise the task hangs forever
+            stepProgress2->state = TaskStepState::Succeeded;
+            stepProgress(*stepProgress2);
+            emitSucceeded();
             return;
         }
 
-        try {
-            QJsonArray entries;
-            entries = Json::requireArray(Json::requireObject(doc), "data");
+        for (auto entry : doc.value()) {
+            auto process = [this, &entry]() -> Result<> {
+                TRY_INTO(const auto& entryObj, Json::requireObject(entry))
+                TRY_INTO(const auto& id, Json::requireInteger(entryObj, "id"))
 
-            for (auto entry : entries) {
-                auto entryObj = Json::requireObject(entry);
-                auto id = Json::requireInteger(entryObj, "id");
-                auto file = std::find_if(m_manifest.files.begin(), m_manifest.files.end(),
-                                         [id](const Flame::File& file) { return file.projectId == id; });
-                if (file == m_manifest.files.end()) {
-                    continue;
+                auto file = std::ranges::find_if(m_manifest.files, [id](const Flame::File& file) { return file.projectId == id; });
+                if (file != m_manifest.files.end()) {
+                    setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
+                    TRY(FlameMod::loadIndexedPack(file->pack, entryObj))
+                    if (file->pack.resourceType == ModPlatform::ResourceType::World) {
+                        file->targetFolder = "saves";
+                    }
                 }
-
-                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
-                FlameMod::loadIndexedPack(file->pack, entryObj);
-                if (file->pack.resourceType == ModPlatform::ResourceType::World) {
-                    file->targetFolder = "saves";
-                }
+                return {};
+            };
+            if (auto result = process(); !result) {
+                qDebug() << result.error();
+                qDebug() << *doc;
+                break;
             }
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
         }
         stepProgress2->state = TaskStepState::Succeeded;
         stepProgress(*stepProgress2);
