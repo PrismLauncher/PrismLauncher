@@ -18,26 +18,25 @@
 
 #pragma once
 
+#include <QEventLoop>
 #include <QObject>
 #include <QString>
-#include <QEventLoop>
 #include <QVariantMap>
 
 namespace DynamicLauncherPortal {
 
 /// A QObject subclass needed to receive the D-Bus Response signal from the portal.
 /// Defined in the header so that MOC can process it
-class PortalResponseReceiver : public QObject
-{
+class PortalResponseReceiver : public QObject {
     Q_OBJECT
-public:
+   public:
     explicit PortalResponseReceiver(QObject* parent = nullptr) : QObject(parent) {}
 
     QEventLoop* loop = nullptr;
     QString* outToken = nullptr;
     bool* outAccepted = nullptr;
 
-public slots:
+   public slots:
     void portalResponse(uint responseCode, QVariantMap results)
     {
         if (outAccepted)

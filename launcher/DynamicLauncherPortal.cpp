@@ -270,4 +270,4 @@ bool uninstallLauncher(const QString& desktopFileId)
 #endif
 }
 
-} // namespace DynamicLauncherPortal
+}  // namespace DynamicLauncherPortal
