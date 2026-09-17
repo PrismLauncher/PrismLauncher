@@ -38,11 +38,12 @@
 
 #include <QTabBar>
 
+#include <QAbstractButton>
 #include "Application.h"
 #include "Filter.h"
-#include "Version.h"
 #include "meta/Index.h"
 #include "meta/VersionList.h"
+#include "minecraft/Component.h"
 #include "minecraft/VanillaInstanceCreationTask.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 
@@ -63,6 +64,7 @@ CustomPage::CustomPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(par
     connect(ui->forgeFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
     connect(ui->fabricFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
     connect(ui->quiltFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
+    connect(ui->ornitheFabricFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
     connect(ui->liteLoaderFilter, &QRadioButton::toggled, this, &CustomPage::loaderFilterChanged);
     connect(ui->loaderRefreshBtn, &QPushButton::clicked, this, &CustomPage::loaderRefresh);
 }
@@ -124,29 +126,23 @@ void CustomPage::loaderFilterChanged()
         ui->loaderVersionList->setEmptyMode(VersionListView::String);
         return;
     } else if (ui->neoForgeFilter->isChecked()) {
-        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
         m_selectedLoader = "net.neoforged";
     } else if (ui->forgeFilter->isChecked()) {
-        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
         m_selectedLoader = "net.minecraftforge";
     } else if (ui->fabricFilter->isChecked()) {
-        // FIXME: dirty hack because the launcher is unaware of Fabric's dependencies
-        if (Version(minecraftVersion) >= Version("1.14"))  // Fabric/Quilt supported
-            ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "");
-        else                                                                                   // Fabric/Quilt unsupported
-            ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA");  // clear list
         m_selectedLoader = "net.fabricmc.fabric-loader";
     } else if (ui->quiltFilter->isChecked()) {
-        // FIXME: dirty hack because the launcher is unaware of Quilt's dependencies (same as Fabric)
-        if (Version(minecraftVersion) >= Version("1.14"))  // Fabric/Quilt supported
-            ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "");
-        else                                                                                   // Fabric/Quilt unsupported
-            ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA");  // clear list
         m_selectedLoader = "org.quiltmc.quilt-loader";
+    } else if (ui->ornitheFabricFilter->isChecked()) {
+        m_selectedLoader = "net.ornithemc.fabric-loader";
     } else if (ui->liteLoaderFilter->isChecked()) {
-        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
         m_selectedLoader = "com.mumfrey.liteloader";
     }
+
+    if (Component::loaderSupportsMinecraft(m_selectedLoader, minecraftVersion))
+        ui->loaderVersionList->setExactIfPresentFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
+    else
+        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA");  // clear list
 
     auto vlist = APPLICATION->metadataIndex()->get(m_selectedLoader);
     ui->loaderVersionList->initialize(vlist.get());
@@ -186,22 +182,10 @@ QString CustomPage::selectedLoader() const
 
 QString CustomPage::selectedLoaderName() const
 {
-    if (ui->neoForgeFilter->isChecked()) {
-        return ui->neoForgeFilter->text();
-    }
-    if (ui->forgeFilter->isChecked()) {
-        return ui->forgeFilter->text();
-    }
-    if (ui->fabricFilter->isChecked()) {
-        return ui->fabricFilter->text();
-    }
-    if (ui->quiltFilter->isChecked()) {
-        return ui->quiltFilter->text();
-    }
-    if (ui->liteLoaderFilter->isChecked()) {
-        return ui->liteLoaderFilter->text();
-    }
-    return QString();
+    const QAbstractButton* checked = ui->loaderBtnGroup->checkedButton();
+    if (checked == nullptr || checked == ui->noneFilter)
+        return {};
+    return checked->text();
 }
 
 void CustomPage::suggestCurrent()

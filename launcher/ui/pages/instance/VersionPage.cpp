@@ -392,7 +392,7 @@ void VersionPage::on_actionChange_version_triggered()
     }
 
     VersionSelectDialog vselect(list.get(), tr("Change %1 version").arg(name), this);
-    if (uid == "net.fabricmc.intermediary" || uid == "org.quiltmc.hashed") {
+    if (Component::KNOWN_INTERMEDIARIES.contains(uid)) {
         vselect.setEmptyString(tr("No intermediary mappings versions are currently available."));
         vselect.setEmptyErrorString(tr("Couldn't load or download the intermediary mappings version lists!"));
     }
