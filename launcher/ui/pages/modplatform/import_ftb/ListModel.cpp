@@ -18,7 +18,7 @@
 
 #include "ListModel.h"
 #include <QDir>
-#include <QDirIterator>
+#include <QDirListing>
 #include <QFileInfo>
 #include <QIcon>
 #include <QProcessEnvironment>
@@ -33,7 +33,6 @@
 #include "ui/widgets/ProjectItem.h"
 
 namespace {
-
 QString getFTBRoot()
 {
     QString partialPath = QDir::homePath();
@@ -82,10 +81,10 @@ void ListModel::update()
         if (auto instancesInfo = QFileInfo(path); !instancesInfo.exists() || !instancesInfo.isDir()) {
             return;
         }
-        QDirIterator directoryIterator(path, QDir::Dirs | QDir::NoDotAndDotDot | QDir::Readable | QDir::Hidden,
-                                       QDirIterator::FollowSymlinks);
-        while (directoryIterator.hasNext()) {
-            auto currentPath = directoryIterator.next();
+        for (const auto& entry :
+             QDirListing(path, QDirListing::IteratorFlag::DirsOnly | QDirListing::IteratorFlag::ResolveSymlinks |
+                                   QDirListing::IteratorFlag::IncludeHidden | QDirListing::IteratorFlag::FollowDirSymlinks)) {
+            auto currentPath = entry.absoluteFilePath();
             if (!wasPathAdded(currentPath)) {
                 auto modpack = parseDirectory(currentPath);
                 if (!modpack) {

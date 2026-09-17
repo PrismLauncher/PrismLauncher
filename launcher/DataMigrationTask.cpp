@@ -6,7 +6,6 @@
 
 #include "FileSystem.h"
 
-#include <QDirIterator>
 #include <QFileInfo>
 #include <QMap>
 

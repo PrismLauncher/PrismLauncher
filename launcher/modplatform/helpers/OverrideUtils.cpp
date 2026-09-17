@@ -1,12 +1,12 @@
 #include "OverrideUtils.h"
 
-#include <QDirIterator>
+#include <QDirListing>
 
 #include "FileSystem.h"
 
 namespace Override {
 
-void createOverrides(const QString& name, const QString& parent_folder, const QString& override_path)
+void createOverrides(const QString& name, const QString& parent_folder, const QString& overridePath)
 {
     QString file_path(FS::PathCombine(parent_folder, name + ".txt"));
     if (QFile::exists(file_path))
@@ -20,17 +20,13 @@ void createOverrides(const QString& name, const QString& parent_folder, const QS
         return;
     }
 
-    QDirIterator override_iterator(override_path, QDirIterator::Subdirectories);
-    while (override_iterator.hasNext()) {
-        auto override_file_path = override_iterator.next();
-        QFileInfo info(override_file_path);
-        if (info.isFile()) {
-            // Absolute path with temp directory -> relative path
-            override_file_path = override_file_path.split(name).last().remove(0, 1);
+    for (const auto& entry : QDirListing(overridePath, QDirListing::IteratorFlag::FilesOnly | QDirListing::IteratorFlag::ResolveSymlinks |
+                                                           QDirListing::IteratorFlag::Recursive)) {
+        // Absolute path with temp directory -> relative path
+        auto overrideFilePath = entry.absoluteFilePath().split(name).last().remove(0, 1);
 
-            file.write(override_file_path.toUtf8());
-            file.write("\n");
-        }
+        file.write(overrideFilePath.toUtf8());
+        file.write("\n");
     }
 
     file.close();

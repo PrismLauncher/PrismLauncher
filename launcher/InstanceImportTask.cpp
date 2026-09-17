@@ -55,6 +55,7 @@
 
 #include "net/ApiRequest.h"
 
+#include <QDirListing>
 #include <QFileInfo>
 #include <QtConcurrentRun>
 #include <memory>
@@ -214,14 +215,10 @@ void InstanceImportTask::processZipPack()
 void InstanceImportTask::extractFinished()
 {
     setAbortable(false);
-    QDir extractDir(m_stagingPath);
 
     qDebug() << "Fixing permissions for extracted pack files...";
-    QDirIterator it(extractDir, QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        auto filepath = it.next();
-        QFileInfo file(filepath);
-        auto permissions = QFile::permissions(filepath);
+    for (const auto& file : QDirListing(m_stagingPath, QDirListing::IteratorFlag::ResolveSymlinks | QDirListing::IteratorFlag::Recursive)) {
+        auto permissions = QFile::permissions(file.absoluteFilePath());
         auto origPermissions = permissions;
         if (file.isDir()) {
             // Folder +rwx for current user
@@ -231,10 +228,10 @@ void InstanceImportTask::extractFinished()
             permissions |= QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser;
         }
         if (origPermissions != permissions) {
-            if (!QFile::setPermissions(filepath, permissions)) {
-                logWarning(tr("Could not fix permissions for %1").arg(filepath));
+            if (!QFile::setPermissions(file.absoluteFilePath(), permissions)) {
+                logWarning(tr("Could not fix permissions for %1").arg(file.absoluteFilePath()));
             } else {
-                qDebug() << "Fixed" << filepath;
+                qDebug() << "Fixed" << file.absoluteFilePath();
             }
         }
     }
