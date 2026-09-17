@@ -51,6 +51,7 @@
 #include <QTextStream>
 #include <QUrl>
 #include <QtNetwork>
+#include <algorithm>
 #include <system_error>
 
 #include "DesktopServices.h"
@@ -957,7 +958,7 @@ QString RemoveInvalidPathChars(QString string, QChar replaceWith)
     return removeChars(std::move(string), replaceWith);
 }
 
-QString DirNameFromString(QString string, QString inDir)
+QString DirNameFromString(QString string, const QStringList& inDirs)
 {
     int num = 0;
     QString baseName = RemoveInvalidFilenameChars(string, '-');
@@ -973,7 +974,7 @@ QString DirNameFromString(QString string, QString inDir)
         if (num > 9000)
             return "";
         num++;
-    } while (QFileInfo(PathCombine(inDir, dirName)).exists());
+    } while (std::ranges::any_of(inDirs, [&dirName](const QString& dir) { return QFileInfo(PathCombine(dir, dirName)).exists(); }));
     return dirName;
 }
 

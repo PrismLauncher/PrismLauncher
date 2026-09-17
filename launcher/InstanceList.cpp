@@ -1118,7 +1118,7 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
     if (shouldOverride) {
         instID = instanceTask.originalInstanceID();
     } else {
-        instID = FS::DirNameFromString(instanceTask.modifiedName(), targetDir);
+        instID = FS::DirNameFromString(instanceTask.modifiedName(), m_instDirs);
     }
 
     Q_ASSERT(!instID.isEmpty());
