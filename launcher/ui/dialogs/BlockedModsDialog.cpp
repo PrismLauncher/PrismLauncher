@@ -27,14 +27,13 @@
 #include "ui_BlockedModsDialog.h"
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "modplatform/helpers/HashUtils.h"
+#include "settings/SettingsObject.h"
 
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDialogButtonBox>
-#include <QDir>
-#include <QDirIterator>
+#include <QDirListing>
 #include <QDragEnterEvent>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -214,13 +213,13 @@ void BlockedModsDialog::watchPath(QString path, bool watch_recursive)
     qDebug() << "[Blocked Mods Dialog] Adding Watch Path:" << path;
     m_watcher.addPath(to_watch_path);
 
-    if (!to_watch.isDir() || !watch_recursive)
+    if (!to_watch.isDir() || !watch_recursive) {
         return;
+    }
 
-    QDirIterator it(to_watch_path, QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
-    while (it.hasNext()) {
-        QString watch_dir = QDir(it.next()).canonicalPath();  // resolve symlinks and relative paths
-        watchPath(watch_dir, watch_recursive);
+    for (const auto& entry : QDirListing(to_watch_path, QDirListing::IteratorFlag::DirsOnly | QDirListing::IteratorFlag::ResolveSymlinks)) {
+        QString watchDir = entry.canonicalFilePath();  // resolve symlinks and relative paths
+        watchPath(watchDir, watch_recursive);
     }
 }
 
@@ -236,12 +235,11 @@ void BlockedModsDialog::scanPaths()
 /// @brief Scan the directory at path, skip paths that do not contain a file name
 ///        of a blocked mod we are looking for
 /// @param path the directory to scan
-void BlockedModsDialog::scanPath(QString path, bool start_task)
+void BlockedModsDialog::scanPath(QString path, bool startTask)
 {
-    QDir scan_dir(path);
-    QDirIterator scan_it(path, QDir::Filter::Files | QDir::Filter::Hidden, QDirIterator::NoIteratorFlags);
-    while (scan_it.hasNext()) {
-        QString file = scan_it.next();
+    for (const auto& entry : QDirListing(path, QDirListing::IteratorFlag::FilesOnly | QDirListing::IteratorFlag::ResolveSymlinks |
+                                                   QDirListing::IteratorFlag::IncludeHidden)) {
+        QString file = entry.absoluteFilePath();
 
         if (!checkValidPath(file)) {
             continue;
@@ -250,7 +248,7 @@ void BlockedModsDialog::scanPath(QString path, bool start_task)
         addHashTask(file);
     }
 
-    if (start_task) {
+    if (startTask) {
         runHashTask();
     }
 }
@@ -379,7 +377,7 @@ bool BlockedModsDialog::checkValidPath(QString path)
 
 bool BlockedModsDialog::allModsMatched()
 {
-    return std::all_of(m_mods.begin(), m_mods.end(), [](auto const& mod) { return mod.matched; });
+    return std::all_of(m_mods.begin(), m_mods.end(), [](const auto& mod) { return mod.matched; });
 }
 
 /// @brief ensure matched file paths still exist
