@@ -52,7 +52,7 @@ QString askToUpdateInstanceDirName(BaseInstance* instance, const QString& oldNam
         return QString();
 
     auto oldRoot = instance->instanceRoot();
-    auto newDirName = FS::DirNameFromString(newName, { QFileInfo(oldRoot).dir().absolutePath() });
+    auto newDirName = FS::DirNameFromString(newName, APPLICATION->instances()->instanceDirs());
     auto newRoot = FS::PathCombine(QFileInfo(oldRoot).dir().absolutePath(), newDirName);
     if (oldRoot == newRoot)
         return QString();
