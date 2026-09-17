@@ -41,9 +41,8 @@
 #include <QString>
 #include <expected>
 
-using Error = QString;
-template <typename T = void>
-using Result = std::expected<T, Error>;
+template <typename T = void, typename E = QString>
+using Result = std::expected<T, E>;
 
 #define TRY(expected)                                \
     if (const auto _result = (expected); !_result) { \
