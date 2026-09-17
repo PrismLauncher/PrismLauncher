@@ -58,7 +58,6 @@ TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent)
     : QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog), model(new Technic::ListModel(this)), m_fetch_progress(this, false)
 {
     ui->setupUi(this);
-    ui->searchEdit->installEventFilter(this);
 
     ui->packView->setModel(model);
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -86,24 +85,6 @@ TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent)
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &TechnicPage::onVersionSelectionChanged);
 
     ui->packView->setItemDelegate(new ProjectItemDelegate(this));
-}
-
-bool TechnicPage::eventFilter(QObject* watched, QEvent* event)
-{
-    if (watched == ui->searchEdit && event->type() == QEvent::KeyPress) {
-        auto* keyEvent = static_cast<QKeyEvent*>(event);
-        if (keyEvent->key() == Qt::Key_Return) {
-            triggerSearch();
-            keyEvent->accept();
-            return true;
-        }
-        if (m_search_timer.isActive()) {
-            m_search_timer.stop();
-        }
-
-        m_search_timer.start(350);
-    }
-    return QWidget::eventFilter(watched, event);
 }
 
 TechnicPage::~TechnicPage()

@@ -68,8 +68,6 @@ class TechnicPage : public QWidget, public ModpackProviderBasePage {
 
     void openedImpl() override;
 
-    bool eventFilter(QObject* watched, QEvent* event) override;
-
     /** Programatically set the term in the search bar. */
     void setSearchTerm(QString /*unused*/) override;
     /** Get the current term in the search bar. */

@@ -88,8 +88,6 @@ ResourcePage::ResourcePage(ResourceDownloadDialog* parent,
 {
     m_ui->setupUi(this);
 
-    m_ui->searchEdit->installEventFilter(this);
-
     m_ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_ui->versionSelectionBox->view()->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
@@ -170,25 +168,10 @@ auto ResourcePage::eventFilter(QObject* watched, QEvent* event) -> bool
 {
     if (event->type() == QEvent::KeyPress) {
         auto* keyEvent = static_cast<QKeyEvent*>(event);
-        if (watched == m_ui->searchEdit) {
-            if (keyEvent->key() == Qt::Key_Return) {
-                triggerSearch();
-                keyEvent->accept();
-                return true;
-            }
-            if (m_searchTimer.isActive()) {
-                m_searchTimer.stop();
-            }
-
-            m_searchTimer.start(350);
-
-        } else if (watched == m_ui->packView) {
-            // stop the event from going to the confirm button
-            if (keyEvent->key() == Qt::Key_Return) {
-                onResourceToggle(m_ui->packView->currentIndex());
-                keyEvent->accept();
-                return true;
-            }
+        if (watched == m_ui->packView && keyEvent->key() == Qt::Key_Return) {  // stop the event from going to the confirm button
+            onResourceToggle(m_ui->packView->currentIndex());
+            keyEvent->accept();
+            return true;
         }
     } else if (watched == m_ui->packView->viewport() && event->type() == QEvent::MouseButtonPress) {
         auto* mouseEvent = static_cast<QMouseEvent*>(event);

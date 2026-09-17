@@ -76,7 +76,6 @@ class ModrinthPage : public QWidget, public ModpackProviderBasePage {
 
     void retranslate() override;
     void openedImpl() override;
-    bool eventFilter(QObject* watched, QEvent* event) override;
 
     /** Programatically set the term in the search bar. */
     void setSearchTerm(QString /*unused*/) override;

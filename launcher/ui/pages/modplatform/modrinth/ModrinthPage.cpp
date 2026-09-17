@@ -62,8 +62,6 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
     m_ui->setupUi(this);
     createFilterWidget();
 
-    m_ui->searchEdit->installEventFilter(this);
-
     m_ui->packView->setModel(m_model);
 
     m_ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -116,24 +114,6 @@ void ModrinthPage::openedImpl()
     BasePage::openedImpl();
     suggestCurrent();
     triggerSearch();
-}
-
-bool ModrinthPage::eventFilter(QObject* watched, QEvent* event)
-{
-    if (watched == m_ui->searchEdit && event->type() == QEvent::KeyPress) {
-        auto* keyEvent = static_cast<QKeyEvent*>(event);
-        if (keyEvent->key() == Qt::Key_Return) {
-            this->triggerSearch();
-            keyEvent->accept();
-            return true;
-        }
-        if (m_searchTimer.isActive()) {
-            m_searchTimer.stop();
-        }
-
-        m_searchTimer.start(350);
-    }
-    return QObject::eventFilter(watched, event);
 }
 
 void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)

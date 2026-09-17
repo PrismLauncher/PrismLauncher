@@ -54,7 +54,6 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
     : QWidget(parent), m_ui(new Ui::FlamePage), m_dialog(dialog), m_listModel(new Flame::ListModel(this)), m_fetchProgress(this, false)
 {
     m_ui->setupUi(this);
-    m_ui->searchEdit->installEventFilter(this);
 
     m_ui->packView->setModel(m_listModel);
 
@@ -99,24 +98,6 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
 FlamePage::~FlamePage()
 {
     delete m_ui;
-}
-
-bool FlamePage::eventFilter(QObject* watched, QEvent* event)
-{
-    if (watched == m_ui->searchEdit && event->type() == QEvent::KeyPress) {
-        auto* keyEvent = static_cast<QKeyEvent*>(event);
-        if (keyEvent->key() == Qt::Key_Return) {
-            triggerSearch();
-            keyEvent->accept();
-            return true;
-        }
-        if (m_searchTimer.isActive()) {
-            m_searchTimer.stop();
-        }
-
-        m_searchTimer.start(350);
-    }
-    return QWidget::eventFilter(watched, event);
 }
 
 bool FlamePage::shouldDisplay() const
