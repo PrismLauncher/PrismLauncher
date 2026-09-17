@@ -872,7 +872,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& currentSet, QSet<QString>&
 
             if (newResource->dateTimeChanged() == currentResource->dateTimeChanged()) {
                 // no significant change
-                bool hadIssues = !currentResource->hasIssues();
+                bool hadIssues = currentResource->hasIssues();
                 currentResource->updateIssues(m_instance);
 
                 if (hadIssues != currentResource->hasIssues()) {
