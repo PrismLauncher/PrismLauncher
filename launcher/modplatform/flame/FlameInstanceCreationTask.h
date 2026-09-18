@@ -97,6 +97,10 @@ class FlameCreationTask final : public InstanceTask {
 
     QString m_managedId, m_managedVersionId;
 
+    // Folder (inside the instance) the pack's files are extracted into; matches the old
+    // instance's game root on update so that ".minecraft" instances don't get abandoned.
+    QString m_rootPath = "minecraft";
+
     QList<std::pair<QString, QString>> m_otherResources;
 
     std::optional<BaseInstance*> m_oldInstance{};
