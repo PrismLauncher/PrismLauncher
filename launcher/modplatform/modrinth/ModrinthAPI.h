@@ -70,15 +70,6 @@ class ModrinthAPI final : public ResourceAPI {
         return l.join(',');
     }
 
-    static auto getCategoriesFilters(const QStringList& categories) -> QString
-    {
-        QStringList l;
-        for (const auto& cat : categories) {
-            l << QString("\"categories:%1\"").arg(cat);
-        }
-        return l.join(',');
-    }
-
     static QString getSideFilters(ModPlatform::SideType side)
     {
         switch (side.value()) {
@@ -135,7 +126,9 @@ class ModrinthAPI final : public ResourceAPI {
             }
         }
         if (args.categoryIds.has_value() && !args.categoryIds->empty()) {
-            facetsList.append(QString("[%1]").arg(getCategoriesFilters(args.categoryIds.value())));
+            for (const auto& category : args.categoryIds.value()) {
+                facetsList.append(QString(R"(["categories:%1"])").arg(category));
+            }
         }
         if (!args.excludeDisclosureTypes.empty()) {
             for (const auto& d : args.excludeDisclosureTypes) {
