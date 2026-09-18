@@ -52,7 +52,7 @@
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/instanceview/InstanceDelegate.h"
 
-SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
+SkinManageDialog::SkinManageDialog(QWidget* parent, const MinecraftAccountPtr& acct)
     : QDialog(parent), m_acct(acct), m_ui(new Ui::SkinManageDialog), m_list(this, APPLICATION->settings()->get("SkinsDir").toString(), acct)
 {
     m_ui->setupUi(this);
@@ -171,7 +171,7 @@ void SkinManageDialog::on_openDirBtn_clicked()
 void SkinManageDialog::on_fileBtn_clicked()
 {
     auto filter = QMimeDatabase().mimeTypeForName("image/png").filterString();
-    QString rawPath = QFileDialog::getOpenFileName(this, tr("Select Skin Texture"), QString(), filter);
+    const QString rawPath = QFileDialog::getOpenFileName(this, tr("Select Skin Texture"), QString(), filter);
     if (rawPath.isNull()) {
         return;
     }
@@ -181,12 +181,13 @@ void SkinManageDialog::on_fileBtn_clicked()
         return;
     }
 }
+
 namespace {
 QPixmap previewCape(const QImage& capeImage, bool elytra = false)
 {
     if (elytra) {
         auto wing = capeImage.copy(34, 2, 12, 20);
-        QImage mirrored = wing.mirrored(true, false);
+        const QImage mirrored = wing.flipped(Qt::Horizontal);
 
         QImage combined((wing.width() * 2) + 1, wing.height() + 14, capeImage.format());
         combined.fill(Qt::transparent);
