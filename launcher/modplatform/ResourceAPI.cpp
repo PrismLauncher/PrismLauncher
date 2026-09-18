@@ -1,4 +1,5 @@
 #include "modplatform/ResourceAPI.h"
+#include <qlist.h>
 
 #include <algorithm>
 #include <memory>
@@ -11,72 +12,6 @@
 
 #include "net/ApiRequest.h"
 #include "net/RPCSink.h"
-
-Task::Ptr ResourceAPI::searchProjects(const SearchArgs& args, const Callback<QList<ModPlatform::IndexedPack::Ptr>>& callbacks) const
-{
-    auto searchUrlOptional = getSearchURL(args);
-    if (!searchUrlOptional.has_value()) {
-        callbacks.onFail("Failed to create search URL", -1);
-        return nullptr;
-    }
-
-    const auto& searchUrl = searchUrlOptional.value();
-
-    auto netJob = makeShared<NetJob>(QString("%1::Search").arg(debugName()), APPLICATION->network());
-
-    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(searchUrl));
-    netJob->addNetAction(action);
-
-    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks] {
-        auto doc = Json::requireDocument(*response, "ResourceAPI");
-        if (!doc) {
-            qWarning() << "Error while parsing JSON response from" << debugName() << ":" << doc.error();
-            qWarning() << *response;
-
-            callbacks.onFail(doc.error(), -1);
-
-            return;
-        }
-
-        QList<ModPlatform::IndexedPack::Ptr> newList;
-        auto packs = documentToArray(doc.value());
-
-        for (auto packRaw : packs) {
-            auto packObj = packRaw.toObject();
-
-            ModPlatform::IndexedPack::Ptr pack = std::make_shared<ModPlatform::IndexedPack>();
-            auto loadRes = loadIndexedPack(*pack, packObj);
-            if (!loadRes) {
-                qWarning().nospace() << "Error while loading resource from " << debugName() << ": " << loadRes.error();
-                continue;
-            }
-            newList << pack;
-        }
-
-        callbacks.onSucceed(newList);
-    });
-
-    // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
-    // This prevents the lambda from extending the lifetime of the shared resource,
-    // as it only temporarily locks the resource when needed.
-    auto weak = netJob.toWeakRef();
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [weak, callbacks](const QString& reason) {
-        int networkErrorCode = -1;
-        if (auto netJob = weak.lock()) {
-            if (auto* failedAction = netJob->getFailedActions().at(0); failedAction) {
-                networkErrorCode = failedAction->replyStatusCode();
-            }
-        }
-        callbacks.onFail(reason, networkErrorCode);
-    });
-    QObject::connect(netJob.get(), &NetJob::aborted, netJob.get(), [callbacks] {
-        if (callbacks.onAbort != nullptr) {
-            callbacks.onAbort();
-        }
-    });
-
-    return netJob;
-}
 
 Task::Ptr ResourceAPI::getProjectVersions(const VersionSearchArgs& args,
                                           const Callback<QVector<ModPlatform::IndexedVersion>>& callbacks) const
@@ -226,28 +161,6 @@ Task::Ptr ResourceAPI::getDependencyVersion(const DependencySearchArgs& args, co
     return netJob;
 }
 
-QString ResourceAPI::getGameVersionsString(const std::vector<Version>& mcVersions)
-{
-    QString s;
-    for (const auto& ver : mcVersions) {
-        s += QString("\"%1\",").arg(mapMCVersionToModrinth(ver));
-    }
-    s.remove(s.length() - 1, 1);  // remove last comma
-    return s;
-}
-
-QString ResourceAPI::mapMCVersionToModrinth(const Version& v)
-{
-    static const QString s_preString = " Pre-Release ";
-    auto verStr = v.toString();
-
-    if (verStr.contains(s_preString)) {
-        verStr.replace(s_preString, "-pre");
-    }
-    verStr.replace(" ", "-");
-    return verStr;
-}
-
 std::pair<NetJob::Ptr, ModPlatform::IndexedPack*> ResourceAPI::getProjectTask(const QString& addonId, bool loadExtra, bool askRetry) const
 {
     auto netJob = makeShared<NetJob>(QString("%1::GetProject").arg(addonId), APPLICATION->network());
@@ -266,6 +179,18 @@ std::pair<NetJob::Ptr, ModPlatform::IndexedPack*> ResourceAPI::getProjectTask(co
             netJob->addNetAction(extraAction);
         }
     }
+
+    return { netJob, response };
+}
+
+std::pair<NetJob::Ptr, QList<ModPlatform::IndexedPack>*> ResourceAPI::searchProjectsTask(const SearchArgs& args) const
+{
+    auto spec = searchProjects(args);
+
+    auto netJob = makeShared<NetJob>(QString("%1::Search").arg(debugName()), APPLICATION->network());
+
+    auto [action, response] = Net::RPC::make<QList<ModPlatform::IndexedPack>>(spec);
+    netJob->addNetAction(action);
 
     return { netJob, response };
 }

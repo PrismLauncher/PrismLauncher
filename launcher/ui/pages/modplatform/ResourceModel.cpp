@@ -179,7 +179,7 @@ void ResourceModel::search()
         if (!projectId.isEmpty()) {
             auto [job, response] = m_api->getProjectTask(projectId, true, false);
 
-            QObject::connect(job.get(), &NetJob::succeeded, job.get(), [response, this] {
+            connect(job.get(), &NetJob::succeeded, job.get(), [response, this] {
                 auto pack = std::make_shared<ModPlatform::IndexedPack>();
                 *pack = *response;
                 if (!s_runningModels.constFind(this).value()) {
@@ -188,7 +188,7 @@ void ResourceModel::search()
                 searchRequestForOneSucceeded(pack);
             });
             auto weak = job.toWeakRef();
-            QObject::connect(job.get(), &NetJob::failed, job.get(), [weak, this](const QString& reason) {
+            connect(job.get(), &NetJob::failed, job.get(), [weak, this](const QString& reason) {
                 int networkErrorCode = -1;
                 if (auto job = weak.lock()) {
                     if (auto* failedAction = job->getFailedActions().at(0); failedAction) {
@@ -203,7 +203,7 @@ void ResourceModel::search()
                 }
                 searchRequestFailed(reason, networkErrorCode);
             });
-            QObject::connect(job.get(), &NetJob::aborted, job.get(), [this] {
+            connect(job.get(), &NetJob::aborted, job.get(), [this] {
                 if (!s_runningModels.constFind(this).value()) {
                     return;
                 }
@@ -216,30 +216,37 @@ void ResourceModel::search()
     }
     auto args{ createSearchArguments() };
 
-    ResourceAPI::Callback<QList<ModPlatform::IndexedPack::Ptr>> callbacks{};
+    auto [job, response] = m_api->searchProjectsTask(args);
 
-    callbacks.onSucceed = [this](auto& doc) {
+    connect(job.get(), &NetJob::succeeded, job.get(), [response, this] {
         if (!s_runningModels.constFind(this).value()) {
             return;
         }
-        searchRequestSucceeded(doc);
-    };
-    callbacks.onFail = [this](const QString& reason, int networkErrorCode) {
+        searchRequestSucceeded(*response);
+    });
+
+    auto weak = job.toWeakRef();
+    connect(job.get(), &NetJob::failed, job.get(), [weak, this](const QString& reason) {
+        int networkErrorCode = -1;
+        if (auto job = weak.lock()) {
+            if (auto* failedAction = job->getFailedActions().at(0); failedAction) {
+                networkErrorCode = failedAction->replyStatusCode();
+            }
+        }
         if (!s_runningModels.constFind(this).value()) {
             return;
         }
         searchRequestFailed(reason, networkErrorCode);
-    };
-    callbacks.onAbort = [this] {
+    });
+
+    connect(job.get(), &NetJob::aborted, job.get(), [this] {
         if (!s_runningModels.constFind(this).value()) {
             return;
         }
         searchRequestAborted();
-    };
+    });
 
-    if (auto job = m_api->searchProjects(args, callbacks); job) {
-        runSearchJob(job);
-    }
+    runSearchJob(job);
 }
 
 void ResourceModel::loadEntry(const QModelIndex& entry)
@@ -425,20 +432,20 @@ std::optional<QIcon> ResourceModel::getIcon(const QModelIndex& index, const QUrl
 
 /* Default callbacks */
 
-void ResourceModel::searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>& newList)
+void ResourceModel::searchRequestSucceeded(const QList<ModPlatform::IndexedPack>& newList)
 {
     QList<ModPlatform::IndexedPack::Ptr> filteredNewList;
     for (auto pack : newList) {
-        ModPlatform::IndexedPack::Ptr p;
+        auto p = std::make_shared<ModPlatform::IndexedPack>();
         if (auto sel = std::ranges::find_if(m_selected,
                                             [&pack](const DownloadTaskPtr& i) {
                                                 const auto ipack = i->getPack();
-                                                return ipack->provider == pack->provider && ipack->addonId == pack->addonId;
+                                                return ipack->provider == pack.provider && ipack->addonId == pack.addonId;
                                             });
             sel != m_selected.end()) {
             p = sel->get()->getPack();
         } else {
-            p = pack;
+            *p = pack;
         }
         if (checkFilters(p)) {
             filteredNewList << p;

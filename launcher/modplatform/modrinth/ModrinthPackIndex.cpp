@@ -19,7 +19,6 @@
 
 #include "ModrinthPackIndex.h"
 #include "FileSystem.h"
-#include "ModrinthAPI.h"
 
 #include "Json.h"
 #include "modplatform/ModIndex.h"
@@ -74,6 +73,44 @@ Result<> loadExtraPackData(ModPlatform::IndexedPack& pack, const QJsonObject& ob
     return {};
 }
 
+QString mapMCVersionFromModrinth(QString v)
+{
+    static const QString s_preString = " Pre-Release ";
+    bool pre = false;
+    if (v.contains("-pre")) {
+        pre = true;
+        v.replace("-pre", s_preString);
+    }
+    v.replace("-", " ");
+    if (pre) {
+        v.replace(" Pre Release ", s_preString);
+    }
+    return v;
+}
+
+const auto g_resourceTypeMap = std::array{
+    std::pair{ ModPlatform::ResourceType::Mod, "mod" },           std::pair{ ModPlatform::ResourceType::ResourcePack, "resourcepack" },
+    std::pair{ ModPlatform::ResourceType::ShaderPack, "shader" }, std::pair{ ModPlatform::ResourceType::DataPack, "datapack" },
+    std::pair{ ModPlatform::ResourceType::Modpack, "modpack" },
+};
+
+ModPlatform::ResourceType getResourceType(const QString& param)
+{
+    for (const auto& [key, value] : g_resourceTypeMap) {
+        if (value == param) {
+            return key;
+        }
+    }
+
+    qWarning() << "Invalid resource type for Modrinth API!" << param;
+    return ModPlatform::ResourceType::Unknown;
+}
+
+QString getAuthorURL(const QString& name)
+{
+    return "https://modrinth.com/user/" + name;
+};
+
 }  // namespace
 
 namespace Modrinth::Parse {
@@ -88,7 +125,7 @@ Result<> loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
 
     pack.provider = ModPlatform::ResourceProvider::MODRINTH;
     TRY_INTO(pack.name, Json::requireString(obj, "title"))
-    pack.resourceType = ModrinthAPI::getResourceType(obj["project_type"].toString());
+    pack.resourceType = getResourceType(obj["project_type"].toString());
     if ((obj.contains("loaders") && obj.value("loaders").toArray({}).contains("datapack")) ||
         (obj.contains("all_project_types") && obj.value("all_project_types").toArray({}).contains("datapack"))) {
         pack.resourceType = ModPlatform::ResourceType::DataPack;
@@ -109,7 +146,7 @@ Result<> loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
     if (obj.contains("author")) {
         ModPlatform::ModpackAuthor modAuthor;
         modAuthor.name = obj["author"].toString();
-        modAuthor.url = ModrinthAPI::getAuthorURL(modAuthor.name);
+        modAuthor.url = getAuthorURL(modAuthor.name);
         pack.authors = { modAuthor };
     }
 
@@ -128,6 +165,18 @@ Result<> loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
     pack.extraDataLoaded = false;
     return loadExtraPackData(pack, obj);
 }
+
+QString resourceTypeParameter(ModPlatform::ResourceType type)
+{
+    for (const auto& [key, value] : g_resourceTypeMap) {
+        if (key == type) {
+            return value;
+        }
+    }
+
+    qWarning() << "Invalid resource type for Modrinth API!" << static_cast<std::uint8_t>(type);
+    return "";
+}
 }  // namespace Modrinth::Parse
 
 Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJsonObject& obj,
@@ -144,8 +193,8 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
         return {};
     }
     for (auto mcVer : versionArray) {
-        file.mcVersion.append({ ModrinthAPI::mapMCVersionFromModrinth(mcVer.toString()),
-                                mcVer.toString() });  // double this so we can check both strings when filtering
+        file.mcVersion.append(
+            { mapMCVersionFromModrinth(mcVer.toString()), mcVer.toString() });  // double this so we can check both strings when filtering
     }
     TRY_INTO(const auto& loaders, Json::requireArray(obj, "loaders"))
     for (auto loader : loaders) {
