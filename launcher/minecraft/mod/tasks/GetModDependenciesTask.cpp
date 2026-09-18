@@ -185,24 +185,8 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
 Task::Ptr GetModDependenciesTask::getProjectInfoTask(const std::shared_ptr<PackDependency>& pDep)
 {
     auto provider = pDep->pack->provider;
-    auto [info, responseInfo] = getAPI(provider)->getProject(pDep->pack->addonId.toString());
-    connect(info.get(), &NetJob::succeeded, this, [this, responseInfo, provider, pDep] {
-        auto obj = Json::requireObject(*responseInfo)
-                       .and_then([provider](const auto& v) -> Result<QJsonObject> {
-                           if (provider == ModPlatform::ResourceProvider::FLAME) {
-                               return Json::requireObject(v, "data", "data");
-                           }
-                           return v;
-                       })
-                       .and_then([&provider, &pDep](const auto& v) { return getAPI(provider)->loadIndexedPack(*pDep->pack, v); });
-
-        if (!obj) {
-            removePack(pDep->pack->addonId);
-            qWarning() << "Error while parsing JSON response for mod info:" << obj.error();
-            qDebug() << *responseInfo;
-            return;
-        }
-    });
+    auto [info, responseInfo] = getAPI(provider)->getProjectTask(pDep->pack->addonId.toString());
+    connect(info.get(), &NetJob::succeeded, this, [responseInfo, pDep] { *pDep->pack = *responseInfo; });
     QObject::connect(info.get(), &NetJob::failed, this, [this, info, pDep] {
         removePack(pDep->pack->addonId);
         m_failed.remove(info.get());

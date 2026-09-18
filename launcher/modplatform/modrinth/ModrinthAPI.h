@@ -5,6 +5,7 @@
 #pragma once
 
 #include "BuildConfig.h"
+#include "Result.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
@@ -175,11 +176,6 @@ class ModrinthAPI final : public ResourceAPI {
         return BuildConfig.MODRINTH_PROD_URL + "/search?" + getArguments.join('&');
     };
 
-    auto getInfoURL(const QString& id) const -> std::optional<QString> override
-    {
-        return BuildConfig.MODRINTH_PROD_URL + "/project/" + id;
-    };
-
     static auto getMultipleModInfoURL(const QStringList& ids) -> QString
     {
         return BuildConfig.MODRINTH_PROD_URL + QString("/projects?ids=[\"%1\"]").arg(ids.join("\",\""));
@@ -232,11 +228,13 @@ class ModrinthAPI final : public ResourceAPI {
     QJsonArray documentToArray(QJsonDocument& obj) const override { return obj.object().value("hits").toArray(); }
     Result<> loadIndexedPack(ModPlatform::IndexedPack& m, const QJsonObject& obj) const override
     {
-        return Modrinth::loadIndexedPack(m, obj);
+        return Modrinth::Parse::loadIndexedPack(m, obj);
     }
     Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType /*unused*/) const override
     {
         return Modrinth::loadIndexedPackVersion(obj);
     };
-    Result<> loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) const override { return Modrinth::loadExtraPackData(m, obj); }
+
+   public slots:
+    Net::RPC::Spec<ModPlatform::IndexedPack> getProject(const QString& id) const override;
 };
