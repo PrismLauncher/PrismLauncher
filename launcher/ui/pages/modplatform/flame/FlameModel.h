@@ -48,7 +48,7 @@ class ListModel : public QAbstractListModel {
     void logoFailed(QString logo);
     void logoLoaded(QString logo, QIcon out);
 
-    void searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr>&);
+    void searchRequestFinished(const QList<ModPlatform::IndexedPack>&);
     void searchRequestFailed(const QString& reason);
     void searchRequestForOneSucceeded(ModPlatform::IndexedPack::Ptr);
 

@@ -141,9 +141,8 @@ const auto g_classIDMappings = std::array{
     std::pair{ ModPlatform::ResourceType::World, 17 },     std::pair{ ModPlatform::ResourceType::ShaderPack, 6552 },
     std::pair{ ModPlatform::ResourceType::Modpack, 4471 }, std::pair{ ModPlatform::ResourceType::DataPack, 6945 },
 };
-}
 
-int FlameAPI::getClassId(ModPlatform::ResourceType type)
+int getClassId(ModPlatform::ResourceType type)
 {
     for (auto&& [e, classId] : g_classIDMappings) {
         if (e == type) {
@@ -152,6 +151,58 @@ int FlameAPI::getClassId(ModPlatform::ResourceType type)
     }
     return 0;
 }
+
+int getMappedModLoader(ModPlatform::ModLoaderType loaders)
+{
+    // https://docs.curseforge.com/?http#tocS_ModLoaderType
+    switch (loaders) {
+        case ModPlatform::Forge:
+            return 1;
+        case ModPlatform::Cauldron:
+            return 2;
+        case ModPlatform::LiteLoader:
+            return 3;
+        case ModPlatform::Fabric:
+            return 4;
+        case ModPlatform::Quilt:
+            return 5;
+        case ModPlatform::NeoForge:
+            return 6;
+        case ModPlatform::DataPack:
+        case ModPlatform::Babric:
+        case ModPlatform::BTA:
+        case ModPlatform::LegacyFabric:
+        case ModPlatform::Ornithe:
+        case ModPlatform::Rift:
+        case ModPlatform::None:
+            break;  // not supported
+    }
+    return 0;
+}
+
+QStringList getModLoaderStrings(const ModPlatform::ModLoaderTypes types)
+{
+    QStringList l;
+    for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt }) {
+        if (types.testAnyFlag(loader)) {
+            l << QString::number(getMappedModLoader(loader));
+        }
+    }
+    return l;
+}
+
+QString getModLoaderFilters(ModPlatform::ModLoaderTypes types)
+{
+    return "[" + getModLoaderStrings(types).join(',') + "]";
+}
+
+}  // namespace
+
+bool FlameAPI::validateModLoaders(ModPlatform::ModLoaderTypes loaders)
+{
+    return loaders.testAnyFlags(ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt);
+}
+
 Net::RPC::Spec<ModPlatform::IndexedPack> FlameAPI::getProject(const QString& id) const
 {
     // https://docs.curseforge.com/rest-api/#get-mod
@@ -180,6 +231,69 @@ std::optional<Net::RPC::Spec<bool>> FlameAPI::getProjectExtra(ModPlatform::Index
               } } };
 }
 
+Net::RPC::Spec<QList<ModPlatform::IndexedPack>> FlameAPI::searchProjects(const SearchArgs& args) const
+{
+    // https://docs.curseforge.com/rest-api/#search-mods
+    auto url = searchProjectsURL(args);
+    return { { .url = url }, [](const auto& response) -> Result<QList<ModPlatform::IndexedPack>> {
+                QList<ModPlatform::IndexedPack> newList;
+                TRY_INTO(auto doc, Json::requireDocument(response, "ResourceAPI")
+                                       .and_then([](const auto& v) { return Json::requireObject(v); })
+                                       .and_then([](const auto& v) { return Json::requireArray(v, "data"); }))
+
+                for (auto packRaw : doc) {
+                    auto packObj = packRaw.toObject();
+
+                    ModPlatform::IndexedPack pack;
+                    TRY(Flame::Parse::loadIndexedPack(pack, packObj))
+                    newList << pack;
+                }
+                return newList;
+            } };
+}
+
+std::optional<QString> FlameAPI::getDependencyURL(const DependencySearchArgs& args) const
+{
+    auto addonId = args.dependency.addonId.toString();
+    auto url = QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files?pageSize=10000&gameVersion=%2").arg(addonId, args.mcVersion.toString());
+    if ((args.loader != 0U) && ModPlatform::hasSingleModLoaderSelected(args.loader)) {
+        int mappedModLoader = getMappedModLoader(static_cast<ModPlatform::ModLoaderType>(static_cast<int>(args.loader)));
+        url += QString("&modLoaderType=%1").arg(mappedModLoader);
+    }
+    return url;
+}
+
+QUrl FlameAPI::searchProjectsURL(const SearchArgs& args)
+{
+    QStringList getArguments;
+    getArguments.append(QString("classId=%1").arg(getClassId(args.type)));
+    getArguments.append(QString("index=%1").arg(args.offset));
+    getArguments.append("pageSize=25");
+    if (args.search.has_value()) {
+        getArguments.append(QString("searchFilter=%1").arg(args.search.value()));
+    }
+    if (args.sorting.has_value()) {
+        getArguments.append(QString("sortField=%1").arg(args.sorting.value().index));
+    }
+    getArguments.append("sortOrder=desc");
+    if (args.loaders.has_value()) {
+        ModPlatform::ModLoaderTypes loaders = args.loaders.value();
+        loaders &= ~static_cast<std::uint16_t>(ModPlatform::ModLoaderType::DataPack);
+        if (loaders != 0) {
+            getArguments.append(QString("modLoaderTypes=%1").arg(getModLoaderFilters(loaders)));
+        }
+    }
+    if (args.categoryIds.has_value() && !args.categoryIds->empty()) {
+        getArguments.append(QString("categoryIds=[%1]").arg(args.categoryIds->join(",")));
+    }
+
+    if (args.versions.has_value() && !args.versions.value().empty()) {
+        getArguments.append(QString("gameVersion=%1").arg(args.versions.value().front().toString()));
+    }
+
+    return BuildConfig.FLAME_BASE_URL + "/mods/search?gameId=432&" + getArguments.join('&');
+}
+
 ModPlatform::ResourceType FlameAPI::getResourceType(int classId)
 {
     for (auto&& [type, c] : g_classIDMappings) {
@@ -188,6 +302,23 @@ ModPlatform::ResourceType FlameAPI::getResourceType(int classId)
         }
     }
     return ModPlatform::ResourceType::Unknown;
+}
+
+std::optional<QString> FlameAPI::getVersionsURL(const VersionSearchArgs& args) const
+{
+    auto addonId = args.pack->addonId.toString();
+    QString url = QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files?pageSize=10000").arg(addonId);
+
+    if (args.mcVersions.has_value()) {
+        url += QString("&gameVersion=%1").arg(args.mcVersions.value().front().toString());
+    }
+
+    if (args.loaders.has_value() && args.loaders.value() != ModPlatform::ModLoaderType::DataPack &&
+        ModPlatform::hasSingleModLoaderSelected(args.loaders.value())) {
+        int mappedModLoader = getMappedModLoader(static_cast<ModPlatform::ModLoaderType>(static_cast<int>(args.loaders.value())));
+        url += QString("&modLoaderType=%1").arg(mappedModLoader);
+    }
+    return url;
 }
 
 std::pair<Task::Ptr, QByteArray*> FlameAPI::getCategories(ModPlatform::ResourceType type)
