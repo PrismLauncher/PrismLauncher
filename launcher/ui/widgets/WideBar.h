@@ -44,8 +44,4 @@ class WideBar : public QToolBar {
     QList<BarEntry> m_entries;
 
     bool m_use_default_action = false;
-
-    // Menu to toggle visibility from buttons in the bar
-    std::unique_ptr<QMenu> m_bar_menu = nullptr;
-    enum class MenuState { Fresh, Dirty } m_menu_state = MenuState::Dirty;
 };

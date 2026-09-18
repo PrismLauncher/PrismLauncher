@@ -71,8 +71,6 @@ void WideBar::addAction(QAction* action)
     entry.type = BarEntry::Type::Action;
 
     m_entries.push_back(entry);
-
-    m_menu_state = MenuState::Dirty;
 }
 
 void WideBar::addSeparator()
@@ -103,8 +101,6 @@ void WideBar::insertActionBefore(QAction* before, QAction* action)
     entry.type = BarEntry::Type::Action;
 
     m_entries.insert(iter, entry);
-
-    m_menu_state = MenuState::Dirty;
 }
 
 void WideBar::insertActionAfter(QAction* after, QAction* action)
@@ -128,8 +124,6 @@ void WideBar::insertActionAfter(QAction* after, QAction* action)
     entry.type = BarEntry::Type::Action;
 
     m_entries.insert(iter, entry);
-
-    m_menu_state = MenuState::Dirty;
 }
 
 void WideBar::insertWidgetBefore(QAction* before, QWidget* widget)
