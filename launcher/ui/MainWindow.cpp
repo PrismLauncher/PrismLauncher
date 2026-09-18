@@ -43,6 +43,7 @@
 #include "FileSystem.h"
 
 #include "MainWindow.h"
+#include "modplatform/flame/FlamePackIndex.h"
 #include "ui_MainWindow.h"
 
 #include <QDir>
@@ -124,8 +125,6 @@
 
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlameModIndex.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
 
 #include "KonamiCode.h"
 
@@ -1010,7 +1009,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                     auto data = doc->object()["data"].toObject();
                     // No way to find out if it's a mod or a modpack before here
                     // And also we need to check if it ends with .zip, instead of any better way
-                    auto versionRes = FlameMod::loadIndexedPackVersion(data);
+                    auto versionRes = Flame::Parse::loadIndexedPackVersion(data);
                     if (!versionRes) {
                         CustomMessageBox::selectable(this, tr("Error"), versionRes.error(), QMessageBox::Critical)->show();
                         return;

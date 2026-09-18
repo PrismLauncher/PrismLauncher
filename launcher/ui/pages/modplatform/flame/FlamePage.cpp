@@ -143,16 +143,16 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
     if (!m_current->versionsLoaded || m_filterWidget->changed()) {
         qDebug() << "Loading flame modpack versions";
 
-        ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion> > callbacks{};
-
         auto addonId = m_current->addonId;
-        // Use default if no callbacks are set
-        callbacks.onSucceed = [this, curr, addonId](auto& doc) {
+
+        auto [netJob, response] = FlameAPI::get().getVersionsTask(
+            { .pack = m_current, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::Modpack });
+        connect(netJob.get(), &NetJob::succeeded, this, [this, addonId, response, curr] {
             if (addonId != m_current->addonId) {
                 return;  // wrong request
             }
 
-            m_current->versions = doc;
+            m_current->versions = *response;
             m_current->versionsLoaded = true;
             auto pred = [this](const ModPlatform::IndexedVersion& v) {
                 if (auto filter = m_filterWidget->getFilter()) {
@@ -177,13 +177,9 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
                 m_ui->versionSelectionBox->addItem(tr("No version is available!"), -1);
             }
             suggestCurrent();
-        };
-        callbacks.onFail = [this](const QString& reason, int) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
-        };
-
-        auto netJob = FlameAPI::get().getProjectVersions(
-            { .pack = m_current, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::Modpack }, callbacks);
+        });
+        connect(netJob.get(), &NetJob::failed, this,
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         m_job = netJob;
         netJob->start();
@@ -207,7 +203,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
 
         auto [job, response] = FlameAPI::get().getProjectTask(addonId.toString(), true);
 
-        QObject::connect(job.get(), &NetJob::succeeded, job.get(), [this, addonId, response] {
+        connect(job.get(), &NetJob::succeeded, this, [this, addonId, response] {
             if (addonId != m_current->addonId) {
                 return;  // wrong request
             }
@@ -221,8 +217,8 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
 
             updateUi();
         });
-        QObject::connect(job.get(), &NetJob::failed, job.get(),
-                         [](const QString& reason) { qWarning() << "Failed to load extra info for the current pack:" << reason; });
+        connect(job.get(), &NetJob::failed, this,
+                [](const QString& reason) { qWarning() << "Failed to load extra info for the current pack:" << reason; });
 
         m_job = job;
         m_job->start();

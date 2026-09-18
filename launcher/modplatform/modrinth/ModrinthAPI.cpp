@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ModrinthAPI.h"
+#include <qjsonarray.h>
 #include <array>
 
 #include "Application.h"
@@ -263,33 +264,6 @@ bool ModrinthAPI::validateModLoaders(ModPlatform::ModLoaderTypes loaders)
                                 ModPlatform::LegacyFabric | ModPlatform::Ornithe | ModPlatform::Rift);
 }
 
-auto ModrinthAPI::getVersionsURL(const VersionSearchArgs& args) const -> std::optional<QString>
-{
-    QStringList getArguments;
-    if (args.mcVersions.has_value()) {
-        getArguments.append(QString("game_versions=[%1]").arg(getGameVersionsString(args.mcVersions.value())));
-    }
-    if (args.loaders.has_value()) {
-        getArguments.append(QString("loaders=[\"%1\"]").arg(getModLoaderStrings(args.loaders.value()).join("\",\"")));
-    }
-    getArguments.append(QString("include_changelog=%1").arg(args.includeChangelog ? "true" : "false"));
-
-    return QString("%1/project/%2/version%3%4")
-        .arg(BuildConfig.MODRINTH_PROD_URL, args.pack->addonId.toString(), getArguments.isEmpty() ? "" : "?", getArguments.join('&'));
-}
-
-std::optional<QString> ModrinthAPI::getDependencyURL(const DependencySearchArgs& args) const
-{
-    return args.dependency.version.length() != 0
-               ? QString("%1/version/%2").arg(BuildConfig.MODRINTH_PROD_URL, args.dependency.version)
-               : QString(R"(%1/project/%2/version?game_versions=["%3"]&loaders=["%4"]&include_changelog=%5)")
-                     .arg(BuildConfig.MODRINTH_PROD_URL)
-                     .arg(args.dependency.addonId.toString())
-                     .arg(mapMCVersionToModrinth(args.mcVersion))
-                     .arg(getModLoaderStrings(args.loader).join("\",\""))
-                     .arg(args.includeChangelog ? "true" : "false");
-}
-
 Net::RPC::Spec<ModPlatform::IndexedPack> ModrinthAPI::getProject(const QString& id) const
 {
     // https://docs.modrinth.com/api/operations/getproject/
@@ -383,4 +357,62 @@ Net::RPC::Spec<QList<ModPlatform::Category>> ModrinthAPI::getCategories(ModPlatf
                  }
                  return categories;
              } };
+}
+
+Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> ModrinthAPI::getVersions(const VersionSearchArgs& args) const
+{  // https://docs.modrinth.com/api/operations/getprojectversions/
+    auto url = getVersionsURL(args);
+    return { { .url = url }, [args](const auto& response) -> Result<QList<ModPlatform::IndexedVersion>> {
+                TRY_INTO(auto doc,
+                         Json::requireDocument(response, "ResourceAPI::getVersions").and_then([](const auto& v) -> Result<QJsonArray> {
+                             if (v.isObject()) {
+                                 return { { v.object() } };
+                             }
+                             return Json::requireArray(v);
+                         }))
+
+                QList<ModPlatform::IndexedVersion> unsortedVersions;
+
+                for (auto versionIter : doc) {
+                    auto obj = versionIter.toObject();
+
+                    TRY_INTO(auto file, Modrinth::Parse::loadIndexedPackVersion(obj))
+                    if (!file.addonId.isValid()) {
+                        file.addonId = args.pack->addonId;
+                    }
+
+                    if (file.fileId.isValid() && !file.downloadUrl.isEmpty()) {  // Heuristic to check if the returned value is valid
+                        unsortedVersions.append(file);
+                    }
+                }
+
+                auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
+                    // dates are in RFC 3339 format
+                    return a.date > b.date;
+                };
+                std::ranges::sort(unsortedVersions, orderSortPredicate);
+
+                args.pack->versions = unsortedVersions;
+                args.pack->versionsLoaded = true;
+
+                return args.pack->versions;
+            } };
+}
+
+QUrl ModrinthAPI::getVersionsURL(const VersionSearchArgs& args)
+{
+    if (!args.version.isEmpty()) {
+        return QString("%1/version/%2").arg(BuildConfig.MODRINTH_PROD_URL, args.version);
+    }
+    QStringList getArguments;
+    if (args.mcVersions.has_value()) {
+        getArguments.append(QString("game_versions=[%1]").arg(getGameVersionsString(args.mcVersions.value())));
+    }
+    if (args.loaders.has_value()) {
+        getArguments.append(QString("loaders=[\"%1\"]").arg(getModLoaderStrings(args.loaders.value()).join("\",\"")));
+    }
+    getArguments.append(QString("include_changelog=%1").arg(args.includeChangelog ? "true" : "false"));
+
+    return QString("%1/project/%2/version%3%4")
+        .arg(BuildConfig.MODRINTH_PROD_URL, args.pack->addonId.toString(), getArguments.isEmpty() ? "" : "?", getArguments.join('&'));
 }

@@ -10,7 +10,6 @@
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 
 #include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/flame/FlamePackIndex.h"
 #include "modplatform/helpers/HashUtils.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
@@ -253,8 +252,9 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
                 setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(resource->name()));
                 qDebug() << "Getting version for" << resource->name() << "from Modrinth";
 
-                TRY_INTO(const auto& version,
-                         Json::requireObject(entries, hash).and_then([](const auto& v) { return Modrinth::loadIndexedPackVersion(v); }))
+                TRY_INTO(const auto& version, Json::requireObject(entries, hash).and_then([](const auto& v) {
+                    return Modrinth::Parse::loadIndexedPackVersion(v);
+                }))
 
                 m_tempVersions.insert(hash, version);
                 return {};
@@ -377,7 +377,7 @@ Task::Ptr EnsureMetadataTask::flameVersionsTask()
 
             setStatus(tr("Parsing API response from CurseForge for '%1'...").arg((*resource)->name()));
 
-            auto versionRes = FlameMod::loadIndexedPackVersion(fileObj);
+            auto versionRes = Flame::Parse::loadIndexedPackVersion(fileObj);
             if (!versionRes) {
                 qDebug() << versionRes.error();
                 qDebug() << *obj;
