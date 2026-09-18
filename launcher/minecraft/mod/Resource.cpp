@@ -1,6 +1,5 @@
 #include "Resource.h"
 
-#include <QDirIterator>
 #include <QFileInfo>
 #include <QObject>
 #include <QRegularExpression>
