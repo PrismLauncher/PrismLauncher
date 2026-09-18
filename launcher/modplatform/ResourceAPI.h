@@ -105,14 +105,14 @@ class ResourceAPI {
         bool includeChangelog{};
     };
 
-   public:
-    /** Gets a list of available sorting methods for this API. */
-    virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
-
    public slots:
 
     Task::Ptr getProjectVersions(const VersionSearchArgs& args, const Callback<QVector<ModPlatform::IndexedVersion>>& callbacks) const;
     virtual Task::Ptr getDependencyVersion(const DependencySearchArgs&, const Callback<ModPlatform::IndexedVersion>&) const;
+
+   public:
+    /** Gets a list of available sorting methods for this API. */
+    virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
 
    public slots:
 
@@ -120,6 +120,7 @@ class ResourceAPI {
     virtual Net::RPC::Spec<QList<ModPlatform::IndexedPack>> getProjects(const QStringList& addonIds) const = 0;
     virtual std::optional<Net::RPC::Spec<bool>> getProjectExtra(ModPlatform::IndexedPack& /*pack*/) const { return {}; }
     virtual Net::RPC::Spec<QList<ModPlatform::IndexedPack>> searchProjects(const SearchArgs& args) const = 0;
+    virtual Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const = 0;
 
     // helpers to omit the netJob stuff
     std::pair<NetJob::Ptr, ModPlatform::IndexedPack*> getProjectTask(const QString& addonId,
@@ -127,6 +128,7 @@ class ResourceAPI {
                                                                      bool askRetry = true) const;
     std::pair<NetJob::Ptr, QList<ModPlatform::IndexedPack>*> searchProjectsTask(const SearchArgs& args) const;
     std::pair<NetJob::Ptr, QList<ModPlatform::IndexedPack>*> getProjectsTask(const QStringList& addonIds) const;
+    std::pair<NetJob::Ptr, QList<ModPlatform::Category>*> getCategoriesTask(ModPlatform::ResourceType type) const;
 
    protected:
     ~ResourceAPI() = default;
@@ -138,8 +140,4 @@ class ResourceAPI {
     virtual auto getDependencyURL(const DependencySearchArgs& args) const -> std::optional<QString> = 0;
 
     virtual Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType) const = 0;
-
-    virtual std::pair<Task::Ptr, QByteArray*> getModCategories() const = 0;
-
-    virtual QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const = 0;
 };

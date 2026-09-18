@@ -35,12 +35,6 @@ class FlameAPI final : public ResourceAPI {
     static std::pair<Task::Ptr, QByteArray*> getFiles(const QStringList& fileIds);
     static std::pair<Task::Ptr, QByteArray*> getFile(const QString& addonId, const QString& fileId);
 
-    static std::pair<Task::Ptr, QByteArray*> getCategories(ModPlatform::ResourceType type);
-    std::pair<Task::Ptr, QByteArray*> getModCategories() const override;
-    QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const override;
-
-    QList<ResourceAPI::SortingMethod> getSortingMethods() const override;
-
     static ModPlatform::ResourceType getResourceType(int classId);
 
    public:
@@ -65,12 +59,14 @@ class FlameAPI final : public ResourceAPI {
    public:
     static bool validateModLoaders(ModPlatform::ModLoaderTypes loaders);
 
+    QList<ResourceAPI::SortingMethod> getSortingMethods() const override;
+
    public slots:
     Net::RPC::Spec<ModPlatform::IndexedPack> getProject(const QString& id) const override;
     Net::RPC::Spec<QList<ModPlatform::IndexedPack>> getProjects(const QStringList& addonIds) const override;
     std::optional<Net::RPC::Spec<bool>> getProjectExtra(ModPlatform::IndexedPack& pack) const override;
-
     Net::RPC::Spec<QList<ModPlatform::IndexedPack>> searchProjects(const SearchArgs& args) const override;
+    Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const override;
 
    private:
     std::optional<QString> getDependencyURL(const DependencySearchArgs& args) const override;

@@ -36,6 +36,7 @@
 
 #include "ModrinthPage.h"
 #include "modplatform/ModIndex.h"
+#include "modplatform/ResourceType.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ModrinthPage.h"
@@ -374,11 +375,8 @@ void ModrinthPage::createFilterWidget()
     connect(m_ui->filterButton, &QPushButton::clicked, this, [this] { m_filterWidget->setHidden(!m_filterWidget->isHidden()); });
 
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &ModrinthPage::triggerSearch);
-    auto [categoriesTask, response] = ModrinthAPI::get().getModCategories();
+    auto [categoriesTask, response] = ModrinthAPI::get().getCategoriesTask(ModPlatform::ResourceType::Modpack);
     m_categoriesTask = categoriesTask;
-    connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() {
-        auto categories = ModrinthAPI::loadCategories(*response, "modpack");
-        m_filterWidget->setCategories(categories);
-    });
+    connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() { m_filterWidget->setCategories(*response); });
     m_categoriesTask->start();
 }

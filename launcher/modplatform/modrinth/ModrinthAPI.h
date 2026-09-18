@@ -39,13 +39,6 @@ class ModrinthAPI final : public ResourceAPI {
                                                      std::optional<std::vector<Version>> mcVersions,
                                                      std::optional<ModPlatform::ModLoaderTypes> loaders) const;
 
-    std::pair<Task::Ptr, QByteArray*> getModCategories() const override;
-    static QList<ModPlatform::Category> loadCategories(const QByteArray& response, const QString& projectType);
-    QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const override;
-
-   public:
-    auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
-
    private:
     static auto getMultipleModInfoURL(const QStringList& ids) -> QString
     {
@@ -64,10 +57,13 @@ class ModrinthAPI final : public ResourceAPI {
    public:
     static bool validateModLoaders(ModPlatform::ModLoaderTypes loaders);
 
+    auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
+
    public slots:
     Net::RPC::Spec<ModPlatform::IndexedPack> getProject(const QString& id) const override;
     Net::RPC::Spec<QList<ModPlatform::IndexedPack>> getProjects(const QStringList& addonIds) const override;
     Net::RPC::Spec<QList<ModPlatform::IndexedPack>> searchProjects(const SearchArgs& args) const override;
+    Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const override;
 
    private:
     static QUrl searchProjectsURL(const SearchArgs& args);

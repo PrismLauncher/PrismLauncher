@@ -231,6 +231,24 @@ Net::RPC::Spec<QList<ModPlatform::IndexedPack>> FlameAPI::getProjects(const QStr
     return { { .method = Net::HttpMethod::Post, .url = url, .data = body }, Flame::Parse::parseProjectList };
 }
 
+Net::RPC::Spec<QList<ModPlatform::Category>> FlameAPI::getCategories(ModPlatform::ResourceType type) const
+{  // https://docs.curseforge.com/rest-api/#get-categories
+    auto url = QString(BuildConfig.FLAME_BASE_URL + "/categories?gameId=432&classId=%1").arg(getClassId(type));
+    return { { .url = url }, [](const auto& response) -> Result<QList<ModPlatform::Category>> {
+                QList<ModPlatform::Category> categories;
+                TRY_INTO(const auto& doc,
+                         Json::requireObject(response).and_then([](const auto& v) { return Json::requireArray(v, "data"); }))
+
+                for (auto val : doc) {
+                    TRY_INTO(const auto& cat, Json::requireObject(val))
+                    TRY_INTO(const auto& id, Json::requireInteger(cat, "id"))
+                    TRY_INTO(const auto& name, Json::requireString(cat, "name"))
+                    categories.push_back({ .name = name, .id = QString::number(id) });
+                }
+                return categories;
+            } };
+}
+
 std::optional<QString> FlameAPI::getDependencyURL(const DependencySearchArgs& args) const
 {
     auto addonId = args.dependency.addonId.toString();
@@ -299,43 +317,6 @@ std::optional<QString> FlameAPI::getVersionsURL(const VersionSearchArgs& args) c
     }
     return url;
 }
-
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getCategories(ModPlatform::ResourceType type)
-{
-    auto netJob = makeShared<NetJob>(QString("Flame::GetCategories"), APPLICATION->network());
-    auto [action, response] = Net::ApiRequest::makeByteArray(
-        QUrl(QString(BuildConfig.FLAME_BASE_URL + "/categories?gameId=432&classId=%1").arg(getClassId(type))));
-    netJob->addNetAction(action);
-    QObject::connect(netJob.get(), &Task::failed, netJob.get(),
-                     [](const QString& msg) { qDebug() << "Flame failed to get categories:" << msg; });
-    return { netJob, response };
-}
-
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getModCategories() const
-{
-    return getCategories(ModPlatform::ResourceType::Mod);
-}
-
-QList<ModPlatform::Category> FlameAPI::loadModCategories(const QByteArray& response) const
-{
-    QList<ModPlatform::Category> categories;
-    auto parse = [&response, &categories] -> Result<> {
-        TRY_INTO(const auto& doc, Json::requireObject(response).and_then([](const auto& v) { return Json::requireArray(v, "data"); }))
-
-        for (auto val : doc) {
-            TRY_INTO(const auto& cat, Json::requireObject(val))
-            TRY_INTO(const auto& id, Json::requireInteger(cat, "id"))
-            TRY_INTO(const auto& name, Json::requireString(cat, "name"))
-            categories.push_back({ .name = name, .id = QString::number(id) });
-        }
-        return {};
-    };
-    if (auto res = parse(); !res) {
-        qCritical() << "Failed to parse response from categories:" << res.error();
-        qDebug() << response;
-    }
-    return categories;
-};
 
 std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(const QList<ModPlatform::IndexedVersion>& versions,
                                                                       const QList<ModPlatform::ModLoaderType>& instanceLoaders,
