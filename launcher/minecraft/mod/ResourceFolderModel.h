@@ -133,7 +133,16 @@ class ResourceFolderModel : public QAbstractListModel {
     /* Qt behavior */
 
     /* Basic columns */
-    enum Columns : std::uint8_t { ActiveColumn = 0, NameColumn, DateColumn, ProviderColumn, SizeColumn, FileNameColumn, NumColumns };
+    enum Columns : std::uint8_t {
+        ActiveColumn = 0,
+        NameColumn,
+        DateColumn,
+        ProviderColumn,
+        VersionColumn,
+        SizeColumn,
+        FileNameColumn,
+        NumColumns
+    };
 
     QStringList columnNames(bool translated = true) const { return translated ? m_columnNamesTranslated : m_columnNames; }
 
@@ -236,13 +245,15 @@ class ResourceFolderModel : public QAbstractListModel {
    protected:
     // Represents the relationship between a column's index (represented by the list index), and it's sorting key.
     // As such, the order in with they appear is very important!
-    QList<SortType> m_columnSortKeys = { SortType::Enabled,  SortType::Name, SortType::Date,
-                                         SortType::Provider, SortType::Size, SortType::Filename };
-    QStringList m_columnNames = { "Enable", "Name", "Last Modified", "Provider", "Size", "File Name" };
-    QStringList m_columnNamesTranslated = { tr("Enable"), tr("Name"), tr("Last Modified"), tr("Provider"), tr("Size"), tr("File Name") };
+    QList<SortType> m_columnSortKeys = { SortType::Enabled, SortType::Name, SortType::Date,    SortType::Provider,
+                                         SortType::Version, SortType::Size, SortType::Filename };
+    QStringList m_columnNames = { "Enable", "Name", "Last Modified", "Provider", "Version", "Size", "File Name" };
+    QStringList m_columnNamesTranslated = { tr("Enable"),  tr("Name"), tr("Last Modified"), tr("Provider"),
+                                            tr("Version"), tr("Size"), tr("File Name") };
     QList<QHeaderView::ResizeMode> m_columnResizeModes = { QHeaderView::Interactive, QHeaderView::Stretch,     QHeaderView::Interactive,
-                                                           QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
-    QList<bool> m_columnsHideable = { false, false, true, true, true, true };
+                                                           QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
+                                                           QHeaderView::Interactive };
+    QList<bool> m_columnsHideable = { false, false, true, true, true, true, true };
 
     QDir m_dir;
     MinecraftInstance* m_instance;
