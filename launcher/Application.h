@@ -227,6 +227,9 @@ class Application : public QApplication {
     void controllerFinished();
     void setupWizardFinished(int status);
 
+   signals:
+    void instanceLaunchFinished(BaseInstance* instance, bool wasSuccessful);
+
    private:
     static bool handleDataMigration(const QString& currentData, const QString& oldData, const QString& name, const QString& configFile);
     bool createSetupWizard();
