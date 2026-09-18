@@ -36,11 +36,13 @@ std::vector<Version> mcVersions(MinecraftInstance* inst)
 }
 ModPlatform::ResourceProvider next(ModPlatform::ResourceProvider p)
 {
-    switch (p) {
+    switch (p.value()) {
         case ModPlatform::ResourceProvider::MODRINTH:
             return ModPlatform::ResourceProvider::FLAME;
         case ModPlatform::ResourceProvider::FLAME:
             return ModPlatform::ResourceProvider::MODRINTH;
+        case ModPlatform::ResourceProviderValue::UNKNOWN:
+            break;
     }
 
     return ModPlatform::ResourceProvider::FLAME;
@@ -307,19 +309,26 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
 
     // adds resource to list based on provider
     auto addToTmp = [&modrinthTmp, &flameTmp](Resource* resource, ModPlatform::ResourceProvider p) {
-        switch (p) {
+        switch (p.value()) {
             case ModPlatform::ResourceProvider::MODRINTH:
                 modrinthTmp.push_back(resource);
                 break;
             case ModPlatform::ResourceProvider::FLAME:
                 flameTmp.push_back(resource);
                 break;
+            case ModPlatform::ResourceProviderValue::UNKNOWN:
+                break;
         }
     };
 
     // ask the user on what provider to seach for the mod first
     for (auto* candidate : m_candidates) {
-        if (candidate->status() != ResourceStatus::NoMetadata) {
+        if (candidate->metadata() && candidate->metadata()->provider.value() == ModPlatform::ResourceProviderValue::UNKNOWN) {
+            m_rematchSlugs[candidate] = candidate->metadata()->slug;
+        }
+
+        if (candidate->status() != ResourceStatus::NoMetadata &&
+            (candidate->metadata() && candidate->metadata()->provider.value() != ModPlatform::ResourceProviderValue::UNKNOWN)) {
             onMetadataEnsured(candidate);
             continue;
         }
@@ -416,12 +425,22 @@ void ResourceUpdateDialog::onMetadataEnsured(Resource* resource)
         return;
     }
 
-    switch (resource->metadata()->provider) {
+    // remove old file
+    if (m_rematchSlugs.contains(resource)) {
+        auto oldSlug = m_rematchSlugs.take(resource);
+        if (oldSlug != resource->metadata()->slug) {
+            Metadata::remove(indexDir(), oldSlug);
+        }
+    }
+
+    switch (resource->metadata()->provider.value()) {
         case ModPlatform::ResourceProvider::MODRINTH:
             m_modrinthToUpdate.push_back(resource);
             break;
         case ModPlatform::ResourceProvider::FLAME:
             m_flameToUpdate.push_back(resource);
+            break;
+        case ModPlatform::ResourceProviderValue::UNKNOWN:
             break;
     }
 }
@@ -462,7 +481,7 @@ void ResourceUpdateDialog::appendResource(const CheckUpdateTask::Update& info, Q
     itemTop->setExpanded(true);
 
     auto* providerItem = new QTreeWidgetItem(itemTop);
-    QString providerName = ModPlatform::ProviderCapabilities::readableName(info.provider);
+    QString providerName = info.provider.readableName();
     providerItem->setText(0, tr("Provider: %1").arg(providerName));
     providerItem->setData(0, Qt::UserRole, providerName);
 

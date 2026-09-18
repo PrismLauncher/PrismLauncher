@@ -57,13 +57,15 @@ class V1 {
 
        public:
         // This is a totally heuristic, but should work for now.
-        auto isValid() const -> bool { return !slug.isEmpty() && !project_id.isNull(); }
+        auto isValid() const -> bool { return !slug.isEmpty() && !filename.isEmpty(); }
 
         // Different providers can use different names for the same thing
         // Modrinth-specific
         auto mod_id() -> QVariant& { return project_id; }
         auto version() -> QVariant& { return file_id; }
     };
+
+    static auto createNoProviderModFormat(const QString& name, const QString& filename) -> Mod;
 
     /* Generates the object representing the information in a mod.pw.toml file via
      * its common representation in the launcher, when downloading mods.

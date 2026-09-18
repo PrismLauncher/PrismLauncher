@@ -67,17 +67,17 @@ void ChooseProviderDialog::confirmAll()
 
 auto ChooseProviderDialog::getSelectedProvider() const -> ModPlatform::ResourceProvider
 {
-    return ModPlatform::ResourceProvider(m_providers.checkedId());
+    return { static_cast<ModPlatform::ResourceProviderValue>(m_providers.checkedId()) };
 }
 
 void ChooseProviderDialog::addProviders()
 {
-    int btn_index = 0;
-    QRadioButton* btn;
+    QRadioButton* btn = nullptr;
 
-    for (auto& provider : { ModPlatform::ResourceProvider::MODRINTH, ModPlatform::ResourceProvider::FLAME }) {
-        btn = new QRadioButton(ModPlatform::ProviderCapabilities::readableName(provider), this);
-        m_providers.addButton(btn, btn_index++);
+    for (const auto& provider : { ModPlatform::ResourceProvider(ModPlatform::ResourceProvider::MODRINTH),
+                                  ModPlatform::ResourceProvider(ModPlatform::ResourceProvider::FLAME) }) {
+        btn = new QRadioButton(provider.readableName(), this);
+        m_providers.addButton(btn, static_cast<int>(provider.value()));
         ui->providersLayout->addWidget(btn);
     }
 }

@@ -21,6 +21,7 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QFileInfo>
 #include <QObject>
 #include <algorithm>
 #include <compare>
@@ -143,6 +144,23 @@ auto V1::createModFormat([[maybe_unused]] const QDir& index_dir,
     return mod;
 }
 
+auto V1::createNoProviderModFormat(const QString& name, const QString& filename) -> Mod
+{
+    Mod mod;
+
+    mod.name = name;
+
+    auto realFilename = filename;
+    if (realFilename.endsWith(".disabled")) {
+        realFilename.chop(9);
+    }
+
+    mod.filename = realFilename;
+    mod.slug = QFileInfo(realFilename).completeBaseName();
+
+    return mod;
+}
+
 void V1::updateModIndex(const QDir& index_dir, Mod& mod)
 {
     if (!mod.isValid()) {
@@ -171,7 +189,7 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
     }
 
     toml::table update;
-    switch (mod.provider) {
+    switch (mod.provider.value()) {
         case (ModPlatform::ResourceProvider::FLAME):
             if (mod.file_id.toInt() == 0 || mod.project_id.toInt() == 0) {
                 qCritical() << QString("Did not write file %1 because missing information!").arg(normalized_fname);
@@ -191,6 +209,8 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
                 { "mod-id", mod.mod_id().toString().toStdString() },
                 { "version", mod.version().toString().toStdString() },
             };
+            break;
+        case ModPlatform::ResourceProviderValue::UNKNOWN:
             break;
     }
 
@@ -227,15 +247,16 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
                                 { "x-prismlauncher-mc-versions", mcVersions },
                                 { "x-prismlauncher-release-type", mod.releaseType.toString().toStdString() },
                                 { "x-prismlauncher-version-number", mod.version_number.toStdString() },
-                                { "x-prismlauncher-dependencies", deps },
-                                { "download",
-                                  toml::table{
-                                      { "mode", mod.mode.toStdString() },
-                                      { "url", mod.url.toString().toStdString() },
-                                      { "hash-format", mod.hash_format.toStdString() },
-                                      { "hash", mod.hash.toStdString() },
-                                  } },
-                                { "update", toml::table{ { ModPlatform::ProviderCapabilities::name(mod.provider), update } } } };
+                                { "x-prismlauncher-dependencies", deps } };
+
+        if (mod.provider.isValid()) {
+            tbl.emplace("download", toml::table{ { "mode", mod.mode.toStdString() },
+                                                 { "url", mod.url.toString().toStdString() },
+                                                 { "hash-format", mod.hash_format.toStdString() },
+                                                 { "hash", mod.hash.toStdString() } });
+            tbl.emplace("update", toml::table{ { mod.provider.toString().toStdString(), update } });
+        }
+
         std::stringstream ss;
         ss << tbl;
         in_stream << QString::fromStdString(ss.str());
@@ -325,38 +346,31 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
 
     {  // [download] info
         auto download_table = table["download"].as_table();
-        if (!download_table) {
-            qCritical() << QString("No [download] section found on mod metadata!");
-            return {};
+        if (download_table) {
+            mod.mode = stringEntry(*download_table, "mode");
+            mod.url = stringEntry(*download_table, "url");
+            mod.hash_format = stringEntry(*download_table, "hash-format");
+            mod.hash = stringEntry(*download_table, "hash");
         }
-
-        mod.mode = stringEntry(*download_table, "mode");
-        mod.url = stringEntry(*download_table, "url");
-        mod.hash_format = stringEntry(*download_table, "hash-format");
-        mod.hash = stringEntry(*download_table, "hash");
     }
 
     {  // [update] info
         using Provider = ModPlatform::ResourceProvider;
 
         auto update_table = table["update"];
-        if (!update_table || !update_table.is_table()) {
-            qCritical() << QString("No [update] section found on mod metadata!");
-            return {};
-        }
-
-        toml::table* mod_provider_table = nullptr;
-        if ((mod_provider_table = update_table[ModPlatform::ProviderCapabilities::name(Provider::FLAME)].as_table())) {
-            mod.provider = Provider::FLAME;
-            mod.file_id = intEntry(*mod_provider_table, "file-id");
-            mod.project_id = intEntry(*mod_provider_table, "project-id");
-        } else if ((mod_provider_table = update_table[ModPlatform::ProviderCapabilities::name(Provider::MODRINTH)].as_table())) {
-            mod.provider = Provider::MODRINTH;
-            mod.mod_id() = stringEntry(*mod_provider_table, "mod-id");
-            mod.version() = stringEntry(*mod_provider_table, "version");
-        } else {
-            qCritical() << QString("No mod provider on mod metadata!");
-            return {};
+        if (update_table && update_table.is_table()) {
+            toml::table* mod_provider_table = nullptr;
+            if ((mod_provider_table = update_table[Provider(Provider::FLAME).toString().toStdString()].as_table()) != nullptr) {
+                mod.provider = Provider::FLAME;
+                mod.file_id = intEntry(*mod_provider_table, "file-id");
+                mod.project_id = intEntry(*mod_provider_table, "project-id");
+            } else if ((mod_provider_table = update_table[Provider(Provider::MODRINTH).toString().toStdString()].as_table())) {
+                mod.provider = Provider::MODRINTH;
+                mod.mod_id() = stringEntry(*mod_provider_table, "mod-id");
+                mod.version() = stringEntry(*mod_provider_table, "version");
+            } else {
+                qWarning() << QString("No supported mod provider found on mod metadata!");
+            }
         }
     }
     {  // dependencies

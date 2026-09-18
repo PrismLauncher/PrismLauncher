@@ -55,6 +55,7 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
     QList<Resource*> m_flameToUpdate;
 
     ConcurrentTask::Ptr m_secondTryMetadata;
+    QHash<Resource*, QString> m_rematchSlugs;
     QList<std::tuple<Resource*, QString>> m_failedMetadata;
     QList<std::tuple<Resource*, QString, QUrl>> m_failedCheckUpdate;
 
