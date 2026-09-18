@@ -194,3 +194,15 @@ std::pair<NetJob::Ptr, QList<ModPlatform::IndexedPack>*> ResourceAPI::searchProj
 
     return { netJob, response };
 }
+
+std::pair<NetJob::Ptr, QList<ModPlatform::IndexedPack>*> ResourceAPI::getProjectsTask(const QStringList& addonIds) const
+{
+    auto spec = getProjects(addonIds);
+
+    auto netJob = makeShared<NetJob>(QString("%1::Search").arg(debugName()), APPLICATION->network());
+
+    auto [action, response] = Net::RPC::make<QList<ModPlatform::IndexedPack>>(spec);
+    netJob->addNetAction(action);
+
+    return { netJob, response };
+}

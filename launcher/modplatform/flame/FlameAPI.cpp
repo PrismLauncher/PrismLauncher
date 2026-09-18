@@ -3,14 +3,17 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "FlameAPI.h"
+#include <qstringview.h>
 #include <optional>
 #include "BuildConfig.h"
 
 #include "Application.h"
 #include "Json.h"
 #include "modplatform/ModIndex.h"
+#include "modplatform/flame/FlamePackIndex.h"
 #include "net/ApiRequest.h"
 #include "net/NetJob.h"
+#include "net/Request.h"
 
 std::pair<Task::Ptr, QByteArray*> FlameAPI::matchFingerprints(const QList<uint>& fingerprints)
 {
@@ -62,28 +65,6 @@ QString FlameAPI::getModFileChangelog(int modId, int fileId)
     lock.exec();
 
     return changelog;
-}
-
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getProjects(QStringList addonIds) const
-{
-    auto netJob = makeShared<NetJob>(QString("Flame::GetProjects"), APPLICATION->network());
-
-    QJsonObject bodyObj;
-    QJsonArray addonsArr;
-    for (auto& addonId : addonIds) {
-        addonsArr.append(addonId);
-    }
-
-    bodyObj["modIds"] = addonsArr;
-
-    QJsonDocument body(bodyObj);
-    auto bodyRaw = body.toJson();
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods"), bodyRaw);
-    netJob->addNetAction(action);
-
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [bodyRaw] { qDebug() << bodyRaw; });
-
-    return { netJob, response };
 }
 
 std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds)
@@ -235,21 +216,19 @@ Net::RPC::Spec<QList<ModPlatform::IndexedPack>> FlameAPI::searchProjects(const S
 {
     // https://docs.curseforge.com/rest-api/#search-mods
     auto url = searchProjectsURL(args);
-    return { { .url = url }, [](const auto& response) -> Result<QList<ModPlatform::IndexedPack>> {
-                QList<ModPlatform::IndexedPack> newList;
-                TRY_INTO(auto doc, Json::requireDocument(response, "ResourceAPI")
-                                       .and_then([](const auto& v) { return Json::requireObject(v); })
-                                       .and_then([](const auto& v) { return Json::requireArray(v, "data"); }))
+    return { { .url = url }, Flame::Parse::parseProjectList };
+}
 
-                for (auto packRaw : doc) {
-                    auto packObj = packRaw.toObject();
+Net::RPC::Spec<QList<ModPlatform::IndexedPack>> FlameAPI::getProjects(const QStringList& addonIds) const
+{
+    // https://docs.curseforge.com/rest-api/#get-mods
+    QJsonObject bodyObj;
+    bodyObj["modIds"] = Json::toJsonArray(addonIds);
+    auto body = QJsonDocument(bodyObj).toJson();
 
-                    ModPlatform::IndexedPack pack;
-                    TRY(Flame::Parse::loadIndexedPack(pack, packObj))
-                    newList << pack;
-                }
-                return newList;
-            } };
+    auto url = BuildConfig.FLAME_BASE_URL + "/mods";
+
+    return { { .method = Net::HttpMethod::Post, .url = url, .data = body }, Flame::Parse::parseProjectList };
 }
 
 std::optional<QString> FlameAPI::getDependencyURL(const DependencySearchArgs& args) const

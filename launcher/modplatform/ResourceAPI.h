@@ -111,14 +111,13 @@ class ResourceAPI {
 
    public slots:
 
-    virtual std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const = 0;
-
     Task::Ptr getProjectVersions(const VersionSearchArgs& args, const Callback<QVector<ModPlatform::IndexedVersion>>& callbacks) const;
     virtual Task::Ptr getDependencyVersion(const DependencySearchArgs&, const Callback<ModPlatform::IndexedVersion>&) const;
 
    public slots:
 
     virtual Net::RPC::Spec<ModPlatform::IndexedPack> getProject(const QString& id) const = 0;
+    virtual Net::RPC::Spec<QList<ModPlatform::IndexedPack>> getProjects(const QStringList& addonIds) const = 0;
     virtual std::optional<Net::RPC::Spec<bool>> getProjectExtra(ModPlatform::IndexedPack& /*pack*/) const { return {}; }
     virtual Net::RPC::Spec<QList<ModPlatform::IndexedPack>> searchProjects(const SearchArgs& args) const = 0;
 
@@ -127,6 +126,7 @@ class ResourceAPI {
                                                                      bool loadExtra = false,
                                                                      bool askRetry = true) const;
     std::pair<NetJob::Ptr, QList<ModPlatform::IndexedPack>*> searchProjectsTask(const SearchArgs& args) const;
+    std::pair<NetJob::Ptr, QList<ModPlatform::IndexedPack>*> getProjectsTask(const QStringList& addonIds) const;
 
    protected:
     ~ResourceAPI() = default;

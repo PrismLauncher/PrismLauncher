@@ -31,7 +31,6 @@ class FlameAPI final : public ResourceAPI {
                                                                        ModPlatform::ModLoaderTypes fallback,
                                                                        bool checkLoaders);
 
-    std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
     static std::pair<Task::Ptr, QByteArray*> matchFingerprints(const QList<uint>& fingerprints);
     static std::pair<Task::Ptr, QByteArray*> getFiles(const QStringList& fileIds);
     static std::pair<Task::Ptr, QByteArray*> getFile(const QString& addonId, const QString& fileId);
@@ -68,6 +67,7 @@ class FlameAPI final : public ResourceAPI {
 
    public slots:
     Net::RPC::Spec<ModPlatform::IndexedPack> getProject(const QString& id) const override;
+    Net::RPC::Spec<QList<ModPlatform::IndexedPack>> getProjects(const QStringList& addonIds) const override;
     std::optional<Net::RPC::Spec<bool>> getProjectExtra(ModPlatform::IndexedPack& pack) const override;
 
     Net::RPC::Spec<QList<ModPlatform::IndexedPack>> searchProjects(const SearchArgs& args) const override;
