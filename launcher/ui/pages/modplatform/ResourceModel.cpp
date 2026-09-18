@@ -177,9 +177,24 @@ void ResourceModel::search()
     if (m_searchState != SearchState::ResetRequested && m_searchTerm.startsWith("#")) {
         auto projectId = m_searchTerm.mid(1);
         if (!projectId.isEmpty()) {
-            ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks;
+            auto [job, response] = m_api->getProjectTask(projectId, true, false);
 
-            callbacks.onFail = [this](const QString& reason, int networkErrorCode) {
+            QObject::connect(job.get(), &NetJob::succeeded, job.get(), [response, this] {
+                auto pack = std::make_shared<ModPlatform::IndexedPack>();
+                *pack = *response;
+                if (!s_runningModels.constFind(this).value()) {
+                    return;
+                }
+                searchRequestForOneSucceeded(pack);
+            });
+            auto weak = job.toWeakRef();
+            QObject::connect(job.get(), &NetJob::failed, job.get(), [weak, this](const QString& reason) {
+                int networkErrorCode = -1;
+                if (auto job = weak.lock()) {
+                    if (auto* failedAction = job->getFailedActions().at(0); failedAction) {
+                        networkErrorCode = failedAction->replyStatusCode();
+                    }
+                }
                 if (!s_runningModels.constFind(this).value()) {
                     return;
                 }
@@ -187,25 +202,15 @@ void ResourceModel::search()
                     m_searchState = SearchState::ResetRequested;
                 }
                 searchRequestFailed(reason, networkErrorCode);
-            };
-            callbacks.onAbort = [this] {
+            });
+            QObject::connect(job.get(), &NetJob::aborted, job.get(), [this] {
                 if (!s_runningModels.constFind(this).value()) {
                     return;
                 }
                 searchRequestAborted();
-            };
+            });
 
-            callbacks.onSucceed = [this](auto& pack) {
-                if (!s_runningModels.constFind(this).value()) {
-                    return;
-                }
-                searchRequestForOneSucceeded(pack);
-            };
-            auto project = std::make_shared<ModPlatform::IndexedPack>();
-            project->addonId = projectId;
-            if (auto job = m_api->getProjectInfo({ project }, callbacks, false); job) {
-                runSearchJob(job);
-            }
+            runSearchJob(job);
             return;
         }
     }
@@ -272,31 +277,34 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
     }
 
     if (!pack->extraDataLoaded) {
-        auto args{ createInfoArguments(entry) };
-        ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks{};
+        auto [job, response] = m_api->getProjectTask(pack->addonId.toString(), true);
 
-        callbacks.onSucceed = [this, entry](auto& newpack) {
+        QObject::connect(job.get(), &NetJob::succeeded, job.get(), [project = pack, response, this, entry] {
+            // Preserve any version data already loaded into the pack, since the project request only carries the pack info
+            auto versions = std::move(project->versions);
+            auto versionsLoaded = project->versionsLoaded;
+            *project = *response;
+            project->versions = std::move(versions);
+            project->versionsLoaded = versionsLoaded;
             if (!s_runningModels.constFind(this).value()) {
                 return;
             }
-            infoRequestSucceeded(newpack, entry);
-        };
-        callbacks.onFail = [this](const QString& reason, int) {
+            infoRequestSucceeded(project, entry);
+        });
+        QObject::connect(job.get(), &NetJob::failed, job.get(), [this](const QString& reason) {
             if (!s_runningModels.constFind(this).value()) {
                 return;
             }
             QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load project info: %1").arg(reason));
-        };
-        callbacks.onAbort = [this] {
+        });
+        QObject::connect(job.get(), &NetJob::aborted, job.get(), [this] {
             if (!s_runningModels.constFind(this).value()) {
                 return;
             }
             qCritical() << tr("The request was aborted for an unknown reason");
-        };
+        });
 
-        if (auto job = m_api->getProjectInfo(args, callbacks); job) {
-            runInfoJob(job);
-        }
+        runInfoJob(job);
     }
 }
 

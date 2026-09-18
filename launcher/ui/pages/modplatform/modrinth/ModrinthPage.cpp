@@ -136,19 +136,24 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
 
     if (!m_current->extraDataLoaded) {
         qDebug() << "Loading modrinth modpack information";
-        ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks;
 
         auto id = m_current->addonId;
-        callbacks.onFail = [this](const QString& reason, int) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
-        };
-        callbacks.onSucceed = [this, id, curr](auto& pack) {
+        auto [job, response] = ModrinthAPI::get().getProjectTask(m_current->addonId.toString(), true);
+
+        QObject::connect(job.get(), &NetJob::succeeded, job.get(), [this, id, curr, response] {
             if (id != m_current->addonId) {
                 return;  // wrong request?
             }
 
+            // Preserve any version data already loaded into the pack, since the project request only carries the pack info
+            auto versions = std::move(m_current->versions);
+            auto versionsLoaded = m_current->versionsLoaded;
+            *m_current = *response;
+            m_current->versions = std::move(versions);
+            m_current->versionsLoaded = versionsLoaded;
+
             QVariant currentUpdated;
-            currentUpdated.setValue(pack);
+            currentUpdated.setValue(response);
 
             if (!m_model->setData(curr, currentUpdated, Qt::UserRole)) {
                 qWarning() << "Failed to cache extra info for the current pack!";
@@ -156,11 +161,13 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
 
             suggestCurrent();
             updateUI();
-        };
-        if (auto netJob = ModrinthAPI::get().getProjectInfo({ m_current }, callbacks); netJob) {
-            m_job = netJob;
-            m_job->start();
-        }
+        });
+        QObject::connect(job.get(), &NetJob::failed, job.get(), [this](const QString& reason) {
+            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
+        });
+
+        m_job = job;
+        m_job->start();
 
     } else {
         updateUI();
