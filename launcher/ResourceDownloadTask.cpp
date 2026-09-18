@@ -60,7 +60,13 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
     : m_pack(std::move(pack)), m_pack_version(std::move(version)), m_pack_model(packs)
 {
     if (isIndexed) {
-        m_update_task.reset(new LocalResourceUpdateTask(m_pack_model->indexDir(), *m_pack, m_pack_version));
+        auto pack = *m_pack;
+        // Key the metadata by file name when multiple versions may be installed
+        if (m_pack_model->allowsMultipleVersions()) {
+            pack.slug = m_pack_version.fileName;
+        }
+
+        m_update_task.reset(new LocalResourceUpdateTask(m_pack_model->indexDir(), pack, m_pack_version));
         connect(m_update_task.get(), &LocalResourceUpdateTask::hasOldResource, this, &ResourceDownloadTask::hasOldResource);
 
         addTask(m_update_task);
@@ -112,20 +118,18 @@ void ResourceDownloadTask::downloadSucceeded()
         return;
     }
 
-    m_pack_model->uninstallResource(oldFilename, true);
-
-    // also rename the shader config file
+    // Copy the shader config from the old version to the new one if it exists
     if (dynamic_cast<ShaderPackFolderModel*>(m_pack_model) != nullptr) {
         QFileInfo oldConfig(m_pack_model->dir(), oldFilename + ".txt");
         QFileInfo newConfig(m_pack_model->dir(), getFilename() + ".txt");
 
-        if (oldConfig.exists() && !newConfig.exists()) {
-            bool success = FS::move(oldConfig.filePath(), newConfig.filePath());
-
-            if (!success) {
-                emit logWarning(tr("Failed to rename shader config from '%1' to '%2'").arg(oldConfig.fileName(), newConfig.fileName()));
-            }
+        if (oldConfig.exists() && !newConfig.exists() && !FS::copy(oldConfig.filePath(), newConfig.filePath())()) {
+            emit logWarning(tr("Failed to copy shader config from '%1' to '%2'").arg(oldConfig.fileName(), newConfig.fileName()));
         }
+    }
+
+    if (!m_pack_model->allowsMultipleVersions()) {
+        m_pack_model->uninstallResource(oldFilename, true);
     }
 }
 
