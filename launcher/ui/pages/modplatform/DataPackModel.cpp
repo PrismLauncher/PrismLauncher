@@ -6,6 +6,7 @@
 #include "DataPackModel.h"
 
 #include <QMessageBox>
+#include <utility>
 
 namespace ResourceDownload {
 
@@ -13,7 +14,7 @@ DataPackResourceModel::DataPackResourceModel(ResourceFolderModel* resourceList,
                                              const ResourceAPI* api,
                                              QString debugName,
                                              QString metaEntryBase)
-    : ResourceModel(resourceList, api), m_debugName(debugName + " (Model)"), m_metaEntryBase(metaEntryBase)
+    : ResourceModel(resourceList, api), m_debugName(debugName + " (Model)"), m_metaEntryBase(std::move(metaEntryBase))
 {}
 
 /******** Make data requests ********/
@@ -32,12 +33,6 @@ ResourceAPI::VersionSearchArgs DataPackResourceModel::createVersionsArguments(co
 {
     auto pack = m_packs[entry.row()];
     return { .pack = pack, .mcVersions = {}, .loaders = ModPlatform::ModLoaderType::DataPack };
-}
-
-ResourceAPI::ProjectInfoArgs DataPackResourceModel::createInfoArguments(const QModelIndex& entry)
-{
-    auto pack = m_packs[entry.row()];
-    return { pack };
 }
 
 void DataPackResourceModel::searchWithTerm(const QString& term, unsigned int sort)

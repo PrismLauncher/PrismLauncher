@@ -38,7 +38,6 @@
 
 #pragma once
 
-#include <qurl.h>
 #include <QDebug>
 #include <QList>
 #include <QString>
@@ -98,10 +97,6 @@ class ResourceAPI {
         bool includeChangelog{};
     };
 
-    struct ProjectInfoArgs {
-        ModPlatform::IndexedPack::Ptr pack;
-    };
-
     struct DependencySearchArgs {
         ModPlatform::Dependency dependency;
         Version mcVersion;
@@ -118,7 +113,6 @@ class ResourceAPI {
 
     virtual std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const = 0;
 
-    virtual Task::Ptr getProjectInfo(const ProjectInfoArgs&, const Callback<ModPlatform::IndexedPack::Ptr>&, bool askRetry = true) const;
     Task::Ptr getProjectVersions(const VersionSearchArgs& args, const Callback<QVector<ModPlatform::IndexedVersion>>& callbacks) const;
     virtual Task::Ptr getDependencyVersion(const DependencySearchArgs&, const Callback<ModPlatform::IndexedVersion>&) const;
 

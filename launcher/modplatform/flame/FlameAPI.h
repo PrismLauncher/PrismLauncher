@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <qstringview.h>
-#include <qurl.h>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
