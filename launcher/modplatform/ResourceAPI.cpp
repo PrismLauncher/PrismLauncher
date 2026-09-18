@@ -199,9 +199,21 @@ std::pair<NetJob::Ptr, QList<ModPlatform::IndexedPack>*> ResourceAPI::getProject
 {
     auto spec = getProjects(addonIds);
 
-    auto netJob = makeShared<NetJob>(QString("%1::Search").arg(debugName()), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("%1::List").arg(debugName()), APPLICATION->network());
 
     auto [action, response] = Net::RPC::make<QList<ModPlatform::IndexedPack>>(spec);
+    netJob->addNetAction(action);
+
+    return { netJob, response };
+}
+
+std::pair<NetJob::Ptr, QList<ModPlatform::Category>*> ResourceAPI::getCategoriesTask(ModPlatform::ResourceType type) const
+{
+    auto spec = getCategories(type);
+
+    auto netJob = makeShared<NetJob>(QString("%1::Categories").arg(debugName()), APPLICATION->network());
+
+    auto [action, response] = Net::RPC::make<QList<ModPlatform::Category>>(spec);
     netJob->addNetAction(action);
 
     return { netJob, response };
