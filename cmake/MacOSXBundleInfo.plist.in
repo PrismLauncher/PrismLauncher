@@ -46,6 +46,10 @@
     <true/>
     <key>LSApplicationCategoryType</key>
     <string>public.app-category.games</string>
+    <key>GCSupportsGameMode</key>
+    <true/>
+    <key>LSSupportsGameMode</key>
+    <true/>
     <key>NSHumanReadableCopyright</key>
     <string>${MACOSX_BUNDLE_COPYRIGHT}</string>
     <key>SUPublicEDKey</key>
