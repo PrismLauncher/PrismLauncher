@@ -23,4 +23,15 @@ class ModListView : public QTreeView {
     explicit ModListView(QWidget* parent = 0);
     virtual void setModel(QAbstractItemModel* model);
     virtual void setResizeModes(const QList<QHeaderView::ResizeMode>& modes);
+
+   protected:
+    void resizeEvent(QResizeEvent* event) override;
+
+   private:
+    void onSectionResized(int logicalIndex, int oldSize, int newSize);
+    void fillWithPrincipal();
+
+    // Column that takes up the spare width. It stays Interactive so the user can still drag it.
+    int m_principalColumn = -1;
+    bool m_adjusting = false;
 };
