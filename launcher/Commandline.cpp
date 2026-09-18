@@ -158,7 +158,7 @@ QString quoteForSplitCommand(const QString& input)
     }
 
     QString escaped = input;
-    escaped.replace("\"", R"(""")");
+    escaped.replace("\\", R"(\\)").replace("\"", R"(\")");
     return "\"" + escaped + "\"";
 }
 
