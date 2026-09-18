@@ -39,7 +39,7 @@
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlameModIndex.h"
+#include "modplatform/flame/FlamePackIndex.h"
 #include "modplatform/flame/PackManifest.h"
 
 #include "Application.h"
@@ -239,7 +239,7 @@ void FlameCreationTask::executeTask()
 
                             Flame::File file;
                             // We don't care about blocked mods, we just need local data to delete the file
-                            TRY_INTO(file.version, FlameMod::loadIndexedPackVersion(entryObj))
+                            TRY_INTO(file.version, Flame::Parse::loadIndexedPackVersion(entryObj))
                             TRY_INTO(const auto& id, Json::requireInteger(entryObj, "id"))
                             oldFiles.insert(id, file);
                             return {};

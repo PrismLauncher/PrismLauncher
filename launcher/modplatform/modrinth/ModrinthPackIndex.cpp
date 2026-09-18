@@ -177,11 +177,10 @@ QString resourceTypeParameter(ModPlatform::ResourceType type)
     qWarning() << "Invalid resource type for Modrinth API!" << static_cast<std::uint8_t>(type);
     return "";
 }
-}  // namespace Modrinth::Parse
 
-Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJsonObject& obj,
-                                                                     const QString& preferredHashType,
-                                                                     const QString& preferredFileName)
+Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(const QJsonObject& obj,
+                                                           const QString& preferredHashType,
+                                                           const QString& preferredFileName)
 {
     ModPlatform::IndexedVersion file;
 
@@ -304,3 +303,4 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
 
     return {};
 }
+}  // namespace Modrinth::Parse
