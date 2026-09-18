@@ -21,28 +21,33 @@
 
 #include "Json.h"
 
-static void loadIndexedVersion(ATLauncher::IndexedVersion& v, QJsonObject& obj)
+namespace {
+Result<> loadIndexedVersion(ATLauncher::IndexedVersion& v, const QJsonObject& obj)
 {
-    v.version = Json::requireString(obj, "version");
-    v.minecraft = Json::requireString(obj, "minecraft");
+    TRY_INTO(v.version, Json::requireString(obj, "version"))
+    TRY_INTO(v.minecraft, Json::requireString(obj, "minecraft"))
+    return {};
 }
+}  // namespace
 
-void ATLauncher::loadIndexedPack(ATLauncher::IndexedPack& m, QJsonObject& obj)
+Result<> ATLauncher::loadIndexedPack(ATLauncher::IndexedPack& m, QJsonObject& obj)
 {
-    m.id = Json::requireInteger(obj, "id");
-    m.position = Json::requireInteger(obj, "position");
-    m.name = Json::requireString(obj, "name");
-    m.type = Json::requireString(obj, "type") == "private" ? ATLauncher::PackType::Private : ATLauncher::PackType::Public;
-    auto versionsArr = Json::requireArray(obj, "versions");
+    TRY_INTO(m.id, Json::requireInteger(obj, "id"))
+    TRY_INTO(m.position, Json::requireInteger(obj, "position"))
+    TRY_INTO(m.name, Json::requireString(obj, "name"))
+    TRY_INTO(const auto& type, Json::requireString(obj, "type"))
+    m.type = type == "private" ? ATLauncher::PackType::Private : ATLauncher::PackType::Public;
+    TRY_INTO(const auto& versionsArr, Json::requireArray(obj, "versions"))
     for (const auto versionRaw : versionsArr) {
-        auto versionObj = Json::requireObject(versionRaw);
         ATLauncher::IndexedVersion version;
-        loadIndexedVersion(version, versionObj);
+        TRY(Json::requireObject(versionRaw).and_then([&version](const auto& v) { return loadIndexedVersion(version, v); }))
         m.versions.append(version);
     }
     m.system = obj["system"].toBool();
     m.description = obj["description"].toString("");
 
     static const QRegularExpression s_regex("[^A-Za-z0-9]");
-    m.safeName = Json::requireString(obj, "name").replace(s_regex, "").toLower() + ".png";
+    TRY_INTO(m.safeName,
+             Json::requireString(obj, "name").and_then([](auto v) -> Result<QString> { return v.replace(s_regex, "").toLower() + ".png"; }))
+    return {};
 }

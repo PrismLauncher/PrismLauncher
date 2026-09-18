@@ -89,22 +89,55 @@ class XmlLogParseTest : public QObject {
     {
         QString source = QFINDTESTDATA("testdata/TestLogs");
 
-        QString shortXml = QString::fromUtf8(FS::read(FS::PathCombine(source, "vanilla-1.21.5.xml.log")));
-        QString shortText = QString::fromUtf8(FS::read(FS::PathCombine(source, "vanilla-1.21.5.text.log")));
-        QStringList shortTextLevels_s = QString::fromUtf8(FS::read(FS::PathCombine(source, "vanilla-1.21.5-levels.txt")))
-                                            .split(QRegularExpression("\n|\r\n|\r"), Qt::SkipEmptyParts);
+        auto shortXmlResult = FS::read(FS::PathCombine(source, "vanilla-1.21.5.xml.log"));
+        if (!shortXmlResult) {
+            QFAIL(qPrintable(shortXmlResult.error()));
+        }
+        QString shortXml = QString::fromUtf8(shortXmlResult.value());
+
+        auto shortTextResult = FS::read(FS::PathCombine(source, "vanilla-1.21.5.text.log"));
+        if (!shortTextResult) {
+            QFAIL(qPrintable(shortTextResult.error()));
+        }
+        QString shortText = QString::fromUtf8(shortTextResult.value());
+
+        auto shortLevelsResult = FS::read(FS::PathCombine(source, "vanilla-1.21.5-levels.txt"));
+        if (!shortLevelsResult) {
+            QFAIL(qPrintable(shortLevelsResult.error()));
+        }
+        QStringList shortTextLevels_s =
+            QString::fromUtf8(shortLevelsResult.value()).split(QRegularExpression("\n|\r\n|\r"), Qt::SkipEmptyParts);
 
         QList<MessageLevel> shortTextLevels;
         shortTextLevels.reserve(24);
         std::transform(shortTextLevels_s.cbegin(), shortTextLevels_s.cend(), std::back_inserter(shortTextLevels),
                        [](const QString& line) { return MessageLevel::fromName(line.trimmed()); });
 
-        QString longXml = QString::fromUtf8(FS::read(FS::PathCombine(source, "TerraFirmaGreg-Modern-forge.xml.log")));
-        QString longText = QString::fromUtf8(FS::read(FS::PathCombine(source, "TerraFirmaGreg-Modern-forge.text.log")));
-        QStringList longTextLevels_s = QString::fromUtf8(FS::read(FS::PathCombine(source, "TerraFirmaGreg-Modern-levels.txt")))
-                                           .split(QRegularExpression("\n|\r\n|\r"), Qt::SkipEmptyParts);
-        QStringList longTextLevelsXml_s = QString::fromUtf8(FS::read(FS::PathCombine(source, "TerraFirmaGreg-Modern-xml-levels.txt")))
-                                              .split(QRegularExpression("\n|\r\n|\r"), Qt::SkipEmptyParts);
+        auto longXmlResult = FS::read(FS::PathCombine(source, "TerraFirmaGreg-Modern-forge.xml.log"));
+        if (!longXmlResult) {
+            QFAIL(qPrintable(longXmlResult.error()));
+        }
+        QString longXml = QString::fromUtf8(longXmlResult.value());
+
+        auto longTextResult = FS::read(FS::PathCombine(source, "TerraFirmaGreg-Modern-forge.text.log"));
+        if (!longTextResult) {
+            QFAIL(qPrintable(longTextResult.error()));
+        }
+        QString longText = QString::fromUtf8(longTextResult.value());
+
+        auto longLevelsResult = FS::read(FS::PathCombine(source, "TerraFirmaGreg-Modern-levels.txt"));
+        if (!longLevelsResult) {
+            QFAIL(qPrintable(longLevelsResult.error()));
+        }
+        QStringList longTextLevels_s =
+            QString::fromUtf8(longLevelsResult.value()).split(QRegularExpression("\n|\r\n|\r"), Qt::SkipEmptyParts);
+
+        auto longXmlLevelsResult = FS::read(FS::PathCombine(source, "TerraFirmaGreg-Modern-xml-levels.txt"));
+        if (!longXmlLevelsResult) {
+            QFAIL(qPrintable(longXmlLevelsResult.error()));
+        }
+        QStringList longTextLevelsXml_s =
+            QString::fromUtf8(longXmlLevelsResult.value()).split(QRegularExpression("\n|\r\n|\r"), Qt::SkipEmptyParts);
 
         QList<MessageLevel> longTextLevelsPlain;
         longTextLevelsPlain.reserve(974);
@@ -142,8 +175,7 @@ class XmlLogParseTest : public QObject {
 
         QList<MessageLevel> levels = {};
 
-        std::transform(entries.cbegin(), entries.cend(), std::back_inserter(levels),
-                       [](std::pair<MessageLevel, QString> entry) { return entry.first; });
+        std::ranges::transform(entries, std::back_inserter(levels), [](const auto& entry) { return entry.first; });
 
         QCOMPARE(levels, entry_levels);
     }

@@ -53,6 +53,9 @@
 #include <algorithm>
 #include <memory>
 
+#include "Application.h"
+#include "settings/Setting.h"
+
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui/dialogs/ResourceUpdateDialog.h"
@@ -65,7 +68,6 @@
 #include "minecraft/mod/ModFolderModel.h"
 #include "minecraft/mod/ResourceFolderModel.h"
 
-#include "Application.h"
 #include "tasks/ConcurrentTask.h"
 #include "tasks/Task.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -191,9 +193,8 @@ void ModFolderPage::downloadDialogFinished(int result)
 {
     if (result != 0) {
         ConcurrentTask tasks(tr("Download Mods"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-        });
+        connect(&tasks, &Task::failed, this,
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
         connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
             QStringList warnings = tasks.warnings();
             if (warnings.count()) {
@@ -272,9 +273,8 @@ void ModFolderPage::updateMods(bool includeDeps)
 
     if (updateDialog.exec() != 0) {
         ConcurrentTask tasks("Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-        });
+        connect(&tasks, &Task::failed, this,
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
         connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
             QStringList warnings = tasks.warnings();
             if (warnings.count()) {
@@ -483,6 +483,20 @@ std::optional<QList<Mod*>> ModFolderPage::pickLockedMods(const QList<Mod*>& allM
 
 void ModFolderPage::changeModVersion()
 {
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        auto response = CustomMessageBox::selectable(
+                            this, tr("Confirm Change Version"),
+                            tr("Changing version of mods while the game is running may cause mod duplication and game crashes.\n"
+                               "The old files may not be deleted as they are in use.\n"
+                               "Are you sure you want to do this?"),
+                            QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
+
+        if (response != QMessageBox::Yes) {
+            return;
+        }
+    }
+
     auto* profile = m_instance->getPackProfile();
     if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
         return;
@@ -524,7 +538,9 @@ CoreModFolderPage::CoreModFolderPage(MinecraftInstance* inst, ModFolderModel* mo
     if ((version != nullptr) && version->getComponent("net.minecraftforge") && version->getComponent("net.minecraft")) {
         auto minecraftCmp = version->getComponent("net.minecraft");
         if (!minecraftCmp->m_loaded) {
-            version->reload(Net::Mode::Offline);
+            if (auto res = version->reload(Net::Mode::Offline); !res) {
+                qWarning() << "Failed to reload components:" << res.error();
+            }
             auto update = version->getCurrentTask();
             if (update) {
                 connect(update.get(), &Task::finished, this, [this] {

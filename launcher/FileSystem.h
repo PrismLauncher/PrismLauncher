@@ -37,8 +37,8 @@
 
 #pragma once
 
-#include "Exception.h"
 #include "Filter.h"
+#include "Result.h"
 
 #include <system_error>
 
@@ -51,30 +51,25 @@
 
 namespace FS {
 
-class FileSystemException : public ::Exception {
-   public:
-    FileSystemException(const QString& message) : Exception(message) {}
-};
-
 /**
  * write data to a file safely
  */
-void write(const QString& filename, const QByteArray& data);
+Result<> write(const QString& filename, const QByteArray& data);
 
 /**
  * append data to a file safely
  */
-void appendSafe(const QString& filename, const QByteArray& data);
+Result<> appendSafe(const QString& filename, const QByteArray& data);
 
 /**
  * append data to a file
  */
-void append(const QString& filename, const QByteArray& data);
+Result<> append(const QString& filename, const QByteArray& data);
 
 /**
  * read data from a file safely
  */
-QByteArray read(const QString& filename);
+Result<QByteArray> read(const QString& filename);
 
 /**
  * Update the last changed timestamp of an existing file

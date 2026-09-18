@@ -52,7 +52,7 @@ auto FileSink::init(QNetworkRequest& request) -> InitResult
     // create a new save file and open it for writing
     if (!FS::ensureFilePathExists(m_filename)) {
         qCCritical(taskNetLogC) << "Could not create folder for " + m_filename;
-        return std::unexpected<Error>("Could not create folder");
+        return std::unexpected("Could not create folder");
     }
 
     m_wroteAnyData = false;
@@ -60,14 +60,14 @@ auto FileSink::init(QNetworkRequest& request) -> InitResult
     if (!m_outputFile->open(QIODevice::WriteOnly)) {
         const auto error = QString("Could not open %1 for writing: %2").arg(m_filename).arg(m_outputFile->errorString());
         qCCritical(taskNetLogC) << error;
-        return std::unexpected<Error>(error);
+        return std::unexpected(error);
     }
 
     initAllValidators();
     return InitType::Ok;
 }
 
-auto FileSink::write(const QByteArray& data) -> Result
+auto FileSink::write(const QByteArray& data) -> Result<>
 {
     writeAllValidators(data);
     if (m_outputFile->write(data) != data.size()) {
@@ -81,7 +81,7 @@ auto FileSink::write(const QByteArray& data) -> Result
         m_outputFile->cancelWriting();
         m_outputFile.reset();
         m_wroteAnyData = false;
-        return std::unexpected<Error>(error);
+        return std::unexpected(error);
     }
 
     m_wroteAnyData = true;
@@ -96,7 +96,7 @@ void FileSink::abort()
     failAllValidators();
 }
 
-auto FileSink::finalize(QNetworkReply& reply) -> Result
+auto FileSink::finalize(QNetworkReply& reply) -> Result<>
 {
     bool gotFile = false;
     QVariant statusCodeV = reply.attribute(QNetworkRequest::HttpStatusCodeAttribute);
@@ -122,7 +122,7 @@ auto FileSink::finalize(QNetworkReply& reply) -> Result
             const auto error = QString("Failed to commit changes to %1: %2").arg(m_filename).arg(m_outputFile->errorString());
             qCCritical(taskNetLogC) << error;
             m_outputFile->cancelWriting();
-            return std::unexpected<Error>(error);
+            return std::unexpected(error);
         }
     }
 

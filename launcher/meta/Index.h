@@ -18,6 +18,7 @@
 #include <QAbstractListModel>
 
 #include "BaseEntity.h"
+#include "Result.h"
 #include "meta/VersionList.h"
 #include "net/Mode.h"
 
@@ -57,7 +58,7 @@ class Index : public QAbstractListModel, public BaseEntity {
     void merge(const std::shared_ptr<Index>& other);
 
    protected:
-    void parse(const QJsonObject& obj) override;
+    Result<> parse(const QJsonObject& obj) override;
 
    private:
     QList<VersionList::Ptr> m_lists;

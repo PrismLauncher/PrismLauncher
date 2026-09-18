@@ -20,6 +20,7 @@
 #include "BaseEntity.h"
 #include "BaseVersionList.h"
 
+#include "Result.h"
 #include "meta/Version.h"
 
 namespace Meta {
@@ -72,7 +73,7 @@ class VersionList : public BaseVersionList, public BaseEntity {
     void setVersions(const QList<Version::Ptr>& versions);
     void merge(const VersionList::Ptr& other);
     void mergeFromIndex(const VersionList::Ptr& other);
-    void parse(const QJsonObject& obj) override;
+    Result<> parse(const QJsonObject& obj) override;
     void addExternalRecommends(const QStringList& recommends);
     void clearExternalRecommends();
 

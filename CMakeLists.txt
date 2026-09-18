@@ -334,7 +334,19 @@ find_package(cmark REQUIRED)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(gamemode REQUIRED IMPORTED_TARGET gamemode)
+    pkg_check_modules(gamemode IMPORTED_TARGET gamemode)
+
+    option(Launcher_ENABLE_GAMEMODE "Enable Feral GameMode support" ${gamemode_FOUND})
+
+    if(Launcher_ENABLE_GAMEMODE AND NOT gamemode_FOUND)
+        message(FATAL_ERROR "Launcher_ENABLE_GAMEMODE is enabled, but Feral GameMode was not found")
+    endif()
+
+    if(Launcher_ENABLE_GAMEMODE)
+        message(STATUS "Feral GameMode support enabled")
+    else()
+        message(STATUS "Feral GameMode support disabled")
+    endif()
 endif()
 
 # Find libqrencode

@@ -143,10 +143,13 @@ class FlameAPI final : public ResourceAPI {
     }
 
     QJsonArray documentToArray(QJsonDocument& obj) const override { return obj.object()["data"].toArray(); }
-    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) const override { FlameMod::loadIndexedPack(m, obj); }
-    ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType resourceType) const override
+    Result<> loadIndexedPack(ModPlatform::IndexedPack& m, const QJsonObject& obj) const override
     {
-        auto arr = FlameMod::loadIndexedPackVersion(obj);
+        return FlameMod::loadIndexedPack(m, obj);
+    }
+    Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType resourceType) const override
+    {
+        TRY_INTO(const auto& arr, FlameMod::loadIndexedPackVersion(obj))
         if (resourceType != ModPlatform::ResourceType::TexturePack) {
             return arr;
         }
@@ -157,9 +160,13 @@ class FlameAPI final : public ResourceAPI {
                         [](const auto& mcVersion) { return Version(mcVersion) <= Version("1.6"); })) {
             return arr;
         }
-        return {};
+        return ModPlatform::IndexedVersion{};
     };
-    void loadExtraPackInfo(ModPlatform::IndexedPack& m, [[maybe_unused]] QJsonObject& /*unused*/) const override { FlameMod::loadBody(m); }
+    Result<> loadExtraPackInfo(ModPlatform::IndexedPack& m, [[maybe_unused]] QJsonObject& /*unused*/) const override
+    {
+        FlameMod::loadBody(m);
+        return {};
+    }
 
    private:
     std::optional<QString> getInfoURL(const QString& id) const override { return QString(BuildConfig.FLAME_BASE_URL + "/mods/%1").arg(id); }
