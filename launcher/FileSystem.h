@@ -364,7 +364,7 @@ QString RemoveInvalidFilenameChars(QString string, QChar replaceWith = '-');
 
 QString RemoveInvalidPathChars(QString string, QChar replaceWith = '-');
 
-QString DirNameFromString(QString string, QString inDir = ".");
+QString DirNameFromString(QString string, const QStringList& inDirs = { "." });
 
 /// Checks if the a given Path contains "!"
 bool checkProblemticPathJava(QDir folder);
