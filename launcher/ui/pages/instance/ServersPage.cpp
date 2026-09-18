@@ -706,11 +706,6 @@ void ServersPage::openedImpl()
 {
     m_model->observe();
 
-    const auto setting_name = QString("WideBarVisibility_%1").arg(id());
-    m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
-
-    ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
-
     // ping servers
     m_model->queryServersStatus();
 }
@@ -718,8 +713,6 @@ void ServersPage::openedImpl()
 void ServersPage::closedImpl()
 {
     m_model->unobserve();
-
-    m_wide_bar_setting->set(QString::fromUtf8(ui->toolBar->getVisibilityState().toBase64()));
 }
 
 void ServersPage::on_actionAdd_triggered()

@@ -40,8 +40,6 @@
 #include "minecraft/MinecraftInstance.h"
 #include "ui/pages/BasePage.h"
 
-#include "settings/Setting.h"
-
 class QMenu;
 class WorldList;
 namespace Ui {
@@ -85,7 +83,6 @@ class WorldListPage : public QMainWindow, public BasePage {
     WorldList* m_worlds;
     QMenu* m_worldToolsMenu = nullptr;
 
-    std::shared_ptr<Setting> m_wideBarSetting = nullptr;
     std::unique_ptr<DataPackFolderModel> m_datapackModel;
 
    private slots:

@@ -64,9 +64,6 @@ class VersionPage : public QMainWindow, public BasePage {
     virtual bool shouldDisplay() const override;
     void retranslate() override;
 
-    void openedImpl() override;
-    void closedImpl() override;
-
    private slots:
     void on_actionChange_version_triggered();
     void on_actionInstall_Loader_triggered();
@@ -108,8 +105,6 @@ class VersionPage : public QMainWindow, public BasePage {
     PackProfile* m_profile;
     MinecraftInstance* m_inst;
     int currentIdx = 0;
-
-    std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
 
    public slots:
     void versionCurrent(const QModelIndex& current, const QModelIndex& previous);

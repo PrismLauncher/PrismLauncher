@@ -179,17 +179,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->instanceToolBar->insertWidgetBefore(ui->actionLaunchInstance, renameButton);
 
         ui->instanceToolBar->insertSeparator(ui->actionLaunchInstance);
-
-        // restore the instance toolbar settings
-        const auto setting_name = QString("WideBarVisibility_%1").arg(ui->instanceToolBar->objectName());
-        instanceToolbarSetting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
-
-        ui->instanceToolBar->setVisibilityState(QByteArray::fromBase64(instanceToolbarSetting->get().toString().toUtf8()));
-
-        ui->instanceToolBar->addContextMenuAction(ui->newsToolBar->toggleViewAction());
-        ui->instanceToolBar->addContextMenuAction(ui->instanceToolBar->toggleViewAction());
-        ui->instanceToolBar->addContextMenuAction(ui->actionToggleStatusBar);
-        ui->instanceToolBar->addContextMenuAction(ui->actionLockToolbars);
     }
 
     // set the menu for the folders help, accounts, and export tool buttons
@@ -1593,7 +1582,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
     // Save the window state and geometry.
     APPLICATION->settings()->set("MainWindowState", QString::fromUtf8(saveState().toBase64()));
     APPLICATION->settings()->set("MainWindowGeometry", QString::fromUtf8(saveGeometry().toBase64()));
-    instanceToolbarSetting->set(QString::fromUtf8(ui->instanceToolBar->getVisibilityState().toBase64()));
     event->accept();
     emit isClosing();
 }
