@@ -30,10 +30,56 @@ bool shouldDownloadOnSide(const QString& side)
 {
     return side == "required" || side == "optional";
 }
+
+Result<> loadExtraPackData(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
+{
+    pack.extraData.issuesUrl = obj["issues_url"].toString();
+    if (pack.extraData.issuesUrl.endsWith('/')) {
+        pack.extraData.issuesUrl.chop(1);
+    }
+
+    pack.extraData.sourceUrl = obj["source_url"].toString();
+    if (pack.extraData.sourceUrl.endsWith('/')) {
+        pack.extraData.sourceUrl.chop(1);
+    }
+
+    pack.extraData.wikiUrl = obj["wiki_url"].toString();
+    if (pack.extraData.wikiUrl.endsWith('/')) {
+        pack.extraData.wikiUrl.chop(1);
+    }
+
+    pack.extraData.discordUrl = obj["discord_url"].toString();
+    if (pack.extraData.discordUrl.endsWith('/')) {
+        pack.extraData.discordUrl.chop(1);
+    }
+
+    auto donateArr = obj["donation_urls"].toArray();
+    for (auto d : donateArr) {
+        TRY_INTO(const auto& dObj, Json::requireObject(d))
+
+        ModPlatform::DonationData donate;
+
+        donate.id = dObj["id"].toString();
+        donate.platform = dObj["platform"].toString();
+        donate.url = dObj["url"].toString();
+
+        pack.extraData.donate.append(donate);
+    }
+
+    pack.extraData.status = obj["status"].toString();
+
+    pack.extraData.body = obj["body"].toString().remove("<br>");
+
+    pack.extraDataLoaded = !pack.extraData.body.isEmpty();
+    return {};
+}
+
 }  // namespace
 
+namespace Modrinth::Parse {
+
 // https://docs.modrinth.com/api/operations/getproject/
-Result<> Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
+Result<> loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
 {
     pack.addonId = obj["project_id"].toString();
     if (pack.addonId.toString().isEmpty()) {
@@ -80,51 +126,9 @@ Result<> Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonOb
 
     // Modrinth can have more data than what's provided by the basic search :)
     pack.extraDataLoaded = false;
-    return {};
+    return loadExtraPackData(pack, obj);
 }
-
-Result<> Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
-{
-    pack.extraData.issuesUrl = obj["issues_url"].toString();
-    if (pack.extraData.issuesUrl.endsWith('/')) {
-        pack.extraData.issuesUrl.chop(1);
-    }
-
-    pack.extraData.sourceUrl = obj["source_url"].toString();
-    if (pack.extraData.sourceUrl.endsWith('/')) {
-        pack.extraData.sourceUrl.chop(1);
-    }
-
-    pack.extraData.wikiUrl = obj["wiki_url"].toString();
-    if (pack.extraData.wikiUrl.endsWith('/')) {
-        pack.extraData.wikiUrl.chop(1);
-    }
-
-    pack.extraData.discordUrl = obj["discord_url"].toString();
-    if (pack.extraData.discordUrl.endsWith('/')) {
-        pack.extraData.discordUrl.chop(1);
-    }
-
-    auto donateArr = obj["donation_urls"].toArray();
-    for (auto d : donateArr) {
-        TRY_INTO(const auto& dObj, Json::requireObject(d))
-
-        ModPlatform::DonationData donate;
-
-        donate.id = dObj["id"].toString();
-        donate.platform = dObj["platform"].toString();
-        donate.url = dObj["url"].toString();
-
-        pack.extraData.donate.append(donate);
-    }
-
-    pack.extraData.status = obj["status"].toString();
-
-    pack.extraData.body = obj["body"].toString().remove("<br>");
-
-    pack.extraDataLoaded = true;
-    return {};
-}
+}  // namespace Modrinth::Parse
 
 Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJsonObject& obj,
                                                                      const QString& preferredHashType,

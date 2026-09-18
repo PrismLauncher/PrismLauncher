@@ -24,6 +24,7 @@
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
+#include "modplatform/flame/FlamePackIndex.h"
 #include "settings/Setting.h"
 #include "tasks/SequentialTask.h"
 #include "tasks/Task.h"
@@ -187,21 +188,11 @@ void ResourceFolderModel::installResourceWithFlameMetadata(const QString& path, 
             .provider = ModPlatform::ResourceProvider::FLAME,
         };
 
-        auto [job, response] = FlameAPI::get().getProject(vers.addonId.toString());
+        auto [job, response] = FlameAPI::get().getProjectTask(vers.addonId.toString());
         connect(job.get(), &Task::failed, this, install);
         connect(job.get(), &Task::aborted, this, install);
         connect(job.get(), &Task::succeeded, this, [response, this, &vers, install, &pack] {
-            auto obj = Json::requireObject(*response, "data");
-            if (!obj) {
-                qWarning() << "Error while parsing JSON response for mod info:" << obj.error();
-                qDebug() << *response;
-                return;
-            }
-            auto loadRes = FlameMod::loadIndexedPack(pack, *obj);
-            if (!loadRes) {
-                qDebug() << *obj;
-                qWarning() << "Error while reading mod info:" << loadRes.error();
-            }
+            pack = *response;
             LocalResourceUpdateTask updateMetadata(indexDir(), pack, vers);
             connect(&updateMetadata, &Task::finished, this, install);
             updateMetadata.start();
