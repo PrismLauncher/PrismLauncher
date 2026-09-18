@@ -153,45 +153,6 @@ Task::Ptr ResourceAPI::getProjectVersions(const VersionSearchArgs& args,
     return netJob;
 }
 
-Task::Ptr ResourceAPI::getProjectInfo(const ProjectInfoArgs& args,
-                                      const Callback<ModPlatform::IndexedPack::Ptr>& callbacks,
-                                      bool askRetry) const
-{
-    auto [job, response] = getProjectTask(args.pack->addonId.toString(), true, askRetry);
-
-    QObject::connect(job.get(), &NetJob::succeeded, job.get(), [callbacks, response, args] {
-        auto pack = args.pack;
-        // Preserve any version data already loaded into the pack, since the project request only carries the pack info
-        auto versions = std::move(pack->versions);
-        auto versionsLoaded = pack->versionsLoaded;
-        *pack = *response;
-        pack->versions = std::move(versions);
-        pack->versionsLoaded = versionsLoaded;
-        callbacks.onSucceed(pack);
-    });
-    // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
-    // This prevents the lambda from extending the lifetime of the shared resource,
-    // as it only temporarily locks the resource when needed.
-    auto weak = job.toWeakRef();
-    QObject::connect(job.get(), &NetJob::failed, job.get(), [weak, callbacks](const QString& reason) {
-        int networkErrorCode = -1;
-        if (auto job = weak.lock()) {
-            if (auto netJob = qSharedPointerDynamicCast<NetJob>(job)) {
-                if (auto* failedAction = netJob->getFailedActions().at(0); failedAction) {
-                    networkErrorCode = failedAction->replyStatusCode();
-                }
-            }
-        }
-        callbacks.onFail(reason, networkErrorCode);
-    });
-    QObject::connect(job.get(), &NetJob::aborted, job.get(), [callbacks] {
-        if (callbacks.onAbort != nullptr) {
-            callbacks.onAbort();
-        }
-    });
-    return job;
-}
-
 Task::Ptr ResourceAPI::getDependencyVersion(const DependencySearchArgs& args, const Callback<ModPlatform::IndexedVersion>& callbacks) const
 {
     auto versionsUrlOptional = getDependencyURL(args);

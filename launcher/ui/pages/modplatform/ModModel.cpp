@@ -6,7 +6,6 @@
 
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "minecraft/mod/Mod.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
@@ -91,12 +90,6 @@ ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(const QModelInd
     }
 
     return { .pack = pack, .mcVersions = versions, .loaders = loaders, .resourceType = ModPlatform::ResourceType::Mod };
-}
-
-ResourceAPI::ProjectInfoArgs ModModel::createInfoArguments(const QModelIndex& index)
-{
-    auto pack = m_packs[index.row()];
-    return { pack };
 }
 
 void ModModel::searchWithTerm(const QString& term, unsigned int sort, bool filterChanged)

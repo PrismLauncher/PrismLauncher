@@ -202,23 +202,30 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
 
     if (!m_current->extraDataLoaded) {
         qDebug() << "Loading flame modpack extra info";
-        ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks;
 
         auto addonId = m_current->addonId;
-        callbacks.onSucceed = [this, addonId](auto& pack) {
+
+        auto [job, response] = FlameAPI::get().getProjectTask(addonId.toString(), true);
+
+        QObject::connect(job.get(), &NetJob::succeeded, job.get(), [this, addonId, response] {
             if (addonId != m_current->addonId) {
                 return;  // wrong request
             }
 
-            m_current->extraData = pack->extraData;
-            m_current->extraDataLoaded = pack->extraDataLoaded;
+            // Preserve any version data already loaded into the pack, since the project request only carries the pack info
+            auto versions = std::move(m_current->versions);
+            auto versionsLoaded = m_current->versionsLoaded;
+            *m_current = *response;
+            m_current->versions = std::move(versions);
+            m_current->versionsLoaded = versionsLoaded;
 
             updateUi();
-        };
-        callbacks.onFail = [](const QString& reason, int) { qWarning() << "Failed to load extra info for the current pack:" << reason; };
+        });
+        QObject::connect(job.get(), &NetJob::failed, job.get(),
+                         [](const QString& reason) { qWarning() << "Failed to load extra info for the current pack:" << reason; });
 
-        if (auto netJob = FlameAPI::get().getProjectInfo({ m_current }, callbacks); netJob) {
-            m_job = netJob;
+        if (job) {
+            m_job = job;
             m_job->start();
         }
     }
