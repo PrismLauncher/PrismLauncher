@@ -141,7 +141,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
         auto id = m_current->addonId;
         auto [job, response] = ModrinthAPI::get().getProjectTask(m_current->addonId.toString(), true);
 
-        QObject::connect(job.get(), &NetJob::succeeded, job.get(), [this, id, curr, response] {
+        connect(job.get(), &NetJob::succeeded, this, [this, id, curr, response] {
             if (id != m_current->addonId) {
                 return;  // wrong request?
             }
@@ -163,14 +163,11 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             suggestCurrent();
             updateUI();
         });
-        QObject::connect(job.get(), &NetJob::failed, job.get(), [this](const QString& reason) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
-        });
+        connect(job.get(), &NetJob::failed, this,
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
-        if (job) {
-            m_job = job;
-            m_job->start();
-        }
+        m_job = job;
+        m_job->start();
 
     } else {
         updateUI();
@@ -179,16 +176,17 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
     if (!m_current->versionsLoaded || m_filterWidget->changed()) {
         qDebug() << "Loading modrinth modpack versions";
 
-        ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
-
         auto addonId = m_current->addonId;
-        // Use default if no callbacks are set
-        callbacks.onSucceed = [this, curr, addonId](auto& doc) {
+
+        auto [netJob, response] = ModrinthAPI::get().getVersionsTask(
+            { .pack = m_current, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::Modpack });
+
+        connect(netJob.get(), &NetJob::succeeded, this, [this, curr, response, addonId] {
             if (addonId != m_current->addonId) {
                 return;  // wrong request
             }
 
-            m_current->versions = doc;
+            m_current->versions = *response;
             m_current->versionsLoaded = true;
             auto pred = [this](const ModPlatform::IndexedVersion& v) {
                 if (auto filter = m_filterWidget->getFilter()) {
@@ -209,13 +207,9 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             }
 
             suggestCurrent();
-        };
-        callbacks.onFail = [this](const QString& reason, int) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
-        };
-
-        auto netJob = ModrinthAPI::get().getProjectVersions(
-            { .pack = m_current, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::Modpack }, callbacks);
+        });
+        connect(netJob.get(), &NetJob::failed, this,
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         m_job2 = netJob;
         m_job2->start();

@@ -45,15 +45,6 @@ class ModrinthAPI final : public ResourceAPI {
         return BuildConfig.MODRINTH_PROD_URL + QString("/projects?ids=[\"%1\"]").arg(ids.join("\",\""));
     };
 
-    auto getVersionsURL(const VersionSearchArgs& args) const -> std::optional<QString> override;
-
-    std::optional<QString> getDependencyURL(const DependencySearchArgs& args) const override;
-
-    Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType /*unused*/) const override
-    {
-        return Modrinth::loadIndexedPackVersion(obj);
-    };
-
    public:
     static bool validateModLoaders(ModPlatform::ModLoaderTypes loaders);
 
@@ -64,7 +55,9 @@ class ModrinthAPI final : public ResourceAPI {
     Net::RPC::Spec<QList<ModPlatform::IndexedPack>> getProjects(const QStringList& addonIds) const override;
     Net::RPC::Spec<QList<ModPlatform::IndexedPack>> searchProjects(const SearchArgs& args) const override;
     Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const override;
+    Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> getVersions(const VersionSearchArgs& args) const override;
 
    private:
     static QUrl searchProjectsURL(const SearchArgs& args);
+    static QUrl getVersionsURL(const VersionSearchArgs& args);
 };

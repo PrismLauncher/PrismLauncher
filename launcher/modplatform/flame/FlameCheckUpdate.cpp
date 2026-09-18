@@ -1,7 +1,7 @@
 #include "FlameCheckUpdate.h"
+#include <qlist.h>
 #include "Application.h"
 #include "FlameAPI.h"
-#include "FlameModIndex.h"
 
 #include <QHash>
 #include <memory>
@@ -17,6 +17,7 @@
 #include "modplatform/flame/FlamePackIndex.h"
 #include "net/ApiRequest.h"
 #include "net/NetJob.h"
+#include "net/RPCSink.h"
 #include "tasks/Task.h"
 
 bool FlameCheckUpdate::abort()
@@ -47,12 +48,8 @@ void FlameCheckUpdate::executeTask()
     for (auto* resource : m_resources) {
         auto project = std::make_shared<ModPlatform::IndexedPack>();
         project->addonId = resource->metadata()->project_id.toString();
-        auto versionsUrlOptional = FlameAPI::get().getVersionsURL({ .pack = project, .mcVersions = m_gameVersions });
-        if (!versionsUrlOptional.has_value()) {
-            continue;
-        }
-
-        auto [task, response] = Net::ApiRequest::makeByteArray(versionsUrlOptional.value());
+        auto spec = FlameAPI::get().getVersions({ .pack = project, .mcVersions = m_gameVersions });
+        auto [task, response] = Net::RPC::make<QList<ModPlatform::IndexedVersion>>(spec);
 
         connect(task.get(), &Task::succeeded, this, [this, resource, response] { getLatestVersionCallback(resource, response); });
         netJob->addNetAction(task);
@@ -61,23 +58,16 @@ void FlameCheckUpdate::executeTask()
     m_task->start();
 }
 
-void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QByteArray* response)
+void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QList<ModPlatform::IndexedVersion>* response)
 {
     auto pack = std::make_shared<ModPlatform::IndexedPack>();
-    auto parse = [&pack, &resource, &response] -> Result<> {
-        TRY_INTO(const auto& doc, Json::requireObject(*response).and_then([](const auto& v) { return Json::requireArray(v, "data"); }))
-        // Fake pack with the necessary info to pass to the download task :)
-        pack->name = resource->name();
-        pack->slug = resource->metadata()->slug;
-        pack->addonId = resource->metadata()->project_id;
-        pack->provider = ModPlatform::ResourceProvider::FLAME;
-        return FlameMod::loadIndexedPackVersions(*pack.get(), doc);
-    };
-    if (auto res = parse(); !res) {
-        qWarning() << "Error while parsing JSON response from latest mod version:" << res.error();
-        qWarning() << *response;
-        return;
-    }
+    // Fake pack with the necessary info to pass to the download task :)
+    pack->name = resource->name();
+    pack->slug = resource->metadata()->slug;
+    pack->addonId = resource->metadata()->project_id;
+    pack->provider = ModPlatform::ResourceProvider::FLAME;
+    pack->versions = *response;
+    pack->versionsLoaded = true;
 
     auto latestVer = FlameAPI::getLatestVersion(pack->versions, m_loadersList, resource->metadata()->loaders, !m_loadersList.isEmpty());
 

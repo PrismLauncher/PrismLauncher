@@ -4,17 +4,12 @@
 
 #pragma once
 
-#include <qstringview.h>
-#include <qurl.h>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QList>
-#include "Version.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
-#include "modplatform/flame/FlameModIndex.h"
-#include "modplatform/flame/FlamePackIndex.h"
 
 class FlameAPI final : public ResourceAPI {
    public:
@@ -38,25 +33,6 @@ class FlameAPI final : public ResourceAPI {
     static ModPlatform::ResourceType getResourceType(int classId);
 
    public:
-    std::optional<QString> getVersionsURL(const VersionSearchArgs& args) const override;
-
-    Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType resourceType) const override
-    {
-        TRY_INTO(const auto& arr, FlameMod::loadIndexedPackVersion(obj))
-        if (resourceType != ModPlatform::ResourceType::TexturePack) {
-            return arr;
-        }
-        // FIXME: Client-side version filtering. This won't take into account any user-selected filtering.
-        const auto& mcVersions = arr.mcVersion;
-
-        if (std::any_of(mcVersions.constBegin(), mcVersions.constEnd(),
-                        [](const auto& mcVersion) { return Version(mcVersion) <= Version("1.6"); })) {
-            return arr;
-        }
-        return ModPlatform::IndexedVersion{};
-    };
-
-   public:
     static bool validateModLoaders(ModPlatform::ModLoaderTypes loaders);
 
     QList<ResourceAPI::SortingMethod> getSortingMethods() const override;
@@ -67,9 +43,9 @@ class FlameAPI final : public ResourceAPI {
     std::optional<Net::RPC::Spec<bool>> getProjectExtra(ModPlatform::IndexedPack& pack) const override;
     Net::RPC::Spec<QList<ModPlatform::IndexedPack>> searchProjects(const SearchArgs& args) const override;
     Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const override;
+    Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> getVersions(const VersionSearchArgs& args) const override;
 
    private:
-    std::optional<QString> getDependencyURL(const DependencySearchArgs& args) const override;
-
     static QUrl searchProjectsURL(const SearchArgs& args);
+    static QUrl getVersionsURL(const VersionSearchArgs& args);
 };

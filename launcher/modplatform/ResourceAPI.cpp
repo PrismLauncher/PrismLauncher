@@ -1,8 +1,6 @@
 #include "modplatform/ResourceAPI.h"
-#include <qlist.h>
 
 #include <algorithm>
-#include <memory>
 
 #include "Application.h"
 #include "Json.h"
@@ -12,154 +10,6 @@
 
 #include "net/ApiRequest.h"
 #include "net/RPCSink.h"
-
-Task::Ptr ResourceAPI::getProjectVersions(const VersionSearchArgs& args,
-                                          const Callback<QVector<ModPlatform::IndexedVersion>>& callbacks) const
-{
-    auto versionsUrlOptional = getVersionsURL(args);
-    if (!versionsUrlOptional.has_value()) {
-        return nullptr;
-    }
-
-    const auto& versionsUrl = versionsUrlOptional.value();
-
-    auto netJob = makeShared<NetJob>(QString("%1::Versions").arg(args.pack->name), APPLICATION->network());
-
-    auto [action, response] = Net::ApiRequest::makeByteArray(versionsUrl);
-    netJob->addNetAction(action);
-
-    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks, args] {
-        auto doc = Json::requireDocument(*response, "ResourceAPI::getProjectVersions");
-        if (!doc) {
-            qWarning() << "Error while parsing JSON response for getting versions:" << doc.error();
-            qWarning() << *response;
-            return;
-        }
-
-        QVector<ModPlatform::IndexedVersion> unsortedVersions;
-        auto arr = doc->isObject() ? doc->object()["data"].toArray() : doc->array();
-
-        for (auto versionIter : arr) {
-            auto obj = versionIter.toObject();
-
-            auto fileRes = loadIndexedPackVersion(obj, args.resourceType);
-            if (!fileRes) {
-                qWarning() << "Error while reading" << debugName() << "resource version:" << fileRes.error();
-                continue;
-            }
-            auto file = fileRes.value();
-            if (!file.addonId.isValid()) {
-                file.addonId = args.pack->addonId;
-            }
-
-            if (file.fileId.isValid() && !file.downloadUrl.isEmpty()) {  // Heuristic to check if the returned value is valid
-                unsortedVersions.append(file);
-            }
-        }
-
-        auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
-            // dates are in RFC 3339 format
-            return a.date > b.date;
-        };
-        std::ranges::sort(unsortedVersions, orderSortPredicate);
-
-        callbacks.onSucceed(unsortedVersions);
-    });
-
-    // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
-    // This prevents the lambda from extending the lifetime of the shared resource,
-    // as it only temporarily locks the resource when needed.
-    auto weak = netJob.toWeakRef();
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [weak, callbacks](const QString& reason) {
-        int networkErrorCode = -1;
-        if (auto netJob = weak.lock()) {
-            if (auto* failedAction = netJob->getFailedActions().at(0); failedAction) {
-                networkErrorCode = failedAction->replyStatusCode();
-            }
-        }
-        callbacks.onFail(reason, networkErrorCode);
-    });
-    QObject::connect(netJob.get(), &NetJob::aborted, netJob.get(), [callbacks] {
-        if (callbacks.onAbort != nullptr) {
-            callbacks.onAbort();
-        }
-    });
-
-    return netJob;
-}
-
-Task::Ptr ResourceAPI::getDependencyVersion(const DependencySearchArgs& args, const Callback<ModPlatform::IndexedVersion>& callbacks) const
-{
-    auto versionsUrlOptional = getDependencyURL(args);
-    if (!versionsUrlOptional.has_value()) {
-        return nullptr;
-    }
-
-    const auto& versionsUrl = versionsUrlOptional.value();
-
-    auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.addonId.toString()), APPLICATION->network());
-    auto [action, response] = Net::ApiRequest::makeByteArray(versionsUrl);
-    netJob->addNetAction(action);
-
-    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks, args] {
-        auto doc = Json::requireDocument(*response, "ResourceAPI::getDependencyVersions");
-        if (!doc) {
-            qWarning() << "Error while parsing JSON response for getting dependency version:" << doc.error();
-            qWarning() << *response;
-            return;
-        }
-
-        QJsonArray arr;
-        if (args.dependency.version.length() != 0 && doc->isObject()) {
-            arr.append(doc->object());
-        } else {
-            arr = doc->isObject() ? doc->object()["data"].toArray() : doc.value().array();
-        }
-
-        QVector<ModPlatform::IndexedVersion> versions;
-        for (auto versionIter : arr) {
-            auto obj = versionIter.toObject();
-
-            auto fileRes = loadIndexedPackVersion(obj, ModPlatform::ResourceType::Mod);
-            if (!fileRes) {
-                qWarning() << "Error while reading" << debugName() << "resource version:" << fileRes.error();
-                continue;
-            }
-            auto file = fileRes.value();
-            if (!file.addonId.isValid()) {
-                file.addonId = args.dependency.addonId;
-            }
-
-            if (file.fileId.isValid() &&
-                (!file.loaders || args.loader & file.loaders)) {  // Heuristic to check if the returned value is valid
-                versions.append(file);
-            }
-        }
-
-        auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
-            // dates are in RFC 3339 format
-            return a.date > b.date;
-        };
-        std::ranges::sort(versions, orderSortPredicate);
-        auto bestMatch = versions.size() != 0 ? versions.front() : ModPlatform::IndexedVersion();
-        callbacks.onSucceed(bestMatch);
-    });
-
-    // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
-    // This prevents the lambda from extending the lifetime of the shared resource,
-    // as it only temporarily locks the resource when needed.
-    auto weak = netJob.toWeakRef();
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [weak, callbacks](const QString& reason) {
-        int networkErrorCode = -1;
-        if (auto netJob = weak.lock()) {
-            if (auto* failedAction = netJob->getFailedActions().at(0); failedAction) {
-                networkErrorCode = failedAction->replyStatusCode();
-            }
-        }
-        callbacks.onFail(reason, networkErrorCode);
-    });
-    return netJob;
-}
 
 std::pair<NetJob::Ptr, ModPlatform::IndexedPack*> ResourceAPI::getProjectTask(const QString& addonId, bool loadExtra, bool askRetry) const
 {
@@ -214,6 +64,18 @@ std::pair<NetJob::Ptr, QList<ModPlatform::Category>*> ResourceAPI::getCategories
     auto netJob = makeShared<NetJob>(QString("%1::Categories").arg(debugName()), APPLICATION->network());
 
     auto [action, response] = Net::RPC::make<QList<ModPlatform::Category>>(spec);
+    netJob->addNetAction(action);
+
+    return { netJob, response };
+}
+
+std::pair<NetJob::Ptr, QList<ModPlatform::IndexedVersion>*> ResourceAPI::getVersionsTask(const VersionSearchArgs& args) const
+{
+    auto spec = getVersions(args);
+
+    auto netJob = makeShared<NetJob>(QString("%1::Versions").arg(debugName()), APPLICATION->network());
+
+    auto [action, response] = Net::RPC::make<QList<ModPlatform::IndexedVersion>>(spec);
     netJob->addNetAction(action);
 
     return { netJob, response };

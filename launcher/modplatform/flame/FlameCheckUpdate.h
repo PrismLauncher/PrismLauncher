@@ -1,6 +1,7 @@
 #pragma once
 
 #include "modplatform/CheckUpdateTask.h"
+#include "modplatform/ModIndex.h"
 
 class FlameCheckUpdate : public CheckUpdateTask {
     Q_OBJECT
@@ -19,7 +20,7 @@ class FlameCheckUpdate : public CheckUpdateTask {
    protected slots:
     void executeTask() override;
    private slots:
-    void getLatestVersionCallback(Resource* resource, QByteArray* response);
+    void getLatestVersionCallback(Resource* resource, QList<ModPlatform::IndexedVersion>* response);
     void collectBlockedMods();
 
    private:

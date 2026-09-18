@@ -38,7 +38,6 @@
 
 #pragma once
 
-#include <qurl.h>
 #include <QDebug>
 #include <QList>
 #include <QString>
@@ -47,12 +46,10 @@
 #include <utility>
 
 #include "../Version.h"
-#include "Result.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceType.h"
 #include "net/NetJob.h"
 #include "net/RPCSink.h"
-#include "tasks/Task.h"
 
 /* Simple class with a common interface for interacting with APIs */
 class ResourceAPI {
@@ -66,13 +63,6 @@ class ResourceAPI {
         QString name;
         // The human-readable name of the sorting, used for display in the UI.
         QString readableName;
-    };
-
-    template <typename T>
-    struct Callback {
-        std::function<void(T&)> onSucceed;
-        std::function<void(const QString& reason, int networkErrorCode)> onFail;
-        std::function<void()> onAbort;
     };
 
     struct SearchArgs {
@@ -96,19 +86,9 @@ class ResourceAPI {
         std::optional<ModPlatform::ModLoaderTypes> loaders;
         ModPlatform::ResourceType resourceType;
         bool includeChangelog{};
+
+        QString version;
     };
-
-    struct DependencySearchArgs {
-        ModPlatform::Dependency dependency;
-        Version mcVersion;
-        ModPlatform::ModLoaderTypes loader;
-        bool includeChangelog{};
-    };
-
-   public slots:
-
-    Task::Ptr getProjectVersions(const VersionSearchArgs& args, const Callback<QVector<ModPlatform::IndexedVersion>>& callbacks) const;
-    virtual Task::Ptr getDependencyVersion(const DependencySearchArgs&, const Callback<ModPlatform::IndexedVersion>&) const;
 
    public:
     /** Gets a list of available sorting methods for this API. */
@@ -121,6 +101,7 @@ class ResourceAPI {
     virtual std::optional<Net::RPC::Spec<bool>> getProjectExtra(ModPlatform::IndexedPack& /*pack*/) const { return {}; }
     virtual Net::RPC::Spec<QList<ModPlatform::IndexedPack>> searchProjects(const SearchArgs& args) const = 0;
     virtual Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const = 0;
+    virtual Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> getVersions(const VersionSearchArgs& args) const = 0;
 
     // helpers to omit the netJob stuff
     std::pair<NetJob::Ptr, ModPlatform::IndexedPack*> getProjectTask(const QString& addonId,
@@ -129,15 +110,10 @@ class ResourceAPI {
     std::pair<NetJob::Ptr, QList<ModPlatform::IndexedPack>*> searchProjectsTask(const SearchArgs& args) const;
     std::pair<NetJob::Ptr, QList<ModPlatform::IndexedPack>*> getProjectsTask(const QStringList& addonIds) const;
     std::pair<NetJob::Ptr, QList<ModPlatform::Category>*> getCategoriesTask(ModPlatform::ResourceType type) const;
+    std::pair<NetJob::Ptr, QList<ModPlatform::IndexedVersion>*> getVersionsTask(const VersionSearchArgs& args) const;
 
    protected:
     ~ResourceAPI() = default;
 
     virtual QString debugName() const { return "External resource API"; }
-
-   public:
-    virtual auto getVersionsURL(const VersionSearchArgs& args) const -> std::optional<QString> = 0;
-    virtual auto getDependencyURL(const DependencySearchArgs& args) const -> std::optional<QString> = 0;
-
-    virtual Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType) const = 0;
 };
