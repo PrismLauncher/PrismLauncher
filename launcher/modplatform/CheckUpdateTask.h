@@ -14,8 +14,13 @@ class CheckUpdateTask : public Task {
     CheckUpdateTask(QList<Resource*>& resources,
                     std::vector<Version>& mcVersions,
                     QList<ModPlatform::ModLoaderType> loadersList,
-                    ResourceFolderModel* resourceModel)
-        : m_resources(resources), m_gameVersions(mcVersions), m_loadersList(std::move(loadersList)), m_resourceModel(resourceModel)
+                    ResourceFolderModel* resourceModel,
+                    std::vector<ModPlatform::IndexedVersionType> releaseTypes = {})
+        : m_resources(resources)
+        , m_gameVersions(mcVersions)
+        , m_loadersList(std::move(loadersList))
+        , m_resourceModel(resourceModel)
+        , m_releaseTypes(std::move(releaseTypes))
     {}
 
     struct Update {
@@ -68,4 +73,5 @@ class CheckUpdateTask : public Task {
 
     std::vector<Update> m_updates;
     QList<std::shared_ptr<GetModDependenciesTask::PackDependency>> m_deps;
+    std::vector<ModPlatform::IndexedVersionType> m_releaseTypes;
 };

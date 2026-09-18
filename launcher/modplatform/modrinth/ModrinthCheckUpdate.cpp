@@ -16,8 +16,9 @@
 ModrinthCheckUpdate::ModrinthCheckUpdate(QList<Resource*>& resources,
                                          std::vector<Version>& mcVersions,
                                          QList<ModPlatform::ModLoaderType> loadersList,
-                                         ResourceFolderModel* resourceModel)
-    : CheckUpdateTask(resources, mcVersions, std::move(loadersList), resourceModel)
+                                         ResourceFolderModel* resourceModel,
+                                         std::vector<ModPlatform::IndexedVersionType> releaseTypes)
+    : CheckUpdateTask(resources, mcVersions, std::move(loadersList), resourceModel, std::move(releaseTypes))
     , m_hashType(ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first())
 {
     if (!m_loadersList.isEmpty()) {  // this is for mods so append all the other posible loaders to the initial list
@@ -104,7 +105,7 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
         return;
     }
 
-    auto [job, response] = ModrinthAPI::get().latestVersions(hashes, m_hashType, m_gameVersions, loader);
+    auto [job, response] = ModrinthAPI::get().latestVersions(hashes, m_hashType, m_gameVersions, loader, m_releaseTypes);
 
     connect(job.get(), &Task::succeeded, this, [this, response, loader] { checkVersionsResponse(response, loader); });
 
