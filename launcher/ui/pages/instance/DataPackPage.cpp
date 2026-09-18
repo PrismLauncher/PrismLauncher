@@ -311,10 +311,6 @@ void GlobalDataPackPage::closedImpl()
 void GlobalDataPackPage::updateContent()
 {
     if (m_underlyingPage != nullptr) {
-        if (m_container->selectedPage() == this) {
-            m_underlyingPage->closedImpl();
-        }
-
         m_underlyingPage->apply();
 
         layout()->removeWidget(m_underlyingPage);
