@@ -217,6 +217,15 @@ bool SettingsObject::contains(const QString& id)
     return m_settings.contains(id);
 }
 
+bool SettingsObject::containsValue(const QString& id)
+{
+    auto setting = getSetting(id);
+    if (!setting)
+        return false;
+    // An invalid QVariant means the key is absent; a valid one may intentionally be empty.
+    return retrieveValue(*setting).isValid();
+}
+
 bool SettingsObject::reload()
 {
     for (auto setting : m_settings.values()) {
