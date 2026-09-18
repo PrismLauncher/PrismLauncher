@@ -12,6 +12,7 @@
 
 #include <QtMath>
 #include <memory>
+#include <utility>
 
 namespace Flame {
 
@@ -153,8 +154,9 @@ bool ListModel::canFetchMore([[maybe_unused]] const QModelIndex& parent) const
 
 void ListModel::fetchMore(const QModelIndex& parent)
 {
-    if (parent.isValid())
+    if (parent.isValid()) {
         return;
+    }
     if (m_nextSearchOffset == 0) {
         qWarning() << "fetchMore with 0 offset is wrong...";
         return;
@@ -171,13 +173,13 @@ void ListModel::performPaginatedSearch()
         if (!projectId.isEmpty()) {
             auto [job, response] = FlameAPI::get().getProjectTask(projectId, true, false);
 
-            QObject::connect(job.get(), &NetJob::succeeded, job.get(), [response, this] {
+            connect(job.get(), &NetJob::succeeded, this, [response, this] {
                 auto pack = std::make_shared<ModPlatform::IndexedPack>();
                 *pack = *response;
                 searchRequestForOneSucceeded(pack);
             });
             auto weak = job.toWeakRef();
-            QObject::connect(job.get(), &NetJob::failed, job.get(), [weak, this](const QString& reason) {
+            connect(job.get(), &NetJob::failed, this, [weak, this](const QString& reason) {
                 int networkErrorCode = -1;
                 if (auto job = weak.lock()) {
                     if (auto* failedAction = job->getFailedActions().at(0); failedAction) {
@@ -189,7 +191,7 @@ void ListModel::performPaginatedSearch()
                 }
                 searchRequestFailed(reason);
             });
-            QObject::connect(job.get(), &NetJob::aborted, job.get(), [this] {
+            connect(job.get(), &NetJob::aborted, this, [this] {
                 qCritical() << "Search task aborted by an unknown reason!";
                 searchRequestFailed("Aborted");
             });
@@ -204,19 +206,23 @@ void ListModel::performPaginatedSearch()
     ResourceAPI::SortingMethod sort{};
     sort.index = m_currentSort + 1;
 
-    ResourceAPI::Callback<QList<ModPlatform::IndexedPack::Ptr>> callbacks{};
+    auto [netJob, response] = FlameAPI::get().searchProjectsTask({ .type = ModPlatform::ResourceType::Modpack,
+                                                                   .offset = m_nextSearchOffset,
+                                                                   .search = m_currentSearchTerm,
+                                                                   .sorting = sort,
+                                                                   .loaders = m_filter->loaders,
+                                                                   .versions = m_filter->versions,
+                                                                   .side = ModPlatform::SideType::NoSide,
+                                                                   .categoryIds = m_filter->categoryIds,
+                                                                   .openSource = m_filter->openSource });
+    connect(netJob.get(), &NetJob::succeeded, this, [response, this] { searchRequestFinished(*response); });
 
-    callbacks.onSucceed = [this](auto& doc) { searchRequestFinished(doc); };
-    callbacks.onFail = [this](QString reason, int) { searchRequestFailed(reason); };
-    callbacks.onAbort = [this] {
+    connect(netJob.get(), &NetJob::failed, this, [this](const QString& reason) { searchRequestFailed(reason); });
+
+    connect(netJob.get(), &NetJob::aborted, this, [this] {
         qCritical() << "Search task aborted by an unknown reason!";
         searchRequestFailed("Aborted");
-    };
-
-    auto netJob = FlameAPI::get().searchProjects(
-        { ModPlatform::ResourceType::Modpack, m_nextSearchOffset, m_currentSearchTerm, sort, m_filter->loaders, m_filter->versions,
-          ModPlatform::SideType::NoSide, m_filter->categoryIds, m_filter->openSource },
-        std::move(callbacks));
+    });
 
     m_jobPtr = netJob;
     m_jobPtr->start();
@@ -229,7 +235,7 @@ void ListModel::searchWithTerm(const QString& term, int sort, std::shared_ptr<Mo
     }
     m_currentSearchTerm = term;
     m_currentSort = sort;
-    m_filter = filter;
+    m_filter = std::move(filter);
     if (hasActiveSearchJob()) {
         m_jobPtr->abort();
         m_searchState = ResetRequested;
@@ -244,10 +250,11 @@ void ListModel::searchWithTerm(const QString& term, int sort, std::shared_ptr<Mo
     performPaginatedSearch();
 }
 
-void Flame::ListModel::searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr>& newList)
+void Flame::ListModel::searchRequestFinished(const QList<ModPlatform::IndexedPack>& newList)
 {
-    if (hasActiveSearchJob())
+    if (hasActiveSearchJob()) {
         return;
+    }
 
     if (newList.size() < 25) {
         m_searchState = Finished;
@@ -257,11 +264,16 @@ void Flame::ListModel::searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr
     }
 
     // When you have a Qt build with assertions turned on, proceeding here will abort the application
-    if (newList.size() == 0)
+    if (newList.size() == 0) {
         return;
+    }
 
     beginInsertRows(QModelIndex(), m_modpacks.size(), m_modpacks.size() + newList.size() - 1);
-    m_modpacks.append(newList);
+    for (const auto& p : newList) {
+        auto pack = std::make_shared<ModPlatform::IndexedPack>();
+        *pack = p;
+        m_modpacks.append(pack);
+    }
     endInsertRows();
 }
 

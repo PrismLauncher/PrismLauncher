@@ -162,13 +162,13 @@ void ModpackListModel::performPaginatedSearch()
         if (!projectId.isEmpty()) {
             auto [job, response] = ModrinthAPI::get().getProjectTask(projectId, true, false);
 
-            QObject::connect(job.get(), &NetJob::succeeded, job.get(), [response, this] {
+            connect(job.get(), &NetJob::succeeded, this, [response, this] {
                 auto pack = std::make_shared<ModPlatform::IndexedPack>();
                 *pack = *response;
                 searchRequestForOneSucceeded(pack);
             });
             auto weak = job.toWeakRef();
-            QObject::connect(job.get(), &NetJob::failed, job.get(), [weak, this](const QString& reason) {
+            connect(job.get(), &NetJob::failed, this, [weak, this](const QString& reason) {
                 int networkErrorCode = -1;
                 if (auto job = weak.lock()) {
                     if (auto* failedAction = job->getFailedActions().at(0); failedAction) {
@@ -180,44 +180,48 @@ void ModpackListModel::performPaginatedSearch()
                 }
                 searchRequestFailed(reason, networkErrorCode);
             });
-            QObject::connect(job.get(), &NetJob::aborted, job.get(), [this] {
+            connect(job.get(), &NetJob::aborted, this, [this] {
                 qCritical() << "Search task aborted by an unknown reason!";
                 searchRequestFailed("Aborted", 0);
             });
 
-            if (job) {
-                m_jobPtr = job;
-                m_jobPtr->start();
-            }
+            m_jobPtr = job;
+            m_jobPtr->start();
+
             return;
         }
     }  // TODO: Move to standalone API
     ResourceAPI::SortingMethod sort{};
     sort.name = m_currentSort;
 
-    ResourceAPI::Callback<QList<ModPlatform::IndexedPack::Ptr>> callbacks{};
+    auto [netJob, response] = ModrinthAPI::get().searchProjectsTask({
+        .type = ModPlatform::ResourceType::Modpack,
+        .offset = m_nextSearchOffset,
+        .search = m_currentSearchTerm,
+        .sorting = sort,
+        .loaders = m_filter->loaders,
+        .versions = m_filter->versions,
+        .side = ModPlatform::SideType::NoSide,
+        .categoryIds = m_filter->categoryIds,
+        .openSource = m_filter->openSource,
+        .excludeDisclosureTypes = m_filter->excludeDisclosureTypes,
+    });
 
-    callbacks.onSucceed = [this](auto& doc) { searchRequestFinished(doc); };
-    callbacks.onFail = [this](const QString& reason, int networkErrorCode) { searchRequestFailed(reason, networkErrorCode); };
-    callbacks.onAbort = [this] {
+    connect(netJob.get(), &NetJob::succeeded, this, [response, this] { searchRequestFinished(*response); });
+    auto weak = netJob.toWeakRef();
+    connect(netJob.get(), &NetJob::failed, this, [weak, this](const QString& reason) {
+        int networkErrorCode = -1;
+        if (auto job = weak.lock()) {
+            if (auto* failedAction = job->getFailedActions().at(0); failedAction) {
+                networkErrorCode = failedAction->replyStatusCode();
+            }
+        }
+        searchRequestFailed(reason, networkErrorCode);
+    });
+    connect(netJob.get(), &NetJob::aborted, this, [this] {
         qCritical() << "Search task aborted by an unknown reason!";
         searchRequestFailed("Aborted", 0);
-    };
-
-    auto netJob = ModrinthAPI::get().searchProjects(
-        {
-            .type = ModPlatform::ResourceType::Modpack,
-            .offset = m_nextSearchOffset,
-            .search = m_currentSearchTerm,
-            .sorting = sort,
-            .loaders = m_filter->loaders,
-            .versions = m_filter->versions,
-            .side = ModPlatform::SideType::NoSide,
-            .categoryIds = m_filter->categoryIds,
-            .openSource = m_filter->openSource,
-            .excludeDisclosureTypes = m_filter->excludeDisclosureTypes,
-        },
-        callbacks);
+    });
 
     m_jobPtr = netJob;
     m_jobPtr->start();
@@ -319,7 +323,7 @@ void ModpackListModel::logoFailed(const QString& logo)
     m_loadingLogos.removeAll(logo);
 }
 
-void ModpackListModel::searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr>& newList)
+void ModpackListModel::searchRequestFinished(const QList<ModPlatform::IndexedPack>& newList)
 {
     m_jobPtr.reset();
 
@@ -336,7 +340,11 @@ void ModpackListModel::searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr
     }
 
     beginInsertRows(QModelIndex(), static_cast<int>(m_modpacks.size()), static_cast<int>(m_modpacks.size() + newList.size() - 1));
-    m_modpacks.append(newList);
+    for (const auto& p : newList) {
+        auto pack = std::make_shared<ModPlatform::IndexedPack>();
+        *pack = p;
+        m_modpacks.append(pack);
+    }
     endInsertRows();
 }
 
