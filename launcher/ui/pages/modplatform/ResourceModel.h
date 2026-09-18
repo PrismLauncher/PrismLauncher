@@ -142,7 +142,7 @@ class ResourceModel : public QAbstractListModel {
 
    private:
     /* Default search request callbacks */
-    void searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>&);
+    void searchRequestSucceeded(const QList<ModPlatform::IndexedPack>&);
     void searchRequestForOneSucceeded(const ModPlatform::IndexedPack::Ptr&);
     void searchRequestFailed(const QString& reason, int networkErrorCode);
     void searchRequestAborted();
