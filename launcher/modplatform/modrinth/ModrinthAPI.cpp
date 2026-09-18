@@ -366,40 +366,21 @@ QUrl ModrinthAPI::searchProjectsURL(const SearchArgs& args)
     return BuildConfig.MODRINTH_PROD_URL + "/search?" + getArguments.join('&');
 };
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getModCategories() const
-{
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetCategories"), APPLICATION->network());
-    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(BuildConfig.MODRINTH_PROD_URL + "/tag/category"));
-    netJob->addNetAction(action);
-    QObject::connect(netJob.get(), &Task::failed, netJob.get(),
-                     [](const QString& msg) { qDebug() << "Modrinth failed to get categories:" << msg; });
+Net::RPC::Spec<QList<ModPlatform::Category>> ModrinthAPI::getCategories(ModPlatform::ResourceType type) const
+{  // https://docs.modrinth.com/api/operations/categorylist/
+    auto projectType = Modrinth::Parse::resourceTypeParameter(type);
+    return { { .url = BuildConfig.MODRINTH_PROD_URL + "/tag/category" },
+             [projectType](const auto& response) -> Result<QList<ModPlatform::Category>> {
+                 QList<ModPlatform::Category> categories;
+                 TRY_INTO(const auto& doc, Json::requireArray(response))
 
-    return { netJob, response };
-}
-
-QList<ModPlatform::Category> ModrinthAPI::loadCategories(const QByteArray& response, const QString& projectType)
-{
-    QList<ModPlatform::Category> categories;
-    auto parse = [&response, &projectType, &categories] -> Result<> {
-        TRY_INTO(const auto& doc, Json::requireArray(response))
-
-        for (auto val : doc) {
-            TRY_INTO(const auto& cat, Json::requireObject(val))
-            TRY_INTO(const auto& name, Json::requireString(cat, "name"))
-            if (cat["project_type"].toString() == projectType) {
-                categories.push_back({ .name = name, .id = name });
-            }
-        }
-        return {};
-    };
-    if (auto res = parse(); !res) {
-        qWarning() << "Error while parsing JSON response from categories:" << res.error();
-        qWarning() << response;
-    }
-    return categories;
-}
-
-QList<ModPlatform::Category> ModrinthAPI::loadModCategories(const QByteArray& response) const
-{
-    return loadCategories(response, "mod");
+                 for (auto val : doc) {
+                     TRY_INTO(const auto& cat, Json::requireObject(val))
+                     TRY_INTO(const auto& name, Json::requireString(cat, "name"))
+                     if (cat["project_type"].toString() == projectType) {
+                         categories.push_back({ .name = name, .id = name });
+                     }
+                 }
+                 return categories;
+             } };
 }
