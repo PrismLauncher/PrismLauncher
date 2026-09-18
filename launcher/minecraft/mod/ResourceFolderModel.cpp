@@ -439,7 +439,12 @@ void ResourceFolderModel::onParseSucceeded(int ticket, const QString& resourceId
 Task* ResourceFolderModel::createUpdateTask()
 {
     auto indexDir2 = indexDir();
-    auto* task = new ResourceFolderLoadTask(dir(), indexDir2, m_isIndexed, m_firstFolderLoad,
+    bool shouldCleanOrphan = m_firstFolderLoad;
+    if (m_instance && m_instance->isOffloaded()) {
+        shouldCleanOrphan = false;
+    }
+
+    auto* task = new ResourceFolderLoadTask(dir(), indexDir2, m_isIndexed, shouldCleanOrphan,
                                             [this](const QFileInfo& file) { return createResource(file); });
     m_firstFolderLoad = false;
     return task;
@@ -578,6 +583,10 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
                 if (at(row).isMoreThanOneHardLink()) {
                     tooltip += tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
                 }
+
+                if (instance()->isOffloaded() && !at(row).fileinfo().exists()) {
+                    tooltip += tr("\nOffloaded — this resource will be re-downloaded when the instance is restored.");
+                }
             }
 
             return tooltip;
@@ -599,6 +608,8 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
                 return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
             }
             return {};
+        case OffloadedRole:
+            return instance()->isOffloaded() && !at(row).fileinfo().exists();
         default:
             return {};
     }

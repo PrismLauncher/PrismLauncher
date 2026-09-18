@@ -306,6 +306,11 @@ bool Resource::isSymLinkUnder(const QString& instPath) const
         return true;
     }
 
+    // Don't treat a missing file as a symlink.
+    if (!m_fileInfo.exists()) {
+        return false;
+    }
+
     auto instDir = QDir(instPath);
 
     auto relAbsPath = instDir.relativeFilePath(m_fileInfo.absoluteFilePath());

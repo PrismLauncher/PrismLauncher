@@ -134,6 +134,9 @@ void drawBadges(QPainter* painter, const QStyleOptionViewItem& option, BaseInsta
     if (instance->hasUpdateAvailable()) {
         pixmaps.append("checkupdate");
     }
+    if (instance->isOffloaded()) {
+        pixmaps.append("delete");
+    }
 
     static const int itemSide = 24;
     static const int spacing = 1;
@@ -182,6 +185,11 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     initStyleOption(&opt, index);
     painter->save();
     painter->setClipRect(opt.rect);
+
+    auto* inst = static_cast<BaseInstance*>(index.data(InstanceList::InstancePointerRole).value<void*>());
+    if (inst && inst->isOffloaded()) {
+        painter->setOpacity(0.5);
+    }
 
     opt.features |= QStyleOptionViewItem::WrapText;
     opt.text = index.data().toString();

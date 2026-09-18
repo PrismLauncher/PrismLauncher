@@ -164,6 +164,10 @@ class MainWindow : public QMainWindow {
     void on_actionExportInstanceMrPack_triggered();
     void on_actionExportInstanceFlamePack_triggered();
 
+    void on_actionOffloadInstance_triggered();
+    void restoreOffloadedInstance();
+    void setOffloadActionState();
+
     void on_actionRenameInstance_triggered();
 
     void on_actionEditInstance_triggered();

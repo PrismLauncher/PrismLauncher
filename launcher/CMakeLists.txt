@@ -14,6 +14,10 @@ set(CORE_SOURCES
     InstanceList.cpp
     InstanceTask.h
     InstanceTask.cpp
+    OffloadInstanceTask.h
+    OffloadInstanceTask.cpp
+    RestoreInstanceTask.h
+    RestoreInstanceTask.cpp
     LoggedProcess.h
     LoggedProcess.cpp
     MessageLevel.cpp

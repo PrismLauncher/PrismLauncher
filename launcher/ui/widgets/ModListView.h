@@ -15,6 +15,7 @@
 
 #pragma once
 #include <QHeaderView>
+#include <QStyledItemDelegate>
 #include <QTreeView>
 
 class ModListView : public QTreeView {
@@ -23,4 +24,12 @@ class ModListView : public QTreeView {
     explicit ModListView(QWidget* parent = 0);
     virtual void setModel(QAbstractItemModel* model);
     virtual void setResizeModes(const QList<QHeaderView::ResizeMode>& modes);
+};
+
+// Fades out rows whose resources are not present on disk, such as offloaded resources.
+class ModListViewDelegate : public QStyledItemDelegate {
+    Q_OBJECT
+   public:
+    explicit ModListViewDelegate(ModListView* parent) : QStyledItemDelegate(parent) {}
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 };
