@@ -45,6 +45,7 @@
 #include <QHeaderView>
 #include <QKeyEvent>
 #include <QMenu>
+#include <QTimer>
 #include <algorithm>
 
 ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, ResourceFolderModel* model, QWidget* parent)
@@ -113,7 +114,12 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, ResourceFol
     m_model->loadColumns(ui->treeView);
     // restoreState brings back the resize modes from the saved state, so apply ours again
     ui->treeView->setResizeModes(m_model->columnResizeModes());
-    connect(ui->treeView->header(), &QHeaderView::sectionResized, this, [this] { m_model->saveColumns(ui->treeView); });
+    // Saving writes the settings files, so wait until the user stops dragging
+    auto* saveColumnsTimer = new QTimer(this);
+    saveColumnsTimer->setSingleShot(true);
+    saveColumnsTimer->setInterval(300);
+    connect(saveColumnsTimer, &QTimer::timeout, this, [this] { m_model->saveColumns(ui->treeView); });
+    connect(ui->treeView->header(), &QHeaderView::sectionResized, saveColumnsTimer, qOverload<>(&QTimer::start));
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &ExternalResourcesPage::filterTextChanged);
     updateActions();
 }
