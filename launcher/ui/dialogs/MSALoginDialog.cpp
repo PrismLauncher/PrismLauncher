@@ -66,7 +66,7 @@ QString formatError(const QString& reason)
     }
     return formatted;
 }
-}
+}  // namespace
 
 MSALoginDialog::MSALoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::MSALoginDialog)
 {
