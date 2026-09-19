@@ -4,12 +4,8 @@
 
 #pragma once
 
-#include <qurl.h>
-#include "BuildConfig.h"
-#include "Result.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
-#include "modplatform/modrinth/ModrinthPackIndex.h"
 
 #include <QDebug>
 #include <QJsonArray>
@@ -25,8 +21,6 @@ class ModrinthAPI final : public ResourceAPI {
         static const ModrinthAPI s_instance;
         return s_instance;
     }
-
-    static std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, const QString& hashFormat);
 
    public:
     static bool validateModLoaders(ModPlatform::ModLoaderTypes loaders);
@@ -56,6 +50,11 @@ class ModrinthAPI final : public ResourceAPI {
         std::optional<std::vector<Version>> mcVersions,
         std::optional<ModPlatform::ModLoaderTypes> loaders,
         const std::optional<std::vector<ModPlatform::IndexedVersionType>>& releaseTypes = std::nullopt);
+
+    static Net::RPC::Spec<QHash<QString, ModPlatform::IndexedVersion>> currentVersions(const QStringList& hashes,
+                                                                                       const QString& hashFormat);
+    static std::pair<NetJob::Ptr, QHash<QString, ModPlatform::IndexedVersion>*> currentVersionsTask(const QStringList& hashes,
+                                                                                                    const QString& hashFormat);
 
    private:
     static QUrl searchProjectsURL(const SearchArgs& args);
