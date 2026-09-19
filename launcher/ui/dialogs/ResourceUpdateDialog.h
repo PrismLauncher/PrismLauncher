@@ -3,10 +3,7 @@
 #include "ResourceDownloadTask.h"
 #include "ReviewMessageBox.h"
 
-#include "minecraft/mod/ModFolderModel.h"
-
 #include "modplatform/CheckUpdateTask.h"
-#include "tasks/Task.h"
 
 class QTextBrowser;
 class Minecraft;
