@@ -111,6 +111,8 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
     connect(viewHeader, &QHeaderView::customContextMenuRequested, this, &ExternalResourcesPage::ShowHeaderContextMenu);
 
     m_model->loadColumns(ui->treeView);
+    // restoreState brings back the resize modes from the saved state, so apply ours again
+    ui->treeView->setResizeModes(m_model->columnResizeModes());
     connect(ui->treeView->header(), &QHeaderView::sectionResized, this, [this] { m_model->saveColumns(ui->treeView); });
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &ExternalResourcesPage::filterTextChanged);
     updateActions();

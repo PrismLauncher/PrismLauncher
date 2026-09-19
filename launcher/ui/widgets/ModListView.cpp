@@ -36,6 +36,7 @@ ModListView::ModListView(QWidget* parent) : QTreeView(parent)
     setDragDropMode(QAbstractItemView::DropOnly);
     viewport()->setAcceptDrops(true);
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    connect(header(), &QHeaderView::sectionResized, this, &ModListView::onSectionResized);
 }
 
 void ModListView::setModel(QAbstractItemModel* model)
@@ -48,22 +49,84 @@ void ModListView::setModel(QAbstractItemModel* model)
     if (head->count() < 1) {
         return;
     }
-    if (!string.size()) {
-        head->setSectionResizeMode(0, QHeaderView::Interactive);
-        head->setSectionResizeMode(1, QHeaderView::Stretch);
-        for (int i = 2; i < head->count(); i++)
-            head->setSectionResizeMode(i, QHeaderView::Interactive);
-    } else {
-        head->setSectionResizeMode(0, QHeaderView::Stretch);
-        for (int i = 1; i < head->count(); i++)
-            head->setSectionResizeMode(i, QHeaderView::Interactive);
-    }
+    m_principalColumn = string.size() ? 0 : 1;
+    for (int i = 0; i < head->count(); i++)
+        head->setSectionResizeMode(i, QHeaderView::Interactive);
 }
 
 void ModListView::setResizeModes(const QList<QHeaderView::ResizeMode>& modes)
 {
     auto head = header();
     for (int i = 0; i < modes.count(); i++) {
-        head->setSectionResizeMode(i, modes[i]);
+        // Stretch marks the principal column. Qt does not let the user drag a Stretch section,
+        // so keep it Interactive and fill the spare width by hand.
+        if (modes[i] == QHeaderView::Stretch) {
+            m_principalColumn = i;
+            head->setSectionResizeMode(i, QHeaderView::Interactive);
+        } else {
+            head->setSectionResizeMode(i, modes[i]);
+        }
     }
+}
+
+void ModListView::resizeEvent(QResizeEvent* event)
+{
+    QTreeView::resizeEvent(event);
+    giveSpareWidthToPrincipalColumn();
+}
+
+// Makes the principal column take whatever width the other visible columns leave.
+void ModListView::giveSpareWidthToPrincipalColumn()
+{
+    auto head = header();
+    if (m_principalColumn < 0 || m_principalColumn >= head->count() || m_adjustingColumnSizes)
+        return;
+
+    int others = 0;
+    for (int i = 0; i < head->count(); i++) {
+        if (i != m_principalColumn && !head->isSectionHidden(i))
+            others += head->sectionSize(i);
+    }
+
+    m_adjustingColumnSizes = true;
+    head->resizeSection(m_principalColumn, qMax(head->minimumSectionSize(), viewport()->width() - others));
+    m_adjustingColumnSizes = false;
+}
+
+// Dragging a handle moves width between the two columns next to it, so the handle follows the cursor
+// and the table stays filled. The right edge of the last column trades width with the principal column.
+void ModListView::onSectionResized(int logicalIndex, int oldSize, int newSize)
+{
+    auto head = header();
+    if (m_adjustingColumnSizes || m_principalColumn < 0)
+        return;
+
+    // A column was shown or hidden
+    if (oldSize == 0 || newSize == 0) {
+        giveSpareWidthToPrincipalColumn();
+        return;
+    }
+
+    int neighbour = -1;
+    for (int v = head->visualIndex(logicalIndex) + 1; v < head->count(); v++) {
+        int i = head->logicalIndex(v);
+        if (!head->isSectionHidden(i)) {
+            neighbour = i;
+            break;
+        }
+    }
+    if (neighbour < 0)
+        neighbour = m_principalColumn;
+    if (neighbour == logicalIndex)
+        return;
+
+    int neighbourSize = head->sectionSize(neighbour) - (newSize - oldSize);
+    int clamped = qMax(head->minimumSectionSize(), neighbourSize);
+
+    m_adjustingColumnSizes = true;
+    head->resizeSection(neighbour, clamped);
+    // The neighbour hit its minimum width, so give the difference back
+    if (clamped != neighbourSize)
+        head->resizeSection(logicalIndex, newSize - (clamped - neighbourSize));
+    m_adjustingColumnSizes = false;
 }
