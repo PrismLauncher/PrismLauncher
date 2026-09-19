@@ -35,7 +35,7 @@
 
 #include "Library.h"
 #include "MinecraftInstance.h"
-#include "net/NetRequest.h"
+#include "net/Request.h"
 
 #include <BuildConfig.h>
 #include <FileSystem.h>
@@ -103,14 +103,14 @@ void Library::getApplicableFiles(const RuntimeContext& runtimeContext,
  * @param cache Pointer to the HTTP meta cache.
  * @param failedLocalFiles List to store paths for failed local files.
  * @param overridePath Optional path to override the default storage path.
- * @return QList<Net::NetRequest::Ptr> List of download requests.
+ * @return QList<Net::Request::Ptr> List of download requests.
  */
-QList<Net::NetRequest::Ptr> Library::getDownloads(const RuntimeContext& runtimeContext,
+QList<Net::Request::Ptr> Library::getDownloads(const RuntimeContext& runtimeContext,
                                                   class HttpMetaCache* cache,
                                                   QStringList& failedLocalFiles,
                                                   const QString& overridePath) const
 {
-    QList<Net::NetRequest::Ptr> out;
+    QList<Net::Request::Ptr> out;
     bool stale = isAlwaysStale();
     bool local = isLocal();
 
@@ -138,13 +138,13 @@ QList<Net::NetRequest::Ptr> Library::getDownloads(const RuntimeContext& runtimeC
         }
         if (!entry->isStale())
             return true;
-        Net::NetRequest::Options options;
+        Net::Request::Options options;
         if (stale) {
-            options |= Net::NetRequest::Option::AcceptLocalFiles;
+            options |= Net::Request::Option::AcceptLocalFiles;
         }
 
         // Don't add a time limit for the libraries cache entry validity
-        options |= Net::NetRequest::Option::MakeEternal;
+        options |= Net::Request::Option::MakeEternal;
 
         if (sha1.size()) {
             auto dl = Net::ApiRequest::makeCached(url, entry, options);

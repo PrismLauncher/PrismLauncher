@@ -97,26 +97,27 @@ void ModrinthCreationTask::executeTask()
         parseManifest(oldIndexPath, oldFiles, false, false);
 
         // Let's remove all duplicated, identical resources!
-        auto filesIterator = m_files.begin();
-    begin:
-        while (filesIterator != m_files.end()) {
+        for (auto filesIterator = m_files.begin(); filesIterator != m_files.end();) {
             const auto& file = *filesIterator;
+            bool erased = false;
 
-            auto oldFilesIterator = oldFiles.begin();
-            while (oldFilesIterator != oldFiles.end()) {
+            for (auto oldFilesIterator = oldFiles.begin(); oldFilesIterator != oldFiles.end();) {
                 const auto& oldFile = *oldFilesIterator;
 
                 if (oldFile.hash == file.hash) {
                     qDebug() << "Removed file at" << file.path << "from list of downloads";
                     filesIterator = m_files.erase(filesIterator);
                     oldFilesIterator = oldFiles.erase(oldFilesIterator);
-                    goto begin;  // Sorry :c
+                    erased = true;
+                    break;
                 }
 
-                oldFilesIterator++;
+                ++oldFilesIterator;
             }
 
-            filesIterator++;
+            if (!erased) {
+                ++filesIterator;
+            }
         }
 
         QDir oldMinecraftDir(inst->gameRoot());
@@ -282,7 +283,7 @@ void ModrinthCreationTask::createInstance()
                                         .dependentOn = !m_managedId.isEmpty() ? m_managedVersionId : "" };
 
         QUrl downloadUrl = file.downloads.dequeue();
-        auto dl = Net::ApiRequest::makeFile(downloadUrl, filePath, Net::NetRequest::Option::NoOptions, meta);
+        auto dl = Net::ApiRequest::makeFile(downloadUrl, filePath, Net::Request::Option::NoOptions, meta);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
         downloadMods->addNetAction(dl);
         if (!file.downloads.empty()) {
@@ -291,7 +292,7 @@ void ModrinthCreationTask::createInstance()
             auto param = dl.toWeakRef();
             connect(dl.get(), &Task::failed, dl.get(), [&file, filePath, param, downloadMods, meta] {
                 QUrl fallbackUrl = file.downloads.dequeue();
-                auto ndl = Net::ApiRequest::makeFile(fallbackUrl, filePath, Net::NetRequest::Option::NoOptions, meta);
+                auto ndl = Net::ApiRequest::makeFile(fallbackUrl, filePath, Net::Request::Option::NoOptions, meta);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 downloadMods->addNetAction(ndl);
                 if (auto shared = param.lock()) {
@@ -318,123 +319,123 @@ void ModrinthCreationTask::createInstance()
 
 bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<File>& files, bool setInternalData, bool showOptionalDialog)
 {
-    try {
-        auto doc = Json::requireDocument(indexPath);
-        auto obj = Json::requireObject(doc, "modrinth.index.json");
-        int formatVersion = Json::requireInteger(obj, "formatVersion", "modrinth.index.json");
-        if (formatVersion == 1) {
-            auto game = Json::requireString(obj, "game", "modrinth.index.json");
-            if (game != "minecraft") {
-                throw JSONValidationError("Unknown game: " + game);
-            }
-
-            if (setInternalData) {
-                if (m_managedVersionId.isEmpty()) {
-                    m_managedVersionId = obj.value("versionId").toString();
-                }
-                m_managedName = obj.value("name").toString();
-            }
-
-            auto jsonFiles = Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json");
-            std::vector<File> optionalFiles;
-            for (const auto& modInfo : jsonFiles) {
-                File file;
-                file.path = Json::requireString(modInfo, "path").replace("\\", "/");
-
-                auto env = modInfo["env"].toObject();
-                // 'env' field is optional
-                if (!env.isEmpty()) {
-                    QString support = env["client"].toString("unsupported");
-                    if (support == "unsupported") {
-                        continue;
-                    }
-                    if (support == "optional") {
-                        file.required = false;
-                    }
-                }
-
-                QJsonObject hashes = Json::requireObject(modInfo, "hashes");
-                file.hash = QByteArray::fromHex(Json::requireString(hashes, "sha512").toLatin1());
-                file.hashAlgorithm = QCryptographicHash::Sha512;
-
-                // Do not use requireUrl, which uses StrictMode, instead use QUrl's default TolerantMode
-                // (as Modrinth seems to incorrectly handle spaces)
-
-                auto downloadArr = modInfo["downloads"].toArray();
-                for (auto download : downloadArr) {
-                    qWarning() << download.toString();
-                    bool isLast = download.toString() == downloadArr.last().toString();
-
-                    auto downloadUrl = QUrl(download.toString());
-
-                    if (!downloadUrl.isValid()) {
-                        qDebug()
-                            << QString("Download URL (%1) for %2 is not a correctly formatted URL").arg(downloadUrl.toString(), file.path);
-                        if (isLast && file.downloads.isEmpty()) {
-                            throw JSONValidationError(tr("Download URL for %1 is not a correctly formatted URL").arg(file.path));
-                        }
-                    } else {
-                        file.downloads.push_back(downloadUrl);
-                    }
-                }
-
-                (file.required ? files : optionalFiles).push_back(file);
-            }
-
-            if (!optionalFiles.empty()) {
-                if (showOptionalDialog) {
-                    QStringList oFiles;
-                    for (const auto& file : optionalFiles) {
-                        oFiles.push_back(file.path);
-                    }
-                    OptionalModDialog optionalModDialog(m_parent, oFiles);
-                    if (optionalModDialog.exec() == QDialog::Rejected) {
-                        emitAborted();
-                        return false;
-                    }
-
-                    auto selectedMods = optionalModDialog.getResult();
-                    for (auto file : optionalFiles) {
-                        if (selectedMods.contains(file.path)) {
-                            file.required = true;
-                        } else {
-                            file.path += ".disabled";
-                        }
-                        files.push_back(file);
-                    }
-                } else {
-                    for (auto file : optionalFiles) {
-                        file.path += ".disabled";
-                        files.push_back(file);
-                    }
-                }
-            }
-            if (setInternalData) {
-                auto dependencies = Json::requireObject(obj, "dependencies", "modrinth.index.json");
-                for (auto it = dependencies.begin(), end = dependencies.end(); it != end; ++it) {
-                    QString name = it.key();
-                    if (name == "minecraft") {
-                        m_minecraftVersion = Json::requireString(*it, "Minecraft version");
-                    } else if (name == "fabric-loader") {
-                        m_fabricVersion = Json::requireString(*it, "Fabric Loader version");
-                    } else if (name == "quilt-loader") {
-                        m_quiltVersion = Json::requireString(*it, "Quilt Loader version");
-                    } else if (name == "forge") {
-                        m_forgeVersion = Json::requireString(*it, "Forge version");
-                    } else if (name == "neoforge") {
-                        m_neoForgeVersion = Json::requireString(*it, "NeoForge version");
-                    } else {
-                        throw JSONValidationError("Unknown dependency type: " + name);
-                    }
-                }
-            }
-        } else {
-            throw JSONValidationError(QStringLiteral("Unknown format version: %s").arg(formatVersion));
+    std::vector<File> optionalFiles;
+    auto parse = [this, &indexPath, &setInternalData, &files, &optionalFiles] -> Result<> {
+        TRY_INTO(const auto& obj, Json::requireObject(indexPath, "modrinth.index.json"))
+        TRY_INTO(const auto& formatVersion, Json::requireInteger(obj, "formatVersion", "modrinth.index.json"))
+        if (formatVersion != 1) {
+            return std::unexpected(QString("Unknown format version: %1").arg(formatVersion));
+        }
+        TRY_INTO(const auto& game, Json::requireString(obj, "game", "modrinth.index.json"))
+        if (game != "minecraft") {
+            return std::unexpected("Unknown game: " + game);
         }
 
-    } catch (const JSONValidationError& e) {
-        emitFailed(tr("Could not understand pack index:\n") + e.cause());
+        if (setInternalData) {
+            if (m_managedVersionId.isEmpty()) {
+                m_managedVersionId = obj.value("versionId").toString();
+            }
+            m_managedName = obj.value("name").toString();
+        }
+
+        TRY_INTO(const auto& jsonFiles, Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json"))
+        for (const auto& modInfo : jsonFiles) {
+            File file;
+            TRY_INTO(auto path, Json::requireString(modInfo, "path"))
+            file.path = path.replace("\\", "/");
+
+            auto env = modInfo["env"].toObject();
+            // 'env' field is optional
+            if (!env.isEmpty()) {
+                QString support = env["client"].toString("unsupported");
+                if (support == "unsupported") {
+                    continue;
+                }
+                if (support == "optional") {
+                    file.required = false;
+                }
+            }
+
+            TRY_INTO(file.hash, Json::requireObject(modInfo, "hashes")
+                                    .and_then([](const auto& v) { return Json::requireString(v, "sha512"); })
+                                    .and_then([](const auto& v) -> Result<QByteArray> { return QByteArray::fromHex(v.toLatin1()); }))
+            file.hashAlgorithm = QCryptographicHash::Sha512;
+
+            // Do not use requireUrl, which uses StrictMode, instead use QUrl's default TolerantMode
+            // (as Modrinth seems to incorrectly handle spaces)
+
+            auto downloadArr = modInfo["downloads"].toArray();
+            for (auto download : downloadArr) {
+                qWarning() << download.toString();
+                bool isLast = download.toString() == downloadArr.last().toString();
+
+                auto downloadUrl = QUrl(download.toString());
+
+                if (!downloadUrl.isValid()) {
+                    qDebug() << QString("Download URL (%1) for %2 is not a correctly formatted URL").arg(downloadUrl.toString(), file.path);
+                    if (isLast && file.downloads.isEmpty()) {
+                        return std::unexpected(tr("Download URL for %1 is not a correctly formatted URL").arg(file.path));
+                    }
+                } else {
+                    file.downloads.push_back(downloadUrl);
+                }
+            }
+
+            (file.required ? files : optionalFiles).push_back(file);
+        }
+
+        if (setInternalData) {
+            TRY_INTO(const auto& dependencies, Json::requireObject(obj, "dependencies", "modrinth.index.json"))
+            for (auto it = dependencies.begin(), end = dependencies.end(); it != end; ++it) {
+                QString name = it.key();
+                if (name == "minecraft") {
+                    TRY_INTO(m_minecraftVersion, Json::requireString(*it, "Minecraft version"))
+                } else if (name == "fabric-loader") {
+                    TRY_INTO(m_fabricVersion, Json::requireString(*it, "Fabric Loader version"))
+                } else if (name == "quilt-loader") {
+                    TRY_INTO(m_quiltVersion, Json::requireString(*it, "Quilt Loader version"))
+                } else if (name == "forge") {
+                    TRY_INTO(m_forgeVersion, Json::requireString(*it, "Forge version"))
+                } else if (name == "neoforge") {
+                    TRY_INTO(m_neoForgeVersion, Json::requireString(*it, "NeoForge version"))
+                } else {
+                    return std::unexpected("Unknown dependency type: " + name);
+                }
+            }
+        }
+        return {};
+    };
+    if (auto res = parse(); !res) {
+        emitFailed(tr("Could not understand pack index:\n") + res.error());
         return false;
+    }
+    if (!optionalFiles.empty()) {
+        if (showOptionalDialog) {
+            QStringList oFiles;
+            for (const auto& file : optionalFiles) {
+                oFiles.push_back(file.path);
+            }
+            OptionalModDialog optionalModDialog(m_parent, oFiles);
+            if (optionalModDialog.exec() == QDialog::Rejected) {
+                emitAborted();
+                return false;
+            }
+
+            auto selectedMods = optionalModDialog.getResult();
+            for (auto file : optionalFiles) {
+                if (selectedMods.contains(file.path)) {
+                    file.required = true;
+                } else {
+                    file.path += ".disabled";
+                }
+                files.push_back(file);
+            }
+        } else {
+            for (auto file : optionalFiles) {
+                file.path += ".disabled";
+                files.push_back(file);
+            }
+        }
     }
 
     return true;
@@ -442,7 +443,7 @@ bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<F
 
 void ModrinthCreationTask::ensureMetaLoop()
 {
-    const QDir folder = FS::PathCombine(m_stagingPath, "minecraft", "jarmods");
+    const QDir folder = FS::PathCombine(m_newInstance->modsRoot(), ".index");
     auto ensureMetadataTask = makeShared<EnsureMetadataTask>(m_resources, folder, ModPlatform::ResourceProvider::MODRINTH);
     connect(ensureMetadataTask.get(), &Task::succeeded, this, &ModrinthCreationTask::finishInstall);
     connect(ensureMetadataTask.get(), &Task::failed, this, &ModrinthCreationTask::emitFailed);

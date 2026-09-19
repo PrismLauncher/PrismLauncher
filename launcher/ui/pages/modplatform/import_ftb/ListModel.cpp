@@ -22,16 +22,17 @@
 #include <QFileInfo>
 #include <QIcon>
 #include <QProcessEnvironment>
+#include <algorithm>
 #include "Application.h"
-#include "settings/SettingsObject.h"
-#include "Exception.h"
 #include "FileSystem.h"
 #include "Json.h"
+#include "Result.h"
 #include "StringUtils.h"
 #include "modplatform/import_ftb/PackHelpers.h"
+#include "settings/SettingsObject.h"
 #include "ui/widgets/ProjectItem.h"
 
-namespace FTBImportAPP {
+namespace {
 
 QString getFTBRoot()
 {
@@ -45,20 +46,23 @@ QString getFTBRoot()
 QString getDynamicPath()
 {
     auto settingsPath = FS::PathCombine(getFTBRoot(), "storage", "settings.json");
-    if (!QFileInfo::exists(settingsPath))
+    if (!QFileInfo::exists(settingsPath)) {
         settingsPath = FS::PathCombine(getFTBRoot(), "bin", "settings.json");
+    }
     if (!QFileInfo::exists(settingsPath)) {
         qWarning() << "The ftb app setings doesn't exist.";
         return {};
     }
-    try {
-        auto doc = Json::requireDocument(FS::read(settingsPath));
-        return Json::requireString(Json::requireObject(doc), "instanceLocation");
-    } catch (const Exception& e) {
-        qCritical() << "Could not read ftb settings file:" << e.cause();
+    auto doc = Json::requireObject(settingsPath).and_then([](const auto& v) { return Json::requireString(v, "instanceLocation"); });
+    if (!doc) {
+        qCritical() << "Could not read ftb settings file:" << doc.error();
+        return {};
     }
-    return {};
+    return doc.value();
 }
+}  // namespace
+
+namespace FTBImportAPP {
 
 ListModel::ListModel(QObject* parent) : QAbstractListModel(parent), m_instances_path(getDynamicPath()) {}
 
@@ -67,27 +71,28 @@ void ListModel::update()
     beginResetModel();
     m_modpacks.clear();
 
-    auto wasPathAdded = [this](QString path) {
-        for (auto pack : m_modpacks) {
-            if (pack.path == path)
-                return true;
-        }
-        return false;
+    auto wasPathAdded = [this](const QString& path) {
+        return std::ranges::any_of(m_modpacks, [&path](const auto& v) { return v.path == path; });
     };
 
-    auto scanPath = [this, wasPathAdded](QString path) {
-        if (path.isEmpty())
+    auto scanPath = [this, wasPathAdded](const QString& path) {
+        if (path.isEmpty()) {
             return;
-        if (auto instancesInfo = QFileInfo(path); !instancesInfo.exists() || !instancesInfo.isDir())
+        }
+        if (auto instancesInfo = QFileInfo(path); !instancesInfo.exists() || !instancesInfo.isDir()) {
             return;
+        }
         QDirIterator directoryIterator(path, QDir::Dirs | QDir::NoDotAndDotDot | QDir::Readable | QDir::Hidden,
                                        QDirIterator::FollowSymlinks);
         while (directoryIterator.hasNext()) {
             auto currentPath = directoryIterator.next();
             if (!wasPathAdded(currentPath)) {
                 auto modpack = parseDirectory(currentPath);
-                if (!modpack.path.isEmpty())
-                    m_modpacks.append(modpack);
+                if (!modpack) {
+                    qDebug() << modpack.error();
+                } else if (!modpack->path.isEmpty()) {
+                    m_modpacks.append(modpack.value());
+                }
             }
         }
     };

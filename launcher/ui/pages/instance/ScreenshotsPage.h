@@ -39,8 +39,6 @@
 
 #include "ui/pages/BasePage.h"
 
-#include "settings/Setting.h"
-
 class QIdentityProxyModel;
 class QItemSelection;
 namespace Ui {
@@ -51,7 +49,6 @@ class ScreenshotsFSModel;
 
 struct ScreenShot;
 class ScreenshotList;
-class ImgurAlbumCreation;
 
 class ScreenshotsPage : public QMainWindow, public BasePage {
     Q_OBJECT
@@ -61,7 +58,6 @@ class ScreenshotsPage : public QMainWindow, public BasePage {
     virtual ~ScreenshotsPage();
 
     void openedImpl() override;
-    void closedImpl() override;
 
     enum { NothingDone = 0x42 };
 
@@ -94,6 +90,4 @@ class ScreenshotsPage : public QMainWindow, public BasePage {
     QString m_folder;
     bool m_valid = false;
     bool m_uploadActive = false;
-
-    std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
 };

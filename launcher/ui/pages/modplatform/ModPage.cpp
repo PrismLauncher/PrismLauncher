@@ -76,7 +76,7 @@ ModPage::ModPage(ResourceDownloadDialog* dialog,
                  ModFilterWidget* filterWidget)
     : ResourcePage(dialog, instance, prepareModDescriptor(), std::move(p)), m_api(api)
 {
-    auto* model = new ModModel(instance, api, debugName(), metaEntryBase());
+    auto* model = new ModModel(instance, getDialog()->getBaseModel(), api, debugName(), metaEntryBase());
     m_model = model;
     m_ui->packView->setModel(m_model);
 

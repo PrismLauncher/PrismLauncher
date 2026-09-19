@@ -51,7 +51,8 @@ ResourceFolderModel::ResourceFolderModel(const QDir& dir, MinecraftInstance* ins
 
 ResourceFolderModel::~ResourceFolderModel()
 {
-    while (!QThreadPool::globalInstance()->waitForDone(100)) {
+    m_resourceResolverThread.quit();
+    while (!m_resourceResolverThread.wait(100)) {
         QCoreApplication::processEvents();
     }
 }
@@ -190,20 +191,16 @@ void ResourceFolderModel::installResourceWithFlameMetadata(const QString& path, 
         connect(job.get(), &Task::failed, this, install);
         connect(job.get(), &Task::aborted, this, install);
         connect(job.get(), &Task::succeeded, this, [response, this, &vers, install, &pack] {
-            QJsonParseError parseError{};
-            QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-            if (parseError.error != QJsonParseError::NoError) {
-                qWarning() << "Error while parsing JSON response for mod info at" << parseError.offset
-                           << "reason:" << parseError.errorString();
+            auto obj = Json::requireObject(*response, "data");
+            if (!obj) {
+                qWarning() << "Error while parsing JSON response for mod info:" << obj.error();
                 qDebug() << *response;
                 return;
             }
-            try {
-                auto obj = Json::requireObject(Json::requireObject(doc), "data");
-                FlameMod::loadIndexedPack(pack, obj);
-            } catch (const JSONValidationError& e) {
-                qDebug() << doc;
-                qWarning() << "Error while reading mod info:" << e.cause();
+            auto loadRes = FlameMod::loadIndexedPack(pack, *obj);
+            if (!loadRes) {
+                qDebug() << *obj;
+                qWarning() << "Error while reading mod info:" << loadRes.error();
             }
             LocalResourceUpdateTask updateMetadata(indexDir(), pack, vers);
             connect(&updateMetadata, &Task::finished, this, install);
@@ -321,11 +318,11 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, Ena
     return succeeded;
 }
 
-static QMutex s_update_task_mutex;
+static QMutex s_updateTaskMutex;
 bool ResourceFolderModel::update()
 {
     // We hold a lock here to prevent race conditions on the m_current_update_task reset.
-    QMutexLocker lock(&s_update_task_mutex);
+    QMutexLocker lock(&s_updateTaskMutex);
 
     // Already updating, so we schedule a future update and return.
     if (m_currentUpdateTask) {
@@ -383,6 +380,8 @@ void ResourceFolderModel::resolveResource(Resource::Ptr res)
         return;
     }
 
+    task->moveToThread(&m_resourceResolverThread);
+
     int ticket = m_nextResolutionTicket.fetch_add(1);
 
     res->setResolving(true, ticket);
@@ -405,7 +404,8 @@ void ResourceFolderModel::resolveResource(Resource::Ptr res)
     m_resourceResolver.addTask(task);
 
     if (!m_resourceResolverRunning) {
-        QThreadPool::globalInstance()->start(&m_resourceResolver);
+        m_resourceResolverThread.start();
+        m_resourceResolver.start();
         m_resourceResolverRunning = true;
     }
 }
@@ -848,7 +848,7 @@ void ResourceFolderModel::onParseFailed(int ticket, const QString& resourceId)
     // update index
     m_resourcesIndex.clear();
     int idx = 0;
-    for (const auto& mod : qAsConst(m_resources)) {
+    for (const auto& mod : std::as_const(m_resources)) {
         m_resourcesIndex[mod->internalId()] = idx;
         idx++;
     }
@@ -872,7 +872,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& currentSet, QSet<QString>&
 
             if (newResource->dateTimeChanged() == currentResource->dateTimeChanged()) {
                 // no significant change
-                bool hadIssues = !currentResource->hasIssues();
+                bool hadIssues = currentResource->hasIssues();
                 currentResource->updateIssues(m_instance);
 
                 if (hadIssues != currentResource->hasIssues()) {
@@ -955,7 +955,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& currentSet, QSet<QString>&
     {
         m_resourcesIndex.clear();
         int idx = 0;
-        for (const auto& mod : qAsConst(m_resources)) {
+        for (const auto& mod : std::as_const(m_resources)) {
             m_resourcesIndex[mod->internalId()] = idx;
             idx++;
         }
@@ -964,7 +964,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& currentSet, QSet<QString>&
 Resource::Ptr ResourceFolderModel::find(QString id)
 {
     auto iter =
-        std::find_if(m_resources.constBegin(), m_resources.constEnd(), [&](const Resource::Ptr& r) { return r->internalId() == id; });
+        std::find_if(m_resources.constBegin(), m_resources.constEnd(), [&id](const Resource::Ptr& r) { return r->internalId() == id; });
     if (iter == m_resources.constEnd()) {
         return nullptr;
     }

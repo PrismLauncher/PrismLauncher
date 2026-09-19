@@ -173,59 +173,60 @@ void FlamePackExportTask::makeApiRequest()
         fingerprints.push_back(murmur.toUInt());
     }
 
-    auto [matchTask, response] = FlameAPI::get().matchFingerprints(fingerprints);
+    auto [matchTask, response] = FlameAPI::matchFingerprints(fingerprints);
     task = matchTask;
 
     connect(task.get(), &Task::succeeded, this, [this, response] {
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from CurseForge::CurrentVersions at" << parseError.offset
-                       << "reason:" << parseError.errorString();
+        auto doc = Json::requireObject(*response)
+                       .and_then([](const auto& v) { return Json::requireObject(v, "data", "data"); })
+                       .and_then([](const auto& v) { return Json::requireArray(v, "exactMatches", "exactMatches"); });
+        if (!doc) {
+            qWarning() << "Error while parsing JSON response from CurseForge::CurrentVersions:" << doc.error();
             qWarning() << *response;
 
-            emitFailed(parseError.errorString());
+            emitFailed(doc.error());
+            return;
+        }
+        if (doc->isEmpty()) {
+            qWarning() << "No matches found for fingerprint search!";
+
+            getProjectsInfo();
             return;
         }
 
-        try {
-            auto docObj = Json::requireObject(doc);
-            auto dataObj = Json::requireObject(docObj, "data");
-            auto dataArr = Json::requireArray(dataObj, "exactMatches");
+        for (auto match : doc.value()) {
+            auto matchObj = match.toObject();
+            auto fileObj = matchObj["file"].toObject();
 
-            if (dataArr.isEmpty()) {
-                qWarning() << "No matches found for fingerprint search!";
+            if (matchObj.isEmpty() || fileObj.isEmpty()) {
+                qWarning() << "Fingerprint match is empty!";
 
-                getProjectsInfo();
-                return;
-            }
-            for (auto match : dataArr) {
-                auto matchObj = match.toObject();
-                auto fileObj = matchObj["file"].toObject();
-
-                if (matchObj.isEmpty() || fileObj.isEmpty()) {
-                    qWarning() << "Fingerprint match is empty!";
-
-                    return;
-                }
-
-                auto fingerprint = QString::number(fileObj["fileFingerprint"].toInteger());
-                auto mod = pendingHashes.find(fingerprint);
-                if (mod == pendingHashes.end()) {
-                    qWarning() << "Invalid fingerprint from the API response.";
-                    continue;
-                }
-
-                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name));
-                if (fileObj["isAvailable"].toBool())
-                    resolvedFiles.insert(mod->path, { Json::requireInteger(fileObj, "modId"), Json::requireInteger(fileObj, "id"),
-                                                      mod->enabled, mod->isMod });
+                continue;
             }
 
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
+            auto fingerprint = QString::number(fileObj["fileFingerprint"].toInteger());
+            auto mod = pendingHashes.find(fingerprint);
+            if (mod == pendingHashes.end()) {
+                qWarning() << "Invalid fingerprint from the API response.";
+                continue;
+            }
+
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name));
+            if (fileObj["isAvailable"].toBool()) {
+                auto parse = [&fileObj, this, &mod] -> Result<> {
+                    TRY_INTO(const auto& modid, Json::requireInteger(fileObj, "modId"))
+                    TRY_INTO(const auto& id, Json::requireInteger(fileObj, "id"))
+                    resolvedFiles.insert(mod->path, { .addonId = modid, .version = id, .enabled = mod->enabled, .isMod = mod->isMod });
+                    return {};
+                };
+                if (auto res = parse(); !res) {
+                    qDebug() << res.error();
+                    qDebug() << *doc;
+                    break;
+                }
+            }
         }
+
         pendingHashes.clear();
         getProjectsInfo();
     });
@@ -246,65 +247,64 @@ void FlamePackExportTask::getProjectsInfo()
     }
 
     Task::Ptr projTask;
-    QByteArray* response;
+    QByteArray* response = nullptr;
 
     if (addonIds.isEmpty()) {
         buildZip();
         return;
-    } else if (addonIds.size() == 1) {
+    }
+    if (addonIds.size() == 1) {
         std::tie(projTask, response) = FlameAPI::get().getProject(*addonIds.begin());
     } else {
         std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds);
     }
 
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
-        QJsonParseError parseError{};
-        auto doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from CurseForge projects task at" << parseError.offset
-                       << "reason:" << parseError.errorString();
+        auto doc = Json::requireObject(*response).and_then([addonIds](const auto& v) -> Result<QJsonArray> {
+            if (addonIds.size() == 1) {
+                TRY_INTO(const auto& obj, Json::requireObject(v, "data", "data"))
+                return { { obj } };
+            }
+            return Json::requireArray(v, "data");
+        });
+        if (!doc) {
+            qWarning() << "Error while parsing JSON response from CurseForge projects task:" << doc.error();
             qWarning() << *response;
-            emitFailed(parseError.errorString());
+            emitFailed(doc.error());
             return;
         }
 
-        try {
-            QJsonArray entries;
-            if (addonIds.size() == 1)
-                entries = { Json::requireObject(Json::requireObject(doc), "data") };
-            else
-                entries = Json::requireArray(Json::requireObject(doc), "data");
+        for (auto entry : doc.value()) {
+            auto parse = [&entry, this] -> Result<> {
+                TRY_INTO(const auto& entryObj, Json::requireObject(entry))
 
-            for (auto entry : entries) {
-                auto entryObj = Json::requireObject(entry);
+                TRY_INTO(const auto& name, Json::requireString(entryObj, "name"))
+                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(name));
 
-                try {
-                    setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(Json::requireString(entryObj, "name")));
+                ModPlatform::IndexedPack pack;
+                TRY(FlameMod::loadIndexedPack(pack, entryObj))
 
-                    ModPlatform::IndexedPack pack;
-                    FlameMod::loadIndexedPack(pack, entryObj);
-                    for (auto key : resolvedFiles.keys()) {
-                        auto val = resolvedFiles.value(key);
-                        if (val.addonId == pack.addonId) {
-                            val.name = pack.name;
-                            val.slug = pack.slug;
-                            QStringList authors;
-                            for (auto author : pack.authors)
-                                authors << author.name;
-
-                            val.authors = authors.join(", ");
-                            resolvedFiles[key] = val;
+                for (const auto& key : resolvedFiles.keys()) {
+                    auto val = resolvedFiles.value(key);
+                    if (val.addonId == pack.addonId) {
+                        val.name = pack.name;
+                        val.slug = pack.slug;
+                        QStringList authors;
+                        for (const auto& author : pack.authors) {
+                            authors << author.name;
                         }
-                    }
 
-                } catch (Json::JsonException& e) {
-                    qDebug() << e.cause();
-                    qDebug() << entries;
+                        val.authors = authors.join(", ");
+                        resolvedFiles[key] = val;
+                    }
                 }
+                return {};
+            };
+            if (auto res = parse(); !res) {
+                qDebug() << res.error();
+                qDebug() << *doc;
+                continue;
             }
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
         }
         buildZip();
     });

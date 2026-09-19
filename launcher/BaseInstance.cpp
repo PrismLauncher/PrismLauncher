@@ -70,7 +70,7 @@ bool shouldStopOnConsoleOverflow(SettingsObject* settings)
 }
 
 BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, QString rootDir)
-    : m_rootDir(std::move(rootDir)), m_settings(std::move(settings)), m_global_settings(globalSettings)
+    : m_rootDir(std::move(rootDir)), m_settings(std::move(settings)), m_globalSettings(globalSettings)
 {
     m_settings->registerSetting("name", "Unnamed Instance");
     m_settings->registerSetting("iconKey", "default");
@@ -108,6 +108,7 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
 
     // Custom Commands
     auto commandSetting = m_settings->registerSetting({ "OverrideCommands", "OverrideLaunchCmd" }, false);
+    m_settings->registerOverride(globalSettings->getSetting("PreLoadCommand"), commandSetting);
     m_settings->registerOverride(globalSettings->getSetting("PreLaunchCommand"), commandSetting);
     m_settings->registerOverride(globalSettings->getSetting("WrapperCommand"), commandSetting);
     m_settings->registerOverride(globalSettings->getSetting("PostExitCommand"), commandSetting);
@@ -137,6 +138,11 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
 QString BaseInstance::getPreLaunchCommand()
 {
     return settings()->get("PreLaunchCommand").toString();
+}
+
+QString BaseInstance::getPreLoadCommand()
+{
+    return settings()->get("PreLoadCommand").toString();
 }
 
 QString BaseInstance::getWrapperCommand()
@@ -191,6 +197,12 @@ void BaseInstance::setManagedPack(const QString& type,
     m_settings->set("ManagedPackName", name);
     m_settings->set("ManagedPackVersionID", versionId);
     m_settings->set("ManagedPackVersionName", version);
+
+    if (APPLICATION->settings()->get("AutomaticJavaSwitch").toBool() && m_settings->get("AutomaticJava").toBool() &&
+        m_settings->get("OverrideJavaLocation").toBool()) {
+        m_settings->set("OverrideJavaLocation", false);
+        m_settings->set("JavaPath", "");
+    }
 }
 
 QStringList BaseInstance::getLinkedInstances() const
@@ -435,14 +447,13 @@ void BaseInstance::setShortcuts(const QList<ShortcutData>& shortcuts)
 QList<ShortcutData> BaseInstance::shortcuts() const
 {
     auto data = m_settings->get("shortcuts").toString().toUtf8();
-    QJsonParseError parseError;
-    auto document = QJsonDocument::fromJson(data, &parseError);
-    if (parseError.error != QJsonParseError::NoError || !document.isArray()) {
+    auto document = Json::requireArray(data);
+    if (!document) {
         return {};
     }
 
     QList<ShortcutData> results;
-    for (const auto& elem : document.array()) {
+    for (const auto& elem : document.value()) {
         if (!elem.isObject()) {
             continue;
         }
@@ -461,7 +472,7 @@ QList<ShortcutData> BaseInstance::shortcuts() const
             qWarning() << "Shortcut" << shortcutName << "for instance" << name() << "have non-existent path" << filePath;
             continue;
         }
-        results.append({ shortcutName, filePath, static_cast<ShortcutTarget>(value) });
+        results.append({ .name = shortcutName, .filePath = filePath, .target = static_cast<ShortcutTarget>(value) });
     }
     return results;
 }

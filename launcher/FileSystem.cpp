@@ -86,6 +86,13 @@ namespace fs = std::filesystem;
 #include <linux/fs.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+
+#if defined(WITH_QTDBUS)
+#include <QDBusConnection>
+#include <QDBusReply>
+#include <QDBusUnixFileDescriptor>
+#endif
+
 #elif defined(Q_OS_MACOS)
 #include <sys/attr.h>
 #include <sys/clonefile.h>
@@ -167,75 +174,91 @@ using PFSCTL_SET_INTEGRITY_INFORMATION_BUFFER = _FSCTL_SET_INTEGRITY_INFORMATION
 
 #endif
 
-namespace FS {
+namespace {
 
-void ensureExists(const QDir& dir)
+Result<> ensureExists(const QDir& dir)
 {
     if (!QDir().mkpath(dir.absolutePath())) {
-        throw FileSystemException("Unable to create folder " + dir.dirName() + " (" + dir.absolutePath() + ")");
+        return std::unexpected("Unable to create folder " + dir.dirName() + " (" + dir.absolutePath() + ")");
     }
+    return {};
 }
+}  // namespace
 
-void write(const QString& filename, const QByteArray& data)
+namespace FS {
+
+Result<> write(const QString& filename, const QByteArray& data)
 {
-    ensureExists(QFileInfo(filename).dir());
+    auto res = ensureExists(QFileInfo(filename).dir());
+    if (!res) {
+        return res;
+    }
     PSaveFile file(filename);
     if (!file.open(PSaveFile::WriteOnly)) {
-        throw FileSystemException("Couldn't open " + filename + " for writing: " + file.errorString());
+        return std::unexpected("Couldn't open " + filename + " for writing: " + file.errorString());
     }
     if (data.size() != file.write(data)) {
-        throw FileSystemException("Error writing data to " + filename + ": " + file.errorString());
+        return std::unexpected("Error writing data to " + filename + ": " + file.errorString());
     }
     if (!file.commit()) {
-        throw FileSystemException("Error while committing data to " + filename + ": " + file.errorString());
+        return std::unexpected("Error while committing data to " + filename + ": " + file.errorString());
     }
+    return {};
 }
 
-void appendSafe(const QString& filename, const QByteArray& data)
+Result<> appendSafe(const QString& filename, const QByteArray& data)
 {
-    ensureExists(QFileInfo(filename).dir());
+    auto res = ensureExists(QFileInfo(filename).dir());
+    if (!res) {
+        return res;
+    }
+
     QByteArray buffer;
-    try {
-        buffer = read(filename);
-    } catch (FileSystemException&) {
-        buffer = QByteArray();
+    auto bRes = read(filename);
+    if (bRes) {
+        buffer = bRes.value();
     }
     buffer.append(data);
     PSaveFile file(filename);
     if (!file.open(PSaveFile::WriteOnly)) {
-        throw FileSystemException("Couldn't open " + filename + " for writing: " + file.errorString());
+        return std::unexpected("Couldn't open " + filename + " for writing: " + file.errorString());
     }
     if (buffer.size() != file.write(buffer)) {
-        throw FileSystemException("Error writing data to " + filename + ": " + file.errorString());
+        return std::unexpected("Error writing data to " + filename + ": " + file.errorString());
     }
     if (!file.commit()) {
-        throw FileSystemException("Error while committing data to " + filename + ": " + file.errorString());
+        return std::unexpected("Error while committing data to " + filename + ": " + file.errorString());
     }
+    return {};
 }
 
-void append(const QString& filename, const QByteArray& data)
+Result<> append(const QString& filename, const QByteArray& data)
 {
-    ensureExists(QFileInfo(filename).dir());
+    auto res = ensureExists(QFileInfo(filename).dir());
+    if (!res) {
+        return res;
+    }
     QFile file(filename);
     if (!file.open(QFile::Append)) {
-        throw FileSystemException("Couldn't open " + filename + " for writing: " + file.errorString());
+        return std::unexpected("Couldn't open " + filename + " for writing: " + file.errorString());
     }
     if (data.size() != file.write(data)) {
-        throw FileSystemException("Error writing data to " + filename + ": " + file.errorString());
+        return std::unexpected("Error writing data to " + filename + ": " + file.errorString());
     }
+    return {};
 }
 
-QByteArray read(const QString& filename)
+Result<QByteArray> read(const QString& filename)
 {
     QFile file(filename);
     if (!file.open(QFile::ReadOnly)) {
-        throw FileSystemException("Unable to open " + filename + " for reading: " + file.errorString());
+        return std::unexpected("Unable to open " + filename + " for reading: " + file.errorString());
     }
     const qint64 size = file.size();
     QByteArray data(int(size), 0);
     const qint64 ret = file.read(data.data(), size);
     if (ret == -1 || ret != size) {
-        throw FileSystemException("Error reading data from " + filename + ": " + file.errorString());
+        return std::unexpected("Error reading data from " + filename + ": " + file.errorString());
     }
     return data;
 }
@@ -311,6 +334,7 @@ bool copy::operator()(const QString& offset, bool dryRun)
     using copy_opts = fs::copy_options;
     m_copied = 0;  // reset counter
     m_failedPaths.clear();
+    m_symlinksToCopy.clear();
 
 // NOTE always deep copy on windows. the alternatives are too messy.
 #if defined Q_OS_WIN32
@@ -338,11 +362,39 @@ bool copy::operator()(const QString& offset, bool dryRun)
 
         auto dst_path = PathCombine(dst, relative_dst_path);
         if (!dryRun) {
-            ensureFilePathExists(dst_path);
+            auto srcStdPath = StringUtils::toStdString(src_path);
+#ifdef Q_OS_WIN32
+            if (fs::is_symlink(srcStdPath)) {
+                auto symlinkTarget = QString(fs::read_symlink(srcStdPath).c_str());
+
+                LinkPair link = { .src = symlinkTarget, .dst = dst_path };
+                m_symlinksToCopy.append(link);
+            }
+#endif
+
+            if (fs::is_directory(srcStdPath) && !fs::is_symlink(srcStdPath)) {
+                ensureFolderPathExists(dst_path);
+            } else {
+                ensureFilePathExists(dst_path);
+            }
 #ifdef Q_OS_WIN32
             copyFolderAttributes(src, dst, relative_dst_path);
 #endif
-            fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
+
+            // don't copy directories as we loop over the individual files and copy them instead
+            // check is necessary as directories are still looped over to copy directory symlinks or empty directories
+            // and otherwise both the directories *and* the files in them will be copied which is messy and weird
+
+            // Behavior varies on OS, on windows symlink directories seem to get follow/deep copied regardless of copy_opts flags,
+            // so skip them now (don't copy them with fs::copy but with privileged FS::create_link later)
+            // On linux symlink directories get correctly copied as symlinks if the flag is set, so only skip non symlink dirs
+            bool skip = fs::is_directory(srcStdPath) && !fs::is_symlink(srcStdPath);
+#ifdef Q_OS_WIN32
+            skip = fs::is_directory(srcStdPath) || fs::is_symlink(srcStdPath);
+#endif
+            if (!skip) {
+                fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
+            }
         }
         if (err) {
             qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
@@ -360,7 +412,13 @@ bool copy::operator()(const QString& offset, bool dryRun)
     // blacklisted paths, so we iterate over the source directory, and if there's no blacklist
     // match, we copy the file.
     QDir src_dir(src);
-    QDirIterator source_it(src, QDir::Filter::Files | QDir::Filter::Hidden, QDirIterator::Subdirectories);
+    QDir::Filters filters = QDir::Filter::Files | QDir::Filter::Hidden;
+
+    if (m_copyDirectories) {
+        filters |= QDir::Filter::NoDotAndDotDot | QDir::Filter::Dirs;
+    }
+
+    QDirIterator source_it(src, filters, QDirIterator::Subdirectories);
 
     while (source_it.hasNext()) {
         auto src_path = source_it.next();
@@ -373,7 +431,43 @@ bool copy::operator()(const QString& offset, bool dryRun)
     if (!fs::is_directory(StringUtils::toStdString(src)))
         copy_file(src, "");
 
-    return err.value() == 0;
+    bool thereWereErrors = false;
+#ifdef Q_OS_WIN32
+    if (!m_symlinksToCopy.empty()) {
+        FS::create_link folderLink(m_symlinksToCopy);
+        folderLink.linkRecursively(false);
+
+        if (!folderLink()) {
+            qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
+            qDebug() << "attempting to run symlinking with privilege";
+
+            QEventLoop loop;
+            bool gotPrivResults = false;
+
+            connect(&folderLink, &FS::create_link::finishedPrivileged, this, [&gotPrivResults, &loop](bool gotResults) {
+                if (!gotResults) {
+                    qDebug() << "Privileged run exited without results!";
+                }
+                gotPrivResults = gotResults;
+                loop.quit();
+            });
+            folderLink.runPrivileged();
+
+            loop.exec();  // wait for the finished signal
+
+            for (auto result : folderLink.getResults()) {
+                if (result.err_value != 0) {
+                    thereWereErrors = true;
+                }
+            }
+            if (thereWereErrors) {
+                qDebug() << "errors encountered while trying to link files";
+            }
+        }
+    }
+#endif
+
+    return err.value() == 0 && !thereWereErrors;
 }
 
 /// qDebug print support for the LinkPair struct
@@ -712,9 +806,36 @@ bool deleteContents(const QString& path)
 
 bool trash(QString path, QString* pathInTrash)
 {
-    // FIXME: Figure out trash in Flatpak. Qt seemingly doesn't use the Trash portal
-    if (DesktopServices::isFlatpak())
+#ifdef Q_OS_LINUX
+    if (DesktopServices::isFlatpak()) {
+#if defined(WITH_QTDBUS)
+        const int file = open(path.toUtf8().data(), O_PATH | O_CLOEXEC, 0);
+        if (file == -1) {
+            return false;
+        }
+        const QDBusUnixFileDescriptor fileDescriptor(file);
+        close(file);
+
+        QDBusMessage message = QDBusMessage::createMethodCall("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop",
+                                                              "org.freedesktop.portal.Trash", "TrashFile");
+
+        message << QVariant::fromValue(fileDescriptor);
+
+        const QDBusReply<uint32_t> reply = QDBusConnection::sessionBus().call(message);
+        if (!reply.isValid()) {
+            qWarning() << "Error while trying to trash the file" << path << reply.error().name() << ":" << reply.error().message();
+            return false;
+        }
+        if (pathInTrash) {
+            *pathInTrash = QString();  // No info provided by the API, use the same semantics as QFile::moveToTrash
+        }
+
+        return reply.value() != 0;
+#else
         return false;
+#endif
+    }
+#endif
 #if defined Q_OS_WIN32
     if (IsWindowsServer())
         return false;

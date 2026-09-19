@@ -39,7 +39,7 @@
 
 #include "minecraft/auth/AuthStep.h"
 #include "net/NetJob.h"
-#include "net/NetRequest.h"
+#include "net/Request.h"
 
 class MSADeviceCodeStep : public AuthStep {
     Q_OBJECT
@@ -72,6 +72,6 @@ class MSADeviceCodeStep : public AuthStep {
     QTimer m_pool_timer;
     QTimer m_expiration_timer;
 
-    Net::NetRequest::Ptr m_request;
+    Net::Request::Ptr m_request;
     NetJob::Ptr m_task;
 };

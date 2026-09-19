@@ -2,6 +2,8 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2024 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2026 Octol1ttle <l1ttleofficial@outlook.com>
+ *  Copyright (C) 2026 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,16 +39,23 @@
 
 #include <QDebug>
 #include <QString>
-#include <exception>
+#include <expected>
 
-class Exception : public std::exception {
-   public:
-    Exception(const QString& message) : std::exception(), m_message(message.toUtf8()) { qCritical() << "Exception:" << message; }
-    Exception(const Exception& other) : std::exception(), m_message(other.m_message) {}
-    virtual ~Exception() noexcept {}
-    const char* what() const noexcept { return m_message.constData(); }
-    QString cause() const { return QString::fromUtf8(m_message); }
+template <typename T = void, typename E = QString>
+using Result = std::expected<T, E>;
 
-   private:
-    QByteArray m_message;
-};
+#define TRY(expected)                                \
+    if (const auto _result = (expected); !_result) { \
+        return std::unexpected{ _result.error() };   \
+    }
+
+#define RESULT_H_CONCAT_(x, y) x##y
+
+#define RESULT_H_CONCAT(x, y) RESULT_H_CONCAT_(x, y)
+
+#define TRY_INTO_VAR_ RESULT_H_CONCAT(_try_tmp_, __LINE__)
+
+#define TRY_INTO(decl, expr)       \
+    auto&& TRY_INTO_VAR_ = (expr); \
+    TRY(TRY_INTO_VAR_)             \
+    decl = TRY_INTO_VAR_.value();

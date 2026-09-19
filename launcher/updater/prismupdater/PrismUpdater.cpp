@@ -51,8 +51,8 @@ namespace fs = std::filesystem;
 #include "Json.h"
 #include "StringUtils.h"
 
-#include "net/NetRequest.h"
 #include "net/RawHeaderProxy.h"
+#include "net/Request.h"
 
 #include "MMCZip.h"
 
@@ -346,16 +346,20 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
 
     m_allowPreRelease = parser.isSet("pre-release");
 
-    auto marker_file_path = QDir(m_rootPath).absoluteFilePath(".prism_launcher_updater_unpack.marker");
-    auto marker_file = QFileInfo(marker_file_path);
-    if (marker_file.exists()) {
-        auto target_dir = QString(FS::read(marker_file_path)).trimmed();
-        if (target_dir.isEmpty()) {
+    auto markerFilePath = QDir(m_rootPath).absoluteFilePath(".prism_launcher_updater_unpack.marker");
+    auto markerFile = QFileInfo(markerFilePath);
+    if (markerFile.exists()) {
+        auto res = FS::read(markerFilePath);
+        if (!res) {
+            qFatal("Could not read updater marker file: %s", res.error().toUtf8().constData());
+        }
+        auto targetDir = QString(res.value()).trimmed();
+        if (targetDir.isEmpty()) {
             qWarning() << "Empty updater marker file contains no install target. making best guess of parent dir";
-            target_dir = QDir(m_rootPath).absoluteFilePath("..");
+            targetDir = QDir(m_rootPath).absoluteFilePath("..");
         }
 
-        QMetaObject::invokeMethod(this, [this, target_dir]() { moveAndFinishUpdate(target_dir); }, Qt::QueuedConnection);
+        QMetaObject::invokeMethod(this, [this, targetDir]() { moveAndFinishUpdate(targetDir); }, Qt::QueuedConnection);
 
     } else {
         QMetaObject::invokeMethod(this, &PrismUpdaterApp::loadReleaseList, Qt::QueuedConnection);
@@ -494,39 +498,41 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
     logUpdate("Finishing update process");
 
     logUpdate("Waiting 2 seconds for resources to free");
-    this->thread()->sleep(2);
+    QThread::sleep(2);
 
     auto manifest_path = FS::PathCombine(m_rootPath, "manifest.txt");
     QFileInfo manifest(manifest_path);
 
     auto app_dir = QDir(m_rootPath);
 
-    QStringList file_list;
+    QStringList fileList;
     if (manifest.isFile()) {
         // load manifest from file
         logUpdate(tr("Reading manifest from %1").arg(manifest.absoluteFilePath()));
-        try {
-            auto contents = QString::fromUtf8(FS::read(manifest.absoluteFilePath()));
+        auto res = FS::read(manifest.absoluteFilePath());
+        if (!res) {
+            logUpdate(tr("Could not read manifest: %1").arg(res.error()));
+        } else {
+            auto contents = QString::fromUtf8(res.value());
             auto files = contents.split('\n');
-            for (auto file : files) {
-                file_list.append(file.trimmed());
+            for (const auto& file : files) {
+                fileList.append(file.trimmed());
             }
-        } catch (FS::FileSystemException&) {
         }
     }
 
-    if (file_list.isEmpty()) {
+    if (fileList.isEmpty()) {
         logUpdate(tr("Manifest empty, making best guess of the directory contents of %1").arg(m_rootPath));
         auto entries = target.entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
-        for (auto entry : entries) {
-            file_list.append(entry.fileName());
+        for (const auto& entry : entries) {
+            fileList.append(entry.fileName());
         }
     }
-    logUpdate(tr("Installing the following to %1 :\n %2").arg(target.absolutePath()).arg(file_list.join(",\n  ")));
+    logUpdate(tr("Installing the following to %1 :\n %2").arg(target.absolutePath()).arg(fileList.join(",\n  ")));
 
     bool error = false;
 
-    QProgressDialog progress(tr("Installing from %1").arg(m_rootPath), "", 0, file_list.length());
+    QProgressDialog progress(tr("Installing from %1").arg(m_rootPath), "", 0, fileList.length());
     progress.setCancelButton(nullptr);
     progress.setMinimumWidth(400);
     progress.adjustSize();
@@ -549,7 +555,7 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
     };
 
     int i = 0;
-    for (auto glob : file_list) {
+    for (auto glob : fileList) {
         QDirIterator iter(m_rootPath, QStringList({ glob }), QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
         progress.setValue(i);
         QCoreApplication::processEvents();
@@ -766,7 +772,7 @@ QFileInfo PrismUpdaterApp::downloadAsset(const GitHubReleaseAsset& asset)
     auto out_file_path = FS::PathCombine(temp_dir, file_url.fileName());
 
     qDebug() << "downloading" << file_url << "to" << out_file_path;
-    auto download = Net::NetRequest::makeFile(file_url, out_file_path);
+    auto download = Net::Request::makeFile(file_url, out_file_path);
     download->setNetwork(m_network.get());
     auto progress_dialog = ProgressDialog();
     progress_dialog.adjustSize();
@@ -800,20 +806,28 @@ void PrismUpdaterApp::clearUpdateLog()
 void PrismUpdaterApp::logUpdate(const QString& msg)
 {
     qDebug() << qUtf8Printable(msg);
-    FS::append(m_updateLogPath, QStringLiteral("%1\n").arg(msg).toUtf8());
+    auto res = FS::append(m_updateLogPath, QStringLiteral("%1\n").arg(msg).toUtf8());
+    if (!res) {
+        qWarning() << "Failed to write update log:" << res.error();
+    }
 }
 
 std::tuple<QDateTime, QString, QString, QString, QString> read_lock_File(const QString& path)
 {
-    auto contents = QString(FS::read(path));
+    auto res = FS::read(path);
+    if (!res) {
+        qFatal("Could not read lock file: %s", res.error().toUtf8().constData());
+    }
+    auto contents = QString(res.value());
     auto lines = contents.split('\n');
 
     QDateTime timestamp;
     QString from, to, target, data_path;
-    for (auto line : lines) {
+    for (const auto& line : lines) {
         auto index = line.indexOf("=");
-        if (index < 0)
+        if (index < 0) {
             continue;
+        }
         auto left = line.left(index);
         auto right = line.mid(index + 1);
         if (left.toLower() == "timestamp") {
@@ -833,16 +847,15 @@ std::tuple<QDateTime, QString, QString, QString, QString> read_lock_File(const Q
 
 bool write_lock_file(const QString& path, QDateTime timestamp, QString from, QString to, QString target, QString data_path)
 {
-    try {
-        FS::write(path, QStringLiteral("TIMESTAMP=%1\nFROM=%2\nTO=%3\nTARGET=%4\nDATA_PATH=%5\n")
-                            .arg(timestamp.toString(Qt::ISODate))
-                            .arg(from)
-                            .arg(to)
-                            .arg(target)
-                            .arg(data_path)
-                            .toUtf8());
-    } catch (FS::FileSystemException& err) {
-        qWarning() << "Error writing lockfile:" << err.what() << "\n" << err.cause();
+    auto res = FS::write(path, QStringLiteral("TIMESTAMP=%1\nFROM=%2\nTO=%3\nTARGET=%4\nDATA_PATH=%5\n")
+                                   .arg(timestamp.toString(Qt::ISODate))
+                                   .arg(from)
+                                   .arg(to)
+                                   .arg(target)
+                                   .arg(data_path)
+                                   .toUtf8());
+    if (!res) {
+        qWarning() << "Error writing lockfile:" << res.error();
         return false;
     }
     return true;
@@ -892,8 +905,10 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
     }
     clearUpdateLog();
 
-    auto changelog_path = FS::PathCombine(m_dataPath, ".prism_launcher_update.changelog");
-    FS::write(changelog_path, m_install_release.body.toUtf8());
+    auto changelogPath = FS::PathCombine(m_dataPath, ".prism_launcher_update.changelog");
+    if (auto res = FS::write(changelogPath, m_install_release.body.toUtf8()); !res) {
+        logUpdate(tr("Failed to write changelog: %1").arg(res.error()));
+    }
 
     logUpdate(tr("Updating from %1 to %2").arg(m_prismVersion).arg(m_install_release.tag_name));
     if (m_isPortable || file.fileName().endsWith(".zip") || file.fileName().endsWith(".tar.gz")) {
@@ -921,8 +936,10 @@ void PrismUpdaterApp::unpackAndInstall(QFileInfo archive)
     backupAppDir();
 
     if (auto loc = unpackArchive(archive)) {
-        auto marker_file_path = loc.value().absoluteFilePath(".prism_launcher_updater_unpack.marker");
-        FS::write(marker_file_path, m_rootPath.toUtf8());
+        auto markerFilePath = loc.value().absoluteFilePath(".prism_launcher_updater_unpack.marker");
+        if (auto res = FS::write(markerFilePath, m_rootPath.toUtf8()); !res) {
+            qFatal("Failed to write unpack marker: %s", res.error().toUtf8().constData());
+        }
 
         QProcess proc = QProcess();
 
@@ -958,13 +975,15 @@ void PrismUpdaterApp::backupAppDir()
         // load manifest from file
 
         logUpdate(tr("Reading manifest from %1").arg(manifest.absoluteFilePath()));
-        try {
-            auto contents = QString::fromUtf8(FS::read(manifest.absoluteFilePath()));
+        auto res = FS::read(manifest.absoluteFilePath());
+        if (!res) {
+            logUpdate(tr("Could not read manifest: %1").arg(res.error()));
+        } else {
+            auto contents = QString::fromUtf8(res.value());
             auto files = contents.split('\n');
-            for (auto file : files) {
+            for (const auto& file : files) {
                 file_list.append(file.trimmed());
             }
-        } catch (FS::FileSystemException&) {
         }
     }
 
@@ -998,7 +1017,9 @@ void PrismUpdaterApp::backupAppDir()
                         QStringLiteral("backup_") + QString(m_prismVersion).replace(s_replaceRegex, QString("_")) + "-" + m_prismGitCommit);
     FS::ensureFolderPathExists(backup_dir);
     auto backup_marker_path = FS::PathCombine(m_dataPath, ".prism_launcher_update_backup_path.txt");
-    FS::write(backup_marker_path, backup_dir.toUtf8());
+    if (auto res = FS::write(backup_marker_path, backup_dir.toUtf8()); !res) {
+        qFatal("Failed to write backup marker: %s", res.error().toUtf8().constData());
+    }
 
     QProgressDialog progress(tr("Backing up install at %1").arg(m_rootPath), "", 0, file_list.length());
     progress.setCancelButton(nullptr);
@@ -1136,7 +1157,7 @@ void PrismUpdaterApp::downloadReleasePage(const QString& api_url, int page)
 {
     int per_page = 30;
     auto page_url = QString("%1?per_page=%2&page=%3").arg(api_url).arg(QString::number(per_page)).arg(QString::number(page));
-    auto [download, response] = Net::NetRequest::makeByteArray(page_url);
+    auto [download, response] = Net::Request::makeByteArray(page_url);
     download->setNetwork(m_network.get());
     m_current_url = page_url;
 
@@ -1147,71 +1168,70 @@ void PrismUpdaterApp::downloadReleasePage(const QString& api_url, int page)
     });
     download->addHeaderProxy(std::move(github_api_headers));
 
-    connect(download.get(), &Net::NetRequest::succeeded, this, [this, response, per_page, api_url, page]() {
-        int num_found = parseReleasePage(response);
-        if (!(num_found < per_page)) {  // there may be more, fetch next page
+    connect(download.get(), &Net::Request::succeeded, this, [this, response, per_page, api_url, page]() {
+        auto numFound = parseReleasePage(response);
+        if (!numFound) {
+            auto errMsg = QString("Failed to parse releases from github: %1\n%2")
+                              .arg(numFound.error())
+                              .arg(QString::fromStdString(response->toStdString()));
+            fail(errMsg);
+        } else if (!(numFound.value() < per_page)) {  // there may be more, fetch next page
             downloadReleasePage(api_url, page + 1);
         } else {
             run();
         }
     });
-    connect(download.get(), &Net::NetRequest::failed, this, &PrismUpdaterApp::downloadError);
+    connect(download.get(), &Net::Request::failed, this, &PrismUpdaterApp::downloadError);
 
     m_current_task.reset(download);
-    connect(download.get(), &Net::NetRequest::finished, this, [this]() {
-        qDebug() << "Download" << m_current_task->getUid().toString() << "finished";
-    });
+    connect(download.get(), &Net::Request::finished, this,
+            [this]() { qDebug() << "Download" << m_current_task->getUid().toString() << "finished"; });
 
     QCoreApplication::processEvents();
 
     QMetaObject::invokeMethod(download.get(), &Task::start, Qt::QueuedConnection);
 }
 
-int PrismUpdaterApp::parseReleasePage(const QByteArray* response)
+Result<int> PrismUpdaterApp::parseReleasePage(const QByteArray* response)
 {
-    if (response->isEmpty())  // empty page
+    if (response->isEmpty()) {  // empty page
         return 0;
-    int num_releases = 0;
-    try {
-        auto doc = Json::requireDocument(*response);
-        auto release_list = Json::requireArray(doc);
-        for (auto release_json : release_list) {
-            auto release_obj = Json::requireObject(release_json);
-
-            GitHubRelease release = {};
-            release.id = Json::requireInteger(release_obj, "id");
-            release.name = release_obj["name"].toString();
-            release.tag_name = Json::requireString(release_obj, "tag_name");
-            release.created_at = QDateTime::fromString(Json::requireString(release_obj, "created_at"), Qt::ISODate);
-            release.published_at = QDateTime::fromString(release_obj["published_at"].toString(), Qt::ISODate);
-            release.draft = Json::requireBoolean(release_obj, "draft");
-            release.prerelease = Json::requireBoolean(release_obj, "prerelease");
-            release.body = release_obj["body"].toString();
-            release.version = Version(release.tag_name);
-
-            auto release_assets_obj = Json::requireArray(release_obj, "assets");
-            for (auto asset_json : release_assets_obj) {
-                auto asset_obj = Json::requireObject(asset_json);
-                GitHubReleaseAsset asset = {};
-                asset.id = Json::requireInteger(asset_obj, "id");
-                asset.name = Json::requireString(asset_obj, "name");
-                asset.label = asset_obj["label"].toString();
-                asset.content_type = Json::requireString(asset_obj, "content_type");
-                asset.size = Json::requireInteger(asset_obj, "size");
-                asset.created_at = QDateTime::fromString(Json::requireString(asset_obj, "created_at"), Qt::ISODate);
-                asset.updated_at = QDateTime::fromString(Json::requireString(asset_obj, "updated_at"), Qt::ISODate);
-                asset.browser_download_url = Json::requireString(asset_obj, "browser_download_url");
-                release.assets.append(asset);
-            }
-            m_releases.append(release);
-            num_releases++;
-        }
-    } catch (Json::JsonException& e) {
-        auto err_msg =
-            QString("Failed to parse releases from github: %1\n%2").arg(e.what()).arg(QString::fromStdString(response->toStdString()));
-        fail(err_msg);
     }
-    return num_releases;
+    int numReleases = 0;
+    TRY_INTO(const auto& doc, Json::requireArray(*response))
+    auto toDate = [](const QString& v) -> Result<QDateTime> { return QDateTime::fromString(v, Qt::ISODate); };
+    for (auto releaseJson : doc) {
+        TRY_INTO(const auto& obj, Json::requireObject(releaseJson))
+
+        GitHubRelease release = {};
+        TRY_INTO(release.id, Json::requireInteger(obj, "id"))
+        release.name = obj["name"].toString();
+        TRY_INTO(release.tag_name, Json::requireString(obj, "tag_name"))
+        TRY_INTO(release.created_at, Json::requireString(obj, "created_at").and_then(toDate))
+        release.published_at = QDateTime::fromString(obj["published_at"].toString(), Qt::ISODate);
+        TRY_INTO(release.draft, Json::requireBoolean(obj, "draft"))
+        TRY_INTO(release.prerelease, Json::requireBoolean(obj, "prerelease"))
+        release.body = obj["body"].toString();
+        release.version = Version(release.tag_name);
+
+        TRY_INTO(const auto& releaseAssetsObj, Json::requireArray(obj, "assets"))
+        for (auto assetJson : releaseAssetsObj) {
+            TRY_INTO(const auto& assetObj, Json::requireObject(assetJson))
+            GitHubReleaseAsset asset = {};
+            TRY_INTO(asset.id, Json::requireInteger(assetObj, "id"))
+            TRY_INTO(asset.name, Json::requireString(assetObj, "name"))
+            asset.label = assetObj["label"].toString();
+            TRY_INTO(asset.content_type, Json::requireString(assetObj, "content_type"))
+            TRY_INTO(asset.size, Json::requireInteger(assetObj, "size"))
+            TRY_INTO(asset.created_at, Json::requireString(assetObj, "created_at").and_then(toDate))
+            TRY_INTO(asset.updated_at, Json::requireString(assetObj, "updated_at").and_then(toDate))
+            TRY_INTO(asset.browser_download_url, Json::requireString(assetObj, "browser_download_url"))
+            release.assets.append(asset);
+        }
+        m_releases.append(release);
+        numReleases++;
+    }
+    return numReleases;
 }
 
 GitHubRelease PrismUpdaterApp::getLatestRelease()

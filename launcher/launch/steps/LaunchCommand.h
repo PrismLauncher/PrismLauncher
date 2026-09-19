@@ -2,7 +2,6 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,36 +33,26 @@
  *      limitations under the License.
  */
 
-#include "CapeChange.h"
+#pragma once
 
-#include <net/DummySink.h>
-#include <memory>
-#include "net/RawHeaderProxy.h"
+#include <LoggedProcess.h>
+#include <launch/LaunchStep.h>
 
-CapeChange::CapeChange(QString cape) : NetRequest(), m_capeId(cape)
-{
-    m_logCat = taskMCSkinsLogC;
-}
+class LaunchCommand : public LaunchStep {
+    Q_OBJECT
+   public:
+    LaunchCommand(LaunchTask* parent, QString command, QString phaseName = {});
+    ~LaunchCommand() override = default;
 
-QNetworkReply* CapeChange::getReply(QNetworkRequest& request)
-{
-    if (m_capeId.isEmpty()) {
-        setStatus(tr("Removing cape"));
-        return m_network->deleteResource(request);
-    } else {
-        setStatus(tr("Equipping cape"));
-        return m_network->put(request, QString("{\"capeId\":\"%1\"}").arg(m_capeId).toUtf8());
-    }
-}
+    void executeTask() override;
+    bool abort() override;
+    bool canAbort() const override { return true; }
+    void setWorkingDirectory(const QString& wd);
+   private slots:
+    void onState(LoggedProcess::State state);
 
-CapeChange::Ptr CapeChange::make(QString token, QString capeId)
-{
-    auto up = makeShared<CapeChange>(capeId);
-    up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/capes/active");
-    up->setObjectName(QString("BYTES:") + up->m_url.toString());
-    up->m_sink.reset(new Net::DummySink());
-    up->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(QList<Net::HeaderPair>{
-        { "Authorization", QString("Bearer %1").arg(token).toLocal8Bit() },
-    }));
-    return up;
-}
+   private:
+    LoggedProcess m_process;
+    QString m_command;
+    QString m_phaseName;
+};

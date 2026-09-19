@@ -37,8 +37,8 @@
 
 #pragma once
 
-#include "Exception.h"
 #include "Filter.h"
+#include "Result.h"
 
 #include <system_error>
 
@@ -51,30 +51,25 @@
 
 namespace FS {
 
-class FileSystemException : public ::Exception {
-   public:
-    FileSystemException(const QString& message) : Exception(message) {}
-};
-
 /**
  * write data to a file safely
  */
-void write(const QString& filename, const QByteArray& data);
+Result<> write(const QString& filename, const QByteArray& data);
 
 /**
  * append data to a file safely
  */
-void appendSafe(const QString& filename, const QByteArray& data);
+Result<> appendSafe(const QString& filename, const QByteArray& data);
 
 /**
  * append data to a file
  */
-void append(const QString& filename, const QByteArray& data);
+Result<> append(const QString& filename, const QByteArray& data);
 
 /**
  * read data from a file safely
  */
-QByteArray read(const QString& filename);
+Result<QByteArray> read(const QString& filename);
 
 /**
  * Update the last changed timestamp of an existing file
@@ -99,6 +94,8 @@ bool ensureFolderPathExists(const QFileInfo folderPath);
  */
 bool ensureFolderPathExists(const QString folderPathName);
 
+struct LinkPair;
+
 /**
  * @brief Copies a directory and it's contents from src to dest
  */
@@ -113,6 +110,17 @@ class copy : public QObject {
     copy& followSymlinks(const bool follow)
     {
         m_followSymlinks = follow;
+        return *this;
+    }
+    /**
+     * Setting this to true copies empty and symlinked directories (if follow symlinks is not set)
+     * instead of ignoring them.
+     *
+     * Defaults to false
+     */
+    copy& copyDirectories(const bool copyDirectories)
+    {
+        m_copyDirectories = copyDirectories;
         return *this;
     }
     copy& matcher(Filter filter)
@@ -146,7 +154,9 @@ class copy : public QObject {
     bool operator()(const QString& offset, bool dryRun = false);
 
    private:
+    bool m_copyDirectories = false;
     bool m_followSymlinks = true;
+    QList<LinkPair> m_symlinksToCopy;
     Filter m_matcher = nullptr;
     bool m_whitelist = false;
     bool m_overwrite = false;

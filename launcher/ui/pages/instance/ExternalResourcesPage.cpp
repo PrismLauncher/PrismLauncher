@@ -145,18 +145,11 @@ void ExternalResourcesPage::ShowHeaderContextMenu(const QPoint& pos)
 void ExternalResourcesPage::openedImpl()
 {
     m_model->startWatching();
-
-    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
-    m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
-
-    ui->actionsToolbar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
 }
 
 void ExternalResourcesPage::closedImpl()
 {
     m_model->stopWatching();
-
-    m_wide_bar_setting->set(QString::fromUtf8(ui->actionsToolbar->getVisibilityState().toBase64()));
 }
 
 void ExternalResourcesPage::retranslate()
@@ -210,7 +203,7 @@ bool ExternalResourcesPage::eventFilter(QObject* obj, QEvent* ev)
 
 void ExternalResourcesPage::addItem()
 {
-    auto list = GuiUtil::BrowseForFiles(
+    auto list = GuiUtil::browseForFiles(
         helpPage(), tr("Select %1", "Select whatever type of files the page contains. Example: 'Loader Mods'").arg(displayName()),
         m_fileSelectionFilter.arg(displayName()), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
 
@@ -341,10 +334,18 @@ void ExternalResourcesPage::updateFrame(const QModelIndex& current, [[maybe_unus
 
 QString ExternalResourcesPage::extraHeaderInfoString()
 {
+    auto all = m_model->allResources();
+    auto enabledCount = std::ranges::count_if(all, [](Resource* res) { return res->enabled(); });
+    auto installedCount = m_model->size();
+
     if (ui && ui->treeView && ui->treeView->selectionModel()) {
         auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
         if (auto count = std::count_if(selection.cbegin(), selection.cend(), [](auto v) { return v.column() == 0; }); count != 0)
-            return tr(" (%1 installed, %2 selected)").arg(m_model->size()).arg(count);
+            return tr(" (%1 installed, %2 enabled, %3 selected)").arg(installedCount).arg(enabledCount).arg(count);
     }
-    return tr(" (%1 installed)").arg(m_model->size());
+
+    if (enabledCount != 0)
+        return tr(" (%1 installed, %2 enabled)").arg(installedCount).arg(enabledCount);
+
+    return tr(" (%1 installed)").arg(installedCount);
 }

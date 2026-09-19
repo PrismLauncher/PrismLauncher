@@ -72,9 +72,11 @@ bool SkinList::update()
 
     auto manifestInfo = QFileInfo(m_dir.absoluteFilePath("index.json"));
     if (manifestInfo.exists()) {
-        try {
-            auto doc = Json::requireDocument(manifestInfo.absoluteFilePath(), "SkinList JSON file");
-            const auto root = doc.object();
+        auto doc = Json::requireDocument(manifestInfo.absoluteFilePath(), "SkinList JSON file");
+        if (!doc) {
+            qCritical() << "Couldn't load skins json:" << doc.error();
+        } else {
+            const auto root = doc->object();
             auto skins = root["skins"].toArray();
             for (auto jSkin : skins) {
                 SkinModel s(m_dir, jSkin.toObject());
@@ -82,8 +84,6 @@ bool SkinList::update()
                     newSkins << s;
                 }
             }
-        } catch (const Exception& e) {
-            qCritical() << "Couldn't load skins json:" << e.cause();
         }
     }
 
@@ -361,10 +361,9 @@ void SkinList::save()
         arr << s.toJSON();
     }
     doc["skins"] = arr;
-    try {
-        Json::write(doc, m_dir.absoluteFilePath("index.json"));
-    } catch (const FS::FileSystemException& e) {
-        qCritical() << "Failed to write skin index file :" << e.cause();
+    auto res = Json::write(doc, m_dir.absoluteFilePath("index.json"));
+    if (!res) {
+        qCritical() << "Failed to write skin index file :" << res.error();
     }
 }
 

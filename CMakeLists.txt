@@ -36,8 +36,8 @@ set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
 
 add_compile_definitions($<$<NOT:$<CONFIG:Debug>>:QT_NO_DEBUG>)
-add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060400)
-add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x060400)
+add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060800)
+add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x060800)
 add_compile_definitions(QT_NO_CONTEXTLESS_CONNECT)
 
 if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
@@ -135,7 +135,7 @@ if (DEBUG_ADDRESS_SANITIZER)
                 $<${USE_ASAN_COMPILE_OPTIONS}:-fno-omit-frame-pointer>
                 $<${USE_ASAN_COMPILE_OPTIONS}:-fno-sanitize-recover=null>
         )
-        link_libraries("asan" "ubsan")
+        add_link_options($<${USE_ASAN_COMPILE_OPTIONS}:-fsanitize=address,undefined>)
     else()
         message(STATUS "Address Sanitizer not available on compiler ${CMAKE_CXX_COMPILER_ID}")
     endif()
@@ -301,7 +301,7 @@ set(Launcher_BUILD_TIMESTAMP "${TODAY}")
 if(Launcher_QT_VERSION_MAJOR EQUAL 6)
     set(QT_VERSION_MAJOR 6)
     find_package(
-        Qt6 6.4
+        Qt6 6.8
         REQUIRED
         COMPONENTS
             Concurrent
@@ -334,7 +334,19 @@ find_package(cmark REQUIRED)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(gamemode REQUIRED IMPORTED_TARGET gamemode)
+    pkg_check_modules(gamemode IMPORTED_TARGET gamemode)
+
+    option(Launcher_ENABLE_GAMEMODE "Enable Feral GameMode support" ${gamemode_FOUND})
+
+    if(Launcher_ENABLE_GAMEMODE AND NOT gamemode_FOUND)
+        message(FATAL_ERROR "Launcher_ENABLE_GAMEMODE is enabled, but Feral GameMode was not found")
+    endif()
+
+    if(Launcher_ENABLE_GAMEMODE)
+        message(STATUS "Feral GameMode support enabled")
+    else()
+        message(STATUS "Feral GameMode support disabled")
+    endif()
 endif()
 
 # Find libqrencode
@@ -406,8 +418,8 @@ if(UNIX AND APPLE)
     set(MACOSX_SPARKLE_UPDATE_PUBLIC_KEY "v55ZWWD6QlPoXGV6VLzOTZxZUggWeE51X8cRQyQh6vA=" CACHE STRING "Public key for Sparkle update feed")
     set(MACOSX_SPARKLE_UPDATE_FEED_URL "https://prismlauncher.org/feed/appcast.xml" CACHE STRING "URL for Sparkle update feed")
 
-    set(MACOSX_SPARKLE_DOWNLOAD_URL "https://github.com/sparkle-project/Sparkle/releases/download/2.8.0/Sparkle-2.8.0.tar.xz" CACHE STRING "URL to Sparkle release archive")
-    set(MACOSX_SPARKLE_SHA256 "fd5681ee92bf238aaac2d08214ceaf0cc8976e452d7f882d80bac1e61581f3b1" CACHE STRING "SHA256 checksum for Sparkle release archive")
+    set(MACOSX_SPARKLE_DOWNLOAD_URL "https://github.com/sparkle-project/Sparkle/releases/download/2.9.6/Sparkle-2.9.6.tar.xz" CACHE STRING "URL to Sparkle release archive")
+    set(MACOSX_SPARKLE_SHA256 "52bf9e88cdd972fc0c81501377a880e90d47031bd8ca5462488f843e2609e192" CACHE STRING "SHA256 checksum for Sparkle release archive")
     set(MACOSX_SPARKLE_DIR "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
 
     if(NOT MACOSX_SPARKLE_UPDATE_PUBLIC_KEY STREQUAL "" AND NOT MACOSX_SPARKLE_UPDATE_FEED_URL STREQUAL "")

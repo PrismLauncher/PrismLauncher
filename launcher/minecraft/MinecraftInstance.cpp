@@ -50,9 +50,8 @@
 #include "launch/LaunchTask.h"
 #include "launch/TaskStepWrapper.h"
 #include "launch/steps/CheckJava.h"
+#include "launch/steps/LaunchCommand.h"
 #include "launch/steps/LookupServerAddress.h"
-#include "launch/steps/PostLaunchCommand.h"
-#include "launch/steps/PreLaunchCommand.h"
 #include "launch/steps/QuitAfterGameStop.h"
 #include "launch/steps/TextPrint.h"
 
@@ -137,11 +136,14 @@
             for (int i = 0; i + 1 < envList.size(); i += 2) {
                 env.insert(envList[i], envList[i + 1]);
             }
-            return true;
+            break;
         }
     }
-#endif
+
+    return true;
+#else
     return false;
+#endif
 }
 
 // all of this because keeping things compatible with deprecated old settings
@@ -186,6 +188,8 @@ void MinecraftInstance::loadSpecificSettings()
     auto locationOverride = m_settings->registerSetting("OverrideJavaLocation", false);
     auto argsOverride = m_settings->registerSetting("OverrideJavaArgs", false);
     m_settings->registerSetting("AutomaticJava", false);
+    m_settings->registerSetting("UseLatestMinecraftVersion", false);
+    m_settings->registerSetting("UseLatestMinecraftVersionType", "release");
 
     if (auto global_settings = globalSettings()) {
         m_settings->registerOverride(global_settings->getSetting("JavaPath"), locationOverride);
@@ -926,11 +930,6 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
                 return aName.localeAwareCompare(bName) < 0;
             });
             for (auto mod : modList) {
-                if (mod->type() == ResourceType::FOLDER) {
-                    out << u8"  [🖿] " + mod->fileinfo().completeBaseName() + " (folder)";
-                    continue;
-                }
-
                 if (mod->enabled()) {
                     out << u8"  [✔] " + mod->fileinfo().completeBaseName();
                 } else {
@@ -1094,7 +1093,9 @@ QString MinecraftInstance::getStatusbarDescription()
     QString mcVersion = m_components->getComponentVersion("net.minecraft");
     if (mcVersion.isEmpty()) {
         // Load component info if needed
-        m_components->reload(Net::Mode::Offline);
+        if (auto res = m_components->reload(Net::Mode::Offline); !res) {
+            qWarning() << "Failed to reload components:" << res.error();
+        }
         mcVersion = m_components->getComponentVersion("net.minecraft");
     }
 
@@ -1173,6 +1174,13 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
         process->appendStep(step);
     }
 
+    // run pre-load command if that's needed, before the metadata is loaded
+    if (!getPreLoadCommand().isEmpty()) {
+        auto step = makeShared<LaunchCommand>(pptr, getPreLoadCommand(), tr("Pre-Load"));
+        step->setWorkingDirectory(gameRoot());
+        process->appendStep(step);
+    }
+
     // load meta
     {
         auto mode = session->launchMode != LaunchMode::Offline ? Net::Mode::Online : Net::Mode::Offline;
@@ -1188,8 +1196,8 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     }
 
     // run pre-launch command if that's needed
-    if (getPreLaunchCommand().size()) {
-        auto step = makeShared<PreLaunchCommand>(pptr);
+    if (!getPreLaunchCommand().isEmpty()) {
+        auto step = makeShared<LaunchCommand>(pptr, getPreLaunchCommand(), tr("Pre-Launch"));
         step->setWorkingDirectory(gameRoot());
         process->appendStep(step);
     }
@@ -1244,8 +1252,8 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     }
 
     // run post-exit command if that's needed
-    if (getPostExitCommand().size()) {
-        auto step = makeShared<PostLaunchCommand>(pptr);
+    if (!getPostExitCommand().isEmpty()) {
+        auto step = makeShared<LaunchCommand>(pptr, getPostExitCommand(), tr("Post-Launch"));
         step->setWorkingDirectory(gameRoot());
         process->appendStep(step);
     }

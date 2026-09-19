@@ -62,7 +62,7 @@ class ModrinthCreationTask final : public InstanceTask {
     Task::Ptr m_task;
 
     std::optional<BaseInstance*> m_oldInstance;
-    std::unique_ptr<MinecraftInstance> m_newInstance{};
+    std::unique_ptr<MinecraftInstance> m_newInstance;
 
     QString m_rootPath = "minecraft";
 

@@ -21,7 +21,7 @@ void MinecraftProfileStep::perform()
                                            { "Accept", "application/json" },
                                            { "Authorization", QString("Bearer %1").arg(m_data->yggdrasilToken.token).toUtf8() } };
 
-    auto [request, response] = Net::NetRequest::makeByteArray(url);
+    auto [request, response] = Net::Request::makeByteArray(url);
     m_request = request;
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);

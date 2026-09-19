@@ -76,6 +76,8 @@ ModFolderModel::ModFolderModel(const QDir& dir, MinecraftInstance* instance, boo
                             QHeaderView::Interactive, QHeaderView::Interactive };
     m_columnsHideable = { false, true, false, true, true, true, true, true, true, true, true, true, true, true };
 
+    m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files);
+
     connect(this, &ModFolderModel::parseFinished, this, &ModFolderModel::onParseFinished);
 }
 
@@ -95,8 +97,6 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
             switch (column) {
                 case VersionColumn: {
                     switch (at(row).type()) {
-                        case ResourceType::FOLDER:
-                            return tr("Folder");
                         case ResourceType::SINGLEFILE:
                             return tr("File");
                         default:
@@ -134,6 +134,26 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
         case Qt::SizeHintRole:
             if (column == ImageColumn) {
                 return QSize(32, 32);
+            }
+            break;
+        case Qt::ToolTipRole:
+            switch (column) {
+                case RequiredByColumn: {
+                    const auto list = requiredByList(at(row).mod_id());
+                    if (!list.isEmpty()) {
+                        return list.join(QLatin1Char('\n'));
+                    }
+                    break;
+                }
+                case RequiresColumn: {
+                    const auto list = requiresList(at(row).mod_id());
+                    if (!list.isEmpty()) {
+                        return list.join(QLatin1Char('\n'));
+                    }
+                    break;
+                }
+                default:
+                    break;
             }
             break;
         default:
@@ -495,14 +515,14 @@ QStringList reqToList(const QSet<Mod*>& l)
 }
 }  // namespace
 
-QStringList ModFolderModel::requiresList(const QString& id)
+QStringList ModFolderModel::requiresList(const QString& id) const
 {
-    return reqToList(m_requires[id]);
+    return reqToList(m_requires.value(id));
 }
 
-QStringList ModFolderModel::requiredByList(const QString& id)
+QStringList ModFolderModel::requiredByList(const QString& id) const
 {
-    return reqToList(m_requiredBy[id]);
+    return reqToList(m_requiredBy.value(id));
 }
 
 bool ModFolderModel::deleteResources(const QModelIndexList& indexes)
@@ -519,7 +539,7 @@ bool ModFolderModel::deleteResources(const QModelIndexList& indexes)
             }
         }
     };
-    auto rsp = ResourceFolderModel::deleteResources(indexes);
+    auto res = ResourceFolderModel::deleteResources(indexes);
     for (auto* mod : allMods()) {
         auto id = mod->mod_id();
         deleteInvalid(m_requiredBy[id]);
@@ -531,5 +551,5 @@ bool ModFolderModel::deleteResources(const QModelIndexList& indexes)
             emit dataChanged(index(row, RequiresColumn), index(row, RequiredByColumn));
         }
     }
-    return rsp;
+    return res;
 }

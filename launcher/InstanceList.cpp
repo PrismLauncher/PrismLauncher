@@ -48,6 +48,7 @@
 #include <QTimer>
 #include <QUuid>
 #include <algorithm>
+#include "Json.h"
 
 #include "Application.h"
 #include "BaseInstance.h"
@@ -485,8 +486,9 @@ QList<InstanceId> InstanceList::discoverInstances()
         while (iter.hasNext()) {
             QString subDir = iter.next();
             QFileInfo dirInfo(subDir);
-            if (!QFileInfo(FS::PathCombine(subDir, "instance.cfg")).exists())
+            if (!QFileInfo(FS::PathCombine(subDir, "instance.cfg")).exists()) {
                 continue;
+            }
             // if it is a symlink, ignore it if it goes to ANY configured instance
             if (dirInfo.isSymLink()) {
                 QFileInfo targetInfo(dirInfo.symLinkTarget());
@@ -789,11 +791,11 @@ void InstanceList::saveGroupList()
         toplevel.insert("ungrouped", ungrouped);
     }
     QJsonDocument doc(toplevel);
-    try {
-        FS::write(groupFileName, doc.toJson());
+    auto res = FS::write(groupFileName, doc.toJson());
+    if (!res) {
+        qCritical() << "Failed to write instance group file :" << res.error();
+    } else {
         qDebug() << "Group list saved.";
-    } catch (const FS::FileSystemException& e) {
-        qCritical() << "Failed to write instance group file :" << e.cause();
     }
 }
 
@@ -820,32 +822,23 @@ void InstanceList::loadGroupList()
         migratingLegacyGroups = true;
     }
 
-    QByteArray jsonData;
-    try {
-        jsonData = FS::read(groupFileName);
-    } catch (const FS::FileSystemException& e) {
-        qCritical() << "Failed to read instance group file :" << e.cause();
+    auto res = FS::read(groupFileName);
+    if (!res) {
+        qCritical() << "Failed to read instance group file :" << res.error();
         return;
     }
+    const auto& jsonData = res.value();
 
-    QJsonParseError error;
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &error);
+    auto jsonDoc = Json::requireObject(jsonData);
 
     // if the json was bad, fail
-    if (error.error != QJsonParseError::NoError) {
-        qCritical() << QString("Failed to parse instance group file: %1 at offset %2")
-                           .arg(error.errorString(), QString::number(error.offset))
-                           .toUtf8();
-        return;
-    }
-
     // if the root of the json wasn't an object, fail
-    if (!jsonDoc.isObject()) {
-        qWarning() << "Invalid group file. Root entry should be an object.";
+    if (!jsonDoc) {
+        qCritical() << QString("Failed to parse instance group file: %1").arg(jsonDoc.error()).toUtf8();
         return;
     }
 
-    QJsonObject rootObj = jsonDoc.object();
+    const auto& rootObj = jsonDoc.value();
 
     // Make sure the format version matches, otherwise fail.
     if (rootObj.value("formatVersion").toVariant().toInt() != g_GROUP_FILE_FORMAT_VERSION) {
@@ -859,7 +852,7 @@ void InstanceList::loadGroupList()
     }
 
     QJsonObject groupMapping = rootObj.value("groups").toObject();
-    for (QJsonObject::iterator iter = groupMapping.begin(); iter != groupMapping.end(); iter++) {
+    for (auto iter = groupMapping.begin(); iter != groupMapping.end(); iter++) {
         QString groupName = iter.key();
         if (groupName.isEmpty()) {
             qWarning() << "Redundant empty group found";

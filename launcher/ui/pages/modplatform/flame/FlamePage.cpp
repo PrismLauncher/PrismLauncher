@@ -34,7 +34,6 @@
  */
 
 #include "FlamePage.h"
-#include "Version.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -52,26 +51,32 @@
 #include "ui/widgets/ProjectItem.h"
 
 FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
-    : QWidget(parent), m_ui(new Ui::FlamePage), m_dialog(dialog), m_listModel(new Flame::ListModel(this)), m_fetch_progress(this, false)
+    : QWidget(parent), m_ui(new Ui::FlamePage), m_dialog(dialog), m_listModel(new Flame::ListModel(this)), m_fetchProgress(this, false)
 {
     m_ui->setupUi(this);
-    m_ui->searchEdit->installEventFilter(this);
 
     m_ui->packView->setModel(m_listModel);
 
     m_ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_ui->versionSelectionBox->view()->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
-    m_search_timer.setSingleShot(true);
+    m_searchTimer.setTimerType(Qt::TimerType::CoarseTimer);
+    m_searchTimer.setSingleShot(true);
 
-    connect(&m_search_timer, &QTimer::timeout, this, &FlamePage::triggerSearch);
+    connect(&m_searchTimer, &QTimer::timeout, this, &FlamePage::triggerSearch);
 
-    m_fetch_progress.hideIfInactive(true);
-    m_fetch_progress.setFixedHeight(24);
-    m_fetch_progress.progressFormat("");
+    connect(m_ui->searchEdit, &QLineEdit::textEdited, this, [this] {
+        if (m_searchTimer.isActive()) {
+            m_searchTimer.stop();
+        }
+        m_searchTimer.start(350);
+    });
 
-    m_ui->verticalLayout->insertWidget(2, &m_fetch_progress);
+    m_fetchProgress.hideIfInactive(true);
+    m_fetchProgress.setFixedHeight(24);
+    m_fetchProgress.progressFormat("");
+
+    m_ui->verticalLayout->insertWidget(2, &m_fetchProgress);
 
     // index is used to set the sorting with the curseforge api
     m_ui->sortByBox->addItem(tr("Sort by Featured"));
@@ -93,24 +98,6 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
 FlamePage::~FlamePage()
 {
     delete m_ui;
-}
-
-bool FlamePage::eventFilter(QObject* watched, QEvent* event)
-{
-    if (watched == m_ui->searchEdit && event->type() == QEvent::KeyPress) {
-        auto* keyEvent = static_cast<QKeyEvent*>(event);
-        if (keyEvent->key() == Qt::Key_Return) {
-            triggerSearch();
-            keyEvent->accept();
-            return true;
-        }
-        if (m_search_timer.isActive()) {
-            m_search_timer.stop();
-        }
-
-        m_search_timer.start(350);
-    }
-    return QWidget::eventFilter(watched, event);
 }
 
 bool FlamePage::shouldDisplay() const
@@ -137,7 +124,7 @@ void FlamePage::triggerSearch()
     m_ui->versionSelectionBox->clear();
     bool filterChanged = m_filterWidget->changed();
     m_listModel->searchWithTerm(m_ui->searchEdit->text(), m_ui->sortByBox->currentIndex(), m_filterWidget->getFilter(), filterChanged);
-    m_fetch_progress.watch(m_listModel->activeSearchJob().get());
+    m_fetchProgress.watch(m_listModel->activeSearchJob().get());
 }
 
 void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)
@@ -160,7 +147,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
 
         auto addonId = m_current->addonId;
         // Use default if no callbacks are set
-        callbacks.on_succeed = [this, curr, addonId](auto& doc) {
+        callbacks.onSucceed = [this, curr, addonId](auto& doc) {
             if (addonId != m_current->addonId) {
                 return;  // wrong request
             }
@@ -173,23 +160,15 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
                 }
                 return false;
             };
-#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
             m_current->versions.removeIf(pred);
-#else
-            for (auto it = m_current->versions.begin(); it != m_current->versions.end();)
-                if (pred(*it))
-                    it = m_current->versions.erase(it);
-                else
-                    ++it;
-#endif
             for (const auto& version : m_current->versions) {
                 m_ui->versionSelectionBox->addItem(version.getVersionDisplayString(), QVariant(version.downloadUrl));
             }
 
-            QVariant current_updated;
-            current_updated.setValue(m_current);
+            QVariant currentUpdated;
+            currentUpdated.setValue(m_current);
 
-            if (!m_listModel->setData(curr, current_updated, Qt::UserRole)) {
+            if (!m_listModel->setData(curr, currentUpdated, Qt::UserRole)) {
                 qWarning() << "Failed to cache versions for the current pack!";
             }
 
@@ -199,11 +178,12 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
             }
             suggestCurrent();
         };
-        callbacks.on_fail = [this](const QString& reason, int) {
+        callbacks.onFail = [this](const QString& reason, int) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
         };
 
-        auto netJob = FlameAPI::get().getProjectVersions({ m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
+        auto netJob = FlameAPI::get().getProjectVersions(
+            { .pack = m_current, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::Modpack }, callbacks);
 
         m_job = netJob;
         netJob->start();
@@ -229,18 +209,18 @@ void FlamePage::suggestCurrent()
         return;
     }
 
-    if (m_selected_version_index == -1) {
+    if (m_selectedVersionIndex == -1) {
         m_dialog->setSuggestedPack();
         return;
     }
 
-    auto version = m_current->versions.at(m_selected_version_index);
+    auto version = m_current->versions.at(m_selectedVersionIndex);
 
-    QMap<QString, QString> extra_info;
-    extra_info.insert("pack_id", m_current->addonId.toString());
-    extra_info.insert("pack_version_id", version.fileId.toString());
+    QMap<QString, QString> extraInfo;
+    extraInfo.insert("pack_id", m_current->addonId.toString());
+    extraInfo.insert("pack_version_id", version.fileId.toString());
 
-    m_dialog->setSuggestedPack(m_current->name, new InstanceImportTask(version.downloadUrl, true, this, std::move(extra_info)));
+    m_dialog->setSuggestedPack(m_current->name, new InstanceImportTask(version.downloadUrl, true, this, std::move(extraInfo)));
     QString editedLogoName = "curseforge_" + m_current->logoName;
     m_listModel->getLogo(m_current->logoName, m_current->logoUrl,
                          [this, editedLogoName](const QString& logo) { m_dialog->setSuggestedIconFromFile(logo, editedLogoName); });
@@ -248,17 +228,17 @@ void FlamePage::suggestCurrent()
 
 void FlamePage::onVersionSelectionChanged(int index)
 {
-    bool is_blocked = false;
-    m_ui->versionSelectionBox->itemData(index).toInt(&is_blocked);
+    bool isBlocked = false;
+    m_ui->versionSelectionBox->itemData(index).toInt(&isBlocked);
 
-    if (index == -1 || is_blocked) {
-        m_selected_version_index = -1;
+    if (index == -1 || isBlocked) {
+        m_selectedVersionIndex = -1;
         return;
     }
 
-    m_selected_version_index = index;
+    m_selectedVersionIndex = index;
 
-    Q_ASSERT(m_current->versions.at(m_selected_version_index).downloadUrl == m_ui->versionSelectionBox->currentData().toString());
+    Q_ASSERT(m_current->versions.at(m_selectedVersionIndex).downloadUrl == m_ui->versionSelectionBox->currentData().toString());
 
     suggestCurrent();
 }
@@ -305,7 +285,7 @@ void FlamePage::updateUi()
     }
 
     text += "<hr>";
-    text += FlameAPI::get().getModDescription(m_current->addonId.toInt()).toUtf8();
+    text += FlameAPI::getModDescription(m_current->addonId.toInt()).toUtf8();
 
     m_ui->packDescription->setHtml(StringUtils::htmlListPatch(text + m_current->description));
     m_ui->packDescription->flush();

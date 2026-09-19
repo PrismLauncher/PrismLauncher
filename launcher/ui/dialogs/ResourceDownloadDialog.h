@@ -82,11 +82,14 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     bool selectPage(QString pageId);
     ResourcePage* selectedPage();
 
-    void addResource(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, QString downloadReason = "standalone", QString dependentOn = "");
+    void addResource(const ModPlatform::IndexedPack::Ptr&,
+                     ModPlatform::IndexedVersion&,
+                     QString downloadReason = "standalone",
+                     QString dependentOn = "");
     void removeResource(const QString&);
 
     QList<DownloadTaskPtr> getTasks();
-    ResourceFolderModel* getBaseModel() const { return m_base_model; }
+    ResourceFolderModel* getBaseModel() const { return m_baseModel; }
 
     void setResourceMetadata(const std::shared_ptr<Metadata::ModStruct>& meta);
 
@@ -117,16 +120,15 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     void initPages(QList<BasePage*> pages);
 
    protected:
-    ResourceFolderModel* m_base_model;
+    ResourceFolderModel* m_baseModel;
 
     PageContainer* m_container = nullptr;
 
     QDialogButtonBox m_buttons;
-    QVBoxLayout m_vertical_layout;
+    QVBoxLayout m_verticalLayout;
 
-   protected:
     bool m_suppressInitialSearch = false;
-    MinecraftInstance* m_instance;
+    MinecraftInstance* m_instance = nullptr;
 
     QString m_resourcesString;
     QString m_geometrySaveKey;

@@ -123,7 +123,7 @@ struct Language {
     bool isIdenticalTo(const Language& other) const
     {
         return (key == other.key && fileName == other.fileName && fileSize == other.fileSize && fileSha1 == other.fileSha1 &&
-                translated == other.translated && fuzzy == other.fuzzy && total == other.fuzzy && localFileType == other.localFileType);
+                translated == other.translated && fuzzy == other.fuzzy && total == other.total && localFileType == other.localFileType);
     }
 
     Language& apply(const Language& other)
@@ -167,7 +167,7 @@ struct TranslationsModel::Private {
     std::unique_ptr<QTranslator> m_qtTranslator;
     std::unique_ptr<QTranslator> m_appTranslator;
 
-    Net::NetRequest* m_indexTask = nullptr;
+    Net::Request* m_indexTask = nullptr;
     QString m_downloadingTranslation;
     NetJob::Ptr m_downloadJob;
     NetJob::Ptr m_indexJob;
@@ -226,41 +226,34 @@ void TranslationsModel::indexReceived()
 namespace {
 void readIndex(const QString& path, QMap<QString, Language>& languages)
 {
-    QByteArray data;
-    try {
-        data = FS::read(path);
-    } catch ([[maybe_unused]] const Exception& e) {
-        qCritical() << "Translations Download Failed: index file not readable";
-        return;
-    }
+    auto parse = [&languages, &path] -> Result<> {
+        TRY_INTO(const auto& doc, Json::requireObject(path))
 
-    try {
-        auto toplevelDoc = Json::requireDocument(data);
-        auto doc = Json::requireObject(toplevelDoc);
-        auto fileType = Json::requireString(doc, "file_type");
+        TRY_INTO(const auto& fileType, Json::requireString(doc, "file_type"))
         if (fileType != "MMC-TRANSLATION-INDEX") {
-            qCritical() << "Translations Download Failed: index file is of unknown file type" << fileType;
-            return;
+            return std::unexpected("index file is of unknown file type " + fileType);
         }
-        auto version = Json::requireInteger(doc, "version");
+        TRY_INTO(const auto& version, Json::requireInteger(doc, "version"))
         if (version > 2) {
-            qCritical() << "Translations Download Failed: index file is of unknown format version" << fileType;
-            return;
+            return std::unexpected(QString("index file is of unknown format version %1").arg(version));
         }
-        auto langObjs = Json::requireObject(doc, "languages");
+        TRY_INTO(const auto& langObjs, Json::requireObject(doc, "languages"))
         for (auto iter = langObjs.begin(); iter != langObjs.end(); ++iter) {
             Language lang(iter.key());
 
-            auto langObj = Json::requireObject(iter.value());
-            lang.setTranslationStats(langObj["translated"].toInt(), langObj["untranslated"].toInt(), langObj["fuzzy"].toInt());
-            lang.fileName = Json::requireString(langObj, "file");
-            lang.fileSha1 = Json::requireString(langObj, "sha1");
-            lang.fileSize = Json::requireInteger(langObj, "size");
+            TRY_INTO(const auto& langObj, Json::requireObject(iter.value()))
+            lang.setTranslationStats(langObj.value("translated").toInt(), langObj.value("untranslated").toInt(),
+                                     langObj.value("fuzzy").toInt());
+            TRY_INTO(lang.fileName, Json::requireString(langObj, "file"))
+            TRY_INTO(lang.fileSha1, Json::requireString(langObj, "sha1"))
+            TRY_INTO(lang.fileSize, Json::requireInteger(langObj, "size"))
 
             languages.insert(lang.key, lang);
         }
-    } catch ([[maybe_unused]] Json::JsonException& e) {
-        qCritical() << "Translations Download Failed: index file could not be parsed as json";
+        return {};
+    };
+    if (auto res = parse(); !res) {
+        qCritical() << "Translations Download Failed:" << res.error();
     }
 }
 }  // namespace
@@ -557,7 +550,7 @@ void TranslationsModel::downloadIndex()
     d->m_indexJob.reset(new NetJob("Translations Index", APPLICATION->network()));
     const MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "index_v2.json");
     entry->setStale(true);
-    auto task = Net::NetRequest::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + "index_v2.json"), entry);
+    auto task = Net::Request::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + "index_v2.json"), entry);
     d->m_indexTask = task.get();
     d->m_indexJob->addNetAction(task);
     d->m_indexJob->setAskRetry(false);
@@ -598,7 +591,7 @@ void TranslationsModel::downloadTranslation(const QString& key)
     const MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "mmc_" + key + ".qm");
     entry->setStale(true);
 
-    auto dl = Net::NetRequest::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + lang->fileName), entry);
+    auto dl = Net::Request::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + lang->fileName), entry);
     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, lang->fileSha1));
     dl->setProgress(dl->getProgress(), lang->fileSize);
 
