@@ -22,8 +22,8 @@
 #include <algorithm>
 
 #include "InstanceConfig.h"
+#include "INIFile.h"
 #include "Json.h"
-#include "settings/INIFile.h"
 
 using namespace Qt::Literals;
 
