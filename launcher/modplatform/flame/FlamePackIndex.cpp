@@ -21,6 +21,7 @@
 #include "FileSystem.h"
 #include "Json.h"
 #include "Result.h"
+#include "Version.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceType.h"
 

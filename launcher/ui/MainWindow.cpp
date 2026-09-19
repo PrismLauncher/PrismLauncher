@@ -43,7 +43,6 @@
 #include "FileSystem.h"
 
 #include "MainWindow.h"
-#include "modplatform/flame/FlamePackIndex.h"
 #include "ui_MainWindow.h"
 
 #include <QDir>
@@ -73,10 +72,8 @@
 #include <QToolButton>
 #include <QWidget>
 #include <QWidgetAction>
-#include <memory>
 
 #include <BaseInstance.h>
-#include <BuildConfig.h>
 #include <DesktopServices.h>
 #include <InstanceList.h>
 #include <MMCZip.h>
@@ -91,10 +88,7 @@
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
-#include "InstanceWindow.h"
 
-#include "ui/GuiUtil.h"
-#include "ui/ViewLogWindow.h"
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
 #include "ui/dialogs/CreateShortcutDialog.h"
@@ -125,13 +119,12 @@
 
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 
 #include "KonamiCode.h"
 
 #include "InstanceCopyTask.h"
 #include "InstanceDirUpdate.h"
-
-#include "Json.h"
 
 #include "MMCTime.h"
 

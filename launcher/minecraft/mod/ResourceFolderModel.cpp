@@ -23,7 +23,6 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlamePackIndex.h"
 #include "settings/Setting.h"
 #include "tasks/SequentialTask.h"
 #include "tasks/Task.h"
