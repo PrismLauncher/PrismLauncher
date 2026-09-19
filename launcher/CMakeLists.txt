@@ -392,12 +392,6 @@ set(TASKS_SOURCES
     tasks/MultipleOptionsTask.cpp
 )
 
-set(SETTINGS_SOURCES
-    # Settings
-    settings/INIFile.cpp
-    settings/INIFile.h
-)
-
 set(JAVA_SOURCES
     java/JavaChecker.h
     java/JavaChecker.cpp
@@ -779,6 +773,8 @@ SET(LAUNCHER_SOURCES
     config/GlobalConfig.cpp
     config/InstanceConfig.h
     config/InstanceConfig.cpp
+    config/INIFile.h
+    config/INIFile.cpp
     config/PlayTimeConfig.h
     config/PlayTimeConfig.cpp
 
