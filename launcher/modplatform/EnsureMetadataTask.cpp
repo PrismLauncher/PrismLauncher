@@ -332,43 +332,10 @@ Task::Ptr EnsureMetadataTask::flameVersionsTask()
         fingerprints.push_back(murmur.toUInt());
     }
 
-    auto [verTask, response] = FlameAPI::matchFingerprints(fingerprints);
+    auto [verTask, response] = FlameAPI::matchFingerprintsTask(fingerprints);
 
     connect(verTask.get(), &Task::succeeded, this, [this, response] {
-        auto obj = Json::requireObject(*response);
-        if (!obj) {
-            qWarning() << "Error while parsing JSON response from Flame::CurrentVersions:" << obj.error();
-            qWarning() << *response;
-
-            failed(obj.error());
-            return;
-        }
-
-        const auto& docObj = obj.value();
-        auto dataObj = Json::requireObject(docObj, "data").and_then([](const auto& v) { return Json::requireArray(v, "exactMatches"); });
-        if (!dataObj) {
-            qDebug() << dataObj.error();
-            qDebug() << *obj;
-            return;
-        }
-
-        if (dataObj->isEmpty()) {
-            qWarning() << "No matches found for fingerprint search!";
-
-            return;
-        }
-
-        for (auto match : dataObj.value()) {
-            auto matchObj = match.toObject();
-            auto fileObj = matchObj["file"].toObject();
-
-            if (matchObj.isEmpty() || fileObj.isEmpty()) {
-                qWarning() << "Fingerprint match is empty!";
-
-                return;
-            }
-
-            auto fingerprint = QString::number(fileObj["fileFingerprint"].toInteger());
+        for (const auto& fingerprint : response->keys()) {
             auto resource = m_resources.find(fingerprint);
             if (resource == m_resources.end()) {
                 qWarning() << "Invalid fingerprint from the API response.";
@@ -377,13 +344,7 @@ Task::Ptr EnsureMetadataTask::flameVersionsTask()
 
             setStatus(tr("Parsing API response from CurseForge for '%1'...").arg((*resource)->name()));
 
-            auto versionRes = Flame::Parse::loadIndexedPackVersion(fileObj);
-            if (!versionRes) {
-                qDebug() << versionRes.error();
-                qDebug() << *obj;
-                continue;
-            }
-            m_tempVersions.insert(fingerprint, versionRes.value());
+            m_tempVersions.insert(fingerprint, response->value(fingerprint));
         }
     });
 

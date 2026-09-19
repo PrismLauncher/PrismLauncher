@@ -16,4 +16,6 @@ Result<QList<ModPlatform::IndexedVersion>> loadIndexedPackVersions(const QJsonAr
 Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(const QJsonObject& obj);
 
 Result<QList<ModPlatform::IndexedPack>> parseProjectList(const QByteArray& response);
+
+int getClassId(ModPlatform::ResourceType type);
 }  // namespace Flame::Parse

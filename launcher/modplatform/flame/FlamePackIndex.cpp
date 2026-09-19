@@ -26,6 +26,12 @@
 #include "modplatform/flame/FlameAPI.h"
 
 namespace {
+const auto g_classIDMappings = std::array{
+    std::pair{ ModPlatform::ResourceType::Mod, 6 },        std::pair{ ModPlatform::ResourceType::ResourcePack, 12 },
+    std::pair{ ModPlatform::ResourceType::World, 17 },     std::pair{ ModPlatform::ResourceType::ShaderPack, 6552 },
+    std::pair{ ModPlatform::ResourceType::Modpack, 4471 }, std::pair{ ModPlatform::ResourceType::DataPack, 6945 },
+};
+
 QString enumToString(int hashAlgorithm)
 {
     switch (hashAlgorithm) {
@@ -36,6 +42,17 @@ QString enumToString(int hashAlgorithm)
             return "md5";
     }
 }
+
+ModPlatform::ResourceType getResourceType(int classId)
+{
+    for (auto&& [type, c] : g_classIDMappings) {
+        if (c == classId) {
+            return type;
+        }
+    }
+    return ModPlatform::ResourceType::Unknown;
+}
+
 }  // namespace
 
 namespace Flame::Parse {
@@ -67,7 +84,7 @@ Result<> loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
         }
     }
 
-    pack.resourceType = FlameAPI::getResourceType(obj["classId"].toInt(0));
+    pack.resourceType = getResourceType(obj["classId"].toInt(0));
     pack.extraDataLoaded = false;
 
     auto linksObj = obj["links"].toObject();
@@ -250,6 +267,16 @@ Result<QList<ModPlatform::IndexedPack>> parseProjectList(const QByteArray& respo
         newList << pack;
     }
     return newList;
+}
+
+int getClassId(ModPlatform::ResourceType type)
+{
+    for (auto&& [e, classId] : g_classIDMappings) {
+        if (e == type) {
+            return classId;
+        }
+    }
+    return 0;
 }
 
 }  // namespace Flame::Parse
