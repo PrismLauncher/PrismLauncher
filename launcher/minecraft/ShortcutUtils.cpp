@@ -42,8 +42,8 @@
 #include "FileSystem.h"
 
 #include <QApplication>
+#include <QBuffer>
 #include <QFileDialog>
-#include <QRegularExpression>
 
 #include <BuildConfig.h>
 #include <DesktopServices.h>
@@ -221,11 +221,6 @@ bool createInstanceShortcutViaPortal(const Shortcut& shortcut)
 
     // Set up the application path and arguments (similar to createInstanceShortcut)
     QString appPath;
-    auto icon = APPLICATION->icons()->icon(shortcut.iconKey.isEmpty() ? shortcut.instance->iconKey() : shortcut.iconKey);
-    if (icon == nullptr) {
-        icon = APPLICATION->icons()->icon("grass");
-    }
-    QString iconPath;
     QStringList args;
     prepareInstanceLaunchArgs(shortcut, appPath, args);
 
@@ -238,29 +233,16 @@ bool createInstanceShortcutViaPortal(const Shortcut& shortcut)
     // The DynamicLauncher portal detects sandboxing automatically
     // and rewrites the Exec= line to use "flatpak run <app-id>" when needed.
     // If we added "flatpak run ...", we'd get double-wrapping on Flatpak.
-#else
-    // DynamicLauncher portal is Linux-specific (part of xdg-desktop-portal)
-    Q_UNUSED(appPath);
-    Q_UNUSED(icon);
-    Q_UNUSED(iconPath);
-    Q_UNUSED(args);
-    return false;
-#endif
 
-    // Save the icon as a PNG file (the portal reads it)
-    iconPath = FS::PathCombine(shortcut.instance->instanceRoot(), "icon.png");
+    // Save the icon to a byte array (the portal takes it as-is)
+    auto icon = APPLICATION->icons()->icon(shortcut.iconKey.isEmpty() ? shortcut.instance->iconKey() : shortcut.iconKey);
+    if (icon == nullptr) {
+        icon = APPLICATION->icons()->icon("grass");
+    }
+    QByteArray iconData;
     {
-        QFile iconFile(iconPath);
-        if (!iconFile.open(QFile::WriteOnly)) {
-            QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"),
-                                  QObject::tr("Failed to create icon for shortcut: %1").arg(iconFile.errorString()));
-            return false;
-        }
-        bool success = icon->icon().pixmap(64, 64).save(&iconFile, "PNG");
-        iconFile.close();
-
-        if (!success) {
-            iconFile.remove();
+        QBuffer iconBuffer(&iconData);
+        if (!iconBuffer.open(QIODevice::WriteOnly) || !icon->icon().pixmap(64, 64).save(&iconBuffer, "PNG")) {
             QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"), QObject::tr("Failed to create icon for shortcut."));
             return false;
         }
@@ -270,28 +252,26 @@ bool createInstanceShortcutViaPortal(const Shortcut& shortcut)
     QString desktopEntry = buildDesktopEntry(appPath, args);
 
     // Call the portal to install the launcher
-    bool success = DynamicLauncherPortal::installLauncher(shortcut.name, iconPath, desktopEntry);
-
-    // Clean up the temporary icon file (the portal has already read it)
-    QFile::remove(iconPath);
-
-    if (!success) {
+    auto installResult = DynamicLauncherPortal::installLauncher(shortcut.name, iconData, desktopEntry);
+    if (!installResult) {
+        qWarning() << "ShortcutUtils: Portal installation failed:" << installResult.error();
         QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"),
                               QObject::tr("Failed to create %1 shortcut via the system portal!").arg(shortcut.targetString));
         return false;
     }
 
-    // Build a synthetic path to register, since the portal manages the actual file location
-    // We use the desktop file id format: appId.InstanceName.desktop
-    QString appId = BuildConfig.LAUNCHER_APPID;
-    QString safeName = shortcut.name;
-    safeName.replace(QRegularExpression(QStringLiteral("[^a-zA-Z0-9_\\-.]")), QStringLiteral("_"));
-    QString registeredShortcutPath = appId + QStringLiteral(".") + safeName + QStringLiteral(".desktop");
+    // The portal manages the actual file location, so register the
+    // desktop file id as the shortcut path
+    QString registeredShortcutPath = DynamicLauncherPortal::buildDesktopFileId(shortcut.name);
 
     shortcut.instance->registerShortcut({ shortcut.name, registeredShortcutPath, ShortcutTarget::Applications });
 
     qDebug() << "ShortcutUtils: Successfully created shortcut via portal:" << shortcut.name;
     return true;
+#else
+    qDebug() << "ShortcutUtils: DynamicLauncher portal is not supported on this platform";
+    return false;
+#endif
 }
 
 bool createInstanceShortcutOnDesktop(const Shortcut& shortcut)
@@ -304,9 +284,8 @@ bool createInstanceShortcutOnDesktop(const Shortcut& shortcut)
     // DynamicLauncher portal can only install launchers into the app launcher,
     // so desktop shortcuts aren't supported there
     if (DesktopServices::isFlatpak()) {
-        QMessageBox::critical(
-            shortcut.parent, QObject::tr("Create Shortcut"),
-            QObject::tr("Desktop shortcuts are not supported in Flatpak. Please use Applications instead."));
+        QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"),
+                              QObject::tr("Desktop shortcuts are not supported in Flatpak. Please use Applications instead."));
         return false;
     }
 #endif

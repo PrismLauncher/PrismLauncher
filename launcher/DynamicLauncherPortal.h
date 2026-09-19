@@ -18,50 +18,29 @@
 
 #pragma once
 
-#include <QEventLoop>
-#include <QObject>
+#include <QByteArray>
 #include <QString>
-#include <QVariantMap>
+
+#include "Result.h"
 
 namespace DynamicLauncherPortal {
-
-/// A QObject subclass needed to receive the D-Bus Response signal from the portal.
-/// Defined in the header so that MOC can process it
-class PortalResponseReceiver : public QObject {
-    Q_OBJECT
-   public:
-    explicit PortalResponseReceiver(QObject* parent = nullptr) : QObject(parent) {}
-
-    QEventLoop* loop = nullptr;
-    QString* outToken = nullptr;
-    bool* outAccepted = nullptr;
-
-   public slots:
-    void portalResponse(uint responseCode, QVariantMap results)
-    {
-        if (outAccepted)
-            *outAccepted = (responseCode == 0);
-        if (outToken && responseCode == 0)
-            *outToken = results.value(QStringLiteral("token")).toString();
-        if (loop)
-            loop->quit();
-    }
-};
 
 /// Check if the DynamicLauncher portal is available on the session bus
 bool isPortalAvailable();
 
+/// Build the desktop file id the portal uses for @p name:
+/// the launcher app id, a sanitized name and a .desktop suffix
+QString buildDesktopFileId(const QString& name);
+
 /// Install a shortcut via the DynamicLauncher portal.
 /// This shows a confirmation dialog to the user through the portal.
-/// @param name   The display name of the shortcut
-/// @param iconPath  Path to a PNG icon file (will be read and sent to the portal)
+/// @param name         The display name of the shortcut
+/// @param icon         The PNG icon data to send to the portal
 /// @param desktopEntry The contents of the .desktop file (without Name= and Icon= lines)
-/// @return true if the launcher was successfully installed
-bool installLauncher(const QString& name, const QString& iconPath, const QString& desktopEntry);
+Result<> installLauncher(const QString& name, const QByteArray& icon, const QString& desktopEntry);
 
 /// Remove a previously installed shortcut via the DynamicLauncher portal.
-/// @param desktopFileId The .desktop file id (e.g. "org.prismlauncher.PrismLauncher.MyInstance.desktop")
-/// @return true if successfully uninstalled
-bool uninstallLauncher(const QString& desktopFileId);
+/// @param desktopFileId The .desktop file id (e.g. "org.prismlauncher.Prismlauncher.MyInstance.desktop")
+Result<> uninstallLauncher(const QString& desktopFileId);
 
 }  // namespace DynamicLauncherPortal
