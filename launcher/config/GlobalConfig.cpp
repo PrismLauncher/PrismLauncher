@@ -34,8 +34,8 @@
  */
 
 #include "GlobalConfig.h"
+#include "INIFile.h"
 #include "SysInfo.h"
-#include "settings/INIFile.h"
 
 #include <QSettings>
 #include <QVariant>

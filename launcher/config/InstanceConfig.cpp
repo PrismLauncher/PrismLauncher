@@ -19,7 +19,7 @@
 
 #include "InstanceConfig.h"
 #include "Json.h"
-#include "settings/INIFile.h"
+#include "INIFile.h"
 
 #include <algorithm>
 
