@@ -19,8 +19,8 @@
 #include <Json.h>
 #include <minecraft/MinecraftInstance.h>
 #include <minecraft/PackProfile.h>
+#include "config/INIFile.h"
 #include "config/InstanceConfig.h"
-#include "settings/INIFile.h"
 
 #include <memory>
 #include "archive/ArchiveReader.h"
