@@ -12,6 +12,7 @@ on:
     types:
       - opened
       - synchronize
+      - edited
 
 permissions: {}
 

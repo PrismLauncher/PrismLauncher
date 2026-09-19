@@ -16,7 +16,7 @@ module.exports = async ({github, context}) => {
 
     const number = context.payload.pull_request.number;
     await syncPullRequestRebaseLabel(github, owner, repo, number);
-    await syncPullRequestAiLabel(github, owner, repo, number);
+    await addPullRequestAiLabel(github, owner, repo, context.payload.pull_request);
 };
 
 /**
@@ -89,23 +89,17 @@ async function syncRebaseLabels(github, owner, repo) {
 }
 
 /**
- * Adds or removes the 'AI' label depending on whether any commit in the pull request is attributed to an AI agent.
+ * Adds the 'AI' label if the pull request description or any of its commits is attributed to an AI agent.
+ * The label is never removed, as it may also be applied manually.
  */
-async function syncPullRequestAiLabel(github, owner, repo, number) {
-    const commits = await github.paginate(github.rest.pulls.listCommits, {owner, repo, pull_number: number, per_page: 100});
-    const isAssisted = commits.some(({commit}) => hasAiAttribution(commit.message));
-
-    const labels = await github.paginate(github.rest.issues.listLabelsOnIssue, {owner, repo, issue_number: number, per_page: 100});
-    const hasLabel = labels.some(x => x.name === AI_LABEL);
-
-    if (isAssisted && !hasLabel) {
-        console.log('Will add AI label');
-        await github.rest.issues.addLabels({owner, repo, issue_number: number, labels: [AI_LABEL]});
+async function addPullRequestAiLabel(github, owner, repo, pull) {
+    const commits = await github.paginate(github.rest.pulls.listCommits, {owner, repo, pull_number: pull.number, per_page: 100});
+    if (!hasAiAttribution(pull.body ?? '') && !commits.some(({commit}) => hasAiAttribution(commit.message))) {
+        return;
     }
-    if (!isAssisted && hasLabel) {
-        console.log('Will remove AI label');
-        await github.rest.issues.removeLabel({owner, repo, issue_number: number, name: AI_LABEL});
-    }
+
+    console.log('Will add AI label');
+    await github.rest.issues.addLabels({owner, repo, issue_number: pull.number, labels: [AI_LABEL]});
 }
 
 /**
