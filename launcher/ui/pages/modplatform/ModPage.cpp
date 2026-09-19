@@ -38,6 +38,7 @@
  */
 
 #include "ModPage.h"
+#include "modplatform/ResourceType.h"
 #include "ui_ResourcePage.h"
 
 #include <QRegularExpression>
@@ -143,12 +144,9 @@ void ModPage::triggerSearch()
 
 void ModPage::prepareProviderCategories()
 {
-    auto [task, response] = m_api->getModCategories();
+    auto [task, response] = m_api->getCategoriesTask(ModPlatform::ResourceType::Mod);
     m_categoriesTask = task;
-    connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() {
-        auto categories = m_api->loadModCategories(*response);
-        m_filterWidget->setCategories(categories);
-    });
+    connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() { m_filterWidget->setCategories(*response); });
     m_categoriesTask->start();
 };
 }  // namespace ResourceDownload

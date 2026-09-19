@@ -8,12 +8,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QList>
-#include <cstdint>
-#include "BuildConfig.h"
-#include "Version.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
-#include "modplatform/flame/FlameModIndex.h"
 
 class FlameAPI final : public ResourceAPI {
    public:
@@ -23,162 +19,35 @@ class FlameAPI final : public ResourceAPI {
         return s_instance;
     }
 
-    static QString getModFileChangelog(int modId, int fileId);
-    static QString getModDescription(int modId);
-
     static std::optional<ModPlatform::IndexedVersion> getLatestVersion(const QList<ModPlatform::IndexedVersion>& versions,
                                                                        const QList<ModPlatform::ModLoaderType>& instanceLoaders,
                                                                        ModPlatform::ModLoaderTypes fallback,
                                                                        bool checkLoaders);
 
-    std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
     static std::pair<Task::Ptr, QByteArray*> matchFingerprints(const QList<uint>& fingerprints);
-    static std::pair<Task::Ptr, QByteArray*> getFiles(const QStringList& fileIds);
-    static std::pair<Task::Ptr, QByteArray*> getFile(const QString& addonId, const QString& fileId);
 
-    static std::pair<Task::Ptr, QByteArray*> getCategories(ModPlatform::ResourceType type);
-    std::pair<Task::Ptr, QByteArray*> getModCategories() const override;
-    QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const override;
+    // ToDo: move it
+    static ModPlatform::ResourceType getResourceType(int classId);
+
+   public:
+    static bool validateModLoaders(ModPlatform::ModLoaderTypes loaders);
 
     QList<ResourceAPI::SortingMethod> getSortingMethods() const override;
 
-    static bool validateModLoaders(ModPlatform::ModLoaderTypes loaders)
-    {
-        return (loaders & (ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt)) != 0;
-    }
+   public slots:
+    Net::RPC::Spec<ModPlatform::IndexedPack> getProject(const QString& id) const override;
+    Net::RPC::Spec<QList<ModPlatform::IndexedPack>> getProjects(const QStringList& addonIds) const override;
+    std::optional<Net::RPC::Spec<bool>> getProjectExtra(ModPlatform::IndexedPack& pack) const override;
+    Net::RPC::Spec<QList<ModPlatform::IndexedPack>> searchProjects(const SearchArgs& args) const override;
+    Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const override;
+    Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> getVersions(const VersionSearchArgs& args) const override;
+    Net::RPC::Spec<ModPlatform::IndexedVersion> getVersion(const QString& id, const QString& versionId) const override;
+    Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> getVersions(const QStringList& versionIds) const override;
 
-    static ModPlatform::ResourceType getResourceType(int classId);
-
-   private:
-    static int getClassId(ModPlatform::ResourceType type);
-
-    static int getMappedModLoader(ModPlatform::ModLoaderType loaders)
-    {
-        // https://docs.curseforge.com/?http#tocS_ModLoaderType
-        switch (loaders) {
-            case ModPlatform::Forge:
-                return 1;
-            case ModPlatform::Cauldron:
-                return 2;
-            case ModPlatform::LiteLoader:
-                return 3;
-            case ModPlatform::Fabric:
-                return 4;
-            case ModPlatform::Quilt:
-                return 5;
-            case ModPlatform::NeoForge:
-                return 6;
-            case ModPlatform::DataPack:
-            case ModPlatform::Babric:
-            case ModPlatform::BTA:
-            case ModPlatform::LegacyFabric:
-            case ModPlatform::Ornithe:
-            case ModPlatform::Rift:
-            case ModPlatform::None:
-                break;  // not supported
-        }
-        return 0;
-    }
-
-    static QStringList getModLoaderStrings(const ModPlatform::ModLoaderTypes types)
-    {
-        QStringList l;
-        for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt }) {
-            if ((types & loader) != 0) {
-                l << QString::number(getMappedModLoader(loader));
-            }
-        }
-        return l;
-    }
-
-    static QString getModLoaderFilters(ModPlatform::ModLoaderTypes types) { return "[" + getModLoaderStrings(types).join(',') + "]"; }
-
-   public:
-    std::optional<QString> getSearchURL(const SearchArgs& args) const override
-    {
-        QStringList getArguments;
-        getArguments.append(QString("classId=%1").arg(getClassId(args.type)));
-        getArguments.append(QString("index=%1").arg(args.offset));
-        getArguments.append("pageSize=25");
-        if (args.search.has_value()) {
-            getArguments.append(QString("searchFilter=%1").arg(args.search.value()));
-        }
-        if (args.sorting.has_value()) {
-            getArguments.append(QString("sortField=%1").arg(args.sorting.value().index));
-        }
-        getArguments.append("sortOrder=desc");
-        if (args.loaders.has_value()) {
-            ModPlatform::ModLoaderTypes loaders = args.loaders.value();
-            loaders &= ~static_cast<std::uint16_t>(ModPlatform::ModLoaderType::DataPack);
-            if (loaders != 0) {
-                getArguments.append(QString("modLoaderTypes=%1").arg(getModLoaderFilters(loaders)));
-            }
-        }
-        if (args.categoryIds.has_value() && !args.categoryIds->empty()) {
-            getArguments.append(QString("categoryIds=[%1]").arg(args.categoryIds->join(",")));
-        }
-
-        if (args.versions.has_value() && !args.versions.value().empty()) {
-            getArguments.append(QString("gameVersion=%1").arg(args.versions.value().front().toString()));
-        }
-
-        return BuildConfig.FLAME_BASE_URL + "/mods/search?gameId=432&" + getArguments.join('&');
-    }
-
-    std::optional<QString> getVersionsURL(const VersionSearchArgs& args) const override
-    {
-        auto addonId = args.pack->addonId.toString();
-        QString url = QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files?pageSize=10000").arg(addonId);
-
-        if (args.mcVersions.has_value()) {
-            url += QString("&gameVersion=%1").arg(args.mcVersions.value().front().toString());
-        }
-
-        if (args.loaders.has_value() && args.loaders.value() != ModPlatform::ModLoaderType::DataPack &&
-            ModPlatform::hasSingleModLoaderSelected(args.loaders.value())) {
-            int mappedModLoader = getMappedModLoader(static_cast<ModPlatform::ModLoaderType>(static_cast<int>(args.loaders.value())));
-            url += QString("&modLoaderType=%1").arg(mappedModLoader);
-        }
-        return url;
-    }
-
-    QJsonArray documentToArray(QJsonDocument& obj) const override { return obj.object()["data"].toArray(); }
-    Result<> loadIndexedPack(ModPlatform::IndexedPack& m, const QJsonObject& obj) const override
-    {
-        return FlameMod::loadIndexedPack(m, obj);
-    }
-    Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType resourceType) const override
-    {
-        TRY_INTO(const auto& arr, FlameMod::loadIndexedPackVersion(obj))
-        if (resourceType != ModPlatform::ResourceType::TexturePack) {
-            return arr;
-        }
-        // FIXME: Client-side version filtering. This won't take into account any user-selected filtering.
-        const auto& mcVersions = arr.mcVersion;
-
-        if (std::any_of(mcVersions.constBegin(), mcVersions.constEnd(),
-                        [](const auto& mcVersion) { return Version(mcVersion) <= Version("1.6"); })) {
-            return arr;
-        }
-        return ModPlatform::IndexedVersion{};
-    };
-    Result<> loadExtraPackInfo(ModPlatform::IndexedPack& m, [[maybe_unused]] QJsonObject& /*unused*/) const override
-    {
-        FlameMod::loadBody(m);
-        return {};
-    }
+    static Net::RPC::Spec<QString> getChangelog(const QString& id, const QString& fileId);
+    static std::pair<NetJob::Ptr, QString*> getChangelogTask(const QString& id, const QString& fileId);
 
    private:
-    std::optional<QString> getInfoURL(const QString& id) const override { return QString(BuildConfig.FLAME_BASE_URL + "/mods/%1").arg(id); }
-    std::optional<QString> getDependencyURL(const DependencySearchArgs& args) const override
-    {
-        auto addonId = args.dependency.addonId.toString();
-        auto url =
-            QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files?pageSize=10000&gameVersion=%2").arg(addonId, args.mcVersion.toString());
-        if ((args.loader != 0U) && ModPlatform::hasSingleModLoaderSelected(args.loader)) {
-            int mappedModLoader = getMappedModLoader(static_cast<ModPlatform::ModLoaderType>(static_cast<int>(args.loader)));
-            url += QString("&modLoaderType=%1").arg(mappedModLoader);
-        }
-        return url;
-    }
+    static QUrl searchProjectsURL(const SearchArgs& args);
+    static QUrl getVersionsURL(const VersionSearchArgs& args);
 };

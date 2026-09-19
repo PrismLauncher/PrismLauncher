@@ -209,12 +209,15 @@ void ModrinthManagedPackPage::parseManagedPack()
         m_fetchJob->abort();
     }
 
-    ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
     m_pack = { .addonId = m_inst->getManagedPackID() };
 
-    // Use default if no callbacks are set
-    callbacks.onSucceed = [this](auto& doc) {
-        m_pack.versions = doc;
+    auto [task, response] = ModrinthAPI::get().getVersionsTask({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
+                                                                 .mcVersions = {},
+                                                                 .loaders = {},
+                                                                 .resourceType = ModPlatform::ResourceType::Modpack,
+                                                                 .includeChangelog = true });
+    connect(task.get(), &Task::succeeded, this, [response, this] {
+        m_pack.versions = *response;
         m_pack.versionsLoaded = true;
 
         // We block signals here so that suggestVersion() doesn't get called, causing an assertion fail.
@@ -237,16 +240,11 @@ void ModrinthManagedPackPage::parseManagedPack()
         suggestVersion();
 
         m_loaded = true;
-    };
-    callbacks.onFail = [this](const QString& /*reason*/, int) { setFailState(); };
-    callbacks.onAbort = [this]() { setFailState(); };
-    m_fetchJob = ModrinthAPI::get().getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
-                                                         .mcVersions = {},
-                                                         .loaders = {},
-                                                         .resourceType = ModPlatform::ResourceType::Modpack,
-                                                         .includeChangelog = true },
-                                                       callbacks);
+    });
+    connect(task.get(), &Task::failed, this, [this] { setFailState(); });
+    connect(task.get(), &Task::aborted, this, [this] { setFailState(); });
 
+    m_fetchJob = task;
     ui->changelogTextBrowser->setText(tr("Fetching changelogs..."));
 
     m_fetchJob->start();
@@ -367,11 +365,13 @@ void FlameManagedPackPage::parseManagedPack()
     QString id = m_inst->getManagedPackID();
     m_pack = { .addonId = id };
 
-    ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
-
-    // Use default if no callbacks are set
-    callbacks.onSucceed = [this](auto& doc) {
-        m_pack.versions = doc;
+    auto [task, response] = FlameAPI::get().getVersionsTask({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
+                                                              .mcVersions = {},
+                                                              .loaders = {},
+                                                              .resourceType = ModPlatform::ResourceType::Modpack,
+                                                              .includeChangelog = true });
+    connect(task.get(), &Task::succeeded, this, [response, this] {
+        m_pack.versions = *response;
         m_pack.versionsLoaded = true;
 
         // We block signals here so that suggestVersion() doesn't get called, causing an assertion fail.
@@ -392,16 +392,11 @@ void FlameManagedPackPage::parseManagedPack()
         suggestVersion();
 
         m_loaded = true;
-    };
-    callbacks.onFail = [this](const QString& /*reason*/, int) { setFailState(); };
-    callbacks.onAbort = [this]() { setFailState(); };
-    m_fetchJob = FlameAPI::get().getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
-                                                      .mcVersions = {},
-                                                      .loaders = {},
-                                                      .resourceType = ModPlatform::ResourceType::Modpack,
-                                                      .includeChangelog = true },
-                                                    callbacks);
+    });
+    connect(task.get(), &Task::failed, this, [this] { setFailState(); });
+    connect(task.get(), &Task::aborted, this, [this] { setFailState(); });
 
+    m_fetchJob = task;
     m_fetchJob->start();
 }
 
@@ -420,9 +415,15 @@ void FlameManagedPackPage::suggestVersion()
     }
     auto version = m_pack.versions.at(index);
 
-    ui->changelogTextBrowser->setHtml(
-        StringUtils::htmlListPatch(FlameAPI::getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt())));
+    if (m_changelogJob && m_changelogJob->isRunning()) {
+        m_changelogJob->abort();
+    }
 
+    auto [changelogJob, changelogResponse] = FlameAPI::getChangelogTask(m_inst->getManagedPackID(), version.fileId.toString());
+    m_changelogJob = changelogJob;
+    connect(changelogJob.get(), &Task::succeeded, this,
+            [this, changelogResponse] { ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(*changelogResponse)); });
+    m_changelogJob->start();
     ManagedPackPage::suggestVersion();
 }
 

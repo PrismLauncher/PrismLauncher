@@ -19,7 +19,6 @@
 
 #include "ModrinthPackIndex.h"
 #include "FileSystem.h"
-#include "ModrinthAPI.h"
 
 #include "Json.h"
 #include "modplatform/ModIndex.h"
@@ -30,60 +29,8 @@ bool shouldDownloadOnSide(const QString& side)
 {
     return side == "required" || side == "optional";
 }
-}  // namespace
 
-// https://docs.modrinth.com/api/operations/getproject/
-Result<> Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
-{
-    pack.addonId = obj["project_id"].toString();
-    if (pack.addonId.toString().isEmpty()) {
-        TRY_INTO(pack.addonId, Json::requireString(obj, "id"))
-    }
-
-    pack.provider = ModPlatform::ResourceProvider::MODRINTH;
-    TRY_INTO(pack.name, Json::requireString(obj, "title"))
-    pack.resourceType = ModrinthAPI::getResourceType(obj["project_type"].toString());
-    if ((obj.contains("loaders") && obj.value("loaders").toArray({}).contains("datapack")) ||
-        (obj.contains("all_project_types") && obj.value("all_project_types").toArray({}).contains("datapack"))) {
-        pack.resourceType = ModPlatform::ResourceType::DataPack;
-    }
-
-    pack.slug = obj["slug"].toString("");
-    if (!pack.slug.isEmpty()) {
-        pack.websiteUrl = "https://modrinth.com/mod/" + pack.slug;
-    } else {
-        pack.websiteUrl = "";
-    }
-
-    pack.description = obj["description"].toString("");
-
-    pack.logoUrl = obj["icon_url"].toString("");
-    pack.logoName = QString("%1.%2").arg(obj["slug"].toString(), QFileInfo(QUrl(pack.logoUrl).fileName()).suffix());
-
-    if (obj.contains("author")) {
-        ModPlatform::ModpackAuthor modAuthor;
-        modAuthor.name = obj["author"].toString();
-        modAuthor.url = ModrinthAPI::getAuthorURL(modAuthor.name);
-        pack.authors = { modAuthor };
-    }
-
-    auto client = shouldDownloadOnSide(obj["client_side"].toString());
-    auto server = shouldDownloadOnSide(obj["server_side"].toString());
-
-    if (server && client) {
-        pack.side = ModPlatform::SideType::UniversalSide;
-    } else if (server) {
-        pack.side = ModPlatform::SideType::ServerSide;
-    } else if (client) {
-        pack.side = ModPlatform::SideType::ClientSide;
-    }
-
-    // Modrinth can have more data than what's provided by the basic search :)
-    pack.extraDataLoaded = false;
-    return {};
-}
-
-Result<> Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
+Result<> loadExtraPackData(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
 {
     pack.extraData.issuesUrl = obj["issues_url"].toString();
     if (pack.extraData.issuesUrl.endsWith('/')) {
@@ -122,13 +69,118 @@ Result<> Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, const QJson
 
     pack.extraData.body = obj["body"].toString().remove("<br>");
 
-    pack.extraDataLoaded = true;
+    pack.extraDataLoaded = !pack.extraData.body.isEmpty();
     return {};
 }
 
-Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJsonObject& obj,
-                                                                     const QString& preferredHashType,
-                                                                     const QString& preferredFileName)
+QString mapMCVersionFromModrinth(QString v)
+{
+    static const QString s_preString = " Pre-Release ";
+    bool pre = false;
+    if (v.contains("-pre")) {
+        pre = true;
+        v.replace("-pre", s_preString);
+    }
+    v.replace("-", " ");
+    if (pre) {
+        v.replace(" Pre Release ", s_preString);
+    }
+    return v;
+}
+
+const auto g_resourceTypeMap = std::array{
+    std::pair{ ModPlatform::ResourceType::Mod, "mod" },           std::pair{ ModPlatform::ResourceType::ResourcePack, "resourcepack" },
+    std::pair{ ModPlatform::ResourceType::ShaderPack, "shader" }, std::pair{ ModPlatform::ResourceType::DataPack, "datapack" },
+    std::pair{ ModPlatform::ResourceType::Modpack, "modpack" },
+};
+
+ModPlatform::ResourceType getResourceType(const QString& param)
+{
+    for (const auto& [key, value] : g_resourceTypeMap) {
+        if (value == param) {
+            return key;
+        }
+    }
+
+    qWarning() << "Invalid resource type for Modrinth API!" << param;
+    return ModPlatform::ResourceType::Unknown;
+}
+
+QString getAuthorURL(const QString& name)
+{
+    return "https://modrinth.com/user/" + name;
+};
+
+}  // namespace
+
+namespace Modrinth::Parse {
+
+// https://docs.modrinth.com/api/operations/getproject/
+Result<> loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
+{
+    pack.addonId = obj["project_id"].toString();
+    if (pack.addonId.toString().isEmpty()) {
+        TRY_INTO(pack.addonId, Json::requireString(obj, "id"))
+    }
+
+    pack.provider = ModPlatform::ResourceProvider::MODRINTH;
+    TRY_INTO(pack.name, Json::requireString(obj, "title"))
+    pack.resourceType = getResourceType(obj["project_type"].toString());
+    if ((obj.contains("loaders") && obj.value("loaders").toArray({}).contains("datapack")) ||
+        (obj.contains("all_project_types") && obj.value("all_project_types").toArray({}).contains("datapack"))) {
+        pack.resourceType = ModPlatform::ResourceType::DataPack;
+    }
+
+    pack.slug = obj["slug"].toString("");
+    if (!pack.slug.isEmpty()) {
+        pack.websiteUrl = "https://modrinth.com/mod/" + pack.slug;
+    } else {
+        pack.websiteUrl = "";
+    }
+
+    pack.description = obj["description"].toString("");
+
+    pack.logoUrl = obj["icon_url"].toString("");
+    pack.logoName = QString("%1.%2").arg(obj["slug"].toString(), QFileInfo(QUrl(pack.logoUrl).fileName()).suffix());
+
+    if (obj.contains("author")) {
+        ModPlatform::ModpackAuthor modAuthor;
+        modAuthor.name = obj["author"].toString();
+        modAuthor.url = getAuthorURL(modAuthor.name);
+        pack.authors = { modAuthor };
+    }
+
+    auto client = shouldDownloadOnSide(obj["client_side"].toString());
+    auto server = shouldDownloadOnSide(obj["server_side"].toString());
+
+    if (server && client) {
+        pack.side = ModPlatform::SideType::UniversalSide;
+    } else if (server) {
+        pack.side = ModPlatform::SideType::ServerSide;
+    } else if (client) {
+        pack.side = ModPlatform::SideType::ClientSide;
+    }
+
+    // Modrinth can have more data than what's provided by the basic search :)
+    pack.extraDataLoaded = false;
+    return loadExtraPackData(pack, obj);
+}
+
+QString resourceTypeParameter(ModPlatform::ResourceType type)
+{
+    for (const auto& [key, value] : g_resourceTypeMap) {
+        if (key == type) {
+            return value;
+        }
+    }
+
+    qWarning() << "Invalid resource type for Modrinth API!" << static_cast<std::uint8_t>(type);
+    return "";
+}
+
+Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(const QJsonObject& obj,
+                                                           const QString& preferredHashType,
+                                                           const QString& preferredFileName)
 {
     ModPlatform::IndexedVersion file;
 
@@ -140,8 +192,8 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
         return {};
     }
     for (auto mcVer : versionArray) {
-        file.mcVersion.append({ ModrinthAPI::mapMCVersionFromModrinth(mcVer.toString()),
-                                mcVer.toString() });  // double this so we can check both strings when filtering
+        file.mcVersion.append(
+            { mapMCVersionFromModrinth(mcVer.toString()), mcVer.toString() });  // double this so we can check both strings when filtering
     }
     TRY_INTO(const auto& loaders, Json::requireArray(obj, "loaders"))
     for (auto loader : loaders) {
@@ -251,3 +303,30 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
 
     return {};
 }
+
+Result<QList<ModPlatform::IndexedVersion>> loadIndexedPackVersions(const QJsonArray& arr, const QString& addonId)
+{
+    QList<ModPlatform::IndexedVersion> unsortedVersions;
+
+    for (auto versionIter : arr) {
+        auto obj = versionIter.toObject();
+
+        TRY_INTO(auto file, Modrinth::Parse::loadIndexedPackVersion(obj))
+        if (!file.addonId.isValid()) {
+            file.addonId = addonId;
+        }
+
+        if (file.fileId.isValid() && !file.downloadUrl.isEmpty()) {  // Heuristic to check if the returned value is valid
+            unsortedVersions.append(file);
+        }
+    }
+
+    auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
+        // dates are in RFC 3339 format
+        return a.date > b.date;
+    };
+    std::ranges::sort(unsortedVersions, orderSortPredicate);
+    return unsortedVersions;
+}
+
+}  // namespace Modrinth::Parse
