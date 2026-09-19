@@ -16,7 +16,8 @@
 #pragma once
 
 #include <QString>
-#include "settings/SettingsObject.h"
+
+struct GlobalConfig;
 
 namespace Technic {
 // not exporting it, only used in SingleZipPackInstallTask, InstanceImportTask and SolderPackInstallTask
@@ -28,8 +29,7 @@ class TechnicPackProcessor : public QObject {
     void failed(QString reason);
 
    public:
-    void run(SettingsObject* globalSettings,
-             const QString& instName,
+    void run(const QString& instName,
              const QString& instIcon,
              const QString& stagingPath,
              const QString& minecraftVersion = QString(),

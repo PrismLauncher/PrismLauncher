@@ -43,6 +43,7 @@
 #include <QMessageBox>
 #include "FileIgnoreProxy.h"
 #include "QObjectPtr.h"
+#include "config/InstanceConfig.h"
 #include "archive/ExportToZipTask.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -100,7 +101,7 @@ ExportInstanceDialog::~ExportInstanceDialog()
 /// Save icon to instance's folder is needed
 void SaveIcon(BaseInstance* m_instance)
 {
-    auto iconKey = m_instance->iconKey();
+    auto iconKey = m_instance->config()->iconKey;
     auto iconList = APPLICATION->icons();
     auto mmcIcon = iconList->icon(iconKey);
     if (!mmcIcon || mmcIcon->isBuiltIn()) {

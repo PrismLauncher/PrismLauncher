@@ -34,7 +34,7 @@
  *      limitations under the License.
  */
 
-#include "settings/INIFile.h"
+#include "INIFile.h"
 
 #include <AssertHelpers.h>
 #include <FileSystem.h>
@@ -54,7 +54,7 @@ INIFile::INIFile() = default;
 bool INIFile::saveFile(const QString& fileName)
 {
     if (!contains("ConfigVersion")) {
-        insert("ConfigVersion", "1.3");
+        insert("ConfigVersion", "1.4");
     }
     QSettings settingsObj{ fileName, QSettings::Format::IniFormat };
     settingsObj.setFallbacksEnabled(false);
@@ -171,6 +171,42 @@ QVariant migrateQByteArrayToBase64(const QString& key, QVariant value)
     }
     return value;
 }
+
+void migrateUIKeys(INIFile& file)
+{
+    auto remap = [&file](const QString& src, const QString& dst) {
+        if (file.contains(src)) {
+            file[dst] = file.take(src);
+        }
+    };
+    remap("MainWindowGeometry", "UIGeometry/MainWindow");
+    remap("ConsoleWindowGeometry", "UIGeometry/ConsoleWindow");
+    remap("PageDialog", "UIGeometry/PageDialog");
+    remap("NewInstanceGeometry", "UIGeometry/NewInstance");
+    remap("NewsGeometry", "UIGeometry/News");
+    remap("ModDownloadGeometry", "UIGeometry/ModDownload");
+    remap("RPDownloadGeometry", "UIGeometry/RPDownload");
+    remap("TPDownloadGeometry", "UIGeometry/TPDownload");
+    remap("ShaderDownloadGeometry", "UIGeometry/ShaderDownload");
+    remap("DataPackDownloadGeometry", "UIGeometry/DataPackDownload");
+
+    remap("MainWindowState", "UIState/MainWindow");
+    remap("ConsoleWindowState", "UIState/ConsoleWindow");
+
+    auto remapResourcePage = [&file, &remap](const QString& name) {
+        remap("UI/" + name + "_Page/Columns", "UIColumnState/" + name);
+        if (file.value("UI/" + name + "_Page/ColumnsOverride").toBool()) {
+            remap("UI/" + name + "_Page/ColumnsVisibility", "UIColumnVisibility/" + name);
+        }
+    };
+
+    remapResourcePage("resource");
+    remapResourcePage("mods");
+    remapResourcePage("resourcepacks");
+    remapResourcePage("texturepacks");
+    remapResourcePage("shaderpacks");
+    remapResourcePage("datapacks");
+}
 }  // namespace
 
 bool INIFile::loadFile(const QString& fileName)
@@ -187,7 +223,8 @@ bool INIFile::loadFile(const QString& fileName)
         }
         return false;
     }
-    if (!settingsObj.value("ConfigVersion").isValid()) {
+    QString configVersion = settingsObj.value("ConfigVersion").toString();
+    if (configVersion.isEmpty()) {
         QFile file(fileName);
         if (!file.open(QIODevice::ReadOnly)) {
             return false;
@@ -196,33 +233,36 @@ bool INIFile::loadFile(const QString& fileName)
         parseOldFileFormat(file, map);
         file.close();
         for (auto&& key : map.keys()) {
-            auto value = migrateQByteArrayToBase64(key, map.value(key));
-            insert(key, value);
+            insert(key, map.value(key));
         }
-        insert("ConfigVersion", "1.3");
-    } else if (settingsObj.value("ConfigVersion").toString() == "1.1") {
-        for (auto&& key : settingsObj.allKeys()) {
-            auto value = migrateQByteArrayToBase64(key, settingsObj.value(key));
-            if (auto valueStr = value.toString();
-                (valueStr.contains(QChar(';')) || valueStr.contains(QChar('=')) || valueStr.contains(QChar(','))) &&
-                valueStr.endsWith("\"") && valueStr.startsWith("\"")) {
-                insert(key, unquote(valueStr));
-            } else {
-                insert(key, value);
-            }
-        }
-        insert("ConfigVersion", "1.3");
-    } else if (settingsObj.value("ConfigVersion").toString() == "1.2") {
-        for (auto&& key : settingsObj.allKeys()) {
-            auto value = migrateQByteArrayToBase64(key, settingsObj.value(key));
-            insert(key, value);
-        }
-        insert("ConfigVersion", "1.3");
+        // unquote is already called by parseOldFileFormat
+        configVersion = "1.2";
     } else {
         for (auto&& key : settingsObj.allKeys()) {
             insert(key, settingsObj.value(key));
         }
     }
+
+    if (configVersion == "1.1") {
+        for (auto&& key : keys()) {
+            insert(key, unquote(value(key).toString()));
+        }
+        configVersion = "1.2";
+    }
+
+    if (configVersion == "1.2") {
+        for (auto&& key : keys()) {
+            auto val = migrateQByteArrayToBase64(key, value(key));
+            insert(key, val);
+        }
+        configVersion = "1.3";
+    }
+
+    if (configVersion == "1.3") {
+        migrateUIKeys(*this);
+        configVersion = "1.4";
+    }
+
     return true;
 }
 

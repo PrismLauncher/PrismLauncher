@@ -17,6 +17,7 @@
  */
 
 #include "SkinManageDialog.h"
+#include "config/GlobalConfig.h"
 #include "ui/dialogs/skins/draw/SkinOpenGLWindow.h"
 #include "ui_SkinManageDialog.h"
 
@@ -36,7 +37,6 @@
 #include "Application.h"
 #include "DesktopServices.h"
 #include "QObjectPtr.h"
-#include "settings/SettingsObject.h"
 
 #include "minecraft/auth/Parsers.h"
 #include "minecraft/skins/SkinList.h"
@@ -53,7 +53,7 @@
 #include "ui/instanceview/InstanceDelegate.h"
 
 SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
-    : QDialog(parent), m_acct(acct), m_ui(new Ui::SkinManageDialog), m_list(this, APPLICATION->settings()->get("SkinsDir").toString(), acct)
+    : QDialog(parent), m_acct(acct), m_ui(new Ui::SkinManageDialog), m_list(this, APPLICATION->config()->skinsDir, acct)
 {
     m_ui->setupUi(this);
 

@@ -34,6 +34,7 @@
  */
 
 #include "ExternalToolsPage.h"
+#include "config/GlobalConfig.h"
 #include "ui_ExternalToolsPage.h"
 
 #include <QFileDialog>
@@ -41,13 +42,13 @@
 #include <QMessageBox>
 #include <QStandardPaths>
 #include <QTabBar>
+#include <utility>
 
 #include <FileSystem.h>
 #include <QTreeWidgetItem>
 #include "Application.h"
 #include "Commandline.h"
 #include "Json.h"
-#include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
 
 ExternalToolsPage::ExternalToolsPage(QWidget* parent) : QWidget(parent), m_ui(new Ui::ExternalToolsPage)
@@ -75,16 +76,16 @@ ExternalToolsPage::~ExternalToolsPage()
 
 void ExternalToolsPage::loadSettings()
 {
-    auto* s = APPLICATION->settings();
-    m_ui->jprofilerPathEdit->setText(s->get("JProfilerPath").toString());
-    m_ui->jvisualvmPathEdit->setText(s->get("JVisualVMPath").toString());
+    const auto& conf = *APPLICATION->config();
+    m_ui->jprofilerPathEdit->setText(conf.jProfilerPath);
+    m_ui->jvisualvmPathEdit->setText(conf.jVisualVmPath);
 
     // Editors
-    m_ui->jsonEditorTextBox->setText(s->get("JsonEditor").toString());
+    m_ui->jsonEditorTextBox->setText(conf.jsonEditorPath);
 
     // World Tools
     m_ui->worldToolTree->clear();
-    const QVariantMap tools = Json::toMap(APPLICATION->settings()->get("WorldTools").toString());
+    const auto& tools = APPLICATION->config()->worldTools;
     for (auto it = tools.constBegin(); it != tools.constEnd(); ++it) {
         auto* item = new QTreeWidgetItem(m_ui->worldToolTree);
         item->setText(0, it.key());
@@ -122,10 +123,10 @@ void ExternalToolsPage::setupWorldToolBrowseBtn(QTreeWidgetItem* item)
 }
 void ExternalToolsPage::applySettings()
 {
-    auto* s = APPLICATION->settings();
+    auto& conf = APPLICATION->config().update();
 
-    s->set("JProfilerPath", m_ui->jprofilerPathEdit->text());
-    s->set("JVisualVMPath", m_ui->jvisualvmPathEdit->text());
+    conf.jProfilerPath = m_ui->jprofilerPathEdit->text();
+    conf.jVisualVmPath = m_ui->jvisualvmPathEdit->text();
 
     // Editors
     QString jsonEditor = m_ui->jsonEditorTextBox->text();
@@ -135,7 +136,7 @@ void ExternalToolsPage::applySettings()
             jsonEditor = found;
         }
     }
-    s->set("JsonEditor", jsonEditor);
+    conf.jsonEditorPath = std::move(jsonEditor);
 
     // World Tools
     QVariantMap tools;
@@ -147,7 +148,7 @@ void ExternalToolsPage::applySettings()
             tools.insert(name, command);
         }
     }
-    APPLICATION->settings()->set("WorldTools", Json::fromMap(tools));
+   conf.worldTools = std::move(tools);
 }
 
 void ExternalToolsPage::on_jprofilerPathBtn_clicked()

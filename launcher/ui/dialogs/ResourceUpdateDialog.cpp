@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "ChooseProviderDialog.h"
 #include "CustomMessageBox.h"
+#include "config/GlobalConfig.h"
 #include "ProgressDialog.h"
 #include "ScrollMessageBox.h"
 #include "StringUtils.h"
@@ -58,7 +59,7 @@ ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
     , m_parent(parent)
     , m_resourceModel(resourceModel)
     , m_candidates(searchFor)
-    , m_secondTryMetadata(new ConcurrentTask("Second Metadata Search", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()))
+    , m_secondTryMetadata(new ConcurrentTask("Second Metadata Search", APPLICATION->config()->numberOfConcurrentTasks))
     , m_instance(instance)
     , m_includeDeps(includeDeps)
     , m_loadersList(std::move(loadersList))
@@ -212,7 +213,7 @@ void ResourceUpdateDialog::checkCandidates()
         }
     }
 
-    if (m_includeDeps && !APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
+    if (m_includeDeps && !APPLICATION->config()->modDependenciesDisabled) {  // dependencies
         auto* modModel = dynamic_cast<ModFolderModel*>(m_resourceModel);
 
         if (modModel != nullptr) {

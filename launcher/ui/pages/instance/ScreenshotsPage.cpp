@@ -37,6 +37,7 @@
 
 #include "ScreenshotsPage.h"
 #include "BuildConfig.h"
+#include "config/GlobalConfig.h"
 #include "ui_ScreenshotsPage.h"
 
 #include <QClipboard>
@@ -56,7 +57,6 @@
 #include <utility>
 
 #include <Application.h>
-#include "settings/SettingsObject.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
