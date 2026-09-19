@@ -203,6 +203,16 @@ void LauncherPage::on_javaDirBrowseBtn_clicked()
     }
 }
 
+void LauncherPage::on_templateDirBrowseBtn_clicked()
+{
+    QString rawDir = QFileDialog::getExistingDirectory(this, tr("Instance Template Folder"), ui->templateDirTextBox->text());
+
+    if (!rawDir.isEmpty() && QDir(rawDir).exists()) {
+        QString cookedDir = FS::NormalizePath(rawDir);
+        ui->templateDirTextBox->setText(cookedDir);
+    }
+}
+
 void LauncherPage::on_skinsDirBrowseBtn_clicked()
 {
     QString rawDir = QFileDialog::getExistingDirectory(this, tr("Skins Folder"), ui->skinsDirTextBox->text());
@@ -255,6 +265,7 @@ void LauncherPage::applySettings()
     s->set("DownloadsDir", ui->downloadsDirTextBox->text());
     s->set("SkinsDir", ui->skinsDirTextBox->text());
     s->set("JavaDir", ui->javaDirTextBox->text());
+    s->set("TemplateDir", ui->templateDirTextBox->text());
     s->set("DownloadsDirWatchRecursive", ui->downloadsDirWatchRecursiveCheckBox->isChecked());
     s->set("MoveModsFromDownloadsDir", ui->downloadsDirMoveCheckBox->isChecked());
 
@@ -319,6 +330,7 @@ void LauncherPage::loadSettings()
     ui->downloadsDirTextBox->setText(s->get("DownloadsDir").toString());
     ui->skinsDirTextBox->setText(s->get("SkinsDir").toString());
     ui->javaDirTextBox->setText(s->get("JavaDir").toString());
+    ui->templateDirTextBox->setText(s->get("TemplateDir").toString());
     ui->downloadsDirWatchRecursiveCheckBox->setChecked(s->get("DownloadsDirWatchRecursive").toBool());
     ui->downloadsDirMoveCheckBox->setChecked(s->get("MoveModsFromDownloadsDir").toBool());
 

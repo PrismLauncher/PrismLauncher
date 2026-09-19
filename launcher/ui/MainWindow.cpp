@@ -1351,6 +1351,11 @@ void MainWindow::on_actionViewJavaFolder_triggered()
     DesktopServices::openPath(APPLICATION->javaPath(), true);
 }
 
+void MainWindow::on_actionViewTemplateFolder_triggered()
+{
+    DesktopServices::openPath(APPLICATION->settings()->get("TemplateDir").toString(), true);
+}
+
 void MainWindow::refreshInstances()
 {
     APPLICATION->instances()->loadList();
