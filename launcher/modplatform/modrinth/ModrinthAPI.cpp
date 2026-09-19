@@ -363,13 +363,9 @@ Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> ModrinthAPI::getVersions(cons
 {  // https://docs.modrinth.com/api/operations/getprojectversions/
     auto url = getVersionsURL(args);
     return { { .url = url }, [args](const auto& response) -> Result<QList<ModPlatform::IndexedVersion>> {
-                TRY_INTO(auto doc,
-                         Json::requireDocument(response, "ResourceAPI::getVersions").and_then([](const auto& v) -> Result<QJsonArray> {
-                             if (v.isObject()) {
-                                 return { { v.object() } };
-                             }
-                             return Json::requireArray(v);
-                         }))
+                TRY_INTO(auto doc, Json::requireDocument(response, "ResourceAPI::getVersions").and_then([](const auto& v) {
+                    return Json::requireArray(v);
+                }))
 
                 QList<ModPlatform::IndexedVersion> unsortedVersions;
 
@@ -399,11 +395,19 @@ Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> ModrinthAPI::getVersions(cons
             } };
 }
 
+Net::RPC::Spec<ModPlatform::IndexedVersion> ModrinthAPI::getVersion(const QString& /*id*/, const QString& versionId) const
+{
+    // https://docs.modrinth.com/api/operations/getversion/
+    auto url = QString("%1/version/%2").arg(BuildConfig.MODRINTH_PROD_URL, versionId);
+    return { { .url = url }, [](const auto& response) -> Result<ModPlatform::IndexedVersion> {
+                return Json::requireObject(response, "ResourceAPI::getVersion").and_then([](const auto& v) {
+                    return Modrinth::Parse::loadIndexedPackVersion(v);
+                });
+            } };
+}
+
 QUrl ModrinthAPI::getVersionsURL(const VersionSearchArgs& args)
 {
-    if (!args.version.isEmpty()) {
-        return QString("%1/version/%2").arg(BuildConfig.MODRINTH_PROD_URL, args.version);
-    }
     QStringList getArguments;
     if (args.mcVersions.has_value()) {
         getArguments.append(QString("game_versions=[%1]").arg(getGameVersionsString(args.mcVersions.value())));

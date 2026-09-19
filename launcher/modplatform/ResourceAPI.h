@@ -86,8 +86,6 @@ class ResourceAPI {
         std::optional<ModPlatform::ModLoaderTypes> loaders;
         ModPlatform::ResourceType resourceType;
         bool includeChangelog{};
-
-        QString version;
     };
 
    public:
@@ -102,6 +100,7 @@ class ResourceAPI {
     virtual Net::RPC::Spec<QList<ModPlatform::IndexedPack>> searchProjects(const SearchArgs& args) const = 0;
     virtual Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const = 0;
     virtual Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> getVersions(const VersionSearchArgs& args) const = 0;
+    virtual Net::RPC::Spec<ModPlatform::IndexedVersion> getVersion(const QString& id, const QString& versionId) const = 0;
 
     // helpers to omit the netJob stuff
     std::pair<NetJob::Ptr, ModPlatform::IndexedPack*> getProjectTask(const QString& addonId,
@@ -111,6 +110,7 @@ class ResourceAPI {
     std::pair<NetJob::Ptr, QList<ModPlatform::IndexedPack>*> getProjectsTask(const QStringList& addonIds) const;
     std::pair<NetJob::Ptr, QList<ModPlatform::Category>*> getCategoriesTask(ModPlatform::ResourceType type) const;
     std::pair<NetJob::Ptr, QList<ModPlatform::IndexedVersion>*> getVersionsTask(const VersionSearchArgs& args) const;
+    std::pair<NetJob::Ptr, ModPlatform::IndexedVersion*> getVersionTask(const QString& id, const QString& versionId) const;
 
    protected:
     ~ResourceAPI() = default;

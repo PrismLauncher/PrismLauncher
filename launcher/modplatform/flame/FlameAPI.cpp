@@ -89,19 +89,6 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds)
     return { netJob, response };
 }
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getFile(const QString& addonId, const QString& fileId)
-{
-    auto netJob = makeShared<NetJob>(QString("Flame::GetFile"), APPLICATION->network());
-    auto [action, response] =
-        Net::ApiRequest::makeByteArray(QUrl(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2").arg(addonId, fileId)));
-    netJob->addNetAction(action);
-
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(),
-                     [addonId, fileId] { qDebug() << "Flame API file failure" << addonId << fileId; });
-
-    return { netJob, response };
-}
-
 QList<ResourceAPI::SortingMethod> FlameAPI::getSortingMethods() const
 {
     // https://docs.curseforge.com/?python#tocS_ModsSearchSortField
@@ -260,6 +247,17 @@ Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> FlameAPI::getVersions(const V
                 TRY(Flame::Parse::loadIndexedPackVersions(*args.pack, doc))
 
                 return args.pack->versions;
+            } };
+}
+
+Net::RPC::Spec<ModPlatform::IndexedVersion> FlameAPI::getVersion(const QString& id, const QString& versionId) const
+{
+    // https://docs.curseforge.com/rest-api/#get-mod-file
+    auto url = QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2").arg(id, versionId);
+    return { { .url = url }, [](const auto& response) -> Result<ModPlatform::IndexedVersion> {
+                return Json::requireObject(response, "ResourceAPI::getVersions")
+                    .and_then([](const auto& v) { return Json::requireObject(v, "data"); })
+                    .and_then([](const auto& v) { return Flame::Parse::loadIndexedPackVersion(v); });
             } };
 }
 
