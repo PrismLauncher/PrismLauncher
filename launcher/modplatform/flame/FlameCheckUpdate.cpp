@@ -16,6 +16,70 @@
 #include "net/RPCSink.h"
 #include "tasks/Task.h"
 
+namespace {
+std::optional<ModPlatform::IndexedVersion> getLatestVersion(const QList<ModPlatform::IndexedVersion>& versions,
+                                                            const QList<ModPlatform::ModLoaderType>& instanceLoaders,
+                                                            ModPlatform::ModLoaderTypes fallback,
+                                                            bool checkLoaders,
+                                                            std::vector<ModPlatform::IndexedVersionType> releaseTypes)
+{
+    static const auto s_noLoader = ModPlatform::ModLoaderType(0);
+    if (!checkLoaders) {
+        std::optional<ModPlatform::IndexedVersion> ver;
+        for (const auto& fileTmp : versions) {
+            if (!releaseTypes.empty() && !std::ranges::contains(releaseTypes, fileTmp.versionType)) {
+                continue;
+            }
+            if (!ver.has_value() || fileTmp.date > ver->date) {
+                ver = fileTmp;
+            }
+        }
+        return ver;
+    }
+    QHash<ModPlatform::ModLoaderType, ModPlatform::IndexedVersion> bestMatch;
+    auto checkVersion = [&bestMatch](const ModPlatform::IndexedVersion& version, const ModPlatform::ModLoaderType& loader) {
+        if (bestMatch.contains(loader)) {
+            auto best = bestMatch.value(loader);
+            if (version.date > best.date) {
+                bestMatch[loader] = version;
+            }
+        } else {
+            bestMatch[loader] = version;
+        }
+    };
+    for (const auto& fileTmp : versions) {
+        if (!releaseTypes.empty() && !std::ranges::contains(releaseTypes, fileTmp.versionType)) {
+            continue;
+        }
+        auto loaders = ModPlatform::modLoaderTypesToList(fileTmp.loaders);
+        if (loaders.isEmpty()) {
+            checkVersion(fileTmp, s_noLoader);
+        } else {
+            for (auto loader : loaders) {
+                checkVersion(fileTmp, loader);
+            }
+        }
+    }
+    // edge case: mod has installed for forge but the instance is fabric => fabric version will be prioritizated on update
+    auto currentLoaders = instanceLoaders + ModPlatform::modLoaderTypesToList(fallback);
+    currentLoaders.append(s_noLoader);  // add a fallback in case the versions do not define a loader
+
+    for (auto loader : currentLoaders) {
+        if (bestMatch.contains(loader)) {
+            auto bestForLoader = bestMatch.value(loader);
+            // awkward case where the mod has only two loaders and one of them is not specified
+            if (loader != s_noLoader && bestMatch.contains(s_noLoader) && bestMatch.size() == 2) {
+                auto bestForNoLoader = bestMatch.value(s_noLoader);
+                if (bestForNoLoader.date > bestForLoader.date) {
+                    return bestForNoLoader;
+                }
+            }
+            return bestForLoader;
+        }
+    }
+    return {};
+}
+}  // namespace
 bool FlameCheckUpdate::abort()
 {
     bool result = false;
@@ -74,8 +138,8 @@ void FlameCheckUpdate::getLatestVersionCallback()
         pack->versions = *response;
         pack->versionsLoaded = true;
 
-        auto latestVer = FlameAPI::getLatestVersion(pack->versions, m_loadersList, resource->metadata()->loaders, !m_loadersList.isEmpty(),
-                                                    m_releaseTypes);
+        auto latestVer =
+            getLatestVersion(pack->versions, m_loadersList, resource->metadata()->loaders, !m_loadersList.isEmpty(), m_releaseTypes);
 
         setStatus(tr("Parsing the API response from CurseForge for '%1'...").arg(resource->name()));
 
