@@ -14,8 +14,6 @@
 
 #include <QAbstractItemView>
 #include <QFileDialog>
-#include <QInputDialog>
-#include <memory>
 
 #include "Application.h"
 #include "InstanceImportTask.h"
