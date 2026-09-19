@@ -26,11 +26,11 @@ namespace MMCZip {
 void ExtractZipTask::executeTask()
 {
     m_zipFuture = QtConcurrent::run(QThreadPool::globalInstance(), [this]() { return extractZip(); });
-    connect(&m_zipWatcher, &QFutureWatcher<ZipResult>::finished, this, &ExtractZipTask::finish);
+    connect(&m_zipWatcher, &QFutureWatcher<Result<>>::finished, this, &ExtractZipTask::finish);
     m_zipWatcher.setFuture(m_zipFuture);
 }
 
-auto ExtractZipTask::extractZip() -> ZipResult
+auto ExtractZipTask::extractZip() -> Result<>
 {
     auto target = m_outputDir.absolutePath();
     auto target_top_dir = QUrl::fromLocalFile(target);
@@ -39,11 +39,11 @@ auto ExtractZipTask::extractZip() -> ZipResult
 
     qDebug() << "Extracting subdir" << m_subdirectory << "from" << m_input.getZipName() << "to" << target;
     if (!m_input.collectFiles()) {
-        return ZipResult(tr("Failed to enumerate files in archive"));
+        return std::unexpected(tr("Failed to enumerate files in archive"));
     }
     if (m_input.getFiles().isEmpty()) {
         logWarning(tr("Extracting empty archives seems odd..."));
-        return ZipResult();
+        return {};
     }
 
     auto extPtr = ArchiveWriter::createDiskWriter();
@@ -51,7 +51,7 @@ auto ExtractZipTask::extractZip() -> ZipResult
 
     setStatus("Extracting files...");
     setProgress(0, m_input.getFiles().count());
-    ZipResult result;
+    Result<> result;
     auto fileName = m_input.getZipName();
     if (!m_input.parse([this, &result, &target, &target_top_dir, ext, &extracted](ArchiveReader::File* f) {
             if (m_zipFuture.isCanceled())
@@ -90,13 +90,13 @@ auto ExtractZipTask::extractZip() -> ZipResult
             }
 
             if (!target_top_dir.isParentOf(QUrl::fromLocalFile(target_file_path))) {
-                result = ZipResult(tr("Extracting %1 was cancelled, because it was effectively outside of the target path %2")
+                result = std::unexpected(tr("Extracting %1 was cancelled, because it was effectively outside of the target path %2")
                                        .arg(relative_file_name, target));
                 return false;
             }
 
             if (!f->writeFile(ext, target_file_path, target)) {
-                result = ZipResult(tr("Failed to extract file %1 to %2").arg(original_name, target_file_path));
+                result = std::unexpected(tr("Failed to extract file %1 to %2").arg(original_name, target_file_path));
                 return false;
             }
             extracted.append(target_file_path);
@@ -105,17 +105,17 @@ auto ExtractZipTask::extractZip() -> ZipResult
             return true;
         })) {
         FS::removeFiles(extracted);
-        return result.has_value() ? result : ZipResult(tr("Failed to parse file %1").arg(fileName));
+        return result.has_value() ? result : std::unexpected(tr("Failed to parse file %1: %2").arg(fileName, result.error()));
     }
-    return ZipResult();
+    return {};
 }
 
 void ExtractZipTask::finish()
 {
     if (m_zipFuture.isCanceled()) {
         emitAborted();
-    } else if (auto result = m_zipFuture.result(); result.has_value()) {
-        emitFailed(result.value());
+    } else if (auto result = m_zipFuture.result(); !result) {
+        emitFailed(result.error());
     } else {
         emitSucceeded();
     }
