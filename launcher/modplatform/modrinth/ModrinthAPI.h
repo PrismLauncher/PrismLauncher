@@ -44,12 +44,6 @@ class ModrinthAPI final : public ResourceAPI {
         std::optional<ModPlatform::ModLoaderTypes> loaders,
         std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes = std::nullopt) const;
 
-   private:
-    static auto getMultipleModInfoURL(const QStringList& ids) -> QString
-    {
-        return BuildConfig.MODRINTH_PROD_URL + QString("/projects?ids=[\"%1\"]").arg(ids.join("\",\""));
-    };
-
    public:
     static bool validateModLoaders(ModPlatform::ModLoaderTypes loaders);
 
@@ -64,6 +58,7 @@ class ModrinthAPI final : public ResourceAPI {
     Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const override;
     Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> getVersions(const VersionSearchArgs& args) const override;
     Net::RPC::Spec<ModPlatform::IndexedVersion> getVersion(const QString& id, const QString& versionId) const override;
+    Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> getVersions(const QStringList& versionIds) const override;
 
    private:
     static QUrl searchProjectsURL(const SearchArgs& args);

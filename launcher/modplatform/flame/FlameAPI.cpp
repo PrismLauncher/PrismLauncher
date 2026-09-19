@@ -66,29 +66,6 @@ QString FlameAPI::getModFileChangelog(int modId, int fileId)
     return changelog;
 }
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds)
-{
-    auto netJob = makeShared<NetJob>(QString("Flame::GetFiles"), APPLICATION->network());
-
-    QJsonObject bodyObj;
-    QJsonArray filesArr;
-    for (const auto& fileId : fileIds) {
-        filesArr.append(fileId);
-    }
-
-    bodyObj["fileIds"] = filesArr;
-
-    QJsonDocument body(bodyObj);
-    auto bodyRaw = body.toJson();
-
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods/files"), bodyRaw);
-    netJob->addNetAction(action);
-
-    QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [bodyRaw] { qDebug() << bodyRaw; });
-
-    return { netJob, response };
-}
-
 QList<ResourceAPI::SortingMethod> FlameAPI::getSortingMethods() const
 {
     // https://docs.curseforge.com/?python#tocS_ModsSearchSortField
@@ -243,8 +220,9 @@ Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> FlameAPI::getVersions(const V
                     return Json::requireArray(v, "data");
                 }))
 
-                args.pack->resourceType = args.resourceType;
-                TRY(Flame::Parse::loadIndexedPackVersions(*args.pack, doc))
+                TRY_INTO(args.pack->versions,
+                         Flame::Parse::loadIndexedPackVersions(doc, args.pack->addonId.toString(), args.pack->resourceType))
+                args.pack->versionsLoaded = true;
 
                 return args.pack->versions;
             } };
@@ -259,6 +237,24 @@ Net::RPC::Spec<ModPlatform::IndexedVersion> FlameAPI::getVersion(const QString& 
                     .and_then([](const auto& v) { return Json::requireObject(v, "data"); })
                     .and_then([](const auto& v) { return Flame::Parse::loadIndexedPackVersion(v); });
             } };
+}
+
+Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> FlameAPI::getVersions(const QStringList& versionIds) const
+{
+    // https://docs.curseforge.com/rest-api/#get-files
+    QJsonObject bodyObj;
+    bodyObj["fileIds"] = Json::toJsonArray(versionIds);
+
+    auto body = QJsonDocument(bodyObj).toJson();
+
+    return { { .method = Net::HttpMethod::Post, .url = BuildConfig.FLAME_BASE_URL + "/mods/files", .data = body },
+             [](const auto& response) -> Result<QList<ModPlatform::IndexedVersion>> {
+                 TRY_INTO(auto doc, Json::requireObject(response, "ResourceAPI::getVersions").and_then([](const auto& v) {
+                     return Json::requireArray(v, "data");
+                 }))
+
+                 return Flame::Parse::loadIndexedPackVersions(doc);
+             } };
 }
 
 QUrl FlameAPI::searchProjectsURL(const SearchArgs& args)

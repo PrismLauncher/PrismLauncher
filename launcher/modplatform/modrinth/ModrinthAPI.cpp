@@ -278,7 +278,7 @@ Net::RPC::Spec<ModPlatform::IndexedPack> ModrinthAPI::getProject(const QString& 
 Net::RPC::Spec<QList<ModPlatform::IndexedPack>> ModrinthAPI::getProjects(const QStringList& addonIds) const
 {
     // https://docs.modrinth.com/api/operations/getprojects/
-    auto url = getMultipleModInfoURL(addonIds);
+    auto url = BuildConfig.MODRINTH_PROD_URL + QString("/projects?ids=[\"%1\"]").arg(addonIds.join("\",\""));
 
     return { { .url = url }, [](const auto& response) -> Result<QList<ModPlatform::IndexedPack>> {
                 QList<ModPlatform::IndexedPack> newList;
@@ -363,34 +363,10 @@ Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> ModrinthAPI::getVersions(cons
 {  // https://docs.modrinth.com/api/operations/getprojectversions/
     auto url = getVersionsURL(args);
     return { { .url = url }, [args](const auto& response) -> Result<QList<ModPlatform::IndexedVersion>> {
-                TRY_INTO(auto doc, Json::requireDocument(response, "ResourceAPI::getVersions").and_then([](const auto& v) {
-                    return Json::requireArray(v);
-                }))
+                TRY_INTO(auto doc, Json::requireArray(response, "ResourceAPI::getVersions"))
 
-                QList<ModPlatform::IndexedVersion> unsortedVersions;
-
-                for (auto versionIter : doc) {
-                    auto obj = versionIter.toObject();
-
-                    TRY_INTO(auto file, Modrinth::Parse::loadIndexedPackVersion(obj))
-                    if (!file.addonId.isValid()) {
-                        file.addonId = args.pack->addonId;
-                    }
-
-                    if (file.fileId.isValid() && !file.downloadUrl.isEmpty()) {  // Heuristic to check if the returned value is valid
-                        unsortedVersions.append(file);
-                    }
-                }
-
-                auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
-                    // dates are in RFC 3339 format
-                    return a.date > b.date;
-                };
-                std::ranges::sort(unsortedVersions, orderSortPredicate);
-
-                args.pack->versions = unsortedVersions;
+                TRY_INTO(args.pack->versions, Modrinth::Parse::loadIndexedPackVersions(doc, args.pack->addonId.toString()))
                 args.pack->versionsLoaded = true;
-
                 return args.pack->versions;
             } };
 }
@@ -403,6 +379,16 @@ Net::RPC::Spec<ModPlatform::IndexedVersion> ModrinthAPI::getVersion(const QStrin
                 return Json::requireObject(response, "ResourceAPI::getVersion").and_then([](const auto& v) {
                     return Modrinth::Parse::loadIndexedPackVersion(v);
                 });
+            } };
+}
+
+Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> ModrinthAPI::getVersions(const QStringList& versionIds) const
+{  // https://docs.modrinth.com/api/operations/getversions/
+    auto url = BuildConfig.MODRINTH_PROD_URL + QString("/versions?ids=[\"%1\"]").arg(versionIds.join("\",\""));
+    return { { .url = url }, [](const auto& response) -> Result<QList<ModPlatform::IndexedVersion>> {
+                TRY_INTO(auto doc, Json::requireArray(response, "ResourceAPI::getVersions"))
+
+                return Modrinth::Parse::loadIndexedPackVersions(doc);
             } };
 }
 
