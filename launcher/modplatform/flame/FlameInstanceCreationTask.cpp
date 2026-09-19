@@ -39,13 +39,11 @@
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlamePackIndex.h"
 #include "modplatform/flame/PackManifest.h"
 
 #include "Application.h"
 #include "FileSystem.h"
 #include "InstanceList.h"
-#include "Json.h"
 
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"

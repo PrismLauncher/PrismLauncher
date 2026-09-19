@@ -4,16 +4,13 @@
 #include <QDebug>
 
 #include "Application.h"
-#include "Json.h"
 
 #include "QObjectPtr.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 
 #include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlamePackIndex.h"
 #include "modplatform/helpers/HashUtils.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
-#include "modplatform/modrinth/ModrinthPackIndex.h"
 #include "settings/SettingsObject.h"
 #include "tasks/ConcurrentTask.h"
 

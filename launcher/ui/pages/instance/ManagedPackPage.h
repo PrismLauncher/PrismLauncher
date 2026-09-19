@@ -7,9 +7,6 @@
 #include "BaseInstance.h"
 
 #include "modplatform/ModIndex.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
-
-#include "modplatform/flame/FlameAPI.h"
 
 #include "ui/pages/BasePage.h"
 

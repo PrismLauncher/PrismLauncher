@@ -1,14 +1,10 @@
 #include "modplatform/ResourceAPI.h"
 
-#include <algorithm>
-
 #include "Application.h"
-#include "Json.h"
 #include "net/NetJob.h"
 
 #include "modplatform/ModIndex.h"
 
-#include "net/ApiRequest.h"
 #include "net/RPCSink.h"
 
 std::pair<NetJob::Ptr, ModPlatform::IndexedPack*> ResourceAPI::getProjectTask(const QString& addonId, bool loadExtra, bool askRetry) const
