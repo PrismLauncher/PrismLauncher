@@ -110,7 +110,7 @@ Wrapperommand=)";
         QVERIFY(f2.loadFile(fileName));
         QCOMPARE(f2.get("PreLaunchCommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link");
         QCOMPARE(f2.get("Wrapperommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link =");
-        QCOMPARE(f2.get("ConfigVersion", "NOT SET").toString(), "1.3");
+        QCOMPARE(f2.get("ConfigVersion", "NOT SET").toString(), "1.4");
 #if defined(Q_OS_WIN)
         FS::deletePath(fileName);
 #endif
@@ -151,7 +151,7 @@ Wrapperommand=)";
         QVERIFY(f2.loadFile(fileName));
         for (auto key : settings.allKeys())
             QCOMPARE(f2.get(key, "NOT SET").toString(), settings.value(key).toString());
-        QCOMPARE(f2.get("ConfigVersion", "NOT SET").toString(), "1.3");
+        QCOMPARE(f2.get("ConfigVersion", "NOT SET").toString(), "1.4");
 #if defined(Q_OS_WIN)
         FS::deletePath(fileName);
 #endif
@@ -185,7 +185,7 @@ PreLaunchCommand=)";
         INIFile f1;
         QVERIFY(f1.loadFile(fileName));
         QCOMPARE(f1.get("PreLaunchCommand", "NOT SET").toString(), "env mesa=true");
-        QCOMPARE(f1.get("ConfigVersion", "NOT SET").toString(), "1.3");
+        QCOMPARE(f1.get("ConfigVersion", "NOT SET").toString(), "1.4");
 #if defined(Q_OS_WIN)
         FS::deletePath(fileName);
 #endif
