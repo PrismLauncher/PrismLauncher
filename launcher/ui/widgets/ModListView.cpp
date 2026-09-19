@@ -72,14 +72,14 @@ void ModListView::setResizeModes(const QList<QHeaderView::ResizeMode>& modes)
 void ModListView::resizeEvent(QResizeEvent* event)
 {
     QTreeView::resizeEvent(event);
-    fillWithPrincipal();
+    giveSpareWidthToPrincipalColumn();
 }
 
 // Makes the principal column take whatever width the other visible columns leave.
-void ModListView::fillWithPrincipal()
+void ModListView::giveSpareWidthToPrincipalColumn()
 {
     auto head = header();
-    if (m_principalColumn < 0 || m_principalColumn >= head->count() || m_adjusting)
+    if (m_principalColumn < 0 || m_principalColumn >= head->count() || m_adjustingColumnSizes)
         return;
 
     int others = 0;
@@ -88,9 +88,9 @@ void ModListView::fillWithPrincipal()
             others += head->sectionSize(i);
     }
 
-    m_adjusting = true;
+    m_adjustingColumnSizes = true;
     head->resizeSection(m_principalColumn, qMax(head->minimumSectionSize(), viewport()->width() - others));
-    m_adjusting = false;
+    m_adjustingColumnSizes = false;
 }
 
 // Dragging a handle moves width between the two columns next to it, so the handle follows the cursor
@@ -98,12 +98,12 @@ void ModListView::fillWithPrincipal()
 void ModListView::onSectionResized(int logicalIndex, int oldSize, int newSize)
 {
     auto head = header();
-    if (m_adjusting || m_principalColumn < 0)
+    if (m_adjustingColumnSizes || m_principalColumn < 0)
         return;
 
     // A column was shown or hidden
     if (oldSize == 0 || newSize == 0) {
-        fillWithPrincipal();
+        giveSpareWidthToPrincipalColumn();
         return;
     }
 
@@ -123,10 +123,10 @@ void ModListView::onSectionResized(int logicalIndex, int oldSize, int newSize)
     int neighbourSize = head->sectionSize(neighbour) - (newSize - oldSize);
     int clamped = qMax(head->minimumSectionSize(), neighbourSize);
 
-    m_adjusting = true;
+    m_adjustingColumnSizes = true;
     head->resizeSection(neighbour, clamped);
     // The neighbour hit its minimum width, so give the difference back
     if (clamped != neighbourSize)
         head->resizeSection(logicalIndex, newSize - (clamped - neighbourSize));
-    m_adjusting = false;
+    m_adjustingColumnSizes = false;
 }

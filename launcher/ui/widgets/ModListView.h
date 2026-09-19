@@ -29,9 +29,9 @@ class ModListView : public QTreeView {
 
    private:
     void onSectionResized(int logicalIndex, int oldSize, int newSize);
-    void fillWithPrincipal();
+    void giveSpareWidthToPrincipalColumn();
 
     // Column that takes up the spare width. It stays Interactive so the user can still drag it.
     int m_principalColumn = -1;
-    bool m_adjusting = false;
+    bool m_adjustingColumnSizes = false;
 };
