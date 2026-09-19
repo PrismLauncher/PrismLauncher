@@ -325,8 +325,6 @@ void ModpackListModel::logoFailed(const QString& logo)
 
 void ModpackListModel::searchRequestFinished(const QList<ModPlatform::IndexedPack>& newList)
 {
-    m_jobPtr.reset();
-
     if (newList.size() < m_modpacksPerPage) {
         m_searchState = Finished;
     } else {
@@ -336,6 +334,7 @@ void ModpackListModel::searchRequestFinished(const QList<ModPlatform::IndexedPac
 
     // When you have a Qt build with assertions turned on, proceeding here will abort the application
     if (newList.size() == 0) {
+        m_jobPtr.reset();
         return;
     }
 
@@ -346,13 +345,15 @@ void ModpackListModel::searchRequestFinished(const QList<ModPlatform::IndexedPac
         m_modpacks.append(pack);
     }
     endInsertRows();
+
+    m_jobPtr.reset();
 }
 
 void ModpackListModel::searchRequestForOneSucceeded(ModPlatform::IndexedPack::Ptr pack)
 {
     m_jobPtr.reset();
 
-    beginInsertRows(QModelIndex(), static_cast<int>(m_modpacks.size()), static_cast<int>(m_modpacks.size() + 1));
+    beginInsertRows(QModelIndex(), static_cast<int>(m_modpacks.size()), static_cast<int>(m_modpacks.size()));
     m_modpacks.append(pack);
     endInsertRows();
 }

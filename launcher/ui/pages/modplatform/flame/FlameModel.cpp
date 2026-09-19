@@ -281,7 +281,7 @@ void Flame::ListModel::searchRequestForOneSucceeded(ModPlatform::IndexedPack::Pt
 {
     m_jobPtr.reset();
 
-    beginInsertRows(QModelIndex(), m_modpacks.size(), m_modpacks.size() + 1);
+    beginInsertRows(QModelIndex(), m_modpacks.size(), m_modpacks.size());
     m_modpacks.append(pack);
     endInsertRows();
 }

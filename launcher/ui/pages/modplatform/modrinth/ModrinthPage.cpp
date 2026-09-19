@@ -220,7 +220,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
                 m_ui->versionSelectionBox->addItem(QString("%1 - %2").arg(version.version, version.versionNumber),
                                                    QVariant(version.fileId));
             } else {
-                m_ui->versionSelectionBox->addItem(version.version, QVariant(version.fileId));
+                m_ui->versionSelectionBox->addItem(version.getVersionDisplayString(), QVariant(version.fileId));
             }
         }
 
