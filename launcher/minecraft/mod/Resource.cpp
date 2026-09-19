@@ -112,7 +112,7 @@ auto Resource::version() const -> QString
         return metadata()->version_number;
     }
 
-    return {};
+    return QObject::tr("Unknown");
 }
 
 auto Resource::homepage() const -> QString
