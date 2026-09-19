@@ -3,16 +3,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ModrinthAPI.h"
-#include <qjsonarray.h>
-#include <array>
 #include <utility>
 
 #include "Application.h"
+#include "BuildConfig.h"
 #include "Json.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceType.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
-#include "net/ApiRequest.h"
 #include "net/NetJob.h"
 #include "net/Request.h"
 
@@ -152,24 +150,6 @@ void addVersionTypes(QJsonObject& bodyObj, const std::optional<std::vector<ModPl
 }
 
 }  // namespace
-
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersions(const QStringList& hashes, const QString& hashFormat)
-{
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersions"), APPLICATION->network());
-
-    QJsonObject bodyObj;
-
-    Json::writeStringList(bodyObj, "hashes", hashes);
-    Json::writeString(bodyObj, "algorithm", hashFormat);
-
-    QJsonDocument body(bodyObj);
-    auto bodyRaw = body.toJson();
-
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files"), bodyRaw);
-    netJob->addNetAction(action);
-    netJob->setAskRetry(false);
-    return { netJob, response };
-}
 
 QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const
 {
@@ -322,6 +302,7 @@ Net::RPC::Spec<QHash<QString, ModPlatform::IndexedVersion>> ModrinthAPI::latestV
     std::optional<ModPlatform::ModLoaderTypes> loaders,
     const std::optional<std::vector<ModPlatform::IndexedVersionType>>& releaseTypes)
 {
+    // https://docs.modrinth.com/api/operations/getlatestversionsfromhashes/
     QString loaderFilter;
     if (loaders.has_value() && loaders != 0) {
         auto modLoaders = ModPlatform::modLoaderTypesToList(*loaders);
@@ -383,6 +364,44 @@ std::pair<NetJob::Ptr, QHash<QString, ModPlatform::IndexedVersion>*> ModrinthAPI
     const std::optional<std::vector<ModPlatform::IndexedVersionType>>& releaseTypes)
 {
     auto spec = latestVersions(hashes, hashFormat, std::move(mcVersions), loaders, releaseTypes);
+
+    auto netJob = makeShared<NetJob>("Modrinth::latestVersionsTask", APPLICATION->network());
+
+    auto [action, response] = Net::RPC::make<QHash<QString, ModPlatform::IndexedVersion>>(spec);
+    netJob->addNetAction(action);
+
+    return { netJob, response };
+}
+Net::RPC::Spec<QHash<QString, ModPlatform::IndexedVersion>> ModrinthAPI::currentVersions(const QStringList& hashes,
+                                                                                         const QString& hashFormat)
+{
+    // https://docs.modrinth.com/api/operations/versionsfromhashes/
+    QJsonObject bodyObj;
+
+    Json::writeStringList(bodyObj, "hashes", hashes);
+    Json::writeString(bodyObj, "algorithm", hashFormat);
+
+    ;
+    auto body = QJsonDocument(bodyObj).toJson();
+
+    return { { .method = Net::HttpMethod::Post, .url = BuildConfig.MODRINTH_PROD_URL + "/version_files", .data = body },
+             [](const auto& response) -> Result<QHash<QString, ModPlatform::IndexedVersion>> {
+                 TRY_INTO(auto doc, Json::requireObject(response, "ModrinthCheckUpdate"))
+
+                 QHash<QString, ModPlatform::IndexedVersion> matches;
+                 for (auto hash : doc.keys()) {
+                     TRY_INTO(matches[hash], Json::requireObject(doc, hash).and_then(
+                                                 [](const auto& v) { return Modrinth::Parse::loadIndexedPackVersion(v); }))
+                 }
+
+                 return matches;
+             } };
+}
+
+std::pair<NetJob::Ptr, QHash<QString, ModPlatform::IndexedVersion>*> ModrinthAPI::currentVersionsTask(const QStringList& hashes,
+                                                                                                      const QString& hashFormat)
+{
+    auto spec = currentVersions(hashes, hashFormat);
 
     auto netJob = makeShared<NetJob>("Modrinth::latestVersionsTask", APPLICATION->network());
 

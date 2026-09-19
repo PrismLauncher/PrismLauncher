@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <QHash>
 #include <QList>
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
