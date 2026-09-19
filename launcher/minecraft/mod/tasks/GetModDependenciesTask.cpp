@@ -22,9 +22,7 @@
 #include <algorithm>
 #include <memory>
 #include <utility>
-#include "Json.h"
 #include "QObjectPtr.h"
-#include "Result.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/ModFolderModel.h"
