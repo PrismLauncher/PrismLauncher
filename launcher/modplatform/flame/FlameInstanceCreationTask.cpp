@@ -213,53 +213,28 @@ void FlameCreationTask::executeTask()
             fileIds.append(QString::number(file.fileId));
         }
 
-        auto [job, rawResponse] = FlameAPI::getFiles(fileIds);
+        auto [job, response] = FlameAPI::get().getVersionsTask(fileIds);
 
-        connect(job.get(), &Task::succeeded, this,
-                [this, rawResponse, fileIds, oldInstDir, oldFiles, oldMinecraftDir, createInst]() mutable {
-                    // Parse the API response
-                    auto doc = Json::requireObject(*rawResponse).and_then([fileIds](const auto& v) -> Result<QJsonArray> {
-                        if (fileIds.size() == 1) {
-                            TRY_INTO(const auto& obj, Json::requireObject(v, "data", "data"))
-                            return { { obj } };
-                        }
-                        return Json::requireArray(v, "data");
-                    });
-                    if (!doc) {
-                        qWarning() << "Error while parsing JSON response from Flame files task:" << doc.error();
-                        qWarning() << *rawResponse;
-                        return;
-                    }
+        connect(job.get(), &Task::succeeded, this, [this, response, fileIds, oldInstDir, oldFiles, oldMinecraftDir, createInst]() mutable {
+            for (const auto& entry : *response) {
+                Flame::File file;
+                // We don't care about blocked mods, we just need local data to delete the file
+                file.version = entry;
+                oldFiles.insert(entry.fileId.toInt(), file);
+            }
 
-                    for (auto entry : doc.value()) {
-                        auto parse = [&entry, &oldFiles] -> Result<> {
-                            TRY_INTO(const auto& entryObj, Json::requireObject(entry))
+            // Delete the files
+            for (const auto& file : oldFiles) {
+                if (file.version.fileName.isEmpty() || file.targetFolder.isEmpty()) {
+                    continue;
+                }
 
-                            Flame::File file;
-                            // We don't care about blocked mods, we just need local data to delete the file
-                            TRY_INTO(file.version, Flame::Parse::loadIndexedPackVersion(entryObj))
-                            TRY_INTO(const auto& id, Json::requireInteger(entryObj, "id"))
-                            oldFiles.insert(id, file);
-                            return {};
-                        };
-                        if (auto res = parse(); !res) {
-                            qCritical() << res.error();
-                            break;
-                        }
-                    }
+                const QString relativePath(FS::PathCombine(file.targetFolder, file.version.fileName));
+                scheduleToDelete(m_parent, oldMinecraftDir, relativePath, true);
+            }
 
-                    // Delete the files
-                    for (const auto& file : oldFiles) {
-                        if (file.version.fileName.isEmpty() || file.targetFolder.isEmpty()) {
-                            continue;
-                        }
-
-                        const QString relativePath(FS::PathCombine(file.targetFolder, file.version.fileName));
-                        scheduleToDelete(m_parent, oldMinecraftDir, relativePath, true);
-                    }
-
-                    createInst();
-                });
+            createInst();
+        });
         connect(job.get(), &Task::aborted, this, [warnUser] {
             warnUser(tr("Failed to fetch the old files."),
                      tr("We couldn't fetch the old files because the task was aborted. This may cause "
