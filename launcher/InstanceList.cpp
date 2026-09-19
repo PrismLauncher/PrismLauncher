@@ -1153,6 +1153,7 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
                 FS::copy folderCopy(templateDir, destination);
                 folderCopy.followSymlinks(false);
                 folderCopy.copyDirectories(true);
+                folderCopy.overwrite(true);
 
                 if (!folderCopy()) {
                     qWarning() << "Failed to copy instance template";
