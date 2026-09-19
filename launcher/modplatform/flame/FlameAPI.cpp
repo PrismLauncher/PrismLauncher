@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "FlameAPI.h"
-#include <qstringview.h>
 #include <optional>
 #include "BuildConfig.h"
 
@@ -33,38 +32,6 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::matchFingerprints(const QList<uint>&
     netJob->addNetAction(action);
 
     return { netJob, response };
-}
-
-QString FlameAPI::getModFileChangelog(int modId, int fileId)
-{
-    QEventLoop lock;
-    QString changelog;
-
-    auto netJob = makeShared<NetJob>(QString("Flame::FileChangelog"), APPLICATION->network());
-    auto [action, response] = Net::ApiRequest::makeByteArray(
-        QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2/changelog")
-            .arg(QString::fromStdString(std::to_string(modId)), QString::fromStdString(std::to_string(fileId))));
-    netJob->addNetAction(action);
-
-    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [&netJob, response, &changelog] {
-        auto doc = Json::requireDocument(*response, "Flame::FileChangelog");
-        if (!doc) {
-            qWarning() << "Error while parsing JSON response from Flame::FileChangelog:" << doc.error();
-            qWarning() << *response;
-
-            netJob->failed(doc.error());
-            return;
-        }
-
-        changelog = doc->object()["data"].toString();
-    });
-
-    QObject::connect(netJob.get(), &NetJob::finished, &lock, &QEventLoop::quit);
-
-    netJob->start();
-    lock.exec();
-
-    return changelog;
 }
 
 QList<ResourceAPI::SortingMethod> FlameAPI::getSortingMethods() const
@@ -256,6 +223,28 @@ Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> FlameAPI::getVersions(const Q
 
                  return Flame::Parse::loadIndexedPackVersions(doc);
              } };
+}
+
+Net::RPC::Spec<QString> FlameAPI::getChangelog(const QString& id, const QString& fileId)
+{
+    // https://docs.curseforge.com/rest-api/#get-mod-file-changelog
+    auto url = QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2/changelog").arg(id, fileId);
+    return { { .url = url }, [](const auto& response) -> Result<QString> {
+                TRY_INTO(auto doc, Json::requireObject(response, "Flame::FileChangelog"))
+                return doc["data"].toString();
+            } };
+}
+
+std::pair<NetJob::Ptr, QString*> FlameAPI::getChangelogTask(const QString& id, const QString& fileId)
+{
+    auto spec = getChangelog(id, fileId);
+
+    auto netJob = makeShared<NetJob>("Flame::Changelog", APPLICATION->network());
+
+    auto [action, response] = Net::RPC::make<QString>(spec);
+    netJob->addNetAction(action);
+
+    return { netJob, response };
 }
 
 QUrl FlameAPI::searchProjectsURL(const SearchArgs& args)

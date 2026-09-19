@@ -20,11 +20,13 @@ class FlameCheckUpdate : public CheckUpdateTask {
    protected slots:
     void executeTask() override;
    private slots:
-    void getLatestVersionCallback(Resource* resource, QList<ModPlatform::IndexedVersion>* response);
+    void getLatestVersionCallback();
     void collectBlockedMods();
 
    private:
     Task::Ptr m_task = nullptr;
 
     QHash<Resource*, QString> m_blocked;
+
+    QList<std::pair<Resource*, QList<ModPlatform::IndexedVersion>*>> m_versions;
 };
