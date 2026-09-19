@@ -54,4 +54,21 @@ class INIFile : public QMap<QString, QVariant> {
 
     QVariant get(const QString& key, QVariant def) const;
     void set(const QString& key, QVariant val);
+
+    template <typename T>
+    T convert(const QString& key, T defaultValue = {}) const {
+        QVariant val = value(key);
+        if (!val.isValid()) {
+            return defaultValue;
+        }
+
+        if (!val.convert(QMetaType::fromType<T>())) {
+            return defaultValue;
+        }
+
+        return val.value<T>();
+    }
+
+    // NOTE: conversion to const char* doesn't work, even though QMetaType::fromType does
+    const char* convert(const QString& key, const char* defaultValue) const = delete;
 };
