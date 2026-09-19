@@ -101,15 +101,6 @@ int Mod::compare(const Resource& other, SortType type) const
         case SortType::Date:
         case SortType::Size:
             return Resource::compare(other, type);
-        case SortType::Version: {
-            auto this_ver = Version(version());
-            auto other_ver = Version(cast_other->version());
-            if (this_ver > other_ver)
-                return 1;
-            if (this_ver < other_ver)
-                return -1;
-            break;
-        }
         case SortType::Side: {
             auto compare_result = QString::compare(side(), cast_other->side(), Qt::CaseInsensitive);
             if (compare_result != 0)
