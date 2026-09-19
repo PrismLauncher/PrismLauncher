@@ -16,17 +16,6 @@ class FlameAPI final : public ResourceAPI {
         return s_instance;
     }
 
-    static std::optional<ModPlatform::IndexedVersion> getLatestVersion(const QList<ModPlatform::IndexedVersion>& versions,
-                                                                       const QList<ModPlatform::ModLoaderType>& instanceLoaders,
-                                                                       ModPlatform::ModLoaderTypes fallback,
-                                                                       bool checkLoaders,
-                                                                       std::vector<ModPlatform::IndexedVersionType> releaseTypes = {});
-
-    static std::pair<Task::Ptr, QByteArray*> matchFingerprints(const QList<uint>& fingerprints);
-
-    // ToDo: move it
-    static ModPlatform::ResourceType getResourceType(int classId);
-
    public:
     static bool validateModLoaders(ModPlatform::ModLoaderTypes loaders);
 
@@ -44,6 +33,10 @@ class FlameAPI final : public ResourceAPI {
 
     static Net::RPC::Spec<QString> getChangelog(const QString& id, const QString& fileId);
     static std::pair<NetJob::Ptr, QString*> getChangelogTask(const QString& id, const QString& fileId);
+    static Net::RPC::Spec<QHash<QString, ModPlatform::IndexedVersion>> matchFingerprints(const QList<uint>& fingerprints,
+                                                                                         bool onlyAvailable = false);
+    static std::pair<NetJob::Ptr, QHash<QString, ModPlatform::IndexedVersion>*> matchFingerprintsTask(const QList<uint>& fingerprints,
+                                                                                                      bool onlyAvailable = false);
 
    private:
     static QUrl searchProjectsURL(const SearchArgs& args);
