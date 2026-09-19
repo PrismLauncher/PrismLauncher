@@ -25,13 +25,14 @@
 #include <QtConcurrentRun>
 #include <algorithm>
 #include <utility>
-#include "Json.h"
+#include "BuildConfig.h"
 #include "MMCZip.h"
 #include "archive/ExportToZipTask.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/helpers/HashUtils.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/Task.h"
 
 const QStringList ModrinthPackExportTask::PREFIXES({ "mods/", "coremods/", "resourcepacks/", "texturepacks/", "shaderpacks/" });

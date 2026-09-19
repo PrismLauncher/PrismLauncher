@@ -8,12 +8,13 @@
 #include <QUrl>
 #include <QUrlQuery>
 #include "modplatform/ModIndex.h"
+#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui_ManagedPackPage.h"
 
 #include <QAbstractItemView>
 #include <QFileDialog>
 #include <QInputDialog>
-#include <memory>
 
 #include "Application.h"
 #include "InstanceImportTask.h"
