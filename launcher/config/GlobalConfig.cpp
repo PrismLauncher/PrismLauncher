@@ -44,9 +44,9 @@
 
 #include "Application.h"
 #include "GlobalConfig.h"
+#include "INIFile.h"
 #include "Json.h"
 #include "SysInfo.h"
-#include "settings/INIFile.h"
 
 using namespace Qt::Literals;
 

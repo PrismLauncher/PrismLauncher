@@ -34,7 +34,7 @@
  *      limitations under the License.
  */
 
-#include "settings/INIFile.h"
+#include "INIFile.h"
 
 #include <AssertHelpers.h>
 #include <FileSystem.h>

@@ -12,8 +12,8 @@
 
 #include "Json.h"
 #include "archive/ArchiveReader.h"
+#include "config/INIFile.h"
 #include "minecraft/mod/ModDetails.h"
-#include "settings/INIFile.h"
 
 static const QRegularExpression s_newlineRegex("\r\n|\n|\r");
 
