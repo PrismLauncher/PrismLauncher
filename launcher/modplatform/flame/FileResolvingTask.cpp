@@ -105,7 +105,7 @@ void Flame::FileResolvingTask::netJobFinished(const QList<ModPlatform::IndexedVe
         getFlameProjects();
         return;
     }
-    auto [modrinthTask, modrinthResponse] = ModrinthAPI::currentVersions(hashes, "sha1");
+    auto [modrinthTask, modrinthResponse] = ModrinthAPI::currentVersionsTask(hashes, "sha1");
     m_task = modrinthTask;
     (dynamic_cast<NetJob*>(m_task.get()))->setAskRetry(false);
     auto stepProgress2 = std::make_shared<TaskStepProgress>();
@@ -113,32 +113,13 @@ void Flame::FileResolvingTask::netJobFinished(const QList<ModPlatform::IndexedVe
         stepProgress2->state = TaskStepState::Succeeded;
         stepProgress(*stepProgress2);
 
-        auto doc = Json::requireObject(*modrinthResponse);
-        if (!doc) {
-            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions:" << doc.error();
-            qWarning() << *modrinthResponse;
-
-            getFlameProjects();
-            return;
-        }
         if (APPLICATION->settings()->get("FallbackMRBlockedMods").toBool()) {
-            const auto& entries = doc.value();
             for (auto& out : m_manifest.files) {
                 auto url = QUrl(out.version.downloadUrl, QUrl::TolerantMode);
                 if (!url.isValid() && "sha1" == out.version.hashType && !out.version.hash.isEmpty()) {
-                    auto parse = [&entries, &out]() -> Result<> {
-                        TRY_INTO(const auto& file, Json::requireObject(entries, out.version.hash).and_then([](const auto& v) {
-                            return Modrinth::Parse::loadIndexedPackVersion(v);
-                        }))
-
-                        out.version.downloadUrl = file.downloadUrl;
+                    if (modrinthResponse->contains(out.version.hash)) {
+                        out.version.downloadUrl = modrinthResponse->value(out.version.hash).downloadUrl;
                         qDebug() << "Found alternative on modrinth" << out.version.fileName;
-                        return {};
-                    };
-                    if (auto res = parse(); !res) {
-                        qDebug() << res.error();
-                        qDebug() << entries;
-                        continue;
                     }
                 }
             }

@@ -10,7 +10,6 @@
 #include "Json.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlamePackIndex.h"
-#include "net/ApiRequest.h"
 #include "net/NetJob.h"
 #include "net/Request.h"
 
