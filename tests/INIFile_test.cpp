@@ -1,6 +1,6 @@
 #include <QTest>
 
-#include <settings/INIFile.h>
+#include <config/INIFile.h>
 #include <QList>
 #include <QSettings>
 #include <QTemporaryFile>
