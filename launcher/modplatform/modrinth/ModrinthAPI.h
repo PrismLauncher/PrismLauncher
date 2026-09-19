@@ -26,23 +26,7 @@ class ModrinthAPI final : public ResourceAPI {
         return s_instance;
     }
 
-    static std::pair<Task::Ptr, QByteArray*> currentVersion(const QString& hash, const QString& hashFormat);
-
     static std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, const QString& hashFormat);
-
-    std::pair<Task::Ptr, QByteArray*> latestVersion(
-        const QString& hash,
-        const QString& hashFormat,
-        std::optional<std::vector<Version>> mcVersions,
-        std::optional<ModPlatform::ModLoaderTypes> loaders,
-        std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes = std::nullopt) const;
-
-    std::pair<Task::Ptr, QByteArray*> latestVersions(
-        const QStringList& hashes,
-        const QString& hashFormat,
-        std::optional<std::vector<Version>> mcVersions,
-        std::optional<ModPlatform::ModLoaderTypes> loaders,
-        std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes = std::nullopt) const;
 
    public:
     static bool validateModLoaders(ModPlatform::ModLoaderTypes loaders);
@@ -59,6 +43,19 @@ class ModrinthAPI final : public ResourceAPI {
     Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> getVersions(const VersionSearchArgs& args) const override;
     Net::RPC::Spec<ModPlatform::IndexedVersion> getVersion(const QString& id, const QString& versionId) const override;
     Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> getVersions(const QStringList& versionIds) const override;
+
+    static Net::RPC::Spec<QHash<QString, ModPlatform::IndexedVersion>> latestVersions(
+        const QStringList& hashes,
+        const QString& hashFormat,
+        std::optional<std::vector<Version>> mcVersions,
+        std::optional<ModPlatform::ModLoaderTypes> loaders,
+        const std::optional<std::vector<ModPlatform::IndexedVersionType>>& releaseTypes = std::nullopt);
+    static std::pair<NetJob::Ptr, QHash<QString, ModPlatform::IndexedVersion>*> latestVersionsTask(
+        const QStringList& hashes,
+        const QString& hashFormat,
+        std::optional<std::vector<Version>> mcVersions,
+        std::optional<ModPlatform::ModLoaderTypes> loaders,
+        const std::optional<std::vector<ModPlatform::IndexedVersionType>>& releaseTypes = std::nullopt);
 
    private:
     static QUrl searchProjectsURL(const SearchArgs& args);
