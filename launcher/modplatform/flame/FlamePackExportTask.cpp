@@ -172,38 +172,18 @@ void FlamePackExportTask::makeApiRequest()
         fingerprints.push_back(murmur.toUInt());
     }
 
-    auto [matchTask, response] = FlameAPI::matchFingerprints(fingerprints);
+    auto [matchTask, response] = FlameAPI::matchFingerprintsTask(fingerprints, true);
     task = matchTask;
 
     connect(task.get(), &Task::succeeded, this, [this, response] {
-        auto doc = Json::requireObject(*response)
-                       .and_then([](const auto& v) { return Json::requireObject(v, "data", "data"); })
-                       .and_then([](const auto& v) { return Json::requireArray(v, "exactMatches", "exactMatches"); });
-        if (!doc) {
-            qWarning() << "Error while parsing JSON response from CurseForge::CurrentVersions:" << doc.error();
-            qWarning() << *response;
-
-            emitFailed(doc.error());
-            return;
-        }
-        if (doc->isEmpty()) {
+        if (response->isEmpty()) {
             qWarning() << "No matches found for fingerprint search!";
 
             getProjectsInfo();
             return;
         }
 
-        for (auto match : doc.value()) {
-            auto matchObj = match.toObject();
-            auto fileObj = matchObj["file"].toObject();
-
-            if (matchObj.isEmpty() || fileObj.isEmpty()) {
-                qWarning() << "Fingerprint match is empty!";
-
-                continue;
-            }
-
-            auto fingerprint = QString::number(fileObj["fileFingerprint"].toInteger());
+        for (const auto& fingerprint : response->keys()) {
             auto mod = pendingHashes.find(fingerprint);
             if (mod == pendingHashes.end()) {
                 qWarning() << "Invalid fingerprint from the API response.";
@@ -211,19 +191,10 @@ void FlamePackExportTask::makeApiRequest()
             }
 
             setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name));
-            if (fileObj["isAvailable"].toBool()) {
-                auto parse = [&fileObj, this, &mod] -> Result<> {
-                    TRY_INTO(const auto& modid, Json::requireInteger(fileObj, "modId"))
-                    TRY_INTO(const auto& id, Json::requireInteger(fileObj, "id"))
-                    resolvedFiles.insert(mod->path, { .addonId = modid, .version = id, .enabled = mod->enabled, .isMod = mod->isMod });
-                    return {};
-                };
-                if (auto res = parse(); !res) {
-                    qDebug() << res.error();
-                    qDebug() << *doc;
-                    break;
-                }
-            }
+            auto file = response->value(fingerprint);
+            resolvedFiles.insert(
+                mod->path,
+                { .addonId = file.addonId.toInt(), .version = file.fileId.toInt(), .enabled = mod->enabled, .isMod = mod->isMod });
         }
 
         pendingHashes.clear();
