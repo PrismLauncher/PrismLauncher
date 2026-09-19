@@ -303,4 +303,30 @@ Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(const QJsonObject& ob
 
     return {};
 }
+
+Result<QList<ModPlatform::IndexedVersion>> loadIndexedPackVersions(const QJsonArray& arr, const QString& addonId)
+{
+    QList<ModPlatform::IndexedVersion> unsortedVersions;
+
+    for (auto versionIter : arr) {
+        auto obj = versionIter.toObject();
+
+        TRY_INTO(auto file, Modrinth::Parse::loadIndexedPackVersion(obj))
+        if (!file.addonId.isValid()) {
+            file.addonId = addonId;
+        }
+
+        if (file.fileId.isValid() && !file.downloadUrl.isEmpty()) {  // Heuristic to check if the returned value is valid
+            unsortedVersions.append(file);
+        }
+    }
+
+    auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
+        // dates are in RFC 3339 format
+        return a.date > b.date;
+    };
+    std::ranges::sort(unsortedVersions, orderSortPredicate);
+    return unsortedVersions;
+}
+
 }  // namespace Modrinth::Parse

@@ -465,7 +465,7 @@ void ResourceModel::searchRequestForOneSucceeded(const ModPlatform::IndexedPack:
 {
     m_searchState = SearchState::Finished;
 
-    beginInsertRows(QModelIndex(), static_cast<int>(m_packs.size()), static_cast<int>(m_packs.size() + 1));
+    beginInsertRows(QModelIndex(), static_cast<int>(m_packs.size()), static_cast<int>(m_packs.size()));
     m_packs.append(pack);
     endInsertRows();
 }
