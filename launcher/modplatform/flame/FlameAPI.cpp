@@ -14,55 +14,7 @@
 #include "net/NetJob.h"
 #include "net/Request.h"
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::matchFingerprints(const QList<uint>& fingerprints)
-{
-    auto netJob = makeShared<NetJob>(QString("Flame::MatchFingerprints"), APPLICATION->network());
-
-    QJsonObject bodyObj;
-    QJsonArray fingerprintsArr;
-    for (const auto& fp : fingerprints) {
-        fingerprintsArr.append(QString("%1").arg(fp));
-    }
-
-    bodyObj["fingerprints"] = fingerprintsArr;
-
-    QJsonDocument body(bodyObj);
-    auto bodyRaw = body.toJson();
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/fingerprints"), bodyRaw);
-    netJob->addNetAction(action);
-
-    return { netJob, response };
-}
-
-QList<ResourceAPI::SortingMethod> FlameAPI::getSortingMethods() const
-{
-    // https://docs.curseforge.com/?python#tocS_ModsSearchSortField
-    return { { .index = 1, .name = "Featured", .readableName = QObject::tr("Sort by Featured") },
-             { .index = 2, .name = "Popularity", .readableName = QObject::tr("Sort by Popularity") },
-             { .index = 3, .name = "LastUpdated", .readableName = QObject::tr("Sort by Last Updated") },
-             { .index = 4, .name = "Name", .readableName = QObject::tr("Sort by Name") },
-             { .index = 5, .name = "Author", .readableName = QObject::tr("Sort by Author") },
-             { .index = 6, .name = "TotalDownloads", .readableName = QObject::tr("Sort by Downloads") },
-             { .index = 7, .name = "Category", .readableName = QObject::tr("Sort by Category") },
-             { .index = 8, .name = "GameVersion", .readableName = QObject::tr("Sort by Game Version") } };
-}
-
 namespace {
-const auto g_classIDMappings = std::array{
-    std::pair{ ModPlatform::ResourceType::Mod, 6 },        std::pair{ ModPlatform::ResourceType::ResourcePack, 12 },
-    std::pair{ ModPlatform::ResourceType::World, 17 },     std::pair{ ModPlatform::ResourceType::ShaderPack, 6552 },
-    std::pair{ ModPlatform::ResourceType::Modpack, 4471 }, std::pair{ ModPlatform::ResourceType::DataPack, 6945 },
-};
-
-int getClassId(ModPlatform::ResourceType type)
-{
-    for (auto&& [e, classId] : g_classIDMappings) {
-        if (e == type) {
-            return classId;
-        }
-    }
-    return 0;
-}
 
 int getMappedModLoader(ModPlatform::ModLoaderType loaders)
 {
@@ -109,6 +61,19 @@ QString getModLoaderFilters(ModPlatform::ModLoaderTypes types)
 }
 
 }  // namespace
+
+QList<ResourceAPI::SortingMethod> FlameAPI::getSortingMethods() const
+{
+    // https://docs.curseforge.com/?python#tocS_ModsSearchSortField
+    return { { .index = 1, .name = "Featured", .readableName = QObject::tr("Sort by Featured") },
+             { .index = 2, .name = "Popularity", .readableName = QObject::tr("Sort by Popularity") },
+             { .index = 3, .name = "LastUpdated", .readableName = QObject::tr("Sort by Last Updated") },
+             { .index = 4, .name = "Name", .readableName = QObject::tr("Sort by Name") },
+             { .index = 5, .name = "Author", .readableName = QObject::tr("Sort by Author") },
+             { .index = 6, .name = "TotalDownloads", .readableName = QObject::tr("Sort by Downloads") },
+             { .index = 7, .name = "Category", .readableName = QObject::tr("Sort by Category") },
+             { .index = 8, .name = "GameVersion", .readableName = QObject::tr("Sort by Game Version") } };
+}
 
 bool FlameAPI::validateModLoaders(ModPlatform::ModLoaderTypes loaders)
 {
@@ -164,7 +129,7 @@ Net::RPC::Spec<QList<ModPlatform::IndexedPack>> FlameAPI::getProjects(const QStr
 
 Net::RPC::Spec<QList<ModPlatform::Category>> FlameAPI::getCategories(ModPlatform::ResourceType type) const
 {  // https://docs.curseforge.com/rest-api/#get-categories
-    auto url = QString(BuildConfig.FLAME_BASE_URL + "/categories?gameId=432&classId=%1").arg(getClassId(type));
+    auto url = QString(BuildConfig.FLAME_BASE_URL + "/categories?gameId=432&classId=%1").arg(Flame::Parse::getClassId(type));
     return { { .url = url }, [](const auto& response) -> Result<QList<ModPlatform::Category>> {
                 QList<ModPlatform::Category> categories;
                 TRY_INTO(const auto& doc,
@@ -247,10 +212,55 @@ std::pair<NetJob::Ptr, QString*> FlameAPI::getChangelogTask(const QString& id, c
     return { netJob, response };
 }
 
+Net::RPC::Spec<QHash<QString, ModPlatform::IndexedVersion>> FlameAPI::matchFingerprints(const QList<uint>& fingerprints, bool onlyAvailable)
+{
+    // https://docs.curseforge.com/rest-api/#get-fingerprints-matches
+
+    QJsonObject bodyObj;
+    QJsonArray fingerprintsArr;
+    for (const auto& fp : fingerprints) {
+        fingerprintsArr.append(QString::number(fp));
+    }
+
+    bodyObj["fingerprints"] = fingerprintsArr;
+
+    auto body = QJsonDocument(bodyObj).toJson();
+
+    return { { .method = Net::HttpMethod::Post, .url = BuildConfig.FLAME_BASE_URL + "/fingerprints", .data = body },
+             [onlyAvailable](const auto& response) -> Result<QHash<QString, ModPlatform::IndexedVersion>> {
+                 TRY_INTO(auto doc, Json::requireObject(response, "matchFingerprints")
+                                        .and_then([](const auto& v) { return Json::requireObject(v, "data"); })
+                                        .and_then([](const auto& v) { return Json::requireArray(v, "exactMatches"); }))
+                 QHash<QString, ModPlatform::IndexedVersion> matches;
+                 for (auto entry : doc) {
+                     TRY_INTO(auto file, Json::requireObject(entry, "file"))
+                     if (onlyAvailable && file["isAvailable"].toBool()) {
+                         continue;
+                     }
+                     auto fingerprint = QString::number(file["fileFingerprint"].toInteger());
+                     TRY_INTO(matches[fingerprint], Flame::Parse::loadIndexedPackVersion(file))
+                 }
+                 return matches;
+             } };
+}
+
+std::pair<NetJob::Ptr, QHash<QString, ModPlatform::IndexedVersion>*> FlameAPI::matchFingerprintsTask(const QList<uint>& fingerprints,
+                                                                                                     bool onlyAvailable)
+{
+    auto spec = matchFingerprints(fingerprints, onlyAvailable);
+
+    auto netJob = makeShared<NetJob>("Flame::matchFingerprints", APPLICATION->network());
+
+    auto [action, response] = Net::RPC::make<QHash<QString, ModPlatform::IndexedVersion>>(spec);
+    netJob->addNetAction(action);
+
+    return { netJob, response };
+}
+
 QUrl FlameAPI::searchProjectsURL(const SearchArgs& args)
 {
     QStringList getArguments;
-    getArguments.append(QString("classId=%1").arg(getClassId(args.type)));
+    getArguments.append(QString("classId=%1").arg(Flame::Parse::getClassId(args.type)));
     getArguments.append(QString("index=%1").arg(args.offset));
     getArguments.append("pageSize=25");
     if (args.search.has_value()) {
@@ -293,77 +303,4 @@ QUrl FlameAPI::getVersionsURL(const VersionSearchArgs& args)
         url += QString("&modLoaderType=%1").arg(mappedModLoader);
     }
     return url;
-}
-
-ModPlatform::ResourceType FlameAPI::getResourceType(int classId)
-{
-    for (auto&& [type, c] : g_classIDMappings) {
-        if (c == classId) {
-            return type;
-        }
-    }
-    return ModPlatform::ResourceType::Unknown;
-}
-
-std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(const QList<ModPlatform::IndexedVersion>& versions,
-                                                                      const QList<ModPlatform::ModLoaderType>& instanceLoaders,
-                                                                      ModPlatform::ModLoaderTypes fallback,
-                                                                      bool checkLoaders,
-                                                                      std::vector<ModPlatform::IndexedVersionType> releaseTypes)
-{
-    static const auto s_noLoader = ModPlatform::ModLoaderType(0);
-    if (!checkLoaders) {
-        std::optional<ModPlatform::IndexedVersion> ver;
-        for (const auto& fileTmp : versions) {
-            if (!releaseTypes.empty() && !std::ranges::contains(releaseTypes, fileTmp.versionType)) {
-                continue;
-            }
-            if (!ver.has_value() || fileTmp.date > ver->date) {
-                ver = fileTmp;
-            }
-        }
-        return ver;
-    }
-    QHash<ModPlatform::ModLoaderType, ModPlatform::IndexedVersion> bestMatch;
-    auto checkVersion = [&bestMatch](const ModPlatform::IndexedVersion& version, const ModPlatform::ModLoaderType& loader) {
-        if (bestMatch.contains(loader)) {
-            auto best = bestMatch.value(loader);
-            if (version.date > best.date) {
-                bestMatch[loader] = version;
-            }
-        } else {
-            bestMatch[loader] = version;
-        }
-    };
-    for (const auto& fileTmp : versions) {
-        if (!releaseTypes.empty() && !std::ranges::contains(releaseTypes, fileTmp.versionType)) {
-            continue;
-        }
-        auto loaders = ModPlatform::modLoaderTypesToList(fileTmp.loaders);
-        if (loaders.isEmpty()) {
-            checkVersion(fileTmp, s_noLoader);
-        } else {
-            for (auto loader : loaders) {
-                checkVersion(fileTmp, loader);
-            }
-        }
-    }
-    // edge case: mod has installed for forge but the instance is fabric => fabric version will be prioritizated on update
-    auto currentLoaders = instanceLoaders + ModPlatform::modLoaderTypesToList(fallback);
-    currentLoaders.append(s_noLoader);  // add a fallback in case the versions do not define a loader
-
-    for (auto loader : currentLoaders) {
-        if (bestMatch.contains(loader)) {
-            auto bestForLoader = bestMatch.value(loader);
-            // awkward case where the mod has only two loaders and one of them is not specified
-            if (loader != s_noLoader && bestMatch.contains(s_noLoader) && bestMatch.size() == 2) {
-                auto bestForNoLoader = bestMatch.value(s_noLoader);
-                if (bestForNoLoader.date > bestForLoader.date) {
-                    return bestForNoLoader;
-                }
-            }
-            return bestForLoader;
-        }
-    }
-    return {};
 }
