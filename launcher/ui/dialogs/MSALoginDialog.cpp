@@ -53,6 +53,21 @@
 
 #include "qrencode.h"
 
+namespace {
+QString formatError(const QString& reason)
+{
+    QString formatted;
+    for (const auto& line : reason.split('\n')) {
+        if (!line.isEmpty()) {
+            formatted += "<font color='red'>" + line + "</font><br />";
+        } else {
+            formatted += "<br />";
+        }
+    }
+    return formatted;
+}
+}
+
 MSALoginDialog::MSALoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::MSALoginDialog)
 {
     ui->setupUi(this);
@@ -114,16 +129,7 @@ void MSALoginDialog::onAuthFlowTaskFailed(QString reason)
     // Set message
     m_authflow_task->disconnect();
     ui->stackedWidget2->setCurrentIndex(0);
-    auto lines = reason.split('\n');
-    QString processed;
-    for (auto line : lines) {
-        if (line.size()) {
-            processed += "<font color='red'>" + line + "</font><br />";
-        } else {
-            processed += "<br />";
-        }
-    }
-    ui->status2->setText(processed);
+    ui->status2->setText(formatError(reason));
     ui->loadingLabel2->setText(m_authflow_task->getStatus());
     disconnect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, m_authflow_task.get(), &Task::abort);
     if (m_devicecode_task->getState() == Task::State::Failed) {
@@ -138,16 +144,7 @@ void MSALoginDialog::onDeviceCodeTaskFailed(QString reason)
     // Set message
     m_devicecode_task->disconnect();
     ui->stackedWidget->setCurrentIndex(0);
-    auto lines = reason.split('\n');
-    QString processed;
-    for (auto line : lines) {
-        if (line.size()) {
-            processed += "<font color='red'>" + line + "</font><br />";
-        } else {
-            processed += "<br />";
-        }
-    }
-    ui->status->setText(processed);
+    ui->status->setText(formatError(reason));
     ui->loadingLabel->setText(m_devicecode_task->getStatus());
     disconnect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, m_devicecode_task.get(), &Task::abort);
     if (m_authflow_task->getState() == Task::State::Failed) {
