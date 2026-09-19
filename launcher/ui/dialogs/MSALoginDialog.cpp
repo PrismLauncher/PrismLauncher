@@ -128,7 +128,8 @@ void MSALoginDialog::onAuthFlowTaskFailed(QString reason)
     disconnect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, m_authflow_task.get(), &Task::abort);
     if (m_devicecode_task->getState() == Task::State::Failed) {
         disconnect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, m_devicecode_task.get(), &Task::abort);
-        connect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, this, &MSALoginDialog::reject, Qt::UniqueConnection);
+        connect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, this, &MSALoginDialog::reject,
+                Qt::UniqueConnection);
     }
 }
 
@@ -151,7 +152,8 @@ void MSALoginDialog::onDeviceCodeTaskFailed(QString reason)
     disconnect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, m_devicecode_task.get(), &Task::abort);
     if (m_authflow_task->getState() == Task::State::Failed) {
         disconnect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, m_authflow_task.get(), &Task::abort);
-        connect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, this, &MSALoginDialog::reject, Qt::UniqueConnection);
+        connect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, this, &MSALoginDialog::reject,
+                Qt::UniqueConnection);
     }
 }
 
