@@ -546,12 +546,12 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
             switch (column) {
                 case NameColumn:
                     return m_resources[row]->name();
+                case VersionColumn:
+                    return m_resources[row]->version();
                 case DateColumn:
                     return m_resources[row]->dateTimeChanged();
                 case ProviderColumn:
                     return m_resources[row]->provider();
-                case VersionColumn:
-                    return m_resources[row]->version();
                 case SizeColumn:
                     return m_resources[row]->sizeStr();
                 case FileNameColumn:
@@ -627,9 +627,9 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
             switch (section) {
                 case ActiveColumn:
                 case NameColumn:
+                case VersionColumn:
                 case DateColumn:
                 case ProviderColumn:
-                case VersionColumn:
                 case SizeColumn:
                 case FileNameColumn:
                     return columnNames().at(section);
@@ -643,12 +643,12 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
                     return tr("Is the resource enabled?");
                 case NameColumn:
                     return tr("The name of the resource.");
+                case VersionColumn:
+                    return tr("The version of the resource.");
                 case DateColumn:
                     return tr("The date and time this resource was last changed (or added).");
                 case ProviderColumn:
                     return tr("The source provider of the resource.");
-                case VersionColumn:
-                    return tr("The version of the resource.");
                 case SizeColumn:
                     return tr("The size of the resource.");
                 case FileNameColumn:

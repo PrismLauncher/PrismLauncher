@@ -136,9 +136,9 @@ class ResourceFolderModel : public QAbstractListModel {
     enum Columns : std::uint8_t {
         ActiveColumn = 0,
         NameColumn,
+        VersionColumn,
         DateColumn,
         ProviderColumn,
-        VersionColumn,
         SizeColumn,
         FileNameColumn,
         NumColumns
@@ -245,11 +245,11 @@ class ResourceFolderModel : public QAbstractListModel {
    protected:
     // Represents the relationship between a column's index (represented by the list index), and it's sorting key.
     // As such, the order in with they appear is very important!
-    QList<SortType> m_columnSortKeys = { SortType::Enabled, SortType::Name, SortType::Date,    SortType::Provider,
-                                         SortType::Version, SortType::Size, SortType::Filename };
-    QStringList m_columnNames = { "Enable", "Name", "Last Modified", "Provider", "Version", "Size", "File Name" };
-    QStringList m_columnNamesTranslated = { tr("Enable"),  tr("Name"), tr("Last Modified"), tr("Provider"),
-                                            tr("Version"), tr("Size"), tr("File Name") };
+    QList<SortType> m_columnSortKeys = { SortType::Enabled,  SortType::Name, SortType::Version, SortType::Date,
+                                         SortType::Provider, SortType::Size, SortType::Filename };
+    QStringList m_columnNames = { "Enable", "Name", "Version", "Last Modified", "Provider", "Size", "File Name" };
+    QStringList m_columnNamesTranslated = { tr("Enable"),   tr("Name"), tr("Version"),  tr("Last Modified"),
+                                            tr("Provider"), tr("Size"), tr("File Name") };
     QList<QHeaderView::ResizeMode> m_columnResizeModes = { QHeaderView::Interactive, QHeaderView::Stretch,     QHeaderView::Interactive,
                                                            QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
                                                            QHeaderView::Interactive };
