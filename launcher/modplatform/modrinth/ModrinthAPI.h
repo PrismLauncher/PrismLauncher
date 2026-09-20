@@ -27,15 +27,19 @@ class ModrinthAPI final : public ResourceAPI {
 
     static std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, const QString& hashFormat);
 
-    std::pair<Task::Ptr, QByteArray*> latestVersion(const QString& hash,
-                                                    const QString& hashFormat,
-                                                    std::optional<std::vector<Version>> mcVersions,
-                                                    std::optional<ModPlatform::ModLoaderTypes> loaders) const;
+    std::pair<Task::Ptr, QByteArray*> latestVersion(
+        const QString& hash,
+        const QString& hashFormat,
+        std::optional<std::vector<Version>> mcVersions,
+        std::optional<ModPlatform::ModLoaderTypes> loaders,
+        std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes = std::nullopt) const;
 
-    std::pair<Task::Ptr, QByteArray*> latestVersions(const QStringList& hashes,
-                                                     const QString& hashFormat,
-                                                     std::optional<std::vector<Version>> mcVersions,
-                                                     std::optional<ModPlatform::ModLoaderTypes> loaders) const;
+    std::pair<Task::Ptr, QByteArray*> latestVersions(
+        const QStringList& hashes,
+        const QString& hashFormat,
+        std::optional<std::vector<Version>> mcVersions,
+        std::optional<ModPlatform::ModLoaderTypes> loaders,
+        std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes = std::nullopt) const;
 
     std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
 
