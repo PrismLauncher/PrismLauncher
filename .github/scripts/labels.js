@@ -93,6 +93,10 @@ async function syncRebaseLabels(github, owner, repo) {
  * The label is never removed, as it may also be applied manually.
  */
 async function addPullRequestAiLabel(github, owner, repo, pull) {
+    if (pull.labels.some(x => x.name === AI_LABEL)) {
+        return;
+    }
+
     const commits = await github.paginate(github.rest.pulls.listCommits, {owner, repo, pull_number: pull.number, per_page: 100});
     if (!hasAiAttribution(pull.body ?? '') && !commits.some(({commit}) => hasAiAttribution(commit.message))) {
         return;
