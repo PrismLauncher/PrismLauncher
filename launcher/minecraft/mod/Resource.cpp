@@ -109,7 +109,7 @@ auto Resource::provider() const -> QString
 auto Resource::version() const -> QString
 {
     if (metadata()) {
-        return metadata()->version_number;
+        return metadata()->versionNumber;
     }
 
     return QObject::tr("Unknown");
@@ -118,10 +118,15 @@ auto Resource::version() const -> QString
 auto Resource::homepage() const -> QString
 {
     if (metadata()) {
-        return ModPlatform::getMetaURL(metadata()->provider, metadata()->project_id);
+        return ModPlatform::getMetaURL(metadata()->provider, metadata()->projectId);
     }
 
     return {};
+}
+
+bool Resource::lockUpdate() const
+{
+    return metadata() && metadata()->lockUpdate;
 }
 
 void Resource::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
@@ -230,6 +235,12 @@ int Resource::compare(const Resource& other, SortType type) const
             auto compareResult = QString::compare(provider(), other.provider(), Qt::CaseInsensitive);
             if (compareResult != 0) {
                 return compareResult;
+            }
+            break;
+        }
+        case SortType::LockUpdate: {
+            if (lockUpdate() != other.lockUpdate()) {
+                return lockUpdate() ? -1 : 1;
             }
             break;
         }

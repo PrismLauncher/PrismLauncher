@@ -117,7 +117,7 @@ void FlamePackExportTask::collectHashes()
             }
             if (mod->metadata() && mod->metadata()->provider == ModPlatform::ResourceProvider::FLAME) {
                 resolvedFiles.insert(mod->fileinfo().absoluteFilePath(),
-                                     { mod->metadata()->project_id.toInt(), mod->metadata()->file_id.toInt(), mod->enabled(), true,
+                                     { mod->metadata()->projectId.toInt(), mod->metadata()->fileId.toInt(), mod->enabled(), true,
                                        mod->metadata()->name, mod->metadata()->slug, mod->authors().join(", ") });
                 continue;
             }
