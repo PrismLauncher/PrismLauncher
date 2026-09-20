@@ -9,6 +9,7 @@
 
 #include "FileSystem.h"
 #include "StringUtils.h"
+#include "Version.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
@@ -100,6 +101,15 @@ auto Resource::provider() const -> QString
 {
     if (metadata()) {
         return ModPlatform::ProviderCapabilities::readableName(metadata()->provider);
+    }
+
+    return QObject::tr("Unknown");
+}
+
+auto Resource::version() const -> QString
+{
+    if (metadata()) {
+        return metadata()->version_number;
     }
 
     return QObject::tr("Unknown");
@@ -199,6 +209,18 @@ int Resource::compare(const Resource& other, SortType type) const
                 return 1;
             }
             if (sizeInfo() < other.sizeInfo()) {
+                return -1;
+            }
+            break;
+        }
+
+        case SortType::Version: {
+            auto thisVer = Version(version());
+            auto otherVer = Version(other.version());
+            if (thisVer > otherVer) {
+                return 1;
+            }
+            if (thisVer < otherVer) {
                 return -1;
             }
             break;

@@ -44,14 +44,15 @@
 ResourcePackFolderModel::ResourcePackFolderModel(const QDir& dir, MinecraftInstance* instance, bool isIndexed, bool createDir, QObject* parent)
     : ResourceFolderModel(dir, instance, isIndexed, createDir, parent)
 {
-    m_columnNames = QStringList({ "Enable", "Image", "Name", "Pack Format", "Last Modified", "Provider", "Size", "File Name" });
-    m_columnNamesTranslated = QStringList(
-        { tr("Enable"), tr("Image"), tr("Name"), tr("Pack Format"), tr("Last Modified"), tr("Provider"), tr("Size"), tr("File Name") });
-    m_columnSortKeys = { SortType::Enabled, SortType::Name,     SortType::Name, SortType::PackFormat,
+    m_columnNames = QStringList({ "Enable", "Image", "Name", "Version", "Pack Format", "Last Modified", "Provider", "Size", "File Name" });
+    m_columnNamesTranslated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Pack Format"), tr("Last Modified"),
+                                            tr("Provider"), tr("Size"), tr("File Name") });
+    m_columnSortKeys = { SortType::Enabled, SortType::Name,     SortType::Name, SortType::Version, SortType::PackFormat,
                          SortType::Date,    SortType::Provider, SortType::Size, SortType::Filename };
-    m_columnResizeModes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,     QHeaderView::Interactive,
-                            QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
-    m_columnsHideable = { false, true, false, true, true, true, true, true };
+    m_columnResizeModes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,
+                            QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
+                            QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
+    m_columnsHideable = { false, true, false, true, true, true, true, true, true };
 }
 
 QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
@@ -104,6 +105,9 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
         case NameColumn:
             mappedIndex = index.siblingAtColumn(ResourceFolderModel::NameColumn);
             break;
+        case VersionColumn:
+            mappedIndex = index.siblingAtColumn(ResourceFolderModel::VersionColumn);
+            break;
         case DateColumn:
             mappedIndex = index.siblingAtColumn(ResourceFolderModel::DateColumn);
             break;
@@ -134,6 +138,7 @@ QVariant ResourcePackFolderModel::headerData(int section, [[maybe_unused]] Qt::O
             switch (section) {
                 case ActiveColumn:
                 case NameColumn:
+                case VersionColumn:
                 case PackFormatColumn:
                 case DateColumn:
                 case ImageColumn:
@@ -151,6 +156,8 @@ QVariant ResourcePackFolderModel::headerData(int section, [[maybe_unused]] Qt::O
                     return tr("Is the resource pack enabled?");
                 case NameColumn:
                     return tr("The name of the resource pack.");
+                case VersionColumn:
+                    return tr("The version of the resource pack.");
                 case PackFormatColumn:
                     //: The string being explained by this is in the format: ID (Lower version - Upper version)
                     return tr("The resource pack format ID, as well as the Minecraft versions it was designed for.");

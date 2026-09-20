@@ -11,6 +11,7 @@ class ResourcePackFolderModel : public ResourceFolderModel {
         ActiveColumn = 0,
         ImageColumn,
         NameColumn,
+        VersionColumn,
         PackFormatColumn,
         DateColumn,
         ProviderColumn,

@@ -122,6 +122,7 @@ class Resource {
     auto metadata() -> std::shared_ptr<Metadata::ModStruct> { return m_metadata; }
     auto metadata() const -> std::shared_ptr<const Metadata::ModStruct> { return m_metadata; }
     auto provider() const -> QString;
+    virtual auto version() const -> QString;
     virtual auto homepage() const -> QString;
 
     void setStatus(ResourceStatus status) { m_status = status; }

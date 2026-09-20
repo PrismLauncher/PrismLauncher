@@ -47,6 +47,7 @@ class DataPackFolderModel : public ResourceFolderModel {
         ActiveColumn = 0,
         ImageColumn,
         NameColumn,
+        VersionColumn,
         PackFormatColumn,
         DateColumn,
         SizeColumn,
