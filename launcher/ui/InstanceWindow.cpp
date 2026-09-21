@@ -218,6 +218,7 @@ void InstanceWindow::closeEvent(QCloseEvent* event)
     }
 
     if (!proceed) {
+        event->ignore();
         return;
     }
 

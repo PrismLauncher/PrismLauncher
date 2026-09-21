@@ -45,6 +45,7 @@
 #include <QFlag>
 #include <QIcon>
 #include <QMutex>
+#include <QPointer>
 #include <QUrl>
 
 #include "QObjectPtr.h"
@@ -286,7 +287,7 @@ class Application : public QApplication {
 
     // FIXME: attach to instances instead.
     struct InstanceXtras {
-        InstanceWindow* window = nullptr;
+        QPointer<InstanceWindow> window;
         std::unique_ptr<LaunchController> controller;
     };
     std::map<QString, InstanceXtras> m_instanceExtras;

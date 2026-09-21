@@ -1598,7 +1598,7 @@ bool Application::launch(MinecraftInstance* instance,
     } else if (instance->canLaunch()) {
         QMutexLocker locker(&m_instanceExtrasMutex);
         auto& extras = m_instanceExtras[instance->id()];
-        auto* window = extras.window;
+        auto* window = extras.window.data();
         if (window) {
             if (!window->saveAll()) {
                 return false;
@@ -1705,7 +1705,7 @@ void Application::controllerFinished()
     // on success, do...
     if (wasSuccessful && controller->instance()->settings()->get("AutoCloseConsole").toBool()) {
         if (extras.window) {
-            QMetaObject::invokeMethod(extras.window, &QWidget::close, Qt::QueuedConnection);
+            QMetaObject::invokeMethod(extras.window.data(), &QWidget::close, Qt::QueuedConnection);
         }
     }
     extras.controller.reset();
@@ -1807,7 +1807,7 @@ InstanceWindow* Application::showInstanceWindow(MinecraftInstance* instance, con
     if (extras.controller) {
         extras.controller->setParentWidget(window);
     }
-    return window;
+    return window.data();
 }
 
 void Application::on_windowClose()
