@@ -230,7 +230,6 @@ Result<> installLauncher(const QString& name, const QByteArray& icon, const QStr
     Q_UNUSED(name);
     Q_UNUSED(icon);
     Q_UNUSED(desktopEntry);
-    qWarning() << "DynamicLauncherPortal: Qt DBus support not compiled in";
     return std::unexpected{ QStringLiteral("Qt DBus support not compiled in") };
 #endif
 }
