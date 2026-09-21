@@ -39,8 +39,4 @@ QString buildDesktopFileId(const QString& name);
 /// @param desktopEntry The contents of the .desktop file (without Name= and Icon= lines)
 Result<> installLauncher(const QString& name, const QByteArray& icon, const QString& desktopEntry);
 
-/// Remove a previously installed shortcut via the DynamicLauncher portal.
-/// @param desktopFileId The .desktop file id (e.g. "org.prismlauncher.Prismlauncher.MyInstance.desktop")
-Result<> uninstallLauncher(const QString& desktopFileId);
-
 }  // namespace DynamicLauncherPortal

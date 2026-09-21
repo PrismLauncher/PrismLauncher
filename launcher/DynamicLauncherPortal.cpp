@@ -112,8 +112,6 @@ QString buildDesktopFileId(const QString& name)
     QString safeName = name;
     safeName.replace(QRegularExpression(QStringLiteral("[^a-zA-Z0-9_\\-.]")), QStringLiteral("_"));
 
-    if (appId.endsWith('.'))
-        return appId + safeName + ".desktop";
     return appId + "." + safeName + ".desktop";
 }
 

@@ -256,7 +256,7 @@ bool createInstanceShortcutViaPortal(const Shortcut& shortcut)
     if (!installResult) {
         qWarning() << "ShortcutUtils: Portal installation failed:" << installResult.error();
         QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"),
-                              QObject::tr("Failed to create %1 shortcut via the system portal!").arg(shortcut.targetString));
+                              QObject::tr("Failed to create %1 shortcut via the system portal: %2").arg(shortcut.targetString, installResult.error()));
         return false;
     }
 
