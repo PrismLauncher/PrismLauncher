@@ -203,7 +203,6 @@ Result<> installLauncher(const QString& name, const QByteArray& icon, const QStr
     QObject::disconnect(signalConn);
     QObject::disconnect(timeoutConn);
     if (!userAccepted || receivedToken.isEmpty()) {
-        qDebug() << "DynamicLauncherPortal: User did not accept";
         return std::unexpected{ QStringLiteral("User did not accept") };
     }
 
