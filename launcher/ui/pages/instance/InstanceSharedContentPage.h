@@ -40,6 +40,7 @@ class InstanceSharedContentPage : public QWidget, public BasePage {
    private slots:
     void createGroup();
     void openGroup();
+    void enabledToggled(bool enabled);
     void updateEnabledState();
 
    private:
@@ -68,4 +69,5 @@ class InstanceSharedContentPage : public QWidget, public BasePage {
     QPlainTextEdit* m_customPaths = nullptr;
     QLabel* m_advancedWarning = nullptr;
     QString m_loadedGroup;
+    bool m_categorySelectionInitialized = false;
 };

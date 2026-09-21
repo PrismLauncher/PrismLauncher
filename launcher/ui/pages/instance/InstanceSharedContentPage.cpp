@@ -122,7 +122,7 @@ InstanceSharedContentPage::InstanceSharedContentPage(MinecraftInstance* instance
     layout->addWidget(m_advancedBox);
     layout->addStretch(1);
 
-    connect(m_enabled, &QCheckBox::toggled, this, &InstanceSharedContentPage::updateEnabledState);
+    connect(m_enabled, &QCheckBox::toggled, this, &InstanceSharedContentPage::enabledToggled);
     connect(m_group, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &InstanceSharedContentPage::updateEnabledState);
     connect(m_createGroupButton, &QPushButton::clicked, this, &InstanceSharedContentPage::createGroup);
     connect(m_openGroupButton, &QPushButton::clicked, this, &InstanceSharedContentPage::openGroup);
@@ -207,13 +207,17 @@ void InstanceSharedContentPage::loadSettings()
         return;
     }
     const QString group = manager->instanceGroup(m_instance);
-    m_enabled->setChecked(!group.isEmpty());
+    {
+        const QSignalBlocker blocker(m_enabled);
+        m_enabled->setChecked(!group.isEmpty());
+    }
     refreshGroups(group);
 
     const QStringList selected = SharedContent::Manager::serializeCategories(manager->instanceCategories(m_instance));
     for (auto it = m_categoryChecks.cbegin(); it != m_categoryChecks.cend(); ++it) {
         it.value()->setChecked(selected.contains(it.key()));
     }
+    m_categorySelectionInitialized = !group.isEmpty() || !selected.isEmpty();
     m_excludedOptions->setPlainText(manager->instanceExcludedOptions(m_instance).join('\n'));
     QStringList customPaths;
     for (const auto& path : manager->instanceCustomPaths(m_instance)) {
@@ -421,6 +425,17 @@ void InstanceSharedContentPage::updateEnabledState()
     m_categoriesBox->setEnabled(enabled);
     m_optionsBox->setEnabled(enabled);
     m_advancedBox->setEnabled(enabled);
+}
+
+void InstanceSharedContentPage::enabledToggled(bool enabled)
+{
+    if (enabled && !m_categorySelectionInitialized) {
+        for (auto* check : m_categoryChecks) {
+            check->setChecked(true);
+        }
+        m_categorySelectionInitialized = true;
+    }
+    updateEnabledState();
 }
 
 void InstanceSharedContentPage::showError(const QString& operation, const QString& error)
