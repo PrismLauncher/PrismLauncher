@@ -49,6 +49,17 @@ bool pathsEqual(const QString& left, const QString& right)
     return QDir::cleanPath(leftInfo.absoluteFilePath()).compare(QDir::cleanPath(rightInfo.absoluteFilePath()), sensitivity) == 0;
 }
 
+bool pathLocationsEqual(const QString& left, const QString& right)
+{
+#ifdef Q_OS_WIN
+    constexpr auto sensitivity = Qt::CaseInsensitive;
+#else
+    constexpr auto sensitivity = Qt::CaseSensitive;
+#endif
+    return QDir::cleanPath(QFileInfo(left).absoluteFilePath())
+               .compare(QDir::cleanPath(QFileInfo(right).absoluteFilePath()), sensitivity) == 0;
+}
+
 bool pathsOverlap(const QString& left, bool leftDirectory, const QString& right, bool rightDirectory)
 {
 #ifdef Q_OS_WIN
@@ -89,6 +100,59 @@ bool isInside(const QString& root, const QString& path)
         }
     }
     return true;
+}
+
+bool resolveStoredDataPacksPath(MinecraftInstance* instance,
+                                const QString& storedPath,
+                                const QString& sharedPath,
+                                QString* localPath,
+                                QString* error)
+{
+    const QString gameRoot = instance->gameRoot();
+    if (storedPath.isEmpty()) {
+        const QString currentPath = QDir::cleanPath(instance->dataPacksDir());
+        if (isInside(gameRoot, currentPath)) {
+            *localPath = currentPath;
+            return true;
+        }
+        if (error) {
+            *error = QObject::tr("The global data packs path is outside this instance.");
+        }
+        return false;
+    }
+
+    const QString storedAbsolute = QDir::cleanPath(QDir::isRelativePath(storedPath) ? QDir(gameRoot).filePath(storedPath) : storedPath);
+    if (isInside(gameRoot, storedAbsolute)) {
+        *localPath = storedAbsolute;
+        return true;
+    }
+
+    const QFileInfo oldPathInfo(storedAbsolute);
+    const QString instancesRoot = QFileInfo(instance->instanceRoot()).dir().absolutePath();
+    const QString relativeToInstances = QDir::fromNativeSeparators(QDir(instancesRoot).relativeFilePath(storedAbsolute));
+    const QStringList parts = relativeToInstances.split('/', Qt::SkipEmptyParts);
+#ifdef Q_OS_WIN
+    constexpr auto sensitivity = Qt::CaseInsensitive;
+#else
+    constexpr auto sensitivity = Qt::CaseSensitive;
+#endif
+    if (!QDir::isRelativePath(storedPath) && parts.size() >= 3 && parts.at(0) != QStringLiteral("..") &&
+        parts.at(1).compare(QFileInfo(gameRoot).fileName(), sensitivity) == 0) {
+        const QString oldInstanceRoot = QDir(instancesRoot).filePath(parts.at(0));
+        const QString relocated = FS::PathCombine(gameRoot, parts.mid(2).join('/'));
+        const QFileInfo relocatedInfo(relocated);
+        if (!oldPathInfo.exists() && !oldPathInfo.isSymLink() && !QFileInfo::exists(oldInstanceRoot) &&
+            !QFileInfo(oldInstanceRoot).isSymLink() && isInside(gameRoot, relocated) && relocatedInfo.isSymLink() &&
+            pathsEqual(relocatedInfo.symLinkTarget(), sharedPath)) {
+            *localPath = relocated;
+            return true;
+        }
+    }
+
+    if (error) {
+        *error = QObject::tr("The stored global data packs path is outside this instance and cannot be safely resolved.");
+    }
+    return false;
 }
 
 bool safeFilePair(const QString& gameRoot, const QString& sharedRoot, const QString& local, const QString& shared)
@@ -735,9 +799,14 @@ bool Manager::configureInstance(MinecraftInstance* instance,
     const QString oldGroupName = oldGroup.toString();
     const Categories oldCategoryFlags = deserializeCategories(oldCategories.toStringList());
     const QString currentDataPacksPath = QDir::cleanPath(localPath(instance, Category::GlobalDataPacks));
-    const QString previousDataPacksPath = oldDataPacksPath.toString().isEmpty() ? currentDataPacksPath : oldDataPacksPath.toString();
+    QString previousDataPacksPath = currentDataPacksPath;
+    if (oldCategoryFlags.testFlag(Category::GlobalDataPacks) &&
+        !resolveStoredDataPacksPath(instance, oldDataPacksPath.toString(), sharedPath(oldGroupName, Category::GlobalDataPacks),
+                                    &previousDataPacksPath, error)) {
+        return false;
+    }
     if (oldCategoryFlags.testFlag(Category::GlobalDataPacks) && categories.testFlag(Category::GlobalDataPacks) &&
-        !pathsEqual(previousDataPacksPath, currentDataPacksPath)) {
+        !pathLocationsEqual(previousDataPacksPath, currentDataPacksPath)) {
         if (error) {
             *error = QObject::tr("The global data packs path changed while it was shared. Disconnect shared content before changing it.");
         }
@@ -890,7 +959,10 @@ bool Manager::configureInstance(MinecraftInstance* instance,
         settingsSaved =
             settings->set(GROUP_SETTING, group) && settings->set(CATEGORY_SETTING, serializeCategories(categories)) &&
             settings->set(CUSTOM_PATH_SETTING, serializedPaths) && settings->set(EXCLUDED_OPTIONS_SETTING, excludedOptions) &&
-            settings->set(DATA_PACKS_PATH_SETTING, categories.testFlag(Category::GlobalDataPacks) ? currentDataPacksPath : QString());
+            settings->set(DATA_PACKS_PATH_SETTING,
+                          categories.testFlag(Category::GlobalDataPacks)
+                              ? QDir::fromNativeSeparators(QDir(instance->gameRoot()).relativeFilePath(currentDataPacksPath))
+                              : QString());
     }
     if (!settingsSaved) {
         restoreSettings();
@@ -1125,8 +1197,12 @@ bool Manager::reconcileDirectories(MinecraftInstance* instance, MigrationPolicy 
         return false;
     }
     if (categories.testFlag(Category::GlobalDataPacks)) {
-        const auto configuredPath = instance->settings()->get(DATA_PACKS_PATH_SETTING).toString();
-        if (!configuredPath.isEmpty() && !pathsEqual(configuredPath, localPath(instance, Category::GlobalDataPacks))) {
+        QString configuredPath;
+        if (!resolveStoredDataPacksPath(instance, instance->settings()->get(DATA_PACKS_PATH_SETTING).toString(),
+                                        sharedPath(group, Category::GlobalDataPacks), &configuredPath, error)) {
+            return false;
+        }
+        if (!pathLocationsEqual(configuredPath, localPath(instance, Category::GlobalDataPacks))) {
             if (error) {
                 *error =
                     QObject::tr("The global data packs path changed while it was shared. Disconnect shared content before changing it.");
@@ -1172,7 +1248,20 @@ bool Manager::reconcileDirectories(MinecraftInstance* instance, MigrationPolicy 
             return false;
         }
     }
-    return updateAllowedSymlinks(instance, FS::PathCombine(groupPath(group), QStringLiteral("minecraft")), true, error);
+    if (!updateAllowedSymlinks(instance, FS::PathCombine(groupPath(group), QStringLiteral("minecraft")), true, error)) {
+        return false;
+    }
+    if (categories.testFlag(Category::GlobalDataPacks)) {
+        const QString relative = QDir::fromNativeSeparators(
+            QDir(instance->gameRoot()).relativeFilePath(localPath(instance, Category::GlobalDataPacks)));
+        if (!instance->settings()->set(DATA_PACKS_PATH_SETTING, relative)) {
+            if (error) {
+                *error = QObject::tr("Could not update the shared global data packs path for %1.").arg(instance->name());
+            }
+            return false;
+        }
+    }
+    return true;
 }
 
 bool Manager::repairInstance(MinecraftInstance* instance, QString* error)
@@ -1431,7 +1520,12 @@ bool Manager::disconnectInstance(MinecraftInstance* instance, bool copySharedCon
     }
     const Categories categories = instanceCategories(instance);
     const auto sharedRoot = FS::PathCombine(groupPath(group), QStringLiteral("minecraft"));
-    const auto configuredDataPacksPath = instance->settings()->get(DATA_PACKS_PATH_SETTING).toString();
+    QString configuredDataPacksPath;
+    if (categories.testFlag(Category::GlobalDataPacks) &&
+        !resolveStoredDataPacksPath(instance, instance->settings()->get(DATA_PACKS_PATH_SETTING).toString(),
+                                    sharedPath(group, Category::GlobalDataPacks), &configuredDataPacksPath, error)) {
+        return false;
+    }
     for (const auto category : s_categories) {
         if (categories.testFlag(category) && (category == Category::Options || isFileCategory(category)) &&
             !safeFilePair(instance->gameRoot(), sharedRoot, localPath(instance, category), sharedPath(group, category))) {
@@ -1482,8 +1576,7 @@ bool Manager::disconnectInstance(MinecraftInstance* instance, bool copySharedCon
         if (!categories.testFlag(category) || !isDirectoryCategory(category)) {
             continue;
         }
-        const QString local = category == Category::GlobalDataPacks && !configuredDataPacksPath.isEmpty() ? configuredDataPacksPath
-                                                                                                          : localPath(instance, category);
+        const QString local = category == Category::GlobalDataPacks ? configuredDataPacksPath : localPath(instance, category);
         const QString shared = sharedPath(group, category);
         const QFileInfo localInfo(local);
         if (localInfo.isSymLink() && pathsEqual(localInfo.symLinkTarget(), shared)) {

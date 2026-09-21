@@ -512,6 +512,144 @@ class SharedContentManagerTest : public QObject {
         QVERIFY(!QFileInfo(instance->gameRoot() + "/mods").isSymLink());
     }
 
+    void rejectsChangedDataPackLocationWithSameSharedTarget()
+    {
+        QTemporaryDir temporaryDir;
+        QVERIFY(temporaryDir.isValid());
+        auto global = makeGlobalSettings(temporaryDir.filePath("global.cfg"));
+        auto instance = makeInstance(global.get(), temporaryDir.filePath("instance"));
+        SharedContent::Manager manager(temporaryDir.filePath("shared"));
+        QString error;
+        QVERIFY2(manager.createGroup("Default", &error), qPrintable(error));
+        QVERIFY2(manager.configureInstance(instance.get(), "Default", SharedContent::Category::GlobalDataPacks, {}, {},
+                                           SharedContent::MigrationPolicy::PreferShared, &error),
+                 qPrintable(error));
+
+        const QString original = instance->dataPacksDir();
+        const QString alternate = instance->gameRoot() + "/otherpacks";
+        const QString shared = manager.groupPath("Default") + "/minecraft/datapacks";
+        if (!QFile::link(shared, alternate)) {
+            QSKIP("Creating a test symlink is unavailable on this platform");
+        }
+        instance->settings()->set("GlobalDataPacksPath", "otherpacks");
+
+        error.clear();
+        QVERIFY(!manager.prepare(instance.get(), &error));
+        QVERIFY(!error.isEmpty());
+        error.clear();
+        QVERIFY(!manager.configureInstance(instance.get(), "Default", SharedContent::Category::GlobalDataPacks, {}, {},
+                                           SharedContent::MigrationPolicy::PreferShared, &error));
+        QVERIFY(!error.isEmpty());
+        QVERIFY(QFileInfo(original).isSymLink());
+        QVERIFY(QFileInfo(alternate).isSymLink());
+        QCOMPARE(manager.instanceGroup(instance.get()), QString("Default"));
+    }
+
+    void renamedInstanceRetainsSharedDataPacks_data()
+    {
+        QTest::addColumn<QString>("dataPacksPath");
+        QTest::addColumn<bool>("legacyAbsolute");
+
+        QTest::newRow("default folder") << QString() << false;
+        QTest::newRow("custom folder") << QString("extras/packs") << false;
+        QTest::newRow("legacy default folder") << QString() << true;
+        QTest::newRow("legacy custom folder") << QString("extras/packs") << true;
+    }
+
+    void renamedInstanceRetainsSharedDataPacks()
+    {
+        QFETCH(QString, dataPacksPath);
+        QFETCH(bool, legacyAbsolute);
+
+        QTemporaryDir temporaryDir;
+        QVERIFY(temporaryDir.isValid());
+        auto global = makeGlobalSettings(temporaryDir.filePath("global.cfg"));
+        const QString oldRoot = temporaryDir.filePath("26.2");
+        const QString newRoot = temporaryDir.filePath("26.3");
+        auto instance = makeInstance(global.get(), oldRoot);
+        SharedContent::Manager manager(temporaryDir.filePath("shared"));
+        QString error;
+        QVERIFY2(manager.createGroup("Default", &error), qPrintable(error));
+
+        instance->settings()->set("GlobalDataPacksPath", dataPacksPath);
+        const QString oldDataPacksPath = QDir::cleanPath(instance->dataPacksDir());
+        QVERIFY(write(oldDataPacksPath + "/local.zip", "local data pack"));
+        QVERIFY(write(instance->gameRoot() + "/mods/example.jar", "instance mod"));
+        QVERIFY2(manager.configureInstance(instance.get(), "Default", SharedContent::Category::GlobalDataPacks, {}, {},
+                                           SharedContent::MigrationPolicy::PreferShared, &error),
+                 qPrintable(error));
+        QVERIFY(QFileInfo(oldDataPacksPath).isSymLink());
+        const QString storedDataPacksPath = instance->settings()->get("SharedContentDataPacksPath").toString();
+        QVERIFY(!QDir::isAbsolutePath(storedDataPacksPath));
+        QCOMPARE(QDir::cleanPath(QDir(instance->gameRoot()).filePath(storedDataPacksPath)), oldDataPacksPath);
+        if (legacyAbsolute) {
+            instance->settings()->set("SharedContentDataPacksPath", oldDataPacksPath);
+        }
+
+        instance.reset();
+        QVERIFY(QFile::rename(oldRoot, newRoot));
+        instance = makeInstance(global.get(), newRoot);
+        QCOMPARE(manager.instanceGroup(instance.get()), QString("Default"));
+        const QString newDataPacksPath = QDir::cleanPath(instance->dataPacksDir());
+        QVERIFY(QFileInfo(newDataPacksPath).isSymLink());
+        QCOMPARE(read(newDataPacksPath + "/local.zip"), QByteArray("local data pack"));
+
+        instance->settings()->set("GlobalDataPacksPath", "mods");
+        error.clear();
+        QVERIFY(!manager.prepare(instance.get(), &error));
+        QVERIFY(!error.isEmpty());
+        QVERIFY(!QFileInfo(instance->gameRoot() + "/mods").isSymLink());
+        QCOMPARE(read(instance->gameRoot() + "/mods/example.jar"), QByteArray("instance mod"));
+
+        instance->settings()->set("GlobalDataPacksPath", dataPacksPath);
+        error.clear();
+        QVERIFY2(manager.prepare(instance.get(), &error), qPrintable(error));
+        const QString migratedPath = instance->settings()->get("SharedContentDataPacksPath").toString();
+        QVERIFY(!QDir::isAbsolutePath(migratedPath));
+        QCOMPARE(QDir::cleanPath(QDir(instance->gameRoot()).filePath(migratedPath)), newDataPacksPath);
+        QVERIFY2(manager.finish(instance.get(), &error), qPrintable(error));
+
+        error.clear();
+        QVERIFY2(manager.disconnectInstance(instance.get(), true, &error), qPrintable(error));
+        QVERIFY(!QFileInfo(newDataPacksPath).isSymLink());
+        QCOMPARE(read(newDataPacksPath + "/local.zip"), QByteArray("local data pack"));
+        QCOMPARE(read(instance->gameRoot() + "/mods/example.jar"), QByteArray("instance mod"));
+        QVERIFY(manager.instanceGroup(instance.get()).isEmpty());
+    }
+
+    void disconnectRejectsLegacyDataPackPathOutsideInstance()
+    {
+        QTemporaryDir temporaryDir;
+        QVERIFY(temporaryDir.isValid());
+        auto global = makeGlobalSettings(temporaryDir.filePath("global.cfg"));
+        auto instance = makeInstance(global.get(), temporaryDir.filePath("instance"));
+        SharedContent::Manager manager(temporaryDir.filePath("shared"));
+        QString error;
+        QVERIFY2(manager.createGroup("Default", &error), qPrintable(error));
+        QVERIFY2(manager.configureInstance(instance.get(), "Default", SharedContent::Category::GlobalDataPacks, {}, {},
+                                           SharedContent::MigrationPolicy::PreferShared, &error),
+                 qPrintable(error));
+
+        const QString local = instance->dataPacksDir();
+        const QString shared = manager.groupPath("Default") + "/minecraft/datapacks";
+        const QString outside = temporaryDir.filePath("outside/datapacks");
+        QVERIFY(QDir().mkpath(QFileInfo(outside).absolutePath()));
+        if (!QFile::link(shared, outside)) {
+            QSKIP("Creating a test symlink is unavailable on this platform");
+        }
+        QVERIFY(QFileInfo(local).isSymLink());
+        QVERIFY(QFileInfo(outside).isSymLink());
+        instance->settings()->set("SharedContentDataPacksPath", outside);
+
+        error.clear();
+        QVERIFY(!manager.disconnectInstance(instance.get(), true, &error));
+        QVERIFY(!error.isEmpty());
+        QVERIFY(QFileInfo(outside).isSymLink());
+        QCOMPARE(QFileInfo(outside).symLinkTarget(), shared);
+        QVERIFY(QFileInfo(local).isSymLink());
+        QCOMPARE(manager.instanceGroup(instance.get()), QString("Default"));
+    }
+
     void otherManagerCannotModifyActiveGroup()
     {
         QTemporaryDir temporaryDir;
