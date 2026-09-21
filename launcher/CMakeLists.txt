@@ -69,6 +69,12 @@ set(CORE_SOURCES
     FileSystem.h
     FileSystem.cpp
 
+    # Cross-instance shared content
+    shared/SharedContentManager.h
+    shared/SharedContentManager.cpp
+    shared/SharedOptionsFile.h
+    shared/SharedOptionsFile.cpp
+
     Result.h
 
     # RW lock protected map
@@ -251,6 +257,8 @@ set(MINECRAFT_SOURCES
     minecraft/launch/ClaimAccount.h
     minecraft/launch/CreateGameFolders.cpp
     minecraft/launch/CreateGameFolders.h
+    minecraft/launch/SharedContentStep.cpp
+    minecraft/launch/SharedContentStep.h
     minecraft/launch/EnsureAvailableMemory.cpp
     minecraft/launch/EnsureAvailableMemory.h
     minecraft/launch/EnsureOfflineLibraries.cpp
@@ -907,6 +915,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/instance/LogPage.cpp
     ui/pages/instance/LogPage.h
     ui/pages/instance/InstanceSettingsPage.h
+    ui/pages/instance/InstanceSharedContentPage.cpp
+    ui/pages/instance/InstanceSharedContentPage.h
     ui/pages/instance/ScreenshotsPage.cpp
     ui/pages/instance/ScreenshotsPage.h
     ui/pages/instance/OtherLogsPage.cpp
@@ -932,6 +942,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/global/LanguagePage.cpp
     ui/pages/global/LanguagePage.h
     ui/pages/global/MinecraftPage.h
+    ui/pages/global/SharedContentPage.cpp
+    ui/pages/global/SharedContentPage.h
     ui/pages/global/LauncherPage.cpp
     ui/pages/global/LauncherPage.h
     ui/pages/global/AppearancePage.h

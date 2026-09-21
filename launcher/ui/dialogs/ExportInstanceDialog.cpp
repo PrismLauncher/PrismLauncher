@@ -51,6 +51,7 @@
 #include <FileSystem.h>
 #include <icons/IconList.h>
 #include <QDebug>
+#include <QFile>
 #include <QFileInfo>
 #include <QPushButton>
 #include <QSaveFile>
@@ -59,6 +60,39 @@
 #include <functional>
 #include "Application.h"
 #include "SeparatorPrefixTree.h"
+
+namespace {
+QByteArray detachedInstanceConfig(const QString& path)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return {};
+    }
+
+    static const QSet<QByteArray> sharedKeys{
+        "SharedContentGroup",
+        "SharedContentCategories",
+        "SharedContentCustomPaths",
+        "SharedContentExcludedOptions",
+    };
+
+    QByteArray detached;
+    const auto lines = file.readAll().split('\n');
+    for (const auto& line : lines) {
+        const auto equals = line.indexOf('=');
+        const auto key = (equals < 0 ? line : line.left(equals)).trimmed();
+        if (sharedKeys.contains(key)) {
+            continue;
+        }
+        detached.append(line);
+        detached.append('\n');
+    }
+    if (!detached.isEmpty()) {
+        detached.chop(1);
+    }
+    return detached;
+}
+}
 
 ExportInstanceDialog::ExportInstanceDialog(BaseInstance* instance, QWidget* parent)
     : QDialog(parent), m_ui(new Ui::ExportInstanceDialog), m_instance(instance)
@@ -150,8 +184,28 @@ void ExportInstanceDialog::doExport()
         QDialog::done(QDialog::Rejected);
         return;
     }
+    files.removeIf([root = QDir(m_instance->instanceRoot())](const QFileInfo& file) {
+        const auto relative = root.relativeFilePath(file.absoluteFilePath());
+        return relative.startsWith(QStringLiteral(".prism-shared-backup/"));
+    });
 
     auto task = makeShared<MMCZip::ExportToZipTask>(output, m_instance->instanceRoot(), files, "", true);
+
+    const auto instanceConfigPath = FS::PathCombine(m_instance->instanceRoot(), "instance.cfg");
+    bool exportInstanceConfig = false;
+    for (const auto& file : files) {
+        if (file.absoluteFilePath() == QFileInfo(instanceConfigPath).absoluteFilePath()) {
+            exportInstanceConfig = true;
+            break;
+        }
+    }
+    if (exportInstanceConfig) {
+        const auto detachedConfig = detachedInstanceConfig(instanceConfigPath);
+        if (!detachedConfig.isNull()) {
+            task->setExcludeFiles({ "instance.cfg" });
+            task->addExtraFile("instance.cfg", detachedConfig);
+        }
+    }
 
     connect(task.get(), &Task::failed, this,
             [this, output](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });

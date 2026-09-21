@@ -66,6 +66,7 @@
 #include "minecraft/launch/PrintInstanceInfo.h"
 #include "minecraft/launch/ReconstructAssets.h"
 #include "minecraft/launch/ScanModFolders.h"
+#include "minecraft/launch/SharedContentStep.h"
 #include "minecraft/launch/VerifyJavaInstall.h"
 
 #include "minecraft/update/AssetUpdateTask.h"
@@ -270,6 +271,11 @@ void MinecraftInstance::loadSpecificSettings()
 
     auto dataPacksEnabled = m_settings->registerSetting("GlobalDataPacksEnabled", false);
     auto dataPacksPath = m_settings->registerSetting("GlobalDataPacksPath", "");
+
+    m_settings->registerSetting("SharedContentGroup", "");
+    m_settings->registerSetting("SharedContentCategories", QVariant(QStringList()));
+    m_settings->registerSetting("SharedContentCustomPaths", QVariant(QStringList()));
+    m_settings->registerSetting("SharedContentExcludedOptions", QVariant(QStringList()));
 
     connect(dataPacksEnabled.get(), &Setting::SettingChanged, this, [this] { m_data_pack_list.reset(); });
     connect(dataPacksPath.get(), &Setting::SettingChanged, this, [this] { m_data_pack_list.reset(); });
@@ -1155,6 +1161,10 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     // create the .minecraft folder and server-resource-packs (workaround for Minecraft bug MCL-3732)
     {
         process->appendStep(makeShared<CreateGameFolders>(pptr));
+    }
+
+    {
+        process->appendStep(makeShared<SharedContentStep>(pptr));
     }
 
     if (!targetToJoin && settings()->get("JoinServerOnLaunch").toBool()) {

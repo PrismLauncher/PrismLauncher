@@ -66,6 +66,9 @@
 #include "ui/pages/global/LauncherPage.h"
 #include "ui/pages/global/MinecraftPage.h"
 #include "ui/pages/global/ProxyPage.h"
+#include "ui/pages/global/SharedContentPage.h"
+
+#include "shared/SharedContentManager.h"
 
 #include "ui/setupwizard/AutoJavaWizardPage.h"
 #include "ui/setupwizard/JavaWizardPage.h"
@@ -709,6 +712,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("MoveModsFromDownloadsDir", false);
         m_settings->registerSetting("SkinsDir", "skins");
         m_settings->registerSetting("JavaDir", "java");
+        auto sharedContentDirSetting = m_settings->registerSetting("SharedContentDir", "shared");
 
 #ifdef Q_OS_MACOS
         // Folder security-scoped bookmarks
@@ -718,6 +722,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("DownloadsDirBookmark", "");
         m_settings->registerSetting("SkinsDirBookmark", "");
         m_settings->registerSetting("JavaDirBookmark", "");
+        m_settings->registerSetting("SharedContentDirBookmark", "");
 #endif
 
         // Editors
@@ -920,11 +925,32 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // Init page provider
         {
+            auto resolveSharedContentDir = [this](const QString& configuredPath) {
+                if (QDir::isRelativePath(configuredPath)) {
+                    return QDir(m_dataPath).absoluteFilePath(configuredPath);
+                }
+                return QDir::cleanPath(configuredPath);
+            };
+            m_sharedContent = std::make_unique<SharedContent::Manager>(
+                resolveSharedContentDir(m_settings->get("SharedContentDir").toString()));
+            QString sharedContentError;
+            if (!m_sharedContent->setRootPath(m_sharedContent->rootPath(), &sharedContentError)) {
+                qWarning() << "Could not initialize shared content:" << sharedContentError;
+            }
+            connect(sharedContentDirSetting.get(), &Setting::SettingChanged, this,
+                    [this, resolveSharedContentDir](const Setting&, const QVariant& value) {
+                        QString error;
+                        if (!m_sharedContent->setRootPath(resolveSharedContentDir(value.toString()), &error)) {
+                            qWarning() << "Failed to change shared content directory:" << error;
+                        }
+                    });
+
             m_globalSettingsProvider = std::make_unique<GenericPageProvider>(tr("Settings"));
             m_globalSettingsProvider->addPage<LauncherPage>();
             m_globalSettingsProvider->addPage<LanguagePage>();
             m_globalSettingsProvider->addPage<AppearancePage>();
             m_globalSettingsProvider->addPage<MinecraftPage>();
+            m_globalSettingsProvider->addPage<SharedContentPage>();
             m_globalSettingsProvider->addPage<JavaPage>();
             m_globalSettingsProvider->addPage<AccountListPage>();
             m_globalSettingsProvider->addPage<APIPage>();

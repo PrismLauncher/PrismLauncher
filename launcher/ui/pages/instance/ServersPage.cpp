@@ -37,6 +37,7 @@
 
 #include "ServersPage.h"
 #include "Application.h"
+#include "InstanceList.h"
 #include "ServerPingTask.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ServersPage.h"
@@ -44,6 +45,7 @@
 #include <FileSystem.h>
 #include <io/stream_reader.h>
 #include <minecraft/MinecraftInstance.h>
+#include <shared/SharedContentManager.h>
 #include <tag_compound.h>
 #include <tag_list.h>
 #include <tag_primitive.h>
@@ -52,6 +54,7 @@
 
 #include <tasks/ConcurrentTask.h>
 #include <QFileSystemWatcher>
+#include <QFileInfo>
 #include <QMenu>
 #include <QTimer>
 
@@ -196,6 +199,22 @@ class ServersModel : public QAbstractListModel {
         m_observed = false;
 
         updateFSObserver();
+    }
+
+    void setPath(const QString& path)
+    {
+        if (m_path == path) {
+            return;
+        }
+        const bool wasObserved = m_observed;
+        unobserve();
+        saveNow();
+        m_path = path;
+        m_loaded = false;
+        load();
+        if (wasObserved) {
+            observe();
+        }
     }
 
     void lock()
@@ -558,7 +577,14 @@ ServersPage::ServersPage(MinecraftInstance* inst, QWidget* parent) : QMainWindow
 {
     ui->setupUi(this);
     m_inst = inst;
-    m_model = new ServersModel(inst->gameRoot(), this);
+    QString serversRoot = inst->gameRoot();
+    if (auto* manager = APPLICATION->sharedContent()) {
+        const auto effectiveServers = manager->effectivePath(inst, SharedContent::Category::Servers);
+        if (!effectiveServers.isEmpty()) {
+            serversRoot = QFileInfo(effectiveServers).absolutePath();
+        }
+    }
+    m_model = new ServersModel(serversRoot, this);
     ui->serversView->setIconSize(QSize(64, 64));
     ui->serversView->setModel(m_model);
     ui->serversView->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -580,16 +606,30 @@ ServersPage::ServersPage(MinecraftInstance* inst, QWidget* parent) : QMainWindow
     auto selectionModel = ui->serversView->selectionModel();
     connect(selectionModel, &QItemSelectionModel::currentChanged, this, &ServersPage::currentChanged);
     connect(m_inst, &MinecraftInstance::runningStatusChanged, this, &ServersPage::runningStateChanged);
+    if (auto* instances = APPLICATION->instances()) {
+        auto watchInstance = [this](MinecraftInstance* instance) {
+            if (instance != m_inst) {
+                connect(instance, &MinecraftInstance::runningStatusChanged, this, &ServersPage::runningStateChanged);
+            }
+        };
+        for (int i = 0; i < instances->count(); ++i) {
+            watchInstance(instances->at(i));
+        }
+        connect(instances, &QAbstractItemModel::rowsInserted, this,
+                [this, instances, watchInstance](const QModelIndex&, int first, int last) {
+                    for (int i = first; i <= last; ++i) {
+                        watchInstance(instances->at(i));
+                    }
+                    runningStateChanged(false);
+                });
+    }
     connect(ui->nameLine, &QLineEdit::textEdited, this, &ServersPage::nameEdited);
     connect(ui->addressLine, &QLineEdit::textEdited, this, &ServersPage::addressEdited);
     connect(ui->resourceComboBox, &QComboBox::currentIndexChanged, this, &ServersPage::resourceIndexChanged);
     connect(m_model, &QAbstractItemModel::rowsRemoved, this, &ServersPage::rowsRemoved);
 
-    m_locked = m_inst->isRunning();
-    if (m_locked) {
-        m_model->lock();
-    }
-
+    m_locked = false;
+    runningStateChanged(false);
     updateState();
 }
 
@@ -618,16 +658,32 @@ QMenu* ServersPage::createPopupMenu()
     return filteredMenu;
 }
 
-void ServersPage::runningStateChanged(bool running)
+void ServersPage::runningStateChanged(bool)
 {
-    if (m_locked == running) {
+    bool locked = m_inst->isRunning();
+    if (auto* manager = APPLICATION->sharedContent()) {
+        const auto group = manager->instanceGroup(m_inst);
+        if (!group.isEmpty() && manager->instanceCategories(m_inst).testFlag(SharedContent::Category::Servers)) {
+            if (auto* instances = APPLICATION->instances()) {
+                for (int i = 0; i < instances->count(); ++i) {
+                    auto* instance = instances->at(i);
+                    if (instance->isRunning() && manager->instanceGroup(instance) == group) {
+                        locked = true;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    if (m_locked == locked) {
         return;
     }
-    m_locked = running;
+    m_locked = locked;
     if (m_locked) {
         m_model->lock();
     } else {
         m_model->unlock();
+        m_model->load();
     }
     updateState();
 }
@@ -704,6 +760,17 @@ void ServersPage::updateState()
 
 void ServersPage::openedImpl()
 {
+    QString serversRoot = m_inst->gameRoot();
+    if (auto* manager = APPLICATION->sharedContent()) {
+        const auto effectiveServers = manager->effectivePath(m_inst, SharedContent::Category::Servers);
+        if (!effectiveServers.isEmpty()) {
+            serversRoot = QFileInfo(effectiveServers).absolutePath();
+        }
+    }
+    m_model->setPath(serversRoot);
+    m_model->saveNow();
+    m_model->load();
+    runningStateChanged(false);
     m_model->observe();
 
     // ping servers

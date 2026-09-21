@@ -76,6 +76,10 @@ class IconTheme;
 class BaseInstance;
 class MinecraftInstance;
 
+namespace SharedContent {
+class Manager;
+}
+
 class LogModel;
 
 struct MinecraftTarget;
@@ -135,6 +139,8 @@ class Application : public QApplication {
     JavaInstallList* javalist();
 
     InstanceList* instances() const { return m_instances.get(); }
+
+    SharedContent::Manager* sharedContent() const { return m_sharedContent.get(); }
 
     IconList* icons() const { return m_icons.get(); }
 
@@ -258,6 +264,7 @@ class Application : public QApplication {
     std::unique_ptr<SettingsObject> m_settings;
     std::unique_ptr<SettingsObject> m_playtimeSettings;
     std::unique_ptr<InstanceList> m_instances;
+    std::unique_ptr<SharedContent::Manager> m_sharedContent;
     std::unique_ptr<IconList> m_icons;
     std::unique_ptr<JavaInstallList> m_javalist;
     std::unique_ptr<TranslationsModel> m_translations;

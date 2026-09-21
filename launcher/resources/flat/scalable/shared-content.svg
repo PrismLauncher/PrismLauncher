@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   fill="#757575"
+   height="24"
+   viewBox="0 0 24 24"
+   width="24"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="shared-content.svg"
+   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs8" />
+  <sodipodi:namedview
+     id="namedview6"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:zoom="38.890873"
+     inkscape:cx="11.210857"
+     inkscape:cy="12.753635"
+     inkscape:window-width="2560"
+     inkscape:window-height="1371"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4"
+     inkscape:showpageshadow="2"
+     inkscape:deskcolor="#d1d1d1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid974"
+       originx="0"
+       originy="0"
+       spacingy="1"
+       spacingx="1"
+       units="px" />
+  </sodipodi:namedview>
+  <g
+     id="g1"
+     transform="translate(0.6573132,0.02244795)">
+    <path
+       d="m 8.3426866,19.377552 q -2.025,-0.8 -3.3375,-2.5125 -1.3125,-1.7125 -1.5875,-3.8875 h 2.025 q 0.225,1.325 0.975,2.425 0.75,1.1 1.925,1.775 z m 3.5000004,2.6 q -0.625,0 -1.0625,-0.4375 -0.4375,-0.4375 -0.4375,-1.0625 v -6 q 0,-0.625 0.4375,-1.0625 0.4375,-0.4375 1.0625,-0.4375 h 2.2 q 0.375,0 0.7125,0.175 0.3375,0.175 0.5375,0.5 l 0.55,0.825 h 4 q 0.625,0 1.0625,0.4375 0.4375,0.4375 0.4375,1.0625 v 4.5 q 0,0.625 -0.4375,1.0625 -0.4375,0.4375 -1.0625,0.4375 z m -9.0000004,-11 q -0.625,0 -1.0625,-0.4375 -0.4375,-0.4375 -0.4375,-1.0624999 v -6 q 0,-0.625 0.4375,-1.0625 0.4375,-0.4375 1.0625,-0.4375 h 2.2 q 0.375,0 0.7125,0.175 0.3375,0.175 0.5375,0.5 l 0.55,0.825 h 4.0000004 q 0.625,0 1.0625,0.4375 0.4375,0.4375 0.4375,1.0625 v 4.5 q 0,0.6249999 -0.4375,1.0624999 -0.4375,0.4375 -1.0625,0.4375 z m 14.5000004,1 q 0,-1.625 -0.8,-3.0124999 -0.8,-1.3875 -2.2,-2.1875 v -2.2 q 2.275,0.925 3.6375,2.9375 1.3625,2.0125 1.3625,4.4624999 z m -5,8 h 7 v -3.5 h -4.575 l -1,-1.5 h -1.425 z M 3.3426866,8.9775521 h 7.0000004 v -3.5 H 5.7676866 l -1,-1.5 h -1.425 z M 12.342687,19.977552 v -5 z M 3.3426866,8.9775521 v -5 z"
+       id="path1"
+       style="stroke-width:0.025" />
+  </g>
+</svg>
