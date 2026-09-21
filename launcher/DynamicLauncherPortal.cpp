@@ -260,7 +260,6 @@ Result<> uninstallLauncher(const QString& desktopFileId)
     return {};
 #else
     Q_UNUSED(desktopFileId);
-    qWarning() << "DynamicLauncherPortal: Qt DBus support not compiled in";
     return std::unexpected{ QStringLiteral("Qt DBus support not compiled in") };
 #endif
 }
