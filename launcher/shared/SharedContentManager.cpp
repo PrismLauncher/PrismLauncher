@@ -60,6 +60,7 @@ bool pathLocationsEqual(const QString& left, const QString& right)
                .compare(QDir::cleanPath(QFileInfo(right).absoluteFilePath()), sensitivity) == 0;
 }
 
+
 bool pathsOverlap(const QString& left, bool leftDirectory, const QString& right, bool rightDirectory)
 {
 #ifdef Q_OS_WIN
