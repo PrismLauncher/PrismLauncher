@@ -24,7 +24,7 @@ class FilterModel : public QSortFilterProxyModel {
     Q_OBJECT
 
    public:
-    FilterModel(QObject* parent = Q_NULLPTR);
+    FilterModel(QObject* parent = nullptr);
     enum Sorting {
         ByPlays,
         ByInstalls,

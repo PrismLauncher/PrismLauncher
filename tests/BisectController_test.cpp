@@ -71,7 +71,7 @@ class BisectControllerTest : public QObject {
         auto answerBasedOnCulprit = [&] {
             bool culpritEnabled = false;
             for (auto* mod : allMods) {
-                if (mod->mod_id() == "charlie" && mod->enabled())
+                if (mod->modId() == "charlie" && mod->enabled())
                     culpritEnabled = true;
             }
             bisect->onUserAnswered(culpritEnabled ? BisectController::Answer::Yes : BisectController::Answer::No);
@@ -86,7 +86,7 @@ class BisectControllerTest : public QObject {
         QCOMPARE(finishedSpy.count(), 1);
         auto culprits = finishedSpy.takeFirst().at(0).value<QList<Mod*>>();
         QCOMPARE(culprits.size(), 1);
-        QCOMPARE(culprits.first()->mod_id(), QStringLiteral("charlie"));
+        QCOMPARE(culprits.first()->modId(), QStringLiteral("charlie"));
     }
 };
 

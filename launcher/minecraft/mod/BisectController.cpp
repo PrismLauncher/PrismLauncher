@@ -29,10 +29,10 @@ BisectController::BisectController(BaseInstance* instance,
     : QObject(parent), m_instance(instance), m_model(model)
 {
     for (auto* m : lockedMods) {
-        m_locked << m->mod_id();
+        m_locked << m->modId();
     }
     for (auto* m : candidateMods) {
-        m_pool << m->mod_id();
+        m_pool << m->modId();
     }
 }
 
@@ -40,7 +40,7 @@ Mod* BisectController::resolveByModId(const QString& modId) const
 {
     for (int row = 0; row < m_model->rowCount({}); ++row) {
         auto& mod = m_model->at(row);
-        if (mod.mod_id() == modId) {
+        if (mod.modId() == modId) {
             return &mod;
         }
     }
