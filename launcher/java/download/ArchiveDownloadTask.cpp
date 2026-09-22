@@ -68,8 +68,8 @@ void ArchiveDownloadTask::extractJava(QString input)
     setStatus(tr("Extracting Java"));
 
     MMCZip::ArchiveReader zip(input);
-    if (!zip.collectFiles()) {
-        emitFailed(tr("Unable to open supplied zip file."));
+    if (const auto result = zip.collectFiles(); !result) {
+        emitFailed(tr("Unable to open supplied zip file: %1").arg(result.error()));
         return;
     }
     auto files = zip.getFiles();

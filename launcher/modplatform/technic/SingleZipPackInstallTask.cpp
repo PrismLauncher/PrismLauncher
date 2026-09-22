@@ -90,8 +90,8 @@ void Technic::SingleZipPackInstallTask::downloadProgressChanged(qint64 current, 
 void Technic::SingleZipPackInstallTask::extractFinished()
 {
     m_packZip.reset();
-    if (!m_extractFuture.result()) {
-        emitFailed(tr("Failed to extract modpack"));
+    if (const auto result = m_extractFuture.result(); !result) {
+        emitFailed(tr("Failed to extract modpack: %1").arg(result.error()));
         return;
     }
     qDebug() << "Fixing permissions for extracted pack files...";
