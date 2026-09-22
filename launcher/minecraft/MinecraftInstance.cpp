@@ -55,6 +55,7 @@
 #include "launch/steps/QuitAfterGameStop.h"
 #include "launch/steps/TextPrint.h"
 
+#include "minecraft/auth/AccountList.h"
 #include "minecraft/launch/AutoInstallJava.h"
 #include "minecraft/launch/ClaimAccount.h"
 #include "minecraft/launch/CreateGameFolders.h"
@@ -324,6 +325,15 @@ void MinecraftInstance::populateLaunchMenu(QMenu* menu)
     connect(normalLaunch, &QAction::triggered, this, [this] { APPLICATION->launch(this); });
     connect(normalLaunchOffline, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Offline); });
     connect(normalLaunchDemo, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Demo); });
+
+    auto accounts = APPLICATION->accounts();
+    QMenu* launchAsMenu = menu->addMenu(tr("Launch &As"));
+    launchAsMenu->setEnabled(accounts->count() > 0);
+    for (int i = 0; i < accounts->count(); i++) {
+        MinecraftAccountPtr account = accounts->at(i);
+        QAction* action = launchAsMenu->addAction(account->displayName());
+        connect(action, &QAction::triggered, this, [this, account] { APPLICATION->launch(this, LaunchMode::Normal, nullptr, account); });
+    }
 
     QString profilersTitle = tr("Profilers");
     menu->addSeparator()->setText(profilersTitle);
