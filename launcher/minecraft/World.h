@@ -42,6 +42,7 @@ class World {
     bool isValid() const { return m_isValid; }
     bool isOnFS() const { return m_containerFile.isDir(); }
     QFileInfo container() const { return m_containerFile; }
+    QString containerOffsetPath() const { return m_containerOffsetPath; }
     // delete all the files of this world
     bool destroy();
     // replace this world with a copy of the other

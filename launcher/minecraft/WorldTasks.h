@@ -25,6 +25,7 @@ class InstallWorldTask : public Task {
 
    private:
     Args m_args;
+    Task::Ptr m_extractTask;
 };
 
 class CopyWorldTask : public Task {
