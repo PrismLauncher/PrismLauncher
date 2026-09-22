@@ -80,7 +80,7 @@ QVariant DataPackFolderModel::data(const QModelIndex& index, int role) const
             break;
         case Qt::DecorationRole: {
             if (column == ImageColumn) {
-                return at(row).image({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
+                return at(row).image({ 32, 32 }, Qt::KeepAspectRatio);
             }
             break;
         }
