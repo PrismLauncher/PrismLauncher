@@ -244,9 +244,6 @@ void MinecraftInstance::loadSpecificSettings()
         auto envSetting = m_settings->registerSetting("OverrideEnv", false);
         m_settings->registerOverride(global_settings->getSetting("Env"), envSetting);
 
-        auto modUpdateReleaseTypesOverride = m_settings->registerSetting("OverrideModUpdateReleaseTypes", false);
-        m_settings->registerOverride(global_settings->getSetting("ModUpdateReleaseTypes"), modUpdateReleaseTypesOverride);
-
         if (m_settings->get("InstanceType").toString() != "OneSix") {
             m_settings->set("InstanceType", "OneSix");
         }
