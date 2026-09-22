@@ -92,7 +92,6 @@ class BlockedModsDialog : public QDialog {
     void hashTaskFinished();
 
     bool checkValidPath(QString path);
-    bool allModsMatched();
 };
 
 QDebug operator<<(QDebug debug, const BlockedMod& m);
