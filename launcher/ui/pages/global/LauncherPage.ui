@@ -512,7 +512,7 @@
                <string>Select the preferred release channel when checking for mod updates.</string>
               </property>
               <property name="text">
-               <string>Mod update channel:</string>
+               <string>Mod Update Channel:</string>
               </property>
              </widget>
             </item>
