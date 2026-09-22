@@ -296,7 +296,7 @@ QPixmap Mod::setIcon(const QImage& newImage) const
 
     // scale the image to avoid flooding the pixmapcache
     auto pixmap =
-        QPixmap::fromImage(newImage.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
+        QPixmap::fromImage(newImage.scaled({ 64, 64 }, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
     m_packImageCacheKey.key = PixmapCache::insert(pixmap);
     m_packImageCacheKey.wasEverUsed = true;
