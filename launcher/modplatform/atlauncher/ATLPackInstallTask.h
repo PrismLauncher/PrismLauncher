@@ -140,8 +140,8 @@ class PackInstallTask : public InstanceTask {
     Meta::Version::Ptr m_minecraftVersion;
     QMap<QString, Meta::Version::Ptr> m_componentsToInstall;
 
-    QFuture<std::optional<QStringList>> m_extractFuture;
-    QFutureWatcher<std::optional<QStringList>> m_extractFutureWatcher;
+    QFuture<Result<QStringList>> m_extractFuture;
+    QFutureWatcher<Result<QStringList>> m_extractFutureWatcher;
 
     QFuture<bool> m_modExtractFuture;
     QFutureWatcher<bool> m_modExtractFutureWatcher;

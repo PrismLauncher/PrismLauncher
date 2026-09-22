@@ -52,29 +52,29 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
     QString fmlMinecraftVersion;
     if (QFile::exists(modpackJar)) {
         MMCZip::ArchiveReader zipFile(modpackJar);
-        if (!zipFile.collectFiles()) {
-            emit failed(tr("Unable to open \"bin/modpack.jar\" file!"));
+        if (const auto result = zipFile.collectFiles(); !result) {
+            emit failed(tr("Unable to open \"bin/modpack.jar\" file: %1").arg(result.error()));
             return;
         }
         if (zipFile.exists("/version.json")) {
             if (zipFile.exists("/fmlversion.properties")) {
                 auto file = zipFile.goToFile("fmlversion.properties");
-                if (!file) {
-                    emit failed(tr("Unable to open \"fmlversion.properties\"!"));
+                if (!file.has_value() || !file.value()) {
+                    emit failed(tr("Unable to open \"fmlversion.properties\": %1").arg(file.error_or(tr("File not found"))));
                     return;
                 }
-                QByteArray fmlVersionData = file->readAll();
+                QByteArray fmlVersionData = file.value()->readAll();
                 INIFile iniFile;
                 iniFile.loadFile(fmlVersionData);
                 // If not present, this evaluates to a null string
                 fmlMinecraftVersion = iniFile["fmlbuild.mcversion"].toString();
             }
             auto file = zipFile.goToFile("version.json");
-            if (!file) {
-                emit failed(tr("Unable to open \"version.json\"!"));
+            if (!file.has_value() || !file.value()) {
+                emit failed(tr("Unable to open \"version.json\": %1").arg(file.error_or(tr("File not found"))));
                 return;
             }
-            data = file->readAll();
+            data = file.value()->readAll();
         } else {
             if (minecraftVersion.isEmpty()) {
                 emit failed(tr("Could not find \"version.json\" inside \"bin/modpack.jar\", but Minecraft version is unknown"));
@@ -88,12 +88,12 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
             // (the code still comes from the jar mod installed above)
             if (zipFile.exists("/forgeversion.properties")) {
                 auto file = zipFile.goToFile("forgeversion.properties");
-                if (!file) {
+                if (!file.has_value() || !file.value()) {
                     // Really shouldn't happen, but error handling shall not be forgotten
-                    emit failed(tr("Unable to open \"forgeversion.properties\""));
+                    emit failed(tr("Unable to open \"forgeversion.properties\": %1").arg(file.error_or(tr("File not found"))));
                     return;
                 }
-                auto forgeVersionData = file->readAll();
+                auto forgeVersionData = file.value()->readAll();
                 INIFile iniFile;
                 iniFile.loadFile(forgeVersionData);
                 QString major, minor, revision, build;

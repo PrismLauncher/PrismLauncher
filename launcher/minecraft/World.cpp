@@ -288,7 +288,7 @@ void World::readFromZip(const QFileInfo& file)
     MMCZip::ArchiveReader r(file.absoluteFilePath());
 
     m_isValid = false;
-    r.parse([this](MMCZip::ArchiveReader::File* file, bool& stop) {
+    if (const auto result = r.parse([this](MMCZip::ArchiveReader::File* file) {
         const QString levelDat = "level.dat";
         auto filePath = file->filename();
         QFileInfo fi(filePath);
@@ -297,10 +297,12 @@ void World::readFromZip(const QFileInfo& file)
             m_levelDatTime = file->dateTime();
             loadFromLevelDat(file->readAll());
             m_isValid = true;
-            stop = true;
+            return true;
         }
-        return true;
-    });
+        return false;
+    }); !result) {
+        qWarning() << "Failed to read world from zip:" << result.error();
+    }
 }
 
 bool World::install(const QString& to, const QString& name)

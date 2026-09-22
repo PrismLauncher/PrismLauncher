@@ -54,8 +54,8 @@ class SingleZipPackInstallTask : public InstanceTask {
     QString m_archivePath;
     NetJob::Ptr m_filesNetJob;
     std::unique_ptr<MMCZip::ArchiveReader> m_packZip;
-    QFuture<std::optional<QStringList>> m_extractFuture;
-    QFutureWatcher<std::optional<QStringList>> m_extractFutureWatcher;
+    QFuture<Result<QStringList>> m_extractFuture;
+    QFutureWatcher<Result<QStringList>> m_extractFutureWatcher;
 };
 
 }  // namespace Technic

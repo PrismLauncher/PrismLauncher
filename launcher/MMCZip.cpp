@@ -50,54 +50,46 @@ namespace MMCZip {
 // ours
 using FilterFunction = std::function<bool(const QString&)>;
 #if defined(LAUNCHER_APPLICATION)
-bool mergeZipFiles(ArchiveWriter& into, QFileInfo from, QSet<QString>& contained, const FilterFunction& filter = nullptr)
+Result<> mergeZipFiles(ArchiveWriter& into, QFileInfo from, QSet<QString>& contained, const FilterFunction& filter = nullptr)
 {
     ArchiveReader r(from.absoluteFilePath());
     return r.parse([&into, &contained, &filter, from](ArchiveReader::File* f) {
         auto filename = f->filename();
         if (filter && !filter(filename)) {
             qDebug() << "Skipping file" << filename << "from" << from.fileName() << "- filtered";
-            f->skip();
-            return true;
+            return f->skip();
         }
         if (contained.contains(filename)) {
             qDebug() << "Skipping already contained file" << filename << "from" << from.fileName();
-            f->skip();
-            return true;
+            return f->skip();
         }
         contained.insert(filename);
-        if (!into.addFile(f)) {
-            qCritical() << "Failed to copy data of" << filename << "into the jar";
-            return false;
-        }
-        return true;
+        return into.addFile(f);
     });
 }
 
-bool compressDirFiles(ArchiveWriter& zip, QString dir, QFileInfoList files)
+Result<> compressDirFiles(ArchiveWriter& zip, QString dir, QFileInfoList files)
 {
     QDir directory(dir);
     if (!directory.exists())
-        return false;
+        return std::unexpected{ "Directory does not exist" };
 
     for (auto e : files) {
         auto filePath = directory.relativeFilePath(e.absoluteFilePath());
         auto srcPath = e.absoluteFilePath();
-        if (!zip.addFile(srcPath, filePath))
-            return false;
+        TRY(zip.addFile(srcPath, filePath))
     }
 
-    return true;
+    return {};
 }
 
 // ours
-bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod*>& mods)
+Result<> createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod*>& mods)
 {
     ArchiveWriter zipOut(targetJarPath);
-    if (!zipOut.open()) {
+    if (const auto result = zipOut.open(); !result) {
         FS::deletePath(targetJarPath);
-        qCritical() << "Failed to open the minecraft.jar for modding";
-        return false;
+        return std::unexpected{ QString("Could not open minecraft.jar for modding: %1").arg(result.error()) };
     }
     // Files already added to the jar.
     // These files will be skipped.
@@ -111,20 +103,18 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
         if (!mod->enabled())
             continue;
         if (mod->type() == ResourceType::ZIPFILE) {
-            if (!mergeZipFiles(zipOut, mod->fileinfo(), addedFiles)) {
-                zipOut.close();
+            if (const auto result = mergeZipFiles(zipOut, mod->fileinfo(), addedFiles); !result) {
+                TRY_OR_LOG(zipOut.close());
                 FS::deletePath(targetJarPath);
-                qCritical() << "Failed to add" << mod->fileinfo().fileName() << "to the jar.";
-                return false;
+                return std::unexpected{ QString("Failed to add %1 to the jar: %2").arg(mod->fileinfo().fileName(), result.error()) };
             }
         } else if (mod->type() == ResourceType::SINGLEFILE) {
             // FIXME: buggy - does not work with addedFiles
             auto filename = mod->fileinfo();
-            if (!zipOut.addFile(filename.absoluteFilePath(), filename.fileName())) {
-                zipOut.close();
+            if (const auto result = zipOut.addFile(filename.absoluteFilePath(), filename.fileName()); !result) {
+                TRY_OR_LOG(zipOut.close());
                 FS::deletePath(targetJarPath);
-                qCritical() << "Failed to add" << mod->fileinfo().fileName() << "to the jar.";
-                return false;
+                return std::unexpected{ QString("Failed to add %1 to the jar: %2").arg(mod->fileinfo().fileName(), result.error()) };
             }
             addedFiles.insert(filename.fileName());
         } else if (mod->type() == ResourceType::FOLDER) {
@@ -143,51 +133,47 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
                     files.removeAll(e);
             }
 
-            if (!compressDirFiles(zipOut, parent_dir, files)) {
-                zipOut.close();
+            if (const auto result = compressDirFiles(zipOut, parent_dir, files); !result) {
+                TRY_OR_LOG(zipOut.close());
                 FS::deletePath(targetJarPath);
-                qCritical() << "Failed to add" << mod->fileinfo().fileName() << "to the jar.";
-                return false;
+                return std::unexpected{ QString("Failed to add %1 to the jar: %2").arg(mod->fileinfo().fileName(), result.error()) };
             }
             qDebug() << "Adding folder" << filename.fileName() << "from" << filename.absoluteFilePath();
         } else {
             // Make sure we do not continue launching when something is missing or undefined...
-            zipOut.close();
+            TRY_OR_LOG(zipOut.close());
             FS::deletePath(targetJarPath);
-            qCritical() << "Failed to add unknown mod type" << mod->fileinfo().fileName() << "to the jar.";
-            return false;
+            return std::unexpected{ QString("Failed to add unknown mod type %1 to the jar.").arg(mod->fileinfo().fileName()) };
         }
     }
 
-    if (!mergeZipFiles(zipOut, QFileInfo(sourceJarPath), addedFiles, [](const QString key) { return !key.contains("META-INF"); })) {
-        zipOut.close();
+    if (const auto result =
+            mergeZipFiles(zipOut, QFileInfo(sourceJarPath), addedFiles, [](const QString key) { return !key.contains("META-INF"); });
+        !result) {
+        TRY_OR_LOG(zipOut.close());
         FS::deletePath(targetJarPath);
-        qCritical() << "Failed to insert minecraft.jar contents.";
-        return false;
+        return std::unexpected{ QString("Failed to insert minecraft.jar contents: %1").arg(result.error()) };
     }
 
     // Recompress the jar
-    if (!zipOut.close()) {
+    if (const auto result = zipOut.close(); !result) {
         FS::deletePath(targetJarPath);
-        qCritical() << "Failed to finalize minecraft.jar!";
-        return false;
+        return std::unexpected{ QString("Failed to finalize minecraft.jar: %1").arg(result.error()) };
     }
-    return true;
+    return {};
 }
 #endif
 
 // ours
-std::optional<QStringList> extractSubDir(ArchiveReader* zip, const QString& subdir, const QString& target)
+Result<QStringList> extractSubDir(ArchiveReader* zip, const QString& subdir, const QString& target)
 {
     auto target_top_dir = QUrl::fromLocalFile(target);
 
     QStringList extracted;
 
     qDebug() << "Extracting subdir" << subdir << "from" << zip->getZipName() << "to" << target;
-    if (!zip->collectFiles()) {
-        qWarning() << "Failed to enumerate files in archive";
-        return std::nullopt;
-    }
+    TRY(zip->collectFiles())
+
     if (zip->getFiles().isEmpty()) {
         qDebug() << "Extracting empty archives seems odd...";
         return extracted;
@@ -196,12 +182,11 @@ std::optional<QStringList> extractSubDir(ArchiveReader* zip, const QString& subd
     auto extPtr = ArchiveWriter::createDiskWriter();
     auto ext = extPtr.get();
 
-    if (!zip->parse([&subdir, &target, &target_top_dir, ext, &extracted](ArchiveReader::File* f) {
+    if (const auto result = zip->parse([&subdir, &target, &target_top_dir, ext, &extracted](ArchiveReader::File* f) -> Result<> {
             QString file_name = f->filename();
             file_name = FS::RemoveInvalidPathChars(file_name);
             if (!file_name.startsWith(subdir)) {
-                f->skip();
-                return true;
+                return f->skip();
             }
 
             auto relative_file_name = QDir::fromNativeSeparators(file_name.mid(subdir.size()));
@@ -229,30 +214,26 @@ std::optional<QStringList> extractSubDir(ArchiveReader* zip, const QString& subd
             }
 
             if (!target_top_dir.isParentOf(QUrl::fromLocalFile(target_file_path))) {
-                qWarning() << "Extracting" << relative_file_name << "was cancelled, because it was effectively outside of the target path"
-                           << target;
-                return false;
-            }
-            if (!f->writeFile(ext, target_file_path, target)) {
-                qWarning() << "Failed to extract file" << original_name << "to" << target_file_path;
-                return false;
+                return std::unexpected{ QString("Extracting %1 was cancelled, because it was effectively outside of the target path %2")
+                                            .arg(relative_file_name, target) };
             }
 
+            TRY(f->writeFile(ext, target_file_path, target))
             extracted.append(target_file_path);
 
             qDebug() << "Extracted file" << relative_file_name << "to" << target_file_path;
-            return true;
-        })) {
-        qWarning() << "Failed to parse file" << zip->getZipName();
+            return {};
+        });
+        !result) {
         FS::removeFiles(extracted);
-        return std::nullopt;
+        return std::unexpected{ result.error() };
     }
 
     return extracted;
 }
 
 // ours
-std::optional<QStringList> extractDir(QString fileCompressed, QString dir)
+Result<QStringList> extractDir(QString fileCompressed, QString dir)
 {
     // check if this is a minimum size empty zip file...
     QFileInfo fileInfo(fileCompressed);
@@ -264,7 +245,7 @@ std::optional<QStringList> extractDir(QString fileCompressed, QString dir)
 }
 
 // ours
-std::optional<QStringList> extractDir(QString fileCompressed, QString subdir, QString dir)
+Result<QStringList> extractDir(QString fileCompressed, QString subdir, QString dir)
 {
     // check if this is a minimum size empty zip file...
     QFileInfo fileInfo(fileCompressed);
@@ -276,17 +257,17 @@ std::optional<QStringList> extractDir(QString fileCompressed, QString subdir, QS
 }
 
 // ours
-bool extractFile(QString fileCompressed, QString file, QString target)
+Result<> extractFile(QString fileCompressed, QString file, QString target)
 {
     // check if this is a minimum size empty zip file...
     QFileInfo fileInfo(fileCompressed);
     if (fileInfo.size() == 22) {
-        return true;
+        return {};
     }
     ArchiveReader zip(fileCompressed);
-    auto f = zip.goToFile(file);
+    TRY_INTO(const auto& f, zip.goToFile(file))
     if (!f) {
-        return false;
+        return std::unexpected{ "File not found" };
     }
     auto extPtr = ArchiveWriter::createDiskWriter();
     auto ext = extPtr.get();

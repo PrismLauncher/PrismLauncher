@@ -79,7 +79,7 @@ class SolderPackInstallTask : public InstanceTask {
     QString m_minecraftVersion;
     QTemporaryDir m_outputDir;
     int m_modCount = 0;
-    QFuture<bool> m_extractFuture;
-    QFutureWatcher<bool> m_extractFutureWatcher;
+    QFuture<Result<>> m_extractFuture;
+    QFutureWatcher<Result<>> m_extractFutureWatcher;
 };
 }  // namespace Technic

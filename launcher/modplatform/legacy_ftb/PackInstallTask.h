@@ -36,8 +36,8 @@ class PackInstallTask : public InstanceTask {
    private: /* data */
     QNetworkAccessManager* m_network;
     bool m_abortable = false;
-    QFuture<std::optional<QStringList>> m_extractFuture;
-    QFutureWatcher<std::optional<QStringList>> m_extractFutureWatcher;
+    QFuture<Result<QStringList>> m_extractFuture;
+    QFutureWatcher<Result<QStringList>> m_extractFutureWatcher;
     NetJob::Ptr m_netJobContainer;
     QString m_archivePath;
 

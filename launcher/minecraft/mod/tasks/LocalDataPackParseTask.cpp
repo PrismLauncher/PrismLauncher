@@ -111,7 +111,7 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
     bool mcmeta_result = false;
     bool pack_png_result = false;
     if (!zip.parse(
-            [&metaParsed, &iconParsed, &mcmeta_result, &pack_png_result, pack, level](MMCZip::ArchiveReader::File* f, bool& breakControl) {
+            [&metaParsed, &iconParsed, &mcmeta_result, &pack_png_result, pack, level](MMCZip::ArchiveReader::File* f) -> Result<bool> {
                 bool skip = true;
                 if (!metaParsed && f->filename() == "pack.mcmeta") {
                     metaParsed = true;
@@ -121,7 +121,6 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
                     mcmeta_result = DataPackUtils::processMCMeta(pack, std::move(data));
 
                     if (!mcmeta_result) {
-                        breakControl = true;
                         return true;  // mcmeta invalid
                     }
                 }
@@ -132,18 +131,17 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
 
                     pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
                     if (!pack_png_result) {
-                        breakControl = true;
                         return true;  // pack.png invalid
                     }
                 }
                 if (skip) {
-                    f->skip();
+                    TRY(f->skip());
                 }
                 if (metaParsed && (level == ProcessingLevel::BasicInfoOnly || iconParsed)) {
-                    breakControl = true;
+                    return true;
                 }
 
-                return true;
+                return false;
             })) {
         return false;  // can't open zip file
     }
@@ -343,10 +341,10 @@ bool processPackPNG(const DataPack* pack)
         case ResourceType::ZIPFILE: {
             MMCZip::ArchiveReader zip(pack->fileinfo().filePath());
             auto f = zip.goToFile("pack.png");
-            if (!f) {
+            if (!f.has_value() || !f.value()) {
                 return png_invalid();
             }
-            auto data = f->readAll();
+            auto data = f.value()->readAll();
 
             bool pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
 

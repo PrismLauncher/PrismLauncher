@@ -38,9 +38,8 @@ auto ExtractZipTask::extractZip() -> Result<>
     QStringList extracted;
 
     qDebug() << "Extracting subdir" << m_subdirectory << "from" << m_input.getZipName() << "to" << target;
-    if (!m_input.collectFiles()) {
-        return std::unexpected(tr("Failed to enumerate files in archive"));
-    }
+    TRY(m_input.collectFiles())
+
     if (m_input.getFiles().isEmpty()) {
         logWarning(tr("Extracting empty archives seems odd..."));
         return {};
@@ -51,16 +50,14 @@ auto ExtractZipTask::extractZip() -> Result<>
 
     setStatus("Extracting files...");
     setProgress(0, m_input.getFiles().count());
-    Result<> result;
     auto fileName = m_input.getZipName();
-    if (!m_input.parse([this, &result, &target, &target_top_dir, ext, &extracted](ArchiveReader::File* f) {
+    if (const auto result = m_input.parse([this, &target, &target_top_dir, ext, &extracted](ArchiveReader::File* f) -> Result<> {
             if (m_zipFuture.isCanceled())
-                return false;
+                return std::unexpected{"Cancelled"};
             setProgress(m_progress + 1, m_progressTotal);
             QString file_name = f->filename();
             if (!file_name.startsWith(m_subdirectory)) {
-                f->skip();
-                return true;
+                return f->skip();
             }
 
             auto relative_file_name = QDir::fromNativeSeparators(file_name.mid(m_subdirectory.size()));
@@ -90,22 +87,20 @@ auto ExtractZipTask::extractZip() -> Result<>
             }
 
             if (!target_top_dir.isParentOf(QUrl::fromLocalFile(target_file_path))) {
-                result = std::unexpected(tr("Extracting %1 was cancelled, because it was effectively outside of the target path %2")
+                return std::unexpected(tr("Extracting %1 was cancelled, because it was effectively outside of the target path %2")
                                        .arg(relative_file_name, target));
-                return false;
             }
 
-            if (!f->writeFile(ext, target_file_path, target)) {
-                result = std::unexpected(tr("Failed to extract file %1 to %2").arg(original_name, target_file_path));
-                return false;
+            if (const auto writeResult = f->writeFile(ext, target_file_path, target); !writeResult) {
+                return std::unexpected(tr("Failed to extract file %1 to %2: %3").arg(original_name, target_file_path, writeResult.error()));
             }
             extracted.append(target_file_path);
 
             qDebug() << "Extracted file" << relative_file_name << "to" << target_file_path;
-            return true;
-        })) {
+            return {};
+        }); !result) {
         FS::removeFiles(extracted);
-        return result.has_value() ? result : std::unexpected(tr("Failed to parse file %1: %2").arg(fileName, result.error()));
+        return std::unexpected{result.error()};
     }
     return {};
 }
