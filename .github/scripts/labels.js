@@ -97,7 +97,7 @@ async function addPullRequestAiLabel(github, owner, repo, pull) {
         return;
     }
 
-    const commits = await github.paginate(github.rest.pulls.listCommits, {owner, repo, pull_number: pull.number, per_page: 100});
+    const {data: commits} = await github.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/commits', {owner, repo, pull_number: pull.number, per_page: 100});
     if (!hasAiAttribution(pull.body ?? '') && !commits.some(({commit}) => hasAiAttribution(commit.message))) {
         return;
     }
