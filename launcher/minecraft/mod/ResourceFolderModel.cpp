@@ -695,12 +695,23 @@ void ResourceFolderModel::saveColumns(QTreeView* tree)
     }
     auto visibility = Json::toMap(settings->get(visibilitySettingName).toString());
     for (auto i = 0; i < m_columnNames.size(); ++i) {
+        const auto& name = m_columnNames[i];
         if (m_columnsHideable[i]) {
-            auto name = m_columnNames[i];
             visibility[name] = !tree->isColumnHidden(i);
         }
     }
     settings->set(visibilitySettingName, Json::fromMap(visibility));
+
+    const auto sizesSettingName = QString("UI/%1_Page/ColumnSizes").arg(id());
+    QVariantMap sizes;
+    for (int i = 0; i < m_columnNames.size(); ++i) {
+        const auto& name = m_columnNames[i];
+        const auto resizeMode = tree->header()->sectionResizeMode(i);
+        if (resizeMode == QHeaderView::Interactive && !tree->isColumnHidden(i)) {
+            sizes[name] = tree->header()->sectionSize(i);
+        }
+    }
+    m_instance->settings()->set(sizesSettingName, Json::fromMap(sizes));
 }
 
 void ResourceFolderModel::loadColumns(QTreeView* tree)
@@ -743,6 +754,26 @@ void ResourceFolderModel::loadColumns(QTreeView* tree)
             setVisible(value);
         }
     });
+
+    const auto sizesSettingName = QString("UI/%1_Page/ColumnSizes").arg(id());
+    const auto sizesSetting = m_instance->settings()->getOrRegisterSetting(sizesSettingName, "{}");
+    auto sizes = Json::toMap(sizesSetting->get().toString());
+    tree->header()->blockSignals(true);
+    for (int i = 0; i < m_columnNames.size(); ++i) {
+        const auto resizeMode = tree->header()->sectionResizeMode(i);
+        if (resizeMode != QHeaderView::Interactive || tree->isColumnHidden(i)) {
+            // NOTE: covers Fixed size too which we don't want to be updated even though it can be
+            continue;
+        }
+
+        const auto& name = m_columnNames[i];
+
+        const auto size = sizes.value(name).toInt();
+        if (size > 0) {
+            tree->header()->resizeSection(i, size);
+        }
+    }
+    tree->header()->blockSignals(false);
 }
 
 QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
