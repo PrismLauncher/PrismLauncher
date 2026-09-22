@@ -6,13 +6,37 @@
 
 #include "ui/pages/BasePage.h"
 
+class MinecraftInstance;
+class QLineEdit;
+
+namespace Ui {
+class PathsPage;
+}
+
 class PathsPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit PathsPage(QWidget* parent = nullptr) : QWidget(parent) {}
+    explicit PathsPage(MinecraftInstance* instance, QWidget* parent = nullptr);
+    ~PathsPage() override;
 
     QString displayName() const override { return tr("Paths"); }
     QIcon icon() const override { return QIcon::fromTheme("viewfolder"); }
     QString id() const override { return "paths"; }
+    void openedImpl() override;
+    void retranslate() override;
+
+   private slots:
+    void on_modsDirBrowseBtn_clicked();
+    void on_resourcePacksDirBrowseBtn_clicked();
+    void on_shaderPacksDirBrowseBtn_clicked();
+    void on_worldsDirBrowseBtn_clicked();
+    void on_screenshotsDirBrowseBtn_clicked();
+
+   private:
+    void loadPaths();
+    void browseForDirectory(QLineEdit* pathEdit, const QString& title);
+
+    Ui::PathsPage* ui;
+    MinecraftInstance* m_instance;
 };
