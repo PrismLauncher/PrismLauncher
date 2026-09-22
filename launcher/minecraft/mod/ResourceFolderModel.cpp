@@ -709,6 +709,8 @@ void ResourceFolderModel::loadColumns(QTreeView* tree)
     const auto visibilitySettingName = QString("UI/%1_Page/ColumnsVisibility").arg(id());
 
     auto setVisible = [this, tree](const QVariant& value) {
+        // NOTE: updating visibility state causes sectionResized to fire and a save
+        tree->header()->blockSignals(true);
         auto visibility = Json::toMap(value.toString());
         for (auto i = 0; i < m_columnNames.size(); ++i) {
             if (m_columnsHideable[i]) {
@@ -716,6 +718,7 @@ void ResourceFolderModel::loadColumns(QTreeView* tree)
                 tree->setColumnHidden(i, !visibility.value(name, false).toBool());
             }
         }
+        tree->header()->blockSignals(false);
     };
 
     const auto defaultValue = Json::fromMap({
@@ -774,12 +777,14 @@ QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
         act->setChecked(!tree->isColumnHidden(col));
 
         connect(act, &QAction::toggled, tree, [this, col, tree](bool toggled) {
+            tree->header()->blockSignals(true);
             tree->setColumnHidden(col, !toggled);
             for (int c = 0; c < columnCount(); ++c) {
                 if (m_columnResizeModes.at(c) == QHeaderView::ResizeToContents) {
                     tree->resizeColumnToContents(c);
                 }
             }
+            tree->header()->blockSignals(false);
             saveColumns(tree);
         });
 
