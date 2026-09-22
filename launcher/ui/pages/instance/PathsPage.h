@@ -32,10 +32,16 @@ class PathsPage : public QWidget, public BasePage {
     void on_shaderPacksDirBrowseBtn_clicked();
     void on_worldsDirBrowseBtn_clicked();
     void on_screenshotsDirBrowseBtn_clicked();
+    void on_modsDirResetBtn_clicked();
+    void on_resourcePacksDirResetBtn_clicked();
+    void on_shaderPacksDirResetBtn_clicked();
+    void on_worldsDirResetBtn_clicked();
+    void on_screenshotsDirResetBtn_clicked();
 
    private:
     void loadPaths();
-    void browseForDirectory(QLineEdit* pathEdit, const QString& title);
+    void browseForDirectory(const QString& path, QLineEdit* pathEdit, const QString& title);
+    void changeDirectory(const QString& path, const QString& selected, QLineEdit* pathEdit);
 
     Ui::PathsPage* ui;
     MinecraftInstance* m_instance;

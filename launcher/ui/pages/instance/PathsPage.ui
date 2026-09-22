@@ -50,6 +50,13 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="3">
+       <widget class="QPushButton" name="modsDirResetBtn">
+        <property name="text">
+         <string>Reset</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0">
        <widget class="QLabel" name="resourcePacksDirLabel">
         <property name="text">
@@ -71,6 +78,13 @@
        <widget class="QPushButton" name="resourcePacksDirBrowseBtn">
         <property name="text">
          <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QPushButton" name="resourcePacksDirResetBtn">
+        <property name="text">
+         <string>Reset</string>
         </property>
        </widget>
       </item>
@@ -98,6 +112,13 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="3">
+       <widget class="QPushButton" name="shaderPacksDirResetBtn">
+        <property name="text">
+         <string>Reset</string>
+        </property>
+       </widget>
+      </item>
       <item row="3" column="0">
        <widget class="QLabel" name="worldsDirLabel">
         <property name="text">
@@ -122,6 +143,13 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="3">
+       <widget class="QPushButton" name="worldsDirResetBtn">
+        <property name="text">
+         <string>Reset</string>
+        </property>
+       </widget>
+      </item>
       <item row="4" column="0">
        <widget class="QLabel" name="screenshotsDirLabel">
         <property name="text">
@@ -143,6 +171,13 @@
        <widget class="QPushButton" name="screenshotsDirBrowseBtn">
         <property name="text">
          <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3">
+       <widget class="QPushButton" name="screenshotsDirResetBtn">
+        <property name="text">
+         <string>Reset</string>
         </property>
        </widget>
       </item>
