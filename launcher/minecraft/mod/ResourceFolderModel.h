@@ -8,9 +8,9 @@
 #include <QTreeView>
 
 #include "Resource.h"
-
 #include "tasks/ConcurrentTask.h"
 #include "tasks/Task.h"
+#include "ui/MultiDecorationItemDelegate.h"
 
 class MinecraftInstance;
 class QSortFilterProxyModel;
@@ -162,6 +162,8 @@ class ResourceFolderModel : public QAbstractListModel {
     QBrush rowBackground(int row) const;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
+
+    virtual QList<MultiDecorationItemDelegate::Icon> icons(int row) const;
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 

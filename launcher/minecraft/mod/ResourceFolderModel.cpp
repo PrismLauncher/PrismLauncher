@@ -27,6 +27,7 @@
 #include "settings/Setting.h"
 #include "tasks/SequentialTask.h"
 #include "tasks/Task.h"
+#include "ui/MultiDecorationItemDelegate.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
 ResourceFolderModel::ResourceFolderModel(const QDir& dir, MinecraftInstance* instance, bool isIndexed, bool createDir, QObject* parent)
@@ -586,14 +587,10 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
         }
         case Qt::DecorationRole: {
             if (column == NameColumn) {
-                if (APPLICATION->settings()->get("ShowModIncompat").toBool() && at(row).hasIssues()) {
-                    return QIcon::fromTheme("status-bad");
-                }
-                if (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()) {
-                    return QIcon::fromTheme("status-yellow");
-                }
+                QVariant result;
+                result.setValue(icons(row));
+                return result;
             }
-
             return {};
         }
         case Qt::CheckStateRole:
@@ -609,6 +606,22 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
         default:
             return {};
     }
+}
+
+QList<MultiDecorationItemDelegate::Icon> ResourceFolderModel::icons(int row) const
+{
+    QList<MultiDecorationItemDelegate::Icon> result;
+    static const QSize s_iconSize{ 16, 16 };
+
+    if (APPLICATION->settings()->get("ShowModIncompat").toBool() && at(row).hasIssues()) {
+        result.append({ .icon = QIcon::fromTheme("status-bad"), .size = s_iconSize });
+    }
+
+    if (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()) {
+        result.append({ .icon = QIcon::fromTheme("status-yellow"), .size = s_iconSize });
+    }
+
+    return result;
 }
 
 bool ResourceFolderModel::setData(const QModelIndex& index, [[maybe_unused]] const QVariant& value, int role)
