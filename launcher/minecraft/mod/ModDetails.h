@@ -39,6 +39,8 @@
 #include <QStringList>
 #include <QUrl>
 
+#include "modplatform/ModIndex.h"
+
 struct ModLicense {
     QString name = {};
     QString id = {};
@@ -140,24 +142,5 @@ struct ModDetails {
 
     QStringList dependencies = {};
 
-    ModDetails() = default;
-
-    /** Metadata should be handled manually to properly set the mod status. */
-    ModDetails(const ModDetails& other)
-        : mod_id(other.mod_id)
-        , name(other.name)
-        , version(other.version)
-        , mcversion(other.mcversion)
-        , homeurl(other.homeurl)
-        , description(other.description)
-        , authors(other.authors)
-        , issue_tracker(other.issue_tracker)
-        , licenses(other.licenses)
-        , icon_file(other.icon_file)
-        , dependencies(other.dependencies)
-    {}
-
-    ModDetails& operator=(const ModDetails& other) = default;
-
-    ModDetails& operator=(ModDetails&& other) = default;
+    ModPlatform::ModLoaderType loader = {};
 };
