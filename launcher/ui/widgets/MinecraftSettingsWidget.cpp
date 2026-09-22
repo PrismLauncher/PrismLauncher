@@ -41,6 +41,7 @@
 
 #include <QFileDialog>
 #include "Application.h"
+#include "BuildConfig.h"
 #include "Json.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/WorldList.h"
