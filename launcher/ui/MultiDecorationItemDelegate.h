@@ -1,5 +1,15 @@
 #pragma once
 
+#include <QIcon>
+#include <QList>
+#include <QObject>
+#include <QSize>
+#include <QStyledItemDelegate>
+
+class QModelIndex;
+class QPainter;
+class QStyleOptionViewItem;
+
 /// Item delegate allowing DecorationRole to be provided as a QList<MultiDecorationItemDelegate::Icon>.
 class MultiDecorationItemDelegate : public QStyledItemDelegate {
     Q_OBJECT
