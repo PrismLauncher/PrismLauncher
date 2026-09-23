@@ -51,7 +51,7 @@
 
 INIFile::INIFile() = default;
 
-bool INIFile::saveFile(const QString& fileName)
+Result<> INIFile::saveFile(const QString& fileName)
 {
     if (!contains("ConfigVersion")) {
         insert("ConfigVersion", "1.3");
@@ -68,16 +68,16 @@ bool INIFile::saveFile(const QString& fileName)
 
     if (auto status = settingsObj.status(); status != QSettings::Status::NoError) {
         if (status == QSettings::Status::AccessError) {
-            qCritical() << "An access error occurred while saving INI file" << fileName << "(is the file read-only?)";
+            return std::unexpected("Failed to write INI file to " + fileName);
         }
-        if (ASSERT_NEVER(status == QSettings::Status::FormatError)) {
-            qCritical() << "A format error occurred while saving INI file" << fileName << "(this shouldn't be possible!)";
+        // NOTE: FormatError can be set by the read that happens when constructing QSettings whether you like it or not
+        // since we're ignoring the existing values anyway it doesn't make much sense to care about this
+        if (status != QSettings::Status::FormatError) {
+            return std::unexpected("Unknown error occurred while saving INI file to " + fileName);
         }
-
-        return false;
     }
 
-    return true;
+    return {};
 }
 
 namespace {
@@ -173,24 +173,24 @@ QVariant migrateQByteArrayToBase64(const QString& key, QVariant value)
 }
 }  // namespace
 
-bool INIFile::loadFile(const QString& fileName)
+Result<> INIFile::loadFile(const QString& fileName)
 {
     QSettings settingsObj{ fileName, QSettings::Format::IniFormat };
     settingsObj.setFallbacksEnabled(false);
 
     if (auto status = settingsObj.status(); status != QSettings::Status::NoError) {
         if (status == QSettings::Status::AccessError) {
-            qCritical() << "An access error occurred while loading INI file" << fileName;
+            return std::unexpected("Access error occurred while loading INI file from " + fileName);
         }
         if (status == QSettings::Status::FormatError) {
-            qCritical() << "A format error occurred while loading INI file" << fileName << "(is the file malformed or corrupted?)";
+            return std::unexpected("Format error occurred while loading INI file from " + fileName);
         }
-        return false;
+        return std::unexpected("Unknown error occurred while loading INI file from " + fileName);
     }
     if (!settingsObj.value("ConfigVersion").isValid()) {
         QFile file(fileName);
         if (!file.open(QIODevice::ReadOnly)) {
-            return false;
+            return std::unexpected("Failed to open INI file from " + fileName + " for reading: " + file.errorString());
         }
         QSettings::SettingsMap map;
         parseOldFileFormat(file, map);
@@ -223,14 +223,14 @@ bool INIFile::loadFile(const QString& fileName)
             insert(key, settingsObj.value(key));
         }
     }
-    return true;
+    return {};
 }
 
-bool INIFile::loadFile(const QByteArray& data)
+Result<> INIFile::loadFile(const QByteArray& data)
 {
     QTemporaryFile file;
     if (!file.open()) {
-        return false;
+        return std::unexpected("Failed to open temporary file for writing: " + file.errorString());
     }
     file.write(data);
     file.flush();
