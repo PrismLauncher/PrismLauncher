@@ -915,6 +915,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/instance/OtherLogsPage.h
     ui/pages/instance/ServersPage.cpp
     ui/pages/instance/ServersPage.h
+    ui/pages/instance/RealmsPage.cpp
+    ui/pages/instance/RealmsPage.h
     ui/pages/instance/WorldListPage.cpp
     ui/pages/instance/WorldListPage.h
     ui/pages/instance/McClient.cpp
