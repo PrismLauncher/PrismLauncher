@@ -1,8 +1,8 @@
 #include "AutoJavaWizardPage.h"
+#include "config/GlobalConfig.h"
 #include "ui_AutoJavaWizardPage.h"
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
 
 AutoJavaWizardPage::AutoJavaWizardPage(QWidget* parent) : BaseWizardPage(parent), ui(new Ui::AutoJavaWizardPage)
 {
@@ -18,13 +18,13 @@ void AutoJavaWizardPage::initializePage() {}
 
 bool AutoJavaWizardPage::validatePage()
 {
-    auto s = APPLICATION->settings();
+    auto& conf = APPLICATION->config().update();
 
     if (!ui->previousSettingsRadioButton->isChecked()) {
-        s->set("AutomaticJavaSwitch", true);
-        s->set("AutomaticJavaDownload", true);
+        conf.automaticJavaSwitch = true;
+        conf.automaticJavaDownload = true;
     }
-    s->set("UserAskedAboutAutomaticJavaDownload", true);
+    conf.userAskedAboutAutomaticJavaDownload = true;
     return true;
 }
 

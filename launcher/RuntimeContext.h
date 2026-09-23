@@ -21,7 +21,6 @@
 #include <QSet>
 #include <QString>
 #include "SysInfo.h"
-#include "settings/SettingsObject.h"
 
 struct RuntimeContext {
     QString javaArchitecture;
@@ -39,12 +38,6 @@ struct RuntimeContext {
         if (javaRealArchitecture == "arm" || javaRealArchitecture == "armhf")
             return "arm32";
         return javaRealArchitecture;
-    }
-
-    void updateFromInstanceSettings(SettingsObject* instanceSettings)
-    {
-        javaArchitecture = instanceSettings->get("JavaArchitecture").toString();
-        javaRealArchitecture = instanceSettings->get("JavaRealArchitecture").toString();
     }
 
     QString getClassifier() const { return system + "-" + mappedJavaRealArchitecture(); }

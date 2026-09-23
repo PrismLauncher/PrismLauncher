@@ -16,6 +16,7 @@
 #include "Index.h"
 
 #include "Application.h"
+#include "config/GlobalConfig.h"
 #include "JsonFormat.h"
 #include "QObjectPtr.h"
 #include "VersionList.h"
@@ -136,7 +137,7 @@ void Index::connectVersionList(const int row, const VersionList::Ptr& list)
 
 Task::Ptr Index::loadVersion(const QString& uid, const QString& version, Net::Mode mode, bool force)
 {
-    if (mode == Net::Mode::Offline || !APPLICATION->settings()->get("MetaRefreshOnLaunch").toBool()) {
+    if (mode == Net::Mode::Offline || !APPLICATION->config()->metaRefreshOnLaunch) {
         return get(uid, version)->loadTask(mode);
     }
 

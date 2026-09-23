@@ -31,11 +31,15 @@ class EnvironmentVariables : public QWidget {
    public:
     explicit EnvironmentVariables(QWidget* state = nullptr);
     ~EnvironmentVariables() override;
-    void initialize(bool instance, bool override, const QMap<QString, QVariant>& value);
+
+    void setCheckable(bool checkable);
+    void setChecked(bool checked);
+    void setValue(const QMap<QString, QVariant>& value);
+
     bool eventFilter(QObject* watched, QEvent* event) override;
 
     void retranslate();
-    bool override() const;
+    bool checked() const;
     QMap<QString, QVariant> value() const;
 
    private:

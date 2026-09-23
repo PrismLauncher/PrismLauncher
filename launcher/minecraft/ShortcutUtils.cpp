@@ -38,6 +38,7 @@
 #include "ShortcutUtils.h"
 
 #include "FileSystem.h"
+#include "config/InstanceConfig.h"
 
 #include <QApplication>
 #include <QFileDialog>
@@ -54,7 +55,7 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
         return false;
 
     QString appPath = QApplication::applicationFilePath();
-    auto icon = APPLICATION->icons()->icon(shortcut.iconKey.isEmpty() ? shortcut.instance->iconKey() : shortcut.iconKey);
+    auto icon = APPLICATION->icons()->icon(shortcut.iconKey.isEmpty() ? shortcut.instance->config()->iconKey : shortcut.iconKey);
     if (icon == nullptr) {
         icon = APPLICATION->icons()->icon("grass");
     }
@@ -159,7 +160,7 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
         return false;
     }
 
-    shortcut.instance->registerShortcut({ shortcut.name, shortcutPath, shortcut.target });
+    shortcut.instance->config().update().shortcuts.append({ shortcut.name, shortcutPath, shortcut.target });
     return true;
 }
 

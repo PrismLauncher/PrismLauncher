@@ -44,8 +44,8 @@
 #include <QSet>
 #include <QUrl>
 #include "Application.h"
+#include "config/GlobalConfig.h"
 #include "icons/IconUtils.h"
-#include "settings/SettingsObject.h"
 
 #define MAX_SIZE 1024
 
@@ -69,7 +69,7 @@ IconList::IconList(const QStringList& builtinPaths, const QString& path, QObject
     m_isWatching = false;
     connect(m_watcher.get(), &QFileSystemWatcher::directoryChanged, this, [this] {
         // NOTE: we don't want the path of the subdir, but of the root dir
-        directoryChanged(APPLICATION->settings()->get("IconsDir").toString());
+        directoryChanged(APPLICATION->config()->iconsDir);
     });
     connect(m_watcher.get(), &QFileSystemWatcher::fileChanged, this, &IconList::fileChanged);
 
