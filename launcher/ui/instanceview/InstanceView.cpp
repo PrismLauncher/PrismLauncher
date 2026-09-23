@@ -48,6 +48,7 @@
 #include <QScrollBar>
 #include <QtMath>
 
+#include "config/GlobalConfig.h"
 #include "VisualGroup.h"
 #include "ui/themes/CatPainter.h"
 #include "ui/themes/ThemeManager.h"
@@ -72,7 +73,7 @@ InstanceView::InstanceView(QWidget* parent) : QAbstractItemView(parent)
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setAcceptDrops(true);
     setAutoScroll(true);
-    setPaintCat(APPLICATION->settings()->get("TheCat").toBool());
+    setPaintCat(APPLICATION->config()->theCat);
     connect(verticalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
     connect(horizontalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
 }

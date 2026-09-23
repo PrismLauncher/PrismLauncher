@@ -1,7 +1,7 @@
 #include "NewsDialog.h"
 
 #include "Application.h"
-#include "settings/SettingsObject.h"
+#include "config/GlobalConfig.h"
 
 #include "ui_NewsDialog.h"
 
@@ -29,10 +29,9 @@ NewsDialog::NewsDialog(QList<NewsEntryPtr> entries, QWidget* parent) : QDialog(p
     ui->currentArticleContentBrowser->flush();
 
     connect(this, &QDialog::finished, this, [this] {
-        APPLICATION->settings()->set("NewsGeometry", QString::fromUtf8(saveGeometry().toBase64()));
+        APPLICATION->config().update().uiGeometry["News"] = saveGeometry();
     });
-    const QByteArray base64Geometry = APPLICATION->settings()->get("NewsGeometry").toString().toUtf8();
-    restoreGeometry(QByteArray::fromBase64(base64Geometry));
+    restoreGeometry(APPLICATION->config()->uiGeometry.value("News"));
 }
 
 NewsDialog::~NewsDialog()
