@@ -23,6 +23,7 @@
 #include <QDialogButtonBox>
 #include <QHash>
 #include <QLayout>
+#include <functional>
 
 #include "QObjectPtr.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
@@ -30,8 +31,10 @@
 #include "ui/pages/BasePageProvider.h"
 
 class BaseInstance;
+struct GlobalConfig;
 class ModFolderModel;
 class PageContainer;
+class QByteArray;
 class QVBoxLayout;
 class QDialogButtonBox;
 class ResourceDownloadTask;
@@ -112,7 +115,6 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
                            QString geometrySaveKey = "",
                            bool suppressInitialSearch = false);
 
-    QString geometrySaveKey() const { return m_geometrySaveKey; }
     void setButtonStatus();
 
     GetModDependenciesTask::Ptr getModDependenciesTask();
