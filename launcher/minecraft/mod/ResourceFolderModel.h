@@ -253,8 +253,9 @@ class ResourceFolderModel : public QAbstractListModel {
     QStringList m_columnNames = { "Enable", "Name", "Version", "Last Modified", "Provider", "Size", "File Name", "Update" };
     QStringList m_columnNamesTranslated = { tr("Enable"),   tr("Name"), tr("Version"),   tr("Last Modified"),
                                             tr("Provider"), tr("Size"), tr("File Name"), tr("Update") };
-    QList<QHeaderView::ResizeMode> m_columnResizeModes = { QHeaderView::Interactive, QHeaderView::Stretch,     QHeaderView::Interactive,
-                                                           QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
+    QList<QHeaderView::ResizeMode> m_columnResizeModes = { QHeaderView::Interactive, QHeaderView::Stretch,
+                                                           QHeaderView::Interactive, QHeaderView::ResizeToContents,
+                                                           QHeaderView::Interactive, QHeaderView::Interactive,
                                                            QHeaderView::Interactive, QHeaderView::Interactive };
     QList<bool> m_columnsHideable = { false, false, true, true, true, true, true, true };
 
