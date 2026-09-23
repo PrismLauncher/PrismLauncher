@@ -44,6 +44,7 @@
 #include "BuildConfig.h"
 #include "Json.h"
 #include "minecraft/PackProfile.h"
+#include "minecraft/Realms.h"
 #include "minecraft/WorldList.h"
 #include "minecraft/auth/AccountList.h"
 #include "settings/Setting.h"
@@ -90,9 +91,12 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
             for (const auto& world : worlds->allWorlds()) {
                 m_ui->worldsCb->addItem(world.folderName());
             }
+            loadRealms();
         } else {
             m_ui->worldsCb->hide();
             m_ui->worldJoinButton->hide();
+            m_ui->realmsCb->hide();
+            m_ui->realmJoinButton->hide();
             m_ui->serverJoinAddressButton->setChecked(true);
             m_ui->serverJoinAddress->setEnabled(true);
             m_ui->serverJoinAddressButton->setStyleSheet("QRadioButton::indicator { width: 0px; height: 0px; }");
@@ -101,6 +105,7 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
         connect(m_ui->openGlobalSettingsButton, &QCommandLinkButton::clicked, this, &MinecraftSettingsWidget::openGlobalSettings);
         connect(m_ui->serverJoinAddressButton, &QAbstractButton::toggled, m_ui->serverJoinAddress, &QWidget::setEnabled);
         connect(m_ui->worldJoinButton, &QAbstractButton::toggled, m_ui->worldsCb, &QWidget::setEnabled);
+        connect(m_ui->realmJoinButton, &QAbstractButton::toggled, m_ui->realmsCb, &QWidget::setEnabled);
 
         connect(m_ui->globalDataPacksGroupBox, &QGroupBox::toggled, this, [this](bool value) {
             m_instance->settings()->set("GlobalDataPacksEnabled", value);
@@ -258,6 +263,14 @@ void MinecraftSettingsWidget::loadSettings()
             m_ui->worldJoinButton->setChecked(true);
             m_ui->serverJoinAddress->setEnabled(false);
             m_ui->worldsCb->setEnabled(true);
+        } else if (auto realm = settings->get("JoinRealmOnLaunch").toString(); !realm.isEmpty() && m_quickPlaySingleplayer) {
+            if (m_ui->realmsCb->findData(realm) == -1) {
+                m_ui->realmsCb->addItem(realm, realm);
+            }
+            m_ui->realmsCb->setCurrentIndex(m_ui->realmsCb->findData(realm));
+            m_ui->realmJoinButton->setChecked(true);
+            m_ui->serverJoinAddress->setEnabled(false);
+            m_ui->worldsCb->setEnabled(false);
         } else {
             m_ui->serverJoinAddressButton->setChecked(true);
             m_ui->worldJoinButton->setChecked(false);
@@ -487,13 +500,20 @@ void MinecraftSettingsWidget::saveSettings()
             if (m_ui->serverJoinAddressButton->isChecked() || !m_quickPlaySingleplayer) {
                 settings->set("JoinServerOnLaunchAddress", m_ui->serverJoinAddress->text());
                 settings->reset("JoinWorldOnLaunch");
+                settings->reset("JoinRealmOnLaunch");
+            } else if (m_ui->realmJoinButton->isChecked()) {
+                settings->set("JoinRealmOnLaunch", m_ui->realmsCb->currentData().toString());
+                settings->reset("JoinServerOnLaunchAddress");
+                settings->reset("JoinWorldOnLaunch");
             } else {
                 settings->set("JoinWorldOnLaunch", m_ui->worldsCb->currentText());
                 settings->reset("JoinServerOnLaunchAddress");
+                settings->reset("JoinRealmOnLaunch");
             }
         } else {
             settings->reset("JoinServerOnLaunchAddress");
             settings->reset("JoinWorldOnLaunch");
+            settings->reset("JoinRealmOnLaunch");
         }
 
         // Use an account for this instance
@@ -571,6 +591,24 @@ void MinecraftSettingsWidget::updateAccountsMenu(SettingsObject& settings) const
 bool MinecraftSettingsWidget::isQuickPlaySupported()
 {
     return m_instance->traits().contains("feature:is_quick_play_singleplayer");
+}
+
+void MinecraftSettingsWidget::loadRealms()
+{
+    m_realmsJob = Realms::fetch(m_instance, this, [this](const QList<Realms::Realm>& realms) {
+        auto current = m_ui->realmsCb->currentData();
+        m_ui->realmsCb->clear();
+        for (const auto& realm : realms) {
+            m_ui->realmsCb->addItem(realm.name, realm.id);
+        }
+        if (auto index = m_ui->realmsCb->findData(current); index != -1) {
+            m_ui->realmsCb->setCurrentIndex(index);
+        }
+    });
+    if (!m_realmsJob) {
+        m_ui->realmJoinButton->setEnabled(false);
+        m_ui->realmJoinButton->setToolTip(tr("A Microsoft account that owns Minecraft is required to join Realms."));
+    }
 }
 
 void MinecraftSettingsWidget::saveSelectedLoaders()

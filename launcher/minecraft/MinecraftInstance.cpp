@@ -256,6 +256,7 @@ void MinecraftInstance::loadSpecificSettings()
     m_settings->registerSetting("JoinServerOnLaunch", false);
     m_settings->registerSetting("JoinServerOnLaunchAddress", "");
     m_settings->registerSetting("JoinWorldOnLaunch", "");
+    m_settings->registerSetting("JoinRealmOnLaunch", "");
 
     // Use account for instance, this does not have a global override
     m_settings->registerSetting("UseAccountForInstance", false);
@@ -1169,6 +1170,8 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
             QString world = settings()->get("JoinWorldOnLaunch").toString();
             if (!world.isEmpty()) {
                 targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(world, true)));
+            } else if (QString realm = settings()->get("JoinRealmOnLaunch").toString(); !realm.isEmpty()) {
+                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::fromRealm(realm)));
             }
         }
     }
