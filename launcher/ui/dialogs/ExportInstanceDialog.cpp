@@ -44,6 +44,7 @@
 #include "FileIgnoreProxy.h"
 #include "QObjectPtr.h"
 #include "archive/ExportToZipTask.h"
+#include "config/InstanceConfig.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui_ExportInstanceDialog.h"
@@ -100,7 +101,7 @@ ExportInstanceDialog::~ExportInstanceDialog()
 /// Save icon to instance's folder is needed
 void SaveIcon(BaseInstance* m_instance)
 {
-    auto iconKey = m_instance->iconKey();
+    auto iconKey = m_instance->config()->iconKey;
     auto iconList = APPLICATION->icons();
     auto mmcIcon = iconList->icon(iconKey);
     if (!mmcIcon || mmcIcon->isBuiltIn()) {
@@ -142,6 +143,12 @@ void ExportInstanceDialog::doExport()
     }
 
     SaveIcon(m_instance);
+    if (m_instance->config().savePending()) {
+        if (const auto saveResult = m_instance->config().save(); !saveResult) {
+            QMessageBox::warning(this, tr("Error"), tr("Failed to save instance config - %1").arg(saveResult.error()));
+            return;
+        }
+    }
 
     auto files = QFileInfoList();
     if (!MMCZip::collectFileListRecursively(m_instance->instanceRoot(), nullptr, &files,

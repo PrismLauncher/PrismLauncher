@@ -19,13 +19,13 @@
 #include <Json.h>
 #include <minecraft/MinecraftInstance.h>
 #include <minecraft/PackProfile.h>
-#include <settings/INISettingsObject.h>
+#include "config/InstanceConfig.h"
+#include "settings/INIFile.h"
 
 #include <memory>
 #include "archive/ArchiveReader.h"
 
-void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
-                                        const QString& instName,
+void Technic::TechnicPackProcessor::run(const QString& instName,
                                         const QString& instIcon,
                                         const QString& stagingPath,
                                         const QString& minecraftVersion,
@@ -33,8 +33,8 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
 {
     QString minecraftPath = FS::PathCombine(stagingPath, "minecraft");
     QString configPath = FS::PathCombine(stagingPath, "instance.cfg");
-    auto instanceSettings = std::make_unique<INISettingsObject>(configPath);
-    MinecraftInstance instance(globalSettings, std::move(instanceSettings), stagingPath);
+    auto confTmp = std::make_unique<InstanceConfigHolder>(configPath, InstanceConfig::loadDefaults());
+    MinecraftInstance instance(std::move(confTmp), stagingPath);
 
     instance.setName(instName);
 
@@ -201,5 +201,11 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
     }
 
     components->saveNow();
+
+    if (const auto saveResult = instance.config().save(); !saveResult) {
+        emit failed(tr("Failed to save instance config: %1").arg(saveResult.error()));
+        return;
+    }
+
     emit succeeded();
 }

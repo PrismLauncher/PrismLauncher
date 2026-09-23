@@ -39,29 +39,31 @@
 #include <QCryptographicHash>
 #include <QFileInfo>
 #include <QStandardPaths>
+#include "Application.h"
+#include "config/GlobalConfig.h"
+#include "config/InstanceConfig.h"
 #include "java/JavaUtils.h"
 
 void CheckJava::executeTask()
 {
     auto instance = m_parent->instance();
-    auto settings = instance->settings();
+    const auto& conf = *instance->config();
 
-    QString javaPathSetting = settings->get("JavaPath").toString();
-    m_javaPath = FS::ResolveExecutable(javaPathSetting);
+    const auto installation = conf.javaInstallationOrGlobal(*APPLICATION->config());
 
-    bool perInstance = settings->get("OverrideJava").toBool() || settings->get("OverrideJavaLocation").toBool();
+    m_javaPath = FS::ResolveExecutable(installation.path);
 
     auto realJavaPath = QStandardPaths::findExecutable(m_javaPath);
     if (realJavaPath.isEmpty()) {
-        if (perInstance) {
+        if (conf.javaInstallation.has_value()) {
             emit logLine(QString("The Java binary \"%1\" couldn't be found. Please fix the Java path "
                                  "override in the instance's settings or disable it.")
-                             .arg(javaPathSetting),
+                             .arg(installation.path),
                          MessageLevel::Warning);
         } else {
             emit logLine(QString("The Java binary \"%1\" couldn't be found. Please set up Java in "
                                  "the settings.")
-                             .arg(javaPathSetting),
+                             .arg(installation.path),
                          MessageLevel::Warning);
         }
         emitFailed(QString("Java path is not valid."));
@@ -79,11 +81,6 @@ void CheckJava::executeTask()
 
     QFileInfo javaInfo(realJavaPath);
     qint64 javaUnixTime = javaInfo.lastModified().toMSecsSinceEpoch();
-    auto storedSignature = settings->get("JavaSignature").toString();
-    auto storedArchitecture = settings->get("JavaArchitecture").toString();
-    auto storedRealArchitecture = settings->get("JavaRealArchitecture").toString();
-    auto storedVersion = settings->get("JavaVersion").toString();
-    auto storedVendor = settings->get("JavaVendor").toString();
 
     QCryptographicHash hash(QCryptographicHash::Sha1);
     hash.addData(QByteArray::number(javaUnixTime));
@@ -91,20 +88,16 @@ void CheckJava::executeTask()
     m_javaSignature = hash.result().toHex();
 
     // if timestamps are not the same, or something is missing, check!
-    if (m_javaSignature != storedSignature || storedVersion.size() == 0 || storedArchitecture.size() == 0 ||
-        storedRealArchitecture.size() == 0 || storedVendor.size() == 0) {
+    if (m_javaSignature != installation.signature || installation.version.isEmpty() || installation.architecture.isEmpty() ||
+        installation.realArchitecture.isEmpty() || installation.vendor.isEmpty()) {
         m_JavaChecker.reset(new JavaChecker(realJavaPath, "", 0, 0, 0, 0));
         emit logLine(QString("Checking Java version..."), MessageLevel::Launcher);
         connect(m_JavaChecker.get(), &JavaChecker::checkFinished, this, &CheckJava::checkJavaFinished);
         m_JavaChecker->start();
         return;
-    } else {
-        auto verString = instance->settings()->get("JavaVersion").toString();
-        auto archString = instance->settings()->get("JavaArchitecture").toString();
-        auto realArchString = settings->get("JavaRealArchitecture").toString();
-        auto vendorString = instance->settings()->get("JavaVendor").toString();
-        printJavaInfo(verString, archString, realArchString, vendorString);
     }
+
+    printJavaInfo(installation.version, installation.architecture, installation.realArchitecture, installation.vendor);
     m_parent->instance()->updateRuntimeContext();
     emitSucceeded();
 }
@@ -131,11 +124,14 @@ void CheckJava::checkJavaFinished(const JavaChecker::Result& result)
         case JavaChecker::Result::Validity::Valid: {
             auto instance = m_parent->instance();
             printJavaInfo(result.javaVersion.toString(), result.mojangPlatform, result.realPlatform, result.javaVendor);
-            instance->settings()->set("JavaVersion", result.javaVersion.toString());
-            instance->settings()->set("JavaArchitecture", result.mojangPlatform);
-            instance->settings()->set("JavaRealArchitecture", result.realPlatform);
-            instance->settings()->set("JavaVendor", result.javaVendor);
-            instance->settings()->set("JavaSignature", m_javaSignature);
+            auto& installation = instance->config()->javaInstallation.has_value()
+                                     ? instance->config().update().javaInstallation.value()
+                                     : APPLICATION->config().update().javaInstallation;
+            installation.version = result.javaVersion.toString();
+            installation.architecture = result.mojangPlatform;
+            installation.realArchitecture = result.realPlatform;
+            installation.vendor = result.javaVendor;
+            installation.signature = m_javaSignature;
             m_parent->instance()->updateRuntimeContext();
             emitSucceeded();
             return;
@@ -145,7 +141,6 @@ void CheckJava::checkJavaFinished(const JavaChecker::Result& result)
 
 void CheckJava::printJavaInfo(const QString& version, const QString& architecture, const QString& realArchitecture, const QString& vendor)
 {
-    emit logLine(
-        QString("Java is version %1, using %2 (%3) architecture, from %4").arg(version, architecture, realArchitecture, vendor),
-        MessageLevel::Launcher);
+    emit logLine(QString("Java is version %1, using %2 (%3) architecture, from %4").arg(version, architecture, realArchitecture, vendor),
+                 MessageLevel::Launcher);
 }

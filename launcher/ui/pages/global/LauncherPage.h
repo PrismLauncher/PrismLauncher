@@ -43,7 +43,6 @@
 #include "ui/pages/BasePage.h"
 
 class QTextCharFormat;
-class SettingsObject;
 
 namespace Ui {
 class LauncherPage;

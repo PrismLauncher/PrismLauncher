@@ -9,7 +9,6 @@
 #include "InstanceCopyPrefs.h"
 #include "InstanceTask.h"
 #include "net/NetJob.h"
-#include "settings/SettingsObject.h"
 #include "tasks/Task.h"
 
 class InstanceCopyTask : public InstanceTask {

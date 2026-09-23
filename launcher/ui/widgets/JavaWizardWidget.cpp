@@ -17,12 +17,12 @@
 #include "DesktopServices.h"
 #include "FileSystem.h"
 #include "JavaCommon.h"
+#include "config/GlobalConfig.h"
 #include "java/JavaChecker.h"
 #include "java/JavaInstall.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
 
-#include "settings/SettingsObject.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/java/InstallJavaDialog.h"
 #include "ui/widgets/VersionSelectWidget.h"
@@ -190,11 +190,11 @@ void JavaWizardWidget::initialize()
     m_versionWidget->initialize(APPLICATION->javalist());
     m_versionWidget->selectSearch();
     m_versionWidget->setResizeOn(2);
-    auto* s = APPLICATION->settings();
+    const auto& conf = *APPLICATION->config();
     // Memory
-    m_observedMinMemory = s->get("MinMemAlloc").toInt();
-    m_observedMaxMemory = s->get("MaxMemAlloc").toInt();
-    m_observedPermGenMemory = s->get("PermGen").toInt();
+    m_observedMinMemory = conf.memory.minAlloc;
+    m_observedMaxMemory = conf.memory.maxAlloc;
+    m_observedPermGenMemory = conf.memory.permGen;
     m_minMemSpinBox->setValue(static_cast<int>(m_observedMinMemory));
     m_maxMemSpinBox->setValue(static_cast<int>(m_observedMaxMemory));
     m_permGenSpinBox->setValue(static_cast<int>(m_observedPermGenMemory));

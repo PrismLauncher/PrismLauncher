@@ -38,6 +38,7 @@
 #pragma once
 #include "Application.h"
 #include "BaseInstance.h"
+#include "config/InstanceConfig.h"
 
 #include <QList>
 #include <QMessageBox>
@@ -51,7 +52,7 @@ struct Shortcut {
     QWidget* parent = nullptr;
     QStringList extraArgs = {};
     QString iconKey = "";
-    ShortcutTarget target;
+    InstanceConfig::ShortcutTarget target;
 };
 
 /// Create an instance shortcut on the specified file path

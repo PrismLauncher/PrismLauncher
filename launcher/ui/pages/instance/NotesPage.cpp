@@ -36,11 +36,12 @@
 #include "NotesPage.h"
 #include <QTabBar>
 #include "ui_NotesPage.h"
+#include "config/InstanceConfig.h"
 
 NotesPage::NotesPage(BaseInstance* inst, QWidget* parent) : QWidget(parent), ui(new Ui::NotesPage), m_inst(inst)
 {
     ui->setupUi(this);
-    ui->noteEditor->setText(m_inst->notes());
+    ui->noteEditor->setText(m_inst->config()->notes);
 }
 
 NotesPage::~NotesPage()
@@ -50,7 +51,7 @@ NotesPage::~NotesPage()
 
 bool NotesPage::apply()
 {
-    m_inst->setNotes(ui->noteEditor->toPlainText());
+    m_inst->config().update().notes = ui->noteEditor->toPlainText();
     return true;
 }
 
