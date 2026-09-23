@@ -37,11 +37,11 @@ class IniFileTest : public QObject {
         INIFile f;
         f.set("a", a);
         f.set("b", b);
-        f.saveFile(filename);
+        QVERIFY(f.saveFile(filename));
 
         // load
         INIFile f2;
-        f2.loadFile(filename);
+        QVERIFY(f2.loadFile(filename));
         QCOMPARE(f2.get("a", "NOT SET").toString(), a);
         QCOMPARE(f2.get("b", "NOT SET").toString(), b);
     }
@@ -59,11 +59,11 @@ class IniFileTest : public QObject {
         INIFile f;
         f.set("list_strings", list_strings);
         f.set("list_numbers", QVariantUtils::fromList(list_numbers));
-        f.saveFile(filename);
+        QVERIFY(f.saveFile(filename));
 
         // load
         INIFile f2;
-        f2.loadFile(filename);
+        QVERIFY(f2.loadFile(filename));
 
         QStringList out_list_strings = f2.get("list_strings", QStringList()).toStringList();
         qDebug() << "OutStringList" << out_list_strings;
@@ -102,12 +102,12 @@ Wrapperommand=)";
 
         // load
         INIFile f1;
-        f1.loadFile(fileName);
+        QVERIFY(f1.loadFile(fileName));
         QCOMPARE(f1.get("PreLaunchCommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link");
         QCOMPARE(f1.get("Wrapperommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link =");
-        f1.saveFile(fileName);
+        QVERIFY(f1.saveFile(fileName));
         INIFile f2;
-        f2.loadFile(fileName);
+        QVERIFY(f2.loadFile(fileName));
         QCOMPARE(f2.get("PreLaunchCommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link");
         QCOMPARE(f2.get("Wrapperommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link =");
         QCOMPARE(f2.get("ConfigVersion", "NOT SET").toString(), "1.3");
@@ -143,12 +143,12 @@ Wrapperommand=)";
 
         // load
         INIFile f1;
-        f1.loadFile(fileName);
+        QVERIFY(f1.loadFile(fileName));
         for (auto key : settings.allKeys())
             QCOMPARE(f1.get(key, "NOT SET").toString(), settings.value(key).toString());
-        f1.saveFile(fileName);
+        QVERIFY(f1.saveFile(fileName));
         INIFile f2;
-        f2.loadFile(fileName);
+        QVERIFY(f2.loadFile(fileName));
         for (auto key : settings.allKeys())
             QCOMPARE(f2.get(key, "NOT SET").toString(), settings.value(key).toString());
         QCOMPARE(f2.get("ConfigVersion", "NOT SET").toString(), "1.3");
@@ -183,7 +183,7 @@ PreLaunchCommand=)";
 
         // load
         INIFile f1;
-        f1.loadFile(fileName);
+        QVERIFY(f1.loadFile(fileName));
         QCOMPARE(f1.get("PreLaunchCommand", "NOT SET").toString(), "env mesa=true");
         QCOMPARE(f1.get("ConfigVersion", "NOT SET").toString(), "1.3");
 #if defined(Q_OS_WIN)
