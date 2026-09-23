@@ -24,6 +24,8 @@ struct MinecraftTarget {
     quint16 port;
 
     QString world;
+    QString realm;
     static MinecraftTarget parse(const QString& fullAddress, bool useWorld);
+    static MinecraftTarget fromRealm(const QString& realmId);
     using Ptr = std::shared_ptr<MinecraftTarget>;
 };

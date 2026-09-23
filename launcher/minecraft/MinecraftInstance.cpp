@@ -779,6 +779,8 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, Mine
             }
         } else if (!targetToJoin->world.isEmpty() && profile->hasTrait("feature:is_quick_play_singleplayer")) {
             args << "--quickPlaySingleplayer" << targetToJoin->world;
+        } else if (!targetToJoin->realm.isEmpty() && profile->hasTrait("feature:is_quick_play_singleplayer")) {
+            args << "--quickPlayRealms" << targetToJoin->realm;
         }
     }
 
@@ -830,6 +832,8 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftT
             launchScript += "serverPort " + QString::number(targetToJoin->port) + "\n";
         } else if (!targetToJoin->world.isEmpty()) {
             launchScript += "worldName " + targetToJoin->world + "\n";
+        } else if (!targetToJoin->realm.isEmpty()) {
+            launchScript += "realmId " + targetToJoin->realm + "\n";
         }
     }
 
