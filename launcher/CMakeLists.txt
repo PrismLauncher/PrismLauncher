@@ -789,6 +789,8 @@ SET(LAUNCHER_SOURCES
     config/Config.h
     config/GlobalConfig.h
     config/GlobalConfig.cpp
+    config/InstanceConfig.h
+    config/InstanceConfig.cpp
 
     # console utils
     console/Console.h
