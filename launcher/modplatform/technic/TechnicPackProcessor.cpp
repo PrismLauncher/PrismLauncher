@@ -65,7 +65,10 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
                 }
                 QByteArray fmlVersionData = file->readAll();
                 INIFile iniFile;
-                iniFile.loadFile(fmlVersionData);
+                if (const auto loadResult = iniFile.loadFile(fmlVersionData); !loadResult) {
+                    emit failed(tr("Unable to read \"fmlversion.properties\": %1").arg(loadResult.error()));
+                    return;
+                }
                 // If not present, this evaluates to a null string
                 fmlMinecraftVersion = iniFile["fmlbuild.mcversion"].toString();
             }
@@ -95,7 +98,11 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
                 }
                 auto forgeVersionData = file->readAll();
                 INIFile iniFile;
-                iniFile.loadFile(forgeVersionData);
+                if (const auto loadResult = iniFile.loadFile(forgeVersionData); !loadResult) {
+                    emit failed(tr("Unable to load \"forgeversion.properties\": %1").arg(loadResult.error()));
+                    return;
+                }
+
                 QString major, minor, revision, build;
                 major = iniFile["forge.major.number"].toString();
                 minor = iniFile["forge.minor.number"].toString();
