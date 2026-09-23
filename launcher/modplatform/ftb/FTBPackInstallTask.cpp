@@ -42,12 +42,12 @@
 
 #include "FileSystem.h"
 #include "Json.h"
+#include "config/InstanceConfig.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/PackManifest.h"
 #include "net/ChecksumValidator.h"
-#include "settings/INISettingsObject.h"
 
 #include "Application.h"
 #include "BuildConfig.h"
@@ -235,9 +235,9 @@ void PackInstallTask::createInstance()
     QCoreApplication::processEvents();
 
     auto instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    auto instanceSettings = std::make_unique<INISettingsObject>(instanceConfigPath);
 
-    m_instance = std::make_unique<MinecraftInstance>(m_globalSettings, std::move(instanceSettings), m_stagingPath);
+    auto confTmp = std::make_unique<InstanceConfigHolder>(instanceConfigPath, InstanceConfig::loadDefaults());
+    m_instance = std::make_unique<MinecraftInstance>(std::move(confTmp), m_stagingPath);
     auto* components = m_instance->getPackProfile();
     components->buildingFromScratch();
 
@@ -280,7 +280,13 @@ void PackInstallTask::createInstance()
 
     m_instance->setName(name());
     m_instance->setIconKey(m_instIcon);
-    m_instance->setManagedPack("ftb", QString::number(m_pack.id), m_pack.name, QString::number(m_version.id), m_version.name);
+    m_instance->config().update().managedPack = {
+        .type = "ftb",
+        .id = QString::number(m_pack.id),
+        .name = m_pack.name,
+        .versionId = QString::number(m_version.id),
+        .versionName = m_version.name,
+    };
 
     m_instance->saveNow();
 
@@ -334,6 +340,14 @@ void PackInstallTask::onModDownloadSucceeded()
     if (!m_blockedMods.isEmpty()) {
         copyBlockedMods();
     }
+
+    m_instance->resetAutoJavaInstallation();
+
+    if (const auto saveResult = m_instance->config().save(); !saveResult) {
+        emitFailed(tr("Failed to save instance config: %1").arg(saveResult.error()));
+        return;
+    }
+
     downloadFiles(m_instance.get());
 }
 

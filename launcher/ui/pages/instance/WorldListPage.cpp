@@ -38,8 +38,8 @@
 #include "WorldListPage.h"
 #include "AssertHelpers.h"
 #include "Commandline.h"
+#include "config/GlobalConfig.h"
 #include "minecraft/WorldList.h"
-#include "settings/SettingsObject.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui_WorldListPage.h"
@@ -68,7 +68,6 @@
 
 #include "Application.h"
 #include "DataPackPage.h"
-#include "settings/Setting.h"
 
 namespace {
 class WorldListProxyModel : public QSortFilterProxyModel {
@@ -132,7 +131,11 @@ WorldListPage::WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget
             m_worldToolsMenu->popup(QCursor::pos());
         }
     });
-    connect(APPLICATION->settings()->getSetting("WorldTools").get(), &Setting::SettingChanged, this, [this] { populateWorldToolsMenu(); });
+    connect(&APPLICATION->config(), &GlobalConfigHolder::updated, this, [this, &conf = APPLICATION->config()] {
+        if (conf.prev()->worldTools != conf->worldTools) {
+            populateWorldToolsMenu();
+        }
+    });
 
     worldChanged(QModelIndex(), QModelIndex());
 }
@@ -263,11 +266,11 @@ void WorldListPage::on_actionData_Packs_triggered()
 
     dialog->resize(static_cast<int>(std::max(0.5 * window()->width(), 400.0)),
                    static_cast<int>(std::max(0.75 * window()->height(), 400.0)));
-    dialog->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("DataPackDownloadGeometry").toByteArray()));
+    dialog->restoreGeometry(QByteArray::fromBase64(APPLICATION->config()->uiGeometry.value("DataPackDownload")));
 
     GenericPageProvider provider(dialog->windowTitle());
 
-    bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+    bool isIndexed = !APPLICATION->config()->modMetadataDisabled;
     m_datapackModel = std::make_unique<DataPackFolderModel>(folder, m_inst, isIndexed, true);
 
     provider.addPageCreator([this] { return new DataPackPage(m_inst, m_datapackModel.get(), this); });
@@ -293,7 +296,7 @@ void WorldListPage::on_actionData_Packs_triggered()
     dialog->setAttribute(Qt::WA_DeleteOnClose);
 
     connect(dialog, &QDialog::finished, this,
-            [dialog] { APPLICATION->settings()->set("DataPackDownloadGeometry", dialog->saveGeometry().toBase64()); });
+            [dialog]() { APPLICATION->config().update().uiGeometry["DataPackDownload"] = dialog->saveGeometry(); });
 
     dialog->open();
 }
@@ -333,7 +336,7 @@ void WorldListPage::on_actionCopy_Seed_triggered()
 void WorldListPage::populateWorldToolsMenu()
 {
     m_worldToolsMenu->clear();
-    const QVariantMap tools = Json::toMap(APPLICATION->settings()->get("WorldTools").toString());
+    const auto& tools = APPLICATION->config()->worldTools;
 
     if (tools.isEmpty()) {
         auto* noToolsAction = m_worldToolsMenu->addAction(tr("No Tools Added"));

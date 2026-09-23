@@ -36,6 +36,7 @@
  */
 
 #include "LogPage.h"
+#include "config/GlobalConfig.h"
 #include "ui_LogPage.h"
 
 #include "Application.h"
@@ -45,7 +46,6 @@
 #include <QShortcut>
 
 #include "launch/LaunchTask.h"
-#include "settings/Setting.h"
 
 #include "ui/GuiUtil.h"
 #include "ui/themes/ThemeManager.h"
@@ -136,13 +136,8 @@ LogPage::LogPage(BaseInstance* instance, QWidget* parent) : QWidget(parent), ui(
 
     // set up fonts in the log proxy
     {
-        QString fontFamily = APPLICATION->settings()->get("ConsoleFont").toString();
-        bool conversionOk = false;
-        int fontSize = APPLICATION->settings()->get("ConsoleFontSize").toInt(&conversionOk);
-        if (!conversionOk) {
-            fontSize = 11;
-        }
-        m_proxy->setFont(QFont(fontFamily, fontSize));
+        QString fontFamily = APPLICATION->config()->consoleFont;
+        m_proxy->setFont(QFont(fontFamily, APPLICATION->config()->consoleFontSize));
     }
 
     ui->text->setModel(m_proxy);

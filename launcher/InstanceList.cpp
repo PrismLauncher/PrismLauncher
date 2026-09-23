@@ -57,8 +57,9 @@
 
 #include "InstanceTask.h"
 #include "WatchLock.h"
+#include "config/GlobalConfig.h"
+#include "config/InstanceConfig.h"
 #include "minecraft/MinecraftInstance.h"
-#include "settings/INISettingsObject.h"
 
 #ifdef Q_OS_WIN32
 #include <windows.h>
@@ -66,8 +67,8 @@
 
 const static int g_GROUP_FILE_FORMAT_VERSION = 1;
 
-InstanceList::InstanceList(SettingsObject* settings, const QStringList& instDirs, QObject* parent)
-    : QAbstractListModel(parent), m_globalSettings(settings), m_watcher(new QFileSystemWatcher(this))
+InstanceList::InstanceList(const QStringList& instDirs, QObject* parent)
+    : QAbstractListModel(parent), m_watcher(new QFileSystemWatcher(this))
 {
     resumeWatch();
 
@@ -136,7 +137,7 @@ QStringList InstanceList::getLinkedInstancesById(const QString& id) const
 {
     QStringList linkedInstances;
     for (const auto& inst : m_instances) {
-        if (inst->isLinkedToInstanceId(id)) {
+        if (inst->config()->linkedInstances.contains(id)) {
             linkedInstances.append(inst->id());
         }
     }
@@ -183,7 +184,7 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
             return pdata->instanceRoot();
         }
         case Qt::DecorationRole: {
-            return pdata->iconKey();
+            return pdata->config()->iconKey;
         }
         // HACK: see InstanceView.h in gui!
         case GroupRole: {
@@ -357,7 +358,7 @@ bool InstanceList::trashInstance(const InstanceId& id)
     m_trashHistory.push({ id, inst->instanceRoot(), trashedLoc, cachedGroupId });
 
     // Also trash all of its shortcuts; we remove the shortcuts if trash fails since it is invalid anyway
-    for (const auto& [name, filePath, target] : inst->shortcuts()) {
+    for (const auto& [name, filePath, target] : inst->config()->shortcuts) {
         if (!FS::trash(filePath, &trashedLoc)) {
             qWarning() << "Trash of shortcut" << name << "at path" << filePath << "for instance" << id
                        << "has not been successful, trying to delete it instead...";
@@ -448,7 +449,7 @@ void InstanceList::deleteInstance(const InstanceId& id)
 
     qDebug() << "Instance" << id << "has been deleted by the launcher.";
 
-    for (const auto& [name, filePath, target] : inst->shortcuts()) {
+    for (const auto& [name, filePath, target] : inst->config()->shortcuts) {
         if (!FS::deletePath(filePath)) {
             qWarning() << "Deletion of shortcut" << name << "at path" << filePath << "for instance" << id << "has not been successful...";
             continue;
@@ -583,20 +584,20 @@ InstanceList::InstListError InstanceList::loadList()
 
 void InstanceList::migrateTotalPlayTime()
 {
-    if (APPLICATION->playtimeSettings()->get("TotalPlayTimeMigrated").toBool()) {
+    if (APPLICATION->config()->totalPlayTimeMigrated) {
         return;
     }
 
     qint64 existingTotal = 0;
     for (const auto& itr : m_instances) {
-        if (itr->countTimePlayed()) {
+        if (itr->config()->countGameTime) {
             existingTotal += itr->totalTimePlayed();
         }
     }
 
-    qint64 current = APPLICATION->playtimeSettings()->get("TotalPlayTime").toLongLong();
-    APPLICATION->playtimeSettings()->set("TotalPlayTime", current + existingTotal);
-    APPLICATION->playtimeSettings()->set("TotalPlayTimeMigrated", true);
+    auto& conf = APPLICATION->config().update();
+    conf.totalPlayTime += existingTotal;
+    conf.totalPlayTimeMigrated = true;
 
     qDebug() << "Migrated" << existingTotal << "seconds of existing instance playtime into global TotalPlayTime.";
 }
@@ -664,7 +665,8 @@ MinecraftInstance* InstanceList::getInstanceByManagedName(const QString& managed
     }
 
     for (const auto& instance : m_instances) {
-        if (instance->getManagedPackName() == managedName) {
+        const auto& managedPack = instance->config()->managedPack;
+        if (managedPack.has_value() && managedPack->name == managedName) {
             return instance.get();
         }
     }
@@ -703,20 +705,19 @@ std::unique_ptr<MinecraftInstance> InstanceList::loadInstance(const InstanceId& 
     }
 
     auto instanceRoot = FS::PathCombine(rootDirOf(id), id);
-    auto instanceSettings = std::make_unique<INISettingsObject>(FS::PathCombine(instanceRoot, "instance.cfg"));
-
-    instanceSettings->registerSetting("InstanceType", "");
-
-    const QString instType = instanceSettings->get("InstanceType").toString();
-    if (!instType.isEmpty() && instType != "OneSix") {
-        qDebug() << "Instance " << id << "has invalid type" << instType;
+    auto confPath = FS::PathCombine(instanceRoot, "instance.cfg");
+    auto confResult = InstanceConfig::load(confPath);
+    if (!confResult.has_value()) {
+        qDebug() << "Failed to load instance" << id << "-" << confResult.error();
         return nullptr;
     }
 
-    auto inst = std::make_unique<MinecraftInstance>(m_globalSettings, std::move(instanceSettings), instanceRoot);
+    auto confTmp = std::make_unique<InstanceConfigHolder>(confPath, std::move(confResult.value()));
+    auto inst = std::make_unique<MinecraftInstance>(std::move(confTmp), instanceRoot);
     qDebug() << "Loaded instance" << inst->name() << "from" << inst->instanceRoot();
 
-    auto shortcut = inst->shortcuts();
+    // TODO: is this unnecessary log clutter?
+    auto shortcut = inst->config()->shortcuts;
     if (!shortcut.isEmpty()) {
         qDebug() << "Loaded" << shortcut.size() << "shortcut(s) for instance" << inst->name();
     }
@@ -902,10 +903,14 @@ void InstanceList::instanceDirContentsChanged(const QString& path)
     emit instancesChanged();
 }
 
-void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting, [[maybe_unused]] const QVariant& value)
+void InstanceList::onConfigUpdate()
 {
-    QString instDir = m_globalSettings->get("InstanceDir").toString();
-    QStringList additionalDirs = m_globalSettings->get("AdditionalInstanceDirs").toStringList();
+    const auto& conf = APPLICATION->config();
+    const auto& instDir = conf->instanceDir;
+    const auto& additionalDirs = conf->additionalInstanceDirs;
+    if (conf.prev()->instanceDir == instDir && conf.prev()->additionalInstanceDirs == additionalDirs) {
+        return;
+    }
 
     QStringList newDirs;
     QStringList candidates;
@@ -921,23 +926,25 @@ void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting,
         }
     }
 
-    if (newDirs != m_instDirs) {
-        if (m_groupsLoaded) {
-            saveGroupList();
-        }
-        for (const auto& dir : m_instDirs) {
-            m_watcher->removePath(dir);
-        }
-        m_instDirs = newDirs;
-        for (const auto& dir : m_instDirs) {
-            m_watcher->addPath(dir);
-        }
-        m_groupsLoaded = false;
-        beginRemoveRows(QModelIndex(), 0, count());
-        m_instances.erase(m_instances.begin(), m_instances.end());
-        endRemoveRows();
-        emit instancesChanged();
+    if (newDirs == m_instDirs) {
+        return;
     }
+
+    if (m_groupsLoaded) {
+        saveGroupList();
+    }
+    for (const auto& dir : m_instDirs) {
+        m_watcher->removePath(dir);
+    }
+    m_instDirs = newDirs;
+    for (const auto& dir : m_instDirs) {
+        m_watcher->addPath(dir);
+    }
+    m_groupsLoaded = false;
+    beginRemoveRows(QModelIndex(), 0, count());
+    m_instances.erase(m_instances.begin(), m_instances.end());
+    endRemoveRows();
+    emit instancesChanged();
 }
 
 void InstanceList::on_GroupStateChanged(const QString& group, bool collapsed)
@@ -959,15 +966,13 @@ class InstanceStaging : public Task {
     const unsigned m_maxBackoff = 16;
 
    public:
-    InstanceStaging(InstanceList* parent, InstanceTask* child, SettingsObject* settings)
-        : m_parent(parent), m_backoff(m_minBackoff, m_maxBackoff)
+    InstanceStaging(InstanceList* parent, InstanceTask* child) : m_parent(parent), m_backoff(m_minBackoff, m_maxBackoff)
     {
         m_stagingPath = parent->getStagedInstancePath(child->targetDir());
 
         m_child.reset(child);
 
         m_child->setStagingPath(m_stagingPath);
-        m_child->setParentSettings(settings);
 
         connect(child, &Task::succeeded, this, &InstanceStaging::childSucceeded);
         connect(child, &Task::failed, this, &InstanceStaging::childFailed);
@@ -1054,7 +1059,7 @@ class InstanceStaging : public Task {
 
 Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 {
-    return new InstanceStaging(this, task, m_globalSettings);
+    return new InstanceStaging(this, task);
 }
 
 QString InstanceList::getStagedInstancePath(const QString& targetDir)

@@ -18,13 +18,18 @@
 
 #include "EnsureAvailableMemory.h"
 
+#include "Application.h"
 #include "HardwareInfo.h"
+#include "config/GlobalConfig.h"
+#include "config/InstanceConfig.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
 EnsureAvailableMemory::EnsureAvailableMemory(LaunchTask* parent, MinecraftInstance* instance) : LaunchStep(parent), m_instance(instance) {}
 
 void EnsureAvailableMemory::executeTask()
 {
+    const auto memory = m_instance->config()->memoryOrGlobal(*APPLICATION->config());
+
 #ifdef Q_OS_MACOS
     QString text;
     switch (MacOSHardwareInfo::memoryPressureLevel()) {
@@ -49,7 +54,7 @@ void EnsureAvailableMemory::executeTask()
 
     bool shouldAbort = false;
 
-    if (m_instance->settings()->get("LowMemWarning").toBool()) {
+    if (memory.lowMemWarning) {
         auto* dialog = CustomMessageBox::selectable(nullptr, tr("High memory pressure"), text, QMessageBox::Icon::Warning,
                                                     QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No,
                                                     QMessageBox::StandardButton::No);
@@ -75,14 +80,14 @@ void EnsureAvailableMemory::executeTask()
         return;
     }
 
-    const uint64_t settingMin = m_instance->settings()->get("MinMemAlloc").toUInt();
-    const uint64_t settingMax = m_instance->settings()->get("MaxMemAlloc").toUInt();
+    const uint64_t settingMin = memory.minAlloc;
+    const uint64_t settingMax = memory.maxAlloc;
     const uint64_t max = std::max(settingMin, settingMax);
 
     if (static_cast<double>(max) * 0.7 > static_cast<double>(available)) {
         bool shouldAbort = false;
 
-        if (m_instance->settings()->get("LowMemWarning").toBool()) {
+        if (memory.lowMemWarning) {
             auto* dialog = CustomMessageBox::selectable(
                 nullptr, tr("Low free memory"),
                 tr("There might not be enough free RAM to launch this instance with the current memory settings.\n\n"
