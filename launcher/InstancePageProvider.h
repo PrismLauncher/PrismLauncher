@@ -10,7 +10,6 @@
 #include "ui/pages/instance/ModFolderPage.h"
 #include "ui/pages/instance/NotesPage.h"
 #include "ui/pages/instance/OtherLogsPage.h"
-#include "ui/pages/instance/RealmsPage.h"
 #include "ui/pages/instance/ResourcePackPage.h"
 #include "ui/pages/instance/ScreenshotsPage.h"
 #include "ui/pages/instance/ServersPage.h"
@@ -43,7 +42,6 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
         values.append(new NotesPage(inst));
         values.append(new WorldListPage(inst, inst->worldList()));
         values.append(new ServersPage(inst));
-        values.append(new RealmsPage(inst));
         values.append(new ScreenshotsPage(FS::PathCombine(inst->gameRoot(), "screenshots")));
         values.append(new InstanceSettingsPage(inst));
         values.append(new OtherLogsPage("logs", tr("Other Logs"), "Other-Logs", inst));

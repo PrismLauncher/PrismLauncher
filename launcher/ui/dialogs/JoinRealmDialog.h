@@ -18,44 +18,26 @@
 
 #pragma once
 
-#include <QMainWindow>
+#include <QDialog>
 
-#include "minecraft/Realms.h"
-#include "ui/pages/BasePage.h"
+#include "net/NetJob.h"
 
 namespace Ui {
-class RealmsPage;
+class JoinRealmDialog;
 }
 
 class MinecraftInstance;
 
-class RealmsPage : public QMainWindow, public BasePage {
+class JoinRealmDialog final : public QDialog {
     Q_OBJECT
 
    public:
-    explicit RealmsPage(MinecraftInstance* inst, QWidget* parent = nullptr);
-    ~RealmsPage() override;
+    explicit JoinRealmDialog(MinecraftInstance* instance, QWidget* parent = nullptr);
+    ~JoinRealmDialog() override;
 
-    QString displayName() const override { return tr("Realms"); }
-    QIcon icon() const override { return QIcon::fromTheme("server"); }
-    QString id() const override { return "realms"; }
-    bool shouldDisplay() const override;
-    void openedImpl() override;
-    void retranslate() override;
-
-   protected:
-    QMenu* createPopupMenu() override;
+    QString selectedRealmId() const;
 
    private:
-    void updateState();
-
-   private slots:
-    void on_actionJoin_triggered();
-    void on_actionRefresh_triggered();
-    void ShowContextMenu(const QPoint& pos);
-
-   private:
-    Ui::RealmsPage* ui = nullptr;
-    MinecraftInstance* m_inst = nullptr;
+    Ui::JoinRealmDialog* ui;
     NetJob::Ptr m_fetchJob;
 };

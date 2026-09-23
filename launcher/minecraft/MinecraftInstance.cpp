@@ -90,6 +90,8 @@
 
 #include "tools/BaseProfiler.h"
 
+#include "ui/dialogs/JoinRealmDialog.h"
+
 #include <QActionGroup>
 #include <QMainWindow>
 #include <QScreen>
@@ -319,12 +321,21 @@ void MinecraftInstance::populateLaunchMenu(QMenu* menu)
     normalLaunchOffline->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
     QAction* normalLaunchDemo = menu->addAction(tr("Launch &Demo"));
     normalLaunchDemo->setShortcut(QKeySequence(tr("Ctrl+Alt+O")));
+    QAction* joinRealm = menu->addAction(tr("Join &Realm..."));
 
     normalLaunchDemo->setEnabled(supportsDemo());
+    joinRealm->setEnabled(traits().contains("feature:is_quick_play_singleplayer"));
 
     connect(normalLaunch, &QAction::triggered, this, [this] { APPLICATION->launch(this); });
     connect(normalLaunchOffline, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Offline); });
     connect(normalLaunchDemo, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Demo); });
+    connect(joinRealm, &QAction::triggered, this, [this, menu] {
+        JoinRealmDialog dialog(this, menu->parentWidget());
+        if (dialog.exec() == QDialog::Accepted) {
+            APPLICATION->launch(this, LaunchMode::Normal,
+                                std::make_shared<MinecraftTarget>(MinecraftTarget::fromRealm(dialog.selectedRealmId())));
+        }
+    });
 
     QString profilersTitle = tr("Profilers");
     menu->addSeparator()->setText(profilersTitle);

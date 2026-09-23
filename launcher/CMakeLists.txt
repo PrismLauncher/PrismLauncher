@@ -915,8 +915,6 @@ SET(LAUNCHER_SOURCES
     ui/pages/instance/OtherLogsPage.h
     ui/pages/instance/ServersPage.cpp
     ui/pages/instance/ServersPage.h
-    ui/pages/instance/RealmsPage.cpp
-    ui/pages/instance/RealmsPage.h
     ui/pages/instance/WorldListPage.cpp
     ui/pages/instance/WorldListPage.h
     ui/pages/instance/McClient.cpp
@@ -1042,6 +1040,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/CopyInstanceDialog.h
     ui/dialogs/CreateShortcutDialog.cpp
     ui/dialogs/CreateShortcutDialog.h
+    ui/dialogs/JoinRealmDialog.cpp
+    ui/dialogs/JoinRealmDialog.h
     ui/dialogs/CustomMessageBox.cpp
     ui/dialogs/CustomMessageBox.h
     ui/dialogs/ExportInstanceDialog.cpp
