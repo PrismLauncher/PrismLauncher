@@ -312,6 +312,8 @@ set(MINECRAFT_SOURCES
     minecraft/World.cpp
     minecraft/WorldList.h
     minecraft/WorldList.cpp
+    minecraft/Realms.h
+    minecraft/Realms.cpp
     minecraft/WorldTasks.h
     minecraft/WorldTasks.cpp
 
