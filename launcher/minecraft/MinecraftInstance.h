@@ -44,7 +44,7 @@
 #include "minecraft/launch/MinecraftTarget.h"
 
 class DataPackFolderModel;
-class LaunchStep;
+class InstanceConfigHolder;
 class LaunchProfile;
 class Mod;
 class ModFolderModel;
@@ -58,11 +58,9 @@ class WorldList;
 class MinecraftInstance : public BaseInstance {
     Q_OBJECT
    public:
-    MinecraftInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, const QString& rootDir);
+    MinecraftInstance(std::unique_ptr<InstanceConfigHolder> conf, const QString& rootDir);
     virtual ~MinecraftInstance();
     virtual void saveNow() override;
-
-    void loadSpecificSettings() override;
 
     // FIXME: remove
     QSet<QString> traits() const override;
@@ -81,7 +79,7 @@ class MinecraftInstance : public BaseInstance {
     QString modsRoot() const override;
     QString coreModsDir() const;
     QString nilModsDir() const;
-    QString dataPacksDir();
+    QString modsCacheLocation() const;
     QString libDir() const;
     QString worldDir() const;
     QString resourcesDir() const;

@@ -21,18 +21,22 @@
 #include "InstanceTask.h"
 #include "Markdown.h"
 #include "StringUtils.h"
+#include "config/InstanceConfig.h"
 
 #include "ui/InstanceWindow.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 
-ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, const QString& type, QWidget* parent)
+ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, QWidget* parent)
 {
-    if (type == "modrinth") {
-        return new ModrinthManagedPackPage(inst, nullptr, parent);
-    }
-    if (type == "flame" && ((APPLICATION->capabilities() & Application::SupportsFlame) != 0U)) {
-        return new FlameManagedPackPage(inst, nullptr, parent);
+    const auto& managedPack = inst->config()->managedPack;
+    if (managedPack.has_value()) {
+        if (managedPack->type == "modrinth") {
+            return new ModrinthManagedPackPage(inst, nullptr, parent);
+        }
+        if (managedPack->type == "flame" && ((APPLICATION->capabilities() & Application::SupportsFlame) != 0U)) {
+            return new FlameManagedPackPage(inst, nullptr, parent);
+        }
     }
 
     return new GenericManagedPackPage(inst, nullptr, parent);
@@ -64,15 +68,19 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWin
             auto decoded = QUrl::fromPercentEncoding(querry.toUtf8());
             auto newUrl = QUrl(decoded);
             if (newUrl.isValid() && (newUrl.scheme() == "http" || newUrl.scheme() == "https")) {
-                QDesktopServices ::openUrl(newUrl);
+                QDesktopServices::openUrl(newUrl);
             }
             return;
         }
         QDesktopServices::openUrl(url);
     });
 
-    connect(ui->urlLine, &QLineEdit::textChanged, this,
-            [this](const QString& text) { m_inst->settings()->set("ManagedPackURL", text.trimmed()); });
+    connect(ui->urlLine, &QLineEdit::textChanged, this, [this](const QString& text) {
+        auto& managedPack = m_inst->config().update().managedPack;
+        Q_ASSERT(managedPack.has_value());
+
+        managedPack->url = text.trimmed();
+    });
 
     connect(ui->updateFromUrlButton, &QPushButton::clicked, this, &ManagedPackPage::updateFromUrl);
 }
@@ -84,7 +92,10 @@ ManagedPackPage::~ManagedPackPage()
 
 void ManagedPackPage::openedImpl()
 {
-    if (m_inst->getManagedPackID().isEmpty()) {
+    const auto& managedPack = m_inst->config()->managedPack;
+    Q_ASSERT(managedPack.has_value());
+
+    if (managedPack->id.isEmpty()) {
         ui->packVersion->hide();
         ui->packVersionLabel->hide();
         ui->packOrigin->hide();
@@ -95,7 +106,7 @@ void ManagedPackPage::openedImpl()
         ui->updateToVersionLabel->setText(tr("URL:"));
         ui->updateButton->setText(tr("Update Pack"));
         ui->updateButton->setDisabled(false);
-        ui->urlLine->setText(m_inst->settings()->get("ManagedPackURL").toString().trimmed());
+        ui->urlLine->setText(managedPack->url);
 
         ui->packName->setText(m_inst->name());
         ui->changelogTextBrowser->setText(tr("This is a local modpack.\n"
@@ -106,17 +117,20 @@ void ManagedPackPage::openedImpl()
         return;
     }
     ui->urlLine->hide();
-    ui->packName->setText(m_inst->getManagedPackName());
-    ui->packVersion->setText(m_inst->getManagedPackVersionName());
+    ui->packName->setText(managedPack->name);
+    ui->packVersion->setText(managedPack->versionName);
     ui->packOrigin->setText(tr("Website: <a href=%1>%2</a>    |    Pack ID: %3    |    Version ID: %4")
-                                .arg(url(), displayName(), m_inst->getManagedPackID(), m_inst->getManagedPackVersionID()));
+                                .arg(url(), displayName(), managedPack->id, managedPack->versionId));
 
     parseManagedPack();
 }
 
 QString ManagedPackPage::displayName() const
 {
-    auto type = m_inst->getManagedPackType();
+    const auto& managedPack = m_inst->config()->managedPack;
+    Q_ASSERT(managedPack.has_value());
+
+    auto type = managedPack->type;
     if (type.isEmpty()) {
         return {};
     }
@@ -128,7 +142,9 @@ QString ManagedPackPage::displayName() const
 
 QIcon ManagedPackPage::icon() const
 {
-    return QIcon::fromTheme(m_inst->getManagedPackType());
+    const auto& managedPack = m_inst->config()->managedPack;
+    Q_ASSERT(managedPack.has_value());
+    return QIcon::fromTheme(managedPack->type);
 }
 
 QString ManagedPackPage::helpPage() const
@@ -143,7 +159,7 @@ void ManagedPackPage::retranslate()
 
 bool ManagedPackPage::shouldDisplay() const
 {
-    return m_inst->isManagedPack();
+    return m_inst->config()->managedPack.has_value();
 }
 
 bool ManagedPackPage::runUpdateTask(InstanceTask* task)
@@ -195,7 +211,7 @@ void ManagedPackPage::setFailState()
 ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWindow, QWidget* parent)
     : ManagedPackPage(inst, instanceWindow, parent)
 {
-    Q_ASSERT(inst->isManagedPack());
+    Q_ASSERT(inst->config()->managedPack.has_value());
     connect(ui->versionsComboBox, &QComboBox::currentIndexChanged, this, &ModrinthManagedPackPage::suggestVersion);
     connect(ui->updateButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::update);
     connect(ui->updateFromFileButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::updateFromFile);
@@ -215,8 +231,11 @@ void ModrinthManagedPackPage::parseManagedPack()
         m_fetchJob->abort();
     }
 
+    const auto& managedPack = m_inst->config()->managedPack;
+    Q_ASSERT(managedPack.has_value());
+
     ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
-    m_pack = { .addonId = m_inst->getManagedPackID() };
+    m_pack = { .addonId = managedPack->id };
 
     // Use default if no callbacks are set
     callbacks.onSucceed = [this](auto& doc) {
@@ -228,12 +247,15 @@ void ModrinthManagedPackPage::parseManagedPack()
         ui->versionsComboBox->clear();
         ui->versionsComboBox->blockSignals(false);
 
+        const auto& managedPack = m_inst->config()->managedPack;
+        Q_ASSERT(managedPack.has_value());
+
         for (const auto& version : m_pack.versions) {
             QString name = version.getVersionDisplayString();
 
             // NOTE: the id from version isn't the same id in the modpack format spec...
             // e.g. HexMC's 4.4.0 has versionId 4.0.0 in the modpack index..............
-            if (version.version == m_inst->getManagedPackVersionName()) {
+            if (version.version == managedPack->versionName) {
                 name = tr("%1 (Current)").arg(name);
             }
 
@@ -260,7 +282,10 @@ void ModrinthManagedPackPage::parseManagedPack()
 
 QString ModrinthManagedPackPage::url() const
 {
-    return "https://modrinth.com/mod/" + m_inst->getManagedPackID();
+    const auto& managedPack = m_inst->config()->managedPack;
+    Q_ASSERT(managedPack.has_value());
+
+    return "https://modrinth.com/mod/" + managedPack->id;
 }
 
 void ModrinthManagedPackPage::suggestVersion()
@@ -282,6 +307,9 @@ void ModrinthManagedPackPage::suggestVersion()
 /// @param did_succeed Whether the update task was successful.
 void ManagedPackPage::onUpdateTaskCompleted(bool didSucceed) const
 {
+    const auto& managedPack = m_inst->config()->managedPack;
+    Q_ASSERT(managedPack.has_value());
+
     // Close the window if the update was successful
     if (didSucceed) {
         if (m_instanceWindow != nullptr) {
@@ -289,14 +317,14 @@ void ManagedPackPage::onUpdateTaskCompleted(bool didSucceed) const
         }
 
         CustomMessageBox::selectable(nullptr, tr("Update Successful"),
-                                     tr("The instance updated to pack version %1 successfully.").arg(m_inst->getManagedPackVersionName()),
+                                     tr("The instance updated to pack version %1 successfully.").arg(managedPack->versionName),
                                      QMessageBox::Information)
             ->show();
     } else {
         CustomMessageBox::selectable(
             nullptr, tr("Update Failed"),
             tr("The instance failed to update to pack version %1. Please check launcher logs for more information.")
-                .arg(m_inst->getManagedPackVersionName()),
+                .arg(managedPack->versionName),
             QMessageBox::Critical)
             ->show();
     }
@@ -304,8 +332,11 @@ void ManagedPackPage::onUpdateTaskCompleted(bool didSucceed) const
 
 void ModrinthManagedPackPage::update()
 {
-    auto customURL = m_inst->settings()->get("ManagedPackURL").toString().trimmed();
-    if (m_inst->getManagedPackID().isEmpty() && !customURL.isEmpty()) {
+    const auto& managedPack = m_inst->config()->managedPack;
+    Q_ASSERT(managedPack.has_value());
+
+    auto customURL = managedPack->url.trimmed();
+    if (managedPack->id.isEmpty() && !customURL.isEmpty()) {
         updatePack(customURL, false);
         return;
     }
@@ -333,7 +364,7 @@ void ModrinthManagedPackPage::updateFromFile()
 FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWindow, QWidget* parent)
     : ManagedPackPage(inst, instanceWindow, parent)
 {
-    Q_ASSERT(inst->isManagedPack());
+    Q_ASSERT(inst->config()->managedPack.has_value());
     connect(ui->versionsComboBox, &QComboBox::currentIndexChanged, this, &FlameManagedPackPage::suggestVersion);
     connect(ui->updateButton, &QPushButton::clicked, this, &FlameManagedPackPage::update);
     connect(ui->updateFromFileButton, &QPushButton::clicked, this, &FlameManagedPackPage::updateFromFile);
@@ -343,8 +374,11 @@ void FlameManagedPackPage::parseManagedPack()
 {
     qDebug() << "Parsing Flame pack";
 
+    const auto& managedPack = m_inst->config()->managedPack;
+    Q_ASSERT(managedPack.has_value());
+
     // We need to tell the user to redownload the pack, since we didn't save the required info previously
-    if (m_inst->getManagedPackID().isEmpty()) {
+    if (managedPack->id.isEmpty()) {
         setFailState();
         QString message =
             tr("<h1>Hey there!</h1>"
@@ -370,8 +404,7 @@ void FlameManagedPackPage::parseManagedPack()
         m_fetchJob->abort();
     }
 
-    QString id = m_inst->getManagedPackID();
-    m_pack = { .addonId = id };
+    m_pack = { .addonId = managedPack->id };
 
     ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
 
@@ -385,10 +418,13 @@ void FlameManagedPackPage::parseManagedPack()
         ui->versionsComboBox->clear();
         ui->versionsComboBox->blockSignals(false);
 
+        const auto& managedPack = m_inst->config()->managedPack;
+        Q_ASSERT(managedPack.has_value());
+
         for (const auto& version : m_pack.versions) {
             QString name = version.getVersionDisplayString();
 
-            if (version.fileId == m_inst->getManagedPackVersionID().toInt()) {
+            if (version.fileId.toString() == managedPack->versionId) {
                 name = tr("%1 (Current)").arg(name);
             }
 
@@ -413,8 +449,11 @@ void FlameManagedPackPage::parseManagedPack()
 
 QString FlameManagedPackPage::url() const
 {
+    const auto& managedPack = m_inst->config()->managedPack;
+    Q_ASSERT(managedPack.has_value());
+
     // FIXME: We should display the websiteUrl field, but this requires doing the API request first :(
-    return "https://www.curseforge.com/projects/" + m_inst->getManagedPackID();
+    return "https://www.curseforge.com/projects/" + managedPack->id;
 }
 
 void FlameManagedPackPage::suggestVersion()
@@ -426,16 +465,22 @@ void FlameManagedPackPage::suggestVersion()
     }
     auto version = m_pack.versions.at(index);
 
+    const auto& managedPack = m_inst->config()->managedPack;
+    Q_ASSERT(managedPack.has_value());
+
     ui->changelogTextBrowser->setHtml(
-        StringUtils::htmlListPatch(FlameAPI::getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt())));
+        StringUtils::htmlListPatch(FlameAPI::getModFileChangelog(managedPack->id.toInt(), version.fileId.toInt())));
 
     ManagedPackPage::suggestVersion();
 }
 
 void FlameManagedPackPage::update()
 {
-    auto customURL = m_inst->settings()->get("ManagedPackURL").toString().trimmed();
-    if (m_inst->getManagedPackID().isEmpty() && !customURL.isEmpty()) {
+    const auto& managedPack = m_inst->config()->managedPack;
+    Q_ASSERT(managedPack.has_value());
+
+    auto customURL = managedPack->url.trimmed();
+    if (managedPack->id.isEmpty() && !customURL.isEmpty()) {
         updatePack(customURL, false);
         return;
     }
@@ -502,9 +547,12 @@ void ManagedPackPage::updatePack(const QUrl& url, bool trusted, const QString& v
         return;
     }
 
+    const auto& managedPack = m_inst->config()->managedPack;
+    Q_ASSERT(managedPack.has_value());
+
     QMap<QString, QString> extraInfo;
     // NOTE: Don't use 'm_pack.id' here, since we didn't completely parse all the metadata for the pack, including this field.
-    extraInfo.insert("pack_id", m_inst->getManagedPackID());
+    extraInfo.insert("pack_id", managedPack->id);
     extraInfo.insert("pack_version_id", versionID);
     extraInfo.insert("original_instance_id", m_inst->id());
 
@@ -513,11 +561,11 @@ void ManagedPackPage::updatePack(const QUrl& url, bool trusted, const QString& v
     if (versionName.isEmpty()) {
         extracted->setName(m_inst->name());
     } else {
-        extracted->setOriginalName(m_inst->getManagedPackName(), versionName);
-        extracted->setName(m_inst->name().replace(m_inst->getManagedPackVersionName(), versionName));
+        extracted->setOriginalName(managedPack->name, versionName);
+        extracted->setName(m_inst->name().replace(managedPack->versionName, versionName));
     }
     extracted->setGroup(APPLICATION->instances()->getInstanceGroup(m_inst->id()));
-    extracted->setIcon(m_inst->iconKey());
+    extracted->setIcon(m_inst->config()->iconKey);
     extracted->setConfirmUpdate(false);
 
     // Run our task then handle the result
