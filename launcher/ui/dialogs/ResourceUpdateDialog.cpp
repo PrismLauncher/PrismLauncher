@@ -69,8 +69,7 @@ ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
     ReviewMessageBox::setGeometry(0, 0, 800, 600);
 
     if (m_releaseTypes.empty()) {
-        auto settingVal =
-            m_instance ? m_instance->settings()->get("ModUpdateReleaseTypes") : APPLICATION->settings()->get("ModUpdateReleaseTypes");
+        auto settingVal = APPLICATION->settings()->get("ModUpdateReleaseTypes");
         m_releaseTypes = ModPlatform::IndexedVersionType::fromStringList(Json::toStringList(settingVal.toString()));
     }
 

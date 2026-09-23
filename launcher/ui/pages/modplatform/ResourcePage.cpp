@@ -51,6 +51,7 @@
 #include "Markdown.h"
 
 #include "Application.h"
+#include "Json.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui/pages/modplatform/ResourceModel.h"
 #include "ui/widgets/ProjectItem.h"
@@ -387,6 +388,10 @@ void ResourcePage::versionListUpdated(const QModelIndex& index)
         m_ui->versionSelectionBox->blockSignals(false);
 
         if (currentPack) {
+            bool versionChosen = false;
+            const auto releaseTypesSetting = APPLICATION->settings()->get("ModUpdateReleaseTypes");
+            const auto releaseTypes = ModPlatform::IndexedVersionType::fromStringList(Json::toStringList(releaseTypesSetting.toString()));
+
             auto installedVersion = m_model->getInstalledPackVersion(currentPack);
 
             for (int i = 0; i < currentPack->versions.size(); i++) {
@@ -396,6 +401,21 @@ void ResourcePage::versionListUpdated(const QModelIndex& index)
                 }
 
                 m_ui->versionSelectionBox->addItem(versionText(version, installedVersion), QVariant(i));
+
+                if (versionChosen) {
+                    continue;
+                }
+
+                const bool preferred =
+                    releaseTypes.empty() || std::ranges::any_of(releaseTypes, [&version](ModPlatform::IndexedVersionType type) {
+                        return version.versionType == type;
+                    });
+                if (!preferred) {
+                    continue;
+                }
+
+                versionChosen = true;
+                m_ui->versionSelectionBox->setCurrentIndex(m_ui->versionSelectionBox->count() - 1);
             }
 
             restoreSelectedVersion(currentPack);
