@@ -327,6 +327,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
           { { "l", "launch" }, "Launch the specified instance (by instance ID)", "instance" },
           { { "s", "server" }, "Join the specified server on launch (only valid in combination with --launch)", "address" },
           { { "w", "world" }, "Join the specified world on launch (only valid in combination with --launch)", "world" },
+          { { "r", "realm" }, "Join the specified realm on launch (only valid in combination with --launch)", "realm" },
           { { "a", "profile" }, "Use the account specified by its profile name (only valid in combination with --launch)", "profile" },
           { { "o", "offline" }, "Launch offline, with given player name (only valid in combination with --launch)", "offline" },
           { "alive", "Write a small '" + g_liveCheckFile + "' file after the launcher starts" },
@@ -344,6 +345,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     m_instanceIdToLaunch = parser.value("launch");
     m_serverToJoin = parser.value("server");
     m_worldToJoin = parser.value("world");
+    m_realmToJoin = parser.value("realm");
     m_profileToUse = parser.value("profile");
     if (parser.isSet("offline")) {
         m_launchOffline = true;
@@ -364,7 +366,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
 
     // error if --launch is missing with --server or --profile
-    if ((!m_serverToJoin.isEmpty() || !m_worldToJoin.isEmpty() || !m_profileToUse.isEmpty() || m_launchOffline) &&
+    if ((!m_serverToJoin.isEmpty() || !m_worldToJoin.isEmpty() || !m_realmToJoin.isEmpty() || !m_profileToUse.isEmpty() ||
+         m_launchOffline) &&
         m_instanceIdToLaunch.isEmpty()) {
         std::cerr << "--server, --profile and --offline can only be used in combination with --launch!" << std::endl;
         m_status = Application::Failed;
@@ -488,6 +491,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                     launch.args["server"] = m_serverToJoin;
                 } else if (!m_worldToJoin.isEmpty()) {
                     launch.args["world"] = m_worldToJoin;
+                } else if (!m_realmToJoin.isEmpty()) {
+                    launch.args["realm"] = m_realmToJoin;
                 }
                 if (!m_profileToUse.isEmpty()) {
                     launch.args["profile"] = m_profileToUse;
@@ -628,6 +633,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             qInfo() << "Address of server to join  :" << m_serverToJoin;
         } else if (!m_worldToJoin.isEmpty()) {
             qInfo() << "Name of the world to join  :" << m_worldToJoin;
+        } else if (!m_realmToJoin.isEmpty()) {
+            qInfo() << "ID of the realm to join    :" << m_realmToJoin;
         }
         qInfo() << "<> Paths set.";
     }
@@ -1387,6 +1394,9 @@ void Application::performMainStartupAction()
             } else if (!m_worldToJoin.isEmpty()) {
                 targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(m_worldToJoin, true)));
                 qDebug() << "   Launching with world" << m_worldToJoin;
+            } else if (!m_realmToJoin.isEmpty()) {
+                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::fromRealm(m_realmToJoin)));
+                qDebug() << "   Launching with realm" << m_realmToJoin;
             }
 
             if (!m_profileToUse.isEmpty()) {
@@ -1495,6 +1505,7 @@ void Application::messageReceived(const QByteArray& message)
         QString id = received.args["id"];
         QString server = received.args["server"];
         QString world = received.args["world"];
+        QString realm = received.args["realm"];
         QString profile = received.args["profile"];
         bool offline = received.args["offline_enabled"] == "true";
         QString offlineName = received.args["offline_name"];
@@ -1516,6 +1527,8 @@ void Application::messageReceived(const QByteArray& message)
             serverObject = std::make_shared<MinecraftTarget>(MinecraftTarget::parse(server, false));
         } else if (!world.isEmpty()) {
             serverObject = std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world, true));
+        } else if (!realm.isEmpty()) {
+            serverObject = std::make_shared<MinecraftTarget>(MinecraftTarget::fromRealm(realm));
         }
         MinecraftAccountPtr accountObject;
         if (!profile.isEmpty()) {

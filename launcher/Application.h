@@ -308,6 +308,7 @@ class Application : public QApplication {
     QString m_instanceIdToLaunch;
     QString m_serverToJoin;
     QString m_worldToJoin;
+    QString m_realmToJoin;
     QString m_profileToUse;
     bool m_launchOffline = false;
     QString m_offlineName;
