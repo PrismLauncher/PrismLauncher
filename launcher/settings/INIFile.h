@@ -37,26 +37,30 @@
 #pragma once
 
 #include <QIODevice>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include <QString>
 #include <QVariant>
 
-#include <QJsonArray>
-#include <QJsonDocument>
+#include "Result.h"
 
 // Sectionless INI parser (for instance config files)
 class INIFile : public QMap<QString, QVariant> {
    public:
     explicit INIFile();
 
-    bool loadFile(const QString& fileName);
-    bool loadFile(const QByteArray& data);
-    bool saveFile(const QString& fileName);
+    Result<> loadFile(const QString& fileName);
+
+    Result<> loadFile(const QByteArray& data);
+
+    Result<> saveFile(const QString& fileName);
 
     QVariant get(const QString& key, QVariant def) const;
     void set(const QString& key, QVariant val);
 
     template <typename T>
-    T convert(const QString& key, T defaultValue = {}) const {
+    T convert(const QString& key, T defaultValue = {}) const
+    {
         QVariant val = value(key);
         if (!val.isValid()) {
             return defaultValue;
