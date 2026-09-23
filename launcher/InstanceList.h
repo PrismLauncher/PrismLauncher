@@ -44,6 +44,8 @@
 #include <QStack>
 #include <cstdint>
 
+#include "Result.h"
+#include "config/InstanceConfig.h"
 #include "minecraft/MinecraftInstance.h"
 
 class QFileSystemWatcher;
@@ -58,7 +60,7 @@ enum class InstCreateError : std::uint8_t { NoCreateError = 0, NoSuchVersion, Un
 enum class GroupsState : std::uint8_t { NotLoaded, Steady, Dirty };
 
 struct TrashShortcutItem {
-    ShortcutData data;
+    InstanceConfig::Shortcut data;
     QString trashPath;
 };
 
@@ -74,7 +76,7 @@ class InstanceList : public QAbstractListModel {
     Q_OBJECT
 
    public:
-    explicit InstanceList(SettingsObject* settings, const QStringList& instDirs, QObject* parent = nullptr);
+    explicit InstanceList(const QStringList& instDirs, QObject* parent = nullptr);
     ~InstanceList() override = default;
 
    public:
@@ -90,18 +92,14 @@ class InstanceList : public QAbstractListModel {
         InstancePointerRole = 0x34B1CB48,  ///< Return pointer to real instance
         InstanceIDRole = 0x34B1CB49        ///< Return id if the instance
     };
-    /*!
-     * \brief Error codes returned by functions in the InstanceList class.
-     * NoError Indicates that no error occurred.
-     * UnknownError indicates that an unspecified error occurred.
-     */
-    enum InstListError : std::uint8_t { NoError = 0, UnknownError };
 
     MinecraftInstance* at(int i) const { return m_instances.at(i).get(); }
 
     int count() const { return static_cast<int>(m_instances.size()); }
 
-    InstListError loadList();
+    const QStringList& problems() const { return m_problems; }
+
+    void loadList();
     void saveNow();
 
     /* O(n) */
@@ -158,11 +156,12 @@ class InstanceList : public QAbstractListModel {
    signals:
     void dataIsInvalid();
     void instancesChanged();
+    void problemsChanged(const QStringList& problems);
     void instanceSelectRequest(QString instanceId);
     void groupsChanged(QSet<QString> groups);
 
    public slots:
-    void on_InstFolderChanged(const Setting& setting, const QVariant& value);
+    void onConfigUpdate();
     void on_GroupStateChanged(const QString& group, bool collapsed);
 
    private slots:
@@ -173,25 +172,22 @@ class InstanceList : public QAbstractListModel {
    private:
     int getInstIndex(MinecraftInstance* inst) const;
     void migrateTotalPlayTime();
-    void suspendWatch();
-    void resumeWatch();
     void add(std::vector<std::unique_ptr<MinecraftInstance>>& list);
     void loadGroupList();
     void saveGroupList();
     QList<InstanceId> discoverInstances();
-    std::unique_ptr<MinecraftInstance> loadInstance(const InstanceId& id);
+    Result<std::unique_ptr<MinecraftInstance>> loadInstance(const InstanceId& id);
 
     void increaseGroupCount(const QString& group);
     void decreaseGroupCount(const QString& group);
 
    private:
-    int m_watchLevel = 0;
     bool m_dirty = false;
     std::vector<std::unique_ptr<MinecraftInstance>> m_instances;
+    QStringList m_problems;
     // id -> refs
     QMap<QString, int> m_groupNameCache;
 
-    SettingsObject* m_globalSettings;
     QStringList m_instDirs;
     QHash<InstanceId, QString> m_instanceRootDirMap;
     QString rootDirOf(const InstanceId& id) const;
