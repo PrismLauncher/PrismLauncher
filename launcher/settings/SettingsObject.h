@@ -65,7 +65,7 @@ class SettingsObject : public QObject {
      * the one that is being registered.
      * \return A valid Setting shared pointer if successful.
      */
-    std::shared_ptr<Setting> registerOverride(std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate);
+    std::shared_ptr<Setting> registerOverride(QStringList synonyms, std::function<QVariant()> original, std::shared_ptr<Setting> gate);
 
     /*!
      * Registers a passthorugh setting for the given original setting in this settings object

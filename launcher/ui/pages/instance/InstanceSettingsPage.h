@@ -36,7 +36,7 @@
 #pragma once
 
 #include <QWidget>
-#include "BaseInstance.h"
+#include "Application.h"
 #include "ui/pages/BasePage.h"
 #include "ui/widgets/MinecraftSettingsWidget.h"
 
@@ -55,7 +55,6 @@ class InstanceSettingsPage : public MinecraftSettingsWidget, public BasePage {
     QString id() const override { return "settings"; }
     bool apply() override
     {
-        SettingsObject::Lock lock(m_instance->settings());
         saveSettings();
         return true;
     }
