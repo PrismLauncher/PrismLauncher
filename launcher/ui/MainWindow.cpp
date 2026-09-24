@@ -1169,6 +1169,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
         }
         ImportResourceDialog dlg(localFileName, type, this);
 
+        dlg.sortBy(version.mcVersion, version.loaders);
         if (dlg.exec() != QDialog::Accepted) {
             continue;
         }
