@@ -416,6 +416,20 @@ void ModFilterWidget::setCategories(const QList<ModPlatform::Category>& categori
     }
 }
 
+void ModFilterWidget::setLoaderVersionOnly(bool only)
+{
+    if (!only) {
+        return;
+    }
+
+    m_ui->categoryGroup->hide();
+    m_ui->environmentGroup->hide();
+    m_ui->hideInstalled->hide();
+    m_ui->openSource->hide();
+    m_ui->releaseGroup->hide();
+    m_ui->disclosureGroup->hide();
+}
+
 void ModFilterWidget::onOpenSourceFilterChanged()
 {
     auto open = m_ui->openSource->isChecked();
