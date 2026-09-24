@@ -929,24 +929,26 @@ void MainWindow::processURLs(QList<QUrl> urls)
 {
     // NOTE: This loop only processes one dropped file!
     for (auto& url : urls) {
-        if (url.isEmpty() || url.toString().trimmed().isEmpty())
+        if (url.isEmpty() || url.toString().trimmed().isEmpty()) {
             continue;
+        }
 
         qDebug() << "Processing" << url;
 
         // The isLocalFile() check below doesn't work as intended without an explicit scheme.
-        if (url.scheme().isEmpty())
+        if (url.scheme().isEmpty()) {
             url.setScheme("file");
+        }
 
         ModPlatform::IndexedVersion version;
-        QMap<QString, QString> extra_info;
-        QUrl local_url;
+        QMap<QString, QString> extraInfo;
+        QUrl localUrl;
         if (!url.isLocalFile()) {  // download the remote resource and identify
             if (url.scheme().compare("modrinth", Qt::CaseInsensitive) == 0) {
                 const auto packId = ModrinthAPI::getModpackIdFromUrl(url);
                 if (!packId.isEmpty()) {
-                    extra_info.insert("pack_id", packId);
-                    addInstance(url.toString(), extra_info);
+                    extraInfo.insert("pack_id", packId);
+                    addInstance(url.toString(), extraInfo);
                 } else {
                     CustomMessageBox::selectable(
                         this, tr("Error"),
@@ -960,7 +962,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
 
             const bool isExternalURLImport = (url.host().toLower() == "import") || (url.path().startsWith("/import", Qt::CaseInsensitive));
 
-            QUrl dl_url;
+            QUrl dlUrl;
             if (url.scheme() == "curseforge" || (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME && url.host() == "install")) {
                 // need to find the download link for the modpack / resource
                 // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
@@ -984,21 +986,21 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 auto addonId = query.allQueryItemValues("addonId")[0];
                 auto fileId = query.allQueryItemValues("fileId")[0];
 
-                extra_info.insert("pack_id", addonId);
-                extra_info.insert("pack_version_id", fileId);
+                extraInfo.insert("pack_id", addonId);
+                extraInfo.insert("pack_version_id", fileId);
 
                 auto [job, versionRes] = FlameAPI::get().getVersionTask(addonId, fileId);
 
                 connect(job.get(), &Task::failed, this, [this](const QString& reason) {
                     CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
                 });
-                connect(job.get(), &Task::succeeded, this, [this, versionRes, addonId, fileId, &dl_url, &version] {
+                connect(job.get(), &Task::succeeded, this, [this, versionRes, addonId, fileId, &dlUrl, &version] {
                     version = *versionRes;
                     auto fileName = version.fileName;
 
                     // Have to use ensureString then use QUrl to get proper url encoding
-                    dl_url = QUrl(version.downloadUrl);
-                    if (!dl_url.isValid()) {
+                    dlUrl = QUrl(version.downloadUrl);
+                    if (!dlUrl.isValid()) {
                         CustomMessageBox::selectable(
                             this, tr("Error"),
                             tr("The modpack, mod, or resource %1 is blocked for third-parties! Please download it manually.").arg(fileName),
@@ -1018,8 +1020,9 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 QVariantMap receivedData;
                 const QUrlQuery query(url.query());
                 const auto items = query.queryItems();
-                for (auto it = items.begin(), end = items.end(); it != end; ++it)
+                for (auto it = items.begin(), end = items.end(); it != end; ++it) {
                     receivedData.insert(it->first, it->second);
+                }
                 emit APPLICATION->oauthReplyRecieved(receivedData);
                 continue;
             } else if ((url.scheme() == "prismlauncher" || url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME) && isExternalURLImport) {
@@ -1080,43 +1083,44 @@ void MainWindow::processURLs(QList<QUrl> urls)
                     continue;
                 }
 
-                dl_url = target;
+                dlUrl = target;
             } else {
-                dl_url = url;
+                dlUrl = url;
             }
 
-            if (!dl_url.isValid()) {
+            if (!dlUrl.isValid()) {
                 continue;  // no valid url to download this resource
             }
 
-            const QString path = dl_url.host() + '/' + dl_url.path();
+            const QString path = dlUrl.host() + '/' + dlUrl.path();
             auto entry = APPLICATION->metacache()->resolveEntry("general", path);
             entry->setStale(true);
-            auto dl_job = unique_qobject_ptr<NetJob>(new NetJob(tr("Modpack download"), APPLICATION->network()));
-            dl_job->addNetAction(Net::ApiRequest::makeCached(dl_url, entry));
+            auto dlJob = unique_qobject_ptr<NetJob>(new NetJob(tr("Modpack download"), APPLICATION->network()));
+            dlJob->addNetAction(Net::ApiRequest::makeCached(dlUrl, entry));
             auto archivePath = entry->getFullPath();
 
-            bool dl_success = false;
-            connect(dl_job.get(), &Task::failed, this,
-                    [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-            connect(dl_job.get(), &Task::succeeded, this, [&dl_success] { dl_success = true; });
+            bool dlSuccess = false;
+            connect(dlJob.get(), &Task::failed, this, [this](const QString& reason) {
+                CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+            });
+            connect(dlJob.get(), &Task::succeeded, this, [&dlSuccess] { dlSuccess = true; });
 
             {  // drop stack
                 ProgressDialog dlUrlDialod(this);
                 dlUrlDialod.setSkipButton(true, tr("Abort"));
-                dlUrlDialod.execWithTask(dl_job.get());
+                dlUrlDialod.execWithTask(dlJob.get());
             }
 
-            if (!dl_success) {
+            if (!dlSuccess) {
                 continue;  // no local file to identify
             }
-            local_url = QUrl::fromLocalFile(archivePath);
+            localUrl = QUrl::fromLocalFile(archivePath);
 
         } else {
-            local_url = url;
+            localUrl = url;
         }
 
-        auto localFileName = QDir::toNativeSeparators(local_url.toLocalFile());
+        auto localFileName = QDir::toNativeSeparators(localUrl.toLocalFile());
         QFileInfo localFileInfo(localFileName);
 
         if (localFileName.isEmpty() || !localFileInfo.exists()) {
@@ -1126,8 +1130,8 @@ void MainWindow::processURLs(QList<QUrl> urls)
 
         auto type = ResourceUtils::identify(localFileInfo);
 
-        if (ModPlatform::ResourceTypeUtils::g_VALID_RESOURCES.count(type) == 0) {  // probably instance/modpack
-            addInstance(localFileName, extra_info);
+        if (!ModPlatform::ResourceTypeUtils::g_VALID_RESOURCES.contains(type)) {  // probably instance/modpack
+            addInstance(localFileName, extraInfo);
             continue;
         }
 
@@ -1141,13 +1145,14 @@ void MainWindow::processURLs(QList<QUrl> urls)
         }
         ImportResourceDialog dlg(localFileName, type, this);
 
-        if (dlg.exec() != QDialog::Accepted)
+        if (dlg.exec() != QDialog::Accepted) {
             continue;
+        }
 
         qDebug() << "Adding resource" << localFileName << "to" << dlg.selectedInstanceKey;
 
-        auto inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
-        auto minecraftInst = inst;
+        auto* inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
+        auto* minecraftInst = inst;
 
         switch (type) {
             case ModPlatform::ResourceType::ResourcePack:
