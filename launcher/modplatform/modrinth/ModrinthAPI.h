@@ -27,8 +27,6 @@ class ModrinthAPI final : public ResourceAPI {
 
     auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 
-    static QString getModpackIdFromUrl(const QUrl& url);
-
    public slots:
     Net::RPC::Spec<ModPlatform::IndexedPack> getProject(const QString& id) const override;
     Net::RPC::Spec<QList<ModPlatform::IndexedPack>> getProjects(const QStringList& addonIds) const override;
