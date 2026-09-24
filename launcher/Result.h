@@ -44,11 +44,6 @@
 template <typename T = void, typename E = QString>
 using Result = std::expected<T, E>;
 
-#ifdef Q_OS_WIN32
-#define UNEXPECTED_WIN32_LAST (std::unexpected{ std::error_code{ static_cast<int>(GetLastError()), std::system_category() } })
-#define UNEXPECTED_WIN32(x) (std::unexpected{ std::error_code{ static_cast<int>(x), std::system_category() } })
-#endif
-
 #define TRY(expected)                                 \
     if (const auto& _result = (expected); !_result) { \
         return std::unexpected{ _result.error() };    \
