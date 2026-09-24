@@ -195,41 +195,20 @@ void Flame::FileResolvingTask::getFlameProjects()
         addonIds.push_back(QString::number(file.projectId));
     }
 
-    auto [task, response] = FlameAPI::get().getProjects(addonIds);
+    auto [task, response] = FlameAPI::get().getProjectsTask(addonIds);
     m_task = task;
 
     auto stepProgress2 = std::make_shared<TaskStepProgress>();
     connect(m_task.get(), &Task::succeeded, this, [this, response, stepProgress2] {
-        auto doc = Json::requireObject(*response).and_then([](const auto& v) { return Json::requireArray(v, "data"); });
-        if (!doc) {
-            qWarning() << "Error while parsing CurseForge projects response:" << doc.error();
-            qWarning() << *response;
-            // treat a parse failure as success, otherwise the task hangs forever
-            stepProgress2->state = TaskStepState::Succeeded;
-            stepProgress(*stepProgress2);
-            emitSucceeded();
-            return;
-        }
-
-        for (auto entry : doc.value()) {
-            auto process = [this, &entry]() -> Result<> {
-                TRY_INTO(const auto& entryObj, Json::requireObject(entry))
-                TRY_INTO(const auto& id, Json::requireInteger(entryObj, "id"))
-
-                auto file = std::ranges::find_if(m_manifest.files, [id](const Flame::File& file) { return file.projectId == id; });
-                if (file != m_manifest.files.end()) {
-                    setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
-                    TRY(Flame::Parse::loadIndexedPack(file->pack, entryObj))
-                    if (file->pack.resourceType == ModPlatform::ResourceType::World) {
-                        file->targetFolder = "saves";
-                    }
+        for (auto entry : *response) {
+            auto file = std::ranges::find_if(m_manifest.files,
+                                             [&entry](const Flame::File& file) { return file.projectId == entry.addonId.toInt(); });
+            if (file != m_manifest.files.end()) {
+                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
+                file->pack = entry;
+                if (file->pack.resourceType == ModPlatform::ResourceType::World) {
+                    file->targetFolder = "saves";
                 }
-                return {};
-            };
-            if (auto result = process(); !result) {
-                qDebug() << result.error();
-                qDebug() << *doc;
-                break;
             }
         }
         stepProgress2->state = TaskStepState::Succeeded;

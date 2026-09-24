@@ -9,4 +9,6 @@
 
 namespace Flame::Parse {
 Result<> loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj);
+
+Result<QList<ModPlatform::IndexedPack>> parseProjectList(const QByteArray& response);
 }  // namespace Flame::Parse
