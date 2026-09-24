@@ -13,6 +13,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QUrl>
 #include <utility>
 
 class ModrinthAPI final : public ResourceAPI {
@@ -42,6 +43,8 @@ class ModrinthAPI final : public ResourceAPI {
         std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes = std::nullopt) const;
 
     std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
+
+    static QString getModpackIdFromUrl(const QUrl& url);
 
     std::pair<Task::Ptr, QByteArray*> getModCategories() const override;
     static QList<ModPlatform::Category> loadCategories(const QByteArray& response, const QString& projectType);

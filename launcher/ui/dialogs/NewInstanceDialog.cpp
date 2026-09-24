@@ -136,9 +136,19 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 
     if (!url.isEmpty()) {
         QUrl actualUrl(url);
-        m_container->selectPage("import");
-        m_importPage->setUrl(url);
-        m_importPage->setExtraInfo(extraInfo);
+        const auto packId = extraInfo.value("pack_id");
+        if (actualUrl.scheme().compare("modrinth", Qt::CaseInsensitive) == 0 && !packId.isEmpty()) {
+            auto* page = dynamic_cast<ModrinthPage*>(m_container->getPage("modrinth"));
+            if (page) {
+                m_searchTerm = "#" + packId;
+                page->setSearchTerm(m_searchTerm);
+                m_container->selectPage(page->id());
+            }
+        } else {
+            m_container->selectPage("import");
+            m_importPage->setUrl(url);
+            m_importPage->setExtraInfo(extraInfo);
+        }
     }
 
     updateDialogState();
