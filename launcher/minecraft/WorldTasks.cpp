@@ -1,7 +1,9 @@
 #include "WorldTasks.h"
 
+#include "FileSystem.h"
 #include "World.h"
 #include "WorldList.h"
+#include "archive/ExtractZipTask.h"
 
 #include <QCoreApplication>
 #include <QMetaObject>
@@ -37,24 +39,30 @@ void InstallWorldTask::executeTask()
 
     QThreadPool::globalInstance()->start([self, args]() mutable {
         World world(args.sourceFile);
-        const bool ok = world.isValid() && world.install(args.targetDir);
+        world.loadMetadata();
 
-        invokeOnMainThread([self, worlds = args.worlds, ok]() {
+        invokeOnMainThread([self, args, world]() {
             if (!self) {
                 return;
             }
 
-            if (!ok) {
+            auto finalPath = FS::PathCombine(args.targetDir, FS::DirNameFromString(world.name(), { args.targetDir }));
+            if (!world.isValid() || !FS::ensureFolderPathExists(finalPath)) {
                 self->emitFailed(self->tr("Failed to import world."));
                 return;
             }
 
-            if (worlds) {
-                worlds->update();
-            }
-
-            self->setProgress(1, 1);
-            self->emitSucceeded();
+            self->m_extractTask =
+                makeShared<MMCZip::ExtractZipTask>(args.sourceFile.absoluteFilePath(), QDir(finalPath), world.containerOffsetPath());
+            connect(self->m_extractTask.get(), &Task::progress, self, &InstallWorldTask::setProgress);
+            connect(self->m_extractTask.get(), &Task::failed, self, &InstallWorldTask::emitFailed);
+            connect(self->m_extractTask.get(), &Task::succeeded, self, [self, worlds = args.worlds]() {
+                if (worlds) {
+                    worlds->update();
+                }
+                self->emitSucceeded();
+            });
+            self->m_extractTask->start();
         });
     });
 }
