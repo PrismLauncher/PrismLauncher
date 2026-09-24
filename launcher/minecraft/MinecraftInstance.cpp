@@ -327,12 +327,19 @@ void MinecraftInstance::populateLaunchMenu(QMenu* menu)
     connect(normalLaunchDemo, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Demo); });
 
     auto accounts = APPLICATION->accounts();
-    QMenu* launchAsMenu = menu->addMenu(tr("Launch &As"));
-    launchAsMenu->setEnabled(accounts->count() > 0);
-    for (int i = 0; i < accounts->count(); i++) {
-        MinecraftAccountPtr account = accounts->at(i);
-        QAction* action = launchAsMenu->addAction(account->displayName());
-        connect(action, &QAction::triggered, this, [this, account] { APPLICATION->launch(this, LaunchMode::Normal, nullptr, account); });
+    if (accounts->count() > 1) {
+        QMenu* launchAsMenu = menu->addMenu(tr("Launch &As"));
+        for (int i = 0; i < accounts->count(); i++) {
+            MinecraftAccountPtr account = accounts->at(i);
+            QAction* action = launchAsMenu->addAction(account->displayName());
+            if (auto face = account->getFace(); !face.isNull()) {
+                action->setIcon(face);
+            } else {
+                action->setIcon(QIcon::fromTheme("noaccount"));
+            }
+            connect(action, &QAction::triggered, this,
+                    [this, account] { APPLICATION->launch(this, LaunchMode::Normal, nullptr, account); });
+        }
     }
 
     QString profilersTitle = tr("Profilers");
