@@ -19,8 +19,12 @@
 #include <icons/IconList.h>
 #include "Application.h"
 #include "InstanceView.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
+#include "modplatform/ModIndex.h"
 
 #include <QDebug>
+#include <utility>
 
 InstanceProxyModel::InstanceProxyModel(QObject* parent) : QSortFilterProxyModel(parent)
 {
@@ -28,6 +32,12 @@ InstanceProxyModel::InstanceProxyModel(QObject* parent) : QSortFilterProxyModel(
     m_naturalSort.setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
     // FIXME: use loaded translation as source of locale instead, hook this up to translation changes
     m_naturalSort.setLocale(QLocale::system());
+}
+void InstanceProxyModel::filterBy(QStringList mcVersions, ModPlatform::ModLoaderTypes loader)
+{
+    m_mcVersions = std::move(mcVersions);
+    m_loader = loader;
+    invalidateFilter();
 }
 
 QVariant InstanceProxyModel::data(const QModelIndex& index, int role) const
@@ -45,7 +55,8 @@ bool InstanceProxyModel::lessThan(const QModelIndex& left, const QModelIndex& ri
     const QString rightCategory = right.data(InstanceViewRoles::GroupRole).toString();
     if (leftCategory == rightCategory) {
         return subSortLessThan(left, right);
-    }  // FIXME: real group sorting happens in InstanceView::updateGeometries(), see LocaleString
+    }
+    // FIXME: real group sorting happens in InstanceView::updateGeometries(), see LocaleString
     auto result = leftCategory.localeAwareCompare(rightCategory);
     if (result == 0) {
         return subSortLessThan(left, right);
@@ -68,4 +79,26 @@ bool InstanceProxyModel::subSortLessThan(const QModelIndex& left, const QModelIn
         return pdataLeft->totalTimePlayed() > pdataRight->totalTimePlayed();
     }
     return m_naturalSort.compare(pdataLeft->name(), pdataRight->name()) < 0;
+}
+
+bool InstanceProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+{
+    if (m_mcVersions.isEmpty() && m_loader == ModPlatform::ModLoaderType::None) {
+        return true;
+    }
+    auto data = sourceModel()->index(sourceRow, 0, sourceParent);
+    auto* inst = static_cast<MinecraftInstance*>(data.internalPointer());
+    auto* profile = inst->getPackProfile();
+    if ((profile == nullptr) || profile->rowCount() == 0) {
+        return true;
+    }
+    const auto mcVersion = profile->getComponentVersion("net.minecraft");
+    auto loader = profile->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
+    if (!m_mcVersions.isEmpty() && !m_mcVersions.contains(mcVersion)) {
+        return false;
+    }
+    if (m_loader != ModPlatform::ModLoaderType::None && !loader.testAnyFlags(m_loader)) {
+        return false;
+    }
+    return true;
 }
