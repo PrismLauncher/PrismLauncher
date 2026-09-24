@@ -17,6 +17,7 @@
 
 #include <QCollator>
 #include <QSortFilterProxyModel>
+#include "modplatform/ModIndex.h"
 
 class InstanceProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
@@ -24,11 +25,17 @@ class InstanceProxyModel : public QSortFilterProxyModel {
    public:
     explicit InstanceProxyModel(QObject* parent = nullptr);
 
+    void sortBy(QStringList mcVersions, ModPlatform::ModLoaderTypes loader = ModPlatform::ModLoaderType::None);
+
    protected:
     QVariant data(const QModelIndex& index, int role) const override;
     bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
     bool subSortLessThan(const QModelIndex& left, const QModelIndex& right) const;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 
    private:
     QCollator m_naturalSort;
+
+    QStringList m_mcVersions;
+    ModPlatform::ModLoaderTypes m_loader;
 };

@@ -8,6 +8,7 @@
 #include "Application.h"
 #include "InstanceList.h"
 
+#include "minecraft/PackProfile.h"
 #include "modplatform/ResourceType.h"
 #include "ui/instanceview/InstanceDelegate.h"
 #include "ui/instanceview/InstanceProxyModel.h"
@@ -44,6 +45,7 @@ ImportResourceDialog::ImportResourceDialog(QString filePath, ModPlatform::Resour
 
     connect(contentsWidget, &QAbstractItemView::doubleClicked, this, &ImportResourceDialog::activated);
     connect(contentsWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ImportResourceDialog::selectionChanged);
+    connect(m_ui->button_show_all, &QPushButton::toggled, this, &ImportResourceDialog::showAllInstances);
 
     m_ui->label->setText(
         tr("Choose the instance you would like to import this %1 to.").arg(ModPlatform::ResourceTypeUtils::getName(m_resourceType)));
@@ -74,4 +76,29 @@ void ImportResourceDialog::selectionChanged(QItemSelection selected, QItemSelect
 ImportResourceDialog::~ImportResourceDialog()
 {
     delete m_ui;
+}
+void ImportResourceDialog::sortBy(QStringList mcVersions, ModPlatform::ModLoaderTypes loader)
+{
+    auto* instances = APPLICATION->instances();
+    for (int i = 0; i < instances->count(); ++i) {
+        auto* inst = instances->at(i);
+        if (auto res = inst->getPackProfile()->reload(Net::Mode::Offline); !res) {
+            qWarning() << "Failed to reload components of" << inst->name() << ':' << res.error();
+        }
+    }
+    m_mcVersions = mcVersions;
+    m_loader = loader;
+    m_proxyModel->sortBy(std::move(mcVersions), loader);
+    m_proxyModel->invalidate();
+    m_ui->button_show_all->setEnabled(m_loader != ModPlatform::ModLoaderType::None || !m_mcVersions.isEmpty());
+}
+
+void ImportResourceDialog::showAllInstances(bool checked)
+{
+    if (checked) {
+        m_proxyModel->sortBy({}, ModPlatform::ModLoaderType::None);
+    } else {
+        m_proxyModel->sortBy(m_mcVersions, m_loader);
+    }
+    m_proxyModel->invalidate();
 }
