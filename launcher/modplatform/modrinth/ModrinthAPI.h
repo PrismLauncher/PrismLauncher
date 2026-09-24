@@ -44,8 +44,6 @@ class ModrinthAPI final : public ResourceAPI {
         std::optional<ModPlatform::ModLoaderTypes> loaders,
         std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes = std::nullopt) const;
 
-    std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
-
     static QString getModpackIdFromUrl(const QUrl& url);
 
     std::pair<Task::Ptr, QByteArray*> getModCategories() const override;
@@ -75,6 +73,7 @@ class ModrinthAPI final : public ResourceAPI {
 
    public slots:
     Net::RPC::Spec<ModPlatform::IndexedPack> getProject(const QString& id) const override;
+    Net::RPC::Spec<QList<ModPlatform::IndexedPack>> getProjects(const QStringList& addonIds) const override;
     Net::RPC::Spec<QList<ModPlatform::IndexedPack>> searchProjects(const SearchArgs& args) const override;
 
    private:

@@ -247,17 +247,6 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(
     return { netJob, response };
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getProjects(QStringList addonIds) const
-{
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetProjects"), APPLICATION->network());
-    auto searchUrl = getMultipleModInfoURL(addonIds);
-
-    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(searchUrl));
-    netJob->addNetAction(action);
-
-    return { netJob, response };
-}
-
 QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const
 {
     // https://docs.modrinth.com/api-spec/#tag/projects/operation/searchProjects
@@ -310,6 +299,27 @@ Net::RPC::Spec<ModPlatform::IndexedPack> ModrinthAPI::getProject(const QString& 
                  TRY(Json::requireObject(response).and_then([&pack](const auto& v) { return Modrinth::Parse::loadIndexedPack(pack, v); }))
                  return pack;
              } };
+}
+
+Net::RPC::Spec<QList<ModPlatform::IndexedPack>> ModrinthAPI::getProjects(const QStringList& addonIds) const
+{
+    // https://docs.modrinth.com/api/operations/getprojects/
+    auto url = getMultipleModInfoURL(addonIds);
+
+    return { { .url = url }, [](const auto& response) -> Result<QList<ModPlatform::IndexedPack>> {
+                QList<ModPlatform::IndexedPack> newList;
+                TRY_INTO(auto doc,
+                         Json::requireDocument(response, "ResourceAPI").and_then([](const auto& v) { return Json::requireArray(v); }))
+
+                for (auto packRaw : doc) {
+                    auto packObj = packRaw.toObject();
+
+                    ModPlatform::IndexedPack pack;
+                    TRY(Modrinth::Parse::loadIndexedPack(pack, packObj))
+                    newList << pack;
+                }
+                return newList;
+            } };
 }
 
 Net::RPC::Spec<QList<ModPlatform::IndexedPack>> ModrinthAPI::searchProjects(const SearchArgs& args) const

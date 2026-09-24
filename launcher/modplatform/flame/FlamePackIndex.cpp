@@ -76,4 +76,22 @@ Result<> loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
     }
     return {};
 }
+
+Result<QList<ModPlatform::IndexedPack>> parseProjectList(const QByteArray& response)
+{
+    QList<ModPlatform::IndexedPack> newList;
+    TRY_INTO(auto doc, Json::requireDocument(response, "ResourceAPI")
+                           .and_then([](const auto& v) { return Json::requireObject(v); })
+                           .and_then([](const auto& v) { return Json::requireArray(v, "data"); }))
+
+    for (auto packRaw : doc) {
+        auto packObj = packRaw.toObject();
+
+        ModPlatform::IndexedPack pack;
+        TRY(Flame::Parse::loadIndexedPack(pack, packObj))
+        newList << pack;
+    }
+    return newList;
+}
+
 }  // namespace Flame::Parse
