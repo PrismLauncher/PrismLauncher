@@ -181,8 +181,8 @@ void ThemeManager::initializeWidgets()
 }
 
 #ifndef Q_OS_MACOS
-void ThemeManager::setTitlebarColorOnMac(WId windowId, QColor color) {}
-void ThemeManager::setTitlebarColorOfAllWindowsOnMac(QColor color) {}
+void ThemeManager::setTitlebarColorOnMac(WId windowId, QColor color, bool useSystemWindowBackground) {}
+void ThemeManager::setTitlebarColorOfAllWindowsOnMac(QColor color, bool useSystemWindowBackground) {}
 void ThemeManager::stopSettingNewWindowColorsOnMac() {}
 #endif
 
@@ -259,7 +259,7 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
         auto& theme = themeIter->second;
         themeDebugLog() << "applying theme" << theme->name();
         theme->apply(initial);
-        setTitlebarColorOfAllWindowsOnMac(qApp->palette().window().color());
+        setTitlebarColorOfAllWindowsOnMac(qApp->palette().window().color(), theme->id() == QStringLiteral("system"));
 
         m_logColors = theme->logColorScheme();
     } else {
