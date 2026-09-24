@@ -43,7 +43,9 @@ ArchiveWriter::ArchiveWriter(const QString& archiveName) : m_filename(archiveNam
 
 ArchiveWriter::~ArchiveWriter()
 {
-    TRY_OR_LOG(close())
+    if (const auto result = close(); !result) {
+        qWarning() << "ArchiveWriter automatic close failed:" << result.error();
+    }
 }
 
 Result<> ArchiveWriter::open()
@@ -116,13 +118,15 @@ Result<> ArchiveWriter::addFile(const QString& fileName, const QString& fileDest
         auto widePath = fileInfo.absoluteFilePath().toStdWString();
         HANDLE file_handle = CreateFileW(widePath.data(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
         if (file_handle == INVALID_HANDLE_VALUE) {
-            return std::unexpected{QString("Could not create file handle: %1").arg(UNEXPECTED_WIN32_LAST.error().message())};
+            const auto err = std::error_code(static_cast<int>(GetLastError()), std::system_category());
+            return std::unexpected{QString("Could not create file handle: %1").arg(err.message())};
         }
 
         BY_HANDLE_FILE_INFORMATION file_info;
         if (!GetFileInformationByHandle(file_handle, &file_info)) {
+            const auto err = std::error_code(static_cast<int>(GetLastError()), std::system_category());
             CloseHandle(file_handle);
-            return std::unexpected{QString("Could not get file information: %1").arg(UNEXPECTED_WIN32_LAST.error().message())};
+            return std::unexpected{QString("Could not get file information: %1").arg(err.message())};
         }
 
         archive_entry_copy_bhfi(entry, &file_info);
@@ -136,9 +140,9 @@ Result<> ArchiveWriter::addFile(const QString& fileName, const QString& fileDest
         QByteArray utf8 = fileInfo.absoluteFilePath().toUtf8();
         const char* cpath = utf8.constData();
         struct stat st;
-        auto statError = std::error_code(stat(cpath, &st), std::system_category());
-        if (statError.value() != 0) {
-            return std::unexpected{ QString("Failed to stat file: %1").arg(StringUtils::fromStdString(statError.message())) };
+        if (stat(cpath, &st) != 0) {
+            const auto err = std::error_code(errno, std::system_category());
+            return std::unexpected{ QString("Failed to stat file: %1").arg(StringUtils::fromStdString(err.message())) };
         }
 
         // This should handle the copying of most attributes
