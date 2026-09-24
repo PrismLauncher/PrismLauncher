@@ -14,20 +14,6 @@
 #include "net/NetJob.h"
 #include "net/Request.h"
 
-QString ModrinthAPI::getModpackIdFromUrl(const QUrl& url)
-{
-    if (url.scheme().compare("modrinth", Qt::CaseInsensitive) != 0 || url.host().compare("modpack", Qt::CaseInsensitive) != 0) {
-        return {};
-    }
-
-    const auto segments = QUrl::fromPercentEncoding(url.path().toUtf8()).split('/', Qt::SkipEmptyParts);
-    if (segments.size() != 1) {
-        return {};
-    }
-
-    return segments.constFirst().trimmed();
-}
-
 namespace {
 
 QStringList getModLoaderStrings(const ModPlatform::ModLoaderTypes types)

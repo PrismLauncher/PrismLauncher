@@ -944,20 +944,34 @@ void MainWindow::processURLs(QList<QUrl> urls)
         QMap<QString, QString> extraInfo;
         QUrl localUrl;
         if (!url.isLocalFile()) {  // download the remote resource and identify
-            if (url.scheme().compare("modrinth", Qt::CaseInsensitive) == 0) {
-                const auto packId = ModrinthAPI::getModpackIdFromUrl(url);
-                if (!packId.isEmpty()) {
-                    extraInfo.insert("pack_id", packId);
-                    addInstance(url.toString(), extraInfo);
-                } else {
+            if (url.scheme() != "modrinth") {
+                const QString type = url.host();
+                const QString id = url.path().mid(1);
+                const QStringList supportedProtocols{ "modpack", "mod", "version" };
+                if (id.isEmpty() || !supportedProtocols.contains(type)) {
                     CustomMessageBox::selectable(
                         this, tr("Error"),
                         tr("Unsupported Modrinth link.\n\nPrism Launcher currently only supports modpack links such as "
                            "modrinth://modpack/fabulously-optimized."),
                         QMessageBox::Critical)
                         ->show();
+                    continue;
                 }
-                continue;
+                if (type == "modpack") {
+                    extraInfo.insert("pack_id", id);
+                    addInstance(url.toString(), extraInfo);
+                    continue;
+                }
+                if (type == "mod") {
+                    CustomMessageBox::selectable(this, tr("Error"), tr("This protocol is not yet supported"), QMessageBox::Critical)
+                        ->show();
+                    continue;
+                }
+                if (type == "version") {
+                    CustomMessageBox::selectable(this, tr("Error"), tr("This protocol is not yet supported"), QMessageBox::Critical)
+                        ->show();
+                    continue;
+                }
             }
 
             const bool isExternalURLImport = (url.host().toLower() == "import") || (url.path().startsWith("/import", Qt::CaseInsensitive));
@@ -1115,7 +1129,6 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 continue;  // no local file to identify
             }
             localUrl = QUrl::fromLocalFile(archivePath);
-
         } else {
             localUrl = url;
         }
