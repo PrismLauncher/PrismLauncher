@@ -944,7 +944,10 @@ void MainWindow::processURLs(QList<QUrl> urls)
         QMap<QString, QString> extraInfo;
         QUrl localUrl;
         if (!url.isLocalFile()) {  // download the remote resource and identify
-            if (url.scheme() != "modrinth") {
+            QUrl dlUrl;
+            const bool isExternalURLImport = (url.host().toLower() == "import") || (url.path().startsWith("/import", Qt::CaseInsensitive));
+
+            if (url.scheme() == "modrinth") {
                 const QString type = url.host();
                 const QString id = url.path().mid(1);
                 const QStringList supportedProtocols{ "modpack", "mod", "version" };
@@ -968,16 +971,28 @@ void MainWindow::processURLs(QList<QUrl> urls)
                     continue;
                 }
                 if (type == "version") {
-                    CustomMessageBox::selectable(this, tr("Error"), tr("This protocol is not yet supported"), QMessageBox::Critical)
-                        ->show();
-                    continue;
+                    auto [job, versionRes] = ModrinthAPI::get().getVersionTask({}, id);
+
+                    connect(job.get(), &Task::failed, this, [this](const QString& reason) {
+                        CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+                    });
+                    connect(job.get(), &Task::succeeded, this, [versionRes, &dlUrl, &version, &extraInfo] {
+                        version = *versionRes;
+                        auto fileName = version.fileName;
+
+                        // Have to use ensureString then use QUrl to get proper url encoding
+                        dlUrl = QUrl(version.downloadUrl);
+                        extraInfo.insert("pack_id", version.addonId.toString());
+                        extraInfo.insert("pack_version_id", version.version);
+                    });
+
+                    {  // drop stack
+                        ProgressDialog dlUrlDialod(this);
+                        dlUrlDialod.setSkipButton(true, tr("Abort"));
+                        dlUrlDialod.execWithTask(job.get());
+                    }
                 }
-            }
-
-            const bool isExternalURLImport = (url.host().toLower() == "import") || (url.path().startsWith("/import", Qt::CaseInsensitive));
-
-            QUrl dlUrl;
-            if (url.scheme() == "curseforge" || (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME && url.host() == "install")) {
+            } else if (url.scheme() == "curseforge" || (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME && url.host() == "install")) {
                 // need to find the download link for the modpack / resource
                 // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
                 // format of url binaryname://install?platform=curseforge&addonId=IDHERE&fileId=IDHERE
