@@ -161,6 +161,9 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#endif
+
+#if defined(Q_OS_WIN32) || defined(Q_OS_MAC)
 #include <QStyleHints>
 #endif
 
@@ -1278,7 +1281,7 @@ bool Application::createSetupWizard()
             settings()->set("IconTheme", QString("pe_colored"));
         }
         if (!validWidgets) {
-#if defined(Q_OS_WIN32)
+#if defined(Q_OS_WIN32) || defined(Q_OS_MACOS)
             const QString style =
                 QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark ? QStringLiteral("dark") : QStringLiteral("bright");
 #else
