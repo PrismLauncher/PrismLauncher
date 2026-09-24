@@ -103,6 +103,7 @@
 
 #ifdef WITH_QTDBUS
 #include <QtDBus/QtDBus>
+#include <memory>
 #endif
 
 #define IBUS "@im=ibus"
@@ -170,7 +171,9 @@ class OrSetting : public Setting {
 MinecraftInstance::MinecraftInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, const QString& rootDir)
     : BaseInstance(globalSettings, std::move(settings), rootDir)
 {
-    m_components.reset(new PackProfile(this));
+    m_components = std::make_unique<PackProfile>(this);
+    connect(m_components.get(), &QAbstractItemModel::dataChanged, this, &MinecraftInstance::propertiesChanged);
+    connect(m_components.get(), &QAbstractItemModel::modelReset, this, &MinecraftInstance::propertiesChanged);
 }
 
 MinecraftInstance::~MinecraftInstance() {}
