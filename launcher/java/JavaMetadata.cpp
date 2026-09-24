@@ -68,11 +68,11 @@ Result<MetadataPtr> parseJavaMeta(const QJsonObject& in)
 
     if (in.contains("version")) {
         TRY_INTO(const auto& version, Json::requireObject(in, "version"))
-        TRY_INTO(const auto& name, version.contains("name") ? Json::requireString(version, "name") : Result<QString>{})
-        TRY_INTO(const auto& major, Json::requireInteger(version, "major"))
-        TRY_INTO(const auto& minor, Json::requireInteger(version, "minor"))
-        TRY_INTO(const auto& security, Json::requireInteger(version, "security"))
-        TRY_INTO(const auto& build, version.contains("build") ? Json::requireInteger(version, "build") : Result<int>{ 0 })
+        const auto& name = version["name"].toString("");
+        const auto& major = version["major"].toInteger();
+        const auto& minor = version["minor"].toInteger();
+        const auto& security = version["security"].toInteger();
+        const auto& build = version["build"].toInteger();
         meta->version = JavaVersion(major, minor, security, build, name);
     }
     return meta;
