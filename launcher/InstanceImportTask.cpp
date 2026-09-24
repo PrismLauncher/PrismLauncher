@@ -217,7 +217,7 @@ void InstanceImportTask::extractFinished()
     QDir extractDir(m_stagingPath);
 
     qDebug() << "Fixing permissions for extracted pack files...";
-    QDirIterator it(extractDir, QDirIterator::Subdirectories);
+    QDirIterator it(extractDir.absolutePath(), QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden, QDirIterator::Subdirectories);
     while (it.hasNext()) {
         auto filepath = it.next();
         QFileInfo file(filepath);
