@@ -3,22 +3,26 @@
 
 #include <QFileDialog>
 #include <QPushButton>
+#include <utility>
 
 #include "Application.h"
 #include "InstanceList.h"
 
-#include <InstanceList.h>
 #include "modplatform/ResourceType.h"
 #include "ui/instanceview/InstanceDelegate.h"
 #include "ui/instanceview/InstanceProxyModel.h"
 
-ImportResourceDialog::ImportResourceDialog(QString file_path, ModPlatform::ResourceType type, QWidget* parent)
-    : QDialog(parent), ui(new Ui::ImportResourceDialog), m_resource_type(type), m_file_path(file_path)
+ImportResourceDialog::ImportResourceDialog(QString filePath, ModPlatform::ResourceType type, QWidget* parent)
+    : QDialog(parent)
+    , m_ui(new Ui::ImportResourceDialog)
+    , m_resourceType(type)
+    , m_filePath(std::move(filePath))
+    , m_proxyModel(new InstanceProxyModel(this))
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
     setWindowModality(Qt::WindowModal);
 
-    auto contentsWidget = ui->instanceView;
+    auto* contentsWidget = m_ui->instanceView;
     contentsWidget->setViewMode(QListView::ListMode);
     contentsWidget->setFlow(QListView::LeftToRight);
     contentsWidget->setIconSize(QSize(48, 48));
@@ -34,20 +38,19 @@ ImportResourceDialog::ImportResourceDialog(QString file_path, ModPlatform::Resou
     contentsWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     contentsWidget->setItemDelegate(new ListViewDelegate());
 
-    proxyModel = new InstanceProxyModel(this);
-    proxyModel->setSourceModel(APPLICATION->instances());
-    proxyModel->sort(0);
-    contentsWidget->setModel(proxyModel);
+    m_proxyModel->setSourceModel(APPLICATION->instances());
+    m_proxyModel->sort(0);
+    contentsWidget->setModel(m_proxyModel);
 
     connect(contentsWidget, &QAbstractItemView::doubleClicked, this, &ImportResourceDialog::activated);
     connect(contentsWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ImportResourceDialog::selectionChanged);
 
-    ui->label->setText(
-        tr("Choose the instance you would like to import this %1 to.").arg(ModPlatform::ResourceTypeUtils::getName(m_resource_type)));
-    ui->label_file_path->setText(tr("File: %1").arg(m_file_path));
+    m_ui->label->setText(
+        tr("Choose the instance you would like to import this %1 to.").arg(ModPlatform::ResourceTypeUtils::getName(m_resourceType)));
+    m_ui->label_file_path->setText(tr("File: %1").arg(m_filePath));
 
-    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
-    ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
+    m_ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
+    m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
 }
 
 void ImportResourceDialog::activated(QModelIndex index)
@@ -56,10 +59,11 @@ void ImportResourceDialog::activated(QModelIndex index)
     accept();
 }
 
-void ImportResourceDialog::selectionChanged(QItemSelection selected, QItemSelection deselected)
+void ImportResourceDialog::selectionChanged(QItemSelection selected, QItemSelection /*deselected*/)
 {
-    if (selected.empty())
+    if (selected.empty()) {
         return;
+    }
 
     QString key = selected.first().indexes().first().data(InstanceList::InstanceIDRole).toString();
     if (!key.isEmpty()) {
@@ -69,5 +73,5 @@ void ImportResourceDialog::selectionChanged(QItemSelection selected, QItemSelect
 
 ImportResourceDialog::~ImportResourceDialog()
 {
-    delete ui;
+    delete m_ui;
 }
