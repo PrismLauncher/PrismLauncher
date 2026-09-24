@@ -40,10 +40,21 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersions(const QStringList
     return { netJob, response };
 }
 
+static void addVersionTypes(QJsonObject& bodyObj, const std::optional<std::vector<ModPlatform::IndexedVersionType>>& releaseTypes)
+{
+    if (releaseTypes.has_value() && !releaseTypes->empty()) {
+        const auto versionTypes = ModPlatform::IndexedVersionType::toModrinthList(releaseTypes.value());
+        if (!versionTypes.isEmpty()) {
+            Json::writeStringList(bodyObj, "version_types", versionTypes);
+        }
+    }
+}
+
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash,
                                                              const QString& hashFormat,
                                                              std::optional<std::vector<Version>> mcVersions,
-                                                             std::optional<ModPlatform::ModLoaderTypes> loaders) const
+                                                             std::optional<ModPlatform::ModLoaderTypes> loaders,
+                                                             std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes) const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersion"), APPLICATION->network());
 
@@ -61,6 +72,8 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash
         Json::writeStringList(bodyObj, "game_versions", gameVersions);
     }
 
+    addVersionTypes(bodyObj, releaseTypes);
+
     QJsonDocument body(bodyObj);
     auto bodyRaw = body.toJson();
 
@@ -71,10 +84,12 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash
     return { netJob, response };
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(const QStringList& hashes,
-                                                              const QString& hashFormat,
-                                                              std::optional<std::vector<Version>> mcVersions,
-                                                              std::optional<ModPlatform::ModLoaderTypes> loaders) const
+std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(
+    const QStringList& hashes,
+    const QString& hashFormat,
+    std::optional<std::vector<Version>> mcVersions,
+    std::optional<ModPlatform::ModLoaderTypes> loaders,
+    std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes) const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersions"), APPLICATION->network());
 
@@ -94,6 +109,8 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(const QStringList&
         }
         Json::writeStringList(bodyObj, "game_versions", gameVersions);
     }
+
+    addVersionTypes(bodyObj, releaseTypes);
 
     QJsonDocument body(bodyObj);
     auto bodyRaw = body.toJson();
@@ -169,29 +186,21 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getModCategories() const
 QList<ModPlatform::Category> ModrinthAPI::loadCategories(const QByteArray& response, const QString& projectType)
 {
     QList<ModPlatform::Category> categories;
-    QJsonParseError parseError{};
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
-    if (parseError.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from categories at" << parseError.offset << "reason:" << parseError.errorString();
-        qWarning() << *response;
-        return categories;
-    }
+    auto parse = [&response, &projectType, &categories] -> Result<> {
+        TRY_INTO(const auto& doc, Json::requireArray(response))
 
-    try {
-        auto arr = Json::requireArray(doc);
-
-        for (auto val : arr) {
-            auto cat = Json::requireObject(val);
-            auto name = Json::requireString(cat, "name");
+        for (auto val : doc) {
+            TRY_INTO(const auto& cat, Json::requireObject(val))
+            TRY_INTO(const auto& name, Json::requireString(cat, "name"))
             if (cat["project_type"].toString() == projectType) {
                 categories.push_back({ .name = name, .id = name });
             }
         }
-
-    } catch (Json::JsonException& e) {
-        qCritical() << "Failed to parse response from a version request.";
-        qCritical() << e.what();
-        qDebug() << doc;
+        return {};
+    };
+    if (auto res = parse(); !res) {
+        qWarning() << "Error while parsing JSON response from categories:" << res.error();
+        qWarning() << response;
     }
     return categories;
 }

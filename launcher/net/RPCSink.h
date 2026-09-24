@@ -20,6 +20,8 @@
 
 #include <expected>
 #include <utility>
+
+#include "Result.h"
 #include "net/ByteArraySink.h"
 #include "net/Request.h"
 
@@ -28,35 +30,18 @@ namespace Net::RPC {
 template <typename T>
 class Sink : public ByteArraySink {
    public:
-    using ParseResult = std::expected<T, QString>;
+    using ParseResult = Result<T>;
     using ParseFunc = std::function<ParseResult(const QByteArray&)>;
 
     explicit Sink(ParseFunc parseFunc) : m_parseFunc(parseFunc) {}
     ~Sink() override = default;
 
    public:
-    auto finalize(QNetworkReply& reply) -> Task::State override
+    Result<> finalize(QNetworkReply& /*reply*/) override
     {
-        if (finalizeAllValidators(reply)) {
-            try {
-                auto result = m_parseFunc(m_output);
-                if (!result.has_value()) {
-                    m_fail_reason = result.error();
-                    return Task::State::Failed;
-                }
-                m_result = *result;
-            } catch (const std::exception& e) {
-                m_fail_reason = QString::fromUtf8(e.what());
-                return Task::State::Failed;
-                // ToDo: make this suppport QJsonException
-            } catch (...) {
-                m_fail_reason = QObject::tr("Unknown error while parsing RPC response");
-                return Task::State::Failed;
-            }
-            return Task::State::Succeeded;
-        }
-        m_fail_reason = "Failed to finalize validators";
-        return Task::State::Failed;
+        TRY(finalizeAllValidators())
+        TRY_INTO(m_result, m_parseFunc(m_output))
+        return {};
     }
 
     T* result() { return &m_result; }

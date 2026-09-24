@@ -9,6 +9,7 @@
 
 #include "FileSystem.h"
 #include "StringUtils.h"
+#include "Version.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
@@ -105,13 +106,27 @@ auto Resource::provider() const -> QString
     return QObject::tr("Unknown");
 }
 
+auto Resource::version() const -> QString
+{
+    if (metadata()) {
+        return metadata()->versionNumber;
+    }
+
+    return QObject::tr("Unknown");
+}
+
 auto Resource::homepage() const -> QString
 {
     if (metadata()) {
-        return ModPlatform::getMetaURL(metadata()->provider, metadata()->project_id);
+        return ModPlatform::getMetaURL(metadata()->provider, metadata()->projectId);
     }
 
     return {};
+}
+
+bool Resource::lockUpdate() const
+{
+    return metadata() && metadata()->lockUpdate;
 }
 
 void Resource::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
@@ -204,10 +219,28 @@ int Resource::compare(const Resource& other, SortType type) const
             break;
         }
 
+        case SortType::Version: {
+            auto thisVer = Version(version());
+            auto otherVer = Version(other.version());
+            if (thisVer > otherVer) {
+                return 1;
+            }
+            if (thisVer < otherVer) {
+                return -1;
+            }
+            break;
+        }
+
         case SortType::Provider: {
             auto compareResult = QString::compare(provider(), other.provider(), Qt::CaseInsensitive);
             if (compareResult != 0) {
                 return compareResult;
+            }
+            break;
+        }
+        case SortType::LockUpdate: {
+            if (lockUpdate() != other.lockUpdate()) {
+                return lockUpdate() ? -1 : 1;
             }
             break;
         }

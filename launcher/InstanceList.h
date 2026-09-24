@@ -153,6 +153,7 @@ class InstanceList : public QAbstractListModel {
     QStringList getLinkedInstancesById(const QString& id) const;
 
     QString primaryDir() const { return m_instDirs.isEmpty() ? QString() : m_instDirs.first(); }
+    const QStringList& instanceDirs() const { return m_instDirs; }
 
    signals:
     void dataIsInvalid();

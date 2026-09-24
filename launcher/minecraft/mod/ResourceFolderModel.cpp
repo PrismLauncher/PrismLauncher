@@ -191,20 +191,16 @@ void ResourceFolderModel::installResourceWithFlameMetadata(const QString& path, 
         connect(job.get(), &Task::failed, this, install);
         connect(job.get(), &Task::aborted, this, install);
         connect(job.get(), &Task::succeeded, this, [response, this, &vers, install, &pack] {
-            QJsonParseError parseError{};
-            QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-            if (parseError.error != QJsonParseError::NoError) {
-                qWarning() << "Error while parsing JSON response for mod info at" << parseError.offset
-                           << "reason:" << parseError.errorString();
+            auto obj = Json::requireObject(*response, "data");
+            if (!obj) {
+                qWarning() << "Error while parsing JSON response for mod info:" << obj.error();
                 qDebug() << *response;
                 return;
             }
-            try {
-                auto obj = Json::requireObject(Json::requireObject(doc), "data");
-                FlameMod::loadIndexedPack(pack, obj);
-            } catch (const JSONValidationError& e) {
-                qDebug() << doc;
-                qWarning() << "Error while reading mod info:" << e.cause();
+            auto loadRes = FlameMod::loadIndexedPack(pack, *obj);
+            if (!loadRes) {
+                qDebug() << *obj;
+                qWarning() << "Error while reading mod info:" << loadRes.error();
             }
             LocalResourceUpdateTask updateMetadata(indexDir(), pack, vers);
             connect(&updateMetadata, &Task::finished, this, install);
@@ -322,9 +318,9 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, Ena
     return succeeded;
 }
 
-static QMutex s_updateTaskMutex;
 bool ResourceFolderModel::update()
 {
+    static QMutex s_updateTaskMutex;
     // We hold a lock here to prevent race conditions on the m_current_update_task reset.
     QMutexLocker lock(&s_updateTaskMutex);
 
@@ -373,7 +369,7 @@ bool ResourceFolderModel::update()
     return true;
 }
 
-void ResourceFolderModel::resolveResource(Resource::Ptr res)
+void ResourceFolderModel::resolveResource(const Resource::Ptr& res)
 {
     if (!res->shouldResolve()) {
         return;
@@ -550,6 +546,8 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
             switch (column) {
                 case NameColumn:
                     return m_resources[row]->name();
+                case VersionColumn:
+                    return m_resources[row]->version();
                 case DateColumn:
                     return m_resources[row]->dateTimeChanged();
                 case ProviderColumn:
@@ -603,6 +601,11 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
                 return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
             }
             return {};
+        case Qt::UserRole:
+            if (column == LockUpdateColumn) {
+                return at(row).lockUpdate();
+            }
+            return {};
         default:
             return {};
     }
@@ -615,6 +618,9 @@ bool ResourceFolderModel::setData(const QModelIndex& index, [[maybe_unused]] con
         return false;
     }
 
+    if (role == Qt::UserRole && columnNames(false).at(index.column()) == "Update") {
+        return setUpdateLock({ index }, EnableAction::TOGGLE);
+    }
     if (role == Qt::CheckStateRole) {
         return setResourceEnabled({ index }, EnableAction::TOGGLE);
     }
@@ -629,14 +635,17 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
             switch (section) {
                 case ActiveColumn:
                 case NameColumn:
+                case VersionColumn:
                 case DateColumn:
                 case ProviderColumn:
                 case SizeColumn:
                 case FileNameColumn:
+                case LockUpdateColumn:
                     return columnNames().at(section);
                 default:
                     return {};
             }
+
         case Qt::ToolTipRole: {
             //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
             switch (section) {
@@ -644,6 +653,8 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
                     return tr("Is the resource enabled?");
                 case NameColumn:
                     return tr("The name of the resource.");
+                case VersionColumn:
+                    return tr("The version of the resource.");
                 case DateColumn:
                     return tr("The date and time this resource was last changed (or added).");
                 case ProviderColumn:
@@ -652,6 +663,8 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
                     return tr("The size of the resource.");
                 case FileNameColumn:
                     return tr("The file name of the resource.");
+                case LockUpdateColumn:
+                    return tr("Should this mod be updated?");
                 default:
                     return {};
             }
@@ -663,7 +676,7 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
     return {};
 }
 
-void ResourceFolderModel::setupHeaderAction(QAction* act, int column)
+void ResourceFolderModel::setupHeaderAction(QAction* act, int column) const
 {
     Q_ASSERT(act);
 
@@ -673,11 +686,15 @@ void ResourceFolderModel::setupHeaderAction(QAction* act, int column)
 void ResourceFolderModel::saveColumns(QTreeView* tree)
 {
     const auto stateSettingName = QString("UI/%1_Page/Columns").arg(id());
+    const auto columnsCountSettingName = QString("UI/%1_Page/ColumnsCount").arg(id());
     const auto overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
     const auto visibilitySettingName = QString("UI/%1_Page/ColumnsVisibility").arg(id());
 
     auto stateSetting = m_instance->settings()->getSetting(stateSettingName);
     stateSetting->set(QString::fromUtf8(tree->header()->saveState().toBase64()));
+
+    auto columnsCountSetting = m_instance->settings()->getSetting(columnsCountSettingName);
+    columnsCountSetting->set(columnCount());
 
     // neither passthrough nor override settings works for this usecase as I need to only set the global when the gate is false
     auto* settings = m_instance->settings();
@@ -697,11 +714,23 @@ void ResourceFolderModel::saveColumns(QTreeView* tree)
 void ResourceFolderModel::loadColumns(QTreeView* tree)
 {
     const auto stateSettingName = QString("UI/%1_Page/Columns").arg(id());
+    const auto columnsCountSettingName = QString("UI/%1_Page/ColumnsCount").arg(id());
     const auto overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
     const auto visibilitySettingName = QString("UI/%1_Page/ColumnsVisibility").arg(id());
 
     auto stateSetting = m_instance->settings()->getOrRegisterSetting(stateSettingName, "");
+    auto columnsCountSetting = m_instance->settings()->getOrRegisterSetting(columnsCountSettingName, 0);
+    int savedColumnsCount = columnsCountSetting->get().toInt();
+
     tree->header()->restoreState(QByteArray::fromBase64(stateSetting->get().toString().toUtf8()));
+
+    if (savedColumnsCount < columnCount()) {
+        // force redraw of the columns that were added after the last save, otherwise they will not work properly
+        for (int col = savedColumnsCount; col < columnCount(); ++col) {
+            tree->setColumnHidden(col, true);
+            tree->setColumnHidden(col, false);
+        }
+    }
 
     auto setVisible = [this, tree](const QVariant& value) {
         auto visibility = Json::toMap(value.toString());
@@ -792,7 +821,7 @@ QSortFilterProxyModel* ResourceFolderModel::createFilterProxyModel(QObject* pare
 SortType ResourceFolderModel::columnToSortKey(size_t column) const
 {
     Q_ASSERT(m_columnSortKeys.size() == columnCount());
-    return m_columnSortKeys.at(column);
+    return m_columnSortKeys.at(static_cast<qsizetype>(column));
 }
 
 /* Standard Proxy Model for createFilterProxyModel */
@@ -876,7 +905,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& currentSet, QSet<QString>&
 
             if (newResource->dateTimeChanged() == currentResource->dateTimeChanged()) {
                 // no significant change
-                bool hadIssues = !currentResource->hasIssues();
+                bool hadIssues = currentResource->hasIssues();
                 currentResource->updateIssues(m_instance);
 
                 if (hadIssues != currentResource->hasIssues()) {
@@ -968,7 +997,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& currentSet, QSet<QString>&
 Resource::Ptr ResourceFolderModel::find(QString id)
 {
     auto iter =
-        std::find_if(m_resources.constBegin(), m_resources.constEnd(), [&](const Resource::Ptr& r) { return r->internalId() == id; });
+        std::find_if(m_resources.constBegin(), m_resources.constEnd(), [&id](const Resource::Ptr& r) { return r->internalId() == id; });
     if (iter == m_resources.constEnd()) {
         return nullptr;
     }
@@ -994,4 +1023,51 @@ QList<Resource*> ResourceFolderModel::selectedResources(const QModelIndexList& i
         result.append(&at(index.row()));
     }
     return result;
+}
+
+bool ResourceFolderModel::setUpdateLock(const QModelIndexList& indexes, EnableAction action)
+{
+    if (indexes.isEmpty()) {
+        return true;
+    }
+
+    bool succeeded = true;
+    auto updateColumn = static_cast<int>(columnNames(false).indexOf("Update"));
+    for (const auto& idx : indexes) {
+        if (!validateIndex(idx) || idx.column() != updateColumn) {
+            continue;
+        }
+
+        int row = idx.row();
+        auto& resource = m_resources[row];
+
+        bool lockUpdate = true;
+        switch (action) {
+            case EnableAction::ENABLE:
+                lockUpdate = true;
+                break;
+            case EnableAction::DISABLE:
+                lockUpdate = false;
+                break;
+            case EnableAction::TOGGLE:
+            default:
+                lockUpdate = !resource->lockUpdate();
+                break;
+        }
+
+        if (resource->lockUpdate() == lockUpdate) {
+            succeeded = false;
+            continue;
+        }
+
+        auto meta = resource->metadata();
+        if (meta) {
+            meta->lockUpdate = lockUpdate;
+            Metadata::update(indexDir(), *meta.get());
+            resource->setMetadata(*meta.get());
+            emit dataChanged(index(row, updateColumn), index(row, columnCount(QModelIndex()) - 1));
+        }
+    }
+
+    return succeeded;
 }

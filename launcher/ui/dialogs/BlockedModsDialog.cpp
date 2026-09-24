@@ -170,10 +170,8 @@ void BlockedModsDialog::update()
 
     ui->textBrowserWatched->setText(watching);
 
-    if (allModsMatched()) {
-        ui->labelModsFound->setText("<span style=\"color:green\">✔</span>" + tr("All mods found"));
-        ui->openMissingButton->setDisabled(true);
-        ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
+    if (std::ranges::all_of(m_mods, [](const auto& mod) { return mod.matched; })) {
+        accept();
     } else {
         ui->labelModsFound->setText(tr("Please download the missing mods."));
         ui->openMissingButton->setDisabled(false);
@@ -375,11 +373,6 @@ bool BlockedModsDialog::checkValidPath(QString path)
     }
 
     return false;
-}
-
-bool BlockedModsDialog::allModsMatched()
-{
-    return std::all_of(m_mods.begin(), m_mods.end(), [](auto const& mod) { return mod.matched; });
 }
 
 /// @brief ensure matched file paths still exist

@@ -226,41 +226,34 @@ void TranslationsModel::indexReceived()
 namespace {
 void readIndex(const QString& path, QMap<QString, Language>& languages)
 {
-    QByteArray data;
-    try {
-        data = FS::read(path);
-    } catch ([[maybe_unused]] const Exception& e) {
-        qCritical() << "Translations Download Failed: index file not readable";
-        return;
-    }
+    auto parse = [&languages, &path] -> Result<> {
+        TRY_INTO(const auto& doc, Json::requireObject(path))
 
-    try {
-        auto toplevelDoc = Json::requireDocument(data);
-        auto doc = Json::requireObject(toplevelDoc);
-        auto fileType = Json::requireString(doc, "file_type");
+        TRY_INTO(const auto& fileType, Json::requireString(doc, "file_type"))
         if (fileType != "MMC-TRANSLATION-INDEX") {
-            qCritical() << "Translations Download Failed: index file is of unknown file type" << fileType;
-            return;
+            return std::unexpected("index file is of unknown file type " + fileType);
         }
-        auto version = Json::requireInteger(doc, "version");
+        TRY_INTO(const auto& version, Json::requireInteger(doc, "version"))
         if (version > 2) {
-            qCritical() << "Translations Download Failed: index file is of unknown format version" << fileType;
-            return;
+            return std::unexpected(QString("index file is of unknown format version %1").arg(version));
         }
-        auto langObjs = Json::requireObject(doc, "languages");
+        TRY_INTO(const auto& langObjs, Json::requireObject(doc, "languages"))
         for (auto iter = langObjs.begin(); iter != langObjs.end(); ++iter) {
             Language lang(iter.key());
 
-            auto langObj = Json::requireObject(iter.value());
-            lang.setTranslationStats(langObj["translated"].toInt(), langObj["untranslated"].toInt(), langObj["fuzzy"].toInt());
-            lang.fileName = Json::requireString(langObj, "file");
-            lang.fileSha1 = Json::requireString(langObj, "sha1");
-            lang.fileSize = Json::requireInteger(langObj, "size");
+            TRY_INTO(const auto& langObj, Json::requireObject(iter.value()))
+            lang.setTranslationStats(langObj.value("translated").toInt(), langObj.value("untranslated").toInt(),
+                                     langObj.value("fuzzy").toInt());
+            TRY_INTO(lang.fileName, Json::requireString(langObj, "file"))
+            TRY_INTO(lang.fileSha1, Json::requireString(langObj, "sha1"))
+            TRY_INTO(lang.fileSize, Json::requireInteger(langObj, "size"))
 
             languages.insert(lang.key, lang);
         }
-    } catch ([[maybe_unused]] Json::JsonException& e) {
-        qCritical() << "Translations Download Failed: index file could not be parsed as json";
+        return {};
+    };
+    if (auto res = parse(); !res) {
+        qCritical() << "Translations Download Failed:" << res.error();
     }
 }
 }  // namespace

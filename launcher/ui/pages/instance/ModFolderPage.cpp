@@ -53,6 +53,8 @@
 #include <memory>
 
 #include "Application.h"
+#include "Json.h"
+#include "settings/Setting.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
@@ -70,46 +72,61 @@
 ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(inst, model, parent), m_model(model)
 {
-    ui->actionDownloadItem->setText(tr("Download Mods"));
-    ui->actionDownloadItem->setToolTip(tr("Download mods from online mod platforms"));
-    ui->actionDownloadItem->setEnabled(true);
-    ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionDownloadItem);
+    m_ui->actionDownloadItem->setText(tr("Download Mods"));
+    m_ui->actionDownloadItem->setToolTip(tr("Download mods from online mod platforms"));
+    m_ui->actionDownloadItem->setEnabled(true);
+    m_ui->actionsToolbar->insertActionBefore(m_ui->actionAddItem, m_ui->actionDownloadItem);
 
-    connect(ui->actionDownloadItem, &QAction::triggered, this, &ModFolderPage::downloadMods);
+    connect(m_ui->actionDownloadItem, &QAction::triggered, this, &ModFolderPage::downloadMods);
 
-    ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
-    connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
-    ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
+    m_ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
+    connect(m_ui->actionUpdateItem, &QAction::triggered, this, [this] { updateMods(); });
+    m_ui->actionsToolbar->insertActionBefore(m_ui->actionAddItem, m_ui->actionUpdateItem);
 
     auto* updateMenu = new QMenu(this);
 
     auto* update = updateMenu->addAction(tr("Check for Updates"));
-    connect(update, &QAction::triggered, this, &ModFolderPage::updateMods);
+    connect(update, &QAction::triggered, this, [this] { updateMods(); });
 
-    updateMenu->addAction(ui->actionVerifyItemDependencies);
-    connect(ui->actionVerifyItemDependencies, &QAction::triggered, this, [this] { updateMods(true); });
+    auto* updateReleasesOnly = updateMenu->addAction(tr("Check for Updates (Release only)"));
+    connect(updateReleasesOnly, &QAction::triggered, this, [this] { updateMods(false, { ModPlatform::IndexedVersionType::Release }); });
+
+    auto* updateIncludeBetas = updateMenu->addAction(tr("Check for Updates (Release and Beta)"));
+    connect(updateIncludeBetas, &QAction::triggered, this,
+            [this] { updateMods(false, { ModPlatform::IndexedVersionType::Release, ModPlatform::IndexedVersionType::Beta }); });
+
+    auto* updateIncludeAlphas = updateMenu->addAction(tr("Check for Updates (Release, Beta and Alpha)"));
+    connect(updateIncludeAlphas, &QAction::triggered, this, [this] {
+        updateMods(false, { ModPlatform::IndexedVersionType::Release, ModPlatform::IndexedVersionType::Beta,
+                            ModPlatform::IndexedVersionType::Alpha });
+    });
+
+    updateMenu->addAction(m_ui->actionVerifyItemDependencies);
+    connect(m_ui->actionVerifyItemDependencies, &QAction::triggered, this, [this] { updateMods(true); });
 
     auto depsDisabled = APPLICATION->settings()->getSetting("ModDependenciesDisabled");
-    ui->actionVerifyItemDependencies->setVisible(!depsDisabled->get().toBool());
+    m_ui->actionVerifyItemDependencies->setVisible(!depsDisabled->get().toBool());
     connect(depsDisabled.get(), &Setting::SettingChanged, this,
-            [this](const Setting&, const QVariant& value) { ui->actionVerifyItemDependencies->setVisible(!value.toBool()); });
+            [this](const Setting&, const QVariant& value) { m_ui->actionVerifyItemDependencies->setVisible(!value.toBool()); });
 
-    updateMenu->addAction(ui->actionResetItemMetadata);
-    connect(ui->actionResetItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
+    updateMenu->addAction(m_ui->actionResetItemMetadata);
+    connect(m_ui->actionResetItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
 
-    ui->actionUpdateItem->setMenu(updateMenu);
+    m_ui->actionUpdateItem->setMenu(updateMenu);
 
-    ui->actionChangeVersion->setToolTip(tr("Change a mod's version."));
-    connect(ui->actionChangeVersion, &QAction::triggered, this, &ModFolderPage::changeModVersion);
-    ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, ui->actionChangeVersion);
+    m_ui->actionChangeVersion->setToolTip(tr("Change a mod's version."));
+    connect(m_ui->actionChangeVersion, &QAction::triggered, this, &ModFolderPage::changeModVersion);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionUpdateItem, m_ui->actionChangeVersion);
 
-    ui->actionViewHomepage->setToolTip(tr("View the homepages of all selected mods."));
+    m_ui->actionViewHomepage->setToolTip(tr("View the homepages of all selected mods."));
 
-    ui->actionExportMetadata->setToolTip(tr("Export mod's metadata to text."));
-    connect(ui->actionExportMetadata, &QAction::triggered, this, &ModFolderPage::exportModMetadata);
-    ui->actionsToolbar->insertActionAfter(ui->actionViewHomepage, ui->actionExportMetadata);
+    m_ui->actionExportMetadata->setToolTip(tr("Export mod's metadata to text."));
+    connect(m_ui->actionExportMetadata, &QAction::triggered, this, &ModFolderPage::exportModMetadata);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionViewHomepage, m_ui->actionExportMetadata);
 
-    ui->actionsToolbar->insertActionAfter(ui->actionViewFolder, ui->actionViewConfigs);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionViewFolder, m_ui->actionViewConfigs);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionChangeVersion, m_ui->actionLockUpdates);
+    m_ui->actionsToolbar->insertActionAfter(m_ui->actionLockUpdates, m_ui->actionUnlockUpdates);
 }
 
 bool ModFolderPage::shouldDisplay() const
@@ -122,7 +139,7 @@ void ModFolderPage::updateFrame(const QModelIndex& current, [[maybe_unused]] con
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
     const Mod& mod = m_model->at(row);
-    ui->frame->updateWithMod(mod);
+    m_ui->frame->updateWithMod(mod);
 }
 
 void ModFolderPage::removeItems(const QItemSelection& selection)
@@ -184,9 +201,8 @@ void ModFolderPage::downloadDialogFinished(int result)
 {
     if (result != 0) {
         ConcurrentTask tasks(tr("Download Mods"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-        });
+        connect(&tasks, &Task::failed, this,
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
         connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
             QStringList warnings = tasks.warnings();
             if (warnings.count()) {
@@ -213,7 +229,7 @@ void ModFolderPage::downloadDialogFinished(int result)
     }
 }
 
-void ModFolderPage::updateMods(bool includeDeps)
+void ModFolderPage::updateMods(bool includeDeps, std::vector<ModPlatform::IndexedVersionType> releaseTypes)
 {
     auto* profile = m_instance->getPackProfile();
     if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
@@ -223,6 +239,7 @@ void ModFolderPage::updateMods(bool includeDeps)
         QMessageBox::critical(this, tr("Error"), tr("Mod updates are unavailable when metadata is disabled!"));
         return;
     }
+
     if (m_instance != nullptr && m_instance->isRunning()) {
         auto response =
             CustomMessageBox::selectable(this, tr("Confirm Update"),
@@ -236,7 +253,7 @@ void ModFolderPage::updateMods(bool includeDeps)
             return;
         }
     }
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
 
     auto modsList = m_model->selectedResources(selection);
     bool useAll = modsList.empty();
@@ -244,7 +261,7 @@ void ModFolderPage::updateMods(bool includeDeps)
         modsList = m_model->allResources();
     }
 
-    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoadersList());
+    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoadersList(), std::move(releaseTypes));
     updateDialog.checkCandidates();
 
     if (updateDialog.aborted()) {
@@ -265,9 +282,8 @@ void ModFolderPage::updateMods(bool includeDeps)
 
     if (updateDialog.exec() != 0) {
         ConcurrentTask tasks("Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(&tasks, &Task::failed, this, [this](const QString& reason) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-        });
+        connect(&tasks, &Task::failed, this,
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
         connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
             QStringList warnings = tasks.warnings();
             if (warnings.count()) {
@@ -289,7 +305,7 @@ void ModFolderPage::updateMods(bool includeDeps)
 
 void ModFolderPage::deleteModMetadata()
 {
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
     auto selectionCount = m_model->selectedMods(selection).length();
     if (selectionCount == 0) {
         return;
@@ -312,6 +328,20 @@ void ModFolderPage::deleteModMetadata()
 
 void ModFolderPage::changeModVersion()
 {
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        auto response = CustomMessageBox::selectable(
+                            this, tr("Confirm Change Version"),
+                            tr("Changing version of mods while the game is running may cause mod duplication and game crashes.\n"
+                               "The old files may not be deleted as they are in use.\n"
+                               "Are you sure you want to do this?"),
+                            QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
+
+        if (response != QMessageBox::Yes) {
+            return;
+        }
+    }
+
     auto* profile = m_instance->getPackProfile();
     if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
         return;
@@ -320,7 +350,7 @@ void ModFolderPage::changeModVersion()
         QMessageBox::critical(this, tr("Error"), tr("Mod updates are unavailable when metadata is disabled!"));
         return;
     }
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
     auto modsList = m_model->selectedMods(selection);
     if (modsList.length() != 1 || modsList[0]->metadata() == nullptr) {
         return;
@@ -336,7 +366,7 @@ void ModFolderPage::changeModVersion()
 
 void ModFolderPage::exportModMetadata()
 {
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
     auto selectedMods = m_model->selectedMods(selection);
     if (selectedMods.length() == 0) {
         selectedMods = m_model->allMods();
@@ -353,7 +383,9 @@ CoreModFolderPage::CoreModFolderPage(MinecraftInstance* inst, ModFolderModel* mo
     if ((version != nullptr) && version->getComponent("net.minecraftforge") && version->getComponent("net.minecraft")) {
         auto minecraftCmp = version->getComponent("net.minecraft");
         if (!minecraftCmp->m_loaded) {
-            version->reload(Net::Mode::Offline);
+            if (auto res = version->reload(Net::Mode::Offline); !res) {
+                qWarning() << "Failed to reload components:" << res.error();
+            }
             auto update = version->getCurrentTask();
             if (update) {
                 connect(update.get(), &Task::finished, this, [this] {

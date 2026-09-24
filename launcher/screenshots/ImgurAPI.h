@@ -1,7 +1,8 @@
-// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
+// SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2024 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,18 +36,20 @@
 
 #pragma once
 
-#include <QDebug>
 #include <QString>
-#include <exception>
+#include <utility>
 
-class Exception : public std::exception {
-   public:
-    Exception(const QString& message) : std::exception(), m_message(message.toUtf8()) { qCritical() << "Exception:" << message; }
-    Exception(const Exception& other) : std::exception(), m_message(other.m_message) {}
-    virtual ~Exception() noexcept {}
-    const char* what() const noexcept { return m_message.constData(); }
-    QString cause() const { return QString::fromUtf8(m_message); }
+#include "Screenshot.h"
+#include "net/Request.h"
 
-   private:
-    QByteArray m_message;
+namespace ImgurAPI {
+
+struct AlbumResult {
+    QString deleteHash;
+    QString id;
 };
+
+std::pair<Net::Request::Ptr, QString*> makeUpload(ScreenShot::Ptr shot);
+std::pair<Net::Request::Ptr, AlbumResult*> makeAlbum(const QList<ScreenShot::Ptr>& screenshots);
+
+}  // namespace ImgurAPI

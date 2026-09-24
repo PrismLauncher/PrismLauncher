@@ -25,7 +25,7 @@
 #include <QImageReader>
 #include <QStyle>
 #include <QStyleFactory>
-#include "Exception.h"
+#include "Result.h"
 #include "ui/themes/BrightTheme.h"
 #include "ui/themes/CatPack.h"
 #include "ui/themes/CustomTheme.h"
@@ -297,10 +297,11 @@ QString ThemeManager::getCatPack(QString catName)
 QString ThemeManager::addCatPack(std::unique_ptr<CatPack> catPack)
 {
     QString id = catPack->id();
-    if (m_catPacks.find(id) == m_catPacks.end())
+    if (!m_catPacks.contains(id)) {
         m_catPacks.emplace(id, std::move(catPack));
-    else
+    } else {
         themeWarningLog() << "CatPack(" << id << ") not added to prevent id duplication";
+    }
     return id;
 }
 
@@ -339,12 +340,13 @@ void ThemeManager::initializeCatPacks()
         QDir dir(directoryIterator.next());
         QFileInfo manifest(dir.absoluteFilePath("catpack.json"));
         if (manifest.isFile()) {
-            try {
-                // Load background manifest
-                themeDebugLog() << "Loading background manifest from:" << manifest.absoluteFilePath();
-                addCatPack(std::unique_ptr<CatPack>(new JsonCatPack(manifest)));
-            } catch (const Exception& e) {
-                themeWarningLog() << "Couldn't load catpack json:" << e.cause();
+            // Load background manifest
+            themeDebugLog() << "Loading background manifest from:" << manifest.absoluteFilePath();
+            auto catPack = JsonCatPack::create(manifest);
+            if (!catPack) {
+                themeWarningLog() << "Couldn't load catpack json:" << catPack.error();
+            } else {
+                addCatPack(std::move(*catPack));
             }
         } else {
             loadFiles(dir);

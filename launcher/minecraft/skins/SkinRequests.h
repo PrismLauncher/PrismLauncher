@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *  Copyright (c) 2026 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,18 +20,8 @@
 
 #include "net/Request.h"
 
-class CapeChange : public Net::Request {
-    Q_OBJECT
-   public:
-    using Ptr = shared_qobject_ptr<CapeChange>;
-    CapeChange(QString capeId);
-    virtual ~CapeChange() = default;
+Net::Request::Ptr makeSkinDeleteRequest(const QString& token);
 
-    static CapeChange::Ptr make(QString token, QString capeId);
+Net::Request::Ptr makeSkinUploadRequest(const QString& token, const QString& path, const QString& variant);
 
-   protected:
-    virtual QNetworkReply* getReply(QNetworkRequest&) override;
-
-   private:
-    QString m_capeId;
-};
+Net::Request::Ptr makeCapeChangeRequest(const QString& token, const QString& capeId);

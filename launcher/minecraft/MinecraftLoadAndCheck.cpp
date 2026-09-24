@@ -18,7 +18,7 @@ void MinecraftLoadAndCheck::executeTask()
         }
     }
     if (auto result = components->reload(m_netmode); !result) {
-        emitFailed(result.error);
+        emitFailed(result.error());
         return;
     }
     m_task = components->getCurrentTask();

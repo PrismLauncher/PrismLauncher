@@ -45,14 +45,15 @@
 DataPackFolderModel::DataPackFolderModel(const QString& dir, MinecraftInstance* instance, bool isIndexed, bool createDir, QObject* parent)
     : ResourceFolderModel(QDir(dir), instance, isIndexed, createDir, parent)
 {
-    m_columnNames = QStringList({ "Enable", "Image", "Name", "Pack Format", "Last Modified", "Size", "File Name" });
-    m_columnNamesTranslated =
-        QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Pack Format"), tr("Last Modified"), tr("Size"), tr("File Name") });
-    m_columnSortKeys = { SortType::Enabled, SortType::Name, SortType::Name,    SortType::PackFormat,
-                         SortType::Date,    SortType::Size, SortType::Filename };
-    m_columnResizeModes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,    QHeaderView::Interactive,
+    m_columnNames = QStringList({ "Enable", "Image", "Name", "Version", "Pack Format", "Last Modified", "Size", "File Name", "Update" });
+    m_columnNamesTranslated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Pack Format"), tr("Last Modified"),
+                                            tr("Size"), tr("File Name"), tr("Update") });
+    m_columnSortKeys = { SortType::Enabled, SortType::Name, SortType::Name,     SortType::Version,   SortType::PackFormat,
+                         SortType::Date,    SortType::Size, SortType::Filename, SortType::LockUpdate };
+    m_columnResizeModes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,
+                            QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
                             QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
-    m_columnsHideable = { false, true, false, true, true, true, true };
+    m_columnsHideable = { false, true, false, true, true, true, true, true, true };
 }
 
 QVariant DataPackFolderModel::data(const QModelIndex& index, int role) const
@@ -79,7 +80,7 @@ QVariant DataPackFolderModel::data(const QModelIndex& index, int role) const
             break;
         case Qt::DecorationRole: {
             if (column == ImageColumn) {
-                return at(row).image({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
+                return at(row).image({ 32, 32 }, Qt::KeepAspectRatio);
             }
             break;
         }
@@ -108,17 +109,20 @@ QVariant DataPackFolderModel::data(const QModelIndex& index, int role) const
         case NameColumn:
             mappedIndex = index.siblingAtColumn(ResourceFolderModel::NameColumn);
             break;
+        case VersionColumn:
+            mappedIndex = index.siblingAtColumn(ResourceFolderModel::VersionColumn);
+            break;
         case DateColumn:
             mappedIndex = index.siblingAtColumn(ResourceFolderModel::DateColumn);
-            break;
-        case ProviderColumn:
-            mappedIndex = index.siblingAtColumn(ResourceFolderModel::ProviderColumn);
             break;
         case FileNameColumn:
             mappedIndex = index.siblingAtColumn(ResourceFolderModel::FileNameColumn);
             break;
         case SizeColumn:
             mappedIndex = index.siblingAtColumn(ResourceFolderModel::SizeColumn);
+            break;
+        case LockUpdateColumn:
+            mappedIndex = index.siblingAtColumn(ResourceFolderModel::LockUpdateColumn);
             break;
         default:
             break;
@@ -138,11 +142,13 @@ QVariant DataPackFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
             switch (section) {
                 case ActiveColumn:
                 case NameColumn:
+                case VersionColumn:
                 case PackFormatColumn:
                 case DateColumn:
                 case ImageColumn:
                 case SizeColumn:
                 case FileNameColumn:
+                case LockUpdateColumn:
                     return columnNames().at(section);
                 default:
                     return {};
@@ -154,6 +160,8 @@ QVariant DataPackFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
                     return tr("Is the data pack enabled? (Only valid for ZIPs)");
                 case NameColumn:
                     return tr("The name of the data pack.");
+                case VersionColumn:
+                    return tr("The version of the data pack.");
                 case PackFormatColumn:
                     //: The string being explained by this is in the format: ID (Lower version - Upper version)
                     return tr("The data pack format ID, as well as the Minecraft versions it was designed for.");
@@ -163,6 +171,8 @@ QVariant DataPackFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
                     return tr("The size of the data pack.");
                 case FileNameColumn:
                     return tr("The file name of the data pack.");
+                case LockUpdateColumn:
+                    return tr("Should this data pack be updated?");
                 default:
                     return {};
             }

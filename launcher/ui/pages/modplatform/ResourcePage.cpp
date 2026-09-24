@@ -51,6 +51,7 @@
 #include "Markdown.h"
 
 #include "Application.h"
+#include "Json.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui/pages/modplatform/ResourceModel.h"
 #include "ui/widgets/ProjectItem.h"
@@ -88,8 +89,6 @@ ResourcePage::ResourcePage(ResourceDownloadDialog* parent,
 {
     m_ui->setupUi(this);
 
-    m_ui->searchEdit->installEventFilter(this);
-
     m_ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_ui->versionSelectionBox->view()->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
@@ -97,6 +96,13 @@ ResourcePage::ResourcePage(ResourceDownloadDialog* parent,
     m_searchTimer.setSingleShot(true);
 
     connect(&m_searchTimer, &QTimer::timeout, this, &ResourcePage::triggerSearch);
+
+    connect(m_ui->searchEdit, &QLineEdit::textEdited, this, [this] {
+        if (m_searchTimer.isActive()) {
+            m_searchTimer.stop();
+        }
+        m_searchTimer.start(350);
+    });
 
     // hide progress bar to prevent weird artifact
     m_fetchProgress.hide();
@@ -163,25 +169,10 @@ auto ResourcePage::eventFilter(QObject* watched, QEvent* event) -> bool
 {
     if (event->type() == QEvent::KeyPress) {
         auto* keyEvent = static_cast<QKeyEvent*>(event);
-        if (watched == m_ui->searchEdit) {
-            if (keyEvent->key() == Qt::Key_Return) {
-                triggerSearch();
-                keyEvent->accept();
-                return true;
-            }
-            if (m_searchTimer.isActive()) {
-                m_searchTimer.stop();
-            }
-
-            m_searchTimer.start(350);
-
-        } else if (watched == m_ui->packView) {
-            // stop the event from going to the confirm button
-            if (keyEvent->key() == Qt::Key_Return) {
-                onResourceToggle(m_ui->packView->currentIndex());
-                keyEvent->accept();
-                return true;
-            }
+        if (watched == m_ui->packView && keyEvent->key() == Qt::Key_Return) {  // stop the event from going to the confirm button
+            onResourceToggle(m_ui->packView->currentIndex());
+            keyEvent->accept();
+            return true;
         }
     } else if (watched == m_ui->packView->viewport() && event->type() == QEvent::MouseButtonPress) {
         auto* mouseEvent = static_cast<QMouseEvent*>(event);
@@ -397,6 +388,10 @@ void ResourcePage::versionListUpdated(const QModelIndex& index)
         m_ui->versionSelectionBox->blockSignals(false);
 
         if (currentPack) {
+            bool versionChosen = false;
+            const auto releaseTypesSetting = APPLICATION->settings()->get("ModUpdateReleaseTypes");
+            const auto releaseTypes = ModPlatform::IndexedVersionType::fromStringList(Json::toStringList(releaseTypesSetting.toString()));
+
             auto installedVersion = m_model->getInstalledPackVersion(currentPack);
 
             for (int i = 0; i < currentPack->versions.size(); i++) {
@@ -406,6 +401,21 @@ void ResourcePage::versionListUpdated(const QModelIndex& index)
                 }
 
                 m_ui->versionSelectionBox->addItem(versionText(version, installedVersion), QVariant(i));
+
+                if (versionChosen) {
+                    continue;
+                }
+
+                const bool preferred =
+                    releaseTypes.empty() || std::ranges::any_of(releaseTypes, [&version](ModPlatform::IndexedVersionType type) {
+                        return version.versionType == type;
+                    });
+                if (!preferred) {
+                    continue;
+                }
+
+                versionChosen = true;
+                m_ui->versionSelectionBox->setCurrentIndex(m_ui->versionSelectionBox->count() - 1);
             }
 
             restoreSelectedVersion(currentPack);

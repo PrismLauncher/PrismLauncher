@@ -34,6 +34,7 @@
  */
 
 #include "ProfileSetupDialog.h"
+#include "Json.h"
 #include "net/RawHeaderProxy.h"
 #include "ui_ProfileSetupDialog.h"
 
@@ -175,8 +176,13 @@ void ProfileSetupDialog::checkName(const QString& name)
 void ProfileSetupDialog::checkFinished(QByteArray* response)
 {
     if (m_check_task->error() == QNetworkReply::NoError) {
-        auto doc = QJsonDocument::fromJson(*response);
-        auto root = doc.object();
+        auto doc = Json::requireDocument(*response);
+        if (!doc) {
+            setNameStatus(NameStatus::Error, tr("Unhandled profile name status: %1").arg(doc.error()));
+            isChecking = false;
+            return;
+        }
+        auto root = doc->object();
         auto statusValue = root.value("status").toString("INVALID");
         if (statusValue == "AVAILABLE") {
             setNameStatus(NameStatus::Available);

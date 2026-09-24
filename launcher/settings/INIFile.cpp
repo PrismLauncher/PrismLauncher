@@ -157,7 +157,7 @@ QVariant migrateQByteArrayToBase64(const QString& key, QVariant value)
                                                    "ConsoleWindowGeometry", "PagedGeometry",      "NewInstanceGeometry",
                                                    "ModDownloadGeometry",   "RPDownloadGeometry", "TPDownloadGeometry",
                                                    "ShaderDownloadGeometry" };
-    if (key.startsWith("WideBarVisibility_") || (key.startsWith("UI/") && key.endsWith("_Page/Columns"))) {
+    if (key.startsWith("UI/") && key.endsWith("_Page/Columns")) {
         return QString::fromUtf8(value.toByteArray().toBase64());
     }
     if (s_otherByteArrays.contains(key)) {

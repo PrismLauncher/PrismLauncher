@@ -69,7 +69,7 @@ set(CORE_SOURCES
     FileSystem.h
     FileSystem.cpp
 
-    Exception.h
+    Result.h
 
     # RW lock protected map
     RWStorage.h
@@ -367,12 +367,8 @@ set(MINECRAFT_SOURCES
     minecraft/AssetsUtils.cpp
 
     # Minecraft skins
-    minecraft/skins/CapeChange.cpp
-    minecraft/skins/CapeChange.h
-    minecraft/skins/SkinUpload.cpp
-    minecraft/skins/SkinUpload.h
-    minecraft/skins/SkinDelete.cpp
-    minecraft/skins/SkinDelete.h
+    minecraft/skins/SkinRequests.cpp
+    minecraft/skins/SkinRequests.h
     minecraft/skins/SkinModel.cpp
     minecraft/skins/SkinModel.h
     minecraft/skins/SkinList.cpp
@@ -383,10 +379,8 @@ set(MINECRAFT_SOURCES
 # the screenshots feature
 set(SCREENSHOTS_SOURCES
     screenshots/Screenshot.h
-    screenshots/ImgurUpload.h
-    screenshots/ImgurUpload.cpp
-    screenshots/ImgurAlbumCreation.h
-    screenshots/ImgurAlbumCreation.cpp
+    screenshots/ImgurAPI.h
+    screenshots/ImgurAPI.cpp
 )
 
 set(TASKS_SOURCES
@@ -590,7 +584,7 @@ set(LINKEXE_SOURCES
     filelink/FileLink.cpp
     FileSystem.h
     FileSystem.cpp
-    Exception.h
+    Result.h
     StringUtils.h
     StringUtils.cpp
     DesktopServices.h
@@ -1271,10 +1265,10 @@ else()
     target_link_libraries(Launcher_logic LibArchive::LibArchive)
 endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_link_libraries(Launcher_logic
-        gamemode
-    )
+if (Launcher_ENABLE_GAMEMODE)
+    target_link_libraries(Launcher_logic PkgConfig::gamemode)
+    # Must be public
+    target_compile_definitions(Launcher_logic PUBLIC ENABLE_GAMEMODE)
 endif()
 
 target_link_libraries(Launcher_logic
@@ -1520,6 +1514,7 @@ if(WIN32 OR (UNIX AND APPLE))
         RUNTIME_DEPENDENCY_SET LAUNCHER_DEPENDENCY_SET
         COMPONENT bundle
         DIRECTORIES
+            $ENV{PATH}
             ${CMAKE_SYSTEM_LIBRARY_PATH}
             ${QT_LIBS_DIR}
             ${QT_LIBEXECS_DIR}
@@ -1539,49 +1534,6 @@ if(WIN32 OR (UNIX AND APPLE))
         SCRIPT ${QT_DEPLOY_SCRIPT}
         COMPONENT bundle
     )
-    # FIXME: remove this crap once we stop using msys2
-    if(MINGW)
-        # i've not found a solution better than injecting the config vars like this...
-        # with install(CODE" for everything everything just breaks
-        install(CODE "
-            set(QT_PLUGINS_DIR \"${QT_PLUGINS_DIR}\")
-            set(QT_LIBS_DIR \"${QT_LIBS_DIR}\")
-            set(QT_LIBEXECS_DIR \"${QT_LIBEXECS_DIR}\")
-            set(CMAKE_SYSTEM_LIBRARY_PATH \"${CMAKE_SYSTEM_LIBRARY_PATH}\")
-            set(CMAKE_INSTALL_PREFIX \"${CMAKE_INSTALL_PREFIX}\")
-            "
-            COMPONENT bundle)
-
-        install(CODE [[
-            file(GLOB QT_IMAGEFORMAT_DLLS "${QT_PLUGINS_DIR}/imageformats/*.dll")
-            set(CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL objdump)
-            file(GET_RUNTIME_DEPENDENCIES
-                RESOLVED_DEPENDENCIES_VAR imageformatdeps
-                LIBRARIES ${QT_IMAGEFORMAT_DLLS}
-                DIRECTORIES
-                    ${CMAKE_SYSTEM_LIBRARY_PATH}
-                    ${QT_PLUGINS_DIR}
-                    ${QT_LIBS_DIR}
-                    ${QT_LIBEXECS_DIR}
-                PRE_EXCLUDE_REGEXES
-                    "^(api-ms-win|ext-ms)-.*\\.dll$"
-                    # FIXME: Why aren't these caught by the below regex???
-                    "^azure.*\\.dll$"
-                    "^vcruntime.*\\.dll$"
-                POST_EXCLUDE_REGEXES
-                    "system32"
-            )
-            foreach(_lib ${imageformatdeps})
-                file(INSTALL
-                    DESTINATION ${CMAKE_INSTALL_PREFIX}
-                    TYPE SHARED_LIBRARY
-                    FOLLOW_SYMLINK_CHAIN
-                    FILES ${_lib}
-                )
-            endforeach()
-        ]]
-        COMPONENT bundle)
-    endif()
 
     # Add qt.conf - this makes Qt stop looking for things outside the bundle
     install(

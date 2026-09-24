@@ -210,12 +210,14 @@ void ResourceDownloadDialog::confirm()
     });
     for (auto& task : selected) {
         auto extraInfo = dependencyExtraInfo.value(task->getPack()->addonId.toString());
-        confirmDialog->appendResource({ .name = task->getName(),
-                                        .filename = task->getFilename(),
-                                        .provider = ModPlatform::ProviderCapabilities::name(task->getProvider()),
-                                        .required_by = extraInfo.requiredByNames,
-                                        .version_type = task->getVersion().versionType.toString(),
-                                        .enabled = !extraInfo.maybeInstalled });
+        confirmDialog->appendResource({
+            .name = task->getName(),
+            .filename = task->getFilename(),
+            .provider = ModPlatform::ProviderCapabilities::name(task->getProvider()),
+            .required_by = extraInfo.requiredByNames,
+            .version_type = task->getVersion().versionType.toString(),
+            .enabled = !extraInfo.maybeInstalled,
+        });
     }
 
     if (confirmDialog->exec() != 0) {
@@ -256,26 +258,30 @@ void ResourceDownloadDialog::addResource(const ModPlatform::IndexedPack::Ptr& pa
     auto* model = getBaseModel();
     auto* instance = dynamic_cast<MinecraftInstance*>(m_instance);
     if (instance) {
+        ResourceFolderModel* targetModel = nullptr;
         switch (pack->resourceType) {
             case ModPlatform::ResourceType::Mod:
-                model = instance->loaderModList();
+                targetModel = instance->loaderModList();
                 break;
             case ModPlatform::ResourceType::ResourcePack:
-                model = instance->resourcePackList();
+                targetModel = instance->resourcePackList();
                 break;
             case ModPlatform::ResourceType::ShaderPack:
-                model = instance->shaderPackList();
+                targetModel = instance->shaderPackList();
                 break;
             case ModPlatform::ResourceType::DataPack:
-                model = instance->dataPackList();
+                targetModel = instance->dataPackList();
                 break;
                 // case ModPlatform::ResourceType::World:
-                // model = instance->worldList();
+                // targetModel = instance->worldList();
             case ModPlatform::ResourceType::TexturePack:
-                model = instance->texturePackList();
+                targetModel = instance->texturePackList();
                 break;
             default:
                 break;
+        }
+        if (targetModel != nullptr && targetModel->id() != model->id()) {
+            model = targetModel;
         }
     }
     selectedPage()->addResourceToPage(pack, ver, model, std::move(downloadReason), std::move(dependentOn));
@@ -344,7 +350,7 @@ void ResourceDownloadDialog::setResourceMetadata(const std::shared_ptr<Metadata:
     m_container->hidePageList();
     m_buttons.hide();
     auto* page = selectedPage();
-    page->openProject(meta->project_id);
+    page->openProject(meta->projectId);
 }
 
 GetModDependenciesTask::Ptr ResourceDownloadDialog::getModDependenciesTask()
@@ -371,7 +377,7 @@ ResourceDownloadDialog* ResourceDownloadDialog::createMod(QWidget* parent,
     QList<BasePage*> pages;
 
     // need to load all resources for dependency task
-    auto* mInstance = dynamic_cast<MinecraftInstance*>(instance);
+    auto* mInstance = instance;
     if (mInstance) {
         for (auto* model : mInstance->resourceLists()) {
             if (model) {

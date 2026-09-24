@@ -1,8 +1,9 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *  Copyright (c) 2024 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2026 Octol1ttle <l1ttleofficial@outlook.com>
+ *  Copyright (C) 2026 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,29 +35,27 @@
  *      limitations under the License.
  */
 
-#include "SkinDelete.h"
+#pragma once
 
-#include <net/DummySink.h>
-#include "net/RawHeaderProxy.h"
+#include <QDebug>
+#include <QString>
+#include <expected>
 
-SkinDelete::SkinDelete() : Request()
-{
-    m_logCat = taskMCSkinsLogC;
-}
+template <typename T = void, typename E = QString>
+using Result = std::expected<T, E>;
 
-QNetworkReply* SkinDelete::getReply(QNetworkRequest& request)
-{
-    setStatus(tr("Deleting skin"));
-    return m_network->deleteResource(request);
-}
+#define TRY(expected)                                \
+    if (const auto _result = (expected); !_result) { \
+        return std::unexpected{ _result.error() };   \
+    }
 
-SkinDelete::Ptr SkinDelete::make(QString token)
-{
-    auto up = makeShared<SkinDelete>();
-    up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/skins/active");
-    up->m_sink.reset(new Net::DummySink());
-    up->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(QList<Net::HeaderPair>{
-        { "Authorization", QString("Bearer %1").arg(token).toLocal8Bit() },
-    }));
-    return up;
-}
+#define RESULT_H_CONCAT_(x, y) x##y
+
+#define RESULT_H_CONCAT(x, y) RESULT_H_CONCAT_(x, y)
+
+#define TRY_INTO_VAR_ RESULT_H_CONCAT(_try_tmp_, __LINE__)
+
+#define TRY_INTO(decl, expr)       \
+    auto&& TRY_INTO_VAR_ = (expr); \
+    TRY(TRY_INTO_VAR_)             \
+    decl = TRY_INTO_VAR_.value();

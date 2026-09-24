@@ -148,7 +148,12 @@ std::unique_ptr<nbt::tag_compound> parseLevelDat(QByteArray data)
 QByteArray serializeLevelDat(nbt::tag_compound* levelInfo)
 {
     std::ostringstream s;
-    nbt::io::write_tag("", *levelInfo, s);
+    try {
+        nbt::io::write_tag("", *levelInfo, s);
+    } catch (const std::exception& e) {
+        qWarning() << "Unable to serialize level.dat:" << e.what();
+        return QByteArray();
+    }
     QByteArray val(s.str().data(), (int)s.str().size());
     return val;
 }
@@ -301,7 +306,7 @@ void World::readFromZip(const QFileInfo& file)
 
 bool World::install(const QString& to, const QString& name)
 {
-    auto finalPath = FS::PathCombine(to, FS::DirNameFromString(m_actualName, to));
+    auto finalPath = FS::PathCombine(to, FS::DirNameFromString(m_actualName, { to }));
     if (!FS::ensureFolderPathExists(finalPath)) {
         return false;
     }
@@ -339,13 +344,22 @@ bool World::rename(const QString& newName)
     if (!worldData) {
         return false;
     }
-    auto& val = worldData->at("Data");
+    nbt::value* valPtr = nullptr;
+    try {
+        valPtr = &worldData->at("Data");
+    } catch (const std::out_of_range&) {
+        return false;
+    }
+    auto& val = *valPtr;
     if (val.get_type() != nbt::tag_type::Compound) {
         return false;
     }
     auto& dataCompound = val.as<nbt::tag_compound>();
     dataCompound.put("LevelName", nbt::value_initializer(newName.toUtf8().data()));
     data = serializeLevelDat(worldData.get());
+    if (data.isEmpty()) {
+        return false;
+    }
 
     putLevelDatDataToFS(m_containerFile, data);
 
@@ -354,7 +368,7 @@ bool World::rename(const QString& newName)
     QDir parentDir(m_containerFile.absoluteFilePath());
     parentDir.cdUp();
     QFile container(m_containerFile.absoluteFilePath());
-    auto dirName = FS::DirNameFromString(m_actualName, parentDir.absolutePath());
+    auto dirName = FS::DirNameFromString(m_actualName, { parentDir.absolutePath() });
     container.rename(parentDir.absoluteFilePath(dirName));
 
     return true;

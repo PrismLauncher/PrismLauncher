@@ -57,15 +57,14 @@ void ManifestDownloadTask::executeTask()
     connect(download.get(), &Task::details, this, &ManifestDownloadTask::setDetails);
 
     connect(download.get(), &Task::succeeded, this, [files, this] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*files, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response at" << parse_error.offset << "reason:" << parse_error.errorString();
+        auto doc = Json::requireDocument(*files, "Java manifest");
+        if (!doc) {
+            qWarning() << "Error while parsing JSON response:" << doc.error();
             qWarning() << *files;
-            emitFailed(parse_error.errorString());
+            emitFailed(doc.error());
             return;
         }
-        downloadJava(doc);
+        downloadJava(doc.value());
     });
     m_task = download;
     m_task->start();

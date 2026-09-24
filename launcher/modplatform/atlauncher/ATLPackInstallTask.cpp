@@ -50,6 +50,7 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/OneSixVersionFormat.h"
 #include "minecraft/PackProfile.h"
+#include "modplatform/ModIndex.h"
 #include "modplatform/atlauncher/ATLPackManifest.h"
 #include "net/ChecksumValidator.h"
 #include "settings/INISettingsObject.h"
@@ -119,22 +120,18 @@ void PackInstallTask::onDownloadSucceeded(QByteArray* responsePtr)
     QByteArray response = std::move(*responsePtr);
     m_jobPtr.reset();
 
-    QJsonParseError parseError{};
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parseError);
-    if (parseError.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from ATLauncher at" << parseError.offset << "reason:" << parseError.errorString();
-        qWarning() << response;
-        return;
-    }
-    auto obj = doc.object();
-
     ATLauncher::PackVersion version;
-    try {
-        ATLauncher::loadVersion(version, obj);
-    } catch (const JSONValidationError& e) {
-        emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
+    auto doc = Json::requireDocument(response, "ATLauncher pack manifest").and_then([&version](const auto& v) {
+        auto obj = v.object();
+        return ATLauncher::loadVersion(version, obj);
+    });
+    if (!doc) {
+        qWarning() << "Error while parsing JSON response from ATLauncher:" << doc.error();
+        qWarning() << response;
+        emitFailed(tr("Could not understand pack manifest:\n") + doc.error());
         return;
     }
+
     m_version = version;
 
     // Derived from the installation mode
@@ -317,7 +314,7 @@ QString PackInstallTask::getDirForModType(ModType type, const QString& raw)
         case ModType::TexturePackExtract:
         case ModType::ResourcePackExtract:
         case ModType::MCPC:
-            return Q_NULLPTR;
+            return nullptr;
         case ModType::Forge:
             // Forge detection happens later on, if it cannot be detected it will
             // install a jarmod component.
@@ -345,13 +342,13 @@ QString PackInstallTask::getDirForModType(ModType type, const QString& raw)
             return "shaderpacks";
         case ModType::Millenaire:
             qWarning() << "Unsupported mod type: " + raw;
-            return Q_NULLPTR;
+            return nullptr;
         case ModType::Unknown:
             emitFailed(tr("Unknown mod type: %1").arg(raw));
-            return Q_NULLPTR;
+            return nullptr;
     }
 
-    return Q_NULLPTR;
+    return nullptr;
 }
 
 QString PackInstallTask::getVersionForLoader(const QString& uid)
@@ -360,7 +357,7 @@ QString PackInstallTask::getVersionForLoader(const QString& uid)
         auto vlist = APPLICATION->metadataIndex()->get(uid);
         if (!vlist) {
             emitFailed(tr("Failed to get local metadata index for %1").arg(uid));
-            return Q_NULLPTR;
+            return nullptr;
         }
 
         vlist->waitToLoad();
@@ -373,7 +370,7 @@ QString PackInstallTask::getVersionForLoader(const QString& uid)
                 // filter by minecraft version, if the loader depends on a certain version.
                 // not all mod loaders depend on a given Minecraft version, so we won't do this
                 // filtering for those loaders.
-                if (m_version.loader.type != "fabric") {
+                if (m_version.loader.type != ModPlatform::ModLoaderType::Fabric) {
                     auto iter = std::ranges::find_if(reqs, [](const Meta::Require& req) { return req.uid == "net.minecraft"; });
                     if (iter == reqs.end()) {
                         continue;
@@ -393,22 +390,22 @@ QString PackInstallTask::getVersionForLoader(const QString& uid)
                 return version->descriptor();
             }
 
-            emitFailed(tr("Failed to find version for %1 loader").arg(m_version.loader.type));
-            return Q_NULLPTR;
+            emitFailed(tr("Failed to find version for %1 loader").arg(ModPlatform::getModLoaderAsString(m_version.loader.type)));
+            return nullptr;
         }
         if (m_version.loader.choose) {
             // Fabric Loader doesn't depend on a given Minecraft version.
-            if (m_version.loader.type == "fabric") {
-                return m_support->chooseVersion(vlist, Q_NULLPTR);
+            if (m_version.loader.type == ModPlatform::ModLoaderType::Fabric) {
+                return m_support->chooseVersion(vlist, nullptr);
             }
 
             return m_support->chooseVersion(vlist, m_version.minecraft);
         }
     }
 
-    if (m_version.loader.version == Q_NULLPTR || m_version.loader.version.isEmpty()) {
+    if (m_version.loader.version == nullptr || m_version.loader.version.isEmpty()) {
         emitFailed(tr("No loader version set for modpack!"));
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     return m_version.loader.version;
@@ -788,7 +785,7 @@ void PackInstallTask::downloadMods()
             m_jobPtr->addNetAction(dl);
         } else {
             auto relpath = getDirForModType(mod.type, mod.type_raw);
-            if (relpath == Q_NULLPTR) {
+            if (relpath == nullptr) {
                 continue;
             }
 
@@ -866,7 +863,7 @@ void PackInstallTask::downloadMods()
                     m_modsToDecomp.insert(blocked.localPath, mod);
                 } else {
                     auto relpath = getDirForModType(mod.type, mod.type_raw);
-                    if (relpath == Q_NULLPTR) {
+                    if (relpath == nullptr) {
                         continue;
                     }
 
@@ -1045,30 +1042,41 @@ void PackInstallTask::install()
         components->setComponentVersion("net.minecraft", m_version.minecraft, true);
 
         // Loader
-        if (m_version.loader.type == QString("forge")) {
-            auto version = getVersionForLoader("net.minecraftforge");
-            if (version == Q_NULLPTR) {
+        switch (m_version.loader.type) {
+            case ModPlatform::ModLoaderType::NeoForge: {
+                auto version = getVersionForLoader("net.neoforged");
+                if (version == nullptr) {
+                    return;
+                }
+
+                components->setComponentVersion("net.neoforged", version);
+                break;
+            }
+            case ModPlatform::ModLoaderType::Forge: {
+                auto version = getVersionForLoader("net.minecraftforge");
+                if (version == nullptr) {
+                    return;
+                }
+
+                components->setComponentVersion("net.minecraftforge", version);
+                break;
+            }
+            case ModPlatform::ModLoaderType::Fabric: {
+                auto version = getVersionForLoader("net.fabricmc.fabric-loader");
+                if (version == nullptr) {
+                    return;
+                }
+
+                components->setComponentVersion("net.fabricmc.fabric-loader", version);
+                break;
+            }
+            case ModPlatform::ModLoaderType::None: {
+                break;
+            }
+            default: {
+                emitFailed(tr("Unknown loader type: ") + ModPlatform::getModLoaderAsString(m_version.loader.type));
                 return;
             }
-
-            components->setComponentVersion("net.minecraftforge", version);
-        } else if (m_version.loader.type == QString("neoforge")) {
-            auto version = getVersionForLoader("net.neoforged");
-            if (version == Q_NULLPTR) {
-                return;
-            }
-
-            components->setComponentVersion("net.neoforged", version);
-        } else if (m_version.loader.type == QString("fabric")) {
-            auto version = getVersionForLoader("net.fabricmc.fabric-loader");
-            if (version == Q_NULLPTR) {
-                return;
-            }
-
-            components->setComponentVersion("net.fabricmc.fabric-loader", version);
-        } else if (m_version.loader.type != QString()) {
-            emitFailed(tr("Unknown loader type: ") + m_version.loader.type);
-            return;
         }
 
         for (const auto& componentUid : m_componentsToInstall.keys()) {

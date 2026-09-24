@@ -45,6 +45,7 @@
 #include <array>
 #include <chrono>
 #include <cstdint>
+#include <expected>
 #include <functional>
 #include <utility>
 #include <variant>
@@ -52,18 +53,15 @@
 #include "EnumWrapper.h"
 #include "HeaderProxy.h"
 #include "HttpMetaCache.h"
+#include "QObjectPtr.h"
 #include "Sink.h"
 #include "Validator.h"
-
-#include "QObjectPtr.h"
-#include "net/Logging.h"
 #include "tasks/Task.h"
 
 class QIODevice;
 class QHttpMultiPart;
 
 namespace Net {
-class ByteArraySink;
 
 enum class HttpMethodValue : std::uint8_t {
     Get,
@@ -102,15 +100,16 @@ class Request : public Task {
     };
     Q_DECLARE_FLAGS(Options, Option)
 
-    using DeviceFactory = std::function<QIODevice*()>;
-    using MultiPartFactory = std::function<QHttpMultiPart*()>;
-    using PostData = std::variant<std::monostate, QByteArray, DeviceFactory, MultiPartFactory>;
+    using DeviceFactory = std::function<std::expected<QIODevice*, QString>()>;
+    using MultiPartFactory = std::function<std::expected<QHttpMultiPart*, QString>()>;
+    using ByteArrayFactory = std::function<std::expected<QByteArray, QString>()>;
+    using PostData = std::variant<std::monostate, QByteArray, DeviceFactory, MultiPartFactory, ByteArrayFactory>;
     using LogCatFunc = const QLoggingCategory& (*)();
 
     struct Spec {
         HttpMethod method = HttpMethod::Get;
         QUrl url{};
-        Request::PostData data{};
+        Request::PostData data;
         Options options = Option::NoOptions;
         QString name{};
     };
@@ -194,7 +193,7 @@ class Request : public Task {
     int m_redirectCount = 0;
 
     HttpMethod m_httpMethod = HttpMethod::Get;
-    PostData m_postData{};
+    PostData m_postData;
 };
 
 }  // namespace Net

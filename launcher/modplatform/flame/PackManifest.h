@@ -40,6 +40,7 @@
 #include <QMap>
 #include <QString>
 #include <QUrl>
+#include "Result.h"
 #include "modplatform/ModIndex.h"
 
 namespace Flame {
@@ -82,5 +83,5 @@ struct Manifest {
     bool isLoaded = false;
 };
 
-void loadManifest(Flame::Manifest& m, const QString& filepath);
+Result<> loadManifest(Flame::Manifest& m, const QString& filepath);
 }  // namespace Flame

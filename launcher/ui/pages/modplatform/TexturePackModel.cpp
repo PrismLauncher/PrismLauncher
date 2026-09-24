@@ -14,7 +14,7 @@
 static std::vector<Version> s_availableVersions = {};
 
 namespace ResourceDownload {
-TexturePackResourceModel::TexturePackResourceModel(const BaseInstance& inst,
+TexturePackResourceModel::TexturePackResourceModel(ResourceFolderModel* inst,
                                                    const ResourceAPI* api,
                                                    const QString& debugName,
                                                    QString metaEntryBase)

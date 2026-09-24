@@ -188,6 +188,28 @@
         <file>48x48/instance-settings.png</file>
         <file>64x64/instance-settings.png</file>
 
+        <file>8x8/lock.png</file>
+        <file>16x16/lock.png</file>
+        <file>22x22/lock.png</file>
+        <file>24x24/lock.png</file>
+        <file>32x32/lock.png</file>
+        <file>48x48/lock.png</file>
+        <file>50x50/lock.png</file>
+        <file>64x64/lock.png</file>
+        <file>128x128/lock.png</file>
+        <file>256x256/lock.png</file>
+        
+        <file>8x8/unlock.png</file>
+        <file>16x16/unlock.png</file>
+        <file>22x22/unlock.png</file>
+        <file>24x24/unlock.png</file>
+        <file>32x32/unlock.png</file>
+        <file>48x48/unlock.png</file>
+        <file>50x50/unlock.png</file>
+        <file>64x64/unlock.png</file>
+        <file>128x128/unlock.png</file>
+        <file>256x256/unlock.png</file>
+
         <!-- View folder. CC-BY-SA 3.0, http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/document-open-folder.png -->
         <file>scalable/viewfolder.svg</file>
         <file>16x16/viewfolder.png</file>
