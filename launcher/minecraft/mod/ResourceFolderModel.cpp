@@ -685,16 +685,8 @@ void ResourceFolderModel::setupHeaderAction(QAction* act, int column) const
 
 void ResourceFolderModel::saveColumns(QTreeView* tree)
 {
-    const auto stateSettingName = QString("UI/%1_Page/Columns").arg(id());
-    const auto columnsCountSettingName = QString("UI/%1_Page/ColumnsCount").arg(id());
     const auto overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
     const auto visibilitySettingName = QString("UI/%1_Page/ColumnsVisibility").arg(id());
-
-    auto stateSetting = m_instance->settings()->getSetting(stateSettingName);
-    stateSetting->set(QString::fromUtf8(tree->header()->saveState().toBase64()));
-
-    auto columnsCountSetting = m_instance->settings()->getSetting(columnsCountSettingName);
-    columnsCountSetting->set(columnCount());
 
     // neither passthrough nor override settings works for this usecase as I need to only set the global when the gate is false
     auto* settings = m_instance->settings();
@@ -703,36 +695,33 @@ void ResourceFolderModel::saveColumns(QTreeView* tree)
     }
     auto visibility = Json::toMap(settings->get(visibilitySettingName).toString());
     for (auto i = 0; i < m_columnNames.size(); ++i) {
+        const auto& name = m_columnNames[i];
         if (m_columnsHideable[i]) {
-            auto name = m_columnNames[i];
             visibility[name] = !tree->isColumnHidden(i);
         }
     }
     settings->set(visibilitySettingName, Json::fromMap(visibility));
+
+    const auto sizesSettingName = QString("UI/%1_Page/ColumnSizes").arg(id());
+    QVariantMap sizes;
+    for (int i = 0; i < m_columnNames.size(); ++i) {
+        const auto& name = m_columnNames[i];
+        const auto resizeMode = tree->header()->sectionResizeMode(i);
+        if (resizeMode == QHeaderView::Interactive && !tree->isColumnHidden(i)) {
+            sizes[name] = tree->header()->sectionSize(i);
+        }
+    }
+    m_instance->settings()->set(sizesSettingName, Json::fromMap(sizes));
 }
 
 void ResourceFolderModel::loadColumns(QTreeView* tree)
 {
-    const auto stateSettingName = QString("UI/%1_Page/Columns").arg(id());
-    const auto columnsCountSettingName = QString("UI/%1_Page/ColumnsCount").arg(id());
     const auto overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
     const auto visibilitySettingName = QString("UI/%1_Page/ColumnsVisibility").arg(id());
 
-    auto stateSetting = m_instance->settings()->getOrRegisterSetting(stateSettingName, "");
-    auto columnsCountSetting = m_instance->settings()->getOrRegisterSetting(columnsCountSettingName, 0);
-    int savedColumnsCount = columnsCountSetting->get().toInt();
-
-    tree->header()->restoreState(QByteArray::fromBase64(stateSetting->get().toString().toUtf8()));
-
-    if (savedColumnsCount < columnCount()) {
-        // force redraw of the columns that were added after the last save, otherwise they will not work properly
-        for (int col = savedColumnsCount; col < columnCount(); ++col) {
-            tree->setColumnHidden(col, true);
-            tree->setColumnHidden(col, false);
-        }
-    }
-
     auto setVisible = [this, tree](const QVariant& value) {
+        // NOTE: updating visibility state causes sectionResized to fire and a save
+        tree->header()->blockSignals(true);
         auto visibility = Json::toMap(value.toString());
         for (auto i = 0; i < m_columnNames.size(); ++i) {
             if (m_columnsHideable[i]) {
@@ -740,6 +729,7 @@ void ResourceFolderModel::loadColumns(QTreeView* tree)
                 tree->setColumnHidden(i, !visibility.value(name, false).toBool());
             }
         }
+        tree->header()->blockSignals(false);
     };
 
     const auto defaultValue = Json::fromMap({
@@ -764,6 +754,26 @@ void ResourceFolderModel::loadColumns(QTreeView* tree)
             setVisible(value);
         }
     });
+
+    const auto sizesSettingName = QString("UI/%1_Page/ColumnSizes").arg(id());
+    const auto sizesSetting = m_instance->settings()->getOrRegisterSetting(sizesSettingName, "{}");
+    auto sizes = Json::toMap(sizesSetting->get().toString());
+    tree->header()->blockSignals(true);
+    for (int i = 0; i < m_columnNames.size(); ++i) {
+        const auto resizeMode = tree->header()->sectionResizeMode(i);
+        if (resizeMode != QHeaderView::Interactive || tree->isColumnHidden(i)) {
+            // NOTE: covers Fixed size too which we don't want to be updated even though it can be
+            continue;
+        }
+
+        const auto& name = m_columnNames[i];
+
+        const auto size = sizes.value(name).toInt();
+        if (size > 0) {
+            tree->header()->resizeSection(i, size);
+        }
+    }
+    tree->header()->blockSignals(false);
 }
 
 QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
@@ -798,12 +808,14 @@ QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
         act->setChecked(!tree->isColumnHidden(col));
 
         connect(act, &QAction::toggled, tree, [this, col, tree](bool toggled) {
+            tree->header()->blockSignals(true);
             tree->setColumnHidden(col, !toggled);
             for (int c = 0; c < columnCount(); ++c) {
                 if (m_columnResizeModes.at(c) == QHeaderView::ResizeToContents) {
                     tree->resizeColumnToContents(c);
                 }
             }
+            tree->header()->blockSignals(false);
             saveColumns(tree);
         });
 
