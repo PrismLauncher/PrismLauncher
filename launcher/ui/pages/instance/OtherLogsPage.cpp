@@ -45,7 +45,6 @@
 #include <FileSystem.h>
 #include <GZip.h>
 #include <QDir>
-#include <QDirIterator>
 #include <QFileSystemWatcher>
 #include <QShortcut>
 #include <QUrl>
