@@ -67,7 +67,7 @@ class JavaSettingsWidget : public QWidget {
     void updateThresholds();
 
    private:
-    void setupPinnedJavaRows();
+    void setupPinnedJavaRows(const QVariantMap& javas);
     void warnAboutUnresolvablePinnedPaths() const;
 
     MinecraftInstance* m_instance;
