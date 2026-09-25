@@ -29,6 +29,9 @@ class ImportResourceDialog : public QDialog {
     QStringList m_mcVersions;
     ModPlatform::ModLoaderTypes m_loader;
 
+    void setSelectedInstanceKey(QString key);
+    void selectFirstInstance();
+
    private slots:
     void selectionChanged(QItemSelection, QItemSelection);
     void activated(QModelIndex);
