@@ -45,6 +45,7 @@
 
 #include "DataMigrationTask.h"
 #include "java/JavaInstallList.h"
+#include "java/JavaUtils.h"
 #include "net/PasteUpload.h"
 #include "tasks/Task.h"
 #include "tools/GenericProfiler.h"
@@ -759,6 +760,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("JavaVersion", "");
         m_settings->registerSetting("JavaVendor", "");
         m_settings->registerSetting("LastHostname", "");
+        for (int major : JavaUtils::pinnableMajors) {
+            m_settings->registerSetting(JavaUtils::pinnedPathSettingName(major), "");
+        }
         m_settings->registerSetting("JvmArgs", "");
         m_settings->registerSetting("IgnoreJavaCompatibility", false);
         m_settings->registerSetting("IgnoreJavaWizard", false);

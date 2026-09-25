@@ -40,6 +40,8 @@
 #include "JavaCommon.h"
 
 class MinecraftInstance;
+class QLineEdit;
+class QPushButton;
 
 namespace Ui {
 class JavaSettingsWidget;
@@ -60,9 +62,17 @@ class JavaSettingsWidget : public QWidget {
     void onJavaBrowse();
     void onJavaAutodetect();
     void onJavaTest();
+    void onJavaBrowseMajor(int major);
+    void onJavaDetectMajor(int major);
     void updateThresholds();
 
    private:
+    void setupPinnedJavaRows();
+    QLineEdit* pinnedJavaEdit(int major) const;
+    QPushButton* pinnedJavaBrowseBtn(int major) const;
+    QPushButton* pinnedJavaDetectBtn(int major) const;
+    void warnAboutUnresolvablePinnedPaths() const;
+
     MinecraftInstance* m_instance;
     Ui::JavaSettingsWidget* m_ui;
     unique_qobject_ptr<JavaCommon::TestCheck> m_checker;

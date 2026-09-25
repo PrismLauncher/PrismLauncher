@@ -114,6 +114,8 @@ QVariant JavaInstallList::data(const QModelIndex& index, int role) const
             return version->path;
         case CPUArchitectureRole:
             return version->arch;
+        case JavaMajorRole:
+            return QString::number(version->id.major());
         default:
             return QVariant();
     }
@@ -121,7 +123,7 @@ QVariant JavaInstallList::data(const QModelIndex& index, int role) const
 
 BaseVersionList::RoleList JavaInstallList::providesRoles() const
 {
-    return { VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, PathRole, CPUArchitectureRole };
+    return { VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, PathRole, CPUArchitectureRole, JavaMajorRole };
 }
 
 void JavaInstallList::updateListData(QList<BaseVersion::Ptr> versions)
