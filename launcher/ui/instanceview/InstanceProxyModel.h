@@ -26,6 +26,7 @@ class InstanceProxyModel : public QSortFilterProxyModel {
     explicit InstanceProxyModel(QObject* parent = nullptr);
 
     void sortBy(QStringList mcVersions, ModPlatform::ModLoaderTypes loader = ModPlatform::ModLoaderType::None);
+    void setSearchTerm(QString searchTerm);
 
    protected:
     QVariant data(const QModelIndex& index, int role) const override;
@@ -36,6 +37,7 @@ class InstanceProxyModel : public QSortFilterProxyModel {
    private:
     QCollator m_naturalSort;
 
+    QString m_searchTerm;
     QStringList m_mcVersions;
     ModPlatform::ModLoaderTypes m_loader;
 };

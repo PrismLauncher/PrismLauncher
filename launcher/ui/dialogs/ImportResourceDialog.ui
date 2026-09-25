@@ -32,6 +32,16 @@
     <widget class="QListView" name="instanceView"/>
    </item>
    <item>
+    <widget class="QLineEdit" name="searchEdit">
+     <property name="placeholderText">
+      <string>Search instances...</string>
+     </property>
+     <property name="clearButtonEnabled">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="button_show_all">

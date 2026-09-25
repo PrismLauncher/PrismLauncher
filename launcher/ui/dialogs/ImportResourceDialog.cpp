@@ -2,6 +2,7 @@
 #include "ui_ImportResourceDialog.h"
 
 #include <QFileDialog>
+#include <QLineEdit>
 #include <QPushButton>
 #include <utility>
 
@@ -45,6 +46,7 @@ ImportResourceDialog::ImportResourceDialog(QString filePath, ModPlatform::Resour
 
     connect(contentsWidget, &QAbstractItemView::doubleClicked, this, &ImportResourceDialog::activated);
     connect(contentsWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ImportResourceDialog::selectionChanged);
+    connect(m_ui->searchEdit, &QLineEdit::textChanged, m_proxyModel, &InstanceProxyModel::setSearchTerm);
     connect(m_ui->button_show_all, &QPushButton::toggled, this, &ImportResourceDialog::showAllInstances);
 
     m_ui->label->setText(
