@@ -38,6 +38,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QVariant>
 #include <algorithm>
 

@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <QObject>
 #include <QString>
 
 struct GlobalConfig;
