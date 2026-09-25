@@ -943,6 +943,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
             url.setScheme("file");
         }
 
+        ModPlatform::ResourceProvider provider{};
         ModPlatform::IndexedVersion version;
         QMap<QString, QString> extraInfo;
         QUrl localUrl;
@@ -951,6 +952,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
             const bool isExternalURLImport = (url.host().toLower() == "import") || (url.path().startsWith("/import", Qt::CaseInsensitive));
 
             if (url.scheme() == "modrinth") {
+                provider = ModPlatform::ResourceProvider::MODRINTH;
                 const QString type = url.host();
                 const QString id = url.path().mid(1);
                 const QStringList supportedProtocols{ "modpack", "mod", "version" };
@@ -1024,7 +1026,11 @@ void MainWindow::processURLs(QList<QUrl> urls)
                             rDlg = ResourceDownload::ResourceDownloadDialog::createTexturePack(this, inst->texturePackList(), inst, true);
                             break;
                         case ModPlatform::ResourceType::DataPack:
-                            rDlg = ResourceDownload::ResourceDownloadDialog::createDataPack(this, inst->dataPackList(), inst, true);
+                            if (auto* dataPackList = inst->dataPackList()) {
+                                rDlg = ResourceDownload::ResourceDownloadDialog::createDataPack(this, dataPackList, inst, true);
+                            } else {
+                                qWarning() << "Data packs are disabled for this instance. Ignoring" << pack->name;
+                            }
                             break;
                         case ModPlatform::ResourceType::Mod:
                             rDlg = ResourceDownload::ResourceDownloadDialog::createMod(this, inst->loaderModList(), inst, true);
@@ -1092,6 +1098,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                     }
                 }
             } else if (url.scheme() == "curseforge" || (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME && url.host() == "install")) {
+                provider = ModPlatform::ResourceProvider::FLAME;
                 // need to find the download link for the modpack / resource
                 // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
                 // format of url binaryname://install?platform=curseforge&addonId=IDHERE&fileId=IDHERE
@@ -1283,19 +1290,23 @@ void MainWindow::processURLs(QList<QUrl> urls)
 
         switch (type) {
             case ModPlatform::ResourceType::ResourcePack:
-                minecraftInst->resourcePackList()->installResourceWithFlameMetadata(localFileName, version);
+                minecraftInst->resourcePackList()->installResourceWithMeta(localFileName, version, provider);
                 break;
             case ModPlatform::ResourceType::TexturePack:
-                minecraftInst->texturePackList()->installResourceWithFlameMetadata(localFileName, version);
+                minecraftInst->texturePackList()->installResourceWithMeta(localFileName, version, provider);
                 break;
             case ModPlatform::ResourceType::DataPack:
-                qWarning() << "Importing of Data Packs not supported at this time. Ignoring" << localFileName;
+                if (auto* dataPackList = minecraftInst->dataPackList()) {
+                    dataPackList->installResourceWithMeta(localFileName, version, provider);
+                } else {
+                    qWarning() << "Data packs are disabled for this instance. Ignoring" << localFileName;
+                }
                 break;
             case ModPlatform::ResourceType::Mod:
-                minecraftInst->loaderModList()->installResourceWithFlameMetadata(localFileName, version);
+                minecraftInst->loaderModList()->installResourceWithMeta(localFileName, version, provider);
                 break;
             case ModPlatform::ResourceType::ShaderPack:
-                minecraftInst->shaderPackList()->installResourceWithFlameMetadata(localFileName, version);
+                minecraftInst->shaderPackList()->installResourceWithMeta(localFileName, version, provider);
                 break;
             case ModPlatform::ResourceType::World:
                 minecraftInst->worldList()->installWorld(localFileInfo);
