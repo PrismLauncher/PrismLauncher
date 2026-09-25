@@ -5,6 +5,8 @@
 
 #include "config/GlobalConfig.h"
 
+using namespace Qt::Literals;
+
 namespace {
 class ConfigTest : public QObject {
     Q_OBJECT
@@ -23,14 +25,20 @@ class ConfigTest : public QObject {
         const auto conf = T::load(srcPath);
         QVERIFY(conf.has_value());
 
-        QTemporaryFile tempFile;
-        QVERIFY(tempFile.open());
-        tempFile.close();
-        tempFile.setAutoRemove(false);
+        QString fileName;
 
-        QVERIFY(conf->save(tempFile.fileName()));
+        // HACK: file is kept open and windows doesn't like that *grumble*
+        {
+            QTemporaryFile tempFile;
+            QVERIFY(tempFile.open());
+            fileName = tempFile.fileName();
+        }
 
-        QSettings savedSettings(tempFile.fileName(), QSettings::IniFormat);
+        auto tempFileRm = qScopeGuard([&fileName] { QFile::remove(fileName); });
+
+        QVERIFY(conf->save(fileName));
+
+        QSettings savedSettings(fileName, QSettings::IniFormat);
         savedSettings.setFallbacksEnabled(false);
         QVERIFY(savedSettings.status() == QSettings::NoError);
 
@@ -40,7 +48,11 @@ class ConfigTest : public QObject {
             const auto& srcVal = srcSettings.value(key);
             const auto& savedVal = savedSettings.value(key);
 
-            QCOMPARE(key + '=' + savedVal.toString(), key + '=' + srcVal.toString());
+            if (srcVal != savedVal || srcVal.metaType() != savedVal.metaType()) {
+                const QString strValMsg = u"when saving %1 in %2: expected %3 (%4) but got %5 (%6)"_s.arg(
+                    key, src, srcVal.toString(), srcVal.metaType().name(), savedVal.toString(), savedVal.metaType().name());
+                QFAIL(qPrintable(strValMsg));
+            }
         }
     }
    private slots:
