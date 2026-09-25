@@ -40,6 +40,7 @@
 
 #include <QAbstractListModel>
 #include <QObject>
+#include <QSet>
 #include <QSharedPointer>
 #include <QVariant>
 
@@ -142,6 +143,7 @@ class AccountList : public QAbstractListModel {
 
    protected:
     QList<QString> m_refreshQueue;
+    QSet<QString> m_explicitRefreshes;
     QTimer* m_refreshTimer;
     QTimer* m_nextTimer;
     shared_qobject_ptr<AuthFlow> m_currentTask;

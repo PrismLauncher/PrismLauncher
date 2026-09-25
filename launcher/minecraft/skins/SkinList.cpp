@@ -72,9 +72,11 @@ bool SkinList::update()
 
     auto manifestInfo = QFileInfo(m_dir.absoluteFilePath("index.json"));
     if (manifestInfo.exists()) {
-        try {
-            auto doc = Json::requireDocument(manifestInfo.absoluteFilePath(), "SkinList JSON file");
-            const auto root = doc.object();
+        auto doc = Json::requireDocument(manifestInfo.absoluteFilePath(), "SkinList JSON file");
+        if (!doc) {
+            qCritical() << "Couldn't load skins json:" << doc.error();
+        } else {
+            const auto root = doc->object();
             auto skins = root["skins"].toArray();
             for (auto jSkin : skins) {
                 SkinModel s(m_dir, jSkin.toObject());
@@ -82,8 +84,6 @@ bool SkinList::update()
                     newSkins << s;
                 }
             }
-        } catch (const Exception& e) {
-            qCritical() << "Couldn't load skins json:" << e.cause();
         }
     }
 
@@ -239,6 +239,8 @@ QVariant SkinList::data(const QModelIndex& index, int role) const
         return QVariant();
     auto skin = m_skinList[row];
     switch (role) {
+        case Qt::SizeHintRole:
+            return QSize(100, 36 + 30);
         case Qt::DecorationRole: {
             auto preview = skin.getPreview();
             if (preview.isNull()) {
@@ -247,9 +249,8 @@ QVariant SkinList::data(const QModelIndex& index, int role) const
             return preview;
         }
         case Qt::DisplayRole:
-            return skin.name();
+        case Qt::ToolTipRole:
         case Qt::UserRole:
-            return skin.name();
         case Qt::EditRole:
             return skin.name();
         default:
@@ -361,10 +362,9 @@ void SkinList::save()
         arr << s.toJSON();
     }
     doc["skins"] = arr;
-    try {
-        Json::write(doc, m_dir.absoluteFilePath("index.json"));
-    } catch (const FS::FileSystemException& e) {
-        qCritical() << "Failed to write skin index file :" << e.cause();
+    auto res = Json::write(doc, m_dir.absoluteFilePath("index.json"));
+    if (!res) {
+        qCritical() << "Failed to write skin index file :" << res.error();
     }
 }
 

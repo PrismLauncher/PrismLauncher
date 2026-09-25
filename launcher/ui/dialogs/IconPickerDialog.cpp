@@ -18,56 +18,131 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSortFilterProxyModel>
+#include <QStyledItemDelegate>
 
 #include "Application.h"
 
 #include "IconPickerDialog.h"
 #include "ui_IconPickerDialog.h"
 
-#include "ui/instanceview/InstanceDelegate.h"
-
 #include <DesktopServices.h>
 #include "icons/IconList.h"
 #include "icons/IconUtils.h"
+
+namespace {
+class DecorSizeDelegate : public QStyledItemDelegate {
+   public:
+    using QStyledItemDelegate::QStyledItemDelegate;
+
+    void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override
+    {
+        QStyledItemDelegate::initStyleOption(option, index);
+        // HACK: qt ignores the iconSize property and only uses it as a maximum icon size
+        option->decorationSize = { 48, 48 };
+    }
+};
+
+class IconProxyModel : public QSortFilterProxyModel {
+   public:
+    explicit IconProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}
+
+    QVariant data(const QModelIndex& proxyIndex, int role) const override
+    {
+        switch (role) {
+            case Qt::SizeHintRole:
+                return QSize(100, 48 + 30);
+            case Qt::ToolTipRole:
+                return QSortFilterProxyModel::data(proxyIndex, Qt::DisplayRole);
+            default:
+                return QSortFilterProxyModel::data(proxyIndex, role);
+        }
+    }
+
+    void setCategory(IconPickerDialog::IconPickerCategory category)
+    {
+        if (m_category == category)
+            return;
+        m_category = category;
+        invalidateFilter();
+    }
+
+   protected:
+    bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override
+    {
+        if (!QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent))
+            return false;
+
+        if (m_category == IconPickerDialog::Any)
+            return true;
+
+        auto model = static_cast<IconList*>(sourceModel());
+        QModelIndex index = model->index(source_row, 0, source_parent);
+        QString key = model->data(index, Qt::UserRole).toString();
+        const MMCIcon* icon = model->icon(key);
+
+        if (!icon)
+            return false;
+
+        bool isModpack = false;
+        bool isBuiltin = icon->isBuiltIn();
+        bool isLegacy = isBuiltin && icon->name().endsWith("_legacy", Qt::CaseInsensitive);
+
+        if (!isBuiltin) {
+            const QString& name = icon->name();
+            if (name.startsWith("curseforge_", Qt::CaseInsensitive) || name.startsWith("modrinth_", Qt::CaseInsensitive) ||
+                name.startsWith("ftb_", Qt::CaseInsensitive) || name.startsWith("technic_", Qt::CaseInsensitive) ||
+                name.startsWith("atl_", Qt::CaseInsensitive)) {
+                isModpack = true;
+            }
+        }
+
+        switch (m_category) {
+            case IconPickerDialog::Legacy:
+                return isBuiltin && isLegacy;
+            case IconPickerDialog::Modpacks:
+                return isModpack;
+            case IconPickerDialog::Modern:
+                return isBuiltin && !isLegacy;
+            case IconPickerDialog::Custom:
+                return !isBuiltin && !isModpack;
+            default:
+                return true;
+        }
+    }
+
+   private:
+    IconPickerDialog::IconPickerCategory m_category = IconPickerDialog::Any;
+};
+}  // namespace
 
 IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui::IconPickerDialog)
 {
     ui->setupUi(this);
     setWindowModality(Qt::WindowModal);
 
-    searchBar = new QLineEdit(this);
-    searchBar->setPlaceholderText(tr("Search..."));
-    ui->verticalLayout->insertWidget(0, searchBar);
+    static const QString context_text[] = {
+        tr("All"), tr("Modern"), tr("Legacy"), tr("Modpacks"), tr("Custom"),
+    };
+    static const IconPickerCategory context_id[] = {
+        Any, Modern, Legacy, Modpacks, Custom,
+    };
+    const int cnt = sizeof(context_text) / sizeof(context_text[0]);
+    for (int i = 0; i < cnt; ++i) {
+        ui->contextCombo->addItem(context_text[i], context_id[i]);
+        if (i == 0) {
+            ui->contextCombo->insertSeparator(i + 1);
+        }
+    }
 
-    proxyModel = new QSortFilterProxyModel(this);
+    proxyModel = new IconProxyModel(this);
     proxyModel->setSourceModel(APPLICATION->icons());
     proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     ui->iconView->setModel(proxyModel);
 
     auto contentsWidget = ui->iconView;
-    contentsWidget->setViewMode(QListView::IconMode);
-    contentsWidget->setFlow(QListView::LeftToRight);
-    contentsWidget->setIconSize(QSize(48, 48));
-    contentsWidget->setMovement(QListView::Static);
-    contentsWidget->setResizeMode(QListView::Adjust);
-    contentsWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-    contentsWidget->setSpacing(5);
-    contentsWidget->setWordWrap(false);
-    contentsWidget->setWrapping(true);
-    contentsWidget->setUniformItemSizes(true);
-    contentsWidget->setTextElideMode(Qt::ElideRight);
-    contentsWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    contentsWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    contentsWidget->setItemDelegate(new ListViewDelegate(contentsWidget));
-
-    // contentsWidget->setAcceptDrops(true);
-    contentsWidget->setDropIndicatorShown(true);
     contentsWidget->viewport()->setAcceptDrops(true);
-    contentsWidget->setDragDropMode(QAbstractItemView::DropOnly);
-    contentsWidget->setDefaultDropAction(Qt::CopyAction);
-
     contentsWidget->installEventFilter(this);
-
+    contentsWidget->setItemDelegate(new DecorSizeDelegate(this));
     contentsWidget->setModel(proxyModel);
 
     // NOTE: ResetRole forces the button to be on the left, while the OK/Cancel ones are on the right. We win.
@@ -86,7 +161,11 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
 
     auto buttonFolder = ui->buttonBox->addButton(tr("Open Folder"), QDialogButtonBox::ResetRole);
     connect(buttonFolder, &QPushButton::clicked, this, &IconPickerDialog::openFolder);
-    connect(searchBar, &QLineEdit::textChanged, this, &IconPickerDialog::filterIcons);
+    connect(ui->searchLine, &QLineEdit::textChanged, this, &IconPickerDialog::filterIcons);
+    connect(ui->contextCombo, &QComboBox::currentIndexChanged, this, [this](int index) {
+        IconPickerCategory category = static_cast<IconPickerCategory>(ui->contextCombo->itemData(index).toInt());
+        filterIconsByCategory(category);
+    });
     // Prevent incorrect indices from e.g. filesystem changes
     connect(APPLICATION->icons(), &IconList::iconUpdated, this, [this]() { proxyModel->invalidate(); });
 }
@@ -181,4 +260,9 @@ void IconPickerDialog::openFolder()
 void IconPickerDialog::filterIcons(const QString& query)
 {
     proxyModel->setFilterFixedString(query);
+}
+
+void IconPickerDialog::filterIconsByCategory(IconPickerCategory category)
+{
+    static_cast<IconProxyModel*>(proxyModel)->setCategory(category);
 }

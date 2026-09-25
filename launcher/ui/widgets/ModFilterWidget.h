@@ -39,6 +39,7 @@
 #include <QList>
 #include <QListWidgetItem>
 #include <QTabWidget>
+#include <algorithm>
 
 #include "Version.h"
 
@@ -61,44 +62,51 @@ class ModFilterWidget : public QTabWidget {
         std::vector<Version> versions;
         std::vector<ModPlatform::IndexedVersionType> releases;
         ModPlatform::ModLoaderTypes loaders;
-        ModPlatform::Side side;
+        ModPlatform::SideType side;
         bool hideInstalled;
         QStringList categoryIds;
         bool openSource;
+        std::vector<ModPlatform::DisclosureType> excludeDisclosureTypes;
 
         bool operator==(const Filter& other) const
         {
             return hideInstalled == other.hideInstalled && side == other.side && loaders == other.loaders && versions == other.versions &&
-                   releases == other.releases && categoryIds == other.categoryIds && openSource == other.openSource;
+                   releases == other.releases && categoryIds == other.categoryIds && openSource == other.openSource &&
+                   excludeDisclosureTypes == other.excludeDisclosureTypes;
         }
         bool operator!=(const Filter& other) const { return !(*this == other); }
 
-        bool checkMcVersions(QStringList value)
+        bool checkMcVersions(const QStringList& value)
         {
-            for (auto mcVersion : versions)
-                if (value.contains(mcVersion.toString()))
+            for (const auto& mcVersion : versions) {
+                if (value.contains(mcVersion.toString())) {
                     return true;
+                }
+            }
 
             return versions.empty();
         }
 
         bool checkModpackFilters(const ModPlatform::IndexedVersion& v)
         {
-            return ((!loaders || !v.loaders || loaders & v.loaders) &&  // loaders
-                    (releases.empty() ||                                // releases
-                     std::find(releases.cbegin(), releases.cend(), v.version_type) != releases.cend()) &&
+            return ((!loaders || !v.loaders || loaders.testAnyFlags(v.loaders)) &&  // loaders
+                    (releases.empty() ||                                            // releases
+                     std::ranges::contains(releases, v.versionType)) &&
                     checkMcVersions({ v.mcVersion }));  // gameVersion}
         }
     };
 
-    static std::unique_ptr<ModFilterWidget> create(MinecraftInstance* instance, bool extended);
-    virtual ~ModFilterWidget();
+    static ModFilterWidget* create(MinecraftInstance* instance, bool extended);
+    ~ModFilterWidget() override;
 
     auto getFilter() -> std::shared_ptr<Filter>;
-    auto changed() const -> bool { return m_filter_changed; }
+    auto changed() const -> bool { return m_filterChanged; }
 
    signals:
     void filterChanged();
+
+   public:
+    void setLoaderVersionOnly(bool only);
 
    public slots:
     void setCategories(const QList<ModPlatform::Category>&);
@@ -119,16 +127,17 @@ class ModFilterWidget : public QTabWidget {
     void onOpenSourceFilterChanged();
     void onReleaseFilterChanged();
     void onShowMoreClicked();
+    void onDisclosureFilterChanged();
 
    private:
-    Ui::ModFilterWidget* ui;
+    Ui::ModFilterWidget* m_ui;
 
     MinecraftInstance* m_instance = nullptr;
     std::shared_ptr<Filter> m_filter;
-    bool m_filter_changed = false;
+    bool m_filterChanged = false;
 
-    Meta::VersionList::Ptr m_version_list;
-    VersionProxyModel* m_versions_proxy = nullptr;
+    Meta::VersionList::Ptr m_versionList;
+    VersionProxyModel* m_versionsProxy = nullptr;
 
     QList<ModPlatform::Category> m_categories;
 };

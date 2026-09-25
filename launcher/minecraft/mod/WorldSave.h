@@ -30,11 +30,7 @@ class Version;
 enum class WorldSaveFormat { SINGLE, MULTI, INVALID };
 
 class WorldSave : public Resource {
-    Q_OBJECT
    public:
-    using Ptr = shared_qobject_ptr<Resource>;
-
-    WorldSave(QObject* parent = nullptr) : Resource(parent) {}
     WorldSave(QFileInfo file_info) : Resource(file_info) {}
 
     /** Gets the format of the save. */

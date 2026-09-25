@@ -6,6 +6,7 @@
   glfw3-minecraft,
   jdk17,
   jdk21,
+  jdk25,
   jdk8,
   kdePackages,
   lib,
@@ -15,6 +16,7 @@
   libXext,
   libXrandr,
   libXxf86vm,
+  libdecor,
   libjack2,
   libpulseaudio,
   libusb1,
@@ -23,10 +25,13 @@
   pciutils,
   pipewire,
   prismlauncher-unwrapped,
+  sdl3,
   stdenv,
   symlinkJoin,
   udev,
   vulkan-loader,
+  wayland,
+  wrapGAppsHook3,
   xrandr,
 
   additionalLibs ? [ ],
@@ -34,6 +39,7 @@
   controllerSupport ? stdenv.hostPlatform.isLinux,
   gamemodeSupport ? stdenv.hostPlatform.isLinux,
   jdks ? [
+    jdk25
     jdk21
     jdk17
     jdk8
@@ -59,7 +65,10 @@ symlinkJoin {
 
   paths = [ prismlauncher' ];
 
-  nativeBuildInputs = [ kdePackages.wrapQtAppsHook ];
+  nativeBuildInputs = [
+    kdePackages.wrapQtAppsHook
+    wrapGAppsHook3
+  ];
 
   buildInputs = [
     kdePackages.qtbase
@@ -71,6 +80,10 @@ symlinkJoin {
   ) kdePackages.qtwayland;
 
   postBuild = ''
+    # Required for org.gtk.Settings.FileChooser
+    gappsWrapperArgsHook
+    qtWrapperArgs+=("''${gappsWrapperArgs[@]}")
+
     wrapQtAppsHook
   '';
 
@@ -81,6 +94,7 @@ symlinkJoin {
         ## native versions
         glfw3-minecraft
         openal
+        sdl3
 
         ## openal
         alsa-lib
@@ -95,6 +109,8 @@ symlinkJoin {
         libXext
         libXrandr
         libXxf86vm
+        wayland
+        libdecor
 
         udev # oshi
 
@@ -113,7 +129,10 @@ symlinkJoin {
       ++ additionalPrograms;
 
     in
-    [ "--prefix PRISMLAUNCHER_JAVA_PATHS : ${lib.makeSearchPath "bin/java" jdks}" ]
+    [
+      "--set NIX_LAUNCHER_WRAPPER ${placeholder "out"}/bin/prismlauncher"
+      "--prefix PRISMLAUNCHER_JAVA_PATHS : ${lib.makeSearchPath "bin/java" jdks}"
+    ]
     ++ lib.optionals stdenv.hostPlatform.isLinux [
       "--set LD_LIBRARY_PATH ${addDriverRunpath.driverLink}/lib:${lib.makeLibraryPath runtimeLibs}"
       "--prefix PATH : ${lib.makeBinPath runtimePrograms}"

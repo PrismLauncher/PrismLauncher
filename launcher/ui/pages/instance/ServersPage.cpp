@@ -118,15 +118,21 @@ struct Server {
 static std::unique_ptr<nbt::tag_compound> parseServersDat(const QString& filename)
 {
     try {
-        QByteArray input = FS::read(filename);
+        auto res = FS::read(filename);
+        if (!res) {
+            return nullptr;
+        }
+        const auto& input = res.value();
         std::istringstream foo(std::string(input.constData(), input.size()));
         auto pair = nbt::io::read_compound(foo);
 
-        if (pair.first != "")
+        if (pair.first != "") {
             return nullptr;
+        }
 
-        if (pair.second == nullptr)
+        if (pair.second == nullptr) {
             return nullptr;
+        }
 
         return std::move(pair.second);
     } catch (...) {
@@ -143,8 +149,8 @@ static bool serializeServerDat(const QString& filename, nbt::tag_compound* level
         std::ostringstream s;
         nbt::io::write_tag("", *levelInfo, s);
         QByteArray val(s.str().data(), (int)s.str().size());
-        FS::write(filename, val);
-        return true;
+        auto res = FS::write(filename, val);
+        return res.has_value();
     } catch (...) {
         return false;
     }
@@ -548,7 +554,7 @@ class ServersModel : public QAbstractListModel {
     ConcurrentTask::Ptr m_currentQueryTask = nullptr;
 };
 
-ServersPage::ServersPage(BaseInstance* inst, QWidget* parent) : QMainWindow(parent), ui(new Ui::ServersPage)
+ServersPage::ServersPage(MinecraftInstance* inst, QWidget* parent) : QMainWindow(parent), ui(new Ui::ServersPage)
 {
     ui->setupUi(this);
     m_inst = inst;
@@ -557,6 +563,11 @@ ServersPage::ServersPage(BaseInstance* inst, QWidget* parent) : QMainWindow(pare
     ui->serversView->setModel(m_model);
     ui->serversView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->serversView, &QTreeView::customContextMenuRequested, this, &ServersPage::ShowContextMenu);
+    connect(ui->serversView, &QAbstractItemView::activated, this, [this](const QModelIndex& index) {
+        if (index.isValid() && ui->actionJoin->isEnabled()) {
+            on_actionJoin_triggered();
+        }
+    });
 
     auto head = ui->serversView->header();
     if (head->count()) {
@@ -695,11 +706,6 @@ void ServersPage::openedImpl()
 {
     m_model->observe();
 
-    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
-    m_wide_bar_setting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
-
-    ui->toolBar->setVisibilityState(QByteArray::fromBase64(m_wide_bar_setting->get().toString().toUtf8()));
-
     // ping servers
     m_model->queryServersStatus();
 }
@@ -707,8 +713,6 @@ void ServersPage::openedImpl()
 void ServersPage::closedImpl()
 {
     m_model->unobserve();
-
-    m_wide_bar_setting->set(QString::fromUtf8(ui->toolBar->getVisibilityState().toBase64()));
 }
 
 void ServersPage::on_actionAdd_triggered()

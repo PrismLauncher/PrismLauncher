@@ -36,12 +36,13 @@
 #include "ui/themes/CatPack.h"
 #include <QDate>
 #include <QDir>
-#include <QDirIterator>
 #include <QFileInfo>
 #include <QImageReader>
 #include <QRandomGenerator>
+#include <algorithm>
 #include "FileSystem.h"
 #include "Json.h"
+#include "Result.h"
 
 QString BasicCatPack::path() const
 {
@@ -64,40 +65,46 @@ QString BasicCatPack::path() const
 JsonCatPack::PartialDate partialDate(QJsonObject date)
 {
     auto month = date["month"].toInt(1);
-    if (month > 12)
+    if (month > 12) {
         month = 12;
-    else if (month <= 0)
+    } else if (month <= 0) {
         month = 1;
+    }
     auto day = date["day"].toInt(1);
-    if (day > 31)
+    if (day > 31) {
         day = 31;
-    else if (day <= 0)
+    } else if (day <= 0) {
         day = 1;
-    return { month, day };
+    }
+    return { .month = month, .day = day };
 };
 
-JsonCatPack::JsonCatPack(QFileInfo& manifestInfo) : BasicCatPack(manifestInfo.dir().dirName())
+Result<std::unique_ptr<JsonCatPack>> JsonCatPack::create(const QFileInfo& manifestInfo)
 {
-    QString path = manifestInfo.path();
-    auto doc = Json::requireDocument(manifestInfo.absoluteFilePath(), "CatPack JSON file");
-    const auto root = doc.object();
-    m_name = Json::requireString(root, "name", "Catpack name");
-    m_default_path = FS::PathCombine(path, Json::requireString(root, "default", "Default Cat"));
+    auto cat = std::unique_ptr<JsonCatPack>(new JsonCatPack(manifestInfo.dir().dirName()));
+    auto path = manifestInfo.path();
+    TRY_INTO(const auto& root, Json::requireObject(manifestInfo.absoluteFilePath(), "CatPack JSON file"))
+    TRY_INTO(cat->m_name, Json::requireString(root, "name", "Catpack name"))
+    TRY_INTO(const auto& defaultPath, Json::requireString(root, "default", "Default Cat"))
+    cat->m_default_path = FS::PathCombine(path, defaultPath);
     auto variants = root["variants"].toArray();
     for (auto v : variants) {
         auto variant = v.toObject();
-        m_variants << Variant{ FS::PathCombine(path, Json::requireString(variant, "path", "Variant path")),
-                               partialDate(Json::requireObject(variant, "startTime", "Variant startTime")),
-                               partialDate(Json::requireObject(variant, "endTime", "Variant endTime")) };
+        TRY_INTO(const auto& variantPath, Json::requireString(variant, "path", "Variant path"))
+        TRY_INTO(const auto& startTime, Json::requireObject(variant, "startTime", "Variant startTime"))
+        TRY_INTO(const auto& endTime, Json::requireObject(variant, "endTime", "Variant endTime"))
+        cat->m_variants << Variant{ .path = FS::PathCombine(path, variantPath),
+                                    .startTime = partialDate(startTime),
+                                    .endTime = partialDate(endTime) };
     }
+    return cat;
 }
 
 QDate ensureDay(int year, int month, int day)
 {
     QDate date(year, month, 1);
-    if (day > date.daysInMonth())
-        day = date.daysInMonth();
-    return QDate(year, month, day);
+    day = std::min(day, date.daysInMonth());
+    return { year, month, day };
 }
 
 QString JsonCatPack::path() const
@@ -107,34 +114,39 @@ QString JsonCatPack::path() const
 
 QString JsonCatPack::path(QDate now) const
 {
-    for (auto var : m_variants) {
+    for (const auto& var : m_variants) {
         QDate startDate = ensureDay(now.year(), var.startTime.month, var.startTime.day);
         QDate endDate = ensureDay(now.year(), var.endTime.month, var.endTime.day);
         if (startDate > endDate) {  // it's spans over multiple years
-            if (endDate < now)      // end date is in the past so jump one year into the future for endDate
+            if (endDate < now) {    // end date is in the past so jump one year into the future for endDate
                 endDate = endDate.addYears(1);
-            else  // end date is in the future so jump one year into the past for startDate
+            } else {  // end date is in the future so jump one year into the past for startDate
                 startDate = startDate.addYears(-1);
+            }
         }
 
-        if (startDate <= now && now <= endDate)
+        if (startDate <= now && now <= endDate) {
             return var.path;
+        }
     }
     auto dInfo = QFileInfo(m_default_path);
-    if (!dInfo.isDir())
+    if (!dInfo.isDir()) {
         return m_default_path;
+    }
 
     QStringList supportedImageFormats;
-    for (auto format : QImageReader::supportedImageFormats()) {
+    for (const auto& format : QImageReader::supportedImageFormats()) {
         supportedImageFormats.append("*." + format);
     }
 
     auto files = QDir(m_default_path).entryInfoList(supportedImageFormats, QDir::Files, QDir::Name);
-    if (files.length() == 0)
+    if (files.length() == 0) {
         return "";
+    }
     auto idx = (now.dayOfYear() - 1) % files.length();
     auto isRandom = dInfo.fileName().compare("random", Qt::CaseInsensitive) == 0;
-    if (isRandom)
+    if (isRandom) {
         idx = QRandomGenerator::global()->bounded(0, files.length());
+    }
     return files[idx].absoluteFilePath();
 }

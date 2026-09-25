@@ -38,11 +38,13 @@
 #include <FileSystem.h>
 #include <Json.h>
 #include <MMCZip.h>
+#include <QDirListing>
 #include <QtConcurrentRun>
+#include <utility>
 
 #include "SolderPackManifest.h"
 #include "TechnicPackProcessor.h"
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 #include "net/ChecksumValidator.h"
 
 Technic::SolderPackInstallTask::SolderPackInstallTask(QNetworkAccessManager* network,
@@ -50,13 +52,8 @@ Technic::SolderPackInstallTask::SolderPackInstallTask(QNetworkAccessManager* net
                                                       const QString& pack,
                                                       const QString& version,
                                                       const QString& minecraftVersion)
-{
-    m_solderUrl = solderUrl;
-    m_pack = pack;
-    m_version = version;
-    m_network = network;
-    m_minecraftVersion = minecraftVersion;
-}
+    : m_network(network), m_solderUrl(solderUrl), m_pack(pack), m_version(version), m_minecraftVersion(minecraftVersion)
+{}
 
 bool Technic::SolderPackInstallTask::abort()
 {
@@ -72,10 +69,10 @@ void Technic::SolderPackInstallTask::executeTask()
 
     m_filesNetJob.reset(new NetJob(tr("Resolving modpack files"), m_network));
     auto sourceUrl = QString("%1/modpack/%2/%3").arg(m_solderUrl.toString(), m_pack, m_version);
-    auto [action, response] = Net::ApiDownload::makeByteArray(sourceUrl);
+    auto [action, response] = Net::ApiRequest::makeByteArray(sourceUrl);
     m_filesNetJob->addNetAction(action);
 
-    auto job = m_filesNetJob.get();
+    auto* job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, [this, response] { fileListSucceeded(response); });
     connect(job, &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
     connect(job, &NetJob::aborted, this, &Technic::SolderPackInstallTask::downloadAborted);
@@ -86,26 +83,22 @@ void Technic::SolderPackInstallTask::fileListSucceeded(QByteArray* response)
 {
     setStatus(tr("Downloading modpack"));
 
-    QJsonParseError parse_error{};
-    QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-    if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from Solder at" << parse_error.offset << "reason:" << parse_error.errorString();
-        qWarning() << *response;
-        return;
-    }
-    auto obj = doc.object();
-
     TechnicSolder::PackBuild build;
-    try {
-        TechnicSolder::loadPackBuild(build, obj);
-    } catch (const JSONValidationError& e) {
+    auto doc = Json::requireDocument(*response).and_then([&build](const auto& v) {
+        auto obj = v.object();
+        return TechnicSolder::loadPackBuild(build, obj);
+    });
+    if (!doc) {
+        qWarning() << "Error while parsing JSON response from Solder:" << doc.error();
+        qWarning() << *response;
         m_filesNetJob.reset();
-        emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
+        emitFailed(tr("Could not understand pack manifest:\n") + doc.error());
         return;
     }
 
-    if (!build.minecraft.isEmpty())
+    if (!build.minecraft.isEmpty()) {
         m_minecraftVersion = build.minecraft;
+    }
 
     m_filesNetJob.reset(new NetJob(tr("Downloading modpack"), m_network));
 
@@ -113,7 +106,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded(QByteArray* response)
     for (const auto& mod : build.mods) {
         auto path = FS::PathCombine(m_outputDir.path(), QString("%1").arg(i));
 
-        auto dl = Net::ApiDownload::makeFile(mod.url, path);
+        auto dl = Net::ApiRequest::makeFile(mod.url, path);
         if (!mod.md5.isEmpty()) {
             dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
         }
@@ -122,7 +115,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded(QByteArray* response)
         i++;
     }
 
-    m_modCount = build.mods.size();
+    m_modCount = static_cast<int>(build.mods.size());
 
     connect(m_filesNetJob.get(), &NetJob::succeeded, this, &Technic::SolderPackInstallTask::downloadSucceeded);
     connect(m_filesNetJob.get(), &NetJob::progress, this, &Technic::SolderPackInstallTask::downloadProgressChanged);
@@ -161,7 +154,7 @@ void Technic::SolderPackInstallTask::downloadFailed(QString reason)
 {
     m_abortable = false;
     m_filesNetJob.reset();
-    emitFailed(reason);
+    emitFailed(std::move(reason));
 }
 
 void Technic::SolderPackInstallTask::downloadProgressChanged(qint64 current, qint64 total)
@@ -182,14 +175,10 @@ void Technic::SolderPackInstallTask::extractFinished()
         emitFailed(tr("Failed to extract modpack"));
         return;
     }
-    QDir extractDir(m_stagingPath);
 
     qDebug() << "Fixing permissions for extracted pack files...";
-    QDirIterator it(extractDir, QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        auto filepath = it.next();
-        QFileInfo file(filepath);
-        auto permissions = QFile::permissions(filepath);
+    for (const auto& file : QDirListing(m_stagingPath, QDirListing::IteratorFlag::ResolveSymlinks | QDirListing::IteratorFlag::Recursive)) {
+        auto permissions = QFile::permissions(file.absoluteFilePath());
         auto origPermissions = permissions;
         if (file.isDir()) {
             // Folder +rwx for current user
@@ -199,10 +188,10 @@ void Technic::SolderPackInstallTask::extractFinished()
             permissions |= QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser;
         }
         if (origPermissions != permissions) {
-            if (!QFile::setPermissions(filepath, permissions)) {
-                logWarning(tr("Could not fix permissions for %1").arg(filepath));
+            if (!QFile::setPermissions(file.absoluteFilePath(), permissions)) {
+                logWarning(tr("Could not fix permissions for %1").arg(file.absoluteFilePath()));
             } else {
-                qDebug() << "Fixed" << filepath;
+                qDebug() << "Fixed" << file.absoluteFilePath();
             }
         }
     }

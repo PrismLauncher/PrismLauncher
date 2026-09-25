@@ -22,6 +22,8 @@
 #include <QList>
 #include <QString>
 
+#include "Result.h"
+
 namespace ATLauncher {
 
 struct ShareCodeMod {
@@ -42,6 +44,6 @@ struct ShareCodeResponse {
     ShareCode data;
 };
 
-void loadShareCodeResponse(ShareCodeResponse& r, QJsonObject& obj);
+Result<> loadShareCodeResponse(ShareCodeResponse& r, const QJsonObject& obj);
 
 }  // namespace ATLauncher

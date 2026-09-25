@@ -43,19 +43,20 @@
 class InstanceImportTask : public InstanceTask {
     Q_OBJECT
    public:
-    explicit InstanceImportTask(const QUrl& sourceUrl, QWidget* parent = nullptr, QMap<QString, QString>&& extra_info = {});
-    virtual ~InstanceImportTask() = default;
+    explicit InstanceImportTask(QUrl sourceUrl, bool trustedSource, QWidget* parent = nullptr, QMap<QString, QString> extraInfo = {});
+    ~InstanceImportTask() override = default;
     bool abort() override;
 
    protected:
     //! Entry point for tasks.
-    virtual void executeTask() override;
+    void executeTask() override;
 
    private:
     void processMultiMC();
     void processTechnic();
     void processFlame();
     void processModrinth();
+    void downloadFromUrl();
 
    private slots:
     void processZipPack();
@@ -63,9 +64,10 @@ class InstanceImportTask : public InstanceTask {
 
    private: /* data */
     QUrl m_sourceUrl;
+    bool m_trustedSource;
     QString m_archivePath;
     Task::Ptr m_task;
-    enum class ModpackType {
+    enum class ModpackType : std::uint8_t {
         Unknown,
         MultiMC,
         Technic,
@@ -75,9 +77,8 @@ class InstanceImportTask : public InstanceTask {
 
     // Extra info we might need, that's available before, but can't be derived from
     // the source URL / the resource it points to alone.
-    QMap<QString, QString> m_extra_info;
+    QMap<QString, QString> m_extraInfo;
 
     // FIXME: nuke
     QWidget* m_parent;
-    void downloadFromUrl();
 };

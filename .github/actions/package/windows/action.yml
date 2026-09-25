@@ -29,6 +29,14 @@ runs:
   using: composite
 
   steps:
+      # NOTE: Avoid multiple matches for DLLs with CMake
+      # This will fallback to those provided by the toolchain (i.e., MSYS2, llvm-mingw)
+    - name: Cleanup Qt install (MinGW)
+      if: ${{ inputs.msystem != '' }}
+      shell: msys2 {0}
+      run: |
+        rm -f "$QT_ROOT_DIR"/bin/lib{c++,unwind}.dll
+
     - name: Package (MinGW)
       if: ${{ inputs.msystem != '' }}
       shell: msys2 {0}
@@ -69,7 +77,7 @@ runs:
 
     - name: Sign executables
       if: ${{ env.CI_HAS_ACCESS_TO_AZURE != '' && inputs.azure-client-id != '' }}
-      uses: azure/artifact-signing-action@v1
+      uses: azure/artifact-signing-action@v2
       with:
         endpoint: https://eus.codesigning.azure.net/
         trusted-signing-account-name: PrismLauncher
@@ -142,7 +150,7 @@ runs:
 
     - name: Sign installer
       if: ${{ env.CI_HAS_ACCESS_TO_AZURE != '' && inputs.azure-client-id != '' }}
-      uses: azure/artifact-signing-action@v1
+      uses: azure/artifact-signing-action@v2
       with:
         endpoint: https://eus.codesigning.azure.net/
         trusted-signing-account-name: PrismLauncher

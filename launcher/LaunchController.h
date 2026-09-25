@@ -34,9 +34,9 @@
  */
 
 #pragma once
-#include <BaseInstance.h>
 #include <tools/BaseProfiler.h>
 
+#include "minecraft/MinecraftInstance.h"
 #include "minecraft/auth/MinecraftAccount.h"
 #include "minecraft/launch/MinecraftTarget.h"
 
@@ -52,9 +52,9 @@ class LaunchController : public Task {
     LaunchController();
     ~LaunchController() override = default;
 
-    void setInstance(BaseInstance* instance) { m_instance = instance; }
+    void setInstance(MinecraftInstance* instance) { m_instance = instance; }
 
-    BaseInstance* instance() const { return m_instance; }
+    MinecraftInstance* instance() const { return m_instance; }
 
     void setLaunchMode(const LaunchMode mode) { m_wantedLaunchMode = mode; }
 
@@ -78,7 +78,7 @@ class LaunchController : public Task {
     void decideAccount();
     LaunchDecision decideLaunchMode();
     bool askPlayDemo() const;
-    QString askOfflineName(const QString& playerName, bool* ok = nullptr) const;
+    QString askOfflineName(const QString& playerName, bool* ok = nullptr);
     bool reauthenticateAccount(const MinecraftAccountPtr& account, const QString& reason);
 
    private slots:
@@ -93,7 +93,7 @@ class LaunchController : public Task {
     LaunchMode m_actualLaunchMode = LaunchMode::Normal;
     BaseProfilerFactory* m_profiler = nullptr;
     QString m_offlineName;
-    BaseInstance* m_instance = nullptr;
+    MinecraftInstance* m_instance = nullptr;
     QWidget* m_parentWidget = nullptr;
     InstanceWindow* m_console = nullptr;
     MinecraftAccountPtr m_accountToUse = nullptr;

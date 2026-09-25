@@ -1,20 +1,22 @@
 #include <QFutureWatcher>
 
 #include <Json.h>
-#include "Exception.h"
 #include "McClient.h"
 #include "McResolver.h"
+#include "Result.h"
 #include "ServerPingTask.h"
 
-unsigned getOnlinePlayers(QJsonObject data)
+namespace {
+unsigned getOnlinePlayers(const QJsonObject& data)
 {
-    try {
-        return Json::requireInteger(Json::requireObject(data, "players"), "online");
-    } catch (Exception& e) {
-        qWarning() << "server ping failed to parse response" << e.what();
+    auto res = Json::requireObject(data, "players").and_then([](const auto& v) { return Json::requireInteger(v, "online"); });
+    if (!res) {
+        qWarning() << "server ping failed to parse response" << res.error();
         return 0;
     }
+    return res.value();
 }
+}  // namespace
 
 void ServerPingTask::executeTask()
 {
@@ -42,6 +44,6 @@ void ServerPingTask::executeTask()
     connect(resolver, &McResolver::failed, this, [this](QString error) { emitFailed(error); });
 
     // Delete McResolver object when done
-    connect(resolver, &McResolver::finished, [resolver]() { resolver->deleteLater(); });
+    connect(resolver, &McResolver::finished, resolver, &McResolver::deleteLater);
     resolver->ping();
 }

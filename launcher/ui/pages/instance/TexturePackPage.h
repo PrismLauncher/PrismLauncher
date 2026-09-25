@@ -55,7 +55,7 @@ class TexturePackPage : public ExternalResourcesPage {
     QString id() const override { return "texturepacks"; }
     QString helpPage() const override { return "Texture-packs"; }
 
-    virtual bool shouldDisplay() const override { return m_instance->traits().contains("texturepacks"); }
+    bool shouldDisplay() const override { return m_instance->traits().contains("texturepacks"); }
 
    public slots:
     void updateFrame(const QModelIndex& current, const QModelIndex& previous) override;
@@ -67,5 +67,5 @@ class TexturePackPage : public ExternalResourcesPage {
 
    private:
     TexturePackFolderModel* m_model;
-    QPointer<ResourceDownload::TexturePackDownloadDialog> m_downloadDialog;
+    QPointer<ResourceDownload::ResourceDownloadDialog> m_downloadDialog;
 };

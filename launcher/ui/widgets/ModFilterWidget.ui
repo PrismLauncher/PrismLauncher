@@ -53,7 +53,7 @@
       </size>
      </property>
      <property name="sizeAdjustPolicy">
-      <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
+      <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContentsOnFirstShow</enum>
      </property>
      <property name="widgetResizable">
       <bool>true</bool>
@@ -62,9 +62,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
+        <y>-636</y>
         <width>294</width>
-        <height>817</height>
+        <height>1234</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -303,9 +303,123 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="disclosureGroup">
+         <property name="title">
+          <string>Advanced exclusions</string>
+         </property>
+         <layout class="QVBoxLayout" name="disclosureLayout">
+          <item>
+           <widget class="QCheckBox" name="aiContent">
+            <property name="text">
+             <string>AI content</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="aiContentCode">
+            <property name="text">
+             <string>AI content (code)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="aiContentAssets">
+            <property name="text">
+             <string>AI content (assets)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="aiContentText">
+            <property name="text">
+             <string>AI content (text)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="aiContentFunctionality">
+            <property name="text">
+             <string>AI content (functionality)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="advertisements">
+            <property name="text">
+             <string>Advertisements</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="epilepsyTriggers">
+            <property name="text">
+             <string>Epilepsy triggers</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="systemInteractions">
+            <property name="text">
+             <string>System interactions</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="telemetry">
+            <property name="text">
+             <string>Telemetry</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="telemetryOptIn">
+            <property name="text">
+             <string>Telemetry (opt-in)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="telemetryOptOut">
+            <property name="text">
+             <string>Telemetry (opt-out)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="telemetryAlwaysActive">
+            <property name="text">
+             <string>Telemetry (always active)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="derivativeWork">
+            <property name="text">
+             <string>Derivative work</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="paidFeatures">
+            <property name="text">
+             <string>Paid features</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="archived">
+            <property name="text">
+             <string>Archived</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>

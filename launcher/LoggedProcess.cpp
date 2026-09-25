@@ -114,7 +114,7 @@ void LoggedProcess::on_error(QProcess::ProcessError error)
 {
     switch (error) {
         case QProcess::FailedToStart: {
-            emit log({ tr("The process failed to start.") }, MessageLevel::Fatal);
+            emit log({ tr("The process failed to start: %1").arg(errorString()) }, MessageLevel::Fatal);
             changeState(LoggedProcess::FailedToStart);
             break;
         }

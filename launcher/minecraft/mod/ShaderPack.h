@@ -41,13 +41,9 @@
 enum class ShaderPackFormat { VALID, INVALID };
 
 class ShaderPack : public Resource {
-    Q_OBJECT
    public:
-    using Ptr = shared_qobject_ptr<Resource>;
-
     ShaderPackFormat packFormat() const { return m_pack_format; }
 
-    ShaderPack(QObject* parent = nullptr) : Resource(parent) {}
     ShaderPack(QFileInfo file_info) : Resource(file_info) {}
 
     /** Thread-safe. */

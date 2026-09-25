@@ -146,7 +146,7 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
     QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"), QObject::tr("Not supported on your platform!"));
     return false;
 #endif
-    args.append({ "--launch", shortcut.instance->id() });
+    args.append({ "--launch", shortcut.instance->uuid() });
     args.append(shortcut.extraArgs);
 
     QString shortcutPath = FS::createShortcut(filePath, appPath, args, shortcut.name, iconPath);

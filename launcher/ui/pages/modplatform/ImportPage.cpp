@@ -118,7 +118,7 @@ void ImportPage::updateState()
             if (fi.exists() && (isZip || isMRPack)) {
                 auto extra_info = QMap(m_extra_info);
                 qDebug() << "Pack Extra Info" << extra_info << m_extra_info;
-                dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, this, std::move(extra_info)));
+                dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, false, this, std::move(extra_info)));
                 dialog->setSuggestedIcon("default");
             }
         } else if (url.scheme() == "curseforge") {
@@ -132,15 +132,19 @@ void ImportPage::updateState()
             auto addonId = query.allQueryItemValues("addonId")[0];
             auto fileId = query.allQueryItemValues("fileId")[0];
 
-            auto api = FlameAPI();
-            auto [job, array] = api.getFile(addonId, fileId);
+            auto [job, array] = FlameAPI::getFile(addonId, fileId);
 
-            connect(job.get(), &NetJob::failed, this,
-                    [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+            connect(job.get(), &NetJob::failed, this, [this](const QString& reason) {
+                CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+            });
             connect(job.get(), &NetJob::succeeded, this, [this, array, addonId, fileId] {
                 qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
                 auto doc = Json::requireDocument(*array);
-                auto data = doc.object()["data"].toObject();
+                if (!doc) {
+                    CustomMessageBox::selectable(this, tr("Error"), doc.error(), QMessageBox::Critical)->show();
+                    return;
+                }
+                auto data = doc->object()["data"].toObject();
                 // No way to find out if it's a mod or a modpack before here
                 // And also we need to check if it ends with .zip, instead of any better way
                 auto fileName = data["fileName"].toString();
@@ -163,7 +167,7 @@ void ImportPage::updateState()
                     extra_info.insert("pack_id", addonId);
                     extra_info.insert("pack_version_id", fileId);
 
-                    dialog->setSuggestedPack(pack_name, new InstanceImportTask(dl_url, this, std::move(extra_info)));
+                    dialog->setSuggestedPack(pack_name, new InstanceImportTask(dl_url, false, this, std::move(extra_info)));
                     dialog->setSuggestedIcon("default");
 
                 } else {
@@ -183,7 +187,7 @@ void ImportPage::updateState()
             // hook, line and sinker.
             QFileInfo fi(url.fileName());
             auto extra_info = QMap(m_extra_info);
-            dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, this, std::move(extra_info)));
+            dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, false, this, std::move(extra_info)));
             dialog->setSuggestedIcon("default");
         }
     } else {

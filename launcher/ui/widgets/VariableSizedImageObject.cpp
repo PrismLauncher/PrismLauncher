@@ -26,7 +26,7 @@
 
 #include "Application.h"
 
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 #include "net/NetJob.h"
 
 enum FormatProperties { ImageData = QTextFormat::UserProperty + 1 };
@@ -141,7 +141,7 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, std::shared_ptr<Ima
 
     auto job = new NetJob(QString("Load Image: %1").arg(meta->url.fileName()), APPLICATION->network());
     job->setAskRetry(false);
-    job->addNetAction(Net::ApiDownload::makeCached(meta->url, entry));
+    job->addNetAction(Net::ApiRequest::makeCached(meta->url, entry));
 
     auto full_entry_path = entry->getFullPath();
     auto source_url = meta->url;

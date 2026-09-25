@@ -11,15 +11,21 @@ class ResourcePackFolderModel : public ResourceFolderModel {
         ActiveColumn = 0,
         ImageColumn,
         NameColumn,
+        VersionColumn,
         PackFormatColumn,
         DateColumn,
         ProviderColumn,
         SizeColumn,
         FileNameColumn,
+        LockUpdateColumn,
         NumColumns
     };
 
-    explicit ResourcePackFolderModel(const QDir& dir, BaseInstance* instance, bool isIndexed, bool createDir, QObject* parent = nullptr);
+    explicit ResourcePackFolderModel(const QDir& dir,
+                                     MinecraftInstance* instance,
+                                     bool isIndexed,
+                                     bool createDir,
+                                     QObject* parent = nullptr);
 
     QString id() const override { return "resourcepacks"; }
 

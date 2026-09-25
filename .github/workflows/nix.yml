@@ -95,7 +95,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install Nix
         uses: cachix/install-nix-action@v31
@@ -103,7 +103,7 @@ jobs:
         # For PRs
       - name: Setup Nix Magic Cache
         if: ${{ github.event_name == 'pull_request' }}
-        uses: DeterminateSystems/magic-nix-cache-action@v13
+        uses: DeterminateSystems/magic-nix-cache-action@v15
         with:
           diagnostic-endpoint: ""
           use-flakehub: false

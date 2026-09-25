@@ -6,7 +6,7 @@ ARG QT_ABI=gcc_64
 ARG QT_ARCH=
 ARG QT_HOST=linux
 ARG QT_TARGET=desktop
-ARG QT_VERSION=6.10.2
+ARG QT_VERSION=6.10.3
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -28,7 +28,7 @@ RUN apt-get --assume-yes --no-install-recommends install \
   # Build system
   cmake ninja-build extra-cmake-modules pkg-config \
   # Dependencies
-  cmark gamemode-dev libarchive-dev libcmark-dev libgamemode0 libgl1-mesa-dev libqrencode-dev libtomlplusplus-dev libvulkan-dev scdoc zlib1g-dev \
+  cmark gamemode-dev libarchive-dev libcmark-dev libgamemode0 libgl1-mesa-dev libqrencode-dev libtomlplusplus-dev scdoc zlib1g-dev \
   # Tooling
   clang-format clang-tidy git
 

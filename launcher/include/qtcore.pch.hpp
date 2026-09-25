@@ -41,7 +41,7 @@
 #include <QJsonObject>
 
 #include <QDir>
-#include <QDirIterator>
+#include <QDirListing>
 #include <QFile>
 #include <QFileInfo>
 #include <QFileSystemWatcher>
