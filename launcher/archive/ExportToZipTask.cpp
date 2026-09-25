@@ -36,7 +36,9 @@ auto ExportToZipTask::exportZip() -> Result<>
     if (!m_dir.exists()) {
         return std::unexpected(tr("Folder doesn't exist"));
     }
-    TRY(m_output.open())
+    if (const auto result = m_output.open(); !result) {
+        return std::unexpected(tr("Failed to open output file: %1").arg(result.error()));
+    }
 
     for (auto fileName : m_extraFiles.keys()) {
         if (m_buildZipFuture.isCanceled())
@@ -66,7 +68,10 @@ auto ExportToZipTask::exportZip() -> Result<>
         }
     }
 
-    return m_output.close();
+    if (const auto result = m_output.close(); !result) {
+        return std::unexpected(tr("Failed to close output file: %1").arg(result.error()));
+    }
+    return {};
 }
 
 void ExportToZipTask::finish()
