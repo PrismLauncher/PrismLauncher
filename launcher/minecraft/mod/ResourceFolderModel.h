@@ -9,6 +9,7 @@
 
 #include "Resource.h"
 
+#include "modplatform/ModIndex.h"
 #include "tasks/ConcurrentTask.h"
 #include "tasks/Task.h"
 
@@ -89,7 +90,7 @@ class ResourceFolderModel : public QAbstractListModel {
      */
     virtual bool installResource(QString path);
 
-    virtual void installResourceWithFlameMetadata(const QString& path, ModPlatform::IndexedVersion& vers);
+    void installResourceWithMeta(const QString& path, const ModPlatform::IndexedVersion& vers, ModPlatform::ResourceProvider provider);
 
     /** Uninstall (i.e. remove all data about it) a resource, given its file name.
      *
@@ -282,4 +283,6 @@ class ResourceFolderModel : public QAbstractListModel {
 
     QMap<int, Task::Ptr> m_activeParseTasks;
     std::atomic<int> m_nextResolutionTicket = 0;
+
+    Task::Ptr m_installWithMetaTask = nullptr;
 };
