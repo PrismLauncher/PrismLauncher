@@ -73,5 +73,7 @@ class TexturePackFolderModel : public ResourceFolderModel {
     [[nodiscard]] Resource* createResource(const QFileInfo& file) override { return new TexturePack(file); }
     [[nodiscard]] Task* createParseTask(Resource& /*unused*/) override;
 
+    bool showImageToggle() override { return true; }
+
     RESOURCE_HELPERS(TexturePack)
 };

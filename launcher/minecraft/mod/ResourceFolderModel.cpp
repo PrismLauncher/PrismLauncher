@@ -713,6 +713,9 @@ void ResourceFolderModel::saveColumns(QTreeView* tree)
             visibility[name] = !tree->isColumnHidden(i);
         }
     }
+    if (showImageToggle()) {
+        visibility["Image"] = m_showImages;
+    }
     settings->set(visibilitySettingName, Json::fromMap(visibility));
 
     const auto sizesSettingName = QString("UI/%1_Page/ColumnSizes").arg(id());
@@ -743,6 +746,8 @@ void ResourceFolderModel::loadColumns(QTreeView* tree)
             }
         }
         tree->header()->blockSignals(false);
+
+        m_showImages = visibility.value("Image").toBool();
     };
 
     const auto defaultValue = Json::fromMap({
@@ -808,6 +813,18 @@ QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
         menu->addAction(act);
     }
     menu->addSeparator()->setText(tr("Show / Hide Columns"));
+
+    if (showImageToggle()) {
+        auto* imageAction = new QAction(tr("Image"));
+        imageAction->setCheckable(true);
+        imageAction->setChecked(m_showImages);
+
+        connect(imageAction, &QAction::toggled, tree, [this](bool toggled) {
+            m_showImages = toggled;
+        });
+
+        menu->addAction(imageAction);
+    }
 
     for (int col = 0; col < columnCount(); ++col) {
         // Skip creating actions for columns that should not be hidden

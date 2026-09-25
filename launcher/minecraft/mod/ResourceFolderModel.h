@@ -172,6 +172,8 @@ class ResourceFolderModel : public QAbstractListModel {
     void loadColumns(QTreeView* tree);
     QMenu* createHeaderContextMenu(QTreeView* tree);
 
+    virtual bool showImageToggle() { return false; }
+
     /** This creates a proxy model to filter / sort the model for a UI.
      *
      *  The actual comparisons and filtering are done directly by the Resource, so to modify behavior go there instead!
@@ -248,6 +250,7 @@ class ResourceFolderModel : public QAbstractListModel {
     virtual void onParseFailed(int ticket, const QString& resourceId);
 
    protected:
+    bool m_showImages = true;
     // Represents the relationship between a column's index (represented by the list index), and it's sorting key.
     // As such, the order in with they appear is very important!
     QList<SortType> m_columnSortKeys = { SortType::Enabled,  SortType::Name, SortType::Version,  SortType::Date,

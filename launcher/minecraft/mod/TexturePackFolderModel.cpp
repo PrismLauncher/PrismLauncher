@@ -128,14 +128,17 @@ QList<MultiDecorationItemDelegate::Icon> TexturePackFolderModel::icons(int row) 
     auto result = ResourceFolderModel::icons(row);
     static const QSize s_iconSize = { 32, 32 };
 
-    QIcon icon;
-    if (const auto pixmap = at(row).image(s_iconSize, Qt::KeepAspectRatio); !pixmap.isNull()) {
-        icon = pixmap;
-    } else {
-        icon = QIcon::fromTheme("resourcepacks");
+    if (m_showImages) {
+        QIcon icon;
+        if (const auto pixmap = at(row).image(s_iconSize, Qt::KeepAspectRatio); !pixmap.isNull()) {
+            icon = pixmap;
+        } else {
+            icon = QIcon::fromTheme("resourcepacks");
+        }
+
+        result.prepend({ .icon = icon, .size = s_iconSize });
     }
 
-    result.prepend({ .icon = icon, .size = s_iconSize });
     return result;
 }
 

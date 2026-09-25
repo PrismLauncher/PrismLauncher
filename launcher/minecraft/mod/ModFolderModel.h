@@ -96,11 +96,12 @@ class ModFolderModel : public ResourceFolderModel {
 
     QModelIndexList getAffectedMods(const QModelIndexList& indexes, EnableAction action);
 
-    RESOURCE_HELPERS(Mod)
-
-   public:
     QStringList requiresList(const QString& id) const;
     QStringList requiredByList(const QString& id) const;
+
+    bool showImageToggle() override { return true; }
+
+    RESOURCE_HELPERS(Mod)
 
    private slots:
     void onParseSucceeded(int ticket, const QString& resourceId) override;

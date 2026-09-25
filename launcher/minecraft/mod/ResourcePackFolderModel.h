@@ -38,5 +38,7 @@ class ResourcePackFolderModel : public ResourceFolderModel {
     [[nodiscard]] Resource* createResource(const QFileInfo& file) override { return new ResourcePack(file); }
     [[nodiscard]] Task* createParseTask(Resource& /*unused*/) override;
 
+    bool showImageToggle() override { return true; }
+
     RESOURCE_HELPERS(ResourcePack)
 };

@@ -221,16 +221,19 @@ QList<MultiDecorationItemDelegate::Icon> ModFolderModel::icons(int row) const
     auto result = ResourceFolderModel::icons(row);
     static const QSize s_iconSize = { 32, 32 };
 
-    const auto& mod = at(row);
+    if (m_showImages) {
+        const auto& mod = at(row);
 
-    QIcon icon;
-    if (const auto pixmap = mod.icon(s_iconSize, Qt::KeepAspectRatio); pixmap.isNull()) {
-        icon = fallbackIcon(mod.details().loader);
-    } else {
-        icon = pixmap;
+        QIcon icon;
+        if (const auto pixmap = mod.icon(s_iconSize, Qt::KeepAspectRatio); pixmap.isNull()) {
+            icon = fallbackIcon(mod.details().loader);
+        } else {
+            icon = pixmap;
+        }
+
+        result.prepend({ .icon = icon, .size = s_iconSize });
     }
 
-    result.prepend({ .icon = icon, .size = s_iconSize });
     return result;
 }
 

@@ -73,5 +73,7 @@ class DataPackFolderModel : public ResourceFolderModel {
     [[nodiscard]] Resource* createResource(const QFileInfo& file) override;
     [[nodiscard]] Task* createParseTask(Resource& /*unused*/) override;
 
+    bool showImageToggle() override { return true; }
+
     RESOURCE_HELPERS(DataPack)
 };
