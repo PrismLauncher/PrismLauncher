@@ -57,7 +57,7 @@ Result<> ArchiveWriter::open()
 
     m_archive = archive_write_new();
     if (!m_archive) {
-        return std::unexpected{QString("Failed to allocate writer object").arg(m_filename)};
+        return std::unexpected{QString("Failed to allocate writer object for archive %1").arg(m_filename)};
     }
 
     auto format = m_format.toUtf8();

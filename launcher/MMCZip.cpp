@@ -266,9 +266,6 @@ Result<> extractFile(QString fileCompressed, QString file, QString target)
     }
     ArchiveReader zip(fileCompressed);
     TRY_INTO(const auto& f, zip.goToFile(file))
-    if (!f) {
-        return std::unexpected{ "File not found" };
-    }
     auto extPtr = ArchiveWriter::createDiskWriter();
     auto ext = extPtr.get();
 

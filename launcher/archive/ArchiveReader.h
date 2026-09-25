@@ -66,6 +66,7 @@ class ArchiveReader {
     };
 
     Result<std::unique_ptr<File>> goToFile(const QString& filename);
+    Result<QByteArray> readFile(const QString& fileName);
     Result<> parse(const std::function<Result<>(File*)>&);
     Result<> parse(const std::function<Result<bool>(File*)>&);
 

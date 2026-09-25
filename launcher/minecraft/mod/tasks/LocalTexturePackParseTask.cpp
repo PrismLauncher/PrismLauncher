@@ -164,13 +164,7 @@ bool processPackPNG(const TexturePack& pack)
         case ResourceType::ZIPFILE: {
             MMCZip::ArchiveReader zip(pack.fileinfo().filePath());
 
-            auto file = zip.goToFile("pack.png");
-            if (file.has_value() && file.value()) {
-                auto dataRes = file.value()->readAll();
-                if (!dataRes) {
-                    return png_invalid();
-                }
-
+            if (auto dataRes = zip.readFile("pack.png"); dataRes) {
                 bool pack_png_result = TexturePackUtils::processPackPNG(pack, std::move(dataRes.value()));
 
                 if (!pack_png_result) {
