@@ -21,8 +21,8 @@
 #include <QList>
 #include <QMap>
 #include <QObject>
-#include <QUrl>
 #include <QString>
+#include <QUrl>
 #include <QWidget>
 
 #include "modplatform/ModIndex.h"
@@ -47,7 +47,10 @@ class UrlHandler : public QObject {
                       ModPlatform::ResourceProvider provider = ModPlatform::ResourceProvider::MODRINTH);
     static void handleOauth(const QUrl& url);
     void handleModrinth(const QUrl& url);
+    void handleModrinthVersion(const QString& versionID);
+    void handleModrinthMod(const QString& id);
     void handleCurseforge(const QUrl& url);
+    void handleCurseforge(const QString& addonId, const QString& fileId);
     void handlePrism(const QUrl& url);
 
    private:
