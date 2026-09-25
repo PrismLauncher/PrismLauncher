@@ -39,6 +39,15 @@ void InstanceProxyModel::sortBy(QStringList mcVersions, ModPlatform::ModLoaderTy
     m_loader = loader;
 }
 
+void InstanceProxyModel::setSearchTerm(QString searchTerm)
+{
+    if (m_searchTerm == searchTerm) {
+        return;
+    }
+    m_searchTerm = std::move(searchTerm);
+    invalidateFilter();
+}
+
 QVariant InstanceProxyModel::data(const QModelIndex& index, int role) const
 {
     QVariant data = QSortFilterProxyModel::data(index, role);
@@ -81,11 +90,14 @@ bool InstanceProxyModel::subSortLessThan(const QModelIndex& left, const QModelIn
 
 bool InstanceProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
 {
+    auto data = sourceModel()->index(sourceRow, 0, sourceParent);
+    auto* inst = static_cast<MinecraftInstance*>(data.internalPointer());
+    if (!m_searchTerm.isEmpty() && !inst->name().contains(m_searchTerm, Qt::CaseInsensitive)) {
+        return false;
+    }
     if (m_mcVersions.isEmpty() && m_loader == ModPlatform::ModLoaderType::None) {
         return true;
     }
-    auto data = sourceModel()->index(sourceRow, 0, sourceParent);
-    auto* inst = static_cast<MinecraftInstance*>(data.internalPointer());
     auto* profile = inst->getPackProfile();
     if ((profile == nullptr) || profile->rowCount() == 0) {
         return true;
