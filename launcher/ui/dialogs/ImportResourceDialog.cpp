@@ -55,24 +55,50 @@ ImportResourceDialog::ImportResourceDialog(QString filePath, ModPlatform::Resour
 
     m_ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
     m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
+    setSelectedInstanceKey({});
+    selectFirstInstance();
+}
+
+void ImportResourceDialog::setSelectedInstanceKey(QString key)
+{
+    selectedInstanceKey = std::move(key);
+    // NOTE: the OK button is always clickable, so an empty key would be accepted otherwise
+    m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!selectedInstanceKey.isEmpty());
+}
+
+void ImportResourceDialog::selectFirstInstance()
+{
+    auto* selectionModel = m_ui->instanceView->selectionModel();
+    if (!selectionModel) {
+        return;
+    }
+    if (selectionModel->hasSelection() && !selectedInstanceKey.isEmpty()) {
+        return;
+    }
+    if (m_proxyModel->rowCount() == 0) {
+        setSelectedInstanceKey({});
+        return;
+    }
+    auto index = m_proxyModel->index(0, 0);
+    selectionModel->select(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+    selectionModel->setCurrentIndex(index, QItemSelectionModel::NoUpdate);
+    m_ui->instanceView->scrollTo(index);
 }
 
 void ImportResourceDialog::activated(QModelIndex index)
 {
-    selectedInstanceKey = index.data(InstanceList::InstanceIDRole).toString();
+    setSelectedInstanceKey(index.data(InstanceList::InstanceIDRole).toString());
     accept();
 }
 
 void ImportResourceDialog::selectionChanged(QItemSelection selected, QItemSelection /*deselected*/)
 {
     if (selected.empty()) {
+        setSelectedInstanceKey({});
         return;
     }
 
-    QString key = selected.first().indexes().first().data(InstanceList::InstanceIDRole).toString();
-    if (!key.isEmpty()) {
-        selectedInstanceKey = key;
-    }
+    setSelectedInstanceKey(selected.first().indexes().first().data(InstanceList::InstanceIDRole).toString());
 }
 
 ImportResourceDialog::~ImportResourceDialog()
@@ -93,6 +119,7 @@ void ImportResourceDialog::sortBy(QStringList mcVersions, ModPlatform::ModLoader
     m_proxyModel->sortBy(std::move(mcVersions), loader);
     m_proxyModel->invalidate();
     m_ui->button_show_all->setEnabled(m_loader != ModPlatform::ModLoaderType::None || !m_mcVersions.isEmpty());
+    selectFirstInstance();
 }
 
 void ImportResourceDialog::showAllInstances(bool checked)
@@ -103,4 +130,5 @@ void ImportResourceDialog::showAllInstances(bool checked)
         m_proxyModel->sortBy(m_mcVersions, m_loader);
     }
     m_proxyModel->invalidate();
+    selectFirstInstance();
 }
