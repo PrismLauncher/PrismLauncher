@@ -17,6 +17,7 @@
 
 #include <QProcess>
 #include <QStringList>
+#include <array>
 #include "java/JavaInstall.h"
 
 #ifdef Q_OS_WIN
@@ -43,4 +44,7 @@ class JavaUtils : public QObject {
 
     static QString getJavaCheckPath();
     static const QString javaExecutable;
+
+    static constexpr std::array<int, 4> pinnableMajors = { 8, 17, 21, 25 };
+    static QString getPinnedPath(int major);
 };

@@ -39,11 +39,16 @@
 
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
 #include "Application.h"
+#include "BaseVersionList.h"
 #include "BuildConfig.h"
 #include "FileSystem.h"
 #include "HardwareInfo.h"
 #include "JavaCommon.h"
+#include "Json.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
 #include "minecraft/MinecraftInstance.h"
@@ -76,6 +81,7 @@ JavaSettingsWidget::JavaSettingsWidget(MinecraftInstance* instance, QWidget* par
         m_ui->skipWizardCheckBox->hide();
         m_ui->autodetectJavaCheckBox->hide();
         m_ui->autodownloadJavaCheckBox->hide();
+        m_ui->pinnedJavaGroupBox->hide();
 
         m_ui->javaInstallationGroupBox->setCheckable(true);
         m_ui->memoryGroupBox->setCheckable(true);
@@ -99,6 +105,8 @@ JavaSettingsWidget::JavaSettingsWidget(MinecraftInstance* instance, QWidget* par
         });
     }
 
+    setupPinnedJavaRows();
+
     connect(m_ui->javaTestBtn, &QPushButton::clicked, this, &JavaSettingsWidget::onJavaTest);
     connect(m_ui->javaDetectBtn, &QPushButton::clicked, this, &JavaSettingsWidget::onJavaAutodetect);
     connect(m_ui->javaBrowseBtn, &QPushButton::clicked, this, &JavaSettingsWidget::onJavaBrowse);
@@ -113,6 +121,57 @@ JavaSettingsWidget::JavaSettingsWidget(MinecraftInstance* instance, QWidget* par
 JavaSettingsWidget::~JavaSettingsWidget()
 {
     delete m_ui;
+}
+
+void JavaSettingsWidget::setupPinnedJavaRows()
+{
+    auto* layout = m_ui->pinnedJavaGridLayout;
+    layout->setColumnStretch(1, 1);
+
+    int row = 0;
+    for (int major : JavaUtils::pinnableMajors) {
+        auto* label = new QLabel(tr("Java %1:").arg(major), m_ui->pinnedJavaGroupBox);
+        auto* edit = new QLineEdit(m_ui->pinnedJavaGroupBox);
+        edit->setToolTip(tr("Path to the Java %1 executable to use for instances that require it. "
+                            "Leave empty to use the automatically detected one.")
+                             .arg(major));
+        label->setBuddy(edit);
+
+        auto* browseBtn = new QPushButton(tr("Browse"), m_ui->pinnedJavaGroupBox);
+        browseBtn->setToolTip(tr("Pick the Java %1 executable from the file system.").arg(major));
+        connect(browseBtn, &QPushButton::clicked, this, [this, major] { onJavaBrowseMajor(major); });
+
+        auto* detectBtn = new QPushButton(tr("Detect"), m_ui->pinnedJavaGroupBox);
+        detectBtn->setToolTip(tr("Pick a detected Java %1 installation.").arg(major));
+        connect(detectBtn, &QPushButton::clicked, this, [this, major] { onJavaDetectMajor(major); });
+
+        layout->addWidget(label, row, 0);
+        layout->addWidget(edit, row, 1);
+        layout->addWidget(browseBtn, row, 2);
+        layout->addWidget(detectBtn, row, 3);
+        m_pinnedJavaEdits.insert(major, edit);
+        row++;
+    }
+}
+
+void JavaSettingsWidget::warnAboutUnresolvablePinnedPaths() const
+{
+    QStringList bad;
+    for (auto [major, edit] : m_pinnedJavaEdits.asKeyValueRange()) {
+        auto path = edit->text().trimmed();
+        if (!path.isEmpty() && FS::ResolveExecutable(path).isNull()) {
+            bad.append(tr("Java %1: %2").arg(major).arg(path));
+        }
+    }
+    if (bad.isEmpty()) {
+        return;
+    }
+    CustomMessageBox::selectable(m_ui->pinnedJavaGroupBox, tr("Pinned Java Installations"),
+                                 tr("The following pinned Java paths could not be found on your system. They were saved anyway, "
+                                    "but instances needing those versions will fall back to the usual detection.\n\n%1")
+                                     .arg(bad.join('\n')),
+                                 QMessageBox::Warning, QMessageBox::Ok, QMessageBox::Ok)
+        ->exec();
 }
 
 void JavaSettingsWidget::loadSettings()
@@ -139,6 +198,11 @@ void JavaSettingsWidget::loadSettings()
         m_ui->autodetectJavaCheckBox->setChecked(settings->get("AutomaticJavaSwitch").toBool());
         m_ui->autodownloadJavaCheckBox->setEnabled(m_ui->autodetectJavaCheckBox->isChecked());
         m_ui->autodownloadJavaCheckBox->setChecked(settings->get("AutomaticJavaDownload").toBool());
+
+        const auto pinned = Json::toMap(settings->get("PinnedJavaPaths").toString());
+        for (auto [major, edit] : m_pinnedJavaEdits.asKeyValueRange()) {
+            edit->setText(pinned.value(QString::number(major)).toString());
+        }
     }
 
     // Memory
@@ -189,6 +253,15 @@ void JavaSettingsWidget::saveSettings()
         settings->set("IgnoreJavaWizard", m_ui->skipWizardCheckBox->isChecked());
         settings->set("AutomaticJavaSwitch", m_ui->autodetectJavaCheckBox->isChecked());
         settings->set("AutomaticJavaDownload", m_ui->autodownloadJavaCheckBox->isChecked());
+
+        QVariantMap pinned;
+        for (auto [major, edit] : m_pinnedJavaEdits.asKeyValueRange()) {
+            if (auto path = edit->text().trimmed(); !path.isEmpty()) {
+                pinned.insert(QString::number(major), path);
+            }
+        }
+        settings->set("PinnedJavaPaths", Json::fromMap(pinned));
+        warnAboutUnresolvablePinnedPaths();
     }
 
     // Memory
@@ -246,6 +319,53 @@ void JavaSettingsWidget::onJavaBrowse()
         return;
     }
     m_ui->javaPathTextBox->setText(cookedPath);
+}
+
+void JavaSettingsWidget::onJavaBrowseMajor(int major)
+{
+    auto* edit = m_pinnedJavaEdits.value(major);
+    if (!edit) {
+        return;
+    }
+
+    QString rawPath = QFileDialog::getOpenFileName(this, tr("Find Java %1 executable").arg(major), edit->text());
+    if (rawPath.isEmpty()) {
+        return;
+    }
+
+    QString cookedPath = FS::NormalizePath(rawPath);
+    QFileInfo javaInfo(cookedPath);
+    if (!javaInfo.exists() || !javaInfo.isExecutable()) {
+        return;
+    }
+    edit->setText(cookedPath);
+}
+
+void JavaSettingsWidget::onJavaDetectMajor(int major)
+{
+    auto* edit = m_pinnedJavaEdits.value(major);
+    if (!edit) {
+        return;
+    }
+    if (JavaUtils::getJavaCheckPath().isEmpty()) {
+        JavaCommon::javaCheckNotFound(this);
+        return;
+    }
+
+    VersionSelectDialog versionDialog(APPLICATION->javalist(), tr("Select a Java %1 installation").arg(major), this, true);
+    versionDialog.setResizeOn(2);
+    versionDialog.setEmptyString(tr("No Java %1 installations were detected on this system.").arg(major));
+    // every remaining entry is a Java %1 install, so nothing can mismatch the row
+    versionDialog.setExactFilter(BaseVersionList::JavaMajorRole, QString::number(major));
+    versionDialog.exec();
+
+    if (versionDialog.result() != QDialog::Accepted || !versionDialog.selectedVersion()) {
+        return;
+    }
+    auto java = std::dynamic_pointer_cast<JavaInstall>(versionDialog.selectedVersion());
+    if (java) {
+        edit->setText(java->path);
+    }
 }
 
 void JavaSettingsWidget::onJavaTest()
