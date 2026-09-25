@@ -23,6 +23,7 @@
 #include <QFile>
 #include <QFileInfo>
 
+#include <cerrno>
 #include <memory>
 #include <system_error>
 #include "StringUtils.h"
