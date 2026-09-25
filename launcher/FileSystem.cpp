@@ -247,11 +247,11 @@ QString quoteArgs(const QStringList& args, const QString& wrap, const QString& e
 
 QString quoteDesktopExecArg(QString arg)
 {
-    arg.replace("\\", "\\\\\\\\");
-    arg.replace("$", "\\\\$");
-    arg.replace("\"", "\\\"");
-    arg.replace("`", "\\`");
-    arg.replace("%", "%%");
+    arg.replace(R"(\)", R"(\\\\)");
+    arg.replace(R"($)", R"(\\$)");
+    arg.replace(R"(")", R"(\")");
+    arg.replace(R"(`)", R"(\`)");
+    arg.replace(R"(%)", R"(%%)");
     return QStringLiteral("\"") + arg + QStringLiteral("\"");
 }
 
