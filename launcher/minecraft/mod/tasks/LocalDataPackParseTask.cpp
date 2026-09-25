@@ -340,12 +340,8 @@ bool processPackPNG(const DataPack* pack)
         }
         case ResourceType::ZIPFILE: {
             MMCZip::ArchiveReader zip(pack->fileinfo().filePath());
-            auto f = zip.goToFile("pack.png");
-            if (!f.has_value() || !f.value()) {
-                return png_invalid();
-            }
-            auto dataRes = f.value()->readAll();
-            if (!dataRes) {
+            auto dataRes = zip.readFile("pack.png");
+            if (!dataRes.has_value()) {
                 return png_invalid();
             }
 

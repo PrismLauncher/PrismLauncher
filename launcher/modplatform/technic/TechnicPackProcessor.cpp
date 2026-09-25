@@ -58,33 +58,23 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
         }
         if (zipFile.exists("/version.json")) {
             if (zipFile.exists("/fmlversion.properties")) {
-                auto fileRes = zipFile.goToFile("fmlversion.properties").and_then([](const auto& v) -> Result<QByteArray> {
-                    if (v) {
-                        return v->readAll();
-                    }
-                    return std::unexpected{"File not found"};
-                });
-                if (!fileRes) {
-                    emit failed(tr("Unable to open \"fmlversion.properties\": %1").arg(fileRes.error()));
+                auto dataRes = zipFile.readFile("fmlversion.properties");
+                if (!dataRes) {
+                    emit failed(tr("Unable to open \"fmlversion.properties\": %1").arg(dataRes.error()));
                     return;
                 }
-                QByteArray fmlVersionData = fileRes.value();
+                QByteArray fmlVersionData = dataRes.value();
                 INIFile iniFile;
                 iniFile.loadFile(fmlVersionData);
                 // If not present, this evaluates to a null string
                 fmlMinecraftVersion = iniFile["fmlbuild.mcversion"].toString();
             }
-            auto file = zipFile.goToFile("version.json").and_then([](const auto& v) -> Result<QByteArray> {
-                if (v) {
-                    return v->readAll();
-                }
-                return std::unexpected{"File not found"};
-            });
-            if (!file.has_value()) {
-                emit failed(tr("Unable to open \"version.json\": %1").arg(file.error()));
+            auto dataRes = zipFile.readFile("version.json");
+            if (!dataRes) {
+                emit failed(tr("Unable to open \"version.json\": %1").arg(dataRes.error()));
                 return;
             }
-            data = file.value();
+            data = dataRes.value();
         } else {
             if (minecraftVersion.isEmpty()) {
                 emit failed(tr("Could not find \"version.json\" inside \"bin/modpack.jar\", but Minecraft version is unknown"));
@@ -97,18 +87,13 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
             // Figure out the forge version and add it as a component
             // (the code still comes from the jar mod installed above)
             if (zipFile.exists("/forgeversion.properties")) {
-                auto file = zipFile.goToFile("forgeversion.properties").and_then([](const auto& v) -> Result<QByteArray> {
-                    if (v) {
-                        return v->readAll();
-                    }
-                    return std::unexpected{"File not found"};
-                });
-                if (!file.has_value()) {
+                auto dataRes = zipFile.readFile("forgeversion.properties");
+                if (!dataRes) {
                     // Really shouldn't happen, but error handling shall not be forgotten
-                    emit failed(tr("Unable to open \"forgeversion.properties\": %1").arg(file.error_or(tr("File not found"))));
+                    emit failed(tr("Unable to open \"forgeversion.properties\": %1").arg(dataRes.error()));
                     return;
                 }
-                auto forgeVersionData = file.value();
+                auto forgeVersionData = dataRes.value();
                 INIFile iniFile;
                 iniFile.loadFile(forgeVersionData);
                 QString major, minor, revision, build;

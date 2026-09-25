@@ -43,7 +43,9 @@ auto ExportToZipTask::exportZip() -> Result<>
     for (auto fileName : m_extraFiles.keys()) {
         if (m_buildZipFuture.isCanceled())
             return {};
-        TRY(m_output.addFile(fileName, m_extraFiles[fileName]))
+        if (const auto result = m_output.addFile(fileName, m_extraFiles[fileName]); !result) {
+            return std::unexpected(tr("Could not add %1: %2").arg(fileName, result.error()));
+        }
     }
 
     for (const QFileInfo& file : m_files) {

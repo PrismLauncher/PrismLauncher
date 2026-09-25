@@ -671,13 +671,11 @@ bool processLitemod(Mod& mod, [[maybe_unused]] ProcessingLevel level)
 
     MMCZip::ArchiveReader zip(mod.fileinfo().filePath());
 
-    if (auto file = zip.goToFile("litemod.json"); file.has_value() && file.value()) {
-        if (const auto data = file.value()->readAll(); data) {
-            details = ReadLiteModInfo(data.value());
+    if (const auto dataRes = zip.readFile("litemod.json"); dataRes) {
+        details = ReadLiteModInfo(dataRes.value());
 
-            mod.setDetails(details);
-            return true;
-        }
+        mod.setDetails(details);
+        return true;
     }
 
     return false;  // no valid litemod.json found in archive
@@ -717,13 +715,7 @@ bool loadIconFile(const Mod& mod, QPixmap* pixmap)
     switch (mod.type()) {
         case ResourceType::ZIPFILE: {
             MMCZip::ArchiveReader zip(mod.fileinfo().filePath());
-            auto file = zip.goToFile(mod.iconPath());
-            if (file.has_value() && file.value()) {
-                auto dataRes = file.value()->readAll();
-                if (!dataRes) {
-                    return png_invalid(QString("Could not read icon data: %1").arg(dataRes.error()));
-                }
-
+            if (auto dataRes = zip.readFile(mod.iconPath()); dataRes) {
                 bool icon_result = ModUtils::processIconPNG(mod, std::move(dataRes.value()), pixmap);
 
                 if (!icon_result) {

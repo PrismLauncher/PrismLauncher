@@ -108,7 +108,14 @@ auto ArchiveReader::goToFile(const QString& filename) -> Result<std::unique_ptr<
     }
 
     archive_read_close(a);
-    return nullptr;
+    return std::unexpected{"File not found"};
+}
+
+Result<QByteArray> ArchiveReader::readFile(const QString& fileName)
+{
+    return goToFile(fileName).and_then([](const auto& v) -> Result<QByteArray> {
+        return v->readAll();
+    });
 }
 
 static int copy_data(struct archive* ar, struct archive* aw, bool notBlock = false)
