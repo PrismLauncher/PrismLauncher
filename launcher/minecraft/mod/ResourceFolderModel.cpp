@@ -22,7 +22,10 @@
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
+#include "modplatform/ModIndex.h"
+#include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FlameAPI.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "settings/Setting.h"
 #include "tasks/SequentialTask.h"
 #include "tasks/Task.h"
@@ -178,28 +181,41 @@ bool ResourceFolderModel::installResource(QString originalPath)
     return false;
 }
 
-void ResourceFolderModel::installResourceWithFlameMetadata(const QString& path, ModPlatform::IndexedVersion& vers)
+void ResourceFolderModel::installResourceWithMeta(const QString& path,
+                                                  const ModPlatform::IndexedVersion& vers,
+                                                  ModPlatform::ResourceProvider provider)
 {
     auto install = [this, path] { installResource(path); };
-    if (vers.addonId.isValid()) {
-        ModPlatform::IndexedPack pack{
-            .addonId = vers.addonId,
-            .provider = ModPlatform::ResourceProvider::FLAME,
-        };
-
-        auto [job, response] = FlameAPI::get().getProjectTask(vers.addonId.toString());
-        connect(job.get(), &Task::failed, this, install);
-        connect(job.get(), &Task::aborted, this, install);
-        connect(job.get(), &Task::succeeded, this, [response, this, vers, install, pack] {
-            LocalResourceUpdateTask updateMetadata(indexDir(), *response, vers);
-            connect(&updateMetadata, &Task::finished, this, install);
-            updateMetadata.start();
-        });
-
-        job->start();
-    } else {
+    if (!vers.addonId.isValid()) {
         install();
+        return;
     }
+
+    ModPlatform::IndexedPack* response = nullptr;
+    if (provider == ModPlatform::ResourceProvider::MODRINTH) {
+        std::tie(m_installWithMetaTask, response) = ModrinthAPI::get().getProjectTask(vers.addonId.toString());
+    } else {
+        std::tie(m_installWithMetaTask, response) = FlameAPI::get().getProjectTask(vers.addonId.toString());
+    }
+    connect(m_installWithMetaTask.get(), &Task::failed, this, install);
+    connect(m_installWithMetaTask.get(), &Task::aborted, this, install);
+    // NOTE: the net job finishes in a later event loop iteration, long after this function returned.
+    // Everything the handler touches has to be captured by value, `vers` in particular is only a reference
+    // to a caller owned (possibly temporary) IndexedVersion.
+    connect(m_installWithMetaTask.get(), &Task::succeeded, this, [this, response, provider, vers = vers, install] {
+        // `response` is owned by the net job's RPC sink, which is kept alive by m_installWithMetaTask
+        ModPlatform::IndexedPack pack = *response;
+        pack.provider = provider;
+
+        auto* updateMetadata = new LocalResourceUpdateTask(indexDir(), pack, vers);
+        connect(updateMetadata, &Task::finished, this, [install, updateMetadata] {
+            install();
+            updateMetadata->deleteLater();
+        });
+        updateMetadata->start();
+    });
+
+    m_installWithMetaTask->start();
 }
 
 bool ResourceFolderModel::uninstallResource(const QString& fileName, bool preserveMetadata)
@@ -559,11 +575,10 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
                 }
 
                 if (at(row).isSymLinkUnder(instDirPath())) {
-                    tooltip +=
-                        m_resources[row]->internalId() +
-                        tr("\nThis resource is symbolically linked from elsewhere. Editing it will also change the original."
-                           "\nCanonical Path: %1")
-                            .arg(at(row).fileinfo().canonicalFilePath());
+                    tooltip += m_resources[row]->internalId() +
+                               tr("\nThis resource is symbolically linked from elsewhere. Editing it will also change the original."
+                                  "\nCanonical Path: %1")
+                                   .arg(at(row).fileinfo().canonicalFilePath());
                 }
 
                 if (at(row).isMoreThanOneHardLink()) {
@@ -1044,7 +1059,7 @@ QList<Resource*> ResourceFolderModel::allResources()
 {
     QList<Resource*> result;
     result.reserve(m_resources.size());
-    for (const Resource ::Ptr& resource : m_resources) {
+    for (const Resource::Ptr& resource : m_resources) {
         result.append((resource.get()));
     }
     return result;
