@@ -147,9 +147,9 @@ void ModPage::triggerSearch()
     m_fetchProgress.watch(m_model->activeSearchJob().get());
 }
 
-void ModPage::openProject(const QVariant& projectID)
+void ModPage::openProject(const QVariant& projectID, const QString& btnTxt)
 {
-    ResourcePage::openProject(projectID);
+    ResourcePage::openProject(projectID, btnTxt);
 
     m_filterWidget->setLoaderVersionOnly(true);
     m_ui->resourceFilterButton->setVisible(true);

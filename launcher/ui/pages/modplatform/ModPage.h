@@ -36,7 +36,7 @@ class ModPage : public ResourcePage {
     void triggerSearch() override;
 
    protected:
-    void openProject(const QVariant& projectID) override;
+    void openProject(const QVariant& projectID, const QString& btnTxt = {}) override;
 
    protected:
     std::unique_ptr<ModFilterWidget> m_filterWidget;

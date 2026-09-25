@@ -72,6 +72,7 @@
 #include <QToolButton>
 #include <QWidget>
 #include <QWidgetAction>
+#include <memory>
 
 #include <BaseInstance.h>
 #include <DesktopServices.h>
@@ -100,6 +101,7 @@
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/dialogs/NewsDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
+#include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui/dialogs/skins/SkinManageDialog.h"
 #include "ui/instanceview/InstanceDelegate.h"
 #include "ui/instanceview/InstanceProxyModel.h"
@@ -118,8 +120,10 @@
 #include "minecraft/mod/tasks/LocalResourceParse.h"
 
 #include "modplatform/ModIndex.h"
+#include "modplatform/ResourceType.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
+#include "net/RPCSink.h"
 
 #include "KonamiCode.h"
 
@@ -133,9 +137,8 @@ QString profileInUseFilter(const QString& profile, bool used)
 {
     if (used) {
         return QObject::tr("%1 (in use)").arg(profile);
-    } else {
-        return profile;
     }
+    return profile;
 }
 }  // namespace
 
@@ -954,8 +957,8 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 if (id.isEmpty() || !supportedProtocols.contains(type)) {
                     CustomMessageBox::selectable(
                         this, tr("Error"),
-                        tr("Unsupported Modrinth link.\n\nPrism Launcher currently only supports modpack links such as "
-                           "modrinth://modpack/fabulously-optimized."),
+                        tr("Unsupported Modrinth link.\n\nPrism Launcher currently only supports modrinth links such as "
+                           "modrinth://modpack/fabulously-optimized, modrinth://mod/fabric-api, modrinth://version/nr1znv5v."),
                         QMessageBox::Critical)
                         ->show();
                     continue;
@@ -966,8 +969,104 @@ void MainWindow::processURLs(QList<QUrl> urls)
                     continue;
                 }
                 if (type == "mod") {
-                    CustomMessageBox::selectable(this, tr("Error"), tr("This protocol is not yet supported"), QMessageBox::Critical)
-                        ->show();
+                    if (APPLICATION->instances()->count() <= 0) {
+                        CustomMessageBox::selectable(
+                            this, tr("No instance!"),
+                            tr("No instance available to add the resource to.\nPlease create a new instance before "
+                               "attempting to install this resource again."),
+                            QMessageBox::Critical)
+                            ->show();
+                        continue;
+                    }
+                    auto [job, pack] = ModrinthAPI::get().getProjectTask(id);
+
+                    auto packPtr = std::make_shared<ModPlatform::IndexedPack>();
+                    *packPtr = *pack;
+                    ResourceAPI::VersionSearchArgs args{ .pack = packPtr };
+                    auto versionSpec = ModrinthAPI::get().getVersions(args);
+                    auto [vTask, versions] = Net::RPC::make<QList<ModPlatform::IndexedVersion>>(versionSpec);
+
+                    job->addNetAction(vTask);
+                    job->setMaxConcurrent(1);  // just to be sure is sync
+
+                    connect(job.get(), &Task::failed, this, [this](const QString& reason) {
+                        CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+                    });
+
+                    {  // drop stack
+                        ProgressDialog dlUrlDialod(this);
+                        dlUrlDialod.setSkipButton(true, tr("Abort"));
+                        dlUrlDialod.execWithTask(job.get());
+                    }
+
+                    QStringList mcVersion;
+                    ModPlatform::ModLoaderTypes loaders;
+                    for (const auto& v : *versions) {
+                        mcVersion.append(v.mcVersion);
+                        loaders |= v.loaders;
+                    }
+                    mcVersion.removeDuplicates();
+
+                    ImportResourceDialog dlg(pack->name, pack->resourceType, this);
+
+                    dlg.sortBy(mcVersion, loaders);
+                    if (dlg.exec() != QDialog::Accepted) {
+                        continue;
+                    }
+
+                    auto* inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
+                    ResourceDownload::ResourceDownloadDialog* rDlg = nullptr;
+                    switch (pack->resourceType) {
+                        case ModPlatform::ResourceType::ResourcePack:
+                            rDlg = ResourceDownload::ResourceDownloadDialog::createResourcePack(this, inst->resourcePackList(), inst, true);
+                            break;
+                        case ModPlatform::ResourceType::TexturePack:
+                            rDlg = ResourceDownload::ResourceDownloadDialog::createTexturePack(this, inst->texturePackList(), inst, true);
+                            break;
+                        case ModPlatform::ResourceType::DataPack:
+                            rDlg = ResourceDownload::ResourceDownloadDialog::createDataPack(this, inst->dataPackList(), inst, true);
+                            break;
+                        case ModPlatform::ResourceType::Mod:
+                            rDlg = ResourceDownload::ResourceDownloadDialog::createMod(this, inst->loaderModList(), inst, true);
+                            break;
+                        case ModPlatform::ResourceType::ShaderPack:
+                            rDlg = ResourceDownload::ResourceDownloadDialog::createShaderPack(this, inst->shaderPackList(), inst, true);
+                            break;
+                        default:
+                            CustomMessageBox::selectable(
+                                this, tr("Error"),
+                                tr("Unsupported Modrinth resource.\n\nPrism Launcher currently doesn't support %1.")
+                                    .arg(ModPlatform::ResourceTypeUtils::getName(pack->resourceType)),
+                                QMessageBox::Critical)
+                                ->show();
+                            break;
+                    }
+                    if (rDlg) {
+                        rDlg->setResourcePack(*pack, ModPlatform::ResourceProvider::MODRINTH);
+                        if (rDlg->exec() != 0) {
+                            ConcurrentTask tasks("Download Data Packs",
+                                                 APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+                            connect(&tasks, &Task::failed, this, [this](const QString& reason) {
+                                CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+                            });
+                            connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
+                                QStringList warnings = tasks.warnings();
+                                if (warnings.count()) {
+                                    CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+                                }
+                            });
+
+                            for (auto& task : rDlg->getTasks()) {
+                                tasks.addTask(task);
+                            }
+
+                            ProgressDialog loadDialog(this);
+                            loadDialog.setSkipButton(true, tr("Abort"));
+                            loadDialog.execWithTask(&tasks);
+                        }
+                        rDlg->deleteLater();
+                    }
+
                     continue;
                 }
                 if (type == "version") {
@@ -1180,8 +1279,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
 
         qDebug() << "Adding resource" << localFileName << "to" << dlg.selectedInstanceKey;
 
-        auto* inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
-        auto* minecraftInst = inst;
+        auto* minecraftInst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
 
         switch (type) {
             case ModPlatform::ResourceType::ResourcePack:
