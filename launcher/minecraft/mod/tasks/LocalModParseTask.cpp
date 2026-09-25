@@ -586,7 +586,7 @@ bool processZIP(Mod& mod, [[maybe_unused]] ProcessingLevel level)
             auto filePath = file->filename();
 
             if (filePath == "META-INF/mods.toml" || filePath == "META-INF/neoforge.mods.toml") {
-                details = ReadMCModTOML(file->readAll());
+                TRY_INTO(details, file->readAll().transform([](const auto& v) { return ReadMCModTOML(v); }))
                 isValid = true;
                 if (details.version == "${file.jarVersion}" && !manifestVersion.isEmpty()) {
                     details.version = manifestVersion;
@@ -596,7 +596,7 @@ bool processZIP(Mod& mod, [[maybe_unused]] ProcessingLevel level)
             }
             if (filePath == "META-INF/MANIFEST.MF") {
                 // quick and dirty line-by-line parser
-                auto manifestLines = QString(file->readAll()).split(s_newlineRegex);
+                TRY_INTO(auto manifestLines, file->readAll().transform([](const auto& v) { return QString(v).split(s_newlineRegex); }));
                 manifestVersion = "";
                 for (auto& line : manifestLines) {
                     if (line.startsWith("Implementation-Version: ", Qt::CaseInsensitive)) {
@@ -616,22 +616,22 @@ bool processZIP(Mod& mod, [[maybe_unused]] ProcessingLevel level)
                 return baseForgePopulated;
             }
             if (filePath == "mcmod.info") {
-                details = ReadMCModInfo(file->readAll());
+                TRY_INTO(details, file->readAll().transform([](const auto& v) { return ReadMCModInfo(v); }))
                 isValid = true;
                 return true;
             }
             if (filePath == "quilt.mod.json") {
-                details = ReadQuiltModInfo(file->readAll());
+                TRY_INTO(details, file->readAll().transform([](const auto& v) { return ReadQuiltModInfo(v); }))
                 isValid = true;
                 return true;
             }
             if (filePath == "fabric.mod.json") {
-                details = ReadFabricModInfo(file->readAll());
+                TRY_INTO(details, file->readAll().transform([](const auto& v) { return ReadFabricModInfo(v); }))
                 isValid = true;
                 return true;
             }
             if (filePath == "forgeversion.properties") {
-                details = ReadForgeInfo(file->readAll());
+                TRY_INTO(details, file->readAll().transform([](const auto& v) { return ReadForgeInfo(v); }))
                 isValid = true;
                 return true;
             }
@@ -644,7 +644,7 @@ bool processZIP(Mod& mod, [[maybe_unused]] ProcessingLevel level)
             }
             // nilmods can shade nilloader to be able to run as a standalone agent - which includes nilloader's own meta file
             if (filePath.endsWith(".nilmod.css") && filePath != "nilloader.nilmod.css") {
-                nilData = file->readAll();
+                TRY_INTO(nilData, file->readAll())
                 nilFilePath = filePath;
                 return isNilMod;
             }
@@ -672,10 +672,12 @@ bool processLitemod(Mod& mod, [[maybe_unused]] ProcessingLevel level)
     MMCZip::ArchiveReader zip(mod.fileinfo().filePath());
 
     if (auto file = zip.goToFile("litemod.json"); file.has_value() && file.value()) {
-        details = ReadLiteModInfo(file.value()->readAll());
+        if (const auto data = file.value()->readAll(); data) {
+            details = ReadLiteModInfo(data.value());
 
-        mod.setDetails(details);
-        return true;
+            mod.setDetails(details);
+            return true;
+        }
     }
 
     return false;  // no valid litemod.json found in archive
@@ -717,9 +719,12 @@ bool loadIconFile(const Mod& mod, QPixmap* pixmap)
             MMCZip::ArchiveReader zip(mod.fileinfo().filePath());
             auto file = zip.goToFile(mod.iconPath());
             if (file.has_value() && file.value()) {
-                auto data = file.value()->readAll();
+                auto dataRes = file.value()->readAll();
+                if (!dataRes) {
+                    return png_invalid(QString("Could not read icon data: %1").arg(dataRes.error()));
+                }
 
-                bool icon_result = ModUtils::processIconPNG(mod, std::move(data), pixmap);
+                bool icon_result = ModUtils::processIconPNG(mod, std::move(dataRes.value()), pixmap);
 
                 if (!icon_result) {
                     return png_invalid("invalid png image");  // icon png invalid

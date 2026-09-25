@@ -59,7 +59,7 @@ QString ArchiveReader::File::filename()
     return decodeLibArchivePath(m_entry, archive_entry_pathname_utf8, archive_entry_pathname);
 }
 
-QByteArray ArchiveReader::File::readAll(int* outStatus)
+Result<QByteArray> ArchiveReader::File::readAll()
 {
     QByteArray data;
     const void* buff = nullptr;
@@ -71,10 +71,7 @@ QByteArray ArchiveReader::File::readAll(int* outStatus)
         data.append(static_cast<const char*>(buff), static_cast<qsizetype>(size));
     }
     if (status != ARCHIVE_EOF && status != ARCHIVE_OK) {
-        qWarning() << "libarchive read error:" << archive_error_string(m_archive.get());
-    }
-    if (outStatus) {
-        *outStatus = status;
+        return std::unexpected{QString("Could not read data block: %1").arg(error())};
     }
     return data;
 }

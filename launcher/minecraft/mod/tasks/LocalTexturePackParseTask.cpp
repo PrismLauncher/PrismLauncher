@@ -96,7 +96,7 @@ bool processZIP(TexturePack& pack, ProcessingLevel level)
     return zip.parse([&packProcessed, &iconProcessed, &pack, level](MMCZip::ArchiveReader::File* file) -> Result<bool> {
         if (!packProcessed && file->filename() == "pack.txt") {
             packProcessed = true;
-            auto data = file->readAll();
+            TRY_INTO(auto data, file->readAll())
             if (!TexturePackUtils::processPackTXT(pack, std::move(data))) {
                 return std::unexpected{"Could not parse texture pack txt"};
             }
@@ -104,7 +104,7 @@ bool processZIP(TexturePack& pack, ProcessingLevel level)
         }
         if (!iconProcessed && file->filename() == "pack.png") {
             iconProcessed = true;
-            auto data = file->readAll();
+            TRY_INTO(auto data, file->readAll())
             if (!TexturePackUtils::processPackPNG(pack, std::move(data))) {
                 return std::unexpected{"Could not parse texture pack png"};
             }
@@ -166,9 +166,12 @@ bool processPackPNG(const TexturePack& pack)
 
             auto file = zip.goToFile("pack.png");
             if (file.has_value() && file.value()) {
-                auto data = file.value()->readAll();
+                auto dataRes = file.value()->readAll();
+                if (!dataRes) {
+                    return png_invalid();
+                }
 
-                bool pack_png_result = TexturePackUtils::processPackPNG(pack, std::move(data));
+                bool pack_png_result = TexturePackUtils::processPackPNG(pack, std::move(dataRes.value()));
 
                 if (!pack_png_result) {
                     return png_invalid();  // pack.png invalid

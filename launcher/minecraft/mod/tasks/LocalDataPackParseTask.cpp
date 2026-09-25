@@ -116,7 +116,7 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
                 if (!metaParsed && f->filename() == "pack.mcmeta") {
                     metaParsed = true;
                     skip = false;
-                    auto data = f->readAll();
+                    TRY_INTO(auto data, f->readAll())
 
                     mcmeta_result = DataPackUtils::processMCMeta(pack, std::move(data));
 
@@ -127,7 +127,7 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
                 if (!iconParsed && level != ProcessingLevel::BasicInfoOnly && f->filename() == "pack.png") {
                     iconParsed = true;
                     skip = false;
-                    auto data = f->readAll();
+                    TRY_INTO(auto data, f->readAll())
 
                     pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
                     if (!pack_png_result) {
@@ -344,9 +344,12 @@ bool processPackPNG(const DataPack* pack)
             if (!f.has_value() || !f.value()) {
                 return png_invalid();
             }
-            auto data = f.value()->readAll();
+            auto dataRes = f.value()->readAll();
+            if (!dataRes) {
+                return png_invalid();
+            }
 
-            bool pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
+            bool pack_png_result = DataPackUtils::processPackPNG(pack, std::move(dataRes.value()));
 
             if (!pack_png_result) {
                 return png_invalid();  // pack.png invalid
