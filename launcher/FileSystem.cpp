@@ -247,6 +247,7 @@ QString quoteArgs(const QStringList& args, const QString& wrap, const QString& e
 
 QString quoteDesktopExecArg(QString arg)
 {
+    // See https://specifications.freedesktop.org/desktop-entry/latest/exec-variables.html
     arg.replace(R"(\)", R"(\\\\)");
     arg.replace(R"($)", R"(\\$)");
     arg.replace(R"(")", R"(\")");
