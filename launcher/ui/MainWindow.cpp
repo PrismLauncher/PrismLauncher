@@ -48,7 +48,6 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QUrl>
-#include <QUrlQuery>
 #include <QVariant>
 
 #include <QAction>
@@ -65,14 +64,12 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
-#include <QProgressDialog>
 #include <QShortcut>
 #include <QStatusBar>
 #include <QToolBar>
 #include <QToolButton>
 #include <QWidget>
 #include <QWidgetAction>
-#include <memory>
 
 #include <BaseInstance.h>
 #include <DesktopServices.h>
@@ -84,12 +81,12 @@
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftInstance.h>
 #include <minecraft/auth/AccountList.h>
-#include <net/ApiRequest.h>
 #include <net/NetJob.h>
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
 
+#include "ui/UrlImportHandler.h"
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
 #include "ui/dialogs/CreateShortcutDialog.h"
@@ -97,11 +94,9 @@
 #include "ui/dialogs/ExportInstanceDialog.h"
 #include "ui/dialogs/ExportPackDialog.h"
 #include "ui/dialogs/IconPickerDialog.h"
-#include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/dialogs/NewsDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
-#include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui/dialogs/skins/SkinManageDialog.h"
 #include "ui/instanceview/InstanceDelegate.h"
 #include "ui/instanceview/InstanceProxyModel.h"
@@ -112,18 +107,8 @@
 
 #include "minecraft/PackProfile.h"
 #include "minecraft/VersionFile.h"
-#include "minecraft/WorldList.h"
-#include "minecraft/mod/ModFolderModel.h"
-#include "minecraft/mod/ResourcePackFolderModel.h"
-#include "minecraft/mod/ShaderPackFolderModel.h"
-#include "minecraft/mod/TexturePackFolderModel.h"
-#include "minecraft/mod/tasks/LocalResourceParse.h"
 
 #include "modplatform/ModIndex.h"
-#include "modplatform/ResourceType.h"
-#include "modplatform/flame/FlameAPI.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
-#include "net/RPCSink.h"
 
 #include "KonamiCode.h"
 
@@ -145,6 +130,9 @@ QString profileInUseFilter(const QString& profile, bool used)
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    m_urlImportHandler = std::make_unique<UrlHandler>(this);
+    connect(m_urlImportHandler.get(), &UrlHandler::addInstance, this, &MainWindow::addInstance);
 
     setWindowIcon(APPLICATION->logo());
     setWindowTitle(APPLICATION->applicationDisplayName());
@@ -179,7 +167,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // set the menu for the folders help, accounts, and export tool buttons
     {
-        auto foldersMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionFoldersButton));
+        auto* foldersMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionFoldersButton));
         ui->actionFoldersButton->setMenu(ui->foldersMenu);
         foldersMenuButton->setPopupMode(QToolButton::InstantPopup);
 
@@ -189,10 +177,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->actionHelpButton->menu()->removeAction(ui->actionCheckUpdate);
         helpMenuButton->setPopupMode(QToolButton::InstantPopup);
 
-        auto accountMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionAccountsButton));
+        auto* accountMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionAccountsButton));
         accountMenuButton->setPopupMode(QToolButton::InstantPopup);
 
-        auto exportInstanceMenu = new QMenu(this);
+        auto* exportInstanceMenu = new QMenu(this);
         exportInstanceMenu->addAction(ui->actionExportInstanceZip);
         exportInstanceMenu->addAction(ui->actionExportInstanceMrPack);
         exportInstanceMenu->addAction(ui->actionExportInstanceFlamePack);
@@ -250,7 +238,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(ui->actionCloseWindow, &QAction::triggered, APPLICATION, &Application::closeCurrentWindow);
 
         // FIXME: This is kinda weird. and bad. We need some kind of managed shutdown.
-        auto q = new QShortcut(QKeySequence::Quit, this);
+        auto* q = new QShortcut(QKeySequence::Quit, this);
         connect(q, &QShortcut::activated, APPLICATION, &Application::quit);
     }
 
@@ -281,25 +269,27 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         view->setSelectionMode(QAbstractItemView::SingleSelection);
         // FIXME: leaks ListViewDelegate
-        auto delegate = new ListViewDelegate(this);
+        auto* delegate = new ListViewDelegate(this);
         view->setItemDelegate(delegate);
         view->setFrameShape(QFrame::NoFrame);
         // do not show ugly blue border on the mac
         view->setAttribute(Qt::WA_MacShowFocusRect, false);
-        connect(delegate, &ListViewDelegate::textChanged, this, [this](QString before, QString after) {
+        connect(delegate, &ListViewDelegate::textChanged, this, [this](const QString& before, const QString& after) {
             if (auto newRoot = askToUpdateInstanceDirName(m_selectedInstance, before, after, this); !newRoot.isEmpty()) {
                 auto oldID = m_selectedInstance->id();
                 auto newID = QFileInfo(newRoot).fileName();
                 QString origGroup(APPLICATION->instances()->getInstanceGroup(oldID));
                 bool syncGroup = origGroup != GroupId() && oldID != newID;
-                if (syncGroup)
+                if (syncGroup) {
                     APPLICATION->instances()->setInstanceGroup(oldID, GroupId());
+                }
 
                 refreshInstances();
                 setSelectedInstanceById(newID);
 
-                if (syncGroup)
+                if (syncGroup) {
                     APPLICATION->instances()->setInstanceGroup(newID, origGroup);
+                }
             }
         });
 
@@ -367,7 +357,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     statusBar()->addPermanentWidget(m_statusCenter, 0);
 
     // Add "manage accounts" button, right align
-    QWidget* spacer = new QWidget();
+    auto* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->mainToolBar->insertWidget(ui->actionAccountsButton, spacer);
 
@@ -402,7 +392,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(ui->actionCheckUpdate, &QAction::triggered, this, &MainWindow::checkForUpdates);
 
         // set up the updater object.
-        auto updater = APPLICATION->updater();
+        auto* updater = APPLICATION->updater();
 
         if (updater) {
             connect(updater, &ExternalUpdater::canCheckForUpdatesChanged, this, &MainWindow::updatesAllowedChanged);
@@ -930,393 +920,7 @@ void MainWindow::on_actionAddInstance_triggered()
 
 void MainWindow::processURLs(QList<QUrl> urls)
 {
-    // NOTE: This loop only processes one dropped file!
-    for (auto& url : urls) {
-        if (url.isEmpty() || url.toString().trimmed().isEmpty()) {
-            continue;
-        }
-
-        qDebug() << "Processing" << url;
-
-        // The isLocalFile() check below doesn't work as intended without an explicit scheme.
-        if (url.scheme().isEmpty()) {
-            url.setScheme("file");
-        }
-
-        ModPlatform::ResourceProvider provider{};
-        ModPlatform::IndexedVersion version;
-        QMap<QString, QString> extraInfo;
-        QUrl localUrl;
-        if (!url.isLocalFile()) {  // download the remote resource and identify
-            QUrl dlUrl;
-            const bool isExternalURLImport = (url.host().toLower() == "import") || (url.path().startsWith("/import", Qt::CaseInsensitive));
-
-            if (url.scheme() == "modrinth") {
-                provider = ModPlatform::ResourceProvider::MODRINTH;
-                const QString type = url.host();
-                const QString id = url.path().mid(1);
-                const QStringList supportedProtocols{ "modpack", "mod", "version" };
-                if (id.isEmpty() || !supportedProtocols.contains(type)) {
-                    CustomMessageBox::selectable(
-                        this, tr("Error"),
-                        tr("Unsupported Modrinth link.\n\nPrism Launcher currently only supports modrinth links such as "
-                           "modrinth://modpack/fabulously-optimized, modrinth://mod/fabric-api, modrinth://version/nr1znv5v."),
-                        QMessageBox::Critical)
-                        ->show();
-                    continue;
-                }
-                if (type == "modpack") {
-                    extraInfo.insert("pack_id", id);
-                    addInstance(url.toString(), extraInfo);
-                    continue;
-                }
-                if (type == "mod") {
-                    if (APPLICATION->instances()->count() <= 0) {
-                        CustomMessageBox::selectable(
-                            this, tr("No instance!"),
-                            tr("No instance available to add the resource to.\nPlease create a new instance before "
-                               "attempting to install this resource again."),
-                            QMessageBox::Critical)
-                            ->show();
-                        continue;
-                    }
-                    auto [job, pack] = ModrinthAPI::get().getProjectTask(id);
-
-                    auto packPtr = std::make_shared<ModPlatform::IndexedPack>();
-                    *packPtr = *pack;
-                    ResourceAPI::VersionSearchArgs args{ .pack = packPtr };
-                    auto versionSpec = ModrinthAPI::get().getVersions(args);
-                    auto [vTask, versions] = Net::RPC::make<QList<ModPlatform::IndexedVersion>>(versionSpec);
-
-                    job->addNetAction(vTask);
-                    job->setMaxConcurrent(1);  // just to be sure is sync
-
-                    connect(job.get(), &Task::failed, this, [this](const QString& reason) {
-                        CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-                    });
-
-                    {  // drop stack
-                        ProgressDialog dlUrlDialod(this);
-                        dlUrlDialod.setSkipButton(true, tr("Abort"));
-                        dlUrlDialod.execWithTask(job.get());
-                    }
-
-                    QStringList mcVersion;
-                    ModPlatform::ModLoaderTypes loaders;
-                    for (const auto& v : *versions) {
-                        mcVersion.append(v.mcVersion);
-                        loaders |= v.loaders;
-                    }
-                    mcVersion.removeDuplicates();
-
-                    ImportResourceDialog dlg(pack->name, pack->resourceType, this);
-
-                    dlg.sortBy(mcVersion, loaders);
-                    if (dlg.exec() != QDialog::Accepted) {
-                        continue;
-                    }
-
-                    auto* inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
-                    ResourceDownload::ResourceDownloadDialog* rDlg = nullptr;
-                    switch (pack->resourceType) {
-                        case ModPlatform::ResourceType::ResourcePack:
-                            rDlg = ResourceDownload::ResourceDownloadDialog::createResourcePack(this, inst->resourcePackList(), inst, true);
-                            break;
-                        case ModPlatform::ResourceType::TexturePack:
-                            rDlg = ResourceDownload::ResourceDownloadDialog::createTexturePack(this, inst->texturePackList(), inst, true);
-                            break;
-                        case ModPlatform::ResourceType::DataPack:
-                            if (auto* dataPackList = inst->dataPackList()) {
-                                rDlg = ResourceDownload::ResourceDownloadDialog::createDataPack(this, dataPackList, inst, true);
-                            } else {
-                                qWarning() << "Data packs are disabled for this instance. Ignoring" << pack->name;
-                            }
-                            break;
-                        case ModPlatform::ResourceType::Mod:
-                            rDlg = ResourceDownload::ResourceDownloadDialog::createMod(this, inst->loaderModList(), inst, true);
-                            break;
-                        case ModPlatform::ResourceType::ShaderPack:
-                            rDlg = ResourceDownload::ResourceDownloadDialog::createShaderPack(this, inst->shaderPackList(), inst, true);
-                            break;
-                        default:
-                            CustomMessageBox::selectable(
-                                this, tr("Error"),
-                                tr("Unsupported Modrinth resource.\n\nPrism Launcher currently doesn't support %1.")
-                                    .arg(ModPlatform::ResourceTypeUtils::getName(pack->resourceType)),
-                                QMessageBox::Critical)
-                                ->show();
-                            break;
-                    }
-                    if (rDlg) {
-                        rDlg->setResourcePack(*pack, ModPlatform::ResourceProvider::MODRINTH);
-                        if (rDlg->exec() != 0) {
-                            ConcurrentTask tasks("Download Data Packs",
-                                                 APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-                            connect(&tasks, &Task::failed, this, [this](const QString& reason) {
-                                CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-                            });
-                            connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
-                                QStringList warnings = tasks.warnings();
-                                if (warnings.count()) {
-                                    CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
-                                }
-                            });
-
-                            for (auto& task : rDlg->getTasks()) {
-                                tasks.addTask(task);
-                            }
-
-                            ProgressDialog loadDialog(this);
-                            loadDialog.setSkipButton(true, tr("Abort"));
-                            loadDialog.execWithTask(&tasks);
-                        }
-                        rDlg->deleteLater();
-                    }
-
-                    continue;
-                }
-                if (type == "version") {
-                    auto [job, versionRes] = ModrinthAPI::get().getVersionTask({}, id);
-
-                    connect(job.get(), &Task::failed, this, [this](const QString& reason) {
-                        CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-                    });
-                    connect(job.get(), &Task::succeeded, this, [versionRes, &dlUrl, &version, &extraInfo] {
-                        version = *versionRes;
-                        auto fileName = version.fileName;
-
-                        // Have to use ensureString then use QUrl to get proper url encoding
-                        dlUrl = QUrl(version.downloadUrl);
-                        extraInfo.insert("pack_id", version.addonId.toString());
-                        extraInfo.insert("pack_version_id", version.version);
-                    });
-
-                    {  // drop stack
-                        ProgressDialog dlUrlDialod(this);
-                        dlUrlDialod.setSkipButton(true, tr("Abort"));
-                        dlUrlDialod.execWithTask(job.get());
-                    }
-                }
-            } else if (url.scheme() == "curseforge" || (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME && url.host() == "install")) {
-                provider = ModPlatform::ResourceProvider::FLAME;
-                // need to find the download link for the modpack / resource
-                // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
-                // format of url binaryname://install?platform=curseforge&addonId=IDHERE&fileId=IDHERE
-                QUrlQuery query(url);
-
-                // check if this is a binaryname:// url
-                if (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME) {
-                    // check this is an curseforge platform request
-                    if (query.queryItemValue("platform").toLower() != "curseforge") {
-                        qDebug() << "Invalid mod distribution platform:" << query.queryItemValue("platform");
-                        continue;
-                    }
-                }
-
-                if (query.allQueryItemValues("addonId").isEmpty() || query.allQueryItemValues("fileId").isEmpty()) {
-                    qDebug() << "Invalid curseforge link:" << url;
-                    continue;
-                }
-
-                auto addonId = query.allQueryItemValues("addonId")[0];
-                auto fileId = query.allQueryItemValues("fileId")[0];
-
-                extraInfo.insert("pack_id", addonId);
-                extraInfo.insert("pack_version_id", fileId);
-
-                auto [job, versionRes] = FlameAPI::get().getVersionTask(addonId, fileId);
-
-                connect(job.get(), &Task::failed, this, [this](const QString& reason) {
-                    CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-                });
-                connect(job.get(), &Task::succeeded, this, [this, versionRes, addonId, fileId, &dlUrl, &version] {
-                    version = *versionRes;
-                    auto fileName = version.fileName;
-
-                    // Have to use ensureString then use QUrl to get proper url encoding
-                    dlUrl = QUrl(version.downloadUrl);
-                    if (!dlUrl.isValid()) {
-                        CustomMessageBox::selectable(
-                            this, tr("Error"),
-                            tr("The modpack, mod, or resource %1 is blocked for third-parties! Please download it manually.").arg(fileName),
-                            QMessageBox::Critical)
-                            ->show();
-                        return;
-                    }
-                });
-
-                {  // drop stack
-                    ProgressDialog dlUrlDialod(this);
-                    dlUrlDialod.setSkipButton(true, tr("Abort"));
-                    dlUrlDialod.execWithTask(job.get());
-                }
-
-            } else if (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME && !isExternalURLImport) {
-                QVariantMap receivedData;
-                const QUrlQuery query(url.query());
-                const auto items = query.queryItems();
-                for (auto it = items.begin(), end = items.end(); it != end; ++it) {
-                    receivedData.insert(it->first, it->second);
-                }
-                emit APPLICATION->oauthReplyRecieved(receivedData);
-                continue;
-            } else if ((url.scheme() == "prismlauncher" || url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME) && isExternalURLImport) {
-                // PrismLauncher URL protocol modpack import
-                // works for any prism fork
-                // preferred import format: prismlauncher://import?url=ENCODED
-                const auto host = url.host().toLower();
-                const auto path = url.path();
-
-                QString encodedTarget;
-
-                {
-                    QUrlQuery query(url);
-                    const auto values = query.allQueryItemValues("url");
-                    if (!values.isEmpty()) {
-                        encodedTarget = values.first();
-                    }
-                }
-
-                // alternative import format: prismlauncher://import/ENCODED
-                if (encodedTarget.isEmpty()) {
-                    QString p = path;
-
-                    if (p.startsWith("/import/", Qt::CaseInsensitive)) {
-                        p = p.mid(QString("/import/").size());
-                    } else if (host == "import" && p.startsWith("/")) {
-                        p = p.mid(1);
-                    }
-
-                    if (!p.isEmpty() && p != "/import") {
-                        encodedTarget = p;
-                    }
-                }
-
-                if (encodedTarget.isEmpty()) {
-                    CustomMessageBox::selectable(this, tr("Error"), tr("Invalid import link: missing 'url' parameter."),
-                                                 QMessageBox::Critical)
-                        ->show();
-                    continue;
-                }
-
-                const QString decodedStr = QUrl::fromPercentEncoding(encodedTarget.toUtf8()).trimmed();
-
-                QUrl target = QUrl::fromUserInput(decodedStr);
-
-                // Validate: only allow http(s)
-                if (!target.isValid() || (target.scheme() != "https" && target.scheme() != "http")) {
-                    CustomMessageBox::selectable(this, tr("Error"), tr("Invalid import link: URL must be http(s)."), QMessageBox::Critical)
-                        ->show();
-                    continue;
-                }
-
-                const auto res = QMessageBox::question(
-                    this, tr("Install modpack"),
-                    tr("Do you want to download and import a modpack from:\n%1\n\nURL:\n%2").arg(target.host(), target.toString()),
-                    QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-                if (res != QMessageBox::Yes) {
-                    continue;
-                }
-
-                dlUrl = target;
-            } else {
-                dlUrl = url;
-            }
-
-            if (!dlUrl.isValid()) {
-                continue;  // no valid url to download this resource
-            }
-
-            const QString path = dlUrl.host() + '/' + dlUrl.path();
-            auto entry = APPLICATION->metacache()->resolveEntry("general", path);
-            entry->setStale(true);
-            auto dlJob = unique_qobject_ptr<NetJob>(new NetJob(tr("Modpack download"), APPLICATION->network()));
-            dlJob->addNetAction(Net::ApiRequest::makeCached(dlUrl, entry));
-            auto archivePath = entry->getFullPath();
-
-            bool dlSuccess = false;
-            connect(dlJob.get(), &Task::failed, this, [this](const QString& reason) {
-                CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-            });
-            connect(dlJob.get(), &Task::succeeded, this, [&dlSuccess] { dlSuccess = true; });
-
-            {  // drop stack
-                ProgressDialog dlUrlDialod(this);
-                dlUrlDialod.setSkipButton(true, tr("Abort"));
-                dlUrlDialod.execWithTask(dlJob.get());
-            }
-
-            if (!dlSuccess) {
-                continue;  // no local file to identify
-            }
-            localUrl = QUrl::fromLocalFile(archivePath);
-        } else {
-            localUrl = url;
-        }
-
-        auto localFileName = QDir::toNativeSeparators(localUrl.toLocalFile());
-        QFileInfo localFileInfo(localFileName);
-
-        if (localFileName.isEmpty() || !localFileInfo.exists()) {
-            qDebug() << "Ignoring invalid path" << localFileName;
-            continue;
-        }
-
-        auto type = ResourceUtils::identify(localFileInfo);
-
-        if (!ModPlatform::ResourceTypeUtils::g_VALID_RESOURCES.contains(type)) {  // probably instance/modpack
-            addInstance(localFileName, extraInfo);
-            continue;
-        }
-
-        if (APPLICATION->instances()->count() <= 0) {
-            CustomMessageBox::selectable(this, tr("No instance!"),
-                                         tr("No instance available to add the resource to.\nPlease create a new instance before "
-                                            "attempting to install this resource again."),
-                                         QMessageBox::Critical)
-                ->show();
-            continue;
-        }
-        ImportResourceDialog dlg(localFileName, type, this);
-
-        dlg.sortBy(version.mcVersion, version.loaders);
-        if (dlg.exec() != QDialog::Accepted) {
-            continue;
-        }
-
-        qDebug() << "Adding resource" << localFileName << "to" << dlg.selectedInstanceKey;
-
-        auto* minecraftInst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
-
-        switch (type) {
-            case ModPlatform::ResourceType::ResourcePack:
-                minecraftInst->resourcePackList()->installResourceWithMeta(localFileName, version, provider);
-                break;
-            case ModPlatform::ResourceType::TexturePack:
-                minecraftInst->texturePackList()->installResourceWithMeta(localFileName, version, provider);
-                break;
-            case ModPlatform::ResourceType::DataPack:
-                if (auto* dataPackList = minecraftInst->dataPackList()) {
-                    dataPackList->installResourceWithMeta(localFileName, version, provider);
-                } else {
-                    qWarning() << "Data packs are disabled for this instance. Ignoring" << localFileName;
-                }
-                break;
-            case ModPlatform::ResourceType::Mod:
-                minecraftInst->loaderModList()->installResourceWithMeta(localFileName, version, provider);
-                break;
-            case ModPlatform::ResourceType::ShaderPack:
-                minecraftInst->shaderPackList()->installResourceWithMeta(localFileName, version, provider);
-                break;
-            case ModPlatform::ResourceType::World:
-                minecraftInst->worldList()->installWorld(localFileInfo);
-                break;
-            case ModPlatform::ResourceType::Unknown:
-            default:
-                qDebug() << "Can't Identify" << localFileName << "Ignoring it.";
-                break;
-        }
-    }
+    m_urlImportHandler->process(urls);
 }
 
 void MainWindow::on_actionREDDIT_triggered()
