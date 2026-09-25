@@ -172,8 +172,6 @@ MinecraftInstance::MinecraftInstance(SettingsObject* globalSettings, std::unique
     : BaseInstance(globalSettings, std::move(settings), rootDir)
 {
     m_components = std::make_unique<PackProfile>(this);
-    connect(m_components.get(), &QAbstractItemModel::dataChanged, this, &MinecraftInstance::propertiesChanged);
-    connect(m_components.get(), &QAbstractItemModel::modelReset, this, &MinecraftInstance::propertiesChanged);
 }
 
 MinecraftInstance::~MinecraftInstance() {}

@@ -47,32 +47,58 @@ ImportResourceDialog::ImportResourceDialog(QString filePath, ModPlatform::Resour
     connect(contentsWidget, &QAbstractItemView::doubleClicked, this, &ImportResourceDialog::activated);
     connect(contentsWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ImportResourceDialog::selectionChanged);
     connect(m_ui->searchEdit, &QLineEdit::textChanged, m_proxyModel, &InstanceProxyModel::setSearchTerm);
-    connect(m_ui->button_show_all, &QPushButton::toggled, this, &ImportResourceDialog::showAllInstances);
+    connect(m_ui->showAllCB, &QCheckBox::toggled, this, &ImportResourceDialog::showAllInstances);
 
     m_ui->label->setText(
         tr("Choose the instance you would like to import this %1 to.").arg(ModPlatform::ResourceTypeUtils::getName(m_resourceType)));
-    m_ui->label_file_path->setText(tr("File: %1").arg(m_filePath));
+    m_ui->labelFilePath->setText(tr("File: %1").arg(m_filePath));
 
     m_ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
     m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
+    setSelectedInstanceKey({});
+    selectFirstInstance();
+}
+
+void ImportResourceDialog::setSelectedInstanceKey(QString key)
+{
+    selectedInstanceKey = std::move(key);
+    // NOTE: the OK button is always clickable, so an empty key would be accepted otherwise
+    m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!selectedInstanceKey.isEmpty());
+}
+
+void ImportResourceDialog::selectFirstInstance()
+{
+    auto* selectionModel = m_ui->instanceView->selectionModel();
+    if (!selectionModel) {
+        return;
+    }
+    if (selectionModel->hasSelection() && !selectedInstanceKey.isEmpty()) {
+        return;
+    }
+    if (m_proxyModel->rowCount() == 0) {
+        setSelectedInstanceKey({});
+        return;
+    }
+    auto index = m_proxyModel->index(0, 0);
+    selectionModel->select(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+    selectionModel->setCurrentIndex(index, QItemSelectionModel::NoUpdate);
+    m_ui->instanceView->scrollTo(index);
 }
 
 void ImportResourceDialog::activated(QModelIndex index)
 {
-    selectedInstanceKey = index.data(InstanceList::InstanceIDRole).toString();
+    setSelectedInstanceKey(index.data(InstanceList::InstanceIDRole).toString());
     accept();
 }
 
 void ImportResourceDialog::selectionChanged(QItemSelection selected, QItemSelection /*deselected*/)
 {
     if (selected.empty()) {
+        setSelectedInstanceKey({});
         return;
     }
 
-    QString key = selected.first().indexes().first().data(InstanceList::InstanceIDRole).toString();
-    if (!key.isEmpty()) {
-        selectedInstanceKey = key;
-    }
+    setSelectedInstanceKey(selected.first().indexes().first().data(InstanceList::InstanceIDRole).toString());
 }
 
 ImportResourceDialog::~ImportResourceDialog()
@@ -95,7 +121,8 @@ void ImportResourceDialog::filterBy(QStringList mcVersions, ModPlatform::ModLoad
     m_mcVersions = mcVersions;
     m_loader = loader;
     m_proxyModel->filterBy(std::move(mcVersions), loader);
-    m_ui->button_show_all->setEnabled(m_loader != ModPlatform::ModLoaderType::None || !m_mcVersions.isEmpty());
+    m_ui->showAllCB->setEnabled(m_loader != ModPlatform::ModLoaderType::None || !m_mcVersions.isEmpty());
+    selectFirstInstance();
 }
 
 void ImportResourceDialog::showAllInstances(bool checked)
