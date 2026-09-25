@@ -51,7 +51,7 @@ class ArchiveReader {
         QDateTime dateTime();
         const char* error();
 
-        QByteArray readAll(int* outStatus = nullptr);
+        Result<QByteArray> readAll();
         Result<> skip();
         Result<> writeFile(archive* out, const QString& targetFileName = "", bool notBlock = false);
         Result<> writeFile(archive* out, const QString& targetFileName, std::optional<QDir> root, bool notBlock = false);
