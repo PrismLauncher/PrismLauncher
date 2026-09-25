@@ -244,6 +244,26 @@ QString quoteArgs(const QStringList& args, const QString& wrap, const QString& e
 
     return result;
 }
+
+QString quoteDesktopExecArg(QString arg)
+{
+    arg.replace("\\", "\\\\\\\\");
+    arg.replace("$", "\\\\$");
+    arg.replace("\"", "\\\"");
+    arg.replace("`", "\\`");
+    arg.replace("%", "%%");
+    return QStringLiteral("\"") + arg + QStringLiteral("\"");
+}
+
+QString quoteDesktopExecArgs(const QStringList& args)
+{
+    QStringList result;
+    result.reserve(args.size());
+    for (auto arg : args) {
+        result.append(quoteDesktopExecArg(arg));
+    }
+    return result.join(' ');
+}
 }  // namespace
 namespace FS {
 
@@ -1054,49 +1074,6 @@ QString getDesktopDir()
 QString getApplicationsDir()
 {
     return QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation);
-}
-
-QString quoteArgs(const QStringList& args, const QString& wrap, const QString& escapeChar, bool wrapOnlyIfNeeded = false)
-{
-    QString result;
-
-    auto size = args.size();
-    for (int i = 0; i < size; ++i) {
-        QString arg = args[i];
-        arg.replace(wrap, escapeChar);
-
-        bool needsWrapping = !wrapOnlyIfNeeded || arg.contains(' ') || arg.contains('\t') || arg.contains(wrap);
-
-        if (needsWrapping)
-            result += wrap + arg + wrap;
-        else
-            result += arg;
-
-        if (i < size - 1)
-            result += ' ';
-    }
-
-    return result;
-}
-
-QString quoteDesktopExecArg(QString arg)
-{
-    arg.replace("\\", "\\\\\\\\");
-    arg.replace("$", "\\\\$");
-    arg.replace("\"", "\\\"");
-    arg.replace("`", "\\`");
-    arg.replace("%", "%%");
-    return QStringLiteral("\"") + arg + QStringLiteral("\"");
-}
-
-QString quoteDesktopExecArgs(const QStringList& args)
-{
-    QStringList result;
-    result.reserve(args.size());
-    for (auto arg : args) {
-        result.append(quoteDesktopExecArg(arg));
-    }
-    return result.join(' ');
 }
 
 // Cross-platform Shortcut creation
