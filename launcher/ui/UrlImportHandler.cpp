@@ -59,15 +59,16 @@ void UrlHandler::process(const QList<QUrl>& urls)
             continue;
         }
         // download the remote resource and identify
-        const bool isExternalURLImport = (url.host().toLower() == "import") || (url.path().startsWith("/import", Qt::CaseInsensitive));
+        const bool isExternalURLImport =
+            url.host().toLower() == "import" || url.path().startsWith("/import", Qt::CaseInsensitive) || url.host() == "install";
 
         if (url.scheme() == "modrinth") {
             handleModrinth(url);
-        } else if (url.scheme() == "curseforge" || (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME && url.host() == "install")) {
+        } else if (url.scheme() == "curseforge") {
             handleCurseforge(url);
         } else if (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME && !isExternalURLImport) {
             handleOauth(url);
-        } else if ((url.scheme() == "prismlauncher" || url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME) && isExternalURLImport) {
+        } else if (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME && isExternalURLImport) {
             handlePrism(url);
         } else {
             downloadFile(url);
@@ -207,135 +208,146 @@ void UrlHandler::handleModrinth(const QUrl& url)
         emit addInstance(url.toString(), { { "pack_id", id } });
         return;
     }
-    if (type == "mod") {
-        if (APPLICATION->instances()->count() <= 0) {
-            CustomMessageBox::selectable(m_parent, tr("No instance!"),
-                                         tr("No instance available to add the resource to.\nPlease create a new instance before "
-                                            "attempting to install this resource again."),
-                                         QMessageBox::Critical)
-                ->show();
-            return;
-        }
-        auto [job, pack] = ModrinthAPI::get().getProjectTask(id);
-
-        auto packPtr = std::make_shared<ModPlatform::IndexedPack>();
-        *packPtr = *pack;
-        ResourceAPI::VersionSearchArgs args{ .pack = packPtr };
-        auto versionSpec = ModrinthAPI::get().getVersions(args);
-        auto [vTask, versions] = Net::RPC::make<QList<ModPlatform::IndexedVersion>>(versionSpec);
-
-        job->addNetAction(vTask);
-        job->setMaxConcurrent(1);  // just to be sure is sync
-
-        connect(job.get(), &Task::failed, this, [this](const QString& reason) {
-            CustomMessageBox::selectable(m_parent, tr("Error"), reason, QMessageBox::Critical)->show();
-        });
-
-        {  // drop stack
-            ProgressDialog dlUrlDialod(m_parent);
-            dlUrlDialod.setSkipButton(true, tr("Abort"));
-            dlUrlDialod.execWithTask(job.get());
-        }
-
-        QStringList mcVersion;
-        ModPlatform::ModLoaderTypes loaders;
-        for (const auto& v : *versions) {
-            mcVersion.append(v.mcVersion);
-            loaders |= v.loaders;
-        }
-        mcVersion.removeDuplicates();
-
-        ImportResourceDialog dlg(pack->name, pack->resourceType, m_parent);
-
-        dlg.sortBy(mcVersion, loaders);
-        if (dlg.exec() != QDialog::Accepted) {
-            return;
-        }
-
-        auto* inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
-        if (!inst) {
-            CustomMessageBox::selectable(m_parent, tr("No instance!"),
-                                         tr("The selected instance no longer exists.\nPlease try importing this resource again."),
-                                         QMessageBox::Critical)
-                ->show();
-            return;
-        }
-        ResourceDownload::ResourceDownloadDialog* rDlg = nullptr;
-        switch (pack->resourceType) {
-            case ModPlatform::ResourceType::ResourcePack:
-                rDlg = ResourceDownload::ResourceDownloadDialog::createResourcePack(m_parent, inst->resourcePackList(), inst, true);
-                break;
-            case ModPlatform::ResourceType::TexturePack:
-                rDlg = ResourceDownload::ResourceDownloadDialog::createTexturePack(m_parent, inst->texturePackList(), inst, true);
-                break;
-            case ModPlatform::ResourceType::DataPack:
-                if (auto* dataPackList = inst->dataPackList()) {
-                    rDlg = ResourceDownload::ResourceDownloadDialog::createDataPack(m_parent, dataPackList, inst, true);
-                } else {
-                    qWarning() << "Data packs are disabled for this instance. Ignoring" << pack->name;
-                }
-                break;
-            case ModPlatform::ResourceType::Mod:
-                rDlg = ResourceDownload::ResourceDownloadDialog::createMod(m_parent, inst->loaderModList(), inst, true);
-                break;
-            case ModPlatform::ResourceType::ShaderPack:
-                rDlg = ResourceDownload::ResourceDownloadDialog::createShaderPack(m_parent, inst->shaderPackList(), inst, true);
-                break;
-            default:
-                CustomMessageBox::selectable(m_parent, tr("Error"),
-                                             tr("Unsupported Modrinth resource.\n\nPrism Launcher currently doesn't support %1.")
-                                                 .arg(ModPlatform::ResourceTypeUtils::getName(pack->resourceType)),
-                                             QMessageBox::Critical)
-                    ->show();
-                break;
-        }
-        if (rDlg) {
-            rDlg->setResourcePack(*pack, ModPlatform::ResourceProvider::MODRINTH);
-            if (rDlg->exec() != 0) {
-                ConcurrentTask tasks("Download Data Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-                connect(&tasks, &Task::failed, this, [this](const QString& reason) {
-                    CustomMessageBox::selectable(m_parent, tr("Error"), reason, QMessageBox::Critical)->show();
-                });
-                connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
-                    QStringList warnings = tasks.warnings();
-                    if (warnings.count()) {
-                        CustomMessageBox::selectable(m_parent, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
-                    }
-                });
-
-                for (auto& task : rDlg->getTasks()) {
-                    tasks.addTask(task);
-                }
-
-                {
-                    ProgressDialog loadDialog(m_parent);
-                    loadDialog.setSkipButton(true, tr("Abort"));
-                    loadDialog.execWithTask(&tasks);
-                }
-            }
-            rDlg->deleteLater();
-        }
-
+    if (type == "version") {
+        handleModrinthVersion(id);
         return;
     }
-    if (type == "version") {
-        auto [job, versionRes] = ModrinthAPI::get().getVersionTask({}, id);
+    if (type == "mod") {
+        handleModrinthMod(id);
+        return;
+    }
+}
 
-        connect(job.get(), &Task::failed, this, [this](const QString& reason) {
-            CustomMessageBox::selectable(m_parent, tr("Error"), reason, QMessageBox::Critical)->show();
-        });
-        connect(job.get(), &Task::succeeded, this, [versionRes, this] {
-            // Have to use ensureString then use QUrl to get proper url encoding
-            downloadFile(versionRes->downloadUrl, *versionRes,
-                         { { "pack_id", versionRes->addonId.toString() }, { "pack_version_id", versionRes->version } },
-                         ModPlatform::ResourceProvider::MODRINTH);
-        });
+void UrlHandler::handleModrinthVersion(const QString& versionID)
+{
+    auto [job, versionRes] = ModrinthAPI::get().getVersionTask({}, versionID);
 
-        {  // drop stack
-            ProgressDialog dlUrlDialod(m_parent);
-            dlUrlDialod.setSkipButton(true, tr("Abort"));
-            dlUrlDialod.execWithTask(job.get());
+    connect(job.get(), &Task::failed, this,
+            [this](const QString& reason) { CustomMessageBox::selectable(m_parent, tr("Error"), reason, QMessageBox::Critical)->show(); });
+    connect(job.get(), &Task::succeeded, this, [versionRes, this] {
+        // Have to use ensureString then use QUrl to get proper url encoding
+        downloadFile(versionRes->downloadUrl, *versionRes,
+                     { { "pack_id", versionRes->addonId.toString() }, { "pack_version_id", versionRes->version } },
+                     ModPlatform::ResourceProvider::MODRINTH);
+    });
+
+    {  // drop stack
+        ProgressDialog dlUrlDialod(m_parent);
+        dlUrlDialod.setSkipButton(true, tr("Abort"));
+        dlUrlDialod.execWithTask(job.get());
+    }
+}
+
+void UrlHandler::handleModrinthMod(const QString& id)
+{
+    if (APPLICATION->instances()->count() <= 0) {
+        CustomMessageBox::selectable(m_parent, tr("No instance!"),
+                                     tr("No instance available to add the resource to.\nPlease create a new instance before "
+                                        "attempting to install this resource again."),
+                                     QMessageBox::Critical)
+            ->show();
+        return;
+    }
+    auto [job, pack] = ModrinthAPI::get().getProjectTask(id);
+
+    auto packPtr = std::make_shared<ModPlatform::IndexedPack>();
+    *packPtr = *pack;
+    ResourceAPI::VersionSearchArgs args{ .pack = packPtr };
+    auto versionSpec = ModrinthAPI::get().getVersions(args);
+    auto [vTask, versions] = Net::RPC::make<QList<ModPlatform::IndexedVersion>>(versionSpec);
+
+    job->addNetAction(vTask);
+    job->setMaxConcurrent(1);  // just to be sure is sync
+
+    connect(job.get(), &Task::failed, this,
+            [this](const QString& reason) { CustomMessageBox::selectable(m_parent, tr("Error"), reason, QMessageBox::Critical)->show(); });
+
+    {  // drop stack
+        ProgressDialog dlUrlDialod(m_parent);
+        dlUrlDialod.setSkipButton(true, tr("Abort"));
+        dlUrlDialod.execWithTask(job.get());
+    }
+
+    QStringList mcVersion;
+    ModPlatform::ModLoaderTypes loaders;
+    for (const auto& v : *versions) {
+        mcVersion.append(v.mcVersion);
+        loaders |= v.loaders;
+    }
+    mcVersion.removeDuplicates();
+
+    ImportResourceDialog dlg(pack->name, pack->resourceType, m_parent);
+
+    dlg.sortBy(mcVersion, loaders);
+    if (dlg.exec() != QDialog::Accepted) {
+        return;
+    }
+
+    auto* inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
+    if (!inst) {
+        CustomMessageBox::selectable(m_parent, tr("No instance!"),
+                                     tr("The selected instance no longer exists.\nPlease try importing this resource again."),
+                                     QMessageBox::Critical)
+            ->show();
+        return;
+    }
+    ResourceDownload::ResourceDownloadDialog* rDlg = nullptr;
+    switch (pack->resourceType) {
+        case ModPlatform::ResourceType::ResourcePack:
+            rDlg = ResourceDownload::ResourceDownloadDialog::createResourcePack(m_parent, inst->resourcePackList(), inst, true);
+            break;
+        case ModPlatform::ResourceType::TexturePack:
+            rDlg = ResourceDownload::ResourceDownloadDialog::createTexturePack(m_parent, inst->texturePackList(), inst, true);
+            break;
+        case ModPlatform::ResourceType::DataPack:
+            if (auto* dataPackList = inst->dataPackList()) {
+                rDlg = ResourceDownload::ResourceDownloadDialog::createDataPack(m_parent, dataPackList, inst, true);
+            } else {
+                qWarning() << "Data packs are disabled for this instance. Ignoring" << pack->name;
+            }
+            break;
+        case ModPlatform::ResourceType::Mod:
+            rDlg = ResourceDownload::ResourceDownloadDialog::createMod(m_parent, inst->loaderModList(), inst, true);
+            break;
+        case ModPlatform::ResourceType::ShaderPack:
+            rDlg = ResourceDownload::ResourceDownloadDialog::createShaderPack(m_parent, inst->shaderPackList(), inst, true);
+            break;
+        case ModPlatform::ResourceType::Modpack:  // just in case
+            emit addInstance(QString("modrinth://modpack/%1").arg(id), { { "pack_id", id } });
+            return;
+        default:
+            CustomMessageBox::selectable(m_parent, tr("Error"),
+                                         tr("Unsupported Modrinth resource.\n\nPrism Launcher currently doesn't support %1.")
+                                             .arg(ModPlatform::ResourceTypeUtils::getName(pack->resourceType)),
+                                         QMessageBox::Critical)
+                ->show();
+            break;
+    }
+    if (rDlg) {
+        rDlg->setResourcePack(*pack, ModPlatform::ResourceProvider::MODRINTH);
+        if (rDlg->exec() != 0) {
+            ConcurrentTask tasks("Download Data Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+            connect(&tasks, &Task::failed, this, [this](const QString& reason) {
+                CustomMessageBox::selectable(m_parent, tr("Error"), reason, QMessageBox::Critical)->show();
+            });
+            connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
+                QStringList warnings = tasks.warnings();
+                if (warnings.count()) {
+                    CustomMessageBox::selectable(m_parent, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+                }
+            });
+
+            for (auto& task : rDlg->getTasks()) {
+                tasks.addTask(task);
+            }
+
+            {
+                ProgressDialog loadDialog(m_parent);
+                loadDialog.setSkipButton(true, tr("Abort"));
+                loadDialog.execWithTask(&tasks);
+            }
         }
+        rDlg->deleteLater();
     }
 }
 
@@ -343,26 +355,20 @@ void UrlHandler::handleCurseforge(const QUrl& url)
 {
     // need to find the download link for the modpack / resource
     // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
-    // format of url binaryname://install?platform=curseforge&addonId=IDHERE&fileId=IDHERE
     QUrlQuery query(url);
 
-    // check if this is a binaryname:// url
-    if (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME) {
-        // check this is an curseforge platform request
-        if (query.queryItemValue("platform").toLower() != "curseforge") {
-            qDebug() << "Invalid mod distribution platform:" << query.queryItemValue("platform");
-            return;
-        }
-    }
-
     if (query.allQueryItemValues("addonId").isEmpty() || query.allQueryItemValues("fileId").isEmpty()) {
-        qDebug() << "Invalid curseforge link:" << url;
+        qDebug() << "Invalid  link:" << url;
         return;
     }
 
     auto addonId = query.allQueryItemValues("addonId")[0];
     auto fileId = query.allQueryItemValues("fileId")[0];
+    handleCurseforge(addonId, fileId);
+}
 
+void UrlHandler::handleCurseforge(const QString& addonId, const QString& fileId)
+{
     auto [job, versionRes] = FlameAPI::get().getVersionTask(addonId, fileId);
 
     connect(job.get(), &Task::failed, this,
@@ -390,6 +396,42 @@ void UrlHandler::handleCurseforge(const QUrl& url)
 
 void UrlHandler::handlePrism(const QUrl& url)
 {
+    // need to find the download link for the modpack / resource
+    // format of url binaryname://install?platform=curseforge&addonId=IDHERE&fileId=IDHERE
+    // format of url binaryname://install?platform=modrinth&addonId=IDHERE&fileId=IDHERE
+    if (url.host() == "install") {
+        QUrlQuery query(url);
+
+        auto platform = query.queryItemValue("platform").toLower();
+        if (platform == "modrinth") {
+            if (!query.allQueryItemValues("fileId").isEmpty()) {
+                auto fileId = query.allQueryItemValues("fileId")[0];
+                handleModrinthVersion(fileId);
+                return;
+            }
+            if (!query.allQueryItemValues("addonId").isEmpty()) {
+                auto addonId = query.allQueryItemValues("addonId")[0];
+                handleModrinthMod(addonId);
+                return;
+            }
+            qDebug() << "Invalid  link:" << url;
+            return;
+        }
+        if (platform == "curseforge") {
+            if (query.allQueryItemValues("addonId").isEmpty() || query.allQueryItemValues("fileId").isEmpty()) {
+                qDebug() << "Invalid  link:" << url;
+                return;
+            }
+            auto addonId = query.allQueryItemValues("addonId")[0];
+            auto fileId = query.allQueryItemValues("fileId")[0];
+            handleCurseforge(addonId, fileId);
+            return;
+        }
+
+        qDebug() << "Invalid mod distribution platform:" << query.queryItemValue("platform");
+        return;
+    }
+
     // PrismLauncher URL protocol modpack import
     // works for any prism fork
     // preferred impoprocessFilert format: prismlauncher://import?url=ENCODED
