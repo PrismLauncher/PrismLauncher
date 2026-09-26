@@ -39,6 +39,7 @@
 #include <QStringList>
 
 #include <settings/Setting.h>
+#include <settings/SettingsObject.h>
 
 #include <QDebug>
 #include "Application.h"
@@ -518,6 +519,18 @@ QList<QString> JavaUtils::FindJavaPaths()
 QString JavaUtils::getJavaCheckPath()
 {
     return APPLICATION->getJarPath("JavaCheck.jar");
+}
+
+const std::array<int, 4> JavaUtils::pinnableMajors = { 8, 17, 21, 25 };
+
+QString JavaUtils::pinnedPathSettingName(int major)
+{
+    return QStringLiteral("JavaPath%1").arg(major);
+}
+
+QString JavaUtils::getPinnedPath(int major)
+{
+    return APPLICATION->settings()->get(pinnedPathSettingName(major)).toString();
 }
 
 QStringList getMinecraftJavaBundle()
