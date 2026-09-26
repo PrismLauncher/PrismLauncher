@@ -27,7 +27,7 @@ class JavaWizardWidget : public QWidget {
     explicit JavaWizardWidget(QWidget* parent);
     ~JavaWizardWidget() override;
 
-    enum class JavaStatus : std ::uint8_t {
+    enum class JavaStatus : std::uint8_t {
         NotSet,
         Pending,
         Good,
@@ -36,7 +36,7 @@ class JavaWizardWidget : public QWidget {
         ReturnedInvalidData
     } javaStatus = JavaStatus::NotSet;
 
-    enum class ValidationStatus : std ::uint8_t { Bad, JavaBad, AllOK };
+    enum class ValidationStatus : std::uint8_t { Bad, JavaBad, AllOK };
 
     void refresh();
     void initialize();
@@ -58,9 +58,9 @@ class JavaWizardWidget : public QWidget {
     void memoryValueChanged();
     void javaPathEdited(const QString& path);
     void javaVersionSelected(const BaseVersion::Ptr& version);
-    void on_javaBrowseBtn_clicked();
-    void on_javaStatusBtn_clicked();
-    void javaDownloadBtn_clicked();
+    void onJavaBrowseBtnClicked();
+    void onJavaStatusBtnClicked();
+    void javaDownloadBtnClicked();
     void checkFinished(const JavaChecker::Result& result);
 
    protected: /* methods */

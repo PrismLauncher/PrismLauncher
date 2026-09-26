@@ -20,13 +20,16 @@
 #include "SkinModel.h"
 #include <QFileInfo>
 #include <QPainter>
+#include <array>
+#include <span>
 
 #include "FileSystem.h"
 
-static void setAlpha(QImage& image, const QRect& region, const int alpha)
+namespace {
+void setAlpha(QImage& image, const QRect& region, const int alpha)
 {
     for (int y = region.top(); y < region.bottom(); ++y) {
-        QRgb* line = reinterpret_cast<QRgb*>(image.scanLine(y));
+        auto line = std::span(reinterpret_cast<QRgb*>(image.scanLine(y)), image.width());
         for (int x = region.left(); x < region.right(); ++x) {
             QRgb pixel = line[x];
             line[x] = qRgba(qRed(pixel), qGreen(pixel), qBlue(pixel), alpha);
@@ -34,10 +37,10 @@ static void setAlpha(QImage& image, const QRect& region, const int alpha)
     }
 }
 
-static void doNotchTransparencyHack(QImage& image)
+void doNotchTransparencyHack(QImage& image)
 {
     for (int y = 0; y < 32; y++) {
-        QRgb* line = reinterpret_cast<QRgb*>(image.scanLine(y));
+        auto line = std::span(reinterpret_cast<QRgb*>(image.scanLine(y)), image.width());
         for (int x = 32; x < 64; x++) {
             if (qAlpha(line[x]) < 128) {
                 return;
@@ -48,7 +51,7 @@ static void doNotchTransparencyHack(QImage& image)
     setAlpha(image, { 32, 0, 32, 32 }, 0);
 }
 
-static QImage improveSkin(QImage skin)
+QImage improveSkin(QImage skin)
 {
     int height = skin.height();
     int width = skin.width();
@@ -71,47 +74,57 @@ static QImage improveSkin(QImage skin)
 
         auto copyRect = [&p, &newSkin](int startX, int startY, int offsetX, int offsetY, int sizeX, int sizeY) {
             QImage region = newSkin.copy(startX, startY, sizeX, sizeY);
-            region = region.mirrored(true, false);
+            region = region.flipped(Qt::Horizontal);
 
             p.drawImage(startX + offsetX, startY + offsetY, region);
         };
-        static const struct {
+        struct FaceRect {
             int x;
             int y;
             int offsetX;
             int offsetY;
             int width;
             int height;
-        } faces[] = {
-            { 4, 16, 16, 32, 4, 4 },  { 8, 16, 16, 32, 4, 4 },   { 0, 20, 24, 32, 4, 12 },   { 4, 20, 16, 32, 4, 12 },
-            { 8, 20, 8, 32, 4, 12 },  { 12, 20, 16, 32, 4, 12 }, { 44, 16, -8, 32, 4, 4 },   { 48, 16, -8, 32, 4, 4 },
-            { 40, 20, 0, 32, 4, 12 }, { 44, 20, -8, 32, 4, 12 }, { 48, 20, -16, 32, 4, 12 }, { 52, 20, -8, 32, 4, 12 },
+        };
+        static constexpr std::array s_faces = {
+            FaceRect{ .x = 4, .y = 16, .offsetX = 16, .offsetY = 32, .width = 4, .height = 4 },
+            FaceRect{ .x = 8, .y = 16, .offsetX = 16, .offsetY = 32, .width = 4, .height = 4 },
+            FaceRect{ .x = 0, .y = 20, .offsetX = 24, .offsetY = 32, .width = 4, .height = 12 },
+            FaceRect{ .x = 4, .y = 20, .offsetX = 16, .offsetY = 32, .width = 4, .height = 12 },
+            FaceRect{ .x = 8, .y = 20, .offsetX = 8, .offsetY = 32, .width = 4, .height = 12 },
+            FaceRect{ .x = 12, .y = 20, .offsetX = 16, .offsetY = 32, .width = 4, .height = 12 },
+            FaceRect{ .x = 44, .y = 16, .offsetX = -8, .offsetY = 32, .width = 4, .height = 4 },
+            FaceRect{ .x = 48, .y = 16, .offsetX = -8, .offsetY = 32, .width = 4, .height = 4 },
+            FaceRect{ .x = 40, .y = 20, .offsetX = 0, .offsetY = 32, .width = 4, .height = 12 },
+            FaceRect{ .x = 44, .y = 20, .offsetX = -8, .offsetY = 32, .width = 4, .height = 12 },
+            FaceRect{ .x = 48, .y = 20, .offsetX = -16, .offsetY = 32, .width = 4, .height = 12 },
+            FaceRect{ .x = 52, .y = 20, .offsetX = -8, .offsetY = 32, .width = 4, .height = 12 },
         };
 
-        for (const auto& face : faces) {
+        for (const auto& face : s_faces) {
             copyRect(face.x, face.y, face.offsetX, face.offsetY, face.width, face.height);
         }
         doNotchTransparencyHack(newSkin);
         skin = newSkin;
     }
-    static const QRect opaqueParts[] = {
-        { 0, 0, 32, 16 },
-        { 0, 16, 64, 16 },
-        { 16, 48, 32, 16 },
+    static constexpr std::array s_opaqueParts = {
+        QRect{ 0, 0, 32, 16 },
+        QRect{ 0, 16, 64, 16 },
+        QRect{ 16, 48, 32, 16 },
     };
 
-    for (const auto& p : opaqueParts) {
+    for (const auto& p : s_opaqueParts) {
         setAlpha(skin, p, 255);
     }
     return skin;
 }
 
-static QImage getSkin(const QString path)
+QImage getSkin(const QString& path)
 {
     return improveSkin(QImage(path));
 }
 
-static QImage generatePreviews(QImage texture, bool slim)
+QImage generatePreviews(const QImage& texture, bool slim)
 {
     QImage preview(36, 36, QImage::Format_ARGB32);
     preview.fill(Qt::transparent);
@@ -162,13 +175,14 @@ static QImage generatePreviews(QImage texture, bool slim)
 
     return preview;
 }
-SkinModel::SkinModel(QString path) : m_path(path), m_texture(getSkin(path)), m_model(Model::CLASSIC)
+}  // namespace
+
+SkinModel::SkinModel(const QString& path) : m_path(path), m_texture(getSkin(path))
 {
     m_preview = generatePreviews(m_texture, false);
 }
 
-SkinModel::SkinModel(QDir skinDir, QJsonObject obj)
-    : m_capeId(obj["capeId"].toString()), m_model(Model::CLASSIC), m_url(obj["url"].toString())
+SkinModel::SkinModel(const QDir& skinDir, QJsonObject obj) : m_capeId(obj.value("capeId").toString()), m_url(obj.value("url").toString())
 {
     auto name = obj["name"].toString();
 
@@ -185,14 +199,14 @@ QString SkinModel::name() const
     return QFileInfo(m_path).completeBaseName();
 }
 
-bool SkinModel::rename(QString newName)
+bool SkinModel::rename(const QString& newName)
 {
     auto info = QFileInfo(m_path);
-    auto new_path = FS::PathCombine(info.absolutePath(), newName + ".png");
-    if (QFileInfo::exists(new_path)) {
+    auto newPath = FS::PathCombine(info.absolutePath(), newName + ".png");
+    if (QFileInfo::exists(newPath)) {
         return false;
     }
-    m_path = new_path;
+    m_path = newPath;
     return FS::move(info.absoluteFilePath(), m_path);
 }
 

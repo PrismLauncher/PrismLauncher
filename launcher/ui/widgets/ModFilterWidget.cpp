@@ -51,6 +51,7 @@
 
 namespace {
 
+namespace {
 class VersionBasicModel : public QIdentityProxyModel {
     Q_OBJECT
 
@@ -105,6 +106,7 @@ class AllVersionProxyModel : public QSortFilterProxyModel {
         return QSortFilterProxyModel::flags(index);
     }
 };
+}  // namespace
 
 }  // namespace
 ModFilterWidget* ModFilterWidget::create(MinecraftInstance* instance, bool extended)
@@ -388,8 +390,9 @@ void ModFilterWidget::setCategories(const QList<ModPlatform::Category>& categori
 {
     m_categories = categories;
 
-    delete m_ui->categoryGroup->layout();
-    auto* layout = new QVBoxLayout(m_ui->categoryGroup);
+    delete m_categoryLayout;
+    m_categoryLayout = new QVBoxLayout(m_ui->categoryGroup);
+    auto* layout = m_categoryLayout;
 
     for (const auto& category : categories) {
         auto name = category.name;
