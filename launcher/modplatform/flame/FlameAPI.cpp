@@ -65,37 +65,6 @@ QString FlameAPI::getModFileChangelog(int modId, int fileId)
     return changelog;
 }
 
-QString FlameAPI::getModDescription(int modId)
-{
-    QEventLoop lock;
-    QString description;
-
-    auto netJob = makeShared<NetJob>(QString("Flame::ModDescription"), APPLICATION->network());
-    auto [action, response] =
-        Net::ApiRequest::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/description").arg(QString::number(modId)));
-    netJob->addNetAction(action);
-
-    QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [&netJob, response, &description] {
-        auto doc = Json::requireDocument(*response, "Flame::ModDescription");
-        if (!doc) {
-            qWarning() << "Error while parsing JSON response from Flame::ModDescription:" << doc.error();
-            qWarning() << *response;
-
-            netJob->failed(doc.error());
-            return;
-        }
-
-        description = doc->object()["data"].toString();
-    });
-
-    QObject::connect(netJob.get(), &NetJob::finished, &lock, &QEventLoop::quit);
-
-    netJob->start();
-    lock.exec();
-
-    return description;
-}
-
 std::pair<Task::Ptr, QByteArray*> FlameAPI::getProjects(QStringList addonIds) const
 {
     auto netJob = makeShared<NetJob>(QString("Flame::GetProjects"), APPLICATION->network());
@@ -184,6 +153,34 @@ int FlameAPI::getClassId(ModPlatform::ResourceType type)
     }
     return 0;
 }
+Net::RPC::Spec<ModPlatform::IndexedPack> FlameAPI::getProject(const QString& id) const
+{
+    // https://docs.curseforge.com/rest-api/#get-mod
+    return { { .url = QUrl(BuildConfig.FLAME_BASE_URL + "/mods/" + id) }, [id](const auto& response) -> Result<ModPlatform::IndexedPack> {
+                ModPlatform::IndexedPack pack = { .addonId = id };
+                TRY(Json::requireObject(response)
+                        .and_then([](const auto& v) { return Json::requireObject(v, "data"); })
+                        .and_then([&pack](const auto& v) { return Flame::Parse::loadIndexedPack(pack, v); }))
+                return pack;
+            } };
+}
+
+std::optional<Net::RPC::Spec<bool>> FlameAPI::getProjectExtra(ModPlatform::IndexedPack& pack) const
+{
+    // https://docs.curseforge.com/rest-api/#get-mod-description
+    auto url = QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/description").arg(pack.addonId.toString());
+    return { { { .url = QUrl(url) }, [&pack](const auto& response) -> Result<bool> {
+                  TRY_INTO(auto doc, Json::requireDocument(response, "Flame::ModDescription"))
+                  pack.extraData.body = doc.object()["data"].toString();
+
+                  if (!pack.extraData.issuesUrl.isEmpty() || !pack.extraData.sourceUrl.isEmpty() || !pack.extraData.wikiUrl.isEmpty() ||
+                      !pack.extraData.body.isEmpty()) {
+                      pack.extraDataLoaded = true;
+                  }
+                  return true;
+              } } };
+}
+
 ModPlatform::ResourceType FlameAPI::getResourceType(int classId)
 {
     for (auto&& [type, c] : g_classIDMappings) {

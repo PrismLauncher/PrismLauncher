@@ -200,6 +200,34 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
         m_ui->versionSelectionBox->addItem(tr("No version is available!"), -1);
     }
 
+    if (!m_current->extraDataLoaded) {
+        qDebug() << "Loading flame modpack extra info";
+
+        auto addonId = m_current->addonId;
+
+        auto [job, response] = FlameAPI::get().getProjectTask(addonId.toString(), true);
+
+        QObject::connect(job.get(), &NetJob::succeeded, job.get(), [this, addonId, response] {
+            if (addonId != m_current->addonId) {
+                return;  // wrong request
+            }
+
+            // Preserve any version data already loaded into the pack, since the project request only carries the pack info
+            auto versions = std::move(m_current->versions);
+            auto versionsLoaded = m_current->versionsLoaded;
+            *m_current = *response;
+            m_current->versions = std::move(versions);
+            m_current->versionsLoaded = versionsLoaded;
+
+            updateUi();
+        });
+        QObject::connect(job.get(), &NetJob::failed, job.get(),
+                         [](const QString& reason) { qWarning() << "Failed to load extra info for the current pack:" << reason; });
+
+        m_job = job;
+        m_job->start();
+    }
+
     updateUi();
 }
 
@@ -284,8 +312,10 @@ void FlamePage::updateUi()
         }
     }
 
-    text += "<hr>";
-    text += FlameAPI::getModDescription(m_current->addonId.toInt()).toUtf8();
+    if (m_current->extraDataLoaded && !m_current->extraData.body.isEmpty()) {
+        text += "<hr>";
+        text += m_current->extraData.body;
+    }
 
     m_ui->packDescription->setHtml(StringUtils::htmlListPatch(text + m_current->description));
     m_ui->packDescription->flush();
