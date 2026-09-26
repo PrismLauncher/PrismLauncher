@@ -36,7 +36,6 @@
  */
 
 #include "FileSystem.h"
-#include <qcontainerfwd.h>
 #include <QPair>
 
 #include "BuildConfig.h"
