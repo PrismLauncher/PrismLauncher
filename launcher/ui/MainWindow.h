@@ -119,6 +119,7 @@ class MainWindow : public QMainWindow {
     void on_actionViewIconsFolder_triggered();
     void on_actionViewLogsFolder_triggered();
     void on_actionViewJavaFolder_triggered();
+    void on_actionViewTemplateFolder_triggered();
 
     void on_actionViewSkinsFolder_triggered();
 
