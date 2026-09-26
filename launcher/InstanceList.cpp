@@ -3,6 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2026 utophii <pos18411@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,6 +53,7 @@
 
 #include "Application.h"
 #include "BaseInstance.h"
+#include "DynamicLauncherPortal.h"
 #include "ExponentialSeries.h"
 #include "FileSystem.h"
 
@@ -358,6 +360,17 @@ bool InstanceList::trashInstance(const InstanceId& id)
 
     // Also trash all of its shortcuts; we remove the shortcuts if trash fails since it is invalid anyway
     for (const auto& [name, filePath, target] : inst->shortcuts()) {
+        if (DynamicLauncherPortal::isPortalAvailable() && !filePath.contains('/') && filePath.endsWith(".desktop")) {
+            auto uninstallResult = DynamicLauncherPortal::uninstallLauncher(filePath);
+            if (uninstallResult) {
+                qDebug() << "Portal shortcut" << name << "(" << filePath << ") for instance" << id
+                         << "has been uninstalled by the launcher.";
+            } else {
+                qWarning() << "Uninstall of portal shortcut" << name << "(" << filePath << ") for instance" << id
+                           << "has not been successful:" << uninstallResult.error();
+            }
+            continue;
+        }
         if (!FS::trash(filePath, &trashedLoc)) {
             qWarning() << "Trash of shortcut" << name << "at path" << filePath << "for instance" << id
                        << "has not been successful, trying to delete it instead...";
@@ -449,6 +462,17 @@ void InstanceList::deleteInstance(const InstanceId& id)
     qDebug() << "Instance" << id << "has been deleted by the launcher.";
 
     for (const auto& [name, filePath, target] : inst->shortcuts()) {
+        if (DynamicLauncherPortal::isPortalAvailable() && !filePath.contains('/') && filePath.endsWith(".desktop")) {
+            auto uninstallResult = DynamicLauncherPortal::uninstallLauncher(filePath);
+            if (uninstallResult) {
+                qDebug() << "Portal shortcut" << name << "(" << filePath << ") for instance" << id
+                         << "has been uninstalled by the launcher.";
+            } else {
+                qWarning() << "Uninstall of portal shortcut" << name << "(" << filePath << ") for instance" << id
+                           << "has not been successful:" << uninstallResult.error();
+            }
+            continue;
+        }
         if (!FS::deletePath(filePath)) {
             qWarning() << "Deletion of shortcut" << name << "at path" << filePath << "for instance" << id << "has not been successful...";
             continue;
