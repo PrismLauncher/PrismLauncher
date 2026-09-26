@@ -489,6 +489,8 @@ set(API_SOURCES
 
     modplatform/flame/FlameAPI.h
     modplatform/flame/FlameAPI.cpp
+    modplatform/flame/FlamePackIndex.h
+    modplatform/flame/FlamePackIndex.cpp
     modplatform/modrinth/ModrinthAPI.h
     modplatform/modrinth/ModrinthAPI.cpp
     modplatform/helpers/HashUtils.h
@@ -523,8 +525,6 @@ set(FTB_SOURCES
 
 set(FLAME_SOURCES
     # Flame
-    modplatform/flame/FlameModIndex.cpp
-    modplatform/flame/FlameModIndex.h
     modplatform/flame/PackManifest.h
     modplatform/flame/PackManifest.cpp
     modplatform/flame/FileResolvingTask.h
@@ -815,6 +815,8 @@ SET(LAUNCHER_SOURCES
     ui/GuiUtil.cpp
     ui/MainWindow.h
     ui/MainWindow.cpp
+    ui/UrlImportHandler.h
+    ui/UrlImportHandler.cpp
     ui/InstanceWindow.h
     ui/InstanceWindow.cpp
     ui/ViewLogWindow.h

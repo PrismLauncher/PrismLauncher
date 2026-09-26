@@ -28,12 +28,12 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <utility>
 #include "Application.h"
-#include "Json.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/ModIndex.h"
-#include "modplatform/flame/FlameModIndex.h"
+#include "modplatform/flame/FlameAPI.h"
 #include "modplatform/helpers/HashUtils.h"
 #include "tasks/Task.h"
 
@@ -173,38 +173,18 @@ void FlamePackExportTask::makeApiRequest()
         fingerprints.push_back(murmur.toUInt());
     }
 
-    auto [matchTask, response] = FlameAPI::matchFingerprints(fingerprints);
+    auto [matchTask, response] = FlameAPI::matchFingerprintsTask(fingerprints, true);
     task = matchTask;
 
     connect(task.get(), &Task::succeeded, this, [this, response] {
-        auto doc = Json::requireObject(*response)
-                       .and_then([](const auto& v) { return Json::requireObject(v, "data", "data"); })
-                       .and_then([](const auto& v) { return Json::requireArray(v, "exactMatches", "exactMatches"); });
-        if (!doc) {
-            qWarning() << "Error while parsing JSON response from CurseForge::CurrentVersions:" << doc.error();
-            qWarning() << *response;
-
-            emitFailed(doc.error());
-            return;
-        }
-        if (doc->isEmpty()) {
+        if (response->isEmpty()) {
             qWarning() << "No matches found for fingerprint search!";
 
             getProjectsInfo();
             return;
         }
 
-        for (auto match : doc.value()) {
-            auto matchObj = match.toObject();
-            auto fileObj = matchObj["file"].toObject();
-
-            if (matchObj.isEmpty() || fileObj.isEmpty()) {
-                qWarning() << "Fingerprint match is empty!";
-
-                continue;
-            }
-
-            auto fingerprint = QString::number(fileObj["fileFingerprint"].toInteger());
+        for (const auto& fingerprint : response->keys()) {
             auto mod = pendingHashes.find(fingerprint);
             if (mod == pendingHashes.end()) {
                 qWarning() << "Invalid fingerprint from the API response.";
@@ -212,19 +192,10 @@ void FlamePackExportTask::makeApiRequest()
             }
 
             setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name));
-            if (fileObj["isAvailable"].toBool()) {
-                auto parse = [&fileObj, this, &mod] -> Result<> {
-                    TRY_INTO(const auto& modid, Json::requireInteger(fileObj, "modId"))
-                    TRY_INTO(const auto& id, Json::requireInteger(fileObj, "id"))
-                    resolvedFiles.insert(mod->path, { .addonId = modid, .version = id, .enabled = mod->enabled, .isMod = mod->isMod });
-                    return {};
-                };
-                if (auto res = parse(); !res) {
-                    qDebug() << res.error();
-                    qDebug() << *doc;
-                    break;
-                }
-            }
+            auto file = response->value(fingerprint);
+            resolvedFiles.insert(
+                mod->path,
+                { .addonId = file.addonId.toInt(), .version = file.fileId.toInt(), .enabled = mod->enabled, .isMod = mod->isMod });
         }
 
         pendingHashes.clear();
@@ -247,42 +218,40 @@ void FlamePackExportTask::getProjectsInfo()
     }
 
     Task::Ptr projTask;
-    QByteArray* response = nullptr;
 
     if (addonIds.isEmpty()) {
         buildZip();
         return;
     }
     if (addonIds.size() == 1) {
-        std::tie(projTask, response) = FlameAPI::get().getProject(*addonIds.begin());
-    } else {
-        std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds);
-    }
+        auto [projectTask, response] = FlameAPI::get().getProjectTask(*addonIds.begin());
+        projTask = projectTask;
+        connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(response->name));
 
-    connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
-        auto doc = Json::requireObject(*response).and_then([addonIds](const auto& v) -> Result<QJsonArray> {
-            if (addonIds.size() == 1) {
-                TRY_INTO(const auto& obj, Json::requireObject(v, "data", "data"))
-                return { { obj } };
+            for (const auto& key : resolvedFiles.keys()) {
+                auto val = resolvedFiles.value(key);
+                if (val.addonId == response->addonId) {
+                    val.name = response->name;
+                    val.slug = response->slug;
+                    QStringList authors;
+                    for (const auto& author : response->authors) {
+                        authors << author.name;
+                    }
+
+                    val.authors = authors.join(", ");
+                    resolvedFiles[key] = val;
+                }
             }
-            return Json::requireArray(v, "data");
+
+            buildZip();
         });
-        if (!doc) {
-            qWarning() << "Error while parsing JSON response from CurseForge projects task:" << doc.error();
-            qWarning() << *response;
-            emitFailed(doc.error());
-            return;
-        }
-
-        for (auto entry : doc.value()) {
-            auto parse = [&entry, this] -> Result<> {
-                TRY_INTO(const auto& entryObj, Json::requireObject(entry))
-
-                TRY_INTO(const auto& name, Json::requireString(entryObj, "name"))
-                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(name));
-
-                ModPlatform::IndexedPack pack;
-                TRY(FlameMod::loadIndexedPack(pack, entryObj))
+    } else {
+        auto [projectTask, response] = FlameAPI::get().getProjectsTask(addonIds);
+        projTask = projectTask;
+        connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
+            for (const auto& pack : *response) {
+                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(pack.name));
 
                 for (const auto& key : resolvedFiles.keys()) {
                     auto val = resolvedFiles.value(key);
@@ -298,16 +267,11 @@ void FlamePackExportTask::getProjectsInfo()
                         resolvedFiles[key] = val;
                     }
                 }
-                return {};
-            };
-            if (auto res = parse(); !res) {
-                qDebug() << res.error();
-                qDebug() << *doc;
-                continue;
             }
-        }
-        buildZip();
-    });
+            buildZip();
+        });
+    }
+
     connect(projTask.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
     connect(projTask.get(), &Task::aborted, this, &FlamePackExportTask::emitAborted);
     task.reset(projTask);

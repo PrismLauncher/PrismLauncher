@@ -24,7 +24,6 @@
 #include "MMCZip.h"
 #include "minecraft/MinecraftInstance.h"
 #include "modplatform/ModIndex.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/Task.h"
 
 class ModrinthPackExportTask : public Task {
@@ -68,7 +67,7 @@ class ModrinthPackExportTask : public Task {
     void collectFiles();
     void collectHashes();
     void makeApiRequest();
-    void parseApiResponse(QByteArray* response);
+    void parseApiResponse(QHash<QString, ModPlatform::IndexedVersion>* response);
     void buildZip();
 
     QByteArray generateIndex();

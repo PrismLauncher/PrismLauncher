@@ -22,8 +22,10 @@
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
+#include "modplatform/ModIndex.h"
+#include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlameModIndex.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "settings/Setting.h"
 #include "tasks/SequentialTask.h"
 #include "tasks/Task.h"
@@ -178,39 +180,38 @@ bool ResourceFolderModel::installResource(QString originalPath)
     return false;
 }
 
-void ResourceFolderModel::installResourceWithFlameMetadata(const QString& path, ModPlatform::IndexedVersion& vers)
+void ResourceFolderModel::installResourceWithMeta(const QString& path,
+                                                  const ModPlatform::IndexedVersion& vers,
+                                                  ModPlatform::ResourceProvider provider)
 {
     auto install = [this, path] { installResource(path); };
-    if (vers.addonId.isValid()) {
-        ModPlatform::IndexedPack pack{
-            .addonId = vers.addonId,
-            .provider = ModPlatform::ResourceProvider::FLAME,
-        };
-
-        auto [job, response] = FlameAPI::get().getProject(vers.addonId.toString());
-        connect(job.get(), &Task::failed, this, install);
-        connect(job.get(), &Task::aborted, this, install);
-        connect(job.get(), &Task::succeeded, this, [response, this, &vers, install, &pack] {
-            auto obj = Json::requireObject(*response, "data");
-            if (!obj) {
-                qWarning() << "Error while parsing JSON response for mod info:" << obj.error();
-                qDebug() << *response;
-                return;
-            }
-            auto loadRes = FlameMod::loadIndexedPack(pack, *obj);
-            if (!loadRes) {
-                qDebug() << *obj;
-                qWarning() << "Error while reading mod info:" << loadRes.error();
-            }
-            LocalResourceUpdateTask updateMetadata(indexDir(), pack, vers);
-            connect(&updateMetadata, &Task::finished, this, install);
-            updateMetadata.start();
-        });
-
-        job->start();
-    } else {
+    if (!vers.addonId.isValid()) {
         install();
+        return;
     }
+
+    ModPlatform::IndexedPack* response = nullptr;
+    if (provider == ModPlatform::ResourceProvider::MODRINTH) {
+        std::tie(m_installWithMetaTask, response) = ModrinthAPI::get().getProjectTask(vers.addonId.toString());
+    } else {
+        std::tie(m_installWithMetaTask, response) = FlameAPI::get().getProjectTask(vers.addonId.toString());
+    }
+    connect(m_installWithMetaTask.get(), &Task::failed, this, install);
+    connect(m_installWithMetaTask.get(), &Task::aborted, this, install);
+    // NOTE: the net job finishes in a later event loop iteration, long after this function returned.
+    // Everything the handler touches has to be captured by value, `vers` in particular is only a reference
+    // to a caller owned (possibly temporary) IndexedVersion.
+    connect(m_installWithMetaTask.get(), &Task::succeeded, this, [this, response, provider, vers = vers, install] {
+        // `response` is owned by the net job's RPC sink, which is kept alive by m_installWithMetaTask
+        ModPlatform::IndexedPack pack = *response;
+        pack.provider = provider;
+
+        LocalResourceUpdateTask updateMetadata(indexDir(), pack, vers);
+        connect(&updateMetadata, &Task::finished, this, install);
+        updateMetadata.start();
+    });
+
+    m_installWithMetaTask->start();
 }
 
 bool ResourceFolderModel::uninstallResource(const QString& fileName, bool preserveMetadata)
