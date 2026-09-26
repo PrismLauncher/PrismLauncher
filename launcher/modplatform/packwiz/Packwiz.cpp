@@ -286,9 +286,9 @@ auto V1::getIndexForMod(const QDir& indexDir, const QString& slug) -> Mod
         return {};
     }
 #else
-    toml::parse_result result = toml::parse_file(StringUtils::toStdString(index_dir.absoluteFilePath(real_fname)));
+    toml::parse_result result = toml::parse_file(StringUtils::toStdString(indexDir.absoluteFilePath(realFname)));
     if (!result) {
-        qWarning() << QString("Could not open file %1!").arg(normalized_fname);
+        qWarning() << QString("Could not open file %1!").arg(normalizedFname);
         qWarning() << "Reason:" << result.error().description();
         return {};
     }
