@@ -220,6 +220,7 @@ bool moveByCopy(const QString& source, const QString& dest)
     return true;
 }
 
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
 QString quoteArgs(const QStringList& args, const QString& wrap, const QString& escapeChar, bool wrapOnlyIfNeeded = false)
 {
     QString result;
@@ -244,7 +245,7 @@ QString quoteArgs(const QStringList& args, const QString& wrap, const QString& e
 
     return result;
 }
-
+#elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
 QString quoteDesktopExecArg(QString arg)
 {
     // See https://specifications.freedesktop.org/desktop-entry/latest/exec-variables.html
@@ -265,6 +266,7 @@ QString quoteDesktopExecArgs(const QStringList& args)
     }
     return result.join(' ');
 }
+#endif
 }  // namespace
 namespace FS {
 
@@ -1172,8 +1174,9 @@ QString createShortcut(QString destination, const QString& target, const QString
     }
     QTextStream stream(&f);
 
-    args.prepend(target);
-    auto argstring = quoteDesktopExecArgs(args);
+    QStringList execArgs = args;
+    execArgs.prepend(target);
+    auto argstring = quoteDesktopExecArgs(execArgs);
 
     stream << "[Desktop Entry]" << "\n";
     stream << "Type=Application" << "\n";
