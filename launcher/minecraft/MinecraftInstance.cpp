@@ -90,6 +90,8 @@
 
 #include "tools/BaseProfiler.h"
 
+#include "ui/dialogs/JoinRealmDialog.h"
+
 #include <QActionGroup>
 #include <QMainWindow>
 #include <QScreen>
@@ -253,6 +255,7 @@ void MinecraftInstance::loadSpecificSettings()
     m_settings->registerSetting("JoinServerOnLaunch", false);
     m_settings->registerSetting("JoinServerOnLaunchAddress", "");
     m_settings->registerSetting("JoinWorldOnLaunch", "");
+    m_settings->registerSetting("JoinRealmOnLaunch", "");
 
     // Use account for instance, this does not have a global override
     m_settings->registerSetting("UseAccountForInstance", false);
@@ -315,12 +318,21 @@ void MinecraftInstance::populateLaunchMenu(QMenu* menu)
     normalLaunchOffline->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
     QAction* normalLaunchDemo = menu->addAction(tr("Launch &Demo"));
     normalLaunchDemo->setShortcut(QKeySequence(tr("Ctrl+Alt+O")));
+    QAction* joinRealm = menu->addAction(tr("Join &Realm..."));
 
     normalLaunchDemo->setEnabled(supportsDemo());
+    joinRealm->setEnabled(traits().contains("feature:is_quick_play_singleplayer"));
 
     connect(normalLaunch, &QAction::triggered, this, [this] { APPLICATION->launch(this); });
     connect(normalLaunchOffline, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Offline); });
     connect(normalLaunchDemo, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Demo); });
+    connect(joinRealm, &QAction::triggered, this, [this, menu] {
+        JoinRealmDialog dialog(this, menu->parentWidget());
+        if (dialog.exec() == QDialog::Accepted) {
+            APPLICATION->launch(this, LaunchMode::Normal,
+                                std::make_shared<MinecraftTarget>(MinecraftTarget::fromRealm(dialog.selectedRealmId())));
+        }
+    });
 
     QString profilersTitle = tr("Profilers");
     menu->addSeparator()->setText(profilersTitle);
@@ -776,6 +788,8 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, Mine
             }
         } else if (!targetToJoin->world.isEmpty() && profile->hasTrait("feature:is_quick_play_singleplayer")) {
             args << "--quickPlaySingleplayer" << targetToJoin->world;
+        } else if (!targetToJoin->realm.isEmpty() && profile->hasTrait("feature:is_quick_play_singleplayer")) {
+            args << "--quickPlayRealms" << targetToJoin->realm;
         }
     }
 
@@ -827,6 +841,8 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftT
             launchScript += "serverPort " + QString::number(targetToJoin->port) + "\n";
         } else if (!targetToJoin->world.isEmpty()) {
             launchScript += "worldName " + targetToJoin->world + "\n";
+        } else if (!targetToJoin->realm.isEmpty()) {
+            launchScript += "realmId " + targetToJoin->realm + "\n";
         }
     }
 
@@ -1162,6 +1178,8 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
             QString world = settings()->get("JoinWorldOnLaunch").toString();
             if (!world.isEmpty()) {
                 targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(world, true)));
+            } else if (QString realm = settings()->get("JoinRealmOnLaunch").toString(); !realm.isEmpty()) {
+                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::fromRealm(realm)));
             }
         }
     }
