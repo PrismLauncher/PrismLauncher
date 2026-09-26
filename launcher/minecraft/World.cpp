@@ -288,19 +288,22 @@ void World::readFromZip(const QFileInfo& file)
     MMCZip::ArchiveReader r(file.absoluteFilePath());
 
     m_isValid = false;
-    r.parse([this](MMCZip::ArchiveReader::File* file, bool& stop) {
+    if (const auto result = r.parse([this](MMCZip::ArchiveReader::File* file) -> Result<bool> {
         const QString levelDat = "level.dat";
         auto filePath = file->filename();
         QFileInfo fi(filePath);
         if (fi.fileName().compare(levelDat, Qt::CaseInsensitive) == 0) {
             m_containerOffsetPath = filePath.chopped(levelDat.length());
             m_levelDatTime = file->dateTime();
-            loadFromLevelDat(file->readAll());
+            TRY_INTO(const auto& data, file->readAll())
+            loadFromLevelDat(data);
             m_isValid = true;
-            stop = true;
+            return true;
         }
-        return true;
-    });
+        return false;
+    }); !result) {
+        qWarning() << "Failed to read world from zip:" << result.error();
+    }
 }
 
 bool World::install(const QString& to, const QString& name)

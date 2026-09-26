@@ -44,9 +44,9 @@
 template <typename T = void, typename E = QString>
 using Result = std::expected<T, E>;
 
-#define TRY(expected)                                \
-    if (const auto _result = (expected); !_result) { \
-        return std::unexpected{ _result.error() };   \
+#define TRY(expected)                                 \
+    if (const auto& _result = (expected); !_result) { \
+        return std::unexpected{ _result.error() };    \
     }
 
 #define RESULT_H_CONCAT_(x, y) x##y
@@ -59,3 +59,8 @@ using Result = std::expected<T, E>;
     auto&& TRY_INTO_VAR_ = (expr); \
     TRY(TRY_INTO_VAR_)             \
     decl = TRY_INTO_VAR_.value();
+
+#define TRY_OR_LOG(expected)                                           \
+    if (const auto _result = (expected); !_result) {                   \
+        qCritical() << "Discarding failed result:" << _result.error(); \
+    }

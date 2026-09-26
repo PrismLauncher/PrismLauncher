@@ -140,9 +140,8 @@ void InstanceImportTask::processZipPack()
     // NOTE: Prioritize modpack platforms that aren't searched for recursively.
     // Especially Flame has a very common filename for its manifest, which may appear inside overrides for example
     // https://docs.modrinth.com/docs/modpacks/format_definition/#storage
-    auto detectInstance = [this, &extractDir, &root](MMCZip::ArchiveReader::File* f, bool& stop) {
+    auto detectInstance = [this, &extractDir, &root](MMCZip::ArchiveReader::File* f) -> Result<bool> {
         if (!isRunning()) {
-            stop = true;
             return true;
         }
         auto fileName = f->filename();
@@ -150,26 +149,26 @@ void InstanceImportTask::processZipPack()
             // process as Modrinth pack
             qDebug() << "Modrinth:" << true;
             m_modpackType = ModpackType::Modrinth;
-            stop = true;
+            return true;
         } else if (fileName == "bin/modpack.jar" || fileName == "bin/version.json") {
             // process as Technic pack
             qDebug() << "Technic:" << true;
             extractDir.mkpath("minecraft");
             extractDir.cd("minecraft");
             m_modpackType = ModpackType::Technic;
-            stop = true;
+            return true;
         } else if (fileName == "manifest.json") {
             qDebug() << "Flame:" << true;
             m_modpackType = ModpackType::Flame;
-            stop = true;
+            return true;
         } else if (QFileInfo fileInfo(fileName); fileInfo.fileName() == "instance.cfg") {
             qDebug() << "MultiMC:" << true;
             m_modpackType = ModpackType::MultiMC;
             root = cleanPath(fileInfo.path());
-            stop = true;
+            return true;
         }
         QCoreApplication::processEvents();
-        return true;
+        return false;
     };
     if (!packZip.parse(detectInstance)) {
         emitFailed(tr("Unable to open supplied modpack zip file."));

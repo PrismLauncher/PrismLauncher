@@ -131,19 +131,17 @@ void Technic::SolderPackInstallTask::downloadSucceeded()
 
     setStatus(tr("Extracting modpack"));
     m_filesNetJob.reset();
-    m_extractFuture = QtConcurrent::run([this]() {
+    m_extractFuture = QtConcurrent::run([this]() -> Result<> {
         int i = 0;
         QString extractDir = FS::PathCombine(m_stagingPath, "minecraft");
         FS::ensureFolderPathExists(extractDir);
 
         while (m_modCount > i) {
             auto path = FS::PathCombine(m_outputDir.path(), QString("%1").arg(i));
-            if (!MMCZip::extractDir(path, extractDir)) {
-                return false;
-            }
+            TRY(MMCZip::extractDir(path, extractDir))
             i++;
         }
-        return true;
+        return {};
     });
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &Technic::SolderPackInstallTask::extractFinished);
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &Technic::SolderPackInstallTask::extractAborted);
@@ -171,8 +169,8 @@ void Technic::SolderPackInstallTask::downloadAborted()
 
 void Technic::SolderPackInstallTask::extractFinished()
 {
-    if (!m_extractFuture.result()) {
-        emitFailed(tr("Failed to extract modpack"));
+    if (const auto result = m_extractFuture.result(); !result) {
+        emitFailed(tr("Failed to extract modpack: %1").arg(result.error()));
         return;
     }
 

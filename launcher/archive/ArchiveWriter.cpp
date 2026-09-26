@@ -23,7 +23,10 @@
 #include <QFile>
 #include <QFileInfo>
 
+#include <cerrno>
 #include <memory>
+#include <system_error>
+#include "StringUtils.h"
 
 #if defined Q_OS_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -41,69 +44,69 @@ ArchiveWriter::ArchiveWriter(const QString& archiveName) : m_filename(archiveNam
 
 ArchiveWriter::~ArchiveWriter()
 {
-    close();
+    if (const auto result = close(); !result) {
+        qWarning() << "ArchiveWriter automatic close failed:" << result.error();
+    }
 }
 
-bool ArchiveWriter::open()
+Result<> ArchiveWriter::open()
 {
     if (m_filename.isEmpty()) {
-        qCritical() << "Archive m_filename not set.";
-        return false;
+        return std::unexpected{"'m_filename' not set."};
     }
 
     m_archive = archive_write_new();
     if (!m_archive) {
-        qCritical() << "Archive not initialized.";
-        return false;
+        return std::unexpected{QString("Failed to allocate writer object for archive %1").arg(m_filename)};
     }
 
     auto format = m_format.toUtf8();
-    archive_write_set_format_by_name(m_archive, format.constData());
+    if (archive_write_set_format_by_name(m_archive, format.constData()) != ARCHIVE_OK) {
+        return std::unexpected{QString("Could not set format for archive %1: %2").arg(m_filename, archive_error_string(m_archive))};
+    }
 
     if (archive_write_set_options(m_archive, "hdrcharset=UTF-8") != ARCHIVE_OK) {
-        qCritical() << "Failed to open archive file:" << m_filename << "-" << archive_error_string(m_archive);
-        return false;
+        return std::unexpected{QString("Could not set charset for archive %1: %2").arg(m_filename, archive_error_string(m_archive))};
     }
 
     auto archiveNameW = m_filename.toStdWString();
     if (archive_write_open_filename_w(m_archive, archiveNameW.data()) != ARCHIVE_OK) {
-        qCritical() << "Failed to open archive file:" << m_filename << "-" << archive_error_string(m_archive);
-        return false;
+        return std::unexpected{QString("Could not open archive %1 for writing: %2").arg(m_filename, archive_error_string(m_archive))};
     }
 
-    return true;
+    return {};
 }
 
-bool ArchiveWriter::close()
+Result<> ArchiveWriter::close()
 {
-    bool success = true;
+    QStringList errors;
     if (m_archive) {
         if (archive_write_close(m_archive) != ARCHIVE_OK) {
-            qCritical() << "Failed to close archive" << m_filename << "-" << archive_error_string(m_archive);
-            success = false;
+            errors.append(QString("close: %1").arg(archive_error_string(m_archive)));
         }
         if (archive_write_free(m_archive) != ARCHIVE_OK) {
-            qCritical() << "Failed to free archive" << m_filename << "-" << archive_error_string(m_archive);
-            success = false;
+            errors.append(QString("free: %1").arg(archive_error_string(m_archive)));
         }
         m_archive = nullptr;
     }
-    return success;
+
+    if (errors.isEmpty()) {
+        return {};
+    }
+    return std::unexpected{QString("Could not close writer for archive %1: %2").arg(m_filename, errors.join("; "))};
 }
 
-bool ArchiveWriter::addFile(const QString& fileName, const QString& fileDest)
+Result<> ArchiveWriter::addFile(const QString& fileName, const QString& fileDest)
 {
     QFileInfo fileInfo(fileName);
     if (!fileInfo.exists()) {
-        qCritical() << "File does not exist:" << fileInfo.filePath();
-        return false;
+        return std::unexpected{QString("File does not exist: %1").arg(fileInfo.filePath())};
     }
 
     std::unique_ptr<archive_entry, void (*)(archive_entry*)> entry_ptr(archive_entry_new(), archive_entry_free);
     auto entry = entry_ptr.get();
     if (!entry) {
-        qCritical() << "Failed to create archive entry";
-        return false;
+        return std::unexpected{"Could not allocate entry object"};
     }
 
     auto fileDestUtf8 = fileDest.toUtf8();
@@ -116,15 +119,15 @@ bool ArchiveWriter::addFile(const QString& fileName, const QString& fileDest)
         auto widePath = fileInfo.absoluteFilePath().toStdWString();
         HANDLE file_handle = CreateFileW(widePath.data(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
         if (file_handle == INVALID_HANDLE_VALUE) {
-            qCritical() << "Failed to stat file:" << fileInfo.filePath();
-            return false;
+            const auto err = std::error_code(static_cast<int>(GetLastError()), std::system_category());
+            return std::unexpected{QString("Could not create file handle: %1").arg(err.message())};
         }
 
         BY_HANDLE_FILE_INFORMATION file_info;
         if (!GetFileInformationByHandle(file_handle, &file_info)) {
-            qCritical() << "Failed to stat file:" << fileInfo.filePath();
+            const auto err = std::error_code(static_cast<int>(GetLastError()), std::system_category());
             CloseHandle(file_handle);
-            return false;
+            return std::unexpected{QString("Could not get file information: %1").arg(err.message())};
         }
 
         archive_entry_copy_bhfi(entry, &file_info);
@@ -139,8 +142,8 @@ bool ArchiveWriter::addFile(const QString& fileName, const QString& fileDest)
         const char* cpath = utf8.constData();
         struct stat st;
         if (stat(cpath, &st) != 0) {
-            qCritical() << "Failed to stat file:" << fileInfo.filePath();
-            return false;
+            const auto err = std::error_code(errno, std::system_category());
+            return std::unexpected{ QString("Failed to stat file: %1").arg(StringUtils::fromStdString(err.message())) };
         }
 
         // This should handle the copying of most attributes
@@ -162,20 +165,17 @@ bool ArchiveWriter::addFile(const QString& fileName, const QString& fileDest)
     } else if (fileInfo.isFile()) {
         archive_entry_set_filetype(entry, AE_IFREG);
     } else {
-        qCritical() << "Unsupported file type:" << fileInfo.filePath();
-        return false;
+        return std::unexpected{QString("Unsupported file type: %1").arg(fileInfo.filePath())};
     }
 
     if (archive_write_header(m_archive, entry) != ARCHIVE_OK) {
-        qCritical() << "Failed to write header for:" << fileDest << "-" << archive_error_string(m_archive);
-        return false;
+        return std::unexpected{QString("Failed to write header: %1").arg(archive_error_string(m_archive))};
     }
 
     if (fileInfo.isFile() && !fileInfo.isSymLink()) {
         QFile file(fileInfo.absoluteFilePath());
         if (!file.open(QIODevice::ReadOnly)) {
-            qCritical() << "Failed to open file:" << fileInfo.filePath() << "error:" << file.errorString();
-            return false;
+            return std::unexpected{QString("Failed to open file: %1").arg(file.errorString())};
         }
 
         constexpr qint64 chunkSize = 8192;
@@ -185,27 +185,24 @@ bool ArchiveWriter::addFile(const QString& fileName, const QString& fileDest)
         while (!file.atEnd()) {
             auto bytesRead = file.read(buffer.data(), chunkSize);
             if (bytesRead < 0) {
-                qCritical() << "Read error in file:" << fileInfo.filePath();
-                return false;
+                return std::unexpected{QString("Error reading file: %1").arg(file.errorString())};
             }
 
             if (archive_write_data(m_archive, buffer.constData(), bytesRead) < 0) {
-                qCritical() << "Write error in archive for:" << fileDest;
-                return false;
+                return std::unexpected{QString("Error writing data to archive: %1").arg(archive_error_string(m_archive))};
             }
         }
     }
 
-    return true;
+    return {};
 }
 
-bool ArchiveWriter::addFile(const QString& fileDest, const QByteArray& data)
+Result<> ArchiveWriter::addFile(const QString& fileDest, const QByteArray& data)
 {
     std::unique_ptr<archive_entry, void (*)(archive_entry*)> entry_ptr(archive_entry_new(), archive_entry_free);
     auto entry = entry_ptr.get();
     if (!entry) {
-        qCritical() << "Failed to create archive entry";
-        return false;
+        return std::unexpected{"Could not allocate entry object"};
     }
 
     auto fileDestUtf8 = fileDest.toUtf8();
@@ -216,18 +213,16 @@ bool ArchiveWriter::addFile(const QString& fileDest, const QByteArray& data)
     archive_entry_set_size(entry, data.size());
 
     if (archive_write_header(m_archive, entry) != ARCHIVE_OK) {
-        qCritical() << "Failed to write header for:" << fileDest << "-" << archive_error_string(m_archive);
-        return false;
+        return std::unexpected{QString("Failed to write header: %1").arg(archive_error_string(m_archive))};
     }
 
     if (archive_write_data(m_archive, data.constData(), data.size()) < 0) {
-        qCritical() << "Write error in archive for:" << fileDest << "-" << archive_error_string(m_archive);
-        return false;
+        return std::unexpected{QString("Error writing data to archive: %1").arg(archive_error_string(m_archive))};
     }
-    return true;
+    return {};
 }
 
-bool ArchiveWriter::addFile(ArchiveReader::File* f)
+Result<> ArchiveWriter::addFile(ArchiveReader::File* f)
 {
     return f->writeFile(m_archive, "", true);
 }

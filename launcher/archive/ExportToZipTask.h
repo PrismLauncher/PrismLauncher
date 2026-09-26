@@ -22,6 +22,7 @@
 #include <QFuture>
 #include <QFutureWatcher>
 
+#include "Result.h"
 #include "archive/ArchiveWriter.h"
 #include "tasks/Task.h"
 
@@ -47,13 +48,11 @@ class ExportToZipTask : public Task {
     void setExcludeFiles(QStringList excludeFiles) { m_excludeFiles = excludeFiles; }
     void addExtraFile(QString fileName, QByteArray data) { m_extraFiles.insert(fileName, data); }
 
-    using ZipResult = std::optional<QString>;
-
    protected:
     virtual void executeTask() override;
     bool abort() override;
 
-    ZipResult exportZip();
+    Result<> exportZip();
     void finish();
 
    private:
@@ -66,7 +65,7 @@ class ExportToZipTask : public Task {
     QStringList m_excludeFiles;
     QHash<QString, QByteArray> m_extraFiles;
 
-    QFuture<ZipResult> m_buildZipFuture;
-    QFutureWatcher<ZipResult> m_buildZipWatcher;
+    QFuture<Result<>> m_buildZipFuture;
+    QFutureWatcher<Result<>> m_buildZipWatcher;
 };
 }  // namespace MMCZip

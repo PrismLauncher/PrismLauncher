@@ -25,6 +25,8 @@
 #include <optional>
 #include <utility>
 
+#include "Result.h"
+
 struct archive;
 struct archive_entry;
 namespace MMCZip {
@@ -36,7 +38,7 @@ class ArchiveReader {
 
     QStringList getFiles();
     QString getZipName();
-    bool collectFiles(bool onlyFiles = true);
+    Result<> collectFiles(bool onlyFiles = true);
     bool exists(const QString& filePath) const;
 
     class File {
@@ -49,10 +51,10 @@ class ArchiveReader {
         QDateTime dateTime();
         const char* error();
 
-        QByteArray readAll(int* outStatus = nullptr);
-        bool skip();
-        bool writeFile(archive* out, const QString& targetFileName = "", bool notBlock = false);
-        bool writeFile(archive* out, const QString& targetFileName, std::optional<QDir> root, bool notBlock = false);
+        Result<QByteArray> readAll();
+        Result<> skip();
+        Result<> writeFile(archive* out, const QString& targetFileName = "", bool notBlock = false);
+        Result<> writeFile(archive* out, const QString& targetFileName, std::optional<QDir> root, bool notBlock = false);
 
        private:
         int readNextHeader();
@@ -63,9 +65,10 @@ class ArchiveReader {
         archive_entry* m_entry;
     };
 
-    std::unique_ptr<File> goToFile(const QString& filename);
-    bool parse(const std::function<bool(File*)>&);
-    bool parse(const std::function<bool(File*, bool&)>&);
+    Result<std::unique_ptr<File>> goToFile(const QString& filename);
+    Result<QByteArray> readFile(const QString& fileName);
+    Result<> parse(const std::function<Result<>(File*)>&);
+    Result<> parse(const std::function<Result<bool>(File*)>&);
 
    private:
     QString m_archivePath;
