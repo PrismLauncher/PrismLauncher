@@ -244,6 +244,29 @@ QString quoteArgs(const QStringList& args, const QString& wrap, const QString& e
 
     return result;
 }
+
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+QString quoteDesktopExecArg(QString arg)
+{
+    // See https://specifications.freedesktop.org/desktop-entry/latest/exec-variables.html
+    arg.replace(R"(\)", R"(\\\\)");
+    arg.replace(R"($)", R"(\\$)");
+    arg.replace(R"(")", R"(\")");
+    arg.replace(R"(`)", R"(\`)");
+    arg.replace(R"(%)", R"(%%)");
+    return QStringLiteral("\"") + arg + QStringLiteral("\"");
+}
+
+QString quoteDesktopExecArgs(const QStringList& args)
+{
+    QStringList result;
+    result.reserve(args.size());
+    for (auto arg : args) {
+        result.append(quoteDesktopExecArg(arg));
+    }
+    return result.join(' ');
+}
+#endif
 }  // namespace
 namespace FS {
 
@@ -1151,12 +1174,14 @@ QString createShortcut(QString destination, const QString& target, const QString
     }
     QTextStream stream(&f);
 
-    auto argstring = quoteArgs(args, "'", "'\\''");
+    QStringList execArgs = args;
+    execArgs.prepend(target);
+    auto argstring = quoteDesktopExecArgs(execArgs);
 
     stream << "[Desktop Entry]" << "\n";
     stream << "Type=Application" << "\n";
     stream << "Categories=Game;ActionGame;AdventureGame;Simulation" << "\n";
-    stream << "Exec=\"" << target.toLocal8Bit() << "\" " << argstring.toLocal8Bit() << "\n";
+    stream << "Exec=" << argstring.toLocal8Bit() << "\n";
     stream << "Name=" << name.toLocal8Bit() << "\n";
     if (!icon.isEmpty()) {
         stream << "Icon=" << icon.toLocal8Bit() << "\n";
