@@ -24,7 +24,6 @@ runs:
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: ${{ inputs.vcvars-arch }}
-        vsversion: 2022
 
     - name: Setup Java (MSVC)
       uses: actions/setup-java@v5
