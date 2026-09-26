@@ -8,9 +8,9 @@
 #include <QTreeView>
 
 #include "Resource.h"
-
 #include "tasks/ConcurrentTask.h"
 #include "tasks/Task.h"
+#include "ui/MultiDecorationItemDelegate.h"
 
 class MinecraftInstance;
 class QSortFilterProxyModel;
@@ -163,12 +163,16 @@ class ResourceFolderModel : public QAbstractListModel {
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
+    virtual QList<MultiDecorationItemDelegate::Icon> icons(int row) const;
+
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     void setupHeaderAction(QAction* act, int column) const;
     void saveColumns(QTreeView* tree);
     void loadColumns(QTreeView* tree);
     QMenu* createHeaderContextMenu(QTreeView* tree);
+
+    virtual bool showImageToggle() { return false; }
 
     /** This creates a proxy model to filter / sort the model for a UI.
      *
@@ -246,6 +250,7 @@ class ResourceFolderModel : public QAbstractListModel {
     virtual void onParseFailed(int ticket, const QString& resourceId);
 
    protected:
+    bool m_showImages = true;
     // Represents the relationship between a column's index (represented by the list index), and it's sorting key.
     // As such, the order in with they appear is very important!
     QList<SortType> m_columnSortKeys = { SortType::Enabled,  SortType::Name, SortType::Version,  SortType::Date,

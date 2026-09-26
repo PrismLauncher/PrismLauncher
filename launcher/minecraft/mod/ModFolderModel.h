@@ -60,7 +60,6 @@ class ModFolderModel : public ResourceFolderModel {
    public:
     enum Columns : std::uint8_t {
         ActiveColumn = 0,
-        ImageColumn,
         NameColumn,
         VersionColumn,
         DateColumn,
@@ -82,6 +81,8 @@ class ModFolderModel : public ResourceFolderModel {
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
+    QList<MultiDecorationItemDelegate::Icon> icons(int row) const override;
+
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     int columnCount(const QModelIndex& parent) const override;
 
@@ -95,11 +96,12 @@ class ModFolderModel : public ResourceFolderModel {
 
     QModelIndexList getAffectedMods(const QModelIndexList& indexes, EnableAction action);
 
-    RESOURCE_HELPERS(Mod)
-
-   public:
     QStringList requiresList(const QString& id) const;
     QStringList requiredByList(const QString& id) const;
+
+    bool showImageToggle() override { return true; }
+
+    RESOURCE_HELPERS(Mod)
 
    private slots:
     void onParseSucceeded(int ticket, const QString& resourceId) override;

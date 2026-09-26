@@ -62,19 +62,19 @@
 ModFolderModel::ModFolderModel(const QDir& dir, MinecraftInstance* instance, bool isIndexed, bool createDir, QObject* parent)
     : ResourceFolderModel(QDir(dir), instance, isIndexed, createDir, parent)
 {
-    m_columnNames = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider", "Size", "Side", "Loaders",
-                                  "Minecraft Versions", "Release Type", "Requires", "Required By", "File Name", "Update" });
-    m_columnNamesTranslated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"),
-                                            tr("Size"), tr("Side"), tr("Loaders"), tr("Minecraft Versions"), tr("Release Type"),
-                                            tr("Requires"), tr("Required By"), tr("File Name"), tr("Update") });
-    m_columnSortKeys = { SortType::Enabled,     SortType::Name,     SortType::Name,       SortType::Version,  SortType::Date,
-                         SortType::Provider,    SortType::Size,     SortType::Side,       SortType::Loaders,  SortType::McVersions,
-                         SortType::ReleaseType, SortType::Requires, SortType::RequiredBy, SortType::Filename, SortType::LockUpdate };
-    m_columnResizeModes = { QHeaderView::Interactive,      QHeaderView::Interactive, QHeaderView::Stretch,     QHeaderView::Interactive,
-                            QHeaderView::ResizeToContents, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
-                            QHeaderView::Interactive,      QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
-                            QHeaderView::Interactive,      QHeaderView::Interactive, QHeaderView::Interactive };
-    m_columnsHideable = { false, true, false, true, true, true, true, true, true, true, true, true, true, true, true };
+    m_columnNames = QStringList({ "Enable", "Name", "Version", "Last Modified", "Provider", "Size", "Side", "Loaders", "Minecraft Versions",
+                                  "Release Type", "Requires", "Required By", "File Name", "Update" });
+    m_columnNamesTranslated =
+        QStringList({ tr("Enable"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"), tr("Size"), tr("Side"), tr("Loaders"),
+                      tr("Minecraft Versions"), tr("Release Type"), tr("Requires"), tr("Required By"), tr("File Name"), tr("Update") });
+    m_columnSortKeys = { SortType::Enabled,  SortType::Name,       SortType::Version,  SortType::Date,       SortType::Provider,
+                         SortType::Size,     SortType::Side,       SortType::Loaders,  SortType::McVersions, SortType::ReleaseType,
+                         SortType::Requires, SortType::RequiredBy, SortType::Filename, SortType::LockUpdate };
+    m_columnResizeModes = { QHeaderView::Interactive, QHeaderView::Stretch,     QHeaderView::Interactive, QHeaderView::ResizeToContents,
+                            QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
+                            QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
+                            QHeaderView::Interactive, QHeaderView::Interactive };
+    m_columnsHideable = { false, false, true, true, true, true, true, true, true, true, true, true, true, true };
 
     m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files);
 
@@ -125,15 +125,9 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
                     break;
             }
             break;
-        case Qt::DecorationRole: {
-            if (column == ImageColumn) {
-                return at(row).icon({ 32, 32 }, Qt::KeepAspectRatio);
-            }
-            break;
-        }
         case Qt::SizeHintRole:
-            if (column == ImageColumn) {
-                return QSize(32, 32);
+            if (column == NameColumn) {
+                return QSize(0, 38);
             }
             break;
         case Qt::ToolTipRole:
@@ -202,6 +196,47 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
     return {};
 }
 
+namespace {
+QIcon fallbackIcon(ModPlatform::ModLoaderType type)
+{
+    switch (type) {
+        default:
+            return QIcon::fromTheme("loadermods");
+        case ModPlatform::ModLoaderType::NeoForge:
+            return QIcon::fromTheme("neoforged");
+        case ModPlatform::ModLoaderType::Forge:
+            return QIcon::fromTheme("forge");
+        case ModPlatform::ModLoaderType::LiteLoader:
+            return QIcon::fromTheme("liteloader");
+        case ModPlatform::ModLoaderType::Fabric:
+            return QIcon::fromTheme("fabricmc");
+        case ModPlatform::ModLoaderType::Quilt:
+            return QIcon::fromTheme("quiltmc");
+    }
+}
+};  // namespace
+
+QList<MultiDecorationItemDelegate::Icon> ModFolderModel::icons(int row) const
+{
+    auto result = ResourceFolderModel::icons(row);
+    static const QSize s_iconSize = { 32, 32 };
+
+    if (m_showImages) {
+        const auto& mod = at(row);
+
+        QIcon icon;
+        if (const auto pixmap = mod.icon(s_iconSize, Qt::KeepAspectRatio); pixmap.isNull()) {
+            icon = fallbackIcon(mod.details().loader);
+        } else {
+            icon = pixmap;
+        }
+
+        result.prepend({ .icon = icon, .size = s_iconSize });
+    }
+
+    return result;
+}
+
 QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const
 {
     switch (role) {
@@ -212,7 +247,6 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                 case VersionColumn:
                 case DateColumn:
                 case ProviderColumn:
-                case ImageColumn:
                 case SideColumn:
                 case LoadersColumn:
                 case McVersionsColumn:

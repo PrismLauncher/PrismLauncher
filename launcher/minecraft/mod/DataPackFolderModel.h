@@ -45,7 +45,6 @@ class DataPackFolderModel : public ResourceFolderModel {
    public:
     enum Columns : std::uint8_t {
         ActiveColumn = 0,
-        ImageColumn,
         NameColumn,
         VersionColumn,
         PackFormatColumn,
@@ -66,11 +65,15 @@ class DataPackFolderModel : public ResourceFolderModel {
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
+    QList<MultiDecorationItemDelegate::Icon> icons(int row) const override;
+
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     int columnCount(const QModelIndex& parent) const override;
 
     [[nodiscard]] Resource* createResource(const QFileInfo& file) override;
     [[nodiscard]] Task* createParseTask(Resource& /*unused*/) override;
+
+    bool showImageToggle() override { return true; }
 
     RESOURCE_HELPERS(DataPack)
 };

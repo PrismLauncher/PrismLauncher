@@ -646,7 +646,6 @@ set(PRISMUPDATER_SOURCES
     ui/dialogs/ProgressDialog.h
     ui/widgets/SubTaskProgressBar.h
     ui/widgets/SubTaskProgressBar.cpp
-
 )
 
 if(WIN32)
@@ -811,16 +810,20 @@ SET(LAUNCHER_SOURCES
     logs/AnonymizeLog.h
 
     # GUI - windows
-    ui/GuiUtil.h
-    ui/GuiUtil.cpp
     ui/MainWindow.h
     ui/MainWindow.cpp
     ui/InstanceWindow.h
     ui/InstanceWindow.cpp
     ui/ViewLogWindow.h
     ui/ViewLogWindow.cpp
+
+    # GUI - utilities
+    ui/GuiUtil.h
+    ui/GuiUtil.cpp
     ui/ToolTipFilter.h
     ui/ToolTipFilter.cpp
+    ui/MultiDecorationItemDelegate.h
+    ui/MultiDecorationItemDelegate.cpp
 
     # FIXME: maybe find a better home for this.
     FileIgnoreProxy.cpp
@@ -1145,6 +1148,7 @@ SET(LAUNCHER_SOURCES
     ui/widgets/MinecraftSettingsWidget.cpp
     ui/widgets/JavaSettingsWidget.h
     ui/widgets/JavaSettingsWidget.cpp
+
 
     # GUI - instance group view
     ui/instanceview/InstanceProxyModel.cpp
