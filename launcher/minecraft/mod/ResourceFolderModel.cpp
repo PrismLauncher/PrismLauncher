@@ -17,6 +17,8 @@
 #include "Application.h"
 #include "FileSystem.h"
 
+#include "config/GlobalConfig.h"
+#include "config/InstanceConfig.h"
 #include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
 
 #include "Json.h"
@@ -24,7 +26,6 @@
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
-#include "settings/Setting.h"
 #include "tasks/SequentialTask.h"
 #include "tasks/Task.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -45,7 +46,7 @@ ResourceFolderModel::ResourceFolderModel(const QDir& dir, MinecraftInstance* ins
         m_resourceResolverRunning = false;
     });
     if (APPLICATION_DYN) {  // in tests the application macro doesn't work
-        m_resourceResolver.setMaxConcurrent(APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
+        m_resourceResolver.setMaxConcurrent(APPLICATION->config()->numberOfConcurrentTasks);
     }
 }
 
@@ -524,7 +525,7 @@ bool ResourceFolderModel::validateIndex(const QModelIndex& index) const
 // and they only delegate to the superclass for compatible columns
 QBrush ResourceFolderModel::rowBackground(int row) const
 {
-    if (APPLICATION->settings()->get("ShowModIncompat").toBool() && m_resources[row]->hasIssues()) {
+    if (APPLICATION->config()->showModIncompat && m_resources[row]->hasIssues()) {
         return { QColor(255, 0, 0, 40) };
     }
     return {};
@@ -563,7 +564,7 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
             QString tooltip = m_resources[row]->internalId();
 
             if (column == NameColumn) {
-                if (APPLICATION->settings()->get("ShowModIncompat").toBool()) {
+                if (APPLICATION->config()->showModIncompat) {
                     for (const QString& issue : at(row).issues()) {
                         tooltip += "\n" + issue;
                     }
@@ -586,7 +587,7 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
         }
         case Qt::DecorationRole: {
             if (column == NameColumn) {
-                if (APPLICATION->settings()->get("ShowModIncompat").toBool() && at(row).hasIssues()) {
+                if (APPLICATION->config()->showModIncompat && at(row).hasIssues()) {
                     return QIcon::fromTheme("status-bad");
                 }
                 if (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()) {
@@ -685,25 +686,25 @@ void ResourceFolderModel::setupHeaderAction(QAction* act, int column) const
 
 void ResourceFolderModel::saveColumns(QTreeView* tree)
 {
-    const auto overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
-    const auto visibilitySettingName = QString("UI/%1_Page/ColumnsVisibility").arg(id());
+    auto& instConf = m_instance->config().update();
 
-    // neither passthrough nor override settings works for this usecase as I need to only set the global when the gate is false
-    auto* settings = m_instance->settings();
-    if (!settings->get(overrideSettingName).toBool()) {
-        settings = APPLICATION->settings();
-    }
-    auto visibility = Json::toMap(settings->get(visibilitySettingName).toString());
+    QHash<QString, bool> visibility;
     for (auto i = 0; i < m_columnNames.size(); ++i) {
         const auto& name = m_columnNames[i];
         if (m_columnsHideable[i]) {
             visibility[name] = !tree->isColumnHidden(i);
         }
     }
-    settings->set(visibilitySettingName, Json::fromMap(visibility));
 
-    const auto sizesSettingName = QString("UI/%1_Page/ColumnSizes").arg(id());
-    QVariantMap sizes;
+    const auto visibilityOverride = instConf.uiColumnVisibility.find(id());
+    if (visibilityOverride != instConf.uiColumnVisibility.end()) {
+        *visibilityOverride = std::move(visibility);
+    } else {
+        auto& globalConf = APPLICATION->config().update();
+        globalConf.uiColumnVisibility[id()] = std::move(visibility);
+    }
+
+    QHash<QString, int> sizes;
     for (int i = 0; i < m_columnNames.size(); ++i) {
         const auto& name = m_columnNames[i];
         const auto resizeMode = tree->header()->sectionResizeMode(i);
@@ -711,53 +712,62 @@ void ResourceFolderModel::saveColumns(QTreeView* tree)
             sizes[name] = tree->header()->sectionSize(i);
         }
     }
-    m_instance->settings()->set(sizesSettingName, Json::fromMap(sizes));
+    instConf.uiColumnSizes[id()] = sizes;
 }
 
 void ResourceFolderModel::loadColumns(QTreeView* tree)
 {
-    const auto overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
-    const auto visibilitySettingName = QString("UI/%1_Page/ColumnsVisibility").arg(id());
+    const auto& instConf = *m_instance->config();
 
-    auto setVisible = [this, tree](const QVariant& value) {
+    auto setVisible = [this, tree](const QHash<QString, bool>& visibility) {
         // NOTE: updating visibility state causes sectionResized to fire and a save
         tree->header()->blockSignals(true);
-        auto visibility = Json::toMap(value.toString());
         for (auto i = 0; i < m_columnNames.size(); ++i) {
             if (m_columnsHideable[i]) {
                 auto name = m_columnNames[i];
-                tree->setColumnHidden(i, !visibility.value(name, false).toBool());
+                tree->setColumnHidden(i, !visibility.value(name, false));
             }
         }
         tree->header()->blockSignals(false);
     };
 
-    const auto defaultValue = Json::fromMap({
+    const QHash<QString, bool> defaultValue = {{
         { "Image", true },
         { "Version", true },
         { "Last Modified", true },
         { "Provider", true },
         { "Pack Format", true },
-    });
-    // neither passthrough nor override settings works for this usecase as I need to only set the global when the gate is false
-    auto* settings = m_instance->settings();
-    if (!settings->getOrRegisterSetting(overrideSettingName, false)->get().toBool()) {
-        settings = APPLICATION->settings();
-    }
-    auto visibility = settings->getOrRegisterSetting(visibilitySettingName, defaultValue);
-    setVisible(visibility->get());
+    }};
 
+    const auto visibilityOverride = instConf.uiColumnVisibility.find(id());
+    if (visibilityOverride != instConf.uiColumnVisibility.end()) {
+        setVisible(*visibilityOverride);
+    } else {
+        const auto& globalConf = *APPLICATION->config();
+        const auto globalVisibility = globalConf.uiColumnVisibility.find(id());
+        if (globalVisibility != globalConf.uiColumnVisibility.end()) {
+            setVisible(*globalVisibility);
+        } else {
+            setVisible(defaultValue);
+        }
+    }
     // allways connect the signal in case the setting is toggled on and off
-    auto gSetting = APPLICATION->settings()->getOrRegisterSetting(visibilitySettingName, defaultValue);
-    connect(gSetting.get(), &Setting::SettingChanged, tree, [this, setVisible, overrideSettingName](const Setting&, const QVariant& value) {
-        if (!m_instance->settings()->get(overrideSettingName).toBool()) {
-            setVisible(value);
+    // FIXME: prone to issues with the ResourceFolderModel being deleted before the tree
+    connect(&APPLICATION->config(), &GlobalConfigHolder::updated, tree, [this, setVisible]() {
+        if (!m_instance->config()->uiColumnVisibility.contains(id())) {
+            const auto& globalConf = APPLICATION->config();
+            if (globalConf.prev()->uiColumnVisibility == globalConf->uiColumnVisibility) {
+                return;
+            }
+
+            const auto globalVisibilityEntry = globalConf->uiColumnVisibility.find(id());
+            if (globalVisibilityEntry != globalConf->uiColumnVisibility.end()) {
+                setVisible(*globalVisibilityEntry);
+            }
         }
     });
 
-    const auto sizesSettingName = QString("UI/%1_Page/ColumnSizes").arg(id());
-    const auto sizesSetting = m_instance->settings()->getOrRegisterSetting(sizesSettingName, "{}");
-    auto sizes = Json::toMap(sizesSetting->get().toString());
+    const auto sizes = instConf.uiColumnSizes.value(id());
     tree->header()->blockSignals(true);
     for (int i = 0; i < m_columnNames.size(); ++i) {
         const auto resizeMode = tree->header()->sectionResizeMode(i);
@@ -768,7 +778,7 @@ void ResourceFolderModel::loadColumns(QTreeView* tree)
 
         const auto& name = m_columnNames[i];
 
-        const auto size = sizes.value(name).toInt();
+        const auto size = sizes.value(name);
         if (size > 0) {
             tree->header()->resizeSection(i, size);
         }
@@ -782,13 +792,16 @@ QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
 
     {  // action to decide if the visibility is per instance or not
         auto* act = new QAction(tr("Override Columns Visibility"), menu);
-        const auto overrideSettingName = QString("UI/%1_Page/ColumnsOverride").arg(id());
 
         act->setCheckable(true);
-        act->setChecked(m_instance->settings()->getOrRegisterSetting(overrideSettingName, false)->get().toBool());
+        act->setChecked(m_instance->config()->uiColumnVisibility.contains(id()));
 
-        connect(act, &QAction::toggled, tree, [this, tree, overrideSettingName](bool toggled) {
-            m_instance->settings()->set(overrideSettingName, toggled);
+        connect(act, &QAction::toggled, tree, [this, tree](bool toggled) {
+            if (toggled) {
+                m_instance->config().update().uiColumnVisibility[id()] = {};
+            } else {
+                m_instance->config().update().uiColumnVisibility.remove(id());
+            }
             saveColumns(tree);
         });
 

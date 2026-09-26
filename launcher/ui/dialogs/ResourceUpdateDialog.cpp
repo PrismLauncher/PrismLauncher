@@ -6,6 +6,8 @@
 #include "ProgressDialog.h"
 #include "ScrollMessageBox.h"
 #include "StringUtils.h"
+#include "config/GlobalConfig.h"
+#include "config/InstanceConfig.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
@@ -60,7 +62,7 @@ ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
     , m_parent(parent)
     , m_resourceModel(resourceModel)
     , m_candidates(searchFor)
-    , m_secondTryMetadata(new ConcurrentTask("Second Metadata Search", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()))
+    , m_secondTryMetadata(new ConcurrentTask("Second Metadata Search", APPLICATION->config()->numberOfConcurrentTasks))
     , m_instance(instance)
     , m_includeDeps(includeDeps)
     , m_loadersList(std::move(loadersList))
@@ -69,8 +71,7 @@ ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
     ReviewMessageBox::setGeometry(0, 0, 800, 600);
 
     if (m_releaseTypes.empty()) {
-        auto settingVal = APPLICATION->settings()->get("ModUpdateReleaseTypes");
-        m_releaseTypes = ModPlatform::IndexedVersionType::fromStringList(Json::toStringList(settingVal.toString()));
+        m_releaseTypes = ModPlatform::IndexedVersionType::fromStringList(APPLICATION->config()->modUpdateReleaseTypes);
     }
 
     ui->explainLabel->setText(tr("You're about to update the following resources:"));
@@ -220,7 +221,7 @@ void ResourceUpdateDialog::checkCandidates()
         }
     }
 
-    if (m_includeDeps && !APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
+    if (m_includeDeps && !APPLICATION->config()->modDependenciesDisabled) {  // dependencies
         auto* modModel = dynamic_cast<ModFolderModel*>(m_resourceModel);
 
         if (modModel != nullptr) {

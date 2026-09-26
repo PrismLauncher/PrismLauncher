@@ -34,7 +34,7 @@
  *      limitations under the License.
  */
 
-#include "settings/INIFile.h"
+#include "INIFile.h"
 
 #include <AssertHelpers.h>
 #include <FileSystem.h>
@@ -51,10 +51,10 @@
 
 INIFile::INIFile() = default;
 
-bool INIFile::saveFile(const QString& fileName)
+Result<> INIFile::saveFile(const QString& fileName)
 {
     if (!contains("ConfigVersion")) {
-        insert("ConfigVersion", "1.3");
+        insert("ConfigVersion", "1.4");
     }
     QSettings settingsObj{ fileName, QSettings::Format::IniFormat };
     settingsObj.setFallbacksEnabled(false);
@@ -68,16 +68,16 @@ bool INIFile::saveFile(const QString& fileName)
 
     if (auto status = settingsObj.status(); status != QSettings::Status::NoError) {
         if (status == QSettings::Status::AccessError) {
-            qCritical() << "An access error occurred while saving INI file" << fileName << "(is the file read-only?)";
+            return std::unexpected("Failed to write INI file to " + fileName);
         }
-        if (ASSERT_NEVER(status == QSettings::Status::FormatError)) {
-            qCritical() << "A format error occurred while saving INI file" << fileName << "(this shouldn't be possible!)";
+        // NOTE: FormatError can be set by the read that happens when constructing QSettings whether you like it or not
+        // since we're ignoring the existing values anyway it doesn't make much sense to care about this
+        if (status != QSettings::Status::FormatError) {
+            return std::unexpected("Unknown error occurred while saving INI file to " + fileName);
         }
-
-        return false;
     }
 
-    return true;
+    return {};
 }
 
 namespace {
@@ -171,66 +171,108 @@ QVariant migrateQByteArrayToBase64(const QString& key, QVariant value)
     }
     return value;
 }
+
+void migrateUIKeys(INIFile& file)
+{
+    auto remap = [&file](const QString& src, const QString& dst) {
+        if (file.contains(src)) {
+            file[dst] = file.take(src);
+        }
+    };
+    remap("MainWindowGeometry", "UIGeometry/MainWindow");
+    remap("ConsoleWindowGeometry", "UIGeometry/ConsoleWindow");
+    remap("PageDialog", "UIGeometry/PageDialog");
+    remap("NewInstanceGeometry", "UIGeometry/NewInstance");
+    remap("NewsGeometry", "UIGeometry/News");
+    remap("ModDownloadGeometry", "UIGeometry/ModDownload");
+    remap("RPDownloadGeometry", "UIGeometry/RPDownload");
+    remap("TPDownloadGeometry", "UIGeometry/TPDownload");
+    remap("ShaderDownloadGeometry", "UIGeometry/ShaderDownload");
+    remap("DataPackDownloadGeometry", "UIGeometry/DataPackDownload");
+
+    remap("MainWindowState", "UIState/MainWindow");
+    remap("ConsoleWindowState", "UIState/ConsoleWindow");
+
+    auto remapResourcePage = [&file, &remap](const QString& name) {
+        remap("UI/" + name + "_Page/ColumnSizes", "UIColumnSizes/" + name);
+        if (file.value("UI/" + name + "_Page/ColumnsOverride").toBool()) {
+            remap("UI/" + name + "_Page/ColumnsVisibility", "UIColumnVisibility/" + name);
+        }
+    };
+
+    remapResourcePage("resource");
+    remapResourcePage("mods");
+    remapResourcePage("resourcepacks");
+    remapResourcePage("texturepacks");
+    remapResourcePage("shaderpacks");
+    remapResourcePage("datapacks");
+}
 }  // namespace
 
-bool INIFile::loadFile(const QString& fileName)
+Result<> INIFile::loadFile(const QString& fileName)
 {
     QSettings settingsObj{ fileName, QSettings::Format::IniFormat };
     settingsObj.setFallbacksEnabled(false);
 
     if (auto status = settingsObj.status(); status != QSettings::Status::NoError) {
         if (status == QSettings::Status::AccessError) {
-            qCritical() << "An access error occurred while loading INI file" << fileName;
+            return std::unexpected("Access error occurred while loading INI file from " + fileName);
         }
         if (status == QSettings::Status::FormatError) {
-            qCritical() << "A format error occurred while loading INI file" << fileName << "(is the file malformed or corrupted?)";
+            return std::unexpected("Format error occurred while loading INI file from " + fileName);
         }
-        return false;
+        return std::unexpected("Unknown error occurred while loading INI file from " + fileName);
     }
-    if (!settingsObj.value("ConfigVersion").isValid()) {
+    QString configVersion = settingsObj.value("ConfigVersion").toString();
+    if (configVersion.isEmpty()) {
         QFile file(fileName);
         if (!file.open(QIODevice::ReadOnly)) {
-            return false;
+            return std::unexpected("Failed to open INI file from " + fileName + " for reading: " + file.errorString());
         }
         QSettings::SettingsMap map;
         parseOldFileFormat(file, map);
         file.close();
         for (auto&& key : map.keys()) {
-            auto value = migrateQByteArrayToBase64(key, map.value(key));
-            insert(key, value);
+            insert(key, map.value(key));
         }
-        insert("ConfigVersion", "1.3");
-    } else if (settingsObj.value("ConfigVersion").toString() == "1.1") {
-        for (auto&& key : settingsObj.allKeys()) {
-            auto value = migrateQByteArrayToBase64(key, settingsObj.value(key));
-            if (auto valueStr = value.toString();
-                (valueStr.contains(QChar(';')) || valueStr.contains(QChar('=')) || valueStr.contains(QChar(','))) &&
-                valueStr.endsWith("\"") && valueStr.startsWith("\"")) {
-                insert(key, unquote(valueStr));
-            } else {
-                insert(key, value);
-            }
-        }
-        insert("ConfigVersion", "1.3");
-    } else if (settingsObj.value("ConfigVersion").toString() == "1.2") {
-        for (auto&& key : settingsObj.allKeys()) {
-            auto value = migrateQByteArrayToBase64(key, settingsObj.value(key));
-            insert(key, value);
-        }
-        insert("ConfigVersion", "1.3");
+        // unquote is already called by parseOldFileFormat
+        configVersion = "1.2";
     } else {
         for (auto&& key : settingsObj.allKeys()) {
             insert(key, settingsObj.value(key));
         }
     }
-    return true;
+
+    if (configVersion == "1.1") {
+        for (auto&& key : keys()) {
+            insert(key, unquote(value(key).toString()));
+        }
+        configVersion = "1.2";
+    }
+
+    if (configVersion == "1.2") {
+        for (auto&& key : keys()) {
+            auto val = migrateQByteArrayToBase64(key, value(key));
+            insert(key, val);
+        }
+        configVersion = "1.3";
+    }
+
+    if (configVersion == "1.3") {
+        migrateUIKeys(*this);
+        configVersion = "1.4";
+    }
+
+    insert("ConfigVersion", configVersion);
+
+    return {};
 }
 
-bool INIFile::loadFile(const QByteArray& data)
+Result<> INIFile::loadFile(const QByteArray& data)
 {
     QTemporaryFile file;
     if (!file.open()) {
-        return false;
+        return std::unexpected("Failed to open temporary file for writing: " + file.errorString());
     }
     file.write(data);
     file.flush();

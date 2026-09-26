@@ -54,7 +54,7 @@
 
 #include "Application.h"
 #include "Json.h"
-#include "settings/Setting.h"
+#include "config/GlobalConfig.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
@@ -104,10 +104,10 @@ ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWi
     updateMenu->addAction(m_ui->actionVerifyItemDependencies);
     connect(m_ui->actionVerifyItemDependencies, &QAction::triggered, this, [this] { updateMods(true); });
 
-    auto depsDisabled = APPLICATION->settings()->getSetting("ModDependenciesDisabled");
-    m_ui->actionVerifyItemDependencies->setVisible(!depsDisabled->get().toBool());
-    connect(depsDisabled.get(), &Setting::SettingChanged, this,
-            [this](const Setting&, const QVariant& value) { m_ui->actionVerifyItemDependencies->setVisible(!value.toBool()); });
+    auto depsDisabled = APPLICATION->config()->modDependenciesDisabled;
+    m_ui->actionVerifyItemDependencies->setVisible(!depsDisabled);
+    connect(&APPLICATION->config(), &GlobalConfigHolder::updated, this,
+            [this]() { m_ui->actionVerifyItemDependencies->setVisible(!APPLICATION->config()->modDependenciesDisabled); });
 
     updateMenu->addAction(m_ui->actionResetItemMetadata);
     connect(m_ui->actionResetItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
@@ -200,7 +200,7 @@ void ModFolderPage::downloadMods()
 void ModFolderPage::downloadDialogFinished(int result)
 {
     if (result != 0) {
-        ConcurrentTask tasks(tr("Download Mods"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        ConcurrentTask tasks(tr("Download Mods"), APPLICATION->config()->numberOfConcurrentDownloads);
         connect(&tasks, &Task::failed, this,
                 [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
         connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
@@ -235,7 +235,7 @@ void ModFolderPage::updateMods(bool includeDeps, std::vector<ModPlatform::Indexe
     if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
         return;
     }
-    if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+    if (APPLICATION->config()->modMetadataDisabled) {
         QMessageBox::critical(this, tr("Error"), tr("Mod updates are unavailable when metadata is disabled!"));
         return;
     }
@@ -281,7 +281,7 @@ void ModFolderPage::updateMods(bool includeDeps, std::vector<ModPlatform::Indexe
     }
 
     if (updateDialog.exec() != 0) {
-        ConcurrentTask tasks("Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        ConcurrentTask tasks("Download Mods", APPLICATION->config()->numberOfConcurrentDownloads);
         connect(&tasks, &Task::failed, this,
                 [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
         connect(&tasks, &Task::succeeded, this, [this, &tasks]() {
@@ -346,7 +346,7 @@ void ModFolderPage::changeModVersion()
     if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
         return;
     }
-    if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+    if (APPLICATION->config()->modMetadataDisabled) {
         QMessageBox::critical(this, tr("Error"), tr("Mod updates are unavailable when metadata is disabled!"));
         return;
     }

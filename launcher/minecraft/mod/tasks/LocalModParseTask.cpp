@@ -12,8 +12,8 @@
 
 #include "Json.h"
 #include "archive/ArchiveReader.h"
+#include "config/INIFile.h"
 #include "minecraft/mod/ModDetails.h"
-#include "settings/INIFile.h"
 
 static const QRegularExpression s_newlineRegex("\r\n|\n|\r");
 
@@ -493,9 +493,12 @@ ModDetails ReadForgeInfo(const QByteArray& contents)
     details.name = "Minecraft Forge";
     details.mod_id = "Forge";
     details.homeurl = "http://www.minecraftforge.net/forum/";
+
     INIFile ini;
-    if (!ini.loadFile(contents))
+    if (const auto loadResult = ini.loadFile(contents); !loadResult) {
+        qWarning() << "Failed to load forgeversion.properties correctly:" << loadResult.error();
         return details;
+    }
 
     QString major = ini.get("forge.major.number", "0").toString();
     QString minor = ini.get("forge.minor.number", "0").toString();

@@ -42,6 +42,7 @@
 #include "BuildConfig.h"
 #include "FileSystem.h"
 
+#include "config/GlobalConfig.h"
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
@@ -335,7 +336,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // Togglable status bar
     {
-        bool statusBarVisible = APPLICATION->settings()->get("StatusBarVisible").toBool();
+        bool statusBarVisible = APPLICATION->config()->statusBarVisible;
         ui->actionToggleStatusBar->setChecked(statusBarVisible);
         connect(ui->actionToggleStatusBar, &QAction::toggled, this, &MainWindow::setStatusBarVisibility);
         setStatusBarVisibility(statusBarVisible);
@@ -343,7 +344,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // Lock toolbars
     {
-        bool toolbarsLocked = APPLICATION->settings()->get("ToolbarsLocked").toBool();
+        bool toolbarsLocked = APPLICATION->config()->toolbarsLocked;
         ui->actionLockToolbars->setChecked(toolbarsLocked);
         connect(ui->actionLockToolbars, &QAction::toggled, this, &MainWindow::lockToolbars);
         lockToolbars(toolbarsLocked);
@@ -416,7 +417,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     connect(ui->actionUndoTrashInstance, &QAction::triggered, this, &MainWindow::undoTrashInstance);
 
-    setSelectedInstanceById(APPLICATION->settings()->get("SelectedInstance").toString());
+    setSelectedInstanceById(APPLICATION->config()->selectedInstance);
 
     // removing this looks stupid
     view->setFocus();
@@ -429,7 +430,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 #ifndef Q_OS_MAC
 void MainWindow::keyReleaseEvent(QKeyEvent* event)
 {
-    if (event->key() == Qt::Key_Alt && !APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool())
+    if (event->key() == Qt::Key_Alt && !APPLICATION->config()->menuBarInsteadOfToolBar)
         ui->menuBar->setVisible(!ui->menuBar->isVisible());
     else
         QMainWindow::keyReleaseEvent(event);
@@ -482,14 +483,14 @@ QMenu* MainWindow::createPopupMenu()
 void MainWindow::setStatusBarVisibility(bool state)
 {
     statusBar()->setVisible(state);
-    APPLICATION->settings()->set("StatusBarVisible", state);
+    APPLICATION->config().update().statusBarVisible = state;
 }
 void MainWindow::lockToolbars(bool state)
 {
     ui->mainToolBar->setMovable(!state);
     ui->instanceToolBar->setMovable(!state);
     ui->newsToolBar->setMovable(!state);
-    APPLICATION->settings()->set("ToolbarsLocked", state);
+    APPLICATION->config().update().toolbarsLocked = state;
 }
 
 void MainWindow::konamiTriggered()
@@ -580,8 +581,8 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
 
 void MainWindow::updateMainToolBar()
 {
-    ui->menuBar->setVisible(APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
-    ui->mainToolBar->setVisible(ui->menuBar->isNativeMenuBar() || !APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
+    ui->menuBar->setVisible(APPLICATION->config()->menuBarInsteadOfToolBar);
+    ui->mainToolBar->setVisible(ui->menuBar->isNativeMenuBar() || !APPLICATION->config()->menuBarInsteadOfToolBar);
 }
 
 void MainWindow::updateLaunchButton()
@@ -614,14 +615,14 @@ void MainWindow::updateThemeMenu()
         QAction* themeAction = themeMenu->addAction(theme->name());
 
         themeAction->setCheckable(true);
-        if (APPLICATION->settings()->get("ApplicationTheme").toString() == theme->id()) {
+        if (APPLICATION->config()->applicationTheme == theme->id()) {
             themeAction->setChecked(true);
         }
         themeAction->setActionGroup(themesGroup);
 
         connect(themeAction, &QAction::triggered, APPLICATION, [theme]() {
             APPLICATION->themeManager()->setApplicationTheme(theme->id());
-            APPLICATION->settings()->set("ApplicationTheme", theme->id());
+            APPLICATION->config().update().applicationTheme = theme->id();
         });
     }
 
@@ -833,7 +834,7 @@ QString intListToString(const QList<int>& list)
 void MainWindow::onCatToggled(bool state)
 {
     setCatBackground(state);
-    APPLICATION->settings()->set("TheCat", state);
+    APPLICATION->config().update().theCat = state;
 }
 
 void MainWindow::setCatBackground(bool enabled)
@@ -844,11 +845,10 @@ void MainWindow::setCatBackground(bool enabled)
 
 void MainWindow::updateCatState()
 {
-    SettingsObject* settings = APPLICATION->settings();
-    const bool catEnabled = settings->get("EnableCat").toBool();
-    bool catVisible = settings->get("TheCat").toBool();
+    const bool catEnabled = APPLICATION->config()->enableCat;
+    bool catVisible = APPLICATION->config()->theCat;
     if (!catEnabled && catVisible) {
-        settings->set("TheCat", false);
+        APPLICATION->config().update().theCat = false;
         catVisible = false;
     }
 
@@ -912,15 +912,16 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
     } while (0);
 
     if (groupName.isEmpty()) {
-        groupName = APPLICATION->settings()->get("LastUsedGroupForNewInstance").toString();
+        groupName = APPLICATION->config()->lastUsedGroupForNewInstance;
     }
 
     NewInstanceDialog newInstDlg(groupName, url, extra_info, this);
     if (!newInstDlg.exec())
         return;
 
-    APPLICATION->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
-    APPLICATION->settings()->set("LastUsedInstDirForNewInstance", newInstDlg.instDir());
+    auto& conf = APPLICATION->config().update();
+    conf.lastUsedGroupForNewInstance = newInstDlg.instGroup();
+    conf.lastUsedInstDirForNewInstance = newInstDlg.instDir();
 
     InstanceTask* creationTask = newInstDlg.extractTask();
     if (creationTask) {
@@ -1219,7 +1220,7 @@ void MainWindow::on_actionChangeInstIcon_triggered()
         return;
 
     IconPickerDialog dlg(this);
-    dlg.execWithSelection(m_selectedInstance->iconKey());
+    dlg.execWithSelection(m_selectedInstance->config()->iconKey);
     if (dlg.result() == QDialog::Accepted) {
         m_selectedInstance->setIconKey(dlg.selectedIconKey);
         auto icon = APPLICATION->icons()->getIcon(dlg.selectedIconKey);
@@ -1323,18 +1324,18 @@ void MainWindow::on_actionViewLauncherRootFolder_triggered()
 
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
-    QString str = APPLICATION->settings()->get("InstanceDir").toString();
+    QString str = APPLICATION->config()->instanceDir;
     DesktopServices::openPath(str);
 }
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
-    DesktopServices::openPath(APPLICATION->settings()->get("CentralModsDir").toString(), true);
+    DesktopServices::openPath(APPLICATION->config()->centralModsDir, true);
 }
 
 void MainWindow::on_actionViewSkinsFolder_triggered()
 {
-    DesktopServices::openPath(APPLICATION->settings()->get("SkinsDir").toString(), true);
+    DesktopServices::openPath(APPLICATION->config()->skinsDir, true);
 }
 
 void MainWindow::on_actionViewIconThemeFolder_triggered()
@@ -1397,7 +1398,7 @@ void MainWindow::globalSettingsClosed()
     updateCatState();
     // This needs to be done to prevent UI elements disappearing in the event the config is changed
     // but Prism Launcher exits abnormally, causing the window state to never be saved:
-    APPLICATION->settings()->set("MainWindowState", QString::fromUtf8(saveState().toBase64()));
+    APPLICATION->config().update().uiState["MainWindow"] = saveState();
     update();
 }
 
@@ -1495,7 +1496,7 @@ void MainWindow::newsButtonClicked()
 
 void MainWindow::onCatChanged(int)
 {
-    setCatBackground(APPLICATION->settings()->get("TheCat").toBool());
+    setCatBackground(APPLICATION->config()->theCat);
 }
 
 void MainWindow::on_actionAbout_triggered()
@@ -1521,7 +1522,7 @@ void MainWindow::on_actionDeleteInstance_triggered()
     auto id = m_selectedInstance->id();
 
     QString shortcutStr;
-    auto shortcuts = m_selectedInstance->shortcuts();
+    auto shortcuts = m_selectedInstance->config()->shortcuts;
     if (!shortcuts.isEmpty())
         shortcutStr = tr(" and its %n registered shortcut(s)", "", shortcuts.size());
     auto response = CustomMessageBox::selectable(this, tr("Confirm Deletion"),
@@ -1543,7 +1544,7 @@ void MainWindow::on_actionDeleteInstance_triggered()
     } else {
         APPLICATION->instances()->deleteInstance(id);
     }
-    APPLICATION->settings()->set("SelectedInstance", QString());
+    APPLICATION->config().update().selectedInstance = {};
     selectionBad();
 }
 
@@ -1596,8 +1597,9 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 void MainWindow::closeEvent(QCloseEvent* event)
 {
     // Save the window state and geometry.
-    APPLICATION->settings()->set("MainWindowState", QString::fromUtf8(saveState().toBase64()));
-    APPLICATION->settings()->set("MainWindowGeometry", QString::fromUtf8(saveGeometry().toBase64()));
+    auto& conf = APPLICATION->config().update();
+    conf.uiState["MainWindow"] = saveState();
+    conf.uiGeometry["MainWindow"] = saveGeometry();
     event->accept();
     emit isClosing();
 }
@@ -1619,7 +1621,7 @@ void MainWindow::instanceActivated(QModelIndex index)
     if (!inst)
         return;
 
-    if (APPLICATION->settings()->get("EditInstanceOnDoubleClick").toBool()) {
+    if (APPLICATION->config()->editInstanceOnDoubleClick) {
         if (inst->canEdit()) {
             APPLICATION->showInstanceWindow(inst);
         } else {
@@ -1677,7 +1679,7 @@ void MainWindow::startTask(Task* task)
 void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     if (!current.isValid()) {
-        APPLICATION->settings()->set("SelectedInstance", QString());
+        APPLICATION->config().update().selectedInstance = {};
         selectionBad();
         return;
     }
@@ -1697,16 +1699,16 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
         renameButton->setText(m_selectedInstance->name());
         m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
         updateStatusCenter();
-        updateInstanceToolIcon(m_selectedInstance->iconKey());
+        updateInstanceToolIcon(m_selectedInstance->config()->iconKey);
 
         updateLaunchButton();
 
-        APPLICATION->settings()->set("SelectedInstance", m_selectedInstance->id());
+        APPLICATION->config().update().selectedInstance = m_selectedInstance->id();
 
         connect(m_selectedInstance, &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
         connect(m_selectedInstance, &BaseInstance::profilerChanged, this, &MainWindow::refreshCurrentInstance);
     } else {
-        APPLICATION->settings()->set("SelectedInstance", QString());
+        APPLICATION->config().update().selectedInstance = {};
         selectionBad();
         return;
     }
@@ -1740,12 +1742,12 @@ void MainWindow::selectionBad()
     updateInstanceToolIcon("grass");
 
     // ...and then see if we can enable the previously selected instance
-    setSelectedInstanceById(APPLICATION->settings()->get("SelectedInstance").toString());
+    setSelectedInstanceById(APPLICATION->config()->selectedInstance);
 }
 
 void MainWindow::checkInstancePathForProblems()
 {
-    QString instanceFolder = APPLICATION->settings()->get("InstanceDir").toString();
+    QString instanceFolder = APPLICATION->config()->instanceDir;
     if (FS::checkProblemticPathJava(QDir(instanceFolder))) {
         QMessageBox warning(this);
         warning.setText(tr("Your instance folder contains \'!\' and this is known to cause Java problems!"));
@@ -1778,12 +1780,11 @@ void MainWindow::checkInstancePathForProblems()
 
 void MainWindow::updateStatusCenter()
 {
-    m_statusCenter->setVisible(APPLICATION->settings()->get("ShowGlobalGameTime").toBool());
-    int64_t timePlayed = APPLICATION->playtimeSettings()->get("TotalPlayTime").toLongLong();
+    m_statusCenter->setVisible(APPLICATION->config()->showGlobalGameTime);
+    int64_t timePlayed = APPLICATION->config()->totalPlayTime;
     if (timePlayed > 0) {
         m_statusCenter->setText(
-            tr("Total playtime: %1")
-                .arg(Time::prettifyDuration(timePlayed, APPLICATION->settings()->get("ShowGameTimeWithoutDays").toBool())));
+            tr("Total playtime: %1").arg(Time::prettifyDuration(timePlayed, APPLICATION->config()->showGameTimeWithoutDays)));
     }
 }
 // "Instance actions" are actions that require an instance to be selected (i.e. "new instance" is not here)

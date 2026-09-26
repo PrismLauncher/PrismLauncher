@@ -199,7 +199,7 @@ void Technic::SolderPackInstallTask::extractFinished()
     auto packProcessor = makeShared<Technic::TechnicPackProcessor>();
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::succeeded, this, &Technic::SolderPackInstallTask::emitSucceeded);
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::failed, this, &Technic::SolderPackInstallTask::emitFailed);
-    packProcessor->run(m_globalSettings, name(), m_instIcon, m_stagingPath, m_minecraftVersion, true);
+    packProcessor->run(name(), m_instIcon, m_stagingPath, m_minecraftVersion, true);
 }
 
 void Technic::SolderPackInstallTask::extractAborted()
