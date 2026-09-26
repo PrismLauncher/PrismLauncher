@@ -33,6 +33,7 @@
  *      limitations under the License.
  */
 
+#include <QFileSystemWatcher>
 #include <QTemporaryDir>
 #include <QTest>
 #include <QTimer>
@@ -134,6 +135,10 @@ class ResourceFolderModelTest : public QObject {
     void test_addFromWatch()
     {
         QString source = QFINDTESTDATA("testdata/Resources");
+        QFileSystemWatcher watcher;
+        if (!watcher.addPath(source))
+            QSKIP("Native filesystem notifications are unavailable");
+
         ModFolderModel model(source, nullptr, false, true);
 
         QCOMPARE(model.size(), 0);
@@ -154,6 +159,10 @@ class ResourceFolderModelTest : public QObject {
         QString file_mod = QFINDTESTDATA("testdata/Resources/supercoolmod.jar");
 
         QTemporaryDir tmp;
+        QFileSystemWatcher watcher;
+        if (!watcher.addPath(tmp.path()))
+            QSKIP("Native filesystem notifications are unavailable");
+
         ResourceFolderModel model(QDir(tmp.path()), nullptr, false, false);
 
         QCOMPARE(model.size(), 0);
