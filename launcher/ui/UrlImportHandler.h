@@ -52,6 +52,10 @@ class UrlHandler : public QObject {
     void handleCurseforge(const QUrl& url);
     void handleCurseforge(const QString& addonId, const QString& fileId);
     void handlePrism(const QUrl& url);
+    void handlePrismInstall(const QUrl& url);
+    void handlePrismImport(const QUrl& url);
+    void handlePrismTheme(const QUrl& url);
+    void importThemeArchive(const QUrl& archiveUrl);
 
    private:
     QWidget* m_parent;
