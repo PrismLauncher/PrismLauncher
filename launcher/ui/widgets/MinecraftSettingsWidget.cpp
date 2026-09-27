@@ -596,13 +596,12 @@ bool MinecraftSettingsWidget::isQuickPlaySupported()
 void MinecraftSettingsWidget::loadRealms()
 {
     m_realmsJob = Realms::fetch(m_instance, this, [this](const QList<Realms::Realm>& realms) {
-        auto current = m_ui->realmsCb->currentData();
-        m_ui->realmsCb->clear();
         for (const auto& realm : realms) {
-            m_ui->realmsCb->addItem(realm.name, realm.id);
-        }
-        if (auto index = m_ui->realmsCb->findData(current); index != -1) {
-            m_ui->realmsCb->setCurrentIndex(index);
+            if (auto index = m_ui->realmsCb->findData(realm.id); index != -1) {
+                m_ui->realmsCb->setItemText(index, realm.name);
+            } else {
+                m_ui->realmsCb->addItem(realm.name, realm.id);
+            }
         }
     });
     if (!m_realmsJob) {
