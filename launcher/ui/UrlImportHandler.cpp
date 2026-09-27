@@ -18,12 +18,20 @@
 
 #include "UrlImportHandler.h"
 
+#include <QFileInfo>
+#include <QMap>
+#include <QStringList>
 #include <QUrl>
 #include <QUrlQuery>
+#include <algorithm>
 
 #include "Application.h"
 #include "BuildConfig.h"
+#include "FileSystem.h"
 #include "InstanceList.h"
+#include "QObjectPtr.h"
+#include "archive/ArchiveReader.h"
+#include "archive/ExtractZipTask.h"
 #include "minecraft/WorldList.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "minecraft/mod/ResourcePackFolderModel.h"
@@ -38,6 +46,15 @@
 #include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
+#include "ui/themes/ThemeManager.h"
+
+namespace {
+bool isHttpUrl(const QUrl& url)
+{
+    return url.isValid() && !url.host().isEmpty() && (url.scheme() == "https" || url.scheme() == "http");
+}
+
+}  // namespace
 
 void UrlHandler::process(const QList<QUrl>& urls)
 {
@@ -58,17 +75,11 @@ void UrlHandler::process(const QList<QUrl>& urls)
             processFile(url);
             continue;
         }
-        // download the remote resource and identify
-        const bool isExternalURLImport =
-            url.host().toLower() == "import" || url.path().startsWith("/import", Qt::CaseInsensitive) || url.host() == "install";
-
         if (url.scheme() == "modrinth") {
             handleModrinth(url);
         } else if (url.scheme() == "curseforge") {
             handleCurseforge(url);
-        } else if (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME && !isExternalURLImport) {
-            handleOauth(url);
-        } else if (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME && isExternalURLImport) {
+        } else if (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME) {
             handlePrism(url);
         } else {
             downloadFile(url);
@@ -396,43 +407,23 @@ void UrlHandler::handleCurseforge(const QString& addonId, const QString& fileId)
 
 void UrlHandler::handlePrism(const QUrl& url)
 {
-    // need to find the download link for the modpack / resource
-    // format of url binaryname://install?platform=curseforge&addonId=IDHERE&fileId=IDHERE
-    // format of url binaryname://install?platform=modrinth&addonId=IDHERE&fileId=IDHERE
     if (url.host() == "install") {
-        QUrlQuery query(url);
-
-        auto platform = query.queryItemValue("platform").toLower();
-        if (platform == "modrinth") {
-            if (!query.allQueryItemValues("fileId").isEmpty()) {
-                auto fileId = query.allQueryItemValues("fileId")[0];
-                handleModrinthVersion(fileId);
-                return;
-            }
-            if (!query.allQueryItemValues("addonId").isEmpty()) {
-                auto addonId = query.allQueryItemValues("addonId")[0];
-                handleModrinthMod(addonId);
-                return;
-            }
-            qDebug() << "Invalid  link:" << url;
-            return;
-        }
-        if (platform == "curseforge") {
-            if (query.allQueryItemValues("addonId").isEmpty() || query.allQueryItemValues("fileId").isEmpty()) {
-                qDebug() << "Invalid  link:" << url;
-                return;
-            }
-            auto addonId = query.allQueryItemValues("addonId")[0];
-            auto fileId = query.allQueryItemValues("fileId")[0];
-            handleCurseforge(addonId, fileId);
-            return;
-        }
-
-        qDebug() << "Invalid mod distribution platform:" << query.queryItemValue("platform");
+        handlePrismInstall(url);
         return;
     }
+    if (url.host() == "themes") {
+        handlePrismTheme(url);
+        return;
+    }
+    if (url.host().toLower() == "import" || url.path().startsWith("/import", Qt::CaseInsensitive)) {
+        handlePrismImport(url);
+        return;
+    }
+    handleOauth(url);
+}
 
-    // PrismLauncher URL protocol modpack import
+void UrlHandler::handlePrismImport(const QUrl& url)
+{  // PrismLauncher URL protocol modpack import
     // works for any prism fork
     // preferred impoprocessFilert format: prismlauncher://import?url=ENCODED
     const auto host = url.host().toLower();
@@ -473,7 +464,7 @@ void UrlHandler::handlePrism(const QUrl& url)
     QUrl target = QUrl::fromUserInput(decodedStr);
 
     // Validate: only allow http(s)
-    if (!target.isValid() || (target.scheme() != "https" && target.scheme() != "http")) {
+    if (!isHttpUrl(target)) {
         CustomMessageBox::selectable(m_parent, tr("Error"), tr("Invalid import link: URL must be http(s)."), QMessageBox::Critical)->show();
         return;
     }
@@ -487,4 +478,164 @@ void UrlHandler::handlePrism(const QUrl& url)
     }
 
     downloadFile(target);
+}
+
+void UrlHandler::handlePrismInstall(const QUrl& url)
+{
+    // need to find the download link for the modpack / resource
+    // format of url binaryname://install?platform=curseforge&addonId=IDHERE&fileId=IDHERE
+    // format of url binaryname://install?platform=modrinth&addonId=IDHERE&fileId=IDHERE
+    QUrlQuery query(url);
+
+    auto platform = query.queryItemValue("platform").toLower();
+    if (platform == "modrinth") {
+        if (!query.allQueryItemValues("fileId").isEmpty()) {
+            auto fileId = query.allQueryItemValues("fileId")[0];
+            handleModrinthVersion(fileId);
+            return;
+        }
+        if (!query.allQueryItemValues("addonId").isEmpty()) {
+            auto addonId = query.allQueryItemValues("addonId")[0];
+            handleModrinthMod(addonId);
+            return;
+        }
+        qDebug() << "Invalid  link:" << url;
+        return;
+    }
+    if (platform == "curseforge") {
+        if (query.allQueryItemValues("addonId").isEmpty() || query.allQueryItemValues("fileId").isEmpty()) {
+            qDebug() << "Invalid  link:" << url;
+            return;
+        }
+        auto addonId = query.allQueryItemValues("addonId")[0];
+        auto fileId = query.allQueryItemValues("fileId")[0];
+        handleCurseforge(addonId, fileId);
+        return;
+    }
+
+    qDebug() << "Invalid mod distribution platform:" << query.queryItemValue("platform");
+}
+
+void UrlHandler::handlePrismTheme(const QUrl& url)
+{
+    // Prism Launcher URL protocol theme import
+    // format of url binaryname://themes?url=ENCODED_THEME_ZIP_URL
+    const auto values = QUrlQuery(url).allQueryItemValues("url");
+    if (values.isEmpty()) {
+        CustomMessageBox::selectable(m_parent, tr("Error"), tr("Invalid theme link: missing 'url' parameter."), QMessageBox::Critical)
+            ->show();
+        return;
+    }
+
+    auto encodedTarget = values.first().trimmed();
+    auto decodedStr = QUrl::fromPercentEncoding(encodedTarget.toUtf8()).trimmed();
+    auto target = QUrl::fromUserInput(decodedStr);
+
+    if (!isHttpUrl(target)) {
+        CustomMessageBox::selectable(m_parent, tr("Error"), tr("Invalid theme link: URL must be http(s)."), QMessageBox::Critical)->show();
+        return;
+    }
+
+    const QString path = target.host() + '/' + target.path();
+    auto entry = APPLICATION->metacache()->resolveEntry("general", path);
+    entry->setStale(true);
+    auto dlJob = unique_qobject_ptr<NetJob>(new NetJob(tr("Theme download"), APPLICATION->network()));
+    dlJob->addNetAction(Net::ApiRequest::makeCached(target, entry));
+    auto pathUrl = QUrl::fromLocalFile(entry->getFullPath());
+
+    connect(dlJob.get(), &Task::failed, this,
+            [this](const QString& reason) { CustomMessageBox::selectable(m_parent, tr("Error"), reason, QMessageBox::Critical)->show(); });
+    connect(dlJob.get(), &Task::succeeded, this, [this, pathUrl] { importThemeArchive(pathUrl); });
+
+    {  // drop stack
+        ProgressDialog dlUrlDialod(m_parent);
+        dlUrlDialod.setWindowTitle(tr("Downloading theme"));
+        dlUrlDialod.showSkipButton();
+        dlUrlDialod.execWithTask(dlJob.get());
+    }
+}
+
+void UrlHandler::importThemeArchive(const QUrl& archiveUrl)
+{
+    const auto archivePath = archiveUrl.toLocalFile();
+
+    MMCZip::ArchiveReader reader(archivePath);
+    if (!reader.collectFiles()) {
+        CustomMessageBox::selectable(m_parent, tr("Error"), tr("Failed to open the theme archive:\n%1").arg(archivePath),
+                                     QMessageBox::Critical)
+            ->show();
+        return;
+    }
+
+    const auto files = reader.getFiles();
+    if (files.isEmpty()) {
+        CustomMessageBox::selectable(m_parent, tr("Error"), tr("The theme archive is empty:\n%1").arg(archivePath), QMessageBox::Critical)
+            ->show();
+        return;
+    }
+
+    const auto dataPath = QFileInfo(APPLICATION->dataRoot()).canonicalFilePath();
+    auto extractTask = makeShared<ConcurrentTask>("Extract Themes", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
+
+    QString mainFolder{};
+    {
+        const auto folder = files.first().section('/', 0, 0);
+        QStringList posibleFolders{ "themes", "icons", "cats" };
+        if (!posibleFolders.contains(folder) &&
+            std::ranges::all_of(files, [&](const auto& path) { return path.section('/', 0, 0) == folder; })) {
+            mainFolder = folder;
+        }
+    }
+
+    for (const auto& [aFolder, targetFolder] :
+         { std::pair{ QString{ "themes" }, QString{ "themes" } }, std::pair{ QString{ "icons" }, QString{ "iconthemes" } },
+           std::pair{ QString{ "cats" }, QString{ "catpacks" } } }) {
+        auto archiveFolder = FS::PathCombine(mainFolder, aFolder) + "/";
+        QStringList entries;
+        for (const auto& file : files) {
+            if (file.startsWith(archiveFolder)) {
+                auto folderName = file.mid(archiveFolder.size()).section('/', 0, 0);
+                if (!folderName.isEmpty() && !entries.contains(folderName)) {
+                    entries.append(folderName);
+                }
+            }
+        }
+        if (entries.isEmpty()) {
+            qDebug() << "Theme archive has no" << archiveFolder << "folder, skipping it";
+            continue;
+        }
+
+        const auto targetPath = FS::PathCombine(dataPath, targetFolder);
+        for (const auto& entry : entries) {
+            const auto existing = FS::PathCombine(targetPath, entry);
+            if (!QFileInfo::exists(existing)) {
+                FS::deletePath(existing);
+            }
+        }
+
+        if (!FS::ensureFolderPathExists(targetPath)) {
+            CustomMessageBox::selectable(m_parent, tr("Error"), tr("Failed to create the folder:\n%1").arg(targetPath),
+                                         QMessageBox::Critical)
+                ->show();
+            return;
+        }
+
+        auto task = makeShared<MMCZip::ExtractZipTask>(archivePath, QDir(targetPath), archiveFolder);
+        extractTask->addTask(task);
+    }
+    connect(extractTask.get(), &Task::failed, this,
+            [this](const QString& reason) { CustomMessageBox::selectable(m_parent, tr("Error"), reason, QMessageBox::Critical)->show(); });
+
+    connect(extractTask.get(), &Task::succeeded, this, [this] {
+        APPLICATION->themeManager()->refresh();
+        CustomMessageBox::selectable(m_parent, tr("Theme imported"),
+                                     tr("The theme was installed. You can select it in the appearance settings."), QMessageBox::Information)
+            ->show();
+    });
+    {
+        ProgressDialog extractDialog(m_parent);
+        extractDialog.setWindowTitle(tr("Installing theme"));
+        extractDialog.showSkipButton();
+        extractDialog.execWithTask(extractTask.get());
+    }
 }
