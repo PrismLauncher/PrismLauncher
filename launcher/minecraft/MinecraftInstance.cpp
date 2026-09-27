@@ -90,6 +90,8 @@
 
 #include "tools/BaseProfiler.h"
 
+#include "minecraft/auth/AccountList.h"
+
 #include "ui/dialogs/JoinRealmDialog.h"
 
 #include <QActionGroup>
@@ -310,6 +312,17 @@ QSet<QString> MinecraftInstance::traits() const
         return { "version-incomplete" };
     }
     return profile->getTraits();
+}
+
+MinecraftAccountPtr MinecraftInstance::accountToUse()
+{
+    auto* accounts = APPLICATION->accounts();
+    const auto instanceAccountId = settings()->get("InstanceAccountId").toString();
+    const auto instanceAccountIndex = accounts->findAccountByProfileId(instanceAccountId);
+    if (instanceAccountIndex == -1 || instanceAccountId.isEmpty()) {
+        return accounts->defaultAccount();
+    }
+    return accounts->at(instanceAccountIndex);
 }
 
 // FIXME: move UI code out of MinecraftInstance

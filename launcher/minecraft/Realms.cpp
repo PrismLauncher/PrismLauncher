@@ -25,45 +25,56 @@
 #include "Application.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "minecraft/auth/AccountList.h"
 #include "net/RawHeaderProxy.h"
 
 namespace Realms {
 
 NetJob::Ptr fetch(MinecraftInstance* instance, QObject* context, std::function<void(const QList<Realm>&)> onSucceeded)
 {
-    auto* accounts = APPLICATION->accounts();
-    auto accountId = instance->settings()->get("InstanceAccountId").toString();
-    auto accountIndex = accounts->findAccountByProfileId(accountId);
-    auto account = accountIndex == -1 || accountId.isEmpty() ? accounts->defaultAccount() : accounts->at(accountIndex);
+    auto account = instance->accountToUse();
     if (!account || !account->ownsMinecraft()) {
         return nullptr;
     }
 
-    auto cookie = QString("sid=token:%1:%2;user=%3;version=%4")
-                      .arg(account->accessToken(), account->profileId(), account->profileName(),
-                           instance->getPackProfile()->getComponentVersion("net.minecraft"));
-    auto [request, response] = Net::Request::makeByteArray(QUrl("https://pc.realms.minecraft.net/worlds"));
-    request->addHeaderProxy(
-        std::make_unique<Net::RawHeaderProxy>(QList<Net::HeaderPair>{ { .headerName = "Cookie", .headerValue = cookie.toUtf8() } }));
-
     NetJob::Ptr job{ new NetJob("Fetch Realms", APPLICATION->network()) };
     job->setAskRetry(false);
-    job->addNetAction(request);
-    QObject::connect(job.get(), &Task::succeeded, context, [response, onSucceeded = std::move(onSucceeded)] {
-        QList<Realm> realms;
-        for (auto value : QJsonDocument::fromJson(*response).object().value("servers").toArray()) {
-            auto obj = value.toObject();
-            realms.append({ .id = QString::number(obj.value("id").toInteger()),
-                            .name = obj.value("name").toString(),
-                            .owner = obj.value("owner").toString(),
-                            .motd = obj.value("motd").toString(),
-                            .open = obj.value("state").toString() == "OPEN",
-                            .expired = obj.value("expired").toBool() });
+    auto startJob = [job = job.get(), account, context, onSucceeded = std::move(onSucceeded),
+                     version = instance->getPackProfile()->getComponentVersion("net.minecraft")] {
+        auto cookie = QString("sid=token:%1:%2;user=%3;version=%4")
+                          .arg(account->accessToken(), account->profileId(), account->profileName(), version);
+        auto [request, response] = Net::Request::makeByteArray(QUrl("https://pc.realms.minecraft.net/worlds"));
+        request->addHeaderProxy(
+            std::make_unique<Net::RawHeaderProxy>(QList<Net::HeaderPair>{ { .headerName = "Cookie", .headerValue = cookie.toUtf8() } }));
+        job->addNetAction(request);
+        QObject::connect(job, &Task::succeeded, context, [response, onSucceeded] {
+            QList<Realm> realms;
+            for (auto value : QJsonDocument::fromJson(*response).object().value("servers").toArray()) {
+                auto obj = value.toObject();
+                realms.append({ .id = QString::number(obj.value("id").toInteger()),
+                                .name = obj.value("name").toString(),
+                                .owner = obj.value("owner").toString(),
+                                .motd = obj.value("motd").toString(),
+                                .open = obj.value("state").toString() == "OPEN",
+                                .expired = obj.value("expired").toBool() });
+            }
+            onSucceeded(realms);
+        });
+        job->start();
+    };
+
+    auto state = account->accountState();
+    if (!account->isInUse() && (state == AccountState::Unchecked || state == AccountState::Errored || state == AccountState::Offline ||
+                                account->shouldRefresh())) {
+        account->refresh();
+    }
+    if (auto refresh = account->currentTask()) {
+        QObject::connect(refresh.get(), &Task::finished, job.get(), startJob);
+        if (!refresh->isRunning()) {
+            refresh->start();
         }
-        onSucceeded(realms);
-    });
-    job->start();
+    } else {
+        startJob();
+    }
     return job;
 }
 
