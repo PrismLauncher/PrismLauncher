@@ -546,5 +546,7 @@ void JavaWizardWidget::onSpinBoxValueChanged(int /*unused*/)
 
 JavaWizardWidget::~JavaWizardWidget()
 {
+    // the spacer is owned by us, take it out of the layout so the layout doesn't delete it too
+    m_verticalLayout->removeItem(m_verticalSpacer);
     delete m_verticalSpacer;
-};
+}
