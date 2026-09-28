@@ -239,6 +239,9 @@ void readIndex(const QString& path, QMap<QString, Language>& languages)
         }
         TRY_INTO(const auto& langObjs, Json::requireObject(doc, "languages"))
         for (auto iter = langObjs.begin(); iter != langObjs.end(); ++iter) {
+            if (iter.key() == g_defaultLangCode) {
+                continue;
+            }
             Language lang(iter.key());
 
             TRY_INTO(const auto& langObj, Json::requireObject(iter.value()))
