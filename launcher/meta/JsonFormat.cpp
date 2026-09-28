@@ -172,7 +172,13 @@ Result<> parseRequires(const QJsonObject& obj, RequireSet* ptr, const char* keyN
             TRY_INTO(const auto& uid, requireString(reqObject, "uid"))
             auto equals = reqObject["equals"].toString();
             auto suggests = reqObject["suggests"].toString();
-            ptr->insert({ .uid = uid, .equalsVersion = equals, .suggests = suggests });
+            const auto matchGameVersion = reqObject["matchGameVersion"].toBool();
+            ptr->insert({
+                .uid = uid,
+                .equalsVersion = equals,
+                .suggests = suggests,
+                .matchGameVersion = matchGameVersion,
+            });
         }
     }
     return {};
