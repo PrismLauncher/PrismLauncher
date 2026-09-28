@@ -468,7 +468,10 @@ QList<ShortcutData> BaseInstance::shortcuts() const
 
         QString shortcutName = dict["name"].toString();
         QString filePath = dict["filePath"].toString();
-        if (!QFileInfo::exists(filePath)) {
+        // Portal launchers are registered by their desktop file id (no path separators),
+        // which is not a local file, so only skip real file paths that are missing
+        bool isFilePath = filePath.contains('/') || filePath.contains('\\');
+        if (isFilePath && !QFileInfo::exists(filePath)) {
             qWarning() << "Shortcut" << shortcutName << "for instance" << name() << "have non-existent path" << filePath;
             continue;
         }
