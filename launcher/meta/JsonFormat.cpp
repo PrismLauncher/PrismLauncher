@@ -41,6 +41,7 @@ Result<std::shared_ptr<Meta::Index>> parseIndexInternal(const QJsonObject& obj)
 
         auto list = std::make_shared<Meta::VersionList>(uid);
         list->setName(entry["name"].toString());
+        list->setInstallableLoader(entry["installableLoader"].toBool());
         list->setSha256(entry["sha256"].toString());
 
         lists.push_back(list);
