@@ -355,7 +355,13 @@ std::unique_ptr<MinecraftInstance> FlameCreationTask::createInstance()
     }
 
     if (!m_pack.overrides.isEmpty()) {
-        QString overridePath = FS::PathCombine(m_stagingPath, m_pack.overrides);
+        const auto overridePath = FS::PathCombine(m_stagingPath, m_pack.overrides);
+        if (!QUrl::fromLocalFile(m_stagingPath).isParentOf(QUrl::fromLocalFile(overridePath))) {
+            // This means we somehow got out of the root folder, so abort here to prevent exploits
+            setError(tr("The overrides has a path that leads to an arbitrary location (%1). This is a security risk and isn't allowed.")
+                         .arg(m_pack.overrides));
+            return nullptr;
+        }
         if (QFile::exists(overridePath)) {
             // Create a list of overrides in "overrides.txt" inside flame/
             Override::createOverrides("overrides", parent_folder, overridePath);
