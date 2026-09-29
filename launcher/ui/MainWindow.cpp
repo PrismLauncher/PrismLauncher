@@ -88,6 +88,7 @@
 #include <net/ApiRequest.h>
 #include <net/NetJob.h>
 #include <news/NewsChecker.h>
+#include <qaction.h>
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
 #include "InstanceWindow.h"
@@ -202,6 +203,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         exportInstanceMenu->addAction(ui->actionExportInstanceMrPack);
         exportInstanceMenu->addAction(ui->actionExportInstanceFlamePack);
         ui->actionExportInstance->setMenu(exportInstanceMenu);
+
+        // some debug crash buttons
+        QAction* segfaultAction = ui->actionHelpButton->menu()->addAction(tr("Cause Segfault"));
+        connect(segfaultAction, &QAction::triggered, ui->actionHelpButton->menu(), [] {
+            // force a segfault
+            *static_cast<volatile int*>(nullptr) = 0;
+        });
     }
 
     // hide, disable and show stuff
