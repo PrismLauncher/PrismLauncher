@@ -100,6 +100,7 @@ struct Command : CommandBase {
 struct Args {
     Startup::DataPathResult dataPath;
     std::vector<Command> commands;
+
     auto operator<=>(const Args&) const = default;
 };
 

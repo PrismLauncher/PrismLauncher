@@ -35,6 +35,9 @@
 
 #include <exception>
 
+#include "crash_handler/CrashHandler.h"
+#include "crash_handler/CrashHandlerDialog.h"
+
 #include <BuildConfig.h>
 
 #include <QObject>
@@ -65,17 +68,47 @@ int main(int argc, char* argv[])
     // get default dataPath before cli alterations
     const auto dataPathResult = Startup::resolveDataPath(exePath.parent_path());
 
+    const std::string crashHandlerFlag = "--crash-handler";
+
+    CrashHandler::attach(CrashHandler::CrashConfig{
+        .crashHandlerFlag = crashHandlerFlag,
+        .processExePath = { exePath.string() },
+        .dataPath = { dataPathResult.dataPath.string() },
+    });
+
     Cli::Args args{
         .dataPath = dataPathResult,
         .commands = {},
     };
 
+    bool handleCrash{ false };
     try {
-        Cli::parseArgs(argc, argv, args);
+        Cli::parseArgs(argc, argv, args, { [&crashHandlerFlag, &handleCrash](CLI::App& parser) {
+                           // add flag and hide it by giving it an empty group
+                           parser.add_flag(crashHandlerFlag, handleCrash, "(for internal use) trace a crash trace from stdin")->group("");
+                       } });
     } catch (const std::exception& err) {
         /// we did a bad job setting up the cli parser
-        std::cerr << "BUG! " << err.what();
+        std::cerr << "BUG! Failed to parse cli args: " << err.what();
         return 1;
+    }
+
+    if (handleCrash) {
+        std::cerr << "HANDLING CRASH!\n";
+
+        auto trace = CrashHandler::readTraceFromStdin();
+
+        // std::cerr << "stacktrace:\n\n" << trace << "\n";
+
+        QApplication crashApp(argc, argv);
+        QString msg = QObject::tr("%1 has Crashed").arg(BuildConfig.LAUNCHER_DISPLAYNAME);
+        CrashHandler::CrashHandlerDialog crashDialog(nullptr, msg, msg, std::move(trace));
+
+        crashDialog.show();
+
+        QApplication::exec();
+
+        std::exit(0);
     }
 
     // initialize Qt
