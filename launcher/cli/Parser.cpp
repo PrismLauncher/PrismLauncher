@@ -267,7 +267,7 @@ void Cli::attach(CLI::App& app, Args& args)
     // app.validate_optional_arguments();
 }
 
-void parseArgs(int argc, char** argv, Args& args)
+void parseArgs(int argc, char** argv, Args& args, std::optional<std::function<void(CLI::App&)>> beforeParse)
 {
     CLI::App app{};
 
@@ -277,6 +277,10 @@ void parseArgs(int argc, char** argv, Args& args)
 
     Cli cli{};
     cli.attach(app, args);
+
+    if (beforeParse) {
+        (*beforeParse)(app);
+    }
 
     // try parse or exit
     try {
