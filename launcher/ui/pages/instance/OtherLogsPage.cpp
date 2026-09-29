@@ -45,7 +45,6 @@
 #include <FileSystem.h>
 #include <GZip.h>
 #include <QDir>
-#include <QDirIterator>
 #include <QFileSystemWatcher>
 #include <QShortcut>
 #include <QUrl>
@@ -355,7 +354,10 @@ void OtherLogsPage::reload()
 void OtherLogsPage::on_btnPaste_clicked()
 {
     QString name = m_currentFile.isEmpty() ? displayName() : m_currentFile;
-    GuiUtil::uploadPaste(name, ui->text->toPlainText(), this);
+    auto res = GuiUtil::uploadPaste(name, ui->text->toPlainText(), this);
+    if (!res) {
+        qWarning() << "Log upload failed:" << res.error();
+    }
 }
 
 void OtherLogsPage::on_btnCopy_clicked()
@@ -370,8 +372,9 @@ void OtherLogsPage::on_btnBottom_clicked()
 
 void OtherLogsPage::on_trackLogCheckbox_clicked(bool checked)
 {
-    if (!m_model)
+    if (!m_model) {
         return;
+    }
     m_model->suspend(!checked);
 }
 

@@ -82,5 +82,5 @@ class ResourceFolderLoadTask : public Task {
     std::atomic<bool> m_aborted = false;
 
     /** This is the thread in which we should put new mod objects */
-    QThread* m_thread_to_spawn_into;
+    QThread* m_mainThread;
 };

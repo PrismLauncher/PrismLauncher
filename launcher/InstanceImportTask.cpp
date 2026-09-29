@@ -53,24 +53,28 @@
 #include "settings/INISettingsObject.h"
 #include "tasks/Task.h"
 
-#include "net/ApiDownload.h"
+#include "net/ApiRequest.h"
 
+#include <QDirListing>
 #include <QFileInfo>
 #include <QtConcurrentRun>
 #include <memory>
+#include <utility>
 
-InstanceImportTask::InstanceImportTask(const QUrl& sourceUrl, QWidget* parent, QMap<QString, QString>&& extra_info)
-    : m_sourceUrl(sourceUrl), m_extra_info(extra_info), m_parent(parent)
+InstanceImportTask::InstanceImportTask(QUrl sourceUrl, bool trustedSource, QWidget* parent, QMap<QString, QString> extraInfo)
+    : m_sourceUrl(std::move(sourceUrl)), m_trustedSource(trustedSource), m_extraInfo(std::move(extraInfo)), m_parent(parent)
 {}
 
 bool InstanceImportTask::abort()
 {
-    if (!canAbort())
+    if (!canAbort()) {
         return false;
+    }
 
     bool wasAborted = false;
-    if (m_task)
+    if (m_task) {
         wasAborted = m_task->abort();
+    }
     return wasAborted;
 }
 
@@ -97,7 +101,7 @@ void InstanceImportTask::downloadFromUrl()
     m_archivePath = entry->getFullPath();
 
     auto filesNetJob = makeShared<NetJob>(tr("Modpack download"), APPLICATION->network());
-    filesNetJob->addNetAction(Net::ApiDownload::makeCached(m_sourceUrl, entry));
+    filesNetJob->addNetAction(Net::ApiRequest::makeCached(m_sourceUrl, entry));
 
     connect(filesNetJob.get(), &NetJob::succeeded, this, &InstanceImportTask::processZipPack);
     connect(filesNetJob.get(), &NetJob::progress, this, &InstanceImportTask::setProgress);
@@ -107,16 +111,20 @@ void InstanceImportTask::downloadFromUrl()
     m_task.reset(filesNetJob);
     filesNetJob->start();
 }
+namespace {
 
-QString cleanPath(QString path)
+QString cleanPath(const QString& path)
 {
-    if (path == ".")
+    if (path == ".") {
         return QString();
+    }
     QString result = path;
-    if (result.startsWith("./"))
+    if (result.startsWith("./")) {
         result = result.mid(2);
+    }
     return result;
 }
+}  // namespace
 
 void InstanceImportTask::processZipPack()
 {
@@ -187,7 +195,7 @@ void InstanceImportTask::processZipPack()
     connect(zipTask.get(), &Task::failed, this, [this, progressStep](QString reason) {
         progressStep->state = TaskStepState::Failed;
         stepProgress(*progressStep);
-        emitFailed(reason);
+        emitFailed(std::move(reason));
     });
     connect(zipTask.get(), &Task::stepProgress, this, &InstanceImportTask::propagateStepProgress);
 
@@ -196,7 +204,7 @@ void InstanceImportTask::processZipPack()
         stepProgress(*progressStep);
     });
     connect(zipTask.get(), &Task::status, this, [this, progressStep](QString status) {
-        progressStep->status = status;
+        progressStep->status = std::move(status);
         stepProgress(*progressStep);
     });
     connect(zipTask.get(), &Task::warningLogged, this, [this](const QString& line) { m_Warnings.append(line); });
@@ -207,14 +215,10 @@ void InstanceImportTask::processZipPack()
 void InstanceImportTask::extractFinished()
 {
     setAbortable(false);
-    QDir extractDir(m_stagingPath);
 
     qDebug() << "Fixing permissions for extracted pack files...";
-    QDirIterator it(extractDir, QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        auto filepath = it.next();
-        QFileInfo file(filepath);
-        auto permissions = QFile::permissions(filepath);
+    for (const auto& file : QDirListing(m_stagingPath, QDirListing::IteratorFlag::ResolveSymlinks | QDirListing::IteratorFlag::Recursive)) {
+        auto permissions = QFile::permissions(file.absoluteFilePath());
         auto origPermissions = permissions;
         if (file.isDir()) {
             // Folder +rwx for current user
@@ -224,10 +228,10 @@ void InstanceImportTask::extractFinished()
             permissions |= QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser;
         }
         if (origPermissions != permissions) {
-            if (!QFile::setPermissions(filepath, permissions)) {
-                logWarning(tr("Could not fix permissions for %1").arg(filepath));
+            if (!QFile::setPermissions(file.absoluteFilePath(), permissions)) {
+                logWarning(tr("Could not fix permissions for %1").arg(file.absoluteFilePath()));
             } else {
-                qDebug() << "Fixed" << filepath;
+                qDebug() << "Fixed" << file.absoluteFilePath();
             }
         }
     }
@@ -251,16 +255,20 @@ void InstanceImportTask::extractFinished()
     }
 }
 
-bool installIcon(QString root, QString instIconKey)
+namespace {
+
+bool installIcon(const QString& root, const QString& instIconKey)
 {
     auto importIconPath = IconUtils::findBestIconIn(root, instIconKey);
-    if (importIconPath.isNull() || !QFile::exists(importIconPath))
+    if (importIconPath.isNull() || !QFile::exists(importIconPath)) {
         importIconPath = IconUtils::findBestIconIn(root, "icon.png");
-    if (importIconPath.isNull() || !QFile::exists(importIconPath))
+    }
+    if (importIconPath.isNull() || !QFile::exists(importIconPath)) {
         importIconPath = IconUtils::findBestIconIn(FS::PathCombine(root, "overrides"), "icon.png");
+    }
     if (!importIconPath.isNull() && QFile::exists(importIconPath)) {
         // import icon
-        auto iconList = APPLICATION->icons();
+        auto* iconList = APPLICATION->icons();
         if (iconList->iconFileExists(instIconKey)) {
             iconList->deleteIcon(instIconKey);
         }
@@ -269,32 +277,35 @@ bool installIcon(QString root, QString instIconKey)
     }
     return false;
 }
+}  // namespace
 
 void InstanceImportTask::processFlame()
 {
-    shared_qobject_ptr<FlameCreationTask> inst_creation_task = nullptr;
-    if (!m_extra_info.isEmpty()) {
-        auto pack_id_it = m_extra_info.constFind("pack_id");
-        Q_ASSERT(pack_id_it != m_extra_info.constEnd());
-        auto pack_id = pack_id_it.value();
+    shared_qobject_ptr<FlameCreationTask> instCreationTask = nullptr;
+    if (!m_extraInfo.isEmpty()) {
+        auto packIdIt = m_extraInfo.constFind("pack_id");
+        Q_ASSERT(packIdIt != m_extraInfo.constEnd());
+        const auto& packId = packIdIt.value();
 
-        auto pack_version_id_it = m_extra_info.constFind("pack_version_id");
-        Q_ASSERT(pack_version_id_it != m_extra_info.constEnd());
-        auto pack_version_id = pack_version_id_it.value();
+        auto packVersionIdIt = m_extraInfo.constFind("pack_version_id");
+        Q_ASSERT(packVersionIdIt != m_extraInfo.constEnd());
+        const auto& packVersionId = packVersionIdIt.value();
 
-        QString original_instance_id;
-        auto original_instance_id_it = m_extra_info.constFind("original_instance_id");
-        if (original_instance_id_it != m_extra_info.constEnd())
-            original_instance_id = original_instance_id_it.value();
+        QString originalInstanceId;
+        auto originalInstanceIdIt = m_extraInfo.constFind("original_instance_id");
+        if (originalInstanceIdIt != m_extraInfo.constEnd()) {
+            originalInstanceId = originalInstanceIdIt.value();
+        }
 
-        inst_creation_task =
-            makeShared<FlameCreationTask>(m_stagingPath, m_globalSettings, m_parent, pack_id, pack_version_id, original_instance_id);
+        instCreationTask = makeShared<FlameCreationTask>(m_stagingPath, m_trustedSource, m_globalSettings, m_parent, packId, packVersionId,
+                                                         originalInstanceId);
     } else {
         // FIXME: Find a way to get IDs in directly imported ZIPs
-        inst_creation_task = makeShared<FlameCreationTask>(m_stagingPath, m_globalSettings, m_parent, QString(), QString());
+        instCreationTask = makeShared<FlameCreationTask>(m_stagingPath, m_trustedSource, m_globalSettings, m_parent, QString(), QString());
     }
 
-    inst_creation_task->setName(*this);
+    instCreationTask->setName(modifiedName());
+    instCreationTask->setOriginalName(originalName(), version());
     // if the icon was specified by user, use that. otherwise pull icon from the pack
     if (m_instIcon == "default") {
         auto iconKey = QString("Flame_%1_Icon").arg(name());
@@ -303,30 +314,30 @@ void InstanceImportTask::processFlame()
             m_instIcon = iconKey;
         }
     }
-    inst_creation_task->setIcon(m_instIcon);
-    inst_creation_task->setGroup(m_instGroup);
-    inst_creation_task->setConfirmUpdate(shouldConfirmUpdate());
+    instCreationTask->setIcon(m_instIcon);
+    instCreationTask->setGroup(m_instGroup);
+    instCreationTask->setConfirmUpdate(shouldConfirmUpdate());
 
-    auto weak = inst_creation_task.toWeakRef();
-    connect(inst_creation_task.get(), &Task::succeeded, this, [this, weak] {
+    auto weak = instCreationTask.toWeakRef();
+    connect(instCreationTask.get(), &Task::succeeded, this, [this, weak] {
         if (auto sp = weak.lock()) {
             setOverride(sp->shouldOverride(), sp->originalInstanceID());
         }
         emitSucceeded();
     });
-    connect(inst_creation_task.get(), &Task::failed, this, &InstanceImportTask::emitFailed);
-    connect(inst_creation_task.get(), &Task::progress, this, &InstanceImportTask::setProgress);
-    connect(inst_creation_task.get(), &Task::stepProgress, this, &InstanceImportTask::propagateStepProgress);
-    connect(inst_creation_task.get(), &Task::status, this, &InstanceImportTask::setStatus);
-    connect(inst_creation_task.get(), &Task::details, this, &InstanceImportTask::setDetails);
+    connect(instCreationTask.get(), &Task::failed, this, &InstanceImportTask::emitFailed);
+    connect(instCreationTask.get(), &Task::progress, this, &InstanceImportTask::setProgress);
+    connect(instCreationTask.get(), &Task::stepProgress, this, &InstanceImportTask::propagateStepProgress);
+    connect(instCreationTask.get(), &Task::status, this, &InstanceImportTask::setStatus);
+    connect(instCreationTask.get(), &Task::details, this, &InstanceImportTask::setDetails);
 
-    connect(inst_creation_task.get(), &Task::aborted, this, &InstanceImportTask::emitAborted);
-    connect(inst_creation_task.get(), &Task::abortStatusChanged, this, &Task::setAbortable);
-    connect(inst_creation_task.get(), &Task::abortButtonTextChanged, this, &Task::setAbortButtonText);
+    connect(instCreationTask.get(), &Task::aborted, this, &InstanceImportTask::emitAborted);
+    connect(instCreationTask.get(), &Task::abortStatusChanged, this, &Task::setAbortable);
+    connect(instCreationTask.get(), &Task::abortButtonTextChanged, this, &Task::setAbortButtonText);
 
-    connect(inst_creation_task.get(), &Task::warningLogged, this, [this](const QString& line) { m_Warnings.append(line); });
+    connect(instCreationTask.get(), &Task::warningLogged, this, [this](const QString& line) { m_Warnings.append(line); });
 
-    m_task.reset(inst_creation_task);
+    m_task.reset(instCreationTask);
     setAbortable(true);
     m_task->start();
 }
@@ -349,6 +360,9 @@ void InstanceImportTask::processMultiMC()
     // reset time played on import... because packs.
     instance.resetTimePlayed();
 
+    // UUID is carried over on export, but this is a distinct instance, so give it its own
+    instance.regenerateUuid();
+
     // set a new nice name
     instance.setName(name());
 
@@ -365,36 +379,39 @@ void InstanceImportTask::processMultiMC()
 
 void InstanceImportTask::processModrinth()
 {
-    shared_qobject_ptr<ModrinthCreationTask> inst_creation_task = nullptr;
-    if (!m_extra_info.isEmpty()) {
-        auto pack_id_it = m_extra_info.constFind("pack_id");
-        Q_ASSERT(pack_id_it != m_extra_info.constEnd());
-        auto pack_id = pack_id_it.value();
+    shared_qobject_ptr<ModrinthCreationTask> instCreationTask = nullptr;
+    if (!m_extraInfo.isEmpty()) {
+        auto packIdIt = m_extraInfo.constFind("pack_id");
+        Q_ASSERT(packIdIt != m_extraInfo.constEnd());
+        const auto& packId = packIdIt.value();
 
-        QString pack_version_id;
-        auto pack_version_id_it = m_extra_info.constFind("pack_version_id");
-        if (pack_version_id_it != m_extra_info.constEnd())
-            pack_version_id = pack_version_id_it.value();
+        QString packVersionId;
+        auto packVersionIdIt = m_extraInfo.constFind("pack_version_id");
+        if (packVersionIdIt != m_extraInfo.constEnd()) {
+            packVersionId = packVersionIdIt.value();
+        }
 
-        QString original_instance_id;
-        auto original_instance_id_it = m_extra_info.constFind("original_instance_id");
-        if (original_instance_id_it != m_extra_info.constEnd())
-            original_instance_id = original_instance_id_it.value();
+        QString originalInstanceId;
+        auto originalInstanceIdIt = m_extraInfo.constFind("original_instance_id");
+        if (originalInstanceIdIt != m_extraInfo.constEnd()) {
+            originalInstanceId = originalInstanceIdIt.value();
+        }
 
-        inst_creation_task =
-            makeShared<ModrinthCreationTask>(m_stagingPath, m_globalSettings, m_parent, pack_id, pack_version_id, original_instance_id);
+        instCreationTask = makeShared<ModrinthCreationTask>(m_stagingPath, m_trustedSource, m_globalSettings, m_parent, packId,
+                                                            packVersionId, originalInstanceId);
     } else {
-        QString pack_id;
+        QString packId;
         if (!m_sourceUrl.isEmpty()) {
             static const QRegularExpression s_regex(R"(data\/([^\/]*)\/versions)");
-            pack_id = s_regex.match(m_sourceUrl.toString()).captured(1);
+            packId = s_regex.match(m_sourceUrl.toString()).captured(1);
         }
 
         // FIXME: Find a way to get the ID in directly imported ZIPs
-        inst_creation_task = makeShared<ModrinthCreationTask>(m_stagingPath, m_globalSettings, m_parent, pack_id);
+        instCreationTask = makeShared<ModrinthCreationTask>(m_stagingPath, m_trustedSource, m_globalSettings, m_parent, packId);
     }
 
-    inst_creation_task->setName(*this);
+    instCreationTask->setName(modifiedName());
+    instCreationTask->setOriginalName(originalName(), version());
     // if the icon was specified by user, use that. otherwise pull icon from the pack
     if (m_instIcon == "default") {
         auto iconKey = QString("Modrinth_%1_Icon").arg(name());
@@ -403,30 +420,30 @@ void InstanceImportTask::processModrinth()
             m_instIcon = iconKey;
         }
     }
-    inst_creation_task->setIcon(m_instIcon);
-    inst_creation_task->setGroup(m_instGroup);
-    inst_creation_task->setConfirmUpdate(shouldConfirmUpdate());
+    instCreationTask->setIcon(m_instIcon);
+    instCreationTask->setGroup(m_instGroup);
+    instCreationTask->setConfirmUpdate(shouldConfirmUpdate());
 
-    auto weak = inst_creation_task.toWeakRef();
-    connect(inst_creation_task.get(), &Task::succeeded, this, [this, weak] {
+    auto weak = instCreationTask.toWeakRef();
+    connect(instCreationTask.get(), &Task::succeeded, this, [this, weak] {
         if (auto sp = weak.lock()) {
             setOverride(sp->shouldOverride(), sp->originalInstanceID());
         }
         emitSucceeded();
     });
-    connect(inst_creation_task.get(), &Task::failed, this, &InstanceImportTask::emitFailed);
-    connect(inst_creation_task.get(), &Task::progress, this, &InstanceImportTask::setProgress);
-    connect(inst_creation_task.get(), &Task::stepProgress, this, &InstanceImportTask::propagateStepProgress);
-    connect(inst_creation_task.get(), &Task::status, this, &InstanceImportTask::setStatus);
-    connect(inst_creation_task.get(), &Task::details, this, &InstanceImportTask::setDetails);
+    connect(instCreationTask.get(), &Task::failed, this, &InstanceImportTask::emitFailed);
+    connect(instCreationTask.get(), &Task::progress, this, &InstanceImportTask::setProgress);
+    connect(instCreationTask.get(), &Task::stepProgress, this, &InstanceImportTask::propagateStepProgress);
+    connect(instCreationTask.get(), &Task::status, this, &InstanceImportTask::setStatus);
+    connect(instCreationTask.get(), &Task::details, this, &InstanceImportTask::setDetails);
 
-    connect(inst_creation_task.get(), &Task::aborted, this, &InstanceImportTask::emitAborted);
-    connect(inst_creation_task.get(), &Task::abortStatusChanged, this, &Task::setAbortable);
-    connect(inst_creation_task.get(), &Task::abortButtonTextChanged, this, &Task::setAbortButtonText);
+    connect(instCreationTask.get(), &Task::aborted, this, &InstanceImportTask::emitAborted);
+    connect(instCreationTask.get(), &Task::abortStatusChanged, this, &Task::setAbortable);
+    connect(instCreationTask.get(), &Task::abortButtonTextChanged, this, &Task::setAbortButtonText);
 
-    connect(inst_creation_task.get(), &Task::warningLogged, this, [this](const QString& line) { m_Warnings.append(line); });
+    connect(instCreationTask.get(), &Task::warningLogged, this, [this](const QString& line) { m_Warnings.append(line); });
 
-    m_task.reset(inst_creation_task);
+    m_task.reset(instCreationTask);
     setAbortable(true);
     m_task->start();
 }

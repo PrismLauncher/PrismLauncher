@@ -46,6 +46,7 @@
 #include "ui/dialogs/BlockedModsDialog.h"
 
 #include <QWidget>
+#include <memory>
 
 namespace FTB {
 
@@ -90,6 +91,8 @@ class PackInstallTask final : public InstanceTask {
 
     QMap<QString, QString> m_filesToCopy;
     QList<BlockedMod> m_blockedMods;
+
+    std::unique_ptr<MinecraftInstance> m_instance;
 
     // FIXME: nuke
     QWidget* m_parent;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "BaseInstance.h"
 #include "ResourceDownloadTask.h"
 #include "ReviewMessageBox.h"
 
@@ -8,6 +7,7 @@
 
 #include "modplatform/CheckUpdateTask.h"
 
+class Minecraft;
 class Mod;
 class ModrinthCheckUpdate;
 class FlameCheckUpdate;
@@ -17,17 +17,18 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
     Q_OBJECT
    public:
     explicit ResourceUpdateDialog(QWidget* parent,
-                                  BaseInstance* instance,
+                                  MinecraftInstance* instance,
                                   ResourceFolderModel* resourceModel,
                                   QList<Resource*>& searchFor,
                                   bool includeDeps,
-                                  QList<ModPlatform::ModLoaderType> loadersList = {});
+                                  QList<ModPlatform::ModLoaderType> loadersList = {},
+                                  std::vector<ModPlatform::IndexedVersionType> releaseTypes = {});
 
     void checkCandidates();
 
     void appendResource(const CheckUpdateTask::Update& info, QStringList requiredBy = {});
 
-    const QList<ResourceDownloadTask::Ptr> getTasks();
+    QList<ResourceDownloadTask::Ptr> getTasks() const;
     auto indexDir() const -> QDir { return m_resourceModel->indexDir(); }
 
     auto noUpdates() const -> bool { return m_noUpdates; };
@@ -59,10 +60,11 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
     QList<std::tuple<Resource*, QString, QUrl>> m_failedCheckUpdate;
 
     QHash<QString, ResourceDownloadTask::Ptr> m_tasks;
-    BaseInstance* m_instance;
+    MinecraftInstance* m_instance;
 
     bool m_noUpdates = false;
     bool m_aborted = false;
     bool m_includeDeps = false;
     QList<ModPlatform::ModLoaderType> m_loadersList;
+    std::vector<ModPlatform::IndexedVersionType> m_releaseTypes;
 };

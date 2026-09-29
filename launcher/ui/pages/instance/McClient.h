@@ -20,13 +20,6 @@ class McClient : public QObject {
     void finished();
 
    private:
-    static uint8_t readByte(QByteArray& data);
-    static int readVarInt(QByteArray& data);
-    static void writeUInt16(QByteArray& data, uint16_t value);
-    static void writeString(QByteArray& data, const QString& value);
-    static void writeVarInt(QByteArray& data, int value);
-
-   private:
     void sendRequest();
     //! Accumulate data until we have a full response, then call parseResponse() once
     void readRawResponse();
@@ -37,11 +30,7 @@ class McClient : public QObject {
     void emitSucceed(QJsonObject data);
 
    private:
-    enum class ResponseReadState : uint8_t {
-        Waiting,
-        GotLength,
-        Finished
-    };
+    enum class ResponseReadState : uint8_t { Waiting, GotLength, Finished };
 
     QString m_domain;
     QString m_ip;

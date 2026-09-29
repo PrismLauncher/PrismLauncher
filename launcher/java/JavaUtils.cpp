@@ -47,6 +47,13 @@
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
 
+#ifdef Q_OS_WIN
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
+#endif
+
 #define IBUS "@im=ibus"
 
 JavaUtils::JavaUtils() {}
@@ -175,7 +182,7 @@ QStringList addJavasFromEnv(QList<QString> javas)
 }
 
 #if defined(Q_OS_WIN32)
-QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString keyName, QString keyJavaDir, QString subkeySuffix)
+QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(std::uint32_t keyType, QString keyName, QString keyJavaDir, QString subkeySuffix)
 {
     QList<JavaInstallPtr> javas;
 

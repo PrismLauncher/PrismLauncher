@@ -10,17 +10,16 @@
 
 namespace ModUtils {
 
-ModDetails ReadFabricModInfo(QByteArray contents);
-ModDetails ReadQuiltModInfo(QByteArray contents);
-ModDetails ReadForgeInfo(QByteArray contents);
-ModDetails ReadLiteModInfo(QByteArray contents);
+ModDetails ReadFabricModInfo(const QByteArray& contents);
+ModDetails ReadQuiltModInfo(const QByteArray& contents);
+ModDetails ReadForgeInfo(const QByteArray& contents);
+ModDetails ReadLiteModInfo(const QByteArray& contents);
 
 enum class ProcessingLevel { Full, BasicInfoOnly };
 
 bool process(Mod& mod, ProcessingLevel level = ProcessingLevel::Full);
 
 bool processZIP(Mod& mod, ProcessingLevel level = ProcessingLevel::Full);
-bool processFolder(Mod& mod, ProcessingLevel level = ProcessingLevel::Full);
 bool processLitemod(Mod& mod, ProcessingLevel level = ProcessingLevel::Full);
 
 /** Checks whether a file is valid as a mod or not. */

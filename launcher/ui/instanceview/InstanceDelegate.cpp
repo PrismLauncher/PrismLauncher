@@ -45,7 +45,6 @@
 #include <QTextEdit>
 #include "BaseInstance.h"
 #include "InstanceList.h"
-#include "InstanceView.h"
 
 // Origin: Qt
 static void viewItemTextLayout(QTextLayout& textLayout, int lineWidth, qreal& height, qreal& widthUsed)
@@ -81,48 +80,6 @@ void drawSelectionRect(QPainter* painter, const QStyleOptionViewItem& option, co
     }
 }
 
-void drawFocusRect(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect)
-{
-    if (!(option.state & QStyle::State_HasFocus))
-        return;
-    QStyleOptionFocusRect opt;
-    opt.direction = option.direction;
-    opt.fontMetrics = option.fontMetrics;
-    opt.palette = option.palette;
-    opt.rect = rect;
-    // opt.state           = option.state | QStyle::State_KeyboardFocusChange |
-    // QStyle::State_Item;
-    auto col = option.state & QStyle::State_Selected ? QPalette::Highlight : QPalette::Base;
-    opt.backgroundColor = option.palette.color(col);
-    // Apparently some widget styles expect this hint to not be set
-    painter->setRenderHint(QPainter::Antialiasing, false);
-
-    QStyle* style = option.widget ? option.widget->style() : QApplication::style();
-
-    style->drawPrimitive(QStyle::PE_FrameFocusRect, &opt, painter, option.widget);
-
-    painter->setRenderHint(QPainter::Antialiasing);
-}
-
-// TODO this can be made a lot prettier
-void drawProgressOverlay(QPainter* painter, const QStyleOptionViewItem& option, const int value, const int maximum)
-{
-    if (maximum == 0 || value == maximum) {
-        return;
-    }
-
-    painter->save();
-
-    qreal percent = (qreal)value / (qreal)maximum;
-    QColor color = option.palette.color(QPalette::Dark);
-    color.setAlphaF(0.70f);
-    painter->setBrush(color);
-    painter->setPen(QPen(QBrush(), 0));
-    painter->drawPie(option.rect, 90 * 16, -percent * 360 * 16);
-
-    painter->restore();
-}
-
 void drawBadges(QPainter* painter, const QStyleOptionViewItem& option, BaseInstance* instance, QIcon::Mode mode, QIcon::State state)
 {
     QList<QString> pixmaps;
@@ -130,9 +87,6 @@ void drawBadges(QPainter* painter, const QStyleOptionViewItem& option, BaseInsta
         pixmaps.append("status-running");
     } else if (instance->hasCrashed() || instance->hasVersionBroken()) {
         pixmaps.append("status-bad");
-    }
-    if (instance->hasUpdateAvailable()) {
-        pixmaps.append("checkupdate");
     }
 
     static const int itemSide = 24;
@@ -190,7 +144,6 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 
     QStyle* style = opt.widget ? opt.widget->style() : QApplication::style();
 
-    // const int iconSize =  style->pixelMetric(QStyle::PM_IconViewIconSize);
     const int iconSize = 48;
     QRect iconbox = opt.rect;
     const int textMargin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, 0, opt.widget) + 1;
@@ -202,65 +155,7 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     textHighlightRect.adjust(0, iconSize + 5, 0, 0);
 
     // draw background
-    {
-        // FIXME: unused
-        // QSize textSize = viewItemTextSize ( &opt );
-        drawSelectionRect(painter, opt, textHighlightRect);
-        /*
-        QPalette::ColorGroup cg;
-        QStyleOptionViewItem opt2(opt);
-
-        if ((opt.widget && opt.widget->isEnabled()) || (opt.state & QStyle::State_Enabled))
-        {
-            if (!(opt.state & QStyle::State_Active))
-                cg = QPalette::Inactive;
-            else
-                cg = QPalette::Normal;
-        }
-        else
-        {
-            cg = QPalette::Disabled;
-        }
-        */
-        /*
-        opt2.palette.setCurrentColorGroup(cg);
-
-        // fill in background, if any
-
-
-        if (opt.backgroundBrush.style() != Qt::NoBrush)
-        {
-            QPointF oldBO = painter->brushOrigin();
-            painter->setBrushOrigin(opt.rect.topLeft());
-            painter->fillRect(opt.rect, opt.backgroundBrush);
-            painter->setBrushOrigin(oldBO);
-        }
-
-        drawSelectionRect(painter, opt2, textHighlightRect);
-        */
-
-        /*
-        if (opt.showDecorationSelected)
-        {
-            drawSelectionRect(painter, opt2, opt.rect);
-            drawFocusRect(painter, opt2, opt.rect);
-            // painter->fillRect ( opt.rect, opt.palette.brush ( cg, QPalette::Highlight ) );
-        }
-        else
-        {
-
-            // if ( opt.state & QStyle::State_Selected )
-            {
-                // QRect textRect = subElementRect ( QStyle::SE_ItemViewItemText,  opt,
-                // opt.widget );
-                // painter->fillRect ( textHighlightRect, opt.palette.brush ( cg,
-                // QPalette::Highlight ) );
-                drawSelectionRect(painter, opt2, textHighlightRect);
-                drawFocusRect(painter, opt2, textHighlightRect);
-            }
-        }
-        */
-    }
+    drawSelectionRect(painter, opt, textHighlightRect);
 
     // icon mode and state, also used for badges
     QIcon::Mode mode = QIcon::Normal;
@@ -312,9 +207,6 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     if (instance) {
         drawBadges(painter, opt, instance, mode, state);
     }
-
-    drawProgressOverlay(painter, opt, index.data(InstanceViewRoles::ProgressValueRole).toInt(),
-                        index.data(InstanceViewRoles::ProgressMaximumRole).toInt());
 
     painter->restore();
 }
@@ -373,7 +265,6 @@ void ListViewDelegate::updateEditorGeometry(QWidget* editor,
 {
     const int iconSize = 48;
     QRect textRect = option.rect;
-    // QStyle *style = option.widget ? option.widget->style() : QApplication::style();
     textRect.adjust(0, iconSize + 5, 0, 0);
     editor->setGeometry(textRect);
 }
@@ -397,8 +288,9 @@ void ListViewDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, 
     // Prevent instance names longer than 128 chars
     text.truncate(128);
     if (text.size() != 0) {
-        emit textChanged(model->data(index).toString(), text);
+        const auto before = model->data(index).toString();
         model->setData(index, text);
+        emit textChanged(before, text);
     }
 }
 

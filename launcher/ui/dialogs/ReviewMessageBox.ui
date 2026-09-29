@@ -41,6 +41,17 @@
        <string/>
       </property>
      </column>
+     <item>
+      <property name="text">
+       <string>Resources</string>
+      </property>
+      <property name="checkState">
+       <enum>Checked</enum>
+      </property>
+      <property name="flags">
+       <set>ItemIsSelectable|ItemIsUserCheckable|ItemIsEnabled|ItemIsAutoTristate</set>
+      </property>
+     </item>
     </widget>
    </item>
    <item row="1" column="0">

@@ -8,7 +8,7 @@
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
 #include "net/RawHeaderProxy.h"
-#include "net/Upload.h"
+#include "net/Request.h"
 
 LauncherLoginStep::LauncherLoginStep(AccountData* data) : AuthStep(data) {}
 
@@ -36,7 +36,7 @@ void LauncherLoginStep::perform()
         { "Accept", "application/json" },
     };
 
-    auto [request, response] = Net::Upload::makeByteArray(url, requestBody.toUtf8());
+    auto [request, response] = Net::Request::makeByteArray(url, requestBody.toUtf8());
     m_request = request;
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);
@@ -56,10 +56,11 @@ void LauncherLoginStep::onRequestDone(QByteArray* response)
     qCDebug(authCredentials()) << *response;
     if (m_request->error() != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << m_request->error();
-        if (Net::isApplicationError(m_request->error())) {
+        if (Net::isApplicationError(m_request->error()) && !Net::isServerError(m_request->error())) {
             emit finished(AccountTaskState::STATE_FAILED_SOFT,
                           tr("Failed to get Minecraft access token: %1").arg(m_request->errorString()));
         } else {
+            m_data->networkError = m_request->error();
             emit finished(AccountTaskState::STATE_OFFLINE, tr("Failed to get Minecraft access token: %1").arg(m_request->errorString()));
         }
         return;

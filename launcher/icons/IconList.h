@@ -92,7 +92,7 @@ class IconList : public QAbstractListModel {
     IconList& operator=(const IconList&) = delete;
     void reindex();
     void sortIconList();
-    bool addPathRecursively(const QString& path);
+    bool addPath(const QString& path);
     QStringList getIconFilePaths() const;
 
    public slots:
@@ -100,7 +100,6 @@ class IconList : public QAbstractListModel {
 
    protected slots:
     void fileChanged(const QString& path);
-    void SettingChanged(const Setting& setting, const QVariant& value);
 
    private:
     shared_qobject_ptr<QFileSystemWatcher> m_watcher;

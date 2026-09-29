@@ -20,6 +20,7 @@
 #include "BaseEntity.h"
 #include "BaseVersionList.h"
 
+#include "Result.h"
 #include "meta/Version.h"
 
 namespace Meta {
@@ -45,6 +46,7 @@ class VersionList : public BaseVersionList, public BaseEntity {
     BaseVersion::Ptr getRecommended() const override;
     Version::Ptr getRecommendedForParent(const QString& uid, const QString& version);
     Version::Ptr getLatestForParent(const QString& uid, const QString& version);
+    Version::Ptr getLatest(bool onlyRelease = true);
 
     QVariant data(const QModelIndex& index, int role) const override;
     RoleList providesRoles() const override;
@@ -71,7 +73,7 @@ class VersionList : public BaseVersionList, public BaseEntity {
     void setVersions(const QList<Version::Ptr>& versions);
     void merge(const VersionList::Ptr& other);
     void mergeFromIndex(const VersionList::Ptr& other);
-    void parse(const QJsonObject& obj) override;
+    Result<> parse(const QJsonObject& obj) override;
     void addExternalRecommends(const QStringList& recommends);
     void clearExternalRecommends();
 

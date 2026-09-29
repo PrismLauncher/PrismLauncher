@@ -37,7 +37,7 @@ OptionalModDialog::OptionalModDialog(QWidget* parent, const QStringList& mods) :
         for (int i = 0; i < ui->list->count(); i++)
             ui->list->item(i)->setCheckState(Qt::Unchecked);
     });
-    connect(ui->list, &QListWidget::itemActivated, [](QListWidgetItem* item) {
+    connect(ui->list, &QListWidget::itemActivated, ui->list, [](QListWidgetItem* item) {
         if (item->checkState() == Qt::Checked)
             item->setCheckState(Qt::Unchecked);
         else

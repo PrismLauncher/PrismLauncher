@@ -121,30 +121,32 @@ class PackInstallTask : public InstanceTask {
    private:
     UserInteractionSupport* m_support;
 
-    bool abortable = false;
+    bool m_abortable = false;
 
-    NetJob::Ptr jobPtr;
+    NetJob::Ptr m_jobPtr;
 
-    InstallMode m_install_mode;
-    QString m_pack_name;
-    QString m_pack_safe_name;
-    QString m_version_name;
+    InstallMode m_installMode;
+    QString m_packName;
+    QString m_packSafeName;
+    QString m_versionName;
     PackVersion m_version;
 
-    QMap<QString, VersionMod> modsToExtract;
-    QMap<QString, VersionMod> modsToDecomp;
-    QMap<QString, QString> modsToCopy;
+    QMap<QString, VersionMod> m_modsToExtract;
+    QMap<QString, VersionMod> m_modsToDecomp;
+    QMap<QString, QString> m_modsToCopy;
 
-    QString archivePath;
-    QStringList jarmods;
-    Meta::Version::Ptr minecraftVersion;
-    QMap<QString, Meta::Version::Ptr> componentsToInstall;
+    QString m_archivePath;
+    QStringList m_jarmods;
+    Meta::Version::Ptr m_minecraftVersion;
+    QMap<QString, Meta::Version::Ptr> m_componentsToInstall;
 
     QFuture<std::optional<QStringList>> m_extractFuture;
     QFutureWatcher<std::optional<QStringList>> m_extractFutureWatcher;
 
     QFuture<bool> m_modExtractFuture;
     QFutureWatcher<bool> m_modExtractFutureWatcher;
+
+    std::unique_ptr<MinecraftInstance> m_instance;
 };
 
 }  // namespace ATLauncher

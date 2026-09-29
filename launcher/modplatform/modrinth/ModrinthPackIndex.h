@@ -17,15 +17,15 @@
 
 #pragma once
 
+#include "Result.h"
 #include "modplatform/ModIndex.h"
-
-#include "BaseInstance.h"
 
 namespace Modrinth {
 
-void loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj);
-void loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& obj);
-auto loadIndexedPackVersion(QJsonObject& obj, const QString& preferred_hash_type = "sha512", const QString& preferred_file_name = "")
-    -> ModPlatform::IndexedVersion;
+Result<> loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj);
+Result<> loadExtraPackData(ModPlatform::IndexedPack& pack, const QJsonObject& obj);
+Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(const QJsonObject& obj,
+                                                           const QString& preferredHashType = "sha512",
+                                                           const QString& preferredFileName = "");
 
 }  // namespace Modrinth

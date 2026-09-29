@@ -32,6 +32,7 @@ struct ModrinthDownloadMeta {
     QString reason;
     QString gameVersion;
     QString loader;
+    QString dependentOn;
 
     bool isEmpty() const { return reason.isEmpty(); }
 
@@ -46,6 +47,9 @@ struct ModrinthDownloadMeta {
         }
         if (!loader.isEmpty()) {
             obj["loader"] = loader;
+        }
+        if (!dependentOn.isEmpty()) {
+            obj["dependent_on"] = dependentOn;
         }
         return QJsonDocument(obj).toJson(QJsonDocument::Compact);
     }

@@ -36,7 +36,7 @@ VersionSelectWidget::VersionSelectWidget(QWidget* parent) : QWidget(parent)
     search->setPlaceholderText(tr("Search"));
     search->setClearButtonEnabled(true);
     verticalLayout->addWidget(search);
-    connect(search, &QLineEdit::textEdited, [this](const QString& value) {
+    connect(search, &QLineEdit::textEdited, this, [this](const QString& value) {
         m_proxyModel->setSearch(value);
         if (!value.isEmpty() || !listView->selectionModel()->hasSelection()) {
             const QModelIndex first = listView->model()->index(0, 0);

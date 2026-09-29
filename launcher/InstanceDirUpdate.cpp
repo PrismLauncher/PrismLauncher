@@ -52,7 +52,7 @@ QString askToUpdateInstanceDirName(BaseInstance* instance, const QString& oldNam
         return QString();
 
     auto oldRoot = instance->instanceRoot();
-    auto newDirName = FS::DirNameFromString(newName, QFileInfo(oldRoot).dir().absolutePath());
+    auto newDirName = FS::DirNameFromString(newName, APPLICATION->instances()->instanceDirs());
     auto newRoot = FS::PathCombine(QFileInfo(oldRoot).dir().absolutePath(), newDirName);
     if (oldRoot == newRoot)
         return QString();
@@ -63,6 +63,13 @@ QString askToUpdateInstanceDirName(BaseInstance* instance, const QString& oldNam
     if (QDir(newRoot).exists()) {
         QMessageBox::warning(parent, QObject::tr("Cannot rename instance"),
                              QObject::tr("New instance root (%1) already exists. <br />Only the metadata will be renamed.").arg(newRoot));
+        return QString();
+    }
+
+    if (instance->isRunning()) {
+        QMessageBox::warning(parent, QObject::tr("Cannot rename instance folder"),
+                             QObject::tr("The instance folder cannot be renamed while the instance is running.\n\n"
+                                         "Only the instance name will be changed. The folder will keep its current name."));
         return QString();
     }
 

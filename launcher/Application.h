@@ -56,7 +56,6 @@ class LocalPeer;
 class InstanceWindow;
 class MainWindow;
 class ViewLogWindow;
-class SetupWizard;
 class GenericPageProvider;
 class QFile;
 class HttpMetaCache;
@@ -71,10 +70,10 @@ class BaseProfilerFactory;
 class BaseDetachedToolFactory;
 class TranslationsModel;
 class ITheme;
-class MCEditTool;
 class ThemeManager;
 class IconTheme;
 class BaseInstance;
+class MinecraftInstance;
 
 class LogModel;
 
@@ -99,29 +98,30 @@ class Index;
 class Application : public QApplication {
     Q_OBJECT
    public:
-    enum Status { StartingUp, Failed, Succeeded, Initialized };
+    enum Status : std::uint8_t { StartingUp, Failed, Succeeded, Initialized };
 
-    enum Capability {
-        None = 0,
+    enum Capability : std::uint8_t {
+        None = 0U,
 
-        SupportsMSA = 1 << 0,
-        SupportsFlame = 1 << 1,
-        SupportsGameMode = 1 << 2,
-        SupportsMangoHud = 1 << 3,
+        SupportsMSA = 1U << 0U,
+        SupportsFlame = 1U << 1U,
+        SupportsGameMode = 1U << 2U,
+        SupportsMangoHud = 1U << 3U,
     };
     Q_DECLARE_FLAGS(Capabilities, Capability)
 
    public:
     Application(int& argc, char** argv);
-    virtual ~Application();
+    ~Application() override;
 
     bool event(QEvent* event) override;
 
     SettingsObject* settings() const { return m_settings.get(); }
+    SettingsObject* playtimeSettings() const { return m_playtimeSettings.get(); }
 
     qint64 timeSinceStart() const { return m_startTime.msecsTo(QDateTime::currentDateTime()); }
 
-    QIcon logo();
+    static QIcon logo();
 
     ThemeManager* themeManager() { return m_themeManager.get(); }
 
@@ -137,15 +137,13 @@ class Application : public QApplication {
 
     IconList* icons() const { return m_icons.get(); }
 
-    MCEditTool* mcedit() const { return m_mcedit.get(); }
-
     AccountList* accounts() const { return m_accounts.get(); }
 
     Status status() const { return m_status; }
 
     const QMap<QString, std::shared_ptr<BaseProfilerFactory>>& profilers() const { return m_profilers; }
 
-    void updateProxySettings(QString proxyTypeStr, QString addr, int port, QString user, QString password);
+    void updateProxySettings(const QString& proxyTypeStr, const QString& addr, int port, const QString& user, const QString& password);
 
     QNetworkAccessManager* network();
 
@@ -161,7 +159,7 @@ class Application : public QApplication {
      * Finds and returns the full path to a jar file.
      * Returns a null-string if it could not be found.
      */
-    QString getJarPath(QString jarFile);
+    QString getJarPath(const QString& jarFile);
 
     QString getMSAClientID();
     QString getFlameAPIKey();
@@ -175,11 +173,11 @@ class Application : public QApplication {
     const QString& dataRoot() { return m_dataPath; }
 
     /// the java installed path the application is using
-    const QString javaPath();
+    QString javaPath();
 
-    bool isPortable() { return m_portable; }
+    bool isPortable() const { return m_portable; }
 
-    const Capabilities capabilities() { return m_capabilities; }
+    Capabilities capabilities() const { return m_capabilities; }
 
     /*!
      * Opens a json file using either a system default editor, or, if not empty, the editor
@@ -187,19 +185,19 @@ class Application : public QApplication {
      */
     bool openJsonEditor(const QString& filename);
 
-    InstanceWindow* showInstanceWindow(BaseInstance* instance, QString page = QString());
+    InstanceWindow* showInstanceWindow(MinecraftInstance* instance, const QString& page = QString());
     MainWindow* showMainWindow(bool minimized = false);
     ViewLogWindow* showLogWindow();
 
     void updateIsRunning(bool running);
-    bool updatesAreAllowed();
+    bool updatesAreAllowed() const;
 
-    void ShowGlobalSettings(class QWidget* parent, QString open_page = QString());
+    void ShowGlobalSettings(class QWidget* parent, QString openPage = QString());
 
     bool updaterEnabled();
-    QString updaterBinaryName();
+    static QString updaterBinaryName();
 
-    QUrl normalizeImportUrl(const QString& url);
+    static QUrl normalizeImportUrl(const QString& url);
 
    signals:
     void updateAllowedChanged(bool status);
@@ -214,22 +212,21 @@ class Application : public QApplication {
 #endif
 
    public slots:
-    bool launch(BaseInstance* instance,
+    bool launch(MinecraftInstance* instance,
                 LaunchMode mode = LaunchMode::Normal,
                 std::shared_ptr<MinecraftTarget> targetToJoin = nullptr,
                 shared_qobject_ptr<MinecraftAccount> accountToUse = nullptr,
                 const QString& offlineName = QString());
     bool kill(BaseInstance* instance);
-    void closeCurrentWindow();
+    static void closeCurrentWindow();
 
    private slots:
     void on_windowClose();
     void messageReceived(const QByteArray& message);
     void controllerFinished();
-    void setupWizardFinished(int status);
 
    private:
-    bool handleDataMigration(const QString& currentData, const QString& oldData, const QString& name, const QString& configFile) const;
+    static bool handleDataMigration(const QString& currentData, const QString& oldData, const QString& name, const QString& configFile);
     bool createSetupWizard();
     void performMainStartupAction();
 
@@ -257,12 +254,12 @@ class Application : public QApplication {
     std::unique_ptr<Meta::Index> m_metadataIndex;
 
     std::unique_ptr<SettingsObject> m_settings;
+    std::unique_ptr<SettingsObject> m_playtimeSettings;
     std::unique_ptr<InstanceList> m_instances;
     std::unique_ptr<IconList> m_icons;
     std::unique_ptr<JavaInstallList> m_javalist;
     std::unique_ptr<TranslationsModel> m_translations;
     std::unique_ptr<GenericPageProvider> m_globalSettingsProvider;
-    std::unique_ptr<MCEditTool> m_mcedit;
     QSet<QString> m_features;
     std::unique_ptr<ThemeManager> m_themeManager;
 
@@ -300,11 +297,10 @@ class Application : public QApplication {
     // peer launcher instance connector - used to implement single instance launcher and signalling
     LocalPeer* m_peerInstance = nullptr;
 
-    SetupWizard* m_setupWizard = nullptr;
-
    public:
     QString m_detectedGLFWPath;
     QString m_detectedOpenALPath;
+    QString m_detectedSDLPath;
     QString m_instanceIdToLaunch;
     QString m_serverToJoin;
     QString m_worldToJoin;
@@ -319,7 +315,7 @@ class Application : public QApplication {
     std::unique_ptr<LogModel> logModel;
 
    public:
-    void addQSavePath(QString);
-    void removeQSavePath(QString);
-    bool checkQSavePath(QString);
+    void addQSavePath(const QString&);
+    void removeQSavePath(const QString&);
+    bool checkQSavePath(const QString&);
 };

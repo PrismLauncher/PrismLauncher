@@ -49,7 +49,7 @@
 #include "settings/Setting.h"
 
 MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QWidget* parent)
-    : QWidget(parent), m_instance(std::move(instance)), m_ui(new Ui::MinecraftSettingsWidget)
+    : QWidget(parent), m_instance(instance), m_ui(new Ui::MinecraftSettingsWidget)
 {
     m_ui->setupUi(this);
 
@@ -61,6 +61,8 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
         m_ui->serverJoinGroupBox->hide();
         m_ui->globalDataPacksGroupBox->hide();
         m_ui->loaderGroup->hide();
+        m_ui->countGameTime->hide();
+        m_ui->latestMCVersionGroupBox->hide();
     } else {
         m_javaSettings = new JavaSettingsWidget(m_instance, this);
         m_ui->javaScrollArea->setWidget(m_javaSettings);
@@ -83,7 +85,7 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
 
         m_quickPlaySingleplayer = m_instance->traits().contains("feature:is_quick_play_singleplayer");
         if (m_quickPlaySingleplayer) {
-            auto worlds = m_instance->worldList();
+            auto* worlds = m_instance->worldList();
             worlds->update();
             for (const auto& world : worlds->allWorlds()) {
                 m_ui->worldsCb->addItem(world.folderName());
@@ -102,24 +104,30 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
 
         connect(m_ui->globalDataPacksGroupBox, &QGroupBox::toggled, this, [this](bool value) {
             m_instance->settings()->set("GlobalDataPacksEnabled", value);
-            if (!value)
+            if (!value) {
                 m_instance->settings()->reset("GlobalDataPacksPath");
+            }
         });
         connect(m_ui->dataPacksPathEdit, &QLineEdit::editingFinished, this, &MinecraftSettingsWidget::saveDataPacksPath);
         connect(m_ui->dataPacksPathBrowse, &QPushButton::clicked, this, &MinecraftSettingsWidget::selectDataPacksFolder);
 
         connect(m_ui->loaderGroup, &QGroupBox::toggled, this, [this](bool value) {
             m_instance->settings()->set("OverrideModDownloadLoaders", value);
-            if (value)
+            if (value) {
                 saveSelectedLoaders();
-            else
+            } else {
                 m_instance->settings()->reset("ModDownloadLoaders");
+            }
         });
 
-        for (auto c : { m_ui->neoForge, m_ui->forge, m_ui->fabric, m_ui->quilt, m_ui->liteLoader, m_ui->babric, m_ui->btaBabric,
-                        m_ui->legacyFabric, m_ui->ornithe, m_ui->rift }) {
-            connect(c, &QCheckBox::stateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
+        for (auto* c : { m_ui->neoForge, m_ui->forge, m_ui->fabric, m_ui->quilt, m_ui->liteLoader, m_ui->babric, m_ui->btaBabric,
+                         m_ui->legacyFabric, m_ui->ornithe, m_ui->rift }) {
+            connect(c, &QCheckBox::checkStateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
         }
+        auto latestVersion = m_instance->settings()->getSetting("UseLatestMinecraftVersion");
+        connect(latestVersion.get(), &Setting::SettingChanged, this, [this](const Setting&, const QVariant&) {
+            m_ui->latestMCVersionGroupBox->setChecked(m_instance->settings()->get("UseLatestMinecraftVersion").toBool());
+        });
     }
 
     m_ui->maximizedWarning->hide();
@@ -143,6 +151,7 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
 
     connect(m_ui->useNativeOpenALCheck, &QAbstractButton::toggled, m_ui->lineEditOpenALPath, &QWidget::setEnabled);
     connect(m_ui->useNativeGLFWCheck, &QAbstractButton::toggled, m_ui->lineEditGLFWPath, &QWidget::setEnabled);
+    connect(m_ui->useNativeSDLCheck, &QAbstractButton::toggled, m_ui->lineEditSDLPath, &QWidget::setEnabled);
 
     loadSettings();
 }
@@ -154,12 +163,13 @@ MinecraftSettingsWidget::~MinecraftSettingsWidget()
 
 void MinecraftSettingsWidget::loadSettings()
 {
-    SettingsObject* settings;
+    SettingsObject* settings = nullptr;
 
-    if (m_instance != nullptr)
+    if (m_instance != nullptr) {
         settings = m_instance->settings();
-    else
+    } else {
         settings = APPLICATION->settings();
+    }
 
     // Game Window
     m_ui->windowSizeGroupBox->setChecked(m_instance == nullptr || settings->get("OverrideWindow").toBool() ||
@@ -174,6 +184,7 @@ void MinecraftSettingsWidget::loadSettings()
     m_ui->gameTimeGroupBox->setChecked(m_instance == nullptr || settings->get("OverrideGameTime").toBool());
     m_ui->showGameTime->setChecked(settings->get("ShowGameTime").toBool());
     m_ui->recordGameTime->setChecked(settings->get("RecordGameTime").toBool());
+    m_ui->countGameTime->setChecked(settings->get("CountGameTime").toBool());
     m_ui->showGlobalGameTime->setChecked(m_instance == nullptr && settings->get("ShowGlobalGameTime").toBool());
     m_ui->showGameTimeWithoutDays->setChecked(m_instance == nullptr && settings->get("ShowGameTimeWithoutDays").toBool());
 
@@ -183,13 +194,14 @@ void MinecraftSettingsWidget::loadSettings()
     m_ui->autoCloseConsoleCheck->setChecked(settings->get("AutoCloseConsole").toBool());
     m_ui->showConsoleErrorCheck->setChecked(settings->get("ShowConsoleOnError").toBool());
 
-    if (m_javaSettings != nullptr)
+    if (m_javaSettings != nullptr) {
         m_javaSettings->loadSettings();
+    }
 
     // Custom commands
     m_ui->customCommands->initialize(m_instance != nullptr, m_instance == nullptr || settings->get("OverrideCommands").toBool(),
-                                     settings->get("PreLaunchCommand").toString(), settings->get("WrapperCommand").toString(),
-                                     settings->get("PostExitCommand").toString());
+                                     settings->get("PreLoadCommand").toString(), settings->get("PreLaunchCommand").toString(),
+                                     settings->get("WrapperCommand").toString(), settings->get("PostExitCommand").toString());
 
     // Environment variables
     m_ui->environmentVariables->initialize(m_instance != nullptr, m_instance == nullptr || settings->get("OverrideEnv").toBool(),
@@ -214,6 +226,13 @@ void MinecraftSettingsWidget::loadSettings()
     m_ui->lineEditOpenALPath->setPlaceholderText(APPLICATION->m_detectedOpenALPath);
 #else
     m_ui->lineEditOpenALPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.OPENAL_LIBRARY_NAME));
+#endif
+    m_ui->useNativeSDLCheck->setChecked(settings->get("UseNativeSDL").toBool());
+    m_ui->lineEditSDLPath->setText(settings->get("CustomSDLPath").toString().trimmed());
+#ifdef Q_OS_LINUX
+    m_ui->lineEditSDLPath->setPlaceholderText(APPLICATION->m_detectedSDLPath);
+#else
+    m_ui->lineEditSDLPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.SDL_LIBRARY_NAME));
 #endif
 
     // Performance
@@ -254,7 +273,7 @@ void MinecraftSettingsWidget::loadSettings()
         auto blockSignalsCheckBoxes = { m_ui->neoForge, m_ui->forge,     m_ui->fabric,       m_ui->quilt,   m_ui->liteLoader,
                                         m_ui->babric,   m_ui->btaBabric, m_ui->legacyFabric, m_ui->ornithe, m_ui->rift };
         m_ui->loaderGroup->blockSignals(true);
-        for (auto c : blockSignalsCheckBoxes) {
+        for (auto* c : blockSignalsCheckBoxes) {
             c->blockSignals(true);
         }
 
@@ -277,22 +296,27 @@ void MinecraftSettingsWidget::loadSettings()
         } else {
             auto instLoaders = m_instance->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
 
-            m_ui->neoForge->setChecked(instLoaders & ModPlatform::NeoForge);
-            m_ui->forge->setChecked(instLoaders & ModPlatform::Forge);
-            m_ui->fabric->setChecked(instLoaders & ModPlatform::Fabric);
-            m_ui->quilt->setChecked(instLoaders & ModPlatform::Quilt);
-            m_ui->liteLoader->setChecked(instLoaders & ModPlatform::LiteLoader);
-            m_ui->babric->setChecked(instLoaders & ModPlatform::Babric);
-            m_ui->btaBabric->setChecked(instLoaders & ModPlatform::BTA);
-            m_ui->legacyFabric->setChecked(instLoaders & ModPlatform::LegacyFabric);
-            m_ui->ornithe->setChecked(instLoaders & ModPlatform::Ornithe);
-            m_ui->rift->setChecked(instLoaders & ModPlatform::Rift);
+            m_ui->neoForge->setChecked(instLoaders.testAnyFlags(ModPlatform::NeoForge));
+            m_ui->forge->setChecked(instLoaders.testAnyFlags(ModPlatform::Forge));
+            m_ui->fabric->setChecked(instLoaders.testAnyFlags(ModPlatform::Fabric));
+            m_ui->quilt->setChecked(instLoaders.testAnyFlags(ModPlatform::Quilt));
+            m_ui->liteLoader->setChecked(instLoaders.testAnyFlags(ModPlatform::LiteLoader));
+            m_ui->babric->setChecked(instLoaders.testAnyFlags(ModPlatform::Babric));
+            m_ui->btaBabric->setChecked(instLoaders.testAnyFlags(ModPlatform::BTA));
+            m_ui->legacyFabric->setChecked(instLoaders.testAnyFlags(ModPlatform::LegacyFabric));
+            m_ui->ornithe->setChecked(instLoaders.testAnyFlags(ModPlatform::Ornithe));
+            m_ui->rift->setChecked(instLoaders.testAnyFlags(ModPlatform::Rift));
         }
 
         m_ui->loaderGroup->blockSignals(false);
-        for (auto c : blockSignalsCheckBoxes) {
+        for (auto* c : blockSignalsCheckBoxes) {
             c->blockSignals(false);
         }
+
+        m_ui->latestMCVersionGroupBox->setChecked(settings->get("UseLatestMinecraftVersion").toBool());
+        auto autoUpdateType = settings->get("UseLatestMinecraftVersionType").toString() == "release";
+        m_ui->releaseRadioButton->setChecked(autoUpdateType);
+        m_ui->anyRadioButton->setChecked(!autoUpdateType);
     }
 
     m_ui->legacySettingsGroupBox->setChecked(settings->get("OverrideLegacySettings").toBool());
@@ -308,183 +332,205 @@ void MinecraftSettingsWidget::loadSettings()
 
 void MinecraftSettingsWidget::saveSettings()
 {
-    SettingsObject* settings;
+    SettingsObject* settings = nullptr;
 
-    if (m_instance != nullptr)
+    if (m_instance != nullptr) {
         settings = m_instance->settings();
-    else
+    } else {
         settings = APPLICATION->settings();
+    }
 
-    {
-        SettingsObject::Lock lock(settings);
+    // Console
+    bool console = m_instance == nullptr || m_ui->consoleSettingsBox->isChecked();
 
-        // Console
-        bool console = m_instance == nullptr || m_ui->consoleSettingsBox->isChecked();
+    if (m_instance != nullptr) {
+        settings->set("OverrideConsole", console);
+    }
 
-        if (m_instance != nullptr)
-            settings->set("OverrideConsole", console);
+    if (console) {
+        settings->set("ShowConsole", m_ui->showConsoleCheck->isChecked());
+        settings->set("AutoCloseConsole", m_ui->autoCloseConsoleCheck->isChecked());
+        settings->set("ShowConsoleOnError", m_ui->showConsoleErrorCheck->isChecked());
+    } else {
+        settings->reset("ShowConsole");
+        settings->reset("AutoCloseConsole");
+        settings->reset("ShowConsoleOnError");
+    }
 
-        if (console) {
-            settings->set("ShowConsole", m_ui->showConsoleCheck->isChecked());
-            settings->set("AutoCloseConsole", m_ui->autoCloseConsoleCheck->isChecked());
-            settings->set("ShowConsoleOnError", m_ui->showConsoleErrorCheck->isChecked());
-        } else {
-            settings->reset("ShowConsole");
-            settings->reset("AutoCloseConsole");
-            settings->reset("ShowConsoleOnError");
-        }
+    // Game Window
+    bool window = m_instance == nullptr || m_ui->windowSizeGroupBox->isChecked();
 
-        // Game Window
-        bool window = m_instance == nullptr || m_ui->windowSizeGroupBox->isChecked();
+    if (m_instance != nullptr) {
+        settings->set("OverrideWindow", window);
+        settings->set("OverrideMiscellaneous", window);
+    }
 
-        if (m_instance != nullptr) {
-            settings->set("OverrideWindow", window);
-            settings->set("OverrideMiscellaneous", window);
-        }
+    if (window) {
+        settings->set("LaunchMaximized", m_ui->maximizedCheckBox->isChecked());
+        settings->set("MinecraftWinWidth", m_ui->windowWidthSpinBox->value());
+        settings->set("MinecraftWinHeight", m_ui->windowHeightSpinBox->value());
+        settings->set("CloseAfterLaunch", m_ui->closeAfterLaunchCheck->isChecked());
+        settings->set("QuitAfterGameStop", m_ui->quitAfterGameStopCheck->isChecked());
+    } else {
+        settings->reset("LaunchMaximized");
+        settings->reset("MinecraftWinWidth");
+        settings->reset("MinecraftWinHeight");
+        settings->reset("CloseAfterLaunch");
+        settings->reset("QuitAfterGameStop");
+    }
 
-        if (window) {
-            settings->set("LaunchMaximized", m_ui->maximizedCheckBox->isChecked());
-            settings->set("MinecraftWinWidth", m_ui->windowWidthSpinBox->value());
-            settings->set("MinecraftWinHeight", m_ui->windowHeightSpinBox->value());
-            settings->set("CloseAfterLaunch", m_ui->closeAfterLaunchCheck->isChecked());
-            settings->set("QuitAfterGameStop", m_ui->quitAfterGameStopCheck->isChecked());
-        } else {
-            settings->reset("LaunchMaximized");
-            settings->reset("MinecraftWinWidth");
-            settings->reset("MinecraftWinHeight");
-            settings->reset("CloseAfterLaunch");
-            settings->reset("QuitAfterGameStop");
-        }
+    // Custom Commands
+    bool custcmd = m_instance == nullptr || m_ui->customCommands->checked();
 
-        // Custom Commands
-        bool custcmd = m_instance == nullptr || m_ui->customCommands->checked();
+    if (m_instance != nullptr) {
+        settings->set("OverrideCommands", custcmd);
+    }
 
-        if (m_instance != nullptr)
-            settings->set("OverrideCommands", custcmd);
+    if (custcmd) {
+        settings->set("PreLoadCommand", m_ui->customCommands->preLoadCommand());
+        settings->set("PreLaunchCommand", m_ui->customCommands->prelaunchCommand());
+        settings->set("WrapperCommand", m_ui->customCommands->wrapperCommand());
+        settings->set("PostExitCommand", m_ui->customCommands->postexitCommand());
+    } else {
+        settings->reset("PreLoadCommand");
+        settings->reset("PreLaunchCommand");
+        settings->reset("WrapperCommand");
+        settings->reset("PostExitCommand");
+    }
 
-        if (custcmd) {
-            settings->set("PreLaunchCommand", m_ui->customCommands->prelaunchCommand());
-            settings->set("WrapperCommand", m_ui->customCommands->wrapperCommand());
-            settings->set("PostExitCommand", m_ui->customCommands->postexitCommand());
-        } else {
-            settings->reset("PreLaunchCommand");
-            settings->reset("WrapperCommand");
-            settings->reset("PostExitCommand");
-        }
+    // Environment Variables
+    auto env = m_instance == nullptr || m_ui->environmentVariables->override();
 
-        // Environment Variables
-        auto env = m_instance == nullptr || m_ui->environmentVariables->override();
+    if (m_instance != nullptr) {
+        settings->set("OverrideEnv", env);
+    }
 
-        if (m_instance != nullptr)
-            settings->set("OverrideEnv", env);
+    if (env) {
+        settings->set("Env", Json::fromMap(m_ui->environmentVariables->value()));
+    } else {
+        settings->reset("Env");
+    }
 
-        if (env)
-            settings->set("Env", Json::fromMap(m_ui->environmentVariables->value()));
-        else
-            settings->reset("Env");
+    // Workarounds
+    bool workarounds = m_instance == nullptr || m_ui->nativeWorkaroundsGroupBox->isChecked();
 
-        // Workarounds
-        bool workarounds = m_instance == nullptr || m_ui->nativeWorkaroundsGroupBox->isChecked();
+    if (m_instance != nullptr) {
+        settings->set("OverrideNativeWorkarounds", workarounds);
+    }
 
-        if (m_instance != nullptr)
-            settings->set("OverrideNativeWorkarounds", workarounds);
+    if (workarounds) {
+        settings->set("UseNativeGLFW", m_ui->useNativeGLFWCheck->isChecked());
+        settings->set("CustomGLFWPath", m_ui->lineEditGLFWPath->text());
+        settings->set("UseNativeOpenAL", m_ui->useNativeOpenALCheck->isChecked());
+        settings->set("CustomOpenALPath", m_ui->lineEditOpenALPath->text());
+        settings->set("UseNativeSDL", m_ui->useNativeSDLCheck->isChecked());
+        settings->set("CustomSDLPath", m_ui->lineEditSDLPath->text());
+    } else {
+        settings->reset("UseNativeGLFW");
+        settings->reset("CustomGLFWPath");
+        settings->reset("UseNativeOpenAL");
+        settings->reset("CustomOpenALPath");
+        settings->reset("UseNativeSDL");
+        settings->reset("CustomSDLPath");
+    }
 
-        if (workarounds) {
-            settings->set("UseNativeGLFW", m_ui->useNativeGLFWCheck->isChecked());
-            settings->set("CustomGLFWPath", m_ui->lineEditGLFWPath->text());
-            settings->set("UseNativeOpenAL", m_ui->useNativeOpenALCheck->isChecked());
-            settings->set("CustomOpenALPath", m_ui->lineEditOpenALPath->text());
-        } else {
-            settings->reset("UseNativeGLFW");
-            settings->reset("CustomGLFWPath");
-            settings->reset("UseNativeOpenAL");
-            settings->reset("CustomOpenALPath");
-        }
+    // Performance
+    bool performance = m_instance == nullptr || m_ui->perfomanceGroupBox->isChecked();
 
-        // Performance
-        bool performance = m_instance == nullptr || m_ui->perfomanceGroupBox->isChecked();
+    if (m_instance != nullptr) {
+        settings->set("OverridePerformance", performance);
+    }
 
-        if (m_instance != nullptr)
-            settings->set("OverridePerformance", performance);
+    if (performance) {
+        settings->set("EnableFeralGamemode", m_ui->enableFeralGamemodeCheck->isChecked());
+        settings->set("EnableMangoHud", m_ui->enableMangoHud->isChecked());
+        settings->set("UseDiscreteGpu", m_ui->useDiscreteGpuCheck->isChecked());
+        settings->set("UseZink", m_ui->useZink->isChecked());
+    } else {
+        settings->reset("EnableFeralGamemode");
+        settings->reset("EnableMangoHud");
+        settings->reset("UseDiscreteGpu");
+        settings->reset("UseZink");
+    }
 
-        if (performance) {
-            settings->set("EnableFeralGamemode", m_ui->enableFeralGamemodeCheck->isChecked());
-            settings->set("EnableMangoHud", m_ui->enableMangoHud->isChecked());
-            settings->set("UseDiscreteGpu", m_ui->useDiscreteGpuCheck->isChecked());
-            settings->set("UseZink", m_ui->useZink->isChecked());
-        } else {
-            settings->reset("EnableFeralGamemode");
-            settings->reset("EnableMangoHud");
-            settings->reset("UseDiscreteGpu");
-            settings->reset("UseZink");
-        }
+    // Game time
+    bool gameTime = m_instance == nullptr || m_ui->gameTimeGroupBox->isChecked();
 
-        // Game time
-        bool gameTime = m_instance == nullptr || m_ui->gameTimeGroupBox->isChecked();
-
-        if (m_instance != nullptr)
-            settings->set("OverrideGameTime", gameTime);
+    if (m_instance != nullptr) {
+        settings->set("OverrideGameTime", gameTime);
 
         if (gameTime) {
-            settings->set("ShowGameTime", m_ui->showGameTime->isChecked());
-            settings->set("RecordGameTime", m_ui->recordGameTime->isChecked());
+            settings->set("CountGameTime", m_ui->countGameTime->isChecked());
         } else {
-            settings->reset("ShowGameTime");
-            settings->reset("RecordGameTime");
-        }
-
-        if (m_instance == nullptr) {
-            settings->set("ShowGlobalGameTime", m_ui->showGlobalGameTime->isChecked());
-            settings->set("ShowGameTimeWithoutDays", m_ui->showGameTimeWithoutDays->isChecked());
-        }
-
-        if (m_instance != nullptr) {
-            // Join server on launch
-            bool joinServerOnLaunch = m_ui->serverJoinGroupBox->isChecked();
-            settings->set("JoinServerOnLaunch", joinServerOnLaunch);
-            if (joinServerOnLaunch) {
-                if (m_ui->serverJoinAddressButton->isChecked() || !m_quickPlaySingleplayer) {
-                    settings->set("JoinServerOnLaunchAddress", m_ui->serverJoinAddress->text());
-                    settings->reset("JoinWorldOnLaunch");
-                } else {
-                    settings->set("JoinWorldOnLaunch", m_ui->worldsCb->currentText());
-                    settings->reset("JoinServerOnLaunchAddress");
-                }
-            } else {
-                settings->reset("JoinServerOnLaunchAddress");
-                settings->reset("JoinWorldOnLaunch");
-            }
-
-            // Use an account for this instance
-            bool useAccountForInstance = m_ui->instanceAccountGroupBox->isChecked();
-            settings->set("UseAccountForInstance", useAccountForInstance);
-            if (useAccountForInstance) {
-                int accountIndex = m_ui->instanceAccountSelector->currentIndex();
-
-                if (accountIndex != -1) {
-                    const MinecraftAccountPtr account = APPLICATION->accounts()->at(accountIndex);
-                    if (account != nullptr)
-                        settings->set("InstanceAccountId", account->profileId());
-                }
-            } else {
-                settings->reset("InstanceAccountId");
-            }
-        }
-
-        bool overrideLegacySettings = m_instance == nullptr || m_ui->legacySettingsGroupBox->isChecked();
-
-        if (m_instance != nullptr)
-            settings->set("OverrideLegacySettings", overrideLegacySettings);
-
-        if (overrideLegacySettings) {
-            settings->set("OnlineFixes", m_ui->onlineFixes->isChecked());
-        } else {
-            settings->reset("OnlineFixes");
+            settings->reset("CountGameTime");
         }
     }
 
-    if (m_javaSettings != nullptr)
+    if (gameTime) {
+        settings->set("ShowGameTime", m_ui->showGameTime->isChecked());
+        settings->set("RecordGameTime", m_ui->recordGameTime->isChecked());
+    } else {
+        settings->reset("ShowGameTime");
+        settings->reset("RecordGameTime");
+    }
+
+    if (m_instance == nullptr) {
+        settings->set("ShowGlobalGameTime", m_ui->showGlobalGameTime->isChecked());
+        settings->set("ShowGameTimeWithoutDays", m_ui->showGameTimeWithoutDays->isChecked());
+    }
+
+    if (m_instance != nullptr) {
+        // Join server on launch
+        bool joinServerOnLaunch = m_ui->serverJoinGroupBox->isChecked();
+        settings->set("JoinServerOnLaunch", joinServerOnLaunch);
+        if (joinServerOnLaunch) {
+            if (m_ui->serverJoinAddressButton->isChecked() || !m_quickPlaySingleplayer) {
+                settings->set("JoinServerOnLaunchAddress", m_ui->serverJoinAddress->text());
+                settings->reset("JoinWorldOnLaunch");
+            } else {
+                settings->set("JoinWorldOnLaunch", m_ui->worldsCb->currentText());
+                settings->reset("JoinServerOnLaunchAddress");
+            }
+        } else {
+            settings->reset("JoinServerOnLaunchAddress");
+            settings->reset("JoinWorldOnLaunch");
+        }
+
+        // Use an account for this instance
+        bool useAccountForInstance = m_ui->instanceAccountGroupBox->isChecked();
+        settings->set("UseAccountForInstance", useAccountForInstance);
+        if (useAccountForInstance) {
+            int accountIndex = m_ui->instanceAccountSelector->currentIndex();
+
+            if (accountIndex != -1) {
+                const MinecraftAccountPtr account = APPLICATION->accounts()->at(accountIndex);
+                if (account != nullptr) {
+                    settings->set("InstanceAccountId", account->profileId());
+                }
+            }
+        } else {
+            settings->reset("InstanceAccountId");
+        }
+
+        settings->set("UseLatestMinecraftVersion", m_ui->latestMCVersionGroupBox->isChecked());
+        settings->set("UseLatestMinecraftVersionType", m_ui->releaseRadioButton->isChecked() ? "release" : "any");
+    }
+
+    bool overrideLegacySettings = m_instance == nullptr || m_ui->legacySettingsGroupBox->isChecked();
+
+    if (m_instance != nullptr) {
+        settings->set("OverrideLegacySettings", overrideLegacySettings);
+    }
+
+    if (overrideLegacySettings) {
+        settings->set("OnlineFixes", m_ui->onlineFixes->isChecked());
+    } else {
+        settings->reset("OnlineFixes");
+    }
+
+    if (m_javaSettings != nullptr) {
         m_javaSettings->saveSettings();
+    }
 }
 
 void MinecraftSettingsWidget::openGlobalSettings()
@@ -493,16 +539,17 @@ void MinecraftSettingsWidget::openGlobalSettings()
 
     qDebug() << id;
 
-    if (id == "javaPage")
+    if (id == "javaPage") {
         APPLICATION->ShowGlobalSettings(this, "java-settings");
-    else  // TODO select tab
+    } else {  // TODO select tab
         APPLICATION->ShowGlobalSettings(this, "minecraft-settings");
+    }
 }
 
-void MinecraftSettingsWidget::updateAccountsMenu(SettingsObject& settings)
+void MinecraftSettingsWidget::updateAccountsMenu(SettingsObject& settings) const
 {
     m_ui->instanceAccountSelector->clear();
-    auto accounts = APPLICATION->accounts();
+    auto* accounts = APPLICATION->accounts();
     int accountIndex = accounts->findAccountByProfileId(settings.get("InstanceAccountId").toString());
 
     for (int i = 0; i < accounts->count(); i++) {
@@ -510,12 +557,14 @@ void MinecraftSettingsWidget::updateAccountsMenu(SettingsObject& settings)
 
         QIcon face = account->getFace();
 
-        if (face.isNull())
+        if (face.isNull()) {
             face = QIcon::fromTheme("noaccount");
+        }
 
         m_ui->instanceAccountSelector->addItem(face, account->profileName(), i);
-        if (i == accountIndex)
+        if (i == accountIndex) {
             m_ui->instanceAccountSelector->setCurrentIndex(i);
+        }
     }
 }
 
@@ -528,34 +577,45 @@ void MinecraftSettingsWidget::saveSelectedLoaders()
 {
     QStringList loaders;
 
-    if (m_ui->neoForge->isChecked())
+    if (m_ui->neoForge->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::NeoForge);
-    if (m_ui->forge->isChecked())
+    }
+    if (m_ui->forge->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::Forge);
-    if (m_ui->fabric->isChecked())
+    }
+    if (m_ui->fabric->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::Fabric);
-    if (m_ui->quilt->isChecked())
+    }
+    if (m_ui->quilt->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::Quilt);
-    if (m_ui->liteLoader->isChecked())
+    }
+    if (m_ui->liteLoader->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::LiteLoader);
-    if (m_ui->babric->isChecked())
+    }
+    if (m_ui->babric->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::Babric);
-    if (m_ui->btaBabric->isChecked())
+    }
+    if (m_ui->btaBabric->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::BTA);
-    if (m_ui->legacyFabric->isChecked())
+    }
+    if (m_ui->legacyFabric->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::LegacyFabric);
-    if (m_ui->ornithe->isChecked())
+    }
+    if (m_ui->ornithe->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::Ornithe);
-    if (m_ui->rift->isChecked())
+    }
+    if (m_ui->rift->isChecked()) {
         loaders << getModLoaderAsString(ModPlatform::Rift);
+    }
 
     m_instance->settings()->set("ModDownloadLoaders", Json::fromStringList(loaders));
 }
 
 void MinecraftSettingsWidget::saveDataPacksPath()
 {
-    if (QDir::separator() != '/')
+    if (QDir::separator() != '/') {
         m_ui->dataPacksPathEdit->setText(m_ui->dataPacksPathEdit->text().replace(QDir::separator(), '/'));
+    }
 
     m_instance->settings()->set("GlobalDataPacksPath", m_ui->dataPacksPathEdit->text());
 }
@@ -564,8 +624,9 @@ void MinecraftSettingsWidget::selectDataPacksFolder()
 {
     QString path = QFileDialog::getExistingDirectory(this, tr("Select Global Data Packs Folder"), m_instance->gameRoot());
 
-    if (path.isEmpty())
+    if (path.isEmpty()) {
         return;
+    }
 
     // if it's inside the instance dir, set path relative to .minecraft
     // (so that if it's directly in instance dir it will still lead with .. but more than two levels up are kept absolute)
@@ -573,8 +634,9 @@ void MinecraftSettingsWidget::selectDataPacksFolder()
     const QUrl instanceRootUrl = QUrl::fromLocalFile(m_instance->instanceRoot());
     const QUrl pathUrl = QUrl::fromLocalFile(path);
 
-    if (instanceRootUrl.isParentOf(pathUrl))
+    if (instanceRootUrl.isParentOf(pathUrl)) {
         path = QDir(m_instance->gameRoot()).relativeFilePath(path);
+    }
 
     m_ui->dataPacksPathEdit->setText(path);
     m_instance->settings()->set("GlobalDataPacksPath", path);

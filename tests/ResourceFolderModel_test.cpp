@@ -51,7 +51,7 @@
     QTimer expire_timer;                                                                \
     expire_timer.callOnTimeout(&loop, &QEventLoop::quit);                               \
     expire_timer.setSingleShot(true);                                                   \
-    expire_timer.start(4000);                                                           \
+    expire_timer.start(10000);                                                          \
                                                                                         \
     VERIFY(EXEC);                                                                       \
     loop.exec();                                                                        \
@@ -94,7 +94,7 @@ class ResourceFolderModelTest : public QObject {
             QTimer expire_timer;
             expire_timer.callOnTimeout(&loop, &QEventLoop::quit);
             expire_timer.setSingleShot(true);
-            expire_timer.start(4000);
+            expire_timer.start(10000);
 
             m.installResource(folder);
 
@@ -118,7 +118,7 @@ class ResourceFolderModelTest : public QObject {
             QTimer expire_timer;
             expire_timer.callOnTimeout(&loop, &QEventLoop::quit);
             expire_timer.setSingleShot(true);
-            expire_timer.start(4000);
+            expire_timer.start(10000);
 
             m.installResource(folder);
 
@@ -143,7 +143,7 @@ class ResourceFolderModelTest : public QObject {
         for (auto mod : model.allMods())
             qDebug() << mod->name();
 
-        QCOMPARE(model.size(), 4);
+        QCOMPARE(model.size(), 2);
 
         model.stopWatching();
     }

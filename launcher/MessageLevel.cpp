@@ -1,30 +1,5 @@
 #include "MessageLevel.h"
 
-MessageLevel MessageLevel::fromName(const QString& levelName)
-{
-    QString name = levelName.toUpper();
-    if (name == "LAUNCHER")
-        return MessageLevel::Launcher;
-    else if (name == "TRACE")
-        return MessageLevel::Trace;
-    else if (name == "DEBUG")
-        return MessageLevel::Debug;
-    else if (name == "INFO")
-        return MessageLevel::Info;
-    else if (name == "MESSAGE")
-        return MessageLevel::Message;
-    else if (name == "WARNING" || name == "WARN")
-        return MessageLevel::Warning;
-    else if (name == "ERROR" || name == "CRITICAL")
-        return MessageLevel::Error;
-    else if (name == "FATAL")
-        return MessageLevel::Fatal;
-    // Skip PrePost, it's not exposed to !![]!
-    // Also skip StdErr and StdOut
-    else
-        return MessageLevel::Unknown;
-}
-
 MessageLevel MessageLevel::fromQtMsgType(const QtMsgType& type)
 {
     switch (type) {

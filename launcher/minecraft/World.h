@@ -20,18 +20,18 @@
 
 struct GameType {
     GameType() = default;
-    GameType(std::optional<int> original);
+    explicit GameType(std::optional<int> original);
 
     QString toTranslatedString() const;
     QString toLogString() const;
 
-    enum { Unknown = -1, Survival, Creative, Adventure, Spectator } type = Unknown;
+    enum : std::int8_t { Unknown = -1, Survival, Creative, Adventure, Spectator } type = Unknown;
     std::optional<int> original;
 };
 
 class World {
    public:
-    World(const QFileInfo& file);
+    explicit World(const QFileInfo& file);
     QString folderName() const { return m_folderName; }
     QString name() const { return m_actualName; }
     QString iconFile() const { return m_iconFile; }
@@ -42,12 +42,15 @@ class World {
     bool isValid() const { return m_isValid; }
     bool isOnFS() const { return m_containerFile.isDir(); }
     QFileInfo container() const { return m_containerFile; }
+    QString containerOffsetPath() const { return m_containerOffsetPath; }
     // delete all the files of this world
     bool destroy();
     // replace this world with a copy of the other
     bool replace(World& with);
     // change the world's filesystem path (used by world lists for *MAGIC* purposes)
     void repath(const QFileInfo& file);
+    void loadMetadata();
+    bool isMetadataLoaded() const { return m_metadataLoaded; }
     // remove the icon file, if any
     bool resetIcon();
 
@@ -78,6 +81,7 @@ class World {
     void readFromZip(const QFileInfo& file);
     void readFromFS(const QFileInfo& file);
     void loadFromLevelDat(QByteArray data);
+    bool m_metadataLoaded = false;
 
    protected:
     QFileInfo m_containerFile;

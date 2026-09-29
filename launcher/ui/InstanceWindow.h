@@ -53,7 +53,7 @@ class InstanceWindow : public QMainWindow, public BasePageContainer {
     Q_OBJECT
 
    public:
-    explicit InstanceWindow(BaseInstance* proc, QWidget* parent = 0);
+    explicit InstanceWindow(MinecraftInstance* proc, QWidget* parent = 0);
     virtual ~InstanceWindow() = default;
 
     bool selectPage(QString pageId) override;
@@ -74,6 +74,7 @@ class InstanceWindow : public QMainWindow, public BasePageContainer {
    private slots:
     void instanceLaunchTaskChanged(LaunchTask* proc);
     void runningStateChanged(bool running);
+    void restartInstance();
     void on_instanceStatusChanged(BaseInstance::Status, BaseInstance::Status newStatus);
 
    protected:
@@ -84,10 +85,12 @@ class InstanceWindow : public QMainWindow, public BasePageContainer {
 
    private:
     LaunchTask* m_proc;
-    BaseInstance* m_instance;
+    MinecraftInstance* m_instance;
     bool m_doNotSave = false;
+    bool m_restartQueued = false;
     PageContainer* m_container = nullptr;
     QPushButton* m_closeButton = nullptr;
     QToolButton* m_launchButton = nullptr;
+    QPushButton* m_restartButton = nullptr;
     QPushButton* m_killButton = nullptr;
 };
