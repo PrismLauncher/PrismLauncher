@@ -37,7 +37,6 @@
 #include "World.h"
 #include <QDebug>
 #include <QDir>
-#include <QDirIterator>
 #include <QString>
 
 #include <FileSystem.h>
@@ -306,7 +305,7 @@ void World::readFromZip(const QFileInfo& file)
 
 bool World::install(const QString& to, const QString& name)
 {
-    auto finalPath = FS::PathCombine(to, FS::DirNameFromString(m_actualName, to));
+    auto finalPath = FS::PathCombine(to, FS::DirNameFromString(m_actualName, { to }));
     if (!FS::ensureFolderPathExists(finalPath)) {
         return false;
     }
@@ -368,7 +367,7 @@ bool World::rename(const QString& newName)
     QDir parentDir(m_containerFile.absoluteFilePath());
     parentDir.cdUp();
     QFile container(m_containerFile.absoluteFilePath());
-    auto dirName = FS::DirNameFromString(m_actualName, parentDir.absolutePath());
+    auto dirName = FS::DirNameFromString(m_actualName, { parentDir.absolutePath() });
     container.rename(parentDir.absoluteFilePath(dirName));
 
     return true;

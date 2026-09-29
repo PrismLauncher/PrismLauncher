@@ -13,6 +13,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QUrl>
 #include <utility>
 
 class ModrinthAPI final : public ResourceAPI {
@@ -27,17 +28,23 @@ class ModrinthAPI final : public ResourceAPI {
 
     static std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, const QString& hashFormat);
 
-    std::pair<Task::Ptr, QByteArray*> latestVersion(const QString& hash,
-                                                    const QString& hashFormat,
-                                                    std::optional<std::vector<Version>> mcVersions,
-                                                    std::optional<ModPlatform::ModLoaderTypes> loaders) const;
+    std::pair<Task::Ptr, QByteArray*> latestVersion(
+        const QString& hash,
+        const QString& hashFormat,
+        std::optional<std::vector<Version>> mcVersions,
+        std::optional<ModPlatform::ModLoaderTypes> loaders,
+        std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes = std::nullopt) const;
 
-    std::pair<Task::Ptr, QByteArray*> latestVersions(const QStringList& hashes,
-                                                     const QString& hashFormat,
-                                                     std::optional<std::vector<Version>> mcVersions,
-                                                     std::optional<ModPlatform::ModLoaderTypes> loaders) const;
+    std::pair<Task::Ptr, QByteArray*> latestVersions(
+        const QStringList& hashes,
+        const QString& hashFormat,
+        std::optional<std::vector<Version>> mcVersions,
+        std::optional<ModPlatform::ModLoaderTypes> loaders,
+        std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes = std::nullopt) const;
 
     std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
+
+    static QString getModpackIdFromUrl(const QUrl& url);
 
     std::pair<Task::Ptr, QByteArray*> getModCategories() const override;
     static QList<ModPlatform::Category> loadCategories(const QByteArray& response, const QString& projectType);
@@ -66,15 +73,6 @@ class ModrinthAPI final : public ResourceAPI {
         QStringList l;
         for (const auto& loader : getModLoaderStrings(types)) {
             l << QString("\"categories:%1\"").arg(loader);
-        }
-        return l.join(',');
-    }
-
-    static auto getCategoriesFilters(const QStringList& categories) -> QString
-    {
-        QStringList l;
-        for (const auto& cat : categories) {
-            l << QString("\"categories:%1\"").arg(cat);
         }
         return l.join(',');
     }
@@ -135,7 +133,9 @@ class ModrinthAPI final : public ResourceAPI {
             }
         }
         if (args.categoryIds.has_value() && !args.categoryIds->empty()) {
-            facetsList.append(QString("[%1]").arg(getCategoriesFilters(args.categoryIds.value())));
+            for (const auto& category : args.categoryIds.value()) {
+                facetsList.append(QString(R"(["categories:%1"])").arg(category));
+            }
         }
         if (!args.excludeDisclosureTypes.empty()) {
             for (const auto& d : args.excludeDisclosureTypes) {

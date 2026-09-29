@@ -56,7 +56,7 @@ class SolderPackInstallTask : public InstanceTask {
 
    protected:
     //! Entry point for tasks.
-    virtual void executeTask() override;
+    void executeTask() override;
 
    private slots:
     void fileListSucceeded(QByteArray* response);
@@ -78,7 +78,7 @@ class SolderPackInstallTask : public InstanceTask {
     QString m_version;
     QString m_minecraftVersion;
     QTemporaryDir m_outputDir;
-    int m_modCount;
+    int m_modCount = 0;
     QFuture<bool> m_extractFuture;
     QFutureWatcher<bool> m_extractFutureWatcher;
 };

@@ -20,6 +20,7 @@
         <file>scalable/java.svg</file>
         <file>scalable/language.svg</file>
         <file>scalable/loadermods.svg</file>
+        <file>scalable/lock.svg</file>
         <file>scalable/log.svg</file>
         <file>scalable/minecraft.svg</file>
         <file>scalable/new.svg</file>
@@ -47,6 +48,7 @@
         <file>scalable/export.svg</file>
         <file>scalable/rename.svg</file>
         <file>scalable/tag.svg</file>
+        <file>scalable/unlock.svg</file>
         <file>scalable/launch.svg</file>
         <file>scalable/server.svg</file>
         <file>scalable/appearance.svg</file>

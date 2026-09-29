@@ -127,25 +127,20 @@ void Request::executeTask()
         m_network = APPLICATION->network();
 #else
         qCCritical(m_logCat) << getUid().toString() << "No network manager set for request:" << m_url.toString();
-        emit failed("No network manager set for request");
-        emit finished();
+        emitFailed("No network manager set for request");
         return;
 #endif
     }
     if (getState() == Task::State::AbortedByUser) {
         qCWarning(m_logCat) << getUid().toString() << "Attempt to start an aborted Request:" << m_url.toString();
-        emit aborted();
-        emit finished();
+        emitAborted();
         return;
     }
 
     QNetworkRequest request(m_url);
     auto result = m_sink->init(request);
     if (!result) {
-        m_state = Task::State::Failed;
-        m_failReason = result.error();
-        emit failed(m_failReason);
-        emit finished();
+        emitFailed(result.error());
         return;
     }
     switch (*result) {
@@ -153,10 +148,8 @@ void Request::executeTask()
             qCDebug(m_logCat) << getUid().toString() << "Running" << m_url.toString();
             break;
         case Sink::InitType::CacheHit:
-            m_state = Task::State::Succeeded;
             qCDebug(m_logCat) << getUid().toString() << "Request cache hit" << m_url.toString();
-            emit succeeded();
-            emit finished();
+            emitSucceeded();
             return;
     }
 
@@ -405,12 +398,9 @@ void Request::downloadFinished()
         qCDebug(m_logCat) << getUid().toString() << "Writing extra" << data.size() << "bytes";
         auto result = m_sink->write(data);
         if (!result) {
-            m_state = Task::State::Failed;
             qCDebug(m_logCat) << getUid().toString() << "Request failed to write:" << m_url.toString();
             m_sink->abort();
-            m_failReason = result.error();
-            emit failed(m_failReason);
-            emit finished();
+            emitFailed(result.error());
             return;
         }
     }
@@ -418,18 +408,14 @@ void Request::downloadFinished()
     // otherwise, finalize the whole graph
     auto result = m_sink->finalize(*m_reply);
     if (!result) {
-        m_state = Task::State::Failed;
         qCDebug(m_logCat) << getUid().toString() << "Request failed to finalize:" << m_url.toString();
         m_sink->abort();
-        m_failReason = result.error();
-        emit failed(m_failReason);
-        emit finished();
+        emitFailed(result.error());
         return;
     }
 
     qCDebug(m_logCat) << getUid().toString() << "Request succeeded:" << m_url.toString();
-    emit succeeded();
-    emit finished();
+    emitSucceeded();
 }
 
 void Request::downloadReadyRead()

@@ -36,7 +36,6 @@
 #include "ui/themes/CatPack.h"
 #include <QDate>
 #include <QDir>
-#include <QDirIterator>
 #include <QFileInfo>
 #include <QImageReader>
 #include <QRandomGenerator>

@@ -73,6 +73,7 @@ class ModFolderModel : public ResourceFolderModel {
         RequiresColumn,
         RequiredByColumn,
         FileNameColumn,
+        LockUpdateColumn,
         NumColumns
     };
     ModFolderModel(const QDir& dir, MinecraftInstance* instance, bool isIndexed, bool createDir, QObject* parent = nullptr);

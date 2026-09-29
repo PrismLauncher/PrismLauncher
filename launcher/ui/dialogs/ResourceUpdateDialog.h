@@ -21,7 +21,8 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
                                   ResourceFolderModel* resourceModel,
                                   QList<Resource*>& searchFor,
                                   bool includeDeps,
-                                  QList<ModPlatform::ModLoaderType> loadersList = {});
+                                  QList<ModPlatform::ModLoaderType> loadersList = {},
+                                  std::vector<ModPlatform::IndexedVersionType> releaseTypes = {});
 
     void checkCandidates();
 
@@ -65,4 +66,5 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
     bool m_aborted = false;
     bool m_includeDeps = false;
     QList<ModPlatform::ModLoaderType> m_loadersList;
+    std::vector<ModPlatform::IndexedVersionType> m_releaseTypes;
 };
