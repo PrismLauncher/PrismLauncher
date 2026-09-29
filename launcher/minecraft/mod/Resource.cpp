@@ -49,7 +49,7 @@ void Resource::parseFile()
     m_internalId = fileName;
 
     std::tie(m_sizeStr, m_sizeInfo) = calculateFileSize(m_fileInfo);
-    m_hardLinkCount = FS::hardLinkCount(m_fileInfo.absoluteFilePath());
+    m_hardLinkCount = m_fileInfo.exists() ? FS::hardLinkCount(m_fileInfo.absoluteFilePath()) : 0;
     if (m_fileInfo.isDir()) {
         m_type = ResourceType::FOLDER;
         m_name = fileName;
