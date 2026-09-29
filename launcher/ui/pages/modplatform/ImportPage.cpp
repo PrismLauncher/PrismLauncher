@@ -175,7 +175,7 @@ void ImportPage::updateState()
                 }
             });
             ProgressDialog dlUrlDialod(this);
-            dlUrlDialod.setSkipButton(true, tr("Abort"));
+            dlUrlDialod.showSkipButton();
             dlUrlDialod.execWithTask(job.get());
             return;
         } else {

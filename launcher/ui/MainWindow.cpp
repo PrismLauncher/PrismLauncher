@@ -868,7 +868,7 @@ void MainWindow::runModalTask(Task* task)
         }
     });
     ProgressDialog loadDialog(this);
-    loadDialog.setSkipButton(true, tr("Abort"));
+    loadDialog.showSkipButton();
     loadDialog.execWithTask(task);
 }
 
@@ -1032,7 +1032,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
 
                 {  // drop stack
                     ProgressDialog dlUrlDialod(this);
-                    dlUrlDialod.setSkipButton(true, tr("Abort"));
+                    dlUrlDialod.showSkipButton();
                     dlUrlDialod.execWithTask(job.get());
                 }
 
@@ -1125,7 +1125,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
 
             {  // drop stack
                 ProgressDialog dlUrlDialod(this);
-                dlUrlDialod.setSkipButton(true, tr("Abort"));
+                dlUrlDialod.showSkipButton();
                 dlUrlDialod.execWithTask(dl_job.get());
             }
 

@@ -359,7 +359,7 @@ void InstallDialog::done(int result)
                 });
                 connect(task.get(), &Task::aborted, this, deletePath);
                 ProgressDialog pg(this);
-                pg.setSkipButton(true, tr("Abort"));
+                pg.showSkipButton();
                 pg.execWithTask(task.get());
             } else {
                 return;

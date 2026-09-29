@@ -115,7 +115,7 @@ void TexturePackPage::downloadDialogFinished(int result)
         }
 
         ProgressDialog loadDialog(this);
-        loadDialog.setSkipButton(true, tr("Abort"));
+        loadDialog.showSkipButton();
         loadDialog.execWithTask(&tasks);
 
         m_model->update();
@@ -188,7 +188,7 @@ void TexturePackPage::updateTexturePacks()
         }
 
         ProgressDialog loadDialog(this);
-        loadDialog.setSkipButton(true, tr("Abort"));
+        loadDialog.showSkipButton();
         loadDialog.execWithTask(&tasks);
 
         m_model->update();

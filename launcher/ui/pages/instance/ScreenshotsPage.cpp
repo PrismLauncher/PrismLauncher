@@ -425,7 +425,7 @@ void ScreenshotsPage::on_actionUpload_triggered()
     auto job = NetJob::Ptr(new NetJob("Screenshot Upload", APPLICATION->network()));
 
     ProgressDialog dialog(this);
-    dialog.setSkipButton(true, tr("Abort"));
+    dialog.showSkipButton();
 
     if (selection.size() < 2) {
         auto item = selection.at(0);

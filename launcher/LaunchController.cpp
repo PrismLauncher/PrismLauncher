@@ -167,7 +167,7 @@ LaunchDecision LaunchController::decideLaunchMode()
     if (state == AccountState::Working) {
         // refresh is in progress, we need to wait for it to finish to proceed.
         ProgressDialog progDialog(m_parentWidget);
-        progDialog.setSkipButton(true, tr("Abort"));
+        progDialog.showSkipButton();
 
         // TODO: this relies on tasks' synchronous signal dispatching nature
         // TODO: meaning currentTask can't complete and become null while this code is running
@@ -481,7 +481,7 @@ void LaunchController::onFailed(QString reason)
 void LaunchController::onProgressRequested(Task* task) const
 {
     ProgressDialog progDialog(m_parentWidget);
-    progDialog.setSkipButton(true, tr("Abort"));
+    progDialog.showSkipButton();
     m_launcher->proceed();
     progDialog.execWithTask(task);
 }
