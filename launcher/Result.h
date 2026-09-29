@@ -64,3 +64,9 @@ using Result = std::expected<T, E>;
     if (const auto& _result = (expected); !_result) {                  \
         qCritical() << "Discarding failed result:" << _result.error(); \
     }
+
+#define TRY_INTO_CHECK_UNEXPECTED(decl, expr, check, err) \
+    decl = (expr);                                        \
+    if (check) {                                          \
+        return std::unexpected{ err };                    \
+    }

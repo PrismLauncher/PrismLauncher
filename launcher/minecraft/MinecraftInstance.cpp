@@ -1174,11 +1174,11 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     if (!targetToJoin && settings()->get("JoinServerOnLaunch").toBool()) {
         QString fullAddress = settings()->get("JoinServerOnLaunchAddress").toString();
         if (!fullAddress.isEmpty()) {
-            targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(fullAddress, false)));
+            targetToJoin.reset(new MinecraftTarget(MinecraftTarget::fromServerAddress(fullAddress)));
         } else {
             QString world = settings()->get("JoinWorldOnLaunch").toString();
             if (!world.isEmpty()) {
-                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(world, true)));
+                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::fromWorldName(world)));
             }
         }
     }
