@@ -1334,7 +1334,8 @@ if(${Launcher_USE_PCH})
 endif()
 
 target_link_libraries(${Launcher_Name}
-    Launcher_logic
+  Launcher_logic
+  CrashHandler
 )
 
 if(DEFINED Launcher_APP_BINARY_NAME)

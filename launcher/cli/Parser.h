@@ -24,6 +24,8 @@
 #include "cli/Commands.h"
 
 #include <CLI/CLI.hpp>
+#include <functional>
+#include <optional>
 
 namespace Cli {
 
@@ -50,5 +52,5 @@ struct Cli {
     void attach(CLI::App& app, Args& args);
 };
 
-void parseArgs(int argc, char** argv, Args& args);
+void parseArgs(int argc, char** argv, Args& args, std::optional<std::function<void(CLI::App&)>> beforeParse = std::nullopt);
 }  // namespace Cli

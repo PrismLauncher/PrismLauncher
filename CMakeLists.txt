@@ -376,6 +376,11 @@ endif()
 
 find_package(ZLIB REQUIRED)
 
+find_package(cpptrace REQUIRED)
+if (WIN32)
+    set(CPPTRACE_UNWIND_WITH_DBGHELP "ON")
+endif()
+
 find_package(CLI11 CONFIG REQUIRED)
 
 include(ECMQtDeclareLoggingCategory)
@@ -539,6 +544,7 @@ add_subdirectory(libraries/qdcss) # css parser
 ############################### Built Artifacts ###############################
 
 add_subdirectory(buildconfig)
+add_subdirectory(crash_handler)
 
 if(BUILD_TESTING)
     add_subdirectory(tests)
