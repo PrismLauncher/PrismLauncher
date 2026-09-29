@@ -16,6 +16,7 @@
   zlib,
   msaClientID ? null,
   libarchive,
+  cli11,
 }:
 
 let
@@ -84,6 +85,7 @@ stdenv.mkDerivation {
     libarchive
     tomlplusplus
     zlib
+    cli11
   ]
   ++ lib.optional stdenv.hostPlatform.isLinux gamemode;
 

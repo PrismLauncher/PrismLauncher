@@ -376,6 +376,7 @@ endif()
 
 find_package(ZLIB REQUIRED)
 
+find_package(CLI11 CONFIG REQUIRED)
 
 include(ECMQtDeclareLoggingCategory)
 
